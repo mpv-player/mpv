@@ -190,7 +190,13 @@ static void set_state_and_wakeup_thread(struct ao *ao,
 
 static void thread_process_dispatch(void *ptr)
 {
-    set_state_and_wakeup_thread(ptr, WASAPI_THREAD_DISPATCH);
+    struct wasapi_state *state = ((struct ao *)ptr)->priv;
+    unsigned int seq;
+
+    do {
+        seq = atomic_fetch_add(&state->dispatch_seq, 1);
+    } while (seq < WASAPI_THREAD_DISPATCH_BASE);
+    set_state_and_wakeup_thread(ptr, seq);
 }
 
 static DWORD __stdcall AudioThread(void *lpParameter)
@@ -210,15 +216,12 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         if (WaitForSingleObject(state->hWake, INFINITE) != WAIT_OBJECT_0)
             MP_ERR(ao, "Unexpected return value from WaitForSingleObject\n");
 
-        int thread_state = atomic_load(&state->thread_state);
+        unsigned int thread_state = atomic_load(&state->thread_state);
         switch (thread_state) {
         case WASAPI_THREAD_FEED:
             // fill twice on under-full buffer (see comment in thread_feed)
             if (thread_feed(ao) && thread_feed(ao))
                 MP_ERR(ao, "Unable to fill buffer fast enough\n");
-            break;
-        case WASAPI_THREAD_DISPATCH:
-            mp_dispatch_queue_process(state->dispatch, 0);
             break;
         case WASAPI_THREAD_RESET:
             thread_reset(ao);
@@ -230,7 +233,10 @@ static DWORD __stdcall AudioThread(void *lpParameter)
             thread_reset(ao);
             goto exit_label;
         default:
-            MP_ERR(ao, "Unhandled thread state: %d\n", thread_state);
+            // each control call has its own state (>= WASAPI_THREAD_DISPATCH_BASE)
+            // to avoid potential race condition
+            mp_dispatch_queue_process(state->dispatch, 0);
+            break;
         }
         // the default is to feed unless something else is requested
         atomic_compare_exchange_strong(&state->thread_state, &thread_state,
