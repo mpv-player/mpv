@@ -266,6 +266,10 @@ static bool resize(struct vo *vo)
 
         if (mp_sws_reinit(p->sws) < 0)
             return false;
+
+        mp_mutex_lock(&vo->params_mutex);
+        vo->target_params = &p->sws->dst;
+        mp_mutex_unlock(&vo->params_mutex);
     }
 
     vo->want_redraw = true;

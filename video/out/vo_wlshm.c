@@ -195,6 +195,7 @@ static int resize(struct vo *vo)
     vo->dwidth = width;
     vo->dheight = height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB),
         .w = width,
@@ -203,6 +204,10 @@ static int resize(struct vo *vo)
         .p_h = 1,
     };
     mp_image_params_guess_csp(&p->sws->dst);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst;
+    mp_mutex_unlock(&vo->params_mutex);
+
     while (p->free_buffers) {
         buf = p->free_buffers;
         p->free_buffers = buf->next;

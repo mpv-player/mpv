@@ -215,6 +215,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst; // essentially constant, so this is okay
+    mp_mutex_unlock(&vo->params_mutex);
     vo->want_redraw = true;
     return 0;
 }
