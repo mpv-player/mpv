@@ -1221,6 +1221,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     resize(vo);
+    TA_FREEP(&vo->target_params);
     return 0;
 }
 
