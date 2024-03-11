@@ -24,7 +24,6 @@
 #include <unistd.h>
 
 #include <drm_fourcc.h>
-#include <libswscale/swscale.h>
 
 #include "common/msg.h"
 #include "drm_atomic.h"
@@ -422,7 +421,8 @@ err:
 
 static int query_format(struct vo *vo, int format)
 {
-    return sws_isSupportedInput(imgfmt2pixfmt(format));
+    struct priv *p = vo->priv;
+    return mp_sws_supports_formats(p->sws, p->imgfmt, format) ? 1 : 0;
 }
 
 static int control(struct vo *vo, uint32_t request, void *arg)
