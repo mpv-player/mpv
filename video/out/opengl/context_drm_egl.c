@@ -616,6 +616,10 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         xrgb_format = GBM_FORMAT_XBGR8888;
         break;
     default:
+        if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
+            MP_VERBOSE(ctx->vo, "Requested format not supported by context, "
+                       "falling back to xrgb8888\n");
+        }
         argb_format = GBM_FORMAT_ARGB8888;
         xrgb_format = GBM_FORMAT_XRGB8888;
         break;
