@@ -19,7 +19,6 @@
 
 #ifndef MAC_EVENTS
 #define MAC_EVENTS
-#include "input/keycodes.h"
 
 struct input_ctx;
 struct mpv_handle;

@@ -29,10 +29,6 @@ struct input_ctx;
 + (EventsResponder *)sharedInstance;
 - (void)setIsApplication:(BOOL)isApplication;
 
-- (bool)processKeyEvent:(NSEvent *)event;
-
-- (BOOL)handleMPKey:(int)key withMask:(int)mask;
-
 @property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
 @property(nonatomic, retain) InputHelper *inputHelper;
 
