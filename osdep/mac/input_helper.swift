@@ -24,66 +24,40 @@ class InputHelper: NSObject {
 
     let keymap: [mp_keymap] = [
         // special keys
-        mp_keymap(from: Int32(kVK_Return), to: MP_KEY_ENTER),
-        mp_keymap(from: Int32(kVK_Escape), to: MP_KEY_ESC),
-        mp_keymap(from: Int32(kVK_Delete), to: MP_KEY_BACKSPACE),
-        mp_keymap(from: Int32(kVK_Tab), to: MP_KEY_TAB),
+        .init(kVK_Return, MP_KEY_ENTER),       .init(kVK_Escape, MP_KEY_ESC),
+        .init(kVK_Delete, MP_KEY_BACKSPACE),   .init(kVK_Tab, MP_KEY_TAB),
 
         // cursor keys
-        mp_keymap(from: Int32(kVK_UpArrow), to: MP_KEY_UP),
-        mp_keymap(from: Int32(kVK_DownArrow), to: MP_KEY_DOWN),
-        mp_keymap(from: Int32(kVK_LeftArrow), to: MP_KEY_LEFT),
-        mp_keymap(from: Int32(kVK_RightArrow), to: MP_KEY_RIGHT),
+        .init(kVK_UpArrow, MP_KEY_UP),     .init(kVK_DownArrow, MP_KEY_DOWN),
+        .init(kVK_LeftArrow, MP_KEY_LEFT), .init(kVK_RightArrow, MP_KEY_RIGHT),
 
         // navigation block
-        mp_keymap(from: Int32(kVK_Help), to: MP_KEY_INSERT),
-        mp_keymap(from: Int32(kVK_ForwardDelete), to: MP_KEY_DELETE),
-        mp_keymap(from: Int32(kVK_Home), to: MP_KEY_HOME),
-        mp_keymap(from: Int32(kVK_End), to: MP_KEY_END),
-        mp_keymap(from: Int32(kVK_PageUp), to: MP_KEY_PAGE_UP),
-        mp_keymap(from: Int32(kVK_PageDown), to: MP_KEY_PAGE_DOWN),
+        .init(kVK_Help, MP_KEY_INSERT),    .init(kVK_ForwardDelete, MP_KEY_DELETE),
+        .init(kVK_Home, MP_KEY_HOME),      .init(kVK_End, MP_KEY_END),
+        .init(kVK_PageUp, MP_KEY_PAGE_UP), .init(kVK_PageDown, MP_KEY_PAGE_DOWN),
 
         // F-keys
-        mp_keymap(from: Int32(kVK_F1), to: MP_KEY_F + 1),
-        mp_keymap(from: Int32(kVK_F2), to: MP_KEY_F + 2),
-        mp_keymap(from: Int32(kVK_F3), to: MP_KEY_F + 3),
-        mp_keymap(from: Int32(kVK_F4), to: MP_KEY_F + 4),
-        mp_keymap(from: Int32(kVK_F5), to: MP_KEY_F + 5),
-        mp_keymap(from: Int32(kVK_F6), to: MP_KEY_F + 6),
-        mp_keymap(from: Int32(kVK_F7), to: MP_KEY_F + 7),
-        mp_keymap(from: Int32(kVK_F8), to: MP_KEY_F + 8),
-        mp_keymap(from: Int32(kVK_F9), to: MP_KEY_F + 9),
-        mp_keymap(from: Int32(kVK_F10), to: MP_KEY_F + 10),
-        mp_keymap(from: Int32(kVK_F11), to: MP_KEY_F + 11),
-        mp_keymap(from: Int32(kVK_F12), to: MP_KEY_F + 12),
-        mp_keymap(from: Int32(kVK_F13), to: MP_KEY_F + 13),
-        mp_keymap(from: Int32(kVK_F14), to: MP_KEY_F + 14),
-        mp_keymap(from: Int32(kVK_F15), to: MP_KEY_F + 15),
-        mp_keymap(from: Int32(kVK_F16), to: MP_KEY_F + 16),
-        mp_keymap(from: Int32(kVK_F17), to: MP_KEY_F + 17),
-        mp_keymap(from: Int32(kVK_F18), to: MP_KEY_F + 18),
-        mp_keymap(from: Int32(kVK_F19), to: MP_KEY_F + 19),
-        mp_keymap(from: Int32(kVK_F20), to: MP_KEY_F + 20),
+        .init(kVK_F1, MP_KEY_F + 1),   .init(kVK_F2, MP_KEY_F + 2),   .init(kVK_F3, MP_KEY_F + 3),
+        .init(kVK_F4, MP_KEY_F + 4),   .init(kVK_F5, MP_KEY_F + 5),   .init(kVK_F6, MP_KEY_F + 6),
+        .init(kVK_F7, MP_KEY_F + 7),   .init(kVK_F8, MP_KEY_F + 8),   .init(kVK_F9, MP_KEY_F + 9),
+        .init(kVK_F10, MP_KEY_F + 10), .init(kVK_F11, MP_KEY_F + 11), .init(kVK_F12, MP_KEY_F + 12),
+        .init(kVK_F13, MP_KEY_F + 13), .init(kVK_F14, MP_KEY_F + 14), .init(kVK_F15, MP_KEY_F + 15),
+        .init(kVK_F16, MP_KEY_F + 16), .init(kVK_F17, MP_KEY_F + 17), .init(kVK_F18, MP_KEY_F + 18),
+        .init(kVK_F19, MP_KEY_F + 19), .init(kVK_F20, MP_KEY_F + 20),
 
         // numpad
-        mp_keymap(from: Int32(kVK_ANSI_KeypadPlus), to: Int32(Character("+").asciiValue ?? 0)),
-        mp_keymap(from: Int32(kVK_ANSI_KeypadMinus), to: Int32(Character("-").asciiValue ?? 0)),
-        mp_keymap(from: Int32(kVK_ANSI_KeypadMultiply), to: Int32(Character("*").asciiValue ?? 0)),
-        mp_keymap(from: Int32(kVK_ANSI_KeypadDivide), to: Int32(Character("/").asciiValue ?? 0)),
-        mp_keymap(from: Int32(kVK_ANSI_KeypadEnter), to: MP_KEY_KPENTER),
-        mp_keymap(from: Int32(kVK_ANSI_KeypadDecimal), to: MP_KEY_KPDEC),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad0), to: MP_KEY_KP0),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad1), to: MP_KEY_KP1),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad2), to: MP_KEY_KP2),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad3), to: MP_KEY_KP3),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad4), to: MP_KEY_KP4),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad5), to: MP_KEY_KP5),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad6), to: MP_KEY_KP6),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad7), to: MP_KEY_KP7),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad8), to: MP_KEY_KP8),
-        mp_keymap(from: Int32(kVK_ANSI_Keypad9), to: MP_KEY_KP9),
+        .init(kVK_ANSI_KeypadPlus, Int32(Character("+").asciiValue ?? 0)),
+        .init(kVK_ANSI_KeypadMinus, Int32(Character("-").asciiValue ?? 0)),
+        .init(kVK_ANSI_KeypadMultiply, Int32(Character("*").asciiValue ?? 0)),
+        .init(kVK_ANSI_KeypadDivide, Int32(Character("/").asciiValue ?? 0)),
+        .init(kVK_ANSI_KeypadEnter, MP_KEY_KPENTER), .init(kVK_ANSI_KeypadDecimal, MP_KEY_KPDEC),
+        .init(kVK_ANSI_Keypad0, MP_KEY_KP0),         .init(kVK_ANSI_Keypad1, MP_KEY_KP1),
+        .init(kVK_ANSI_Keypad2, MP_KEY_KP2),         .init(kVK_ANSI_Keypad3, MP_KEY_KP3),
+        .init(kVK_ANSI_Keypad4, MP_KEY_KP4),         .init(kVK_ANSI_Keypad5, MP_KEY_KP5),
+        .init(kVK_ANSI_Keypad6, MP_KEY_KP6),         .init(kVK_ANSI_Keypad7, MP_KEY_KP7),
+        .init(kVK_ANSI_Keypad8, MP_KEY_KP8),         .init(kVK_ANSI_Keypad9, MP_KEY_KP9),
 
-        mp_keymap(from: 0, to: 0)
+        .init(0, 0)
     ]
 
     @objc init(_ input: OpaquePointer? = nil, _ mpv: MPVHelper? = nil) {
