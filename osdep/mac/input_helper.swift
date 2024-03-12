@@ -27,9 +27,6 @@ class InputHelper: NSObject {
         mp_keymap(from: Int32(kVK_Return), to: MP_KEY_ENTER),
         mp_keymap(from: Int32(kVK_Escape), to: MP_KEY_ESC),
         mp_keymap(from: Int32(kVK_Delete), to: MP_KEY_BACKSPACE),
-        mp_keymap(from: Int32(kVK_Option), to: MP_KEY_BACKSPACE),
-        mp_keymap(from: Int32(kVK_Control), to: MP_KEY_BACKSPACE),
-        mp_keymap(from: Int32(kVK_Shift), to: MP_KEY_BACKSPACE),
         mp_keymap(from: Int32(kVK_Tab), to: MP_KEY_TAB),
 
         // cursor keys
