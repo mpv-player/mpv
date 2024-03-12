@@ -47,6 +47,12 @@ extension NSEvent.ModifierFlags {
     public static var optionRight: NSEvent.ModifierFlags = .init(rawValue: UInt(NX_DEVICERALTKEYMASK))
 }
 
+extension mp_keymap {
+    init(_ f: Int, _ t: Int32) {
+        self.init(from: Int32(f), to: t)
+    }
+}
+
 extension Bool {
     init(_ int32: Int32) {
         self.init(int32 != 0)
