@@ -26,6 +26,8 @@ class InputHelper: NSObject {
         // special keys
         .init(kVK_Return, MP_KEY_ENTER),       .init(kVK_Escape, MP_KEY_ESC),
         .init(kVK_Delete, MP_KEY_BACKSPACE),   .init(kVK_Tab, MP_KEY_TAB),
+        .init(kVK_VolumeUp, MP_KEY_VOLUME_UP), .init(kVK_VolumeDown, MP_KEY_VOLUME_DOWN),
+        .init(kVK_Mute, MP_KEY_MUTE),
 
         // cursor keys
         .init(kVK_UpArrow, MP_KEY_UP),     .init(kVK_DownArrow, MP_KEY_DOWN),
