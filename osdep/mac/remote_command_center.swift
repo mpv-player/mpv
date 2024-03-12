@@ -155,7 +155,7 @@ class RemoteCommandCenter: NSObject {
             self.configs[event.command]?.state = state
         }
 
-        EventsResponder.sharedInstance().handleMPKey(config.key, withMask: Int32(state))
+        EventsResponder.sharedInstance().inputHelper.put(key: config.key | Int32(state))
 
         return .success
     }

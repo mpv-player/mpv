@@ -115,7 +115,7 @@ static void terminate_cocoa_application(void)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    if ([self modalWindow] || ![_eventsResponder processKeyEvent:event])
+    if ([self modalWindow] || ![_eventsResponder.inputHelper processKeyWithEvent:event])
         [super sendEvent:event];
     [_eventsResponder.inputHelper wakeup];
 }
