@@ -134,7 +134,8 @@ void update_core_idle_state(struct MPContext *mpctx)
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
     bool active = !mpctx->paused && mpctx->restart_complete &&
-                  !mpctx->stop_play && mpctx->in_playloop && !eof;
+                  !mpctx->stop_play && mpctx->in_playloop && !eof &&
+                  mpctx->time_frame < INFINITY;
 
     if (mpctx->playback_active != active) {
         mpctx->playback_active = active;
