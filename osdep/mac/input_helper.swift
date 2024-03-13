@@ -203,8 +203,8 @@ class InputHelper: NSObject {
             0: SWIFT_MBTN_LEFT,
             1: SWIFT_MBTN_RIGHT,
             2: SWIFT_MBTN_MID,
-            3: SWIFT_MBTN_BACK,
-            4: SWIFT_MBTN_FORWARD,
+            3: SWIFT_MBTN_FORWARD,
+            4: SWIFT_MBTN_BACK,
         ]
 
         return Int32(buttonMapping[button] ?? SWIFT_MBTN9 + Int32(button - 5));
