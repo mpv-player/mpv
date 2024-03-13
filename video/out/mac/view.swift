@@ -132,16 +132,12 @@ class View: NSView, CALayerDelegate {
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseMovement(event)
-        }
+        signalMouseMovement(event)
         common.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseMovement(event)
-        }
+        signalMouseMovement(event)
     }
 
     override func mouseDown(with event: NSEvent) {
