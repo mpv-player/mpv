@@ -3358,8 +3358,8 @@ Window
             of the screen width, or higher than 60% of the screen height.
 
 ``--autofit-larger=<[W[xH]]>``
-    This option behaves exactly like ``--autofit``, except the window size is
-    only changed if the window would be larger than the specified size.
+    This option behaves exactly like ``--autofit``, except that it sets the
+    maximum size of the window.
 
     .. admonition:: Example
 
