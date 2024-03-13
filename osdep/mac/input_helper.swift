@@ -115,6 +115,16 @@ class InputHelper: NSObject {
         }
     }
 
+    func processMouse(event: NSEvent) {
+        if !mouseEnabled() { return }
+        lock.withLock {
+            putKey(map(button: event.buttonNumber), modifiers: event.modifierFlags, type: event.type)
+            if event.clickCount > 1 {
+                putKey(map(button: event.buttonNumber), modifiers: event.modifierFlags, type: .keyUp)
+            }
+        }
+    }
+
     func draggable(at pos: NSPoint) -> Bool {
         lock.withLock {
             guard let input = input else { return false }
@@ -158,6 +168,12 @@ class InputHelper: NSObject {
         let typeMapping: [NSEvent.EventType:UInt32] = [
             .keyDown: MP_KEY_STATE_DOWN,
             .keyUp: MP_KEY_STATE_UP,
+            .leftMouseDown: MP_KEY_STATE_DOWN,
+            .leftMouseUp: MP_KEY_STATE_UP,
+            .rightMouseDown: MP_KEY_STATE_DOWN,
+            .rightMouseUp: MP_KEY_STATE_UP,
+            .otherMouseDown: MP_KEY_STATE_DOWN,
+            .otherMouseUp: MP_KEY_STATE_UP,
         ]
 
         return Int32(typeMapping[type] ?? 0);
@@ -180,6 +196,18 @@ class InputHelper: NSObject {
         }
 
         return Int32(mask)
+    }
+
+    private func map(button: Int) -> Int32 {
+        let buttonMapping: [Int:Int32] = [
+            0: SWIFT_MBTN_LEFT,
+            1: SWIFT_MBTN_RIGHT,
+            2: SWIFT_MBTN_MID,
+            3: SWIFT_MBTN_BACK,
+            4: SWIFT_MBTN_FORWARD,
+        ]
+
+        return Int32(buttonMapping[button] ?? SWIFT_MBTN9 + Int32(button - 5));
     }
 
     @objc func open(files: [String]) {

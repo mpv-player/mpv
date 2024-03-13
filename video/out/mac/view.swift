@@ -145,40 +145,34 @@ class View: NSView, CALayerDelegate {
     }
 
     override func mouseDown(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = true
+        input?.processMouse(event: event)
     }
 
     override func mouseUp(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
         common.window?.isMoving = false
+        input?.processMouse(event: event)
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = true
+        input?.processMouse(event: event)
     }
 
     override func rightMouseUp(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
+        input?.processMouse(event: event)
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = true
+        input?.processMouse(event: event)
     }
 
     override func otherMouseUp(with event: NSEvent) {
-        if input?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
+        input?.processMouse(event: event)
     }
 
     override func magnify(with event: NSEvent) {
@@ -186,23 +180,6 @@ class View: NSView, CALayerDelegate {
             common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
 
         common.window?.addWindowScale(Double(event.magnification))
-    }
-
-    func signalMouseDown(_ event: NSEvent) {
-        signalMouseEvent(event, MP_KEY_STATE_DOWN)
-        if event.clickCount > 1 {
-            signalMouseEvent(event, MP_KEY_STATE_UP)
-        }
-    }
-
-    func signalMouseUp(_ event: NSEvent) {
-        signalMouseEvent(event, MP_KEY_STATE_UP)
-    }
-
-    func signalMouseEvent(_ event: NSEvent, _ state: UInt32) {
-        hasMouseDown = state == MP_KEY_STATE_DOWN
-        let mpkey = getMpvButton(event)
-        input?.put(key: (mpkey | Int32(state)), modifiers: event.modifierFlags)
     }
 
     func signalMouseMovement(_ event: NSEvent) {
@@ -282,17 +259,5 @@ class View: NSView, CALayerDelegate {
     func canHideCursor() -> Bool {
         guard let window = common.window else { return false }
         return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
-    }
-
-    func getMpvButton(_ event: NSEvent) -> Int32 {
-        let buttonNumber = event.buttonNumber
-        switch (buttonNumber) {
-            case 0:  return SWIFT_MBTN_LEFT
-            case 1:  return SWIFT_MBTN_RIGHT
-            case 2:  return SWIFT_MBTN_MID
-            case 3:  return SWIFT_MBTN_BACK
-            case 4:  return SWIFT_MBTN_FORWARD
-            default: return SWIFT_MBTN9 + Int32(buttonNumber - 5)
-        }
     }
 }
