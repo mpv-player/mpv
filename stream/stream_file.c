@@ -307,6 +307,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     }
 
     struct stat st;
+    bool is_sock_or_fifo = false;
     if (fstat(p->fd, &st) == 0) {
         if (S_ISDIR(st.st_mode)) {
             stream->is_directory = true;
@@ -320,6 +321,9 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
             fcntl(p->fd, F_SETFL, val);
 #endif
         } else {
+#ifndef __MINGW32__
+            is_sock_or_fifo = S_ISSOCK(st.st_mode) || S_ISFIFO(st.st_mode);
+#endif
             p->use_poll = true;
         }
     }
@@ -341,7 +345,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     stream->get_size = get_size;
     stream->close = s_close;
 
-    if (check_stream_network(p->fd)) {
+    if (is_sock_or_fifo || check_stream_network(p->fd)) {
         stream->streaming = true;
 #if HAVE_COCOA
         if (fcntl(p->fd, F_RDAHEAD, 0) < 0) {
