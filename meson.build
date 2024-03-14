@@ -503,7 +503,8 @@ if features['win32-desktop']
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
-                     'video/out/win32/droptarget.c')
+                     'video/out/win32/droptarget.c',
+                     'video/out/win32/menu.c')
     main_fn_source = files('osdep/main-fn-win.c')
 endif
 
