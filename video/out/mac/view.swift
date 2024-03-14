@@ -189,42 +189,8 @@ class View: NSView, CALayerDelegate {
         }
     }
 
-    func preciseScroll(_ event: NSEvent) {
-        var delta: Double
-        var cmd: Int32
-
-        if abs(event.deltaY) >= abs(event.deltaX) {
-            delta = Double(event.deltaY) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-        } else {
-            delta = Double(event.deltaX) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
-        }
-
-        input?.putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
-    }
-
     override func scrollWheel(with event: NSEvent) {
-        if !(input?.mouseEnabled() ?? true) {
-            return
-        }
-
-        if event.hasPreciseScrollingDeltas {
-            preciseScroll(event)
-        } else {
-            let modifiers = event.modifierFlags
-            let deltaX = modifiers.contains(.shift) ? event.scrollingDeltaY : event.scrollingDeltaX
-            let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
-            var mpkey: Int32
-
-            if abs(deltaY) >= abs(deltaX) {
-                mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-            } else {
-                mpkey = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
-            }
-
-            input?.put(key: mpkey, modifiers: modifiers)
-        }
+        input?.processWheel(event: event)
     }
 
     func containsMouseLocation() -> Bool {

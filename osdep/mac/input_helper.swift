@@ -125,6 +125,43 @@ class InputHelper: NSObject {
         }
     }
 
+    private func preciseScroll(_ event: NSEvent) {
+        var delta: Double
+        var cmd: Int32
+
+        if abs(event.deltaY) >= abs(event.deltaX) {
+            delta = Double(event.deltaY) * 0.1
+            cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
+        } else {
+            delta = Double(event.deltaX) * 0.1
+            cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
+        }
+
+        putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
+    }
+
+    func processWheel(event: NSEvent) {
+        if !mouseEnabled() { return }
+        lock.withLock {
+            if event.hasPreciseScrollingDeltas {
+                preciseScroll(event)
+            } else {
+                let modifiers = event.modifierFlags
+                let deltaX = modifiers.contains(.shift) ? event.scrollingDeltaY : event.scrollingDeltaX
+                let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
+                var mpkey: Int32
+
+                if abs(deltaY) >= abs(deltaX) {
+                    mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
+                } else {
+                    mpkey = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
+                }
+
+                putKey(mpkey, modifiers: modifiers)
+            }
+        }
+    }
+
     func draggable(at pos: NSPoint) -> Bool {
         lock.withLock {
             guard let input = input else { return false }
@@ -147,11 +184,9 @@ class InputHelper: NSObject {
         }
     }
 
-    func putAxis(_ mpkey: Int32, modifiers: NSEvent.ModifierFlags, delta: Double) {
-        lock.withLock {
-            guard let input = input else { return }
-            mp_input_put_wheel(input, mpkey | mapModifier(modifiers), delta)
-        }
+    private func putAxis(_ mpkey: Int32, modifiers: NSEvent.ModifierFlags, delta: Double) {
+        guard let input = input else { return }
+        mp_input_put_wheel(input, mpkey | mapModifier(modifiers), delta)
     }
 
     @discardableResult @objc func command(_ cmd: String) -> Bool {
