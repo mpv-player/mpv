@@ -341,12 +341,12 @@ static void do_activate_getch2(void)
     enable_kx(true);
 
     struct termios tio_new;
-    tcgetattr(tty_in,&tio_new);
+    tcgetattr(tty_in, &tio_new);
 
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
-    tcsetattr(tty_in,TCSANOW,&tio_new);
+    tcsetattr(tty_in, TCSANOW, &tio_new);
 
     getch2_active = 1;
 }
