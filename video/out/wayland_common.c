@@ -2422,11 +2422,11 @@ void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 
 bool vo_wayland_init(struct vo *vo)
 {
-    vo->wl = talloc_zero(NULL, struct vo_wayland_state);
-    struct vo_wayland_state *wl = vo->wl;
-
     if (!getenv("WAYLAND_DISPLAY"))
         goto err;
+
+    vo->wl = talloc_zero(NULL, struct vo_wayland_state);
+    struct vo_wayland_state *wl = vo->wl;
 
     *wl = (struct vo_wayland_state) {
         .display = wl_display_connect(NULL),
