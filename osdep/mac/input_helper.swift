@@ -125,40 +125,28 @@ class InputHelper: NSObject {
         }
     }
 
-    private func preciseScroll(_ event: NSEvent) {
-        var delta: Double
-        var cmd: Int32
-
-        if abs(event.deltaY) >= abs(event.deltaX) {
-            delta = Double(event.deltaY) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-        } else {
-            delta = Double(event.deltaX) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
-        }
-
-        putAxis(cmd, modifiers: event.modifierFlags, delta: abs(delta))
-    }
-
     func processWheel(event: NSEvent) {
         if !mouseEnabled() { return }
         lock.withLock {
-            if event.hasPreciseScrollingDeltas {
-                preciseScroll(event)
-            } else {
-                let modifiers = event.modifierFlags
-                let deltaX = modifiers.contains(.shift) ? event.scrollingDeltaY : event.scrollingDeltaX
-                let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
-                var mpkey: Int32
+            guard let input = input else { return }
+            let modifiers = event.modifierFlags
+            let precise = event.hasPreciseScrollingDeltas
+            var deltaX = event.deltaX * 0.1
+            var deltaY = event.deltaY * 0.1
 
-                if abs(deltaY) >= abs(deltaX) {
-                    mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-                } else {
-                    mpkey = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
-                }
-
-                putKey(mpkey, modifiers: modifiers)
+            if !precise {
+                deltaX = modifiers.contains(.shift) ? event.scrollingDeltaY : event.scrollingDeltaX
+                deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
             }
+
+            var key = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
+            var delta = Double(deltaY)
+            if abs(deltaX) > abs(deltaY) {
+                key = deltaX > 0 ? SWIFT_WHEEL_LEFT : SWIFT_WHEEL_RIGHT
+                delta = Double(deltaX)
+            }
+
+            mp_input_put_wheel(input, key | mapModifier(modifiers), precise ? abs(delta) : 1)
         }
     }
 
@@ -182,11 +170,6 @@ class InputHelper: NSObject {
             guard let input = input else { return }
             mp_input_set_mouse_pos(input, Int32(position.x), Int32(position.y))
         }
-    }
-
-    private func putAxis(_ mpkey: Int32, modifiers: NSEvent.ModifierFlags, delta: Double) {
-        guard let input = input else { return }
-        mp_input_put_wheel(input, mpkey | mapModifier(modifiers), delta)
     }
 
     @discardableResult @objc func command(_ cmd: String) -> Bool {
