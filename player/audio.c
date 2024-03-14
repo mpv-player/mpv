@@ -182,9 +182,29 @@ void audio_update_volume(struct MPContext *mpctx)
     ao_set_gain(ao_c->ao, gain);
 }
 
+// Calculate a speed multiplier proportional to the delay between the current
+// playback time and the media source. This multiplier is used to keep up with a
+// real-time source such as a live stream.
+static double calc_realtime_catchup_speed(struct MPContext *mpctx)
+{
+    double max_delay = mpctx->opts->realtime_catchup_max_delay;
+    double delay = get_time_length(mpctx) - get_playback_time(mpctx);
+
+    if (delay > max_delay) {
+        double multiplier = mpctx->opts->realtime_catchup_speed_multiplier;
+        return 1.0 + powf((delay - max_delay) * multiplier, 2.0);
+    } else {
+        return 1.0;
+    }
+}
+
 // Call this if opts->playback_speed or mpctx->speed_factor_* change.
 void update_playback_speed(struct MPContext *mpctx)
 {
+    if (mpctx->opts->realtime_catchup) {
+        mpctx->opts->playback_speed = calc_realtime_catchup_speed(mpctx);
+    }
+
     mpctx->audio_speed = mpctx->opts->playback_speed * mpctx->speed_factor_a;
     mpctx->video_speed = mpctx->opts->playback_speed * mpctx->speed_factor_v;
 
