@@ -125,6 +125,10 @@ enum mp_voctrl {
 
     // Begin VO dragging.
     VOCTRL_BEGIN_DRAGGING,
+
+    // Native context menu
+    VOCTRL_SHOW_MENU,
+    VOCTRL_UPDATE_MENU,
 };
 
 // Helper to expose what kind of content is currently playing to the VO.

@@ -310,6 +310,21 @@ Wheel left/right
 Ctrl+Wheel up/down
     Change video zoom.
 
+Context Menu
+-------------
+
+.. warning::
+
+    This feature is experimental. It may not work with all VOs. A libass based
+    fallback may be implemented in the future.
+
+Context Menu is a menu that pops up on the video window on user interaction
+(mouse right click, etc.).
+
+To use this feature, you need to fill the ``menu-data`` property with menu
+definition data, and add a keybinding to run the ``context-menu`` command,
+which can be done with a user script.
+
 USAGE
 =====
 

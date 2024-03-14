@@ -114,6 +114,7 @@ struct command_ctx {
 
     char **script_props;
     mpv_node udata;
+    mpv_node mdata;
 
     double cached_window_scale;
 };
@@ -123,6 +124,10 @@ static const struct m_option script_props_type = {
 };
 
 static const struct m_option udata_type = {
+    .type = CONF_TYPE_NODE
+};
+
+static const struct m_option mdata_type = {
     .type = CONF_TYPE_NODE
 };
 
@@ -3730,6 +3735,35 @@ static int mp_property_bindings(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_mdata(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    mpv_node *node = &mpctx->command_ctx->mdata;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE:
+        m_option_copy(&mdata_type, arg, node);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+    case M_PROPERTY_SET_NODE: {
+        m_option_copy(&mdata_type, node, arg);
+        talloc_steal(mpctx->command_ctx, node_get_alloc(node));
+        mp_notify_property(mpctx, prop->name);
+
+        struct vo *vo = mpctx->video_out;
+        if (vo)
+            vo_control(vo, VOCTRL_UPDATE_MENU, arg);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int do_list_udata(int item, int action, void *arg, void *ctx);
 
 struct udata_ctx {
@@ -4108,6 +4142,8 @@ static const struct m_property mp_properties_base[] = {
     {"profile-list", mp_profile_list},
     {"command-list", mp_property_commands},
     {"input-bindings", mp_property_bindings},
+
+    {"menu-data", mp_property_mdata},
 
     {"user-data", mp_property_udata},
     {"term-size", mp_property_term_size},
@@ -6567,6 +6603,16 @@ static void cmd_begin_vo_dragging(void *p)
         vo_control(vo, VOCTRL_BEGIN_DRAGGING, NULL);
 }
 
+static void cmd_context_menu(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct vo *vo = mpctx->video_out;
+    
+    if (vo)
+        vo_control(vo, VOCTRL_SHOW_MENU, NULL);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7039,6 +7085,8 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "begin-vo-dragging", cmd_begin_vo_dragging },
 
+    { "context-menu", cmd_context_menu },
+
     {0}
 };
 
@@ -7112,6 +7160,9 @@ void command_init(struct MPContext *mpctx)
 
         ctx->properties[count++] = prop;
     }
+
+    node_init(&ctx->mdata, MPV_FORMAT_NODE_ARRAY, NULL);
+    talloc_steal(ctx, ctx->mdata.u.list);
 
     node_init(&ctx->udata, MPV_FORMAT_NODE_MAP, NULL);
     talloc_steal(ctx, ctx->udata.u.list);
