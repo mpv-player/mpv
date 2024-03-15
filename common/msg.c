@@ -269,6 +269,7 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
     }
 
 done:
+    log->root->status_line.len = 0;
     mp_mutex_unlock(&log->root->lock);
 }
 
