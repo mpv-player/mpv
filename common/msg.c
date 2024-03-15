@@ -228,21 +228,15 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
         bstr up_clear = bstr0("\033[A\033[K");
         for (int i = 1; i < root->status_lines; ++i)
             bstr_xappend(root, out, up_clear);
-        // Reposition cursor after last message
-        line_skip = (new_lines ? new_lines : root->blank_lines) - root->status_lines;
-        line_skip = MPMIN(root->blank_lines - root->status_lines, line_skip);
-        if (line_skip)
-            bstr_xappend_asprintf(root, out, "\033[%dA", line_skip);
-    } else if (new_lines) {
-        line_skip = new_lines - root->blank_lines;
+        assert(root->status_lines > 0 && root->blank_lines >= root->status_lines);
+        line_skip = root->blank_lines - root->status_lines;
     }
 
-    if (line_skip < 0) {
-        // Reposition cursor to keep status line at the same line
-        line_skip = MPMIN(root->blank_lines, -line_skip);
-        if (line_skip)
-            bstr_xappend_asprintf(root, out, "\033[%dB", line_skip);
-    }
+    if (new_lines)
+        line_skip -= MPMAX(0, root->blank_lines - new_lines);
+
+    if (line_skip)
+        bstr_xappend_asprintf(root, out, line_skip > 0 ? "\033[%dA" : "\033[%dB", abs(line_skip));
 
     root->blank_lines = MPMAX(0, root->blank_lines - term_lines);
     root->status_lines = new_lines;
