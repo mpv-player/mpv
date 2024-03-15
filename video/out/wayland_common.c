@@ -1099,13 +1099,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         wl->hidden = is_suspended;
 
     if (vo_opts->fullscreen != is_fullscreen) {
-        wl->state_change = true;
         vo_opts->fullscreen = is_fullscreen;
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->fullscreen);
     }
 
     if (vo_opts->window_maximized != is_maximized) {
-        wl->state_change = true;
         vo_opts->window_maximized = is_maximized;
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
     }
@@ -2142,7 +2140,6 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
 {
-    wl->state_change = true;
     bool specific_screen = wl->vo_opts->fsscreen_id >= 0 || wl->vo_opts->fsscreen_name;
     if (wl->vo_opts->fullscreen && !specific_screen) {
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, NULL);
@@ -2156,7 +2153,6 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
 
 static void toggle_maximized(struct vo_wayland_state *wl)
 {
-    wl->state_change = true;
     if (wl->vo_opts->window_maximized) {
         xdg_toplevel_set_maximized(wl->xdg_toplevel);
     } else {
@@ -2314,6 +2310,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
+                wl->state_change = true;
                 set_geometry(wl, true);
             }
         }
@@ -2352,6 +2349,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window_size.x1 = s[0];
         wl->window_size.y1 = s[1];
         if (!wl->vo_opts->fullscreen && !wl->tiled) {
+            wl->state_change = true;
             if (wl->vo_opts->window_maximized) {
                 xdg_toplevel_unset_maximized(wl->xdg_toplevel);
                 wl_display_dispatch_pending(wl->display);
