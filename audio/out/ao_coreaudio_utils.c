@@ -138,7 +138,8 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 {
     if (code == noErr) return true;
 
-    mp_msg(ao->log, level, "%s (%s/%d)\n", message, mp_tag_str(code), (int)code);
+    if (ao)
+        mp_msg(ao->log, level, "%s (%s/%d)\n", message, mp_tag_str(code), (int)code);
 
     return false;
 }
