@@ -78,30 +78,24 @@ class View: NSView, CALayerDelegate {
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pb = sender.draggingPasteboard
         guard let types = pb.types else { return false }
+        var files: [String] = []
 
         if types.contains(.fileURL) || types.contains(.URL) {
-            if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
-                let files = urls.map { $0.absoluteString }
-                input?.open(files: files)
-                return true
-            }
+             guard let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] else { return false }
+             files = urls.map { $0.absoluteString }
         } else if types.contains(.string) {
             guard let str = pb.string(forType: .string) else { return false }
-            var filesArray: [String] = []
-
-            for val in str.components(separatedBy: "\n") {
-                let url = val.trimmingCharacters(in: .whitespacesAndNewlines)
+            files = str.components(separatedBy: "\n").compactMap {
+                let url = $0.trimmingCharacters(in: .whitespacesAndNewlines)
                 let path = (url as NSString).expandingTildeInPath
-                if isURL(url) {
-                    filesArray.append(url)
-                } else if path.starts(with: "/") {
-                    filesArray.append(path)
-                }
+                if isURL(url) { return url }
+                if path.starts(with: "/") { return path }
+                return nil
             }
-            input?.open(files: filesArray)
-            return true
         }
-        return false
+        if files.isEmpty { return false }
+        input?.open(files: files)
+        return true
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
