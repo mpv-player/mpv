@@ -950,19 +950,34 @@ end
 local function add_audio(s)
     local r = mp.get_property_native("audio-params")
     -- in case of e.g. lavfi-complex there can be no input audio, only output
-    if not r then
-        r = mp.get_property_native("audio-out-params")
-    end
+    local ro = mp.get_property_native("audio-out-params") or r
+    r = r or ro
     if not r then
         return
     end
 
+    local merge = function(r, ro, prop)
+        local a = r[prop] or ro[prop]
+        local b = ro[prop] or r[prop]
+        return (a == b or a == nil) and a or (a .. " → " .. b)
+    end
+
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
-    local cc = append(s, r["channel-count"], {prefix="Channels:"})
-    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl,
+    append_property(s, "current-ao", {prefix="AO:", nl="",
+                                      indent=o.prefix_sep .. o.prefix_sep})
+    local dev = append_property(s, "audio-device", {prefix="Device:"})
+    local ao_mute = mp.get_property_native("ao-mute") and " (Muted)" or ""
+    append_property(s, "ao-volume", {prefix="AO Volume:", suffix="%" .. ao_mute,
+                                     nl=dev and "" or o.nl,
+                                     indent=dev and o.prefix_sep .. o.prefix_sep})
+    if math.abs(mp.get_property_native("audio-delay")) > 1e-6 then
+        append_property(s, "audio-delay", {prefix="A-V delay:"})
+    end
+    local cc = append(s, merge(r, ro, "channel-count"), {prefix="Channels:"})
+    append(s, merge(r, ro, "format"), {prefix="Format:", nl=cc and "" or o.nl,
                             indent=cc and o.prefix_sep .. o.prefix_sep})
-    append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
+    append(s, merge(r, ro, "samplerate"), {prefix="Sample Rate:", suffix=" Hz"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
 end
