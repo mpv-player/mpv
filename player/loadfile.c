@@ -1901,6 +1901,7 @@ terminate_playback:
                mpv_error_string(end_event.error), end_event.reason);
     if (end_event.error == MPV_ERROR_UNKNOWN_FORMAT)
         MP_ERR(mpctx, "Failed to recognize file format.\n");
+    MP_INFO(mpctx, "\n");
 
     if (mpctx->playing)
         playlist_entry_unref(mpctx->playing);
