@@ -304,30 +304,6 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
     return vfprintf(stream, format, args);
 }
 #else
-static int mp_check_console(HANDLE wstream)
-{
-    if (wstream != INVALID_HANDLE_VALUE) {
-        unsigned int filetype = GetFileType(wstream);
-
-        if (!((filetype == FILE_TYPE_UNKNOWN) &&
-            (GetLastError() != ERROR_SUCCESS)))
-        {
-            filetype &= ~(FILE_TYPE_REMOTE);
-
-            if (filetype == FILE_TYPE_CHAR) {
-                DWORD ConsoleMode;
-                int ret = GetConsoleMode(wstream, &ConsoleMode);
-
-                if (!(!ret && (GetLastError() == ERROR_INVALID_HANDLE))) {
-                    // This seems to be a console
-                    return 1;
-                }
-            }
-        }
-    }
-
-    return 0;
-}
 
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {

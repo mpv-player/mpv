@@ -53,20 +53,16 @@ static void attempt_native_out_vt(HANDLE hOut, DWORD basemode)
         SetConsoleMode(hOut, basemode);
 }
 
-static bool is_native_out_vt(HANDLE hOut)
-{
-    DWORD cmode;
-    return GetConsoleMode(hOut, &cmode) &&
-           (cmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) &&
-           !(cmode & DISABLE_NEWLINE_AUTO_RETURN);
-}
 
+#define hSTDIN GetStdHandle(STD_INPUT_HANDLE)
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
 
 #define FOREGROUND_ALL (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 #define BACKGROUND_ALL (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 
+static bool is_console[STDERR_FILENO + 1];
+static bool is_vt[STDERR_FILENO + 1];
 static short stdoutAttrs = 0;  // copied from the screen buffer on init
 static const unsigned char ansi2win32[8] = {
     0,
@@ -93,6 +89,23 @@ static bool running;
 static HANDLE death;
 static mp_thread input_thread;
 static struct input_ctx *input_ctx;
+
+static bool is_native_out_vt_internal(HANDLE hOut)
+{
+    DWORD cmode;
+    return GetConsoleMode(hOut, &cmode) &&
+           (cmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) &&
+           !(cmode & DISABLE_NEWLINE_AUTO_RETURN);
+}
+
+static bool is_native_out_vt(HANDLE hOut)
+{
+    if (hOut == hSTDOUT)
+        return is_vt[STDOUT_FILENO];
+    if (hOut == hSTDERR)
+        return is_vt[STDERR_FILENO];
+    return is_native_out_vt_internal(hOut);
+}
 
 void terminal_get_size(int *w, int *h)
 {
@@ -360,6 +373,17 @@ static bool is_a_console(HANDLE h)
     return GetConsoleMode(h, &(DWORD){0});
 }
 
+bool mp_check_console(void *handle)
+{
+    if (handle == hSTDIN)
+        return is_console[STDIN_FILENO];
+    if (handle == hSTDOUT)
+        return is_console[STDOUT_FILENO];
+    if (handle == hSTDERR)
+        return is_console[STDERR_FILENO];
+    return is_a_console(handle);
+}
+
 static void reopen_console_handle(DWORD std, int fd, FILE *stream)
 {
     HANDLE handle = GetStdHandle(std);
@@ -420,6 +444,16 @@ void terminal_init(void)
     cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
     attempt_native_out_vt(hSTDOUT, cmode);
     attempt_native_out_vt(hSTDERR, cmode);
+
+    // Init for mp_check_console(), this never changes during runtime
+    is_console[STDIN_FILENO] = is_a_console(hSTDIN);
+    is_console[STDOUT_FILENO] = is_a_console(hSTDOUT);
+    is_console[STDERR_FILENO] = is_a_console(hSTDERR);
+
+    // Init for is_native_out_vt(), this is never disabled/changed during runtime
+    is_vt[STDOUT_FILENO] = is_native_out_vt_internal(hSTDOUT);
+    is_vt[STDERR_FILENO] = is_native_out_vt_internal(hSTDERR);
+
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
 }
