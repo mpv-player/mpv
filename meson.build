@@ -1556,7 +1556,7 @@ macos_touchbar = get_option('macos-touchbar').require(
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
-    sources += files('osdep/mac/touchbar.m')
+    swift_sources += files('osdep/mac/touch_bar.swift')
 endif
 
 if features['swift'] and swift_sources.length() > 0
