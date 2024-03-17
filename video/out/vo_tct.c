@@ -39,16 +39,16 @@
 #define ALGO_PLAIN 1
 #define ALGO_HALF_BLOCKS 2
 
-#define TERM_ESC_CLEAR_COLORS           bstr0("\033[0m")
-#define TERM_ESC_COLOR256_BG            bstr0("\033[48;5")
-#define TERM_ESC_COLOR256_FG            bstr0("\033[38;5")
-#define TERM_ESC_COLOR24BIT_BG          bstr0("\033[48;2")
-#define TERM_ESC_COLOR24BIT_FG          bstr0("\033[38;2")
-
-#define UNICODE_LOWER_HALF_BLOCK        bstr0("\xe2\x96\x84")
-
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
+
+static const bstr TERM_ESC_CLEAR_COLORS    = bstr0_s("\033[0m");
+static const bstr TERM_ESC_COLOR256_BG     = bstr0_s("\033[48;5");
+static const bstr TERM_ESC_COLOR256_FG     = bstr0_s("\033[38;5");
+static const bstr TERM_ESC_COLOR24BIT_BG   = bstr0_s("\033[48;2");
+static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_s("\033[38;2");
+
+static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_s("\xe2\x96\x84");
 
 struct vo_tct_opts {
     int algo;
@@ -111,14 +111,14 @@ static void print_seq3(bstr *frame, struct lut_item *lut, bstr prefix,
     bstr_xappend(NULL, frame, (bstr){ lut[r].str, lut[r].width });
     bstr_xappend(NULL, frame, (bstr){ lut[g].str, lut[g].width });
     bstr_xappend(NULL, frame, (bstr){ lut[b].str, lut[b].width });
-    bstr_xappend(NULL, frame, bstr0("m"));
+    bstr_xappend(NULL, frame, bstr0_s("m"));
 }
 
 static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c)
 {
     bstr_xappend(NULL, frame, prefix);
     bstr_xappend(NULL, frame, (bstr){ lut[c].str, lut[c].width });
-    bstr_xappend(NULL, frame, bstr0("m"));
+    bstr_xappend(NULL, frame, bstr0_s("m"));
 }
 
 static void write_plain(bstr *frame,
@@ -142,7 +142,7 @@ static void write_plain(bstr *frame,
             } else {
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
-            bstr_xappend(NULL, frame, bstr0(" "));
+            bstr_xappend(NULL, frame, bstr0_s(" "));
         }
         bstr_xappend(NULL, frame, TERM_ESC_CLEAR_COLORS);
     }
@@ -263,7 +263,7 @@ static void flip_page(struct vo *vo)
             p->opts.term256, p->lut);
     }
 
-    bstr_xappend(NULL, &p->frame_buf, bstr0("\n"));
+    bstr_xappend(NULL, &p->frame_buf, bstr0_s("\n"));
 #ifdef _WIN32
     printf("%.*s", BSTR_P(p->frame_buf));
 #else
