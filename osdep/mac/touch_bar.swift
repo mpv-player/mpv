@@ -251,15 +251,11 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func format(time: Int) -> String {
-        let seconds = time % 60
-        let minutes = (time / 60) % 60
-        let hours = time / (60 * 60)
-
-        var stime = hours > 0 ? "\(hours):" : ""
-        stime = (stime.count > 0 || minutes > 9) ? String(format: "%@%02d:", stime, minutes) : "\(minutes):"
-        stime = String(format: "%@%02d", stime, seconds)
-
-        return stime
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = time >= (60 * 60) ? [.dropLeading] : []
+        formatter.allowedUnits = time >= (60 * 60) ? [.hour, .minute, .second] : [.minute, .second]
+        return formatter.string(from: TimeInterval(time)) ?? "0:00"
     }
 
     func removeConstraintFor(identifier: NSTouchBarItem.Identifier) {
