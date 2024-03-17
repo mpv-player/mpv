@@ -77,9 +77,9 @@ extension TouchBar {
 
 class TouchBar: NSTouchBar, NSTouchBarDelegate {
     var configs: [NSTouchBarItem.Identifier:Config] = [:]
-    var isPaused: Bool = false
-    var position: Double = 0
-    var duration: Double = 0
+    var isPaused: Bool = false { didSet { updatePlayButton() } }
+    var position: Double = 0 { didSet { updateTouchBarTimeItems() } }
+    var duration: Double = 0 { didSet { updateTouchBarTimeItems() } }
     var rate: Double = 0
 
     override init() {
@@ -304,14 +304,11 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
             let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
             if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
-                updateTouchBarTimeItems()
             }
         case "duration" where property.format == MPV_FORMAT_DOUBLE:
             duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
-            updateTouchBarTimeItems()
         case "pause" where property.format == MPV_FORMAT_FLAG:
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
-            updatePlayButton()
         case "speed" where property.format == MPV_FORMAT_DOUBLE:
             rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
         default:
