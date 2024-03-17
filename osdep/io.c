@@ -307,8 +307,6 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
-    int done = 0;
-
     HANDLE wstream = INVALID_HANDLE_VALUE;
 
     if (stream == stdout || stream == stderr) {
@@ -316,20 +314,10 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
                                STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     }
 
-    if (mp_check_console(wstream)) {
-        size_t len = vsnprintf(NULL, 0, format, args) + 1;
-        char *buf = talloc_array(NULL, char, len);
+    if (mp_check_console(wstream))
+        return mp_write_console_ansi(wstream, format, args);
 
-        if (buf) {
-            done = vsnprintf(buf, len, format, args);
-            mp_write_console_ansi(wstream, buf);
-        }
-        talloc_free(buf);
-    } else {
-        done = vfprintf(stream, format, args);
-    }
-
-    return done;
+    return vfprintf(stream, format, args);
 }
 #endif
 

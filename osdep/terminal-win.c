@@ -204,6 +204,12 @@ void terminal_setup_getch(struct input_ctx *ictx)
     }
 }
 
+DWORD tmp_buffers_key = FLS_OUT_OF_INDEXES;
+struct tmp_buffers {
+    bstr write_console_buf;
+    wchar_t *write_console_wbuf;
+};
+
 void terminal_uninit(void)
 {
     if (running) {
@@ -212,6 +218,7 @@ void terminal_uninit(void)
         input_ctx = NULL;
         running = false;
     }
+    FlsFree(tmp_buffers_key);
 }
 
 bool terminal_in_background(void)
@@ -219,14 +226,20 @@ bool terminal_in_background(void)
     return false;
 }
 
-void mp_write_console_ansi(HANDLE wstream, char *buf)
+int mp_write_console_ansi(HANDLE wstream, const char *format, va_list args)
 {
-    wchar_t *wbuf = mp_from_utf8(NULL, buf);
-    wchar_t *pos = wbuf;
+    struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
+    if (!buffers)
+        buffers = talloc_zero(NULL, struct tmp_buffers);
+
+    buffers->write_console_buf.len = 0;
+    bstr_xappend_vasprintf(buffers, &buffers->write_console_buf, format, args);
+    int wlen = bstr_to_wchar(buffers, buffers->write_console_buf, &buffers->write_console_wbuf);
+    wchar_t *pos = buffers->write_console_wbuf;
 
     while (*pos) {
         if (is_native_out_vt(wstream)) {
-            WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
+            WriteConsoleW(wstream, pos, wlen, NULL, NULL);
             break;
         }
         wchar_t *next = wcschr(pos, '\033');
@@ -365,7 +378,12 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
         pos = next;
     }
 
-    talloc_free(wbuf);
+    int ret = buffers->write_console_buf.len;
+
+    if (!FlsSetValue(tmp_buffers_key, buffers))
+        talloc_free(buffers);
+
+    return ret;
 }
 
 static bool is_a_console(HANDLE h)
@@ -455,4 +473,6 @@ void terminal_init(void)
 
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
+
+    tmp_buffers_key = FlsAlloc((PFLS_CALLBACK_FUNCTION)talloc_free);
 }
