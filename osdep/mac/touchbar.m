@@ -17,10 +17,16 @@
 
 #include "player/client.h"
 #import "osdep/mac/touchbar.h"
+#import "osdep/mac/events_objc.h"
+
+#include "config.h"
+
+#if HAVE_SWIFT
+#include "osdep/mac/swift.h"
+#endif
 
 @implementation TouchBar
 
-@synthesize app = _app;
 @synthesize touchbarItems = _touchbar_items;
 @synthesize duration = _duration;
 @synthesize position = _position;
@@ -231,7 +237,7 @@
 - (void)buttonAction:(NSButton *)sender
 {
     NSString *identifier = [self getIdentifierFromView:sender];
-    [self.app queueCommand:(char *)[self.touchbarItems[identifier][@"cmd"] UTF8String]];
+    [[EventsResponder sharedInstance].inputHelper command:self.touchbarItems[identifier][@"cmd"]];
 }
 
 - (void)seekbarChanged:(NSSlider *)slider
@@ -239,7 +245,7 @@
     NSString *identifier = [self getIdentifierFromView:slider];
     NSString *seek = [NSString stringWithFormat:
         self.touchbarItems[identifier][@"cmd"], slider.doubleValue];
-    [self.app queueCommand:(char *)[seek UTF8String]];
+    [[EventsResponder sharedInstance].inputHelper command:seek];
 }
 
 - (NSString *)formatTime:(int)time

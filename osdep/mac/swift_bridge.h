@@ -28,6 +28,7 @@
 #include "player/core.h"
 #include "input/input.h"
 #include "input/event.h"
+#include "input/keycodes.h"
 #include "video/out/win_state.h"
 
 #include "osdep/mac/application_objc.h"

@@ -20,6 +20,7 @@ import Cocoa
 class Window: NSWindow, NSWindowDelegate {
     weak var common: Common! = nil
     var mpv: MPVHelper? { get { return common.mpv } }
+    var input: InputHelper? { get { return common.input } }
 
     var targetScreen: NSScreen?
     var previousScreen: NSScreen?
@@ -335,7 +336,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func updateMovableBackground(_ pos: NSPoint) {
         if !isInFullscreen {
-            isMovableByWindowBackground = mpv?.canBeDraggedAt(pos) ?? true
+            isMovableByWindowBackground = input?.draggable(at: pos) ?? true
         } else {
             isMovableByWindowBackground = false
         }
@@ -503,12 +504,12 @@ class Window: NSWindow, NSWindowDelegate {
     @objc func setDoubleWindowSize() { setWindowScale(2.0) }
 
     func setWindowScale(_ scale: Double) {
-        mpv?.command("set window-scale \(scale)")
+        input?.command("set window-scale \(scale)")
     }
 
     func addWindowScale(_ scale: Double) {
         if !isInFullscreen {
-            mpv?.command("add window-scale \(scale)")
+            input?.command("add window-scale \(scale)")
         }
     }
 
@@ -555,7 +556,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        cocoa_put_key(MP_KEY_CLOSE_WIN)
+        input?.put(key: MP_KEY_CLOSE_WIN)
         return false
     }
 

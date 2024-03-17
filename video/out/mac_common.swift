@@ -28,6 +28,7 @@ class MacCommon: Common {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
         mpv = MPVHelper(vo, log)
+        input = InputHelper(vo.pointee.input_ctx, mpv)
         timer = PreciseTimer(common: self)
 
         DispatchQueue.main.sync {

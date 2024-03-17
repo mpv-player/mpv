@@ -627,17 +627,20 @@ Available video output drivers are:
         lower resolution (the video when handled by the hwdec will be on the
         drmprime-video plane and at full 4K resolution)
 
-    ``--drm-format=<xrgb8888|xrgb2101010>``
+    ``--drm-format=<xrgb8888|xbgr8888|xrgb2101010|xbgr2101010|yuyv>``
         Select the DRM format to use (default: xrgb8888). This allows you to
-        choose the bit depth of the DRM mode. xrgb8888 is your usual 24 bit per
-        pixel/8 bits per channel packed RGB format with 8 bits of padding.
-        xrgb2101010 is a packed 30 bits per pixel/10 bits per channel packed RGB
-        format with 2 bits of padding.
+        choose the bit depth and color type of the DRM mode.
+
+        xrgb8888 is your usual 24bpp packed RGB format with 8 bits of padding.
+        xrgb2101010 is a 30bpp packed RGB format with 2 bits of padding.
+        yuyv is a 32bpp packed YUV 4:2:2 format. No planar formats are currently
+        supported.
 
         There are cases when xrgb2101010 will work with the ``drm`` VO, but not
         with the ``drm`` backend for the ``gpu`` VO. This is because with the
         ``gpu`` VO, in addition to requiring support in your DRM driver,
-        requires support for xrgb2101010 in your EGL driver
+        requires support for xrgb2101010 in your EGL driver.
+        yuyv only ever works with the ``drm`` VO.
 
     ``--drm-draw-surface-size=<[WxH]>``
         Sets the size of the surface used on the draw plane. The surface will

@@ -19,13 +19,9 @@
 
 #ifndef MAC_EVENTS
 #define MAC_EVENTS
-#include "input/keycodes.h"
 
 struct input_ctx;
 struct mpv_handle;
-
-void cocoa_put_key(int keycode);
-void cocoa_put_key_with_modifiers(int keycode, int modifiers);
 
 void cocoa_init_media_keys(void);
 void cocoa_uninit_media_keys(void);

@@ -24,7 +24,6 @@
 #include <unistd.h>
 
 #include <drm_fourcc.h>
-#include <libswscale/swscale.h>
 
 #include "common/msg.h"
 #include "drm_atomic.h"
@@ -38,11 +37,12 @@
 #include "vo.h"
 
 #define IMGFMT_XRGB8888 IMGFMT_BGR0
-#if BYTE_ORDER == BIG_ENDIAN
-#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10BE)
-#else
-#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10LE)
-#endif
+#define IMGFMT_XBGR8888 IMGFMT_RGB0
+#define IMGFMT_XRGB2101010 \
+    pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2RGB10LE, AV_PIX_FMT_X2RGB10BE))
+#define IMGFMT_XBGR2101010 \
+    pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2BGR10LE, AV_PIX_FMT_X2BGR10BE))
+#define IMGFMT_YUYV pixfmt2imgfmt(AV_PIX_FMT_YUYV422)
 
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
@@ -118,12 +118,31 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     fb->handle = creq.handle;
 
     // select format
-    if (drm->opts->drm_format == DRM_OPTS_FORMAT_XRGB2101010) {
+    switch (drm->opts->drm_format) {
+    case DRM_OPTS_FORMAT_XRGB2101010:
         p->drm_format = DRM_FORMAT_XRGB2101010;
         p->imgfmt = IMGFMT_XRGB2101010;
-    } else {
-        p->drm_format = DRM_FORMAT_XRGB8888;;
+        break;
+    case DRM_OPTS_FORMAT_XBGR2101010:
+        p->drm_format = DRM_FORMAT_XRGB2101010;
+        p->imgfmt = IMGFMT_XRGB2101010;
+        break;
+    case DRM_OPTS_FORMAT_XBGR8888:
+        p->drm_format = DRM_FORMAT_XBGR8888;
+        p->imgfmt = IMGFMT_XBGR8888;
+        break;
+    case DRM_OPTS_FORMAT_YUYV:
+        p->drm_format = DRM_FORMAT_YUYV;
+        p->imgfmt = IMGFMT_YUYV;
+        break;
+    default:
+        if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
+            MP_VERBOSE(vo, "Requested format not supported by VO, "
+                       "falling back to xrgb8888\n");
+        }
+        p->drm_format = DRM_FORMAT_XRGB8888;
         p->imgfmt = IMGFMT_XRGB8888;
+        break;
     }
 
     // create framebuffer object for the dumb-buffer
@@ -172,14 +191,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vo->dheight = drm->fb->height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
 
-    int w = p->dst.x1 - p->dst.x0;
-    int h = p->dst.y1 - p->dst.y0;
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(p->imgfmt);
+    p->dst.x0 = MP_ALIGN_DOWN(p->dst.x0, fmt.align_x);
+    p->dst.y0 = MP_ALIGN_DOWN(p->dst.y0, fmt.align_y);
 
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->imgfmt,
-        .w = w,
-        .h = h,
+        .w = mp_rect_w(p->dst),
+        .h = mp_rect_h(p->dst),
         .p_w = 1,
         .p_h = 1,
     };
@@ -200,6 +220,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst; // essentially constant, so this is okay
+    mp_mutex_unlock(&vo->params_mutex);
     vo->want_redraw = true;
     return 0;
 }
@@ -239,35 +262,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, struct framebuffer *buf)
             osd_draw_on_image(vo->osd, p->osd, 0, 0, p->cur_frame);
         }
 
-        if (p->drm_format == DRM_FORMAT_XRGB2101010) {
-            // Pack GBRP10 image into XRGB2101010 for DRM
-            const int w = p->cur_frame->w;
-            const int h = p->cur_frame->h;
-
-            const int g_padding = p->cur_frame->stride[0]/sizeof(uint16_t) - w;
-            const int b_padding = p->cur_frame->stride[1]/sizeof(uint16_t) - w;
-            const int r_padding = p->cur_frame->stride[2]/sizeof(uint16_t) - w;
-            const int fbuf_padding = buf->stride/sizeof(uint32_t) - w;
-
-            uint16_t *g_ptr = (uint16_t*)p->cur_frame->planes[0];
-            uint16_t *b_ptr = (uint16_t*)p->cur_frame->planes[1];
-            uint16_t *r_ptr = (uint16_t*)p->cur_frame->planes[2];
-            uint32_t *fbuf_ptr = (uint32_t*)buf->map;
-            for (unsigned y = 0; y < h; ++y) {
-                for (unsigned x = 0; x < w; ++x) {
-                    *fbuf_ptr++ = (*r_ptr++ << 20) | (*g_ptr++ << 10) | (*b_ptr++);
-                }
-                g_ptr += g_padding;
-                b_ptr += b_padding;
-                r_ptr += r_padding;
-                fbuf_ptr += fbuf_padding;
-            }
-        } else { // p->drm_format == DRM_FORMAT_XRGB8888
-            memcpy_pic(buf->map, p->cur_frame->planes[0],
-                       p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
-                       buf->stride,
-                       p->cur_frame->stride[0]);
-        }
+        memcpy_pic(buf->map, p->cur_frame->planes[0],
+                   p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
+                   buf->stride,
+                   p->cur_frame->stride[0]);
     }
 
     if (mpi != p->last_input) {
@@ -423,7 +421,8 @@ err:
 
 static int query_format(struct vo *vo, int format)
 {
-    return sws_isSupportedInput(imgfmt2pixfmt(format));
+    struct priv *p = vo->priv;
+    return mp_sws_supports_formats(p->sws, p->imgfmt, format) ? 1 : 0;
 }
 
 static int control(struct vo *vo, uint32_t request, void *arg)

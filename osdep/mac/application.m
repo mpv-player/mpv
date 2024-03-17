@@ -115,9 +115,9 @@ static void terminate_cocoa_application(void)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    if ([self modalWindow] || ![_eventsResponder processKeyEvent:event])
+    if ([self modalWindow] || ![_eventsResponder.inputHelper processKeyWithEvent:event])
         [super sendEvent:event];
-    [_eventsResponder wakeup];
+    [_eventsResponder.inputHelper wakeup];
 }
 
 - (id)init
@@ -162,7 +162,6 @@ static const char mac_icon[] =
 - (NSTouchBar *)makeTouchBar
 {
     TouchBar *tBar = [[TouchBar alloc] init];
-    [tBar setApp:self];
     tBar.delegate = tBar;
     tBar.customizationIdentifier = customID;
     tBar.defaultItemIdentifiers = @[play, previousItem, nextItem, seekBar];
@@ -202,17 +201,6 @@ static const char mac_icon[] =
     return &vo_sub_opts;
 }
 
-- (void)queueCommand:(char *)cmd
-{
-    [_eventsResponder queueCommand:cmd];
-}
-
-- (void)stopMPV:(char *)cmd
-{
-    if (![_eventsResponder queueCommand:cmd])
-        terminate_cocoa_application();
-}
-
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
     NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
@@ -225,7 +213,8 @@ static const char mac_icon[] =
 - (void)handleQuitEvent:(NSAppleEventDescriptor *)event
          withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
-    [self stopMPV:"quit"];
+    if (![_eventsResponder.inputHelper command:@"quit"])
+        terminate_cocoa_application();
 }
 
 - (void)getUrl:(NSAppleEventDescriptor *)event
@@ -240,7 +229,7 @@ static const char mac_icon[] =
                      range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
     url = [url stringByRemovingPercentEncoding];
-    [_eventsResponder handleFilesArray:@[url]];
+    [_eventsResponder.inputHelper openWithFiles:@[url]];
 }
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
@@ -249,14 +238,10 @@ static const char mac_icon[] =
         mpv_shared_app().openCount--;
         return;
     }
-    [self openFiles:filenames];
-}
 
-- (void)openFiles:(NSArray *)filenames
-{
     SEL cmpsel = @selector(localizedStandardCompare:);
     NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
-    [_eventsResponder handleFilesArray:files];
+    [_eventsResponder.inputHelper openWithFiles:files];
 }
 @end
 
@@ -357,7 +342,7 @@ int cocoa_main(int argc, char *argv[])
         }
 
         mp_thread_create(&playback_thread_id, playback_thread, &ctx);
-        [[EventsResponder sharedInstance] waitForInputContext];
+        [[EventsResponder sharedInstance].inputHelper wait];
         cocoa_run_runloop();
 
         // This should never be reached: cocoa_run_runloop blocks until the

@@ -21,8 +21,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <libswscale/swscale.h>
-
 #include "osdep/endian.h"
 #include "present_sync.h"
 #include "sub/osd.h"
@@ -31,6 +29,8 @@
 #include "video/sws_utils.h"
 #include "vo.h"
 #include "wayland_common.h"
+
+#define IMGFMT_WL_RGB MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB)
 
 struct buffer {
     struct vo *vo;
@@ -164,7 +164,8 @@ err:
 
 static int query_format(struct vo *vo, int format)
 {
-    return sws_isSupportedInput(imgfmt2pixfmt(format));
+    struct priv *p = vo->priv;
+    return mp_sws_supports_formats(p->sws, IMGFMT_WL_RGB, format) ? 1 : 0;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -195,14 +196,19 @@ static int resize(struct vo *vo)
     vo->dwidth = width;
     vo->dheight = height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB),
+        .imgfmt = IMGFMT_WL_RGB,
         .w = width,
         .h = height,
         .p_w = 1,
         .p_h = 1,
     };
     mp_image_params_guess_csp(&p->sws->dst);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst;
+    mp_mutex_unlock(&vo->params_mutex);
+
     while (p->free_buffers) {
         buf = p->free_buffers;
         p->free_buffers = buf->next;

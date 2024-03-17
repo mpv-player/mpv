@@ -21,25 +21,15 @@
 #include "osdep/mac/events.h"
 
 @class RemoteCommandCenter;
+@class InputHelper;
 struct input_ctx;
 
 @interface EventsResponder : NSObject
 
 + (EventsResponder *)sharedInstance;
-- (void)setInputContext:(struct input_ctx *)ctx;
 - (void)setIsApplication:(BOOL)isApplication;
 
-/// Blocks until inputContext is present.
-- (void)waitForInputContext;
-- (void)wakeup;
-- (void)putKey:(int)keycode;
-- (void)handleFilesArray:(NSArray *)files;
-
-- (bool)queueCommand:(char *)cmd;
-- (bool)processKeyEvent:(NSEvent *)event;
-
-- (BOOL)handleMPKey:(int)key withMask:(int)mask;
-
 @property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
+@property(nonatomic, retain) InputHelper *inputHelper;
 
 @end

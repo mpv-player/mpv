@@ -480,8 +480,10 @@ struct vo {
     //     which are still safe to read in the play loop, but for correctness
     //     generic getter is protected by params_mutex.
     mp_mutex params_mutex;
-    struct mp_image_params *params; // Configured parameters (changed in vo_reconfig)
-    struct mp_image_params *target_params; // Target display parameters
+    // Configured parameters (changed in vo_reconfig)
+    struct mp_image_params *params;
+    // Target display parameters (VO is responsible for re-/setting)
+    struct mp_image_params *target_params;
 
     // --- The following fields can be accessed only by the VO thread, or from
     //     anywhere _if_ the VO thread is suspended (use vo->dispatch).

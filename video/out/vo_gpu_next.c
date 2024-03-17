@@ -1221,6 +1221,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     resize(vo);
+    TA_FREEP(&vo->target_params);
     return 0;
 }
 
@@ -1477,17 +1478,17 @@ static inline void copy_frame_info_to_mp(struct frame_info *pl,
     }
 }
 
-static void update_ra_ctx_options(struct vo *vo)
+static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
 {
     struct priv *p = vo->priv;
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
     bool border_alpha = (p->next_opts->border_background == BACKGROUND_COLOR &&
                          gl_opts->background_color.a != 255) ||
                          p->next_opts->border_background == BACKGROUND_NONE;
-    p->ra_ctx->opts.want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
-                                  gl_opts->background_color.a != 255) ||
-                                  gl_opts->background == BACKGROUND_NONE ||
-                                  border_alpha;
+    ctx_opts->want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
+                            gl_opts->background_color.a != 255) ||
+                            gl_opts->background == BACKGROUND_NONE ||
+                            border_alpha;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -1505,7 +1506,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
         m_config_cache_update(p->opts_cache);
-        update_ra_ctx_options(vo);
+        update_ra_ctx_options(vo, &p->ra_ctx->opts);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         update_render_options(vo);
@@ -1825,7 +1826,10 @@ static int preinit(struct vo *vo)
     p->log = vo->log;
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
-    p->context = gpu_ctx_create(vo, gl_opts);
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
+    update_ra_ctx_options(vo, ctx_opts);
+    p->context = gpu_ctx_create(vo, ctx_opts);
+    talloc_free(ctx_opts);
     if (!p->context)
         goto err_out;
     // For the time being
@@ -1838,7 +1842,6 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra_ctx = p->ra_ctx,
     };
-    update_ra_ctx_options(vo);
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);

@@ -27,9 +27,6 @@ struct mpv_handle;
 
 - (NSImage *)getMPVIcon;
 - (void)processEvent:(struct mpv_event *)event;
-- (void)queueCommand:(char *)cmd;
-- (void)stopMPV:(char *)cmd;
-- (void)openFiles:(NSArray *)filenames;
 - (void)initCocoaCb:(struct mpv_handle *)ctx;
 + (const struct m_sub_options *)getMacOSConf;
 + (const struct m_sub_options *)getVoSubConf;
