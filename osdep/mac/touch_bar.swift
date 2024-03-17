@@ -80,6 +80,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     var isPaused: Bool = false
     var position: Double = 0
     var duration: Double = 0
+    var rate: Double = 0
 
     override init() {
         super.init()
@@ -326,7 +327,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
         switch String(cString: property.name) {
         case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
             let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
-            if Int(floor(newPosition) - floor(position)) != 0 {
+            if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
                 updateTouchBarTimeItems()
             }
@@ -336,6 +337,8 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
         case "pause" where property.format == MPV_FORMAT_FLAG:
             isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
             updatePlayButton()
+        case "speed" where property.format == MPV_FORMAT_DOUBLE:
+            rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
         default:
             break
         }
