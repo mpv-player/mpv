@@ -56,9 +56,11 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
     return r;
 }
 
+#define bstr0_s(s) (struct bstr){(unsigned char *)(s), (s) ? strlen(s) : 0}
+
 static inline struct bstr bstr0(const char *s)
 {
-    return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
+    return bstr0_s(s);
 }
 
 int bstrcmp(struct bstr str1, struct bstr str2);
