@@ -298,6 +298,31 @@ int mp_fstat(int fd, struct mp_stat *buf)
     return hstat(h, buf);
 }
 
+static inline HANDLE get_handle(FILE *stream)
+{
+    HANDLE wstream = INVALID_HANDLE_VALUE;
+
+    if (stream == stdout || stream == stderr) {
+        wstream = GetStdHandle(stream == stdout ?
+                               STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
+    }
+    return wstream;
+}
+
+int mp_fputs(const char *str, FILE *stream)
+{
+    HANDLE wstream = get_handle(stream);
+    if (mp_check_console(wstream))
+        return mp_console_fputs(wstream, bstr0(str));
+
+    return fputs(str, stream);
+}
+
+int mp_puts(const char *str)
+{
+    return mp_fputs(str, stdout);
+}
+
 #if HAVE_UWP
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
@@ -307,15 +332,9 @@ static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
-    HANDLE wstream = INVALID_HANDLE_VALUE;
-
-    if (stream == stdout || stream == stderr) {
-        wstream = GetStdHandle(stream == stdout ?
-                               STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
-    }
-
+    HANDLE wstream = get_handle(stream);
     if (mp_check_console(wstream))
-        return mp_write_console_ansi(wstream, format, args);
+        return mp_console_vfprintf(wstream, format, args);
 
     return vfprintf(stream, format, args);
 }

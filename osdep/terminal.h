@@ -54,7 +54,8 @@ void terminal_get_size(int *w, int *h);
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height);
 
 // Windows only.
-int mp_write_console_ansi(void *wstream, const char *format, va_list args);
+int mp_console_vfprintf(void *wstream, const char *format, va_list args);
+int mp_console_fputs(void *wstream, bstr str);
 bool mp_check_console(void *handle);
 
 /* Windows-only function to attach to the parent process's console */
