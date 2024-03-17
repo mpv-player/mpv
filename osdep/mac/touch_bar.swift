@@ -266,12 +266,10 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
 
     func applyConstraintFrom(string: String, identifier: NSTouchBarItem.Identifier) {
         guard let text = configs[identifier]?.view as? NSTextField else { return }
-        let fString = string.components(separatedBy: .decimalDigits).joined(separator: "0")
-        let textField = NSTextField(labelWithString: fString)
-        let size = textField.frame.size
-
+        let fullString = string.components(separatedBy: .decimalDigits).joined(separator: "0")
+        let textField = NSTextField(labelWithString: fullString)
         let con = NSLayoutConstraint(item: text, attribute: .width, relatedBy: .equal, toItem: nil,
-            attribute: .notAnAttribute, multiplier: 1.0, constant: ceil(size.width * 1.1))
+            attribute: .notAnAttribute, multiplier: 1.1, constant: ceil(textField.frame.size.width))
         text.addConstraint(con)
         configs[identifier]?.constraint = con
     }
