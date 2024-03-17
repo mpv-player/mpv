@@ -208,14 +208,9 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
         guard let config = configs[.seekBar], let slider = config.view as? NSSlider else { return }
         if !(config.item?.isVisible ?? false) { return }
 
-        if duration <= 0 {
-            slider.isEnabled = false
-            slider.doubleValue = 0
-        } else {
-            slider.isEnabled = true
-            if (!slider.isHighlighted) {
-                slider.doubleValue = (position / duration) * 100
-            }
+        slider.isEnabled = duration > 0
+        if !slider.isHighlighted {
+            slider.doubleValue = slider.isEnabled ? (position / duration) * 100 : 0
         }
     }
 
@@ -224,14 +219,9 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
         if !(config.item?.isVisible ?? false) { return }
 
         removeConstraintFor(identifier: .timeLeft)
-        if duration <= 0 {
-            text.stringValue = ""
-        } else {
-            let left = Int(floor(duration) - floor(position))
-            let leftFormat = format(time: left)
-            let durationFormat = format(time: Int(duration))
-            text.stringValue = "-\(leftFormat)"
-            applyConstraintFrom(string: "-\(durationFormat)", identifier: .timeLeft)
+        text.stringValue = duration > 0 ? "-" + format(time: Int(floor(duration) - floor(position))) : ""
+        if !text.stringValue.isEmpty {
+            applyConstraintFrom(string: "-" + format(time: Int(duration)), identifier: .timeLeft)
         }
     }
 
@@ -241,22 +231,13 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
 
         text.stringValue = format(time: Int(floor(position)))
         removeConstraintFor(identifier: .currentPosition)
-        if duration <= 0 {
-            applyConstraintFrom(string: format(time: Int(position)), identifier: .currentPosition)
-        } else {
-            applyConstraintFrom(string: format(time: Int(duration)), identifier: .currentPosition)
-        }
+        applyConstraintFrom(string: format(time: Int(duration > 0 ? duration : position)), identifier: .currentPosition)
     }
 
     func updatePlayButton() {
         guard let config = configs[.play], let button = config.view as? NSButton else { return }
         if !isVisible || !(config.item?.isVisible ?? false) { return }
-
-        if isPaused {
-            button.image = configs[.play]?.imageAlt
-        } else {
-            button.image = configs[.play]?.image
-        }
+        button.image = isPaused ? configs[.play]?.imageAlt : configs[.play]?.image
     }
 
     @objc func buttonAction(_ button: NSButton) {
