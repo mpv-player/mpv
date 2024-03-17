@@ -189,7 +189,7 @@ static bool get_file_ids_win8(HANDLE h, dev_t *dev, ino_t *ino)
     // SDK, but we can ignore that by just memcpying it. This will also
     // truncate the file ID on 32-bit Windows, which doesn't support __int128.
     // 128-bit file IDs are only used for ReFS, so that should be okay.
-    assert(sizeof(*ino) <= sizeof(ii.FileId));
+    static_assert(sizeof(*ino) <= sizeof(ii.FileId), "");
     memcpy(ino, &ii.FileId, sizeof(*ino));
     return true;
 }
