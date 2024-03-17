@@ -27,7 +27,12 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 {
 }
 
-int mp_write_console_ansi(void *wstream, const char *format, va_list args)
+int mp_console_vfprintf(void *wstream, const char *format, va_list args)
+{
+    return 0;
+}
+
+int mp_console_fputs(void *wstream, bstr str)
 {
     return 0;
 }

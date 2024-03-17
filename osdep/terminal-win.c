@@ -226,15 +226,36 @@ bool terminal_in_background(void)
     return false;
 }
 
-int mp_write_console_ansi(HANDLE wstream, const char *format, va_list args)
+int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
 {
     struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
-    if (!buffers)
+    bool free_buf = false;
+    if (!buffers) {
         buffers = talloc_zero(NULL, struct tmp_buffers);
+        free_buf = !FlsSetValue(tmp_buffers_key, buffers);
+    }
 
     buffers->write_console_buf.len = 0;
     bstr_xappend_vasprintf(buffers, &buffers->write_console_buf, format, args);
-    int wlen = bstr_to_wchar(buffers, buffers->write_console_buf, &buffers->write_console_wbuf);
+
+    int ret = mp_console_fputs(wstream, buffers->write_console_buf);
+
+    if (free_buf)
+        talloc_free(buffers);
+
+    return ret;
+}
+
+int mp_console_fputs(HANDLE wstream, bstr str)
+{
+    struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
+    bool free_buf = false;
+    if (!buffers) {
+        buffers = talloc_zero(NULL, struct tmp_buffers);
+        free_buf = !FlsSetValue(tmp_buffers_key, buffers);
+    }
+
+    int wlen = bstr_to_wchar(buffers, str, &buffers->write_console_wbuf);
     wchar_t *pos = buffers->write_console_wbuf;
 
     while (*pos) {
@@ -380,7 +401,7 @@ int mp_write_console_ansi(HANDLE wstream, const char *format, va_list args)
 
     int ret = buffers->write_console_buf.len;
 
-    if (!FlsSetValue(tmp_buffers_key, buffers))
+    if (free_buf)
         talloc_free(buffers);
 
     return ret;
