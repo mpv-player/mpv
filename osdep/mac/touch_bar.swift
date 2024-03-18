@@ -37,40 +37,33 @@ extension NSTouchBarItem.Identifier {
 }
 
 extension TouchBar {
-    enum `Type` {
-        case button
-        case text
-        case slider
-    }
+    typealias ViewHandler = (Config) -> (NSView)
 
     struct Config {
         let name: String
-        let type: Type
         let command: String
-        var view: NSView?
         var item: NSCustomTouchBarItem?
         var constraint: NSLayoutConstraint?
         let image: NSImage
         let imageAlt: NSImage
+        let handler: ViewHandler
 
         init(
             name: String = "",
-            type: Type = .button,
             command: String = "",
-            view: NSView? = nil,
             item: NSCustomTouchBarItem? = nil,
             constraint: NSLayoutConstraint? = nil,
             image: NSImage? = nil,
-            imageAlt: NSImage? = nil
+            imageAlt: NSImage? = nil,
+            handler: @escaping ViewHandler = { _ in return NSButton(title: "", target: nil, action: nil) }
         ) {
             self.name = name
-            self.type = type
             self.command = command
-            self.view = view
             self.item = item
             self.constraint = constraint
             self.image = image ?? NSImage(size: NSSize(width: 1, height: 1))
             self.imageAlt = imageAlt ?? NSImage(size: NSSize(width: 1, height: 1))
+            self.handler = handler
         }
     }
 }
@@ -86,51 +79,51 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
         super.init()
 
         configs = [
-            .seekBar: Config(name: "Seek Bar", type: .slider, command: "seek %f absolute-percent"),
-            .currentPosition: Config(name: "Current Position", type: .text),
-            .timeLeft: Config(name: "Time Left", type: .text),
+            .seekBar: Config(name: "Seek Bar", command: "seek %f absolute-percent", handler: createSlider),
+            .currentPosition: Config(name: "Current Position", handler: createText),
+            .timeLeft: Config(name: "Time Left", handler: createText),
             .play: Config(
                 name: "Play Button",
-                type: .button,
                 command: "cycle pause",
                 image: .init(named: NSImage.touchBarPauseTemplateName),
-                imageAlt: .init(named: NSImage.touchBarPlayTemplateName)
+                imageAlt: .init(named: NSImage.touchBarPlayTemplateName),
+                handler: createButton
             ),
             .previousItem: Config(
                 name: "Previous Playlist Item",
-                type: .button,
                 command: "playlist-prev",
-                image: .init(named: NSImage.touchBarGoBackTemplateName)
+                image: .init(named: NSImage.touchBarGoBackTemplateName),
+                handler: createButton
             ),
             .nextItem: Config(
                 name: "Next Playlist Item",
-                type: .button,
                 command: "playlist-next",
-                image: .init(named: NSImage.touchBarGoForwardTemplateName)
+                image: .init(named: NSImage.touchBarGoForwardTemplateName),
+                handler: createButton
             ),
             .previousChapter: Config(
                 name: "Previous Chapter",
-                type: .button,
                 command: "add chapter -1",
-                image: .init(named: NSImage.touchBarSkipBackTemplateName)
+                image: .init(named: NSImage.touchBarSkipBackTemplateName),
+                handler: createButton
             ),
             .nextChapter: Config(
                 name: "Next Chapter",
-                type: .button,
                 command: "add chapter 1",
-                image: .init(named: NSImage.touchBarSkipAheadTemplateName)
+                image: .init(named: NSImage.touchBarSkipAheadTemplateName),
+                handler: createButton
             ),
             .cycleAudio: Config(
                 name: "Cycle Audio",
-                type: .button,
                 command: "cycle audio",
-                image: .init(named: NSImage.touchBarAudioInputTemplateName)
-                ),
+                image: .init(named: NSImage.touchBarAudioInputTemplateName),
+                handler: createButton
+            ),
             .cycleSubtitle: Config(
                 name: "Cycle Subtitle",
-                type: .button,
                 command: "cycle sub",
-                image: .init(named: NSImage.touchBarComposeTemplateName)
+                image: .init(named: NSImage.touchBarComposeTemplateName),
+                handler: createButton
             )
         ]
 
@@ -149,39 +142,29 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     func touchBar(_ touchBar: NSTouchBar, makeItemForIdentifier identifier: NSTouchBarItem.Identifier) -> NSTouchBarItem? {
         guard let config = configs[identifier] else { return nil }
 
-        switch config.type {
-        case .button:
-            let item = NSCustomTouchBarItem(identifier: identifier)
-            let image = config.image
-            let button = NSButton(image: image, target: self, action: #selector(buttonAction(_:)))
-            item.view = button;
-            item.customizationLabel = config.name
-            configs[identifier]?.view = button
-            configs[identifier]?.item = item
-            item.addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
-            return item
-        case .text:
-            let item = NSCustomTouchBarItem(identifier: identifier)
-            let text = NSTextField(labelWithString: "0:00")
-            text.alignment = .center
-            item.view = text;
-            item.customizationLabel = config.name
-            configs[identifier]?.view = text
-            configs[identifier]?.item = item
-            item.addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
-            return item
-        case .slider:
-            let item = NSCustomTouchBarItem(identifier: identifier)
-            let slider = NSSlider(target: self, action: #selector(seekbarChanged(_:)))
-            slider.minValue = 0
-            slider.maxValue = 100
-            item.view = slider;
-            item.customizationLabel = config.name
-            configs[identifier]?.view = slider
-            configs[identifier]?.item = item
-            item.addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
-            return item
-        }
+        let item = NSCustomTouchBarItem(identifier: identifier)
+        item.view = config.handler(config)
+        item.customizationLabel = config.name
+        configs[identifier]?.item = item
+        item.addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
+        return item
+    }
+
+    lazy var createButton: ViewHandler = { config in
+        return NSButton(image: config.image, target: self, action: #selector(Self.buttonAction(_:)))
+    }
+
+    lazy var createText: ViewHandler = { config in
+        let text = NSTextField(labelWithString: "0:00")
+        text.alignment = .center
+        return text
+    }
+
+    lazy var createSlider: ViewHandler = { config in
+        let slider = NSSlider(target: self, action: #selector(Self.seekbarChanged(_:)))
+        slider.minValue = 0
+        slider.maxValue = 100
+        return slider
     }
 
     override func observeValue(
@@ -205,7 +188,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func updateSlider() {
-        guard let config = configs[.seekBar], let slider = config.view as? NSSlider else { return }
+        guard let config = configs[.seekBar], let slider = config.item?.view as? NSSlider else { return }
         if !(config.item?.isVisible ?? false) { return }
 
         slider.isEnabled = duration > 0
@@ -215,7 +198,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func updateTimeLeft() {
-        guard let config = configs[.timeLeft], let text = config.view as? NSTextField else { return }
+        guard let config = configs[.timeLeft], let text = config.item?.view as? NSTextField else { return }
         if !(config.item?.isVisible ?? false) { return }
 
         removeConstraintFor(identifier: .timeLeft)
@@ -226,7 +209,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func updateCurrentPosition() {
-        guard let config = configs[.currentPosition], let text = config.view as? NSTextField else { return }
+        guard let config = configs[.currentPosition], let text = config.item?.view as? NSTextField else { return }
         if !(config.item?.isVisible ?? false) { return }
 
         text.stringValue = format(time: Int(floor(position)))
@@ -235,7 +218,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func updatePlayButton() {
-        guard let config = configs[.play], let button = config.view as? NSButton else { return }
+        guard let config = configs[.play], let button = config.item?.view as? NSButton else { return }
         if !isVisible || !(config.item?.isVisible ?? false) { return }
         button.image = isPaused ? configs[.play]?.imageAlt : configs[.play]?.image
     }
@@ -259,13 +242,13 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     }
 
     func removeConstraintFor(identifier: NSTouchBarItem.Identifier) {
-        guard let text = configs[identifier]?.view as? NSTextField,
+        guard let text = configs[identifier]?.item?.view as? NSTextField,
               let constraint = configs[identifier]?.constraint as? NSLayoutConstraint else { return }
         text.removeConstraint(constraint)
     }
 
     func applyConstraintFrom(string: String, identifier: NSTouchBarItem.Identifier) {
-        guard let text = configs[identifier]?.view as? NSTextField else { return }
+        guard let text = configs[identifier]?.item?.view as? NSTextField else { return }
         let fullString = string.components(separatedBy: .decimalDigits).joined(separator: "0")
         let textField = NSTextField(labelWithString: fullString)
         let con = NSLayoutConstraint(item: text, attribute: .width, relatedBy: .equal, toItem: nil,
@@ -276,7 +259,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
 
     func getIdentifierFrom(view: NSView) -> NSTouchBarItem.Identifier? {
         for (identifier, config) in configs {
-            if config.view == view {
+            if config.item?.view == view {
                 return identifier
             }
         }
