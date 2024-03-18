@@ -210,7 +210,7 @@ static inline int get_system_metrics(struct vo_w32_state *w32, int metric)
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
-    if (!w32->opts->border)
+    if (!w32->opts->border && !IsMaximized(w32->window))
         return;
 
     if (w32->api.pAdjustWindowRectExForDpi) {
@@ -244,7 +244,7 @@ static bool check_windows10_build(DWORD build)
 // Get adjusted title bar height, only relevant for --title-bar=no
 static int get_title_bar_height(struct vo_w32_state *w32)
 {
-    assert(!w32->opts->title_bar && w32->opts->border);
+    assert(w32->opts->border ? !w32->opts->title_bar : IsMaximized(w32->window));
     UINT visible_border = 0;
     // Only available on Windows 11, check in case it's backported and breaks
     // WM_NCCALCSIZE exception for Windows 10.
@@ -947,7 +947,7 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
     if (w32->current_fs) {
         style |= FULLSCREEN;
     } else {
-        style |= w32->opts->border ? FRAME : NO_FRAME;
+        style |= (w32->opts->border || w32->opts->window_maximized) ? FRAME : NO_FRAME;
         if (!w32->opts->title_bar && is_high_contrast())
             style &= ~WS_CAPTION;
     }
@@ -1110,6 +1110,8 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
 {
     if (w32->parent)
         return;
+
+    update_window_style(w32);
 
     // Apply the maximized state on leaving fullscreen.
     if (w32->current_fs && !leaving_fullscreen)
@@ -1444,6 +1446,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                     (wp.flags & WPF_RESTORETOMAXIMIZED));
             if (w32->opts->window_maximized != is_maximized) {
                 w32->opts->window_maximized = is_maximized;
+                update_window_style(w32);
                 m_config_cache_write_opt(w32->opts_cache,
                                          &w32->opts->window_maximized);
             }
@@ -1667,12 +1670,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_window_state(w32);
         break;
     case WM_NCCALCSIZE:
-        if (!w32->opts->border)
+        if (!w32->opts->border && !IsMaximized(w32->window))
             return 0;
+
         // Apparently removing WS_CAPTION disables some window animation, instead
         // just reduce non-client size to remove title bar.
-        if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
-            !w32->current_fs && !w32->parent &&
+        if (wParam && lParam && !w32->current_fs && !w32->parent &&
+            (w32->opts->border ? !w32->opts->title_bar : IsMaximized(w32->window)) &&
             (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
         {
             // Remove all NC area on Windows 10 due to inability to control the
