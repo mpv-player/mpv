@@ -7,169 +7,113 @@
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
-        <key>CFBundleTypeExtensions</key>
-        <array>
-          <string>AAC</string>
-          <string>AC3</string>
-          <string>AIFF</string>
-          <string>M4A</string>
-          <string>MKA</string>
-          <string>MP3</string>
-          <string>OGG</string>
-          <string>PCM</string>
-          <string>VAW</string>
-          <string>WAV</string>
-          <string>WAW</string>
-          <string>WMA</string>
-          <string>aac</string>
-          <string>ac3</string>
-          <string>aiff</string>
-          <string>m4a</string>
-          <string>mka</string>
-          <string>mp3</string>
-          <string>ogg</string>
-          <string>pcm</string>
-          <string>vaw</string>
-          <string>wav</string>
-          <string>waw</string>
-          <string>wma</string>
-        </array>
         <key>CFBundleTypeIconFile</key>
         <string>document.icns</string>
         <key>CFBundleTypeName</key>
-        <string>Audio file</string>
+        <string>Audio File</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
-        <string>XML</string>
+        <string>Binary</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>com.apple.coreaudio-format</string>
+          <string>com.microsoft.waveform-audio</string>
+          <string>com.microsoft.windows-media-wma</string>
+          <string>io.mpv.dts</string>
+          <string>io.mpv.pcm</string>
+          <string>org.matroska.mka</string>
+          <string>org.xiph.flac</string>
+          <string>org.xiph.ogg-audio</string>
+          <string>public.aac-audio</string>
+          <string>public.ac3-audio</string>
+          <string>public.aifc.audio</string>
+          <string>public.aiff-audio</string>
+          <string>public.audio</string>
+          <string>public.mp2</string>
+          <string>public.mp3</string>
+          <string>public.mpeg-4-audio</string>
+          <string>public.ulaw-audio</string>
+        </array>
       </dict>
       <dict>
-        <key>CFBundleTypeExtensions</key>
-        <array>
-          <string>*</string>
-          <string>*</string>
-          <string>3GP</string>
-          <string>3IV</string>
-          <string>3gp</string>
-          <string>3iv</string>
-          <string>ASF</string>
-          <string>AVI</string>
-          <string>CPK</string>
-          <string>DAT</string>
-          <string>DIVX</string>
-          <string>DV</string>
-          <string>FLAC</string>
-          <string>FLI</string>
-          <string>FLV</string>
-          <string>H264</string>
-          <string>I263</string>
-          <string>M2TS</string>
-          <string>M4V</string>
-          <string>MKV</string>
-          <string>MOV</string>
-          <string>MP2</string>
-          <string>MP4</string>
-          <string>MPEG</string>
-          <string>MPG</string>
-          <string>MPG2</string>
-          <string>MPG4</string>
-          <string>NSV</string>
-          <string>NUT</string>
-          <string>NUV</string>
-          <string>OGG</string>
-          <string>OGM</string>
-          <string>QT</string>
-          <string>RM</string>
-          <string>RMVB</string>
-          <string>VCD</string>
-          <string>VFW</string>
-          <string>VOB</string>
-          <string>WEBM</string>
-          <string>WMV</string>
-          <string>MK3D</string>
-          <string>asf</string>
-          <string>avi</string>
-          <string>cpk</string>
-          <string>dat</string>
-          <string>divx</string>
-          <string>dv</string>
-          <string>flac</string>
-          <string>fli</string>
-          <string>flv</string>
-          <string>h264</string>
-          <string>i263</string>
-          <string>m2ts</string>
-          <string>m4v</string>
-          <string>mkv</string>
-          <string>mov</string>
-          <string>mp2</string>
-          <string>mp4</string>
-          <string>mpeg</string>
-          <string>mpg</string>
-          <string>mpg2</string>
-          <string>mpg4</string>
-          <string>nsv</string>
-          <string>nut</string>
-          <string>nuv</string>
-          <string>ogg</string>
-          <string>ogm</string>
-          <string>qt</string>
-          <string>rm</string>
-          <string>rmvb</string>
-          <string>vcd</string>
-          <string>vfw</string>
-          <string>vob</string>
-          <string>webm</string>
-          <string>wmv</string>
-          <string>mk3d</string>
-        </array>
         <key>CFBundleTypeIconFile</key>
         <string>document.icns</string>
         <key>CFBundleTypeName</key>
-        <string>Movie file</string>
+        <string>Movie File</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
-        <string>XML</string>
+        <string>Binary</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>com.adobe.flash.video</string>
+          <string>com.apple.m4v-video</string>
+          <string>com.apple.quicktime-movie</string>
+          <string>com.microsoft.advanced-systems-format</string>
+          <string>com.mythtv.nuv</string>
+          <string>com.real.realmedia</string>
+          <string>io.mpv.divx</string>
+          <string>io.mpv.h263</string>
+          <string>io.mpv.h264</string>
+          <string>io.mpv.hevc</string>
+          <string>io.mpv.mk3d</string>
+          <string>io.mpv.mts</string>
+          <string>io.mpv.nsv</string>
+          <string>io.mpv.vcd</string>
+          <string>io.mpv.vob</string>
+          <string>io.mpv.webm</string>
+          <string>io.mpv.wmv</string>
+          <string>io.mpv.xvid</string>
+          <string>io.mpv.y4m</string>
+          <string>io.mpv.yuv</string>
+          <string>org.matroska.mkv</string>
+          <string>org.xiph.ogg-video</string>
+          <string>public.3gpp2</string>
+          <string>public.3gpp</string>
+          <string>public.avi</string>
+          <string>public.dv-movie</string>
+          <string>public.flc-animation</string>
+          <string>public.movie</string>
+          <string>public.mpeg-2-video</string>
+          <string>public.mpeg-4</string>
+          <string>public.mpeg</string>
+          <string>public.video</string>
+        </array>
       </dict>
       <dict>
-        <key>CFBundleTypeExtensions</key>
-        <array>
-          <string>AQT</string>
-          <string>ASS</string>
-          <string>JSS</string>
-          <string>RT</string>
-          <string>SMI</string>
-          <string>SRT</string>
-          <string>SSA</string>
-          <string>SUB</string>
-          <string>TXT</string>
-          <string>UTF</string>
-          <string>aqt</string>
-          <string>ass</string>
-          <string>jss</string>
-          <string>rt</string>
-          <string>smi</string>
-          <string>srt</string>
-          <string>ssa</string>
-          <string>sub</string>
-          <string>txt</string>
-          <string>utf</string>
-        </array>
         <key>CFBundleTypeIconFile</key>
         <string>document.icns</string>
         <key>CFBundleTypeName</key>
-        <string>Subtitles file</string>
+        <string>Subtitles File</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
         <string>XML</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>io.mpv.aqt</string>
+          <string>io.mpv.ass</string>
+          <string>io.mpv.jss</string>
+          <string>io.mpv.rt</string>
+          <string>io.mpv.smi</string>
+          <string>io.mpv.subrip</string>
+          <string>io.mpv.sub</string>
+          <string>io.mpv.vobsub</string>
+          <string>public.plain-text</string>
+        </array>
       </dict>
     </array>
     <key>CFBundleExecutable</key>
@@ -202,6 +146,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>mpv Custom Protocol</string>
         <key>CFBundleURLSchemes</key>
@@ -212,6 +158,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>Streaming Protocol</string>
         <key>CFBundleURLSchemes</key>
@@ -233,6 +181,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>CD/DVD/Bluray Media</string>
         <key>CFBundleURLSchemes</key>
@@ -256,9 +206,9 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.ac3</string>
+        <string>public.ac3-audio</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://wiki.multimedia.cx/index.php?title=AC3</string>
+        <string>https://wiki.multimedia.cx/index.php?title=AC3</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
@@ -266,6 +216,11 @@
             <string>ac3</string>
             <string>a52</string>
             <string>eac3</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/ac3</string>
+            <string>audio/eac3</string>
           </array>
         </dict>
       </dict>
@@ -281,12 +236,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.dts</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://wiki.multimedia.cx/index.php?title=DTS</string>
+        <string>https://wiki.multimedia.cx/index.php?title=DTS</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>dts</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/vnd.dts</string>
           </array>
         </dict>
       </dict>
@@ -300,14 +259,18 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.flac</string>
+        <string>org.xiph.flac</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://flac.sourceforge.net/format.html</string>
+        <string>https://flac.sourceforge.net/format.html</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>flac</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/flac</string>
           </array>
         </dict>
       </dict>
@@ -321,14 +284,18 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.mka</string>
+        <string>org.matroska.mka</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.matroska.org</string>
+        <string>https://www.matroska.org</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>mka</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/matroska</string>
           </array>
         </dict>
       </dict>
@@ -342,14 +309,19 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.ogg-audio</string>
+        <string>org.xiph.ogg-audio</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://xiph.org/ogg</string>
+        <string>https://xiph.org/ogg</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
+            <string>oga</string>
             <string>ogg</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/ogg</string>
           </array>
         </dict>
       </dict>
@@ -365,12 +337,41 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.pcm</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/Pulse-code_modulation</string>
+        <string>https://en.wikipedia.org/wiki/Pulse-code_modulation</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>pcm</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/pcm</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.audio</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Waveform Audio</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>com.microsoft.waveform-audio</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/WAV</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>wav</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/wav</string>
           </array>
         </dict>
       </dict>
@@ -384,14 +385,18 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.wma</string>
+        <string>com.microsoft.windows-media-wma</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/Windows_Media_Audio</string>
+        <string>https://en.wikipedia.org/wiki/Windows_Media_Audio</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>wma</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>audio/x-ms-wma</string>
           </array>
         </dict>
       </dict>
@@ -405,14 +410,18 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.avi</string>
+        <string>public.avi</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.the-labs.com/Video/odmlff2-avidef.pdf</string>
+        <string>https://www.the-labs.com/Video/odmlff2-avidef.pdf</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>avi</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/x-msvideo</string>
           </array>
         </dict>
       </dict>
@@ -428,12 +437,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.divx</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.divx.com</string>
+        <string>https://www.divx.com</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>divx</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/divx</string>
           </array>
         </dict>
       </dict>
@@ -447,15 +460,19 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.dv</string>
+        <string>public.dv-movie</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/DV</string>
+        <string>https://en.wikipedia.org/wiki/DV</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>dv</string>
             <string>hdv</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/dv</string>
           </array>
         </dict>
       </dict>
@@ -469,17 +486,24 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.flv</string>
+        <string>com.adobe.flash.video</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/Flash_Video</string>
+        <string>https://en.wikipedia.org/wiki/Flash_Video</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>flv</string>
+            <string>fla</string>
+            <string>f4a</string>
             <string>f4v</string>
+            <string>f4b</string>
             <string>f4p</string>
             <string>swf</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>application/vnd.adobe.flash.movie</string>
           </array>
         </dict>
       </dict>
@@ -495,7 +519,7 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.mts</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/.m2ts</string>
+        <string>https://en.wikipedia.org/wiki/.m2ts</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
@@ -506,6 +530,35 @@
             <string>mts</string>
             <string>mtv</string>
             <string>ts</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>model/vnd.mts</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>MPEG-4 File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>com.apple.m4v-video</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/M4V</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>m4v</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/m4v</string>
           </array>
         </dict>
       </dict>
@@ -519,14 +572,18 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.mkv</string>
+        <string>org.matroska.mkv</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.matroska.org</string>
+        <string>https://www.matroska.org</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>mkv</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/matroska</string>
           </array>
         </dict>
       </dict>
@@ -542,12 +599,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.mk3d</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.matroska.org</string>
+        <string>https://www.matroska.org</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>mk3d</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>application/x-matroska</string>
           </array>
         </dict>
       </dict>
@@ -555,6 +616,7 @@
         <key>UTTypeConformsTo</key>
         <array>
           <string>public.movie</string>
+          <string>org.matroska.mkv</string>
         </array>
         <key>UTTypeDescription</key>
         <string>WebM Video</string>
@@ -563,12 +625,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.webm</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.webmproject.org</string>
+        <string>https://www.webmproject.org</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>webm</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/webm</string>
           </array>
         </dict>
       </dict>
@@ -582,15 +648,19 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.ogv</string>
+        <string>org.xiph.ogg-video</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://xiph.org/ogg</string>
+        <string>https://xiph.org/ogg</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>ogm</string>
             <string>ogv</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/ogg</string>
           </array>
         </dict>
       </dict>
@@ -604,15 +674,97 @@
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
         <key>UTTypeIdentifier</key>
-        <string>io.mpv.rmvb</string>
+        <string>com.real.realmedia</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.real.com</string>
+        <string>https://www.real.com</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
-            <string>rmvb</string>
             <string>rm</string>
+            <string>rmd</string>
+            <string>rmj</string>
+            <string>rms</string>
+            <string>rmvb</string>
+            <string>rmx</string>
+            <string>rp</string>
+            <string>rpm</string>
+            <string>rt</string>
+            <string>rv</string>
+            <string>rvx</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>application/vnd.rn-realmedia-vbr</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Nullsoft Streaming Video</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.nsv</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/Nullsoft</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>nsv</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/x-nsv</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>NuppleVideo File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>com.mythtv.nuv</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/Nullsoft</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>nuv</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Video CD File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.vcd</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/Video_CD</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>vcd</string>
+            <string>svcd</string>
+            <string>dat</string>
           </array>
         </dict>
       </dict>
@@ -628,12 +780,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.vob</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/VOB</string>
+        <string>https://en.wikipedia.org/wiki/VOB</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>vob</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/x-ms-vob</string>
           </array>
         </dict>
       </dict>
@@ -649,12 +805,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.wmv</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/Windows_Media_Video</string>
+        <string>https://en.wikipedia.org/wiki/Windows_Media_Video</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>wmv</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/x-ms-wmv</string>
           </array>
         </dict>
       </dict>
@@ -670,12 +830,41 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.xvid</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.xvid.org</string>
+        <string>https://www.xvid.org</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>xvid</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/x-xvid</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.movie</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>H.263 raw stream</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.h263</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://www.itu.int/rec/T-REC-H.263</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>263</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/h263</string>
           </array>
         </dict>
       </dict>
@@ -691,12 +880,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.h264</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://www.itu.int/rec/T-REC-H.264</string>
+        <string>https://www.itu.int/rec/T-REC-H.264</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>264</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>video/H264</string>
           </array>
         </dict>
       </dict>
@@ -733,7 +926,7 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.yuv</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/YUV</string>
+        <string>https://en.wikipedia.org/wiki/YUV</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
@@ -754,7 +947,7 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.y4m</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://wiki.multimedia.cx/index.php?title=YUV4MPEG2</string>
+        <string>https://wiki.multimedia.cx/index.php?title=YUV4MPEG2</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
@@ -775,12 +968,16 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.subrip</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/SubRip</string>
+        <string>https://en.wikipedia.org/wiki/SubRip</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>srt</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>application/x-subrip</string>
           </array>
         </dict>
       </dict>
@@ -796,12 +993,89 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.sub</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/MicroDVD</string>
+        <string>https://en.wikipedia.org/wiki/MicroDVD</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>sub</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/plain</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.plain-text</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>AQTitle Subtitle</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.aqt</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://web.archive.org/web/20070210095721/http://www.volny.cz/aberka/czech/aqt.html</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>aqt</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/plain</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.plain-text</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>JACOSub Subtitle</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.jss</string>
+        <key>UTTypeReferenceURL</key>
+        <string>http://unicorn.us.com/jacosub/jscripts.html</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>jss</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/plain</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.plain-text</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>RealText Subtitle</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.rt</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>rt</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/plain</string>
           </array>
         </dict>
       </dict>
@@ -825,6 +1099,10 @@
             <string>ass</string>
             <string>ssa</string>
           </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/plain</string>
+          </array>
         </dict>
       </dict>
       <dict>
@@ -839,7 +1117,7 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.vobsub</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/DirectVobSub</string>
+        <string>https://en.wikipedia.org/wiki/DirectVobSub</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
@@ -861,13 +1139,17 @@
         <key>UTTypeIdentifier</key>
         <string>io.mpv.smi</string>
         <key>UTTypeReferenceURL</key>
-        <string>http://en.wikipedia.org/wiki/SAMI</string>
+        <string>https://en.wikipedia.org/wiki/SAMI</string>
         <key>UTTypeTagSpecification</key>
         <dict>
           <key>public.filename-extension</key>
           <array>
             <string>smi</string>
             <string>smil</string>
+          </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>application/smil</string>
           </array>
         </dict>
       </dict>
