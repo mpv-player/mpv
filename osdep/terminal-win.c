@@ -63,6 +63,7 @@ static void attempt_native_out_vt(HANDLE hOut, DWORD basemode)
 
 static bool is_console[STDERR_FILENO + 1];
 static bool is_vt[STDERR_FILENO + 1];
+static bool utf8_output;
 static short stdoutAttrs = 0;  // copied from the screen buffer on init
 static const unsigned char ansi2win32[8] = {
     0,
@@ -255,14 +256,24 @@ int mp_console_fputs(HANDLE wstream, bstr str)
         free_buf = !FlsSetValue(tmp_buffers_key, buffers);
     }
 
-    int wlen = bstr_to_wchar(buffers, str, &buffers->write_console_wbuf);
-    wchar_t *pos = buffers->write_console_wbuf;
+    bool vt = is_native_out_vt(wstream);
+    int wlen = 0;
+    wchar_t *pos = NULL;
+    if (!utf8_output || !vt) {
+        wlen = bstr_to_wchar(buffers, str, &buffers->write_console_wbuf);
+        pos = buffers->write_console_wbuf;
+    }
+
+    if (vt) {
+        if (utf8_output) {
+            WriteConsoleA(wstream, str.start, str.len, NULL, NULL);
+        } else {
+            WriteConsoleW(wstream, pos, wlen, NULL, NULL);
+        }
+        goto done;
+    }
 
     while (*pos) {
-        if (is_native_out_vt(wstream)) {
-            WriteConsoleW(wstream, pos, wlen, NULL, NULL);
-            break;
-        }
         wchar_t *next = wcschr(pos, '\033');
         if (!next) {
             WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
@@ -399,6 +410,7 @@ int mp_console_fputs(HANDLE wstream, bstr str)
         pos = next;
     }
 
+done:;
     int ret = buffers->write_console_buf.len;
 
     if (free_buf)
@@ -496,4 +508,5 @@ void terminal_init(void)
     stdoutAttrs = cinfo.wAttributes;
 
     tmp_buffers_key = FlsAlloc((PFLS_CALLBACK_FUNCTION)talloc_free);
+    utf8_output = SetConsoleOutputCP(CP_UTF8);
 }
