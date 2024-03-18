@@ -28,6 +28,8 @@
 #define TERM_ESC_GOTO_YX            "\033[%d;%df"
 #define TERM_ESC_HIDE_CURSOR        "\033[?25l"
 #define TERM_ESC_RESTORE_CURSOR     "\033[?25h"
+#define TERM_ESC_SYNC_UPDATE_BEGIN  "\033[?2026h"
+#define TERM_ESC_SYNC_UPDATE_END    "\033[?2026l"
 
 #define TERM_ESC_CLEAR_SCREEN       "\033[2J"
 #define TERM_ESC_ALT_SCREEN         "\033[?1049h"

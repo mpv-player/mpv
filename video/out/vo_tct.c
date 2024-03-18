@@ -275,6 +275,8 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
+    printf(TERM_ESC_SYNC_UPDATE_BEGIN);
+
     p->frame_buf.len = 0;
     if (p->opts.algo == ALGO_PLAIN) {
         write_plain(&p->frame_buf,
@@ -291,6 +293,8 @@ static void flip_page(struct vo *vo)
     bstr_xappend(NULL, &p->frame_buf, bstr0_s("\n"));
     if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
         print_buffer(&p->frame_buf);
+
+    printf(TERM_ESC_SYNC_UPDATE_END);
     fflush(stdout);
 }
 
