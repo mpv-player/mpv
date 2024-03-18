@@ -7,7 +7,7 @@
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>
-        <key>CFBundleTypeExtensions</key>
+        <key>LSItemContentTypes</key>
         <array>
           <string>AAC</string>
           <string>AC3</string>
@@ -40,13 +40,15 @@
         <string>Audio file</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
         <string>XML</string>
       </dict>
       <dict>
-        <key>CFBundleTypeExtensions</key>
+        <key>LSItemContentTypes</key>
         <array>
           <string>*</string>
           <string>*</string>
@@ -131,13 +133,15 @@
         <string>Movie file</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
         <string>XML</string>
       </dict>
       <dict>
-        <key>CFBundleTypeExtensions</key>
+        <key>LSItemContentTypes</key>
         <array>
           <string>AQT</string>
           <string>ASS</string>
@@ -166,6 +170,8 @@
         <string>Subtitles file</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>LSTypeIsPackage</key>
         <false/>
         <key>NSPersistentStoreTypeKey</key>
@@ -202,6 +208,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>mpv Custom Protocol</string>
         <key>CFBundleURLSchemes</key>
@@ -212,6 +220,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>Streaming Protocol</string>
         <key>CFBundleURLSchemes</key>
@@ -233,6 +243,8 @@
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
         <key>CFBundleURLName</key>
         <string>CD/DVD/Bluray Media</string>
         <key>CFBundleURLSchemes</key>
