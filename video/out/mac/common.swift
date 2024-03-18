@@ -303,7 +303,7 @@ class Common: NSObject {
         lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
         IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
         var n = io_object_t()
-        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, MPVHelper.bridge(obj: self), &n)
+        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, TypeHelper.bridge(obj: self), &n)
         let kr = IOServiceOpen(srv, mach_task_self_, 0, &lightSensor)
         IOObjectRelease(srv)
 
@@ -311,7 +311,7 @@ class Common: NSObject {
             log.sendVerbose("Can't start ambient light sensor connection")
             return
         }
-        lightSensorCallback(MPVHelper.bridge(obj: self), 0, 0, nil)
+        lightSensorCallback(TypeHelper.bridge(obj: self), 0, 0, nil)
     }
 
     func uninitLightSensor() {
@@ -334,11 +334,11 @@ class Common: NSObject {
     }
 
     func addDisplayReconfigureObserver() {
-        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
+        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, TypeHelper.bridge(obj: self))
     }
 
     func removeDisplayReconfigureObserver() {
-        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
+        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, TypeHelper.bridge(obj: self))
     }
 
     func addAppNotifications() {
@@ -528,43 +528,43 @@ class Common: NSObject {
             var opt: UnsafeMutableRawPointer?
             while mpv.nextChangedOption(property: &opt) {
                 switch opt {
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.border):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.border):
                     DispatchQueue.main.async {
                         self.window?.border = Bool(mpv.opts.border)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.fullscreen):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.fullscreen):
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop_level):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.ontop): fallthrough
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.all_workspaces):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.all_workspaces):
                     DispatchQueue.main.async {
                         self.window?.setOnAllWorkspaces(Bool(mpv.opts.all_workspaces))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.keepaspect_window):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {
                         self.window?.keepAspect = Bool(mpv.opts.keepaspect_window)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_minimized):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.window_minimized):
                     DispatchQueue.main.async {
                         self.window?.setMinimized(Bool(mpv.opts.window_minimized))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_maximized):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.window_maximized):
                     DispatchQueue.main.async {
                         self.window?.setMaximized(Bool(mpv.opts.window_maximized))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.cursor_passthrough):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.cursor_passthrough):
                     DispatchQueue.main.async {
                         self.window?.ignoresMouseEvents = mpv.opts.cursor_passthrough
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.geometry): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_smaller): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_larger):
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.geometry): fallthrough
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.autofit): fallthrough
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.autofit_smaller): fallthrough
+                case TypeHelper.toPointer(&mpv.optsPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
                         let (_, _, wr) = self.getInitProperties(vo)
                         self.window?.updateFrame(wr)
@@ -700,11 +700,11 @@ class Common: NSObject {
         var opt: UnsafeMutableRawPointer?
         while mpv.nextChangedMacOption(property: &opt) {
             switch opt {
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
+            case TypeHelper.toPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
                 titleBar?.set(appearance: Int(mpv.macOpts.macos_title_bar_appearance))
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
+            case TypeHelper.toPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
                 titleBar?.set(material: Int(mpv.macOpts.macos_title_bar_material))
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
+            case TypeHelper.toPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
                 titleBar?.set(color: mpv.macOpts.macos_title_bar_color)
             default:
                 break

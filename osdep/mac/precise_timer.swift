@@ -59,7 +59,7 @@ class PreciseTimer {
     init?(common com: Common) {
         common = com
 
-        pthread_create(&thread, &threadAttr, entryC, MPVHelper.bridge(obj: self))
+        pthread_create(&thread, &threadAttr, entryC, TypeHelper.bridge(obj: self))
         if thread == nil {
             common.log.sendWarning("Couldn't create pthread for high precision timer")
             return nil
@@ -119,7 +119,7 @@ class PreciseTimer {
     let threadSignal: @convention(c) (Int32) -> () = { (sig: Int32) in }
 
     let entryC: @convention(c) (UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? = { (ptr: UnsafeMutableRawPointer) in
-        let ptimer: PreciseTimer = MPVHelper.bridge(ptr: ptr)
+        let ptimer: PreciseTimer = TypeHelper.bridge(ptr: ptr)
         ptimer.entry()
         return nil
     }

@@ -50,7 +50,7 @@ class LibmpvHelper {
         let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil)
 
-        MPVHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
+        TypeHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: pointers[0]),
@@ -87,7 +87,7 @@ class LibmpvHelper {
         if mpvRenderContext == nil {
             log.sendWarning("Init mpv render context first.")
         } else {
-            mpv_render_context_set_update_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
+            mpv_render_context_set_update_callback(mpvRenderContext, callback, TypeHelper.bridge(obj: object))
         }
     }
 
@@ -95,7 +95,7 @@ class LibmpvHelper {
         if mpvRenderContext == nil {
             log.sendWarning("Init mpv render context first.")
         } else {
-            mp_render_context_set_control_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
+            mp_render_context_set_control_callback(mpvRenderContext, callback, TypeHelper.bridge(obj: object))
         }
     }
 
@@ -132,7 +132,7 @@ class LibmpvHelper {
                                         h: Int32(surface.height),
                           internal_format: 0)
 
-            MPVHelper.withUnsafeMutableRawPointers([data, flip, ditherDepth, skip]) { (pointers: [UnsafeMutableRawPointer?]) in
+            TypeHelper.withUnsafeMutableRawPointers([data, flip, ditherDepth, skip]) { (pointers: [UnsafeMutableRawPointer?]) in
                 var params: [mpv_render_param] = [
                     mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: pointers[0]),
                     mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: pointers[1]),
@@ -233,22 +233,5 @@ class LibmpvHelper {
         ta_free(macOptsPtr)
         macOptsPtr = nil
         mpvHandle = nil
-    }
-
-    // *(char **) MPV_FORMAT_STRING on mpv_event_property
-    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer?) -> String? {
-        guard let str = obj else { return nil }
-        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(str))
-        return String(cString: cstr[0])
-    }
-
-    // MPV_FORMAT_FLAG
-    class func mpvFlagToBool(_ obj: UnsafeMutableRawPointer) -> Bool? {
-        return UnsafePointer<Bool>(OpaquePointer(obj))?.pointee
-    }
-
-    // MPV_FORMAT_DOUBLE
-    class func mpvDoubleToDouble(_ obj: UnsafeMutableRawPointer) -> Double? {
-        return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
     }
 }

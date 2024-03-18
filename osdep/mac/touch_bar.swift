@@ -284,16 +284,16 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
 
         switch String(cString: property.name) {
         case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
-            let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
+            let newPosition = max(TypeHelper.toDouble(property.data) ?? 0, 0)
             if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
             }
         case "duration" where property.format == MPV_FORMAT_DOUBLE:
-            duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+            duration = TypeHelper.toDouble(property.data) ?? 0
         case "pause" where property.format == MPV_FORMAT_FLAG:
-            isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
+            isPaused = TypeHelper.toBool(property.data) ?? false
         case "speed" where property.format == MPV_FORMAT_DOUBLE:
-            rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
+            rate = TypeHelper.toDouble(property.data) ?? 1
         default:
             break
         }
