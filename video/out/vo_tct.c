@@ -50,8 +50,15 @@ static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_s("\033[38;2");
 
 static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_s("\xe2\x96\x84");
 
+enum vo_tct_buffering {
+    VO_TCT_BUFFER_PIXEL,
+    VO_TCT_BUFFER_LINE,
+    VO_TCT_BUFFER_FRAME
+};
+
 struct vo_tct_opts {
     int algo;
+    int buffering;
     int width;   // 0 -> default
     int height;  // 0 -> default
     bool term256;  // 0 -> true color
@@ -121,11 +128,21 @@ static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c
     bstr_xappend(NULL, frame, bstr0_s("m"));
 }
 
+static void print_buffer(bstr *frame)
+{
+#ifdef _WIN32
+    printf("%.*s", BSTR_P(*frame));
+#else
+    fwrite(frame->start, frame->len, 1, stdout);
+#endif
+    frame->len = 0;
+}
+
 static void write_plain(bstr *frame,
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     const unsigned char *source, const int source_stride,
-    bool term256, struct lut_item *lut)
+    bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -143,8 +160,12 @@ static void write_plain(bstr *frame,
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
             bstr_xappend(NULL, frame, bstr0_s(" "));
+            if (buffering <= VO_TCT_BUFFER_PIXEL)
+                print_buffer(frame);
         }
         bstr_xappend(NULL, frame, TERM_ESC_CLEAR_COLORS);
+        if (buffering <= VO_TCT_BUFFER_LINE)
+            print_buffer(frame);
     }
 }
 
@@ -152,7 +173,7 @@ static void write_half_blocks(bstr *frame,
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     unsigned char *source, int source_stride,
-    bool term256, struct lut_item *lut)
+    bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -176,8 +197,12 @@ static void write_half_blocks(bstr *frame,
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_FG, r_down, g_down, b_down);
             }
             bstr_xappend(NULL, frame, UNICODE_LOWER_HALF_BLOCK);
+            if (buffering <= VO_TCT_BUFFER_PIXEL)
+                print_buffer(frame);
         }
         bstr_xappend(NULL, frame, TERM_ESC_CLEAR_COLORS);
+        if (buffering <= VO_TCT_BUFFER_LINE)
+            print_buffer(frame);
     }
 }
 
@@ -255,20 +280,17 @@ static void flip_page(struct vo *vo)
         write_plain(&p->frame_buf,
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts.term256, p->lut);
+            p->opts.term256, p->lut, p->opts.buffering);
     } else {
         write_half_blocks(&p->frame_buf,
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts.term256, p->lut);
+            p->opts.term256, p->lut, p->opts.buffering);
     }
 
     bstr_xappend(NULL, &p->frame_buf, bstr0_s("\n"));
-#ifdef _WIN32
-    printf("%.*s", BSTR_P(p->frame_buf));
-#else
-    fwrite(p->frame_buf.start, p->frame_buf.len, 1, stdout);
-#endif
+    if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
+        print_buffer(&p->frame_buf);
     fflush(stdout);
 }
 
@@ -329,6 +351,7 @@ const struct vo_driver video_out_tct = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .opts.algo = ALGO_HALF_BLOCKS,
+        .opts.buffering = VO_TCT_BUFFER_LINE,
     },
     .options = (const m_option_t[]) {
         {"algo", OPT_CHOICE(opts.algo,
@@ -337,6 +360,10 @@ const struct vo_driver video_out_tct = {
         {"width", OPT_INT(opts.width)},
         {"height", OPT_INT(opts.height)},
         {"256", OPT_BOOL(opts.term256)},
+        {"buffering", OPT_CHOICE(opts.buffering,
+            {"pixel", VO_TCT_BUFFER_PIXEL},
+            {"line", VO_TCT_BUFFER_LINE},
+            {"frame", VO_TCT_BUFFER_FRAME})},
         {0}
     },
     .options_prefix = "vo-tct",

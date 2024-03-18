@@ -376,6 +376,25 @@ Available video output drivers are:
             Uses spaces. Causes vertical resolution to drop twofolds, but in
             theory works in more places.
 
+    ``--vo-tct-buffering=<pixel|line|frame>``
+        Specifies the size of data batches buffered before being sent to the
+        terminal.
+
+        TCT image output is not synchronized with other terminal output from mpv,
+        which can lead to broken images. Sending data to the terminal in small
+        batches may improve parallelism between terminal processing and mpv
+        processing but incurs a static overhead of generating tens of thousands
+        of small writes. Also, depending on the terminal used, sending frames in
+        one chunk might help with tearing of the output, especially if not used
+        with ``--really-quiet`` and other logs interrupt the data stream.
+
+        pixel
+            Send data to terminal for each pixel.
+        line
+            Send data to terminal for each line. (Default)
+        frame
+            Send data to terminal for each frame.
+
     ``--vo-tct-width=<width>``  ``--vo-tct-height=<height>``
         Assume the terminal has the specified character width and/or height.
         These default to 80x25 if the terminal size cannot be determined.
