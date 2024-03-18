@@ -78,44 +78,10 @@ class MPVHelper: NSObject {
     }
 
     func setMacOptionCallback(_ callback: swift_wakeup_cb_fn, context object: AnyObject) {
-        m_config_cache_set_wakeup_cb(macOptsCachePtr, callback, MPVHelper.bridge(obj: object))
+        m_config_cache_set_wakeup_cb(macOptsCachePtr, callback, TypeHelper.bridge(obj: object))
     }
 
     func nextChangedMacOption(property: inout UnsafeMutableRawPointer?) -> Bool {
         return m_config_cache_get_next_changed(macOptsCachePtr, &property)
-    }
-
-    // (__bridge void*)
-    class func bridge<T: AnyObject>(obj: T) -> UnsafeMutableRawPointer {
-        return UnsafeMutableRawPointer(Unmanaged.passUnretained(obj).toOpaque())
-    }
-
-    // (__bridge T*)
-    class func bridge<T: AnyObject>(ptr: UnsafeRawPointer) -> T {
-        return Unmanaged<T>.fromOpaque(ptr).takeUnretainedValue()
-    }
-
-    class func withUnsafeMutableRawPointers(_ arguments: [Any],
-                                               pointers: [UnsafeMutableRawPointer?] = [],
-                                                closure: (_ pointers: [UnsafeMutableRawPointer?]) -> Void) {
-        if arguments.count > 0 {
-            let args = Array(arguments.dropFirst(1))
-            var newPtrs = pointers
-            var firstArg = arguments.first
-            withUnsafeMutableBytes(of: &firstArg) { (ptr: UnsafeMutableRawBufferPointer) in
-                newPtrs.append(ptr.baseAddress)
-                withUnsafeMutableRawPointers(args, pointers: newPtrs, closure: closure)
-            }
-
-            return
-        }
-
-        closure(pointers)
-    }
-
-    class func getPointer<T>(_ value: inout T) -> UnsafeMutableRawPointer? {
-        return withUnsafeMutableBytes(of: &value) { (ptr: UnsafeMutableRawBufferPointer) in
-            ptr.baseAddress
-        }
     }
 }

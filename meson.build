@@ -1525,6 +1525,7 @@ if features['cocoa'] and features['swift']
                            'osdep/mac/precise_timer.swift',
                            'osdep/mac/swift_compat.swift',
                            'osdep/mac/swift_extensions.swift',
+                           'osdep/mac/type_helper.swift',
                            'video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
