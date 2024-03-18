@@ -43,7 +43,7 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
                                               struct scaler *scaler)
 {
     gl_sc_uniform_texture(sc, "lut", scaler->lut);
-    GLSLF("float ypos = LUT_POS(fcoord, %d.0);\n", scaler->lut->params.h);
+    GLSLF("float ypos = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
     int N = scaler->kernel->size;
     int width = (N + 3) / 4; // round up
@@ -125,10 +125,10 @@ static void polar_sample(struct gl_shader_cache *sc, struct scaler *scaler,
     // get the weight for this pixel
     if (scaler->lut->params.dimensions == 1) {
         GLSLF("w = tex1D(lut, LUT_POS(d * 1.0/%f, %d.0)).r;\n",
-              radius, scaler->lut->params.w);
+              radius, scaler->lut_size);
     } else {
         GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d * 1.0/%f, %d.0))).r;\n",
-              radius, scaler->lut->params.h);
+              radius, scaler->lut_size);
     }
     GLSL(wsum += w;)
 

@@ -312,6 +312,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .correct_downscaling = true,
     .linear_downscaling = true,
     .sigmoid_upscaling = true,
+    .scaler_lut_size = 6,
     .interpolation_threshold = 0.01,
     .background = BACKGROUND_TILES,
     .background_color = {0, 0, 0, 255},
@@ -421,7 +422,7 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("dscale", SCALER_DSCALE),
         SCALER_OPTS("cscale", SCALER_CSCALE),
         SCALER_OPTS("tscale", SCALER_TSCALE),
-        {"scaler-lut-size", OPT_REMOVED("hard-coded as 8")},
+        {"scaler-lut-size", OPT_INT(scaler_lut_size), M_RANGE(4, 10)},
         {"scaler-resizes-only", OPT_BOOL(scaler_resizes_only)},
         {"correct-downscaling", OPT_BOOL(correct_downscaling)},
         {"linear-downscaling", OPT_BOOL(linear_downscaling)},
@@ -1775,16 +1776,17 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     int stride = width * num_components;
     assert(size <= stride);
 
-    static const int lut_size = 256;
-    float *weights = talloc_array(NULL, float, lut_size * stride);
-    mp_compute_lut(scaler->kernel, lut_size, stride, weights);
+    scaler->lut_size = 1 << p->opts.scaler_lut_size;
+
+    float *weights = talloc_array(NULL, float, scaler->lut_size * stride);
+    mp_compute_lut(scaler->kernel, scaler->lut_size, stride, weights);
 
     bool use_1d = scaler->kernel->polar && (p->ra->caps & RA_CAP_TEX_1D);
 
     struct ra_tex_params lut_params = {
         .dimensions = use_1d ? 1 : 2,
-        .w = use_1d ? lut_size : width,
-        .h = use_1d ? 1 : lut_size,
+        .w = use_1d ? scaler->lut_size : width,
+        .h = use_1d ? 1 : scaler->lut_size,
         .d = 1,
         .format = fmt,
         .render_src = true,
