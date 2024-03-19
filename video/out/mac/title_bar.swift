@@ -64,9 +64,9 @@ class TitleBar: NSVisualEffectView {
         window.contentView?.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        set(appearance: Int(option.macOpts.macos_title_bar_appearance))
-        set(material: Int(option.macOpts.macos_title_bar_material))
-        set(color: option.macOpts.macos_title_bar_color)
+        set(appearance: Int(option.mac.macos_title_bar_appearance))
+        set(material: Int(option.mac.macos_title_bar_material))
+        set(color: option.mac.macos_title_bar_color)
     }
 
     required init?(coder: NSCoder) {

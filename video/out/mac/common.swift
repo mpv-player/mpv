@@ -63,7 +63,7 @@ class Common: NSObject {
 
     func initApp() {
         var policy: NSApplication.ActivationPolicy = .regular
-        switch option.macOpts.macos_app_activation_policy {
+        switch option.mac.macos_app_activation_policy {
         case 0:
             policy = .regular
         case 1:
@@ -92,16 +92,16 @@ class Common: NSObject {
             exit(1)
         }
 
-        window.setOnTop(Bool(option.opts.ontop), Int(option.opts.ontop_level))
-        window.setOnAllWorkspaces(Bool(option.opts.all_workspaces))
-        window.keepAspect = Bool(option.opts.keepaspect_window)
+        window.setOnTop(Bool(option.vo.ontop), Int(option.vo.ontop_level))
+        window.setOnAllWorkspaces(Bool(option.vo.all_workspaces))
+        window.keepAspect = Bool(option.vo.keepaspect_window)
         window.title = title
-        window.border = Bool(option.opts.border)
+        window.border = Bool(option.vo.border)
 
         titleBar = TitleBar(frame: wr, window: window, common: self)
 
-        let maximized = Bool(option.opts.window_maximized)
-        let minimized = Bool(option.opts.window_minimized)
+        let maximized = Bool(option.vo.window_maximized)
+        let minimized = Bool(option.vo.window_minimized)
         window.isRestorable = false
         window.isReleasedWhenClosed = false
         window.setMaximized((minimized || !maximized) ? window.isZoomed : maximized)
@@ -115,10 +115,10 @@ class Common: NSObject {
             window.orderFront(nil)
         }
 
-        NSApp.activate(ignoringOtherApps: option.opts.focus_on >= 1)
+        NSApp.activate(ignoringOtherApps: option.vo.focus_on >= 1)
 
         // workaround for macOS 10.15 to refocus the previous App
-        if option.opts.focus_on == 0 {
+        if option.vo.focus_on == 0 {
             previousActiveApp?.activate()
         }
     }
@@ -139,7 +139,7 @@ class Common: NSObject {
     }
 
     func initWindowState() {
-        if option.opts.fullscreen {
+        if option.vo.fullscreen {
             DispatchQueue.main.async {
                 self.window?.toggleFullScreen(nil)
             }
@@ -401,9 +401,9 @@ class Common: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        let screenID = fs ? option.opts.fsscreen_id : option.opts.screen_id
+        let screenID = fs ? option.vo.fsscreen_id : option.vo.screen_id
         var name: String?
-        if let screenName = fs ? option.opts.fsscreen_name : option.opts.screen_name {
+        if let screenName = fs ? option.vo.fsscreen_name : option.vo.screen_name {
             name = String(cString: screenName)
         }
         return getScreenBy(id: Int(screenID)) ?? getScreenBy(name: name)
@@ -418,7 +418,7 @@ class Common: NSObject {
     func getWindowGeometry(forScreen screen: NSScreen,
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = screen.convertRectToBacking(screen.frame)
-        let targetFrame = option.macOpts.macos_geometry_calculation == FRAME_VISIBLE
+        let targetFrame = option.mac.macos_geometry_calculation == FRAME_VISIBLE
             ? screen.visibleFrame : screen.frame
         let rv = screen.convertRectToBacking(targetFrame)
 
@@ -506,43 +506,43 @@ class Common: NSObject {
             var opt: UnsafeMutableRawPointer?
             while option.nextChangedOption(property: &opt) {
                 switch opt {
-                case TypeHelper.toPointer(&option.optsPtr.pointee.border):
+                case TypeHelper.toPointer(&option.voPtr.pointee.border):
                     DispatchQueue.main.async {
-                        self.window?.border = Bool(self.option.opts.border)
+                        self.window?.border = Bool(self.option.vo.border)
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.fullscreen):
+                case TypeHelper.toPointer(&option.voPtr.pointee.fullscreen):
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.ontop): fallthrough
-                case TypeHelper.toPointer(&option.optsPtr.pointee.ontop_level):
+                case TypeHelper.toPointer(&option.voPtr.pointee.ontop): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
-                        self.window?.setOnTop(Bool(self.option.opts.ontop), Int(self.option.opts.ontop_level))
+                        self.window?.setOnTop(Bool(self.option.vo.ontop), Int(self.option.vo.ontop_level))
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.all_workspaces):
+                case TypeHelper.toPointer(&option.voPtr.pointee.all_workspaces):
                     DispatchQueue.main.async {
-                        self.window?.setOnAllWorkspaces(Bool(self.option.opts.all_workspaces))
+                        self.window?.setOnAllWorkspaces(Bool(self.option.vo.all_workspaces))
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.keepaspect_window):
+                case TypeHelper.toPointer(&option.voPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {
-                        self.window?.keepAspect = Bool(self.option.opts.keepaspect_window)
+                        self.window?.keepAspect = Bool(self.option.vo.keepaspect_window)
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.window_minimized):
+                case TypeHelper.toPointer(&option.voPtr.pointee.window_minimized):
                     DispatchQueue.main.async {
-                        self.window?.setMinimized(Bool(self.option.opts.window_minimized))
+                        self.window?.setMinimized(Bool(self.option.vo.window_minimized))
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.window_maximized):
+                case TypeHelper.toPointer(&option.voPtr.pointee.window_maximized):
                     DispatchQueue.main.async {
-                        self.window?.setMaximized(Bool(self.option.opts.window_maximized))
+                        self.window?.setMaximized(Bool(self.option.vo.window_maximized))
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.cursor_passthrough):
+                case TypeHelper.toPointer(&option.voPtr.pointee.cursor_passthrough):
                     DispatchQueue.main.async {
-                        self.window?.ignoresMouseEvents = self.option.opts.cursor_passthrough
+                        self.window?.ignoresMouseEvents = self.option.vo.cursor_passthrough
                     }
-                case TypeHelper.toPointer(&option.optsPtr.pointee.geometry): fallthrough
-                case TypeHelper.toPointer(&option.optsPtr.pointee.autofit): fallthrough
-                case TypeHelper.toPointer(&option.optsPtr.pointee.autofit_smaller): fallthrough
-                case TypeHelper.toPointer(&option.optsPtr.pointee.autofit_larger):
+                case TypeHelper.toPointer(&option.voPtr.pointee.geometry): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_smaller): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
                         let (_, wr) = self.getInitProperties(vo)
                         self.window?.updateFrame(wr)
@@ -608,7 +608,7 @@ class Common: NSObject {
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
             var rect = window?.unfsContentFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
-            if let screen = window?.currentScreen, !Bool(option.opts.hidpi_window_scale) {
+            if let screen = window?.currentScreen, !Bool(option.vo.hidpi_window_scale) {
                 rect = screen.convertRectToBacking(rect)
             }
 
@@ -620,7 +620,7 @@ class Common: NSObject {
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
             var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
             DispatchQueue.main.async {
-                if let screen = self.window?.currentScreen, !Bool(self.option.opts.hidpi_window_scale) {
+                if let screen = self.window?.currentScreen, !Bool(self.option.vo.hidpi_window_scale) {
                     rect = screen.convertRectFromBacking(rect)
                 }
                 self.window?.updateSize(rect.size)
@@ -673,12 +673,12 @@ class Common: NSObject {
         var opt: UnsafeMutableRawPointer?
         while option.nextChangedMacOption(property: &opt) {
             switch opt {
-            case TypeHelper.toPointer(&option.macOptsPtr.pointee.macos_title_bar_appearance):
-                titleBar?.set(appearance: Int(option.macOpts.macos_title_bar_appearance))
-            case TypeHelper.toPointer(&option.macOptsPtr.pointee.macos_title_bar_material):
-                titleBar?.set(material: Int(option.macOpts.macos_title_bar_material))
-            case TypeHelper.toPointer(&option.macOptsPtr.pointee.macos_title_bar_color):
-                titleBar?.set(color: option.macOpts.macos_title_bar_color)
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_appearance):
+                titleBar?.set(appearance: Int(option.mac.macos_title_bar_appearance))
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_material):
+                titleBar?.set(material: Int(option.mac.macos_title_bar_material))
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_color):
+                titleBar?.set(color: option.mac.macos_title_bar_color)
             default:
                 break
             }
