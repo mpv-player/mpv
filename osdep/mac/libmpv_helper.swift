@@ -25,23 +25,12 @@ class LibmpvHelper {
     var log: LogHelper
     var mpvHandle: OpaquePointer?
     var mpvRenderContext: OpaquePointer?
-    var macOptsPtr: UnsafeMutableRawPointer?
-    var macOpts: macos_opts = macos_opts()
     var fbo: GLint = 1
     let deinitLock = NSLock()
 
     init(_ mpv: OpaquePointer, _ mpLog: OpaquePointer?) {
         mpvHandle = mpv
         log = LogHelper(mpLog)
-
-        let global = mp_client_get_global(mpvHandle)
-        guard let ptr = mp_get_config_group(nil, global, Application.getMacOSConf()) else
-        {
-            log.sendError("macOS config group couldn't be retrieved'")
-            exit(1)
-        }
-        macOptsPtr = ptr
-        macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr)).pointee
     }
 
     func initRender() {
@@ -63,7 +52,6 @@ class LibmpvHelper {
                 exit(1)
             }
         }
-
     }
 
     let getProcAddress: (@convention(c) (UnsafeMutableRawPointer?, UnsafePointer<Int8>?)
@@ -230,8 +218,6 @@ class LibmpvHelper {
         if destroy {
             mpv_destroy(mpvHandle)
         }
-        ta_free(macOptsPtr)
-        macOptsPtr = nil
         mpvHandle = nil
     }
 }
