@@ -1809,8 +1809,8 @@ void vo_x11_config_vo_window(struct vo *vo)
         rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
 
-    bool reset_size = (x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc)) &&
-                      (opts->auto_window_resize || x11->geometry_change);
+    bool reset_size = ((x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc))
+                       && opts->auto_window_resize) || x11->geometry_change;
     reset_size |= (x11->old_x != rc.x0 || x11->old_y != rc.y0) &&
                   (x11->geometry_change);
 
