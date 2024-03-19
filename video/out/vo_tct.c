@@ -50,6 +50,8 @@ static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_s("\033[38;2");
 
 static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_s("\xe2\x96\x84");
 
+#define WRITE_STR(str) fwrite((str), strlen(str), 1, stdout)
+
 enum vo_tct_buffering {
     VO_TCT_BUFFER_PIXEL,
     VO_TCT_BUFFER_LINE,
@@ -130,11 +132,7 @@ static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c
 
 static void print_buffer(bstr *frame)
 {
-#ifdef _WIN32
-    printf("%.*s", BSTR_P(*frame));
-#else
     fwrite(frame->start, frame->len, 1, stdout);
-#endif
     frame->len = 0;
 }
 
@@ -249,7 +247,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    printf(TERM_ESC_CLEAR_SCREEN);
+    WRITE_STR(TERM_ESC_CLEAR_SCREEN);
 
     vo->want_redraw = true;
     return 0;
@@ -275,7 +273,7 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
-    printf(TERM_ESC_SYNC_UPDATE_BEGIN);
+    WRITE_STR(TERM_ESC_SYNC_UPDATE_BEGIN);
 
     p->frame_buf.len = 0;
     if (p->opts.algo == ALGO_PLAIN) {
@@ -294,14 +292,14 @@ static void flip_page(struct vo *vo)
     if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
         print_buffer(&p->frame_buf);
 
-    printf(TERM_ESC_SYNC_UPDATE_END);
+    WRITE_STR(TERM_ESC_SYNC_UPDATE_END);
     fflush(stdout);
 }
 
 static void uninit(struct vo *vo)
 {
-    printf(TERM_ESC_RESTORE_CURSOR);
-    printf(TERM_ESC_NORMAL_SCREEN);
+    WRITE_STR(TERM_ESC_RESTORE_CURSOR);
+    WRITE_STR(TERM_ESC_NORMAL_SCREEN);
     struct priv *p = vo->priv;
     talloc_free(p->frame);
     talloc_free(p->frame_buf.start);
@@ -324,8 +322,8 @@ static int preinit(struct vo *vo)
         memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
     }
 
-    printf(TERM_ESC_HIDE_CURSOR);
-    printf(TERM_ESC_ALT_SCREEN);
+    WRITE_STR(TERM_ESC_HIDE_CURSOR);
+    WRITE_STR(TERM_ESC_ALT_SCREEN);
 
     return 0;
 }
