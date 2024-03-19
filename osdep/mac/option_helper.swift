@@ -22,9 +22,12 @@ typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Voi
 class OptionHelper: NSObject {
     var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>
-    var optsPtr: UnsafeMutablePointer<mp_vo_opts>
     var macOptsCachePtr: UnsafeMutablePointer<m_config_cache>
+
+    var optsPtr: UnsafeMutablePointer<mp_vo_opts>
+        { get { return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(optsCachePtr.pointee.opts)) } }
     var macOptsPtr: UnsafeMutablePointer<macos_opts>
+        { get { return UnsafeMutablePointer<macos_opts>(OpaquePointer(macOptsCachePtr.pointee.opts)) } }
 
     // these computed properties return a local copy of the struct accessed:
     // - don't use if you rely on the pointers
@@ -42,9 +45,7 @@ class OptionHelper: NSObject {
             exit(1)
         }
         optsCachePtr = cache
-        optsPtr = UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(cache.pointee.opts))
         macOptsCachePtr = macCache
-        macOptsPtr = UnsafeMutablePointer<macos_opts>(OpaquePointer(macCache.pointee.opts))
     }
 
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {
