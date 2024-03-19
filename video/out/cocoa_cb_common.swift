@@ -39,7 +39,7 @@ class CocoaCB: Common {
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        option = OptionHelper(vo, log)
+        option = OptionHelper(vo)
         input = InputHelper(vo.pointee.input_ctx, option)
 
         if backendState == .uninitialized {

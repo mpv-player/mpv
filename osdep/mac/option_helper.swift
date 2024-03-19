@@ -20,7 +20,6 @@ import Cocoa
 typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
 class OptionHelper: NSObject {
-    var log: LogHelper
     var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>
     var optsPtr: UnsafeMutablePointer<mp_vo_opts>
@@ -30,15 +29,11 @@ class OptionHelper: NSObject {
     // these computed properties return a local copy of the struct accessed:
     // - don't use if you rely on the pointers
     // - only for reading
-    var vout: vo { get { return vo.pointee } }
-    var optsCache: m_config_cache { get { return optsCachePtr.pointee } }
     var opts: mp_vo_opts { get { return optsPtr.pointee } }
-    var macOptsCache: m_config_cache { get { return macOptsCachePtr.pointee } }
     var macOpts: macos_opts { get { return macOptsPtr.pointee } }
 
-    init(_ vo: UnsafeMutablePointer<vo>, _ log: LogHelper) {
+    init(_ vo: UnsafeMutablePointer<vo>) {
         self.vo = vo
-        self.log = log
 
         guard let cache = m_config_cache_alloc(vo, vo.pointee.global, Application.getVoSubConf()),
               let macCache = m_config_cache_alloc(vo, vo.pointee.global, Application.getMacOSConf()) else

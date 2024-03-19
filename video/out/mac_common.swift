@@ -27,7 +27,7 @@ class MacCommon: Common {
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
-        option = OptionHelper(vo, log)
+        option = OptionHelper(vo)
         input = InputHelper(vo.pointee.input_ctx, option)
         timer = PreciseTimer(common: self)
 
