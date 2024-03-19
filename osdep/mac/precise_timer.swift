@@ -24,7 +24,7 @@ struct Timing {
 
 class PreciseTimer {
     unowned var common: Common
-    var mpv: MPVHelper? { get { return common.mpv } }
+    var option: OptionHelper? { get { return common.option } }
 
     let nanoPerSecond: Double = 1e+9
     let machToNano: Double = {
