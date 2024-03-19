@@ -27,6 +27,7 @@
 #include <spa/utils/result.h>
 #include <math.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -166,7 +167,7 @@ static void on_process(void *userdata)
     void *data[MP_NUM_CHANNELS];
 
     if ((b = pw_stream_dequeue_buffer(p->stream)) == NULL) {
-        MP_WARN(ao, "out of buffers: %s\n", strerror(errno));
+        MP_WARN(ao, "out of buffers: %s\n", mp_strerror(errno));
         return;
     }
 
@@ -518,7 +519,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!p->core) {
         MP_MSG(ao, ao->probing ? MSGL_V : MSGL_ERR,
                "Could not connect to context '%s': %s\n",
-               p->options.remote, strerror(errno));
+               p->options.remote, mp_strerror(errno));
         pw_context_destroy(context);
         goto error;
     }
