@@ -59,12 +59,12 @@ class MacCommon: Common {
             }
 
             if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) &&
-               option.opts.auto_window_resize
+               option.vo.auto_window_resize
             {
                 window?.updateSize(wr.size)
             }
 
-            if option.opts.focus_on == 2 {
+            if option.vo.focus_on == 2 {
                 NSApp.activate(ignoringOtherApps: true)
             }
 
@@ -89,7 +89,7 @@ class MacCommon: Common {
     }
 
     @objc func swapBuffer() {
-        if option.macOpts.macos_render_timer != RENDER_TIMER_SYSTEM {
+        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
             swapLock.lock()
             while(swapTime < 1) {
                 swapLock.wait()
@@ -112,8 +112,8 @@ class MacCommon: Common {
             self.swapLock.unlock()
         }
 
-        if option.macOpts.macos_render_timer != RENDER_TIMER_SYSTEM {
-            if let timer = self.timer, option.macOpts.macos_render_timer == RENDER_TIMER_PRECISE {
+        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
+            if let timer = self.timer, option.mac.macos_render_timer == RENDER_TIMER_PRECISE {
                 timer.scheduleAt(time: inOutputTime.pointee.hostTime, closure: signalSwap)
                 return kCVReturnSuccess
             }

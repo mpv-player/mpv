@@ -28,8 +28,8 @@ struct mpv_handle;
 - (NSImage *)getMPVIcon;
 - (void)processEvent:(struct mpv_event *)event;
 - (void)initCocoaCb:(struct mpv_handle *)ctx;
-+ (const struct m_sub_options *)getMacOSConf;
-+ (const struct m_sub_options *)getVoSubConf;
++ (const struct m_sub_options *)getMacConf;
++ (const struct m_sub_options *)getVoConf;
 
 @property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, assign) size_t openCount;

@@ -65,11 +65,11 @@ class CocoaCB: Common {
         self.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
-        } else if option.opts.auto_window_resize {
+        } else if option.vo.auto_window_resize {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
-                if self.option.opts.focus_on == 2 {
+                if self.option.vo.focus_on == 2 {
                     NSApp.activate(ignoringOtherApps: true)
                 }
             }
@@ -204,7 +204,7 @@ class CocoaCB: Common {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && option.opts.native_fs
+                         window?.isInFullscreen ?? false && option.vo.native_fs
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }

@@ -232,11 +232,11 @@ class InputHelper: NSObject {
     @objc func open(files: [String]) {
         lock.withLock {
             guard let input = input else { return }
-            if (option?.opts.drag_and_drop ?? -1) == -2 { return }
+            if (option?.vo.drag_and_drop ?? -1) == -2 { return }
 
             var action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
-            if (option?.opts.drag_and_drop ?? -1) >= 0  {
-                action = mp_dnd_action(UInt32(option?.opts.drag_and_drop ?? Int32(DND_REPLACE.rawValue)))
+            if (option?.vo.drag_and_drop ?? -1) >= 0  {
+                action = mp_dnd_action(UInt32(option?.vo.drag_and_drop ?? Int32(DND_REPLACE.rawValue)))
             }
 
             let filesClean = files.map{ $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }

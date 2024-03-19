@@ -20,61 +20,55 @@ import Cocoa
 typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
 class OptionHelper: NSObject {
-    var optsCachePtr: UnsafeMutablePointer<m_config_cache>
-    var macOptsCachePtr: UnsafeMutablePointer<m_config_cache>
+    var voCachePtr: UnsafeMutablePointer<m_config_cache>
+    var macCachePtr: UnsafeMutablePointer<m_config_cache>
 
-    var optsPtr: UnsafeMutablePointer<mp_vo_opts>
-        { get { return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(optsCachePtr.pointee.opts)) } }
-    var macOptsPtr: UnsafeMutablePointer<macos_opts>
-        { get { return UnsafeMutablePointer<macos_opts>(OpaquePointer(macOptsCachePtr.pointee.opts)) } }
+    var voPtr: UnsafeMutablePointer<mp_vo_opts>
+        { get { return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(voCachePtr.pointee.opts)) } }
+    var macPtr: UnsafeMutablePointer<macos_opts>
+        { get { return UnsafeMutablePointer<macos_opts>(OpaquePointer(macCachePtr.pointee.opts)) } }
 
     // these computed properties return a local copy of the struct accessed:
     // - don't use if you rely on the pointers
     // - only for reading
-    var opts: mp_vo_opts { get { return optsPtr.pointee } }
-    var macOpts: macos_opts { get { return macOptsPtr.pointee } }
+    var vo: mp_vo_opts { get { return voPtr.pointee } }
+    var mac: macos_opts { get { return macPtr.pointee } }
 
     init(_ taParent: UnsafeMutableRawPointer, _ global: OpaquePointer?) {
-        guard let cache = m_config_cache_alloc(taParent, global, Application.getVoSubConf()),
-              let macCache = m_config_cache_alloc(taParent, global, Application.getMacOSConf()) else
-        {
-            // will never be hit, mp_get_config_group asserts for invalid groups
-            exit(1)
-        }
-        optsCachePtr = cache
-        macOptsCachePtr = macCache
+        voCachePtr = m_config_cache_alloc(taParent, global, Application.getVoConf())
+        macCachePtr = m_config_cache_alloc(taParent, global, Application.getMacConf())
     }
 
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {
-        return m_config_cache_get_next_changed(optsCachePtr, &property)
+        return m_config_cache_get_next_changed(voCachePtr, &property)
     }
 
     func setOption(fullscreen: Bool) {
-        optsPtr.pointee.fullscreen = fullscreen
-        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.fullscreen) { (ptr: UnsafeMutableRawBufferPointer) in
-            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        voPtr.pointee.fullscreen = fullscreen
+        _ = withUnsafeMutableBytes(of: &voPtr.pointee.fullscreen) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(voCachePtr, ptr.baseAddress)
         }
     }
 
     func setOption(minimized: Bool) {
-        optsPtr.pointee.window_minimized = minimized
-        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_minimized) { (ptr: UnsafeMutableRawBufferPointer) in
-            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        voPtr.pointee.window_minimized = minimized
+        _ = withUnsafeMutableBytes(of: &voPtr.pointee.window_minimized) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(voCachePtr, ptr.baseAddress)
         }
     }
 
     func setOption(maximized: Bool) {
-        optsPtr.pointee.window_maximized = maximized
-        _ = withUnsafeMutableBytes(of: &optsPtr.pointee.window_maximized) { (ptr: UnsafeMutableRawBufferPointer) in
-            m_config_cache_write_opt(optsCachePtr, ptr.baseAddress)
+        voPtr.pointee.window_maximized = maximized
+        _ = withUnsafeMutableBytes(of: &voPtr.pointee.window_maximized) { (ptr: UnsafeMutableRawBufferPointer) in
+            m_config_cache_write_opt(voCachePtr, ptr.baseAddress)
         }
     }
 
     func setMacOptionCallback(_ callback: swift_wakeup_cb_fn, context object: AnyObject) {
-        m_config_cache_set_wakeup_cb(macOptsCachePtr, callback, TypeHelper.bridge(obj: object))
+        m_config_cache_set_wakeup_cb(macCachePtr, callback, TypeHelper.bridge(obj: object))
     }
 
     func nextChangedMacOption(property: inout UnsafeMutableRawPointer?) -> Bool {
-        return m_config_cache_get_next_changed(macOptsCachePtr, &property)
+        return m_config_cache_get_next_changed(macCachePtr, &property)
     }
 }

@@ -92,7 +92,7 @@ class Window: NSWindow, NSWindowDelegate {
         title = com.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
-        ignoresMouseEvents = option.opts.cursor_passthrough
+        ignoresMouseEvents = option.vo.cursor_passthrough
         delegate = self
 
         if let cView = contentView {
@@ -143,7 +143,7 @@ class Window: NSWindow, NSWindowDelegate {
             setFrame(frame, display: true)
         }
 
-        if Bool(option.opts.native_fs) {
+        if Bool(option.vo.native_fs) {
             super.toggleFullScreen(sender)
         } else {
             if !isInFullscreen {
@@ -283,7 +283,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double {
-        let duration = option.macOpts.macos_fs_animation_duration
+        let duration = option.mac.macos_fs_animation_duration
         if duration < 0 {
             return def
         } else {
