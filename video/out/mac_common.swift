@@ -27,7 +27,8 @@ class MacCommon: Common {
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
-        option = OptionHelper(vo)
+        self.vo = vo
+        option = OptionHelper(vo, vo.pointee.global)
         input = InputHelper(vo.pointee.input_ctx, option)
         timer = PreciseTimer(common: self)
 
@@ -38,7 +39,7 @@ class MacCommon: Common {
     }
 
     @objc func config(_ vo: UnsafeMutablePointer<vo>) -> Bool {
-        option?.vo = vo
+        self.vo = vo
 
         DispatchQueue.main.sync {
             let previousActiveApp = getActiveApp()

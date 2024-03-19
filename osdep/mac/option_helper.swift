@@ -20,7 +20,6 @@ import Cocoa
 typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
 class OptionHelper: NSObject {
-    var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>
     var macOptsCachePtr: UnsafeMutablePointer<m_config_cache>
 
@@ -35,11 +34,9 @@ class OptionHelper: NSObject {
     var opts: mp_vo_opts { get { return optsPtr.pointee } }
     var macOpts: macos_opts { get { return macOptsPtr.pointee } }
 
-    init(_ vo: UnsafeMutablePointer<vo>) {
-        self.vo = vo
-
-        guard let cache = m_config_cache_alloc(vo, vo.pointee.global, Application.getVoSubConf()),
-              let macCache = m_config_cache_alloc(vo, vo.pointee.global, Application.getMacOSConf()) else
+    init(_ taParent: UnsafeMutableRawPointer, _ global: OpaquePointer?) {
+        guard let cache = m_config_cache_alloc(taParent, global, Application.getVoSubConf()),
+              let macCache = m_config_cache_alloc(taParent, global, Application.getMacOSConf()) else
         {
             // will never be hit, mp_get_config_group asserts for invalid groups
             exit(1)
