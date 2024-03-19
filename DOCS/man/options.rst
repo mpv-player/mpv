@@ -6087,8 +6087,10 @@ them.
     Enable the debanding algorithm. This greatly reduces the amount of visible
     banding, blocking and other quantization artifacts, at the expense of
     very slightly blurring some of the finest details. In practice, it's
-    virtually always an improvement - the only reason to disable it would be
-    for performance.
+    virtually always an improvement for files with visible banding.
+
+    This can also be used as a pure grain generator by setting
+    ``--deband-iterations=0``.
 
 ``--deband-iterations=<0..16>``
     The number of debanding steps to perform per sample. Each step reduces a
