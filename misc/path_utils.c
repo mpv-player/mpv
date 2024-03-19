@@ -109,9 +109,9 @@ bool mp_path_is_absolute(struct bstr path)
 char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
 {
     if (p1.len == 0)
-        return bstrdup0(talloc_ctx, p2);
+        return bstrto0(talloc_ctx, p2);
     if (p2.len == 0)
-        return bstrdup0(talloc_ctx, p1);
+        return bstrto0(talloc_ctx, p1);
 
     if (mp_path_is_absolute(p2))
         return bstrdup0(talloc_ctx, p2);
