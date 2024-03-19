@@ -528,7 +528,8 @@ FILE *mp_fopen(const char *filename, const char *mode)
     for (const char *pos = mode + 1; *pos; pos++) {
         switch (*pos) {
         case '+': rwmode = _O_RDWR;  break;
-        // Ignore unknown flags
+        case 'x': oflags |= _O_EXCL; break;
+        // Ignore unknown flags (glibc does too)
         default: break;
         }
     }
