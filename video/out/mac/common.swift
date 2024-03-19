@@ -64,14 +64,10 @@ class Common: NSObject {
     func initApp() {
         var policy: NSApplication.ActivationPolicy = .regular
         switch option.mac.macos_app_activation_policy {
-        case 0:
-            policy = .regular
-        case 1:
-            policy = .accessory
-        case 2:
-            policy = .prohibited
-        default:
-            break
+        case 0: policy = .regular
+        case 1: policy = .accessory
+        case 2: policy = .prohibited
+        default: break
         }
 
         NSApp.setActivationPolicy(policy)

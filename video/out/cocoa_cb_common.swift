@@ -94,10 +94,7 @@ class CocoaCB: Common {
         }
 
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
-        if !(window?.isVisible ?? false) &&
-           !(window?.isMiniaturized ?? false) &&
-           !NSApp.isHidden
-        {
+        if !(window?.isVisible ?? false) && !(window?.isMiniaturized ?? false) && !NSApp.isHidden {
             window?.makeKeyAndOrderFront(nil)
         }
         layer?.atomicDrawingStart()
