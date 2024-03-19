@@ -195,9 +195,6 @@ static void process(struct mp_filter *f)
         case MP_FRAME_AUDIO:
             TA_FREEP(&s->in_frame);
             s->in_frame = input.data;
-            frame = mp_frame_to_av(input, NULL);
-            if (!frame)
-                goto error;
             if (mp_aframe_get_channels(s->in_frame) < s->opts->min_channel_num) {
                 // Just pass it through.
                 s->in_frame = NULL;
@@ -208,6 +205,9 @@ static void process(struct mp_filter *f)
                 if (!reinit(f))
                     goto error;
             }
+            frame = mp_frame_to_av(input, NULL);
+            if (!frame)
+                goto error;
             break;
         default: goto error; // unexpected packet type
         }
