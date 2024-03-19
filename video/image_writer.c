@@ -37,6 +37,7 @@
 #endif
 
 #include "osdep/io.h"
+#include "misc/path_utils.h"
 
 #include "common/av_common.h"
 #include "common/msg.h"
@@ -162,9 +163,14 @@ static void prepare_avframe(AVFrame *pic, AVCodecContext *avctx,
     );
 }
 
-static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, const char *filename)
+static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image,
+                       const char *filename, bool overwrite)
 {
-    FILE *fp = fopen(filename, "wb");
+    FILE *fp = fopen(filename, overwrite ? "wb" : "wbx");
+    if (!fp && errno == EEXIST) {
+        MP_ERR(ctx, "File '%s' already exists!\n", filename);
+        return false;
+    }
     if (!fp) {
         MP_ERR(ctx, "Error opening '%s' for writing!\n", filename);
         return false;
@@ -277,9 +283,13 @@ static void write_jpeg_error_exit(j_common_ptr cinfo)
 }
 
 static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image,
-                       const char *filename)
+                       const char *filename, bool overwrite)
 {
-    FILE *fp = fopen(filename, "wb");
+    FILE *fp = fopen(filename, overwrite ? "wb" : "wbx");
+    if (!fp && errno == EEXIST) {
+        MP_ERR(ctx, "File '%s' already exists!\n", filename);
+        return false;
+    }
     if (!fp) {
         MP_ERR(ctx, "Error opening '%s' for writing!\n", filename);
         return false;
@@ -361,7 +371,7 @@ static void log_side_data(struct image_writer_ctx *ctx, AVPacketSideData *data,
 }
 
 static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
-                       const char *filename)
+                       const char *filename, bool overwrite)
 {
     const AVCodec *codec = NULL;
     const AVOutputFormat *ofmt = NULL;
@@ -426,6 +436,11 @@ static bool write_avif(struct image_writer_ctx *ctx, mp_image_t *image,
     ret = avcodec_open2(avctx, codec, NULL);
     if (ret < 0) {
         MP_ERR(ctx, "Could not open libavcodec encoder for saving images\n");
+        goto free_data;
+    }
+
+    if (!overwrite && mp_path_exists(filename)) {
+        MP_ERR(ctx, "File '%s' already exists\n", filename);
         goto free_data;
     }
 
@@ -705,7 +720,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
                  const char *filename, struct mpv_global *global,
-                 struct mp_log *log)
+                 struct mp_log *log, bool overwrite)
 {
     struct image_writer_opts defs = image_writer_opts_defaults;
     if (!opts)
@@ -714,7 +729,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     mp_verbose(log, "input: %s\n", mp_image_params_to_str(&image->params));
 
     struct image_writer_ctx ctx = { log, opts, image->fmt };
-    bool (*write)(struct image_writer_ctx *, mp_image_t *, const char *) = write_lavc;
+    bool (*write)(struct image_writer_ctx *, mp_image_t *, const char *, bool) = write_lavc;
     int destfmt = 0;
 
 #if HAVE_JPEG
@@ -751,7 +766,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (!dst)
         return false;
 
-    bool success = write(&ctx, dst, filename);
+    bool success = write(&ctx, dst, filename, overwrite);
     if (!success)
         mp_err(log, "Error writing file '%s'!\n", filename);
 
@@ -763,5 +778,5 @@ void dump_png(struct mp_image *image, const char *filename, struct mp_log *log)
 {
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = AV_CODEC_ID_PNG;
-    write_image(image, &opts, filename, NULL, log);
+    write_image(image, &opts, filename, NULL, log, true);
 }

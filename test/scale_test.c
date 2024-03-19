@@ -60,7 +60,7 @@ static void dump_image(struct scale_test *stest, const char *name,
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = AV_CODEC_ID_PNG;
 
-    if (!write_image(img, &opts, path, NULL, NULL)) {
+    if (!write_image(img, &opts, path, NULL, NULL, true)) {
         printf("Failed to write '%s'.\n", path);
         abort();
     }
