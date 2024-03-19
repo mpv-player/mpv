@@ -65,6 +65,7 @@ Interface changes
     - add `hdr10plus` sub-parameter to `format` video filter
     - remove `--focus-on-open` and add replacement `--focus-on`
     - remove debanding from the high-quality profile
+    - raise default `--deband-threshold` to 64
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

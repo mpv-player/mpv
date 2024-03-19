@@ -6101,7 +6101,7 @@ them.
 ``--deband-threshold=<0..4096>``
     The debanding filter's cut-off threshold. Higher numbers increase the
     debanding strength dramatically but progressively diminish image details.
-    (Default 48)
+    (Default 64)
 
 ``--deband-range=<1..64>``
     The debanding filter's initial radius. The radius increases linearly for
