@@ -68,7 +68,7 @@ int image_writer_format_from_ext(const char *ext);
  */
 bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
                 const char *filename, struct mpv_global *global,
-                 struct mp_log *log);
+                 struct mp_log *log, bool overwrite);
 
 // Debugging helper.
 void dump_png(struct mp_image *image, const char *filename, struct mp_log *log);
