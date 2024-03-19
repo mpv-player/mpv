@@ -22,6 +22,7 @@ class Common: NSObject {
     var option: OptionHelper?
     var input: InputHelper?
     var log: LogHelper
+    var vo: UnsafeMutablePointer<vo>?
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
     @objc var window: Window?
@@ -483,11 +484,11 @@ class Common: NSObject {
         events |= ev
         eventsLock.unlock()
 
-        guard let vout = option?.vo else {
+        guard let vo = vo else {
             log.sendWarning("vo nil in flagEvents")
             return
         }
-        vo_wakeup(vout)
+        vo_wakeup(vo)
     }
 
     func checkEvents() -> Int {

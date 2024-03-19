@@ -35,11 +35,12 @@ class CocoaCB: Common {
         let newlog = mp_log_new(UnsafeMutablePointer<MPContext>(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
         libmpv = LibmpvHelper(mpvHandle, newlog)
         super.init(newlog)
+        option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
         layer = GLLayer(cocoaCB: self)
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        option = OptionHelper(vo)
+        self.vo = vo
         input = InputHelper(vo.pointee.input_ctx, option)
 
         if backendState == .uninitialized {
@@ -62,7 +63,7 @@ class CocoaCB: Common {
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
-        option?.vo = vo
+        self.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else if option?.opts.auto_window_resize ?? true {
