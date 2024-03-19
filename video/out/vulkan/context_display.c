@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "common/common.h"
 #include "context.h"
 #include "options/m_config.h"
 #include "utils.h"
@@ -296,7 +297,7 @@ static void open_render_fd(struct ra_ctx *ctx, const char *render_path)
     p->drm_params.render_fd = open(render_path, O_RDWR | O_CLOEXEC);
     if (p->drm_params.render_fd == -1) {
         MP_WARN(ctx, "Failed to open render node: %s\n",
-                strerror(errno));
+                mp_strerror(errno));
     }
 }
 

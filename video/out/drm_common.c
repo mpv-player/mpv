@@ -388,7 +388,7 @@ bool vo_drm_acquire_crtc(struct vo_drm_state *drm)
     drm_object_set_property(request, atomic_ctx->draw_plane, "CRTC_H",  drm->mode.mode.vdisplay);
 
     if (drmModeAtomicCommit(drm->fd, request, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL)) {
-        MP_ERR(drm, "Failed to commit ModeSetting atomic request: %s\n", strerror(errno));
+        MP_ERR(drm, "Failed to commit ModeSetting atomic request: %s\n", mp_strerror(errno));
         goto err;
     }
 
