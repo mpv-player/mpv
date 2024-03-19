@@ -168,43 +168,6 @@ class LibmpvHelper {
         }
     }
 
-    func commandAsync(_ cmd: [String?], id: UInt64 = 1) {
-        if mpvHandle == nil { return }
-        var mCmd = cmd
-        mCmd.append(nil)
-        var cargs = mCmd.map { $0.flatMap { UnsafePointer<Int8>(strdup($0)) } }
-        mpv_command_async(mpvHandle, id, &cargs)
-        for ptr in cargs { free(UnsafeMutablePointer(mutating: ptr)) }
-    }
-
-    // Unsafe function when called while using the render API
-    func command(_ cmd: String) {
-        if mpvHandle == nil { return }
-        mpv_command_string(mpvHandle, cmd)
-    }
-
-    func getBoolProperty(_ name: String) -> Bool {
-        if mpvHandle == nil { return false }
-        var value = Int32()
-        mpv_get_property(mpvHandle, name, MPV_FORMAT_FLAG, &value)
-        return value > 0
-    }
-
-    func getIntProperty(_ name: String) -> Int {
-        if mpvHandle == nil { return 0 }
-        var value = Int64()
-        mpv_get_property(mpvHandle, name, MPV_FORMAT_INT64, &value)
-        return Int(value)
-    }
-
-    func getStringProperty(_ name: String) -> String? {
-        guard let mpv = mpvHandle else { return nil }
-        guard let value = mpv_get_property_string(mpv, name) else { return nil }
-        let str = String(cString: value)
-        mpv_free(value)
-        return str
-    }
-
     func deinitRender() {
         mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
         mp_render_context_set_control_callback(mpvRenderContext, nil, nil)
