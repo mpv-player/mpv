@@ -19,7 +19,7 @@ import Cocoa
 
 typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
-class MPVHelper: NSObject {
+class OptionHelper: NSObject {
     var log: LogHelper
     var vo: UnsafeMutablePointer<vo>
     var optsCachePtr: UnsafeMutablePointer<m_config_cache>

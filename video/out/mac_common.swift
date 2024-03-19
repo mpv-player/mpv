@@ -27,8 +27,8 @@ class MacCommon: Common {
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
         super.init(newlog)
-        mpv = MPVHelper(vo, log)
-        input = InputHelper(vo.pointee.input_ctx, mpv)
+        option = OptionHelper(vo, log)
+        input = InputHelper(vo.pointee.input_ctx, option)
         timer = PreciseTimer(common: self)
 
         DispatchQueue.main.sync {
@@ -38,7 +38,7 @@ class MacCommon: Common {
     }
 
     @objc func config(_ vo: UnsafeMutablePointer<vo>) -> Bool {
-        mpv?.vo = vo
+        option?.vo = vo
 
         DispatchQueue.main.sync {
             let previousActiveApp = getActiveApp()
@@ -58,12 +58,12 @@ class MacCommon: Common {
             }
 
             if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) &&
-               mpv?.opts.auto_window_resize ?? true
+               option?.opts.auto_window_resize ?? true
             {
                 window?.updateSize(wr.size)
             }
 
-            if mpv?.opts.focus_on ?? 1 == 2 {
+            if option?.opts.focus_on ?? 1 == 2 {
                 NSApp.activate(ignoringOtherApps: true)
             }
 
@@ -88,7 +88,7 @@ class MacCommon: Common {
     }
 
     @objc func swapBuffer() {
-        if mpv?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK) != RENDER_TIMER_SYSTEM {
+        if option?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK) != RENDER_TIMER_SYSTEM {
             swapLock.lock()
             while(swapTime < 1) {
                 swapLock.wait()
@@ -104,7 +104,7 @@ class MacCommon: Common {
                                           _ flagsIn: CVOptionFlags,
                                          _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
     {
-        let frameTimer = mpv?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK)
+        let frameTimer = option?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK)
         let signalSwap = {
             self.swapLock.lock()
             self.swapTime += 1

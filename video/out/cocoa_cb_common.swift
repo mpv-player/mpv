@@ -39,8 +39,8 @@ class CocoaCB: Common {
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        mpv = MPVHelper(vo, log)
-        input = InputHelper(vo.pointee.input_ctx, mpv)
+        option = OptionHelper(vo, log)
+        input = InputHelper(vo.pointee.input_ctx, option)
 
         if backendState == .uninitialized {
             backendState = .needsInit
@@ -58,18 +58,18 @@ class CocoaCB: Common {
     func uninit() {
         window?.orderOut(nil)
         window?.close()
-        mpv = nil
+        option = nil
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
-        mpv?.vo = vo
+        option?.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
-        } else if mpv?.opts.auto_window_resize ?? true {
+        } else if option?.opts.auto_window_resize ?? true {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
-                if self.mpv?.opts.focus_on ?? 1 == 2 {
+                if self.option?.opts.focus_on ?? 1 == 2 {
                     NSApp.activate(ignoringOtherApps: true)
                 }
             }
@@ -204,7 +204,7 @@ class CocoaCB: Common {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && mpv?.opts.native_fs ?? true
+                         window?.isInFullscreen ?? false && option?.opts.native_fs ?? true
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }

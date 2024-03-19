@@ -19,7 +19,7 @@ import Cocoa
 
 class View: NSView, CALayerDelegate {
     unowned var common: Common
-    var mpv: MPVHelper? { get { return common.mpv } }
+    var option: OptionHelper? { get { return common.option } }
     var input: InputHelper? { get { return common.input } }
 
     var tracker: NSTrackingArea?
