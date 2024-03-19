@@ -19,7 +19,7 @@ import Cocoa
 import IOKit.pwr_mgt
 
 class Common: NSObject {
-    var option: OptionHelper?
+    var option: OptionHelper
     var input: InputHelper?
     var log: LogHelper
     var vo: UnsafeMutablePointer<vo>?
@@ -48,16 +48,12 @@ class Common: NSObject {
         didSet { if let window = window { window.title = title } }
     }
 
-    init(_ mpLog: OpaquePointer?) {
+    init(_ opt: OptionHelper, _ mpLog: OpaquePointer?) {
+        option = opt
         log = LogHelper(mpLog)
     }
 
     func initMisc(_ vo: UnsafeMutablePointer<vo>) {
-        guard let option = option else {
-            log.sendError("Something went wrong, no OptionHelper was initialized")
-            exit(1)
-        }
-
         startDisplayLink(vo)
         initLightSensor()
         addDisplayReconfigureObserver()
@@ -66,11 +62,6 @@ class Common: NSObject {
     }
 
     func initApp() {
-        guard let option = option else {
-            log.sendError("Something went wrong, no OptionHelper was initialized")
-            exit(1)
-        }
-
         var policy: NSApplication.ActivationPolicy = .regular
         switch option.macOpts.macos_app_activation_policy {
         case 0:
@@ -88,7 +79,7 @@ class Common: NSObject {
     }
 
     func initWindow(_ vo: UnsafeMutablePointer<vo>, _ previousActiveApp: NSRunningApplication?) {
-        let (option, targetScreen, wr) = getInitProperties(vo)
+        let (targetScreen, wr) = getInitProperties(vo)
 
         guard let view = self.view else {
             log.sendError("Something went wrong, no View was initialized")
@@ -133,7 +124,7 @@ class Common: NSObject {
     }
 
     func initView(_ vo: UnsafeMutablePointer<vo>, _ layer: CALayer) {
-        let (_, _, wr) = getInitProperties(vo)
+        let (_, wr) = getInitProperties(vo)
 
         view = View(frame: wr, common: self)
         guard let view = self.view else {
@@ -148,7 +139,7 @@ class Common: NSObject {
     }
 
     func initWindowState() {
-        if option?.opts.fullscreen ?? false {
+        if option.opts.fullscreen {
             DispatchQueue.main.async {
                 self.window?.toggleFullScreen(nil)
             }
@@ -410,11 +401,6 @@ class Common: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        guard let option = option else {
-            log.sendWarning("Unexpected nil value in getTargetScreen")
-            return nil
-        }
-
         let screenID = fs ? option.opts.fsscreen_id : option.opts.screen_id
         var name: String?
         if let screenName = fs ? option.opts.fsscreen_name : option.opts.screen_name {
@@ -432,7 +418,7 @@ class Common: NSObject {
     func getWindowGeometry(forScreen screen: NSScreen,
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = screen.convertRectToBacking(screen.frame)
-        let targetFrame = (option?.macOpts.macos_geometry_calculation ?? Int32(FRAME_VISIBLE)) == FRAME_VISIBLE
+        let targetFrame = option.macOpts.macos_geometry_calculation == FRAME_VISIBLE
             ? screen.visibleFrame : screen.frame
         let rv = screen.convertRectToBacking(targetFrame)
 
@@ -459,11 +445,7 @@ class Common: NSObject {
         return screen.convertRectFromBacking(NSMakeRect(x, y, width, height))
     }
 
-    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (OptionHelper, NSScreen, NSRect) {
-        guard let option = option else {
-            log.sendError("Something went wrong, no OptionHelper was initialized")
-            exit(1)
-        }
+    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect) {
         guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
             log.sendError("Something went wrong, no Screen was found")
             exit(1)
@@ -471,7 +453,7 @@ class Common: NSObject {
 
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
 
-        return (option, targetScreen, wr)
+        return (targetScreen, wr)
     }
 
     // call before initApp, because on macOS +10.15 it changes the active App
@@ -516,11 +498,6 @@ class Common: NSObject {
                          request: UInt32,
                          data: UnsafeMutableRawPointer?) -> Int32
     {
-        guard let option = option else {
-            log.sendWarning("Unexpected nil value in Control Callback")
-            return VO_FALSE
-        }
-
         switch mp_voctrl(request) {
         case VOCTRL_CHECK_EVENTS:
             events.pointee |= Int32(checkEvents())
@@ -531,7 +508,7 @@ class Common: NSObject {
                 switch opt {
                 case TypeHelper.toPointer(&option.optsPtr.pointee.border):
                     DispatchQueue.main.async {
-                        self.window?.border = Bool(option.opts.border)
+                        self.window?.border = Bool(self.option.opts.border)
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.fullscreen):
                     DispatchQueue.main.async {
@@ -540,34 +517,34 @@ class Common: NSObject {
                 case TypeHelper.toPointer(&option.optsPtr.pointee.ontop): fallthrough
                 case TypeHelper.toPointer(&option.optsPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
-                        self.window?.setOnTop(Bool(option.opts.ontop), Int(option.opts.ontop_level))
+                        self.window?.setOnTop(Bool(self.option.opts.ontop), Int(self.option.opts.ontop_level))
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.all_workspaces):
                     DispatchQueue.main.async {
-                        self.window?.setOnAllWorkspaces(Bool(option.opts.all_workspaces))
+                        self.window?.setOnAllWorkspaces(Bool(self.option.opts.all_workspaces))
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {
-                        self.window?.keepAspect = Bool(option.opts.keepaspect_window)
+                        self.window?.keepAspect = Bool(self.option.opts.keepaspect_window)
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.window_minimized):
                     DispatchQueue.main.async {
-                        self.window?.setMinimized(Bool(option.opts.window_minimized))
+                        self.window?.setMinimized(Bool(self.option.opts.window_minimized))
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.window_maximized):
                     DispatchQueue.main.async {
-                        self.window?.setMaximized(Bool(option.opts.window_maximized))
+                        self.window?.setMaximized(Bool(self.option.opts.window_maximized))
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.cursor_passthrough):
                     DispatchQueue.main.async {
-                        self.window?.ignoresMouseEvents = option.opts.cursor_passthrough
+                        self.window?.ignoresMouseEvents = self.option.opts.cursor_passthrough
                     }
                 case TypeHelper.toPointer(&option.optsPtr.pointee.geometry): fallthrough
                 case TypeHelper.toPointer(&option.optsPtr.pointee.autofit): fallthrough
                 case TypeHelper.toPointer(&option.optsPtr.pointee.autofit_smaller): fallthrough
                 case TypeHelper.toPointer(&option.optsPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
-                        let (_, _, wr) = self.getInitProperties(vo)
+                        let (_, wr) = self.getInitProperties(vo)
                         self.window?.updateFrame(wr)
                     }
                 default:
@@ -643,7 +620,7 @@ class Common: NSObject {
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
             var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
             DispatchQueue.main.async {
-                if let screen = self.window?.currentScreen, !Bool(self.option?.opts.hidpi_window_scale ?? true) {
+                if let screen = self.window?.currentScreen, !Bool(self.option.opts.hidpi_window_scale) {
                     rect = screen.convertRectFromBacking(rect)
                 }
                 self.window?.updateSize(rect.size)
@@ -693,11 +670,6 @@ class Common: NSObject {
     }
 
     func macOptsUpdate() {
-        guard let option = option else {
-            log.sendWarning("Unexpected nil value in mac opts update")
-            return
-        }
-
         var opt: UnsafeMutableRawPointer?
         while option.nextChangedMacOption(property: &opt) {
             switch opt {

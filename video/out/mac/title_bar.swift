@@ -19,7 +19,7 @@ import Cocoa
 
 class TitleBar: NSVisualEffectView {
     unowned var common: Common
-    var option: OptionHelper? { get { return common.option } }
+    var option: OptionHelper { get { return common.option } }
 
     var systemBar: NSView? {
         get { return common.window?.standardWindowButton(.closeButton)?.superview }
@@ -64,9 +64,9 @@ class TitleBar: NSVisualEffectView {
         window.contentView?.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        set(appearance: Int(option?.macOpts.macos_title_bar_appearance ?? 0))
-        set(material: Int(option?.macOpts.macos_title_bar_material ?? 0))
-        set(color: option?.macOpts.macos_title_bar_color ?? "#00000000")
+        set(appearance: Int(option.macOpts.macos_title_bar_appearance))
+        set(material: Int(option.macOpts.macos_title_bar_material))
+        set(color: option.macOpts.macos_title_bar_color)
     }
 
     required init?(coder: NSCoder) {

@@ -24,7 +24,7 @@ struct Timing {
 
 class PreciseTimer {
     unowned var common: Common
-    var option: OptionHelper? { get { return common.option } }
+    var option: OptionHelper { get { return common.option } }
 
     let nanoPerSecond: Double = 1e+9
     let machToNano: Double = {

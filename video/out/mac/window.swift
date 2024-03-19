@@ -19,7 +19,7 @@ import Cocoa
 
 class Window: NSWindow, NSWindowDelegate {
     weak var common: Common! = nil
-    var option: OptionHelper? { get { return common.option } }
+    var option: OptionHelper { get { return common.option } }
     var input: InputHelper? { get { return common.input } }
 
     var targetScreen: NSScreen?
@@ -92,7 +92,7 @@ class Window: NSWindow, NSWindowDelegate {
         title = com.title
         minSize = NSMakeSize(160, 90)
         collectionBehavior = .fullScreenPrimary
-        ignoresMouseEvents = option?.opts.cursor_passthrough ?? false
+        ignoresMouseEvents = option.opts.cursor_passthrough
         delegate = self
 
         if let cView = contentView {
@@ -143,7 +143,7 @@ class Window: NSWindow, NSWindowDelegate {
             setFrame(frame, display: true)
         }
 
-        if Bool(option?.opts.native_fs ?? true) {
+        if Bool(option.opts.native_fs) {
             super.toggleFullScreen(sender)
         } else {
             if !isInFullscreen {
@@ -194,7 +194,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEnterFullScreen(_ notification: Notification) {
         isInFullscreen = true
-        option?.setOption(fullscreen: isInFullscreen)
+        option.setOption(fullscreen: isInFullscreen)
         common.updateCursorVisibility()
         endAnimation(frame)
         common.titleBar?.show()
@@ -203,7 +203,7 @@ class Window: NSWindow, NSWindowDelegate {
     func windowDidExitFullScreen(_ notification: Notification) {
         guard let tScreen = targetScreen else { return }
         isInFullscreen = false
-        option?.setOption(fullscreen: isInFullscreen)
+        option.setOption(fullscreen: isInFullscreen)
         endAnimation(calculateWindowPosition(for: tScreen, withoutBounds: targetScreen == screen))
         common.view?.layerContentsPlacement = .scaleProportionallyToFit
     }
@@ -251,7 +251,7 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(targetFrame, display: true)
         endAnimation()
         isInFullscreen = true
-        option?.setOption(fullscreen: isInFullscreen)
+        option.setOption(fullscreen: isInFullscreen)
         common.windowSetToFullScreen()
     }
 
@@ -270,7 +270,7 @@ class Window: NSWindow, NSWindowDelegate {
         setFrame(newFrame, display: true)
         endAnimation()
         isInFullscreen = false
-        option?.setOption(fullscreen: isInFullscreen)
+        option.setOption(fullscreen: isInFullscreen)
         common.windowSetToWindow()
     }
 
@@ -283,7 +283,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func getFsAnimationDuration(_ def: Double) -> Double {
-        let duration = option?.macOpts.macos_fs_animation_duration ?? -1
+        let duration = option.macOpts.macos_fs_animation_duration
         if duration < 0 {
             return def
         } else {
@@ -542,7 +542,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidEndLiveResize(_ notification: Notification) {
         common.windowDidEndLiveResize()
-        option?.setOption(maximized: isZoomed)
+        option.setOption(maximized: isZoomed)
 
         if let contentViewFrame = contentView?.frame,
                !isAnimating && !isInFullscreen
@@ -561,11 +561,11 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMiniaturize(_ notification: Notification) {
-        option?.setOption(minimized: true)
+        option.setOption(minimized: true)
     }
 
     func windowDidDeminiaturize(_ notification: Notification) {
-        option?.setOption(minimized: false)
+        option.setOption(minimized: false)
     }
 
     func windowDidResignKey(_ notification: Notification) {
@@ -588,6 +588,6 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
-        option?.setOption(maximized: isZoomed)
+        option.setOption(maximized: isZoomed)
     }
 }

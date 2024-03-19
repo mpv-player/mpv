@@ -32,10 +32,10 @@ class CocoaCB: Common {
 
 
     @objc init(_ mpvHandle: OpaquePointer) {
-        let newlog = mp_log_new(UnsafeMutablePointer<MPContext>(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
+        let newlog = mp_log_new(UnsafeMutablePointer(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
+        let option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
         libmpv = LibmpvHelper(mpvHandle, newlog)
-        super.init(newlog)
-        option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
+        super.init(option, newlog)
         layer = GLLayer(cocoaCB: self)
     }
 
@@ -59,18 +59,17 @@ class CocoaCB: Common {
     func uninit() {
         window?.orderOut(nil)
         window?.close()
-        option = nil
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
         self.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
-        } else if option?.opts.auto_window_resize ?? true {
+        } else if option.opts.auto_window_resize {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
-                if self.option?.opts.focus_on ?? 1 == 2 {
+                if self.option.opts.focus_on == 2 {
                     NSApp.activate(ignoringOtherApps: true)
                 }
             }
@@ -205,7 +204,7 @@ class CocoaCB: Common {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && option?.opts.native_fs ?? true
+                         window?.isInFullscreen ?? false && option.opts.native_fs
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }
