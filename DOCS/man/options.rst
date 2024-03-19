@@ -5555,15 +5555,15 @@ them.
         Disable any dithering done by mpv.
     auto
         Automatic selection.
-        On ``vo=gpu``: if output bit depth cannot be detected, 8 bpc is assumed.
-        On ``vo=gpu-next``: with ``gpu-api=d3d11``, real on-the-wire bpc is used.
-        For other ``gpu-api``, 8 bpc is used for SDR content.
+        On ``--vo=gpu``: detected depth or 8 bpc otherwise
+        On ``--vo=gpu-next``: detected depth or 8 bpc (for SDR target)
     8
         Dither to 8 bit output.
 
-    Note that the depth of the connected video display device cannot be
-    detected. Often, LCD panels will do dithering on their own, which conflicts
-    with this option and leads to ugly output.
+    Note that the on-the-wire bit depth cannot be detected except when using
+    ``gpu-api=d3d11``. Explicitly setting the value to your display's bit depth
+    is recommended, as dithering performed by some LCD panels can be of low
+    quality.
 
 ``--dither-size-fruit=<2-8>``
     Set the size of the dither matrix (default: 6). The actual size of the
