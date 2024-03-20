@@ -309,7 +309,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
         JSAMPROW row_pointer[1];
         row_pointer[0] = image->planes[0] +
                          (ptrdiff_t)cinfo.next_scanline * image->stride[0];
-        jpeg_write_scanlines(&cinfo, row_pointer,1);
+        jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
 
     jpeg_finish_compress(&cinfo);
