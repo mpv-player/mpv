@@ -1131,7 +1131,7 @@ static void vo_x11_update_composition_hint(struct vo *vo)
     case 3: hint = 2; break; // always enable
     }
 
-    XChangeProperty(x11->display, x11->window, XA(x11,_NET_WM_BYPASS_COMPOSITOR),
+    XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_BYPASS_COMPOSITOR),
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&hint, 1);
 }
 
