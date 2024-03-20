@@ -38,7 +38,7 @@
 
 #if !PW_CHECK_VERSION(0, 3, 50)
 static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time *time, size_t size) {
-	return pw_stream_get_time(stream, time);
+    return pw_stream_get_time(stream, time);
 }
 #endif
 
