@@ -147,8 +147,8 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     if (evk->vk_sem.sem == VK_NULL_HANDLE) {
          ret = -1;
          goto error;
-     }
-     // The returned FD or Handle is owned by the caller (us).
+    }
+    // The returned FD or Handle is owned by the caller (us).
 
     CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC w_desc = {
 #if HAVE_WIN32_DESKTOP
@@ -233,8 +233,8 @@ static bool cuda_ext_vk_wait(const struct ra_hwdec_mapper *mapper, int n)
                 .value = evk->vk_sem.value
             }
         }
-     };
-     ret = CHECK_CU(cu->cuWaitExternalSemaphoresAsync(&evk->cuda_sem,
+    };
+    ret = CHECK_CU(cu->cuWaitExternalSemaphoresAsync(&evk->cuda_sem,
                                                      &wp, 1, 0));
     return ret == 0;
 }

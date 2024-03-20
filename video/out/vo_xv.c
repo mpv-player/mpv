@@ -866,7 +866,7 @@ static int preinit(struct vo *vo)
                 "You should fix your graphics drivers, or not force the xv VO.\n");
     return 0;
 
-  error:
+error:
     uninit(vo);                 // free resources
     return -1;
 }

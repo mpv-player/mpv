@@ -583,7 +583,7 @@ static bool setup_crtc(struct vo_drm_state *drm, const drmModeRes *res)
            drm->connector->connector_id);
     return false;
 
-  success:
+success:
     MP_VERBOSE(drm, "Selected Encoder %u with CRTC %u\n",
                drm->encoder->encoder_id, drm->crtc_id);
     return true;

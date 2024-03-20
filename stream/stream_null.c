@@ -24,7 +24,7 @@
 
 static int open_s(stream_t *stream)
 {
-  return 1;
+    return 1;
 }
 
 const stream_info_t stream_info_null = {

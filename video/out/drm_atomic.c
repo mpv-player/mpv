@@ -43,7 +43,7 @@ int drm_object_create_properties(struct mp_log *log, int fd,
 
     return 0;
 
-  fail:
+fail:
     drm_object_free_properties(object);
     return -1;
 }
@@ -68,43 +68,43 @@ void drm_object_free_properties(struct drm_object *object)
 
 int drm_object_get_property(struct drm_object *object, char *name, uint64_t *value)
 {
-   for (int i = 0; i < object->props->count_props; i++) {
-       if (strcasecmp(name, object->props_info[i]->name) == 0) {
-           *value = object->props->prop_values[i];
-           return 0;
-       }
-   }
+    for (int i = 0; i < object->props->count_props; i++) {
+        if (strcasecmp(name, object->props_info[i]->name) == 0) {
+            *value = object->props->prop_values[i];
+            return 0;
+        }
+    }
 
-   return -EINVAL;
+    return -EINVAL;
 }
 
 drmModePropertyBlobPtr drm_object_get_property_blob(struct drm_object *object, char *name)
 {
-   uint64_t blob_id;
+    uint64_t blob_id;
 
-   if (!drm_object_get_property(object, name, &blob_id)) {
-       return drmModeGetPropertyBlob(object->fd, blob_id);
-   }
+    if (!drm_object_get_property(object, name, &blob_id)) {
+        return drmModeGetPropertyBlob(object->fd, blob_id);
+    }
 
-   return NULL;
+    return NULL;
 }
 
 int drm_object_set_property(drmModeAtomicReq *request, struct drm_object *object,
                             char *name, uint64_t value)
 {
-   for (int i = 0; i < object->props->count_props; i++) {
-       if (strcasecmp(name, object->props_info[i]->name) == 0) {
-           if (object->props_info[i]->flags & DRM_MODE_PROP_IMMUTABLE) {
-               /* Do not try to set immutable values, as this might cause the
-                * atomic commit operation to fail. */
-               return -EINVAL;
-           }
-           return drmModeAtomicAddProperty(request, object->id,
-                                           object->props_info[i]->prop_id, value);
-       }
-   }
+    for (int i = 0; i < object->props->count_props; i++) {
+        if (strcasecmp(name, object->props_info[i]->name) == 0) {
+            if (object->props_info[i]->flags & DRM_MODE_PROP_IMMUTABLE) {
+                /* Do not try to set immutable values, as this might cause the
+                 * atomic commit operation to fail. */
+                return -EINVAL;
+            }
+            return drmModeAtomicAddProperty(request, object->id,
+                                            object->props_info[i]->prop_id, value);
+        }
+    }
 
-   return -EINVAL;
+    return -EINVAL;
 }
 
 struct drm_object *drm_object_create(struct mp_log *log, int fd,

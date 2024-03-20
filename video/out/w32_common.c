@@ -1717,7 +1717,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             adjust_window_rect(w32, w32->window, &r);
             NCCALCSIZE_PARAMS *p = (LPNCCALCSIZE_PARAMS)lParam;
             p->rgrc[0].top += r.top + get_title_bar_height(w32);
-       }
+        }
         break;
     case WM_IME_STARTCOMPOSITION: {
         HIMC imc = ImmGetContext(w32->window);

@@ -429,16 +429,16 @@ done:
 }
 
 const stream_info_t stream_info_ffmpeg = {
-  .name = "ffmpeg",
-  .open = open_f,
-  .protocols = (const char *const[]){
-     "rtmp", "rtsp", "rtsps", "http", "https", "mms", "mmst", "mmsh", "mmshttp",
-     "rtp", "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srt",
-     "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns", "dav",
-     "davs", "webdav", "webdavs",
-     NULL },
-  .can_write = true,
-  .stream_origin = STREAM_ORIGIN_NET,
+    .name = "ffmpeg",
+    .open = open_f,
+    .protocols = (const char *const[]){
+        "rtmp", "rtsp", "rtsps", "http", "https", "mms", "mmst", "mmsh", "mmshttp",
+        "rtp", "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srt",
+        "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns", "dav",
+        "davs", "webdav", "webdavs",
+        NULL },
+    .can_write = true,
+    .stream_origin = STREAM_ORIGIN_NET,
 };
 
 // Unlike above, this is not marked as safe, and can contain protocols which
@@ -446,12 +446,12 @@ const stream_info_t stream_info_ffmpeg = {
 // pseudo-demuxer, which in turn gives access to filters that can access the
 // local filesystem.)
 const stream_info_t stream_info_ffmpeg_unsafe = {
-  .name = "ffmpeg",
-  .open = open_f,
-  .protocols = (const char *const[]){
-     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
-     "concat", "smb",
-     NULL },
-  .stream_origin = STREAM_ORIGIN_UNSAFE,
-  .can_write = true,
+    .name = "ffmpeg",
+    .open = open_f,
+    .protocols = (const char *const[]){
+        "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
+        "concat", "smb",
+        NULL },
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
+    .can_write = true,
 };
