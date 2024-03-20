@@ -119,7 +119,6 @@ struct mp_scaletempo2 {
     // How many additional frames of silence have been added to |input_buffer|
     // for padding after the final packet.
     int input_buffer_added_silence;
-    float *energy_candidate_blocks;
 };
 
 void mp_scaletempo2_destroy(struct mp_scaletempo2 *p);

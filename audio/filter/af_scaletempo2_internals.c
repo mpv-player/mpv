@@ -63,137 +63,19 @@ static void zero_2d_partial(float **a, int x, int y)
     }
 }
 
-// Energies of sliding windows of channels are interleaved.
-// The number windows is |input_frames| - (|frames_per_window| - 1), hence,
-// the method assumes |energy| must be, at least, of size
-// (|input_frames| - (|frames_per_window| - 1)) * |channels|.
-static void multi_channel_moving_block_energies(
-    float **input, int input_frames, int channels,
-    int frames_per_block, float *energy)
-{
-    int num_blocks = input_frames - (frames_per_block - 1);
-
-    for (int k = 0; k < channels; ++k) {
-        const float* input_channel = input[k];
-
-        energy[k] = 0;
-
-        // First block of channel |k|.
-        for (int m = 0; m < frames_per_block; ++m) {
-            energy[k] += input_channel[m] * input_channel[m];
-        }
-
-        const float* slide_out = input_channel;
-        const float* slide_in = input_channel + frames_per_block;
-        for (int n = 1; n < num_blocks; ++n, ++slide_in, ++slide_out) {
-            energy[k + n * channels] = energy[k + (n - 1) * channels]
-                - *slide_out * *slide_out + *slide_in * *slide_in;
-        }
-    }
-}
-
 static float multi_channel_similarity_measure(
-    const float* dot_prod_a_b,
-    const float* energy_a, const float* energy_b,
-    int channels)
+    float *restrict *restrict a, float *restrict *restrict b,
+    int frame_offset_b, int channels, int num_frames)
 {
-    const float epsilon = 1e-12f;
-    float similarity_measure = 0.0f;
-    for (int n = 0; n < channels; ++n) {
-        similarity_measure += dot_prod_a_b[n]
-            / sqrtf(energy_a[n] * energy_b[n] + epsilon);
+    float distance = 0;
+    for (int c = 0; c < channels ; c++) {
+        float *restrict source = b[c];
+        float *restrict target = a[c];
+        for (int i = 0; i < num_frames; i++)
+            distance += fabs(target[i] - source[frame_offset_b + i]);
     }
-    return similarity_measure;
+    return -distance;
 }
-
-#if HAVE_VECTOR
-
-typedef float v8sf __attribute__ ((vector_size (32), aligned (1)));
-
-// Dot-product of channels of two AudioBus. For each AudioBus an offset is
-// given. |dot_product[k]| is the dot-product of channel |k|. The caller should
-// allocate sufficient space for |dot_product|.
-static void multi_channel_dot_product(
-    float **a, int frame_offset_a,
-    float **b, int frame_offset_b,
-    int channels,
-    int num_frames, float *dot_product)
-{
-    assert(frame_offset_a >= 0);
-    assert(frame_offset_b >= 0);
-
-    for (int k = 0; k < channels; ++k) {
-        const float* ch_a = a[k] + frame_offset_a;
-        const float* ch_b = b[k] + frame_offset_b;
-        float sum = 0.0;
-        if (num_frames < 32)
-            goto rest;
-
-        const v8sf *va = (const v8sf *) ch_a;
-        const v8sf *vb = (const v8sf *) ch_b;
-        v8sf vsum[4] = {
-            // Initialize to product of first 32 floats
-            va[0] * vb[0],
-            va[1] * vb[1],
-            va[2] * vb[2],
-            va[3] * vb[3],
-        };
-        va += 4;
-        vb += 4;
-
-        // Process `va` and `vb` across four vertical stripes
-        for (int n = 1; n < num_frames / 32; n++) {
-            vsum[0] += va[0] * vb[0];
-            vsum[1] += va[1] * vb[1];
-            vsum[2] += va[2] * vb[2];
-            vsum[3] += va[3] * vb[3];
-            va += 4;
-            vb += 4;
-        }
-
-        // Vertical sum across `vsum` entries
-        vsum[0] += vsum[1];
-        vsum[2] += vsum[3];
-        vsum[0] += vsum[2];
-
-        // Horizontal sum across `vsum[0]`, could probably be done better but
-        // this section is not super performance critical
-        float *vf = (float *) &vsum[0];
-        sum = vf[0] + vf[1] + vf[2] + vf[3] + vf[4] + vf[5] + vf[6] + vf[7];
-        ch_a = (const float *) va;
-        ch_b = (const float *) vb;
-
-rest:
-        // Process the remainder
-        for (int n = 0; n < num_frames % 32; n++)
-            sum += *ch_a++ * *ch_b++;
-
-        dot_product[k] = sum;
-    }
-}
-
-#else // !HAVE_VECTOR
-
-static void multi_channel_dot_product(
-    float **a, int frame_offset_a,
-    float **b, int frame_offset_b,
-    int channels,
-    int num_frames, float *dot_product)
-{
-    assert(frame_offset_a >= 0);
-    assert(frame_offset_b >= 0);
-
-    for (int k = 0; k < channels; ++k) {
-        const float* ch_a = a[k] + frame_offset_a;
-        const float* ch_b = b[k] + frame_offset_b;
-        float sum = 0.0;
-        for (int n = 0; n < num_frames; n++)
-            sum += *ch_a++ * *ch_b++;
-        dot_product[k] = sum;
-    }
-}
-
-#endif // HAVE_VECTOR
 
 // Fit the curve f(x) = a * x^2 + b * x + c such that
 //   f(-1) = y[0]
@@ -201,7 +83,8 @@ static void multi_channel_dot_product(
 //   f(1) = y[2]
 // and return the maximum, assuming that y[0] <= y[1] >= y[2].
 static void quadratic_interpolation(
-    const float* y_values, float* extremum, float* extremum_value)
+    const float *restrict y_values, float *restrict extremum,
+    float *restrict extremum_value)
 {
     float a = 0.5f * (y_values[2] + y_values[0]) - y_values[1];
     float b = 0.5f * (y_values[2] - y_values[0]);
@@ -223,125 +106,62 @@ static void quadratic_interpolation(
 // the best match.
 static int decimated_search(
     int decimation, struct interval exclude_interval,
-    float **target_block, int target_block_frames,
-    float **search_segment, int search_segment_frames,
-    int channels,
-    const float *energy_target_block, const float *energy_candidate_blocks)
+    float *restrict *restrict target_block, int target_block_frames,
+    float *restrict *restrict search_block, int search_block_frames,
+    int channels)
 {
-    int num_candidate_blocks = search_segment_frames - (target_block_frames - 1);
-    float dot_prod [MP_NUM_CHANNELS];
-    float similarity[3];  // Three elements for cubic interpolation.
-
-    int n = 0;
-    multi_channel_dot_product(
-        target_block, 0,
-        search_segment, n,
-        channels,
-        target_block_frames, dot_prod);
-    similarity[0] = multi_channel_similarity_measure(
-        dot_prod, energy_target_block,
-        &energy_candidate_blocks[n * channels], channels);
-
-    // Set the starting point as optimal point.
-    float best_similarity = similarity[0];
+    int num_candidate_blocks = search_block_frames - (target_block_frames - 1);
+    float history[3] = {0};
+    float best_similarity = -FLT_MAX;
     int optimal_index = 0;
+    for (int offset = 0; offset < num_candidate_blocks; offset += decimation) {
+        float similarity = multi_channel_similarity_measure(
+            target_block, search_block, offset,
+            channels, target_block_frames);
 
-    n += decimation;
-    if (n >= num_candidate_blocks) {
-        return 0;
-    }
-
-    multi_channel_dot_product(
-        target_block, 0,
-        search_segment, n,
-        channels,
-        target_block_frames, dot_prod);
-    similarity[1] = multi_channel_similarity_measure(
-        dot_prod, energy_target_block,
-        &energy_candidate_blocks[n * channels], channels);
-
-    n += decimation;
-    if (n >= num_candidate_blocks) {
-        // We cannot do any more sampling. Compare these two values and return the
-        // optimal index.
-        return similarity[1] > similarity[0] ? decimation : 0;
-    }
-
-    for (; n < num_candidate_blocks; n += decimation) {
-        multi_channel_dot_product(
-            target_block, 0,
-            search_segment, n,
-            channels,
-            target_block_frames, dot_prod);
-
-        similarity[2] = multi_channel_similarity_measure(
-            dot_prod, energy_target_block,
-            &energy_candidate_blocks[n * channels], channels);
-
-        if ((similarity[1] > similarity[0] && similarity[1] >= similarity[2]) ||
-            (similarity[1] >= similarity[0] && similarity[1] > similarity[2]))
-        {
-            // A local maximum is found. Do a cubic interpolation for a better
-            // estimate of candidate maximum.
-            float normalized_candidate_index;
-            float candidate_similarity;
-            quadratic_interpolation(similarity, &normalized_candidate_index,
-                                    &candidate_similarity);
-
-            int candidate_index = n - decimation
-                 + (int)(normalized_candidate_index * decimation +  0.5f);
-            if (candidate_similarity > best_similarity
-                && !in_interval(candidate_index, exclude_interval)) {
-                optimal_index = candidate_index;
-                best_similarity = candidate_similarity;
-            }
-        } else if (n + decimation >= num_candidate_blocks &&
-                   similarity[2] > best_similarity &&
-                   !in_interval(n, exclude_interval))
-        {
-            // If this is the end-point and has a better similarity-measure than
-            // optimal, then we accept it as optimal point.
-            optimal_index = n;
-            best_similarity = similarity[2];
+        int optimal_index_candidate = offset;
+        history[2] = similarity;
+        if(offset >= 2 && history[0] <= history[1] && history[1] >= history[2]) {
+            float extremum;
+            quadratic_interpolation(history, &extremum, &similarity);
+            optimal_index_candidate = offset - decimation
+                + (int)(extremum * decimation + 0.5f);
         }
-        memmove(similarity, &similarity[1], 2 * sizeof(*similarity));
+
+        if (similarity > best_similarity &&
+            !in_interval(optimal_index_candidate, exclude_interval)) {
+            best_similarity = similarity;
+            optimal_index  = optimal_index_candidate;
+        }
+        memmove(history, &history[1], 2 * sizeof(*history));
     }
     return optimal_index;
 }
 
 // Search [|low_limit|, |high_limit|] of |search_segment| to find a block that
-// is most similar to |target_block|. |energy_target_block| is the energy of the
-// |target_block|. |energy_candidate_blocks| is the energy of all blocks within
-// |search_block|.
+// is most similar to |target_block|.
 static int full_search(
     int low_limit, int high_limit,
     struct interval exclude_interval,
-    float **target_block, int target_block_frames,
-    float **search_block, int search_block_frames,
-    int channels,
-    const float* energy_target_block,
-    const float* energy_candidate_blocks)
+    float *restrict *restrict target_block, int target_block_frames,
+    float *restrict *restrict search_block, int search_block_frames,
+    int channels)
 {
-    // int block_size = target_block->frames;
-    float dot_prod [sizeof(float) * MP_NUM_CHANNELS];
-
-    float best_similarity = -FLT_MAX;//FLT_MIN;
+    float best_similarity = -FLT_MAX;
     int optimal_index = 0;
 
-    for (int n = low_limit; n <= high_limit; ++n) {
-        if (in_interval(n, exclude_interval)) {
+    for (int offset = low_limit; offset <= high_limit; ++offset) {
+        if (in_interval(offset, exclude_interval)) {
             continue;
         }
-        multi_channel_dot_product(target_block, 0, search_block, n, channels,
-            target_block_frames, dot_prod);
 
         float similarity = multi_channel_similarity_measure(
-            dot_prod, energy_target_block,
-            &energy_candidate_blocks[n * channels], channels);
+            target_block, search_block, offset,
+            channels, target_block_frames);
 
         if (similarity > best_similarity) {
             best_similarity = similarity;
-            optimal_index = n;
+            optimal_index = offset;
         }
     }
 
@@ -352,9 +172,8 @@ static int full_search(
 // to |target_block|. Obviously, the returned index is w.r.t. |search_block|.
 // |exclude_interval| is an interval that is excluded from the search.
 static int compute_optimal_index(
-    float **search_block, int search_block_frames,
-    float **target_block, int target_block_frames,
-    float *energy_candidate_blocks,
+    float *restrict *restrict search_block, int search_block_frames,
+    float *restrict *restrict target_block, int target_block_frames,
     int channels,
     struct interval exclude_interval)
 {
@@ -368,32 +187,11 @@ static int compute_optimal_index(
     // This value is chosen heuristically based on experiments.
     const int search_decimation = 5;
 
-    float energy_target_block [MP_NUM_CHANNELS];
-    // energy_candidate_blocks must have at least size
-    // sizeof(float) * channels * num_candidate_blocks
-
-    // Energy of all candid frames.
-    multi_channel_moving_block_energies(
-        search_block,
-        search_block_frames,
-        channels,
-        target_block_frames,
-        energy_candidate_blocks);
-
-    // Energy of target frame.
-    multi_channel_dot_product(
-        target_block, 0,
-        target_block, 0,
-        channels,
-        target_block_frames, energy_target_block);
-
     int optimal_index = decimated_search(
         search_decimation, exclude_interval,
         target_block, target_block_frames,
         search_block, search_block_frames,
-        channels,
-        energy_target_block,
-        energy_candidate_blocks);
+        channels);
 
     int lim_low = MPMAX(0, optimal_index - search_decimation);
     int lim_high = MPMIN(num_candidate_blocks - 1,
@@ -402,8 +200,7 @@ static int compute_optimal_index(
         lim_low, lim_high, exclude_interval,
         target_block, target_block_frames,
         search_block, search_block_frames,
-        channels,
-        energy_target_block, energy_candidate_blocks);
+        channels);
 }
 
 static void peek_buffer(struct mp_scaletempo2 *p,
@@ -591,7 +388,6 @@ static void get_optimal_block(struct mp_scaletempo2 *p)
         optimal_index = compute_optimal_index(
             p->search_block, p->search_block_size,
             p->target_block, p->ola_window_size,
-            p->energy_candidate_blocks,
             p->channels,
             exclude_iterval);
 
@@ -779,7 +575,6 @@ void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)
     free(p->search_block);
     free(p->target_block);
     free(p->input_buffer);
-    free(p->energy_candidate_blocks);
 }
 
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
@@ -867,7 +662,4 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->input_buffer_frames = 0;
     p->input_buffer_final_frames = 0;
     p->input_buffer_added_silence = 0;
-
-    p->energy_candidate_blocks = realloc(p->energy_candidate_blocks,
-        sizeof(float) * p->channels * p->num_candidate_blocks);
 }
