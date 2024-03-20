@@ -77,7 +77,7 @@ static void deint_process(struct mp_filter *f)
     char *field_parity;
     switch (opts->field_parity) {
     case MP_FIELD_PARITY_TFF:
-        field_parity = "tff"; 
+        field_parity = "tff";
         break;
     case MP_FIELD_PARITY_BFF:
         field_parity = "bff";
@@ -88,7 +88,7 @@ static void deint_process(struct mp_filter *f)
 
     bool has_filter = true;
     if (img->imgfmt == IMGFMT_VDPAU) {
-        char *args[] = {"deint", "yes", 
+        char *args[] = {"deint", "yes",
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vdpaupp", args);
@@ -108,7 +108,7 @@ static void deint_process(struct mp_filter *f)
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_vulkan", args);
     } else if (img->imgfmt == IMGFMT_VAAPI) {
         char *args[] = {"deint", "motion-adaptive",
-                        "interlaced-only", "yes", 
+                        "interlaced-only", "yes",
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vavpp", args);
