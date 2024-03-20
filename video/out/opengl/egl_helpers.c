@@ -203,7 +203,8 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     }
 
     if (!egl_ctx) {
-        MP_MSG(ctx, msgl, "Could not create EGL context for %s!\n", name);
+        MP_MSG(ctx, msgl, "Could not create EGL context for %s (error=%d)!\n",
+               name, eglGetError());
         return false;
     }
 
