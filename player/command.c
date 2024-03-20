@@ -4100,7 +4100,7 @@ static const struct m_property mp_properties_base[] = {
     // Subs
     {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
     {"secondary-sid", property_switch_track,
-     .priv = (void *)(const int[]){1, STREAM_SUB}},
+        .priv = (void *)(const int[]){1, STREAM_SUB}},
     {"sub-delay", mp_property_sub_delay, .priv = (void *)&(const int){0}},
     {"secondary-sub-delay", mp_property_sub_delay,
         .priv = (void *)&(const int){1}},
@@ -4732,9 +4732,9 @@ static void cmd_overlay_add(void *pcmd)
     int dw = cmd->args[9].v.i, dh = cmd->args[10].v.i;
 
     if (dw <= 0)
-      dw = w;
+        dw = w;
     if (dh <= 0)
-      dh = h;
+        dh = h;
     if (strcmp(fmt, "bgra") != 0) {
         MP_ERR(mpctx, "overlay-add: unsupported OSD format '%s'\n", fmt);
         goto error;

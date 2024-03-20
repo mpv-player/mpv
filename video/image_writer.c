@@ -220,7 +220,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     }
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
-     print_open_fail:
+    print_open_fail:
         MP_ERR(ctx, "Could not open libavcodec encoder for saving images\n");
         goto error_exit;
     }
@@ -260,11 +260,11 @@ error_exit:
 
 static void write_jpeg_error_exit(j_common_ptr cinfo)
 {
-  // NOTE: do not write error message, too much effort to connect the libjpeg
-  //       log callbacks with mplayer's log function mp_msp()
+    // NOTE: do not write error message, too much effort to connect the libjpeg
+    //       log callbacks with mplayer's log function mp_msp()
 
-  // Return control to the setjmp point
-  longjmp(*(jmp_buf*)cinfo->client_data, 1);
+    // Return control to the setjmp point
+    longjmp(*(jmp_buf*)cinfo->client_data, 1);
 }
 
 static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
