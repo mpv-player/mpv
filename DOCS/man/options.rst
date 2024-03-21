@@ -4071,17 +4071,18 @@ Demuxer
 Input
 -----
 
-``--native-keyrepeat``
+``--native-keyrepeat=<yes|no>``
     Use system settings for keyrepeat delay and rate, instead of
-    ``--input-ar-delay`` and ``--input-ar-rate``. (Whether this applies
-    depends on the VO backend and how it handles keyboard input. Does not
-    apply to terminal input.)
+    ``--input-ar-delay`` and ``--input-ar-rate`` (default: no).
+    Whether this applies depends on the VO backend and how it handles
+    keyboard input. Does not apply to terminal input.
 
 ``--input-ar-delay``
-    Delay in milliseconds before we start to autorepeat a key (0 to disable).
+    Delay in milliseconds before we start to autorepeat a key (default: 200).
+    Set it to 0 to disable.
 
 ``--input-ar-rate``
-    Number of key presses to generate per second on autorepeat.
+    Number of key presses to generate per second on autorepeat (default: 40).
 
 ``--input-conf=<filename>``
     Specify input configuration file other than the default location in the mpv
