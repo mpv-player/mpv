@@ -79,8 +79,6 @@ struct cmd_bind_section {
 
 #define MP_MAX_SOURCES 10
 
-#define MAX_ACTIVE_SECTIONS 50
-
 struct active_section {
     char *name;
     int flags;
@@ -142,7 +140,7 @@ struct input_ctx {
     int num_sections;
 
     // List currently active command sections
-    struct active_section active_sections[MAX_ACTIVE_SECTIONS];
+    struct active_section *active_sections;
     int num_active_sections;
 
     unsigned int mouse_event_counter;
@@ -1017,20 +1015,16 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 
     MP_TRACE(ictx, "enable section '%s'\n", name);
 
-    if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
-        int top = ictx->num_active_sections;
-        if (!(flags & MP_INPUT_ON_TOP)) {
-            // insert before the first top entry
-            for (top = 0; top < ictx->num_active_sections; top++) {
-                if (ictx->active_sections[top].flags & MP_INPUT_ON_TOP)
-                    break;
-            }
-            for (int n = ictx->num_active_sections; n > top; n--)
-                ictx->active_sections[n] = ictx->active_sections[n - 1];
+    int top = ictx->num_active_sections;
+    if (!(flags & MP_INPUT_ON_TOP)) {
+        // insert before the first top entry
+        for (top = 0; top < ictx->num_active_sections; top++) {
+            if (ictx->active_sections[top].flags & MP_INPUT_ON_TOP)
+                break;
         }
-        ictx->active_sections[top] = (struct active_section){name, flags};
-        ictx->num_active_sections++;
     }
+    MP_TARRAY_INSERT_AT(ictx, ictx->active_sections, ictx->num_active_sections,
+                        top, (struct active_section){name, flags});
 
     MP_TRACE(ictx, "active section stack:\n");
     for (int n = 0; n < ictx->num_active_sections; n++) {
@@ -1327,6 +1321,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
         .opts_cache = m_config_cache_alloc(ictx, global, &input_config),
         .wakeup_cb = wakeup_cb,
         .wakeup_ctx = wakeup_ctx,
+        .active_sections = talloc_array(ictx, struct active_section, 0),
     };
 
     ictx->opts = ictx->opts_cache->opts;
