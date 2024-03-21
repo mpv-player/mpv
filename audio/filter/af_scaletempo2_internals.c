@@ -93,15 +93,15 @@ static void multi_channel_moving_block_energies(
 }
 
 static float multi_channel_similarity_measure(
-    const float* dot_prod_a_b,
-    const float* energy_a, const float* energy_b,
+    const float* dot_prod,
+    const float* energy_target, const float* energy_candidate,
     int channels)
 {
     const float epsilon = 1e-12f;
     float similarity_measure = 0.0f;
     for (int n = 0; n < channels; ++n) {
-        similarity_measure += dot_prod_a_b[n]
-            / sqrtf(energy_a[n] * energy_b[n] + epsilon);
+        similarity_measure += dot_prod[n] * energy_target[n]
+            / sqrtf(energy_target[n] * energy_candidate[n] + epsilon);
     }
     return similarity_measure;
 }
