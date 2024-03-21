@@ -68,7 +68,7 @@ struct vo_tct_opts {
 
 struct lut_item {
     char str[4];
-    int width;
+    uint8_t width;
 };
 
 struct priv {
@@ -80,8 +80,8 @@ struct priv {
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_sws_context *sws;
-    struct lut_item lut[256];
     bstr frame_buf;
+    struct lut_item lut[256];
 };
 
 // Convert RGB24 to xterm-256 8-bit value
@@ -316,10 +316,15 @@ static int preinit(struct vo *vo)
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
-    for (int i = 0; i < 256; ++i) {
-        char buff[8];
-        p->lut[i].width = snprintf(buff, sizeof(buff), ";%d", i);
-        memcpy(p->lut[i].str, buff, 4); // some strings may not end on a null byte, but that's ok.
+    for (int i = 0; i < MP_ARRAY_SIZE(p->lut); ++i) {
+        char* out = p->lut[i].str;
+        *out++ = ';';
+        if (i >= 100)
+            *out++ = '0' + (i / 100);
+        if (i >= 10)
+            *out++ = '0' + ((i / 10) % 10);
+        *out++ = '0' + (i % 10);
+        p->lut[i].width = out - p->lut[i].str;
     }
 
     WRITE_STR(TERM_ESC_HIDE_CURSOR);
