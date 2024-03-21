@@ -32,7 +32,7 @@ int mp_console_vfprintf(void *wstream, const char *format, va_list args)
     return 0;
 }
 
-int mp_console_fputs(void *wstream, bstr str)
+int mp_console_write(void *wstream, bstr str)
 {
     return 0;
 }
