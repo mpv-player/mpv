@@ -35,6 +35,9 @@ UP      Scroll one line up
 DOWN    Scroll one line down
 ====   ==================
 
+Page 4 also binds ``/`` to search for input bindings by typing part of a binding
+or command.
+
 Configuration
 -------------
 
@@ -62,6 +65,8 @@ Configurable Options
     Default: UP
 ``key_scroll_down``
     Default: DOWN
+``key_scroll_search``
+    Default: /
 ``scroll_lines``
     Default: 1
 
