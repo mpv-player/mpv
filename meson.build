@@ -1172,7 +1172,7 @@ if features['d3d11'] or features['egl-angle-win32']
     sources += files('video/out/gpu/d3d11_helpers.c')
 endif
 
-egl = dependency('egl', version: '> 1.4.0', required: get_option('egl'))
+egl = dependency('egl', version: '>= 1.4.0', required: get_option('egl'))
 features += {'egl': egl.found() and gl_allowed}
 if features['egl']
     dependencies += egl
