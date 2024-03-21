@@ -77,7 +77,8 @@ static char *stripext(void *talloc_ctx, const char *s)
 }
 
 static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
-                             const char *filename, struct image_writer_opts *opts)
+                             const char *filename, struct image_writer_opts *opts,
+                             bool overwrite)
 {
     struct MPContext *mpctx = cmd->mpctx;
     struct image_writer_opts *gopts = mpctx->opts->screenshot_image_opts;
@@ -88,7 +89,7 @@ static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
     mp_core_unlock(mpctx);
 
     bool ok = img && write_image(img, &opts_copy, filename, mpctx->global,
-                                 mpctx->screenshot_ctx->log);
+                                 mpctx->screenshot_ctx->log, overwrite);
 
     mp_core_lock(mpctx);
 
@@ -496,7 +497,7 @@ void cmd_screenshot_to_file(void *p)
         cmd->success = false;
         return;
     }
-    cmd->success = write_screenshot(cmd, image, filename, &opts);
+    cmd->success = write_screenshot(cmd, image, filename, &opts, true);
     talloc_free(image);
 }
 
@@ -537,7 +538,7 @@ void cmd_screenshot(void *p)
     if (image) {
         char *filename = gen_fname(cmd, image_writer_file_ext(opts));
         if (filename) {
-            cmd->success = write_screenshot(cmd, image, filename, NULL);
+            cmd->success = write_screenshot(cmd, image, filename, NULL, false);
             if (cmd->success) {
                 node_init(res, MPV_FORMAT_NODE_MAP, NULL);
                 node_map_add_string(res, "filename", filename);

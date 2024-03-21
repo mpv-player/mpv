@@ -52,7 +52,7 @@ endif
 
 if features['win32-desktop']
     test_utils_deps += cc.find_library('imm32')
-    test_utils_deps += cc.find_library('winmm')
+    test_utils_deps += cc.find_library('ntdll')
 endif
 test_utils_objects = libmpv.extract_objects(test_utils_files)
 test_utils = static_library('test-utils', 'test_utils.c', include_directories: incdir,
@@ -105,6 +105,9 @@ test('linked-list', linked_list)
 
 timer = executable('timer', files('timer.c'), include_directories: incdir, link_with: test_utils)
 test('timer', timer)
+
+format = executable('format', files('format.c'), include_directories: incdir, link_with: test_utils)
+test('format', format)
 
 paths_objects = libmpv.extract_objects('options/path.c', path_source)
 paths = executable('paths', 'paths.c', include_directories: incdir,

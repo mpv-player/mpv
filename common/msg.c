@@ -228,21 +228,15 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
         bstr up_clear = bstr0("\033[A\033[K");
         for (int i = 1; i < root->status_lines; ++i)
             bstr_xappend(root, out, up_clear);
-        // Reposition cursor after last message
-        line_skip = (new_lines ? new_lines : root->blank_lines) - root->status_lines;
-        line_skip = MPMIN(root->blank_lines - root->status_lines, line_skip);
-        if (line_skip)
-            bstr_xappend_asprintf(root, out, "\033[%dA", line_skip);
-    } else if (new_lines) {
-        line_skip = new_lines - root->blank_lines;
+        assert(root->status_lines > 0 && root->blank_lines >= root->status_lines);
+        line_skip = root->blank_lines - root->status_lines;
     }
 
-    if (line_skip < 0) {
-        // Reposition cursor to keep status line at the same line
-        line_skip = MPMIN(root->blank_lines, -line_skip);
-        if (line_skip)
-            bstr_xappend_asprintf(root, out, "\033[%dB", line_skip);
-    }
+    if (new_lines)
+        line_skip -= MPMAX(0, root->blank_lines - new_lines);
+
+    if (line_skip)
+        bstr_xappend_asprintf(root, out, line_skip > 0 ? "\033[%dA" : "\033[%dB", abs(line_skip));
 
     root->blank_lines = MPMAX(0, root->blank_lines - term_lines);
     root->status_lines = new_lines;
@@ -275,6 +269,7 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
     }
 
 done:
+    log->root->status_line.len = 0;
     mp_mutex_unlock(&log->root->lock);
 }
 
@@ -283,7 +278,7 @@ void mp_msg_set_term_title(struct mp_log *log, const char *title)
     if (log->root && title) {
         // Lock because printf to terminal is not necessarily atomic.
         mp_mutex_lock(&log->root->lock);
-        fprintf(stderr, "\e]0;%s\007", title);
+        fprintf(stderr, "\033]0;%s\007", title);
         mp_mutex_unlock(&log->root->lock);
     }
 }
@@ -299,15 +294,18 @@ bool mp_msg_has_status_line(struct mpv_global *global)
 
 static void set_term_color(void *talloc_ctx, bstr *text, int c)
 {
-    return c == -1 ? bstr_xappend(talloc_ctx, text, bstr0("\033[0m"))
-                   : bstr_xappend_asprintf(talloc_ctx, text,
-                                           "\033[%d;3%dm", c >> 3, c & 7);
+    if (c == -1) {
+        bstr_xappend(talloc_ctx, text, bstr0("\033[0m"));
+        return;
+    }
+
+    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d;3%dm", c >> 3, c & 7);
 }
 
 static void set_msg_color(void *talloc_ctx, bstr *text, int lev)
 {
     static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, 8, -1};
-    return set_term_color(talloc_ctx, text, v_colors[lev]);
+    set_term_color(talloc_ctx, text, v_colors[lev]);
 }
 
 static void pretty_print_module(struct mp_log_root *root, bstr *text,

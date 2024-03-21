@@ -57,7 +57,7 @@ int check_cu(const struct ra_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
-const static cuda_interop_init interop_inits[] = {
+static const cuda_interop_init interop_inits[] = {
 #if HAVE_GL
     cuda_gl_init,
 #endif

@@ -50,7 +50,7 @@
 #define AC3_MAX_CHANNELS 6
 #define AC3_MAX_CODED_FRAME_SIZE 3840
 #define AC3_FRAME_SIZE (6  * 256)
-const static uint16_t ac3_bitrate_tab[19] = {
+static const uint16_t ac3_bitrate_tab[19] = {
     32, 40, 48, 56, 64, 80, 96, 112, 128,
     160, 192, 224, 256, 320, 384, 448, 512, 576, 640
 };
@@ -195,9 +195,6 @@ static void process(struct mp_filter *f)
         case MP_FRAME_AUDIO:
             TA_FREEP(&s->in_frame);
             s->in_frame = input.data;
-            frame = mp_frame_to_av(input, NULL);
-            if (!frame)
-                goto error;
             if (mp_aframe_get_channels(s->in_frame) < s->opts->min_channel_num) {
                 // Just pass it through.
                 s->in_frame = NULL;
@@ -208,6 +205,9 @@ static void process(struct mp_filter *f)
                 if (!reinit(f))
                     goto error;
             }
+            frame = mp_frame_to_av(input, NULL);
+            if (!frame)
+                goto error;
             break;
         default: goto error; // unexpected packet type
         }

@@ -379,7 +379,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             }
             break;
         case SUBBITMAP_LIBASS:
-            if (src && item->video_color_space)
+            if (src && item->video_color_space && !pl_color_space_is_hdr(&src->params.color))
                 ol->color = src->params.color;
             ol->mode = PL_OVERLAY_MONOCHROME;
             ol->repr.alpha = PL_ALPHA_INDEPENDENT;
@@ -841,7 +841,11 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     int dither_depth = opts->dither_depth;
     if (dither_depth == 0) {
         struct ra_swapchain *sw = p->ra_ctx->swapchain;
-        dither_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
+        if (sw->fns->color_depth) {
+            dither_depth = sw->fns->color_depth(sw);
+        } else if (!pl_color_transfer_is_hdr(target->color.transfer)) {
+            dither_depth = 8;
+        }
     }
     if (dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
@@ -1002,14 +1006,15 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
             // Advance the queue state to the current PTS to discard unused frames
-            pl_queue_update(p->queue, NULL, pl_queue_params(
+            struct pl_queue_params qparams = *pl_queue_params(
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
                 .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
+            );
 #if PL_API_VER >= 340
-                .drift_compensation = 0,
+            qparams.drift_compensation = 0;
 #endif
-            ));
+            pl_queue_update(p->queue, NULL, &qparams);
         }
         return;
     }
@@ -1035,10 +1040,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             .interpolation_threshold = opts->interpolation_threshold,
-#if PL_API_VER >= 340
-            .drift_compensation = 0,
-#endif
         );
+#if PL_API_VER >= 340
+        qparams.drift_compensation = 0;
+#endif
 
         // Depending on the vsync ratio, we may be up to half of the vsync
         // duration before the current frame time. This works fine because
@@ -1295,12 +1300,13 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // Retrieve the current frame from the frame queue
     struct pl_frame_mix mix;
     enum pl_queue_status status;
-    status = pl_queue_update(p->queue, &mix, pl_queue_params(
+    struct pl_queue_params qparams = *pl_queue_params(
         .pts = p->last_pts,
+    );
 #if PL_API_VER >= 340
-        .drift_compensation = 0,
+        qparams.drift_compensation = 0;
 #endif
-    ));
+    status = pl_queue_update(p->queue, &mix, &qparams);
     assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
         MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");

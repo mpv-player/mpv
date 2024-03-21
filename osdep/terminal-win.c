@@ -53,20 +53,17 @@ static void attempt_native_out_vt(HANDLE hOut, DWORD basemode)
         SetConsoleMode(hOut, basemode);
 }
 
-static bool is_native_out_vt(HANDLE hOut)
-{
-    DWORD cmode;
-    return GetConsoleMode(hOut, &cmode) &&
-           (cmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) &&
-           !(cmode & DISABLE_NEWLINE_AUTO_RETURN);
-}
 
+#define hSTDIN GetStdHandle(STD_INPUT_HANDLE)
 #define hSTDOUT GetStdHandle(STD_OUTPUT_HANDLE)
 #define hSTDERR GetStdHandle(STD_ERROR_HANDLE)
 
 #define FOREGROUND_ALL (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE)
 #define BACKGROUND_ALL (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE)
 
+static bool is_console[STDERR_FILENO + 1];
+static bool is_vt[STDERR_FILENO + 1];
+static bool utf8_output;
 static short stdoutAttrs = 0;  // copied from the screen buffer on init
 static const unsigned char ansi2win32[8] = {
     0,
@@ -93,6 +90,23 @@ static bool running;
 static HANDLE death;
 static mp_thread input_thread;
 static struct input_ctx *input_ctx;
+
+static bool is_native_out_vt_internal(HANDLE hOut)
+{
+    DWORD cmode;
+    return GetConsoleMode(hOut, &cmode) &&
+           (cmode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) &&
+           !(cmode & DISABLE_NEWLINE_AUTO_RETURN);
+}
+
+static bool is_native_out_vt(HANDLE hOut)
+{
+    if (hOut == hSTDOUT)
+        return is_vt[STDOUT_FILENO];
+    if (hOut == hSTDERR)
+        return is_vt[STDERR_FILENO];
+    return is_native_out_vt_internal(hOut);
+}
 
 void terminal_get_size(int *w, int *h)
 {
@@ -191,6 +205,12 @@ void terminal_setup_getch(struct input_ctx *ictx)
     }
 }
 
+DWORD tmp_buffers_key = FLS_OUT_OF_INDEXES;
+struct tmp_buffers {
+    bstr write_console_buf;
+    wchar_t *write_console_wbuf;
+};
+
 void terminal_uninit(void)
 {
     if (running) {
@@ -199,6 +219,7 @@ void terminal_uninit(void)
         input_ctx = NULL;
         running = false;
     }
+    FlsFree(tmp_buffers_key);
 }
 
 bool terminal_in_background(void)
@@ -206,16 +227,53 @@ bool terminal_in_background(void)
     return false;
 }
 
-void mp_write_console_ansi(HANDLE wstream, char *buf)
+int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
 {
-    wchar_t *wbuf = mp_from_utf8(NULL, buf);
-    wchar_t *pos = wbuf;
+    struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
+    bool free_buf = false;
+    if (!buffers) {
+        buffers = talloc_zero(NULL, struct tmp_buffers);
+        free_buf = !FlsSetValue(tmp_buffers_key, buffers);
+    }
+
+    buffers->write_console_buf.len = 0;
+    bstr_xappend_vasprintf(buffers, &buffers->write_console_buf, format, args);
+
+    int ret = mp_console_fputs(wstream, buffers->write_console_buf);
+
+    if (free_buf)
+        talloc_free(buffers);
+
+    return ret;
+}
+
+int mp_console_fputs(HANDLE wstream, bstr str)
+{
+    struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
+    bool free_buf = false;
+    if (!buffers) {
+        buffers = talloc_zero(NULL, struct tmp_buffers);
+        free_buf = !FlsSetValue(tmp_buffers_key, buffers);
+    }
+
+    bool vt = is_native_out_vt(wstream);
+    int wlen = 0;
+    wchar_t *pos = NULL;
+    if (!utf8_output || !vt) {
+        wlen = bstr_to_wchar(buffers, str, &buffers->write_console_wbuf);
+        pos = buffers->write_console_wbuf;
+    }
+
+    if (vt) {
+        if (utf8_output) {
+            WriteConsoleA(wstream, str.start, str.len, NULL, NULL);
+        } else {
+            WriteConsoleW(wstream, pos, wlen, NULL, NULL);
+        }
+        goto done;
+    }
 
     while (*pos) {
-        if (is_native_out_vt(wstream)) {
-            WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
-            break;
-        }
         wchar_t *next = wcschr(pos, '\033');
         if (!next) {
             WriteConsoleW(wstream, pos, wcslen(pos), NULL, NULL);
@@ -352,12 +410,29 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
         pos = next;
     }
 
-    talloc_free(wbuf);
+done:;
+    int ret = buffers->write_console_buf.len;
+
+    if (free_buf)
+        talloc_free(buffers);
+
+    return ret;
 }
 
 static bool is_a_console(HANDLE h)
 {
     return GetConsoleMode(h, &(DWORD){0});
+}
+
+bool mp_check_console(void *handle)
+{
+    if (handle == hSTDIN)
+        return is_console[STDIN_FILENO];
+    if (handle == hSTDOUT)
+        return is_console[STDOUT_FILENO];
+    if (handle == hSTDERR)
+        return is_console[STDERR_FILENO];
+    return is_a_console(handle);
 }
 
 static void reopen_console_handle(DWORD std, int fd, FILE *stream)
@@ -369,7 +444,6 @@ static void reopen_console_handle(DWORD std, int fd, FILE *stream)
         } else {
             freopen("CONOUT$", "wt", stream);
         }
-        setvbuf(stream, NULL, _IONBF, 0);
 
         // Set the low-level FD to the new handle value, since mp_subprocess2
         // callers might rely on low-level FDs being set. Note, with this
@@ -420,6 +494,19 @@ void terminal_init(void)
     cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
     attempt_native_out_vt(hSTDOUT, cmode);
     attempt_native_out_vt(hSTDERR, cmode);
+
+    // Init for mp_check_console(), this never changes during runtime
+    is_console[STDIN_FILENO] = is_a_console(hSTDIN);
+    is_console[STDOUT_FILENO] = is_a_console(hSTDOUT);
+    is_console[STDERR_FILENO] = is_a_console(hSTDERR);
+
+    // Init for is_native_out_vt(), this is never disabled/changed during runtime
+    is_vt[STDOUT_FILENO] = is_native_out_vt_internal(hSTDOUT);
+    is_vt[STDERR_FILENO] = is_native_out_vt_internal(hSTDERR);
+
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
+
+    tmp_buffers_key = FlsAlloc((PFLS_CALLBACK_FUNCTION)talloc_free);
+    utf8_output = SetConsoleOutputCP(CP_UTF8);
 }

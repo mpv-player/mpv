@@ -30,9 +30,6 @@
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
 
-#if HAVE_MACOS_TOUCHBAR
-#import "osdep/mac/touchbar.h"
-#endif
 #if HAVE_SWIFT
 #include "osdep/mac/swift.h"
 #endif
@@ -161,14 +158,7 @@ static const char mac_icon[] =
 #if HAVE_MACOS_TOUCHBAR
 - (NSTouchBar *)makeTouchBar
 {
-    TouchBar *tBar = [[TouchBar alloc] init];
-    tBar.delegate = tBar;
-    tBar.customizationIdentifier = customID;
-    tBar.defaultItemIdentifiers = @[play, previousItem, nextItem, seekBar];
-    tBar.customizationAllowedItemIdentifiers = @[play, seekBar, previousItem,
-        nextItem, previousChapter, nextChapter, cycleAudio, cycleSubtitle,
-        currentPosition, timeLeft];
-    return tBar;
+    return [[TouchBar alloc] init];
 }
 #endif
 
@@ -191,12 +181,12 @@ static const char mac_icon[] =
 #endif
 }
 
-+ (const struct m_sub_options *)getMacOSConf
++ (const struct m_sub_options *)getMacConf
 {
     return &macos_conf;
 }
 
-+ (const struct m_sub_options *)getVoSubConf
++ (const struct m_sub_options *)getVoConf
 {
     return &vo_sub_opts;
 }

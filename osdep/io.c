@@ -189,7 +189,7 @@ static bool get_file_ids_win8(HANDLE h, dev_t *dev, ino_t *ino)
     // SDK, but we can ignore that by just memcpying it. This will also
     // truncate the file ID on 32-bit Windows, which doesn't support __int128.
     // 128-bit file IDs are only used for ReFS, so that should be okay.
-    assert(sizeof(*ino) <= sizeof(ii.FileId));
+    static_assert(sizeof(*ino) <= sizeof(ii.FileId), "");
     memcpy(ino, &ii.FileId, sizeof(*ino));
     return true;
 }
@@ -298,62 +298,45 @@ int mp_fstat(int fd, struct mp_stat *buf)
     return hstat(h, buf);
 }
 
-#if HAVE_UWP
-static int mp_vfprintf(FILE *stream, const char *format, va_list args)
+static inline HANDLE get_handle(FILE *stream)
 {
-    return vfprintf(stream, format, args);
-}
-#else
-static int mp_check_console(HANDLE wstream)
-{
-    if (wstream != INVALID_HANDLE_VALUE) {
-        unsigned int filetype = GetFileType(wstream);
-
-        if (!((filetype == FILE_TYPE_UNKNOWN) &&
-            (GetLastError() != ERROR_SUCCESS)))
-        {
-            filetype &= ~(FILE_TYPE_REMOTE);
-
-            if (filetype == FILE_TYPE_CHAR) {
-                DWORD ConsoleMode;
-                int ret = GetConsoleMode(wstream, &ConsoleMode);
-
-                if (!(!ret && (GetLastError() == ERROR_INVALID_HANDLE))) {
-                    // This seems to be a console
-                    return 1;
-                }
-            }
-        }
-    }
-
-    return 0;
-}
-
-static int mp_vfprintf(FILE *stream, const char *format, va_list args)
-{
-    int done = 0;
-
     HANDLE wstream = INVALID_HANDLE_VALUE;
 
     if (stream == stdout || stream == stderr) {
         wstream = GetStdHandle(stream == stdout ?
                                STD_OUTPUT_HANDLE : STD_ERROR_HANDLE);
     }
+    return wstream;
+}
 
-    if (mp_check_console(wstream)) {
-        size_t len = vsnprintf(NULL, 0, format, args) + 1;
-        char *buf = talloc_array(NULL, char, len);
+int mp_fputs(const char *str, FILE *stream)
+{
+    HANDLE wstream = get_handle(stream);
+    if (mp_check_console(wstream))
+        return mp_console_fputs(wstream, bstr0(str));
 
-        if (buf) {
-            done = vsnprintf(buf, len, format, args);
-            mp_write_console_ansi(wstream, buf);
-        }
-        talloc_free(buf);
-    } else {
-        done = vfprintf(stream, format, args);
-    }
+    return fputs(str, stream);
+}
 
-    return done;
+int mp_puts(const char *str)
+{
+    return mp_fputs(str, stdout);
+}
+
+#if HAVE_UWP
+static int mp_vfprintf(FILE *stream, const char *format, va_list args)
+{
+    return vfprintf(stream, format, args);
+}
+#else
+
+static int mp_vfprintf(FILE *stream, const char *format, va_list args)
+{
+    HANDLE wstream = get_handle(stream);
+    if (mp_check_console(wstream))
+        return mp_console_vfprintf(wstream, format, args);
+
+    return vfprintf(stream, format, args);
 }
 #endif
 
@@ -528,7 +511,8 @@ FILE *mp_fopen(const char *filename, const char *mode)
     for (const char *pos = mode + 1; *pos; pos++) {
         switch (*pos) {
         case '+': rwmode = _O_RDWR;  break;
-        // Ignore unknown flags
+        case 'x': oflags |= _O_EXCL; break;
+        // Ignore unknown flags (glibc does too)
         default: break;
         }
     }

@@ -48,6 +48,12 @@ enum mp_property_action {
     //  arg: char**
     M_PROPERTY_PRINT,
 
+    // Get human readable fixed length string representing the current value.
+    // If unimplemented, the property wrapper uses the property type as
+    // fallback.
+    //  arg: char**
+    M_PROPERTY_FIXED_LEN_PRINT,
+
     // Like M_PROPERTY_GET_TYPE, but get a type that is compatible to the real
     // type, but reflect practical limits, such as runtime-available values.
     // This is mostly used for "UI" related things.

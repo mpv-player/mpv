@@ -39,7 +39,7 @@ typedef HANDLE             mp_thread;
 typedef DWORD              mp_thread_id;
 
 #define MP_STATIC_COND_INITIALIZER CONDITION_VARIABLE_INIT
-#define MP_STATIC_MUTEX_INITIALIZER (mp_mutex){ .srw = SRWLOCK_INIT }
+#define MP_STATIC_MUTEX_INITIALIZER { .srw = SRWLOCK_INIT }
 #define MP_STATIC_ONCE_INITIALIZER INIT_ONCE_STATIC_INIT
 
 static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_type mtype)
@@ -115,7 +115,7 @@ static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t time
     timeout = MPCLAMP(timeout, 0, MP_TIME_MS_TO_NS(INFINITE)) / MP_TIME_MS_TO_NS(1);
 
     int ret = 0;
-    int hrt = mp_start_hires_timers(timeout);
+    int64_t hrt = mp_start_hires_timers(MP_TIME_MS_TO_NS(timeout));
     BOOL bRet;
 
     if (mutex->use_cs) {

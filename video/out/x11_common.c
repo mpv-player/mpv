@@ -1161,11 +1161,6 @@ static void vo_x11_check_net_wm_state_change(struct vo *vo)
             XFree(elems);
         }
 
-        if (opts->window_maximized && !is_maximized && x11->geometry_change) {
-            x11->geometry_change = false;
-            vo_x11_config_vo_window(vo);
-        }
-
         opts->window_minimized = is_minimized;
         x11->hidden = is_minimized;
         m_config_cache_write_opt(x11->opts_cache, &opts->window_minimized);
@@ -1726,12 +1721,12 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     vo_x11_xembed_update(x11, XEMBED_MAPPED);
 }
 
-static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc)
+static void vo_x11_highlevel_resize(struct vo *vo, struct mp_rect rc, bool force)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct mp_vo_opts *opts = x11->opts;
 
-    bool reset_pos = opts->force_window_position;
+    bool reset_pos = opts->force_window_position || force;
     if (reset_pos) {
         x11->nofsrc = rc;
     } else {
@@ -1801,10 +1796,6 @@ void vo_x11_config_vo_window(struct vo *vo)
 
     assert(x11->window);
 
-    // Don't attempt to change autofit/geometry on maximized windows.
-    if (x11->geometry_change && opts->window_maximized)
-        return;
-
     vo_x11_update_screeninfo(vo);
 
     struct vo_win_geometry geo;
@@ -1820,15 +1811,19 @@ void vo_x11_config_vo_window(struct vo *vo)
 
     bool reset_size = (x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc)) &&
                       (opts->auto_window_resize || x11->geometry_change);
+    reset_size |= (x11->old_x != rc.x0 || x11->old_y != rc.y0) &&
+                  (x11->geometry_change);
 
     x11->old_dw = RC_W(rc);
     x11->old_dh = RC_H(rc);
+    x11->old_x = rc.x0;
+    x11->old_y = rc.y0;
 
     if (x11->window_hidden) {
         x11->nofsrc = rc;
         vo_x11_map_window(vo, rc);
     } else if (reset_size) {
-        vo_x11_highlevel_resize(vo, rc);
+        vo_x11_highlevel_resize(vo, rc, x11->geometry_change);
     }
 
     x11->geometry_change = false;
@@ -2094,6 +2089,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
+                if (opts->window_maximized && !opts->fullscreen) {
+                    x11->opts->window_maximized = false;
+                    m_config_cache_write_opt(x11->opts_cache,
+                            &x11->opts->window_maximized);
+                    vo_x11_maximize(vo);
+                }
                 vo_x11_set_geometry(vo);
             }
         }
@@ -2122,7 +2123,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                     &x11->opts->window_maximized);
             vo_x11_maximize(vo);
         }
-        vo_x11_highlevel_resize(vo, rc);
+        vo_x11_highlevel_resize(vo, rc, false);
         if (!x11->fs) { // guess new window size, instead of waiting for X
             x11->winrc.x1 = x11->winrc.x0 + w;
             x11->winrc.y1 = x11->winrc.y0 + h;

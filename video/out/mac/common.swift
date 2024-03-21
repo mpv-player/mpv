@@ -19,9 +19,10 @@ import Cocoa
 import IOKit.pwr_mgt
 
 class Common: NSObject {
-    var mpv: MPVHelper?
+    var option: OptionHelper
     var input: InputHelper?
     var log: LogHelper
+    var vo: UnsafeMutablePointer<vo>?
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
     @objc var window: Window?
@@ -47,39 +48,26 @@ class Common: NSObject {
         didSet { if let window = window { window.title = title } }
     }
 
-    init(_ mpLog: OpaquePointer?) {
+    init(_ opt: OptionHelper, _ mpLog: OpaquePointer?) {
+        option = opt
         log = LogHelper(mpLog)
     }
 
     func initMisc(_ vo: UnsafeMutablePointer<vo>) {
-        guard let mpv = mpv else {
-            log.sendError("Something went wrong, no MPVHelper was initialized")
-            exit(1)
-        }
-
         startDisplayLink(vo)
         initLightSensor()
         addDisplayReconfigureObserver()
         addAppNotifications()
-        mpv.setMacOptionCallback(macOptsWakeupCallback, context: self)
+        option.setMacOptionCallback(macOptsWakeupCallback, context: self)
     }
 
     func initApp() {
-        guard let mpv = mpv else {
-            log.sendError("Something went wrong, no MPVHelper was initialized")
-            exit(1)
-        }
-
         var policy: NSApplication.ActivationPolicy = .regular
-        switch mpv.macOpts.macos_app_activation_policy {
-        case 0:
-            policy = .regular
-        case 1:
-            policy = .accessory
-        case 2:
-            policy = .prohibited
-        default:
-            break
+        switch option.mac.macos_app_activation_policy {
+        case 0: policy = .regular
+        case 1: policy = .accessory
+        case 2: policy = .prohibited
+        default: break
         }
 
         NSApp.setActivationPolicy(policy)
@@ -87,7 +75,7 @@ class Common: NSObject {
     }
 
     func initWindow(_ vo: UnsafeMutablePointer<vo>, _ previousActiveApp: NSRunningApplication?) {
-        let (mpv, targetScreen, wr) = getInitProperties(vo)
+        let (targetScreen, wr) = getInitProperties(vo)
 
         guard let view = self.view else {
             log.sendError("Something went wrong, no View was initialized")
@@ -100,16 +88,16 @@ class Common: NSObject {
             exit(1)
         }
 
-        window.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
-        window.setOnAllWorkspaces(Bool(mpv.opts.all_workspaces))
-        window.keepAspect = Bool(mpv.opts.keepaspect_window)
+        window.setOnTop(Bool(option.vo.ontop), Int(option.vo.ontop_level))
+        window.setOnAllWorkspaces(Bool(option.vo.all_workspaces))
+        window.keepAspect = Bool(option.vo.keepaspect_window)
         window.title = title
-        window.border = Bool(mpv.opts.border)
+        window.border = Bool(option.vo.border)
 
         titleBar = TitleBar(frame: wr, window: window, common: self)
 
-        let maximized = Bool(mpv.opts.window_maximized)
-        let minimized = Bool(mpv.opts.window_minimized)
+        let maximized = Bool(option.vo.window_maximized)
+        let minimized = Bool(option.vo.window_minimized)
         window.isRestorable = false
         window.isReleasedWhenClosed = false
         window.setMaximized((minimized || !maximized) ? window.isZoomed : maximized)
@@ -123,16 +111,16 @@ class Common: NSObject {
             window.orderFront(nil)
         }
 
-        NSApp.activate(ignoringOtherApps: mpv.opts.focus_on >= 1)
+        NSApp.activate(ignoringOtherApps: option.vo.focus_on >= 1)
 
         // workaround for macOS 10.15 to refocus the previous App
-        if mpv.opts.focus_on == 0 {
+        if option.vo.focus_on == 0 {
             previousActiveApp?.activate()
         }
     }
 
     func initView(_ vo: UnsafeMutablePointer<vo>, _ layer: CALayer) {
-        let (_, _, wr) = getInitProperties(vo)
+        let (_, wr) = getInitProperties(vo)
 
         view = View(frame: wr, common: self)
         guard let view = self.view else {
@@ -147,7 +135,7 @@ class Common: NSObject {
     }
 
     func initWindowState() {
-        if mpv?.opts.fullscreen ?? false {
+        if option.vo.fullscreen {
             DispatchQueue.main.async {
                 self.window?.toggleFullScreen(nil)
             }
@@ -184,7 +172,7 @@ class Common: NSObject {
         guard let screen = getTargetScreen(forFullscreen: false) ?? NSScreen.main,
               let link = self.link else
         {
-            log.sendWarning("Couldn't start DisplayLink, no MPVHelper, Screen or DisplayLink available")
+            log.sendWarning("Couldn't start DisplayLink, no OptionHelper, Screen or DisplayLink available")
             return
         }
 
@@ -303,7 +291,7 @@ class Common: NSObject {
         lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
         IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
         var n = io_object_t()
-        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, MPVHelper.bridge(obj: self), &n)
+        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, TypeHelper.bridge(obj: self), &n)
         let kr = IOServiceOpen(srv, mach_task_self_, 0, &lightSensor)
         IOObjectRelease(srv)
 
@@ -311,7 +299,7 @@ class Common: NSObject {
             log.sendVerbose("Can't start ambient light sensor connection")
             return
         }
-        lightSensorCallback(MPVHelper.bridge(obj: self), 0, 0, nil)
+        lightSensorCallback(TypeHelper.bridge(obj: self), 0, 0, nil)
     }
 
     func uninitLightSensor() {
@@ -334,11 +322,11 @@ class Common: NSObject {
     }
 
     func addDisplayReconfigureObserver() {
-        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
+        CGDisplayRegisterReconfigurationCallback(reconfigureCallback, TypeHelper.bridge(obj: self))
     }
 
     func removeDisplayReconfigureObserver() {
-        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, MPVHelper.bridge(obj: self))
+        CGDisplayRemoveReconfigurationCallback(reconfigureCallback, TypeHelper.bridge(obj: self))
     }
 
     func addAppNotifications() {
@@ -409,14 +397,9 @@ class Common: NSObject {
     }
 
     func getTargetScreen(forFullscreen fs: Bool) -> NSScreen? {
-        guard let mpv = mpv else {
-            log.sendWarning("Unexpected nil value in getTargetScreen")
-            return nil
-        }
-
-        let screenID = fs ? mpv.opts.fsscreen_id : mpv.opts.screen_id
+        let screenID = fs ? option.vo.fsscreen_id : option.vo.screen_id
         var name: String?
-        if let screenName = fs ? mpv.opts.fsscreen_name : mpv.opts.screen_name {
+        if let screenName = fs ? option.vo.fsscreen_name : option.vo.screen_name {
             name = String(cString: screenName)
         }
         return getScreenBy(id: Int(screenID)) ?? getScreenBy(name: name)
@@ -431,7 +414,7 @@ class Common: NSObject {
     func getWindowGeometry(forScreen screen: NSScreen,
                            videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
         let r = screen.convertRectToBacking(screen.frame)
-        let targetFrame = (mpv?.macOpts.macos_geometry_calculation ?? Int32(FRAME_VISIBLE)) == FRAME_VISIBLE
+        let targetFrame = option.mac.macos_geometry_calculation == FRAME_VISIBLE
             ? screen.visibleFrame : screen.frame
         let rv = screen.convertRectToBacking(targetFrame)
 
@@ -458,11 +441,7 @@ class Common: NSObject {
         return screen.convertRectFromBacking(NSMakeRect(x, y, width, height))
     }
 
-    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (MPVHelper, NSScreen, NSRect) {
-        guard let mpv = mpv else {
-            log.sendError("Something went wrong, no MPVHelper was initialized")
-            exit(1)
-        }
+    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect) {
         guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
             log.sendError("Something went wrong, no Screen was found")
             exit(1)
@@ -470,7 +449,7 @@ class Common: NSObject {
 
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
 
-        return (mpv, targetScreen, wr)
+        return (targetScreen, wr)
     }
 
     // call before initApp, because on macOS +10.15 it changes the active App
@@ -483,11 +462,11 @@ class Common: NSObject {
         events |= ev
         eventsLock.unlock()
 
-        guard let vout = mpv?.vo else {
+        guard let vo = vo else {
             log.sendWarning("vo nil in flagEvents")
             return
         }
-        vo_wakeup(vout)
+        vo_wakeup(vo)
     }
 
     func checkEvents() -> Int {
@@ -515,58 +494,53 @@ class Common: NSObject {
                          request: UInt32,
                          data: UnsafeMutableRawPointer?) -> Int32
     {
-        guard let mpv = mpv else {
-            log.sendWarning("Unexpected nil value in Control Callback")
-            return VO_FALSE
-        }
-
         switch mp_voctrl(request) {
         case VOCTRL_CHECK_EVENTS:
             events.pointee |= Int32(checkEvents())
             return VO_TRUE
         case VOCTRL_VO_OPTS_CHANGED:
             var opt: UnsafeMutableRawPointer?
-            while mpv.nextChangedOption(property: &opt) {
+            while option.nextChangedOption(property: &opt) {
                 switch opt {
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.border):
+                case TypeHelper.toPointer(&option.voPtr.pointee.border):
                     DispatchQueue.main.async {
-                        self.window?.border = Bool(mpv.opts.border)
+                        self.window?.border = Bool(self.option.vo.border)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.fullscreen):
+                case TypeHelper.toPointer(&option.voPtr.pointee.fullscreen):
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.ontop_level):
+                case TypeHelper.toPointer(&option.voPtr.pointee.ontop): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
-                        self.window?.setOnTop(Bool(mpv.opts.ontop), Int(mpv.opts.ontop_level))
+                        self.window?.setOnTop(Bool(self.option.vo.ontop), Int(self.option.vo.ontop_level))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.all_workspaces):
+                case TypeHelper.toPointer(&option.voPtr.pointee.all_workspaces):
                     DispatchQueue.main.async {
-                        self.window?.setOnAllWorkspaces(Bool(mpv.opts.all_workspaces))
+                        self.window?.setOnAllWorkspaces(Bool(self.option.vo.all_workspaces))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.keepaspect_window):
+                case TypeHelper.toPointer(&option.voPtr.pointee.keepaspect_window):
                     DispatchQueue.main.async {
-                        self.window?.keepAspect = Bool(mpv.opts.keepaspect_window)
+                        self.window?.keepAspect = Bool(self.option.vo.keepaspect_window)
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_minimized):
+                case TypeHelper.toPointer(&option.voPtr.pointee.window_minimized):
                     DispatchQueue.main.async {
-                        self.window?.setMinimized(Bool(mpv.opts.window_minimized))
+                        self.window?.setMinimized(Bool(self.option.vo.window_minimized))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.window_maximized):
+                case TypeHelper.toPointer(&option.voPtr.pointee.window_maximized):
                     DispatchQueue.main.async {
-                        self.window?.setMaximized(Bool(mpv.opts.window_maximized))
+                        self.window?.setMaximized(Bool(self.option.vo.window_maximized))
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.cursor_passthrough):
+                case TypeHelper.toPointer(&option.voPtr.pointee.cursor_passthrough):
                     DispatchQueue.main.async {
-                        self.window?.ignoresMouseEvents = mpv.opts.cursor_passthrough
+                        self.window?.ignoresMouseEvents = self.option.vo.cursor_passthrough
                     }
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.geometry): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_smaller): fallthrough
-                case MPVHelper.getPointer(&mpv.optsPtr.pointee.autofit_larger):
+                case TypeHelper.toPointer(&option.voPtr.pointee.geometry): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_smaller): fallthrough
+                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
-                        let (_, _, wr) = self.getInitProperties(vo)
+                        let (_, wr) = self.getInitProperties(vo)
                         self.window?.updateFrame(wr)
                     }
                 default:
@@ -630,7 +604,7 @@ class Common: NSObject {
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
             var rect = window?.unfsContentFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
-            if let screen = window?.currentScreen, !Bool(mpv.opts.hidpi_window_scale) {
+            if let screen = window?.currentScreen, !Bool(option.vo.hidpi_window_scale) {
                 rect = screen.convertRectToBacking(rect)
             }
 
@@ -642,7 +616,7 @@ class Common: NSObject {
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
             var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
             DispatchQueue.main.async {
-                if let screen = self.window?.currentScreen, !Bool(self.mpv?.opts.hidpi_window_scale ?? true) {
+                if let screen = self.window?.currentScreen, !Bool(self.option.vo.hidpi_window_scale) {
                     rect = screen.convertRectFromBacking(rect)
                 }
                 self.window?.updateSize(rect.size)
@@ -692,20 +666,15 @@ class Common: NSObject {
     }
 
     func macOptsUpdate() {
-        guard let mpv = mpv else {
-            log.sendWarning("Unexpected nil value in mac opts update")
-            return
-        }
-
         var opt: UnsafeMutableRawPointer?
-        while mpv.nextChangedMacOption(property: &opt) {
+        while option.nextChangedMacOption(property: &opt) {
             switch opt {
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_appearance):
-                titleBar?.set(appearance: Int(mpv.macOpts.macos_title_bar_appearance))
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_material):
-                titleBar?.set(material: Int(mpv.macOpts.macos_title_bar_material))
-            case MPVHelper.getPointer(&mpv.macOptsPtr.pointee.macos_title_bar_color):
-                titleBar?.set(color: mpv.macOpts.macos_title_bar_color)
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_appearance):
+                titleBar?.set(appearance: Int(option.mac.macos_title_bar_appearance))
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_material):
+                titleBar?.set(material: Int(option.mac.macos_title_bar_material))
+            case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_color):
+                titleBar?.set(color: option.mac.macos_title_bar_color)
             default:
                 break
             }

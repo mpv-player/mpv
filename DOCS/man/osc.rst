@@ -307,7 +307,7 @@ Configurable Options
 
     String that supports property expansion that will be displayed as
     OSC title.
-    ASS tags are escaped, and newlines and trailing slashes are stripped.
+    ASS tags are escaped and newlines are converted to spaces.
 
 ``tooltipborder``
     Default: 1

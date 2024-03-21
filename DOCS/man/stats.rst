@@ -85,6 +85,18 @@ Configurable Options
     respective duration. This can result in overlapping text when multiple
     scripts decide to print text at the same time.
 
+``term_width_limit``
+    Default: -1
+
+    Sets the terminal width.
+    A value of 0 means the width is infinite, -1 means it's automatic.
+
+``term_height_limit``
+    Default: -1
+
+    Sets the terminal height.
+    A value of 0 means the height is infinite, -1 means it's automatic.
+
 ``plot_perfdata``
     Default: yes
 

@@ -25,23 +25,12 @@ class LibmpvHelper {
     var log: LogHelper
     var mpvHandle: OpaquePointer?
     var mpvRenderContext: OpaquePointer?
-    var macOptsPtr: UnsafeMutableRawPointer?
-    var macOpts: macos_opts = macos_opts()
     var fbo: GLint = 1
     let deinitLock = NSLock()
 
     init(_ mpv: OpaquePointer, _ mpLog: OpaquePointer?) {
         mpvHandle = mpv
         log = LogHelper(mpLog)
-
-        let global = mp_client_get_global(mpvHandle)
-        guard let ptr = mp_get_config_group(nil, global, Application.getMacOSConf()) else
-        {
-            log.sendError("macOS config group couldn't be retrieved'")
-            exit(1)
-        }
-        macOptsPtr = ptr
-        macOpts = UnsafeMutablePointer<macos_opts>(OpaquePointer(ptr)).pointee
     }
 
     func initRender() {
@@ -50,7 +39,7 @@ class LibmpvHelper {
         let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil)
 
-        MPVHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
+        TypeHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: pointers[0]),
@@ -63,7 +52,6 @@ class LibmpvHelper {
                 exit(1)
             }
         }
-
     }
 
     let getProcAddress: (@convention(c) (UnsafeMutableRawPointer?, UnsafePointer<Int8>?)
@@ -87,7 +75,7 @@ class LibmpvHelper {
         if mpvRenderContext == nil {
             log.sendWarning("Init mpv render context first.")
         } else {
-            mpv_render_context_set_update_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
+            mpv_render_context_set_update_callback(mpvRenderContext, callback, TypeHelper.bridge(obj: object))
         }
     }
 
@@ -95,7 +83,7 @@ class LibmpvHelper {
         if mpvRenderContext == nil {
             log.sendWarning("Init mpv render context first.")
         } else {
-            mp_render_context_set_control_callback(mpvRenderContext, callback, MPVHelper.bridge(obj: object))
+            mp_render_context_set_control_callback(mpvRenderContext, callback, TypeHelper.bridge(obj: object))
         }
     }
 
@@ -132,7 +120,7 @@ class LibmpvHelper {
                                         h: Int32(surface.height),
                           internal_format: 0)
 
-            MPVHelper.withUnsafeMutableRawPointers([data, flip, ditherDepth, skip]) { (pointers: [UnsafeMutableRawPointer?]) in
+            TypeHelper.withUnsafeMutableRawPointers([data, flip, ditherDepth, skip]) { (pointers: [UnsafeMutableRawPointer?]) in
                 var params: [mpv_render_param] = [
                     mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_FBO, data: pointers[0]),
                     mpv_render_param(type: MPV_RENDER_PARAM_FLIP_Y, data: pointers[1]),
@@ -180,43 +168,6 @@ class LibmpvHelper {
         }
     }
 
-    func commandAsync(_ cmd: [String?], id: UInt64 = 1) {
-        if mpvHandle == nil { return }
-        var mCmd = cmd
-        mCmd.append(nil)
-        var cargs = mCmd.map { $0.flatMap { UnsafePointer<Int8>(strdup($0)) } }
-        mpv_command_async(mpvHandle, id, &cargs)
-        for ptr in cargs { free(UnsafeMutablePointer(mutating: ptr)) }
-    }
-
-    // Unsafe function when called while using the render API
-    func command(_ cmd: String) {
-        if mpvHandle == nil { return }
-        mpv_command_string(mpvHandle, cmd)
-    }
-
-    func getBoolProperty(_ name: String) -> Bool {
-        if mpvHandle == nil { return false }
-        var value = Int32()
-        mpv_get_property(mpvHandle, name, MPV_FORMAT_FLAG, &value)
-        return value > 0
-    }
-
-    func getIntProperty(_ name: String) -> Int {
-        if mpvHandle == nil { return 0 }
-        var value = Int64()
-        mpv_get_property(mpvHandle, name, MPV_FORMAT_INT64, &value)
-        return Int(value)
-    }
-
-    func getStringProperty(_ name: String) -> String? {
-        guard let mpv = mpvHandle else { return nil }
-        guard let value = mpv_get_property_string(mpv, name) else { return nil }
-        let str = String(cString: value)
-        mpv_free(value)
-        return str
-    }
-
     func deinitRender() {
         mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
         mp_render_context_set_control_callback(mpvRenderContext, nil, nil)
@@ -230,25 +181,6 @@ class LibmpvHelper {
         if destroy {
             mpv_destroy(mpvHandle)
         }
-        ta_free(macOptsPtr)
-        macOptsPtr = nil
         mpvHandle = nil
-    }
-
-    // *(char **) MPV_FORMAT_STRING on mpv_event_property
-    class func mpvStringArrayToString(_ obj: UnsafeMutableRawPointer?) -> String? {
-        guard let str = obj else { return nil }
-        let cstr = UnsafeMutablePointer<UnsafeMutablePointer<Int8>>(OpaquePointer(str))
-        return String(cString: cstr[0])
-    }
-
-    // MPV_FORMAT_FLAG
-    class func mpvFlagToBool(_ obj: UnsafeMutableRawPointer) -> Bool? {
-        return UnsafePointer<Bool>(OpaquePointer(obj))?.pointee
-    }
-
-    // MPV_FORMAT_DOUBLE
-    class func mpvDoubleToDouble(_ obj: UnsafeMutableRawPointer) -> Double? {
-        return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
     }
 }

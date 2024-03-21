@@ -192,18 +192,20 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
     }
     if (!egl_ctx) {
         // Fallback for EGL 1.4 without EGL_KHR_create_context or GLES
-        // Add the context flags only for GLES - GL has been attempted above
         EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, 2,
-            es ? EGL_CONTEXT_FLAGS_KHR : EGL_NONE, ctx_flags,
+            EGL_CONTEXT_FLAGS_KHR, ctx_flags,
+            es ? EGL_CONTEXT_CLIENT_VERSION : EGL_NONE, 2,
             EGL_NONE
         };
 
         egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, attrs);
+        if (!egl_ctx)
+            egl_ctx = eglCreateContext(display, config, EGL_NO_CONTEXT, &attrs[2]);
     }
 
     if (!egl_ctx) {
-        MP_MSG(ctx, msgl, "Could not create EGL context for %s!\n", name);
+        MP_MSG(ctx, msgl, "Could not create EGL context for %s (error=%d)!\n",
+               name, eglGetError());
         return false;
     }
 

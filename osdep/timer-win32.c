@@ -16,6 +16,8 @@
  */
 
 #include <windows.h>
+#include <winternl.h>
+#include <ntstatus.h>
 #include <sys/time.h>
 #include <mmsystem.h>
 #include <stdlib.h>
@@ -27,16 +29,23 @@
 
 static LARGE_INTEGER perf_freq;
 
-// ms values
-static int hires_max = 50;
-static int hires_res = 1;
+static int64_t hires_max = MP_TIME_MS_TO_NS(50);
+static int64_t hires_res = MP_TIME_MS_TO_NS(1);
 
-int mp_start_hires_timers(int wait_ms)
+// NtSetTimerResolution allows setting the timer resolution to less than 1 ms.
+// Resolutions are specified in 100-ns units.
+// If Set is TRUE, set the RequestedResolution. Otherwise, return to the previous resolution.
+NTSTATUS NTAPI NtSetTimerResolution(ULONG RequestedResolution, BOOLEAN Set, PULONG ActualResolution);
+// Acquire the valid timer resolution range.
+NTSTATUS NTAPI NtQueryTimerResolution(PULONG MinimumResolution, PULONG MaximumResolution, PULONG ActualResolution);
+
+int64_t mp_start_hires_timers(int64_t wait_ns)
 {
 #if !HAVE_UWP
-    // policy: request hires_res ms resolution if wait < hires_max ms
-    if (wait_ms > 0 && wait_ms <= hires_max &&
-        timeBeginPeriod(hires_res) == TIMERR_NOERROR)
+    ULONG actual_res = 0;
+    // policy: request hires_res resolution if wait < hires_max ns
+    if (wait_ns > 0 && wait_ns <= hires_max &&
+        NtSetTimerResolution(hires_res / 100, TRUE, &actual_res) == STATUS_SUCCESS)
     {
         return hires_res;
     }
@@ -44,11 +53,12 @@ int mp_start_hires_timers(int wait_ms)
     return 0;
 }
 
-void mp_end_hires_timers(int res_ms)
+void mp_end_hires_timers(int64_t res_ns)
 {
 #if !HAVE_UWP
-    if (res_ms > 0)
-        timeEndPeriod(res_ms);
+    ULONG actual_res = 0;
+    if (res_ns > 0)
+        NtSetTimerResolution(res_ns / 100, FALSE, &actual_res);
 #endif
 }
 
@@ -57,7 +67,7 @@ void mp_sleep_ns(int64_t ns)
     if (ns < 0)
         return;
 
-    int hrt = mp_start_hires_timers(ns < 1e6 ? 1 : ns / 1e6);
+    int64_t hrt = mp_start_hires_timers(ns);
 
 #ifndef CREATE_WAITABLE_TIMER_HIGH_RESOLUTION
 #define CREATE_WAITABLE_TIMER_HIGH_RESOLUTION 0x2
@@ -107,21 +117,28 @@ void mp_raw_time_init(void)
     QueryPerformanceFrequency(&perf_freq);
 
 #if !HAVE_UWP
+    ULONG min_res, max_res, actual_res;
+    if (NtQueryTimerResolution(&min_res, &max_res, &actual_res) != STATUS_SUCCESS) {
+        min_res = 156250;
+        max_res = 10000;
+    }
+
     // allow (undocumented) control of all the High Res Timers parameters,
     // for easier experimentation and diagnostic of bug reports.
     const char *v;
+    char *end;
 
     // 1..1000 ms max timetout for hires (used in "perwait" mode)
     if ((v = getenv("MPV_HRT_MAX"))) {
-        int hmax = atoi(v);
-        if (hmax >= 1 && hmax <= 1000)
+        int64_t hmax = strtoll(v, &end, 10);
+        if (*end == '\0' && hmax >= MP_TIME_MS_TO_NS(1) && hmax <= MP_TIME_MS_TO_NS(1000))
             hires_max = hmax;
     }
 
-    // 1..15 ms hires resolution (not used in "never" mode)
+    // hires resolution clamped by the available resolution range (not used in "never" mode)
     if ((v = getenv("MPV_HRT_RES"))) {
-        int res = atoi(v);
-        if (res >= 1 && res <= 15)
+        int64_t res = strtoll(v, &end, 10);
+        if (*end == '\0' && res >= max_res * INT64_C(100) && res <= min_res * INT64_C(100))
             hires_res = res;
     }
 
@@ -134,8 +151,8 @@ void mp_raw_time_init(void)
     } else if (!strcmp(v, "never")) {
         hires_max = 0;
     } else {  // "always" or unknown value
+        mp_start_hires_timers(hires_res);
         hires_max = 0;
-        timeBeginPeriod(hires_res);
     }
 #endif
 }

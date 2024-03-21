@@ -1203,11 +1203,7 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     if (src->fields & MP_IMGFIELD_REPEAT_FIRST)
         dst->repeat_pict = 1;
 
-    dst->colorspace = pl_system_to_av(src->params.repr.sys);
-    dst->color_range = pl_levels_to_av(src->params.repr.levels);
-    dst->color_primaries =
-        pl_primaries_to_av(src->params.color.primaries);
-    dst->color_trc = pl_transfer_to_av(src->params.color.transfer);
+    pl_avframe_set_repr(dst, src->params.repr);
 
     dst->chroma_location = pl_chroma_to_av(src->params.chroma_location);
 

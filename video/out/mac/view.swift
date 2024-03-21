@@ -19,7 +19,6 @@ import Cocoa
 
 class View: NSView, CALayerDelegate {
     unowned var common: Common
-    var mpv: MPVHelper? { get { return common.mpv } }
     var input: InputHelper? { get { return common.input } }
 
     var tracker: NSTrackingArea?
@@ -166,9 +165,7 @@ class View: NSView, CALayerDelegate {
     }
 
     override func magnify(with event: NSEvent) {
-        event.phase == .ended ?
-            common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
-
+        event.phase == .ended ? common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
         common.window?.addWindowScale(Double(event.magnification))
     }
 

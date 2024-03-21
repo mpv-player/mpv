@@ -114,7 +114,7 @@ static OSStatus enable_property_listener(struct ao *ao, bool enabled)
                             kAudioHardwarePropertyDevices};
     AudioDeviceID devs[] = {p->device,
                             kAudioObjectSystemObject};
-    assert(MP_ARRAY_SIZE(selectors) == MP_ARRAY_SIZE(devs));
+    static_assert(MP_ARRAY_SIZE(selectors) == MP_ARRAY_SIZE(devs), "");
 
     OSStatus status = noErr;
     for (int n = 0; n < MP_ARRAY_SIZE(devs); n++) {

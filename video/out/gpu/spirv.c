@@ -16,6 +16,7 @@ static const struct spirv_compiler_fns *compilers[] = {
 #if HAVE_SHADERC
     [SPIRV_SHADERC] = &spirv_shaderc,
 #endif
+    NULL
 };
 
 static const struct m_opt_choice_alternatives compiler_choices[] = {

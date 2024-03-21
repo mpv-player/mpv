@@ -3358,8 +3358,8 @@ Window
             of the screen width, or higher than 60% of the screen height.
 
 ``--autofit-larger=<[W[xH]]>``
-    This option behaves exactly like ``--autofit``, except the window size is
-    only changed if the window would be larger than the specified size.
+    This option behaves exactly like ``--autofit``, except that it sets the
+    maximum size of the window.
 
     .. admonition:: Example
 
@@ -3521,7 +3521,7 @@ Window
     Don't move the window when clicking on it and moving the mouse pointer.
 
 ``--x11-name=<string>``
-    Set the window class name for X11-based video output methods.
+    Set the window instance name for X11-based video output methods.
 
 ``--x11-netwm=<yes|no|auto>``
     (X11 only)
@@ -4100,6 +4100,21 @@ Input
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
+
+``--input-commands=<cmd1,cmd2,...>``
+    Define a list of commands for mpv to run. The syntax is the same as format
+    as ``input.conf`` but without the key binding argument at the beginning.
+    When this option is set at startup, the commands will run after audio and
+    video playback are about to begin if applicable (in idle mode with no file,
+    it will run immediately). When changing values at runtime, the commands will
+    also run as soon as possible.
+
+    This is a string list option. See `List Options`_ for details.
+
+    .. admonition:: Example
+
+        ``--input-commands="playlist-play-index 1,set ao-volume 40"``
+            sets the playlist index to 1 and the ao-volume to 40
 
 ``--input-doubleclick-time=<milliseconds>``
     Time in milliseconds to recognize two consecutive button presses as a
@@ -5554,14 +5569,16 @@ them.
     no
         Disable any dithering done by mpv.
     auto
-        Automatic selection. If output bit depth cannot be detected, 8 bits per
-        component are assumed.
+        Automatic selection.
+        On ``--vo=gpu``: detected depth or 8 bpc otherwise
+        On ``--vo=gpu-next``: detected depth or 8 bpc (for SDR target)
     8
         Dither to 8 bit output.
 
-    Note that the depth of the connected video display device cannot be
-    detected. Often, LCD panels will do dithering on their own, which conflicts
-    with this option and leads to ugly output.
+    Note that the on-the-wire bit depth cannot be detected except when using
+    ``gpu-api=d3d11``. Explicitly setting the value to your display's bit depth
+    is recommended, as dithering performed by some LCD panels can be of low
+    quality.
 
 ``--dither-size-fruit=<2-8>``
     Set the size of the dither matrix (default: 6). The actual size of the

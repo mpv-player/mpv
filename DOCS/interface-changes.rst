@@ -17,9 +17,12 @@ a large part of the user interface and APIs.
 
 Also see compatibility.rst.
 
-This document lists changes to them. New changes are added to the top. Usually,
-only incompatible or important changes are mentioned. New options/commands/etc.
-are not always listed.
+This document lists changes to them. New options/commands/etc. are not always
+listed.
+
+**Never** write to this file directly except when making releases. New changes
+are added in the interface-changes directory instead. See contribute.md for more
+details.
 
 Interface changes
 =================
@@ -64,6 +67,7 @@ Interface changes
     - add `video-target-params` property
     - add `hdr10plus` sub-parameter to `format` video filter
     - remove `--focus-on-open` and add replacement `--focus-on`
+    - remove debanding from the high-quality profile
  --- mpv 0.37.0 ---
     - `--save-position-on-quit` and its associated commands now store state files
       in %LOCALAPPDATA% instead of %APPDATA% directory by default on Windows.

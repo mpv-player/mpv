@@ -7,7 +7,7 @@ project('mpv',
             'buildtype=debugoptimized',
             'b_lundef=false',
             'c_std=c11',
-            'warning_level=1',
+            'warning_level=2',
         ]
 )
 
@@ -267,6 +267,10 @@ flags = ['-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
 test_flags = ['-Werror=implicit-function-declaration',
+              '-Wno-missing-field-initializers',
+              '-Wno-sign-compare',
+              '-Wno-unused-parameter',
+              '-Wno-cast-function-type',
               '-Wempty-body',
               '-Wdisabled-optimization',
               '-Wstrict-prototypes',
@@ -382,6 +386,7 @@ pthread_debug = get_option('pthread-debug').require(
 features += {'pthread-debug': pthread_debug.allowed()}
 
 add_project_arguments(flags, language: 'c')
+add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
 
 
@@ -492,11 +497,11 @@ if features['win32-desktop']
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
                           cc.find_library('imm32'),
+                          cc.find_library('ntdll'),
                           cc.find_library('ole32'),
                           cc.find_library('uuid'),
                           cc.find_library('uxtheme'),
-                          cc.find_library('version'),
-                          cc.find_library('winmm')]
+                          cc.find_library('version')]
     dependencies += win32_desktop_libs
     path_source = files('osdep/path-win.c')
     subprocess_source = files('osdep/subprocess-win.c')
@@ -1142,9 +1147,10 @@ if features['egl-angle']
     sources += files('video/out/opengl/angle_dynamic.c')
 endif
 
-egl_dep = cc.find_library('EGL', required: get_option('egl-angle-lib'))
+egl_dep = cc.find_library('EGL', required:
+    get_option('egl-angle-lib').require(features['egl-angle']))
 egl_angle_lib = get_option('egl-angle-lib').require(
-    features['egl-angle'] and cc.has_function('eglCreateWindowSurface',
+    egl_dep.found() and cc.has_function('eglCreateWindowSurface',
                                                dependencies: egl_dep,
                                                prefix: '#include <EGL/egl.h>'),
     error_message: 'egl-angle-lib could not be found!',
@@ -1167,7 +1173,7 @@ if features['d3d11'] or features['egl-angle-win32']
     sources += files('video/out/gpu/d3d11_helpers.c')
 endif
 
-egl = dependency('egl', version: '> 1.4.0', required: get_option('egl'))
+egl = dependency('egl', version: '>= 1.4.0', required: get_option('egl'))
 features += {'egl': egl.found() and gl_allowed}
 if features['egl']
     dependencies += egl
@@ -1221,12 +1227,11 @@ if plain_gl.allowed()
     features += {'gl': true}
 endif
 
-features += {'egl-helpers': features['egl'] or egl_android.found() or egl_angle_win32.allowed()}
-if features['egl-helpers']
+if features['egl'] or features['egl-android'] or features['egl-angle-win32']
     sources += files('video/out/opengl/egl_helpers.c')
 endif
 
-if features['egl'] and features['egl-helpers']
+if features['gl'] and features['egl']
     sources += files('video/filter/vf_gpu.c')
 endif
 
@@ -1515,11 +1520,12 @@ if features['cocoa'] and features['swift']
     swift_sources += files('osdep/mac/libmpv_helper.swift',
                            'osdep/mac/input_helper.swift',
                            'osdep/mac/log_helper.swift',
-                           'osdep/mac/mpv_helper.swift',
                            'osdep/mac/menu_bar.swift',
+                           'osdep/mac/option_helper.swift',
                            'osdep/mac/precise_timer.swift',
                            'osdep/mac/swift_compat.swift',
                            'osdep/mac/swift_extensions.swift',
+                           'osdep/mac/type_helper.swift',
                            'video/out/mac/common.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
@@ -1556,7 +1562,7 @@ macos_touchbar = get_option('macos-touchbar').require(
 )
 features += {'macos-touchbar': macos_touchbar.allowed()}
 if features['macos-touchbar']
-    sources += files('osdep/mac/touchbar.m')
+    swift_sources += files('osdep/mac/touch_bar.swift')
 endif
 
 if features['swift'] and swift_sources.length() > 0

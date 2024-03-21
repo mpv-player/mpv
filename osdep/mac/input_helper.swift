@@ -18,7 +18,7 @@
 import Carbon.HIToolbox
 
 class InputHelper: NSObject {
-    var mpv: MPVHelper?
+    var option: OptionHelper?
     var lock = NSCondition()
     private var input: OpaquePointer?
 
@@ -62,10 +62,10 @@ class InputHelper: NSObject {
         .init(0, 0)
     ]
 
-    @objc init(_ input: OpaquePointer? = nil, _ mpv: MPVHelper? = nil) {
+    @objc init(_ input: OpaquePointer? = nil, _ option: OptionHelper? = nil) {
         super.init()
         self.input = input
-        self.mpv = mpv
+        self.option = option
     }
 
     @objc func put(
@@ -232,11 +232,11 @@ class InputHelper: NSObject {
     @objc func open(files: [String]) {
         lock.withLock {
             guard let input = input else { return }
-            if (mpv?.opts.drag_and_drop ?? -1) == -2 { return }
+            if (option?.vo.drag_and_drop ?? -1) == -2 { return }
 
             var action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
-            if (mpv?.opts.drag_and_drop ?? -1) >= 0  {
-                action = mp_dnd_action(UInt32(mpv?.opts.drag_and_drop ?? Int32(DND_REPLACE.rawValue)))
+            if (option?.vo.drag_and_drop ?? -1) >= 0  {
+                action = mp_dnd_action(UInt32(option?.vo.drag_and_drop ?? Int32(DND_REPLACE.rawValue)))
             }
 
             let filesClean = files.map{ $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }

@@ -249,7 +249,7 @@ class GLLayer: CAOpenGLLayer {
         var pix: CGLPixelFormatObj?
         var depth: GLint = 8
         var err: CGLError = CGLError(rawValue: 0)
-        let swRender = ccb.libmpv.macOpts.cocoa_cb_sw_renderer
+        let swRender = ccb.option.mac.cocoa_cb_sw_renderer
 
         if swRender != 1 {
             (pix, depth, err) = GLLayer.findPixelFormat(ccb)
@@ -277,12 +277,12 @@ class GLLayer: CAOpenGLLayer {
             glBase.insert(CGLPixelFormatAttribute(ver.rawValue), at: 1)
 
             var glFormat = [glBase]
-            if ccb.libmpv.macOpts.cocoa_cb_10bit_context {
+            if ccb.option.mac.cocoa_cb_10bit_context {
                 glFormat += [glFormat10Bit]
             }
             glFormat += glFormatOptional
 
-            if !ccb.libmpv.macOpts.macos_force_dedicated_gpu {
+            if !ccb.option.mac.macos_force_dedicated_gpu {
                 glFormat += [glFormatAutoGPU]
             }
 
@@ -308,7 +308,7 @@ class GLLayer: CAOpenGLLayer {
         ccb.log.sendWarning("Couldn't create a " +
                            "\(software ? "software" : "hardware accelerated") " +
                            "CGL pixel format: \(errS) (\(err.rawValue))")
-        if software == false && ccb.libmpv.macOpts.cocoa_cb_sw_renderer == -1 {
+        if software == false && ccb.option.mac.cocoa_cb_sw_renderer == -1 {
             ccb.log.sendWarning("Falling back to software renderer")
         }
 

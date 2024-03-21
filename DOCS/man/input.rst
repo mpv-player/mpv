@@ -1259,6 +1259,18 @@ Input Commands that are Possibly Subject to Change
         use the ``mp.create_osd_overlay()`` helper instead of invoking this
         command directly.
 
+``escape-ass <text>``
+    Modify ``text`` so that commands and functions that interpret ASS tags,
+    such as ``osd-overlay`` and ``mp.create_osd_overlay``, will display it
+    verbatim, and return it. This can only be used through the client API or
+    from a script using ``mp.command_native``.
+
+    .. admonition:: Example
+
+        ``mp.osd_message(mp.command_native({"escape-ass", "foo {bar}"}))``
+
+        This line of Lua prints "foo \\{bar}" on the OSD.
+
 ``script-message [<arg1> [<arg2> [...]]]``
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments
@@ -2804,6 +2816,19 @@ Property list
     Any of these properties may be unavailable or set to dummy values if the
     VO window is not created or visible.
 
+``term-size``
+    The current terminal size.
+
+    This has two sub-properties.
+
+    ``term-size/w``
+        width of the terminal in cells
+    ``term-size/h``
+        height of the terminal in cells
+
+    This property is not observable. Reacting to size changes requires
+    polling.
+
 ``window-id``
     Read-only - mpv's window id. May not always be available, i.e due to window
     not being opened yet or not being supported by the VO.
@@ -3088,6 +3113,11 @@ Property list
 
     ``track-list/N/demux-par``
         Pixel aspect ratio.
+
+    ``track-list/N/format-name``
+        Short name for format from ffmpeg. If the track is audio, this will be
+        the name of the sample format. If the track is video, this will be the
+        name of the pixel format.
 
     ``track-list/N/audio-channels`` (deprecated)
         Deprecated alias for ``track-list/N/demux-channel-count``.
@@ -3736,7 +3766,9 @@ Normally, properties are formatted as human-readable text, meant to be
 displayed on OSD or on the terminal. It is possible to retrieve an unformatted
 (raw) value from a property by prefixing its name with ``=``. These raw values
 can be parsed by other programs and follow the same conventions as the options
-associated with the properties.
+associated with the properties. Additionally, there is a ``>`` prefix to format
+human-readable text, with fixed precision for floating-point values. This is
+useful for printing values where a constant width is important.
 
 .. admonition:: Examples
 
@@ -3744,6 +3776,10 @@ associated with the properties.
       minutes 23 seconds)
     - ``${=time-pos}`` expands to ``863.4`` (same time, plus 400 milliseconds -
       milliseconds are normally not shown in the formatted case)
+
+    - ``${avsync}`` expands to ``+0.003``
+    - ``${>avsync}`` expands to ``+0.0030``
+    - ``${=avsync}`` expands to ``0.003028``
 
 Sometimes, the difference in amount of information carried by raw and formatted
 property values can be rather big. In some cases, raw values have more

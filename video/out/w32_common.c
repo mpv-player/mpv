@@ -58,10 +58,17 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #endif
 
+#ifndef DWMWA_VISIBLE_FRAME_BORDER_THICKNESS
+#define DWMWA_VISIBLE_FRAME_BORDER_THICKNESS 37
+#endif
 
-//Older MinGW compatibility
+#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
 #define DWMWA_WINDOW_CORNER_PREFERENCE 33
+#endif
+
+#ifndef DWMWA_SYSTEMBACKDROP_TYPE
 #define DWMWA_SYSTEMBACKDROP_TYPE 38
+#endif
 
 #ifndef DPI_ENUMS_DECLARED
 typedef enum MONITOR_DPI_TYPE {
@@ -78,6 +85,7 @@ typedef enum MONITOR_DPI_TYPE {
 struct w32_api {
     HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
     BOOL (WINAPI *pAdjustWindowRectExForDpi)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+    int (WINAPI *pGetSystemMetricsForDpi)(int nIndex, UINT dpi);
     BOOLEAN (WINAPI *pShouldAppsUseDarkMode)(void);
     DWORD (WINAPI *pSetPreferredAppMode)(DWORD mode);
 };
@@ -185,7 +193,15 @@ struct vo_w32_state {
     BOOL win_arranging;
 
     bool conversion_mode_init;
+    bool unmaximize;
 };
+
+static inline int get_system_metrics(struct vo_w32_state *w32, int metric)
+{
+    return w32->api.pGetSystemMetricsForDpi
+               ? w32->api.pGetSystemMetricsForDpi(metric, w32->dpi)
+               : GetSystemMetrics(metric);
+}
 
 static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
@@ -201,13 +217,67 @@ static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     }
 }
 
+static bool check_windows10_build(DWORD build)
+{
+    OSVERSIONINFOEXW osvi = {
+        .dwOSVersionInfoSize = sizeof(osvi),
+        .dwMajorVersion = HIBYTE(_WIN32_WINNT_WIN10),
+        .dwMinorVersion = LOBYTE(_WIN32_WINNT_WIN10),
+        .dwBuildNumber = build,
+    };
+
+    DWORD type = VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER;
+
+    ULONGLONG mask = 0;
+    mask = VerSetConditionMask(mask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    mask = VerSetConditionMask(mask, VER_MINORVERSION, VER_GREATER_EQUAL);
+    mask = VerSetConditionMask(mask, VER_BUILDNUMBER, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfoW(&osvi, type, mask);
+}
+
+// Get adjusted title bar height, only relevant for --title-bar=no
+static int get_title_bar_height(struct vo_w32_state *w32)
+{
+    assert(!w32->opts->title_bar && w32->opts->border);
+    UINT visible_border = 0;
+    // Only available on Windows 11, check in case it's backported and breaks
+    // WM_NCCALCSIZE exception for Windows 10.
+    if (check_windows10_build(22000)) {
+        DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+                              &visible_border, sizeof(visible_border));
+    }
+    int top_bar = IsMaximized(w32->window)
+                      ? get_system_metrics(w32, SM_CYFRAME) +
+                        get_system_metrics(w32, SM_CXPADDEDBORDER)
+                      : visible_border;
+    return top_bar;
+}
+
 static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
 {
     RECT win = *rc;
     adjust_window_rect(w32, hwnd, rc);
     // Adjust for title bar height that will be hidden in WM_NCCALCSIZE
-    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs)
-        rc->top -= rc->top - win.top;
+    // Keep the frame border. On Windows 10 the top border is not retained.
+    // It appears that DWM draws the title bar with its full height, extending
+    // outside the window area. Essentially, there is a bug in DWM, preventing
+    // the adjustment of the title bar height. This issue occurs when both the
+    // top and left client areas are non-zero in WM_NCCALCSIZE. If the left NC
+    // area is set to 0, the title bar is drawn correctly with the adjusted
+    // height. To mitigate this problem, set the top NC area to zero. The issue
+    // doesn't happen on Windows 11 or when DWM NC drawing is disabled with
+    // DWMWA_NCRENDERING_POLICY. We aim to avoid the manual drawing the border
+    // and want the DWM look and feel, so skip the top border on Windows 10.
+    // Also DWMWA_VISIBLE_FRAME_BORDER_THICKNESS is available only on Windows 11,
+    // so it would be hard to guess this size correctly on Windows 10 anyway.
+    if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs &&
+       (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
+    {
+        if (!check_windows10_build(22000) && !IsMaximized(w32->window))
+            *rc = win;
+        rc->top = win.top - get_title_bar_height(w32);
+    }
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -230,13 +300,13 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
     if (!GetWindowRect(w32->window, &rc))
         return HTNOWHERE;
 
-    POINT frame = {GetSystemMetrics(SM_CXSIZEFRAME),
-                   GetSystemMetrics(SM_CYSIZEFRAME)};
+    POINT frame = {get_system_metrics(w32, SM_CXSIZEFRAME),
+                   get_system_metrics(w32, SM_CYSIZEFRAME)};
     if (w32->opts->border) {
-        frame.x += GetSystemMetrics(SM_CXPADDEDBORDER);
-        frame.y += GetSystemMetrics(SM_CXPADDEDBORDER);
+        frame.x += get_system_metrics(w32, SM_CXPADDEDBORDER);
+        frame.y += get_system_metrics(w32, SM_CXPADDEDBORDER);
         if (!w32->opts->title_bar)
-            rc.top -= GetSystemMetrics(SM_CXPADDEDBORDER);
+            rc.top -= get_system_metrics(w32, SM_CXPADDEDBORDER);
     }
     InflateRect(&rc, -frame.x, -frame.y);
 
@@ -759,10 +829,10 @@ static RECT get_screen_area(struct vo_w32_state *w32)
 {
     // Handle --fs-screen=all
     if (w32->current_fs && w32->opts->fsscreen_id == -2) {
-        const int x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        const int y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        return (RECT) { x, y, x + GetSystemMetrics(SM_CXVIRTUALSCREEN),
-                              y + GetSystemMetrics(SM_CYVIRTUALSCREEN) };
+        const int x = get_system_metrics(w32, SM_XVIRTUALSCREEN);
+        const int y = get_system_metrics(w32, SM_YVIRTUALSCREEN);
+        return (RECT) { x, y, x + get_system_metrics(w32, SM_CXVIRTUALSCREEN),
+                              y + get_system_metrics(w32, SM_CYVIRTUALSCREEN) };
     }
     return get_monitor_info(w32).rcMonitor;
 }
@@ -858,6 +928,13 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     return true;
 }
 
+static bool is_high_contrast(void)
+{
+    HIGHCONTRAST hc = {sizeof(hc)};
+    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
+    return hc.dwFlags & HCF_HIGHCONTRASTON;
+}
+
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
     const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX | WS_THICKFRAME;
@@ -869,15 +946,10 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
         style |= FULLSCREEN;
     } else {
         style |= w32->opts->border ? FRAME : NO_FRAME;
+        if (!w32->opts->title_bar && is_high_contrast())
+            style &= ~WS_CAPTION;
     }
     return style;
-}
-
-static LONG get_title_bar_height(struct vo_w32_state *w32)
-{
-    RECT rc = {0};
-    adjust_window_rect(w32, w32->window, &rc);
-    return -rc.top;
 }
 
 static void update_window_style(struct vo_w32_state *w32)
@@ -1022,14 +1094,13 @@ static void update_minimized_state(struct vo_w32_state *w32)
     }
 }
 
-static void update_maximized_state(struct vo_w32_state *w32)
+static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullscreen)
 {
     if (w32->parent)
         return;
 
-    // Don't change the maximized state in fullscreen for now. In future, this
-    // should be made to apply the maximized state on leaving fullscreen.
-    if (w32->current_fs)
+    // Apply the maximized state on leaving fullscreen.
+    if (w32->current_fs && !leaving_fullscreen)
         return;
 
     WINDOWPLACEMENT wp = { .length = sizeof wp };
@@ -1081,11 +1152,24 @@ static void update_window_state(struct vo_w32_state *w32)
                  wr.left, wr.top, rect_w(wr), rect_h(wr),
                  SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 
+    // Unmaximize the window if a size change is requested because SetWindowPos
+    // doesn't change the window maximized state.
+    // ShowWindow(SW_SHOWNOACTIVATE) can't be used here because it tries to
+    // "restore" the window to its size before it's maximized.
+    if (w32->unmaximize) {
+        WINDOWPLACEMENT wp = { .length = sizeof wp };
+        GetWindowPlacement(w32->window, &wp);
+        wp.showCmd = SW_SHOWNOACTIVATE;
+        wp.rcNormalPosition = wr;
+        SetWindowPlacement(w32->window, &wp);
+        w32->unmaximize = false;
+    }
+
     // Show the window if it's not yet visible
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
             ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
-            update_maximized_state(w32); // Set the WPF_RESTORETOMAXIMIZED flag
+            update_maximized_state(w32, false); // Set the WPF_RESTORETOMAXIMIZED flag
         } else if (w32->opts->window_maximized) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
         } else {
@@ -1182,13 +1266,9 @@ static void update_dark_mode(const struct vo_w32_state *w32)
     if (w32->api.pSetPreferredAppMode)
         w32->api.pSetPreferredAppMode(1); // allow dark mode
 
-    HIGHCONTRAST hc = {sizeof(hc)};
-    SystemParametersInfo(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, 0);
-    bool high_contrast = hc.dwFlags & HCF_HIGHCONTRASTON;
-
     // if pShouldAppsUseDarkMode is not available, just assume it to be true
-    const BOOL use_dark_mode = !high_contrast && (!w32->api.pShouldAppsUseDarkMode ||
-                                                  w32->api.pShouldAppsUseDarkMode());
+    const BOOL use_dark_mode = !is_high_contrast() && (!w32->api.pShouldAppsUseDarkMode ||
+                                                       w32->api.pShouldAppsUseDarkMode());
 
     SetWindowTheme(w32->window, use_dark_mode ? L"DarkMode_Explorer" : L"", NULL);
 
@@ -1563,6 +1643,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_SETTINGCHANGE:
         update_dark_mode(w32);
+        update_window_style(w32);
+        update_window_state(w32);
         break;
     case WM_NCCALCSIZE:
         if (!w32->opts->border)
@@ -1570,10 +1652,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Apparently removing WS_CAPTION disables some window animation, instead
         // just reduce non-client size to remove title bar.
         if (wParam && lParam && w32->opts->border && !w32->opts->title_bar &&
-            !w32->current_fs && !w32->parent)
+            !w32->current_fs && !w32->parent &&
+            (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
         {
-            ((LPNCCALCSIZE_PARAMS) lParam)->rgrc[0].top -= get_title_bar_height(w32);
-        }
+            // Remove all NC area on Windows 10 due to inability to control the
+            // top bar height before Windows 11.
+            if (!check_windows10_build(22000) && !IsMaximized(w32->window))
+                return 0;
+            RECT r = {0};
+            adjust_window_rect(w32, w32->window, &r);
+            NCCALCSIZE_PARAMS *p = (LPNCCALCSIZE_PARAMS)lParam;
+            p->rgrc[0].top += r.top + get_title_bar_height(w32);
+       }
         break;
     case WM_IME_STARTCOMPOSITION: {
         HIMC imc = ImmGetContext(w32->window);
@@ -1739,9 +1829,8 @@ static void run_message_loop(struct vo_w32_state *w32)
         mp_dispatch_queue_process(w32->dispatch, 1000);
 }
 
-static void gui_thread_reconfig(void *ptr)
+static void window_reconfig(struct vo_w32_state *w32, bool force)
 {
-    struct vo_w32_state *w32 = ptr;
     struct vo *vo = w32->vo;
 
     RECT r = get_working_area(w32);
@@ -1764,14 +1853,14 @@ static void gui_thread_reconfig(void *ptr)
     vo_calc_window_geometry3(vo, &screen, &mon, w32->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    bool reset_size = (w32->o_dwidth != vo->dwidth ||
+    bool reset_size = ((w32->o_dwidth != vo->dwidth ||
                        w32->o_dheight != vo->dheight) &&
-                       w32->opts->auto_window_resize;
+                       w32->opts->auto_window_resize) || force;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
 
-    if (!w32->parent && !w32->window_bounds_initialized) {
+    if (!w32->parent && (!w32->window_bounds_initialized || force)) {
         SetRect(&w32->windowrc, geo.win.x0, geo.win.y0,
                 geo.win.x0 + vo->dwidth, geo.win.y0 + vo->dheight);
         w32->prev_windowrc = w32->windowrc;
@@ -1802,6 +1891,11 @@ finish:
     reinit_window_state(w32);
 }
 
+static void gui_thread_reconfig(void *ptr)
+{
+    window_reconfig(ptr, false);
+}
+
 // Resize the window. On the first call, it's also made visible.
 void vo_w32_config(struct vo *vo)
 {
@@ -1820,20 +1914,15 @@ static void w32_api_load(struct vo_w32_state *w32)
     // Available since Win10
     w32->api.pAdjustWindowRectExForDpi = !user32_dll ? NULL :
                 (void *)GetProcAddress(user32_dll, "AdjustWindowRectExForDpi");
+    w32->api.pGetSystemMetricsForDpi = !user32_dll ? NULL :
+                (void *)GetProcAddress(user32_dll, "GetSystemMetricsForDpi");
 
     // Dark mode related functions, available since the 1809 Windows 10 update
     // Check the Windows build version as on previous versions used ordinals
     // may point to unexpected code/data. Alternatively could check uxtheme.dll
     // version directly, but it is little bit more boilerplate code, and build
     // number is good enough check.
-    void (WINAPI *pRtlGetNtVersionNumbers)(LPDWORD, LPDWORD, LPDWORD) =
-        (void *)GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetNtVersionNumbers");
-
-    DWORD major, build;
-    pRtlGetNtVersionNumbers(&major, NULL, &build);
-    build &= ~0xF0000000;
-
-    HMODULE uxtheme_dll = (major < 10 || build < 17763) ? NULL :
+    HMODULE uxtheme_dll = !check_windows10_build(17763) ? NULL :
                 GetModuleHandle(L"uxtheme.dll");
     w32->api.pShouldAppsUseDarkMode = !uxtheme_dll ? NULL :
                 (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(132));
@@ -2057,6 +2146,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             struct mp_vo_opts *vo_opts = w32->opts_cache->opts;
 
             if (changed_option == &vo_opts->fullscreen) {
+                if (!vo_opts->fullscreen)
+                    update_maximized_state(w32, true);
                 reinit_window_state(w32);
             } else if (changed_option == &vo_opts->window_affinity) {
                 update_affinity(w32);
@@ -2074,9 +2165,16 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->window_minimized) {
                 update_minimized_state(w32);
             } else if (changed_option == &vo_opts->window_maximized) {
-                update_maximized_state(w32);
+                update_maximized_state(w32, false);
             } else if (changed_option == &vo_opts->window_corners) {
                 update_corners_pref(w32);
+            } else if (changed_option == &vo_opts->geometry || changed_option == &vo_opts->autofit ||
+                changed_option == &vo_opts->autofit_smaller || changed_option == &vo_opts->autofit_larger)
+            {
+                if (w32->opts->window_maximized) {
+                    w32->unmaximize = true;
+                }
+                window_reconfig(w32, true);
             }
         }
 
@@ -2112,6 +2210,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
         resize_and_move_rect(w32, rc, s[0], s[1]);
 
+        if (w32->opts->window_maximized) {
+            w32->unmaximize = true;
+        }
         w32->fit_on_screen = true;
         reinit_window_state(w32);
         return VO_TRUE;

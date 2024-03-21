@@ -439,7 +439,7 @@ end
 function window_controls_enabled()
     val = user_opts.windowcontrols
     if val == "auto" then
-        return not state.border
+        return not (state.border and state.title_bar)
     else
         return val ~= "no"
     end
@@ -955,10 +955,7 @@ function show_message(text, duration)
     -- may slow down massively on huge input
     text = string.sub(text, 0, 4000)
 
-    -- replace actual linebreaks with ASS linebreaks
-    text = string.gsub(text, "\n", "\\N")
-
-    state.message_text = text
+    state.message_text = mp.command_native({"escape-ass", text})
 
     if not state.message_hide_timer then
         state.message_hide_timer = mp.add_timeout(0, request_tick)
@@ -1162,9 +1159,8 @@ function window_controls(topbar)
     ne = new_element("wctitle", "button")
     ne.content = function ()
         local title = mp.command_native({"expand-text", user_opts.windowcontrols_title})
-        -- escape ASS, and strip newlines and trailing slashes
-        title = title:gsub("\\n", " "):gsub("\\$", ""):gsub("{","\\{")
-        return not (title == "") and title or "mpv"
+        title = title:gsub("\n", " ")
+        return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
     local left_pad = 5
     local right_pad = 10
@@ -1792,9 +1788,8 @@ function osc_init()
     ne.content = function ()
         local title = state.forced_title or
                       mp.command_native({"expand-text", user_opts.title})
-        -- escape ASS, and strip newlines and trailing slashes
-        title = title:gsub("\\n", " "):gsub("\\$", ""):gsub("{","\\{")
-        return not (title == "") and title or "mpv"
+        title = title:gsub("\n", " ")
+        return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
 
     ne.eventresponder["mbtn_left_up"] = function ()
@@ -2783,6 +2778,12 @@ mp.observe_property("fullscreen", "bool",
 mp.observe_property("border", "bool",
     function(name, val)
         state.border = val
+        request_init_resize()
+    end
+)
+mp.observe_property("title-bar", "bool",
+    function(name, val)
+        state.title_bar = val
         request_init_resize()
     end
 )

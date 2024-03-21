@@ -25,7 +25,7 @@ static const enum pl_log_level msg_lev_to_pl_log[MSGL_MAX+1] = {
 };
 
 // translates log levels while probing
-static const enum pl_log_level probing_map(enum pl_log_level level)
+static enum pl_log_level probing_map(enum pl_log_level level)
 {
     switch (level) {
     case PL_LOG_FATAL:

@@ -25,6 +25,10 @@ Releases are listed here: https://github.com/mpv-player/mpv/releases
 Try to reproduce your issue with --no-config first. If it isn't reproducible
 with --no-config try to first find out which option or script causes your issue.
 
+If the issue is performance-related, try to reproduce it with --no-config
+--profile=fast, which is designed to work on lower-end mobile devices.
+Additionally, enable hardware decoding with --hwdec=yes or the Ctrl+h shortcut.
+
 Describe the reproduction steps as precise as possible. It's very likely that
 the bug you experience wasn't reproduced by the developer because the workflow
 differs from your own.

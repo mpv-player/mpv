@@ -124,7 +124,7 @@ static void uninit(struct ra_hwdec *hw)
     va_destroy(p->ctx);
 }
 
-const static dmabuf_interop_init interop_inits[] = {
+static const dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif

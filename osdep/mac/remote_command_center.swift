@@ -186,24 +186,24 @@ class RemoteCommandCenter: NSObject {
 
         switch String(cString: property.name) {
         case "pause" where property.format == MPV_FORMAT_FLAG:
-            isPaused = LibmpvHelper.mpvFlagToBool(property.data) ?? false
+            isPaused = TypeHelper.toBool(property.data) ?? false
         case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
-            let newPosition = max(LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0, 0)
+            let newPosition = max(TypeHelper.toDouble(property.data) ?? 0, 0)
             if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
             }
         case "duration" where property.format == MPV_FORMAT_DOUBLE:
-            duration = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 0
+            duration = TypeHelper.toDouble(property.data) ?? 0
         case "speed" where property.format == MPV_FORMAT_DOUBLE:
-            rate = LibmpvHelper.mpvDoubleToDouble(property.data) ?? 1
+            rate = TypeHelper.toDouble(property.data) ?? 1
         case "media-title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            title = LibmpvHelper.mpvStringArrayToString(property.data) ?? ""
+            title = TypeHelper.toString(property.data) ?? ""
         case "chapter-metadata/title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            chapter = LibmpvHelper.mpvStringArrayToString(property.data)
+            chapter = TypeHelper.toString(property.data)
         case "metadata/by-key/album" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            album = LibmpvHelper.mpvStringArrayToString(property.data)
+            album = TypeHelper.toString(property.data)
         case "metadata/by-key/artist" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            artist = LibmpvHelper.mpvStringArrayToString(property.data)
+            artist = TypeHelper.toString(property.data)
         default:
             break
         }

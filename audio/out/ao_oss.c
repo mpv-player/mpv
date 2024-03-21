@@ -36,6 +36,7 @@
 #include <sys/types.h>
 
 #include "audio/format.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "osdep/endian.h"
@@ -89,7 +90,7 @@ static const int format_table[][2] = {
 
 #define MP_WARN_IOCTL_ERR(__ao) \
     MP_WARN((__ao), "%s: ioctl() fail, err = %i: %s\n", \
-        __FUNCTION__, errno, strerror(errno))
+        __FUNCTION__, errno, mp_strerror(errno))
 
 
 static void uninit(struct ao *ao);
@@ -329,7 +330,7 @@ static bool audio_write(struct ao *ao, void **data, int samples)
         if (errno == EINTR)
 			continue;
         MP_WARN(ao, "audio_write: write() fail, err = %i: %s.\n",
-            errno, strerror(errno));
+            errno, mp_strerror(errno));
         return false;
     }
     if ((size_t)rc != size) {

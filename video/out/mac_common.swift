@@ -26,9 +26,10 @@ class MacCommon: Common {
 
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let newlog = mp_log_new(vo, vo.pointee.log, "mac")
-        super.init(newlog)
-        mpv = MPVHelper(vo, log)
-        input = InputHelper(vo.pointee.input_ctx, mpv)
+        let option = OptionHelper(vo, vo.pointee.global)
+        super.init(option, newlog)
+        self.vo = vo
+        input = InputHelper(vo.pointee.input_ctx, option)
         timer = PreciseTimer(common: self)
 
         DispatchQueue.main.sync {
@@ -38,13 +39,13 @@ class MacCommon: Common {
     }
 
     @objc func config(_ vo: UnsafeMutablePointer<vo>) -> Bool {
-        mpv?.vo = vo
+        self.vo = vo
 
         DispatchQueue.main.sync {
             let previousActiveApp = getActiveApp()
             initApp()
 
-            let (_, _, wr) = getInitProperties(vo)
+            let (_, wr) = getInitProperties(vo)
 
             guard let layer = self.layer else {
                 log.sendError("Something went wrong, no MetalLayer was initialized")
@@ -58,12 +59,12 @@ class MacCommon: Common {
             }
 
             if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) &&
-               mpv?.opts.auto_window_resize ?? true
+               option.vo.auto_window_resize
             {
                 window?.updateSize(wr.size)
             }
 
-            if mpv?.opts.focus_on ?? 1 == 2 {
+            if option.vo.focus_on == 2 {
                 NSApp.activate(ignoringOtherApps: true)
             }
 
@@ -88,7 +89,7 @@ class MacCommon: Common {
     }
 
     @objc func swapBuffer() {
-        if mpv?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK) != RENDER_TIMER_SYSTEM {
+        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
             swapLock.lock()
             while(swapTime < 1) {
                 swapLock.wait()
@@ -104,7 +105,6 @@ class MacCommon: Common {
                                           _ flagsIn: CVOptionFlags,
                                          _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
     {
-        let frameTimer = mpv?.macOpts.macos_render_timer ?? Int32(RENDER_TIMER_CALLBACK)
         let signalSwap = {
             self.swapLock.lock()
             self.swapTime += 1
@@ -112,8 +112,8 @@ class MacCommon: Common {
             self.swapLock.unlock()
         }
 
-        if frameTimer != RENDER_TIMER_SYSTEM {
-            if let timer = self.timer, frameTimer == RENDER_TIMER_PRECISE {
+        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
+            if let timer = self.timer, option.mac.macos_render_timer == RENDER_TIMER_PRECISE {
                 timer.scheduleAt(time: inOutputTime.pointee.hostTime, closure: signalSwap)
                 return kCVReturnSuccess
             }

@@ -497,7 +497,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         struct stream_dvd_info_req *req = arg;
         memset(req, 0, sizeof(*req));
         req->num_subs = mp_dvdnav_number_of_subs(stream);
-        assert(sizeof(uint32_t) == sizeof(unsigned int));
+        static_assert(sizeof(uint32_t) == sizeof(unsigned int), "");
         memcpy(req->palette, priv->spu_clut, sizeof(req->palette));
         return STREAM_OK;
     }

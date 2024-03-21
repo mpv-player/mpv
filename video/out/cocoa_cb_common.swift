@@ -32,15 +32,16 @@ class CocoaCB: Common {
 
 
     @objc init(_ mpvHandle: OpaquePointer) {
-        let newlog = mp_log_new(UnsafeMutablePointer<MPContext>(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
+        let newlog = mp_log_new(UnsafeMutablePointer(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
+        let option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
         libmpv = LibmpvHelper(mpvHandle, newlog)
-        super.init(newlog)
+        super.init(option, newlog)
         layer = GLLayer(cocoaCB: self)
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        mpv = MPVHelper(vo, log)
-        input = InputHelper(vo.pointee.input_ctx, mpv)
+        self.vo = vo
+        input = InputHelper(vo.pointee.input_ctx, option)
 
         if backendState == .uninitialized {
             backendState = .needsInit
@@ -58,18 +59,17 @@ class CocoaCB: Common {
     func uninit() {
         window?.orderOut(nil)
         window?.close()
-        mpv = nil
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
-        mpv?.vo = vo
+        self.vo = vo
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
-        } else if mpv?.opts.auto_window_resize ?? true {
+        } else if option.vo.auto_window_resize {
             DispatchQueue.main.async {
                 self.updateWindowSize(vo)
                 self.layer?.update(force: true)
-                if self.mpv?.opts.focus_on ?? 1 == 2 {
+                if self.option.vo.focus_on == 2 {
                     NSApp.activate(ignoringOtherApps: true)
                 }
             }
@@ -94,10 +94,7 @@ class CocoaCB: Common {
         }
 
         let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
-        if !(window?.isVisible ?? false) &&
-           !(window?.isMiniaturized ?? false) &&
-           !NSApp.isHidden
-        {
+        if !(window?.isVisible ?? false) && !(window?.isMiniaturized ?? false) && !NSApp.isHidden {
             window?.makeKeyAndOrderFront(nil)
         }
         layer?.atomicDrawingStart()
@@ -204,7 +201,7 @@ class CocoaCB: Common {
 
     func shutdown(_ destroy: Bool = false) {
         isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && mpv?.opts.native_fs ?? true
+                         window?.isInFullscreen ?? false && option.vo.native_fs
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
             window?.close()
         }

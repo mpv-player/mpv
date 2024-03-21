@@ -30,6 +30,8 @@ local o = {
     print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
     show_frame_info = false,          -- whether to show the current frame info
+    term_width_limit = -1,           -- overwrites the terminal width
+    term_height_limit = -1,          -- overwrites the terminal height
     debug = false,
 
     -- Graph options and style
@@ -83,6 +85,15 @@ local o = {
 }
 options.read_options(o)
 
+o.term_width_limit = tonumber(o.term_width_limit) or -1
+o.term_height_limit = tonumber(o.term_height_limit) or -1
+if o.term_width_limit < 0 then
+    o.term_width_limit = nil
+end
+if o.term_height_limit < 0 then
+    o.term_height_limit = nil
+end
+
 local format = string.format
 local max = math.max
 local min = math.min
@@ -118,9 +129,6 @@ local function graph_add_value(graph, value)
     graph.max = max(graph.max, value)
 end
 
--- "\\<U+2060>" in UTF-8 (U+2060 is WORD-JOINER)
-local ESC_BACKSLASH = "\\" .. string.char(0xE2, 0x81, 0xA0)
-
 local function no_ASS(t)
     if not o.use_ass then
         return t
@@ -128,16 +136,7 @@ local function no_ASS(t)
         -- mp.osd_message supports ass-escape using osd-ass-cc/{0|1}
         return ass_stop .. t .. ass_start
     else
-        -- mp.set_osd_ass doesn't support ass-escape. roll our own.
-        -- similar to mpv's sub/osd_libass.c:mangle_ass(...), excluding
-        -- space after newlines because no_ASS is not used with multi-line.
-        -- space at the beginning is replaced with "\\h" because it matters
-        -- at the beginning of a line, and we can't know where our output
-        -- ends up. no issue if it ends up at the middle of a line.
-        return tostring(t)
-               :gsub("\\", ESC_BACKSLASH)
-               :gsub("{", "\\{")
-               :gsub("^ ", "\\h")
+        return mp.command_native({"escape-ass", tostring(t)})
     end
 end
 
@@ -277,7 +276,13 @@ local function sorted_keys(t, comp_fn)
     return keys
 end
 
-local function append_perfdata(s, dedicated_page, print_passes)
+local function scroll_hint()
+    local hint = format("(hint: scroll with %s/%s)", o.key_scroll_up, o.key_scroll_down)
+    if not o.use_ass then return " " .. hint end
+    return format(" {\\fs%s}%s{\\fs%s}", o.font_size * 0.66, hint, o.font_size)
+end
+
+local function append_perfdata(header, s, dedicated_page, print_passes)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
@@ -318,11 +323,12 @@ local function append_perfdata(s, dedicated_page, print_passes)
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
-    s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s{\\fs%s}",
+    local h = dedicated_page and header or s
+    h[#h+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}%s",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
                      b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
-                     "(last/average/peak μs)",
-                     dedicated_page and " (hint: scroll with ↑↓)" or "", o.font_size)
+                     "(last/average/peak μs)", o.font_size,
+                     dedicated_page and scroll_hint() or "")
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
@@ -361,11 +367,6 @@ local function append_perfdata(s, dedicated_page, print_passes)
                             frame:gsub("^%l", string.upper))
         end
     end
-end
-
-local function ellipsis(s, maxlen)
-    if not maxlen or s:len() <= maxlen then return s end
-    return s:sub(1, maxlen - 3) .. "..."
 end
 
 -- command prefix tokens to strip - includes generic property commands
@@ -419,7 +420,7 @@ local function keyname_cells(k)
     return klen
 end
 
-local function get_kbinfo_lines(width)
+local function get_kbinfo_lines()
     -- active keys: only highest priority of each key, and not our (stats) keys
     local bindings = mp.get_property_native("input-bindings", {})
     local active = {}  -- map: key-name -> bind-info
@@ -482,8 +483,6 @@ local function get_kbinfo_lines(width)
                        or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%d\\u1}",
                                  o.font_mono, kspaces, o.font, 1.3*o.font_size)
     local spost = term and "" or format("{\\u0\\fs%d}", o.font_size)
-    local _, itabs = o.indent:gsub("\t", "")
-    local cutoff = term and (width or 79) - o.indent:len() - itabs * 7 - spre:len()
 
     -- create the display lines
     local info_lines = {}
@@ -497,38 +496,25 @@ local function get_kbinfo_lines(width)
         if bind.comment then
             bind.cmd = bind.cmd .. "  # " .. bind.comment
         end
-        append(info_lines, ellipsis(bind.cmd, cutoff),
-               { prefix = kpre .. no_ASS(align_right(bind.key)) .. kpost })
+        append(info_lines, bind.cmd, { prefix = kpre .. no_ASS(align_right(bind.key)) .. kpost })
     end
     return info_lines
 end
 
-local function append_general_perfdata(s, offset)
-    local perf_info = mp.get_property_native("perf-info") or {}
-    local count = 0
-    for _, data in ipairs(perf_info) do
-        count = count + 1
-    end
-    offset = max(1, min((offset or 1), count))
+local function append_general_perfdata(s)
+    for i, data in ipairs(mp.get_property_native("perf-info") or {}) do
+        append(s, data.text or data.value, {prefix="["..tostring(i).."] "..data.name..":"})
 
-    local i = 0
-    for _, data in ipairs(perf_info) do
-        i = i + 1
-        if i >= offset then
-            append(s, data.text or data.value, {prefix="["..tostring(i).."] "..data.name..":"})
-
-            if o.plot_perfdata and o.use_ass and data.value then
-                buf = perf_buffers[data.name]
-                if not buf then
-                    buf = {0, pos = 1, len = 50, max = 0}
-                    perf_buffers[data.name] = buf
-                end
-                graph_add_value(buf, data.value)
-                s[#s+1] = generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
+        if o.plot_perfdata and o.use_ass and data.value then
+            buf = perf_buffers[data.name]
+            if not buf then
+                buf = {0, pos = 1, len = 50, max = 0}
+                perf_buffers[data.name] = buf
             end
+            graph_add_value(buf, data.value)
+            s[#s] = s[#s] .. generate_graph(buf, buf.pos, buf.len, buf.max, nil, 0.8, 1)
         end
     end
-    return offset
 end
 
 local function append_display_sync(s)
@@ -865,7 +851,7 @@ local function add_video_out(s)
         append_property(s, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
-    append_perfdata(s, false, o.print_perfdata_passes)
+    append_perfdata(nil, s, false, o.print_perfdata_passes)
 
     if mp.get_property_native("deinterlace-active") then
         append_property(s, "deinterlace", {prefix="Deinterlacing:"})
@@ -950,19 +936,34 @@ end
 local function add_audio(s)
     local r = mp.get_property_native("audio-params")
     -- in case of e.g. lavfi-complex there can be no input audio, only output
-    if not r then
-        r = mp.get_property_native("audio-out-params")
-    end
+    local ro = mp.get_property_native("audio-out-params") or r
+    r = r or ro
     if not r then
         return
     end
 
+    local merge = function(r, ro, prop)
+        local a = r[prop] or ro[prop]
+        local b = ro[prop] or r[prop]
+        return (a == b or a == nil) and a or (a .. " → " .. b)
+    end
+
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
     append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
-    local cc = append(s, r["channel-count"], {prefix="Channels:"})
-    append(s, r["format"], {prefix="Format:", nl=cc and "" or o.nl,
+    append_property(s, "current-ao", {prefix="AO:", nl="",
+                                      indent=o.prefix_sep .. o.prefix_sep})
+    local dev = append_property(s, "audio-device", {prefix="Device:"})
+    local ao_mute = mp.get_property_native("ao-mute") and " (Muted)" or ""
+    append_property(s, "ao-volume", {prefix="AO Volume:", suffix="%" .. ao_mute,
+                                     nl=dev and "" or o.nl,
+                                     indent=dev and o.prefix_sep .. o.prefix_sep})
+    if math.abs(mp.get_property_native("audio-delay")) > 1e-6 then
+        append_property(s, "audio-delay", {prefix="A-V delay:"})
+    end
+    local cc = append(s, merge(r, ro, "channel-count"), {prefix="Channels:"})
+    append(s, merge(r, ro, "format"), {prefix="Format:", nl=cc and "" or o.nl,
                             indent=cc and o.prefix_sep .. o.prefix_sep})
-    append(s, r["samplerate"], {prefix="Sample Rate:", suffix=" Hz"})
+    append(s, merge(r, ro, "samplerate"), {prefix="Sample Rate:", suffix=" Hz"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
     append_filters(s, "af", "Filters:")
 end
@@ -990,6 +991,91 @@ local function eval_ass_formatting()
     end
 end
 
+-- assumptions:
+--   s is composed of SGR escape sequences and/or printable UTF8 sequences
+--   printable codepoints occupy one terminal cell (we don't have wcwidth)
+--   tabstops are 8, 16, 24..., and the output starts at 0 or a tabstop
+-- note: if maxwidth <= 2 and s doesn't fit: the result is "..." (more than 2)
+function term_ellipsis(s, maxwidth)
+    local TAB, ESC, SGR_END = 9, 27, ("m"):byte()
+    local width, ellipsis = 0, "..."
+    local fit_len, in_sgr
+
+    for i = 1, #s do
+        local x = s:byte(i)
+
+        if in_sgr then
+            in_sgr = x ~= SGR_END
+        elseif x == ESC then
+            in_sgr = true
+            ellipsis = "\27[0m..."  -- ensure SGR reset
+        elseif x < 128 or x >= 192 then  -- non UTF8-continuation
+            -- tab adds till the next stop, else add 1
+            width = width + (x == TAB and 8 - width % 8 or 1)
+
+            if fit_len == nil and width > maxwidth - 3 then
+                fit_len = i - 1  -- adding "..." still fits maxwidth
+            end
+            if width > maxwidth then
+                return s:sub(1, fit_len) .. ellipsis
+            end
+        end
+    end
+
+    return s
+end
+
+local function term_ellipsis_array(arr, from, to, max_width)
+    for i = from, to do
+        arr[i] = term_ellipsis(arr[i], max_width)
+    end
+    return arr
+end
+
+-- split str into a table
+-- example: local t = split(s, "\n")
+-- plain: whether pat is a plain string (default false - pat is a pattern)
+local function split(str, pat, plain)
+    local init = 1
+    local r, i, find, sub = {}, 1, string.find, string.sub
+    repeat
+        local f0, f1 = find(str, pat, init, plain)
+        r[i], i = sub(str, init, f0 and f0 - 1), i+1
+        init = f0 and f1 + 1
+    until f0 == nil
+    return r
+end
+
+-- Composes the output with header and scrollable content
+-- Returns string of the finished page and the actually chosen offset
+--
+-- header      : table of the header where each entry is one line
+-- content     : table of the content where each entry is one line
+-- apply_scroll: scroll the content
+local function finalize_page(header, content, apply_scroll)
+    local term_size = mp.get_property_native("term-size", {})
+    local term_width = o.term_width_limit or term_size.w or 80
+    local term_height = o.term_height_limit or term_size.h or 24
+    local from, to = 1, #content
+    if apply_scroll and term_height > 0 then
+        -- Up to 40 lines for libass because it can put a big performance toll on
+        -- libass to process many lines which end up outside (below) the screen.
+        -- In the terminal reduce height by 2 for the status line (can be more then one line)
+        local max_content_lines = (o.use_ass and 40 or term_height - 2) - #header
+        -- in the terminal the scrolling should stop once the last line is visible
+        local max_offset = o.use_ass and #content or #content - max_content_lines + 1
+        from = max(1, min((pages[curr_page].offset or 1), max_offset))
+        to = min(#content, from + max_content_lines - 1)
+        pages[curr_page].offset = from
+    end
+    local output = table.concat(header) .. table.concat(content, "", from, to)
+    if not o.use_ass and term_width > 0 then
+        local t = split(output, "\n", true)
+        -- limit width for the terminal
+        output = table.concat(term_ellipsis_array(t, 1, #t, term_width), "\n")
+    end
+    return output, from
+end
 
 -- Returns an ASS string with "normal" stats
 local function default_stats()
@@ -1000,70 +1086,44 @@ local function default_stats()
     add_video_out(stats)
     add_video(stats)
     add_audio(stats)
-    return table.concat(stats)
-end
-
-local function scroll_vo_stats(stats, fixed_items, offset)
-    local ret = {}
-    local count = #stats - fixed_items
-    offset = max(1, min((offset or 1), count))
-
-    for i, line in pairs(stats) do
-        if i <= fixed_items or i >= fixed_items + offset then
-            ret[#ret+1] = stats[i]
-        end
-    end
-    return ret, offset
+    return finalize_page({}, stats, false)
 end
 
 -- Returns an ASS string with extended VO stats
 local function vo_stats()
-    local stats = {}
+    local header, content = {}, {}
     eval_ass_formatting()
-    add_header(stats)
-
-    -- first line (title) added next is considered fixed
-    local fixed_items = #stats + 1
-    append_perfdata(stats, true, true)
-
-    local page = pages[o.key_page_2]
-    stats, page.offset = scroll_vo_stats(stats, fixed_items, page.offset)
-    return table.concat(stats)
+    add_header(header)
+    append_perfdata(header, content, true, true)
+    header = {table.concat(header)}
+    return finalize_page(header, content, false)
 end
 
 local kbinfo_lines = nil
-local function keybinding_info(after_scroll)
+local function keybinding_info(after_scroll, bindlist)
     local header = {}
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=format("%s: {\\fs%s}%s{\\fs%s}", page.desc,
-           o.font_size * 0.66, "(hint: scroll with ↑↓)", o.font_size), nl="",
-           indent=""})
+    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
+    header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
-        kbinfo_lines = get_kbinfo_lines()
+        kbinfo_lines = get_kbinfo_lines(o.term_width_limit)
     end
-    -- up to 20 lines for the terminal - so that mpv can also print
-    -- the status line without scrolling, and up to 40 lines for libass
-    -- because it can put a big performance toll on libass to process
-    -- many lines which end up outside (below) the screen.
-    local term = not o.use_ass
-    local nlines = #kbinfo_lines
-    page.offset = max(1, min((page.offset or 1), term and nlines - 20 or nlines))
-    local maxline = min(nlines, page.offset + (term and 20 or 40))
-    return table.concat(header) ..
-           table.concat(kbinfo_lines, "", page.offset, maxline)
+
+    return finalize_page(header, kbinfo_lines, not bindlist)
 end
 
 local function perf_stats()
-    local stats = {}
+    local header, content = {}, {}
     eval_ass_formatting()
-    add_header(stats)
+    add_header(header)
     local page = pages[o.key_page_0]
-    append(stats, "", {prefix=page.desc .. ":", nl="", indent=""})
-    page.offset = append_general_perfdata(stats, page.offset)
-    return table.concat(stats)
+    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
+    append_general_perfdata(content)
+    header = {table.concat(header)}
+    return finalize_page(header, content, true)
 end
 
 local function opt_time(t)
@@ -1084,7 +1144,7 @@ local function cache_stats()
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
         append(stats, "Unavailable.", {})
-        return table.concat(stats)
+        return finalize_page({}, stats, false)
     end
 
     local a = info["reader-pts"]
@@ -1162,7 +1222,7 @@ local function cache_stats()
                {prefix = format("Range %s:", n)})
     end
 
-    return table.concat(stats)
+    return finalize_page({}, stats, false)
 end
 
 -- Record 1 sample of cache statistics.
@@ -1412,9 +1472,8 @@ if o.bindlist ~= "no" then
     mp.add_timeout(0, function()  -- wait for all other scripts to finish init
         o.ass_formatting = false
         o.no_ass_indent = " "
-        eval_ass_formatting()
-        io.write(pages[o.key_page_4].desc .. ":" ..
-                 table.concat(get_kbinfo_lines(width)) .. "\n")
+        o.term_size = { w = width , h = 0}
+        io.write(keybinding_info(false, true) .. "\n")
         mp.command("quit")
     end)
 end

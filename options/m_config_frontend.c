@@ -871,7 +871,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         if (!defptr)
             defptr = &m_option_value_default;
         if (defptr)
-            def = m_option_pretty_print(opt, defptr);
+            def = m_option_pretty_print(opt, defptr, false);
         if (def) {
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);

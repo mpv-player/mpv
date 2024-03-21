@@ -1023,17 +1023,12 @@ static char *print_double(const m_option_t *opt, const void *val)
     return talloc_asprintf(NULL, "%f", f);
 }
 
-static char *print_double_7g(const m_option_t *opt, const void *val)
+static char *pretty_print_double(const m_option_t *opt, const void *val)
 {
     double f = VAL(val);
     if (isnan(f))
         return print_double(opt, val);
-    // Truncate anything < 1e-4 to avoid switching to scientific notation
-    if (fabs(f) < 1e-4) {
-        return talloc_strdup(NULL, "0");
-    } else {
-        return talloc_asprintf(NULL, "%.7g", f);
-    }
+    return mp_format_double(NULL, f, 4, false, false, !(opt->flags & M_OPT_FIXED_LEN_PRINT));
 }
 
 static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
@@ -1105,7 +1100,7 @@ const m_option_type_t m_option_type_double = {
     .size  = sizeof(double),
     .parse = parse_double,
     .print = print_double,
-    .pretty_print = print_double_7g,
+    .pretty_print = pretty_print_double,
     .copy  = copy_opt,
     .add = add_double,
     .multiply = multiply_double,
@@ -1131,7 +1126,7 @@ const m_option_type_t m_option_type_aspect = {
     .flags = M_OPT_TYPE_CHOICE | M_OPT_TYPE_USES_RANGE,
     .parse = parse_double_aspect,
     .print = print_double,
-    .pretty_print = print_double_7g,
+    .pretty_print = pretty_print_double,
     .copy  = copy_opt,
     .add = add_double,
     .multiply = multiply_double,
@@ -1159,10 +1154,10 @@ static char *print_float(const m_option_t *opt, const void *val)
     return print_double(opt, &tmp);
 }
 
-static char *print_float_f3(const m_option_t *opt, const void *val)
+static char *pretty_print_float(const m_option_t *opt, const void *val)
 {
     double tmp = VAL(val);
-    return print_double_7g(opt, &tmp);
+    return pretty_print_double(opt, &tmp);
 }
 
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
@@ -1207,7 +1202,7 @@ const m_option_type_t m_option_type_float = {
     .size  = sizeof(float),
     .parse = parse_float,
     .print = print_float,
-    .pretty_print = print_float_f3,
+    .pretty_print = pretty_print_float,
     .copy  = copy_opt,
     .add = add_float,
     .multiply = multiply_float,
@@ -2827,8 +2822,7 @@ static char *print_rel_time(const m_option_t *opt, const void *val)
     case REL_TIME_ABSOLUTE:
         return talloc_asprintf(NULL, "%g", t->pos);
     case REL_TIME_RELATIVE:
-        return talloc_asprintf(NULL, "%s%g",
-            (t->pos >= 0) ? "+" : "-", fabs(t->pos));
+        return talloc_asprintf(NULL, "%+g", t->pos);
     case REL_TIME_CHAPTER:
         return talloc_asprintf(NULL, "#%g", t->pos);
     case REL_TIME_PERCENT:
@@ -3792,7 +3786,7 @@ static void dup_node(void *ta_parent, struct mpv_node *node)
 
 static void copy_node(const m_option_t *opt, void *dst, const void *src)
 {
-    assert(sizeof(struct mpv_node) <= sizeof(union m_option_value));
+    static_assert(sizeof(struct mpv_node) <= sizeof(union m_option_value), "");
 
     if (!(dst && src))
         return;
