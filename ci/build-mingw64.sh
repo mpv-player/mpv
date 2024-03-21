@@ -10,6 +10,7 @@ gitclone="git clone --depth=1 --recursive --shallow-submodules"
 
 # -posix is Ubuntu's variant with pthreads support
 export CC=$TARGET-gcc-posix
+export AS=$TARGET-gcc-posix
 export CXX=$TARGET-g++-posix
 export AR=$TARGET-ar
 export NM=$TARGET-nm
@@ -50,9 +51,11 @@ EOF
 # CMake
 cmake_args=(
     -Wno-dev
+    -DCMAKE_SYSTEM_PROCESSOR="${fam}"
     -DCMAKE_SYSTEM_NAME=Windows
     -DCMAKE_FIND_ROOT_PATH="$PKG_CONFIG_SYSROOT_DIR"
     -DCMAKE_RC_COMPILER="${TARGET}-windres"
+    -DCMAKE_ASM_COMPILER="$AS"
     -DCMAKE_BUILD_TYPE=Release
 )
 
@@ -192,7 +195,7 @@ _vulkan_loader () {
     [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
     builddir Vulkan-Loader
     cmake .. "${cmake_args[@]}" \
-        -DENABLE_WERROR=OFF
+        -DENABLE_WERROR=OFF -DUSE_GAS=ON
     makeplusinstall
     popd
 }
@@ -310,8 +313,10 @@ if [ "$2" = pack ]; then
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
         av*.dll sw*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
         lib{shaderc_shared,spirv-cross-c-shared,dav1d}.dll zlib1.dll
-        # note: vulkan-1.dll is not here since drivers provide it
     )
+    if [[ -f vulkan-1.dll ]]; then
+        dlls+=(vulkan-1.dll)
+    fi
     mv -v "${dlls[@]}" ..
     popd
 
