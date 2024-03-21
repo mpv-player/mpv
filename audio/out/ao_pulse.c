@@ -804,6 +804,7 @@ const struct ao_driver audio_out_pulse = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .cfg_buffer = 100,
+        .cfg_latency_hacks = true,
     },
     .options = (const struct m_option[]) {
         {"host", OPT_STRING(cfg_host)},
