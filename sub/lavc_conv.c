@@ -89,6 +89,22 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     if (!priv->avpkt || !priv->avpkt_vtt)
         goto error;
 
+    switch (codec->id) {
+    case AV_CODEC_ID_DVB_TELETEXT:;
+        if (!sd->opts->teletext_page) {
+            av_dict_set(&opts, "txt_page", "subtitle", 0);
+        } else if (sd->opts->teletext_page == -1) {
+            av_dict_set(&opts, "txt_page", "*", 0);
+        } else {
+            av_dict_set_int(&opts, "txt_page", sd->opts->teletext_page, 0);
+        }
+        av_dict_set_int(&opts, "txt_format", 2, 0);
+        break;
+    case AV_CODEC_ID_ARIB_CAPTION:
+        av_dict_set_int(&opts, "sub_type", SUBTITLE_ASS, 0);
+        break;
+    }
+
 #if LIBAVCODEC_VERSION_MAJOR < 59
     av_dict_set(&opts, "sub_text_format", "ass", 0);
 #endif
