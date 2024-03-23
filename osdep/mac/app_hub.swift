@@ -20,6 +20,7 @@ class AppHub: NSObject {
 
     var mpv: OpaquePointer?
     @objc var input: InputHelper
+    var event: EventHelper?
 #if HAVE_MACOS_MEDIA_PLAYER
     var remote: RemoteCommandCenter?
 #endif
@@ -31,21 +32,16 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
-        if isApplication {
-            self.mpv = mpv
-            mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE)
-            mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE)
-            mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE)
-            mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG)
-            mpv_observe_property(mpv, 0, "media-title", MPV_FORMAT_STRING)
-            mpv_observe_property(mpv, 0, "chapter-metadata/title", MPV_FORMAT_STRING)
-            mpv_observe_property(mpv, 0, "metadata/by-key/album", MPV_FORMAT_STRING)
-            mpv_observe_property(mpv, 0, "metadata/by-key/artist", MPV_FORMAT_STRING)
-            mpv_set_wakeup_callback(mpv, wakeup, TypeHelper.bridge(obj: self))
-            return
-        }
-
-        mpv_destroy(mpv)
+        self.mpv = mpv
+        mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE)
+        mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE)
+        mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE)
+        mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG)
+        mpv_observe_property(mpv, 0, "media-title", MPV_FORMAT_STRING)
+        mpv_observe_property(mpv, 0, "chapter-metadata/title", MPV_FORMAT_STRING)
+        mpv_observe_property(mpv, 0, "metadata/by-key/album", MPV_FORMAT_STRING)
+        mpv_observe_property(mpv, 0, "metadata/by-key/artist", MPV_FORMAT_STRING)
+        event = EventHelper(mpv)
     }
 
     @objc func initInput(_ input: OpaquePointer?) {
