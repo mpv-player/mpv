@@ -516,7 +516,7 @@ endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
 
-features += {'glob-win32': win32 and not posix}
+features += {'glob-win32': win32 and not features['glob-posix']}
 if features['glob-win32']
     sources += files('osdep/glob-win.c')
 endif
@@ -712,13 +712,13 @@ if features['lua']
     sources += files('player/lua.c')
 endif
 if not features['lua'] and lua_opt == 'enabled'
-     error('lua enabled but no suitable lua version could be found!')
+     error('Lua enabled but no suitable Lua version could be found!')
 endif
 
 rubberband = dependency('rubberband', version: '>= 1.8.0', required: get_option('rubberband'))
 features += {'rubberband': rubberband.found()}
-features += {'rubberband-3': rubberband.version().version_compare('>= 3.0.0')}
 if features['rubberband']
+    features += {'rubberband-3': rubberband.version().version_compare('>= 3.0.0')}
     dependencies += rubberband
     sources += files('audio/filter/af_rubberband.c')
 endif
@@ -786,11 +786,12 @@ if features['alsa']
     sources += files('audio/out/ao_alsa.c')
 endif
 
+audiounit_opt = get_option('audiounit').require(darwin)
 audiounit = {
     'deps': dependency('appleframeworks', modules: ['Foundation', 'AudioToolbox'],
-                       required: get_option('audiounit')),
+                       required: audiounit_opt),
     'symbol': cc.has_header_symbol('AudioToolbox/AudioToolbox.h', 'kAudioUnitSubType_RemoteIO',
-                                   required: get_option('audiounit')),
+                                   required: audiounit_opt),
 }
 features += {'audiounit': audiounit['deps'].found() and audiounit['symbol']}
 if features['audiounit']
@@ -879,7 +880,8 @@ if features['sndio']
     sources += files('audio/out/ao_sndio.c')
 endif
 
-wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required: get_option('wasapi'))
+wasapi = cc.has_header_symbol('audioclient.h', 'IAudioClient', required:
+    get_option('wasapi').require(win32))
 features += {'wasapi': wasapi}
 if features['wasapi']
     sources += files('audio/out/ao_wasapi.c',
@@ -923,7 +925,11 @@ if features['drm']
                      'video/out/vo_drm.c')
 endif
 
-gbm = dependency('gbm', version: '>=17.1.0', required: get_option('gbm'))
+gbm_opt = get_option('gbm').require(
+    features['drm'],
+    error_message: 'drm was not found!'
+)
+gbm = dependency('gbm', version: '>= 17.1.0', required: gbm_opt)
 features += {'gbm': gbm.found()}
 if features['gbm']
     dependencies += gbm
@@ -944,7 +950,8 @@ if features['sdl2-video']
     sources += files('video/out/vo_sdl.c')
 endif
 
-shaderc = dependency('shaderc', required: get_option('shaderc').require(features['win32-desktop']))
+shaderc = dependency('shaderc', required:
+    get_option('shaderc').require(features['win32-desktop']))
 features += {'shaderc': shaderc.found()}
 if features['shaderc']
     dependencies += shaderc
@@ -963,7 +970,8 @@ if features['posix']
     features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
 endif
 
-spirv_cross = dependency('spirv-cross-c-shared', required: get_option('spirv-cross').require(features['win32-desktop']))
+spirv_cross = dependency('spirv-cross-c-shared', required:
+    get_option('spirv-cross').require(features['win32-desktop']))
 features += {'spirv-cross': spirv_cross.found()}
 if features['spirv-cross']
     dependencies += spirv_cross
@@ -1110,12 +1118,11 @@ if features['gl-x11']
     sources += files('video/out/opengl/context_glx.c')
 endif
 
-gl_dxinterop_d3d = gl_win32.allowed() and \
-                   cc.has_header_symbol('GL/wglext.h', 'WGL_ACCESS_READ_ONLY_NV',
-                                        prefix: '#include <GL/gl.h>')
-gl_dxinterop_gl = features['gl-win32'] and cc.has_header_symbol('d3d9.h', 'IDirect3D9Ex')
 gl_dxinterop = get_option('gl-dxinterop').require(
-    gl_dxinterop_d3d and gl_dxinterop_gl and gl_win32.allowed(),
+    features['gl-win32'] and
+        cc.has_header_symbol('GL/wglext.h', 'WGL_ACCESS_READ_ONLY_NV',
+                             prefix: '#include <GL/gl.h>') and
+        cc.has_header_symbol('d3d9.h', 'IDirect3D9Ex'),
     error_message: 'gl-dxinterop could not be found!',
 )
 features += {'gl-dxinterop': gl_dxinterop.allowed()}
@@ -1184,7 +1191,7 @@ if features['egl-android']
 endif
 
 egl_drm = get_option('egl-drm').require(
-    features['drm'] and features['egl'] and gbm.found() and gl_allowed,
+    features['drm'] and features['egl'] and features['gbm'] and gl_allowed,
     error_message: 'either drm, egl, or gbm could not be found!',
 )
 features += {'egl-drm': egl_drm.allowed()}
@@ -1193,8 +1200,12 @@ if features['egl-drm']
     sources += files('video/out/opengl/context_drm_egl.c')
 endif
 
-egl_wayland = dependency('wayland-egl', version: '>= 9.0.0', required: get_option('egl-wayland'))
-features += {'egl-wayland': features['egl'] and egl_wayland.found() and gl_allowed and features['wayland']}
+egl_wayland_opt = get_option('egl-wayland').require(
+    features['egl'] and features['wayland'] and gl_allowed,
+    error_message: 'either egl or wayland could not be found!',
+)
+egl_wayland = dependency('wayland-egl', version: '>= 9.0.0', required: egl_wayland_opt)
+features += {'egl-wayland': egl_wayland.found()}
 if features['egl-wayland']
     dependencies += egl_wayland
     features += {'gl': true}
@@ -1283,15 +1294,6 @@ if features['ffnvcodec']
     sources += files('video/cuda.c')
 endif
 
-android_media_ndk = get_option('android-media-ndk').require(
-    features['android'] and cc.has_header_symbol('media/NdkImageReader.h', 'AIMAGE_FORMAT_PRIVATE')
-)
-features += {'android-media-ndk': android_media_ndk.allowed()}
-if features['android-media-ndk']
-    # header only, library is dynamically loaded
-    sources += files('video/out/hwdec/hwdec_aimagereader.c')
-endif
-
 cuda_hwaccel = get_option('cuda-hwaccel').require(
     features['ffnvcodec'],
     error_message: 'ffnvcodec was not found!',
@@ -1305,12 +1307,21 @@ cuda_interop = get_option('cuda-interop').require(
     features['cuda-hwaccel'] and (features['gl'] or features['vulkan']),
     error_message: 'cuda-hwaccel and either gl or vulkan were not found!',
 )
-features += {'cuda-interop': cuda_interop.allowed() and (features['gl'] or features['vulkan'])}
+features += {'cuda-interop': cuda_interop.allowed()}
 if features['cuda-interop'] and features['gl']
     sources += files('video/out/hwdec/hwdec_cuda_gl.c')
 endif
 if features['cuda-interop'] and features['vulkan']
     sources += files('video/out/hwdec/hwdec_cuda_vk.c')
+endif
+
+android_media_ndk = get_option('android-media-ndk').require(
+    features['android'] and cc.has_header_symbol('media/NdkImageReader.h', 'AIMAGE_FORMAT_PRIVATE')
+)
+features += {'android-media-ndk': android_media_ndk.allowed()}
+if features['android-media-ndk']
+    # header only, library is dynamically loaded
+    sources += files('video/out/hwdec/hwdec_aimagereader.c')
 endif
 
 vulkan_interop = get_option('vulkan-interop').require(
@@ -1319,7 +1330,7 @@ vulkan_interop = get_option('vulkan-interop').require(
     error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238, and libavutil >= 58.11.100',
 )
 features += {'vulkan-interop': vulkan_interop.allowed()}
-if vulkan_interop.allowed()
+if features['vulkan-interop']
     sources += files('video/out/hwdec/hwdec_vulkan.c')
 endif
 
@@ -1333,7 +1344,7 @@ if features['d3d-hwaccel']
                      'video/filter/vf_d3d11vpp.c')
 endif
 
-if features['d3d-hwaccel'] and egl_angle.allowed()
+if features['d3d-hwaccel'] and features['egl-angle']
     sources += files('video/out/opengl/hwdec_d3d11egl.c')
 endif
 if features['d3d-hwaccel'] and features['d3d11']
@@ -1361,7 +1372,9 @@ if features['gl-dxinterop-d3d9']
     sources += files('video/out/opengl/hwdec_dxva2gldx.c')
 endif
 
-ios_gl = cc.has_header_symbol('OpenGLES/ES3/glext.h', 'GL_RGB32F', required: get_option('ios-gl'))
+# this is an arbitrary GLES 3.x symbol
+ios_gl = cc.has_header_symbol('OpenGLES/ES3/glext.h', 'GL_RGB32F', required:
+    get_option('ios-gl').require(darwin))
 features += {'ios-gl': ios_gl}
 if features['ios-gl']
     sources += files('video/out/hwdec/hwdec_ios_gl.m')
@@ -1369,29 +1382,30 @@ endif
 
 libva = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
 
-vaapi_drm = dependency('libva-drm', version: '>= 1.1.0',
-                       required: get_option('vaapi-drm').require(libva.found() and features['drm']))
+vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required:
+    get_option('vaapi-drm').require(libva.found() and features['drm']))
 features += {'vaapi-drm': vaapi_drm.found()}
 if features['vaapi-drm']
     dependencies += vaapi_drm
 endif
 
-vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0',
-                           required: get_option('vaapi-wayland').require(libva.found() and features['wayland']))
+vaapi_wayland = dependency('libva-wayland', version: '>= 1.1.0', required:
+    get_option('vaapi-wayland').require(libva.found() and features['wayland']))
 features += {'vaapi-wayland': vaapi_wayland.found()}
 if features['vaapi-wayland']
     dependencies += vaapi_wayland
 endif
 
-vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0',
-                       required: get_option('vaapi-x11').require(libva.found() and features['x11']))
+vaapi_x11 = dependency('libva-x11', version: '>= 1.1.0', required:
+    get_option('vaapi-x11').require(libva.found() and features['x11']))
 features += {'vaapi-x11': vaapi_x11.found()}
 if features['vaapi-x11']
     dependencies += vaapi_x11
     sources += files('video/out/vo_vaapi.c')
 endif
 
-vaapi_win32 = dependency('libva-win32', required: get_option('vaapi-win32').require(libva.found()))
+vaapi_win32 = dependency('libva-win32', required:
+    get_option('vaapi-win32').require(libva.found() and win32))
 features += {'vaapi-win32': vaapi_win32.found()}
 if features['vaapi-win32']
     dependencies += vaapi_win32
@@ -1410,8 +1424,7 @@ if features['vaapi']
                      'video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
-dmabuf_interop_gl = features['egl'] and features['drm']
-features += {'dmabuf-interop-gl': dmabuf_interop_gl}
+features += {'dmabuf-interop-gl': features['egl'] and features['drm']}
 if features['dmabuf-interop-gl']
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
@@ -1430,7 +1443,7 @@ if features['vdpau']
                      'video/vdpau_mixer.c')
 endif
 
-features += {'vdpau-gl-x11': vdpau.found() and gl_x11.allowed()}
+features += {'vdpau-gl-x11': features['vdpau'] and gl_x11.allowed()}
 if features['vdpau'] and features['vdpau-gl-x11']
     sources += files('video/out/opengl/hwdec_vdpau.c')
 endif
@@ -1440,7 +1453,8 @@ videotoolbox_gl = get_option('videotoolbox-gl').require(
     error_message: 'gl-cocoa nor ios-gl could be found!',
 )
 features += {'videotoolbox-gl': videotoolbox_gl.allowed()}
-corevideo = dependency('appleframeworks', modules: ['CoreVideo'], required: get_option('videotoolbox-pl'))
+corevideo = dependency('appleframeworks', modules: ['CoreVideo'], required:
+    get_option('videotoolbox-pl').require(darwin))
 videotoolbox_pl = get_option('videotoolbox-pl').require(
     features['vulkan'] and corevideo.found(),
     error_message: 'vulkan or CV metal support could be found!',
