@@ -225,12 +225,12 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
 
     @objc func buttonAction(_ button: NSButton) {
         guard let identifier = getIdentifierFrom(view: button), let command = configs[identifier]?.command else { return }
-        EventsResponder.sharedInstance().inputHelper.command(command)
+        AppHub.shared.input.command(command)
     }
 
     @objc func seekbarChanged(_ slider: NSSlider) {
         guard let identifier = getIdentifierFrom(view: slider), let command = configs[identifier]?.command else { return }
-        EventsResponder.sharedInstance().inputHelper.command(String(format: command, slider.doubleValue))
+        AppHub.shared.input.command(String(format: command, slider.doubleValue))
     }
 
     func format(time: Int) -> String {

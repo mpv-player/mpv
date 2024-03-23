@@ -19,8 +19,16 @@ if get_option('optimization') != '0'
     swift_flags += '-O'
 endif
 
+if macos_cocoa_cb.allowed()
+    swift_flags += ['-D', 'HAVE_MACOS_COCOA_CB']
+endif
+
 if macos_touchbar.allowed()
     swift_flags += ['-D', 'HAVE_MACOS_TOUCHBAR']
+endif
+
+if macos_media_player.allowed()
+    swift_flags += ['-D', 'HAVE_MACOS_MEDIA_PLAYER']
 endif
 
 extra_flags = get_option('swift-flags').split()

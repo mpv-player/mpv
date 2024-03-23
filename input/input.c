@@ -50,7 +50,7 @@
 #include "common/common.h"
 
 #if HAVE_COCOA
-#include "osdep/mac/events.h"
+#include "osdep/mac/app_bridge.h"
 #endif
 
 #define input_lock(ictx)    mp_mutex_lock(&ictx->mutex)

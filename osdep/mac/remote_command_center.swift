@@ -155,7 +155,7 @@ class RemoteCommandCenter: NSObject {
             self.configs[event.command]?.state = state
         }
 
-        EventsResponder.sharedInstance().inputHelper.put(key: config.key | Int32(state))
+        AppHub.shared.input.put(key: config.key | Int32(state))
 
         return .success
     }
@@ -166,7 +166,7 @@ class RemoteCommandCenter: NSObject {
         }
 
         let cmd = String(format: "seek %.02f absolute", posEvent.positionTime)
-        return EventsResponder.sharedInstance().inputHelper.command(cmd) ? .success : .commandFailed
+        return AppHub.shared.input.command(cmd) ? .success : .commandFailed
     }
 
     @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {
