@@ -24,6 +24,9 @@ class AppHub: NSObject {
 #if HAVE_MACOS_MEDIA_PLAYER
     var remote: RemoteCommandCenter?
 #endif
+#if HAVE_MACOS_TOUCHBAR
+    @objc var touchBar: TouchBar?
+#endif
 
     var isApplication: Bool { get { NSApp is Application } }
 
@@ -44,6 +47,9 @@ class AppHub: NSObject {
         event = EventHelper(mpv)
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.registerEvents()
+#endif
+#if HAVE_MACOS_TOUCHBAR
+        touchBar = TouchBar()
 #endif
     }
 

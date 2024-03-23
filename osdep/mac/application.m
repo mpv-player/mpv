@@ -157,7 +157,7 @@ static const char mac_icon[] =
 #if HAVE_MACOS_TOUCHBAR
 - (NSTouchBar *)makeTouchBar
 {
-    return [[TouchBar alloc] init];
+    return [[AppHub shared] touchBar];
 }
 #endif
 
