@@ -216,9 +216,9 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
 
     // Set cursor state
     if (new_lines && !root->status_lines) {
-        bstr_xappend(root, out, bstr0("\033[?25l"));
+        bstr_xappend(root, out, bstr0(TERM_ESC_HIDE_CURSOR));
     } else if (!new_lines && root->status_lines) {
-        bstr_xappend(root, out, bstr0("\033[?25h"));
+        bstr_xappend(root, out, bstr0(TERM_ESC_RESTORE_CURSOR));
     }
 
     int line_skip = 0;
