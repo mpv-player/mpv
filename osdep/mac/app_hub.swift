@@ -29,6 +29,10 @@ class AppHub: NSObject {
 
     private override init() {
         input = InputHelper()
+        super.init()
+#if HAVE_MACOS_MEDIA_PLAYER
+        remote = RemoteCommandCenter(self)
+#endif
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
@@ -37,11 +41,10 @@ class AppHub: NSObject {
         mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE)
         mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE)
         mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG)
-        mpv_observe_property(mpv, 0, "media-title", MPV_FORMAT_STRING)
-        mpv_observe_property(mpv, 0, "chapter-metadata/title", MPV_FORMAT_STRING)
-        mpv_observe_property(mpv, 0, "metadata/by-key/album", MPV_FORMAT_STRING)
-        mpv_observe_property(mpv, 0, "metadata/by-key/artist", MPV_FORMAT_STRING)
         event = EventHelper(mpv)
+#if HAVE_MACOS_MEDIA_PLAYER
+        remote?.registerEvents()
+#endif
     }
 
     @objc func initInput(_ input: OpaquePointer?) {
@@ -55,7 +58,6 @@ class AppHub: NSObject {
 
     @objc func startRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
-        if remote == nil { remote = RemoteCommandCenter() }
         remote?.start()
 #endif
     }
@@ -82,12 +84,6 @@ class AppHub: NSObject {
         if let app = NSApp as? Application {
             app.processEvent(event)
         }
-
-#if HAVE_MACOS_MEDIA_PLAYER
-        if let remote = remote {
-            remote.processEvent(event)
-        }
-#endif
 
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
