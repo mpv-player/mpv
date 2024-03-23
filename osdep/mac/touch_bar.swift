@@ -73,7 +73,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate {
     var isPaused: Bool = false { didSet { updatePlayButton() } }
     var position: Double = 0 { didSet { updateTouchBarTimeItems() } }
     var duration: Double = 0 { didSet { updateTouchBarTimeItems() } }
-    var rate: Double = 0
+    var rate: Double = 1
 
     override init() {
         super.init()
