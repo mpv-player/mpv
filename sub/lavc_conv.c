@@ -32,6 +32,7 @@
 
 struct lavc_conv {
     struct mp_log *log;
+    struct mp_subtitle_opts *opts;
     AVCodecContext *avctx;
     AVPacket *avpkt;
     AVPacket *avpkt_vtt;
@@ -70,6 +71,7 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
 {
     struct lavc_conv *priv = talloc_zero(NULL, struct lavc_conv);
     priv->log = sd->log;
+    priv->opts = sd->opts;
     priv->cur_list = talloc_array(priv, char*, 0);
     priv->codec = talloc_strdup(priv, sd->codec->codec);
     AVCodecContext *avctx = NULL;
@@ -88,6 +90,15 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     priv->avpkt_vtt = av_packet_alloc();
     if (!priv->avpkt || !priv->avpkt_vtt)
         goto error;
+
+    switch (codec->id) {
+    case AV_CODEC_ID_DVB_TELETEXT:
+        av_dict_set_int(&opts, "txt_format", 2, 0);
+        break;
+    case AV_CODEC_ID_ARIB_CAPTION:
+        av_dict_set_int(&opts, "sub_type", SUBTITLE_ASS, 0);
+        break;
+    }
 
 #if LIBAVCODEC_VERSION_MAJOR < 59
     av_dict_set(&opts, "sub_text_format", "ass", 0);
@@ -247,6 +258,18 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
             goto done;
         }
         curr_pkt = priv->avpkt_vtt;
+    }
+
+    if (avctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
+        if (!priv->opts->teletext_page) {
+            av_opt_set(avctx, "txt_page", "subtitle", AV_OPT_SEARCH_CHILDREN);
+        } else if (priv->opts->teletext_page == -1) {
+            av_opt_set(avctx, "txt_page", "*", AV_OPT_SEARCH_CHILDREN);
+        } else {
+            char page[4];
+            snprintf(page, sizeof(page), "%d", priv->opts->teletext_page);
+            av_opt_set(avctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+        }
     }
 
     ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, curr_pkt);
