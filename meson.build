@@ -47,7 +47,6 @@ features = {
     'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
     'avif-muxer': libavformat.version().version_compare('>= 59.24.100'),
     'libass': true,
-    'threads': true,
     'libplacebo': true,
 }
 
@@ -327,18 +326,13 @@ if posix
     flags += ['-D_GNU_SOURCE']
 endif
 
-noexecstack = false
 if cc.has_link_argument('-Wl,-z,noexecstack')
     link_flags += '-Wl,-z,noexecstack'
-    noexecstack = true
 endif
 
 if cc.has_link_argument('-Wl,--nxcompat,--no-seh,--dynamicbase')
     link_flags += '-Wl,--nxcompat,--no-seh,--dynamicbase'
-    noexecstack = true
 endif
-
-features += {'noexecstack': noexecstack}
 
 features += {'build-date': get_option('build-date')}
 if not features['build-date']
@@ -676,14 +670,12 @@ if features['libbluray']
 endif
 
 libm = cc.find_library('m', required: false)
-features += {'libm': libm.found()}
-if features['libm']
+if libm.found()
     dependencies += libm
 endif
 
 librt = cc.find_library('rt', required: false)
-features += {'librt': librt.found()}
-if features['librt']
+if librt.found()
     dependencies += librt
 endif
 
@@ -1575,8 +1567,7 @@ endif
 # manpages
 manpage = 'DOCS/man/mpv.rst'
 rst2man = find_program('rst2man', 'rst2man.py', required: get_option('manpage-build'))
-features += {'manpage-build': rst2man.found()}
-if features['manpage-build']
+if rst2man.found()
     mandir = get_option('mandir')
     custom_target('manpages',
         input: manpage,
@@ -1593,8 +1584,7 @@ if features['manpage-build']
 endif
 
 rst2html = find_program('rst2html', 'rst2html.py', required: get_option('html-build'))
-features += {'html-build': rst2html.found()}
-if features['html-build']
+if rst2html.found()
     datadir = get_option('datadir')
     custom_target('html-manpages',
         input: manpage,
@@ -1610,8 +1600,7 @@ if features['html-build']
 endif
 
 rst2pdf = find_program('rst2pdf', required: get_option('pdf-build'))
-features += {'pdf-build': rst2pdf.found()}
-if features['pdf-build']
+if rst2pdf.found()
     dependency_file = rst2pdf.version().version_compare('>=0.100')
     datadir = get_option('datadir')
     custom_target('pdf-manpages',
