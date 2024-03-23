@@ -7060,6 +7060,11 @@ void command_uninit(struct MPContext *mpctx)
     mpctx->command_ctx = NULL;
 }
 
+static int str_compare(const void *a, const void *b)
+{
+    return strcmp(*(const char **)a, *(const char **)b);
+}
+
 void command_init(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = talloc(NULL, struct command_ctx);
@@ -7073,6 +7078,11 @@ void command_init(struct MPContext *mpctx)
     ctx->properties =
         talloc_zero_array(ctx, struct m_property, num_base + num_opts + 1);
     memcpy(ctx->properties, mp_properties_base, sizeof(mp_properties_base));
+
+    const char **prop_names = talloc_array(NULL, const char *, num_base);
+    for (int i = 0; i < num_base; ++i)
+        prop_names[i] = mp_properties_base[i].name;
+    qsort(prop_names, num_base, sizeof(const char *), str_compare);
 
     int count = num_base;
     for (int n = 0; n < num_opts; n++) {
@@ -7107,7 +7117,7 @@ void command_init(struct MPContext *mpctx)
         }
 
         // The option might be covered by a manual property already.
-        if (m_property_list_find(ctx->properties, prop.name))
+        if (bsearch(&prop.name, prop_names, num_base, sizeof(const char *), str_compare))
             continue;
 
         ctx->properties[count++] = prop;
@@ -7115,6 +7125,7 @@ void command_init(struct MPContext *mpctx)
 
     node_init(&ctx->udata, MPV_FORMAT_NODE_MAP, NULL);
     talloc_steal(ctx, ctx->udata.u.list);
+    talloc_free(prop_names);
 }
 
 static void command_event(struct MPContext *mpctx, int event, void *arg)
