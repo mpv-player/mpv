@@ -1518,6 +1518,7 @@ features += {'swift': swift.allowed()}
 swift_sources = []
 if features['cocoa'] and features['swift']
     swift_sources += files('osdep/mac/libmpv_helper.swift',
+                           'osdep/mac/event_helper.swift',
                            'osdep/mac/input_helper.swift',
                            'osdep/mac/log_helper.swift',
                            'osdep/mac/menu_bar.swift',
