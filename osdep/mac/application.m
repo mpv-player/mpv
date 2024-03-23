@@ -26,7 +26,6 @@
 #include "options/options.h"
 
 #import "osdep/mac/application_objc.h"
-#import "osdep/mac/events_objc.h"
 #include "osdep/threads.h"
 #include "osdep/main-fn.h"
 
@@ -87,7 +86,7 @@ static mp_thread playback_thread_id;
 
 @interface Application ()
 {
-    EventsResponder *_eventsResponder;
+    AppHub *_appHub;
 }
 
 @end
@@ -112,15 +111,15 @@ static void terminate_cocoa_application(void)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    if ([self modalWindow] || ![_eventsResponder.inputHelper processKeyWithEvent:event])
+    if ([self modalWindow] || ![_appHub.input processKeyWithEvent:event])
         [super sendEvent:event];
-    [_eventsResponder.inputHelper wakeup];
+    [_appHub.input wakeup];
 }
 
 - (id)init
 {
     if (self = [super init]) {
-        _eventsResponder = [EventsResponder sharedInstance];
+        _appHub = [AppHub shared];
 
         NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
         [em setEventHandler:self
@@ -203,7 +202,7 @@ static const char mac_icon[] =
 - (void)handleQuitEvent:(NSAppleEventDescriptor *)event
          withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 {
-    if (![_eventsResponder.inputHelper command:@"quit"])
+    if (![_appHub.input command:@"quit"])
         terminate_cocoa_application();
 }
 
@@ -219,7 +218,7 @@ static const char mac_icon[] =
                      range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
     url = [url stringByRemovingPercentEncoding];
-    [_eventsResponder.inputHelper openWithFiles:@[url]];
+    [_appHub.input openWithFiles:@[url]];
 }
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
@@ -231,7 +230,7 @@ static const char mac_icon[] =
 
     SEL cmpsel = @selector(localizedStandardCompare:);
     NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
-    [_eventsResponder.inputHelper openWithFiles:files];
+    [_appHub.input openWithFiles:files];
 }
 @end
 
@@ -315,7 +314,6 @@ int cocoa_main(int argc, char *argv[])
 {
     @autoreleasepool {
         application_instantiated = true;
-        [[EventsResponder sharedInstance] setIsApplication:YES];
 
         struct playback_thread_ctx ctx = {0};
         ctx.argc     = &argc;
@@ -332,7 +330,7 @@ int cocoa_main(int argc, char *argv[])
         }
 
         mp_thread_create(&playback_thread_id, playback_thread, &ctx);
-        [[EventsResponder sharedInstance].inputHelper wait];
+        [[AppHub shared].input wait];
         cocoa_run_runloop();
 
         // This should never be reached: cocoa_run_runloop blocks until the

@@ -71,7 +71,7 @@ static const char def_config[] =
 ;
 
 #if HAVE_COCOA
-#include "osdep/mac/events.h"
+#include "osdep/mac/app_bridge.h"
 #endif
 
 #ifndef FULLCONFIG
