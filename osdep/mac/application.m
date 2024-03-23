@@ -175,7 +175,8 @@ static const char mac_icon[] =
 {
 #if HAVE_MACOS_COCOA_CB
     if (!_cocoa_cb) {
-        [NSApp setCocoaCB:[[CocoaCB alloc] init:ctx]];
+        mpv_handle *mpv = mpv_create_client(ctx, "cocoacb");
+        [NSApp setCocoaCB:[[CocoaCB alloc] init:mpv]];
     }
 #endif
 }
