@@ -21,7 +21,7 @@ class CocoaCB: Common {
     var libmpv: LibmpvHelper
     var layer: GLLayer?
 
-    @objc var isShuttingDown: Bool = false
+    var isShuttingDown: Bool = false
 
     enum State {
         case uninitialized
@@ -199,7 +199,7 @@ class CocoaCB: Common {
         return super.control(vo, events: events, request: request, data: data)
     }
 
-    func shutdown(_ destroy: Bool = false) {
+    func shutdown() {
         isShuttingDown = window?.isAnimating ?? false ||
                          window?.isInFullscreen ?? false && option.vo.native_fs
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
@@ -211,14 +211,13 @@ class CocoaCB: Common {
         uninitCommon()
 
         layer?.lockCglContext()
-        libmpv.deinitRender()
+        libmpv.uninit()
         layer?.unlockCglContext()
-        libmpv.deinitMPV(destroy)
     }
 
     func checkShutdown() {
         if isShuttingDown {
-            shutdown(true)
+            shutdown()
         }
     }
 

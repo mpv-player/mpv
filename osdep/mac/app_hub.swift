@@ -95,12 +95,6 @@ class AppHub: NSObject {
 
         switch event.pointee.event_id {
         case MPV_EVENT_SHUTDOWN:
-#if HAVE_MACOS_COCOA_CB
-            if let app = NSApp as? Application, app.cocoaCB?.isShuttingDown ?? false {
-                mpv = nil;
-                return
-            }
-#endif
             mpv_destroy(mpv)
             mpv = nil
         default: break
