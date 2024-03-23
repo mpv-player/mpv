@@ -53,6 +53,33 @@ extension mp_keymap {
     }
 }
 
+extension mpv_event_id: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case MPV_EVENT_NONE: return "MPV_EVENT_NONE2"
+        case MPV_EVENT_SHUTDOWN: return "MPV_EVENT_SHUTDOWN"
+        case MPV_EVENT_LOG_MESSAGE: return "MPV_EVENT_LOG_MESSAGE"
+        case MPV_EVENT_GET_PROPERTY_REPLY: return "MPV_EVENT_GET_PROPERTY_REPLY"
+        case MPV_EVENT_SET_PROPERTY_REPLY: return "MPV_EVENT_SET_PROPERTY_REPLY"
+        case MPV_EVENT_COMMAND_REPLY: return "MPV_EVENT_COMMAND_REPLY"
+        case MPV_EVENT_START_FILE: return "MPV_EVENT_START_FILE"
+        case MPV_EVENT_END_FILE: return "MPV_EVENT_END_FILE"
+        case MPV_EVENT_FILE_LOADED: return "MPV_EVENT_FILE_LOADED"
+        case MPV_EVENT_IDLE: return "MPV_EVENT_IDLE"
+        case MPV_EVENT_TICK: return "MPV_EVENT_TICK"
+        case MPV_EVENT_CLIENT_MESSAGE: return "MPV_EVENT_CLIENT_MESSAGE"
+        case MPV_EVENT_VIDEO_RECONFIG: return "MPV_EVENT_VIDEO_RECONFIG"
+        case MPV_EVENT_AUDIO_RECONFIG: return "MPV_EVENT_AUDIO_RECONFIG"
+        case MPV_EVENT_SEEK: return "MPV_EVENT_SEEK"
+        case MPV_EVENT_PLAYBACK_RESTART: return "MPV_EVENT_PLAYBACK_RESTART"
+        case MPV_EVENT_PROPERTY_CHANGE: return "MPV_EVENT_PROPERTY_CHANGE"
+        case MPV_EVENT_QUEUE_OVERFLOW: return "MPV_EVENT_QUEUE_OVERFLOW"
+        case MPV_EVENT_HOOK: return "MPV_EVENT_HOOK"
+        default: return "MPV_EVENT_" + String(self.rawValue)
+        }
+    }
+}
+
 extension Bool {
     init(_ int32: Int32) {
         self.init(int32 != 0)
