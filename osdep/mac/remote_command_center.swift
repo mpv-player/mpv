@@ -45,7 +45,7 @@ class RemoteCommandCenter: NSObject {
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
     var duration: Double = 0 { didSet { updateInfoCenter() } }
     var position: Double = 0 { didSet { updateInfoCenter() } }
-    var rate: Double = 0 { didSet { updateInfoCenter() } }
+    var rate: Double = 1 { didSet { updateInfoCenter() } }
     var title: String = "" { didSet { updateInfoCenter() } }
     var chapter: String? { didSet { updateInfoCenter() } }
     var album: String? { didSet { updateInfoCenter() } }
