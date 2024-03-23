@@ -161,13 +161,6 @@ static const char mac_icon[] =
 }
 #endif
 
-- (void)processEvent:(struct mpv_event *)event
-{
-#if HAVE_MACOS_TOUCHBAR
-    [(TouchBar *)self.touchBar processEvent:event];
-#endif
-}
-
 - (void)initCocoaCb:(struct mpv_handle *)ctx
 {
 #if HAVE_MACOS_COCOA_CB

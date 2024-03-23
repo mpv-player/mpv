@@ -40,16 +40,12 @@ class AppHub: NSObject {
 
     @objc func initMpv(_ mpv: OpaquePointer) {
         self.mpv = mpv
-        mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE)
-        mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE)
-        mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE)
-        mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG)
         event = EventHelper(mpv)
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.registerEvents()
 #endif
 #if HAVE_MACOS_TOUCHBAR
-        touchBar = TouchBar()
+        touchBar = TouchBar(self)
 #endif
     }
 
@@ -72,30 +68,5 @@ class AppHub: NSObject {
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.stop()
 #endif
-    }
-
-    let wakeup: EventHelper.wakeup_cb = { ( ctx ) in
-        let event = unsafeBitCast(ctx, to: AppHub.self)
-        DispatchQueue.main.async { event.eventLoop() }
-    }
-
-    func eventLoop() {
-        while let mpv = mpv, let event = mpv_wait_event(mpv, 0) {
-            if event.pointee.event_id == MPV_EVENT_NONE { break }
-            handle(event: event)
-        }
-    }
-
-    func handle(event: UnsafeMutablePointer<mpv_event>) {
-        if let app = NSApp as? Application {
-            app.processEvent(event)
-        }
-
-        switch event.pointee.event_id {
-        case MPV_EVENT_SHUTDOWN:
-            mpv_destroy(mpv)
-            mpv = nil
-        default: break
-        }
     }
 }
