@@ -166,9 +166,6 @@ static const char mac_icon[] =
 #if HAVE_MACOS_TOUCHBAR
     [(TouchBar *)self.touchBar processEvent:event];
 #endif
-    if (_cocoa_cb) {
-        [_cocoa_cb processEvent:event];
-    }
 }
 
 - (void)initCocoaCb:(struct mpv_handle *)ctx

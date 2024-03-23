@@ -17,7 +17,7 @@
 
 import Cocoa
 
-class CocoaCB: Common {
+class CocoaCB: Common, EventSubscriber {
     var libmpv: LibmpvHelper
     var layer: GLLayer?
 
@@ -37,6 +37,7 @@ class CocoaCB: Common {
         libmpv = LibmpvHelper(mpvHandle, newlog)
         super.init(option, newlog)
         layer = GLLayer(cocoaCB: self)
+        AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
@@ -221,12 +222,7 @@ class CocoaCB: Common {
         }
     }
 
-    @objc func processEvent(_ event: UnsafePointer<mpv_event>) {
-        switch event.pointee.event_id {
-        case MPV_EVENT_SHUTDOWN:
-            shutdown()
-        default:
-            break
-        }
+    func handle(event: EventHelper.Event) {
+        if event.name == String(describing: MPV_EVENT_SHUTDOWN) { shutdown() }
     }
 }
