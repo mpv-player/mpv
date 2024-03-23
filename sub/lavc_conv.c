@@ -66,13 +66,12 @@ static void disable_styles(bstr header)
     }
 }
 
-struct lavc_conv *lavc_conv_create(struct mp_log *log,
-                                   const struct mp_codec_params *mp_codec)
+struct lavc_conv *lavc_conv_create(struct sd *sd)
 {
     struct lavc_conv *priv = talloc_zero(NULL, struct lavc_conv);
-    priv->log = log;
+    priv->log = sd->log;
     priv->cur_list = talloc_array(priv, char*, 0);
-    priv->codec = talloc_strdup(priv, mp_codec->codec);
+    priv->codec = talloc_strdup(priv, sd->codec->codec);
     AVCodecContext *avctx = NULL;
     AVDictionary *opts = NULL;
     const char *fmt = get_lavc_format(priv->codec);
@@ -82,7 +81,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log,
     avctx = avcodec_alloc_context3(codec);
     if (!avctx)
         goto error;
-    if (mp_set_avctx_codec_headers(avctx, mp_codec) < 0)
+    if (mp_set_avctx_codec_headers(avctx, sd->codec) < 0)
         goto error;
 
     priv->avpkt = av_packet_alloc();

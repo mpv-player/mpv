@@ -51,8 +51,7 @@ struct sd_functions {
 
 // lavc_conv.c
 struct lavc_conv;
-struct lavc_conv *lavc_conv_create(struct mp_log *log,
-                                   const struct mp_codec_params *mp_codec);
+struct lavc_conv *lavc_conv_create(struct sd *sd);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);
 char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
                         double *sub_pts, double *sub_duration);
