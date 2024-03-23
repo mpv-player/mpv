@@ -271,7 +271,7 @@ static int init(struct sd *sd)
         strcmp(sd->codec->codec, "null") != 0)
     {
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->codec);
+        ctx->converter = lavc_conv_create(sd);
         if (!ctx->converter)
             return -1;
 
