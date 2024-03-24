@@ -42,6 +42,7 @@ extension RemoteCommandCenter {
 class RemoteCommandCenter: EventSubscriber {
     unowned let appHub: AppHub
     var event: EventHelper? { get { return appHub.event } }
+    var input: InputHelper { get { return appHub.input } }
     var configs: [MPRemoteCommand:Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
@@ -168,7 +169,7 @@ class RemoteCommandCenter: EventSubscriber {
             self.configs[event.command]?.state = state
         }
 
-        AppHub.shared.input.put(key: config.key | Int32(state))
+        self.input.put(key: config.key | Int32(state))
 
         return .success
     }
@@ -179,7 +180,7 @@ class RemoteCommandCenter: EventSubscriber {
         }
 
         let cmd = String(format: "seek %.02f absolute", posEvent.positionTime)
-        return AppHub.shared.input.command(cmd) ? .success : .commandFailed
+        return self.input.command(cmd) ? .success : .commandFailed
     }
 
     func handle(event: EventHelper.Event) {
