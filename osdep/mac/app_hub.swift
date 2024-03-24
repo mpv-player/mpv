@@ -39,8 +39,9 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
-        self.mpv = mpv
-        event = EventHelper(mpv)
+        event = EventHelper(self, mpv)
+        self.mpv = event?.mpv
+
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.registerEvents()
 #endif
@@ -54,7 +55,7 @@ class AppHub: NSObject {
     }
 
     @objc func initCocoaCb() {
-        guard let app = NSApp as? Application else { return }
+        guard let app = NSApp as? Application, let mpv = mpv else { return }
         DispatchQueue.main.sync { app.initCocoaCb(mpv) }
     }
 
