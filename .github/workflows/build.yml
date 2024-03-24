@@ -395,7 +395,7 @@ jobs:
             spirv-cross:p
             uchardet:p
             vapoursynth:p
-            vulkan:p
+            vulkan-devel:p
 
       - name: Build with meson
         id: build
