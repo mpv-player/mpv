@@ -86,6 +86,7 @@ struct vo_wayland_state {
     double scaling;
     int timeout_count;
     int wakeup_pipe[2];
+    int resizing;
 
     /* content-type */
     /* TODO: unvoid these if required wayland protocols is bumped to 1.27+ */
