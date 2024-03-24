@@ -71,6 +71,7 @@ extension TouchBar {
 class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
     unowned let appHub: AppHub
     var event: EventHelper? { get { return appHub.event } }
+    var input: InputHelper { get { return appHub.input } }
     var configs: [NSTouchBarItem.Identifier:Config] = [:]
     var isPaused: Bool = false { didSet { updatePlayButton() } }
     var position: Double = 0 { didSet { updateTouchBarTimeItems() } }
@@ -234,12 +235,12 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
 
     @objc func buttonAction(_ button: NSButton) {
         guard let identifier = getIdentifierFrom(view: button), let command = configs[identifier]?.command else { return }
-        AppHub.shared.input.command(command)
+        input.command(command)
     }
 
     @objc func seekbarChanged(_ slider: NSSlider) {
         guard let identifier = getIdentifierFrom(view: slider), let command = configs[identifier]?.command else { return }
-        AppHub.shared.input.command(String(format: command, slider.doubleValue))
+        input.command(String(format: command, slider.doubleValue))
     }
 
     func format(time: Int) -> String {
