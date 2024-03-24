@@ -206,8 +206,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
-        // This is a literal string as it's not in the official headers yet.
-        "VK_MESA_video_decode_av1",
+        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
     };
 
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
