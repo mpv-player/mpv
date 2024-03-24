@@ -3850,7 +3850,7 @@ static int do_list_udata(int item, int action, void *arg, void *ctx)
 {
     struct udata_ctx nctx = *(struct udata_ctx*)ctx;
     nctx.node = &nctx.node->u.list->values[item];
-    nctx.ta_parent = &nctx.node->u.list;
+    nctx.ta_parent = nctx.node->u.list;
 
     return do_op_udata(&nctx, action, arg);
 }
@@ -3876,7 +3876,7 @@ static int mp_property_udata(void *ctx, struct m_property *prop,
         .mpctx = mpctx,
         .path = path,
         .node = &mpctx->command_ctx->udata,
-        .ta_parent = &mpctx->command_ctx,
+        .ta_parent = mpctx->command_ctx,
     };
 
     int ret = do_op_udata(&nctx, action, arg);
