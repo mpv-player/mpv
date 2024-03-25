@@ -765,7 +765,8 @@ double mp_scaletempo2_get_latency(struct mp_scaletempo2 *p, double playback_rate
 
 bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_rate)
 {
-    return p->input_buffer_final_frames > p->target_block_index
+    return (p->input_buffer_final_frames > p->target_block_index &&
+            p->input_buffer_final_frames > 0)
         || can_perform_wsola(p, playback_rate)
         || p->num_complete_frames > 0;
 }
