@@ -70,4 +70,11 @@ class AppHub: NSObject {
         remote?.stop()
 #endif
     }
+
+    func getIcon() -> NSImage {
+        guard let iconData = app_bridge_icon(), let icon = NSImage(data: iconData) else {
+            return NSImage(size: NSSize(width: 1, height: 1))
+        }
+        return icon
+    }
 }

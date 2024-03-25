@@ -358,10 +358,8 @@ class Common: NSObject {
     }
 
     func setAppIcon() {
-        if let app = NSApp as? Application,
-            ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true"
-        {
-            NSApp.applicationIconImage = app.getMPVIcon()
+        if ProcessInfo.processInfo.environment["MPVBUNDLE"] != "true" {
+            NSApp.applicationIconImage = AppHub.shared.getIcon()
         }
     }
 

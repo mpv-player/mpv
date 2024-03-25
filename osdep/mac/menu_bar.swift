@@ -79,7 +79,7 @@ class MenuBar: NSObject {
         UserDefaults.standard.set(true, forKey: "NSDisabledDictationMenuItem")
         UserDefaults.standard.set(true, forKey: "NSDisabledCharacterPaletteMenuItem")
         NSWindow.allowsAutomaticWindowTabbing = false
-        appIcon = (NSApp as? Application)?.getMPVIcon() ?? NSImage(size: NSSize(width: 1, height: 1))
+        appIcon = AppHub.shared.getIcon()
 
         super.init()
 

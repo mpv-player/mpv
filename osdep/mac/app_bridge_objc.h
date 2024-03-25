@@ -16,20 +16,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#include "osdep/mac/application.h"
 
-@class CocoaCB;
-@class MenuBar;
-struct mpv_event;
-struct mpv_handle;
+#include "osdep/mac/app_bridge.h"
 
-@interface Application : NSApplication
-
-- (void)initCocoaCb:(struct mpv_handle *)ctx;
-+ (const struct m_sub_options *)getMacConf;
-+ (const struct m_sub_options *)getVoConf;
-
-@property(nonatomic, retain) MenuBar *menuBar;
-@property(nonatomic, assign) size_t openCount;
-@property(nonatomic, retain) CocoaCB *cocoaCB;
-@end
+NSData *app_bridge_icon(void);
