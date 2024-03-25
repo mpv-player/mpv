@@ -15,8 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAC_APPLICATION
-#define MAC_APPLICATION
+#pragma once
 
 #include "options/m_option.h"
 
@@ -48,5 +47,3 @@ struct macos_opts {
 int cocoa_main(int argc, char *argv[]);
 
 extern const struct m_sub_options macos_conf;
-
-#endif /* MAC_APPLICATION */

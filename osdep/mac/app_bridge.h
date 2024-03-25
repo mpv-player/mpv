@@ -1,6 +1,4 @@
 /*
- * Cocoa Application Event Handling
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -17,8 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAC_EVENTS
-#define MAC_EVENTS
+#pragma once
 
 #include "input/input.h"
 
@@ -27,5 +24,3 @@ void cocoa_uninit_media_keys(void);
 void cocoa_set_input_context(struct input_ctx *input_context);
 void cocoa_set_mpv_handle(struct mpv_handle *ctx);
 void cocoa_init_cocoa_cb(void);
-
-#endif
