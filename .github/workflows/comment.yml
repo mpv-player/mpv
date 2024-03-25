@@ -40,14 +40,14 @@ jobs:
 
             let body = `Download the artifacts for this pull request:\n\n<details><summary>Windows</summary>\n`;
             for (const art of artifacts) {
-              const art_link = `https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip`;
+              const art_link = `https://github.com/${owner}/${repo}/actions/runs/${run_id}/artifacts/${art.id}`;
               if (art.name.includes('w64')) {
                 body += `\n* [${art.name}](${art_link})`;
               }
             }
             body += `\n</details>\n\n<details><summary>macOS</summary>\n`;
             for (const art of artifacts) {
-              const art_link = `https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip`;
+              const art_link = `https://github.com/${owner}/${repo}/actions/runs/${run_id}/artifacts/${art.id}`;
               if (art.name.includes('macos')) {
                 body += `\n* [${art.name}](${art_link})`;
               }
