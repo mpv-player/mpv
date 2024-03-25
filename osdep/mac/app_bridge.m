@@ -1,6 +1,4 @@
 /*
- * Cocoa Application Event Handling
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
