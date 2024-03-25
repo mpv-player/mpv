@@ -62,6 +62,11 @@ struct buffer_state {
     bool paused;                // logically paused
 
     int64_t end_time_ns;        // absolute output time of last played sample
+    int64_t queued_time_ns;     // duration of samples that have been queued to
+                                // the device but have not been played.
+                                // This field is only set in ao_set_paused(),
+                                // and is considered as a temporary solution;
+                                // DO NOT USE IT IN OTHER PLACES.
 
     bool initial_unblocked;
 
@@ -381,7 +386,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
 {
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
-    bool do_reset = false, do_start = false;
+    bool do_change_state = false;
 
     // If we are going to pause on eof and ao is still playing,
     // be sure to drain the ao first for gapless.
@@ -402,9 +407,9 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
                     p->streaming = false;
                     p->recover_pause = !ao->untimed;
                 }
-            } else if (ao->driver->reset) {
+            } else if (ao->driver->reset || ao->driver->set_pause) {
                 // See ao_reset() why this is done outside of the lock.
-                do_reset = true;
+                do_change_state = true;
                 p->streaming = false;
             }
         }
@@ -416,7 +421,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
             p->hw_paused = false;
         } else {
             if (!p->streaming)
-                do_start = true;
+                do_change_state = true;
             p->streaming = true;
         }
         wakeup = true;
@@ -425,10 +430,22 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
 
     mp_mutex_unlock(&p->lock);
 
-    if (do_reset)
-        ao->driver->reset(ao);
-    if (do_start)
-        ao->driver->start(ao);
+    if (do_change_state) {
+        if (ao->driver->set_pause) {
+            if (paused) {
+                ao->driver->set_pause(ao, true);
+                p->queued_time_ns = p->end_time_ns - mp_time_ns();
+            } else {
+                p->end_time_ns = p->queued_time_ns + mp_time_ns();
+                ao->driver->set_pause(ao, false);
+            }
+        } else {
+            if (paused)
+                ao->driver->reset(ao);
+            else
+                ao->driver->start(ao);
+        }
+    }
 
     if (wakeup)
         ao_wakeup_playthread(ao);

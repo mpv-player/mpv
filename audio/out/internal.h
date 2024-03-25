@@ -108,6 +108,7 @@ struct mp_pcm_state {
  *          start
  *     Optional for both types:
  *          control
+ *          set_pause
  *  a) ->write is called to queue audio. push.c creates a thread to regularly
  *     refill audio device buffers with ->write, but all driver functions are
  *     always called under an exclusive lock.
@@ -115,8 +116,6 @@ struct mp_pcm_state {
  *          reset
  *          write
  *          get_state
- *     Optional:
- *          set_pause
  *  b) ->write must be NULL. ->start must be provided, and should make the
  *     audio API start calling the audio callback. Your audio callback should
  *     in turn call ao_read_data() to get audio data. Most functions are
@@ -149,6 +148,9 @@ struct ao_driver {
     // Stop all audio playback, clear buffers, back to state after init().
     // Optional for pull AOs.
     void (*reset)(struct ao *ao);
+    // pull based: set pause state. Only called after start() and before reset().
+    //             The return value is ignored.
+    //             The pausing state is also cleared by reset().
     // push based: set pause state. Only called after start() and before reset().
     //             returns success (this is intended for paused=true; if it
     //             returns false, playback continues, and the core emulates via
