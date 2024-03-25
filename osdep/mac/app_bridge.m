@@ -17,10 +17,20 @@
 
 #include "config.h"
 
-#include "osdep/mac/app_bridge.h"
+#import "osdep/mac/app_bridge_objc.h"
+
 #if HAVE_SWIFT
 #include "osdep/mac/swift.h"
 #endif
+
+static const char app_icon[] =
+#include "TOOLS/osxbundle/icon.icns.inc"
+;
+
+NSData *app_bridge_icon(void)
+{
+    return [NSData dataWithBytesNoCopy:(void *)app_icon length:sizeof(app_icon) - 1 freeWhenDone:NO];
+}
 
 void cocoa_init_media_keys(void)
 {

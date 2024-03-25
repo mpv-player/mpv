@@ -141,19 +141,6 @@ static void terminate_cocoa_application(void)
     [super dealloc];
 }
 
-static const char mac_icon[] =
-#include "TOOLS/osxbundle/icon.icns.inc"
-;
-
-- (NSImage *)getMPVIcon
-{
-    // The C string contains a trailing null, so we strip it away
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)mac_icon
-                                             length:sizeof(mac_icon) - 1
-                                       freeWhenDone:NO];
-    return [[NSImage alloc] initWithData:icon_data];
-}
-
 #if HAVE_MACOS_TOUCHBAR
 - (NSTouchBar *)makeTouchBar
 {

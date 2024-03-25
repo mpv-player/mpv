@@ -31,8 +31,8 @@
 #include "input/keycodes.h"
 #include "video/out/win_state.h"
 
+#include "osdep/mac/app_bridge_objc.h"
 #include "osdep/mac/application_objc.h"
-
 
 // complex macros won't get imported to Swift so we have to reassign them
 static int SWIFT_MBTN_LEFT       = MP_MBTN_LEFT;
