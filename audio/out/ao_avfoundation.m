@@ -159,6 +159,19 @@ static void stop(struct ao *ao)
     });
 }
 
+static bool set_pause(struct ao *ao, bool paused)
+{
+    struct priv *p = ao->priv;
+
+    if (paused) {
+        [p->synchronizer setRate:0];
+    } else {
+        [p->synchronizer setRate:1];
+    }
+
+    return true;
+}
+
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *p = ao->priv;
@@ -353,6 +366,7 @@ const struct ao_driver audio_out_avfoundation = {
     .control        = control,
     .reset          = stop,
     .start          = start,
+    .set_pause      = set_pause,
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
 };
