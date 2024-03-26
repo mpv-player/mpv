@@ -48,7 +48,7 @@ class MacCommon: Common {
             let (_, wr) = getInitProperties(vo)
 
             guard let layer = self.layer else {
-                log.sendError("Something went wrong, no MetalLayer was initialized")
+                log.error("Something went wrong, no MetalLayer was initialized")
                 exit(1)
             }
 

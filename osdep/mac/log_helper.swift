@@ -24,24 +24,24 @@ class LogHelper {
         self.log = log
     }
 
-    func sendVerbose(_ msg: String) {
-        send(message: msg, type: MSGL_V)
+    func verbose(_ message: String) {
+        send(message: message, type: MSGL_V)
     }
 
-    func sendInfo(_ msg: String) {
-        send(message: msg, type: MSGL_INFO)
+    func info(_ message: String) {
+        send(message: message, type: MSGL_INFO)
     }
 
-    func sendWarning(_ msg: String) {
-        send(message: msg, type: MSGL_WARN)
+    func warning(_ message: String) {
+        send(message: message, type: MSGL_WARN)
     }
 
-    func sendError(_ msg: String) {
-        send(message: msg, type: MSGL_ERR)
+    func error(_ message: String) {
+        send(message: message, type: MSGL_ERR)
     }
 
-    func send(message msg: String, type t: Int) {
-        let args: [CVarArg] = [ (msg as NSString).utf8String ?? "NO MESSAGE"]
-        mp_msg_va(log, Int32(t), "%s\n", getVaList(args))
+    func send(message: String, type: Int) {
+        let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
+        mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
     }
 }

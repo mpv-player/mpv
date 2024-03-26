@@ -260,7 +260,7 @@ class GLLayer: CAOpenGLLayer {
         }
 
         guard let pixelFormat = pix, err == kCGLNoError else {
-            ccb.log.sendError("Couldn't create any CGL pixel format")
+            ccb.log.error("Couldn't create any CGL pixel format")
             exit(1)
         }
 
@@ -297,7 +297,7 @@ class GLLayer: CAOpenGLLayer {
                         return attributeLookUp[value.rawValue] ?? String(value.rawValue)
                     })
 
-                    ccb.log.sendVerbose("Created CGL pixel format with attributes: " +
+                    ccb.log.verbose("Created CGL pixel format with attributes: " +
                                     "\(attArray.joined(separator: ", "))")
                     return (pix, glFormat.contains(glFormat10Bit) ? 16 : 8, err)
                 }
@@ -305,11 +305,11 @@ class GLLayer: CAOpenGLLayer {
         }
 
         let errS = String(cString: CGLErrorString(err))
-        ccb.log.sendWarning("Couldn't create a " +
+        ccb.log.warning("Couldn't create a " +
                            "\(software ? "software" : "hardware accelerated") " +
                            "CGL pixel format: \(errS) (\(err.rawValue))")
         if software == false && ccb.option.mac.cocoa_cb_sw_renderer == -1 {
-            ccb.log.sendWarning("Falling back to software renderer")
+            ccb.log.warning("Falling back to software renderer")
         }
 
         return (pix, 8, err)
@@ -321,7 +321,7 @@ class GLLayer: CAOpenGLLayer {
 
         guard let cglContext = context, error == kCGLNoError else {
             let errS = String(cString: CGLErrorString(error))
-            ccb.log.sendError("Couldn't create a CGLContext: " + errS)
+            ccb.log.error("Couldn't create a CGLContext: " + errS)
             exit(1)
         }
 
