@@ -64,13 +64,6 @@ ta.h & ta.c:
     least talloc_steal()). A talloc allocation that is used as parent is often
     called a talloc context.
 
-    One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
-    as in it doesn't require valgrind.) You can enable it by setting the
-    MPV_LEAK_REPORT environment variable to "1":
-        export MPV_LEAK_REPORT=1
-    Or permanently by building with --enable-ta-leak-report.
-    This will list all unfree'd allocations on exit.
-
     Documentation can be found here:
         http://git.samba.org/?p=samba.git;a=blob;f=lib/talloc/talloc.h;hb=HEAD
 

@@ -268,21 +268,11 @@ void ta_set_destructor(void *ptr, void (*destructor)(void *))
 #include "osdep/threads.h"
 
 static mp_static_mutex ta_dbg_mutex = MP_STATIC_MUTEX_INITIALIZER;
-static bool enable_leak_check; // pretty much constant
-static struct ta_header leak_node;
 static char allocation_is_string;
 
 static void ta_dbg_add(struct ta_header *h)
 {
     h->canary = CANARY;
-    if (enable_leak_check) {
-        mp_mutex_lock(&ta_dbg_mutex);
-        h->leak_next = &leak_node;
-        h->leak_prev = leak_node.leak_prev;
-        leak_node.leak_prev->leak_next = h;
-        leak_node.leak_prev = h;
-        mp_mutex_unlock(&ta_dbg_mutex);
-    }
 }
 
 static void ta_dbg_check_header(struct ta_header *h)
@@ -307,66 +297,6 @@ static void ta_dbg_remove(struct ta_header *h)
         h->leak_next = h->leak_prev = NULL;
     }
     h->canary = 0;
-}
-
-static size_t get_children_size(struct ta_header *h)
-{
-    size_t size = 0;
-    for (struct ta_header *s = h->child; s; s = s->next)
-        size += s->size + get_children_size(s);
-    return size;
-}
-
-static void print_leak_report(void)
-{
-    mp_mutex_lock(&ta_dbg_mutex);
-    if (leak_node.leak_next && leak_node.leak_next != &leak_node) {
-        size_t size = 0;
-        size_t num_blocks = 0;
-        fprintf(stderr, "Blocks not freed:\n");
-        fprintf(stderr, "  %-20s %10s %10s  %s\n",
-                "Ptr", "Bytes", "C. Bytes", "Name");
-        while (leak_node.leak_next != &leak_node) {
-            struct ta_header *cur = leak_node.leak_next;
-            // Don't list those with parent; logically, only parents are listed
-            if (!cur->next) {
-                size_t c_size = get_children_size(cur);
-                char name[50] = {0};
-                if (cur->name)
-                    snprintf(name, sizeof(name), "%s", cur->name);
-                if (cur->name == &allocation_is_string) {
-                    snprintf(name, sizeof(name), "'%.*s'",
-                             (int)cur->size, (char *)PTR_FROM_HEADER(cur));
-                }
-                for (int n = 0; n < sizeof(name); n++) {
-                    if (name[n] && name[n] < 0x20)
-                        name[n] = '.';
-                }
-                fprintf(stderr, "  %-20p %10zu %10zu  %s\n",
-                        cur, cur->size, c_size, name);
-            }
-            size += cur->size;
-            num_blocks += 1;
-            // Unlink, and don't confuse valgrind by leaving live pointers.
-            cur->leak_next->leak_prev = cur->leak_prev;
-            cur->leak_prev->leak_next = cur->leak_next;
-            cur->leak_next = cur->leak_prev = NULL;
-        }
-        fprintf(stderr, "%zu bytes in %zu blocks.\n", size, num_blocks);
-    }
-    mp_mutex_unlock(&ta_dbg_mutex);
-}
-
-void ta_enable_leak_report(void)
-{
-    mp_mutex_lock(&ta_dbg_mutex);
-    enable_leak_check = true;
-    if (!leak_node.leak_prev && !leak_node.leak_next) {
-        leak_node.leak_prev = &leak_node;
-        leak_node.leak_next = &leak_node;
-        atexit(print_leak_report);
-    }
-    mp_mutex_unlock(&ta_dbg_mutex);
 }
 
 /* Set a (static) string that will be printed if the memory allocation in ptr
@@ -397,7 +327,6 @@ static void ta_dbg_add(struct ta_header *h){}
 static void ta_dbg_check_header(struct ta_header *h){}
 static void ta_dbg_remove(struct ta_header *h){}
 
-void ta_enable_leak_report(void){}
 void *ta_dbg_set_loc(void *ptr, const char *loc){return ptr;}
 void *ta_dbg_mark_as_string(void *ptr){return ptr;}
 
