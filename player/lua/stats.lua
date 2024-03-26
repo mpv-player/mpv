@@ -9,6 +9,7 @@
 local mp = require 'mp'
 local options = require 'mp.options'
 local utils = require 'mp.utils'
+local input = require 'mp.input'
 
 -- Options
 local o = {
@@ -21,6 +22,7 @@ local o = {
     -- For pages which support scrolling
     key_scroll_up = "UP",
     key_scroll_down = "DOWN",
+    key_search = "/",
     scroll_lines = 1,
 
     duration = 4,
@@ -108,6 +110,7 @@ local cache_recorder_timer = nil
 local curr_page = o.key_page_1
 local pages = {}
 local scroll_bound = false
+local searched_text
 local tm_viz_prev = nil
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
@@ -276,8 +279,12 @@ local function sorted_keys(t, comp_fn)
     return keys
 end
 
-local function scroll_hint()
-    local hint = format("(hint: scroll with %s/%s)", o.key_scroll_up, o.key_scroll_down)
+local function scroll_hint(search)
+    local hint = format("(hint: scroll with %s/%s", o.key_scroll_up, o.key_scroll_down)
+    if search then
+        hint = hint .. " and search with " .. o.key_search
+    end
+    hint = hint .. ")"
     if not o.use_ass then return " " .. hint end
     return format(" {\\fs%s}%s{\\fs%s}", o.font_size * 0.66, hint, o.font_size)
 end
@@ -431,6 +438,11 @@ local function get_kbinfo_lines()
                (bind.is_weak == active[bind.key].is_weak and
                 bind.priority > active[bind.key].priority)
            ) and not bind.cmd:find("script-binding stats/__forced_", 1, true)
+           and bind.section ~= "input_forced_console"
+           and (
+               searched_text == nil or
+               (bind.key .. bind.cmd):lower():find(searched_text, 1, true)
+           )
         then
             active[bind.key] = bind
         end
@@ -1105,7 +1117,7 @@ local function keybinding_info(after_scroll, bindlist)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
+    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint(true)), nl="", indent=""})
     header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
@@ -1334,11 +1346,57 @@ local function unbind_scroll()
         scroll_bound = false
     end
 end
+
+local function filter_bindings()
+    input.get({
+        prompt = "Filter bindings:",
+        opened = function ()
+            -- This is necessary to close the console if the oneshot
+            -- display_timer expires without typing anything.
+            searched_text = ""
+        end,
+        edited = function (text)
+            reset_scroll_offsets()
+            searched_text = text:lower()
+            print_page(curr_page)
+            if display_timer.oneshot then
+                display_timer:kill()
+                display_timer:resume()
+            end
+        end,
+        submit = input.terminate,
+        closed = function ()
+            searched_text = nil
+            if display_timer:is_enabled() then
+                print_page(curr_page)
+                if display_timer.oneshot then
+                    display_timer:kill()
+                    display_timer:resume()
+                end
+            end
+        end,
+    })
+end
+
+local function bind_search()
+    mp.add_forced_key_binding(o.key_search, "__forced_"..o.key_search, filter_bindings)
+end
+
+local function unbind_search()
+    mp.remove_key_binding("__forced_"..o.key_search)
+end
+
 local function update_scroll_bindings(k)
     if pages[k].scroll then
         bind_scroll()
     else
         unbind_scroll()
+    end
+
+    if k == o.key_page_4 then
+        bind_search()
+    else
+        unbind_search()
     end
 end
 
@@ -1366,6 +1424,7 @@ local function remove_page_bindings()
         mp.remove_key_binding("__forced_"..k)
     end
     unbind_scroll()
+    unbind_search()
 end
 
 
@@ -1428,6 +1487,10 @@ display_timer = mp.add_periodic_timer(o.duration,
     function()
         if display_timer.oneshot then
             display_timer:kill() ; clear_screen() ; remove_page_bindings()
+            -- Close the console only if it was opened for searching bindings.
+            if searched_text then
+                input.terminate()
+            end
         else
             print_page(curr_page)
         end
