@@ -116,6 +116,7 @@ struct command_ctx {
     mpv_node udata;
 
     double cached_window_scale;
+    bool warned_current_window_scale;
 };
 
 static const struct m_option script_props_type = {
@@ -2555,6 +2556,12 @@ static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
     }
 
     if (action == M_PROPERTY_SET) {
+        struct command_ctx *cmd = mpctx->command_ctx;
+        if (prop && !cmd->warned_current_window_scale) {
+            MP_WARN(mpctx, "Setting current-window-scale is deprecated. "
+                           "Set window-scale instead.\n");
+            cmd->warned_current_window_scale = true;
+        }
         // Also called by update_window_scale as a NULL property.
         double scale = *(double *)arg;
         int s[2] = {vid_w * scale, vid_h * scale};
