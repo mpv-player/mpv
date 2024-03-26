@@ -77,4 +77,12 @@ class AppHub: NSObject {
         }
         return icon
     }
+
+    func getMacConf() -> UnsafePointer<m_sub_options>? {
+        return app_bridge_mac_conf()
+    }
+
+    func getVoConf() -> UnsafePointer<m_sub_options>? {
+        return app_bridge_vo_conf()
+    }
 }

@@ -35,8 +35,8 @@ class OptionHelper: NSObject {
     var mac: macos_opts { get { return macPtr.pointee } }
 
     init(_ taParent: UnsafeMutableRawPointer, _ global: OpaquePointer?) {
-        voCachePtr = m_config_cache_alloc(taParent, global, Application.getVoConf())
-        macCachePtr = m_config_cache_alloc(taParent, global, Application.getMacConf())
+        voCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getVoConf())
+        macCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getMacConf())
     }
 
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {

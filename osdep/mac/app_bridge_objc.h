@@ -20,3 +20,5 @@
 #include "osdep/mac/app_bridge.h"
 
 NSData *app_bridge_icon(void);
+const struct m_sub_options *app_bridge_mac_conf(void);
+const struct m_sub_options *app_bridge_vo_conf(void);
