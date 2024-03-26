@@ -119,10 +119,10 @@ bool mp_refqueue_is_top_field(struct mp_refqueue *q)
 {
     if (!mp_refqueue_has_output(q))
         return false;
-    
+
     bool tff = q->field_parity == MP_FIELD_PARITY_TFF;
     bool bff = q->field_parity == MP_FIELD_PARITY_BFF;
-    bool ret = (!!(q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) ^ q->second_field 
+    bool ret = (!!(q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) ^ q->second_field
                 && !tff && !bff); // Default parity
     ret = ret || (tff && !q->second_field); // Check if top field is forced
     ret = ret || (bff && q->second_field); // Check if bottom field is forced

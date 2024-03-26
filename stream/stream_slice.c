@@ -61,7 +61,7 @@ static int64_t get_size(struct stream *s)
     if (size <= 0)
         return size;
     if (size <= p->slice_start)
-      return 0;
+        return 0;
     if (p->slice_max_end)
         size = MPMIN(size, p->slice_max_end);
     return size - p->slice_start;
@@ -123,7 +123,7 @@ static int parse_slice_range(stream_t *stream)
     }
 
     if (max_end_is_offset)
-      p->slice_max_end += p->slice_start;
+        p->slice_max_end += p->slice_start;
 
     if (p->slice_max_end && p->slice_max_end < p->slice_start) {
         MP_ERR(stream, "The byte range end (%"PRId64") can't be smaller than the start (%"PRId64"): '%s'\n",

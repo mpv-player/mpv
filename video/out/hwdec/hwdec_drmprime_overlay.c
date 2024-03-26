@@ -88,7 +88,7 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
     }
 }
 
-static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h ,struct mp_rect *src, struct mp_rect *dst)
+static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h, struct mp_rect *src, struct mp_rect *dst)
 {
     struct priv *p = hw->priv;
 
