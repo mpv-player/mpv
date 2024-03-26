@@ -105,13 +105,11 @@ class Window: NSWindow, NSWindowDelegate {
         currentScreen = screen
         unfScreen = screen
 
-        if let app = NSApp as? Application {
-            app.menuBar.register(#selector(setHalfWindowSize), key: .itemHalfSize)
-            app.menuBar.register(#selector(setNormalWindowSize), key: .itemNormalSize)
-            app.menuBar.register(#selector(setDoubleWindowSize), key: .itemDoubleSize)
-            app.menuBar.register(#selector(performMiniaturize(_:)), key: .itemMinimize)
-            app.menuBar.register(#selector(performZoom(_:)), key: .itemZoom)
-        }
+        AppHub.shared.menu?.register(#selector(setHalfWindowSize), key: .itemHalfSize)
+        AppHub.shared.menu?.register(#selector(setNormalWindowSize), key: .itemNormalSize)
+        AppHub.shared.menu?.register(#selector(setDoubleWindowSize), key: .itemDoubleSize)
+        AppHub.shared.menu?.register(#selector(performMiniaturize(_:)), key: .itemMinimize)
+        AppHub.shared.menu?.register(#selector(performZoom(_:)), key: .itemZoom)
     }
 
     override func toggleFullScreen(_ sender: Any?) {
