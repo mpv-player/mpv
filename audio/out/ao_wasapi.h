@@ -51,7 +51,9 @@ enum wasapi_thread_state {
     WASAPI_THREAD_DISPATCH,
     WASAPI_THREAD_RESUME,
     WASAPI_THREAD_RESET,
-    WASAPI_THREAD_SHUTDOWN
+    WASAPI_THREAD_SHUTDOWN,
+    WASAPI_THREAD_PAUSE,
+    WASAPI_THREAD_UNPAUSE,
 };
 
 typedef struct wasapi_state {
