@@ -31,7 +31,7 @@ class CocoaCB: Common, EventSubscriber {
     var backendState: State = .uninitialized
 
 
-    @objc init(_ mpvHandle: OpaquePointer) {
+    init(_ mpvHandle: OpaquePointer) {
         let newlog = mp_log_new(UnsafeMutablePointer(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
         let option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
         libmpv = LibmpvHelper(mpvHandle, newlog)
