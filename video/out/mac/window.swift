@@ -360,7 +360,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     override func setFrame(_ frameRect: NSRect, display flag: Bool) {
         if frameRect.width < minSize.width || frameRect.height < minSize.height {
-            common.log.sendVerbose("tried to set too small window size: \(frameRect.size)")
+            common.log.verbose("tried to set too small window size: \(frameRect.size)")
             return
         }
 

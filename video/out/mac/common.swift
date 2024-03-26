@@ -78,13 +78,13 @@ class Common: NSObject {
         let (targetScreen, wr) = getInitProperties(vo)
 
         guard let view = self.view else {
-            log.sendError("Something went wrong, no View was initialized")
+            log.error("Something went wrong, no View was initialized")
             exit(1)
         }
 
         window = Window(contentRect: wr, screen: targetScreen, view: view, common: self)
         guard let window = self.window else {
-            log.sendError("Something went wrong, no Window was initialized")
+            log.error("Something went wrong, no Window was initialized")
             exit(1)
         }
 
@@ -124,7 +124,7 @@ class Common: NSObject {
 
         view = View(frame: wr, common: self)
         guard let view = self.view else {
-            log.sendError("Something went wrong, no View was initialized")
+            log.error("Something went wrong, no View was initialized")
             exit(1)
         }
 
@@ -172,7 +172,7 @@ class Common: NSObject {
         guard let screen = getTargetScreen(forFullscreen: false) ?? NSScreen.main,
               let link = self.link else
         {
-            log.sendWarning("Couldn't start DisplayLink, no OptionHelper, Screen or DisplayLink available")
+            log.warning("Couldn't start DisplayLink, no Screen or DisplayLink available")
             return
         }
 
@@ -191,7 +191,7 @@ class Common: NSObject {
 
     func updateDisplaylink() {
         guard let screen = window?.screen, let link = self.link else {
-            log.sendWarning("Couldn't update DisplayLink, no Screen or DisplayLink available")
+            log.warning("Couldn't update DisplayLink, no Screen or DisplayLink available")
             return
         }
 
@@ -214,17 +214,17 @@ class Common: NSObject {
                 }
 
                 if fabs(actualFps - nominalFps) > 0.1 {
-                    log.sendVerbose("Falling back to nominal display refresh rate: \(nominalFps)")
+                    log.verbose("Falling back to nominal display refresh rate: \(nominalFps)")
                     return nominalFps
                 } else {
                     return actualFps
                 }
             }
         } else {
-            log.sendWarning("No DisplayLink available")
+            log.warning("No DisplayLink available")
         }
 
-        log.sendWarning("Falling back to standard display refresh rate: 60Hz")
+        log.warning("Falling back to standard display refresh rate: 60Hz")
         return 60.0
     }
 
@@ -278,13 +278,13 @@ class Common: NSObject {
     }
 
     func lightSensorUpdate() {
-        log.sendWarning("lightSensorUpdate not implemented")
+        log.warning("lightSensorUpdate not implemented")
     }
 
     func initLightSensor() {
         let srv = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("AppleLMUController"))
         if srv == IO_OBJECT_NULL {
-            log.sendVerbose("Can't find an ambient light sensor")
+            log.verbose("Can't find an ambient light sensor")
             return
         }
 
@@ -296,7 +296,7 @@ class Common: NSObject {
         IOObjectRelease(srv)
 
         if kr != KERN_SUCCESS {
-            log.sendVerbose("Can't start ambient light sensor connection")
+            log.verbose("Can't start ambient light sensor connection")
             return
         }
         lightSensorCallback(TypeHelper.bridge(obj: self), 0, 0, nil)
@@ -315,7 +315,7 @@ class Common: NSObject {
             let displayID = com.window?.screen?.displayID ?? display
 
             if displayID == display {
-                com.log.sendVerbose("Detected display mode change, updating screen refresh rate")
+                com.log.verbose("Detected display mode change, updating screen refresh rate")
                 com.flagEvents(VO_EVENT_WIN_STATE)
             }
         }
@@ -372,12 +372,12 @@ class Common: NSObject {
     }
 
     func updateICCProfile() {
-        log.sendWarning("updateICCProfile not implemented")
+        log.warning("updateICCProfile not implemented")
     }
 
     func getScreenBy(id screenID: Int) -> NSScreen? {
         if screenID >= NSScreen.screens.count {
-            log.sendInfo("Screen ID \(screenID) does not exist, falling back to current device")
+            log.info("Screen ID \(screenID) does not exist, falling back to current device")
             return nil
         } else if screenID < 0 {
             return nil
@@ -441,7 +441,7 @@ class Common: NSObject {
 
     func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect) {
         guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
-            log.sendError("Something went wrong, no Screen was found")
+            log.error("Something went wrong, no Screen was found")
             exit(1)
         }
 
@@ -461,7 +461,7 @@ class Common: NSObject {
         eventsLock.unlock()
 
         guard let vo = vo else {
-            log.sendWarning("vo nil in flagEvents")
+            log.warning("vo nil in flagEvents")
             return
         }
         vo_wakeup(vo)
@@ -580,7 +580,7 @@ class Common: NSObject {
         case VOCTRL_GET_ICC_PROFILE:
             let screen = getCurrentScreen()
             guard var iccData = screen?.colorSpace?.iccProfileData else {
-                log.sendWarning("No Screen available to retrieve ICC profile")
+                log.warning("No Screen available to retrieve ICC profile")
                 return VO_TRUE
             }
 
@@ -632,7 +632,7 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_RES:
             guard let screen = getCurrentScreen() else {
-                log.sendWarning("No Screen available to retrieve frame")
+                log.warning("No Screen available to retrieve frame")
                 return VO_NOTAVAIL
             }
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
