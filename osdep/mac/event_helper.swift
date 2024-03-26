@@ -62,15 +62,15 @@ class EventHelper {
     var mpv: OpaquePointer?
     var events: [String:[Int:EventSubscriber]] = [:]
 
-    init?(_ appHub: AppHub, _ mpvHandle: OpaquePointer) {
+    init?(_ appHub: AppHub, _ mpv: OpaquePointer) {
         if !appHub.isApplication {
-            mpv_destroy(mpvHandle)
+            mpv_destroy(mpv)
             return nil
         }
 
         self.appHub = appHub
-        self.mpv = mpvHandle
-        mpv_set_wakeup_callback(mpvHandle, wakeup, TypeHelper.bridge(obj: self))
+        self.mpv = mpv
+        mpv_set_wakeup_callback(mpv, wakeup, TypeHelper.bridge(obj: self))
     }
 
     func subscribe(_ subscriber: any EventSubscriber, event: Event) {

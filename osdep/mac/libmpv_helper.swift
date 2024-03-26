@@ -23,13 +23,13 @@ let glDummy: @convention(c) () -> Void = {}
 
 class LibmpvHelper {
     var log: LogHelper
-    var mpvHandle: OpaquePointer?
+    var mpv: OpaquePointer?
     var mpvRenderContext: OpaquePointer?
     var fbo: GLint = 1
     let uninitLock = NSLock()
 
     init(_ mpv: OpaquePointer, _ mpLog: OpaquePointer?) {
-        mpvHandle = mpv
+        self.mpv = mpv
         log = LogHelper(mpLog)
     }
 
@@ -47,7 +47,7 @@ class LibmpvHelper {
                 mpv_render_param()
             ]
 
-            if (mpv_render_context_create(&mpvRenderContext, mpvHandle, &params) < 0) {
+            if (mpv_render_context_create(&mpvRenderContext, mpv, &params) < 0) {
                 log.sendError("Render context init has failed.")
                 exit(1)
             }
@@ -174,8 +174,8 @@ class LibmpvHelper {
         uninitLock.lock()
         mpv_render_context_free(mpvRenderContext)
         mpvRenderContext = nil
-        mpv_destroy(mpvHandle)
-        mpvHandle = nil
+        mpv_destroy(mpv)
+        mpv = nil
         uninitLock.unlock()
     }
 }
