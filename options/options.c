@@ -307,6 +307,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-ass-vsfilter-color-compat", OPT_CHOICE(ass_vsfilter_color_compat,
             {"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})},
         {"sub-ass-vsfilter-blur-compat", OPT_BOOL(ass_vsfilter_blur_compat)},
+        {"sub-vsfilter-bidi-compat", OPT_BOOL(sub_vsfilter_bidi_compat)},
         {"embeddedfonts", OPT_BOOL(use_embedded_fonts), .flags = UPDATE_SUB_HARD},
         {"sub-ass-style-overrides", OPT_STRINGLIST(ass_style_override_list),
             .flags = UPDATE_SUB_HARD},
