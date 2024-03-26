@@ -19,7 +19,6 @@
 #include "osdep/mac/application.h"
 
 @class CocoaCB;
-@class MenuBar;
 struct mpv_event;
 struct mpv_handle;
 
@@ -27,7 +26,6 @@ struct mpv_handle;
 
 - (void)initCocoaCb:(struct mpv_handle *)ctx;
 
-@property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, assign) size_t openCount;
 @property(nonatomic, retain) CocoaCB *cocoaCB;
 @end

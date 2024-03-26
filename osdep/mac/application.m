@@ -58,7 +58,6 @@ static void terminate_cocoa_application(void)
 }
 
 @implementation Application
-@synthesize menuBar = _menu_bar;
 @synthesize openCount = _open_count;
 @synthesize cocoaCB = _cocoa_cb;
 
@@ -183,7 +182,6 @@ static void init_cocoa_application(bool regular)
 {
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
-    [NSApp setMenuBar:[[MenuBar alloc] init]];
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.

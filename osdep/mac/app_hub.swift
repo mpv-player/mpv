@@ -21,6 +21,7 @@ class AppHub: NSObject {
     var mpv: OpaquePointer?
     @objc var input: InputHelper
     var event: EventHelper?
+    var menu: MenuBar?
 #if HAVE_MACOS_MEDIA_PLAYER
     var remote: RemoteCommandCenter?
 #endif
@@ -33,6 +34,7 @@ class AppHub: NSObject {
     private override init() {
         input = InputHelper()
         super.init()
+        if isApplication { menu = MenuBar(self) }
 #if HAVE_MACOS_MEDIA_PLAYER
         remote = RemoteCommandCenter(self)
 #endif
