@@ -617,7 +617,37 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
             buffered_audio = predicted + difference / opts->autosync;
         }
 
-        mpctx->time_frame = buffered_audio - mpctx->delay / mpctx->video_speed;
+        double buffer = buffered_audio - mpctx->delay / mpctx->video_speed;
+
+        /* Large speed changes can have a massive, sharp difference which cause
+         * playback position changes if not specially handled. */
+        if (mpctx->speed_changed) {
+            double percent_diff = (buffer - mpctx->time_frame) / ((buffer + mpctx->time_frame) / 2);
+            // arbitrary
+            if (percent_diff > 0.5)
+                mpctx->time_frame_buffer = buffer;
+
+            mpctx->speed_changed = false;
+        }
+
+        if (mpctx->time_frame_buffer > 0) {
+            // Try to avoid by non-monotonic frame orders by limiting the buffer
+            // by an arbitrary factor for an equally arbitrary amount of frames.
+            // Probably won't work for insanely high speeds that cause an a/v
+            // desync but oh well.
+            mpctx->time_frame_buffer -= mpctx->time_frame_buffer * 0.01;
+            mpctx->time_frame = buffer * 0.5;
+            if (mpctx->time_frame_buffer <= 0.05)
+                mpctx->time_frame_buffer = 0;
+        } else if (mpctx->time_frame_buffer < 0) {
+            // Add a small, arbitrary negative offset to avoid seeking forwards.
+            // Waith until buffer becomes positive again before breaking.
+            mpctx->time_frame = -0.01;
+            if (buffer > 0)
+                mpctx->time_frame_buffer = 0;
+        } else {
+            mpctx->time_frame = buffer;
+        }
     } else {
         /* If we're more than 200 ms behind the right playback
          * position, don't try to speed up display of following
@@ -648,6 +678,20 @@ static void update_av_diff(struct MPContext *mpctx, double offset)
     double a_pos = written_audio_pts(mpctx);
     if (a_pos != MP_NOPTS_VALUE && mpctx->video_pts != MP_NOPTS_VALUE) {
         a_pos -= mpctx->audio_speed * ao_get_delay(mpctx->ao);
+
+        // On large speed changes, a_pos will drift a ton away from the video
+        // pts which causes the playback position to change. Workaround this by
+        // clamping it to the video pts until a_pos gets back to a reasonable
+        // value.
+        if (mpctx->speed_changed_display_sync && mpctx->num_past_frames == MAX_NUM_VO_PTS) {
+            double percent_diff = (a_pos - mpctx->video_pts) / ((a_pos + mpctx->video_pts) / 2);
+            if (percent_diff > 0.1) {
+                a_pos = mpctx->video_pts;
+            } else {
+                mpctx->speed_changed_display_sync = false;
+            }
+        }
+
         mpctx->last_av_difference = a_pos - mpctx->video_pts
                                   + opts->audio_delay + offset;
     }
@@ -828,6 +872,13 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
                 mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP ||
                 mode == VS_DISP_TEMPO;
     drop &= frame->can_drop;
+
+    // Return here so the old frame_duration doesn't get used.
+    if (mpctx->speed_changed && !mpctx->speed_changed_display_sync) {
+        mpctx->speed_changed = false;
+        mpctx->speed_changed_display_sync = true;
+        return;
+    }
 
     if (resample && using_spdif_passthrough(mpctx))
         return;
