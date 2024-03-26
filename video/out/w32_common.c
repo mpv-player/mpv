@@ -502,10 +502,6 @@ static bool handle_appcommand(struct vo_w32_state *w32, UINT cmd)
 
 static void handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
 {
-    // Ignore key repeat
-    if (scancode & KF_REPEAT)
-        return;
-
     int mpkey = mp_w32_vkey_to_mpkey(vkey, scancode & KF_EXTENDED);
     if (!mpkey) {
         mpkey = decode_key(w32, vkey, scancode & (0xff | KF_EXTENDED));
@@ -513,7 +509,8 @@ static void handle_key_down(struct vo_w32_state *w32, UINT vkey, UINT scancode)
             return;
     }
 
-    mp_input_put_key(w32->input_ctx, mpkey | mod_state(w32) | MP_KEY_STATE_DOWN);
+    int state = w32->opts->native_keyrepeat ? 0 : MP_KEY_STATE_DOWN;
+    mp_input_put_key(w32->input_ctx, mpkey | mod_state(w32) | state);
 }
 
 static void handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
