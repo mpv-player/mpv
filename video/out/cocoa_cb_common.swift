@@ -31,10 +31,10 @@ class CocoaCB: Common, EventSubscriber {
     var backendState: State = .uninitialized
 
     init(_ mpv: OpaquePointer) {
-        let newlog = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "cocoacb")
+        let log = LogHelper(mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "cocoacb"))
         let option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        libmpv = LibmpvHelper(mpv, newlog)
-        super.init(option, newlog)
+        libmpv = LibmpvHelper(mpv, log)
+        super.init(option, log)
         layer = GLLayer(cocoaCB: self)
         AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
     }

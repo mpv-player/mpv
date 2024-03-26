@@ -48,9 +48,9 @@ class Common: NSObject {
         didSet { if let window = window { window.title = title } }
     }
 
-    init(_ opt: OptionHelper, _ mpLog: OpaquePointer?) {
-        option = opt
-        log = LogHelper(mpLog)
+    init(_ option: OptionHelper, _ log: LogHelper) {
+        self.option = option
+        self.log = log
     }
 
     func initMisc(_ vo: UnsafeMutablePointer<vo>) {
