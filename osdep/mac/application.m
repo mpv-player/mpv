@@ -35,10 +35,6 @@
 
 #define MPV_PROTOCOL @"mpv://"
 
-// Whether the NSApplication singleton was created. If this is false, we are
-// running in libmpv mode, and cocoa_main() was never called.
-static bool application_instantiated;
-
 static mp_thread playback_thread_id;
 
 @interface Application ()
@@ -238,8 +234,6 @@ static void setup_bundle(int *argc, char *argv[])
 int cocoa_main(int argc, char *argv[])
 {
     @autoreleasepool {
-        application_instantiated = true;
-
         struct playback_thread_ctx ctx = {0};
         ctx.argc     = &argc;
         ctx.argv     = &argv;
