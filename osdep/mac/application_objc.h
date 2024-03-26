@@ -18,14 +18,6 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/mac/application.h"
 
-@class CocoaCB;
-struct mpv_event;
-struct mpv_handle;
-
 @interface Application : NSApplication
-
-- (void)initCocoaCb:(struct mpv_handle *)ctx;
-
 @property(nonatomic, assign) size_t openCount;
-@property(nonatomic, retain) CocoaCB *cocoaCB;
 @end

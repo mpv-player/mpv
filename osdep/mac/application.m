@@ -59,7 +59,6 @@ static void terminate_cocoa_application(void)
 
 @implementation Application
 @synthesize openCount = _open_count;
-@synthesize cocoaCB = _cocoa_cb;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -99,16 +98,6 @@ static void terminate_cocoa_application(void)
     return [[AppHub shared] touchBar];
 }
 #endif
-
-- (void)initCocoaCb:(struct mpv_handle *)ctx
-{
-#if HAVE_MACOS_COCOA_CB
-    if (!_cocoa_cb) {
-        mpv_handle *mpv = mpv_create_client(ctx, "cocoacb");
-        [NSApp setCocoaCB:[[CocoaCB alloc] init:mpv]];
-    }
-#endif
-}
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {

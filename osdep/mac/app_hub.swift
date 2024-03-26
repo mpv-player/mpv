@@ -28,6 +28,9 @@ class AppHub: NSObject {
 #if HAVE_MACOS_TOUCHBAR
     @objc var touchBar: TouchBar?
 #endif
+#if HAVE_MACOS_COCOA_CB
+    var cocoaCb: CocoaCB?
+#endif
 
     var isApplication: Bool { get { NSApp is Application } }
 
@@ -57,8 +60,12 @@ class AppHub: NSObject {
     }
 
     @objc func initCocoaCb() {
-        guard let app = NSApp as? Application, let mpv = mpv else { return }
-        DispatchQueue.main.sync { app.initCocoaCb(mpv) }
+#if HAVE_MACOS_COCOA_CB
+        if !isApplication { return }
+        DispatchQueue.main.sync {
+            self.cocoaCb = self.cocoaCb ?? CocoaCB(mpv_create_client(mpv, "cocoacb"))
+        }
+#endif
     }
 
     @objc func startRemote() {
