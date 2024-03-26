@@ -18,6 +18,7 @@
 #ifndef MPLAYER_BSTR_H
 #define MPLAYER_BSTR_H
 
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -35,25 +36,28 @@ typedef struct bstr {
     size_t len;
 } bstr;
 
-// If str.start is NULL, return NULL.
+// If str.len is 0, return NULL.
 static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
 {
+    if (!str.len)
+        return NULL;
+    assert(str.start);
     return talloc_strndup(talloc_ctx, (char *)str.start, str.len);
 }
 
 // Like bstrdup0(), but always return a valid C-string.
 static inline char *bstrto0(void *talloc_ctx, struct bstr str)
 {
-    return str.start ? bstrdup0(talloc_ctx, str) : talloc_strdup(talloc_ctx, "");
+    return str.len ? bstrdup0(talloc_ctx, str) : talloc_strdup(talloc_ctx, "");
 }
 
-// Return start = NULL iff that is true for the original.
+// Return duplicate of the bstr
 static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
 {
-    struct bstr r = { NULL, str.len };
-    if (str.start)
-        r.start = (unsigned char *)talloc_memdup(talloc_ctx, str.start, str.len);
-    return r;
+    if (!str.len)
+        return (bstr){0};
+    assert(str.start);
+    return (bstr){talloc_memdup(talloc_ctx, str.start, str.len), str.len};
 }
 
 static inline struct bstr bstr0(const char *s)
