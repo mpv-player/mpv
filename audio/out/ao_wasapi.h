@@ -48,21 +48,22 @@ void wasapi_change_uninit(struct ao* ao);
 
 enum wasapi_thread_state {
     WASAPI_THREAD_FEED = 0,
-    WASAPI_THREAD_DISPATCH,
     WASAPI_THREAD_RESUME,
     WASAPI_THREAD_RESET,
-    WASAPI_THREAD_SHUTDOWN
+    WASAPI_THREAD_SHUTDOWN,
+    WASAPI_THREAD_DISPATCH_BASE
 };
 
 typedef struct wasapi_state {
     struct mp_log *log;
 
-    bool init_ok;            // status of init phase
+    bool init_ok;             // status of init phase
     // Thread handles
-    HANDLE hInitDone;        // set when init is complete in audio thread
-    HANDLE hAudioThread;     // the audio thread itself
-    HANDLE hWake;            // thread wakeup event
-    atomic_int thread_state; // enum wasapi_thread_state (what to do on wakeup)
+    HANDLE hInitDone;         // set when init is complete in audio thread
+    HANDLE hAudioThread;      // the audio thread itself
+    HANDLE hWake;             // thread wakeup event
+    atomic_uint thread_state; // enum wasapi_thread_state (what to do on wakeup)
+    atomic_uint dispatch_seq; // incremented each time AO control is called
     struct mp_dispatch_queue *dispatch; // for volume/mute/session display
 
     // for setting the audio thread priority
