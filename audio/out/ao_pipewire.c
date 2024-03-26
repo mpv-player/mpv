@@ -694,6 +694,15 @@ static void start(struct ao *ao)
     pw_thread_loop_unlock(p->loop);
 }
 
+static bool set_pause(struct ao *ao, bool paused)
+{
+    struct priv *p = ao->priv;
+    pw_thread_loop_lock(p->loop);
+    pw_stream_set_active(p->stream, !paused);
+    pw_thread_loop_unlock(p->loop);
+    return true;
+}
+
 #define CONTROL_RET(r) (!r ? CONTROL_OK : CONTROL_ERROR)
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -885,7 +894,7 @@ const struct ao_driver audio_out_pipewire = {
     .uninit      = uninit,
     .reset       = reset,
     .start       = start,
-
+    .set_pause   = set_pause,
     .control     = control,
 
     .hotplug_init   = hotplug_init,
