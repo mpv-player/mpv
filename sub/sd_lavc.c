@@ -83,12 +83,13 @@ static int init(struct sd *sd)
     case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
+    case AV_CODEC_ID_ARIB_CAPTION:
         break;
     default:
         return -1;
     }
 
-    struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
+    struct sd_lavc_priv *priv = NULL;
     AVCodecContext *ctx = NULL;
     const AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
@@ -99,6 +100,29 @@ static int init(struct sd *sd)
 
     mp_set_avopts(sd->log, ctx, sd->opts->sub_avopts);
 
+    switch (cid) {
+    case AV_CODEC_ID_DVB_TELETEXT: {
+        int64_t format;
+        int ret = av_opt_get_int(ctx, "txt_format", AV_OPT_SEARCH_CHILDREN, &format);
+        // format == 0 is bitmap
+        if (!ret && format) {
+            avcodec_free_context(&ctx);
+            return -1;
+        }
+        break;
+    }
+    case AV_CODEC_ID_ARIB_CAPTION: {
+        int64_t format;
+        int ret = av_opt_get_int(ctx, "sub_type", AV_OPT_SEARCH_CHILDREN, &format);
+        if (!ret && format != SUBTITLE_BITMAP) {
+            avcodec_free_context(&ctx);
+            return -1;
+        }
+        break;
+    }
+    }
+
+    priv = talloc_zero(NULL, struct sd_lavc_priv);
     priv->avpkt = av_packet_alloc();
     if (!priv->avpkt)
         goto error;
