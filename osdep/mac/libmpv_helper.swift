@@ -28,9 +28,9 @@ class LibmpvHelper {
     var fbo: GLint = 1
     let uninitLock = NSLock()
 
-    init(_ mpv: OpaquePointer, _ mpLog: OpaquePointer?) {
+    init(_ mpv: OpaquePointer, _ log: LogHelper) {
         self.mpv = mpv
-        log = LogHelper(mpLog)
+        self.log = log
     }
 
     func initRender() {

@@ -25,9 +25,9 @@ class MacCommon: Common {
     let swapLock: NSCondition = NSCondition()
 
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
-        let newlog = mp_log_new(vo, vo.pointee.log, "mac")
+        let log = LogHelper(mp_log_new(vo, vo.pointee.log, "mac"))
         let option = OptionHelper(vo, vo.pointee.global)
-        super.init(option, newlog)
+        super.init(option, log)
         self.vo = vo
         input = InputHelper(vo.pointee.input_ctx, option)
         timer = PreciseTimer(common: self)
