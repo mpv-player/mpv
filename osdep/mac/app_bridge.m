@@ -23,6 +23,49 @@
 #include "osdep/mac/swift.h"
 #endif
 
+#define OPT_BASE_STRUCT struct macos_opts
+const struct m_sub_options macos_conf = {
+    .opts = (const struct m_option[]) {
+        {"macos-title-bar-appearance", OPT_CHOICE(macos_title_bar_appearance,
+            {"auto", 0}, {"aqua", 1}, {"darkAqua", 2},
+            {"vibrantLight", 3}, {"vibrantDark", 4},
+            {"aquaHighContrast", 5}, {"darkAquaHighContrast", 6},
+            {"vibrantLightHighContrast", 7},
+            {"vibrantDarkHighContrast", 8})},
+        {"macos-title-bar-material", OPT_CHOICE(macos_title_bar_material,
+            {"titlebar", 0}, {"selection", 1}, {"menu", 2},
+            {"popover", 3}, {"sidebar", 4}, {"headerView", 5},
+            {"sheet", 6}, {"windowBackground", 7}, {"hudWindow", 8},
+            {"fullScreen", 9}, {"toolTip", 10}, {"contentBackground", 11},
+            {"underWindowBackground", 12}, {"underPageBackground", 13},
+            {"dark", 14}, {"light", 15}, {"mediumLight", 16},
+            {"ultraDark", 17})},
+        {"macos-title-bar-color", OPT_COLOR(macos_title_bar_color)},
+        {"macos-fs-animation-duration",
+            OPT_CHOICE(macos_fs_animation_duration, {"default", -1}),
+            M_RANGE(0, 1000)},
+        {"macos-force-dedicated-gpu", OPT_BOOL(macos_force_dedicated_gpu)},
+        {"macos-app-activation-policy", OPT_CHOICE(macos_app_activation_policy,
+            {"regular", 0}, {"accessory", 1}, {"prohibited", 2})},
+        {"macos-geometry-calculation", OPT_CHOICE(macos_geometry_calculation,
+            {"visible", FRAME_VISIBLE}, {"whole", FRAME_WHOLE})},
+        {"macos-render-timer", OPT_CHOICE(macos_render_timer,
+            {"callback", RENDER_TIMER_CALLBACK}, {"precise", RENDER_TIMER_PRECISE},
+            {"system", RENDER_TIMER_SYSTEM})},
+        {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
+            {"auto", -1}, {"no", 0}, {"yes", 1})},
+        {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
+        {0}
+    },
+    .size = sizeof(struct macos_opts),
+    .defaults = &(const struct macos_opts){
+        .macos_title_bar_color = {0, 0, 0, 0},
+        .macos_fs_animation_duration = -1,
+        .cocoa_cb_sw_renderer = -1,
+        .cocoa_cb_10bit_context = true
+    },
+};
+
 static const char app_icon[] =
 #include "TOOLS/osxbundle/icon.icns.inc"
 ;
@@ -30,6 +73,16 @@ static const char app_icon[] =
 NSData *app_bridge_icon(void)
 {
     return [NSData dataWithBytesNoCopy:(void *)app_icon length:sizeof(app_icon) - 1 freeWhenDone:NO];
+}
+
+const struct m_sub_options *app_bridge_mac_conf(void)
+{
+    return &macos_conf;
+}
+
+const struct m_sub_options *app_bridge_vo_conf(void)
+{
+    return &vo_sub_opts;
 }
 
 void cocoa_init_media_keys(void)
