@@ -1,0 +1,2 @@
+add `context-menu` command
+add `menu-data` property
