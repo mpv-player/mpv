@@ -85,6 +85,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         MP_ERR(vo, "Failed presenting frame!\n");
         return;
     }
+
+    struct mp_image_params *params = gl_video_get_target_params_ptr(p->renderer);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = params;
+    mp_mutex_unlock(&vo->params_mutex);
 }
 
 static void flip_page(struct vo *vo)

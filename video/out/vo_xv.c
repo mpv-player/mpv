@@ -92,6 +92,7 @@ struct xvctx {
     int Shmem_Flag;
     XShmSegmentInfo Shminfo[MAX_BUFFERS];
     int Shm_Warned_Slow;
+    struct mp_image_params dst_params;
 };
 
 #define MP_FOURCC(a,b,c,d) ((a) | ((b)<<8) | ((c)<<16) | ((unsigned)(d)<<24))
@@ -522,6 +523,13 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     int is_709 = params->repr.sys == PL_COLOR_SYSTEM_BT_709;
     xv_set_eq(vo, ctx->xv_port, "bt_709", is_709 * 200 - 100);
     read_xv_csp(vo);
+
+    ctx->dst_params = *params;
+    if (ctx->cached_csp)
+        ctx->dst_params.repr.sys = ctx->cached_csp;
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &ctx->dst_params;
+    mp_mutex_unlock(&vo->params_mutex);
 
     resize(vo);
 

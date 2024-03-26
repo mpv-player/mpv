@@ -102,6 +102,7 @@ typedef struct d3d_priv {
     struct mp_osd_res osd_res;
     int image_format;           /**< mplayer image format */
     struct mp_image_params params;
+    struct mp_image_params dst_params;
 
     D3DFORMAT movie_src_fmt;        /**< Movie colorspace format (depends on
                                     the movie's codec) */
@@ -895,6 +896,18 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     if (!resize_d3d(priv))
         return VO_ERROR;
+
+    priv->dst_params = *params;
+    for (const struct fmt_entry *cur = &fmt_table[0]; cur->mplayer_fmt; ++cur) {
+        if (cur->fourcc == priv->desktop_fmt) {
+            priv->dst_params.imgfmt = cur->mplayer_fmt;
+            break;
+        }
+    }
+    mp_image_params_guess_csp(&priv->dst_params);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &priv->dst_params;
+    mp_mutex_unlock(&vo->params_mutex);
 
     return 0; /* Success */
 }
