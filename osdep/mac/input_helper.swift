@@ -62,13 +62,13 @@ class InputHelper: NSObject {
         .init(0, 0)
     ]
 
-    @objc init(_ input: OpaquePointer? = nil, _ option: OptionHelper? = nil) {
+    init(_ input: OpaquePointer? = nil, _ option: OptionHelper? = nil) {
         super.init()
         self.input = input
         self.option = option
     }
 
-    @objc func put(
+    func put(
         key: Int32,
         modifiers: NSEvent.ModifierFlags = .init(rawValue: 0),
         type: NSEvent.EventType = .applicationDefined
@@ -258,7 +258,7 @@ class InputHelper: NSObject {
         }
     }
 
-    @objc func signal(input: OpaquePointer? = nil) {
+    func signal(input: OpaquePointer? = nil) {
         lock.withLock {
             self.input = input
             if input != nil { lock.signal() }

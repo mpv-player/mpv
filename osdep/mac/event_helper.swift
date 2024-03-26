@@ -57,12 +57,12 @@ extension EventHelper {
     }
 }
 
-public class EventHelper: NSObject {
+class EventHelper {
     unowned let appHub: AppHub
     var mpv: OpaquePointer?
     var events: [String:[Int:EventSubscriber]] = [:]
 
-    @objc init?(_ appHub: AppHub, _ mpvHandle: OpaquePointer) {
+    init?(_ appHub: AppHub, _ mpvHandle: OpaquePointer) {
         if !appHub.isApplication {
             mpv_destroy(mpvHandle)
             return nil
@@ -70,7 +70,6 @@ public class EventHelper: NSObject {
 
         self.appHub = appHub
         self.mpv = mpvHandle
-        super.init()
         mpv_set_wakeup_callback(mpvHandle, wakeup, TypeHelper.bridge(obj: self))
     }
 
