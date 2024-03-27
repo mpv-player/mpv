@@ -40,6 +40,7 @@ extern const struct ao_driver audio_out_audiotrack;
 extern const struct ao_driver audio_out_audiounit;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_coreaudio_exclusive;
+extern const struct ao_driver audio_out_avfoundation;
 extern const struct ao_driver audio_out_rsound;
 extern const struct ao_driver audio_out_pipewire;
 extern const struct ao_driver audio_out_sndio;
@@ -64,6 +65,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_COREAUDIO
     &audio_out_coreaudio,
+#endif
+#if HAVE_AVFOUNDATION
+    &audio_out_avfoundation,
 #endif
 #if HAVE_PIPEWIRE
     &audio_out_pipewire,

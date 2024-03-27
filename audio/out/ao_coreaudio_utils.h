@@ -29,6 +29,11 @@
 #include "internal.h"
 #include "osdep/utils-mac.h"
 
+#if HAVE_AVFOUNDATION || HAVE_AUDIOUNIT
+#undef HAVE_COREAUDIO
+#define HAVE_COREAUDIO 1
+#endif
+
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 
 #define CHECK_CA_ERROR_L(label, message) \

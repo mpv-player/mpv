@@ -799,6 +799,14 @@ if features['audiounit']
     sources += files('audio/out/ao_audiounit.m')
 endif
 
+avfoundation = dependency('appleframeworks', modules: ['CoreMedia', 'AVFoundation'],
+                          required: get_option('avfoundation'))
+features += {'avfoundation': avfoundation.found()}
+if features['avfoundation']
+    dependencies += avfoundation
+    sources += files('audio/out/ao_avfoundation.m')
+endif
+
 coreaudio = dependency('appleframeworks', modules: ['CoreFoundation', 'CoreAudio',
                        'AudioUnit', 'AudioToolbox'], required: get_option('coreaudio'))
 features += {'coreaudio': coreaudio.found()}
@@ -809,9 +817,10 @@ if features['coreaudio']
                      'audio/out/ao_coreaudio_properties.c')
 endif
 
-if features['audiounit'] or features['coreaudio']
+if features['audiounit'] or features['coreaudio'] or features['avfoundation']
     sources += files('audio/out/ao_coreaudio_chmap.c',
-                     'audio/out/ao_coreaudio_utils.c')
+                     'audio/out/ao_coreaudio_utils.c',
+                     'audio/out/ao_coreaudio_properties.c')
 endif
 
 jack_opt = get_option('jack').require(

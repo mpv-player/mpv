@@ -138,10 +138,20 @@ Available audio output drivers are:
         passthrough (even if the device reports it as supported). Use with
         extreme care.
 
-
 ``coreaudio_exclusive`` (macOS only)
     Native macOS audio output driver using direct device access and
     exclusive mode (bypasses the sound server).
+
+``avfoundation`` (macOS only)
+    Native macOS audio output driver using ``AVSampleBufferAudioRenderer``
+    in AVFoundation, which supports `spatial audio
+    <https://support.apple.com/en-us/HT211775>`_.
+
+    .. warning::
+
+        Turning on spatial audio may hang the playback
+        if mpv is not started out of the bundle,
+        though playback with spatial audio off always works.
 
 ``openal``
     OpenAL audio output driver.
