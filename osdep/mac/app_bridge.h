@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include "input/input.h"
-
 enum {
     FRAME_VISIBLE = 0,
     FRAME_WHOLE,

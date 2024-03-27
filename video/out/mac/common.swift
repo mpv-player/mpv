@@ -626,8 +626,8 @@ class Common: NSObject {
             var count: Int32 = 0
             let displayName = getCurrentScreen()?.localizedName ?? "Unknown"
 
-            SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, ta_xstrdup(nil, displayName))
-            SWIFT_TARRAY_STRING_APPEND(nil, &array, &count, nil)
+            app_bridge_tarray_append(nil, &array, &count, ta_xstrdup(nil, displayName))
+            app_bridge_tarray_append(nil, &array, &count, nil)
             dnames.pointee = array
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_RES:
