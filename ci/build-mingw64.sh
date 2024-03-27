@@ -8,16 +8,21 @@ ln -snf . "$prefix_dir/local"
 wget="wget -nc --progress=bar:force"
 gitclone="git clone --depth=1 --recursive --shallow-submodules"
 
-# -posix is Ubuntu's variant with pthreads support
-export CC=$TARGET-gcc-posix
-export AS=$TARGET-gcc-posix
-export CXX=$TARGET-g++-posix
+CC=gcc-posix
+CXX=g++-posix
+AS=gcc-posix
+[[ "$TOOLCHAIN" == "llvm" ]] && CC=clang && CXX=clang++ && AS=clang && export PATH="$PWD/llvm-mingw/bin:$PATH"
+[[ "$TOOLCHAIN" == "llvm" ]] && LLVM_CFLAGS="-fdata-sections -ffunction-sections" && LLVM_LDFLAGS="-Wl,--gc-sections,--icf=safe"
+export CC=$TARGET-$CC
+export CXX=$TARGET-$CXX
+export AS=$TARGET-$AS
 export AR=$TARGET-ar
 export NM=$TARGET-nm
 export RANLIB=$TARGET-ranlib
 
-export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
-export LDFLAGS="-fstack-protector-strong"
+export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2 $LLVM_CFLAGS"
+export CXXFLAGS="$CFLAGS"
+export LDFLAGS="-fstack-protector-strong $LLVM_LDFLAGS"
 
 # anything that uses pkg-config
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
@@ -29,6 +34,7 @@ commonflags="--disable-static --enable-shared"
 # meson
 fam=x86_64
 [[ "$TARGET" == "i686-"* ]] && fam=x86
+[[ "$TARGET" == "aarch64-"* ]] && fam=aarch64
 cat >"$prefix_dir/crossfile" <<EOF
 [built-in options]
 buildtype = 'release'
@@ -257,6 +263,8 @@ _luajit () {
     [ -d LuaJIT ] || $gitclone https://github.com/LuaJIT/LuaJIT.git
     pushd LuaJIT
     local hostcc="ccache cc"
+    local CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
+    local LDFLAGS="-fstack-protector-strong"
     local flags=
     [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
     make TARGET_SYS=Windows clean
@@ -287,10 +295,13 @@ LDFLAGS+=" -L'$prefix_dir/lib'"
 export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
+[[ "$TOOLCHAIN" == "llvm" ]] && mpv_c_args="-Wno-error=deprecated -Wno-error=deprecated-declarations -Wno-error=cast-calling-convention -gcodeview" && mpv_c_link_args="-Wl,--pdb="
+[[ "$TOOLCHAIN" == "gcc" ]] && mpv_c_args="-Wno-error=deprecated -Wno-error=deprecated-declarations"
 
 meson setup $build --cross-file "$prefix_dir/crossfile" \
     --werror                   \
-    -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
+    -Dc_args="$mpv_c_args" \
+    -Dc_link_args="$mpv_c_link_args" \
     --buildtype debugoptimized \
     -Dlibmpv=true -Dlua=luajit \
     -D{shaderc,spirv-cross,d3d11}=enabled
@@ -300,21 +311,29 @@ meson compile -C $build
 if [ "$2" = pack ]; then
     mkdir -p artifact/tmp
     echo "Copying:"
-    cp -pv $build/mpv.com $build/mpv.exe artifact/
+    [[ "$TOOLCHAIN" == "llvm" ]] && cp -pv $build/mpv.{com,exe,pdb} artifact/
+    [[ "$TOOLCHAIN" == "gcc" ]] && cp -pv $build/mpv.{com,exe} artifact/
     # copy everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
-    for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
-        cp -p "$file" artifact/tmp/
-    done
+    if [[ "$TOOLCHAIN" == "llvm" ]]; then
+        for file in $PWD/llvm-mingw/$TARGET/bin/*.dll; do
+            cp -p "$file" artifact/tmp/
+        done
+    else
+        for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
+            cp -p "$file" artifact/tmp/
+        done
+    fi
     # pick DLLs we need
     pushd artifact/tmp
     dlls=(
-        libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
         av*.dll sw*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
         lib{shaderc_shared,spirv-cross-c-shared,dav1d}.dll zlib1.dll
     )
-    if [[ -f vulkan-1.dll ]]; then
+    [[ "$TOOLCHAIN" == "llvm" ]] && dlls+=(lib{unwind,c++,winpthread}*.dll) # compiler runtime
+    [[ "$TOOLCHAIN" == "gcc" ]] && dlls+=(libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll)
+    if [[ -f vulkan-1.dl ]]; then
         dlls+=(vulkan-1.dll)
     fi
     mv -v "${dlls[@]}" ..

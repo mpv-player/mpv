@@ -35,7 +35,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [i686-w64-mingw32, x86_64-w64-mingw32]
+        target: [i686-w64-mingw32, x86_64-w64-mingw32, aarch64-w64-mingw32]
+        toolchain: [gcc, llvm]
+        exclude:
+          - target: aarch64-w64-mingw32
+            toolchain: gcc
     steps:
       - uses: actions/checkout@v4
 
@@ -56,11 +60,27 @@ jobs:
           sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64 ccache
           sudo python3 -m pip install meson
 
+      - name: Download llvm-mingw
+        if: ${{ matrix.toolchain == 'llvm' }}
+        uses: robinraju/release-downloader@main
+        with:
+          repository: "mstorsjo/llvm-mingw"
+          latest: true
+          extract: false
+          fileName: "llvm-mingw-*-ucrt-ubuntu-*-x86_64.tar.xz"
+
+      - name: Install llvm-mingw
+        if: ${{ matrix.toolchain == 'llvm' }}
+        run: |
+          tar -xaf llvm-mingw-*.tar.xz && rm llvm-mingw-*.tar.xz
+          mv llvm-mingw-* llvm-mingw
+
       - name: Build libraries
         run: |
           ./ci/build-mingw64.sh
         env:
           TARGET: ${{ matrix.target }}
+          TOOLCHAIN: ${{ matrix.toolchain }}
 
       - name: Build with meson
         id: build
@@ -68,6 +88,7 @@ jobs:
           ./ci/build-mingw64.sh meson pack
         env:
           TARGET: ${{ matrix.target }}
+          TOOLCHAIN: ${{ matrix.toolchain }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -75,6 +96,7 @@ jobs:
           cat ./build/meson-logs/meson-log.txt
 
       - name: Functional test
+        if: ${{ matrix.target != 'aarch64-w64-mingw32' }}
         id: tests
         run: |
           cd artifact && wine64 ./mpv.com -v --no-config
@@ -83,7 +105,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mpv-${{ matrix.target }}
+          name: mpv-${{ matrix.target }}-${{ matrix.toolchain }}
           path: mpv-git-*.zip
 
   macos:
