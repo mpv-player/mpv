@@ -190,6 +190,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return self;
 }
 - (void)handleRestartNotification:(NSNotification*)notification {
+    char *name = cfstr_get_cstr((CFStringRef)notification.name);
+    MP_WARN(ao, "restarting due to system notification; this will cause desync\n");
+    MP_VERBOSE(ao, "notification name: %s\n", name);
+    talloc_free(name);
     stop(ao);
     start(ao);
 }
@@ -295,8 +299,8 @@ static int init(struct ao *ao)
 
     p->observer = [[AVObserver alloc] initWithAO:ao];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification object:nil];
-    [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification object:nil];
+    [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification object:p->renderer];
+    [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification object:p->renderer];
 
     return CONTROL_OK;
 
