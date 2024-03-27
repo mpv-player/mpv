@@ -279,6 +279,7 @@ static void flip_page(struct vo *vo)
 static void uninit(struct vo *vo)
 {
     printf(TERM_ESC_RESTORE_CURSOR);
+    printf(TERM_ESC_DISABLE_MOUSE);
     printf(TERM_ESC_NORMAL_SCREEN);
     struct priv *p = vo->priv;
     if (p->frame)
@@ -303,6 +304,7 @@ static int preinit(struct vo *vo)
     }
 
     printf(TERM_ESC_HIDE_CURSOR);
+    printf(TERM_ESC_ENABLE_MOUSE);
     printf(TERM_ESC_ALT_SCREEN);
 
     return 0;
