@@ -791,7 +791,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     range.
 
 ``print-text <text>``
-    Print text to stdout. The string can contain properties (see
+    Print text to stderr. The string can contain properties (see
     `Property Expansion`_). Take care to put the argument in quotes.
 
 ``show-text <text> [<duration>|-1 [<level>]]``

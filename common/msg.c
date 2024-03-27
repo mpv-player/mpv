@@ -66,11 +66,10 @@ struct mp_log_root {
     bool show_time;
     int blank_lines;    // number of lines usable by status
     int status_lines;   // number of current status lines
-    bool color[STDERR_FILENO + 1];
-    bool isatty[STDERR_FILENO + 1];
+    bool color;
+    bool isatty;
     int verbose;
     bool really_quiet;
-    bool force_stderr;
     struct mp_log_buffer **buffers;
     int num_buffers;
     struct mp_log_buffer *early_buffer;
@@ -193,12 +192,6 @@ int mp_msg_level(struct mp_log *log)
     return log->level;
 }
 
-static inline int term_msg_fileno(struct mp_log_root *root, int lev)
-{
-    return (root->force_stderr || lev == MSGL_STATUS || lev == MSGL_FATAL ||
-            lev == MSGL_ERR || lev == MSGL_WARN) ? STDERR_FILENO : STDOUT_FILENO;
-}
-
 // Reposition cursor and clear lines for outputting the status line. In certain
 // cases, like term OSD and subtitle display, the status can consist of
 // multiple lines.
@@ -207,7 +200,7 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
     int new_lines = lev == MSGL_STATUS ? term_lines : 0;
     out->len = 0;
 
-    if (!root->isatty[term_msg_fileno(root, lev)]) {
+    if (!root->isatty) {
         if (root->status_lines)
             bstr_xappend(root, out, bstr0("\n"));
         root->status_lines = new_lines;
@@ -253,7 +246,7 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
         goto done;
 
     if (!clear) {
-        if (log->root->isatty[STDERR_FILENO])
+        if (log->root->isatty)
             fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
         fprintf(stderr, "\n");
         log->root->blank_lines = 0;
@@ -313,7 +306,7 @@ static void pretty_print_module(struct mp_log_root *root, bstr *text,
 {
     size_t prefix_len = strlen(prefix);
     root->module_indent = MPMAX(10, MPMAX(root->module_indent, prefix_len));
-    bool color = root->color[term_msg_fileno(root, lev)];
+    bool color = root->color;
 
     // Use random color based on the name of the module
     if (color) {
@@ -389,8 +382,7 @@ static void append_terminal_line(struct mp_log *log, int lev,
     }
 
     bstr_xappend(root, term_msg, text);
-    *line_w = root->isatty[term_msg_fileno(root, lev)]
-                ? term_disp_width(bstr_splice(*term_msg, start, term_msg->len)) : 0;
+    *line_w = root->isatty ? term_disp_width(bstr_splice(*term_msg, start, term_msg->len)) : 0;
 }
 
 static struct mp_log_buffer_entry *log_buffer_read(struct mp_log_buffer *buffer)
@@ -468,9 +460,8 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
 {
     struct mp_log_root *root = log->root;
     bool print_term = test_terminal_level(log, lev);
-    int fileno = term_msg_fileno(root, lev);
     int term_w = 0, term_h = 0;
-    if (print_term && root->isatty[fileno])
+    if (print_term && root->isatty)
         terminal_get_size(&term_w, &term_h);
 
     out->len = 0;
@@ -498,9 +489,9 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
         write_msg_to_buffers(log, lev, line);
     }
 
-    if (lev == MSGL_STATUS && print_term) {
+    if (lev == MSGL_STATUS) {
         int line_w = 0;
-        if (str.len)
+        if (str.len && print_term)
             append_terminal_line(log, lev, str, &root->term_msg_tmp, &line_w);
         term_msg_lines += !term_w ? (str.len ? 1 : 0)
                                   : (line_w + term_w - 1) / term_w;
@@ -510,7 +501,7 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
 
     if (print_term && (root->term_msg_tmp.len || lev == MSGL_STATUS)) {
         prepare_prefix(root, out, lev, term_msg_lines);
-        if (root->color[fileno] && root->term_msg_tmp.len) {
+        if (root->color && root->term_msg_tmp.len) {
             set_msg_color(root, out, lev);
             set_term_color(root, &root->term_msg_tmp, -1);
         }
@@ -560,16 +551,14 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
                            &root->term_status_msg);
         }
 
-        int fileno = term_msg_fileno(root, lev);
-        FILE *stream = fileno == STDERR_FILENO ? stderr : stdout;
         if (root->term_msg.len) {
             if (root->term_status_msg.len) {
-                fprintf(stream, "%.*s%.*s", BSTR_P(root->term_msg),
+                fprintf(stderr, "%.*s%.*s", BSTR_P(root->term_msg),
                         BSTR_P(root->term_status_msg));
             } else {
-                fprintf(stream, "%.*s", BSTR_P(root->term_msg));
+                fprintf(stderr, "%.*s", BSTR_P(root->term_msg));
             }
-            fflush(stream);
+            fflush(stderr);
         }
     }
 
@@ -750,14 +739,11 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     root->module = opts->msg_module;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
+    root->isatty = root->use_terminal && isatty(STDERR_FILENO);
+    root->color = opts->msg_color && root->isatty;
 
     if (root->really_quiet)
         root->status_lines = 0;
-
-    for (int i = STDOUT_FILENO; i <= STDERR_FILENO && root->use_terminal; ++i) {
-        root->isatty[i] = isatty(i);
-        root->color[i] = opts->msg_color && root->isatty[i];
-    }
 
     m_option_type_msglevels.free(&root->msg_levels);
     m_option_type_msglevels.copy(NULL, &root->msg_levels, &opts->msg_levels);
@@ -832,15 +818,6 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     }
 }
 
-void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
-{
-    struct mp_log_root *root = global->log->root;
-
-    mp_mutex_lock(&root->lock);
-    root->force_stderr = force_stderr;
-    mp_mutex_unlock(&root->lock);
-}
-
 // Only to be called from the main thread.
 bool mp_msg_has_log_file(struct mpv_global *global)
 {
@@ -853,7 +830,7 @@ void mp_msg_uninit(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
     mp_msg_flush_status_line(global->log, true);
-    if (root->really_quiet && root->isatty[STDERR_FILENO])
+    if (root->really_quiet && root->isatty)
         fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
     terminate_log_file_thread(root);
     mp_msg_log_buffer_destroy(root->early_buffer);
