@@ -239,7 +239,7 @@ int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
     buffers->write_console_buf.len = 0;
     bstr_xappend_vasprintf(buffers, &buffers->write_console_buf, format, args);
 
-    int ret = mp_console_fputs(wstream, buffers->write_console_buf);
+    int ret = mp_console_write(wstream, buffers->write_console_buf);
 
     if (free_buf)
         talloc_free(buffers);
@@ -247,7 +247,7 @@ int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
     return ret;
 }
 
-int mp_console_fputs(HANDLE wstream, bstr str)
+int mp_console_write(HANDLE wstream, bstr str)
 {
     struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
     bool free_buf = false;

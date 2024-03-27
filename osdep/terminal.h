@@ -28,6 +28,8 @@
 #define TERM_ESC_GOTO_YX            "\033[%d;%df"
 #define TERM_ESC_HIDE_CURSOR        "\033[?25l"
 #define TERM_ESC_RESTORE_CURSOR     "\033[?25h"
+#define TERM_ESC_SYNC_UPDATE_BEGIN  "\033[?2026h"
+#define TERM_ESC_SYNC_UPDATE_END    "\033[?2026l"
 
 #define TERM_ESC_CLEAR_SCREEN       "\033[2J"
 #define TERM_ESC_ALT_SCREEN         "\033[?1049h"
@@ -55,7 +57,7 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height);
 
 // Windows only.
 int mp_console_vfprintf(void *wstream, const char *format, va_list args);
-int mp_console_fputs(void *wstream, bstr str);
+int mp_console_write(void *wstream, bstr str);
 bool mp_check_console(void *handle);
 
 /* Windows-only function to attach to the parent process's console */

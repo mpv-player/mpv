@@ -309,18 +309,26 @@ static inline HANDLE get_handle(FILE *stream)
     return wstream;
 }
 
-int mp_fputs(const char *str, FILE *stream)
+size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
+                 FILE *restrict stream)
 {
+    if (!size || !count)
+        return 0;
+
     HANDLE wstream = get_handle(stream);
-    if (mp_check_console(wstream))
-        return mp_console_fputs(wstream, bstr0(str));
+    if (mp_check_console(wstream)) {
+        unsigned char *start = (unsigned char *)buffer;
+        size_t c = 0;
+        for (; c < count; ++c) {
+            if (mp_console_write(wstream, (bstr){start, size}) <= 0)
+                break;
+            start += size;
+        }
+        return c;
+    }
 
-    return fputs(str, stream);
-}
-
-int mp_puts(const char *str)
-{
-    return mp_fputs(str, stdout);
+#undef fwrite
+    return fwrite(buffer, size, count, stream);
 }
 
 #if HAVE_UWP
