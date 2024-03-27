@@ -323,8 +323,10 @@ struct vo_driver {
 
     /*
      * Whether the given image format is supported and config() will succeed.
+     * VO can choose fallback order of formats. Priority N-1 will only be considered if
+     * no format of priority N is usable.
      * format: one of IMGFMT_*
-     * returns: 0 on not supported, otherwise 1
+     * returns: 0 if not supported, priority otherwise
      */
     int (*query_format)(struct vo *vo, int format);
 

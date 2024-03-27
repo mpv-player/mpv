@@ -81,7 +81,7 @@ struct mp_refqueue *mp_refqueue_alloc(struct mp_filter *f)
 
 void mp_refqueue_add_in_format(struct mp_refqueue *q, int fmt, int subfmt)
 {
-    mp_autoconvert_add_imgfmt(q->conv, fmt, subfmt);
+    mp_autoconvert_add_imgfmt(q->conv, fmt, subfmt, 1);
 }
 
 // The minimum number of frames required before and after the current frame.

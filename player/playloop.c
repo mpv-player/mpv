@@ -1024,16 +1024,19 @@ int handle_force_window(struct MPContext *mpctx, bool force)
 
     if (!mpctx->video_out->config_ok || force) {
         struct vo *vo = mpctx->video_out;
-        // Pick whatever works
+        // Pick most-preferred format
         int config_format = 0;
+        uint8_t prio = 0;
         uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
         vo_query_formats(vo, fmts);
         for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
-            if (fmts[fmt - IMGFMT_START]) {
+            if (fmts[fmt - IMGFMT_START] > prio) {
                 config_format = fmt;
-                break;
+                prio = fmts[fmt - IMGFMT_START];
             }
         }
+        if (!config_format)
+            goto err;
 
         // Use a 16:9 aspect ratio so that fullscreen on a 16:9 screen will not
         // have vertical margins, which can lead to a different size or position
