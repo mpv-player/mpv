@@ -54,6 +54,7 @@ static void update_speed_filters(struct MPContext *mpctx)
     if (!ao_c)
         return;
 
+    double pitch = mpctx->opts->playback_pitch;
     double speed = mpctx->opts->playback_speed;
     double resample = mpctx->speed_factor_a;
     double drop = 1.0;
@@ -63,17 +64,22 @@ static void update_speed_filters(struct MPContext *mpctx)
         speed = 1.0;
     }
 
-    if (mpctx->display_sync_active) {
-        switch (mpctx->video_out->opts->video_sync) {
-            case VS_DISP_ADROP:
-                drop *= speed * resample;
-                resample = speed = 1.0;
-                break;
-            case VS_DISP_TEMPO:
-                speed = mpctx->audio_speed;
-                resample = 1.0;
-                break;
-        }
+    int video_sync = mpctx->display_sync_active ?
+        mpctx->video_out->opts->video_sync : VS_NONE;
+    switch (video_sync) {
+        case VS_DISP_ADROP:
+            drop *= speed * resample / pitch;
+            resample = pitch;
+            speed = 1.0;
+            break;
+        case VS_DISP_TEMPO:
+            speed = mpctx->audio_speed / pitch;
+            resample = pitch;
+            break;
+        default:
+            resample *= pitch;
+            speed /= pitch;
+            break;
     }
 
     mp_output_chain_set_audio_speed(ao_c->filter, speed, resample, drop);
