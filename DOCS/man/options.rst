@@ -237,6 +237,11 @@ Playback Control
     speed higher than normal automatically inserts the ``scaletempo2`` audio
     filter.
 
+``--pitch=<0.01-100>``
+    Raise or lower the audio's pitch by the factor given as parameter. Does not
+    affect playback speed. Playing with an altered pitch automatically inserts
+    the ``scaletempo2`` audio filter.
+
 ``--pause``
     Start the player in paused state.
 

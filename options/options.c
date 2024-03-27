@@ -675,6 +675,7 @@ static const m_option_t mp_opts[] = {
     {"audio-channels", OPT_CHANNELS(audio_output_channels), .flags = UPDATE_AUDIO},
     {"audio-format", OPT_AUDIOFORMAT(audio_output_format), .flags = UPDATE_AUDIO},
     {"speed", OPT_DOUBLE(playback_speed), M_RANGE(0.01, 100.0)},
+    {"pitch", OPT_DOUBLE(playback_pitch), M_RANGE(0.01, 100.0)},
 
     {"audio-pitch-correction", OPT_BOOL(pitch_correction)},
 
@@ -1036,6 +1037,7 @@ static const struct MPOpts mp_default_opts = {
     .audio_display = 1,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
+    .playback_pitch = 1.,
     .pitch_correction = true,
     .audiofile_auto = -1,
     .osd_bar_visible = true,
@@ -1127,6 +1129,7 @@ static const struct MPOpts mp_default_opts = {
     .watch_later_options = (char *[]){
         "start",
         "speed",
+        "pitch",
         "edition",
         "volume",
         "mute",

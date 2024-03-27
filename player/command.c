@@ -431,6 +431,19 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+/// Playback pitch (RW)
+static int mp_property_playback_pitch(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, mpctx->opts->playback_pitch, 2,
+                                         false, false, action != M_PROPERTY_FIXED_LEN_PRINT);
+        return M_PROPERTY_OK;
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
 static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
@@ -3983,6 +3996,7 @@ static const struct m_property mp_properties_base[] = {
     // General
     {"pid", mp_property_pid},
     {"speed", mp_property_playback_speed},
+    {"pitch", mp_property_playback_pitch},
     {"audio-speed-correction", mp_property_av_speed_correction, .priv = "a"},
     {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
     {"display-sync-active", mp_property_display_sync_active},
@@ -4402,6 +4416,7 @@ static const struct property_osd_display {
      .seek_bar = OSD_SEEK_INFO_BAR},
     {"hr-seek", "hr-seek"},
     {"speed", "Speed"},
+    {"pitch", "Pitch"},
     {"clock", "Clock"},
     {"edition", "Edition"},
     // audio
@@ -7438,7 +7453,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         run_command_opts(mpctx);
     }
 
-    if (opt_ptr == &opts->playback_speed) {
+    if (opt_ptr == &opts->playback_speed || opt_ptr == &opts->playback_pitch) {
         update_playback_speed(mpctx);
         mp_wakeup_core(mpctx);
     }
