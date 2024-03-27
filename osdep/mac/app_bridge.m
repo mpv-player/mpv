@@ -75,6 +75,11 @@ NSData *app_bridge_icon(void)
     return [NSData dataWithBytesNoCopy:(void *)app_icon length:sizeof(app_icon) - 1 freeWhenDone:NO];
 }
 
+void app_bridge_tarray_append(void *t, char ***a, int *i, char *s)
+{
+    MP_TARRAY_APPEND(t, *a, *i, s);
+}
+
 const struct m_sub_options *app_bridge_mac_conf(void)
 {
     return &macos_conf;

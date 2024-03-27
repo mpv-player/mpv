@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
+
 protocol EventSubscriber: AnyObject {
     var uid: Int { get }
     func handle(event: EventHelper.Event)

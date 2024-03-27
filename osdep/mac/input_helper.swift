@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
 import Carbon.HIToolbox
 
 class InputHelper: NSObject {

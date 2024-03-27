@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
+
 class AppHub: NSObject {
     @objc static let shared = AppHub()
 
