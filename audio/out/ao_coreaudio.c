@@ -137,6 +137,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
 static void init_physical_format(struct ao *ao);
+static void reinit_latency(struct ao *ao);
 
 static bool reinit_device(struct ao *ao) {
     struct priv *p = ao->priv;
@@ -174,6 +175,8 @@ static int init(struct ao *ao)
 
     if (!init_audiounit(ao, asbd))
         goto coreaudio_error;
+
+    reinit_latency(ao);
 
     p->queue = dispatch_queue_create("io.mpv.coreaudio_stop_during_idle",
                                      DISPATCH_QUEUE_SERIAL);
@@ -307,8 +310,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
-    p->hw_latency_ns = ca_get_hardware_latency(ao);
-
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
         .inputProcRefCon = ao,
@@ -330,6 +331,13 @@ coreaudio_error_component:
     AudioComponentInstanceDispose(p->audio_unit);
 coreaudio_error:
     return false;
+}
+
+static void reinit_latency(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    p->hw_latency_ns = ca_get_hardware_latency(ao);
 }
 
 static void stop(struct ao *ao)
@@ -432,8 +440,11 @@ static OSStatus hotplug_cb(AudioObjectID id, UInt32 naddr,
                            void *ctx)
 {
     struct ao *ao = ctx;
+    struct priv *p = ao->priv;
     MP_VERBOSE(ao, "Handling potential hotplug event...\n");
     reinit_device(ao);
+    if (p->audio_unit)
+        reinit_latency(ao);
     ao_hotplug_event(ao);
     return noErr;
 }
