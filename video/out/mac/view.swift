@@ -134,7 +134,7 @@ class View: NSView, CALayerDelegate {
     }
 
     override func mouseDown(with event: NSEvent) {
-        hasMouseDown = true
+        hasMouseDown = event.clickCount <= 1
         input?.processMouse(event: event)
     }
 
@@ -145,7 +145,7 @@ class View: NSView, CALayerDelegate {
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        hasMouseDown = true
+        hasMouseDown = event.clickCount <= 1
         input?.processMouse(event: event)
     }
 
@@ -155,7 +155,7 @@ class View: NSView, CALayerDelegate {
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        hasMouseDown = true
+        hasMouseDown = event.clickCount <= 1
         input?.processMouse(event: event)
     }
 
