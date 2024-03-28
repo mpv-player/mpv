@@ -2,6 +2,9 @@
 
 #include "formats.h"
 #include "utils.h"
+#if defined(_WIN32) && (defined(__aarch64__) || defined(__arm64ec__) || defined(__arm__))
+#undef MemoryBarrier
+#endif
 #include "ra_gl.h"
 
 static struct ra_fns ra_fns_gl;
