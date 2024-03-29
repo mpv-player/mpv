@@ -17,19 +17,34 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#import <Cocoa/Cocoa.h>
-#include "osdep/mac/events.h"
+#include "config.h"
 
-@class RemoteCommandCenter;
-@class InputHelper;
-struct input_ctx;
+#include "osdep/mac/app_bridge.h"
+#if HAVE_SWIFT
+#include "osdep/mac/swift.h"
+#endif
 
-@interface EventsResponder : NSObject
+void cocoa_init_media_keys(void)
+{
+    [[AppHub shared] startRemote];
+}
 
-+ (EventsResponder *)sharedInstance;
-- (void)setIsApplication:(BOOL)isApplication;
+void cocoa_uninit_media_keys(void)
+{
+    [[AppHub shared] stopRemote];
+}
 
-@property(nonatomic, retain) RemoteCommandCenter *remoteCommandCenter;
-@property(nonatomic, retain) InputHelper *inputHelper;
+void cocoa_set_input_context(struct input_ctx *input_context)
+{
+    [[AppHub shared] initInput:input_context];
+}
 
-@end
+void cocoa_set_mpv_handle(struct mpv_handle *ctx)
+{
+    [[AppHub shared] initMpv:ctx];
+}
+
+void cocoa_init_cocoa_cb(void)
+{
+    [[AppHub shared] initCocoaCb];
+}

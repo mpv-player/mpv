@@ -17,11 +17,11 @@
 
 import Cocoa
 
-class CocoaCB: Common {
+class CocoaCB: Common, EventSubscriber {
     var libmpv: LibmpvHelper
     var layer: GLLayer?
 
-    @objc var isShuttingDown: Bool = false
+    var isShuttingDown: Bool = false
 
     enum State {
         case uninitialized
@@ -37,6 +37,7 @@ class CocoaCB: Common {
         libmpv = LibmpvHelper(mpvHandle, newlog)
         super.init(option, newlog)
         layer = GLLayer(cocoaCB: self)
+        AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
@@ -199,7 +200,7 @@ class CocoaCB: Common {
         return super.control(vo, events: events, request: request, data: data)
     }
 
-    func shutdown(_ destroy: Bool = false) {
+    func shutdown() {
         isShuttingDown = window?.isAnimating ?? false ||
                          window?.isInFullscreen ?? false && option.vo.native_fs
         if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
@@ -211,23 +212,17 @@ class CocoaCB: Common {
         uninitCommon()
 
         layer?.lockCglContext()
-        libmpv.deinitRender()
+        libmpv.uninit()
         layer?.unlockCglContext()
-        libmpv.deinitMPV(destroy)
     }
 
     func checkShutdown() {
         if isShuttingDown {
-            shutdown(true)
+            shutdown()
         }
     }
 
-    @objc func processEvent(_ event: UnsafePointer<mpv_event>) {
-        switch event.pointee.event_id {
-        case MPV_EVENT_SHUTDOWN:
-            shutdown()
-        default:
-            break
-        }
+    func handle(event: EventHelper.Event) {
+        if event.name == String(describing: MPV_EVENT_SHUTDOWN) { shutdown() }
     }
 }

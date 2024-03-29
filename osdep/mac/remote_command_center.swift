@@ -39,13 +39,16 @@ extension RemoteCommandCenter {
     }
 }
 
-class RemoteCommandCenter: NSObject {
+class RemoteCommandCenter: EventSubscriber {
+    unowned let appHub: AppHub
+    var event: EventHelper? { get { return appHub.event } }
+    var input: InputHelper { get { return appHub.input } }
     var configs: [MPRemoteCommand:Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
     var duration: Double = 0 { didSet { updateInfoCenter() } }
     var position: Double = 0 { didSet { updateInfoCenter() } }
-    var rate: Double = 0 { didSet { updateInfoCenter() } }
+    var rate: Double = 1 { didSet { updateInfoCenter() } }
     var title: String = "" { didSet { updateInfoCenter() } }
     var chapter: String? { didSet { updateInfoCenter() } }
     var album: String? { didSet { updateInfoCenter() } }
@@ -55,8 +58,8 @@ class RemoteCommandCenter: NSObject {
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
 
-    @objc override init() {
-        super.init()
+    init(_ appHub: AppHub) {
+        self.appHub = appHub
 
         configs = [
             commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
@@ -91,7 +94,18 @@ class RemoteCommandCenter: NSObject {
         }
     }
 
-    @objc func start() {
+    func registerEvents() {
+        event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_DOUBLE))
+        event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_DOUBLE))
+        event?.subscribe(self, event: .init(name: "speed", format: MPV_FORMAT_DOUBLE))
+        event?.subscribe(self, event: .init(name: "pause", format: MPV_FORMAT_FLAG))
+        event?.subscribe(self, event: .init(name: "media-title", format: MPV_FORMAT_STRING))
+        event?.subscribe(self, event: .init(name: "chapter-metadata/title", format: MPV_FORMAT_STRING))
+        event?.subscribe(self, event: .init(name: "metadata/by-key/album", format: MPV_FORMAT_STRING))
+        event?.subscribe(self, event: .init(name: "metadata/by-key/artist", format: MPV_FORMAT_STRING))
+    }
+
+    func start() {
         for (cmd, config) in configs {
             cmd.isEnabled = true
             cmd.addTarget(handler: config.handler)
@@ -107,7 +121,7 @@ class RemoteCommandCenter: NSObject {
         )
     }
 
-    @objc func stop() {
+    func stop() {
         for (cmd, _) in configs {
             cmd.isEnabled = false
             cmd.removeTarget(nil)
@@ -155,7 +169,7 @@ class RemoteCommandCenter: NSObject {
             self.configs[event.command]?.state = state
         }
 
-        EventsResponder.sharedInstance().inputHelper.put(key: config.key | Int32(state))
+        self.input.put(key: config.key | Int32(state))
 
         return .success
     }
@@ -166,46 +180,24 @@ class RemoteCommandCenter: NSObject {
         }
 
         let cmd = String(format: "seek %.02f absolute", posEvent.positionTime)
-        return EventsResponder.sharedInstance().inputHelper.command(cmd) ? .success : .commandFailed
+        return self.input.command(cmd) ? .success : .commandFailed
     }
 
-    @objc func processEvent(_ event: UnsafeMutablePointer<mpv_event>) {
-        switch event.pointee.event_id {
-        case MPV_EVENT_PROPERTY_CHANGE:
-            handlePropertyChange(event)
-        default:
-            break
-        }
-    }
-
-    func handlePropertyChange(_ event: UnsafeMutablePointer<mpv_event>) {
-        let pData = OpaquePointer(event.pointee.data)
-        guard let property = UnsafePointer<mpv_event_property>(pData)?.pointee else {
-            return
-        }
-
-        switch String(cString: property.name) {
-        case "pause" where property.format == MPV_FORMAT_FLAG:
-            isPaused = TypeHelper.toBool(property.data) ?? false
-        case "time-pos" where property.format == MPV_FORMAT_DOUBLE:
-            let newPosition = max(TypeHelper.toDouble(property.data) ?? 0, 0)
+    func handle(event: EventHelper.Event) {
+        switch event.name {
+        case "time-pos":
+            let newPosition = max(event.double ?? 0, 0)
             if Int((floor(newPosition) - floor(position)) / rate) != 0 {
                 position = newPosition
             }
-        case "duration" where property.format == MPV_FORMAT_DOUBLE:
-            duration = TypeHelper.toDouble(property.data) ?? 0
-        case "speed" where property.format == MPV_FORMAT_DOUBLE:
-            rate = TypeHelper.toDouble(property.data) ?? 1
-        case "media-title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            title = TypeHelper.toString(property.data) ?? ""
-        case "chapter-metadata/title" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            chapter = TypeHelper.toString(property.data)
-        case "metadata/by-key/album" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            album = TypeHelper.toString(property.data)
-        case "metadata/by-key/artist" where [MPV_FORMAT_STRING, MPV_FORMAT_NONE].contains(property.format):
-            artist = TypeHelper.toString(property.data)
-        default:
-            break
+        case "pause": isPaused = event.bool ?? false
+        case "duration": duration = event.double ?? 0
+        case "speed": rate = event.double ?? 1
+        case "media-title": title = event.string ?? ""
+        case "chapter-metadata/title": chapter = event.string
+        case "metadata/by-key/album": album = event.string
+        case "metadata/by-key/artist": artist = event.string
+        default: break
         }
     }
 }

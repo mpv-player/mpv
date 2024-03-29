@@ -26,7 +26,6 @@ struct mpv_handle;
 @interface Application : NSApplication
 
 - (NSImage *)getMPVIcon;
-- (void)processEvent:(struct mpv_event *)event;
 - (void)initCocoaCb:(struct mpv_handle *)ctx;
 + (const struct m_sub_options *)getMacConf;
 + (const struct m_sub_options *)getVoConf;

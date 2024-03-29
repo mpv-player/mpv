@@ -183,6 +183,7 @@ struct gl_video {
 
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
+    struct mp_image_params target_params;       // target format
     struct ra_imgfmt_desc ra_format;            // texture format
     int plane_count;
 
@@ -2726,6 +2727,21 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
     // Adapt from src to dst as necessary
     pass_color_map(p->sc, p->use_linear && !osd, src, dst, src_light, dst_light, &tone_map);
 
+    if (!osd) {
+        struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
+        mp_csp_equalizer_state_get(p->video_eq, &cparams);
+        if (cparams.levels_out == PL_COLOR_LEVELS_UNKNOWN)
+            cparams.levels_out = PL_COLOR_LEVELS_FULL;
+        p->target_params = (struct mp_image_params){
+            .imgfmt_name = p->fbo_format ? p->fbo_format->name : "unknown",
+            .w = p->texture_w,
+            .h = p->texture_h,
+            .color = dst,
+            .repr = {.sys = PL_COLOR_SYSTEM_RGB, .levels = cparams.levels_out},
+            .rotate = p->image_params.rotate,
+        };
+    }
+
     if (p->use_lut_3d && (flags & RENDER_SCREEN_COLOR)) {
         gl_sc_uniform_texture(p->sc, "lut_3d", p->lut_3d_texture);
         GLSL(vec3 cpos;)
@@ -4374,4 +4390,9 @@ void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p, struct mp_hwdec_device
 {
     assert(p->hwdec_ctx.ra_ctx);
     ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
+}
+
+struct mp_image_params *gl_video_get_target_params_ptr(struct gl_video *p)
+{
+    return &p->target_params;
 }
