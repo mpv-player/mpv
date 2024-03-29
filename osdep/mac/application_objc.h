@@ -17,7 +17,3 @@
 
 #import <Cocoa/Cocoa.h>
 #include "osdep/mac/application.h"
-
-@interface Application : NSApplication
-@property(nonatomic, assign) size_t openCount;
-@end

@@ -33,16 +33,7 @@
 #include "osdep/mac/swift.h"
 #endif
 
-#define MPV_PROTOCOL @"mpv://"
-
 static mp_thread playback_thread_id;
-
-@interface Application ()
-{
-    AppHub *_appHub;
-}
-
-@end
 
 static Application *mpv_shared_app(void)
 {
@@ -56,92 +47,6 @@ static void terminate_cocoa_application(void)
         [NSApp terminate:NSApp];
     });
 }
-
-@implementation Application
-@synthesize openCount = _open_count;
-
-- (void)sendEvent:(NSEvent *)event
-{
-    if ([self modalWindow] || ![_appHub.input processKeyWithEvent:event])
-        [super sendEvent:event];
-    [_appHub.input wakeup];
-}
-
-- (id)init
-{
-    if (self = [super init]) {
-        _appHub = [AppHub shared];
-
-        NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
-        [em setEventHandler:self
-                andSelector:@selector(getUrl:withReplyEvent:)
-              forEventClass:kInternetEventClass
-                 andEventID:kAEGetURL];
-    }
-
-    return self;
-}
-
-- (void)dealloc
-{
-    NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
-    [em removeEventHandlerForEventClass:kInternetEventClass
-                             andEventID:kAEGetURL];
-    [em removeEventHandlerForEventClass:kCoreEventClass
-                             andEventID:kAEQuitApplication];
-    [super dealloc];
-}
-
-#if HAVE_MACOS_TOUCHBAR
-- (NSTouchBar *)makeTouchBar
-{
-    return [[AppHub shared] touchBar];
-}
-#endif
-
-- (void)applicationWillFinishLaunching:(NSNotification *)notification
-{
-    NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
-    [em setEventHandler:self
-            andSelector:@selector(handleQuitEvent:withReplyEvent:)
-          forEventClass:kCoreEventClass
-             andEventID:kAEQuitApplication];
-}
-
-- (void)handleQuitEvent:(NSAppleEventDescriptor *)event
-         withReplyEvent:(NSAppleEventDescriptor *)replyEvent
-{
-    if (![_appHub.input command:@"quit"])
-        terminate_cocoa_application();
-}
-
-- (void)getUrl:(NSAppleEventDescriptor *)event
-    withReplyEvent:(NSAppleEventDescriptor *)replyEvent
-{
-    NSString *url =
-        [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
-
-    url = [url stringByReplacingOccurrencesOfString:MPV_PROTOCOL
-                withString:@""
-                   options:NSAnchoredSearch
-                     range:NSMakeRange(0, [MPV_PROTOCOL length])];
-
-    url = [url stringByRemovingPercentEncoding];
-    [_appHub.input openWithFiles:@[url]];
-}
-
-- (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
-{
-    if (mpv_shared_app().openCount > 0) {
-        mpv_shared_app().openCount--;
-        return;
-    }
-
-    SEL cmpsel = @selector(localizedStandardCompare:);
-    NSArray *files = [filenames sortedArrayUsingSelector:cmpsel];
-    [_appHub.input openWithFiles:files];
-}
-@end
 
 struct playback_thread_ctx {
     int  *argc;
