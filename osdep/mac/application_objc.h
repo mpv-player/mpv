@@ -18,19 +18,6 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/mac/application.h"
 
-@class CocoaCB;
-@class MenuBar;
-struct mpv_event;
-struct mpv_handle;
-
 @interface Application : NSApplication
-
-- (NSImage *)getMPVIcon;
-- (void)initCocoaCb:(struct mpv_handle *)ctx;
-+ (const struct m_sub_options *)getMacConf;
-+ (const struct m_sub_options *)getVoConf;
-
-@property(nonatomic, retain) MenuBar *menuBar;
 @property(nonatomic, assign) size_t openCount;
-@property(nonatomic, retain) CocoaCB *cocoaCB;
 @end

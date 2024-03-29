@@ -60,7 +60,7 @@ class PreciseTimer {
 
         pthread_create(&thread, &threadAttr, entryC, TypeHelper.bridge(obj: self))
         if thread == nil {
-            common.log.sendWarning("Couldn't create pthread for high precision timer")
+            common.log.warning("Couldn't create pthread for high precision timer")
             return nil
         }
 
@@ -84,7 +84,7 @@ class PreciseTimer {
 
         isHighPrecision = success == KERN_SUCCESS
         if !isHighPrecision {
-            common.log.sendWarning("Couldn't create a high precision timer")
+            common.log.warning("Couldn't create a high precision timer")
         }
     }
 

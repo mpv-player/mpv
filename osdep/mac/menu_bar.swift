@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
+
 extension MenuBar {
     class MenuItem: NSMenuItem {
         var config: Config?
@@ -68,18 +70,20 @@ extension MenuBar {
 }
 
 class MenuBar: NSObject {
+    unowned let appHub: AppHub
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
     var dynamicMenuItems: [Type:[MenuItem]] = [:]
     let appIcon: NSImage
 
-    @objc override init() {
+    @objc init(_ appHub: AppHub) {
+        self.appHub = appHub
         UserDefaults.standard.set(false, forKey: "NSFullScreenMenuItemEverywhere")
         UserDefaults.standard.set(true, forKey: "NSDisabledDictationMenuItem")
         UserDefaults.standard.set(true, forKey: "NSDisabledCharacterPaletteMenuItem")
         NSWindow.allowsAutomaticWindowTabbing = false
-        appIcon = (NSApp as? Application)?.getMPVIcon() ?? NSImage(size: NSSize(width: 1, height: 1))
+        appIcon = appHub.getIcon()
 
         super.init()
 
@@ -318,7 +322,7 @@ class MenuBar: NSObject {
 
     @objc func quit(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        AppHub.shared.input.command(menuConfig.command)
+        appHub.input.command(menuConfig.command)
     }
 
     @objc func openFiles() {
@@ -327,7 +331,7 @@ class MenuBar: NSObject {
         panel.canChooseDirectories = true
 
         if panel.runModal() == .OK {
-            AppHub.shared.input.open(files: panel.urls.map { $0.path })
+            appHub.input.open(files: panel.urls.map { $0.path })
         }
     }
 
@@ -335,7 +339,7 @@ class MenuBar: NSObject {
         let panel = NSOpenPanel()
 
         if panel.runModal() == .OK, let url = panel.urls.first {
-            AppHub.shared.input.command("loadlist \"\(url.path)\"")
+            appHub.input.command("loadlist \"\(url.path)\"")
         }
     }
 
@@ -355,13 +359,13 @@ class MenuBar: NSObject {
         }
 
         if alert.runModal() == .alertFirstButtonReturn && input.stringValue.count > 0 {
-            AppHub.shared.input.open(files: [input.stringValue])
+            appHub.input.open(files: [input.stringValue])
         }
     }
 
     @objc func command(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        AppHub.shared.input.command(menuConfig.command)
+        appHub.input.command(menuConfig.command)
     }
 
     @objc func url(_ menuItem: MenuItem) {

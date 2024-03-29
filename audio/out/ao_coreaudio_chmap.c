@@ -22,6 +22,7 @@
 #include "ao_coreaudio_utils.h"
 
 #include "ao_coreaudio_chmap.h"
+#include <CoreAudioTypes/CoreAudioTypes.h>
 
 static const int speaker_map[][2] = {
     { kAudioChannelLabel_Left,                 MP_SPEAKER_ID_FL   },
@@ -65,6 +66,119 @@ static const int speaker_map[][2] = {
     { 0,                                       -1                 },
 };
 
+static const AudioChannelLayoutTag std_layouts[] = {
+    (100U<<16) | 1, // kAudioChannelLayoutTag_Mono
+    (101U<<16) | 2, // kAudioChannelLayoutTag_Stereo
+    (102U<<16) | 2, // kAudioChannelLayoutTag_StereoHeadphones
+    (103U<<16) | 2, // kAudioChannelLayoutTag_MatrixStereo
+    (104U<<16) | 2, // kAudioChannelLayoutTag_MidSide
+    (105U<<16) | 2, // kAudioChannelLayoutTag_XY
+    (106U<<16) | 2, // kAudioChannelLayoutTag_Binaural
+    (107U<<16) | 4, // kAudioChannelLayoutTag_Ambisonic_B_Format
+    (108U<<16) | 4, // kAudioChannelLayoutTag_Quadraphonic
+    (109U<<16) | 5, // kAudioChannelLayoutTag_Pentagonal
+    (110U<<16) | 6, // kAudioChannelLayoutTag_Hexagonal
+    (111U<<16) | 8, // kAudioChannelLayoutTag_Octagonal
+    (112U<<16) | 8, // kAudioChannelLayoutTag_Cube
+    (113U<<16) | 3, // kAudioChannelLayoutTag_MPEG_3_0_A
+    (114U<<16) | 3, // kAudioChannelLayoutTag_MPEG_3_0_B
+    (115U<<16) | 4, // kAudioChannelLayoutTag_MPEG_4_0_A
+    (116U<<16) | 4, // kAudioChannelLayoutTag_MPEG_4_0_B
+    (117U<<16) | 5, // kAudioChannelLayoutTag_MPEG_5_0_A
+    (118U<<16) | 5, // kAudioChannelLayoutTag_MPEG_5_0_B
+    (119U<<16) | 5, // kAudioChannelLayoutTag_MPEG_5_0_C
+    (120U<<16) | 5, // kAudioChannelLayoutTag_MPEG_5_0_D
+    (121U<<16) | 6, // kAudioChannelLayoutTag_MPEG_5_1_A
+    (122U<<16) | 6, // kAudioChannelLayoutTag_MPEG_5_1_B
+    (123U<<16) | 6, // kAudioChannelLayoutTag_MPEG_5_1_C
+    (124U<<16) | 6, // kAudioChannelLayoutTag_MPEG_5_1_D
+    (125U<<16) | 7, // kAudioChannelLayoutTag_MPEG_6_1_A
+    (126U<<16) | 8, // kAudioChannelLayoutTag_MPEG_7_1_A
+    (127U<<16) | 8, // kAudioChannelLayoutTag_MPEG_7_1_B
+    (128U<<16) | 8, // kAudioChannelLayoutTag_MPEG_7_1_C
+    (129U<<16) | 8, // kAudioChannelLayoutTag_Emagic_Default_7_1
+    (130U<<16) | 8, // kAudioChannelLayoutTag_SMPTE_DTV
+    (131U<<16) | 3, // kAudioChannelLayoutTag_ITU_2_1
+    (132U<<16) | 4, // kAudioChannelLayoutTag_ITU_2_2
+    (133U<<16) | 3, // kAudioChannelLayoutTag_DVD_4
+    (134U<<16) | 4, // kAudioChannelLayoutTag_DVD_5
+    (135U<<16) | 5, // kAudioChannelLayoutTag_DVD_6
+    (136U<<16) | 4, // kAudioChannelLayoutTag_DVD_10
+    (137U<<16) | 5, // kAudioChannelLayoutTag_DVD_11
+    (138U<<16) | 5, // kAudioChannelLayoutTag_DVD_18
+    (139U<<16) | 6, // kAudioChannelLayoutTag_AudioUnit_6_0
+    (140U<<16) | 7, // kAudioChannelLayoutTag_AudioUnit_7_0
+    (148U<<16) | 7, // kAudioChannelLayoutTag_AudioUnit_7_0_Front
+    (141U<<16) | 6, // kAudioChannelLayoutTag_AAC_6_0
+    (142U<<16) | 7, // kAudioChannelLayoutTag_AAC_6_1
+    (143U<<16) | 7, // kAudioChannelLayoutTag_AAC_7_0
+    (183U<<16) | 8, // kAudioChannelLayoutTag_AAC_7_1_B
+    (184U<<16) | 8, // kAudioChannelLayoutTag_AAC_7_1_C
+    (144U<<16) | 8, // kAudioChannelLayoutTag_AAC_Octagonal
+    (145U<<16) | 16, // kAudioChannelLayoutTag_TMH_10_2_std
+    (146U<<16) | 21, // kAudioChannelLayoutTag_TMH_10_2_full
+    (149U<<16) | 2, // kAudioChannelLayoutTag_AC3_1_0_1
+    (150U<<16) | 3, // kAudioChannelLayoutTag_AC3_3_0
+    (151U<<16) | 4, // kAudioChannelLayoutTag_AC3_3_1
+    (152U<<16) | 4, // kAudioChannelLayoutTag_AC3_3_0_1
+    (153U<<16) | 4, // kAudioChannelLayoutTag_AC3_2_1_1
+    (154U<<16) | 5, // kAudioChannelLayoutTag_AC3_3_1_1
+    (155U<<16) | 6, // kAudioChannelLayoutTag_EAC_6_0_A
+    (156U<<16) | 7, // kAudioChannelLayoutTag_EAC_7_0_A
+    (157U<<16) | 7, // kAudioChannelLayoutTag_EAC3_6_1_A
+    (158U<<16) | 7, // kAudioChannelLayoutTag_EAC3_6_1_B
+    (159U<<16) | 7, // kAudioChannelLayoutTag_EAC3_6_1_C
+    (160U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_A
+    (161U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_B
+    (162U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_C
+    (163U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_D
+    (164U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_E
+    (165U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_F
+    (166U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_G
+    (167U<<16) | 8, // kAudioChannelLayoutTag_EAC3_7_1_H
+    (168U<<16) | 4, // kAudioChannelLayoutTag_DTS_3_1
+    (169U<<16) | 5, // kAudioChannelLayoutTag_DTS_4_1
+    (170U<<16) | 6, // kAudioChannelLayoutTag_DTS_6_0_A
+    (171U<<16) | 6, // kAudioChannelLayoutTag_DTS_6_0_B
+    (172U<<16) | 6, // kAudioChannelLayoutTag_DTS_6_0_C
+    (173U<<16) | 7, // kAudioChannelLayoutTag_DTS_6_1_A
+    (174U<<16) | 7, // kAudioChannelLayoutTag_DTS_6_1_B
+    (175U<<16) | 7, // kAudioChannelLayoutTag_DTS_6_1_C
+    (176U<<16) | 7, // kAudioChannelLayoutTag_DTS_7_0
+    (177U<<16) | 8, // kAudioChannelLayoutTag_DTS_7_1
+    (178U<<16) | 8, // kAudioChannelLayoutTag_DTS_8_0_A
+    (179U<<16) | 8, // kAudioChannelLayoutTag_DTS_8_0_B
+    (180U<<16) | 9, // kAudioChannelLayoutTag_DTS_8_1_A
+    (181U<<16) | 9, // kAudioChannelLayoutTag_DTS_8_1_B
+    (182U<<16) | 7, // kAudioChannelLayoutTag_DTS_6_1_D
+    (185U<<16) | 4, // kAudioChannelLayoutTag_WAVE_4_0_B
+    (186U<<16) | 5, // kAudioChannelLayoutTag_WAVE_5_0_B
+    (187U<<16) | 6, // kAudioChannelLayoutTag_WAVE_5_1_B
+    (188U<<16) | 7, // kAudioChannelLayoutTag_WAVE_6_1
+    (189U<<16) | 8, // kAudioChannelLayoutTag_WAVE_7_1
+    (194U<<16) | 8, // kAudioChannelLayoutTag_Atmos_5_1_2
+    (195U<<16) | 10, // kAudioChannelLayoutTag_Atmos_5_1_4
+    (196U<<16) | 10, // kAudioChannelLayoutTag_Atmos_7_1_2
+    (192U<<16) | 12, // kAudioChannelLayoutTag_Atmos_7_1_4
+    (193U<<16) | 16, // kAudioChannelLayoutTag_Atmos_9_1_6
+    (197U<<16) | 4, // kAudioChannelLayoutTag_Logic_4_0_C
+    (198U<<16) | 6, // kAudioChannelLayoutTag_Logic_6_0_B
+    (199U<<16) | 7, // kAudioChannelLayoutTag_Logic_6_1_B
+    (200U<<16) | 7, // kAudioChannelLayoutTag_Logic_6_1_D
+    (201U<<16) | 8, // kAudioChannelLayoutTag_Logic_7_1_B
+    (202U<<16) | 12, // kAudioChannelLayoutTag_Logic_Atmos_7_1_4_B
+    (203U<<16) | 14, // kAudioChannelLayoutTag_Logic_Atmos_7_1_6
+    (204U<<16) | 24, // kAudioChannelLayoutTag_CICP_13
+    (205U<<16) | 8, // kAudioChannelLayoutTag_CICP_14
+    (206U<<16) | 12, // kAudioChannelLayoutTag_CICP_15
+    (207U<<16) | 10, // kAudioChannelLayoutTag_CICP_16
+    (208U<<16) | 12, // kAudioChannelLayoutTag_CICP_17
+    (209U<<16) | 14, // kAudioChannelLayoutTag_CICP_18
+    (210U<<16) | 12, // kAudioChannelLayoutTag_CICP_19
+    (211U<<16) | 14, // kAudioChannelLayoutTag_CICP_20
+    kAudioChannelLayoutTag_Unknown
+};
+
 int ca_label_to_mp_speaker_id(AudioChannelLabel label)
 {
     for (int i = 0; speaker_map[i][1] >= 0; i++)
@@ -73,30 +187,48 @@ int ca_label_to_mp_speaker_id(AudioChannelLabel label)
     return -1;
 }
 
+AudioChannelLabel mp_speaker_id_to_ca_label(int speaker_id)
+{
+    for (int i = 0; speaker_map[i][1] >= 0; i++)
+        if (speaker_map[i][1] == speaker_id)
+            return speaker_map[i][0];
+    return -1; // kAudioChannelLabel_Unknown
+}
+
 #if HAVE_COREAUDIO
-static void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
+void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
 {
     if (!mp_msg_test(ao->log, l))
         return;
 
-    AudioChannelDescription *descs = layout->mChannelDescriptions;
+    AudioChannelLayoutTag tag = layout->mChannelLayoutTag;
+    mp_msg(ao->log, l, "audio channel layout: tag: <%u>", tag);
 
-    mp_msg(ao->log, l, "layout: tag: <%u>, bitmap: <%u>, "
-                       "descriptions <%u>\n",
-                       (unsigned) layout->mChannelLayoutTag,
-                       (unsigned) layout->mChannelBitmap,
-                       (unsigned) layout->mNumberChannelDescriptions);
+    if (tag == kAudioChannelLayoutTag_UseChannelDescriptions) {
+        AudioChannelDescription *descs = layout->mChannelDescriptions;
+        mp_msg(ao->log, l, ", descriptions <%u>\n",
+                           (unsigned) layout->mNumberChannelDescriptions);
 
-    for (int i = 0; i < layout->mNumberChannelDescriptions; i++) {
-        AudioChannelDescription d = descs[i];
-        mp_msg(ao->log, l, " - description %d: label <%u, %u>, "
-            " flags: <%u>, coords: <%f, %f, %f>\n", i,
-            (unsigned) d.mChannelLabel,
-            (unsigned) ca_label_to_mp_speaker_id(d.mChannelLabel),
-            (unsigned) d.mChannelFlags,
-            d.mCoordinates[0],
-            d.mCoordinates[1],
-            d.mCoordinates[2]);
+        for (int i = 0; i < layout->mNumberChannelDescriptions; i++) {
+            AudioChannelDescription d = descs[i];
+            mp_msg(ao->log, l, " - description %d: label <%u, %u>,  flags: <%u>",
+                i,
+                (unsigned) d.mChannelLabel,
+                (unsigned) ca_label_to_mp_speaker_id(d.mChannelLabel),
+                (unsigned) d.mChannelFlags);
+            if (d.mChannelFlags != kAudioChannelFlags_AllOff) {
+                mp_msg(ao->log, l, ", coords: <%f, %f, %f>\n",
+                    d.mCoordinates[0],
+                    d.mCoordinates[1],
+                    d.mCoordinates[2]);
+            } else {
+                mp_msg(ao->log, l, "\n");
+            }
+        }
+    } else if (tag == kAudioChannelLayoutTag_UseChannelBitmap) {
+        mp_msg(ao->log, l, ", bitmap <%u>\n", layout->mChannelBitmap);
+    } else {
+        mp_msg(ao->log, l, "\n");
     }
 }
 
@@ -117,7 +249,7 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
             kAudioFormatProperty_ChannelLayoutForBitmap,
             sizeof(uint32_t), &l->mChannelBitmap, &psize);
         CHECK_CA_ERROR("failed to convert channel bitmap to descriptions (info)");
-        r = talloc_size(NULL, psize);
+        r = talloc_size(talloc_ctx, psize);
         err = AudioFormatGetProperty(
             kAudioFormatProperty_ChannelLayoutForBitmap,
             sizeof(uint32_t), &l->mChannelBitmap, &psize, r);
@@ -127,7 +259,7 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
         err = AudioFormatGetPropertyInfo(
             kAudioFormatProperty_ChannelLayoutForTag,
             sizeof(AudioChannelLayoutTag), &l->mChannelLayoutTag, &psize);
-        r = talloc_size(NULL, psize);
+        r = talloc_size(talloc_ctx, psize);
         CHECK_CA_ERROR("failed to convert channel tag to descriptions (info)");
         err = AudioFormatGetProperty(
             kAudioFormatProperty_ChannelLayoutForTag,
@@ -135,12 +267,51 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
         CHECK_CA_ERROR("failed to convert channel tag to descriptions (get)");
     }
 
-    MP_VERBOSE(ao, "converted input channel layout:\n");
-    ca_log_layout(ao, MSGL_V, l);
+    if (ao) {
+        MP_VERBOSE(ao, "converted input channel layout:\n");
+        ca_log_layout(ao, MSGL_V, l);
+    }
 
     return r;
 coreaudio_error:
     return NULL;
+}
+
+AudioChannelLayout *ca_find_standard_layout(void *talloc_ctx, AudioChannelLayout *l)
+{
+    if (l->mChannelLayoutTag != kAudioChannelLayoutTag_UseChannelDescriptions)
+        return l;
+
+    AudioChannelLayout *s = talloc_size(talloc_ctx, sizeof(AudioChannelLayout));
+
+    for (int i = 0; ; ++i) {
+        if ((s->mChannelLayoutTag = std_layouts[i]) == kAudioChannelLayoutTag_Unknown) {
+            s = NULL;
+            break;
+        }
+
+        AudioChannelLayout *r = ca_layout_to_custom_layout(NULL, talloc_ctx, s);
+
+        if (!r)
+            goto mismatch;
+        if (l->mNumberChannelDescriptions != r->mNumberChannelDescriptions)
+            goto mismatch;
+
+        for (int i = 0; i < l->mNumberChannelDescriptions; ++i) {
+            AudioChannelDescription *ld = l->mChannelDescriptions + i;
+            AudioChannelDescription *rd = r->mChannelDescriptions + i;
+            if (ld->mChannelLabel == rd->mChannelLabel)
+                continue;
+            // XXX: we cannot handle channels with coordinates
+            goto mismatch;
+        }
+
+        break;
+
+mismatch:;
+    }
+
+    return s ? s : l;
 }
 
 

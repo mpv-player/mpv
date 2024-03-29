@@ -30,12 +30,11 @@ class CocoaCB: Common, EventSubscriber {
     }
     var backendState: State = .uninitialized
 
-
-    @objc init(_ mpvHandle: OpaquePointer) {
-        let newlog = mp_log_new(UnsafeMutablePointer(mpvHandle), mp_client_get_log(mpvHandle), "cocoacb")
-        let option = OptionHelper(UnsafeMutablePointer(mpvHandle), mp_client_get_global(mpvHandle))
-        libmpv = LibmpvHelper(mpvHandle, newlog)
-        super.init(option, newlog)
+    init(_ mpv: OpaquePointer) {
+        let log = LogHelper(mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "cocoacb"))
+        let option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
+        libmpv = LibmpvHelper(mpv, log)
+        super.init(option, log)
         layer = GLLayer(cocoaCB: self)
         AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
     }
@@ -48,7 +47,7 @@ class CocoaCB: Common, EventSubscriber {
             backendState = .needsInit
 
             guard let layer = self.layer else {
-                log.sendError("Something went wrong, no GLLayer was initialized")
+                log.error("Something went wrong, no GLLayer was initialized")
                 exit(1)
             }
 
@@ -90,7 +89,7 @@ class CocoaCB: Common, EventSubscriber {
     func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
         guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else
         {
-            log.sendWarning("Couldn't update Window size, no Screen available")
+            log.warning("Couldn't update Window size, no Screen available")
             return
         }
 
@@ -118,7 +117,7 @@ class CocoaCB: Common, EventSubscriber {
 
     override func updateICCProfile() {
         guard let colorSpace = window?.screen?.colorSpace else {
-            log.sendWarning("Couldn't update ICC Profile, no color space available")
+            log.warning("Couldn't update ICC Profile, no color space available")
             return
         }
 
@@ -171,7 +170,7 @@ class CocoaCB: Common, EventSubscriber {
         let ccb = unsafeBitCast(ctx, to: CocoaCB.self)
 
         guard let vo = v, let events = e else {
-            ccb.log.sendWarning("Unexpected nil value in Control Callback")
+            ccb.log.warning("Unexpected nil value in Control Callback")
             return VO_FALSE
         }
 

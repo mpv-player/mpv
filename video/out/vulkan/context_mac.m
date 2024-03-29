@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#import <QuartzCore/QuartzCore.h>
+
 #include "video/out/gpu/context.h"
 #include "osdep/mac/swift.h"
 

@@ -35,53 +35,6 @@
 
 #define MPV_PROTOCOL @"mpv://"
 
-#define OPT_BASE_STRUCT struct macos_opts
-const struct m_sub_options macos_conf = {
-    .opts = (const struct m_option[]) {
-        {"macos-title-bar-appearance", OPT_CHOICE(macos_title_bar_appearance,
-            {"auto", 0}, {"aqua", 1}, {"darkAqua", 2},
-            {"vibrantLight", 3}, {"vibrantDark", 4},
-            {"aquaHighContrast", 5}, {"darkAquaHighContrast", 6},
-            {"vibrantLightHighContrast", 7},
-            {"vibrantDarkHighContrast", 8})},
-        {"macos-title-bar-material", OPT_CHOICE(macos_title_bar_material,
-            {"titlebar", 0}, {"selection", 1}, {"menu", 2},
-            {"popover", 3}, {"sidebar", 4}, {"headerView", 5},
-            {"sheet", 6}, {"windowBackground", 7}, {"hudWindow", 8},
-            {"fullScreen", 9}, {"toolTip", 10}, {"contentBackground", 11},
-            {"underWindowBackground", 12}, {"underPageBackground", 13},
-            {"dark", 14}, {"light", 15}, {"mediumLight", 16},
-            {"ultraDark", 17})},
-        {"macos-title-bar-color", OPT_COLOR(macos_title_bar_color)},
-        {"macos-fs-animation-duration",
-            OPT_CHOICE(macos_fs_animation_duration, {"default", -1}),
-            M_RANGE(0, 1000)},
-        {"macos-force-dedicated-gpu", OPT_BOOL(macos_force_dedicated_gpu)},
-        {"macos-app-activation-policy", OPT_CHOICE(macos_app_activation_policy,
-            {"regular", 0}, {"accessory", 1}, {"prohibited", 2})},
-        {"macos-geometry-calculation", OPT_CHOICE(macos_geometry_calculation,
-            {"visible", FRAME_VISIBLE}, {"whole", FRAME_WHOLE})},
-        {"macos-render-timer", OPT_CHOICE(macos_render_timer,
-            {"callback", RENDER_TIMER_CALLBACK}, {"precise", RENDER_TIMER_PRECISE},
-            {"system", RENDER_TIMER_SYSTEM})},
-        {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
-            {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
-        {0}
-    },
-    .size = sizeof(struct macos_opts),
-    .defaults = &(const struct macos_opts){
-        .macos_title_bar_color = {0, 0, 0, 0},
-        .macos_fs_animation_duration = -1,
-        .cocoa_cb_sw_renderer = -1,
-        .cocoa_cb_10bit_context = true
-    },
-};
-
-// Whether the NSApplication singleton was created. If this is false, we are
-// running in libmpv mode, and cocoa_main() was never called.
-static bool application_instantiated;
-
 static mp_thread playback_thread_id;
 
 @interface Application ()
@@ -105,9 +58,7 @@ static void terminate_cocoa_application(void)
 }
 
 @implementation Application
-@synthesize menuBar = _menu_bar;
 @synthesize openCount = _open_count;
-@synthesize cocoaCB = _cocoa_cb;
 
 - (void)sendEvent:(NSEvent *)event
 {
@@ -141,45 +92,12 @@ static void terminate_cocoa_application(void)
     [super dealloc];
 }
 
-static const char mac_icon[] =
-#include "TOOLS/osxbundle/icon.icns.inc"
-;
-
-- (NSImage *)getMPVIcon
-{
-    // The C string contains a trailing null, so we strip it away
-    NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)mac_icon
-                                             length:sizeof(mac_icon) - 1
-                                       freeWhenDone:NO];
-    return [[NSImage alloc] initWithData:icon_data];
-}
-
 #if HAVE_MACOS_TOUCHBAR
 - (NSTouchBar *)makeTouchBar
 {
     return [[AppHub shared] touchBar];
 }
 #endif
-
-- (void)initCocoaCb:(struct mpv_handle *)ctx
-{
-#if HAVE_MACOS_COCOA_CB
-    if (!_cocoa_cb) {
-        mpv_handle *mpv = mpv_create_client(ctx, "cocoacb");
-        [NSApp setCocoaCB:[[CocoaCB alloc] init:mpv]];
-    }
-#endif
-}
-
-+ (const struct m_sub_options *)getMacConf
-{
-    return &macos_conf;
-}
-
-+ (const struct m_sub_options *)getVoConf
-{
-    return &vo_sub_opts;
-}
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
 {
@@ -253,7 +171,6 @@ static void init_cocoa_application(bool regular)
 {
     NSApp = mpv_shared_app();
     [NSApp setDelegate:NSApp];
-    [NSApp setMenuBar:[[MenuBar alloc] init]];
 
     // Will be set to Regular from cocoa_common during UI creation so that we
     // don't create an icon when playing audio only files.
@@ -304,8 +221,6 @@ static void setup_bundle(int *argc, char *argv[])
 int cocoa_main(int argc, char *argv[])
 {
     @autoreleasepool {
-        application_instantiated = true;
-
         struct playback_thread_ctx ctx = {0};
         ctx.argc     = &argc;
         ctx.argv     = &argv;

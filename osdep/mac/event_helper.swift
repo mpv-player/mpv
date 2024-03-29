@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
+
 protocol EventSubscriber: AnyObject {
     var uid: Int { get }
     func handle(event: EventHelper.Event)
@@ -57,21 +59,20 @@ extension EventHelper {
     }
 }
 
-public class EventHelper: NSObject {
+class EventHelper {
     unowned let appHub: AppHub
     var mpv: OpaquePointer?
     var events: [String:[Int:EventSubscriber]] = [:]
 
-    @objc init?(_ appHub: AppHub, _ mpvHandle: OpaquePointer) {
+    init?(_ appHub: AppHub, _ mpv: OpaquePointer) {
         if !appHub.isApplication {
-            mpv_destroy(mpvHandle)
+            mpv_destroy(mpv)
             return nil
         }
 
         self.appHub = appHub
-        self.mpv = mpvHandle
-        super.init()
-        mpv_set_wakeup_callback(mpvHandle, wakeup, TypeHelper.bridge(obj: self))
+        self.mpv = mpv
+        mpv_set_wakeup_callback(mpv, wakeup, TypeHelper.bridge(obj: self))
     }
 
     func subscribe(_ subscriber: any EventSubscriber, event: Event) {

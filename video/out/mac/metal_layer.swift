@@ -16,6 +16,7 @@
  */
 
 import Cocoa
+import QuartzCore
 
 class MetalLayer: CAMetalLayer {
     unowned var common: MacCommon

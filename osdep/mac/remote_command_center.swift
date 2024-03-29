@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
 import MediaPlayer
 
 extension RemoteCommandCenter {
@@ -53,13 +54,14 @@ class RemoteCommandCenter: EventSubscriber {
     var chapter: String? { didSet { updateInfoCenter() } }
     var album: String? { didSet { updateInfoCenter() } }
     var artist: String? { didSet { updateInfoCenter() } }
-    var cover: NSImage = NSImage(size: NSSize(width: 256, height: 256))
+    var cover: NSImage
 
     var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
     var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
 
     init(_ appHub: AppHub) {
         self.appHub = appHub
+        cover = appHub.getIcon()
 
         configs = [
             commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
@@ -86,8 +88,6 @@ class RemoteCommandCenter: EventSubscriber {
             commandCenter.dislikeCommand,
             commandCenter.bookmarkCommand,
         ]
-
-        cover = (NSApp as? Application)?.getMPVIcon() ?? cover
 
         for cmd in disabledCommands {
             cmd.isEnabled = false

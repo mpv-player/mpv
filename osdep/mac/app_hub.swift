@@ -15,17 +15,24 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Cocoa
+
 class AppHub: NSObject {
     @objc static let shared = AppHub()
 
     var mpv: OpaquePointer?
     @objc var input: InputHelper
+    var option: OptionHelper?
     var event: EventHelper?
+    var menu: MenuBar?
 #if HAVE_MACOS_MEDIA_PLAYER
     var remote: RemoteCommandCenter?
 #endif
 #if HAVE_MACOS_TOUCHBAR
     @objc var touchBar: TouchBar?
+#endif
+#if HAVE_MACOS_COCOA_CB
+    var cocoaCb: CocoaCB?
 #endif
 
     var isApplication: Bool { get { NSApp is Application } }
@@ -33,12 +40,15 @@ class AppHub: NSObject {
     private override init() {
         input = InputHelper()
         super.init()
+        if isApplication { menu = MenuBar(self) }
 #if HAVE_MACOS_MEDIA_PLAYER
         remote = RemoteCommandCenter(self)
 #endif
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
+        option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
+        input.option = option
         event = EventHelper(self, mpv)
         self.mpv = event?.mpv
 
@@ -55,8 +65,12 @@ class AppHub: NSObject {
     }
 
     @objc func initCocoaCb() {
-        guard let app = NSApp as? Application, let mpv = mpv else { return }
-        DispatchQueue.main.sync { app.initCocoaCb(mpv) }
+#if HAVE_MACOS_COCOA_CB
+        if !isApplication { return }
+        DispatchQueue.main.sync {
+            self.cocoaCb = self.cocoaCb ?? CocoaCB(mpv_create_client(mpv, "cocoacb"))
+        }
+#endif
     }
 
     @objc func startRemote() {
@@ -69,5 +83,20 @@ class AppHub: NSObject {
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.stop()
 #endif
+    }
+
+    func getIcon() -> NSImage {
+        guard let iconData = app_bridge_icon(), let icon = NSImage(data: iconData) else {
+            return NSImage(size: NSSize(width: 1, height: 1))
+        }
+        return icon
+    }
+
+    func getMacConf() -> UnsafePointer<m_sub_options>? {
+        return app_bridge_mac_conf()
+    }
+
+    func getVoConf() -> UnsafePointer<m_sub_options>? {
+        return app_bridge_vo_conf()
     }
 }

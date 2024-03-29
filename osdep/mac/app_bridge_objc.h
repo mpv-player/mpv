@@ -15,9 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// including frameworks here again doesn't make sense, but otherwise the swift
-// compiler doesn't include the needed headers in our generated header file
-#import <IOKit/pwr_mgt/IOPMLib.h>
 #import <QuartzCore/QuartzCore.h>
 
 #include "player/client.h"
@@ -31,10 +28,10 @@
 #include "input/keycodes.h"
 #include "video/out/win_state.h"
 
+#include "osdep/mac/app_bridge.h"
 #include "osdep/mac/application_objc.h"
 
-
-// complex macros won't get imported to Swift so we have to reassign them
+// complex macros won't get imported to swift so we have to reassign them
 static int SWIFT_MBTN_LEFT       = MP_MBTN_LEFT;
 static int SWIFT_MBTN_MID        = MP_MBTN_MID;
 static int SWIFT_MBTN_RIGHT      = MP_MBTN_RIGHT;
@@ -52,10 +49,7 @@ static int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 static const char *swift_mpv_version = mpv_version;
 static const char *swift_mpv_copyright = mpv_copyright;
 
-// only used from Swift files and therefore seen as unused by the c compiler
-static void SWIFT_TARRAY_STRING_APPEND(void *t, char ***a, int *i, char *s) __attribute__ ((unused));
-
-static void SWIFT_TARRAY_STRING_APPEND(void *t, char ***a, int *i, char *s)
-{
-    MP_TARRAY_APPEND(t, *a, *i, s);
-}
+NSData *app_bridge_icon(void);
+void app_bridge_tarray_append(void *t, char ***a, int *i, char *s);
+const struct m_sub_options *app_bridge_mac_conf(void);
+const struct m_sub_options *app_bridge_vo_conf(void);
