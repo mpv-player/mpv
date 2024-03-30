@@ -20,7 +20,6 @@ import Cocoa
 class Application: NSApplication, NSApplicationDelegate {
     var appHub: AppHub { get { return AppHub.shared } }
     let MPV_PROTOCOL: String = "mpv://"
-    @objc var openCount: Int = 0
 
     var playbackThreadId: mp_thread!
     var argc: Int32?
@@ -28,14 +27,6 @@ class Application: NSApplication, NSApplicationDelegate {
 
     override init() {
         super.init()
-
-        let eventManager = NSAppleEventManager.shared()
-        eventManager.setEventHandler(
-            self,
-            andSelector: #selector(self.getUrl(event:replyEvent:)),
-            forEventClass: AEEventClass(kInternetEventClass),
-            andEventID: AEEventID(kAEGetURL)
-        )
     }
 
     required init?(coder: NSCoder) {
@@ -44,7 +35,6 @@ class Application: NSApplication, NSApplicationDelegate {
 
     deinit {
         let eventManager = NSAppleEventManager.shared()
-        eventManager.removeEventHandler(forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         eventManager.removeEventHandler(forEventClass: AEEventClass(kCoreEventClass), andEventID: kAEQuitApplication)
     }
 
@@ -84,6 +74,18 @@ class Application: NSApplication, NSApplicationDelegate {
     }
 #endif
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        let files = urls.map {
+            if $0.isFileURL { return $0.path }
+            var path = $0.absoluteString
+            if path.hasPrefix(MPV_PROTOCOL) { path.removeFirst(MPV_PROTOCOL.count) }
+            return path.removingPercentEncoding ?? path
+        }.sorted { (strL: String, strR: String) -> Bool in
+            return strL.localizedStandardCompare(strR) == .orderedAscending
+        }
+        appHub.input.open(files: files)
+    }
+
     func applicationWillFinishLaunching(_ notification: Notification) {
         let eventManager = NSAppleEventManager.shared()
         eventManager.setEventHandler(
@@ -99,29 +101,6 @@ class Application: NSApplication, NSApplicationDelegate {
         if !appHub.input.command("quit") {
             terminateApplication()
         }
-    }
-
-    @objc func getUrl(event: NSAppleEventDescriptor?, replyEvent: NSAppleEventDescriptor?) {
-        guard var url: String = event?.paramDescriptor(forKeyword: keyDirectObject)?.stringValue else { return }
-
-        if url.hasPrefix(MPV_PROTOCOL) {
-            url.removeFirst(MPV_PROTOCOL.count)
-        }
-
-        url = url.removingPercentEncoding ?? url
-        appHub.input.open(files: [url])
-    }
-
-    func application(_ sender: NSApplication, openFiles: [String]) {
-        if openCount > 0 {
-            openCount -= openFiles.count
-            return
-        }
-
-        let files = openFiles.sorted { (strL: String, strR: String) -> Bool in
-            return strL.localizedStandardCompare(strR) == .orderedAscending
-        }
-        appHub.input.open(files: files)
     }
 
     func bundleStartedFromFinder() -> Bool {
@@ -158,11 +137,6 @@ class Application: NSApplication, NSApplicationDelegate {
             setupBundle()
             initApplication(true)
         } else {
-            for argument in CommandLine.arguments.dropFirst() {
-                if !argument.hasPrefix("-") {
-                    openCount += 1
-                }
-            }
             initApplication(false)
         }
 
