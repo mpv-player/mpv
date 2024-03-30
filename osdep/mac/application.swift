@@ -18,12 +18,15 @@
 import Cocoa
 
 class Application: NSApplication, NSApplicationDelegate {
-    let appHub: AppHub
+    var appHub: AppHub { get { return AppHub.shared } }
     let MPV_PROTOCOL: String = "mpv://"
     @objc var openCount: Int = 0
 
+    var playbackThreadId: mp_thread!
+    var argc: Int32?
+    var argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+
     override init() {
-        appHub = AppHub.shared
         super.init()
 
         let eventManager = NSAppleEventManager.shared()
@@ -43,6 +46,22 @@ class Application: NSApplication, NSApplicationDelegate {
         let eventManager = NSAppleEventManager.shared()
         eventManager.removeEventHandler(forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         eventManager.removeEventHandler(forEventClass: AEEventClass(kCoreEventClass), andEventID: kAEQuitApplication)
+    }
+
+    func initApplication(_ regular: Bool) {
+        NSApp = self
+        NSApp.delegate = self
+
+        // Will be set to Regular from cocoa_common during UI creation so that we
+        // don't create an icon when playing audio only files.
+        NSApp.setActivationPolicy(regular ? .regular : .accessory)
+
+        atexit_b({
+            // Because activation policy has just been set to behave like a real
+            // application, that policy must be reset on exit to prevent, among
+            // other things, the menubar created here from remaining on screen.
+            DispatchQueue.main.async { NSApp.setActivationPolicy(.prohibited) }
+        })
     }
 
     func terminateApplication() {
@@ -75,6 +94,7 @@ class Application: NSApplication, NSApplicationDelegate {
         )
     }
 
+    // quit from App icon
     @objc func handleQuit(event: NSAppleEventDescriptor?, replyEvent: NSAppleEventDescriptor?) {
         if !appHub.input.command("quit") {
             terminateApplication()
@@ -102,5 +122,60 @@ class Application: NSApplication, NSApplicationDelegate {
             return strL.localizedStandardCompare(strR) == .orderedAscending
         }
         appHub.input.open(files: files)
+    }
+
+    func bundleStartedFromFinder() -> Bool {
+        return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true"
+    }
+
+    func setupBundle() {
+        // started from finder the first argument after the binary may start with -psn_
+        // remove it and all following
+        if CommandLine.argc > 1 && CommandLine.arguments[1].hasPrefix("-psn_") {
+            argc? = 1
+            argv?[1] = nil
+        }
+
+        let path = (ProcessInfo.processInfo.environment["PATH"] ?? "") +
+            ":/usr/local/bin:/usr/local/sbin:/opt/local/bin:/opt/local/sbin"
+        _ = path.withCString { setenv("PATH", $0, 1) }
+    }
+
+    let playbackThread: @convention(c) (UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? = { (ptr: UnsafeMutableRawPointer) in
+        let application: Application = TypeHelper.bridge(ptr: ptr)
+        mp_thread_set_name("core/playback")
+        let r: Int32 = mpv_main(application.argc ?? 1, application.argv)
+        application.terminateApplication()
+        // normally never reached - unless the cocoa mainloop hasn't started yet
+        exit(r)
+    }
+
+    @objc func main(_ argc: Int32, _ argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) -> Int {
+        self.argc = argc
+        self.argv = argv
+
+        if bundleStartedFromFinder() {
+            setupBundle()
+            initApplication(true)
+        } else {
+            for argument in CommandLine.arguments.dropFirst() {
+                if !argument.hasPrefix("-") {
+                    openCount += 1
+                }
+            }
+            initApplication(false)
+        }
+
+        pthread_create(&playbackThreadId, nil, playbackThread, TypeHelper.bridge(obj: self))
+        appHub.input.wait()
+        NSApp.run()
+
+        // This should never be reached: NSApp.run() blocks until the process is quit
+        print("""
+            There was either a problem initializing Cocoa or the Runloop was stopped unexpectedly. \
+            Please report this issues to a developer.\n
+        """)
+        pthread_join(playbackThreadId, nil)
+        return 1
     }
 }

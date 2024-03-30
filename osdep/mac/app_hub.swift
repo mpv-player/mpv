@@ -21,7 +21,7 @@ class AppHub: NSObject {
     @objc static let shared = AppHub()
 
     var mpv: OpaquePointer?
-    @objc var input: InputHelper
+    var input: InputHelper
     var option: OptionHelper?
     var event: EventHelper?
     var menu: MenuBar?
@@ -29,7 +29,7 @@ class AppHub: NSObject {
     var remote: RemoteCommandCenter?
 #endif
 #if HAVE_MACOS_TOUCHBAR
-    @objc var touchBar: TouchBar?
+    var touchBar: TouchBar?
 #endif
 #if HAVE_MACOS_COCOA_CB
     var cocoaCb: CocoaCB?
