@@ -114,3 +114,9 @@ void cocoa_init_cocoa_cb(void)
 {
     [[AppHub shared] initCocoaCb];
 }
+
+int cocoa_main(int argc, char *argv[])
+{
+    return [(Application *)[Application sharedApplication] main:argc :argv];
+}
+

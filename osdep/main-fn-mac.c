@@ -1,4 +1,4 @@
-#include "osdep/mac/application.h"
+#include "osdep/mac/app_bridge.h"
 
 // This is needed because Cocoa absolutely requires creating the NSApplication
 // singleton and running it in the "main" thread. It is apparently not
