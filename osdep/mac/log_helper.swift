@@ -16,11 +16,20 @@
  */
 
 import Cocoa
+import os
 
 class LogHelper {
     var log: OpaquePointer?
+    let logger = Logger(subsystem: "io.mpv", category: "mpv")
 
-    init(_ log: OpaquePointer?) {
+    let loggerMapping: [Int:OSLogType] = [
+        MSGL_V: .debug,
+        MSGL_INFO: .info,
+        MSGL_WARN: .error,
+        MSGL_ERR: .fault,
+    ]
+
+    init(_ log: OpaquePointer? = nil) {
         self.log = log
     }
 
@@ -41,6 +50,11 @@ class LogHelper {
     }
 
     func send(message: String, type: Int) {
+        guard let log = log, UnsafeRawPointer(log).load(as: UInt8.self) != 0 else {
+            logger.log(level: loggerMapping[type] ?? .default, "\(message, privacy: .public)")
+            return
+        }
+
         let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
         mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
     }
