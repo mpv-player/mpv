@@ -173,8 +173,7 @@ static void on_process(void *userdata)
 
     struct spa_buffer *buf = b->buffer;
 
-    int bytes_per_channel = buf->datas[0].maxsize / ao->channels.num;
-    int nframes = bytes_per_channel / ao->sstride;
+    int nframes = buf->datas[0].maxsize / ao->sstride;
 #if PW_CHECK_VERSION(0, 3, 49)
     if (b->requested != 0)
         nframes = MPMIN(b->requested, nframes);
