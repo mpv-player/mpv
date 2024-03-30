@@ -226,7 +226,7 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
     if (param == NULL || id != SPA_PARAM_Format)
         return;
 
-    int buffer_size = ao->device_buffer * af_fmt_to_bytes(ao->format) * ao->channels.num;
+    int buffer_size = ao->device_buffer * ao->sstride;
 
     params[0] = spa_pod_builder_add_object(&b,
                     SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
