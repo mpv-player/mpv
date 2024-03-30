@@ -46,6 +46,8 @@ struct priv {
     // Block that is executed after `IDLE_TIME` to stop audio output unit.
     dispatch_block_t idle_work;
     dispatch_queue_t queue;
+
+    int hotplug_cb_registration_times;
 };
 
 static int64_t ca_get_hardware_latency(struct ao *ao) {
@@ -138,6 +140,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
 static void init_physical_format(struct ao *ao);
 static void reinit_latency(struct ao *ao);
+static bool register_hotplug_cb(struct ao *ao);
+static void unregister_hotplug_cb(struct ao *ao);
 
 static bool reinit_device(struct ao *ao) {
     struct priv *p = ao->priv;
@@ -162,6 +166,9 @@ static int init(struct ao *ao)
     }
 
     if (!reinit_device(ao))
+        goto coreaudio_error;
+
+    if (!register_hotplug_cb(ao))
         goto coreaudio_error;
 
     if (p->change_physical_format)
@@ -433,6 +440,8 @@ static void uninit(struct ao *ao)
                               &p->original_asbd);
         CHECK_CA_WARN("could not restore physical stream format");
     }
+
+    unregister_hotplug_cb(ao);
 }
 
 static OSStatus hotplug_cb(AudioObjectID id, UInt32 naddr,
@@ -457,7 +466,25 @@ static uint32_t hotplug_properties[] = {
 static int hotplug_init(struct ao *ao)
 {
     if (!reinit_device(ao))
-        goto coreaudio_error;
+        return -1;
+
+    if (!register_hotplug_cb(ao))
+        return -1;
+
+    return 0;
+}
+
+static void hotplug_uninit(struct ao *ao)
+{
+    unregister_hotplug_cb(ao);
+}
+
+static bool register_hotplug_cb(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    if (p->hotplug_cb_registration_times++)
+        return true;
 
     OSStatus err = noErr;
     for (int i = 0; i < MP_ARRAY_SIZE(hotplug_properties); i++) {
@@ -476,14 +503,19 @@ static int hotplug_init(struct ao *ao)
         }
     }
 
-    return 0;
+    return true;
 
 coreaudio_error:
-    return -1;
+    return false;
 }
 
-static void hotplug_uninit(struct ao *ao)
+static void unregister_hotplug_cb(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
+    if (--p->hotplug_cb_registration_times)
+        return;
+
     OSStatus err = noErr;
     for (int i = 0; i < MP_ARRAY_SIZE(hotplug_properties); i++) {
         AudioObjectPropertyAddress addr = {
