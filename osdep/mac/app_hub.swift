@@ -22,6 +22,7 @@ class AppHub: NSObject {
 
     var mpv: OpaquePointer?
     var input: InputHelper
+    var log: LogHelper
     var option: OptionHelper?
     var event: EventHelper?
     var menu: MenuBar?
@@ -39,6 +40,7 @@ class AppHub: NSObject {
 
     private override init() {
         input = InputHelper()
+        log = LogHelper()
         super.init()
         if isApplication { menu = MenuBar(self) }
 #if HAVE_MACOS_MEDIA_PLAYER
@@ -47,6 +49,7 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
+        log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
         option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
         input.option = option
         event = EventHelper(self, mpv)
