@@ -558,6 +558,13 @@ bool terminal_try_attach(void)
 
 void terminal_set_mouse_input(bool enable)
 {
+    DWORD cmode;
+    HANDLE in = hSTDIN;
+    if (GetConsoleMode(in, &cmode)) {
+        cmode = enable ? cmode | ENABLE_MOUSE_INPUT
+                       : cmode & (~ENABLE_MOUSE_INPUT);
+        SetConsoleMode(in, cmode);
+    }
 }
 
 void terminal_init(void)
