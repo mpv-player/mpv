@@ -111,15 +111,35 @@ static bool is_native_out_vt(HANDLE hOut)
 void terminal_get_size(int *w, int *h)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE hOut = hSTDOUT;
     if (GetConsoleScreenBufferInfo(hOut, &cinfo)) {
         *w = cinfo.dwMaximumWindowSize.X - (is_native_out_vt(hOut) ? 0 : 1);
         *h = cinfo.dwMaximumWindowSize.Y;
     }
 }
 
+static bool get_font_size(int *w, int *h)
+{
+  CONSOLE_FONT_INFO finfo;
+  HANDLE hOut = hSTDOUT;
+  BOOL res = GetCurrentConsoleFont(hOut, FALSE, &finfo);
+  if (res) {
+      *w = finfo.dwFontSize.X;
+      *h = finfo.dwFontSize.Y;
+  }
+  return res;
+}
+
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 {
+    int w = 0, h = 0, fw = 0, fh = 0;
+    terminal_get_size(&w, &h);
+    if (get_font_size(&fw, &fh)) {
+        *px_width = fw * w;
+        *px_height = fh * h;
+        *rows = w;
+        *cols = h;
+    }
 }
 
 static bool has_input_events(HANDLE h)
