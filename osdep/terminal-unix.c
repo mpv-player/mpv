@@ -588,6 +588,12 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
     *px_height = ws.ws_ypixel;
 }
 
+void terminal_set_mouse_input(bool enable)
+{
+    printf(enable ? TERM_ESC_ENABLE_MOUSE : TERM_ESC_DISABLE_MOUSE);
+    fflush(stdout);
+}
+
 void terminal_init(void)
 {
     assert(!getch2_enabled);

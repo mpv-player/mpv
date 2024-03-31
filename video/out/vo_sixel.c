@@ -520,7 +520,7 @@ static int preinit(struct vo *vo)
         sixel_strwrite(TERM_ESC_ALT_SCREEN);
 
     sixel_strwrite(TERM_ESC_HIDE_CURSOR);
-    sixel_strwrite(TERM_ESC_ENABLE_MOUSE);
+    terminal_set_mouse_input(true);
 
     /* don't use private color registers for each frame. */
     sixel_strwrite(TERM_ESC_USE_GLOBAL_COLOR_REG);
@@ -560,7 +560,7 @@ static void uninit(struct vo *vo)
     struct priv *priv = vo->priv;
 
     sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
-    sixel_strwrite(TERM_ESC_DISABLE_MOUSE);
+    terminal_set_mouse_input(false);
 
     if (priv->opts.alt_screen)
         sixel_strwrite(TERM_ESC_NORMAL_SCREEN);

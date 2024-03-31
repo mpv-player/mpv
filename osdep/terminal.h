@@ -58,6 +58,9 @@ void terminal_get_size(int *w, int *h);
 /* Get terminal-size in columns/rows and width/height in pixels. */
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height);
 
+/* Enable/Disable mouse input. */
+void terminal_set_mouse_input(bool enable);
+
 // Windows only.
 int mp_console_vfprintf(void *wstream, const char *format, va_list args);
 int mp_console_write(void *wstream, bstr str);
