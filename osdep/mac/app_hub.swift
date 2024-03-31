@@ -47,6 +47,7 @@ class AppHub: NSObject {
 #if HAVE_MACOS_MEDIA_PLAYER
         remote = RemoteCommandCenter(self)
 #endif
+        log.verbose("AppHub initialised")
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
@@ -64,15 +65,18 @@ class AppHub: NSObject {
 #if HAVE_MACOS_TOUCHBAR
         touchBar = TouchBar(self)
 #endif
+        log.verbose("AppHub functionality initialised")
     }
 
     @objc func initInput(_ input: OpaquePointer?) {
+        log.verbose("Initialising Input")
         self.input.signal(input: input)
     }
 
     @objc func initCocoaCb() {
 #if HAVE_MACOS_COCOA_CB
         if !isApplication { return }
+        log.verbose("Initialising CocoaCB")
         DispatchQueue.main.sync {
             self.cocoaCb = self.cocoaCb ?? CocoaCB(mpv_create_client(mpv, "cocoacb"))
         }
@@ -81,12 +85,14 @@ class AppHub: NSObject {
 
     @objc func startRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
+        log.verbose("Starting RemoteCommandCenter")
         remote?.start()
 #endif
     }
 
     @objc func stopRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
+        log.verbose("Stoping RemoteCommandCenter")
         remote?.stop()
 #endif
     }
@@ -100,6 +106,7 @@ class AppHub: NSObject {
         }.sorted { (strL: String, strR: String) -> Bool in
             return strL.localizedStandardCompare(strR) == .orderedAscending
         }
+        log.verbose("Opening dropped files: \(files)")
         input.open(files: files)
     }
 

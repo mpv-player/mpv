@@ -88,6 +88,7 @@ class Application: NSApplication, NSApplicationDelegate {
 
         let path = (ProcessInfo.processInfo.environment["PATH"] ?? "") +
             ":/usr/local/bin:/usr/local/sbin:/opt/local/bin:/opt/local/sbin"
+        appHub.log.verbose("Setting Bundle $PATH to: \(path)")
         _ = path.withCString { setenv("PATH", $0, 1) }
     }
 
