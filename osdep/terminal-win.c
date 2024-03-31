@@ -556,6 +556,10 @@ bool terminal_try_attach(void)
     return true;
 }
 
+void terminal_set_mouse_input(bool enable)
+{
+}
+
 void terminal_init(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
