@@ -19,8 +19,6 @@ import Cocoa
 
 class Application: NSApplication, NSApplicationDelegate {
     var appHub: AppHub { get { return AppHub.shared } }
-    let MPV_PROTOCOL: String = "mpv://"
-
     var playbackThreadId: mp_thread!
     var argc: Int32?
     var argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
@@ -75,15 +73,7 @@ class Application: NSApplication, NSApplicationDelegate {
 #endif
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        let files = urls.map {
-            if $0.isFileURL { return $0.path }
-            var path = $0.absoluteString
-            if path.hasPrefix(MPV_PROTOCOL) { path.removeFirst(MPV_PROTOCOL.count) }
-            return path.removingPercentEncoding ?? path
-        }.sorted { (strL: String, strR: String) -> Bool in
-            return strL.localizedStandardCompare(strR) == .orderedAscending
-        }
-        appHub.input.open(files: files)
+        appHub.open(urls: urls)
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
