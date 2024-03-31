@@ -110,8 +110,8 @@ class MenuBar: NSObject {
             Config(name: "Hide Others", key: "h", modifiers: [.command, .option], action: #selector(NSApp.hideOtherApplications(_:))),
             Config(name: "Show All", action: #selector(NSApp.unhideAllApplications(_:))),
             Config(type: .separator),
-            Config(name: "Quit and Remember Position", action: #selector(quit(_:)), target: self, command: "quit-watch-later"),
-            Config(name: "Quit mpv", key: "q", action: #selector(quit(_:)), target: self, command: "quit"),
+            Config(name: "Quit and Remember Position", action: #selector(command(_:)), target: self, command: "quit-watch-later"),
+            Config(name: "Quit mpv", key: "q", action: #selector(command(_:)), target: self, command: "quit"),
         ]
 
         let fileMenuConfigs = [
@@ -318,11 +318,6 @@ class MenuBar: NSObject {
                 return
             }
         }
-    }
-
-    @objc func quit(_ menuItem: MenuItem) {
-        guard let menuConfig = menuItem.config else { return }
-        appHub.input.command(menuConfig.command)
     }
 
     @objc func openFiles() {
