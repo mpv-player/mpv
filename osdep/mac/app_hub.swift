@@ -36,6 +36,7 @@ class AppHub: NSObject {
     var cocoaCb: CocoaCB?
 #endif
 
+    let MPV_PROTOCOL: String = "mpv://"
     var isApplication: Bool { get { NSApp is Application } }
 
     private override init() {
@@ -86,6 +87,18 @@ class AppHub: NSObject {
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.stop()
 #endif
+    }
+
+    func open(urls: [URL]) {
+        let files = urls.map {
+            if $0.isFileURL { return $0.path }
+            var path = $0.absoluteString
+            if path.hasPrefix(MPV_PROTOCOL) { path.removeFirst(MPV_PROTOCOL.count) }
+            return path.removingPercentEncoding ?? path
+        }.sorted { (strL: String, strR: String) -> Bool in
+            return strL.localizedStandardCompare(strR) == .orderedAscending
+        }
+        input.open(files: files)
     }
 
     func getIcon() -> NSImage {
