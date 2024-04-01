@@ -505,7 +505,7 @@ class Window: NSWindow, NSWindowDelegate {
 
     func addWindowScale(_ scale: Double) {
         if !isInFullscreen {
-            input?.command("add window-scale \(scale)")
+            input?.command("add current-window-scale \(scale)")
         }
     }
 
