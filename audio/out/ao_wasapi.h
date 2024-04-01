@@ -89,6 +89,7 @@ typedef struct wasapi_state {
 
     // ao options
     int opt_exclusive;
+    int opt_exclusive_buffer; // exclusive mode buffer duration in us
 
     // format info
     WAVEFORMATEXTENSIBLE format;
