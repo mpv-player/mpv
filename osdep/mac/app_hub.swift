@@ -50,11 +50,13 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
-        log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
-        option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        input.option = option
         event = EventHelper(self, mpv)
-        self.mpv = event?.mpv
+        if let mpv = event?.mpv {
+            self.mpv = mpv
+            log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
+            option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
+            input.option = option
+        }
 
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.registerEvents()
