@@ -1,0 +1,1 @@
+add `--wasapi-exclusive-buffer` option

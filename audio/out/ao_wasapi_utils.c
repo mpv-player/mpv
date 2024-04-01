@@ -640,16 +640,25 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     struct wasapi_state *state = ao->priv;
 
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
-    REFERENCE_TIME devicePeriod;
-    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod,
-                                              NULL);
-    MP_VERBOSE(state, "Device period: %.2g ms\n",
-               (double) devicePeriod / 10000.0 );
+    REFERENCE_TIME defaultPeriod, minPeriod;
+    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&defaultPeriod,
+                                              &minPeriod);
+    MP_VERBOSE(state, "Device period: default %lld us, minimum %lld us\n",
+               defaultPeriod / 10, minPeriod / 10);
 
-    REFERENCE_TIME bufferDuration = devicePeriod;
+    REFERENCE_TIME bufferDuration;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
         // for shared mode, use integer multiple of device period close to 50ms
-        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
+        bufferDuration = defaultPeriod * ceil(50.0 * 10000.0 / defaultPeriod);
+    } else if (state->opt_exclusive_buffer == 0) {
+        bufferDuration = defaultPeriod;
+    } else {
+        if (state->opt_exclusive_buffer > 0 && !align_hack) {
+            MP_VERBOSE(state, "Requested buffer duration: %d us\n",
+                       state->opt_exclusive_buffer);
+        }
+        bufferDuration = MPMAX((REFERENCE_TIME) state->opt_exclusive_buffer * 10,
+                               minPeriod);
     }
 
     // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
@@ -661,6 +670,8 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
             (10000.0 * 1000 / state->format.Format.nSamplesPerSec
              * state->bufferFrameCount));
     }
+
+    MP_VERBOSE(state, "Trying buffer duration %lld us\n", bufferDuration / 10);
 
     REFERENCE_TIME bufferPeriod =
         state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
@@ -694,8 +705,8 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     bufferDuration = (REFERENCE_TIME) (0.5 +
         (10000.0 * 1000 / state->format.Format.nSamplesPerSec
          * state->bufferFrameCount));
-    MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
-               state->bufferFrameCount, (double) bufferDuration / 10000.0 );
+    MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%lld us)\n",
+               state->bufferFrameCount, bufferDuration / 10);
 
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);

@@ -297,3 +297,18 @@ Available audio output drivers are:
 
 ``wasapi``
     Audio output to the Windows Audio Session API.
+
+    The following global options are supported by this audio output:
+
+    ``--wasapi-exclusive-buffer=<default|min|1-2000000>``
+        Set buffer duration in exclusive mode (i.e., with
+        ``--audio-exclusive=yes``). ``default`` and ``min`` use the default and
+        minimum device period reported by WASAPI, respectively. You can also
+        directly specify the buffer duration in microseconds, in which case a
+        duration shorter than the minimum device period will be rounded up to
+        the minimum period.
+
+        The default buffer duration should provide robust playback in most
+        cases, but reportedly on some devices there are glitches following
+        stream resets under the default setting. In such cases, specifying a
+        shorter duration might help.
