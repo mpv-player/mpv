@@ -21,7 +21,8 @@ class AppHub: NSObject {
     @objc static let shared = AppHub()
 
     var mpv: OpaquePointer?
-    @objc var input: InputHelper
+    var input: InputHelper
+    var log: LogHelper
     var option: OptionHelper?
     var event: EventHelper?
     var menu: MenuBar?
@@ -29,28 +30,34 @@ class AppHub: NSObject {
     var remote: RemoteCommandCenter?
 #endif
 #if HAVE_MACOS_TOUCHBAR
-    @objc var touchBar: TouchBar?
+    var touchBar: TouchBar?
 #endif
 #if HAVE_MACOS_COCOA_CB
     var cocoaCb: CocoaCB?
 #endif
 
+    let MPV_PROTOCOL: String = "mpv://"
     var isApplication: Bool { get { NSApp is Application } }
 
     private override init() {
         input = InputHelper()
+        log = LogHelper()
         super.init()
         if isApplication { menu = MenuBar(self) }
 #if HAVE_MACOS_MEDIA_PLAYER
         remote = RemoteCommandCenter(self)
 #endif
+        log.verbose("AppHub initialised")
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
-        option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        input.option = option
         event = EventHelper(self, mpv)
-        self.mpv = event?.mpv
+        if let mpv = event?.mpv {
+            self.mpv = mpv
+            log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
+            option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
+            input.option = option
+        }
 
 #if HAVE_MACOS_MEDIA_PLAYER
         remote?.registerEvents()
@@ -58,15 +65,18 @@ class AppHub: NSObject {
 #if HAVE_MACOS_TOUCHBAR
         touchBar = TouchBar(self)
 #endif
+        log.verbose("AppHub functionality initialised")
     }
 
     @objc func initInput(_ input: OpaquePointer?) {
+        log.verbose("Initialising Input")
         self.input.signal(input: input)
     }
 
     @objc func initCocoaCb() {
 #if HAVE_MACOS_COCOA_CB
         if !isApplication { return }
+        log.verbose("Initialising CocoaCB")
         DispatchQueue.main.sync {
             self.cocoaCb = self.cocoaCb ?? CocoaCB(mpv_create_client(mpv, "cocoacb"))
         }
@@ -75,14 +85,29 @@ class AppHub: NSObject {
 
     @objc func startRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
+        log.verbose("Starting RemoteCommandCenter")
         remote?.start()
 #endif
     }
 
     @objc func stopRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
+        log.verbose("Stoping RemoteCommandCenter")
         remote?.stop()
 #endif
+    }
+
+    func open(urls: [URL]) {
+        let files = urls.map {
+            if $0.isFileURL { return $0.path }
+            var path = $0.absoluteString
+            if path.hasPrefix(MPV_PROTOCOL) { path.removeFirst(MPV_PROTOCOL.count) }
+            return path.removingPercentEncoding ?? path
+        }.sorted { (strL: String, strR: String) -> Bool in
+            return strL.localizedStandardCompare(strR) == .orderedAscending
+        }
+        log.verbose("Opening dropped files: \(files)")
+        input.open(files: files)
     }
 
     func getIcon() -> NSImage {

@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
 #include "player/client.h"
@@ -28,8 +29,8 @@
 #include "input/keycodes.h"
 #include "video/out/win_state.h"
 
+#include "osdep/main-fn.h"
 #include "osdep/mac/app_bridge.h"
-#include "osdep/mac/application_objc.h"
 
 // complex macros won't get imported to swift so we have to reassign them
 static int SWIFT_MBTN_LEFT       = MP_MBTN_LEFT;

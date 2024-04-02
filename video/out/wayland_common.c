@@ -246,6 +246,13 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     s->pointer_enter_serial = serial;
     set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
+
+    wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
+    wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
+
+    if (!wl->toplevel_configured)
+        mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    wl->toplevel_configured = false;
 }
 
 static void pointer_handle_leave(void *data, struct wl_pointer *pointer,

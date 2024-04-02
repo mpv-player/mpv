@@ -623,7 +623,8 @@ static void uninit(struct ao *ao)
         CHECK_ALSA_ERROR("pcm close error");
     }
 
-alsa_error: ;
+alsa_error:
+    snd_config_update_free_global();
 }
 
 #define INIT_DEVICE_ERR_GENERIC -1

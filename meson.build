@@ -393,7 +393,6 @@ if features['cocoa']
     sources += files('osdep/language-mac.c',
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
-                     'osdep/mac/application.m',
                      'osdep/mac/app_bridge.m')
     main_fn_source = files('osdep/main-fn-mac.c')
 endif
@@ -1532,7 +1531,8 @@ features += {'swift': swift.allowed()}
 
 swift_sources = []
 if features['cocoa'] and features['swift']
-    swift_sources += files('osdep/mac/app_hub.swift',
+    swift_sources += files('osdep/mac/application.swift',
+                           'osdep/mac/app_hub.swift',
                            'osdep/mac/event_helper.swift',
                            'osdep/mac/input_helper.swift',
                            'osdep/mac/libmpv_helper.swift',

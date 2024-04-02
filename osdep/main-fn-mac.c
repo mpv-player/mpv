@@ -1,9 +1,6 @@
-#include "osdep/mac/application.h"
+#include "osdep/mac/app_bridge.h"
 
-// This is needed because Cocoa absolutely requires creating the NSApplication
-// singleton and running it in the "main" thread. It is apparently not
-// possible to do this on a separate thread at all. It is not known how
-// Apple managed this colossal fuckup.
+// Cocoa absolutely requires creating the NSApplication singleton and running it on the main thread.
 int main(int argc, char *argv[])
 {
     return cocoa_main(argc, argv);
