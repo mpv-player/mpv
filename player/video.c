@@ -226,6 +226,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 
     if (!mpctx->video_out) {
         struct vo_extra ex = {
+            .command_ctx = mpctx->command_ctx,
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,

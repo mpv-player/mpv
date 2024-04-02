@@ -201,6 +201,7 @@ struct mp_image;
 struct mp_image_params;
 
 struct vo_extra {
+    struct command_ctx *command_ctx;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
@@ -459,6 +460,7 @@ struct vo {
     struct vo_android_state *android;
     struct vo_drm_state *drm;
     struct mp_hwdec_devices *hwdec_devs;
+    struct command_ctx *command_ctx;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
