@@ -196,7 +196,8 @@ static int init_filter(struct mp_filter *da)
     if (!stream)
         goto fail;
 
-    stream->codecpar->codec_id = spdif_ctx->codec_id;
+    stream->codecpar->codec_type = AVMEDIA_TYPE_AUDIO;
+    stream->codecpar->codec_id   = spdif_ctx->codec_id;
 
     AVDictionary *format_opts = NULL;
 
@@ -259,6 +260,8 @@ static int init_filter(struct mp_filter *da)
     default:
         abort();
     }
+
+    stream->codecpar->sample_rate = samplerate;
 
     struct mp_chmap chmap;
     mp_chmap_from_channels(&chmap, num_channels);
