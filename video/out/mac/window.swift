@@ -550,6 +550,9 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidResize(_ notification: Notification) {
+        if let contentViewFrame = contentView?.frame, !isAnimating && !isInFullscreen && !inLiveResize {
+            unfsContentFrame = convertToScreen(contentViewFrame)
+        }
         common.windowDidResize()
     }
 
