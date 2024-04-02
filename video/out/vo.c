@@ -658,8 +658,16 @@ static void run_control(void *p)
 int vo_control(struct vo *vo, int request, void *data)
 {
     int ret;
-    void *p[] = {vo, (void *)(intptr_t)request, data, &ret};
-    mp_dispatch_run(vo->in->dispatch, run_control, p);
+    struct vo_internal *in = vo->in;
+    if (mp_thread_id_equal(mp_thread_get_id(in->thread), mp_thread_current_id())) {
+        mp_mutex_lock(&in->lock);
+        update_opts(vo);
+        ret = vo->driver->control(vo, request, data);
+        mp_mutex_unlock(&in->lock);
+    } else {
+        void *p[] = {vo, (void *)(intptr_t)request, data, &ret};
+        mp_dispatch_run(vo->in->dispatch, run_control, p);
+    }
     return ret;
 }
 
