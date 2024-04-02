@@ -165,6 +165,7 @@ class View: NSView, CALayerDelegate {
     }
 
     override func magnify(with event: NSEvent) {
+        common.window?.isAnimating = event.phase != .ended
         event.phase == .ended ? common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
         common.window?.addWindowScale(Double(event.magnification))
     }
