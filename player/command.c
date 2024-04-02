@@ -85,6 +85,7 @@
 struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
+    struct MPContext *mpctx;
 
     double last_seek_time;
     double last_seek_pts;
@@ -4269,14 +4270,13 @@ int mp_property_do(const char *name, int action, void *val,
     return r;
 }
 
-char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
+char *mp_property_expand_string(struct command_ctx *ctx, const char *str)
 {
-    struct command_ctx *ctx = mpctx->command_ctx;
-    return m_properties_expand_string(ctx->properties, str, mpctx);
+    return m_properties_expand_string(ctx->properties, str, ctx->mpctx);
 }
 
 // Before expanding properties, parse C-style escapes like "\n"
-char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str)
+char *mp_property_expand_escaped_string(struct command_ctx *ctx, const char *str)
 {
     void *tmp = talloc_new(NULL);
     bstr strb = bstr0(str);
@@ -4291,7 +4291,7 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
             break;
         bstr_xappend(tmp, &dst, bstr0("\""));
     }
-    char *r = mp_property_expand_string(mpctx, dst.start);
+    char *r = mp_property_expand_string(ctx, dst.start);
     talloc_free(tmp);
     return r;
 }
@@ -4460,7 +4460,7 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
         if (!msg)
             msg = talloc_asprintf(tmp, "%s: ${%s}", disp.osd_name, name);
 
-        char *osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
+        char *osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx->command_ctx, msg));
 
         if (osd_msg && osd_msg[0])
             set_osd_msg(mpctx, 1, opts->osd_duration, "%s", osd_msg);
@@ -5101,7 +5101,7 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     if (cmd->flags & MP_EXPAND_PROPERTIES) {
         for (int n = 0; n < cmd->nargs; n++) {
             if (cmd->args[n].type->type == CONF_TYPE_STRING) {
-                char *s = mp_property_expand_string(mpctx, cmd->args[n].v.s);
+                char *s = mp_property_expand_string(mpctx->command_ctx, cmd->args[n].v.s);
                 if (!s) {
                     ctx->success = false;
                     mp_cmd_ctx_complete(ctx);
@@ -5567,7 +5567,7 @@ static void cmd_expand_text(void *p)
 
     cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
-        .u.string = mp_property_expand_string(mpctx, cmd->args[0].v.s)
+        .u.string = mp_property_expand_string(mpctx->command_ctx, cmd->args[0].v.s)
     };
 }
 
@@ -7072,6 +7072,7 @@ void command_init(struct MPContext *mpctx)
         .last_seek_pts = MP_NOPTS_VALUE,
     };
     mpctx->command_ctx = ctx;
+    ctx->mpctx = mpctx;
 
     int num_base = MP_ARRAY_SIZE(mp_properties_base);
     int num_opts = m_config_get_co_count(mpctx->mconfig);

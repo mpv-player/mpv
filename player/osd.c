@@ -100,7 +100,7 @@ static void term_osd_update_title(struct MPContext *mpctx)
     if (!mpctx->opts->use_terminal)
         return;
 
-    char *s = mp_property_expand_escaped_string(mpctx, mpctx->opts->term_title);
+    char *s = mp_property_expand_escaped_string(mpctx->command_ctx, mpctx->opts->term_title);
     if (bstr_equals(bstr0(s), bstr0(mpctx->term_osd_title))) {
         talloc_free(s);
         return;
@@ -170,7 +170,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     if (opts->status_msg)
-        return mp_property_expand_escaped_string(mpctx, opts->status_msg);
+        return mp_property_expand_escaped_string(mpctx->command_ctx, opts->status_msg);
 
     char *line = NULL;
 
@@ -218,7 +218,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         // VO stats
         if (mpctx->vo_chain) {
             if (mpctx->display_sync_active) {
-                char *r = mp_property_expand_string(mpctx,
+                char *r = mp_property_expand_string(mpctx->command_ctx,
                                             "${?vsync-ratio:${vsync-ratio}}");
                 if (r[0]) {
                     saddf(&line, " DS: %s/%"PRId64, r,
@@ -427,7 +427,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
     char *msg = mpctx->opts->osd_msg[level - 1];
 
     if (msg && msg[0]) {
-        char *text = mp_property_expand_escaped_string(mpctx, msg);
+        char *text = mp_property_expand_escaped_string(mpctx->command_ctx, msg);
         *buffer = talloc_strdup_append(*buffer, text);
         talloc_free(text);
     } else if (level >= 2) {
@@ -437,7 +437,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
         saddf(buffer, "%s ", sym);
         char *custom_msg = mpctx->opts->osd_status_msg;
         if (custom_msg && level == 3) {
-            char *text = mp_property_expand_escaped_string(mpctx, custom_msg);
+            char *text = mp_property_expand_escaped_string(mpctx->command_ctx, custom_msg);
             *buffer = talloc_strdup_append(*buffer, text);
             talloc_free(text);
         } else {

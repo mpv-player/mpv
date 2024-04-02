@@ -1147,7 +1147,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         if (!mpctx->playing_msg_shown) {
             if (opts->playing_msg && opts->playing_msg[0]) {
                 char *msg =
-                    mp_property_expand_escaped_string(mpctx, opts->playing_msg);
+                    mp_property_expand_escaped_string(mpctx->command_ctx, opts->playing_msg);
                 struct mp_log *log = mp_log_new(NULL, mpctx->log, "!term-msg");
                 mp_info(log, "%s\n", msg);
                 talloc_free(log);
@@ -1155,7 +1155,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
             }
             if (opts->osd_playing_msg && opts->osd_playing_msg[0]) {
                 char *msg =
-                    mp_property_expand_escaped_string(mpctx, opts->osd_playing_msg);
+                    mp_property_expand_escaped_string(mpctx->command_ctx, opts->osd_playing_msg);
                 set_osd_msg(mpctx, 1, opts->osd_playing_msg_duration ?
                             opts->osd_playing_msg_duration : opts->osd_duration,
                             "%s", msg);

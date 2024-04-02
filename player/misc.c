@@ -224,7 +224,7 @@ void update_window_title(struct MPContext *mpctx, bool force)
         mpctx->last_window_title = NULL;
         return;
     }
-    char *title = mp_property_expand_string(mpctx, mpctx->opts->wintitle);
+    char *title = mp_property_expand_string(mpctx->command_ctx, mpctx->opts->wintitle);
     if (!mpctx->last_window_title || force ||
         strcmp(title, mpctx->last_window_title) != 0)
     {

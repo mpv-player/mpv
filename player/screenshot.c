@@ -247,7 +247,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
                 goto error_exit;
             struct bstr prop = bstr_splice(bstr0(template), 0, end - template);
             char *tmp = talloc_asprintf(NULL, "${%.*s}", BSTR_P(prop));
-            char *s = mp_property_expand_string(mpctx, tmp);
+            char *s = mp_property_expand_string(mpctx->command_ctx, tmp);
             talloc_free(tmp);
             if (s)
                 append_filename(&res, s);
