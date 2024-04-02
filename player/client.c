@@ -1293,7 +1293,7 @@ static void setproperty_fn(void *arg)
         node = &tmp;
     }
 
-    int err = mp_property_do(req->name, M_PROPERTY_SET_NODE, node, req->mpctx);
+    int err = mp_property_do(req->name, M_PROPERTY_SET_NODE, node, req->mpctx->command_ctx);
 
     req->status = translate_property_error(err);
 
@@ -1406,11 +1406,11 @@ static void getproperty_fn(void *arg)
     int err = -1;
     switch (req->format) {
     case MPV_FORMAT_OSD_STRING:
-        err = mp_property_do(req->name, M_PROPERTY_PRINT, data, req->mpctx);
+        err = mp_property_do(req->name, M_PROPERTY_PRINT, data, req->mpctx->command_ctx);
         break;
     case MPV_FORMAT_STRING: {
         char *s = NULL;
-        err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s, req->mpctx);
+        err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s, req->mpctx->command_ctx);
         if (err == M_PROPERTY_OK)
             *(char **)data = s;
         break;
@@ -1420,13 +1420,13 @@ static void getproperty_fn(void *arg)
     case MPV_FORMAT_INT64:
     case MPV_FORMAT_DOUBLE: {
         struct mpv_node node = {{0}};
-        err = mp_property_do(req->name, M_PROPERTY_GET_NODE, &node, req->mpctx);
+        err = mp_property_do(req->name, M_PROPERTY_GET_NODE, &node, req->mpctx->command_ctx);
         if (err == M_PROPERTY_NOT_IMPLEMENTED) {
             // Go through explicit string conversion. Same reasoning as on the
             // GET code path.
             char *s = NULL;
             err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s,
-                                 req->mpctx);
+                                 req->mpctx->command_ctx);
             if (err != M_PROPERTY_OK)
                 break;
             node.format = MPV_FORMAT_STRING;

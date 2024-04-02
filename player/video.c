@@ -1037,7 +1037,7 @@ static void apply_video_crop(struct MPContext *mpctx, struct vo *vo)
                     str, p.w, p.h);
             talloc_free(str);
             *gm = (struct m_geometry){0};
-            mp_property_do("video-crop", M_PROPERTY_SET, gm, mpctx);
+            mp_property_do("video-crop", M_PROPERTY_SET, gm, mpctx->command_ctx);
             return;
         }
         mpctx->next_frames[n]->params.crop = p.crop;

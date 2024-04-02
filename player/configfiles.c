@@ -352,7 +352,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         // Only store it if it's different from the initial value.
         if (m_config_watch_later_backup_opt_changed(mpctx->mconfig, pname)) {
             char *val = NULL;
-            mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
+            mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx->command_ctx);
             if (needs_config_quoting(val)) {
                 // e.g. '%6%STRING'
                 fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);

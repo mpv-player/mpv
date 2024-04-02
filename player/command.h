@@ -78,8 +78,7 @@ void mp_cmd_msg(struct mp_cmd_ctx *cmd, int status, const char *msg, ...);
 char *mp_property_expand_string(struct command_ctx *ctx, const char *str);
 char *mp_property_expand_escaped_string(struct command_ctx *ctx, const char *str);
 void property_print_help(struct MPContext *mpctx);
-int mp_property_do(const char* name, int action, void* val,
-                   struct MPContext *mpctx);
+int mp_property_do(const char *name, int action, void *val, struct command_ctx *ctx);
 
 void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
                                bool self_update);
