@@ -89,7 +89,7 @@ static void destroy(struct mp_filter *da)
             av_write_trailer(lavf_ctx);
         if (lavf_ctx->pb)
             av_freep(&lavf_ctx->pb->buffer);
-        av_freep(&lavf_ctx->pb);
+        avio_context_free(&lavf_ctx->pb);
         avformat_free_context(lavf_ctx);
         spdif_ctx->lavf_ctx = NULL;
     }
