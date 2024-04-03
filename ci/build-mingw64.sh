@@ -142,7 +142,7 @@ _ffmpeg () {
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
         --cc="$CC" --cxx="$CXX" $commonflags
         --disable-{doc,programs,muxers,encoders}
-        --enable-encoder=mjpeg,png --enable-libdav1d
+        --enable-muxer=spdif --enable-encoder=mjpeg,png --enable-libdav1d
     )
     pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
     ../configure "${args[@]}"
