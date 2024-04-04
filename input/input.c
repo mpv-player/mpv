@@ -1351,7 +1351,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
 
     ictx->opts = ictx->opts_cache->opts;
 
-    mp_mutex_init_type(&ictx->mutex, MP_MUTEX_RECURSIVE);
+    mp_mutex_init(&ictx->mutex);
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
