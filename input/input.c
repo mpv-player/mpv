@@ -703,7 +703,7 @@ static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
     return true;
 }
 
-static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
+static void feed_key(struct input_ctx *ictx, int code, double scale,
                               bool force_mouse)
 {
     struct input_opts *opts = ictx->opts;
@@ -758,7 +758,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
 void mp_input_put_key(struct input_ctx *ictx, int code)
 {
     input_lock(ictx);
-    mp_input_feed_key(ictx, code, 1, false);
+    feed_key(ictx, code, 1, false);
     input_unlock(ictx);
 }
 
@@ -767,7 +767,7 @@ void mp_input_put_key_artificial(struct input_ctx *ictx, int code, double value)
     if (value == 0.0)
         return;
     input_lock(ictx);
-    mp_input_feed_key(ictx, code, value, true);
+    feed_key(ictx, code, value, true);
     input_unlock(ictx);
 }
 
@@ -786,7 +786,7 @@ void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value)
     if (value == 0.0)
         return;
     input_lock(ictx);
-    mp_input_feed_key(ictx, direction, value, false);
+    feed_key(ictx, direction, value, false);
     input_unlock(ictx);
 }
 
@@ -1557,7 +1557,7 @@ struct mp_input_src_internal {
     bool drop;
 };
 
-static struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
+static struct mp_input_src *input_add_src(struct input_ctx *ictx)
 {
     input_lock(ictx);
     if (ictx->num_sources == MP_MAX_SOURCES) {
@@ -1581,7 +1581,7 @@ static struct mp_input_src *mp_input_add_src(struct input_ctx *ictx)
     return src;
 }
 
-static void mp_input_src_kill(struct mp_input_src *src);
+static void input_src_kill(struct mp_input_src *src);
 
 static void close_input_sources(struct input_ctx *ictx)
 {
@@ -1593,11 +1593,11 @@ static void close_input_sources(struct input_ctx *ictx)
         input_unlock(ictx);
         if (!src)
             break;
-        mp_input_src_kill(src);
+        input_src_kill(src);
     }
 }
 
-static void mp_input_src_kill(struct mp_input_src *src)
+static void input_src_kill(struct mp_input_src *src)
 {
     if (!src)
         return;
@@ -1651,17 +1651,17 @@ static MP_THREAD_VOID input_src_thread(void *ptr)
 int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
     void (*loop_fn)(struct mp_input_src *src, void *ctx))
 {
-    struct mp_input_src *src = mp_input_add_src(ictx);
+    struct mp_input_src *src = input_add_src(ictx);
     if (!src)
         return -1;
 
     void *args[] = {src, loop_fn, ctx};
     if (mp_thread_create(&src->in->thread, input_src_thread, args)) {
-        mp_input_src_kill(src);
+        input_src_kill(src);
         return -1;
     }
     if (mp_rendezvous(&src->in->init_done, 0) < 0) {
-        mp_input_src_kill(src);
+        input_src_kill(src);
         return -1;
     }
     return 0;
