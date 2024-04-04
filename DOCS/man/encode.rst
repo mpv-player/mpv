@@ -77,9 +77,8 @@ You can encode files from one format/codec to another using this facility.
     and all pts are passed through as-is. Never seek backwards or use multiple
     input files in this mode!
 
-``--no-ocopy-metadata``
-    Turns off copying of metadata from input files to output files when
-    encoding (which is enabled by default).
+``--ocopy-metadata=<yes|no>``
+    Copy metadata from input files to output files when encoding (default: yes).
 
 ``--oset-metadata=<metadata-tag[,metadata-tag,...]>``
     Specifies metadata to include in the output file.

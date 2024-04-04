@@ -49,8 +49,8 @@ input.conf syntax
 ``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] <command> ( ; <command> )*``
 
 Note that by default, the right Alt key can be used to create special
-characters, and thus does not register as a modifier. The option
-``--no-input-right-alt-gr`` changes this behavior.
+characters, and thus does not register as a modifier. This can be changed
+with ``--input-right-alt-gr`` option.
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
@@ -264,7 +264,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``ignore``
     Use this to "block" keys that should be unbound, and do nothing. Useful for
     disabling default bindings, without disabling all bindings with
-    ``--no-input-default-bindings``.
+    ``--input-default-bindings=no``.
 
 ``seek <target> [<flags>]``
     Change the playback position. By default, seeks by a relative amount of

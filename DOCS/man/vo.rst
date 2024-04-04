@@ -325,7 +325,7 @@ Available video output drivers are:
 ``null``
     Produces no video output. Useful for benchmarking.
 
-    Usually, it's better to disable video with ``--no-video`` instead.
+    Usually, it's better to disable video with ``--video=no`` instead.
 
     The following global options are supported by this video output:
 
@@ -348,7 +348,7 @@ Available video output drivers are:
     performance.
 
     Note: the TCT image output is not synchronized with other terminal output
-    from mpv, which can lead to broken images. The options ``--no-terminal`` or
+    from mpv, which can lead to broken images. The options ``--terminal=no`` or
     ``--really-quiet`` can help with that.
 
     ``--vo-tct-algo=<algo>``

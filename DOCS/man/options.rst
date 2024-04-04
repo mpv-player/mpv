@@ -46,7 +46,7 @@ Track Selection
 
     ``--audio`` is an alias for ``--aid``.
 
-    ``--aid=no`` or ``--audio=no`` or ``--no-audio`` disables audio playback.
+    ``--aid=no`` or ``--audio=no`` disables audio playback.
     (The latter variant does not work with the client API.)
 
     .. note::
@@ -102,7 +102,7 @@ Track Selection
 
     ``--sub`` is an alias for ``--sid``.
 
-    ``--sid=no`` or ``--sub=no`` or ``--no-sub`` disables subtitle decoding.
+    ``--sid=no`` or ``--sub=no`` disables subtitle decoding.
     (The latter variant does not work with the client API.)
 
 ``--vid=<ID|auto|no>``
@@ -110,7 +110,7 @@ Track Selection
 
     ``--video`` is an alias for ``--vid``.
 
-    ``--vid=no`` or ``--video=no`` or ``--no-video`` disables video playback.
+    ``--vid=no`` or ``--video=no`` disables video playback.
     (The latter variant does not work with the client API.)
 
     If video is disabled, mpv will try to download the audio only if media is
@@ -447,11 +447,10 @@ Playback Control
     will not enable looping again (the command will show ``(disabled)`` on the
     OSD message if both loop points are set, but ``ab-loop-count`` is 0).
 
-``--ordered-chapters``, ``--no-ordered-chapters``
-    Enabled by default.
-    Disable support for Matroska ordered chapters. mpv will not load or
-    search for video segments from other files, and will also ignore any
-    chapter order specified for the main file.
+``--ordered-chapters=<yes|no>``
+    Enable support for Matroska ordered chapters. mpv will load and
+    search for video segments from other files, and will also respect any
+    chapter order specified for the main file (default: yes).
 
 ``--ordered-chapters-files=<playlist-file>``
     Loads the given file as playlist, and tries to use the files contained in
@@ -855,11 +854,11 @@ Program Behavior
 
         May be dangerous if playing from untrusted media.
 
-``--ytdl``, ``--no-ytdl``
+``--ytdl=<yes|no>``
     Enable the youtube-dl hook-script. It will look at the input URL, and will
     play the video located on the website. This works with many streaming sites,
     not just the one that the script is named after. This requires a recent
-    version of youtube-dl to be installed on the system. (Enabled by default.)
+    version of youtube-dl to be installed on the system (default: yes).
 
     If the script can't do anything with an URL, it will do nothing.
 
@@ -1055,11 +1054,11 @@ Watch Later
     named "watch_later" underneath the local state directory
     (usually ``~/.local/state/mpv/``).
 
-``--no-resume-playback``
-    Do not restore playback position from the ``watch_later`` configuration
-    subdirectory (usually ``~/.config/mpv/watch_later/``).
+``--resume-playback=<yes|no>``
+    Restore playback position from the ``watch_later`` configuration
+    subdirectory, usually ``~/.config/mpv/watch_later/`` (default: yes).
 
-``--resume-playback-check-mtime``
+``--resume-playback-check-mtime=<yes|no>``
     Only restore the playback position from the ``watch_later`` configuration
     subdirectory (usually ``~/.config/mpv/watch_later/``) if the file's
     modification time is the same as at the time of saving. This may prevent
@@ -1131,7 +1130,7 @@ Video
 
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
-    with ``--no-audio.``
+    with ``--audio=no``.
 
 ``--framedrop=<mode>``
     Skip displaying some frames to maintain A/V sync on slow systems, or
@@ -1557,7 +1556,7 @@ Video
     also still be scaled in one dimension if the source uses non-square pixels
     (e.g. anamorphic widescreen DVDs).
 
-    This option is disabled if the ``--no-keepaspect`` option is used.
+    This option is disabled if ``--keepaspect=no`` is used.
 
 ``--video-pan-x=<value>``, ``--video-pan-y=<value>``
     Moves the displayed video rectangle by the given value in the X or Y
@@ -1569,7 +1568,7 @@ Video
     ``--video-pan-x=-0.1`` would move the video 192 pixels to the left and
     ``--video-pan-y=-0.1`` would move the video 108 pixels up.
 
-    This option is disabled if the ``--no-keepaspect`` option is used.
+    This option is disabled if ``--keepaspect=no`` is used.
 
 ``--video-rotate=<0-359|no>``
     Rotate the video clockwise, in degrees. If ``no`` is given, the video is
@@ -1597,7 +1596,7 @@ Video
     ``--video-zoom=1`` is twice the size, ``--video-zoom=-2`` is one fourth of
     the size, and so on.
 
-    This option is disabled if the ``--no-keepaspect`` option is used.
+    This option is disabled if ``--keepaspect=no`` is used.
 
 ``--video-scale-x=<value>``, ``--video-scale-y=<value>``
     Multiply the video display size with the given value (default: 1.0). If a
@@ -1605,8 +1604,8 @@ Video
     video will be either cut off, or black bars are added.
 
     This value is multiplied with the value derived from ``--video-zoom`` and
-    the normal video aspect ratio. This option is disabled if the
-    ``--no-keepaspect`` option is used.
+    the normal video aspect ratio. This option is disabled if
+    ``--keepaspect=no`` is used.
 
 ``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
     Moves the video rectangle within the black borders, which are usually added
@@ -1618,7 +1617,7 @@ Video
 
     If video and screen aspect match perfectly, these options do nothing.
 
-    This option is disabled if the ``--no-keepaspect`` option is used.
+    This option is disabled if ``--keepaspect=no`` is used.
 
 ``--video-margin-ratio-left=<val>``, ``--video-margin-ratio-right=<val>``, ``--video-margin-ratio-top=<val>``, ``--video-margin-ratio-bottom=<val>``
     Set extra video margins on each border (default: 0). Each value is a ratio
@@ -1633,7 +1632,7 @@ Video
     The margins are applied after 90° video rotation, but before any other video
     transformations.
 
-    This option is disabled if the ``--no-keepaspect`` option is used.
+    This option is disabled if ``--keepaspect=no`` is used.
 
     Subtitles still may use the margins, depending on ``--sub-use-margins`` and
     similar options.
@@ -1644,8 +1643,8 @@ Video
     more generally useful. The behavior of these options may change to fit
     OSC requirements better, too.
 
-``--correct-pts``, ``--no-correct-pts``
-    ``--no-correct-pts`` switches mpv to a mode where video timing is
+``--correct-pts=<yes|no>``
+    ``--correct-pts=no`` switches mpv to a mode where video timing is
     determined using a fixed framerate value (either using the
     ``--container-fps-override`` option, or using file information). Sometimes,
     files with very broken timestamps can be played somewhat well in this mode.
@@ -1657,7 +1656,7 @@ Video
 
     .. note::
 
-        Works in ``--no-correct-pts`` mode only.
+        Works in ``--correct-pts=no`` mode only.
 
 ``--deinterlace=<yes|no|auto>``
     Enable or disable interlacing (default: no).
@@ -2084,7 +2083,7 @@ Audio
 
     This is a key/value list option. See `List Options`_ for details.
 
-``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
+``--ad-spdif-dtshd=<yes|no>``, ``--dtshd=<yes|no>``
     If DTS is passed through, use DTS-HD.
 
     .. warning::
@@ -2227,7 +2226,7 @@ Audio
         then the buffered audio may run out before playback of the new file
         can start.
 
-``--initial-audio-sync``, ``--no-initial-audio-sync``
+``--initial-audio-sync=<yes|no>``
     When starting a video file or after events such as seeking, mpv will by
     default modify the audio stream to make it start from the same timestamp
     as video, by either inserting silence at the start or cutting away the
@@ -2236,7 +2235,7 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
+``--audio-file-auto=<no|exact|fuzzy|all>``
     Load additional audio files matching the video filename. The parameter
     specifies how external audio files are matched.
 
@@ -2359,14 +2358,14 @@ Subtitles
     .. note::
 
         Styling and interpretation of any formatting tags is disabled for the
-        secondary subtitle. Internally, the same mechanism as ``--no-sub-ass``
+        secondary subtitle. Internally, the same mechanism as ``--sub-ass=no``
         is used to strip the styling.
 
     .. note::
 
         If the main subtitle stream contains formatting tags which display the
         subtitle at the top of the screen, it will overlap with the secondary
-        subtitle. To prevent this, you could use ``--no-sub-ass`` to disable
+        subtitle. To prevent this, you could use ``--sub-ass=no`` to disable
         styling in the main subtitle stream.
 
 ``--sub-scale=<0-100>``
@@ -2611,8 +2610,8 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was trancoded, while attempting to keep the old subtitles.
 
-``--sub-ass``, ``--no-sub-ass``
-    Render ASS subtitles natively (enabled by default).
+``--sub-ass=<yes|no>``
+    Render ASS subtitles natively (default: yes).
 
     .. note::
 
@@ -2621,17 +2620,17 @@ Subtitles
         using ``--sub-ass-override=style`` should give better results
         without breaking subtitles too much.
 
-    If ``--no-sub-ass`` is specified, all tags and style declarations are
+    If ``--sub-ass=no`` is specified, all tags and style declarations are
     stripped and ignored on display. The subtitle renderer uses the font style
     as specified by the ``--sub-`` options instead.
 
     .. note::
 
-        Using ``--no-sub-ass`` may lead to incorrect or completely broken
+        Using ``--sub-ass=no`` may lead to incorrect or completely broken
         rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
         override the styling of ASS subtitles, but should be avoided in general.
 
-``--sub-auto=<no|exact|fuzzy|all>``, ``--no-sub-auto``
+``--sub-auto=<no|exact|fuzzy|all>``
     Load additional subtitle files matching the video filename. The parameter
     specifies how external subtitle files are matched. ``exact`` is enabled by
     default.
@@ -2747,11 +2746,11 @@ Subtitles
 
     This is a path list option. See `List Options`_ for details.
 
-``--sub-visibility``, ``--no-sub-visibility``
+``--sub-visibility=<yes|no>``
     Can be used to disable display of subtitles, but still select and decode
     them.
 
-``--secondary-sub-visibility``, ``--no-secondary-sub-visibility``
+``--secondary-sub-visibility=<yes|no>``
     Can be used to disable display of secondary subtitles, but still select and
     decode them.
 
@@ -2800,8 +2799,8 @@ Subtitles
     .. note::
 
         The ``--sub-font`` option (and many other style related ``--sub-``
-        options) are ignored when ASS-subtitles are rendered, unless the
-        ``--no-sub-ass`` option is specified.
+        options) are ignored when ASS-subtitles are rendered, unless
+        ``--sub-ass=no`` is specified.
 
         This used to support fontconfig patterns. Starting with libass 0.13.0,
         this stopped working.
@@ -2887,7 +2886,7 @@ Subtitles
     Control to which corner of the screen text subtitles should be
     aligned to (default: ``center``).
 
-    Never applied to ASS subtitles, except in ``--no-sub-ass`` mode. Likewise,
+    Never applied to ASS subtitles, except in ``--sub-ass=no`` mode. Likewise,
     this does not apply to image subtitles.
 
 ``--sub-align-y=<top|center|bottom>``
@@ -3193,7 +3192,7 @@ Window
         mode can be used to create the window always on program start, but this
         may cause other issues.
 
-``--taskbar-progress``, ``--no-taskbar-progress``
+``--taskbar-progress=<yes|no>``
     (Windows only)
     Enable/disable playback progress rendering in taskbar (Windows 7 and above).
 
@@ -3244,14 +3243,14 @@ Window
     :round: Round the corners if appropriate
     :roundsmall: Round the corners if appropriate, with a small radius
 
-``--border``, ``--no-border``
+``--border=<yes|no>``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
 
-``--title-bar``, ``--no-title-bar``
+``--title-bar=<yes|no>``
     (Windows and X11 only)
     Play video with the window title bar. Since this is on by default,
-    use --no-title-bar to hide the title bar. The --no-border option takes
+    use ``--title-bar=no`` to hide the title bar. The ``--border`` option takes
     precedence.
 
 ``--on-all-workspaces``
@@ -3310,7 +3309,7 @@ Window
         ``50%x50%``
             Forces the window width and height to half the screen width and
             height. Will show black borders to compensate for the video aspect
-            ratio (with most VOs and without ``--no-keepaspect``).
+            ratio (with most VOs and with ``--keepaspect=yes``).
         ``50%+10+10/2``
             Sets the window to half the screen widths, and positions it 10
             pixels below/left of the top left corner of the screen, on the
@@ -3439,14 +3438,14 @@ Window
     behavior so the window size never changes automatically. This option does
     not have any impact on the ``--autofit`` or ``--geometry`` options.
 
-``--no-keepaspect``, ``--keepaspect``
-    ``--no-keepaspect`` will always stretch the video to window size, and will
+``--keepaspect=<yes|no>``
+    ``--keepaspect=no`` will always stretch the video to window size, and will
     disable the window manager hints that force the window aspect ratio.
     (Ignored in fullscreen mode.)
 
-``--no-keepaspect-window``, ``--keepaspect-window``
-    ``--keepaspect-window`` (the default) will lock the window size to the
-    video aspect. ``--no-keepaspect-window`` disables this behavior, and will
+``--keepaspect-window=<yes|no>``
+    ``--keepaspect-window=yes`` (the default) will lock the window size to the
+    video aspect. ``--keepaspect-window=no`` disables this behavior, and will
     instead add black bars if window aspect and video aspect mismatch. Whether
     this actually works depends on the VO backend.
     (Ignored in fullscreen mode.)
@@ -3463,12 +3462,12 @@ Window
         - ``--monitoraspect=4:3``  or ``--monitoraspect=1.3333``
         - ``--monitoraspect=16:9`` or ``--monitoraspect=1.7777``
 
-``--hidpi-window-scale``, ``--no-hidpi-window-scale``
+``--hidpi-window-scale=<yes|no>``
     Scale the window size according to the backing DPI scale factor from the OS
     (default: no). For example, if the OS DPI scaling is set to 200%, mpv's window
     size will be multiplied by 2.
 
-``--native-fs``, ``--no-native-fs``
+``--native-fs=<yes|no>``
     (macOS only)
     Uses the native fullscreen mechanism of the OS (default: yes).
 
@@ -3517,8 +3516,8 @@ Window
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
     ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec``).
 
-``--no-window-dragging``
-    Don't move the window when clicking on it and moving the mouse pointer.
+``--window-dragging=<yes|no>``
+    Move the window when clicking on it and moving the mouse pointer (default: yes).
 
 ``--x11-name=<string>``
     Set the window instance name for X11-based video output methods.
@@ -3573,7 +3572,7 @@ Window
     mechanism in case there is good/bad behavior with whatever your combination
     of hardware/drivers/etc. happens to be.
 
-``--x11-wid-title`` ``--no-x11-wid-title``
+``--x11-wid-title=<yes|no>``
     Whether or not to set the window title when mpv is embedded on X11 (default:
     ``no``).
 
@@ -4088,16 +4087,16 @@ Input
     Specify input configuration file other than the default location in the mpv
     configuration directory (usually ``~/.config/mpv/input.conf``).
 
-``--no-input-default-bindings``
-    Disable default-level ("weak") key bindings. These are bindings which config
-    files like ``input.conf`` can override. It currently affects the builtin key
-    bindings, and keys which scripts bind using ``mp.add_key_binding`` (but not
-    ``mp.add_forced_key_binding`` because this overrides ``input.conf``).
+``--input-default-bindings=<yes|no>``
+    Enable default-level ("weak") key bindings (default: yes). These are bindings
+    which config files like ``input.conf`` can override. It currently affects the
+    builtin key bindings, and keys which scripts bind using ``mp.add_key_binding``
+    (but not ``mp.add_forced_key_binding`` because this overrides ``input.conf``).
 
-``--no-input-builtin-bindings``
-    Disable loading of built-in key bindings during start-up. This option is
-    applied only during (lib)mpv initialization, and if used then it will not
-    be not possible to enable them later. May be useful to libmpv clients.
+``--input-builtin-bindings=<yes|no>``
+    Enable loading of built-in key bindings during start-up (default: yes). This
+    option is applied only during (lib)mpv initialization, and if disabled then it
+    will not be not possible to enable them later. May be useful to libmpv clients.
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
@@ -4138,8 +4137,8 @@ Input
     work (key bindings that normally quit will be shown on OSD only, just
     like any other binding). See `INPUT.CONF`_.
 
-``--input-terminal``, ``--no-input-terminal``
-    ``--no-input-terminal`` prevents the player from reading key events from
+``--input-terminal=<yes|no>``
+    ``--input-terminal=no`` prevents the player from reading key events from
     standard input. Useful when reading data from standard input. This is
     automatically enabled when ``-`` is found on the command line. There are
     situations where you have to set it manually, e.g. if you open
@@ -4194,12 +4193,12 @@ Input
 ``--input-gamepad=<yes|no>``
     Enable/disable SDL2 Gamepad support. Disabled by default.
 
-``--input-cursor``, ``--no-input-cursor``
+``--input-cursor=<yes|no>``
     Permit mpv to receive pointer events reported by the video output
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
     Support depends on the VO in use.
 
-``--input-cursor-passthrough``, ``--no-input-cursor-passthrough``
+``--input-cursor-passthrough=<yes|no>``
     Tell the backend windowing system to allow pointer events to passthrough
     the mpv window. This allows windows under mpv to instead receive pointer
     events as if the mpv window was never there.
@@ -4229,7 +4228,7 @@ Input
     Note that disabling the preprocessing does not affect any filtering done
     by the OS/driver before these events are delivered to mpv, if any.
 
-``--input-right-alt-gr``, ``--no-input-right-alt-gr``
+``--input-right-alt-gr=<yes|no>``
     (macOS and Windows only)
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
@@ -4260,11 +4259,11 @@ Input
 OSD
 ---
 
-``--osc``, ``--no-osc``
+``--osc=<yes|no>``
     Whether to load the on-screen-controller (default: yes).
 
-``--no-osd-bar``, ``--osd-bar``
-    Disable display of the OSD bar.
+``--osd-bar=<yes|no>``
+    Enable display of the OSD bar (default: yes).
 
     You can configure this on a per-command basis in input.conf using ``osd-``
     prefixes, see ``Input Command Prefixes``. If you want to disable the OSD
@@ -4455,7 +4454,7 @@ OSD
     all OSD rendering, use ``--osd-level=0``.
 
     It does not affect subtitles or overlays created by scripts (in particular,
-    the OSC needs to be disabled with ``--no-osc``).
+    the OSC needs to be disabled with ``--osc=no``).
 
     This option is somewhat experimental and could be replaced by another
     mechanism in the future.
@@ -4846,15 +4845,15 @@ Terminal
 ``--really-quiet``
     Display even less output and status messages than with ``--quiet``.
 
-``--no-terminal``, ``--terminal``
-    Disable any use of the terminal and stdin/stdout/stderr. This completely
-    silences any message output.
+``--terminal=<yes|no>``
+    ``--terminal=no`` disables any use of the terminal and stdin/stdout/stderr.
+    This completely silences any message output.
 
     Unlike ``--really-quiet``, this disables input and terminal initialization
     as well.
 
-``--no-msg-color``
-    Disable colorful console output on terminals.
+``--msg-color=<yes|no>``
+    Enable colorful console output on terminals (default: yes).
 
 ``--msg-level=<module1=level1,module2=level2,...>``
     Control verbosity directly for each module. The ``all`` module changes the
@@ -4913,7 +4912,7 @@ Terminal
 
     The ``auto`` mode also enables terminal OSD if ``--video-osd=no`` was set.
 
-``--term-osd-bar``, ``--no-term-osd-bar``
+``--term-osd-bar=<yes|no>``
     Enable printing a progress bar under the status line on the terminal.
     (Disabled by default.)
 
@@ -4971,9 +4970,6 @@ Cache
     Before mpv 0.30.0, this used to accept a number, which specified the size
     of the cache in kilobytes. Use e.g. ``--cache --demuxer-max-bytes=123k``
     instead.
-
-``--no-cache``
-    Turn off input stream caching. See ``--cache``.
 
 ``--cache-secs=<seconds>``
     How many seconds of audio/video to prefetch if the cache is active. This
@@ -5143,7 +5139,7 @@ Network
 ``--user-agent=<string>``
     Use ``<string>`` as user agent for HTTP streaming.
 
-``--cookies``, ``--no-cookies``
+``--cookies=<yes|no>``
     Support cookies when making HTTP requests. Disabled by default.
 
 ``--cookies-file=<filename>``
@@ -5819,7 +5815,7 @@ them.
 ``--wayland-disable-vsync=<yes|no>``
     Disable mpv's internal vsync for Wayland-based video output (default: no).
     This is mainly useful for benchmarking wayland VOs when combined with
-    ``video-sync=display-desync``, ``--no-audio``, and ``--untimed=yes``.
+    ``video-sync=display-desync``, ``--audio=no``, and ``--untimed=yes``.
 
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 16) to initiate client side
@@ -7055,9 +7051,9 @@ Miscellaneous
     Specifying ``--autosync=0``, the default, will cause frame timing to be
     based entirely on audio delay measurements. Specifying ``--autosync=1``
     will do the same, but will subtly change the A/V correction algorithm. An
-    uneven video framerate in a video which plays fine with ``--no-audio`` can
+    uneven video framerate in a video which plays fine with ``--audio=no`` can
     often be helped by setting this to an integer value greater than 1. The
-    higher the value, the closer the timing will be to ``--no-audio``. Try
+    higher the value, the closer the timing will be to ``--audio=no``. Try
     ``--autosync=30`` to smooth out problems with sound drivers which do not
     implement a perfect audio delay measurement. With this value, if large A/V
     sync offsets occur, they will only take about 1 or 2 seconds to settle
