@@ -336,6 +336,21 @@ Available video output drivers are:
 ``caca``
     Color ASCII art video output driver that works on a text console.
 
+    This driver reserves some keys for runtime configuration. These keys are
+    hardcoded and cannot be bound:
+
+    d and D
+        Toggle dithering algorithm.
+
+    a and A
+        Toggle antialiasing method.
+
+    h and H
+        Toggle charset method.
+
+    c and C
+        Toggle color method.
+
     .. note:: This driver is a joke.
 
 ``tct``
