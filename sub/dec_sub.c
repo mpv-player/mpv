@@ -123,7 +123,7 @@ static void wakeup_demux(void *ctx)
     mp_dispatch_interrupt(q);
 }
 
-static void sub_destroy_cached_pkts(struct dec_sub *sub)
+static void destroy_cached_pkts(struct dec_sub *sub)
 {
     int index = 0;
     while (index < sub->num_cached_pkts) {
@@ -204,7 +204,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
     };
     sub->opts = sub->opts_cache->opts;
     sub->shared_opts = sub->shared_opts_cache->opts;
-    mp_mutex_init_type(&sub->lock, MP_MUTEX_RECURSIVE);
+    mp_mutex_init(&sub->lock);
 
     sub->sd = init_decoder(sub);
     if (sub->sd) {
@@ -476,7 +476,7 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    sub_destroy_cached_pkts(sub);
+    destroy_cached_pkts(sub);
     TA_FREEP(&sub->new_segment);
     mp_mutex_unlock(&sub->lock);
 }
