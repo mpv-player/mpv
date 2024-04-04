@@ -1730,9 +1730,16 @@ Video
     This is usually only needed with broken GPUs, where a codec is reported
     as supported, but decoding causes more problems than it solves.
 
+    .. note::
+
+        On some broken drivers (e.g. NVIDIA on Linux), probing for codecs which
+        the GPU does not support can unnecessarily slow down video playback
+        initialization. To alleviate this, explicitly specify a list which
+        only includes the codecs supported on the setup.
+
     .. admonition:: Example
 
-        ``mpv --hwdec=vdpau --vo=vdpau --hwdec-codecs=h264,mpeg2video``
+        ``mpv --hwdec=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
 ``--vd-lavc-check-hw-profile=<yes|no>``
