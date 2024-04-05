@@ -84,7 +84,7 @@ static void destroy(struct mp_filter *da)
             av_write_trailer(lavf_ctx);
         if (lavf_ctx->pb)
             av_freep(&lavf_ctx->pb->buffer);
-        av_freep(&lavf_ctx->pb);
+        avio_context_free(&lavf_ctx->pb);
         avformat_free_context(lavf_ctx);
         spdif_ctx->lavf_ctx = NULL;
     }
@@ -191,7 +191,8 @@ static int init_filter(struct mp_filter *da)
     if (!stream)
         goto fail;
 
-    stream->codecpar->codec_id = spdif_ctx->codec_id;
+    stream->codecpar->codec_type = AVMEDIA_TYPE_AUDIO;
+    stream->codecpar->codec_id   = spdif_ctx->codec_id;
 
     AVDictionary *format_opts = NULL;
 
@@ -254,6 +255,8 @@ static int init_filter(struct mp_filter *da)
     default:
         abort();
     }
+
+    stream->codecpar->sample_rate = samplerate;
 
     struct mp_chmap chmap;
     mp_chmap_from_channels(&chmap, num_channels);

@@ -29,7 +29,7 @@ extension RemoteCommandCenter {
     struct Config {
         let key: Int32
         let type: KeyType
-        var state: UInt32 = 0
+        var state: NSEvent.EventType = .applicationDefined
         let handler: ConfigHandler
 
         init(key: Int32 = 0, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
@@ -165,11 +165,10 @@ class RemoteCommandCenter: EventSubscriber {
 
         var state = config.state
         if config.type == .repeatable {
-            state = config.state == MP_KEY_STATE_DOWN ? MP_KEY_STATE_UP : MP_KEY_STATE_DOWN
+            state = config.state == .keyDown ? .keyUp : .keyDown
             self.configs[event.command]?.state = state
         }
-
-        self.input.put(key: config.key | Int32(state))
+        self.input.put(key: config.key, type: state)
 
         return .success
     }

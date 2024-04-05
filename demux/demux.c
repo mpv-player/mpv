@@ -663,7 +663,7 @@ static void update_seek_ranges(struct demux_cached_range *range)
         }
     }
 
-    if (range->seek_start >= range->seek_end)
+    if (range->seek_start >= range->seek_end && !(range->is_bof && range->is_eof))
         goto broken;
 
     prune_metadata(range);

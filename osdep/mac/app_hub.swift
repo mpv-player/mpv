@@ -38,6 +38,7 @@ class AppHub: NSObject {
 
     let MPV_PROTOCOL: String = "mpv://"
     var isApplication: Bool { get { NSApp is Application } }
+    var openEvents: Int = 0
 
     private override init() {
         input = InputHelper()
@@ -106,8 +107,10 @@ class AppHub: NSObject {
         }.sorted { (strL: String, strR: String) -> Bool in
             return strL.localizedStandardCompare(strR) == .orderedAscending
         }
-        log.verbose("Opening dropped files: \(files)")
-        input.open(files: files)
+        log.verbose("\(openEvents > 0 ? "Appending" : "Opening") dropped files: \(files)")
+        input.open(files: files, append: openEvents > 0)
+        openEvents += 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.openEvents -= 1 }
     }
 
     func getIcon() -> NSImage {

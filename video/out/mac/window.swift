@@ -27,7 +27,7 @@ class Window: NSWindow, NSWindowDelegate {
     var currentScreen: NSScreen?
     var unfScreen: NSScreen?
 
-    var unfsContentFrame: NSRect?
+    var unfsContentFrame: NSRect = NSRect(x: 0, y: 0, width: 160, height: 90)
     var isInFullscreen: Bool = false
     var isMoving: Bool = false
     var previousStyleMask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
@@ -35,7 +35,7 @@ class Window: NSWindow, NSWindowDelegate {
     var isAnimating: Bool = false
     let animationLock: NSCondition = NSCondition()
 
-    var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame ?? NSRect(x: 0, y: 0, width: 160, height: 90)) } }
+    var unfsContentFramePixel: NSRect { get { return convertToBacking(unfsContentFrame) } }
     @objc var framePixel: NSRect { get { return convertToBacking(frame) } }
 
     var keepAspect: Bool = true {
@@ -45,7 +45,7 @@ class Window: NSWindow, NSWindowDelegate {
             }
 
             if keepAspect {
-                contentAspectRatio = unfsContentFrame?.size ?? contentAspectRatio
+                contentAspectRatio = unfsContentFrame.size
             } else {
                 resizeIncrements = NSSize(width: 1.0, height: 1.0)
             }
@@ -94,6 +94,7 @@ class Window: NSWindow, NSWindowDelegate {
         collectionBehavior = .fullScreenPrimary
         ignoresMouseEvents = option.vo.cursor_passthrough
         delegate = self
+        unfsContentFrame = contentRect
 
         if let cView = contentView {
             cView.addSubview(view)
@@ -366,9 +367,7 @@ class Window: NSWindow, NSWindowDelegate {
 
         super.setFrame(frameRect, display: flag)
 
-        if let size = unfsContentFrame?.size, keepAspect {
-            contentAspectRatio = size
-        }
+        if keepAspect { contentAspectRatio = unfsContentFrame.size }
     }
 
     func centeredContentSize(for rect: NSRect, size sz: NSSize) -> NSRect {
@@ -389,10 +388,9 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func calculateWindowPosition(for tScreen: NSScreen, withoutBounds: Bool) -> NSRect {
-        guard let contentFrame = unfsContentFrame, let screen = unfScreen else {
-            return frame
-        }
-        var newFrame = frameRect(forContentRect: contentFrame)
+        guard let screen = unfScreen else { return frame }
+
+        var newFrame = frameRect(forContentRect: unfsContentFrame)
         let targetFrame = tScreen.frame
         let targetVisibleFrame = tScreen.visibleFrame
         let unfsScreenFrame = screen.frame
@@ -550,6 +548,9 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidResize(_ notification: Notification) {
+        if let contentViewFrame = contentView?.frame, !isAnimating && !isInFullscreen && !inLiveResize {
+            unfsContentFrame = convertToScreen(contentViewFrame)
+        }
         common.windowDidResize()
     }
 

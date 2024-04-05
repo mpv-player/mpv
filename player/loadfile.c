@@ -505,7 +505,6 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
             return t1->program_id == preferred_program;
     }
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
-    t1->forced_select = sub && forced && t1->forced_track;
     if (!os_langs && l1 != l2)
         return l1 > l2;
     if (forced)
@@ -656,6 +655,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                 (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
             {
                 pick = track;
+                pick->forced_select = forced;
             }
         } else if (!pick || compare_track(track, pick, langs, os_langs, false, mpctx->opts, preferred_program)) {
             pick = track;

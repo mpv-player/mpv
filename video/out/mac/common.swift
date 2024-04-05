@@ -601,10 +601,8 @@ class Common: NSObject {
         case VOCTRL_GET_UNFS_WINDOW_SIZE:
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
-            var rect = window?.unfsContentFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
-            if let screen = window?.currentScreen, !Bool(option.vo.hidpi_window_scale) {
-                rect = screen.convertRectToBacking(rect)
-            }
+            let rect = (Bool(option.vo.hidpi_window_scale) ? window?.unfsContentFrame
+                : window?.unfsContentFramePixel) ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
 
             size[0] = Int32(rect.size.width)
             size[1] = Int32(rect.size.height)
