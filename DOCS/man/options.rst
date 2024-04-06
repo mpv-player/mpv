@@ -6358,6 +6358,7 @@ them.
     :precise:  Syncs to the time of the next vertical display refresh reported by the
                CVDisplayLink callback provided information
     :system:   No manual syncing, depend on the layer mechanic and the next drawable
+    :feedback: Same as precise but uses the presentation feedback core mechanism
 
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.

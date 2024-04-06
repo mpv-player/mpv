@@ -36,7 +36,12 @@ void mp_sleep_ns(int64_t ns)
 
 uint64_t mp_raw_time_ns(void)
 {
-    return mach_absolute_time() * timebase_ratio_ns;
+    return mp_raw_time_ns_from_mach(mach_absolute_time());
+}
+
+uint64_t mp_raw_time_ns_from_mach(uint64_t mach_time)
+{
+    return mach_time * timebase_ratio_ns;
 }
 
 void mp_raw_time_init(void)

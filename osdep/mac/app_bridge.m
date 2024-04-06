@@ -51,7 +51,7 @@ const struct m_sub_options macos_conf = {
             {"visible", FRAME_VISIBLE}, {"whole", FRAME_WHOLE})},
         {"macos-render-timer", OPT_CHOICE(macos_render_timer,
             {"callback", RENDER_TIMER_CALLBACK}, {"precise", RENDER_TIMER_PRECISE},
-            {"system", RENDER_TIMER_SYSTEM})},
+            {"system", RENDER_TIMER_SYSTEM}, {"feedback", RENDER_TIMER_PRESENTATION_FEEDBACK})},
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
@@ -61,6 +61,7 @@ const struct m_sub_options macos_conf = {
     .defaults = &(const struct macos_opts){
         .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
+        .macos_render_timer = RENDER_TIMER_CALLBACK,
         .cocoa_cb_sw_renderer = -1,
         .cocoa_cb_10bit_context = true
     },
