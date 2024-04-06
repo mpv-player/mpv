@@ -19,12 +19,16 @@
 #define MPLAYER_TIMER_H
 
 #include <inttypes.h>
+#include "config.h"
 
 // Initialize timer, must be called at least once at start.
 void mp_time_init(void);
 
 // Return time in nanoseconds. Never wraps. Never returns negative values.
 int64_t mp_time_ns(void);
+
+// Return time in nanoseconds. Coverts raw time in nanoseconds to mp time, subtracts init offset.
+int64_t mp_time_ns_from_raw_time(uint64_t raw_time);
 
 // Return time in seconds. Can have down to 1 nanosecond resolution, but will
 // be much worse when casted to float.
@@ -37,6 +41,11 @@ uint64_t mp_raw_time_ns(void);
 
 // Sleep in nanoseconds.
 void mp_sleep_ns(int64_t ns);
+
+#if HAVE_DARWIN
+// Coverts mach time to raw time in nanoseconds and returns it.
+uint64_t mp_raw_time_ns_from_mach(uint64_t mach_time);
+#endif
 
 #ifdef _WIN32
 // returns: timer resolution in ns if needed and started successfully, else 0
