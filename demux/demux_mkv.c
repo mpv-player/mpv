@@ -1576,7 +1576,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->color = track->color;
 
     if (track->v_projection_pose_roll_set) {
-        int rotate = lrintf(fmodf(fmodf(track->v_projection_pose_roll, 360) + 360, 360));
+        int rotate = lrintf(fmodf(fmodf(-1 * track->v_projection_pose_roll, 360) + 360, 360));
         sh_v->rotate = rotate;
     }
 
