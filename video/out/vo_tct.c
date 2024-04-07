@@ -42,13 +42,13 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
-static const bstr TERM_ESC_CLEAR_COLORS    = bstr0_s("\033[0m");
-static const bstr TERM_ESC_COLOR256_BG     = bstr0_s("\033[48;5");
-static const bstr TERM_ESC_COLOR256_FG     = bstr0_s("\033[38;5");
-static const bstr TERM_ESC_COLOR24BIT_BG   = bstr0_s("\033[48;2");
-static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_s("\033[38;2");
+static const bstr TERM_ESC_CLEAR_COLORS    = bstr0_lit("\033[0m");
+static const bstr TERM_ESC_COLOR256_BG     = bstr0_lit("\033[48;5");
+static const bstr TERM_ESC_COLOR256_FG     = bstr0_lit("\033[38;5");
+static const bstr TERM_ESC_COLOR24BIT_BG   = bstr0_lit("\033[48;2");
+static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_lit("\033[38;2");
 
-static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_s("\xe2\x96\x84");
+static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_lit("\xe2\x96\x84");
 
 #define WRITE_STR(str) fwrite((str), strlen(str), 1, stdout)
 
@@ -120,14 +120,14 @@ static void print_seq3(bstr *frame, struct lut_item *lut, bstr prefix,
     bstr_xappend(NULL, frame, (bstr){ lut[r].str, lut[r].width });
     bstr_xappend(NULL, frame, (bstr){ lut[g].str, lut[g].width });
     bstr_xappend(NULL, frame, (bstr){ lut[b].str, lut[b].width });
-    bstr_xappend(NULL, frame, bstr0_s("m"));
+    bstr_xappend(NULL, frame, (bstr)bstr0_lit("m"));
 }
 
 static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c)
 {
     bstr_xappend(NULL, frame, prefix);
     bstr_xappend(NULL, frame, (bstr){ lut[c].str, lut[c].width });
-    bstr_xappend(NULL, frame, bstr0_s("m"));
+    bstr_xappend(NULL, frame, (bstr)bstr0_lit("m"));
 }
 
 static void print_buffer(bstr *frame)
@@ -157,7 +157,7 @@ static void write_plain(bstr *frame,
             } else {
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
-            bstr_xappend(NULL, frame, bstr0_s(" "));
+            bstr_xappend(NULL, frame, (bstr)bstr0_lit(" "));
             if (buffering <= VO_TCT_BUFFER_PIXEL)
                 print_buffer(frame);
         }
@@ -288,7 +288,7 @@ static void flip_page(struct vo *vo)
             p->opts.term256, p->lut, p->opts.buffering);
     }
 
-    bstr_xappend(NULL, &p->frame_buf, bstr0_s("\n"));
+    bstr_xappend(NULL, &p->frame_buf, (bstr)bstr0_lit("\n"));
     if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
         print_buffer(&p->frame_buf);
 
