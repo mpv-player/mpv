@@ -445,11 +445,14 @@ char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type)
 
 char *sub_ass_get_extradata(struct dec_sub *sub)
 {
+    mp_mutex_lock(&sub->lock);
     if (strcmp(sub->sd->codec->codec, "ass") != 0)
         return NULL;
     char *extradata = sub->sd->codec->extradata;
     int extradata_size = sub->sd->codec->extradata_size;
-    return talloc_strndup(NULL, extradata, extradata_size);
+    char *data = talloc_strndup(NULL, extradata, extradata_size);
+    mp_mutex_unlock(&sub->lock);
+    return data;
 }
 
 struct sd_times sub_get_times(struct dec_sub *sub, double pts)
