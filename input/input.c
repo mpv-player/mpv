@@ -275,13 +275,12 @@ static struct mp_cmd *queue_peek_tail(struct cmd_queue *queue)
     return cur;
 }
 
-static int queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
+static void queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
-    if (cmd) {
-        queue_add_tail(&ictx->cmd_queue, cmd);
-        mp_input_wakeup(ictx);
-    }
-    return 1;
+    if (!cmd)
+        return;
+    queue_add_tail(&ictx->cmd_queue, cmd);
+    mp_input_wakeup(ictx);
 }
 
 static void append_bind_info(struct input_ctx *ictx, char **pmsg,
@@ -957,6 +956,8 @@ static void adjust_max_wait_time(struct input_ctx *ictx, double *time)
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
+    if (!cmd)
+        return 0;
     input_lock(ictx);
     queue_cmd(ictx, cmd);
     input_unlock(ictx);
