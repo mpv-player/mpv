@@ -58,6 +58,7 @@ class AppHub: NSObject {
             log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
             option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
             input.option = option
+            event?.subscribe(log, event: .init(name: "MPV_EVENT_SHUTDOWN"))
         }
 
 #if HAVE_MACOS_MEDIA_PLAYER

@@ -18,8 +18,9 @@
 import Cocoa
 import os
 
-class LogHelper {
+class LogHelper: EventSubscriber {
     var log: OpaquePointer?
+    let lock = NSLock()
     let logger = Logger(subsystem: "io.mpv", category: "mpv")
 
     let loggerMapping: [Int:OSLogType] = [
@@ -50,12 +51,23 @@ class LogHelper {
     }
 
     func send(message: String, type: Int) {
-        guard let log = log, UnsafeRawPointer(log).load(as: UInt8.self) != 0 else {
-            logger.log(level: loggerMapping[type] ?? .default, "\(message, privacy: .public)")
-            return
-        }
+        lock.withLock {
+            guard let log = log else {
+                logger.log(level: loggerMapping[type] ?? .default, "\(message, privacy: .public)")
+                return
+            }
 
-        let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
-        mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
+            let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
+            mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
+        }
+    }
+
+    func handle(event: EventHelper.Event) {
+        if event.name == "MPV_EVENT_SHUTDOWN" {
+            lock.withLock {
+                ta_free(UnsafeMutablePointer(log))
+                log = nil
+            }
+        }
     }
 }
