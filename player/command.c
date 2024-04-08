@@ -72,6 +72,7 @@
 #include "misc/thread_pool.h"
 #include "misc/thread_tools.h"
 
+#include "osdep/clipboard.h"
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
 #include "osdep/terminal.h"
@@ -7044,6 +7045,16 @@ const struct mp_cmd_def mp_cmds[] = {
     { "screenshot-to-file", cmd_screenshot_to_file,
         {
             {"filename", OPT_STRING(v.s)},
+            {"flags", OPT_CHOICE(v.i,
+                {"video", 0},
+                {"window", 1},
+                {"subtitles", 2}),
+                OPTDEF_INT(2)},
+        },
+        .spawn_thread = true,
+    },
+    { "screenshot-to-clipboard", cmd_screenshot_to_clipboard,
+        {
             {"flags", OPT_CHOICE(v.i,
                 {"video", 0},
                 {"window", 1},

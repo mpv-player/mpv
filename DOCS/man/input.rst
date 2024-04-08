@@ -402,6 +402,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
+``screenshot-to-clipboard [<flags>]``
+    Take a screenshot and save it to the system clipboard.
+
+    The ``flags`` argument is like the first argument to ``screenshot`` and
+    supports ``subtitles``, ``video``, ``window``.
+
 ``playlist-next <flags>``
     Go to the next entry on the playlist.
 
