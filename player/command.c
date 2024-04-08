@@ -130,6 +130,10 @@ static const struct m_option mdata_type = {
     .type = CONF_TYPE_NODE
 };
 
+static const struct m_option clipboard_type = {
+    .type = CONF_TYPE_NODE
+};
+
 struct overlay {
     struct mp_image *source;
     int x, y;
@@ -4108,6 +4112,178 @@ static int mp_property_udata(void *ctx, struct m_property *prop,
     return ret;
 }
 
+static int do_get_clipboard(struct MPContext *mpctx, union m_option_value *out,
+                            enum m_clipboard_type type)
+{
+    struct m_clipboard_item item = {
+        .type = type,
+    };
+
+    int ret = m_clipboard_get(mpctx, &item);
+    if (ret < 0) {
+        return M_PROPERTY_ERROR;
+    } else if (ret == CLIPBOARD_NONE) {
+        if (type == CLIPBOARD_PATHS) {
+            out->string_list = NULL;
+            return M_PROPERTY_OK;
+        } else {
+            return M_PROPERTY_UNAVAILABLE;
+        }
+    }
+
+    switch (type) {
+    case CLIPBOARD_TEXT:
+    case CLIPBOARD_URL:
+    case CLIPBOARD_PATH:
+        out->string = item.string;
+        return M_PROPERTY_OK;
+    case CLIPBOARD_PATHS:
+        out->string_list = item.string_list;
+        return M_PROPERTY_OK;
+    default:
+        m_clipboard_item_free(&item);
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+}
+
+static int do_set_clipboard(struct MPContext *mpctx, void *arg, enum m_clipboard_type type)
+{
+    struct m_clipboard_item item = {
+        .type = type,
+    };
+
+    union m_option_value *val = arg;
+
+    switch (type) {
+    case CLIPBOARD_TEXT:
+    case CLIPBOARD_URL:
+    case CLIPBOARD_PATH:
+        item.string = val->string;
+        break;
+    case CLIPBOARD_PATHS:
+        item.string_list = val->string_list;
+        break;
+    case CLIPBOARD_UNKNOWN:
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+    return (m_clipboard_set(mpctx, &item) == CLIPBOARD_OK) ? M_PROPERTY_OK : M_PROPERTY_ERROR;
+}
+
+static void do_clipboard_node(struct MPContext *mpctx, mpv_node *parent,
+                              enum m_clipboard_type type, const char *key)
+{
+    struct mpv_node *node = node_map_add(parent, key, MPV_FORMAT_NONE);
+
+    struct m_clipboard_item item = {
+        .type = type,
+    };
+
+    int ret = m_clipboard_get(mpctx, &item);
+    if (ret != CLIPBOARD_OK)
+        return;
+
+    switch (type) {
+    case CLIPBOARD_TEXT:
+    case CLIPBOARD_URL:
+    case CLIPBOARD_PATH:
+        node->format = MPV_FORMAT_STRING;
+        node->u.string = item.string;
+        return;
+    case CLIPBOARD_PATHS:
+        node_init(node, MPV_FORMAT_NODE_ARRAY, parent);
+        for (size_t i = 0; item.string_list[i]; i++) {
+            struct mpv_node *entry = node_array_add(node, MPV_FORMAT_NONE);
+            entry->format = MPV_FORMAT_STRING;
+            entry->u.string = talloc_steal(node->u.list, item.string_list[i]);
+        }
+        m_clipboard_item_free(&item);
+        return;
+    default:
+        m_clipboard_item_free(&item);
+        return;
+    }
+}
+
+static int mp_property_clipboard(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    struct MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = clipboard_type;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
+        mpv_node *node = arg;
+        m_option_free(&clipboard_type, node);
+        node_init(node, MPV_FORMAT_NODE_MAP, NULL);
+        do_clipboard_node(mpctx, node, CLIPBOARD_TEXT, "text");
+        do_clipboard_node(mpctx, node, CLIPBOARD_URL, "url");
+        do_clipboard_node(mpctx, node, CLIPBOARD_PATHS, "paths");
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+    case M_PROPERTY_SET_NODE: {
+        mpv_node *node = arg;
+        switch (node->format) {
+        case MPV_FORMAT_STRING:
+            return do_set_clipboard(mpctx, &node->u.string, CLIPBOARD_TEXT);
+        default:
+            return M_PROPERTY_INVALID_FORMAT;
+        }
+    }
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *act = arg;
+        const char *key = act->key;
+
+        enum m_clipboard_type type = CLIPBOARD_UNKNOWN;
+        if (!strcmp(key, "text")) {
+            type = CLIPBOARD_TEXT;
+        } else if (!strcmp(key, "url")) {
+            type = CLIPBOARD_URL;
+        } else if (!strcmp(key, "path")) {
+            type = CLIPBOARD_PATH;
+        } else if (!strcmp(key, "paths")) {
+            type = CLIPBOARD_PATHS;
+        }
+
+        if (type == CLIPBOARD_UNKNOWN)
+            return M_PROPERTY_UNKNOWN;
+
+        switch (act->action) {
+        case M_PROPERTY_GET_TYPE:
+            switch (type) {
+            case CLIPBOARD_TEXT:
+            case CLIPBOARD_URL:
+            case CLIPBOARD_PATH:
+                *(struct m_option *)act->arg = (struct m_option){
+                    .type = CONF_TYPE_STRING,
+                };
+                return M_PROPERTY_OK;
+            case CLIPBOARD_PATHS:
+                *(struct m_option *)act->arg = (struct m_option){
+                    .type = CONF_TYPE_STRING_LIST,
+                };
+                return M_PROPERTY_OK;
+            default:
+                return M_PROPERTY_UNKNOWN;
+            }
+        case M_PROPERTY_GET:
+            return do_get_clipboard(mpctx, act->arg, type);
+        case M_PROPERTY_SET:
+            return do_set_clipboard(mpctx, act->arg, type);
+        default:
+            return M_PROPERTY_NOT_IMPLEMENTED;
+        }
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -4322,6 +4498,8 @@ static const struct m_property mp_properties_base[] = {
 
     {"user-data", mp_property_udata},
     {"term-size", mp_property_term_size},
+
+    {"clipboard", mp_property_clipboard},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
