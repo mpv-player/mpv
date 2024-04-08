@@ -1916,7 +1916,8 @@ terminate_playback:
     } else {
         mpctx->files_played++;
     }
-
+    // Fix the problem of automatic loop playback assertion failure in Linux
+    mpctx->stop_play = AT_END_OF_FILE;
     assert(mpctx->stop_play);
 
     process_hooks(mpctx, "on_after_end_file");
