@@ -49,8 +49,8 @@ input.conf syntax
 ``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] <command> ( ; <command> )*``
 
 Note that by default, the right Alt key can be used to create special
-characters, and thus does not register as a modifier. The option
-``--no-input-right-alt-gr`` changes this behavior.
+characters, and thus does not register as a modifier. This can be changed
+with ``--input-right-alt-gr`` option.
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
@@ -264,7 +264,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``ignore``
     Use this to "block" keys that should be unbound, and do nothing. Useful for
     disabling default bindings, without disabling all bindings with
-    ``--no-input-default-bindings``.
+    ``--input-default-bindings=no``.
 
 ``seek <target> [<flags>]``
     Change the playback position. By default, seeks by a relative amount of
@@ -926,6 +926,9 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     <keep-selection>
         Do not change current track selections.
+
+``context-menu``
+    Show context menu on the video window. See `Context Menu`_ section for details.
 
 
 Input Commands that are Possibly Subject to Change
@@ -3453,6 +3456,48 @@ Property list
     representation. If converting a leaf-level object (i.e. not a map or array)
     and not using raw mode, the underlying content will be given (e.g. strings will be
     printed directly, rather than quoted and JSON-escaped).
+
+``menu-data`` (RW)
+    This property stores the raw menu definition. See `Context Menu`_ section for details.
+
+    ``type``
+        Menu item type. Can be: ``separator``, ``submenu``, or empty.
+
+    ``title``
+        Menu item title. Required if type is not ``separator``.
+
+    ``cmd``
+        Command to execute when the menu item is clicked.
+
+    ``shortcut``
+        Menu item shortcut key which appears to the right of the menu item.
+        A shortcut key does not have to be functional; it's just a visual hint.
+
+    ``state``
+        Menu item state. Can be: ``checked``, ``disabled``, ``hidden``, or empty.
+
+    ``submenu``
+        Submenu items, which is required if type is ``submenu``.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``, or with
+    Lua ``mp.get_property_native``, this will return a mpv_node with the following
+    contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (menu item)
+                "type"           MPV_FORMAT_STRING
+                "title"          MPV_FORMAT_STRING
+                "cmd"            MPV_FORMAT_STRING
+                "shortcut"       MPV_FORMAT_STRING
+                "state"          MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_STRING]
+                "submenu"        MPV_FORMAT_NODE_ARRAY[menu item]
+
+    Writing to this property with the client API using ``MPV_FORMAT_NODE`` or with
+    Lua ``mp.set_property_native`` will trigger an immediate update of the menu if
+    mpv video output is currently active. You may observe the ``current-vo``
+    property to check if this is the case.
 
 ``working-directory``
     The working directory of the mpv process. Can be useful for JSON IPC users,

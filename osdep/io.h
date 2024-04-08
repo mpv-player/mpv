@@ -106,8 +106,8 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <sys/stat.h>
 #include <fcntl.h>
 
-int mp_puts(const char *str);
-int mp_fputs(const char *str, FILE *stream);
+size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
+                 FILE *restrict stream);
 int mp_printf(const char *format, ...) PRINTF_ATTRIBUTE(1, 2);
 int mp_fprintf(FILE *stream, const char *format, ...) PRINTF_ATTRIBUTE(2, 3);
 int mp_open(const char *filename, int oflag, ...);
@@ -176,8 +176,7 @@ int mp_glob(const char *restrict pattern, int flags,
             int (*errfunc)(const char*, int), mp_glob_t *restrict pglob);
 void mp_globfree(mp_glob_t *pglob);
 
-#define puts(...) mp_puts(__VA_ARGS__)
-#define fputs(...) mp_fputs(__VA_ARGS__)
+#define fwrite(...) mp_fwrite(__VA_ARGS__)
 #define printf(...) mp_printf(__VA_ARGS__)
 #define fprintf(...) mp_fprintf(__VA_ARGS__)
 #define open(...) mp_open(__VA_ARGS__)

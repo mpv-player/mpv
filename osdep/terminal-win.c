@@ -239,7 +239,7 @@ int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
     buffers->write_console_buf.len = 0;
     bstr_xappend_vasprintf(buffers, &buffers->write_console_buf, format, args);
 
-    int ret = mp_console_fputs(wstream, buffers->write_console_buf);
+    int ret = mp_console_write(wstream, buffers->write_console_buf);
 
     if (free_buf)
         talloc_free(buffers);
@@ -247,7 +247,7 @@ int mp_console_vfprintf(HANDLE wstream, const char *format, va_list args)
     return ret;
 }
 
-int mp_console_fputs(HANDLE wstream, bstr str)
+int mp_console_write(HANDLE wstream, bstr str)
 {
     struct tmp_buffers *buffers = FlsGetValue(tmp_buffers_key);
     bool free_buf = false;
@@ -285,6 +285,10 @@ int mp_console_fputs(HANDLE wstream, bstr str)
             // CSI - Control Sequence Introducer
             next += 2;
 
+            // private sequences
+            bool priv = next[0] == '?';
+            next += priv;
+
             // CSI codes generally follow this syntax:
             //    "\033[" [ <i> (';' <i> )* ] <c>
             // where <i> are integers, and <c> a single char command code.
@@ -308,16 +312,82 @@ int mp_console_fputs(HANDLE wstream, bstr str)
             CONSOLE_SCREEN_BUFFER_INFO info;
             GetConsoleScreenBufferInfo(wstream, &info);
             switch (code) {
-            case 'K': {     // erase to end of line
-                COORD at = info.dwCursorPosition;
-                int len = info.dwSize.X - at.X;
-                FillConsoleOutputCharacterW(wstream, ' ', len, at, &(DWORD){0});
-                SetConsoleCursorPosition(wstream, at);
+            case 'K': {     // erase line
+                COORD cursor_pos = info.dwCursorPosition;
+                COORD at = cursor_pos;
+                int len;
+                switch (num_params ? params[0] : 0) {
+                case 1:
+                    len = at.X;
+                    at.X = 0;
+                    break;
+                case 2:
+                    len = info.dwSize.X;
+                    at.X = 0;
+                    break;
+                case 0:
+                default:
+                    len = info.dwSize.X - at.X;
+                }
+                FillConsoleOutputCharacterW(wstream, L' ', len, at, &(DWORD){0});
+                SetConsoleCursorPosition(wstream, cursor_pos);
+                break;
+            }
+            case 'B': {     // cursor down
+                info.dwCursorPosition.Y += !num_params ? 1 : params[0];
+                SetConsoleCursorPosition(wstream, info.dwCursorPosition);
                 break;
             }
             case 'A': {     // cursor up
-                info.dwCursorPosition.Y -= 1;
+                info.dwCursorPosition.Y -= !num_params ? 1 : params[0];
                 SetConsoleCursorPosition(wstream, info.dwCursorPosition);
+                break;
+            }
+            case 'J': {
+                // Only full screen clear is supported
+                if (!num_params || params[0] != 2)
+                    break;
+
+                COORD top_left = {0, 0};
+                FillConsoleOutputCharacterW(wstream, L' ', info.dwSize.X * info.dwSize.Y,
+                                            top_left, &(DWORD){0});
+                SetConsoleCursorPosition(wstream, top_left);
+                break;
+            }
+            case 'f': {
+               if (num_params != 2)
+                    break;
+                SetConsoleCursorPosition(wstream, (COORD){params[0], params[1]});
+                break;
+            }
+            case 'l': {
+                if (!priv || !num_params)
+                    break;
+
+                switch (params[0]) {
+                case 25:;  // hide the cursor
+                    CONSOLE_CURSOR_INFO cursor_info;
+                    if (!GetConsoleCursorInfo(wstream, &cursor_info))
+                        break;
+                    cursor_info.bVisible = FALSE;
+                    SetConsoleCursorInfo(wstream, &cursor_info);
+                    break;
+                }
+                break;
+            }
+            case 'h': {
+                if (!priv || !num_params)
+                    break;
+
+                switch (params[0]) {
+                case 25:;  // show the cursor
+                    CONSOLE_CURSOR_INFO cursor_info;
+                    if (!GetConsoleCursorInfo(wstream, &cursor_info))
+                        break;
+                    cursor_info.bVisible = TRUE;
+                    SetConsoleCursorInfo(wstream, &cursor_info);
+                    break;
+                }
                 break;
             }
             case 'm': {     // "SGR"

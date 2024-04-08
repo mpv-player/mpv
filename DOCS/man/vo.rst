@@ -325,7 +325,7 @@ Available video output drivers are:
 ``null``
     Produces no video output. Useful for benchmarking.
 
-    Usually, it's better to disable video with ``--no-video`` instead.
+    Usually, it's better to disable video with ``--video=no`` instead.
 
     The following global options are supported by this video output:
 
@@ -335,6 +335,21 @@ Available video output drivers are:
 
 ``caca``
     Color ASCII art video output driver that works on a text console.
+
+    This driver reserves some keys for runtime configuration. These keys are
+    hardcoded and cannot be bound:
+
+    d and D
+        Toggle dithering algorithm.
+
+    a and A
+        Toggle antialiasing method.
+
+    h and H
+        Toggle charset method.
+
+    c and C
+        Toggle color method.
 
     .. note:: This driver is a joke.
 
@@ -348,7 +363,7 @@ Available video output drivers are:
     performance.
 
     Note: the TCT image output is not synchronized with other terminal output
-    from mpv, which can lead to broken images. The options ``--no-terminal`` or
+    from mpv, which can lead to broken images. The options ``--terminal=no`` or
     ``--really-quiet`` can help with that.
 
     ``--vo-tct-algo=<algo>``
@@ -360,6 +375,25 @@ Available video output drivers are:
         plain
             Uses spaces. Causes vertical resolution to drop twofolds, but in
             theory works in more places.
+
+    ``--vo-tct-buffering=<pixel|line|frame>``
+        Specifies the size of data batches buffered before being sent to the
+        terminal.
+
+        TCT image output is not synchronized with other terminal output from mpv,
+        which can lead to broken images. Sending data to the terminal in small
+        batches may improve parallelism between terminal processing and mpv
+        processing but incurs a static overhead of generating tens of thousands
+        of small writes. Also, depending on the terminal used, sending frames in
+        one chunk might help with tearing of the output, especially if not used
+        with ``--really-quiet`` and other logs interrupt the data stream.
+
+        pixel
+            Send data to terminal for each pixel.
+        line
+            Send data to terminal for each line. (Default)
+        frame
+            Send data to terminal for each frame.
 
     ``--vo-tct-width=<width>``  ``--vo-tct-height=<height>``
         Assume the terminal has the specified character width and/or height.

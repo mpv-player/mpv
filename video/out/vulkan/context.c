@@ -25,6 +25,7 @@
 
 #include "options/m_config.h"
 #include "video/out/placebo/ra_pl.h"
+#include "video/out/placebo/utils.h"
 
 #include "context.h"
 #include "utils.h"
@@ -39,36 +40,30 @@ struct vulkan_opts {
 
 static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 {
-    struct bstr param = bstr0(*value);
     int ret = M_OPT_INVALID;
-    VkResult res;
+    void *ta_ctx = talloc_new(NULL);
+    pl_log pllog = mppl_log_create(ta_ctx, log);
+    if (!pllog)
+        goto done;
 
     // Create a dummy instance to validate/list the devices
-    VkInstanceCreateInfo info = {
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pApplicationInfo = &(VkApplicationInfo) {
-            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            .apiVersion = VK_API_VERSION_1_1,
-        }
-    };
+    mppl_log_set_probing(pllog, true);
+    pl_vk_inst inst = pl_vk_inst_create(pllog, pl_vk_inst_params());
+    mppl_log_set_probing(pllog, false);
+    if (!inst)
+        goto done;
 
-    VkInstance inst;
-    VkPhysicalDevice *devices = NULL;
     uint32_t num = 0;
-
-    res = vkCreateInstance(&info, NULL, &inst);
+    VkResult res = vkEnumeratePhysicalDevices(inst->instance, &num, NULL);
     if (res != VK_SUCCESS)
         goto done;
 
-    res = vkEnumeratePhysicalDevices(inst, &num, NULL);
+    VkPhysicalDevice *devices = talloc_array(ta_ctx, VkPhysicalDevice, num);
+    res = vkEnumeratePhysicalDevices(inst->instance, &num, devices);
     if (res != VK_SUCCESS)
         goto done;
 
-    devices = talloc_array(NULL, VkPhysicalDevice, num);
-    res = vkEnumeratePhysicalDevices(inst, &num, devices);
-    if (res != VK_SUCCESS)
-        goto done;
-
+    struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
     if (help) {
         mp_info(log, "Available vulkan devices:\n");
@@ -110,7 +105,9 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
                BSTR_P(param));
 
 done:
-    talloc_free(devices);
+    pl_vk_inst_destroy(&inst);
+    pl_log_destroy(&pllog);
+    talloc_free(ta_ctx);
     return ret;
 }
 

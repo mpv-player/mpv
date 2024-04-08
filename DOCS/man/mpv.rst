@@ -310,6 +310,21 @@ Wheel left/right
 Ctrl+Wheel up/down
     Change video zoom.
 
+Context Menu
+-------------
+
+.. warning::
+
+    This feature is experimental. It may not work with all VOs. A libass based
+    fallback may be implemented in the future.
+
+Context Menu is a menu that pops up on the video window on user interaction
+(mouse right click, etc.).
+
+To use this feature, you need to fill the ``menu-data`` property with menu
+definition data, and add a keybinding to run the ``context-menu`` command,
+which can be done with a user script.
+
 USAGE
 =====
 
@@ -976,7 +991,7 @@ There are three choices for using mpv from other programs or scripts:
        addition, terminal behavior itself may change any time. Compatibility
        cannot be guaranteed.
 
-       Your code should work even if you pass ``--no-terminal``. Do not attempt
+       Your code should work even if you pass ``--terminal=no``. Do not attempt
        to simulate user input by sending terminal control codes to mpv's stdin.
        If you need interactive control, using ``--input-ipc-server`` is
        recommended. This gives you access to the `JSON IPC`_  over unix domain
@@ -1100,7 +1115,7 @@ this with ``--untimed``, but it will likely break, unless the stream has no
 audio, and the input feeds data to the player at a constant rate.
 
 Another common problem is with MJPEG streams. These do not signal the correct
-framerate. Using ``--untimed`` or ``--no-correct-pts --container-fps-override=60``
+framerate. Using ``--untimed`` or ``--correct-pts=no --container-fps-override=60``
 might help.
 
 For livestreams, data can build up due to pausing the stream, due to slightly
