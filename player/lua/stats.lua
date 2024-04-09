@@ -1096,7 +1096,7 @@ local function vo_stats()
     add_header(header)
     append_perfdata(header, content, true, true)
     header = {table.concat(header)}
-    return finalize_page(header, content, false)
+    return finalize_page(header, content, true)
 end
 
 local kbinfo_lines = nil
