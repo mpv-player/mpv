@@ -159,12 +159,15 @@ struct load_action {
     bool play;
 };
 
-// U+279C HEAVY ROUND-TIPPED RIGHTWARDS ARROW
+// U+25CB WHITE CIRCLE
+// U+25CF BLACK CIRCLE
 // U+00A0 NO-BREAK SPACE
-#define ARROW_SP "\342\236\234\302\240"
+#define WHITECIRCLE "\xe2\x97\x8b"
+#define BLACKCIRCLE "\xe2\x97\x8f"
+#define NBSP "\xc2\xa0"
 
-const char list_current[] = OSD_ASS_0 ARROW_SP OSD_ASS_1;
-const char list_normal[] = OSD_ASS_0 "{\\alpha&HFF}" ARROW_SP "{\\r}" OSD_ASS_1;
+const char list_current[] = BLACKCIRCLE NBSP;
+const char list_normal[] = WHITECIRCLE NBSP;
 
 static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
                         enum stream_type mediatype,
