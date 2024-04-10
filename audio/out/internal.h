@@ -159,7 +159,7 @@ struct ao_driver {
     bool (*set_pause)(struct ao *ao, bool paused);
     // pull based: start the audio callback
     // push based: start playing queued data
-    //             AO should call ao_wakeup_playthread() if a period boundary
+    //             AO should call ao_wakeup() if a period boundary
     //             is crossed, or playback stops due to external reasons
     //             (including underruns or device removal)
     //             must set mp_pcm_state.playing; unset on error/underrun/end
@@ -231,7 +231,7 @@ bool ao_can_convert_inplace(struct ao_convert_fmt *fmt);
 bool ao_need_conversion(struct ao_convert_fmt *fmt);
 void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples);
 
-void ao_wakeup_playthread(struct ao *ao);
+void ao_wakeup(struct ao *ao);
 
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
                            void **data, int samples, int64_t out_time_ns);

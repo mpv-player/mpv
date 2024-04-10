@@ -547,7 +547,7 @@ error:
     return -1;
 }
 
-static MP_THREAD_VOID playthread(void *arg)
+static MP_THREAD_VOID ao_thread(void *arg)
 {
     struct ao *ao = arg;
     struct priv *p = ao->priv;
@@ -766,7 +766,7 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    if (mp_thread_create(&p->thread, playthread, ao)) {
+    if (mp_thread_create(&p->thread, ao_thread, ao)) {
         MP_ERR(ao, "pthread creation failed\n");
         goto error;
     }
