@@ -50,12 +50,18 @@ class LogHelper {
     }
 
     func send(message: String, type: Int) {
-        guard let log = log, UnsafeRawPointer(log).load(as: UInt8.self) != 0 else {
+        guard let log = log else {
             logger.log(level: loggerMapping[type] ?? .default, "\(message, privacy: .public)")
             return
         }
 
         let args: [CVarArg] = [(message as NSString).utf8String ?? "NO MESSAGE"]
         mp_msg_va(log, Int32(type), "%s\n", getVaList(args))
+    }
+
+    deinit {
+        // only a manual dereferencing will trigger this, cleanup properly in that case
+        ta_free(UnsafeMutablePointer(log))
+        log = nil
     }
 }
