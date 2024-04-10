@@ -788,7 +788,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     For embedded subtitles (like with Matroska), this works only with subtitle
     events that have already been displayed, or are within a short prefetch
-    range.
+    range (``--demuxer-readahead-secs``).
 
 ``print-text <text>``
     Print text to stdout. The string can contain properties (see
