@@ -14,6 +14,10 @@ commands to the player or receive events from it.
     which can run arbitrary system commands. The use-case is controlling the
     player locally. This is not different from the MPlayer slave protocol.
 
+.. note::
+
+    A list of input commands can be found `here. <input.rst#list-of-input-commands>`_
+
 Socat example
 -------------
 
@@ -210,13 +214,13 @@ is described in the C API ``mpv_command_node()`` documentation (the
 ``MPV_FORMAT_NODE_MAP`` case). In some cases, this may make commands more
 readable, while some obscure commands basically require using named arguments.
 
-Currently, only "proper" commands (as listed by `List of Input Commands`_)
+Currently, only "proper" commands (as listed by `List of Input Commands <input.rst#list-of-input-commands>`_)
 support named arguments.
 
 Commands
 --------
 
-In addition to the commands described in `List of Input Commands`_, a few
+In addition to the commands described in `List of Input Commands <input.rst#list-of-input-commands>`_, a few
 extra commands can also be used as part of the protocol:
 
 ``client_name``
