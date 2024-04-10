@@ -105,7 +105,7 @@ static bool init_rubberband(struct mp_filter *f)
     return true;
 }
 
-static void process(struct mp_filter *f)
+static void af_rubberband_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -233,7 +233,7 @@ error:
     mp_filter_internal_mark_failed(f);
 }
 
-static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+static bool af_rubberband_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *p = f->priv;
 
@@ -263,7 +263,7 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
     return false;
 }
 
-static void reset(struct mp_filter *f)
+static void af_rubberband_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -274,7 +274,7 @@ static void reset(struct mp_filter *f)
     TA_FREEP(&p->pending);
 }
 
-static void destroy(struct mp_filter *f)
+static void af_rubberband_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -286,10 +286,10 @@ static void destroy(struct mp_filter *f)
 static const struct mp_filter_info af_rubberband_filter = {
     .name = "rubberband",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .command = command,
-    .reset = reset,
-    .destroy = destroy,
+    .process = af_rubberband_process,
+    .command = af_rubberband_command,
+    .reset = af_rubberband_reset,
+    .destroy = af_rubberband_destroy,
 };
 
 static struct mp_filter *af_rubberband_create(struct mp_filter *parent,

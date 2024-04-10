@@ -1369,14 +1369,14 @@ static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-static void process(struct mp_filter *vd)
+static void vd_lavc_process(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     lavc_process(vd, &ctx->state, send_packet, receive_frame);
 }
 
-static void reset(struct mp_filter *vd)
+static void vd_lavc_reset(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
@@ -1386,7 +1386,7 @@ static void reset(struct mp_filter *vd)
     ctx->framedrop_flags = 0;
 }
 
-static void destroy(struct mp_filter *vd)
+static void vd_lavc_destroy(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
@@ -1398,9 +1398,9 @@ static void destroy(struct mp_filter *vd)
 static const struct mp_filter_info vd_lavc_filter = {
     .name = "vd_lavc",
     .priv_size = sizeof(vd_ffmpeg_ctx),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = vd_lavc_process,
+    .reset = vd_lavc_reset,
+    .destroy = vd_lavc_destroy,
 };
 
 static struct mp_decoder *create(struct mp_filter *parent,

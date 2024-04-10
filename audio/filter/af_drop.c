@@ -11,7 +11,7 @@ struct priv {
     struct mp_aframe *last; // for repeating
 };
 
-static void process(struct mp_filter *f)
+static void af_drop_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -52,7 +52,7 @@ static void process(struct mp_filter *f)
     mp_pin_in_write(f->ppins[1], frame);
 }
 
-static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+static bool af_drop_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *p = f->priv;
 
@@ -65,7 +65,7 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
     return false;
 }
 
-static void reset(struct mp_filter *f)
+static void af_drop_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -73,18 +73,18 @@ static void reset(struct mp_filter *f)
     p->diff = 0;
 }
 
-static void destroy(struct mp_filter *f)
+static void af_drop_destroy(struct mp_filter *f)
 {
-    reset(f);
+    af_drop_reset(f);
 }
 
 static const struct mp_filter_info af_drop_filter = {
     .name = "drop",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .command = command,
-    .reset = reset,
-    .destroy = destroy,
+    .process = af_drop_process,
+    .command = af_drop_command,
+    .reset = af_drop_reset,
+    .destroy = af_drop_destroy,
 };
 
 static struct mp_filter *af_drop_create(struct mp_filter *parent, void *options)

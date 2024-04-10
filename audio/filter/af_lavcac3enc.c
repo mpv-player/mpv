@@ -139,18 +139,18 @@ static bool reinit(struct mp_filter *f)
     return true;
 }
 
-static void reset(struct mp_filter *f)
+static void af_lavcac3enc_reset(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
     TA_FREEP(&s->in_frame);
 }
 
-static void destroy(struct mp_filter *f)
+static void af_lavcac3enc_destroy(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
-    reset(f);
+    af_lavcac3enc_reset(f);
     av_packet_free(&s->lavc_pkt);
     avcodec_free_context(&s->lavc_actx);
 }
@@ -161,7 +161,7 @@ static void swap_16(uint16_t *ptr, size_t size)
         ptr[n] = av_bswap16(ptr[n]);
 }
 
-static void process(struct mp_filter *f)
+static void af_lavcac3enc_process(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
@@ -281,9 +281,9 @@ error:
 static const struct mp_filter_info af_lavcac3enc_filter = {
     .name = "lavcac3enc",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = af_lavcac3enc_process,
+    .reset = af_lavcac3enc_reset,
+    .destroy = af_lavcac3enc_destroy,
 };
 
 static void add_chmaps_to_autoconv(struct mp_filter *f,

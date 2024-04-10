@@ -38,7 +38,7 @@ struct priv {
     struct mp_pin *in_pin;
 };
 
-static void process(struct mp_filter *f)
+static void af_format_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -85,7 +85,7 @@ error:
 static const struct mp_filter_info af_format_filter = {
     .name = "format",
     .priv_size = sizeof(struct priv),
-    .process = process,
+    .process = af_format_process,
 };
 
 static struct mp_filter *af_format_create(struct mp_filter *parent,
