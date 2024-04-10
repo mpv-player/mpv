@@ -68,7 +68,7 @@ bool mp_sws_supports_input(int imgfmt)
     return sws_isSupportedInput(imgfmt2pixfmt(imgfmt));
 }
 
-static void process(struct mp_filter *f)
+static void sws_process(struct mp_filter *f)
 {
     struct mp_sws_filter *s = f->priv;
 
@@ -130,7 +130,7 @@ error:
 static const struct mp_filter_info sws_filter = {
     .name = "swscale",
     .priv_size = sizeof(struct mp_sws_filter),
-    .process = process,
+    .process = sws_process,
 };
 
 struct mp_sws_filter *mp_sws_filter_create(struct mp_filter *parent)

@@ -229,7 +229,7 @@ static void output_overlap_s16(struct priv *s, void *buf_out,
     }
 }
 
-static void process(struct mp_filter *f)
+static void af_scaletempo_process(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
@@ -511,7 +511,7 @@ static bool reinit(struct mp_filter *f)
     return true;
 }
 
-static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+static bool af_scaletempo_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *s = f->priv;
 
@@ -530,7 +530,7 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
     return false;
 }
 
-static void reset(struct mp_filter *f)
+static void af_scaletempo_reset(struct mp_filter *f)
 {
     struct priv *s = f->priv;
 
@@ -543,7 +543,7 @@ static void reset(struct mp_filter *f)
     TA_FREEP(&s->in);
 }
 
-static void destroy(struct mp_filter *f)
+static void af_scaletempo_destroy(struct mp_filter *f)
 {
     struct priv *s = f->priv;
     free(s->buf_queue);
@@ -558,10 +558,10 @@ static void destroy(struct mp_filter *f)
 static const struct mp_filter_info af_scaletempo_filter = {
     .name = "scaletempo",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .command = command,
-    .reset = reset,
-    .destroy = destroy,
+    .process = af_scaletempo_process,
+    .command = af_scaletempo_command,
+    .reset = af_scaletempo_reset,
+    .destroy = af_scaletempo_destroy,
 };
 
 static struct mp_filter *af_scaletempo_create(struct mp_filter *parent,

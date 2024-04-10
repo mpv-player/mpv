@@ -79,7 +79,7 @@ static int write_packet(void *p, const uint8_t *buf, int buf_size)
 }
 
 // (called on both filter destruction _and_ if lavf fails to init)
-static void destroy(struct mp_filter *da)
+static void ad_spdif_destroy(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
@@ -283,12 +283,12 @@ static int init_filter(struct mp_filter *da)
     return 0;
 
 fail:
-    destroy(da);
+    ad_spdif_destroy(da);
     mp_filter_internal_mark_failed(da);
     return -1;
 }
 
-static void process(struct mp_filter *da)
+static void ad_spdif_process(struct mp_filter *da)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
@@ -413,8 +413,8 @@ struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref)
 static const struct mp_filter_info ad_spdif_filter = {
     .name = "ad_spdif",
     .priv_size = sizeof(struct spdifContext),
-    .process = process,
-    .destroy = destroy,
+    .process = ad_spdif_process,
+    .destroy = ad_spdif_destroy,
 };
 
 static struct mp_decoder *create(struct mp_filter *parent,

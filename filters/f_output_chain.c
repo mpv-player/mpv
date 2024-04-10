@@ -145,7 +145,7 @@ static void check_in_format_change(struct mp_user_filter *u,
     }
 }
 
-static void process_user(struct mp_filter *f)
+static void user_wrapper_process(struct mp_filter *f)
 {
     struct mp_user_filter *u = f->priv;
     struct chain *p = u->p;
@@ -212,7 +212,7 @@ static void process_user(struct mp_filter *f)
     }
 }
 
-static void reset_user(struct mp_filter *f)
+static void user_wrapper_reset(struct mp_filter *f)
 {
     struct mp_user_filter *u = f->priv;
 
@@ -220,7 +220,7 @@ static void reset_user(struct mp_filter *f)
     u->last_in_pts = u->last_out_pts = MP_NOPTS_VALUE;
 }
 
-static void destroy_user(struct mp_filter *f)
+static void user_wrapper_destroy(struct mp_filter *f)
 {
     struct mp_user_filter *u = f->priv;
 
@@ -233,9 +233,9 @@ static void destroy_user(struct mp_filter *f)
 static const struct mp_filter_info user_wrapper_filter = {
     .name = "user_filter_wrapper",
     .priv_size = sizeof(struct mp_user_filter),
-    .process = process_user,
-    .reset = reset_user,
-    .destroy = destroy_user,
+    .process = user_wrapper_process,
+    .reset = user_wrapper_reset,
+    .destroy = user_wrapper_destroy,
 };
 
 static struct mp_user_filter *create_wrapper_filter(struct chain *p)
@@ -282,7 +282,7 @@ static void relink_filter_list(struct chain *p)
     }
 }
 
-static void process(struct mp_filter *f)
+static void output_chain_process(struct mp_filter *f)
 {
     struct chain *p = f->priv;
 
@@ -311,7 +311,7 @@ static void process(struct mp_filter *f)
     }
 }
 
-static void reset(struct mp_filter *f)
+static void output_chain_reset(struct mp_filter *f)
 {
     struct chain *p = f->priv;
 
@@ -341,17 +341,17 @@ void mp_output_chain_reset_harder(struct mp_output_chain *c)
     }
 }
 
-static void destroy(struct mp_filter *f)
+static void output_chain_destroy(struct mp_filter *f)
 {
-    reset(f);
+    output_chain_reset(f);
 }
 
 static const struct mp_filter_info output_chain_filter = {
     .name = "output_chain",
     .priv_size = sizeof(struct chain),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = output_chain_process,
+    .reset = output_chain_reset,
+    .destroy = output_chain_destroy,
 };
 
 static double get_display_fps(struct mp_stream_info *i)
@@ -736,7 +736,7 @@ struct mp_output_chain *mp_output_chain_create(struct mp_filter *parent,
 
     relink_filter_list(p);
 
-    reset(f);
+    output_chain_reset(f);
 
     return c;
 }
