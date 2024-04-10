@@ -1215,6 +1215,8 @@ static int decode_frame(struct mp_filter *vd)
         return ret;
     }
 
+    mp_codec_info_from_av(avctx, ctx->codec);
+
     // If something was decoded successfully, it must return a frame with valid
     // data.
     assert(ctx->pic->buf[0]);
@@ -1443,6 +1445,9 @@ static struct mp_decoder *create(struct mp_filter *parent,
         talloc_free(vd);
         return NULL;
     }
+
+    codec->codec_desc = ctx->avctx->codec_descriptor->long_name;
+
     return &ctx->public;
 }
 

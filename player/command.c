@@ -1829,26 +1829,30 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-/// Audio codec tag (RO)
-static int mp_property_audio_codec_name(void *ctx, struct m_property *prop,
-                                        int action, void *arg)
+static int property_codec_info(MPContext *mpctx, struct m_property *prop,
+                               int action, void *arg, enum stream_type st)
 {
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    const char *c = track && track->stream ? track->stream->codec->codec : NULL;
-    return m_property_strdup_ro(action, arg, c);
+    struct track *track = mpctx->current_track[0][st];
+    if (!track || !track->stream)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct m_sub_property props[] = {
+        {"name",    SUB_PROP_STR(track->stream->codec->codec),
+            .unavailable = !track->stream->codec->codec},
+        {"desc",    SUB_PROP_STR(track->stream->codec->codec_desc),
+            .unavailable = !track->stream->codec->codec_desc},
+        {"profile", SUB_PROP_STR(track->stream->codec->codec_profile),
+            .unavailable = !track->stream->codec->codec_profile},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
 }
 
-/// Audio codec name (RO)
-static int mp_property_audio_codec(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
+static int mp_property_audio_codec_info(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
 {
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    char desc[256] = "";
-    if (track && track->dec)
-        mp_decoder_wrapper_get_desc(track->dec, desc, sizeof(desc));
-    return m_property_strdup_ro(action, arg, desc[0] ? desc : NULL);
+    return property_codec_info(ctx, prop, action, arg, STREAM_AUDIO);
 }
 
 static int property_audiofmt(struct mp_aframe *fmt, int action, void *arg)
@@ -2055,6 +2059,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !decoder_desc[0]},
         {"codec",       SUB_PROP_STR(p.codec),
                         .unavailable = !p.codec},
+        {"codec-desc",  SUB_PROP_STR(p.codec_desc),
+                        .unavailable = !p.codec_desc},
+        {"codec-profile", SUB_PROP_STR(p.codec_profile),
+                        .unavailable = !p.codec_profile},
         {"demux-w",     SUB_PROP_INT(p.disp_w), .unavailable = !p.disp_w},
         {"demux-h",     SUB_PROP_INT(p.disp_h), .unavailable = !p.disp_h},
         {"demux-crop-x",SUB_PROP_INT(p.crop.x0), .unavailable = !has_crop},
@@ -2264,26 +2272,10 @@ static int mp_property_frame_count(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, frames);
 }
 
-/// Video codec tag (RO)
-static int mp_property_video_format(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
+static int mp_property_video_codec_info(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
 {
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    const char *c = track && track->stream ? track->stream->codec->codec : NULL;
-    return m_property_strdup_ro(action, arg, c);
-}
-
-/// Video codec name (RO)
-static int mp_property_video_codec(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    char desc[256] = "";
-    if (track && track->dec)
-        mp_decoder_wrapper_get_desc(track->dec, desc, sizeof(desc));
-    return m_property_strdup_ro(action, arg, desc[0] ? desc : NULL);
+    return property_codec_info(ctx, prop, action, arg, STREAM_VIDEO);
 }
 
 static const char *get_aspect_ratio_name(double ratio)
@@ -4027,8 +4019,9 @@ static const struct m_property mp_properties_base[] = {
     {"ao-volume", mp_property_ao_volume},
     {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
-    {"audio-codec-name", mp_property_audio_codec_name},
-    {"audio-codec", mp_property_audio_codec},
+    {"audio-codec-info", mp_property_audio_codec_info},
+    M_PROPERTY_ALIAS("audio-codec-name", "audio-codec-info/name"),
+    M_PROPERTY_ALIAS("audio-codec", "audio-codec-info/desc"),
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
     {"aid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_AUDIO}},
@@ -4041,9 +4034,10 @@ static const struct m_property mp_properties_base[] = {
     {"video-out-params", mp_property_vo_imgparams},
     {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
-    {"video-format", mp_property_video_format},
     {"video-frame-info", mp_property_video_frame_info},
-    {"video-codec", mp_property_video_codec},
+    {"video-codec-info", mp_property_video_codec_info},
+    M_PROPERTY_ALIAS("video-format", "video-codec-info/name"),
+    M_PROPERTY_ALIAS("video-codec", "video-codec-info/desc"),
     M_PROPERTY_ALIAS("dwidth", "video-out-params/dw"),
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
     M_PROPERTY_ALIAS("width", "video-params/w"),
@@ -4189,10 +4183,10 @@ static const char *const *const mp_event_property_change[] = {
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "container-fps", "aspect", "aspect-name", "vo-configured", "current-vo",
       "video-dec-params", "osd-dimensions", "hwdec", "hwdec-current", "hwdec-interop",
-      "window-id"),
+      "window-id", "video-codec-info"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "volume-gain", "mute",
-      "current-ao", "audio-codec-name", "audio-params",
+      "current-ao", "audio-codec-name", "audio-params", "audio-codec-info",
       "audio-out-params", "volume-max", "volume-gain-min", "volume-gain-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),

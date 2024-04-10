@@ -50,5 +50,6 @@ void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d)
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
 int mp_set_avopts_pos(struct mp_log *log, void *avobj, void *posargs, char **kv);
 void mp_free_av_packet(AVPacket **pkt);
+void mp_codec_info_from_av(const AVCodecContext *avctx, struct mp_codec_params *c);
 
 #endif

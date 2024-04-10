@@ -44,6 +44,7 @@
 #include "options/options.h"
 
 struct priv {
+    struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *avframe;
     AVPacket *avpkt;
@@ -219,6 +220,8 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     if (!priv->avframe->buf[0])
         return ret;
 
+    mp_codec_info_from_av(avctx, priv->codec);
+
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
     struct mp_aframe *mpframe = mp_aframe_from_avframe(priv->avframe);
@@ -305,12 +308,16 @@ static struct mp_decoder *create(struct mp_filter *parent,
     da->log = mp_log_new(da, parent->log, NULL);
 
     struct priv *priv = da->priv;
+    priv->codec = codec;
     priv->public.f = da;
 
     if (!init(da, codec, decoder)) {
         talloc_free(da);
         return NULL;
     }
+
+    codec->codec_desc = priv->avctx->codec_descriptor->long_name;
+
     return &priv->public;
 }
 
