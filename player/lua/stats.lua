@@ -892,7 +892,10 @@ local function add_video(s)
     end
 
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
-    if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
+    local ci = mp.get_property_native("video-codec-info")
+    if ci and append(s, ci["desc"], {prefix_sep="", nl="", indent=""}) then
+        append(s, ci["profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
         append_property(s, "hwdec-current", {prefix="HW:", nl="",
                         indent=o.prefix_sep .. o.prefix_sep,
                         no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
@@ -945,7 +948,12 @@ local function add_audio(s)
     end
 
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
-    append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
+    local ci = mp.get_property_native("audio-codec-info")
+    if ci then
+        append(s, ci["desc"], {prefix_sep="", nl="", indent=""})
+        append(s, ci["profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
+    end
     append_property(s, "current-ao", {prefix="AO:", nl="",
                                       indent=o.prefix_sep .. o.prefix_sep})
     local dev = append_property(s, "audio-device", {prefix="Device:"})
