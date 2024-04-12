@@ -35,6 +35,7 @@
            cuda                              |
           d3d11                              |
     d3d11va_vld                              |
+          d3d12                              |
       drm_prime                              |
       dxva2_vld                              |
           gbrap    Zin   Zout  SWSin  SWSout |
@@ -152,7 +153,6 @@
          xv30be    Zin   Zout                |
            xv36    Zin   Zout  SWSin  SWSout |
          xv36be    Zin   Zout                |
-           xvmc                              |
           xyz12    Zin   Zout  SWSin  SWSout |
         xyz12be    Zin   Zout  SWSin  SWSout |
              y1    Zin   Zout                |

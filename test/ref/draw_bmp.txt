@@ -35,6 +35,7 @@ bgra64be    = align=1:1 ov=unknown, ov_f=gbrapf32, v_f=gbrapf32, a=unknown, ca=u
 cuda        = no
 d3d11       = no
 d3d11va_vld = no
+d3d12       = no
 drm_prime   = no
 dxva2_vld   = no
 gbrap       = align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrap, a=unknown, ca=unknown, ca_f=unknown
@@ -152,7 +153,6 @@ xv30        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca
 xv30be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 xv36        = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
 xv36be      = align=1:1 ov=yuva444p, ov_f=yuva444pf, v_f=yuv444pf, a=unknown, ca=unknown, ca_f=unknown
-xvmc        = no
 xyz12       = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 xyz12be     = align=1:1 ov=gbrap  , ov_f=gbrapf32, v_f=gbrpf32, a=unknown, ca=unknown, ca_f=unknown
 y1          = no
