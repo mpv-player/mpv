@@ -1,7 +1,7 @@
 # So we don't have to reorganize the entire directory tree.
 incdir = include_directories('../')
 outdir = join_paths(build_root, 'test', 'out')
-refdir = join_paths(source_root, 'test', 'ref')
+refdir = ''
 
 # Convenient testing libraries. An adhoc collection of
 # mpv objects that test_utils.c needs. Paths and subprocesses
@@ -121,10 +121,15 @@ if get_option('libmpv')
     test('libmpv', libmpv_test, args: file, timeout: 60)
 endif
 
-# Minimum required libavutil version that works with these tests.
+# Supported libavutil versions that work with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
 if libavutil.version().version_compare('>= 59.0.100')
+    refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg7')
+elif libavutil.version().version_compare('>= 58.27.100')
+    refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg6')
+endif
 
+if refdir != ''
 # The CI can randomly fail if libavutil isn't explicitly linked again here.
     img_format = executable('img-format', 'img_format.c', include_directories: incdir,
                             dependencies: [libavutil, libplacebo], link_with: [img_utils, test_utils])

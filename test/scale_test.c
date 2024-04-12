@@ -101,7 +101,7 @@ static void assert_imgs_equal(struct scale_test *stest, FILE *f,
 
 void repack_test_run(struct scale_test *stest)
 {
-    char *logname = mp_tprintf(80, "%s.log", stest->test_name);
+    char *logname = mp_tprintf(80, "../%s.log", stest->test_name);
     FILE *f = test_open_out(stest->outdir, logname);
 
     if (!stest->sws) {
