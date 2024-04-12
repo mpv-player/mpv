@@ -1106,18 +1106,24 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         wl->hidden = is_suspended;
 
     if (vo_opts->fullscreen != is_fullscreen) {
+        wl->state_change = wl->reconfigured;
         vo_opts->fullscreen = is_fullscreen;
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->fullscreen);
     }
 
     if (vo_opts->window_maximized != is_maximized) {
+        wl->state_change = wl->reconfigured;
         vo_opts->window_maximized = is_maximized;
         m_config_cache_write_opt(wl->vo_opts_cache, &vo_opts->window_maximized);
     }
 
+    if (!is_tiled && wl->tiled)
+        wl->state_change = wl->reconfigured;
+
     wl->tiled = is_tiled;
 
     wl->locked_size = is_fullscreen || is_maximized || is_tiled;
+    wl->reconfigured = false;
 
     if (wl->requested_decoration)
         request_decoration_mode(wl, wl->requested_decoration);
@@ -2154,6 +2160,7 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
         struct vo_wayland_output *output = find_output(wl);
         xdg_toplevel_set_fullscreen(wl->xdg_toplevel, output->output);
     } else {
+        wl->state_change = wl->reconfigured;
         xdg_toplevel_unset_fullscreen(wl->xdg_toplevel);
     }
 }
@@ -2163,6 +2170,7 @@ static void toggle_maximized(struct vo_wayland_state *wl)
     if (wl->vo_opts->window_maximized) {
         xdg_toplevel_set_maximized(wl->xdg_toplevel);
     } else {
+        wl->state_change = wl->reconfigured;
         xdg_toplevel_unset_maximized(wl->xdg_toplevel);
     }
 }
@@ -2605,6 +2613,9 @@ bool vo_wayland_reconfig(struct vo *vo)
 
     if (wl->vo_opts->auto_window_resize || !wl->geometry_configured)
         set_geometry(wl, false);
+
+    if (wl->geometry_configured && wl->vo_opts->auto_window_resize)
+        wl->reconfigured = true;
 
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
