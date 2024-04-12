@@ -2620,22 +2620,23 @@ bool vo_wayland_reconfig(struct vo *vo)
     if (wl->opts->configure_bounds)
         set_window_bounds(wl);
 
-    if (!wl->geometry_configured || !wl->locked_size) {
-        wl->geometry = wl->window_size;
-        wl->geometry_configured = true;
-    }
-
     if (wl->vo_opts->cursor_passthrough)
         set_input_region(wl, true);
 
-    if (wl->vo_opts->fullscreen)
-        toggle_fullscreen(wl);
+    if (!wl->geometry_configured || !wl->locked_size)
+        wl->geometry = wl->window_size;
 
-    if (wl->vo_opts->window_maximized)
-        toggle_maximized(wl);
+    if (!wl->geometry_configured) {
+        if (wl->vo_opts->fullscreen)
+            toggle_fullscreen(wl);
 
-    if (wl->vo_opts->window_minimized)
-        do_minimize(wl);
+        if (wl->vo_opts->window_maximized)
+            toggle_maximized(wl);
+
+        if (wl->vo_opts->window_minimized)
+            do_minimize(wl);
+        wl->geometry_configured = true;
+    }
 
     prepare_resize(wl);
 
