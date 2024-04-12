@@ -1006,6 +1006,24 @@ local function add_audio(s)
 end
 
 
+local function add_subtitles(s, sub)
+    local track = mp.get_property_native("current-tracks/" .. sub)
+    if not track then
+        return
+    end
+
+    local desc = track["codec-desc"] and string.gsub(track["codec-desc"], "%s*subtitles?$", "")
+    append(s, "", {prefix=o.nl .. o.nl .. "Subtitles:", nl="", indent=""})
+    append(s, desc or track["codec"], {prefix_sep="", nl="", indent=""})
+    if track["codec"] ~= track["decoder"] then
+        append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
+    end
+    append(s, track["profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+            no_prefix_markup=true, suffix="]"})
+end
+
+
 -- Determine whether ASS formatting shall/can be used and set formatting sequences
 local function eval_ass_formatting()
     o.use_ass = o.ass_formatting and has_vo_window()
@@ -1123,6 +1141,8 @@ local function default_stats()
     add_video_out(stats)
     add_video(stats)
     add_audio(stats)
+    add_subtitles(stats, "sub")
+    add_subtitles(stats, "sub2")
     return finalize_page({}, stats, false)
 end
 
