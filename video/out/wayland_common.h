@@ -75,6 +75,7 @@ struct vo_wayland_state {
     bool hidden;
     bool initial_size_hint;
     bool locked_size;
+    bool reconfigured;
     bool scale_configured;
     bool state_change;
     bool tiled;
