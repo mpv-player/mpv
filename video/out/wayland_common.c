@@ -222,6 +222,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
+static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static int greatest_common_divisor(int a, int b);
 static void guess_focus(struct vo_wayland_state *wl);
@@ -1155,12 +1156,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     }
 
     if (!wl->locked_size) {
-        if (vo_opts->keepaspect) {
-            double scale_factor = (double)width / wl->reduced_width;
-            width = ceil(wl->reduced_width * scale_factor);
-            if (vo_opts->keepaspect_window)
-                height = ceil(wl->reduced_height * scale_factor);
-        }
+        apply_keepaspect(wl, &width, &height);
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
         wl->window_size.x1 = lround(width * wl->scaling);
@@ -1567,6 +1563,17 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 /* Static functions */
+static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height)
+{
+    if (!wl->vo_opts->keepaspect)
+        return;
+
+    double scale_factor = (double)*width / wl->reduced_width;
+    *width = ceil(wl->reduced_width * scale_factor);
+    if (wl->vo_opts->keepaspect_window)
+        *height = ceil(wl->reduced_height * scale_factor);
+}
+
 static void free_dnd_data(struct vo_wayland_state *wl)
 {
     // caller should close wl->dnd_fd if appropriate
@@ -2105,6 +2112,8 @@ static void set_window_bounds(struct vo_wayland_state *wl)
     {
         return;
     }
+
+    apply_keepaspect(wl, &wl->bounded_width, &wl->bounded_height);
 
     if (wl->bounded_width && wl->bounded_width < wl->window_size.x1)
         wl->window_size.x1 = wl->bounded_width;
