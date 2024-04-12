@@ -278,6 +278,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         APPEND(b, " '%s'", t->title);
     const char *codec = s ? s->codec->codec : NULL;
     APPEND(b, " (%s", codec ? codec : "<unknown>");
+    if (s && s->codec->codec_profile)
+        APPEND(b, " [%s]", s->codec->codec_profile);
     if (t->type == STREAM_VIDEO) {
         if (s && s->codec->disp_w)
             APPEND(b, " %dx%d", s->codec->disp_w, s->codec->disp_h);
