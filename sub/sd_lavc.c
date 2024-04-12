@@ -56,6 +56,7 @@ struct seekpoint {
 };
 
 struct sd_lavc_priv {
+    struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVPacket *avpkt;
     AVRational pkt_timebase;
@@ -124,6 +125,7 @@ static int init(struct sd *sd)
 
     priv = talloc_zero(NULL, struct sd_lavc_priv);
     priv->avpkt = av_packet_alloc();
+    priv->codec = sd->codec;
     if (!priv->avpkt)
         goto error;
     if (mp_set_avctx_codec_headers(ctx, sd->codec) < 0)
@@ -350,6 +352,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, priv->avpkt);
     if (res < 0 || !got_sub)
         return;
+
+    mp_codec_info_from_av(ctx, priv->codec);
 
     packet->sub_duration = sub.end_display_time;
 
