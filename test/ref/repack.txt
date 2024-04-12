@@ -68,6 +68,7 @@ bgra64be        => [pa] [un] gbrapf32        | a=1:1 [planar-f32]
 cuda            => no
 d3d11           => no
 d3d11va_vld     => no
+d3d12           => no
 drm_prime       => no
 dxva2_vld       => no
 gbrap           => [pa] [un] gbrapf32        | a=1:1 [planar-f32]
@@ -262,7 +263,6 @@ xv36            => [pa] [un] yuv444p16       | a=1:1
 xv36            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
 xv36be          => [pa] [un] yuv444p16       | a=1:1
 xv36be          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
-xvmc            => no
 xyz12           => [pa] [un] gbrp16          | a=1:1 [tu] [tp]
 xyz12           => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 xyz12be         => [pa] [un] gbrp16          | a=1:1 [tu] [tp]

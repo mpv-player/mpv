@@ -346,6 +346,11 @@ d3d11va_vld: [GENERIC] ctype=unknown
     planes=0, chroma=1:1 align=2:2
     {}
   AVD: name=d3d11va_vld chroma=1:1 flags=0x8 [hw]
+d3d12: [GENERIC] ctype=unknown
+  Basic desc: [le][be][hw]
+    planes=0, chroma=0:0 align=1:1
+    {}
+  AVD: name=d3d12 chroma=0:0 flags=0x8 [hw]
 drm_prime: ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1
@@ -1345,9 +1350,9 @@ rgb8: [GENERIC] fcsp=rgb ctype=uint
     {8/[0:0] }
     0: 8bits {5:3} {2:3} {0:2} {}
   AVD: name=rgb8 chroma=0:0 flags=0x20 [rgb]
-    0: p=0  st=1  o=0  sh=6  d=2
-    1: p=0  st=1  o=0  sh=3  d=3
-    2: p=0  st=1  o=0  sh=0  d=3
+    0: p=0  st=1  o=0  sh=5  d=3
+    1: p=0  st=1  o=0  sh=2  d=3
+    2: p=0  st=1  o=0  sh=0  d=2
 rgba: fcsp=rgb ctype=uint
   Basic desc: [ba][bb][a][rgb][le][be][uint]
     planes=1, chroma=0:0 align=1:1
@@ -1576,11 +1581,6 @@ xv36be: [GENERIC] ctype=uint
     0: p=0  st=8  o=2  sh=4  d=12
     1: p=0  st=8  o=0  sh=4  d=12
     2: p=0  st=8  o=4  sh=4  d=12
-xvmc: [GENERIC] ctype=unknown
-  Basic desc: [le][be][hw]
-    planes=0, chroma=0:0 align=1:1
-    {}
-  AVD: name=xvmc chroma=0:0 flags=0x8 [hw]
 xyz12: [GENERIC] fcsp=xyz ctype=uint
   Basic desc: [ba][bb][xyz][le][uint]
     planes=1, chroma=0:0 align=1:1
@@ -1588,7 +1588,7 @@ xyz12: [GENERIC] fcsp=xyz ctype=uint
     0: 48bits {0:16/4} {16:16/4} {32:16/4} {}
   Regular: planes=1 compbytes=2 bitpad=4 chroma=1x1 ctype=uint
     0: {1, 2, 3}
-  AVD: name=xyz12le chroma=0:0 flags=0x0
+  AVD: name=xyz12le chroma=0:0 flags=0x400
     0: p=0  st=6  o=0  sh=4  d=12
     1: p=0  st=6  o=2  sh=4  d=12
     2: p=0  st=6  o=4  sh=4  d=12
@@ -1597,7 +1597,7 @@ xyz12be: [GENERIC] fcsp=xyz ctype=uint
     planes=1, chroma=0:0 align=1:1
     {48/[0:0] }
     0: 48bits endian_bytes=2 {0:16/4} {16:16/4} {32:16/4} {}
-  AVD: name=xyz12be chroma=0:0 flags=0x1 [be]
+  AVD: name=xyz12be chroma=0:0 flags=0x401 [be]
     0: p=0  st=6  o=0  sh=4  d=12
     1: p=0  st=6  o=2  sh=4  d=12
     2: p=0  st=6  o=4  sh=4  d=12
