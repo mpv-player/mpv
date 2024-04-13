@@ -646,10 +646,13 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     MP_VERBOSE(state, "Device period: default %lld us, minimum %lld us\n",
                defaultPeriod / 10, minPeriod / 10);
 
+    // per Microsoft:
+    // * hnsBufferDuration = hnsPeriodicity = 0 for shared mode
+    // * hnsBufferDuration = hnsPeriodicity != 0 for exclusive mode
+    // https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclient-initialize
     REFERENCE_TIME bufferDuration;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
-        // for shared mode, use integer multiple of device period close to 50ms
-        bufferDuration = defaultPeriod * ceil(50.0 * 10000.0 / defaultPeriod);
+        bufferDuration = 0;
     } else if (state->opt_exclusive_buffer == 0) {
         bufferDuration = defaultPeriod;
     } else {
@@ -671,17 +674,15 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
              * state->bufferFrameCount));
     }
 
-    MP_VERBOSE(state, "Trying buffer duration %lld us\n", bufferDuration / 10);
-
-    REFERENCE_TIME bufferPeriod =
-        state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
+    if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+        MP_VERBOSE(state, "Trying buffer duration %lld us\n", bufferDuration / 10);
 
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  bufferDuration,
-                                 bufferPeriod,
+                                 bufferDuration,
                                  &(state->format.Format),
                                  NULL);
     EXIT_ON_ERROR(hr);
