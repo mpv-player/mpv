@@ -1134,8 +1134,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->target_params = (struct mp_image_params){
         .imgfmt_name = swframe.fbo->params.format
                         ? swframe.fbo->params.format->name : NULL,
-        .w = swframe.fbo->params.w,
-        .h = swframe.fbo->params.h,
+        .w = mp_rect_w(target.crop),
+        .h = mp_rect_h(target.crop),
         .color = target.color,
         .repr = target.repr,
         .rotate = target.rotation,
