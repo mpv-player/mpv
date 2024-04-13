@@ -862,18 +862,23 @@ local function add_video_out(s)
         scale = mp.get_property_native("current-window-scale")
     end
 
-    local r = mp.get_property_native("video-target-params")
-    if not r then
-        local osd_dims = mp.get_property_native("osd-dimensions")
-        local scaled_width = osd_dims["w"] - osd_dims["ml"] - osd_dims["mr"]
-        local scaled_height = osd_dims["h"] - osd_dims["mt"] - osd_dims["mb"]
-        append_resolution(s, {w=scaled_width, h=scaled_height, s=scale},
-                          "Resolution:")
-        return
-    end
+    local od = mp.get_property_native("osd-dimensions")
+    local rt = mp.get_property_native("video-target-params")
+    r = rt or {}
 
     -- Add window scale
     r["s"] = scale
+    r["crop-x"] = od["ml"]
+    r["crop-y"] = od["mt"]
+    r["crop-w"] = od["w"] - od["ml"] - od["mr"]
+    r["crop-h"] = od["h"] - od["mt"] - od["mb"]
+
+    if not rt then
+        r["w"] = r["crop-w"]
+        r["h"] = r["crop-h"]
+        append_resolution(s, r, "Resolution:", "w", "h", true)
+        return
+    end
 
     append_img_params(s, r)
     append_hdr(s, r, true)
