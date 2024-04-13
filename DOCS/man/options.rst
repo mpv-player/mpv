@@ -3478,6 +3478,12 @@ Window
     (macOS only)
     Uses the native fullscreen mechanism of the OS (default: yes).
 
+``--show-in-taskbar=<yes|no>``
+    (Windows and X11 only)
+    Show mpv in the taskbar (default: yes). If set to no, mpv will no longer
+    appear in taskbars and tasklists in supported window managers, and may be
+    excluded from Alt+Tab window switching.
+
 ``--monitorpixelaspect=<ratio>``
     Set the aspect of a single pixel of your monitor or TV screen (default:
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
