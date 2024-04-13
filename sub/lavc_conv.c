@@ -33,6 +33,7 @@
 struct lavc_conv {
     struct mp_log *log;
     struct mp_subtitle_opts *opts;
+    bool styled;
     AVCodecContext *avctx;
     AVPacket *avpkt;
     AVPacket *avpkt_vtt;
@@ -245,9 +246,12 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
         curr_pkt = priv->avpkt_vtt;
     }
 
+    priv->styled = avctx->codec_id == AV_CODEC_ID_DVB_TELETEXT;
+
     if (avctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
         if (!priv->opts->teletext_page) {
             av_opt_set(avctx, "txt_page", "subtitle", AV_OPT_SEARCH_CHILDREN);
+            priv->styled = false;
         } else if (priv->opts->teletext_page == -1) {
             av_opt_set(avctx, "txt_page", "*", AV_OPT_SEARCH_CHILDREN);
         } else {
@@ -283,6 +287,11 @@ done:
     av_packet_unref(priv->avpkt_vtt);
     MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     return priv->cur_list;
+}
+
+bool lavc_conv_is_styled(struct lavc_conv *priv)
+{
+    return priv->styled;
 }
 
 void lavc_conv_reset(struct lavc_conv *priv)

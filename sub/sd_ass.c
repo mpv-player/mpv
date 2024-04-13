@@ -651,7 +651,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     struct mp_subtitle_opts *opts = sd->opts;
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
     bool no_ass = !opts->ass_enabled || shared_opts->ass_style_override[sd->order] == 5;
-    bool converted = ctx->is_converted || no_ass;
+    bool converted = (ctx->is_converted && !lavc_conv_is_styled(ctx->converter)) || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
     struct sub_bitmaps *res = &(struct sub_bitmaps){0};
