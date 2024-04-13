@@ -891,10 +891,6 @@ local function add_video(s)
         return
     end
 
-    local osd_dims = mp.get_property_native("osd-dimensions")
-    local scaled_width = osd_dims["w"] - osd_dims["ml"] - osd_dims["mr"]
-    local scaled_height = osd_dims["h"] - osd_dims["mt"] - osd_dims["mb"]
-
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
     if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
         append_property(s, "hwdec-current", {prefix="HW:", nl="",
