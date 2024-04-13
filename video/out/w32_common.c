@@ -954,6 +954,14 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
     return style;
 }
 
+static DWORD update_exstyle(struct vo_w32_state *w32, DWORD exstyle)
+{
+    exstyle &= ~(WS_EX_TOOLWINDOW);
+    if (!w32->opts->show_in_taskbar)
+        exstyle |= WS_EX_TOOLWINDOW;
+    return exstyle;
+}
+
 static void update_window_style(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -963,7 +971,9 @@ static void update_window_style(struct vo_w32_state *w32)
     // has to be saved now and restored after setting the new style.
     const RECT wr = w32->windowrc;
     const DWORD style = GetWindowLongPtrW(w32->window, GWL_STYLE);
+    const DWORD exstyle = GetWindowLongPtrW(w32->window, GWL_EXSTYLE);
     SetWindowLongPtrW(w32->window, GWL_STYLE, update_style(w32, style));
+    SetWindowLongPtrW(w32->window, GWL_EXSTYLE, update_exstyle(w32, exstyle));
     w32->windowrc = wr;
 }
 
@@ -2172,7 +2182,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->cursor_passthrough) {
                 update_cursor_passthrough(w32);
             } else if (changed_option == &vo_opts->border ||
-                       changed_option == &vo_opts->title_bar)
+                       changed_option == &vo_opts->title_bar ||
+                       changed_option == &vo_opts->show_in_taskbar)
             {
                 update_window_style(w32);
                 update_window_state(w32);
