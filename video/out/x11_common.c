@@ -69,6 +69,7 @@
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
 #define vo_wm_STICKY 32
+#define vo_wm_SKIP_TASKBAR 64
 
 /* EWMH state actions, see
          http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
@@ -335,6 +336,7 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
     NET_WM_STATE_TEST(STAYS_ON_TOP);
     NET_WM_STATE_TEST(BELOW);
     NET_WM_STATE_TEST(STICKY);
+    NET_WM_STATE_TEST(SKIP_TASKBAR);
     return 0;
 }
 
