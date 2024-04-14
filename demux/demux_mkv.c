@@ -113,6 +113,8 @@ typedef struct mkv_track {
     struct pl_color_repr repr;
     struct pl_color_space color;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
+    float v_projection_pose_yaw;
+    float v_projection_pose_pitch;
     float v_projection_pose_roll;
 
     uint32_t a_channels, a_bps;
@@ -657,13 +659,29 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
 static void parse_trackprojection(struct demuxer *demuxer, struct mkv_track *track,
                                   struct ebml_projection *projection)
 {
-    if (projection->n_projection_pose_yaw || projection->n_projection_pose_pitch)
-          MP_WARN(demuxer, "Projection pose yaw/pitch not supported!\n");
+    if (projection->n_projection_pose_yaw) {
+        track->v_projection_pose_yaw = projection->projection_pose_yaw;
+        MP_DBG(demuxer, "|   + Projection pose yaw: %f\n",
+               track->v_projection_pose_yaw);
+    }
+
+    if (projection->n_projection_pose_pitch) {
+        track->v_projection_pose_pitch = projection->projection_pose_pitch;
+        MP_DBG(demuxer, "|   + Projection pose pitch: %f\n",
+               track->v_projection_pose_pitch);
+    }
 
     if (projection->n_projection_pose_roll) {
         track->v_projection_pose_roll = projection->projection_pose_roll;
         MP_DBG(demuxer, "|   + Projection pose roll: %f\n",
                track->v_projection_pose_roll);
+    }
+
+    if (track->v_projection_pose_yaw || track->v_projection_pose_pitch) {
+        MP_WARN(demuxer, "Not supported projection: yaw %f, pitch %f, roll %f\n",
+                track->v_projection_pose_yaw,
+                track->v_projection_pose_pitch,
+                track->v_projection_pose_roll);
     }
 }
 
