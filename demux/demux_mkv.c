@@ -114,7 +114,6 @@ typedef struct mkv_track {
     struct pl_color_space color;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
     float v_projection_pose_roll;
-    bool v_projection_pose_roll_set;
 
     uint32_t a_channels, a_bps;
     float a_sfreq;
@@ -663,7 +662,6 @@ static void parse_trackprojection(struct demuxer *demuxer, struct mkv_track *tra
 
     if (projection->n_projection_pose_roll) {
         track->v_projection_pose_roll = projection->projection_pose_roll;
-        track->v_projection_pose_roll_set = true;
         MP_DBG(demuxer, "|   + Projection pose roll: %f\n",
                track->v_projection_pose_roll);
     }
@@ -1575,7 +1573,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->stereo_mode = track->stereo_mode;
     sh_v->color = track->color;
 
-    if (track->v_projection_pose_roll_set) {
+    if (track->v_projection_pose_roll) {
         int rotate = lrintf(fmodf(fmodf(-1 * track->v_projection_pose_roll, 360) + 360, 360));
         sh_v->rotate = rotate;
     }
