@@ -996,7 +996,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    if (wl->fractional_scale_manager)
+    if (wl->fractional_scale_manager || wl->scaling == scale)
         return;
 
     wl->pending_scaling = scale;
@@ -1221,7 +1221,11 @@ static void preferred_scale(void *data,
                             uint32_t scale)
 {
     struct vo_wayland_state *wl = data;
-    wl->pending_scaling = (double)scale / 120;
+    double new_scale = (double)scale / 120;
+    if (wl->scaling == new_scale)
+        return;
+
+    wl->pending_scaling = new_scale;
     wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
                wl->pending_scaling);
