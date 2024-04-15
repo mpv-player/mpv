@@ -35,8 +35,6 @@ struct ra_ctx_fns {
     const char *type; // API type (for --gpu-api)
     const char *name; // name (for --gpu-context)
 
-    bool hidden; // hide the ra_ctx from users
-
     // Resize the window, or create a new window if there isn't one yet.
     // Currently, there is an unfortunate interaction with ctx->vo, and
     // display size etc. are determined by it.
