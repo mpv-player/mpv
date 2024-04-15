@@ -183,6 +183,11 @@ Configurable Options
 
     Border color used for drawing graphs.
 
+``plot_bg_border_width``
+    Default: 0.5
+
+    Border width used for drawing graphs.
+
 ``plot_bg_color``
     Default: 262626
 
