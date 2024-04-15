@@ -1,3 +1,5 @@
 /subprojects/*
 !/subprojects/packagefiles
 !/subprojects/*.wrap
+
+*.xcodeproj/*

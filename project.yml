@@ -1,0 +1,65 @@
+name: MPV
+options:
+  bundleIdPrefix: top.ourfor.opensource
+settings:
+  HEADER_SEARCH_PATHS: [
+    $SRCROOT/**,
+    "/opt/homebrew/opt/googletest/include"
+  ]
+targets:
+  Player:
+    type: tool
+    platform: macOS
+    deploymentTarget: 10.15
+    sources:
+      - path: .
+        includes:
+          - "**/*.[ch]"
+          - "**/*.cc"
+          - "**/*.m"
+          - "**/*.mm"
+          - "**/*.[ch]pp"
+        excludes:
+          - ".git/*"
+          - ".vscode/*"
+        buildPhase: none
+
+    preBuildScripts:
+      - script: /opt/homebrew/bin/bazel build -c dbg --strip=never //tensorflow/lite/examples/label_image:label_image
+        name: Build Target
+    postCompileScripts:
+      - script: |
+          cp $PROJECT_DIR/bazel-bin/tensorflow/lite/examples/label_image/label_image $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME
+          chown $USER $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME
+        name: Copy Executable
+  Dummy:
+    type: tool
+    platform: macOS
+    deploymentTarget: 10.15
+    sources:
+      - path: .
+        includes:
+          - "**/*.[ch]"
+          - "**/*.cc"
+          - "**/*.m"
+          - "**/*.mm"
+          - "**/*.[ch]pp"
+        excludes:
+          - "bazel-*"
+          - ".git/*"
+          - ".vscode/*"
+schemes:
+  Player:
+    build:
+      targets:
+        Player: [run]
+    run:
+      debugEnabled: true
+      commandLineArguments:
+        "--MPV_model $(SRCROOT)/demo/Player/mobilenet_v1_1.0_224.MPV": true
+        "--labels $(SRCROOT)/demo/Player/labels.txt": true
+        "--image $(SRCROOT)/demo/Player/grace_hopper.bmp": true
+        "--verbose 1": true
+        "--profiling 1": true
+      environmentVariables:
+        SRCROOT: $(SRCROOT)
