@@ -198,6 +198,12 @@ Configurable Options
 
     Color used for drawing graphs.
 
+``vidscale``
+    Default: yes
+
+    Scale the text and graphs with the video.
+    ``no`` tries to keep the sizes constant.
+
 Note: colors are given as hexadecimal values and use ASS tag order: BBGGRR
 (blue green red).
 
