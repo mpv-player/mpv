@@ -1977,10 +1977,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct mp_codec_params p =
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
-    char decoder_desc[256] = {0};
-    if (track->dec)
-        mp_decoder_wrapper_get_desc(track->dec, decoder_desc, sizeof(decoder_desc));
-
     bool has_rg = track->stream && track->stream->codec->replaygain_data;
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
                                        : (struct replaygain_data){0};
@@ -2029,8 +2025,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->hls_bitrate},
         {"program-id",  SUB_PROP_INT(track->program_id),
                         .unavailable = track->program_id < 0},
-        {"decoder-desc", SUB_PROP_STR(decoder_desc),
-                        .unavailable = !decoder_desc[0]},
+        {"decoder",     SUB_PROP_STR(p.decoder),
+                        .unavailable = !p.decoder},
+        {"decoder-desc", SUB_PROP_STR(p.decoder_desc),
+                        .unavailable = !p.decoder_desc},
         {"codec",       SUB_PROP_STR(p.codec),
                         .unavailable = !p.codec},
         {"codec-desc",  SUB_PROP_STR(p.codec_desc),
