@@ -78,6 +78,12 @@ struct mp_codec_params {
     // Corresponding codec profile
     const char *codec_profile;
 
+    // E.g. "h264" (usually corresponds to AVCodec.name)
+    const char *decoder;
+
+    // Usually corresponds to AVCodec.long_name
+    const char *decoder_desc;
+
     // Usually a FourCC, exact meaning depends on codec.
     unsigned int codec_tag;
 

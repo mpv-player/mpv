@@ -3077,6 +3077,9 @@ Property list
         match even if the default (builtin) demuxer is used, but there is
         no hard guarantee.
 
+    ``track-list/N/decoder``
+        If this track is being decoded, the short decoder name,
+
     ``track-list/N/decoder-desc``
         If this track is being decoded, the human-readable decoder name,
 
