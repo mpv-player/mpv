@@ -37,7 +37,6 @@ static bool init(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_wldmabuf = {
     .type               = "none",
     .name               = "wldmabuf",
-    .hidden             = true,
     .init               = init,
     .uninit             = uninit,
 };
