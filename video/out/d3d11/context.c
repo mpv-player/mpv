@@ -27,6 +27,24 @@
 #include "context.h"
 #include "ra_d3d11.h"
 
+#define xlog(format, ...)                                          \
+  printf("[%s:%d]\n%s\n" format, __FILE__, __LINE__, __FUNCTION__, \
+         ##__VA_ARGS__)
+#define xinfo(format, ...)                                         \
+  printf("[%s:%d]\n%s\n" format, __FILE__, __LINE__, __FUNCTION__, \
+         ##__VA_ARGS__)
+#define xerror(format, ...)                                        \
+  printf("[%s:%d]\n%s\n" format, __FILE__, __LINE__, __FUNCTION__, \
+         ##__VA_ARGS__)
+#define xdebug(format, ...)                                        \
+  printf("[%s:%d]\n%s\n" format, __FILE__, __LINE__, __FUNCTION__, \
+         ##__VA_ARGS__)
+#define xfault(format, ...)                                        \
+  printf("[%s:%d]\n%s\n" format, __FILE__, __LINE__, __FUNCTION__, \
+         ##__VA_ARGS__)
+
+IDXGISwapChain *mpv_windows_swapchain;
+
 struct d3d11_opts {
     int feature_level;
     int warp;
@@ -509,7 +527,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
         goto error;
-
+    
+    mpv_windows_swapchain = p->swapchain;
+    xinfo("mpv_windows_swapchain %p", mpv_windows_swapchain);
     return true;
 
 error:
