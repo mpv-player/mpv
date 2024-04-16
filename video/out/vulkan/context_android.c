@@ -89,6 +89,7 @@ static int android_control(struct ra_ctx *ctx, int *events, int request, void *a
 const struct ra_ctx_fns ra_ctx_vulkan_android = {
     .type           = "vulkan",
     .name           = "androidvk",
+    .description    = "Android/Vulkan",
     .reconfig       = android_reconfig,
     .control        = android_control,
     .init           = android_init,

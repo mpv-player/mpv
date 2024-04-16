@@ -342,6 +342,7 @@ static void glx_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 const struct ra_ctx_fns ra_ctx_glx = {
     .type           = "opengl",
     .name           = "x11",
+    .description    = "X11/GLX",
     .reconfig       = glx_reconfig,
     .control        = glx_control,
     .wakeup         = glx_wakeup,

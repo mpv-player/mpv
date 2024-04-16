@@ -220,6 +220,7 @@ static bool wayland_egl_init(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_wayland_egl = {
     .type               = "opengl",
     .name               = "wayland",
+    .description        = "Wayland/EGL",
     .reconfig           = wayland_egl_reconfig,
     .control            = wayland_egl_control,
     .wakeup             = wayland_egl_wakeup,

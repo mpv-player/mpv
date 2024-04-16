@@ -739,6 +739,7 @@ static void drm_egl_wakeup(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_drm_egl = {
     .type           = "opengl",
     .name           = "drm",
+    .description    = "DRM/EGL",
     .reconfig       = drm_egl_reconfig,
     .control        = drm_egl_control,
     .init           = drm_egl_init,

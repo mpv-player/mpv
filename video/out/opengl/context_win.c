@@ -380,6 +380,7 @@ static void wgl_update_render_opts(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_wgl = {
     .type               = "opengl",
     .name               = "win",
+    .description        = "Win32/WGL",
     .init               = wgl_init,
     .reconfig           = wgl_reconfig,
     .control            = wgl_control,
