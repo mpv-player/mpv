@@ -25,11 +25,11 @@ targets:
         buildPhase: none
 
     preBuildScripts:
-      - script: /opt/homebrew/bin/bazel build -c dbg --strip=never //tensorflow/lite/examples/label_image:label_image
+      - script: PATH=/opt/homebrew/bin:$PATH /opt/homebrew/bin/meson compile -C build -j4
         name: Build Target
     postCompileScripts:
       - script: |
-          cp $PROJECT_DIR/bazel-bin/tensorflow/lite/examples/label_image/label_image $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME
+          cp $PROJECT_DIR/build/mpv $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME
           chown $USER $BUILT_PRODUCTS_DIR/$EXECUTABLE_NAME
         name: Copy Executable
   Dummy:
@@ -56,10 +56,9 @@ schemes:
     run:
       debugEnabled: true
       commandLineArguments:
-        "--MPV_model $(SRCROOT)/demo/Player/mobilenet_v1_1.0_224.MPV": true
-        "--labels $(SRCROOT)/demo/Player/labels.txt": true
-        "--image $(SRCROOT)/demo/Player/grace_hopper.bmp": true
-        "--verbose 1": true
-        "--profiling 1": true
+        "-v": true
+        "--no-config": true
+        "loadfile": true
+        "https://drive.endemy.me/breaking-bad.mp4": true
       environmentVariables:
         SRCROOT: $(SRCROOT)
