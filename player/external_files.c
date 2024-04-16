@@ -108,36 +108,36 @@ static int compare_sub_priority(const void *a, const void *b)
     return strcoll(s1->fname, s2->fname);
 }
 
-static struct bstr guess_lang_from_filename(struct bstr name, int *fn_start)
+static struct bstr guess_lang_from_filename(struct bstr name, int *lang_start)
 {
     if (name.len < 2)
         return (struct bstr){NULL, 0};
 
-    int n = 0;
+    int lang_length = 0;
     int i = name.len - 1;
 
-    char thing = '.';
+    char delimiter = '.';
     if (name.start[i] == ')') {
-        thing = '(';
+        delimiter = '(';
         i--;
     }
     if (name.start[i] == ']') {
-        thing = '[';
+        delimiter = '[';
         i--;
     }
 
     while (i >= 0 && mp_isalpha(name.start[i])) {
-        n++;
-        if (n > 3)
+        lang_length++;
+        if (lang_length > 3)
             return (struct bstr){NULL, 0};
         i--;
     }
 
-    if (n < 2 || i == 0 || name.start[i] != thing)
+    if (lang_length < 2 || i == 0 || name.start[i] != delimiter)
         return (struct bstr){NULL, 0};
 
-    *fn_start = i;
-    return (struct bstr){name.start + i + 1, n};
+    *lang_start = i;
+    return (struct bstr){name.start + i + 1, lang_length};
 }
 
 char *mp_guess_lang_from_filename(void* ctx, const char *filename)
