@@ -6385,13 +6385,15 @@ them.
 ``--gpu-sw``
     Continue even if a software renderer is detected.
 
-``--gpu-context=<sys>``
-    The value ``auto`` (the default) selects the GPU context. You can also pass
-    ``help`` to get a complete list of compiled in backends (sorted by
-    autoprobe order).
+``--gpu-context=<context1,context2,...[,]>``
+    Specify a priority list of the GPU contexts to be used.
+    The value ``auto`` (the default) selects the GPU context with the default autoprobe
+    order. You can also pass ``help`` to get a complete list of compiled in backends
+    (sorted by the default autoprobe order).
 
     auto
-        auto-select (default)
+        auto-select (default). Note that this context must be used alone and
+        does not participate in the priority list.
     win
         Win32/WGL
     winvk
