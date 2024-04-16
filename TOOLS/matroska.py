@@ -92,6 +92,7 @@ elements_matroska = (
                 'MaxBlockAdditionID, 55ee, uint',
                 'Name, 536e, str',
                 'Language, 22b59c, str',
+                'LanguageBCP47, 22b59d, str',
                 'CodecID, 86, str',
                 'CodecPrivate, 63a2, binary',
                 'CodecName, 258688, str',
@@ -206,6 +207,7 @@ elements_matroska = (
                     'ChapterDisplay*, 80, sub', (
                         'ChapString, 85, str',
                         'ChapLanguage*, 437c, str',
+                        'ChapLanguageBCP47*, 437d, str',
                         'ChapCountry*, 437e, str',
                     ),
                 ),
@@ -224,6 +226,7 @@ elements_matroska = (
                 'SimpleTag*, 67c8, sub', (
                     'TagName, 45a3, str',
                     'TagLanguage, 447a, str',
+                    'TagLanguageBCP47, 447b, str',
                     'TagString, 4487, str',
                     'TagDefault, 4484, uint',
                 ),
