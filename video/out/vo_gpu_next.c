@@ -1636,9 +1636,6 @@ done:
 
 static void cache_save_obj(void *p, pl_cache_obj obj)
 {
-    if (!obj.data || !obj.size)
-        return;
-
     const struct cache *c = p;
     void *ta_ctx = talloc_new(NULL);
 
@@ -1648,6 +1645,11 @@ static void cache_save_obj(void *p, pl_cache_obj obj)
     char *filepath = cache_filepath(ta_ctx, c->dir, c->name, obj.key);
     if (!filepath)
         goto done;
+
+    if (!obj.data || !obj.size) {
+        unlink(filepath);
+        goto done;
+    }
 
     // Don't save if already exists
     if (!stat(filepath, &(struct stat){0})) {
