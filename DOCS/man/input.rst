@@ -2401,26 +2401,6 @@ Property list
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
     even if ``ao-volume`` works.
 
-``audio-codec-info``
-    Audio codec information.
-
-    ``audio-codec-info/name``
-        The codec name used by this track, for example ``aac``.
-
-    ``audio-codec-info/desc``
-        The codec descriptive name used by this track.
-
-    ``audio-codec-info/profile``
-        The codec profile used by this track. Available only if the track has
-        been already decoded.
-
-    ::
-
-        MPV_FORMAT_NODE_MAP
-            "name"     MPV_FORMAT_STRING
-            "desc"     MPV_FORMAT_STRING
-            "profile"  MPV_FORMAT_STRING
-
 ``audio-params``
     Audio format as output by the audio decoder.
     This has a number of sub-properties:
@@ -2503,26 +2483,6 @@ Property list
     This does not necessarily use the same values as ``hwdec``. There can be
     multiple interop drivers for the same hardware decoder, depending on
     platform and VO.
-
-``video-codec-info``
-    Video codec information.
-
-    ``video-codec-info/name``
-        The codec name used by this track, for example ``h264``.
-
-    ``video-codec-info/desc``
-        The codec descriptive name used by this track.
-
-    ``video-codec-info/profile``
-        The codec profile used by this track. Available only if the track has
-        been already decoded.
-
-    ::
-
-        MPV_FORMAT_NODE_MAP
-            "name"     MPV_FORMAT_STRING
-            "desc"     MPV_FORMAT_STRING
-            "profile"  MPV_FORMAT_STRING
 
 ``width``, ``height``
     Video size. This uses the size of the video as decoded, or if no video

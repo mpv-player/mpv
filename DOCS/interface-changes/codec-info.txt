@@ -1,1 +1,0 @@
-add `video-codec-info` and `audio-codec-info` properties
