@@ -123,6 +123,7 @@ static int android_control(struct ra_ctx *ctx, int *events, int request, void *a
 const struct ra_ctx_fns ra_ctx_android = {
     .type           = "opengl",
     .name           = "android",
+    .description    = "Android/EGL",
     .reconfig       = android_reconfig,
     .control        = android_control,
     .init           = android_init,

@@ -486,6 +486,7 @@ static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 const struct ra_ctx_fns ra_ctx_vulkan_display = {
     .type           = "vulkan",
     .name           = "displayvk",
+    .description    = "VK_KHR_display",
     .reconfig       = display_reconfig,
     .control        = display_control,
     .wakeup         = display_wakeup,

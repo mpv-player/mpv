@@ -598,6 +598,7 @@ static int dxgl_control(struct ra_ctx *ctx, int *events, int request,
 const struct ra_ctx_fns ra_ctx_dxgl = {
     .type         = "opengl",
     .name         = "dxinterop",
+    .description  = "WGL rendering/Direct3D 9Ex presentation",
     .init         = dxgl_init,
     .reconfig     = dxgl_reconfig,
     .control      = dxgl_control,

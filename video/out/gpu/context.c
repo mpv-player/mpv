@@ -147,6 +147,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
     const struct ra_ctx_fns *ctx = contexts[index];
     *dst = (struct m_obj_desc) {
         .name = ctx->name,
+        .description = ctx->description,
     };
     return true;
 }

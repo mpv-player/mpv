@@ -547,6 +547,7 @@ bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra)
 const struct ra_ctx_fns ra_ctx_d3d11 = {
     .type               = "d3d11",
     .name               = "d3d11",
+    .description        = "Direct3D 11",
     .reconfig           = d3d11_reconfig,
     .control            = d3d11_control,
     .update_render_opts = d3d11_update_render_opts,

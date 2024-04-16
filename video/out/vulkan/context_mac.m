@@ -128,6 +128,7 @@ static int mac_vk_control(struct ra_ctx *ctx, int *events, int request, void *ar
 const struct ra_ctx_fns ra_ctx_vulkan_mac = {
     .type           = "vulkan",
     .name           = "macvk",
+    .description    = "mac/Vulkan (via Metal)",
     .reconfig       = mac_vk_reconfig,
     .control        = mac_vk_control,
     .init           = mac_vk_init,

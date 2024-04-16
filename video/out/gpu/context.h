@@ -34,6 +34,7 @@ struct ra_ctx {
 struct ra_ctx_fns {
     const char *type; // API type (for --gpu-api)
     const char *name; // name (for --gpu-context)
+    const char *description; // description (for --gpu-context=help)
 
     // Resize the window, or create a new window if there isn't one yet.
     // Currently, there is an unfortunate interaction with ctx->vo, and

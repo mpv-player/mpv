@@ -646,6 +646,7 @@ static int angle_control(struct ra_ctx *ctx, int *events, int request, void *arg
 const struct ra_ctx_fns ra_ctx_angle = {
     .type           = "opengl",
     .name           = "angle",
+    .description    = "Win32/ANGLE (via Direct3D)",
     .init           = angle_init,
     .reconfig       = angle_reconfig,
     .control        = angle_control,
