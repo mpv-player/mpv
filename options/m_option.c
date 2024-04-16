@@ -3166,7 +3166,7 @@ print_help: ;
     } else if (list->print_unknown_entry_help) {
         list->print_unknown_entry_help(log, mp_tprintf(80, "%.*s", BSTR_P(name)));
     } else {
-        mp_warn(log, "Option %.*s: item %.*s doesn't exist.\n",
+        mp_warn(log, "Option %.*s: item '%.*s' isn't supported.\n",
                BSTR_P(opt_name), BSTR_P(name));
     }
     r = M_OPT_EXIT;
@@ -3221,7 +3221,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
     int idx = bstrspn(*pstr, NAMECH);
     str = bstr_splice(*pstr, 0, idx);
     if (!str.len) {
-        mp_err(log, "Option %.*s: filter name expected.\n", BSTR_P(opt));
+        mp_err(log, "Option %.*s: item name expected.\n", BSTR_P(opt));
         return M_OPT_INVALID;
     }
     *pstr = bstr_cut(*pstr, idx);
@@ -3238,7 +3238,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt, int op,
         char name[80];
         snprintf(name, sizeof(name), "%.*s", BSTR_P(str));
         if (list->check_unknown_entry && !list->check_unknown_entry(name)) {
-            mp_err(log, "Option %.*s: %.*s doesn't exist.\n",
+            mp_err(log, "Option %.*s: '%.*s' isn't supported.\n",
                    BSTR_P(opt), BSTR_P(str));
             return M_OPT_INVALID;
         }
@@ -3332,15 +3332,15 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 "  %s-set\n"
                 " Overwrite the old list with the given list\n\n"
                 "  %s-append\n"
-                " Append the given filter to the current list\n\n"
+                " Append the given item to the current list\n\n"
                 "  %s-add\n"
                 " Append the given list to the current list\n\n"
                 "  %s-pre\n"
                 " Prepend the given list to the current list\n\n"
                 "  %s-remove\n"
-                " Remove the given filter from the current list\n\n"
+                " Remove the given item from the current list\n\n"
                 "  %s-toggle\n"
-                " Add the filter to the list, or remove it if it's already added.\n\n"
+                " Add the item to the list, or remove it if it's already added.\n\n"
                 "  %s-clr\n"
                 " Clear the current list.\n\n",
                 opt->name, opt->name, opt->name, opt->name, opt->name,
@@ -3420,7 +3420,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
 
     if (op != OP_NONE && res && res[0].name && res[1].name) {
         if (op == OP_APPEND) {
-            mp_err(log, "Option %.*s: -append takes only 1 filter (no ',').\n",
+            mp_err(log, "Option %.*s: -append takes only 1 item (no ',').\n",
                    BSTR_P(name));
             free_obj_settings_list(&res);
             return M_OPT_INVALID;
