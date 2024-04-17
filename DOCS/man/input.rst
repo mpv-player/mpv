@@ -2867,6 +2867,11 @@ Property list
     subtitles, returns the first start time. If no current subtitle is present
     null is returned instead.
 
+    This has a sub-property:
+
+    ``sub-start/full``
+        ``sub-start`` with milliseconds.
+
 ``secondary-sub-start``
     Same as ``sub-start``, but for the secondary subtitles.
 
@@ -2875,6 +2880,11 @@ Property list
     subtitles, return the last end time. If no current subtitle is present, or
     if it's present but has unknown or incorrect duration, null is returned
     instead.
+
+    This has a sub-property:
+
+    ``sub-end/full``
+        ``sub-end`` with milliseconds.
 
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.
