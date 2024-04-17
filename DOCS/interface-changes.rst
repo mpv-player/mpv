@@ -30,6 +30,14 @@ Interface changes
 ::
 
  --- mpv 0.38.0 ---
+    - add `term-size` property
+    - add the `escape-ass` command
+    - add `>` for fixed precision floating-point property expansion
+    - add `--input-comands` option
+    - change `--pulse-latency-hacks` default to `yes`
+    - add `context-menu` command
+    - add `menu-data` property
+    - add `--vo-tct-buffering` option
     - add `begin-vo-dragging` command
     - add `--deinterlace-field-parity` option
     - add `--volume-gain`, `--volume-gain-min`, and `--volume-gain-max` options
