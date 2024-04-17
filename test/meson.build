@@ -17,6 +17,7 @@ test_utils_files = [
     'misc/dispatch.c',
     'misc/io_utils.c',
     'misc/json.c',
+    'misc/language.c',
     'misc/node.c',
     'misc/path_utils.c',
     'misc/random.c',
@@ -112,6 +113,9 @@ test('timer', timer)
 
 format = executable('format', files('format.c'), include_directories: incdir, link_with: test_utils)
 test('format', format)
+
+language = executable('language', files('language.c'), include_directories: incdir, link_with: test_utils)
+test('language', language)
 
 paths_objects = libmpv.extract_objects('options/path.c', path_source)
 paths = executable('paths', 'paths.c', include_directories: incdir,
