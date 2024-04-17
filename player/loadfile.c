@@ -455,9 +455,8 @@ static int match_lang(char **langs, const char *lang)
     if (!lang)
         return 0;
     for (int idx = 0; langs && langs[idx]; idx++) {
-        int score = mp_match_lang_single(langs[idx], lang);
-        if (score > 0)
-            return INT_MAX - (idx + 1) * LANGUAGE_SCORE_MAX + score - 1;
+        if (lang && strcasecmp(langs[idx], lang) == 0)
+            return INT_MAX - idx;
     }
     return 0;
 }
@@ -617,7 +616,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (sub) {
             // Subtitle specific auto-selecting crap.
-            bool audio_matches = mp_match_lang_single(audio_lang, track->lang);
+            bool audio_matches = audio_lang && track->lang && !strcasecmp(audio_lang, track->lang);
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
             bool lang_match = !os_langs && match_lang(langs, track->lang) > 0;
