@@ -449,18 +449,6 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
         add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n));
 }
 
-// Result numerically higher => better match. 0 == no match.
-static int match_lang(char **langs, const char *lang)
-{
-    if (!lang)
-        return 0;
-    for (int idx = 0; langs && langs[idx]; idx++) {
-        if (lang && strcasecmp(langs[idx], lang) == 0)
-            return INT_MAX - idx;
-    }
-    return 0;
-}
-
 /* Get the track wanted by the user.
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
@@ -504,7 +492,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
             (t2->program_id == preferred_program))
             return t1->program_id == preferred_program;
     }
-    int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
+    int l1 = mp_match_lang(langs, t1->lang), l2 = mp_match_lang(langs, t2->lang);
     if (!os_langs && l1 != l2)
         return l1 > l2;
     if (forced)
@@ -619,10 +607,10 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             bool audio_matches = audio_lang && track->lang && !strcasecmp(audio_lang, track->lang);
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
-            bool lang_match = !os_langs && match_lang(langs, track->lang) > 0;
+            bool lang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
             bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
                                  (opts->subs_fallback == 1 && track->default_track);
-            bool subs_matching_audio = (!match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
+            bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
             if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
                 (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))

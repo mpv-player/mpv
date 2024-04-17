@@ -135,6 +135,7 @@ sources = files(
     'misc/dispatch.c',
     'misc/io_utils.c',
     'misc/json.c',
+    'misc/language.c',
     'misc/natural_sort.c',
     'misc/node.c',
     'misc/path_utils.c',
