@@ -579,35 +579,6 @@ static char **process_langs(char **in)
     return out;
 }
 
-static const char *get_audio_lang(struct MPContext *mpctx)
-{
-    // If we have a single current audio track, this is simple.
-    if (mpctx->current_track[0][STREAM_AUDIO])
-        return mpctx->current_track[0][STREAM_AUDIO]->lang;
-
-    const char *ret = NULL;
-
-    // Otherwise, we may be using a filter with multiple inputs.
-    // Iterate over the tracks and find the ones in use.
-    for (int i = 0; i < mpctx->num_tracks; i++) {
-        const struct track *t = mpctx->tracks[i];
-        if (t->type != STREAM_AUDIO || !t->selected)
-            continue;
-
-        // If we have input in multiple audio languages, bail out;
-        // we don't have a meaningful single language.
-        // Partial matches (e.g. en-US vs en-GB) are acceptable here.
-        if (ret && t->lang && !mp_match_lang_single(t->lang, ret))
-            return NULL;
-
-        // We'll return the first non-null tag we see
-        if (!ret)
-            ret = t->lang;
-    }
-
-    return ret;
-}
-
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type)
 {
@@ -625,7 +596,9 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         langs = add_os_langs();
         os_langs = true;
     }
-    const char *audio_lang = get_audio_lang(mpctx);
+    const char *audio_lang = mpctx->current_track[0][STREAM_AUDIO] ?
+                             mpctx->current_track[0][STREAM_AUDIO]->lang :
+                             NULL;
     bool sub = type == STREAM_SUB;
     struct track *pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
