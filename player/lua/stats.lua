@@ -891,12 +891,11 @@ local function add_video(s)
         return
     end
 
-    local osd_dims = mp.get_property_native("osd-dimensions")
-    local scaled_width = osd_dims["w"] - osd_dims["ml"] - osd_dims["mr"]
-    local scaled_height = osd_dims["h"] - osd_dims["mt"] - osd_dims["mb"]
-
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
-    if append_property(s, "video-codec", {prefix_sep="", nl="", indent=""}) then
+    local track = mp.get_property_native("current-tracks/video")
+    if track and append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""}) then
+        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
         append_property(s, "hwdec-current", {prefix="HW:", nl="",
                         indent=o.prefix_sep .. o.prefix_sep,
                         no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
@@ -945,11 +944,16 @@ local function add_audio(s)
     local merge = function(r, ro, prop)
         local a = r[prop] or ro[prop]
         local b = ro[prop] or r[prop]
-        return (a == b or a == nil) and a or (a .. " → " .. b)
+        return (a == b or a == nil) and a or (a .. " ➜ " .. b)
     end
 
     append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
-    append_property(s, "audio-codec", {prefix_sep="", nl="", indent=""})
+    local track = mp.get_property_native("current-tracks/audio")
+    if track then
+        append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""})
+        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
+    end
     append_property(s, "current-ao", {prefix="AO:", nl="",
                                       indent=o.prefix_sep .. o.prefix_sep})
     local dev = append_property(s, "audio-device", {prefix="Device:"})
@@ -1096,7 +1100,7 @@ local function vo_stats()
     add_header(header)
     append_perfdata(header, content, true, true)
     header = {table.concat(header)}
-    return finalize_page(header, content, false)
+    return finalize_page(header, content, true)
 end
 
 local kbinfo_lines = nil

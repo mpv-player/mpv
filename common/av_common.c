@@ -402,3 +402,12 @@ void mp_free_av_packet(AVPacket **pkt)
     }
     av_packet_free(pkt);
 }
+
+void mp_codec_info_from_av(const AVCodecContext *avctx, struct mp_codec_params *c)
+{
+    c->codec_profile = av_get_profile_name(avctx->codec, avctx->profile);
+    if (!c->codec_profile)
+        c->codec_profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
+    c->codec = avctx->codec_descriptor->name;
+    c->codec_desc = avctx->codec_descriptor->long_name;
+}

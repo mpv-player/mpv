@@ -75,6 +75,8 @@ struct vo_wayland_state {
     bool hidden;
     bool initial_size_hint;
     bool locked_size;
+    bool need_rescale;
+    bool reconfigured;
     bool scale_configured;
     bool state_change;
     bool tiled;
@@ -83,6 +85,7 @@ struct vo_wayland_state {
     int mouse_x;
     int mouse_y;
     int pending_vo_events;
+    double pending_scaling;
     double scaling;
     int timeout_count;
     int wakeup_pipe[2];

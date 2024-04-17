@@ -695,10 +695,7 @@ done:
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
 
-    // mpv rotates clockwise but the wayland spec has counter-clockwise rotations
-    // swap 1 and 3 to match mpv's direction
-    int transform = (360 - img->params.rotate) % 360 / 90;
-    wl_surface_set_buffer_transform(vo->wl->video_surface, transform);
+    wl_surface_set_buffer_transform(vo->wl->video_surface, img->params.rotate / 90);
 
     // Immediately destroy all buffers if params change.
     destroy_buffers(vo);

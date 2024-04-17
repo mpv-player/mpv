@@ -224,10 +224,18 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     osd_set_sub(mpctx->osd, order, track->d_sub);
 
     // When paused we have to wait for packets to be available.
-    // So just retry until we get a packet in this case.
-    if (mpctx->playback_initialized)
-        while (!update_subtitles(mpctx, mpctx->playback_pts) &&
-               mpctx->paused && !mpctx->paused_for_cache);
+    // Retry on a timeout until we get a packet. If still not successful,
+    // then queue it for later in the playloop (but this will have a delay).
+    if (mpctx->playback_initialized) {
+        track->demuxer_ready = false;
+        int64_t end = mp_time_ns() + MP_TIME_MS_TO_NS(50);
+        while (!track->demuxer_ready && mp_time_ns() < end)
+            track->demuxer_ready = update_subtitles(mpctx, mpctx->playback_pts) ||
+                                  !mpctx->paused;
+        if (!track->demuxer_ready)
+            mp_wakeup_core(mpctx);
+
+    }
 }
 
 void reinit_sub_all(struct MPContext *mpctx)

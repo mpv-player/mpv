@@ -803,6 +803,22 @@ int get_cache_buffering_percentage(struct MPContext *mpctx)
     return mpctx->demuxer ? mpctx->cache_buffer : -1;
 }
 
+static void handle_update_subtitles(struct MPContext *mpctx)
+{
+    if (mpctx->video_status == STATUS_EOF) {
+        update_subtitles(mpctx, mpctx->playback_pts);
+        return;
+    }
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (track->type == STREAM_SUB && !track->demuxer_ready) {
+            update_subtitles(mpctx, mpctx->playback_pts);
+            break;
+        }
+    }
+}
+
 static void handle_cursor_autohide(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -1233,8 +1249,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_dummy_ticks(mpctx);
 
     update_osd_msg(mpctx);
-    if (mpctx->video_status == STATUS_EOF)
-        update_subtitles(mpctx, mpctx->playback_pts);
+
+    handle_update_subtitles(mpctx);
 
     handle_each_frame_screenshot(mpctx);
 

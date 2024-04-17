@@ -20,6 +20,7 @@ import Cocoa
 class MacCommon: Common {
     @objc var layer: MetalLayer?
 
+    var presentation: Presentation?
     var timer: PreciseTimer?
     var swapTime: UInt64 = 0
     let swapLock: NSCondition = NSCondition()
@@ -30,6 +31,7 @@ class MacCommon: Common {
         super.init(option, log)
         self.vo = vo
         input = InputHelper(vo.pointee.input_ctx, option)
+        presentation = Presentation(common: self)
         timer = PreciseTimer(common: self)
 
         DispatchQueue.main.sync {
@@ -89,7 +91,7 @@ class MacCommon: Common {
     }
 
     @objc func swapBuffer() {
-        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
+        if option.mac.macos_render_timer > RENDER_TIMER_SYSTEM {
             swapLock.lock()
             while(swapTime < 1) {
                 swapLock.wait()
@@ -98,6 +100,15 @@ class MacCommon: Common {
             swapLock.unlock()
         }
     }
+
+     @objc func fillVsync(info: UnsafeMutablePointer<vo_vsync_info>) {
+        if option.mac.macos_render_timer != RENDER_TIMER_PRESENTATION_FEEDBACK { return }
+
+        let next = presentation?.next()
+        info.pointee.vsync_duration = next?.duration ?? -1
+        info.pointee.skipped_vsyncs = next?.skipped ?? -1
+        info.pointee.last_queue_display_time = next?.time ?? -1
+     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                             _ inNow: UnsafePointer<CVTimeStamp>,
@@ -112,13 +123,18 @@ class MacCommon: Common {
             self.swapLock.unlock()
         }
 
-        if option.mac.macos_render_timer != RENDER_TIMER_SYSTEM {
+        if option.mac.macos_render_timer > RENDER_TIMER_SYSTEM {
             if let timer = self.timer, option.mac.macos_render_timer == RENDER_TIMER_PRECISE {
                 timer.scheduleAt(time: inOutputTime.pointee.hostTime, closure: signalSwap)
                 return kCVReturnSuccess
             }
 
             signalSwap()
+            return kCVReturnSuccess
+        }
+
+        if option.mac.macos_render_timer == RENDER_TIMER_PRESENTATION_FEEDBACK {
+            presentation?.add(time: inOutputTime.pointee)
         }
 
         return kCVReturnSuccess

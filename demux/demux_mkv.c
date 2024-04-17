@@ -113,8 +113,9 @@ typedef struct mkv_track {
     struct pl_color_repr repr;
     struct pl_color_space color;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
+    float v_projection_pose_yaw;
+    float v_projection_pose_pitch;
     float v_projection_pose_roll;
-    bool v_projection_pose_roll_set;
 
     uint32_t a_channels, a_bps;
     float a_sfreq;
@@ -658,14 +659,29 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
 static void parse_trackprojection(struct demuxer *demuxer, struct mkv_track *track,
                                   struct ebml_projection *projection)
 {
-    if (projection->n_projection_pose_yaw || projection->n_projection_pose_pitch)
-          MP_WARN(demuxer, "Projection pose yaw/pitch not supported!\n");
+    if (projection->n_projection_pose_yaw) {
+        track->v_projection_pose_yaw = projection->projection_pose_yaw;
+        MP_DBG(demuxer, "|   + Projection pose yaw: %f\n",
+               track->v_projection_pose_yaw);
+    }
+
+    if (projection->n_projection_pose_pitch) {
+        track->v_projection_pose_pitch = projection->projection_pose_pitch;
+        MP_DBG(demuxer, "|   + Projection pose pitch: %f\n",
+               track->v_projection_pose_pitch);
+    }
 
     if (projection->n_projection_pose_roll) {
         track->v_projection_pose_roll = projection->projection_pose_roll;
-        track->v_projection_pose_roll_set = true;
         MP_DBG(demuxer, "|   + Projection pose roll: %f\n",
                track->v_projection_pose_roll);
+    }
+
+    if (track->v_projection_pose_yaw || track->v_projection_pose_pitch) {
+        MP_WARN(demuxer, "Not supported projection: yaw %f, pitch %f, roll %f\n",
+                track->v_projection_pose_yaw,
+                track->v_projection_pose_pitch,
+                track->v_projection_pose_roll);
     }
 }
 
@@ -804,7 +820,10 @@ static void parse_trackentry(struct demuxer *demuxer,
         MP_DBG(demuxer, "|  + CodecPrivate, length %u\n", track->private_size);
     }
 
-    if (entry->language) {
+    if (entry->language_bcp47) {
+        track->language = talloc_strdup(track, entry->language_bcp47);
+        MP_DBG(demuxer, "|  + LanguageBCP47: %s\n", track->language);
+    } else if (entry->language) {
         track->language = talloc_strdup(track, entry->language);
         MP_DBG(demuxer, "|  + Language: %s\n", track->language);
     } else {
@@ -1091,8 +1110,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                 }
             }
 
-            MP_DBG(demuxer, "Chapter %u from %02d:%02d:%02d.%03d "
-                   "to %02d:%02d:%02d.%03d, %s\n", i,
+            MP_DBG(demuxer, "Chapter %u from %02d:%02d:%02d.%09d "
+                   "to %02d:%02d:%02d.%09d, %s\n", i,
                    (int) (chapter.start / 60 / 60 / 1000000000),
                    (int) ((chapter.start / 60 / 1000000000) % 60),
                    (int) ((chapter.start / 1000000000) % 60),
@@ -1575,8 +1594,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->stereo_mode = track->stereo_mode;
     sh_v->color = track->color;
 
-    if (track->v_projection_pose_roll_set) {
-        int rotate = lrintf(fmodf(fmodf(track->v_projection_pose_roll, 360) + 360, 360));
+    if (track->v_projection_pose_roll) {
+        int rotate = lrintf(fmodf(fmodf(-1 * track->v_projection_pose_roll, 360) + 360, 360));
         sh_v->rotate = rotate;
     }
 

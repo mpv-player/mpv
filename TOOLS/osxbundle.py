@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 import os
 import shutil
-import sys
 import fileinput
 import dylib_unhell
+import subprocess
 from optparse import OptionParser
-
-def sh(command):
-    return os.popen(command).read().strip()
 
 def bundle_path(binary_name):
     return "%s.app" % binary_name
@@ -45,8 +42,8 @@ def sign_bundle(binary_name):
         resolved_dir = os.path.join(bundle_path(binary_name), dir)
         for root, _dirs, files in os.walk(resolved_dir):
             for f in files:
-                sh('codesign --force -s - ' + os.path.join(root, f))
-    sh('codesign --force -s - ' + bundle_path(binary_name))
+                subprocess.run(['codesign', '--force', '-s', '-', os.path.join(root, f)])
+    subprocess.run(['codesign', '--force', '-s', '-', bundle_path(binary_name)])
 
 def bundle_version(src_path):
     version = 'UNKNOWN'

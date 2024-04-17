@@ -44,6 +44,7 @@
 #include "options/options.h"
 
 struct priv {
+    struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *avframe;
     AVPacket *avpkt;
@@ -156,7 +157,7 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     return true;
 }
 
-static void destroy(struct mp_filter *da)
+static void ad_lavc_destroy(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
 
@@ -165,7 +166,7 @@ static void destroy(struct mp_filter *da)
     mp_free_av_packet(&ctx->avpkt);
 }
 
-static void reset(struct mp_filter *da)
+static void ad_lavc_reset(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
 
@@ -218,6 +219,8 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
 
     if (!priv->avframe->buf[0])
         return ret;
+
+    mp_codec_info_from_av(avctx, priv->codec);
 
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
@@ -276,7 +279,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     return ret;
 }
 
-static void process(struct mp_filter *ad)
+static void ad_lavc_process(struct mp_filter *ad)
 {
     struct priv *priv = ad->priv;
 
@@ -286,9 +289,9 @@ static void process(struct mp_filter *ad)
 static const struct mp_filter_info ad_lavc_filter = {
     .name = "ad_lavc",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = ad_lavc_process,
+    .reset = ad_lavc_reset,
+    .destroy = ad_lavc_destroy,
 };
 
 static struct mp_decoder *create(struct mp_filter *parent,
@@ -305,12 +308,16 @@ static struct mp_decoder *create(struct mp_filter *parent,
     da->log = mp_log_new(da, parent->log, NULL);
 
     struct priv *priv = da->priv;
+    priv->codec = codec;
     priv->public.f = da;
 
     if (!init(da, codec, decoder)) {
         talloc_free(da);
         return NULL;
     }
+
+    codec->codec_desc = priv->avctx->codec_descriptor->long_name;
+
     return &priv->public;
 }
 

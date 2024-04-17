@@ -2401,12 +2401,6 @@ Property list
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
     even if ``ao-volume`` works.
 
-``audio-codec``
-    Audio codec selected for decoding.
-
-``audio-codec-name``
-    Audio codec.
-
 ``audio-params``
     Audio format as output by the audio decoder.
     This has a number of sub-properties:
@@ -2489,12 +2483,6 @@ Property list
     This does not necessarily use the same values as ``hwdec``. There can be
     multiple interop drivers for the same hardware decoder, depending on
     platform and VO.
-
-``video-format``
-    Video format as string.
-
-``video-codec``
-    Video codec selected for decoding.
 
 ``width``, ``height``
     Video size. This uses the size of the video as decoded, or if no video
@@ -3057,6 +3045,13 @@ Property list
         The codec name used by this track, for example ``h264``. Unavailable
         in some rare cases.
 
+    ``track-list/N/codec-desc``
+        The codec descriptive name used by this track.
+
+    ``track-list/N/codec-profile``
+        The codec profile used by this track. Available only if the track has
+        been already decoded.
+
     ``track-list/N/external``
         ``yes``/true if the track is an external file, ``no``/false or
         unavailable otherwise. This is set for separate subtitle files.
@@ -3157,6 +3152,8 @@ Property list
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING
+                "codec-desc"        MPV_FORMAT_STRING
+                "codec-profile"     MPV_FORMAT_STRING
                 "ff-index"          MPV_FORMAT_INT64
                 "decoder-desc"      MPV_FORMAT_STRING
                 "demux-w"           MPV_FORMAT_INT64

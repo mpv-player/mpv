@@ -55,7 +55,7 @@ class AppHub: NSObject {
         event = EventHelper(self, mpv)
         if let mpv = event?.mpv {
             self.mpv = mpv
-            log.log = mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "app")
+            log.log = mp_log_new(nil, mp_client_get_log(mpv), "app")
             option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
             input.option = option
         }

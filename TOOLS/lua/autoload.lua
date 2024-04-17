@@ -73,17 +73,17 @@ function Split (s)
     return set
 end
 
-EXTENSIONS_VIDEO = Set {
+EXTENSIONS_VIDEO_DEFAULT = Set {
     '3g2', '3gp', 'avi', 'flv', 'm2ts', 'm4v', 'mj2', 'mkv', 'mov',
     'mp4', 'mpeg', 'mpg', 'ogv', 'rmvb', 'webm', 'wmv', 'y4m'
 }
 
-EXTENSIONS_AUDIO = Set {
+EXTENSIONS_AUDIO_DEFAULT = Set {
     'aiff', 'ape', 'au', 'flac', 'm4a', 'mka', 'mp3', 'oga', 'ogg',
     'ogm', 'opus', 'wav', 'wma'
 }
 
-EXTENSIONS_IMAGES = Set {
+EXTENSIONS_IMAGES_DEFAULT = Set {
     'avif', 'bmp', 'gif', 'j2k', 'jp2', 'jpeg', 'jpg', 'jxl', 'png',
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
@@ -97,9 +97,21 @@ split_option_exts(true, true, true)
 
 function create_extensions()
     EXTENSIONS = {}
-    if o.videos then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_VIDEO), o.additional_video_exts) end
-    if o.audio then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_AUDIO), o.additional_audio_exts) end
-    if o.images then SetUnion(SetUnion(EXTENSIONS, EXTENSIONS_IMAGES), o.additional_image_exts) end
+    EXTENSIONS_VIDEO = {}
+    EXTENSIONS_AUDIO = {}
+    EXTENSIONS_IMAGES = {}
+    if o.videos then
+        SetUnion(SetUnion(EXTENSIONS_VIDEO, EXTENSIONS_VIDEO_DEFAULT), o.additional_video_exts)
+        SetUnion(EXTENSIONS, EXTENSIONS_VIDEO)
+    end
+    if o.audio then
+        SetUnion(SetUnion(EXTENSIONS_AUDIO, EXTENSIONS_AUDIO_DEFAULT), o.additional_audio_exts)
+        SetUnion(EXTENSIONS, EXTENSIONS_AUDIO)
+    end
+    if o.images then
+        SetUnion(SetUnion(EXTENSIONS_IMAGES, EXTENSIONS_IMAGES_DEFAULT), o.additional_image_exts)
+        SetUnion(EXTENSIONS, EXTENSIONS_IMAGES)
+    end
 end
 create_extensions()
 
