@@ -2858,8 +2858,11 @@ Property list
         with line breaks. Contains only the "Text" part of the events.
 
         This property is not enough to render ASS subtitles correctly, because ASS
-        header and per-event metadata are not returned. You likely need to do
-        further filtering on the returned string to make it useful.
+        header and per-event metadata are not returned. Use ``/ass-full`` for that.
+
+    ``sub-text/ass-full``
+        Like ``sub-text-ass``, but return the full event with all fields, formatted as
+        lines in a .ass text file. Use with ``sub-ass-extradata`` for style information.
 
 ``sub-text-ass`` (deprecated)
     Deprecated alias for ``sub-text/ass``.
