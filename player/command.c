@@ -3062,7 +3062,7 @@ static int mp_property_sub_start(void *ctx, struct m_property *prop,
     double start = get_times(ctx, prop, action, arg).start;
     if (start == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, start);
+    return property_time(action, arg, start);
 }
 
 
@@ -3072,7 +3072,7 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     double end = get_times(ctx, prop, action, arg).end;
     if (end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, end);
+    return property_time(action, arg, end);
 }
 
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
