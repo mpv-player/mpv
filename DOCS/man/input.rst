@@ -2823,19 +2823,24 @@ Property list
     stripped. If the subtitle is not text-based (i.e. DVD/BD subtitles), an
     empty string is returned.
 
-``sub-text-ass``
-    Like ``sub-text``, but return the text in ASS format. Text subtitles in
-    other formats are converted. For native ASS subtitles, events that do
-    not contain any text (but vector drawings etc.) are not filtered out. If
-    multiple events match with the current playback time, they are concatenated
-    with line breaks. Contains only the "Text" part of the events.
+    This has sub-properties for different formats:
 
-    This property is not enough to render ASS subtitles correctly, because ASS
-    header and per-event metadata are not returned. You likely need to do
-    further filtering on the returned string to make it useful.
+    ``sub-text/ass``
+        Like ``sub-text``, but return the text in ASS format. Text subtitles in
+        other formats are converted. For native ASS subtitles, events that do
+        not contain any text (but vector drawings etc.) are not filtered out. If
+        multiple events match with the current playback time, they are concatenated
+        with line breaks. Contains only the "Text" part of the events.
+
+        This property is not enough to render ASS subtitles correctly, because ASS
+        header and per-event metadata are not returned. You likely need to do
+        further filtering on the returned string to make it useful.
+
+``sub-text-ass`` (deprecated)
+    Deprecated alias for ``sub-text/ass``.
 
 ``secondary-sub-text``
-    Same as ``sub-text``, but for the secondary subtitles.
+    Same as ``sub-text`` (with the same sub-properties), but for the secondary subtitles.
 
 ``sub-start``
     The current subtitle start time (in seconds). If there's multiple current

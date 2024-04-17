@@ -1,0 +1,1 @@
+deprecate `sub-text-ass` property; add `sub-text/ass` sub-property

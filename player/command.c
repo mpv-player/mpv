@@ -3021,6 +3021,18 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
     int sub_index = def[0];
     int type = def[1];
 
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = arg;
+
+        if (!strcmp(ka->key, "ass"))
+            type = SD_TEXT_TYPE_ASS;
+        else
+            return M_PROPERTY_UNKNOWN;
+
+        action = ka->action;
+        arg = ka->arg;
+    }
+
     struct track *track = mpctx->current_track[sub_index][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
     double pts = mpctx->playback_pts;
