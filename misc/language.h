@@ -20,12 +20,6 @@
 #ifndef MP_LANGUAGE_H
 #define MP_LANGUAGE_H
 
-#define LANGUAGE_SCORE_BITS 16
-#define LANGUAGE_SCORE_MAX (1 << LANGUAGE_SCORE_BITS)
-
-// Where applicable, l1 is the user-specified code and l2 is the code being checked against it
-int mp_match_lang_single(const char *l1, const char *l2);
-
 char **mp_get_user_langs(void);
 
 #endif /* MP_LANGUAGE_H */
