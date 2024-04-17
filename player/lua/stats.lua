@@ -31,6 +31,8 @@ local o = {
     ass_formatting = true,
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     filter_params_max_length = 100,  -- show one filter per line if list exceeds this length
+    file_tag_max_length = 128,       -- only show file tags shorter than this length in bytes
+    file_tag_max_count = 16,         -- only show the first x file tags
     show_frame_info = false,         -- whether to show the current frame info
     term_width_limit = -1,           -- overwrites the terminal width
     term_height_limit = -1,          -- overwrites the terminal height
@@ -641,11 +643,24 @@ local function add_header(s)
 end
 
 
-local function add_file(s, print_cache)
+local function add_file(s, print_cache, print_tags)
     append(s, "", {prefix="File:", nl="", indent=""})
     append_property(s, "filename", {prefix_sep="", nl="", indent=""})
     if mp.get_property_osd("filename") ~= mp.get_property_osd("media-title") then
         append_property(s, "media-title", {prefix="Title:"})
+    end
+
+    if print_tags then
+        local tags = mp.get_property_native("display-tags")
+        local tags_displayed = 0
+        for _, tag in ipairs(tags) do
+            local value = mp.get_property("metadata/by-key/" .. tag)
+            if tag ~= "Title" and tags_displayed < o.file_tag_max_count
+               and value and value:len() < o.file_tag_max_length then
+                append(s, value, {prefix=string.gsub(tag, "_", " ") .. ":"})
+                tags_displayed = tags_displayed + 1
+            end
+        end
     end
 
     local editions = mp.get_property_number("editions")
@@ -1140,7 +1155,7 @@ local function default_stats()
     local stats = {}
     eval_ass_formatting()
     add_header(stats)
-    add_file(stats, true)
+    add_file(stats, true, false)
     add_video_out(stats)
     add_video(stats)
     add_audio(stats)
@@ -1287,7 +1302,7 @@ local function track_info()
     append(h, "", {prefix=format("%s:%s", desc, scroll_hint()), nl="", indent=""})
     h = {table.concat(h)}
     table.insert(c, o.nl .. o.nl)
-    add_file(c)
+    add_file(c, false, true)
     for i, track in ipairs(mp.get_property_native("track-list")) do
         if track['selected'] then
             add_track(c, track, i - 1)

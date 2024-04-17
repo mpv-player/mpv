@@ -93,6 +93,16 @@ Configurable Options
     respective duration. This can result in overlapping text when multiple
     scripts decide to print text at the same time.
 
+``file_tag_max_length``
+    Default: 128
+
+    Only show file tags shorter than this length, in bytes.
+
+``file_tag_max_count``
+    Default: 16
+
+    Only show the first specified amount of file tags.
+
 ``term_width_limit``
     Default: -1
 
