@@ -5,11 +5,10 @@ Track Selection
 ---------------
 
 ``--alang=<languagecode[,languagecode,...]>``
-    Specify a priority list of audio languages to use, as IETF language tags.
-    Equivalent ISO 639-1 two-letter and ISO 639-2 three-letter codes are treated the same.
-    The first tag in the list whose language matches a track in the file will be used.
-    A track that matches more subtags will be preferred over one that matches fewer,
-    with preference given to earlier subtags over later ones. See also ``--aid``.
+    Specify a priority list of audio languages to use. Different container
+    formats employ different language codes. DVDs use ISO 639-1 two-letter
+    language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
+    language codes, while OGM uses a free-form identifier. See also ``--aid``.
 
     This is a string list option. See `List Options`_ for details.
 
@@ -21,7 +20,10 @@ Track Selection
           audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
-    Equivalent to ``--alang``, for subtitle tracks.
+    Specify a priority list of subtitle languages to use. Different container
+    formats employ different language codes. DVDs use ISO 639-1 two letter
+    language codes, Matroska uses ISO 639-2 three letter language codes while
+    OGM uses a free-form identifier. See also ``--sid``.
 
     This is a string list option. See `List Options`_ for details.
 
@@ -31,8 +33,6 @@ Track Selection
           a DVD and falls back on English if Hungarian is not available.
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
-        - ``mpv --slang=pt-BR example.mkv`` plays a Matroska file with Brazilian
-          Portuguese subtitles if available, and otherwise any Portuguese subtitles.
 
 ``--vlang=<...>``
     Equivalent to ``--alang`` and ``--slang``, for video tracks.
