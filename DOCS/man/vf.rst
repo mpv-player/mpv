@@ -103,7 +103,7 @@ filter list.
     compared. (Passing multiple filters is currently still possible, but
     deprecated.)
 
-``-vf-toggle=filter``
+``--vf-toggle=filter``
     Add the given filter to the list if it was not present yet, or remove it
     from the list if it was present. Matching of filters works as described in
     ``--vf-remove``.
@@ -192,7 +192,7 @@ Available mpv-only filters are:
         space if the system video driver supports it, but not input and output
         levels. The ``scale`` video filter can configure color space and input
         levels, but only if the output format is RGB (if the video output driver
-        supports RGB output, you can force this with ``-vf scale,format=rgba``).
+        supports RGB output, you can force this with ``--vf=scale,format=rgba``).
 
         If this option is set to ``auto`` (which is the default), the video's
         color space flag will be used. If that flag is unset, the color space
