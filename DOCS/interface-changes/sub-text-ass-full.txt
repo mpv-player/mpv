@@ -1,0 +1,1 @@
+add `sub-text/ass-full` sub-property

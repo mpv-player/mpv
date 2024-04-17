@@ -795,6 +795,28 @@ static bstr get_text_buf(struct sd *sd, double pts, enum sd_text_type type)
                 int start = b->len;
                 if (type == SD_TEXT_TYPE_PLAIN) {
                     ass_to_plaintext(b, event->Text);
+                } else if (type == SD_TEXT_TYPE_ASS_FULL) {
+                    long long s = event->Start;
+                    long long e = s + event->Duration;
+
+                    ASS_Style *style = (event->Style < 0 || event->Style >= track->n_styles) ? NULL : &track->styles[event->Style];
+
+                    int sh = (s / 60 / 60 / 1000);
+                    int sm = (s / 60 / 1000) % 60;
+                    int ss = (s / 1000) % 60;
+                    int sc = (s / 10) % 100;
+                    int eh = (e / 60 / 60 / 1000);
+                    int em = (e / 60 / 1000) % 60;
+                    int es = (e / 1000) % 60;
+                    int ec = (e / 10) % 100;
+
+                    bstr_xappend_asprintf(NULL, b, "Dialogue: %d,%d:%02d:%02d.%02d,%d:%02d:%02d.%02d,%s,%s,%04d,%04d,%04d,%s,%s",
+                        event->Layer,
+                        sh, sm, ss, sc,
+                        eh, em, es, ec,
+                        (style && style->Name) ? style->Name : "", event->Name,
+                        event->MarginL, event->MarginR, event->MarginV,
+                        event->Effect, event->Text);
                 } else {
                     bstr_xappend(NULL, b, bstr0(event->Text));
                 }
