@@ -57,7 +57,27 @@ extern const struct ra_ctx_fns ra_ctx_d3d11;
 /* No API */
 extern const struct ra_ctx_fns ra_ctx_wldmabuf;
 
+/* Autoprobe dummy. Always fails to create. */
+static bool dummy_init(struct ra_ctx *ctx)
+{
+    return false;
+}
+
+static void dummy_uninit(struct ra_ctx *ctx)
+{
+}
+
+static const struct ra_ctx_fns ra_ctx_dummy = {
+    .type           = "auto",
+    .name           = "auto",
+    .description    = "Auto detect",
+    .init           = dummy_init,
+    .uninit         = dummy_uninit,
+};
+
 static const struct ra_ctx_fns *contexts[] = {
+    &ra_ctx_dummy,
+// Direct3D contexts:
 #if HAVE_D3D11
     &ra_ctx_d3d11,
 #endif
@@ -113,6 +133,7 @@ static const struct ra_ctx_fns *contexts[] = {
 };
 
 static const struct ra_ctx_fns *no_api_contexts[] = {
+    &ra_ctx_dummy,
 /* No API contexts: */
 #if HAVE_DMABUF_WAYLAND
     &ra_ctx_wldmabuf,
@@ -133,8 +154,6 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 static bool check_unknown_entry(const char *name)
 {
     struct bstr param = bstr0(name);
-    if (bstr_equals0(param, "auto"))
-        return true;
     for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
         if (bstr_equals0(param, contexts[i]->name))
             return true;
@@ -155,7 +174,6 @@ static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
                            struct bstr name)
 {
     mp_info(log, "GPU APIs (contexts):\n");
-    mp_info(log, "    auto (autodetect)\n");
     for (int n = 0; n < MP_ARRAY_SIZE(contexts); n++) {
         mp_info(log, "    %s (%s)\n", contexts[n]->type, contexts[n]->name);
     }
@@ -165,8 +183,6 @@ static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
 static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_api)
 {
     struct bstr param = bstr0(*value);
-    if (bstr_equals0(param, "auto"))
-        return 1;
     for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
         if (bstr_equals0(param, contexts[i]->type))
             return 1;
