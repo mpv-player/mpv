@@ -31,6 +31,7 @@ API changes
 ===========
 
 ::
+
  --- mpv 0.38.0 ---
  2.3    - partially revert the changes from API version 1.27, remove libmpv as
           the default VO and move it to the bottom of the auto-probing order.
