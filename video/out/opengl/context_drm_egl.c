@@ -491,7 +491,8 @@ static void drm_egl_uninit(struct ra_ctx *ctx)
         if (p->gbm.surface)
             gbm_surface_destroy(p->gbm.surface);
         eglTerminate(p->egl.display);
-        gbm_device_destroy(p->gbm.device);
+        if (p->gbm.device)
+            gbm_device_destroy(p->gbm.device);
 
         if (p->drm_params.render_fd != -1)
             close(p->drm_params.render_fd);
