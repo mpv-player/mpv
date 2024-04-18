@@ -195,7 +195,7 @@ AudioChannelLabel mp_speaker_id_to_ca_label(int speaker_id)
     return -1; // kAudioChannelLabel_Unknown
 }
 
-#if HAVE_COREAUDIO
+#if HAVE_COREAUDIO || HAVE_AVFOUNDATION
 void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
 {
     if (!mp_msg_test(ao->log, l))
