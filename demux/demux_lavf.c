@@ -464,12 +464,18 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         }
     }
 
-    // HLS streams seems to be not well tagged, so matching mime type is not
-    // enough. Strip URL parameters and match extension.
-    bstr ext = bstr_get_ext(bstr_split(bstr0(priv->filename), "?#", NULL));
+    // HLS streams do not seem to be well tagged, so matching by MIME type is
+    // not enough - we need to strip the query string and match by their
+    // extensions. We also pass jpg filenames to fix issues like #13192 (jpgs
+    // being treated as videos due to a bogus second frame) and #13431 (jpgs
+    // misdetected as mpegts). We don't pass filenames otherwise to not
+    // misdetect files with a wrong extension, as described in 74e62ed2d1.
+    bstr ext = bstr_get_ext(mp_is_url(bstr0(priv->filename))
+                                ? bstr_split(bstr0(priv->filename), "?#", NULL)
+                                : bstr0(priv->filename));
     AVProbeData avpd = {
-        // Disable file-extension matching with normal checks, except for HLS
         .filename = !bstrcasecmp0(ext, "m3u8") || !bstrcasecmp0(ext, "m3u") ||
+                    !bstrcasecmp0(ext, "jpg") || !bstrcasecmp0(ext, "jpeg") ||
                     check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE),
