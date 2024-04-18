@@ -21,7 +21,7 @@
 #include "config.h"
 #include <AudioToolbox/AudioToolbox.h>
 
-#if HAVE_AVFOUNDATION || HAVE_AUDIOUNIT
+#if HAVE_AVFOUNDATION
 #undef HAVE_COREAUDIO
 #define HAVE_COREAUDIO 1
 #endif
