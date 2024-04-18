@@ -23,11 +23,6 @@
 
 #include "internal.h"
 
-#if HAVE_AVFOUNDATION
-#undef HAVE_COREAUDIO
-#define HAVE_COREAUDIO 1
-#endif
-
 // CoreAudio names are way too verbose
 #define ca_sel    AudioObjectPropertySelector
 #define ca_scope  AudioObjectPropertyScope
