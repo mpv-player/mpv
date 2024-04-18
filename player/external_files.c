@@ -115,6 +115,7 @@ static struct bstr guess_lang_from_filename(struct bstr name, int *lang_start)
 
     int lang_length = 0;
     int i = name.len - 1;
+    int suffixes_length = 0;
 
     char delimiter = '.';
     if (name.start[i] == ')') {
@@ -126,15 +127,31 @@ static struct bstr guess_lang_from_filename(struct bstr name, int *lang_start)
         i--;
     }
 
-    while (i >= 0 && mp_isalpha(name.start[i])) {
-        lang_length++;
-        if (lang_length > 3)
-            return (struct bstr){NULL, 0};
-        i--;
+    while (true) {
+        while (i >= 0 && mp_isalpha(name.start[i])) {
+            lang_length++;
+            i--;
+        }
+
+        // According to
+        // https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
+        // subtags after the first are composed of 1 to 8 letters.
+        if (lang_length < suffixes_length + 1 || lang_length > suffixes_length + 8)
+            return (struct bstr){0};
+
+        if (i >= 0 && name.start[i] == '-') {
+            lang_length++;
+            i--;
+            suffixes_length = lang_length;
+        } else {
+            break;
+        }
     }
 
-    if (lang_length < 2 || i == 0 || name.start[i] != delimiter)
-        return (struct bstr){NULL, 0};
+    // The primary subtag can have 2 or 3 letters.
+    if (lang_length < suffixes_length + 2 || lang_length > suffixes_length + 3 ||
+        i == 0 || name.start[i] != delimiter)
+        return (struct bstr){0};
 
     *lang_start = i;
     return (struct bstr){name.start + i + 1, lang_length};
@@ -160,7 +177,6 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
     struct bstr f_fname = mp_iconv_to_utf8(log, f_fbname,
                                            "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
     struct bstr f_fname_noext = bstrdup(tmpmem, bstr_strip_ext(f_fname));
-    bstr_lower(f_fname_noext);
     struct bstr f_fname_trim = bstr_strip(f_fname_noext);
 
     if (f_fbname.start != f_fname.start)
@@ -183,7 +199,6 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
                                               "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
         // retrieve various parts of the filename
         struct bstr tmp_fname_noext = bstrdup(tmpmem2, bstr_strip_ext(dename));
-        bstr_lower(tmp_fname_noext);
         struct bstr tmp_fname_ext = bstr_get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
@@ -215,13 +230,13 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
         // higher prio -> auto-selection may prefer it (0 = not loaded)
         int prio = 0;
 
-        if (bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
+        if (bstrcasecmp(tmp_fname_trim, f_fname_trim) == 0)
             prio |= 32; // exact movie name match
 
         bstr lang = {0};
         int start = 0;
         lang = guess_lang_from_filename(tmp_fname_trim, &start);
-        if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
+        if (bstr_case_startswith(tmp_fname_trim, f_fname_trim)) {
             if (lang.len && start == f_fname_trim.len)
                 prio |= 16; // exact movie name + followed by lang
 
