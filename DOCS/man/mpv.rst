@@ -181,9 +181,8 @@ V
     Toggle subtitle VSFilter aspect compatibility mode. See
     ``--sub-ass-vsfilter-aspect-compat`` for more info.
 
-r and R
-    Move subtitles up/down. The ``t`` key does the same as ``R`` currently, but
-    use is discouraged.
+Ctrl+UP and Ctrl+DOWN
+    Move subtitles up/down.
 
 s
     Take a screenshot.
@@ -225,6 +224,12 @@ Alt++ and Alt+-
 
 Alt+BACKSPACE
     Reset the pan/zoom settings.
+
+r
+    Rotate the video counter-clockwise.
+
+R and t
+    Rotate the video clockwise.
 
 F8
     Show the playlist and the current position in it.
