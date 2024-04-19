@@ -1414,13 +1414,15 @@ void mp_input_load_config(struct input_ctx *ictx)
         talloc_free(tmp);
     }
 
-#if HAVE_SDL2_GAMEPAD
-    if (ictx->opts->use_gamepad) {
-        mp_input_sdl_gamepad_add(ictx);
-    }
-#endif
-
+    bool use_gamepad = ictx->opts->use_gamepad;
     input_unlock(ictx);
+
+#if HAVE_SDL2_GAMEPAD
+    if (use_gamepad)
+        mp_input_sdl_gamepad_add(ictx);
+#else
+    (void)use_gamepad;
+#endif
 }
 
 bool mp_input_load_config_file(struct input_ctx *ictx, char *file)
