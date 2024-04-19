@@ -1988,6 +1988,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         goto done;
     }
 
+    w32->menu_ctx = mp_win32_menu_init();
     update_dark_mode(w32);
     update_corners_pref(w32);
     if (w32->opts->window_affinity)
@@ -2061,6 +2062,8 @@ done:
     MP_VERBOSE(w32, "uninit\n");
 
     remove_parent_hook(w32);
+    if (w32->menu_ctx)
+        mp_win32_menu_uninit(w32->menu_ctx);
     if (w32->window && !w32->destroyed)
         DestroyWindow(w32->window);
     if (w32->taskbar_list)
@@ -2086,7 +2089,6 @@ bool vo_w32_init(struct vo *vo)
         .dispatch = mp_dispatch_create(w32),
     };
     w32->opts = w32->opts_cache->opts;
-    w32->menu_ctx = mp_win32_menu_init();
     vo->w32 = w32;
 
     if (mp_thread_create(&w32->thread, gui_thread, w32))
@@ -2369,7 +2371,6 @@ void vo_w32_uninit(struct vo *vo)
 
     AvRevertMmThreadCharacteristics(w32->avrt_handle);
 
-    mp_win32_menu_uninit(w32->menu_ctx);
     talloc_free(w32);
     vo->w32 = NULL;
 }
