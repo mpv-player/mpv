@@ -54,6 +54,12 @@ static struct termios tio_orig;
 
 static int tty_in = -1, tty_out = -1;
 
+enum entry_type {
+    ENTRY_TYPE_KEY = 0,
+    ENTRY_TYPE_MOUSE_BUTTON,
+    ENTRY_TYPE_MOUSE_MOVE,
+};
+
 struct key_entry {
     const char *seq;
     int mpkey;
@@ -61,6 +67,10 @@ struct key_entry {
     // existing sequence is replaced by the following string. Matching
     // continues normally, and mpkey is or-ed into the final result.
     const char *replace;
+    // Extend the match length by a certain length, so the contents
+    // after the match can be processed with custom logic.
+    int skip;
+    enum entry_type type;
 };
 
 static const struct key_entry keys[] = {
@@ -160,6 +170,18 @@ static const struct key_entry keys[] = {
     {"\033[29~", MP_KEY_MENU},
     {"\033[Z", MP_KEY_TAB | MP_KEY_MODIFIER_SHIFT},
 
+    // Mouse button inputs. 2 bytes of position information requires special processing.
+    {"\033[M ", MP_MBTN_LEFT | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    {"\033[M!", MP_MBTN_MID | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    {"\033[M\"", MP_MBTN_RIGHT | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    {"\033[M#", MP_INPUT_RELEASE_ALL, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    {"\033[M`", MP_WHEEL_UP, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    {"\033[Ma", MP_WHEEL_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_BUTTON},
+    // Mouse move inputs. No key events should be generated for them.
+    {"\033[M@", MP_MBTN_LEFT | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_MOVE},
+    {"\033[MA", MP_MBTN_MID | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_MOVE},
+    {"\033[MB", MP_MBTN_RIGHT | MP_KEY_STATE_DOWN, .skip = 2, .type = ENTRY_TYPE_MOUSE_MOVE},
+    {"\033[MC", MP_INPUT_RELEASE_ALL, .skip = 2, .type = ENTRY_TYPE_MOUSE_MOVE},
     {0}
 };
 
@@ -218,6 +240,13 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             int mods = 0;
             if (buf.b[0] == '\033') {
                 if (buf.len > 1 && buf.b[1] == '[') {
+                    // Throw away unrecognized mouse CSI sequences.
+                    // Cannot be handled by the loop below since the bytes
+                    // afterwards can be out of that range.
+                    if (buf.len > 2 && buf.b[2] == 'M') {
+                        skip_buf(&buf, buf.len);
+                        continue;
+                    }
                     // unknown CSI sequence. wait till it completes
                     for (int i = 2; i < buf.len; i++) {
                         if (buf.b[i] >= 0x40 && buf.b[i] <= 0x7E)  {
@@ -250,7 +279,7 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             continue;
         }
 
-        int seq_len = strlen(match->seq);
+        int seq_len = strlen(match->seq) + match->skip;
         if (seq_len > buf.len)
             goto read_more; /* partial match */
 
@@ -264,7 +293,23 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             continue;
         }
 
-        mp_input_put_key(input_ctx, buf.mods | match->mpkey);
+        // Parse the initially skipped mouse position information.
+        // The positions are 1-based character cell positions plus 32.
+        // Treat mouse position as the pixel values at the center of the cell.
+        if ((match->type == ENTRY_TYPE_MOUSE_BUTTON ||
+             match->type == ENTRY_TYPE_MOUSE_MOVE) && seq_len >= 6)
+        {
+            int num_rows        = 80;
+            int num_cols        = 25;
+            int total_px_width  = 0;
+            int total_px_height = 0;
+            terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
+            mp_input_set_mouse_pos(input_ctx,
+                (buf.b[4] - 32.5) * (total_px_width / num_cols),
+                (buf.b[5] - 32.5) * (total_px_height / num_rows));
+        }
+        if (match->type != ENTRY_TYPE_MOUSE_MOVE)
+            mp_input_put_key(input_ctx, buf.mods | match->mpkey);
         skip_buf(&buf, seq_len);
     }
 
@@ -296,12 +341,12 @@ static void do_activate_getch2(void)
     enable_kx(true);
 
     struct termios tio_new;
-    tcgetattr(tty_in,&tio_new);
+    tcgetattr(tty_in, &tio_new);
 
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
-    tcsetattr(tty_in,TCSANOW,&tio_new);
+    tcsetattr(tty_in, TCSANOW, &tio_new);
 
     getch2_active = 1;
 }
@@ -541,6 +586,12 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
     *cols = ws.ws_col;
     *px_width = ws.ws_xpixel;
     *px_height = ws.ws_ypixel;
+}
+
+void terminal_set_mouse_input(bool enable)
+{
+    printf(enable ? TERM_ESC_ENABLE_MOUSE : TERM_ESC_DISABLE_MOUSE);
+    fflush(stdout);
 }
 
 void terminal_init(void)

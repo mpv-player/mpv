@@ -271,7 +271,7 @@ static int init(struct sd *sd)
         strcmp(sd->codec->codec, "null") != 0)
     {
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->codec);
+        ctx->converter = lavc_conv_create(sd);
         if (!ctx->converter)
             return -1;
 
@@ -510,7 +510,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
-#ifdef ASS_JUSTIFY_AUTO
+#if LIBASS_VERSION >= 0x01306000
     if ((converted || shared_opts->ass_style_override[sd->order]) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
@@ -527,8 +527,16 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);
 #if LIBASS_VERSION >= 0x01600010
-    if (converted)
+    if (converted) {
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+        if (!opts->sub_vsfilter_bidi_compat) {
+            for (int n = 0; n < track->n_styles; n++) {
+                track->styles[n].Encoding = -1;
+            }
+            ass_track_set_feature(track, ASS_FEATURE_BIDI_BRACKETS, 1);
+            ass_track_set_feature(track, ASS_FEATURE_WHOLE_TEXT_LAYOUT, 1);
+        }
+    }
 #endif
     if (converted) {
         bool override_playres = true;
@@ -550,12 +558,13 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         if (override_playres) {
             int vidw = dim->w - (dim->ml + dim->mr);
             int vidh = dim->h - (dim->mt + dim->mb);
+            int old_playresx = track->PlayResX;
             track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
-            // ffmpeg and mpv use a default PlayResX of 384 when it is not known,
-            // this comes from VSFilter.
-            double fix_margins = track->PlayResX / (double)MP_ASS_FONT_PLAYRESX;
-            track->styles->MarginL = round(track->styles->MarginL * fix_margins);
-            track->styles->MarginR = round(track->styles->MarginR * fix_margins);
+            double fix_margins = track->PlayResX / (double)old_playresx;
+            for (int n = 0; n < track->n_styles; n++) {
+                track->styles[n].MarginL = round(track->styles[n].MarginL * fix_margins);
+                track->styles[n].MarginR = round(track->styles[n].MarginR * fix_margins);
+            }
         }
     }
 }

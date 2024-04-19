@@ -157,6 +157,7 @@ static void wayland_vk_update_render_opts(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {
     .type               = "vulkan",
     .name               = "waylandvk",
+    .description        = "Wayland/Vulkan",
     .reconfig           = wayland_vk_reconfig,
     .control            = wayland_vk_control,
     .wakeup             = wayland_vk_wakeup,

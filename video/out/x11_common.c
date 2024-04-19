@@ -69,6 +69,7 @@
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
 #define vo_wm_STICKY 32
+#define vo_wm_SKIP_TASKBAR 64
 
 /* EWMH state actions, see
          http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
@@ -148,6 +149,7 @@ static void set_screensaver(struct vo_x11_state *x11, bool enabled);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
 static void vo_x11_setlayer(struct vo *vo, bool ontop);
+static void vo_x11_set_in_taskbar(struct vo *vo, bool in);
 static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce);
 static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4]);
 static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
@@ -335,6 +337,7 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
     NET_WM_STATE_TEST(STAYS_ON_TOP);
     NET_WM_STATE_TEST(BELOW);
     NET_WM_STATE_TEST(STICKY);
+    NET_WM_STATE_TEST(SKIP_TASKBAR);
     return 0;
 }
 
@@ -1809,8 +1812,8 @@ void vo_x11_config_vo_window(struct vo *vo)
         rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
 
-    bool reset_size = (x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc)) &&
-                      (opts->auto_window_resize || x11->geometry_change);
+    bool reset_size = ((x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc))
+                       && opts->auto_window_resize) || x11->geometry_change;
     reset_size |= (x11->old_x != rc.x0 || x11->old_y != rc.y0) &&
                   (x11->geometry_change);
 
@@ -1830,6 +1833,8 @@ void vo_x11_config_vo_window(struct vo *vo)
 
     if (opts->ontop)
         vo_x11_setlayer(vo, opts->ontop);
+    if (!opts->show_in_taskbar)
+        vo_x11_set_in_taskbar(vo, opts->show_in_taskbar);
 
     vo_x11_fullscreen(vo);
 
@@ -1887,6 +1892,19 @@ static void vo_x11_setlayer(struct vo *vo, bool ontop)
         params[1] = CurrentTime;
         MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n", params[0]);
         x11_send_ewmh_msg(x11, "_WIN_LAYER", params);
+    }
+}
+
+static void vo_x11_set_in_taskbar(struct vo *vo, bool in)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    if (x11->parent || !x11->window)
+        return;
+
+    if (x11->wm_type & (vo_wm_SKIP_TASKBAR)) {
+        char *state = "_NET_WM_STATE_SKIP_TASKBAR";
+        x11_set_ewmh_state(x11, state, !in);
+        MP_VERBOSE(x11, "NET style set skip taskbar (%d).\n", !in);
     }
 }
 
@@ -2074,6 +2092,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_fullscreen(vo);
             if (opt == &opts->ontop)
                 vo_x11_setlayer(vo, opts->ontop);
+            if (opt == &opts->show_in_taskbar)
+                vo_x11_set_in_taskbar(vo, opts->show_in_taskbar);
             if (opt == &opts->border || opt == &opts->title_bar)
                 vo_x11_decoration(vo, opts->border, opts->title_bar);
             if (opt == &opts->all_workspaces)

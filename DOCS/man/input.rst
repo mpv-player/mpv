@@ -2690,30 +2690,6 @@ Property list
     enabled, or after precise seeking). Files with imprecise timestamps (such
     as Matroska) might lead to unstable results.
 
-``window-scale`` (RW)
-    Window size multiplier. Setting this will resize the video window to the
-    values contained in ``dwidth`` and ``dheight`` multiplied with the value
-    set with this property. Setting ``1`` will resize to original video size
-    (or to be exact, the size the video filters output). ``2`` will set the
-    double size, ``0.5`` halves the size.
-
-    Note that setting a value identical to its previous value will not resize
-    the window. That's because this property mirrors the ``window-scale``
-    option, and setting an option to its previous value is ignored. If this
-    value is set while the window is in a fullscreen, the multiplier is not
-    applied until the window is taken out of that state. Writing this property
-    to a maximized window can unmaximize the window depending on the OS and
-    window manager. If the window does not unmaximize, the multiplier will be
-    applied if the user unmaximizes the window later.
-
-    See ``current-window-scale`` for the value derived from the actual window
-    size.
-
-    Since mpv 0.31.0, this always returns the previously set value (or the
-    default value), instead of the value implied by the actual window size.
-    Before mpv 0.31.0, this returned what ``current-window-scale`` returns now,
-    after the window was created.
-
 ``current-window-scale`` (RW)
     The ``window-scale`` value calculated from the current window size. This
     has the same value as ``window-scale`` if the window size was not changed
@@ -2722,10 +2698,9 @@ Property list
     calculated from the last non-fullscreen size of the window. The property
     is unavailable if no video is active.
 
-    When setting this property in the fullscreen or maximized state, the behavior
-    is the same as window-scale. In all other cases, setting the value of this
-    property will always resize the window. This does not affect the value of
-    ``window-scale``.
+    It is also possible to write to this property. This has the same behavior as
+    writing ``window-scale``. Note that writing to ``current-window-scale`` will
+    not affect the value of ``window-scale``.
 
 ``focused``
     Whether the window has focus. Might not be supported by all VOs.
@@ -2867,6 +2842,11 @@ Property list
     subtitles, returns the first start time. If no current subtitle is present
     null is returned instead.
 
+    This has a sub-property:
+
+    ``sub-start/full``
+        ``sub-start`` with milliseconds.
+
 ``secondary-sub-start``
     Same as ``sub-start``, but for the secondary subtitles.
 
@@ -2875,6 +2855,11 @@ Property list
     subtitles, return the last end time. If no current subtitle is present, or
     if it's present but has unknown or incorrect duration, null is returned
     instead.
+
+    This has a sub-property:
+
+    ``sub-end/full``
+        ``sub-end`` with milliseconds.
 
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.
@@ -2966,7 +2951,7 @@ Property list
         Name of the Nth entry. Available if the playlist file contains
         such fields and mpv's parser supports it for the given
         playlist format, or if the playlist entry has been opened before and a
-        media-title other then then filename has been acquired.
+        media-title other than filename has been acquired.
 
     ``playlist/N/id``
         Unique ID for this entry. This is an automatically assigned integer ID
@@ -3076,6 +3061,9 @@ Property list
         (``--demuxer=lavf``) is used. For mkv files, the index will usually
         match even if the default (builtin) demuxer is used, but there is
         no hard guarantee.
+
+    ``track-list/N/decoder``
+        If this track is being decoded, the short decoder name,
 
     ``track-list/N/decoder-desc``
         If this track is being decoded, the human-readable decoder name,

@@ -123,7 +123,7 @@ static void wakeup_demux(void *ctx)
     mp_dispatch_interrupt(q);
 }
 
-static void sub_destroy_cached_pkts(struct dec_sub *sub)
+static void destroy_cached_pkts(struct dec_sub *sub)
 {
     int index = 0;
     while (index < sub->num_cached_pkts) {
@@ -204,7 +204,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
     };
     sub->opts = sub->opts_cache->opts;
     sub->shared_opts = sub->shared_opts_cache->opts;
-    mp_mutex_init_type(&sub->lock, MP_MUTEX_RECURSIVE);
+    mp_mutex_init(&sub->lock);
 
     sub->sd = init_decoder(sub);
     if (sub->sd) {
@@ -445,11 +445,14 @@ char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type)
 
 char *sub_ass_get_extradata(struct dec_sub *sub)
 {
+    mp_mutex_lock(&sub->lock);
     if (strcmp(sub->sd->codec->codec, "ass") != 0)
         return NULL;
     char *extradata = sub->sd->codec->extradata;
     int extradata_size = sub->sd->codec->extradata_size;
-    return talloc_strndup(NULL, extradata, extradata_size);
+    char *data = talloc_strndup(NULL, extradata, extradata_size);
+    mp_mutex_unlock(&sub->lock);
+    return data;
 }
 
 struct sd_times sub_get_times(struct dec_sub *sub, double pts)
@@ -476,7 +479,7 @@ void sub_reset(struct dec_sub *sub)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
-    sub_destroy_cached_pkts(sub);
+    destroy_cached_pkts(sub);
     TA_FREEP(&sub->new_segment);
     mp_mutex_unlock(&sub->lock);
 }
@@ -548,10 +551,16 @@ void sub_set_play_dir(struct dec_sub *sub, int dir)
 
 bool sub_is_primary_visible(struct dec_sub *sub)
 {
-    return sub->shared_opts->sub_visibility[0];
+    mp_mutex_lock(&sub->lock);
+    bool ret = sub->shared_opts->sub_visibility[0];
+    mp_mutex_unlock(&sub->lock);
+    return ret;
 }
 
 bool sub_is_secondary_visible(struct dec_sub *sub)
 {
-    return sub->shared_opts->sub_visibility[1];
+    mp_mutex_lock(&sub->lock);
+    bool ret = sub->shared_opts->sub_visibility[1];
+    mp_mutex_unlock(&sub->lock);
+    return ret;
 }

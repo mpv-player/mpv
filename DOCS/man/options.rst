@@ -2560,6 +2560,15 @@ Subtitles
     offset scale factor, not what the video filter chain or the video output
     use.
 
+``--sub-vsfilter-bidi-compat=<yes|no>``
+    Set implicit bidi detection to ``ltr`` instead of ``auto`` to match ASS'
+    default. This also disables libass' incompatible extensions. This currently
+    includes bracket pair matching according to the revised Unicode
+    Bidirectional Algorithm introduced in Unicode 6.3, and also affects how BiDi
+    runs are split and processed, as well as soft linewrapping of unicode text.
+
+    This affects plaintext (non-ASS) subtitles only. Default: no.
+
 ``--sub-ass-vsfilter-color-compat=<basic|full|force-601|no>``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
     was not color space aware. This was no problem as long as the color space
@@ -3388,7 +3397,10 @@ Window
 ``--window-scale=<factor>``
     Resize the video window to a multiple (or fraction) of the video size. This
     option is applied before ``--autofit`` and other options are applied (so
-    they override this option).
+    they override this option). Changing this option while the window is
+    maximized can unmaximize the window depending on the OS and window manager.
+    If the window does not unmaximize, the multiplier will be applied if the user
+    unmaximizes the window later.
 
     For example, ``--window-scale=0.5`` would show the window at half the
     video size.
@@ -3477,6 +3489,12 @@ Window
 ``--native-fs=<yes|no>``
     (macOS only)
     Uses the native fullscreen mechanism of the OS (default: yes).
+
+``--show-in-taskbar=<yes|no>``
+    (Windows and X11 only)
+    Show mpv in the taskbar (default: yes). If set to no, mpv will no longer
+    appear in taskbars and tasklists in supported window managers, and may be
+    excluded from Alt+Tab window switching.
 
 ``--monitorpixelaspect=<ratio>``
     Set the aspect of a single pixel of your monitor or TV screen (default:
@@ -6370,13 +6388,15 @@ them.
 ``--gpu-sw``
     Continue even if a software renderer is detected.
 
-``--gpu-context=<sys>``
-    The value ``auto`` (the default) selects the GPU context. You can also pass
-    ``help`` to get a complete list of compiled in backends (sorted by
-    autoprobe order).
+``--gpu-context=<context1,context2,...[,]>``
+    Specify a priority list of the GPU contexts to be used.
+    The value ``auto`` (the default) selects the GPU context with the default autoprobe
+    order. You can also pass ``help`` to get a complete list of compiled in backends
+    (sorted by the default autoprobe order).
 
     auto
-        auto-select (default)
+        auto-select (default). Note that this context must be used alone and
+        does not participate in the priority list.
     win
         Win32/WGL
     winvk

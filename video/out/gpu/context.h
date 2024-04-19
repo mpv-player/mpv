@@ -10,7 +10,7 @@ struct ra_ctx_opts {
     bool want_alpha;      // create an alpha framebuffer if possible
     bool debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
-    char *context_name;  // filter by `ra_ctx_fns.name`
+    struct m_obj_settings *context_list; // list of `ra_ctx_fns.name` to probe
     char *context_type;  // filter by `ra_ctx_fns.type`
 };
 
@@ -34,8 +34,7 @@ struct ra_ctx {
 struct ra_ctx_fns {
     const char *type; // API type (for --gpu-api)
     const char *name; // name (for --gpu-context)
-
-    bool hidden; // hide the ra_ctx from users
+    const char *description; // description (for --gpu-context=help)
 
     // Resize the window, or create a new window if there isn't one yet.
     // Currently, there is an unfortunate interaction with ctx->vo, and

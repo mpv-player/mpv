@@ -1965,10 +1965,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct mp_codec_params p =
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
-    char decoder_desc[256] = {0};
-    if (track->dec)
-        mp_decoder_wrapper_get_desc(track->dec, decoder_desc, sizeof(decoder_desc));
-
     bool has_rg = track->stream && track->stream->codec->replaygain_data;
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
                                        : (struct replaygain_data){0};
@@ -2017,8 +2013,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->hls_bitrate},
         {"program-id",  SUB_PROP_INT(track->program_id),
                         .unavailable = track->program_id < 0},
-        {"decoder-desc", SUB_PROP_STR(decoder_desc),
-                        .unavailable = !decoder_desc[0]},
+        {"decoder",     SUB_PROP_STR(p.decoder),
+                        .unavailable = !p.decoder},
+        {"decoder-desc", SUB_PROP_STR(p.decoder_desc),
+                        .unavailable = !p.decoder_desc},
         {"codec",       SUB_PROP_STR(p.codec),
                         .unavailable = !p.codec},
         {"codec-desc",  SUB_PROP_STR(p.codec_desc),
@@ -3052,7 +3050,7 @@ static int mp_property_sub_start(void *ctx, struct m_property *prop,
     double start = get_times(ctx, prop, action, arg).start;
     if (start == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, start);
+    return property_time(action, arg, start);
 }
 
 
@@ -3062,7 +3060,7 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     double end = get_times(ctx, prop, action, arg).end;
     if (end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, end);
+    return property_time(action, arg, end);
 }
 
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
@@ -7252,7 +7250,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     }
 
     if (opt_ptr == &opts->vo->video_driver_list ||
-        opt_ptr == &opts->ra_ctx_opts->context_name ||
+        opt_ptr == &opts->ra_ctx_opts->context_list ||
         opt_ptr == &opts->ra_ctx_opts->context_type) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_out(mpctx);

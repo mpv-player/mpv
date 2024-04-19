@@ -111,15 +111,35 @@ static bool is_native_out_vt(HANDLE hOut)
 void terminal_get_size(int *w, int *h)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE hOut = hSTDOUT;
     if (GetConsoleScreenBufferInfo(hOut, &cinfo)) {
         *w = cinfo.dwMaximumWindowSize.X - (is_native_out_vt(hOut) ? 0 : 1);
         *h = cinfo.dwMaximumWindowSize.Y;
     }
 }
 
+static bool get_font_size(int *w, int *h)
+{
+  CONSOLE_FONT_INFO finfo;
+  HANDLE hOut = hSTDOUT;
+  BOOL res = GetCurrentConsoleFont(hOut, FALSE, &finfo);
+  if (res) {
+      *w = finfo.dwFontSize.X;
+      *h = finfo.dwFontSize.Y;
+  }
+  return res;
+}
+
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 {
+    int w = 0, h = 0, fw = 0, fh = 0;
+    terminal_get_size(&w, &h);
+    if (get_font_size(&fw, &fh)) {
+        *px_width = fw * w;
+        *px_height = fh * h;
+        *rows = w;
+        *cols = h;
+    }
 }
 
 static bool has_input_events(HANDLE h)
@@ -139,35 +159,80 @@ static void read_input(HANDLE in)
             break;
 
         // Only key-down events are interesting to us
-        if (event.EventType != KEY_EVENT)
-            continue;
-        KEY_EVENT_RECORD *record = &event.Event.KeyEvent;
-        if (!record->bKeyDown)
-            continue;
+        switch (event.EventType)
+        {
+        case KEY_EVENT: {
+            KEY_EVENT_RECORD *record = &event.Event.KeyEvent;
+            if (!record->bKeyDown)
+                continue;
 
-        UINT vkey = record->wVirtualKeyCode;
-        bool ext = record->dwControlKeyState & ENHANCED_KEY;
+            UINT vkey = record->wVirtualKeyCode;
+            bool ext = record->dwControlKeyState & ENHANCED_KEY;
 
-        int mods = 0;
-        if (record->dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
-            mods |= MP_KEY_MODIFIER_ALT;
-        if (record->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
-            mods |= MP_KEY_MODIFIER_CTRL;
-        if (record->dwControlKeyState & SHIFT_PRESSED)
-            mods |= MP_KEY_MODIFIER_SHIFT;
+            int mods = 0;
+            if (record->dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+                mods |= MP_KEY_MODIFIER_ALT;
+            if (record->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
+                mods |= MP_KEY_MODIFIER_CTRL;
+            if (record->dwControlKeyState & SHIFT_PRESSED)
+                mods |= MP_KEY_MODIFIER_SHIFT;
 
-        int mpkey = mp_w32_vkey_to_mpkey(vkey, ext);
-        if (mpkey) {
-            mp_input_put_key(input_ctx, mpkey | mods);
-        } else {
-            // Only characters should be remaining
-            int c = record->uChar.UnicodeChar;
-            // The ctrl key always produces control characters in the console.
-            // Shift them back up to regular characters.
-            if (c > 0 && c < 0x20 && (mods & MP_KEY_MODIFIER_CTRL))
-                c += (mods & MP_KEY_MODIFIER_SHIFT) ? 0x40 : 0x60;
-            if (c >= 0x20)
-                mp_input_put_key(input_ctx, c | mods);
+            int mpkey = mp_w32_vkey_to_mpkey(vkey, ext);
+            if (mpkey) {
+                mp_input_put_key(input_ctx, mpkey | mods);
+            } else {
+                // Only characters should be remaining
+                int c = record->uChar.UnicodeChar;
+                // The ctrl key always produces control characters in the console.
+                // Shift them back up to regular characters.
+                if (c > 0 && c < 0x20 && (mods & MP_KEY_MODIFIER_CTRL))
+                    c += (mods & MP_KEY_MODIFIER_SHIFT) ? 0x40 : 0x60;
+                if (c >= 0x20)
+                    mp_input_put_key(input_ctx, c | mods);
+            }
+            break;
+        }
+        case MOUSE_EVENT: {
+            MOUSE_EVENT_RECORD *record = &event.Event.MouseEvent;
+            int mods = 0;
+            if (record->dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+                mods |= MP_KEY_MODIFIER_ALT;
+            if (record->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
+                mods |= MP_KEY_MODIFIER_CTRL;
+            if (record->dwControlKeyState & SHIFT_PRESSED)
+                mods |= MP_KEY_MODIFIER_SHIFT;
+
+            switch (record->dwEventFlags) {
+            case MOUSE_MOVED: {
+                int w = 0, h = 0;
+                if (get_font_size(&w, &h)) {
+                    mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
+                                                      h * (record->dwMousePosition.Y + 0.5));
+                }
+                break;
+            }
+            case MOUSE_HWHEELED: {
+                int button = (int16_t)HIWORD(record->dwButtonState) > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
+                mp_input_put_key(input_ctx, button | mods);
+                break;
+            }
+            case MOUSE_WHEELED: {
+                int button = (int16_t)HIWORD(record->dwButtonState) > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
+                mp_input_put_key(input_ctx, button | mods);
+                break;
+            }
+            default: {
+                int left_button_state = record->dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED ?
+                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
+                mp_input_put_key(input_ctx, MP_MBTN_LEFT | mods | left_button_state);
+                int right_button_state = record->dwButtonState & RIGHTMOST_BUTTON_PRESSED ?
+                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
+                mp_input_put_key(input_ctx, MP_MBTN_RIGHT | mods | right_button_state);
+                break;
+            }
+            }
+            break;
+        }
         }
     }
 }
@@ -554,6 +619,17 @@ bool terminal_try_attach(void)
     reopen_console_handle(STD_ERROR_HANDLE, STDERR_FILENO, stderr);
 
     return true;
+}
+
+void terminal_set_mouse_input(bool enable)
+{
+    DWORD cmode;
+    HANDLE in = hSTDIN;
+    if (GetConsoleMode(in, &cmode)) {
+        cmode = enable ? cmode | ENABLE_MOUSE_INPUT
+                       : cmode & (~ENABLE_MOUSE_INPUT);
+        SetConsoleMode(in, cmode);
+    }
 }
 
 void terminal_init(void)

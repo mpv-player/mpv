@@ -115,10 +115,14 @@ paths = executable('paths', 'paths.c', include_directories: incdir,
 test('paths', paths)
 
 if get_option('libmpv')
-    libmpv_test = executable('libmpv-test', 'libmpv_test.c',
-                             include_directories: incdir, link_with: libmpv)
+    exe = executable('libmpv-test', 'libmpv_test.c',
+                     include_directories: incdir, link_with: libmpv)
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
-    test('libmpv', libmpv_test, args: file, timeout: 60)
+    test('libmpv', exe, args: file, timeout: 60)
+
+    exe = executable('libmpv-encode', 'libmpv_encode.c',
+                     include_directories: incdir, link_with: libmpv)
+    test('libmpv-encode', exe, timeout: 30)
 endif
 
 # Supported libavutil versions that work with these tests.

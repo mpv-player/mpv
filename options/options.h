@@ -56,6 +56,7 @@ typedef struct mp_vo_opts {
     bool keepaspect_window;
     bool hidpi_window_scale;
     bool native_fs;
+    bool show_in_taskbar;
 
     int64_t WinID;
 
@@ -104,6 +105,7 @@ struct mp_subtitle_opts {
     bool ass_vsfilter_aspect_compat;
     int ass_vsfilter_color_compat;
     bool ass_vsfilter_blur_compat;
+    bool sub_vsfilter_bidi_compat;
     bool use_embedded_fonts;
     char **ass_style_override_list;
     char *ass_styles_file;

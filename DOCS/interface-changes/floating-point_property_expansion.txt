@@ -1,1 +1,0 @@
-add `>` for fixed precision floating-point property expansion

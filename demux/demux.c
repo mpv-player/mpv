@@ -3173,19 +3173,26 @@ void demux_update(demuxer_t *demuxer, double pts)
 
 static void demux_init_cuesheet(struct demuxer *demuxer)
 {
+    if (demuxer->num_chapters)
+        return;
+
+    struct sh_stream *sh = demuxer->in->metadata_stream;
     char *cue = mp_tags_get_str(demuxer->metadata, "cuesheet");
-    if (cue && !demuxer->num_chapters) {
-        struct cue_file *f = mp_parse_cue(bstr0(cue));
-        if (f) {
-            if (mp_check_embedded_cue(f) < 0) {
-                MP_WARN(demuxer, "Embedded cue sheet references more than one file. "
-                        "Ignoring it.\n");
-            } else {
-                for (int n = 0; n < f->num_tracks; n++) {
-                    struct cue_track *t = &f->tracks[n];
-                    int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
-                    mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
-                }
+    if (!cue && sh)
+        cue = mp_tags_get_str(sh->tags, "cuesheet");
+    if (!cue)
+        return;
+
+    struct cue_file *f = mp_parse_cue(bstr0(cue));
+    if (f) {
+        if (mp_check_embedded_cue(f) < 0) {
+            MP_WARN(demuxer, "Embedded cue sheet references more than one file. "
+                    "Ignoring it.\n");
+        } else {
+            for (int n = 0; n < f->num_tracks; n++) {
+                struct cue_track *t = &f->tracks[n];
+                int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
+                mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
             }
         }
         talloc_free(f);

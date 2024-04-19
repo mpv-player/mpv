@@ -13,6 +13,7 @@
 #include "osdep/windows_utils.h"
 #include "video/out/gpu/spirv.h"
 #include "video/out/gpu/utils.h"
+#include "video/out/gpu/d3d11_helpers.h"
 
 #include "ra_d3d11.h"
 
@@ -43,9 +44,11 @@ struct ra_d3d11 {
 
     struct dll_version d3d_compiler_ver;
 
+#if HAVE_DXGI_DEBUG
     // Debug interfaces (--gpu-debug)
-    ID3D11Debug *debug;
-    ID3D11InfoQueue *iqueue;
+    IDXGIDebug *debug;
+    IDXGIInfoQueue *iqueue;
+#endif
 
     // Device capabilities
     D3D_FEATURE_LEVEL fl;
@@ -2094,24 +2097,25 @@ static uint64_t timer_stop(struct ra *ra, ra_timer *ratimer)
     return timer->result;
 }
 
-static int map_msg_severity(D3D11_MESSAGE_SEVERITY sev)
+#if HAVE_DXGI_DEBUG
+static int map_msg_severity(DXGI_INFO_QUEUE_MESSAGE_SEVERITY sev)
 {
     switch (sev) {
-    case D3D11_MESSAGE_SEVERITY_CORRUPTION:
+    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION:
         return MSGL_FATAL;
-    case D3D11_MESSAGE_SEVERITY_ERROR:
+    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR:
         return MSGL_ERR;
-    case D3D11_MESSAGE_SEVERITY_WARNING:
+    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING:
         return MSGL_WARN;
     default:
-    case D3D11_MESSAGE_SEVERITY_INFO:
-    case D3D11_MESSAGE_SEVERITY_MESSAGE:
+    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_INFO:
+    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_MESSAGE:
         return MSGL_DEBUG;
     }
 }
 
 static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
-                                  D3D11_MESSAGE_SEVERITY sev)
+                                  DXGI_INFO_QUEUE_MESSAGE_SEVERITY sev)
 {
     switch (id) {
     // These are normal. The RA timer queue habitually reuses timer objects
@@ -2168,9 +2172,11 @@ static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
         return map_msg_severity(sev);
     }
 }
+#endif
 
 static void debug_marker(struct ra *ra, const char *msg)
 {
+#if HAVE_DXGI_DEBUG
     struct ra_d3d11 *p = ra->priv;
     void *talloc_ctx = talloc_new(NULL);
     HRESULT hr;
@@ -2180,33 +2186,38 @@ static void debug_marker(struct ra *ra, const char *msg)
 
     // Copy debug-layer messages to mpv's log output
     bool printed_header = false;
-    uint64_t messages = ID3D11InfoQueue_GetNumStoredMessages(p->iqueue);
+    uint64_t messages = IDXGIInfoQueue_GetNumStoredMessages(p->iqueue,
+                                                            DXGI_DEBUG_ALL);
     for (uint64_t i = 0; i < messages; i++) {
         SIZE_T len;
-        hr = ID3D11InfoQueue_GetMessage(p->iqueue, i, NULL, &len);
+        hr = IDXGIInfoQueue_GetMessage(p->iqueue, DXGI_DEBUG_ALL, i, NULL, &len);
         if (FAILED(hr) || !len)
             goto done;
 
-        D3D11_MESSAGE *d3dmsg = talloc_size(talloc_ctx, len);
-        hr = ID3D11InfoQueue_GetMessage(p->iqueue, i, d3dmsg, &len);
+        DXGI_INFO_QUEUE_MESSAGE *dxgimsg = talloc_size(talloc_ctx, len);
+        hr = IDXGIInfoQueue_GetMessage(p->iqueue, DXGI_DEBUG_ALL, i, dxgimsg, &len);
         if (FAILED(hr))
             goto done;
 
-        int msgl = map_msg_severity_by_id(d3dmsg->ID, d3dmsg->Severity);
+        int msgl = IsEqualGUID(&dxgimsg->Producer, &DXGI_DEBUG_D3D11)
+                        ? map_msg_severity_by_id(dxgimsg->ID, dxgimsg->Severity)
+                        : map_msg_severity(dxgimsg->Severity);
+
         if (mp_msg_test(ra->log, msgl)) {
             if (!printed_header)
                 MP_INFO(ra, "%s:\n", msg);
             printed_header = true;
 
-            MP_MSG(ra, msgl, "%d: %.*s\n", (int)d3dmsg->ID,
-                (int)d3dmsg->DescriptionByteLength, d3dmsg->pDescription);
-            talloc_free(d3dmsg);
+            MP_MSG(ra, msgl, "%d: %.*s\n", (int)dxgimsg->ID,
+                (int)dxgimsg->DescriptionByteLength, dxgimsg->pDescription);
+            talloc_free(dxgimsg);
         }
     }
 
-    ID3D11InfoQueue_ClearStoredMessages(p->iqueue);
+    IDXGIInfoQueue_ClearStoredMessages(p->iqueue, DXGI_DEBUG_ALL);
 done:
     talloc_free(talloc_ctx);
+#endif
 }
 
 static void destroy(struct ra *ra)
@@ -2237,16 +2248,18 @@ static void destroy(struct ra *ra)
     }
     SAFE_RELEASE(p->ctx);
 
+#if HAVE_DXGI_DEBUG
     if (p->debug) {
         // Report any leaked objects
         debug_marker(ra, "after destroy");
-        ID3D11Debug_ReportLiveDeviceObjects(p->debug, D3D11_RLDO_DETAIL);
+        IDXGIDebug_ReportLiveObjects(p->debug, DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
         debug_marker(ra, "after leak check");
-        ID3D11Debug_ReportLiveDeviceObjects(p->debug, D3D11_RLDO_SUMMARY);
+        IDXGIDebug_ReportLiveObjects(p->debug, DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_SUMMARY);
         debug_marker(ra, "after leak summary");
     }
     SAFE_RELEASE(p->debug);
     SAFE_RELEASE(p->iqueue);
+#endif
 
     talloc_free(ra);
 }
@@ -2278,34 +2291,6 @@ void ra_d3d11_flush(struct ra *ra)
 {
     struct ra_d3d11 *p = ra->priv;
     ID3D11DeviceContext_Flush(p->ctx);
-}
-
-static void init_debug_layer(struct ra *ra)
-{
-    struct ra_d3d11 *p = ra->priv;
-    HRESULT hr;
-
-    hr = ID3D11Device_QueryInterface(p->dev, &IID_ID3D11Debug,
-                                     (void**)&p->debug);
-    if (FAILED(hr)) {
-        MP_ERR(ra, "Failed to get debug device: %s\n", mp_HRESULT_to_str(hr));
-        return;
-    }
-
-    hr = ID3D11Device_QueryInterface(p->dev, &IID_ID3D11InfoQueue,
-                                     (void**)&p->iqueue);
-    if (FAILED(hr)) {
-        MP_ERR(ra, "Failed to get info queue: %s\n", mp_HRESULT_to_str(hr));
-        return;
-    }
-
-    // Store an unlimited amount of messages in the buffer. This is fine
-    // because we flush stored messages regularly (in debug_marker.)
-    ID3D11InfoQueue_SetMessageCountLimit(p->iqueue, -1);
-
-    // Push empty filter to get everything
-    D3D11_INFO_QUEUE_FILTER filter = {0};
-    ID3D11InfoQueue_PushStorageFilter(p->iqueue, &filter);
 }
 
 static struct dll_version get_dll_version(HMODULE dll)
@@ -2466,8 +2451,10 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         p->max_uavs = D3D11_PS_CS_UAV_REGISTER_COUNT;
     }
 
+#if HAVE_DXGI_DEBUG
     if (ID3D11Device_GetCreationFlags(p->dev) & D3D11_CREATE_DEVICE_DEBUG)
-        init_debug_layer(ra);
+        mp_d3d11_get_debug_interfaces(ra->log, &p->debug, &p->iqueue);
+#endif
 
     // Some level 9_x devices don't have timestamp queries
     hr = ID3D11Device_CreateQuery(p->dev,
@@ -2481,9 +2468,11 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ff476874.aspx
     find_max_texture_dimension(ra);
 
+#if HAVE_DXGI_DEBUG
     // Ignore any messages during find_max_texture_dimension
     if (p->iqueue)
-        ID3D11InfoQueue_ClearStoredMessages(p->iqueue);
+        IDXGIInfoQueue_ClearStoredMessages(p->iqueue, DXGI_DEBUG_ALL);
+#endif
 
     MP_VERBOSE(ra, "Maximum Texture2D size: %dx%d\n", ra->max_texture_wh,
                ra->max_texture_wh);

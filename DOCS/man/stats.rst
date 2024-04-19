@@ -35,6 +35,9 @@ UP      Scroll one line up
 DOWN    Scroll one line down
 ====   ==================
 
+Page 4 also binds ``/`` to search for input bindings by typing part of a binding
+or command.
+
 Configuration
 -------------
 
@@ -62,6 +65,8 @@ Configurable Options
     Default: UP
 ``key_scroll_down``
     Default: DOWN
+``key_scroll_search``
+    Default: /
 ``scroll_lines``
     Default: 1
 
@@ -120,7 +125,7 @@ Configurable Options
     Clear data buffers used for drawing graphs when toggling.
 
 ``font``
-    Default: sans-serif
+    Default: same as ``osd-font``
 
     Font name. Should support as many font weights as possible for optimal
     visual experience.
@@ -137,9 +142,9 @@ Configurable Options
     Font size used to render text.
 
 ``font_color``
-    Default: FFFFFF
+    Default: same as ``osd-color``
 
-    Font color.
+    Color of the text.
 
 ``border_size``
     Default: 0.8
@@ -147,19 +152,41 @@ Configurable Options
     Size of border drawn around the font.
 
 ``border_color``
-    Default: 262626
+    Default: same as ``osd-border-color``
 
-    Color of drawn border.
+    Color of the text border.
+
+``shadow_x_offset``
+    Default: 0
+
+    The horizontal distance from the text to position the shadow at.
+
+``shadow_y_offset``
+    Default: 0
+
+    The vertical distance from the text to position the shadow at.
+
+``shadow_color``
+    Default: same as ``osd-shadow-color``
+
+    Color of the text shadow.
 
 ``alpha``
     Default: 11
 
-    Transparency for drawn text.
+    Transparency of text when ``font_color`` is specified, of text borders when
+    ``border_color`` is specified, and of text shadows when ``shadow_color`` is
+    specified.
 
 ``plot_bg_border_color``
     Default: 0000FF
 
     Border color used for drawing graphs.
+
+``plot_bg_border_width``
+    Default: 0.5
+
+    Border width used for drawing graphs.
 
 ``plot_bg_color``
     Default: 262626
@@ -170,6 +197,12 @@ Configurable Options
     Default: FFFFFF
 
     Color used for drawing graphs.
+
+``vidscale``
+    Default: yes
+
+    Scale the text and graphs with the video.
+    ``no`` tries to keep the sizes constant.
 
 Note: colors are given as hexadecimal values and use ASS tag order: BBGGRR
 (blue green red).

@@ -57,7 +57,27 @@ extern const struct ra_ctx_fns ra_ctx_d3d11;
 /* No API */
 extern const struct ra_ctx_fns ra_ctx_wldmabuf;
 
+/* Autoprobe dummy. Always fails to create. */
+static bool dummy_init(struct ra_ctx *ctx)
+{
+    return false;
+}
+
+static void dummy_uninit(struct ra_ctx *ctx)
+{
+}
+
+static const struct ra_ctx_fns ra_ctx_dummy = {
+    .type           = "auto",
+    .name           = "auto",
+    .description    = "Auto detect",
+    .init           = dummy_init,
+    .uninit         = dummy_uninit,
+};
+
 static const struct ra_ctx_fns *contexts[] = {
+    &ra_ctx_dummy,
+// Direct3D contexts:
 #if HAVE_D3D11
     &ra_ctx_d3d11,
 #endif
@@ -110,21 +130,53 @@ static const struct ra_ctx_fns *contexts[] = {
     &ra_ctx_vulkan_mac,
 #endif
 #endif
+};
 
+static const struct ra_ctx_fns *no_api_contexts[] = {
+    &ra_ctx_dummy,
 /* No API contexts: */
 #if HAVE_DMABUF_WAYLAND
     &ra_ctx_wldmabuf,
 #endif
 };
 
+static bool get_desc(struct m_obj_desc *dst, int index)
+{
+    if (index >= MP_ARRAY_SIZE(contexts))
+        return false;
+    const struct ra_ctx_fns *ctx = contexts[index];
+    *dst = (struct m_obj_desc) {
+        .name = ctx->name,
+        .description = ctx->description,
+    };
+    return true;
+}
+
+static bool check_unknown_entry(const char *name)
+{
+    struct bstr param = bstr0(name);
+    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
+        if (bstr_equals0(param, contexts[i]->name))
+            return true;
+    }
+    return false;
+}
+
+const struct m_obj_list ra_ctx_obj_list = {
+    .get_desc = get_desc,
+    .check_unknown_entry = check_unknown_entry,
+    .description = "GPU contexts",
+    .allow_trailer = true,
+    .disallow_positional_parameters = true,
+    .use_global_options = true,
+};
+
 static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
                            struct bstr name)
 {
     mp_info(log, "GPU APIs (contexts):\n");
-    mp_info(log, "    auto (autodetect)\n");
     for (int n = 0; n < MP_ARRAY_SIZE(contexts); n++) {
-        if (!contexts[n]->hidden)
-            mp_info(log, "    %s (%s)\n", contexts[n]->type, contexts[n]->name);
+        mp_info(log, "    %s (%s)\n", contexts[n]->type, contexts[n]->name);
     }
     return M_OPT_EXIT;
 }
@@ -132,37 +184,63 @@ static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
 static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_api)
 {
     struct bstr param = bstr0(*value);
-    if (bstr_equals0(param, "auto"))
-        return 1;
     for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (bstr_equals0(param, contexts[i]->type) && !contexts[i]->hidden)
+        if (bstr_equals0(param, contexts[i]->type))
             return 1;
     }
     return M_OPT_INVALID;
 }
 
-static int ra_ctx_context_help(struct mp_log *log, const struct m_option *opt,
-                               struct bstr name)
+#define OPT_BASE_STRUCT struct ra_ctx_opts
+const struct m_sub_options ra_ctx_conf = {
+    .opts = (const m_option_t[]) {
+        {"gpu-context",
+            OPT_SETTINGSLIST(context_list, &ra_ctx_obj_list)},
+        {"gpu-api",
+            OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
+            .help = ra_ctx_api_help},
+        {"gpu-debug", OPT_BOOL(debug)},
+        {"gpu-sw", OPT_BOOL(allow_sw)},
+        {0}
+    },
+    .size = sizeof(struct ra_ctx_opts),
+};
+
+static struct ra_ctx *create_in_contexts(struct vo *vo, const char *name, bool api_auto,
+                                         const struct ra_ctx_fns *ctxs[],
+                                         size_t size, struct ra_ctx_opts opts)
 {
-    mp_info(log, "GPU contexts (APIs):\n");
-    mp_info(log, "    auto (autodetect)\n");
-    for (int n = 0; n < MP_ARRAY_SIZE(contexts); n++) {
-        if (!contexts[n]->hidden)
-            mp_info(log, "    %s (%s)\n", contexts[n]->name, contexts[n]->type);
+    for (int i = 0; i < size; i++) {
+        if (strcmp(name, ctxs[i]->name) != 0)
+            continue;
+        if (!api_auto && strcmp(ctxs[i]->type, opts.context_type) != 0)
+            continue;
+        struct ra_ctx *ctx = talloc_ptrtype(NULL, ctx);
+        *ctx = (struct ra_ctx) {
+            .vo = vo,
+            .global = vo->global,
+            .log = mp_log_new(ctx, vo->log, ctxs[i]->type),
+            .opts = opts,
+            .fns = ctxs[i],
+        };
+
+        MP_VERBOSE(ctx, "Initializing GPU context '%s'\n", ctx->fns->name);
+        if (ctxs[i]->init(ctx))
+            return ctx;
+        talloc_free(ctx);
     }
-    return M_OPT_EXIT;
+    return NULL;
 }
 
-static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_context)
+struct ra_ctx *ra_ctx_create_by_name(struct vo *vo, const char *name)
 {
-    struct bstr param = bstr0(*value);
-    if (bstr_equals0(param, "auto"))
-        return 1;
-    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (bstr_equals0(param, contexts[i]->name) && !contexts[i]->hidden)
-            return 1;
-    }
-    return M_OPT_INVALID;
+    struct ra_ctx_opts dummy = {0};
+    struct ra_ctx *ctx = create_in_contexts(vo, name, true, contexts,
+                                            MP_ARRAY_SIZE(contexts), dummy);
+    if (ctx)
+        return ctx;
+    return create_in_contexts(vo, name, true, no_api_contexts,
+                              MP_ARRAY_SIZE(no_api_contexts), dummy);
 }
 
 // Create a VO window and create a RA context on it.
@@ -170,7 +248,9 @@ static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_context)
 struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
 {
     bool api_auto = !opts.context_type || strcmp(opts.context_type, "auto") == 0;
-    bool ctx_auto = !opts.context_name || strcmp(opts.context_name, "auto") == 0;
+    bool ctx_auto = !opts.context_list ||
+                    (opts.context_list[0].name &&
+                     strcmp(opts.context_list[0].name, "auto") == 0);
 
     if (ctx_auto) {
         MP_VERBOSE(vo, "Probing for best GPU context.\n");
@@ -182,31 +262,27 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
     bool old_probing = vo->probing;
     vo->probing = opts.probing;
 
-    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (contexts[i]->hidden)
-            continue;
-        if (!opts.probing && strcmp(contexts[i]->name, opts.context_name) != 0)
-            continue;
-        if (!api_auto && strcmp(contexts[i]->type, opts.context_type) != 0)
-            continue;
-
-        struct ra_ctx *ctx = talloc_ptrtype(NULL, ctx);
-        *ctx = (struct ra_ctx) {
-            .vo = vo,
-            .global = vo->global,
-            .log = mp_log_new(ctx, vo->log, contexts[i]->type),
-            .opts = opts,
-            .fns = contexts[i],
-        };
-
-        MP_VERBOSE(ctx, "Initializing GPU context '%s'\n", ctx->fns->name);
-        if (contexts[i]->init(ctx)) {
-            vo->probing = old_probing;
-            vo->context_name = ctx->fns->name;
-            return ctx;
+    struct ra_ctx *ctx = NULL;
+    if (opts.probing) {
+        for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
+            ctx = create_in_contexts(vo, contexts[i]->name, api_auto,
+                                     contexts, MP_ARRAY_SIZE(contexts), opts);
+            if (ctx)
+                goto done;
         }
+    }
+    for (int i = 0; opts.context_list && opts.context_list[i].name; i++) {
+        ctx = create_in_contexts(vo, opts.context_list[i].name, api_auto,
+                                 contexts, MP_ARRAY_SIZE(contexts), opts);
+        if (ctx)
+            goto done;
+    }
 
-        talloc_free(ctx);
+done:
+    if (ctx) {
+        vo->probing = old_probing;
+        vo->context_name = ctx->fns->name;
+        return ctx;
     }
 
     vo->probing = old_probing;
@@ -215,28 +291,6 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
     // requested, or the backend creation failed for all of them.
     if (!vo->probing)
         MP_ERR(vo, "Failed initializing any suitable GPU context!\n");
-    return NULL;
-}
-
-struct ra_ctx *ra_ctx_create_by_name(struct vo *vo, const char *name)
-{
-    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (strcmp(name, contexts[i]->name) != 0)
-            continue;
-
-        struct ra_ctx *ctx = talloc_ptrtype(NULL, ctx);
-        *ctx = (struct ra_ctx) {
-            .vo = vo,
-            .global = vo->global,
-            .log = mp_log_new(ctx, vo->log, contexts[i]->type),
-            .fns = contexts[i],
-        };
-
-        MP_VERBOSE(ctx, "Initializing GPU context '%s'\n", ctx->fns->name);
-        if (contexts[i]->init(ctx))
-            return ctx;
-        talloc_free(ctx);
-    }
     return NULL;
 }
 
@@ -254,19 +308,3 @@ void ra_ctx_destroy(struct ra_ctx **ctx_ptr)
 
     *ctx_ptr = NULL;
 }
-
-#define OPT_BASE_STRUCT struct ra_ctx_opts
-const struct m_sub_options ra_ctx_conf = {
-    .opts = (const m_option_t[]) {
-        {"gpu-context",
-            OPT_STRING_VALIDATE(context_name, ra_ctx_validate_context),
-            .help = ra_ctx_context_help},
-        {"gpu-api",
-            OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
-            .help = ra_ctx_api_help},
-        {"gpu-debug", OPT_BOOL(debug)},
-        {"gpu-sw", OPT_BOOL(allow_sw)},
-        {0}
-    },
-    .size = sizeof(struct ra_ctx_opts),
-};
