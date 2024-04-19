@@ -2182,10 +2182,16 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             } else if (changed_option == &vo_opts->cursor_passthrough) {
                 update_cursor_passthrough(w32);
             } else if (changed_option == &vo_opts->border ||
-                       changed_option == &vo_opts->title_bar ||
-                       changed_option == &vo_opts->show_in_taskbar)
+                       changed_option == &vo_opts->title_bar)
             {
                 update_window_style(w32);
+                update_window_state(w32);
+            } else if (changed_option == &vo_opts->show_in_taskbar) {
+                // This hide and show is apparently required according to the documentation:
+                // https://learn.microsoft.com/en-us/windows/win32/shell/taskbar#managing-taskbar-buttons
+                ShowWindow(w32->window, SW_HIDE);
+                update_window_style(w32);
+                ShowWindow(w32->window, SW_SHOW);
                 update_window_state(w32);
             } else if (changed_option == &vo_opts->window_minimized) {
                 update_minimized_state(w32);
