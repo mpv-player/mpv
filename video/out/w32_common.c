@@ -1509,7 +1509,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         break;
     }
-    case WM_SYSCOMMAND:
+    case WM_SYSCOMMAND: {
         switch (wParam & 0xFFF0) {
         case SC_SCREENSAVE:
         case SC_MONITORPOWER:
@@ -1527,7 +1527,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         }
+        // All custom items must use ids of less than 0xF000. The context menu items are
+        // also larger than WM_USER, which excludes SCF_ISSECURE.
+        if (wParam > WM_USER && wParam < 0xF000) {
+            const char *cmd = mp_win32_menu_get_cmd(w32->menu_ctx, LOWORD(wParam));
+            if (cmd) {
+                mp_cmd_t *cmdt = mp_input_parse_cmd(w32->input_ctx, bstr0(cmd), "");
+                mp_input_queue_cmd(w32->input_ctx, cmdt);
+                return 0;
+            }
+        }
         break;
+    }
     case WM_NCACTIVATE:
         // Cosmetic to remove blinking window border when initializing window
         if (!w32->opts->border)
@@ -1988,7 +1999,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         goto done;
     }
 
-    w32->menu_ctx = mp_win32_menu_init();
+    w32->menu_ctx = mp_win32_menu_init(w32->window);
     update_dark_mode(w32);
     update_corners_pref(w32);
     if (w32->opts->window_affinity)

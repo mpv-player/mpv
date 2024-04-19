@@ -23,7 +23,7 @@
 struct mpv_node;
 struct menu_ctx;
 
-struct menu_ctx *mp_win32_menu_init(void);
+struct menu_ctx *mp_win32_menu_init(HWND hwnd);
 void mp_win32_menu_uninit(struct menu_ctx *ctx);
 void mp_win32_menu_show(struct menu_ctx *ctx, HWND hwnd);
 void mp_win32_menu_update(struct menu_ctx *ctx, struct mpv_node *data);
