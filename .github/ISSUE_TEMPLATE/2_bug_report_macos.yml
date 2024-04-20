@@ -1,0 +1,75 @@
+name: "Report a macOS Issue"
+description: "Create a report for a runtime related macOS Issue"
+labels: ["os:mac"]
+body:
+- type: textarea
+  attributes:
+      label: "Important Information"
+      description: >
+          - mpv version
+           - macOS Version
+           - Source of the mpv binary or bundle
+           - If known which version of mpv introduced the problem
+           - Possible screenshot or video of visual glitches
+
+          If you're not using git master or the latest release, update.
+          Releases are listed [here](https://github.com/mpv-player/mpv/releases).
+      value: |-
+          - mpv version:
+          - macOS version:
+          - Source:
+          - Introduced in version:
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Reproduction Steps"
+      description: >
+          Try to reproduce your issue with `--no-config` first. If it isn't reproducible
+          with `--no-config` try to find out which option or script causes your issue.
+
+          If the issue is performance-related, try to reproduce it with `--no-config
+          --profile=fast`, which is designed to work on lower-end mobile devices.
+          Additionally, enable hardware decoding with `--hwdec=yes` or the `Ctrl+h` shortcut.
+
+          Describe the reproduction steps as precise as possible. It's very likely that
+          the bug you experience wasn't reproduced by the developer because the workflow
+          differs from your own.
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Expected Behavior"
+      placeholder: "What were you expecting?"
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Actual Behavior"
+      placeholder: "What happened instead?"
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Log File"
+      placeholder: "Drag and drop log file here (Don't paste content directly)"
+      description: >
+          Make a log file made with `-v -v` or `--log-file=output.txt`, attach it to
+          the issue. If you use the Bundle, a default log is created for your last run at
+          `~/Library/Logs/mpv.log`. You can jump to that file via the `Help > Show log File…`
+          menu.
+
+          In the case of a crash, please provide the macOS Crash Report (Backtrace).
+
+          Without the log file, this issue will be closed for ignoring the issue template.
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Sample Files"
+      placeholder: "Drag and drop sample files here"
+      description: >
+          Sample files needed to reproduce this issue can be attached to the issue
+          (preferred), or be uploaded to https://0x0.st/ or similar sites.
+          (Only needed if the issue cannot be reproduced without it.)
+          Do not use garbage like "cloud storage", especially not Google Drive.
