@@ -123,7 +123,7 @@ Configuration
 
 This script can be customized through a config file ``script-opts/console.conf``
 placed in mpv's user directory and through the ``--script-opts`` command-line
-option. The configuration syntax is described in `ON SCREEN CONTROLLER`_.
+option. The configuration syntax is described in `mp.options functions`_.
 
 Key bindings can be changed in a standard way, see for example stats.lua
 documentation.
