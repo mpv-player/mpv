@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: mpv Discussions
+    url: https://github.com/mpv-player/mpv/discussions
+    about: If you have questions or want to discuss things use our GitHub Discussions
   - name: mpv IRC channel
     url: https://mpv.io/community/
     about: Feel free to ask questions here irc://irc.libera.chat/mpv
