@@ -387,7 +387,7 @@ class Common: NSObject {
 
     func getScreenBy(name screenName: String?) -> NSScreen? {
         for screen in NSScreen.screens {
-            if screen.localizedName == screenName {
+            if [screen.localizedName, screen.name, screen.uniqueName, screen.serialNumber].contains(screenName) {
                 return screen
             }
         }
@@ -622,7 +622,7 @@ class Common: NSObject {
             let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
             var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
             var count: Int32 = 0
-            let displayName = getCurrentScreen()?.localizedName ?? "Unknown"
+            let displayName = getCurrentScreen()?.uniqueName ?? "Unknown"
 
             app_bridge_tarray_append(nil, &array, &count, ta_xstrdup(nil, displayName))
             app_bridge_tarray_append(nil, &array, &count, nil)
