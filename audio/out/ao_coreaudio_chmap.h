@@ -21,17 +21,12 @@
 #include "config.h"
 #include <AudioToolbox/AudioToolbox.h>
 
-#if HAVE_AVFOUNDATION || HAVE_AUDIOUNIT
-#undef HAVE_COREAUDIO
-#define HAVE_COREAUDIO 1
-#endif
-
 struct mp_chmap;
 
 int ca_label_to_mp_speaker_id(AudioChannelLabel label);
 AudioChannelLabel mp_speaker_id_to_ca_label(int speaker_id);
 
-#if HAVE_COREAUDIO
+#if HAVE_COREAUDIO || HAVE_AVFOUNDATION
 AudioChannelLayout *ca_find_standard_layout(void *talloc_ctx, AudioChannelLayout *l);
 void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout);
 bool ca_init_chmap(struct ao *ao, AudioDeviceID device);

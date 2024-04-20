@@ -819,8 +819,11 @@ endif
 
 if features['audiounit'] or features['coreaudio'] or features['avfoundation']
     sources += files('audio/out/ao_coreaudio_chmap.c',
-                     'audio/out/ao_coreaudio_utils.c',
-                     'audio/out/ao_coreaudio_properties.c')
+                     'audio/out/ao_coreaudio_utils.c')
+endif
+
+if features['avfoundation']
+    sources += files('audio/out/ao_coreaudio_properties.c')
 endif
 
 jack_opt = get_option('jack').require(
