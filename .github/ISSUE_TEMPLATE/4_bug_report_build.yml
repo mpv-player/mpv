@@ -1,0 +1,51 @@
+name: "Report a build Problem"
+description: "Create a report for a build related Issue"
+labels: ["core:meson"]
+body:
+- type: textarea
+  attributes:
+      label: "Important Information"
+      description: >
+          - mpv version
+           - Platform and Version
+           - Meson version
+
+          If you're not using git master or the latest release, update.
+          Releases are listed [here](https://github.com/mpv-player/mpv/releases).
+      value: |-
+          - mpv version:
+          - Platform version:
+          - Meson version:
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Reproduction Steps"
+      description: >
+          Describe the reproduction steps as precise as possible. It's very likely that
+          the bug you experience wasn't reproduced by the developer because the workflow
+          differs from your own.
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Expected Behavior"
+      placeholder: "What were you expecting?"
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Actual Behavior"
+      placeholder: "What happened instead?"
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Log File"
+      placeholder: "Drag and drop log file here (Don't paste content directly)"
+      description: >
+          Attach meson-logs/meson-log.txt or meson setup build output to the issue.
+
+          Without the log file, this issue will be closed for ignoring the issue template.
+  validations:
+      required: true
