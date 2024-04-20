@@ -130,22 +130,9 @@ del             Cycles visibility between never / auto (mouse-move) / always
 Configuration
 -------------
 
-The OSC offers limited configuration through a config file
-``script-opts/osc.conf`` placed in mpv's user dir and through the
-``--script-opts`` command-line option. Options provided through the command-line
-will override those from the config file.
-
-Config Syntax
-~~~~~~~~~~~~~
-
-The config file must exactly follow the following syntax::
-
-    # this is a comment
-    optionA=value1
-    optionB=value2
-
-``#`` can only be used at the beginning of a line and there may be no
-spaces around the ``=`` or anywhere else.
+This script can be customized through a config file ``script-opts/osc.conf``
+placed in mpv's user directory and through the ``--script-opts`` command-line
+option. The configuration syntax is described in `mp.options functions`_.
 
 Command-line Syntax
 ~~~~~~~~~~~~~~~~~~~
