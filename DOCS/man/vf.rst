@@ -765,11 +765,21 @@ Available mpv-only filters are:
         read information from this filter instead.
 
 ``gpu=...``
-    Convert video to RGB using the OpenGL renderer normally used with
-    ``--vo=gpu``. This requires that the EGL implementation supports off-screen
-    rendering on the default display. (This is the case with Mesa.)
+    Convert video to RGB using the Vulkan or OpenGL renderer normally used with
+    ``--vo=gpu``. In case of OpenGL, this requires that the EGL implementation
+    supports off-screen rendering on the default display. (This is the case with
+    Mesa.)
 
     Sub-options:
+
+    ``api=<type>``
+        The value ``type`` selects the rendering API. You can also pass
+        ``help`` to get a complete list of compiled in backends.
+
+        egl
+            EGL (default if available)
+        vulkan
+            Vulkan
 
     ``w=<pixels>``, ``h=<pixels>``
         Size of the output in pixels (default: 0). If not positive, this will
