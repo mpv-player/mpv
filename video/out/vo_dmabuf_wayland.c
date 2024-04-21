@@ -494,9 +494,9 @@ static void set_viewport_source(struct vo *vo, struct mp_rect src)
         return;
 
     if (!mp_rect_equals(&p->src, &src)) {
-        wp_viewport_set_source(wl->video_viewport, src.x0 << 8,
-                               src.y0 << 8, mp_rect_w(src) << 8,
-                               mp_rect_h(src) << 8);
+        wp_viewport_set_source(wl->video_viewport, wl_fixed_from_int(src.x0),
+                               wl_fixed_from_int(src.y0), wl_fixed_from_int(mp_rect_w(src)),
+                               wl_fixed_from_int(mp_rect_h(src)));
         p->src = src;
     }
 }
