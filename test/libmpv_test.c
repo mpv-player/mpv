@@ -46,7 +46,6 @@ static double double_ = 1.5;
 // Global handle.
 static mpv_handle *ctx;
 
-
 MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
 static void fail(const char *fmt, ...)
 {
@@ -56,8 +55,32 @@ static void fail(const char *fmt, ...)
 		vfprintf(stderr, fmt, va);
 		va_end(va);
 	}
-	mpv_destroy(ctx);
     exit(1);
+}
+
+
+static void exit_cleanup(void)
+{
+    if (ctx)
+        mpv_destroy(ctx);
+}
+
+static mpv_event *wrap_wait_event(void)
+{
+    while (1) {
+        mpv_event *ev = mpv_wait_event(ctx, 1);
+
+        if (ev->event_id == MPV_EVENT_NONE) {
+			continue;
+        } else if (ev->event_id == MPV_EVENT_LOG_MESSAGE) {
+            mpv_event_log_message *msg = (mpv_event_log_message*)ev->data;
+			printf("[%s:%s] %s", msg->prefix, msg->level, msg->text);
+            if (msg->log_level <= MPV_LOG_LEVEL_ERROR)
+                fail("error was logged");
+        } else {
+            return ev;
+        }
+    }
 }
 
 static void check_api_error(int status)
@@ -65,6 +88,8 @@ static void check_api_error(int status)
     if (status < 0)
         fail("mpv API error: %s\n", mpv_error_string(status));
 }
+
+/****/
 
 static void check_double(const char *property, double expect)
 {
@@ -144,6 +169,8 @@ static void set_options_and_properties(const char *options[], const char *proper
     }
 }
 
+/****/
+
 static void test_file_loading(char *file)
 {
     const char *cmd[] = {"loadfile", file, NULL};
@@ -151,7 +178,7 @@ static void test_file_loading(char *file)
     int loaded = 0;
     int finished = 0;
     while (!finished) {
-        mpv_event *event = mpv_wait_event(ctx, 0);
+        mpv_event *event = wrap_wait_event();
         switch (event->event_id) {
         case MPV_EVENT_FILE_LOADED:
             // make sure it loads before exiting
@@ -174,7 +201,7 @@ static void test_lavfi_complex(char *file)
     int finished = 0;
     int loaded = 0;
     while (!finished) {
-        mpv_event *event = mpv_wait_event(ctx, 0);
+        mpv_event *event = wrap_wait_event();
         switch (event->event_id) {
         case MPV_EVENT_FILE_LOADED:
             // Add file as external and toggle lavfi-complex on.
@@ -248,14 +275,16 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
         return 1;
+    atexit(exit_cleanup);
 
     ctx = mpv_create();
     if (!ctx)
         return 1;
 
     check_api_error(mpv_set_option_string(ctx, "vo", "null"));
-    check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
-    check_api_error(mpv_set_option_string(ctx, "msg-level", "all=debug"));
+    // load osc too to see if it works
+    check_api_error(mpv_set_option_string(ctx, "osc", "yes"));
+    check_api_error(mpv_request_log_messages(ctx, "debug"));
 
     const char *fmt = "================ TEST: %s ================\n";
 
@@ -266,6 +295,9 @@ int main(int argc, char *argv[])
     printf(fmt, "test_lavfi_complex");
     test_lavfi_complex(argv[1]);
 
-    mpv_destroy(ctx);
+    printf("================ SHUTDOWN ================\n");
+    mpv_command_string(ctx, "quit");
+    while (wrap_wait_event()->event_id != MPV_EVENT_SHUTDOWN) {}
+
     return 0;
 }
