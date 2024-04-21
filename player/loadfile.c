@@ -511,10 +511,10 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
         return l1 > l2;
     if (forced)
         return t1->forced_track;
-    if (sub && !t2->forced_select && t2->forced_track)
-        return !t1->forced_track;
     if (t1->default_track != t2->default_track && !t2->forced_select)
         return t1->default_track;
+    if (sub && !t2->forced_select && t2->forced_track)
+        return !t1->forced_track;
     if (os_langs && l1 != l2)
         return l1 > l2;
     if (t1->attached_picture != t2->attached_picture)
