@@ -61,10 +61,16 @@ body:
       label: "Log File"
       placeholder: "Drag and drop log file here (Don't paste content directly)"
       description: >
-          Make a log file made with `-v -v` or `--log-file=output.txt`, attach it to
-          the issue.
+          Make a log file with `--gpu-debug --log-file=output.txt`, which is our preferred way, and
+          attach it to the issue.
+
+
+          If you have trouble producing a log file, you can alternatively use `--gpu-debug -v -v`,
+          save the terminal output to a file, and attach it to the issue.
+
 
           In the case of a crash, please provide a backtrace.
+
 
           Without the log file, this issue will be closed for ignoring the issue template.
   validations:

@@ -18,5 +18,9 @@ body:
       label: "Log File"
       description: >
           Even if you think it's not necessary at first, it might help us later to find
-          possible issues. Make a log file made with `-v -v` or `--log-file=output.txt` and
-          attach it to the issue.
+          possible issues. Make a log file with `--log-file=output.txt`, which is our preferred way,
+          and attach it to the issue.
+
+
+          If you have trouble producing a log file, you can alternatively use `-v -v`, save the
+          terminal output to a file, and attach it to the issue.
