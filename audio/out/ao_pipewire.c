@@ -206,7 +206,8 @@ static void on_process(void *userdata)
 #endif
     end_time -= pw_stream_get_nsec(p->stream) - time.now;
 
-    int samples = ao_read_data(ao, data, nframes, end_time, NULL, false, false);
+    bool eof;
+    int samples = ao_read_data(ao, data, nframes, end_time, &eof, false, false);
     b->size = samples;
 
     for (int i = 0; i < buf->n_datas; i++) {
@@ -216,6 +217,11 @@ static void on_process(void *userdata)
     }
 
     pw_stream_queue_buffer(p->stream, b);
+
+    if (eof) {
+        pw_stream_flush(p->stream, true);
+        ao_stop_streaming(ao);
+    }
 
     MP_TRACE(ao, "queued %d of %d samples\n", samples, nframes);
 }
