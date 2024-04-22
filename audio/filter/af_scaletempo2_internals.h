@@ -110,7 +110,6 @@ struct mp_scaletempo2 {
     float **target_block;
     // Buffered audio data.
     float **input_buffer;
-    int input_buffer_size;
     int input_buffer_frames;
     // How many frames in |input_buffer| need to be flushed by padding with
     // silence to process the final packet. While this is nonzero, the filter
