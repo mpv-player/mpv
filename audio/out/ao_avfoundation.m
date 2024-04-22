@@ -77,7 +77,7 @@ static void feed(struct ao *ao)
     int64_t end_time_av = MPMAX(p->end_time_av, cur_time_av);
     int64_t time_delta = CMTimeGetNanoseconds(CMTimeMake(request_sample_count, samplerate));
     bool eof;
-    int real_sample_count = ao_read_data(ao, data, request_sample_count, end_time_av - cur_time_av + cur_time_mp + time_delta, &eof, false, false);
+    int real_sample_count = ao_read_data(ao, data, request_sample_count, end_time_av - cur_time_av + cur_time_mp + time_delta, &eof, false, true);
     if (eof) {
         [p->renderer stopRequestingMediaData];
         ao_stop_streaming(ao);
