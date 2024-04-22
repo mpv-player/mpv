@@ -8,7 +8,7 @@
 #include "options/m_option.h"
 
 struct priv {
-    struct mp_scaletempo2 data;
+    struct mp_scaletempo2 *data;
     struct mp_pin *in_pin;
     struct mp_aframe *cur_format;
     struct mp_aframe_pool *out_pool;
@@ -29,7 +29,7 @@ static void af_scaletempo2_process(struct mp_filter *f)
         return;
 
     while (!p->initialized || !p->pending ||
-           !mp_scaletempo2_frames_available(&p->data, p->speed))
+           !mp_scaletempo2_frames_available(p->data, p->speed))
     {
         bool eof = false;
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
@@ -64,16 +64,16 @@ static void af_scaletempo2_process(struct mp_filter *f)
         if (p->pending && !format_change && !p->sent_final) {
             int frame_size = mp_aframe_get_size(p->pending);
             uint8_t **planes = mp_aframe_get_data_ro(p->pending);
-            int read = mp_scaletempo2_fill_input_buffer(&p->data,
+            int read = mp_scaletempo2_fill_input_buffer(p->data,
                 planes, frame_size, p->speed);
             mp_aframe_skip_samples(p->pending, read);
         }
         if (final && p->pending && !p->sent_final) {
-            mp_scaletempo2_set_final(&p->data);
+            mp_scaletempo2_set_final(p->data);
             p->sent_final = true;
         }
 
-        if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
+        if (mp_scaletempo2_frames_available(p->data, p->speed)) {
             if (eof) {
                 mp_pin_out_repeat_eof(p->in_pin); // drain more next time
             }
@@ -89,9 +89,9 @@ static void af_scaletempo2_process(struct mp_filter *f)
     }
 
     assert(p->pending);
-    if (mp_scaletempo2_frames_available(&p->data, p->speed)) {
+    if (mp_scaletempo2_frames_available(p->data, p->speed)) {
         struct mp_aframe *out = mp_aframe_new_ref(p->cur_format);
-        int out_samples = p->data.ola_hop_size;
+        int out_samples = p->data->ola_hop_size;
         if (mp_aframe_pool_allocate(p->out_pool, out, out_samples) < 0) {
             talloc_free(out);
             goto error;
@@ -101,14 +101,14 @@ static void af_scaletempo2_process(struct mp_filter *f)
 
         uint8_t **planes = mp_aframe_get_data_rw(out);
         assert(planes);
-        assert(mp_aframe_get_planes(out) == p->data.channels);
+        assert(mp_aframe_get_planes(out) == p->data->channels);
 
-        out_samples = mp_scaletempo2_fill_buffer(&p->data,
+        out_samples = mp_scaletempo2_fill_buffer(p->data,
             (float**)planes, out_samples, p->speed);
 
         double pts = mp_aframe_get_pts(p->pending);
         if (pts != MP_NOPTS_VALUE) {
-            double frame_delay = mp_scaletempo2_get_latency(&p->data, p->speed)
+            double frame_delay = mp_scaletempo2_get_latency(p->data, p->speed)
                 + out_samples * p->speed;
             mp_aframe_set_pts(out, pts - frame_delay / mp_aframe_get_effective_rate(out));
 
@@ -122,7 +122,7 @@ static void af_scaletempo2_process(struct mp_filter *f)
 
                     // reset the filter to ensure it stops generating audio
                     // and mp_scaletempo2_frames_available returns false
-                    mp_scaletempo2_reset(&p->data);
+                    mp_scaletempo2_reset(p->data);
                 }
             }
         }
@@ -150,7 +150,7 @@ static bool init_scaletempo2(struct mp_filter *f)
     p->sent_final = false;
     mp_aframe_config_copy(p->cur_format, p->pending);
 
-    mp_scaletempo2_init(&p->data, mp_aframe_get_channels(p->pending),
+    mp_scaletempo2_init(p->data, mp_aframe_get_channels(p->pending),
         mp_aframe_get_rate(p->pending));
 
     return true;
@@ -172,7 +172,7 @@ static bool af_scaletempo2_command(struct mp_filter *f, struct mp_filter_command
 static void af_scaletempo2_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    mp_scaletempo2_reset(&p->data);
+    mp_scaletempo2_reset(p->data);
     p->initialized = false;
     TA_FREEP(&p->pending);
 }
@@ -180,8 +180,8 @@ static void af_scaletempo2_reset(struct mp_filter *f)
 static void af_scaletempo2_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    mp_scaletempo2_destroy(&p->data);
-    talloc_free(p->pending);
+    TA_FREEP(&p->data);
+    TA_FREEP(&p->pending);
 }
 
 static const struct mp_filter_info af_scaletempo2_filter = {
@@ -206,7 +206,8 @@ static struct mp_filter *af_scaletempo2_create(
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 
     struct priv *p = f->priv;
-    p->data.opts = talloc_steal(p, options);
+    p->data = talloc_zero(p, struct mp_scaletempo2);
+    p->data->opts = talloc_steal(p, options);
     p->speed = 1.0;
     p->cur_format = talloc_steal(p, mp_aframe_create());
     p->out_pool = mp_aframe_pool_create(p);
