@@ -90,7 +90,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     int64_t end = mp_time_ns();
     end += p->hw_latency_ns + ca_get_latency(ts) + ca_frames_to_ns(ao, frames);
     // don't use the returned sample count since CoreAudio always expects full frames
-    ao_read_data(ao, planes, frames, end);
+    ao_read_data(ao, planes, frames, end, NULL, true, true);
     return noErr;
 }
 
