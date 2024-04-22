@@ -534,7 +534,7 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
 
     int required_size = read + p->input_buffer_frames;
     if (required_size > p->input_buffer_size)
-        resize_input_buffer(p, required_size);
+        grow_input_buffer(p, MPMAX(required_size, p->input_buffer_size * 1.5));
 
     for (int i = 0; i < p->channels; ++i) {
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
