@@ -480,10 +480,19 @@ static bool can_perform_wsola(struct mp_scaletempo2 *p, double playback_rate)
     return frames_needed(p, playback_rate) <= 0;
 }
 
-static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
+static void grow_input_buffer(struct mp_scaletempo2 *p, int size)
 {
-    p->input_buffer_size = size;
+    assert(size > p->input_buffer_size);
+
     p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
+
+    float *data = (float*) (p->input_buffer + p->channels);
+    for (int k = p->channels - 1; k > 0; k--) {
+        memmove(data + k * size, data + k * p->input_buffer_size,
+            p->input_buffer_frames * sizeof(float));
+    }
+
+    p->input_buffer_size = size;
 }
 
 // pad end with silence until a wsola iteration can be performed
@@ -495,7 +504,7 @@ static void add_input_buffer_final_silence(struct mp_scaletempo2 *p, double play
 
     int required_size = needed + p->input_buffer_frames;
     if (required_size > p->input_buffer_size)
-        resize_input_buffer(p, required_size);
+        grow_input_buffer(p, required_size);
 
     for (int i = 0; i < p->channels; ++i) {
         float *ch_input = p->input_buffer[i];
@@ -864,10 +873,11 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     p->search_block = realloc_2d(p->search_block, p->channels, p->search_block_size);
     p->target_block = realloc_2d(p->target_block, p->channels, p->ola_window_size);
 
-    resize_input_buffer(p, 4 * MPMAX(p->ola_window_size, p->search_block_size));
     p->input_buffer_frames = 0;
     p->input_buffer_final_frames = 0;
     p->input_buffer_added_silence = 0;
+    p->input_buffer_size = 4 * MPMAX(p->ola_window_size, p->search_block_size);
+    p->input_buffer = realloc_2d(p->input_buffer, channels, p->input_buffer_size);
 
     p->energy_candidate_blocks = realloc(p->energy_candidate_blocks,
         sizeof(float) * p->channels * p->num_candidate_blocks);
