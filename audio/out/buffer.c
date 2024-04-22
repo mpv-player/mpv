@@ -178,12 +178,12 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
 }
 
 static int ao_read_data_locked(struct ao *ao, void **data, int samples,
-                               int64_t out_time_ns, bool pad_silence)
+                               int64_t out_time_ns, bool *eof, bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
 
-    int pos = read_buffer(ao, data, samples, &(bool){0}, pad_silence);
+    int pos = read_buffer(ao, data, samples, eof, pad_silence);
 
     if (pos > 0)
         p->end_time_ns = out_time_ns;
@@ -206,29 +206,23 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 // If this is called in paused mode, it will always return 0.
 // The caller should set out_time_ns to the expected delay until the last sample
 // reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns)
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking)
 {
     struct buffer_state *p = ao->buffer_state;
 
-    mp_mutex_lock(&p->lock);
+    if (blocking) {
+        mp_mutex_lock(&p->lock);
+    } else if (mp_mutex_trylock(&p->lock)) {
+        return 0;
+    }
 
-    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, true);
+    bool eof_buf;
+    if (eof == NULL) {
+        // This is a public API. We want to reduce the cognitive burden of the caller.
+        eof = &eof_buf;
+    }
 
-    mp_mutex_unlock(&p->lock);
-
-    return pos;
-}
-
-// Like ao_read_data() but does not block and also may return partial data.
-// Callers have to check the return value.
-int ao_read_data_nonblocking(struct ao *ao, void **data, int samples, int64_t out_time_ns)
-{
-    struct buffer_state *p = ao->buffer_state;
-
-    if (mp_mutex_trylock(&p->lock))
-            return 0;
-
-    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, false);
+    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, eof, pad_silence);
 
     mp_mutex_unlock(&p->lock);
 
@@ -244,7 +238,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     void *ndata[MP_NUM_CHANNELS] = {0};
 
     if (!ao_need_conversion(fmt))
-        return ao_read_data(ao, data, samples, out_time_ns);
+        return ao_read_data(ao, data, samples, out_time_ns, NULL, true, true);
 
     assert(ao->format == fmt->src_fmt);
     assert(ao->channels.num == fmt->channels);
@@ -264,7 +258,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     for (int n = 0; n < planes; n++)
         ndata[n] = p->convert_buffer + n * src_plane_size;
 
-    int res = ao_read_data(ao, ndata, samples, out_time_ns);
+    int res = ao_read_data(ao, ndata, samples, out_time_ns, NULL, true, true);
 
     ao_convert_inplace(fmt, ndata, samples);
     for (int n = 0; n < planes; n++)

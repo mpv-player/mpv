@@ -201,9 +201,7 @@ struct ao_driver {
 
 // These functions can be called by AOs.
 
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns);
-MP_WARN_UNUSED_RESULT
-int ao_read_data_nonblocking(struct ao *ao, void **data, int samples, int64_t out_time_ns);
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);

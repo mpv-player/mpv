@@ -124,7 +124,7 @@ static int process(jack_nframes_t nframes, void *arg)
     int64_t end_time = mp_time_ns();
     end_time += MP_TIME_S_TO_NS((jack_latency + nframes) / (double)ao->samplerate);
 
-    ao_read_data(ao, buffers, nframes, end_time);
+    ao_read_data(ao, buffers, nframes, end_time, NULL, true, true);
 
     return 0;
 }
