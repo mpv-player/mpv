@@ -268,6 +268,16 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     return res;
 }
 
+// Called by pull-based AO to indicate the AO has stopped requesting more data,
+// usually when EOF is got from ao_read_data().
+// After this function is called, the core will call ao->driver->start() again
+// when more audio data after EOF arrives.
+void ao_stop_streaming(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+    p->streaming = false;
+}
+
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct buffer_state *p = ao->buffer_state;

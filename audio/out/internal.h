@@ -234,4 +234,6 @@ void ao_wakeup(struct ao *ao);
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
                            void **data, int samples, int64_t out_time_ns);
 
+void ao_stop_streaming(struct ao *ao);
+
 #endif
