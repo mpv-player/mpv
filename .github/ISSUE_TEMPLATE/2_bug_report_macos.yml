@@ -73,3 +73,23 @@ body:
           (preferred), or be uploaded to https://0x0.st/ or similar sites.
           (Only needed if the issue cannot be reproduced without it.)
           Do not use garbage like "cloud storage", especially not Google Drive.
+- type: checkboxes
+  attributes:
+      label: "I carefully read all instruction and confirm that I did the following:"
+      options:
+          - label: "I tested with the latest mpv version to validate that the issue is not already fixed."
+            required: true
+          - label: "I provided all required information including system and mpv version."
+            required: true
+          - label: >-
+              I produced the log file with the exact same set of files, parameters, and conditions
+              used in "Reproduction Steps", with the addition of `--log-file=output.txt`.
+            required: true
+          - label: >-
+              I produced the log file while the behaviors described in "Actual Behavior" were
+              actively observed.
+            required: true
+          - label: "I attached the full, untruncated log file."
+            required: true
+          - label: "I attached the backtrace in the case of a crash."
+            required: true

@@ -49,3 +49,21 @@ body:
           Without the log file, this issue will be closed for ignoring the issue template.
   validations:
       required: true
+- type: checkboxes
+  attributes:
+      label: "I carefully read all instruction and confirm that I did the following:"
+      options:
+          - label: "I tested with the latest mpv version to validate that the issue is not already fixed."
+            required: true
+          - label: "I provided all required information including system and mpv version."
+            required: true
+          - label: >-
+              I produced the log file with the exact same set of parameters, and conditions used in
+              "Reproduction Steps".
+            required: true
+          - label: >-
+              I produced the log file while the behaviors described in "Actual Behavior" were
+              actively observed.
+            required: true
+          - label: "I attached the full, untruncated log file."
+            required: true
