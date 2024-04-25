@@ -28,6 +28,30 @@ extension NSScreen {
             return deviceDescription[.screenNumber] as? CGDirectDisplayID ?? 0
         }
     }
+
+    public var serialNumber: String {
+        get {
+            return String(CGDisplaySerialNumber(displayID))
+        }
+    }
+
+    public var name: String {
+        get {
+            // force unwrapping is fine here, regex is guaranteed to be valid
+            let regex = try! NSRegularExpression(pattern: " \\(\\d+\\)$", options: .caseInsensitive)
+            return regex.stringByReplacingMatches(
+                in: localizedName,
+                range: NSRange(location: 0, length: localizedName.count),
+                withTemplate: ""
+            )
+        }
+    }
+
+    public var uniqueName: String {
+        get {
+            return name + " (\(serialNumber))"
+        }
+    }
 }
 
 extension NSColor {
