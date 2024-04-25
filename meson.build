@@ -13,6 +13,7 @@ project('mpv',
 
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
+conf_data = configuration_data()
 python = find_program('python3')
 
 # ffmpeg
@@ -1660,7 +1661,6 @@ endif
 
 
 # Set config.h
-conf_data = configuration_data()
 conf_data.set_quoted('CONFIGURATION', configuration)
 conf_data.set_quoted('DEFAULT_DVD_DEVICE', dvd_device)
 conf_data.set_quoted('DEFAULT_CDROM_DEVICE', cd_device)

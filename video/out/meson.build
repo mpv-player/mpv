@@ -27,6 +27,14 @@ endif
 
 foreach p: protocols
     xml = join_paths(p)
+
+    wayland_interface_parse = find_program(join_paths(tools_directory, 'wayland-interface-parse.py'))
+    interfaces = run_command(wayland_interface_parse, xml, check: true).stdout().split(',')
+    foreach interface: interfaces
+        split = interface.split()
+        conf_data.set(split[0], split[1].to_int())
+    endforeach
+
     wl_protocols_source += custom_target(xml.underscorify() + '_c',
         input: xml,
         output: '@BASENAME@.c',
