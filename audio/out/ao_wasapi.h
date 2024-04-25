@@ -48,7 +48,6 @@ void wasapi_change_uninit(struct ao* ao);
 
 enum wasapi_thread_state {
     WASAPI_THREAD_FEED = 0,
-    WASAPI_THREAD_DISPATCH,
     WASAPI_THREAD_RESUME,
     WASAPI_THREAD_RESET,
     WASAPI_THREAD_SHUTDOWN,
