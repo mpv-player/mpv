@@ -1192,6 +1192,7 @@ static void handle_toplevel_close(void *data, struct xdg_toplevel *xdg_toplevel)
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
+#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
 static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_toplevel,
                                     int32_t width, int32_t height)
 {
@@ -1199,6 +1200,7 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
     wl->bounded_width = width * wl->scaling;
     wl->bounded_height = height * wl->scaling;
 }
+#endif
 
 #ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
 static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
@@ -1210,7 +1212,9 @@ static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
+#ifdef XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION
     handle_configure_bounds,
+#endif
 #ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
     handle_wm_capabilities,
 #endif
