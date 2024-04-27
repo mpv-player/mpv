@@ -735,6 +735,11 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         release_down_cmd(ictx, false);
         return;
     }
+    if (code == MP_TOUCH_RELEASE_ALL) {
+        MP_TRACE(ictx, "release all touch\n");
+        ictx->num_touch_points = 0;
+        return;
+    }
     if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod) && !force_mouse)
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE || unmod == MP_KEY_MOUSE_ENTER) {
