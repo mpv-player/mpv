@@ -1,0 +1,10 @@
+disabled_rules:
+    - identifier_name
+    - line_length
+    - large_tuple
+    - void_function_in_ternary
+    - function_body_length
+    - cyclomatic_complexity
+    - file_length
+    - type_body_length
+strict: true
