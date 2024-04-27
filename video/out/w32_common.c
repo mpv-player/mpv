@@ -568,19 +568,29 @@ static void begin_dragging(struct vo_w32_state *w32)
     mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
 }
 
-static bool handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
+// If native touch is enabled and the mouse event is emulated, ignore it.
+// See: <https://learn.microsoft.com/en-us/windows/win32/tablet/
+//       system-events-and-mouse-messages#distinguishing-pen-input-from-mouse-and-touch>
+static bool should_ignore_mouse_event(const struct vo_w32_state *w32)
 {
+    return w32->opts->native_touch && ((GetMessageExtraInfo() & 0xFFFFFF00) == 0xFF515700);
+}
+
+static void handle_mouse_down(struct vo_w32_state *w32, int btn, int x, int y)
+{
+    if (should_ignore_mouse_event(w32))
+        return;
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_DOWN);
     SetCapture(w32->window);
-    return false;
 }
 
 static void handle_mouse_up(struct vo_w32_state *w32, int btn)
 {
+    if (should_ignore_mouse_event(w32))
+        return;
     btn |= mod_state(w32);
     mp_input_put_key(w32->input_ctx, btn | MP_KEY_STATE_UP);
-
     ReleaseCapture();
 }
 
@@ -1315,6 +1325,19 @@ static void update_cursor_passthrough(const struct vo_w32_state *w32)
     }
 }
 
+static void update_native_touch(const struct vo_w32_state *w32)
+{
+    if (w32->parent)
+        return;
+
+    if (w32->opts->native_touch) {
+        RegisterTouchWindow(w32->window, 0);
+    } else {
+        UnregisterTouchWindow(w32->window);
+        mp_input_put_key(w32->input_ctx, MP_TOUCH_RELEASE_ALL);
+    }
+}
+
 static void set_ime_conversion_mode(const struct vo_w32_state *w32, DWORD mode)
 {
     if (w32->parent)
@@ -1615,14 +1638,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (x != w32->mouse_x || y != w32->mouse_y) {
             w32->mouse_x = x;
             w32->mouse_y = y;
-            mp_input_set_mouse_pos(w32->input_ctx, x, y);
+            if (!should_ignore_mouse_event(w32))
+                mp_input_set_mouse_pos(w32->input_ctx, x, y);
         }
         break;
     }
     case WM_LBUTTONDOWN:
-        if (handle_mouse_down(w32, MP_MBTN_LEFT, GET_X_LPARAM(lParam),
-                                                 GET_Y_LPARAM(lParam)))
-            return 0;
+        handle_mouse_down(w32, MP_MBTN_LEFT, GET_X_LPARAM(lParam),
+                                             GET_Y_LPARAM(lParam));
         break;
     case WM_LBUTTONUP:
         handle_mouse_up(w32, MP_MBTN_LEFT);
@@ -1713,6 +1736,26 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_SHOWMENU:
         mp_win32_menu_show(w32->menu_ctx, w32->window);
         break;
+    case WM_TOUCH: {
+        UINT count = LOWORD(wParam);
+        TOUCHINPUT *inputs = talloc_array_ptrtype(NULL, inputs, count);
+        if (GetTouchInputInfo((HTOUCHINPUT)lParam, count, inputs, sizeof(TOUCHINPUT))) {
+            for (UINT i = 0; i < count; i++) {
+                TOUCHINPUT *ti = &inputs[i];
+                POINT pt = {TOUCH_COORD_TO_PIXEL(ti->x), TOUCH_COORD_TO_PIXEL(ti->y)};
+                ScreenToClient(w32->window, &pt);
+                if (ti->dwFlags & TOUCHEVENTF_DOWN)
+                    mp_input_add_touch_point(w32->input_ctx, ti->dwID, pt.x, pt.y);
+                if (ti->dwFlags & TOUCHEVENTF_MOVE)
+                    mp_input_update_touch_point(w32->input_ctx, ti->dwID, pt.x, pt.y);
+                if (ti->dwFlags & TOUCHEVENTF_UP)
+                    mp_input_remove_touch_point(w32->input_ctx, ti->dwID);
+            }
+        }
+        CloseTouchInputHandle((HTOUCHINPUT)lParam);
+        talloc_free(inputs);
+        return 0;
+    }
     }
 
     if (message == w32->tbtn_created_msg) {
@@ -1996,6 +2039,8 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         update_backdrop(w32);
     if (w32->opts->cursor_passthrough)
         update_cursor_passthrough(w32);
+    if (w32->opts->native_touch)
+        update_native_touch(w32);
 
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
@@ -2193,6 +2238,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 update_maximized_state(w32, false);
             } else if (changed_option == &vo_opts->window_corners) {
                 update_corners_pref(w32);
+            } else if (changed_option == &vo_opts->native_touch) {
+                update_native_touch(w32);
             } else if (changed_option == &vo_opts->geometry || changed_option == &vo_opts->autofit ||
                 changed_option == &vo_opts->autofit_smaller || changed_option == &vo_opts->autofit_larger)
             {
