@@ -17,7 +17,9 @@
 
 import Cocoa
 
-typealias swift_wakeup_cb_fn = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
+extension OptionHelper {
+    typealias WakeupCallback = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
+}
 
 class OptionHelper {
     var voCachePtr: UnsafeMutablePointer<m_config_cache>
@@ -64,7 +66,7 @@ class OptionHelper {
         }
     }
 
-    func setMacOptionCallback(_ callback: swift_wakeup_cb_fn, context object: AnyObject) {
+    func setMacOptionCallback(_ callback: WakeupCallback, context object: AnyObject) {
         m_config_cache_set_wakeup_cb(macCachePtr, callback, TypeHelper.bridge(obj: object))
     }
 
