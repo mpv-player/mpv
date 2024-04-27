@@ -654,7 +654,7 @@ class Common: NSObject {
         }
     }
 
-    let macOptsWakeupCallback: swift_wakeup_cb_fn = { ( ctx ) in
+    let macOptsWakeupCallback: OptionHelper.WakeupCallback = { ( ctx ) in
         let com = unsafeBitCast(ctx, to: Common.self)
         DispatchQueue.main.async {
             com.macOptsUpdate()

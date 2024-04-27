@@ -27,7 +27,7 @@ extension EventSubscriber {
 }
 
 extension EventHelper {
-    typealias wakeup_cb = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
+    typealias WakeupCallback = (@convention(c) (UnsafeMutableRawPointer?) -> Void)?
 
     struct Event {
         var id: String {
@@ -91,7 +91,7 @@ class EventHelper {
         }
     }
 
-    let wakeup: wakeup_cb = { ( ctx ) in
+    let wakeup: WakeupCallback = { ( ctx ) in
         let event = unsafeBitCast(ctx, to: EventHelper.self)
         DispatchQueue.main.async { event.eventLoop() }
     }
