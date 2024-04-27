@@ -4281,6 +4281,13 @@ Input
     disabled by default in libmpv as well - it should be enabled if you want
     the mpv default key bindings.
 
+``--input-touch-emulate-mouse=<yes|no>``
+    When multi-touch support is enabled (either required by the platform,
+    or enabled by ``--native-touch``), emulate mouse move and button presses
+    for the touch events (default: yes). This is useful for compatibility
+    for mouse key bindings and scripts which read mouse positions for platforms
+    which do not support ``--native-touch=no`` (e.g. Wayland).
+
 OSD
 ---
 

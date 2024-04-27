@@ -187,6 +187,7 @@ struct input_opts {
     bool test;
     bool allow_win_drag;
     bool preprocess_wheel;
+    bool touch_emulate_mouse;
 };
 
 const struct m_sub_options input_config = {
@@ -207,6 +208,7 @@ const struct m_sub_options input_config = {
         {"input-vo-keyboard", OPT_BOOL(vo_key_input)},
         {"input-media-keys", OPT_BOOL(use_media_keys)},
         {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
+        {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
@@ -227,6 +229,7 @@ const struct m_sub_options input_config = {
         .vo_key_input = true,
         .allow_win_drag = true,
         .preprocess_wheel = true,
+        .touch_emulate_mouse = true,
     },
     .change_flags = UPDATE_INPUT,
 };
@@ -927,6 +930,9 @@ static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, i
         return;
     ictx->touch_points[idx].x = x;
     ictx->touch_points[idx].y = y;
+    // Emulate mouse input from the primary touch point (the first one added)
+    if (ictx->opts->touch_emulate_mouse && idx == 0)
+        set_mouse_pos(ictx, x, y);
     notify_touch_update(ictx);
 }
 
@@ -943,6 +949,11 @@ void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
                  ictx->num_touch_points, id, x, y);
         MP_TARRAY_APPEND(ictx, ictx->touch_points, ictx->num_touch_points,
                          (struct touch_point){id, x, y});
+        // Emulate MBTN_LEFT down if this is the only touch point
+        if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 1) {
+            set_mouse_pos(ictx, x, y);
+            feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
+        }
         notify_touch_update(ictx);
     }
     input_unlock(ictx);
@@ -967,6 +978,9 @@ void mp_input_remove_touch_point(struct input_ctx *ictx, int id)
     if (idx != -1) {
         MP_TRACE(ictx, "Touch point %d remove (id %d)\n", idx, id);
         MP_TARRAY_REMOVE_AT(ictx->touch_points, ictx->num_touch_points, idx);
+        // Emulate MBTN_LEFT up if there are no touch points left
+        if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 0)
+            feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
         notify_touch_update(ictx);
     }
     input_unlock(ictx);
