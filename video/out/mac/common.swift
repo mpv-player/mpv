@@ -158,11 +158,10 @@ class Common: NSObject {
     }
 
     func displayLinkCallback(_ displayLink: CVDisplayLink,
-                                   _ inNow: UnsafePointer<CVTimeStamp>,
-                            _ inOutputTime: UnsafePointer<CVTimeStamp>,
-                                 _ flagsIn: CVOptionFlags,
-                                _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
-    {
+                             _ inNow: UnsafePointer<CVTimeStamp>,
+                             _ inOutputTime: UnsafePointer<CVTimeStamp>,
+                             _ flagsIn: CVOptionFlags,
+                             _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn {
         return kCVReturnSuccess
     }
 
@@ -170,8 +169,7 @@ class Common: NSObject {
         CVDisplayLinkCreateWithActiveCGDisplays(&link)
 
         guard let screen = getTargetScreen(forFullscreen: false) ?? NSScreen.main,
-              let link = self.link else
-        {
+              let link = self.link else {
             log.warning("Couldn't start DisplayLink, no Screen or DisplayLink available")
             return
         }
@@ -261,7 +259,7 @@ class Common: NSObject {
         return lux > 0 ? lux : 0
     }
 
-    var lightSensorCallback: IOServiceInterestCallback = { (ctx, service, messageType, messageArgument) -> Void in
+    var lightSensorCallback: IOServiceInterestCallback = { (ctx, _ service, _ messageType, _ messageArgument) in
         let com = unsafeBitCast(ctx, to: Common.self)
 
         var outputs: UInt32 = 2
@@ -291,7 +289,8 @@ class Common: NSObject {
         lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
         IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
         var n = io_object_t()
-        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback, TypeHelper.bridge(obj: self), &n)
+        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback,
+                                         TypeHelper.bridge(obj: self), &n)
         let kr = IOServiceOpen(srv, mach_task_self_, 0, &lightSensor)
         IOObjectRelease(srv)
 
@@ -386,10 +385,9 @@ class Common: NSObject {
     }
 
     func getScreenBy(name screenName: String?) -> NSScreen? {
-        for screen in NSScreen.screens {
-            if [screen.localizedName, screen.name, screen.uniqueName, screen.serialNumber].contains(screenName) {
-                return screen
-            }
+        for screen in NSScreen.screens
+            where [screen.localizedName, screen.name, screen.uniqueName, screen.serialNumber].contains(screenName) {
+            return screen
         }
         return nil
     }
@@ -436,7 +434,7 @@ class Common: NSObject {
         // flip the y origin again
         let y = CGFloat(-geo.win.y1)
         let x = CGFloat(geo.win.x0)
-        return screen.convertRectFromBacking(NSMakeRect(x, y, width, height))
+        return screen.convertRectFromBacking(NSRect(x: x, y: y, width: width, height: height))
     }
 
     func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect) {
@@ -488,10 +486,9 @@ class Common: NSObject {
     func windowDidChangeOcclusionState() {}
 
     @objc func control(_ vo: UnsafeMutablePointer<vo>,
-                         events: UnsafeMutablePointer<Int32>,
-                         request: UInt32,
-                         data: UnsafeMutableRawPointer?) -> Int32
-    {
+                       events: UnsafeMutablePointer<Int32>,
+                       request: UInt32,
+                       data: UnsafeMutableRawPointer?) -> Int32 {
         switch mp_voctrl(request) {
         case VOCTRL_CHECK_EVENTS:
             events.pointee |= Int32(checkEvents())
@@ -508,8 +505,8 @@ class Common: NSObject {
                     DispatchQueue.main.async {
                         self.window?.toggleFullScreen(nil)
                     }
-                case TypeHelper.toPointer(&option.voPtr.pointee.ontop): fallthrough
-                case TypeHelper.toPointer(&option.voPtr.pointee.ontop_level):
+                case TypeHelper.toPointer(&option.voPtr.pointee.ontop),
+                     TypeHelper.toPointer(&option.voPtr.pointee.ontop_level):
                     DispatchQueue.main.async {
                         self.window?.setOnTop(Bool(self.option.vo.ontop), Int(self.option.vo.ontop_level))
                     }
@@ -533,10 +530,10 @@ class Common: NSObject {
                     DispatchQueue.main.async {
                         self.window?.ignoresMouseEvents = self.option.vo.cursor_passthrough
                     }
-                case TypeHelper.toPointer(&option.voPtr.pointee.geometry): fallthrough
-                case TypeHelper.toPointer(&option.voPtr.pointee.autofit): fallthrough
-                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_smaller): fallthrough
-                case TypeHelper.toPointer(&option.voPtr.pointee.autofit_larger):
+                case TypeHelper.toPointer(&option.voPtr.pointee.geometry),
+                     TypeHelper.toPointer(&option.voPtr.pointee.autofit),
+                     TypeHelper.toPointer(&option.voPtr.pointee.autofit_smaller),
+                     TypeHelper.toPointer(&option.voPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
                         let (_, wr) = self.getInitProperties(vo)
                         self.window?.updateFrame(wr)
@@ -595,7 +592,7 @@ class Common: NSObject {
             if lightSensor != 0 {
                 let lux = data!.assumingMemoryBound(to: Int32.self)
                 lux.pointee = Int32(lmuToLux(lastLmu))
-                return VO_TRUE;
+                return VO_TRUE
             }
             return VO_NOTIMPL
         case VOCTRL_GET_UNFS_WINDOW_SIZE:
@@ -610,7 +607,7 @@ class Common: NSObject {
         case VOCTRL_SET_UNFS_WINDOW_SIZE:
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeBufferPointer(start: sizeData, count: 2)
-            var rect = NSMakeRect(0, 0, CGFloat(size[0]), CGFloat(size[1]))
+            var rect = NSRect(x: 0, y: 0, width: CGFloat(size[0]), height: CGFloat(size[1]))
             DispatchQueue.main.async {
                 if let screen = self.window?.currentScreen, !Bool(self.option.vo.hidpi_window_scale) {
                     rect = screen.convertRectFromBacking(rect)
@@ -620,7 +617,7 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_GET_DISPLAY_NAMES:
             let dnames = data!.assumingMemoryBound(to: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?.self)
-            var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>? = nil
+            var array: UnsafeMutablePointer<UnsafeMutablePointer<Int8>?>?
             var count: Int32 = 0
             let displayName = getCurrentScreen()?.uniqueName ?? "Unknown"
 

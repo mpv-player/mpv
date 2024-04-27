@@ -19,7 +19,7 @@ import Cocoa
 
 struct Timing {
     let time: UInt64
-    let closure: () -> ()
+    let closure: () -> Void
 }
 
 class PreciseTimer {
@@ -97,14 +97,14 @@ class PreciseTimer {
         pthread_join(thread, nil)
     }
 
-    func scheduleAt(time: UInt64, closure: @escaping () -> ()) {
+    func scheduleAt(time: UInt64, closure: @escaping () -> Void) {
         condition.lock()
         let firstEventTime = events.first?.time ?? 0
         let lastEventTime = events.last?.time ?? 0
         events.append(Timing(time: time, closure: closure))
 
         if lastEventTime > time {
-            events.sort{ $0.time < $1.time }
+            events.sort { $0.time < $1.time }
         }
 
         condition.signal()
@@ -115,7 +115,7 @@ class PreciseTimer {
         }
     }
 
-    let threadSignal: @convention(c) (Int32) -> () = { (sig: Int32) in }
+    let threadSignal: @convention(c) (Int32) -> Void = { (_ sig: Int32) in }
 
     let entryC: @convention(c) (UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? = { (ptr: UnsafeMutableRawPointer) in
         let ptimer: PreciseTimer = TypeHelper.bridge(ptr: ptr)

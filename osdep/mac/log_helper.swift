@@ -22,11 +22,11 @@ class LogHelper {
     var log: OpaquePointer?
     let logger = Logger(subsystem: "io.mpv", category: "mpv")
 
-    let loggerMapping: [Int:OSLogType] = [
+    let loggerMapping: [Int: OSLogType] = [
         MSGL_V: .debug,
         MSGL_INFO: .info,
         MSGL_WARN: .error,
-        MSGL_ERR: .fault,
+        MSGL_ERR: .fault
     ]
 
     init(_ log: OpaquePointer? = nil) {
