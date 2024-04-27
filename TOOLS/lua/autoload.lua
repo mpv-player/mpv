@@ -28,7 +28,7 @@ additional_audio_exts=list,of,ext
 ignore_hidden=yes
 same_type=yes
 directory_mode=recursive
-ignore_patterns=^~,^bak-,%.bak%.mp4$
+ignore_patterns=^~,^bak-,%.bak$
 
 --]]
 
