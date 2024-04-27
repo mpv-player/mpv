@@ -4101,6 +4101,17 @@ Input
     Whether this applies depends on the VO backend and how it handles
     keyboard input. Does not apply to terminal input.
 
+``--native-touch=<yes|no>``
+    (Windows only)
+    For platforms which send emulated mouse inputs for touch-unaware clients,
+    such as Windows, use system native touch events, instead of receiving them
+    as emulated mouse events (default: no). This is required for multi-touch
+    support for these platforms.
+
+    Note that this option has no effect on other platforms: either native touch
+    is not supported by mpv, or the platform does not give an option to receive
+    emulated mouse inputs (so native touch is always enabled, e.g. Wayland).
+
 ``--input-ar-delay``
     Delay in milliseconds before we start to autorepeat a key (default: 200).
     Set it to 0 to disable.
