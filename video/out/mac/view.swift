@@ -19,14 +19,13 @@ import Cocoa
 
 class View: NSView, CALayerDelegate {
     unowned var common: Common
-    var input: InputHelper? { get { return common.input } }
+    var input: InputHelper? { return common.input }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
 
     override var isFlipped: Bool { return true }
     override var acceptsFirstResponder: Bool { return true }
-
 
     init(frame: NSRect, common com: Common) {
         common = com

@@ -32,7 +32,7 @@ extension RemoteCommandCenter {
         var state: NSEvent.EventType = .applicationDefined
         let handler: ConfigHandler
 
-        init(key: Int32 = 0, type: KeyType = .normal, handler: @escaping ConfigHandler = { event in return .commandFailed }) {
+        init(key: Int32 = 0, type: KeyType = .normal, handler: @escaping ConfigHandler = { _ in return .commandFailed }) {
             self.key = key
             self.type = type
             self.handler = handler
@@ -42,9 +42,9 @@ extension RemoteCommandCenter {
 
 class RemoteCommandCenter: EventSubscriber {
     unowned let appHub: AppHub
-    var event: EventHelper? { get { return appHub.event } }
-    var input: InputHelper { get { return appHub.input } }
-    var configs: [MPRemoteCommand:Config] = [:]
+    var event: EventHelper? { return appHub.event }
+    var input: InputHelper { return appHub.input }
+    var configs: [MPRemoteCommand: Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
     var duration: Double = 0 { didSet { updateInfoCenter() } }
@@ -56,8 +56,8 @@ class RemoteCommandCenter: EventSubscriber {
     var artist: String? { didSet { updateInfoCenter() } }
     var cover: NSImage
 
-    var infoCenter: MPNowPlayingInfoCenter { get { return MPNowPlayingInfoCenter.default() } }
-    var commandCenter: MPRemoteCommandCenter { get { return MPRemoteCommandCenter.shared() } }
+    var infoCenter: MPNowPlayingInfoCenter { return MPNowPlayingInfoCenter.default() }
+    var commandCenter: MPRemoteCommandCenter { return MPRemoteCommandCenter.shared() }
 
     init(_ appHub: AppHub) {
         self.appHub = appHub
@@ -72,7 +72,7 @@ class RemoteCommandCenter: EventSubscriber {
             commandCenter.togglePlayPauseCommand: Config(key: MP_KEY_PLAY, handler: keyHandler),
             commandCenter.seekForwardCommand: Config(key: MP_KEY_FORWARD, type: .repeatable, handler: keyHandler),
             commandCenter.seekBackwardCommand: Config(key: MP_KEY_REWIND, type: .repeatable, handler: keyHandler),
-            commandCenter.changePlaybackPositionCommand: Config(handler: seekHandler),
+            commandCenter.changePlaybackPositionCommand: Config(handler: seekHandler)
         ]
 
         disabledCommands = [
@@ -86,7 +86,7 @@ class RemoteCommandCenter: EventSubscriber {
             commandCenter.ratingCommand,
             commandCenter.likeCommand,
             commandCenter.dislikeCommand,
-            commandCenter.bookmarkCommand,
+            commandCenter.bookmarkCommand
         ]
 
         for cmd in disabledCommands {

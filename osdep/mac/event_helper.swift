@@ -23,7 +23,7 @@ protocol EventSubscriber: AnyObject {
 }
 
 extension EventSubscriber {
-    var uid: Int { get { return Int(bitPattern: ObjectIdentifier(self)) }}
+    var uid: Int { return Int(bitPattern: ObjectIdentifier(self)) }
 }
 
 extension EventHelper {
@@ -31,10 +31,10 @@ extension EventHelper {
 
     struct Event {
         var id: String {
-            get { name + (name.starts(with: "MPV_EVENT_") ? "" : String(format.rawValue)) }
+            return name + (name.starts(with: "MPV_EVENT_") ? "" : String(format.rawValue))
         }
         var idReset: String {
-            get { name + (name.starts(with: "MPV_EVENT_") ? "" : String(MPV_FORMAT_NONE.rawValue)) }
+            return name + (name.starts(with: "MPV_EVENT_") ? "" : String(MPV_FORMAT_NONE.rawValue))
         }
         let name: String
         let format: mpv_format
@@ -62,7 +62,7 @@ extension EventHelper {
 class EventHelper {
     unowned let appHub: AppHub
     var mpv: OpaquePointer?
-    var events: [String:[Int:EventSubscriber]] = [:]
+    var events: [String: [Int: EventSubscriber]] = [:]
 
     init?(_ appHub: AppHub, _ mpv: OpaquePointer) {
         if !appHub.isApplication {
@@ -128,7 +128,7 @@ class EventHelper {
         let name = String(cString: property.name)
         let format = property.format
         for (_, subscriber) in events[name + String(format.rawValue)] ?? [:] {
-            var event: Event? = nil
+            var event: Event?
             switch format {
             case MPV_FORMAT_STRING:
                 event = .init(name: name, format: format, string: TypeHelper.toString(property.data))

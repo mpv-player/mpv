@@ -25,16 +25,18 @@ class OptionHelper {
     var voCachePtr: UnsafeMutablePointer<m_config_cache>
     var macCachePtr: UnsafeMutablePointer<m_config_cache>
 
-    var voPtr: UnsafeMutablePointer<mp_vo_opts>
-        { get { return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(voCachePtr.pointee.opts)) } }
-    var macPtr: UnsafeMutablePointer<macos_opts>
-        { get { return UnsafeMutablePointer<macos_opts>(OpaquePointer(macCachePtr.pointee.opts)) } }
+    var voPtr: UnsafeMutablePointer<mp_vo_opts> {
+        return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(voCachePtr.pointee.opts))
+    }
+    var macPtr: UnsafeMutablePointer<macos_opts> {
+        return UnsafeMutablePointer<macos_opts>(OpaquePointer(macCachePtr.pointee.opts))
+    }
 
     // these computed properties return a local copy of the struct accessed:
     // - don't use if you rely on the pointers
     // - only for reading
-    var vo: mp_vo_opts { get { return voPtr.pointee } }
-    var mac: macos_opts { get { return macPtr.pointee } }
+    var vo: mp_vo_opts { return voPtr.pointee }
+    var mac: macos_opts { return macPtr.pointee }
 
     init(_ taParent: UnsafeMutableRawPointer, _ global: OpaquePointer?) {
         voCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getVoConf())

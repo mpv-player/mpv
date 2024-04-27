@@ -18,9 +18,9 @@
 import Cocoa
 
 class Application: NSApplication, NSApplicationDelegate {
-    var appHub: AppHub { get { return AppHub.shared } }
-    var eventManager: NSAppleEventManager { get { return NSAppleEventManager.shared() } }
-    var isBundle: Bool { get { return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" } }
+    var appHub: AppHub { return AppHub.shared }
+    var eventManager: NSAppleEventManager { return NSAppleEventManager.shared() }
+    var isBundle: Bool { return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" }
     var playbackThreadId: mp_thread!
     var argc: Int32?
     var argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
