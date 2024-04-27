@@ -64,9 +64,10 @@ class View: NSView, CALayerDelegate {
     }
 
     func isURL(_ str: String) -> Bool {
-        // force unwrapping is fine here, regex is guaranteed to be valid
-        let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
-                                             options: .caseInsensitive)
+        guard let regex = try? NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
+                                                   options: .caseInsensitive) else {
+            return false
+        }
         let isURL = regex.numberOfMatches(in: str,
                                      options: [],
                                        range: NSRange(location: 0, length: str.count))
