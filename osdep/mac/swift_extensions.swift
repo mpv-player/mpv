@@ -32,8 +32,9 @@ extension NSScreen {
     }
 
     public var name: String {
-        // force unwrapping is fine here, regex is guaranteed to be valid
-        let regex = try! NSRegularExpression(pattern: " \\(\\d+\\)$", options: .caseInsensitive)
+        guard let regex = try? NSRegularExpression(pattern: " \\(\\d+\\)$", options: .caseInsensitive) else {
+            return localizedName
+        }
         return regex.stringByReplacingMatches(
             in: localizedName,
             range: NSRange(location: 0, length: localizedName.count),
