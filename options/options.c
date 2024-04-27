@@ -169,6 +169,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"keepaspect-window", OPT_BOOL(keepaspect_window)},
     {"hidpi-window-scale", OPT_BOOL(hidpi_window_scale)},
     {"native-fs", OPT_BOOL(native_fs)},
+    {"native-touch", OPT_BOOL(native_touch)},
     {"show-in-taskbar", OPT_BOOL(show_in_taskbar)},
     {"display-fps-override", OPT_DOUBLE(display_fps_override),
         M_RANGE(0, DBL_MAX)},
