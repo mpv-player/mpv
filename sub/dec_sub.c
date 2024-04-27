@@ -23,6 +23,7 @@
 #include <limits.h>
 
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "sd.h"
 #include "dec_sub.h"
 #include "options/m_config.h"
@@ -127,7 +128,8 @@ static void destroy_cached_pkts(struct dec_sub *sub)
 {
     int index = 0;
     while (index < sub->num_cached_pkts) {
-        TA_FREEP(&sub->cached_pkts[index]);
+        demux_packet_pool_push(sub->global->packet_pool, sub->cached_pkts[index]);
+        sub->cached_pkts[index] = NULL;
         ++index;
     }
     sub->cached_pkt_pos = 0;
@@ -375,7 +377,7 @@ void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
         MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
 
         if (is_new_segment(sub, pkt)) {
-            sub->new_segment = demux_copy_packet(pkt);
+            sub->new_segment = demux_copy_packet(sub->global->packet_pool, pkt);
             // Note that this can be delayed to a much later point in time.
             update_segment(sub);
             break;
@@ -482,7 +484,8 @@ void sub_reset(struct dec_sub *sub)
     sub->last_pkt_pts = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
     destroy_cached_pkts(sub);
-    TA_FREEP(&sub->new_segment);
+    demux_packet_pool_push(sub->global->packet_pool, sub->new_segment);
+    sub->new_segment = NULL;
     mp_mutex_unlock(&sub->lock);
 }
 
