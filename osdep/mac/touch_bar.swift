@@ -75,6 +75,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
     var event: EventHelper? { get { return appHub.event } }
     var input: InputHelper { get { return appHub.input } }
     var configs: [NSTouchBarItem.Identifier:Config] = [:]
+    var observers: [NSKeyValueObservation] = []
     var isPaused: Bool = false { didSet { updatePlayButton() } }
     var position: Double = 0 { didSet { updateTouchBarTimeItems() } }
     var duration: Double = 0 { didSet { updateTouchBarTimeItems() } }
@@ -138,7 +139,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         defaultItemIdentifiers = [.play, .previousItem, .nextItem, .seekBar]
         customizationAllowedItemIdentifiers = [.play, .seekBar, .previousItem, .nextItem,
             .previousChapter, .nextChapter, .cycleAudio, .cycleSubtitle, .currentPosition, .timeLeft]
-        addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
+        observers += [observe(\.isVisible, options: [.new]) { object, change in self.changed(visibility: change.newValue) }]
 
         event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_DOUBLE))
         event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_DOUBLE))
@@ -158,7 +159,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         item.view = config.handler(config)
         item.customizationLabel = config.name
         configs[identifier]?.item = item
-        item.addObserver(self, forKeyPath: "visible", options: [.new], context: nil)
+        observers += [item.observe(\.isVisible, options: [.new]) { object, change in self.changed(visibility: change.newValue) }]
         return item
     }
 
@@ -179,14 +180,8 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         return slider
     }
 
-    override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey:Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
-        guard let visible = change?[.newKey] as? Bool else { return }
-        if keyPath == "isVisible" && visible {
+    func changed(visibility: Bool?) {
+        if let visible = visibility, visible {
             updateTouchBarTimeItems()
             updatePlayButton()
         }
