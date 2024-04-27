@@ -2897,6 +2897,32 @@ static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int get_touch_pos(int item, int action, void *arg, void *ctx)
+{
+    const int **pos = (const int **)ctx;
+    struct m_sub_property props[] = {
+        {"x", SUB_PROP_INT(pos[0][item])},
+        {"y", SUB_PROP_INT(pos[1][item])},
+        {"id", SUB_PROP_INT(pos[2][item])},
+        {0}
+    };
+
+    int r = m_property_read_sub(props, action, arg);
+    return r;
+}
+
+#define MAX_TOUCH_POINTS 10
+static int mp_property_touch_pos(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int xs[MAX_TOUCH_POINTS], ys[MAX_TOUCH_POINTS], ids[MAX_TOUCH_POINTS];
+    int count = mp_input_get_touch_pos(mpctx->input, MAX_TOUCH_POINTS, xs, ys, ids);
+    const int *pos[3] = {xs, ys, ids};
+    return m_property_read_list(action, arg, MPMIN(MAX_TOUCH_POINTS, count),
+                                get_touch_pos, (void *)pos);
+}
+
 /// Video fps (RO)
 static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -4031,6 +4057,7 @@ static const struct m_property mp_properties_base[] = {
     {"osd-ass-cc", mp_property_osd_ass},
 
     {"mouse-pos", mp_property_mouse_pos},
+    {"touch-pos", mp_property_touch_pos},
 
     // Subs
     {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
@@ -4169,7 +4196,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count", "playlist-current-pos",
       "playlist-playing-pos"),
-    E(MP_EVENT_INPUT_PROCESSED, "mouse-pos"),
+    E(MP_EVENT_INPUT_PROCESSED, "mouse-pos", "touch-pos"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
 };
 #undef E
