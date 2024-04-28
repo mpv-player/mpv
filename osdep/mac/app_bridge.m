@@ -55,6 +55,22 @@ const struct m_sub_options macos_conf = {
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
+        {"cocoa-cb-output-csp", OPT_CHOICE(cocoa_cb_output_csp,
+            {"auto", MAC_CSP_AUTO},
+            {"display-p3", MAC_CSP_DISPLAY_P3},
+            {"display-p3-hlg", MAC_CSP_DISPLAY_P3_HLG},
+            {"display-p3-pq", MAC_CSP_DISPLAY_P3_PQ},
+            {"display-p3-linear", MAC_CSP_DISPLAY_P3_LINEAR},
+            {"dci-p3", MAC_CSP_DCI_P3},
+            {"bt.2020", MAC_CSP_BT_2020},
+            {"bt.2020-linear", MAC_CSP_BT_2020_LINEAR},
+            {"bt.2100-hlg", MAC_CSP_BT_2100_HLG},
+            {"bt.2100-pq", MAC_CSP_BT_2100_PQ},
+            {"bt.709", MAC_CSP_BT_709},
+            {"srgb", MAC_CSP_SRGB},
+            {"srgb-linear", MAC_CSP_SRGB_LINEAR},
+            {"rgb-linear", MAC_CSP_RGB_LINEAR},
+            {"adobe", MAC_CSP_ADOBE})},
         {0}
     },
     .size = sizeof(struct macos_opts),
@@ -63,7 +79,8 @@ const struct m_sub_options macos_conf = {
         .macos_fs_animation_duration = -1,
         .macos_render_timer = RENDER_TIMER_CALLBACK,
         .cocoa_cb_sw_renderer = -1,
-        .cocoa_cb_10bit_context = true
+        .cocoa_cb_10bit_context = true,
+        .cocoa_cb_output_csp = MAC_CSP_AUTO,
     },
 };
 
