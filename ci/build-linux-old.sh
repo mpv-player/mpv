@@ -9,6 +9,7 @@ git clone https://code.videolan.org/videolan/libplacebo.git \
     --depth=1 --branch v6.338 subprojects/libplacebo \
 
 meson setup build \
+    --werror      \
     -Dlibplacebo:vulkan=disabled \
     -Dlibmpv=true \
     -Dlua=enabled \
