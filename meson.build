@@ -1570,6 +1570,18 @@ if features['cocoa'] and features['swift']
                            'video/out/mac/window.swift')
 endif
 
+macos_11_features = get_option('macos-11-features').require(
+    macos_sdk_version.version_compare('>= 11'),
+    error_message: 'A macos sdk version >= 11 could not be found!',
+)
+features += {'macos-11-features': macos_11_features.allowed()}
+
+macos_12_features = get_option('macos-12-features').require(
+    macos_sdk_version.version_compare('>= 12'),
+    error_message: 'A macos sdk version >= 12 could not be found!',
+)
+features += {'macos-12-features': macos_12_features.allowed()}
+
 macos_cocoa_cb = get_option('macos-cocoa-cb').require(
     features['cocoa'] and features['gl-cocoa'] and features['swift'],
     error_message: 'Either cocoa, gl-cocoa or swift could not be found!',
