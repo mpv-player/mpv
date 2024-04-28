@@ -21,11 +21,13 @@
 #include <assert.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/hdr_dynamic_metadata.h>
 #include <libavutil/intreadwrite.h>
 
 #include "common/av_common.h"
 #include "common/common.h"
 #include "demux.h"
+#include "demux/ebml.h"
 
 #include "packet.h"
 
@@ -232,9 +234,57 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
 {
     if (!dp->avpacket)
         return -1;
-    uint8_t *sd =  av_packet_new_side_data(dp->avpacket,
-                                           AV_PKT_DATA_MATROSKA_BLOCKADDITIONAL,
-                                           8 + size);
+
+    switch (id) {
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(58, 5, 100)
+    case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
+        static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
+        static const uint16_t ITU_T_T35_PROVIDER_CODE_SMTPE = 0x3C;
+
+        if (size < 6)
+            break;
+
+        uint8_t *p = data;
+
+        uint8_t country_code = AV_RB8(p);
+        p += sizeof(country_code);
+        uint16_t provider_code = AV_RB16(p);
+        p += sizeof(provider_code);
+
+        if (country_code != ITU_T_T35_COUNTRY_CODE_US ||
+            provider_code != ITU_T_T35_PROVIDER_CODE_SMTPE)
+            break;
+
+        uint16_t provider_oriented_code = AV_RB16(p);
+        p += sizeof(provider_oriented_code);
+        uint8_t application_identifier = AV_RB8(p);
+        p += sizeof(application_identifier);
+
+        if (provider_oriented_code != 1 || application_identifier != 4)
+            break;
+
+        size_t hdrplus_size;
+        AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
+        MP_HANDLE_OOM(hdrplus);
+
+        if (av_dynamic_hdr_plus_from_t35(hdrplus, p, size - (p - (uint8_t *)data)) < 0 ||
+            av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
+                                    (uint8_t *)hdrplus, hdrplus_size) < 0)
+        {
+            av_free(hdrplus);
+            return -1;
+        }
+
+        return 0;
+    }
+#endif
+    default:
+        break;
+    }
+
+    uint8_t *sd = av_packet_new_side_data(dp->avpacket,
+                                          AV_PKT_DATA_MATROSKA_BLOCKADDITIONAL,
+                                          8 + size);
     if (!sd)
         return -1;
     AV_WB64(sd, id);
