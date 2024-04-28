@@ -101,7 +101,7 @@ function _mpv_generate_arguments {
 
         entry+='->files'
 
-      elif [[ $name == (ao|vo|af|vf|profile|audio-device|vulkan-device) ]]; then
+      elif [[ $desc = 'Object settings list'* || $name == (profile|audio-device|vulkan-device) ]]; then
 
         entry+="->parse-help-$name"
 

@@ -41,19 +41,15 @@ static bool in_interval(int n, struct interval q)
     return n >= q.lo && n <= q.hi;
 }
 
-static float **realloc_2d(float **p, int x, int y)
+static void alloc_sample_buffer(struct mp_scaletempo2 *p, float ***ptr, size_t size)
 {
-    float **array = realloc(p, sizeof(float*) * x + sizeof(float) * x * y);
-    float* data = (float*) (array + x);
-    for (int i = 0; i < x; ++i) {
-        array[i] = data + i * y;
-    }
-    return array;
-}
+    talloc_free(*ptr);
 
-static void zero_2d(float **a, int x, int y)
-{
-    memset(a + x, 0, sizeof(float) * x * y);
+    float **buff = talloc_array(p, float*, p->channels);
+    for (int i = 0; i < p->channels; ++i) {
+        buff[i] = talloc_array(buff, float, size);
+    }
+    *ptr = buff;
 }
 
 static void zero_2d_partial(float **a, int x, int y)
@@ -480,12 +476,6 @@ static bool can_perform_wsola(struct mp_scaletempo2 *p, double playback_rate)
     return frames_needed(p, playback_rate) <= 0;
 }
 
-static void resize_input_buffer(struct mp_scaletempo2 *p, int size)
-{
-    p->input_buffer_size = size;
-    p->input_buffer = realloc_2d(p->input_buffer, p->channels, size);
-}
-
 // pad end with silence until a wsola iteration can be performed
 static void add_input_buffer_final_silence(struct mp_scaletempo2 *p, double playback_rate)
 {
@@ -493,11 +483,9 @@ static void add_input_buffer_final_silence(struct mp_scaletempo2 *p, double play
     if (needed <= 0)
         return; // no silence needed for iteration
 
-    int required_size = needed + p->input_buffer_frames;
-    if (required_size > p->input_buffer_size)
-        resize_input_buffer(p, required_size);
-
+    int last_index = needed + p->input_buffer_frames - 1;
     for (int i = 0; i < p->channels; ++i) {
+        MP_TARRAY_GROW(p, p->input_buffer[i], last_index);
         float *ch_input = p->input_buffer[i];
         for (int j = 0; j < needed; ++j) {
             ch_input[p->input_buffer_frames + j] = 0.0f;
@@ -523,11 +511,9 @@ int mp_scaletempo2_fill_input_buffer(struct mp_scaletempo2 *p,
     if (read == 0)
         return 0;
 
-    int required_size = read + p->input_buffer_frames;
-    if (required_size > p->input_buffer_size)
-        resize_input_buffer(p, required_size);
-
+    int last_index = read + p->input_buffer_frames - 1;
     for (int i = 0; i < p->channels; ++i) {
+        MP_TARRAY_GROW(p, p->input_buffer[i], last_index);
         memcpy(p->input_buffer[i] + p->input_buffer_frames,
             planes[i], read * sizeof(float));
     }
@@ -771,18 +757,6 @@ bool mp_scaletempo2_frames_available(struct mp_scaletempo2 *p, double playback_r
         || p->num_complete_frames > 0;
 }
 
-void mp_scaletempo2_destroy(struct mp_scaletempo2 *p)
-{
-    free(p->ola_window);
-    free(p->transition_window);
-    free(p->wsola_output);
-    free(p->optimal_block);
-    free(p->search_block);
-    free(p->target_block);
-    free(p->input_buffer);
-    free(p->energy_candidate_blocks);
-}
-
 void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
 {
     p->input_buffer_frames = 0;
@@ -791,8 +765,6 @@ void mp_scaletempo2_reset(struct mp_scaletempo2 *p)
     p->output_time = 0.0;
     p->search_block_index = 0;
     p->target_block_index = 0;
-    // Clear the queue of decoded packets.
-    zero_2d(p->wsola_output, p->channels, p->wsola_output_size);
     p->num_complete_frames = 0;
     p->wsola_output_started = false;
 }
@@ -847,28 +819,26 @@ void mp_scaletempo2_init(struct mp_scaletempo2 *p, int channels, int rate)
     //                   1,          ...         |num_candidate_blocks|
     p->search_block_center_offset = p->num_candidate_blocks / 2
         + (p->ola_window_size / 2 - 1);
-    p->ola_window = realloc(p->ola_window, sizeof(float) * p->ola_window_size);
+    MP_RESIZE_ARRAY(p, p->ola_window, p->ola_window_size);
     get_symmetric_hanning_window(p->ola_window_size, p->ola_window);
-    p->transition_window = realloc(p->transition_window,
-        sizeof(float) * p->ola_window_size * 2);
+    MP_RESIZE_ARRAY(p, p->transition_window, p->ola_window_size * 2);
     get_symmetric_hanning_window(2 * p->ola_window_size, p->transition_window);
 
     p->wsola_output_size = p->ola_window_size + p->ola_hop_size;
-    p->wsola_output = realloc_2d(p->wsola_output, p->channels, p->wsola_output_size);
-    // Initialize for overlap-and-add of the first block.
-    zero_2d(p->wsola_output, p->channels, p->wsola_output_size);
+    alloc_sample_buffer(p, &p->wsola_output, p->wsola_output_size);
 
     // Auxiliary containers.
-    p->optimal_block = realloc_2d(p->optimal_block, p->channels, p->ola_window_size);
+    alloc_sample_buffer(p, &p->optimal_block, p->ola_window_size);
     p->search_block_size = p->num_candidate_blocks + (p->ola_window_size - 1);
-    p->search_block = realloc_2d(p->search_block, p->channels, p->search_block_size);
-    p->target_block = realloc_2d(p->target_block, p->channels, p->ola_window_size);
+    alloc_sample_buffer(p, &p->search_block, p->search_block_size);
+    alloc_sample_buffer(p, &p->target_block, p->ola_window_size);
 
-    resize_input_buffer(p, 4 * MPMAX(p->ola_window_size, p->search_block_size));
     p->input_buffer_frames = 0;
     p->input_buffer_final_frames = 0;
     p->input_buffer_added_silence = 0;
+    size_t initial_size = 4 * MPMAX(p->ola_window_size, p->search_block_size);
+    alloc_sample_buffer(p, &p->input_buffer, initial_size);
 
-    p->energy_candidate_blocks = realloc(p->energy_candidate_blocks,
-        sizeof(float) * p->channels * p->num_candidate_blocks);
+    MP_RESIZE_ARRAY(p, p->energy_candidate_blocks,
+        p->channels * p->num_candidate_blocks);
 }

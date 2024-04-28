@@ -3009,6 +3009,20 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
     int sub_index = def[0];
     int type = def[1];
 
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = arg;
+
+        if (!strcmp(ka->key, "ass"))
+            type = SD_TEXT_TYPE_ASS;
+        else if (!strcmp(ka->key, "ass-full"))
+            type = SD_TEXT_TYPE_ASS_FULL;
+        else
+            return M_PROPERTY_UNKNOWN;
+
+        action = ka->action;
+        arg = ka->arg;
+    }
+
     struct track *track = mpctx->current_track[sub_index][STREAM_SUB];
     struct dec_sub *sub = track ? track->d_sub : NULL;
     double pts = mpctx->playback_pts;
@@ -4036,8 +4050,7 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int[]){0, SD_TEXT_TYPE_PLAIN}},
     {"secondary-sub-text", mp_property_sub_text,
         .priv = (void *)&(const int[]){1, SD_TEXT_TYPE_PLAIN}},
-    {"sub-text-ass", mp_property_sub_text,
-        .priv = (void *)&(const int[]){0, SD_TEXT_TYPE_ASS}},
+    M_PROPERTY_DEPRECATED_ALIAS("sub-text-ass", "sub-text/ass"),
     {"sub-start", mp_property_sub_start,
         .priv = (void *)&(const int){0}},
     {"secondary-sub-start", mp_property_sub_start,

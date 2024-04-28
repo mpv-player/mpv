@@ -48,7 +48,6 @@ void wasapi_change_uninit(struct ao* ao);
 
 enum wasapi_thread_state {
     WASAPI_THREAD_FEED = 0,
-    WASAPI_THREAD_DISPATCH,
     WASAPI_THREAD_RESUME,
     WASAPI_THREAD_RESET,
     WASAPI_THREAD_SHUTDOWN,
@@ -66,6 +65,7 @@ typedef struct wasapi_state {
     HANDLE hWake;            // thread wakeup event
     atomic_int thread_state; // enum wasapi_thread_state (what to do on wakeup)
     struct mp_dispatch_queue *dispatch; // for volume/mute/session display
+    HANDLE hUserWake;        // mpv-requested wakeup event
 
     // for setting the audio thread priority
     HANDLE hTask;

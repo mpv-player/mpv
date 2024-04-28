@@ -24,95 +24,49 @@
 #include "options/options.h"
 #include "video/out/aspect.h"
 #include "video/out/gpu/video.h"
-#include "video/out/opengl/egl_helpers.h"
-#include "video/out/opengl/ra_gl.h"
+#include "video/filter/vf_gpu.h"
 
-struct offscreen_ctx {
-    struct mp_log *log;
-    struct ra *ra;
-    void *priv;
+extern const struct offscreen_context offscreen_vk;
+extern const struct offscreen_context offscreen_egl;
 
-    void (*set_context)(struct offscreen_ctx *ctx, bool enable);
+static const struct offscreen_context *contexts[] = {
+#if HAVE_EGL
+    &offscreen_egl,
+#endif
+#if HAVE_VULKAN
+    &offscreen_vk,
+#endif
 };
 
-struct gl_offscreen_ctx {
-    GL gl;
-    EGLDisplay egl_display;
-    EGLContext egl_context;
-};
-
-static void gl_ctx_destroy(void *p)
+static inline OPT_STRING_VALIDATE_FUNC(offscreen_ctx_validate_api)
 {
-    struct offscreen_ctx *ctx = p;
-    struct gl_offscreen_ctx *gl = ctx->priv;
-
-    ra_free(&ctx->ra);
-
-    if (gl->egl_context)
-        eglDestroyContext(gl->egl_display, gl->egl_context);
+    struct bstr param = bstr0(*value);
+    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
+        if (bstr_equals0(param, contexts[i]->api))
+            return 1;
+    }
+    return M_OPT_INVALID;
 }
 
-static void gl_ctx_set_context(struct offscreen_ctx *ctx, bool enable)
+static int offscreen_ctx_api_help(struct mp_log *log, const struct m_option *opt,
+                                  struct bstr name)
 {
-    struct gl_offscreen_ctx *gl = ctx->priv;
-    EGLContext c = enable ? gl->egl_context : EGL_NO_CONTEXT;
-
-    if (!eglMakeCurrent(gl->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, c))
-        MP_ERR(ctx, "Could not make EGL context current.\n");
+    mp_info(log, "GPU APIs (offscreen contexts):\n");
+    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++)
+        mp_info(log, "    %s\n", contexts[i]->api);
+    return M_OPT_EXIT;
 }
 
-static struct offscreen_ctx *gl_offscreen_ctx_create(struct mpv_global *global,
-                                                     struct mp_log *log)
+static struct offscreen_ctx *offscreen_ctx_create(struct mpv_global *global,
+                                                  struct mp_log *log,
+                                                  const char *api)
 {
-    struct offscreen_ctx *ctx = talloc_zero(NULL, struct offscreen_ctx);
-    struct gl_offscreen_ctx *gl = talloc_zero(ctx, struct gl_offscreen_ctx);
-    talloc_set_destructor(ctx, gl_ctx_destroy);
-    *ctx = (struct offscreen_ctx){
-        .log = log,
-        .priv = gl,
-        .set_context = gl_ctx_set_context,
-    };
-
-    // This appears to work with Mesa. EGL 1.5 doesn't specify what a "default
-    // display" is at all.
-    gl->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (!eglInitialize(gl->egl_display, NULL, NULL)) {
-        MP_ERR(ctx, "Could not initialize EGL.\n");
-        goto error;
+    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
+        if (api && strcmp(contexts[i]->api, api) != 0)
+            continue;
+        mp_info(log, "Creating offscreen GPU context '%s'\n", contexts[i]->api);
+        return contexts[i]->offscreen_ctx_create(global, log);
     }
-
-    // Unfortunately, mpegl_create_context() is entangled with ra_ctx.
-    // Fortunately, it does not need much, and we can provide a stub.
-    struct ra_ctx ractx = {
-        .log = ctx->log,
-        .global = global,
-    };
-    EGLConfig config;
-    if (!mpegl_create_context(&ractx, gl->egl_display, &gl->egl_context, &config))
-    {
-        MP_ERR(ctx, "Could not create EGL context.\n");
-        goto error;
-    }
-
-    if (!eglMakeCurrent(gl->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                        gl->egl_context))
-    {
-        MP_ERR(ctx, "Could not make EGL context current.\n");
-        goto error;
-    }
-
-    mpegl_load_functions(&gl->gl, ctx->log);
-    ctx->ra = ra_create_gl(&gl->gl, ctx->log);
-
-    if (!ctx->ra)
-        goto error;
-
-    gl_ctx_set_context(ctx, false);
-
-    return ctx;
-
-error:
-    talloc_free(ctx);
     return NULL;
 }
 
@@ -124,6 +78,7 @@ static void offscreen_ctx_set_current(struct offscreen_ctx *ctx, bool enable)
 
 struct gpu_opts {
     int w, h;
+    char *api;
 };
 
 struct priv {
@@ -327,7 +282,7 @@ static struct mp_filter *gpu_create(struct mp_filter *parent, void *options)
     priv->vo_opts_cache = m_config_cache_alloc(f, f->global, &vo_sub_opts);
     priv->vo_opts = priv->vo_opts_cache->opts;
 
-    priv->ctx = gl_offscreen_ctx_create(f->global, f->log);
+    priv->ctx = offscreen_ctx_create(f->global, f->log, priv->opts->api);
     if (!priv->ctx) {
         MP_FATAL(f, "Could not create offscreen ra context.\n");
         goto error;
@@ -368,6 +323,8 @@ const struct mp_user_filter_entry vf_gpu = {
         .options = (const struct m_option[]){
             {"w", OPT_INT(w)},
             {"h", OPT_INT(h)},
+            {"api", OPT_STRING_VALIDATE(api, offscreen_ctx_validate_api),
+                .help = offscreen_ctx_api_help},
             {0}
         },
     },

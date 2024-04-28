@@ -379,6 +379,15 @@ pthread_debug = get_option('pthread-debug').require(
 )
 features += {'pthread-debug': pthread_debug.allowed()}
 
+if get_option('fuzzers')
+    if get_option('cplayer') or not get_option('libmpv')
+        error('fuzzers require !cplayer and libmpv')
+    endif
+    # Adding flags manually until https://github.com/mesonbuild/meson/pull/9825
+    flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
+    link_flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
+endif
+
 add_project_arguments(flags, language: 'c')
 add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
 add_project_link_arguments(link_flags, language: ['c', 'objc'])
@@ -1249,7 +1258,7 @@ if features['egl'] or features['egl-android'] or features['egl-angle-win32']
 endif
 
 if features['gl'] and features['egl']
-    sources += files('video/filter/vf_gpu.c')
+    sources += files('video/filter/vf_gpu_egl.c')
 endif
 
 if features['gl']
@@ -1274,7 +1283,8 @@ features += {'vulkan': vulkan.found()}
 if features['vulkan']
     dependencies += vulkan
     sources += files('video/out/vulkan/context.c',
-                     'video/out/vulkan/utils.c')
+                     'video/out/vulkan/utils.c',
+                     'video/filter/vf_gpu_vulkan.c')
 endif
 
 if features['vulkan'] and features['android']
@@ -1297,6 +1307,10 @@ features += {'vk-khr-display': cc.has_function('vkCreateDisplayPlaneSurfaceKHR',
                                                dependencies: [vulkan])}
 if features['vk-khr-display']
     sources += files('video/out/vulkan/context_display.c')
+endif
+
+if features['vulkan'] or (features['gl'] and features['egl'])
+    sources += files('video/filter/vf_gpu.c')
 endif
 
 
@@ -1796,6 +1810,10 @@ endif
 
 if get_option('tests')
     subdir('test')
+endif
+
+if get_option('fuzzers')
+    subdir('fuzzers')
 endif
 
 summary({'d3d11': features['d3d11'],

@@ -205,6 +205,30 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+  linux-fuzz:
+    runs-on: "ubuntu-latest"
+    container:
+      image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
+      env:
+        CC: "clang"
+        CXX: "clang++"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with meson
+        id: build
+        run: |
+          meson setup build \
+            --werror        \
+            -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
+            -Dfuzzers=true -Dlibmpv=true -Dcplayer=false
+          meson compile -C build
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
   linux-ffmpeg-4-4:
     runs-on: ubuntu-22.04
     container:

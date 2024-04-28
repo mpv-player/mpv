@@ -55,6 +55,7 @@ struct lavc_conv *lavc_conv_create(struct sd *sd);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);
 char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
                         double *sub_pts, double *sub_duration);
+bool lavc_conv_is_styled(struct lavc_conv *priv);
 void lavc_conv_reset(struct lavc_conv *priv);
 void lavc_conv_uninit(struct lavc_conv *priv);
 
@@ -106,8 +107,10 @@ int sd_ass_fmt_offset(const char *event_format);
 bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset);
 
 // convert \0-terminated "Text" (ass) content to plaintext, possibly in-place.
-// result.start is out, result.len is MIN(out_siz, strlen(in)) or smaller.
-// if there's room: out[result.len] is set to \0. out == in is allowed.
-bstr sd_ass_to_plaintext(char *out, size_t out_siz, const char *in);
+// result.start is *out, result.len is strlen(in) or smaller.
+// (*out)[result.len] is always set to \0. *out == in is allowed.
+// *out must be a talloc-allocated buffer or NULL, and will be reallocated if needed.
+// *out will not be reallocated if *out == in.
+bstr sd_ass_to_plaintext(char **out, const char *in);
 
 #endif

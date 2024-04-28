@@ -99,12 +99,17 @@ struct config_cache {
     void *wakeup_cb_ctx;
 };
 
+struct force_update {
+    char *name;
+    uint64_t ts;
+};
+
 // Per m_config_data state for each m_config_group.
 struct m_group_data {
-    char *udata;          // pointer to group user option struct
-    uint64_t ts;          // timestamp of the data copy
-    char **force_updates; // track if any opt in group was written with force_update
-    int force_updates_len;
+    char *udata;                        // pointer to group user option struct
+    uint64_t ts;                        // timestamp of the data copy
+    struct force_update **force_update; // tracks opts that are written with force update
+    int force_update_len;
 };
 
 static void add_sub_group(struct m_config_shadow *shadow, const char *name_prefix,
@@ -590,23 +595,30 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
     return m_config_cache_from_shadow(ta_parent, global->config, group);
 }
 
-static void clear_force_update_list(struct m_group_data *gsrc)
+static void append_force_update(struct m_config_cache *cache, struct m_group_data *gdata,
+                                const char *opt_name)
 {
-    int index = 0;
-    while (index < gsrc->force_updates_len) {
-        TA_FREEP(&gsrc->force_updates[index]);
-        ++index;
+    for (int i = 0; i < gdata->force_update_len; ++i) {
+        if (strcmp(opt_name, gdata->force_update[i]->name) == 0) {
+            gdata->force_update[i]->ts = gdata->ts;
+            return;
+        }
     }
-    gsrc->force_updates_len = 0;
+    struct force_update *new_update = talloc_zero(cache, struct force_update);
+    new_update->name = talloc_strdup(cache, opt_name);
+    new_update->ts = gdata->ts;
+    MP_TARRAY_APPEND(cache, gdata->force_update, gdata->force_update_len, new_update);
 }
 
-static bool check_force_update_list(struct m_group_data *gsrc, const char *opt_name)
+static bool check_force_update(struct m_group_data *gdata, const char *opt_name,
+                               uint64_t timestamp)
 {
-    int index = 0;
-    while (index < gsrc->force_updates_len) {
-        if (strcmp(opt_name, gsrc->force_updates[index]) == 0)
+    for (int i = 0; i < gdata->force_update_len; ++i) {
+        if ((strcmp(opt_name, gdata->force_update[i]->name) == 0) &&
+            gdata->force_update[i]->ts == timestamp)
+        {
             return true;
-        ++index;
+        }
     }
     return false;
 }
@@ -637,8 +649,8 @@ static void update_next_option(struct m_config_cache *cache, void **p_opt)
 
                 if (opt->offset >= 0 && opt->type->size) {
                     bool opt_equal = m_option_equal(opt, ddst, dsrc);
-                    bool force_update = opt->force_update && gsrc->force_updates_len &&
-                                        check_force_update_list(gsrc, opt->name);
+                    bool force_update = opt->force_update &&
+                                        check_force_update(gsrc, opt->name, in->ts);
                     if (!opt_equal || force_update) {
                         uint64_t ch = get_opt_change_mask(dst->shadow,
                                         in->upd_group, dst->group_index, opt);
@@ -666,8 +678,6 @@ static void update_next_option(struct m_config_cache *cache, void **p_opt)
             }
 
             gdst->ts = gsrc->ts;
-        } else {
-            clear_force_update_list(gsrc);
         }
 
         in->upd_group++;
@@ -791,10 +801,8 @@ bool m_config_cache_write_opt(struct m_config_cache *cache, void *ptr)
         }
     }
 
-    if (opt->force_update) {
-        MP_TARRAY_APPEND(shadow, gsrc->force_updates, gsrc->force_updates_len,
-                         talloc_strdup(shadow, opt->name));
-    }
+    if (opt->force_update)
+        append_force_update(cache, gsrc, opt->name);
 
     mp_mutex_unlock(&shadow->lock);
 
