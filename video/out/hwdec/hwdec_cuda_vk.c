@@ -271,12 +271,7 @@ static bool cuda_ext_vk_signal(const struct ra_hwdec_mapper *mapper, int n)
 #undef CHECK_CU
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
-bool cuda_vk_init(const struct ra_hwdec *hw) {
-    int ret = 0;
-    int level = hw->probing ? MSGL_V : MSGL_ERR;
-    struct cuda_hw_priv *p = hw->priv;
-    CudaFunctions *cu = p->cu;
-
+static bool cuda_vk_check(const struct ra_hwdec *hw) {
     pl_gpu gpu = ra_pl_get(hw->ra_ctx->ra);
     if (gpu != NULL) {
         if (!(gpu->export_caps.tex & HANDLE_TYPE)) {
@@ -292,6 +287,16 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
         // This is not a Vulkan RA.
         return false;
     }
+
+    return true;
+}
+
+static bool cuda_vk_init(const struct ra_hwdec *hw) {
+    int ret = 0;
+    int level = hw->probing ? MSGL_V : MSGL_ERR;
+    struct cuda_hw_priv *p = hw->priv;
+    CudaFunctions *cu = p->cu;
+    pl_gpu gpu = ra_pl_get(hw->ra_ctx->ra);
 
     if (!cu->cuImportExternalMemory) {
         MP_MSG(hw, level, "CUDA hwdec with Vulkan requires driver version 410.48 or newer.\n");
@@ -341,3 +346,7 @@ bool cuda_vk_init(const struct ra_hwdec *hw) {
     return true;
 }
 
+struct cuda_interop_fn cuda_vk_fn = {
+    .check = cuda_vk_check,
+    .init = cuda_vk_init
+};

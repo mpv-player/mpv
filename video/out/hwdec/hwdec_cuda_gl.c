@@ -105,11 +105,7 @@ static void cuda_ext_gl_uninit(const struct ra_hwdec_mapper *mapper, int n)
 #undef CHECK_CU
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
-bool cuda_gl_init(const struct ra_hwdec *hw) {
-    int ret = 0;
-    struct cuda_hw_priv *p = hw->priv;
-    CudaFunctions *cu = p->cu;
-
+static bool cuda_gl_check(const struct ra_hwdec *hw) {
     if (ra_is_gl(hw->ra_ctx->ra)) {
         GL *gl = ra_gl_get(hw->ra_ctx->ra);
         if (gl->version < 210 && gl->es < 300) {
@@ -120,6 +116,14 @@ bool cuda_gl_init(const struct ra_hwdec *hw) {
         // This is not an OpenGL RA.
         return false;
     }
+
+    return true;
+}
+
+static bool cuda_gl_init(const struct ra_hwdec *hw) {
+    int ret = 0;
+    struct cuda_hw_priv *p = hw->priv;
+    CudaFunctions *cu = p->cu;
 
     CUdevice display_dev;
     unsigned int device_count;
@@ -171,3 +175,8 @@ bool cuda_gl_init(const struct ra_hwdec *hw) {
 
     return true;
 }
+
+struct cuda_interop_fn cuda_gl_fn = {
+    .check = cuda_gl_check,
+    .init = cuda_gl_init
+};
