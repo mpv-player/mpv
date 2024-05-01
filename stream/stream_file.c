@@ -53,6 +53,33 @@
 #include <winternl.h>
 #include <io.h>
 
+#ifdef _MSC_VER
+// Those are defined only in Windows DDK
+typedef struct _FILE_FS_DEVICE_INFORMATION {
+    DEVICE_TYPE DeviceType;
+    ULONG Characteristics;
+} FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
+
+typedef enum _FSINFOCLASS {
+    FileFsVolumeInformation          = 1,
+    FileFsLabelInformation,         // 2
+    FileFsSizeInformation,          // 3
+    FileFsDeviceInformation,        // 4
+    FileFsAttributeInformation,     // 5
+    FileFsControlInformation,       // 6
+    FileFsFullSizeInformation,      // 7
+    FileFsObjectIdInformation,      // 8
+    FileFsDriverPathInformation,    // 9
+    FileFsVolumeFlagsInformation,   // 10
+    FileFsSectorSizeInformation,    // 11
+    FileFsDataCopyInformation,      // 12
+    FileFsMetadataSizeInformation,  // 13
+    FileFsFullSizeInformationEx,    // 14
+    FileFsGuidInformation,          // 15
+    FileFsMaximumInformation
+} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
+#endif
+
 #ifndef FILE_REMOTE_DEVICE
 #define FILE_REMOTE_DEVICE (0x10)
 #endif
