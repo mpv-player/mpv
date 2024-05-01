@@ -2599,6 +2599,13 @@ bool vo_wayland_init(struct vo *vo)
     }
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (!wl->cursor_shape_manager) {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_cursor_shape_manager_v1_interface.name);
+    }
+#endif
+
     if (wl->dnd_devman) {
         struct vo_wayland_seat *seat;
         wl_list_for_each(seat, &wl->seat_list, link) {
