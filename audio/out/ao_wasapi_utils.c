@@ -20,9 +20,17 @@
 #include <math.h>
 
 #include <windows.h>
-#include <mmsystem.h>
+// Workaround for redefinition of some guids in mingw. ks.h has to be included
+// before other ks*.h headers, but mingw fails then.
+#ifdef __MINGW32__
 #include <mmreg.h>
 #include <ksguid.h>
+#else
+#include <ks.h>
+#include <ksguid.h>
+#include <mmreg.h>
+#endif
+#include <mmsystem.h>
 #include <ksmedia.h>
 #include <avrt.h>
 #include <propsys.h>
