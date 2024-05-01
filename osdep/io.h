@@ -97,12 +97,14 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 
 #ifdef __CYGWIN__
 #include <io.h>
+#include "dirent-win.h"
+#else
+#include <dirent.h>
 #endif
 
 #ifdef __MINGW32__
 
 #include <stdio.h>
-#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 

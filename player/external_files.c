@@ -15,7 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
