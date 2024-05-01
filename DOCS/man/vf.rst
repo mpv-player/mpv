@@ -585,7 +585,7 @@ Available mpv-only filters are:
 
     ``display_res``
         Resolution of the current display. This is an integer array with the
-        first entry corresponding to the width and the second entry coresponding
+        first entry corresponding to the width and the second entry corresponding
         to the height. These values can be 0. Note that this will not respond to
         monitor changes and may not work on all platforms.
 
