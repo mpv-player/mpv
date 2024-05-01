@@ -292,7 +292,7 @@ bool mp_load_scripts(struct MPContext *mpctx)
 
 #if HAVE_CPLUGINS
 
-#if !HAVE_WIN32
+#ifndef _WIN32
 #include <dlfcn.h>
 #endif
 
@@ -392,7 +392,7 @@ error: ;
 
 const struct mp_scripting mp_scripting_cplugin = {
     .name = "cplugin",
-    #if HAVE_WIN32
+    #ifdef _WIN32
     .file_ext = "dll",
     #else
     .file_ext = "so",
