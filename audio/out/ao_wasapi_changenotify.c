@@ -155,6 +155,11 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
     return S_OK;
 }
 
+// IsEqualIID in Windows SDK passes GUID as REFGUID (reference) in C++, but in
+// C is has to get pointers...
+#undef IsEqualPropertyKey
+#define IsEqualPropertyKey(a, b) (((a).pid == (b).pid) && IsEqualIID(&(a).fmtid, &(b).fmtid))
+
 static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     IMMNotificationClient *This,
     LPCWSTR pwstrDeviceId,
