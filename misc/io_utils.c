@@ -63,7 +63,7 @@ bool mp_save_to_file(const char *filepath, const void *data, size_t size)
 
     bool result = false;
     char *tmp = talloc_asprintf(NULL, "%sXXXXXX", filepath);
-    int fd = mkstemp(tmp);
+    int fd = mp_mkostemps(tmp, 0, O_CLOEXEC);
     if (fd < 0)
         goto done;
     FILE *cache = fdopen(fd, "wb");
