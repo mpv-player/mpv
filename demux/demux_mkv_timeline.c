@@ -21,7 +21,6 @@
 #include <assert.h>
 #include <dirent.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <libavutil/common.h>

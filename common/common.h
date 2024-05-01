@@ -27,6 +27,7 @@
 #include "config.h"
 
 #if HAVE_POSIX || defined(__MINGW32__)
+#include <strings.h>
 #include <unistd.h>
 #endif
 
