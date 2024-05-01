@@ -1010,6 +1010,9 @@ static void surface_handle_preferred_buffer_scale(void *data,
     // Update scaling now.
     if (single_output_spanned(wl))
         update_output_scaling(wl);
+
+    if (!wl->current_output)
+        wl->scaling = wl->pending_scaling;
 }
 
 static void surface_handle_preferred_buffer_transform(void *data,
@@ -1235,6 +1238,9 @@ static void preferred_scale(void *data,
     // Update scaling now.
     if (single_output_spanned(wl))
         update_output_scaling(wl);
+
+    if (!wl->current_output)
+        wl->scaling = wl->pending_scaling;
 }
 
 static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
