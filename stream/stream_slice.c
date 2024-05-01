@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include "common/common.h"
 #include "options/m_option.h"

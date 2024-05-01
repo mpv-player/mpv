@@ -18,7 +18,6 @@
 #include <stddef.h>
 #include <inttypes.h>
 #include <math.h>
-#include <unistd.h>
 #include <errno.h>
 #include <assert.h>
 

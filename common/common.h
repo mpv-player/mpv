@@ -24,6 +24,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "config.h"
+
+#if HAVE_POSIX || defined(__MINGW32__)
+#include <unistd.h>
+#endif
+
 #include "osdep/compiler.h"
 #include "mpv_talloc.h"
 

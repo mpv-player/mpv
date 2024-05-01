@@ -21,7 +21,6 @@
 #include <dirent.h>
 #include <math.h>
 #include <assert.h>
-#include <unistd.h>
 
 #include "config.h"
 

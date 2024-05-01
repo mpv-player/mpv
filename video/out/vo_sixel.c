@@ -35,10 +35,6 @@
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
 
-#if HAVE_POSIX
-#include <unistd.h>
-#endif
-
 #define IMGFMT IMGFMT_RGB24
 
 #define TERM_ESC_USE_GLOBAL_COLOR_REG   "\033[?1070l"

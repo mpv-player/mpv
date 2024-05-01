@@ -18,7 +18,6 @@
 #include <stdatomic.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #ifdef __MINGW32__
 #include <windows.h>

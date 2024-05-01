@@ -25,7 +25,6 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
-#include <unistd.h>
 
 #define CHECK_CU(x) check_cu((mapper)->owner, (x), #x)
 

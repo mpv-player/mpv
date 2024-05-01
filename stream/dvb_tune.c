@@ -28,12 +28,12 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <poll.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 
+#include "common/common.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
 #include "dvbin.h"

@@ -27,11 +27,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <limits.h>
-#include <unistd.h>
 
 #include "mpv_talloc.h"
 
 #include "config.h"
+#include "common/common.h"
 #include "misc/random.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"

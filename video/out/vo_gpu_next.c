@@ -20,7 +20,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>

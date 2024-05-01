@@ -1,6 +1,5 @@
 #include <stdatomic.h>
 #include <time.h>
-#include <unistd.h>
 
 #include "common.h"
 #include "global.h"
