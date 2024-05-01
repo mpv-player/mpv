@@ -1539,6 +1539,15 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
+        if (fourcc1 == MKTAG('A', 'V', 'd', 'n') ||
+            fourcc2 == MKTAG('A', 'V', 'd', 'n') ||
+            fourcc1 == MKTAG('A', 'V', 'd', 'h') ||
+            fourcc2 == MKTAG('A', 'V', 'd', 'h'))
+        {
+            sh_v->codec = "dnxhd";
+            extradata = track->private_data;
+            extradata_size = track->private_size;
+        }
     } else {
         for (int i = 0; mkv_video_tags[i][0]; i++) {
             if (!strcmp(mkv_video_tags[i][0], track->codec_id)) {
