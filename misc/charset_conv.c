@@ -21,11 +21,11 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <strings.h>
 #include <assert.h>
 
 #include "config.h"
 
+#include "common/common.h"
 #include "common/msg.h"
 
 #if HAVE_UCHARDET

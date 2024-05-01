@@ -26,7 +26,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 static const struct lang {
     char match[4];

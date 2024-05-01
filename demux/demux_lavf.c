@@ -21,7 +21,6 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
-#include <strings.h>
 #include <errno.h>
 #include <assert.h>
 
@@ -41,6 +40,7 @@
 
 #include "audio/chmap_avchannel.h"
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
