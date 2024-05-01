@@ -21,7 +21,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#ifdef _WIN32
+#include <sys/utime.h>
+#else
 #include <utime.h>
+#endif
 
 #include <libavutil/md5.h>
 
