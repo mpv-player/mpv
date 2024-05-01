@@ -171,4 +171,25 @@ char **mp_dup_str_array(void *tctx, char **s);
             abort();            \
     } while (0)
 
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+
+#ifndef STDIN_FILENO
+#define STDIN_FILENO 0
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO 2
+#endif
+#ifndef O_NONBLOCK
+#define O_NONBLOCK 0
+#endif
+
+typedef long long ssize_t;
+typedef unsigned short mode_t;
+#endif
+
 #endif /* MPLAYER_MPCOMMON_H */
