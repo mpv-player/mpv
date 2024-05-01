@@ -19,7 +19,6 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <assert.h>
-#include <dirent.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
