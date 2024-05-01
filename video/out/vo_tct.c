@@ -16,7 +16,6 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <config.h>
 
 #if HAVE_POSIX

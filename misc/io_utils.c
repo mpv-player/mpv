@@ -23,10 +23,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <limits.h>
-#include <unistd.h>
 
 #include "mpv_talloc.h"
 #include "config.h"
+#include "common/common.h"
 #include "misc/random.h"
 #include "misc/io_utils.h"
 #include "osdep/io.h"

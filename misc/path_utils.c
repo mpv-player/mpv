@@ -24,12 +24,12 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
 
 #include "config.h"
 
 #include "mpv_talloc.h"
+#include "common/common.h"
 #include "osdep/io.h"
 #include "misc/ctype.h"
 #include "misc/path_utils.h"

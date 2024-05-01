@@ -24,7 +24,6 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 #include <libplacebo/vulkan.h>
-#include <unistd.h>
 
 #if HAVE_WIN32_DESKTOP
 #include <versionhelpers.h>
