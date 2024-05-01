@@ -1,6 +1,8 @@
 #ifndef MP_SEMAPHORE_H_
 #define MP_SEMAPHORE_H_
 
+#ifdef __APPLE__
+
 #include <sys/types.h>
 #include <semaphore.h>
 
@@ -10,7 +12,6 @@
 // sem_post() won't always correctly return an error on overflow.
 // Process-shared semantics are not provided.
 
-#ifdef __APPLE__
 
 #define MP_SEMAPHORE_EMULATION
 
