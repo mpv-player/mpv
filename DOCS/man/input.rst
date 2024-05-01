@@ -2522,7 +2522,7 @@ Property list
         Display aspect ratio as float.
 
     ``video-params/aspect-name``
-        Display aspect ratio name as string. The name coresponds to motion
+        Display aspect ratio name as string. The name corresponds to motion
         picture film format that introduced given aspect ratio in film.
 
     ``video-params/par``
