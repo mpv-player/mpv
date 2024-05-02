@@ -57,7 +57,7 @@ static void microsoft_nonsense(void)
                       BASE_SEARCH_PATH_PERMANENT);
 }
 
-int main(int argc_, char **argv_)
+int main(void)
 {
     microsoft_nonsense();
 
@@ -91,4 +91,9 @@ int main(int argc_, char **argv_)
 
     talloc_free(argv_u8);
     return ret;
+}
+
+int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cmdline, int cmdshow)
+{
+    return main();
 }
