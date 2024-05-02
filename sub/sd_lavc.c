@@ -93,10 +93,10 @@ static int init(struct sd *sd)
     AVCodecContext *ctx = NULL;
     const AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
-        goto error;
+        goto error_probe;
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
-        goto error;
+        goto error_probe;
 
     mp_set_avopts(sd->log, ctx, sd->opts->sub_avopts);
 
