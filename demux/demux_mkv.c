@@ -1527,15 +1527,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->codec_tag = track->colorspace;
         sh_v->codec = "rawvideo";
     } else if (strcmp(track->codec_id, "V_QUICKTIME") == 0) {
-        uint32_t fourcc1 = 0, fourcc2 = 0;
         if (track->private_size >= 8) {
-            fourcc1 = AV_RL32(track->private_data + 0);
-            fourcc2 = AV_RL32(track->private_data + 4);
-        }
-        if (fourcc1 == MKTAG('S', 'V', 'Q', '3') ||
-            fourcc2 == MKTAG('S', 'V', 'Q', '3'))
-        {
-            sh_v->codec = "svq3";
+            sh_v->codec_tag = AV_RL32(track->private_data + 4);
+            mp_set_codec_from_tag(sh_v);
+            // Some non-compliant files have fourcc at offset 0.
+            if (!sh_v->codec) {
+                sh_v->codec_tag = AV_RL32(track->private_data);
+                mp_set_codec_from_tag(sh_v);
+            }
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
