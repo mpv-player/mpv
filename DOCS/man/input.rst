@@ -1019,8 +1019,6 @@ Input Commands that are Possibly Subject to Change
     list yourself when adding a second key binding for cycling backwards.
 
 ``enable-section <name> [<flags>]``
-    This command is deprecated, except for mpv-internal uses.
-
     Enable all key bindings in the named input section.
 
     The enabled input sections form a stack. Bindings in sections on the top of
@@ -1043,13 +1041,9 @@ Input Commands that are Possibly Subject to Change
         Same.
 
 ``disable-section <name>``
-    This command is deprecated, except for mpv-internal uses.
-
     Disable the named input section. Undoes ``enable-section``.
 
 ``define-section <name> <contents> [<flags>]``
-    This command is deprecated, except for mpv-internal uses.
-
     Create a named input section, or replace the contents of an already existing
     input section. The ``contents`` parameter uses the same syntax as the
     ``input.conf`` file (except that using the section syntax in it is not
