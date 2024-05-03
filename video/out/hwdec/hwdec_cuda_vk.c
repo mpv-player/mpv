@@ -274,18 +274,16 @@ static bool cuda_ext_vk_signal(const struct ra_hwdec_mapper *mapper, int n)
 
 static bool cuda_vk_check(const struct ra_hwdec *hw) {
     pl_gpu gpu = ra_pl_get(hw->ra_ctx->ra);
-    if (gpu != NULL) {
-        if (!(gpu->export_caps.tex & HANDLE_TYPE)) {
-            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",
-                       HANDLE_TYPE);
-            return false;
-        } else if (!(gpu->export_caps.sync & HANDLE_TYPE)) {
-            MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable semaphores of type 0x%X.\n",
-                       HANDLE_TYPE);
-            return false;
-        }
-    } else {
-        // This is not a Vulkan RA.
+    if (gpu == NULL)
+        return false; // This is not a Vulkan RA.
+
+    if (!(gpu->export_caps.tex & HANDLE_TYPE)) {
+        MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable texture memory of type 0x%X.\n",
+                   HANDLE_TYPE);
+        return false;
+    } else if (!(gpu->export_caps.sync & HANDLE_TYPE)) {
+        MP_VERBOSE(hw, "CUDA hwdec with Vulkan requires exportable semaphores of type 0x%X.\n",
+                   HANDLE_TYPE);
         return false;
     }
 

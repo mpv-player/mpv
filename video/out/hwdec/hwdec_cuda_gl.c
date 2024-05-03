@@ -107,14 +107,12 @@ static void cuda_ext_gl_uninit(const struct ra_hwdec_mapper *mapper, int n)
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
 static bool cuda_gl_check(const struct ra_hwdec *hw) {
-    if (ra_is_gl(hw->ra_ctx->ra)) {
-        GL *gl = ra_gl_get(hw->ra_ctx->ra);
-        if (gl->version < 210 && gl->es < 300) {
-            MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
-            return false;
-        }
-    } else {
-        // This is not an OpenGL RA.
+    if (!ra_is_gl(hw->ra_ctx->ra))
+        return false; // This is not an OpenGL RA.
+
+    GL *gl = ra_gl_get(hw->ra_ctx->ra);
+    if (gl->version < 210 && gl->es < 300) {
+        MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
         return false;
     }
 
