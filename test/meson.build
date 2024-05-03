@@ -15,6 +15,7 @@ test_utils_files = [
     'common/common.c',
     'misc/bstr.c',
     'misc/dispatch.c',
+    'misc/io_utils.c',
     'misc/json.c',
     'misc/node.c',
     'misc/path_utils.c',
@@ -124,7 +125,7 @@ if get_option('libmpv')
     test('libmpv', exe, args: file, timeout: 60)
 
     exe = executable('libmpv-encode', 'libmpv_encode.c',
-                     include_directories: incdir, link_with: libmpv)
+                     include_directories: incdir, link_with: [libmpv, test_utils])
     test('libmpv-encode', exe, timeout: 30)
 endif
 
