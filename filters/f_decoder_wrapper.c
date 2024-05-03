@@ -367,6 +367,8 @@ static void decf_destroy(struct mp_filter *f)
         MP_DBG(f, "Uninit decoder.\n");
         talloc_free(p->decoder->f);
         p->decoder = NULL;
+        p->codec->decoder = NULL;
+        p->codec->decoder_desc = NULL;
     }
 
     decf_reset(f);
