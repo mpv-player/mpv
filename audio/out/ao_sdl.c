@@ -57,9 +57,8 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
     if (len % ao->sstride)
         MP_ERR(ao, "SDL audio callback not sample aligned");
 
-    // Time this buffer will take, plus assume 1 period (1 callback invocation)
-    // fixed latency.
-    double delay = 2 * len / (double)ao->bps;
+    // assume 1 period (1 callback invocation) fixed latency.
+    double delay = len / (double)ao->bps;
 
     ao_read_data(ao, data, len / ao->sstride, mp_time_ns() + MP_TIME_S_TO_NS(delay), NULL, true, true);
 }

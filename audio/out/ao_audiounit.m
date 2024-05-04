@@ -96,7 +96,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
 
     int64_t end = mp_time_ns();
     end += MP_TIME_S_TO_NS(p->device_latency);
-    end += ca_get_latency(ts) + ca_frames_to_ns(ao, frames);
+    end += ca_get_latency(ts);
     ao_read_data(ao, planes, frames, end, NULL, true, true);
     return noErr;
 }

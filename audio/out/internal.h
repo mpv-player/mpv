@@ -201,7 +201,7 @@ struct ao_driver {
 
 // These functions can be called by AOs.
 
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking);
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t start_time_ns, bool *eof, bool pad_silence, bool blocking);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
@@ -232,7 +232,7 @@ void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples
 void ao_wakeup(struct ao *ao);
 
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
-                           void **data, int samples, int64_t out_time_ns);
+                           void **data, int samples, int64_t start_time_ns);
 
 void ao_stop_streaming(struct ao *ao);
 

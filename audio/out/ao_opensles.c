@@ -74,14 +74,11 @@ static void buffer_callback(SLBufferQueueItf buffer_queue, void *context)
     struct ao *ao = context;
     struct priv *p = ao->priv;
     SLresult res;
-    double delay;
 
     mp_mutex_lock(&p->buffer_lock);
 
-    delay = p->frames_per_enqueue / (double)ao->samplerate;
-    delay += p->audio_latency;
     ao_read_data(ao, &p->buf, p->frames_per_enqueue,
-        mp_time_ns() + MP_TIME_S_TO_NS(delay), NULL, true, true);
+        mp_time_ns() + MP_TIME_S_TO_NS(p->audio_latency), NULL, true, true);
 
     res = (*buffer_queue)->Enqueue(buffer_queue, p->buf, p->bytes_per_enqueue);
     if (res != SL_RESULT_SUCCESS)

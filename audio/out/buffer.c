@@ -182,7 +182,7 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
 }
 
 static int ao_read_data_locked(struct ao *ao, void **data, int samples,
-                               int64_t out_time_ns, bool *eof, bool pad_silence)
+                               int64_t start_time_ns, bool *eof, bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
@@ -190,7 +190,7 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
     int pos = read_buffer(ao, data, samples, eof, pad_silence);
 
     if (pos > 0)
-        p->end_time_ns = out_time_ns;
+        p->end_time_ns = start_time_ns + MP_TIME_S_TO_NS(pad_silence ? samples : pos) / ao->samplerate;
 
     if (pos < samples && p->playing && !p->paused) {
         p->playing = false;
@@ -208,9 +208,9 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
 // If this is called in paused mode, it will always return 0.
-// The caller should set out_time_ns to the expected delay until the last sample
+// The caller should set start_time_ns to the expected delay until the first sample
 // reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking)
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t start_time_ns, bool *eof, bool pad_silence, bool blocking)
 {
     struct buffer_state *p = ao->buffer_state;
 
@@ -220,7 +220,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, b
         return 0;
     }
 
-    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, eof, pad_silence);
+    int pos = ao_read_data_locked(ao, data, samples, start_time_ns, eof, pad_silence);
 
     mp_mutex_unlock(&p->lock);
 
@@ -230,13 +230,13 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, b
 // Same as ao_read_data(), but convert data according to *fmt.
 // fmt->src_fmt and fmt->channels must be the same as the AO parameters.
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
-                           void **data, int samples, int64_t out_time_ns)
+                           void **data, int samples, int64_t start_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
     void *ndata[MP_NUM_CHANNELS] = {0};
 
     if (!ao_need_conversion(fmt))
-        return ao_read_data(ao, data, samples, out_time_ns, NULL, true, true);
+        return ao_read_data(ao, data, samples, start_time_ns, NULL, true, true);
 
     assert(ao->format == fmt->src_fmt);
     assert(ao->channels.num == fmt->channels);
@@ -256,7 +256,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     for (int n = 0; n < planes; n++)
         ndata[n] = p->convert_buffer + n * src_plane_size;
 
-    int res = ao_read_data(ao, ndata, samples, out_time_ns, NULL, true, true);
+    int res = ao_read_data(ao, ndata, samples, start_time_ns, NULL, true, true);
 
     ao_convert_inplace(fmt, ndata, samples);
     for (int n = 0; n < planes; n++)
