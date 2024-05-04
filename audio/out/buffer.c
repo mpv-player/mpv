@@ -123,6 +123,10 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
 {
     struct buffer_state *p = ao->buffer_state;
     int pos = 0;
+
+    if (eof == NULL) {
+        eof = &(bool){0};
+    }
     *eof = false;
 
     while (p->playing && !p->paused && pos < samples) {
@@ -214,12 +218,6 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, b
         mp_mutex_lock(&p->lock);
     } else if (mp_mutex_trylock(&p->lock)) {
         return 0;
-    }
-
-    bool eof_buf;
-    if (eof == NULL) {
-        // This is a public API. We want to reduce the cognitive burden of the caller.
-        eof = &eof_buf;
     }
 
     int pos = ao_read_data_locked(ao, data, samples, out_time_ns, eof, pad_silence);
