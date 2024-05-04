@@ -16,6 +16,7 @@
  */
 
 #include "ao.h"
+#include "audio/aframe.h"
 #include "audio/format.h"
 #include "audio/out/ao_coreaudio_chmap.h"
 #include "audio/out/ao_coreaudio_utils.h"
@@ -47,6 +48,12 @@ struct priv {
     int64_t end_time_av;
 };
 
+static void free_block(void *refcon, void *doomedMemoryBlock, size_t sizeInBytes)
+{
+    struct mp_aframe *aframe = refcon;
+    talloc_free(aframe);
+}
+
 static int64_t CMTimeGetNanoseconds(CMTime time)
 {
     time = CMTimeConvertScale(time, 1000000000, kCMTimeRoundingMethod_Default);
@@ -66,33 +73,38 @@ static void feed(struct ao *ao)
 
     CMBlockBufferRef block_buffer = NULL;
     CMSampleBufferRef sample_buffer = NULL;
+    struct mp_aframe *aframe = NULL;
     OSStatus err;
-
-    int request_sample_count = samplerate / 10;
-    int buffer_size = request_sample_count * sstride;
-    void *data[] = {CFAllocatorAllocate(NULL, buffer_size, 0)};
 
     int64_t cur_time_av = CMTimeGetNanoseconds([p->synchronizer currentTime]);
     int64_t cur_time_mp = mp_time_ns();
     int64_t end_time_av = MPMAX(p->end_time_av, cur_time_av);
     bool eof;
-    int real_sample_count = ao_read_data(ao, data, request_sample_count, end_time_av - cur_time_av + cur_time_mp, &eof, false, true);
+    aframe = ao_read_frame(ao, end_time_av - cur_time_av + cur_time_mp, &eof, true);
+    int sample_count = aframe ? mp_aframe_get_size(aframe) : 0;
     if (eof) {
         [p->renderer stopRequestingMediaData];
         ao_stop_streaming(ao);
     }
-    if (real_sample_count == 0) {
-        return;
+    if (sample_count == 0) {
+        goto finish;
     }
+
+    CMBlockBufferCustomBlockSource block_source = {
+        .version = kCMBlockBufferCustomBlockSourceVersion,
+        .AllocateBlock = NULL,
+        .FreeBlock = free_block,
+        .refCon = aframe,
+    };
 
     if ((err = CMBlockBufferCreateWithMemoryBlock(
         NULL,
-        data[0],
-        buffer_size,
+        mp_aframe_get_data_ro(aframe)[0],
+        sample_count * sstride,
         NULL,
-        NULL,
+        &block_source,
         0,
-        real_sample_count * sstride,
+        sample_count * sstride,
         0,
         &block_buffer
     )) != noErr) {
@@ -100,7 +112,7 @@ static void feed(struct ao *ao)
         MP_VERBOSE(ao, "CMBlockBufferCreateWithMemoryBlock returned %d\n", err);
         goto error;
     }
-    data[0] = NULL;
+    aframe = NULL;
 
     CMSampleTimingInfo sample_timing_into[] = {(CMSampleTimingInfo) {
         .duration = CMTimeMake(1, samplerate),
@@ -112,7 +124,7 @@ static void feed(struct ao *ao)
         NULL,
         block_buffer,
         p->format_description,
-        real_sample_count,
+        sample_count,
         1,
         sample_timing_into,
         1,
@@ -126,7 +138,7 @@ static void feed(struct ao *ao)
 
     [p->renderer enqueueSampleBuffer:sample_buffer];
 
-    int64_t time_delta = CMTimeGetNanoseconds(CMTimeMake(real_sample_count, samplerate));
+    int64_t time_delta = CMTimeGetNanoseconds(CMTimeMake(sample_count, samplerate));
     p->end_time_av = end_time_av + time_delta;
 
     goto finish;
@@ -134,7 +146,7 @@ static void feed(struct ao *ao)
 error:
     ao_request_reload(ao);
 finish:
-    if (data[0]) CFAllocatorDeallocate(NULL, data[0]);
+    talloc_free(aframe);
     if (block_buffer) CFRelease(block_buffer);
     if (sample_buffer) CFRelease(sample_buffer);
 }
