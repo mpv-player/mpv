@@ -203,6 +203,8 @@ struct ao_driver {
 
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t start_time_ns, bool *eof, bool pad_silence, bool blocking);
 
+struct mp_aframe *ao_read_frame(struct ao *ao, int64_t start_time_ns, bool *eof, bool blocking);
+
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
 bool ao_chmap_sel_adjust2(struct ao *ao, const struct mp_chmap_sel *s,

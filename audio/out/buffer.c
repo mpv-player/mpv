@@ -189,8 +189,15 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 
     int pos = read_buffer(ao, data, samples, eof, pad_silence);
 
-    if (pos > 0)
-        p->end_time_ns = start_time_ns + MP_TIME_S_TO_NS(pad_silence ? samples : pos) / ao->samplerate;
+    if (pos > 0) {
+        p->end_time_ns = start_time_ns
+            + MP_TIME_S_TO_NS(pad_silence
+                ? samples   // If pad_silence is true, the ao is expecting a fixed number of samples.
+                : (data     // If pad_silence is false, the ao can handle partial data.
+                    ? pos
+                    : mp_aframe_get_size(p->pending) // If data is not set, the ao is reading frames directly.
+                )) / ao->samplerate;
+    }
 
     if (pos < samples && p->playing && !p->paused) {
         p->playing = false;
@@ -225,6 +232,30 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t start_time_ns,
     mp_mutex_unlock(&p->lock);
 
     return pos;
+}
+
+// Read a audio frame. Returns the audio frame.
+// If there is not data (buffer underrun or EOF), NULL is returned.
+// THE CALLER IS RESPONSIBLE FOR DEALLOCATING THE RETURNED FRAME.
+struct mp_aframe *ao_read_frame(struct ao *ao, int64_t start_time_ns, bool *eof, bool blocking)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    if (blocking) {
+        mp_mutex_lock(&p->lock);
+    } else if (mp_mutex_trylock(&p->lock)) {
+        return 0;
+    }
+
+    if (!p->pending) {
+        (void)ao_read_data_locked(ao, NULL, 1, start_time_ns, eof, false);
+    }
+    struct mp_aframe *ret = p->pending;
+    p->pending = NULL;
+
+    mp_mutex_unlock(&p->lock);
+
+    return ret;
 }
 
 // Same as ao_read_data(), but convert data according to *fmt.
