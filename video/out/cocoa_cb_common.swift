@@ -87,8 +87,7 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
-        guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else
-        {
+        guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
             log.warning("Couldn't update Window size, no Screen available")
             return
         }
@@ -102,11 +101,10 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
-                                            _ inNow: UnsafePointer<CVTimeStamp>,
-                                     _ inOutputTime: UnsafePointer<CVTimeStamp>,
-                                          _ flagsIn: CVOptionFlags,
-                                         _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
-    {
+                                      _ inNow: UnsafePointer<CVTimeStamp>,
+                                      _ inOutputTime: UnsafePointer<CVTimeStamp>,
+                                      _ flagsIn: CVOptionFlags,
+                                      _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn {
         libmpv.reportRenderFlip()
         return kCVReturnSuccess
     }
@@ -178,10 +176,9 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func control(_ vo: UnsafeMutablePointer<vo>,
-                    events: UnsafeMutablePointer<Int32>,
-                    request: UInt32,
-                    data: UnsafeMutableRawPointer?) -> Int32
-    {
+                          events: UnsafeMutablePointer<Int32>,
+                          request: UInt32,
+                          data: UnsafeMutableRawPointer?) -> Int32 {
         switch mp_voctrl(request) {
         case VOCTRL_PREINIT:
             DispatchQueue.main.sync { self.preinit(vo) }

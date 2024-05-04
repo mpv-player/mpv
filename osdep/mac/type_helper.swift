@@ -27,8 +27,8 @@ class TypeHelper {
     }
 
     class func withUnsafeMutableRawPointers(_ arguments: [Any],
-                                               pointers: [UnsafeMutableRawPointer?] = [],
-                                                closure: (_ pointers: [UnsafeMutableRawPointer?]) -> Void) {
+                                            pointers: [UnsafeMutableRawPointer?] = [],
+                                            closure: (_ pointers: [UnsafeMutableRawPointer?]) -> Void) {
         if arguments.count > 0 {
             let args = Array(arguments.dropFirst(1))
             var newPtrs = pointers

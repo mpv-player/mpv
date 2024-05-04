@@ -440,19 +440,17 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    // Note: the position should still be saved here for VO dragging handling.
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
-    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN);
+    mp_input_add_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && check_for_resize(wl, wl->opts->edge_pixels_touch, &edge))
     {
         xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
-        // Explicitly send an UP event after the client finishes a resize
-        mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
     } else {
         // Save the serial and seat for voctrl-initialized dragging requests.
         s->pointer_button_serial = serial;
@@ -465,7 +463,7 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    mp_input_put_key(wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP);
+    mp_input_remove_touch_point(wl->vo->input_ctx, id);
     wl->last_button_seat = NULL;
 }
 
@@ -478,7 +476,7 @@ static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
     wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    mp_input_update_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 }
 
 static void touch_handle_frame(void *data, struct wl_touch *wl_touch)
@@ -487,6 +485,9 @@ static void touch_handle_frame(void *data, struct wl_touch *wl_touch)
 
 static void touch_handle_cancel(void *data, struct wl_touch *wl_touch)
 {
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+    mp_input_put_key(wl->vo->input_ctx, MP_TOUCH_RELEASE_ALL);
 }
 
 static void touch_handle_shape(void *data, struct wl_touch *wl_touch,
@@ -1010,6 +1011,9 @@ static void surface_handle_preferred_buffer_scale(void *data,
     // Update scaling now.
     if (single_output_spanned(wl))
         update_output_scaling(wl);
+
+    if (!wl->current_output)
+        wl->scaling = wl->pending_scaling;
 }
 
 static void surface_handle_preferred_buffer_transform(void *data,
@@ -1235,6 +1239,9 @@ static void preferred_scale(void *data,
     // Update scaling now.
     if (single_output_spanned(wl))
         update_output_scaling(wl);
+
+    if (!wl->current_output)
+        wl->scaling = wl->pending_scaling;
 }
 
 static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
@@ -2596,6 +2603,13 @@ bool vo_wayland_init(struct vo *vo)
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_fractional_scale_manager_v1_interface.name);
+    }
+#endif
+
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (!wl->cursor_shape_manager) {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_cursor_shape_manager_v1_interface.name);
     }
 #endif
 

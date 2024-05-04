@@ -37,7 +37,7 @@ class AppHub: NSObject {
 #endif
 
     let MPV_PROTOCOL: String = "mpv://"
-    var isApplication: Bool { get { NSApp is Application } }
+    var isApplication: Bool { return NSApp is Application }
     var openEvents: Int = 0
 
     private override init() {

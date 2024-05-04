@@ -93,6 +93,11 @@ struct wheel_state {
     double unit_accum;
 };
 
+struct touch_point {
+    int id;
+    int x, y;
+};
+
 struct input_ctx {
     mp_mutex mutex;
     struct mp_log *log;
@@ -143,6 +148,10 @@ struct input_ctx {
     struct active_section *active_sections;
     int num_active_sections;
 
+    // List currently active touch points
+    struct touch_point *touch_points;
+    int num_touch_points;
+
     unsigned int mouse_event_counter;
 
     struct mp_input_src *sources[MP_MAX_SOURCES];
@@ -178,6 +187,7 @@ struct input_opts {
     bool test;
     bool allow_win_drag;
     bool preprocess_wheel;
+    bool touch_emulate_mouse;
 };
 
 const struct m_sub_options input_config = {
@@ -198,6 +208,7 @@ const struct m_sub_options input_config = {
         {"input-vo-keyboard", OPT_BOOL(vo_key_input)},
         {"input-media-keys", OPT_BOOL(use_media_keys)},
         {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
+        {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
@@ -218,6 +229,7 @@ const struct m_sub_options input_config = {
         .vo_key_input = true,
         .allow_win_drag = true,
         .preprocess_wheel = true,
+        .touch_emulate_mouse = true,
     },
     .change_flags = UPDATE_INPUT,
 };
@@ -723,6 +735,11 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         release_down_cmd(ictx, false);
         return;
     }
+    if (code == MP_TOUCH_RELEASE_ALL) {
+        MP_TRACE(ictx, "release all touch\n");
+        ictx->num_touch_points = 0;
+        return;
+    }
     if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod) && !force_mouse)
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE || unmod == MP_KEY_MOUSE_ENTER) {
@@ -892,6 +909,99 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     if (ictx->opts->enable_mouse_movements)
         set_mouse_pos(ictx, x, y);
     input_unlock(ictx);
+}
+
+static int find_touch_point_index(struct input_ctx *ictx, int id)
+{
+    for (int i = 0; i < ictx->num_touch_points; i++) {
+        if (ictx->touch_points[i].id == id)
+            return i;
+    }
+    return -1;
+}
+
+static void notify_touch_update(struct input_ctx *ictx)
+{
+    // queue dummy cmd so that touch-pos can notify observers
+    mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
+    queue_cmd(ictx, cmd);
+}
+
+static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, int y)
+{
+    MP_TRACE(ictx, "Touch point %d update (id %d) %d/%d\n",
+             idx, id, x, y);
+    if (ictx->touch_points[idx].x == x && ictx->touch_points[idx].y == y)
+        return;
+    ictx->touch_points[idx].x = x;
+    ictx->touch_points[idx].y = y;
+    // Emulate mouse input from the primary touch point (the first one added)
+    if (ictx->opts->touch_emulate_mouse && idx == 0)
+        set_mouse_pos(ictx, x, y);
+    notify_touch_update(ictx);
+}
+
+void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
+{
+    input_lock(ictx);
+    int idx = find_touch_point_index(ictx, id);
+    if (idx != -1) {
+        MP_WARN(ictx, "Touch point %d (id %d) already exists! Treat as update.\n",
+                idx, id);
+        update_touch_point(ictx, idx, id, x, y);
+    } else {
+        MP_TRACE(ictx, "Touch point %d add (id %d) %d/%d\n",
+                 ictx->num_touch_points, id, x, y);
+        MP_TARRAY_APPEND(ictx, ictx->touch_points, ictx->num_touch_points,
+                         (struct touch_point){id, x, y});
+        // Emulate MBTN_LEFT down if this is the only touch point
+        if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 1) {
+            set_mouse_pos(ictx, x, y);
+            feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
+        }
+        notify_touch_update(ictx);
+    }
+    input_unlock(ictx);
+}
+
+void mp_input_update_touch_point(struct input_ctx *ictx, int id, int x, int y)
+{
+    input_lock(ictx);
+    int idx = find_touch_point_index(ictx, id);
+    if (idx != -1) {
+        update_touch_point(ictx, idx, id, x, y);
+    } else {
+        MP_WARN(ictx, "Touch point id %d does not exist!\n", id);
+    }
+    input_unlock(ictx);
+}
+
+void mp_input_remove_touch_point(struct input_ctx *ictx, int id)
+{
+    input_lock(ictx);
+    int idx = find_touch_point_index(ictx, id);
+    if (idx != -1) {
+        MP_TRACE(ictx, "Touch point %d remove (id %d)\n", idx, id);
+        MP_TARRAY_REMOVE_AT(ictx->touch_points, ictx->num_touch_points, idx);
+        // Emulate MBTN_LEFT up if there are no touch points left
+        if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 0)
+            feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
+        notify_touch_update(ictx);
+    }
+    input_unlock(ictx);
+}
+
+int mp_input_get_touch_pos(struct input_ctx *ictx, int count, int *x, int *y, int *id)
+{
+    input_lock(ictx);
+    int num_touch_points = ictx->num_touch_points;
+    for (int i = 0; i < MPMIN(num_touch_points, count); i++) {
+        x[i] = ictx->touch_points[i].x;
+        y[i] = ictx->touch_points[i].y;
+        id[i] = ictx->touch_points[i].id;
+    }
+    input_unlock(ictx);
+    return num_touch_points;
 }
 
 static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags)
@@ -1348,6 +1458,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
         .wakeup_cb = wakeup_cb,
         .wakeup_ctx = wakeup_ctx,
         .active_sections = talloc_array(ictx, struct active_section, 0),
+        .touch_points = talloc_array(ictx, struct touch_point, 0),
     };
 
     ictx->opts = ictx->opts_cache->opts;

@@ -52,24 +52,24 @@ let glFormatAutoGPU: [CGLPixelFormatAttribute] = [
     kCGLPFASupportsAutomaticGraphicsSwitching
 ]
 
-let attributeLookUp: [UInt32:String] = [
-    kCGLOGLPVersion_3_2_Core.rawValue:     "kCGLOGLPVersion_3_2_Core",
-    kCGLOGLPVersion_Legacy.rawValue:       "kCGLOGLPVersion_Legacy",
-    kCGLPFAOpenGLProfile.rawValue:         "kCGLPFAOpenGLProfile",
-    UInt32(kCGLRendererGenericFloatID):    "kCGLRendererGenericFloatID",
-    kCGLPFARendererID.rawValue:            "kCGLPFARendererID",
-    kCGLPFAAccelerated.rawValue:           "kCGLPFAAccelerated",
-    kCGLPFADoubleBuffer.rawValue:          "kCGLPFADoubleBuffer",
-    kCGLPFABackingStore.rawValue:          "kCGLPFABackingStore",
-    kCGLPFAColorSize.rawValue:             "kCGLPFAColorSize",
-    kCGLPFAColorFloat.rawValue:            "kCGLPFAColorFloat",
+let attributeLookUp: [UInt32: String] = [
+    kCGLOGLPVersion_3_2_Core.rawValue: "kCGLOGLPVersion_3_2_Core",
+    kCGLOGLPVersion_Legacy.rawValue: "kCGLOGLPVersion_Legacy",
+    kCGLPFAOpenGLProfile.rawValue: "kCGLPFAOpenGLProfile",
+    UInt32(kCGLRendererGenericFloatID): "kCGLRendererGenericFloatID",
+    kCGLPFARendererID.rawValue: "kCGLPFARendererID",
+    kCGLPFAAccelerated.rawValue: "kCGLPFAAccelerated",
+    kCGLPFADoubleBuffer.rawValue: "kCGLPFADoubleBuffer",
+    kCGLPFABackingStore.rawValue: "kCGLPFABackingStore",
+    kCGLPFAColorSize.rawValue: "kCGLPFAColorSize",
+    kCGLPFAColorFloat.rawValue: "kCGLPFAColorFloat",
     kCGLPFAAllowOfflineRenderers.rawValue: "kCGLPFAAllowOfflineRenderers",
-    kCGLPFASupportsAutomaticGraphicsSwitching.rawValue: "kCGLPFASupportsAutomaticGraphicsSwitching",
+    kCGLPFASupportsAutomaticGraphicsSwitching.rawValue: "kCGLPFASupportsAutomaticGraphicsSwitching"
 ]
 
 class GLLayer: CAOpenGLLayer {
     unowned var cocoaCB: CocoaCB
-    var libmpv: LibmpvHelper { get { return cocoaCB.libmpv } }
+    var libmpv: LibmpvHelper { return cocoaCB.libmpv }
 
     let displayLock = NSLock()
     let cglContext: CGLContextObj
@@ -176,7 +176,7 @@ class GLLayer: CAOpenGLLayer {
         glGetIntegerv(GLenum(GL_VIEWPORT), &dims)
         surfaceSize = NSSize(width: CGFloat(dims[2]), height: CGFloat(dims[3]))
 
-        if NSEqualSizes(surfaceSize, NSZeroSize) {
+        if surfaceSize == NSSize.zero {
             surfaceSize = bounds.size
             surfaceSize.width *= contentsScale
             surfaceSize.height *= contentsScale
@@ -228,7 +228,7 @@ class GLLayer: CAOpenGLLayer {
             lockCglContext()
             CGLSetCurrentContext(cglContext)
             if libmpv.isRenderUpdateFrame() {
-                libmpv.drawRender(NSZeroSize, bufferDepth, cglContext, skip: true)
+                libmpv.drawRender(NSSize.zero, bufferDepth, cglContext, skip: true)
             }
             unlockCglContext()
         }

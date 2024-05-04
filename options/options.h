@@ -56,6 +56,7 @@ typedef struct mp_vo_opts {
     bool keepaspect_window;
     bool hidpi_window_scale;
     bool native_fs;
+    bool native_touch;
     bool show_in_taskbar;
 
     int64_t WinID;

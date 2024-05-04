@@ -89,14 +89,14 @@ static int init(struct sd *sd)
         return -1;
     }
 
-    struct sd_lavc_priv *priv = NULL;
+    struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
     AVCodecContext *ctx = NULL;
     const AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
-        goto error;
+        goto error_probe;
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
-        goto error;
+        goto error_probe;
 
     mp_set_avopts(sd->log, ctx, sd->opts->sub_avopts);
 
@@ -105,24 +105,19 @@ static int init(struct sd *sd)
         int64_t format;
         int ret = av_opt_get_int(ctx, "txt_format", AV_OPT_SEARCH_CHILDREN, &format);
         // format == 0 is bitmap
-        if (!ret && format) {
-            avcodec_free_context(&ctx);
-            return -1;
-        }
+        if (!ret && format)
+            goto error_probe;
         break;
     }
     case AV_CODEC_ID_ARIB_CAPTION: {
         int64_t format;
         int ret = av_opt_get_int(ctx, "sub_type", AV_OPT_SEARCH_CHILDREN, &format);
-        if (!ret && format != SUBTITLE_BITMAP) {
-            avcodec_free_context(&ctx);
-            return -1;
-        }
+        if (!ret && format != SUBTITLE_BITMAP)
+            goto error_probe;
         break;
     }
     }
 
-    priv = talloc_zero(NULL, struct sd_lavc_priv);
     priv->avpkt = av_packet_alloc();
     if (!priv->avpkt)
         goto error;
@@ -139,8 +134,9 @@ static int init(struct sd *sd)
     priv->packer = talloc_zero(priv, struct bitmap_packer);
     return 0;
 
- error:
+error:
     MP_FATAL(sd, "Could not open libavcodec subtitle decoder\n");
+error_probe:
     avcodec_free_context(&ctx);
     mp_free_av_packet(&priv->avpkt);
     talloc_free(priv);

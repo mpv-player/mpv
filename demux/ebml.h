@@ -78,6 +78,9 @@ struct ebml_parse_ctx {
 #define EBML_UINT_INVALID   UINT64_MAX
 #define EBML_INT_INVALID    INT64_MAX
 
+/* Block Addition Mappings */
+#define MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35 4
+
 bool ebml_is_mkv_level1_id(uint32_t id);
 uint32_t ebml_read_id (stream_t *s);
 uint64_t ebml_read_length (stream_t *s);

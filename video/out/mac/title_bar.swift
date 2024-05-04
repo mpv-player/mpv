@@ -19,16 +19,14 @@ import Cocoa
 
 class TitleBar: NSVisualEffectView {
     unowned var common: Common
-    var option: OptionHelper { get { return common.option } }
+    var option: OptionHelper { return common.option }
 
-    var systemBar: NSView? {
-        get { return common.window?.standardWindowButton(.closeButton)?.superview }
-    }
+    var systemBar: NSView? { return common.window?.standardWindowButton(.closeButton)?.superview }
     static var height: CGFloat {
-        get { return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height }
+        return NSWindow.frameRect(forContentRect: CGRect.zero, styleMask: .titled).size.height
     }
     var buttons: [NSButton] {
-        get { return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).compactMap { common.window?.standardWindowButton($0) } }
+        return ([.closeButton, .miniaturizeButton, .zoomButton] as [NSWindow.ButtonType]).compactMap { common.window?.standardWindowButton($0) }
     }
 
     override var material: NSVisualEffectView.Material {
@@ -36,20 +34,16 @@ class TitleBar: NSVisualEffectView {
         set {
             super.material = newValue
             // fix for broken deprecated materials
-            if material == .light || material == .dark || material == .mediumLight ||
-               material == .ultraDark
-            {
+            if material == .light || material == .dark || material == .mediumLight || material == .ultraDark {
                 state = .active
             } else {
                 state = .followsWindowActiveState
             }
-
         }
     }
 
     init(frame: NSRect, window: NSWindow, common com: Common) {
-        let f = NSMakeRect(0, frame.size.height - TitleBar.height,
-                           frame.size.width, TitleBar.height + 1)
+        let f = NSRect(x: 0, y: frame.size.height - TitleBar.height, width: frame.size.width, height: TitleBar.height + 1)
         common = com
         super.init(frame: f)
         buttons.forEach { $0.isHidden = true }
@@ -133,7 +127,7 @@ class TitleBar: NSVisualEffectView {
         let loc = common.view?.convert(window.mouseLocationOutsideOfEventStream, from: nil)
 
         buttons.forEach { $0.isHidden = false }
-        NSAnimationContext.runAnimationGroup({ (context) -> Void in
+        NSAnimationContext.runAnimationGroup({ (context) in
             context.duration = 0.20
             systemBar?.animator().alphaValue = 1
             if !window.isInFullscreen && !window.isAnimating {
@@ -156,7 +150,7 @@ class TitleBar: NSVisualEffectView {
             isHidden = true
             return
         }
-        NSAnimationContext.runAnimationGroup({ (context) -> Void in
+        NSAnimationContext.runAnimationGroup({ (context) in
             context.duration = duration
             systemBar?.animator().alphaValue = 0
             animator().alphaValue = 0
@@ -191,7 +185,8 @@ class TitleBar: NSVisualEffectView {
             return NSAppearance(named: .accessibilityHighContrastVibrantLight)
         case "8", "vibrantDarkHighContrast":
             return NSAppearance(named: .accessibilityHighContrastVibrantDark)
-        case "0", "auto": fallthrough
+        case "0", "auto":
+            return nil
         default:
             return nil
         }
@@ -199,16 +194,16 @@ class TitleBar: NSVisualEffectView {
 
     func materialFrom(string: String) -> NSVisualEffectView.Material {
         switch string {
-        case "0",  "titlebar":              return .titlebar
-        case "1",  "selection":             return .selection
-        case "2,", "menu":                  return .menu
-        case "3",  "popover":               return .popover
-        case "4",  "sidebar":               return .sidebar
-        case "5,", "headerView":            return .headerView
-        case "6",  "sheet":                 return .sheet
-        case "7",  "windowBackground":      return .windowBackground
-        case "8",  "hudWindow":             return .hudWindow
-        case "9",  "fullScreen":            return .fullScreenUI
+        case "0", "titlebar":               return .titlebar
+        case "1", "selection":              return .selection
+        case "2", "menu":                   return .menu
+        case "3", "popover":                return .popover
+        case "4", "sidebar":                return .sidebar
+        case "5", "headerView":             return .headerView
+        case "6", "sheet":                  return .sheet
+        case "7", "windowBackground":       return .windowBackground
+        case "8", "hudWindow":              return .hudWindow
+        case "9", "fullScreen":             return .fullScreenUI
         case "10", "toolTip":               return .toolTip
         case "11", "contentBackground":     return .contentBackground
         case "12", "underWindowBackground": return .underWindowBackground

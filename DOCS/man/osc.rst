@@ -431,6 +431,57 @@ Configurable Options
     Use a Unicode minus sign instead of an ASCII hyphen when displaying
     the remaining playback time.
 
+``background_color``
+    Default: #000000
+
+    Sets the background color of the OSC.
+
+``timecode_color``
+    Default: #FFFFFF
+
+    Sets the color of the timecode and seekbar, of the OSC.
+
+``title_color``
+    Default: #FFFFFF
+
+    Sets the color of the video title. Formatted as #RRGGBB.
+
+``time_pos_color``
+    Default: #FFFFFF
+
+    Sets the color of the timecode at hover position in the seekbar.
+
+``time_pos_outline_color``
+    Default: #FFFFFF
+
+    Sets the color of the timecode's outline at hover position in the seekbar.
+    Also affects the timecode in the slimbox layout.
+
+``buttons_color``
+    Default: #FFFFFF
+
+    Sets the colors of the big buttons.
+
+``top_buttons_color``
+    Default: #FFFFFF
+
+    Sets the colors of the top buttons.
+
+``small_buttonsL_color``
+    Default: #FFFFFF
+
+    Sets the colors of the small buttons on the left in the box layout.
+
+``small_buttonsR_color``
+    Default: #FFFFFF
+
+    Sets the colors of the small buttons on the right in the box layout.
+
+``held_element_color``
+    Default: #999999
+
+    Sets the colors of the elements that are being pressed or held down.
+
 
 Script Commands
 ~~~~~~~~~~~~~~~

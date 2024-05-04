@@ -60,9 +60,7 @@ class MacCommon: Common {
                 initWindowState()
             }
 
-            if !NSEqualSizes(window?.unfsContentFramePixel.size ?? NSZeroSize, wr.size) &&
-               option.vo.auto_window_resize
-            {
+            if (window?.unfsContentFramePixel.size ?? NSSize.zero) != wr.size && option.vo.auto_window_resize {
                 window?.updateSize(wr.size)
             }
 
@@ -93,7 +91,7 @@ class MacCommon: Common {
     @objc func swapBuffer() {
         if option.mac.macos_render_timer > RENDER_TIMER_SYSTEM {
             swapLock.lock()
-            while(swapTime < 1) {
+            while swapTime < 1 {
                 swapLock.wait()
             }
             swapTime = 0
@@ -111,11 +109,10 @@ class MacCommon: Common {
      }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
-                                            _ inNow: UnsafePointer<CVTimeStamp>,
-                                     _ inOutputTime: UnsafePointer<CVTimeStamp>,
-                                          _ flagsIn: CVOptionFlags,
-                                         _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn
-    {
+                                      _ inNow: UnsafePointer<CVTimeStamp>,
+                                      _ inOutputTime: UnsafePointer<CVTimeStamp>,
+                                      _ flagsIn: CVOptionFlags,
+                                      _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn {
         let signalSwap = {
             self.swapLock.lock()
             self.swapTime += 1
