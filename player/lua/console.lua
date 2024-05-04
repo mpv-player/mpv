@@ -75,6 +75,7 @@ local styles = {
     fatal = '{\\1c&H5791f9&\\b1}',
     suggestion = '{\\1c&Hcc99cc&}',
     selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
+    disabled = '{\\1c&Hcccccc&}',
 }
 
 local terminal_styles = {
@@ -84,6 +85,7 @@ local terminal_styles = {
     error = '\027[31m',
     fatal = '\027[1;31m',
     selected_suggestion = '\027[7m',
+    disabled = '\027[38;5;8m',
 }
 
 local repl_active = false
@@ -111,6 +113,11 @@ local file_commands = {}
 local path_separator = platform == 'windows' and '\\' or '/'
 local completion_old_line
 local completion_old_cursor
+
+local selectable_items
+local matches = {}
+local selected_match = 1
+local first_match_to_print = 1
 
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
@@ -232,6 +239,23 @@ function ass_escape(str)
     return mp.command_native({'escape-ass', str})
 end
 
+local function calculate_max_log_lines()
+    if not mp.get_property_native('vo-configured') then
+        -- Subtract 1 for the input line and for each line in the status line.
+        -- This does not detect wrapped lines.
+        return mp.get_property_native('term-size/h', 24) - 2 -
+               select(2, mp.get_property('term-status-msg'):gsub('\\n', ''))
+    end
+
+    -- Subtract 1.5 to account for the input line.
+    return math.floor(mp.get_property_native('osd-height')
+                      / mp.get_property_native('display-hidpi-scale', 1)
+                      / opts.scale
+                      * (1 - global_margins.t - global_margins.b)
+                      / opts.font_size
+                      - 1.5)
+end
+
 -- Takes a list of strings, a max width in characters and
 -- optionally a max row count.
 -- The result contains at least one column.
@@ -323,12 +347,70 @@ function format_table(list, width_max, rows_max)
     return table.concat(rows, ass_escape('\n')), row_count
 end
 
+local function fuzzy_find(needle, haystacks)
+    local result = require 'mp.fzy'.filter(needle, haystacks)
+    table.sort(result, function (i, j)
+        return i[3] > j[3]
+    end)
+    for i, value in ipairs(result) do
+        result[i] = value[1]
+    end
+    return result
+end
+
+local function populate_log_with_matches()
+    if not selectable_items then
+        return
+    end
+
+    log_buffers[id] = {}
+    local log = log_buffers[id]
+
+    -- Subtract 2 for the "(n hidden items)" lines.
+    local max_log_lines = calculate_max_log_lines() - 2
+
+    if selected_match < first_match_to_print then
+        first_match_to_print = selected_match
+    elseif selected_match > first_match_to_print + max_log_lines - 1 then
+        first_match_to_print = selected_match - max_log_lines + 1
+    end
+
+    if first_match_to_print > 1 then
+        log[1] = {
+            text = '↑ (' .. (first_match_to_print - 1) .. ' hidden items)' .. '\n',
+            style = styles.disabled,
+            terminal_style = terminal_styles.disabled,
+        }
+    end
+
+    local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
+                                          #matches)
+
+    for i = first_match_to_print, last_match_to_print do
+        log[#log + 1] = {
+            text = matches[i].text .. '\n',
+            style = i == selected_match and styles.selected_suggestion or '',
+            terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
+        }
+    end
+
+    if last_match_to_print < #matches then
+        log[#log + 1] = {
+            text = '↓ (' .. (#matches - last_match_to_print) .. ' hidden items)' .. '\n',
+            style = styles.disabled,
+            terminal_style = terminal_styles.disabled,
+        }
+    end
+end
+
 local function print_to_terminal()
     -- Clear the log after closing the console.
     if not repl_active then
         mp.osd_message('')
         return
     end
+
+    populate_log_with_matches()
 
     local log = ''
     for _, log_line in ipairs(log_buffers[id]) do
@@ -413,15 +495,14 @@ function update()
     -- Render log messages as ASS.
     -- This will render at most screeny / font_size - 1 messages.
 
-    -- lines above the prompt
-    -- subtract 1.5 to account for the input line
-    local screeny_factor = (1 - global_margins.t - global_margins.b)
-    local lines_max = math.ceil(screeny * screeny_factor / opts.font_size - 1.5)
+    local lines_max = calculate_max_log_lines()
     -- Estimate how many characters fit in one line
     local width_max = math.ceil(screenx / opts.font_size * get_font_hw_ratio())
 
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
     local suggestion_ass = style .. styles.suggestion .. suggestions
+
+    populate_log_with_matches()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
@@ -485,6 +566,7 @@ function set_active(active)
             input_caller = nil
             line = ''
             cursor = 1
+            selectable_items = nil
         end
         collectgarbage()
     end
@@ -548,6 +630,15 @@ function len_utf8(str)
 end
 
 local function handle_edit()
+    if selectable_items then
+        matches = {}
+        selected_match = 1
+
+        for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+            matches[i] = { index = match, text = selectable_items[match] }
+        end
+    end
+
     suggestion_buffer = {}
     update()
 
@@ -692,7 +783,7 @@ function handle_enter()
 
     if input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
-                    line)
+                    selectable_items and matches[selected_match].index or line)
     else
         -- match "help [<text>]", return <text> or "", strip all whitespace
         local help = line:match('^%s*help%s+(.-)%s*$') or
@@ -745,17 +836,48 @@ end
 
 -- Go to the specified relative position in the command history (Up, Down)
 function move_history(amount)
+    if selectable_items then
+        selected_match = selected_match + amount
+        if selected_match > #matches then
+            selected_match = 1
+        elseif selected_match < 1 then
+            selected_match = #matches
+        end
+        update()
+        return
+    end
+
     go_history(history_pos + amount)
 end
 
 -- Go to the first command in the command history (PgUp)
 function handle_pgup()
+    if selectable_items then
+        selected_match = math.max(selected_match - calculate_max_log_lines() + 1, 1)
+        update()
+        return
+    end
+
     go_history(1)
 end
 
 -- Stop browsing history and start editing a blank line (PgDown)
 function handle_pgdown()
+    if selectable_items then
+        selected_match = math.min(selected_match + calculate_max_log_lines() - 1, #matches)
+        update()
+        return
+    end
+
     go_history(#history + 1)
+end
+
+local function page_up_or_prev_char()
+    return selectable_items and handle_pgup() or prev_char()
+end
+
+local function page_down_or_next_char()
+    return selectable_items and handle_pgdown() or next_char()
 end
 
 -- Move to the start of the current word, or if already at the start, the start
@@ -1285,9 +1407,9 @@ function get_bindings()
         { 'shift+ins',   function() paste(false) end            },
         { 'mbtn_mid',    function() paste(false) end            },
         { 'left',        function() prev_char() end             },
-        { 'ctrl+b',      function() prev_char() end             },
+        { 'ctrl+b',      function() page_up_or_prev_char() end  },
         { 'right',       function() next_char() end             },
-        { 'ctrl+f',      function() next_char() end             },
+        { 'ctrl+f',      function() page_down_or_next_char() end},
         { 'up',          function() move_history(-1) end        },
         { 'ctrl+p',      function() move_history(-1) end        },
         { 'wheel_up',    function() move_history(-1) end        },
@@ -1393,6 +1515,16 @@ mp.register_script_message('get-input', function (script_name, args)
     end
     history = histories[id]
     history_pos = #history + 1
+
+    selectable_items = args.items
+    if selectable_items then
+        matches = {}
+        selected_match = args.default_item or 1
+        first_match_to_print = 1
+        for i, item in ipairs(selectable_items) do
+            matches[i] = { index = i, text = item }
+        end
+    end
 
     set_active(true)
     mp.commandv('script-message-to', input_caller, 'input-event', 'opened')

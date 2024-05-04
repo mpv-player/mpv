@@ -18,15 +18,7 @@ License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 local utils = require "mp.utils"
 local input = {}
 
-function input.get(t)
-    mp.commandv("script-message-to", "console", "get-input",
-                mp.get_script_name(), utils.format_json({
-                    prompt = t.prompt,
-                    default_text = t.default_text,
-                    cursor_position = t.cursor_position,
-                    id = t.id,
-                }))
-
+local function register_event_handler(t)
     mp.register_script_message("input-event", function (type, text, cursor_position)
         if t[type] then
             local suggestions, completion_start_position = t[type](text, cursor_position)
@@ -41,8 +33,29 @@ function input.get(t)
             mp.unregister_script_message("input-event")
         end
     end)
+end
 
-    return true
+function input.get(t)
+    mp.commandv("script-message-to", "console", "get-input",
+                mp.get_script_name(), utils.format_json({
+                    prompt = t.prompt,
+                    default_text = t.default_text,
+                    cursor_position = t.cursor_position,
+                    id = t.id,
+                }))
+
+    register_event_handler(t)
+end
+
+function input.select(t)
+    mp.commandv("script-message-to", "console", "get-input",
+                mp.get_script_name(), utils.format_json({
+                    prompt = t.prompt,
+                    items = t.items,
+                    default_item = t.default_item,
+                }))
+
+    register_event_handler(t)
 end
 
 function input.terminate()

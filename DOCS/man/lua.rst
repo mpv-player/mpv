@@ -888,9 +888,8 @@ REPL.
         present a list of options with ``input.set_log()``.
 
     ``edited``
-        A callback invoked when the text changes. This can be used to filter a
-        list of options based on what the user typed with ``input.set_log()``,
-        like dmenu does. The first argument is the text in the console.
+        A callback invoked when the text changes. The first argument is the text
+        in the console.
 
     ``complete``
         A callback invoked when the user presses TAB. The first argument is the
@@ -950,6 +949,44 @@ REPL.
                 terminal_style = "\027[31m",
             }
         })
+
+``input.select(table)``
+    Specify a list of items that are presented to the user for selection. The
+    user can type part of the desired item and/or navigate them with
+    keybindings: ``Down`` and ``Ctrl+n`` go down, ``Up`` and ``Ctrl+p`` go up,
+    ``Page down`` and ``Ctrl+f`` scroll down one page, and ``Page up`` and
+    ``Ctrl+b`` scroll up one page.
+
+    The following entries of ``table`` are read:
+
+    ``prompt``
+        The string to be displayed before the input field.
+
+    ``items``
+        The table of the entries to choose from.
+
+    ``default_item``
+        The 1-based integer index of the preselected item.
+
+    ``submit``
+        The callback invoked when the user presses Enter. The first argument is
+        the 1-based index of the selected item. You can close the console from
+        within the callback by calling ``input.terminate()``.
+
+    Example:
+
+        ::
+
+            input.select({
+                items = {
+                    "First playlist entry",
+                    "Second playlist entry",
+                },
+                submit = function (id)
+                    mp.commandv("playlist-play-index", id - 1)
+                    input.terminate()
+                end,
+            })
 
 Events
 ------
