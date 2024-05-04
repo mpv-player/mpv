@@ -3613,6 +3613,12 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
                     break;
                 MP_TARRAY_APPEND(NULL, choices, num, (char *)desc.name);
             }
+            if (objs->get_lavfi_filters) {
+                const char **filters = objs->get_lavfi_filters(choices);
+                for (int n = 0; filters[n]; n++) {
+                    MP_TARRAY_APPEND(NULL, choices, num, (char *)filters[n]);
+                }
+            }
             MP_TARRAY_APPEND(NULL, choices, num, NULL);
         }
 
