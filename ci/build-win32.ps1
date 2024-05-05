@@ -6,6 +6,31 @@ if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
 
+# Download pre-built shaderc, it is quite big to build each time
+# For download link see https://github.com/google/shaderc/blob/main/downloads.md
+$url = "https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_release.html"
+$shaderc = "shaderc.zip"
+$resp = Invoke-WebRequest -Uri $url
+if ($resp.Content -match '<meta http-equiv="refresh" content="\d+; url=(?<url>[^"]+)"') {
+    $url = $matches['url']
+}
+Invoke-WebRequest -Uri $url -OutFile $shaderc
+if (Test-Path "$subprojects/shaderc") {
+    Remove-Item -LiteralPath "$subprojects/shaderc" -Force -Recurse
+}
+Expand-Archive -Path $shaderc -DestinationPath "$subprojects/shaderc"
+Move-Item -Path "$subprojects/shaderc/install/*" -Destination "$subprojects/shaderc"
+
+Set-Content -Path "$subprojects/shaderc/meson.build" -Value @"
+project('shaderc', 'c', version: '2024.1')
+cc = meson.get_compiler('c')
+shaderc_dep = declare_dependency(
+  dependencies: cc.find_library('shaderc_combined', dirs: meson.current_source_dir() / 'lib'),
+  include_directories: include_directories('include')
+)
+meson.override_dependency('shaderc', shaderc_dep)
+"@
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -68,6 +93,7 @@ meson setup build `
     -Dlcms2:fastfloat=true `
     -Dlibplacebo:demos=false `
     -Dlibplacebo:lcms=enabled `
+    -Dlibplacebo:shaderc=enabled `
     -Dlibplacebo:vulkan=enabled `
     -Djavascript=enabled
 ninja -C build mpv.exe mpv.com libmpv.a
