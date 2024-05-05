@@ -32,7 +32,7 @@ def get_commit_range() -> Optional[str]:
 	return None
 
 def do_lint(commit_range: str) -> bool:
-	commits = call(["git", "log", "--pretty=format:%h %s", commit_range]).splitlines()
+	commits = call(["git", "log", "--pretty=format:%H %s", commit_range]).splitlines()
 	print(f"Linting {len(commits)} commit(s):")
 	any_failed = False
 	for commit in commits:
