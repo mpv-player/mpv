@@ -34,6 +34,11 @@
 #include "misc/ctype.h"
 #include "misc/path_utils.h"
 
+#if defined(HAVE_PATHCCH) && HAVE_PATHCCH
+#include <windows.h>
+#include <pathcch.h>
+#endif
+
 char *mp_basename(const char *path)
 {
     char *s;
@@ -164,7 +169,34 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
         path = mp_path_join(talloc_ctx, cwd, path);
     }
 
-#if HAVE_DOS_PATHS
+#if defined(HAVE_PATHCCH) && HAVE_PATHCCH
+    wchar_t *pathw = mp_from_utf8(NULL, path);
+    wchar_t *read = pathw, *write = pathw;
+    wchar_t prev = '\0';
+    // preserve leading double backslashes
+    if (read[0] == '\\' && read[1] == '\\') {
+        prev = '\\';
+        write += 2;
+        read += 2;
+    }
+    wchar_t curr;
+    while ((curr = *read)) {
+        if (curr == '/')
+            curr = '\\';
+        if (curr != '\\' || prev != '\\')
+            *write++ = curr;
+        prev = curr;
+        read++;
+    }
+    *write = '\0';
+    size_t max_size = wcslen(pathw) + 1;
+    wchar_t *pathc = talloc_array(NULL, wchar_t, max_size);
+    HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
+    char *ret = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
+    talloc_free(pathw);
+    talloc_free(pathc);
+    return ret;
+#elif HAVE_DOS_PATHS
     return talloc_strdup(talloc_ctx, path);
 #else
     char *result = talloc_strdup(talloc_ctx, "");
