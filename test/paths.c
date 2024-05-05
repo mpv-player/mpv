@@ -10,6 +10,7 @@ static void test_join(char *file, int line, char *a, char *b, char *c)
     if (strcmp(res, c) != 0) {
         printf("%s:%d: '%s' + '%s' = '%s', expected '%s'\n", file, line,
                a, b, res, c);
+        fflush(stdout);
         abort();
     }
     talloc_free(res);
@@ -20,6 +21,7 @@ static void test_abs(char *file, int line, bool abs, char *a)
     if (mp_path_is_absolute(bstr0(a)) != abs) {
         printf("%s:%d: mp_path_is_absolute('%s') => %d, expected %d\n",
                file, line, a, !abs, abs);
+        fflush(stdout);
         abort();
     }
 }
