@@ -31,6 +31,36 @@ shaderc_dep = declare_dependency(
 meson.override_dependency('shaderc', shaderc_dep)
 "@
 
+# Manually wrap spirv-cross for CMAKE_MSVC_RUNTIME_LIBRARY option
+# This also allows us to link statically
+if (-not (Test-Path "$subprojects/spirv-cross-c-shared")) {
+    New-Item -Path "$subprojects/spirv-cross-c-shared" -ItemType Directory | Out-Null
+}
+Set-Content -Path "$subprojects/spirv-cross-c-shared/meson.build" -Value @"
+project('spirv-cross', 'cpp', version: '0.59.0')
+cmake = import('cmake')
+opts = cmake.subproject_options()
+opts.add_cmake_defines({
+    'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+    'CMAKE_POLICY_DEFAULT_CMP0091': 'NEW',
+    'SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS': 'ON',
+    'SPIRV_CROSS_CLI': 'OFF',
+    'SPIRV_CROSS_ENABLE_TESTS': 'OFF',
+    'SPIRV_CROSS_ENABLE_MSL': 'OFF',
+    'SPIRV_CROSS_ENABLE_CPP': 'OFF',
+    'SPIRV_CROSS_ENABLE_REFLECT': 'OFF',
+    'SPIRV_CROSS_ENABLE_UTIL': 'OFF',
+})
+spirv_cross_proj = cmake.subproject('spirv-cross', options: opts)
+spirv_cross_c_dep = declare_dependency(dependencies: [
+    spirv_cross_proj.dependency('spirv-cross-c'),
+    spirv_cross_proj.dependency('spirv-cross-core'),
+    spirv_cross_proj.dependency('spirv-cross-glsl'),
+    spirv_cross_proj.dependency('spirv-cross-hlsl'),
+])
+meson.override_dependency('spirv-cross-c-shared', spirv_cross_c_dep)
+"@
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -56,6 +86,12 @@ $projects = @(
         URL = "https://code.videolan.org/videolan/libplacebo.git"
         Revision = "master"
     },
+    @{
+        Path = "$subprojects/spirv-cross.wrap"
+        URL = "https://github.com/KhronosGroup/SPIRV-Cross"
+        Revision = "main"
+        Method = "cmake"
+    },
     # Remove harfbuzz wrap once the new version with build fixes is released.
     @{
         Path = "$subprojects/harfbuzz.wrap"
@@ -75,6 +111,9 @@ revision = $($project.Revision)
 depth = 1
 clone-recursive = true
 "@
+    if ($project.ContainsKey('Method')) {
+        $content += "`nmethod = $($project.Method)"
+    }
     if ($project.ContainsKey('Provides')) {
         $provide = "[provide]`n$($project.Provides -join "`n")"
         $content += "`n$provide"
@@ -95,6 +134,8 @@ meson setup build `
     -Dlibplacebo:lcms=enabled `
     -Dlibplacebo:shaderc=enabled `
     -Dlibplacebo:vulkan=enabled `
+    -Dlibplacebo:d3d11=enabled `
+    -Dd3d11=enabled `
     -Djavascript=enabled
 ninja -C build mpv.exe mpv.com libmpv.a
 ./build/mpv.com -v --no-config
