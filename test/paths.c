@@ -24,11 +24,27 @@ static void test_abs(char *file, int line, bool abs, char *a)
     }
 }
 
+static void test_normalize(char *file, int line, char *expected, char *path)
+{
+    void *ctx = talloc_new(NULL);
+    char *normalized = mp_normalize_path(ctx, path);
+    if (strcmp(normalized, expected)) {
+        printf("%s:%d: mp_normalize_path('%s') => %s, expected %s\n",
+               file, line, path, normalized, expected);
+        fflush(stdout);
+        abort();
+    }
+    talloc_free(ctx);
+}
+
 #define TEST_JOIN(a, b, c) \
     test_join(__FILE__, __LINE__, a, b, c);
 
 #define TEST_ABS(abs, a) \
     test_abs(__FILE__, __LINE__, abs, a)
+
+#define TEST_NORMALIZE(expected, path) \
+    test_normalize(__FILE__, __LINE__, expected, path)
 
 int main(void)
 {
@@ -61,5 +77,23 @@ int main(void)
     TEST_JOIN("c:a",        "b",            "c:a/b");
     TEST_JOIN("c:",         "b",            "c:b");
 #endif
+
+    TEST_NORMALIZE("https://foo", "https://foo");
+    TEST_NORMALIZE("/foo", "/foo");
+
+    void *ctx = talloc_new(NULL);
+    bstr dst = bstr0(mp_getcwd(ctx));
+    bstr_xappend(ctx, &dst, bstr0("/foo"));
+    TEST_NORMALIZE(dst.start, "foo");
+    talloc_free(ctx);
+
+#if (!HAVE_DOS_PATHS)
+    TEST_NORMALIZE("/foo/bar", "/foo//bar");
+    TEST_NORMALIZE("/foo/bar", "/foo///bar");
+    TEST_NORMALIZE("/foo/bar", "/foo/bar/");
+    TEST_NORMALIZE("/foo/bar", "/foo/./bar");
+    TEST_NORMALIZE("/usr", "/usr/bin/..");
+#endif
+
     return 0;
 }
