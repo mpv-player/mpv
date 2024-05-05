@@ -63,6 +63,11 @@ static bool check_af_lavfi(const char *name)
     return check_unknown_entry(name, AVMEDIA_TYPE_AUDIO);
 }
 
+static const char **get_lavfi_audio_filters(void *talloc_ctx)
+{
+    return mp_get_lavfi_filters(talloc_ctx, AVMEDIA_TYPE_AUDIO);
+}
+
 const struct m_obj_list af_obj_list = {
     .get_desc = get_af_desc,
     .description = "audio filters",
@@ -70,6 +75,7 @@ const struct m_obj_list af_obj_list = {
     .check_unknown_entry = check_af_lavfi,
     .print_help_list = print_af_help_list,
     .print_unknown_entry_help = print_af_lavfi_help,
+    .get_lavfi_filters = get_lavfi_audio_filters,
 };
 
 // --vf option
@@ -119,6 +125,11 @@ static bool check_vf_lavfi(const char *name)
     return check_unknown_entry(name, AVMEDIA_TYPE_VIDEO);
 }
 
+static const char **get_lavfi_video_filters(void *talloc_ctx)
+{
+    return mp_get_lavfi_filters(talloc_ctx, AVMEDIA_TYPE_VIDEO);
+}
+
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_vf_desc,
     .description = "video filters",
@@ -126,6 +137,7 @@ const struct m_obj_list vf_obj_list = {
     .check_unknown_entry = check_vf_lavfi,
     .print_help_list = print_vf_help_list,
     .print_unknown_entry_help = print_vf_lavfi_help,
+    .get_lavfi_filters = get_lavfi_video_filters,
 };
 
 // Create a bidir, single-media filter from command line arguments.

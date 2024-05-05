@@ -2318,6 +2318,11 @@ Property list
     other byte-oriented input layer) in bytes per second. May be inaccurate or
     missing.
 
+    ``ts-per-stream`` is an array containing an entry for each stream type: video,
+    audio, and subtitle. For each stream type, the details for the demuxer cache
+    for that stream type are available as ``cache-duration``, ``reader-pts`` and
+    ``cache-end``.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2337,6 +2342,12 @@ Property list
             "reader-pts"        MPV_FORMAT_DOUBLE
             "cache-duration"    MPV_FORMAT_DOUBLE
             "raw-input-rate"    MPV_FORMAT_INT64
+            "ts-per-stream"     MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_NODE_MAP
+                      "type"            MPV_FORMAT_STRING
+                      "cache-duration"  MPV_FORMAT_DOUBLE
+                      "reader-pts"      MPV_FORMAT_DOUBLE
+                      "cache-end"       MPV_FORMAT_DOUBLE
 
     Other fields (might be changed or removed in the future):
 

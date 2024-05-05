@@ -245,12 +245,12 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         struct demux_reader_state s;
         demux_get_reader_state(mpctx->demuxer, &s);
 
-        if (s.ts_duration < 0) {
+        if (s.ts_info.duration < 0) {
             saddf(&line, "???");
-        } else if (s.ts_duration < 10) {
-            saddf(&line, "%2.1fs", s.ts_duration);
+        } else if (s.ts_info.duration < 10) {
+            saddf(&line, "%2.1fs", s.ts_info.duration);
         } else {
-            saddf(&line, "%2ds", (int)s.ts_duration);
+            saddf(&line, "%2ds", (int)s.ts_info.duration);
         }
         int64_t cache_size = s.fw_bytes;
         if (cache_size > 0) {
@@ -412,6 +412,8 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
             sym = OSD_CLOCK;
         } else if (mpctx->paused || mpctx->step_frames) {
             sym = OSD_PAUSE;
+        } else if (mpctx->play_dir < 0 ) {
+            sym = OSD_REV;
         } else {
             sym = OSD_PLAY;
         }

@@ -714,7 +714,7 @@ static void handle_update_cache(struct MPContext *mpctx)
     }
 
     bool is_low = use_pause_on_low_cache && !s.idle &&
-                  s.ts_duration < opts->cache_pause_wait;
+                  s.ts_info.duration < opts->cache_pause_wait;
 
     // Enter buffering state only if there actually was an underrun (or if
     // initial caching before playback restart is used).
@@ -754,7 +754,7 @@ static void handle_update_cache(struct MPContext *mpctx)
 
     if (mpctx->paused_for_cache) {
         cache_buffer =
-            100 * MPCLAMP(s.ts_duration / opts->cache_pause_wait, 0, 0.99);
+            100 * MPCLAMP(s.ts_info.duration / opts->cache_pause_wait, 0, 0.99);
         mp_set_timeout(mpctx, 0.2);
     }
 
@@ -775,15 +775,15 @@ static void handle_update_cache(struct MPContext *mpctx)
         if ((mpctx->cache_buffer == 100) != (cache_buffer == 100)) {
             if (cache_buffer < 100) {
                 MP_VERBOSE(mpctx, "Enter buffering (buffer went from %d%% -> %d%%) [%fs].\n",
-                           mpctx->cache_buffer, cache_buffer, s.ts_duration);
+                           mpctx->cache_buffer, cache_buffer, s.ts_info.duration);
             } else {
                 double t = now - mpctx->cache_stop_time;
                 MP_VERBOSE(mpctx, "End buffering (waited %f secs) [%fs].\n",
-                           t, s.ts_duration);
+                           t, s.ts_info.duration);
             }
         } else {
             MP_VERBOSE(mpctx, "Still buffering (buffer went from %d%% -> %d%%) [%fs].\n",
-                       mpctx->cache_buffer, cache_buffer, s.ts_duration);
+                       mpctx->cache_buffer, cache_buffer, s.ts_info.duration);
         }
         mpctx->cache_buffer = cache_buffer;
         force_update = true;

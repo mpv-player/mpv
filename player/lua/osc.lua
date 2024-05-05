@@ -1878,7 +1878,11 @@ function osc_init()
 
     ne.content = function ()
         if mp.get_property("pause") == "yes" then
-            return ("\238\132\129")
+            if mp.get_property("play-direction", "forward") ~= "backward" then
+                return ("\238\132\129")
+            else
+                return ("\238\132\144")
+            end
         else
             return ("\238\128\130")
         end

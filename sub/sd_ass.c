@@ -420,7 +420,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (sd->opts->sub_stretch_durations ||
             packet->duration < 0 || sub_duration == UINT32_MAX) {
             if (!ctx->duration_unknown) {
-                MP_WARN(sd, "Subtitle with unknown duration.\n");
+                MP_VERBOSE(sd, "Subtitle with unknown duration.\n");
                 ctx->duration_unknown = true;
             }
             sub_duration = UNKNOWN_DURATION;

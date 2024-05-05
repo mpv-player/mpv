@@ -1527,15 +1527,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->codec_tag = track->colorspace;
         sh_v->codec = "rawvideo";
     } else if (strcmp(track->codec_id, "V_QUICKTIME") == 0) {
-        uint32_t fourcc1 = 0, fourcc2 = 0;
         if (track->private_size >= 8) {
-            fourcc1 = AV_RL32(track->private_data + 0);
-            fourcc2 = AV_RL32(track->private_data + 4);
-        }
-        if (fourcc1 == MKTAG('S', 'V', 'Q', '3') ||
-            fourcc2 == MKTAG('S', 'V', 'Q', '3'))
-        {
-            sh_v->codec = "svq3";
+            sh_v->codec_tag = AV_RL32(track->private_data + 4);
+            mp_set_codec_from_tag(sh_v);
+            // Some non-compliant files have fourcc at offset 0.
+            if (!sh_v->codec) {
+                sh_v->codec_tag = AV_RL32(track->private_data);
+                mp_set_codec_from_tag(sh_v);
+            }
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
@@ -2045,14 +2044,14 @@ static void probe_if_image(demuxer_t *demuxer)
 
         int64_t timecode = -1;
         // Arbitrary restriction on packet reading.
-        for (int i = 0; i < 1000; i++) {
-            int ret = read_next_block_into_queue(demuxer);
-            if (ret == 1 && mkv_d->blocks[i].track == track) {
-                if (timecode != mkv_d->blocks[i].timecode)
-                    ++video_blocks;
-                timecode = mkv_d->blocks[i].timecode;
-            }
-            // No need to read more
+        for (size_t block = 0; block < 100000; block++) {
+            if (block >= mkv_d->num_blocks && read_next_block_into_queue(demuxer) != 1)
+                break;
+            if (mkv_d->blocks[block].track != track)
+                continue;
+            if (timecode != mkv_d->blocks[block].timecode)
+                ++video_blocks;
+            timecode = mkv_d->blocks[block].timecode;
             if (video_blocks > 1)
                 break;
         }
