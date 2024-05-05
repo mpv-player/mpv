@@ -117,12 +117,6 @@ struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
     if (!strcmp(filename, "-"))
         filename = "pipe:1";
 
-    if (filename && (
-            !strcmp(filename, "/dev/stdout") ||
-            !strcmp(filename, "pipe:") ||
-            !strcmp(filename, "pipe:1")))
-        mp_msg_force_stderr(global, true);
-
     encode_lavc_discontinuity(ctx);
 
     p->muxer = avformat_alloc_context();
@@ -944,6 +938,19 @@ fail:
     MP_ERR(p, "error encoding at %s\n",
            frame ? av_ts2timestr(frame->pts, &p->encoder->time_base) : "EOF");
     return false;
+}
+
+void encoder_update_log(struct mpv_global *global)
+{
+    struct encode_opts *options = mp_get_config_group(NULL, global, &encode_config);
+    if (options->file && (!strcmp(options->file, "-") ||
+                          !strcmp(options->file, "/dev/stdout") ||
+                          !strcmp(options->file, "pipe:") ||
+                          !strcmp(options->file, "pipe:1")))
+    {
+        mp_msg_force_stderr(global, true);
+    }
+    talloc_free(options);
 }
 
 // vim: ts=4 sw=4 et
