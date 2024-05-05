@@ -2044,14 +2044,14 @@ static void probe_if_image(demuxer_t *demuxer)
 
         int64_t timecode = -1;
         // Arbitrary restriction on packet reading.
-        for (int i = 0; i < 1000; i++) {
-            int ret = read_next_block_into_queue(demuxer);
-            if (ret == 1 && mkv_d->blocks[i].track == track) {
-                if (timecode != mkv_d->blocks[i].timecode)
-                    ++video_blocks;
-                timecode = mkv_d->blocks[i].timecode;
-            }
-            // No need to read more
+        for (size_t block = 0; block < 100000; block++) {
+            if (block >= mkv_d->num_blocks && read_next_block_into_queue(demuxer) != 1)
+                break;
+            if (mkv_d->blocks[block].track != track)
+                continue;
+            if (timecode != mkv_d->blocks[block].timecode)
+                ++video_blocks;
+            timecode = mkv_d->blocks[block].timecode;
             if (video_blocks > 1)
                 break;
         }
