@@ -827,6 +827,21 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         This line of Lua would show the location of the user's mpv
         configuration directory on the OSD.
 
+``normalize-path <filename>``
+    Return a canonical representation of the path ``filename`` by converting it
+    to an absolute path, removing consecutive slashes, removing ``.``
+    components, resolving ``..`` components, and converting slashes to
+    backslashes on Windows. Symlinks are not resolved unless the platform is
+    Unix-like and one of the path components is ``..``. If ``filename`` is a
+    URL, it is returned unchanged. This can only be used through the client API
+    or from a script using ``mp.command_native``.
+
+    .. admonition:: Example
+
+        ``mp.osd_message(mp.command_native({"normalize-path", "/foo//./bar"}))``
+
+        This line of Lua prints "/foo/bar" on the OSD.
+
 ``escape-ass <text>``
     Modify ``text`` so that commands and functions that interpret ASS tags,
     such as ``osd-overlay`` and ``mp.create_osd_overlay``, will display it
