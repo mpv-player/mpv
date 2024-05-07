@@ -674,7 +674,7 @@ mp.input = {
 
         register_event_handler(t)
     },
-    select: function () {
+    select: function (t) {
         mp.commandv("script-message-to", "console", "get-input", mp.script_name,
                     JSON.stringify({
                         prompt: t.prompt,
@@ -682,8 +682,8 @@ mp.input = {
                         default_item: t.default_item,
                     }));
 
-        register_event_handler(t)
-    }
+        register_event_handler(t);
+    },
     terminate: function () {
         mp.commandv("script-message-to", "console", "disable");
     },
