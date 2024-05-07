@@ -3678,6 +3678,9 @@ Property list
         means the option value will be restored to the value before playback
         start when playback ends.
 
+    ``option-info/<name>/expects-file``
+        Whether the option takes file paths as arguments.
+
     ``option-info/<name>/default-value``
         The default value of the option. May not always be available.
 
