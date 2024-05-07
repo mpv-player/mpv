@@ -929,7 +929,7 @@ local function property_list()
 
         for _, sub_property in pairs({
             'name', 'type', 'set-from-commandline', 'set-locally',
-            'default-value', 'min', 'max', 'choices',
+            'expects-file', 'default-value', 'min', 'max', 'choices',
         }) do
             properties[#properties + 1] = 'option-info/' .. option .. '/' ..
                                           sub_property
