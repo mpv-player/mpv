@@ -23,10 +23,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
 
-#ifndef __MINGW32__
+#ifndef _WIN32
 #include <poll.h>
 #endif
 
@@ -53,6 +52,33 @@
 #include <winioctl.h>
 #include <winternl.h>
 #include <io.h>
+
+#ifdef _MSC_VER
+// Those are defined only in Windows DDK
+typedef struct _FILE_FS_DEVICE_INFORMATION {
+    DEVICE_TYPE DeviceType;
+    ULONG Characteristics;
+} FILE_FS_DEVICE_INFORMATION, *PFILE_FS_DEVICE_INFORMATION;
+
+typedef enum _FSINFOCLASS {
+    FileFsVolumeInformation          = 1,
+    FileFsLabelInformation,         // 2
+    FileFsSizeInformation,          // 3
+    FileFsDeviceInformation,        // 4
+    FileFsAttributeInformation,     // 5
+    FileFsControlInformation,       // 6
+    FileFsFullSizeInformation,      // 7
+    FileFsObjectIdInformation,      // 8
+    FileFsDriverPathInformation,    // 9
+    FileFsVolumeFlagsInformation,   // 10
+    FileFsSectorSizeInformation,    // 11
+    FileFsDataCopyInformation,      // 12
+    FileFsMetadataSizeInformation,  // 13
+    FileFsFullSizeInformationEx,    // 14
+    FileFsGuidInformation,          // 15
+    FileFsMaximumInformation
+} FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
+#endif
 
 #ifndef FILE_REMOTE_DEVICE
 #define FILE_REMOTE_DEVICE (0x10)
@@ -90,7 +116,7 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
 {
     struct priv *p = s->priv;
 
-#ifndef __MINGW32__
+#ifndef _WIN32
     if (p->use_poll) {
         int c = mp_cancel_get_fd(p->cancel);
         struct pollfd fds[2] = {
@@ -315,7 +341,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
                 MP_INFO(stream, "This is a directory - adding to playlist.\n");
         } else if (S_ISREG(st.st_mode)) {
             p->regular_file = true;
-#ifndef __MINGW32__
+#ifndef _WIN32
             // O_NONBLOCK has weird semantics on file locks; remove it.
             int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
             fcntl(p->fd, F_SETFL, val);
@@ -328,7 +354,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
         }
     }
 
-#ifdef __MINGW32__
+#ifdef _WIN32
     setmode(p->fd, O_BINARY);
 #endif
 

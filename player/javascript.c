@@ -17,11 +17,8 @@
 
 #include <assert.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <math.h>
 #include <stdint.h>
 

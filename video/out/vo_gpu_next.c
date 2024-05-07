@@ -17,10 +17,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <libplacebo/colorspace.h>
 #include <libplacebo/options.h>

@@ -775,7 +775,11 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
         Steps through the secondary subtitles.
 
 ``sub-seek <skip> <flags>``
-    Seek to the next (skip set to 1) or the previous (skip set to -1) subtitle.
+    Change video and audio position such that the subtitle event after
+    ``<skip>`` subtitle events is displayed. For example, ``sub-seek 1`` skips
+    to the next subtitle, ``sub-seek -1`` skips to the previous subtitles, and
+    ``sub-seek 0`` seeks to the beginning of the current subtitle.
+
     This is similar to ``sub-step``, except that it seeks video and audio
     instead of adjusting the subtitle delay.
 
@@ -788,7 +792,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
     For embedded subtitles (like with Matroska), this works only with subtitle
     events that have already been displayed, or are within a short prefetch
-    range.
+    range. See `Cache`_ for details on how to control the available prefetch range.
 
 ``print-text <text>``
     Print text to stdout. The string can contain properties (see
@@ -806,12 +810,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     <level>
         The minimum OSD level to show the text at (see ``--osd-level``).
 
-``expand-text <string>``
+``expand-text <text>``
     Property-expand the argument and return the expanded string. This can be
     used only through the client API or from a script using
     ``mp.command_native``. (see `Property Expansion`_).
 
-``expand-path "<string>"``
+``expand-path "<text>"``
     Expand a path's double-tilde placeholders into a platform-specific path.
     As ``expand-text``, this can only be used through the client API or from
     a script using ``mp.command_native``.
@@ -822,6 +826,33 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
         This line of Lua would show the location of the user's mpv
         configuration directory on the OSD.
+
+``normalize-path <filename>``
+    Return a canonical representation of the path ``filename`` by converting it
+    to an absolute path, removing consecutive slashes, removing ``.``
+    components, resolving ``..`` components, and converting slashes to
+    backslashes on Windows. Symlinks are not resolved unless the platform is
+    Unix-like and one of the path components is ``..``. If ``filename`` is a
+    URL, it is returned unchanged. This can only be used through the client API
+    or from a script using ``mp.command_native``.
+
+    .. admonition:: Example
+
+        ``mp.osd_message(mp.command_native({"normalize-path", "/foo//./bar"}))``
+
+        This line of Lua prints "/foo/bar" on the OSD.
+
+``escape-ass <text>``
+    Modify ``text`` so that commands and functions that interpret ASS tags,
+    such as ``osd-overlay`` and ``mp.create_osd_overlay``, will display it
+    verbatim, and return it. This can only be used through the client API or
+    from a script using ``mp.command_native``.
+
+    .. admonition:: Example
+
+        ``mp.osd_message(mp.command_native({"escape-ass", "foo {bar}"}))``
+
+        This line of Lua prints "foo \\{bar}" on the OSD.
 
 ``show-progress``
     Show the progress bar, the elapsed time and the total duration of the file
@@ -1261,18 +1292,6 @@ Input Commands that are Possibly Subject to Change
         Always use named arguments (``mpv_command_node()``). Lua scripts should
         use the ``mp.create_osd_overlay()`` helper instead of invoking this
         command directly.
-
-``escape-ass <text>``
-    Modify ``text`` so that commands and functions that interpret ASS tags,
-    such as ``osd-overlay`` and ``mp.create_osd_overlay``, will display it
-    verbatim, and return it. This can only be used through the client API or
-    from a script using ``mp.command_native``.
-
-    .. admonition:: Example
-
-        ``mp.osd_message(mp.command_native({"escape-ass", "foo {bar}"}))``
-
-        This line of Lua prints "foo \\{bar}" on the OSD.
 
 ``script-message [<arg1> [<arg2> [...]]]``
     Send a message to all clients, and pass it the following list of arguments.

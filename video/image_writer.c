@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <unistd.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>

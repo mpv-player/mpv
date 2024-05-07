@@ -17,7 +17,6 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <strings.h>
 #include <inttypes.h>
 #include <assert.h>
 

@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <dirent.h>
 #include <inttypes.h>
 
 #include "osdep/io.h"

@@ -57,12 +57,12 @@ int check_cu(const struct ra_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
-static const cuda_interop_init interop_inits[] = {
+static const struct cuda_interop_fn *interop_fns[] = {
 #if HAVE_GL
-    cuda_gl_init,
+    &cuda_gl_fn,
 #endif
 #if HAVE_VULKAN
-    cuda_vk_init,
+    &cuda_vk_fn,
 #endif
     NULL
 };
@@ -73,25 +73,36 @@ static int cuda_init(struct ra_hwdec *hw)
     CUcontext dummy;
     int ret = 0;
     struct cuda_hw_priv *p = hw->priv;
-    CudaFunctions *cu;
+    CudaFunctions *cu = NULL;
     int level = hw->probing ? MSGL_V : MSGL_ERR;
-
-    ret = cuda_load_functions(&p->cu, NULL);
-    if (ret != 0) {
-        MP_MSG(hw, level, "Failed to load CUDA symbols\n");
-        return -1;
-    }
-    cu = p->cu;
-
-    ret = CHECK_CU(cu->cuInit(0));
-    if (ret < 0)
-        return -1;
+    bool initialized = false;
 
     // Initialise CUDA context from backend.
-    for (int i = 0; interop_inits[i]; i++) {
-        if (interop_inits[i](hw)) {
-            break;
+    // Note that the interop check doesn't require the CUDA backend to be initialized.
+    // This is important because cuInit wakes up the dgpu (even if the cuda hwdec won't be used!)
+    // Doing this allows us to check if CUDA should be used without waking up the dgpu, avoiding
+    // a few seconds of delay and improving battery life for laptops!
+    for (int i = 0; interop_fns[i]; i++) {
+        if (!interop_fns[i]->check(hw))
+            continue;
+
+        if (!initialized) {
+            ret = cuda_load_functions(&p->cu, NULL);
+            if (ret != 0) {
+                MP_MSG(hw, level, "Failed to load CUDA symbols\n");
+                return -1;
+            }
+
+            cu = p->cu;
+            ret = CHECK_CU(cu->cuInit(0));
+            if (ret < 0)
+                return -1;
+
+            initialized = true;
         }
+
+        if (interop_fns[i]->init(hw))
+            break;
     }
 
     if (!p->ext_init || !p->ext_uninit) {

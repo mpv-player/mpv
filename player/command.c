@@ -18,7 +18,6 @@
 #include <float.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -5632,6 +5631,19 @@ static void cmd_expand_path(void *p)
     };
 }
 
+static void cmd_normalize_path(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    void *ctx = talloc_new(NULL);
+
+    cmd->result = (mpv_node){
+        .format = MPV_FORMAT_STRING,
+        .u.string = talloc_strdup(NULL, mp_normalize_path(ctx, cmd->args[0].v.s)),
+    };
+
+    talloc_free(ctx);
+}
+
 static void cmd_escape_ass(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6714,6 +6726,7 @@ const struct mp_cmd_def mp_cmds[] = {
         .is_noisy = true },
     { "expand-path", cmd_expand_path, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
+    { "normalize-path", cmd_normalize_path, { {"filename", OPT_STRING(v.s)} }},
     { "escape-ass", cmd_escape_ass, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true,

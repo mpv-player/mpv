@@ -3,7 +3,6 @@
 #include "test_utils.h"
 
 #include <time.h>
-#include <sys/time.h>
 #include <limits.h>
 
 int main(void)

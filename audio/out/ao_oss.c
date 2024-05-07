@@ -25,7 +25,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>

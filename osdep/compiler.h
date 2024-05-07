@@ -3,7 +3,7 @@
 
 #define MP_EXPAND_ARGS(...) __VA_ARGS__
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
 #define MP_NORETURN __attribute__((noreturn))
 #define MP_FALLTHROUGH __attribute__((fallthrough))

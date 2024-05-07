@@ -19,12 +19,9 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <assert.h>
-#include <dirent.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <libavutil/common.h>
 
 #include "osdep/io.h"

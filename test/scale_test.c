@@ -62,6 +62,7 @@ static void dump_image(struct scale_test *stest, const char *name,
 
     if (!write_image(img, &opts, path, NULL, NULL, true)) {
         printf("Failed to write '%s'.\n", path);
+        fflush(stdout);
         abort();
     }
 }

@@ -312,7 +312,9 @@ features += {'dos-paths': win32, 'win32': win32}
 
 mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DWINVER=0x0602', '-DUNICODE',
                '-DCOBJMACROS', '-DINITGUID', '-U__STRICT_ANSI__', '-DNOMINMAX',
-               '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN']
+               '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN',
+               '-D_CRT_DECLARE_NONSTDC_NAMES', '-D_CRT_NONSTDC_NO_WARNINGS',
+               '-D_CRT_SECURE_NO_WARNINGS']
 
 if host_machine.system() == 'windows'
     flags += [mswin_flags]
@@ -495,6 +497,11 @@ endif
 
 features += {'win32-desktop': win32 and not uwp.found()}
 if features['win32-desktop']
+    pathcch = cc.find_library('pathcch', required: false)
+    features += {'pathcch': pathcch.found()}
+    if features['pathcch']
+        dependencies += pathcch
+    endif
     win32_desktop_libs = [cc.find_library('avrt'),
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
@@ -1570,6 +1577,18 @@ if features['cocoa'] and features['swift']
                            'video/out/mac/window.swift')
 endif
 
+macos_11_features = get_option('macos-11-features').require(
+    macos_sdk_version.version_compare('>= 11'),
+    error_message: 'A macos sdk version >= 11 could not be found!',
+)
+features += {'macos-11-features': macos_11_features.allowed()}
+
+macos_12_features = get_option('macos-12-features').require(
+    macos_sdk_version.version_compare('>= 12'),
+    error_message: 'A macos sdk version >= 12 could not be found!',
+)
+features += {'macos-12-features': macos_12_features.allowed()}
+
 macos_cocoa_cb = get_option('macos-cocoa-cb').require(
     features['cocoa'] and features['gl-cocoa'] and features['swift'],
     error_message: 'Either cocoa, gl-cocoa or swift could not be found!',
@@ -1790,7 +1809,7 @@ if get_option('cplayer')
     install_data('etc/mpv-symbolic.svg', install_dir: join_paths(hicolor_dir, 'symbolic', 'apps'))
 
     mpv = executable('mpv', main_fn_source, objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
-                     win_subsystem: 'windows,6.0', install: true)
+                     win_subsystem: 'windows', install: true)
 
     # Older meson versions generate this in the player subdirectory.
     if win32 and meson.version().version_compare('>= 1.3.0')

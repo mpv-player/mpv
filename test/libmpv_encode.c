@@ -20,8 +20,14 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <sys/types.h>
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__
@@ -97,6 +103,8 @@ static void check_output(int fd)
     puts("output file ok");
 }
 
+int mp_mkostemps(char *template, int suffixlen, int flags);
+
 int main(int argc, char *argv[])
 {
     atexit(exit_cleanup);
@@ -108,7 +116,7 @@ int main(int argc, char *argv[])
     int fd;
     {
         char path[] = "./testout.XXXXXX";
-        fd = mkstemp(path);
+        fd = mp_mkostemps(path, 0, 0);
         if (fd == -1)
             fail("mkstemp failed");
         out_path = strdup(path);

@@ -1,5 +1,7 @@
 #define VERSION "@VERSION@"
-#define MPVCOPYRIGHT "Copyright © 2000-2024 mpv/MPlayer/mplayer2 projects"
+#define MPVCOPYRIGHT_T(C) "Copyright " C " 2000-2024 mpv/MPlayer/mplayer2 projects"
+#define MPVCOPYRIGHT MPVCOPYRIGHT_T("\xC2\xA9")
+#define MPVCOPYRIGHT_W MPVCOPYRIGHT_T(L"\xA9")
 #ifndef NO_BUILD_TIMESTAMPS
 #define BUILDDATE __DATE__ " " __TIME__
 #else

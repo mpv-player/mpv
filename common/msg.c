@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "mpv_talloc.h"
 
@@ -195,8 +194,7 @@ int mp_msg_level(struct mp_log *log)
 
 static inline int term_msg_fileno(struct mp_log_root *root, int lev)
 {
-    return (root->force_stderr || lev == MSGL_STATUS || lev == MSGL_FATAL ||
-            lev == MSGL_ERR || lev == MSGL_WARN) ? STDERR_FILENO : STDOUT_FILENO;
+    return root->force_stderr ? STDERR_FILENO : STDOUT_FILENO;
 }
 
 // Reposition cursor and clear lines for outputting the status line. In certain

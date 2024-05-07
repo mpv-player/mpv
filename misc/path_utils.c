@@ -24,15 +24,20 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <errno.h>
 
 #include "config.h"
 
 #include "mpv_talloc.h"
+#include "common/common.h"
 #include "osdep/io.h"
 #include "misc/ctype.h"
 #include "misc/path_utils.h"
+
+#if defined(HAVE_PATHCCH) && HAVE_PATHCCH
+#include <windows.h>
+#include <pathcch.h>
+#endif
 
 char *mp_basename(const char *path)
 {
@@ -151,10 +156,88 @@ char *mp_getcwd(void *talloc_ctx)
 
 char *mp_normalize_path(void *talloc_ctx, const char *path)
 {
+    if (!path)
+        return NULL;
+
     if (mp_is_url(bstr0(path)))
         return talloc_strdup(talloc_ctx, path);
 
-    return mp_path_join(talloc_ctx, mp_getcwd(talloc_ctx), path);
+    if (!mp_path_is_absolute(bstr0(path))) {
+        char *cwd = mp_getcwd(talloc_ctx);
+        if (!cwd)
+            return NULL;
+        path = mp_path_join(talloc_ctx, cwd, path);
+    }
+
+#if defined(HAVE_PATHCCH) && HAVE_PATHCCH
+    wchar_t *pathw = mp_from_utf8(NULL, path);
+    wchar_t *read = pathw, *write = pathw;
+    wchar_t prev = '\0';
+    // preserve leading double backslashes
+    if (read[0] == '\\' && read[1] == '\\') {
+        prev = '\\';
+        write += 2;
+        read += 2;
+    }
+    wchar_t curr;
+    while ((curr = *read)) {
+        if (curr == '/')
+            curr = '\\';
+        if (curr != '\\' || prev != '\\')
+            *write++ = curr;
+        prev = curr;
+        read++;
+    }
+    *write = '\0';
+    size_t max_size = wcslen(pathw) + 1;
+    wchar_t *pathc = talloc_array(NULL, wchar_t, max_size);
+    HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
+    char *ret = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
+    talloc_free(pathw);
+    talloc_free(pathc);
+    return ret;
+#elif HAVE_DOS_PATHS
+    return talloc_strdup(talloc_ctx, path);
+#else
+    char *result = talloc_strdup(talloc_ctx, "");
+    const char *next;
+    const char *end = path + strlen(path);
+
+    for (const char *ptr = path; ptr < end; ptr = next + 1) {
+        next = memchr(ptr, '/', end - ptr);
+        if (next == NULL)
+            next = end;
+
+        switch (next - ptr) {
+            case 0:
+                continue;
+            case 1:
+                if (ptr[0] == '.')
+                    continue;
+                break;
+            case 2:
+                // Normalizing symlink/.. results in a wrong path: if the
+                // current working directory is /tmp/foo, and it is a symlink to
+                // /usr/bin, mpv ../file.mkv opens /usr/file.mkv, so we can't
+                // normalize the path to /tmp/file.mkv. Resolve symlinks to fix
+                // this. Otherwise we don't use realpath so users can use
+                // symlinks e.g. to hide how media files are distributed over
+                // real storage and move them while still resuming playback as
+                // long as the symlinked path doesn't change.
+                if (ptr[0] == '.' && ptr[1] == '.') {
+                    char *tmp_result = realpath(path, NULL);
+                    result = talloc_strdup(talloc_ctx, tmp_result);
+                    free(tmp_result);
+                    return result;
+                }
+        }
+
+        result = talloc_strdup_append_buffer(result, "/");
+        result = talloc_strndup_append_buffer(result, ptr, next - ptr);
+    }
+
+    return result;
+#endif
 }
 
 bool mp_path_exists(const char *path)
