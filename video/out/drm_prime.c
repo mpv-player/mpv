@@ -130,10 +130,9 @@ void drm_prime_add_handle_ref(struct drm_prime_handle_refs *handle_refs,
     if (handle) {
         if (handle > handle_refs->size) {
             MP_TARRAY_GROW(handle_refs->ctx, handle_refs->handle_ref_count,
-                           handle);
-            memset(&handle_refs->handle_ref_count[handle_refs->size + 1], 0,
-                           (handle - handle_refs->size)
-                           * sizeof(handle_refs->handle_ref_count[0]));
+                           handle - 1);
+            uint32_t *p = handle_refs->handle_ref_count;
+            memset(&p[handle_refs->size], 0, (handle - handle_refs->size) * sizeof(p[0]));
             handle_refs->size = handle;
         }
         handle_refs->handle_ref_count[handle - 1]++;
