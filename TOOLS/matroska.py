@@ -165,6 +165,12 @@ elements_matroska = (
                         ),
                     ),
                 ),
+                'BlockAdditionMapping*, 41e4, sub', (
+                    'BlockAddIDValue, 41f0, uint',
+                    'BlockAddIDName, 41a4, str',
+                    'BlockAddIDType, 41e7, uint',
+                    'BlockAddIDExtraData, 41ed, binary',
+                ),
             ),
         ),
 

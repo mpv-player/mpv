@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
+#include <libavutil/dovi_meta.h>
 #include <libavutil/lzo.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/avstring.h>
@@ -154,6 +155,8 @@ typedef struct mkv_track {
 
     /* latest added index entry for this track */
     size_t last_index_entry;
+
+    AVDOVIDecoderConfigurationRecord *dovi_config;
 } mkv_track_t;
 
 typedef struct mkv_index {
@@ -746,6 +749,84 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         parse_trackprojection(demuxer, track, &video->projection);
 }
 
+static void parse_dovi_config(struct demuxer *demuxer, struct mkv_track *track,
+                              const uint8_t *buf_ptr, size_t size)
+{
+    if (size < 4)
+        return;
+
+    av_free(track->dovi_config);
+
+    size_t dovi_size;
+    track->dovi_config = av_dovi_alloc(&dovi_size);
+    MP_HANDLE_OOM(track->dovi_config);
+
+    track->dovi_config->dv_version_major = *buf_ptr++;    // 8 bits
+    track->dovi_config->dv_version_minor = *buf_ptr++;    // 8 bits
+
+    uint32_t buf;
+    buf = *buf_ptr++ << 8;
+    buf |= *buf_ptr++;
+
+    track->dovi_config->dv_profile        = (buf >> 9) & 0x7f;    // 7 bits
+    track->dovi_config->dv_level          = (buf >> 3) & 0x3f;    // 6 bits
+    track->dovi_config->rpu_present_flag  = (buf >> 2) & 0x01;    // 1 bit
+    track->dovi_config->el_present_flag   = (buf >> 1) & 0x01;    // 1 bit
+    track->dovi_config->bl_present_flag   =  buf       & 0x01;    // 1 bit
+
+    if (size >= 5) {
+        track->dovi_config->dv_bl_signal_compatibility_id = ((*buf_ptr++) >> 4) & 0x0f; // 4 bits
+    } else {
+        // 0 stands for None
+        // Dolby Vision V1.2.93 profiles and levels
+        track->dovi_config->dv_bl_signal_compatibility_id = 0;
+    }
+
+    MP_DBG(demuxer, "|  + Dolby Vision - version: %d.%d, profile: %d, level: %d, "
+                    "RPU: %d, EL: %d, BL: %d, ID: %d\n",
+                    track->dovi_config->dv_version_major,
+                    track->dovi_config->dv_version_minor,
+                    track->dovi_config->dv_profile,
+                    track->dovi_config->dv_level,
+                    track->dovi_config->rpu_present_flag,
+                    track->dovi_config->el_present_flag,
+                    track->dovi_config->bl_present_flag,
+                    track->dovi_config->dv_bl_signal_compatibility_id);
+}
+
+static void parse_block_addition_mapping(struct demuxer *demuxer,
+                                         struct mkv_track *track,
+                                         struct ebml_block_addition_mapping *block_addition_mapping,
+                                         int count)
+{
+    for (int i = 0; i < count; ++i) {
+        if (!block_addition_mapping->n_block_add_id_type)
+            continue;
+        switch (block_addition_mapping->block_add_id_type) {
+        case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35:
+        break;
+        case MKBETAG('a','v','c','E'):
+        case MKBETAG('h','v','c','E'):
+            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback is not supported.\n");
+        break;
+        case MKBETAG('d','v','c','C'):
+        case MKBETAG('d','v','v','C'):
+            if (block_addition_mapping->n_block_add_id_extra_data) {
+                bstr data = block_addition_mapping->block_add_id_extra_data;
+                parse_dovi_config(demuxer, track, data.start, data.len);
+            }
+        break;
+        case MKBETAG('m','v','c','C'):
+            MP_WARN(demuxer, "MVC configuration is not supported.\n");
+        break;
+        default:
+            MP_WARN(demuxer, "Unsupported block addition type: %" PRIx64 "\n",
+                    block_addition_mapping->block_add_id_type);
+        }
+        block_addition_mapping++;
+    }
+}
+
 /**
  * \brief free any data associated with given track
  * \param track track of which to free data
@@ -753,6 +834,7 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
 static void demux_mkv_free_trackentry(mkv_track_t *track)
 {
     talloc_free(track->parser_tmp);
+    av_freep(&track->dovi_config);
     talloc_free(track);
 }
 
@@ -858,6 +940,12 @@ static void parse_trackentry(struct demuxer *demuxer,
 
     if (entry->n_codec_delay)
         track->codec_delay = entry->codec_delay / 1e9;
+
+    if (entry->n_block_addition_mapping) {
+        parse_block_addition_mapping(demuxer, track,
+                                     entry->block_addition_mapping,
+                                     entry->n_block_addition_mapping);
+    }
 
     mkv_d->tracks[mkv_d->num_tracks++] = track;
 }
