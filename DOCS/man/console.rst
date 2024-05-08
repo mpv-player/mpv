@@ -148,13 +148,13 @@ Configurable Options
     aligned correctly.
 
 ``font_size``
-    Default: 16
+    Default: 26
 
     Set the font size used for the REPL and the console. This will be
     multiplied by "scale".
 
 ``border_size``
-    Default: 1
+    Default: 3
 
     Set the font border size used for the REPL and the console.
 

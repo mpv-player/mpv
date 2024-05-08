@@ -25,8 +25,8 @@ local opts = {
     font = "",
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
-    font_size = 16,
-    border_size = 1,
+    font_size = 26,
+    border_size = 3,
     case_sensitive = true,
     -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
