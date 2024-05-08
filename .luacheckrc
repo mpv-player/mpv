@@ -63,7 +63,8 @@ local mp_globals = {
             set_mouse_area = {},
             set_osd_ass = {},
         }
-    }
+    },
+    unpack = {},
 }
 
 local mp_internal = {

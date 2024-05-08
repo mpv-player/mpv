@@ -567,7 +567,7 @@ function set_active(active)
 
         if input_caller then
             mp.commandv('script-message-to', input_caller, 'input-event',
-                        'closed', line, cursor)
+                        'closed', utils.format_json({line, cursor}))
             input_caller = nil
             line = ''
             cursor = 1
@@ -649,7 +649,7 @@ local function handle_edit()
 
     if input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
-                    line)
+                    utils.format_json({line}))
     end
 end
 
@@ -788,7 +788,7 @@ function handle_enter()
 
     if input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
-                    selectable_items and matches[selected_match].index or line)
+                    utils.format_json({selectable_items and matches[selected_match].index or line}))
     else
         -- match "help [<text>]", return <text> or "", strip all whitespace
         local help = line:match('^%s*help%s+(.-)%s*$') or
@@ -1202,7 +1202,7 @@ function complete(backwards)
         completion_old_line = line
         completion_old_cursor = cursor
         mp.commandv('script-message-to', input_caller, 'input-event',
-                    'complete', line:sub(1, cursor - 1))
+                    'complete', utils.format_json({line:sub(1, cursor - 1)}))
         return
     end
 
@@ -1512,7 +1512,7 @@ mp.register_script_message('get-input', function (script_name, args)
     args = utils.parse_json(args)
     prompt = args.prompt or default_prompt
     line = args.default_text or ''
-    cursor = tonumber(args.cursor_position) or line:len() + 1
+    cursor = args.cursor_position or line:len() + 1
     id = args.id or script_name .. prompt
     if histories[id] == nil then
         histories[id] = {}
