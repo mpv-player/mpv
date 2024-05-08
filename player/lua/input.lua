@@ -19,9 +19,10 @@ local utils = require "mp.utils"
 local input = {}
 
 local function register_event_handler(t)
-    mp.register_script_message("input-event", function (type, text, cursor_position)
+    mp.register_script_message("input-event", function (type, args)
         if t[type] then
-            local suggestions, completion_start_position = t[type](text, cursor_position)
+            local suggestions, completion_start_position =
+                t[type](unpack(utils.parse_json(args or "") or {}))
 
             if type == "complete" and suggestions then
                 mp.commandv("script-message-to", "console", "complete",
