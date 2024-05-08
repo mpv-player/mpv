@@ -121,6 +121,10 @@ struct mp_codec_params {
     struct pl_color_repr repr;   // color representaion info where available
     struct mp_rect crop;         // crop to be applied
 
+    bool dovi;
+    uint8_t dv_profile;
+    uint8_t dv_level;
+
     // STREAM_VIDEO + STREAM_AUDIO
     int bits_per_coded_sample;
     char *format_name;    // pixel format (video) or sample format (audio)
