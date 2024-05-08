@@ -68,8 +68,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_initialize(ctx));
 #endif
 
-    const void *value = data;
-    mpv_set_property(ctx, name, MPV_FORMAT, &value);
+if (MPV_FORMAT == MPV_FORMAT_STRING) {
+    mpv_set_property_string(ctx, name, (void *)data);
+} else {
+    mpv_set_property(ctx, name, MPV_FORMAT, (void *)data);
+}
 
 #if MPV_RUN
     check_error(mpv_set_option_string(ctx, "audio-files", "av://lavfi:sine=d=0.1"));
