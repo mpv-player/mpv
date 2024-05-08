@@ -1687,6 +1687,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->rotate = rotate;
     }
 
+    if (track->dovi_config) {
+        sh_v->dovi = true;
+        sh_v->dv_level = track->dovi_config->dv_level;
+        sh_v->dv_profile = track->dovi_config->dv_profile;
+    }
+
 done:
     demux_add_sh_stream(demuxer, sh);
 
