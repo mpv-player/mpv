@@ -2986,6 +2986,18 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                         add->block_additional.start, add->block_additional.len);
                 }
             }
+            if (track->dovi_config) {
+                size_t dovi_size;
+                AVDOVIDecoderConfigurationRecord *dovi = av_dovi_alloc(&dovi_size);
+                MP_HANDLE_OOM(dovi);
+                memcpy(dovi, track->dovi_config, dovi_size);
+                if (av_packet_add_side_data(dp->avpacket,
+                                            AV_PKT_DATA_DOVI_CONF,
+                                            (uint8_t *)dovi, dovi_size) < 0)
+                {
+                    av_free(dovi);
+                }
+            }
 
             mkv_parse_and_add_packet(demuxer, track, dp);
             talloc_free_children(track->parser_tmp);
