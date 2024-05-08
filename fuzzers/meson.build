@@ -24,3 +24,11 @@ foreach f : ['MPV_FORMAT_STRING', 'MPV_FORMAT_FLAG', 'MPV_FORMAT_INT64', 'MPV_FO
                 link_with: libmpv)
   endforeach
 endforeach
+
+foreach cmd : ['config-file', 'input-conf']
+    executable('fuzzer_load_' + cmd.underscorify(),
+                'fuzzer_load.c',
+                c_args: ['-DMPV_LOAD="' + cmd + '"'],
+                include_directories: incdir,
+                link_with: libmpv)
+endforeach
