@@ -629,7 +629,7 @@ static bool ao_play_data(struct ao *ao)
     struct mp_pcm_state state;
     get_dev_state(ao, &state);
 
-    if (p->streaming && !state.playing)
+    if (p->streaming && !state.playing && !ao->untimed)
         goto eof;
 
     void **planes = NULL;
