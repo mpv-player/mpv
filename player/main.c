@@ -80,9 +80,9 @@ static const char def_config[] =
 #endif
 
 enum exit_reason {
-  EXIT_NONE,
-  EXIT_NORMAL,
-  EXIT_ERROR,
+    EXIT_NONE,
+    EXIT_NORMAL,
+    EXIT_ERROR,
 };
 
 const char mp_help_text[] =

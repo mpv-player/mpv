@@ -965,8 +965,8 @@ static void init_video(struct gl_video *p)
 
 static struct dr_buffer *gl_find_dr_buffer(struct gl_video *p, uint8_t *ptr)
 {
-   for (int i = 0; i < p->num_dr_buffers; i++) {
-       struct dr_buffer *buffer = &p->dr_buffers[i];
+    for (int i = 0; i < p->num_dr_buffers; i++) {
+        struct dr_buffer *buffer = &p->dr_buffers[i];
         uint8_t *bufptr = buffer->buf->data;
         size_t size = buffer->buf->params.size;
         if (ptr >= bufptr && ptr < bufptr + size)

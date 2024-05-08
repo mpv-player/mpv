@@ -241,7 +241,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     if (mapper->ra->num_formats &&
             !ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
-       return -1;
+        return -1;
 
     p->num_planes = desc.num_planes;
     mp_image_set_params(&p->layout, &mapper->dst_params);

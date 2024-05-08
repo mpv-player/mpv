@@ -86,13 +86,13 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
         for (int plane = 0; plane < AV_DRM_MAX_PLANES; plane++) {
             drm_prime_add_handle_ref(handle_refs, framebuffer->gem_handles[plane]);
         }
-   }
+    }
 
-   return 0;
+    return 0;
 
 fail:
-   memset(framebuffer, 0, sizeof(*framebuffer));
-   return -1;
+    memset(framebuffer, 0, sizeof(*framebuffer));
+    return -1;
 }
 
 void drm_prime_destroy_framebuffer(struct mp_log *log, int fd,
@@ -129,9 +129,11 @@ void drm_prime_add_handle_ref(struct drm_prime_handle_refs *handle_refs,
 {
     if (handle) {
         if (handle > handle_refs->size) {
-            handle_refs->size = handle;
             MP_TARRAY_GROW(handle_refs->ctx, handle_refs->handle_ref_count,
-                           handle_refs->size);
+                           handle - 1);
+            uint32_t *p = handle_refs->handle_ref_count;
+            memset(&p[handle_refs->size], 0, (handle - handle_refs->size) * sizeof(p[0]));
+            handle_refs->size = handle;
         }
         handle_refs->handle_ref_count[handle - 1]++;
     }

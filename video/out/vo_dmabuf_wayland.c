@@ -759,7 +759,7 @@ static int preinit(struct vo *vo)
     wl_list_init(&p->buffer_list);
     wl_list_init(&p->osd_buffer_list);
     if (!p->ctx)
-       goto err;
+        goto err;
 
     assert(p->ctx->ra);
 

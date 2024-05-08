@@ -358,6 +358,17 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     setmode(p->fd, O_BINARY);
 #endif
 
+#if HAVE_SEEK_DATA
+    if (stream->mode == STREAM_READ) {
+        off_t first_data = lseek(p->fd, 0, SEEK_DATA);
+        if (first_data == (off_t)-1 && errno == ENXIO) {
+            MP_ERR(stream, "File is empty or all sparse (has no data).\n");
+            s_close(stream);
+            return STREAM_ERROR;
+        }
+    }
+#endif
+
     off_t len = lseek(p->fd, 0, SEEK_END);
     lseek(p->fd, 0, SEEK_SET);
     if (len != (off_t)-1) {

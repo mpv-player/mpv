@@ -196,7 +196,9 @@ meta-paths like ``~~/foo`` (other JS file functions do expand meta paths).
 ``mp.options.read_options(obj [, identifier [, on_update]])`` (types:
 string/boolean/number)
 
-``mp.input.get(obj)`` (LE)
+``mp.input.get(obj)``
+
+``mp.input.select(obj)``
 
 ``mp.input.terminate()``
 

@@ -920,9 +920,9 @@ static int dvb_open(stream_t *stream)
 
     mp_mutex_lock(&global_dvb_state_lock);
     if (global_dvb_state && global_dvb_state->stream_used) {
-      MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!\n");
-      mp_mutex_unlock(&global_dvb_state_lock);
-      goto err_out;
+        MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!\n");
+        mp_mutex_unlock(&global_dvb_state_lock);
+        goto err_out;
     }
 
     // Need to re-get config in any case, not part of global state.

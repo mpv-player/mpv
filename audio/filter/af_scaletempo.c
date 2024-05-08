@@ -2,7 +2,7 @@
  * scaletempo audio filter
  *
  * scale tempo while maintaining pitch
- * (WSOLA technique with cross correlation)
+ * (WSOLA technique with taxicab distance)
  * inspired by SoundTouch library by Olli Parviainen
  *
  * basic algorithm
@@ -35,6 +35,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 
 #include "audio/aframe.h"
 #include "audio/format.h"
@@ -87,8 +88,6 @@ struct priv {
     // best overlap
     int frames_search;
     int num_channels;
-    void *buf_pre_corr;
-    void *table_window;
     int (*best_overlap_offset)(struct priv *s);
 };
 
@@ -135,72 +134,144 @@ static bool fill_queue(struct priv *s)
     return bytes_needed == 0;
 }
 
-#define UNROLL_PADDING (4 * 4)
+// Fit the curve f(x) = a * x^2 + b * x + c such that
+//   f(-1) = y[0]
+//   f(0) = y[1]
+//   f(1) = y[2]
+// and return the extremum position and value
+// assuming y[0] <= y[1] >= y[2] || y[0] >= y[1] <= y[2]
+static void quadratic_interpolation_float(
+    const float* y_values, float* x, float* value)
+{
+    const float b = (y_values[2] - y_values[0]) * 0.5f;
+    const float c = y_values[1];
+    const float a = y_values[0] + b - c;
+
+    if (a == 0.f) {
+        // it's a flat line
+        *x = 0;
+        *value = c;
+    } else {
+        const float pos = -b / (2.f * a);
+        *x = pos;
+        *value = a * pos * pos + b * pos + c;
+    }
+}
+
+static void quadratic_interpolation_s16(
+    const int32_t* y_values, float* x, int32_t* value)
+{
+    const float b = (y_values[2] - y_values[0]) * 0.5f;
+    const float c = y_values[1];
+    const float a = y_values[0] + b - c;
+
+    if (a == 0.f) {
+        // it's a flat line
+        *x = 0;
+        *value = c;
+    } else {
+        const float pos = -b / (2.f * a);
+        *x = pos;
+        *value = a * pos * pos + b * pos + c;
+    }
+}
 
 static int best_overlap_offset_float(struct priv *s)
 {
-    float best_corr = INT_MIN;
-    int best_off = 0;
+    int num_channels = s->num_channels, frames_search = s->frames_search;
+    float *source = (float *)s->buf_queue + num_channels;
+    float *target = (float *)s->buf_overlap + num_channels;
+    int num_samples = s->samples_overlap - num_channels;
+    int step_size = 3;
+    float history[3] = {};
 
-    float *pw  = s->table_window;
-    float *po  = s->buf_overlap;
-    po += s->num_channels;
-    float *ppc = s->buf_pre_corr;
-    for (int i = s->num_channels; i < s->samples_overlap; i++)
-        *ppc++ = *pw++ **po++;
+    float best_distance = FLT_MAX;
+    int best_offset_approx = 0;
+    for (int offset = 0; offset < frames_search; offset += step_size) {
+        float distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += fabsf(target[i] - source[offset * num_channels + i]);
 
-    float *search_start = (float *)s->buf_queue + s->num_channels;
-    for (int off = 0; off < s->frames_search; off++) {
-        float corr = 0;
-        float *ps = search_start;
-        ppc = s->buf_pre_corr;
-        for (int i = s->num_channels; i < s->samples_overlap; i++)
-            corr += *ppc++ **ps++;
-        if (corr > best_corr) {
-            best_corr = corr;
-            best_off  = off;
+        int offset_approx = offset;
+        history[0] = history[1];
+        history[1] = history[2];
+        history[2] = distance;
+        if(offset >= 2 && history[0] >= history[1] && history[1] <= history[2]) {
+            float extremum;
+            quadratic_interpolation_float(history, &extremum, &distance);
+            offset_approx = offset - step_size + (int)(extremum * step_size + 0.5f);
         }
-        search_start += s->num_channels;
+
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset_approx  = offset_approx;
+        }
     }
 
-    return best_off * 4 * s->num_channels;
+    best_distance = FLT_MAX;
+    int best_offset = 0;
+    int min_offset = MPMAX(0, best_offset_approx - step_size + 1);
+    int max_offset = MPMIN(frames_search, best_offset_approx + step_size);
+    for (int offset = min_offset; offset < max_offset; offset++) {
+        float distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += fabsf(target[i] - source[offset * num_channels + i]);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset  = offset;
+        }
+    }
+
+    return best_offset * 4 * num_channels;
 }
 
 static int best_overlap_offset_s16(struct priv *s)
 {
-    int64_t best_corr = INT64_MIN;
-    int best_off = 0;
+    int num_channels = s->num_channels, frames_search = s->frames_search;
+    int16_t *source = (int16_t *)s->buf_queue + num_channels;
+    int16_t *target = (int16_t *)s->buf_overlap + num_channels;
+    int num_samples = s->samples_overlap - num_channels;
+    int step_size = 3;
+    int32_t history[3] = {};
 
-    int32_t *pw  = s->table_window;
-    int16_t *po  = s->buf_overlap;
-    po += s->num_channels;
-    int32_t *ppc = s->buf_pre_corr;
-    for (long i = s->num_channels; i < s->samples_overlap; i++)
-        *ppc++ = (*pw++ **po++) >> 15;
+    int32_t best_distance = INT32_MAX;
+    int best_offset_approx = 0;
+    for (int offset = 0; offset < frames_search; offset += step_size) {
+        int32_t distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += abs((int32_t)target[i] - source[offset * num_channels + i]);
 
-    int16_t *search_start = (int16_t *)s->buf_queue + s->num_channels;
-    for (int off = 0; off < s->frames_search; off++) {
-        int64_t corr = 0;
-        int16_t *ps = search_start;
-        ppc = s->buf_pre_corr;
-        ppc += s->samples_overlap - s->num_channels;
-        ps  += s->samples_overlap - s->num_channels;
-        long i  = -(s->samples_overlap - s->num_channels);
-        do {
-            corr += ppc[i + 0] * (int64_t)ps[i + 0];
-            corr += ppc[i + 1] * (int64_t)ps[i + 1];
-            corr += ppc[i + 2] * (int64_t)ps[i + 2];
-            corr += ppc[i + 3] * (int64_t)ps[i + 3];
-            i += 4;
-        } while (i < 0);
-        if (corr > best_corr) {
-            best_corr = corr;
-            best_off  = off;
+        int offset_approx = offset;
+        history[0] = history[1];
+        history[1] = history[2];
+        history[2] = distance;
+        if(offset >= 2 && history[0] >= history[1] && history[1] <= history[2]) {
+            float extremum;
+            quadratic_interpolation_s16(history, &extremum, &distance);
+            offset_approx = offset - step_size + (int)(extremum * step_size + 0.5f);
         }
-        search_start += s->num_channels;
+
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset_approx  = offset_approx;
+        }
     }
 
-    return best_off * 2 * s->num_channels;
+    best_distance = INT32_MAX;
+    int best_offset = 0;
+    int min_offset = MPMAX(0, best_offset_approx - step_size + 1);
+    int max_offset = MPMIN(frames_search, best_offset_approx + step_size);
+    for (int offset = min_offset; offset < max_offset; offset++) {
+        int32_t distance = 0;
+        for (int i = 0; i < num_samples; i++)
+            distance += abs((int32_t)target[i] - source[offset * num_channels + i]);
+        if (distance < best_distance) {
+            best_distance = distance;
+            best_offset  = offset;
+        }
+    }
+
+    return best_offset * 2 * s->num_channels;
 }
 
 static void output_overlap_float(struct priv *s, void *buf_out,
@@ -211,8 +282,9 @@ static void output_overlap_float(struct priv *s, void *buf_out,
     float *po   = s->buf_overlap;
     float *pin  = (float *)(s->buf_queue + bytes_off);
     for (int i = 0; i < s->samples_overlap; i++) {
-        *pout++ = *po - *pb++ *(*po - *pin++);
-        po++;
+        // the math is equal to *po * (1 - *pb) + *pin * *pb
+        float o = *po++;
+        *pout++ = o - *pb++ * (o - *pin++);
     }
 }
 
@@ -224,8 +296,9 @@ static void output_overlap_s16(struct priv *s, void *buf_out,
     int16_t *po   = s->buf_overlap;
     int16_t *pin  = (int16_t *)(s->buf_queue + bytes_off);
     for (int i = 0; i < s->samples_overlap; i++) {
-        *pout++ = *po - ((*pb++ *(*po - *pin++)) >> 16);
-        po++;
+        // the math is equal to *po * (1 - *pb) + *pin * *pb
+        int32_t o = *po++;
+        *pout++ = o - ((*pb++ *(o - *pin++)) >> 16);
     }
 }
 
@@ -420,18 +493,20 @@ static bool reinit(struct mp_filter *f)
         memset(s->buf_overlap, 0, s->bytes_overlap);
         if (use_int) {
             int32_t *pb = s->table_blend;
-            int64_t blend = 0;
+            const float scale = M_PI / frames_overlap;
             for (int i = 0; i < frames_overlap; i++) {
-                int32_t v = blend / frames_overlap;
+                // Hann function
+                const int32_t v = 0.5f * (1.0f - cosf(i * scale)) * 65536 + 0.5;
                 for (int j = 0; j < nch; j++)
                     *pb++ = v;
-                blend += 65536; // 2^16
             }
             s->output_overlap = output_overlap_s16;
         } else {
             float *pb = s->table_blend;
+            const float scale = M_PI / frames_overlap;
             for (int i = 0; i < frames_overlap; i++) {
-                float v = i / (float)frames_overlap;
+                // Hann function
+                const float v = 0.5f * (1.0f - cosf(i * scale));
                 for (int j = 0; j < nch; j++)
                     *pb++ = v;
             }
@@ -444,39 +519,8 @@ static bool reinit(struct mp_filter *f)
         s->best_overlap_offset = NULL;
     else {
         if (use_int) {
-            int64_t t = frames_overlap;
-            int32_t n = 8589934588LL / (t * t); // 4 * (2^31 - 1) / t^2
-            s->buf_pre_corr = realloc(s->buf_pre_corr,
-                                        s->bytes_overlap * 2 + UNROLL_PADDING);
-            s->table_window = realloc(s->table_window,
-                                        s->bytes_overlap * 2 - nch * bps * 2);
-            if (!s->buf_pre_corr || !s->table_window) {
-                MP_FATAL(f, "Out of memory\n");
-                return false;
-            }
-            memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0,
-                    UNROLL_PADDING);
-            int32_t *pw = s->table_window;
-            for (int i = 1; i < frames_overlap; i++) {
-                int32_t v = (i * (t - i) * n) >> 15;
-                for (int j = 0; j < nch; j++)
-                    *pw++ = v;
-            }
             s->best_overlap_offset = best_overlap_offset_s16;
         } else {
-            s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap);
-            s->table_window = realloc(s->table_window,
-                                        s->bytes_overlap - nch * bps);
-            if (!s->buf_pre_corr || !s->table_window) {
-                MP_FATAL(f, "Out of memory\n");
-                return false;
-            }
-            float *pw = s->table_window;
-            for (int i = 1; i < frames_overlap; i++) {
-                float v = i * (frames_overlap - i);
-                for (int j = 0; j < nch; j++)
-                    *pw++ = v;
-            }
             s->best_overlap_offset = best_overlap_offset_float;
         }
     }
@@ -486,7 +530,7 @@ static bool reinit(struct mp_filter *f)
 
     s->bytes_queue = (s->frames_search + s->frames_stride + frames_overlap)
                         * bps * nch;
-    s->buf_queue = realloc(s->buf_queue, s->bytes_queue + UNROLL_PADDING);
+    s->buf_queue = realloc(s->buf_queue, s->bytes_queue);
     if (!s->buf_queue) {
         MP_FATAL(f, "Out of memory\n");
         return false;
@@ -548,9 +592,7 @@ static void af_scaletempo_destroy(struct mp_filter *f)
     struct priv *s = f->priv;
     free(s->buf_queue);
     free(s->buf_overlap);
-    free(s->buf_pre_corr);
     free(s->table_blend);
-    free(s->table_window);
     TA_FREEP(&s->in);
     mp_filter_free_children(f);
 }

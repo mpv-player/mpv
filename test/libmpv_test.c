@@ -49,12 +49,12 @@ static mpv_handle *ctx;
 MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
 static void fail(const char *fmt, ...)
 {
-	if (fmt) {
-		va_list va;
-		va_start(va, fmt);
-		vfprintf(stderr, fmt, va);
-		va_end(va);
-	}
+    if (fmt) {
+        va_list va;
+        va_start(va, fmt);
+        vfprintf(stderr, fmt, va);
+        va_end(va);
+    }
     exit(1);
 }
 
