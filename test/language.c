@@ -54,4 +54,27 @@ int main(void)
     assert_int_equal(mp_match_lang(LANGS("ax")            , NULL)            , 0);
     assert_int_equal(mp_match_lang(LANGS("")              , "ax")            , 0);
     assert_int_equal(mp_match_lang((char*[]){NULL}        , "ax")            , 0);
+
+    void *ta_ctx = talloc_new(NULL);
+    int start; // this is actually the position of the delimiter.
+
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en.srt"), &start)), "en");
+    assert_int_equal(start, 3);
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.eng.srt"), NULL)), "eng");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.e.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.engg.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.00.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0(NULL), NULL)), "");
+
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-US.srt"), NULL)), "en-US");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-simple.srt"), NULL)), "en-simple");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.sgn-FSL.srt"), NULL)), "sgn-FSL");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.gsw-u-sd-chzh.srt"), NULL)), "gsw-u-sd-chzh");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-US-.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-aaaaaaaaa.srt"), NULL)), "");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-0.srt"), NULL)), "");
+
+    talloc_free(ta_ctx);
 }
