@@ -24,8 +24,8 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "misc/ctype.h"
 #include "misc/charset_conv.h"
+#include "misc/language.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "external_files.h"
@@ -108,63 +108,6 @@ static int compare_sub_priority(const void *a, const void *b)
     return strcoll(s1->fname, s2->fname);
 }
 
-static struct bstr guess_lang_from_filename(struct bstr name, int *lang_start)
-{
-    if (name.len < 2)
-        return (struct bstr){NULL, 0};
-
-    int lang_length = 0;
-    int i = name.len - 1;
-    int suffixes_length = 0;
-
-    char delimiter = '.';
-    if (name.start[i] == ')') {
-        delimiter = '(';
-        i--;
-    }
-    if (name.start[i] == ']') {
-        delimiter = '[';
-        i--;
-    }
-
-    while (true) {
-        while (i >= 0 && mp_isalpha(name.start[i])) {
-            lang_length++;
-            i--;
-        }
-
-        // According to
-        // https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
-        // subtags after the first are composed of 1 to 8 letters.
-        if (lang_length < suffixes_length + 1 || lang_length > suffixes_length + 8)
-            return (struct bstr){0};
-
-        if (i >= 0 && name.start[i] == '-') {
-            lang_length++;
-            i--;
-            suffixes_length = lang_length;
-        } else {
-            break;
-        }
-    }
-
-    // The primary subtag can have 2 or 3 letters.
-    if (lang_length < suffixes_length + 2 || lang_length > suffixes_length + 3 ||
-        i == 0 || name.start[i] != delimiter)
-        return (struct bstr){0};
-
-    *lang_start = i;
-    return (struct bstr){name.start + i + 1, lang_length};
-}
-
-char *mp_guess_lang_from_filename(void* ctx, const char *filename)
-{
-    bstr filename_no_ext = bstr_strip_ext(bstr0(filename));
-    int start = 0; // only used in append_dir_subtitles()
-    char *lang = bstrto0(ctx, guess_lang_from_filename(filename_no_ext, &start));
-    return lang;
-}
-
 static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
                                  struct subfn **slist, int *nsub,
                                  struct bstr path, const char *fname,
@@ -235,7 +178,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
 
         bstr lang = {0};
         int start = 0;
-        lang = guess_lang_from_filename(tmp_fname_trim, &start);
+        lang = mp_guess_lang_from_filename(dename, &start);
         if (bstr_case_startswith(tmp_fname_trim, f_fname_trim)) {
             if (lang.len && start == f_fname_trim.len)
                 prio |= 16; // exact movie name + followed by lang
