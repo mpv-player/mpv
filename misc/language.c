@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include "common/common.h"
-#include "misc/bstr.h"
+#include "misc/ctype.h"
 
 #define L(s) { #s, sizeof(#s) - 1 }
 
@@ -295,4 +295,57 @@ int mp_match_lang(char **langs, const char *lang)
 done:
     talloc_free(ta_ctx);
     return best_score;
+}
+
+bstr mp_guess_lang_from_filename(bstr name, int *lang_start)
+{
+    name = bstr_strip(bstr_strip_ext(name));
+
+    if (name.len < 2)
+        return (bstr){0};
+
+    int lang_length = 0;
+    int i = name.len - 1;
+    int suffixes_length = 0;
+
+    char delimiter = '.';
+    if (name.start[i] == ')') {
+        delimiter = '(';
+        i--;
+    }
+    if (name.start[i] == ']') {
+        delimiter = '[';
+        i--;
+    }
+
+    while (true) {
+        while (i >= 0 && mp_isalpha(name.start[i])) {
+            lang_length++;
+            i--;
+        }
+
+        // According to
+        // https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
+        // subtags after the first are composed of 1 to 8 letters.
+        if (lang_length < suffixes_length + 1 || lang_length > suffixes_length + 8)
+            return (bstr){0};
+
+        if (i >= 0 && name.start[i] == '-') {
+            lang_length++;
+            i--;
+            suffixes_length = lang_length;
+        } else {
+            break;
+        }
+    }
+
+    // The primary subtag can have 2 or 3 letters.
+    if (lang_length < suffixes_length + 2 || lang_length > suffixes_length + 3 ||
+        i <= 0 || name.start[i] != delimiter)
+        return (bstr){0};
+
+    if (lang_start)
+        *lang_start = i;
+
+    return (bstr){name.start + i + 1, lang_length};
 }
