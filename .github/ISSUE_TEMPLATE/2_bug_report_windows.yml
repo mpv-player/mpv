@@ -4,10 +4,29 @@ labels: ["os:win"]
 body:
 - type: textarea
   attributes:
-      label: "Important Information"
+      label: "mpv Information"
+      placeholder: |
+          mpv v0.38.0-96-gf776be6af5 Copyright © 2000-2024 mpv/MPlayer/mplayer2 projects
+           built on May  5 2024 18:37:43
+          libplacebo version: v7.349.0 (v6.338.0-120-g7b294350)
+          FFmpeg version: 6.1.1
+          FFmpeg library versions:
+             libavutil       58.29.100
+             libavcodec      60.31.102
+             libavformat     60.16.100
+             libswscale      7.5.100
+             libavfilter     9.12.100
+             libswresample   4.12.100
+      description: |
+          Provide the output of `mpv --version`.
+      render: bash
+  validations:
+      required: false
+- type: textarea
+  attributes:
+      label: "Other Information"
       description: >
-          - mpv version
-           - Windows Version
+          - Windows Version
            - Source of the mpv binary
            - If known which version of mpv introduced the problem
            - GPU model, driver and version
@@ -18,7 +37,6 @@ body:
           click on the latest workflow run, scroll down to the Artifacts section and download the
           appropriate build. Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
-          - mpv version:
           - Windows version:
           - Source:
           - Introduced in version:
