@@ -60,6 +60,7 @@ struct buffer_state {
     bool streaming;             // AO streaming active
     bool playing;               // logically playing audio from buffer
     bool paused;                // logically paused
+    bool hw_paused;             // driver->set_pause() was used successfully
 
     int64_t end_time_ns;        // absolute output time of last played sample
     int64_t queued_time_ns;     // duration of samples that have been queued to
@@ -71,7 +72,6 @@ struct buffer_state {
     bool initial_unblocked;
 
     // "Push" AOs only (AOs with driver->write).
-    bool hw_paused;             // driver->set_pause() was used successfully
     bool recover_pause;         // non-hw_paused: needs to recover delay
     struct mp_pcm_state prepause_state;
     mp_thread thread;           // thread shoveling data to AO
@@ -387,6 +387,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
     struct buffer_state *p = ao->buffer_state;
     bool wakeup = false;
     bool do_change_state = false;
+    bool is_hw_paused;
 
     // If we are going to pause on eof and ao is still playing,
     // be sure to drain the ao first for gapless.
@@ -411,6 +412,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
                 // See ao_reset() why this is done outside of the lock.
                 do_change_state = true;
                 p->streaming = false;
+                is_hw_paused = p->hw_paused = !!ao->driver->set_pause;
             }
         }
         wakeup = true;
@@ -423,6 +425,8 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
             if (!p->streaming)
                 do_change_state = true;
             p->streaming = true;
+            is_hw_paused = p->hw_paused;
+            p->hw_paused = false;
         }
         wakeup = true;
     }
@@ -431,7 +435,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
     mp_mutex_unlock(&p->lock);
 
     if (do_change_state) {
-        if (ao->driver->set_pause) {
+        if (is_hw_paused) {
             if (paused) {
                 ao->driver->set_pause(ao, true);
                 p->queued_time_ns = p->end_time_ns - mp_time_ns();
