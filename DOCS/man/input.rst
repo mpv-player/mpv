@@ -3573,6 +3573,19 @@ Property list
     and not using raw mode, the underlying content will be given (e.g. strings will be
     printed directly, rather than quoted and JSON-escaped).
 
+    ``user-data/mpv/ytdl``
+        Data shared by the builtin ytdl hook script.
+
+        ``user-data/mpv/ytdl/path``
+            Path to the ytdl executable, if found, or an empty string otherwise.
+            The property is not set until the script attempts to find the ytdl
+            executable, i.e. until an URL is being loaded by the script.
+
+        ``user-data/mpv/ytdl/json-subprocess-result``
+            Result of executing ytdl to retrieve the JSON data of the URL being
+            loaded. The format is the same as ``subprocess``'s result, capturing
+            stdout and stderr.
+
 ``menu-data`` (RW)
     This property stores the raw menu definition. See `Context Menu`_ section for details.
 

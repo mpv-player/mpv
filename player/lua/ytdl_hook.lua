@@ -993,11 +993,15 @@ local function run_ytdl_hook(url)
         end
 
         ytdl.searched = true
+
+        mp.set_property("user-data/mpv/ytdl/path", ytdl.path or "")
     end
 
     if result.killed_by_us then
         return
     end
+
+    mp.set_property_native("user-data/mpv/ytdl/json-subprocess-result", result)
 
     local json = result.stdout
     local parse_err = nil
@@ -1201,4 +1205,8 @@ mp.add_hook("on_preloaded", 10, function ()
         mp.set_property_native("chapter-list", chapter_list)
         chapter_list = {}
     end
+end)
+
+mp.add_hook("on_after_end_file", 50, function ()
+    mp.del_property("user-data/mpv/ytdl/json-subprocess-result")
 end)
