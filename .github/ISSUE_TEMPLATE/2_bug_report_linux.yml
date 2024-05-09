@@ -15,7 +15,7 @@ body:
            - Possible screenshot or video of visual glitches
 
           If you're not using git master or the latest release, update.
-          Releases are listed [here](https://github.com/mpv-player/mpv/releases).
+          Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - mpv version:
           - Linux version:
