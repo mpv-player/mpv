@@ -26,10 +26,11 @@ body:
   attributes:
       label: "Other Information"
       description: >
-          - Windows Version
+          - Windows Version: `ver` (cmd) or
+          `"$([Environment]::OSVersion)/$((gp 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuild).CurrentBuild).$((gp 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name UBR).UBR)"` (PowerShell)
+           - GPU model, driver and version
            - Source of the mpv binary
            - If known which version of mpv introduced the problem
-           - GPU model, driver and version
            - Possible screenshot or video of visual glitches
 
           If you're not using git master or the latest release, update.
@@ -38,9 +39,9 @@ body:
           appropriate build. Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - Windows version:
-          - Source:
-          - Introduced in version:
           - GPU model, driver and version:
+          - Source of mpv:
+          - Introduced in version:
   validations:
       required: true
 - type: textarea

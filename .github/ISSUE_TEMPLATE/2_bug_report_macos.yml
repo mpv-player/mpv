@@ -26,7 +26,7 @@ body:
   attributes:
       label: "Other Information"
       description: >
-          - macOS Version
+          - macOS Version: `system_profiler SPSoftwareDataType | sed -rn 's/^ *System Version: (.*$)/\1/p'`
            - Source of the mpv binary or bundle
            - If known which version of mpv introduced the problem
            - Possible screenshot or video of visual glitches
@@ -37,7 +37,7 @@ body:
           appropriate build. Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - macOS version:
-          - Source:
+          - Source of mpv:
           - Introduced in version:
   validations:
       required: true

@@ -26,21 +26,26 @@ body:
   attributes:
       label: "Other Information"
       description: >
-          - Linux Distribution and Version
+          Provide follwing information if applicable.
+           - Linux Version: `cat /etc/os-release | grep "NAME"`
+           - Kernel Version: `uname -a`
+           - GPU Model: `lspci -nn | grep VGA` or `lshw -C display -numeric`
+           - Mesa/GPU Driver Version: `glxinfo -B | grep "OpenGL version string"` or `vulkaninfo | grep driverInfo`
+           - Window Manager and Version
            - Source of the mpv binary
            - If known which version of mpv introduced the problem
-           - Window Manager and version
-           - GPU model, driver and version
            - Possible screenshot or video of visual glitches
 
           If you're not using git master or the latest release, update.
           Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - Linux version:
-          - Source:
+          - Kernel Version:
+          - GPU Model:
+          - Mesa/GPU Driver Version:
+          - Window Manager and Version:
+          - Source mpv:
           - Introduced in version:
-          - Window Manager and version:
-          - GPU model, driver and version:
   validations:
       required: true
 - type: textarea

@@ -27,18 +27,18 @@ body:
       label: "Important Information"
       description: >
           - Platform and Version
+           - GPU model, driver and version
            - Source of the mpv binary
            - If known which version of mpv introduced the problem
-           - GPU model, driver and version
            - Possible screenshot or video of visual glitches
 
           If you're not using git master or the latest release, update.
           Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - Platform version:
+          - GPU model, driver and version:
           - Source:
           - Introduced in version:
-          - GPU model, driver and version:
   validations:
       required: true
 - type: textarea
