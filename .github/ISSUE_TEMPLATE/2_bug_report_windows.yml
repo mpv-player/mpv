@@ -71,7 +71,8 @@ body:
           save the terminal output to a file, and attach it to the issue.
 
 
-          In the case of a crash, please provide a backtrace.
+          In the case of a crash, please provide a backtrace, attach the approriate `.dmp` file
+          from `%LOCALAPPDATA%\CrashDumps`.
 
 
           Without the log file, this issue will be closed for ignoring the issue template.

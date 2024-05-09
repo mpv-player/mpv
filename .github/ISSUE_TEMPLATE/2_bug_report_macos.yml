@@ -70,7 +70,8 @@ body:
           save the terminal output to a file, and attach it to the issue.
 
 
-          In the case of a crash, please provide the macOS Crash Report (Backtrace).
+          In the case of a crash, please provide the macOS Crash Report or create a [backtrace](https://developer.apple.com/library/archive/documentation/General/Conceptual/lldb-guide/chapters/C5-Examining-The-Call-Stack.html)
+          yourself.
 
 
           Without the log file, this issue will be closed for ignoring the issue template.
