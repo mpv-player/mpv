@@ -86,7 +86,7 @@ static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
     fput16le(WAV_ID_FORMAT_EXTENSIBLE, fp);
     fput16le(ao->channels.num, fp);
     fput32le(ao->samplerate, fp);
-    fput32le(ao->bps, fp);
+    fput32le(MPCLAMP(ao->bps, 0, UINT32_MAX), fp);
     fput16le(ao->channels.num * (bits / 8), fp);
     fput16le(bits, fp);
 
@@ -145,7 +145,7 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt_to_bytes(ao->format);
+    ao->bps = ao->channels.num * (int64_t)ao->samplerate * af_fmt_to_bytes(ao->format);
 
     MP_INFO(ao, "File: %s (%s)\nPCM: Samplerate: %d Hz Channels: %d Format: %s\n",
             outputfilename,
