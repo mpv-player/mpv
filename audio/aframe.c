@@ -600,7 +600,7 @@ bool mp_aframe_set_silence(struct mp_aframe *f, int offset, int samples)
 bool mp_aframe_reverse(struct mp_aframe *f)
 {
     int format = mp_aframe_get_format(f);
-    size_t bps = af_fmt_to_bytes(format);
+    int bps = af_fmt_to_bytes(format);
     if (!af_fmt_is_pcm(format) || bps > 16)
         return false;
 
