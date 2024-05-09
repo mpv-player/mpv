@@ -517,7 +517,7 @@ function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margins.b * screeny)
+    ass:pos(6, screeny - 6 - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
     if #suggestions > 0 then
         ass:append(suggestion_ass .. '\\N')
@@ -530,7 +530,7 @@ function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(2, screeny - 2 - global_margins.b * screeny)
+    ass:pos(6, screeny - 6 - global_margins.b * screeny)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
