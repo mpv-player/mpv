@@ -567,7 +567,7 @@ error:
 
 static void fix_filenames(struct tl_parts *parts, char *source_path)
 {
-    if (bstr_equals0(mp_split_proto(bstr0(source_path), NULL), "edl"))
+    if (!bstrcasecmp0(mp_split_proto(bstr0(source_path), NULL), "edl"))
         return;
     struct bstr dirname = mp_dirname(source_path);
     for (int n = 0; n < parts->num_parts; n++) {

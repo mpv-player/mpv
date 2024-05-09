@@ -79,7 +79,7 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
         goto error;
 
     struct vulkan_opts *vk_opts = mp_get_config_group(NULL, global, &vulkan_conf);
-    vk->vulkan = mppl_create_vulkan(vk_opts, vk->vkinst, vk->pllog, NULL);
+    vk->vulkan = mppl_create_vulkan(vk_opts, vk->vkinst, vk->pllog, VK_NULL_HANDLE);
     talloc_free(vk_opts);
     if (!vk->vulkan)
         goto error;

@@ -15,49 +15,38 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <unistd.h>
+
 #include <libmpv/client.h>
 
 #include "common.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    size_t value_len;
-    switch (MPV_FORMAT)
-    {
-    case MPV_FORMAT_STRING:
-        value_len = strnlen(data, size);
-        if (!value_len || value_len == size)
-            return -1;
-        value_len += 1;
-        break;
-    case MPV_FORMAT_FLAG:
-        value_len = sizeof(int);
-        break;
-    case MPV_FORMAT_INT64:
-        value_len = sizeof(int64_t);
-        break;
-    case MPV_FORMAT_DOUBLE:
-        value_len = sizeof(double);
-        break;
-    default:
+    if (size == 0)
+        return -1;
+
+    char filename[15 + 10 + 1];
+    sprintf(filename, "/tmp/libfuzzer.%d", getpid());
+
+    FILE *fp = fopen(filename, "wb");
+    if (!fp)
         exit(1);
-        break;
-    }
 
-    // at least two bytes for the name
-    if (size < value_len + 2)
-        return -1;
+    if (fwrite(data, size, 1, fp) != 1)
+        exit(1);
 
-    const char *name = (const char *)data + value_len;
-    size_t name_len = strnlen(name, size - value_len);
-    if (!name_len || name_len != size - value_len - 1)
-        return -1;
+    if (fclose(fp))
+        exit(1);
 
     mpv_handle *ctx = mpv_create();
     if (!ctx)
         exit(1);
 
-#if MPV_RUN
     check_error(mpv_set_option_string(ctx, "vo", "null"));
     check_error(mpv_set_option_string(ctx, "ao", "null"));
     check_error(mpv_set_option_string(ctx, "ao-null-untimed", "yes"));
@@ -66,25 +55,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_set_option_string(ctx, "msg-level", "all=trace"));
 
     check_error(mpv_initialize(ctx));
-#endif
 
-if (MPV_FORMAT == MPV_FORMAT_STRING) {
-    mpv_set_property_string(ctx, name, (void *)data);
-} else {
-    mpv_set_property(ctx, name, MPV_FORMAT, (void *)data);
-}
-
-#if MPV_RUN
-    check_error(mpv_set_option_string(ctx, "audio-files", "av://lavfi:sine=d=0.1"));
-    const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.1", NULL};
+    const char *cmd[] = {"load-" MPV_LOAD, filename, NULL};
     check_error(mpv_command(ctx, cmd));
-
-    while (1) {
-        mpv_event *event = mpv_wait_event(ctx, 10000);
-        if (event->event_id == MPV_EVENT_IDLE)
-            break;
-    }
-#endif
 
     mpv_terminate_destroy(ctx);
 

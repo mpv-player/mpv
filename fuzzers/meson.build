@@ -9,7 +9,7 @@ foreach p : ['bd', 'cdda', 'dvb', 'dvd', 'edl', 'file', 'hex', 'lavf', 'memory',
              'mf', 'slice', 'smb']
   executable('fuzzer_protocol_' + p,
              'fuzzer_loadfile_direct.c',
-             c_args: ['-DMPV_PROTO=' + p],
+             c_args: ['-DMPV_PROTO=' + p, '-DMPV_PROTO_' + p.to_upper()],
              include_directories: incdir,
              link_with: libmpv)
 endforeach
@@ -23,4 +23,12 @@ foreach f : ['MPV_FORMAT_STRING', 'MPV_FORMAT_FLAG', 'MPV_FORMAT_INT64', 'MPV_FO
                 include_directories: incdir,
                 link_with: libmpv)
   endforeach
+endforeach
+
+foreach cmd : ['config-file', 'input-conf']
+    executable('fuzzer_load_' + cmd.underscorify(),
+                'fuzzer_load.c',
+                c_args: ['-DMPV_LOAD="' + cmd + '"'],
+                include_directories: incdir,
+                link_with: libmpv)
 endforeach
