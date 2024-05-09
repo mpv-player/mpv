@@ -71,7 +71,7 @@ body:
           save the terminal output to a file, and attach it to the issue.
 
 
-          In the case of a crash, please provide a backtrace.
+          In the case of a crash, please provide a [backtrace](https://wiki.archlinux.org/title/Debugging/Getting_traces).
 
 
           Without the log file, this issue will be closed for ignoring the issue template.
