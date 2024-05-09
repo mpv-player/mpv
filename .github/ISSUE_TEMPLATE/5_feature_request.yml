@@ -24,3 +24,24 @@ body:
 
           If you have trouble producing a log file, you can alternatively use `-v -v`, save the
           terminal output to a file, and attach it to the issue.
+- type: textarea
+  attributes:
+      label: "Sample Files"
+      placeholder: "Drag and drop sample files here"
+      description: >
+          Please provide sample files in the case you request a format/codec/container dependent
+          feature, and it could help us test and implement it.
+
+
+          Preferably files should be attached directly within the text field below. Due to GitHub's
+          upload restriction, you may need to archive the sample file first and upload it as `.zip`
+          file. If the sample file is too big to attach directly, use a solution that is easy to
+          access with possible long-term retention. Possible services include, but are not limited
+          to, the following:
+
+          - [0x0.st](https://0x0.st/) (no long-term retention)
+           - [Dropbox](https://www.dropbox.com)
+           - [Google Drive](https://www.google.com/drive/)
+           - [iCLoud Drive](https://www.icloud.com/iclouddrive/)
+           - [MediaFire](https://www.mediafire.com/)
+           - [OneDrive](https://onedrive.live.com/)
