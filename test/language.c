@@ -76,5 +76,13 @@ int main(void)
     assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-aaaaaaaaa.srt"), NULL)), "");
     assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo.en-0.srt"), NULL)), "");
 
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo[en].srt"), NULL)), "en");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo[en-US].srt"), NULL)), "en-US");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo[].srt"), NULL)), "");
+
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo(en).srt"), NULL)), "en");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo(en-US).srt"), NULL)), "en-US");
+    assert_string_equal(bstrto0(ta_ctx, mp_guess_lang_from_filename(bstr0("foo().srt"), NULL)), "");
+
     talloc_free(ta_ctx);
 }
