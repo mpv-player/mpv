@@ -6,6 +6,13 @@ if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
 
+# {avcodec,tests}: rename the bundled Mesa AV1 vulkan video headers
+if (-not (Test-Path "$subprojects/packagefiles/ffmpeg")) {
+    New-Item -Path "$subprojects/packagefiles/ffmpeg" -ItemType Directory | Out-Null
+}
+Invoke-WebRequest -Uri "https://github.com/FFmpeg/FFmpeg/commit/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch" `
+                  -OutFile "$subprojects/packagefiles/ffmpeg/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch"
+
 # Download pre-built shaderc, it is quite big to build each time
 # For download link see https://github.com/google/shaderc/blob/main/downloads.md
 $url = "https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_release.html"
@@ -66,6 +73,7 @@ $projects = @(
         Path = "$subprojects/ffmpeg.wrap"
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
         Revision = "meson-6.1"
+        Patch = "ffmpeg/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch"
         Provides = @(
             "libavcodec = libavcodec_dep",
             "libavdevice = libavdevice_dep",
@@ -91,15 +99,6 @@ $projects = @(
         URL = "https://github.com/KhronosGroup/SPIRV-Cross"
         Revision = "main"
         Method = "cmake"
-    },
-    # Remove harfbuzz wrap once the new version with build fixes is released.
-    @{
-        Path = "$subprojects/harfbuzz.wrap"
-        URL = "https://github.com/harfbuzz/harfbuzz"
-        Revision = "main"
-        Provides = @(
-            "harfbuzz = libharfbuzz_dep"
-        )
     }
 )
 
@@ -111,6 +110,9 @@ revision = $($project.Revision)
 depth = 1
 clone-recursive = true
 "@
+    if ($project.ContainsKey('Patch')) {
+        $content += "`ndiff_files = $($project.Patch)"
+    }
     if ($project.ContainsKey('Method')) {
         $content += "`nmethod = $($project.Method)"
     }
@@ -122,6 +124,7 @@ clone-recursive = true
 }
 
 meson setup build `
+    --wrap-mode=forcefallback `
     -Ddefault_library=static `
     -Dlibmpv=true `
     -Dtests=true `
@@ -129,13 +132,28 @@ meson setup build `
     -Dffmpeg:gpl=enabled `
     -Dffmpeg:tests=disabled `
     -Dffmpeg:programs=disabled `
+    -Dffmpeg:sdl2=disabled `
+    -Dffmpeg:vulkan=auto `
     -Dlcms2:fastfloat=true `
+    -Dlcms2:jpeg=disabled `
+    -Dlcms2:tiff=disabled `
+    -Dlibusb:tests=false `
+    -Dlibusb:examples=false `
     -Dlibplacebo:demos=false `
     -Dlibplacebo:lcms=enabled `
     -Dlibplacebo:shaderc=enabled `
     -Dlibplacebo:vulkan=enabled `
     -Dlibplacebo:d3d11=enabled `
+    -Dxxhash:inline-all=true `
+    -Dxxhash:cli=false `
+    -Dluajit:amalgam=true `
     -Dd3d11=enabled `
-    -Djavascript=enabled
+    -Djavascript=enabled `
+    -Dlua=luajit `
+    -Ddrm=disabled `
+    -Dlibarchive=disabled `
+    -Drubberband=disabled `
+    -Dwayland=disabled `
+    -Dx11=disabled
 ninja -C build mpv.exe mpv.com libmpv.a
 ./build/mpv.com -v --no-config
