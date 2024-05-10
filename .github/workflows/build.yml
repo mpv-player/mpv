@@ -114,6 +114,11 @@ jobs:
       - name: Update Meson WrapDB
         run: |
           meson wrap update-db
+          # Explicitly download wraps, as nested projects may have older versions of them.
+          meson wrap install expat
+          meson wrap install harfbuzz
+          meson wrap install libpng
+          meson wrap install zlib
 
       - name: Build
         id: build
