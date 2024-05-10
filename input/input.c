@@ -407,8 +407,6 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
     for (int builtin = 0; builtin < 2; builtin++) {
         if (builtin && !ictx->opts->default_bindings)
             break;
-        if (best)
-            break;
         for (int n = 0; n < bs->num_binds; n++) {
             if (bs->binds[n].is_builtin == (bool)builtin) {
                 struct cmd_bind *b = &bs->binds[n];
@@ -418,7 +416,7 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
                     if (b->keys[i] != keys[b->num_keys - 1 - i])
                         goto skip;
                 }
-                if (!best || b->num_keys >= best->num_keys)
+                if (!best || b->num_keys > best->num_keys)
                     best = b;
             skip: ;
             }
