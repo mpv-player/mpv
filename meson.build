@@ -392,7 +392,7 @@ endif
 
 add_project_arguments(flags, language: 'c')
 add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
-add_project_link_arguments(link_flags, language: ['c', 'objc'])
+add_project_link_arguments(link_flags, language: ['c', 'cpp', 'objc'])
 
 
 # osdep
