@@ -362,7 +362,7 @@ local function fuzzy_find(needle, haystacks)
     return result
 end
 
-local function populate_log_with_matches()
+local function populate_log_with_matches(max_width)
     if not selectable_items then
         return
     end
@@ -392,7 +392,7 @@ local function populate_log_with_matches()
 
     for i = first_match_to_print, last_match_to_print do
         log[#log + 1] = {
-            text = matches[i].text .. '\n',
+            text = truncate_utf8(matches[i].text, max_width) .. '\n',
             style = i == selected_match and styles.selected_suggestion or '',
             terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
         }
@@ -414,7 +414,7 @@ local function print_to_terminal()
         return
     end
 
-    populate_log_with_matches()
+    populate_log_with_matches(mp.get_property_native('term-size/w', 80))
 
     local log = ''
     for _, log_line in ipairs(log_buffers[id]) do
@@ -506,7 +506,7 @@ function update()
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
     local suggestion_ass = style .. styles.suggestion .. suggestions
 
-    populate_log_with_matches()
+    populate_log_with_matches(width_max)
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
@@ -631,6 +631,19 @@ function len_utf8(str)
         len = len + 1
     end
     return len
+end
+
+function truncate_utf8(str, max_length)
+    local len = 0
+    local pos = 1
+    while pos <= #str do
+        pos = next_utf8(str, pos)
+        len = len + 1
+        if len == max_length - 1 then
+            return str:sub(1, pos - 1) .. '⋯'
+        end
+    end
+    return str
 end
 
 local function handle_edit()
