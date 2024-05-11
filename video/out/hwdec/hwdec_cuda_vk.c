@@ -25,6 +25,8 @@
 #include <libavutil/hwcontext_cuda.h>
 #include <libplacebo/vulkan.h>
 
+#include "osdep/io.h"
+
 #if HAVE_WIN32_DESKTOP
 #include <versionhelpers.h>
 #define HANDLE_TYPE PL_HANDLE_WIN32
