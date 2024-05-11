@@ -53,8 +53,10 @@ local params = {
 }
 
 local function parse_value(value)
-	-- Using nil here because tonumber differs between lua 5.1 and 5.2 when parsing fractions in combination with explicit base argument set to 10.
-	-- And we can't omit it because gsub returns 2 values which would get unpacked and cause more problems. Gotta love scripting languages.
+	-- Using nil here because tonumber differs between lua 5.1 and 5.2 when
+	-- parsing fractions in combination with explicit base argument set to 10.
+	-- And we can't omit it because gsub returns 2 values which would get
+	-- unpacked and cause more problems. Gotta love scripting languages.
 	return tonumber(value:gsub('dB$', ''), nil)
 end
 
@@ -76,7 +78,8 @@ local function show_osd(filter)
 	for _,param in ipairs(params) do
 		local value = parse_value(filter.params[param.name])
 		if not (param.hide_default and value == o['default_' .. param.name]) then
-			pretty[#pretty+1] = string.format('%s: %g%s', param.name:gsub("^%l", string.upper), value, param.dB)
+			pretty[#pretty+1] = string.format('%s: %g%s', param.name:gsub("^%l", string.upper),
+			                                  value, param.dB)
 		end
 	end
 
