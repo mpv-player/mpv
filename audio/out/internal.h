@@ -28,7 +28,7 @@ struct ao {
     int samplerate;
     struct mp_chmap channels;
     int format;                 // one of AF_FORMAT_...
-    int bps;                    // bytes per second (per plane)
+    int64_t bps;                // bytes per second (per plane)
     int sstride;                // size of a sample on each plane
                                 // (format_size*num_channels/num_planes)
     int num_planes;

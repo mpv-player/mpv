@@ -967,8 +967,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (mpctx->audio_status == STATUS_DRAINING) {
         // Wait until the AO has played all queued data. In the gapless case,
         // we trigger EOF immediately, and let it play asynchronously.
-        if (!ao_c->ao || (!ao_is_playing(ao_c->ao) ||
-                          (opts->gapless_audio && !ao_untimed(ao_c->ao))))
+        if (!ao_c->ao || (!ao_is_playing(ao_c->ao) || opts->gapless_audio))
         {
             MP_VERBOSE(mpctx, "audio EOF reached\n");
             mpctx->audio_status = STATUS_EOF;

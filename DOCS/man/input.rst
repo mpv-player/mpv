@@ -3185,6 +3185,10 @@ Property list
         values currently. It's possible that future mpv versions will make
         these properties unavailable instead in this case.
 
+    ``track-list/N/dolby-vision-profile``, ``track-list/N/dolby-vision-level``
+        Dolby Vision profile and level. May not be available if the container
+        does not provide this information.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -3229,6 +3233,8 @@ Property list
                 "replaygain-track-gain" MPV_FORMAT_DOUBLE
                 "replaygain-album-peak" MPV_FORMAT_DOUBLE
                 "replaygain-album-gain" MPV_FORMAT_DOUBLE
+                "dolby-vision-profile" MPV_FORMAT_INT64
+                "dolby-vision-level" MPV_FORMAT_INT64
 
 ``current-tracks/...``
     This gives access to currently selected tracks. It redirects to the correct

@@ -1,6 +1,4 @@
 /*
- * Language code utility functions
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -19,343 +17,335 @@
 
 #include "language.h"
 
-#include "common/common.h"
-#include "osdep/strnlen.h"
+#include <limits.h>
+#include <stdint.h>
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
+#include "common/common.h"
+#include "misc/ctype.h"
+
+#define L(s) { #s, sizeof(#s) - 1 }
 
 static const struct lang {
-    char match[4];
-    char canonical[4];
+    struct { const char s[3]; uint8_t l; } match;
+    struct { const char s[3]; uint8_t l; } canonical;
 } langmap[] = {
-    {"aa", "aar"},
-    {"ab", "abk"},
-    {"ae", "ave"},
-    {"af", "afr"},
-    {"ak", "aka"},
-    {"am", "amh"},
-    {"an", "arg"},
-    {"ar", "ara"},
-    {"as", "asm"},
-    {"av", "ava"},
-    {"ay", "aym"},
-    {"az", "aze"},
-    {"ba", "bak"},
-    {"be", "bel"},
-    {"bg", "bul"},
-    {"bh", "bih"},
-    {"bi", "bis"},
-    {"bm", "bam"},
-    {"bn", "ben"},
-    {"bo", "tib"},
-    {"bod", "tib"},
-    {"br", "bre"},
-    {"bs", "bos"},
-    {"ca", "cat"},
-    {"ce", "che"},
-    {"ces", "cze"},
-    {"ch", "cha"},
-    {"co", "cos"},
-    {"cr", "cre"},
-    {"cs", "cze"},
-    {"cu", "chu"},
-    {"cv", "chv"},
-    {"cy", "wel"},
-    {"cym", "wel"},
-    {"da", "dan"},
-    {"de", "ger"},
-    {"deu", "ger"},
-    {"dv", "div"},
-    {"dz", "dzo"},
-    {"ee", "ewe"},
-    {"el", "gre"},
-    {"ell", "gre"},
-    {"en", "eng"},
-    {"eo", "epo"},
-    {"es", "spa"},
-    {"et", "est"},
-    {"eu", "baq"},
-    {"eus", "baq"},
-    {"fa", "per"},
-    {"fas", "per"},
-    {"ff", "ful"},
-    {"fi", "fin"},
-    {"fj", "fij"},
-    {"fo", "fao"},
-    {"fr", "fre"},
-    {"fra", "fre"},
-    {"fy", "fry"},
-    {"ga", "gle"},
-    {"gd", "gla"},
-    {"gl", "glg"},
-    {"gn", "grn"},
-    {"gu", "guj"},
-    {"gv", "glv"},
-    {"ha", "hau"},
-    {"he", "heb"},
-    {"hi", "hin"},
-    {"ho", "hmo"},
-    {"hr", "hrv"},
-    {"ht", "hat"},
-    {"hu", "hun"},
-    {"hy", "arm"},
-    {"hye", "arm"},
-    {"hz", "her"},
-    {"ia", "ina"},
-    {"id", "ind"},
-    {"ie", "ile"},
-    {"ig", "ibo"},
-    {"ii", "iii"},
-    {"ik", "ipk"},
-    {"io", "ido"},
-    {"is", "ice"},
-    {"isl", "ice"},
-    {"it", "ita"},
-    {"iu", "iku"},
-    {"ja", "jpn"},
-    {"jv", "jav"},
-    {"ka", "geo"},
-    {"kat", "geo"},
-    {"kg", "kon"},
-    {"ki", "kik"},
-    {"kj", "kua"},
-    {"kk", "kaz"},
-    {"kl", "kal"},
-    {"km", "khm"},
-    {"kn", "kan"},
-    {"ko", "kor"},
-    {"kr", "kau"},
-    {"ks", "kas"},
-    {"ku", "kur"},
-    {"kv", "kom"},
-    {"kw", "cor"},
-    {"ky", "kir"},
-    {"la", "lat"},
-    {"lb", "ltz"},
-    {"lg", "lug"},
-    {"li", "lim"},
-    {"ln", "lin"},
-    {"lo", "lao"},
-    {"lt", "lit"},
-    {"lu", "lub"},
-    {"lv", "lav"},
-    {"mg", "mlg"},
-    {"mh", "mah"},
-    {"mi", "mao"},
-    {"mk", "mac"},
-    {"mkd", "mac"},
-    {"ml", "mal"},
-    {"mn", "mon"},
-    {"mr", "mar"},
-    {"mri", "mao"},
-    {"ms", "may"},
-    {"msa", "may"},
-    {"mt", "mlt"},
-    {"my", "bur"},
-    {"mya", "bur"},
-    {"na", "nau"},
-    {"nb", "nob"},
-    {"nd", "nde"},
-    {"ne", "nep"},
-    {"ng", "ndo"},
-    {"nl", "dut"},
-    {"nld", "dut"},
-    {"nn", "nno"},
-    {"no", "nor"},
-    {"nr", "nbl"},
-    {"nv", "nav"},
-    {"ny", "nya"},
-    {"oc", "oci"},
-    {"oj", "oji"},
-    {"om", "orm"},
-    {"or", "ori"},
-    {"os", "oss"},
-    {"pa", "pan"},
-    {"pi", "pli"},
-    {"pl", "pol"},
-    {"ps", "pus"},
-    {"pt", "por"},
-    {"qu", "que"},
-    {"rm", "roh"},
-    {"rn", "run"},
-    {"ro", "rum"},
-    {"ron", "rum"},
-    {"ru", "rus"},
-    {"rw", "kin"},
-    {"sa", "san"},
-    {"sc", "srd"},
-    {"sd", "snd"},
-    {"se", "sme"},
-    {"sg", "sag"},
-    {"si", "sin"},
-    {"sk", "slo"},
-    {"sl", "slv"},
-    {"slk", "slo"},
-    {"sm", "smo"},
-    {"sn", "sna"},
-    {"so", "som"},
-    {"sq", "alb"},
-    {"sqi", "alb"},
-    {"sr", "srp"},
-    {"ss", "ssw"},
-    {"st", "sot"},
-    {"su", "sun"},
-    {"sv", "swe"},
-    {"sw", "swa"},
-    {"ta", "tam"},
-    {"te", "tel"},
-    {"tg", "tgk"},
-    {"th", "tha"},
-    {"ti", "tir"},
-    {"tk", "tuk"},
-    {"tl", "tgl"},
-    {"tn", "tsn"},
-    {"to", "ton"},
-    {"tr", "tur"},
-    {"ts", "tso"},
-    {"tt", "tat"},
-    {"tw", "twi"},
-    {"ty", "tah"},
-    {"ug", "uig"},
-    {"uk", "ukr"},
-    {"ur", "urd"},
-    {"uz", "uzb"},
-    {"ve", "ven"},
-    {"vi", "vie"},
-    {"vo", "vol"},
-    {"wa", "wln"},
-    {"wo", "wol"},
-    {"xh", "xho"},
-    {"yi", "yid"},
-    {"yo", "yor"},
-    {"za", "zha"},
-    {"zh", "chi"},
-    {"zho", "chi"},
-    {"zu", "zul"},
+    {L(aa), L(aar)},
+    {L(ab), L(abk)},
+    {L(ae), L(ave)},
+    {L(af), L(afr)},
+    {L(ak), L(aka)},
+    {L(am), L(amh)},
+    {L(an), L(arg)},
+    {L(ar), L(ara)},
+    {L(as), L(asm)},
+    {L(av), L(ava)},
+    {L(ay), L(aym)},
+    {L(az), L(aze)},
+    {L(ba), L(bak)},
+    {L(be), L(bel)},
+    {L(bg), L(bul)},
+    {L(bh), L(bih)},
+    {L(bi), L(bis)},
+    {L(bm), L(bam)},
+    {L(bn), L(ben)},
+    {L(bo), L(tib)},
+    {L(bod), L(tib)},
+    {L(br), L(bre)},
+    {L(bs), L(bos)},
+    {L(ca), L(cat)},
+    {L(ce), L(che)},
+    {L(ces), L(cze)},
+    {L(ch), L(cha)},
+    {L(co), L(cos)},
+    {L(cr), L(cre)},
+    {L(cs), L(cze)},
+    {L(cu), L(chu)},
+    {L(cv), L(chv)},
+    {L(cy), L(wel)},
+    {L(cym), L(wel)},
+    {L(da), L(dan)},
+    {L(de), L(ger)},
+    {L(deu), L(ger)},
+    {L(dv), L(div)},
+    {L(dz), L(dzo)},
+    {L(ee), L(ewe)},
+    {L(el), L(gre)},
+    {L(ell), L(gre)},
+    {L(en), L(eng)},
+    {L(eo), L(epo)},
+    {L(es), L(spa)},
+    {L(et), L(est)},
+    {L(eu), L(baq)},
+    {L(eus), L(baq)},
+    {L(fa), L(per)},
+    {L(fas), L(per)},
+    {L(ff), L(ful)},
+    {L(fi), L(fin)},
+    {L(fj), L(fij)},
+    {L(fo), L(fao)},
+    {L(fr), L(fre)},
+    {L(fra), L(fre)},
+    {L(fy), L(fry)},
+    {L(ga), L(gle)},
+    {L(gd), L(gla)},
+    {L(gl), L(glg)},
+    {L(gn), L(grn)},
+    {L(gu), L(guj)},
+    {L(gv), L(glv)},
+    {L(ha), L(hau)},
+    {L(he), L(heb)},
+    {L(hi), L(hin)},
+    {L(ho), L(hmo)},
+    {L(hr), L(hrv)},
+    {L(ht), L(hat)},
+    {L(hu), L(hun)},
+    {L(hy), L(arm)},
+    {L(hye), L(arm)},
+    {L(hz), L(her)},
+    {L(ia), L(ina)},
+    {L(id), L(ind)},
+    {L(ie), L(ile)},
+    {L(ig), L(ibo)},
+    {L(ii), L(iii)},
+    {L(ik), L(ipk)},
+    {L(io), L(ido)},
+    {L(is), L(ice)},
+    {L(isl), L(ice)},
+    {L(it), L(ita)},
+    {L(iu), L(iku)},
+    {L(ja), L(jpn)},
+    {L(jv), L(jav)},
+    {L(ka), L(geo)},
+    {L(kat), L(geo)},
+    {L(kg), L(kon)},
+    {L(ki), L(kik)},
+    {L(kj), L(kua)},
+    {L(kk), L(kaz)},
+    {L(kl), L(kal)},
+    {L(km), L(khm)},
+    {L(kn), L(kan)},
+    {L(ko), L(kor)},
+    {L(kr), L(kau)},
+    {L(ks), L(kas)},
+    {L(ku), L(kur)},
+    {L(kv), L(kom)},
+    {L(kw), L(cor)},
+    {L(ky), L(kir)},
+    {L(la), L(lat)},
+    {L(lb), L(ltz)},
+    {L(lg), L(lug)},
+    {L(li), L(lim)},
+    {L(ln), L(lin)},
+    {L(lo), L(lao)},
+    {L(lt), L(lit)},
+    {L(lu), L(lub)},
+    {L(lv), L(lav)},
+    {L(mg), L(mlg)},
+    {L(mh), L(mah)},
+    {L(mi), L(mao)},
+    {L(mk), L(mac)},
+    {L(mkd), L(mac)},
+    {L(ml), L(mal)},
+    {L(mn), L(mon)},
+    {L(mr), L(mar)},
+    {L(mri), L(mao)},
+    {L(ms), L(may)},
+    {L(msa), L(may)},
+    {L(mt), L(mlt)},
+    {L(my), L(bur)},
+    {L(mya), L(bur)},
+    {L(na), L(nau)},
+    {L(nb), L(nob)},
+    {L(nd), L(nde)},
+    {L(ne), L(nep)},
+    {L(ng), L(ndo)},
+    {L(nl), L(dut)},
+    {L(nld), L(dut)},
+    {L(nn), L(nno)},
+    {L(no), L(nor)},
+    {L(nr), L(nbl)},
+    {L(nv), L(nav)},
+    {L(ny), L(nya)},
+    {L(oc), L(oci)},
+    {L(oj), L(oji)},
+    {L(om), L(orm)},
+    {L(or), L(ori)},
+    {L(os), L(oss)},
+    {L(pa), L(pan)},
+    {L(pi), L(pli)},
+    {L(pl), L(pol)},
+    {L(ps), L(pus)},
+    {L(pt), L(por)},
+    {L(qu), L(que)},
+    {L(rm), L(roh)},
+    {L(rn), L(run)},
+    {L(ro), L(rum)},
+    {L(ron), L(rum)},
+    {L(ru), L(rus)},
+    {L(rw), L(kin)},
+    {L(sa), L(san)},
+    {L(sc), L(srd)},
+    {L(sd), L(snd)},
+    {L(se), L(sme)},
+    {L(sg), L(sag)},
+    {L(si), L(sin)},
+    {L(sk), L(slo)},
+    {L(sl), L(slv)},
+    {L(slk), L(slo)},
+    {L(sm), L(smo)},
+    {L(sn), L(sna)},
+    {L(so), L(som)},
+    {L(sq), L(alb)},
+    {L(sqi), L(alb)},
+    {L(sr), L(srp)},
+    {L(ss), L(ssw)},
+    {L(st), L(sot)},
+    {L(su), L(sun)},
+    {L(sv), L(swe)},
+    {L(sw), L(swa)},
+    {L(ta), L(tam)},
+    {L(te), L(tel)},
+    {L(tg), L(tgk)},
+    {L(th), L(tha)},
+    {L(ti), L(tir)},
+    {L(tk), L(tuk)},
+    {L(tl), L(tgl)},
+    {L(tn), L(tsn)},
+    {L(to), L(ton)},
+    {L(tr), L(tur)},
+    {L(ts), L(tso)},
+    {L(tt), L(tat)},
+    {L(tw), L(twi)},
+    {L(ty), L(tah)},
+    {L(ug), L(uig)},
+    {L(uk), L(ukr)},
+    {L(ur), L(urd)},
+    {L(uz), L(uzb)},
+    {L(ve), L(ven)},
+    {L(vi), L(vie)},
+    {L(vo), L(vol)},
+    {L(wa), L(wln)},
+    {L(wo), L(wol)},
+    {L(xh), L(xho)},
+    {L(yi), L(yid)},
+    {L(yo), L(yor)},
+    {L(za), L(zha)},
+    {L(zh), L(chi)},
+    {L(zho), L(chi)},
+    {L(zu), L(zul)},
 };
 
-struct langsearch {
-    const char *str;
-    size_t size;
-};
-
-static int lang_compare(const void *s, const void *k)
+static int lang_compare(const void *key, const void *lang)
 {
-    const struct langsearch *search = s;
-    const struct lang *key = k;
-
-    int ret = strncasecmp(search->str, key->match, search->size);
-    if (!ret && search->size < sizeof(key->match) && key->match[search->size])
-        return 1;
-    return ret;
+    const struct lang *l = lang;
+    return bstrcasecmp(*(const bstr*)key, (bstr){(unsigned char *)l->match.s, l->match.l});
 }
 
-static void canonicalize(const char **lang, size_t *size)
+static bstr canonicalize(bstr lang)
 {
-    if (*size > sizeof(langmap[0].match))
-        return;
+    const struct lang *l = bsearch(&lang, langmap, MP_ARRAY_SIZE(langmap),
+                                   sizeof(langmap[0]), &lang_compare);
+    return l ? (bstr){(unsigned char *)l->canonical.s, l->canonical.l} : lang;
+}
 
-    struct langsearch search = {*lang, *size};
-    struct lang *l = bsearch(&search, langmap, MP_ARRAY_SIZE(langmap), sizeof(langmap[0]),
-                             &lang_compare);
+int mp_match_lang(char **langs, const char *lang)
+{
+    if (!lang)
+        return 0;
 
-    if (l) {
-        *lang = l->canonical;
-        *size = strnlen(l->canonical, sizeof(l->canonical));
+    void *ta_ctx = talloc_new(NULL);
+    int lang_parts_n = 0;
+    bstr *lang_parts = NULL;
+    bstr rest = bstr0(lang);
+    while (rest.len) {
+        bstr s = bstr_split(rest, "-", &rest);
+        MP_TARRAY_APPEND(ta_ctx, lang_parts, lang_parts_n, s);
     }
-}
 
-static bool tag_matches(const char *l1, size_t s1, const char *l2, size_t s2)
-{
-    return s1 == s2 && !strncasecmp(l1, l2, s1);
-}
+    int best_score = 0;
+    if (!lang_parts_n)
+        goto done;
 
-int mp_match_lang_single(const char *l1, const char *l2)
-{
-    // We never consider null or empty strings to match
-    if (!l1 || !l2 || !*l1 || !*l2)
-        return 0;
+    for (int idx = 0; langs && langs[idx]; idx++) {
+        rest = bstr0(langs[idx]);
+        int part = 0;
+        int score = 0;
+        while (rest.len) {
+            bstr s = bstr_split(rest, "-", &rest);
+            if (!part) {
+                if (bstrcasecmp(canonicalize(lang_parts[0]), canonicalize(s)))
+                    break;
+                score = INT_MAX - idx;
+                part++;
+                continue;
+            }
 
-    // The first subtag should always be a language; canonicalize to 3-letter ISO 639-2B (arbitrarily chosen)
-    size_t s1 = strcspn(l1, "-_");
-    size_t s2 = strcspn(l2, "-_");
-
-    const char *l1c = l1;
-    const char *l2c = l2;
-    size_t s1c = s1;
-    size_t s2c = s2;
-
-    canonicalize(&l1c, &s1c);
-    canonicalize(&l2c, &s2c);
-
-    // If the first subtags don't match, we have no match at all
-    if (!tag_matches(l1c, s1c, l2c, s2c))
-        return 0;
-
-    // Attempt to match each subtag in each string against each in the other
-    int score = 1;
-    bool x1 = false;
-    int count = 0;
-    for (;;) {
-        l1 += s1;
-
-        while (*l1 == '-' || *l1 == '_')
-            l1++;
-
-        if (!*l1)
-            break;
-
-        s1 = strcspn(l1, "-_");
-        if (tag_matches(l1, s1, "x", 1)) {
-            x1 = true;
-            continue;
-        }
-
-        const char *l2o = l2;
-        size_t s2o = s2;
-        bool x2 = false;
-        for (;;) {
-            l2 += s2;
-
-            while (*l2 == '-' || *l2 == '_')
-                l2++;
-
-            if (!*l2)
+            if (part >= lang_parts_n)
                 break;
 
-            s2 = strcspn(l2, "-_");
-            if (tag_matches(l2, s2, "x", 1)) {
-                x2 = true;
-                if (!x1)
-                    break;
-                continue;
-            }
+            if (bstrcasecmp(lang_parts[part], s))
+                score -= 1000;
 
-            // Private-use subtags only match against other private-use subtags
-            if (x1 && !x2)
-                continue;
-
-            if (tag_matches(l1c, s1c, l2c, s2c)) {
-                // Matches for subtags earlier in the user's string take priority over later ones,
-                // for up to LANGUAGE_SCORE_BITS subtags
-                int shift = (LANGUAGE_SCORE_BITS - count - 1);
-                if (shift < 0)
-                    shift = 0;
-                score += (1 << shift);
-
-                if (score >= LANGUAGE_SCORE_MAX)
-                    return LANGUAGE_SCORE_MAX;
-            }
+            part++;
         }
-
-        l2 = l2o;
-        s2 = s2o;
-
-        count++;
+        score -= (lang_parts_n - part) * 1000;
+        best_score = MPMAX(best_score, score);
     }
 
-    return score;
+done:
+    talloc_free(ta_ctx);
+    return best_score;
+}
+
+bstr mp_guess_lang_from_filename(bstr name, int *lang_start)
+{
+    name = bstr_strip(bstr_strip_ext(name));
+
+    if (name.len < 2)
+        return (bstr){0};
+
+    int lang_length = 0;
+    int i = name.len - 1;
+    int suffixes_length = 0;
+
+    char delimiter = '.';
+    if (name.start[i] == ')') {
+        delimiter = '(';
+        i--;
+    }
+    if (name.start[i] == ']') {
+        delimiter = '[';
+        i--;
+    }
+
+    while (true) {
+        while (i >= 0 && mp_isalpha(name.start[i])) {
+            lang_length++;
+            i--;
+        }
+
+        // According to
+        // https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
+        // subtags after the first are composed of 1 to 8 letters.
+        if (lang_length < suffixes_length + 1 || lang_length > suffixes_length + 8)
+            return (bstr){0};
+
+        if (i >= 0 && name.start[i] == '-') {
+            lang_length++;
+            i--;
+            suffixes_length = lang_length;
+        } else {
+            break;
+        }
+    }
+
+    // The primary subtag can have 2 or 3 letters.
+    if (lang_length < suffixes_length + 2 || lang_length > suffixes_length + 3 ||
+        i <= 0 || name.start[i] != delimiter)
+        return (bstr){0};
+
+    if (lang_start)
+        *lang_start = i;
+
+    return (bstr){name.start + i + 1, lang_length};
 }

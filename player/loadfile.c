@@ -449,19 +449,6 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
         add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n));
 }
 
-// Result numerically higher => better match. 0 == no match.
-static int match_lang(char **langs, const char *lang)
-{
-    if (!lang)
-        return 0;
-    for (int idx = 0; langs && langs[idx]; idx++) {
-        int score = mp_match_lang_single(langs[idx], lang);
-        if (score > 0)
-            return INT_MAX - (idx + 1) * LANGUAGE_SCORE_MAX + score - 1;
-    }
-    return 0;
-}
-
 /* Get the track wanted by the user.
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
@@ -505,7 +492,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
             (t2->program_id == preferred_program))
             return t1->program_id == preferred_program;
     }
-    int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
+    int l1 = mp_match_lang(langs, t1->lang), l2 = mp_match_lang(langs, t2->lang);
     if (!os_langs && l1 != l2)
         return l1 > l2;
     if (forced)
@@ -579,35 +566,6 @@ static char **process_langs(char **in)
     return out;
 }
 
-static const char *get_audio_lang(struct MPContext *mpctx)
-{
-    // If we have a single current audio track, this is simple.
-    if (mpctx->current_track[0][STREAM_AUDIO])
-        return mpctx->current_track[0][STREAM_AUDIO]->lang;
-
-    const char *ret = NULL;
-
-    // Otherwise, we may be using a filter with multiple inputs.
-    // Iterate over the tracks and find the ones in use.
-    for (int i = 0; i < mpctx->num_tracks; i++) {
-        const struct track *t = mpctx->tracks[i];
-        if (t->type != STREAM_AUDIO || !t->selected)
-            continue;
-
-        // If we have input in multiple audio languages, bail out;
-        // we don't have a meaningful single language.
-        // Partial matches (e.g. en-US vs en-GB) are acceptable here.
-        if (ret && t->lang && !mp_match_lang_single(t->lang, ret))
-            return NULL;
-
-        // We'll return the first non-null tag we see
-        if (!ret)
-            ret = t->lang;
-    }
-
-    return ret;
-}
-
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type)
 {
@@ -625,7 +583,9 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         langs = add_os_langs();
         os_langs = true;
     }
-    const char *audio_lang = get_audio_lang(mpctx);
+    const char *audio_lang = mpctx->current_track[0][STREAM_AUDIO] ?
+                             mpctx->current_track[0][STREAM_AUDIO]->lang :
+                             NULL;
     bool sub = type == STREAM_SUB;
     struct track *pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
@@ -644,13 +604,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (sub) {
             // Subtitle specific auto-selecting crap.
-            bool audio_matches = mp_match_lang_single(audio_lang, track->lang);
+            bool audio_matches = audio_lang && track->lang && !strcasecmp(audio_lang, track->lang);
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
-            bool lang_match = !os_langs && match_lang(langs, track->lang) > 0;
+            bool lang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
             bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
                                  (opts->subs_fallback == 1 && track->default_track);
-            bool subs_matching_audio = (!match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
+            bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
             if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
                 (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
