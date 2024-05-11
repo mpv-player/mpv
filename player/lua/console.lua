@@ -364,7 +364,7 @@ local function fuzzy_find(needle, haystacks)
 end
 
 local function populate_log_with_matches(max_width)
-    if not selectable_items then
+    if not selectable_items or selected_match == 0 then
         return
     end
 
