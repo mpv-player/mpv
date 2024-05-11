@@ -891,11 +891,19 @@ function handle_pgdown()
 end
 
 local function page_up_or_prev_char()
-    return selectable_items and handle_pgup() or prev_char()
+    if selectable_items then
+        handle_pgup()
+    else
+        prev_char()
+    end
 end
 
 local function page_down_or_next_char()
-    return selectable_items and handle_pgdown() or next_char()
+    if selectable_items then
+        handle_pgdown()
+    else
+        next_char()
+    end
 end
 
 -- Move to the start of the current word, or if already at the start, the start
