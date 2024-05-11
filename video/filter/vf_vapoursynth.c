@@ -209,6 +209,10 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
     if (img->fields & MP_IMGFIELD_INTERLACED)
         field = img->fields & MP_IMGFIELD_TOP_FIRST ? 2 : 1;
     p->vsapi->propSetInt(map, "_FieldBased", field, 0);
+
+    // Don't increase the reference count. It is not intended to be read externally,
+    // and we know it will be alive when we retrieve it.
+    p->vsapi->propSetData(map, "_MP_IMAGE", (const char *)img, sizeof(*img), 0);
 }
 
 static int set_vs_frame_props(struct priv *p, VSFrameRef *frame,
@@ -231,11 +235,13 @@ static VSFrameRef *alloc_vs_frame(struct priv *p, struct mp_image_params *fmt)
 }
 
 static struct mp_image map_vs_frame(struct priv *p, const VSFrameRef *ref,
-                                    bool w)
+                                    bool w, struct mp_image *ref_image)
 {
     const VSFormat *fmt = p->vsapi->getFrameFormat(ref);
 
     struct mp_image img = {0};
+    if (ref_image)
+        img = *ref_image;
     mp_image_setfmt(&img, mp_from_vs(fmt->id));
     mp_image_set_size(&img, p->vsapi->getFrameWidth(ref, 0),
                             p->vsapi->getFrameHeight(ref, 0));
@@ -270,13 +276,19 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
 
     struct mp_image *res = NULL;
     if (f) {
-        struct mp_image img = map_vs_frame(p, f, false);
-        struct mp_image dummy = {.params = p->fmt_in};
-        if (p->fmt_in.w != img.w || p->fmt_in.h != img.h)
-            dummy.params.crop = (struct mp_rect){0, 0, img.w, img.h};
-        mp_image_copy_attributes(&img, &dummy);
-        img.pkt_duration = -1;
         const VSMap *map = p->vsapi->getFramePropsRO(f);
+        if (!map)
+            MP_ERR(p, "Failed to get frame properties!");
+        struct mp_image *mpi = NULL;
+        if (map) {
+            mpi = (void *)p->vsapi->propGetData(map, "_MP_IMAGE", 0, NULL);
+            if (!mpi)
+                MP_ERR(p, "Failed to get mp_image attributes!");
+        }
+        struct mp_image img = map_vs_frame(p, f, false, mpi);
+        img.pkt_duration = -1;
+        if (mpi && (mpi->params.w != img.w || mpi->params.h != img.h))
+            img.params.crop = (struct mp_rect){0, 0, img.w, img.h};
         if (map) {
             int err1, err2;
             int num = p->vsapi->propGetInt(map, "_DurationNum", 0, &err1);
@@ -491,7 +503,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
                 break;
             }
-            struct mp_image vsframe = map_vs_frame(p, ret, true);
+            struct mp_image vsframe = map_vs_frame(p, ret, true, NULL);
             mp_image_clear(&vsframe, 0, 0, p->fmt_in.w, p->fmt_in.h);
             struct mp_image dummy = {0};
             mp_image_set_params(&dummy, &p->fmt_in);
@@ -539,7 +551,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             }
 
             mp_mutex_unlock(&p->lock);
-            struct mp_image vsframe = map_vs_frame(p, ret, true);
+            struct mp_image vsframe = map_vs_frame(p, ret, true, NULL);
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
