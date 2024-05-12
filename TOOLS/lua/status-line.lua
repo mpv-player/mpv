@@ -80,7 +80,7 @@ end
 
 timer = mp.add_periodic_timer(1, update_status_line)
 
-function on_pause_change(name, value)
+function on_pause_change(_, value)
     if value == false then
         timer:resume()
     else
