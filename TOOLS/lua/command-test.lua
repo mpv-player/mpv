@@ -35,11 +35,11 @@ mp.observe_property("vo-configured", "bool", function(_, v)
     timer:resume()
 
     print("Slow screenshot command...")
-    res, err = mp.command_native({"screenshot"})
+    res = mp.command_native({"screenshot"})
     print("done, res: " .. utils.to_string(res))
 
     print("Slow screenshot async command...")
-    res, err = mp.command_native_async({"screenshot"}, function(res)
+    res = mp.command_native_async({"screenshot"}, function(res)
         print("done (async), res: " .. utils.to_string(res))
         timer:kill()
     end)
@@ -78,13 +78,13 @@ mp.observe_property("vo-configured", "bool", function(_, v)
 
     mp.command_native_async({name = "subprocess", args = {"wc", "-c"},
                              stdin_data = "hello", capture_stdout = true},
-        function(res, val, err)
+        function(_, val)
             print("Should be '5': " .. val.stdout)
         end)
     -- blocking stdin by default
     mp.command_native_async({name = "subprocess", args = {"cat"},
                              capture_stdout = true},
-        function(res, val, err)
+        function(_, val)
             print("Should be 0: " .. #val.stdout)
         end)
     -- stdin + detached
@@ -92,7 +92,7 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                              args = {"bash", "-c", "(sleep 5s ; cat)"},
                              stdin_data = "this should appear after 5s.\n",
                              detach = true},
-        function(res, val, err)
+        function(_, val)
             print("5s test: " .. val.status)
         end)
 
