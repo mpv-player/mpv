@@ -76,12 +76,19 @@ static char *mp_get_win_local_app_dir(void *talloc_ctx)
     return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
+static void path_uninit(void)
+{
+    TA_FREEP(&portable_path);
+}
+
 static void path_init(void)
 {
     void *tmp = talloc_new(NULL);
     char *path = mp_get_win_exe_subdir(tmp, "portable_config");
-    if (path && mp_path_exists(path))
+    if (path && mp_path_exists(path)) {
         portable_path = talloc_strdup(NULL, path);
+        atexit(path_uninit);
+    }
     talloc_free(tmp);
 }
 
