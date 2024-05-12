@@ -168,19 +168,24 @@ do
     local function normalized_text_width(text, size, horizontal)
         local align, rotation = horizontal and 7 or 1, horizontal and 0 or -90
         local template = '{\\pos(0,0)\\rDefault\\blur0\\bord0\\shad0\\q2\\an%s\\fs%s\\fn%s\\frz%s}%s'
-        local x1, y1 = nil, nil
         size = size / 0.8
-        -- prevent endless loop
+        local width
+        -- Limit to 5 iterations
         local repetitions_left = 5
-        repeat
+        for i = 1, repetitions_left do
             size = size * 0.8
             local ass = assdraw.ass_new()
             ass.text = template:format(align, size, opts.font, rotation, text)
-            _, _, x1, y1 = measure_bounds(ass.text)
-            repetitions_left = repetitions_left - 1
-            -- make sure nothing got clipped
-        until (x1 and x1 < osd_width and y1 < osd_height) or repetitions_left == 0
-        local width = (repetitions_left == 0 and not x1) and 0 or (horizontal and x1 or y1)
+            local _, _, x1, y1 = measure_bounds(ass.text)
+            -- Check if nothing got clipped
+            if x1 and x1 < osd_width and y1 < osd_height then
+                width = horizontal and x1 or y1
+                break
+            end
+            if i == repetitions_left then
+                width = 0
+            end
+        end
         return width / size, horizontal and osd_width or osd_height
     end
 
@@ -455,7 +460,7 @@ function update()
 
     dpi_scale = dpi_scale * opts.scale
 
-    local screenx, screeny, aspect = mp.get_osd_size()
+    local screenx, screeny = mp.get_osd_size()
     screenx = screenx / dpi_scale
     screeny = screeny / dpi_scale
 
@@ -681,14 +686,14 @@ function handle_ins()
 end
 
 -- Move the cursor to the next character (Right)
-function next_char(amount)
+function next_char()
     cursor = next_utf8(line, cursor)
     suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the previous character (Left)
-function prev_char(amount)
+function prev_char()
     cursor = prev_utf8(line, cursor)
     suggestion_buffer = {}
     update()
