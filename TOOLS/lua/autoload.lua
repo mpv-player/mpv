@@ -198,21 +198,6 @@ function is_ignored(file)
     return false
 end
 
-table.filter = function(t, iter)
-    for i = #t, 1, -1 do
-        if not iter(t[i]) then
-            table.remove(t, i)
-        end
-    end
-end
-
-table.append = function(t1, t2)
-    local t1_size = #t1
-    for i = 1, #t2 do
-        t1[t1_size + i] = t2[i]
-    end
-end
-
 -- alphanum sorting for humans in Lua
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
@@ -245,7 +230,16 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
     local files = utils.readdir(path, "files") or {}
     local dirs = dir_mode ~= "ignore" and utils.readdir(path, "dirs") or {}
     local prefix = path == "." and "" or path
-    table.filter(files, function (v)
+
+    local filter = function(t, iter)
+        for i = #t, 1, -1 do
+            if not iter(t[i]) then
+                table.remove(t, i)
+            end
+        end
+    end
+
+    filter(files, function (v)
         -- The current file could be a hidden file, ignoring it doesn't load other
         -- files from the current directory.
         local current = prefix .. v == current_file
@@ -262,7 +256,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         end
         return extensions[string.lower(ext)]
     end)
-    table.filter(dirs, function(d)
+    filter(dirs, function(d)
         return not ((o.ignore_hidden and string.match(d, "^%.")))
     end)
     alphanumsort(files)
@@ -272,7 +266,14 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         files[i] = prefix .. file
     end
 
-    table.append(total_files, files)
+    local append = function(t1, t2)
+        local t1_size = #t1
+        for i = 1, #t2 do
+            t1[t1_size + i] = t2[i]
+        end
+    end
+
+    append(total_files, files)
     if dir_mode == "recursive" then
         for _, dir in ipairs(dirs) do
             scan_dir(prefix .. dir .. separator, current_file, dir_mode,
@@ -282,7 +283,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
         for i, dir in ipairs(dirs) do
             dirs[i] = prefix .. dir
         end
-        table.append(total_files, dirs)
+        append(total_files, dirs)
     end
 end
 
@@ -319,7 +320,7 @@ function find_and_add_entries()
         end
     end
 
-    local extensions = {}
+    local extensions
     if o.same_type then
         if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
             extensions = EXTENSIONS_VIDEO
