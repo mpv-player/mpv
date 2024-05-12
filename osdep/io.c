@@ -664,11 +664,12 @@ static void free_env(void)
 static void init_getenv(void)
 {
 #if !HAVE_UWP
-    wchar_t *wenv = GetEnvironmentStringsW();
-    if (!wenv)
+    wchar_t *wenv_begin = GetEnvironmentStringsW();
+    if (!wenv_begin)
         return;
     utf8_environ_ctx = talloc_new(NULL);
     int num_env = 0;
+    wchar_t *wenv = wenv_begin;
     while (1) {
         size_t len = wcslen(wenv);
         if (!len)
@@ -677,6 +678,7 @@ static void init_getenv(void)
         MP_TARRAY_APPEND(utf8_environ_ctx, utf8_environ, num_env, s);
         wenv += len + 1;
     }
+    FreeEnvironmentStringsW(wenv_begin);
     MP_TARRAY_APPEND(utf8_environ_ctx, utf8_environ, num_env, NULL);
     // Avoid showing up in leak detectors etc.
     atexit(free_env);
