@@ -87,7 +87,7 @@ function stop_detect()
     timer = nil
 end
 
-progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3, 4
+progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3
 
 function judge(label)
     -- get the metadata
