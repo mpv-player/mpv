@@ -547,6 +547,7 @@ static const m_option_t mp_opts[] = {
     {"load-auto-profiles",
         OPT_CHOICE(lua_load_auto_profiles, {"no", 0}, {"yes", 1}, {"auto", -1}),
         .flags = UPDATE_BUILTIN_SCRIPTS},
+    {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS},
 #endif
 
 // ------------------------- stream options --------------------
@@ -969,6 +970,7 @@ static const struct MPOpts mp_default_opts = {
     .lua_load_stats = true,
     .lua_load_console = true,
     .lua_load_auto_profiles = -1,
+    .lua_load_select = true,
 #endif
     .auto_load_scripts = true,
     .loop_times = 1,

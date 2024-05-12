@@ -175,6 +175,7 @@ typedef struct MPOpts {
     bool lua_load_stats;
     bool lua_load_console;
     int lua_load_auto_profiles;
+    bool lua_load_select;
 
     bool auto_load_scripts;
 
