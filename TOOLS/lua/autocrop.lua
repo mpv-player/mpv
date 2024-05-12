@@ -164,7 +164,7 @@ function detect_end()
 
     restore_hwdec()
 
-    local meta = {}
+    local meta
 
     -- Verify the existence of metadata.
     if cropdetect_metadata then
