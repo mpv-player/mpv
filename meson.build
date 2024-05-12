@@ -438,9 +438,6 @@ endif
 features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
                                       prefix: '#include <poll.h>')}
 
-features += {'seek-data': cc.has_header_symbol('errno.h', 'ENXIO') and
-    cc.has_header_symbol('unistd.h', 'SEEK_DATA', args: '-D_GNU_SOURCE')}
-
 cd_devices = {
     'windows': 'D:',
     'cygwin': 'D:',
