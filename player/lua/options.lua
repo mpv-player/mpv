@@ -72,13 +72,9 @@ local function read_options(options, identifier, on_update)
             if line:sub(#line) == "\r" then
                 line = line:sub(1, #line - 1)
             end
-            if string.find(line, "#") == 1 then
-
-            else
+            if string.find(line, "#") ~= 1 then
                 local eqpos = string.find(line, "=")
-                if eqpos == nil then
-
-                else
+                if eqpos ~= nil then
                     local key = string.sub(line, 1, eqpos-1)
                     local val = string.sub(line, eqpos+1)
 
@@ -108,7 +104,7 @@ local function read_options(options, identifier, on_update)
     -- command line options are always applied on top of these
     local conf_and_default_opts = opt_table_copy(options)
 
-    local function parse_opts(full, options)
+    local function parse_opts(full, opt)
         for key, val in pairs(full) do
             if string.find(key, prefix, 1, true) == 1 then
                 key = string.sub(key, string.len(prefix)+1)
@@ -122,7 +118,7 @@ local function read_options(options, identifier, on_update)
                         msg.error("script-opts: error converting value '" .. val ..
                             "' for key '" .. key .. "'")
                     else
-                        options[key] = convval
+                        opt[key] = convval
                     end
                 end
             end
@@ -136,15 +132,15 @@ local function read_options(options, identifier, on_update)
     if on_update then
         local last_opts = opt_table_copy(options)
 
-        mp.observe_property("options/script-opts", "native", function(name, val)
+        mp.observe_property("options/script-opts", "native", function(_, val)
             local new_opts = opt_table_copy(conf_and_default_opts)
             parse_opts(val, new_opts)
             local changelist = {}
-            for key, val in pairs(new_opts) do
-                if not opt_equal(last_opts[key], val) then
+            for k, v in pairs(new_opts) do
+                if not opt_equal(last_opts[k], v) then
                     -- copy to user
-                    options[key] = opt_copy(val)
-                    changelist[key] = true
+                    options[k] = opt_copy(v)
+                    changelist[k] = true
                 end
             end
             last_opts = new_opts
