@@ -82,6 +82,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@auto_profiles.lua",
 #   include "player/lua/auto_profiles.lua.inc"
     },
+    {"@select.lua",
+#   include "player/lua/select.lua.inc"
+    },
     {0}
 };
 

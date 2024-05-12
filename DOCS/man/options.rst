@@ -1023,6 +1023,10 @@ Program Behavior
     `Conditional auto profiles`_ for details. ``auto`` will load the script,
     but immediately unload it if there are no conditional profiles.
 
+``--load-select=<yes|no>``
+    Enable the builtin script that lets you select from lists of items (default:
+    yes). By default, its keybindings start with the ``g`` key.
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but
