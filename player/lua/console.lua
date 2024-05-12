@@ -107,9 +107,8 @@ local input_caller
 
 local suggestion_buffer = {}
 local selected_suggestion_index
-local completion_start_position
+local completion_pos
 local completion_append
-local file_commands = {}
 local path_separator = platform == 'windows' and '\\' or '/'
 local completion_old_line
 local completion_old_cursor
@@ -908,13 +907,6 @@ local function command_list()
     return commands
 end
 
-local function command_list_and_help()
-    local commands = command_list()
-    commands[#commands + 1] = 'help'
-
-    return commands
-end
-
 local function property_list()
     local properties = mp.get_property_native('property-list')
 
@@ -969,7 +961,7 @@ local function list_option_list()
     return options
 end
 
-local function list_option_verb_list(option)
+local function list_option_action_list(option)
     local type = mp.get_property('option-info/' .. option .. '/type')
 
     if type == 'Key/value list' then
@@ -979,33 +971,29 @@ local function list_option_verb_list(option)
     if type == 'String list' or type == 'Object settings list' then
         return {'add', 'append', 'clr', 'pre', 'set', 'remove', 'toggle'}
     end
-
-    return {}
 end
 
-local function choice_list(option)
-    local info = mp.get_property_native('option-info/' .. option, {})
-
-    if info.type == 'Flag' then
-        return { 'no', 'yes' }
+local function list_option_value_list(option)
+    if option ~= 'af' and option ~= 'vf' then
+        return mp.get_property_native(option)
     end
 
-    return info.choices or {}
+    local filters = {}
+
+    for i, filter in ipairs(mp.get_property_native(option)) do
+        filters[i] = filter.label and '@' .. filter.label or filter.name
+    end
+
+    return filters
 end
 
-local function find_commands_with_file_argument()
-    if #file_commands > 0 then
-        return file_commands
-    end
-
+local function has_file_argument(candidate_command)
     for _, command in pairs(mp.get_property_native('command-list')) do
-        if command.args[1] and
-           (command.args[1].name == 'filename' or command.args[1].name == 'url') then
-            file_commands[#file_commands + 1] = command.name
+        if command.name == candidate_command then
+            return command.args[1] and
+                   (command.args[1].name == 'filename' or command.args[1].name == 'url')
         end
     end
-
-    return file_commands
 end
 
 local function file_list(directory)
@@ -1022,61 +1010,39 @@ local function file_list(directory)
     return files
 end
 
--- List of tab-completions:
---   pattern: A Lua pattern used in string:match. It should return the start
---            position of the word to be completed in the first capture (using
---            the empty parenthesis notation "()"). In patterns with 2
---            captures, the first determines the completions, and the second is
---            the start of the word to be completed.
---   list: A function that returns a list of candidate completion values.
---   append: An extra string to be appended to the end of a successful
---           completion. It is only appended if 'list' contains exactly one
---           match.
-function build_completers()
-    local completers = {
-        { pattern = '^%s*()[%w_-]*$', list = command_list_and_help, append = ' ' },
-        { pattern = '^%s*help%s+()[%w_-]*$', list = command_list },
-        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+()%S*$', list = choice_list },
-        { pattern = '^%s*set%s+"?([%w_-]+)"?%s+"()%S*$', list = choice_list, append = '"' },
-        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+()%S*$', list = choice_list, append = " " },
-        { pattern = '^%s*cycle[-_]values%s+"?([%w_-]+)"?.-%s+"()%S*$', list = choice_list, append = '" ' },
-        { pattern = '^%s*apply[-_]profile%s+"()%S*$', list = profile_list, append = '"' },
-        { pattern = '^%s*apply[-_]profile%s+()%S*$', list = profile_list },
-        { pattern = '^%s*change[-_]list%s+()[%w_-]*$', list = list_option_list, append = ' ' },
-        { pattern = '^%s*change[-_]list%s+()"[%w_-]*$', list = list_option_list, append = '" ' },
-        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+()%a*$', list = list_option_verb_list, append = ' ' },
-        { pattern = '^%s*change[-_]list%s+"?([%w_-]+)"?%s+"()%a*$', list = list_option_verb_list, append = '" ' },
-        { pattern = '^%s*([av]f)%s+()%a*$', list = list_option_verb_list, append = ' ' },
-        { pattern = '^%s*([av]f)%s+"()%a*$', list = list_option_verb_list, append = '" ' },
-        { pattern = '${[=>]?()[%w_/-]*$', list = property_list, append = '}' },
-    }
+local function handle_file_completion(before_cur, path_pos)
+    local directory, last_component_pos =
+        before_cur:sub(path_pos):match('(.-)()[^' .. path_separator ..']*$')
+    completion_pos = path_pos + last_component_pos - 1
 
-    for _, command in pairs({'set', 'add', 'cycle', 'cycle[-_]values', 'multiply'}) do
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+()[%w_/-]*$',
-            list = property_list,
-            append = ' ',
-        }
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command .. '%s+"()[%w_/-]*$',
-            list = property_list,
-            append = '" ',
-        }
+    if directory:find('^~' .. path_separator) then
+        local home = mp.command_native({'expand-path', '~/'})
+        before_cur = before_cur:sub(1, completion_pos - #directory - 1) ..
+                     home ..
+                     before_cur:sub(completion_pos - #directory + 1)
+        directory = home .. directory:sub(2)
+        completion_pos = completion_pos + #home - 1
     end
 
+    -- Don't use completion_append for file completion to not add quotes after
+    -- directories whose entries you may want to complete afterwards.
+    completion_append = ''
 
-    for _, command in pairs(find_commands_with_file_argument()) do
-        completers[#completers + 1] = {
-            pattern = '^%s*' .. command:gsub('-', '[-_]') ..
-                      '%s+["\']?(.-)()[^' .. path_separator ..']*$',
-            list = file_list,
-            -- Unfortunately appending " here would append it everytime a
-            -- directory is fully completed, even if you intend to browse it
-            -- afterwards.
-        }
+    return file_list(directory), before_cur
+end
+
+local function handle_choice_completion(option, before_cur, path_pos)
+    local info = mp.get_property_native('option-info/' .. option, {})
+
+    if info.type == 'Flag' then
+        return { 'no', 'yes' }, before_cur
     end
 
-    return completers
+    if info['expects-file'] then
+        return handle_file_completion(before_cur, path_pos)
+    end
+
+    return info.choices, before_cur
 end
 
 function common_prefix_length(s1, s2)
@@ -1179,7 +1145,7 @@ local function cycle_through_suggestions(backwards)
         selected_suggestion_index = #suggestion_buffer
     end
 
-    local before_cur = line:sub(1, completion_start_position - 1) ..
+    local before_cur = line:sub(1, completion_pos - 1) ..
                        suggestion_buffer[selected_suggestion_index] .. completion_append
     line = before_cur .. strip_common_characters(line:sub(cursor), completion_append)
     cursor = before_cur:len() + 1
@@ -1203,66 +1169,174 @@ function complete(backwards)
 
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
+    local tokens = {}
+    local first_useful_token_index = 1
+    local completions
 
-    -- Try the first completer that works
-    for _, completer in ipairs(build_completers()) do
-        -- Completer patterns should return the start of the word to be
-        -- completed as the first capture.
-        local s2
-        completion_start_position, s2 = before_cur:match(completer.pattern)
-        if not completion_start_position then
-            -- Multiple input commands can be separated by semicolons, so all
-            -- completions that are anchored at the start of the string with
-            -- '^' can start from a semicolon as well. Replace ^ with ; and try
-            -- to match again.
-            completion_start_position, s2 =
-                before_cur:match(completer.pattern:gsub('^^', ';'))
-        end
-        if completion_start_position then
-            local hint
-            if s2 then
-                hint = completion_start_position
-                completion_start_position = s2
+    local begin_new_token = true
+    local last_quote
+    for pos, char in before_cur:gmatch('()(.)') do
+        if char:find('[%s;]') and not last_quote then
+            begin_new_token = true
+            if char == ';' then
+                first_useful_token_index = #tokens + 1
             end
-
-            -- Expand ~ in file completion.
-            if completer.list == file_list and hint:find('^~' .. path_separator) then
-                local home = mp.command_native({'expand-path', '~/'})
-                before_cur = before_cur:sub(1, completion_start_position - #hint - 1) ..
-                             home ..
-                             before_cur:sub(completion_start_position - #hint + 1)
-                hint = home .. hint:sub(2)
-                completion_start_position = completion_start_position + #home - 1
-            end
-
-            -- If the completer's pattern found a word, check the completer's
-            -- list for possible completions
-            local part = before_cur:sub(completion_start_position)
-            local completions, prefix = complete_match(part, completer.list(hint))
-            if #completions > 0 then
-                -- If there was only one full match from the list, add
-                -- completer.append to the final string. This is normally a
-                -- space or a quotation mark followed by a space.
-                completion_append = completer.append or ''
-                if #completions == 1 then
-                    prefix = prefix .. completion_append
-                    after_cur = strip_common_characters(after_cur, completion_append)
-                else
-                    table.sort(completions)
-                    suggestion_buffer = completions
-                    selected_suggestion_index = 0
-                end
-
-                -- Insert the completion and update
-                before_cur = before_cur:sub(1, completion_start_position - 1) ..
-                             prefix
-                cursor = before_cur:len() + 1
-                line = before_cur .. after_cur
-                update()
-                return
+        elseif begin_new_token then
+            tokens[#tokens + 1] = { text = char, pos = pos }
+            last_quote = char:match('["\']')
+            begin_new_token = false
+        else
+            tokens[#tokens].text = tokens[#tokens].text .. char
+            if char == last_quote then
+                last_quote = nil
             end
         end
     end
+
+    completion_append = last_quote or ''
+
+    -- Strip quotes from tokens.
+    for _, token in pairs(tokens) do
+        if token.text:find('^"') then
+            token.text = token.text:sub(2):gsub('"$', '')
+            token.pos = token.pos + 1
+        elseif token.text:find("^'") then
+            token.text = token.text:sub(2):gsub("'$", '')
+            token.pos = token.pos + 1
+        end
+    end
+
+    -- Skip command prefixes because it is not worth lumping them together with
+    -- command completions when they are useless for interactive usage.
+    local command_prefixes = {
+        ['osd-auto'] = true, ['no-osd'] = true, ['osd-bar'] = true,
+        ['osd-msg'] = true, ['osd-msg-bar'] = true, ['raw'] = true,
+        ['expand-properties'] = true, ['repeatable'] = true, ['async'] = true,
+        ['sync'] = true
+    }
+
+    while tokens[first_useful_token_index] and
+          command_prefixes[tokens[first_useful_token_index].text] do
+        first_useful_token_index = first_useful_token_index + 1
+    end
+
+    -- Add an empty token if the cursor is after whitespace to simplify
+    -- comparisons.
+    if before_cur == '' or before_cur:find('%s$') then
+        tokens[#tokens + 1] = { text = "", pos = cursor }
+    end
+
+    local add_actions = {
+        ['add'] = true, ['append'] = true, ['pre'] = true, ['set'] = true
+    }
+
+    local first_useful_token = tokens[first_useful_token_index]
+
+    completion_pos = before_cur:match('${[=>]?()[%w_/-]*$')
+    if completion_pos then
+        completions = property_list()
+        completion_append = '} '
+    elseif #tokens == first_useful_token_index then
+        completions = command_list()
+        completions[#completions + 1] = 'help'
+        completion_pos = first_useful_token.pos
+        completion_append = completion_append .. ' '
+    elseif #tokens == first_useful_token_index + 1 then
+        if first_useful_token.text == 'set' or
+           first_useful_token.text == 'add' or
+           first_useful_token.text == 'cycle' or
+           first_useful_token.text == 'cycle-values' or
+           first_useful_token.text == 'multiply' then
+            completions = property_list()
+            completion_pos = tokens[first_useful_token_index + 1].pos
+            completion_append = completion_append .. ' '
+        elseif first_useful_token.text == 'help' then
+            completions = command_list()
+            completion_pos = tokens[first_useful_token_index + 1].pos
+        elseif first_useful_token.text == 'apply-profile' then
+            completions = profile_list()
+            completion_pos = tokens[first_useful_token_index + 1].pos
+        elseif first_useful_token.text == 'change-list' then
+            completions = list_option_list()
+            completion_pos = tokens[first_useful_token_index + 1].pos
+            completion_append = completion_append .. ' '
+        elseif first_useful_token.text == 'vf' or
+               first_useful_token.text == 'af' then
+            completions = list_option_action_list(first_useful_token.text)
+            completion_pos = tokens[first_useful_token_index + 1].pos
+            completion_append = completion_append .. ' '
+        elseif has_file_argument(first_useful_token.text) then
+            completions, before_cur =
+                handle_file_completion(before_cur, tokens[first_useful_token_index + 1].pos)
+        end
+    elseif first_useful_token.text == 'cycle-values' then
+        completion_pos = tokens[#tokens].pos
+        completion_append = completion_append .. ' '
+        completions, before_cur =
+            handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                     before_cur, tokens[#tokens].pos)
+    elseif #tokens == first_useful_token_index + 2 then
+        if first_useful_token.text == 'set' then
+            completion_pos = tokens[#tokens].pos
+            completions, before_cur =
+                handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                         before_cur,
+                                         tokens[first_useful_token_index + 2].pos)
+        elseif first_useful_token.text == 'change-list' then
+            completions = list_option_action_list(tokens[first_useful_token_index + 1].text)
+            completion_pos = tokens[first_useful_token_index + 2].pos
+            completion_append = completion_append .. ' '
+        elseif first_useful_token.text == 'vf' or
+               first_useful_token.text == 'af' then
+            if add_actions[tokens[first_useful_token_index + 1].text] then
+                completion_pos = tokens[#tokens].pos
+                completions, before_cur =
+                    handle_choice_completion(first_useful_token.text,
+                                             before_cur, tokens[#tokens].pos)
+            elseif tokens[first_useful_token_index + 1].text == 'remove' then
+                completions = list_option_value_list(first_useful_token.text)
+                completion_pos = tokens[#tokens].pos
+            end
+        end
+    elseif #tokens == first_useful_token_index + 3 then
+        if first_useful_token.text == 'change-list' then
+            if add_actions[tokens[first_useful_token_index + 2].text] then
+                completion_pos = tokens[#tokens].pos
+                completions, before_cur =
+                    handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                             before_cur, tokens[#tokens].pos)
+            elseif tokens[first_useful_token_index + 2].text == 'remove' then
+                completion_pos = tokens[#tokens].pos
+                completions = list_option_value_list(tokens[first_useful_token_index + 1].text)
+            end
+        elseif first_useful_token.text == 'dump-cache' then
+            completions, before_cur =
+                handle_file_completion(before_cur,
+                                       tokens[first_useful_token_index + 3].pos)
+        end
+    end
+
+    if completions == nil then
+        return
+    end
+
+    local prefix
+    completions, prefix =
+        complete_match(before_cur:sub(completion_pos), completions)
+
+    if #completions == 1 then
+        prefix = prefix .. completion_append
+        after_cur = strip_common_characters(after_cur, completion_append)
+    else
+        table.sort(completions)
+        suggestion_buffer = completions
+        selected_suggestion_index = 0
+    end
+
+    before_cur = before_cur:sub(1, completion_pos - 1) .. prefix
+    cursor = before_cur:len() + 1
+    line = before_cur .. after_cur
+    update()
 end
 
 -- Move the cursor to the beginning of the line (HOME)
@@ -1585,7 +1659,7 @@ mp.register_script_message('complete', function(list, start_pos)
     if #completions > 1 then
         suggestion_buffer = completions
         selected_suggestion_index = 0
-        completion_start_position = start_pos
+        completion_pos = start_pos
         completion_append = ''
     end
 
