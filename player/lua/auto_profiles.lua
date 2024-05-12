@@ -1,6 +1,5 @@
 -- Note: anything global is accessible by profile condition expressions.
 
-local utils = require 'mp.utils'
 local msg = require 'mp.msg'
 
 local profiles = {}
@@ -128,7 +127,7 @@ end
 
 local evil_magic = {}
 setmetatable(evil_magic, {
-    __index = function(table, key)
+    __index = function(_, key)
         -- interpret everything as property, unless it already exists as
         -- a non-nil global value
         local v = _G[key]
@@ -141,7 +140,7 @@ setmetatable(evil_magic, {
 
 p = {}
 setmetatable(p, {
-    __index = function(table, key)
+    __index = function(_, key)
         return magic_get(key)
     end,
 })
@@ -149,6 +148,8 @@ setmetatable(p, {
 local function compile_cond(name, s)
     local code, chunkname = "return " .. s, "profile " .. name .. " condition"
     local chunk, err
+    -- luacheck: push
+    -- luacheck: ignore setfenv loadstring
     if setfenv then -- lua 5.1
         chunk, err = loadstring(code, chunkname)
         if chunk then
@@ -157,6 +158,7 @@ local function compile_cond(name, s)
     else -- lua 5.2
         chunk, err = load(code, chunkname, "t", evil_magic)
     end
+    -- luacheck: pop
     if not chunk then
         msg.error("Profile '" .. name .. "' condition: " .. err)
         chunk = function() return false end
