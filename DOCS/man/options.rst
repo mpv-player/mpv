@@ -2391,7 +2391,8 @@ Subtitles
     Whether to scale subtitles with the window size (default: yes). If this is
     disabled, changing the window size won't change the subtitle font size.
 
-    Like ``--sub-scale``, this can break ASS subtitles.
+    Affects plain text subtitles only (or ASS if ``--sub-ass-override`` is set
+    high enough).
 
 ``--sub-scale-with-window=<yes|no>``
     Make the subtitle font size relative to the window, instead of the video.
