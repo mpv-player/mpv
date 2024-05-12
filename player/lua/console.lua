@@ -799,9 +799,15 @@ function handle_enter()
         history_add(line)
     end
 
-    if input_caller then
+    if selectable_items then
+        if #matches > 0 then
+            mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
+                        utils.format_json({matches[selected_match].index}))
+        end
+        set_active(false)
+    elseif input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
-                    utils.format_json({selectable_items and matches[selected_match].index or line}))
+                    utils.format_json({line}))
     else
         -- match "help [<text>]", return <text> or "", strip all whitespace
         local help = line:match('^%s*help%s+(.-)%s*$') or
