@@ -1469,7 +1469,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             w32->windowrc.right = w32->windowrc.left + w;
             w32->windowrc.bottom = w32->windowrc.top + h;
             signal_events(w32, VO_EVENT_RESIZE);
-            MP_VERBOSE(w32, "resize window: %d:%d\n", w, h);
+            MP_TRACE(w32, "resize window: %d:%d\n", w, h);
         }
 
         // Window may have been minimized, maximized or restored
