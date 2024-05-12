@@ -247,11 +247,6 @@ Configurable Options
 
     Scale factor of the OSC when fullscreen
 
-``scaleforcedwindow``
-    Default: 2.0
-
-    Scale factor of the OSC when rendered on a forced (dummy) window
-
 ``vidscale``
     Default: yes
 
