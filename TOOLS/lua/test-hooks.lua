@@ -25,8 +25,8 @@ end
 
 local props = {"path", "metadata"}
 for _, name in ipairs(props) do
-    mp.observe_property(name, "native", function(name, val)
-        print("property '" .. name .. "' changed to '" ..
+    mp.observe_property(name, "native", function(prop, val)
+        print("property '" .. prop .. "' changed to '" ..
               utils.to_string(val) .. "'")
     end)
 end
