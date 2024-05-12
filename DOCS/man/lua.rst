@@ -970,8 +970,9 @@ REPL.
 
     ``submit``
         The callback invoked when the user presses Enter. The first argument is
-        the 1-based index of the selected item. You can close the console from
-        within the callback by calling ``input.terminate()``.
+        the 1-based index of the selected item. Unlike with ``input.get()``, the
+        console is automatically closed on submit without having to call
+        ``input.terminate()``.
 
     Example:
 
@@ -984,7 +985,6 @@ REPL.
                 },
                 submit = function (id)
                     mp.commandv("playlist-play-index", id - 1)
-                    input.terminate()
                 end,
             })
 
