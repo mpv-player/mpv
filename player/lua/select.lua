@@ -193,20 +193,18 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         name = "subprocess",
         capture_stdout = true,
         args = sub.external
-            and {"ffmpeg", "-loglevel", "quiet", "-i", sub["external-filename"],
+            and {"ffmpeg", "-loglevel", "error", "-i", sub["external-filename"],
                  "-f", "lrc", "-map_metadata", "-1", "-fflags", "+bitexact", "-"}
-            or {"ffmpeg", "-loglevel", "quiet", "-i", mp.get_property("path"),
+            or {"ffmpeg", "-loglevel", "error", "-i", mp.get_property("path"),
                 "-map", "s:" .. sub["id"] - 1, "-f", "lrc", "-map_metadata",
                 "-1", "-fflags", "+bitexact", "-"}
     })
 
-    if r.status < 0 then
-        show_error("subprocess error: " .. r.error_string)
+    if r.error_string == "init" then
+        show_error("Failed to extract subtitles: ffmpeg not found.")
         return
-    end
-
-    if r.status > 0 then
-        show_error("ffmpeg failed with code " .. r.status)
+    elseif r.status ~= 0 then
+        show_error("Failed to extract subtitles.")
         return
     end
 
