@@ -246,34 +246,39 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
     root->blank_lines += root->status_lines;
 }
 
-void mp_msg_flush_status_line(struct mp_log *log, bool clear)
+static void msg_flush_status_line(struct mp_log_root *root, bool clear)
 {
-    if (!log->root)
-        return;
-
-    mp_mutex_lock(&log->root->lock);
-    if (!log->root->status_lines)
+    if (!root->status_lines)
         goto done;
 
-    FILE *fp = term_msg_fp(log->root, MSGL_STATUS);
+    FILE *fp = term_msg_fp(root, MSGL_STATUS);
     if (!clear) {
-        if (log->root->isatty[term_msg_fileno(log->root, MSGL_STATUS)])
+        if (root->isatty[term_msg_fileno(root, MSGL_STATUS)])
             fprintf(fp, TERM_ESC_RESTORE_CURSOR);
         fprintf(fp, "\n");
-        log->root->blank_lines = 0;
-        log->root->status_lines = 0;
+        root->blank_lines = 0;
+        root->status_lines = 0;
         goto done;
     }
 
     bstr term_msg = {0};
-    prepare_prefix(log->root, &term_msg, MSGL_STATUS, 0);
+    prepare_prefix(root, &term_msg, MSGL_STATUS, 0);
     if (term_msg.len) {
         fprintf(fp, "%.*s", BSTR_P(term_msg));
         talloc_free(term_msg.start);
     }
 
 done:
-    log->root->status_line.len = 0;
+    root->status_line.len = 0;
+}
+
+void mp_msg_flush_status_line(struct mp_log *log, bool clear)
+{
+    if (!log->root)
+        return;
+
+    mp_mutex_lock(&log->root->lock);
+    msg_flush_status_line(log->root, clear);
     mp_mutex_unlock(&log->root->lock);
 }
 
