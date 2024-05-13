@@ -163,16 +163,18 @@ int m_config_parse_config_file(m_config_t *config, struct mpv_global *global,
 
     MP_VERBOSE(config, "Reading config file %s\n", conffile);
 
+    int r = 0;
+
     struct stream *s = stream_create(conffile, STREAM_READ | STREAM_ORIGIN_DIRECT,
                                      NULL, global);
     if (!s)
-        return 0;
+        goto done;
     bstr data = stream_read_complete(s, s, 1000000000);
     if (!data.start)
-        return 0;
+        goto done;
+    r = m_config_parse(config, conffile, data, initial_section, flags);
 
-    int r = m_config_parse(config, conffile, data, initial_section, flags);
-    talloc_free(data.start);
+done:
     free_stream(s);
     return r;
 }
