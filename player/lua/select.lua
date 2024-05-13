@@ -27,7 +27,7 @@ end
 
 mp.add_forced_key_binding(nil, "select-playlist", function ()
     local playlist = {}
-    local default_item = 1
+    local default_item
 
     for i, entry in ipairs(mp.get_property_native("playlist")) do
         playlist[i] = select(2, utils.split_path(entry.filename))
@@ -100,7 +100,7 @@ end)
 local function select_track(property, type, prompt, error)
     local tracks = {}
     local items = {}
-    local default_item = 1
+    local default_item
     local track_id = mp.get_property_native(property)
 
     for _, track in ipairs(mp.get_property_native("track-list")) do
@@ -260,7 +260,7 @@ mp.add_forced_key_binding(nil, "select-audio-device", function ()
     -- otherwise its value is just auto and there is no current-audio-device
     -- property.
     local selected_device = mp.get_property("audio-device")
-    local default_item = 1
+    local default_item
 
     if #devices == 0 then
         show_error("No available audio devices.")
