@@ -271,8 +271,8 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     stream_t *stream = stream_create(source_filename,
                                      STREAM_ORIGIN_DIRECT | STREAM_READ,
                                      mpctx->playback_abort, mpctx->global);
-    if (!stream)
-        return -1;
+    if (!stream || stream->is_directory)
+        goto done;
 
     int64_t size = stream_get_size(stream);
 

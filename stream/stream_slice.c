@@ -157,7 +157,11 @@ static int open2(struct stream *stream, const struct stream_open_args *args)
         return inner_ret;
     }
 
-    if (!p->inner->seekable) {
+    if (p->inner->is_directory) {
+        MP_FATAL(stream, "Inner stream '%s' is a directory\n", p->inner->url);
+        free_stream(p->inner);
+        return STREAM_ERROR;
+    } else if (!p->inner->seekable) {
         MP_FATAL(stream, "Non-seekable stream '%s' can't be used with 'slice://'\n", p->inner->url);
         free_stream(p->inner);
         return STREAM_ERROR;

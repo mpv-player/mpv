@@ -168,6 +168,10 @@ static int open_cb(struct archive *arch, void *priv)
                                     vol->mpa->primary_src->stream_origin,
                                  vol->mpa->primary_src->cancel,
                                  vol->mpa->primary_src->global);
+        if (vol->src && vol->src->is_directory) {
+            free_stream(vol->src);
+            vol->src = NULL;
+        }
         // We pretend that failure to open a stream means it was not found,
         // we assume in turn means that the volume doesn't exist (since
         // libarchive builds volumes as some sort of abstraction on top of its
