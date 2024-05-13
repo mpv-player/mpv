@@ -197,6 +197,11 @@ static inline int term_msg_fileno(struct mp_log_root *root, int lev)
     return root->force_stderr ? STDERR_FILENO : STDOUT_FILENO;
 }
 
+static inline FILE *term_msg_fp(struct mp_log_root *root, int lev)
+{
+    return term_msg_fileno(root, lev) == STDERR_FILENO ? stderr : stdout;
+}
+
 // Reposition cursor and clear lines for outputting the status line. In certain
 // cases, like term OSD and subtitle display, the status can consist of
 // multiple lines.
@@ -250,10 +255,11 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
     if (!log->root->status_lines)
         goto done;
 
+    FILE *fp = term_msg_fp(log->root, MSGL_STATUS);
     if (!clear) {
-        if (log->root->isatty[STDERR_FILENO])
-            fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
-        fprintf(stderr, "\n");
+        if (log->root->isatty[term_msg_fileno(log->root, MSGL_STATUS)])
+            fprintf(fp, TERM_ESC_RESTORE_CURSOR);
+        fprintf(fp, "\n");
         log->root->blank_lines = 0;
         log->root->status_lines = 0;
         goto done;
@@ -262,7 +268,7 @@ void mp_msg_flush_status_line(struct mp_log *log, bool clear)
     bstr term_msg = {0};
     prepare_prefix(log->root, &term_msg, MSGL_STATUS, 0);
     if (term_msg.len) {
-        fprintf(stderr, "%.*s", BSTR_P(term_msg));
+        fprintf(fp, "%.*s", BSTR_P(term_msg));
         talloc_free(term_msg.start);
     }
 
@@ -276,7 +282,7 @@ void mp_msg_set_term_title(struct mp_log *log, const char *title)
     if (log->root && title) {
         // Lock because printf to terminal is not necessarily atomic.
         mp_mutex_lock(&log->root->lock);
-        fprintf(stderr, "\033]0;%s\007", title);
+        fprintf(term_msg_fp(log->root, MSGL_STATUS), "\033]0;%s\007", title);
         mp_mutex_unlock(&log->root->lock);
     }
 }
@@ -558,8 +564,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
                            &root->term_status_msg);
         }
 
-        int fileno = term_msg_fileno(root, lev);
-        FILE *stream = fileno == STDERR_FILENO ? stderr : stdout;
+        FILE *stream = term_msg_fp(root, lev);
         if (root->term_msg.len) {
             fwrite(root->term_msg.start, root->term_msg.len, 1, stream);
             if (root->term_status_msg.len)
@@ -848,8 +853,8 @@ void mp_msg_uninit(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
     mp_msg_flush_status_line(global->log, true);
-    if (root->really_quiet && root->isatty[STDERR_FILENO])
-        fprintf(stderr, TERM_ESC_RESTORE_CURSOR);
+    if (root->really_quiet && root->isatty[term_msg_fileno(root, MSGL_STATUS)])
+        fprintf(term_msg_fp(root, MSGL_STATUS), TERM_ESC_RESTORE_CURSOR);
     terminate_log_file_thread(root);
     mp_msg_log_buffer_destroy(root->early_buffer);
     mp_msg_log_buffer_destroy(root->early_filebuffer);
