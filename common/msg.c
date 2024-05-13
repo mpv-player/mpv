@@ -96,6 +96,7 @@ struct mp_log_root {
     // --- protected by log_file_lock
     bool log_file_thread_active; // also termination signal for the thread
     int module_indent;
+    bool status_stderr;
 };
 
 struct mp_log {
@@ -194,6 +195,8 @@ int mp_msg_level(struct mp_log *log)
 
 static inline int term_msg_fileno(struct mp_log_root *root, int lev)
 {
+    if (lev == MSGL_STATUS && root->status_stderr)
+        return STDERR_FILENO;
     return root->force_stderr ? STDERR_FILENO : STDOUT_FILENO;
 }
 
@@ -769,6 +772,11 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     root->module = opts->msg_module;
     root->use_terminal = opts->use_terminal;
     root->show_time = opts->msg_time;
+
+    if (root->status_stderr != opts->msg_status_stderr) {
+        msg_flush_status_line(root, true);
+        root->status_stderr = opts->msg_status_stderr;
+    }
 
     if (root->really_quiet)
         root->status_lines = 0;

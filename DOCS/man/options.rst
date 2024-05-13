@@ -5000,6 +5000,9 @@ Terminal
     later actually), using a monotonic time source depending on the OS. This
     is ``CLOCK_MONOTONIC`` on sane UNIX variants.
 
+``--msg-status-stderr``
+    Print status line to stderr.
+
 Cache
 -----
 

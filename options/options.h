@@ -160,6 +160,7 @@ typedef struct MPOpts {
     bool msg_color;
     bool msg_module;
     bool msg_time;
+    bool msg_status_stderr;
     char *log_file;
 
     int operation_mode;
