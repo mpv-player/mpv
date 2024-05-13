@@ -221,7 +221,7 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     for line in r.stdout:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
         sub_lines[#sub_lines + 1] = line:sub(2):gsub("]", " ", 1)
 
-        if line:find("^" .. sub_start) then
+        if line:find("^%[" .. sub_start) then
             default_item = #sub_lines
         end
     end
