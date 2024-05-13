@@ -202,6 +202,17 @@ static inline FILE *term_msg_fp(struct mp_log_root *root, int lev)
     return term_msg_fileno(root, lev) == STDERR_FILENO ? stderr : stdout;
 }
 
+static inline bool is_status_output(struct mp_log_root *root, int lev)
+{
+    if (lev == MSGL_STATUS)
+        return true;
+    int msg_out = term_msg_fileno(root, lev);
+    int status_out = term_msg_fileno(root, MSGL_STATUS);
+    if (msg_out != status_out && root->isatty[msg_out] != root->isatty[status_out])
+        return false;
+    return true;
+}
+
 // Reposition cursor and clear lines for outputting the status line. In certain
 // cases, like term OSD and subtitle display, the status can consist of
 // multiple lines.
@@ -209,6 +220,9 @@ static void prepare_prefix(struct mp_log_root *root, bstr *out, int lev, int ter
 {
     int new_lines = lev == MSGL_STATUS ? term_lines : 0;
     out->len = 0;
+
+    if (!is_status_output(root, lev))
+        return;
 
     if (!root->isatty[term_msg_fileno(root, lev)]) {
         if (root->status_lines)
@@ -563,7 +577,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
         root->term_status_msg.len = 0;
         if (lev != MSGL_STATUS && root->status_line.len && root->status_log &&
-            test_terminal_level(root->status_log, MSGL_STATUS))
+            is_status_output(root, lev) && test_terminal_level(root->status_log, MSGL_STATUS))
         {
             write_term_msg(root->status_log, MSGL_STATUS, root->status_line,
                            &root->term_status_msg);
