@@ -219,9 +219,9 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
 
     -- Strip HTML and ASS tags.
     for line in r.stdout:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
-        sub_lines[#sub_lines + 1] = line
+        sub_lines[#sub_lines + 1] = line:sub(2):gsub("]", " ", 1)
 
-        if line:find("^%[" .. sub_start) then
+        if line:find("^" .. sub_start) then
             default_item = #sub_lines
         end
     end
@@ -231,7 +231,7 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         items = sub_lines,
         default_item = default_item,
         submit = function (index)
-            mp.commandv("seek", sub_lines[index]:match("[%d:%.]+"), "absolute")
+            mp.commandv("seek", sub_lines[index]:match("%S*"), "absolute")
         end,
     })
 end)
