@@ -13,28 +13,60 @@ if (-not (Test-Path "$subprojects/packagefiles/ffmpeg")) {
 Invoke-WebRequest -Uri "https://github.com/FFmpeg/FFmpeg/commit/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch" `
                   -OutFile "$subprojects/packagefiles/ffmpeg/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch"
 
-# Download pre-built shaderc, it is quite big to build each time
-# For download link see https://github.com/google/shaderc/blob/main/downloads.md
-$url = "https://storage.googleapis.com/shaderc/badges/build_link_windows_vs2019_release.html"
-$shaderc = "shaderc.zip"
-$resp = Invoke-WebRequest -Uri $url
-if ($resp.Content -match '<meta http-equiv="refresh" content="\d+; url=(?<url>[^"]+)"') {
-    $url = $matches['url']
+# Wrap shaderc to run git-sync-deps and patch unsupported generator expression
+if (-not (Test-Path "$subprojects/shaderc_cmake")) {
+    git clone https://github.com/google/shaderc --depth 1 $subprojects/shaderc_cmake
+    Set-Content -Path "$subprojects/shaderc_cmake/p.diff" -Value @'
+diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
+index d44f62a..54d4719 100644
+--- a/third_party/CMakeLists.txt
++++ b/third_party/CMakeLists.txt
+@@ -87,7 +87,11 @@ if (NOT TARGET glslang)
+       # Glslang tests are off by default. Turn them on if testing Shaderc.
+       set(GLSLANG_TESTS ON)
+     endif()
+-    set(GLSLANG_ENABLE_INSTALL $<NOT:${SKIP_GLSLANG_INSTALL}>)
++    if (SKIP_GLSLANG_INSTALL)
++      set(GLSLANG_ENABLE_INSTALL OFF)
++    else()
++      set(GLSLANG_ENABLE_INSTALL ON)
++    endif()
+     add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
+   endif()
+   if (NOT TARGET glslang)
+'@
+    git -C $subprojects/shaderc_cmake apply --ignore-whitespace p.diff
 }
-Invoke-WebRequest -Uri $url -OutFile $shaderc
-if (Test-Path "$subprojects/shaderc") {
-    Remove-Item -LiteralPath "$subprojects/shaderc" -Force -Recurse
+if (-not (Test-Path "$subprojects/shaderc")) {
+    New-Item -Path "$subprojects/shaderc" -ItemType Directory | Out-Null
 }
-Expand-Archive -Path $shaderc -DestinationPath "$subprojects/shaderc"
-Move-Item -Path "$subprojects/shaderc/install/*" -Destination "$subprojects/shaderc"
-
 Set-Content -Path "$subprojects/shaderc/meson.build" -Value @"
-project('shaderc', 'c', version: '2024.1')
-cc = meson.get_compiler('c')
-shaderc_dep = declare_dependency(
-  dependencies: cc.find_library('shaderc_combined', dirs: meson.current_source_dir() / 'lib'),
-  include_directories: include_directories('include')
-)
+project('shaderc', 'cpp', version: '2024.1')
+
+python = find_program('python3')
+run_command(python, '../shaderc_cmake/utils/git-sync-deps', check: true)
+
+cmake = import('cmake')
+opts = cmake.subproject_options()
+opts.add_cmake_defines({
+    'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+    'CMAKE_POLICY_DEFAULT_CMP0091': 'NEW',
+    'SHADERC_SKIP_INSTALL': 'ON',
+    'SHADERC_SKIP_TESTS': 'ON',
+    'SHADERC_SKIP_EXAMPLES': 'ON',
+    'SHADERC_SKIP_COPYRIGHT_CHECK': 'ON'
+})
+shaderc_proj = cmake.subproject('shaderc_cmake', options: opts)
+shaderc_dep = declare_dependency(dependencies: [
+    shaderc_proj.dependency('shaderc'),
+    shaderc_proj.dependency('shaderc_util'),
+    shaderc_proj.dependency('SPIRV'),
+    shaderc_proj.dependency('SPIRV-Tools-static'),
+    shaderc_proj.dependency('SPIRV-Tools-opt'),
+    shaderc_proj.dependency('glslang'),
+    shaderc_proj.dependency('GenericCodeGen'),
+    shaderc_proj.dependency('MachineIndependent'),
+])
 meson.override_dependency('shaderc', shaderc_dep)
 "@
 
