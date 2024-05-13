@@ -848,9 +848,12 @@ struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                 STREAM_LESS_NOISE;
     stream_t *s = stream_create(filename, flags, NULL, global);
     if (s) {
-        res = stream_read_complete(s, talloc_ctx, max_size);
-        free_stream(s);
+        if (s->is_directory)
+            mp_err(s->log, "Failed to open %s (not a file).\n", filename);
+        else
+            res = stream_read_complete(s, talloc_ctx, max_size);
     }
+    free_stream(s);
     return res;
 }
 
