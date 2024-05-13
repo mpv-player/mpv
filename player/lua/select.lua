@@ -210,9 +210,10 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     end
 
     local sub_lines = {}
-    local default_item = 1
+    local default_item
 
-    local sub_start = mp.get_property_native("sub-start", 0)
+    local sub_start = mp.get_property_native("sub-start",
+                                             mp.get_property("time-pos"))
     local m = math.floor(sub_start / 60)
     local s = sub_start - m * 60
     sub_start = string.format("%.2d:%05.2f", m, s)
@@ -223,6 +224,22 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
 
         if line:find("^%[" .. sub_start) then
             default_item = #sub_lines
+        end
+    end
+
+    -- Preselect the previous line when there is no exact match.
+    if default_item == nil then
+        local a = 1
+        local b = #sub_lines
+        while a < b do
+            local mid = math.ceil(b - a)
+
+            if sub_lines[mid]:match("%S*") < sub_start then
+                default_item = mid
+                a = mid + 1
+            else
+                b = mid
+            end
         end
     end
 
