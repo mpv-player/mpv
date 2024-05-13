@@ -266,6 +266,8 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
 int stream_dump(struct MPContext *mpctx, const char *source_filename)
 {
     struct MPOpts *opts = mpctx->opts;
+    bool ok = false;
+
     stream_t *stream = stream_create(source_filename,
                                      STREAM_ORIGIN_DIRECT | STREAM_READ,
                                      mpctx->playback_abort, mpctx->global);
@@ -277,10 +279,10 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     FILE *dest = fopen(opts->stream_dump, "wb");
     if (!dest) {
         MP_ERR(mpctx, "Error opening dump file: %s\n", mp_strerror(errno));
-        return -1;
+        goto done;
     }
 
-    bool ok = true;
+    ok = true;
 
     while (mpctx->stop_play == KEEP_PLAYING && ok) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
@@ -300,6 +302,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     }
 
     ok &= fclose(dest) == 0;
+done:
     free_stream(stream);
     return ok ? 0 : -1;
 }
