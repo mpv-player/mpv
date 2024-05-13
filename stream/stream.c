@@ -471,8 +471,13 @@ struct stream *stream_create(const char *url, int flags,
 
 stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 {
-    return stream_create(filename, STREAM_ORIGIN_DIRECT | STREAM_WRITE,
-                         NULL, global);
+    struct stream *s = stream_create(filename, STREAM_ORIGIN_DIRECT | STREAM_WRITE,
+                                     NULL, global);
+    if (s && s->is_directory) {
+        free_stream(s);
+        s = NULL;
+    }
+    return s;
 }
 
 // Read function bypassing the local stream buffer. This will not write into
@@ -804,6 +809,8 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 {
     if (max_size <= 0 || max_size > STREAM_MAX_READ_SIZE)
         abort();
+    if (s->is_directory)
+        return (struct bstr){NULL, 0};
 
     int bufsize;
     int total_read = 0;
