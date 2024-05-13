@@ -7396,8 +7396,18 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         uninit_video_out(mpctx);
         handle_force_window(mpctx, true);
         reinit_video_chain(mpctx);
-        if (track)
-            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
+        
+    //recurring bug https://github.com/mpv-player/mpv/issues/10782
+    if (track) {
+        int old_stop_play = mpctx->stop_play;
+        if (old_stop_play == AT_END_OF_FILE) {
+        mpctx->play_dir = opts->play_dir;
+        }
+        queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
+        if (old_stop_play == AT_END_OF_FILE) {
+            mpctx->stop_play = old_stop_play;
+        }
+    }
 
         mp_wakeup_core(mpctx);
     }
