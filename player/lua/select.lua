@@ -241,6 +241,13 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
                 b = mid
             end
         end
+
+        -- Handle sub-start of embedded subs being slightly earlier than
+        -- ffmpeg's timestamps.
+        if mp.get_property("sub-start") and default_item and
+           sub_lines[default_item + 1] then
+            default_item = default_item + 1
+        end
     end
 
     input.select({
