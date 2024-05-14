@@ -370,13 +370,54 @@ local function populate_log_with_matches(max_width)
     log_buffers[id] = {}
     local log = log_buffers[id]
 
-    -- Subtract 2 for the "(n hidden items)" lines.
-    local max_log_lines = calculate_max_log_lines() - 2
+    local max_log_lines = calculate_max_log_lines()
 
     if selected_match < first_match_to_print then
         first_match_to_print = selected_match
-    elseif selected_match > first_match_to_print + max_log_lines - 1 then
+    end
+
+    if first_match_to_print > 1 then
+        -- Reserve the first line for "n hidden items".
+        max_log_lines = max_log_lines - 1
+    end
+
+    if selected_match > first_match_to_print + max_log_lines - 1 then
+        -- Reserve the first line for "n hidden items" if it wasn't already.
+        if first_match_to_print == 1 then
+            max_log_lines = max_log_lines - 1
+        end
+
         first_match_to_print = selected_match - max_log_lines + 1
+    end
+
+    local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
+                                          #matches)
+
+    if last_match_to_print < #matches then
+        -- Reserve the last line for "n hidden items".
+        last_match_to_print = last_match_to_print - 1
+
+        -- After decrementing the last match to print, we need to check if the
+        -- selected match is beyond the last match to print again, and shift
+        -- both the first and last match to print when it is.
+        if selected_match > last_match_to_print then
+            if first_match_to_print == 1 then
+                -- Reserve the first line for "2 hidden items".
+                first_match_to_print = first_match_to_print + 1
+            end
+
+            first_match_to_print = first_match_to_print + 1
+            last_match_to_print = last_match_to_print + 1
+        end
+    end
+
+    -- When there is only 1 hidden item, print it in the previously reserved
+    -- line instead of printing "1 hidden items".
+    if first_match_to_print == 2 then
+        first_match_to_print = 1
+    end
+    if last_match_to_print == #matches - 1 then
+        last_match_to_print = #matches
     end
 
     if first_match_to_print > 1 then
@@ -386,9 +427,6 @@ local function populate_log_with_matches(max_width)
             terminal_style = terminal_styles.disabled,
         }
     end
-
-    local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
-                                          #matches)
 
     for i = first_match_to_print, last_match_to_print do
         log[#log + 1] = {
@@ -876,7 +914,12 @@ end
 -- Go to the first command in the command history (PgUp)
 function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_log_lines() + 1, 1)
+        -- We don't know whether to count the "n hidden items" lines here; an
+        -- offset of 2 is better with 1 extra line because it scrolls from the
+        -- last to the first visible match, while with both extra lines that is
+        -- done with +3. When there are no "n hidden items" lines selected_match
+        -- becomes 1 with any offset >= 1.
+        selected_match = math.max(selected_match - calculate_max_log_lines() + 2, 1)
         update()
         return
     end
@@ -887,7 +930,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_log_lines() - 1, #matches)
+        selected_match = math.min(selected_match + calculate_max_log_lines() - 2, #matches)
         update()
         return
     end
