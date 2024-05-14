@@ -933,12 +933,12 @@ local function add_video(s)
     append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
     local track = mp.get_property_native("current-tracks/video")
     if track and append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""}) then
-        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
-               no_prefix_markup=true, suffix="]"})
         if track["codec"] ~= track["decoder"] then
             append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
                    no_prefix_markup=true, suffix="]"})
         end
+        append(s, track["codec-profile"], {prefix="Profile:", nl="",
+               indent=o.prefix_sep .. o.prefix_sep, no_prefix_markup=false, suffix=""})
         append_property(s, "hwdec-current", {prefix="HW:", nl="",
                         indent=o.prefix_sep .. o.prefix_sep,
                         no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
@@ -998,8 +998,8 @@ local function add_audio(s)
             append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
                    no_prefix_markup=true, suffix="]"})
         end
-        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
-               no_prefix_markup=true, suffix="]"})
+        append(s, track["codec-profile"], {prefix="Profile:", nl="",
+               indent=o.prefix_sep .. o.prefix_sep, no_prefix_markup=false, suffix=""})
     end
     append_property(s, "current-ao", {prefix="AO:", nl="",
                                       indent=o.prefix_sep .. o.prefix_sep})
