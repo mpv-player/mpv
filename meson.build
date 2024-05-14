@@ -581,6 +581,7 @@ tools_directory = join_paths(source_root, 'TOOLS')
 docutils_wrapper = find_program(join_paths(tools_directory, 'docutils-wrapper.py'))
 file2string = find_program(join_paths(tools_directory, 'file2string.py'))
 matroska = find_program(join_paths(tools_directory, 'matroska.py'))
+mpv_desktop = find_program(join_paths(tools_directory, 'gen-mpv-desktop.py'))
 
 ebml_defs = custom_target('ebml_defs.inc',
     output: 'ebml_defs.inc',
@@ -1796,7 +1797,6 @@ if get_option('cplayer')
     zsh_install_dir = join_paths(datadir, 'zsh', 'site-functions')
     install_data('etc/_mpv.zsh', install_dir: zsh_install_dir, rename: '_mpv')
 
-    install_data('etc/mpv.desktop', install_dir: join_paths(datadir, 'applications'))
     install_data('etc/mpv.metainfo.xml', install_dir: join_paths(datadir, 'metainfo'))
     install_data('etc/encoding-profiles.conf', install_dir: join_paths(confdir, 'mpv'))
 
@@ -1826,6 +1826,21 @@ if get_option('cplayer')
             output: 'mpv.app',
             command: [osxbundle, mpv.full_path(), '@SOURCE_ROOT@'],
         )
+    endif
+
+    if not win32 and not darwin
+        if meson.can_run_host_binaries()
+            mpv_desktop_path = join_paths(source_root, 'etc', 'mpv.desktop')
+            custom_target('mpv.desktop',
+                depends: mpv,
+                output: 'mpv.desktop',
+                command: [mpv_desktop, mpv_desktop_path, mpv.full_path(), '@OUTPUT@'],
+                install: true,
+                install_dir: join_paths(datadir, 'applications'),
+            )
+        else
+            install_data('etc/mpv.desktop', install_dir: join_paths(datadir, 'applications'))
+        endif
     endif
 endif
 
