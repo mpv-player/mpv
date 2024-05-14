@@ -61,7 +61,8 @@ local function format_track(track)
             (track["demux-w"] and track["demux-w"] .. "x" .. track["demux-h"]
              .. " " or "") ..
             (track["demux-fps"] and not track.image
-             and string.format("%.3f", track["demux-fps"]) .. " fps " or "") ..
+             and string.format("%.4f", track["demux-fps"]):gsub("%.?0*$", "") ..
+             " fps " or "") ..
             (track["demux-channel-count"] and track["demux-channel-count"] ..
              " ch " or "") ..
             (track["codec-profile"] and track.type == "audio"
