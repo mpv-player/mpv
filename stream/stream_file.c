@@ -343,8 +343,6 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     if (fstat(p->fd, &st) == 0) {
         if (S_ISDIR(st.st_mode)) {
             stream->is_directory = true;
-            if (!(args->flags & STREAM_LESS_NOISE))
-                MP_INFO(stream, "This is a directory - adding to playlist.\n");
         } else if (S_ISREG(st.st_mode)) {
             p->regular_file = true;
 #ifndef _WIN32
