@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sys/mman.h>
 #include <unistd.h>
 
 #include <libmpv/client.h>
@@ -27,20 +28,21 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    if (size == 0)
-        return -1;
-
-    char filename[15 + 10 + 1];
-    sprintf(filename, "/tmp/libfuzzer.%d", getpid());
-
-    FILE *fp = fopen(filename, "wb");
-    if (!fp)
+    // fmemopen doesn't have associated file descriptor, so we do copy.
+    int fd = memfd_create("fuzz_mpv_load", 0);
+    if (fd == -1)
         exit(1);
-
-    if (fwrite(data, size, 1, fp) != 1)
+    ssize_t written = 0;
+    while (written < size) {
+        ssize_t result = write(fd, data + written, size - written);
+        if (result == -1)
+            exit(1);
+        written += result;
+    }
+    if (lseek(fd, 0, SEEK_SET) != 0)
         exit(1);
-
-    if (fclose(fp))
+    char filename[5 + 10 + 1];
+    if (sprintf(filename, "fd://%d", fd) <= 5)
         exit(1);
 
     mpv_handle *ctx = mpv_create();
@@ -69,7 +71,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 #endif
 
     mpv_terminate_destroy(ctx);
-    unlink(filename);
+    close(fd);
 
     return 0;
 }
