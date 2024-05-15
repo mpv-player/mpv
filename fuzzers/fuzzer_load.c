@@ -57,10 +57,19 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     check_error(mpv_initialize(ctx));
 
-    const char *cmd[] = {"load-" MPV_LOAD, filename, NULL};
+    const char *cmd[] = {"load" MPV_LOAD, filename, NULL};
     check_error(mpv_command(ctx, cmd));
 
+#ifdef MPV_LOADFILE
+    while (1) {
+        mpv_event *event = mpv_wait_event(ctx, 10000);
+        if (event->event_id == MPV_EVENT_IDLE)
+            break;
+    }
+#endif
+
     mpv_terminate_destroy(ctx);
+    unlink(filename);
 
     return 0;
 }
