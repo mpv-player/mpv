@@ -251,13 +251,14 @@ local function calculate_max_log_lines()
                select(2, mp.get_property('term-status-msg'):gsub('\\n', ''))
     end
 
-    -- Subtract 1.5 to account for the input line.
     return math.floor(mp.get_property_native('osd-height')
                       / mp.get_property_native('display-hidpi-scale', 1)
                       / opts.scale
                       * (1 - global_margins.t - global_margins.b)
                       / opts.font_size
-                      - 1.5)
+                      -- Subtract 1 for the input line and 1 for the newline
+                      -- between the log and the input line.
+                      - 2)
 end
 
 -- Takes a list of strings, a max width in characters and
