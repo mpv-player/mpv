@@ -1,7 +1,5 @@
 incdir = include_directories('../')
 
-executable('fuzzer_loadfile', 'fuzzer_loadfile.c',
-           include_directories: incdir, link_with: libmpv)
 executable('fuzzer_loadfile_direct', 'fuzzer_loadfile_direct.c',
            include_directories: incdir, link_with: libmpv)
 
@@ -43,10 +41,10 @@ foreach f : ['MPV_FORMAT_STRING', 'MPV_FORMAT_FLAG', 'MPV_FORMAT_INT64', 'MPV_FO
   endforeach
 endforeach
 
-foreach cmd : ['config-file', 'input-conf']
-    executable('fuzzer_load_' + cmd.underscorify(),
+foreach cmd : ['file', '-config-file', '-input-conf']
+    executable('fuzzer_load' + cmd.underscorify(),
                 'fuzzer_load.c',
-                c_args: ['-DMPV_LOAD="' + cmd + '"'],
+                c_args: ['-DMPV_LOAD="' + cmd + '"', '-DMPV_LOAD' + cmd.underscorify().to_upper()],
                 include_directories: incdir,
                 link_with: libmpv)
 endforeach
