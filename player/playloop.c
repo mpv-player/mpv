@@ -430,9 +430,6 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 
     mp_wakeup_core(mpctx);
 
-    if (mpctx->stop_play == AT_END_OF_FILE)
-        mpctx->stop_play = KEEP_PLAYING;
-
     switch (type) {
     case MPSEEK_RELATIVE:
         seek->flags |= flags;
