@@ -1356,10 +1356,7 @@ end
 local function update_scale(_, value)
     -- Calculate scaled metrics.
     local scale = 1
-    if not o.vidscale then
-        if value <= 1 then
-            value = 1
-        end
+    if not o.vidscale and value > 0 then
         scale = 720 / value
     end
     font_size = o.font_size * scale
