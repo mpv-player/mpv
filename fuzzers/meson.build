@@ -5,8 +5,26 @@ executable('fuzzer_loadfile', 'fuzzer_loadfile.c',
 executable('fuzzer_loadfile_direct', 'fuzzer_loadfile_direct.c',
            include_directories: incdir, link_with: libmpv)
 
-foreach p : ['bd', 'cdda', 'dvb', 'dvd', 'edl', 'file', 'hex', 'lavf', 'memory',
-             'mf', 'slice', 'smb']
+protocols = ['edl', 'file', 'hex', 'lavf', 'memory', 'mf', 'slice', 'smb']
+if features['cdda']
+    protocols += ['cdda']
+endif
+if features['dvbin']
+    protocols += ['dvb']
+endif
+if features['dvdnav']
+    # TODO: This needs folder structure to load.
+    protocols += ['dvd']
+endif
+if features['libbluray']
+    # TODO: This needs folder structure to load.
+    protocols += ['bd']
+endif
+if features['libarchive']
+    protocols += ['archive']
+endif
+
+foreach p : protocols
   executable('fuzzer_protocol_' + p,
              'fuzzer_loadfile_direct.c',
              c_args: ['-DMPV_PROTO=' + p, '-DMPV_PROTO_' + p.to_upper()],
