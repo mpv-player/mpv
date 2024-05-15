@@ -265,7 +265,7 @@ char **mp_get_lavf_demuxers(void)
         const AVInputFormat *cur = av_demuxer_iterate(&iter);
         if (!cur)
             break;
-        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, cur->name));
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(list, cur->name));
     }
     MP_TARRAY_APPEND(NULL, list, num, NULL);
     return list;
