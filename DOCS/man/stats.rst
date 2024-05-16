@@ -199,7 +199,7 @@ Configurable Options
     Color used for drawing graphs.
 
 ``vidscale``
-    Default: yes
+    Default: auto
 
     Scale the text and graphs with the video.
     ``no`` tries to keep the sizes constant.

@@ -60,7 +60,7 @@ local o = {
     shadow_y_offset = 0.0,
     shadow_color = "",
     alpha = "11",
-    vidscale = "yes",
+    vidscale = "auto",
 
     -- Custom header for ASS tags to style the text output.
     -- Specifying this will ignore the text style values above and just
