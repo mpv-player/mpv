@@ -50,7 +50,7 @@ reasonable). For example, a feature deprecated in mpv 0.30.0 may be removed in
 mpv 0.32.0. Minor releases do not count towards this.
 
 Less useful parts can be broken immediately, but must come with some sort of
-removal warning-
+removal warning.
 
 Parts for debugging and testing may be removed any time, potentially even
 without any sort of documentation.
