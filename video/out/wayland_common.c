@@ -1537,7 +1537,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
+#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
         ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
+#else
+        ver = MPMIN(ver, 4);
+#endif
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
