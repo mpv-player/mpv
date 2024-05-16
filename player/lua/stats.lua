@@ -1353,7 +1353,7 @@ local function print_page(page, after_scroll)
     end
 end
 
-local function update_scale(_, value)
+local function update_scale(value)
     local scale_with_video
     if o.vidscale == "auto" then
         scale_with_video = mp.get_property_native("osd-scale-by-window")
@@ -1374,6 +1374,15 @@ local function update_scale(_, value)
     if display_timer:is_enabled() then
         print_page(curr_page)
     end
+end
+
+local function handle_osd_height_update(_, value)
+    update_scale(value)
+end
+
+local function handle_osd_scale_by_window_update()
+    local value = mp.get_property_native("osd-height")
+    update_scale(value)
 end
 
 local function clear_screen()
@@ -1604,4 +1613,5 @@ if o.bindlist ~= "no" then
     end)
 end
 
-mp.observe_property('osd-height', 'native', update_scale)
+mp.observe_property('osd-height', 'native', handle_osd_height_update)
+mp.observe_property('osd-scale-by-window', 'native', handle_osd_scale_by_window_update)
