@@ -487,7 +487,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     ``insert-at-play`` actions. When used with those actions, the new item will
     be inserted at the index position in the playlist, or appended to the end if
     index is less than 0 or greater than the size of the playlist. This argument
-    will be ignored for all other actions.
+    will be ignored for all other actions. This argument is added in mpv 0.38.0.
 
     The fourth argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
@@ -495,6 +495,14 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     table), however the values themselves must be strings currently. These
     options are set during playback, and restored to the previous value at end
     of playback (see `Per-File Options`_).
+
+    .. warning::
+
+        Since mpv 0.38.0, an insertion index argument is added as the third argument.
+        This breaks all existing uses of this command which make use of the argument
+        to include the list of options to be set while the file is playing. To address
+        this problem, the third argument now needs to be set to -1 if the fourth
+        argument needs to be used.
 
 ``loadlist <url> [<flags> [<index>]]``
     Load the given playlist file or URL (like ``--playlist``).
