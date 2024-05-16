@@ -203,6 +203,8 @@ Configurable Options
 
     Scale the text and graphs with the video.
     ``no`` tries to keep the sizes constant.
+    ``auto`` scales the text and graphs with the OSD, which is scaled with the
+    window or kept at a constant size, depending on the ``--osd-scale-by-window`` option.
 
 Note: colors are given as hexadecimal values and use ASS tag order: BBGGRR
 (blue green red).

@@ -1,1 +1,2 @@
 change `vidscale` script option type to string for osc.lua
+change `vidscale` script option type to string for stats.lua
