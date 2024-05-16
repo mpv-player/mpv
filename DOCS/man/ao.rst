@@ -15,6 +15,10 @@ in the list.
     See ``--ao=help`` for a list of compiled-in audio output drivers sorted by
     autoprobe order.
 
+    Note that the default audio output driver is subject to change, and must
+    not be relied upon. If a certain AO needs to be used, it must be
+    explicitly specified.
+
 Available audio output drivers are:
 
 ``alsa``
