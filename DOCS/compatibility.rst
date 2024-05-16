@@ -29,7 +29,9 @@ All of these are important for interfacing both with end users and API users
 (which include Lua scripts, libmpv, and the JSON IPC). As such, they constitute
 a large part of the user interface and APIs.
 
-All incompatible changes to this must be declared in interface-changes.rst.
+All incompatible changes to this must be declared in interface-changes.rst,
+which include the types of changes, the impact of these changes, and suggested
+actions to address such impact so that the incompatibility is alleviated.
 (This may also list compatible additions, but it's not a requirement.)
 
 Degrees of importance and compatibility preservation
