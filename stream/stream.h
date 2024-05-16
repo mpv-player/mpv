@@ -114,6 +114,8 @@ typedef struct stream_info_st {
     // Alternative to open(). Only either open() or open2() can be set.
     int (*open2)(struct stream *st, const struct stream_open_args *args);
     const char *const *protocols;
+    // Alternative to protocols. For stream_lavf.
+    char **(*get_protocols)(void);
     bool can_write;     // correctly checks for READ/WRITE modes
     bool local_fs;      // supports STREAM_LOCAL_FS_ONLY
     int stream_origin;  // 0 or set of STREAM_ORIGIN_*; if 0, the same origin

@@ -238,6 +238,96 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
     talloc_free(temp);
 }
 
+#define PROTO(...) (const char *[]){__VA_ARGS__, NULL}
+
+// List of safe protocols and their aliases
+static const char **safe_protos[] = {
+    PROTO("data"),
+    PROTO("gopher"),
+    PROTO("gophers"),
+    PROTO("http", "dav", "webdav"),
+    PROTO("httpproxy"),
+    PROTO("https", "davs", "webdavs"),
+    PROTO("ipfs"),
+    PROTO("ipns"),
+    PROTO("mmsh", "mms", "mmshttp"),
+    PROTO("mmst"),
+    PROTO("rist"),
+    PROTO("rtmp"),
+    PROTO("rtmpe"),
+    PROTO("rtmps"),
+    PROTO("rtmpt"),
+    PROTO("rtmpte"),
+    PROTO("rtmpts"),
+    PROTO("rtp"),
+    PROTO("srt"),
+    PROTO("srtp"),
+    NULL,
+};
+
+static char **get_safe_protocols(void)
+{
+    int num = 0;
+    char **protocols = NULL;
+    char **ffmpeg_demuxers = mp_get_lavf_demuxers();
+    char **ffmpeg_protos = mp_get_lavf_protocols();
+
+    for (int i = 0; ffmpeg_protos[i]; i++) {
+        for (int j = 0; safe_protos[j]; j++) {
+            if (strcmp(ffmpeg_protos[i], safe_protos[j][0]) != 0)
+                continue;
+            for (int k = 0; safe_protos[j][k]; k++)
+                MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, safe_protos[j][k]));
+            break;
+        }
+    }
+
+    // rtsp is a demuxer not protocol in ffmpeg so it is handled separately
+    for (int i = 0; ffmpeg_demuxers[i]; i++) {
+        if (strcmp("rtsp", ffmpeg_demuxers[i]) == 0) {
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "rtsp"));
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "rtsps"));
+            break;
+        }
+    }
+
+    MP_TARRAY_APPEND(NULL, protocols, num, NULL);
+
+    talloc_free(ffmpeg_demuxers);
+    talloc_free(ffmpeg_protos);
+
+    return protocols;
+}
+
+static char **get_unsafe_protocols(void)
+{
+    int num = 0;
+    char **protocols = NULL;
+    char **safe_protocols = get_safe_protocols();
+    char **ffmpeg_protos = mp_get_lavf_protocols();
+
+    for (int i = 0; ffmpeg_protos[i]; i++) {
+        bool safe_protocol = false;
+        for (int j = 0; safe_protocols[j]; j++) {
+            if (strcmp(ffmpeg_protos[i], safe_protocols[j]) == 0) {
+                safe_protocol = true;
+                break;
+            }
+        }
+        if (!safe_protocol)
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, ffmpeg_protos[i]));
+    }
+
+    MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "ffmpeg"));
+    MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "lavf"));
+
+    MP_TARRAY_APPEND(NULL, protocols, num, NULL);
+
+    talloc_free(ffmpeg_protos);
+    talloc_free(safe_protocols);
+    return protocols;
+}
+
 // Escape http URLs with unescaped, invalid characters in them.
 // libavformat's http protocol does not do this, and a patch to add this
 // in a 100% safe case (spaces only) was rejected.
@@ -431,12 +521,7 @@ done:
 const stream_info_t stream_info_ffmpeg = {
     .name = "ffmpeg",
     .open = open_f,
-    .protocols = (const char *const[]){
-        "rtmp", "rtsp", "rtsps", "http", "https", "mms", "mmst", "mmsh", "mmshttp",
-        "rtp", "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srt",
-        "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns", "dav",
-        "davs", "webdav", "webdavs",
-        NULL },
+    .get_protocols = get_safe_protocols,
     .can_write = true,
     .stream_origin = STREAM_ORIGIN_NET,
 };
@@ -448,10 +533,7 @@ const stream_info_t stream_info_ffmpeg = {
 const stream_info_t stream_info_ffmpeg_unsafe = {
     .name = "ffmpeg",
     .open = open_f,
-    .protocols = (const char *const[]){
-        "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
-        "concat", "smb",
-        NULL },
+    .get_protocols = get_unsafe_protocols,
     .stream_origin = STREAM_ORIGIN_UNSAFE,
     .can_write = true,
 };
