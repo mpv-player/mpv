@@ -1464,20 +1464,27 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
     }
 
-    if (!strcmp(interface, wl_subcompositor_interface.name) && (ver >= 1) && found++)
-        wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, 1);
+    if (!strcmp(interface, wl_subcompositor_interface.name) && found++) {
+        ver = 1;
+        wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, ver);
+    }
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
-        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, 4);
+        ver = 4;
+        wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, ver);
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
     }
 
-    if (!strcmp (interface, wp_viewporter_interface.name) && (ver >= 1) && found++)
-        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, 1);
+    if (!strcmp (interface, wp_viewporter_interface.name) && found++) {
+        ver = 1;
+        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, ver);
+    }
 
-    if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++)
-        wl->dnd_devman = wl_registry_bind(reg, id, &wl_data_device_manager_interface, 3);
+    if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
+        ver = 3;
+        wl->dnd_devman = wl_registry_bind(reg, id, &wl_data_device_manager_interface, ver);
+    }
 
     if (!strcmp(interface, wl_output_interface.name) && (ver >= 2) && found++) {
         struct vo_wayland_output *output = talloc_zero(wl, struct vo_wayland_output);
@@ -1510,29 +1517,40 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_list_insert(&wl->seat_list, &seat->link);
     }
 
-    if (!strcmp(interface, wl_shm_interface.name) && found++)
-        wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
+    if (!strcmp(interface, wl_shm_interface.name) && found++) {
+        ver = 1;
+        wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, ver);
+    }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_27
-    if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++)
-        wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, 1);
+    if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, ver);
+    }
 
-    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++)
-        wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, 1);
+    if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, ver);
+    }
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_31
-    if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++)
-        wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, 1);
+    if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, ver);
+    }
 #endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++)
-        wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, 1);
+    if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, ver);
+    }
 #endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
-        wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, 1);
+        ver = 1;
+        wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
         wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
     }
 
@@ -1542,14 +1560,18 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
 
-    if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++)
-        wl->xdg_decoration_manager = wl_registry_bind(reg, id, &zxdg_decoration_manager_v1_interface, 1);
+    if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->xdg_decoration_manager = wl_registry_bind(reg, id, &zxdg_decoration_manager_v1_interface, ver);
+    }
 
-    if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++)
-        wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, 1);
+    if (!strcmp(interface, zwp_idle_inhibit_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, ver);
+    }
 
     if (found > 1)
-        MP_VERBOSE(wl, "Registered for protocol %s\n", interface);
+        MP_VERBOSE(wl, "Registered interface %s at version %d\n", interface, ver);
 }
 
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
