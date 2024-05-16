@@ -51,6 +51,15 @@ functionality still works, and a replacement is available (if technically
 reasonable). For example, a feature deprecated in mpv 0.30.0 may be removed in
 mpv 0.32.0. Minor releases do not count towards this.
 
+Under extraordinary circumstances, such as missed incompatible changes that are
+already included in a release, critical security fixes, or a severe shortage of
+developer time to address the known incompatible changes, important/often used
+parts may be broken immediately, but the change must be extensively documented:
+all of the related documentations (including manpage, interface-changes.rst,
+etc., retrospectively modified if applicable) must clearly state the following:
+the fact that the change is a breaking change; the version when the breaking
+change happened; and the reason, impact, and suggested remedy actions.
+
 Less useful parts can be broken immediately, but must come with some sort of
 removal warning.
 
