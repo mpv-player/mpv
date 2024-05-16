@@ -29,6 +29,13 @@ All of these are important for interfacing both with end users and API users
 (which include Lua scripts, libmpv, and the JSON IPC). As such, they constitute
 a large part of the user interface and APIs.
 
+Certain options and commands may have documented default values. These default
+values are considered a part of the API since scripts may already rely on these
+documented behaviors. Changing these defaults are considered incompatible
+changes and must be documented. Undocumented default values do not subject to
+this requirement, and it is recommended to discourage such usage in the related
+documentations if there is a need to frequently change such defaults.
+
 All incompatible changes to this must be declared in interface-changes.rst,
 which include the types of changes, the impact of these changes, and suggested
 actions to address such impact so that the incompatibility is alleviated.
