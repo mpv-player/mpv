@@ -4474,12 +4474,18 @@ OSD
     are always in actual pixels. The effect is that changing the window size
     won't change the OSD font size.
 
+    .. note::
+
+        For scripts which draw user interface elements, it is recommended to
+        respect the value of this option when deciding whether the elements
+        are scaled with window size or not.
+
 ``--osd-shadow-color=<color>``
     See ``--sub-color``. Color used for OSD shadow.
 
     .. note::
 
-        ignored when ``--osd-back-color`` is specified (or more exactly: when
+        Ignored when ``--osd-back-color`` is specified (or more exactly: when
         that option is not set to completely transparent).
 
 ``--osd-shadow-offset=<size>``
