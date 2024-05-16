@@ -250,8 +250,10 @@ Configurable Options
 ``vidscale``
     Default: yes
 
-    Scale the OSC with the video
-    ``no`` tries to keep the OSC size constant as much as the window size allows
+    Scale the OSC with the video.
+    ``no`` tries to keep the OSC size constant as much as the window size allows.
+    ``auto`` scales the OSC with the OSD, which is scaled with the window or kept at a
+    constant size, depending on the ``--osd-scale-by-window`` option.
 
 ``valign``
     Default: 0.8
