@@ -2851,6 +2851,7 @@ mp.observe_property("osd-dimensions", "native", function()
     --  we might have to worry about property update ordering)
     request_init_resize()
 end)
+mp.observe_property('osd-scale-by-window', 'native', request_init_resize)
 
 -- mouse show/hide bindings
 mp.set_key_bindings({
