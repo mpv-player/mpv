@@ -42,6 +42,7 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type);
 void mp_add_lavc_encoders(struct mp_decoder_list *list);
 char **mp_get_lavf_demuxers(void);
+char **mp_get_lavf_protocols(void);
 int mp_codec_to_av_codec_id(const char *codec);
 const char *mp_codec_from_av_codec_id(int codec_id);
 bool mp_codec_is_lossless(const char *codec);

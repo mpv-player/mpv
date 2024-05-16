@@ -271,6 +271,18 @@ char **mp_get_lavf_demuxers(void)
     return list;
 }
 
+char **mp_get_lavf_protocols(void)
+{
+    char **list = NULL;
+    int num = 0;
+    void *opaque = NULL;
+    const char *name;
+    while ((name = avio_enum_protocols(&opaque, 0)))
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(list, name));
+    MP_TARRAY_APPEND(NULL, list, num, NULL);
+    return list;
+}
+
 int mp_codec_to_av_codec_id(const char *codec)
 {
     int id = AV_CODEC_ID_NONE;
