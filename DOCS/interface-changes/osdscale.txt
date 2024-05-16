@@ -1,0 +1,1 @@
+change `vidscale` script option type to string for osc.lua
