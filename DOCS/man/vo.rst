@@ -19,6 +19,10 @@ in the list.
     does not work, it will fallback to other drivers (in the same order as
     listed by ``--vo=help``).
 
+    Note that the default video output driver is subject to change, and must
+    not be relied upon. If a certain VO needs to be used (e.g. for ``libmpv``
+    rendering API), it must be explicitly specified.
+
 Available video output drivers are:
 
 ``gpu``
