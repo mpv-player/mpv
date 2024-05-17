@@ -452,8 +452,12 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
                                                                ictx->mouse_vo_x,
                                                                ictx->mouse_vo_y)))
             {
-                if (!best_bind || (best_bind->is_builtin && !bind->is_builtin))
+                if (!best_bind || bind->num_keys > best_bind->num_keys ||
+                    (best_bind->is_builtin && !bind->is_builtin &&
+                     bind->num_keys == best_bind->num_keys))
+                {
                     best_bind = bind;
+                }
             }
         }
         if (s->flags & MP_INPUT_EXCLUSIVE)
