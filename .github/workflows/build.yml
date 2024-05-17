@@ -168,6 +168,7 @@ jobs:
           name: mpv-x86_64-windows-msvc
           path: |
             build/mpv.???
+            build/vulkan-*.dll
             !build/mpv.lib
 
   macos:

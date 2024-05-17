@@ -100,6 +100,24 @@ spirv_cross_c_dep = declare_dependency(dependencies: [
 meson.override_dependency('spirv-cross-c-shared', spirv_cross_c_dep)
 "@
 
+# Manually wrap Vulkan-Loader for UPDATE_DEPS option
+if (-not (Test-Path "$subprojects/vulkan")) {
+    New-Item -Path "$subprojects/vulkan" -ItemType Directory | Out-Null
+}
+Set-Content -Path "$subprojects/vulkan/meson.build" -Value @"
+project('vulkan', 'cpp', version: '1.3.285')
+cmake = import('cmake')
+opts = cmake.subproject_options()
+opts.add_cmake_defines({
+    'UPDATE_DEPS': 'ON',
+    'USE_GAS': 'ON',
+})
+opts.append_link_args(['-lcfgmgr32', '-Wl,/def:../subprojects/vulkan-loader/loader/vulkan-1.def'])
+vulkan_proj = cmake.subproject('vulkan-loader', options: opts)
+vulkan_dep = vulkan_proj.dependency('vulkan')
+meson.override_dependency('vulkan', vulkan_dep)
+"@
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -129,6 +147,12 @@ $projects = @(
     @{
         Path = "$subprojects/spirv-cross.wrap"
         URL = "https://github.com/KhronosGroup/SPIRV-Cross"
+        Revision = "main"
+        Method = "cmake"
+    },
+    @{
+        Path = "$subprojects/vulkan-loader.wrap"
+        URL = "https://github.com/KhronosGroup/Vulkan-Loader"
         Revision = "main"
         Method = "cmake"
     }
@@ -180,6 +204,7 @@ meson setup build `
     -Dxxhash:cli=false `
     -Dluajit:amalgam=true `
     -Dd3d11=enabled `
+    -Dvulkan=enabled `
     -Djavascript=enabled `
     -Dlua=luajit `
     -Ddrm=disabled `
@@ -188,4 +213,5 @@ meson setup build `
     -Dwayland=disabled `
     -Dx11=disabled
 ninja -C build mpv.exe mpv.com libmpv.a
+cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 ./build/mpv.com -v --no-config
