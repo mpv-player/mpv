@@ -112,7 +112,7 @@ opts.add_cmake_defines({
     'UPDATE_DEPS': 'ON',
     'USE_GAS': 'ON',
 })
-opts.append_link_args(['-lcfgmgr32', '-Wl,/def:../subprojects/vulkan-loader/loader/vulkan-1.def'])
+opts.append_link_args(['-lcfgmgr32', '-Wl,/def:../subprojects/vulkan-loader/loader/vulkan-1.def'], target: 'vulkan')
 vulkan_proj = cmake.subproject('vulkan-loader', options: opts)
 vulkan_dep = vulkan_proj.dependency('vulkan')
 meson.override_dependency('vulkan', vulkan_dep)
