@@ -451,8 +451,7 @@ jobs:
                 sndio \
                 uchardet \
                 v4l_compat \
-                vulkan-headers \
-                wayland-protocols
+                vulkan-headers
             ./ci/build-freebsd.sh
             meson test -C build
 

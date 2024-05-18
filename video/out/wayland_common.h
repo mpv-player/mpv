@@ -18,7 +18,12 @@
 #ifndef MPLAYER_WAYLAND_COMMON_H
 #define MPLAYER_WAYLAND_COMMON_H
 
-#include <wayland-client.h>
+#include <wayland-client-core.h>
+#include "wayland.h"
+#include "content-type-v1.h"
+#include "cursor-shape-v1.h"
+#include "fractional-scale-v1.h"
+#include "single-pixel-buffer-v1.h"
 #include "input/event.h"
 #include "vo.h"
 
@@ -91,19 +96,16 @@ struct vo_wayland_state {
     int wakeup_pipe[2];
 
     /* content-type */
-    /* TODO: unvoid these if required wayland protocols is bumped to 1.27+ */
-    void *content_type_manager;
-    void *content_type;
+    struct wp_content_type_manager_v1 *content_type_manager;
+    struct wp_content_type_v1 *content_type;
     int current_content_type;
 
     /* cursor-shape */
-    /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
-    void *cursor_shape_manager;
+    struct wp_cursor_shape_manager_v1 *cursor_shape_manager;
 
     /* fractional-scale */
-    /* TODO: unvoid these if required wayland protocols is bumped to 1.31+ */
-    void *fractional_scale_manager;
-    void *fractional_scale;
+    struct wp_fractional_scale_manager_v1 *fractional_scale_manager;
+    struct wp_fractional_scale_v1 *fractional_scale;
 
     /* idle-inhibit */
     struct zwp_idle_inhibit_manager_v1 *idle_inhibit_manager;
@@ -123,8 +125,7 @@ struct vo_wayland_state {
     bool use_present;
 
     /* single-pixel-buffer */
-    /* TODO: unvoid this if required wayland-protocols is bumped to 1.27+ */
-    void *single_pixel_manager;
+    struct wp_single_pixel_buffer_manager_v1 *single_pixel_manager;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;

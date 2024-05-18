@@ -37,39 +37,18 @@
 
 // Generated from wayland-protocols
 #include "idle-inhibit-unstable-v1.h"
-#include "linux-dmabuf-unstable-v1.h"
+#include "linux-dmabuf-v1.h"
 #include "presentation-time.h"
 #include "xdg-decoration-unstable-v1.h"
 #include "xdg-shell.h"
 #include "viewporter.h"
-
-#if HAVE_WAYLAND_PROTOCOLS_1_27
 #include "content-type-v1.h"
 #include "single-pixel-buffer-v1.h"
-#endif
-
-#if HAVE_WAYLAND_PROTOCOLS_1_31
 #include "fractional-scale-v1.h"
-#endif
-
-#if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
-#endif
-
-#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 21
-#define HAVE_WAYLAND_1_21
-#endif
-
-#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
-#define HAVE_WAYLAND_1_22
-#endif
 
 #ifndef CLOCK_MONOTONIC_RAW
 #define CLOCK_MONOTONIC_RAW 4
-#endif
-
-#ifndef XDG_TOPLEVEL_STATE_SUSPENDED
-#define XDG_TOPLEVEL_STATE_SUSPENDED 9
 #endif
 
 
@@ -195,8 +174,7 @@ struct vo_wayland_seat {
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
     struct wl_data_device *dnd_ddev;
-    /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
-    void *cursor_shape_device;
+    struct wp_cursor_shape_device_v1 *cursor_shape_device;
     uint32_t pointer_enter_serial;
     uint32_t pointer_button_serial;
     struct xkb_keymap  *xkb_keymap;
@@ -402,7 +380,6 @@ static void pointer_handle_axis_discrete(void *data, struct wl_pointer *wl_point
 {
 }
 
-#ifdef HAVE_WAYLAND_1_21
 static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_pointer,
                                          uint32_t axis, int32_t value120)
 {
@@ -417,7 +394,6 @@ static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_point
         break;
     }
 }
-#endif
 
 static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_enter,
@@ -429,9 +405,7 @@ static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_axis_source,
     pointer_handle_axis_stop,
     pointer_handle_axis_discrete,
-#ifdef HAVE_WAYLAND_1_21
     pointer_handle_axis_value120,
-#endif
 };
 
 static void touch_handle_down(void *data, struct wl_touch *wl_touch,
@@ -991,7 +965,6 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
-#ifdef HAVE_WAYLAND_1_22
 static void surface_handle_preferred_buffer_scale(void *data,
                                                   struct wl_surface *wl_surface,
                                                   int32_t scale)
@@ -1021,15 +994,12 @@ static void surface_handle_preferred_buffer_transform(void *data,
                                                       uint32_t transform)
 {
 }
-#endif
 
 static const struct wl_surface_listener surface_listener = {
     surface_handle_enter,
     surface_handle_leave,
-#ifdef HAVE_WAYLAND_1_22
     surface_handle_preferred_buffer_scale,
     surface_handle_preferred_buffer_transform,
-#endif
 };
 
 static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
@@ -1204,23 +1174,18 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
     wl->bounded_height = height * wl->scaling;
 }
 
-#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
 static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
                                    struct wl_array *capabilities)
 {
 }
-#endif
 
 static const struct xdg_toplevel_listener xdg_toplevel_listener = {
     handle_toplevel_config,
     handle_toplevel_close,
     handle_configure_bounds,
-#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
     handle_wm_capabilities,
-#endif
 };
 
-#if HAVE_WAYLAND_PROTOCOLS_1_31
 static void preferred_scale(void *data,
                             struct wp_fractional_scale_v1 *fractional_scale,
                             uint32_t scale)
@@ -1247,7 +1212,6 @@ static void preferred_scale(void *data,
 static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
     preferred_scale,
 };
-#endif
 
 static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 {
@@ -1444,11 +1408,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     struct vo_wayland_state *wl = data;
 
     if (!strcmp(interface, wl_compositor_interface.name) && (ver >= 4) && found++) {
-#ifdef HAVE_WAYLAND_1_22
         ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
-#else
-        ver = 4;
-#endif
         wl->compositor = wl_registry_bind(reg, id, &wl_compositor_interface, ver);
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
@@ -1504,11 +1464,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         if (ver < 5)
             MP_WARN(wl, "Scrolling won't work because the compositor doesn't "
                         "support version 5 of wl_seat protocol!\n");
-#ifdef HAVE_WAYLAND_1_21
         ver = MPMIN(ver, 8); /* Cap at 8 in case new events are added later. */
-#else
-        ver = MPMIN(ver, 7);
-#endif
         struct vo_wayland_seat *seat = talloc_zero(wl, struct vo_wayland_seat);
         seat->wl   = wl;
         seat->id   = id;
@@ -1522,7 +1478,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, ver);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_27
     if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, ver);
@@ -1532,21 +1487,16 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         ver = 1;
         wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, ver);
     }
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_31
     if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, ver);
     }
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, ver);
     }
-#endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = 1;
@@ -1555,11 +1505,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
-#ifdef XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION
         ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
-#else
-        ver = MPMIN(ver, 4);
-#endif
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
@@ -1821,12 +1767,10 @@ static int get_mods(struct vo_wayland_seat *s)
 
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!s->cursor_shape_device && wl->cursor_shape_manager) {
         s->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
                                                                         s->pointer);
     }
-#endif
 }
 
 static int greatest_common_divisor(int a, int b)
@@ -1986,10 +1930,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_touch_destroy(seat->touch);
     if (seat->dnd_ddev)
         wl_data_device_destroy(seat->dnd_ddev);
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (seat->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
-#endif
     if (seat->xkb_keymap)
         xkb_keymap_unref(seat->xkb_keymap);
     if (seat->xkb_state)
@@ -2004,22 +1946,18 @@ static void set_content_type(struct vo_wayland_state *wl)
 {
     if (!wl->content_type_manager)
         return;
-#if HAVE_WAYLAND_PROTOCOLS_1_27
     // handle auto;
     if (wl->vo_opts->content_type == -1) {
         wp_content_type_v1_set_content_type(wl->content_type, wl->current_content_type);
     } else {
         wp_content_type_v1_set_content_type(wl->content_type, wl->vo_opts->content_type);
     }
-#endif
 }
 
 static void set_cursor_shape(struct vo_wayland_seat *s)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_enter_serial,
                                         WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
-#endif
 }
 
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
@@ -2433,10 +2371,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_CONTENT_TYPE: {
-#if HAVE_WAYLAND_PROTOCOLS_1_27
         wl->current_content_type = *(enum mp_content_type *)arg;
         set_content_type(wl);
-#endif
         return VO_TRUE;
     }
     case VOCTRL_GET_FOCUSED: {
@@ -2608,7 +2544,6 @@ bool vo_wayland_init(struct vo *vo)
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_27
     if (wl->content_type_manager) {
         wl->content_type = wp_content_type_manager_v1_get_surface_content_type(wl->content_type_manager, wl->surface);
     } else {
@@ -2620,9 +2555,7 @@ bool vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_single_pixel_buffer_manager_v1_interface.name);
     }
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_31
     if (wl->fractional_scale_manager) {
         wl->fractional_scale = wp_fractional_scale_manager_v1_get_fractional_scale(wl->fractional_scale_manager, wl->surface);
         wp_fractional_scale_v1_add_listener(wl->fractional_scale, &fractional_scale_listener, wl);
@@ -2630,14 +2563,11 @@ bool vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_fractional_scale_manager_v1_interface.name);
     }
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!wl->cursor_shape_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_cursor_shape_manager_v1_interface.name);
     }
-#endif
 
     if (wl->dnd_devman) {
         struct vo_wayland_seat *seat;
@@ -2783,10 +2713,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->subcompositor)
         wl_subcompositor_destroy(wl->subcompositor);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (wl->cursor_shape_manager)
         wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
-#endif
 
     if (wl->cursor_surface)
         wl_surface_destroy(wl->cursor_surface);
@@ -2794,13 +2722,11 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_27
     if (wl->content_type)
         wp_content_type_v1_destroy(wl->content_type);
 
     if (wl->content_type_manager)
         wp_content_type_manager_v1_destroy(wl->content_type_manager);
-#endif
 
     if (wl->dnd_devman)
         wl_data_device_manager_destroy(wl->dnd_devman);
@@ -2811,13 +2737,11 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->fback_pool)
         clean_feedback_pool(wl->fback_pool);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_31
     if (wl->fractional_scale)
         wp_fractional_scale_v1_destroy(wl->fractional_scale);
 
     if (wl->fractional_scale_manager)
         wp_fractional_scale_manager_v1_destroy(wl->fractional_scale_manager);
-#endif
 
     if (wl->frame_callback)
         wl_callback_destroy(wl->frame_callback);
@@ -2858,10 +2782,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->shm)
         wl_shm_destroy(wl->shm);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_27
     if (wl->single_pixel_manager)
         wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
-#endif
 
     if (wl->surface)
         wl_surface_destroy(wl->surface);
