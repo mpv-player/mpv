@@ -75,6 +75,8 @@ enum mp_cmd_flags {
     MP_ASYNC_CMD = 32,          // do not wait for command to complete
     MP_SYNC_CMD = 64,           // block on command completion
 
+    MP_DISALLOW_REPEAT = 128,   // if used as keybinding, disallow key repeat
+
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
 };

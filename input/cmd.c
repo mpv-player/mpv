@@ -51,9 +51,10 @@ static const struct flag cmd_flags[] = {
     {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
     {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
-    {"repeatable",          0,               MP_ALLOW_REPEAT},
+    {"repeatable",          MP_DISALLOW_REPEAT, MP_ALLOW_REPEAT},
+    {"nonrepeatable",       MP_ALLOW_REPEAT,    MP_DISALLOW_REPEAT},
     {"async",               MP_SYNC_CMD,     MP_ASYNC_CMD},
-    {"sync",                MP_ASYNC_CMD,     MP_SYNC_CMD},
+    {"sync",                MP_ASYNC_CMD,    MP_SYNC_CMD},
     {0}
 };
 
@@ -611,7 +612,8 @@ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
     if (cmd->def == &mp_cmd_list && cmd->args[0].v.p)
         cmd = cmd->args[0].v.p;  // list - only 1st cmd is considered
 
-    return (cmd->def->allow_auto_repeat) || (cmd->flags & MP_ALLOW_REPEAT);
+    return (cmd->def->allow_auto_repeat && !(cmd->flags & MP_DISALLOW_REPEAT)) ||
+           (cmd->flags & MP_ALLOW_REPEAT);
 }
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
