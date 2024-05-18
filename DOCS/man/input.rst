@@ -1818,6 +1818,9 @@ prefixes can be specified. They are separated by whitespace.
     This prefix forces enabling key repeat in any case. For a list of commands:
     the first command determines the repeatability of the whole list (up to and
     including version 0.33 - a list was always repeatable).
+``nonrepeatable``
+    For some commands, keeping a key pressed runs the command repeatedly.
+    This prefix forces disabling key repeat in any case.
 ``async``
     Allow asynchronous execution (if possible). Note that only a few commands
     will support this (usually this is explicitly documented). Some commands
