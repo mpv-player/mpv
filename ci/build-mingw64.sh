@@ -245,8 +245,7 @@ _harfbuzz_mark=lib/libharfbuzz.dll.a
 _libass () {
     [ -d libass ] || $gitclone https://github.com/libass/libass.git
     builddir libass
-    [ -f ../configure ] || (cd .. && ./autogen.sh)
-    ../configure --host=$TARGET $commonflags
+    meson setup .. --cross-file "$prefix_dir/crossfile" -Ddefault_library=shared
     makeplusinstall
     popd
 }
