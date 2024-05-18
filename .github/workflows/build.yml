@@ -245,7 +245,7 @@ jobs:
           path: mpv.tar.gz
 
   linux:
-    runs-on: "ubuntu-22.04"
+    runs-on: ubuntu-latest
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
@@ -291,7 +291,7 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
   linux-fuzz:
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
@@ -315,7 +315,7 @@ jobs:
           cat ./build/meson-logs/meson-log.txt
 
   linux-ffmpeg-4-4:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
       # We want to test ffmpeg 4.4 which alpine 3.15 has exactly.
       # Furthermore, this is a very minimal build of mpv without commonly
