@@ -27,7 +27,7 @@ on:
 
 jobs:
   mingw:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -65,8 +65,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ccache g++-mingw-w64 nasm ninja-build pkg-config wine wine64
-          sudo python3 -m pip install meson
+          sudo apt-get install -y ccache g++-mingw-w64 meson nasm ninja-build pkg-config wine
 
       - name: Install Meson Wraps
         run: |
