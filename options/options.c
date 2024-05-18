@@ -949,6 +949,14 @@ static const m_option_t mp_opts[] = {
 static const struct MPOpts mp_default_opts = {
     .use_terminal = true,
     .msg_color = true,
+
+    .reset_options = (char *[]){
+        "ab-loop-a",
+        "ab-loop-b",
+        "ab-loop-count",
+        NULL
+    },
+
     .softvol_max = 130,
     .softvol_volume = 100,
     .softvol_gain_max = 12,

@@ -816,12 +816,12 @@ Program Behavior
     defined profiles.
 
 ``--reset-on-next-file=<all|option1,option2,...>``
-    Normally, mpv will try to keep all settings when playing the next file on
+    Normally, mpv will try to keep most settings when playing the next file on
     the playlist, even if they were changed by the user during playback. (This
     behavior is the opposite of MPlayer's, which tries to reset all settings
     when starting next file.)
 
-    Default: Do not reset anything.
+    Default: ``ab-loop-a``, ``ab-loop-b``, ``ab-loop-count``.
 
     This can be changed with this option. It accepts a list of options, and
     mpv will reset the value of these options on playback start to the initial
