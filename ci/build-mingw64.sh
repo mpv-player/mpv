@@ -194,8 +194,7 @@ _vulkan_headers_mark=include/vulkan/vulkan.h
 _vulkan_loader () {
     [ -d Vulkan-Loader ] || $gitclone https://github.com/KhronosGroup/Vulkan-Loader
     builddir Vulkan-Loader
-    cmake .. "${cmake_args[@]}" \
-        -DENABLE_WERROR=OFF -DUSE_GAS=ON
+    cmake .. "${cmake_args[@]}" -DUSE_GAS=ON
     makeplusinstall
     popd
 }
