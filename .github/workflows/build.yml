@@ -53,7 +53,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64 ccache
+          sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib nasm ninja-build pkg-config python3-pip wine
           sudo python3 -m pip install meson
 
       - name: Build libraries
@@ -77,7 +77,7 @@ jobs:
       - name: Functional test
         id: tests
         run: |
-          cd artifact && wine64 ./mpv.com -v --no-config
+          cd artifact && wine ./mpv.com -v --no-config
         env:
           WINEDEBUG: '+loaddll'
 
