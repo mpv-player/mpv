@@ -43,7 +43,8 @@ jobs:
         id: get_time
         run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v4
+      - name: Restore cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
@@ -86,6 +87,13 @@ jobs:
           name: mpv-${{ matrix.target }}
           path: mpv-git-*.zip
 
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+
   win32:
     runs-on: windows-latest
     env:
@@ -111,7 +119,8 @@ jobs:
         run: |
           "timestamp=$((Get-Date).Ticks)" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/cache@v4
+      - name: Restore cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: x86_64-windows-msvc-${{ steps.get_time.outputs.timestamp }}
@@ -170,6 +179,13 @@ jobs:
             build/mpv.???
             build/vulkan-*.dll
             !build/mpv.lib
+
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: x86_64-windows-msvc-${{ steps.get_time.outputs.timestamp }}
 
   macos:
     runs-on: ${{ matrix.os }}
