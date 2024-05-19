@@ -1,0 +1,37 @@
+name: Cleanup caches
+
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          caches=$(gh cache list -R ${{ github.repository }} -L 100 --json id,key,ref -S last_accessed_at -O desc)
+          echo "$caches" | jq -c '
+            map(select(.key | startswith("x86_64-w64-mingw32-") or
+                              startswith("i686-w64-mingw32-") or
+                              startswith("x86_64-windows-msvc-"))) |
+            group_by(.ref) |
+            map({
+              ref: .[0].ref,
+              caches: map(.key)
+            }) |
+            .[]
+          ' |
+          while read -r group; do
+            pr=$(echo "$group" | jq -r '.ref | capture("refs/pull/(?<num>[0-9]+)/merge").num')
+            if [[ -n "$pr" ]] && [ "$(gh pr view -R ${{ github.repository }} $pr --json state --jq '.state')" != "OPEN" ]; then
+              keys=$(echo "$group" | jq -c '.caches')
+            else
+              keys=$(echo "$group" | jq -c '.caches[1:]')
+            fi
+            for key in $(echo "$keys" | jq -r '.[]'); do
+              gh cache delete "$key" -R ${{ github.repository }}
+            done
+          done
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
