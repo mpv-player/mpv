@@ -644,7 +644,7 @@ void update_ab_loop_clip(struct MPContext *mpctx)
 
 static void handle_osd_redraw(struct MPContext *mpctx)
 {
-    if (!mpctx->video_out || !mpctx->video_out->config_ok)
+    if (!mpctx->video_out || !mpctx->video_out->config_ok || (mpctx->playing && mpctx->stop_play))
         return;
     // If we're playing normally, let OSD be redrawn naturally as part of
     // video display.
