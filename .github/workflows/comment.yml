@@ -2,64 +2,45 @@ name: comment
 
 on:
   workflow_run:
-    workflows: ["build"]
+    workflows: [build]
     types: [completed]
 
 jobs:
   pr_comment:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const run_id = ${{ github.event.workflow_run.id }};
-            const pull_head_sha = '${{github.event.workflow_run.head_sha}}';
+      - env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr=$(gh pr list --state open --json headRefOid,number \
+            --jq '.[] | select(.headRefOid == "${{ github.event.workflow_run.head_sha }}") | .number')
+          if [ -z "$pr" ]; then
+            echo "No matching pull request found"
+            exit 1
+          fi
 
-            const issue_number = await(async () => {
-              const pulls = await github.rest.pulls.list({ owner, repo });
-              for await (const { data } of github.paginate.iterator(pulls)) {
-                for (const pull of data) {
-                  if (pull.head.sha === pull_head_sha) {
-                    return pull.number;
-                  }
-                }
-              }
-            })();
-            if (issue_number) {
-              core.info(`Using pull request ${issue_number}`);
-            } else {
-              return core.error(`No matching pull request found`);
-            }
+          artifacts=$(gh api repos/{owner}/{repo}/actions/runs/${{ github.event.workflow_run.id }}/artifacts --jq '.artifacts')
+          if [ "$(echo "$artifacts" | jq 'length')" -eq 0 ]; then
+            echo "No artifacts found"
+            exit 0
+          fi
 
-            const { data: { artifacts } } = await github.rest.actions.listWorkflowRunArtifacts({ owner, repo, run_id });
-            if (!artifacts.length) {
-              return core.error(`No artifacts found`);
-            }
+          body=$(echo "$artifacts" | jq -r '
+            def link: "https://nightly.link/${{ github.repository_owner }}/${{ github.repository }}/actions/artifacts/\(.id).zip";
+            def entry: "* [\(.name)](link)";
+            "Download the artifacts for this pull request:\n\n<details><summary>Windows</summary>\n" +
+            (sort_by(.name) | map(select(.name | test("w64|msvc")) | entry) | join("\n")) +
+            "\n</details>\n\n<details><summary>macOS</summary>\n" +
+            (sort_by(.name) | map(select(.name | test("macos")) | entry) | join("\n")) +
+            "\n</details>"
+          ')
 
-            let body = `Download the artifacts for this pull request:\n\n<details><summary>Windows</summary>\n`;
-            for (const art of artifacts) {
-              const art_link = `https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip`;
-              if (art.name.includes('w64') || art.name.includes('msvc')) {
-                body += `\n* [${art.name}](${art_link})`;
-              }
-            }
-            body += `\n</details>\n\n<details><summary>macOS</summary>\n`;
-            for (const art of artifacts) {
-              const art_link = `https://nightly.link/${owner}/${repo}/actions/artifacts/${art.id}.zip`;
-              if (art.name.includes('macos')) {
-                body += `\n* [${art.name}](${art_link})`;
-              }
-            }
-            body += `\n</details>`;
-
-            const { data: comments } = await github.rest.issues.listComments({ repo, owner, issue_number });
-            const existing_comment = comments.find((c) => c.user.login === 'github-actions[bot]');
-            if (existing_comment) {
-              core.info(`Updating comment ${existing_comment.id}`);
-              await github.rest.issues.updateComment({ repo, owner, comment_id: existing_comment.id, body });
-            } else {
-              core.info(`Creating a comment`);
-              await github.rest.issues.createComment({ repo, owner, issue_number, body });
-            }
+          comment_id=$(gh issue view $pr --json comments \
+            --jq '.comments[] | select(.author.login == "github-actions") | .id')
+          if [ -n "$comment_id" ]; then
+            edit=--edit-last
+          fi
+          gh pr comment $pr --body "$body" $edit
