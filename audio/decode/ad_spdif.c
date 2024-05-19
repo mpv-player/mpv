@@ -446,6 +446,10 @@ static struct mp_decoder *create(struct mp_filter *parent,
         return NULL;
     }
 
+    const AVCodecDescriptor *desc = avcodec_descriptor_get(spdif_ctx->codec_id);
+    if (desc)
+        codec->codec_desc = desc->long_name;
+
     return &spdif_ctx->public;
 }
 
