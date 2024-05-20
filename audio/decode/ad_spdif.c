@@ -121,12 +121,13 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
         av_parser_parse2(parser, ctx, &d, &s, pkt->data, pkt->size, 0, 0, 0);
         *out_profile = profile = ctx->profile;
         *out_rate = ctx->sample_rate;
+        spdif_ctx->codec->codec_profile = avcodec_profile_name(spdif_ctx->codec_id, profile);
 
         avcodec_free_context(&ctx);
         av_parser_close(parser);
     }
 
-    if (profile != AV_PROFILE_UNKNOWN  || spdif_ctx->codec_id != AV_CODEC_ID_DTS)
+    if (profile != AV_PROFILE_UNKNOWN || spdif_ctx->codec_id == AV_CODEC_ID_AC3)
         return;
 
     const AVCodec *codec = avcodec_find_decoder(spdif_ctx->codec_id);
