@@ -118,10 +118,11 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
 
         uint8_t *d = NULL;
         int s = 0;
-        av_parser_parse2(parser, ctx, &d, &s, pkt->data, pkt->size, 0, 0, 0);
-        *out_profile = profile = ctx->profile;
-        *out_rate = ctx->sample_rate;
-        spdif_ctx->codec->codec_profile = avcodec_profile_name(spdif_ctx->codec_id, profile);
+        if (av_parser_parse2(parser, ctx, &d, &s, pkt->data, pkt->size, 0, 0, 0) > 0) {
+            *out_profile = profile = ctx->profile;
+            *out_rate = ctx->sample_rate;
+            spdif_ctx->codec->codec_profile = avcodec_profile_name(spdif_ctx->codec_id, profile);
+        }
 
         avcodec_free_context(&ctx);
         av_parser_close(parser);
