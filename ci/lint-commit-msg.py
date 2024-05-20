@@ -62,15 +62,8 @@ NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Updat
 
 @lint_rule("Subject line must contain a prefix identifying the sub system")
 def subsystem_prefix(body):
-	if re.search(NO_PREFIX_WHITELIST, body[0]):
-		return True
-	m = re.search(r"^([^:]+): ", body[0])
-	if not m:
-		return False
-	# a comma-separated list is okay
-	s = re.sub(r", ", "", m.group(1))
-	# but no spaces otherwise
-	return not " " in s
+	return (re.search(NO_PREFIX_WHITELIST, body[0]) or
+			re.search(r"^[\w/\.{},-]+: ", body[0]))
 
 @lint_rule("First word after : must be lower case")
 def description_lowercase(body):
