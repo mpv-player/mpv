@@ -207,7 +207,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew update
-          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 \
+          brew install -q autoconf automake pkg-config libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
       - name: Build with meson
