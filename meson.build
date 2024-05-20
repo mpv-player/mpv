@@ -4,6 +4,7 @@ project('mpv',
         version: files('./VERSION'),
         meson_version: '>=0.62.0',
         default_options: [
+            'backend_max_links=16',
             'buildtype=debugoptimized',
             'b_lundef=false',
             'c_std=c11',
