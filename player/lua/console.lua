@@ -1006,17 +1006,21 @@ local function list_option_action_list(option)
 end
 
 local function list_option_value_list(option)
-    if option ~= 'af' and option ~= 'vf' then
-        return mp.get_property_native(option)
+    local values = mp.get_property_native(option)
+
+    if type(values) ~= 'table' then
+        return
     end
 
-    local filters = {}
-
-    for i, filter in ipairs(mp.get_property_native(option)) do
-        filters[i] = filter.label and '@' .. filter.label or filter.name
+    if type(values[1]) ~= 'table' then
+        return values
     end
 
-    return filters
+    for i, value in ipairs(values) do
+        values[i] = value.label and '@' .. value.label or value.name
+    end
+
+    return values
 end
 
 local function has_file_argument(candidate_command)
