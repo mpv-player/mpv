@@ -64,11 +64,11 @@ NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Updat
 def subsystem_prefix(body):
 	if re.search(NO_PREFIX_WHITELIST, body[0]):
 		return True
-	m = re.search(r"^([^:]+):\s", body[0])
+	m = re.search(r"^([^:]+): ", body[0])
 	if not m:
 		return False
 	# a comma-separated list is okay
-	s = re.sub(r",\s+", "", m.group(1))
+	s = re.sub(r", ", "", m.group(1))
 	# but no spaces otherwise
 	return not " " in s
 
@@ -77,9 +77,9 @@ def description_lowercase(body):
 	if re.search(NO_PREFIX_WHITELIST, body[0]):
 		return True
 	# Allow all caps for acronyms and such
-	if re.search(r":\s[A-Z]{2,}\s", body[0]):
+	if re.search(r": [A-Z]{2,} ", body[0]):
 		return True
-	return re.search(r":\s+[a-z0-9]", body[0])
+	return re.search(r": [a-z0-9]", body[0])
 
 @lint_rule("Subject line must not end with a full stop")
 def no_dot(body):
@@ -105,7 +105,7 @@ def line_too_long(body):
 
 @lint_rule("Prefix should not include C file extensions (use `vo_gpu: ...` not `vo_gpu.c: ...`)")
 def no_file_exts(body):
-	return not re.search(r"[a-z0-9]\.[ch]:\s", body[0])
+	return not re.search(r"[a-z0-9]\.[ch]: ", body[0])
 
 ################################################################################
 
