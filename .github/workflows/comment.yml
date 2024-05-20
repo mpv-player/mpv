@@ -30,7 +30,7 @@ jobs:
 
           body=$(echo "$artifacts" | jq -r '
             def link: "https://nightly.link/${{ github.repository_owner }}/${{ github.repository }}/actions/artifacts/\(.id).zip";
-            def entry: "* [\(.name)](link)";
+            def entry: "* [\(.name)](\(link))";
             "Download the artifacts for this pull request:\n\n<details><summary>Windows</summary>\n" +
             (sort_by(.name) | map(select(.name | test("w64|msvc")) | entry) | join("\n")) +
             "\n</details>\n\n<details><summary>macOS</summary>\n" +
