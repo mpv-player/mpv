@@ -45,6 +45,7 @@
 
 struct spdifContext {
     struct mp_log   *log;
+    struct mp_codec_params *codec;
     enum AVCodecID   codec_id;
     AVFormatContext *lavf_ctx;
     AVPacket        *avpkt;
@@ -150,6 +151,13 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
 
     *out_profile = profile = ctx->profile;
     *out_rate = ctx->sample_rate;
+
+    struct mp_codec_params *c = spdif_ctx->codec;
+    c->codec_profile = av_get_profile_name(ctx->codec, ctx->profile);
+    if (!c->codec_profile)
+        c->codec_profile = avcodec_profile_name(ctx->codec_id, ctx->profile);
+    c->codec = ctx->codec_descriptor->name;
+    c->codec_desc = ctx->codec_descriptor->long_name;
 
 done:
     av_frame_free(&frame);
@@ -432,6 +440,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
 
     struct spdifContext *spdif_ctx = da->priv;
     spdif_ctx->log = da->log;
+    spdif_ctx->codec = codec;
     spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
     spdif_ctx->public.f = da;
 
