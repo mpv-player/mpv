@@ -1116,10 +1116,8 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_DOVI_RPU_BUFFER);
     if (sd) {
-#ifdef PL_HAVE_LIBDOVI
         pl_hdr_metadata_from_dovi_rpu(&dst->params.color.hdr, sd->buf->data,
                                       sd->buf->size);
-#endif
     }
 #endif
 
