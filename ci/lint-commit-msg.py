@@ -74,12 +74,9 @@ def subsystem_prefix(body):
 
 @lint_rule("First word after : must be lower case")
 def description_lowercase(body):
-	if re.search(NO_PREFIX_WHITELIST, body[0]):
-		return True
-	# Allow all caps for acronyms and such
-	if re.search(r": [A-Z]{2,} ", body[0]):
-		return True
-	return re.search(r": [a-z0-9]", body[0])
+	# Allow all caps for acronyms and options with --
+	return (re.search(NO_PREFIX_WHITELIST, body[0]) or
+			re.search(r": (?:[A-Z]{2,} |--[a-z]|[a-z0-9])", body[0]))
 
 @lint_rule("Subject line must not end with a full stop")
 def no_dot(body):
