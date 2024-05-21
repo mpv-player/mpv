@@ -51,6 +51,7 @@ EOF
 # CMake
 cmake_args=(
     -Wno-dev
+    -GNinja
     -DCMAKE_SYSTEM_PROCESSOR="${fam}"
     -DCMAKE_SYSTEM_NAME=Windows
     -DCMAKE_FIND_ROOT_PATH="$PKG_CONFIG_SYSROOT_DIR"
