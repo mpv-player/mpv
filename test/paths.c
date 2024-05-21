@@ -85,6 +85,10 @@ int main(void)
     TEST_NORMALIZE("/foo", "/foo");
 #endif
 
+#if defined(_WIN32) && (!defined(HAVE_PATHCCH) || !HAVE_PATHCCH)
+    return 0;
+#endif
+
     void *ctx = talloc_new(NULL);
     bstr dst = bstr0(mp_getcwd(ctx));
     bstr_xappend(ctx, &dst, bstr0("/foo"));
