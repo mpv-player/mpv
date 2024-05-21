@@ -53,7 +53,7 @@ static void exit_cleanup(void)
 {
     if (ctx)
         mpv_destroy(ctx);
-    if (out_path)
+    if (out_path && *out_path)
         unlink(out_path);
 }
 
@@ -87,18 +87,19 @@ static void wait_done(void)
     }
 }
 
-static void check_output(int fd)
+static void check_output(FILE *fp)
 {
-    off_t size = lseek(fd, 0, SEEK_END);
+    fseek(fp, 0, SEEK_END);
+    long size = ftell(fp);
     if (size < 100)
-        fail("did not encode anything");
+        fail("did not encode anything\n");
 
     char magic[4] = {0};
-    lseek(fd, 0, SEEK_SET);
-    read(fd, magic, sizeof(magic));
+    fseek(fp, 0, SEEK_SET);
+    fread(magic, sizeof(magic), 1, fp);
     static const char ebml_magic[] = {26, 69, 223, 163};
     if (memcmp(magic, ebml_magic, 4) != 0)
-        fail("output was not Matroska");
+        fail("output was not Matroska\n");
 
     puts("output file ok");
 }
@@ -113,14 +114,11 @@ int main(int argc, char *argv[])
     if (!ctx)
         return 1;
 
-    int fd;
-    {
-        char path[] = "./testout.XXXXXX";
-        fd = mp_mkostemps(path, 0, 0);
-        if (fd == -1)
-            fail("mkstemp failed");
-        out_path = strdup(path);
-    }
+    static char path[] = "./testout.XXXXXX";
+    out_path = mktemp(path);
+    if (!out_path || !*out_path)
+        fail("tmpfile failed\n");
+
     check_api_error(mpv_set_option_string(ctx, "o", out_path));
     check_api_error(mpv_set_option_string(ctx, "of", "matroska"));
     check_api_error(mpv_set_option_string(ctx, "end", "1.5"));
@@ -139,8 +137,11 @@ int main(int argc, char *argv[])
     mpv_destroy(ctx);
     ctx = NULL;
 
-    check_output(fd);
-    close(fd);
+    FILE *output = fopen(out_path, "rb");
+    if (!output)
+        fail("output file doesn't exist\n");
+    check_output(output);
+    fclose(output);
 
     return 0;
 }
