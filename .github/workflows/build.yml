@@ -54,7 +54,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib nasm ninja-build pkg-config python3-pip wine
+          sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib nasm ninja-build pkg-config python3-pip wine wine32 wine64
           sudo python3 -m pip install meson
 
       - name: Build libraries

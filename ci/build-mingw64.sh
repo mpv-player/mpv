@@ -23,6 +23,10 @@ export LDFLAGS="-fstack-protector-strong"
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
 export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
 
+if [[ "$TARGET" == "i686-"* ]]; then
+    export WINEPATH="`$CC -print-file-name=`;/usr/$TARGET/lib"
+fi
+
 # autotools(-like)
 commonflags="--disable-static --enable-shared"
 
@@ -41,6 +45,7 @@ strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
 windres = '${TARGET}-windres'
 dlltool = '${TARGET}-dlltool'
+exe_wrapper = 'wine'
 [host_machine]
 system = 'windows'
 cpu_family = '${fam}'
