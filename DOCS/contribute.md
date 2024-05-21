@@ -141,7 +141,10 @@ Interface change policy
   must be documented by making a new text file with a txt extension containing a
   small note in the DOCS/interface-changes directory.
 - The name of the file should be brief and related to the commit that makes the
-  change.
+  change. The content of the file should begin with the type of the change
+  (add, remove, deprecate, change, rename, etc.). If the file contains multiple
+  changes, the change which causes the most serious compatibility issues should
+  be placed first.
 - Grouping multiple related changes in the same file is also OK. Just be sure to
   put each separate change on a different line.
 - Documenting additions in DOCS/interface-changes is optional but encouraged.
