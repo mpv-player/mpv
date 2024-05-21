@@ -1,1 +1,1 @@
-`add mp.input.select()`
+add `mp.input.select()`

@@ -1,1 +1,3 @@
-add --native-touch option
+add `--native-touch` option
+add `--input-touch-emulate-mouse` option
+add `touch-pos` property

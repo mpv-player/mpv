@@ -44,7 +44,7 @@ Interface changes
     - add `current-gpu-context` property
     - add `--secondary-sub-ass-override` option
     - add `--input-preprocess-wheel` option
-    - remove shared-script-properties (user-data is a replacement)
+    - remove `shared-script-properties` (`user-data` is a replacement)
     - add `--secondary-sub-delay`, decouple secondary subtitles from
       `--sub-delay`
     - add the `--osd-bar-border-size` option
