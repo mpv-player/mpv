@@ -62,15 +62,10 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->FontSize = opts->font_size * scale;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
     style->SecondaryColour = style->PrimaryColour;
-    style->OutlineColour = MP_ASS_COLOR(opts->border_color);
-    if (opts->back_color.a) {
-        style->BackColour = MP_ASS_COLOR(opts->back_color);
-        style->BorderStyle = 4; // opaque box
-    } else {
-        style->BackColour = MP_ASS_COLOR(opts->shadow_color);
-        style->BorderStyle = 1; // outline
-    }
-    style->Outline = opts->border_size * scale;
+    style->OutlineColour = MP_ASS_COLOR(opts->outline_color);
+    style->BackColour = MP_ASS_COLOR(opts->back_color);
+    style->BorderStyle = opts->border_style;
+    style->Outline = opts->outline_size * scale;
     style->Shadow = opts->shadow_offset * scale;
     style->Spacing = opts->spacing * scale;
     style->MarginL = opts->margin_x * scale;
