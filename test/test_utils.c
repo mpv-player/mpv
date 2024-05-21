@@ -60,23 +60,55 @@ void assert_text_files_equal_impl(const char *file, int line,
                                   const char *ref, const char *new,
                                   const char *err)
 {
-    char *path_ref = mp_tprintf(4096, "%s/%s", refdir, ref);
-    char *path_new = mp_tprintf(4096, "%s/%s", outdir, new);
+    char path_ref[4096];
+    char path_new[4096];
 
-    struct mp_subprocess_opts opts = {
-        .exe = "diff",
-        .args = (char*[]){"diff", "-u", "--", path_ref, path_new, 0},
-        .fds = { {0, .src_fd = 0}, {1, .src_fd = 1}, {2, .src_fd = 2} },
-        .num_fds = 3,
-    };
+    snprintf(path_ref, sizeof(path_ref), "%s/%s", refdir, ref);
+    snprintf(path_new, sizeof(path_new), "%s/%s", outdir, new);
 
-    struct mp_subprocess_result res;
-    mp_subprocess2(&opts, &res);
+    bool ok = false;
+    FILE *fref = fopen(path_ref, "r");
+    FILE *fnew = fopen(path_new, "r");
 
-    if (res.error || res.exit_status) {
-        if (res.error)
-            printf("Note: %s\n", mp_subprocess_err_str(res.error));
-        printf("Giving up.\n");
+    if (!fref || !fnew) {
+        printf("Error: Could not open files %s or %s\n", path_ref, path_new);
+        goto done;
+    }
+
+    char ref_line[4096];
+    char new_line[4096];
+    int line_num = 0;
+
+    while (fgets(ref_line, sizeof(ref_line), fref))
+    {
+        line_num++;
+
+        if (!fgets(new_line, sizeof(new_line), fnew)) {
+            printf("Extra line %d in reference file: %s", line_num, ref_line);
+            goto done;
+        }
+
+        if (strcmp(ref_line, new_line)) {
+            printf("Difference found at line %d:\n", line_num);
+            printf("Reference: %s", ref_line);
+            printf("New file: %s", new_line);
+            goto done;
+        }
+    }
+
+    if (fgets(new_line, sizeof(new_line), fnew)) {
+        printf("Extra line %d in new file: %s", line_num, new_line);
+        goto done;
+    }
+
+    ok = true;
+
+done:
+    if (fref)
+        fclose(fref);
+    if (fnew)
+        fclose(fnew);
+    if (!ok) {
         fflush(stdout);
         abort();
     }
