@@ -142,7 +142,7 @@ _ffmpeg () {
         --pkg-config=pkg-config --target-os=mingw32
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
         --cc="$CC" --cxx="$CXX" $commonflags
-        --disable-{doc,programs,muxers,encoders}
+        --disable-{doc,programs}
         --enable-muxer=spdif --enable-encoder=mjpeg,png --enable-libdav1d
     )
     pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
