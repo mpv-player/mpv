@@ -167,7 +167,6 @@ Configurable Options
     Default: true
 
     Remove duplicate entries in history as to only keep the latest one.
-    multiplied by "scale."
 
 ``font_hw_ratio``
     Default: auto
