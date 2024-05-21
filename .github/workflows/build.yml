@@ -73,14 +73,23 @@ jobs:
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
-          cat ./build/meson-logs/meson-log.txt
+          cat ./mingw_build/meson-logs/meson-log.txt
 
       - name: Functional test
-        id: tests
         run: |
           cd artifact && wine ./mpv.com -v --no-config
         env:
           WINEDEBUG: '+loaddll'
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C mingw_build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./mingw_build/meson-logs/testlog.txt
 
       - uses: actions/upload-artifact@v4
         with:
