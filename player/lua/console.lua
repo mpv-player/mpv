@@ -514,7 +514,7 @@ local function update()
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  screenx .. ',' .. screeny
     local ass = assdraw.ass_new()
-    local has_shadow = mp.get_property('osd-back-color'):sub(2, 3) == '00'
+    local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local style = '{\\r' ..
                   '\\1a&H00&\\3a&H00&\\1c&Heeeeee&\\3c&H111111&' ..
                   (has_shadow and '\\4a&H99&\\4c&H000000&' or '') ..

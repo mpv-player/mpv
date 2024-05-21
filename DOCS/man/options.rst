@@ -2832,10 +2832,6 @@ Subtitles
 
     Default: 55.
 
-``--sub-back-color=<color>``
-    See ``--sub-color``. Color used for sub text background. You can use
-    ``--sub-shadow-offset`` to change its size relative to the text.
-
 ``--sub-blur=<0..20.0>``
     Gaussian blur factor applied to the sub font border.
     0 means no blur applied (default).
@@ -2846,14 +2842,47 @@ Subtitles
 ``--sub-italic=<yes|no>``
     Format text on italic.
 
-``--sub-border-color=<color>``
-    See ``--sub-color``. Color used for the sub font border.
+``--sub-outline-color=<color>``
+    See ``--sub-color``. Color used for the sub font outline.
 
-``--sub-border-size=<size>``
-    Size of the sub font border in scaled pixels (see ``--sub-font-size``
-    for details). A value of 0 disables borders.
+    ``--sub-border-color`` is an alias for ``--sub-outline-color``.
+
+``--sub-back-color=<color>``
+    See ``--sub-color``. Color used for sub text background.
+
+    ``--sub-shadow-color`` is an alias for ``--sub-back-color``.
+
+``--sub-outline-size=<size>``
+    Size of the sub font outline in scaled pixels (see ``--sub-font-size``
+    for details). A value of 0 disables outlines.
+
+    ``--sub-border-size`` is an alias for ``--sub-outline-size``.
 
     Default: 3.
+
+``--sub-border-style=<outline-and-shadow|opaque-box|background-box>``
+    The style of the border.
+
+    - ``outline-and-shadow``: draw outline and shadow.
+      The size of the outline is determined by ``--sub-outline-size``,
+      and the offset of the shadow is determined by ``--sub-shadow-offset``.
+      The outline is colored by ``--sub-outline-color``,
+      and the shadow is colored by ``--sub-back-color``.
+      This corresponds to ``BorderStyle=1`` in the ASS spec.
+    - ``opaque-box``: draw outline and shadow as opaque boxes that tightly wrap each lines of text.
+      The margin of the outline opaque box is determined by ``--sub-outline-size``,
+      and the offset of the shadow opaque box is determined by ``--sub-shadow-offset``.
+      The outline opaque box is colored by ``--sub-outline-color``,
+      and the shadow opaque box is colored by ``--sub-back-color``.
+      Despite its name, the opaque box can be semi-transparent.
+      This corresponds to ``BorderStyle=3`` in the ASS spec.
+    - ``background-box``: draw a background box that bounds all lines of text.
+      The background box is colored by ``--sub-back-color``,
+      and the margin of the background box is determined by ``--sub-shadow-offset``.
+      The behavior of the outline is the same as the ``outline-and-shadow`` style.
+      This corresponds to ``BorderStyle=4``, which is a libass-specific extension.
+
+    Default: ``outline-and-shadow``.
 
 ``--sub-color=<color>``
     Specify the color used for unstyled text subtitles.
@@ -2923,15 +2952,6 @@ Subtitles
     Applies justification as defined by ``--sub-justify`` on ASS subtitles
     if ``--sub-ass-override`` is not set to ``no``.
     Default: ``no``.
-
-``--sub-shadow-color=<color>``
-    See ``--sub-color``. Color used for sub text shadow.
-
-    .. note::
-
-        ignored when ``--sub-back-color`` is
-        specified (or more exactly: when that option is not set to completely
-        transparent).
 
 ``--sub-shadow-offset=<size>``
     Displacement of the sub text shadow in scaled pixels (see
@@ -4411,14 +4431,13 @@ OSD
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
-``--osd-bar-border-size=<size>``
-    Size of the border of the OSD bar in scaled pixels (see ``--sub-font-size``
+``--osd-bar-outline-size=<size>``
+    Size of the outline of the OSD bar in scaled pixels (see ``--sub-font-size``
     for details).
 
-    Default: 0.5.
+    ``--osd-bar-border-size`` is an alias for ``--osd-bar-outline-size``.
 
-``--osd-back-color=<color>``
-    See ``--sub-color``. Color used for OSD text background.
+    Default: 0.5.
 
 ``--osd-blur=<0..20.0>``
     Gaussian blur factor applied to the OSD font border.
@@ -4430,14 +4449,26 @@ OSD
 ``--osd-italic=<yes|no>``
     Format text on italic.
 
-``--osd-border-color=<color>``
-    See ``--sub-color``. Color used for the OSD font border.
+``--osd-outline-color=<color>``
+    See ``--sub-color``. Color used for the OSD font outline.
 
-``--osd-border-size=<size>``
-    Size of the OSD font border in scaled pixels (see ``--sub-font-size``
-    for details). A value of 0 disables borders.
+    ``--osd-border-color`` is an alias for ``--osd-outline-color``.
+
+``--osd-back-color=<color>``
+    See ``--sub-color``. Color used for OSD text background.
+
+    ``--osd-shadow-color`` is an alias for ``--osd-back-color``.
+
+``--osd-outline-size=<size>``
+    Size of the OSD font outline in scaled pixels (see ``--sub-font-size``
+    for details). A value of 0 disables outlines.
+
+    ``--osd-border-size`` is an alias for ``--osd-outline-size``.
 
     Default: 3.
+
+``--osd-border-style=<outline-and-shadow|opaque-box|background-box>``
+    See ``--sub-border-style``. Style used for OSD text border.
 
 ``--osd-color=<color>``
     Specify the color used for OSD.
@@ -4494,14 +4525,6 @@ OSD
         For scripts which draw user interface elements, it is recommended to
         respect the value of this option when deciding whether the elements
         are scaled with window size or not.
-
-``--osd-shadow-color=<color>``
-    See ``--sub-color``. Color used for OSD shadow.
-
-    .. note::
-
-        Ignored when ``--osd-back-color`` is specified (or more exactly: when
-        that option is not set to completely transparent).
 
 ``--osd-shadow-offset=<size>``
     Displacement of the OSD shadow in scaled pixels (see
