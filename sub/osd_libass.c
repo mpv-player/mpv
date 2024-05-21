@@ -375,18 +375,15 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 
     mp_ass_set_style(style, track->PlayResY, opts->osd_style);
 
-    if (osd->opts->osd_style->back_color.a) {
-        // override the default osd opaque-box into plain outline. Otherwise
-        // the opaque box is not aligned with the bar (even without shadow),
-        // and each bar ass event gets its own opaque box - breaking the bar.
-        style->BackColour = MP_ASS_COLOR(opts->osd_style->shadow_color);
-        style->BorderStyle = 1; // outline
-    }
+    // override the default osd opaque-box into plain outline. Otherwise
+    // the opaque box is not aligned with the bar (even without shadow),
+    // and each bar ass event gets its own opaque box - breaking the bar.
+    style->BorderStyle = 1; // outline
 
     *o_w = track->PlayResX * (opts->osd_bar_w / 100.0);
     *o_h = track->PlayResY * (opts->osd_bar_h / 100.0);
 
-    style->Outline = opts->osd_bar_border_size;
+    style->Outline = opts->osd_bar_outline_size;
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
 
@@ -428,7 +425,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
 
-    if (osd->opts->osd_style->back_color.a) {
+    if (osd->opts->osd_style->back_color.a && osd->opts->osd_style->border_style != 1) {
         // the bar style always ignores the --osd-back-color config - it messes
         // up the bar. draw an artificial box at the original back color.
         struct m_color bc = osd->opts->osd_style->back_color;

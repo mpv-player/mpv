@@ -145,10 +145,10 @@ struct osd_style_opts {
     char *font;
     float font_size;
     struct m_color color;
-    struct m_color border_color;
-    struct m_color shadow_color;
+    struct m_color outline_color;
     struct m_color back_color;
-    float border_size;
+    int border_style;
+    float outline_size;
     float shadow_offset;
     float spacing;
     int margin_x;
