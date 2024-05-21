@@ -27,7 +27,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     case MPV_FORMAT_STRING:
         value_len = strnlen(data, size);
         if (!value_len || value_len == size)
-            return -1;
+            return 0;
         value_len += 1;
         break;
     case MPV_FORMAT_FLAG:
@@ -46,12 +46,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     // at least two bytes for the name
     if (size < value_len + 2)
-        return -1;
+        return 0;
 
     const char *name = (const char *)data + value_len;
     size_t name_len = strnlen(name, size - value_len);
     if (!name_len || name_len != size - value_len - 1)
-        return -1;
+        return 0;
 
     mpv_handle *ctx = mpv_create();
     if (!ctx)

@@ -27,15 +27,15 @@
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (size <= 1 || data[size - 1] != '\0')
-        return -1;
+        return 0;
 
     // Exlude data with null bytes inside
     if (strlen(data) != size - 1)
-        return -1;
+        return 0;
 
 #ifdef MPV_PROTO
     if (!str_startswith(data, size - 1, MPV_STRINGIFY(MPV_PROTO) "://", sizeof(MPV_STRINGIFY(MPV_PROTO) "://") - 1))
-        return -1;
+        return 0;
 #endif
 
 #if !defined(MPV_PROTO) || defined(MPV_PROTO_FILE)
@@ -49,13 +49,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     // Exclude some common paths that are not useful for testing.
     // Exclude -
     if (size_check == 2 && !strncmp(data_check, "-", 1))
-        return -1;
+        return 0;
     // Exclude relative paths
     if (str_startswith(data_check, size_check - 1, ".", 1))
-        return -1;
+        return 0;
     // Exclude absolute paths
     if (str_startswith(data_check, size_check - 1, "/", 1))
-        return -1;
+        return 0;
 #endif
 
     mpv_handle *ctx = mpv_create();
