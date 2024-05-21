@@ -296,7 +296,7 @@ meson setup $build --cross-file "$prefix_dir/crossfile" \
     --werror                   \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     --buildtype debugoptimized \
-    -Dlibmpv=true -Dlua=luajit \
+    -D{libmpv,tests}=true -Dlua=luajit \
     -D{shaderc,spirv-cross,d3d11}=enabled
 
 meson compile -C $build
