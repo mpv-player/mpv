@@ -1886,12 +1886,20 @@ static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
 {
     struct vo_wayland_state *wl = s->wl;
 
+    switch (state) {
+    case WL_KEYBOARD_KEY_STATE_RELEASED:
+        state = MP_KEY_STATE_UP;
+        break;
+    case WL_KEYBOARD_KEY_STATE_PRESSED:
+        state = MP_KEY_STATE_DOWN;
+        break;
+    default:
+        return;
+    }
+
     s->keyboard_code = key + 8;
     xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
     int mpkey = lookupkey(sym);
-
-    state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
-                                                   : MP_KEY_STATE_UP;
 
     if (mpkey) {
         mp_input_put_key(wl->vo->input_ctx, mpkey | state | s->mpmod);
