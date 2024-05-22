@@ -412,9 +412,9 @@ endif
 if posix
     path_source = files('osdep/path-unix.c')
     if cc.has_function('fork', prefix : '#include <unistd.h>')
-        subprocess_source = files('osdep/subprocess-posix.c')
+        sources += files('osdep/subprocess-posix.c')
     else
-        subprocess_source = files('osdep/subprocess-dummy.c')
+        sources += files('osdep/subprocess-dummy.c')
     endif
     sources += files('input/ipc-unix.c',
                      'osdep/poll_wrapper.c',
@@ -486,7 +486,6 @@ features += {'uwp': uwp.found()}
 if features['uwp']
     dependencies += uwp
     path_source = files('osdep/path-uwp.c')
-    subprocess_source = []
 endif
 
 features += {'win32-executable': win32 and get_option('cplayer')}
@@ -514,9 +513,9 @@ if features['win32-desktop']
                           cc.find_library('version')]
     dependencies += win32_desktop_libs
     path_source = files('osdep/path-win.c')
-    subprocess_source = files('osdep/subprocess-win.c')
     sources += files('input/ipc-win.c',
                      'osdep/language-win.c',
+                     'osdep/subprocess-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
@@ -526,8 +525,8 @@ if features['win32-desktop']
 endif
 
 if not posix and not features['win32-desktop']
-    subprocess_source = files('osdep/subprocess-dummy.c')
     sources += files('input/ipc-dummy.c',
+                     'osdep/subprocess-dummy.c',
                      'osdep/terminal-dummy.c')
 endif
 
@@ -573,7 +572,7 @@ vector = get_option('vector').require(
 )
 features += {'vector': vector.allowed()}
 
-sources += path_source + subprocess_source + timer_source
+sources += path_source + timer_source
 
 
 # various file generations

@@ -4,10 +4,8 @@ outdir = join_paths(build_root, 'test', 'out')
 refdir = ''
 
 # Convenient testing libraries. An adhoc collection of
-# mpv objects that test_utils.c needs. Paths and subprocesses
-# are required in order to run a diff command when comparing
-# different files. Stuff will probably break if core things are
-# carelessly moved around.
+# mpv objects that test_utils.c needs. Stuff will probably
+# break if core things are carelessly moved around.
 test_utils_args = []
 test_utils_files = [
     'audio/chmap.c',
@@ -24,13 +22,9 @@ test_utils_files = [
     'options/m_config_core.c',
     'options/m_config_frontend.c',
     'options/m_option.c',
-    'options/path.c',
     'osdep/io.c',
-    'osdep/subprocess.c',
     'osdep/timer.c',
     timer_source,
-    path_source,
-    subprocess_source,
     'ta/ta.c',
     'ta/ta_talloc.c',
     'ta/ta_utils.c'
@@ -70,7 +64,6 @@ img_utils_files = [
     'video/fmt-conversion.c',
     'video/img_format.c',
     'video/mp_image.c',
-    'video/out/placebo/utils.c',
     'video/sws_utils.c'
 ]
 if features['zimg']
