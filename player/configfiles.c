@@ -343,6 +343,16 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         write_start = false;
         MP_INFO(mpctx, "Not seekable, or time unknown - not saving position.\n");
     }
+
+    // Workaround pts being negative when pausing and seeking to the beginning
+    // of audio without video. This would save a negative start which would make
+    // mpv seek to the end and immediately advance to the next playlist entry.
+    // We can't make playing_audio_pts() always return positive values because
+    // it increases jitter with display-resample. ao_get_delay() should be fixed
+    // instead, as tracked in #12322.
+    if (pos < 0)
+        write_start = false;
+
     char **watch_later_options = mpctx->opts->watch_later_options;
     for (int i = 0; watch_later_options && watch_later_options[i]; i++) {
         char *pname = watch_later_options[i];
