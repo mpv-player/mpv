@@ -314,6 +314,10 @@ static char **get_unsafe_protocols(void)
                 break;
             }
         }
+        // Skip to avoid name conflict with builtin mpv protocol.
+        if (strcmp(ffmpeg_protos[i], "bluray") == 0 || strcmp(ffmpeg_protos[i], "dvd") == 0)
+            continue;
+
         if (!safe_protocol)
             MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, ffmpeg_protos[i]));
     }
