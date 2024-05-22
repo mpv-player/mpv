@@ -16,6 +16,7 @@
  */
 
 #include <CoreAudio/HostTime.h>
+#include <libavutil/mathematics.h>
 
 #include "ao.h"
 #include "internal.h"
@@ -178,6 +179,7 @@ static int init(struct ao *ao)
         goto coreaudio_error;
 
     reinit_latency(ao);
+    ao->device_buffer = av_rescale(p->hw_latency_ns, ao->samplerate, 1000000000) * 2;
 
     p->queue = dispatch_queue_create("io.mpv.coreaudio_stop_during_idle",
                                      DISPATCH_QUEUE_SERIAL);
