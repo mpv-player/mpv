@@ -2120,7 +2120,7 @@ static int set_screensaver_inhibitor(struct vo_wayland_state *wl, int state)
     if (state) {
         MP_VERBOSE(wl, "Enabling idle inhibitor\n");
         struct zwp_idle_inhibit_manager_v1 *mgr = wl->idle_inhibit_manager;
-        wl->idle_inhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(mgr, wl->surface);
+        wl->idle_inhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(mgr, wl->callback_surface);
     } else {
         MP_VERBOSE(wl, "Disabling the idle inhibitor\n");
         zwp_idle_inhibitor_v1_destroy(wl->idle_inhibitor);
