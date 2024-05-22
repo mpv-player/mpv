@@ -43,6 +43,7 @@ cpp = ['ccache', '${CXX}']
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 windres = '${TARGET}-windres'
 dlltool = '${TARGET}-dlltool'
 exe_wrapper = 'wine'
