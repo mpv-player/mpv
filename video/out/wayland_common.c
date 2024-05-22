@@ -219,7 +219,7 @@ static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edge);
 static int get_mods(struct vo_wayland_seat *seat);
 static int greatest_common_divisor(int a, int b);
-static int lookupkey(int key);
+static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
@@ -559,6 +559,10 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
     struct vo_wayland_state *wl = s->wl;
     s->has_keyboard_input = true;
     guess_focus(wl);
+
+    uint32_t *key;
+    wl_array_for_each(key, keys)
+        handle_key_input(s, *key, WL_KEYBOARD_KEY_STATE_PRESSED);
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
@@ -579,36 +583,7 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
                                 uint32_t state)
 {
     struct vo_wayland_seat *s = data;
-    struct vo_wayland_state *wl = s->wl;
-
-    s->keyboard_code = key + 8;
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
-    int mpkey = lookupkey(sym);
-
-    state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
-                                                   : MP_KEY_STATE_UP;
-
-    if (mpkey) {
-        mp_input_put_key(wl->vo->input_ctx, mpkey | state | s->mpmod);
-    } else {
-        char str[128];
-        if (xkb_keysym_to_utf8(sym, str, sizeof(str)) > 0) {
-            mp_input_put_key_utf8(wl->vo->input_ctx, state | s->mpmod, bstr0(str));
-        } else {
-            // Assume a modifier was pressed and handle it in the mod event instead.
-            // If a modifier is released before a regular key, also release that
-            // key to not activate it again by accident.
-            if (state == MP_KEY_STATE_UP) {
-                s->mpkey = 0;
-                mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
-            }
-            return;
-        }
-    }
-    if (state == MP_KEY_STATE_DOWN)
-        s->mpkey = mpkey;
-    if (mpkey && state == MP_KEY_STATE_UP)
-        s->mpkey = 0;
+    handle_key_input(s, key, state);
 }
 
 static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
@@ -1904,6 +1879,41 @@ static int lookupkey(int key)
         mpkey = lookup_keymap_table(keymap, key);
 
     return mpkey;
+}
+
+static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
+                             uint32_t state)
+{
+    struct vo_wayland_state *wl = s->wl;
+
+    s->keyboard_code = key + 8;
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
+    int mpkey = lookupkey(sym);
+
+    state = state == WL_KEYBOARD_KEY_STATE_PRESSED ? MP_KEY_STATE_DOWN
+                                                   : MP_KEY_STATE_UP;
+
+    if (mpkey) {
+        mp_input_put_key(wl->vo->input_ctx, mpkey | state | s->mpmod);
+    } else {
+        char str[128];
+        if (xkb_keysym_to_utf8(sym, str, sizeof(str)) > 0) {
+            mp_input_put_key_utf8(wl->vo->input_ctx, state | s->mpmod, bstr0(str));
+        } else {
+            // Assume a modifier was pressed and handle it in the mod event instead.
+            // If a modifier is released before a regular key, also release that
+            // key to not activate it again by accident.
+            if (state == MP_KEY_STATE_UP) {
+                s->mpkey = 0;
+                mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
+            }
+            return;
+        }
+    }
+    if (state == MP_KEY_STATE_DOWN)
+        s->mpkey = mpkey;
+    if (mpkey && state == MP_KEY_STATE_UP)
+        s->mpkey = 0;
 }
 
 static void prepare_resize(struct vo_wayland_state *wl)
