@@ -263,7 +263,10 @@ local function append(s, str, attr)
     attr.prefix = attr.prefix or ""
     attr.no_prefix_markup = attr.no_prefix_markup or false
     attr.prefix = attr.no_prefix_markup and attr.prefix or bold(attr.prefix)
-    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
+
+    local index = #s + (attr.nl == "" and 0 or 1)
+    s[index] = s[index] or ""
+    s[index] = s[index] .. format("%s%s%s%s%s%s", attr.nl, attr.indent,
                      attr.prefix, attr.prefix_sep, no_ASS(str), attr.suffix)
     return true
 end
@@ -872,7 +875,7 @@ local function add_video_out(s)
         return
     end
 
-    append(s, "", {prefix=o.nl .. o.nl .. "Display:", nl="", indent=""})
+    append(s, "", {prefix="Display:", nl=o.nl .. o.nl, indent=""})
     append(s, vo, {prefix_sep="", nl="", indent=""})
     append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
                                          no_prefix_markup=true, nl="", indent=" "})
@@ -930,7 +933,7 @@ local function add_video(s)
         return
     end
 
-    append(s, "", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""})
+    append(s, "", {prefix="Video:", nl=o.nl .. o.nl, indent=""})
     local track = mp.get_property_native("current-tracks/video")
     if track and append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""}) then
         append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
@@ -990,7 +993,7 @@ local function add_audio(s)
         return (a == b or a == nil) and a or (a .. " ➜ " .. b)
     end
 
-    append(s, "", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
+    append(s, "", {prefix="Audio:", nl=o.nl .. o.nl, indent=""})
     local track = mp.get_property_native("current-tracks/audio")
     if track then
         append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""})
@@ -1259,7 +1262,7 @@ local function cache_stats()
     append(stats, info["debug-low-level-seeks"], {prefix = "Media Seeks:"})
     append(stats, info["debug-byte-level-seeks"], {prefix = "Stream Seeks:"})
 
-    append(stats, "", {prefix=o.nl .. o.nl .. "Ranges:", nl="", indent=""})
+    append(stats, "", {prefix="Ranges:", nl=o.nl .. o.nl, indent=""})
 
     append(stats, info["bof-cached"] and "yes" or "no",
            {prefix = "Start Cached:"})
