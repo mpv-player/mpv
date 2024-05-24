@@ -32,23 +32,19 @@
 
 // NOTE: all filters are designed for discrete convolution
 
-const struct filter_window *mp_find_filter_window(const char *name)
+const struct filter_window *mp_find_filter_window(enum scaler_filter function)
 {
-    if (!name)
-        return NULL;
-    for (const struct filter_window *w = mp_filter_windows; w->name; w++) {
-        if (strcmp(w->name, name) == 0)
+    for (const struct filter_window *w = mp_filter_windows; w->function; w++) {
+        if (w->function == function)
             return w;
     }
     return NULL;
 }
 
-const struct filter_kernel *mp_find_filter_kernel(const char *name)
+const struct filter_kernel *mp_find_filter_kernel(enum scaler_filter function)
 {
-    if (!name)
-        return NULL;
-    for (const struct filter_kernel *k = mp_filter_kernels; k->f.name; k++) {
-        if (strcmp(k->f.name, name) == 0)
+    for (const struct filter_kernel *k = mp_filter_kernels; k->f.function; k++) {
+        if (k->f.function == function)
             return k;
     }
     return NULL;
@@ -335,21 +331,21 @@ static double sphinx(params *p, double x)
 }
 
 const struct filter_window mp_filter_windows[] = {
-    {"box",            1,   box},
-    {"triangle",       1,   triangle},
-    {"bartlett",       1,   triangle},
-    {"cosine",         M_PI_2, cosine},
-    {"hanning",        1,   hanning},
-    {"tukey",          1,   hanning, .taper = 0.5},
-    {"hamming",        1,   hamming},
-    {"quadric",        1.5, quadric},
-    {"welch",          1,   welch},
-    {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
-    {"blackman",       1,   blackman, .params = {0.16, NAN} },
-    {"gaussian",       2,   gaussian, .params = {1.00, NAN} },
-    {"sinc",           1,   sinc},
-    {"jinc",           1.2196698912665045, jinc},
-    {"sphinx",         1.4302966531242027, sphinx},
+    {WINDOW_BOX,      1,   box},
+    {WINDOW_TRIANGLE, 1,   triangle},
+    {WINDOW_BARTLETT, 1,   triangle},
+    {WINDOW_COSINE,   M_PI_2, cosine},
+    {WINDOW_HANNING,  1,   hanning},
+    {WINDOW_TUKEY,    1,   hanning, .taper = 0.5},
+    {WINDOW_HAMMING,  1,   hamming},
+    {WINDOW_QUADRIC,  1.5, quadric},
+    {WINDOW_WELCH,    1,   welch},
+    {WINDOW_KAISER,   1,   kaiser,   .params = {6.33, NAN} },
+    {WINDOW_BLACKMAN, 1,   blackman, .params = {0.16, NAN} },
+    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN} },
+    {WINDOW_SINC,     1,   sinc},
+    {WINDOW_JINC,     1.2196698912665045, jinc},
+    {WINDOW_SPHINX,   1.4302966531242027, sphinx},
     {0}
 };
 
@@ -358,54 +354,54 @@ const struct filter_window mp_filter_windows[] = {
 
 const struct filter_kernel mp_filter_kernels[] = {
     // Spline filters
-    {{"spline16",       2,   spline16}},
-    {{"spline36",       3,   spline36}},
-    {{"spline64",       4,   spline64}},
+    {{SCALER_SPLINE16, 2, spline16}},
+    {{SCALER_SPLINE36, 3, spline36}},
+    {{SCALER_SPLINE64, 4, spline64}},
     // Sinc filters
-    {{"sinc",           2,  sinc, .resizable = true}},
-    {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
-    {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
+    {{SCALER_SINC,    2,  sinc, .resizable = true}},
+    {{SCALER_LANCZOS, 3,  sinc, .resizable = true}, .window = WINDOW_SINC},
+    {{SCALER_GINSENG, 3,  sinc, .resizable = true}, .window = WINDOW_JINC},
     // Jinc filters
-    {{"jinc",           JINC_R3, jinc, .resizable = true}, .polar = true},
-    {{"ewa_lanczos",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "jinc"},
-    {{"ewa_hanning",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "hanning" },
-    {{"ewa_ginseng",    JINC_R3, jinc, .resizable = true}, .polar = true, .window = "sinc"},
+    {{SCALER_JINC,        JINC_R3, jinc, .resizable = true}, .polar = true},
+    {{SCALER_EWA_LANCZOS, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_JINC},
+    {{SCALER_EWA_HANNING, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_HANNING},
+    {{SCALER_EWA_GINSENG, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_SINC},
     // Slightly sharpened to minimize the 1D step response error (to better
     // preserve horizontal/vertical lines)
-    {{"ewa_lanczossharp", JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
-        .polar = true, .window = "jinc"},
+    {{SCALER_EWA_LANCZOSSHARP, JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
     // Similar to the above, but sharpened substantially to the point of
     // minimizing the total impulse response error on an integer grid. Tends
     // to preserve hash patterns well. Very sharp but rings a lot.
-    {{"ewa_lanczos4sharpest", JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
-        .polar = true, .window = "jinc"},
+    {{SCALER_EWA_LANCZOS4SHARPEST, JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
     // Similar to the above, but softened instead, to make even/odd integer
     // contributions exactly symmetrical. Designed to smooth out hash patterns.
-    {{"ewa_lanczossoft", JINC_R3, jinc, .blur = 1.0164667662867047, .resizable = true},
-        .polar = true, .window = "jinc"},
+    {{SCALER_EWA_LANCZOSSOFT, JINC_R3, jinc, .blur = 1.0164667662867047, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
     // Blur parameter picked to match orthogonal and diagonal contributions
-    {{"haasnsoft", JINC_R3, jinc, .blur = 1.11, .resizable = true},
-        .polar = true, .window = "hanning"},
+    {{SCALER_HAASNSOFT, JINC_R3, jinc, .blur = 1.11, .resizable = true},
+        .polar = true, .window = WINDOW_HANNING},
     // Cubic filters
-    {{"bicubic",        2,   cubic_bc, .params = {1.0, 0.0} }},
-    {{"hermite",        1,   cubic_bc, .params = {0.0, 0.0} }},
-    {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
-    {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
-    {{"robidoux",       2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),
-                                                  113 / (58 + 216 * M_SQRT2)} }},
-    {{"robidouxsharp",  2,   cubic_bc, .params = {6 / (13 + 7 * M_SQRT2),
-                                                  7 / (2 + 12 * M_SQRT2)} }},
-    {{"ewa_robidoux",   2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),
-                                                  113 / (58 + 216 * M_SQRT2)}},
-            .polar = true},
-    {{"ewa_robidouxsharp", 2,cubic_bc, .params = {6 / (13 + 7 * M_SQRT2),
-                                                  7 / (2 + 12 * M_SQRT2)}},
-            .polar = true},
+    {{SCALER_BICUBIC,       2, cubic_bc, .params = {1.0, 0.0} }},
+    {{SCALER_HERMITE,       1, cubic_bc, .params = {0.0, 0.0} }},
+    {{SCALER_CATMULL_ROM,   2, cubic_bc, .params = {0.0, 0.5} }},
+    {{SCALER_MITCHELL,      2, cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
+    {{SCALER_ROBIDOUX,      2, cubic_bc,
+      .params = {12 / (19 + 9 * M_SQRT2), 113 / (58 + 216 * M_SQRT2)} }},
+    {{SCALER_ROBIDOUXSHARP, 2, cubic_bc,
+      .params = {6 / (13 + 7 * M_SQRT2), 7 / (2 + 12 * M_SQRT2)} }},
+    {{SCALER_EWA_ROBIDOUX,  2, cubic_bc,
+      .params = {12 / (19 + 9 * M_SQRT2), 113 / (58 + 216 * M_SQRT2)}},
+        .polar = true},
+    {{SCALER_EWA_ROBIDOUXSHARP, 2,cubic_bc,
+      .params = {6 / (13 + 7 * M_SQRT2), 7 / (2 + 12 * M_SQRT2)}},
+        .polar = true},
     // Miscellaneous filters
-    {{"box",            1,   box, .resizable = true}},
-    {{"nearest",        0.5, box}},
-    {{"triangle",       1,   triangle, .resizable = true}},
-    {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
+    {{SCALER_BOX,      1,   box, .resizable = true}},
+    {{SCALER_NEAREST,  0.5, box}},
+    {{SCALER_TRIANGLE, 1,   triangle, .resizable = true}},
+    {{SCALER_GAUSSIAN, 2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
     {{0}}
 };

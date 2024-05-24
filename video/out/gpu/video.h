@@ -29,10 +29,11 @@
 #include "video/out/filter_kernels.h"
 
 struct scaler_fun {
-    char *name;
+    int function;
     float params[2];
     float blur;
     float taper;
+    const struct m_opt_choice_alternatives *functions;
 };
 
 struct scaler_config {
