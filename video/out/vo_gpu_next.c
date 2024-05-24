@@ -1906,13 +1906,13 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
     const struct scaler_config *cfg = &opts->scaler[unit];
-    if (unit == SCALER_DSCALE && (!cfg->kernel.name || !cfg->kernel.name[0]))
+    if (cfg->kernel.function == SCALER_INHERIT)
         cfg = &opts->scaler[SCALER_SCALE];
-    if (unit == SCALER_CSCALE && (!cfg->kernel.name || !cfg->kernel.name[0]))
-        cfg = &opts->scaler[SCALER_SCALE];
+    const char *kernel_name = m_opt_choice_str(cfg->kernel.functions,
+                                               cfg->kernel.function);
 
     for (int i = 0; fixed_presets[i].name; i++) {
-        if (strcmp(cfg->kernel.name, fixed_presets[i].name) == 0)
+        if (strcmp(kernel_name, fixed_presets[i].name) == 0)
             return fixed_presets[i].filter;
     }
 
@@ -1920,9 +1920,9 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     struct scaler_params *par = &p->scalers[unit];
     const struct pl_filter_preset *preset;
     const struct pl_filter_function_preset *fpreset;
-    if ((preset = pl_find_filter_preset(cfg->kernel.name))) {
+    if ((preset = pl_find_filter_preset(kernel_name))) {
         par->config = *preset->filter;
-    } else if ((fpreset = pl_find_filter_function_preset(cfg->kernel.name))) {
+    } else if ((fpreset = pl_find_filter_function_preset(kernel_name))) {
         par->config = (struct pl_filter_config) {
             .kernel = fpreset->function,
             .params[0] = fpreset->function->params[0],
@@ -1930,12 +1930,13 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
         };
     } else {
         MP_ERR(p, "Failed mapping filter function '%s', no libplacebo analog?\n",
-               cfg->kernel.name);
+               kernel_name);
         return &pl_filter_bilinear;
     }
 
     const struct pl_filter_function_preset *wpreset;
-    if ((wpreset = pl_find_filter_function_preset(cfg->window.name))) {
+    if ((wpreset = pl_find_filter_function_preset(
+             m_opt_choice_str(cfg->window.functions, cfg->window.function)))) {
         par->config.window = wpreset->function;
         par->config.wparams[0] = wpreset->function->params[0];
         par->config.wparams[1] = wpreset->function->params[1];
@@ -1958,7 +1959,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
             par->config.radius = cfg->radius;
         } else {
             MP_WARN(p, "Filter radius specified but filter '%s' is not "
-                    "resizable, ignoring\n", cfg->kernel.name);
+                    "resizable, ignoring\n", kernel_name);
         }
     }
 
