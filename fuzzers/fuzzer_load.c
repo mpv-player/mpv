@@ -26,13 +26,6 @@
 
 #include "common.h"
 
-int LLVMFuzzerInitialize(int *argc, char ***argv)
-{
-    // Is /tmp really persistent?
-    system("rm -f /tmp/libfuzzer.*");
-    return 0;
-}
-
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     // fmemopen doesn't have associated file descriptor, so we do copy.
