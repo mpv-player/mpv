@@ -2110,9 +2110,10 @@ Property list
 
 ``audio-pts``
     Current audio playback position in current file in seconds. Unlike time-pos,
-    this updates more often than once per frame. For audio-only files, it is
-    mostly equivalent to time-pos, while for video-only files this property is
-    not available.
+    this updates more often than once per frame. This is mostly equivalent to
+    time-pos for audio-only files however it also takes into account the audio
+    driver delay. This can lead to negative values in certain cases, so in
+    general you probably want to simply use time-pos.
 
     This has a sub-property:
 
