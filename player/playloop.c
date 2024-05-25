@@ -529,6 +529,9 @@ double get_playback_time(struct MPContext *mpctx)
         if (length >= 0)
             cur = MPCLAMP(cur, 0, length);
     }
+    // Force to 0 if this is not MP_NOPTS_VALUE.
+    if (cur != MP_NOPTS_VALUE && cur < 0)
+        cur = 0.0;
     return cur;
 }
 
