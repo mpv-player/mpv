@@ -578,13 +578,13 @@ static void vo_x11_update_screeninfo(struct vo *vo)
     }
 }
 
-static struct xrandr_display *get_current_display(struct vo *vo)
+static struct xrandr_display *get_xrandr_display(struct vo *vo, struct mp_rect rc)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct xrandr_display *selected_disp = NULL;
     for (int n = 0; n < x11->num_displays; n++) {
         struct xrandr_display *disp = &x11->displays[n];
-        disp->overlaps = rc_overlaps(disp->rc, x11->winrc);
+        disp->overlaps = rc_overlaps(disp->rc, rc);
         if (disp->overlaps && (!selected_disp || disp->fps < selected_disp->fps))
             selected_disp = disp;
     }
@@ -1262,6 +1262,7 @@ void vo_x11_check_events(struct vo *vo)
             if (x11->window == None)
                 break;
             vo_x11_update_geometry(vo);
+            vo_x11_update_screeninfo(vo);
             if (x11->parent && Event.xconfigure.window == x11->parent) {
                 MP_TRACE(x11, "adjusting embedded window position\n");
                 XMoveResizeWindow(x11->display, x11->window,
@@ -1665,6 +1666,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_STATE), XA_ATOM,
                         32, PropModeAppend, (unsigned char *)&state, 1);
         x11->fs = 1;
+        x11->init_fs = true;
         // The "saved" positions are bogus, so reset them when leaving FS again.
         x11->size_changed_during_fs = true;
         x11->pos_changed_during_fs = true;
@@ -1932,7 +1934,7 @@ static void vo_x11_update_geometry(struct vo *vo)
                               &x, &y, &dummy_win);
         x11->winrc = (struct mp_rect){x, y, x + w, y + h};
     }
-    struct xrandr_display *disp = get_current_display(vo);
+    struct xrandr_display *disp = get_xrandr_display(vo, x11->winrc);
     // Try to fallback to something reasonable if we have no disp yet
     if (!disp) {
         int screen = vo_x11_select_screen(vo);
@@ -1985,6 +1987,26 @@ static void vo_x11_fullscreen(struct vo *vo)
                 rc.x1 -= 1;
                 rc.y1 -= 1;
             }
+
+            // If launched with --fs and the fs screen is different than
+            // nofsrc, try to translate nofsrc to the fs screen.
+            if (x11->init_fs) {
+                struct xrandr_display *fs_disp = get_xrandr_display(vo, x11->winrc);
+                struct xrandr_display *nofs_disp = get_xrandr_display(vo, x11->nofsrc);
+                if (fs_disp && nofs_disp && fs_disp->screen != nofs_disp->screen) {
+                    int old_w = mp_rect_w(x11->nofsrc);
+                    int old_h = mp_rect_h(x11->nofsrc);
+                    int new_x = (mp_rect_w(fs_disp->rc) - old_w) / 2 + fs_disp->rc.x0;
+                    int new_y = (mp_rect_h(fs_disp->rc) - old_h) / 2 + fs_disp->rc.y0;
+                    x11->nofsrc.x0 = new_x;
+                    x11->nofsrc.x1 = new_x + old_w;
+                    x11->nofsrc.y0 = new_y;
+                    x11->nofsrc.y1 = new_y + old_h;
+                    rc = x11->nofsrc;
+                }
+                x11->init_fs = false;
+            }
+
             vo_x11_move_resize(vo, x11->pos_changed_during_fs,
                                    x11->size_changed_during_fs, rc);
         }
