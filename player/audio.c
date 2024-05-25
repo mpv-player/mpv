@@ -612,13 +612,14 @@ double written_audio_pts(struct MPContext *mpctx)
     return mpctx->ao_chain ? mpctx->ao_chain->last_out_pts : MP_NOPTS_VALUE;
 }
 
-// Return pts value corresponding to currently playing audio.
+// Return pts value corresponding to currently playing audio adjusted for AO delay
+// and playback speed.
 double playing_audio_pts(struct MPContext *mpctx)
 {
     double pts = written_audio_pts(mpctx);
     if (pts == MP_NOPTS_VALUE || !mpctx->ao)
         return pts;
-    return pts - ao_get_delay(mpctx->ao);
+    return pts - mpctx->audio_speed * ao_get_delay(mpctx->ao);
 }
 
 // This garbage is needed for untimed AOs. These consume audio infinitely fast,
@@ -829,8 +830,7 @@ void audio_start_ao(struct MPContext *mpctx)
     double pts = MP_NOPTS_VALUE;
     if (!get_sync_pts(mpctx, &pts))
         return;
-    double apts = written_audio_pts(mpctx);
-    apts -= apts != MP_NOPTS_VALUE ? mpctx->audio_speed * ao_get_delay(mpctx->ao) : 0;
+    double apts = playing_audio_pts(mpctx);
     if (pts != MP_NOPTS_VALUE && apts != MP_NOPTS_VALUE && pts < apts &&
         mpctx->video_status != STATUS_EOF)
     {
