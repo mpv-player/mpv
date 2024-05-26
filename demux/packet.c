@@ -64,6 +64,7 @@ static struct demux_packet *packet_create(void)
         .end = MP_NOPTS_VALUE,
         .stream = -1,
         .avpacket = av_packet_alloc(),
+        .animated = -1,
     };
     MP_HANDLE_OOM(dp->avpacket);
     return dp;

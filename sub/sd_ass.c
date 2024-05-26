@@ -57,8 +57,9 @@ struct sd_ass_priv {
     struct mp_osd_res osd;
     struct seen_packet *seen_packets;
     int num_seen_packets;
-    bool *packets_animated;
+    int *packets_animated;
     int num_packets_animated;
+    bool check_animated;
     bool duration_unknown;
 };
 
@@ -351,19 +352,32 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
                       llrint(pkt->pts * 1000),
                       llrint(pkt->duration * 1000));
 
-    // This bookkeeping is only ever needed for ASS subs
+    // This bookkeeping only has any practical use for ASS subs
+    // over a VO with no video.
     if (!ctx->is_converted) {
         if (!pkt->seen) {
             for (int n = track->n_events - 1; n >= 0; n--) {
-                if (n + 1 == old_n_events || pkt->animated)
+                if (n + 1 == old_n_events || pkt->animated == 1)
                     break;
                 ASS_Event *event = &track->events[n];
-                pkt->animated = (event->Effect && event->Effect[0]) ||
-                                 is_animated(event->Text);
+                // Might as well mark pkt->animated here with effects if we can.
+                pkt->animated = (event->Effect && event->Effect[0]) ? 1 : -1;
+                if (ctx->check_animated && pkt->animated != 1)
+                    pkt->animated = is_animated(event->Text);
             }
             MP_TARRAY_APPEND(ctx, ctx->packets_animated, ctx->num_packets_animated, pkt->animated);
         } else {
-            pkt->animated = ctx->packets_animated[pkt->seen_pos];
+            if (ctx->check_animated && ctx->packets_animated[pkt->seen_pos] == -1) {
+                for (int n = track->n_events - 1; n >= 0; n--) {
+                    if (n + 1 == old_n_events || pkt->animated == 1)
+                        break;
+                    ASS_Event *event = &track->events[n];
+                    ctx->packets_animated[pkt->seen_pos] = is_animated(event->Text);
+                    pkt->animated = ctx->packets_animated[pkt->seen_pos];
+                }
+            } else {
+                pkt->animated = ctx->packets_animated[pkt->seen_pos];
+            }
         }
     }
 
@@ -952,6 +966,9 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         a[0] += res / 1000.0 + SUB_SEEK_OFFSET;
         return true;
     }
+    case SD_CTRL_SET_ANIMATED_CHECK:
+        ctx->check_animated = *(bool *)arg;
+        return CONTROL_OK;
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;

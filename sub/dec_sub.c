@@ -319,7 +319,7 @@ static bool update_pkt_cache(struct dec_sub *sub, double video_pts)
             return true;
     }
 
-    if (pkt && pkt->animated)
+    if (pkt && pkt->animated == 1)
         return true;
 
     return false;

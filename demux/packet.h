@@ -59,7 +59,7 @@ typedef struct demux_packet {
     double start, end;              // set to non-NOPTS iff segmented is set
 
     // subtitles only
-    bool animated;
+    int animated; // -1 is unknown
     bool seen;
     int seen_pos;
     double sub_duration;

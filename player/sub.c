@@ -106,6 +106,15 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
 
+    // Checking if packets have special animations is relatively expensive.
+    // This is only needed if we are rendering ASS subtitles with no video
+    // being played.
+    bool still_image = mpctx->video_out && ((mpctx->video_status == STATUS_EOF &&
+                       mpctx->opts->subs_rend->sub_past_video_end) ||
+                       !mpctx->current_track[0][STREAM_VIDEO] ||
+                       mpctx->current_track[0][STREAM_VIDEO]->image);
+    sub_control(dec_sub, SD_CTRL_SET_ANIMATED_CHECK, &still_image);
+
     if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
         // Assume fully_read implies no interleaved audio/video streams.
         // (Reading packets will change the demuxer position.)
@@ -136,10 +145,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         // Handle displaying subtitles on VO with no video being played. This is
         // quite different, because normally subtitles are redrawn on new video
         // frames, using the video frames' timestamps.
-        if (mpctx->video_out && mpctx->video_status == STATUS_EOF &&
-            (mpctx->opts->subs_rend->sub_past_video_end ||
-            !mpctx->current_track[0][STREAM_VIDEO] ||
-            mpctx->current_track[0][STREAM_VIDEO]->image)) {
+        if (still_image) {
             if (osd_pts != video_pts) {
                 osd_set_force_video_pts(mpctx->osd, video_pts);
                 osd_query_and_reset_want_redraw(mpctx->osd);
