@@ -489,6 +489,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_sub_pos = 100.0f - shared_opts->sub_pos[sd->order];
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
+    }
+    if (total_override || shared_opts->ass_style_override[sd->order] == 4) {
         set_font_scale = opts->sub_scale;
     }
     if (set_scale_with_window) {
