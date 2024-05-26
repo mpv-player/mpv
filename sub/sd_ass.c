@@ -290,12 +290,30 @@ static int init(struct sd *sd)
 // Check if subtitle has events that would cause it to be animated inside {}
 static bool is_animated(char *s)
 {
+    char *start = s;
     bool in_tag = false;
     bool valid_event = false;
     bool valid_tag = false;
     while (*s) {
-        if (!in_tag && s[0] == '{')
-            in_tag = true;
+        if (!in_tag) {
+            s = strchr(s, '{');
+            if (!s)
+                break;
+
+            if (s == start || s[-1] != '\\') {
+                in_tag = true;
+                valid_event = false;
+                valid_tag = false;
+            }
+
+            s++;
+            continue;
+        } else if (in_tag && valid_event) {
+            s = strchr(s, '}');
+            if (!s)
+                break;
+        }
+
         if (s[0] == '\\') {
             s++;
             if (!s[0])
