@@ -22,6 +22,7 @@
 
 import pathlib
 import sys
+import textwrap
 from shutil import which
 from subprocess import check_output
 
@@ -41,8 +42,10 @@ def add_new_entries(docs_dir, out, git):
     for file in files:
         with open(file[0].resolve(), "r") as f:
             for line in f:
-               line =  "    - " + line.rstrip()
-               out.write(line + "\n")
+                line = textwrap.fill(line.rstrip(), width=80,
+                                     initial_indent="    - ",
+                                     subsequent_indent="      ")
+                out.write(line + "\n")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
