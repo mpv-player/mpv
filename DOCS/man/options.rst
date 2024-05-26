@@ -2501,7 +2501,7 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--sub-ass-override=<yes|no|force|scale|strip>``
+``--sub-ass-override=<no|yes|scale|force|strip>``
     Control whether user style overrides should be applied. Note that all of
     these overrides try to be somewhat smart about figuring out whether or not
     a subtitle is considered a "sign".
@@ -2511,16 +2511,16 @@ Subtitles
     :yes:   Apply all the ``--sub-ass-*`` style override options. Changing the
             default for any of these options can lead to incorrect subtitle
             rendering (default).
+    :scale: Like ``yes``, but also apply ``--sub-scale``.
     :force: Like ``yes``, but also force all ``--sub-*`` options. Can break
             rendering easily.
-    :scale: Like ``yes``, but also apply ``--sub-scale``.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
     This also controls some bitmap subtitle overrides, as well as HTML tags in
     formats like SRT, despite the name of the option.
 
-``--secondary-sub-ass-override=<yes|no|force|scale|strip>``
+``--secondary-sub-ass-override=<no|yes|scale|force|strip>``
     Control whether user secondary substyle overrides should be applied. This
     works exactly like ``--sub-ass-override``.
 

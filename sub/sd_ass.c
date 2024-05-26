@@ -476,7 +476,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     bool set_scale_by_window = true;
     bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
-    if (converted || shared_opts->ass_style_override[sd->order] == 3) { // 'force'
+    if (converted || shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_FORCE) {
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
@@ -490,7 +490,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
     }
-    if (total_override || shared_opts->ass_style_override[sd->order] == 4) {
+    if (total_override || shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE) {
         set_font_scale = opts->sub_scale;
     }
     if (set_scale_with_window) {
@@ -508,7 +508,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     int set_force_flags = 0;
     if (total_override)
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
-    if (shared_opts->ass_style_override[sd->order] == 4) // 'scale'
+    if (shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE)
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
@@ -589,7 +589,8 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     long long ts = llrint(pts * 1000);
 
-    if (!sd->opts->sub_fix_timing || sd->shared_opts->ass_style_override[sd->order] == 0)
+    if (!sd->opts->sub_fix_timing ||
+        sd->shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_NONE)
         return ts;
 
     // Try to fix small gaps and overlaps.
@@ -652,7 +653,8 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     struct sd_ass_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
-    bool no_ass = !opts->ass_enabled || shared_opts->ass_style_override[sd->order] == 5;
+    bool no_ass = !opts->ass_enabled ||
+        shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_STRIP;
     bool converted = (ctx->is_converted && !lavc_conv_is_styled(ctx->converter)) || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
