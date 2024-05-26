@@ -13,6 +13,14 @@
 #define SUB_SEEK_OFFSET 0.01
 #define SUB_SEEK_WITHOUT_VIDEO_OFFSET 0.1
 
+enum ass_style_override {
+    ASS_STYLE_OVERRIDE_NONE,
+    ASS_STYLE_OVERRIDE_YES,
+    ASS_STYLE_OVERRIDE_SCALE,
+    ASS_STYLE_OVERRIDE_FORCE,
+    ASS_STYLE_OVERRIDE_STRIP,
+};
+
 struct sd {
     struct mpv_global *global;
     struct mp_log *log;

@@ -1,0 +1,1 @@
+move 'scale' above 'force' for `sub-ass-override` in documentation as well as code. This more accurately reflects destructiveness of these options.
