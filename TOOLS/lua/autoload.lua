@@ -32,14 +32,14 @@ ignore_patterns=^~,^bak-,%.bak$
 
 --]]
 
-MAXENTRIES = 5000
-MAXDIRSTACK = 20
+local MAXENTRIES = 5000
+local MAXDIRSTACK = 20
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
 local utils = require 'mp.utils'
 
-o = {
+local o = {
     disabled = false,
     images = true,
     videos = true,
@@ -52,37 +52,46 @@ o = {
     directory_mode = "auto",
     ignore_patterns = ""
 }
-options.read_options(o, nil, function(list)
-    split_option_exts(list.additional_video_exts, list.additional_audio_exts, list.additional_image_exts)
-    if list.videos or list.additional_video_exts or
-        list.audio or list.additional_audio_exts or
-        list.images or list.additional_image_exts then
-        create_extensions()
-    end
-    if list.directory_mode then
-        validate_directory_mode()
-    end
-end)
 
-function Set (t)
+local function Set (t)
     local set = {}
     for _, v in pairs(t) do set[v] = true end
     return set
 end
 
-function SetUnion (a,b)
+local EXTENSIONS_VIDEO_DEFAULT = Set {
+    '3g2', '3gp', 'avi', 'flv', 'm2ts', 'm4v', 'mj2', 'mkv', 'mov',
+    'mp4', 'mpeg', 'mpg', 'ogv', 'rmvb', 'webm', 'wmv', 'y4m'
+}
+
+local EXTENSIONS_AUDIO_DEFAULT = Set {
+    'aiff', 'ape', 'au', 'flac', 'm4a', 'mka', 'mp3', 'oga', 'ogg',
+    'ogm', 'opus', 'wav', 'wma'
+}
+
+local EXTENSIONS_IMAGES_DEFAULT = Set {
+    'avif', 'bmp', 'gif', 'j2k', 'jp2', 'jpeg', 'jpg', 'jxl', 'png',
+    'svg', 'tga', 'tif', 'tiff', 'webp'
+}
+
+local EXTENSIONS = {}
+local EXTENSIONS_VIDEO = {}
+local EXTENSIONS_AUDIO = {}
+local EXTENSIONS_IMAGES = {}
+
+local function SetUnion (a,b)
     for k in pairs(b) do a[k] = true end
     return a
 end
 
 -- Returns first and last positions in string or past-to-end indices
-function FindOrPastTheEnd (string, pattern, start_at)
+local function FindOrPastTheEnd (string, pattern, start_at)
     local pos1, pos2 = string.find(string, pattern, start_at)
     return pos1 or #string + 1,
            pos2 or #string + 1
 end
 
-function Split (list)
+local function Split (list)
     local set = {}
 
     local item_pos = 1
@@ -117,38 +126,19 @@ function Split (list)
     return set
 end
 
-EXTENSIONS_VIDEO_DEFAULT = Set {
-    '3g2', '3gp', 'avi', 'flv', 'm2ts', 'm4v', 'mj2', 'mkv', 'mov',
-    'mp4', 'mpeg', 'mpg', 'ogv', 'rmvb', 'webm', 'wmv', 'y4m'
-}
-
-EXTENSIONS_AUDIO_DEFAULT = Set {
-    'aiff', 'ape', 'au', 'flac', 'm4a', 'mka', 'mp3', 'oga', 'ogg',
-    'ogm', 'opus', 'wav', 'wma'
-}
-
-EXTENSIONS_IMAGES_DEFAULT = Set {
-    'avif', 'bmp', 'gif', 'j2k', 'jp2', 'jpeg', 'jpg', 'jxl', 'png',
-    'svg', 'tga', 'tif', 'tiff', 'webp'
-}
-
-function split_option_exts(video, audio, image)
+local function split_option_exts(video, audio, image)
     if video then o.additional_video_exts = Split(o.additional_video_exts) end
     if audio then o.additional_audio_exts = Split(o.additional_audio_exts) end
     if image then o.additional_image_exts = Split(o.additional_image_exts) end
 end
 split_option_exts(true, true, true)
 
-function split_patterns()
+local function split_patterns()
     o.ignore_patterns = Split(o.ignore_patterns)
 end
 split_patterns()
 
-function create_extensions()
-    EXTENSIONS = {}
-    EXTENSIONS_VIDEO = {}
-    EXTENSIONS_AUDIO = {}
-    EXTENSIONS_IMAGES = {}
+local function create_extensions()
     if o.videos then
         SetUnion(SetUnion(EXTENSIONS_VIDEO, EXTENSIONS_VIDEO_DEFAULT), o.additional_video_exts)
         SetUnion(EXTENSIONS, EXTENSIONS_VIDEO)
@@ -164,14 +154,28 @@ function create_extensions()
 end
 create_extensions()
 
-function validate_directory_mode()
-    if o.directory_mode ~= "recursive" and o.directory_mode ~= "lazy" and o.directory_mode ~= "ignore" then
+local function validate_directory_mode()
+    if o.directory_mode ~= "recursive" and o.directory_mode ~= "lazy"
+       and o.directory_mode ~= "ignore" then
         o.directory_mode = nil
     end
 end
 validate_directory_mode()
 
-function add_files(files)
+options.read_options(o, nil, function(list)
+    split_option_exts(list.additional_video_exts, list.additional_audio_exts,
+                      list.additional_image_exts)
+    if list.videos or list.additional_video_exts or
+        list.audio or list.additional_audio_exts or
+        list.images or list.additional_image_exts then
+        create_extensions()
+    end
+    if list.directory_mode then
+        validate_directory_mode()
+    end
+end)
+
+local function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
     for i = 1, #files do
         mp.commandv("loadfile", files[i][1], "append")
@@ -179,16 +183,11 @@ function add_files(files)
     end
 end
 
-function get_extension(path)
-    match = string.match(path, "%.([^%.]+)$" )
-    if match == nil then
-        return "nomatch"
-    else
-        return match
-    end
+local function get_extension(path)
+    return string.match(path, "%.([^%.]+)$" ) or "nomatch"
 end
 
-function is_ignored(file)
+local function is_ignored(file)
     for pattern, _ in pairs(o.ignore_patterns) do
         if string.match(file, pattern) then
             return true
@@ -201,7 +200,7 @@ end
 -- alphanum sorting for humans in Lua
 -- http://notebook.kulchenko.com/algorithms/alphanumeric-natural-sorting-for-humans-in-lua
 
-function alphanumsort(filenames)
+local function alphanumsort(filenames)
     local function padnum(n, d)
         return #d > 0 and ("%03d%s%.12f"):format(#n, n, tonumber(d) / (10 ^ #d))
             or ("%03d%s"):format(#n, n)
@@ -222,7 +221,7 @@ local autoloaded = nil
 local added_entries = {}
 local autoloaded_dir = nil
 
-function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files, extensions)
+local function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files, extensions)
     if dir_depth == MAXDIRSTACK then
         return
     end
@@ -287,7 +286,7 @@ function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_file
     end
 end
 
-function find_and_add_entries()
+local function find_and_add_entries()
     local aborted = mp.get_property_native("playback-abort")
     if aborted then
         msg.debug("stopping: playback aborted")
@@ -306,7 +305,7 @@ function find_and_add_entries()
     end
 
     local pl_count = mp.get_property_number("playlist-count", 1)
-    this_ext = get_extension(filename)
+    local this_ext = get_extension(filename)
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
        (pl_count == 1 and EXTENSIONS[string.lower(this_ext)] == nil) then
