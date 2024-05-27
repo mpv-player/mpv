@@ -110,7 +110,6 @@ max_line_length = 100
 -- TODO: Remove everything below this line
 local todo = {
     "player/lua/osc.lua",
-    "player/lua/ytdl_hook.lua",
     "TOOLS/lua/ao-null-reload.lua",
     "TOOLS/lua/autocrop.lua",
     "TOOLS/lua/autodeint.lua",
