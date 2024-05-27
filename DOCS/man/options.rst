@@ -5716,6 +5716,12 @@ them.
     results, as can missing or incorrect display FPS information (see
     ``--display-fps-override``).
 
+``--egl-config-id=<ID>``
+    (EGL only)
+    Select EGLConfig with specific EGL_CONFIG_ID.
+    Rendering surfaces and contexts will be created using this EGLConfig.
+    You can use ``--msg-level=vo=trace`` to obtain a list of available configs.
+
 ``--vulkan-device=<device name|UUID>``
     The name or UUID of the Vulkan device to use for rendering and presentation. Use
     ``--vulkan-device=help`` to see the list of available devices and their

@@ -389,6 +389,7 @@ typedef struct MPOpts {
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
     struct zimg_opts *zimg_opts;
+    struct egl_opts *egl_opts;
 
     int cuda_device;
 } MPOpts;
