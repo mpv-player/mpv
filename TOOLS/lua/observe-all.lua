@@ -6,7 +6,7 @@
 
 local utils = require("mp.utils")
 
-function observe(name)
+local function observe(name)
     mp.observe_property(name, "native", function(prop, val)
         print("property '" .. prop .. "' changed to '" ..
               utils.to_string(val) .. "'")
