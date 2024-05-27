@@ -15,10 +15,10 @@
 -- TODO: It might make sense to use hardware assisted vdpaupp=pullup,
 -- if available, but I don't have hardware to test it. Patch welcome.
 
-script_name = mp.get_script_name()
-pullup_label = string.format("%s-pullup", script_name)
+local script_name = mp.get_script_name()
+local pullup_label = string.format("%s-pullup", script_name)
 
-function pullup_on()
+local function pullup_on()
     for _, vf in pairs(mp.get_property_native('vf')) do
         if vf['label'] == pullup_label then
             return "yes"
@@ -27,7 +27,7 @@ function pullup_on()
     return "no"
 end
 
-function do_cycle()
+local function do_cycle()
     if pullup_on() == "yes" then
         -- if pullup is on remove it
         mp.command(string.format("vf del @%s:pullup", pullup_label))
@@ -44,7 +44,7 @@ function do_cycle()
     end
 end
 
-function cycle_deinterlace_pullup_handler()
+local function cycle_deinterlace_pullup_handler()
     do_cycle()
     -- independently determine current state and give user feedback
     mp.osd_message(string.format("deinterlace: %s\n"..
