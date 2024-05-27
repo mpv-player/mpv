@@ -36,7 +36,7 @@ local opts = {
     font_hw_ratio = 'auto',
 }
 
-function detect_platform()
+local function detect_platform()
     local platform = mp.get_property_native('platform')
     if platform == 'darwin' or platform == 'windows' then
         return platform
@@ -118,128 +118,133 @@ local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
 
-local update_timer = nil
-update_timer = mp.add_periodic_timer(0.05, function()
-    if pending_update then
-        update()
-    else
-        update_timer:kill()
+local set_active
+
+
+-- Naive helper function to find the next UTF-8 character in 'str' after 'pos'
+-- by skipping continuation bytes. Assumes 'str' contains valid UTF-8.
+local function next_utf8(str, pos)
+    if pos > str:len() then return pos end
+    repeat
+        pos = pos + 1
+    until pos > str:len() or str:byte(pos) < 0x80 or str:byte(pos) > 0xbf
+    return pos
+end
+
+-- As above, but finds the previous UTF-8 character in 'str' before 'pos'
+local function prev_utf8(str, pos)
+    if pos <= 1 then return pos end
+    repeat
+        pos = pos - 1
+    until pos <= 1 or str:byte(pos) < 0x80 or str:byte(pos) > 0xbf
+    return pos
+end
+
+local function len_utf8(str)
+    local len = 0
+    local pos = 1
+    while pos <= str:len() do
+        pos = next_utf8(str, pos)
+        len = len + 1
     end
-end)
-update_timer:kill()
+    return len
+end
 
-mp.observe_property("user-data/osc/margins", "native", function(_, val)
-    if val then
-        global_margins = val
-    else
-        global_margins = { t = 0, b = 0 }
-    end
-    update()
-end)
-
-do
-    local width_length_ratio = 0.5
-    local osd_width, osd_height = 100, 100
-
-    ---Update osd resolution if valid
-    local function update_osd_resolution()
-        local dim = mp.get_property_native('osd-dimensions')
-        if not dim or dim.w == 0 or dim.h == 0 then
-            return
+local function truncate_utf8(str, max_length)
+    local len = 0
+    local pos = 1
+    while pos <= #str do
+        pos = next_utf8(str, pos)
+        len = len + 1
+        if len == max_length - 1 then
+            return str:sub(1, pos - 1) .. '⋯'
         end
-        osd_width = dim.w
-        osd_height = dim.h
     end
+    return str
+end
 
-    local text_osd = mp.create_osd_overlay('ass-events')
-    text_osd.compute_bounds, text_osd.hidden = true, true
 
-    local function measure_bounds(ass_text)
+-- Functions to calculate the font width.
+local width_length_ratio = 0.5
+local osd_width, osd_height = 100, 100
+
+---Update osd resolution if valid
+local function update_osd_resolution()
+    local dim = mp.get_property_native('osd-dimensions')
+    if not dim or dim.w == 0 or dim.h == 0 then
+        return
+    end
+    osd_width = dim.w
+    osd_height = dim.h
+end
+
+local text_osd = mp.create_osd_overlay('ass-events')
+text_osd.compute_bounds, text_osd.hidden = true, true
+
+local function measure_bounds(ass_text)
+    update_osd_resolution()
+    text_osd.res_x, text_osd.res_y = osd_width, osd_height
+    text_osd.data = ass_text
+    local res = text_osd:update()
+    return res.x0, res.y0, res.x1, res.y1
+end
+
+---Measure text width and normalize to a font size of 1
+---text has to be ass safe
+local function normalized_text_width(text, size, horizontal)
+    local align, rotation = horizontal and 7 or 1, horizontal and 0 or -90
+    local template = '{\\pos(0,0)\\rDefault\\blur0\\bord0\\shad0\\q2\\an%s\\fs%s\\fn%s\\frz%s}%s'
+    size = size / 0.8
+    local width
+    -- Limit to 5 iterations
+    local repetitions_left = 5
+    for i = 1, repetitions_left do
+        size = size * 0.8
+        local ass = assdraw.ass_new()
+        ass.text = template:format(align, size, opts.font, rotation, text)
+        local _, _, x1, y1 = measure_bounds(ass.text)
+        -- Check if nothing got clipped
+        if x1 and x1 < osd_width and y1 < osd_height then
+            width = horizontal and x1 or y1
+            break
+        end
+        if i == repetitions_left then
+            width = 0
+        end
+    end
+    return width / size, horizontal and osd_width or osd_height
+end
+
+local function fit_on_osd(text)
+    local estimated_width = #text * width_length_ratio
+    if osd_width >= osd_height then
+        -- Fill the osd as much as possible, bigger is more accurate.
+        return math.min(osd_width / estimated_width, osd_height), true
+    else
+        return math.min(osd_height / estimated_width, osd_width), false
+    end
+end
+
+local measured_font_hw_ratio = nil
+local function get_font_hw_ratio()
+    local font_hw_ratio = tonumber(opts.font_hw_ratio)
+    if font_hw_ratio then
+        return font_hw_ratio
+    end
+    if not measured_font_hw_ratio then
+        local alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        local text = alphabet:rep(3)
         update_osd_resolution()
-        text_osd.res_x, text_osd.res_y = osd_width, osd_height
-        text_osd.data = ass_text
-        local res = text_osd:update()
-        return res.x0, res.y0, res.x1, res.y1
+        local size, horizontal = fit_on_osd(text)
+        local normalized_width = normalized_text_width(text, size * 0.9, horizontal)
+        measured_font_hw_ratio = #text / normalized_width * 0.95
     end
-
-    ---Measure text width and normalize to a font size of 1
-    ---text has to be ass safe
-    local function normalized_text_width(text, size, horizontal)
-        local align, rotation = horizontal and 7 or 1, horizontal and 0 or -90
-        local template = '{\\pos(0,0)\\rDefault\\blur0\\bord0\\shad0\\q2\\an%s\\fs%s\\fn%s\\frz%s}%s'
-        size = size / 0.8
-        local width
-        -- Limit to 5 iterations
-        local repetitions_left = 5
-        for i = 1, repetitions_left do
-            size = size * 0.8
-            local ass = assdraw.ass_new()
-            ass.text = template:format(align, size, opts.font, rotation, text)
-            local _, _, x1, y1 = measure_bounds(ass.text)
-            -- Check if nothing got clipped
-            if x1 and x1 < osd_width and y1 < osd_height then
-                width = horizontal and x1 or y1
-                break
-            end
-            if i == repetitions_left then
-                width = 0
-            end
-        end
-        return width / size, horizontal and osd_width or osd_height
-    end
-
-    local function fit_on_osd(text)
-        local estimated_width = #text * width_length_ratio
-        if osd_width >= osd_height then
-            -- Fill the osd as much as possible, bigger is more accurate.
-            return math.min(osd_width / estimated_width, osd_height), true
-        else
-            return math.min(osd_height / estimated_width, osd_width), false
-        end
-    end
-
-    local measured_font_hw_ratio = nil
-    function get_font_hw_ratio()
-        local font_hw_ratio = tonumber(opts.font_hw_ratio)
-        if font_hw_ratio then
-            return font_hw_ratio
-        end
-        if not measured_font_hw_ratio then
-            local alphabet = 'abcdefghijklmnopqrstuvwxyz'
-            local text = alphabet:rep(3)
-            update_osd_resolution()
-            local size, horizontal = fit_on_osd(text)
-            local normalized_width = normalized_text_width(text, size * 0.9, horizontal)
-            measured_font_hw_ratio = #text / normalized_width * 0.95
-        end
-        return measured_font_hw_ratio
-    end
+    return measured_font_hw_ratio
 end
 
--- Add a line to the log buffer (which is limited to 100 lines)
-function log_add(text, style, terminal_style)
-    local log_buffer = log_buffers[id]
-    log_buffer[#log_buffer + 1] = {
-        text = text,
-        style = style or '',
-        terminal_style = terminal_style or '',
-    }
-    if #log_buffer > 100 then
-        table.remove(log_buffer, 1)
-    end
-
-    if repl_active then
-        if not update_timer:is_enabled() then
-            update()
-            update_timer:resume()
-        else
-            pending_update = true
-        end
-    end
-end
 
 -- Escape a string for verbatim display on the OSD
-function ass_escape(str)
+local function ass_escape(str)
     return mp.command_native({'escape-ass', str})
 end
 
@@ -266,7 +271,7 @@ end
 -- The result contains at least one column.
 -- Rows are cut off from the top if rows_max is specified.
 -- returns a string containing the formatted table and the row count
-function format_table(list, width_max, rows_max)
+local function format_table(list, width_max, rows_max)
     if #list == 0 then
         return '', 0
     end
@@ -288,9 +293,10 @@ function format_table(list, width_max, rows_max)
     -- use as many columns as possible
     for columns = 2, list_size do
         local rows_lower_bound = math.min(rows_max, math.ceil(list_size / columns))
-        local rows_upper_bound = math.min(rows_max, list_size, math.ceil(list_size / (columns - 1) - 1))
+        local rows_upper_bound = math.min(rows_max, list_size,
+                                          math.ceil(list_size / (columns - 1) - 1))
         for rows = rows_upper_bound, rows_lower_bound, -1 do
-            cw = {}
+            local cw = {}
             width_total = 0
 
             -- find out width of each column
@@ -484,7 +490,7 @@ local function print_to_terminal()
 end
 
 -- Render the REPL and console as an ASS OSD
-function update()
+local function update()
     pending_update = false
 
     -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
@@ -581,108 +587,51 @@ function update()
     mp.set_osd_ass(screenx, screeny, ass.text)
 end
 
--- Set the REPL visibility ("enable", Esc)
-function set_active(active)
-    if active == repl_active then return end
-    if active then
-        repl_active = true
-        insert_mode = false
-        mp.enable_key_bindings('console-input', 'allow-hide-cursor+allow-vo-dragging')
-        define_key_bindings()
-
-        if not input_caller then
-            prompt = default_prompt
-            id = default_id
-            history = histories[id]
-            history_pos = #history + 1
-            mp.enable_messages('terminal-default')
-        end
-    else
-        repl_active = false
-        suggestion_buffer = {}
-        undefine_key_bindings()
-        mp.enable_messages('silent:terminal-default')
-
-        if input_caller then
-            mp.commandv('script-message-to', input_caller, 'input-event',
-                        'closed', utils.format_json({line, cursor}))
-            input_caller = nil
-            line = ''
-            cursor = 1
-            selectable_items = nil
-        end
-        collectgarbage()
-    end
-    update()
-end
-
--- Show the repl if hidden and replace its contents with 'text'
--- (script-message-to repl type)
-function show_and_type(text, cursor_pos)
-    text = text or ''
-    cursor_pos = tonumber(cursor_pos)
-
-    -- Save the line currently being edited, just in case
-    if line ~= text and line ~= '' and history[#history] ~= line then
-        history_add(line)
-    end
-
-    line = text
-    if cursor_pos ~= nil and cursor_pos >= 1
-       and cursor_pos <= line:len() + 1 then
-        cursor = math.floor(cursor_pos)
-    else
-        cursor = line:len() + 1
-    end
-    history_pos = #history + 1
-    insert_mode = false
-    if repl_active then
+local update_timer = nil
+update_timer = mp.add_periodic_timer(0.05, function()
+    if pending_update then
         update()
     else
-        set_active(true)
+        update_timer:kill()
     end
-end
+end)
+update_timer:kill()
 
--- Naive helper function to find the next UTF-8 character in 'str' after 'pos'
--- by skipping continuation bytes. Assumes 'str' contains valid UTF-8.
-function next_utf8(str, pos)
-    if pos > str:len() then return pos end
-    repeat
-        pos = pos + 1
-    until pos > str:len() or str:byte(pos) < 0x80 or str:byte(pos) > 0xbf
-    return pos
-end
-
--- As above, but finds the previous UTF-8 character in 'str' before 'pos'
-function prev_utf8(str, pos)
-    if pos <= 1 then return pos end
-    repeat
-        pos = pos - 1
-    until pos <= 1 or str:byte(pos) < 0x80 or str:byte(pos) > 0xbf
-    return pos
-end
-
-function len_utf8(str)
-    local len = 0
-    local pos = 1
-    while pos <= str:len() do
-        pos = next_utf8(str, pos)
-        len = len + 1
+-- Add a line to the log buffer (which is limited to 100 lines)
+local function log_add(text, style, terminal_style)
+    local log_buffer = log_buffers[id]
+    log_buffer[#log_buffer + 1] = {
+        text = text,
+        style = style or '',
+        terminal_style = terminal_style or '',
+    }
+    if #log_buffer > 100 then
+        table.remove(log_buffer, 1)
     end
-    return len
-end
 
-function truncate_utf8(str, max_length)
-    local len = 0
-    local pos = 1
-    while pos <= #str do
-        pos = next_utf8(str, pos)
-        len = len + 1
-        if len == max_length - 1 then
-            return str:sub(1, pos - 1) .. '⋯'
+    if repl_active then
+        if not update_timer:is_enabled() then
+            update()
+            update_timer:resume()
+        else
+            pending_update = true
         end
     end
-    return str
+end
+
+-- Add a line to the history and deduplicate
+local function history_add(text)
+    if opts.history_dedup then
+        -- More recent entries are more likely to be repeated
+        for i = #history, 1, -1 do
+            if history[i] == text then
+                table.remove(history, i)
+                break
+            end
+        end
+    end
+
+    history[#history + 1] = text
 end
 
 local function handle_edit()
@@ -705,7 +654,7 @@ local function handle_edit()
 end
 
 -- Insert a character at the current cursor position (any_unicode)
-function handle_char_input(c)
+local function handle_char_input(c)
     if insert_mode then
         line = line:sub(1, cursor - 1) .. c .. line:sub(next_utf8(line, cursor))
     else
@@ -716,7 +665,7 @@ function handle_char_input(c)
 end
 
 -- Remove the character behind the cursor (Backspace)
-function handle_backspace()
+local function handle_backspace()
     if cursor <= 1 then return end
     local prev = prev_utf8(line, cursor)
     line = line:sub(1, prev - 1) .. line:sub(cursor)
@@ -725,33 +674,33 @@ function handle_backspace()
 end
 
 -- Remove the character in front of the cursor (Del)
-function handle_del()
+local function handle_del()
     if cursor > line:len() then return end
     line = line:sub(1, cursor - 1) .. line:sub(next_utf8(line, cursor))
     handle_edit()
 end
 
 -- Toggle insert mode (Ins)
-function handle_ins()
+local function handle_ins()
     insert_mode = not insert_mode
 end
 
 -- Move the cursor to the next character (Right)
-function next_char()
+local function next_char()
     cursor = next_utf8(line, cursor)
     suggestion_buffer = {}
     update()
 end
 
 -- Move the cursor to the previous character (Left)
-function prev_char()
+local function prev_char()
     cursor = prev_utf8(line, cursor)
     suggestion_buffer = {}
     update()
 end
 
 -- Clear the current line (Ctrl+C)
-function clear()
+local function clear()
     line = ''
     cursor = 1
     insert_mode = false
@@ -761,7 +710,7 @@ end
 
 -- Close the REPL if the current line is empty, otherwise delete the next
 -- character (Ctrl+D)
-function maybe_exit()
+local function maybe_exit()
     if line == '' then
         set_active(false)
     else
@@ -769,7 +718,7 @@ function maybe_exit()
     end
 end
 
-function help_command(param)
+local function help_command(param)
     local cmdlist = mp.get_property_native('command-list')
     table.sort(cmdlist, function(c1, c2)
         return c1.name < c2.name
@@ -813,23 +762,8 @@ function help_command(param)
     log_add(output)
 end
 
--- Add a line to the history and deduplicate
-function history_add(text)
-    if opts.history_dedup then
-        -- More recent entries are more likely to be repeated
-        for i = #history, 1, -1 do
-            if history[i] == text then
-                table.remove(history, i)
-                break
-            end
-        end
-    end
-
-    history[#history + 1] = text
-end
-
 -- Run the current command and clear the line (Enter)
-function handle_enter()
+local function handle_enter()
     if line == '' and input_caller == nil then
         return
     end
@@ -861,7 +795,7 @@ function handle_enter()
 end
 
 -- Go to the specified position in the command history
-function go_history(new_pos)
+local function go_history(new_pos)
     local old_pos = history_pos
     history_pos = new_pos
 
@@ -897,7 +831,7 @@ function go_history(new_pos)
 end
 
 -- Go to the specified relative position in the command history (Up, Down)
-function move_history(amount)
+local function move_history(amount)
     if selectable_items then
         selected_match = selected_match + amount
         if selected_match > #matches then
@@ -913,7 +847,7 @@ function move_history(amount)
 end
 
 -- Go to the first command in the command history (PgUp)
-function handle_pgup()
+local function handle_pgup()
     if selectable_items then
         -- We don't know whether to count the "n hidden items" lines here; an
         -- offset of 2 is better with 1 extra line because it scrolls from the
@@ -929,7 +863,7 @@ function handle_pgup()
 end
 
 -- Stop browsing history and start editing a blank line (PgDown)
-function handle_pgdown()
+local function handle_pgdown()
     if selectable_items then
         selected_match = math.min(selected_match + calculate_max_log_lines() - 2, #matches)
         update()
@@ -957,7 +891,7 @@ end
 
 -- Move to the start of the current word, or if already at the start, the start
 -- of the previous word. (Ctrl+Left)
-function prev_word()
+local function prev_word()
     -- This is basically the same as next_word() but backwards, so reverse the
     -- string in order to do a "backwards" find. This wouldn't be as annoying
     -- to do if Lua didn't insist on 1-based indexing.
@@ -968,10 +902,140 @@ end
 
 -- Move to the end of the current word, or if already at the end, the end of
 -- the next word. (Ctrl+Right)
-function next_word()
+local function next_word()
     cursor = select(2, line:find('%s*[^%s]*', cursor)) + 1
     suggestion_buffer = {}
     update()
+end
+
+-- Move the cursor to the beginning of the line (HOME)
+local function go_home()
+    cursor = 1
+    suggestion_buffer = {}
+    update()
+end
+
+-- Move the cursor to the end of the line (END)
+local function go_end()
+    cursor = line:len() + 1
+    suggestion_buffer = {}
+    update()
+end
+
+-- Delete from the cursor to the beginning of the word (Ctrl+Backspace)
+local function del_word()
+    local before_cur = line:sub(1, cursor - 1)
+    local after_cur = line:sub(cursor)
+
+    before_cur = before_cur:gsub('[^%s]+%s*$', '', 1)
+    line = before_cur .. after_cur
+    cursor = before_cur:len() + 1
+    handle_edit()
+end
+
+-- Delete from the cursor to the end of the word (Ctrl+Del)
+local function del_next_word()
+    if cursor > line:len() then return end
+
+    local before_cur = line:sub(1, cursor - 1)
+    local after_cur = line:sub(cursor)
+
+    after_cur = after_cur:gsub('^%s*[^%s]+', '', 1)
+    line = before_cur .. after_cur
+    handle_edit()
+end
+
+-- Delete from the cursor to the end of the line (Ctrl+K)
+local function del_to_eol()
+    line = line:sub(1, cursor - 1)
+    handle_edit()
+end
+
+-- Delete from the cursor back to the start of the line (Ctrl+U)
+local function del_to_start()
+    line = line:sub(cursor)
+    cursor = 1
+    handle_edit()
+end
+
+-- Empty the log buffer of all messages (Ctrl+L)
+local function clear_log_buffer()
+    log_buffers[id] = {}
+    update()
+end
+
+-- Returns a string of UTF-8 text from the clipboard (or the primary selection)
+local function get_clipboard(clip)
+    if platform == 'x11' then
+        local res = utils.subprocess({
+            args = { 'xclip', '-selection', clip and 'clipboard' or 'primary', '-out' },
+            playback_only = false,
+        })
+        if not res.error then
+            return res.stdout
+        end
+    elseif platform == 'wayland' then
+        local res = utils.subprocess({
+            args = { 'wl-paste', clip and '-n' or  '-np' },
+            playback_only = false,
+        })
+        if not res.error then
+            return res.stdout
+        end
+    elseif platform == 'windows' then
+        local res = utils.subprocess({
+            args = { 'powershell', '-NoProfile', '-Command', [[& {
+                Trap {
+                    Write-Error -ErrorRecord $_
+                    Exit 1
+                }
+
+                $clip = ""
+                if (Get-Command "Get-Clipboard" -errorAction SilentlyContinue) {
+                    $clip = Get-Clipboard -Raw -Format Text -TextFormatType UnicodeText
+                } else {
+                    Add-Type -AssemblyName PresentationCore
+                    $clip = [Windows.Clipboard]::GetText()
+                }
+
+                $clip = $clip -Replace "`r",""
+                $u8clip = [System.Text.Encoding]::UTF8.GetBytes($clip)
+                [Console]::OpenStandardOutput().Write($u8clip, 0, $u8clip.Length)
+            }]] },
+            playback_only = false,
+        })
+        if not res.error then
+            return res.stdout
+        end
+    elseif platform == 'darwin' then
+        local res = utils.subprocess({
+            args = { 'pbpaste' },
+            playback_only = false,
+        })
+        if not res.error then
+            return res.stdout
+        end
+    end
+    return ''
+end
+
+-- Paste text from the window-system's clipboard. 'clip' determines whether the
+-- clipboard or the primary selection buffer is used (on X11 and Wayland only.)
+local function paste(clip)
+    local text = get_clipboard(clip)
+    local before_cur = line:sub(1, cursor - 1)
+    local after_cur = line:sub(cursor)
+    line = before_cur .. text .. after_cur
+    cursor = cursor + text:len()
+    handle_edit()
+end
+
+local function text_input(info)
+    if info.key_text and (info.event == "press" or info.event == "down"
+                          or info.event == "repeat")
+    then
+        handle_char_input(info.key_text)
+    end
 end
 
 local function command_list()
@@ -1125,7 +1189,7 @@ local function handle_choice_completion(option, before_cur, path_pos)
     return info.choices, before_cur
 end
 
-function common_prefix_length(s1, s2)
+local function common_prefix_length(s1, s2)
     local common_count = 0
     for i = 1, #s1 do
         if s1:byte(i) ~= s2:byte(i) then
@@ -1136,7 +1200,7 @@ function common_prefix_length(s1, s2)
     return common_count
 end
 
-function max_overlap_length(s1, s2)
+local function max_overlap_length(s1, s2)
     for s1_offset = 0, #s1 - 1 do
         local match = true
         for i = 1, #s1 - s1_offset do
@@ -1233,7 +1297,7 @@ local function cycle_through_suggestions(backwards)
 end
 
 -- Complete the option or property at the cursor (TAB)
-function complete(backwards)
+local function complete(backwards)
     if #suggestion_buffer > 0 then
         cycle_through_suggestions(backwards)
         return
@@ -1419,131 +1483,9 @@ function complete(backwards)
     update()
 end
 
--- Move the cursor to the beginning of the line (HOME)
-function go_home()
-    cursor = 1
-    suggestion_buffer = {}
-    update()
-end
-
--- Move the cursor to the end of the line (END)
-function go_end()
-    cursor = line:len() + 1
-    suggestion_buffer = {}
-    update()
-end
-
--- Delete from the cursor to the beginning of the word (Ctrl+Backspace)
-function del_word()
-    local before_cur = line:sub(1, cursor - 1)
-    local after_cur = line:sub(cursor)
-
-    before_cur = before_cur:gsub('[^%s]+%s*$', '', 1)
-    line = before_cur .. after_cur
-    cursor = before_cur:len() + 1
-    handle_edit()
-end
-
--- Delete from the cursor to the end of the word (Ctrl+Del)
-function del_next_word()
-    if cursor > line:len() then return end
-
-    local before_cur = line:sub(1, cursor - 1)
-    local after_cur = line:sub(cursor)
-
-    after_cur = after_cur:gsub('^%s*[^%s]+', '', 1)
-    line = before_cur .. after_cur
-    handle_edit()
-end
-
--- Delete from the cursor to the end of the line (Ctrl+K)
-function del_to_eol()
-    line = line:sub(1, cursor - 1)
-    handle_edit()
-end
-
--- Delete from the cursor back to the start of the line (Ctrl+U)
-function del_to_start()
-    line = line:sub(cursor)
-    cursor = 1
-    handle_edit()
-end
-
--- Empty the log buffer of all messages (Ctrl+L)
-function clear_log_buffer()
-    log_buffers[id] = {}
-    update()
-end
-
--- Returns a string of UTF-8 text from the clipboard (or the primary selection)
-function get_clipboard(clip)
-    if platform == 'x11' then
-        local res = utils.subprocess({
-            args = { 'xclip', '-selection', clip and 'clipboard' or 'primary', '-out' },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
-    elseif platform == 'wayland' then
-        local res = utils.subprocess({
-            args = { 'wl-paste', clip and '-n' or  '-np' },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
-    elseif platform == 'windows' then
-        local res = utils.subprocess({
-            args = { 'powershell', '-NoProfile', '-Command', [[& {
-                Trap {
-                    Write-Error -ErrorRecord $_
-                    Exit 1
-                }
-
-                $clip = ""
-                if (Get-Command "Get-Clipboard" -errorAction SilentlyContinue) {
-                    $clip = Get-Clipboard -Raw -Format Text -TextFormatType UnicodeText
-                } else {
-                    Add-Type -AssemblyName PresentationCore
-                    $clip = [Windows.Clipboard]::GetText()
-                }
-
-                $clip = $clip -Replace "`r",""
-                $u8clip = [System.Text.Encoding]::UTF8.GetBytes($clip)
-                [Console]::OpenStandardOutput().Write($u8clip, 0, $u8clip.Length)
-            }]] },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
-    elseif platform == 'darwin' then
-        local res = utils.subprocess({
-            args = { 'pbpaste' },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
-    end
-    return ''
-end
-
--- Paste text from the window-system's clipboard. 'clip' determines whether the
--- clipboard or the primary selection buffer is used (on X11 and Wayland only.)
-function paste(clip)
-    local text = get_clipboard(clip)
-    local before_cur = line:sub(1, cursor - 1)
-    local after_cur = line:sub(cursor)
-    line = before_cur .. text .. after_cur
-    cursor = cursor + text:len()
-    handle_edit()
-end
-
 -- List of input bindings. This is a weird mashup between common GUI text-input
 -- bindings and readline bindings.
-function get_bindings()
+local function get_bindings()
     local bindings = {
         { 'esc',         function() set_active(false) end       },
         { 'ctrl+[',      function() set_active(false) end       },
@@ -1607,15 +1549,7 @@ function get_bindings()
     return bindings
 end
 
-local function text_input(info)
-    if info.key_text and (info.event == "press" or info.event == "down"
-                          or info.event == "repeat")
-    then
-        handle_char_input(info.key_text)
-    end
-end
-
-function define_key_bindings()
+local function define_key_bindings()
     if #key_bindings > 0 then
         return
     end
@@ -1630,11 +1564,73 @@ function define_key_bindings()
     key_bindings[#key_bindings + 1] = "_console_text"
 end
 
-function undefine_key_bindings()
+local function undefine_key_bindings()
     for _, name in ipairs(key_bindings) do
         mp.remove_key_binding(name)
     end
     key_bindings = {}
+end
+
+-- Set the REPL visibility ("enable", Esc)
+set_active = function (active)
+    if active == repl_active then return end
+    if active then
+        repl_active = true
+        insert_mode = false
+        mp.enable_key_bindings('console-input', 'allow-hide-cursor+allow-vo-dragging')
+        define_key_bindings()
+
+        if not input_caller then
+            prompt = default_prompt
+            id = default_id
+            history = histories[id]
+            history_pos = #history + 1
+            mp.enable_messages('terminal-default')
+        end
+    else
+        repl_active = false
+        suggestion_buffer = {}
+        undefine_key_bindings()
+        mp.enable_messages('silent:terminal-default')
+
+        if input_caller then
+            mp.commandv('script-message-to', input_caller, 'input-event',
+                        'closed', utils.format_json({line, cursor}))
+            input_caller = nil
+            line = ''
+            cursor = 1
+            selectable_items = nil
+        end
+        collectgarbage()
+    end
+    update()
+end
+
+-- Show the repl if hidden and replace its contents with 'text'
+-- (script-message-to repl type)
+local function show_and_type(text, cursor_pos)
+    text = text or ''
+    cursor_pos = tonumber(cursor_pos)
+
+    -- Save the line currently being edited, just in case
+    if line ~= text and line ~= '' and history[#history] ~= line then
+        history_add(line)
+    end
+
+    line = text
+    if cursor_pos ~= nil and cursor_pos >= 1
+        and cursor_pos <= line:len() + 1 then
+        cursor = math.floor(cursor_pos)
+    else
+        cursor = line:len() + 1
+    end
+    history_pos = #history + 1
+    insert_mode = false
+    if repl_active then
+        update()
+    else
+        set_active(true)
+    end
 end
 
 -- Add a global binding for enabling the REPL. While it's enabled, its bindings
@@ -1752,6 +1748,15 @@ mp.observe_property('osd-width', 'native', update)
 mp.observe_property('osd-height', 'native', update)
 mp.observe_property('display-hidpi-scale', 'native', update)
 mp.observe_property('focused', 'native', update)
+
+mp.observe_property("user-data/osc/margins", "native", function(_, val)
+    if val then
+        global_margins = val
+    else
+        global_margins = { t = 0, b = 0 }
+    end
+    update()
+end)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
 -- until enable_messages is called again without the silent: prefix.
