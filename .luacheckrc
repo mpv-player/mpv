@@ -110,7 +110,6 @@ max_line_length = 100
 -- TODO: Remove everything below this line
 local todo = {
     "player/lua/osc.lua",
-    "TOOLS/lua/status-line.lua",
     "TOOLS/lua/test-hooks.lua",
 }
 for _, path in ipairs(todo) do
