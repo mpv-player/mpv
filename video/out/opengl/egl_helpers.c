@@ -16,6 +16,7 @@
  */
 
 #include "config.h"
+#include "options/m_config.h"
 
 #if HAVE_LIBDL
 #include <dlfcn.h>
@@ -100,8 +101,21 @@ static void *mpegl_get_proc_address(void *ctx, const char *name)
     return p;
 }
 
+struct egl_opts {
+    int config_id;
+};
+
+#define OPT_BASE_STRUCT struct egl_opts
+const struct m_sub_options egl_conf = {
+    .opts = (const struct m_option[]) {
+        {"egl-config-id", OPT_INT(config_id)},
+        {0},
+    },
+    .size = sizeof(struct egl_opts),
+};
+
 static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
-                           bool es, struct mpegl_cb cb,
+                           bool es, struct mpegl_cb cb, struct egl_opts *opts,
                            EGLContext *out_context, EGLConfig *out_config)
 {
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_FATAL;
@@ -136,6 +150,11 @@ static bool create_context(struct ra_ctx *ctx, EGLDisplay display,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
+    if (opts->config_id) {
+        attributes[0] = EGL_CONFIG_ID;
+        attributes[1] = opts->config_id;
+        attributes[2] = EGL_NONE;
+    }
 
     EGLint num_configs;
     if (!eglChooseConfig(display, attributes, NULL, 0, &num_configs))
@@ -243,17 +262,23 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
 
     enum gles_mode mode = ra_gl_ctx_get_glesmode(ctx);
 
-    if ((mode == GLES_NO || mode == GLES_AUTO) &&
-        create_context(ctx, display, false, cb, out_context, out_config))
-        return true;
+    void *tmp = talloc_new(NULL);
+    struct egl_opts *opts = mp_get_config_group(tmp, ctx->global, &egl_conf);
 
-    if ((mode == GLES_YES || mode == GLES_AUTO) &&
-        create_context(ctx, display, true, cb, out_context, out_config))
-        return true;
+    bool r = false;
+    if (!r && (mode == GLES_NO || mode == GLES_AUTO))
+        r = create_context(ctx, display, false, cb, opts, out_context, out_config);
+    if (!r && (mode == GLES_YES || mode == GLES_AUTO))
+        r = create_context(ctx, display, true, cb, opts, out_context, out_config);
 
-    int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
-    MP_MSG(ctx, msgl, "Could not create a GL context.\n");
-    return false;
+    talloc_free(tmp);
+
+    if (!r) {
+        int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
+        MP_MSG(ctx, msgl, "Could not create a GL context.\n");
+    }
+
+    return r;
 }
 
 static int GLAPIENTRY swap_interval(int interval)
