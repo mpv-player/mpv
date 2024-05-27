@@ -1,1 +1,2 @@
 move 'scale' above 'force' for `sub-ass-override` in documentation as well as code. This more accurately reflects destructiveness of these options.
+change `sub-ass-override` default from 'yes' to 'scale'. This should result in no effective changes because 'yes' used to unintentionally do what 'scale' should've done.
