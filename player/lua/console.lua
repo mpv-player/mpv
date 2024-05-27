@@ -1184,7 +1184,7 @@ local function complete_match(part, list)
     local prefix = find_common_prefix(completions)
 
     if opts.case_sensitive then
-        return completions, prefix
+        return completions, prefix or part
     end
 
     completions = {}
