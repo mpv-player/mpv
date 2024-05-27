@@ -383,7 +383,7 @@ const struct m_sub_options mp_subtitle_shared_sub_opts = {
         .sub_visibility[0] = true,
         .sub_visibility[1] = true,
         .sub_pos[0] = 100,
-        .ass_style_override[0] = ASS_STYLE_OVERRIDE_YES,
+        .ass_style_override[0] = ASS_STYLE_OVERRIDE_SCALE,
         .ass_style_override[1] = ASS_STYLE_OVERRIDE_STRIP,
     },
     .change_flags = UPDATE_OSD,

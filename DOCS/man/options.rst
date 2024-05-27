@@ -2510,8 +2510,8 @@ Subtitles
             overrides.
     :yes:   Apply all the ``--sub-ass-*`` style override options. Changing the
             default for any of these options can lead to incorrect subtitle
-            rendering (default).
-    :scale: Like ``yes``, but also apply ``--sub-scale``.
+            rendering.
+    :scale: Like ``yes``, but also apply ``--sub-scale`` (default).
     :force: Like ``yes``, but also force all ``--sub-*`` options. Can break
             rendering easily.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
