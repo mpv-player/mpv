@@ -5722,6 +5722,27 @@ them.
     Rendering surfaces and contexts will be created using this EGLConfig.
     You can use ``--msg-level=vo=trace`` to obtain a list of available configs.
 
+``--egl-output-format=<auto|rgb8|rgba8|rgb10|rgb10_a2|rgb16|rgba16|rgb16f|rgba16f|rgb32f|rgba32f>``
+    (EGL only)
+    Select a specific EGL output format to utilize for OpenGL rendering.
+    This option is mutually exclusive with ``--egl-config-id``.
+    "auto" is the default, which will pick the first usable config
+    based on the order given by the driver.
+
+    All formats are not available.
+    A fatal error is caused if an unavailable format is selected.
+
+    .. note::
+
+        There is no reliable API to query desktop bit depth in EGL.
+        You can manually set this option
+        according to the bit depth of your display.
+        This option also affects the auto-detection of ``--dither-depth``.
+
+    .. note::
+
+        Unlike  ``--d3d11-output-format``, this option also takes effect with ``--vo=gpu-next``.
+
 ``--vulkan-device=<device name|UUID>``
     The name or UUID of the Vulkan device to use for rendering and presentation. Use
     ``--vulkan-device=help`` to see the list of available devices and their

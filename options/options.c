@@ -905,7 +905,7 @@ static const m_option_t mp_opts[] = {
 #endif
 
 #if HAVE_EGL || HAVE_EGL_ANDROID || HAVE_EGL_ANGLE_WIN32
-    {"", OPT_SUBSTRUCT(egl_opts, egl_conf)},
+    {"egl", OPT_SUBSTRUCT(egl_opts, egl_conf)},
 #endif
 
 #if HAVE_VULKAN
