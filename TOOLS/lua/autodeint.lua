@@ -26,19 +26,21 @@
 
 require "mp.msg"
 
-script_name = mp.get_script_name()
-detect_label = string.format("%s-detect", script_name)
-pullup_label = string.format("%s", script_name)
-dominance_label = string.format("%s-dominance", script_name)
-ivtc_detect_label = string.format("%s-ivtc-detect", script_name)
+local script_name = mp.get_script_name()
+local detect_label = string.format("%s-detect", script_name)
+local pullup_label = string.format("%s", script_name)
+local dominance_label = string.format("%s-dominance", script_name)
+local ivtc_detect_label = string.format("%s-ivtc-detect", script_name)
+local timer
+local progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3
 
 -- number of seconds to gather cropdetect data
-detect_seconds = tonumber(mp.get_opt(string.format("%s.detect_seconds", script_name)))
+local detect_seconds = tonumber(mp.get_opt(string.format("%s.detect_seconds", script_name)))
 if not detect_seconds then
     detect_seconds = 4
 end
 
-function del_filter_if_present(label)
+local function del_filter_if_present(label)
     -- necessary because mp.command('vf del @label:filter') raises an
     -- error if the filter doesn't exist
     local vfs = mp.get_property_native("vf")
@@ -57,39 +59,13 @@ local function add_vf(label, filter)
     return mp.command(('vf add @%s:%s'):format(label, filter))
 end
 
-function start_detect()
-    -- exit if detection is already in progress
-    if timer then
-        mp.msg.warn("already detecting!")
-        return
-    end
-
-    mp.set_property("deinterlace","no")
-    del_filter_if_present(pullup_label)
-    del_filter_if_present(dominance_label)
-
-    -- insert the detection filters
-    if not (add_vf(detect_label, 'idet') and
-            add_vf(dominance_label, 'setfield=mode=auto') and
-            add_vf(pullup_label, 'lavfi-pullup') and
-            add_vf(ivtc_detect_label, 'idet')) then
-        mp.msg.error("failed to insert detection filters")
-        return
-    end
-
-    -- wait to gather data
-    timer = mp.add_timeout(detect_seconds, select_filter)
-end
-
-function stop_detect()
+local function stop_detect()
     del_filter_if_present(detect_label)
     del_filter_if_present(ivtc_detect_label)
     timer = nil
 end
 
-progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3
-
-function judge(label)
+local function judge(label)
     -- get the metadata
     local result = mp.get_property_native(string.format("vf-metadata/%s", label))
     local num_tff          = tonumber(result["lavfi.idet.multiple.tff"])
@@ -118,7 +94,7 @@ function judge(label)
     end
 end
 
-function select_filter()
+local function select_filter()
     -- handle the first detection filter results
     local verdict = judge(detect_label)
     local ivtc_verdict = judge(ivtc_detect_label)
@@ -146,11 +122,36 @@ function select_filter()
         mp.msg.info(string.format("telecined with %s field dominance: using pullup", dominance))
         stop_detect()
     else
-        mp.msg.info(string.format("interlaced with %s field dominance: setting deinterlace property", dominance))
+        mp.msg.info("interlaced with " .. dominance ..
+                    " field dominance: setting deinterlace property")
         del_filter_if_present(pullup_label)
         mp.set_property("deinterlace","yes")
         stop_detect()
     end
+end
+
+local function start_detect()
+    -- exit if detection is already in progress
+    if timer then
+        mp.msg.warn("already detecting!")
+        return
+    end
+
+    mp.set_property("deinterlace","no")
+    del_filter_if_present(pullup_label)
+    del_filter_if_present(dominance_label)
+
+    -- insert the detection filters
+    if not (add_vf(detect_label, 'idet') and
+            add_vf(dominance_label, 'setfield=mode=auto') and
+            add_vf(pullup_label, 'lavfi-pullup') and
+            add_vf(ivtc_detect_label, 'idet')) then
+        mp.msg.error("failed to insert detection filters")
+        return
+    end
+
+    -- wait to gather data
+    timer = mp.add_timeout(detect_seconds, select_filter)
 end
 
 mp.add_key_binding("ctrl+d", script_name, start_detect)
