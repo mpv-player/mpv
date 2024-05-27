@@ -1,6 +1,6 @@
 local utils = require("mp.utils")
 
-function hardsleep()
+local function hardsleep()
     os.execute("sleep 1s")
 end
 
