@@ -187,6 +187,7 @@ struct input_opts {
     bool use_media_keys;
     bool default_bindings;
     bool builtin_bindings;
+    bool builtin_dragging;
     bool enable_mouse_movements;
     bool vo_key_input;
     bool test;
@@ -204,6 +205,7 @@ const struct m_sub_options input_config = {
         {"input-cmdlist", OPT_PRINT(mp_print_cmd_list)},
         {"input-default-bindings", OPT_BOOL(default_bindings)},
         {"input-builtin-bindings", OPT_BOOL(builtin_bindings)},
+        {"input-builtin-dragging", OPT_BOOL(builtin_dragging)},
         {"input-test", OPT_BOOL(test)},
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
@@ -233,6 +235,7 @@ const struct m_sub_options input_config = {
         .use_media_keys = true,
         .default_bindings = true,
         .builtin_bindings = true,
+        .builtin_dragging = true,
         .vo_key_input = true,
         .allow_win_drag = true,
         .preprocess_wheel = true,
@@ -919,7 +922,9 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
     bool mouse_outside_dragging_deadzone =
         abs(ictx->mouse_raw_x - ictx->mouse_drag_x) >= ictx->opts->dragging_deadzone ||
         abs(ictx->mouse_raw_y - ictx->mouse_drag_y) >= ictx->opts->dragging_deadzone;
-    if (ictx->dragging_button_down && mouse_outside_dragging_deadzone) {
+    if (ictx->dragging_button_down && mouse_outside_dragging_deadzone &&
+        ictx->opts->builtin_dragging)
+    {
         // Begin built-in VO dragging if the mouse moves while the dragging button is down.
         ictx->dragging_button_down = false;
         // Prevent activation of MBTN_LEFT key binding if VO dragging begins.
