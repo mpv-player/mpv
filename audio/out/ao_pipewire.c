@@ -56,11 +56,10 @@ static uint64_t pw_stream_get_nsec(struct pw_stream *stream)
 }
 #endif
 
-enum state {
-    STATE_UNINITIALIZED,
-    STATE_READY,
-    STATE_ERROR,
-    STATE_DRAINING,
+enum init_state {
+    INIT_STATE_NONE,
+    INIT_STATE_SUCCESS,
+    INIT_STATE_ERROR,
 };
 
 enum {
@@ -74,7 +73,7 @@ struct priv {
     struct pw_core *core;
     struct spa_hook stream_listener;
     struct spa_hook core_listener;
-    enum state state;
+    enum init_state init_state;
 
     bool muted;
     float volume;
@@ -222,7 +221,6 @@ static void on_process(void *userdata)
     if (eof) {
         pw_stream_flush(p->stream, true);
         ao_stop_streaming(ao);
-        p->state = STATE_DRAINING;
     }
 
     MP_TRACE(ao, "queued %d of %d samples\n", samples, nframes);
@@ -240,7 +238,7 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
      * As there is no proper callback for this we use the Latency param for this
      */
     if (id == SPA_PARAM_Latency) {
-        p->state = STATE_READY;
+        p->init_state = INIT_STATE_SUCCESS;
         pw_thread_loop_signal(p->loop, false);
     }
 
@@ -275,7 +273,7 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
 
     if (state == PW_STREAM_STATE_ERROR) {
         MP_WARN(ao, "Stream in error state, trying to reload...\n");
-        p->state = STATE_ERROR;
+        p->init_state = INIT_STATE_ERROR;
         pw_thread_loop_signal(p->loop, false);
         ao_request_reload(ao);
     }
@@ -330,22 +328,12 @@ static void on_control_info(void *userdata, uint32_t id,
     }
 }
 
-static void on_drained(void *userdata)
-{
-    struct ao *ao = userdata;
-    struct priv *p = ao->priv;
-
-    p->state = STATE_READY;
-    pw_thread_loop_signal(p->loop, false);
-}
-
 static const struct pw_stream_events stream_events = {
     .version = PW_VERSION_STREAM_EVENTS,
     .param_changed = on_param_changed,
     .process = on_process,
     .state_changed = on_state_changed,
     .control_info = on_control_info,
-    .drained = on_drained,
 };
 
 static void uninit(struct ao *ao)
@@ -571,7 +559,7 @@ error:
     return -1;
 }
 
-static void wait_for_state_ready(struct ao *ao)
+static void wait_for_init_done(struct ao *ao)
 {
     struct priv *p = ao->priv;
     struct timespec abstime;
@@ -583,7 +571,7 @@ static void wait_for_state_ready(struct ao *ao)
         return;
     }
 
-    while (p->state != STATE_READY && p->state != STATE_ERROR) {
+    while (p->init_state == INIT_STATE_NONE) {
         r = pw_thread_loop_timed_wait_full(p->loop, &abstime);
         if (r < 0) {
             MP_WARN(ao, "Could not wait for initialization: %s\n", spa_strerror(r));
@@ -691,11 +679,11 @@ static int init(struct ao *ao)
         goto error;
     }
 
-    wait_for_state_ready(ao);
+    wait_for_init_done(ao);
 
     pw_thread_loop_unlock(p->loop);
 
-    if (p->state == STATE_ERROR)
+    if (p->init_state == INIT_STATE_ERROR)
         goto error;
 
     return 0;
@@ -720,7 +708,6 @@ static void start(struct ao *ao)
 {
     struct priv *p = ao->priv;
     pw_thread_loop_lock(p->loop);
-    wait_for_state_ready(ao);
     pw_stream_set_active(p->stream, true);
     pw_thread_loop_unlock(p->loop);
 }
@@ -937,7 +924,7 @@ const struct ao_driver audio_out_pipewire = {
     {
         .loop = NULL,
         .stream = NULL,
-        .state = STATE_UNINITIALIZED,
+        .init_state = INIT_STATE_NONE,
         .options.buffer_msec = 0,
         .options.volume_mode = VOLUME_MODE_CHANNEL,
     },
