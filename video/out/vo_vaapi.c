@@ -423,7 +423,6 @@ static void free_video_specific(struct priv *p)
 
 static bool alloc_swdec_surfaces(struct priv *p, int w, int h, int imgfmt)
 {
-    free_video_specific(p);
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++) {
         p->swdec_surfaces[i] = mp_image_pool_get(p->pool, IMGFMT_VAAPI, w, h);
         if (va_surface_alloc_imgfmt(p, p->swdec_surfaces[i], imgfmt) < 0)
