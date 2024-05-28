@@ -406,18 +406,11 @@ static void va_pool_set_allocator(struct mp_image_pool *pool,
     mp_image_pool_set_lru(pool);
 }
 
-static void flush_output_surfaces(struct priv *p)
-{
-    for (int n = 0; n < MAX_OUTPUT_SURFACES; n++)
-        mp_image_unrefp(&p->output_surfaces[n]);
-    p->output_surface = 0;
-    p->visible_surface = 0;
-}
-
 // See flush_surfaces() remarks - the same applies.
 static void free_video_specific(struct priv *p)
 {
-    flush_output_surfaces(p);
+    p->output_surface = 0;
+    p->visible_surface = 0;
 
     mp_image_unrefp(&p->black_surface);
 
