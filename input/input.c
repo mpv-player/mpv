@@ -122,6 +122,7 @@ struct input_ctx {
 
     // VO dragging state
     bool dragging_button_down;
+    int mouse_drag_x, mouse_drag_y;
     // Raw mouse position before transform
     int mouse_raw_x, mouse_raw_y;
 
@@ -180,6 +181,7 @@ struct input_opts {
     // Autorepeat config (be aware of mp_input_set_repeat_info())
     int ar_delay;
     int ar_rate;
+    int dragging_deadzone;
     bool use_alt_gr;
     bool use_gamepad;
     bool use_media_keys;
@@ -212,6 +214,7 @@ const struct m_sub_options input_config = {
         {"input-media-keys", OPT_BOOL(use_media_keys)},
         {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
         {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
+        {"input-dragging-deadzone", OPT_INT(dragging_deadzone)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
@@ -224,6 +227,7 @@ const struct m_sub_options input_config = {
         .doubleclick_time = 300,
         .ar_delay = 200,
         .ar_rate = 40,
+        .dragging_deadzone = 3,
         .use_alt_gr = true,
         .enable_mouse_movements = true,
         .use_media_keys = true,
@@ -779,6 +783,9 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
             // This is a mouse left botton down event which isn't part of a doubleclick.
             // Mark the dragging mouse button down in this case.
             ictx->dragging_button_down = true;
+            // Store the current mouse position for deadzone handling.
+            ictx->mouse_drag_x = ictx->mouse_raw_x;
+            ictx->mouse_drag_y = ictx->mouse_raw_y;
         }
         ictx->last_doubleclick_key_down = code;
         ictx->last_doubleclick_time = now;
@@ -909,7 +916,10 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
         }
     }
 
-    if (ictx->dragging_button_down) {
+    bool mouse_outside_dragging_deadzone =
+        abs(ictx->mouse_raw_x - ictx->mouse_drag_x) >= ictx->opts->dragging_deadzone ||
+        abs(ictx->mouse_raw_y - ictx->mouse_drag_y) >= ictx->opts->dragging_deadzone;
+    if (ictx->dragging_button_down && mouse_outside_dragging_deadzone) {
         // Begin built-in VO dragging if the mouse moves while the dragging button is down.
         ictx->dragging_button_down = false;
         mp_cmd_t *drag_cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
