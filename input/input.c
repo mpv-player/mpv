@@ -929,6 +929,8 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
         ictx->dragging_button_down = false;
         // Prevent activation of MBTN_LEFT key binding if VO dragging begins.
         release_down_cmd(ictx, true);
+        // Prevent activation of MBTN_LEFT_DBL if VO dragging begins.
+        ictx->last_doubleclick_time = 0;
         mp_cmd_t *drag_cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
         queue_cmd(ictx, drag_cmd);
     }
