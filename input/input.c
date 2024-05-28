@@ -122,6 +122,8 @@ struct input_ctx {
 
     // VO dragging state
     bool dragging_button_down;
+    // Raw mouse position before transform
+    int mouse_raw_x, mouse_raw_y;
 
     // Mouse position on the consumer side (as command.c sees it)
     int mouse_x, mouse_y;
@@ -863,9 +865,11 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     MP_TRACE(ictx, "mouse move %d/%d\n", x, y);
 
-    if (ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) {
+    if (ictx->mouse_raw_x == x && ictx->mouse_raw_y == y) {
         return;
     }
+    ictx->mouse_raw_x = x;
+    ictx->mouse_raw_y = y;
 
     if (ictx->mouse_mangle) {
         struct mp_rect *src = &ictx->mouse_src;
