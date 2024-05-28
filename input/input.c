@@ -922,6 +922,8 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
     if (ictx->dragging_button_down && mouse_outside_dragging_deadzone) {
         // Begin built-in VO dragging if the mouse moves while the dragging button is down.
         ictx->dragging_button_down = false;
+        // Prevent activation of MBTN_LEFT key binding if VO dragging begins.
+        release_down_cmd(ictx, true);
         mp_cmd_t *drag_cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
         queue_cmd(ictx, drag_cmd);
     }
