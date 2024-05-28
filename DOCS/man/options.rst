@@ -4236,8 +4236,7 @@ Input
 
 ``--input-cursor=<yes|no>``
     Permit mpv to receive pointer events reported by the video output
-    driver. Necessary to use the OSC, or to select the buttons in DVD menus.
-    Support depends on the VO in use.
+    driver. Necessary to use the OSC. Support depends on the VO in use.
 
 ``--input-cursor-passthrough=<yes|no>``
     Tell the backend windowing system to allow pointer events to passthrough
