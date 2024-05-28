@@ -4139,6 +4139,12 @@ Input
     option is applied only during (lib)mpv initialization, and if disabled then it
     will not be not possible to enable them later. May be useful to libmpv clients.
 
+``--input-builtin-dragging=<yes|no>``
+    Enable the built-in window-dragging behavior (default: yes). Setting it to no
+    disables the built-in dragging behavior. Note that unlike the ``window-dragging``
+    option, this option only affects VOs which support the ``begin-vo-dragging``
+    command, and does not disable window dragging initialized with the command.
+
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
