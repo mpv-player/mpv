@@ -120,6 +120,9 @@ struct input_ctx {
     int last_doubleclick_key_down;
     double last_doubleclick_time;
 
+    // VO dragging state
+    bool dragging_button_down;
+
     // Mouse position on the consumer side (as command.c sees it)
     int mouse_x, mouse_y;
     int mouse_hover;  // updated on mouse-enter/leave
@@ -733,6 +736,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_TRACE(ictx, "release all\n");
         release_down_cmd(ictx, false);
+        ictx->dragging_button_down = false;
         return;
     }
     if (code == MP_TOUCH_RELEASE_ALL) {
@@ -771,12 +775,18 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
                           1, 1);
         } else if (code == MP_MBTN_LEFT) {
             // This is a mouse left botton down event which isn't part of a doubleclick.
-            // Initialize vo dragging in this case.
-            mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
-            queue_cmd(ictx, cmd);
+            // Mark the dragging mouse button down in this case.
+            ictx->dragging_button_down = true;
         }
         ictx->last_doubleclick_key_down = code;
         ictx->last_doubleclick_time = now;
+    }
+    if (code & MP_KEY_STATE_UP) {
+        code &= ~MP_KEY_STATE_UP;
+        if (code == MP_MBTN_LEFT) {
+            // This is a mouse left botton up event. Mark the dragging mouse button up.
+            ictx->dragging_button_down = false;
+        }
     }
 }
 
@@ -893,6 +903,13 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
             }
             queue_cmd(ictx, cmd);
         }
+    }
+
+    if (ictx->dragging_button_down) {
+        // Begin built-in VO dragging if the mouse moves while the dragging button is down.
+        ictx->dragging_button_down = false;
+        mp_cmd_t *drag_cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
+        queue_cmd(ictx, drag_cmd);
     }
 }
 
