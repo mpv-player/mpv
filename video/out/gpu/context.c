@@ -154,11 +154,6 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 
 static bool check_unknown_entry(const char *name)
 {
-    struct bstr param = bstr0(name);
-    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (bstr_equals0(param, contexts[i]->name))
-            return true;
-    }
     return false;
 }
 
