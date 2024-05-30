@@ -239,7 +239,11 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         items = sub_lines,
         default_item = default_item,
         submit = function (index)
-            mp.commandv("seek", sub_times[index], "absolute")
+            -- Add an offset to seek to the correct line while paused without a
+            -- video track.
+            local offset = mp.get_property_native("current-tracks/video/image") == false
+                           and 0 or .09
+            mp.commandv("seek", sub_times[index] + offset, "absolute")
         end,
     })
 end)
