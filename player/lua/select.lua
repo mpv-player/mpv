@@ -149,13 +149,17 @@ mp.add_forced_key_binding(nil, "select-vid", function ()
                  "No available video tracks.")
 end)
 
-local function format_time(t)
+local function format_time(t, duration)
     local h = math.floor(t / (60 * 60))
     t = t - (h * 60 * 60)
     local m = math.floor(t / 60)
     local s = t - (m * 60)
 
-    return string.format("%.2d:%.2d:%.2d", h, m, s)
+    if duration >= 60 * 60 or h > 0 then
+        return string.format("%.2d:%.2d:%.2d", h, m, s)
+    end
+
+    return string.format("%.2d:%.2d", m, s)
 end
 
 mp.add_forced_key_binding(nil, "select-chapter", function ()
@@ -167,8 +171,10 @@ mp.add_forced_key_binding(nil, "select-chapter", function ()
         return
     end
 
+    local duration = mp.get_property_native("duration", math.huge)
+
     for i, chapter in ipairs(mp.get_property_native("chapter-list")) do
-        chapters[i] = format_time(chapter.time) .. " " .. chapter.title
+        chapters[i] = format_time(chapter.time, duration) .. " " .. chapter.title
     end
 
     input.select({
@@ -213,13 +219,14 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     local default_item
     local sub_start = mp.get_property_native("sub-start",
                                              mp.get_property_native("time-pos"))
+    local duration = mp.get_property_native("duration", math.huge)
 
     -- Strip HTML and ASS tags.
     for line in r.stdout:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
         -- ffmpeg outputs LRCs with minutes > 60 instead of adding hours.
         sub_times[#sub_times + 1] = line:match("%d+") * 60 + line:match(":([%d%.]*)")
-        sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times]) .. " " ..
-                                    line:gsub(".*]", "", 1)
+        sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times], duration) ..
+                                    " " .. line:gsub(".*]", "", 1)
 
         if sub_times[#sub_times] <= sub_start then
             default_item = #sub_times
