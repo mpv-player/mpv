@@ -209,44 +209,29 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     end
 
     local sub_lines = {}
+    local sub_times = {}
     local default_item
-
     local sub_start = mp.get_property_native("sub-start",
-                                             mp.get_property("time-pos"))
-    local m = math.floor(sub_start / 60)
-    local s = sub_start - m * 60
-    sub_start = string.format("%.2d:%05.2f", m, s)
+                                             mp.get_property_native("time-pos"))
 
     -- Strip HTML and ASS tags.
     for line in r.stdout:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
-        sub_lines[#sub_lines + 1] = line:sub(2):gsub("]", " ", 1)
+        -- ffmpeg outputs LRCs with minutes > 60 instead of adding hours.
+        sub_times[#sub_times + 1] = line:match("%d+") * 60 + line:match(":([%d%.]*)")
+        sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times]) .. " " ..
+                                    line:gsub(".*]", "", 1)
 
-        if line:find("^%[" .. sub_start) then
-            default_item = #sub_lines
+        if sub_times[#sub_times] <= sub_start then
+            default_item = #sub_times
         end
     end
 
-    -- Preselect the previous line when there is no exact match.
-    if default_item == nil then
-        local a = 1
-        local b = #sub_lines
-        while a < b do
-            local mid = math.ceil(b - a)
-
-            if sub_lines[mid]:match("%S*") < sub_start then
-                default_item = mid
-                a = mid + 1
-            else
-                b = mid
-            end
-        end
-
-        -- Handle sub-start of embedded subs being slightly earlier than
-        -- ffmpeg's timestamps.
-        if mp.get_property("sub-start") and default_item and
-           sub_lines[default_item + 1] then
-            default_item = default_item + 1
-        end
+    -- Handle sub-start of embedded subs being slightly earlier than
+    -- ffmpeg's timestamps.
+    sub_start = mp.get_property_native("sub-start")
+    if sub_start and default_item and sub_times[default_item] < sub_start and
+       sub_lines[default_item + 1] then
+        default_item = default_item + 1
     end
 
     input.select({
@@ -254,7 +239,7 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         items = sub_lines,
         default_item = default_item,
         submit = function (index)
-            mp.commandv("seek", sub_lines[index]:match("%S*"), "absolute")
+            mp.commandv("seek", sub_times[index], "absolute")
         end,
     })
 end)
