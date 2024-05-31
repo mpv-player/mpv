@@ -195,6 +195,11 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         return
     end
 
+    if sub.external and sub["external-filename"]:find("^edl://") then
+        sub["external-filename"] = sub["external-filename"]:match('https?://.*')
+                                   or sub["external-filename"]
+    end
+
     local r = mp.command_native({
         name = "subprocess",
         capture_stdout = true,
