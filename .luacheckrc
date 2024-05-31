@@ -106,12 +106,3 @@ stds = { mp = { read_globals = mp_globals } }
 files["player/lua/defaults.lua"] = { globals = mp_internal }
 files["player/lua/auto_profiles.lua"] = { globals = { "p", "get" } }
 max_line_length = 100
-
--- TODO: Remove everything below this line
-local todo = {
-    "player/lua/osc.lua",
-}
-for _, path in ipairs(todo) do
-    files[path]["allow_defined"] = true
-    files[path]["max_line_length"] = 120
-end
