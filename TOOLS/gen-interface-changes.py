@@ -34,18 +34,19 @@ def add_new_entries(docs_dir, out, git):
             timestamp = check_output([git, "log", "--format=%ct", "-n", "1", "--",
                                       f], encoding="UTF-8")
             if timestamp:
-                files.append((f, timestamp))
+                content = f.read_text()
+                files.append(content)
             else:
                 print(f"Skipping file not tracked by git: {f.name}")
 
-    files.sort(key=lambda x: x[1])
-    for file in files:
-        with open(file[0].resolve(), "r") as f:
-            for line in f:
-                line = textwrap.fill(line.rstrip(), width=80,
-                                     initial_indent="    - ",
-                                     subsequent_indent="      ")
-                out.write(line + "\n")
+    # Sort the changes by "severity", which roughly corresponds to
+    # alphabetical order by accident (e.g. remove > deprecate > change > add)
+    for file in reversed(sorted(files)):
+        for line in file.splitlines():
+            line = textwrap.fill(line.rstrip(), width=80,
+                                  initial_indent="    - ",
+                                  subsequent_indent="      ")
+            out.write(line + "\n")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
