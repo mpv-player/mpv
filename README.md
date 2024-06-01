@@ -144,9 +144,7 @@ you may wish to use the separately available build wrapper ([mpv-build][mpv-buil
 which first compiles FFmpeg libraries and libass, and then compiles the player
 statically linked against those.
 
-If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
-or cross-compile from Linux with MinGW. See
-[Windows compilation][windows_compilation].
+If you want to build a Windows binary, see [Windows compilation][windows_compilation].
 
 
 ## Release cycle
