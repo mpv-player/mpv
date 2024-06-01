@@ -1,214 +1,253 @@
-Compiling for Windows
-=====================
+# Compiling for Windows
 
-Compiling for Windows is supported with MinGW-w64. This can be used to produce
-both 32-bit and 64-bit executables, and it works for building on Windows and
-cross-compiling from Linux and Cygwin. MinGW-w64 is available from:
-https://www.mingw-w64.org/
+Compiling for Windows is supported using GNU-like compilers (GCC/Clang). Clang
+is compatible with both the ``w64-windows-gnu`` [MinGW-w64](https://www.mingw-w64.org/)
+and ``pc-windows-msvc`` [Windows SDK](https://developer.microsoft.com/windows/downloads/windows-sdk)
+targets. It supports the production of both 32-bit and 64-bit binaries and is
+suitable for building on Windows as well as cross-compiling from Linux and Cygwin.
 
-While building a complete MinGW-w64 toolchain yourself is possible, there are a
-few build environments and scripts to help ease the process, such as MSYS2 and
-MXE. Note that MinGW environments included in Linux distributions are often
-broken, outdated and useless, and usually don't use MinGW-w64.
+Although it is possible to build a complete MinGW-w64 toolchain yourself, there
+are build environments and scripts available to simplify the process, such as
+MSYS2 on Windows or a packaged toolchain provided by your favorite Linux
+distribution. Note that MinGW-w64 environments included in Linux distributions
+can vary in versions. As a general guideline, mpv only supports the MinGW-w64
+toolchain version included in the latest Ubuntu LTS release.
 
-**Warning**: the original MinGW (https://osdn.net/projects/mingw/) is unsupported.
+mpv employs Meson for building, and the process is the same as any standard Meson
+compilation.
 
-Cross-compilation
-=================
+For the most up-to-date reference on build scripts, you can refer to
+[build.yml](https://github.com/mpv-player/mpv/blob/master/.github/workflows/build.yml),
+which builds and tests all supported configurations: ``MinGW-w64``, ``Windows SDK``,
+and ``MSYS2`` builds.
 
-When cross-compiling, it is recommended to use a meson crossfile to setup
-the cross compiling environment. A minimal example is included below:
+## Cross-compilation
 
-```ini
-[binaries]
-c = 'x86_64-w64-mingw32-gcc'
-cpp = 'x86_64-w64-mingw32-g++'
-ar = 'x86_64-w64-mingw32-ar'
-strip = 'x86_64-w64-mingw32-strip'
-exe_wrapper = 'wine64'
+When cross-compiling, it is recommended to use a Meson ``--cross-file`` to set up the
+cross-compiling environment. For a basic example, please refer to
+[Cross-compilation](https://mesonbuild.com/Cross-compilation.html).
 
-[host_machine]
-system = 'windows'
-cpu_family = 'x86_64'
-cpu = 'x86_64'
-endian = 'little'
+Alternatively, consider using [mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake),
+which bootstraps a MinGW-w64 toolchain and builds mpv along with its dependencies.
+
+### Example with Meson
+
+1. Create ``cross-file.txt`` with definitions for your toolchain and target platform.
+   Refer to [x86_64-w64-mingw32.txt](https://mesonbuild.com/Cross-compilation.html)
+   as a directly usable example.
+   - **Important**: Beware of pkg-config usage. By default, it uses build machine
+     files for dependency detection, even when ``--cross-file`` is used. It must
+     be configured correctly. Refer to ``pkg_config_libdir`` and ``sys_root``
+     in the [documentation](https://mesonbuild.com/Cross-compilation.html#defining-the-environment)
+     for proper setup. **In this example pkg-config is not used/required.**
+2. Initialize subprojects. This step is optional; other methods are also
+   available to provide the necessary dependencies.
+
+   ``` bash
+   # Update the subprojects database from Meson's WrapDB.
+   meson wrap update-db
+
+   # Explicitly download wraps as nested projects may have older versions of them.
+   meson wrap install expat
+   meson wrap install harfbuzz
+   meson wrap install libpng
+   meson wrap install zlib
+
+   # Add wraps for mpv's required dependencies
+   mkdir -p subprojects
+
+   cat <<EOF > subprojects/libplacebo.wrap
+   [wrap-git]
+   url = https://github.com/haasn/libplacebo
+   revision = master
+   depth = 1
+   clone-recursive = true
+   EOF
+
+   cat <<EOF > subprojects/libass.wrap
+   [wrap-git]
+   revision = master
+   url = https://github.com/libass/libass
+   depth = 1
+   EOF
+
+   # For FFmpeg, use Meson's build system port; alternatively, you can compile
+   # the upstream version yourself. See https://trac.ffmpeg.org/wiki/CompilationGuide
+   cat <<EOF > subprojects/ffmpeg.wrap
+   [wrap-git]
+   url = https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git
+   revision = meson-6.1
+   depth = 1
+   [provide]
+   libavcodec = libavcodec_dep
+   libavdevice = libavdevice_dep
+   libavfilter = libavfilter_dep
+   libavformat = libavformat_dep
+   libavutil = libavutil_dep
+   libswresample = libswresample_dep
+   libswscale = libswscale_dep
+   EOF
+   ```
+
+3. Build
+
+   ``` bash
+   meson setup -Ddefault_library=static -Dprefer_static=true \
+               -Dc_link_args='-static' -Dcpp_link_args='-static' \
+               --cross-file cross-file.txt build
+
+   ninja -C build mpv.exe mpv.com
+   ```
+
+   This will produce fully portabiel, statically linked, ``mpv.exe`` and ``mpv.com``
+   binaries.
+
+#### Building libmpv
+
+- To also build ``libmpv``, execute the following commands:
+
+   ``` bash
+   # For a static library
+   meson configure build -Dlibmpv=true -Ddefault_library=static
+   ninja -C build libmpv.a
+
+   # For a shared library
+   meson configure build -Dlibmpv=true -Ddefault_library=shared
+   ninja -C build libmpv-2.dll
+   ```
+
+- Depending on the use case, you might want to use ``-Dgpl=false`` and review
+  similar options for subprojects.
+- If any of Meson's subprojects are not linked statically, you might need to
+  specify options like the following example for ffmpeg:
+  ``-Dffmpeg:default_library=static``.
+
+#### Enabling more mpv features
+
+The process above produces a basic mpv build. You can enable additional features.
+Check the Meson
+[WrapDB packages](https://mesonbuild.com/Wrapdb-projects.html) for available
+dependencies or by providing them through other means.
+
+Enhancing mpv with more features is as simple as adding more arguments to the
+Meson setup command, for example:
+
+``` bash
+-Dlua=enabled -Djavascript=enabled -Dlcms2=enabled -Dlibplacebo:lcms=enabled
 ```
 
-See [meson's documentation](https://mesonbuild.com/Cross-compilation.html) for
-more information.
+they will be automatically downloaded and built by Meson.
 
-[MXE](https://mxe.cc) makes it very easy to bootstrap a complete MingGW-w64
-environment from a Linux machine. See a working example below.
+## Native Compilation with Clang (Windows SDK Build)
 
-Alternatively, you can try [mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake),
-which bootstraps a MinGW-w64 environment and builds mpv and dependencies.
+1. Install [Build Tools for Visual Studio](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
+   or the full [Visual Studio](https://visualstudio.microsoft.com/downloads/#visual-studio-community-2022):
+   - From the installer, select the necessary components:
+      - Clang compiler for Windows
+      - Windows SDK
+2. Install Meson, as outlined in [Getting Meson](https://mesonbuild.com/Getting-meson.html):
+   - **Important**: At the time of writing, there is an issue in Meson with
+     escaping response files.
 
-Example with MXE
-----------------
+     See: [mesonbuild/meson#8981](https://github.com/mesonbuild/meson/issues/8981)
+     and [mesonbuild/meson#11715](https://github.com/mesonbuild/meson/pull/11715)
 
-```bash
-# Before starting, make sure you install MXE prerequisites. MXE will download
-# and build all target dependencies, but no host dependencies. For example,
-# you need a working compiler, or MXE can't build the crosscompiler.
-#
-# Refer to
-#
-#    https://mxe.cc/#requirements
-#
-# Scroll down for disto/OS-specific instructions to install them.
+     If you wish to install a fixed version, follow the steps outlined
+     [here](https://github.com/mpv-player/mpv/blob/481e498427fc34956ad24b94157553908f5cd638/.github/workflows/build.yml#L132-L135).
+3. Set environment variables or use the ``--native-file`` option in Meson.
 
-# Download MXE. Note that compiling the required packages requires about 1.4 GB
-# or more!
+   ``` powershell
+   $env:CC = "clang"
+   $env:CXX = "clang++"
+   $env:CC_LD = 'lld'
+   $env:CXX_LD = 'lld'
+   $env:WINDRES = 'llvm-rc'
+   ```
 
-cd /opt
-git clone https://github.com/mxe/mxe mxe
-cd mxe
+4. Execute [build-win32.ps1](https://github.com/mpv-player/mpv/blob/master/ci/build-win32.ps1):
+   - This script utilizes the Meson subprojects system to build mpv and its
+     dependencies. Refer to the script for more details.
 
-# Set build options.
+This process will produce a fully static ``mpv.exe`` and ``mpv.com``, as well as
+a static ``libmpv.a``.
 
-# The JOBS environment variable controls threads to use when building. DO NOT
-# use the regular `make -j4` option with MXE as it will slow down the build.
-# Alternatively, you can set this in the make command by appending "JOBS=4"
-# to the end of command:
-echo "JOBS := 4" >> settings.mk
+## Native Compilation with MSYS2
 
-# The MXE_TARGET environment variable builds MinGW-w64 for 32 bit targets.
-# Alternatively, you can specify this in the make command by appending
-# "MXE_TARGETS=i686-w64-mingw32" to the end of command:
-echo "MXE_TARGETS := i686-w64-mingw32.static" >> settings.mk
+For Windows developers seeking a quick setup, MSYS2 is an effective tool for
+compiling mpv natively on a Windows machine. The MSYS2 repositories provide
+binary packages for most of mpv's dependencies, simplifying the process to
+primarily involve building mpv itself.
 
-# If you want to build 64 bit version, use this:
-# echo "MXE_TARGETS := x86_64-w64-mingw32.static" >> settings.mk
+### Installing MSYS2
 
-# Build required packages. The following provide a minimum required to build
-# a reasonable mpv binary (though not an absolute minimum).
+1. Follow the installation steps from [MSYS2](https://www.msys2.org/).
+2. Initiate one of the [Environments](https://www.msys2.org/docs/environments/),
+   with the CLANG64 (``clang64.exe``) being the recommended option.
+   **Note:** This environment is distinct from the MSYS2 shell that opens
+   automatically after the final installation dialog. You must close that
+   initial shell and open a new one for the appropriate environment.
 
-make gcc ffmpeg libass jpeg lua luajit
+### Updating MSYS2
 
-# Add MXE binaries to $PATH
-export PATH=/opt/mxe/usr/bin/:$PATH
+For guidance on updating MSYS2, please refer to the official documentation:
+[Updating MSYS2](https://www.msys2.org/docs/updating/).
 
-# Build mpv. The target will be used to automatically select the name of the
-# build tools involved (e.g. it will use i686-w64-mingw32.static-gcc).
+### Installing mpv Dependencies
 
-cd ..
-git clone https://github.com/mpv-player/mpv.git
-cd mpv
-meson setup build --crossfile crossfile
-meson compile -C build
-```
+``` bash
+# Install pacboy
+pacman -S pactoys
 
-Native compilation with MSYS2
-=============================
-
-For Windows developers looking to get started quickly, MSYS2 can be used to
-compile mpv natively on a Windows machine. The MSYS2 repositories have binary
-packages for most of mpv's dependencies, so the process should only involve
-building mpv itself.
-
-To build 64-bit mpv on Windows:
-
-Installing MSYS2
-----------------
-
-1. Download an installer from https://www.msys2.org/
-
-   Both the i686 and the x86_64 version of MSYS2 can build 32-bit and 64-bit
-   mpv binaries when running on a 64-bit version of Windows, but the x86_64
-   version is preferred since the larger address space makes it less prone to
-   fork() errors.
-
-2. Start a MinGW-w64 shell (``mingw64.exe``). **Note:** This is different from
-   the MSYS2 shell that is started from the final installation dialog. You must
-   close that shell and open a new one.
-
-   For a 32-bit build, use ``mingw32.exe``.
-
-Updating MSYS2
---------------
-
-To prevent errors during post-install, the MSYS2 core runtime must be updated
-separately.
-
-```bash
-# Check for core updates. If instructed, close the shell window and reopen it
-# before continuing.
-pacman -Syu
-
-# Update everything else
-pacman -Su
-```
-
-Installing mpv dependencies
----------------------------
-
-```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git $MINGW_PACKAGE_PREFIX-{python,pkgconf,gcc,meson}
+pacboy -S git {python,pkgconf,cc,meson}:p
 
-# Install the most important MinGW-w64 dependencies. libass and lcms2 are also
-# pulled in as dependencies of ffmpeg.
-pacman -S $MINGW_PACKAGE_PREFIX-{ffmpeg,libjpeg-turbo,luajit}
+# Install key dependencies. libass and lcms2 are also included as dependencies
+# of ffmpeg.
+pacboy -S {ffmpeg,libjpeg-turbo,libplacebo,luajit}:p
 ```
 
-Building mpv
-------------
+### Building mpv
 
-Finally, compile and install mpv. Binaries will be installed to
-``/mingw64/bin`` or ``/mingw32/bin``.
-
-```bash
-meson setup build --prefix=$MSYSTEM_PREFIX
-meson compile -C build
-```
-
-Or, compile and install both libmpv and mpv:
+To compile and install mpv, execute the following commands.
+The binaries will be installed in the directory ``/$MSYSTEM_PREFIX/bin``.
 
 ```bash
+# Set up the build directory with the desired configuration
 meson setup build -Dlibmpv=true --prefix=$MSYSTEM_PREFIX
+
+# Compile
 meson compile -C build
+
+# Optionally, install the compiled binaries
 meson install -C build
 ```
 
-Linking libmpv with MSVC programs
----------------------------------
+## Running mpv
 
-mpv/libmpv cannot be built with Visual Studio (Microsoft is too incompetent to
-support C99/C11 properly and/or hates open source and Linux too much to
-seriously do it). But you can build C++ programs in Visual Studio and link them
-with a libmpv built with MinGW.
+Depending on your build configuration, ``mpv.exe`` may rely on external
+libraries. To create a portable package, you will need to include these
+dependencies as well. The quickest way to determine which libraries are needed
+is to run ``mpv.exe`` and note any error messages that list the required ``.dll``
+files. You can find these libraries in the sysroot used for compilation, such as
+``/clang64/bin/`` in MSYS2.
 
-To do this, you need a Visual Studio which supports ``stdint.h`` (recent ones do),
-and you need to create a import library for the mpv DLL:
+## Linking libmpv with MSVC Programs
 
-```bash
-lib /name:mpv-1.dll /out:mpv.lib /MACHINE:X64
-```
+Building mpv/libmpv directly with the MSVC compiler (cl.exe) is not supported
+due to differences in compiler flags. Our build system is designed specifically
+for GNU-like compiler drivers. However, you can still build programs in
+Visual Studio and link them with libmpv.
 
-The string in the ``/name:`` parameter must match the filename of the DLL (this
-is simply the filename the MSVC linker will use).
-
-Static linking is not possible.
-
-Running mpv
------------
-
-If you want to run mpv from the MinGW-w64 shell, you will find the experience
-much more pleasant if you use the ``winpty`` utility
+If the toolchain used generates a ``.lib`` file, it will be ready for use.
+Otherwise, you will need to create an import library for the mpv DLL with the
+following command:
 
 ```bash
-pacman -S winpty
-winpty mpv.com ToS-4k-1920.mov
+lib /name:mpv-2.dll /out:mpv.lib /MACHINE:X64
 ```
 
-If you want to move / copy ``mpv.exe`` and ``mpv.com`` to somewhere other than
-``/mingw64/bin/`` for use outside the MinGW-w64 shell, they will still depend on
-DLLs in that folder. The simplest solution is to add ``C:\msys64\mingw64\bin``
-to the windows system ``%PATH%``. Beware though that this can cause problems or
-confusion in Cygwin if that is also installed on the machine.
+Ensure that the string in the ``/name:`` parameter matches the filename of the
+DLL, as this is the filename that the MSVC linker will reference.
 
-Use of the ANGLE OpenGL backend requires a copy of the D3D compiler DLL that
-matches the version of the D3D SDK that ANGLE was built with
-(``d3dcompiler_43.dll`` in case of MinGW-built ANGLE) in the path or in the
-same folder as mpv. It must be of the same architecture (x86_64 / i686) as the
-mpv you compiled.
+**Note:** Static linking is only feasible with matching compilers. For instance,
+if you build with Clang in Visual Studio, static linking is possible.
