@@ -69,7 +69,9 @@ local user_opts = {
     top_buttons_color = "#FFFFFF",	-- color of top buttons
     held_element_color = "#999999",	-- color of an element while held down
 
-    time_pos_outline_color = "#000000"	-- color of the border timecodes in slimbox and TimePosBar
+    time_pos_outline_color = "#000000",	-- color of the border timecodes in slimbox and TimePosBar
+
+    tick_delay = 1 / 60,                  -- minimum interval between OSC redraws in seconds
 }
 
 local osc_param = { -- calculated by osc_init()
@@ -90,7 +92,7 @@ local margins_opts = {
     {"b", "video-margin-ratio-bottom"},
 }
 
-local tick_delay = 0.03
+local tick_delay = 1 / 60
 local tracks_osc = {}
 local tracks_mpv = {}
 local window_control_box_width = 80
@@ -2980,6 +2982,7 @@ end
 opt.read_options(user_opts, "osc", function()
     validate_user_opts()
     set_osc_styles()
+    tick_delay = user_opts.tick_delay
     request_tick()
     visibility_mode(user_opts.visibility, true)
     update_duration_watch()

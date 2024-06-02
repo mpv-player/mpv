@@ -472,6 +472,12 @@ Configurable Options
 
     Sets the colors of the elements that are being pressed or held down.
 
+``tick_delay``
+    Default: 1/60
+
+    Sets the minimum interval between OSC redraws in seconds. This can be
+    decreased on fast systems to make OSC rendering smoother.
+
 
 Script Commands
 ~~~~~~~~~~~~~~~
