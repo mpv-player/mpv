@@ -169,8 +169,8 @@ Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
 reports or feature requests. Follow the template's instructions or the issue
 will likely be ignored or closed as invalid.
 
-Using the bug tracker as place for simple questions is fine but IRC is
-recommended (see [Contact](#Contact) below).
+Questions can be asked in the [discussions][discussions] or on IRC (see
+[Contact](#Contact) below).
 
 ## Contributing
 
@@ -202,6 +202,7 @@ see the [FAQ][FAQ].
 Most activity happens on the IRC channel and the GitHub issue tracker.
 
 - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
+- **Discussions**: [discussions][discussions]
 - **User IRC Channel**: `#mpv` on `irc.libera.chat`
 - **Developer IRC Channel**: `#mpv-devel` on `irc.libera.chat`
 
@@ -209,6 +210,7 @@ Most activity happens on the IRC channel and the GitHub issue tracker.
 [releases]: https://github.com/mpv-player/mpv/releases
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
+[discussions]: https://github.com/mpv-player/mpv/discussions
 [release-policy]: https://github.com/mpv-player/mpv/blob/master/DOCS/release-policy.md
 [windows_compilation]: https://github.com/mpv-player/mpv/blob/master/DOCS/compile-windows.md
 [interface-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/interface-changes.rst
