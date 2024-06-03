@@ -570,13 +570,6 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     return ans;
 }
 
-// 0-100, -1 if unknown
-int get_percent_pos(struct MPContext *mpctx)
-{
-    double pos = get_current_pos_ratio(mpctx, false);
-    return pos < 0 ? -1 : (int)round(pos * 100);
-}
-
 // -2 is no chapters, -1 is before first chapter
 int get_current_chapter(struct MPContext *mpctx)
 {
