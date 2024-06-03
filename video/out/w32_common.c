@@ -767,8 +767,15 @@ static void update_playback_state(struct vo_w32_state *w32)
         return;
     }
 
+    ULONGLONG completed = pstate->position;
+    ULONGLONG total = UINT8_MAX;
+    if (!pstate->position) {
+        completed = 1;
+        total = MAXULONGLONG;
+    }
+
     ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
-                                   pstate->percent_pos, 100);
+                                   completed, total);
     ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
                                    pstate->paused ? TBPF_PAUSED :
                                                     TBPF_NORMAL);
