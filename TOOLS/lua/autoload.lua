@@ -74,10 +74,10 @@ local EXTENSIONS_IMAGES_DEFAULT = Set {
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
 
-local EXTENSIONS = {}
-local EXTENSIONS_VIDEO = {}
-local EXTENSIONS_AUDIO = {}
-local EXTENSIONS_IMAGES = {}
+local EXTENSIONS
+local EXTENSIONS_VIDEO
+local EXTENSIONS_AUDIO
+local EXTENSIONS_IMAGES
 
 local function SetUnion (a,b)
     for k in pairs(b) do a[k] = true end
@@ -137,6 +137,10 @@ local function split_patterns()
 end
 
 local function create_extensions()
+    EXTENSIONS = {}
+    EXTENSIONS_VIDEO = {}
+    EXTENSIONS_AUDIO = {}
+    EXTENSIONS_IMAGES = {}
     if o.videos then
         SetUnion(SetUnion(EXTENSIONS_VIDEO, EXTENSIONS_VIDEO_DEFAULT), o.additional_video_exts)
         SetUnion(EXTENSIONS, EXTENSIONS_VIDEO)
@@ -168,6 +172,9 @@ options.read_options(o, nil, function(list)
     end
     if list.directory_mode then
         validate_directory_mode()
+    end
+    if list.ignore_patterns then
+        split_patterns()
     end
 end)
 
