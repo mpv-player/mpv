@@ -591,7 +591,6 @@ double get_time_length(struct MPContext *mpctx);
 double get_start_time(struct MPContext *mpctx, int dir);
 double get_current_time(struct MPContext *mpctx);
 double get_playback_time(struct MPContext *mpctx);
-int get_percent_pos(struct MPContext *mpctx);
 double get_current_pos_ratio(struct MPContext *mpctx, bool use_range);
 int get_current_chapter(struct MPContext *mpctx);
 char *chapter_display_name(struct MPContext *mpctx, int chapter);
