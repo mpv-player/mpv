@@ -54,9 +54,9 @@ static void sadd_hhmmssff(char **buf, double time, bool fractions)
     talloc_free(s);
 }
 
-static void sadd_percentage(char **buf, int percent) {
-    if (percent >= 0)
-        *buf = talloc_asprintf_append(*buf, " (%d%%)", percent);
+static void sadd_percentage(char **buf, double ratio) {
+    if (ratio >= 0)
+        *buf = talloc_asprintf_append(*buf, " (%.f%%)", ratio * 100);
 }
 
 static char *join_lines(void *ta_ctx, char **parts, int num_parts)
@@ -194,7 +194,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     saddf(&line, " / ");
     sadd_hhmmssff(&line, get_time_length(mpctx), opts->osd_fractions);
 
-    sadd_percentage(&line, get_percent_pos(mpctx));
+    sadd_percentage(&line, get_current_pos_ratio(mpctx, false));
 
     // other
     if (opts->playback_speed != 1)
@@ -447,7 +447,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
             if (level == 3) {
                 saddf(buffer, " / ");
                 sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
-                sadd_percentage(buffer, get_percent_pos(mpctx));
+                sadd_percentage(buffer, get_current_pos_ratio(mpctx, false));
             }
         }
     }
