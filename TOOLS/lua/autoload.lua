@@ -131,12 +131,10 @@ local function split_option_exts(video, audio, image)
     if audio then o.additional_audio_exts = Split(o.additional_audio_exts) end
     if image then o.additional_image_exts = Split(o.additional_image_exts) end
 end
-split_option_exts(true, true, true)
 
 local function split_patterns()
     o.ignore_patterns = Split(o.ignore_patterns)
 end
-split_patterns()
 
 local function create_extensions()
     if o.videos then
@@ -152,7 +150,6 @@ local function create_extensions()
         SetUnion(EXTENSIONS, EXTENSIONS_IMAGES)
     end
 end
-create_extensions()
 
 local function validate_directory_mode()
     if o.directory_mode ~= "recursive" and o.directory_mode ~= "lazy"
@@ -160,7 +157,6 @@ local function validate_directory_mode()
         o.directory_mode = nil
     end
 end
-validate_directory_mode()
 
 options.read_options(o, nil, function(list)
     split_option_exts(list.additional_video_exts, list.additional_audio_exts,
@@ -174,6 +170,11 @@ options.read_options(o, nil, function(list)
         validate_directory_mode()
     end
 end)
+
+split_option_exts(true, true, true)
+split_patterns()
+create_extensions()
+validate_directory_mode()
 
 local function add_files(files)
     local oldcount = mp.get_property_number("playlist-count", 1)
