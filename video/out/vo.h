@@ -149,7 +149,7 @@ struct voctrl_playback_state {
     bool taskbar_progress;
     bool playing;
     bool paused;
-    int percent_pos;
+    uint8_t position;
 };
 
 // VOCTRL_PERFORMANCE_DATA

@@ -15,10 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "mpv_talloc.h"
 
@@ -191,17 +192,18 @@ void update_vo_playback_state(struct MPContext *mpctx)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
+        double pos = get_current_pos_ratio(mpctx, false);
         struct voctrl_playback_state newstate = {
-            .taskbar_progress = mpctx->opts->vo->taskbar_progress,
+            .taskbar_progress = mpctx->opts->vo->taskbar_progress && pos >= 0,
             .playing = mpctx->playing,
             .paused = mpctx->paused,
-            .percent_pos = get_percent_pos(mpctx),
+            .position = pos > 0 ? lrint(pos * UINT8_MAX) : 0,
         };
 
         if (oldstate.taskbar_progress != newstate.taskbar_progress ||
             oldstate.playing != newstate.playing ||
             oldstate.paused != newstate.paused ||
-            oldstate.percent_pos != newstate.percent_pos)
+            oldstate.position != newstate.position)
         {
             // Don't update progress bar if it was and still is hidden
             if ((oldstate.playing && oldstate.taskbar_progress) ||
