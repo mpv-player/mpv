@@ -266,41 +266,31 @@ cc = meson.get_compiler('c')
 flags = ['-D_FILE_OFFSET_BITS=64']
 link_flags = []
 
-test_flags = ['-Werror=implicit-function-declaration',
-              '-Wno-missing-field-initializers',
-              '-Wno-sign-compare',
-              '-Wno-unused-parameter',
-              '-Wno-cast-function-type',
+test_flags = ['-Wdisabled-optimization',
               '-Wempty-body',
-              '-Wdisabled-optimization',
-              '-Wstrict-prototypes',
-              '-Wno-format-zero-length',
-              '-Wno-redundant-decls',
-              '-Wvla',
-              '-Wno-format-truncation',
+              '-Wformat',
               '-Wimplicit-fallthrough',
+              '-Wmissing-prototypes',
+              '-Wparentheses',
+              '-Wpointer-arith',
+              '-Wshadow',
+              '-Wstrict-prototypes',
+              '-Wundef',
+              '-Wvla',
+              '-Werror=implicit-function-declaration',
+              '-Wno-cast-function-type',
+              '-Wno-format-zero-length',
+              '-Wno-missing-field-initializers',
+              '-Wno-pointer-sign',
+              '-Wno-sign-compare',
+              '-Wno-switch',
+              '-Wno-unused-parameter',
               '-fno-math-errno']
 
 flags += cc.get_supported_arguments(test_flags)
 
 if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
-    flags += ['-Wformat', '-Werror=format-security']
-endif
-
-if cc.get_id() == 'gcc'
-    gcc_flags = ['-Wundef', '-Wmissing-prototypes', '-Wshadow',
-                 '-Wno-switch', '-Wparentheses', '-Wpointer-arith',
-                 '-Wno-pointer-sign',
-                 # GCC bug 66425
-                 '-Wno-unused-result']
-    flags += gcc_flags
-endif
-
-if cc.get_id() == 'clang'
-    clang_flags = ['-Wno-logical-op-parentheses', '-Wno-switch',
-                   '-Wno-tautological-compare', '-Wno-pointer-sign',
-                   '-Wno-tautological-constant-out-of-range-compare']
-    flags += clang_flags
+    flags += '-Werror=format-security'
 endif
 
 darwin = host_machine.system() == 'darwin'
