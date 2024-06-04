@@ -420,6 +420,8 @@ typedef struct MPContext {
     int max_frames;
     bool playing_msg_shown;
 
+    int remaining_file_loops;
+
     bool paused_for_cache;
     bool demux_underrun;
     double cache_stop_time;
