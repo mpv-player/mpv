@@ -34,7 +34,7 @@
 #include "common/msg.h"
 #include "osdep/endian.h"
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 // for GetFileType to detect pipes
 #include <windows.h>
 #include <io.h>
@@ -172,7 +172,7 @@ static void uninit(struct ao *ao)
 
     if (priv->waveheader) {    // Rewrite wave header
         bool broken_seek = false;
-#ifdef __MINGW32__
+#ifdef _WIN32
         // Windows, in its usual idiocy "emulates" seeks on pipes so it always
         // looks like they work. So we have to detect them brute-force.
         broken_seek = FILE_TYPE_DISK !=
