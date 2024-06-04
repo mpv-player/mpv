@@ -320,15 +320,19 @@ local function find_and_add_entries()
 
     local extensions
     if o.same_type then
-        if EXTENSIONS_VIDEO[string.lower(this_ext)] ~= nil then
+        if EXTENSIONS_VIDEO[this_ext:lower()] then
             extensions = EXTENSIONS_VIDEO
-        elseif EXTENSIONS_AUDIO[string.lower(this_ext)] ~= nil then
+        elseif EXTENSIONS_AUDIO[this_ext:lower()] then
             extensions = EXTENSIONS_AUDIO
-        else
+        elseif EXTENSIONS_IMAGES[this_ext:lower()] then
             extensions = EXTENSIONS_IMAGES
         end
     else
         extensions = EXTENSIONS
+    end
+    if not extensions then
+        msg.debug("stopping: no matched extentions list")
+        return
     end
 
     local pl = mp.get_property_native("playlist", {})
