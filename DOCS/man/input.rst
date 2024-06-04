@@ -2142,6 +2142,12 @@ Property list
     ``playback-time/full``
         ``playback-time`` with milliseconds.
 
+``remaining-file-loops``
+    How many more times the current file is going to be looped. This is
+    initialized from the value of ``--loop-file``. This counts the number of
+    times it causes the player to seek to the beginning of the file, so it is 0
+    the last the time is played. -1 corresponds to infinity.
+
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
 
