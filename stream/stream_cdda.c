@@ -26,6 +26,10 @@
 // For cdio_cddap_version
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-prototypes"
+#ifndef TESTING_IS_FINISHED
+// Suppress Wundef warning
+#define TESTING_IS_FINISHED 0
+#endif
 #include <cdio/paranoia/cdda.h>
 #include <cdio/paranoia/paranoia.h>
 #pragma GCC diagnostic pop
