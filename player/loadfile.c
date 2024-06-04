@@ -1633,6 +1633,9 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
 
+    mpctx->remaining_file_loops = mpctx->opts->loop_file;
+    mp_notify_property(mpctx, "remaining-file-loops");
+
     mpctx->max_frames = opts->play_frames;
 
     handle_force_window(mpctx, false);

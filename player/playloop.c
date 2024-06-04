@@ -901,10 +901,10 @@ static void handle_loop_file(struct MPContext *mpctx)
         }
         target = ab[0];
         prec = MPSEEK_EXACT;
-    } else if (opts->loop_file) {
-        if (opts->loop_file > 0) {
-            opts->loop_file--;
-            m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->loop_file);
+    } else if (mpctx->remaining_file_loops) {
+        if (mpctx->remaining_file_loops > 0) {
+            mpctx->remaining_file_loops--;
+            mp_notify_property(mpctx, "remaining-file-loops");
         }
         target = get_start_time(mpctx, mpctx->play_dir);
     }

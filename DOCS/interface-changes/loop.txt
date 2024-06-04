@@ -1,0 +1,2 @@
+numerical values of `--loop-file` no longer decrease on each iteration
+add `remaining-file-loops` property as a replacement to get the remaining loop count
