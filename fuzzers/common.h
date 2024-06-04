@@ -18,9 +18,12 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 #define MPV_STRINGIFY_(X) #X
 #define MPV_STRINGIFY(X) MPV_STRINGIFY_(X)
