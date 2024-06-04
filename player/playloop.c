@@ -913,7 +913,7 @@ static void handle_loop_file(struct MPContext *mpctx)
             opts->loop_file--;
             m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->loop_file);
         }
-        target = get_start_time(mpctx, mpctx->play_dir);
+        target = get_play_start_pts(mpctx);
     }
 
     if (target != MP_NOPTS_VALUE) {
