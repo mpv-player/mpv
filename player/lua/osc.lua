@@ -72,6 +72,7 @@ local user_opts = {
     time_pos_outline_color = "#000000",	-- color of the border timecodes in slimbox and TimePosBar
 
     tick_delay = 1 / 60,                  -- minimum interval between OSC redraws in seconds
+    tick_delay_follow_display_fps = false -- use display fps as the minimum interval
 }
 
 local osc_param = { -- calculated by osc_init()
@@ -2730,6 +2731,15 @@ local function update_duration_watch()
     end
 end
 
+local function set_tick_delay(_, display_fps)
+    -- may be nil if unavailable or 0 fps is reported
+    if not display_fps or not user_opts.tick_delay_follow_display_fps then
+        tick_delay = user_opts.tick_delay
+        return
+    end
+    tick_delay = 1 / display_fps
+end
+
 mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
 mp.observe_property("track-list", "native", request_init)
@@ -2779,6 +2789,7 @@ mp.observe_property("idle-active", "bool", function(_, val)
     request_tick()
 end)
 
+mp.observe_property("display-fps", "number", set_tick_delay)
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
 mp.observe_property("vo-configured", "bool", request_tick)
@@ -2970,10 +2981,12 @@ local function validate_user_opts()
 end
 
 -- read options from config and command-line
-opt.read_options(user_opts, "osc", function()
+opt.read_options(user_opts, "osc", function(changed)
     validate_user_opts()
     set_osc_styles()
-    tick_delay = user_opts.tick_delay
+    if changed.tick_delay or changed.tick_delay_follow_display_fps then
+        set_tick_delay("display_fps", mp.get_property_number("display_fps", nil))
+    end
     request_tick()
     visibility_mode(user_opts.visibility, true)
     update_duration_watch()
@@ -2982,6 +2995,7 @@ end)
 
 validate_user_opts()
 set_osc_styles()
+set_tick_delay("display_fps", mp.get_property_number("display_fps", nil))
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
 

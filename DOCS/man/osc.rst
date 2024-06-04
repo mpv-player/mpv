@@ -478,6 +478,14 @@ Configurable Options
     Sets the minimum interval between OSC redraws in seconds. This can be
     decreased on fast systems to make OSC rendering smoother.
 
+    Ignored if ``tick_delay_follow_display_fps`` is set to yes and the VO
+    supports the ``display-fps`` property.
+
+``tick_delay_follow_display_fps``
+    Default: no
+
+    Use display fps to calculate the interval between OSC redraws.
+
 
 Script Commands
 ~~~~~~~~~~~~~~~
