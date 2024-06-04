@@ -63,18 +63,25 @@ int bstrcasecmp(struct bstr str1, struct bstr str2)
 
 int bstrchr(struct bstr str, int c)
 {
-    for (int i = 0; i < str.len; i++)
-        if (str.start[i] == c)
-            return i;
-    return -1;
+    if (!str.len)
+        return -1;
+    unsigned char *pos = memchr(str.start, c, str.len);
+    return pos ? pos - str.start : -1;
 }
 
 int bstrrchr(struct bstr str, int c)
 {
+    if (!str.len)
+        return -1;
+#if HAVE_MEMRCHR
+    unsigned char *pos = memrchr(str.start, c, str.len);
+    return pos ? pos - str.start : -1;
+#else
     for (int i = str.len - 1; i >= 0; i--)
         if (str.start[i] == c)
             return i;
     return -1;
+#endif
 }
 
 int bstrcspn(struct bstr str, const char *reject)
