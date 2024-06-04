@@ -20,6 +20,14 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// For FreeBSD where spa/param/audio/raw.h expects those to be defined
+#include "osdep/endian.h"
+#ifndef __BYTE_ORDER
+#define __BYTE_ORDER    BYTE_ORDER
+#define __LITTLE_ENDIAN LITTLE_ENDIAN
+#define __BIG_ENDIAN    BIG_ENDIAN
+#endif
+
 #include <pipewire/pipewire.h>
 #include <pipewire/global.h>
 #include <spa/param/audio/format-utils.h>
