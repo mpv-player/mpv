@@ -1,10 +1,6 @@
 #include <windows.h>
 #include <shellapi.h>
 
-#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
-#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
-#endif
-
 #include "common/common.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
