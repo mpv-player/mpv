@@ -399,7 +399,7 @@ char **mp_dup_str_array(void *tctx, char **s)
 //  mp_log2(32) == 5
 unsigned int mp_log2(uint32_t v)
 {
-#if defined(__GNUC__) && __GNUC__ >= 4
+#if (defined(__GNUC__) && __GNUC__ >= 4) || defined(__clang__)
     return v ? 31 - __builtin_clz(v) : 0;
 #else
     for (int x = 31; x >= 0; x--) {
