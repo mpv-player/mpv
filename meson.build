@@ -497,17 +497,13 @@ endif
 
 features += {'win32-desktop': win32 and not uwp.found()}
 if features['win32-desktop']
-    pathcch = cc.find_library('pathcch', required: false)
-    features += {'pathcch': pathcch.found()}
-    if features['pathcch']
-        dependencies += pathcch
-    endif
     win32_desktop_libs = [cc.find_library('avrt'),
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
                           cc.find_library('imm32'),
                           cc.find_library('ntdll'),
                           cc.find_library('ole32'),
+                          cc.find_library('pathcch'),
                           cc.find_library('shcore'),
                           cc.find_library('user32'),
                           cc.find_library('uuid'),
