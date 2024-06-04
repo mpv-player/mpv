@@ -37,8 +37,12 @@
 #include <X11/extensions/scrnsaver.h>
 #include <X11/extensions/dpms.h>
 #include <X11/extensions/shape.h>
-#include <X11/extensions/Xpresent.h>
 #include <X11/extensions/Xrandr.h>
+
+#ifndef PRESENT_FUTURE_VERSION
+#define PRESENT_FUTURE_VERSION 0
+#endif
+#include <X11/extensions/Xpresent.h>
 
 #include "misc/bstr.h"
 #include "options/options.h"
