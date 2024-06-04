@@ -2752,37 +2752,28 @@ mp.register_script_message("osc-tracklist", function(dur)
     show_message(table.concat(message, '\n\n'), dur)
 end)
 
-mp.observe_property("fullscreen", "bool",
-    function(_, val)
-        state.fullscreen = val
-        state.marginsREQ = true
-        request_init_resize()
-    end
-)
-mp.observe_property("border", "bool",
-    function(_, val)
-        state.border = val
-        request_init_resize()
-    end
-)
-mp.observe_property("title-bar", "bool",
-    function(_, val)
-        state.title_bar = val
-        request_init_resize()
-    end
-)
-mp.observe_property("window-maximized", "bool",
-    function(_, val)
-        state.maximized = val
-        request_init_resize()
-    end
-)
-mp.observe_property("idle-active", "bool",
-    function(_, val)
-        state.idle = val
-        request_tick()
-    end
-)
+mp.observe_property("fullscreen", "bool", function(_, val)
+    state.fullscreen = val
+    state.marginsREQ = true
+    request_init_resize()
+end)
+mp.observe_property("border", "bool", function(_, val)
+    state.border = val
+    request_init_resize()
+end)
+mp.observe_property("title-bar", "bool", function(_, val)
+    state.title_bar = val
+    request_init_resize()
+end)
+mp.observe_property("window-maximized", "bool", function(_, val)
+    state.maximized = val
+    request_init_resize()
+end)
+mp.observe_property("idle-active", "bool", function(_, val)
+    state.idle = val
+    request_tick()
+end)
+
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
 mp.observe_property("vo-configured", "bool", request_tick)
