@@ -289,45 +289,34 @@ static int init(struct sd *sd)
 }
 
 // Check if subtitle has events that would cause it to be animated inside {}
-static bool is_animated(char *s)
+static bool is_animated(const char *str)
 {
-    bool in_tag = false;
-    bool valid_event = false;
-    bool valid_tag = false;
-    while (*s) {
-        if (!in_tag && s[0] == '{')
-            in_tag = true;
-        if (s[0] == '\\') {
-            s++;
-            if (!s[0])
-                break;
-            if (s[0] == 'k' || s[0] == 'K' || s[0] == 't') {
-                valid_event = true;
-                continue;
-            // just bruteforce the multi-letter ones
-            } else if (s[0] == 'f') {
-                if (!strncmp(s, "fad", 3)) {
-                    valid_event = true;
-                    continue;
-                }
-            } else if (s[0] == 'm') {
-                if (!strncmp(s, "move", 4)) {
-                    valid_event = true;
-                    continue;
-                }
+    const char *begin = str;
+    while ((str = strchr(str, '{'))) {
+        if (str++ > begin && str[-2] == '\\')
+            continue;
+
+        const char *end = strchr(str, '}');
+        if (!end)
+            return false;
+
+        while ((str = memchr(str, '\\', end - str))) {
+            while (str[0] == '\\')
+                ++str;
+            while (str[0] == ' ' || str[0] == '\t')
+                ++str;
+            if (str[0] == 'k' || str[0] == 'K' || str[0] == 't' ||
+                (str[0] == 'f' && str[1] == 'a' && str[2] == 'd') ||
+                (str[0] == 'm' && str[1] == 'o' && str[2] == 'v' && str[3] == 'e'))
+            {
+                return true;
             }
         }
-        if (in_tag && valid_event && s[0] == '}') {
-            valid_tag = true;
-            break;
-        } else if (s[0] == '}') {
-            in_tag = false;
-            valid_event = false;
-            valid_tag = false;
-        }
-        s++;
+
+        str = end + 1;
     }
-    return valid_tag;
+
+    return false;
 }
 
 // Note: pkt is not necessarily a fully valid refcounted packet.
