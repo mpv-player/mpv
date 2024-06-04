@@ -243,13 +243,15 @@ local function scan_dir(path, current_file, dir_mode, separator, dir_depth, tota
     end
 
     filter(files, function(v)
-        -- The current file could be a hidden file, ignoring it doesn't load other
-        -- files from the current directory.
+        -- Always accept current file
         local current = prefix .. v == current_file
-        if o.ignore_hidden and not current and v:match("^%.") then
+        if current then
+            return true
+        end
+        if o.ignore_hidden and v:match("^%.") then
             return false
         end
-        if not current and is_ignored(v) then
+        if is_ignored(v) then
             return false
         end
 
@@ -308,8 +310,7 @@ local function find_and_add_entries()
     local pl_count = mp.get_property_number("playlist-count", 1)
     local this_ext = get_extension(filename)
     -- check if this is a manually made playlist
-    if (pl_count > 1 and autoloaded == nil) or
-       (pl_count == 1 and EXTENSIONS[this_ext:lower()] == nil) then
+    if pl_count > 1 and autoloaded == nil then
         msg.debug("stopping: manually made playlist")
         return
     elseif pl_count == 1 then
@@ -360,6 +361,7 @@ local function find_and_add_entries()
         end
     end
     if not current then
+        msg.debug("current file not found in directory")
         return
     end
     msg.trace("current file position in files: "..current)
