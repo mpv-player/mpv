@@ -44,11 +44,9 @@ struct ra_d3d11 {
 
     struct dll_version d3d_compiler_ver;
 
-#if HAVE_DXGI_DEBUG
     // Debug interfaces (--gpu-debug)
     IDXGIDebug *debug;
     IDXGIInfoQueue *iqueue;
-#endif
 
     // Device capabilities
     D3D_FEATURE_LEVEL fl;
@@ -2097,7 +2095,6 @@ static uint64_t timer_stop(struct ra *ra, ra_timer *ratimer)
     return timer->result;
 }
 
-#if HAVE_DXGI_DEBUG
 static int map_msg_severity(DXGI_INFO_QUEUE_MESSAGE_SEVERITY sev)
 {
     switch (sev) {
@@ -2172,11 +2169,9 @@ static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
         return map_msg_severity(sev);
     }
 }
-#endif
 
 static void debug_marker(struct ra *ra, const char *msg)
 {
-#if HAVE_DXGI_DEBUG
     struct ra_d3d11 *p = ra->priv;
     void *talloc_ctx = talloc_new(NULL);
     HRESULT hr;
@@ -2217,7 +2212,6 @@ static void debug_marker(struct ra *ra, const char *msg)
     IDXGIInfoQueue_ClearStoredMessages(p->iqueue, DXGI_DEBUG_ALL);
 done:
     talloc_free(talloc_ctx);
-#endif
 }
 
 static void destroy(struct ra *ra)
@@ -2248,7 +2242,6 @@ static void destroy(struct ra *ra)
     }
     SAFE_RELEASE(p->ctx);
 
-#if HAVE_DXGI_DEBUG
     if (p->debug) {
         // Report any leaked objects
         debug_marker(ra, "after destroy");
@@ -2259,7 +2252,6 @@ static void destroy(struct ra *ra)
     }
     SAFE_RELEASE(p->debug);
     SAFE_RELEASE(p->iqueue);
-#endif
 
     talloc_free(ra);
 }
@@ -2451,10 +2443,8 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         p->max_uavs = D3D11_PS_CS_UAV_REGISTER_COUNT;
     }
 
-#if HAVE_DXGI_DEBUG
     if (ID3D11Device_GetCreationFlags(p->dev) & D3D11_CREATE_DEVICE_DEBUG)
         mp_d3d11_get_debug_interfaces(ra->log, &p->debug, &p->iqueue);
-#endif
 
     // Some level 9_x devices don't have timestamp queries
     hr = ID3D11Device_CreateQuery(p->dev,
@@ -2468,11 +2458,9 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
     // https://msdn.microsoft.com/en-us/library/windows/desktop/ff476874.aspx
     find_max_texture_dimension(ra);
 
-#if HAVE_DXGI_DEBUG
     // Ignore any messages during find_max_texture_dimension
     if (p->iqueue)
         IDXGIInfoQueue_ClearStoredMessages(p->iqueue, DXGI_DEBUG_ALL);
-#endif
 
     MP_VERBOSE(ra, "Maximum Texture2D size: %dx%d\n", ra->max_texture_wh,
                ra->max_texture_wh);
