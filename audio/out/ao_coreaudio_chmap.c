@@ -297,9 +297,9 @@ AudioChannelLayout *ca_find_standard_layout(void *talloc_ctx, AudioChannelLayout
         if (l->mNumberChannelDescriptions != r->mNumberChannelDescriptions)
             goto mismatch;
 
-        for (int i = 0; i < l->mNumberChannelDescriptions; ++i) {
-            AudioChannelDescription *ld = l->mChannelDescriptions + i;
-            AudioChannelDescription *rd = r->mChannelDescriptions + i;
+        for (int j = 0; j < l->mNumberChannelDescriptions; ++j) {
+            AudioChannelDescription *ld = l->mChannelDescriptions + j;
+            AudioChannelDescription *rd = r->mChannelDescriptions + j;
             if (ld->mChannelLabel == rd->mChannelLabel)
                 continue;
             // XXX: we cannot handle channels with coordinates
