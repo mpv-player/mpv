@@ -18,7 +18,6 @@
 #include <assert.h>
 
 #include <X11/Xlib.h>
-#include <X11/extensions/Xpresent.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
