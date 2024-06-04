@@ -1,5 +1,5 @@
 -- This script automatically loads playlist entries before and after the
--- the currently played file. It does so by scanning the directory a file is
+-- currently played file. It does so by scanning the directory a file is
 -- located in when starting playback. It sorts the directory entries
 -- alphabetically, and adds entries before and after the current file to
 -- the internal playlist. (It stops if it would add an already existing
@@ -32,8 +32,8 @@ ignore_patterns=^~,^bak-,%.bak$
 
 --]]
 
-local MAXENTRIES = 5000
-local MAXDIRSTACK = 20
+local MAX_ENTRIES = 5000
+local MAX_DIR_STACK = 20
 
 local msg = require 'mp.msg'
 local options = require 'mp.options'
@@ -53,7 +53,7 @@ local o = {
     ignore_patterns = ""
 }
 
-local function Set (t)
+local function Set(t)
     local set = {}
     for _, v in pairs(t) do set[v] = true end
     return set
@@ -74,24 +74,21 @@ local EXTENSIONS_IMAGES_DEFAULT = Set {
     'svg', 'tga', 'tif', 'tiff', 'webp'
 }
 
-local EXTENSIONS
-local EXTENSIONS_VIDEO
-local EXTENSIONS_AUDIO
-local EXTENSIONS_IMAGES
+local EXTENSIONS, EXTENSIONS_VIDEO, EXTENSIONS_AUDIO, EXTENSIONS_IMAGES
 
-local function SetUnion (a,b)
+local function SetUnion(a, b)
     for k in pairs(b) do a[k] = true end
     return a
 end
 
 -- Returns first and last positions in string or past-to-end indices
-local function FindOrPastTheEnd (string, pattern, start_at)
-    local pos1, pos2 = string.find(string, pattern, start_at)
+local function FindOrPastTheEnd(string, pattern, start_at)
+    local pos1, pos2 = string:find(pattern, start_at)
     return pos1 or #string + 1,
            pos2 or #string + 1
 end
 
-local function Split (list)
+local function Split(list)
     local set = {}
 
     local item_pos = 1
@@ -192,16 +189,15 @@ local function add_files(files)
 end
 
 local function get_extension(path)
-    return string.match(path, "%.([^%.]+)$" ) or "nomatch"
+    return path:match("%.([^%.]+)$") or "nomatch"
 end
 
 local function is_ignored(file)
-    for pattern, _ in pairs(o.ignore_patterns) do
-        if string.match(file, pattern) then
+    for pattern in pairs(o.ignore_patterns) do
+        if file:match(pattern) then
             return true
         end
     end
-
     return false
 end
 
@@ -225,12 +221,12 @@ local function alphanumsort(filenames)
     return filenames
 end
 
-local autoloaded = nil
+local autoloaded
 local added_entries = {}
-local autoloaded_dir = nil
+local autoloaded_dir
 
 local function scan_dir(path, current_file, dir_mode, separator, dir_depth, total_files, extensions)
-    if dir_depth == MAXDIRSTACK then
+    if dir_depth == MAX_DIR_STACK then
         return
     end
     msg.trace("scanning: " .. path)
@@ -238,7 +234,7 @@ local function scan_dir(path, current_file, dir_mode, separator, dir_depth, tota
     local dirs = dir_mode ~= "ignore" and utils.readdir(path, "dirs") or {}
     local prefix = path == "." and "" or path
 
-    local filter = function(t, iter)
+    local function filter(t, iter)
         for i = #t, 1, -1 do
             if not iter(t[i]) then
                 table.remove(t, i)
@@ -246,11 +242,11 @@ local function scan_dir(path, current_file, dir_mode, separator, dir_depth, tota
         end
     end
 
-    filter(files, function (v)
+    filter(files, function(v)
         -- The current file could be a hidden file, ignoring it doesn't load other
         -- files from the current directory.
         local current = prefix .. v == current_file
-        if o.ignore_hidden and not current and string.match(v, "^%.") then
+        if o.ignore_hidden and not current and v:match("^%.") then
             return false
         end
         if not current and is_ignored(v) then
@@ -258,13 +254,10 @@ local function scan_dir(path, current_file, dir_mode, separator, dir_depth, tota
         end
 
         local ext = get_extension(v)
-        if ext == nil then
-            return false
-        end
-        return extensions[string.lower(ext)]
+        return ext and extensions[ext:lower()]
     end)
     filter(dirs, function(d)
-        return not ((o.ignore_hidden and string.match(d, "^%.")))
+        return not (o.ignore_hidden and d:match("^%."))
     end)
     alphanumsort(files)
     alphanumsort(dirs)
@@ -273,7 +266,7 @@ local function scan_dir(path, current_file, dir_mode, separator, dir_depth, tota
         files[i] = prefix .. file
     end
 
-    local append = function(t1, t2)
+    local function append(t1, t2)
         local t1_size = #t1
         for i = 1, #t2 do
             t1[t1_size + i] = t2[i]
@@ -316,15 +309,13 @@ local function find_and_add_entries()
     local this_ext = get_extension(filename)
     -- check if this is a manually made playlist
     if (pl_count > 1 and autoloaded == nil) or
-       (pl_count == 1 and EXTENSIONS[string.lower(this_ext)] == nil) then
+       (pl_count == 1 and EXTENSIONS[this_ext:lower()] == nil) then
         msg.debug("stopping: manually made playlist")
         return
-    else
-        if pl_count == 1 then
-            autoloaded = true
-            autoloaded_dir = dir
-            added_entries = {}
-        end
+    elseif pl_count == 1 then
+        autoloaded = true
+        autoloaded_dir = dir
+        added_entries = {}
     end
 
     local extensions
@@ -346,11 +337,10 @@ local function find_and_add_entries()
         utils.to_string(pl)))
 
     local files = {}
-    do
-        local dir_mode = o.directory_mode or mp.get_property("directory-mode", "lazy")
-        local separator = mp.get_property_native("platform") == "windows" and "\\" or "/"
-        scan_dir(autoloaded_dir, path, dir_mode, separator, 0, files, extensions)
-    end
+    scan_dir(autoloaded_dir, path,
+             o.directory_mode or mp.get_property("directory-mode", "lazy"),
+             mp.get_property_native("platform") == "windows" and "\\" or "/",
+             0, files, extensions)
 
     if next(files) == nil then
         msg.debug("no other files or directories in directory")
@@ -365,7 +355,7 @@ local function find_and_add_entries()
             break
         end
     end
-    if current == nil then
+    if not current then
         return
     end
     msg.trace("current file position in files: "..current)
@@ -378,7 +368,7 @@ local function find_and_add_entries()
 
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
-        for i = 1, MAXENTRIES do
+        for i = 1, MAX_ENTRIES do
             local pos = current + i * direction
             local file = files[pos]
             if file == nil or file[1] == "." then
@@ -398,12 +388,13 @@ local function find_and_add_entries()
                         mp.commandv("loadfile", file, "append")
                     end
                 end
+                added_entries[file] = true
             end
-            added_entries[file] = true
         end
         if pl_count == 1 and direction == -1 and #append[-1] > 0 then
-            for i = 1, #append[-1] do
-                mp.commandv("loadfile", append[-1][i][1], "append")
+            local load = append[-1]
+            for i = 1, #load do
+                mp.commandv("loadfile", load[i][1], "append")
             end
             mp.commandv("playlist-move", 0, current)
         end
