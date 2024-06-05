@@ -38,6 +38,8 @@
 #define TERM_ESC_ENABLE_MOUSE       "\033[?1003h"
 #define TERM_ESC_DISABLE_MOUSE      "\033[?1003l"
 
+#define TERM_ESC_GREY               "\033[38;5;8m"
+
 struct input_ctx;
 
 /* Global initialization for terminal output. */

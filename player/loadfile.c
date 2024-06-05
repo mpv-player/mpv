@@ -235,7 +235,10 @@ static void uninit_demuxer(struct MPContext *mpctx)
     talloc_free(demuxers);
 }
 
+#define BLACK_CIRCLE "\xe2\x97\x8f"
+#define WHITE_CIRCLE "\xe2\x97\x8b"
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
+#define FILL(s, n) mp_snprintf_cat(s, sizeof(s), "%*s", n, "")
 
 static void print_stream(struct MPContext *mpctx, struct track *t)
 {
@@ -245,7 +248,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     const char *langopt = "?";
     switch (t->type) {
     case STREAM_VIDEO:
-        tname = "Video"; selopt = "vid"; langopt = NULL;
+        tname = "Video"; selopt = "vid"; langopt = "vlang";
         break;
     case STREAM_AUDIO:
         tname = "Audio"; selopt = "aid"; langopt = "alang";
@@ -255,24 +258,32 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         break;
     }
     char b[2048] = {0};
-    bool forced_only = false;
-    if (t->type == STREAM_SUB) {
-        bool forced_opt = mpctx->opts->subs_rend->sub_forced_events_only;
-        if (forced_opt)
-            forced_only = t->selected;
+
+    bool tracks_have_lang = false;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        if (mpctx->tracks[n]->lang) {
+            tracks_have_lang = true;
+            break;
+        }
     }
-    APPEND(b, " %3s %-5s", t->selected ? (forced_only ? "(*)" : "(+)") : "", tname);
-    APPEND(b, " --%s=%d", selopt, t->user_tid);
-    if (t->lang && langopt)
-        APPEND(b, " --%s=%s", langopt, t->lang);
+
+    if (!isatty(STDOUT_FILENO)) {
+        APPEND(b, "%s ", t->selected ? BLACK_CIRCLE : WHITE_CIRCLE);
+    } else if (!t->selected) {
+        APPEND(b, "%s", TERM_ESC_GREY);
+    }
+    APPEND(b, "%-5s --%s=%-2d", tname, selopt, t->user_tid);
+    if (t->lang) {
+        APPEND(b, " --%s=%-7s", langopt, t->lang);
+    } else if (tracks_have_lang) {
+        FILL(b, 16);
+    }
     if (t->default_track)
         APPEND(b, " (*)");
     if (t->forced_track)
         APPEND(b, " (f)");
     if (t->attached_picture)
         APPEND(b, " [P]");
-    if (forced_only)
-        APPEND(b, " [F]");
     if (t->title)
         APPEND(b, " '%s'", t->title);
     const char *codec = s ? s->codec->codec : NULL;
@@ -282,13 +293,20 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     if (t->type == STREAM_VIDEO) {
         if (s && s->codec->disp_w)
             APPEND(b, " %dx%d", s->codec->disp_w, s->codec->disp_h);
-        if (s && s->codec->fps)
-            APPEND(b, " %.3ffps", s->codec->fps);
+        if (s && s->codec->fps && !t->image) {
+            char *fps = mp_format_double(NULL, s->codec->fps, 4, false, false, true);
+            APPEND(b, " %s fps", fps);
+            talloc_free(fps);
+        }
     } else if (t->type == STREAM_AUDIO) {
         if (s && s->codec->channels.num)
-            APPEND(b, " %dch", s->codec->channels.num);
-        if (s && s->codec->samplerate)
-            APPEND(b, " %dHz", s->codec->samplerate);
+            APPEND(b, " %d ch", s->codec->channels.num);
+        if (s && s->codec->samplerate) {
+            char *samplerate = mp_format_double(NULL, s->codec->samplerate / 1000.0,
+                                                4, false, false, true);
+            APPEND(b, " %s kHz", samplerate);
+            talloc_free(samplerate);
+        }
     }
     APPEND(b, ")");
     if (s && s->hls_bitrate > 0)
@@ -320,8 +338,12 @@ void update_demuxer_properties(struct MPContext *mpctx)
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
             char b[128] = {0};
-            APPEND(b, " %3s --edition=%d",
-                   n == demuxer->edition ? "(+)" : "", n);
+            if (!isatty(STDOUT_FILENO)) {
+                APPEND(b, "%s ", n == demuxer->edition ? BLACK_CIRCLE : WHITE_CIRCLE);
+            } else if (n != demuxer->edition) {
+                APPEND(b, "%s", TERM_ESC_GREY);
+            }
+            APPEND(b, "--edition=%d", n);
             char *name = mp_tags_get_str(edition->metadata, "title");
             if (name)
                 APPEND(b, " '%s'", name);
