@@ -546,7 +546,7 @@ static void update_mouse_section(struct input_ctx *ictx)
 }
 
 // Called when the currently held-down key is released. This (usually) sends
-// the a key-up version of the command associated with the keys that were held
+// the key-up version of the command associated with the keys that were held
 // down.
 // If the drop_current parameter is set to true, then don't send the key-up
 // command. Unless we've already sent a key-down event, in which case the
@@ -570,7 +570,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     update_mouse_section(ictx);
 }
 
-// We don't want the append to the command queue indefinitely, because that
+// We don't want it to append to the command queue indefinitely, because that
 // could lead to situations where recovery would take too long.
 static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
@@ -633,7 +633,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
         // Press of key with no separate down/up events
         // Mixing press events and up/down with the same key is not supported,
         // and input sources shouldn't do this, but can happen anyway if
-        // multiple input sources interfere with each others.
+        // multiple input sources interfere with each other.
         if (ictx->last_key_down == code)
             release_down_cmd(ictx, false);
         cmd = resolve_key(ictx, code);
@@ -679,7 +679,7 @@ static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
     // much in any direction before their scroll is registered.
     static const double DEADZONE_DIST = 0.125;
     // The deadzone accumulator is reset if no scrolls happened in this many
-    // seconds, eg. the user is assumed to have finished scrolling.
+    // seconds, e.g. the user is assumed to have finished scrolling.
     static const double DEADZONE_SCROLL_TIME = 0.2;
     // The scale_units accumulator is reset if no scrolls happened in this many
     // seconds. This value should be fairly large, so commands will still be
@@ -767,7 +767,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         return;
     }
     double now = mp_time_sec();
-    // ignore system-doubleclick if we generate these events ourselves
+    // ignore system doubleclick if we generate these events ourselves
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     int units = 1;
@@ -786,7 +786,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         } else if (code == MP_MBTN_LEFT && ictx->opts->allow_win_drag &&
                    !test_mouse(ictx, ictx->mouse_vo_x, ictx->mouse_vo_y, MP_INPUT_ALLOW_VO_DRAGGING))
         {
-            // This is a mouse left botton down event which isn't part of a doubleclick,
+            // This is a mouse left button down event which isn't part of a doubleclick,
             // and the mouse is on an input section which allows VO dragging.
             // Mark the dragging mouse button down in this case.
             ictx->dragging_button_down = true;
