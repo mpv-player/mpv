@@ -36,7 +36,7 @@ fam=x86_64
 cat >"$prefix_dir/crossfile" <<EOF
 [built-in options]
 buildtype = 'release'
-wrap_mode = 'nodownload'
+wrap_mode = 'nofallback'
 [binaries]
 c = ['ccache', '${CC}']
 cpp = ['ccache', '${CXX}']
@@ -297,8 +297,11 @@ meson setup $build --cross-file "$prefix_dir/crossfile" \
     --werror                   \
     -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
     --buildtype debugoptimized \
+    --force-fallback-for=mujs  \
+    -Dmujs:werror=false        \
+    -Dmujs:default_library=static      \
     -D{libmpv,tests}=true -Dlua=luajit \
-    -D{shaderc,spirv-cross,d3d11}=enabled
+    -D{shaderc,spirv-cross,d3d11,javascript}=enabled
 
 meson compile -C $build
 
