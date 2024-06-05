@@ -170,6 +170,7 @@ struct input_ctx {
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section);
 static void close_input_sources(struct input_ctx *ictx);
+static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags);
 
 #define OPT_BASE_STRUCT struct input_opts
 struct input_opts {
@@ -782,8 +783,11 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
             now = 0;
             interpret_key(ictx, code - MP_MBTN_BASE + MP_MBTN_DBL_BASE,
                           1, 1);
-        } else if (code == MP_MBTN_LEFT) {
-            // This is a mouse left botton down event which isn't part of a doubleclick.
+        } else if (code == MP_MBTN_LEFT && ictx->opts->allow_win_drag &&
+                   !test_mouse(ictx, ictx->mouse_vo_x, ictx->mouse_vo_y, MP_INPUT_ALLOW_VO_DRAGGING))
+        {
+            // This is a mouse left botton down event which isn't part of a doubleclick,
+            // and the mouse is on an input section which allows VO dragging.
             // Mark the dragging mouse button down in this case.
             ictx->dragging_button_down = true;
             // Store the current mouse position for deadzone handling.
