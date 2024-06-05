@@ -57,6 +57,11 @@ jobs:
           sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib nasm ninja-build pkg-config python3-pip wine wine32 wine64
           sudo python3 -m pip install meson
 
+      - name: Install Meson Wraps
+        run: |
+          mkdir subprojects -p
+          meson wrap install mujs
+
       - name: Build libraries
         run: |
           ./ci/build-mingw64.sh
