@@ -632,6 +632,11 @@ void terminal_set_mouse_input(bool enable)
     }
 }
 
+static VOID NTAPI fls_free_cb(PVOID ptr)
+{
+    talloc_free(ptr);
+}
+
 void terminal_init(void)
 {
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
@@ -653,6 +658,6 @@ void terminal_init(void)
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
 
-    tmp_buffers_key = FlsAlloc((PFLS_CALLBACK_FUNCTION)talloc_free);
+    tmp_buffers_key = FlsAlloc(fls_free_cb);
     utf8_output = SetConsoleOutputCP(CP_UTF8);
 }
