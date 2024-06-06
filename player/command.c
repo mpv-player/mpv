@@ -6342,7 +6342,8 @@ static void cmd_script_binding(void *p)
         target = space;
         name = sep + 1;
     }
-    char state[3] = {'p', incmd->is_mouse_button ? 'm' : '-'};
+    char state[4] = {'p', incmd->is_mouse_button ? 'm' : '-',
+                          incmd->canceled ? 'c' : '-'};
     if (incmd->is_up_down)
         state[0] = incmd->repeated ? 'r' : (incmd->is_up ? 'u' : 'd');
     event.num_args = 5;
