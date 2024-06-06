@@ -311,6 +311,7 @@ function add_binding(forced, key, name, fn, opts) {
             fn({
                 event: KEY_STATES[state[0]] || "unknown",
                 is_mouse: state[1] == "m",
+                canceled: state[2] == "c",
                 key_name: key_name || undefined,
                 key_text: key_text || undefined
             });
@@ -321,7 +322,10 @@ function add_binding(forced, key, name, fn, opts) {
             // Emulate the semantics at input.c: mouse emits on up, kb on down.
             // Also, key repeat triggers the binding again.
             var e = state[0],
-                emit = (state[1] == "m") ? (e == "u") : (e == "d");
+                emit = (state[1] == "m") ? (e == "u") : (e == "d"),
+                canceled = state[2] == "c";
+            if (canceled)
+                return;
             if (emit || e == "p" || e == "r" && key_data.repeatable)
                 fn();
         }
