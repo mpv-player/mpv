@@ -207,6 +207,7 @@ local function add_binding(attrs, key, name, fn, rp)
             fn({
                 event = key_states[state:sub(1, 1)] or "unknown",
                 is_mouse = state:sub(2, 2) == "m",
+                canceled = state:sub(3, 3) == "c",
                 key_name = key_name,
                 key_text = key_text,
             })
@@ -222,7 +223,8 @@ local function add_binding(attrs, key, name, fn, rp)
             -- Also, key repeat triggers the binding again.
             local event = state:sub(1, 1)
             local is_mouse = state:sub(2, 2) == "m"
-            if event == "r" and not repeatable then
+            local canceled = state:sub(3, 3) == "c"
+            if canceled or event == "r" and not repeatable then
                 return
             end
             if is_mouse and (event == "u" or event == "p") then

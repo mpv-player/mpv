@@ -292,6 +292,18 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     After calling this function, key presses will cause the function ``fn`` to
     be called (unless the user remapped the key with another binding).
+    However, if the key binding is canceled , the function will not be called,
+    unless ``complex`` flag is set to ``true``, where the function will be
+    called with the ``canceled`` entry set to ``true``.
+
+    For example, a canceled key binding can happen in the following situations:
+
+    - If key A is pressed while key B is being held down, key B is logically
+      released ("canceled" by key A), which stops the current autorepeat
+      action key B has.
+    - If key A is pressed while a mouse button is being held down, the mouse
+      button is logically released, but the mouse button's action will not be
+      called, unless ``complex`` flag is set to ``true``.
 
     The ``name`` argument should be a short symbolic string. It allows the user
     to remap the key binding via input.conf using the ``script-message``
@@ -318,10 +330,14 @@ The ``mp`` module is preloaded, although it can be loaded manually with
                 ``event``
                     Set to one of the strings ``down``, ``repeat``, ``up`` or
                     ``press`` (the latter if key up/down/repeat can't be
-                    tracked).
+                    tracked), which indicates the key's logical state.
 
                 ``is_mouse``
-                    Boolean Whether the event was caused by a mouse button.
+                    Boolean: Whether the event was caused by a mouse button.
+
+                ``canceled``
+                    Boolean: Whether the event was canceled.
+                    Not all types of cancellations set this flag.
 
                 ``key_name``
                     The name of they key that triggered this, or ``nil`` if
