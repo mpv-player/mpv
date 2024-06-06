@@ -46,7 +46,7 @@ pkgconfig = 'pkg-config'
 pkg-config = 'pkg-config'
 windres = '${TARGET}-windres'
 dlltool = '${TARGET}-dlltool'
-exe_wrapper = 'wine'
+exe_wrapper = '${WINE}'
 [host_machine]
 system = 'windows'
 cpu_family = '${fam}'
