@@ -84,16 +84,18 @@ static const struct va_create_native create_native_cbs[] = {
 #if HAVE_VAAPI_DRM
     {"drm",     create_drm_va_display},
 #endif
+    {0}
 };
 
 static VADisplay *create_native_va_display(struct ra *ra, struct mp_log *log)
 {
-    for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
-        const struct va_create_native *disp = &create_native_cbs[n];
+    const struct va_create_native *disp = create_native_cbs;
+    while (disp->name) {
         mp_verbose(log, "Trying to open a %s VA display...\n", disp->name);
         VADisplay *display = disp->create(ra);
         if (display)
             return display;
+        disp++;
     }
     return NULL;
 }
