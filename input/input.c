@@ -551,7 +551,8 @@ static void update_mouse_section(struct input_ctx *ictx)
 // If the drop_current parameter is set to true, then don't send the key-up
 // command. Unless we've already sent a key-down event, in which case the
 // input receiver (the player) must get a key-up event, or it would get stuck
-// thinking a key is still held down.
+// thinking a key is still held down. In this case, mark the command as
+// canceled so that it can be distinguished from a normally triggered command.
 static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 {
     if (ictx->current_down_cmd && ictx->current_down_cmd->emit_on_up &&
@@ -559,6 +560,8 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     {
         memset(ictx->key_history, 0, sizeof(ictx->key_history));
         ictx->current_down_cmd->is_up = true;
+        if (drop_current)
+            ictx->current_down_cmd->canceled = true;
         queue_cmd(ictx, ictx->current_down_cmd);
     } else {
         talloc_free(ictx->current_down_cmd);
