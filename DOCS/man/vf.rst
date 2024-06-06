@@ -433,7 +433,7 @@ Available mpv-only filters are:
             subtitle colors and video under the influence of the video equalizer
             settings.
 
-``vapoursynth=file:buffered-frames:concurrent-frames``
+``vapoursynth=file:buffered-frames:concurrent-frames:user-data``
     Loads a VapourSynth filter script. This is intended for streamed
     processing: mpv actually provides a source filter, instead of using a
     native VapourSynth video source. The mpv source will answer frame
@@ -559,6 +559,10 @@ Available mpv-only filters are:
         By default, this uses the special value ``auto``, which sets the option
         to the number of detected logical CPU cores.
 
+    ``user-data``
+        Optional arbitrary string that is passed to the script. Default to empty
+        string if not set.
+
     The following ``.vpy`` script variables are defined by mpv:
 
     ``video_in``
@@ -588,6 +592,10 @@ Available mpv-only filters are:
         first entry corresponding to the width and the second entry corresponding
         to the height. These values can be 0. Note that this will not respond to
         monitor changes and may not work on all platforms.
+
+    ``user_data``
+        User data passed from the filter. This variable always exists, and defaults
+        to empty string.
 
 ``vavpp``
     VA-API video post processing. Requires the system to support VA-API,

@@ -46,6 +46,7 @@ struct vapoursynth_opts {
     char *file;
     int maxbuffer;
     int maxrequests;
+    char *user_data;
 
     const struct script_driver *drv;
 };
@@ -699,6 +700,7 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
     p->vsapi->propSetFloat(vars, "container_fps", container_fps, 0);
     p->vsapi->propSetFloat(vars, "display_fps", display_fps, 0);
     p->vsapi->propSetIntArray(vars, "display_res", display_res, 2);
+    p->vsapi->propSetData(vars, "user_data", p->opts->user_data, -1, 0);
 
     if (p->drv->load(p, vars) < 0)
         goto error;
@@ -830,6 +832,7 @@ static const m_option_t vf_opts_fields[] = {
         OPTDEF_INT(4)},
     {"concurrent-frames", OPT_CHOICE(maxrequests, {"auto", -1}),
         M_RANGE(1, 99), OPTDEF_INT(-1)},
+    {"user-data", OPT_STRING(user_data), OPTDEF_STR("")},
     {0}
 };
 
