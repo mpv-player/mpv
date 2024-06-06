@@ -505,7 +505,9 @@ jobs:
       fail-fast: false
       matrix:
         sys:
+          - clang32
           - clang64
+          - mingw32
           - mingw64
           - ucrt64
     defaults:
@@ -524,10 +526,8 @@ jobs:
           update: true
           install: git
           pacboy: >-
-            angleproject:p
             ca-certificates:p
             cc:p
-            diffutils:p
             ffmpeg:p
             lcms2:p
             libarchive:p
@@ -541,18 +541,23 @@ jobs:
             ninja:p
             pkgconf:p
             python:p
-            rst2pdf:p
-            rubberband:p
             shaderc:p
             spirv-cross:p
             uchardet:p
             vapoursynth:p
             vulkan-devel:p
 
+      - name: Install dependencies
+        if: ${{ matrix.sys != 'clang32' && matrix.sys != 'mingw32' }}
+        run: |
+          pacboy --noconfirm -S {angleproject,rst2pdf,rubberband}:p
+
       - name: Build with meson
         id: build
         run: |
           ./ci/build-msys2.sh meson
+        env:
+          SYS: ${{ matrix.sys }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
