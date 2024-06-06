@@ -1344,13 +1344,16 @@ Input Commands that are Possibly Subject to Change
     key with a letter is normally not emitted as having a modifier, and results
     in upper case text instead, but some backends may mess up).
 
-    The key state consists of 2 characters:
+    The key state consists of 3 characters:
 
     1. One of ``d`` (key was pressed down), ``u`` (was released), ``r`` (key
        is still down, and was repeated; only if key repeat is enabled for this
        binding), ``p`` (key was pressed; happens if up/down can't be tracked).
     2. Whether the event originates from the mouse, either ``m`` (mouse button)
        or ``-`` (something else).
+    3. Whether the event results from a cancellation (e.g. the key is logically
+       released but not physically released), either ``c`` (canceled) or ``-``
+       (something else). Not all types of cancellations set this flag.
 
     Future versions can add more arguments and more key state characters to
     support more input peculiarities.
