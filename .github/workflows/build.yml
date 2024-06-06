@@ -32,10 +32,14 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 500M
+      WINE: ${{ matrix.wine }}
     strategy:
       fail-fast: false
       matrix:
-        target: [i686-w64-mingw32, x86_64-w64-mingw32]
+        include:
+          - target: i686-w64-mingw32
+          - target: x86_64-w64-mingw32
+            wine: wine
     steps:
       - uses: actions/checkout@v4
 
@@ -50,11 +54,18 @@ jobs:
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
           restore-keys: ${{ matrix.target }}-
 
-      - name: Install dependencies
+      # For LuaJIT build
+      - name: Enable multilib
+        if: ${{ matrix.target == 'i686-w64-mingw32' }}
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib nasm ninja-build pkg-config python3-pip wine wine32 wine64
+          sudo apt-get install -y gcc-multilib
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ccache g++-mingw-w64 nasm ninja-build pkg-config wine wine64
           sudo python3 -m pip install meson
 
       - name: Install Meson Wraps
@@ -81,12 +92,14 @@ jobs:
           cat ./mingw_build/meson-logs/meson-log.txt
 
       - name: Functional test
+        if: ${{ matrix.wine }}
         run: |
           cd artifact && wine ./mpv.com -v --no-config
         env:
           WINEDEBUG: '+loaddll'
 
       - name: Run meson tests
+        if: ${{ matrix.wine }}
         id: tests
         run: |
           meson test -C mingw_build
