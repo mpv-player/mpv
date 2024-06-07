@@ -65,7 +65,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ccache g++-mingw-w64 meson nasm ninja-build pkg-config wine
+          sudo apt-get install -y ccache g++-mingw-w64 meson nasm ninja-build pkg-config ${{ matrix.wine }}
 
       - name: Install Meson Wraps
         run: |
