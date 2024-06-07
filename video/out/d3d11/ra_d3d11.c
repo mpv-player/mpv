@@ -1503,21 +1503,21 @@ static size_t vbuf_upload(struct ra *ra, void *data, size_t size)
 }
 
 static const char cache_magic[4] = "RD11";
-static const int cache_version = 3;
+static const uint32_t cache_version = 4;
 
 struct cache_header {
     char magic[sizeof(cache_magic)];
-    int cache_version;
+    uint32_t cache_version;
     char compiler[SPIRV_NAME_MAX_LEN];
-    int spv_compiler_version;
-    unsigned spvc_compiler_major;
-    unsigned spvc_compiler_minor;
-    unsigned spvc_compiler_patch;
+    int32_t spv_compiler_version;
+    uint32_t spvc_compiler_major;
+    uint32_t spvc_compiler_minor;
+    uint32_t spvc_compiler_patch;
     struct dll_version d3d_compiler_version;
-    int feature_level;
-    size_t vert_bytecode_len;
-    size_t frag_bytecode_len;
-    size_t comp_bytecode_len;
+    int32_t feature_level;
+    uint32_t vert_bytecode_len;
+    uint32_t frag_bytecode_len;
+    uint32_t comp_bytecode_len;
 };
 
 static void load_cached_program(struct ra *ra,
