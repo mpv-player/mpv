@@ -144,7 +144,12 @@ they will be automatically downloaded and built by Meson.
    or the full [Visual Studio](https://visualstudio.microsoft.com/downloads/#visual-studio-community-2022):
    - From the installer, select the necessary components:
       - Clang compiler for Windows
+      - C++ CMake tools for Windows
       - Windows SDK
+   - Activate the developer shell:
+      ```
+      & "<Visual Studio Path>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64 -SkipAutomaticLocation | Out-Null
+      ```
 2. Install Meson, as outlined in [Getting Meson](https://mesonbuild.com/Getting-meson.html):
    - **Important**: At the time of writing, there is an issue in Meson with
      escaping response files.
@@ -154,19 +159,31 @@ they will be automatically downloaded and built by Meson.
 
      If you wish to install a fixed version, follow the steps outlined
      [here](https://github.com/mpv-player/mpv/blob/481e498427fc34956ad24b94157553908f5cd638/.github/workflows/build.yml#L132-L135).
-3. Set environment variables or use the ``--native-file`` option in Meson.
+3. The following build script utilizes the Meson subprojects system to build mpv and its dependencies.
+   To make sure all dependency versions are up-to-date, update the subprojects database from Meson's WrapDB.
+   Also explicitly download several wraps as some nested projects may pull older versions of them.
+   ```
+   meson wrap update-db
 
-   ``` powershell
-   $env:CC = "clang"
-   $env:CXX = "clang++"
+   meson wrap install expat
+   meson wrap install harfbuzz
+   meson wrap install libpng
+   meson wrap install zlib
+   ```
+4. Set environment variables or use the `--native-file` option in Meson.
+   ```powershell
+   $env:CC = 'clang'
+   $env:CXX = 'clang++'
    $env:CC_LD = 'lld'
    $env:CXX_LD = 'lld'
    $env:WINDRES = 'llvm-rc'
    ```
-
-4. Execute [build-win32.ps1](https://github.com/mpv-player/mpv/blob/master/ci/build-win32.ps1):
-   - This script utilizes the Meson subprojects system to build mpv and its
-     dependencies. Refer to the script for more details.
+   Note that some dependencies (e.g. LuaJIT) may require `sed` to configure. Fortunately, it is already bundled in
+   [Git for Windows](https://www.git-scm.com/download/win):
+   ```powershell
+   $env:PATH += ';<Git Path>\usr\bin'
+   ```
+5. Execute [ci\build-win32.ps1](https://github.com/mpv-player/mpv/blob/master/ci/build-win32.ps1). Refer to the script for more details.
 
 This process will produce a fully static ``mpv.exe`` and ``mpv.com``, as well as
 a static ``libmpv.a``.
