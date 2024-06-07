@@ -3262,8 +3262,10 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 
         for (int n = 0; n < pl->num_entries; n++) {
             struct playlist_entry *e = pl->entries[n];
+            res =  talloc_strdup_append(res, pl->current == e ? list_current
+                                                              : list_normal);
             char *p = e->title;
-            if (!p) {
+            if (!p || mpctx->opts->playlist_entry_name > 0) {
                 p = e->filename;
                 if (!mp_is_url(bstr0(p))) {
                     char *s = mp_basename(e->filename);
@@ -3271,8 +3273,11 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                         p = s;
                 }
             }
-            const char *m = pl->current == e ? list_current : list_normal;
-            res = talloc_asprintf_append(res, "%s%s\n", m, p);
+            if (!e->title || p == e->title || mpctx->opts->playlist_entry_name == 1) {
+                res = talloc_asprintf_append(res, "%s\n", p);
+            } else {
+                res = talloc_asprintf_append(res, "%s (%s)\n", e->title, p);
+            }
         }
 
         *(char **)arg =

@@ -862,6 +862,9 @@ static const m_option_t mp_opts[] = {
     {"osd-msg2", OPT_STRING(osd_msg[1]), .flags = UPDATE_OSD},
     {"osd-msg3", OPT_STRING(osd_msg[2]), .flags = UPDATE_OSD},
 
+    {"osd-playlist-entry", OPT_CHOICE(playlist_entry_name,
+        {"title", 0}, {"filename", 1}, {"both", 2})},
+
     {"video-osd", OPT_BOOL(video_osd), .flags = UPDATE_OSD},
 
     {"idle", OPT_CHOICE(player_idle_mode,
