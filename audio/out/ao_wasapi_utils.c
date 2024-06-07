@@ -653,7 +653,7 @@ static void init_volume_control(struct wasapi_state *state)
         MP_DBG(state, "Activating pEndpointVolume interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice,
                                          &IID_IAudioEndpointVolume,
-                                         CLSCTX_ALL, NULL,
+                                         CLSCTX_INPROC_SERVER, NULL,
                                          (void **)&state->pEndpointVolume);
         EXIT_ON_ERROR(hr);
 
@@ -845,7 +845,7 @@ static struct enumerator *create_enumerator(struct mp_log *log)
     struct enumerator *e = talloc_zero(NULL, struct enumerator);
     e->log = log;
     HRESULT hr = CoCreateInstance(
-        &CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+        &CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER, &IID_IMMDeviceEnumerator,
         (void **)&e->pEnumerator);
     EXIT_ON_ERROR(hr);
 
@@ -913,7 +913,7 @@ static bool load_device(struct mp_log *l,
                            IMMDevice **ppDevice, LPWSTR deviceID)
 {
     IMMDeviceEnumerator *pEnumerator = NULL;
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER,
                                   &IID_IMMDeviceEnumerator,
                                   (void **)&pEnumerator);
     EXIT_ON_ERROR(hr);
@@ -1027,7 +1027,7 @@ retry:
 
         MP_DBG(ao, "Activating pAudioClient interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
-                                         CLSCTX_ALL, NULL,
+                                         CLSCTX_INPROC_SERVER, NULL,
                                          (void **)&state->pAudioClient);
         if (FAILED(hr)) {
             MP_FATAL(ao, "Error activating device: %s\n",
