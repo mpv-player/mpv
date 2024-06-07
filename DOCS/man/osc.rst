@@ -408,13 +408,6 @@ Configurable Options
     Whether to display the chapters/playlist at the OSD when left-clicking the
     next/previous OSC buttons, respectively.
 
-``playlist_media_title``
-    Default: yes
-
-    Whether to display playlist entries in media titles. If set to ``no``, file
-    names are used instead. Note that media title of a file is only available
-    once it has been loaded.
-
 ``chapter_fmt``
     Default: ``Chapter: %s``
 
