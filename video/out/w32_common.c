@@ -1752,6 +1752,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (wParam == WM_CREATE) {
             // Default to alphanumeric input when the IME is first initialized.
             set_ime_conversion_mode(w32, IME_CMODE_ALPHANUMERIC);
+            KillTimer(w32->window, (UINT_PTR)WM_CREATE);
             return 0;
         }
         break;
