@@ -1452,7 +1452,7 @@ local function record_data(skip)
         end
 
         if o.plot_vsync_jitter then
-            local r = mp.get_property_number("vsync-jitter", nil)
+            local r = mp.get_property_number("vsync-jitter")
             if r then
                 vsjitter_buf.pos = (vsjitter_buf.pos % vsjitter_buf.len) + 1
                 vsjitter_buf[vsjitter_buf.pos] = r
@@ -1461,7 +1461,7 @@ local function record_data(skip)
         end
 
         if o.plot_vsync_ratio then
-            local r = mp.get_property_number("vsync-ratio", nil)
+            local r = mp.get_property_number("vsync-ratio")
             if r then
                 vsratio_buf.pos = (vsratio_buf.pos % vsratio_buf.len) + 1
                 vsratio_buf[vsratio_buf.pos] = r

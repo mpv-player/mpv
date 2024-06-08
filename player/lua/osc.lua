@@ -2096,7 +2096,7 @@ local function osc_init()
     ne.enabled = mp.get_property("percent-pos") ~= nil
     state.slider_element = ne.enabled and ne or nil  -- used for forced_title
     ne.slider.markerF = function ()
-        local duration = mp.get_property_number("duration", nil)
+        local duration = mp.get_property_number("duration")
         if duration ~= nil then
             local chapters = mp.get_property_native("chapter-list", {})
             local markers = {}
@@ -2109,9 +2109,9 @@ local function osc_init()
         end
     end
     ne.slider.posF =
-        function () return mp.get_property_number("percent-pos", nil) end
+        function () return mp.get_property_number("percent-pos") end
     ne.slider.tooltipF = function (pos)
-        local duration = mp.get_property_number("duration", nil)
+        local duration = mp.get_property_number("duration")
         if duration ~= nil and pos ~= nil then
             local possec = duration * (pos / 100)
             return mp.format_time(possec)
@@ -2127,7 +2127,7 @@ local function osc_init()
         if not cache_state then
             return nil
         end
-        local duration = mp.get_property_number("duration", nil)
+        local duration = mp.get_property_number("duration")
         if duration == nil or duration <= 0 then
             return nil
         end
@@ -2985,7 +2985,7 @@ opt.read_options(user_opts, "osc", function(changed)
     validate_user_opts()
     set_osc_styles()
     if changed.tick_delay or changed.tick_delay_follow_display_fps then
-        set_tick_delay("display_fps", mp.get_property_number("display_fps", nil))
+        set_tick_delay("display_fps", mp.get_property_number("display_fps"))
     end
     request_tick()
     visibility_mode(user_opts.visibility, true)
@@ -2995,7 +2995,7 @@ end)
 
 validate_user_opts()
 set_osc_styles()
-set_tick_delay("display_fps", mp.get_property_number("display_fps", nil))
+set_tick_delay("display_fps", mp.get_property_number("display_fps"))
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
 
