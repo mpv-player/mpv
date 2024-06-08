@@ -448,7 +448,9 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
 
     // First look whether a mouse section is capturing all mouse input
     // exclusively (regardless of the active section stack order).
-    if (use_mouse && MP_KEY_IS_MOUSE_BTN_SINGLE(ictx->last_key_down)) {
+    if (use_mouse && MP_KEY_IS_MOUSE_BTN_SINGLE(ictx->last_key_down) &&
+        !MP_KEY_IS_MOUSE_BTN_DBL(code))
+    {
         struct cmd_bind *bind =
             find_bind_for_key_section(ictx, ictx->mouse_section, code);
         if (bind)
