@@ -25,6 +25,7 @@
 #include <libavutil/opt.h>
 
 #include "audio/aframe.h"
+#include "audio/chmap_avchannel.h"
 #include "audio/format.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -122,7 +123,7 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
         av_parser_close(parser);
     }
 
-    if (profile != AV_PROFILE_UNKNOWN || spdif_ctx->codec_id == AV_CODEC_ID_AC3)
+    if (profile != AV_PROFILE_UNKNOWN)
         return;
 
     const AVCodec *codec = avcodec_find_decoder(spdif_ctx->codec_id);
@@ -154,6 +155,7 @@ static void determine_codec_params(struct mp_filter *da, AVPacket *pkt,
         c->codec_profile = avcodec_profile_name(ctx->codec_id, ctx->profile);
     c->codec = ctx->codec_descriptor->name;
     c->codec_desc = ctx->codec_descriptor->long_name;
+    mp_chmap_from_av_layout(&c->channels, &ctx->ch_layout);
 
 done:
     av_frame_free(&frame);
