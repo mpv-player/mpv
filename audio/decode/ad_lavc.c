@@ -215,6 +215,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
         return ret;
 
     mp_codec_info_from_av(avctx, priv->codec);
+    mp_chmap_from_av_layout(&priv->codec->channels, &avctx->ch_layout);
 
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
@@ -311,6 +312,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
     }
 
     codec->codec_desc = priv->avctx->codec_descriptor->long_name;
+    mp_chmap_from_av_layout(&priv->codec->channels, &priv->avctx->ch_layout);
 
     return &priv->public;
 }
