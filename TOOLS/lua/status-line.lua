@@ -43,7 +43,7 @@ local function update_status_line()
         atsl(string.format(" x%4.2f", r))
     end
 
-    r = mp.get_property_number("avsync", nil)
+    r = mp.get_property_number("avsync")
     if r ~= nil then
         atsl(string.format(" A-V: %f", r))
     end
