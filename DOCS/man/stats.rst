@@ -25,6 +25,7 @@ stats:
 2      Show frame timings (scroll)
 3      Input cache stats
 4      Active key bindings (scroll)
+5      Selected Tracks Info (scroll)
 0      Internal stuff (scroll)
 ====   ==================
 
@@ -56,6 +57,8 @@ Configurable Options
     Default: 3
 ``key_page_4``
     Default: 4
+``key_page_5``
+    Default: 5
 ``key_page_0``
     Default: 0
 
