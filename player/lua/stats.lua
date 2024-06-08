@@ -29,7 +29,6 @@ local o = {
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
-    print_perfdata_passes = false,   -- when true, print the full information about all passes
     filter_params_max_length = 100,  -- show one filter per line if list exceeds this length
     show_frame_info = false,         -- whether to show the current frame info
     term_width_limit = -1,           -- overwrites the terminal width
@@ -312,7 +311,7 @@ local function scroll_hint(search)
     return format(" {\\fs%s}%s{\\fs%s}", font_size * 0.66, hint, font_size)
 end
 
-local function append_perfdata(header, s, dedicated_page, print_passes)
+local function append_perfdata(header, s, dedicated_page)
     local vo_p = mp.get_property_native("vo-passes")
     if not vo_p then
         return
@@ -359,7 +358,7 @@ local function append_perfdata(header, s, dedicated_page, print_passes)
         local data = vo_p[frame]
         local f = "%s%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s%s"
 
-        if print_passes then
+        if dedicated_page then
             s[#s+1] = format("%s%s%s:", o.nl, o.indent,
                              bold(frame:gsub("^%l", string.upper)))
 
@@ -885,7 +884,7 @@ local function add_video_out(s)
         append_property(s, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
     append_display_sync(s)
-    append_perfdata(nil, s, false, o.print_perfdata_passes)
+    append_perfdata(nil, s, false)
 
     if mp.get_property_native("deinterlace-active") then
         append_property(s, "deinterlace", {prefix="Deinterlacing:"})
@@ -1145,7 +1144,7 @@ local function vo_stats()
     local header, content = {}, {}
     eval_ass_formatting()
     add_header(header)
-    append_perfdata(header, content, true, true)
+    append_perfdata(header, content, true)
     header = {table.concat(header)}
     return finalize_page(header, content, true)
 end
