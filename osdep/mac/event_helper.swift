@@ -75,7 +75,7 @@ class EventHelper {
         mpv_set_wakeup_callback(mpv, wakeup, TypeHelper.bridge(obj: self))
     }
 
-    func subscribe(_ subscriber: any EventSubscriber, event: Event) {
+    func subscribe(_ subscriber: EventSubscriber, event: Event) {
         guard let mpv = mpv else { return }
 
         if !event.name.isEmpty {
