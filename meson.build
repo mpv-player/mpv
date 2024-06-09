@@ -764,8 +764,8 @@ if not features['lavu-uuid']
     sources += files('misc/uuid.c')
 endif
 
-vapoursynth = dependency('vapoursynth', version: '>= 26', required: get_option('vapoursynth'))
-vapoursynth_script = dependency('vapoursynth-script', version: '>= 26',
+vapoursynth = dependency('vapoursynth', version: '>= 56', required: get_option('vapoursynth'))
+vapoursynth_script = dependency('vapoursynth-script', version: '>= 56',
                                 required: get_option('vapoursynth'))
 features += {'vapoursynth': vapoursynth.found() and vapoursynth_script.found()}
 if features['vapoursynth']
