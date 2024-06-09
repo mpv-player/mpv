@@ -222,6 +222,15 @@ local function set_osd(res_x, res_y, text, z)
     state.osd:update()
 end
 
+local function set_time_styles(timetotal_changed, timems_changed)
+    if timetotal_changed then
+        state.rightTC_trem = not user_opts.timetotal
+    end
+    if timems_changed then
+        state.tc_ms = user_opts.timems
+    end
+end
+
 -- scale factor for translating between real and virtual ASS coordinates
 local function get_virt_scale_factor()
     local w, h = mp.get_osd_size()
@@ -2984,6 +2993,7 @@ end
 opt.read_options(user_opts, "osc", function(changed)
     validate_user_opts()
     set_osc_styles()
+    set_time_styles(changed.timetotal, changed.timems)
     if changed.tick_delay or changed.tick_delay_follow_display_fps then
         set_tick_delay("display_fps", mp.get_property_number("display_fps"))
     end
@@ -2995,6 +3005,7 @@ end)
 
 validate_user_opts()
 set_osc_styles()
+set_time_styles(true, true)
 set_tick_delay("display_fps", mp.get_property_number("display_fps"))
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
