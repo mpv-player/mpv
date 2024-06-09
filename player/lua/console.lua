@@ -1577,7 +1577,6 @@ set_active = function (active)
     if active then
         repl_active = true
         insert_mode = false
-        mp.enable_key_bindings('console-input', 'allow-hide-cursor+allow-vo-dragging')
         define_key_bindings()
 
         if not input_caller then
