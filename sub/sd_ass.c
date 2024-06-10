@@ -470,6 +470,21 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
 }
 
+// Calculate the height used for scaling subtitle text size so --sub-scale-with-window
+// can undo this scale and use frame size instead. The algorithm used is the following:
+// - If use_margins is disabled, the text is scaled with the visual size of the video.
+// - If use_margins is enabled, the text is scaled with the size of the video
+//   as if the video is resized to "fit" the size of the frame.
+static float get_libass_scale_height(struct mp_osd_res *dim, bool use_margins)
+{
+    float vidw = dim->w - (dim->ml + dim->mr);
+    float vidh = dim->h - (dim->mt + dim->mb);
+    if (!use_margins || vidw < 1.0)
+        return vidh;
+    else
+        return MPMIN(dim->h, dim->w / vidw * vidh);
+}
+
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                           bool converted, ASS_Track *track)
 {
@@ -508,8 +523,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_font_scale = opts->sub_scale;
     }
     if (set_scale_with_window) {
-        int vidh = dim->h - (dim->mt + dim->mb);
-        set_font_scale *= dim->h / (float)MPMAX(vidh, 1);
+        set_font_scale *= dim->h / MPMAX(get_libass_scale_height(dim, set_use_margins), 1);
     }
     if (!set_scale_by_window) {
         double factor = dim->h / 720.0;
