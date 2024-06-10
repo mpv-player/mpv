@@ -24,7 +24,7 @@ While on master:
 
 - Update the `RELEASE_NOTES` file, replacing the previous release notes.
 
-- Update the `VERSION` file.
+- Update the `MPV_VERSION` file.
 
 - Update `DOCS/client-api-changes.rst` (in particular, update the last version
   number if necessary)
@@ -43,7 +43,7 @@ While on master:
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
   the new version.
 
-- Readd -UNKNOWN suffix to version in `VERSION` file.
+- Readd -UNKNOWN suffix to version in `MPV_VERSION` file.
 
 If necessary (to e.g. exclude commits already on master), the release can
 be done on a branch with different commit history. The release branch **must**

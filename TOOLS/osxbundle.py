@@ -47,7 +47,7 @@ def sign_bundle(binary_name):
 
 def bundle_version(src_path):
     version = 'UNKNOWN'
-    version_path = os.path.join(src_path, 'VERSION')
+    version_path = os.path.join(src_path, 'MPV_VERSION')
     if os.path.exists(version_path):
         x = open(version_path)
         version = x.read()
