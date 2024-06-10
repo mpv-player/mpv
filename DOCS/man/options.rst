@@ -2387,26 +2387,27 @@ Subtitles
 
 ``--sub-scale-by-window=<yes|no>``
     Whether to scale subtitles with the window size (default: yes). If this is
-    disabled, changing the window size won't change the subtitle font size.
+    disabled while ``--sub-scale-with-window`` is set to yes, changing the window
+    size won't change the subtitle font size.
 
     Affects plain text subtitles only (or ASS if ``--sub-ass-override`` is set
     high enough).
 
 ``--sub-scale-with-window=<yes|no>``
-    Make the subtitle font size relative to the window, instead of the video.
-    This is useful if you always want the same font size, even if the video
-    doesn't cover the window fully, e.g. because screen aspect and window
-    aspect mismatch (and the player adds black bars).
-
-    Default: yes.
-
-    This option is misnamed. The difference to the confusingly similar sounding
-    option ``--sub-scale-by-window`` is that ``--sub-scale-with-window`` still
-    scales with the approximate window size, while the other option disables
-    this scaling.
+    Make the subtitle font size relative to the window (default: yes). If this is
+    disabled while ``--sub-scale-by-window`` is set to yes, the subtitle font
+    size is scaled relative to the video size instead.
 
     Affects plain text subtitles only (or ASS if ``--sub-ass-override`` is set
     high enough).
+
+    .. note::
+
+        By default, the subtitle font size is scaled with the window size.
+        To make the font size constant, set only ``--sub-scale-by-window`` to no.
+        To make the font size scale with video size instead, set only
+        ``--sub-scale-with-window`` to no.
+        It's not meaningful to set both options to no.
 
 ``--sub-ass-scale-with-window=<yes|no>``
     Like ``--sub-scale-with-window``, but affects subtitles in ASS format only.
