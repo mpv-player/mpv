@@ -199,12 +199,13 @@ static inline int mp_thread_detach(mp_thread thread)
 wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
 static inline void mp_thread_set_name(const char *name)
 {
-    HRESULT (WINAPI *pSetThreadDescription)(HANDLE, PCWSTR);
+    typedef HRESULT (WINAPI *SetThreadDescriptionFn)(HANDLE, PCWSTR);
+    SetThreadDescriptionFn pSetThreadDescription;
 #if !HAVE_UWP
     HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
     if (!kernel32)
         return;
-    pSetThreadDescription = (void *) GetProcAddress(kernel32, "SetThreadDescription");
+    pSetThreadDescription = (SetThreadDescriptionFn) GetProcAddress(kernel32, "SetThreadDescription");
     if (!pSetThreadDescription)
         return;
 #else
