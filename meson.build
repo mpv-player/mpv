@@ -1,7 +1,7 @@
 project('mpv',
         'c',
         license: ['GPL2+', 'LGPL2.1+'],
-        version: files('./VERSION'),
+        version: files('./MPV_VERSION'),
         meson_version: '>=0.62.0',
         default_options: [
             'backend_max_links=16',
