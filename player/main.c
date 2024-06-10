@@ -36,6 +36,7 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/main-fn.h"
+#include "osdep/win32/smtc.h"
 
 #include "common/av_log.h"
 #include "common/codecs.h"
@@ -397,6 +398,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 #if HAVE_COCOA
     mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
     cocoa_set_mpv_handle(ctx);
+#endif
+
+#if defined(HAVE_WIN32_SMTC) && HAVE_WIN32_SMTC
+    if (opts->media_controls == 2 || (mpctx->is_cli && opts->media_controls == 1))
+        mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
 
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {

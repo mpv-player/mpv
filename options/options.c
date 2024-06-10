@@ -543,6 +543,8 @@ static const m_option_t mp_opts[] = {
         {"idle",        IDLE_PRIORITY_CLASS}),
         .flags = UPDATE_PRIORITY},
 #endif
+    {"media-controls", OPT_CHOICE(media_controls,
+        {"no", 0}, {"player", 1}, {"yes", 2})},
     {"config", OPT_BOOL(load_config), .flags = CONF_PRE_PARSE},
     {"config-dir", OPT_STRING(force_configdir),
         .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
@@ -1039,6 +1041,7 @@ static const struct MPOpts mp_default_opts = {
     .osd_bar_visible = true,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
+    .media_controls = 1,
 
     .audiofile_auto_exts = (char *[]){
         "aac",
