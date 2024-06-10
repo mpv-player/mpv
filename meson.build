@@ -530,6 +530,10 @@ if not posix and not features['win32-desktop']
                      'osdep/terminal-dummy.c')
 endif
 
+if win32
+    subdir('osdep/win32')
+endif
+
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
 
 features += {'glob-win32': win32 and not features['glob-posix']}

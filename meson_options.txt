@@ -116,6 +116,9 @@ option('macos-touchbar', type: 'feature', value: 'auto', description: 'macOS Tou
 option('swift-build', type: 'feature', value: 'auto', description: 'macOS Swift build tools')
 option('swift-flags', type: 'string', description: 'Optional Swift compiler flags')
 
+# Windows features
+option('win32-smtc', type: 'feature', value: 'auto', description: 'Enable Media Control support')
+
 # manpages
 option('html-build', type: 'feature', value: 'disabled', description: 'HTML manual generation')
 option('manpage-build', type: 'feature', value: 'auto', description: 'manpage generation')
