@@ -265,24 +265,21 @@ sources = files(
 cc = meson.get_compiler('c')
 
 flags = ['-D_FILE_OFFSET_BITS=64']
+flags_c = []
 link_flags = []
 
 test_flags = ['-Wdisabled-optimization',
               '-Wempty-body',
               '-Wformat',
               '-Wimplicit-fallthrough',
-              '-Wmissing-prototypes',
               '-Wparentheses',
               '-Wpointer-arith',
               '-Wshadow',
-              '-Wstrict-prototypes',
               '-Wundef',
               '-Wvla',
-              '-Werror=implicit-function-declaration',
               '-Wno-cast-function-type',
               '-Wno-format-zero-length',
               '-Wno-missing-field-initializers',
-              '-Wno-pointer-sign',
               '-Wno-sign-compare',
               '-Wno-switch',
               '-Wno-unused-parameter',
@@ -290,7 +287,13 @@ test_flags = ['-Wdisabled-optimization',
               '-fno-signed-zeros',
               '-fno-trapping-math']
 
+test_flags_c = ['-Wmissing-prototypes',
+                '-Wstrict-prototypes',
+                '-Werror=implicit-function-declaration',
+                '-Wno-pointer-sign']
+
 flags += cc.get_supported_arguments(test_flags)
+flags_c += cc.get_supported_arguments(test_flags_c)
 
 if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
     flags += '-Werror=format-security'
@@ -305,13 +308,14 @@ features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
 
 mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DWINVER=0x0602', '-DUNICODE',
-               '-DCOBJMACROS', '-DINITGUID', '-U__STRICT_ANSI__', '-DNOMINMAX',
+               '-DCOBJMACROS', '-DINITGUID', '-DNOMINMAX',
                '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN',
                '-D_CRT_DECLARE_NONSTDC_NAMES', '-D_CRT_NONSTDC_NO_WARNINGS',
                '-D_CRT_SECURE_NO_WARNINGS']
 
 if host_machine.system() == 'windows'
     flags += [mswin_flags]
+    flags_c += ['-U__STRICT_ANSI__']
 endif
 
 if host_machine.system() == 'cygwin'
@@ -385,8 +389,8 @@ if get_option('fuzzers')
     link_flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
 endif
 
-add_project_arguments(flags, language: 'c')
-add_project_arguments(['-Wno-unused-parameter'], language: 'objc')
+add_project_arguments(flags, language: ['c', 'cpp', 'objc'])
+add_project_arguments(flags_c, language: ['c', 'objc'])
 add_project_link_arguments(link_flags, language: ['c', 'cpp', 'objc'])
 
 
@@ -1513,7 +1517,7 @@ endif
 
 if macos_sdk_version != '0.0'
     message('Detected macOS SDK: ' + macos_sdk_version)
-    add_languages('objc')
+    add_languages('objc', native: false)
     objc_link_flags = ['-isysroot', macos_sdk_path, '-L/usr/lib', '-L/usr/local/lib']
     add_project_link_arguments(objc_link_flags, language: ['c', 'objc'])
 endif
