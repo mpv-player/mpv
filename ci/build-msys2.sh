@@ -9,7 +9,7 @@ args=(
 )
 
 [[ "$SYS" != "clang32" && "$SYS" != "mingw32" ]] && args+=(
-  -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband}=enabled
+  -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband,win32-smtc}=enabled
 )
 
 meson setup build "${args[@]}"
