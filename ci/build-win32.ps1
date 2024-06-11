@@ -206,6 +206,7 @@ meson setup build `
     -Dd3d11=enabled `
     -Dvulkan=enabled `
     -Djavascript=enabled `
+    -Dwin32-smtc=enabled `
     -Dlua=luajit `
     -Ddrm=disabled `
     -Dlibarchive=disabled `
