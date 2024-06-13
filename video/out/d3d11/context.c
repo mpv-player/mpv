@@ -156,8 +156,8 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     DXGI_OUTPUT_DESC1 desc1;
-    if (mp_get_dxgi_output_desc(p->swapchain, &desc1))
-        return desc1.BitsPerColor;
+    if (!mp_get_dxgi_output_desc(p->swapchain, &desc1))
+        desc1.BitsPerColor = 0;
 
     DXGI_SWAP_CHAIN_DESC desc;
 
@@ -165,15 +165,18 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     if (FAILED(hr)) {
         MP_ERR(sw->ctx, "Failed to query swap chain description: %s!\n",
                mp_HRESULT_to_str(hr));
-        return 0;
+        return desc1.BitsPerColor;
     }
 
     const struct ra_format *ra_fmt =
         ra_d3d11_get_ra_format(sw->ctx->ra, desc.BufferDesc.Format);
-    if (!ra_fmt)
-        return 0;
+    if (!ra_fmt || !ra_fmt->component_depth[0])
+        return desc1.BitsPerColor;
 
-    return ra_fmt->component_depth[0];
+    if (!desc1.BitsPerColor)
+        return ra_fmt->component_depth[0];
+
+    return MPMIN(ra_fmt->component_depth[0], desc1.BitsPerColor);
 }
 
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
