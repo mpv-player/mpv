@@ -93,6 +93,7 @@ static const struct key_name key_names[] = {
     { MP_KEY_KPPGUP, "KP_PGUP" },
     { MP_KEY_KPPGDOWN, "KP_PGDWN" },
     { MP_KEY_KPRIGHT, "KP_RIGHT" },
+    { MP_KEY_KPBEGIN, "KP_BEGIN" },
     { MP_KEY_KPLEFT, "KP_LEFT" },
     { MP_KEY_KPDOWN, "KP_DOWN" },
     { MP_KEY_KPUP, "KP_UP" },

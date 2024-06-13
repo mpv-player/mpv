@@ -119,7 +119,7 @@ static const struct mp_keymap keymap[] = {
     /* Numpad without numlock */
     {XKB_KEY_KP_Insert, MP_KEY_KPINS},   {XKB_KEY_KP_End,       MP_KEY_KPEND},
     {XKB_KEY_KP_Down,   MP_KEY_KPDOWN},  {XKB_KEY_KP_Page_Down, MP_KEY_KPPGDOWN},
-    {XKB_KEY_KP_Left,   MP_KEY_KPLEFT},  {XKB_KEY_KP_Begin,     MP_KEY_KP5},
+    {XKB_KEY_KP_Left,   MP_KEY_KPLEFT},  {XKB_KEY_KP_Begin,     MP_KEY_KPBEGIN},
     {XKB_KEY_KP_Right,  MP_KEY_KPRIGHT}, {XKB_KEY_KP_Home,      MP_KEY_KPHOME},
     {XKB_KEY_KP_Up,     MP_KEY_KPUP},    {XKB_KEY_KP_Page_Up,   MP_KEY_KPPGUP},
     {XKB_KEY_KP_Delete, MP_KEY_KPDEL},
