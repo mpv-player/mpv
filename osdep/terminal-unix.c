@@ -109,7 +109,7 @@ static const struct key_entry keys[] = {
     {"\033[B", MP_KEY_DOWN},
     {"\033[C", MP_KEY_RIGHT},
     {"\033[D", MP_KEY_LEFT},
-    {"\033[E", MP_KEY_KP5},
+    {"\033[E", MP_KEY_KPBEGIN},
     {"\033[F", MP_KEY_END},
     {"\033[H", MP_KEY_HOME},
 
