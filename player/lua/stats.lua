@@ -348,7 +348,7 @@ local function append_perfdata(header, s, dedicated_page)
         end
         -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
         local w = (700 * math.sqrt(i)) + 200
-        return format("{\\b%d}%2d%%{\\b0}", w, i * 100)
+        return format("{\\b%d}%3d%%{\\b0}", w, i * 100)
     end
 
     -- ensure that the fixed title is one element and every scrollable line is
@@ -372,7 +372,7 @@ local function append_perfdata(header, s, dedicated_page)
                 s[#s+1] = format(f, o.nl, o.indent, o.indent,
                                  o.font_mono, pp(pass["last"]),
                                  pp(pass["avg"]), pp(pass["peak"]),
-                                 o.prefix_sep .. "\\h\\h", p(pass["last"], last_s[frame]),
+                                 o.prefix_sep .. "\\h", p(pass["last"], last_s[frame]),
                                  o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
