@@ -1255,6 +1255,12 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     struct sh_stream *stream = info->sh;
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
+    // Never send additional frames for streams that are a single frame jpeg.
+    if (stream->image && !strcmp(priv->avif->name, "jpeg_pipe") && pkt->pos != 0) {
+        av_packet_unref(pkt);
+        return true;
+    }
+
     if (!demux_stream_is_selected(stream)) {
         av_packet_unref(pkt);
         return true; // don't signal EOF if skipping a packet
