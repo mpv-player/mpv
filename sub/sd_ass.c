@@ -592,8 +592,9 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
             track->PlayResX = track->PlayResY * (double)vidw / MPMAX(vidh, 1);
             double fix_margins = track->PlayResX / (double)old_playresx;
             for (int n = 0; n < track->n_styles; n++) {
-                track->styles[n].MarginL = round(track->styles[n].MarginL * fix_margins);
-                track->styles[n].MarginR = round(track->styles[n].MarginR * fix_margins);
+                track->styles[n].MarginL = lrint(track->styles[n].MarginL * fix_margins);
+                track->styles[n].MarginR = lrint(track->styles[n].MarginR * fix_margins);
+                track->styles[n].MarginV = lrint(track->styles[n].MarginV * set_font_scale);
             }
         }
     }
