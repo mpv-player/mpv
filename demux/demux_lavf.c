@@ -945,7 +945,7 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
     struct demuxer *demuxer = s->opaque;
     lavf_priv_t *priv = demuxer->priv;
 
-    if (priv->opts->propagate_opts) {
+    if (options && priv->opts->propagate_opts) {
         // Copy av_opts to options, but only entries that are not present in
         // options. (Hope this will break less by not overwriting important
         // settings.)
