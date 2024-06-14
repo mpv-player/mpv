@@ -24,10 +24,15 @@
 #include <windows.h>
 #include <systemmediatransportcontrolsinterop.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Media.h>
+#include <winrt/Windows.Storage.h>
+#include <winrt/Windows.Storage.Streams.h>
 
 extern "C" {
 #include "common/msg.h"
+#include "misc/node.h"
+#include "misc/path_utils.h"
 #include "osdep/threads.h"
 #include "player/client.h"
 }
@@ -36,8 +41,11 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define WM_MP_EVENT (WM_USER + 1)
 
 using namespace std::chrono_literals;
+using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Graphics::Imaging;
 using namespace winrt::Windows::Media;
-using winrt::Windows::Foundation::TimeSpan;
+using namespace winrt::Windows::Storage;
+using namespace winrt::Windows::Storage::Streams;
 
 struct mpv_deleter {
     void operator()(void *ptr) const {
@@ -45,11 +53,29 @@ struct mpv_deleter {
     }
 };
 using mp_string = std::unique_ptr<char, mpv_deleter>;
+using talloc_ctx = std::unique_ptr<void, mpv_deleter>;
+
+struct mp_node : mpv_node {
+    mp_node() = default;
+    ~mp_node() {
+        if (valid)
+            mpv_free_node_contents(static_cast<mpv_node *>(this));
+    }
+    mp_node(const mp_node &) = delete;
+    mp_node& operator=(const mp_node &) = delete;
+    mp_node& operator=(mp_node &&) = delete;
+    mp_node(mp_node &&o) noexcept
+        : mpv_node(static_cast<mpv_node &>(o)),
+          valid(std::exchange(o.valid, false)) {}
+
+    bool valid = false;
+};
 
 template<mpv_format F> struct mp_fmt;
 template<> struct mp_fmt<MPV_FORMAT_FLAG>   { using type = int; };
 template<> struct mp_fmt<MPV_FORMAT_INT64>  { using type = int64_t; };
 template<> struct mp_fmt<MPV_FORMAT_DOUBLE> { using type = double; };
+template<> struct mp_fmt<MPV_FORMAT_NODE>   { using type = mp_node; };
 
 template<mpv_format F>
 static inline std::optional<typename mp_fmt<F>::type>
@@ -58,6 +84,8 @@ mp_get_property(mpv_handle *mpv, const char *name)
     typename mp_fmt<F>::type val;
     if (mpv_get_property(mpv, name, F, &val) != MPV_ERROR_SUCCESS)
         return std::nullopt;
+    if constexpr (F == MPV_FORMAT_NODE)
+        val.valid = true;
     return val;
 }
 
@@ -79,6 +107,7 @@ struct smtc_ctx {
     mp_log *log;
     mpv_handle *mpv;
     SystemMediaTransportControls smtc{ nullptr };
+    IAsyncOperation<FileProperties::StorageItemThumbnail> thumb_async{ nullptr };
     std::atomic_bool close{ false };
     std::atomic<HWND> hwnd{ nullptr };
 };
@@ -141,6 +170,85 @@ static void update_state(SystemMediaTransportControls &smtc, mpv_handle *mpv)
     smtc.UpdateTimelineProperties(tl);
 }
 
+static void update_thumbnail(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
+{
+    auto track_list = mp_get_property<MPV_FORMAT_NODE>(ctx.mpv, "track-list");
+    if (!track_list)
+        return;
+    assert(track_list->format == MPV_FORMAT_NODE_ARRAY);
+    auto list = track_list->u.list;
+    const char *thumbnail = nullptr;
+    mp_string filepath{ mpv_get_property_string(ctx.mpv, "path") };
+    // Get first albumart or image from tracks
+    for (int i = 0; i < list->num; ++i) {
+        mpv_node *img = node_map_get(list->values + i, "image");
+        if (!img || img->format != MPV_FORMAT_FLAG || !img->u.flag)
+            continue;
+
+        // If this is the only track selected and image, try to use it directly
+        if (list->num == 1)
+            thumbnail = filepath.get();
+
+        mpv_node *file = node_map_get(list->values + i, "external-filename");
+        if (!file || file->format != MPV_FORMAT_STRING || !file->u.string)
+            continue;
+
+        // Select first image found
+        if (!thumbnail)
+            thumbnail = file->u.string;
+
+        mpv_node *art = node_map_get(list->values + i, "albumart");
+        if (!art || art->format != MPV_FORMAT_FLAG || !art->u.flag)
+            continue;
+
+        // Select first albumart found
+        thumbnail = file->u.string;
+        break;
+    }
+
+    try {
+        if (thumbnail) {
+            talloc_ctx ta_ctx{ talloc_new(nullptr) };
+            mp_string normalized_path{ mp_normalize_path(ta_ctx.get(), thumbnail) };
+            MP_TRACE(&ctx, "Using thumbnail: %s\n", normalized_path.get());
+            auto hstr = winrt::to_hstring(normalized_path.get());
+            RandomAccessStreamReference stream_ref{ nullptr };
+            if (mp_is_url(bstr0(thumbnail))) {
+                stream_ref = RandomAccessStreamReference::CreateFromUri(Uri(hstr));
+            } else {
+                auto storage_file = StorageFile::GetFileFromPathAsync(hstr);
+                stream_ref = RandomAccessStreamReference::CreateFromFile(storage_file.get());
+            }
+            if (!stream_ref)
+                return;
+            auto updater = smtc.DisplayUpdater();
+            updater.Thumbnail(stream_ref);
+        } else {
+            if (filepath && !mp_is_url(bstr0(filepath.get()))) {
+                talloc_ctx ta_ctx{ talloc_new(nullptr) };
+                mp_string path{ mp_normalize_path(ta_ctx.get(), filepath.get()) };
+                MP_TRACE(&ctx, "Generating thumbnail for: %s\n", path.get());
+                auto storage_file = StorageFile::GetFileFromPathAsync(winrt::to_hstring(path.get()));
+
+                if (ctx.thumb_async)
+                    ctx.thumb_async.Cancel();
+                ctx.thumb_async = storage_file.get().GetThumbnailAsync(FileProperties::ThumbnailMode::SingleItem, 240);
+
+                ctx.thumb_async.Completed([&ctx](auto &&async, const AsyncStatus &status) {
+                    if (status != AsyncStatus::Completed || ctx.close)
+                        return;
+                    auto stream_ref = RandomAccessStreamReference::CreateFromStream(async.GetResults());
+                    auto updater = ctx.smtc.DisplayUpdater();
+                    updater.Thumbnail(stream_ref);
+                    updater.Update();
+                });
+            }
+        }
+    } catch (const winrt::hresult_error& e) {
+        MP_VERBOSE(&ctx, "%s: 0x%x - %ls\n", __func__, int32_t(e.code()), e.message().c_str());
+    }
+}
+
 static void update_metadata(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
 {
     auto *mpv = ctx.mpv;
@@ -154,6 +262,8 @@ static void update_metadata(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
 
     if (!video && !image && !audio)
         return;
+
+    update_thumbnail(smtc, ctx);
 
     mp_string title{ mpv_get_property_osd_string(mpv, "media-title") };
     if (video && !image) {
@@ -356,6 +466,8 @@ static MP_THREAD_VOID win_event_loop_fn(void *arg)
     mpv_wakeup(mpv);
     HWND hwnd = ctx.hwnd;
     ctx.hwnd = nullptr;
+    if (ctx.thumb_async)
+        ctx.thumb_async.Cancel();
     DestroyWindow(hwnd);
     UnregisterClassW(wc.lpszClassName, HINSTANCE(&__ImageBase));
 
@@ -396,6 +508,7 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
     mpv_observe_property(mpv, 0, "shuffle", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "speed", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_INT64);
+    mpv_observe_property(mpv, 0, "track-list", MPV_FORMAT_NODE);
     // TODO: Options are not observable, fix me!
     mpv_observe_property(mpv, 0, "loop-file", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "loop-playlist", MPV_FORMAT_DOUBLE);
