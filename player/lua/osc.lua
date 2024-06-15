@@ -2925,6 +2925,7 @@ local function idlescreen_visibility(mode, no_osd)
 end
 
 mp.register_script_message("osc-visibility", visibility_mode)
+mp.register_script_message("osc-show", show_osc)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
 
 mp.register_script_message("osc-idlescreen", idlescreen_visibility)
