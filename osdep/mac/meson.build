@@ -19,6 +19,10 @@ if get_option('optimization') != '0'
     swift_flags += '-O'
 endif
 
+if macos_10_15_4_features.allowed()
+    swift_flags += ['-D', 'HAVE_MACOS_10_15_4_FEATURES']
+endif
+
 if macos_11_features.allowed()
     swift_flags += ['-D', 'HAVE_MACOS_11_FEATURES']
 endif
