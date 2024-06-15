@@ -1260,15 +1260,15 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     struct sh_stream *stream = info->sh;
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
+    if (!demux_stream_is_selected(stream)) {
+        av_packet_unref(pkt);
+        return true; // don't signal EOF if skipping a packet
+    }
+
     // Never send additional frames for streams that are a single frame.
     if (stream->image && priv->format_hack.first_frame_only && pkt->pos != 0) {
         av_packet_unref(pkt);
         return true;
-    }
-
-    if (!demux_stream_is_selected(stream)) {
-        av_packet_unref(pkt);
-        return true; // don't signal EOF if skipping a packet
     }
 
     struct demux_packet *dp = new_demux_packet_from_avpacket(pkt);
