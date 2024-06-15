@@ -1585,6 +1585,12 @@ macos_11_features = get_option('macos-11-features').require(
 )
 features += {'macos-11-features': macos_11_features.allowed()}
 
+macos_11_3_features = get_option('macos-11-3-features').require(
+    macos_sdk_version.version_compare('>= 11.3'),
+    error_message: 'A macos sdk version >= 11.3 could not be found!',
+)
+features += {'macos-11-3-features': macos_11_3_features.allowed()}
+
 macos_12_features = get_option('macos-12-features').require(
     macos_sdk_version.version_compare('>= 12'),
     error_message: 'A macos sdk version >= 12 could not be found!',

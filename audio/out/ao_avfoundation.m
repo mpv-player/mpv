@@ -254,9 +254,11 @@ static int init(struct ao *ao)
     }
 
     [p->synchronizer addRenderer:p->renderer];
+#if HAVE_MACOS_11_3_FEATURES
     if (@available(tvOS 14.5, iOS 14.5, macOS 11.3, *)) {
         [p->synchronizer setDelaysRateChangeUntilHasSufficientMediaData:NO];
     }
+#endif
 
     if (af_fmt_is_spdif(ao->format)) {
         MP_FATAL(ao, "avfoundation does not support SPDIF\n");
@@ -315,7 +317,11 @@ static int init(struct ao *ao)
 
     p->observer = [[AVObserver alloc] initWithAO:ao];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification object:p->renderer];
+#if HAVE_MACOS_12_FEATURES
+    if (@available(tvOS 15.0, iOS 15.0, macOS 12.0, *)) {
+        [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererOutputConfigurationDidChangeNotification object:p->renderer];
+    }
+#endif
     [center addObserver:p->observer selector:@selector(handleRestartNotification:) name:AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification object:p->renderer];
 
     return CONTROL_OK;
