@@ -43,3 +43,11 @@ extension NSDraggingInfo {
     }
 }
 #endif
+
+#if !HAVE_MACOS_12_FEATURES && HAVE_MACOS_11_FEATURES
+@available(macOS 11.0, *)
+extension CGColorSpace {
+    static let itur_2100_HLG: CFString = kCGColorSpaceITUR_2100_HLG
+    static let itur_2100_PQ: CFString = kCGColorSpaceITUR_2100_PQ
+}
+#endif
