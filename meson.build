@@ -8,6 +8,8 @@ project('mpv',
             'buildtype=debugoptimized',
             'b_lundef=false',
             'c_std=c11',
+            'cpp_std=c++20',
+            'cpp_eh=default',
             'warning_level=2',
         ]
 )
