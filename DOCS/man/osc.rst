@@ -499,7 +499,10 @@ in ``input.conf``, or sent by other scripts.
 
 ``osc-visibility``
     Controls visibility mode ``never`` / ``auto`` (on mouse move) / ``always``
-    and also ``cycle`` to cycle between the modes
+    and also ``cycle`` to cycle between the modes.
+
+``osc-show``
+    Triggers the OSC to show up, just as if user moved mouse.
 
 Example
 
