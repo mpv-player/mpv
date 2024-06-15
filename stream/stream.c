@@ -916,7 +916,8 @@ bool stream_has_proto(const char *proto)
         }
 
         talloc_free(get_protocols);
-        return match;
+        if (match)
+            return match;
     }
 
     return false;
