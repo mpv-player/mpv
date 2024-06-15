@@ -59,17 +59,17 @@ local user_opts = {
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
 
-    background_color = "#000000",	-- background color of the osc
-    timecode_color = "#FFFFFF",		-- color of the progress bar and time color
-    title_color = "#FFFFFF",		-- color of the title
-    time_pos_color = "#FFFFFF",		-- color of the timecode at hovered position
-    buttons_color = "#FFFFFF",		-- color of big buttons, wc buttons, and bar small buttons
-    small_buttonsL_color = "#FFFFFF",	-- color of left small buttons
-    small_buttonsR_color = "#FFFFFF",	-- color of right small buttons
-    top_buttons_color = "#FFFFFF",	-- color of top buttons
-    held_element_color = "#999999",	-- color of an element while held down
+    background_color = "#000000",     -- background color of the osc
+    timecode_color = "#FFFFFF",       -- color of the progress bar and time color
+    title_color = "#FFFFFF",          -- color of the title
+    time_pos_color = "#FFFFFF",       -- color of the timecode at hovered position
+    buttons_color = "#FFFFFF",        -- color of big buttons, wc buttons, and bar small buttons
+    small_buttonsL_color = "#FFFFFF", -- color of left small buttons
+    small_buttonsR_color = "#FFFFFF", -- color of right small buttons
+    top_buttons_color = "#FFFFFF",    -- color of top buttons
+    held_element_color = "#999999",   -- color of an element while held down
 
-    time_pos_outline_color = "#000000",	-- color of the border timecodes in slimbox and TimePosBar
+    time_pos_outline_color = "#000000",   -- color of the border timecodes in slimbox and TimePosBar
 
     tick_delay = 1 / 60,                  -- minimum interval between OSC redraws in seconds
     tick_delay_follow_display_fps = false -- use display fps as the minimum interval
@@ -102,7 +102,7 @@ local is_december = os.date("*t").month == 12
 local UNICODE_MINUS = string.char(0xe2, 0x88, 0x92)  -- UTF-8 for U+2212 MINUS SIGN
 
 local function osc_color_convert(color)
-	return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
+    return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
 end
 
 -- luacheck: push ignore
@@ -110,28 +110,28 @@ end
 local osc_styles
 
 local function set_osc_styles()
-	osc_styles = {
-	    bigButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
-	    smallButtonsL = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsL_color) .. "\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
-	    smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
-	    smallButtonsR = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsR_color) .. "\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
-	    topButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
+    osc_styles = {
+        bigButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
+        smallButtonsL = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsL_color) .. "\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
+        smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
+        smallButtonsR = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsR_color) .. "\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
+        topButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
 
-	    elementDown = "{\\1c&H" .. osc_color_convert(user_opts.held_element_color) .."}",
-	    timecodes = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .. "\\3c&HFFFFFF\\fs20}",
-	    vidtitle = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs12\\q2}",
-	    box = "{\\rDefault\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.background_color) .. "\\3c&HFFFFFF}",
+        elementDown = "{\\1c&H" .. osc_color_convert(user_opts.held_element_color) .."}",
+        timecodes = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .. "\\3c&HFFFFFF\\fs20}",
+        vidtitle = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs12\\q2}",
+        box = "{\\rDefault\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.background_color) .. "\\3c&HFFFFFF}",
 
-	    topButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
-	    smallButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
-	    timecodesBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .."\\3c&HFFFFFF\\fs27}",
-	    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&H" .. osc_color_convert(user_opts.time_pos_color) .. "\\3c&H" .. osc_color_convert(user_opts.time_pos_outline_color) .. "\\fs30}",
-	    vidtitleBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs18\\q2}",
+        topButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
+        smallButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
+        timecodesBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .."\\3c&HFFFFFF\\fs27}",
+        timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&H" .. osc_color_convert(user_opts.time_pos_color) .. "\\3c&H" .. osc_color_convert(user_opts.time_pos_outline_color) .. "\\fs30}",
+        vidtitleBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs18\\q2}",
 
-	    wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fnmpv-osd-symbols}",
-	    wcTitle = "{\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\fs24\\q2}",
-	    wcBar = "{\\1c&H" .. osc_color_convert(user_opts.background_color) .. "}",
-	}
+        wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fnmpv-osd-symbols}",
+        wcTitle = "{\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\fs24\\q2}",
+        wcBar = "{\\1c&H" .. osc_color_convert(user_opts.background_color) .. "}",
+    }
 end
 
 -- internal states, do not touch
@@ -2983,9 +2983,9 @@ local function validate_user_opts()
         user_opts.held_element_color, user_opts.time_pos_outline_color,
     }
     for _, color in pairs(colors) do
-	    if color:find("^#%x%x%x%x%x%x$") == nil then
-		    msg.warn("'" .. color .. "' is not a valid color")
-	    end
+        if color:find("^#%x%x%x%x%x%x$") == nil then
+            msg.warn("'" .. color .. "' is not a valid color")
+        end
     end
 end
 
