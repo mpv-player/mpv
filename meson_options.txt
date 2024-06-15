@@ -108,6 +108,7 @@ option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan gr
 # macOS features
 option('macos-10-15-4-features', type: 'feature', value: 'auto', description: 'macOS 10.15.4 SDK Features')
 option('macos-11-features', type: 'feature', value: 'auto', description: 'macOS 11 SDK Features')
+option('macos-11-3-features', type: 'feature', value: 'auto', description: 'macOS 11.3 SDK Features')
 option('macos-12-features', type: 'feature', value: 'auto', description: 'macOS 12 SDK Features')
 option('macos-cocoa-cb', type: 'feature', value: 'auto', description: 'macOS libmpv backend')
 option('macos-media-player', type: 'feature', value: 'auto', description: 'macOS Media Player support')
