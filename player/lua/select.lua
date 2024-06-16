@@ -232,8 +232,7 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     local sub_lines = {}
     local sub_times = {}
     local default_item
-    local sub_start = mp.get_property_native("sub-start",
-                                             mp.get_property_native("time-pos"))
+    local time_pos = mp.get_property_native("time-pos")
     local duration = mp.get_property_native("duration", math.huge)
 
     -- Strip HTML and ASS tags.
@@ -243,17 +242,9 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times], duration) ..
                                     " " .. line:gsub(".*]", "", 1)
 
-        if sub_times[#sub_times] <= sub_start then
+        if sub_times[#sub_times] <= time_pos then
             default_item = #sub_times
         end
-    end
-
-    -- Handle sub-start of embedded subs being slightly earlier than
-    -- ffmpeg's timestamps.
-    sub_start = mp.get_property_native("sub-start")
-    if sub_start and default_item and sub_times[default_item] < sub_start and
-       sub_lines[default_item + 1] then
-        default_item = default_item + 1
     end
 
     input.select({
