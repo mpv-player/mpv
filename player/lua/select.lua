@@ -232,7 +232,8 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     local sub_lines = {}
     local sub_times = {}
     local default_item
-    local time_pos = mp.get_property_native("time-pos")
+    local delay = mp.get_property_native("sub-delay")
+    local time_pos = mp.get_property_native("time-pos") - delay
     local duration = mp.get_property_native("duration", math.huge)
 
     -- Strip HTML and ASS tags.
@@ -254,9 +255,11 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
         submit = function (index)
             -- Add an offset to seek to the correct line while paused without a
             -- video track.
-            local offset = mp.get_property_native("current-tracks/video/image") == false
-                           and 0 or .09
-            mp.commandv("seek", sub_times[index] + offset, "absolute")
+            if mp.get_property_native("current-tracks/video/image") ~= false then
+                delay = delay + 0.1
+            end
+
+            mp.commandv("seek", sub_times[index] + delay, "absolute")
         end,
     })
 end)
