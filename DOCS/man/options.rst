@@ -6573,21 +6573,6 @@ them.
     Finally, attempts to utilize rgb10_a2 or rgba8 if all of the previous formats
     are not available.
 
-``--gamma-factor=<0.1..2.0>``
-    Set an additional raw gamma factor (default: 1.0). If gamma is adjusted in
-    other ways (like with the ``--gamma`` option or key bindings and the
-    ``gamma`` property), the value is multiplied with the other gamma value.
-
-    This option is deprecated and may be removed in the future.
-
-``--gamma-auto``
-    Automatically corrects the gamma value depending on ambient lighting
-    conditions (adding a gamma boost for bright rooms).
-
-    This option is deprecated and may be removed in the future.
-
-    NOTE: Only implemented on macOS.
-
 ``--image-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors
     during image decoding. The exact interpretation of the LUT depends on
@@ -7063,8 +7048,8 @@ them.
     Blend subtitles directly onto upscaled video frames, before interpolation
     and/or color management (default: no). Enabling this causes subtitles to be
     affected by ``--icc-profile``, ``--target-prim``, ``--target-trc``,
-    ``--interpolation``, ``--gamma-factor`` and ``--glsl-shaders``. It also
-    increases subtitle performance when using ``--interpolation``.
+    ``--interpolation``, and ``--glsl-shaders``. It also increases subtitle performance when using
+    ``--interpolation``.
 
     The downside of enabling this is that it restricts subtitles to the visible
     portion of the video, so you can't have subtitles exist in the black

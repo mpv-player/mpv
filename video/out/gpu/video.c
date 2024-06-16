@@ -316,7 +316,6 @@ static const struct gl_video_opts gl_video_opts_def = {
     .interpolation_threshold = 0.01,
     .background = BACKGROUND_TILES,
     .background_color = {0, 0, 0, 255},
-    .gamma = 1.0f,
     .tone_map = {
         .curve = TONE_MAPPING_AUTO,
         .curve_param = NAN,
@@ -361,10 +360,6 @@ const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
         {"gpu-dumb-mode", OPT_CHOICE(dumb_mode,
             {"auto", 0}, {"yes", 1}, {"no", -1})},
-        {"gamma-factor", OPT_FLOAT(gamma), M_RANGE(0.1, 2.0),
-            .deprecation_message = "no replacement"},
-        {"gamma-auto", OPT_BOOL(gamma_auto),
-            .deprecation_message = "no replacement"},
         {"target-prim", OPT_CHOICE_C(target_prim, pl_csp_prim_names)},
         {"target-trc", OPT_CHOICE_C(target_trc, pl_csp_trc_names)},
         {"target-peak", OPT_CHOICE(target_peak, {"auto", 0}),
@@ -596,11 +591,6 @@ static void uninit_rendering(struct gl_video *p)
     gl_video_reset_hooks(p);
 
     gl_sc_reset_error(p->sc);
-}
-
-bool gl_video_gamma_auto_enabled(struct gl_video *p)
-{
-    return p->opts.gamma_auto;
 }
 
 // Warning: profile.start must point to a ta allocation, and the function
@@ -2343,7 +2333,7 @@ static void pass_convert_yuv(struct gl_video *p)
     cparams.is_float = p->ra_format.component_type == RA_CTYPE_FLOAT;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_equalizer_state_get(p->video_eq, &cparams);
-    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
+    p->user_gamma = 1.0 / cparams.gamma;
 
     pass_describe(p, "color conversion");
 
@@ -3889,8 +3879,6 @@ static void check_gl_features(struct gl_video *p)
                 [SCALER_CSCALE] = dumb_scaler_config,
                 [SCALER_TSCALE] = dumb_scaler_config,
             },
-            .gamma = p->opts.gamma,
-            .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
             .fbo_format = p->opts.fbo_format,
             .background = p->opts.background,
@@ -4293,15 +4281,6 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
             mp_fatal(log, "No error diffusion kernel named '%s' found!\n", s);
     }
     return r;
-}
-
-void gl_video_set_ambient_lux(struct gl_video *p, int lux)
-{
-    if (p->opts.gamma_auto) {
-        p->opts.gamma = gl_video_scale_ambient_lux(16.0, 256.0, 1.0, 1.2, lux);
-        MP_TRACE(p, "ambient light changed: %d lux (gamma: %f)\n", lux,
-                 p->opts.gamma);
-    }
 }
 
 static void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
