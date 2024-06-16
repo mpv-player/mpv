@@ -109,10 +109,6 @@ class CocoaCB: Common, EventSubscriber {
         return kCVReturnSuccess
     }
 
-    override func lightSensorUpdate() {
-        libmpv.setRenderLux(lmuToLux(lastLmu))
-    }
-
     override func updateICCProfile() {
         guard let colorSpace = window?.screen?.colorSpace else {
             log.warning("Couldn't update ICC Profile, no color space available")
