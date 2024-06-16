@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.39.0 ---
+ 2.4    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.38.0 ---
  2.3    - partially revert the changes from API version 1.27, remove libmpv as
           the default VO and move it to the bottom of the auto-probing order.

@@ -113,6 +113,7 @@ static int set_parameter(struct render_backend *ctx, mpv_render_param param)
     case MPV_RENDER_PARAM_AMBIENT_LIGHT: {
         int lux = *(int *)param.data;
         gl_video_set_ambient_lux(p->renderer, lux);
+        MP_WARN(ctx, "MPV_RENDER_PARAM_AMBIENT_LIGHT is deprecated and might be removed in the future (no replacement)\n");
         return 0;
     }
     default:
