@@ -5,7 +5,7 @@ add_languages('cpp', native: false)
 executable('fuzzer_loadfile_direct', 'fuzzer_loadfile_direct.c',
            link_language: 'cpp', include_directories: incdir, link_with: libmpv)
 
-protocols = ['memory']
+protocols = ['edl', 'file', 'lavf', 'memory']
 demuxers = ['mkv']
 
 if features['cdda']
