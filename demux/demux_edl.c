@@ -289,6 +289,10 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
         } else {
             struct tl_part p = { .length = -1 };
             p.filename = get_param0(&ctx, tl, "file");
+            if (!p.filename || !p.filename[0]) {
+                mp_err(log, "Missing filename in segment.'\n");
+                goto error;
+            }
             p.offset_set = get_param_time(&ctx, "start", &p.offset);
             get_param_time(&ctx, "length", &p.length);
             bstr ts = get_param(&ctx, "timestamps");
@@ -305,10 +309,6 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                 } else {
                     mp_warn(log, "Unknown layout param: '%.*s'\n", BSTR_P(layout));
                 }
-            }
-            if (!p.filename) {
-                mp_err(log, "Missing filename in segment.'\n");
-                goto error;
             }
             MP_TARRAY_APPEND(tl, tl->parts, tl->num_parts, p);
         }
