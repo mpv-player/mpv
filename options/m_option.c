@@ -3308,6 +3308,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     bool *mark_del = NULL;
     int num_items = obj_settings_list_num_items(dst ? VAL(dst) : 0);
     const struct m_obj_list *ol = opt->priv;
+    int ret = 1;
 
     assert(opt->priv);
 
@@ -3345,7 +3346,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 opt->name, opt->name, opt->name, opt->name, opt->name,
                 opt->name, opt->name, opt->name);
 
-        return M_OPT_EXIT;
+        ret = M_OPT_EXIT;
+        goto done;
     }
 
     if (!bstrcmp0(param, "help")) {
@@ -3366,24 +3368,29 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             mp_info(log, "Get help on individual entries via: --%s=entry=help\n",
                     opt->name);
         }
-        return M_OPT_EXIT;
+        ret = M_OPT_EXIT;
+        goto done;
     }
 
     if (op == OP_CLR) {
         if (param.len) {
             mp_err(log, "Option %.*s: -clr does not take an argument.\n",
                    BSTR_P(name));
-            return M_OPT_INVALID;
+            ret = M_OPT_INVALID;
+            goto done;
         }
         if (dst)
             free_obj_settings_list(dst);
-        return 0;
+        ret = 0;
+        goto done;
     } else if (op == OP_REMOVE) {
         mark_del = talloc_zero_array(NULL, bool, num_items + 1);
     }
 
-    if (op != OP_NONE && param.len == 0)
-        return M_OPT_MISSING_PARAM;
+    if (op != OP_NONE && param.len == 0) {
+        ret = M_OPT_MISSING_PARAM;
+        goto done;
+    }
 
     while (param.len > 0) {
         int r = 0;
@@ -3394,18 +3401,21 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         }
         if (r < 0) {
             free_obj_settings_list(&res);
-            return r;
+            ret = r;
+            goto done;
         }
         if (param.len > 0) {
             const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
             if (!bstr_eatstart0(&param, sep)) {
                 free_obj_settings_list(&res);
-                return M_OPT_INVALID;
+                ret = M_OPT_INVALID;
+                goto done;
             }
             if (param.len == 0) {
                 if (!ol->allow_trailer) {
                     free_obj_settings_list(&res);
-                    return M_OPT_INVALID;
+                    ret = M_OPT_INVALID;
+                    goto done;
                 }
                 if (dst) {
                     m_obj_settings_t item = {
@@ -3422,7 +3432,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             mp_err(log, "Option %.*s: -append takes only 1 item (no ',').\n",
                    BSTR_P(name));
             free_obj_settings_list(&res);
-            return M_OPT_INVALID;
+            ret = M_OPT_INVALID;
+            goto done;
         }
         mp_warn(log, "Passing more than 1 argument to %.*s is deprecated!\n",
                 BSTR_P(name));
@@ -3501,8 +3512,9 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
         VAL(dst) = list;
     }
 
+done:
     talloc_free(mark_del);
-    return 1;
+    return ret;
 }
 
 static void append_param(char **res, char *param)
