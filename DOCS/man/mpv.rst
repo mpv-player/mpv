@@ -671,6 +671,8 @@ Options of this type can be changed at runtime using the ``change-list``
 command, which takes the suffix (without the ``-``) as separate operation
 parameter.
 
+An object settings list can hold up to 100 elements.
+
 CONFIGURATION FILES
 ===================
 

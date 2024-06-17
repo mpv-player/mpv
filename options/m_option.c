@@ -2917,10 +2917,18 @@ static void obj_settings_list_del_at(m_obj_settings_t **p_obj_list, int idx)
 // Insert such that *p_obj_list[idx] is set to item.
 // If idx < 0, set idx = count + idx + 1 (i.e. -1 inserts it as last element).
 // Memory referenced by *item is not copied.
-static void obj_settings_list_insert_at(m_obj_settings_t **p_obj_list, int idx,
+static bool obj_settings_list_insert_at(struct mp_log *log,
+                                        m_obj_settings_t **p_obj_list, int idx,
                                         m_obj_settings_t *item)
 {
     int num = obj_settings_list_num_items(*p_obj_list);
+    // Limit list entries to 100. obj_settings_list is not designed to hold more
+    // items, and it quickly starts taking ages to add all items.
+    if (num > 100) {
+        mp_warn(log, "Object settings list capacity exceeded: "
+                     "a maximum of 100 elements is allowed.");
+        return false;
+    }
     if (idx < 0)
         idx = num + idx + 1;
     assert(idx >= 0 && idx <= num);
@@ -2930,6 +2938,7 @@ static void obj_settings_list_insert_at(m_obj_settings_t **p_obj_list, int idx,
             (num - idx) * sizeof(m_obj_settings_t));
     (*p_obj_list)[idx] = *item;
     (*p_obj_list)[num + 1] = (m_obj_settings_t){0};
+    return true;
 }
 
 static int obj_settings_list_find_by_label(m_obj_settings_t *obj_list,
@@ -3266,7 +3275,10 @@ done: ;
         .enabled = enabled,
         .attribs = plist,
     };
-    obj_settings_list_insert_at(_ret, -1, &item);
+    if (!obj_settings_list_insert_at(log, _ret, -1, &item)) {
+        obj_setting_free(&item);
+        return M_OPT_OUT_OF_RANGE;
+    }
     return 1;
 }
 
@@ -3421,7 +3433,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                     m_obj_settings_t item = {
                         .name = talloc_strdup(NULL, ""),
                     };
-                    obj_settings_list_insert_at(&res, -1, &item);
+                    if (!obj_settings_list_insert_at(log, &res, -1, &item)) {
+                        obj_setting_free(&item);
+                        ret = M_OPT_OUT_OF_RANGE;
+                        goto done;
+                    }
                 }
             }
         }
@@ -3446,7 +3462,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             for (int n = 0; res && res[n].name; n++) {
                 int label = obj_settings_list_find_by_label0(list, res[n].label);
                 if (label < 0) {
-                    obj_settings_list_insert_at(&list, prepend_counter, &res[n]);
+                    if (!obj_settings_list_insert_at(log, &list, prepend_counter, &res[n])) {
+                        obj_setting_free(&res[n]);
+                        ret = M_OPT_OUT_OF_RANGE;
+                        goto done;
+                    }
                     prepend_counter++;
                 } else {
                     // Prefer replacement semantics, instead of actually
@@ -3460,7 +3480,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             for (int n = 0; res && res[n].name; n++) {
                 int label = obj_settings_list_find_by_label0(list, res[n].label);
                 if (label < 0) {
-                    obj_settings_list_insert_at(&list, -1, &res[n]);
+                    if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
+                        obj_setting_free(&res[n]);
+                        ret = M_OPT_OUT_OF_RANGE;
+                        goto done;
+                    }
                 } else {
                     // Prefer replacement semantics, instead of actually
                     // appending.
@@ -3485,7 +3509,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 } else {
                     int found = obj_settings_find_by_content(list, &res[n]);
                     if (found < 0) {
-                        obj_settings_list_insert_at(&list, -1, &res[n]);
+                        if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
+                            obj_setting_free(&res[n]);
+                            ret = M_OPT_OUT_OF_RANGE;
+                            goto done;
+                        }
                     } else {
                         obj_settings_list_del_at(&list, found);
                         obj_setting_free(&res[n]);
