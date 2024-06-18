@@ -104,8 +104,6 @@ static void check_output(FILE *fp)
     puts("output file ok");
 }
 
-int mp_mkostemps(char *template, int suffixlen, int flags);
-
 int main(int argc, char *argv[])
 {
     atexit(exit_cleanup);
@@ -115,9 +113,17 @@ int main(int argc, char *argv[])
         return 1;
 
     static char path[] = "./testout.XXXXXX";
-    out_path = mktemp(path);
+
+#ifdef _WIN32
+    out_path = _mktemp(path);
     if (!out_path || !*out_path)
         fail("tmpfile failed\n");
+#else
+    int fd = mkstemp(path);
+    if (fd == -1)
+        fail("tmpfile failed\n");
+    out_path = path;
+#endif
 
     check_api_error(mpv_set_option_string(ctx, "o", out_path));
     check_api_error(mpv_set_option_string(ctx, "of", "matroska"));
