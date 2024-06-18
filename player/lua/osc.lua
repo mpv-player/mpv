@@ -1980,11 +1980,11 @@ local function osc_init()
     ne.softrepeat = true
     ne.content = "\238\128\132"
     ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", -5, "relative", "keyframes") end
+        function () mp.commandv("seek", -5) end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () mp.commandv("frame-back-step") end
     ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", -30, "relative", "keyframes") end
+        function () mp.commandv("seek", -30) end
 
     --skipfrwd
     ne = new_element("skipfrwd", "button")
@@ -1992,11 +1992,11 @@ local function osc_init()
     ne.softrepeat = true
     ne.content = "\238\128\133"
     ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", 10, "relative", "keyframes") end
+        function () mp.commandv("seek", 10) end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () mp.commandv("frame-step") end
     ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", 60, "relative", "keyframes") end
+        function () mp.commandv("seek", 60) end
 
     --ch_prev
     ne = new_element("ch_prev", "button")
@@ -2172,7 +2172,7 @@ local function osc_init()
         end
     ne.eventresponder["mbtn_left_down"] = --exact seeks on single clicks
         function (element) mp.commandv("seek", get_slider_value(element),
-            "absolute-percent", "exact") end
+            "absolute-percent+exact") end
     ne.eventresponder["reset"] =
         function (element) element.state.lastseek = nil end
 
