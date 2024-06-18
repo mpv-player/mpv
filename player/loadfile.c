@@ -1032,6 +1032,7 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
     struct MPOpts *opts = mpctx->opts;
 
     pl->current = NULL;
+    pl->playlist_completed = false;
 
     if (opts->playlist_pos >= 0)
         pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
@@ -1760,6 +1761,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mpctx->playback_initialized = true;
     mpctx->playing->playlist_prev_attempt = false;
+    mpctx->playlist->playlist_completed = false;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
     clear_playlist_paths(mpctx);
@@ -1999,6 +2001,9 @@ void mp_play_files(struct MPContext *mpctx)
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
             new_entry = mpctx->playlist->current;
         }
+
+        if (!new_entry)
+            mpctx->playlist->playlist_completed = true;
 
         mpctx->playlist->current = new_entry;
         mpctx->playlist->current_was_replaced = false;
