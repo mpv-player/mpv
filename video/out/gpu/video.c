@@ -347,10 +347,8 @@ static OPT_STRING_VALIDATE_FUNC(validate_error_diffusion_opt);
     {n"-param1", OPT_FLOATDEF(scaler[i].kernel.params[0])},                \
     {n"-param2", OPT_FLOATDEF(scaler[i].kernel.params[1])},                \
     {n"-blur",   OPT_FLOAT(scaler[i].kernel.blur)},                        \
-    {n"-cutoff", OPT_REMOVED("Hard-coded as 0.001")},                      \
     {n"-taper",  OPT_FLOAT(scaler[i].kernel.taper), M_RANGE(0.0, 1.0)},    \
     {n"-wparam", OPT_FLOATDEF(scaler[i].window.params[0])},                \
-    {n"-wblur",  OPT_REMOVED("Just adjust filter radius directly")},       \
     {n"-wtaper", OPT_FLOAT(scaler[i].window.taper), M_RANGE(0.0, 1.0)},    \
     {n"-clamp",  OPT_FLOAT(scaler[i].clamp), M_RANGE(0.0, 1.0)},           \
     {n"-radius", OPT_FLOAT(scaler[i].radius), M_RANGE(0.5, 16.0)},         \
@@ -422,7 +420,6 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("dscale", SCALER_DSCALE),
         SCALER_OPTS("cscale", SCALER_CSCALE),
         SCALER_OPTS("tscale", SCALER_TSCALE),
-        {"scaler-lut-size", OPT_REMOVED("hard-coded as 8")},
         {"scaler-resizes-only", OPT_BOOL(scaler_resizes_only)},
         {"correct-downscaling", OPT_BOOL(correct_downscaling)},
         {"linear-downscaling", OPT_BOOL(linear_downscaling)},
@@ -473,8 +470,6 @@ const struct m_sub_options gl_video_conf = {
         {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
         {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
         {"tone-mapping-desaturate-exponent", OPT_REMOVED("Replaced by --tone-mapping-mode")},
-        {"tone-mapping-crosstalk", OPT_REMOVED("Hard-coded as 0.04")},
-        {"tone-mapping-mode", OPT_REMOVED("no replacement")},
         {0}
     },
     .size = sizeof(struct gl_video_opts),
