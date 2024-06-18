@@ -618,7 +618,6 @@ const struct vo_driver video_out_sixel = {
         {"config-clear", OPT_BOOL(opts.config_clear), },
         {"alt-screen", OPT_BOOL(opts.alt_screen), },
         {"buffered", OPT_BOOL(opts.buffered), },
-        {"exit-clear", OPT_REPLACED("vo-sixel-alt-screen")},
         {0}
     },
     .options_prefix = "vo-sixel",

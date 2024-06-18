@@ -70,7 +70,6 @@ extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_playlist_conf;
 extern const struct m_sub_options demux_lavf_conf;
 extern const struct m_sub_options demux_mkv_conf;
-extern const struct m_sub_options demux_cue_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
@@ -632,7 +631,6 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_CDDA
     {"cdda", OPT_SUBSTRUCT(stream_cdda_opts, stream_cdda_conf)},
-    {"cdrom-device", OPT_REPLACED("cdda-device")},
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
@@ -684,7 +682,6 @@ static const m_option_t mp_opts[] = {
     {"demuxer-rawvideo", OPT_SUBSTRUCT(demux_rawvideo, demux_rawvideo_conf)},
     {"", OPT_SUBSTRUCT(demux_playlist, demux_playlist_conf)},
     {"demuxer-mkv", OPT_SUBSTRUCT(demux_mkv, demux_mkv_conf)},
-    {"demuxer-cue", OPT_SUBSTRUCT(demux_cue, demux_cue_conf)},
 
 // ------------------------- subtitles options --------------------
 
@@ -955,7 +952,6 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
 
     {"play-dir", OPT_REPLACED("play-direction")},
-    {"sub-forced-only", OPT_REPLACED("sub-forced-events-only")},
     {0}
 };
 

@@ -132,7 +132,6 @@ const struct m_sub_options dec_wrapper_conf = {
             M_RANGE(0, M_MAX_MEM_BYTES)},
         {"audio-reversal-buffer", OPT_BYTE_SIZE(audio_reverse_size),
             M_RANGE(0, M_MAX_MEM_BYTES)},
-        {"fps", OPT_REPLACED("container-fps-override")},
         {0}
     },
     .size = sizeof(struct dec_wrapper_opts),

@@ -1,0 +1,7 @@
+remove deprecated `--cache-dir` option alias
+remove deprecated `--cache-unlink-files` option alias
+remove deprecated `--demuxer-cue-codepage` option alias
+remove deprecated `--fps` option alias
+remove deprecated `--cdrom-device` option alias
+remove deprecated `--sub-forced-only` option alias
+remove deprecated `--vo-sixel-exit-clear` option alias
