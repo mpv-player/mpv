@@ -70,6 +70,7 @@ struct playlist {
     // current_was_replaced is set to true.
     struct playlist_entry *current;
     bool current_was_replaced;
+    bool playlist_completed;
 
     uint64_t id_alloc;
 };
