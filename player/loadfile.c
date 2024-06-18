@@ -1025,6 +1025,7 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
 
     pl->current = NULL;
     pl->playlist_completed = false;
+    pl->playlist_started = false;
 
     if (opts->playlist_pos >= 0)
         pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
@@ -1754,6 +1755,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->playback_initialized = true;
     mpctx->playing->playlist_prev_attempt = false;
     mpctx->playlist->playlist_completed = false;
+    mpctx->playlist->playlist_started = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
     update_screensaver_state(mpctx);
     clear_playlist_paths(mpctx);

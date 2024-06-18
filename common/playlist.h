@@ -71,6 +71,7 @@ struct playlist {
     struct playlist_entry *current;
     bool current_was_replaced;
     bool playlist_completed;
+    bool playlist_started;
 
     uint64_t id_alloc;
 };
