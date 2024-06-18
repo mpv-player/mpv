@@ -351,7 +351,6 @@ typedef struct MPOpts {
     struct demux_playlist_opts *demux_playlist;
     struct demux_lavf_opts *demux_lavf;
     struct demux_mkv_opts *demux_mkv;
-    struct demux_cue_opts *demux_cue;
 
     struct demux_opts *demux_opts;
     struct demux_cache_opts *demux_cache_opts;

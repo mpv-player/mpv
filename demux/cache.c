@@ -44,8 +44,6 @@ const struct m_sub_options demux_cache_conf = {
         {"demuxer-cache-unlink-files", OPT_CHOICE(unlink_files,
             {"immediate", 2}, {"whendone", 1}, {"no", 0}),
         },
-        {"cache-dir", OPT_REPLACED("demuxer-cache-dir")},
-        {"cache-unlink-files", OPT_REPLACED("demuxer-cache-unlink-files")},
         {0}
     },
     .size = sizeof(struct demux_cache_opts),
