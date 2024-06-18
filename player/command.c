@@ -870,20 +870,6 @@ static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
     return property_time(action, arg, remaining / speed);
 }
 
-static int mp_property_playback_time(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->playback_initialized)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (action == M_PROPERTY_SET) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, 0);
-        return M_PROPERTY_OK;
-    }
-    return property_time(action, arg, get_playback_time(mpctx));
-}
-
 /// Current chapter (RW)
 static int mp_property_chapter(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -4009,7 +3995,7 @@ static const struct m_property mp_properties_base[] = {
     {"time-remaining", mp_property_remaining},
     {"audio-pts", mp_property_audio_pts},
     {"playtime-remaining", mp_property_playtime_remaining},
-    {"playback-time", mp_property_playback_time},
+    M_PROPERTY_ALIAS("playback-time", "time-pos"),
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
     {"current-edition", mp_property_current_edition},

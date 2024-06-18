@@ -2112,11 +2112,11 @@ Property list
         ``time-remaining`` with milliseconds.
 
 ``audio-pts``
-    Current audio playback position in current file in seconds. Unlike time-pos,
+    Current audio playback position in current file in seconds. Unlike ``time-pos``,
     this updates more often than once per frame. This is mostly equivalent to
-    time-pos for audio-only files however it also takes into account the audio
+    ``time-pos`` for audio-only files however it also takes into account the audio
     driver delay. This can lead to negative values in certain cases, so in
-    general you probably want to simply use time-pos.
+    general you probably want to simply use ``time-pos``.
 
     This has a sub-property:
 
@@ -2132,10 +2132,10 @@ Property list
         ``playtime-remaining`` with milliseconds.
 
 ``playback-time`` (RW)
-    Position in current file in seconds. Unlike ``time-pos``, the time is
-    clamped to the range of the file. (Inaccurate file durations etc. could
-    make it go out of range. Useful on attempts to seek outside of the file,
-    as the seek target time is considered the current position during seeking.)
+    Alias for ``time-pos``.
+
+    Prior to mpv 0.39.0, ``time-pos`` and ``playback-time`` could report
+    different values in certain edge cases.
 
     This has a sub-property:
 
