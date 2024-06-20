@@ -302,26 +302,19 @@ static struct m_config_option *m_config_get_co_any(const struct m_config *config
         char buf[M_CONFIG_MAX_OPT_NAME_LEN];
         const char *alias = m_config_shadow_get_alias_from_opt(config->shadow, co->opt_id,
                                                                buf, sizeof(buf));
-        if (co->opt->deprecation_message && !co->warning_was_printed) {
-            if (co->opt->deprecation_message[0]) {
-                MP_WARN(config, "Warning: option %s%s was replaced with "
-                        "%s%s: %s\n", prefix, co->name, prefix, alias,
-                        co->opt->deprecation_message);
-            } else {
-                MP_WARN(config, "Warning: option %s%s was replaced with "
-                        "%s%s and might be removed in the future.\n",
-                        prefix, co->name, prefix, alias);
-            }
+        if (co->opt->deprecated && !co->warning_was_printed) {
+            MP_WARN(config, "Warning: option %s%s was replaced with "
+                    "%s%s and might be removed in the future.\n",
+                    prefix, co->name, prefix, alias);
             co->warning_was_printed = true;
         }
         return m_config_get_co_any(config, bstr0(alias));
-    } else if (co->opt->deprecation_message) {
-        if (!co->warning_was_printed) {
-            MP_WARN(config, "Warning: option %s%s is deprecated "
-                    "and might be removed in the future (%s).\n",
-                    prefix, co->name, co->opt->deprecation_message);
-            co->warning_was_printed = true;
-        }
+    } else if (co->opt->deprecated && !co->warning_was_printed) {
+        MP_WARN(config, "Warning: option %s%s is deprecated "
+                "and might be removed in the future.\n"
+                "See DOCS/interface-changes.rst for possible replacements.\n",
+                prefix, co->name);
+        co->warning_was_printed = true;
     }
     return co;
 }
@@ -358,7 +351,7 @@ const char *m_config_get_positional_option(const struct m_config *config, int p)
     int pos = 0;
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
-        if (!co->opt->deprecation_message) {
+        if (!co->opt->deprecated) {
             if (pos == p)
                 return co->name;
             pos++;
@@ -752,7 +745,7 @@ done:
     if (r < 0 && r != M_OPT_EXIT) {
         MP_ERR(config, "Error parsing option %.*s (%s)\n",
                BSTR_P(name), m_option_strerror(r));
-        MP_ERR(config, "This option might have been renamed, removed, or changed semantics. "
+        MP_ERR(config, "This option might have been renamed, removed, or changed semantics.\n"
                        "See DOCS/interface-changes.rst for possible replacements.\n");
         r = M_OPT_INVALID;
     }
@@ -867,7 +860,7 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " [not in config files]");
         if (opt->flags & M_OPT_FILE)
             MP_INFO(config, " [file]");
-        if (opt->deprecation_message)
+        if (opt->deprecated)
             MP_INFO(config, " [deprecated]");
         if (opt->type == &m_option_type_alias) {
             char buf[M_CONFIG_MAX_OPT_NAME_LEN];

@@ -7215,7 +7215,7 @@ void command_init(struct MPContext *mpctx)
                                                                    buf, sizeof(buf));
             prop.priv = talloc_strdup(ctx, alias);
 
-            prop.call = co->opt->deprecation_message ?
+            prop.call = co->opt->deprecated ?
                             mp_property_deprecated_alias : mp_property_alias;
 
             // Check whether this eventually arrives at a real option. If not,
