@@ -765,6 +765,8 @@ done:
     if (r < 0 && r != M_OPT_EXIT) {
         MP_ERR(config, "Error parsing option %.*s (%s)\n",
                BSTR_P(name), m_option_strerror(r));
+        MP_ERR(config, "This option might have been renamed, removed, or changed semantics. "
+                       "See DOCS/interface-changes.rst for possible replacements.\n");
         r = M_OPT_INVALID;
     }
     return r;
