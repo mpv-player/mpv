@@ -545,10 +545,6 @@ const struct m_sub_options gl_video_conf = {
         {"gpu-shader-cache-dir", OPT_STRING(shader_cache_dir), .flags = M_OPT_FILE},
         {"gpu-hwdec-interop",
             OPT_STRING_VALIDATE(hwdec_interop, ra_hwdec_validate_opt)},
-        {"gamut-warning", OPT_REMOVED("Replaced by --gamut-mapping-mode=warn")},
-        {"gamut-clipping", OPT_REMOVED("Replaced by --gamut-mapping-mode=desaturate")},
-        {"tone-mapping-desaturate", OPT_REMOVED("Replaced by --tone-mapping-mode")},
-        {"tone-mapping-desaturate-exponent", OPT_REMOVED("Replaced by --tone-mapping-mode")},
         {0}
     },
     .size = sizeof(struct gl_video_opts),

@@ -3912,9 +3912,6 @@ const m_option_type_t m_option_type_alias = {
 const m_option_type_t m_option_type_cli_alias = {
     .name  = "alias",
 };
-const m_option_type_t m_option_type_removed = {
-    .name  = "removed",
-};
 const m_option_type_t m_option_type_subconfig = {
     .name = "Subconfig",
 };

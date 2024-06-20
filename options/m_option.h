@@ -73,7 +73,6 @@ extern const m_option_type_t m_option_type_cycle_dir;
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
 extern const m_option_type_t m_option_type_cli_alias;
-extern const m_option_type_t m_option_type_removed;
 extern const m_option_type_t m_option_type_subconfig;
 
 // Callback used by m_option_type_print_fn options.
@@ -774,11 +773,6 @@ extern const char m_option_path_separator;
 #define OPT_CLI_ALIAS(newname) \
     .type = &m_option_type_cli_alias, .priv = newname, \
     .flags = M_OPT_NOPROP, .offset = -1
-
-// "--optname" doesn't exist, but inform the user about a replacement with msg.
-#define OPT_REMOVED(msg) \
-    .type = &m_option_type_removed, .priv = msg, \
-    .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1
 
 #define OPT_PRINT(fn) \
     .flags = M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP, \

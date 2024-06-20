@@ -315,19 +315,6 @@ static struct m_config_option *m_config_get_co_any(const struct m_config *config
             co->warning_was_printed = true;
         }
         return m_config_get_co_any(config, bstr0(alias));
-    } else if (co->opt->type == &m_option_type_removed) {
-        if (!co->warning_was_printed) {
-            char *msg = co->opt->priv;
-            if (msg) {
-                MP_FATAL(config, "Option %s%s was removed: %s\n",
-                         prefix, co->name, msg);
-            } else {
-                MP_FATAL(config, "Option %s%s was removed.\n",
-                         prefix, co->name);
-            }
-            co->warning_was_printed = true;
-        }
-        return NULL;
     } else if (co->opt->deprecation_message) {
         if (!co->warning_was_printed) {
             MP_WARN(config, "Warning: option %s%s is deprecated "
