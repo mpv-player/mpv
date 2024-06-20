@@ -75,6 +75,7 @@ const struct m_opt_choice_alternatives mp_image_writer_formats[] = {
     {"jpeg", AV_CODEC_ID_MJPEG},
     {"png",  AV_CODEC_ID_PNG},
     {"webp", AV_CODEC_ID_WEBP},
+    {"bgra", AV_CODEC_ID_RAWVIDEO},
 #if HAVE_JPEGXL
     {"jxl",  AV_CODEC_ID_JPEGXL},
 #endif
@@ -712,6 +713,9 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
         // We don't want that, so force YUV/YUVA here.
         int alpha = image->fmt.flags & MP_IMGFLAG_ALPHA;
         destfmt = alpha ? pixfmt2imgfmt(AV_PIX_FMT_YUVA420P) : IMGFMT_420P;
+    }
+    if (opts->format == AV_CODEC_ID_RAWVIDEO) {
+        destfmt = IMGFMT_BGRA;
     }
 
     if (!destfmt)
