@@ -176,7 +176,7 @@ void audio_update_volume(struct MPContext *mpctx)
     gain = pow(gain, 3);
     gain *= compute_replaygain(mpctx);
     gain *= db_gain(opts->softvol_gain);
-    if (opts->softvol_mute == 1)
+    if (opts->softvol_mute)
         gain = 0.0;
 
     ao_set_gain(ao_c->ao, gain);
