@@ -83,13 +83,12 @@ Typically, renaming an option can be done in a compatible way with OPT_REPLACED.
 You may need to check whether the corresponding properties still work (including
 messy details like observing properties for changes).
 
-OPT_REMOVED can be used to inform the user of alternatives or reasons for the
-removal, which is better than an option not found error. Likewise,
-m_option.deprecation_message should be set to something helpful.
+OPT_REPLACED can remain in the code for a long time, since it's unintrusive and
+hopefully make incompatible changes less painful for users.
 
-Both OPT_REPLACED and OPT_REMOVED can remain in the code for a long time, since
-they're unintrusive and hopefully make incompatible changes less painful for
-users.
+Users are informed to see interface-changes.rst after the option is removed.
+Since that file is only updated after a release, options scheduled for removal
+should only be removed at release.
 
 Scripting APIs
 --------------
