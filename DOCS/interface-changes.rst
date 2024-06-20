@@ -111,7 +111,8 @@ Interface changes
     - change `--subs-fallback-forced` so that it works alongside `--slang`
     - add `--icc-3dlut-size=auto` and make it the default
     - add `--scale=ewa_lanczos4sharpest`
-    - remove `--scale-wblur`, `--cscale-wblur`, `--dscale-wblur`, `--tscale-wblur`
+    - remove `--scale-wblur`, `--cscale-wblur`, `--dscale-wblur`, `--tscale-wblur`:
+      Just adjust filter radius directly.
     - remove `bcspline` filter (`bicubic` is now the same as `bcspline`)
     - rename `--cache-dir` and `--cache-unlink-files` to `--demuxer-cache-dir` and
       `--demuxer-cache-unlink-files`
@@ -192,7 +193,7 @@ Interface changes
     - add `--wayland-content-type`
     - deprecate `--vo-sixel-exit-clear` and alias it to
       `--vo-sixel-alt-screen`
-    - deprecate `--drm-atomic`
+    - deprecate `--drm-atomic`: DRM Atomic is required.
     - add `--demuxer-hysteresis-secs`
     - add `--video-sync=display-tempo`
     - the `start` option is no longer unconditionally written by
