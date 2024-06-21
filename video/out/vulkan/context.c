@@ -17,11 +17,7 @@
 
 #include "config.h"
 
-#if HAVE_LAVU_UUID
 #include <libavutil/uuid.h>
-#else
-#include "misc/uuid.h"
-#endif
 
 #include "options/m_config.h"
 #include "video/out/placebo/ra_pl.h"
