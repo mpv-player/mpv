@@ -243,6 +243,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (!p->frame)
         return -1;
 
+    mp_image_clear(p->frame, 0, 0, p->frame->w, p->frame->h);
+
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
