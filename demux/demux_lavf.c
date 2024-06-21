@@ -714,13 +714,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
         sh = demux_alloc_sh_stream(STREAM_AUDIO);
-
-#if !HAVE_AV_CHANNEL_LAYOUT
-        // probably unneeded
-        mp_chmap_set_unknown(&sh->codec->channels, codec->channels);
-        if (codec->channel_layout)
-            mp_chmap_from_lavc(&sh->codec->channels, codec->channel_layout);
-#else
         if (!mp_chmap_from_av_layout(&sh->codec->channels, &codec->ch_layout)) {
             char layout[128] = {0};
             MP_WARN(demuxer,
@@ -729,7 +722,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
                                                layout, 128) < 0 ?
                     "undefined" : layout);
         }
-#endif
 
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;

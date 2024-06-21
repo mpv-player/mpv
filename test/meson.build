@@ -76,11 +76,9 @@ img_utils = static_library('img-utils', 'img_utils.c', include_directories: incd
 
 # The actual tests.
 chmap_files = [
-    'audio/chmap_sel.c'
+    'audio/chmap_avchannel.c',
+    'audio/chmap_sel.c',
 ]
-if features['av-channel-layout']
-    chmap_files += 'audio/chmap_avchannel.c'
-endif
 chmap_objects = libmpv.extract_objects(chmap_files)
 chmap = executable('chmap', 'chmap.c', include_directories: incdir,
                    dependencies: [libavutil], objects: chmap_objects,

@@ -116,12 +116,7 @@ static bool reinit(struct mp_filter *f)
     // Put sample parameters
     s->lavc_actx->sample_fmt = af_to_avformat(format);
 
-#if !HAVE_AV_CHANNEL_LAYOUT
-    s->lavc_actx->channels = chmap.num;
-    s->lavc_actx->channel_layout = mp_chmap_to_lavc(&chmap);
-#else
     mp_chmap_to_av_layout(&s->lavc_actx->ch_layout, &chmap);
-#endif
     s->lavc_actx->sample_rate = rate;
     s->lavc_actx->bit_rate = bit_rate;
 
@@ -290,15 +285,6 @@ static void add_chmaps_to_autoconv(struct mp_filter *f,
                                    struct mp_autoconvert *conv,
                                    const struct AVCodec *codec)
 {
-#if !HAVE_AV_CHANNEL_LAYOUT
-    const uint64_t *lch = codec->channel_layouts;
-    for (int n = 0; lch && lch[n]; n++) {
-        struct mp_chmap chmap = {0};
-        mp_chmap_from_lavc(&chmap, lch[n]);
-        if (mp_chmap_is_valid(&chmap))
-            mp_autoconvert_add_chmap(conv, &chmap);
-    }
-#else
     const AVChannelLayout *lch = codec->ch_layouts;
     for (int n = 0; lch && lch[n].nb_channels; n++) {
         struct mp_chmap chmap = {0};
@@ -315,7 +301,6 @@ static void add_chmaps_to_autoconv(struct mp_filter *f,
         if (mp_chmap_is_valid(&chmap))
             mp_autoconvert_add_chmap(conv, &chmap);
     }
-#endif
 }
 
 static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
@@ -357,14 +342,7 @@ static struct mp_filter *af_lavcac3enc_create(struct mp_filter *parent,
     // For this one, we require the decoder to export lists of all supported
     // parameters. (Not all decoders do that, but the ones we're interested
     // in do.)
-    if (!s->lavc_acodec->sample_fmts ||
-#if !HAVE_AV_CHANNEL_LAYOUT
-        !s->lavc_acodec->channel_layouts
-#else
-        !s->lavc_acodec->ch_layouts
-#endif
-        )
-    {
+    if (!s->lavc_acodec->sample_fmts || !s->lavc_acodec->ch_layouts) {
         MP_ERR(f, "Audio encoder doesn't list supported parameters.\n");
         goto error;
     }
