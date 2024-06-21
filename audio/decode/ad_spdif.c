@@ -37,12 +37,6 @@
 
 #define OUTBUF_SIZE 65536
 
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(60, 26, 100)
-#define AV_PROFILE_UNKNOWN FF_PROFILE_UNKNOWN
-#define AV_PROFILE_DTS_HD_HRA FF_PROFILE_DTS_HD_HRA
-#define AV_PROFILE_DTS_HD_MA FF_PROFILE_DTS_HD_MA
-#endif
-
 struct spdifContext {
     struct mp_log   *log;
     struct mp_codec_params *codec;

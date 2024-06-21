@@ -759,11 +759,6 @@ static void init_avctx(struct mp_filter *vd)
     if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
         avctx->opaque = vd;
         avctx->get_buffer2 = get_buffer2_direct;
-#if LIBAVCODEC_VERSION_MAJOR < 60
-        AV_NOWARN_DEPRECATED({
-            avctx->thread_safe_callbacks = 1;
-        });
-#endif
     }
 
     avctx->flags |= lavc_param->bitexact ? AV_CODEC_FLAG_BITEXACT : 0;
@@ -780,12 +775,6 @@ static void init_avctx(struct mp_filter *vd)
     if (lavc_codec->id == AV_CODEC_ID_H264 && lavc_param->old_x264)
         av_opt_set(avctx, "x264_build", "150", AV_OPT_SEARCH_CHILDREN);
 
-#ifndef AV_CODEC_EXPORT_DATA_FILM_GRAIN
-    if (ctx->opts->film_grain == 1)
-        MP_WARN(vd, "GPU film grain requested, but FFmpeg too old to expose "
-                    "film grain parameters. Please update to latest master, "
-                    "or at least to release 4.4.\n");
-#else
     switch(ctx->opts->film_grain) {
     case 0: /*CPU*/
         // default lavc flags handle film grain within the decoder.
@@ -808,7 +797,6 @@ static void init_avctx(struct mp_filter *vd)
 
         break;
     }
-#endif
 
     mp_set_avopts(vd->log, avctx, lavc_param->avopts);
 
@@ -1238,13 +1226,7 @@ static int decode_frame(struct mp_filter *vd)
 
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
-
-    mpi->pkt_duration =
-#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(59, 30, 100)
-        mp_pts_from_av(ctx->pic->duration, &ctx->codec_timebase);
-#else
-        mp_pts_from_av(ctx->pic->pkt_duration, &ctx->codec_timebase);
-#endif
+    mpi->pkt_duration = mp_pts_from_av(ctx->pic->duration, &ctx->codec_timebase);
 
     av_frame_unref(ctx->pic);
 
