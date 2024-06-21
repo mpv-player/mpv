@@ -3435,6 +3435,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                     };
                     if (!obj_settings_list_insert_at(log, &res, -1, &item)) {
                         obj_setting_free(&item);
+                        free_obj_settings_list(&res);
                         ret = M_OPT_OUT_OF_RANGE;
                         goto done;
                     }
@@ -3464,6 +3465,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 if (label < 0) {
                     if (!obj_settings_list_insert_at(log, &list, prepend_counter, &res[n])) {
                         obj_setting_free(&res[n]);
+                        free_obj_settings_list(&res);
                         ret = M_OPT_OUT_OF_RANGE;
                         goto done;
                     }
@@ -3482,6 +3484,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 if (label < 0) {
                     if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
                         obj_setting_free(&res[n]);
+                        free_obj_settings_list(&res);
                         ret = M_OPT_OUT_OF_RANGE;
                         goto done;
                     }
@@ -3511,6 +3514,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                     if (found < 0) {
                         if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
                             obj_setting_free(&res[n]);
+                            free_obj_settings_list(&res);
                             ret = M_OPT_OUT_OF_RANGE;
                             goto done;
                         }
