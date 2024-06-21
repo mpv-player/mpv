@@ -59,6 +59,7 @@ sources = files(
     ## Audio
     'audio/aframe.c',
     'audio/chmap.c',
+    'audio/chmap_avchannel.c',
     'audio/chmap_sel.c',
     'audio/decode/ad_lavc.c',
     'audio/decode/ad_spdif.c',
@@ -597,13 +598,6 @@ subdir('sub')
 
 if darwin
     subdir(join_paths('TOOLS', 'osxbundle'))
-endif
-
-
-# misc dependencies
-features += {'av-channel-layout': libavutil.version().version_compare('>= 57.24.100')}
-if features['av-channel-layout']
-    sources += files('audio/chmap_avchannel.c')
 endif
 
 cdda_opt = get_option('cdda').require(

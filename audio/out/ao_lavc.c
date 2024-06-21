@@ -126,13 +126,7 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_adjust2(ao, &sel, &ao->channels, false))
         goto fail;
     mp_chmap_reorder_to_lavc(&ao->channels);
-
-#if !HAVE_AV_CHANNEL_LAYOUT
-    encoder->channels = ao->channels.num;
-    encoder->channel_layout = mp_chmap_to_lavc(&ao->channels);
-#else
     mp_chmap_to_av_layout(&encoder->ch_layout, &ao->channels);
-#endif
 
     encoder->sample_fmt = AV_SAMPLE_FMT_NONE;
 
