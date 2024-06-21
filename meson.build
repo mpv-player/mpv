@@ -19,12 +19,12 @@ source_root = meson.project_source_root()
 python = find_program('python3')
 
 # ffmpeg
-libavcodec = dependency('libavcodec', version: '>= 58.134.100')
-libavfilter = dependency('libavfilter', version: '>= 7.110.100')
-libavformat = dependency('libavformat', version: '>= 58.76.100')
-libavutil = dependency('libavutil', version: '>= 56.70.100')
-libswresample = dependency('libswresample', version: '>= 3.9.100')
-libswscale = dependency('libswscale', version: '>= 5.9.100')
+libavcodec = dependency('libavcodec', version: '>= 60.31.102')
+libavfilter = dependency('libavfilter', version: '>= 9.12.100')
+libavformat = dependency('libavformat', version: '>= 60.16.100')
+libavutil = dependency('libavutil', version: '>= 58.29.100')
+libswresample = dependency('libswresample', version: '>= 4.12.100')
+libswscale = dependency('libswscale', version: '>= 7.5.100')
 
 libplacebo = dependency('libplacebo', version: '>=6.338.2',
                 default_options: ['default_library=static', 'demos=false'])
@@ -669,7 +669,7 @@ if features['libarchive']
                      'stream/stream_libarchive.c')
 endif
 
-libavdevice = dependency('libavdevice', version: '>= 58.13.100', required: get_option('libavdevice'))
+libavdevice = dependency('libavdevice', version: '>= 60.3.100', required: get_option('libavdevice'))
 features += {'libavdevice': libavdevice.found()}
 if features['libavdevice']
     dependencies += libavdevice
