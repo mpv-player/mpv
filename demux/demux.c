@@ -3964,6 +3964,28 @@ static void initiate_refresh_seek(struct demux_internal *in,
     in->seek_pts = start_ts;
 }
 
+// Called locked.
+static void refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
+                          double ref_pts)
+{
+    struct demux_internal *in = demuxer->in;
+    struct demux_stream *ds = stream->ds;
+    ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
+
+    MP_VERBOSE(in, "refresh track %d\n", stream->index);
+    if (in->back_demuxing)
+        ds->back_seek_pos = ref_pts;
+    // Allow refresh seek for non-video streams, even if no packets have
+    // ever been read yet or after seeking. This is necessary because:
+    // - A-V sync targets may come from different demuxers, so enabling an external
+    //   audio track for the first time can cause desync since a seek is not performed.
+    // - If cache is enabled and a seek causes some new data to be cached, the demuxer
+    //   is sought to the end of cache after cache joining. Switching track immediately
+    //   after this also causes the same problem.
+    if (!in->after_seek || ds->type != STREAM_VIDEO)
+        initiate_refresh_seek(in, ds, ref_pts);
+}
+
 // Set whether the given stream should return packets.
 // ref_pts is used only if the stream is enabled. Then it serves as approximate
 // start pts for this stream (in the worst case it is ignored).
@@ -3973,19 +3995,14 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     struct demux_internal *in = demuxer->in;
     struct demux_stream *ds = stream->ds;
     mp_mutex_lock(&in->lock);
-    ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
     // don't flush buffers if stream is already selected / unselected
     if (ds->selected != selected) {
         MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
         ds->selected = selected;
         update_stream_selection_state(in, ds);
         in->tracks_switched = true;
-        if (ds->selected) {
-            if (in->back_demuxing)
-                ds->back_seek_pos = ref_pts;
-            if (!in->after_seek)
-                initiate_refresh_seek(in, ds, ref_pts);
-        }
+        if (ds->selected)
+            refresh_track(demuxer, stream, ref_pts);
         if (in->threading) {
             mp_cond_signal(&in->wakeup);
         } else {
@@ -4003,14 +4020,9 @@ void demuxer_refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
     struct demux_internal *in = demuxer->in;
     struct demux_stream *ds = stream->ds;
     mp_mutex_lock(&in->lock);
-    ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
     if (ds->selected) {
-        MP_VERBOSE(in, "refresh track %d\n", stream->index);
         update_stream_selection_state(in, ds);
-        if (in->back_demuxing)
-            ds->back_seek_pos = ref_pts;
-        if (!in->after_seek)
-            initiate_refresh_seek(in, ds, ref_pts);
+        refresh_track(demuxer, stream, ref_pts);
     }
     mp_mutex_unlock(&in->lock);
 }
