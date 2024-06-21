@@ -755,11 +755,6 @@ if features['uchardet']
     dependencies += uchardet
 endif
 
-features += {'lavu-uuid': libavutil.version().version_compare('>= 57.27.100')}
-if not features['lavu-uuid']
-    sources += files('misc/uuid.c')
-endif
-
 vapoursynth = dependency('vapoursynth', version: '>= 56', required: get_option('vapoursynth'))
 vapoursynth_script = dependency('vapoursynth-script', version: '>= 56',
                                 required: get_option('vapoursynth'))
