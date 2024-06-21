@@ -47,8 +47,6 @@ features = {
     'debug': get_option('debug'),
     'ffmpeg': true,
     'gpl': get_option('gpl'),
-    'jpegxl': libavformat.version().version_compare('>= 59.27.100'),
-    'avif-muxer': libavformat.version().version_compare('>= 59.24.100'),
     'libass': true,
     'libplacebo': true,
 }
@@ -1347,9 +1345,8 @@ if features['android-media-ndk']
 endif
 
 vulkan_interop = get_option('vulkan-interop').require(
-    features['vulkan'] and vulkan.version().version_compare('>=1.3.238') and
-    libavutil.version().version_compare('>=58.11.100'),
-    error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238, and libavutil >= 58.11.100',
+    features['vulkan'] and vulkan.version().version_compare('>=1.3.238'),
+    error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238',
 )
 features += {'vulkan-interop': vulkan_interop.allowed()}
 if features['vulkan-interop']

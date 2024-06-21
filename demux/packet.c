@@ -237,7 +237,6 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
         return -1;
 
     switch (id) {
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(58, 5, 100)
     case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
         static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
         static const uint16_t ITU_T_T35_PROVIDER_CODE_SMTPE = 0x3C;
@@ -278,7 +277,6 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
 
         return 0;
     }
-#endif
     default:
         break;
     }

@@ -87,9 +87,7 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
         break;
     }
 
-#if LIBAVCODEC_VERSION_MAJOR < 59
     av_dict_set(&opts, "sub_text_format", "ass", 0);
-#endif
     av_dict_set(&opts, "flags2", "+ass_ro_flush_noop", 0);
     if (strcmp(priv->codec, "eia_608") == 0)
         av_dict_set(&opts, "real_time", "1", 0);
