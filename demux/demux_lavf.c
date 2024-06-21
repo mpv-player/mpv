@@ -85,7 +85,10 @@ struct demux_lavf_opts {
     int rtsp_transport;
     int linearize_ts;
     bool propagate_opts;
+    bool seamless_looping;
 };
+
+static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags);
 
 const struct m_sub_options demux_lavf_conf = {
     .opts = (const m_option_t[]) {
@@ -112,6 +115,7 @@ const struct m_sub_options demux_lavf_conf = {
         {"demuxer-lavf-linearize-timestamps", OPT_CHOICE(linearize_ts,
             {"no", 0}, {"auto", -1}, {"yes", 1})},
         {"demuxer-lavf-propagate-opts", OPT_BOOL(propagate_opts)},
+        {"seamless-looping", OPT_BOOL(seamless_looping)},
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -271,6 +275,9 @@ typedef struct lavf_priv {
 #else
     void (*default_io_close)(struct AVFormatContext *s, AVIOContext *pb);
 #endif
+    double highest_pts,pts_off;
+    double highest_dts,dts_off;
+    double duration;
 } lavf_priv_t;
 
 static void update_read_stats(struct demuxer *demuxer)
@@ -1234,14 +1241,22 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
                                    struct demux_packet **mp_pkt)
 {
     lavf_priv_t *priv = demux->priv;
+    struct demux_lavf_opts *lavfdopts = priv->opts;
 
     AVPacket *pkt = &(AVPacket){0};
     int r = av_read_frame(priv->avfc, pkt);
     update_read_stats(demux);
     if (r < 0) {
         av_packet_unref(pkt);
-        if (r == AVERROR_EOF)
+        if (r == AVERROR_EOF) {
+            if (lavfdopts->seamless_looping) {
+                demux_seek_lavf(demux,0,0);
+                priv->pts_off = priv->highest_pts + priv->duration;
+                priv->dts_off = priv->highest_dts + priv->duration;
+                return demux_lavf_read_packet(demux, mp_pkt);
+            }
             return false;
+        }
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         if (priv->retry_counter >= 10) {
             MP_ERR(demux, "...treating it as fatal error.\n");
@@ -1280,9 +1295,16 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     if (priv->pcm_seek_hack == st && !priv->pcm_seek_hack_packet_size)
         priv->pcm_seek_hack_packet_size = pkt->size;
 
-    dp->pts = mp_pts_from_av(pkt->pts, &st->time_base);
-    dp->dts = mp_pts_from_av(pkt->dts, &st->time_base);
+    dp->pts = mp_pts_from_av(pkt->pts, &st->time_base) + priv->pts_off;
+    dp->dts = mp_pts_from_av(pkt->dts, &st->time_base) + priv->dts_off;
     dp->duration = pkt->duration * av_q2d(st->time_base);
+    if (lavfdopts->seamless_looping) {
+        if (priv->highest_pts < dp->pts)
+            priv->highest_pts = dp->pts;
+        if (priv->highest_dts < dp->dts)
+            priv->highest_dts = dp->dts;
+        priv->duration = dp->duration;
+    }
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     av_packet_unref(pkt);
