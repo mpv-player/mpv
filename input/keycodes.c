@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -258,8 +259,16 @@ found:
     if (code >= 0 && rest.len == 0)
         return mp_normalize_keycode(code + modifiers);
 
-    if (bstr_startswith0(bname, "0x"))
-        return mp_normalize_keycode(strtol(name, NULL, 16) + modifiers);
+    if (bstr_startswith0(bname, "0x")) {
+        char *end;
+        long long val = strtoll(name, &end, 16);
+        if (name == end || val > INT_MAX || val < INT_MIN)
+            return -1;
+        long long keycode = val + modifiers;
+        if (keycode > INT_MAX || keycode < INT_MIN)
+            return -1;
+        return mp_normalize_keycode(keycode);
+    }
 
     for (int i = 0; key_names[i].name != NULL; i++) {
         if (strcasecmp(key_names[i].name, name) == 0)
