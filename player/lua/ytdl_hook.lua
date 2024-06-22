@@ -905,7 +905,7 @@ local function run_ytdl_hook(url)
     end
 
     if format == "" then
-        format = "bestvideo+bestaudio/best"
+        format = "bestvideo[protocol^=m3u8]+bestaudio[protocol^=m3u8]/bestvideo+bestaudio/best"
     end
 
     if format ~= "ytdl" then

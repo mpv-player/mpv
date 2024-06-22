@@ -973,7 +973,7 @@ Program Behavior
     available formats can be found with the command
     ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
     available aliases.
-    (Default: ``bestvideo+bestaudio/best``)
+    (Default: ``bestvideo[protocol^=m3u8]+bestaudio[protocol^=m3u8]/bestvideo+bestaudio/best``)
 
     The ``ytdl`` value does not pass a ``--format`` option to youtube-dl at all,
     and thus does not override its default. Note that sometimes youtube-dl
