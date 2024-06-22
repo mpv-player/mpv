@@ -194,12 +194,15 @@ struct lib {
 void check_library_versions(struct mp_log *log, int v)
 {
     const struct lib libs[] = {
-        {"libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version()},
         {"libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version()},
-        {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
-        {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
+#if HAVE_LIBAVDEVICE
+        {"libavdevice",   LIBAVDEVICE_VERSION_INT,   avdevice_version()},
+#endif
         {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
+        {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
+        {"libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version()},
         {"libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version()},
+        {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
     };
 
     mp_msg(log, v, "FFmpeg version: %s\n", av_version_info());
