@@ -273,7 +273,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     if (code->start[0] == 'u' && code->len >= 5) {
         bstr num = bstr_splice(*code, 1, 5);
         uint32_t c = bstrtoll(num, &num, 16);
-        if (num.len)
+        if (num.len || c > 0x10FFFF)
             return false;
         if (c >= 0xd800 && c <= 0xdbff) {
             if (code->len < 5 + 6 // udddd + \udddd
