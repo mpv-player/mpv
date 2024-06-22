@@ -245,6 +245,8 @@ const struct autoprobe_info hwdec_autoprobe_info[] = {
     {"nvdec-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vaapi",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vaapi-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"vulkan",          HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
+    {"vulkan-copy",     HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"vdpau",           HWDEC_FLAG_AUTO},
     {"vdpau-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"drm",             HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
