@@ -23,7 +23,7 @@
 
 #include <libavutil/buffer.h>
 #include <libavutil/hwcontext.h>
-#if HAVE_VULKAN_INTEROP
+#if HAVE_VULKAN
 #include <libavutil/hwcontext_vulkan.h>
 #endif
 #include <libavutil/mem.h>
@@ -393,7 +393,7 @@ bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
         hw_frames->width = w;
         hw_frames->height = h;
 
-#if HAVE_VULKAN_INTEROP
+#if HAVE_VULKAN
         if (format == AV_PIX_FMT_VULKAN && disable_multiplane) {
             const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(sw_format);
             if ((desc->flags & AV_PIX_FMT_FLAG_PLANAR) &&
