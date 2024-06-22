@@ -1092,7 +1092,6 @@ static void pass_info_reset(struct gl_video *p, bool is_redraw)
 
     for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         p->pass[i].desc.len = 0;
-        p->pass[i].perf = (struct mp_pass_perf){0};
     }
 }
 
@@ -1103,13 +1102,13 @@ static void pass_report_performance(struct gl_video *p)
 
     for (int i = 0; i < VO_PASS_PERF_MAX; i++) {
         struct pass_info *pass = &p->pass[i];
-        if (pass->desc.len) {
-            MP_TRACE(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
-                     BSTR_P(pass->desc),
-                     (int)pass->perf.last/1000,
-                     (int)pass->perf.avg/1000,
-                     (int)pass->perf.peak/1000);
-        }
+        if (!pass->desc.len)
+            break;
+        MP_TRACE(p, "pass '%.*s': last %dus avg %dus peak %dus\n",
+                 BSTR_P(pass->desc),
+                 (int)pass->perf.last/1000,
+                 (int)pass->perf.avg/1000,
+                 (int)pass->perf.peak/1000);
     }
 }
 
