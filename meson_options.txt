@@ -103,7 +103,6 @@ option('gl-dxinterop-d3d9', type: 'feature', value: 'auto', description: 'OpenGL
 option('ios-gl', type: 'feature', value: 'auto', description: 'iOS OpenGL ES interop support')
 option('videotoolbox-gl', type: 'feature', value: 'auto', description: 'Videotoolbox with OpenGL')
 option('videotoolbox-pl', type: 'feature', value: 'auto', description: 'Videotoolbox with libplacebo')
-option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan graphics interop')
 
 # macOS features
 option('macos-10-15-4-features', type: 'feature', value: 'auto', description: 'macOS 10.15.4 SDK Features')

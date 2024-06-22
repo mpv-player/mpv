@@ -178,7 +178,6 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     };
 
-#if HAVE_VULKAN_INTEROP
     /*
      * Request the additional extensions and features required to make full use
      * of the ffmpeg Vulkan hwcontext and video decoding capability.
@@ -208,7 +207,6 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     };
 
     features.pNext = &atomic_float_feature;
-#endif
 
     AVUUID param_uuid = { 0 };
     bool is_uuid = opts->device &&
@@ -223,11 +221,9 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .async_transfer = opts->async_transfer,
         .async_compute = opts->async_compute,
         .queue_count = opts->queue_count,
-#if HAVE_VULKAN_INTEROP
         .extra_queues = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
         .opt_extensions = opt_extensions,
         .num_opt_extensions = MP_ARRAY_SIZE(opt_extensions),
-#endif
         .features = &features,
         .device_name = is_uuid ? NULL : opts->device,
     };

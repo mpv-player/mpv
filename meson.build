@@ -1280,14 +1280,16 @@ vulkan_opt = get_option('vulkan').require(
     libplacebo.get_variable('pl_has_vulkan', default_value: '0') == '1',
     error_message: 'libplacebo compiled without vulkan support!',
 )
-vulkan = dependency('vulkan', version: '>= 1.1.70', required: vulkan_opt)
+# libplacebo/ffmpeg public headers depend on Vulkan 1.3
+vulkan = dependency('vulkan', version: '>= 1.3.238', required: vulkan_opt)
 features += {'vulkan': vulkan.found() and (vulkan.type_name() == 'internal' or
                        cc.has_header_symbol('vulkan/vulkan_core.h',
-                                            'VK_VERSION_1_1',
+                                            'VK_VERSION_1_3',
                                             dependencies: vulkan))}
 if features['vulkan']
     dependencies += vulkan
-    sources += files('video/out/vulkan/context.c',
+    sources += files('video/out/hwdec/hwdec_vulkan.c',
+                     'video/out/vulkan/context.c',
                      'video/out/vulkan/utils.c',
                      'video/filter/vf_gpu_vulkan.c')
 endif
@@ -1356,15 +1358,6 @@ features += {'android-media-ndk': android_media_ndk.allowed()}
 if features['android-media-ndk']
     # header only, library is dynamically loaded
     sources += files('video/out/hwdec/hwdec_aimagereader.c')
-endif
-
-vulkan_interop = get_option('vulkan-interop').require(
-    features['vulkan'] and vulkan.version().version_compare('>=1.3.238'),
-    error_message: 'Vulkan Interop requires vulkan headers >= 1.3.238',
-)
-features += {'vulkan-interop': vulkan_interop.allowed()}
-if features['vulkan-interop']
-    sources += files('video/out/hwdec/hwdec_vulkan.c')
 endif
 
 d3d_hwaccel = get_option('d3d-hwaccel').require(
