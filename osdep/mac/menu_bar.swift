@@ -71,6 +71,7 @@ extension MenuBar {
 
 class MenuBar: NSObject {
     unowned let appHub: AppHub
+    var option: OptionHelper? { return appHub.option }
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
@@ -272,7 +273,8 @@ class MenuBar: NSObject {
     }
 
     func createMenuItem(parentMenu: NSMenu, config: Config) -> MenuItem {
-        var item = MenuItem(title: config.name, action: config.action, keyEquivalent: config.key)
+        var item = MenuItem(title: config.name, action: config.action,
+              keyEquivalent: (option?.mac.macos_menu_shortcuts ?? true) ? config.key : "")
         item.config = config
         item.target = config.target
         item.keyEquivalentModifierMask = config.modifiers

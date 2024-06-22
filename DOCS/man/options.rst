@@ -6479,6 +6479,11 @@ them.
     :system:   No manual syncing, depend on the layer mechanic and the next drawable
     :feedback: Same as precise but uses the presentation feedback core mechanism
 
+``--macos-menu-shortcuts=<yes|no>``
+    Enables the default menu bar shortcuts (default: yes). The menu bar shortcuts always take
+    precedence over any other shortcuts, they are not propagated to the mpv core and they can't be
+    used in config files like ``input.conf`` or script bindings.
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
