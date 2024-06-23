@@ -175,6 +175,10 @@ const struct m_option *m_config_shadow_get_opt(struct m_config_shadow *shadow,
 const char *m_config_shadow_get_opt_name(struct m_config_shadow *shadow,
                                          int32_t id, char *buf, size_t buf_size);
 
+// Resolve alias mapping from opt.
+const char *m_config_shadow_get_alias_from_opt(struct m_config_shadow *shadow, int32_t id,
+                                               char *buf, size_t buf_size);
+
 // Pointer to default value, using m_option.type. NULL if option without data.
 // id must be a valid option ID as returned by m_config_shadow_get_next_opt() or
 // m_config_cache_get_next_opt().
