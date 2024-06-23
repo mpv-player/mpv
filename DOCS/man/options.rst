@@ -1352,11 +1352,11 @@ Video
     :rkmpp:     requires ``--vo=gpu`` (some RockChip devices only)
 
     ``auto`` tries to automatically enable hardware decoding using the first
-    available method. This still depends what VO you are using. For example,
-    if you are not using ``--vo=gpu`` or ``--vo=vdpau``, vdpau decoding will
-    never be enabled. Also note that if the first found method doesn't actually
-    work, it will always fall back to software decoding, instead of trying the
-    next method (might matter on some Linux systems).
+    available method. This still depends what VO you are using. See the list
+    above, for which ``--vo`` and ``gpu-context`` is required for a given
+    hwdec. It will go down the list of available hwdecs until one is
+    successfully initialised. If all of them fail, it will fallback to software
+    decoding.
 
     ``auto-safe`` is similar to ``auto``, but allows only whitelisted methods
     that are considered "safe". This is supposed to be a reasonable way to
