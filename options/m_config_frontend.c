@@ -990,6 +990,11 @@ static struct m_profile *find_check_profile(struct m_config *config, char *name)
 
 int m_config_set_profile(struct m_config *config, char *name, int flags)
 {
+    if ((flags & M_SETOPT_FROM_CONFIG_FILE) && !strcmp(name, "default")) {
+        MP_WARN(config, "Ignoring profile=%s from config file.\n", name);
+        return 0;
+    }
+
     MP_VERBOSE(config, "Applying profile '%s'...\n", name);
     struct m_profile *p = find_check_profile(config, name);
     if (!p)
@@ -1040,7 +1045,7 @@ int m_config_restore_profile(struct m_config *config, char *name)
 void m_config_finish_default_profile(struct m_config *config, int flags)
 {
     struct m_profile *p = m_config_add_profile(config, NULL);
-    m_config_set_profile(config, p->name, flags);
+    m_config_set_profile(config, p->name, flags & ~M_SETOPT_FROM_CONFIG_FILE);
     p->num_opts = 0;
 }
 
