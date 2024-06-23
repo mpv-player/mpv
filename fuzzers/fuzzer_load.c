@@ -28,11 +28,6 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-#if defined(MPV_LOAD_CONFIG_FILE) || defined(MPV_LOAD_INPUT_CONF)
-    if (memmem(data, size, "include", sizeof("include") - 1))
-        return 0;
-#endif
-
     // fmemopen doesn't have associated file descriptor, so we do copy.
     int fd = memfd_create("fuzz_mpv_load", 0);
     if (fd == -1)

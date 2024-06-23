@@ -381,6 +381,7 @@ if get_option('fuzzers')
     endif
     # Adding flags manually until https://github.com/mesonbuild/meson/pull/9825
     flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
+    flags += ['-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION']
     link_flags += ['-fsanitize=address,undefined,fuzzer', '-fno-omit-frame-pointer']
 endif
 
