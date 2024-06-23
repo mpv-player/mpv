@@ -508,6 +508,8 @@ local function update()
     screenx = screenx / dpi_scale
     screeny = screeny / dpi_scale
 
+    local bottom_left_margin = 6
+
     -- Clear the OSD if the REPL is not active
     if not repl_active then
         mp.set_osd_ass(screenx, screeny, '')
@@ -546,7 +548,9 @@ local function update()
 
     local lines_max = calculate_max_log_lines()
     -- Estimate how many characters fit in one line
-    local width_max = math.ceil(screenx / opts.font_size * get_font_hw_ratio())
+    local width_max = math.floor((screenx - bottom_left_margin -
+                                  mp.get_property_native('osd-margin-x') * 2 * screeny / 720) /
+                                 opts.font_size * get_font_hw_ratio())
 
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
     local suggestion_ass = style .. styles.suggestion .. suggestions
@@ -566,7 +570,7 @@ local function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(6, screeny - 6 - global_margins.b * screeny)
+    ass:pos(bottom_left_margin, screeny - bottom_left_margin - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
     if #suggestions > 0 then
         ass:append(suggestion_ass .. '\\N')
@@ -579,7 +583,7 @@ local function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(6, screeny - 6 - global_margins.b * screeny)
+    ass:pos(bottom_left_margin, screeny - bottom_left_margin - global_margins.b * screeny)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
