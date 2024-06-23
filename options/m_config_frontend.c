@@ -302,7 +302,9 @@ static struct m_config_option *m_config_get_co_any(const struct m_config *config
 
     const char *prefix = config->is_toplevel ? "--" : "";
     if (co->opt->type == &m_option_type_alias) {
-        const char *alias = (const char *)co->opt->priv;
+        char buf[M_CONFIG_MAX_OPT_NAME_LEN];
+        const char *alias = m_config_shadow_get_alias_from_opt(config->shadow, co->opt_id,
+                                                               buf, sizeof(buf));
         if (co->opt->deprecation_message && !co->warning_was_printed) {
             if (co->opt->deprecation_message[0]) {
                 MP_WARN(config, "Warning: option %s%s was replaced with "
@@ -881,8 +883,12 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " [file]");
         if (opt->deprecation_message)
             MP_INFO(config, " [deprecated]");
-        if (opt->type == &m_option_type_alias)
-            MP_INFO(config, " for %s", (char *)opt->priv);
+        if (opt->type == &m_option_type_alias) {
+            char buf[M_CONFIG_MAX_OPT_NAME_LEN];
+            const char *alias = m_config_shadow_get_alias_from_opt(config->shadow, co->opt_id,
+                                                                   buf, sizeof(buf));
+            MP_INFO(config, " for %s", alias);
+        }
         if (opt->type == &m_option_type_cli_alias)
             MP_INFO(config, " for --%s (CLI/config files only)", (char *)opt->priv);
         MP_INFO(config, "\n");

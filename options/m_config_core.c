@@ -227,6 +227,19 @@ const char *m_config_shadow_get_opt_name(struct m_config_shadow *shadow,
                            g->group->opts[opt_index].name);
 }
 
+const char *m_config_shadow_get_alias_from_opt(struct m_config_shadow *shadow, int32_t id,
+                                               char *buf, size_t buf_size)
+{
+    int group_index, opt_index;
+    get_opt_from_id(shadow, id, &group_index, &opt_index);
+
+    struct m_config_group *g = &shadow->groups[group_index];
+    const struct m_option *opt = &shadow->groups[group_index].group->opts[opt_index];
+    if (opt->alias_use_prefix)
+        return concat_name_buf(buf, buf_size, g->prefix, (const char *)opt->priv);
+    return (const char *)opt->priv;
+}
+
 const void *m_config_shadow_get_opt_default(struct m_config_shadow *shadow,
                                             int32_t id)
 {
