@@ -28,6 +28,18 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+#ifdef MPV_LOAD_CONFIG_FILE
+    // config file size limit, see m_config_parse_config_file()
+    if (size > 1000000000)
+        return 0;
+#endif
+
+#ifdef MPV_LOAD_INPUT_CONF
+    // input config file size limit, see parse_config_file() in input.c
+    if (size > 1000000)
+        return 0;
+#endif
+
     // fmemopen doesn't have associated file descriptor, so we do copy.
     int fd = memfd_create("fuzz_mpv_load", 0);
     if (fd == -1)
