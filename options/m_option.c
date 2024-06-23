@@ -3275,10 +3275,8 @@ done: ;
         .enabled = enabled,
         .attribs = plist,
     };
-    if (!obj_settings_list_insert_at(log, _ret, -1, &item)) {
+    if (!obj_settings_list_insert_at(log, _ret, -1, &item))
         obj_setting_free(&item);
-        return M_OPT_OUT_OF_RANGE;
-    }
     return 1;
 }
 
@@ -3433,12 +3431,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                     m_obj_settings_t item = {
                         .name = talloc_strdup(NULL, ""),
                     };
-                    if (!obj_settings_list_insert_at(log, &res, -1, &item)) {
+                    if (!obj_settings_list_insert_at(log, &res, -1, &item))
                         obj_setting_free(&item);
-                        free_obj_settings_list(&res);
-                        ret = M_OPT_OUT_OF_RANGE;
-                        goto done;
-                    }
                 }
             }
         }
@@ -3463,12 +3457,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             for (int n = 0; res && res[n].name; n++) {
                 int label = obj_settings_list_find_by_label0(list, res[n].label);
                 if (label < 0) {
-                    if (!obj_settings_list_insert_at(log, &list, prepend_counter, &res[n])) {
+                    if (!obj_settings_list_insert_at(log, &list, prepend_counter, &res[n]))
                         obj_setting_free(&res[n]);
-                        free_obj_settings_list(&res);
-                        ret = M_OPT_OUT_OF_RANGE;
-                        goto done;
-                    }
                     prepend_counter++;
                 } else {
                     // Prefer replacement semantics, instead of actually
@@ -3482,12 +3472,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             for (int n = 0; res && res[n].name; n++) {
                 int label = obj_settings_list_find_by_label0(list, res[n].label);
                 if (label < 0) {
-                    if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
+                    if (!obj_settings_list_insert_at(log, &list, -1, &res[n]))
                         obj_setting_free(&res[n]);
-                        free_obj_settings_list(&res);
-                        ret = M_OPT_OUT_OF_RANGE;
-                        goto done;
-                    }
                 } else {
                     // Prefer replacement semantics, instead of actually
                     // appending.
@@ -3512,12 +3498,8 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
                 } else {
                     int found = obj_settings_find_by_content(list, &res[n]);
                     if (found < 0) {
-                        if (!obj_settings_list_insert_at(log, &list, -1, &res[n])) {
+                        if (!obj_settings_list_insert_at(log, &list, -1, &res[n]))
                             obj_setting_free(&res[n]);
-                            free_obj_settings_list(&res);
-                            ret = M_OPT_OUT_OF_RANGE;
-                            goto done;
-                        }
                     } else {
                         obj_settings_list_del_at(&list, found);
                         obj_setting_free(&res[n]);
