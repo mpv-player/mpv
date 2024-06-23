@@ -67,11 +67,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_initialize(ctx));
 #endif
 
+    int ret;
     if (MPV_FORMAT == MPV_FORMAT_STRING) {
-        mpv_set_property_string(ctx, name, (void *)data);
+        ret = mpv_set_property_string(ctx, name, (void *)data);
     } else {
-        mpv_set_property(ctx, name, MPV_FORMAT, (void *)data);
+        ret = mpv_set_property(ctx, name, MPV_FORMAT, (void *)data);
     }
+
+    if (ret != MPV_ERROR_SUCCESS)
+        return 0;
 
 #if MPV_RUN
     check_error(mpv_set_option_string(ctx, "ao-null-untimed", "yes"));
