@@ -41,6 +41,9 @@ static inline uint64_t splitmix64(uint64_t *const x)
 
 void mp_rand_seed(uint64_t seed)
 {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    seed = 42;
+#endif
     mp_mutex_lock(&state_mutex);
     state[0] = seed;
     for (int i = 1; i < 4; i++)
