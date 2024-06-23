@@ -1088,7 +1088,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     m_config_cache_write_opt(w32->opts_cache,
                              &w32->opts->fullscreen);
 
-    if (toggle_fs) {
+    if (toggle_fs && !w32->opts->window_maximized) {
         if (w32->current_fs) {
             // Save window rect when switching to fullscreen.
             w32->prev_windowrc = w32->windowrc;
@@ -1123,6 +1123,8 @@ static void update_minimized_state(struct vo_w32_state *w32)
     }
 }
 
+static void update_window_state(struct vo_w32_state *w32);
+
 static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullscreen)
 {
     if (w32->parent)
@@ -1133,6 +1135,8 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
     // Apply the maximized state on leaving fullscreen.
     if (w32->current_fs && !leaving_fullscreen)
         return;
+
+    bool toggle = !w32->opts->window_maximized && IsMaximized(w32->window);
 
     WINDOWPLACEMENT wp = { .length = sizeof wp };
     GetWindowPlacement(w32->window, &wp);
@@ -1152,6 +1156,11 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
         } else {
             ShowWindow(w32->window, SW_SHOWNOACTIVATE);
         }
+    }
+
+    if (toggle && !w32->current_fs) {
+        w32->windowrc = w32->prev_windowrc;
+        update_window_state(w32);
     }
 }
 
@@ -1456,7 +1465,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             w32->windowrc.right = w32->windowrc.left + w;
             w32->windowrc.bottom = w32->windowrc.top + h;
             signal_events(w32, VO_EVENT_RESIZE);
-            MP_VERBOSE(w32, "resize window: %d:%d\n", w, h);
+            MP_TRACE(w32, "resize window: %d:%d\n", w, h);
         }
 
         // Window may have been minimized, maximized or restored
@@ -2299,7 +2308,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         if (!w32->window_bounds_initialized)
             return VO_FALSE;
 
-        RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
+        RECT *rc = (w32->current_fs || w32->opts->window_maximized)
+                        ? &w32->prev_windowrc : &w32->windowrc;
         s[0] = rect_w(*rc);
         s[1] = rect_h(*rc);
         return VO_TRUE;
@@ -2313,7 +2323,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         RECT *rc = w32->current_fs ? &w32->prev_windowrc : &w32->windowrc;
         resize_and_move_rect(w32, rc, s[0], s[1]);
 
-        if (w32->opts->window_maximized) {
+        if (w32->opts->window_maximized && !w32->current_fs) {
             w32->unmaximize = true;
         }
         w32->fit_on_screen = true;
