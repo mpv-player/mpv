@@ -74,7 +74,7 @@ local function format_track(track)
              and string.format("%.4f", track["demux-fps"]):gsub("%.?0*$", "") ..
              " fps " or "") ..
             (track["demux-channel-count"] and track["demux-channel-count"] ..
-             " ch " or "") ..
+             "ch " or "") ..
             (track["codec-profile"] and track.type == "audio"
              and track["codec-profile"] .. " " or "") ..
             (track["demux-samplerate"] and track["demux-samplerate"] / 1000 ..

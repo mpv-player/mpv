@@ -239,8 +239,12 @@ static void uninit_demuxer(struct MPContext *mpctx)
 #define WHITE_CIRCLE "\xe2\x97\x8b"
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
 #define FILL(s, n) mp_snprintf_cat(s, sizeof(s), "%*s", n, "")
+#define ADD_FLAG(b, flag, first) do {           \
+    APPEND(b, " %s%s", first ? "[" : "", flag); \
+    first = false;                              \
+} while(0)
 
-static void print_stream(struct MPContext *mpctx, struct track *t)
+static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
 {
     struct sh_stream *s = t->stream;
     const char *tname = "?";
@@ -259,33 +263,24 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     }
     char b[2048] = {0};
 
-    bool tracks_have_lang = false;
+    int max_lang_length = 0;
     for (int n = 0; n < mpctx->num_tracks; n++) {
-        if (mpctx->tracks[n]->lang) {
-            tracks_have_lang = true;
-            break;
-        }
+        if (mpctx->tracks[n]->lang)
+            max_lang_length = MPMAX(strlen(mpctx->tracks[n]->lang), max_lang_length);
     }
 
-    if (!isatty(STDOUT_FILENO)) {
-        APPEND(b, "%s ", t->selected ? BLACK_CIRCLE : WHITE_CIRCLE);
-    } else if (!t->selected) {
-        APPEND(b, "%s", TERM_ESC_GREY);
-    }
-    APPEND(b, "%-5s --%s=%-2d", tname, selopt, t->user_tid);
+    if (indent)
+        APPEND(b, " ");
+    APPEND(b, "%s %-5s  --%s=%-2d", t->selected ? BLACK_CIRCLE : WHITE_CIRCLE,
+           tname, selopt, t->user_tid);
     if (t->lang) {
-        APPEND(b, " --%s=%-7s", langopt, t->lang);
-    } else if (tracks_have_lang) {
-        FILL(b, 16);
+        APPEND(b, " --%s=%-*s ", langopt, max_lang_length, t->lang);
+    } else if (max_lang_length) {
+        FILL(b, (int) strlen(" --alang= ") + max_lang_length);
     }
-    if (t->default_track)
-        APPEND(b, " (*)");
-    if (t->forced_track)
-        APPEND(b, " (f)");
-    if (t->attached_picture)
-        APPEND(b, " [P]");
     if (t->title)
         APPEND(b, " '%s'", t->title);
+
     const char *codec = s ? s->codec->codec : NULL;
     APPEND(b, " (%s", codec ? codec : "<unknown>");
     if (s && s->codec->codec_profile)
@@ -300,19 +295,30 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         }
     } else if (t->type == STREAM_AUDIO) {
         if (s && s->codec->channels.num)
-            APPEND(b, " %d ch", s->codec->channels.num);
-        if (s && s->codec->samplerate) {
-            char *samplerate = mp_format_double(NULL, s->codec->samplerate / 1000.0,
-                                                4, false, false, true);
-            APPEND(b, " %s kHz", samplerate);
-            talloc_free(samplerate);
-        }
+            APPEND(b, " %dch", s->codec->channels.num);
+        if (s && s->codec->samplerate)
+            APPEND(b, " %d Hz", s->codec->samplerate);
     }
-    APPEND(b, ")");
     if (s && s->hls_bitrate > 0)
-        APPEND(b, " (%d kbps)", (s->hls_bitrate + 500) / 1000);
+        APPEND(b, " %d kbps", (s->hls_bitrate + 500) / 1000);
+    APPEND(b, ")");
+
+    bool first = true;
+    if (t->default_track)
+        ADD_FLAG(b, "default", first);
+    if (t->forced_track)
+        ADD_FLAG(b, "forced", first);
+    if (t->attached_picture)
+        ADD_FLAG(b, "picture", first);
+    if (t->visual_impaired_track)
+        ADD_FLAG(b, "visual_impaired", first);
+    if (t->hearing_impaired_track)
+        ADD_FLAG(b, "hearing_impaired", first);
     if (t->is_external)
-        APPEND(b, " (external)");
+        ADD_FLAG(b, "external", first);
+    if (!first)
+        APPEND(b, "]");
+
     MP_INFO(mpctx, "%s\n", b);
 }
 
@@ -323,7 +329,11 @@ void print_track_list(struct MPContext *mpctx, const char *msg)
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
-                print_stream(mpctx, mpctx->tracks[n]);
+                // Indent tracks after messages like "Tracks switched" and
+                // "Playing:".
+                print_stream(mpctx, mpctx->tracks[n], msg ||
+                             mpctx->playlist->num_entries > 1 ||
+                             mpctx->playing->playlist_path);
     }
 }
 
@@ -338,17 +348,15 @@ void update_demuxer_properties(struct MPContext *mpctx)
         for (int n = 0; n < demuxer->num_editions; n++) {
             struct demux_edition *edition = &demuxer->editions[n];
             char b[128] = {0};
-            if (!isatty(STDOUT_FILENO)) {
-                APPEND(b, "%s ", n == demuxer->edition ? BLACK_CIRCLE : WHITE_CIRCLE);
-            } else if (n != demuxer->edition) {
-                APPEND(b, "%s", TERM_ESC_GREY);
-            }
-            APPEND(b, "--edition=%d", n);
+            if (mpctx->playlist->num_entries > 1 || mpctx->playing->playlist_path)
+                APPEND(b, " ");
+            APPEND(b, "%s --edition=%d", n == demuxer->edition ?
+                   BLACK_CIRCLE : WHITE_CIRCLE, n);
             char *name = mp_tags_get_str(edition->metadata, "title");
             if (name)
                 APPEND(b, " '%s'", name);
             if (edition->default_edition)
-                APPEND(b, " (*)");
+                APPEND(b, " [default]");
             MP_INFO(mpctx, "%s\n", b);
         }
     }
