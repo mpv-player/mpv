@@ -1780,20 +1780,8 @@ mp.register_event('log-message', function(e)
     if e.level == 'trace' then return end
 
     -- Use color for debug/v/warn/error/fatal messages.
-    local style = styles[e.level]
-    local terminal_style = terminal_styles[e.level]
-
-    -- Strip the terminal escape sequence from unselected tracks.
-    if e.prefix == 'cplayer' and e.level == 'info' then
-        local found
-        e.text, found = e.text:gsub('^\027%[38;5;8m', '')
-        if found == 1 then
-            style = styles.disabled
-            terminal_style = terminal_styles.disabled
-        end
-    end
-
-    log_add('[' .. e.prefix .. '] ' .. e.text, style, terminal_style)
+    log_add('[' .. e.prefix .. '] ' .. e.text, styles[e.level],
+            terminal_styles[e.level])
 end)
 
 collectgarbage()
