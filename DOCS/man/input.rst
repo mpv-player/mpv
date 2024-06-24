@@ -3108,6 +3108,24 @@ Property list
         ``yes``/true if the track has the forced flag set in the file,
         ``no``/false or unavailable otherwise.
 
+    ``track-list/N/dependent``
+        ``yes``/true if the track has the dependent flag set in the file,
+        ``no``/false or unavailable otherwise.
+
+    ``track-list/N/visual-impaired``
+        ``yes``/true if the track has the visual impaired flag set in the file,
+        ``no``/false or unavailable otherwise.
+
+    ``track-list/N/hearing-impaired``
+        ``yes``/true if the track has the hearing impaired flag set in the file,
+        ``no``/false or unavailable otherwise.
+
+    ``track-list/N/hls-bitrate``
+        The bitrate of the HLS stream, if available.
+
+    ``track-list/N/program-id``
+        The program ID of the HLS stream, if available.
+
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
         in some rare cases.
@@ -3221,6 +3239,11 @@ Property list
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
+                "dependent"         MPV_FORMAT_FLAG
+                "visual-impaired"   MPV_FORMAT_FLAG
+                "hearing-impaired"  MPV_FORMAT_FLAG
+                "hls-bitrate"       MPV_FORMAT_INT64
+                "program-id"        MPV_FORMAT_INT64
                 "selected"          MPV_FORMAT_FLAG
                 "main-selection"    MPV_FORMAT_INT64
                 "external"          MPV_FORMAT_FLAG
@@ -3229,6 +3252,7 @@ Property list
                 "codec-desc"        MPV_FORMAT_STRING
                 "codec-profile"     MPV_FORMAT_STRING
                 "ff-index"          MPV_FORMAT_INT64
+                "decoder"           MPV_FORMAT_STRING
                 "decoder-desc"      MPV_FORMAT_STRING
                 "demux-w"           MPV_FORMAT_INT64
                 "demux-h"           MPV_FORMAT_INT64
@@ -3243,6 +3267,7 @@ Property list
                 "demux-bitrate"     MPV_FORMAT_INT64
                 "demux-rotation"    MPV_FORMAT_INT64
                 "demux-par"         MPV_FORMAT_DOUBLE
+                "format-name"       MPV_FORMAT_STRING
                 "audio-channels"    MPV_FORMAT_INT64
                 "replaygain-track-peak" MPV_FORMAT_DOUBLE
                 "replaygain-track-gain" MPV_FORMAT_DOUBLE
