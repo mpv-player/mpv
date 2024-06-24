@@ -75,7 +75,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     if (ret != MPV_ERROR_SUCCESS)
-        return 0;
+        goto done;
 
 #if MPV_RUN
     check_error(mpv_set_option_string(ctx, "ao-null-untimed", "yes"));
@@ -93,6 +93,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 #endif
 
+done:
     mpv_terminate_destroy(ctx);
 
     return 0;
