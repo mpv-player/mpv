@@ -154,8 +154,16 @@ local function truncate_utf8(str, max_length)
     local len = 0
     local pos = 1
     while pos <= #str do
+        local last_pos = pos
         pos = next_utf8(str, pos)
         len = len + 1
+        if pos > last_pos + 1 then
+            if len == max_length - 1 then
+                pos = prev_utf8(str, pos)
+            else
+                len = len + 1
+            end
+        end
         if len == max_length - 1 then
             return str:sub(1, pos - 1) .. '⋯'
         end
