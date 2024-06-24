@@ -1114,8 +1114,7 @@ static void public_f_reset(struct mp_filter *f)
     if (p->queue) {
         mp_async_queue_reset(p->queue);
         thread_lock(p);
-        if (p->dec_root_filter)
-            mp_filter_reset(p->dec_root_filter);
+        mp_filter_reset(p->dec_root_filter);
         mp_dispatch_interrupt(p->dec_dispatch);
         thread_unlock(p);
         mp_async_queue_resume(p->queue);

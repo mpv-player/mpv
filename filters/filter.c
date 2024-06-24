@@ -592,6 +592,9 @@ static void reset_pin(struct mp_pin *p)
 
 void mp_filter_reset(struct mp_filter *filter)
 {
+    if (!filter)
+        return;
+
     for (int n = 0; n < filter->in->num_children; n++)
         mp_filter_reset(filter->in->children[n]);
 
