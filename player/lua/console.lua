@@ -437,7 +437,8 @@ local function populate_log_with_matches(max_width)
 
     for i = first_match_to_print, last_match_to_print do
         log[#log + 1] = {
-            text = truncate_utf8(matches[i].text, max_width) .. '\n',
+            text = (max_width and truncate_utf8(matches[i].text, max_width)
+                    or matches[i].text) .. '\n',
             style = i == selected_match and styles.selected_suggestion or '',
             terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
         }
@@ -525,7 +526,8 @@ local function update()
                   '\\1a&H00&\\3a&H00&\\1c&Heeeeee&\\3c&H111111&' ..
                   (has_shadow and '\\4a&H99&\\4c&H000000&' or '') ..
                   '\\fn' .. opts.font .. '\\fs' .. opts.font_size ..
-                  '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0\\q1' ..
+                  '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0' ..
+                  (selectable_items and '\\q2' or '\\q1') ..
                   '\\clip(' .. clipping_coordinates .. ')}'
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
     -- inline with the surrounding text, but it sets the advance to the width
@@ -555,7 +557,7 @@ local function update()
     local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
     local suggestion_ass = style .. styles.suggestion .. suggestions
 
-    populate_log_with_matches(width_max)
+    populate_log_with_matches()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
