@@ -349,7 +349,7 @@ jobs:
             --werror        \
             -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
             -Dfuzzers=true -Dlibmpv=true -Dcplayer=false
-          meson compile -C build
+          meson compile -C build fuzzers
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
