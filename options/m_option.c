@@ -2654,7 +2654,8 @@ const m_option_type_t m_option_type_channels = {
 
 static int parse_timestring(struct bstr str, double *time, char endchar)
 {
-    int h, m, len;
+    int len;
+    unsigned h, m;
     double s;
     *time = 0; /* ensure initialization for error cases */
     bool neg = bstr_eatstart0(&str, "-");
@@ -2662,11 +2663,11 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
         bstr_eatstart0(&str, "+");
     if (bstrchr(str, '-') >= 0 || bstrchr(str, '+') >= 0)
         return 0; /* the timestamp shouldn't contain anymore +/- after this point */
-    if (bstr_sscanf(str, "%d:%d:%lf%n", &h, &m, &s, &len) >= 3) {
+    if (bstr_sscanf(str, "%u:%u:%lf%n", &h, &m, &s, &len) >= 3) {
         if (m >= 60 || s >= 60)
             return 0; /* minutes or seconds are out of range */
         *time = 3600.0 * h + 60 * m + s;
-    } else if (bstr_sscanf(str, "%d:%lf%n", &m, &s, &len) >= 2) {
+    } else if (bstr_sscanf(str, "%u:%lf%n", &m, &s, &len) >= 2) {
         if (s >= 60)
             return 0; /* seconds are out of range */
         *time = 60.0 * m + s;
