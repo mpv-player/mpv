@@ -79,7 +79,7 @@ struct bstr bstr_splice(struct bstr str, int start, int end);
 long long bstrtoll(struct bstr str, struct bstr *rest, int base);
 double bstrtod(struct bstr str, struct bstr *rest);
 void bstr_lower(struct bstr str);
-int bstr_sscanf(struct bstr str, const char *format, ...);
+int bstr_sscanf(struct bstr str, const char *format, ...) SCANF_ATTRIBUTE(2, 3);
 
 // Decode a string containing hexadecimal data. All whitespace will be silently
 // ignored. When successful, this allocates a new array to store the output.

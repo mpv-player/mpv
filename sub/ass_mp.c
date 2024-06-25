@@ -121,6 +121,7 @@ static const int map_ass_level[] = {
     MSGL_TRACE,         // 7 "verbose DEBUG"
 };
 
+PRINTF_ATTRIBUTE(2, 0)
 static void message_callback(int level, const char *format, va_list va, void *ctx)
 {
     struct mp_log *log = ctx;

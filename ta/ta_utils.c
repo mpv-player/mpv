@@ -168,6 +168,7 @@ bool ta_strndup_append_buffer(char **str, const char *a, size_t n)
     return strndup_append_at(str, size, a, n);
 }
 
+TA_PRF(3, 0)
 static bool ta_vasprintf_append_at(char **str, size_t at, const char *fmt,
                                    va_list ap)
 {

@@ -296,6 +296,7 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
     talloc_free(line);
 }
 
+PRINTF_ATTRIBUTE(4, 0)
 static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
                            const char *fmt, va_list ap)
 {
