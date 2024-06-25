@@ -79,11 +79,29 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
 #if MPV_RUN
     check_error(mpv_set_option_string(ctx, "ao-null-untimed", "yes"));
-    check_error(mpv_set_option_string(ctx, "untimed", "yes"));
+    check_error(mpv_set_option_string(ctx, "loop-file", "no"));
+    check_error(mpv_set_option_string(ctx, "loop-playlist", "no"));
     check_error(mpv_set_option_string(ctx, "pause", "no"));
+    check_error(mpv_set_option_string(ctx, "untimed", "yes"));
 
-    check_error(mpv_set_option_string(ctx, "audio-files", "av://lavfi:sine=d=0.1"));
-    const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.1", NULL};
+    mpv_node node = {
+        .format = MPV_FORMAT_NODE_ARRAY,
+        .u.list = &(mpv_node_list) {
+            .num = 1,
+            .values = &(mpv_node) {
+                .format = MPV_FORMAT_STRING,
+                .u.string = "av://lavfi:sine=d=0.01",
+            },
+        },
+    };
+    check_error(mpv_set_option(ctx, "audio-files", MPV_FORMAT_NODE, &node));
+
+    node.u.list->num = 0;
+    check_error(mpv_set_option(ctx, "cover-art-files", MPV_FORMAT_NODE, &node));
+    check_error(mpv_set_option(ctx, "external-files", MPV_FORMAT_NODE, &node));
+    check_error(mpv_set_option(ctx, "sub-files", MPV_FORMAT_NODE, &node));
+
+    const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.01", NULL};
     check_error(mpv_command(ctx, cmd));
 
     while (1) {
