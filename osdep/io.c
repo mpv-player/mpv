@@ -332,12 +332,14 @@ size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
 }
 
 #if HAVE_UWP
+PRINTF_ATTRIBUTE(2, 0)
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     return vfprintf(stream, format, args);
 }
 #else
 
+PRINTF_ATTRIBUTE(2, 0)
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     HANDLE wstream = get_handle(stream);
