@@ -895,6 +895,9 @@ truthy to falsy or error. If you want to use this, you need to set
 ``profile-restore`` for the profile. Another possibility it to create another
 profile with an inverse condition to undo the other profile.
 
+You can specify that the profile only gets applied once by setting
+``profile-once``.
+
 Recursive profiles can be used. But it is discouraged to reference other
 conditional profiles in a conditional profile, since this can lead to tricky
 and unintuitive behavior.
@@ -909,6 +912,14 @@ and unintuitive behavior.
         profile-desc=HD video sucks
         profile-cond=width >= 1280
         hue=-50
+
+    Make only HD video fullscreen but only apply the condition once:
+
+    ::
+        [something]
+        profile-cond=width >= 1280
+        profile-once
+        fullscreen
 
     Make only videos containing "youtube" or "youtu.be" in their path brighter:
 

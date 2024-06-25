@@ -50,6 +50,7 @@ struct m_profile {
     char *name;
     char *desc;
     char *cond;
+    bool once_mode;
     int restore_mode;
     int num_opts;
     // Option/value pair array.
@@ -66,6 +67,11 @@ struct m_opt_backup {
     struct m_config_option *co;
     int flags;
     void *backup, *nval;
+};
+
+static const struct m_option profile_once_mode_opt = {
+    .name = "profile-once",
+    .type = &m_option_type_bool,
 };
 
 static const struct m_option profile_restore_mode_opt = {
@@ -962,6 +968,10 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
             p->cond = bstrto0(p, val);
         return 0;
     }
+    if (bstr_equals0(name, profile_once_mode_opt.name)) {
+        return m_option_parse(config->log, &profile_once_mode_opt, name, val,
+                              &p->once_mode);
+    }
     if (bstr_equals0(name, profile_restore_mode_opt.name)) {
         return m_option_parse(config->log, &profile_restore_mode_opt, name, val,
                               &p->restore_mode);
@@ -1069,6 +1079,11 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
             node_map_add_string(entry, "profile-desc", profile->desc);
         if (profile->cond)
             node_map_add_string(entry, "profile-cond", profile->cond);
+        if (profile->once_mode) {
+            char *s = m_option_print(&profile_once_mode_opt, &profile->once_mode);
+            node_map_add_string(entry, profile_once_mode_opt.name, s);
+            talloc_free(s);
+        }
         if (profile->restore_mode) {
             char *s =
                 m_option_print(&profile_restore_mode_opt, &profile->restore_mode);

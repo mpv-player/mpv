@@ -33,9 +33,13 @@ local function evaluate(profile)
     end
     res = not not res
     if res ~= profile.status then
-        if res == true then
+        if profile.has_once_opt and profile.applied_once then
+            msg.verbose("Profile, " .. profile.name .. ", has already been applied once.")
+            return
+        elseif res == true then
             msg.info("Applying auto profile: " .. profile.name)
             mp.commandv("apply-profile", profile.name)
+            profile.applied_once = true
         elseif profile.status == true and profile.has_restore_opt then
             msg.info("Restoring profile: " .. profile.name)
             mp.commandv("apply-profile", profile.name, "restore")
@@ -176,7 +180,9 @@ local function load_profiles(profiles_property)
                 properties = {},
                 status = nil,
                 dirty = true, -- need re-evaluate
-                has_restore_opt = v["profile-restore"] and v["profile-restore"] ~= "default"
+                has_restore_opt = v["profile-restore"] and v["profile-restore"] ~= "default",
+                has_once_opt = v["profile-once"] and v["profile-once"] == "yes",
+                applied_once = false
             }
             profiles[#profiles + 1] = profile
             have_dirty_profiles = true
