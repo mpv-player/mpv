@@ -20,6 +20,13 @@ static void test_normalize(char *file, int line, char *expected, char *path)
     talloc_free(ctx);
 }
 
+static void test_dirname(char *file, int line, char *path, char *expected)
+{
+    char *res = bstrto0(NULL, mp_dirname(path));
+    assert_string_equal_impl(file, line, res, expected);
+    talloc_free(res);
+}
+
 #define TEST_JOIN(a, b, c) \
     test_join(__FILE__, __LINE__, a, b, c);
 
@@ -28,6 +35,12 @@ static void test_normalize(char *file, int line, char *expected, char *path)
 
 #define TEST_NORMALIZE(expected, path) \
     test_normalize(__FILE__, __LINE__, expected, path)
+
+#define TEST_BASENAME(path, expected) \
+    assert_string_equal_impl(__FILE__, __LINE__, mp_basename(path), expected)
+
+#define TEST_DIRNAME(path, expected) \
+    test_dirname(__FILE__, __LINE__, path, expected)
 
 int main(void)
 {
@@ -101,6 +114,42 @@ int main(void)
     TEST_NORMALIZE("/foo/bar", "/foo/bar/");
     TEST_NORMALIZE("/foo/bar", "/foo/./bar");
     TEST_NORMALIZE("/usr", "/usr/bin/..");
+#endif
+
+    TEST_BASENAME("/usr/local/bin", "bin");
+    TEST_BASENAME("/usr/local/", "");
+    TEST_BASENAME("/usr/", "");
+    TEST_BASENAME("/", "");
+    TEST_BASENAME("usr/local/bin", "bin");
+    TEST_BASENAME("usr/local/", "");
+    TEST_BASENAME("usr/", "");
+    TEST_BASENAME("usr", "usr");
+    TEST_BASENAME("", "");
+    TEST_BASENAME(".", ".");
+    TEST_BASENAME("..", "..");
+#if HAVE_DOS_PATHS
+    TEST_BASENAME("C:\\Windows\\System32", "System32");
+    TEST_BASENAME("C:\\Windows\\", "");
+    TEST_BASENAME("C:\\", "");
+    TEST_BASENAME("C:", "");
+#endif
+
+    TEST_DIRNAME("/usr/local/bin", "/usr/local/");
+    TEST_DIRNAME("/usr/local/", "/usr/local/");
+    TEST_DIRNAME("/usr/", "/usr/");
+    TEST_DIRNAME("/", "/");
+    TEST_DIRNAME("usr/local/bin", "usr/local/");
+    TEST_DIRNAME("usr/local/", "usr/local/");
+    TEST_DIRNAME("usr/", "usr/");
+    TEST_DIRNAME("usr", ".");
+    TEST_DIRNAME("", ".");
+    TEST_DIRNAME(".", ".");
+    TEST_DIRNAME("..", ".");
+#if HAVE_DOS_PATHS
+    TEST_DIRNAME("C:\\Windows\\System32", "C:\\Windows\\");
+    TEST_DIRNAME("C:\\Windows\\", "C:\\Windows\\");
+    TEST_DIRNAME("C:\\", "C:\\");
+    TEST_DIRNAME("C:", "C:");
 #endif
 
     return 0;
