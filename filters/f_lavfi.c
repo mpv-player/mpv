@@ -904,6 +904,9 @@ struct mp_lavfi *mp_lavfi_create_graph(struct mp_filter *parent,
                                        char *hwdec_interop,
                                        char **graph_opts, const char *graph)
 {
+    if (!graph)
+        return NULL;
+
     struct lavfi *c = lavfi_alloc(parent);
     if (!c)
         return NULL;
