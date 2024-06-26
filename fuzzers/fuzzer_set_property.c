@@ -104,9 +104,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.01", NULL};
     check_error(mpv_command(ctx, cmd));
 
+    bool loaded = false;
     while (1) {
-        mpv_event *event = mpv_wait_event(ctx, 10000);
-        if (event->event_id == MPV_EVENT_IDLE)
+        mpv_event *event = mpv_wait_event(ctx, -1);
+        if (event->event_id == MPV_EVENT_START_FILE)
+            loaded = true;
+        if (loaded && event->event_id == MPV_EVENT_IDLE)
             break;
     }
 #endif
