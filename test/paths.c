@@ -7,35 +7,16 @@
 static void test_join(char *file, int line, char *a, char *b, char *c)
 {
     char *res = mp_path_join(NULL, a, b);
-    if (strcmp(res, c) != 0) {
-        printf("%s:%d: '%s' + '%s' = '%s', expected '%s'\n", file, line,
-               a, b, res, c);
-        fflush(stdout);
-        abort();
-    }
+    assert_string_equal_impl(file, line, res, c);
     talloc_free(res);
 }
 
-static void test_abs(char *file, int line, bool abs, char *a)
-{
-    if (mp_path_is_absolute(bstr0(a)) != abs) {
-        printf("%s:%d: mp_path_is_absolute('%s') => %d, expected %d\n",
-               file, line, a, !abs, abs);
-        fflush(stdout);
-        abort();
-    }
-}
 
 static void test_normalize(char *file, int line, char *expected, char *path)
 {
     void *ctx = talloc_new(NULL);
     char *normalized = mp_normalize_path(ctx, path);
-    if (strcmp(normalized, expected)) {
-        printf("%s:%d: mp_normalize_path('%s') => %s, expected %s\n",
-               file, line, path, normalized, expected);
-        fflush(stdout);
-        abort();
-    }
+    assert_string_equal_impl(file, line, normalized, expected);
     talloc_free(ctx);
 }
 
@@ -43,7 +24,7 @@ static void test_normalize(char *file, int line, char *expected, char *path)
     test_join(__FILE__, __LINE__, a, b, c);
 
 #define TEST_ABS(abs, a) \
-    test_abs(__FILE__, __LINE__, abs, a)
+    assert_int_equal_impl(__FILE__, __LINE__, abs, mp_path_is_absolute(bstr0(a)))
 
 #define TEST_NORMALIZE(expected, path) \
     test_normalize(__FILE__, __LINE__, expected, path)
