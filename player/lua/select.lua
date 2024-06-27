@@ -62,6 +62,25 @@ mp.add_forced_key_binding(nil, "select-playlist", function ()
     })
 end)
 
+local function format_flags(track)
+    local flags = ""
+
+    for _, flag in ipairs({
+        "default", "forced", "dependent", "visual-impaired", "hearing-impaired",
+        "image", "external"
+    }) do
+        if track[flag] then
+            flags = flags .. flag .. " "
+        end
+    end
+
+    if flags == "" then
+        return ""
+    end
+
+    return " [" .. flags:sub(1, -2) .. "]"
+end
+
 local function format_track(track)
     return (track.selected and "●" or "○") ..
         (track.title and " " .. track.title or "") ..
@@ -78,9 +97,8 @@ local function format_track(track)
             (track["codec-profile"] and track.type == "audio"
              and track["codec-profile"] .. " " or "") ..
             (track["demux-samplerate"] and track["demux-samplerate"] / 1000 ..
-             " kHz " or "") ..
-            (track.external and "external " or "")
-        ):sub(1, -2) .. ")"
+             " kHz " or "")
+        ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
 mp.add_forced_key_binding(nil, "select-track", function ()
