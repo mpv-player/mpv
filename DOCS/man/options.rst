@@ -5921,6 +5921,11 @@ them.
     Defines the size of an edge border (default: 32) to initiate client side
     resizes events in the wayland contexts with touch events.
 
+``--wayland-present=<yes|no>``
+    Enable the use of wayland's presentation time protocol for more accurate
+    frame presentation if it is supported by the compositor (default: ``yes``).
+    This only has an effect if ``--video-sync=display-...`` is being used.
+
 ``--spirv-compiler=<compiler>``
     Controls which compiler is used to translate GLSL to SPIR-V. This is
     only relevant for ``--gpu-api=d3d11`` with ``--vo=gpu``.
