@@ -2076,9 +2076,12 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static const char *track_type_name(enum stream_type t)
+static const char *track_type_name(struct track *t)
 {
-    switch (t) {
+    if (t->image)
+        return "Image";
+
+    switch (t->type) {
     case STREAM_VIDEO: return "Video";
     case STREAM_AUDIO: return "Audio";
     case STREAM_SUB: return "Sub";
@@ -2100,7 +2103,7 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                     continue;
 
                 res = talloc_asprintf_append(res, "%s: ",
-                                             track_type_name(track->type));
+                                             track_type_name(track));
                 res = talloc_strdup_append(res,
                                 track->selected ? list_current : list_normal);
                 res = talloc_asprintf_append(res, "(%d) ", track->user_tid);

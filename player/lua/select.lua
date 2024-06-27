@@ -87,7 +87,8 @@ mp.add_forced_key_binding(nil, "select-track", function ()
     local tracks = {}
 
     for i, track in ipairs(mp.get_property_native("track-list")) do
-        tracks[i] = track.type:sub(1, 1):upper() .. track.type:sub(2) .. ": " ..
+        tracks[i] = (track.image and "Image" or
+                     track.type:sub(1, 1):upper() .. track.type:sub(2)) .. ": " ..
                     format_track(track)
     end
 
