@@ -97,7 +97,11 @@ local function format_track(track)
             (track["codec-profile"] and track.type == "audio"
              and track["codec-profile"] .. " " or "") ..
             (track["demux-samplerate"] and track["demux-samplerate"] / 1000 ..
-             " kHz " or "")
+             " kHz " or "") ..
+            (track["demux-bitrate"] and string.format("%.0f", track["demux-bitrate"] / 1000)
+             .. " kbps " or "") ..
+            (track["hls-bitrate"] and string.format("%.0f", track["hls-bitrate"] / 1000)
+             .. " HLS kbps " or "")
         ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
