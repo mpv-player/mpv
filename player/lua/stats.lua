@@ -1016,12 +1016,12 @@ local function add_audio(s)
     local track = mp.get_property_native("current-tracks/audio")
     if track then
         append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""})
+        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
+               no_prefix_markup=true, suffix="]"})
         if track["codec"] ~= track["decoder"] then
             append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
                    no_prefix_markup=true, suffix="]"})
         end
-        append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
-               no_prefix_markup=true, suffix="]"})
     end
     append_property(s, "current-ao", {prefix="AO:", nl="",
                                       indent=o.prefix_sep .. o.prefix_sep})
