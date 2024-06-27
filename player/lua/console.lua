@@ -18,16 +18,10 @@ local assdraw = require 'mp.assdraw'
 -- Default options
 local opts = {
     font = "",
-    -- Set the font size used for the REPL and the console. This will be
-    -- multiplied by "scale".
     font_size = 16,
     border_size = 1,
     case_sensitive = true,
-    -- Remove duplicate entries in history as to only keep the latest one.
     history_dedup = true,
-    -- The ratio of font height to font width.
-    -- Adjusts table width of completion suggestions.
-    -- Values in the range 1.8..2.5 make sense for common monospace fonts.
     font_hw_ratio = 'auto',
 }
 
@@ -154,7 +148,7 @@ local function truncate_utf8(str, max_length)
         len = len + 1
         if pos > last_pos + 1 then
             if len == max_length - 1 then
-                pos = prev_utf8(str, pos)
+                pos = last_pos
             else
                 len = len + 1
             end
@@ -503,19 +497,18 @@ local function update()
         return
     end
 
-    local dpi_scale = mp.get_property_native("display-hidpi-scale", 1.0)
+    -- Clear the OSD if the REPL is not active
+    if not repl_active then
+        mp.set_osd_ass(0, 0, '')
+        return
+    end
 
     local screenx, screeny = mp.get_osd_size()
+    local dpi_scale = mp.get_property_native('display-hidpi-scale', 1)
     screenx = screenx / dpi_scale
     screeny = screeny / dpi_scale
 
     local bottom_left_margin = 6
-
-    -- Clear the OSD if the REPL is not active
-    if not repl_active then
-        mp.set_osd_ass(screenx, screeny, '')
-        return
-    end
 
     local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
