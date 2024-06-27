@@ -3479,14 +3479,6 @@ Property list
     In earlier versions of mpv, these properties returned a static (but bad)
     guess using a completely different method.
 
-``packet-video-bitrate``, ``packet-audio-bitrate``, ``packet-sub-bitrate``
-    Old and deprecated properties for ``video-bitrate``, ``audio-bitrate``,
-    ``sub-bitrate``. They behave exactly the same, but return a value in
-    kilobits. Also, they don't have any OSD formatting, though the same can be
-    achieved with e.g. ``${=video-bitrate}``.
-
-    These properties shouldn't be used anymore.
-
 ``audio-device-list``
     The list of discovered audio devices. This is mostly for use with the
     client API, and reflects what ``--audio-device=help`` with the command line
