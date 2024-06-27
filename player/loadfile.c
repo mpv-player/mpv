@@ -308,12 +308,12 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
         ADD_FLAG(b, "default", first);
     if (t->forced_track)
         ADD_FLAG(b, "forced", first);
-    if (t->attached_picture)
-        ADD_FLAG(b, "picture", first);
+    if (t->dependent_track)
+        ADD_FLAG(b, "dependent", first);
     if (t->visual_impaired_track)
-        ADD_FLAG(b, "visual_impaired", first);
+        ADD_FLAG(b, "visual-impaired", first);
     if (t->hearing_impaired_track)
-        ADD_FLAG(b, "hearing_impaired", first);
+        ADD_FLAG(b, "hearing-impaired", first);
     if (t->is_external)
         ADD_FLAG(b, "external", first);
     if (!first)

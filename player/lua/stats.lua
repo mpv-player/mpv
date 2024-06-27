@@ -1227,8 +1227,8 @@ local function add_track(c, t, i)
     append(c, t["ff-index"], {prefix="FFmpeg Index:", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append(c, t["external-filename"], {prefix="File:"})
     append(c, "", {prefix="Flags:"})
-    local flags = {"default", "forced", "external", "dependent",
-                   "hearing-impaired", "visual-impaired", "image", "albumart"}
+    local flags = {"default", "forced", "dependent", "visual-impaired",
+                   "hearing-impaired", "image", "albumart", "external"}
     local any = false
     for _, flag in ipairs(flags) do
         if t[flag] then
