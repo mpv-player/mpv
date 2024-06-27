@@ -17,11 +17,6 @@ local assdraw = require 'mp.assdraw'
 
 -- Default options
 local opts = {
-    -- All drawing is scaled by this value, including the text borders and the
-    -- cursor. Change it if you have a high-DPI display.
-    scale = 1,
-    -- Set the font used for the REPL and the console.
-    -- This has to be a monospaced font.
     font = "",
     -- Set the font size used for the REPL and the console. This will be
     -- multiplied by "scale".
@@ -266,7 +261,6 @@ local function calculate_max_log_lines()
 
     return math.floor(mp.get_property_native('osd-height')
                       / mp.get_property_native('display-hidpi-scale', 1)
-                      / opts.scale
                       * (1 - global_margins.t - global_margins.b)
                       / opts.font_size
                       -- Subtract 1 for the input line and 1 for the newline
@@ -510,8 +504,6 @@ local function update()
     end
 
     local dpi_scale = mp.get_property_native("display-hidpi-scale", 1.0)
-
-    dpi_scale = dpi_scale * opts.scale
 
     local screenx, screeny = mp.get_osd_size()
     screenx = screenx / dpi_scale
