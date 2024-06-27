@@ -154,6 +154,7 @@ const struct m_sub_options wayland_conf = {
             M_RANGE(0, INT_MAX)},
         {"wayland-edge-pixels-touch", OPT_INT(edge_pixels_touch),
             M_RANGE(0, INT_MAX)},
+        {"wayland-present", OPT_BOOL(present)},
         {0},
     },
     .size = sizeof(struct wayland_opts),
@@ -161,6 +162,7 @@ const struct m_sub_options wayland_conf = {
         .configure_bounds = -1,
         .edge_pixels_pointer = 16,
         .edge_pixels_touch = 32,
+        .present = true,
     },
 };
 
@@ -1283,7 +1285,7 @@ static void pres_set_clockid(void *data, struct wp_presentation *pres,
     struct vo_wayland_state *wl = data;
 
     if (clockid == CLOCK_MONOTONIC || clockid == CLOCK_MONOTONIC_RAW)
-        wl->use_present = true;
+        wl->present_clock = true;
 }
 
 static const struct wp_presentation_listener pres_listener = {
@@ -1349,6 +1351,7 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
+    wl->use_present = wl->present_clock && wl->opts->present;
     if (wl->use_present) {
         struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->callback_surface);
         add_feedback(wl->fback_pool, fback);
