@@ -3965,14 +3965,12 @@ static void initiate_refresh_seek(struct demux_internal *in,
 }
 
 // Called locked.
-static void refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
+static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
                           double ref_pts)
 {
-    struct demux_internal *in = demuxer->in;
     struct demux_stream *ds = stream->ds;
     ref_pts = MP_ADD_PTS(ref_pts, -in->ts_offset);
 
-    MP_VERBOSE(in, "refresh track %d\n", stream->index);
     if (in->back_demuxing)
         ds->back_seek_pos = ref_pts;
     // Allow refresh seek for non-video streams, even if no packets have
@@ -3982,8 +3980,11 @@ static void refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
     // - If cache is enabled and a seek causes some new data to be cached, the demuxer
     //   is sought to the end of cache after cache joining. Switching track immediately
     //   after this also causes the same problem.
-    if (!in->after_seek || ds->type != STREAM_VIDEO)
+    if (!in->after_seek || ds->type != STREAM_VIDEO) {
+        MP_VERBOSE(in, "refresh track %d (%s)\n", stream->index,
+                   stream_type_name(ds->type));
         initiate_refresh_seek(in, ds, ref_pts);
+    }
 }
 
 // Set whether the given stream should return packets.
@@ -4002,7 +4003,7 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
         update_stream_selection_state(in, ds);
         in->tracks_switched = true;
         if (ds->selected)
-            refresh_track(demuxer, stream, ref_pts);
+            refresh_track(in, stream, ref_pts);
         if (in->threading) {
             mp_cond_signal(&in->wakeup);
         } else {
@@ -4022,7 +4023,7 @@ void demuxer_refresh_track(struct demuxer *demuxer, struct sh_stream *stream,
     mp_mutex_lock(&in->lock);
     if (ds->selected) {
         update_stream_selection_state(in, ds);
-        refresh_track(demuxer, stream, ref_pts);
+        refresh_track(in, stream, ref_pts);
     }
     mp_mutex_unlock(&in->lock);
 }
