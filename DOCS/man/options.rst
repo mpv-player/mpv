@@ -6546,8 +6546,8 @@ them.
     macvk
         Vulkan on macOS with a metal surface through a translation layer (experimental)
 
-``--gpu-api=<type>``
-    Controls which type of graphics APIs will be accepted:
+``--gpu-api=<type1,type2,...[,]>``
+    Specify a priority list of accepted graphics APIs.
 
     auto
         Use any available API (default). Note that the default GPU API used for this

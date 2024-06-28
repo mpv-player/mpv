@@ -11,7 +11,7 @@ struct ra_ctx_opts {
     bool debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
     struct m_obj_settings *context_list; // list of `ra_ctx_fns.name` to probe
-    char *context_type;  // filter by `ra_ctx_fns.type`
+    struct m_obj_settings *context_type_list;  // list of `ra_ctx_fns.type` to probe
 };
 
 extern const struct m_sub_options ra_ctx_conf;
