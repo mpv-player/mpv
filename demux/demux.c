@@ -3973,6 +3973,17 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
 
     if (in->back_demuxing)
         ds->back_seek_pos = ref_pts;
+    // Avoid refresh seek for video streams except when immediately after a seek
+    // to ensure a correct seek position.
+    bool avoid_refresh = false;
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds_n = in->streams[n]->ds;
+        if (ds_n->type == STREAM_VIDEO && ds_n->selected) {
+            avoid_refresh = true;
+            break;
+        }
+    }
+    avoid_refresh = avoid_refresh && !(in->after_seek && !in->after_seek_to_start);
     // Allow refresh seek for non-video streams, even if no packets have
     // ever been read yet or after seeking. This is necessary because:
     // - A-V sync targets may come from different demuxers, so enabling an external
@@ -3980,7 +3991,7 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
     // - If cache is enabled and a seek causes some new data to be cached, the demuxer
     //   is sought to the end of cache after cache joining. Switching track immediately
     //   after this also causes the same problem.
-    if (!in->after_seek || ds->type != STREAM_VIDEO) {
+    if (!in->after_seek || (ds->type != STREAM_VIDEO && !avoid_refresh)) {
         MP_VERBOSE(in, "refresh track %d (%s)\n", stream->index,
                    stream_type_name(ds->type));
         initiate_refresh_seek(in, ds, ref_pts);
