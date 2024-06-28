@@ -638,8 +638,14 @@ local function handle_edit()
         matches = {}
         selected_match = 1
 
-        for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-            matches[i] = { index = match, text = selectable_items[match] }
+        if line == '' then
+            for i, item in ipairs(selectable_items) do
+                matches[i] = { index = i, text = item }
+            end
+        else
+            for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+                matches[i] = { index = match, text = selectable_items[match] }
+            end
         end
     end
 
