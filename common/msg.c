@@ -28,6 +28,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/bstr.h"
+#include "misc/wcwidth.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "osdep/terminal.h"
@@ -372,18 +373,19 @@ static int term_disp_width(bstr str)
             continue;
         }
 
-        bstr code = bstr_split_utf8(str, &str);
-        if (code.len == 0)
+        int code = bstr_decode_utf8(str, &str);
+
+        if (code < 0)
             return 0;
 
-        if (code.len == 1 && *code.start == '\n')
-            continue;
+        int code_width = wcwidth(code);
 
-        // Only single-width characters are supported
-        width++;
+        // Non-printable characters have -1 width, so don't subtract that.
+        if (code_width > 0)
+            width += code_width;
 
         // Assume that everything before \r should be discarded for simplicity
-        if (code.len == 1 && *code.start == '\r')
+        if (code == '\r')
             width = 0;
     }
 
