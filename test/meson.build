@@ -115,8 +115,15 @@ test('paths', paths)
 if get_option('libmpv')
     exe = executable('libmpv-test', 'libmpv_test.c',
                      include_directories: incdir, link_with: libmpv)
+
+    ffmpeg = find_program('ffmpeg', required: false)
+    if ffmpeg.found()
+        generate_test_media = find_program(join_paths(source_root, 'ci', 'generate-test-media.sh'), required: true)
+        run_command(generate_test_media, build_root, check: true)
+    endif
+
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
-    test('libmpv', exe, args: file, timeout: 60, should_fail: not features['lua'])
+    test('libmpv', exe, args: [file, build_root], timeout: 60, should_fail: not features['lua'])
 
     exe = executable('libmpv-encode', 'libmpv_encode.c',
                      include_directories: incdir, link_with: libmpv)
