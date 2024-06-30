@@ -25,6 +25,9 @@ if features['wayland-protocols-1-32']
                   [wl_protocol_dir, 'unstable/tablet/tablet-unstable-v2.xml']] # required by cursor-shape
 endif
 
+#TODO: guard this against a version check once the protocol is actually released
+protocols += [[wl_protocol_dir, 'staging/surface-invalidation/surface-invalidation-v1.xml']]
+
 foreach p: protocols
     xml = join_paths(p)
     wl_protocols_source += custom_target(xml.underscorify() + '_c',
