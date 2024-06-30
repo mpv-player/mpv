@@ -1153,17 +1153,21 @@ local function run_ytdl_hook(url)
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end
 
-if not o.try_ytdl_first then
-    mp.add_hook("on_load", 10, function ()
-        msg.verbose('ytdl:// hook')
-        local url = mp.get_property("stream-open-filename", "")
-        if url:find("ytdl://") ~= 1 then
-            msg.verbose('not a ytdl:// url')
-            return
-        end
-        run_ytdl_hook(url)
-    end)
+local function on_load_hook(load_fail)
+    local url = mp.get_property("stream-open-filename", "")
+    local force = url:find("^ytdl://")
+    local early = force or o.try_ytdl_first
+    if early and load_fail then
+        return
+    end
+    if not force and (not url:find("^https?://") or is_blacklisted(url)) then
+        return
+    end
+    run_ytdl_hook(url)
 end
+
+mp.add_hook("on_load", 10, function() on_load_hook() end)
+mp.add_hook("on_load_fail", 10, function() on_load_hook(true) end)
 
 mp.add_hook("on_load", 20, function ()
     msg.verbose('playlist hook')
@@ -1171,16 +1175,6 @@ mp.add_hook("on_load", 20, function ()
     if playlist_cookies[url] then
         set_cookies(playlist_cookies[url])
     end
-end)
-
-mp.add_hook(o.try_ytdl_first and "on_load" or "on_load_fail", 10, function()
-    msg.verbose('full hook')
-    local url = mp.get_property("stream-open-filename", "")
-    if url:find("ytdl://") ~= 1 and
-        not ((url:find("https?://") == 1) and not is_blacklisted(url)) then
-        return
-    end
-    run_ytdl_hook(url)
 end)
 
 mp.add_hook("on_preloaded", 10, function ()
