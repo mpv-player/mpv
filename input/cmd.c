@@ -637,37 +637,3 @@ void mp_print_cmd_list(struct mp_log *out)
         mp_info(out, "\n");
     }
 }
-
-static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, struct bstr param, void *dst)
-{
-    double val;
-    if (bstrcmp0(param, "up") == 0) {
-        val = +1;
-    } else if (bstrcmp0(param, "down") == 0) {
-        val = -1;
-    } else {
-        return m_option_type_double.parse(log, opt, name, param, dst);
-    }
-    *(double *)dst = val;
-    return 1;
-}
-
-static char *print_cycle_dir(const m_option_t *opt, const void *val)
-{
-    return talloc_asprintf(NULL, "%f", *(double *)val);
-}
-
-static void copy_opt(const m_option_t *opt, void *dst, const void *src)
-{
-    if (dst && src)
-        memcpy(dst, src, opt->type->size);
-}
-
-const struct m_option_type m_option_type_cycle_dir = {
-    .name = "up|down",
-    .parse = parse_cycle_dir,
-    .print = print_cycle_dir,
-    .copy = copy_opt,
-    .size = sizeof(double),
-};
