@@ -156,6 +156,8 @@ char *mp_getcwd(void *talloc_ctx)
 
 char *mp_normalize_path(void *talloc_ctx, const char *path)
 {
+    assert(talloc_ctx && "mp_normalize_path requires talloc_ctx!");
+
     if (!path)
         return NULL;
 

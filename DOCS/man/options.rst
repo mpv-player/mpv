@@ -7393,6 +7393,13 @@ Miscellaneous
 
     .. warning:: Using realtime priority can cause system lockup.
 
+``--media-controls=<yes|player|no>``
+    (Windows only)
+    Enable integration of media control interface SystemMediaTransportControls.
+    If set to ``player``, only the player will use the controls. Setting it to
+    ``yes`` will also enable the controls for libmpv integrations.
+    (default: ``player``)
+
 ``--force-media-title=<string>``
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's
