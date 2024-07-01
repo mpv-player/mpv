@@ -68,6 +68,7 @@ extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_obj_settings_list;
 extern const m_option_type_t m_option_type_node;
 extern const m_option_type_t m_option_type_rect;
+extern const m_option_type_t m_option_type_cycle_dir;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;

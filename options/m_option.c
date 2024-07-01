@@ -3879,6 +3879,34 @@ const m_option_type_t m_option_type_node = {
     .equal = node_equal,
 };
 
+static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
+                           struct bstr name, struct bstr param, void *dst)
+{
+    double val;
+    if (bstrcmp0(param, "up") == 0) {
+        val = +1;
+    } else if (bstrcmp0(param, "down") == 0) {
+        val = -1;
+    } else {
+        return m_option_type_double.parse(log, opt, name, param, dst);
+    }
+    *(double *)dst = val;
+    return 1;
+}
+
+static char *print_cycle_dir(const m_option_t *opt, const void *val)
+{
+    return talloc_asprintf(NULL, "%f", *(double *)val);
+}
+
+const m_option_type_t m_option_type_cycle_dir = {
+    .name = "up|down",
+    .parse = parse_cycle_dir,
+    .print = print_cycle_dir,
+    .copy = copy_opt,
+    .size = sizeof(double),
+};
+
 // Special-cased by m_config.c.
 const m_option_type_t m_option_type_alias = {
     .name  = "alias",

@@ -154,6 +154,4 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
 // This creates a copy of a command (used by the auto repeat stuff).
 struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
-extern const struct m_option_type m_option_type_cycle_dir;
-
 #endif
