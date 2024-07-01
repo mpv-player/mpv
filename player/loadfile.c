@@ -252,7 +252,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
     const char *langopt = "?";
     switch (t->type) {
     case STREAM_VIDEO:
-        tname = "Video"; selopt = "vid"; langopt = "vlang";
+        tname = t->image ? "Image" : "Video"; selopt = "vid"; langopt = "vlang";
         break;
     case STREAM_AUDIO:
         tname = "Audio"; selopt = "aid"; langopt = "alang";
@@ -299,8 +299,10 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
         if (s && s->codec->samplerate)
             APPEND(b, " %d Hz", s->codec->samplerate);
     }
-    if (s && s->hls_bitrate > 0)
-        APPEND(b, " %d kbps", (s->hls_bitrate + 500) / 1000);
+    if (s && s->codec->bitrate)
+        APPEND(b, " %d kbps", (s->codec->bitrate + 500) / 1000);
+    if (s && s->hls_bitrate)
+        APPEND(b, " %d HLS kbps", (s->hls_bitrate + 500) / 1000);
     APPEND(b, ")");
 
     bool first = true;
@@ -308,12 +310,12 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
         ADD_FLAG(b, "default", first);
     if (t->forced_track)
         ADD_FLAG(b, "forced", first);
-    if (t->attached_picture)
-        ADD_FLAG(b, "picture", first);
+    if (t->dependent_track)
+        ADD_FLAG(b, "dependent", first);
     if (t->visual_impaired_track)
-        ADD_FLAG(b, "visual_impaired", first);
+        ADD_FLAG(b, "visual-impaired", first);
     if (t->hearing_impaired_track)
-        ADD_FLAG(b, "hearing_impaired", first);
+        ADD_FLAG(b, "hearing-impaired", first);
     if (t->is_external)
         ADD_FLAG(b, "external", first);
     if (!first)

@@ -62,6 +62,25 @@ mp.add_forced_key_binding(nil, "select-playlist", function ()
     })
 end)
 
+local function format_flags(track)
+    local flags = ""
+
+    for _, flag in ipairs({
+        "default", "forced", "dependent", "visual-impaired", "hearing-impaired",
+        "image", "external"
+    }) do
+        if track[flag] then
+            flags = flags .. flag .. " "
+        end
+    end
+
+    if flags == "" then
+        return ""
+    end
+
+    return " [" .. flags:sub(1, -2) .. "]"
+end
+
 local function format_track(track)
     return (track.selected and "●" or "○") ..
         (track.title and " " .. track.title or "") ..
@@ -79,15 +98,19 @@ local function format_track(track)
              and track["codec-profile"] .. " " or "") ..
             (track["demux-samplerate"] and track["demux-samplerate"] / 1000 ..
              " kHz " or "") ..
-            (track.external and "external " or "")
-        ):sub(1, -2) .. ")"
+            (track["demux-bitrate"] and string.format("%.0f", track["demux-bitrate"] / 1000)
+             .. " kbps " or "") ..
+            (track["hls-bitrate"] and string.format("%.0f", track["hls-bitrate"] / 1000)
+             .. " HLS kbps " or "")
+        ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
 mp.add_forced_key_binding(nil, "select-track", function ()
     local tracks = {}
 
     for i, track in ipairs(mp.get_property_native("track-list")) do
-        tracks[i] = track.type:sub(1, 1):upper() .. track.type:sub(2) .. ": " ..
+        tracks[i] = (track.image and "Image" or
+                     track.type:sub(1, 1):upper() .. track.type:sub(2)) .. ": " ..
                     format_track(track)
     end
 
