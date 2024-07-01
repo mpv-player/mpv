@@ -180,7 +180,7 @@ end
 local function serialize_cookies_for_avformat(cookies)
     local result = ''
     for _, cookie in pairs(cookies) do
-        local cookie_str = ('%s=%s; '):format(cookie.name, cookie.value)
+        local cookie_str = ('%s=%s; '):format(cookie.name, cookie.value:gsub('^"(.+)"$', '%1'))
         for k, v in pairs(cookie) do
             if k ~= "name" and k ~= "value" then
                 cookie_str = cookie_str .. ('%s=%s; '):format(k, v)
