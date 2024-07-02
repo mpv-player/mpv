@@ -40,7 +40,7 @@ enum {
     VO_EVENT_ICC_PROFILE_CHANGED        = 1 << 2,
     // Some other window state changed (position, window state, fps)
     VO_EVENT_WIN_STATE                  = 1 << 3,
-    // The ambient light conditions changed and need to be reloaded
+    // Deprecated. The ambient light conditions changed and need to be reloaded
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
     // Special mechanism for making resizing with Cocoa react faster
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
@@ -114,7 +114,6 @@ enum mp_voctrl {
     VOCTRL_UPDATE_RENDER_OPTS,
 
     VOCTRL_GET_ICC_PROFILE,             // bstr*
-    VOCTRL_GET_AMBIENT_LUX,             // int*
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_HIDPI_SCALE,             // double*
     VOCTRL_GET_DISPLAY_RES,             // int[2]

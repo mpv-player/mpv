@@ -34,10 +34,6 @@ class Common: NSObject {
     let eventsLock = NSLock()
     var events: Int = 0
 
-    var lightSensor: io_connect_t = 0
-    var lastLmu: UInt64 = 0
-    var lightSensorIOPort: IONotificationPortRef?
-
     var displaySleepAssertion: IOPMAssertionID = IOPMAssertionID(0)
 
     var appNotificationObservers: [NSObjectProtocol] = []
@@ -55,7 +51,6 @@ class Common: NSObject {
 
     func initMisc(_ vo: UnsafeMutablePointer<vo>) {
         startDisplayLink(vo)
-        initLightSensor()
         addDisplayReconfigureObserver()
         addAppNotifications()
         option.setMacOptionCallback(macOptsWakeupCallback, context: self)
@@ -147,7 +142,6 @@ class Common: NSObject {
     func uninitCommon() {
         setCursorVisibility(true)
         stopDisplaylink()
-        uninitLightSensor()
         removeDisplayReconfigureObserver()
         removeAppNotifications()
         enableDisplaySleep()
@@ -238,74 +232,6 @@ class Common: NSObject {
             IOPMAssertionLevel(kIOPMAssertionLevelOn),
             "io.mpv.video_playing_back" as CFString,
             &displaySleepAssertion)
-    }
-
-    func lmuToLux(_ v: UInt64) -> Int {
-        // the polinomial approximation for apple lmu value -> lux was empirically
-        // derived by firefox developers (Apple provides no documentation).
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=793728
-        let power_c4: Double = 1 / pow(10, 27)
-        let power_c3: Double = 1 / pow(10, 19)
-        let power_c2: Double = 1 / pow(10, 12)
-        let power_c1: Double = 1 / pow(10, 5)
-
-        let lum = Double(v)
-        let term4: Double = -3.0 * power_c4 * pow(lum, 4.0)
-        let term3: Double = 2.6 * power_c3 * pow(lum, 3.0)
-        let term2: Double = -3.4 * power_c2 * pow(lum, 2.0)
-        let term1: Double = 3.9 * power_c1 * lum
-
-        let lux = Int(ceil(term4 + term3 + term2 + term1 - 0.19))
-        return lux > 0 ? lux : 0
-    }
-
-    var lightSensorCallback: IOServiceInterestCallback = { (ctx, _ service, _ messageType, _ messageArgument) in
-        let com = unsafeBitCast(ctx, to: Common.self)
-
-        var outputs: UInt32 = 2
-        var values: [UInt64] = [0, 0]
-
-        var kr = IOConnectCallMethod(com.lightSensor, 0, nil, 0, nil, 0, &values, &outputs, nil, nil)
-        if kr == KERN_SUCCESS {
-            var mean = (values[0] + values[1]) / 2
-            if com.lastLmu != mean {
-                com.lastLmu = mean
-                com.lightSensorUpdate()
-            }
-        }
-    }
-
-    func lightSensorUpdate() {
-        log.warning("lightSensorUpdate not implemented")
-    }
-
-    func initLightSensor() {
-        let srv = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("AppleLMUController"))
-        if srv == IO_OBJECT_NULL {
-            log.verbose("Can't find an ambient light sensor")
-            return
-        }
-
-        lightSensorIOPort = IONotificationPortCreate(kIOMasterPortDefault)
-        IONotificationPortSetDispatchQueue(lightSensorIOPort, queue)
-        var n = io_object_t()
-        IOServiceAddInterestNotification(lightSensorIOPort, srv, kIOGeneralInterest, lightSensorCallback,
-                                         TypeHelper.bridge(obj: self), &n)
-        let kr = IOServiceOpen(srv, mach_task_self_, 0, &lightSensor)
-        IOObjectRelease(srv)
-
-        if kr != KERN_SUCCESS {
-            log.verbose("Can't start ambient light sensor connection")
-            return
-        }
-        lightSensorCallback(TypeHelper.bridge(obj: self), 0, 0, nil)
-    }
-
-    func uninitLightSensor() {
-        if lightSensorIOPort != nil {
-            IONotificationPortDestroy(lightSensorIOPort)
-            IOObjectRelease(lightSensor)
-        }
     }
 
     var reconfigureCallback: CGDisplayReconfigurationCallBack = { (display, flags, userInfo) in
@@ -588,13 +514,6 @@ class Common: NSObject {
                 icc.pointee = bstrdup(nil, bstr(start: u8Ptr, len: ptr.count))
             }
             return VO_TRUE
-        case VOCTRL_GET_AMBIENT_LUX:
-            if lightSensor != 0 {
-                let lux = data!.assumingMemoryBound(to: Int32.self)
-                lux.pointee = Int32(lmuToLux(lastLmu))
-                return VO_TRUE
-            }
-            return VO_NOTIMPL
         case VOCTRL_GET_UNFS_WINDOW_SIZE:
             let sizeData = data!.assumingMemoryBound(to: Int32.self)
             let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)

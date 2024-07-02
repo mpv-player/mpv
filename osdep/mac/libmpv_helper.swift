@@ -155,15 +155,6 @@ class LibmpvHelper {
         }
     }
 
-    func setRenderLux(_ lux: Int) {
-        if mpvRenderContext == nil { return }
-        var light = lux
-        withUnsafeMutableBytes(of: &light) { (ptr: UnsafeMutableRawBufferPointer) in
-            let params = mpv_render_param(type: MPV_RENDER_PARAM_AMBIENT_LIGHT, data: ptr.baseAddress)
-            mpv_render_context_set_parameter(mpvRenderContext, params)
-        }
-    }
-
     func uninit() {
         mpv_render_context_set_update_callback(mpvRenderContext, nil, nil)
         mp_render_context_set_control_callback(mpvRenderContext, nil, nil)

@@ -161,19 +161,6 @@ static void get_and_update_icc_profile(struct gpu_priv *p)
     }
 }
 
-static void get_and_update_ambient_lighting(struct gpu_priv *p)
-{
-    int lux;
-    int r = p->ctx->fns->control(p->ctx, &p->events, VOCTRL_GET_AMBIENT_LUX, &lux);
-    if (r == VO_TRUE) {
-        gl_video_set_ambient_lux(p->renderer, lux);
-    }
-    if (r != VO_TRUE && gl_video_gamma_auto_enabled(p->renderer)) {
-        MP_ERR(p, "gamma_auto option provided, but querying for ambient"
-                  " lighting is not supported on this platform\n");
-    }
-}
-
 static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
 {
     struct gpu_priv *p = vo->priv;
@@ -233,10 +220,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int r = p->ctx->fns->control(p->ctx, &events, request, data);
     if (events & VO_EVENT_ICC_PROFILE_CHANGED) {
         get_and_update_icc_profile(p);
-        vo->want_redraw = true;
-    }
-    if (events & VO_EVENT_AMBIENT_LIGHTING_CHANGED) {
-        get_and_update_ambient_lighting(p);
         vo->want_redraw = true;
     }
     events |= p->events;
