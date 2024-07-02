@@ -402,6 +402,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
+``screenshot-to-clipboard [<flags>]``
+    Take a screenshot and save it to the system clipboard.
+
+    The ``flags`` argument is like the first argument to ``screenshot`` and
+    supports ``subtitles``, ``video``, ``window``.
+
 ``playlist-next <flags>``
     Go to the next entry on the playlist.
 
@@ -3538,6 +3544,35 @@ Property list
 
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
+
+``clipboard`` (RW)
+    Access to the system clipboard as a key/value map of types and data.
+
+    Sub-paths can be accessed directly; e.g. ``clipboard/text`` can be read, written,
+    or observed.
+
+    Writing a string to the root ``clipboard`` property will write to the text clipboard
+    as a shortcut.
+
+    Converting this property to a string will give a JSON representation of all types.
+    Unset types will be null.
+
+    Writing to one type may cause other types to also be updated.
+
+    Currently, the following types are available:
+
+    ``text``
+        Arbitrary plain text
+
+    ``url``
+        A URL; if ``path`` is populated, this will be a corresponding file:// URL
+
+    ``paths``
+        A list of absolute paths to files on disk.
+
+    ``path``
+        A single absolute path to a file on disk.
+        Exposed for convenience and not included in the top-level map.
 
 ``user-data`` (RW)
     This is a recursive key/value map of arbitrary nodes shared between clients for

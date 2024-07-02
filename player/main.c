@@ -31,6 +31,7 @@
 
 #include "misc/dispatch.h"
 #include "misc/thread_pool.h"
+#include "osdep/clipboard.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 #include "osdep/threads.h"
@@ -274,6 +275,7 @@ struct MPContext *mp_create(void)
         .thread_pool = mp_thread_pool_create(mpctx, 0, 1, 30),
         .stop_play = PT_NEXT_ENTRY,
         .play_dir = 1,
+        .clipboard = m_clipboard_new(mpctx),
     };
 
     mp_mutex_init(&mpctx->abort_lock);
