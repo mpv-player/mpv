@@ -67,11 +67,6 @@ void mp_sleep_ns(int64_t ns)
         return;
 
     int64_t hrt = mp_start_hires_timers(ns);
-
-#ifndef CREATE_WAITABLE_TIMER_HIGH_RESOLUTION
-#define CREATE_WAITABLE_TIMER_HIGH_RESOLUTION 0x2
-#endif
-
     HANDLE timer = CreateWaitableTimerEx(NULL, NULL,
                                          CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
                                          TIMER_ALL_ACCESS);

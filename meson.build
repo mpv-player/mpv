@@ -304,7 +304,7 @@ features += {'darwin': darwin}
 features += {'posix': posix}
 features += {'dos-paths': win32, 'win32': win32}
 
-mswin_flags = ['-D_WIN32_WINNT=0x0602', '-DWINVER=0x0602', '-DUNICODE',
+mswin_flags = ['-D_WIN32_WINNT=0x0A00', '-DWINVER=0x0A00', '-DUNICODE',
                '-DCOBJMACROS', '-DINITGUID', '-U__STRICT_ANSI__', '-DNOMINMAX',
                '-D_USE_MATH_DEFINES', '-DWIN32_LEAN_AND_MEAN',
                '-D_CRT_DECLARE_NONSTDC_NAMES', '-D_CRT_NONSTDC_NO_WARNINGS',
@@ -493,17 +493,15 @@ endif
 
 features += {'win32-desktop': win32 and not uwp.found()}
 if features['win32-desktop']
-    pathcch = cc.find_library('pathcch', required: false)
-    features += {'pathcch': pathcch.found()}
-    if features['pathcch']
-        dependencies += pathcch
-    endif
     win32_desktop_libs = [cc.find_library('avrt'),
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
                           cc.find_library('imm32'),
                           cc.find_library('ntdll'),
                           cc.find_library('ole32'),
+                          cc.find_library('pathcch'),
+                          cc.find_library('shcore'),
+                          cc.find_library('user32'),
                           cc.find_library('uuid'),
                           cc.find_library('uxtheme'),
                           cc.find_library('version')]
@@ -999,7 +997,6 @@ if features['d3d11']
     sources += files('video/out/d3d11/context.c',
                      'video/out/d3d11/ra_d3d11.c')
     features += {'dxgi-debug-d3d11': cc.has_header_symbol('d3d11sdklayers.h', 'DXGI_DEBUG_D3D11')}
-    features += {'dxgi-debug': cc.has_header_symbol('dxgidebug.h', 'IID_IDXGIInfoQueue')}
 endif
 
 wayland = {
