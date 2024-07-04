@@ -166,25 +166,43 @@ const struct m_obj_list ra_ctx_obj_list = {
     .use_global_options = true,
 };
 
-static int ra_ctx_api_help(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name)
+static bool get_type_desc(struct m_obj_desc *dst, int index)
 {
-    mp_info(log, "GPU APIs (contexts):\n");
-    for (int n = 0; n < MP_ARRAY_SIZE(contexts); n++) {
-        mp_info(log, "    %s (%s)\n", contexts[n]->type, contexts[n]->name);
+    int api_index = 0;
+
+    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
+        if (i && strcmp(contexts[i - 1]->type, contexts[i]->type))
+            api_index++;
+
+        if (api_index == index) {
+            *dst = (struct m_obj_desc) {
+                .name = contexts[i]->type,
+                .description = "",
+            };
+            return true;
+        }
     }
-    return M_OPT_EXIT;
+
+    return false;
 }
 
-static inline OPT_STRING_VALIDATE_FUNC(ra_ctx_validate_api)
+static void print_context_apis(struct mp_log *log)
 {
-    struct bstr param = bstr0(*value);
-    for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-        if (bstr_equals0(param, contexts[i]->type))
-            return 1;
+    mp_info(log, "Available GPU APIs and contexts:\n");
+    for (int n = 0; n < MP_ARRAY_SIZE(contexts); n++) {
+        mp_info(log, "  %s %s\n", contexts[n]->type, contexts[n]->name);
     }
-    return M_OPT_INVALID;
 }
+
+const struct m_obj_list ra_ctx_type_obj_list = {
+    .get_desc = get_type_desc,
+    .check_unknown_entry = check_unknown_entry,
+    .description = "GPU APIs",
+    .allow_trailer = true,
+    .disallow_positional_parameters = true,
+    .use_global_options = true,
+    .print_help_list = print_context_apis,
+};
 
 #define OPT_BASE_STRUCT struct ra_ctx_opts
 const struct m_sub_options ra_ctx_conf = {
@@ -192,8 +210,7 @@ const struct m_sub_options ra_ctx_conf = {
         {"gpu-context",
             OPT_SETTINGSLIST(context_list, &ra_ctx_obj_list)},
         {"gpu-api",
-            OPT_STRING_VALIDATE(context_type, ra_ctx_validate_api),
-            .help = ra_ctx_api_help},
+            OPT_SETTINGSLIST(context_type_list, &ra_ctx_type_obj_list)},
         {"gpu-debug", OPT_BOOL(debug)},
         {"gpu-sw", OPT_BOOL(allow_sw)},
         {0}
@@ -201,15 +218,26 @@ const struct m_sub_options ra_ctx_conf = {
     .size = sizeof(struct ra_ctx_opts),
 };
 
-static struct ra_ctx *create_in_contexts(struct vo *vo, const char *name, bool api_auto,
-                                         const struct ra_ctx_fns *ctxs[],
-                                         size_t size, struct ra_ctx_opts opts)
+static struct ra_ctx *create_in_contexts(struct vo *vo, const char *name,
+                                         struct m_obj_settings *context_type_list,
+                                         const struct ra_ctx_fns *ctxs[], size_t size,
+                                         struct ra_ctx_opts opts)
 {
     for (int i = 0; i < size; i++) {
         if (strcmp(name, ctxs[i]->name) != 0)
             continue;
-        if (!api_auto && strcmp(ctxs[i]->type, opts.context_type) != 0)
-            continue;
+        if (context_type_list) {
+            bool found = false;
+            for (int j = 0; context_type_list[j].name; j++) {
+                if (strcmp(context_type_list[j].name, "auto") == 0 ||
+                    strcmp(context_type_list[j].name, ctxs[i]->type) == 0) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                continue;
+        }
         struct ra_ctx *ctx = talloc_ptrtype(NULL, ctx);
         *ctx = (struct ra_ctx) {
             .vo = vo,
@@ -230,11 +258,11 @@ static struct ra_ctx *create_in_contexts(struct vo *vo, const char *name, bool a
 struct ra_ctx *ra_ctx_create_by_name(struct vo *vo, const char *name)
 {
     struct ra_ctx_opts dummy = {0};
-    struct ra_ctx *ctx = create_in_contexts(vo, name, true, contexts,
+    struct ra_ctx *ctx = create_in_contexts(vo, name, NULL, contexts,
                                             MP_ARRAY_SIZE(contexts), dummy);
     if (ctx)
         return ctx;
-    return create_in_contexts(vo, name, true, no_api_contexts,
+    return create_in_contexts(vo, name, NULL, no_api_contexts,
                               MP_ARRAY_SIZE(no_api_contexts), dummy);
 }
 
@@ -242,7 +270,6 @@ struct ra_ctx *ra_ctx_create_by_name(struct vo *vo, const char *name)
 //  vo_flags: passed to the backend's create window function
 struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
 {
-    bool api_auto = !opts.context_type || strcmp(opts.context_type, "auto") == 0;
     bool ctx_auto = !opts.context_list ||
                     (opts.context_list[0].name &&
                      strcmp(opts.context_list[0].name, "auto") == 0);
@@ -259,16 +286,27 @@ struct ra_ctx *ra_ctx_create(struct vo *vo, struct ra_ctx_opts opts)
 
     struct ra_ctx *ctx = NULL;
     if (opts.probing) {
-        for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++) {
-            ctx = create_in_contexts(vo, contexts[i]->name, api_auto,
-                                     contexts, MP_ARRAY_SIZE(contexts), opts);
-            if (ctx)
-                goto done;
+        struct m_obj_settings context_type_list[2] = {{.name = "auto"}, {0}};
+
+        for (int i = 0;
+             opts.context_type_list ? opts.context_type_list[i].name != NULL : i == 0;
+             i++) {
+            for (int j = 0; j < MP_ARRAY_SIZE(contexts); j++) {
+                if (opts.context_type_list)
+                    context_type_list[0].name = opts.context_type_list[i].name;
+
+                ctx = create_in_contexts(vo, contexts[j]->name, context_type_list,
+                                         contexts, MP_ARRAY_SIZE(contexts),
+                                         opts);
+                if (ctx)
+                    goto done;
+            }
         }
     }
     for (int i = 0; opts.context_list && opts.context_list[i].name; i++) {
-        ctx = create_in_contexts(vo, opts.context_list[i].name, api_auto,
-                                 contexts, MP_ARRAY_SIZE(contexts), opts);
+        ctx = create_in_contexts(vo, opts.context_list[i].name,
+                                 opts.context_type_list, contexts,
+                                 MP_ARRAY_SIZE(contexts), opts);
         if (ctx)
             goto done;
     }
