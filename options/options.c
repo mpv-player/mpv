@@ -111,7 +111,7 @@ static const struct m_sub_options screenshot_conf = {
 #define OPT_BASE_STRUCT struct mp_vo_opts
 
 static const m_option_t mp_vo_opt_list[] = {
-    {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list)},
+    {"vo", OPT_SETTINGSLIST(video_driver_list, &vo_obj_list), .flags = UPDATE_VO},
     {"taskbar-progress", OPT_BOOL(taskbar_progress)},
     {"drag-and-drop", OPT_CHOICE(drag_and_drop, {"no", -2}, {"auto", -1},
         {"replace", DND_REPLACE},
