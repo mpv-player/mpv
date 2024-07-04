@@ -422,6 +422,7 @@ typedef struct MPContext {
     bool playing_msg_shown;
 
     int remaining_file_loops;
+    int remaining_ab_loops;
 
     bool paused_for_cache;
     bool demux_underrun;

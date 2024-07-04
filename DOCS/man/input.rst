@@ -2148,6 +2148,12 @@ Property list
     times it causes the player to seek to the beginning of the file, so it is 0
     the last the time is played. -1 corresponds to infinity.
 
+``remaining-ab-loops``
+    How many more times the current A-B loop is going to be looped, if one is
+    active. This is initialized from the value of ``--ab-loop-count``. This
+    counts the number of times it causes the player to seek to ``--ab-loop-a``,
+    so it is 0 the last the time the loop is played. -1 corresponds to infinity.
+
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
 

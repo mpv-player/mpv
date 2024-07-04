@@ -876,6 +876,13 @@ static int mp_property_remaining_file_loops(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, mpctx->remaining_file_loops);
 }
 
+static int mp_property_remaining_ab_loops(void *ctx, struct m_property *prop,
+        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_int_ro(action, arg, mpctx->remaining_ab_loops);
+}
+
 /// Current chapter (RW)
 static int mp_property_chapter(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -4007,6 +4014,8 @@ static const struct m_property mp_properties_base[] = {
     {"playtime-remaining", mp_property_playtime_remaining},
     M_PROPERTY_ALIAS("playback-time", "time-pos"),
     {"remaining-file-loops", mp_property_remaining_file_loops},
+    {"remaining-ab-loops", mp_property_remaining_ab_loops},
+    {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
     {"current-edition", mp_property_current_edition},
     {"chapters", mp_property_chapters},
@@ -7494,6 +7503,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (opt_ptr == &opts->loop_file) {
         mpctx->remaining_file_loops = opts->loop_file;
         mp_notify_property(mpctx, "remaining-file-loops");
+    }
+
+    if (opt_ptr == &opts->ab_loop[0] || opt_ptr == &opts->ab_loop[1] ||
+        opt_ptr == &opts->ab_loop_count) {
+        mpctx->remaining_ab_loops = opts->ab_loop_count;
+        mp_notify_property(mpctx, "remaining-ab-loops");
     }
 
     if (opt_ptr == &opts->ab_loop[0] || opt_ptr == &opts->ab_loop[1]) {

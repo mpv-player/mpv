@@ -885,8 +885,6 @@ static void handle_sstep(struct MPContext *mpctx)
 
 static void handle_loop_file(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-
     if (mpctx->stop_play != AT_END_OF_FILE)
         return;
 
@@ -895,9 +893,9 @@ static void handle_loop_file(struct MPContext *mpctx)
 
     double ab[2];
     if (get_ab_loop_times(mpctx, ab) && mpctx->ab_loop_clip) {
-        if (opts->ab_loop_count > 0) {
-            opts->ab_loop_count--;
-            m_config_notify_change_opt_ptr(mpctx->mconfig, &opts->ab_loop_count);
+        if (mpctx->remaining_ab_loops > 0) {
+            mpctx->remaining_ab_loops--;
+            mp_notify_property(mpctx, "remaining-ab-loops");
         }
         target = ab[0];
         prec = MPSEEK_EXACT;
