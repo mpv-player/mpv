@@ -457,23 +457,24 @@ char *format_file_size(int64_t size);
 #define UPDATE_SUB_HARD         (1 << 22) // subtitle opts. that need full reinit
 #define UPDATE_SUB_EXTS         (1 << 23) // update internal list of sub exts
 #define UPDATE_VIDEO            (1 << 24) // force redraw if needed
-#define UPDATE_OPT_LAST         (1 << 24)
+#define UPDATE_VO               (1 << 25) // reinit the VO
+#define UPDATE_OPT_LAST         (1 << 25)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
     (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
 
 // type_float/type_double: string "default" is parsed as NaN (and reverse)
-#define M_OPT_DEFAULT_NAN       (1 << 25)
+#define M_OPT_DEFAULT_NAN       (1 << 26)
 
 // type time: string "no" maps to MP_NOPTS_VALUE (if unset, NOPTS is rejected)
-#define M_OPT_ALLOW_NO          (1 << 26)
+#define M_OPT_ALLOW_NO          (1 << 27)
 
 // type channels: disallow "auto" (still accept ""), limit list to at most 1 item.
-#define M_OPT_CHANNELS_LIMITED  (1 << 27)
+#define M_OPT_CHANNELS_LIMITED  (1 << 28)
 
 // type_float/type_double: controls if pretty print should trim trailing zeros
-#define M_OPT_FIXED_LEN_PRINT   (1 << 28)
+#define M_OPT_FIXED_LEN_PRINT   (1 << 29)
 
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
