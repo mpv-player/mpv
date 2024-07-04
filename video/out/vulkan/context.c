@@ -128,6 +128,7 @@ const struct m_sub_options vulkan_conf = {
         .async_transfer = true,
         .async_compute = true,
     },
+    .change_flags = UPDATE_VO,
 };
 
 struct priv {
