@@ -86,8 +86,9 @@ struct vo_wayland_state {
     int mouse_x;
     int mouse_y;
     int pending_vo_events;
-    double pending_scaling;
-    double scaling;
+    int pending_scaling;   // base 120
+    int scaling;           // base 120
+    double scaling_factor; // wl->scaling divided by 120
     int timeout_count;
     int wakeup_pipe[2];
 

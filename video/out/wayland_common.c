@@ -62,6 +62,9 @@
 #define XDG_TOPLEVEL_STATE_SUSPENDED 9
 #endif
 
+// From the fractional scale protocol
+#define WAYLAND_SCALE_FACTOR 120.0
+
 
 static const struct mp_keymap keymap[] = {
     /* Special keys */
@@ -214,7 +217,7 @@ static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edge);
 static int get_mods(struct vo_wayland_seat *seat);
 static int greatest_common_divisor(int a, int b);
-static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state);
+static int handle_round(int scale, int n);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
@@ -223,6 +226,7 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
+static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state);
 static void prepare_resize(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
@@ -248,8 +252,8 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     set_cursor_visibility(s, wl->cursor_visible);
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_ENTER);
 
-    wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
-    wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(sx));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(sy));
 
     if (!wl->toplevel_configured)
         mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
@@ -270,8 +274,8 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->mouse_x = wl_fixed_to_int(sx) * wl->scaling;
-    wl->mouse_y = wl_fixed_to_int(sy) * wl->scaling;
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(sx));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(sy));
 
     if (!wl->toplevel_configured)
         mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
@@ -432,8 +436,8 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     // Note: the position should still be saved here for VO dragging handling.
-    wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
-    wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
 
     mp_input_add_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 
@@ -464,8 +468,8 @@ static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->mouse_x = wl_fixed_to_int(x_w) * wl->scaling;
-    wl->mouse_y = wl_fixed_to_int(y_w) * wl->scaling;
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
 
     mp_input_update_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 }
@@ -857,10 +861,11 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     MP_VERBOSE(o->wl, "Registered output %s %s (0x%x):\n"
                "\tx: %dpx, y: %dpx\n"
                "\tw: %dpx (%dmm), h: %dpx (%dmm)\n"
-               "\tscale: %d\n"
+               "\tscale: %f\n"
                "\tHz: %f\n", o->make, o->model, o->id, o->geometry.x0,
                o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
-               mp_rect_h(o->geometry), o->phys_height, o->scale, o->refresh_rate);
+               mp_rect_h(o->geometry), o->phys_height,
+               o->scale / WAYLAND_SCALE_FACTOR, o->refresh_rate);
 
     /* If we satisfy this conditional, something about the current
      * output must have changed (resolution, scale, etc). All window
@@ -882,7 +887,7 @@ static void output_handle_scale(void *data, struct wl_output *wl_output,
         MP_ERR(output->wl, "Invalid output scale given by the compositor!\n");
         return;
     }
-    output->scale = factor;
+    output->scale = factor * WAYLAND_SCALE_FACTOR;
 }
 
 static void output_handle_name(void *data, struct wl_output *wl_output,
@@ -933,7 +938,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
 
     MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %f, refresh rate = %f Hz\n",
                wl->current_output->make, wl->current_output->model,
-               wl->current_output->id, wl->scaling, wl->current_output->refresh_rate);
+               wl->current_output->id, wl->scaling_factor, wl->current_output->refresh_rate);
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
@@ -972,13 +977,13 @@ static void surface_handle_preferred_buffer_scale(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    if (wl->fractional_scale_manager || wl->scaling == scale)
+    if (wl->fractional_scale_manager || wl->scaling == scale * WAYLAND_SCALE_FACTOR)
         return;
 
-    wl->pending_scaling = scale;
+    wl->pending_scaling = scale * WAYLAND_SCALE_FACTOR;
     wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
-               wl->scaling);
+               wl->scaling / WAYLAND_SCALE_FACTOR);
     wl->pending_vo_events |= VO_EVENT_DPI;
     wl->need_rescale = true;
 
@@ -986,8 +991,10 @@ static void surface_handle_preferred_buffer_scale(void *data,
     if (single_output_spanned(wl))
         update_output_scaling(wl);
 
-    if (!wl->current_output)
+    if (!wl->current_output) {
         wl->scaling = wl->pending_scaling;
+        wl->scaling_factor = scale;
+    }
 }
 
 static void surface_handle_preferred_buffer_transform(void *data,
@@ -1144,13 +1151,13 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         apply_keepaspect(wl, &width, &height);
         wl->window_size.x0 = 0;
         wl->window_size.y0 = 0;
-        wl->window_size.x1 = lround(width * wl->scaling);
-        wl->window_size.y1 = lround(height * wl->scaling);
+        wl->window_size.x1 = handle_round(wl->scaling, width);
+        wl->window_size.y1 = handle_round(wl->scaling, height);
     }
     wl->geometry.x0 = 0;
     wl->geometry.y0 = 0;
-    wl->geometry.x1 = lround(width * wl->scaling);
-    wl->geometry.y1 = lround(height * wl->scaling);
+    wl->geometry.x1 = handle_round(wl->scaling, width);
+    wl->geometry.y1 = handle_round(wl->scaling, height);
 
     if (mp_rect_equals(&old_geometry, &wl->geometry))
         return;
@@ -1174,8 +1181,8 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
                                     int32_t width, int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    wl->bounded_width = width * wl->scaling;
-    wl->bounded_height = height * wl->scaling;
+    wl->bounded_width = handle_round(wl->scaling, width);
+    wl->bounded_height = handle_round(wl->scaling, height);
 }
 
 static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
@@ -1195,22 +1202,23 @@ static void preferred_scale(void *data,
                             uint32_t scale)
 {
     struct vo_wayland_state *wl = data;
-    double new_scale = (double)scale / 120;
-    if (wl->scaling == new_scale)
+    if (wl->scaling == scale)
         return;
 
-    wl->pending_scaling = new_scale;
+    wl->pending_scaling = scale;
     wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
-               wl->pending_scaling);
+               wl->pending_scaling / WAYLAND_SCALE_FACTOR);
     wl->need_rescale = true;
 
     // Update scaling now.
     if (single_output_spanned(wl))
         update_output_scaling(wl);
 
-    if (!wl->current_output)
+    if (!wl->current_output) {
         wl->scaling = wl->pending_scaling;
+        wl->scaling_factor = wl->scaling / WAYLAND_SCALE_FACTOR;
+    }
 }
 
 static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
@@ -1906,10 +1914,16 @@ static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
         s->mpkey = 0;
 }
 
+// Avoid possible floating point errors.
+static int handle_round(int scale, int n)
+{
+    return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
+}
+
 static void prepare_resize(struct vo_wayland_state *wl)
 {
-    int32_t width = mp_rect_w(wl->geometry) / wl->scaling;
-    int32_t height = mp_rect_h(wl->geometry) / wl->scaling;
+    int32_t width = mp_rect_w(wl->geometry) / wl->scaling_factor;
+    int32_t height = mp_rect_h(wl->geometry) / wl->scaling_factor;
     xdg_surface_set_window_geometry(wl->xdg_surface, 0, 0, width, height);
     wl->pending_vo_events |= VO_EVENT_RESIZE;
 }
@@ -2036,7 +2050,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
             if (!buffer)
                 return VO_FALSE;
-            double scale = MPMAX(wl->scaling, 1);
+            double scale = MPMAX(wl->scaling_factor, 1);
             wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
@@ -2080,7 +2094,7 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
-    vo_calc_window_geometry2(vo, &screenrc, wl->scaling, &geo);
+    vo_calc_window_geometry2(vo, &screenrc, wl->scaling_factor, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     int gcd = greatest_common_divisor(vo->dwidth, vo->dheight);
@@ -2137,6 +2151,7 @@ static void set_surface_scaling(struct vo_wayland_state *wl)
 
     double old_scale = wl->scaling;
     wl->scaling = wl->current_output->scale;
+    wl->scaling_factor = wl->scaling / WAYLAND_SCALE_FACTOR;
     rescale_geometry(wl, old_scale);
     wl->pending_vo_events |= VO_EVENT_DPI;
 }
@@ -2192,7 +2207,8 @@ static int spawn_cursor(struct vo_wayland_state *wl)
             size = (int)size_long;
     }
 
-    wl->cursor_theme = wl_cursor_theme_load(xcursor_theme, size*wl->scaling, wl->shm);
+    wl->cursor_theme = wl_cursor_theme_load(xcursor_theme, handle_round(wl->scaling, size),
+                                            wl->shm);
     if (!wl->cursor_theme) {
         MP_ERR(wl, "Unable to load cursor theme!\n");
         return 1;
@@ -2245,6 +2261,7 @@ static void update_output_scaling(struct vo_wayland_state *wl)
 {
     double old_scale = wl->scaling;
     wl->scaling = wl->pending_scaling;
+    wl->scaling_factor = wl->scaling / WAYLAND_SCALE_FACTOR;
     rescale_geometry(wl, old_scale);
     set_geometry(wl, false);
     prepare_resize(wl);
@@ -2500,9 +2517,9 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_HIDPI_SCALE: {
-        if (!wl->scaling)
+        if (!wl->scaling_factor)
             return VO_NOTAVAIL;
-        *(double *)arg = wl->scaling;
+        *(double *)arg = wl->scaling_factor;
         return VO_TRUE;
     }
     case VOCTRL_BEGIN_DRAGGING:
@@ -2523,9 +2540,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 {
-    wp_viewport_set_destination(wl->viewport,
-                                lround(mp_rect_w(wl->geometry) / wl->scaling),
-                                lround(mp_rect_h(wl->geometry) / wl->scaling));
+    wp_viewport_set_destination(wl->viewport, lround(mp_rect_w(wl->geometry) / wl->scaling_factor),
+                                lround(mp_rect_h(wl->geometry) / wl->scaling_factor));
 }
 
 bool vo_wayland_init(struct vo *vo)
@@ -2543,7 +2559,7 @@ bool vo_wayland_init(struct vo *vo)
         .bounded_width = 0,
         .bounded_height = 0,
         .refresh_interval = 0,
-        .scaling = 1,
+        .scaling = WAYLAND_SCALE_FACTOR,
         .wakeup_pipe = {-1, -1},
         .display_fd = -1,
         .dnd_fd = -1,

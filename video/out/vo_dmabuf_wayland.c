@@ -525,19 +525,19 @@ static void resize(struct vo *vo)
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
     int window_w = MPMAX(0, p->screen_osd_res.ml + p->screen_osd_res.mr) + mp_rect_w(dst);
     int window_h = MPMAX(0, p->screen_osd_res.mt + p->screen_osd_res.mb) + mp_rect_h(dst);
-    wp_viewport_set_destination(wl->viewport, lround(window_w / wl->scaling),
-                                lround(window_h / wl->scaling));
+    wp_viewport_set_destination(wl->viewport, lround(window_w / wl->scaling_factor),
+                                lround(window_h / wl->scaling_factor));
 
     //now we restore pan for video viewport calculation
     vo->opts->pan_x = vo_opts->pan_x;
     vo->opts->pan_y = vo_opts->pan_y;
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
-    wp_viewport_set_destination(wl->video_viewport, lround(mp_rect_w(dst) / wl->scaling),
-                                                    lround(mp_rect_h(dst) / wl->scaling));
-    wl_subsurface_set_position(wl->video_subsurface, lround(dst.x0 / wl->scaling), lround(dst.y0 / wl->scaling));
-    wp_viewport_set_destination(wl->osd_viewport, lround(vo->dwidth / wl->scaling),
-                                                  lround(vo->dheight / wl->scaling));
-    wl_subsurface_set_position(wl->osd_subsurface, lround((0 - dst.x0) / wl->scaling), lround((0 - dst.y0) / wl->scaling));
+    wp_viewport_set_destination(wl->video_viewport, lround(mp_rect_w(dst) / wl->scaling_factor),
+                                                    lround(mp_rect_h(dst) / wl->scaling_factor));
+    wl_subsurface_set_position(wl->video_subsurface, lround(dst.x0 / wl->scaling_factor), lround(dst.y0 / wl->scaling_factor));
+    wp_viewport_set_destination(wl->osd_viewport, lround(vo->dwidth / wl->scaling_factor),
+                                                  lround(vo->dheight / wl->scaling_factor));
+    wl_subsurface_set_position(wl->osd_subsurface, lround((0 - dst.x0) / wl->scaling_factor), lround((0 - dst.y0) / wl->scaling_factor));
     set_viewport_source(vo, src);
 }
 
