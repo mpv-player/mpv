@@ -402,8 +402,8 @@ end
 -- command prefix tokens to strip - includes generic property commands
 local cmd_prefixes = {
     osd_auto=1, no_osd=1, osd_bar=1, osd_msg=1, osd_msg_bar=1, raw=1, sync=1,
-    async=1, expand_properties=1, repeatable=1, set=1, add=1, multiply=1,
-    toggle=1, cycle=1, cycle_values=1, ["!reverse"]=1, change_list=1,
+    async=1, expand_properties=1, repeatable=1, nonrepeatable=1, set=1, add=1,
+    multiply=1, toggle=1, cycle=1, cycle_values=1, ["!reverse"]=1, change_list=1,
 }
 -- commands/writable-properties prefix sub-words (followed by -) to strip
 local name_prefixes = {
