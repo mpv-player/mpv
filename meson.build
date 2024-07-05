@@ -1003,9 +1003,9 @@ if features['d3d11']
 endif
 
 wayland = {
-    'deps': [dependency('wayland-client', version: '>= 1.20.0', required: get_option('wayland')),
-             dependency('wayland-cursor', version: '>= 1.20.0', required: get_option('wayland')),
-             dependency('wayland-protocols', version: '>= 1.25', required: get_option('wayland')),
+    'deps': [dependency('wayland-client', version: '>= 1.21.0', required: get_option('wayland')),
+             dependency('wayland-cursor', version: '>= 1.21.0', required: get_option('wayland')),
+             dependency('wayland-protocols', version: '>= 1.31', required: get_option('wayland')),
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
     'header': cc.has_header('linux/input-event-codes.h', required: get_option('wayland'),
                             # Pass CFLAGS from a related package as a hint for non-Linux

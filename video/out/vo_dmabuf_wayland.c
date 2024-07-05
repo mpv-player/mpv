@@ -43,10 +43,7 @@
 // Generated from wayland-protocols
 #include "linux-dmabuf-unstable-v1.h"
 #include "viewporter.h"
-
-#if HAVE_WAYLAND_PROTOCOLS_1_27
 #include "single-pixel-buffer-v1.h"
-#endif
 
 // We need at least enough buffers to avoid a
 // flickering artifact in certain formats.
@@ -782,10 +779,8 @@ static int preinit(struct vo *vo)
     }
 
     if (vo->wl->single_pixel_manager) {
-#if HAVE_WAYLAND_PROTOCOLS_1_27
         p->solid_buffer = wp_single_pixel_buffer_manager_v1_create_u32_rgba_buffer(
             vo->wl->single_pixel_manager, 0, 0, 0, UINT32_MAX); /* R, G, B, A */
-#endif
     } else {
         int width = 1;
         int height = 1;
