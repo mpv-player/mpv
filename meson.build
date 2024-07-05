@@ -862,7 +862,7 @@ if features['oss-audio']
     sources += files('audio/out/ao_oss.c')
 endif
 
-pipewire = dependency('libpipewire-0.3', version: '>= 0.3.48', required: get_option('pipewire'))
+pipewire = dependency('libpipewire-0.3', version: '>= 0.3.57', required: get_option('pipewire'))
 features += {'pipewire': pipewire.found()}
 if features['pipewire']
     dependencies += pipewire
