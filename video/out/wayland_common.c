@@ -2580,7 +2580,7 @@ bool vo_wayland_init(struct vo *vo)
         goto err;
     }
 
-    if (!wl_list_length(&wl->output_list)) {
+    if (wl_list_empty(&wl->output_list)) {
         MP_FATAL(wl, "No outputs found or compositor doesn't support %s (ver. 2)\n",
                  wl_output_interface.name);
         goto err;
