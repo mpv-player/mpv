@@ -121,6 +121,18 @@ if get_option('libmpv')
     exe = executable('libmpv-encode', 'libmpv_encode.c',
                      include_directories: incdir, link_with: libmpv)
     test('libmpv-encode', exe, timeout: 30)
+
+    mpvlib = libmpv
+    shared = get_option('default_library') == 'shared'
+    if get_option('default_library') == 'both'
+        mpvlib = libmpv.get_shared_lib()
+        shared = true
+    endif
+    if shared
+        exe = executable('libmpv-lifetime', sources: 'libmpv_lifetime.c',
+                         include_directories: incdir)
+        test('libmpv-lifetime', exe, depends: mpvlib)
+    endif
 endif
 
 # Supported libavutil versions that work with these tests.
