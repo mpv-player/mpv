@@ -20,10 +20,12 @@
 #include <stdatomic.h>
 #include <stdio.h>
 
+#define _DECL_DLLMAIN
 #include <windows.h>
 #include <windowsx.h>
 #include <dwmapi.h>
 #include <ole2.h>
+#include <process.h>
 #include <shobjidl.h>
 #include <avrt.h>
 
@@ -47,6 +49,8 @@
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"
+
+#define MPV_WINDOW_CLASS_NAME L"mpv"
 
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
@@ -1802,7 +1806,7 @@ static void register_window_class(void)
         .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .hbrBackground = (HBRUSH) GetStockObject(BLACK_BRUSH),
-        .lpszClassName = L"mpv",
+        .lpszClassName = MPV_WINDOW_CLASS_NAME,
     });
 }
 
@@ -2036,7 +2040,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     if (w32->parent) {
         RECT r;
         GetClientRect(w32->parent, &r);
-        CreateWindowExW(WS_EX_NOPARENTNOTIFY, (LPWSTR)MAKEINTATOM(cls), L"mpv",
+        CreateWindowExW(WS_EX_NOPARENTNOTIFY, (LPWSTR)MAKEINTATOM(cls), MPV_WINDOW_CLASS_NAME,
                         WS_CHILD | WS_VISIBLE, 0, 0, r.right, r.bottom,
                         w32->parent, 0, HINST_THISCOMPONENT, w32);
 
@@ -2044,7 +2048,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         if (w32->window)
             install_parent_hook(w32);
     } else {
-        CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), L"mpv",
+        CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), MPV_WINDOW_CLASS_NAME,
                         update_style(w32, 0), CW_USEDEFAULT, SW_HIDE, 100, 100,
                         0, 0, HINST_THISCOMPONENT, w32);
     }
@@ -2482,4 +2486,11 @@ void vo_w32_set_transparency(struct vo *vo, bool enable)
         dbb.fEnable = FALSE;
         DwmEnableBlurBehindWindow(w32->window, &dbb);
     }
+}
+
+BOOL WINAPI DllMain(HANDLE dll, DWORD reason, LPVOID reserved)
+{
+    if (reason == DLL_PROCESS_DETACH && window_class)
+        UnregisterClassW(MPV_WINDOW_CLASS_NAME, HINST_THISCOMPONENT);
+    return TRUE;
 }
