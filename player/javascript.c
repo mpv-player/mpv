@@ -42,7 +42,7 @@
 #include "core.h"
 #include "command.h"
 #include "client.h"
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js

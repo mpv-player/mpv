@@ -28,7 +28,7 @@
 #include <unistd.h>
 #endif
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__

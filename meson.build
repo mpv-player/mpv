@@ -1755,7 +1755,7 @@ if win32
 endif
 
 
-client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "libmpv/client.h"',
+client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "mpv/client.h"',
                                 include_directories: include_directories('.'))
 major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
 minor = client_h_define.split('|')[1].strip('() ')
@@ -1772,12 +1772,12 @@ if get_option('libmpv')
     pkg.generate(libmpv, version: client_api_version,
                  description: 'mpv media player client library')
 
-    headers = ['libmpv/client.h', 'libmpv/render.h',
-               'libmpv/render_gl.h', 'libmpv/stream_cb.h']
+    headers = ['mpv/client.h', 'mpv/render.h',
+               'mpv/render_gl.h', 'mpv/stream_cb.h']
     install_headers(headers, subdir: 'mpv')
 
     # Allow projects to build with libmpv by cloning into ./subprojects/mpv
-    libmpv_dep = declare_dependency(link_with: libmpv)
+    libmpv_dep = declare_dependency(include_directories: '.',  link_with: libmpv)
     meson.override_dependency('mpv', libmpv_dep)
 endif
 

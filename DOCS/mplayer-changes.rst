@@ -37,7 +37,7 @@ Player
 * ``--keep-open`` option to stop the player from closing the window and
   exiting after playback ends.
 * A client API, that allows embedding **mpv** into applications
-  (see ``libmpv/client.h`` in the sources).
+  (see ``mpv/client.h`` in the sources).
 
 Input
 ~~~~~
@@ -410,7 +410,7 @@ Slave mode
   `JSON IPC`_ for more information.
 
 * **mpv** also provides a client API, which can be used to embed the player
-  by loading it as shared library. (See ``libmpv/client.h`` in the sources.)
+  by loading it as shared library. (See ``mpv/client.h`` in the sources.)
   It might also be possible to implement a custom slave mode-like protocol
   using Lua scripting.
 

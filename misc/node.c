@@ -1,6 +1,6 @@
 #include "node.h"
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 #include "common/common.h"
 #include "bstr.h"

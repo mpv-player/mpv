@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 #include "common/common.h"
 #include "common/msg_control.h"
