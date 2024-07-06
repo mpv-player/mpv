@@ -2070,7 +2070,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
             if (!buffer)
                 return VO_FALSE;
-            int scale = MPMAX(wl->scaling, 1);
+            double scale = MPMAX(wl->scaling, 1);
             wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, wl->cursor_surface,
                                   img->hotspot_x / scale, img->hotspot_y / scale);
             wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
