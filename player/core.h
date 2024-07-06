@@ -232,6 +232,7 @@ extern const int num_ptracks[STREAM_TYPE_COUNT];
 typedef struct MPContext {
     bool initialized;
     bool is_cli;
+    mp_thread core_thread;
     struct mpv_global *global;
     struct MPOpts *opts;
     struct mp_log *log;

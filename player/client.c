@@ -422,11 +422,6 @@ static void abort_async(struct MPContext *mpctx, mpv_handle *ctx,
     mp_mutex_unlock(&mpctx->abort_lock);
 }
 
-static void get_thread_id(void *ptr)
-{
-    *(mp_thread_id *)ptr = mp_thread_current_id();
-}
-
 static void mp_destroy_client(mpv_handle *ctx, bool terminate)
 {
     if (!ctx)
@@ -521,9 +516,6 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
         mpctx->stop_play = PT_QUIT;
         mp_dispatch_unlock(mpctx->dispatch);
 
-        mp_thread_id playthread;
-        mp_dispatch_run(mpctx->dispatch, get_thread_id, &playthread);
-
         // Ask the core thread to stop.
         mp_mutex_lock(&clients->lock);
         clients->terminate_core_thread = true;
@@ -531,7 +523,7 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
         mp_wakeup_core(mpctx);
 
         // Blocking wait for all clients and core thread to terminate.
-        mp_thread_join_id(playthread);
+        mp_thread_join(mpctx->core_thread);
 
         mp_destroy(mpctx);
     }
@@ -629,8 +621,7 @@ mpv_handle *mpv_create(void)
         return NULL;
     }
 
-    mp_thread thread;
-    if (mp_thread_create(&thread, core_thread, mpctx) != 0) {
+    if (mp_thread_create(&mpctx->core_thread, core_thread, mpctx) != 0) {
         ctx->clients->have_terminator = true; // avoid blocking
         mpv_terminate_destroy(ctx);
         mp_destroy(mpctx);

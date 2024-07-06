@@ -219,7 +219,6 @@ static inline int mp_cond_timedwait_until(mp_cond *cond, mp_mutex *mutex, int64_
 
 #define mp_thread_create(t, f, a) pthread_create(t, NULL, f, a)
 #define mp_thread_join(t)         pthread_join(t, NULL)
-#define mp_thread_join_id(t)      pthread_join(t, NULL)
 #define mp_thread_detach          pthread_detach
 #define mp_thread_current_id      pthread_self
 #define mp_thread_id_equal(a, b)  ((a) == (b))
