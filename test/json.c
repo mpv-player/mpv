@@ -1,4 +1,4 @@
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 #include "misc/json.h"
 #include "misc/node.h"

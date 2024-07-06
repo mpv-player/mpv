@@ -2,7 +2,7 @@
 #include "context.h"
 #include "ra_gl.h"
 #include "options/m_config.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/gpu/libmpv_gpu.h"
 #include "video/out/gpu/ra.h"
 

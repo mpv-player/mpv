@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__

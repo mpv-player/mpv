@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 // detect enabled ASAN on gcc & clang
 #ifndef __SANITIZE_ADDRESS__
