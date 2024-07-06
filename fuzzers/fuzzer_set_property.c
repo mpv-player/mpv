@@ -90,7 +90,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             .num = 1,
             .values = &(mpv_node) {
                 .format = MPV_FORMAT_STRING,
-                .u.string = "av://lavfi:sine=d=0.01",
+                .u.string = "av://lavfi:sine=d=0.1",
             },
         },
     };
@@ -101,7 +101,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_set_option(ctx, "external-files", MPV_FORMAT_NODE, &node));
     check_error(mpv_set_option(ctx, "sub-files", MPV_FORMAT_NODE, &node));
 
-    const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.01", NULL};
+    const char *cmd[] = {"loadfile", "av://lavfi:yuvtestsrc=d=0.1", NULL};
     check_error(mpv_command(ctx, cmd));
 
     bool loaded = false;
