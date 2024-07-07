@@ -94,11 +94,11 @@ static void check_output(FILE *fp)
     if (size < 100)
         fail("did not encode anything\n");
 
-    char magic[4] = {0};
+    char magic[4];
     fseek(fp, 0, SEEK_SET);
-    fread(magic, sizeof(magic), 1, fp);
+    size_t ret = fread(magic, sizeof(magic), 1, fp);
     static const char ebml_magic[] = {26, 69, 223, 163};
-    if (memcmp(magic, ebml_magic, 4) != 0)
+    if (ret != 1 || memcmp(magic, ebml_magic, sizeof(magic)) != 0)
         fail("output was not Matroska\n");
 
     puts("output file ok");
