@@ -2132,6 +2132,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                 vo_x11_set_input_region(vo, opts->cursor_passthrough);
             if (opt == &opts->x11_present)
                 xpresent_set(x11);
+            if (opt == &opts->keepaspect || opt == &opts->keepaspect_window)
+                vo_x11_sizehint(vo, x11->fs ? x11->nofsrc : x11->winrc, false);
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
