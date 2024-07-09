@@ -311,7 +311,7 @@ double ao_get_delay(struct ao *ao)
         driver_delay = MPMAX(0, MP_TIME_NS_TO_S(end - now));
     }
 
-    int pending = mp_async_queue_get_samples(p->queue);
+    int64_t pending = mp_async_queue_get_samples(p->queue);
     if (p->pending)
         pending += mp_aframe_get_size(p->pending);
 
