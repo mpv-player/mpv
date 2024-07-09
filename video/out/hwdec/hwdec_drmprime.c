@@ -92,6 +92,17 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
+#if HAVE_V4L2REQUEST
+    /*
+     * AVCodecHWConfig contains a combo of a pixel format and hwdevice type,
+     * correct type must be created here or hwaccel will fail.
+     *
+     * FIXME: Create hwdevice based on type in AVCodecHWConfig
+     */
+    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                     AV_HWDEVICE_TYPE_V4L2REQUEST,
+                                     NULL, NULL, 0);
+#else
     /*
      * The drm_params resource is not provided when using X11 or Wayland, but
      * there are extensions that supposedly provide this information from the
@@ -118,6 +129,7 @@ static int init(struct ra_hwdec *hw)
                                      AV_HWDEVICE_TYPE_DRM,
                                      device_path, NULL, 0);
     talloc_free(tmp);
+#endif
     if (ret != 0) {
         MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
         return -1;

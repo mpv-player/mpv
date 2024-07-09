@@ -101,6 +101,7 @@ option('d3d-hwaccel', type: 'feature', value: 'auto', description: 'D3D11VA hwac
 option('d3d9-hwaccel', type: 'feature', value: 'auto', description: 'DXVA2 hwaccel')
 option('gl-dxinterop-d3d9', type: 'feature', value: 'auto', description: 'OpenGL/DirectX DXVA2 hwaccel')
 option('ios-gl', type: 'feature', value: 'auto', description: 'iOS OpenGL ES interop support')
+option('v4l2request', type: 'feature', value: 'disabled', description: 'V4L2 Request API hwaccel')
 option('videotoolbox-gl', type: 'feature', value: 'auto', description: 'Videotoolbox with OpenGL')
 option('videotoolbox-pl', type: 'feature', value: 'auto', description: 'Videotoolbox with libplacebo')
 option('vulkan-interop', type: 'feature', value: 'auto', description: 'Vulkan graphics interop')
