@@ -484,10 +484,7 @@ void ao_drain(struct ao *ao)
         double delay = ao_get_delay(ao);
         mp_mutex_lock(&p->lock);
 
-        // Limit to buffer + arbitrary ~250ms max. waiting for robustness.
-        delay += mp_async_queue_get_samples(p->queue) / (double)ao->samplerate;
-
-        // Wait for EOF signal from AO.
+        // Wait for buffer + arbitrary ~250ms for EOF signal from AO.
         if (mp_cond_timedwait(&p->wakeup, &p->lock,
                               MP_TIME_S_TO_NS(MPMAX(delay, 0) + 0.25)))
         {
