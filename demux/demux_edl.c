@@ -567,8 +567,13 @@ error:
 
 static void fix_filenames(struct tl_parts *parts, char *source_path)
 {
-    if (!bstrcasecmp0(mp_split_proto(bstr0(source_path), NULL), "edl"))
+    bstr proto = mp_split_proto(bstr0(source_path), NULL);
+    // Don't adjust self-expanding protocols
+    if (!bstrcasecmp0(proto, "memory") || !bstrcasecmp0(proto, "lavf") ||
+        !bstrcasecmp0(proto, "hex") || !bstrcasecmp0(proto, "edl"))
+    {
         return;
+    }
     struct bstr dirname = mp_dirname(source_path);
     for (int n = 0; n < parts->num_parts; n++) {
         struct tl_part *part = &parts->parts[n];
