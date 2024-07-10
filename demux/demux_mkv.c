@@ -3065,7 +3065,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             if (ebml_read_element(s, &parse_ctx, &additions,
                                   &ebml_block_additions_desc) < 0)
                 return -1;
-            if (additions.n_block_more > 0) {
+            if (additions.n_block_more > 0 && !block->additions) {
                 block->additions = talloc_dup(NULL, &additions);
                 talloc_steal(block->additions, parse_ctx.talloc_ctx);
                 parse_ctx.talloc_ctx = NULL;
