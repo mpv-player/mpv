@@ -1212,6 +1212,18 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
     mpctx->open_url_flags = url_flags;
     mpctx->open_for_prefetch = for_prefetch && mpctx->opts->demuxer_thread;
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    // Don't allow to open local paths or stdin during fuzzing
+    bstr open_url = bstr0(mpctx->open_url);
+    if (bstr_startswith0(open_url, "/") ||
+        bstr_startswith0(open_url, "./") ||
+        bstr_equals0(open_url, "-"))
+    {
+        cancel_open(mpctx);
+        return;
+    }
+#endif
+
     if (mp_thread_create(&mpctx->open_thread, open_demux_thread, mpctx)) {
         cancel_open(mpctx);
         return;
