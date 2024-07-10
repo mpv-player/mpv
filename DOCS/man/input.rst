@@ -590,7 +590,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 
 ``subprocess``
     Similar to ``run``, but gives more control about process execution to the
-    caller, and does does not detach the process.
+    caller, and does not detach the process.
 
     You can avoid blocking until the process terminates by running this command
     asynchronously. (For example ``mp.command_native_async()`` in Lua scripting.)
