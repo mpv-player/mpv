@@ -83,7 +83,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
                         break;
                     }
                     char *entry = bstrto0(mf, fname);
-                    if (!mp_path_exists(entry)) {
+                    if (!mp_path_exists(entry) && !mp_is_url(fname)) {
                         mp_verbose(log, "file not found: '%s'\n", entry);
                     } else {
                         MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
@@ -108,7 +108,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
             bstr_split_tok(bfilename, ",", &bfname, &bfilename);
             char *fname2 = bstrdup0(mf, bfname);
 
-            if (!mp_path_exists(fname2))
+            if (!mp_path_exists(fname2) && !mp_is_url(bfname))
                 mp_verbose(log, "file not found: '%s'\n", fname2);
             else {
                 mf_add(mf, fname2);
