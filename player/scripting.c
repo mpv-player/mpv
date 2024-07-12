@@ -433,7 +433,7 @@ static int load_run(struct mp_script_args *args)
         .detach = true,
     };
     struct mp_subprocess_result res;
-    mp_subprocess2(&opts, &res);
+    mp_subprocess(args->log, &opts, &res);
 
     // Closing these will (probably) make the client exit, if it really died.
     // They _should_ be CLOEXEC, but are not, because
@@ -443,13 +443,7 @@ static int load_run(struct mp_script_args *args)
     if (fds[1] >= 0)
         close(fds[1]);
 
-    if (res.error < 0) {
-        MP_ERR(args, "Starting '%s' failed: %s\n", args->filename,
-               mp_subprocess_err_str(res.error));
-        return -1;
-    }
-
-    return 0;
+    return res.error;
 }
 
 const struct mp_scripting mp_scripting_run = {

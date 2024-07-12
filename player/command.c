@@ -6052,11 +6052,7 @@ static void cmd_run(void *p)
         .detach = true,
     };
     struct mp_subprocess_result res;
-    mp_subprocess2(&opts, &res);
-    if (res.error < 0) {
-        mp_err(mpctx->log, "Starting subprocess failed: %s\n",
-               mp_subprocess_err_str(res.error));
-    }
+    mp_subprocess(mpctx->log, &opts, &res);
     talloc_free(args);
 }
 
@@ -6170,7 +6166,7 @@ static void cmd_subprocess(void *p)
     }
 
     struct mp_subprocess_result sres;
-    mp_subprocess2(&opts, &sres);
+    mp_subprocess(fdlog, &opts, &sres);
     int status = sres.exit_status;
     char *error = NULL;
     if (sres.error < 0) {

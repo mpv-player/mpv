@@ -97,8 +97,6 @@ local function platform_is_windows()
 end
 
 local function exec(args)
-    msg.debug("Running: " .. table.concat(args, " "))
-
     return mp.command_native({
         name = "subprocess",
         args = args,
