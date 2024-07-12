@@ -2258,7 +2258,7 @@ Property list
 ``vf-metadata/<filter-label>``
     Metadata added by video filters. Accessed by the filter label,
     which, if not explicitly specified using the ``@filter-label:`` syntax,
-    will be ``<filter-name>NN``.
+    will be ``<filter-name>.NN``.
 
     Works similar to ``metadata`` property. It allows the same access
     methods (using sub-properties).
