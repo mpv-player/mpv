@@ -1157,7 +1157,7 @@ local function on_load_hook(load_fail)
     local url = mp.get_property("stream-open-filename", "")
     local force = url:find("^ytdl://")
     local early = force or o.try_ytdl_first
-    if early and load_fail then
+    if early == load_fail then
         return
     end
     if not force and (not url:find("^https?://") or is_blacklisted(url)) then
@@ -1166,7 +1166,7 @@ local function on_load_hook(load_fail)
     run_ytdl_hook(url)
 end
 
-mp.add_hook("on_load", 10, function() on_load_hook() end)
+mp.add_hook("on_load", 10, function() on_load_hook(false) end)
 mp.add_hook("on_load_fail", 10, function() on_load_hook(true) end)
 
 mp.add_hook("on_load", 20, function ()
