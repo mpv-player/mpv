@@ -1162,7 +1162,10 @@ static char *pretty_print_float(const m_option_t *opt, const void *val)
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
 {
     double tmp = VAL(val);
-    add_double(opt, &tmp, add, wrap);
+    // Change the double to be added
+    // to a representable float.
+    float float_add = add;
+    add_double(opt, &tmp, float_add, wrap);
     VAL(val) = tmp;
 }
 
