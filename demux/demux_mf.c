@@ -119,7 +119,11 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
         goto exit_mf;
     }
 
-    size_t fname_avail = strlen(filename) + 32;
+    bstr bfilename = bstr0(filename);
+    if (mp_is_url(bfilename))
+        goto exit_mf;
+
+    size_t fname_avail = bfilename.len + 32;
     char *fname = talloc_size(mf, fname_avail);
 
 #if HAVE_GLOB
