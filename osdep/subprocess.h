@@ -35,8 +35,6 @@ typedef void (*subprocess_read_cb)(void *ctx, char *data, size_t size);
 // Not filling the buffer means EOF.
 typedef void (*subprocess_write_cb)(void *ctx);
 
-void mp_devnull(void *ctx, char *data, size_t size);
-
 #define MP_SUBPROCESS_MAX_FDS 10
 
 struct mp_subprocess_fd {
@@ -64,7 +62,7 @@ struct mp_subprocess_opts {
 };
 
 struct mp_subprocess_result {
-    int error;              // one of MP_SUBPROCESS_* (>0 on error)
+    int error;              // one of MP_SUBPROCESS_* (<0 on error)
     // NB: if WIFEXITED applies, error==0, and this is WEXITSTATUS
     //     on win32, this can use the full 32 bit
     //     if started with detach==true, this is always 0
@@ -84,5 +82,10 @@ const char *mp_subprocess_err_str(int num);
 // Caller must set *opts.
 void mp_subprocess2(struct mp_subprocess_opts *opts,
                     struct mp_subprocess_result *res);
+
+struct mp_log;
+void mp_subprocess(struct mp_log *log,
+                   struct mp_subprocess_opts *opts,
+                   struct mp_subprocess_result *res);
 
 #endif
