@@ -83,6 +83,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_set_option_string(ctx, "loop-playlist", "no"));
     check_error(mpv_set_option_string(ctx, "pause", "no"));
     check_error(mpv_set_option_string(ctx, "untimed", "yes"));
+    check_error(mpv_set_option_string(ctx, "sstep", "0"));
 
     mpv_node node = {
         .format = MPV_FORMAT_NODE_ARRAY,
