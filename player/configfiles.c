@@ -262,13 +262,13 @@ static void write_filename(struct MPContext *mpctx, FILE *file, char *filename)
     }
 }
 
-static void write_redirect(struct MPContext *mpctx, char *path)
+static void write_redirect(struct MPContext *mpctx, char *path, char *conf)
 {
     char *conffile = mp_get_playback_resume_config_filename(mpctx, path);
     if (conffile) {
         FILE *file = fopen(conffile, "wb");
         if (file) {
-            fprintf(file, "# redirect entry\n");
+            fprintf(file, "# redirect entry %s\n", conf);
             write_filename(mpctx, file, path);
             fclose(file);
         }
@@ -281,7 +281,7 @@ static void write_redirect(struct MPContext *mpctx, char *path)
     }
 }
 
-static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path)
+static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path, char *conf)
 {
     if (mp_is_url(bstr0(path)) || mpctx->opts->ignore_path_in_watch_later_config)
         return;
@@ -297,7 +297,7 @@ static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path)
     while (dir.len > 1 && dir.len < strlen(path)) {
         path[dir.len] = '\0';
         mp_path_strip_trailing_separator(path);
-        write_redirect(mpctx, path);
+        write_redirect(mpctx, path, conf);
         dir = mp_dirname(path);
     }
 }
@@ -373,7 +373,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
                 conffile);
     }
 
-    write_redirects_for_parent_dirs(mpctx, path);
+    write_redirects_for_parent_dirs(mpctx, path, conffile);
 
     // Also write redirect entries for a playlist that mpv expanded if the
     // current entry is a URL, this is mostly useful for playing multiple
@@ -382,8 +382,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     // URL.
     if (cur->playlist_path && mp_is_url(bstr0(path))) {
         char *playlist_path = mp_normalize_path(ctx, cur->playlist_path);
-        write_redirect(mpctx, playlist_path);
-        write_redirects_for_parent_dirs(mpctx, playlist_path);
+        write_redirect(mpctx, playlist_path, conffile);
+        write_redirects_for_parent_dirs(mpctx, playlist_path, conffile);
     }
 
 exit:
