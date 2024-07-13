@@ -56,6 +56,11 @@ static bool mac_vk_init(struct ra_ctx *ctx)
     struct mpvk_ctx *vk = &p->vk;
     int msgl = ctx->opts.probing ? MSGL_V : MSGL_ERR;
 
+    if (!NSApp) {
+        MP_ERR(ctx, "Failed to initialize macvk context, no NSApplication initialized.\n");
+        goto error;
+    }
+
     if (!mpvk_init(vk, ctx, VK_EXT_METAL_SURFACE_EXTENSION_NAME))
         goto error;
 
