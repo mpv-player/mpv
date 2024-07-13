@@ -43,3 +43,29 @@ static inline bool str_startswith(const char *str, size_t str_len,
         return false;
     return !memcmp(str, prefix, prefix_len);
 }
+
+#ifndef PLAYBACK_TIME_LIMIT
+#define PLAYBACK_TIME_LIMIT 5
+#endif
+
+static inline void player_loop(mpv_handle *ctx)
+{
+    bool playing = false;
+    bool loaded = false;
+    int timeout = -1;
+    while (1) {
+        mpv_event *event = mpv_wait_event(ctx, timeout);
+        if (timeout == PLAYBACK_TIME_LIMIT && event->event_id == MPV_EVENT_NONE)
+            break;
+        if (event->event_id == MPV_EVENT_START_FILE)
+            loaded = playing = true;
+        if (event->event_id == MPV_EVENT_END_FILE) {
+            playing = false;
+            timeout = -1;
+        }
+        if (playing && event->event_id == MPV_EVENT_PLAYBACK_RESTART)
+            timeout = PLAYBACK_TIME_LIMIT;
+        if (loaded && event->event_id == MPV_EVENT_IDLE)
+            break;
+    }
+}
