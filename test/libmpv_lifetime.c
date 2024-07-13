@@ -63,11 +63,6 @@ static inline void check_error_(int status, __typeof__(&mpv_error_string) error_
 
 int main(void)
 {
-#ifdef __APPLE__
-    // FIXME: Hangs after libplacebo initialization
-    return 77;
-#endif
-
     // Skip this test when run through a wrapper like Wine. It is well-tested on
     // different configurations. Meson does not set PATH and WINEPATH when
     // libmpv is not directly linked, and doing it manually would be annoying.
