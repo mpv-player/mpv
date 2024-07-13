@@ -7454,13 +7454,14 @@ Miscellaneous
 
     This is a string list option. See `List Options`_ for details.
 
-``--cover-art-whitelist=<no|yes>``
-    Whether to load files with a filename among "AlbumArt", "Album", "cover",
-    "front", "AlbumArtSmall", "Folder", ".folder", "thumb", and an extension in
-    ``--cover-art-auto-exts``, as cover art. This has no effect if
-    ``cover-art-auto`` is ``no``.
+``--cover-art-whitelist=filename1,filename2,...``
+    Filenames to load as cover art, sorted by descending priority. They are
+    combined with the extensions in ``--cover-art-auto-exts``. This has no
+    effect if ``cover-art-auto`` is ``no``.
 
-    Default: ``yes``.
+    Default: ``AlbumArt,Album,cover,front,AlbumArtSmall,Folder,.folder,thumb``
+
+    This is a string list option. See `List Options`_ for details.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).

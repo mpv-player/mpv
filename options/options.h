@@ -334,7 +334,7 @@ typedef struct MPOpts {
     char **audiofile_auto_exts;
     int coverart_auto;
     char **coverart_auto_exts;
-    bool coverart_whitelist;
+    char **coverart_whitelist;
     bool osd_bar_visible;
 
     int w32_priority;

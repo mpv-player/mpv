@@ -708,7 +708,7 @@ static const m_option_t mp_opts[] = {
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"cover-art-auto-exts", OPT_STRINGLIST(coverart_auto_exts)},
-    {"cover-art-whitelist", OPT_BOOL(coverart_whitelist)},
+    {"cover-art-whitelist", OPT_STRINGLIST(coverart_whitelist)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_shared, mp_subtitle_shared_sub_opts)},
@@ -1029,7 +1029,6 @@ static const struct MPOpts mp_default_opts = {
     .playback_speed = 1.,
     .pitch_correction = true,
     .audiofile_auto = -1,
-    .coverart_whitelist = true,
     .osd_bar_visible = true,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
@@ -1083,6 +1082,20 @@ static const struct MPOpts mp_default_opts = {
         "utf-8",
         "utf8",
         "vtt",
+        NULL
+    },
+
+    // Stolen from: vlc/-/blob/master/modules/meta_engine/folder.c#L40
+    // sorted by priority (descending)
+    .coverart_whitelist = (char *[]){
+        "AlbumArt",
+        "Album",
+        "cover",
+        "front",
+        "AlbumArtSmall",
+        "Folder",
+        ".folder",
+        "thumb",
         NULL
     },
 
