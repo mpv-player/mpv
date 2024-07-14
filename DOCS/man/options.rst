@@ -1027,6 +1027,11 @@ Program Behavior
     Enable the builtin script that lets you select from lists of items (default:
     yes). By default, its keybindings start with the ``g`` key.
 
+``--load-autoload=<yes|no>``
+    Enable the builtin script that scans the directory a file is located in and
+    adds the found files to the playlist before and after the currently playing
+    file (default: no).
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but

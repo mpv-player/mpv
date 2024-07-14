@@ -558,6 +558,7 @@ static const m_option_t mp_opts[] = {
         OPT_CHOICE(lua_load_auto_profiles, {"no", 0}, {"yes", 1}, {"auto", -1}),
         .flags = UPDATE_BUILTIN_SCRIPTS},
     {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS},
+    {"load-autoload", OPT_BOOL(lua_load_autoload), .flags = UPDATE_BUILTIN_SCRIPTS},
 #endif
 
 // ------------------------- stream options --------------------

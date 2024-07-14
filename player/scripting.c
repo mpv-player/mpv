@@ -263,6 +263,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, 4, mpctx->opts->lua_load_auto_profiles,
                         "@auto_profiles.lua");
     load_builtin_script(mpctx, 5, mpctx->opts->lua_load_select, "@select.lua");
+    load_builtin_script(mpctx, 6, mpctx->opts->lua_load_autoload, "@autoload.lua");
 }
 
 bool mp_load_scripts(struct MPContext *mpctx)
