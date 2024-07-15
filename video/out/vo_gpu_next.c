@@ -774,12 +774,13 @@ static void update_options(struct vo *vo)
 
     // Update equalizer state
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
+    const struct gl_video_opts *opts = p->opts_cache->opts;
     mp_csp_equalizer_state_get(p->video_eq, &cparams);
     pars->color_adjustment.brightness = cparams.brightness;
     pars->color_adjustment.contrast = cparams.contrast;
     pars->color_adjustment.hue = cparams.hue;
     pars->color_adjustment.saturation = cparams.saturation;
-    pars->color_adjustment.gamma = cparams.gamma;
+    pars->color_adjustment.gamma = cparams.gamma * opts->gamma;
     p->output_levels = cparams.levels_out;
 
     for (char **kv = p->next_opts->raw_opts; kv && kv[0]; kv += 2)
