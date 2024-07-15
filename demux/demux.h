@@ -86,6 +86,7 @@ struct demux_opts {
     double back_seek_size;
     char *meta_cp;
     bool force_retry_eof;
+    bool autocreate_playlist;
 };
 
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
@@ -211,6 +212,7 @@ struct demuxer_params {
     bool stream_record; // if true, enable stream recording if option is set
     int stream_flags;
     struct stream *external_stream; // if set, use this, don't open or close streams
+    bool has_playlist;
     // result
     bool demuxer_failed;
 };

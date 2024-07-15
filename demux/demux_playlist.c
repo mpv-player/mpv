@@ -85,6 +85,7 @@ struct pl_parser {
     bool force;
     bool add_base;
     bool line_allocated;
+    bool create_dir_playlist;
     enum demux_check check_level;
     struct stream *real_stream;
     char *format;
@@ -463,14 +464,25 @@ static bool scan_dir(struct pl_parser *p, char *path,
 
 static int parse_dir(struct pl_parser *p)
 {
-    if (!p->real_stream->is_directory)
-        return -1;
-    if (p->probing)
-        return 0;
+    int ret = -1;
+    struct stream *stream = p->real_stream;
+    if (p->create_dir_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
+        int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
+                    STREAM_LESS_NOISE;
+        bstr dir = mp_dirname(p->real_stream->url);
+        if (dir.len)
+            stream = stream_create(bstrdup0(p, dir), flags, NULL, p->global);
+    }
+    if (!stream->is_directory)
+        goto done;
+    if (p->probing) {
+        ret = 0;
+        goto done;
+    }
 
-    char *path = mp_file_get_path(p, bstr0(p->real_stream->url));
+    char *path = mp_file_get_path(p, bstr0(stream->url));
     if (!path)
-        return -1;
+        goto done;
 
     struct stat dir_stack[MAX_DIR_STACK];
 
@@ -483,8 +495,12 @@ static int parse_dir(struct pl_parser *p)
     scan_dir(p, path, dir_stack, 0);
 
     p->add_base = false;
+    ret = p->pl->num_entries > 0 ? 0 : -1;
 
-    return p->pl->num_entries > 0 ? 0 : -1;
+done:
+    if (stream != p->real_stream)
+        free_stream(stream);
+    return ret;
 }
 
 #define MIME_TYPES(...) \
@@ -497,7 +513,6 @@ struct pl_format {
 };
 
 static const struct pl_format formats[] = {
-    {"directory", parse_dir},
     {"m3u", parse_m3u,
      MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
     {"ini", parse_ref_init},
@@ -505,6 +520,7 @@ static const struct pl_format formats[] = {
      MIME_TYPES("audio/x-scpls")},
     {"url", parse_url},
     {"txt", parse_txt},
+    {"directory", parse_dir},
 };
 
 static const struct pl_format *probe_pl(struct pl_parser *p)
@@ -549,6 +565,8 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->force = force;
     p->check_level = check;
     p->probing = true;
+    p->create_dir_playlist = !demuxer->params->has_playlist && opts->autocreate_playlist;
+
     const struct pl_format *fmt = probe_pl(p);
     free_stream(p->s);
     playlist_clear(p->pl);
