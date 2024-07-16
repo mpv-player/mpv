@@ -1330,7 +1330,8 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         if (!chain)
             return M_PROPERTY_UNAVAILABLE;
 
-        if (ka->action != M_PROPERTY_GET_TYPE) {
+        int remaining = strlen(rem);
+        if (remaining || ka->action != M_PROPERTY_GET_TYPE) {
             struct mp_filter_command cmd = {
                 .type = MP_FILTER_COMMAND_GET_META,
                 .res = &metadata,
@@ -1343,7 +1344,7 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         }
 
         int res;
-        if (strlen(rem)) {
+        if (remaining) {
             struct m_property_action_arg next_ka = *ka;
             next_ka.key = rem;
             res = tag_property(M_PROPERTY_KEY_ACTION, &next_ka, metadata);
