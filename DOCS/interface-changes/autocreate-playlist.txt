@@ -1,4 +1,4 @@
 add `--autocreate-playlist`
-add `--autocreate-playlist-video-exts`
-add `--autocreate-playlist-audio-exts`
-add `--autocreate-playlist-image-exts`
+add `--directory-video-exts`
+add `--directory-audio-exts`
+add `--directory-image-exts`
