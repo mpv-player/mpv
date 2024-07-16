@@ -42,9 +42,20 @@ enum dir_mode {
     DIR_IGNORE,
 };
 
+enum autocreate_mode {
+    AUTO_NONE  = 0,
+    AUTO_VIDEO = 1 << 0,
+    AUTO_AUDIO = 1 << 1,
+    AUTO_IMAGE = 1 << 2,
+    AUTO_ANY   = 1 << 3,
+};
+
 #define OPT_BASE_STRUCT struct demux_playlist_opts
 struct demux_playlist_opts {
     int dir_mode;
+    char **autocreate_playlist_vid_exts;
+    char **autocreate_playlist_aud_exts;
+    char **autocreate_playlist_img_exts;
 };
 
 struct m_sub_options demux_playlist_conf = {
@@ -54,11 +65,29 @@ struct m_sub_options demux_playlist_conf = {
             {"lazy", DIR_LAZY},
             {"recursive", DIR_RECURSIVE},
             {"ignore", DIR_IGNORE})},
+        {"autocreate-playlist-video-exts",
+            OPT_STRINGLIST(autocreate_playlist_vid_exts)},
+        {"autocreate-playlist-audio-exts",
+            OPT_STRINGLIST(autocreate_playlist_aud_exts)},
+        {"autocreate-playlist-image-exts",
+            OPT_STRINGLIST(autocreate_playlist_img_exts)},
         {0}
     },
     .size = sizeof(struct demux_playlist_opts),
     .defaults = &(const struct demux_playlist_opts){
         .dir_mode = DIR_AUTO,
+        .autocreate_playlist_vid_exts = (char *[]){
+            "3g2", "3gp", "avi", "flv", "m2ts", "m4v", "mj2", "mkv", "mov",
+            "mp4", "mpeg", "mpg", "ogv", "rmvb", "webm", "wmv", "y4m", NULL
+        },
+        .autocreate_playlist_aud_exts = (char *[]){
+            "aiff", "ape", "au", "flac", "m4a", "mka", "mp3", "oga", "ogg",
+            "ogm", "opus", "wav", "wma", NULL
+        },
+        .autocreate_playlist_img_exts = (char *[]){
+            "avif", "bmp", "gif", "j2k", "jp2", "jpeg", "jpg", "jxl", "png",
+            "svg", "tga", "tif", "tiff", "webp", NULL
+        },
     },
 };
 
@@ -85,7 +114,7 @@ struct pl_parser {
     bool force;
     bool add_base;
     bool line_allocated;
-    bool create_dir_playlist;
+    int autocreate_playlist;
     enum demux_check check_level;
     struct stream *real_stream;
     char *format;
@@ -395,9 +424,36 @@ static int cmp_dir_entry(const void *a, const void *b)
     }
 }
 
+static bool has_ext(bstr ext, char **list)
+{
+    if (!list)
+        return false;
+    while (*list) {
+        if (!bstrcasecmp0(ext, *list++))
+            return true;
+    }
+    return false;
+}
+
+static bool test_autocreate_path(struct pl_parser *p, char *path, int autocreate)
+{
+    if (autocreate & AUTO_ANY)
+        return true;
+
+    bstr ext = bstr_get_ext(bstr0(path));
+    if (autocreate & AUTO_VIDEO && has_ext(ext, p->opts->autocreate_playlist_vid_exts))
+        return true;
+    if (autocreate & AUTO_AUDIO && has_ext(ext, p->opts->autocreate_playlist_aud_exts))
+        return true;
+    if (autocreate & AUTO_IMAGE && has_ext(ext, p->opts->autocreate_playlist_img_exts))
+        return true;
+
+    return false;
+}
+
 // Return true if this was a readable directory.
 static bool scan_dir(struct pl_parser *p, char *path,
-                     struct stat *dir_stack, int num_dir_stack)
+                     struct stat *dir_stack, int num_dir_stack, int autocreate)
 {
     if (strlen(path) >= 8192 || num_dir_stack == MAX_DIR_STACK)
         return false; // things like mount bind loops
@@ -452,10 +508,11 @@ static bool scan_dir(struct pl_parser *p, char *path,
         if (dir_mode == DIR_RECURSIVE && dir_entries[n].is_dir) {
             dir_stack[num_dir_stack] = dir_entries[n].st;
             char *file = dir_entries[n].path;
-            scan_dir(p, file, dir_stack, num_dir_stack + 1);
+            scan_dir(p, file, dir_stack, num_dir_stack + 1, autocreate);
         }
         else {
-            playlist_append_file(p->pl, dir_entries[n].path);
+            if (autocreate == AUTO_NONE || test_autocreate_path(p, dir_entries[n].path, autocreate))
+                playlist_append_file(p->pl, dir_entries[n].path);
         }
     }
 
@@ -466,11 +523,32 @@ static int parse_dir(struct pl_parser *p)
 {
     int ret = -1;
     struct stream *stream = p->real_stream;
-    if (p->create_dir_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
+    int autocreate = AUTO_NONE;
+    if (p->autocreate_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
+        bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
+        switch (p->autocreate_playlist) {
+        case 1: // any
+            autocreate = AUTO_ANY;
+            break;
+        case 2: // exts
+            autocreate = AUTO_VIDEO | AUTO_AUDIO | AUTO_IMAGE;
+            break;
+        case 3: // same
+            if (has_ext(ext, p->opts->autocreate_playlist_vid_exts)) {
+                autocreate = AUTO_VIDEO;
+            } else if (has_ext(ext, p->opts->autocreate_playlist_aud_exts)) {
+                autocreate = AUTO_AUDIO;
+            } else if (has_ext(ext, p->opts->autocreate_playlist_img_exts)) {
+                autocreate = AUTO_IMAGE;
+            }
+            break;
+        }
         int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
                     STREAM_LESS_NOISE;
         bstr dir = mp_dirname(p->real_stream->url);
-        if (dir.len)
+        if (!dir.len)
+            autocreate = AUTO_NONE;
+        if (autocreate != AUTO_NONE)
             stream = stream_create(bstrdup0(p, dir), flags, NULL, p->global);
     }
     if (!stream->is_directory)
@@ -492,9 +570,10 @@ static int parse_dir(struct pl_parser *p)
         talloc_free(opts);
     }
 
-    scan_dir(p, path, dir_stack, 0);
+    scan_dir(p, path, dir_stack, 0, autocreate);
 
     p->add_base = false;
+    p->pl->autocreated = autocreate != AUTO_NONE;
     ret = p->pl->num_entries > 0 ? 0 : -1;
 
 done:
@@ -512,7 +591,12 @@ struct pl_format {
     const char *const *mime_types;
 };
 
-static const struct pl_format formats[] = {
+static const struct pl_format dir_formats[] = {
+    {"directory", parse_dir},
+    {0},
+};
+
+static const struct pl_format playlist_formats[] = {
     {"m3u", parse_m3u,
      MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
     {"ini", parse_ref_init},
@@ -520,14 +604,14 @@ static const struct pl_format formats[] = {
      MIME_TYPES("audio/x-scpls")},
     {"url", parse_url},
     {"txt", parse_txt},
-    {"directory", parse_dir},
+    {0},
 };
 
-static const struct pl_format *probe_pl(struct pl_parser *p)
+static const struct pl_format *probe_pl(struct pl_parser *p, const struct pl_format *fmts)
 {
     int64_t start = stream_tell(p->s);
-    for (int n = 0; n < MP_ARRAY_SIZE(formats); n++) {
-        const struct pl_format *fmt = &formats[n];
+    const struct pl_format *fmt = fmts;
+    while (fmt->name) {
         stream_seek(p->s, start);
         if (check_mimetype(p->s, fmt->mime_types)) {
             MP_VERBOSE(p, "forcing format by mime-type.\n");
@@ -536,9 +620,13 @@ static const struct pl_format *probe_pl(struct pl_parser *p)
         }
         if (fmt->parse(p) >= 0)
             return fmt;
+        fmt++;
     }
     return NULL;
 }
+
+extern const demuxer_desc_t demuxer_desc_playlist;
+extern const demuxer_desc_t demuxer_desc_directory;
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
@@ -565,9 +653,14 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->force = force;
     p->check_level = check;
     p->probing = true;
-    p->create_dir_playlist = !demuxer->params->has_playlist && opts->autocreate_playlist;
+    p->autocreate_playlist = demuxer->params->allow_playlist_create ? opts->autocreate_playlist : 0;
+    p->opts = mp_get_config_group(demuxer, demuxer->global, &demux_playlist_conf);
 
-    const struct pl_format *fmt = probe_pl(p);
+    const struct pl_format *fmts = playlist_formats;
+    if (demuxer->desc == &demuxer_desc_directory)
+        fmts = dir_formats;
+
+    const struct pl_format *fmt = probe_pl(p, fmts);
     free_stream(p->s);
     playlist_clear(p->pl);
     if (!fmt) {
@@ -579,7 +672,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->error = false;
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
-    p->opts = mp_get_config_group(demuxer, demuxer->global, &demux_playlist_conf);
     bool ok = fmt->parse(p) >= 0 && !p->error;
     if (p->add_base) {
         bstr proto = mp_split_proto(bstr0(demuxer->filename), NULL);
@@ -599,6 +691,12 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         demux_close_stream(demuxer);
     return ok ? 0 : -1;
 }
+
+const demuxer_desc_t demuxer_desc_directory = {
+    .name = "directory",
+    .desc = "Playlist dir",
+    .open = open_file,
+};
 
 const demuxer_desc_t demuxer_desc_playlist = {
     .name = "playlist",
