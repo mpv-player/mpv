@@ -72,7 +72,7 @@ struct playlist {
     bool current_was_replaced;
     bool playlist_completed;
     bool playlist_started;
-    bool autocreated;
+    char *playlist_dir;
 
     uint64_t id_alloc;
 };

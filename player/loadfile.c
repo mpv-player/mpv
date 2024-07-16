@@ -1042,10 +1042,16 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
     if (opts->playlist_pos >= 0)
         pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
 
-    for (int i = 0; i < pl->num_entries && pl->autocreated; ++i) {
+    for (int i = 0; i < pl->num_entries && pl->playlist_dir; ++i) {
         if (!pl->entries[i]->playlist_path)
             continue;
-        if (!strcmp(pl->entries[i]->filename, pl->entries[i]->playlist_path)) {
+        char *path = pl->entries[i]->playlist_path;
+        if (path[0] != '.')
+            path = mp_path_join(NULL, pl->playlist_dir, pl->entries[i]->playlist_path);
+        bool same = !strcmp(pl->entries[i]->filename, path);
+        if (path != pl->entries[i]->playlist_path)
+            talloc_free(path);
+        if (same) {
             pl->current = pl->entries[i];
             break;
         }
@@ -1079,7 +1085,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
         if (new)
             mpctx->playlist->current = new;
-        mpctx->playlist->autocreated = pl->autocreated;
+        mpctx->playlist->playlist_dir = talloc_steal(mpctx->playlist, pl->playlist_dir);
     } else {
         MP_WARN(mpctx, "Empty playlist!\n");
     }
@@ -1156,7 +1162,7 @@ static MP_THREAD_VOID open_demux_thread(void *ctx)
         .stream_record = true,
         .is_top_level = true,
         .allow_playlist_create = mpctx->playlist->num_entries <= 1 &&
-                                 !mpctx->playlist->autocreated,
+                                 !mpctx->playlist->playlist_dir,
     };
     struct demuxer *demux =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);

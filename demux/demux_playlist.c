@@ -53,9 +53,10 @@ enum autocreate_mode {
 #define OPT_BASE_STRUCT struct demux_playlist_opts
 struct demux_playlist_opts {
     int dir_mode;
-    char **autocreate_playlist_vid_exts;
-    char **autocreate_playlist_aud_exts;
-    char **autocreate_playlist_img_exts;
+    char **directory_filter;
+    char **directory_vid_exts;
+    char **directory_aud_exts;
+    char **directory_img_exts;
 };
 
 struct m_sub_options demux_playlist_conf = {
@@ -65,26 +66,31 @@ struct m_sub_options demux_playlist_conf = {
             {"lazy", DIR_LAZY},
             {"recursive", DIR_RECURSIVE},
             {"ignore", DIR_IGNORE})},
-        {"autocreate-playlist-video-exts",
-            OPT_STRINGLIST(autocreate_playlist_vid_exts)},
-        {"autocreate-playlist-audio-exts",
-            OPT_STRINGLIST(autocreate_playlist_aud_exts)},
-        {"autocreate-playlist-image-exts",
-            OPT_STRINGLIST(autocreate_playlist_img_exts)},
+        {"directory-filter-types",
+            OPT_STRINGLIST(directory_filter)},
+        {"directory-video-exts",
+            OPT_STRINGLIST(directory_vid_exts)},
+        {"directory-audio-exts",
+            OPT_STRINGLIST(directory_aud_exts)},
+        {"directory-image-exts",
+            OPT_STRINGLIST(directory_img_exts)},
         {0}
     },
     .size = sizeof(struct demux_playlist_opts),
     .defaults = &(const struct demux_playlist_opts){
         .dir_mode = DIR_AUTO,
-        .autocreate_playlist_vid_exts = (char *[]){
+        .directory_filter = (char *[]){
+            NULL
+        },
+        .directory_vid_exts = (char *[]){
             "3g2", "3gp", "avi", "flv", "m2ts", "m4v", "mj2", "mkv", "mov",
             "mp4", "mpeg", "mpg", "ogv", "rmvb", "webm", "wmv", "y4m", NULL
         },
-        .autocreate_playlist_aud_exts = (char *[]){
+        .directory_aud_exts = (char *[]){
             "aiff", "ape", "au", "flac", "m4a", "mka", "mp3", "oga", "ogg",
             "ogm", "opus", "wav", "wma", NULL
         },
-        .autocreate_playlist_img_exts = (char *[]){
+        .directory_img_exts = (char *[]){
             "avif", "bmp", "gif", "j2k", "jp2", "jpeg", "jpg", "jxl", "png",
             "svg", "tga", "tif", "tiff", "webp", NULL
         },
@@ -424,7 +430,7 @@ static int cmp_dir_entry(const void *a, const void *b)
     }
 }
 
-static bool has_ext(bstr ext, char **list)
+static bool has_str(bstr ext, char **list)
 {
     if (!list)
         return false;
@@ -435,17 +441,17 @@ static bool has_ext(bstr ext, char **list)
     return false;
 }
 
-static bool test_autocreate_path(struct pl_parser *p, char *path, int autocreate)
+static bool test_path(struct pl_parser *p, char *path, int autocreate)
 {
     if (autocreate & AUTO_ANY)
         return true;
 
     bstr ext = bstr_get_ext(bstr0(path));
-    if (autocreate & AUTO_VIDEO && has_ext(ext, p->opts->autocreate_playlist_vid_exts))
+    if (autocreate & AUTO_VIDEO && has_str(ext, p->opts->directory_vid_exts))
         return true;
-    if (autocreate & AUTO_AUDIO && has_ext(ext, p->opts->autocreate_playlist_aud_exts))
+    if (autocreate & AUTO_AUDIO && has_str(ext, p->opts->directory_aud_exts))
         return true;
-    if (autocreate & AUTO_IMAGE && has_ext(ext, p->opts->autocreate_playlist_img_exts))
+    if (autocreate & AUTO_IMAGE && has_str(ext, p->opts->directory_img_exts))
         return true;
 
     return false;
@@ -505,13 +511,13 @@ static bool scan_dir(struct pl_parser *p, char *path,
         qsort(dir_entries, num_dir_entries, sizeof(dir_entries[0]), cmp_dir_entry);
 
     for (int n = 0; n < num_dir_entries; n++) {
+        char *file = dir_entries[n].path;
         if (dir_mode == DIR_RECURSIVE && dir_entries[n].is_dir) {
             dir_stack[num_dir_stack] = dir_entries[n].st;
-            char *file = dir_entries[n].path;
             scan_dir(p, file, dir_stack, num_dir_stack + 1, autocreate);
         }
         else {
-            if (autocreate == AUTO_NONE || test_autocreate_path(p, dir_entries[n].path, autocreate))
+            if (dir_entries[n].is_dir || test_path(p, file, autocreate))
                 playlist_append_file(p->pl, dir_entries[n].path);
         }
     }
@@ -524,21 +530,22 @@ static int parse_dir(struct pl_parser *p)
     int ret = -1;
     struct stream *stream = p->real_stream;
     int autocreate = AUTO_NONE;
+    p->pl->playlist_dir = NULL;
     if (p->autocreate_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
         bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
         switch (p->autocreate_playlist) {
         case 1: // any
             autocreate = AUTO_ANY;
             break;
-        case 2: // exts
+        case 2: // filter
             autocreate = AUTO_VIDEO | AUTO_AUDIO | AUTO_IMAGE;
             break;
         case 3: // same
-            if (has_ext(ext, p->opts->autocreate_playlist_vid_exts)) {
+            if (has_str(ext, p->opts->directory_vid_exts)) {
                 autocreate = AUTO_VIDEO;
-            } else if (has_ext(ext, p->opts->autocreate_playlist_aud_exts)) {
+            } else if (has_str(ext, p->opts->directory_aud_exts)) {
                 autocreate = AUTO_AUDIO;
-            } else if (has_ext(ext, p->opts->autocreate_playlist_img_exts)) {
+            } else if (has_str(ext, p->opts->directory_img_exts)) {
                 autocreate = AUTO_IMAGE;
             }
             break;
@@ -548,8 +555,20 @@ static int parse_dir(struct pl_parser *p)
         bstr dir = mp_dirname(p->real_stream->url);
         if (!dir.len)
             autocreate = AUTO_NONE;
-        if (autocreate != AUTO_NONE)
+        if (autocreate != AUTO_NONE) {
             stream = stream_create(bstrdup0(p, dir), flags, NULL, p->global);
+            p->pl->playlist_dir = bstrdup0(p->pl, dir);
+        }
+    } else {
+        autocreate = AUTO_NONE;
+        if (!p->opts->directory_filter[0])
+            autocreate = AUTO_ANY;
+        if (has_str(bstr0("video"), p->opts->directory_filter))
+            autocreate |= AUTO_VIDEO;
+        if (has_str(bstr0("audio"), p->opts->directory_filter))
+            autocreate |= AUTO_AUDIO;
+        if (has_str(bstr0("image"), p->opts->directory_filter))
+            autocreate |= AUTO_IMAGE;
     }
     if (!stream->is_directory)
         goto done;
@@ -560,6 +579,9 @@ static int parse_dir(struct pl_parser *p)
 
     char *path = mp_file_get_path(p, bstr0(stream->url));
     if (!path)
+        goto done;
+
+    if (autocreate == AUTO_NONE)
         goto done;
 
     struct stat dir_stack[MAX_DIR_STACK];
@@ -573,7 +595,6 @@ static int parse_dir(struct pl_parser *p)
     scan_dir(p, path, dir_stack, 0, autocreate);
 
     p->add_base = false;
-    p->pl->autocreated = autocreate != AUTO_NONE;
     ret = p->pl->num_entries > 0 ? 0 : -1;
 
 done:

@@ -120,7 +120,7 @@ const struct m_sub_options demux_conf = {
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
         {"autocreate-playlist", OPT_CHOICE(autocreate_playlist,
-            {"no", 0}, {"any", 1}, {"exts", 2}, {"same", 3})},
+            {"no", 0}, {"any", 1}, {"filter", 2}, {"same", 3})},
         {0}
     },
     .size = sizeof(struct demux_opts),
