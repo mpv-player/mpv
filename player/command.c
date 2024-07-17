@@ -7235,6 +7235,9 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     if (event == MPV_EVENT_PLAYBACK_RESTART)
         ctx->last_seek_time = mp_time_sec();
 
+    if (event == MPV_EVENT_IDLE)
+        run_command_opts(mpctx);
+
     if (event == MPV_EVENT_END_FILE)
         mp_msg_flush_status_line(mpctx->log, false);
 
@@ -7268,10 +7271,6 @@ void handle_command_updates(struct MPContext *mpctx)
 
     // Depends on polling demuxer wakeup callback notifications.
     cache_dump_poll(mpctx);
-
-    // Potentially run the commands now (idle) instead of waiting for a file to load.
-    if (mpctx->stop_play == PT_STOP)
-        run_command_opts(mpctx);
 }
 
 void run_command_opts(struct MPContext *mpctx)
