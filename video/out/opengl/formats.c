@@ -12,8 +12,8 @@ enum {
 // This is limited to combinations that are useful for our renderer.
 const struct gl_format gl_formats[] = {
     // These are used for desktop GL 3+, and GLES 3+ with GL_EXT_texture_norm16.
-    {"r8",      GL_R8,       GL_RED,             T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
-    {"rg8",     GL_RG8,      GL_RG,              T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
+    {"r8",      GL_R8,       GL_RED,             T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3 | F_GL2R | F_ES2R },
+    {"rg8",     GL_RG8,      GL_RG,              T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3 | F_GL2R | F_ES2R },
     {"rgb8",    GL_RGB8,     GL_RGB,             T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
     {"rgba8",   GL_RGBA8,    GL_RGBA,            T_U8,  F_CF | F_GL3 | F_GL2F | F_ES3},
     {"r16",     GL_R16,      GL_RED,             T_U16, F_CF | F_GL3 | F_GL2F | F_EXT16},
@@ -107,6 +107,8 @@ int gl_format_feature_flags(GL *gl)
     return (gl->version == 210 ? F_GL2 : 0)
          | (gl->version >= 300 ? F_GL3 : 0)
          | (gl->es == 200 ? F_ES2 : 0)
+         | ((gl->es == 200  &&
+            (gl->mpgl_caps & MPGL_CAP_TEX_RG)) ? F_ES2R : 0)
          | (gl->es >= 300 ? F_ES3 : 0)
          | (gl->es >= 320 ? F_ES32 : 0)
          | (gl->mpgl_caps & MPGL_CAP_EXT16 ? F_EXT16 : 0)
@@ -116,7 +118,9 @@ int gl_format_feature_flags(GL *gl)
             (gl->mpgl_caps & MPGL_CAP_ARB_FLOAT) &&
             (gl->mpgl_caps & MPGL_CAP_TEX_RG) &&
             (gl->mpgl_caps & MPGL_CAP_FB)) ? F_GL2F : 0)
-         | (gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422 ? F_APPL : 0);
+         | (gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422 ? F_APPL : 0)
+         | ((gl->version == 210 &&
+            (gl->mpgl_caps & MPGL_CAP_TEX_RG)) ? F_GL2R : 0);
 }
 
 int gl_format_type(const struct gl_format *format)
