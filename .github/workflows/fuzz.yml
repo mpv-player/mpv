@@ -16,25 +16,31 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined, memory]
     steps:
-    - name: Build Fuzzers
+    - name: Build Fuzzers (${{ matrix.sanitizer }})
       id: build
       uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
       with:
         oss-fuzz-project-name: 'mpv'
         language: c
-    - name: Run Fuzzers
+        sanitizer: ${{ matrix.sanitizer }}
+    - name: Run Fuzzers (${{ matrix.sanitizer }})
       uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
       with:
         oss-fuzz-project-name: 'mpv'
         language: c
         fuzz-seconds: 1200
+        sanitizer: ${{ matrix.sanitizer }}
         output-sarif: true
     - name: Upload Crash
       uses: actions/upload-artifact@v4
       if: failure() && steps.build.outcome == 'success'
       with:
-        name: artifacts
+        name: ${{ matrix.sanitizer }}-artifacts
         path: ./out/artifacts
     - name: Upload Sarif
       if: always() && steps.build.outcome == 'success'
