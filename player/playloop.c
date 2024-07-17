@@ -1149,7 +1149,6 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
         mpctx->current_seek = (struct seek_params){0};
-        run_command_opts(mpctx);
         handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
         update_core_idle_state(mpctx);
