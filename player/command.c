@@ -7232,8 +7232,10 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->marked_permanent = false;
     }
 
-    if (event == MPV_EVENT_PLAYBACK_RESTART)
+    if (event == MPV_EVENT_PLAYBACK_RESTART) {
         ctx->last_seek_time = mp_time_sec();
+        run_command_opts(mpctx);
+    }
 
     if (event == MPV_EVENT_IDLE)
         run_command_opts(mpctx);
