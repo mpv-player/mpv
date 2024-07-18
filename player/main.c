@@ -153,7 +153,6 @@ void mp_print_version(struct mp_log *log, int always)
         mp_msg(log, v, " built on %s\n", mpv_builddate);
     mp_msg(log, v, "libplacebo version: %s\n", PL_VERSION);
     check_library_versions(log, v);
-    mp_msg(log, v, "\n");
     // Only in verbose mode.
     if (!always) {
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
