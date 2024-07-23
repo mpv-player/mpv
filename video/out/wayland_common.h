@@ -30,21 +30,11 @@ typedef struct {
     uint64_t modifier;
 } wayland_format;
 
-struct wayland_opts {
-    int configure_bounds;
-    int content_type;
-    bool disable_vsync;
-    int edge_pixels_pointer;
-    int edge_pixels_touch;
-    bool present;
-};
-
 struct vo_wayland_state {
-    struct m_config_cache   *vo_opts_cache;
+    struct m_config_cache   *opts_cache;
     struct mp_log           *log;
-    struct mp_vo_opts       *vo_opts;
+    struct mp_vo_opts       *opts;
     struct vo               *vo;
-    struct wayland_opts     *opts;
     struct wl_callback      *frame_callback;
     struct wl_compositor    *compositor;
     struct wl_subcompositor *subcompositor;
