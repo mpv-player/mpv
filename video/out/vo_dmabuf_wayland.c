@@ -505,7 +505,7 @@ static void resize(struct vo *vo)
 
     struct mp_rect src;
     struct mp_rect dst;
-    struct mp_vo_opts *vo_opts = wl->vo_opts;
+    struct mp_vo_opts *opts = wl->opts;
 
     const int width = mp_rect_w(wl->geometry);
     const int height = mp_rect_h(wl->geometry);
@@ -529,8 +529,8 @@ static void resize(struct vo *vo)
                                 lround(window_h / wl->scaling_factor));
 
     //now we restore pan for video viewport calculation
-    vo->opts->pan_x = vo_opts->pan_x;
-    vo->opts->pan_y = vo_opts->pan_y;
+    vo->opts->pan_x = opts->pan_x;
+    vo->opts->pan_y = opts->pan_y;
     vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
     wp_viewport_set_destination(wl->video_viewport, lround(mp_rect_w(dst) / wl->scaling_factor),
                                                     lround(mp_rect_h(dst) / wl->scaling_factor));
@@ -643,7 +643,7 @@ static void flip_page(struct vo *vo)
     wl_surface_commit(wl->osd_surface);
     wl_surface_commit(wl->surface);
 
-    if (!wl->opts->disable_vsync)
+    if (!wl->opts->wl_disable_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)

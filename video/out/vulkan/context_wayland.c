@@ -36,7 +36,7 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
 
-    if (!wl->opts->disable_vsync)
+    if (!wl->opts->wl_disable_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)

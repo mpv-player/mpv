@@ -194,8 +194,16 @@ static const m_option_t mp_vo_opt_list[] = {
     {"x11-wid-title", OPT_BOOL(x11_wid_title)},
 #endif
 #if HAVE_WAYLAND
-    {"wayland-content-type", OPT_CHOICE(content_type, {"auto", -1}, {"none", 0},
+    {"wayland-configure-bounds", OPT_CHOICE(wl_configure_bounds,
+        {"auto", -1}, {"no", 0}, {"yes", 1})},
+    {"wayland-content-type", OPT_CHOICE(wl_content_type, {"auto", -1}, {"none", 0},
         {"photo", 1}, {"video", 2}, {"game", 3})},
+    {"wayland-disable-vsync", OPT_BOOL(wl_disable_vsync)},
+    {"wayland-edge-pixels-pointer", OPT_INT(wl_edge_pixels_pointer),
+        M_RANGE(0, INT_MAX)},
+    {"wayland-edge-pixels-touch", OPT_INT(wl_edge_pixels_touch),
+        M_RANGE(0, INT_MAX)},
+    {"wayland-present", OPT_BOOL(wl_present)},
 #endif
 #if HAVE_WIN32_DESKTOP
 // For old MinGW-w64 compatibility
@@ -250,11 +258,15 @@ const struct m_sub_options vo_sub_opts = {
         .border = true,
         .title_bar = true,
         .appid = "mpv",
-        .content_type = -1,
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
         .x11_present = 1,
+        .wl_configure_bounds = -1,
+        .wl_content_type = -1,
+        .wl_edge_pixels_pointer = 16,
+        .wl_edge_pixels_touch = 32,
+        .wl_present = true,
         .mmcss_profile = "Playback",
         .ontop_level = -1,
         .timing_offset = 0.050,
@@ -926,10 +938,6 @@ static const m_option_t mp_opts[] = {
 
 #if HAVE_DRM
     {"", OPT_SUBSTRUCT(drm_opts, drm_conf)},
-#endif
-
-#if HAVE_WAYLAND
-    {"", OPT_SUBSTRUCT(wayland_opts, wayland_conf)},
 #endif
 
 #if HAVE_GL_WIN32
