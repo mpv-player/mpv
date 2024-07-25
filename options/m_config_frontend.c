@@ -79,7 +79,6 @@ static void list_profiles(struct m_config *config)
     MP_INFO(config, "Available profiles:\n");
     for (struct m_profile *p = config->profiles; p; p = p->next)
         MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
-    MP_INFO(config, "\n");
 }
 
 static int show_profile(struct m_config *config, bstr param)
@@ -120,8 +119,6 @@ static int show_profile(struct m_config *config, bstr param)
         }
     }
     config->profile_depth--;
-    if (!config->profile_depth)
-        MP_INFO(config, "\n");
     return M_OPT_EXIT;
 }
 
