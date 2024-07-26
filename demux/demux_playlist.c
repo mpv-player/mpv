@@ -54,9 +54,6 @@ enum autocreate_mode {
 struct demux_playlist_opts {
     int dir_mode;
     char **directory_filter;
-    char **directory_vid_exts;
-    char **directory_aud_exts;
-    char **directory_img_exts;
 };
 
 struct m_sub_options demux_playlist_conf = {
@@ -68,12 +65,6 @@ struct m_sub_options demux_playlist_conf = {
             {"ignore", DIR_IGNORE})},
         {"directory-filter-types",
             OPT_STRINGLIST(directory_filter)},
-        {"directory-video-exts",
-            OPT_STRINGLIST(directory_vid_exts)},
-        {"directory-audio-exts",
-            OPT_STRINGLIST(directory_aud_exts)},
-        {"directory-image-exts",
-            OPT_STRINGLIST(directory_img_exts)},
         {0}
     },
     .size = sizeof(struct demux_playlist_opts),
@@ -81,18 +72,6 @@ struct m_sub_options demux_playlist_conf = {
         .dir_mode = DIR_AUTO,
         .directory_filter = (char *[]){
             NULL
-        },
-        .directory_vid_exts = (char *[]){
-            "3g2", "3gp", "avi", "flv", "m2ts", "m4v", "mj2", "mkv", "mov",
-            "mp4", "mpeg", "mpg", "ogv", "rmvb", "webm", "wmv", "y4m", NULL
-        },
-        .directory_aud_exts = (char *[]){
-            "aiff", "ape", "au", "flac", "m4a", "mka", "mp3", "oga", "ogg",
-            "ogm", "opus", "wav", "wma", NULL
-        },
-        .directory_img_exts = (char *[]){
-            "avif", "bmp", "gif", "j2k", "jp2", "jpeg", "jpg", "jxl", "png",
-            "svg", "tga", "tif", "tiff", "webp", NULL
         },
     },
 };
@@ -126,6 +105,7 @@ struct pl_parser {
     char *format;
     char *codepage;
     struct demux_playlist_opts *opts;
+    struct MPOpts *mp_opts;
 };
 
 
@@ -447,11 +427,11 @@ static bool test_path(struct pl_parser *p, char *path, int autocreate)
         return true;
 
     bstr ext = bstr_get_ext(bstr0(path));
-    if (autocreate & AUTO_VIDEO && has_str(ext, p->opts->directory_vid_exts))
+    if (autocreate & AUTO_VIDEO && has_str(ext, p->mp_opts->video_exts))
         return true;
-    if (autocreate & AUTO_AUDIO && has_str(ext, p->opts->directory_aud_exts))
+    if (autocreate & AUTO_AUDIO && has_str(ext, p->mp_opts->audio_exts))
         return true;
-    if (autocreate & AUTO_IMAGE && has_str(ext, p->opts->directory_img_exts))
+    if (autocreate & AUTO_IMAGE && has_str(ext, p->mp_opts->image_exts))
         return true;
 
     return false;
@@ -541,11 +521,11 @@ static int parse_dir(struct pl_parser *p)
             autocreate = AUTO_VIDEO | AUTO_AUDIO | AUTO_IMAGE;
             break;
         case 3: // same
-            if (has_str(ext, p->opts->directory_vid_exts)) {
+            if (has_str(ext, p->mp_opts->video_exts)) {
                 autocreate = AUTO_VIDEO;
-            } else if (has_str(ext, p->opts->directory_aud_exts)) {
+            } else if (has_str(ext, p->mp_opts->audio_exts)) {
                 autocreate = AUTO_AUDIO;
-            } else if (has_str(ext, p->opts->directory_img_exts)) {
+            } else if (has_str(ext, p->mp_opts->image_exts)) {
                 autocreate = AUTO_IMAGE;
             }
             break;
@@ -561,7 +541,7 @@ static int parse_dir(struct pl_parser *p)
         }
     } else {
         autocreate = AUTO_NONE;
-        if (!p->opts->directory_filter[0])
+        if (!p->opts->directory_filter || !p->opts->directory_filter[0])
             autocreate = AUTO_ANY;
         if (has_str(bstr0("video"), p->opts->directory_filter))
             autocreate |= AUTO_VIDEO;
@@ -675,6 +655,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->check_level = check;
     p->probing = true;
     p->autocreate_playlist = demuxer->params->allow_playlist_create ? opts->autocreate_playlist : 0;
+    p->mp_opts = mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
     p->opts = mp_get_config_group(demuxer, demuxer->global, &demux_playlist_conf);
 
     const struct pl_format *fmts = playlist_formats;
