@@ -71,7 +71,7 @@ struct m_sub_options demux_playlist_conf = {
     .defaults = &(const struct demux_playlist_opts){
         .dir_mode = DIR_AUTO,
         .directory_filter = (char *[]){
-            NULL
+            "video", "audio", "image", NULL
         },
     },
 };
