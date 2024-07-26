@@ -720,11 +720,14 @@ static const m_option_t mp_opts[] = {
     {"sub-auto-exts", OPT_STRINGLIST(sub_auto_exts), .flags = UPDATE_SUB_EXTS},
     {"audio-file-auto", OPT_CHOICE(audiofile_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
-    {"audio-file-auto-exts", OPT_STRINGLIST(audiofile_auto_exts)},
+    {"audio-exts", OPT_STRINGLIST(audio_exts)},
+    {"audio-file-auto-exts", OPT_ALIAS("audio-exts")},
     {"cover-art-auto", OPT_CHOICE(coverart_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
-    {"cover-art-auto-exts", OPT_STRINGLIST(coverart_auto_exts)},
+    {"image-exts", OPT_STRINGLIST(image_exts)},
+    {"cover-art-auto-exts", OPT_ALIAS("image-exts")},
     {"cover-art-whitelist", OPT_STRINGLIST(coverart_whitelist)},
+    {"video-exts", OPT_STRINGLIST(video_exts)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_shared, mp_subtitle_shared_sub_opts)},
@@ -1044,36 +1047,17 @@ static const struct MPOpts mp_default_opts = {
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
     .media_controls = 1,
-
-    .audiofile_auto_exts = (char *[]){
-        "aac",
-        "ac3",
-        "dts",
-        "eac3",
-        "flac",
-        "m4a",
-        "mka",
-        "mp3",
-        "ogg",
-        "opus",
-        "thd",
-        "wav",
-        "wv",
-        NULL
+    .video_exts = (char *[]){
+        "3g2", "3gp", "avi", "flv", "m2ts", "m4v", "mj2", "mkv", "mov", "mp4",
+        "mpeg", "mpg", "ogv", "rmvb", "ts", "webm", "wmv", "y4m", NULL
     },
-
-    .coverart_auto_exts = (char *[]){
-        "avif",
-        "bmp",
-        "gif",
-        "jpeg",
-        "jpg",
-        "jxl",
-        "png",
-        "tif",
-        "tiff",
-        "webp",
-        NULL
+    .audio_exts = (char *[]){
+        "aac", "ac3", "aiff", "ape", "au", "dts", "eac3", "flac", "m4a", "mka",
+        "mp3", "oga", "ogg", "ogm", "opus", "thd", "wav", "wav", "wma", "wv", NULL
+    },
+    .image_exts = (char *[]){
+        "avif", "bmp", "gif", "j2k", "jp2", "jpeg", "jpg", "jxl", "png",
+        "svg", "tga", "tif", "tiff", "webp", NULL
     },
 
     .sub_auto_exts = (char *[]){

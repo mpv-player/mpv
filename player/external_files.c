@@ -49,9 +49,9 @@ static int test_ext(MPOpts *opts, bstr ext)
 {
     if (test_ext_list(ext, opts->sub_auto_exts))
         return STREAM_SUB;
-    if (test_ext_list(ext, opts->audiofile_auto_exts))
+    if (test_ext_list(ext, opts->audio_exts))
         return STREAM_AUDIO;
-    if (test_ext_list(ext, opts->coverart_auto_exts))
+    if (test_ext_list(ext, opts->image_exts))
         return STREAM_VIDEO;
     return -1;
 }
