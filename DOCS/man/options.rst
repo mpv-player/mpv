@@ -4143,7 +4143,7 @@ Demuxer
 
 ``--directory-filter-types=<video,audio,image>``
     Media file types to filter when opening directory. If the list is empty,
-    all files are added to the playlist.
+    all files are added to the playlist. (Default: ``video,audio,image``)
 
     This is a string list option. See `List Options`_ for details.
 
