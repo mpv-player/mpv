@@ -436,9 +436,6 @@ static int load_run(struct mp_script_args *args)
     mp_subprocess(args->log, &opts, &res);
 
     // Closing these will (probably) make the client exit, if it really died.
-    // They _should_ be CLOEXEC, but are not, because
-    // posix_spawn_file_actions_adddup2() may not clear the CLOEXEC flag
-    // properly if by coincidence fd==src_fd.
     close(fds[0]);
     if (fds[1] >= 0)
         close(fds[1]);
