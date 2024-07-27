@@ -541,7 +541,7 @@ static void resize(struct vo *vo)
     set_viewport_source(vo, src);
 }
 
-static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
+static bool draw_osd(struct vo *vo, struct mp_image *cur, enum pl_color_system sys, double pts)
 {
     struct priv *p = vo->priv;
     struct mp_osd_res *res = &p->screen_osd_res;
@@ -562,7 +562,11 @@ static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
                                                MP_ARRAY_SIZE(act_rc), &num_act_rc,
                                                mod_rc, MP_ARRAY_SIZE(mod_rc), &num_mod_rc);
 
-    p->osd_surface_has_contents = num_act_rc > 0;
+    // Unfortunately compositors always assume bt601 which is not always the
+    // case. This can lead to bad flickering artifacts during direct scanout.
+    // Pretend the osd surface always has stuff in it if the colorspace isn't
+    // bt601.
+    p->osd_surface_has_contents = sys == PL_COLOR_SYSTEM_BT_601 ? num_act_rc > 0 : true;
 
     if (!osd || !num_mod_rc)
         goto done;
@@ -591,6 +595,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct vo_wayland_state *wl = vo->wl;
     struct buffer *buf;
     struct osd_buffer *osd_buf;
+    enum pl_color_system sys = PL_COLOR_SYSTEM_UNKNOWN;
     double pts;
 
     if (!vo_wayland_check_visible(vo)) {
@@ -614,16 +619,16 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         if (buf && buf->frame) {
             struct mp_image *image = buf->frame->current;
+            sys = image->params.repr.sys;
             wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
             wl_surface_damage_buffer(wl->video_surface, 0, 0, image->w,
                                      image->h);
-
         }
     }
 
     osd_buf = osd_buffer_get(vo);
     if (osd_buf && osd_buf->buffer) {
-        if (draw_osd(vo, &osd_buf->image, pts) && p->osd_surface_has_contents) {
+        if (draw_osd(vo, &osd_buf->image, sys, pts) && p->osd_surface_has_contents) {
             wl_surface_attach(wl->osd_surface, osd_buf->buffer, 0, 0);
             wl_surface_damage_buffer(wl->osd_surface, 0, 0, osd_buf->image.w,
                                      osd_buf->image.h);
