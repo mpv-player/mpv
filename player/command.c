@@ -7395,7 +7395,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }
 
-    if (flags & UPDATE_VO) {
+    if (flags & UPDATE_VO && mpctx->video_out) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_out(mpctx);
         handle_force_window(mpctx, true);
