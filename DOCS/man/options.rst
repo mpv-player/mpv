@@ -4229,8 +4229,8 @@ Input
     ``--input-ipc-server``, except no socket is created, and instead the passed
     FD is treated like a socket connection received from ``accept()``. In
     practice, you could pass either a FD created by ``socketpair()``, or a pipe.
-    In both cases, you must sure the FD is actually inherited by mpv (do not
-    set the POSIX ``CLOEXEC`` flag).
+    In both cases, you must make sure that the FD is actually inherited by mpv
+    (do not set the POSIX ``CLOEXEC`` flag).
 
     The player quits when the connection is closed.
 
