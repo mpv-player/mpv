@@ -881,9 +881,7 @@ static const m_option_t mp_opts[] = {
     {"input-terminal", OPT_BOOL(consolecontrols), .flags = UPDATE_TERM},
 
     {"input-ipc-server", OPT_STRING(ipc_path), .flags = M_OPT_FILE},
-#if HAVE_POSIX
     {"input-ipc-client", OPT_STRING(ipc_client)},
-#endif
 
     {"screenshot", OPT_SUBSTRUCT(screenshot_image_opts, screenshot_conf)},
     {"screenshot-template", OPT_STRING(screenshot_template)},

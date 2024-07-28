@@ -4243,7 +4243,11 @@ Input
 
     .. note::
 
-        Does not and will not work on Windows.
+        To use this option on Windows, the fd must refer to a wrapped
+        (created by ``_open_osfhandle``) named pipe server handle with a client
+        already connected. The named pipe must be created duplex with overlapped
+        IO and inheritable handles. The program communicates with mpv through
+        the client handle.
 
     .. warning::
 
