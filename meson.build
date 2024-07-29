@@ -539,6 +539,8 @@ features += {'vt.h': cc.has_header_symbol('sys/vt.h', 'VT_GETMODE')}
 
 features += {'consio.h': not features['vt.h'] and cc.has_header_symbol('sys/consio.h', 'VT_GETMODE')}
 
+features += {'wsdisplay-usl-io.h': cc.has_header_symbol('dev/wscons/wsdisplay_usl_io.h', 'VT_GETMODE', prefix: '#include <sys/types.h>')}
+
 # macOS's pthread_setname_np is a special snowflake and differs from literally every other platform.
 features += {'mac-thread-name': darwin}
 
@@ -926,7 +928,7 @@ if features['direct3d']
 endif
 
 drm = dependency('libdrm', version: '>= 2.4.105', required: get_option('drm'))
-features += {'drm': drm.found() and (features['vt.h'] or features['consio.h'])}
+features += {'drm': drm.found() and (features['vt.h'] or features['consio.h'] or features['wsdisplay-usl-io.h'])}
 if features['drm']
     dependencies += drm
     sources += files('video/drmprime.c',

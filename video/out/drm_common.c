@@ -31,8 +31,10 @@
 
 #if HAVE_CONSIO_H
 #include <sys/consio.h>
-#else
+#elif HAVE_VT_H
 #include <sys/vt.h>
+#elif HAVE_WSDISPLAY_USL_IO_H
+#include <dev/wscons/wsdisplay_usl_io.h>
 #endif
 
 #include "drm_atomic.h"
