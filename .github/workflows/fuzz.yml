@@ -6,6 +6,8 @@ on:
         - 'DOCS/**'
         - 'TOOLS/lua/**'
         - '.editorconfig'
+        - '.github/ISSUE_TEMPLATE/**'
+        - '.github/PULL_REQUEST_TEMPLATE'
         - '.gitignore'
         - 'Copyright'
         - 'README.md'
