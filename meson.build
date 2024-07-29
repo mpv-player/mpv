@@ -1271,7 +1271,10 @@ vulkan_opt = get_option('vulkan').require(
     error_message: 'libplacebo compiled without vulkan support!',
 )
 vulkan = dependency('vulkan', version: '>= 1.1.70', required: vulkan_opt)
-features += {'vulkan': vulkan.found()}
+features += {'vulkan': vulkan.found() and (vulkan.type_name() == 'internal' or
+                       cc.has_header_symbol('vulkan/vulkan_core.h',
+                                            'VK_VERSION_1_1',
+                                            dependencies: vulkan))}
 if features['vulkan']
     dependencies += vulkan
     sources += files('video/out/vulkan/context.c',
