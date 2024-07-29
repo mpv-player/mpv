@@ -395,11 +395,11 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
 
     if (opts->ipc_client && opts->ipc_client[0]) {
         int fd = -1;
-        if (strncmp(opts->ipc_client, "fd://", 5) == 0) {
-            char *end;
-            unsigned long l = strtoul(opts->ipc_client + 5, &end, 0);
-            if (!end[0] && l <= INT_MAX)
-                fd = l;
+        bstr str = bstr0(opts->ipc_client);
+        if (bstr_eatstart0(&str, "fd://") && str.len) {
+            long long ll = bstrtoll(str, &str, 0);
+            if (!str.len && ll >= 0 && ll <= INT_MAX)
+                fd = ll;
         }
         if (fd < 0) {
             MP_ERR(arg, "Invalid IPC client argument: '%s'\n", opts->ipc_client);
