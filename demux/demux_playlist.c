@@ -28,6 +28,7 @@
 #include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "options/path.h"
+#include "player/core.h"
 #include "stream/stream.h"
 #include "osdep/io.h"
 #include "misc/natural_sort.h"
@@ -410,28 +411,17 @@ static int cmp_dir_entry(const void *a, const void *b)
     }
 }
 
-static bool has_str(bstr ext, char **list)
-{
-    if (!list)
-        return false;
-    while (*list) {
-        if (!bstrcasecmp0(ext, *list++))
-            return true;
-    }
-    return false;
-}
-
 static bool test_path(struct pl_parser *p, char *path, int autocreate)
 {
     if (autocreate & AUTO_ANY)
         return true;
 
     bstr ext = bstr_get_ext(bstr0(path));
-    if (autocreate & AUTO_VIDEO && has_str(ext, p->mp_opts->video_exts))
+    if (autocreate & AUTO_VIDEO && str_in_list(ext, p->mp_opts->video_exts))
         return true;
-    if (autocreate & AUTO_AUDIO && has_str(ext, p->mp_opts->audio_exts))
+    if (autocreate & AUTO_AUDIO && str_in_list(ext, p->mp_opts->audio_exts))
         return true;
-    if (autocreate & AUTO_IMAGE && has_str(ext, p->mp_opts->image_exts))
+    if (autocreate & AUTO_IMAGE && str_in_list(ext, p->mp_opts->image_exts))
         return true;
 
     return false;
@@ -521,11 +511,11 @@ static int parse_dir(struct pl_parser *p)
             autocreate = AUTO_VIDEO | AUTO_AUDIO | AUTO_IMAGE;
             break;
         case 3: // same
-            if (has_str(ext, p->mp_opts->video_exts)) {
+            if (str_in_list(ext, p->mp_opts->video_exts)) {
                 autocreate = AUTO_VIDEO;
-            } else if (has_str(ext, p->mp_opts->audio_exts)) {
+            } else if (str_in_list(ext, p->mp_opts->audio_exts)) {
                 autocreate = AUTO_AUDIO;
-            } else if (has_str(ext, p->mp_opts->image_exts)) {
+            } else if (str_in_list(ext, p->mp_opts->image_exts)) {
                 autocreate = AUTO_IMAGE;
             }
             break;
@@ -543,11 +533,11 @@ static int parse_dir(struct pl_parser *p)
         autocreate = AUTO_NONE;
         if (!p->opts->directory_filter || !p->opts->directory_filter[0])
             autocreate = AUTO_ANY;
-        if (has_str(bstr0("video"), p->opts->directory_filter))
+        if (str_in_list(bstr0("video"), p->opts->directory_filter))
             autocreate |= AUTO_VIDEO;
-        if (has_str(bstr0("audio"), p->opts->directory_filter))
+        if (str_in_list(bstr0("audio"), p->opts->directory_filter))
             autocreate |= AUTO_AUDIO;
-        if (has_str(bstr0("image"), p->opts->directory_filter))
+        if (str_in_list(bstr0("image"), p->opts->directory_filter))
             autocreate |= AUTO_IMAGE;
     }
     if (!stream->is_directory)
