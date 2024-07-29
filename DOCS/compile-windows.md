@@ -212,15 +212,15 @@ For guidance on updating MSYS2, please refer to the official documentation:
 ### Installing mpv Dependencies
 
 ``` bash
-# Install pacboy
-pacman -S pactoys
+# Install pacboy and git
+pacman -S pactoys git
 
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacboy -S git {python,pkgconf,cc,meson}:p
+pacboy -S python pkgconf cc meson
 
 # Install key dependencies. libass and lcms2 are also included as dependencies
 # of ffmpeg.
-pacboy -S {ffmpeg,libjpeg-turbo,libplacebo,luajit}:p
+pacboy -S ffmpeg libjpeg-turbo libplacebo luajit vulkan-headers
 ```
 
 ### Building mpv
