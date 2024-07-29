@@ -125,4 +125,6 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
 
 void playlist_entry_unref(struct playlist_entry *e);
 
+void playlist_set_current(struct playlist *pl);
+
 #endif

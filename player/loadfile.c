@@ -1042,20 +1042,8 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
     if (opts->playlist_pos >= 0)
         pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
 
-    for (int i = 0; i < pl->num_entries && pl->playlist_dir; ++i) {
-        if (!pl->entries[i]->playlist_path)
-            continue;
-        char *path = pl->entries[i]->playlist_path;
-        if (path[0] != '.')
-            path = mp_path_join(NULL, pl->playlist_dir, pl->entries[i]->playlist_path);
-        bool same = !strcmp(pl->entries[i]->filename, path);
-        if (path != pl->entries[i]->playlist_path)
-            talloc_free(path);
-        if (same) {
-            pl->current = pl->entries[i];
-            break;
-        }
-    }
+    if (pl->playlist_dir)
+        playlist_set_current(pl);
 
     if (opts->shuffle)
         playlist_shuffle(pl);
