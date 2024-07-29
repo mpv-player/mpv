@@ -565,6 +565,7 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track);
+bool str_in_list(bstr str, char **list);
 
 // osd.c
 void set_osd_bar(struct MPContext *mpctx, int type,

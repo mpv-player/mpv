@@ -343,3 +343,14 @@ const char *mp_status_str(enum playback_status st)
     default:                return "bug";
     }
 }
+
+bool str_in_list(bstr str, char **list)
+{
+    if (!list)
+        return false;
+    while (*list) {
+        if (!bstrcasecmp0(str, *list++))
+            return true;
+    }
+    return false;
+}
