@@ -92,8 +92,9 @@ body:
 
           Without the log file, this issue will be closed for ignoring the issue template.
 
+
           Disclaimer: The log file may contain identifiable information, such as your username.
-                      Review the log file before sharing and redact any sensitive data if necessary.
+          Review the log file before sharing and redact any sensitive data if necessary.
   validations:
       required: true
 - type: textarea
