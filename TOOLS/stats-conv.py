@@ -38,9 +38,10 @@ Currently, the following event types are supported:
 
 class G:
     events = {}
-    start = None
+    start = 0.0
     markers = ["o", "s", "t", "d"]
     curveno = {}
+    sevents = []
 
 def find_marker():
     if len(G.markers) == 0:
@@ -50,7 +51,10 @@ def find_marker():
     return m
 
 class Event:
-    pass
+    name = None
+    vals = []
+    type = None
+    marker = ""
 
 def get_event(event, evtype):
     if event not in G.events:
@@ -161,6 +165,6 @@ for e in G.sevents:
     else:
         args['pen'] = pg.mkPen(color, width=0)
     G.curveno[cur] += 1
-    n = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], **args)
+    cur.plot([x for x, _ in e.vals], [y for _, y in e.vals], **args)
 
 app.exec()
