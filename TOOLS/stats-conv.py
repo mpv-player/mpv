@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pyqtgraph.Qt import QtGui, QtCore
+from PyQt6 import QtWidgets
 import pyqtgraph as pg
 import sys
 import re
@@ -135,9 +135,9 @@ for e, index in zip(G.sevents, range(len(G.sevents))):
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
-app = QtGui.QApplication([])
-win = pg.GraphicsWindow()
-#win.resize(1500, 900)
+app = QtWidgets.QApplication([])
+win = pg.GraphicsLayoutWidget()
+win.show()
 
 ax = [None, None]
 plots = 2 if hasval else 1
@@ -163,4 +163,4 @@ for e in G.sevents:
     G.curveno[cur] += 1
     n = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], **args)
 
-QtGui.QApplication.instance().exec_()
+app.exec()
