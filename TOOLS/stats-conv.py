@@ -76,60 +76,63 @@ def mkColor(t):
 
 SCALE = 1e6 # microseconds to seconds
 
-for line in [line.split("#")[0].strip() for line in open(filename, "r")]:
-    line = line.strip()
-    if not line:
-        continue
-    ts, event = line.split(" ", 1)
-    ts = int(ts) / SCALE
-    if G.start is None:
-        G.start = ts
-    ts = ts - G.start
-    if event.startswith("start "):
-        e = get_event(event[6:], "event")
-        e.vals.append((ts, 0))
-        e.vals.append((ts, 1))
-    elif event.startswith("end "):
-        e = get_event(event[4:], "event")
-        e.vals.append((ts, 1))
-        e.vals.append((ts, 0))
-    elif event.startswith("value "):
-        _, val, name = event.split(" ", 2)
-        val = float(val)
-        e = get_event(name, "value")
-        e.vals.append((ts, val))
-    elif event.startswith("event-timed "):
-        _, val, name = event.split(" ", 2)
-        val = int(val) / SCALE - G.start
-        e = get_event(name, "event-signal")
-        e.vals.append((val, 1))
-    elif event.startswith("range-timed "):
-        _, ts1, ts2, name = event.split(" ", 3)
-        ts1 = int(ts1) / SCALE - G.start
-        ts2 = int(ts2) / SCALE - G.start
-        e = get_event(name, "event")
-        e.vals.append((ts1, 0))
-        e.vals.append((ts1, 1))
-        e.vals.append((ts2, 1))
-        e.vals.append((ts2, 0))
-    elif event.startswith("value-timed "):
-        _, tsval, val, name = event.split(" ", 3)
-        tsval = int(tsval) / SCALE - G.start
-        val = float(val)
-        e = get_event(name, "value")
-        e.vals.append((tsval, val))
-    elif event.startswith("signal "):
-        name = event.split(" ", 2)[1]
-        e = get_event(name, "event-signal")
-        e.vals.append((ts, 1))
-    else:
-        e = get_event(event, "event-signal")
-        e.vals.append((ts, 1))
+with open(filename, "r") as file:
+    for line in file:
+        line = line.split("#")[0].strip()
+        if not line:
+            continue
+        ts, event = line.split(" ", 1)
+        ts = int(ts) / SCALE
+        if G.start is None:
+            G.start = ts
+        ts -= G.start
+
+        match event.split(" ", 1):
+            case ["start", name]:
+                e = get_event(name, "event")
+                e.vals.append((ts, 0))
+                e.vals.append((ts, 1))
+            case ["end", name]:
+                e = get_event(name, "event")
+                e.vals.append((ts, 1))
+                e.vals.append((ts, 0))
+            case ["value", rest]:
+                val, name = rest.split(" ", 1)
+                val = float(val)
+                e = get_event(name, "value")
+                e.vals.append((ts, val))
+            case ["event-timed", rest]:
+                val, name = rest.split(" ", 1)
+                val = int(val) / SCALE - G.start
+                e = get_event(name, "event-signal")
+                e.vals.append((val, 1))
+            case ["range-timed", rest]:
+                ts1, ts2, name = rest.split(" ", 2)
+                ts1 = int(ts1) / SCALE - G.start
+                ts2 = int(ts2) / SCALE - G.start
+                e = get_event(name, "event")
+                e.vals.append((ts1, 0))
+                e.vals.append((ts1, 1))
+                e.vals.append((ts2, 1))
+                e.vals.append((ts2, 0))
+            case ["value-timed", rest]:
+                tsval, val, name = rest.split(" ", 2)
+                tsval = int(tsval) / SCALE - G.start
+                val = float(val)
+                e = get_event(name, "value")
+                e.vals.append((tsval, val))
+            case ["signal", name]:
+                e = get_event(name, "event-signal")
+                e.vals.append((ts, 1))
+            case _:
+                e = get_event(event, "event-signal")
+                e.vals.append((ts, 1))
 
 # deterministically sort them; make sure the legend is sorted too
 G.sevents = list(G.events.values())
 G.sevents.sort(key=lambda x: x.name)
 hasval = False
+
 for e, index in zip(G.sevents, range(len(G.sevents))):
     m = len(G.sevents)
     if e.type == "value":
@@ -146,13 +149,16 @@ win.show()
 ax = [None, None]
 plots = 2 if hasval else 1
 ax[0] = win.addPlot()
+
 if hasval:
     win.nextRow()
     ax[1] = win.addPlot()
     ax[1].setXLink(ax[0])
+
 for cur in ax:
     if cur is not None:
         cur.addLegend(offset = (-1, 1))
+
 for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
     if not cur in G.curveno:
@@ -165,6 +171,6 @@ for e in G.sevents:
     else:
         args['pen'] = pg.mkPen(color, width=0)
     G.curveno[cur] += 1
-    cur.plot([x for x, _ in e.vals], [y for _, y in e.vals], **args)
+    cur.plot(*zip(*e.vals), **args)
 
 app.exec()
