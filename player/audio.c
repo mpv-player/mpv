@@ -213,6 +213,7 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
     ao_c->start_pts = MP_NOPTS_VALUE;
     ao_c->untimed_throttle = false;
     ao_c->underrun = false;
+    ao_c->delaying_audio_start = false;
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -841,12 +842,13 @@ void audio_start_ao(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
                        apts, pts, diff);
             mpctx->logged_async_diff = diff;
+            ao_c->delaying_audio_start = true;
         }
         return;
     }
 
     MP_VERBOSE(mpctx, "starting audio playback\n");
-    ao_c->audio_started = true;
+    ao_c->delaying_audio_start = false;
     ao_start(ao_c->ao);
     mpctx->audio_status = STATUS_PLAYING;
     if (ao_c->out_eof) {
