@@ -388,7 +388,7 @@ static void handle_new_frame(struct MPContext *mpctx)
         }
     }
     mpctx->time_frame += frame_time / mpctx->video_speed;
-    if (mpctx->ao_chain && mpctx->ao_chain->audio_started)
+    if (mpctx->ao_chain && !mpctx->ao_chain->delaying_audio_start)
         mpctx->delay -= frame_time;
     if (mpctx->video_status >= STATUS_PLAYING)
         adjust_sync(mpctx, pts, frame_time);

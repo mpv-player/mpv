@@ -194,7 +194,7 @@ struct ao_chain {
     double start_pts;
     bool start_pts_known;
 
-    bool audio_started;
+    bool delaying_audio_start;
 
     struct track *track;
     struct mp_pin *filter_src;
