@@ -543,8 +543,12 @@ static const m_option_t mp_opts[] = {
         {"idle",        IDLE_PRIORITY_CLASS}),
         .flags = UPDATE_PRIORITY},
 #endif
+#if defined(HAVE_WIN32_SMTC) && HAVE_WIN32_SMTC
     {"media-controls", OPT_CHOICE(media_controls,
         {"no", 0}, {"player", 1}, {"yes", 2})},
+#else
+    {"media-controls", OPT_REMOVED("This mpv build does not include media controls support.")},
+#endif
     {"config", OPT_BOOL(load_config), .flags = CONF_PRE_PARSE},
     {"config-dir", OPT_STRING(force_configdir),
         .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
