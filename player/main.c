@@ -399,7 +399,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     cocoa_set_mpv_handle(ctx);
 #endif
 
-#if defined(HAVE_WIN32_SMTC) && HAVE_WIN32_SMTC
+#if HAVE_WIN32_SMTC
     if (opts->media_controls == 2 || (mpctx->is_cli && opts->media_controls == 1))
         mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
