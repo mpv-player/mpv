@@ -530,8 +530,11 @@ if not posix and not features['win32-desktop']
                      'osdep/terminal-dummy.c')
 endif
 
+# media controls
 if win32
     subdir('osdep/win32')
+else
+    features += {'win32-smtc': false}
 endif
 
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
