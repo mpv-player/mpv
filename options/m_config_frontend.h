@@ -50,6 +50,7 @@ struct m_config_option {
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
+    bool unavailable;               // Option is missing compile-time support
     int32_t opt_id;                 // For some m_config APIs
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
