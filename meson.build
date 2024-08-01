@@ -1726,6 +1726,31 @@ foreach feature, allowed: features
     endif
 endforeach
 
+# Add some dummy Windows defines for non-win32 platforms.
+if not win32
+    win32_defines = ['DWMWCP_DEFAULT',
+                     'DWMWCP_DONOTROUND',
+                     'DWMWCP_ROUND',
+                     'DWMWCP_ROUNDSMALL',
+                     'DWMSBT_AUTO',
+                     'DWMSBT_NONE',
+                     'DWMSBT_MAINWINDOW',
+                     'DWMSBT_TRANSIENTWINDOW',
+                     'DWMSBT_TABBEDWINDOW',
+                     'WDA_NONE',
+                     'WDA_MONITOR',
+                     'WDA_EXCLUDEFROMCAPTURE',
+                     'REALTIME_PRIORITY_CLASS',
+                     'HIGH_PRIORITY_CLASS',
+                     'ABOVE_NORMAL_PRIORITY_CLASS',
+                     'NORMAL_PRIORITY_CLASS',
+                     'BELOW_NORMAL_PRIORITY_CLASS',
+                     'IDLE_PRIORITY_CLASS']
+    foreach define: win32_defines
+        conf_data.set10(define, false)
+    endforeach
+endif
+
 
 # Script to sort the feature_keys object.
 feature_sort = '''
