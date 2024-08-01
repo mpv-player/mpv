@@ -980,12 +980,24 @@ static bool render_frame(struct vo *vo)
 
         vo->driver->flip_page(vo);
 
+        int64_t forced_wait = 0;
+        if (vo->opts->display_fps_limiter && VS_IS_DISP(vo->opts->video_sync)) {
+            forced_wait = now + in->nominal_vsync_interval;
+            wait_until(vo, forced_wait);
+        }
+
         struct vo_vsync_info vsync = {
             .last_queue_display_time = -1,
             .skipped_vsyncs = -1,
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
+
+        // If we are using the fps limiter, set these fields using forced wait.
+        if (forced_wait) {
+            vsync.last_queue_display_time = forced_wait;
+            vsync.vsync_duration = forced_wait - now;
+        }
 
         // Make up some crap if presentation feedback is missing.
         if (vsync.last_queue_display_time <= 0)

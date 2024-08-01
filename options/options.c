@@ -172,6 +172,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"native-fs", OPT_BOOL(native_fs)},
     {"native-touch", OPT_BOOL(native_touch)},
     {"show-in-taskbar", OPT_BOOL(show_in_taskbar)},
+    {"display-fps-limiter", OPT_BOOL(display_fps_limiter)},
     {"display-fps-override", OPT_DOUBLE(display_fps_override),
         M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},

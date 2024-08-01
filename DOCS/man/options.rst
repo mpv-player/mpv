@@ -1212,7 +1212,17 @@ Video
     monitor.
 
     Set this option only if you have reason to believe the automatically
-    determined value is wrong.
+    determined value is wrong or intend to use the ``--display-fps-limiter``
+    option.
+
+``--display-fps-limiter=<yes|no>``
+    When using a ``--video-sync=display-*``, limit mpv's framerate to the
+    detected display FPS. This can be combined with the
+    ``--display-fps-override`` option to essentially set a specific framerate
+    limiter. This is mainly useful for VRR monitors with very high refresh rates
+    that can also support a lower rate. Using this is probably less accurate
+    than setting a custom modeline to your target frame rate, so use with
+    caution.
 
 ``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
