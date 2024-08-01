@@ -82,6 +82,8 @@ local function format_flags(track)
 end
 
 local function format_track(track)
+    local bitrate = track["demux-bitrate"] or track["hls-bitrate"]
+
     return (track.selected and "●" or "○") ..
         (track.title and " " .. track.title or "") ..
         " (" .. (
@@ -98,10 +100,8 @@ local function format_track(track)
              and track["codec-profile"] .. " " or "") ..
             (track["demux-samplerate"] and track["demux-samplerate"] / 1000 ..
              " kHz " or "") ..
-            (track["demux-bitrate"] and string.format("%.0f", track["demux-bitrate"] / 1000)
-             .. " kbps " or "") ..
-            (track["hls-bitrate"] and string.format("%.0f", track["hls-bitrate"] / 1000)
-             .. " HLS kbps " or "")
+            (bitrate and string.format("%.0f", bitrate / 1000) ..
+             " kbps " or "")
         ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
