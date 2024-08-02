@@ -1754,7 +1754,7 @@ mp.observe_property('display-hidpi-scale', 'native', update)
 mp.observe_property('focused', 'native', update)
 
 mp.observe_property("user-data/osc/margins", "native", function(_, val)
-    if val then
+    if type(val) == "table" and type(val.t) == "number" and type(val.b) == "number" then
         global_margins = val
     else
         global_margins = { t = 0, b = 0 }
