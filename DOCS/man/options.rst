@@ -237,6 +237,21 @@ Playback Control
     speed higher than normal automatically inserts the ``scaletempo2`` audio
     filter.
 
+``--rt-catchup``
+    Enable the player to speed up by a factor equal to the sum of 1, and the
+    square of the product of how many seconds behind the the delay given by
+    ``--rt-catchup-max-delay`` the player has fallen and the value given by
+    ``--rt-catchup-multiplier`` unless the delay does not exceed the delay
+    given by ``--rt-catchup-max-delay``.
+
+``--rt-catchup-max-delay=<0.0..>``
+    The maximum delay in seconds behind the media source the player may reach
+    before it starts speeding up, if ``--rt-catchup`` is enabled.
+
+``--rt-catchup-multiplier=<0.0..>``
+    A coefficient applied during the speed multiplier calculation according to
+    ``--rt-catchup`` and ``--rt-catchup-max-delay``
+
 ``--pause``
     Start the player in paused state.
 

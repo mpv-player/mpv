@@ -681,6 +681,13 @@ static const m_option_t mp_opts[] = {
     // set a-v distance
     {"audio-delay", OPT_FLOAT(audio_delay)},
 
+    // set live/realtime catch-up parameters
+    {"rt-catchup", OPT_FLAG(realtime_catchup)},
+    {"rt-catchup-multiplier", OPT_DOUBLE(realtime_catchup_speed_multiplier),
+        M_RANGE(0, DBL_MAX)},
+    {"rt-catchup-max-delay", OPT_DOUBLE(realtime_catchup_max_delay),
+        M_RANGE(0, DBL_MAX)},
+
 // ------------------------- codec/vfilter options --------------------
 
     {"af", OPT_SETTINGSLIST(af_settings, &af_obj_list)},
