@@ -3551,6 +3551,14 @@ Property list
     upon, and writing to these properties may prevent builtin scripts from working
     properly.
 
+    Currently, the following properties have defined special semantics:
+
+    ``user-data/osc/margins``
+        This property is written by an OSC implementation to indicate the margins that it
+        occupies. Its sub-properties ``l``, ``r``, ``t``, and ``b`` should all be set to
+        the left, right, top, and bottom margins respectively.
+        Values are between 0.0 and 1.0, normalized to window width/height.
+
     Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
     read, written, or observed.
 
