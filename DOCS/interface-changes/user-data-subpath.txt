@@ -1,0 +1,1 @@
+reserve `user-data/osc` and `user-data/mpv` sub-paths for internal use
