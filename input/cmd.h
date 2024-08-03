@@ -105,7 +105,7 @@ typedef struct mp_cmd {
     int flags; // mp_cmd_flags bitfield
     char *original;
     char *desc; // (usually NULL since stripped away later)
-    char *input_section;
+    bstr input_section;
     bool is_up_down : 1;
     bool is_up : 1;
     bool emit_on_up : 1;
