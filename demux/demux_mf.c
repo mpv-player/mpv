@@ -126,7 +126,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     size_t fname_avail = bfilename.len + 32;
     char *fname = talloc_size(mf, fname_avail);
 
-#if HAVE_GLOB
+#if HAVE_GLOB && !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
     if (!strchr(filename, '%')) {
         // append * if none present
         snprintf(fname, fname_avail, "%s%c", filename,
