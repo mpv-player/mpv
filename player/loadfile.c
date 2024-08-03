@@ -1219,7 +1219,7 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
     // Don't allow to open local paths or stdin during fuzzing
     bstr open_url = bstr0(mpctx->open_url);
     if (bstr_startswith0(open_url, "/") ||
-        bstr_startswith0(open_url, "./") ||
+        bstr_startswith0(open_url, ".") ||
         bstr_equals0(open_url, "-"))
     {
         cancel_open(mpctx);
