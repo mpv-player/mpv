@@ -1860,6 +1860,8 @@ terminate_playback:
     reinit_complex_filters(mpctx, true);
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
+    if (mpctx->vo_chain)
+        vo_eof_reset(mpctx->vo_chain->vo);
     uninit_sub_all(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
