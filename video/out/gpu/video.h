@@ -216,6 +216,7 @@ bool gl_video_icc_auto_enabled(struct gl_video *p);
 bool gl_video_gamma_auto_enabled(struct gl_video *p);
 
 void gl_video_reset(struct gl_video *p);
+void gl_video_reset_frame(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);
 
 struct mp_hwdec_devices;
