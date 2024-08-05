@@ -544,12 +544,15 @@ local function get_playlist()
 
     local message = string.format('Playlist [%d/%d]:\n', pos, count)
     local show = mp.get_property_native('osd-playlist-entry')
+    local trailing_slash_pattern = mp.get_property("platform") == "windows"
+                                   and "[/\\]+$" or "/+$"
     for _, v in ipairs(limlist) do
         local entry = v.title
         if not entry or show ~= 'title' then
             entry = v.filename
             if not entry:find("://") then
-                entry = select(2, utils.split_path(entry))
+                entry = select(2, utils.split_path(
+                    entry:gsub(trailing_slash_pattern, "")))
             end
         end
         if v.title and show == 'both' then
