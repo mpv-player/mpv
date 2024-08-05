@@ -37,6 +37,8 @@ jobs:
         language: c
         fuzz-seconds: 1200
         sanitizer: ${{ matrix.sanitizer }}
+        report-ooms: true
+        report-timeouts: true
         output-sarif: true
     - name: Upload Crash
       uses: actions/upload-artifact@v4
