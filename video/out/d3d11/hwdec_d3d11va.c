@@ -246,6 +246,7 @@ const struct ra_hwdec_driver ra_hwdec_d3d11va = {
     .name = "d3d11va",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_D3D11, 0},
+    .device_type = AV_HWDEVICE_TYPE_D3D11VA,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){
