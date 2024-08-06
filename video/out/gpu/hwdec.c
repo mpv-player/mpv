@@ -352,3 +352,13 @@ int ra_hwdec_driver_get_imgfmt_for_name(const char *name)
     }
     return IMGFMT_NONE;
 }
+
+enum AVHWDeviceType ra_hwdec_driver_get_device_type_for_name(const char *name)
+{
+    for (int i = 0; ra_hwdec_drivers[i]; i++) {
+        if (!strcmp(ra_hwdec_drivers[i]->name, name)) {
+            return ra_hwdec_drivers[i]->device_type;
+        }
+    }
+    return AV_HWDEVICE_TYPE_NONE;
+}
