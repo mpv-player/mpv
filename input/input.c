@@ -316,7 +316,7 @@ static void append_bind_info(struct input_ctx *ictx, char **pmsg,
     msg = talloc_asprintf_append(msg, " '%s'", stripped);
     if (!cmd)
         msg = talloc_asprintf_append(msg, " (invalid)");
-    if (bstr_equals0(bind->owner->section, "default"))
+    if (!bstr_equals0(bind->owner->section, "default"))
         msg = talloc_asprintf_append(msg, " in section {%.*s}",
                                      BSTR_P(bind->owner->section));
     msg = talloc_asprintf_append(msg, " in %s", bind->location);
