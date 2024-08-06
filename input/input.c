@@ -168,7 +168,7 @@ struct input_ctx {
 };
 
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
-                        const char *location, bstr section);
+                        const char *location, const bstr restrict_section);
 static void close_input_sources(struct input_ctx *ictx);
 static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags);
 
@@ -1384,10 +1384,10 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     }
 }
 
-// section: every entry is forced to this section name
+// restrict_section: every entry is forced to this section name
 //          if NULL, load normally and allow any sections
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
-                        const char *location, bstr section)
+                        const char *location, const bstr restrict_section)
 {
     int n_binds = 0;
     int line_no = 0;
@@ -1434,6 +1434,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         }
         talloc_free(name);
 
+        bstr section = restrict_section;
         if (!section.len) {
             if (bstr_startswith0(command, "{")) {
                 int p = bstrchr(command, '}');
