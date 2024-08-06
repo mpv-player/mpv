@@ -137,7 +137,7 @@ static struct mp_filter *vf_vdpaupp_create(struct mp_filter *parent, void *optio
     p->queue = mp_refqueue_alloc(f);
 
     struct mp_hwdec_ctx *hwdec_ctx =
-        mp_filter_load_hwdec_device(f, IMGFMT_VDPAU);
+        mp_filter_load_hwdec_device(f, IMGFMT_VDPAU, AV_HWDEVICE_TYPE_VDPAU);
     if (!hwdec_ctx || !hwdec_ctx->av_device_ref)
         goto error;
     p->ctx = mp_vdpau_get_ctx_from_av(hwdec_ctx->av_device_ref);

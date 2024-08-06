@@ -456,7 +456,8 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
         hwdec_devices_request_for_img_fmt(ctx->hwdec_devs, &params);
 
         const struct mp_hwdec_ctx *hw_ctx =
-            hwdec_devices_get_by_imgfmt(ctx->hwdec_devs, imgfmt);
+            hwdec_devices_get_by_imgfmt_and_type(ctx->hwdec_devs, imgfmt,
+                                                 hwdec->lavc_device);
 
         if (hw_ctx && hw_ctx->av_device_ref)
             return av_buffer_ref(hw_ctx->av_device_ref);
