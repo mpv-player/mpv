@@ -417,7 +417,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Test in OpenBSD VM
-      uses: cross-platform-actions/action@v0.24.0
+      uses: cross-platform-actions/action@v0.25.0
       with:
         operating_system: openbsd
         version: '7.5'
@@ -459,10 +459,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v0.24.0
+      uses: cross-platform-actions/action@v0.25.0
       with:
         operating_system: freebsd
-        version: '14.0'
+        version: '14.1'
         run: |
             sudo pkg update
             sudo pkg install -y \
