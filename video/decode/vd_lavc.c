@@ -237,8 +237,10 @@ struct autoprobe_info {
 
 // Things not included in this list will be tried last, in random order.
 const struct autoprobe_info hwdec_autoprobe_info[] = {
+    {"vulkan",          HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"d3d11va",         HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"dxva2",           HWDEC_FLAG_AUTO},
+    {"vulkan-copy",     HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"d3d11va-copy",    HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"dxva2-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"nvdec",           HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
