@@ -6,13 +6,6 @@ if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
 
-# {avcodec,tests}: rename the bundled Mesa AV1 vulkan video headers
-if (-not (Test-Path "$subprojects/packagefiles/ffmpeg")) {
-    New-Item -Path "$subprojects/packagefiles/ffmpeg" -ItemType Directory | Out-Null
-}
-Invoke-WebRequest -Uri "https://github.com/FFmpeg/FFmpeg/commit/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch" `
-                  -OutFile "$subprojects/packagefiles/ffmpeg/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch"
-
 # Wrap shaderc to run git-sync-deps and patch unsupported generator expression
 if (-not (Test-Path "$subprojects/shaderc_cmake")) {
     git clone https://github.com/google/shaderc --depth 1 $subprojects/shaderc_cmake
@@ -122,8 +115,7 @@ $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
-        Revision = "meson-6.1"
-        Patch = "ffmpeg/e06ce6d2b45edac4a2df04f304e18d4727417d24.patch"
+        Revision = "meson-7.0"
         Provides = @(
             "libavcodec = libavcodec_dep",
             "libavdevice = libavdevice_dep",
@@ -166,9 +158,6 @@ revision = $($project.Revision)
 depth = 1
 clone-recursive = true
 "@
-    if ($project.ContainsKey('Patch')) {
-        $content += "`ndiff_files = $($project.Patch)"
-    }
     if ($project.ContainsKey('Method')) {
         $content += "`nmethod = $($project.Method)"
     }
