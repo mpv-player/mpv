@@ -32,7 +32,7 @@
 
 #include <libavutil/common.h>
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "player/client.h"
 
 #include "mpv_talloc.h"

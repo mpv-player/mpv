@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/drm_common.h"
 #endif
 

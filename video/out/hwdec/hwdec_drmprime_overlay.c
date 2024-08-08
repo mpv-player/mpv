@@ -29,7 +29,7 @@
 #include "video/hwdec.h"
 #include "common/msg.h"
 #include "options/m_config.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/drm_atomic.h"
 #include "video/out/drm_common.h"
 #include "video/out/drm_prime.h"

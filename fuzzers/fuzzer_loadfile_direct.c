@@ -20,7 +20,7 @@
 
 #include <unistd.h>
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 #include "common.h"
 
