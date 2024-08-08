@@ -242,6 +242,25 @@ Playback Control
     affect playback speed. Playing with an altered pitch automatically inserts
     the ``scaletempo2`` audio filter.
 
+    In a standard 12-tone scale system, octaves are separated by a factor of 2
+    whereas semitones are represented by a factor of 2^(1/12). This means
+    pitches can easily be shifted up or down with a simple multiplier.
+
+    .. admonition:: Examples
+
+        ``--pitch=2``
+            Shifts the pitch up a full octave.
+        ``--pitch=0.5``
+            Shifts the pitch down an octave.
+        ``--pitch=1.498307`` (2^(7/12))
+            Shifts the pitch up a perfect fifth.
+        ``--pitch=0.667420`` (2^(-7/12))
+            Shifts the pitch down a perfect fifth.
+        ``--pitch=1.059463`` (2^(1/12))
+            Shifts the pitch up a semitone.
+        ``--pitch=0.943874`` (2^(-1/12))
+            Shifts the pitch down a semitone.
+
 ``--pause``
     Start the player in paused state.
 
