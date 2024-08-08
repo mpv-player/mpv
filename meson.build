@@ -145,6 +145,7 @@ sources = files(
     'misc/rendezvous.c',
     'misc/thread_pool.c',
     'misc/thread_tools.c',
+    'misc/wcwidth.c',
 
     ## Options
     'options/m_config_core.c',
