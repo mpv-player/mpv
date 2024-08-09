@@ -4147,14 +4147,13 @@ Demuxer
 
     This is a string list option. See `List Options`_ for details.
 
-``--autocreate-playlist=<no|any|filter|same>``
+``--autocreate-playlist=<no|filter|same>``
     When opening a local file, act as if the parent directory is opened and
     create a playlist automatically.
 
     :no:     Load a single file (default).
-    :any:    Create a playlist from the parent directory with any file type.
     :filter: Create a playlist from the parent directory with files matching
-             extensions from any list ``*-exts``.
+             ``--directory-filter-types``.
     :same:   Create a playlist from the parent directory with files matching the
              same category as the currently loaded file. One of the
              ``*-exts`` is selected based on the input file
