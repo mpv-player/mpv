@@ -451,7 +451,7 @@ static struct mp_filter *vf_vavpp_create(struct mp_filter *parent, void *options
     p->queue = mp_refqueue_alloc(f);
 
     struct mp_hwdec_ctx *hwdec_ctx =
-        mp_filter_load_hwdec_device(f, IMGFMT_VAAPI);
+        mp_filter_load_hwdec_device(f, IMGFMT_VAAPI, AV_HWDEVICE_TYPE_VAAPI);
     if (!hwdec_ctx || !hwdec_ctx->av_device_ref)
         goto error;
     p->av_device_ref = av_buffer_ref(hwdec_ctx->av_device_ref);

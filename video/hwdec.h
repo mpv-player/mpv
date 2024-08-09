@@ -2,6 +2,7 @@
 #define MP_HWDEC_H_
 
 #include <libavutil/buffer.h>
+#include <libavutil/hwcontext.h>
 
 #include "options/m_option.h"
 
@@ -35,8 +36,9 @@ struct mp_hwdec_devices;
 struct mp_hwdec_devices *hwdec_devices_create(void);
 void hwdec_devices_destroy(struct mp_hwdec_devices *devs);
 
-struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt(struct mp_hwdec_devices *devs,
-                                                 int hw_imgfmt);
+struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt_and_type(struct mp_hwdec_devices *devs,
+                                                          int hw_imgfmt,
+                                                          enum AVHWDeviceType device_type);
 
 // For code which still strictly assumes there is 1 (or none) device.
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs);

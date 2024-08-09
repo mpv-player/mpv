@@ -34,14 +34,18 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs)
     talloc_free(devs);
 }
 
-struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt(struct mp_hwdec_devices *devs,
-                                                 int hw_imgfmt)
+struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt_and_type(struct mp_hwdec_devices *devs,
+                                                          int hw_imgfmt,
+                                                          enum AVHWDeviceType device_type)
 {
     struct mp_hwdec_ctx *res = NULL;
     mp_mutex_lock(&devs->lock);
     for (int n = 0; n < devs->num_hwctxs; n++) {
         struct mp_hwdec_ctx *dev = devs->hwctxs[n];
-        if (dev->hw_imgfmt == hw_imgfmt) {
+        AVHWDeviceContext *hw_device_ctx =
+            dev->av_device_ref ? (AVHWDeviceContext *)dev->av_device_ref->data : NULL;
+        if (dev->hw_imgfmt == hw_imgfmt &&
+            (!hw_device_ctx || hw_device_ctx->type == device_type)) {
             res = dev;
             break;
         }

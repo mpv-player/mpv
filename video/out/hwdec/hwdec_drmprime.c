@@ -307,6 +307,7 @@ const struct ra_hwdec_driver ra_hwdec_drmprime = {
     .name = "drmprime",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
+    .device_type = AV_HWDEVICE_TYPE_DRM,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

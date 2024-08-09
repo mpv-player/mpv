@@ -284,6 +284,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_cuda = {
     .name = "cuda",
     .imgfmts = {IMGFMT_CUDA, 0},
+    .device_type = AV_HWDEVICE_TYPE_CUDA,
     .priv_size = sizeof(struct cuda_hw_priv),
     .init = cuda_init,
     .uninit = cuda_uninit,

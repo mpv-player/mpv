@@ -320,6 +320,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_vulkan = {
     .name = "vulkan",
     .imgfmts = {IMGFMT_VULKAN, 0},
+    .device_type = AV_HWDEVICE_TYPE_VULKAN,
     .priv_size = sizeof(struct vulkan_hw_priv),
     .init = vulkan_init,
     .uninit = vulkan_uninit,

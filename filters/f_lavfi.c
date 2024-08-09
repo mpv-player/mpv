@@ -556,7 +556,9 @@ static void init_graph(struct lavfi *c)
             if (c->hwdec_interop) {
                 int imgfmt =
                     ra_hwdec_driver_get_imgfmt_for_name(c->hwdec_interop);
-                hwdec_ctx = mp_filter_load_hwdec_device(c->f, imgfmt);
+                enum AVHWDeviceType device_type =
+                    ra_hwdec_driver_get_device_type_for_name(c->hwdec_interop);
+                hwdec_ctx = mp_filter_load_hwdec_device(c->f, imgfmt, device_type);
             } else {
                 hwdec_ctx = hwdec_devices_get_first(info->hwdec_devs);
             }

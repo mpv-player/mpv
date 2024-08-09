@@ -435,7 +435,8 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
     struct mp_hwdec_ctx *hwctx =
-        hwdec_devices_get_by_imgfmt(info->hwdec_devs, IMGFMT_D3D11);
+        hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, IMGFMT_D3D11,
+                                             AV_HWDEVICE_TYPE_D3D11VA);
     if (!hwctx || !hwctx->av_device_ref)
         goto fail;
     AVHWDeviceContext *avhwctx = (void *)hwctx->av_device_ref->data;

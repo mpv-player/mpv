@@ -466,6 +466,7 @@ const struct ra_hwdec_driver ra_hwdec_dxva2dxgi = {
     .name = "dxva2-dxgi",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_DXVA2, 0},
+    .device_type = AV_HWDEVICE_TYPE_DXVA2,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){
