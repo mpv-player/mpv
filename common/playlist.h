@@ -72,6 +72,7 @@ struct playlist {
     bool current_was_replaced;
     bool playlist_completed;
     bool playlist_started;
+    char *playlist_dir;
 
     uint64_t id_alloc;
 };
@@ -123,5 +124,7 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
                                      struct mpv_global *global);
 
 void playlist_entry_unref(struct playlist_entry *e);
+
+void playlist_set_current(struct playlist *pl);
 
 #endif

@@ -881,6 +881,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     struct demuxer_params params = {
         .is_top_level = true,
         .stream_flags = STREAM_ORIGIN_DIRECT,
+        .allow_playlist_create = false,
     };
 
     switch (filter) {
@@ -1041,6 +1042,9 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
     if (opts->playlist_pos >= 0)
         pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
 
+    if (pl->playlist_dir)
+        playlist_set_current(pl);
+
     if (opts->shuffle)
         playlist_shuffle(pl);
 
@@ -1069,6 +1073,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
         if (new)
             mpctx->playlist->current = new;
+        mpctx->playlist->playlist_dir = talloc_steal(mpctx->playlist, pl->playlist_dir);
     } else {
         MP_WARN(mpctx, "Empty playlist!\n");
     }
@@ -1144,6 +1149,8 @@ static MP_THREAD_VOID open_demux_thread(void *ctx)
         .stream_flags = mpctx->open_url_flags,
         .stream_record = true,
         .is_top_level = true,
+        .allow_playlist_create = mpctx->playlist->num_entries <= 1 &&
+                                 !mpctx->playlist->playlist_dir,
     };
     struct demuxer *demux =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);

@@ -57,6 +57,7 @@ extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_playlist;
+extern const demuxer_desc_t demuxer_desc_directory;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
@@ -64,6 +65,7 @@ extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
 static const demuxer_desc_t *const demuxer_list[] = {
+    &demuxer_desc_directory,
     &demuxer_desc_disc,
     &demuxer_desc_edl,
     &demuxer_desc_cue,
@@ -117,6 +119,8 @@ const struct m_sub_options demux_conf = {
         {"demuxer-backward-playback-step", OPT_DOUBLE(back_seek_size),
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
+        {"autocreate-playlist", OPT_CHOICE(autocreate_playlist,
+            {"no", 0}, {"filter", 1}, {"same", 2})},
         {0}
     },
     .size = sizeof(struct demux_opts),
