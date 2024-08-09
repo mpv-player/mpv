@@ -1,0 +1,1 @@
+add `--display-fps-limiter` option
