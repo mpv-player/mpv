@@ -495,22 +495,33 @@ static bool scan_dir(struct pl_parser *p, char *path,
     return true;
 }
 
+static enum autocreate_mode get_directory_filter(struct pl_parser *p)
+{
+    enum autocreate_mode autocreate = AUTO_NONE;
+    if (!p->opts->directory_filter || !p->opts->directory_filter[0])
+        autocreate = AUTO_ANY;
+    if (str_in_list(bstr0("video"), p->opts->directory_filter))
+        autocreate |= AUTO_VIDEO;
+    if (str_in_list(bstr0("audio"), p->opts->directory_filter))
+        autocreate |= AUTO_AUDIO;
+    if (str_in_list(bstr0("image"), p->opts->directory_filter))
+        autocreate |= AUTO_IMAGE;
+    return autocreate;
+}
+
 static int parse_dir(struct pl_parser *p)
 {
     int ret = -1;
     struct stream *stream = p->real_stream;
-    int autocreate = AUTO_NONE;
+    enum autocreate_mode autocreate = AUTO_NONE;
     p->pl->playlist_dir = NULL;
     if (p->autocreate_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
         bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
         switch (p->autocreate_playlist) {
-        case 1: // any
-            autocreate = AUTO_ANY;
+        case 1: // filter
+            autocreate = get_directory_filter(p);
             break;
-        case 2: // filter
-            autocreate = AUTO_VIDEO | AUTO_AUDIO | AUTO_IMAGE;
-            break;
-        case 3: // same
+        case 2: // same
             if (str_in_list(ext, p->mp_opts->video_exts)) {
                 autocreate = AUTO_VIDEO;
             } else if (str_in_list(ext, p->mp_opts->audio_exts)) {
@@ -530,15 +541,7 @@ static int parse_dir(struct pl_parser *p)
             p->pl->playlist_dir = bstrdup0(p->pl, dir);
         }
     } else {
-        autocreate = AUTO_NONE;
-        if (!p->opts->directory_filter || !p->opts->directory_filter[0])
-            autocreate = AUTO_ANY;
-        if (str_in_list(bstr0("video"), p->opts->directory_filter))
-            autocreate |= AUTO_VIDEO;
-        if (str_in_list(bstr0("audio"), p->opts->directory_filter))
-            autocreate |= AUTO_AUDIO;
-        if (str_in_list(bstr0("image"), p->opts->directory_filter))
-            autocreate |= AUTO_IMAGE;
+        autocreate = get_directory_filter(p);
     }
     if (!stream->is_directory)
         goto done;
