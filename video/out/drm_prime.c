@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+#include <drm_fourcc.h>
 #include <drm_mode.h>
 
 #include "common/common.h"
@@ -36,7 +37,8 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
     uint32_t offsets[4] = { 0 };
     uint32_t handles[4] = { 0 };
     uint64_t modifiers[4] = { 0 };
-    int ret, layer_fd;
+    uint32_t flags = 0;
+    int ret;
 
     if (descriptor && descriptor->nb_layers) {
         *framebuffer = (struct drm_prime_framebuffer){0};
@@ -49,17 +51,17 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
                        object, descriptor->objects[object].fd);
                 goto fail;
             }
-            modifiers[object] = descriptor->objects[object].format_modifier;
         }
 
         layer = &descriptor->layers[0];
 
         for (int plane = 0; plane < AV_DRM_MAX_PLANES; plane++) {
-            layer_fd = framebuffer->gem_handles[layer->planes[plane].object_index];
-            if (layer_fd && layer->planes[plane].pitch) {
+            if (plane < layer->nb_planes) {
+                int object = layer->planes[plane].object_index;
                 pitches[plane] = layer->planes[plane].pitch;
                 offsets[plane] = layer->planes[plane].offset;
-                handles[plane] = layer_fd;
+                handles[plane] = framebuffer->gem_handles[object];
+                modifiers[plane] = descriptor->objects[object].format_modifier;
             } else {
                 pitches[plane] = 0;
                 offsets[plane] = 0;
@@ -68,23 +70,26 @@ int drm_prime_create_framebuffer(struct mp_log *log, int fd,
             }
         }
 
+        if (modifiers[0] && modifiers[0] != DRM_FORMAT_MOD_INVALID) {
+            flags = DRM_MODE_FB_MODIFIERS;
+        }
+
         ret = drmModeAddFB2WithModifiers(fd, width, height, layer->format,
-                                         handles, pitches, offsets,
-                                         modifiers, &framebuffer->fb_id,
-                                         DRM_MODE_FB_MODIFIERS);
-        if (ret < 0) {
+                                         handles, pitches, offsets, modifiers,
+                                         &framebuffer->fb_id, flags);
+        if (ret) {
             ret = drmModeAddFB2(fd, width, height, layer->format,
                                 handles, pitches, offsets,
                                 &framebuffer->fb_id, 0);
-            if (ret < 0) {
-                mp_err(log, "Failed to create framebuffer with drmModeAddFB2 on layer %d: %s\n",
-                        0, mp_strerror(errno));
-                goto fail;
-            }
+        }
+        if (ret) {
+            mp_err(log, "Failed to create framebuffer on layer %d: %s\n",
+                   0, mp_strerror(errno));
+            goto fail;
         }
 
-        for (int plane = 0; plane < AV_DRM_MAX_PLANES; plane++) {
-            drm_prime_add_handle_ref(handle_refs, framebuffer->gem_handles[plane]);
+        for (int object = 0; object < descriptor->nb_objects; object++) {
+            drm_prime_add_handle_ref(handle_refs, framebuffer->gem_handles[object]);
         }
     }
 
