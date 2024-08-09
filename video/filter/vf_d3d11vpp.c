@@ -42,12 +42,63 @@
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE 0x10
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION 0x20
 
+#define SUPER_RESOLUTION_OFF 0
+#define SUPER_RESOLUTION_NVIDIA 1
+#define SUPER_RESOLUTION_INTEL 2
+
+#ifndef NVIDIA_PPE_INTERFACE_GUID
+DEFINE_GUID(NVIDIA_PPE_INTERFACE_GUID,
+            0xd43ce1b3, 0x1f4b, 0x48ac, 0xba, 0xee,
+            0xc3, 0xc2, 0x53, 0x75, 0xe6, 0xf7);
+#endif
+
+#ifndef INTEL_VPE_INTERFACE_GUID
+DEFINE_GUID(INTEL_VPE_INTERFACE_GUID,
+            0xedd1d4b9, 0x8659, 0x4cbc, 0xa4, 0xd6,
+            0x98, 0x31, 0xa2, 0x16, 0x3a, 0xc3);
+#endif
+
+
+
 struct opts {
     bool deint_enabled;
     bool interlaced_only;
     int mode;
     int field_parity;
+    int scale;
 };
+
+enum scale_state {
+    OFF = 0,
+    ON,
+    FAILED
+};
+
+struct nvidia_stream_ext {
+    unsigned int version;
+    unsigned int method;
+    unsigned int enable;
+};
+
+struct intel_vpe_ext {
+    unsigned int function;
+    void* param;
+};
+
+
+static const unsigned int kIntelVpeFnVersion = 0x01;
+static const unsigned int kIntelVpeFnMode    = 0x20;
+static const unsigned int kIntelVpeFnScaling = 0x37;
+
+// values for kIntelVpeFnVersion
+static const unsigned int kIntelVpeVersion3 = 0x0003;
+
+// values for kIntelVpeFnMode
+static const unsigned int kIntelVpeModePreproc = 0x1;
+
+// values for kIntelVpeFnScaling
+static const unsigned int kIntelVpeScalingSuperResolution = 0x2;
+
 
 struct priv {
     struct opts *opts;
@@ -72,6 +123,7 @@ struct priv {
     struct mp_image_pool *pool;
 
     struct mp_refqueue *queue;
+    enum scale_state scale_state;
 };
 
 static void release_tex(void *arg)
@@ -134,6 +186,107 @@ static void destroy_video_proc(struct mp_filter *vf)
     p->vp_enum = NULL;
 }
 
+// cacluate the render output, given the video size and the window size.
+static void get_render_size(int input_w, int input_h,
+                                int window_w, int window_h,
+                                int *out_w, int *out_h)
+{
+    // if input larger than window, then keep it as it is.
+    if (input_w > window_w || input_h > window_h) {
+        *out_w = input_w;
+        *out_h = input_h;
+    } else {
+        // else scale to window_w,window_h as much as possible
+        float aspect_ratio = (float)input_w / input_h;
+        *out_w = window_w;
+        *out_h = (int)(window_w / aspect_ratio);
+
+        // if the height is still larger than the window height after scaling,
+        // adjust the width based on the window height
+        if (*out_h > window_h) {
+            *out_h = window_h;
+            *out_w = (int)(window_h * aspect_ratio);
+        }
+    }
+}
+
+static void set_super_resolution_nvidia(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if(p->scale_state != OFF){
+        return;
+    }
+
+    struct nvidia_stream_ext stream_ext = {0x1, 0x2, 1u};
+
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,p->video_proc,0,&NVIDIA_PPE_INTERFACE_GUID,
+        sizeof(stream_ext), &stream_ext);
+
+    if (FAILED(hr)) {
+        p->scale_state = FAILED;
+        MP_ERR(vf, "Failed to enable Nvidia RTX Super Resolution. Error code: %lx\n", hr);
+    } else {
+        p->scale_state = ON;
+        MP_VERBOSE(vf, "Nvidia RTX Super Resolution enabled\n");
+    }
+}
+
+static void set_super_resolution_intel(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if (p->scale_state != OFF){
+        return;
+    }
+
+    struct intel_vpe_ext ext = {};
+    unsigned int param = 0;
+    ext.param = &param;
+
+    ext.function = kIntelVpeFnVersion;
+    param = kIntelVpeVersion3;
+    HRESULT hr;
+    
+    hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(
+        p->video_ctx,p->video_proc,
+        &INTEL_VPE_INTERFACE_GUID, sizeof(ext), &ext
+    );
+    
+    if (FAILED(hr)) {
+        p->scale_state = FAILED;        
+        MP_ERR(vf, "Failed to enable Intel Super Resolution. Error code: %lx\n", hr);
+        return;
+    }
+
+    ext.function = kIntelVpeFnMode;
+    param = kIntelVpeModePreproc;
+    hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(
+        p->video_ctx,p->video_proc,
+        &INTEL_VPE_INTERFACE_GUID, sizeof(ext), &ext
+    );
+    
+    if (FAILED(hr)) {
+        p->scale_state = FAILED;
+        MP_ERR(vf, "Failed to enable Intel Super Resolution. Error code: %lx\n", hr);
+        return;
+    }
+
+    ext.function = kIntelVpeFnScaling;
+    param = kIntelVpeScalingSuperResolution;
+
+    hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(
+        p->video_ctx,p->video_proc,0,&INTEL_VPE_INTERFACE_GUID,
+        sizeof(ext), &ext
+    );
+    
+    if (FAILED(hr)) {
+        p->scale_state = FAILED;
+        MP_ERR(vf, "Failed to enable Intel Super Resolution. Error code: %lx\n", hr);
+    } else {
+        p->scale_state = ON;
+        MP_VERBOSE(vf,  "Succeeded to enable Intel Super Resolution.\n");
+    }
+}
+
 static int recreate_video_proc(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -145,8 +298,8 @@ static int recreate_video_proc(struct mp_filter *vf)
         .InputFrameFormat = p->d3d_frame_format,
         .InputWidth = p->c_w,
         .InputHeight = p->c_h,
-        .OutputWidth = p->params.w,
-        .OutputHeight = p->params.h,
+        .OutputWidth = p->out_params.w,
+        .OutputHeight = p->out_params.h,
     };
     hr = ID3D11VideoDevice_CreateVideoProcessorEnumerator(p->video_dev, &vpdesc,
                                                           &p->vp_enum);
@@ -235,7 +388,7 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
-    out = mp_image_pool_get(p->pool, IMGFMT_D3D11, p->params.w, p->params.h);
+    out = mp_image_pool_get(p->pool, IMGFMT_D3D11, p->out_params.w, p->out_params.h);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
         goto cleanup;
@@ -246,10 +399,21 @@ static struct mp_image *render(struct mp_filter *vf)
     in = mp_refqueue_get(p->queue, 0);
     if (!in)
         goto cleanup;
+
     ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
     int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
+    if (p->opts->scale) {
+        // mp_image_copy_attributes overwrites the height and width
+        // set it the size back if we are using scale
+        mp_image_set_size(out, p->out_params.w, p->out_params.h);
+
+        // mp_image_copy_attributes will set the crop value to the origin
+        // width and height, set the crop back to the default state
+        struct mp_rect no_crop = {0, 0, 0, 0};
+        out->params.crop = no_crop;
+    }
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
     if (!mp_refqueue_should_deint(p->queue)) {
@@ -316,6 +480,14 @@ static struct mp_image *render(struct mp_filter *vf)
         .pInputSurface = in_view,
     };
     int frame = mp_refqueue_is_second_field(p->queue);
+    switch (p->opts->scale){
+        case SUPER_RESOLUTION_NVIDIA:
+            set_super_resolution_nvidia(vf);
+            break;
+        case SUPER_RESOLUTION_INTEL:
+            set_super_resolution_intel(vf);
+            break;
+    }
     hr = ID3D11VideoContext_VideoProcessorBlt(p->video_ctx, p->video_proc,
                                               out_view, frame, 1, &stream);
     if (FAILED(hr)) {
@@ -351,12 +523,19 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         p->out_format = DXGI_FORMAT_NV12;
 
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt;
+
+        if (p->opts->scale) {
+            int window_w = 2560;
+            int window_h = 1440;
+            get_render_size(p->params.w, p->params.h, window_w, window_h,
+                            &(p->out_params.w), &(p->out_params.h));
+        }
     }
 
     if (!mp_refqueue_can_output(p->queue))
         return;
 
-    if (!mp_refqueue_should_deint(p->queue) && !p->require_filtering) {
+    if (!mp_refqueue_should_deint(p->queue) && !p->require_filtering && !p->opts->scale) {
         // no filtering
         struct mp_image *in = mp_image_new_ref(mp_refqueue_get(p->queue, 0));
         if (!in) {
@@ -459,6 +638,7 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     if (FAILED(hr))
         goto fail;
 
+    p->scale_state = OFF;
     p->pool = mp_image_pool_new(f);
     mp_image_pool_set_allocator(p->pool, alloc_pool, f);
     mp_image_pool_set_lru(p->pool);
@@ -466,11 +646,13 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
 
     mp_refqueue_set_refs(p->queue, 0, 0);
-    mp_refqueue_set_mode(p->queue,
-        (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
-        MP_MODE_OUTPUT_FIELDS |
-        (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
-    mp_refqueue_set_parity(p->queue, p->opts->field_parity);
+    if (!p->opts->scale){
+        mp_refqueue_set_mode(p->queue,
+            (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
+            MP_MODE_OUTPUT_FIELDS |
+            (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
+        mp_refqueue_set_parity(p->queue, p->opts->field_parity);
+    }
 
     return f;
 
@@ -494,6 +676,10 @@ static const m_option_t vf_opts_fields[] = {
         {"tff", MP_FIELD_PARITY_TFF},
         {"bff", MP_FIELD_PARITY_BFF},
         {"auto", MP_FIELD_PARITY_AUTO})},
+    {"scale", OPT_CHOICE(scale,
+        {"intel", SUPER_RESOLUTION_INTEL},
+        {"nvidia", SUPER_RESOLUTION_NVIDIA},
+        {"none", SUPER_RESOLUTION_OFF})},
     {0}
 };
 
@@ -506,6 +692,7 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
             .deint_enabled = true,
             .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
             .field_parity = MP_FIELD_PARITY_AUTO,
+            .scale = SUPER_RESOLUTION_OFF,
         },
         .options = vf_opts_fields,
     },
