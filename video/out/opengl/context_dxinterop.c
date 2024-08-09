@@ -30,11 +30,6 @@
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
-// mingw-w64 header typo?
-#ifndef IDirect3DSwapChain9Ex_GetBackBuffer
-#define IDirect3DSwapChain9Ex_GetBackBuffer IDirect3DSwapChain9EX_GetBackBuffer
-#endif
-
 struct priv {
     GL gl;
 
