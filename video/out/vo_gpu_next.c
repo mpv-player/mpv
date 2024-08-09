@@ -913,6 +913,15 @@ static void update_tm_viz(struct pl_color_map_params *params,
     params->visualize_hue = M_PI / 4.0;
 }
 
+static void reset_queue(struct priv *p)
+{
+    pl_renderer_flush_cache(p->rr);
+    pl_queue_reset(p->queue);
+    p->last_pts = 0.0;
+    p->last_id = 0;
+    p->want_reset = false;
+}
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -959,13 +968,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     for (int n = 0; n < frame->num_frames; n++) {
         int id = frame->frame_id + n;
 
-        if (p->want_reset) {
-            pl_renderer_flush_cache(p->rr);
-            pl_queue_reset(p->queue);
-            p->last_pts = 0.0;
-            p->last_id = 0;
-            p->want_reset = false;
-        }
+        if (p->want_reset)
+            reset_queue(p);
 
         if (id <= p->last_id)
             continue; // ignore already seen frames
@@ -1537,6 +1541,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_RESET:
         // Defer until the first new frame (unique ID) actually arrives
         p->want_reset = true;
+        return VO_TRUE;
+
+    case VOCTRL_FRAME_RESET:
+        reset_queue(p);
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA: {

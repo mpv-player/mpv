@@ -4012,6 +4012,11 @@ void gl_video_reset(struct gl_video *p)
     gl_video_reset_surfaces(p);
 }
 
+void gl_video_reset_frame(struct gl_video *p)
+{
+    unref_current_image(p);
+}
+
 bool gl_video_showing_interpolated_frame(struct gl_video *p)
 {
     return p->is_interpolated;

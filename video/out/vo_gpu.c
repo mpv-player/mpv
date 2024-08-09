@@ -216,6 +216,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_RESET:
         gl_video_reset(p->renderer);
         return true;
+    case VOCTRL_FRAME_RESET:
+        gl_video_reset_frame(p->renderer);
+        return true;
     case VOCTRL_PAUSE:
         if (gl_video_showing_interpolated_frame(p->renderer))
             vo->want_redraw = true;

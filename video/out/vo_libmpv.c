@@ -603,8 +603,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_RESET:
+    case VOCTRL_FRAME_RESET:
         mp_mutex_lock(&ctx->lock);
-        forget_frames(ctx, false);
+        forget_frames(ctx, request == VOCTRL_FRAME_RESET);
         ctx->need_reset = true;
         mp_mutex_unlock(&ctx->lock);
         vo->want_redraw = true;
