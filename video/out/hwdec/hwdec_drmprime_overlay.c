@@ -303,12 +303,24 @@ static int init(struct ra_hwdec *hw)
         .hw_imgfmt = IMGFMT_DRMPRIME,
     };
 
+#if HAVE_V4L2REQUEST
+    /*
+     * AVCodecHWConfig contains a combo of a pixel format and hwdevice type,
+     * correct type must be created here or hwaccel will fail.
+     *
+     * FIXME: Create hwdevice based on type in AVCodecHWConfig
+     */
+    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                     AV_HWDEVICE_TYPE_V4L2REQUEST,
+                                     NULL, NULL, 0);
+#else
     char *device = drmGetDeviceNameFromFd2(p->ctx->fd);
     int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
                                      AV_HWDEVICE_TYPE_DRM, device, NULL, 0);
 
     if (device)
         free(device);
+#endif
 
     if (ret != 0) {
         MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));

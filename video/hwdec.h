@@ -102,6 +102,7 @@ extern const struct hwcontext_fns hwcontext_fns_cuda;
 extern const struct hwcontext_fns hwcontext_fns_d3d11;
 extern const struct hwcontext_fns hwcontext_fns_drmprime;
 extern const struct hwcontext_fns hwcontext_fns_dxva2;
+extern const struct hwcontext_fns hwcontext_fns_v4l2request;
 extern const struct hwcontext_fns hwcontext_fns_vaapi;
 extern const struct hwcontext_fns hwcontext_fns_vdpau;
 
