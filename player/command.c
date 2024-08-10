@@ -6521,7 +6521,7 @@ static void cmd_apply_profile(void *p)
     int mode = cmd->args[1].v.i;
     if (mode == 0) {
         cmd->success = m_config_set_profile(mpctx->mconfig, profile, 0) >= 0;
-    } else {
+    } else if (!mp_is_shutting_down(mpctx)) {
         cmd->success = m_config_restore_profile(mpctx->mconfig, profile) >= 0;
     }
 }
