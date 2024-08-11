@@ -1,1 +1,1 @@
-remap numpad `+ - * /` keys to `KP_ADD/KP_SUBTRACT/KP_MULTIPLY/KP_KPDIVIDE`; keybinds which require these numpad keys to function need to use the new names instead
+remap numpad `+ - * /` keys to `KP_ADD/KP_SUBTRACT/KP_MULTIPLY/KP_DIVIDE`; keybinds which require these numpad keys to function need to use the new names instead
