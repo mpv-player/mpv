@@ -116,6 +116,9 @@ Q
 / and *
     Decrease/increase volume.
 
+KP_DIVIDE and KP_MULTIPLY
+    Decrease/increase volume.
+
 9 and 0
     Decrease/increase volume.
 
