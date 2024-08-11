@@ -49,10 +49,10 @@ class InputHelper: NSObject {
         .init(kVK_F19, MP_KEY_F + 19), .init(kVK_F20, MP_KEY_F + 20),
 
         // numpad
-        .init(kVK_ANSI_KeypadPlus, Int32(Character("+").asciiValue ?? 0)),
-        .init(kVK_ANSI_KeypadMinus, Int32(Character("-").asciiValue ?? 0)),
-        .init(kVK_ANSI_KeypadMultiply, Int32(Character("*").asciiValue ?? 0)),
-        .init(kVK_ANSI_KeypadDivide, Int32(Character("/").asciiValue ?? 0)),
+        .init(kVK_ANSI_KeypadPlus, MP_KEY_KPADD),
+        .init(kVK_ANSI_KeypadMinus, MP_KEY_KPSUBTRACT),
+        .init(kVK_ANSI_KeypadMultiply, MP_KEY_KPMULTIPLY),
+        .init(kVK_ANSI_KeypadDivide, MP_KEY_KPDIVIDE),
         .init(kVK_ANSI_KeypadEnter, MP_KEY_KPENTER), .init(kVK_ANSI_KeypadDecimal, MP_KEY_KPDEC),
         .init(kVK_ANSI_Keypad0, MP_KEY_KP0), .init(kVK_ANSI_Keypad1, MP_KEY_KP1),
         .init(kVK_ANSI_Keypad2, MP_KEY_KP2), .init(kVK_ANSI_Keypad3, MP_KEY_KP3),

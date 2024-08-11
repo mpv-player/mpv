@@ -786,8 +786,9 @@ static const struct mp_keymap keymap[] = {
     {XK_F22, MP_KEY_F+22}, {XK_F23, MP_KEY_F+23}, {XK_F24, MP_KEY_F+24},
 
     // numpad independent of numlock
-    {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'},
-    {XK_KP_Divide, '/'}, {XK_KP_Enter, MP_KEY_KPENTER},
+    {XK_KP_Subtract, MP_KEY_KPSUBTRACT}, {XK_KP_Add, MP_KEY_KPADD},
+    {XK_KP_Multiply, MP_KEY_KPMULTIPLY}, {XK_KP_Divide, MP_KEY_KPDIVIDE},
+    {XK_KP_Enter, MP_KEY_KPENTER},
 
     // numpad with numlock
     {XK_KP_0, MP_KEY_KP0}, {XK_KP_1, MP_KEY_KP1}, {XK_KP_2, MP_KEY_KP2},
