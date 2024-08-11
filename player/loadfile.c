@@ -1679,10 +1679,12 @@ static void play_current_file(struct MPContext *mpctx)
     if (!mpctx->demuxer || mpctx->stop_play)
         goto terminate_playback;
 
-    if (mpctx->demuxer->playlist) {
-        if (watch_later)
+    struct playlist *pl = mpctx->demuxer->playlist;
+    if (pl) {
+        // pl->playlist_dir indicates that the playlist was auto-created from
+        // the parent file. In this case, mpctx->filename points to real file.
+        if (watch_later && !pl->playlist_dir)
             mp_delete_watch_later_conf(mpctx, mpctx->filename);
-        struct playlist *pl = mpctx->demuxer->playlist;
         playlist_populate_playlist_path(pl, mpctx->filename);
         if (infinite_playlist_loading_loop(mpctx, pl)) {
             mpctx->stop_play = PT_STOP;
