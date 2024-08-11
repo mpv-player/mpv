@@ -117,6 +117,7 @@ void playlist_clear(struct playlist *pl)
     pl->current_was_replaced = false;
     pl->playlist_completed = false;
     pl->playlist_started = false;
+    TA_FREEP(&pl->playlist_dir);
 }
 
 void playlist_clear_except_current(struct playlist *pl)
