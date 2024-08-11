@@ -294,9 +294,6 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
         button = 0;
     }
 
-    if (button)
-        mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
-
     enum xdg_toplevel_resize_edge edges;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN) &&
@@ -304,8 +301,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     {
         // Implement an edge resize zone if there are no decorations
         xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edges);
-        // Explicitly send an UP event after the client finishes a resize
-        mp_input_put_key(wl->vo->input_ctx, button | MP_KEY_STATE_UP);
+        return;
     } else if (state == MP_KEY_STATE_DOWN) {
         // Save the serial and seat for voctrl-initialized dragging requests.
         s->pointer_button_serial = serial;
@@ -313,6 +309,9 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     } else {
         wl->last_button_seat = NULL;
     }
+
+    if (button)
+        mp_input_put_key(wl->vo->input_ctx, button | state | s->mpmod);
 }
 
 static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
@@ -417,18 +416,19 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
 
-    mp_input_add_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
-
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && check_for_resize(wl, wl->opts->wl_edge_pixels_touch, &edge))
     {
         xdg_toplevel_resize(wl->xdg_toplevel, s->seat, serial, edge);
+        return;
     } else {
         // Save the serial and seat for voctrl-initialized dragging requests.
         s->pointer_button_serial = serial;
         wl->last_button_seat = s;
     }
+
+    mp_input_add_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
