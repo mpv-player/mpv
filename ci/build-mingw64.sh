@@ -47,7 +47,7 @@ pkg-config = 'pkg-config'
 windres = '${TARGET}-windres'
 dlltool = '${TARGET}-dlltool'
 nasm = 'nasm'
-exe_wrapper = '${WINE}'
+exe_wrapper = 'wine'
 [host_machine]
 system = 'windows'
 cpu_family = '${fam}'
