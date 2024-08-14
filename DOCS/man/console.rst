@@ -76,6 +76,9 @@ PGUP
 PGDN
     Stop navigating the command history.
 
+Ctrl+r
+    Search the command history.
+
 INSERT
     Toggle insert mode.
 
