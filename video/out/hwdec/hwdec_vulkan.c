@@ -94,17 +94,6 @@ static int vulkan_init(struct ra_hwdec *hw)
 
     vkGetPhysicalDeviceQueueFamilyProperties2(vk->vulkan->phys_device, &num_qf, qf);
 
-    int decode_index = -1;
-    for (int i = 0; i < num_qf; i++) {
-        /*
-         * Pick the first discovered decode queue that we find. Maybe a day will
-         * come when this needs to be smarter, but I'm sure a bunch of other
-         * things will have to change too.
-         */
-        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR)
-            decode_index = i;
-    }
-
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VULKAN);
     if (!hw_device_ctx)
         goto error;
@@ -142,15 +131,22 @@ static int vulkan_init(struct ra_hwdec *hw)
         .num = vk->vulkan->queue_compute.count,
         .flags = VK_QUEUE_COMPUTE_BIT,
     };
-    if (decode_index >= 0) {
-        device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
-            .idx = decode_index,
-            .num = qf[decode_index].queueFamilyProperties.queueCount,
-            .flags = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
-            .video_caps = qf_vid[decode_index].videoCodecOperations,
-        };
+    for (int i = 0; i < num_qf; i++) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
+            device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+                .idx = i,
+                .num = qf[i].queueFamilyProperties.queueCount,
+                .flags = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
+                .video_caps = qf_vid[i].videoCodecOperations,
+            };
+        }
     }
 #else
+    int decode_index = -1;
+    for (int i = 0; i < num_qf; i++) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR)
+            decode_index = i;
+    }
     device_hwctx->queue_family_index = vk->vulkan->queue_graphics.index;
     device_hwctx->nb_graphics_queues = vk->vulkan->queue_graphics.count;
     device_hwctx->queue_family_tx_index = vk->vulkan->queue_transfer.index;
@@ -158,7 +154,7 @@ static int vulkan_init(struct ra_hwdec *hw)
     device_hwctx->queue_family_comp_index = vk->vulkan->queue_compute.index;
     device_hwctx->nb_comp_queues = vk->vulkan->queue_compute.count;
     device_hwctx->queue_family_decode_index = decode_index;
-    device_hwctx->nb_decode_queues = decode_count;
+    device_hwctx->nb_decode_queues = qf[decode_index].queueFamilyProperties.queueCount;
 #endif
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
