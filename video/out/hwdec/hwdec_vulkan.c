@@ -74,25 +74,35 @@ static int vulkan_init(struct ra_hwdec *hw)
      * one is the decode queue.
      */
     uint32_t num_qf = 0;
-    VkQueueFamilyProperties *qf = NULL;
-    vkGetPhysicalDeviceQueueFamilyProperties(vk->vulkan->phys_device, &num_qf, NULL);
+    VkQueueFamilyProperties2 *qf = NULL;
+    VkQueueFamilyVideoPropertiesKHR *qf_vid = NULL;
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk->vulkan->phys_device, &num_qf, NULL);
     if (!num_qf)
         goto error;
 
-    qf = talloc_array(NULL, VkQueueFamilyProperties, num_qf);
-    vkGetPhysicalDeviceQueueFamilyProperties(vk->vulkan->phys_device, &num_qf, qf);
+    qf = talloc_array(NULL, VkQueueFamilyProperties2, num_qf);
+    qf_vid = talloc_array(NULL, VkQueueFamilyVideoPropertiesKHR, num_qf);
+    for (int i = 0; i < num_qf; i++) {
+        qf_vid[i] = (VkQueueFamilyVideoPropertiesKHR) {
+            .sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR,
+        };
+        qf[i] = (VkQueueFamilyProperties2) {
+            .sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2,
+            .pNext = &qf_vid[i],
+        };
+    }
 
-    int decode_index = -1, decode_count = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk->vulkan->phys_device, &num_qf, qf);
+
+    int decode_index = -1;
     for (int i = 0; i < num_qf; i++) {
         /*
          * Pick the first discovered decode queue that we find. Maybe a day will
          * come when this needs to be smarter, but I'm sure a bunch of other
          * things will have to change too.
          */
-        if ((qf[i].queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR)
             decode_index = i;
-            decode_count = qf[i].queueCount;
-        }
     }
 
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VULKAN);
@@ -114,6 +124,33 @@ static int vulkan_init(struct ra_hwdec *hw)
     device_hwctx->nb_enabled_inst_extensions = vk->vkinst->num_extensions;
     device_hwctx->enabled_dev_extensions = vk->vulkan->extensions;
     device_hwctx->nb_enabled_dev_extensions = vk->vulkan->num_extensions;
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(59, 34, 100)
+    device_hwctx->nb_qf = 0;
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_graphics.index,
+        .num = vk->vulkan->queue_graphics.count,
+        .flags = VK_QUEUE_GRAPHICS_BIT,
+    };
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_transfer.index,
+        .num = vk->vulkan->queue_transfer.count,
+        .flags = VK_QUEUE_TRANSFER_BIT,
+    };
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_compute.index,
+        .num = vk->vulkan->queue_compute.count,
+        .flags = VK_QUEUE_COMPUTE_BIT,
+    };
+    if (decode_index >= 0) {
+        device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+            .idx = decode_index,
+            .num = qf[decode_index].queueFamilyProperties.queueCount,
+            .flags = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
+            .video_caps = qf_vid[decode_index].videoCodecOperations,
+        };
+    }
+#else
     device_hwctx->queue_family_index = vk->vulkan->queue_graphics.index;
     device_hwctx->nb_graphics_queues = vk->vulkan->queue_graphics.count;
     device_hwctx->queue_family_tx_index = vk->vulkan->queue_transfer.index;
@@ -122,6 +159,7 @@ static int vulkan_init(struct ra_hwdec *hw)
     device_hwctx->nb_comp_queues = vk->vulkan->queue_compute.count;
     device_hwctx->queue_family_decode_index = decode_index;
     device_hwctx->nb_decode_queues = decode_count;
+#endif
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
@@ -137,10 +175,12 @@ static int vulkan_init(struct ra_hwdec *hw)
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     talloc_free(qf);
+    talloc_free(qf_vid);
     return 0;
 
  error:
     talloc_free(qf);
+    talloc_free(qf_vid);
     av_buffer_unref(&hw_device_ctx);
     return -1;
 }
