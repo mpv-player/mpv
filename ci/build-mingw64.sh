@@ -46,6 +46,7 @@ pkgconfig = 'pkg-config'
 pkg-config = 'pkg-config'
 windres = '${TARGET}-windres'
 dlltool = '${TARGET}-dlltool'
+nasm = 'nasm'
 exe_wrapper = '${WINE}'
 [host_machine]
 system = 'windows'
