@@ -242,6 +242,11 @@ Playback Control
     affect playback speed. Playing with an altered pitch automatically inserts
     the ``scaletempo2`` audio filter.
 
+    Since pitch change is achieved by combining pitch-preserving speed change and
+    resampling, the range of pitch change is effectively limited by the
+    ``min-speed`` and ``max-speed`` parameters of ``scaletempo2``: for example,
+    a ``min-speed`` of 0.25 limits the highest pitch factor to 4 (1/0.25).
+
     In a standard 12-tone scale system, octaves are separated by a factor of 2
     whereas semitones are represented by a factor of 2^(1/12). This means
     pitches can easily be shifted up or down with a simple multiplier.
