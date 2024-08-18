@@ -39,6 +39,7 @@ body:
           - macOS version:
           - Source of mpv:
           - Introduced in version:
+      render: text
   validations:
       required: true
 - type: textarea

@@ -16,6 +16,7 @@ body:
           - mpv version:
           - Platform version:
           - Meson version:
+      render: text
   validations:
       required: true
 - type: textarea
