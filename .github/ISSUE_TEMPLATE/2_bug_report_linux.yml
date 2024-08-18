@@ -46,6 +46,7 @@ body:
           - Window Manager and Version:
           - Source mpv:
           - Introduced in version:
+      render: text
   validations:
       required: true
 - type: textarea
