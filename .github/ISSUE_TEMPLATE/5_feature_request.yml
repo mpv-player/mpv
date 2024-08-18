@@ -6,8 +6,16 @@ body:
   attributes:
       label: "Expected behavior of the wanted feature"
       description: >
-          Before requesting a new feature make sure it hasn't been
-          [requested yet](https://github.com/mpv-player/mpv/labels/meta%3Afeature-request).
+          Before requesting a new feature, make sure it hasn't been
+          [requested yet](https://github.com/mpv-player/mpv/labels/meta%3Afeature-request),
+          and isn't already supported by [mpv](https://mpv.io/manual/master/),
+          [ffmpeg](https://ffmpeg.org/documentation.html), or existing
+          [mpv scripts](https://github.com/mpv-player/mpv/wiki/User-Scripts).
+
+
+          If you are not sure about this, ask on
+          [mpv Discussions](https://github.com/mpv-player/mpv/discussions) and
+          [mpv IRC channel](https://mpv.io/community/) first before opening a feature request.
   validations:
       required: true
 - type: textarea
