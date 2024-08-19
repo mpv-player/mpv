@@ -1,0 +1,1 @@
+add `--vf=d3d11vpp=scaling-mode`

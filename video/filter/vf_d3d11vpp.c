@@ -42,9 +42,40 @@
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE 0x10
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION 0x20
 
+// For video procesor extensions identifiers reference see:
+// https://chromium.googlesource.com/chromium/src/+/5f354f38/ui/gl/swap_chain_presenter.cc
+
+#ifndef NVIDIA_PPE_INTERFACE_GUID
+DEFINE_GUID(NVIDIA_PPE_INTERFACE_GUID,
+            0xd43ce1b3, 0x1f4b, 0x48ac, 0xba, 0xee,
+            0xc3, 0xc2, 0x53, 0x75, 0xe6, 0xf7);
+#endif
+
+#ifndef INTEL_VPE_INTERFACE_GUID
+DEFINE_GUID(INTEL_VPE_INTERFACE_GUID,
+            0xedd1d4b9, 0x8659, 0x4cbc, 0xa4, 0xd6,
+            0x98, 0x31, 0xa2, 0x16, 0x3a, 0xc3);
+#endif
+
+static const unsigned int intel_vpe_fn_version = 0x1;
+static const unsigned int intel_vpe_version    = 0x3;
+
+static const unsigned int intel_vpe_fn_scaling  = 0x37;
+static const unsigned int intel_vpe_scaling_vsr = 0x2;
+
+static const unsigned int intel_vpe_fn_mode      = 0x20;
+static const unsigned int intel_vpe_mode_preproc = 0x1;
+
+enum scaling_mode {
+    SCALING_BASIC,
+    SCALING_INTEL_VSR,
+    SCALING_NVIDIA_RTX,
+};
+
 struct opts {
     bool deint_enabled;
     float scale;
+    int scaling_mode;
     bool interlaced_only;
     int mode;
     int field_parity;
@@ -135,6 +166,74 @@ static void destroy_video_proc(struct mp_filter *vf)
     p->vp_enum = NULL;
 }
 
+static void enable_nvidia_rtx_extension(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct nvidia_ext {
+        unsigned int version;
+        unsigned int method;
+        unsigned int enable;
+    } ext = {1, 2, 1};
+
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     0,
+                                                                     &NVIDIA_PPE_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+
+    if (FAILED(hr)) {
+        MP_WARN(vf, "Failed to enable NVIDIA RTX Super Resolution: %s\n", mp_HRESULT_to_str(hr));
+    } else {
+        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled\n");
+    }
+}
+
+static void enable_intel_vsr_extension(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct intel_vpe_ext {
+        unsigned int function;
+        const void* param;
+    } ext;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_version, &intel_vpe_version};
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     &INTEL_VPE_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_mode, &intel_vpe_mode_preproc};
+    hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(p->video_ctx,
+                                                             p->video_proc,
+                                                             &INTEL_VPE_INTERFACE_GUID,
+                                                             sizeof(ext),
+                                                             &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_scaling, &intel_vpe_scaling_vsr};
+    hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                             p->video_proc,
+                                                             0,
+                                                             &INTEL_VPE_INTERFACE_GUID,
+                                                             sizeof(ext),
+                                                             &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    MP_VERBOSE(vf, "Intel Video Super Resolution enabled\n");
+    return;
+
+failed:
+    MP_WARN(vf, "Failed to enable Intel Video Super Resolution: %s\n", mp_HRESULT_to_str(hr));
+}
+
 static int recreate_video_proc(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -221,6 +320,15 @@ static int recreate_video_proc(struct mp_filter *vf)
     ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
                                                          p->video_proc,
                                                          &csp);
+
+    switch (p->opts->scaling_mode) {
+    case SCALING_INTEL_VSR:
+        enable_intel_vsr_extension(vf);
+        break;
+    case SCALING_NVIDIA_RTX:
+        enable_nvidia_rtx_extension(vf);
+        break;
+    }
 
     return 0;
 fail:
@@ -499,6 +607,10 @@ fail:
 static const m_option_t vf_opts_fields[] = {
     {"deint", OPT_BOOL(deint_enabled)},
     {"scale", OPT_FLOAT(scale)},
+    {"scaling-mode", OPT_CHOICE(scaling_mode,
+        {"standard", SCALING_BASIC},
+        {"intel", SCALING_INTEL_VSR},
+        {"nvidia", SCALING_NVIDIA_RTX})},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
     {"mode", OPT_CHOICE(mode,
         {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
@@ -522,6 +634,7 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .deint_enabled = false,
             .scale = 1.0,
+            .scaling_mode = SCALING_BASIC,
             .mode = 0,
             .field_parity = MP_FIELD_PARITY_AUTO,
         },
