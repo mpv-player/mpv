@@ -694,6 +694,18 @@ Available mpv-only filters are:
         Whether deinterlacing is enabled (default: no).
     ``scale``
         Scaling factor for the video frames (default: 1.0).
+    ``scaling-mode=<standard,intel,nvidia>``
+        Select the scaling mode to be used. Note that this only enables the
+        appropriate processing extensions; whether it actually works or not
+        depends on your hardware and the settings in your GPU driver's control
+        panel (default: standard).
+
+        standard
+            Default scaling mode as decided by d3d11vpp implementation.
+        intel
+            Intel Video Super Resolution.
+        nvidia
+            NVIDIA RTX Super Resolution.
     ``interlaced-only=<yes|no>``
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
