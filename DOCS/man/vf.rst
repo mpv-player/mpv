@@ -692,6 +692,8 @@ Available mpv-only filters are:
 
     ``deint=<yes|no>``
         Whether deinterlacing is enabled (default: no).
+    ``scale``
+        Scaling factor for the video frames (default: 1.0).
     ``interlaced-only=<yes|no>``
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
