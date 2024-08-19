@@ -44,6 +44,7 @@
 
 struct opts {
     bool deint_enabled;
+    float scale;
     bool interlaced_only;
     int mode;
     int field_parity;
@@ -145,8 +146,8 @@ static int recreate_video_proc(struct mp_filter *vf)
         .InputFrameFormat = p->d3d_frame_format,
         .InputWidth = p->c_w,
         .InputHeight = p->c_h,
-        .OutputWidth = p->params.w,
-        .OutputHeight = p->params.h,
+        .OutputWidth = p->out_params.w,
+        .OutputHeight = p->out_params.h,
     };
     hr = ID3D11VideoDevice_CreateVideoProcessorEnumerator(p->video_dev, &vpdesc,
                                                           &p->vp_enum);
@@ -235,7 +236,7 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
-    out = mp_image_pool_get(p->pool, IMGFMT_D3D11, p->params.w, p->params.h);
+    out = mp_image_pool_get(p->pool, IMGFMT_D3D11, p->out_params.w, p->out_params.h);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
         goto cleanup;
@@ -250,6 +251,12 @@ static struct mp_image *render(struct mp_filter *vf)
     int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
+    // mp_image_copy_attributes overwrites the height and width
+    // set it the size back if we are using scale
+    mp_image_set_size(out, p->out_params.w, p->out_params.h);
+    // mp_image_copy_attributes will set the crop value to the origin
+    // width and height, set the crop back to the default state
+    out->params.crop = p->out_params.crop;
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
     if (!mp_refqueue_should_deint(p->queue)) {
@@ -346,11 +353,19 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
 
         p->params = in_fmt->params;
         p->out_params = p->params;
+        p->out_params.w = lrintf(p->opts->scale * p->params.w);
+        p->out_params.h = lrintf(p->opts->scale * p->params.h);
+        p->out_params.crop.x0 = lrintf(p->opts->scale * p->out_params.crop.x0);
+        p->out_params.crop.x1 = lrintf(p->opts->scale * p->out_params.crop.x1);
+        p->out_params.crop.y0 = lrintf(p->opts->scale * p->out_params.crop.y0);
+        p->out_params.crop.y1 = lrintf(p->opts->scale * p->out_params.crop.y1);
 
         p->out_params.hw_subfmt = IMGFMT_NV12;
         p->out_format = DXGI_FORMAT_NV12;
 
-        p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt;
+        p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
+                               p->params.w != p->out_params.w ||
+                               p->params.h != p->out_params.h;
     }
 
     if (!mp_refqueue_can_output(p->queue))
@@ -483,6 +498,7 @@ fail:
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
     {"deint", OPT_BOOL(deint_enabled)},
+    {"scale", OPT_FLOAT(scale)},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
     {"mode", OPT_CHOICE(mode,
         {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
@@ -504,8 +520,9 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .name = "d3d11vpp",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
-            .deint_enabled = true,
-            .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
+            .deint_enabled = false,
+            .scale = 1.0,
+            .mode = 0,
             .field_parity = MP_FIELD_PARITY_AUTO,
         },
         .options = vf_opts_fields,
