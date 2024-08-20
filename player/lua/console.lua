@@ -1575,6 +1575,10 @@ local function get_bindings()
         { 'ctrl+del',    del_next_word                          },
         { 'alt+d',       del_next_word                          },
         { 'kp_dec',      function() handle_char_input('.') end  },
+        { 'kp_add',      function() handle_char_input('+') end  },
+        { 'kp_subtract', function() handle_char_input('-') end  },
+        { 'kp_multiply', function() handle_char_input('*') end  },
+        { 'kp_divide',   function() handle_char_input('/') end  },
     }
 
     for i = 0, 9 do
