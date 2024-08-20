@@ -461,8 +461,10 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
 
         p->params = in_fmt->params;
         p->out_params = p->params;
-        p->out_params.w = lrintf(p->opts->scale * p->params.w);
-        p->out_params.h = lrintf(p->opts->scale * p->params.h);
+        p->out_params.w = (int)(p->opts->scale * p->params.w);
+        p->out_params.w += p->out_params.w % 2 != 0;
+        p->out_params.h = (int)(p->opts->scale * p->params.h);
+        p->out_params.h += p->out_params.h % 2 != 0;
         p->out_params.crop.x0 = lrintf(p->opts->scale * p->out_params.crop.x0);
         p->out_params.crop.x1 = lrintf(p->opts->scale * p->out_params.crop.x1);
         p->out_params.crop.y0 = lrintf(p->opts->scale * p->out_params.crop.y0);
