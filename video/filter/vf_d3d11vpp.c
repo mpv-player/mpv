@@ -74,7 +74,7 @@ enum scaling_mode {
 
 struct opts {
     bool deint_enabled;
-    float scale;
+    double scale;
     int scaling_mode;
     bool interlaced_only;
     int mode;
@@ -606,7 +606,7 @@ fail:
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
     {"deint", OPT_BOOL(deint_enabled)},
-    {"scale", OPT_FLOAT(scale)},
+    {"scale", OPT_DOUBLE(scale)},
     {"scaling-mode", OPT_CHOICE(scaling_mode,
         {"standard", SCALING_BASIC},
         {"intel", SCALING_INTEL_VSR},
