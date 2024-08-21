@@ -2756,9 +2756,13 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     if (track->parse && !track->av_parser) {
         int id = mp_codec_to_av_codec_id(track->stream->codec->codec);
         const AVCodec *codec = avcodec_find_decoder(id);
-        track->av_parser = av_parser_init(id);
+        assert(!track->av_parser_codec);
         if (codec)
             track->av_parser_codec = avcodec_alloc_context3(codec);
+        if (track->av_parser_codec)
+            track->av_parser = av_parser_init(id);
+        if (!track->av_parser)
+            avcodec_free_context(&track->av_parser_codec);
     }
 
     if (!track->parse || !track->av_parser || !track->av_parser_codec) {
