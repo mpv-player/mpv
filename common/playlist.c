@@ -446,7 +446,7 @@ void playlist_set_current(struct playlist *pl)
             continue;
         char *path = pl->entries[i]->playlist_path;
         if (path[0] != '.')
-            path = mp_path_join(NULL, pl->playlist_dir, pl->entries[i]->playlist_path);
+            path = mp_path_join(NULL, pl->playlist_dir, mp_basename(pl->entries[i]->playlist_path));
         bool same = !strcmp(pl->entries[i]->filename, path);
         if (path != pl->entries[i]->playlist_path)
             talloc_free(path);
