@@ -259,7 +259,7 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames,
                                  pl->entries[n]->filename);
             }
-        } else if (!ctx->demuxer->stream->is_local_file) {
+        } else if (!ctx->demuxer->stream->is_local_fs) {
             MP_WARN(ctx, "Playback source is not a "
                     "normal disk file. Will not search for related files.\n");
         } else {

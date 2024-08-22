@@ -152,7 +152,7 @@ typedef struct stream {
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool is_network : 1; // I really don't know what this is for
-    bool is_local_file : 1; // from the filesystem
+    bool is_local_fs : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
     struct mp_log *log;
