@@ -280,7 +280,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
         .fd = -1,
     };
     stream->priv = p;
-    stream->is_local_file = true;
+    stream->is_local_fs = true;
 
     bool strict_fs = args->flags & STREAM_LOCAL_FS_ONLY;
     bool write = stream->mode == STREAM_WRITE;
@@ -297,6 +297,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
 
     bool is_fdclose = strncmp(url, "fdclose://", 10) == 0;
     if (strncmp(url, "fd://", 5) == 0 || is_fdclose) {
+        stream->is_local_fs = false;
         char *begin = strstr(stream->url, "://") + 3, *end = NULL;
         p->fd = strtol(begin, &end, 0);
         if (!end || end == begin || end[0] || p->fd < 0) {
@@ -312,6 +313,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
         if (is_fdclose)
             p->close = true;
     } else if (!strict_fs && !strcmp(filename, "-")) {
+        stream->is_local_fs = false;
         if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
             p->fd = 0;

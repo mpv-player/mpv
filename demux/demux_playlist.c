@@ -515,7 +515,7 @@ static int parse_dir(struct pl_parser *p)
     struct stream *stream = p->real_stream;
     enum autocreate_mode autocreate = AUTO_NONE;
     p->pl->playlist_dir = NULL;
-    if (p->autocreate_playlist && p->real_stream->is_local_file && !p->real_stream->is_directory) {
+    if (p->autocreate_playlist && p->real_stream->is_local_fs && !p->real_stream->is_directory) {
         bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
         switch (p->autocreate_playlist) {
         case 1: // filter
