@@ -4464,7 +4464,7 @@ static const struct property_osd_display {
       "${?secondary-sub-visibility==yes:visible${?secondary-sid==no: (but no secondary subtitles selected)}}"},
     {"sub-forced-events-only", "Forced sub only"},
     {"sub-scale", "Sub Scale"},
-    {"sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
+    {"sub-ass-use-video-data", "Subtitle using video properties"},
     {"sub-ass-override", "ASS subtitle style override"},
     {"secondary-sub-ass-override", "Secondary sub ASS subtitle style override"},
     {"vf", "Video filters", .msg = "Video filters:\n${vf}"},
