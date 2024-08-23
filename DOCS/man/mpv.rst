@@ -181,8 +181,8 @@ u
     style. See ``--sub-ass-override`` for more info.
 
 V
-    Toggle subtitle VSFilter aspect compatibility mode. See
-    ``--sub-ass-vsfilter-aspect-compat`` for more info.
+    Cycle through which video data gets used for ASS rendering.
+    See ``--sub-ass-use-video-data`` for more info.
 
 r and R
     Move subtitles up/down. The ``t`` key does the same as ``R`` currently, but

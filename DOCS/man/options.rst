@@ -2568,31 +2568,22 @@ Subtitles
 
     Default: yes.
 
-``--sub-ass-vsfilter-aspect-compat=<yes|no>``
-    Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
-    with traditional VSFilter behavior. This switch has no effect when the
-    video is stored with square pixels.
+``--sub-ass-use-video-data=<none|aspect-ratio|all>``
+    Controls which information about the video stream is passed to libass.
+    Any option but ``all`` is incompatible with standard ASS and VSFilters.
 
-    The renderer historically most commonly used for the SSA/ASS subtitle
-    formats, VSFilter, had questionable behavior that resulted in subtitles
-    being stretched too if the video was stored in anamorphic format that
-    required scaling for display.  This behavior is usually undesirable and
-    newer VSFilter versions may behave differently. However, many existing
-    scripts compensate for the stretching by modifying things in the opposite
-    direction.  Thus, if such scripts are displayed "correctly", they will not
-    appear as intended.  This switch enables emulation of the old VSFilter
-    behavior (undesirable but expected by many existing scripts).
+    For certain kinds of broken ASS files which got repurposed across
+    several video resolutions without either setting ``LayoutRes`` headers
+    or adjusting affected effects, it may be desirable to withhold storage resolution
+    information from libass to ensure consistent rendering across resolutions.
+    Among others this affects 3D rotations and blurs.
+    When encountering such files, try setting ``aspect-ratio``.
 
-    Enabled by default.
+    Even more broken files on anamorphic video might also exhibit stretching
+    unless aspect ratio information is also faked, in this case you can try
+    using ``none``. This has never an effect on non-anamorphic video.
 
-``--sub-ass-vsfilter-blur-compat=<yes|no>``
-    Scale ``\blur`` tags by video resolution instead of script resolution
-    (enabled by default). This is bug in VSFilter, which according to some,
-    can't be fixed anymore in the name of compatibility.
-
-    Note that this uses the actual video resolution for calculating the
-    offset scale factor, not what the video filter chain or the video output
-    use.
+    Default: ``all``
 
 ``--sub-vsfilter-bidi-compat=<yes|no>``
     Set implicit bidi detection to ``ltr`` instead of ``auto`` to match ASS'
