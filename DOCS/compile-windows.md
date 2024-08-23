@@ -174,8 +174,8 @@ they will be automatically downloaded and built by Meson.
    ```powershell
    $env:CC = 'clang'
    $env:CXX = 'clang++'
-   $env:CC_LD = 'lld'
-   $env:CXX_LD = 'lld'
+   $env:CC_LD = 'lld-link'
+   $env:CXX_LD = 'lld-link'
    $env:WINDRES = 'llvm-rc'
    ```
    Note that some dependencies (e.g. LuaJIT) may require `sed` to configure. Fortunately, it is already bundled in
