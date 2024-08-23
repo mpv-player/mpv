@@ -649,13 +649,23 @@ mpv_handle *mpv_create_weak_client(mpv_handle *ctx, const char *name)
     return new;
 }
 
-int mpv_initialize(mpv_handle *ctx)
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+int mpv_initialize_opts(mpv_handle *ctx, char **options);
+#else
+static
+#endif
+int mpv_initialize_opts(mpv_handle *ctx, char **options)
 {
     lock_core(ctx);
-    int res = mp_initialize(ctx->mpctx, NULL) ? MPV_ERROR_INVALID_PARAMETER : 0;
+    int res = mp_initialize(ctx->mpctx, options) ? MPV_ERROR_INVALID_PARAMETER : 0;
     mp_wakeup_core(ctx->mpctx);
     unlock_core(ctx);
     return res;
+}
+
+int mpv_initialize(mpv_handle *ctx)
+{
+    return mpv_initialize_opts(ctx, NULL);
 }
 
 // set ev->data to a new copy of the original data
