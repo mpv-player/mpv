@@ -71,4 +71,9 @@ foreach cmd : ['file', '-config-file', '-input-conf']
                           link_with: libmpv)
 endforeach
 
+fuzzers += executable('fuzzer_options_parser', 'fuzzer_options_parser.c',
+                      link_language: 'cpp', include_directories: incdir,
+                      objects: libmpv.extract_all_objects(recursive: true),
+                      dependencies: dependencies)
+
 alias_target('fuzzers', fuzzers)

@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libmpv/client.h>
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 #define MPV_STRINGIFY_(X) #X
