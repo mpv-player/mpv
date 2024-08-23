@@ -357,9 +357,11 @@ end
 
 local function fuzzy_find(needle, haystacks)
     local result = require 'mp.fzy'.filter(needle, haystacks)
-    table.sort(result, function (i, j)
-        return i[3] > j[3]
-    end)
+    if line ~= '' then -- Prevent table.sort() from reordering the items.
+        table.sort(result, function (i, j)
+            return i[3] > j[3]
+        end)
+    end
     for i, value in ipairs(result) do
         result[i] = value[1]
     end
@@ -639,14 +641,8 @@ local function handle_edit()
         matches = {}
         selected_match = 1
 
-        if line == '' then
-            for i, item in ipairs(selectable_items) do
-                matches[i] = { index = i, text = item }
-            end
-        else
-            for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-                matches[i] = { index = match, text = selectable_items[match] }
-            end
+        for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+            matches[i] = { index = match, text = selectable_items[match] }
         end
     end
 
@@ -902,7 +898,10 @@ local function search_history()
 
     for i = 1, #history do
         selectable_items[i] = history[#history + 1 - i]
-        matches[i] = { index = i, text = history[#history + 1 - i] }
+    end
+
+    for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+        matches[i] = { index = match, text = selectable_items[match] }
     end
 
     update()
