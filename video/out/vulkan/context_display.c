@@ -474,24 +474,12 @@ static int display_control(struct ra_ctx *ctx, int *events, int request, void *a
     return VO_NOTIMPL;
 }
 
-static void display_wakeup(struct ra_ctx *ctx)
-{
-    // TODO
-}
-
-static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
-{
-    // TODO
-}
-
 const struct ra_ctx_fns ra_ctx_vulkan_display = {
     .type           = "vulkan",
     .name           = "displayvk",
     .description    = "VK_KHR_display",
     .reconfig       = display_reconfig,
     .control        = display_control,
-    .wakeup         = display_wakeup,
-    .wait_events    = display_wait_events,
     .init           = display_init,
     .uninit         = display_uninit,
 };
