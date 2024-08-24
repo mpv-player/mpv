@@ -192,4 +192,6 @@ typedef long long ssize_t;
 typedef unsigned short mode_t;
 #endif
 
+#define UNUSED(x) (void)(x)
+
 #endif /* MPLAYER_MPCOMMON_H */

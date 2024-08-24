@@ -57,6 +57,7 @@ struct gl_lcms {
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
+    UNUSED(code);
     struct gl_lcms *p = cmsGetContextUserData(ctx);
     MP_ERR(p, "lcms2: %s\n", msg);
 }

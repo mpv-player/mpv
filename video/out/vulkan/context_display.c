@@ -218,6 +218,9 @@ done:
 static int print_display_info(struct mp_log *log, const struct m_option *opt,
                               struct bstr name)
 {
+    UNUSED(opt);
+    UNUSED(name);
+
     void *ta_ctx = talloc_new(NULL);
     pl_log pllog = mppl_log_create(ta_ctx, log);
     if (!pllog)
@@ -471,16 +474,23 @@ static bool display_reconfig(struct ra_ctx *ctx)
 
 static int display_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
+    UNUSED(ctx);
+    UNUSED(events);
+    UNUSED(request);
+    UNUSED(arg);
     return VO_NOTIMPL;
 }
 
 static void display_wakeup(struct ra_ctx *ctx)
 {
+    UNUSED(ctx);
     // TODO
 }
 
 static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
+    UNUSED(ctx);
+    UNUSED(until_time_ns);
     // TODO
 }
 

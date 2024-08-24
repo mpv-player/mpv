@@ -180,6 +180,8 @@ typedef struct filter_window params;
 
 static double box(params *p, double x)
 {
+    UNUSED(p);
+    UNUSED(x);
     // This is mathematically 1.0 everywhere, the clipping is done implicitly
     // based on the radius.
     return 1.0;
@@ -192,21 +194,25 @@ static double triangle(params *p, double x)
 
 static double cosine(params *p, double x)
 {
+    UNUSED(p);
     return cos(x);
 }
 
 static double hanning(params *p, double x)
 {
+    UNUSED(p);
     return 0.5 + 0.5 * cos(M_PI * x);
 }
 
 static double hamming(params *p, double x)
 {
+    UNUSED(p);
     return 0.54 + 0.46 * cos(M_PI * x);
 }
 
 static double quadric(params *p, double x)
 {
+    UNUSED(p);
     if (x <  0.5) {
         return 0.75 - x * x;
     } else if (x <  1.5) {
@@ -248,6 +254,7 @@ static double blackman(params *p, double x)
 
 static double welch(params *p, double x)
 {
+    UNUSED(p);
     return 1.0 - x*x;
 }
 
@@ -274,6 +281,7 @@ static double cubic_bc(params *p, double x)
 
 static double spline16(params *p, double x)
 {
+    UNUSED(p);
     if (x < 1.0) {
         return ((x - 9.0/5.0 ) * x - 1.0/5.0 ) * x + 1.0;
     } else {
@@ -283,6 +291,7 @@ static double spline16(params *p, double x)
 
 static double spline36(params *p, double x)
 {
+    UNUSED(p);
     if (x < 1.0) {
         return ((13.0/11.0 * x - 453.0/209.0) * x - 3.0/209.0) * x + 1.0;
     } else if (x < 2.0) {
@@ -312,6 +321,7 @@ static double gaussian(params *p, double x)
 
 static double sinc(params *p, double x)
 {
+    UNUSED(p);
     if (fabs(x) < 1e-8)
         return 1.0;
     x *= M_PI;
@@ -320,6 +330,7 @@ static double sinc(params *p, double x)
 
 static double jinc(params *p, double x)
 {
+    UNUSED(p);
     if (fabs(x) < 1e-8)
         return 1.0;
     x *= M_PI;
@@ -328,6 +339,7 @@ static double jinc(params *p, double x)
 
 static double sphinx(params *p, double x)
 {
+    UNUSED(p);
     if (fabs(x) < 1e-8)
         return 1.0;
     x *= M_PI;

@@ -27,7 +27,7 @@
 #include "sub/osd.h"
 
 static void aspect_calc_panscan(struct mp_vo_opts *opts,
-                                int w, int h, int d_w, int d_h, int unscaled,
+                                int h, int d_w, int d_h, int unscaled,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
@@ -168,7 +168,7 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
 
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
-        aspect_calc_panscan(opts, src_w, src_h, src_dw, src_dh, opts->unscaled,
+        aspect_calc_panscan(opts, src_h, src_dw, src_dh, opts->unscaled,
                             vid_window_w, vid_window_h, monitor_par,
                             &scaled_width, &scaled_height);
         src_dst_split_scaling(src_w, vid_window_w, scaled_width,

@@ -60,11 +60,13 @@ extern const struct ra_ctx_fns ra_ctx_wldmabuf;
 /* Autoprobe dummy. Always fails to create. */
 static bool dummy_init(struct ra_ctx *ctx)
 {
+    UNUSED(ctx);
     return false;
 }
 
 static void dummy_uninit(struct ra_ctx *ctx)
 {
+    UNUSED(ctx);
 }
 
 static const struct ra_ctx_fns ra_ctx_dummy = {
@@ -154,6 +156,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 
 static bool check_unknown_entry(const char *name)
 {
+    UNUSED(name);
     return false;
 }
 

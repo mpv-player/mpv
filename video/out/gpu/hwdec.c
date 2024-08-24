@@ -180,6 +180,8 @@ static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
                                       const m_option_t *opt,
                                       struct bstr name, const char **value)
 {
+    UNUSED(opt);
+    UNUSED(name);
     struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
     if (help)

@@ -47,6 +47,8 @@ static bool check_format(struct render_backend *ctx, int imgfmt)
 
 static int set_parameter(struct render_backend *ctx, mpv_render_param param)
 {
+    UNUSED(ctx);
+    UNUSED(param);
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
 
@@ -60,6 +62,7 @@ static void reconfig(struct render_backend *ctx, struct mp_image_params *params)
 
 static void reset(struct render_backend *ctx)
 {
+    UNUSED(ctx);
     // stateless
 }
 
@@ -84,6 +87,7 @@ static void resize(struct render_backend *ctx, struct mp_rect *src,
 static int get_target_size(struct render_backend *ctx, mpv_render_param *params,
                            int *out_w, int *out_h)
 {
+    UNUSED(ctx);
     int *sz = get_mpv_render_param(params, MPV_RENDER_PARAM_SW_SIZE, NULL);
     if (!sz)
         return MPV_ERROR_INVALID_PARAMETER;
@@ -191,6 +195,7 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
 
 static void destroy(struct render_backend *ctx)
 {
+    UNUSED(ctx);
     // nop
 }
 

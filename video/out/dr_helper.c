@@ -89,6 +89,7 @@ static void dr_thread_free(void *ptr)
 
 static void free_dr_buffer_on_dr_thread(void *opaque, uint8_t *data)
 {
+    UNUSED(data);
     struct free_dr_context *ctx = opaque;
     struct dr_helper *dr = ctx->dr;
 
