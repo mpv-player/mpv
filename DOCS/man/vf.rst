@@ -329,10 +329,6 @@ Available mpv-only filters are:
         ``--vf=format:stereo-in=help`` to list all available modes. Check with
         the ``stereo3d`` filter documentation to see what the names mean.
 
-    ``<stereo-out>``
-        Set the stereo mode the video should be displayed as. Takes the
-        same values as the ``stereo-in`` option.
-
     ``<rotate>``
         Set the rotation the video is assumed to be encoded with in degrees.
         The special value ``-1`` uses the input format.
