@@ -324,6 +324,10 @@ Available mpv-only filters are:
         Whether or not to include film grain metadata (default: yes). If
         disabled, any film grain metadata will be stripped from frames.
 
+    ``<chroma-location>``
+        Set the chroma loc of the video. Use
+        ``--vf=format:chroma-location=help`` to list all available modes.
+
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Use
         ``--vf=format:stereo-in=help`` to list all available modes. Check with

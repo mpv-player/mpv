@@ -111,7 +111,7 @@ const struct m_opt_choice_alternatives pl_chroma_names[] = {
     {"mpeg2/4/h264",PL_CHROMA_LEFT},
     {"mpeg1/jpeg",  PL_CHROMA_CENTER},
     {"top",         PL_CHROMA_TOP_CENTER},
-    {"bottom left", PL_CHROMA_BOTTOM_LEFT},
+    {"bottom-left", PL_CHROMA_BOTTOM_LEFT},
     {"bottom",      PL_CHROMA_BOTTOM_CENTER},
     {0}
 };
