@@ -3960,6 +3960,8 @@ Demuxer
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
 
+    Note rawvideo/rawaudio aren't used unless explicitly requested or forced by the user.
+
 ``--demuxer-max-bytes=<bytesize>``
     This controls how much the demuxer is allowed to buffer ahead. The demuxer
     will normally try to read ahead as much as necessary, or as much is
