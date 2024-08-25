@@ -336,12 +336,12 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static int query_format(struct vo *vo, int format)
+static int query_format(mp_unused struct vo *vo, int format)
 {
     return format == IMGFMT;
 }
 
-static int control(struct vo *vo, uint32_t request, void *data)
+static int control(mp_unused struct vo *vo, mp_unused uint32_t request, mp_unused void *data)
 {
     return VO_NOTIMPL;
 }

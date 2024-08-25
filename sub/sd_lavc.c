@@ -434,7 +434,7 @@ static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
 }
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
-                                       int format, double pts)
+                                       mp_unused int format, double pts)
 {
     struct sd_lavc_priv *priv = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;

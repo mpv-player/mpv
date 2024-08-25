@@ -22,7 +22,7 @@
 #include <libavutil/hwcontext.h>
 
 static struct AVBufferRef *cuda_create_standalone(struct mpv_global *global,
-        struct mp_log *log, struct hwcontext_create_dev_params *params)
+        mp_unused struct mp_log *log, mp_unused struct hwcontext_create_dev_params *params)
 {
     struct cuda_opts *opts = mp_get_config_group(NULL, global, &cuda_conf);
 

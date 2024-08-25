@@ -23,7 +23,7 @@
 #include "video/out/placebo/utils.h"
 
 static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
-                         struct dmabuf_interop *dmabuf_interop,
+                         mp_unused struct dmabuf_interop *dmabuf_interop,
                          bool probing)
 {
     struct dmabuf_interop_priv *p = mapper->priv;

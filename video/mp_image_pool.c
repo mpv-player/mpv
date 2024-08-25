@@ -102,7 +102,7 @@ void mp_image_pool_clear(struct mp_image_pool *pool)
 
 // This is the only function that is allowed to run in a different thread.
 // (Consider passing an image to another thread, which frees it.)
-static void unref_image(void *opaque, uint8_t *data)
+static void unref_image(void *opaque, mp_unused uint8_t *data)
 {
     struct mp_image *img = opaque;
     struct image_flags *it = img->priv;

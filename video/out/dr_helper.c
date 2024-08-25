@@ -87,7 +87,7 @@ static void dr_thread_free(void *ptr)
     talloc_free(ctx);
 }
 
-static void free_dr_buffer_on_dr_thread(void *opaque, uint8_t *data)
+static void free_dr_buffer_on_dr_thread(void *opaque, mp_unused uint8_t *data)
 {
     struct free_dr_context *ctx = opaque;
     struct dr_helper *dr = ctx->dr;

@@ -210,17 +210,17 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
     state->delay = 0;
 }
 
-static bool set_pause(struct ao *ao, bool paused)
+static bool set_pause(mp_unused struct ao *ao, mp_unused bool paused)
 {
     return true; // signal support so common code doesn't write silence
 }
 
-static void start(struct ao *ao)
+static void start(mp_unused struct ao *ao)
 {
     // we use data immediately
 }
 
-static void reset(struct ao *ao)
+static void reset(mp_unused struct ao *ao)
 {
 }
 

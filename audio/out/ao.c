@@ -586,7 +586,7 @@ void ao_hotplug_destroy(struct ao_hotplug *hp)
     talloc_free(hp);
 }
 
-static void dummy_wakeup(void *ctx)
+static void dummy_wakeup(mp_unused void *ctx)
 {
 }
 

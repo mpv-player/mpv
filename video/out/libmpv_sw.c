@@ -45,7 +45,8 @@ static bool check_format(struct render_backend *ctx, int imgfmt)
     return mp_sws_supports_formats(p->sws, IMGFMT_RGB0, imgfmt);
 }
 
-static int set_parameter(struct render_backend *ctx, mpv_render_param param)
+static int set_parameter(mp_unused struct render_backend *ctx,
+                         mp_unused mpv_render_param param)
 {
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
@@ -58,7 +59,7 @@ static void reconfig(struct render_backend *ctx, struct mp_image_params *params)
     p->anything_changed = true;
 }
 
-static void reset(struct render_backend *ctx)
+static void reset(mp_unused struct render_backend *ctx)
 {
     // stateless
 }
@@ -81,7 +82,7 @@ static void resize(struct render_backend *ctx, struct mp_rect *src,
     p->anything_changed = true;
 }
 
-static int get_target_size(struct render_backend *ctx, mpv_render_param *params,
+static int get_target_size(mp_unused struct render_backend *ctx, mpv_render_param *params,
                            int *out_w, int *out_h)
 {
     int *sz = get_mpv_render_param(params, MPV_RENDER_PARAM_SW_SIZE, NULL);
@@ -189,7 +190,7 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     return 0;
 }
 
-static void destroy(struct render_backend *ctx)
+static void destroy(mp_unused struct render_backend *ctx)
 {
     // nop
 }

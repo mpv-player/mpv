@@ -93,7 +93,7 @@ static void dump_egl_config(struct mp_log *log, int msgl, EGLDisplay display,
     }
 }
 
-static void *mpegl_get_proc_address(void *ctx, const char *name)
+static void *mpegl_get_proc_address(mp_unused void *ctx, const char *name)
 {
     void *p = eglGetProcAddress(name);
 #if defined(__GLIBC__) && HAVE_LIBDL

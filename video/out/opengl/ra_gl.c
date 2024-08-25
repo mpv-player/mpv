@@ -717,7 +717,7 @@ static void gl_blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-static int gl_desc_namespace(struct ra *ra, enum ra_vartype type)
+static int gl_desc_namespace(mp_unused struct ra *ra, enum ra_vartype type)
 {
     return type;
 }

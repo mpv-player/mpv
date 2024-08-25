@@ -105,7 +105,7 @@ struct priv {
     uint64_t drm_modifier;
 };
 
-static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+static void buffer_handle_release(void *data, mp_unused struct wl_buffer *wl_buffer)
 {
     struct buffer *buf = data;
     if (buf->frame) {
@@ -118,7 +118,7 @@ static const struct wl_buffer_listener buffer_listener = {
     buffer_handle_release,
 };
 
-static void osd_buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+static void osd_buffer_handle_release(void *data, mp_unused struct wl_buffer *wl_buffer)
 {
     struct osd_buffer *osd_buf = data;
     wl_list_remove(&osd_buf->link);
@@ -662,7 +662,7 @@ static bool is_supported_fmt(int fmt)
     return (fmt == IMGFMT_DRMPRIME || fmt == IMGFMT_VAAPI);
 }
 
-static int query_format(struct vo *vo, int format)
+static int query_format(mp_unused struct vo *vo, int format)
 {
     return is_supported_fmt(format);
 }

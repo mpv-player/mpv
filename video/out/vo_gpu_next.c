@@ -556,7 +556,7 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
     return false;
 }
 
-static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
+static bool hwdec_acquire(mp_unused pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
@@ -577,7 +577,7 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
     return true;
 }
 
-static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
+static void hwdec_release(mp_unused pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
@@ -721,7 +721,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     return true;
 }
 
-static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
+static void unmap_frame(mp_unused pl_gpu gpu, mp_unused struct pl_frame *frame,
                         const struct pl_source_frame *src)
 {
     struct mp_image *mpi = src->frame_data;
@@ -1224,7 +1224,7 @@ static void resize(struct vo *vo)
     p->dst = dst;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+static int reconfig(struct vo *vo, mp_unused struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
     if (!p->ra_ctx->fns->reconfig(p->ra_ctx))

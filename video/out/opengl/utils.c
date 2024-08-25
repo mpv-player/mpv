@@ -241,8 +241,9 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
     gl_vao_unbind(vao);
 }
 
-static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
-                                   GLenum severity, GLsizei length,
+static void GLAPIENTRY gl_debug_cb(mp_unused GLenum source, mp_unused GLenum type,
+                                   mp_unused GLuint id, GLenum severity,
+                                   mp_unused GLsizei length,
                                    const GLchar *message, const void *userParam)
 {
     // keep in mind that the debug callback can be asynchronous

@@ -1936,15 +1936,15 @@ static bool image_equiv(struct image a, struct image b)
 }
 
 static void deband_hook(struct gl_video *p, struct image img,
-                        struct gl_transform *trans, void *priv)
+                        mp_unused struct gl_transform *trans, mp_unused void *priv)
 {
     pass_describe(p, "debanding (%s)", plane_names[img.type]);
     pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg,
                        p->image_params.color.transfer);
 }
 
-static void unsharp_hook(struct gl_video *p, struct image img,
-                         struct gl_transform *trans, void *priv)
+static void unsharp_hook(struct gl_video *p, mp_unused struct image img,
+                         mp_unused struct gl_transform *trans, mp_unused void *priv)
 {
     pass_describe(p, "unsharp masking");
     pass_sample_unsharp(p->sc, p->opts.unsharp);
@@ -4196,7 +4196,7 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
     vo_set_queue_params(vo, 0, queue_size);
 }
 
-static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
+static int validate_scaler_opt(struct mp_log *log, mp_unused const m_option_t *opt,
                                struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
@@ -4239,8 +4239,8 @@ next_window: ;
     return r;
 }
 
-static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, const char **value)
+static int validate_window_opt(struct mp_log *log, mp_unused const m_option_t *opt,
+                               mp_unused struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     char s[32] = {0};
@@ -4265,8 +4265,8 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     return r;
 }
 
-static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
-                                        struct bstr name, const char **value)
+static int validate_error_diffusion_opt(struct mp_log *log, mp_unused const m_option_t *opt,
+                                        mp_unused struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     char s[32] = {0};

@@ -206,7 +206,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     return 0;
 }
 
-static void mapper_uninit(struct ra_hwdec_mapper *mapper)
+static void mapper_uninit(mp_unused struct ra_hwdec_mapper *mapper)
 {
 
 }

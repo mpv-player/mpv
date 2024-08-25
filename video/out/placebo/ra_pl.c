@@ -285,7 +285,7 @@ static bool buf_poll_pl(struct ra *ra, struct ra_buf *buf)
 }
 
 static void clear_pl(struct ra *ra, struct ra_tex *dst, float color[4],
-                     struct mp_rect *scissor)
+                     mp_unused struct mp_rect *scissor)
 {
     // TODO: implement scissor clearing by bltting a 1x1 tex instead
     pl_tex_clear(get_gpu(ra), dst->priv, color);

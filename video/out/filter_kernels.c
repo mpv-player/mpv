@@ -178,7 +178,7 @@ void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
 
 typedef struct filter_window params;
 
-static double box(params *p, double x)
+static double box(mp_unused params *p, mp_unused double x)
 {
     // This is mathematically 1.0 everywhere, the clipping is done implicitly
     // based on the radius.
@@ -190,22 +190,22 @@ static double triangle(params *p, double x)
     return fmax(0.0, 1.0 - fabs(x / p->radius));
 }
 
-static double cosine(params *p, double x)
+static double cosine(mp_unused params *p, double x)
 {
     return cos(x);
 }
 
-static double hanning(params *p, double x)
+static double hanning(mp_unused params *p, double x)
 {
     return 0.5 + 0.5 * cos(M_PI * x);
 }
 
-static double hamming(params *p, double x)
+static double hamming(mp_unused params *p, double x)
 {
     return 0.54 + 0.46 * cos(M_PI * x);
 }
 
-static double quadric(params *p, double x)
+static double quadric(mp_unused params *p, double x)
 {
     if (x <  0.5) {
         return 0.75 - x * x;
@@ -246,7 +246,7 @@ static double blackman(params *p, double x)
     return a0 + a1*cos(pix) + a2*cos(2 * pix);
 }
 
-static double welch(params *p, double x)
+static double welch(mp_unused params *p, double x)
 {
     return 1.0 - x*x;
 }
@@ -272,7 +272,7 @@ static double cubic_bc(params *p, double x)
     return 0.0;
 }
 
-static double spline16(params *p, double x)
+static double spline16(mp_unused params *p, double x)
 {
     if (x < 1.0) {
         return ((x - 9.0/5.0 ) * x - 1.0/5.0 ) * x + 1.0;
@@ -281,7 +281,7 @@ static double spline16(params *p, double x)
     }
 }
 
-static double spline36(params *p, double x)
+static double spline36(mp_unused params *p, double x)
 {
     if (x < 1.0) {
         return ((13.0/11.0 * x - 453.0/209.0) * x - 3.0/209.0) * x + 1.0;
@@ -292,7 +292,7 @@ static double spline36(params *p, double x)
     }
 }
 
-static double spline64(params *p, double x)
+static double spline64(mp_unused params *p, double x)
 {
     if (x < 1.0) {
         return ((49.0/41.0 * x - 6387.0/2911.0) * x - 3.0/2911.0) * x + 1.0;
@@ -310,7 +310,7 @@ static double gaussian(params *p, double x)
     return exp(-2.0 * x * x / p->params[0]);
 }
 
-static double sinc(params *p, double x)
+static double sinc(mp_unused params *p, double x)
 {
     if (fabs(x) < 1e-8)
         return 1.0;
@@ -318,7 +318,7 @@ static double sinc(params *p, double x)
     return sin(x) / x;
 }
 
-static double jinc(params *p, double x)
+static double jinc(mp_unused params *p, double x)
 {
     if (fabs(x) < 1e-8)
         return 1.0;
@@ -326,7 +326,7 @@ static double jinc(params *p, double x)
     return 2.0 * j1(x) / x;
 }
 
-static double sphinx(params *p, double x)
+static double sphinx(mp_unused params *p, double x)
 {
     if (fabs(x) < 1e-8)
         return 1.0;

@@ -219,8 +219,8 @@ static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect o
                                    struct mp_rect old_output_geometry);
 
 /* Wayland listener boilerplate */
-static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
-                                 uint32_t serial, struct wl_surface *surface,
+static void pointer_handle_enter(void *data, mp_unused struct wl_pointer *pointer,
+                                 uint32_t serial, mp_unused struct wl_surface *surface,
                                  wl_fixed_t sx, wl_fixed_t sy)
 {
     struct vo_wayland_seat *s = data;
@@ -238,16 +238,17 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     wl->toplevel_configured = false;
 }
 
-static void pointer_handle_leave(void *data, struct wl_pointer *pointer,
-                                 uint32_t serial, struct wl_surface *surface)
+static void pointer_handle_leave(void *data, mp_unused struct wl_pointer *pointer,
+                                 mp_unused uint32_t serial,
+                                 mp_unused struct wl_surface *surface)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_LEAVE);
 }
 
-static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
-                                  uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
+static void pointer_handle_motion(void *data, mp_unused struct wl_pointer *pointer,
+                                  mp_unused uint32_t time, wl_fixed_t sx, wl_fixed_t sy)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -260,9 +261,9 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
     wl->toplevel_configured = false;
 }
 
-static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
-                                  uint32_t serial, uint32_t time, uint32_t button,
-                                  uint32_t state)
+static void pointer_handle_button(void *data, mp_unused struct wl_pointer *wl_pointer,
+                                  uint32_t serial, mp_unused uint32_t time,
+                                  uint32_t button, uint32_t state)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -315,8 +316,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     }
 }
 
-static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
-                                uint32_t time, uint32_t axis, wl_fixed_t value)
+static void pointer_handle_axis(void *data, mp_unused struct wl_pointer *wl_pointer,
+                                mp_unused uint32_t time, uint32_t axis, wl_fixed_t value)
 {
     struct vo_wayland_seat *s = data;
     switch (axis) {
@@ -329,7 +330,7 @@ static void pointer_handle_axis(void *data, struct wl_pointer *wl_pointer,
     }
 }
 
-static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
+static void pointer_handle_frame(void *data, mp_unused struct wl_pointer *wl_pointer)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -364,22 +365,26 @@ static void pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
     s->axis_value120_horizontal = 0;
 }
 
-static void pointer_handle_axis_source(void *data, struct wl_pointer *wl_pointer,
-                                       uint32_t axis_source)
+static void pointer_handle_axis_source(mp_unused void *data,
+                                       mp_unused struct wl_pointer *wl_pointer,
+                                       mp_unused uint32_t axis_source)
 {
 }
 
-static void pointer_handle_axis_stop(void *data, struct wl_pointer *wl_pointer,
-                                     uint32_t time, uint32_t axis)
+static void pointer_handle_axis_stop(mp_unused void *data,
+                                     mp_unused struct wl_pointer *wl_pointer,
+                                     mp_unused uint32_t time, mp_unused uint32_t axis)
 {
 }
 
-static void pointer_handle_axis_discrete(void *data, struct wl_pointer *wl_pointer,
-                                         uint32_t axis, int32_t discrete)
+static void pointer_handle_axis_discrete(mp_unused void *data,
+                                         mp_unused struct wl_pointer *wl_pointer,
+                                         mp_unused uint32_t axis,
+                                         mp_unused int32_t discrete)
 {
 }
 
-static void pointer_handle_axis_value120(void *data, struct wl_pointer *wl_pointer,
+static void pointer_handle_axis_value120(void *data, mp_unused struct wl_pointer *wl_pointer,
                                          uint32_t axis, int32_t value120)
 {
     struct vo_wayland_seat *s = data;
@@ -407,8 +412,9 @@ static const struct wl_pointer_listener pointer_listener = {
     pointer_handle_axis_value120,
 };
 
-static void touch_handle_down(void *data, struct wl_touch *wl_touch,
-                              uint32_t serial, uint32_t time, struct wl_surface *surface,
+static void touch_handle_down(void *data, mp_unused struct wl_touch *wl_touch,
+                              uint32_t serial, mp_unused uint32_t time,
+                              mp_unused struct wl_surface *surface,
                               int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
 {
     struct vo_wayland_seat *s = data;
@@ -431,8 +437,8 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     }
 }
 
-static void touch_handle_up(void *data, struct wl_touch *wl_touch,
-                            uint32_t serial, uint32_t time, int32_t id)
+static void touch_handle_up(void *data, mp_unused struct wl_touch *wl_touch,
+                            mp_unused uint32_t serial, mp_unused uint32_t time, int32_t id)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -440,8 +446,9 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
     wl->last_button_seat = NULL;
 }
 
-static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
-                                uint32_t time, int32_t id, wl_fixed_t x_w, wl_fixed_t y_w)
+static void touch_handle_motion(void *data, mp_unused struct wl_touch *wl_touch,
+                                mp_unused uint32_t time, int32_t id,
+                                wl_fixed_t x_w, wl_fixed_t y_w)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -452,24 +459,27 @@ static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
     mp_input_update_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
 }
 
-static void touch_handle_frame(void *data, struct wl_touch *wl_touch)
+static void touch_handle_frame(mp_unused void *data, mp_unused struct wl_touch *wl_touch)
 {
 }
 
-static void touch_handle_cancel(void *data, struct wl_touch *wl_touch)
+static void touch_handle_cancel(void *data, mp_unused struct wl_touch *wl_touch)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     mp_input_put_key(wl->vo->input_ctx, MP_TOUCH_RELEASE_ALL);
 }
 
-static void touch_handle_shape(void *data, struct wl_touch *wl_touch,
-                               int32_t id, wl_fixed_t major, wl_fixed_t minor)
+static void touch_handle_shape(mp_unused void *data, mp_unused struct wl_touch *wl_touch,
+                               mp_unused int32_t id, mp_unused wl_fixed_t major,
+                               mp_unused wl_fixed_t minor)
 {
 }
 
-static void touch_handle_orientation(void *data, struct wl_touch *wl_touch,
-                                     int32_t id, wl_fixed_t orientation)
+static void touch_handle_orientation(mp_unused void *data,
+                                     mp_unused struct wl_touch *wl_touch,
+                                     mp_unused int32_t id,
+                                     mp_unused wl_fixed_t orientation)
 {
 }
 
@@ -483,7 +493,7 @@ static const struct wl_touch_listener touch_listener = {
     touch_handle_orientation,
 };
 
-static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
+static void keyboard_handle_keymap(void *data, mp_unused struct wl_keyboard *wl_keyboard,
                                    uint32_t format, int32_t fd, uint32_t size)
 {
     struct vo_wayland_seat *s = data;
@@ -524,8 +534,9 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
     }
 }
 
-static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
-                                  uint32_t serial, struct wl_surface *surface,
+static void keyboard_handle_enter(void *data, mp_unused struct wl_keyboard *wl_keyboard,
+                                  mp_unused uint32_t serial,
+                                  mp_unused struct wl_surface *surface,
                                   struct wl_array *keys)
 {
     struct vo_wayland_seat *s = data;
@@ -539,8 +550,9 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
         MP_TARRAY_APPEND(s, s->keyboard_entering_keys, s->num_keyboard_entering_keys, *key);
 }
 
-static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
-                                  uint32_t serial, struct wl_surface *surface)
+static void keyboard_handle_leave(void *data, mp_unused struct wl_keyboard *wl_keyboard,
+                                  mp_unused uint32_t serial,
+                                  mp_unused struct wl_surface *surface)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -552,16 +564,16 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
     guess_focus(wl);
 }
 
-static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
-                                uint32_t serial, uint32_t time, uint32_t key,
-                                uint32_t state)
+static void keyboard_handle_key(void *data, mp_unused struct wl_keyboard *wl_keyboard,
+                                mp_unused uint32_t serial, mp_unused uint32_t time,
+                                uint32_t key, uint32_t state)
 {
     struct vo_wayland_seat *s = data;
     handle_key_input(s, key, state);
 }
 
-static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
-                                      uint32_t serial, uint32_t mods_depressed,
+static void keyboard_handle_modifiers(void *data, mp_unused struct wl_keyboard *wl_keyboard,
+                                      mp_unused uint32_t serial, uint32_t mods_depressed,
                                       uint32_t mods_latched, uint32_t mods_locked,
                                       uint32_t group)
 {
@@ -584,7 +596,7 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
     }
 }
 
-static void keyboard_handle_repeat_info(void *data, struct wl_keyboard *wl_keyboard,
+static void keyboard_handle_repeat_info(void *data, mp_unused struct wl_keyboard *wl_keyboard,
                                         int32_t rate, int32_t delay)
 {
     struct vo_wayland_seat *s = data;
@@ -634,8 +646,8 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
     }
 }
 
-static void seat_handle_name(void *data, struct wl_seat *seat,
-                             const char *name)
+static void seat_handle_name(mp_unused void *data, mp_unused struct wl_seat *seat,
+                             mp_unused const char *name)
 {
 }
 
@@ -644,7 +656,7 @@ static const struct wl_seat_listener seat_listener = {
     seat_handle_name,
 };
 
-static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
+static void data_offer_handle_offer(void *data, mp_unused struct wl_data_offer *offer,
                                     const char *mime_type)
 {
     struct vo_wayland_seat *s = data;
@@ -659,11 +671,14 @@ static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
     }
 }
 
-static void data_offer_source_actions(void *data, struct wl_data_offer *offer, uint32_t source_actions)
+static void data_offer_source_actions(mp_unused void *data,
+                                      mp_unused struct wl_data_offer *offer,
+                                      mp_unused uint32_t source_actions)
 {
 }
 
-static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, uint32_t dnd_action)
+static void data_offer_action(void *data, mp_unused struct wl_data_offer *wl_data_offer,
+                              uint32_t dnd_action)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -691,7 +706,8 @@ static const struct wl_data_offer_listener data_offer_listener = {
     data_offer_action,
 };
 
-static void data_device_handle_data_offer(void *data, struct wl_data_device *wl_ddev,
+static void data_device_handle_data_offer(void *data,
+                                          mp_unused struct wl_data_device *wl_ddev,
                                           struct wl_data_offer *id)
 {
     struct vo_wayland_seat *s = data;
@@ -703,9 +719,9 @@ static void data_device_handle_data_offer(void *data, struct wl_data_device *wl_
     wl_data_offer_add_listener(id, &data_offer_listener, s);
 }
 
-static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
-                                     uint32_t serial, struct wl_surface *surface,
-                                     wl_fixed_t x, wl_fixed_t y,
+static void data_device_handle_enter(void *data, mp_unused struct wl_data_device *wl_ddev,
+                                     uint32_t serial, mp_unused struct wl_surface *surface,
+                                     mp_unused wl_fixed_t x, mp_unused wl_fixed_t y,
                                      struct wl_data_offer *id)
 {
     struct vo_wayland_seat *s = data;
@@ -725,7 +741,7 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
 
 }
 
-static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
+static void data_device_handle_leave(void *data, mp_unused struct wl_data_device *wl_ddev)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -745,15 +761,16 @@ static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
     }
 }
 
-static void data_device_handle_motion(void *data, struct wl_data_device *wl_ddev,
-                                      uint32_t time, wl_fixed_t x, wl_fixed_t y)
+static void data_device_handle_motion(void *data, mp_unused struct wl_data_device *wl_ddev,
+                                      uint32_t time,
+                                      mp_unused wl_fixed_t x, mp_unused wl_fixed_t y)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     wl_data_offer_accept(wl->dnd_offer, time, wl->dnd_mime_type);
 }
 
-static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
+static void data_device_handle_drop(void *data, mp_unused struct wl_data_device *wl_ddev)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -774,8 +791,8 @@ static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
     wl->dnd_fd = pipefd[0];
 }
 
-static void data_device_handle_selection(void *data, struct wl_data_device *wl_ddev,
-                                         struct wl_data_offer *id)
+static void data_device_handle_selection(void *data, mp_unused struct wl_data_device *wl_ddev,
+                                         mp_unused struct wl_data_offer *id)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
@@ -797,11 +814,11 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection,
 };
 
-static void output_handle_geometry(void *data, struct wl_output *wl_output,
+static void output_handle_geometry(void *data, mp_unused struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t phys_width,
-                                   int32_t phys_height, int32_t subpixel,
+                                   int32_t phys_height, mp_unused int32_t subpixel,
                                    const char *make, const char *model,
-                                   int32_t transform)
+                                   mp_unused int32_t transform)
 {
     struct vo_wayland_output *output = data;
     output->make = talloc_strdup(output->wl, make);
@@ -812,7 +829,7 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
     output->phys_height = phys_height;
 }
 
-static void output_handle_mode(void *data, struct wl_output *wl_output,
+static void output_handle_mode(void *data, mp_unused struct wl_output *wl_output,
                                uint32_t flags, int32_t width,
                                int32_t height, int32_t refresh)
 {
@@ -857,7 +874,7 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
-static void output_handle_scale(void *data, struct wl_output *wl_output,
+static void output_handle_scale(void *data, mp_unused struct wl_output *wl_output,
                                 int32_t factor)
 {
     struct vo_wayland_output *output = data;
@@ -868,15 +885,16 @@ static void output_handle_scale(void *data, struct wl_output *wl_output,
     output->scale = factor * WAYLAND_SCALE_FACTOR;
 }
 
-static void output_handle_name(void *data, struct wl_output *wl_output,
+static void output_handle_name(void *data, mp_unused struct wl_output *wl_output,
                                const char *name)
 {
     struct vo_wayland_output *output = data;
     output->name = talloc_strdup(output->wl, name);
 }
 
-static void output_handle_description(void *data, struct wl_output *wl_output,
-                                      const char *description)
+static void output_handle_description(mp_unused void *data,
+                                      mp_unused struct wl_output *wl_output,
+                                      mp_unused const char *description)
 {
 }
 
@@ -889,7 +907,7 @@ static const struct wl_output_listener output_listener = {
     output_handle_description,
 };
 
-static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
+static void surface_handle_enter(void *data, mp_unused struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
@@ -921,7 +939,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
-static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
+static void surface_handle_leave(void *data, mp_unused struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
@@ -950,7 +968,7 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
 
 #ifdef HAVE_WAYLAND_1_22
 static void surface_handle_preferred_buffer_scale(void *data,
-                                                  struct wl_surface *wl_surface,
+                                                  mp_unused struct wl_surface *wl_surface,
                                                   int32_t scale)
 {
     struct vo_wayland_state *wl = data;
@@ -975,9 +993,9 @@ static void surface_handle_preferred_buffer_scale(void *data,
     }
 }
 
-static void surface_handle_preferred_buffer_transform(void *data,
-                                                      struct wl_surface *wl_surface,
-                                                      uint32_t transform)
+static void surface_handle_preferred_buffer_transform(mp_unused void *data,
+                                                      mp_unused struct wl_surface *wl_surface,
+                                                      mp_unused uint32_t transform)
 {
 }
 #endif
@@ -991,7 +1009,7 @@ static const struct wl_surface_listener surface_listener = {
 #endif
 };
 
-static void xdg_wm_base_ping(void *data, struct xdg_wm_base *wm_base, uint32_t serial)
+static void xdg_wm_base_ping(mp_unused void *data, struct xdg_wm_base *wm_base, uint32_t serial)
 {
     xdg_wm_base_pong(wm_base, serial);
 }
@@ -1000,7 +1018,7 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
     xdg_wm_base_ping,
 };
 
-static void handle_surface_config(void *data, struct xdg_surface *surface,
+static void handle_surface_config(mp_unused void *data, struct xdg_surface *surface,
                                   uint32_t serial)
 {
     xdg_surface_ack_configure(surface, serial);
@@ -1010,7 +1028,7 @@ static const struct xdg_surface_listener xdg_surface_listener = {
     handle_surface_config,
 };
 
-static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
+static void handle_toplevel_config(void *data, mp_unused struct xdg_toplevel *toplevel,
                                    int32_t width, int32_t height, struct wl_array *states)
 {
     struct vo_wayland_state *wl = data;
@@ -1149,13 +1167,15 @@ resize:
     wl->toplevel_configured = true;
 }
 
-static void handle_toplevel_close(void *data, struct xdg_toplevel *xdg_toplevel)
+static void handle_toplevel_close(void *data,
+                                  mp_unused struct xdg_toplevel *xdg_toplevel)
 {
     struct vo_wayland_state *wl = data;
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
 }
 
-static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_toplevel,
+static void handle_configure_bounds(void *data,
+                                    mp_unused struct xdg_toplevel *xdg_toplevel,
                                     int32_t width, int32_t height)
 {
     struct vo_wayland_state *wl = data;
@@ -1163,8 +1183,9 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
     wl->bounded_height = handle_round(wl->scaling, height);
 }
 
-static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
-                                   struct wl_array *capabilities)
+static void handle_wm_capabilities(mp_unused void *data,
+                                   mp_unused struct xdg_toplevel *xdg_toplevel,
+                                   mp_unused struct wl_array *capabilities)
 {
 }
 
@@ -1176,7 +1197,7 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
 };
 
 static void preferred_scale(void *data,
-                            struct wp_fractional_scale_v1 *fractional_scale,
+                            mp_unused struct wp_fractional_scale_v1 *fractional_scale,
                             uint32_t scale)
 {
     struct vo_wayland_state *wl = data;
@@ -1216,7 +1237,7 @@ static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 }
 
 static void configure_decorations(void *data,
-                                  struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration,
+                                  mp_unused struct zxdg_toplevel_decoration_v1 *xdg_toplevel_decoration,
                                   uint32_t mode)
 {
     struct vo_wayland_state *wl = data;
@@ -1245,7 +1266,7 @@ static const struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
     configure_decorations,
 };
 
-static void pres_set_clockid(void *data, struct wp_presentation *pres,
+static void pres_set_clockid(void *data, mp_unused struct wp_presentation *pres,
                              uint32_t clockid)
 {
     struct vo_wayland_state *wl = data;
@@ -1258,8 +1279,9 @@ static const struct wp_presentation_listener pres_listener = {
     pres_set_clockid,
 };
 
-static void feedback_sync_output(void *data, struct wp_presentation_feedback *fback,
-                               struct wl_output *output)
+static void feedback_sync_output(mp_unused void *data,
+                                 mp_unused struct wp_presentation_feedback *fback,
+                                 mp_unused struct wl_output *output)
 {
 }
 
@@ -1267,7 +1289,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
                               uint32_t tv_sec_hi, uint32_t tv_sec_lo,
                               uint32_t tv_nsec, uint32_t refresh_nsec,
                               uint32_t seq_hi, uint32_t seq_lo,
-                              uint32_t flags)
+                              mp_unused uint32_t flags)
 {
     struct vo_wayland_feedback_pool *fback_pool = data;
     struct vo_wayland_state *wl = fback_pool->wl;
@@ -1307,7 +1329,7 @@ static const struct wp_presentation_feedback_listener feedback_listener = {
 
 static const struct wl_callback_listener frame_listener;
 
-static void frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+static void frame_callback(void *data, struct wl_callback *callback, mp_unused uint32_t time)
 {
     struct vo_wayland_state *wl = data;
 
@@ -1332,13 +1354,13 @@ static const struct wl_callback_listener frame_listener = {
     frame_callback,
 };
 
-static void done(void *data,
-                 struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
+static void done(mp_unused void *data,
+                 mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
 }
 
 static void format_table(void *data,
-                         struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                         mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
                          int32_t fd,
                          uint32_t size)
 {
@@ -1353,32 +1375,32 @@ static void format_table(void *data,
     }
 }
 
-static void main_device(void *data,
-                        struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
-                        struct wl_array *device)
+static void main_device(mp_unused void *data,
+                        mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                        mp_unused struct wl_array *device)
 {
 }
 
-static void tranche_done(void *data,
-                         struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
+static void tranche_done(mp_unused void *data,
+                         mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
 }
 
-static void tranche_target_device(void *data,
-                                  struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
-                                  struct wl_array *device)
+static void tranche_target_device(mp_unused void *data,
+                                  mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                                  mp_unused struct wl_array *device)
 {
 }
 
-static void tranche_formats(void *data,
-                            struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
-                            struct wl_array *indices)
+static void tranche_formats(mp_unused void *data,
+                            mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                            mp_unused struct wl_array *indices)
 {
 }
 
-static void tranche_flags(void *data,
-                          struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
-                          uint32_t flags)
+static void tranche_flags(mp_unused void *data,
+                          mp_unused struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
+                          mp_unused uint32_t flags)
 {
 }
 
@@ -1521,7 +1543,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         MP_VERBOSE(wl, "Registered interface %s at version %d\n", interface, ver);
 }
 
-static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
+static void registry_handle_remove(void *data, mp_unused struct wl_registry *reg, uint32_t id)
 {
     struct vo_wayland_state *wl = data;
     struct vo_wayland_output *output, *output_tmp;

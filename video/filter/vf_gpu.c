@@ -48,8 +48,8 @@ static inline OPT_STRING_VALIDATE_FUNC(offscreen_ctx_validate_api)
     return M_OPT_INVALID;
 }
 
-static int offscreen_ctx_api_help(struct mp_log *log, const struct m_option *opt,
-                                  struct bstr name)
+static int offscreen_ctx_api_help(struct mp_log *log, mp_unused const struct m_option *opt,
+                                  mp_unused struct bstr name)
 {
     mp_info(log, "GPU APIs (offscreen contexts):\n");
     for (int i = 0; i < MP_ARRAY_SIZE(contexts); i++)

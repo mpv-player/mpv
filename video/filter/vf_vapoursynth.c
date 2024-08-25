@@ -251,7 +251,7 @@ static void drain_oldest_buffered_frame(struct priv *p)
 }
 
 static void VS_CC vs_frame_done(void *userData, const VSFrame *f, int n,
-                                VSNode *node, const char *errorMsg)
+                                mp_unused VSNode *node, const char *errorMsg)
 {
     struct priv *p = userData;
 
@@ -434,10 +434,9 @@ done:
     mp_mutex_unlock(&p->lock);
 }
 
-static const VSFrame *VS_CC infiltGetFrame(int frameno, int activationReason,
-    void *instanceData, void **frameData,
-    VSFrameContext *frameCtx, VSCore *core,
-    const VSAPI *vsapi)
+static const VSFrame *VS_CC infiltGetFrame(int frameno, mp_unused int activationReason,
+        void *instanceData, mp_unused void **frameData, VSFrameContext *frameCtx,
+        mp_unused VSCore *core, mp_unused const VSAPI *vsapi)
 {
     struct priv *p = instanceData;
     VSFrame *ret = NULL;
@@ -521,7 +520,8 @@ static const VSFrame *VS_CC infiltGetFrame(int frameno, int activationReason,
     return ret;
 }
 
-static void VS_CC infiltFree(void *instanceData, VSCore *core, const VSAPI *vsapi)
+static void VS_CC infiltFree(void *instanceData, mp_unused VSCore *core,
+                             mp_unused const VSAPI *vsapi)
 {
     struct priv *p = instanceData;
 

@@ -521,7 +521,7 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
     }
 }
 
-static void unpack_pal(struct mp_repack *rp,
+static void unpack_pal(mp_unused struct mp_repack *rp,
                        struct mp_image *a, int a_x, int a_y,
                        struct mp_image *b, int b_x, int b_y, int w)
 {
@@ -804,7 +804,7 @@ static void setup_nv_packer(struct mp_repack *rp)
 
 #define UN_F32(name, packed_t)                                              \
     static void name(void *restrict src, float *restrict dst, int w, float m, \
-                     float o, uint32_t unused) {                            \
+                     float o, mp_unused uint32_t unused) {                            \
         for (int x = 0; x < w; x++)                                         \
             dst[x] = ((packed_t *)src)[x] * m + o;                          \
     }

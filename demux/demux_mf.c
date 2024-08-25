@@ -420,7 +420,7 @@ error:
     return -1;
 }
 
-static void demux_close_mf(demuxer_t *demuxer)
+static void demux_close_mf(mp_unused demuxer_t *demuxer)
 {
 }
 

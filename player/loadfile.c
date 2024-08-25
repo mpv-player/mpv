@@ -124,7 +124,7 @@ void mp_abort_recheck_locked(struct MPContext *mpctx,
     }
 }
 
-void mp_abort_trigger_locked(struct MPContext *mpctx,
+void mp_abort_trigger_locked(mp_unused struct MPContext *mpctx,
                              struct mp_abort_entry *abort)
 {
     mp_cancel_trigger(abort->cancel);

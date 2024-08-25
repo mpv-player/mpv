@@ -236,11 +236,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     av_frame_free(&frame);
 }
 
-static void flip_page(struct vo *vo)
+static void flip_page(mp_unused struct vo *vo)
 {
 }
 
-static int control(struct vo *vo, uint32_t request, void *data)
+static int control(mp_unused struct vo *vo, mp_unused uint32_t request, mp_unused void *data)
 {
     return VO_NOTIMPL;
 }

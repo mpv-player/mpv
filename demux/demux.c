@@ -2826,7 +2826,7 @@ done:
     return out_pkt;
 }
 
-int demuxer_help(struct mp_log *log, const m_option_t *opt, struct bstr name)
+int demuxer_help(struct mp_log *log, mp_unused const m_option_t *opt, mp_unused struct bstr name)
 {
     int i;
 
@@ -4634,7 +4634,7 @@ static void visit_meta(struct demuxer *demuxer, void *ctx,
 }
 
 
-static void visit_detect(void *ctx, void *ta, char **s)
+static void visit_detect(void *ctx, mp_unused void *ta, char **s)
 {
     char **all = ctx;
 

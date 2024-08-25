@@ -140,7 +140,7 @@ static void disable_video_plane(struct ra_hwdec *hw)
 }
 
 static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
-                         struct mp_rect *src, struct mp_rect *dst, bool newframe)
+                         struct mp_rect *src, struct mp_rect *dst, mp_unused bool newframe)
 {
     struct priv *p = hw->priv;
     AVDRMFrameDescriptor *desc = NULL;

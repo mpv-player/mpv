@@ -605,8 +605,8 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     }
 }
 
-static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name)
+static int hwdec_opt_help(struct mp_log *log, mp_unused const m_option_t *opt,
+                          mp_unused struct bstr name)
 {
     struct hwdec_info *hwdecs = NULL;
     int num_hwdecs = 0;

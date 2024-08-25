@@ -81,7 +81,7 @@ static void path_init(void)
     }
 }
 
-const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type)
+const char *mp_get_platform_path_unix(mp_unused void *talloc_ctx, const char *type)
 {
     mp_exec_once(&path_init_once, path_init);
     if (strcmp(type, "home") == 0)

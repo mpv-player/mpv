@@ -545,7 +545,7 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
 //           read it. You have to free it with talloc_free() when done.
 //  in: valid struct, or NULL (in this case it also returns NULL)
 //  returns: new copy, or NULL if there was no data in the input
-struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **p_cache,
+struct sub_bitmaps *sub_bitmaps_copy(mp_unused struct sub_bitmap_copy_cache **p_cache,
                                      struct sub_bitmaps *in)
 {
     if (!in || !in->num_parts)

@@ -17,19 +17,19 @@
 #include "video/out/wldmabuf/ra_wldmabuf.h"
 #include "dmabuf_interop.h"
 
-static bool mapper_init(struct ra_hwdec_mapper *mapper,
-                        const struct ra_imgfmt_desc *desc)
+static bool mapper_init(mp_unused struct ra_hwdec_mapper *mapper,
+                        mp_unused const struct ra_imgfmt_desc *desc)
 {
     return true;
 }
 
-static void mapper_uninit(const struct ra_hwdec_mapper *mapper)
+static void mapper_uninit(mp_unused const struct ra_hwdec_mapper *mapper)
 {
 }
 
 static bool map(struct ra_hwdec_mapper *mapper,
                 struct dmabuf_interop *dmabuf_interop,
-                bool probing)
+                mp_unused bool probing)
 {
     // 1. only validate format when composed layers is enabled (i.e. vaapi)
     // 2. for drmprime, just return true for now, as this use case
@@ -61,7 +61,7 @@ static bool map(struct ra_hwdec_mapper *mapper,
     return true;
 }
 
-static void unmap(struct ra_hwdec_mapper *mapper)
+static void unmap(mp_unused struct ra_hwdec_mapper *mapper)
 {
 }
 

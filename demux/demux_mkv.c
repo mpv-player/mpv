@@ -2286,7 +2286,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
     return 0;
 }
 
-static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
+static int demux_mkv_open(demuxer_t *demuxer, mp_unused enum demux_check check)
 {
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;

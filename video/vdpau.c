@@ -42,7 +42,7 @@ static void mark_vdpau_objects_uninitialized(struct mp_vdpau_ctx *ctx)
     ctx->preemption_obj = VDP_INVALID_HANDLE;
 }
 
-static void preemption_callback(VdpDevice device, void *context)
+static void preemption_callback(mp_unused VdpDevice device, void *context)
 {
     struct mp_vdpau_ctx *ctx = context;
 
@@ -547,7 +547,7 @@ static bool is_emulated(struct AVBufferRef *hw_device_ctx)
     return mp_vdpau_guess_if_emulated(ctx);
 }
 
-static struct AVBufferRef *vdpau_create_standalone(struct mpv_global *global,
+static struct AVBufferRef *vdpau_create_standalone(mp_unused struct mpv_global *global,
         struct mp_log *log, struct hwcontext_create_dev_params *params)
 {
     XInitThreads();

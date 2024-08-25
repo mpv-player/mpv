@@ -49,7 +49,7 @@ struct priv {
     struct mp_osd_res osd;
 };
 
-static void buffer_handle_release(void *data, struct wl_buffer *wl_buffer)
+static void buffer_handle_release(void *data, mp_unused struct wl_buffer *wl_buffer)
 {
     struct buffer *buf = data;
     struct vo *vo = buf->vo;

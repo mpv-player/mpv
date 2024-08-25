@@ -200,8 +200,8 @@ static void x11_destroy(void *native_ctx)
     XCloseDisplay(native_ctx);
 }
 
-static void x11_create(struct mp_log *log, VADisplay **out_display,
-                       void **out_native_ctx, const char *path)
+static void x11_create(mp_unused struct mp_log *log, VADisplay **out_display,
+                       void **out_native_ctx, mp_unused const char *path)
 {
     void *native_display = XOpenDisplay(NULL);
     if (!native_display)
@@ -261,7 +261,7 @@ static void drm_destroy(void *native_ctx)
     talloc_free(ctx);
 }
 
-static void drm_create(struct mp_log *log, VADisplay **out_display,
+static void drm_create(mp_unused struct mp_log *log, VADisplay **out_display,
                        void **out_native_ctx, const char *path)
 {
     int drm_fd = open(path, O_RDWR);

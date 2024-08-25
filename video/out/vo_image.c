@@ -123,14 +123,14 @@ static void flip_page(struct vo *vo)
     talloc_free(t);
 }
 
-static int query_format(struct vo *vo, int fmt)
+static int query_format(mp_unused struct vo *vo, int fmt)
 {
     if (mp_sws_supported_format(fmt))
         return 1;
     return 0;
 }
 
-static void uninit(struct vo *vo)
+static void uninit(mp_unused struct vo *vo)
 {
 }
 
@@ -143,7 +143,7 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-static int control(struct vo *vo, uint32_t request, void *data)
+static int control(mp_unused struct vo *vo, mp_unused uint32_t request, mp_unused void *data)
 {
     return VO_NOTIMPL;
 }

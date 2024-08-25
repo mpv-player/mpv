@@ -465,14 +465,14 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, val);
 }
 
-static int mp_property_display_sync_active(void *ctx, struct m_property *prop,
+static int mp_property_display_sync_active(void *ctx, mp_unused struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_bool_ro(action, arg, mpctx->display_sync_active);
 }
 
-static int mp_property_pid(void *ctx, struct m_property *prop,
+static int mp_property_pid(mp_unused void *ctx, mp_unused struct m_property *prop,
                            int action, void *arg)
 {
     // 32 bit on linux/windows - which C99 `int' is not guaranteed to hold
@@ -480,7 +480,7 @@ static int mp_property_pid(void *ctx, struct m_property *prop,
 }
 
 /// filename with path (RO)
-static int mp_property_path(void *ctx, struct m_property *prop,
+static int mp_property_path(void *ctx, mp_unused struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -489,7 +489,7 @@ static int mp_property_path(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, mpctx->filename);
 }
 
-static int mp_property_filename(void *ctx, struct m_property *prop,
+static int mp_property_filename(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -538,7 +538,7 @@ static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_file_size(void *ctx, struct m_property *prop,
+static int mp_property_file_size(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -587,7 +587,7 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
     return mp_property_filename(ctx, prop, action, arg);
 }
 
-static int mp_property_stream_path(void *ctx, struct m_property *prop,
+static int mp_property_stream_path(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -597,7 +597,7 @@ static int mp_property_stream_path(void *ctx, struct m_property *prop,
 }
 
 /// Demuxer name (RO)
-static int mp_property_demuxer(void *ctx, struct m_property *prop,
+static int mp_property_demuxer(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -607,7 +607,7 @@ static int mp_property_demuxer(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, demuxer->desc->name);
 }
 
-static int mp_property_file_format(void *ctx, struct m_property *prop,
+static int mp_property_file_format(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -618,7 +618,7 @@ static int mp_property_file_format(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, name);
 }
 
-static int mp_property_stream_pos(void *ctx, struct m_property *prop,
+static int mp_property_stream_pos(void *ctx, mp_unused struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -672,7 +672,7 @@ static int property_time(int action, void *arg, double time)
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_duration(void *ctx, struct m_property *prop,
+static int mp_property_duration(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -684,7 +684,7 @@ static int mp_property_duration(void *ctx, struct m_property *prop,
     return property_time(action, arg, len);
 }
 
-static int mp_property_avsync(void *ctx, struct m_property *prop,
+static int mp_property_avsync(void *ctx, mp_unused struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -698,7 +698,7 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, mpctx->last_av_difference);
 }
 
-static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
+static int mp_property_total_avsync_change(void *ctx, mp_unused struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -709,7 +709,7 @@ static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, mpctx->total_avsync_change);
 }
 
-static int mp_property_frame_drop_dec(void *ctx, struct m_property *prop,
+static int mp_property_frame_drop_dec(void *ctx, mp_unused struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -722,7 +722,7 @@ static int mp_property_frame_drop_dec(void *ctx, struct m_property *prop,
                              mp_decoder_wrapper_get_frames_dropped(dec));
 }
 
-static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
+static int mp_property_mistimed_frame_count(void *ctx, mp_unused struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -732,7 +732,7 @@ static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
 }
 
-static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
+static int mp_property_vsync_ratio(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -754,7 +754,7 @@ static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, vsyncs / (double)frames);
 }
 
-static int mp_property_frame_drop_vo(void *ctx, struct m_property *prop,
+static int mp_property_frame_drop_vo(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -764,7 +764,7 @@ static int mp_property_frame_drop_vo(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
 }
 
-static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop,
+static int mp_property_vo_delayed_frame_count(void *ctx, mp_unused struct m_property *prop,
                                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -775,7 +775,7 @@ static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop
 }
 
 /// Current position in percent (RW)
-static int mp_property_percent_pos(void *ctx, struct m_property *prop,
+static int mp_property_percent_pos(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -813,7 +813,7 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_time_start(void *ctx, struct m_property *prop,
+static int mp_property_time_start(mp_unused void *ctx, mp_unused struct m_property *prop,
                                   int action, void *arg)
 {
     // minor backwards-compat.
@@ -821,7 +821,7 @@ static int mp_property_time_start(void *ctx, struct m_property *prop,
 }
 
 /// Current position in seconds (RW)
-static int mp_property_time_pos(void *ctx, struct m_property *prop,
+static int mp_property_time_pos(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -836,7 +836,7 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
 }
 
 /// Current audio pts in seconds (R)
-static int mp_property_audio_pts(void *ctx, struct m_property *prop,
+static int mp_property_audio_pts(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -860,7 +860,7 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
     return len >= 0;
 }
 
-static int mp_property_remaining(void *ctx, struct m_property *prop,
+static int mp_property_remaining(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     double remaining;
@@ -870,7 +870,7 @@ static int mp_property_remaining(void *ctx, struct m_property *prop,
     return property_time(action, arg, remaining);
 }
 
-static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
+static int mp_property_playtime_remaining(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -882,14 +882,14 @@ static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
     return property_time(action, arg, remaining / speed);
 }
 
-static int mp_property_remaining_file_loops(void *ctx, struct m_property *prop,
+static int mp_property_remaining_file_loops(void *ctx, mp_unused struct m_property *prop,
         int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_int_ro(action, arg, mpctx->remaining_file_loops);
 }
 
-static int mp_property_remaining_ab_loops(void *ctx, struct m_property *prop,
+static int mp_property_remaining_ab_loops(void *ctx, mp_unused struct m_property *prop,
         int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -897,7 +897,7 @@ static int mp_property_remaining_ab_loops(void *ctx, struct m_property *prop,
 }
 
 /// Current chapter (RW)
-static int mp_property_chapter(void *ctx, struct m_property *prop,
+static int mp_property_chapter(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1051,7 +1051,7 @@ static int parse_node_chapters(struct MPContext *mpctx,
     return M_PROPERTY_OK;
 }
 
-static int mp_property_list_chapters(void *ctx, struct m_property *prop,
+static int mp_property_list_chapters(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1088,7 +1088,7 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     return m_property_read_list(action, arg, count, get_chapter_entry, mpctx);
 }
 
-static int mp_property_current_edition(void *ctx, struct m_property *prop,
+static int mp_property_current_edition(void *ctx, mp_unused struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1158,7 +1158,7 @@ static int get_edition_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static int property_list_editions(void *ctx, struct m_property *prop,
+static int property_list_editions(void *ctx, mp_unused struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1196,7 +1196,7 @@ static int property_list_editions(void *ctx, struct m_property *prop,
 }
 
 /// Number of chapters in file
-static int mp_property_chapters(void *ctx, struct m_property *prop,
+static int mp_property_chapters(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1206,7 +1206,7 @@ static int mp_property_chapters(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, count);
 }
 
-static int mp_property_editions(void *ctx, struct m_property *prop,
+static int mp_property_editions(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1304,7 +1304,7 @@ static int tag_property(int action, void *arg, struct mp_tags *tags)
 }
 
 /// Demuxer meta data
-static int mp_property_metadata(void *ctx, struct m_property *prop,
+static int mp_property_metadata(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1315,7 +1315,7 @@ static int mp_property_metadata(void *ctx, struct m_property *prop,
     return tag_property(action, arg, demuxer->metadata);
 }
 
-static int mp_property_filtered_metadata(void *ctx, struct m_property *prop,
+static int mp_property_filtered_metadata(void *ctx, mp_unused struct m_property *prop,
                                          int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1325,7 +1325,7 @@ static int mp_property_filtered_metadata(void *ctx, struct m_property *prop,
     return tag_property(action, arg, mpctx->filtered_tags);
 }
 
-static int mp_property_chapter_metadata(void *ctx, struct m_property *prop,
+static int mp_property_chapter_metadata(void *ctx, mp_unused struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1383,14 +1383,14 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_core_idle(void *ctx, struct m_property *prop,
+static int mp_property_core_idle(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_bool_ro(action, arg, !mpctx->playback_active);
 }
 
-static int mp_property_deinterlace(void *ctx, struct m_property *prop,
+static int mp_property_deinterlace(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1402,14 +1402,14 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, deinterlace_active);
 }
 
-static int mp_property_idle(void *ctx, struct m_property *prop,
+static int mp_property_idle(void *ctx, mp_unused struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_bool_ro(action, arg, mpctx->stop_play == PT_STOP);
 }
 
-static int mp_property_window_id(void *ctx, struct m_property *prop,
+static int mp_property_window_id(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1420,7 +1420,7 @@ static int mp_property_window_id(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, wid);
 }
 
-static int mp_property_eof_reached(void *ctx, struct m_property *prop,
+static int mp_property_eof_reached(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1431,7 +1431,7 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, eof);
 }
 
-static int mp_property_seeking(void *ctx, struct m_property *prop,
+static int mp_property_seeking(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1440,14 +1440,14 @@ static int mp_property_seeking(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, !mpctx->restart_complete);
 }
 
-static int mp_property_playback_abort(void *ctx, struct m_property *prop,
+static int mp_property_playback_abort(void *ctx, mp_unused struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_bool_ro(action, arg, !mpctx->playing || mpctx->stop_play);
 }
 
-static int mp_property_cache_speed(void *ctx, struct m_property *prop,
+static int mp_property_cache_speed(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1466,7 +1466,7 @@ static int mp_property_cache_speed(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, val);
 }
 
-static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_cache_duration(void *ctx, mp_unused struct m_property *prop,
                                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1482,7 +1482,7 @@ static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop
     return m_property_double_ro(action, arg, s.ts_info.duration);
 }
 
-static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_cache_time(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1498,7 +1498,7 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, s.ts_info.end);
 }
 
-static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_cache_idle(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1511,7 +1511,7 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, s.idle);
 }
 
-static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_cache_state(void *ctx, mp_unused struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1590,7 +1590,7 @@ static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
     return M_PROPERTY_OK;
 }
 
-static int mp_property_demuxer_start_time(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_start_time(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1600,7 +1600,7 @@ static int mp_property_demuxer_start_time(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, mpctx->demuxer->start_time);
 }
 
-static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
+static int mp_property_paused_for_cache(void *ctx, mp_unused struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1609,7 +1609,7 @@ static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, mpctx->paused_for_cache);
 }
 
-static int mp_property_cache_buffering(void *ctx, struct m_property *prop,
+static int mp_property_cache_buffering(void *ctx, mp_unused struct m_property *prop,
                                        int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1619,7 +1619,7 @@ static int mp_property_cache_buffering(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, state);
 }
 
-static int mp_property_demuxer_is_network(void *ctx, struct m_property *prop,
+static int mp_property_demuxer_is_network(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1630,7 +1630,7 @@ static int mp_property_demuxer_is_network(void *ctx, struct m_property *prop,
 }
 
 
-static int mp_property_clock(void *ctx, struct m_property *prop,
+static int mp_property_clock(mp_unused void *ctx, mp_unused struct m_property *prop,
                              int action, void *arg)
 {
     char outstr[6];
@@ -1642,7 +1642,7 @@ static int mp_property_clock(void *ctx, struct m_property *prop,
     return M_PROPERTY_UNAVAILABLE;
 }
 
-static int mp_property_seekable(void *ctx, struct m_property *prop,
+static int mp_property_seekable(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1651,7 +1651,7 @@ static int mp_property_seekable(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, mpctx->demuxer->seekable);
 }
 
-static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
+static int mp_property_partially_seekable(void *ctx, mp_unused struct m_property *prop,
                                           int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1660,7 +1660,7 @@ static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, mpctx->demuxer->partially_seekable);
 }
 
-static int mp_property_mixer_active(void *ctx, struct m_property *prop,
+static int mp_property_mixer_active(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1712,7 +1712,7 @@ static int mp_property_volume_gain(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int mp_property_ao_volume(void *ctx, struct m_property *prop,
+static int mp_property_ao_volume(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1751,7 +1751,7 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
 }
 
 
-static int mp_property_ao_mute(void *ctx, struct m_property *prop,
+static int mp_property_ao_mute(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1831,7 +1831,7 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int mp_property_audio_devices(void *ctx, struct m_property *prop,
+static int mp_property_audio_devices(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     struct MPContext *mpctx = ctx;
@@ -1843,7 +1843,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
                                 get_device_entry, list);
 }
 
-static int mp_property_ao(void *ctx, struct m_property *p, int action, void *arg)
+static int mp_property_ao(void *ctx, mp_unused struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_strdup_ro(action, arg, mpctx->ao ? ao_get_name(mpctx->ao) : NULL);
@@ -1881,7 +1881,7 @@ static int property_audiofmt(struct mp_aframe *fmt, int action, void *arg)
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_audio_params(void *ctx, struct m_property *prop,
+static int mp_property_audio_params(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -1889,7 +1889,7 @@ static int mp_property_audio_params(void *ctx, struct m_property *prop,
         mpctx->ao_chain->filter->input_aformat : NULL, action, arg);
 }
 
-static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
+static int mp_property_audio_out_params(void *ctx, mp_unused struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2115,7 +2115,7 @@ static const char *track_type_name(struct track *t)
     return NULL;
 }
 
-static int property_list_tracks(void *ctx, struct m_property *prop,
+static int property_list_tracks(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2158,7 +2158,7 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                                 get_track_entry, mpctx);
 }
 
-static int property_current_tracks(void *ctx, struct m_property *prop,
+static int property_current_tracks(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2215,7 +2215,7 @@ static int property_current_tracks(void *ctx, struct m_property *prop,
     return mp_property_do(name, ka->action, ka->arg, ctx);
 }
 
-static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
+static int mp_property_hwdec_current(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2232,7 +2232,7 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, current);
 }
 
-static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
+static int mp_property_hwdec_interop(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2260,7 +2260,7 @@ static int get_frame_count(struct MPContext *mpctx)
     return len * fps;
 }
 
-static int mp_property_frame_number(void *ctx, struct m_property *prop,
+static int mp_property_frame_number(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2272,7 +2272,7 @@ static int mp_property_frame_number(void *ctx, struct m_property *prop,
         lrint(get_current_pos_ratio(mpctx, false) * frames));
 }
 
-static int mp_property_frame_count(void *ctx, struct m_property *prop,
+static int mp_property_frame_count(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2480,7 +2480,7 @@ static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
     return property_imgparams(&p, action, arg);
 }
 
-static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
+static int mp_property_vd_imgparams(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2536,7 +2536,7 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_current_window_scale(void *ctx, struct m_property *prop,
+static int mp_property_current_window_scale(void *ctx, mp_unused struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2586,7 +2586,7 @@ static void update_window_scale(struct MPContext *mpctx)
                                      M_PROPERTY_SET, (void*)&scale);
 }
 
-static int mp_property_display_fps(void *ctx, struct m_property *prop,
+static int mp_property_display_fps(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2603,7 +2603,7 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
+static int mp_property_estimated_display_fps(void *ctx, mp_unused struct m_property *prop,
                                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2616,7 +2616,7 @@ static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, 1.0 / interval);
 }
 
-static int mp_property_vsync_jitter(void *ctx, struct m_property *prop,
+static int mp_property_vsync_jitter(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2646,7 +2646,7 @@ static int mp_property_display_resolution(void *ctx, struct m_property *prop,
     }
 }
 
-static int mp_property_hidpi_scale(void *ctx, struct m_property *prop,
+static int mp_property_hidpi_scale(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2685,7 +2685,7 @@ static void update_hidpi_window_scale(struct MPContext *mpctx, bool hidpi_scale)
     vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
 }
 
-static int mp_property_focused(void *ctx, struct m_property *prop,
+static int mp_property_focused(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2700,7 +2700,7 @@ static int mp_property_focused(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, focused);
 }
 
-static int mp_property_display_names(void *ctx, struct m_property *prop,
+static int mp_property_display_names(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2724,7 +2724,7 @@ static int mp_property_display_names(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_vo_configured(void *ctx, struct m_property *prop,
+static int mp_property_vo_configured(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2761,7 +2761,7 @@ static char *asprint_perf(char *res, struct mp_frame_perf *perf)
     return res;
 }
 
-static int mp_property_vo_passes(void *ctx, struct m_property *prop,
+static int mp_property_vo_passes(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2813,7 +2813,7 @@ static int mp_property_vo_passes(void *ctx, struct m_property *prop,
     return M_PROPERTY_OK;
 }
 
-static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
+static int mp_property_perf_info(void *ctx, mp_unused struct m_property *p, int action,
                                  void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2830,21 +2830,22 @@ static int mp_property_perf_info(void *ctx, struct m_property *p, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
+static int mp_property_vo(void *ctx, mp_unused struct m_property *p, int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_strdup_ro(action, arg, mpctx->video_out ?
                                 mpctx->video_out->driver->name : NULL);
 }
 
-static int mp_property_gpu_context(void *ctx, struct m_property *p, int action, void *arg)
+static int mp_property_gpu_context(void *ctx, mp_unused struct m_property *p,
+                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return m_property_strdup_ro(action, arg, mpctx->video_out ?
                                 mpctx->video_out->context_name : NULL);
 }
 
-static int mp_property_osd_dim(void *ctx, struct m_property *prop,
+static int mp_property_osd_dim(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2871,7 +2872,7 @@ static int mp_property_osd_dim(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_osd_sym(void *ctx, struct m_property *prop,
+static int mp_property_osd_sym(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2880,7 +2881,7 @@ static int mp_property_osd_sym(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, temp);
 }
 
-static int mp_property_osd_ass(void *ctx, struct m_property *prop,
+static int mp_property_osd_ass(mp_unused void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     struct m_sub_property props[] = {
@@ -2891,7 +2892,7 @@ static int mp_property_osd_ass(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_term_size(void *ctx, struct m_property *prop,
+static int mp_property_term_size(mp_unused void *ctx, mp_unused struct m_property *prop,
                                   int action, void *arg)
 {
     int w = -1, h = -1;
@@ -2908,7 +2909,7 @@ static int mp_property_term_size(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
+static int mp_property_mouse_pos(void *ctx, mp_unused struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2951,7 +2952,7 @@ static int get_touch_pos(int item, int action, void *arg, void *ctx)
 }
 
 #define MAX_TOUCH_POINTS 10
-static int mp_property_touch_pos(void *ctx, struct m_property *prop,
+static int mp_property_touch_pos(void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2963,7 +2964,7 @@ static int mp_property_touch_pos(void *ctx, struct m_property *prop,
 }
 
 /// Video fps (RO)
-static int mp_property_fps(void *ctx, struct m_property *prop,
+static int mp_property_fps(void *ctx, mp_unused struct m_property *prop,
                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -2973,7 +2974,7 @@ static int mp_property_fps(void *ctx, struct m_property *prop,
     return m_property_float_ro(action, arg, fps);
 }
 
-static int mp_property_vf_fps(void *ctx, struct m_property *prop,
+static int mp_property_vf_fps(void *ctx, mp_unused struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3055,7 +3056,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int mp_property_sub_ass_extradata(void *ctx, struct m_property *prop,
+static int mp_property_sub_ass_extradata(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3122,7 +3123,7 @@ static int mp_property_sub_text(void *ctx, struct m_property *prop,
 }
 
 static struct sd_times get_times(void *ctx, struct m_property *prop,
-                                int action, void *arg)
+                                mp_unused int action, mp_unused void *arg)
 {
     struct sd_times res = { .start = MP_NOPTS_VALUE, .end = MP_NOPTS_VALUE };
     MPContext *mpctx = ctx;
@@ -3154,7 +3155,7 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     return property_time(action, arg, end);
 }
 
-static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
+static int mp_property_playlist_current_pos(void *ctx, mp_unused struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3178,7 +3179,7 @@ static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
 }
 
 
-static int mp_property_playlist_playing_pos(void *ctx, struct m_property *prop,
+static int mp_property_playlist_playing_pos(void *ctx, mp_unused struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3187,7 +3188,7 @@ static int mp_property_playlist_playing_pos(void *ctx, struct m_property *prop,
                              playlist_entry_to_index(pl, mpctx->playing));
 }
 
-static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
+static int mp_property_playlist_pos_x(void *ctx, mp_unused struct m_property *prop,
                                       int action, void *arg, int base)
 {
     MPContext *mpctx = ctx;
@@ -3257,7 +3258,7 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_playlist_path(void *ctx, struct m_property *prop,
+static int mp_property_playlist_path(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3268,7 +3269,7 @@ static int mp_property_playlist_path(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, e->playlist_path);
 }
 
-static int mp_property_playlist(void *ctx, struct m_property *prop,
+static int mp_property_playlist(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3326,7 +3327,7 @@ static char *print_obj_osd_list(struct m_obj_settings *list)
 }
 
 static int property_filter(struct m_property *prop, int action, void *arg,
-                           MPContext *mpctx, enum stream_type mt)
+                           MPContext *mpctx, mp_unused enum stream_type mt)
 {
     if (action == M_PROPERTY_PRINT) {
         struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
@@ -3397,7 +3398,7 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, llrint(rate));
 }
 
-static int mp_property_cwd(void *ctx, struct m_property *prop,
+static int mp_property_cwd(mp_unused void *ctx, mp_unused struct m_property *prop,
                            int action, void *arg)
 {
     switch (action) {
@@ -3415,7 +3416,7 @@ static int mp_property_cwd(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_protocols(void *ctx, struct m_property *prop,
+static int mp_property_protocols(mp_unused void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     switch (action) {
@@ -3429,7 +3430,7 @@ static int mp_property_protocols(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_keylist(void *ctx, struct m_property *prop,
+static int mp_property_keylist(mp_unused void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     switch (action) {
@@ -3458,7 +3459,7 @@ static int get_decoder_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static int mp_property_decoders(void *ctx, struct m_property *prop,
+static int mp_property_decoders(mp_unused void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     struct mp_decoder_list *codecs = talloc_zero(NULL, struct mp_decoder_list);
@@ -3472,7 +3473,7 @@ static int mp_property_decoders(void *ctx, struct m_property *prop,
     return r;
 }
 
-static int mp_property_encoders(void *ctx, struct m_property *prop,
+static int mp_property_encoders(mp_unused void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     struct mp_decoder_list *codecs = talloc_zero(NULL, struct mp_decoder_list);
@@ -3483,7 +3484,7 @@ static int mp_property_encoders(void *ctx, struct m_property *prop,
     return r;
 }
 
-static int mp_property_lavf_demuxers(void *ctx, struct m_property *prop,
+static int mp_property_lavf_demuxers(mp_unused void *ctx, mp_unused struct m_property *prop,
                                  int action, void *arg)
 {
     switch (action) {
@@ -3497,31 +3498,31 @@ static int mp_property_lavf_demuxers(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_version(void *ctx, struct m_property *prop,
+static int mp_property_version(mp_unused void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     return m_property_strdup_ro(action, arg, mpv_version);
 }
 
-static int mp_property_configuration(void *ctx, struct m_property *prop,
+static int mp_property_configuration(mp_unused void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     return m_property_strdup_ro(action, arg, CONFIGURATION);
 }
 
-static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
+static int mp_property_ffmpeg(mp_unused void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     return m_property_strdup_ro(action, arg, av_version_info());
 }
 
-static int mp_property_libass_version(void *ctx, struct m_property *prop,
+static int mp_property_libass_version(mp_unused void *ctx, mp_unused struct m_property *prop,
                                       int action, void *arg)
 {
     return m_property_int64_ro(action, arg, ass_library_version());
 }
 
-static int mp_property_platform(void *ctx, struct m_property *prop,
+static int mp_property_platform(mp_unused void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     return m_property_strdup_ro(action, arg, PLATFORM);
@@ -3598,21 +3599,21 @@ static int access_option_list(int action, void *arg, bool local, MPContext *mpct
 }
 
 
-static int mp_property_options(void *ctx, struct m_property *prop,
+static int mp_property_options(void *ctx, mp_unused struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return access_option_list(action, arg, false, mpctx);
 }
 
-static int mp_property_local_options(void *ctx, struct m_property *prop,
+static int mp_property_local_options(void *ctx, mp_unused struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
     return access_option_list(action, arg, true, mpctx);
 }
 
-static int mp_property_option_info(void *ctx, struct m_property *prop,
+static int mp_property_option_info(void *ctx, mp_unused struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3688,7 +3689,7 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_list(void *ctx, struct m_property *prop,
+static int mp_property_list(void *ctx, mp_unused struct m_property *prop,
                             int action, void *arg)
 {
     struct MPContext *mpctx = ctx;
@@ -3713,7 +3714,7 @@ static int mp_property_list(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_profile_list(void *ctx, struct m_property *prop,
+static int mp_profile_list(void *ctx, mp_unused struct m_property *prop,
                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -3729,8 +3730,8 @@ static int mp_profile_list(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_commands(void *ctx, struct m_property *prop,
-                           int action, void *arg)
+static int mp_property_commands(mp_unused void *ctx, mp_unused struct m_property *prop,
+                                int action, void *arg)
 {
     switch (action) {
     case M_PROPERTY_GET_TYPE:
@@ -3767,7 +3768,7 @@ static int mp_property_commands(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_bindings(void *ctx, struct m_property *prop,
+static int mp_property_bindings(void *ctx, mp_unused struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -6100,7 +6101,7 @@ static void subprocess_read(void *p, char *data, size_t size)
     }
 }
 
-static void subprocess_write(void *p)
+static void subprocess_write(mp_unused void *p)
 {
     // Unused; we write a full buffer.
 }
@@ -7244,7 +7245,7 @@ void command_init(struct MPContext *mpctx)
     talloc_free(prop_names);
 }
 
-static void command_event(struct MPContext *mpctx, int event, void *arg)
+static void command_event(struct MPContext *mpctx, int event, mp_unused void *arg)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
 

@@ -58,12 +58,12 @@ extern const struct ra_ctx_fns ra_ctx_d3d11;
 extern const struct ra_ctx_fns ra_ctx_wldmabuf;
 
 /* Autoprobe dummy. Always fails to create. */
-static bool dummy_init(struct ra_ctx *ctx)
+static bool dummy_init(mp_unused struct ra_ctx *ctx)
 {
     return false;
 }
 
-static void dummy_uninit(struct ra_ctx *ctx)
+static void dummy_uninit(mp_unused struct ra_ctx *ctx)
 {
 }
 
@@ -152,7 +152,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
     return true;
 }
 
-static bool check_unknown_entry(const char *name)
+static bool check_unknown_entry(mp_unused const char *name)
 {
     return false;
 }

@@ -177,8 +177,8 @@ int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img)
 }
 
 static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
-                                      const m_option_t *opt,
-                                      struct bstr name, const char **value)
+                                      mp_unused const m_option_t *opt,
+                                      mp_unused struct bstr name, const char **value)
 {
     struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");

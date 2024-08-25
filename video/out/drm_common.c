@@ -265,7 +265,7 @@ static bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     return true;
 }
 
-static void vt_switcher_interrupt_poll(struct vt_switcher *s)
+static void vt_switcher_interrupt_poll(mp_unused struct vt_switcher *s)
 {
     unsigned char event = EVT_INTERRUPT;
     (void)write(vt_switcher_pipe[1], &event, sizeof(event));
@@ -910,7 +910,7 @@ err:
     drmFreeDevices(devices, card_count);
 }
 
-static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
+static void drm_pflip_cb(mp_unused int fd, unsigned int msc, unsigned int sec,
                          unsigned int usec, void *data)
 {
     struct vo_drm_state *drm = data;
@@ -921,7 +921,7 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
     drm->waiting_for_flip = false;
 }
 
-int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
+int vo_drm_control(struct vo *vo, mp_unused int *events, int request, void *arg)
 {
     struct vo_drm_state *drm = vo->drm;
     switch (request) {
@@ -1122,7 +1122,8 @@ err:
         drmModeFreeResources(res);
 }
 
-static void drm_show_connector_name_and_state_callback(struct mp_log *log, int card_no,
+static void drm_show_connector_name_and_state_callback(struct mp_log *log,
+                                                       mp_unused int card_no,
                                                        const drmModeConnector *connector)
 {
     char other_connector_name[MAX_CONNECTOR_NAME_LEN];
@@ -1208,22 +1209,22 @@ static void drm_show_available_cards_connectors_and_modes(struct mp_log *log)
     drm_show_foreach_card(log, drm_show_available_connectors_and_modes);
 }
 
-static int drm_connector_opt_help(struct mp_log *log, const struct m_option *opt,
-                                  struct bstr name)
+static int drm_connector_opt_help(struct mp_log *log, mp_unused const struct m_option *opt,
+                                  mp_unused struct bstr name)
 {
     drm_show_available_cards_and_connectors(log);
     return M_OPT_EXIT;
 }
 
-static int drm_mode_opt_help(struct mp_log *log, const struct m_option *opt,
-                             struct bstr name)
+static int drm_mode_opt_help(struct mp_log *log, mp_unused const struct m_option *opt,
+                             mp_unused struct bstr name)
 {
     drm_show_available_cards_connectors_and_modes(log);
     return M_OPT_EXIT;
 }
 
-static int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
-                                 struct bstr name, const char **value)
+static int drm_validate_mode_opt(struct mp_log *log, mp_unused const struct m_option *opt,
+                                 mp_unused struct bstr name, const char **value)
 {
     const char *param = *value;
     if (!parse_mode_spec(param, NULL)) {

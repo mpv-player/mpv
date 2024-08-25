@@ -112,7 +112,7 @@ static int init(struct ao *ao)
 }
 
 // close audio device
-static void uninit(struct ao *ao)
+static void uninit(mp_unused struct ao *ao)
 {
 }
 
@@ -156,7 +156,7 @@ static bool set_pause(struct ao *ao, bool paused)
     return true;
 }
 
-static bool audio_write(struct ao *ao, void **data, int samples)
+static bool audio_write(struct ao *ao, mp_unused void **data, int samples)
 {
     struct priv *priv = ao->priv;
 

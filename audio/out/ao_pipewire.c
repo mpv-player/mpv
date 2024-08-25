@@ -364,8 +364,9 @@ static bool is_sink_node(const char *type, const struct spa_dict *props)
 }
 
 static void for_each_sink_registry_event_global(void *data, uint32_t id,
-                                                uint32_t permissions, const
-                                                char *type, uint32_t version,
+                                                mp_unused uint32_t permissions,
+                                                const char *type,
+                                                mp_unused uint32_t version,
                                                 const struct spa_dict *props)
 {
     struct registry_event_global_ctx *ctx = data;
@@ -387,7 +388,7 @@ static const struct pw_registry_events for_each_sink_registry_events = {
     .global = for_each_sink_registry_event_global,
 };
 
-static void for_each_sink_done(void *data, uint32_t it, int seq)
+static void for_each_sink_done(void *data, mp_unused uint32_t it, mp_unused int seq)
 {
     struct for_each_done_ctx *ctx = data;
     ctx->done = true;
@@ -452,7 +453,8 @@ unlock_loop:
     return ret;
 }
 
-static void have_sink(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
+static void have_sink(mp_unused struct ao *ao, mp_unused uint32_t id,
+                      mp_unused const struct spa_dict *props, void *ctx)
 {
     bool *b = ctx;
     *b = true;
@@ -468,7 +470,8 @@ static bool session_has_sinks(struct ao *ao)
     return b;
 }
 
-static void on_error(void *data, uint32_t id, int seq, int res, const char *message)
+static void on_error(void *data, mp_unused uint32_t id, mp_unused int seq,
+                     int res, const char *message)
 {
     struct ao *ao = data;
 
@@ -772,7 +775,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
-static void add_device_to_list(struct ao *ao, uint32_t id, const struct spa_dict *props, void *ctx)
+static void add_device_to_list(struct ao *ao, mp_unused uint32_t id,
+                               const struct spa_dict *props, void *ctx)
 {
     struct ao_device_list *list = ctx;
     const char *name = spa_dict_lookup(props, PW_KEY_NODE_NAME);
@@ -786,8 +790,8 @@ static void add_device_to_list(struct ao *ao, uint32_t id, const struct spa_dict
 }
 
 static void hotplug_registry_global_cb(void *data, uint32_t id,
-                                       uint32_t permissions, const char *type,
-                                       uint32_t version, const struct spa_dict *props)
+                                       mp_unused uint32_t permissions, const char *type,
+                                       mp_unused uint32_t version, const struct spa_dict *props)
 {
     struct ao *ao = data;
     struct priv *priv = ao->priv;

@@ -32,7 +32,7 @@ struct priv {
     double cfg_fps;
 };
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static void draw_frame(mp_unused struct vo *vo, mp_unused struct vo_frame *frame)
 {
 }
 
@@ -52,21 +52,21 @@ static void flip_page(struct vo *vo)
     }
 }
 
-static int query_format(struct vo *vo, int format)
+static int query_format(mp_unused struct vo *vo, mp_unused int format)
 {
     return 1;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+static int reconfig(mp_unused struct vo *vo, mp_unused struct mp_image_params *params)
 {
     return 0;
 }
 
-static void uninit(struct vo *vo)
+static void uninit(mp_unused struct vo *vo)
 {
 }
 
-static int preinit(struct vo *vo)
+static int preinit(mp_unused struct vo *vo)
 {
     return 0;
 }

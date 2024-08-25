@@ -354,7 +354,7 @@ struct free_args {
     void (*free)(void *arg);
 };
 
-static void call_free(void *opaque, uint8_t *data)
+static void call_free(void *opaque, mp_unused uint8_t *data)
 {
     struct free_args *args = opaque;
     args->free(args->arg);

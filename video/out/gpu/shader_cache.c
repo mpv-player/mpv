@@ -504,7 +504,7 @@ static void update_ubo(struct ra *ra, struct ra_buf *ubo, struct sc_uniform *u)
     }
 }
 
-static void update_pushc(struct ra *ra, void *pushc, struct sc_uniform *u)
+static void update_pushc(mp_unused struct ra *ra, void *pushc, struct sc_uniform *u)
 {
     uintptr_t src = (uintptr_t) &u->v;
     uintptr_t dst = (uintptr_t) pushc + (ptrdiff_t) u->offset;

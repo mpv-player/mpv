@@ -215,8 +215,8 @@ done:
     return ret;
 }
 
-static int print_display_info(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name)
+static int print_display_info(struct mp_log *log, mp_unused const struct m_option *opt,
+                              mp_unused struct bstr name)
 {
     void *ta_ctx = talloc_new(NULL);
     pl_log pllog = mppl_log_create(ta_ctx, log);
@@ -469,17 +469,18 @@ static bool display_reconfig(struct ra_ctx *ctx)
     return ra_vk_ctx_resize(ctx, p->width, p->height);
 }
 
-static int display_control(struct ra_ctx *ctx, int *events, int request, void *arg)
+static int display_control(mp_unused struct ra_ctx *ctx, mp_unused int *events,
+                           mp_unused int request, mp_unused void *arg)
 {
     return VO_NOTIMPL;
 }
 
-static void display_wakeup(struct ra_ctx *ctx)
+static void display_wakeup(mp_unused struct ra_ctx *ctx)
 {
     // TODO
 }
 
-static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
+static void display_wait_events(mp_unused struct ra_ctx *ctx, mp_unused int64_t until_time_ns)
 {
     // TODO
 }

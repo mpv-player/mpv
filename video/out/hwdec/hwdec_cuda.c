@@ -221,7 +221,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     CHECK_CU(cu->cuCtxPopCurrent(&dummy));
 }
 
-static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+static void mapper_unmap(mp_unused struct ra_hwdec_mapper *mapper)
 {
 }
 

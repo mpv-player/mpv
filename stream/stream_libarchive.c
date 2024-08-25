@@ -101,7 +101,7 @@ static bool volume_seek(struct mp_archive_volume *vol)
     return r;
 }
 
-static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
+static ssize_t read_cb(mp_unused struct archive *arch, void *priv, const void **buffer)
 {
     struct mp_archive_volume *vol = priv;
     if (!vol->src)
@@ -115,7 +115,7 @@ static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
 }
 
 // lazy seek to avoid problems with end seeking over http
-static int64_t seek_cb(struct archive *arch, void *priv,
+static int64_t seek_cb(mp_unused struct archive *arch, void *priv,
                        int64_t offset, int whence)
 {
     struct mp_archive_volume *vol = priv;
@@ -142,7 +142,7 @@ static int64_t seek_cb(struct archive *arch, void *priv,
     return vol->seek_to;
 }
 
-static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
+static int64_t skip_cb(mp_unused struct archive *arch, void *priv, int64_t request)
 {
     struct mp_archive_volume *vol = priv;
     if (!vol->src)
@@ -154,7 +154,7 @@ static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
     return stream_tell(vol->src) - old;
 }
 
-static int open_cb(struct archive *arch, void *priv)
+static int open_cb(mp_unused struct archive *arch, void *priv)
 {
     struct mp_archive_volume *vol = priv;
     vol->seek_to = -1;
@@ -200,7 +200,7 @@ static void volume_close(struct mp_archive_volume *vol)
     }
 }
 
-static int close_cb(struct archive *arch, void *priv)
+static int close_cb(mp_unused struct archive *arch, void *priv)
 {
     struct mp_archive_volume *vol = priv;
     volume_close(vol);

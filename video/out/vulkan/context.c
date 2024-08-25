@@ -335,7 +335,7 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     return true;
 }
 
-static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
+static bool submit_frame(struct ra_swapchain *sw, mp_unused const struct vo_frame *frame)
 {
     struct priv *p = sw->priv;
     return pl_swapchain_submit_frame(p->vk->swapchain);

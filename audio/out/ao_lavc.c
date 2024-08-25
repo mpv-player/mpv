@@ -243,7 +243,7 @@ static bool write_frame(struct ao *ao, struct mp_frame frame)
     return true;
 }
 
-static bool audio_write(struct ao *ao, void **data, int samples)
+static bool audio_write(struct ao *ao, void **data, mp_unused int samples)
 {
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
@@ -292,24 +292,24 @@ static bool audio_write(struct ao *ao, void **data, int samples)
     return write_frame(ao, MAKE_FRAME(MP_FRAME_AUDIO, af));
 }
 
-static void get_state(struct ao *ao, struct mp_pcm_state *state)
+static void get_state(mp_unused struct ao *ao, struct mp_pcm_state *state)
 {
     state->free_samples = 1;
     state->queued_samples = 0;
     state->delay = 0;
 }
 
-static bool set_pause(struct ao *ao, bool paused)
+static bool set_pause(mp_unused struct ao *ao, mp_unused bool paused)
 {
     return true; // signal support so common code doesn't write silence
 }
 
-static void start(struct ao *ao)
+static void start(mp_unused struct ao *ao)
 {
     // we use data immediately
 }
 
-static void reset(struct ao *ao)
+static void reset(mp_unused struct ao *ao)
 {
 }
 

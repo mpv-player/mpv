@@ -22,7 +22,7 @@
 
 #include "stream.h"
 
-static int open_s(stream_t *stream)
+static int open_s(mp_unused stream_t *stream)
 {
     return 1;
 }

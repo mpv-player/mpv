@@ -166,7 +166,7 @@ static void freeMyXImage(struct priv *p, int foo)
 
 #define MAKE_MASK(comp) (((1ul << (comp).size) - 1) << (comp).offset)
 
-static int reconfig(struct vo *vo, struct mp_image_params *fmt)
+static int reconfig(struct vo *vo, mp_unused struct mp_image_params *fmt)
 {
     vo_x11_config_vo_window(vo);
 
@@ -276,7 +276,7 @@ static bool resize(struct vo *vo)
     return true;
 }
 
-static void Display_Image(struct priv *p, XImage *myximage)
+static void Display_Image(struct priv *p, mp_unused XImage *myximage)
 {
     struct vo *vo = p->vo;
 

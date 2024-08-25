@@ -377,7 +377,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 }
 
 static int dvbv5_tune(dvb_priv_t *priv, int fd_frontend,
-                       unsigned int delsys, struct dtv_properties* cmdseq)
+                       mp_unused unsigned int delsys, struct dtv_properties* cmdseq)
 {
     MP_VERBOSE(priv, "Dumping raw tuning commands and values:\n");
     for (int i = 0; i < cmdseq->num; ++i) {

@@ -23,7 +23,7 @@
 
 extern const struct m_sub_options drm_conf;
 static struct AVBufferRef *drm_create_standalone(struct mpv_global *global,
-        struct mp_log *log, struct hwcontext_create_dev_params *params)
+        mp_unused struct mp_log *log, mp_unused struct hwcontext_create_dev_params *params)
 {
     void *tmp = talloc_new(NULL);
     struct drm_opts *drm_opts = mp_get_config_group(tmp, global, &drm_conf);

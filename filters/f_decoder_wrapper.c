@@ -231,7 +231,7 @@ struct priv {
 };
 
 static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
-                             struct bstr name)
+                             mp_unused struct bstr name)
 {
     if (strcmp(opt->name, "ad") == 0) {
         struct mp_decoder_list *list = audio_decoder_list();

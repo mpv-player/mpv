@@ -59,7 +59,7 @@ struct priv {
     bool direct_channels;
 };
 
-static int control(struct ao *ao, enum aocontrol cmd, void *arg)
+static int control(mp_unused struct ao *ao, enum aocontrol cmd, void *arg)
 {
     switch (cmd) {
     case AOCONTROL_GET_VOLUME:

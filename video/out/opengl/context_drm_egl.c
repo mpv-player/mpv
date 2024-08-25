@@ -254,7 +254,7 @@ static bool init_gbm(struct ra_ctx *ctx)
     return true;
 }
 
-static void framebuffer_destroy_callback(struct gbm_bo *bo, void *data)
+static void framebuffer_destroy_callback(mp_unused struct gbm_bo *bo, void *data)
 {
     struct framebuffer *fb = data;
     if (fb) {

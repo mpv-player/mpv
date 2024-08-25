@@ -33,7 +33,7 @@ static int fill_buffer(stream_t *s, void *buffer, int len)
     return len;
 }
 
-static int seek(stream_t *s, int64_t newpos)
+static int seek(mp_unused stream_t *s, mp_unused int64_t newpos)
 {
     return 1;
 }

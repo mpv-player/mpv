@@ -635,7 +635,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     return true;
 }
 
-static int d_open(struct demuxer *demuxer, enum demux_check check)
+static int d_open(struct demuxer *demuxer, mp_unused enum demux_check check)
 {
     struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
     p->tl = demuxer->params ? demuxer->params->timeline : NULL;

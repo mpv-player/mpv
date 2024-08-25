@@ -76,8 +76,8 @@ static void context_state_cb(pa_context *c, void *userdata)
     }
 }
 
-static void subscribe_cb(pa_context *c, pa_subscription_event_type_t t,
-                         uint32_t idx, void *userdata)
+static void subscribe_cb(mp_unused pa_context *c, pa_subscription_event_type_t t,
+                         mp_unused uint32_t idx, void *userdata)
 {
     struct ao *ao = userdata;
     int type = t & PA_SUBSCRIPTION_MASK_SINK;
@@ -89,7 +89,7 @@ static void subscribe_cb(pa_context *c, pa_subscription_event_type_t t,
     }
 }
 
-static void context_success_cb(pa_context *c, int success, void *userdata)
+static void context_success_cb(mp_unused pa_context *c, int success, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
@@ -114,7 +114,7 @@ static void stream_state_cb(pa_stream *s, void *userdata)
     }
 }
 
-static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
+static void stream_request_cb(mp_unused pa_stream *s, mp_unused size_t length, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
@@ -122,14 +122,14 @@ static void stream_request_cb(pa_stream *s, size_t length, void *userdata)
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static void stream_latency_update_cb(pa_stream *s, void *userdata)
+static void stream_latency_update_cb(mp_unused pa_stream *s, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static void underflow_cb(pa_stream *s, void *userdata)
+static void underflow_cb(mp_unused pa_stream *s, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
@@ -139,7 +139,7 @@ static void underflow_cb(pa_stream *s, void *userdata)
     pa_threaded_mainloop_signal(priv->mainloop, 0);
 }
 
-static void success_cb(pa_stream *s, int success, void *userdata)
+static void success_cb(mp_unused pa_stream *s, int success, void *userdata)
 {
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
@@ -646,7 +646,7 @@ static void audio_get_state(struct ao *ao, struct mp_pcm_state *state)
  * pa_context_get_sink_input_info() operation completes. Saves the
  * volume field of the specified structure to the global variable volume.
  */
-static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
+static void info_func(mp_unused struct pa_context *c, const struct pa_sink_input_info *i,
                       int is_last, void *userdata)
 {
     struct ao *ao = userdata;
@@ -744,7 +744,7 @@ struct sink_cb_ctx {
     struct ao_device_list *list;
 };
 
-static void sink_info_cb(pa_context *c, const pa_sink_info *i, int eol, void *ud)
+static void sink_info_cb(mp_unused pa_context *c, const pa_sink_info *i, int eol, void *ud)
 {
     struct sink_cb_ctx *ctx = ud;
     struct priv *priv = ctx->ao->priv;

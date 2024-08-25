@@ -430,14 +430,14 @@ static void close_tty(void)
     tty_in = tty_out = -1;
 }
 
-static void quit_request_sighandler(int signum)
+static void quit_request_sighandler(mp_unused int signum)
 {
     int saved_errno = errno;
     (void)write(death_pipe[1], &(char){1}, 1);
     errno = saved_errno;
 }
 
-static MP_THREAD_VOID terminal_thread(void *ptr)
+static MP_THREAD_VOID terminal_thread(mp_unused void *ptr)
 {
     mp_thread_set_name("terminal/input");
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
