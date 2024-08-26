@@ -486,7 +486,8 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
             enum AVPixelFormat *fmts;
             if (av_hwframe_transfer_get_formats(frames,
-                                AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0)
+                                AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0 &&
+                                fmts[0] != AV_PIX_FMT_NONE)
             {
                 int index = p->num_fmts;
                 MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
