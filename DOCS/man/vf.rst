@@ -687,8 +687,9 @@ Available mpv-only filters are:
             Apply high quality VDPAU scaling (needs capable hardware).
 
 ``d3d11vpp``
-    Direct3D 11 video post processing. Currently requires D3D11 hardware
-    decoding for use.
+    Direct3D 11 video post-processing. Requires a D3D11 context and works best
+    with hardware decoding. Software frames are automatically uploaded to hardware
+    for processing.
 
     ``deint=<yes|no>``
         Whether deinterlacing is enabled (default: no).
