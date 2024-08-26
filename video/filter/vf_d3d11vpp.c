@@ -212,6 +212,10 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
+    int rindex = p->opts->mode ? -1 : 0;
+    if (rindex == 0)
+        goto create;
+
     D3D11_VIDEO_PROCESSOR_CAPS caps;
     hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorCaps(p->vp_enum, &caps);
     if (FAILED(hr))
@@ -220,7 +224,6 @@ static int recreate_video_proc(struct mp_filter *vf)
     MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
                (int)caps.RateConversionCapsCount, p->opts->mode);
 
-    int rindex = -1;
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
         hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorRateConversionCaps
@@ -242,6 +245,7 @@ static int recreate_video_proc(struct mp_filter *vf)
 
     // TODO: so, how do we select which rate conversion mode the processor uses?
 
+create:
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
     if (FAILED(hr)) {
