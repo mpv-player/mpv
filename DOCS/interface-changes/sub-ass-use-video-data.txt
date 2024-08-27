@@ -1,5 +1,6 @@
 Remove sub-ass-vsfilter-aspect-compat.
 Remove sub-ass-vsfilter-blur-compat.
 Add sub-ass-use-video-data.
+Add sub-ass-video-aspect-override.
 Change default V keybind to cycle sub-ass-use-video-data
 instead of toggling the now removed sub-ass-vsfilter-aspect-compat.

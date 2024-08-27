@@ -4465,6 +4465,7 @@ static const struct property_osd_display {
     {"sub-forced-events-only", "Forced sub only"},
     {"sub-scale", "Sub Scale"},
     {"sub-ass-use-video-data", "Subtitle using video properties"},
+    {"sub-ass-video-aspect-override", "Subtitle aspect override"},
     {"sub-ass-override", "ASS subtitle style override"},
     {"secondary-sub-ass-override", "Secondary sub ASS subtitle style override"},
     {"vf", "Video filters", .msg = "Video filters:\n${vf}"},
