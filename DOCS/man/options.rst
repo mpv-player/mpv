@@ -2585,6 +2585,12 @@ Subtitles
 
     Default: ``all``
 
+``--sub-ass-video-aspect-override=<no|ratio>``
+    Allows passing any arbitrary aspect ratio to libass instead of the video’s
+    actual aspect ratio. Zero or negative aspect ratios are identical to ``no``.
+
+    This has no effect if ``sub-ass-use-video-data`` is set to none.
+
 ``--sub-vsfilter-bidi-compat=<yes|no>``
     Set implicit bidi detection to ``ltr`` instead of ``auto`` to match ASS'
     default. This also disables libass' incompatible extensions. This currently
