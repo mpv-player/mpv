@@ -123,6 +123,7 @@ jobs:
       CXX: "ccache clang++"
       CC_LD: "lld"
       CXX_LD: "lld"
+      _LINK_: "/nodefaultlib:libucrt.lib /defaultlib:ucrt.lib"
       WINDRES: "llvm-rc"
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: "${{ github.workspace }}\\.ccache"
