@@ -691,6 +691,13 @@ Available mpv-only filters are:
     with hardware decoding. Software frames are automatically uploaded to hardware
     for processing.
 
+    ``format``
+        Convert to the selected image format, e.g., nv12, p010, etc. (default: don't change).
+        Format names can be queried with ``--vf=d3d11vpp=format=help``.
+        Note that only a limited subset is supported, and actual support depends
+        on your hardware. Normally, this shouldn't be changed unless some
+        processing only works with a specific format, in which case it can be
+        selected here.
     ``deint=<yes|no>``
         Whether deinterlacing is enabled (default: no).
     ``scale``
