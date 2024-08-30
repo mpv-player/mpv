@@ -22,10 +22,10 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys
+import os, sys
 
 def file2string(infilename, infile, outfile):
-    outfile.write("// Generated from %s\n\n" % infilename)
+    outfile.write("// Generated from %s\n\n" % os.path.basename(infilename))
 
     conv = ["\\%03o" % c for c in range(256)]
     safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" \
