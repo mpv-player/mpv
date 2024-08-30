@@ -288,6 +288,7 @@ jobs:
       env:
         CC: "${{ matrix.config.cc }}"
         CXX: "${{ matrix.config.cxx }}"
+        ASAN_OPTIONS: "halt_on_error=1:abort_on_error=1:print_summary=1:detect_leaks=0"
     strategy:
       matrix:
         config:
