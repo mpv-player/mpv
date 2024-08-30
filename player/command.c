@@ -6531,9 +6531,11 @@ static void cmd_load_config_file(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    char *config_file = cmd->args[0].v.s;
+    void *ctx = talloc_new(NULL);
+    char *config_file = mp_get_user_path(ctx, mpctx->global, cmd->args[0].v.s);
     int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global,
                                        config_file, NULL, 0);
+    talloc_free(ctx);
 
     if (r < 1) {
         cmd->success = false;
