@@ -79,6 +79,7 @@ struct opts {
     bool interlaced_only;
     int mode;
     int field_parity;
+    int format;
 };
 
 struct priv {
@@ -467,6 +468,9 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         p->out_params.crop.y0 = lrintf(p->opts->scale * p->out_params.crop.y0);
         p->out_params.crop.y1 = lrintf(p->opts->scale * p->out_params.crop.y1);
 
+        if (p->opts->format)
+            p->out_params.hw_subfmt = p->opts->format;
+
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
                                p->params.w != p->out_params.w ||
                                p->params.h != p->out_params.h;
@@ -599,6 +603,7 @@ fail:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
+    {"format", OPT_IMAGEFORMAT(format)},
     {"deint", OPT_BOOL(deint_enabled)},
     {"scale", OPT_FLOAT(scale)},
     {"scaling-mode", OPT_CHOICE(scaling_mode,
