@@ -168,8 +168,7 @@ static void vf_format_process(struct mp_filter *f)
         }
 
         if (!priv->opts->dovi) {
-            if (img->params.repr.sys == PL_COLOR_SYSTEM_DOLBYVISION)
-                img->params.repr.sys = PL_COLOR_SYSTEM_BT_2020_NC;
+            mp_image_params_restore_dovi_mapping(&img->params);
             // Map again to strip any DV metadata set to common fields.
             img->params.color.hdr = (struct pl_hdr_metadata){0};
             pl_map_hdr_metadata(&img->params.color.hdr, &(struct pl_av_hdr_metadata) {
