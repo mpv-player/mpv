@@ -50,6 +50,11 @@ struct mp_image_params {
     bool force_window;          // fake image created by handle_force_window
     struct pl_color_space color;
     struct pl_color_repr repr;
+    // Original values before Dolby Vision metadata mapping
+    enum pl_color_primaries primaries_orig;
+    enum pl_color_transfer transfer_orig;
+    enum pl_color_system sys_orig;
+
     enum mp_csp_light light;
     enum pl_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
@@ -177,6 +182,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);
 bool mp_image_params_static_equal(const struct mp_image_params *p1,
                                   const struct mp_image_params *p2);
+void mp_image_params_restore_dovi_mapping(struct mp_image_params *params);
 
 void mp_image_params_get_dsize(const struct mp_image_params *p,
                                int *d_w, int *d_h);
