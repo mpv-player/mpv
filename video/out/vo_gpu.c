@@ -123,7 +123,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     resize(vo);
-    gl_video_config(p->renderer, params);
+    struct mp_image_params fallback_params = *params;
+    mp_image_params_restore_dovi_mapping(&fallback_params);
+    gl_video_config(p->renderer, &fallback_params);
 
     return 0;
 }
