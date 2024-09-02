@@ -1256,7 +1256,7 @@ void vo_x11_check_events(struct vo *vo)
 
     while (XPending(display)) {
         XNextEvent(display, &Event);
-        if (XFilterEvent(&Event, x11->window))
+        if (XFilterEvent(&Event, None))
             continue;
         MP_TRACE(x11, "XEvent: %d\n", Event.type);
         switch (Event.type) {
@@ -1646,6 +1646,8 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
                              XNClientWindow, x11->window,
                              XNFocusWindow, x11->window,
                              NULL);
+        if (x11->xic)
+            XSetICFocus(x11->xic);
     }
 
     if (!x11->parent) {
