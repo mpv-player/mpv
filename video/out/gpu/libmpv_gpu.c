@@ -124,9 +124,7 @@ static void reconfig(struct render_backend *ctx, struct mp_image_params *params)
 {
     struct priv *p = ctx->priv;
 
-    struct mp_image_params fallback_params = *params;
-    mp_image_params_restore_dovi_mapping(&fallback_params);
-    gl_video_config(p->renderer, &fallback_params);
+    gl_video_config(p->renderer, params);
 }
 
 static void reset(struct render_backend *ctx)
