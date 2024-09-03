@@ -152,7 +152,6 @@ struct osd_state *osd_create(struct mpv_global *global)
     osd->objs[OSDTYPE_SUB]->is_sub = true;
     osd->objs[OSDTYPE_SUB2]->is_sub = true;
 
-    osd_init_backend(osd);
     return osd;
 }
 
