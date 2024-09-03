@@ -911,6 +911,7 @@ static void init_video(struct gl_video *p)
     }
     p->color_swizzle[4] = '\0';
 
+    mp_image_params_restore_dovi_mapping(&p->image_params);
     mp_image_params_guess_csp(&p->image_params);
 
     av_lfg_init(&p->lfg, 1);
