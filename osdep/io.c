@@ -708,7 +708,7 @@ char ***mp_penviron(void)
     return &utf8_environ;  // `environ' should be an l-value
 }
 
-off_t mp_lseek(int fd, off_t offset, int whence)
+off_t mp_lseek64(int fd, off_t offset, int whence)
 {
     HANDLE h = (HANDLE)_get_osfhandle(fd);
     if (h != INVALID_HANDLE_VALUE && GetFileType(h) != FILE_TYPE_DISK) {

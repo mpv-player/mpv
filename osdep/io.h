@@ -130,7 +130,9 @@ char *mp_getenv(const char *name);
 #define environ (*mp_penviron())  /* ensure initialization and l-value */
 char ***mp_penviron(void);
 
-off_t mp_lseek(int fd, off_t offset, int whence);
+#undef off_t
+#define off_t int64_t
+off_t mp_lseek64(int fd, off_t offset, int whence);
 void *mp_dlopen(const char *filename, int flag);
 void *mp_dlsym(void *handle, const char *symbol);
 char *mp_dlerror(void);
@@ -194,7 +196,7 @@ void mp_globfree(mp_glob_t *pglob);
 #define getenv(...) mp_getenv(__VA_ARGS__)
 
 #undef lseek
-#define lseek(...) mp_lseek(__VA_ARGS__)
+#define lseek(...) mp_lseek64(__VA_ARGS__)
 
 #define RTLD_NOW 0
 #define RTLD_LOCAL 0
