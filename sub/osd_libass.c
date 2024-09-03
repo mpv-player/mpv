@@ -41,10 +41,6 @@ static const char osd_font_pfb[] =
 static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
                        ASS_Image **img_list, bool *changed);
 
-void osd_init_backend(struct osd_state *osd)
-{
-}
-
 static void create_ass_renderer(struct osd_state *osd, struct ass_state *ass)
 {
     if (ass->render)
