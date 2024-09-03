@@ -137,6 +137,14 @@ $projects = @(
         Revision = "master"
     },
     @{
+        Path = "$subprojects/dav1d.wrap"
+        URL = "https://code.videolan.org/videolan/dav1d"
+        Revision = "master"
+        Provides = @(
+            "dav1d = dav1d_dep"
+        )
+    },
+    @{
         Path = "$subprojects/spirv-cross.wrap"
         URL = "https://github.com/KhronosGroup/SPIRV-Cross"
         Revision = "main"
@@ -179,6 +187,7 @@ meson setup build `
     -Dffmpeg:programs=disabled `
     -Dffmpeg:sdl2=disabled `
     -Dffmpeg:vulkan=auto `
+    -Dffmpeg:libdav1d=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
