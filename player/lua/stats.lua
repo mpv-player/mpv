@@ -517,7 +517,7 @@ local function get_kbinfo_lines()
     local spre = term and kspaces .. "   "
                        or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%d\\u1}",
                                  o.font_mono, kspaces, o.font, 1.3*font_size)
-    local spost = term and "" or format("{\\u0\\fs%d}", font_size)
+    local spost = term and "" or format("{\\u0\\fs%d}%s", font_size, text_style())
 
     -- create the display lines
     local info_lines = {}
