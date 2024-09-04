@@ -1691,7 +1691,7 @@ Video
         Works in ``--correct-pts=no`` mode only.
 
 ``--deinterlace=<yes|no|auto>``
-    Enable or disable interlacing (default: no).
+    Enable or disable deinterlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
     fast movement. Enabling this typically inserts the bwdif video filter in
     order to deinterlace the video, or lets the video output apply deinterlacing
@@ -1708,7 +1708,7 @@ Video
     it's not actually interlaced.
 
 ``--deinterlace-field-parity=<tff|bff|auto>``
-    Specify the field parity/order when deinterlacing(default: auto)
+    Specify the field parity/order when deinterlacing (default: auto).
     Each frame of an interlaced video is divided into two fields, which are
     then separately transmitted. Top field represents even lines while bottom
     field represents odd lines. When deinterlacing the deinterlacer needs to
