@@ -1720,7 +1720,7 @@ struct mpv_node mp_input_get_bindings(struct input_ctx *ictx)
             if (b_priority >= 0 && !b->is_builtin)
                 b_priority += ictx->num_active_sections;
 
-            node_map_add_string(entry, "section", s->section.start);
+            node_map_add_bstr(entry, "section", s->section);
             if (s->owner)
                 node_map_add_string(entry, "owner", s->owner);
             node_map_add_string(entry, "cmd", b->cmd);
