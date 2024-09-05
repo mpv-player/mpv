@@ -116,8 +116,7 @@ void term_osd_set_subs(struct MPContext *mpctx, const char *text)
         text = ""; // disable
     if (strcmp(mpctx->term_osd_subs ? mpctx->term_osd_subs : "", text) == 0)
         return;
-    talloc_free(mpctx->term_osd_subs);
-    mpctx->term_osd_subs = talloc_strdup(mpctx, text);
+    talloc_replace(mpctx, mpctx->term_osd_subs, text);
     term_osd_update(mpctx);
 }
 
@@ -126,14 +125,12 @@ static void term_osd_set_text_lazy(struct MPContext *mpctx, const char *text)
     bool video_osd = mpctx->video_out && mpctx->opts->video_osd;
     if ((video_osd && mpctx->opts->term_osd != 1) || !text)
         text = ""; // disable
-    talloc_free(mpctx->term_osd_text);
-    mpctx->term_osd_text = talloc_strdup(mpctx, text);
+    talloc_replace(mpctx, mpctx->term_osd_text, text);
 }
 
 static void term_osd_set_status_lazy(struct MPContext *mpctx, const char *text)
 {
-    talloc_free(mpctx->term_osd_status);
-    mpctx->term_osd_status = talloc_strdup(mpctx, text);
+    talloc_replace(mpctx, mpctx->term_osd_status, text);
 }
 
 static void add_term_osd_bar(struct MPContext *mpctx, char **line, int width)

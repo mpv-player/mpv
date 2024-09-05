@@ -2229,8 +2229,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         set_screensaver(x11, true);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        talloc_free(x11->window_title);
-        x11->window_title = talloc_strdup(x11, (char *)arg);
+        talloc_replace(x11, x11->window_title, (char *)arg);
         if (!x11->parent || x11->opts->x11_wid_title)
             vo_x11_update_window_title(vo);
         return VO_TRUE;
