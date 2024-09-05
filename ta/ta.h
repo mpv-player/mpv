@@ -99,6 +99,16 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_dup(ta_parent, ptr) \
     (TA_TYPEOF(ptr))ta_memdup(ta_parent, ptr, sizeof(*(ptr)))
 
+#define ta_replace(ta_parent, str, replace)             \
+    do {                                                \
+        if (!(str)) {                                   \
+            (str) = ta_xstrdup((ta_parent), (replace)); \
+        } else {                                        \
+            *(str) = '\0';                              \
+            ta_xstrdup_append(&(str), (replace));       \
+        }                                               \
+    } while (0)
+
 // Ugly macros that crash on OOM.
 // All of these mirror real functions (with a 'x' added after the 'ta_'
 // prefix), and the only difference is that they will call abort() on allocation
