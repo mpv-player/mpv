@@ -1233,10 +1233,8 @@ static char *print_str(const m_option_t *opt, const void *val)
 
 static void copy_str(const m_option_t *opt, void *dst, const void *src)
 {
-    if (dst && src) {
-        talloc_free(VAL(dst));
-        VAL(dst) = talloc_strdup(NULL, VAL(src));
-    }
+    if (dst && src)
+        talloc_replace(NULL, VAL(dst), VAL(src));
 }
 
 static int str_set(const m_option_t *opt, void *dst, struct mpv_node *src)

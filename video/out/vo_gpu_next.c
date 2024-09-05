@@ -2028,8 +2028,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     update_icc(p, icc);
 
     // Update cached path
-    talloc_free(p->icc_path);
-    p->icc_path = talloc_strdup(p, opts->profile);
+    talloc_replace(p, p->icc_path, opts->profile);
 }
 
 static void update_lut(struct priv *p, struct user_lut *lut)
@@ -2045,8 +2044,7 @@ static void update_lut(struct priv *p, struct user_lut *lut)
 
     // Update cached path
     pl_lut_free(&lut->lut);
-    talloc_free(lut->path);
-    lut->path = talloc_strdup(p, lut->opt);
+    talloc_replace(p, lut->path, lut->opt);
 
     // Load LUT file
     char *fname = mp_get_user_path(NULL, p->global, lut->path);

@@ -1302,8 +1302,7 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     if ((!bs->owner || (owner && strcmp(bs->owner, owner) != 0)) &&
         !bstr_equals0(bs->section, "default"))
     {
-        talloc_free(bs->owner);
-        bs->owner = talloc_strdup(bs, owner);
+        talloc_replace(bs, bs->owner, owner);
     }
     remove_binds(bs, builtin);
     if (contents && contents[0]) {

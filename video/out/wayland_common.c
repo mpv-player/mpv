@@ -652,9 +652,7 @@ static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
     int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
     if (score > wl->dnd_mime_score && wl->opts->drag_and_drop != -2) {
         wl->dnd_mime_score = score;
-        if (wl->dnd_mime_type)
-            talloc_free(wl->dnd_mime_type);
-        wl->dnd_mime_type = talloc_strdup(wl, mime_type);
+        talloc_replace(wl, wl->dnd_mime_type, mime_type);
         MP_VERBOSE(wl, "Given DND offer with mime type %s\n", wl->dnd_mime_type);
     }
 }
