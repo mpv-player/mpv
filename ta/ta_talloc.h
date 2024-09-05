@@ -61,7 +61,6 @@
 #define talloc_asprintf_append          ta_talloc_asprintf_append
 #define talloc_asprintf_append_buffer   ta_talloc_asprintf_append_buffer
 
-char *ta_talloc_strdup(void *t, const char *p);
 char *ta_talloc_strdup_append(char *s, const char *a);
 char *ta_talloc_strdup_append_buffer(char *s, const char *a);
 
