@@ -224,7 +224,7 @@ struct vo_wayland_tranche {
 static bool single_output_spanned(struct vo_wayland_state *wl);
 
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
-                            enum xdg_toplevel_resize_edge *edge);
+                            enum xdg_toplevel_resize_edge *edges);
 static int get_mods(struct vo_wayland_seat *seat);
 static int greatest_common_divisor(int a, int b);
 static int handle_round(int scale, int n);
@@ -327,7 +327,6 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
     } else {
         button = 0;
     }
-
     enum xdg_toplevel_resize_edge edges;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && (button == MP_MBTN_LEFT) && (state == MP_KEY_STATE_DOWN) &&
@@ -1894,39 +1893,24 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
 }
 
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
-                            enum xdg_toplevel_resize_edge *edge)
+                            enum xdg_toplevel_resize_edge *edges)
 {
     if (wl->opts->fullscreen || wl->opts->window_maximized)
         return 0;
 
     int pos[2] = { wl->mouse_x, wl->mouse_y };
-    int left_edge   = pos[0] < edge_pixels;
-    int top_edge    = pos[1] < edge_pixels;
-    int right_edge  = pos[0] > (mp_rect_w(wl->geometry) - edge_pixels);
-    int bottom_edge = pos[1] > (mp_rect_h(wl->geometry) - edge_pixels);
+    *edges = 0;
 
-    if (left_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
-        if (top_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_LEFT;
-        else if (bottom_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_LEFT;
-    } else if (right_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
-        if (top_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP_RIGHT;
-        else if (bottom_edge)
-            *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM_RIGHT;
-    } else if (top_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_TOP;
-    } else if (bottom_edge) {
-        *edge = XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
-    } else {
-        *edge = 0;
-        return 0;
-    }
+    if (pos[0] < edge_pixels)
+        *edges |= XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
+    if (pos[0] > (mp_rect_w(wl->geometry) - edge_pixels))
+        *edges |= XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
+    if (pos[1] < edge_pixels)
+        *edges |= XDG_TOPLEVEL_RESIZE_EDGE_TOP;
+    if (pos[1] > (mp_rect_h(wl->geometry) - edge_pixels))
+        *edges |= XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
 
-    return 1;
+    return *edges;
 }
 
 static bool create_input(struct vo_wayland_state *wl)
