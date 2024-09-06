@@ -184,9 +184,6 @@ struct vo_wayland_seat {
     bool axis_value120_scroll;
     bool has_keyboard_input;
     struct wl_list link;
-    bool keyboard_entering;
-    uint32_t *keyboard_entering_keys;
-    int num_keyboard_entering_keys;
 };
 
 static bool single_output_spanned(struct vo_wayland_state *wl);
@@ -531,12 +528,7 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     s->has_keyboard_input = true;
-    s->keyboard_entering = true;
     guess_focus(wl);
-
-    uint32_t *key;
-    wl_array_for_each(key, keys)
-        MP_TARRAY_APPEND(s, s->keyboard_entering_keys, s->num_keyboard_entering_keys, *key);
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
@@ -573,13 +565,7 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
                               mods_locked, 0, 0, group);
         s->mpmod = get_mods(s);
     }
-    // Handle keys pressed during the enter event.
-    if (s->keyboard_entering) {
-        s->keyboard_entering = false;
-        for (int n = 0; n < s->num_keyboard_entering_keys; n++)
-            handle_key_input(s, s->keyboard_entering_keys[n], WL_KEYBOARD_KEY_STATE_PRESSED);
-        s->num_keyboard_entering_keys = 0;
-    } else if (s->xkb_state && s->mpkey) {
+    if (s->xkb_state && s->mpkey) {
         mp_input_put_key(wl->vo->input_ctx, s->mpkey | MP_KEY_STATE_DOWN | s->mpmod);
     }
 }
