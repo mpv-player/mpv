@@ -68,6 +68,7 @@ struct vo_wayland_state {
     bool locked_size;
     bool need_rescale;
     bool reconfigured;
+    bool resizing;
     bool scale_configured;
     bool state_change;
     bool tiled;
@@ -79,6 +80,7 @@ struct vo_wayland_state {
     int pending_scaling;   // base 120
     int scaling;           // base 120
     double scaling_factor; // wl->scaling divided by 120
+    int resizing_constraint;
     int timeout_count;
     int wakeup_pipe[2];
 

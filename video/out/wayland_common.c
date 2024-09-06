@@ -66,6 +66,11 @@
 #define WAYLAND_SCALE_FACTOR 120.0
 
 
+enum resizing_constraint {
+    MP_WIDTH_CONSTRAINT = 1,
+    MP_HEIGHT_CONSTRAINT = 2,
+};
+
 static const struct mp_keymap keymap[] = {
     /* Special keys */
     {XKB_KEY_Pause,     MP_KEY_PAUSE}, {XKB_KEY_Escape,       MP_KEY_ESC},
@@ -1040,6 +1045,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     bool is_maximized = false;
     bool is_fullscreen = false;
     bool is_activated = false;
+    bool is_resizing = false;
     bool is_suspended = false;
     bool is_tiled = false;
     enum xdg_toplevel_state *state;
@@ -1049,6 +1055,7 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             is_fullscreen = true;
             break;
         case XDG_TOPLEVEL_STATE_RESIZING:
+            is_resizing = true;
             break;
         case XDG_TOPLEVEL_STATE_ACTIVATED:
             is_activated = true;
@@ -1078,6 +1085,11 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
 
     if (wl->hidden != is_suspended)
         wl->hidden = is_suspended;
+
+    if (wl->resizing != is_resizing) {
+        wl->resizing = is_resizing;
+        wl->resizing_constraint = 0;
+    }
 
     if (opts->fullscreen != is_fullscreen) {
         wl->state_change = wl->reconfigured;
@@ -1555,10 +1567,39 @@ static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *heigh
     if (!wl->opts->keepaspect)
         return;
 
+    int phys_width = handle_round(wl->scaling, *width);
+    int phys_height = handle_round(wl->scaling, *height);
+
+    // Ensure that the size actually changes before we start trying to actually
+    // calculate anything so the wrong constraint for the rezie isn't choosen.
+    if (wl->resizing && !wl->resizing_constraint &&
+        phys_width == mp_rect_w(wl->geometry) && phys_height == mp_rect_h(wl->geometry))
+        return;
+
+    // We are doing a continuous resize (e.g. dragging with mouse), constrain the
+    // aspect ratio against the height if the change is only in the height
+    // coordinate.
+    if (wl->resizing && !wl->resizing_constraint && phys_width == mp_rect_w(wl->geometry) &&
+        phys_height != mp_rect_h(wl->geometry)) {
+        wl->resizing_constraint = MP_HEIGHT_CONSTRAINT;
+    } else if (!wl->resizing_constraint) {
+        wl->resizing_constraint = MP_WIDTH_CONSTRAINT;
+    }
+
+    if (wl->resizing_constraint == MP_HEIGHT_CONSTRAINT) {
+        MPSWAP(int, *width, *height);
+        MPSWAP(int, wl->reduced_width, wl->reduced_height);
+    }
+
     double scale_factor = (double)*width / wl->reduced_width;
     *width = ceil(wl->reduced_width * scale_factor);
     if (wl->opts->keepaspect_window)
         *height = ceil(wl->reduced_height * scale_factor);
+
+    if (wl->resizing_constraint == MP_HEIGHT_CONSTRAINT) {
+        MPSWAP(int, *width, *height);
+        MPSWAP(int, wl->reduced_width, wl->reduced_height);
+    }
 }
 
 static void free_dnd_data(struct vo_wayland_state *wl)
