@@ -97,10 +97,14 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
     if (p->alpha)
         out->repr.alpha = p->alpha;
 
-    if (p->w > 0 && set_size)
+    if (p->w > 0 && set_size) {
         out->w = p->w;
-    if (p->h > 0 && set_size)
+        out->crop = (struct mp_rect){0};
+    }
+    if (p->h > 0 && set_size) {
         out->h = p->h;
+        out->crop = (struct mp_rect){0};
+    }
     AVRational dsize;
     mp_image_params_get_dsize(out, &dsize.num, &dsize.den);
     if (p->dw > 0)
