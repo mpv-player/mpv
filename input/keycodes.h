@@ -226,12 +226,12 @@
 
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
-// This is a fixed part of the keycode, not a modifier than can change.
+// This is a fixed part of the keycode, not a modifier that can change.
 #define MP_KEY_EMIT_ON_UP      (1u<<22)
 
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 // Also means both key-down key-up events produce emit bound commands.
-// This is a fixed part of the keycode, not a modifier than can change.
+// This is a fixed part of the keycode, not a modifier that can change.
 #define MP_NO_REPEAT_KEY       (1u<<23)
 
 /* Modifiers added to individual keys */
