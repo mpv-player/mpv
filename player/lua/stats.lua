@@ -348,21 +348,31 @@ local function append_perfdata(header, s, dedicated_page)
         end
         -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
         local w = (700 * math.sqrt(i)) + 200
+        if not o.use_ass then
+            local str = format("%3d%%", i * 100)
+            return w >= 700 and bold(str) or str
+        end
         return format("{\\b%d}%3d%%{\\b0}", w, i * 100)
     end
+
+    local font_small = o.use_ass and format("{\\fs%s}", font_size * 0.66) or ""
+    local font_normal = o.use_ass and format("{\\fs%s}", font_size) or ""
+    local font = o.use_ass and format("{\\fn%s}", o.font) or ""
+    local font_mono = o.use_ass and format("{\\fn%s}", o.font_mono) or ""
+    local indent = o.use_ass and "\\h" or " "
 
     -- ensure that the fixed title is one element and every scrollable line is
     -- also one single element.
     local h = dedicated_page and header or s
-    h[#h+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}%s",
+    h[#h+1] = format("%s%s%s%s%s%s%s%s",
                      dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
-                     bold("Frame Timings:"), o.prefix_sep, font_size * 0.66,
-                     "(last/average/peak μs)", font_size,
+                     bold("Frame Timings:"), o.prefix_sep, font_small,
+                     "(last/average/peak μs)", font_normal,
                      dedicated_page and scroll_hint() or "")
 
     for _,frame in ipairs(sorted_keys(vo_p)) do  -- ensure fixed display order
         local data = vo_p[frame]
-        local f = "%s%s%s{\\fn%s}%s / %s / %s %s%s{\\fn%s}%s%s%s"
+        local f = "%s%s%s%s%s / %s / %s %s%s%s%s%s%s"
 
         if dedicated_page then
             s[#s+1] = format("%s%s%s:", o.nl, o.indent,
@@ -370,10 +380,10 @@ local function append_perfdata(header, s, dedicated_page)
 
             for _, pass in ipairs(data) do
                 s[#s+1] = format(f, o.nl, o.indent, o.indent,
-                                 o.font_mono, pp(pass["last"]),
+                                 font_mono, pp(pass["last"]),
                                  pp(pass["avg"]), pp(pass["peak"]),
-                                 o.prefix_sep .. "\\h", p(pass["last"], last_s[frame]),
-                                 o.font, o.prefix_sep, o.prefix_sep, pass["desc"])
+                                 o.prefix_sep .. indent, p(pass["last"], last_s[frame]),
+                                 font, o.prefix_sep, o.prefix_sep, pass["desc"])
 
                 if o.plot_perfdata and o.use_ass then
                     -- use the same line that was already started for this iteration
@@ -386,14 +396,14 @@ local function append_perfdata(header, s, dedicated_page)
 
             -- Print sum of timing values as "Total"
             s[#s+1] = format(f, o.nl, o.indent, o.indent,
-                             o.font_mono, pp(last_s[frame]),
+                             font_mono, pp(last_s[frame]),
                              pp(avg_s[frame]), pp(peak_s[frame]),
-                             o.prefix_sep, bold("Total"), o.font, "", "", "")
+                             o.prefix_sep, bold("Total"), font, "", "", "")
         else
             -- for the simplified view, we just print the sum of each pass
-            s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+            s[#s+1] = format(f, o.nl, o.indent, o.indent, font_mono,
                             pp(last_s[frame]), pp(avg_s[frame]), pp(peak_s[frame]),
-                            "", "", o.font, o.prefix_sep, o.prefix_sep,
+                            "", "", font, o.prefix_sep, o.prefix_sep,
                             frame:gsub("^%l", string.upper))
         end
     end
