@@ -251,6 +251,9 @@
 // or don't use MP_KEY_STATE_DOWN in the first place.
 #define MP_KEY_STATE_UP        (1u<<29)
 
+// Only set the key state without triggering key bindings.
+#define MP_KEY_STATE_SET_ONLY  (1u<<30)
+
 #define MP_KEY_MODIFIER_MASK (MP_KEY_MODIFIER_SHIFT | MP_KEY_MODIFIER_CTRL | \
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META | \
                               MP_KEY_STATE_DOWN | MP_KEY_STATE_UP)
