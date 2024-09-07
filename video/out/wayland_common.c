@@ -204,7 +204,7 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
-static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state);
+static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
 static void prepare_resize(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
@@ -557,7 +557,7 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
                                 uint32_t state)
 {
     struct vo_wayland_seat *s = data;
-    handle_key_input(s, key, state);
+    handle_key_input(s, key, state, false);
 }
 
 static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboard,
@@ -576,8 +576,11 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
     // Handle keys pressed during the enter event.
     if (s->keyboard_entering) {
         s->keyboard_entering = false;
-        for (int n = 0; n < s->num_keyboard_entering_keys; n++)
-            handle_key_input(s, s->keyboard_entering_keys[n], WL_KEYBOARD_KEY_STATE_PRESSED);
+        // Only handle entering keys if only one key is pressed since
+        // Wayland doesn't guarantee that these keys are in order.
+        if (s->num_keyboard_entering_keys == 1)
+            for (int n = 0; n < s->num_keyboard_entering_keys; n++)
+                handle_key_input(s, s->keyboard_entering_keys[n], WL_KEYBOARD_KEY_STATE_PRESSED, true);
         s->num_keyboard_entering_keys = 0;
     } else if (s->xkb_state && s->mpkey) {
         mp_input_put_key(wl->vo->input_ctx, s->mpkey | MP_KEY_STATE_DOWN | s->mpmod);
@@ -1850,7 +1853,7 @@ static int lookupkey(int key)
 }
 
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
-                             uint32_t state)
+                             uint32_t state, bool no_emit)
 {
     struct vo_wayland_state *wl = s->wl;
 
@@ -1864,6 +1867,9 @@ static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
     default:
         return;
     }
+
+    if (no_emit)
+        state = state | MP_KEY_STATE_SET_ONLY;
 
     s->keyboard_code = key + 8;
     xkb_keysym_t sym = xkb_state_key_get_one_sym(s->xkb_state, s->keyboard_code);
@@ -1879,16 +1885,16 @@ static void handle_key_input(struct vo_wayland_seat *s, uint32_t key,
             // Assume a modifier was pressed and handle it in the mod event instead.
             // If a modifier is released before a regular key, also release that
             // key to not activate it again by accident.
-            if (state == MP_KEY_STATE_UP) {
+            if (state & MP_KEY_STATE_UP) {
                 s->mpkey = 0;
                 mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
             }
             return;
         }
     }
-    if (state == MP_KEY_STATE_DOWN)
+    if (state & MP_KEY_STATE_DOWN)
         s->mpkey = mpkey;
-    if (mpkey && state == MP_KEY_STATE_UP)
+    if (mpkey && (state & MP_KEY_STATE_UP))
         s->mpkey = 0;
 }
 
