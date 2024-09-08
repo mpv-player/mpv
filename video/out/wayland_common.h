@@ -102,10 +102,13 @@ struct vo_wayland_state {
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 
     /* linux-dmabuf */
+    dev_t main_device_id;
     struct zwp_linux_dmabuf_v1 *dmabuf;
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
     compositor_format *compositor_format_map;
     uint32_t compositor_format_size;
+    uint32_t *gpu_formats;
+    int num_gpu_formats;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
