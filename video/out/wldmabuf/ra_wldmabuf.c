@@ -28,12 +28,28 @@ static void destroy(struct ra *ra)
     talloc_free(ra->priv);
 }
 
-bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
+bool ra_compatible_format(struct ra *ra, int imgfmt, uint32_t drm_format, uint64_t modifier)
 {
-    struct priv* p = ra->priv;
+    struct priv *p = ra->priv;
     struct vo_wayland_state *wl = p->vo->wl;
     const compositor_format *formats = wl->compositor_format_map;
 
+
+    // If we were able to make the DRM query, filter out the GPU formats.
+    // If not, just assume they all work and hope for the best.
+    if (wl->gpu_formats) {
+        bool supported_gpu_format = false;
+        for (int i = 0; i < wl->num_gpu_formats; i++) {
+            if (drm_format == wl->gpu_formats[i]) {
+                supported_gpu_format = true;
+                break;
+            }
+        }
+        if (!supported_gpu_format)
+            return false;
+    }
+
+    // Always check if the compositor supports the format.
     for (int i = 0; i < wl->compositor_format_size / sizeof(compositor_format); i++) {
         if (drm_format == formats[i].format && modifier == formats[i].modifier)
             return true;

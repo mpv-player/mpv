@@ -199,7 +199,7 @@ static void vaapi_dmabuf_importer(struct buffer *buf, struct mp_image *src,
         goto done;
     }
     buf->drm_format = desc.layers[layer_no].drm_format;
-    if (!ra_compatible_format(p->ctx->ra, buf->drm_format, desc.objects[0].drm_format_modifier)) {
+    if (!ra_compatible_format(p->ctx->ra, src->params.hw_subfmt, buf->drm_format, desc.objects[0].drm_format_modifier)) {
         MP_VERBOSE(vo, "%s(%016" PRIx64 ") is not supported.\n",
                    mp_tag_str(buf->drm_format), desc.objects[0].drm_format_modifier);
         buf->drm_format = 0;
@@ -681,7 +681,7 @@ static int reconfig(struct vo *vo, struct mp_image *img)
         return VO_ERROR;
     }
 
-    if (!ra_compatible_format(p->ctx->ra, p->drm_format, p->drm_modifier)) {
+    if (!ra_compatible_format(p->ctx->ra, img->params.hw_subfmt, p->drm_format, p->drm_modifier)) {
         MP_ERR(vo, "Format '%s' with modifier '(%016" PRIx64 ")' is not supported by"
                " the compositor.\n", mp_tag_str(p->drm_format), p->drm_modifier);
         return VO_ERROR;
