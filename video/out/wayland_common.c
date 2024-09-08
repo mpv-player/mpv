@@ -1363,6 +1363,12 @@ static void format_table(void *data,
 {
     struct vo_wayland_state *wl = data;
 
+    if (wl->compositor_format_size) {
+        munmap(wl->compositor_format_map, wl->compositor_format_size);
+        wl->compositor_format_map = NULL;
+        wl->compositor_format_size = 0;
+    }
+
     void *map = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
 
@@ -1377,32 +1383,62 @@ static void main_device(void *data,
                         struct wl_array *device)
 {
     struct vo_wayland_state *wl = data;
+    wl->add_tranche = true;
 
-    // Despite being an array, the protocol specifically states there can only be
-    // one main device so break as soon as we get one.
-    dev_t *id;
-    wl_array_for_each(id, device) {
-        memcpy(&wl->main_device_id, id, sizeof(dev_t));
-        break;
-    }
-    get_gpu_drm_formats(wl);
 }
 
 static void tranche_done(void *data,
                          struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
+    struct vo_wayland_state *wl = data;
+    wl->add_tranche = false;
 }
 
 static void tranche_target_device(void *data,
                                   struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
                                   struct wl_array *device)
 {
+    struct vo_wayland_state *wl = data;
+    // Only use the first tranche device we get.
+    if (wl->add_tranche) {
+        dev_t *id;
+        wl_array_for_each(id, device) {
+            memcpy(&wl->target_device_id, id, sizeof(dev_t));
+            break;
+        }
+        get_gpu_drm_formats(wl);
+    }
 }
 
 static void tranche_formats(void *data,
                             struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
                             struct wl_array *indices)
 {
+    struct vo_wayland_state *wl = data;
+
+    // Only grab formats from the first tranche and ignore the rest.
+    if (!wl->add_tranche)
+        return;
+
+    // Should never happen.
+    if (!wl->compositor_format_map) {
+        MP_WARN(wl, "Compositor did not send a format and modifier table!\n");
+        return;
+    }
+
+    const compositor_format *formats = wl->compositor_format_map;
+    MP_RESIZE_ARRAY(wl, wl->compositor_formats, indices->size);
+    wl->num_compositor_formats = 0;
+    uint16_t *index;
+    wl_array_for_each(index, indices) {
+        MP_TARRAY_APPEND(wl, wl->compositor_formats, wl->num_compositor_formats,
+                         (struct drm_format) {
+                            formats[*index].format,
+                            formats[*index].modifier,
+                        });
+        MP_DBG(wl, "Compositor supports drm format: '%s(%016" PRIx64 ")'\n",
+               mp_tag_str(formats[*index].format), formats[*index].modifier);
+    }
 }
 
 static void tranche_flags(void *data,
@@ -1799,7 +1835,7 @@ static void get_gpu_drm_formats(struct vo_wayland_state *wl)
     drmModePlaneRes *res = NULL;
     drmModePlane *plane = NULL;
 
-    if (drmGetDeviceFromDevId(wl->main_device_id, 0, &device) != 0) {
+    if (drmGetDeviceFromDevId(wl->target_device_id, 0, &device) != 0) {
         MP_WARN(wl, "Unable to get drm device from device id: %s\n", mp_strerror(errno));
         goto done;
     }
