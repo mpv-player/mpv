@@ -30,6 +30,11 @@ typedef struct {
     uint64_t modifier;
 } compositor_format;
 
+struct drm_format {
+    uint32_t format;
+    uint64_t modifier;
+};
+
 struct vo_wayland_state {
     struct m_config_cache   *opts_cache;
     struct mp_log           *log;
@@ -102,11 +107,14 @@ struct vo_wayland_state {
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 
     /* linux-dmabuf */
-    dev_t main_device_id;
+    dev_t target_device_id;
     struct zwp_linux_dmabuf_v1 *dmabuf;
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
+    bool add_tranche;
     compositor_format *compositor_format_map;
     uint32_t compositor_format_size;
+    struct drm_format *compositor_formats;
+    int num_compositor_formats;
     uint32_t *gpu_formats;
     int num_gpu_formats;
 

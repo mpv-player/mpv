@@ -32,7 +32,7 @@ bool ra_compatible_format(struct ra *ra, int imgfmt, uint32_t drm_format, uint64
 {
     struct priv *p = ra->priv;
     struct vo_wayland_state *wl = p->vo->wl;
-    const compositor_format *formats = wl->compositor_format_map;
+    struct drm_format *formats = wl->compositor_formats;
 
 
     // If we were able to make the DRM query, filter out the GPU formats.
@@ -50,7 +50,7 @@ bool ra_compatible_format(struct ra *ra, int imgfmt, uint32_t drm_format, uint64
     }
 
     // Always check if the compositor supports the format.
-    for (int i = 0; i < wl->compositor_format_size / sizeof(compositor_format); i++) {
+    for (int i = 0; i < wl->num_compositor_formats; ++i) {
         if (drm_format == formats[i].format && modifier == formats[i].modifier)
             return true;
     }
