@@ -187,8 +187,6 @@ void mp_destroy(struct MPContext *mpctx)
     cocoa_set_input_context(NULL);
 #endif
 
-    mp_input_uninit(mpctx->input);
-
     uninit_libav(mpctx->global);
 
     mp_msg_uninit(mpctx->global);
@@ -197,6 +195,8 @@ void mp_destroy(struct MPContext *mpctx)
         terminal_uninit();
         cas_terminal_owner(mpctx, NULL);
     }
+
+    mp_input_uninit(mpctx->input);
 
     assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
