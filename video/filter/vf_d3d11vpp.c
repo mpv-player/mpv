@@ -212,6 +212,9 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
+    if (!p->opts->mode && p->opts->deint_enabled)
+        p->opts->mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+
     int rindex = p->opts->mode ? -1 : 0;
     if (rindex == 0)
         goto create;
