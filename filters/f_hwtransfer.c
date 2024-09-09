@@ -392,6 +392,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                                                 ctx->conversion_config);
     }
 
+    int hw_transfer_index = 0;
     for (int n = 0; cstr->valid_sw_formats &&
                     cstr->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
     {
@@ -489,8 +490,19 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                                 AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0 &&
                                 fmts[0] != AV_PIX_FMT_NONE)
             {
-                int index = p->num_fmts;
-                MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
+                // Don't add the format to p->fmts if we know it cannot be used.
+                if (ctx->supported_hwupload_formats) {
+                    for (int i = 0; ctx->supported_hwupload_formats[i]; i++) {
+                        if (ctx->supported_hwupload_formats[i] == imgfmt)
+                            MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
+                    }
+                } else {
+                    MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
+                }
+
+                int index = hw_transfer_index;
+                hw_transfer_index++;
+
                 MP_TARRAY_GROW(p, p->fmt_upload_index, index);
                 MP_TARRAY_GROW(p, p->fmt_upload_num, index);
 
