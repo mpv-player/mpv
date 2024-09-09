@@ -20,6 +20,10 @@ struct mp_hwdec_ctx {
     // HW format used by the hwdec
     int hw_imgfmt;
 
+    // List of support software formats when doing hwuploads.
+    // If NULL, all possible hwuploads are assumed to be supported.
+    const int *supported_hwupload_formats;
+
     // The name of this hwdec's matching conversion filter if available.
     // This will be used for hardware conversion of frame formats.
     // NULL otherwise.
