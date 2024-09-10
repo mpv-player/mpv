@@ -959,7 +959,8 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
         case SND_PCM_STATE_XRUN:
         case SND_PCM_STATE_DRAINING:
             err = snd_pcm_prepare(p->alsa);
-            CHECK_ALSA_ERROR("pcm prepare error");
+            if (err < 0)
+                MP_ERR(ao, "pcm prepare error: %s\n", snd_strerror(err));
             continue;
         // Hardware suspend.
         case SND_PCM_STATE_SUSPENDED:
