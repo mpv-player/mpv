@@ -43,10 +43,29 @@ end
 
 -- youtube-dl JSON name to mpv tag name
 local tag_list = {
+    ["artist"]          = "artist",
+    ["album"]           = "album",
+    ["album_artist"]    = "album_artist",
+    ["composer"]        = "composer",
+    ["upload_date"]     = "date",
+    ["genre"]           = "genre",
+    ["series"]          = "series",
+    ["track"]           = "title",
+    ["track_number"]    = "track",
     ["uploader"]        = "uploader",
     ["channel_url"]     = "channel_url",
-    -- these titles tend to be a bit too long, so hide them on the terminal
-    -- (default --display-tags does not include this name)
+
+    -- These tags are not displayed by default, but can be shown with
+    -- --display-tags
+    ["playlist"]        = "ytdl_playlist",
+    ["playlist_index"]  = "ytdl_playlist_index",
+    ["playlist_title"]  = "ytdl_playlist_title",
+    ["playlist_id"]     = "ytdl_playlist_id",
+    ["chapters"]        = "ytdl_chapters",
+    ["season"]          = "ytdl_season",
+    ["episode"]         = "ytdl_episode",
+    ["is_live"]         = "ytdl_is_live",
+    ["release_year"]    = "ytdl_release_year",
     ["description"]     = "ytdl_description",
     -- "title" is handled by force-media-title
     -- tags don't work with all_formats=yes
