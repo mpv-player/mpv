@@ -321,13 +321,27 @@ static void set_term_color(void *talloc_ctx, bstr *text, int c)
         bstr_xappend(talloc_ctx, text, bstr0("\033[0m"));
         return;
     }
-
-    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d;3%dm", c >> 3, c & 7);
+    // Pure black to gray
+    if (c == 0)
+        c += 8;
+    // Pure white to light one
+    if (c == 15)
+        c -= 8;
+    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d%dm", c >= 8 ? 9 : 3, c & 7);
 }
 
 static void set_msg_color(void *talloc_ctx, bstr *text, int lev)
 {
-    static const int v_colors[] = {9, 1, 3, -1, -1, 2, 8, 8, 8, -1};
+    static const int v_colors[] = {
+        [MSGL_FATAL]  = 9,  // bright red
+        [MSGL_ERR]    = 1,  // red
+        [MSGL_WARN]   = 3,  // yellow
+        [MSGL_INFO]   = -1, // default
+        [MSGL_STATUS] = -1, // default
+        [MSGL_V]      = 2,  // green
+        [MSGL_DEBUG]  = 4,  // blue
+        [MSGL_TRACE]  = 8,  // bright black aka. gray
+    };
     set_term_color(talloc_ctx, text, v_colors[lev]);
 }
 
