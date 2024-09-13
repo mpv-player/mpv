@@ -94,7 +94,6 @@ static void deint_process(struct mp_filter *f)
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vdpaupp", args);
     } else if (img->imgfmt == IMGFMT_D3D11) {
         char *args[] = {"deint", "yes",
-                        "interlaced-only", "yes",
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "d3d11vpp", args);
@@ -110,7 +109,6 @@ static void deint_process(struct mp_filter *f)
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "bwdif_vulkan", args);
     } else if (img->imgfmt == IMGFMT_VAAPI) {
         char *args[] = {"deint", "motion-adaptive",
-                        "interlaced-only", "yes",
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vavpp", args);
