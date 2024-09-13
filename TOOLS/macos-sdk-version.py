@@ -3,9 +3,7 @@
 # This checks for the sdk path, the sdk version, and
 # the sdk build version.
 
-import re
 import os
-import string
 import subprocess
 import sys
 from shutil import which
@@ -33,7 +31,7 @@ def find_macos_sdk():
         try:
             sdk_version = check_output([xcodebuild, '-sdk', 'macosx', '-version', 'ProductVersion'],
                                         encoding="UTF-8", stderr=subprocess.DEVNULL)
-        except:
+        except Exception:
             pass
 
     if not isinstance(sdk_version, str):

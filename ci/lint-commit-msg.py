@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-import os, sys, json, subprocess, re
+import os
+import sys
+import json
+import subprocess
+import re
 from typing import Dict, Tuple, Callable, Optional
 
 def call(cmd) -> str:

@@ -16,13 +16,13 @@ def is_user_lib(objfile, libname):
     return not sys_re.match(libname) and \
            not usr_re.match(libname) and \
            not exe_re.match(libname) and \
-           not "libobjc." in libname and \
-           not "libSystem." in libname and \
-           not "libc." in libname and \
-           not "libgcc." in libname and \
+           "libobjc." not in libname and \
+           "libSystem." not in libname and \
+           "libc." not in libname and \
+           "libgcc." not in libname and \
            not os.path.basename(libname) == 'Python' and \
-           not os.path.basename(objfile) in libname and \
-           not "libswift" in libname
+           os.path.basename(objfile) not in libname and \
+           "libswift" not in libname
 
 def otool(objfile, rapths):
     command = "otool -L '%s' | grep -e '\t' | awk '{ print $1 }'" % objfile
@@ -46,7 +46,7 @@ def get_rapths(objfile):
 
     try:
         result = subprocess.check_output(command, shell = True, universal_newlines=True)
-    except:
+    except Exception:
         return rpaths
 
     for line in result.splitlines():
@@ -90,9 +90,9 @@ def resolve_lib_path(objfile, lib, rapths):
 
 def check_vulkan_max_version(version):
     try:
-        result = subprocess.check_output("pkg-config vulkan --max-version=" + version, shell = True)
+        subprocess.check_output("pkg-config vulkan --max-version=" + version, shell = True)
         return True
-    except:
+    except Exception:
         return False
 
 def get_homebrew_prefix():
@@ -100,7 +100,7 @@ def get_homebrew_prefix():
     result = "/opt/homebrew"
     try:
         result = subprocess.check_output("brew --prefix", universal_newlines=True, shell=True, stderr=subprocess.DEVNULL).strip()
-    except:
+    except Exception:
         pass
 
     return result
