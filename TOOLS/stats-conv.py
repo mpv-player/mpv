@@ -161,7 +161,7 @@ for cur in ax:
 
 for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
-    if not cur in G.curveno:
+    if cur not in G.curveno:
         G.curveno[cur] = 0
     args = {'name': e.name,'antialias':True}
     color = mkColor(colors[G.curveno[cur] % len(colors)])

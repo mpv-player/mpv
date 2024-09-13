@@ -58,7 +58,7 @@ try:
     proc = subprocess.run(argv, check=True)
     if depfile is not None:
         convert_depfile(output, depfile)
-except:
+except Exception:
     remove(output)
     if depfile is not None:
         remove(depfile)

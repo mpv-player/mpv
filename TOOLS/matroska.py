@@ -4,6 +4,10 @@ Generate C definitions for parsing Matroska files.
 Can also be used to directly parse Matroska files and display their contents.
 """
 
+import sys
+from math import ldexp
+from binascii import hexlify
+
 #
 # This file is part of mpv.
 #
@@ -242,14 +246,11 @@ elements_matroska = (
 )
 
 
-import sys
-from math import ldexp
-from binascii import hexlify
-
 def byte2num(s):
     return int(hexlify(s), 16)
 
-class EOF(Exception): pass
+class EOF(Exception):
+    pass
 
 def camelcase_to_words(name):
     parts = []
@@ -291,9 +292,9 @@ class MatroskaElement(object):
 
 elementd = {}
 elementlist = []
-def parse_elems(l, namespace):
+def parse_elems(elements, namespace):
     subelements = []
-    for el in l:
+    for el in elements:
         if isinstance(el, str):
             name, hexid, eltype = [x.strip() for x in el.split(',')]
             hexid = hexid.lower()
@@ -328,10 +329,10 @@ def generate_C_header(out):
             continue
         printf(out)
         printf(out, 'struct {0.structname} {{'.format(el))
-        l = max(len(subel.valname) for subel, multiple in el.subelements)+1
+        length = max(len(subel.valname) for subel, multiple in el.subelements)+1
         for subel, multiple in el.subelements:
-            printf(out, '    {e.valname:{l}} {star}{e.fieldname};'.format(
-                        e=subel, l=l, star=' *'[multiple]))
+            printf(out, '    {e.valname:{length}} {star}{e.fieldname};'.format(
+                        e=subel, length=length, star=' *'[multiple]))
         printf(out)
         for subel, multiple in el.subelements:
             printf(out, '    int  n_{0.fieldname};'.format(subel))

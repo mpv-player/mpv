@@ -33,3 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: lunarmodules/luacheck@v1
+
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
