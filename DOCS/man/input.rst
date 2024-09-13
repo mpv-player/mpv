@@ -2486,7 +2486,8 @@ Property list
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
 
 ``deinterlace-active``
-    Returns ``yes``/true if mpv's deinterlacing filter is active. Note that it
+    Returns ``yes``/true if mpv's deinterlacing filter is active. This is only
+    a guess with ``--deinterlace=auto`` and may not be accurate. Note that it
     will not detect any manually inserted deinterlacing filters done via
     ``--vf``.
 
