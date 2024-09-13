@@ -322,7 +322,7 @@ static void set_term_color(void *talloc_ctx, bstr *text, int c)
         return;
     }
 
-    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d;3%dm", c >> 3, c & 7);
+    bstr_xappend_asprintf(talloc_ctx, text, "\033[%d;9%dm", c >> 3, c & 7);
 }
 
 static void set_msg_color(void *talloc_ctx, bstr *text, int lev)
