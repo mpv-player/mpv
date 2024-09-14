@@ -1122,6 +1122,11 @@ local function handle_choice_completion(option, before_cur, path_pos)
         return handle_file_completion(before_cur, path_pos)
     end
 
+    -- Fix completing the empty value for --dscale and --cscale.
+    if info.choices and info.choices[1] == '' and completion_append == '' then
+        info.choices[1] = '""'
+    end
+
     return info.choices, before_cur
 end
 
