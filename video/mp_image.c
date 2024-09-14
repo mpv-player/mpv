@@ -1109,17 +1109,8 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         if (header->disable_residual_flag) {
             dst->dovi = dovi = av_buffer_alloc(sizeof(struct pl_dovi_metadata));
             MP_HANDLE_OOM(dovi);
-#if PL_API_VER >= 343
             pl_map_avdovi_metadata(&dst->params.color, &dst->params.repr,
                                    (void *)dst->dovi->data, metadata);
-#else
-            struct pl_frame frame;
-            frame.repr = dst->params.repr;
-            frame.color = dst->params.color;
-            pl_frame_map_avdovi_metadata(&frame, (void *)dst->dovi->data, metadata);
-            dst->params.repr = frame.repr;
-            dst->params.color = frame.color;
-#endif
         }
 #endif
     }

@@ -1012,9 +1012,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                 .radius = pl_frame_mix_radius(&params),
                 .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             );
-#if PL_API_VER >= 340
             qparams.drift_compensation = 0;
-#endif
             pl_queue_update(p->queue, NULL, &qparams);
         }
         return;
@@ -1042,9 +1040,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             .interpolation_threshold = opts->interpolation_threshold,
         );
-#if PL_API_VER >= 340
         qparams.drift_compensation = 0;
-#endif
 
         // Depending on the vsync ratio, we may be up to half of the vsync
         // duration before the current frame time. This works fine because
@@ -1305,9 +1301,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     struct pl_queue_params qparams = *pl_queue_params(
         .pts = p->last_pts,
     );
-#if PL_API_VER >= 340
         qparams.drift_compensation = 0;
-#endif
     status = pl_queue_update(p->queue, &mix, &qparams);
     assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
@@ -2145,7 +2139,6 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
 
-#if PL_API_VER >= 346
     int map_background_types[3] = {
         PL_CLEAR_SKIP,  // BACKGROUND_NONE
         PL_CLEAR_COLOR, // BACKGROUND_COLOR
@@ -2153,9 +2146,6 @@ static void update_render_options(struct vo *vo)
     };
     pars->params.background = map_background_types[opts->background];
     pars->params.border = map_background_types[p->next_opts->border_background];
-#else
-    pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
-#endif
 
     pars->params.corner_rounding = p->next_opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
