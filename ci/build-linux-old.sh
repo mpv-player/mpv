@@ -6,7 +6,7 @@ rm -rf subprojects
 mkdir -p subprojects
 git clone https://code.videolan.org/videolan/libplacebo.git \
     --recurse-submodules --shallow-submodules \
-    --depth=1 --branch v6.338 subprojects/libplacebo \
+    --depth=1 --branch v7.349 subprojects/libplacebo \
 
 meson setup build \
     --werror      \
