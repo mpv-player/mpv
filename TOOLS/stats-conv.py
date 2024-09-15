@@ -81,7 +81,7 @@ colors = [
     (0.75, 0, 0.75),
 ]
 
-def mkColor(t):
+def mk_color(t):
     return pg.mkColor(int(t[0] * 255), int(t[1] * 255), int(t[2] * 255))
 
 SCALE = 1e6 # microseconds to seconds
@@ -174,7 +174,7 @@ for e in G.sevents:
     if cur not in G.curveno:
         G.curveno[cur] = 0
     args = {"name": e.name,"antialias":True}
-    color = mkColor(colors[G.curveno[cur] % len(colors)])
+    color = mk_color(colors[G.curveno[cur] % len(colors)])
     if e.type == "event-signal":
         args["symbol"] = e.marker
         args["symbolBrush"] = pg.mkBrush(color, width=0)

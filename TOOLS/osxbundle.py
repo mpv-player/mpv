@@ -40,8 +40,8 @@ def apply_plist_template(plist_file, version):
 
 def sign_bundle(binary_name):
     sign_directories = ["Contents/Frameworks", "Contents/MacOS"]
-    for dir in sign_directories:
-        resolved_dir = os.path.join(bundle_path(binary_name), dir)
+    for sign_dir in sign_directories:
+        resolved_dir = os.path.join(bundle_path(binary_name), sign_dir)
         for root, _dirs, files in os.walk(resolved_dir):
             for f in files:
                 path = os.path.join(root, f)
