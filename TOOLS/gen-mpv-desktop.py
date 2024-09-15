@@ -24,7 +24,7 @@ import sys
 from subprocess import check_output
 
 if __name__ == "__main__":
-    with open(sys.argv[1], "r", encoding="UTF-8") as f:
+    with open(sys.argv[1], encoding="UTF-8") as f:
         next(f)
         mpv_desktop = dict([line.split("=", 1) for line in f])
 

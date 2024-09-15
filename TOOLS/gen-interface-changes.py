@@ -26,11 +26,12 @@ import textwrap
 from shutil import which
 from subprocess import check_output
 
+
 def add_new_entries(docs_dir, out, git):
     changes_dir = pathlib.Path(docs_dir) / "interface-changes"
     files = []
     for f in pathlib.Path(changes_dir).glob("*.txt"):
-        if f.is_file() and not f.name == "example.txt":
+        if f.is_file() and f.name != "example.txt":
             timestamp = check_output([git, "log", "--format=%ct", "-n", "1", "--",
                                       f], encoding="UTF-8")
             if timestamp:
@@ -73,7 +74,7 @@ if __name__ == "__main__":
 
     docs_dir = pathlib.Path(sys.argv[0]).resolve().parents[1] / "DOCS"
     interface_changes = docs_dir / "interface-changes.rst"
-    with open(interface_changes, "r") as f:
+    with open(interface_changes) as f:
         lines = [line.rstrip() for line in f]
 
     ver_line = " --- mpv 0." + major_version + ".0 ---"

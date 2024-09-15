@@ -27,7 +27,7 @@ import sys
 
 
 def convert_depfile(output, depfile):
-    with open(depfile, "r") as f:
+    with open(depfile) as f:
         deps = f.readlines()
 
     with open(depfile, "w") as f:

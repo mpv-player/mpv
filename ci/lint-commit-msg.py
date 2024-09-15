@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import os
-import sys
 import json
-import subprocess
+import os
 import re
-from typing import Dict, Tuple, Callable, Optional
+import subprocess
+import sys
+from typing import Callable, Dict, Optional, Tuple
+
 
 def call(cmd) -> str:
     sys.stdout.flush()
@@ -16,7 +17,7 @@ lint_rules: Dict[str, Tuple[Callable, str]] = {}
 # A lint rule should return True if everything is okay
 def lint_rule(description: str):
     def f(func):
-        assert func.__name__ not in lint_rules.keys()
+        assert func.__name__ not in lint_rules
         lint_rules[func.__name__] = (func, description)
     return f
 
@@ -100,7 +101,7 @@ def line_too_long(body):
     return revert or len(body[0]) <= 72
 
 @lint_rule(
-    "Prefix should not include file extension (use `vo_gpu: ...` not `vo_gpu.c: ...`)"
+    "Prefix should not include file extension (use `vo_gpu: ...` not `vo_gpu.c: ...`)",
 )
 def no_file_exts(body):
     return not re.search(r"[a-z0-9]\.([chm]|cpp|swift|py): ", body[0])

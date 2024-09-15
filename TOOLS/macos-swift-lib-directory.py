@@ -29,7 +29,7 @@ def find_swift_lib():
 
     swift_lib_dir = os.path.join(
         xcode_path,
-        "Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx"
+        "Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx",
     )
     if os.path.isdir(swift_lib_dir):
         return swift_lib_dir
