@@ -44,6 +44,7 @@
 #include "linux-dmabuf-unstable-v1.h"
 #include "viewporter.h"
 #include "single-pixel-buffer-v1.h"
+#include "frog-color-management-v1.h"
 
 // We need at least enough buffers to avoid a
 // flickering artifact in certain formats.
@@ -585,6 +586,18 @@ done:
     return draw;
 }
 
+static enum frog_color_managed_surface_primaries const csp2fcsp[] = {
+    [PL_COLOR_PRIM_BT_2020] = FROG_COLOR_MANAGED_SURFACE_PRIMARIES_REC2020,
+    [PL_COLOR_PRIM_BT_709] = FROG_COLOR_MANAGED_SURFACE_PRIMARIES_REC709
+};
+
+static enum frog_color_managed_surface_transfer_function const cst2fcst[] = {
+    [PL_COLOR_TRC_SRGB] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_SRGB,
+    [PL_COLOR_TRC_GAMMA22] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_GAMMA_22,
+    [PL_COLOR_TRC_PQ] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_ST2084_PQ,
+    [PL_COLOR_TRC_LINEAR] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_SCRGB_LINEAR
+};
+
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -610,6 +623,11 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
+        frog_color_managed_surface_set_known_container_color_volume(wl->color_surface, csp2fcsp[frame->current->params.color.primaries]);
+        frog_color_managed_surface_set_known_transfer_function(wl->color_surface, cst2fcst[frame->current->params.color.transfer]);
+        frog_color_managed_surface_set_hdr_metadata(wl->color_surface, frame->current->params.color.hdr.prim.red.x, frame->current->params.color.hdr.prim.red.y, frame->current->params.color.hdr.prim.green.x, frame->current->params.color.hdr.prim.green.y, frame->current->params.color.hdr.prim.blue.x, frame->current->params.color.hdr.prim.blue.y, frame->current->params.color.hdr.prim.white.x, frame->current->params.color.hdr.prim.white.y, frame->current->params.color.hdr.max_luma, frame->current->params.color.hdr.min_luma, frame->current->params.color.hdr.max_cll, frame->current->params.color.hdr.max_fall);
+
+
         buf = buffer_get(vo, frame);
 
         if (buf && buf->frame) {

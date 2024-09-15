@@ -42,11 +42,13 @@ struct vo_wayland_state {
     struct wl_registry      *registry;
     struct wl_shm           *shm;
     struct wl_surface       *surface;
+    struct frog_color_managed_surface       *color_surface;
     struct wl_surface       *osd_surface;
     struct wl_subsurface    *osd_subsurface;
     struct wl_surface       *video_surface;
     struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
+    struct frog_color_management_factory_v1 *color_management;
 
     /* Geometry */
     struct mp_rect geometry;

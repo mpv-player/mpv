@@ -45,6 +45,7 @@
 #include "content-type-v1.h"
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
+#include "frog-color-management-v1.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
@@ -1430,6 +1431,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
         wl->cursor_surface = wl_compositor_create_surface(wl->compositor);
         wl_surface_add_listener(wl->surface, &surface_listener, wl);
+    }
+
+    if (!strcmp(interface, frog_color_management_factory_v1_interface.name) && (ver >= 1) && found++) {
+        wl->color_management = wl_registry_bind(reg, id, &frog_color_management_factory_v1_interface, ver);
+        wl->color_surface = frog_color_management_factory_v1_get_color_managed_surface(wl->color_management, wl->surface);
     }
 
     if (!strcmp(interface, wl_subcompositor_interface.name) && found++) {
@@ -2886,6 +2892,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->single_pixel_manager)
         wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
+
+    if (wl->color_management)
+        frog_color_management_factory_v1_destroy(wl->color_management);
+
+    if (wl->color_surface)
+        frog_color_managed_surface_destroy(wl->color_surface);
 
     if (wl->surface)
         wl_surface_destroy(wl->surface);
