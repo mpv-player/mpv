@@ -42,7 +42,8 @@ def sign_bundle(binary_name):
         resolved_dir = os.path.join(bundle_path(binary_name), dir)
         for root, _dirs, files in os.walk(resolved_dir):
             for f in files:
-                subprocess.run(['codesign', '--force', '-s', '-', os.path.join(root, f)])
+                path = os.path.join(root, f)
+                subprocess.run(['codesign', '--force', '-s', '-', path])
     subprocess.run(['codesign', '--force', '-s', '-', bundle_path(binary_name)])
 
 def bundle_version(src_path):
