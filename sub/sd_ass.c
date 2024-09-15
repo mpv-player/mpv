@@ -514,7 +514,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
     }
-    if (converted || shared_opts->ass_style_override[sd->order]) {
+    if (converted || shared_opts->ass_style_override[sd->order] >= ASS_STYLE_OVERRIDE_YES) {
         set_sub_pos = 100.0f - shared_opts->sub_pos[sd->order];
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
@@ -538,7 +538,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
     if (shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE)
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
-    if (converted)
+    if (converted || shared_opts->ass_style_override[sd->order] >= ASS_STYLE_OVERRIDE_YES)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
 #if LIBASS_VERSION >= 0x01306000
     if ((converted || shared_opts->ass_style_override[sd->order]) && opts->ass_justify)
