@@ -5,8 +5,8 @@ Can also be used to directly parse Matroska files and display their contents.
 """
 
 import sys
-from math import ldexp
 from binascii import hexlify
+from math import ldexp
 
 #
 # This file is part of mpv.
@@ -263,11 +263,11 @@ def camelcase_to_words(name):
     parts.append(name[start:])
     return "_".join(parts).lower()
 
-class MatroskaElement(object):
+class MatroskaElement:
 
     def __init__(self, name, elid, valtype, namespace):
         self.name = name
-        self.definename = "{0}_ID_{1}".format(namespace, name.upper())
+        self.definename = f"{namespace}_ID_{name.upper()}"
         self.fieldname = camelcase_to_words(name)
         self.structname = "ebml_" + self.fieldname
         self.elid = elid
@@ -296,7 +296,7 @@ def parse_elems(elements, namespace):
     subelements = []
     for el in elements:
         if isinstance(el, str):
-            name, hexid, eltype = [x.strip() for x in el.split(",")]
+            name, hexid, eltype = (x.strip() for x in el.split(","))
             hexid = hexid.lower()
             multiple = name.endswith("*")
             name = name.strip("*")
@@ -320,7 +320,7 @@ def generate_C_header(out):
     printf(out)
 
     for el in elementlist:
-        printf(out, "#define {0.definename:40} 0x{0.elid}".format(el))
+        printf(out, f"#define {el.definename:40} 0x{el.elid}")
 
     printf(out)
 
@@ -328,14 +328,14 @@ def generate_C_header(out):
         if not el.subelements:
             continue
         printf(out)
-        printf(out, "struct {0.structname} {{".format(el))
+        printf(out, f"struct {el.structname} {{")
         length = max(len(subel.valname) for subel, multiple in el.subelements)+1
         for subel, multiple in el.subelements:
             printf(out, "    {e.valname:{length}} {star}{e.fieldname};".format(
                         e=subel, length=length, star=" *"[multiple]))
         printf(out)
         for subel, multiple in el.subelements:
-            printf(out, "    int  n_{0.fieldname};".format(subel))
+            printf(out, f"    int  n_{subel.fieldname};")
         printf(out, "};")
 
     for el in elementlist:
@@ -355,14 +355,14 @@ def generate_C_definitions(out):
         printf(out)
         if el.subelements:
             printf(out, "#define N", el.fieldname)
-            printf(out, 'E_S("{0}", {1})'.format(el.name, len(el.subelements)))
+            printf(out, f'E_S("{el.name}", {len(el.subelements)})')
             for subel, multiple in el.subelements:
-                printf(out, "F({0.definename}, {0.fieldname}, {1})".format(
-                            subel, int(multiple)))
+                msg = f"F({subel.definename}, {subel.fieldname}, {int(multiple)})"
+                printf(out, msg)
             printf(out, "}};")
             printf(out, "#undef N")
         else:
-            printf(out, 'E("{0.name}", {0.fieldname}, {0.ebmltype})'.format(el))
+            printf(out, f'E("{el.name}", {el.fieldname}, {el.ebmltype})')
 
 def read(s, length):
     t = s.read(length)
@@ -449,11 +449,11 @@ def parse_one(s, depth, parent, maxlen):
                 if idelem is None:
                     dec = "(UNKNOWN)"
                 else:
-                    dec = "({0.name})".format(idelem)
+                    dec = f"({idelem.name})"
             if len(t) < 20:
                 t = hexlify(t).decode("ascii")
             else:
-                t = "<{0} bytes>".format(len(t))
+                t = f"<{len(t)} bytes>"
             print("binary", t, dec)
         elif elem.valtype == "uint":
             print("uint", read_uint(s, length))

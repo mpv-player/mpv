@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-from PyQt6 import QtWidgets
-import pyqtgraph as pg
-import sys
 import re
+import sys
+
+import pyqtgraph as pg
+from PyQt6 import QtWidgets
 
 filename = sys.argv[1]
 
@@ -77,7 +78,7 @@ colors = [
     (1.0, 0.0, 0.0),
     (0.75, 0.75, 0),
     (0.0, 0.75, 0.75),
-    (0.75, 0, 0.75)
+    (0.75, 0, 0.75),
 ]
 
 def mkColor(t):
@@ -85,7 +86,7 @@ def mkColor(t):
 
 SCALE = 1e6 # microseconds to seconds
 
-with open(filename, "r") as file:
+with open(filename) as file:
     for line in file:
         line = line.split("#")[0].strip()
         if not line:

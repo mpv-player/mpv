@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
+import fileinput
 import os
 import shutil
-import fileinput
-import dylib_unhell
 import subprocess
 from optparse import OptionParser
 
+import dylib_unhell
+
+
 def bundle_path(binary_name):
-    return "%s.app" % binary_name
+    return f"{binary_name}.app"
 
 def bundle_name(binary_name):
     return os.path.basename(bundle_path(binary_name))
@@ -72,7 +74,7 @@ def main():
 
     version = bundle_version(src_path).rstrip()
 
-    print("Creating macOS application bundle (version: %s)..." % version)
+    print(f"Creating macOS application bundle (version: {version})...")
     print("> copying bundle skeleton")
     copy_bundle(binary_name, src_path)
     print("> copying binary")

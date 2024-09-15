@@ -25,10 +25,11 @@
 import os
 import sys
 
-def file2string(infilename, infile, outfile):
-    outfile.write("// Generated from %s\n\n" % infilename)
 
-    conv = ["\\%03o" % c for c in range(256)]
+def file2string(infilename, infile, outfile):
+    outfile.write(f"// Generated from {infilename}\n\n")
+
+    conv = [f"\\{c:03o}" for c in range(256)]
     safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" \
                  "0123456789!#%&'()*+,-./:;<=>[]^_{|}~ "
 
