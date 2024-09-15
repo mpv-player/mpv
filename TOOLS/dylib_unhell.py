@@ -20,7 +20,7 @@ def is_user_lib(objfile, libname):
            "libSystem." not in libname and \
            "libc." not in libname and \
            "libgcc." not in libname and \
-           not os.path.basename(libname) == 'Python' and \
+           not os.path.basename(libname) == "Python" and \
            os.path.basename(objfile) not in libname and \
            "libswift" not in libname
 
@@ -52,8 +52,8 @@ def get_rapths(objfile):
     for line in result.splitlines():
         line_clean = pathRe.search(line).group(1).strip()
         # resolve @loader_path
-        if line_clean.startswith('@loader_path/'):
-            line_clean = line_clean[len('@loader_path/'):]
+        if line_clean.startswith("@loader_path/"):
+            line_clean = line_clean[len("@loader_path/"):]
             line_clean = os.path.join(os.path.dirname(objfile), line_clean)
             line_clean = os.path.normpath(line_clean)
         rpaths.append(line_clean)
@@ -63,7 +63,7 @@ def get_rapths(objfile):
 def get_rpaths_dev_tools(binary):
     command = (
         f"otool -l '{binary}' | grep -A2 LC_RPATH | grep path | "
-        "grep \"Xcode\\|CommandLineTools\""
+        'grep "Xcode\\|CommandLineTools"'
     )
     result  = subprocess.check_output(command, shell = True, universal_newlines=True)
     pathRe = re.compile(r"^\s*path (.*) \(offset \d*\)$")
@@ -78,19 +78,19 @@ def resolve_lib_path(objfile, lib, rapths):
     if os.path.exists(lib):
         return lib
 
-    if lib.startswith('@rpath/'):
-        lib = lib[len('@rpath/'):]
+    if lib.startswith("@rpath/"):
+        lib = lib[len("@rpath/"):]
         for rpath in rapths:
             lib_path = os.path.join(rpath, lib)
             if os.path.exists(lib_path):
                 return lib_path
-    elif lib.startswith('@loader_path/'):
-        lib = lib[len('@loader_path/'):]
+    elif lib.startswith("@loader_path/"):
+        lib = lib[len("@loader_path/"):]
         lib_path = os.path.normpath(os.path.join(objfile, lib))
         if os.path.exists(lib_path):
             return lib_path
 
-    raise Exception('Could not resolve library: ' + lib)
+    raise Exception("Could not resolve library: " + lib)
 
 def check_vulkan_max_version(version):
     try:
@@ -149,10 +149,10 @@ def libraries(objfile, result = dict(), result_relative = set(), rapths = []):
     return result, result_relative
 
 def lib_path(binary):
-    return os.path.join(os.path.dirname(binary), 'lib')
+    return os.path.join(os.path.dirname(binary), "lib")
 
 def resources_path(binary):
-    return os.path.join(os.path.dirname(binary), '../Resources')
+    return os.path.join(os.path.dirname(binary), "../Resources")
 
 def lib_name(lib):
     return os.path.join("@executable_path", "lib", os.path.basename(lib))
@@ -185,20 +185,20 @@ def process_libraries(libs_dict, libs_dyn, binary):
         install_name_tool_change(lib, lib_name(lib), binary)
 
 def process_swift_libraries(binary):
-    command = ['xcrun', '--find', 'swift-stdlib-tool']
+    command = ["xcrun", "--find", "swift-stdlib-tool"]
     swiftStdlibTool = subprocess.check_output(command, universal_newlines=True).strip()
     # from xcode11 on the dynamic swift libs reside in a separate directory from
     # the std one, might need versioned paths for future swift versions
-    swiftLibPath = os.path.join(swiftStdlibTool, '../../lib/swift-5.0/macosx')
+    swiftLibPath = os.path.join(swiftStdlibTool, "../../lib/swift-5.0/macosx")
     swiftLibPath = os.path.abspath(swiftLibPath)
 
     command = [
-        swiftStdlibTool, '--copy', '--platform', 'macosx', '--scan-executable',
-        binary, '--destination', lib_path(binary)
+        swiftStdlibTool, "--copy", "--platform", "macosx", "--scan-executable",
+        binary, "--destination", lib_path(binary)
     ]
 
     if os.path.exists(swiftLibPath):
-        command.extend(['--source-libraries', swiftLibPath])
+        command.extend(["--source-libraries", swiftLibPath])
 
     subprocess.check_output(command, universal_newlines=True)
 
@@ -216,7 +216,7 @@ def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode)
         os.path.join(os.path.expanduser("~"), ".local/share", loaderRelativeFolder),
         os.path.join("/usr/local/share", loaderRelativeFolder),
         os.path.join("/usr/share/vulkan", loaderRelativeFolder),
-        os.path.join(get_homebrew_prefix(), 'share', loaderRelativeFolder),
+        os.path.join(get_homebrew_prefix(), "share", loaderRelativeFolder),
     ]
 
     loaderSystemFolder = ""
@@ -241,7 +241,7 @@ def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode)
     if not os.path.exists(loaderBundleFolder):
         os.makedirs(loaderBundleFolder)
 
-    loaderSystemFile = open(loaderSystemPath, 'r')
+    loaderSystemFile = open(loaderSystemPath, "r")
     loaderJsonData = json.load(loaderSystemFile)
     libraryPath = loaderJsonData[libraryNode]["library_path"]
     librarySystemPath = os.path.join(loaderSystemFolder, libraryPath)
@@ -251,7 +251,7 @@ def process_vulkan_loader(binary, loaderName, loaderRelativeFolder, libraryNode)
         return
 
     print(">>> modifiying and writing loader json " + loaderName)
-    loaderBundleFile = open(loaderBundlePath, 'w')
+    loaderBundleFile = open(loaderBundlePath, "w")
     loaderLibraryName = os.path.basename(librarySystemPath)
     library_path = os.path.join(libraryRelativeFolder, loaderLibraryName)
     loaderJsonData[libraryNode]["library_path"] = library_path

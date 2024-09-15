@@ -53,7 +53,7 @@ if __name__ == "__main__":
         print(f"Usage: {sys.argv[0]} <version>")
         sys.exit(1)
 
-    git = which('git')
+    git = which("git")
     if not git:
         print("Unable to find git binary")
         sys.exit(1)

@@ -35,11 +35,10 @@ def file2string(infilename, infile, outfile):
     for c in safe_chars:
         conv[ord(c)] = c
     for c, esc in ("\nn", "\tt", r"\\", '""'):
-        conv[ord(c)] = '\\' + esc
+        conv[ord(c)] = "\\" + esc
     for line in infile:
-        outfile.write('"' + ''.join(conv[c] for c in line) + '"\n')
+        outfile.write('"' + "".join(conv[c] for c in line) + '"\n')
 
 if __name__ == "__main__":
-
-    with open(sys.argv[1], 'rb') as infile, open(sys.argv[2], "w") as outfile:
+    with open(sys.argv[1], "rb") as infile, open(sys.argv[2], "w") as outfile:
         file2string(os.path.relpath(sys.argv[1], sys.argv[3]), infile, outfile)

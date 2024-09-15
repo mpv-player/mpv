@@ -43,7 +43,7 @@ def do_lint(commit_range: str) -> bool:
     print(f"Linting {len(commits)} commit(s):")
     any_failed = False
     for commit in commits:
-        sha, _, _ = commit.partition(' ')
+        sha, _, _ = commit.partition(" ")
         body = call(["git", "show", "-s", "--format=%B", sha]).splitlines()
         failed = []
         if len(body) == 0:
@@ -79,7 +79,7 @@ def description_lowercase(body):
 
 @lint_rule("Subject line must not end with a full stop")
 def no_dot(body):
-    return not body[0].rstrip().endswith('.')
+    return not body[0].rstrip().endswith(".")
 
 @lint_rule("There must be an empty line between subject and extended description")
 def empty_line(body):
