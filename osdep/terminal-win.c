@@ -285,6 +285,7 @@ void terminal_uninit(void)
         running = false;
     }
     FlsFree(tmp_buffers_key);
+    tmp_buffers_key = FLS_OUT_OF_INDEXES;
 }
 
 bool terminal_in_background(void)
