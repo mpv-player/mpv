@@ -31,7 +31,7 @@ if __name__ == "__main__":
     if not mpv_desktop["X-KDE-Protocols"]:
         raise ValueError("Missing X-KDE-Protocols entry in mpv.desktop file")
 
-    mpv_protocols = check_output([sys.argv[2], "--list-protocols"], encoding="UTF-8")
+    mpv_protocols = check_output([sys.argv[2], "--no-config", "--list-protocols"], encoding="UTF-8")
     mpv_protocols = set(line.strip(" :/") for line in mpv_protocols.splitlines() if "://" in line)
     if len(mpv_protocols) == 0:
         raise ValueError("Unable to parse any protocols from mpv '--list-protocols'")
