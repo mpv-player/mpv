@@ -5,6 +5,8 @@ line-length = 100
 select = [
     "F", # pyflakes
     "E", "W", # pycodestyle
+    "N", # pep8-naming
     "UP", # pyupgrade
+    "A", # flake8-builtins
     "Q", # flake8-quotes
 ]

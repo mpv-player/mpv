@@ -216,7 +216,7 @@ def process_swift_libraries(binary):
 def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_node):
     # https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderDriverInterface.md#example-macos-driver-search-path
     # https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderLayerInterface.md#macos-layer-discovery
-    loaderSystemSearchFolders = [
+    loader_system_search_folders = [
         os.path.join(os.path.expanduser("~"), ".config", loader_relative_folder),
         os.path.join("/etc/xdg", loader_relative_folder),
         os.path.join("/usr/local/etc", loader_relative_folder),
@@ -227,50 +227,52 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
         os.path.join(get_homebrew_prefix(), "share", loader_relative_folder),
     ]
 
-    loaderSystemFolder = ""
-    for loaderSystemSearchFolder in loaderSystemSearchFolders:
-        if os.path.exists(loaderSystemSearchFolder):
-            loaderSystemFolder = loaderSystemSearchFolder
+    loader_system_folder = ""
+    for loader_system_search_folder in loader_system_search_folders:
+        if os.path.exists(loader_system_search_folder):
+            loader_system_folder = loader_system_search_folder
             break
 
-    if not loaderSystemFolder:
+    if not loader_system_folder:
         print(">>> could not find loader folder " + loader_relative_folder)
         return
 
-    loaderBundleFolder = os.path.join(resources_path(binary), loader_relative_folder)
-    loaderSystemPath = os.path.join(loaderSystemFolder, loader_name)
-    loaderBundlePath = os.path.join(loaderBundleFolder, loader_name)
-    libraryRelativeFolder = "../../../Frameworks/"
+    loader_bundle_folder = os.path.join(resources_path(binary), loader_relative_folder)
+    loader_system_path = os.path.join(loader_system_folder, loader_name)
+    loader_bundle_path = os.path.join(loader_bundle_folder, loader_name)
+    library_relative_folder = "../../../Frameworks/"
 
-    if not os.path.exists(loaderSystemPath):
+    if not os.path.exists(loader_system_path):
         print(">>> could not find loader " + loader_name)
         return
 
-    if not os.path.exists(loaderBundleFolder):
-        os.makedirs(loaderBundleFolder)
+    if not os.path.exists(loader_bundle_folder):
+        os.makedirs(loader_bundle_folder)
 
-    loaderSystemFile = open(loaderSystemPath)
-    loaderJsonData = json.load(loaderSystemFile)
-    libraryPath = loaderJsonData[library_node]["library_path"]
-    librarySystemPath = os.path.join(loaderSystemFolder, libraryPath)
+    loader_system_file = open(loader_system_path)
+    loader_json_data = json.load(loader_system_file)
+    library_path = loader_json_data[library_node]["library_path"]
+    library_system_path = os.path.join(loader_system_folder, library_path)
 
-    if not os.path.exists(librarySystemPath):
-        print(">>> could not find loader library " + librarySystemPath)
+    if not os.path.exists(library_system_path):
+        print(">>> could not find loader library " + library_system_path)
         return
 
     print(">>> modifiying and writing loader json " + loader_name)
-    loaderBundleFile = open(loaderBundlePath, "w")
-    loaderLibraryName = os.path.basename(librarySystemPath)
-    library_path = os.path.join(libraryRelativeFolder, loaderLibraryName)
-    loaderJsonData[library_node]["library_path"] = library_path
-    json.dump(loaderJsonData, loaderBundleFile, indent=4)
+    loader_bundle_file = open(loader_bundle_path, "w")
+    loader_library_name = os.path.basename(library_system_path)
+    library_path = os.path.join(library_relative_folder, loader_library_name)
+    loader_json_data[library_node]["library_path"] = library_path
+    json.dump(loader_json_data, loader_bundle_file, indent=4)
 
-    print(">>> copying loader library " + loaderLibraryName)
-    frameworkBundleFolder = os.path.join(loaderBundleFolder, libraryRelativeFolder)
-    if not os.path.exists(frameworkBundleFolder):
-        os.makedirs(frameworkBundleFolder)
-    library_target_path = os.path.join(frameworkBundleFolder, loaderLibraryName)
-    shutil.copy(librarySystemPath, library_target_path)
+    print(">>> copying loader library " + loader_library_name)
+    framework_bundle_folder = os.path.join(
+        loader_bundle_folder, library_relative_folder
+    )
+    if not os.path.exists(framework_bundle_folder):
+        os.makedirs(framework_bundle_folder)
+    library_target_path = os.path.join(framework_bundle_folder, loader_library_name)
+    shutil.copy(library_system_path, library_target_path)
 
 def remove_dev_tools_rapths(binary):
     for path in get_rpaths_dev_tools(binary):
