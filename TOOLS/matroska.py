@@ -341,7 +341,7 @@ def generate_C_header(out):
     for el in elementlist:
         if not el.subelements:
             continue
-        printf(out, 'extern const struct ebml_elem_desc {0.structname}_desc;'.format(el))
+        printf(out, f'extern const struct ebml_elem_desc {el.structname}_desc;')
 
     printf(out)
     printf(out, '#define MAX_EBML_SUBELEMENTS', max(len(el.subelements)
@@ -431,7 +431,8 @@ def parse_one(s, depth, parent, maxlen):
     this_length = len(elid) / 2 + size + length
     if elem is not None:
         if elem.valtype != 'skip':
-            print("    " * depth, '[' + elid + ']', elem.name, 'size:', length, 'value:', end=' ')
+            indent = "    " * depth
+            print(f"{indent} [{elid}] {elem.name} size: {length} value:", end=' ')
         if elem.valtype == 'sub':
             print('subelements:')
             while length > 0:
