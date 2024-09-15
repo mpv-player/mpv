@@ -187,10 +187,6 @@ void mp_destroy(struct MPContext *mpctx)
     cocoa_set_input_context(NULL);
 #endif
 
-    uninit_libav(mpctx->global);
-
-    mp_msg_uninit(mpctx->global);
-
     if (cas_terminal_owner(mpctx, mpctx)) {
         terminal_uninit();
         cas_terminal_owner(mpctx, NULL);
@@ -198,6 +194,9 @@ void mp_destroy(struct MPContext *mpctx)
 
     mp_input_uninit(mpctx->input);
 
+    uninit_libav(mpctx->global);
+
+    mp_msg_uninit(mpctx->global);
     assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
     mp_mutex_destroy(&mpctx->abort_lock);
