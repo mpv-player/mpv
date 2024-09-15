@@ -510,7 +510,7 @@ local function update()
 
     -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
     -- which would print the log to the OSD.
-    if not mp.get_property('current-vo') then
+    if not mp.get_property('current-vo') or not mp.get_property_native('video-osd') then
         print_to_terminal()
         return
     end
