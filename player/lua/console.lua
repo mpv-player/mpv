@@ -368,6 +368,21 @@ local function fuzzy_find(needle, haystacks)
     return result
 end
 
+local function calculate_max_terminal_width()
+    local max_width = mp.get_property_native('term-size/w', 80)
+
+    -- The longest module name is vo/gpu-next/libplacebo.
+    if mp.get_property_native('msg-module') then
+        max_width = max_width - 24
+    end
+
+    if mp.get_property_native('msg-time') then
+        max_width = max_width - 13
+    end
+
+    return max_width
+end
+
 local function populate_log_with_matches(max_width)
     if not selectable_items or selected_match == 0 then
         return
@@ -459,7 +474,7 @@ local function print_to_terminal()
         return
     end
 
-    populate_log_with_matches(mp.get_property_native('term-size/w', 80))
+    populate_log_with_matches(calculate_max_terminal_width())
 
     local log = ''
     for _, log_line in ipairs(log_buffers[id]) do
