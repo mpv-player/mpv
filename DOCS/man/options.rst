@@ -2577,7 +2577,7 @@ Subtitles
     rendering for most files. It's thus recommended to only use ``none`` or
     ``aspect-ratio`` on a per-file basis.
 
-    :nono:  Don't use aspect ratio or storage resolution.
+    :none:  Don't use aspect ratio or storage resolution.
     :aspect-ratio: Use aspect ratio only. Resolutions specified in the script
                    are used in place of storage resolution.
     :all:   Use both aspect ratio and storage resolution.
