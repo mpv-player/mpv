@@ -149,8 +149,8 @@ for e, index in zip(G.sevents, range(len(G.sevents))):
     else:
         e.vals = [(x, y * (m - index) / m) for (x, y) in e.vals]
 
-pg.setConfigOption('background', 'w')
-pg.setConfigOption('foreground', 'k')
+pg.setConfigOption("background", "w")
+pg.setConfigOption("foreground", "k")
 app = QtWidgets.QApplication([])
 win = pg.GraphicsLayoutWidget()
 win.show()
@@ -172,13 +172,13 @@ for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
     if cur not in G.curveno:
         G.curveno[cur] = 0
-    args = {'name': e.name,'antialias':True}
+    args = {"name": e.name,"antialias":True}
     color = mkColor(colors[G.curveno[cur] % len(colors)])
     if e.type == "event-signal":
-        args['symbol'] = e.marker
-        args['symbolBrush'] = pg.mkBrush(color, width=0)
+        args["symbol"] = e.marker
+        args["symbolBrush"] = pg.mkBrush(color, width=0)
     else:
-        args['pen'] = pg.mkPen(color, width=0)
+        args["pen"] = pg.mkPen(color, width=0)
     G.curveno[cur] += 1
     cur.plot(*zip(*e.vals), **args)
 

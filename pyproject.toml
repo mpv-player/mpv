@@ -5,4 +5,5 @@ line-length = 100
 select = [
     "F", # pyflakes
     "E", "W", # pycodestyle
+    "Q", # flake8-quotes
 ]
