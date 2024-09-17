@@ -25,7 +25,7 @@ local function show_error(message)
     end
 end
 
-mp.add_forced_key_binding(nil, "select-playlist", function ()
+mp.add_key_binding(nil, "select-playlist", function ()
     local playlist = {}
     local default_item
     local show = mp.get_property_native("osd-playlist-entry")
@@ -108,7 +108,7 @@ local function format_track(track)
         ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
-mp.add_forced_key_binding(nil, "select-track", function ()
+mp.add_key_binding(nil, "select-track", function ()
     local tracks = {}
 
     for i, track in ipairs(mp.get_property_native("track-list")) do
@@ -166,21 +166,21 @@ local function select_track(property, type, prompt, error)
     })
 end
 
-mp.add_forced_key_binding(nil, "select-sid", function ()
+mp.add_key_binding(nil, "select-sid", function ()
     select_track("sid", "sub", "Select a subtitle:", "No available subtitles.")
 end)
 
-mp.add_forced_key_binding(nil, "select-secondary-sid", function ()
+mp.add_key_binding(nil, "select-secondary-sid", function ()
     select_track("secondary-sid", "sub", "Select a secondary subtitle:",
                  "No available subtitles.")
 end)
 
-mp.add_forced_key_binding(nil, "select-aid", function ()
+mp.add_key_binding(nil, "select-aid", function ()
     select_track("aid", "audio", "Select an audio track:",
                  "No available audio tracks.")
 end)
 
-mp.add_forced_key_binding(nil, "select-vid", function ()
+mp.add_key_binding(nil, "select-vid", function ()
     select_track("vid", "video", "Select a video track:",
                  "No available video tracks.")
 end)
@@ -198,7 +198,7 @@ local function format_time(t, duration)
     return string.format("%.2d:%.2d", m, s)
 end
 
-mp.add_forced_key_binding(nil, "select-chapter", function ()
+mp.add_key_binding(nil, "select-chapter", function ()
     local chapters = {}
     local default_item = mp.get_property_native("chapter")
 
@@ -223,7 +223,7 @@ mp.add_forced_key_binding(nil, "select-chapter", function ()
     })
 end)
 
-mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
+mp.add_key_binding(nil, "select-subtitle-line", function ()
     local sub = mp.get_property_native("current-tracks/sub")
 
     if sub == nil then
@@ -290,7 +290,7 @@ mp.add_forced_key_binding(nil, "select-subtitle-line", function ()
     })
 end)
 
-mp.add_forced_key_binding(nil, "select-audio-device", function ()
+mp.add_key_binding(nil, "select-audio-device", function ()
     local devices = mp.get_property_native("audio-device-list")
     local items = {}
     -- This is only useful if an --audio-device has been explicitly set,
@@ -322,7 +322,7 @@ mp.add_forced_key_binding(nil, "select-audio-device", function ()
     })
 end)
 
-mp.add_forced_key_binding(nil, "select-binding", function ()
+mp.add_key_binding(nil, "select-binding", function ()
     local bindings = {}
 
     for _, binding in pairs(mp.get_property_native("input-bindings")) do
@@ -368,7 +368,7 @@ local function add_property(property, value)
     end
 end
 
-mp.add_forced_key_binding(nil, "show-properties", function ()
+mp.add_key_binding(nil, "show-properties", function ()
     properties = {}
 
     -- Don't log errors for renamed and removed properties.
