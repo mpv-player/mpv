@@ -2041,10 +2041,14 @@ Property list
     This replaces the ``length`` property, which was deprecated after the
     mpv 0.9 release. (The semantics are the same.)
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``duration/full``
         ``duration`` with milliseconds.
+
+    ``duration/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current file. This is only available
+        if the file has a video track. See also ``time-pos/smpte``.
 
 ``avsync``
     Last A/V synchronization difference. Unavailable if audio or video is
@@ -2092,10 +2096,18 @@ Property list
 ``time-pos`` (RW)
     Position in current file in seconds.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``time-pos/full``
         ``time-pos`` with milliseconds.
+
+    ``time-pos/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current file. This is only available
+        if the file has a video track.
+
+        Same warnings as ``container-fps`` apply. The detected fps may not be
+        accurate. Moreover, it is impossible to detect accurate timecodes with
+        fractional container fps or variable refresh rate files.
 
 ``time-start``
     Deprecated. Always returns 0. Before mpv 0.14, this used to return the start
@@ -2106,10 +2118,14 @@ Property list
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``time-remaining/full``
         ``time-remaining`` with milliseconds.
+
+    ``time-remaining/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the remaining length of the file. This
+        is only available if the file has a video track. See also ``time-pos/smpte``.
 
 ``audio-pts``
     Current audio playback position in current file in seconds. Unlike ``time-pos``,
@@ -2118,18 +2134,26 @@ Property list
     driver delay. This can lead to negative values in certain cases, so in
     general you probably want to simply use ``time-pos``.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``audio-pts/full``
         ``audio-pts`` with milliseconds.
 
+    ``audio-pts/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current audio PTS. This is only
+        available if the file has an audio track. See also ``time-pos/smpte``.
+
 ``playtime-remaining``
     ``time-remaining`` scaled by the current ``speed``.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``playtime-remaining/full``
         ``playtime-remaining`` with milliseconds.
+
+    ``playtime-remaining/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the remaining playback time. This is
+        only available if the file has a video track. See also ``time-pos/smpte``.
 
 ``playback-time`` (RW)
     Alias for ``time-pos``.
@@ -2137,10 +2161,14 @@ Property list
     Prior to mpv 0.39.0, ``time-pos`` and ``playback-time`` could report
     different values in certain edge cases.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``playback-time/full``
         ``playback-time`` with milliseconds.
+
+    ``playback-time/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current playback time. This is only
+        available if the file has a video track. See also ``time-pos/smpte``.
 
 ``remaining-file-loops``
     How many more times the current file is going to be looped. This is
@@ -2936,10 +2964,14 @@ Property list
     subtitles, returns the first start time. If no current subtitle is present
     null is returned instead.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``sub-start/full``
         ``sub-start`` with milliseconds.
+
+    ``sub-start/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current subtitle start time. This is
+        only available if the file has a video track. See also ``time-pos/smpte``.
 
 ``secondary-sub-start``
     Same as ``sub-start``, but for the secondary subtitles.
@@ -2950,10 +2982,14 @@ Property list
     if it's present but has unknown or incorrect duration, null is returned
     instead.
 
-    This has a sub-property:
+    This has the following sub-properties:
 
     ``sub-end/full``
         ``sub-end`` with milliseconds.
+
+    ``sub-end/smpte``
+        SMPTE timecode (HH:MM:SS:FF) of the current subtitle end time. This is
+        only available if the file has a video track. See also ``time-pos/smpte``.
 
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.

@@ -635,9 +635,53 @@ static int mp_property_stream_end(void *ctx, struct m_property *prop,
     return mp_property_file_size(ctx, prop, action, arg);
 }
 
+static int property_smpte(int action, void *arg, double time, double fps)
+{
+    if (fps < 0.1 || !isfinite(fps) || time == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int time_s = (int)time;
+        // Round to nearest frame
+        int frames = (int)(((time - time_s) * fps) + 0.5);
+        *(int *)arg = frames;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_PRINT: {
+        int time_s = (int)time;
+        int hours = time_s / 3600;
+        int minutes = (time_s % 3600) / 60;
+        int seconds = time_s % 60;
+        int frames = (int)(((time - time_s) * fps) + 0.5);
+
+        // Handle rollover if frames exceed container_fps
+        if (frames > (int)fps) {
+            frames = 1;
+            seconds++;
+            if (seconds >= 60) {
+                seconds = 0;
+                minutes++;
+                if (minutes >= 60) {
+                    minutes = 0;
+                    hours++;
+                }
+            }
+        }
+        // Format the timecode as HH:MM:SS:FF
+        *(char **)arg = talloc_asprintf(NULL, "%02d:%02d:%02d:%02d",
+                                        hours, minutes, seconds, frames);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_INT};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Does some magic to handle "<name>/full" as time formatted with milliseconds.
 // Assumes prop is the type of the actual property.
-static int property_time(int action, void *arg, double time)
+static int property_time(int action, void *arg, double time, double fps)
 {
     if (time == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -652,21 +696,22 @@ static int property_time(int action, void *arg, double time)
         return M_PROPERTY_OK;
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
-
-        if (strcmp(ka->key, "full") != 0)
-            return M_PROPERTY_UNKNOWN;
-
-        switch (ka->action) {
-        case M_PROPERTY_GET:
-            *(double *)ka->arg = time;
-            return M_PROPERTY_OK;
-        case M_PROPERTY_PRINT:
-            *(char **)ka->arg = mp_format_time(time, true);
-            return M_PROPERTY_OK;
-        case M_PROPERTY_GET_TYPE:
-            *(struct m_option *)ka->arg = time_type;
-            return M_PROPERTY_OK;
+        if (strcmp(ka->key, "full") == 0) {
+            switch (ka->action) {
+            case M_PROPERTY_GET:
+                *(double *)ka->arg = time;
+                return M_PROPERTY_OK;
+            case M_PROPERTY_PRINT:
+                *(char **)ka->arg = mp_format_time(time, true);
+                return M_PROPERTY_OK;
+            case M_PROPERTY_GET_TYPE:
+                *(struct m_option *)ka->arg = time_type;
+                return M_PROPERTY_OK;
+            }
+        } else if (strcmp(ka->key, "smpte") == 0) {
+            return property_smpte(ka->action, ka->arg, time, fps);
         }
+        return M_PROPERTY_UNKNOWN;
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -677,11 +722,12 @@ static int mp_property_duration(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     double len = get_time_length(mpctx);
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
 
     if (len < 0)
         return M_PROPERTY_UNAVAILABLE;
 
-    return property_time(action, arg, len);
+    return property_time(action, arg, len, fps);
 }
 
 static int mp_property_avsync(void *ctx, struct m_property *prop,
@@ -817,7 +863,7 @@ static int mp_property_time_start(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     // minor backwards-compat.
-    return property_time(action, arg, 0);
+    return property_time(action, arg, 0, 0);
 }
 
 /// Current position in seconds (RW)
@@ -832,7 +878,9 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, 0);
         return M_PROPERTY_OK;
     }
-    return property_time(action, arg, get_playback_time(mpctx));
+
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, get_playback_time(mpctx), fps);
 }
 
 /// Current audio pts in seconds (R)
@@ -844,7 +892,8 @@ static int mp_property_audio_pts(void *ctx, struct m_property *prop,
         mpctx->audio_status >= STATUS_EOF)
         return M_PROPERTY_UNAVAILABLE;
 
-    return property_time(action, arg, playing_audio_pts(mpctx));
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, playing_audio_pts(mpctx), fps);
 }
 
 static bool time_remaining(MPContext *mpctx, double *remaining)
@@ -863,11 +912,13 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
 static int mp_property_remaining(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
+    MPContext *mpctx = ctx;
     double remaining;
     if (!time_remaining(ctx, &remaining))
         return M_PROPERTY_UNAVAILABLE;
 
-    return property_time(action, arg, remaining);
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, remaining, fps);
 }
 
 static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
@@ -879,7 +930,8 @@ static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     double speed = mpctx->video_speed;
-    return property_time(action, arg, remaining / speed);
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, remaining / speed, fps);
 }
 
 static int mp_property_remaining_file_loops(void *ctx, struct m_property *prop,
@@ -3138,20 +3190,24 @@ static struct sd_times get_times(void *ctx, struct m_property *prop,
 static int mp_property_sub_start(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
+    MPContext *mpctx = ctx;
     double start = get_times(ctx, prop, action, arg).start;
     if (start == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return property_time(action, arg, start);
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, start, fps);
 }
 
 
 static int mp_property_sub_end(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
+    MPContext *mpctx = ctx;
     double end = get_times(ctx, prop, action, arg).end;
     if (end == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
-    return property_time(action, arg, end);
+    double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+    return property_time(action, arg, end, fps);
 }
 
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
@@ -3358,7 +3414,8 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
         if (mp_property_generic_option(mpctx, prop, M_PROPERTY_GET, &val) < 1)
             return M_PROPERTY_ERROR;
 
-        return property_time(action, arg, val);
+        double fps = mpctx->vo_chain ? mpctx->vo_chain->filter->container_fps : 0;
+        return property_time(action, arg, val, fps);
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
