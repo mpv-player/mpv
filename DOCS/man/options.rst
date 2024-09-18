@@ -2570,17 +2570,16 @@ Subtitles
 
 ``--sub-ass-use-video-data=<none|aspect-ratio|all>``
     Controls which information about the video stream is passed to libass.
-    Any option but ``all`` is incompatible with VSFilter, whose behavior
-    most subtitle scripts and renderers target, including libass.
-    Aspect ratio and storage resolution information are needed for VSFilter
-    compatibility, and withholding them will likely result in broken subtitle
-    rendering for most files. It's thus recommended to only use ``none`` or
-    ``aspect-ratio`` on a per-file basis.
+    Any option but ``all`` is incompatible with standard ASS as defined by VSFilter,
+    whose behavior most subtitle scripts and renderers target, including libass.
+    Video stream properties are needed to accurately emulate VSFilter semantics and
+    withholding them will likely result in broken subtitle rendering for most files.
+    It's thus recommended to only change this selectively if required on a per-file basis.
 
-    :none:  Don't use aspect ratio or storage resolution.
-    :aspect-ratio: Use aspect ratio only. Resolutions specified in the script
-                   are used in place of storage resolution.
-    :all:   Use both aspect ratio and storage resolution.
+    :none:  Don't forward any video stream information.
+    :aspect-ratio: Only forward aspect ratio; fallbacks are used for other properties.
+                   This makes behaviour consistent across different video resolutions.
+    :all:   Forward all available information, notably including storage resolution.
 
     For certain kinds of broken ASS files which got repurposed across
     several video resolutions without either setting ``LayoutRes`` headers
