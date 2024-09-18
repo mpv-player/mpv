@@ -1140,7 +1140,7 @@ static const struct MPOpts mp_default_opts = {
         "sub-scale",
         "sub-use-margins",
         "sub-ass-force-margins",
-        "sub-ass-use-video-data"
+        "sub-ass-use-video-data",
         "sub-ass-override",
         "secondary-sid",
         "secondary-sub-delay",
