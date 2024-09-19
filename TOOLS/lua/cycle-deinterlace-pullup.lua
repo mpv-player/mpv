@@ -30,7 +30,7 @@ end
 local function do_cycle()
     if pullup_on() == "yes" then
         -- if pullup is on remove it
-        mp.command(string.format("vf del @%s:pullup", pullup_label))
+        mp.command(string.format("vf remove @%s:pullup", pullup_label))
         return
     elseif mp.get_property("deinterlace") == "yes" then
         -- if deinterlace is on, turn it off and insert pullup filter
