@@ -1478,10 +1478,10 @@ static bool parse_config_file(struct input_ctx *ictx, char *file)
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
         goto done;
     }
-    stream_skip_bom(s);
     bstr data = stream_read_complete(s, tmp, 1000000);
     if (data.start) {
         MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
+        bstr_eatstart0(&data, "\xEF\xBB\xBF"); // skip BOM
         int num = parse_config(ictx, false, data, file, (bstr){0});
         MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, num);
         r = true;
