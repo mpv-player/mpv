@@ -8,6 +8,7 @@ import sys
 from shutil import which
 from subprocess import check_output
 
+
 def find_swift_lib():
     swift_lib_dir = os.environ.get("SWIFT_LIB_DYNAMIC", "")
     if swift_lib_dir:
