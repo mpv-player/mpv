@@ -22,6 +22,7 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import os
 import sys
 
 def file2string(infilename, infile, outfile):
@@ -39,6 +40,6 @@ def file2string(infilename, infile, outfile):
         outfile.write('"' + ''.join(conv[c] for c in line) + '"\n')
 
 if __name__ == "__main__":
-    outfile = open(sys.argv[2], "w")
-    with open(sys.argv[1], 'rb') as infile:
-        file2string(sys.argv[1], infile, outfile)
+
+    with open(sys.argv[1], 'rb') as infile, open(sys.argv[2], "w") as outfile:
+        file2string(os.path.relpath(sys.argv[1], sys.argv[3]), infile, outfile)
