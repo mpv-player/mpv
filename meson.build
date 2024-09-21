@@ -134,6 +134,7 @@ sources = files(
     ## Misc
     'misc/bstr.c',
     'misc/charset_conv.c',
+    'misc/codepoint_width.c',
     'misc/dispatch.c',
     'misc/io_utils.c',
     'misc/json.c',
