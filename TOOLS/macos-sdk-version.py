@@ -33,7 +33,7 @@ def find_macos_sdk():
             sdk_version = check_output(
                 [xcodebuild, "-sdk", "macosx", "-version", "ProductVersion"],
                 encoding="UTF-8",
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
             )
         except Exception:
             pass

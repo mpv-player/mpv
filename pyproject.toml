@@ -10,4 +10,5 @@ select = [
     "UP", # pyupgrade
     "A", # flake8-builtins
     "Q", # flake8-quotes
+    "COM", # flake8-commas
 ]
