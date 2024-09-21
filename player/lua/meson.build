@@ -3,9 +3,9 @@ lua_files = ['defaults.lua', 'assdraw.lua', 'options.lua', 'osc.lua',
              'input.lua', 'fzy.lua', 'select.lua']
 foreach file: lua_files
     lua_file = custom_target(file,
-        input: join_paths(source_root, 'player', 'lua', file),
+        input: file,
         output: file + '.inc',
-        command: [file2string, '@INPUT@', '@OUTPUT@'],
+        command: [file2string, '@INPUT@', '@OUTPUT@', '@SOURCE_ROOT@'],
     )
     sources += lua_file
 endforeach

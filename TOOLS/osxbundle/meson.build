@@ -1,8 +1,6 @@
-input = join_paths(source_root, 'TOOLS', 'osxbundle',
-                   'mpv.app', 'Contents', 'Resources', 'icon.icns')
 osxbundle = custom_target('osxbundle',
-    input: input,
+    input: join_paths('mpv.app', 'Contents', 'Resources', 'icon.icns'),
     output: 'icon.icns.inc',
-    command: [file2string, '@INPUT@', '@OUTPUT@'],
+    command: [file2string, '@INPUT@', '@OUTPUT@', '@SOURCE_ROOT@'],
 )
 sources += osxbundle
