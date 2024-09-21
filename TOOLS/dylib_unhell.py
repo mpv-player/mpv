@@ -267,7 +267,7 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
 
     print(">>> copying loader library " + loader_library_name)
     framework_bundle_folder = os.path.join(
-        loader_bundle_folder, library_relative_folder
+        loader_bundle_folder, library_relative_folder,
     )
     if not os.path.exists(framework_bundle_folder):
         os.makedirs(framework_bundle_folder)
