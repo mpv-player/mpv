@@ -9,6 +9,7 @@ import sys
 from shutil import which
 from subprocess import check_output
 
+
 def find_macos_sdk():
     sdk = os.environ.get("MACOS_SDK", "")
     sdk_version = os.environ.get("MACOS_SDK_VERSION", "0.0")
