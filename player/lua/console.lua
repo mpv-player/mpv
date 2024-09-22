@@ -247,7 +247,8 @@ local function ass_escape(str)
 end
 
 local function calculate_max_log_lines()
-    if not mp.get_property_native('vo-configured') then
+    if not mp.get_property_native('vo-configured')
+       or not mp.get_property_native('video-osd') then
         -- Subtract 1 for the input line and for each line in the status line.
         -- This does not detect wrapped lines.
         return mp.get_property_native('term-size/h', 24) - 2 -
