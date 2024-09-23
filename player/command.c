@@ -28,6 +28,7 @@
 #include <ass/ass.h>
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
+#include <libavutil/timecode.h>
 
 #include "mpv_talloc.h"
 #include "client.h"
@@ -2524,11 +2525,40 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
     const char *pict_type = f->pict_type >= 1 && f->pict_type <= 3
                           ? pict_types[f->pict_type] : NULL;
 
+    char gop_tc[AV_TIMECODE_STR_SIZE] = {0};
+    char s12m_tc[AV_TIMECODE_STR_SIZE] = {0};
+    for (int n = 0; n < f->num_ff_side_data; n++) {
+
+        struct mp_ff_side_data *mpsd = &f->ff_side_data[n];
+        if (mpsd->type == AV_FRAME_DATA_GOP_TIMECODE)
+            av_timecode_make_mpeg_tc_string(gop_tc, *(int64_t*)(mpsd->buf->data));
+        if (mpctx->vo_chain && mpsd->type == AV_FRAME_DATA_S12M_TIMECODE) {
+            av_timecode_make_smpte_tc_string2(s12m_tc,
+                                              av_d2q(mpctx->vo_chain->filter->container_fps, INT_MAX),
+                                              *(uint32_t*)(mpsd->buf->data), 0, 0);
+        }
+    }
+
+    char approx_smpte[AV_TIMECODE_STR_SIZE] = {0};
+    if (s12m_tc[0] == '\0' && mpctx->vo_chain) {
+        const AVTimecode tcr = {
+            .start = 0,
+            .flags = AV_TIMECODE_FLAG_DROPFRAME,
+            .rate = av_d2q(mpctx->vo_chain->filter->container_fps, INT_MAX),
+            .fps = lrint(mpctx->vo_chain->filter->container_fps),
+        };
+        int frame = lrint(get_current_pos_ratio(mpctx, false) * get_frame_count(mpctx));
+        av_timecode_make_string(&tcr, approx_smpte, frame);
+    }
+
     struct m_sub_property props[] = {
         {"picture-type",    SUB_PROP_STR(pict_type), .unavailable = !pict_type},
         {"interlaced",      SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_INTERLACED))},
         {"tff",             SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_TOP_FIRST))},
         {"repeat",          SUB_PROP_BOOL(!!(f->fields & MP_IMGFIELD_REPEAT_FIRST))},
+        {"gop-timecode",    SUB_PROP_STR(gop_tc), .unavailable = gop_tc[0] == '\0'},
+        {"smpte-timecode",  SUB_PROP_STR(s12m_tc), .unavailable = s12m_tc[0] == '\0'},
+        {"estimated-smpte-timecode", SUB_PROP_STR(approx_smpte), .unavailable = approx_smpte[0] == '\0'},
         {0}
     };
 
