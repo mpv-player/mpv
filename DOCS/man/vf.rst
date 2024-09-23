@@ -722,6 +722,8 @@ Available mpv-only filters are:
         which algorithm is actually selected. ``none`` always falls back. On
         most if not all hardware, this option will probably do nothing, because
         a video processor usually supports all modes or none.
+    ``nvidia-true-hdr``
+        Enable NVIDIA RTX Video HDR processing.
 
 ``fingerprint=...``
     Compute video frame fingerprints and provide them as metadata. Actually, it
