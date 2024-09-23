@@ -1,2 +1,0 @@
-add `--osd-playlist-entry` option
-remove `osc-playlist_media_title` script-opt

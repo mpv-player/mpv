@@ -1,2 +1,0 @@
-change `mp.add_key_binding` so that by default, the callback is not invoked if the event is canceled; clients should now use the `complex` option to detect this situation
-add `canceled` entry to `mp.add_key_binding` callback argument

@@ -29,6 +29,103 @@ Interface changes
 
 ::
 
+ --- mpv 0.40.0 ---
+ --- mpv 0.39.0 ---
+    - turn `--cover-art-whitelist` into a list option
+    - reserve `user-data/osc` and `user-data/mpv` sub-paths for internal use
+    - remove deprecated `packet-video-bitrate` `packet-audio-bitrate` and
+      `packet-sub-bitrate` properties
+    - remove deprecated `--cache-dir` option alias
+    - remove deprecated `--cache-unlink-files` option alias
+    - remove deprecated `--demuxer-cue-codepage` option alias
+    - remove deprecated `--fps` option alias
+    - remove deprecated `--cdrom-device` option alias
+    - remove deprecated `--sub-forced-only` option alias
+    - remove deprecated `--vo-sixel-exit-clear` option alias
+    - remove deprecated `--cdda-toc-bias` option
+    - remove deprecated `--drm-atomic` option
+    - remove `sub-ass-vsfilter-aspect-compat`: use `sub-ass-use-video-data=none`
+      for disabling aspect compat
+    - remove `sub-ass-vsfilter-blur-compat`: use `sub-ass-use-video-data=aspect-
+      ratio` for disabling blur compat
+    - add `sub-ass-use-video-data`
+    - add `sub-ass-video-aspect-override`
+    - change default V keybind to cycle `sub-ass-use-video-data` instead of the
+      now removed `sub-ass-vsfilter-aspect-compat`
+    - remove `console-scale` script-opt
+    - remap numpad `+ - * /` keys to `KP_ADD/KP_SUBTRACT/KP_MULTIPLY/KP_DIVIDE`;
+      keybinds which require these numpad keys to function need to use the new
+      names instead
+    - numerical values of `--loop-file` no longer decrease on each iteration
+    - add `remaining-file-loops` property as a replacement to get the remaining
+      loop count
+    - numerical values of `--ab-loop-count` no longer decrease on each iteration
+    - add `remaining-ab-loops` property as a replacement to get the remaining
+      loop count
+    - move 'scale' above 'force' for `sub-ass-override` in documentation as well
+      as code. This more accurately reflects destructiveness of these options.
+    - change `sub-ass-override` default from 'yes' to 'scale'. This should
+      result in no effective changes because 'yes' used to unintentionally do
+      what 'scale' should've done.
+    - change 'u' binding to cycle between 'force' and 'scale', instead of
+      'force' and 'yes'
+    - deprecate `sub-text-ass` property; add `sub-text/ass` sub-property
+    - change type of `sub-start` and `sub-end` properties to time
+    - change `vidscale` script option type to string for osc.lua
+    - change `vidscale` script option type to string for stats.lua
+    - change `vidscale` default from `yes` to `auto` for osc.lua and stats.lua
+    - change `mp.add_key_binding` so that by default, the callback is not
+      invoked if the event is canceled; clients should now use the `complex`
+      option to detect this situation
+    - add `canceled` entry to `mp.add_key_binding` callback argument
+    - add the `normalize-path` command
+    - add `user-data/mpv/ytdl/path` and `user-data/mpv/ytdl/json-subprocess-
+      result` properties
+    - add `track-list/N/dolby-vision-profile` and `track-list/N/dolby-vision-
+      level`
+    - add `track-list/N/decoder`
+    - add `sub-text/ass-full` sub-property
+    - add `osc-show` script message
+    - add `nonrepeatable` input command prefix
+    - add `mp.input.select()`
+    - add `--wasapi-exclusive-buffer` option
+    - add `--vf=d3d11vpp=scaling-mode`
+    - add `--vf=d3d11vpp=scale`
+    - add `--sub-border-style` and `--osd-border-style` options
+    - the border style does not depend on `--(sub/osd)-border-color` and
+      `--(sub/osd)-shadow-color`; now it depends solely on `--(sub/osd)-border-
+      style`
+    - make `--(sub/osd)-border-color` an alias of `--(sub/osd)-outline-color`
+    - make `--(sub/osd)-border-size` an alias of `--(sub/osd)-outline-size`
+    - make `--(sub/osd)-shadow-color` an alias of `--(sub/osd)-back-color`; they
+      cannot both be set now
+    - make `--osd-bar-border-size` an alias of `--osd-bar-outline-size`
+    - add `--show-in-taskbar` option
+    - add `--pitch` option
+    - add `--osd-playlist-entry` option
+    - remove `osc-playlist_media_title` script-opt
+    - add `--native-touch` option
+    - add `--input-touch-emulate-mouse` option
+    - add `touch-pos` property
+    - add `--media-controls` option
+    - add `--input-dragging-deadzone` option
+    - add `--input-builtin-dragging` option
+    - add `--egl-config-id` option
+    - add `--egl-output-format` option
+    - add `--directory-filter-types`
+    - By default, opening a directory will create a playlist with only the media
+      types "video, audio, image". To restore the previous behavior, use
+      `--directory-filter-types-clr`.
+    - add `--autocreate-playlist`
+    - add `--video-exts`
+    - add `--audio-exts`
+    - add `--image-exts`
+    - add `option-info/<name>/expects-file` sub-property
+    - Bump dependency of VapourSynth to utilize its API version 4. New minimum
+      VapourSynth version for runtime is R56. Some functions and plugins are
+      changed or removed. For details, refer to VapourSynth documentation
+      <http://www.vapoursynth.com/2021/09/r55-audio-support-and-improved-performance/> and
+      <https://github.com/vapoursynth/vapoursynth/blob/R68/APIV4%20changes.txt>
  --- mpv 0.38.0 ---
     - add `term-size` property
     - add the `escape-ass` command

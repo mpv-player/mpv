@@ -1,1 +1,0 @@
-add `user-data/mpv/ytdl/path` and `user-data/mpv/ytdl/json-subprocess-result` properties

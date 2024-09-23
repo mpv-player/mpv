@@ -1,1 +1,0 @@
-change type of `sub-start` and `sub-end` properties to time

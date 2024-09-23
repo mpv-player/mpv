@@ -1,6 +1,0 @@
-add `--sub-border-style` and `--osd-border-style` options
-the border style does not depend on `--(sub/osd)-border-color` and `--(sub/osd)-shadow-color`; now it depends solely on `--(sub/osd)-border-style`
-make `--(sub/osd)-border-color` an alias of `--(sub/osd)-outline-color`
-make `--(sub/osd)-border-size` an alias of `--(sub/osd)-outline-size`
-make `--(sub/osd)-shadow-color` an alias of `--(sub/osd)-back-color`; they cannot both be set now
-make `--osd-bar-border-size` an alias of `--osd-bar-outline-size`

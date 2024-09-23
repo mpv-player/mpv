@@ -1,3 +1,0 @@
-change `vidscale` script option type to string for osc.lua
-change `vidscale` script option type to string for stats.lua
-change `vidscale` default from `yes` to `auto` for osc.lua and stats.lua

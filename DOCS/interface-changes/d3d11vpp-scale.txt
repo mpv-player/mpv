@@ -1,1 +1,0 @@
-add `--vf=d3d11vpp=scale`

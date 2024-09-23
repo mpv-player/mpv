@@ -1,1 +1,0 @@
-add `track-list/N/dolby-vision-profile` and `track-list/N/dolby-vision-level`

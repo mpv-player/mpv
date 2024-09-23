@@ -1,2 +1,0 @@
-add `--egl-config-id` option
-add `--egl-output-format` option

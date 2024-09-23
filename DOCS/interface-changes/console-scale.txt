@@ -1,1 +1,0 @@
-remove `console-scale` script-opt

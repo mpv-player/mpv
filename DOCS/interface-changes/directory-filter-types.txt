@@ -1,2 +1,0 @@
-add `--directory-filter-types`
-By default, opening a directory will create a playlist with only the media types "video, audio, image". To restore the previous behavior, use `--directory-filter-types-clr`.

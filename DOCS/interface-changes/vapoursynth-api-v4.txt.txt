@@ -1,1 +1,0 @@
-Bump dependency of VapourSynth to utilize its API version 4. New minimum VapourSynth version for runtime is R56. Some functions and plugins are changed or removed. For details, refer to VapourSynth documentation http://www.vapoursynth.com/2021/09/r55-audio-support-and-improved-performance/ and https://github.com/vapoursynth/vapoursynth/blob/R68/APIV4%20changes.txt

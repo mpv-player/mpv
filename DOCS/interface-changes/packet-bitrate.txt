@@ -1,1 +1,0 @@
-remove deprecated `packet-video-bitrate` `packet-audio-bitrate` and `packet-sub-bitrate` properties
