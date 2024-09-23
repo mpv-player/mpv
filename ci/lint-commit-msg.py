@@ -9,6 +9,7 @@ def call(cmd) -> str:
 
 lint_rules: Dict[str, Tuple[Callable, str]] = {}
 
+# A lint rule should return True if everything is okay
 def lint_rule(description: str):
 	def f(func):
 		assert func.__name__ not in lint_rules.keys()
@@ -37,7 +38,6 @@ def do_lint(commit_range: str) -> bool:
 	any_failed = False
 	for commit in commits:
 		sha, _, _ = commit.partition(' ')
-		#print(commit)
 		body = call(["git", "show", "-s", "--format=%B", sha]).splitlines()
 		failed = []
 		if len(body) == 0:
@@ -58,7 +58,7 @@ def do_lint(commit_range: str) -> bool:
 
 ################################################################################
 
-NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Update VERSION$"
+NO_PREFIX_WHITELIST = r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Update MPV_VERSION$"
 
 @lint_rule("Subject line must contain a prefix identifying the sub system")
 def subsystem_prefix(body):
@@ -91,11 +91,11 @@ def no_merge(body):
 @lint_rule("Subject line should be shorter than 72 characters")
 def line_too_long(body):
 	revert = re.search(r"^Revert \"(.*)\"|^Reapply \"(.*)\"", body[0])
-	return True if revert else len(body[0]) <= 72
+	return revert or len(body[0]) <= 72
 
-@lint_rule("Prefix should not include C file extensions (use `vo_gpu: ...` not `vo_gpu.c: ...`)")
+@lint_rule("Prefix should not include file extension (use `vo_gpu: ...` not `vo_gpu.c: ...`)")
 def no_file_exts(body):
-	return not re.search(r"[a-z0-9]\.[ch]: ", body[0])
+	return not re.search(r"[a-z0-9]\.([chm]|cpp|swift|py): ", body[0])
 
 ################################################################################
 
