@@ -996,6 +996,21 @@ local function add_video(s)
                                       or {prefix="Picture Type:"}
             append(s, "Interlaced", attrs)
         end
+
+        local timecodes = {
+            ["gop-timecode"] = "GOP",
+            ["smpte-timecode"] = "SMPTE",
+            ["estimated-smpte-timecode"] = "Estimated SMPTE",
+        }
+        for prop, name in pairs(timecodes) do
+            if frame_info and frame_info[prop] then
+                local attrs = has_prefix and {prefix=name .. " Timecode:",
+                                              indent=o.prefix_sep .. o.prefix_sep, nl=""}
+                                          or {prefix=name .. " Timecode:"}
+                append(s, frame_info[prop], attrs)
+                break
+            end
+        end
     end
 
     if mp.get_property_native("current-tracks/video/image") == false then
