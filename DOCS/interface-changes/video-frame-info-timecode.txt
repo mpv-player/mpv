@@ -1,0 +1,1 @@
+add `video-frame-info/gop-timecode`, `video-frame-info/smpte-timecode` and `video-frame-info/estimated-smpte-timecode`

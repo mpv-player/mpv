@@ -2733,6 +2733,15 @@ Property list
     ``video-frame-info/repeat``
         Whether the frame must be delayed when decoding.
 
+    ``video-frame-info/gop-timecode``
+        String with the GOP timecode encoded in the frame.
+
+    ``video-frame-info/smpte-timecode``
+        String with the SMPTE timecode encoded in the frame.
+
+    ``video-frame-info/estimated-smpte-timecode``
+        Estimated timecode based on the current playback position and frame count.
+
 ``container-fps``
     Container FPS. This can easily contain bogus values. For videos that use
     modern container formats or video codecs, this will often be incorrect.
