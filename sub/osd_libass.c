@@ -207,6 +207,10 @@ void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
             in += 1;
             continue;
         }
+        if (*in == TERM_MSG_0[0]) {
+            in += 1;
+            continue;
+        }
         if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
         // Replace newlines with \N for escape-ass. This is necessary to apply

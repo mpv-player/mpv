@@ -2926,6 +2926,12 @@ static int mp_property_osd_ass(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
+static int mp_property_term_clip(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    return m_property_strdup_ro(action, arg, TERM_MSG_0);
+}
+
 static int mp_property_term_size(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
@@ -4158,6 +4164,8 @@ static const struct m_property mp_properties_base[] = {
 
     {"osd-sym-cc", mp_property_osd_sym},
     {"osd-ass-cc", mp_property_osd_ass},
+
+    {"term-clip-cc", mp_property_term_clip},
 
     {"mouse-pos", mp_property_mouse_pos},
     {"touch-pos", mp_property_touch_pos},

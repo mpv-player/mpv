@@ -3377,6 +3377,11 @@ Property list
     See ``--cursor-autohide``. Setting this to a new value will always update
     the cursor, and reset the internal timer.
 
+``term-clip-cc``
+    Inserts the symbol to force line truncation to the current terminal width.
+    This can be used for ``show-text`` and other OSD messages. It must be the
+    first character in the line. It takes effect until the end of the line.
+
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
     sense only with the ``show-text`` command or options which set OSD messages.

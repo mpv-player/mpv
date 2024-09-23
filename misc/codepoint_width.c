@@ -662,20 +662,26 @@ static int ucdToCharacterWidth(const int val)
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-int term_disp_width(bstr str)
+#include "common/common.h"
+
+int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
 {
     static const int ambiguous_width = 1;
 
     int width = 0;
 
+    const unsigned char *prev_pos = str.start;
     while (str.len) {
+        int current_width = 0;
+
         if (bstr_eatstart0(&str, "\033[")) {
             while (str.len && !((*str.start >= '@' && *str.start <= '~') || *str.start == 'm'))
                 str = bstr_cut(str, 1);
             str = bstr_cut(str, 1);
-            continue;
+            goto next;
         }
 
+        prev_pos = str.start;
         int cp = bstr_decode_utf8(str, &str);
 
         // Stop processing on any invalid input
@@ -684,18 +690,17 @@ int term_disp_width(bstr str)
 
         if (cp == '\r') {
             width = 0;
-            continue;
+            goto next;
         }
 
         if (cp < 0x20)
-            continue;
+            goto next;
 
         if (cp <= 0x7E) {
-            width++;
-            continue;
+            current_width = 1;
+            goto next;
         }
 
-        int grapheme_width = 0;
         int state = 0;
 
         while (true) {
@@ -711,7 +716,7 @@ int term_disp_width(bstr str)
             if (cp == 0xFE0F)
                 w = 2;
 
-            grapheme_width += w;
+            current_width += w;
 
             if (!str.len)
                 break;
@@ -730,7 +735,20 @@ int term_disp_width(bstr str)
 
             str = cluster_end;
         }
-        width += grapheme_width > 2 ? 2 : grapheme_width;
+
+next:
+        current_width = MPMIN(current_width, 2);
+        if (width + current_width > max_width) {
+            assert(prev_pos < str.start + str.len);
+            *cut_pos = prev_pos;
+            break;
+        }
+        width += current_width;
+        if (width == max_width) {
+            if (str.len)
+                *cut_pos = str.start;
+            break;
+        }
     }
 
     return width;

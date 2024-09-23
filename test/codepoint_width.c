@@ -17,9 +17,11 @@
 
 #include "test_utils.h"
 
+#include <limits.h>
+
 #include "misc/codepoint_width.h"
 
-#define W(s) term_disp_width((bstr)bstr0_lit(s))
+#define W(s) term_disp_width((bstr)bstr0_lit(s), INT_MAX, &(const unsigned char *){NULL})
 
 int main(void) {
     assert_int_equal(W("A"), 1);               // Single ASCII character
@@ -64,4 +66,23 @@ int main(void) {
 
     // ASCII characters with carriage return
     assert_int_equal(W("ABC\rDEF"), 3);
+
+    bstr str = bstr0("ABCDEF");
+    const unsigned char *cut_pos;
+
+    cut_pos = NULL;
+    assert_int_equal(term_disp_width(str, 3, &cut_pos), 3);
+    assert_int_equal(cut_pos - str.start, 3);
+
+    cut_pos = NULL;
+    assert_int_equal(term_disp_width(str, -2, &cut_pos), 0);
+    assert_int_equal(cut_pos - str.start, 0);
+
+    cut_pos = NULL;
+    assert_int_equal(term_disp_width(str, str.len, &cut_pos), 6);
+    if (cut_pos) {
+        printf("%s:%d: cut_pos != NULL\n", __FILE__, __LINE__);
+        fflush(stdout);
+        abort();
+    }
 }
