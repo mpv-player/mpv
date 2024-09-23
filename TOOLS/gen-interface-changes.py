@@ -78,6 +78,7 @@ if __name__ == "__main__":
 
     ver_line = " --- mpv 0." + major_version + ".0 ---"
     next_ver_line = " --- mpv 0." + str(int(major_version) + 1) + ".0 ---"
+    found = False
     with open(interface_changes, "w", newline="\n") as f:
         for line in lines:
             if line == ver_line:
@@ -85,3 +86,6 @@ if __name__ == "__main__":
             f.write(line + "\n")
             if line == ver_line:
                 add_new_entries(docs_dir, f, git)
+                found = True
+    if not found:
+        print(f"Nothing changed! The following line was not found:\n{ver_line}")
