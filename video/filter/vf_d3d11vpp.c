@@ -43,6 +43,12 @@ DEFINE_GUID(NVIDIA_PPE_INTERFACE_GUID,
             0xc3, 0xc2, 0x53, 0x75, 0xe6, 0xf7);
 #endif
 
+#ifndef NVIDIA_TRUE_HDR_INTERFACE_GUID
+DEFINE_GUID(NVIDIA_TRUE_HDR_INTERFACE_GUID,
+            0xfdd62bb4, 0x620b, 0x4fd7, 0x9a, 0xb3,
+            0x1e, 0x59, 0xd0, 0xd5, 0x44, 0xb3);
+#endif
+
 #ifndef INTEL_VPE_INTERFACE_GUID
 DEFINE_GUID(INTEL_VPE_INTERFACE_GUID,
             0xedd1d4b9, 0x8659, 0x4cbc, 0xa4, 0xd6,
@@ -72,6 +78,7 @@ struct opts {
     int mode;
     int field_parity;
     int format;
+    bool nvidia_true_hdr;
 };
 
 struct priv {
@@ -139,6 +146,31 @@ static void enable_nvidia_rtx_extension(struct mp_filter *vf)
         MP_WARN(vf, "Failed to enable NVIDIA RTX Super Resolution: %s\n", mp_HRESULT_to_str(hr));
     } else {
         MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled\n");
+    }
+}
+
+static void enable_nvidia_true_hdr(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct nvidia_ext {
+        unsigned int version;
+        unsigned int method;
+        unsigned int enable : 1;
+        unsigned int reserved : 31;
+    } ext = {4, 3, 1};
+
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     0,
+                                                                     &NVIDIA_TRUE_HDR_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+
+    if (FAILED(hr)) {
+        MP_WARN(vf, "Failed to enable NVIDIA RTX Video HDR: %s\n", mp_HRESULT_to_str(hr));
+    } else {
+        MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled\n");
     }
 }
 
@@ -288,6 +320,9 @@ create:
         enable_nvidia_rtx_extension(vf);
         break;
     }
+
+    if (p->opts->nvidia_true_hdr)
+        enable_nvidia_true_hdr(vf);
 
     return 0;
 fail:
@@ -468,7 +503,8 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
 
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
                                p->params.w != p->out_params.w ||
-                               p->params.h != p->out_params.h;
+                               p->params.h != p->out_params.h ||
+                               p->opts->nvidia_true_hdr;
     }
 
     if (!mp_refqueue_can_output(p->queue))
@@ -617,6 +653,7 @@ static const m_option_t vf_opts_fields[] = {
         {"tff", MP_FIELD_PARITY_TFF},
         {"bff", MP_FIELD_PARITY_BFF},
         {"auto", MP_FIELD_PARITY_AUTO})},
+    {"nvidia-true-hdr", OPT_BOOL(nvidia_true_hdr)},
     {0}
 };
 
