@@ -393,10 +393,7 @@ void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
     va_copy(copy, ap);
     size_t avail = talloc_get_size(s->start) - s->len;
     char *dest = s->start ? s->start + s->len : NULL;
-    char c;
-    if (avail < 1)
-        dest = &c;
-    size = vsnprintf(dest, MPMAX(avail, 1), fmt, copy);
+    size = vsnprintf(dest, avail, fmt, copy);
     va_end(copy);
 
     if (size < 0)
