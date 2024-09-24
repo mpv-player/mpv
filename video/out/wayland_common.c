@@ -32,6 +32,7 @@
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
+#include "video/mp_image.h"
 #include "wayland_common.h"
 #include "win_state.h"
 
@@ -54,6 +55,10 @@
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
+#endif
+
+#if HAVE_FROG_PROTOCOLS
+#include "frog-color-management-v1.h"
 #endif
 
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
@@ -147,6 +152,19 @@ static const struct mp_keymap keymap[] = {
 
     {0, 0}
 };
+
+#if HAVE_FROG_PROTOCOLS
+int primaries_map[PL_COLOR_PRIM_COUNT] = {
+    [PL_COLOR_PRIM_BT_709] = FROG_COLOR_MANAGED_SURFACE_PRIMARIES_REC709,
+    [PL_COLOR_PRIM_BT_2020] = FROG_COLOR_MANAGED_SURFACE_PRIMARIES_REC2020,
+};
+
+int transfer_map[PL_COLOR_TRC_COUNT] = {
+    [PL_COLOR_TRC_SRGB] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_SRGB,
+    [PL_COLOR_TRC_GAMMA22] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_GAMMA_22,
+    [PL_COLOR_TRC_PQ] = FROG_COLOR_MANAGED_SURFACE_TRANSFER_FUNCTION_ST2084_PQ,
+};
+#endif
 
 struct compositor_format {
     uint32_t format;
@@ -1590,6 +1608,13 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 #endif
 
+#if HAVE_FROG_PROTOCOLS
+    if (!strcmp(interface, frog_color_management_factory_v1_interface.name) && found++) {
+        ver = 1;
+        wl->color_management = wl_registry_bind(reg, id, &frog_color_management_factory_v1_interface, ver);
+    }
+#endif
+
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = 1;
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
@@ -2149,6 +2174,18 @@ static int handle_round(int scale, int n)
     return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
 }
 
+#if HAVE_FROG_PROTOCOLS
+static int pl_primaries_to_frog(enum pl_color_primaries primaries)
+{
+    return primaries_map[primaries];
+}
+
+static int pl_transfer_to_frog(enum pl_color_transfer transfer)
+{
+    return transfer_map[transfer];
+}
+#endif
+
 static void prepare_resize(struct vo_wayland_state *wl)
 {
     int32_t width = mp_rect_w(wl->geometry) / wl->scaling_factor;
@@ -2241,6 +2278,17 @@ static void remove_seat(struct vo_wayland_seat *seat)
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
     return;
+}
+
+static void set_colorspace(struct vo_wayland_state *wl)
+{
+    if (!wl->color_surface || !wl->vo->target_params)
+        return;
+#if HAVE_FROG_PROTOCOLS
+    struct pl_color_space color = wl->vo->target_params->color;
+    frog_color_managed_surface_set_known_container_color_volume(wl->color_surface, pl_primaries_to_frog(color.primaries));
+    frog_color_managed_surface_set_known_transfer_function(wl->color_surface, pl_transfer_to_frog(color.transfer));
+#endif
 }
 
 static void set_content_type(struct vo_wayland_state *wl)
@@ -2657,6 +2705,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                                              &wl->opts->border);
                 }
             }
+            if (opt == &opts->wl_colorspace_hint)
+                vo_wayland_handle_hdr_metadata(wl);
             if (opt == &opts->wl_content_type)
                 set_content_type(wl);
             if (opt == &opts->cursor_passthrough)
@@ -2765,6 +2815,23 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     }
 
     return VO_NOTIMPL;
+}
+
+void vo_wayland_handle_hdr_metadata(struct vo_wayland_state *wl)
+{
+    if (wl->reset_colorspace) {
+        set_colorspace(wl);
+        wl->reset_colorspace = false;
+    }
+
+    if (!wl->color_surface || !wl->opts->wl_colorspace_hint || !pl_color_space_is_hdr(&wl->vo->target_params->color))
+        return;
+#if HAVE_FROG_PROTOCOLS
+    struct pl_hdr_metadata hdr = wl->vo->target_params->color.hdr;
+    frog_color_managed_surface_set_hdr_metadata(wl->color_surface, hdr.prim.red.x, hdr.prim.red.y, hdr.prim.green.x,
+                                                hdr.prim.green.y, hdr.prim.blue.x, hdr.prim.blue.y, hdr.prim.white.x,
+                                                hdr.prim.white.y, hdr.max_luma, hdr.min_luma, hdr.max_cll, hdr.max_fall);
+#endif
 }
 
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
@@ -2906,6 +2973,15 @@ bool vo_wayland_init(struct vo *vo)
     }
 #endif
 
+#if HAVE_FROG_PROTOCOLS
+    if (wl->color_management) {
+        wl->color_surface = frog_color_management_factory_v1_get_color_managed_surface(wl->color_management, wl->surface);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   frog_color_management_factory_v1_interface.name);
+    }
+#endif
+
     if (wl->dnd_devman) {
         struct vo_wayland_seat *seat;
         wl_list_for_each(seat, &wl->seat_list, link) {
@@ -2975,6 +3051,8 @@ bool vo_wayland_reconfig(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
+
+    wl->reset_colorspace = true;
 
     if (!wl->current_output) {
         wl->current_output = find_output(wl);
@@ -3052,6 +3130,14 @@ void vo_wayland_uninit(struct vo *vo)
 #if HAVE_WAYLAND_PROTOCOLS_1_32
     if (wl->cursor_shape_manager)
         wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
+#endif
+
+#if HAVE_FROG_PROTOCOLS
+    if (wl->color_management)
+        frog_color_management_factory_v1_destroy(wl->color_management);
+
+    if (wl->color_surface)
+        frog_color_managed_surface_destroy(wl->color_surface);
 #endif
 
     if (wl->cursor_surface)

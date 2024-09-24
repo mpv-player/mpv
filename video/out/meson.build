@@ -11,6 +11,11 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
 wl_protocols_source = []
 wl_protocols_headers = []
 
+if features['frog-protocols']
+    frog_protocol_dir = frog_protocols.get_variable(pkgconfig: 'pkgdatadir', internal: 'pkgdatadir')
+    protocols += [[frog_protocol_dir, 'frog-color-management-v1.xml']]
+endif
+
 foreach v: ['1.32']
     features += {'wayland-protocols-' + v.replace('.', '-'):
         wayland['deps'][2].version().version_compare('>=' + v)}

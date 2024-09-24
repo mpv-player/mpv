@@ -36,6 +36,8 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
 
+    vo_wayland_handle_hdr_metadata(wl);
+
     if (!wl->opts->wl_disable_vsync)
         vo_wayland_wait_frame(wl);
 

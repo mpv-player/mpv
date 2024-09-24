@@ -250,6 +250,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!render)
         return;
 
+    vo_wayland_handle_hdr_metadata(wl);
+
     buf = p->free_buffers;
     if (buf) {
         p->free_buffers = buf->next;

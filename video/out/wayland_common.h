@@ -85,6 +85,11 @@ struct vo_wayland_state {
     int timeout_count;
     int wakeup_pipe[2];
 
+    /* color-management */
+    void *color_management;
+    void *color_surface;
+    bool reset_colorspace;
+
     /* content-type */
     struct wp_content_type_manager_v1 *content_type_manager;
     struct wp_content_type_v1 *content_type;
@@ -167,6 +172,7 @@ bool vo_wayland_reconfig(struct vo *vo);
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
+void vo_wayland_handle_hdr_metadata(struct vo_wayland_state *wl);
 void vo_wayland_handle_scale(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);

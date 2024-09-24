@@ -35,6 +35,7 @@ typedef struct mp_vo_opts {
     bool cursor_passthrough;
     bool native_keyrepeat;
 
+    bool wl_colorspace_hint;
     int wl_configure_bounds;
     int wl_content_type;
     bool wl_disable_vsync;

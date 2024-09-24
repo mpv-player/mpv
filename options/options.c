@@ -194,6 +194,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"x11-wid-title", OPT_BOOL(x11_wid_title)},
 #endif
 #if HAVE_WAYLAND
+    {"wayland-colorspace-hint", OPT_BOOL(wl_colorspace_hint)},
     {"wayland-configure-bounds", OPT_CHOICE(wl_configure_bounds,
         {"auto", -1}, {"no", 0}, {"yes", 1})},
     {"wayland-content-type", OPT_CHOICE(wl_content_type, {"auto", -1}, {"none", 0},

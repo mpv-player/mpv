@@ -1025,6 +1025,8 @@ endforeach
 features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'].found()}
 
 if features['wayland']
+    frog_protocols = dependency('frog-protocols', required: false)
+    features += {'frog-protocols': frog_protocols.found()}
     subdir(join_paths('video', 'out'))
 endif
 
