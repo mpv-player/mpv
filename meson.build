@@ -569,15 +569,7 @@ features += {'bsd-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/mo
 
 features += {'linux-fstatfs': cc.has_function('fstatfs', prefix: '#include <sys/vfs.h>')}
 
-vector_attribute = '''int main() {
-float v __attribute__((vector_size(32)));
-}
-'''
-vector = get_option('vector').require(
-    cc.compiles(vector_attribute, name: 'vector check'),
-    error_message: 'the compiler does not support gcc vectors!',
-)
-features += {'vector': vector.allowed()}
+features += {'vector': cc.has_function_attribute('vector_size', required: get_option('vector'))}
 
 sources += path_source + timer_source
 
