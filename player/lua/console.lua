@@ -78,6 +78,7 @@ local terminal_styles = {
 }
 
 local repl_active = false
+local osd_msg_active = false
 local insert_mode = false
 local pending_update = false
 local line = ''
@@ -472,6 +473,7 @@ local function print_to_terminal()
     -- Clear the log after closing the console.
     if not repl_active then
         mp.osd_message('')
+        osd_msg_active = false
         return
     end
 
@@ -503,6 +505,7 @@ local function print_to_terminal()
     mp.osd_message(log .. suggestions .. prompt .. ' ' .. before_cur ..
                   '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
                    after_cur:sub(2), 999)
+    osd_msg_active = true
 end
 
 -- Render the REPL and console as an ASS OSD
@@ -514,6 +517,12 @@ local function update()
     if not mp.get_property('current-vo') or not mp.get_property_native('video-osd') then
         print_to_terminal()
         return
+    end
+
+    -- Clear the OSD if the console was being printed to the terminal
+    if osd_msg_active then
+        mp.osd_message('')
+        osd_msg_active = false
     end
 
     -- Clear the OSD if the REPL is not active
