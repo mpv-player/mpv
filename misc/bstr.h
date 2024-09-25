@@ -136,9 +136,9 @@ static inline struct bstr bstr_getline(struct bstr str, struct bstr *rest)
 struct bstr bstr_strip_linebreaks(struct bstr str);
 
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
-void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
+int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     PRINTF_ATTRIBUTE(3, 4);
-void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
+int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
     PRINTF_ATTRIBUTE(3, 0);
 
 // If s starts/ends with prefix, return true and return the rest of the string
