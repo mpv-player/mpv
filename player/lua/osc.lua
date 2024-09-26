@@ -254,7 +254,9 @@ end
 
 local function set_virt_mouse_area(x0, y0, x1, y1, name)
     local sx, sy = get_virt_scale_factor()
-    mp.set_mouse_area(x0 / sx, y0 / sy, x1 / sx, y1 / sy, name)
+    if sx > 0 and sy > 0 then
+        mp.set_mouse_area(x0 / sx, y0 / sy, x1 / sx, y1 / sy, name)
+    end
 end
 
 local function scale_value(x0, x1, y0, y1, val)
@@ -360,7 +362,7 @@ end
 
 -- multiplies two alpha values, formular can probably be improved
 local function mult_alpha(alphaA, alphaB)
-    return 255 - (((1-(alphaA/255)) * (1-(alphaB/255))) * 255)
+    return math.floor(255 - (((1-(alphaA/255)) * (1-(alphaB/255))) * 255))
 end
 
 local function add_area(name, x1, y1, x2, y2)

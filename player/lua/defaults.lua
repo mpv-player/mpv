@@ -131,7 +131,11 @@ function mp.disable_key_bindings(section)
 end
 
 function mp.set_mouse_area(x0, y0, x1, y1, section)
-    mp.input_set_section_mouse_area(section or default_section, x0, y0, x1, y1)
+    mp.input_set_section_mouse_area(section or default_section,
+                                    math.floor(x0),
+                                    math.floor(y0),
+                                    math.floor(x1),
+                                    math.floor(y1))
 end
 
 -- "Newer" and more convenient API

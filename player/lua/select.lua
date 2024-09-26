@@ -189,7 +189,7 @@ local function format_time(t, duration)
     local h = math.floor(t / (60 * 60))
     t = t - (h * 60 * 60)
     local m = math.floor(t / 60)
-    local s = t - (m * 60)
+    local s = math.floor(t - m * 60)
 
     if duration >= 60 * 60 or h > 0 then
         return string.format("%.2d:%.2d:%.2d", h, m, s)

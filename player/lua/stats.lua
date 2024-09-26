@@ -337,7 +337,7 @@ local function append_perfdata(header, s, dedicated_page)
     -- Pretty print measured time
     local function pp(i)
         -- rescale to microseconds for a saner display
-        return format("%5d", i / 1000)
+        return format("%5.0f", i / 1000)
     end
 
     -- Format n/m with a font weight based on the ratio
@@ -349,10 +349,10 @@ local function append_perfdata(header, s, dedicated_page)
         -- Calculate font weight. 100 is minimum, 400 is normal, 700 bold, 900 is max
         local w = (700 * math.sqrt(i)) + 200
         if not o.use_ass then
-            local str = format("%3d%%", i * 100)
+            local str = format("%3.0f%%", i * 100)
             return w >= 700 and bold(str) or str
         end
-        return format("{\\b%d}%3d%%{\\b0}", w, i * 100)
+        return format("{\\b%f}%3.0f%%{\\b0}", w, i * 100)
     end
 
     local font_small = o.use_ass and format("{\\fs%s}", font_size * 0.66) or ""
@@ -525,9 +525,9 @@ local function get_kbinfo_lines()
     local kpre = term and "" or format("{\\q2\\fn%s}%s", o.font_mono, LTR)
     local kpost = term and " " or format(" {\\fn%s}", o.font)
     local spre = term and kspaces .. "   "
-                       or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%d\\u1}",
+                       or format("{\\q2\\fn%s}%s   {\\fn%s}{\\fs%f\\u1}",
                                  o.font_mono, kspaces, o.font, 1.3*font_size)
-    local spost = term and "" or format("{\\u0\\fs%d}%s", font_size, text_style())
+    local spost = term and "" or format("{\\u0\\fs%f}%s", font_size, text_style())
 
     -- create the display lines
     local info_lines = {}

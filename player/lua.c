@@ -458,11 +458,6 @@ static int load_lua(struct mp_script_args *args)
 
     stats_register_thread_cputime(ctx->stats, "cpu");
 
-    if (LUA_VERSION_NUM != 501 && LUA_VERSION_NUM != 502) {
-        MP_FATAL(ctx, "Only Lua 5.1 and 5.2 are supported.\n");
-        goto error_out;
-    }
-
     lua_State *L = ctx->state = luaL_newstate();
     if (!L) {
         MP_FATAL(ctx, "Could not initialize Lua.\n");
@@ -879,7 +874,7 @@ static void pushnode(lua_State *L, mpv_node *node)
         lua_pushstring(L, node->u.string);
         break;
     case MPV_FORMAT_INT64:
-        lua_pushnumber(L, node->u.int64);
+        lua_pushinteger(L, node->u.int64);
         break;
     case MPV_FORMAT_DOUBLE:
         lua_pushnumber(L, node->u.double_);
