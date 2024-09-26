@@ -46,6 +46,9 @@
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
 
+// Vendored protocols
+#include "xx-color-management-v4.h"
+
 #if HAVE_DRM
 #include <drm_fourcc.h>
 #include <xf86drm.h>
@@ -70,6 +73,9 @@
 
 // From the fractional scale protocol
 #define WAYLAND_SCALE_FACTOR 120.0
+
+// From the xx color management protocol
+#define WAYLAND_COLOR_FACTOR 10000
 
 
 enum resizing_constraint {
@@ -232,6 +238,7 @@ static void get_planar_drm_formats(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
+static void initialize_color_maps(struct vo_wayland_state *wl);
 static void prepare_resize(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
@@ -1241,6 +1248,136 @@ static const struct wp_fractional_scale_v1_listener fractional_scale_listener = 
     preferred_scale,
 };
 
+static void supported_intent(void *data, struct xx_color_manager_v4 *color_manager,
+                             uint32_t render_intent)
+{
+}
+
+static void supported_feature(void *data, struct xx_color_manager_v4 *color_manager,
+                              uint32_t feature)
+{
+    struct vo_wayland_state *wl = data;
+
+    switch (feature) {
+    case XX_COLOR_MANAGER_V4_FEATURE_ICC_V2_V4:
+        MP_VERBOSE(wl, "Compositor supports ICC creator requests.\n");
+        wl->supports_icc = true; // TODO: actually implement
+        break;
+    case XX_COLOR_MANAGER_V4_FEATURE_PARAMETRIC:
+        MP_VERBOSE(wl, "Compositor supports parametric image description creator.\n");
+        wl->supports_parametric = true;
+        break;
+    case XX_COLOR_MANAGER_V4_FEATURE_SET_PRIMARIES:
+        MP_VERBOSE(wl, "Compositor supports setting primaries.\n");
+        wl->supports_primaries = true;
+        break;
+    case XX_COLOR_MANAGER_V4_FEATURE_SET_TF_POWER:
+        MP_VERBOSE(wl, "Compositor supports setting transfer functions.\n");
+        wl->supports_tf_power = true;
+        break;
+    case XX_COLOR_MANAGER_V4_FEATURE_SET_LUMINANCES:
+        MP_VERBOSE(wl, "Compositor supports setting luminances.\n");
+        wl->supports_luminances = true;
+        break;
+    case XX_COLOR_MANAGER_V4_FEATURE_SET_MASTERING_DISPLAY_PRIMARIES:
+        MP_VERBOSE(wl, "Compositor supports setting mastering display primaries.\n");
+        wl->supports_display_primaries = true;
+        break;
+    }
+}
+
+static void supported_tf_named(void *data, struct xx_color_manager_v4 *color_manager,
+                               uint32_t tf)
+{
+    struct vo_wayland_state *wl = data;
+
+    switch (tf) {
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_SRGB:
+        wl->transfer_map[PL_COLOR_TRC_SRGB] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_SRGB;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_LINEAR:
+        wl->transfer_map[PL_COLOR_TRC_LINEAR] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_LINEAR;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_GAMMA22:
+        wl->transfer_map[PL_COLOR_TRC_GAMMA22] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_GAMMA22;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_GAMMA28:
+        wl->transfer_map[PL_COLOR_TRC_GAMMA28] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_GAMMA28;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_ST428:
+        wl->transfer_map[PL_COLOR_TRC_ST428] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_ST428;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_ST2084_PQ:
+        wl->transfer_map[PL_COLOR_TRC_PQ] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_ST2084_PQ;
+        break;
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_HLG:
+        wl->transfer_map[PL_COLOR_TRC_HLG] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_HLG;
+        break;
+    }
+}
+
+static void supported_primaries_named(void *data, struct xx_color_manager_v4 *color_manager,
+                                      uint32_t primaries)
+{
+    struct vo_wayland_state *wl = data;
+
+    switch (primaries) {
+    case XX_COLOR_MANAGER_V4_PRIMARIES_PAL:
+        wl->primaries_map[PL_COLOR_PRIM_BT_601_525] = XX_COLOR_MANAGER_V4_PRIMARIES_PAL;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_NTSC:
+        wl->primaries_map[PL_COLOR_PRIM_BT_601_625] = XX_COLOR_MANAGER_V4_PRIMARIES_NTSC;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_SRGB:
+        wl->primaries_map[PL_COLOR_PRIM_BT_709] = XX_COLOR_MANAGER_V4_PRIMARIES_SRGB;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_PAL_M:
+        wl->primaries_map[PL_COLOR_PRIM_BT_470M] = XX_COLOR_MANAGER_V4_PRIMARIES_PAL_M;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_BT2020:
+        wl->primaries_map[PL_COLOR_PRIM_BT_2020] = XX_COLOR_MANAGER_V4_PRIMARIES_BT2020;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_ADOBE_RGB:
+        wl->primaries_map[PL_COLOR_PRIM_ADOBE] = XX_COLOR_MANAGER_V4_PRIMARIES_ADOBE_RGB;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_DCI_P3:
+        wl->primaries_map[PL_COLOR_PRIM_DCI_P3] = XX_COLOR_MANAGER_V4_PRIMARIES_DCI_P3;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_DISPLAY_P3:
+        wl->primaries_map[PL_COLOR_PRIM_DISPLAY_P3] = XX_COLOR_MANAGER_V4_PRIMARIES_DISPLAY_P3;
+        break;
+    case XX_COLOR_MANAGER_V4_PRIMARIES_GENERIC_FILM:
+        wl->primaries_map[PL_COLOR_PRIM_FILM_C] = XX_COLOR_MANAGER_V4_PRIMARIES_GENERIC_FILM;
+        break;
+    }
+}
+
+static const struct xx_color_manager_v4_listener color_manager_listener = {
+    supported_intent,
+    supported_feature,
+    supported_tf_named,
+    supported_primaries_named,
+};
+
+static void image_description_failed(void *data, struct xx_image_description_v4 *image_description,
+                                     uint32_t cause, const char *msg)
+{
+    struct vo_wayland_state *wl = data;
+    MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
+}
+
+static void image_description_ready(void *data, struct xx_image_description_v4 *image_description,
+                                    uint32_t identity)
+{
+    struct vo_wayland_state *wl = data;
+    xx_color_management_surface_v4_set_image_description(wl->color_surface, wl->image_description, 0);
+}
+
+static const struct xx_image_description_v4_listener image_description_listener = {
+    image_description_failed,
+    image_description_ready,
+};
+
 static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 {
     switch (mode) {
@@ -1503,6 +1640,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->surface = wl_compositor_create_surface(wl->compositor);
         wl->video_surface = wl_compositor_create_surface(wl->compositor);
         wl->osd_surface = wl_compositor_create_surface(wl->compositor);
+        wl->callback_surface = !strcmp(wl->vo->driver->name, "dmabuf-wayland") ?
+                               wl->video_surface : wl->surface;
 
         /* never accept input events on anything besides the main surface */
         struct wl_region *region = wl_compositor_create_region(wl->compositor);
@@ -1600,6 +1739,13 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
+    }
+
+    if (!strcmp(interface, xx_color_manager_v4_interface.name) && found++) {
+        ver = 1;
+        initialize_color_maps(wl);
+        wl->color_manager = wl_registry_bind(reg, id, &xx_color_manager_v4_interface, ver);
+        xx_color_manager_v4_add_listener(wl->color_manager, &color_manager_listener, wl);
     }
 
     if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++) {
@@ -2149,6 +2295,15 @@ static int handle_round(int scale, int n)
     return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
 }
 
+static void initialize_color_maps(struct vo_wayland_state *wl)
+{
+    // -1 indicates unsupported
+    for (int i = 0; i < PL_COLOR_PRIM_COUNT; i++)
+        wl->primaries_map[i] = -1;
+    for (int i = 0; i < PL_COLOR_TRC_COUNT; i++)
+        wl->transfer_map[i] = -1;
+}
+
 static void prepare_resize(struct vo_wayland_state *wl)
 {
     int32_t width = mp_rect_w(wl->geometry) / wl->scaling_factor;
@@ -2241,6 +2396,75 @@ static void remove_seat(struct vo_wayland_seat *seat)
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
     return;
+}
+
+static void reset_color_management(struct vo_wayland_state *wl)
+{
+    if (!wl->color_surface)
+        return;
+
+    if (wl->image_creator_params)
+        xx_image_description_creator_params_v4_destroy(wl->image_creator_params);
+
+    if (wl->image_description) {
+        xx_color_management_surface_v4_unset_image_description(wl->color_surface);
+        xx_image_description_v4_destroy(wl->image_description);
+        wl->image_description = NULL;
+    }
+
+    wl->image_creator_params = xx_color_manager_v4_new_parametric_creator(wl->color_manager);
+    wl->unsupported_colorspace = false;
+}
+
+static int set_colorspace(struct vo_wayland_state *wl)
+{
+    struct pl_color_space color = wl->vo->target_params->color;
+    int xx_primaries = wl->primaries_map[color.primaries];
+    int xx_transfer = wl->transfer_map[color.transfer];
+
+    if (xx_primaries == -1)
+        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", pl_color_primaries_name(color.primaries));
+
+    if (xx_transfer == -1)
+        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", pl_color_transfer_name(color.transfer));
+
+    if (xx_primaries == -1 || xx_transfer == -1) {
+        wl->unsupported_colorspace = true;
+        return -1;
+    }
+
+    xx_image_description_creator_params_v4_set_primaries_named(wl->image_creator_params, xx_primaries);
+    xx_image_description_creator_params_v4_set_tf_named(wl->image_creator_params, xx_transfer);
+    return 0;
+}
+
+static void set_color_management(struct vo_wayland_state *wl)
+{
+    struct pl_color_space color = wl->vo->target_params->color;
+    if (!wl->color_surface || wl->unsupported_colorspace || pl_color_space_equal(&color, &wl->target_params.color))
+        return;
+
+    wl->target_params = *wl->vo->target_params;
+    reset_color_management(wl);
+    if (set_colorspace(wl))
+        return;
+    struct pl_hdr_metadata hdr = wl->vo->target_params->color.hdr;
+    if (wl->supports_display_primaries) {
+        xx_image_description_creator_params_v4_set_mastering_display_primaries(wl->image_creator_params,
+                hdr.prim.red.x * WAYLAND_COLOR_FACTOR, hdr.prim.red.y * WAYLAND_COLOR_FACTOR, hdr.prim.green.x * WAYLAND_COLOR_FACTOR,
+                hdr.prim.green.y * WAYLAND_COLOR_FACTOR, hdr.prim.blue.x * WAYLAND_COLOR_FACTOR, hdr.prim.blue.y * WAYLAND_COLOR_FACTOR,
+                hdr.prim.white.x * WAYLAND_COLOR_FACTOR, hdr.prim.white.y * WAYLAND_COLOR_FACTOR);
+
+        // No clear enum in the protocol to indicate if these are supposed
+        // to work or not so just hope they do if setting display
+        // primaries is supported.
+        xx_image_description_creator_params_v4_set_mastering_luminance(wl->image_creator_params, hdr.min_luma * WAYLAND_COLOR_FACTOR, hdr.max_luma);
+        xx_image_description_creator_params_v4_set_max_cll(wl->image_creator_params, hdr.max_cll);
+        xx_image_description_creator_params_v4_set_max_fall(wl->image_creator_params, hdr.max_fall);
+    }
+    wl->image_description = xx_image_description_creator_params_v4_create(wl->image_creator_params);
+    wl->image_creator_params = NULL;
+    xx_image_description_v4_add_listener(wl->image_description, &image_description_listener, wl);
 }
 
 static void set_content_type(struct vo_wayland_state *wl)
@@ -2767,6 +2991,15 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+void vo_wayland_handle_color(struct vo_wayland_state *wl)
+{
+    if (!wl->vo->target_params)
+        return;
+
+    set_color_management(wl);
+}
+
+
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 {
     wp_viewport_set_destination(wl->viewport, lround(mp_rect_w(wl->geometry) / wl->scaling_factor),
@@ -2825,7 +3058,6 @@ bool vo_wayland_init(struct vo *vo)
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
     wl->opts = wl->opts_cache->opts;
-    bool using_dmabuf_wayland = !strcmp(wl->vo->driver->name, "dmabuf-wayland");
 
     wl_list_init(&wl->output_list);
     wl_list_init(&wl->seat_list);
@@ -2877,6 +3109,14 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
+    }
+
+    // Only bind to vo_dmabuf_wayland for now to avoid conflicting with VK_hdr_layer
+    if (wl->color_manager && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
+        wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   xx_color_manager_v4_interface.name);
     }
 
     if (wl->content_type_manager) {
@@ -2954,7 +3194,6 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->callback_surface = using_dmabuf_wayland ? wl->video_surface : wl->surface;
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
@@ -2962,6 +3201,15 @@ bool vo_wayland_init(struct vo *vo)
     /* Do another roundtrip to ensure all of the above is initialized
      * before mpv does anything else. */
     wl_display_roundtrip(wl->display);
+
+    // The compositor needs to at least support parametric otherwise
+    // the protocol is useless for us.
+    // TODO: Use the icc stuff.
+    if (wl->color_manager && !wl->supports_parametric) {
+        MP_VERBOSE(wl, "Compositor does not support parametic image descriptions!\n");
+        xx_color_management_surface_v4_destroy(wl->color_surface);
+        wl->color_surface = NULL;
+    }
 
     return true;
 
@@ -2975,6 +3223,8 @@ bool vo_wayland_reconfig(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
+
+    reset_color_management(wl);
 
     if (!wl->current_output) {
         wl->current_output = find_output(wl);
@@ -3059,6 +3309,18 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
+
+    if (wl->color_manager)
+        xx_color_manager_v4_destroy(wl->color_manager);
+
+    if (wl->color_surface)
+        xx_color_management_surface_v4_destroy(wl->color_surface);
+
+    if (wl->image_creator_params)
+        xx_image_description_creator_params_v4_destroy(wl->image_creator_params);
+
+    if (wl->image_description)
+        xx_image_description_v4_destroy(wl->image_description);
 
     if (wl->content_type)
         wp_content_type_v1_destroy(wl->content_type);
