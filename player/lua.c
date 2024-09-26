@@ -105,7 +105,6 @@ struct script_ctx {
 
 #if LUA_VERSION_NUM <= 501
 #define mp_cpcall lua_cpcall
-#define mp_lua_len lua_objlen
 #else
 // Curse whoever had this stupid idea. Curse whoever thought it would be a good
 // idea not to include an emulated lua_cpcall() even more.
@@ -115,7 +114,6 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
     lua_pushlightuserdata(L, ud);
     return lua_pcall(L, 1, 0, 0);
 }
-#define mp_lua_len lua_rawlen
 #endif
 
 // Ensure that the given argument exists, even if it's nil. Can be used to
