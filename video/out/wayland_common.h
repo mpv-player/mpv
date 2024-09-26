@@ -19,7 +19,9 @@
 #define MPLAYER_WAYLAND_COMMON_H
 
 #include <wayland-client.h>
+
 #include "input/event.h"
+#include "video/mp_image.h"
 #include "vo.h"
 
 struct compositor_format;
@@ -84,6 +86,22 @@ struct vo_wayland_state {
     int resizing_constraint;
     int timeout_count;
     int wakeup_pipe[2];
+
+    /* color-management */
+    struct xx_color_manager_v4 *color_manager;
+    struct xx_color_management_surface_v4 *color_surface;
+    struct xx_image_description_v4 *image_description;
+    struct xx_image_description_creator_params_v4 *image_creator_params;
+    struct mp_image_params target_params;
+    bool supports_icc;
+    bool supports_parametric;
+    bool supports_primaries;
+    bool supports_tf_power;
+    bool supports_luminances;
+    bool supports_display_primaries;
+    bool unsupported_colorspace;
+    int primaries_map[PL_COLOR_PRIM_COUNT];
+    int transfer_map[PL_COLOR_TRC_COUNT];
 
     /* content-type */
     struct wp_content_type_manager_v1 *content_type_manager;
@@ -167,6 +185,7 @@ bool vo_wayland_reconfig(struct vo *vo);
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
+void vo_wayland_handle_color(struct vo_wayland_state *wl);
 void vo_wayland_handle_scale(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);

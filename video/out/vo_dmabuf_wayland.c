@@ -100,6 +100,8 @@ struct priv {
     bool destroy_buffers;
     bool force_window;
     enum hwdec_type hwdec_type;
+
+    struct mp_image_params target_params;
     uint32_t drm_format;
     uint64_t drm_modifier;
 };
@@ -538,6 +540,12 @@ static void resize(struct vo *vo)
                                                   lround(vo->dheight / wl->scaling_factor));
     wl_subsurface_set_position(wl->osd_subsurface, lround((0 - dst.x0) / wl->scaling_factor), lround((0 - dst.y0) / wl->scaling_factor));
     set_viewport_source(vo, src);
+
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params->w = mp_rect_w(dst);
+    vo->target_params->h = mp_rect_h(dst);
+    vo->target_params->rotate = (vo->params->rotate % 90) * 90;
+    mp_mutex_unlock(&vo->params_mutex);
 }
 
 static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
@@ -612,6 +620,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         buf = buffer_get(vo, frame);
 
         if (buf && buf->frame) {
+            vo_wayland_handle_color(wl);
             struct mp_image *image = buf->frame->current;
             wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
             wl_surface_damage_buffer(wl->video_surface, 0, 0, image->w,
@@ -690,6 +699,17 @@ static int reconfig(struct vo *vo, struct mp_image *img)
 done:
     if (!vo_wayland_reconfig(vo))
         return VO_ERROR;
+
+    mp_mutex_lock(&vo->params_mutex);
+    p->target_params = img->params;
+    // Restore fallback layer parameters if available.
+    mp_image_params_restore_dovi_mapping(&p->target_params);
+    // Strip metadata that is not understood anyway.
+    struct pl_hdr_metadata *hdr = &p->target_params.color.hdr;
+    hdr->scene_max[0] = hdr->scene_max[1] = hdr->scene_max[2] = 0;
+    hdr->scene_avg = hdr->max_pq_y = hdr->avg_pq_y = 0;
+    vo->target_params = &p->target_params;
+    mp_mutex_unlock(&vo->params_mutex);
 
     wl_surface_set_buffer_transform(vo->wl->video_surface, img->params.rotate / 90);
 

@@ -6,8 +6,9 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
              [wl_protocol_dir, 'unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml'],
              [wl_protocol_dir, 'unstable/xdg-decoration/xdg-decoration-unstable-v1.xml'],
              [wl_protocol_dir, 'staging/content-type/content-type-v1.xml'],
+             [wl_protocol_dir, 'staging/fractional-scale/fractional-scale-v1.xml'],
              [wl_protocol_dir, 'staging/single-pixel-buffer/single-pixel-buffer-v1.xml'],
-             [wl_protocol_dir, 'staging/fractional-scale/fractional-scale-v1.xml']]
+             ['protocols', 'xx-color-management-v4.xml']]
 wl_protocols_source = []
 wl_protocols_headers = []
 
