@@ -209,6 +209,8 @@ static int resize(struct vo *vo)
     vo->target_params = &p->sws->dst;
     mp_mutex_unlock(&vo->params_mutex);
 
+    vo_wayland_handle_color(wl);
+
     while (p->free_buffers) {
         buf = p->free_buffers;
         p->free_buffers = buf->next;
