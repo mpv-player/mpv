@@ -603,7 +603,7 @@ static const m_option_t mp_opts[] = {
     {"ab-loop-a", OPT_TIME(ab_loop[0]), .flags = M_OPT_ALLOW_NO},
     {"ab-loop-b", OPT_TIME(ab_loop[1]), .flags = M_OPT_ALLOW_NO},
     {"ab-loop-count", OPT_CHOICE(ab_loop_count, {"inf", -1}),
-        M_RANGE(0, INT_MAX)},
+        M_RANGE(0, INT_MAX), .force_update = true},
 
     {"playlist-start", OPT_CHOICE(playlist_pos, {"auto", -1}, {"no", -1}),
         M_RANGE(0, INT_MAX)},
@@ -821,7 +821,7 @@ static const m_option_t mp_opts[] = {
         {"no", 0},
         {"inf", -1},
         {"yes", -1}),
-        M_RANGE(0, 10000)},
+        M_RANGE(0, 10000), .force_update = true},
     {"loop", OPT_ALIAS("loop-file")},
 
     {"resume-playback", OPT_BOOL(position_resume)},
