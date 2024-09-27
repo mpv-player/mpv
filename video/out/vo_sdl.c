@@ -453,7 +453,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct mp_rect screenrc;
 
     update_screeninfo(vo, &screenrc);
-    vo_calc_window_geometry(vo, &screenrc, &screenrc, 1.0, &geo);
+    vo_calc_window_geometry(vo, &screenrc, &screenrc, 1.0, false, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     int win_w = vo->dwidth;

@@ -426,7 +426,7 @@ class Common: NSObject {
                                         y1: Int32(originY + rv.size.height))
 
         var geo: vo_win_geometry = vo_win_geometry()
-        vo_calc_window_geometry(vo, &screenRC, &screenRC, Double(screen.backingScaleFactor), &geo)
+        vo_calc_window_geometry(vo, &screenRC, &screenRC, Double(screen.backingScaleFactor), false, &geo)
         vo_apply_window_geometry(vo, &geo)
 
         let height = CGFloat(geo.win.y1 - geo.win.y0)
