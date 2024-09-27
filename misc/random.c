@@ -20,7 +20,10 @@
 
 #include <stdint.h>
 
+#include <libavutil/random_seed.h>
+
 #include "osdep/threads.h"
+#include "osdep/timer.h"
 #include "random.h"
 
 static uint64_t state[4];
@@ -44,6 +47,16 @@ void mp_rand_seed(uint64_t seed)
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     seed = 42;
 #endif
+
+    if (seed == 0) {
+        uint8_t buf[sizeof(seed)];
+        if (av_random_bytes(buf, sizeof(buf)) < 0) {
+            seed = mp_raw_time_ns();
+        } else {
+            memcpy(&seed, buf, sizeof(seed));
+        }
+    }
+
     mp_mutex_lock(&state_mutex);
     state[0] = seed;
     for (int i = 1; i < 4; i++)
