@@ -1809,7 +1809,8 @@ void vo_x11_config_vo_window(struct vo *vo)
     vo_x11_update_screeninfo(vo);
 
     struct vo_win_geometry geo;
-    vo_calc_window_geometry(vo, &x11->screenrc, &x11->screenrc, x11->dpi_scale, false, &geo);
+    vo_calc_window_geometry(vo, &x11->screenrc, &x11->screenrc, x11->dpi_scale,
+                            !x11->pseudo_mapped, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     struct mp_rect rc = geo.win;
@@ -1833,7 +1834,7 @@ void vo_x11_config_vo_window(struct vo *vo)
         x11->nofsrc = rc;
         vo_x11_map_window(vo, rc);
     } else if (reset_size) {
-        vo_x11_highlevel_resize(vo, rc, x11->geometry_change);
+        vo_x11_highlevel_resize(vo, rc, geo.flags & VO_WIN_FORCE_POS);
     }
 
     x11->geometry_change = false;
