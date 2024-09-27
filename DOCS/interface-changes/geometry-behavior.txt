@@ -1,0 +1,1 @@
+change `--geometry` so that it no longer unconditionally moves the window on platforms where that is possible. Use `--force-window-position` or add `+50%+50%` to your geometry command to get the old behavior back.

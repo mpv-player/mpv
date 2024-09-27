@@ -74,14 +74,17 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 //  monitor: position of the monitor on virtual desktop (used for pixelaspect).
 //  dpi_scale: the DPI multiplier to get from virtual to real coordinates
 //             (>1 for "hidpi")
+//  force_center: force centering x/y in the middle of the given screen even if
+//                opts->force_window_position is not set. ignored if the user
+//                supplies valid x/y coordinates on their own.
 // Use vo_apply_window_geometry() to copy the result into the vo.
 // NOTE: currently, all windowing backends do their own handling of window
 //       geometry additional to this code. This is to deal with initial window
 //       placement, fullscreen handling, avoiding resize on reconfig() with no
 //       size change, multi-monitor stuff, and possibly more.
 void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
-                             const struct mp_rect *monitor,
-                             double dpi_scale, struct vo_win_geometry *out_geo)
+                             const struct mp_rect *monitor, double dpi_scale,
+                             bool force_center, struct vo_win_geometry *out_geo)
 {
     struct mp_vo_opts *opts = vo->opts;
 
@@ -121,15 +124,24 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
 
     out_geo->win.x0 = (int)(scr_w - d_w) / 2;
     out_geo->win.y0 = (int)(scr_h - d_h) / 2;
+
+    int old_w = d_w;
+    int old_h = d_h;
+
     m_geometry_apply(&out_geo->win.x0, &out_geo->win.y0, &d_w, &d_h,
                      scr_w, scr_h, &opts->geometry);
+
+    if ((opts->force_window_position || force_center) && !opts->geometry.xy_valid) {
+        out_geo->win.x0 += old_w / 2 - d_w / 2;
+        out_geo->win.y0 += old_h / 2 - d_h / 2;
+    }
 
     out_geo->win.x0 += screen->x0;
     out_geo->win.y0 += screen->y0;
     out_geo->win.x1 = out_geo->win.x0 + d_w;
     out_geo->win.y1 = out_geo->win.y0 + d_h;
 
-    if (opts->geometry.xy_valid || opts->force_window_position)
+    if (opts->geometry.xy_valid || opts->force_window_position || force_center)
         out_geo->flags |= VO_WIN_FORCE_POS;
 }
 

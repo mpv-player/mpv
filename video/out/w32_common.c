@@ -1920,7 +1920,7 @@ static void window_reconfig(struct vo_w32_state *w32, bool force)
     if (w32->dpi_scale == 0)
         force_update_display_info(w32);
 
-    vo_calc_window_geometry(vo, &screen, &mon, w32->dpi_scale, &geo);
+    vo_calc_window_geometry(vo, &screen, &mon, w32->dpi_scale, false, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = ((w32->o_dwidth != vo->dwidth ||
