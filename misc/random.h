@@ -24,7 +24,7 @@
 
 /*
  * Initialize the pseudo-random number generator's state with
- * the given 64-bit seed.
+ * the given 64-bit seed. If the seed is 0, it is randomized.
  */
 void mp_rand_seed(uint64_t seed);
 

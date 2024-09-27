@@ -30,6 +30,7 @@
 #include "mpv_talloc.h"
 
 #include "misc/dispatch.h"
+#include "misc/random.h"
 #include "misc/thread_pool.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
@@ -263,6 +264,7 @@ struct MPContext *mp_create(void)
         talloc_enable_leak_report();
 
     mp_time_init();
+    mp_rand_seed(0);
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
