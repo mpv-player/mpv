@@ -1809,7 +1809,7 @@ void vo_x11_config_vo_window(struct vo *vo)
     vo_x11_update_screeninfo(vo);
 
     struct vo_win_geometry geo;
-    vo_calc_window_geometry2(vo, &x11->screenrc, x11->dpi_scale, &geo);
+    vo_calc_window_geometry(vo, &x11->screenrc, &x11->screenrc, x11->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     struct mp_rect rc = geo.win;
