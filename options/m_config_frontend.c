@@ -662,10 +662,13 @@ static struct m_config_option *m_config_mogrify_cli_opt(struct m_config *config,
     bstr no_name = *name;
     if (!co && bstr_eatstart0(&no_name, "no-")) {
         co = m_config_get_co(config, no_name);
+        if (!co)
+            return NULL;
 
         // Not all choice types have this value - if they don't, then parsing
         // them will simply result in an error. Good enough.
-        if (!co || !(co->opt->type->flags & M_OPT_TYPE_CHOICE))
+        if (!(co->opt->type->flags & M_OPT_TYPE_CHOICE) &&
+            !(co->opt->flags & M_OPT_ALLOW_NO))
             return NULL;
 
         *name = no_name;
