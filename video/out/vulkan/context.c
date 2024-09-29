@@ -185,6 +185,7 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     const char *opt_extensions[] = {
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
+        VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
@@ -192,9 +193,15 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
     };
 
+    VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
+        .pNext = NULL,
+        .shaderObject = true,
+    };
+
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
-        .pNext = NULL,
+        .pNext = &shader_object_feature,
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
