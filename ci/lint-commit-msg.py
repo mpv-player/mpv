@@ -61,6 +61,7 @@ def do_lint(commit_range: str) -> bool:
             print("\nhas the following issues:")
             print("\n".join(failed))
             print("-" * 40)
+    return any_failed
 
 ################################################################################
 
