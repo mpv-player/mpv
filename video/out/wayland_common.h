@@ -115,8 +115,8 @@ struct vo_wayland_state {
     uint32_t compositor_format_size;
     struct drm_format *compositor_formats;
     int num_compositor_formats;
-    uint32_t *gpu_formats;
-    int num_gpu_formats;
+    uint32_t *planar_formats;
+    int num_planar_formats;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
