@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <drm_fourcc.h>
+
 #include "video/out/wayland_common.h"
 #include "video/out/gpu/ra.h"
 #include "ra_wldmabuf.h"
@@ -34,25 +36,26 @@ bool ra_compatible_format(struct ra *ra, int imgfmt, uint32_t drm_format, uint64
     struct vo_wayland_state *wl = p->vo->wl;
     struct drm_format *formats = wl->compositor_formats;
 
-
-    // If we were able to make the DRM query, filter out the planar formats.
-    // If not, just assume they all work and hope for the best.
-    if (wl->planar_formats) {
-        bool supported_planar_format = false;
-        for (int i = 0; i < wl->num_planar_formats; i++) {
-            if (drm_format == wl->planar_formats[i]) {
-                supported_planar_format = true;
-                break;
-            }
-        }
-        if (!supported_planar_format)
-            return false;
+    // Always check if the compositor supports the format.
+    bool supported_compositor_format = false;
+    for (int i = 0; i < wl->num_compositor_formats; ++i) {
+        if (formats[i].format != drm_format || formats[i].modifier == DRM_FORMAT_MOD_INVALID)
+            continue;
+        if (modifier == formats[i].modifier)
+            return true;
+        supported_compositor_format = true;
     }
 
-    // Always check if the compositor supports the format.
-    for (int i = 0; i < wl->num_compositor_formats; ++i) {
-        if (drm_format == formats[i].format && modifier == formats[i].modifier)
-            return true;
+    if (!supported_compositor_format)
+        return false;
+
+    // If the compositor supports the format but there are no valid modifiers,
+    // see if this is a planar format which can be still be supported.
+    if (wl->planar_formats) {
+        for (int i = 0; i < wl->num_planar_formats; i++) {
+            if (drm_format == wl->planar_formats[i])
+                return true;
+        }
     }
 
     return false;
