@@ -47,7 +47,7 @@ static int test_ext(MPOpts *opts, bstr ext)
 
 static int test_cover_filename(bstr fname, char **cover_files)
 {
-    for (int n = 0; cover_files[n]; n++) {
+    for (int n = 0; cover_files && cover_files[n]; n++) {
         if (bstrcasecmp(bstr0(cover_files[n]), fname) == 0) {
             size_t size = n;
             while (cover_files[++size]);
