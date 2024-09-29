@@ -98,6 +98,7 @@ void playlist_append_file(struct playlist *pl, const char *filename);
 void playlist_populate_playlist_path(struct playlist *pl, const char *path);
 void playlist_shuffle(struct playlist *pl);
 void playlist_unshuffle(struct playlist *pl);
+void playlist_reorder(struct playlist *pl, const int *indexes, int num_indexes);
 struct playlist_entry *playlist_get_first(struct playlist *pl);
 struct playlist_entry *playlist_get_last(struct playlist *pl);
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);

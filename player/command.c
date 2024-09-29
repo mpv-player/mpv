@@ -5903,6 +5903,25 @@ static void cmd_playlist_move(void *p)
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
 }
 
+static void cmd_playlist_reorder(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    int num_indexes = cmd->num_args;
+    int *indexes = talloc_array(NULL, int, num_indexes);
+    for (int i = 0; i < num_indexes; i++)
+        indexes[i] = cmd->args[i].v.i;
+    playlist_reorder(mpctx->playlist, indexes, num_indexes);
+    talloc_free(indexes);
+
+    // Can't play a removed entry.
+    if (mpctx->playlist->current_was_replaced && !mpctx->stop_play)
+        mpctx->stop_play = PT_NEXT_ENTRY;
+    mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+    mp_wakeup_core(mpctx);
+}
+
 static void cmd_playlist_shuffle(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -6993,6 +7012,12 @@ const struct mp_cmd_def mp_cmds[] = {
             .flags = MP_CMD_OPT_ARG, M_RANGE(0, INT_MAX)}, }},
     { "playlist-move", cmd_playlist_move,  { {"index1", OPT_INT(v.i)},
                                              {"index2", OPT_INT(v.i)}, }},
+    { "playlist-reorder", cmd_playlist_reorder,
+        {
+            {"index", OPT_INT(v.i)},
+        },
+        .vararg = true,
+    },
     { "run", cmd_run, { {"command", OPT_STRING(v.s)},
                         {"args", OPT_STRING(v.s)}, },
         .vararg = true,

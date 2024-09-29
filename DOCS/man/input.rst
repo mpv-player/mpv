@@ -554,6 +554,12 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     because index2 refers to the target entry, not the index the entry
     will have after moving.)
 
+``playlist-reorder [<index1> [<index2> [...]]]``
+    Reorder playlist to start with playlist entry at index1, followed by the
+    entry at index2 and so on. Entries not mentioned in the list are removed.
+    Removing the current entry stops playback and starts playing the next kept
+    entry. Index values start counting with 0.
+
 ``playlist-shuffle``
     Shuffle the playlist. This is similar to what is done on start if the
     ``--shuffle`` option is used.
