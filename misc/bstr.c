@@ -361,11 +361,6 @@ static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
     }
 }
 
-// Append the string, so that *s = *s + append. s->start is expected to be
-// a talloc allocation (which can be realloced) or NULL.
-// This function will always implicitly append a \0 after the new string for
-// convenience.
-// talloc_ctx will be used as parent context, if s->start is NULL.
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append)
 {
     if (!append.len)
@@ -385,7 +380,6 @@ int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     return ret;
 }
 
-// Exactly as bstr_xappend(), but with a formatted string.
 int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
                            va_list ap)
 {
