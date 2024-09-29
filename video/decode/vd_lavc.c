@@ -124,7 +124,7 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-apply-cropping", OPT_BOOL(apply_cropping)},
         {"hwdec", OPT_STRINGLIST(hwdec_api),
             .help = hwdec_opt_help,
-            .flags = M_OPT_OPTIONAL_PARAM | UPDATE_HWDEC},
+            .flags = M_OPT_OPTIONAL_PARAM | M_OPT_ALLOW_NO | UPDATE_HWDEC},
         {"hwdec-codecs", OPT_STRING(hwdec_codecs)},
         {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format)},
         {"hwdec-extra-frames", OPT_INT(hwdec_extra_frames), M_RANGE(0, 256)},
