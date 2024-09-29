@@ -481,7 +481,7 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     add_all_hwdec_methods(&hwdecs, &num_hwdecs);
 
     char **hwdec_api = ctx->opts->hwdec_api;
-    for (int i = 0; hwdec_api[i]; i++) {
+    for (int i = 0; hwdec_api && hwdec_api[i]; i++) {
         bstr opt = bstr0(hwdec_api[i]);
 
         bool hwdec_requested = !bstr_equals0(opt, "no");
