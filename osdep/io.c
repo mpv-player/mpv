@@ -62,13 +62,7 @@ bool mp_set_cloexec(int fd)
     return true;
 }
 
-#ifdef _WIN32
-int mp_make_cloexec_pipe(int pipes[2])
-{
-    pipes[0] = pipes[1] = -1;
-    return -1;
-}
-#else
+#ifndef _WIN32
 int mp_make_cloexec_pipe(int pipes[2])
 {
     if (pipe(pipes) != 0) {
@@ -80,14 +74,7 @@ int mp_make_cloexec_pipe(int pipes[2])
         mp_set_cloexec(pipes[i]);
     return 0;
 }
-#endif
 
-#ifdef _WIN32
-int mp_make_wakeup_pipe(int pipes[2])
-{
-    return mp_make_cloexec_pipe(pipes);
-}
-#else
 // create a pipe, and set it to non-blocking (and also set FD_CLOEXEC)
 int mp_make_wakeup_pipe(int pipes[2])
 {
@@ -100,15 +87,13 @@ int mp_make_wakeup_pipe(int pipes[2])
     }
     return 0;
 }
-#endif
 
 void mp_flush_wakeup_pipe(int pipe_end)
 {
-#ifndef _WIN32
     char buf[100];
     (void)read(pipe_end, buf, sizeof(buf));
-#endif
 }
+#endif
 
 #ifdef _WIN32
 
@@ -146,9 +131,13 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 
 #ifdef _WIN32
 
+#include <stdatomic.h>
+
 #include <io.h>
 #include <fcntl.h>
+
 #include "osdep/threads.h"
+#include "osdep/getpid.h"
 
 static void set_errno_from_lasterror(void)
 {
@@ -876,6 +865,95 @@ locale_t uselocale(locale_t locobj)
 
 void freelocale(locale_t locobj)
 {
+}
+
+#define MP_PIPE_BUF_SIZE 65536
+
+int mp_make_cloexec_pipe(int pipes[2])
+{
+    if (_pipe(pipes, MP_PIPE_BUF_SIZE, _O_BINARY | _O_NOINHERIT) != 0) {
+        pipes[0] = pipes[1] = -1;
+        return -1;
+    }
+    return 0;
+}
+
+int mp_make_wakeup_pipe(int pipes[2])
+{
+    static atomic_ulong pipe_id = 0;
+
+    pipes[0] = pipes[1] = -1;
+    HANDLE handles[2];
+    handles[0] = handles[1] = INVALID_HANDLE_VALUE;
+
+    const char *pipe_name = mp_tprintf(55, "\\\\?\\pipe\\mpv\\%lu-%lu", mp_getpid(), atomic_fetch_add_explicit(&pipe_id, 1, memory_order_relaxed));
+
+    handles[1] = CreateNamedPipeA(
+        pipe_name,
+        PIPE_ACCESS_OUTBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
+        0,
+        1,
+        MP_PIPE_BUF_SIZE,
+        MP_PIPE_BUF_SIZE,
+        0,
+        NULL
+    );
+    if (handles[1] == INVALID_HANDLE_VALUE) {
+        set_errno_from_lasterror();
+        goto error;
+    }
+
+    handles[0] = CreateFileA(
+        pipe_name,
+        GENERIC_READ,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_OVERLAPPED,
+        NULL
+    );
+    if (handles[0] == INVALID_HANDLE_VALUE) {
+        set_errno_from_lasterror();
+        goto error;
+    }
+
+    if (!ConnectNamedPipe(handles[1], NULL) && GetLastError() != ERROR_PIPE_CONNECTED) {
+        set_errno_from_lasterror();
+        goto error;
+    }
+
+    for (int i = 0; i < 2; i++) {
+        pipes[i] = _open_osfhandle((intptr_t)handles[i], 0);
+        if (pipes[i] == -1)
+            goto error;
+    }
+
+    return 0;
+
+error:
+    for (int i = 0; i < 2; i++) {
+        if (pipes[i] != -1) {
+            _close(pipes[i]);
+            pipes[i] = -1;
+        } else if (handles[i] != INVALID_HANDLE_VALUE) {
+            CloseHandle(handles[i]);
+        }
+    }
+
+    return -1;
+}
+
+void mp_flush_wakeup_pipe(int pipe_end)
+{
+    char buf[100];
+    OVERLAPPED operation = {};
+    HANDLE handle = (HANDLE)_get_osfhandle(pipe_end);
+    if (handle == INVALID_HANDLE_VALUE)
+        return;
+    if (!ReadFile(handle, buf, sizeof(buf), NULL, &operation)) {
+        if (GetLastError() != ERROR_IO_PENDING || !CancelIoEx(handle, &operation))
+            set_errno_from_lasterror();
+    }
 }
 
 #endif // __MINGW32__
