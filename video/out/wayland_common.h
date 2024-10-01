@@ -22,13 +22,9 @@
 #include "input/event.h"
 #include "vo.h"
 
+struct compositor_format;
 struct vo_wayland_seat;
-
-typedef struct {
-    uint32_t format;
-    uint32_t padding;
-    uint64_t modifier;
-} compositor_format;
+struct vo_wayland_tranche;
 
 struct drm_format {
     uint32_t format;
@@ -107,16 +103,12 @@ struct vo_wayland_state {
     struct zwp_idle_inhibitor_v1 *idle_inhibitor;
 
     /* linux-dmabuf */
-    dev_t target_device_id;
+    struct wl_list tranche_list;
+    struct vo_wayland_tranche *current_tranche;
     struct zwp_linux_dmabuf_v1 *dmabuf;
     struct zwp_linux_dmabuf_feedback_v1 *dmabuf_feedback;
-    bool add_tranche;
-    compositor_format *compositor_format_map;
+    struct compositor_format *compositor_format_map;
     uint32_t compositor_format_size;
-    struct drm_format *compositor_formats;
-    int num_compositor_formats;
-    uint32_t *planar_formats;
-    int num_planar_formats;
 
     /* presentation-time */
     struct wp_presentation  *presentation;
@@ -168,6 +160,7 @@ struct vo_wayland_state {
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
+bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier);
 bool vo_wayland_init(struct vo *vo);
 bool vo_wayland_reconfig(struct vo *vo);
 
