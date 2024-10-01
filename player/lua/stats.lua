@@ -1619,6 +1619,7 @@ local function filter_bindings()
                 end
             end
         end,
+        dont_bind_up_down = true,
     })
 end
 
