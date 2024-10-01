@@ -464,6 +464,7 @@ features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
 features += {'memrchr': cc.has_function('memrchr', args: '-D_GNU_SOURCE',
                                         prefix: '#include <string.h>')}
 features += {'clone': cc.has_header_symbol('sched.h', 'clone', args: '-D_GNU_SOURCE')}
+features += {'rfork': cc.has_header_symbol('unistd.h', 'rfork_thread')}
 
 optical_devices = {
     'windows': 'D:',
