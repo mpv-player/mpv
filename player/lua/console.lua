@@ -142,27 +142,6 @@ local function len_utf8(str)
     return len
 end
 
-local function truncate_utf8(str, max_length)
-    local len = 0
-    local pos = 1
-    while pos <= #str do
-        local last_pos = pos
-        pos = next_utf8(str, pos)
-        len = len + 1
-        if pos > last_pos + 1 then
-            if len == max_length - 1 then
-                pos = last_pos
-            else
-                len = len + 1
-            end
-        end
-        if len == max_length - 1 then
-            return str:sub(1, pos - 1) .. '⋯'
-        end
-    end
-    return str
-end
-
 
 -- Functions to calculate the font width.
 local width_length_ratio = 0.5
@@ -371,22 +350,7 @@ local function fuzzy_find(needle, haystacks)
     return result
 end
 
-local function calculate_max_terminal_width()
-    local max_width = mp.get_property_native('term-size/w', 80)
-
-    -- The longest module name is vo/gpu-next/libplacebo.
-    if mp.get_property_native('msg-module') then
-        max_width = max_width - 24
-    end
-
-    if mp.get_property_native('msg-time') then
-        max_width = max_width - 13
-    end
-
-    return max_width
-end
-
-local function populate_log_with_matches(max_width)
+local function populate_log_with_matches()
     if not selectable_items or selected_match == 0 then
         return
     end
@@ -454,8 +418,7 @@ local function populate_log_with_matches(max_width)
 
     for i = first_match_to_print, last_match_to_print do
         log[#log + 1] = {
-            text = (max_width and truncate_utf8(matches[i].text, max_width)
-                    or matches[i].text),
+            text = matches[i].text,
             style = i == selected_match and styles.selected_suggestion or '',
             terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
         }
@@ -478,11 +441,12 @@ local function print_to_terminal()
         return
     end
 
-    populate_log_with_matches(calculate_max_terminal_width())
+    populate_log_with_matches()
 
     local log = ''
+    local clip = selectable_items and mp.get_property('term-clip-cc') or ''
     for _, log_line in ipairs(log_buffers[id]) do
-        log = log .. log_line.terminal_style .. log_line.text .. '\027[0m\n'
+        log = log .. clip .. log_line.terminal_style .. log_line.text .. '\027[0m\n'
     end
 
     local suggestions = ''
