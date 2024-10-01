@@ -451,7 +451,7 @@ static void create_shm_pool(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
 
-    int stride = MP_ALIGN_UP(vo->dwidth * 4, 16);
+    int stride = MP_ALIGN_UP(vo->dwidth * 4, MP_IMAGE_BYTE_ALIGN);
     size_t size = vo->dheight * stride;
     int fd = vo_wayland_allocate_memfd(vo, size);
     if (fd < 0)
@@ -783,7 +783,7 @@ static int preinit(struct vo *vo)
     } else {
         int width = 1;
         int height = 1;
-        int stride = MP_ALIGN_UP(width * 4, 16);
+        int stride = MP_ALIGN_UP(width * 4, MP_IMAGE_BYTE_ALIGN);
         int fd = vo_wayland_allocate_memfd(vo, stride);
         if (fd < 0)
             goto err;
