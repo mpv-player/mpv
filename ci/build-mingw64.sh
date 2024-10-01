@@ -240,7 +240,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=9.0.0
+    local ver=10.0.1
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
