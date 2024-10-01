@@ -79,6 +79,8 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
 // signal handlers first so nothing funny happens.
 static void reset_signals_child(void)
 {
+#if !HAVE_RFORK
+    // RFSPAWN has reset all signal actions in the child to default already
     struct sigaction sa = { 0 };
     sigset_t sigmask;
     sa.sa_handler = SIG_DFL;
@@ -87,6 +89,7 @@ static void reset_signals_child(void)
     for (int nr = 1; nr <= SIGNAL_MAX; nr++)
         sigaction(nr, &sa, NULL);
     sigprocmask(SIG_SETMASK, &sigmask, NULL);
+#endif
 }
 
 struct child_args {
@@ -101,9 +104,9 @@ struct child_args {
 static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *opts,
                                  int src_fds[], bool detach);
 
-// This function is called from a clone(CLONE_VM) context where the child
-// shares the parent's address space. Use MP_NO_ASAN to avoid false positives
-// from ASan when the child writes to shared memory.
+// This function is called from a clone(CLONE_VM)/rfork_thread context where
+// the child shares the parent's address space. Use MP_NO_ASAN to avoid false
+// positives from ASan when the child writes to shared memory.
 MP_NO_ASAN static int child_main(void* args)
 {
     struct child_args *child_args = args;
@@ -161,11 +164,16 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
 
     int p[2] = {-1, -1};
 
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     const size_t stack_size = 0x8000;
     void* stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
     if (stack == MAP_FAILED)
         goto done;
+#endif
+
+#if HAVE_RFORK
+    fres = rfork_thread(RFSPAWN, (int8_t*)stack + stack_size, child_main, &child_args);
+#elif HAVE_CLONE
     fres = clone(child_main, (int8_t*)stack + stack_size, CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
 #else
     // We setup a communication pipe to signal failure. Since the child calls
@@ -190,7 +198,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
         goto done;
     }
 
-#if !HAVE_CLONE
+#if !HAVE_CLONE && !HAVE_RFORK
     if (fres == 0) {
         _exit(child_main(&child_args));
     }
@@ -211,7 +219,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
     }
 
 done:
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     munmap(stack, stack_size);
 #endif
     SAFE_CLOSE(p[0]);
@@ -224,14 +232,18 @@ done:
 static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
                            int src_fds[])
 {
+#if !HAVE_RFORK
     sigset_t sigmask, oldmask;
 
     sigfillset(&sigmask);
     pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
+#endif
 
     pid_t fres = spawn_process_inner(path, opts, src_fds, opts->detach);
 
+#if !HAVE_RFORK
     pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
+#endif
 
     return fres;
 }
