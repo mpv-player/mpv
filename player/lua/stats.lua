@@ -474,7 +474,7 @@ local function get_kbinfo_lines()
            and bind.section ~= "input_forced_console"
            and (
                searched_text == nil or
-               (bind.key .. bind.cmd):lower():find(searched_text, 1, true)
+               (bind.key .. bind.cmd .. (bind.comment or "")):lower():find(searched_text, 1, true)
            )
         then
             active[bind.key] = bind
