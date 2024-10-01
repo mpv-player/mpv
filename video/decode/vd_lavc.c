@@ -30,7 +30,6 @@
 #include <libavutil/pixdesc.h>
 
 #include "mpv_talloc.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/options.h"

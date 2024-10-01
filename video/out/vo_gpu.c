@@ -30,7 +30,6 @@
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "common/msg.h"
-#include "common/global.h"
 #include "options/m_config.h"
 #include "vo.h"
 #include "video/mp_image.h"

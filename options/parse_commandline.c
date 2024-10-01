@@ -23,7 +23,6 @@
 #include <stdbool.h>
 
 #include "osdep/io.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "m_option.h"

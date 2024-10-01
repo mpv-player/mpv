@@ -33,7 +33,6 @@
 #include "audio/fmt-conversion.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"

@@ -24,7 +24,6 @@
 #include <va/va_drmcommon.h>
 #endif
 
-#include "common/global.h"
 #include "gpu/hwdec.h"
 #include "gpu/video.h"
 #include "mpv_talloc.h"

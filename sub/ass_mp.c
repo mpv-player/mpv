@@ -29,7 +29,6 @@
 #include <ass/ass_types.h>
 
 #include "common/common.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "ass_mp.h"

@@ -3,7 +3,6 @@
 #include <libavutil/pixfmt.h>
 
 #include "common/common.h"
-#include "common/global.h"
 #include "img_utils.h"
 #include "sub/draw_bmp.h"
 #include "sub/osd.h"

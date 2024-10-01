@@ -18,7 +18,8 @@
 #pragma once
 
 #include "common/common.h"
-#include "common/global.h"
+
+struct mpv_global;
 
 struct offscreen_ctx {
     struct mp_log *log;

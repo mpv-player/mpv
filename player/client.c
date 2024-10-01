@@ -26,7 +26,6 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
-#include "common/global.h"
 #include "input/input.h"
 #include "input/cmd.h"
 #include "misc/ctype.h"
