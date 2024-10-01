@@ -3,8 +3,9 @@ local msg = require 'mp.msg'
 local options = require 'mp.options'
 
 local o = {
+    try_ytdl_first = true,
     exclude = "",
-    try_ytdl_first = false,
+    exclude_by_extension = true,
     use_manifests = false,
     all_formats = false,
     force_all_formats = true,
@@ -284,10 +285,18 @@ local function extract_chapters(data, video_length)
 end
 
 local function is_blacklisted(url)
-    if o.exclude == "" then return false end
     if #ytdl.blacklisted == 0 then
         for match in o.exclude:gmatch('%|?([^|]+)') do
             ytdl.blacklisted[#ytdl.blacklisted + 1] = match
+        end
+
+        if o.exclude_by_extension then
+            for _, property in pairs({"audio-exts", "image-exts", "video-exts"}) do
+                for _, ext in pairs(mp.get_property_native(property)) do
+                    ytdl.blacklisted[#ytdl.blacklisted + 1] = "%." .. ext
+                end
+            end
+            ytdl.blacklisted[#ytdl.blacklisted + 1] = "%.m3u"
         end
     end
     if #ytdl.blacklisted > 0 then

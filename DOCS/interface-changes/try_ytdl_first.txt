@@ -1,0 +1,2 @@
+change `ytdl_hook-try_ytdl_first`'s default to `yes`
+add `ytdl_hook-exclude_by_extension` script-opt

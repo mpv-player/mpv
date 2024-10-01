@@ -894,14 +894,17 @@ Program Behavior
     ``--script-opts`` option (using ``ytdl_hook-`` as prefix):
 
     ``try_ytdl_first=<yes|no>``
-        If 'yes' will try parsing the URL with youtube-dl first, instead of the
-        default where it's only after mpv failed to open it. This mostly depends
-        on whether most of your URLs need youtube-dl parsing.
+        If ``yes`` and the URL is not excluded by the next options, mpv will try
+        parsing the URL with youtube-dl first, instead of only after it fails to
+        open it. This mostly depends on whether most of your URLs need
+        youtube-dl parsing.
+
+        Default: ``yes``.
 
     ``exclude=<URL1|URL2|...``
-        A ``|``-separated list of URL patterns which mpv should not use with
-        youtube-dl. The patterns are matched after the ``http(s)://`` part of
-        the URL.
+        A ``|``-separated list of URL patterns which mpv should not try parsing
+        with youtube-dl first when ``try_ytdl_first`` is ``yes``. The patterns
+        are matched after the ``http(s)://`` part of the URL.
 
         ``^`` matches the beginning of the URL, ``$`` matches its end, and you
         should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to
@@ -916,6 +919,12 @@ Program Behavior
               will exclude any URL that ends with ``.mkv`` or ``.mp4``.
 
         See more lua patterns here: https://www.lua.org/manual/5.1/manual.html#5.4.1
+
+    ``exclude_by_extension=<yes|no>``
+
+        Whether to also exclude URLs containing one of the extensions in
+        ``audio-exts``, ``--image-exts`` and ``-video-exts``, and also ``m3u``
+        and ``m3u8``.
 
     ``all_formats=<yes|no>``
         If 'yes' will attempt to add all formats found reported by youtube-dl
