@@ -75,6 +75,7 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
     return -1;
 }
 
+#if !HAVE_RFORK
 // In the child process, resets the signal mask to defaults. Also clears any
 // signal handlers first so nothing funny happens.
 static void reset_signals_child(void)
@@ -88,6 +89,7 @@ static void reset_signals_child(void)
         sigaction(nr, &sa, NULL);
     sigprocmask(SIG_SETMASK, &sigmask, NULL);
 }
+#endif
 
 struct child_args {
     const char *path;
@@ -116,7 +118,10 @@ static int child_main(void* args)
         return 0;
     }
 
+    // RFSPAWN has reset all signal actions in the child to default
+#if !HAVE_RFORK
     reset_signals_child();
+#endif
 
     for (int n = 0; n < opts->num_fds; n++) {
         if (src_fds[n] == opts->fds[n].fd) {
@@ -134,7 +139,7 @@ static int child_main(void* args)
     as_execvpe(path, opts->exe, opts->args, opts->env ? opts->env : environ);
 
 child_failed:
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     *pipe_end = 1;
 #else
     (void)write(*pipe_end, &(char){1}, 1); // shouldn't be able to fail
@@ -156,11 +161,16 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
         .detach = detach,
     };
 
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     const size_t stack_size = 0x8000;
     void* stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
     if (stack == MAP_FAILED)
         goto done;
+#endif
+
+#if HAVE_RFORK
+    fres = rfork_thread(RFSPAWN, (int8_t*)stack + stack_size, child_main, &child_args);
+#elif HAVE_CLONE
     fres = clone(child_main, (int8_t*)stack + stack_size, CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
 #else
     int p[2] = {-1, -1};
@@ -186,7 +196,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
         goto done;
     }
 
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     r = child_args.pipe_end;
 #else
     if (fres == 0) {
@@ -209,7 +219,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
     }
 
 done:
-#if HAVE_CLONE
+#if HAVE_CLONE || HAVE_RFORK
     munmap(stack, stack_size);
 #else
     SAFE_CLOSE(p[0]);
@@ -224,14 +234,18 @@ done:
 static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
                            int src_fds[])
 {
+#if !HAVE_RFORK
     sigset_t sigmask, oldmask;
 
     sigfillset(&sigmask);
     pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
+#endif
 
     pid_t fres = spawn_process_inner(path, opts, src_fds, opts->detach);
 
+#if !HAVE_RFORK
     pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
+#endif
 
     return fres;
 }
