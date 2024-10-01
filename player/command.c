@@ -3302,7 +3302,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_PRINT) {
+    switch (action) {
+    case M_PROPERTY_PRINT: {
         struct playlist *pl = mpctx->playlist;
         char *res = talloc_strdup(NULL, "");
 
@@ -3329,6 +3330,147 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
         *(char **)arg =
             cut_osd_list(mpctx, res, playlist_entry_to_index(pl, pl->current));
         return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+    case M_PROPERTY_SET_NODE: {
+        struct mpv_node *node = arg;
+        if (node->format != MPV_FORMAT_NODE_ARRAY)
+            return M_PROPERTY_INVALID_FORMAT;
+        struct mpv_node_list *list = node->u.list;
+
+        struct playlist *pl = mpctx->playlist;
+        playlist_id_map_t *pi = NULL;
+
+        int num_entries = 0;
+        struct playlist_entry **entries = talloc_array(pl, struct playlist_entry *, list->num);
+        struct playlist_entry *current_entry = pl->current;
+
+        for (int n = 0; n < pl->num_entries; n++)
+            pl->entries[n]->removed = true;
+
+        for (int n = 0; n < list->num; n++) {
+            struct mpv_node *item = &list->values[n];
+            struct playlist_entry *entry = NULL;
+
+            switch (item->format) {
+            case MPV_FORMAT_STRING:
+                entry = playlist_entry_new(item->u.string);
+                break;
+            case MPV_FORMAT_INT64:
+                entry = playlist_entry_from_index(pl, (int)item->u.int64);
+                if (entry && !entry->removed)
+                    entry = NULL;
+                break;
+            case MPV_FORMAT_NODE_MAP: {
+                struct mpv_node_list *map = item->u.list;
+
+                bool current = false;
+                uint64_t id = 0;
+                const char *filename = NULL;
+                const char *title = NULL;
+
+                for (int j = 0; j < map->num; j++) {
+                    const char *key = map->keys[j];
+                    const mpv_node *value = &map->values[j];
+
+                    switch (value->format) {
+                    case MPV_FORMAT_NONE:
+                        if (strcmp(key, "title") == 0) {
+                            title = "";
+                        }
+                        break;
+                    case MPV_FORMAT_FLAG:
+                        if (strcmp(key, "current") == 0) {
+                            current = value->u.flag;
+                        }
+                        break;
+                    case MPV_FORMAT_INT64:
+                        if (strcmp(key, "id") == 0) {
+                            id = value->u.int64;
+                        }
+                        break;
+                    case MPV_FORMAT_STRING:
+                        if (strcmp(key, "filename") == 0) {
+                            filename = value->u.string;
+                        } else if (strcmp(key, "title") == 0) {
+                            title = value->u.string;
+                        }
+                        break;
+                    }
+                }
+
+                if (id) {
+                    if (!pi)
+                        pi = playlist_build_id_map(pl);
+                    entry = playlist_entry_from_id(pl, pi, id);
+                    if (entry && !entry->removed)
+                        entry = NULL;
+                } else if (filename) {
+                    entry = playlist_entry_new(filename);
+                }
+
+                if (entry) {
+                    if (title) {
+                        TA_FREEP(&entry->title);
+                        if (*title)
+                            entry->title = talloc_strdup(entry, title);
+                    }
+
+                    if (current)
+                        current_entry = entry;
+                }
+                break;
+            }
+            }
+
+            if (entry) {
+                entry->pl_index = num_entries;
+                entry->removed = false;
+
+                if (!entry->pl) {
+                    entry->pl = pl;
+                    entry->id = ++pl->id_alloc;
+                    talloc_steal(pl, entry);
+                }
+
+                entries[num_entries++] = entry;
+            }
+        }
+
+        if (pi)
+            playlist_destroy_id_map(pi);
+
+        if (current_entry && current_entry->removed) {
+            int n = current_entry->pl_index + 1;
+            current_entry = NULL;
+            for (; n < pl->num_entries; n++) {
+                struct playlist_entry *e = pl->entries[n];
+                if (!e->removed) {
+                    current_entry = e;
+                    break;
+                }
+            }
+        }
+
+        for (int n = 0; n < pl->num_entries; n++) {
+            struct playlist_entry *e = pl->entries[n];
+            if (e->removed)
+                playlist_entry_remove(e);
+        }
+
+        talloc_free(pl->entries);
+        pl->entries = entries;
+        pl->num_entries = num_entries;
+
+        if (pl->current == current_entry) {
+            mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+            mp_wakeup_core(mpctx);
+        } else {
+            mp_set_playlist_entry(mpctx, current_entry);
+        }
+
+        return M_PROPERTY_OK;
+    }
     }
 
     return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
