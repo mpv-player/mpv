@@ -219,8 +219,8 @@ _libplacebo () {
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.13.2
-    gettar "https://mirror.netcologne.de/savannah/freetype/freetype-${ver}.tar.xz"
+    local ver=2.13.3
+    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall
