@@ -670,24 +670,9 @@ function register_event_handler(t) {
 mp.input = {
     get: function(t) {
         mp.commandv("script-message-to", "console", "get-input", mp.script_name,
-                    JSON.stringify({
-                        prompt: t.prompt,
-                        default_text: t.default_text,
-                        cursor_position: t.cursor_position,
-                        id: t.id,
-                    }));
+                    JSON.stringify(t));
 
         register_event_handler(t)
-    },
-    select: function (t) {
-        mp.commandv("script-message-to", "console", "get-input", mp.script_name,
-                    JSON.stringify({
-                        prompt: t.prompt,
-                        items: t.items,
-                        default_item: t.default_item,
-                    }));
-
-        register_event_handler(t);
     },
     terminate: function () {
         mp.commandv("script-message-to", "console", "disable");
@@ -708,6 +693,7 @@ mp.input = {
                     JSON.stringify(log));
     }
 }
+mp.input.select = mp.input.get
 
 /**********************************************************************
  *  various
