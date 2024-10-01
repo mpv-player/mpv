@@ -93,6 +93,7 @@ local history_pos = 1
 local searching_history = false
 local log_buffers = {[id] = {}}
 local key_bindings = {}
+local dont_bind_up_down = false
 local global_margins = { t = 0, b = 0 }
 local input_caller
 
@@ -1624,10 +1625,12 @@ local function define_key_bindings()
         return
     end
     for _, bind in ipairs(get_bindings()) do
-        -- Generate arbitrary name for removing the bindings later.
-        local name = "_console_" .. (#key_bindings + 1)
-        key_bindings[#key_bindings + 1] = name
-        mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
+        if not (dont_bind_up_down and (bind[1] == 'up' or bind[1] == 'down')) then
+            -- Generate arbitrary name for removing the bindings later.
+            local name = "_console_" .. (#key_bindings + 1)
+            key_bindings[#key_bindings + 1] = name
+            mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
+        end
     end
     mp.add_forced_key_binding("any_unicode", "_console_text", text_input,
         {repeatable = true, complex = true})
@@ -1675,6 +1678,7 @@ set_active = function (active)
             line = ''
             cursor = 1
             selectable_items = nil
+            dont_bind_up_down = false
         end
         collectgarbage()
     end
@@ -1734,6 +1738,7 @@ mp.register_script_message('get-input', function (script_name, args)
     line = args.default_text or ''
     cursor = args.cursor_position or line:len() + 1
     id = args.id or script_name .. prompt
+    dont_bind_up_down = args.dont_bind_up_down
     if histories[id] == nil then
         histories[id] = {}
         log_buffers[id] = {}
