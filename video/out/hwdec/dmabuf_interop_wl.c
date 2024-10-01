@@ -44,8 +44,8 @@ static bool map(struct ra_hwdec_mapper *mapper,
     if (mapper_p->desc.nb_layers != 1) {
         MP_VERBOSE(mapper, "Mapped surface has separate layers - expected composed layers.\n");
         return false;
-    } else if (!ra_compatible_format(mapper->ra, mapper->src->params.hw_subfmt,
-               drm_format, mapper_p->desc.objects[0].format_modifier)) {
+    } else if (!ra_compatible_format(mapper->ra, drm_format,
+               mapper_p->desc.objects[0].format_modifier)) {
         MP_VERBOSE(mapper, "Mapped surface with format %s; drm format '%s(%016" PRIx64 ")' "
                    "is not supported by compositor and GPU combination.\n",
                    mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
