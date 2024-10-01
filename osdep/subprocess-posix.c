@@ -95,7 +95,11 @@ struct child_args {
     int *src_fds;
     int pipe_end;
     bool failed;
+    bool detach;
 };
+
+static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *opts,
+                                 int src_fds[], bool detach);
 
 // This function is called from a clone(CLONE_VM) context where the child
 // shares the parent's address space. Use MP_NO_ASAN to avoid false positives
@@ -107,6 +111,14 @@ MP_NO_ASAN static int child_main(void* args)
     struct mp_subprocess_opts *opts = child_args->opts;
     int *src_fds = child_args->src_fds;
     int pipe_end = child_args->pipe_end;
+    bool detach = child_args->detach;
+
+    if (detach) {
+        setsid();
+        if (!spawn_process_inner(path, opts, src_fds, false))
+            goto child_failed;
+        return 0;
+    }
 
     reset_signals_child();
 
@@ -132,17 +144,11 @@ child_failed:
     return 1;
 }
 
-// Returns 0 on any error, valid PID on success.
-// This function must be async-signal-safe, as it may be called from a fork().
-static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
-                           int src_fds[])
+static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *opts,
+                                 int src_fds[], bool detach)
 {
     pid_t fres = 0;
-    sigset_t sigmask, oldmask;
     int r = 0;
-
-    sigfillset(&sigmask);
-    pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
 
     struct child_args child_args = {
         .path = path,
@@ -150,6 +156,7 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
         .src_fds = src_fds,
         .pipe_end = -1,
         .failed = false,
+        .detach = detach,
     };
 
     int p[2] = {-1, -1};
@@ -196,18 +203,35 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
 #endif
 
     // If exec()ing child failed, collect it immediately.
-    if (child_args.failed || r != 0) {
-        while (waitpid(fres, &(int){0}, 0) < 0 && errno == EINTR) {}
-        fres = 0;
+    if (detach || child_args.failed || r != 0) {
+        int child_status = 0;
+        while (waitpid(fres, &child_status, 0) < 0 && errno == EINTR) {}
+        if (r != 0 || !WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0)
+            fres = 0;
     }
 
 done:
-    pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
 #if HAVE_CLONE
     munmap(stack, stack_size);
 #endif
     SAFE_CLOSE(p[0]);
     SAFE_CLOSE(p[1]);
+
+    return fres;
+}
+
+// Returns 0 on any error, valid PID on success.
+static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
+                           int src_fds[])
+{
+    sigset_t sigmask, oldmask;
+
+    sigfillset(&sigmask);
+    pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
+
+    pid_t fres = spawn_process_inner(path, opts, src_fds, opts->detach);
+
+    pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
 
     return fres;
 }
@@ -270,33 +294,11 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
         src_fds[n] = src_fd;
     }
 
-    if (opts->detach) {
-        // If we run it detached, we fork a child to start the process; then
-        // it exits immediately, letting PID 1 inherit it. So we don't need
-        // anything else to collect these child PIDs.
-        sigset_t sigmask, oldmask;
-        sigfillset(&sigmask);
-        pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
-        pid_t fres = fork();
-        if (fres < 0)
-            goto done;
-        if (fres == 0) {
-            // child
-            setsid();
-            if (!spawn_process(path, opts, src_fds))
-                _exit(1);
-            _exit(0);
-        }
-        pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
-        int child_status = 0;
-        while (waitpid(fres, &child_status, 0) < 0 && errno == EINTR) {}
-        if (!WIFEXITED(child_status) || WEXITSTATUS(child_status) != 0)
-            goto done;
-    } else {
-        pid = spawn_process(path, opts, src_fds);
-        if (!pid)
-            goto done;
-    }
+    pid = spawn_process(path, opts, src_fds);
+    if (!pid)
+        goto done;
+    if (opts->detach)
+        pid = 0;
 
     spawned = true;
 
