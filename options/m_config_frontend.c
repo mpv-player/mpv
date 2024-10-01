@@ -27,7 +27,6 @@
 #include "libmpv/client.h"
 
 #include "common/common.h"
-#include "common/global.h"
 #include "common/msg_control.h"
 #include "common/msg.h"
 #include "m_config_frontend.h"

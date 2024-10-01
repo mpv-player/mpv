@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common/global.h"
 #include "video/out/gpu/context.h"
 #include "common.h"
 

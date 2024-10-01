@@ -21,7 +21,6 @@
 
 #include <libavcodec/avcodec.h>
 
-#include "common/global.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"

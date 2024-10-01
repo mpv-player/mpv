@@ -34,7 +34,6 @@
 
 #include "osdep/io.h"
 
-#include "common/global.h"
 #include "common/encode.h"
 #include "common/msg.h"
 #include "misc/ctype.h"

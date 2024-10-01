@@ -8,7 +8,6 @@
 
 #include "common/common.h"
 #include "common/msg.h"
-#include "common/global.h"
 #include "stream.h"
 #include "options/m_option.h"
 #include "options/path.h"

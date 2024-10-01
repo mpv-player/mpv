@@ -26,7 +26,6 @@
 #include "common/msg.h"
 #include "options/options.h"
 #include "common/common.h"
-#include "common/global.h"
 
 #include "stream/stream.h"
 #include "sub/dec_sub.h"

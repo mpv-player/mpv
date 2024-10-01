@@ -30,7 +30,6 @@
 #include "misc/bstr.h"
 #include "options/m_config.h"
 #include "options/path.h"
-#include "common/global.h"
 #include "options/options.h"
 #include "utils.h"
 #include "hwdec.h"
