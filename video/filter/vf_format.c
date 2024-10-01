@@ -84,6 +84,11 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
             out->light = MP_CSP_LIGHT_AUTO;
         }
     }
+    if (p->colormatrix != PL_COLOR_SYSTEM_DOLBYVISION && !p->dovi) {
+        out->primaries_orig = out->color.primaries;
+        out->transfer_orig = out->color.transfer;
+        out->sys_orig = out->repr.sys;
+    }
     if (p->sig_peak)
         out->color.hdr = (struct pl_hdr_metadata){ .max_luma = p->sig_peak * MP_REF_WHITE };
     if (p->light)
