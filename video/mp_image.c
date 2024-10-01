@@ -855,6 +855,8 @@ bool mp_image_params_static_equal(const struct mp_image_params *p1,
 // before dovi mapping.
 void mp_image_params_restore_dovi_mapping(struct mp_image_params *params)
 {
+    if (params->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION)
+        return;
     params->color.primaries = params->primaries_orig;
     params->color.transfer = params->transfer_orig;
     params->repr.sys = params->sys_orig;
