@@ -1203,13 +1203,16 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     if (src->fields & MP_IMGFIELD_REPEAT_FIRST)
         dst->repeat_pict = 1;
 
-    pl_avframe_set_repr(dst, src->params.repr);
+    // Image params without dovi mapped; should be passed as side data instead
+    struct mp_image_params params = src->params;
+    mp_image_params_restore_dovi_mapping(&params);
+    pl_avframe_set_repr(dst, params.repr);
 
-    dst->chroma_location = pl_chroma_to_av(src->params.chroma_location);
+    dst->chroma_location = pl_chroma_to_av(params.chroma_location);
 
     dst->opaque_ref = av_buffer_alloc(sizeof(struct mp_image_params));
     MP_HANDLE_OOM(dst->opaque_ref);
-    *(struct mp_image_params *)dst->opaque_ref->data = src->params;
+    *(struct mp_image_params *)dst->opaque_ref->data = params;
 
     if (src->icc_profile) {
         AVFrameSideData *sd =
@@ -1219,14 +1222,14 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
         new_ref->icc_profile = NULL;
     }
 
-    pl_avframe_set_color(dst, src->params.color);
+    pl_avframe_set_color(dst, params.color);
 
     {
         AVFrameSideData *sd = av_frame_new_side_data(dst,
                                                      AV_FRAME_DATA_DISPLAYMATRIX,
                                                      sizeof(int32_t) * 9);
         MP_HANDLE_OOM(sd);
-        av_display_rotation_set((int32_t *)sd->data, src->params.rotate);
+        av_display_rotation_set((int32_t *)sd->data, params.rotate);
     }
 
     // Add back side data, but only for types which are not specially handled
