@@ -143,7 +143,7 @@ _dav1d () {
 _dav1d_mark=lib/libdav1d.dll.a
 
 _ffmpeg () {
-    [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
+    [ -d ffmpeg ] || $gitclone https://github.com/$LIBAV/$LIBAV.git ffmpeg
     builddir ffmpeg
     local args=(
         --pkg-config=pkg-config --target-os=mingw32

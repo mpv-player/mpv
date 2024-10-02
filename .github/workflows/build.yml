@@ -39,6 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        libav: [ffmpeg, librempeg]
+        target: [i686-w64-mingw32, x86_64-w64-mingw32]
         include:
           - target: i686-w64-mingw32
             wine: wine32
@@ -55,8 +57,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
-          restore-keys: ${{ matrix.target }}-
+          key: ${{ matrix.libav }}-${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ matrix.libav }}-${{ matrix.target }}-
 
       - name: Install dependencies
         run: |
@@ -74,6 +76,7 @@ jobs:
           ./ci/build-mingw64.sh
         env:
           TARGET: ${{ matrix.target }}
+          LIBAV: ${{ matrix.libav }}
 
       - name: Build with meson
         id: build
@@ -81,6 +84,7 @@ jobs:
           ./ci/build-mingw64.sh meson pack
         env:
           TARGET: ${{ matrix.target }}
+          LIBAV: ${{ matrix.libav }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -105,7 +109,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mpv-${{ matrix.target }}
+          name: mpv-${{ matrix.libav }}-${{ matrix.target }}
           path: mpv-git-*.zip
 
       - name: Save Cache
@@ -113,7 +117,7 @@ jobs:
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          key: ${{ matrix.libav }}-${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
 
   win32:
     runs-on: windows-latest
