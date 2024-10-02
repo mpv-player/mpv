@@ -110,32 +110,38 @@ static bool select_format(struct priv *p, int input_fmt,
         return true;
     }
 
-    // First find the closest hw input fmt. Some hwdec APIs return crazy lists of
-    // "supported" formats, which then are not supported or crash (???), so
-    // the this is a good way to avoid problems.
-    // (Actually we should just have hardcoded everything instead of relying on
-    // this fragile bullshit FFmpeg API and the fragile bullshit hwdec drivers.)
-    int hw_input_fmt = mp_imgfmt_select_best_list(p->fmts, p->num_fmts, input_fmt);
-    if (!hw_input_fmt)
+    // Select best output format from the available hw formats
+    int hw_output_fmt = mp_imgfmt_select_best_list(p->fmts, p->num_fmts, input_fmt);
+    if (!hw_output_fmt)
         return false;
 
     // Dumb, but find index for p->fmts[index]==hw_input_fmt.
     int index = -1;
     for (int n = 0; n < p->num_fmts; n++) {
-        if (p->fmts[n] == hw_input_fmt)
+        if (p->fmts[n] == hw_output_fmt)
             index = n;
     }
     if (index < 0)
         return false;
 
-    // Now check the available output formats. This is the format our sw frame
-    // will be in after the upload (probably).
+    // Now check the available upload formats. This is the sw format which will
+    // be uploaded to given output format.
     int *upload_fmts = &p->upload_fmts[p->fmt_upload_index[index]];
     int num_upload_fmts = p->fmt_upload_num[index];
 
-    int hw_output_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts,
-                                            input_fmt);
-    if (!hw_output_fmt)
+    // Select the output format as the upload format if available to avoid double
+    // conversion. Note that this will prevent double conversion but does not
+    // guarantee that the conversion chain is optimal. Conversion during upload
+    // might already be done on hardware, in which case it may be better to
+    // prefer a lighter conversion before upload, instead of going directly to
+    // the output format. However, such cases are uncommon, and in practice,
+    // there is no good way to predict this without hardcoding specific rules.
+    int hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, hw_output_fmt);
+
+    // Select best input format for the available upload formats otherwise.
+    if (hw_input_fmt != hw_output_fmt)
+        hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, input_fmt);
+    if (!hw_input_fmt)
         return false;
 
     *out_hw_input_fmt = hw_input_fmt;
@@ -270,6 +276,19 @@ static bool vo_supports(struct mp_hwdec_ctx *ctx, int hw_fmt, int sw_fmt)
     return false;
 }
 
+static bool upload_supports(struct mp_hwdec_ctx *ctx, int fmt)
+{
+    if (!ctx->supported_hwupload_formats)
+        return true; // if unset, all formats are allowed
+
+    for (int i = 0; ctx->supported_hwupload_formats[i]; i++) {
+        if (ctx->supported_hwupload_formats[i] == fmt)
+            return true;
+    }
+
+    return false;
+}
+
 /**
  * Some hwcontexts do not implement constraints, and so cannot
  * report supported formats, so cobble something together from our
@@ -392,12 +411,9 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                                                 ctx->conversion_config);
     }
 
-    int hw_transfer_index = 0;
     for (int n = 0; cstr->valid_sw_formats &&
                     cstr->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++)
     {
-        int *not_supported_by_vo = NULL;
-        int num_not_supported = 0;
         int imgfmt = pixfmt2imgfmt(cstr->valid_sw_formats[n]);
         if (!imgfmt)
             continue;
@@ -411,6 +427,11 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
             // do any further probing. It will be supported.
             MP_DBG(f, "  supports %s (a hardware format)\n",
                        mp_imgfmt_to_name(imgfmt));
+            continue;
+        }
+
+        if (!vo_supports(ctx, hw_imgfmt, imgfmt)) {
+            MP_DBG(f, "  not supported by VO\n");
             continue;
         }
 
@@ -445,7 +466,6 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                 for (int i = 0; ctx->supported_formats[i]; i++) {
                     int fmt = ctx->supported_formats[i];
                     if (fmt == imgfmt) {
-                        MP_DBG(f, "  vo accepts %s\n", mp_imgfmt_to_name(fmt));
                         MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
                     }
                 }
@@ -458,18 +478,8 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                 int fmt = pixfmt2imgfmt(fmts[i]);
                 if (!fmt)
                     continue;
-                if (!vo_supports(ctx, hw_imgfmt, fmt)) {
-                    MP_TARRAY_APPEND(p, not_supported_by_vo, num_not_supported, fmt);
-                    continue;
-                }
                 MP_DBG(f, " %s", mp_imgfmt_to_name(fmt));
                 MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
-            }
-            if (num_not_supported) {
-                MP_DBG(f, "\n  not supported by VO:");
-                for (int i = 0; i < num_not_supported; i++) {
-                    MP_DBG(f, " %s", mp_imgfmt_to_name(not_supported_by_vo[i]));
-                }
             }
             MP_DBG(f, "\n");
 
@@ -490,43 +500,36 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
                                 AV_HWFRAME_TRANSFER_DIRECTION_TO, &fmts, 0) >= 0 &&
                                 fmts[0] != AV_PIX_FMT_NONE)
             {
-                // Don't add the format to p->fmts if we know it cannot be used.
-                if (ctx->supported_hwupload_formats) {
-                    for (int i = 0; ctx->supported_hwupload_formats[i]; i++) {
-                        if (ctx->supported_hwupload_formats[i] == imgfmt)
-                            MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
-                    }
-                } else {
-                    MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
-                }
-
-                int index = hw_transfer_index;
-                hw_transfer_index++;
-
+                int index = p->num_fmts;
+                MP_TARRAY_APPEND(p, p->fmts, p->num_fmts, imgfmt);
                 MP_TARRAY_GROW(p, p->fmt_upload_index, index);
                 MP_TARRAY_GROW(p, p->fmt_upload_num, index);
 
                 p->fmt_upload_index[index] = p->num_upload_fmts;
+
+                int *upload_not_supported = NULL;
+                int num_upload_not_supported = 0;
 
                 MP_DBG(f, "  supports:");
                 for (int i = 0; fmts[i] != AV_PIX_FMT_NONE; i++) {
                     int fmt = pixfmt2imgfmt(fmts[i]);
                     if (!fmt)
                         continue;
-                    if (!vo_supports(ctx, hw_imgfmt, fmt)) {
-                        MP_TARRAY_APPEND(p, not_supported_by_vo, num_not_supported, fmt);
+                    if (!upload_supports(ctx, fmt)) {
+                        MP_TARRAY_APPEND(NULL, upload_not_supported, num_upload_not_supported, fmt);
                         continue;
                     }
                     MP_DBG(f, " %s", mp_imgfmt_to_name(fmt));
                     MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
                 }
-                if (num_not_supported) {
-                    MP_DBG(f, "\n  not supported by VO:");
-                    for (int i = 0; i < num_not_supported; i++) {
-                        MP_DBG(f, " %s", mp_imgfmt_to_name(not_supported_by_vo[i]));
-                    }
+                if (num_upload_not_supported) {
+                    MP_DBG(f, "\n  upload not supported:");
+                    for (int i = 0; i < num_upload_not_supported; ++i)
+                        MP_DBG(f, " %s", mp_imgfmt_to_name(upload_not_supported[i]));
                 }
                 MP_DBG(f, "\n");
+
+                talloc_free(upload_not_supported);
 
                 p->fmt_upload_num[index] =
                     p->num_upload_fmts - p->fmt_upload_index[index];
@@ -536,7 +539,6 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
             av_buffer_unref(&frames);
         }
-        talloc_free(not_supported_by_vo);
     }
 
     av_hwframe_constraints_free(&cstr);
@@ -604,19 +606,7 @@ struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
         }
     } else {
         u.f = f;
-        /*
-         * In the case where the imgfmt is not natively supported, it must be
-         * converted, either before or during upload. If the imgfmt is supported
-         * as a hw input format, then prefer that, and if the upload has to do
-         * implicit conversion, that's fine. On the other hand, if the imgfmt is
-         * not a supported input format, then pick the output format as the
-         * conversion target to avoid doing two conversions (one before upload,
-         * and one during upload). Note that for most hardware types, there is
-         * no ability to convert during upload, and the two formats will always
-         * be the same.
-         */
-        u.selected_sw_imgfmt =
-            sw_imgfmt == hw_input_fmt ? hw_input_fmt : hw_output_fmt;
+        u.selected_sw_imgfmt = hw_input_fmt;
     }
 
     u.successful_init = true;
