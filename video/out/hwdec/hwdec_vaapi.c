@@ -21,6 +21,7 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+#include <libavutil/pixdesc.h>
 #include <va/va_drmcommon.h>
 
 #include "config.h"
@@ -138,6 +139,30 @@ static const dmabuf_interop_init interop_inits[] = {
     NULL
 };
 
+static struct mp_conversion_filter *get_conversion_filter_desc(int target_imgfmt)
+{
+    const AVPixFmtDescriptor *pixfmt_desc = av_pix_fmt_desc_get(imgfmt2pixfmt(target_imgfmt));
+    if (!pixfmt_desc)
+        return NULL;
+
+    bool rgb = pixfmt_desc->flags & AV_PIX_FMT_FLAG_RGB;
+
+    struct mp_conversion_filter *desc = talloc_ptrtype(NULL, desc);
+    desc->name = "scale_vaapi";
+    desc->args = talloc_array_ptrtype(desc, desc->args, rgb ? 5 : 3);
+
+    int i = 0;
+    desc->args[i++] = "format";
+    desc->args[i++] = (char *)pixfmt_desc->name;
+    if (rgb) {
+        desc->args[i++] = "out_range";
+        desc->args[i++] = "full";
+    }
+    desc->args[i++] = NULL;
+
+    return desc;
+}
+
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
@@ -195,7 +220,7 @@ static int init(struct ra_hwdec *hw)
     p->ctx->hwctx.supported_formats = p->formats;
     p->ctx->hwctx.supported_hwupload_formats = p->hwupload_formats;
     p->ctx->hwctx.driver_name = hw->driver->name;
-    p->ctx->hwctx.conversion_filter_name = "scale_vaapi";
+    p->ctx->hwctx.get_conversion_filter = get_conversion_filter_desc;
     p->ctx->hwctx.conversion_config = hwconfig;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;

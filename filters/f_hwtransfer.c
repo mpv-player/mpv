@@ -44,8 +44,8 @@ struct priv {
     int num_map_fmts;
 
     // If the selected hwdec has a conversion filter available for converting
-    // between sw formats in hardware, the name will be set. NULL otherwise.
-    const char *conversion_filter_name;
+    // between sw formats in hardware, the getter will be set. NULL otherwise.
+    struct mp_conversion_filter *(*get_conversion_filter)(int imgfmt);
 };
 
 struct hwmap_pairs {
@@ -544,7 +544,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
     p->av_device_ctx = av_buffer_ref(ctx->av_device_ref);
     if (!p->av_device_ctx)
         return false;
-    p->conversion_filter_name = ctx->conversion_filter_name;
+    p->get_conversion_filter = ctx->get_conversion_filter;
 
     /*
      * In the case of needing to do hardware conversion vs uploading, we will
@@ -554,7 +554,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
      * through whatever format we are given.
      */
     return p->num_upload_fmts > 0 ||
-           (use_conversion_filter && !p->conversion_filter_name);
+           (use_conversion_filter && !p->get_conversion_filter);
 }
 
 struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
@@ -582,7 +582,7 @@ struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
     }
 
     if (src_is_same_hw) {
-        if (p->conversion_filter_name) {
+        if (p->get_conversion_filter) {
             /*
             * If we are converting from one sw format to another within the same
             * hw format, we will use that hw format's conversion filter rather
@@ -590,14 +590,17 @@ struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
             */
             u.selected_sw_imgfmt = hw_output_fmt;
             if (sw_imgfmt != u.selected_sw_imgfmt) {
-                enum AVPixelFormat pixfmt = imgfmt2pixfmt(u.selected_sw_imgfmt);
-                const char *avfmt_name = av_get_pix_fmt_name(pixfmt);
-                char *args[] = {"format", (char *)avfmt_name, NULL};
-                MP_VERBOSE(f, "Hardware conversion: %s -> %s\n",
-                           p->conversion_filter_name, avfmt_name);
+                struct mp_conversion_filter *desc = p->get_conversion_filter(u.selected_sw_imgfmt);
+                if (!desc)
+                    goto fail;
+                MP_VERBOSE(f, "Hardware conversion: %s (%s -> %s)\n",
+                           desc->name,
+                           mp_imgfmt_to_name(sw_imgfmt),
+                           mp_imgfmt_to_name(u.selected_sw_imgfmt));
                 struct mp_filter *sv =
                     mp_create_user_filter(parent, MP_OUTPUT_CHAIN_VIDEO,
-                                        p->conversion_filter_name, args);
+                                          desc->name, desc->args);
+                talloc_free(desc);
                 u.f = sv;
                 talloc_free(f);
             }
