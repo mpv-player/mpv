@@ -8,6 +8,14 @@
 
 struct mp_image_pool;
 
+struct mp_conversion_filter {
+    // Name of the conversion filter.
+    const char *name;
+
+    // Arguments for the conversion filter.
+    char **args;
+};
+
 struct mp_hwdec_ctx {
     const char *driver_name; // NULL if unknown/not loaded
 
@@ -24,10 +32,11 @@ struct mp_hwdec_ctx {
     // If NULL, all possible hwuploads are assumed to be supported.
     const int *supported_hwupload_formats;
 
-    // The name of this hwdec's matching conversion filter if available.
+    // Getter for conversion filter description, or NULL.
     // This will be used for hardware conversion of frame formats.
-    // NULL otherwise.
-    const char *conversion_filter_name;
+    // If available the talloc allocated mp_conversion_filter is returned,
+    // Caller is responsible to free the allocation.
+    struct mp_conversion_filter *(*get_conversion_filter)(int imgfmt);
 
     // The libavutil hwconfig to be used when querying constraints for the
     // conversion filter. Can be NULL if no special config is required.
