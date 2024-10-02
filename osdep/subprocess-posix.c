@@ -34,7 +34,6 @@ extern char **environ;
 
 #if HAVE_CLONE
 #include <sched.h>
-#include <sys/mman.h>
 #endif
 
 #ifdef SIGRTMAX
@@ -95,12 +94,13 @@ struct child_args {
     const char *path;
     struct mp_subprocess_opts *opts;
     int *src_fds;
+    void *child_stack;
     int pipe_end;
     bool detach;
 };
 
 static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *opts,
-                                 int src_fds[], bool detach);
+                                 int src_fds[], bool detach, void *stacks[]);
 
 static int child_main(void* args)
 {
@@ -108,12 +108,13 @@ static int child_main(void* args)
     const char *path = child_args->path;
     struct mp_subprocess_opts *opts = child_args->opts;
     int *src_fds = child_args->src_fds;
+    void *child_stack = child_args->child_stack;
     int *pipe_end = &child_args->pipe_end;
     bool detach = child_args->detach;
 
     if (detach) {
         setsid();
-        if (!spawn_process_inner(path, opts, src_fds, false))
+        if (!spawn_process_inner(path, opts, src_fds, false, &child_stack))
             goto child_failed;
         return 0;
     }
@@ -148,7 +149,7 @@ child_failed:
 }
 
 static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *opts,
-                                 int src_fds[], bool detach)
+                                 int src_fds[], bool detach, void *stacks[])
 {
     pid_t fres = 0;
     int r;
@@ -157,21 +158,15 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
         .path = path,
         .opts = opts,
         .src_fds = src_fds,
+        .child_stack = stacks[1],
         .pipe_end = 0,
         .detach = detach,
     };
 
-#if HAVE_CLONE || HAVE_RFORK
-    const size_t stack_size = 0x8000;
-    void* stack = mmap(NULL, stack_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
-    if (stack == MAP_FAILED)
-        goto done;
-#endif
-
 #if HAVE_RFORK
-    fres = rfork_thread(RFSPAWN, (int8_t*)stack + stack_size, child_main, &child_args);
+    fres = rfork_thread(RFSPAWN, stacks[0], child_main, &child_args);
 #elif HAVE_CLONE
-    fres = clone(child_main, (int8_t*)stack + stack_size, CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
+    fres = clone(child_main, stacks[0], CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
 #else
     int p[2] = {-1, -1};
     // We setup a communication pipe to signal failure. Since the child calls
@@ -219,9 +214,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
     }
 
 done:
-#if HAVE_CLONE || HAVE_RFORK
-    munmap(stack, stack_size);
-#else
+#if !HAVE_CLONE && !HAVE_RFORK
     SAFE_CLOSE(p[0]);
     SAFE_CLOSE(p[1]);
 #endif
@@ -234,6 +227,18 @@ done:
 static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
                            int src_fds[])
 {
+    bool detach = opts->detach;
+    void *stacks[2];
+
+#if HAVE_CLONE || HAVE_RFORK
+    // pre-allocate stacks so we can be async-signal-safe in spawn_process_inner()
+    const size_t stack_size = 0x8000;
+    void *ctx = talloc_new(NULL);
+    // stack should be aligned to 16 bytes, which is guaranteed by malloc
+    stacks[0] = (int8_t*)talloc_size(ctx, stack_size) + stack_size;
+    if (detach) stacks[1] = (int8_t*)talloc_size(ctx, stack_size) + stack_size;
+#endif
+
 #if !HAVE_RFORK
     sigset_t sigmask, oldmask;
 
@@ -241,10 +246,14 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
     pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
 #endif
 
-    pid_t fres = spawn_process_inner(path, opts, src_fds, opts->detach);
+    pid_t fres = spawn_process_inner(path, opts, src_fds, detach, stacks);
 
 #if !HAVE_RFORK
     pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
+#endif
+
+#if HAVE_CLONE || HAVE_RFORK
+    talloc_free(ctx);
 #endif
 
     return fres;
