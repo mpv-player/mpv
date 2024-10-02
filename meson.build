@@ -251,7 +251,6 @@ sources = files(
 
     ## osdep
     'osdep/io.c',
-    'osdep/semaphore-mac.c',
     'osdep/subprocess.c',
     'osdep/timer.c',
 

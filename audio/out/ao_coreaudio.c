@@ -34,6 +34,9 @@
 #define IDLE_TIME 7 * NSEC_PER_SEC
 
 struct priv {
+    // This must be put in the front
+    struct coreaudio_cb_sem sem;
+
     AudioDeviceID device;
     AudioUnit audio_unit;
 
@@ -543,6 +546,12 @@ const struct ao_driver audio_out_coreaudio = {
     .hotplug_uninit = hotplug_uninit,
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
+    .priv_defaults  = &(const struct priv){
+        .sem = (struct coreaudio_cb_sem){
+            .mutex = MP_STATIC_MUTEX_INITIALIZER,
+            .cond = MP_STATIC_COND_INITIALIZER,
+        }
+    },
     .options = (const struct m_option[]){
         {"change-physical-format", OPT_BOOL(change_physical_format)},
         {0}
