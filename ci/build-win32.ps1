@@ -111,6 +111,23 @@ vulkan_dep = vulkan_proj.dependency('vulkan')
 meson.override_dependency('vulkan', vulkan_dep)
 "@
 
+# Manually wrap libjxl for CMAKE_MSVC_RUNTIME_LIBRARY option
+if (-not (Test-Path "$subprojects/libjxl")) {
+    New-Item -Path "$subprojects/libjxl" -ItemType Directory | Out-Null
+}
+Set-Content -Path "$subprojects/libjxl/meson.build" -Value @"
+project('libjxl', 'cpp', version: '0.12.0')
+cmake = import('cmake')
+opts = cmake.subproject_options()
+opts.add_cmake_defines({
+    'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+    'BUILD_SHARED_LIBS': 'OFF',
+})
+libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
+libjxl_dep = libjxl_proj.dependency('jxl')
+meson.override_dependency('libjxl', libjxl_dep)
+"@
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -155,6 +172,11 @@ $projects = @(
         URL = "https://github.com/KhronosGroup/Vulkan-Loader"
         Revision = "main"
         Method = "cmake"
+    },
+    @{
+        Path = "$subprojects/libjxl-cmake.wrap"
+        URL = "https://github.com/libjxl/libjxl"
+        Revision = "main"
     }
 )
 
@@ -188,6 +210,7 @@ meson setup build `
     -Dffmpeg:sdl2=disabled `
     -Dffmpeg:vulkan=auto `
     -Dffmpeg:libdav1d=enabled `
+    -Dffmpeg:libjxl=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
