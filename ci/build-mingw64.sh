@@ -146,7 +146,7 @@ _ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/$LIBAV/$LIBAV.git ffmpeg
     builddir ffmpeg
     local args=(
-        --pkg-config=pkg-config --target-os=mingw32
+        --pkg-config=pkg-config --target-os=mingw32 --enable-gpl
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
         --cc="$CC" --cxx="$CXX" $commonflags
         --disable-{doc,programs}
@@ -320,7 +320,7 @@ if [ "$2" = pack ]; then
     pushd artifact/tmp
     dlls=(
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
-        av*.dll sw*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
+        av*.dll sw*.dll postproc-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
         lib{shaderc_shared,spirv-cross-c-shared,dav1d}.dll zlib1.dll
     )
     if [[ -f vulkan-1.dll ]]; then

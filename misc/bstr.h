@@ -135,9 +135,52 @@ static inline struct bstr bstr_getline(struct bstr str, struct bstr *rest)
 // and will remove the trailing \n or \r\n sequence.
 struct bstr bstr_strip_linebreaks(struct bstr str);
 
+/**
+ * @brief Append a string to the existing bstr.
+ *
+ * This function appends the content of the `append` bstr to the `s` bstr.
+ * `s->start` is expected to be a talloc allocation (which can be resized) or NULL.
+ * A null terminator ('\0') is always appended for convenience. If `s->start`
+ * is NULL, the `talloc_ctx` will be used as the parent context to allocate
+ * memory.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the `append` string is appended.
+ * @param append      The string to append to `s`.
+ */
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
+
+/**
+ * @brief Append a formatted string to the existing bstr.
+ *
+ * This function works like bstr_xappend() but appends a formatted string using
+ * a format string and additional arguments. The formatted string is created
+ * using vsnprintf. The function takes care of resizing the destination
+ * buffer if necessary.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the formatted string is appended.
+ * @param fmt         The format string (same as in vsnprintf).
+ * @param ...         Additional arguments for the format string.
+ * @return            The number of characters added (excluding the null terminator)
+ *                    or a negative value on error.
+ */
 int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     PRINTF_ATTRIBUTE(3, 4);
+
+/**
+ * @brief Append a formatted string to the existing bstr using a va_list.
+ *
+ * This function is identical to bstr_xappend_asprintf() but takes a `va_list`
+ * instead of a variable number of arguments.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the formatted string is appended.
+ * @param fmt         The format string (same as in printf).
+ * @param ap          The `va_list` containing the arguments for the format string.
+ * @return            The number of characters added (excluding the null terminator)
+ *                    or a negative value on error.
+ */
 int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
     PRINTF_ATTRIBUTE(3, 0);
 

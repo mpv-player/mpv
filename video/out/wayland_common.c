@@ -47,6 +47,7 @@
 #include "fractional-scale-v1.h"
 
 #if HAVE_DRM
+#include <drm_fourcc.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 #endif
@@ -147,6 +148,12 @@ static const struct mp_keymap keymap[] = {
     {0, 0}
 };
 
+struct compositor_format {
+    uint32_t format;
+    uint32_t padding;
+    uint64_t modifier;
+};
+
 struct vo_wayland_feedback_pool {
     struct wp_presentation_feedback **fback;
     struct vo_wayland_state *wl;
@@ -197,6 +204,15 @@ struct vo_wayland_seat {
     bool keyboard_entering;
     uint32_t *keyboard_entering_keys;
     int num_keyboard_entering_keys;
+};
+
+struct vo_wayland_tranche {
+    struct drm_format *compositor_formats;
+    int num_compositor_formats;
+    uint32_t *planar_formats;
+    int num_planar_formats;
+    dev_t device_id;
+    struct wl_list link;
 };
 
 static bool single_output_spanned(struct vo_wayland_state *wl);
@@ -1383,15 +1399,20 @@ static void main_device(void *data,
                         struct wl_array *device)
 {
     struct vo_wayland_state *wl = data;
-    wl->add_tranche = true;
 
+    // Remove any old devices and tranches if we get this again.
+    struct vo_wayland_tranche *tranche, *tranche_tmp;
+    wl_list_for_each_safe(tranche, tranche_tmp, &wl->tranche_list, link) {
+        wl_list_remove(&tranche->link);
+        talloc_free(tranche);
+    }
 }
 
 static void tranche_done(void *data,
                          struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1)
 {
     struct vo_wayland_state *wl = data;
-    wl->add_tranche = false;
+    wl->current_tranche = NULL;
 }
 
 static void tranche_target_device(void *data,
@@ -1399,15 +1420,18 @@ static void tranche_target_device(void *data,
                                   struct wl_array *device)
 {
     struct vo_wayland_state *wl = data;
-    // Only use the first tranche device we get.
-    if (wl->add_tranche) {
-        dev_t *id;
-        wl_array_for_each(id, device) {
-            memcpy(&wl->target_device_id, id, sizeof(dev_t));
-            break;
-        }
-        get_planar_drm_formats(wl);
+    struct vo_wayland_tranche *tranche = talloc_zero(wl, struct vo_wayland_tranche);
+
+    dev_t *id;
+    wl_array_for_each(id, device) {
+        memcpy(&tranche->device_id, id, sizeof(dev_t));
+        break;
     }
+    static_assert(sizeof(tranche->device_id) == sizeof(dev_t), "");
+
+    wl->current_tranche = tranche;
+    get_planar_drm_formats(wl);
+    wl_list_insert(&wl->tranche_list, &tranche->link);
 }
 
 static void tranche_formats(void *data,
@@ -1416,22 +1440,22 @@ static void tranche_formats(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    // Only grab formats from the first tranche and ignore the rest.
-    if (!wl->add_tranche)
-        return;
-
     // Should never happen.
     if (!wl->compositor_format_map) {
         MP_WARN(wl, "Compositor did not send a format and modifier table!\n");
         return;
     }
 
-    const compositor_format *formats = wl->compositor_format_map;
-    MP_RESIZE_ARRAY(wl, wl->compositor_formats, indices->size);
-    wl->num_compositor_formats = 0;
+    struct vo_wayland_tranche *tranche = wl->current_tranche;
+    if (!tranche)
+        return;
+
+    const struct compositor_format *formats = wl->compositor_format_map;
     uint16_t *index;
+    MP_DBG(wl, "Querying available drm format and modifier pairs from tranche on device '%lu'\n",
+           tranche->device_id);
     wl_array_for_each(index, indices) {
-        MP_TARRAY_APPEND(wl, wl->compositor_formats, wl->num_compositor_formats,
+        MP_TARRAY_APPEND(tranche, tranche->compositor_formats, tranche->num_compositor_formats,
                          (struct drm_format) {
                             formats[*index].format,
                             formats[*index].modifier,
@@ -1445,6 +1469,9 @@ static void tranche_flags(void *data,
                           struct zwp_linux_dmabuf_feedback_v1 *zwp_linux_dmabuf_feedback_v1,
                           uint32_t flags)
 {
+    struct vo_wayland_state *wl = data;
+    if (flags & ZWP_LINUX_DMABUF_FEEDBACK_V1_TRANCHE_FLAGS_SCANOUT)
+        MP_DBG(wl, "Tranche has direct scanout.\n");
 }
 
 static const struct zwp_linux_dmabuf_feedback_v1_listener dmabuf_feedback_listener = {
@@ -1806,6 +1833,19 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
     }
 }
 
+static bool devices_are_equal(dev_t a, dev_t b)
+{
+    bool ret = false;
+#if HAVE_DRM
+    drmDevice *deviceA, *deviceB;
+    if (!drmGetDeviceFromDevId(a, 0, &deviceA) && !drmGetDeviceFromDevId(b, 0, &deviceB))
+        ret = drmDevicesEqual(deviceA, deviceB);
+    drmFreeDevice(&deviceA);
+    drmFreeDevice(&deviceB);
+#endif
+    return ret;
+}
+
 static void do_minimize(struct vo_wayland_state *wl)
 {
     if (wl->opts->window_minimized)
@@ -1831,12 +1871,23 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
 static void get_planar_drm_formats(struct vo_wayland_state *wl)
 {
 #if HAVE_DRM
+    struct vo_wayland_tranche *tranche;
+    wl_list_for_each(tranche, &wl->tranche_list, link) {
+        // If there is a device equality, just copy the pointer over.
+        if (devices_are_equal(tranche->device_id, wl->current_tranche->device_id)) {
+            wl->current_tranche->planar_formats = tranche->planar_formats;
+            wl->current_tranche->num_planar_formats = tranche->num_planar_formats;
+            return;
+        }
+    }
+
+    tranche = wl->current_tranche;
     drmDevice *device = NULL;
     drmModePlaneRes *res = NULL;
     drmModePlane *plane = NULL;
 
-    if (drmGetDeviceFromDevId(wl->target_device_id, 0, &device) != 0) {
-        MP_WARN(wl, "Unable to get drm device from device id: %s\n", mp_strerror(errno));
+    if (drmGetDeviceFromDevId(tranche->device_id, 0, &device) != 0) {
+        MP_VERBOSE(wl, "Unable to get drm device from device id: %s\n", mp_strerror(errno));
         goto done;
     }
 
@@ -1850,30 +1901,30 @@ static void get_planar_drm_formats(struct vo_wayland_state *wl)
     }
 
     if (!path || !path[0]) {
-        MP_WARN(wl, "Unable to find a valid drm device node.\n");
+        MP_VERBOSE(wl, "Unable to find a valid drm device node.\n");
         goto done;
     }
 
     int fd = open(path, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
-        MP_WARN(wl, "Unable to open DRM node path '%s': %s\n", path, mp_strerror(errno));
+        MP_VERBOSE(wl, "Unable to open DRM node path '%s': %s\n", path, mp_strerror(errno));
         goto done;
     }
 
     // Need to set this in order to access plane information.
     if (drmSetClientCap(fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
-        MP_WARN(wl, "Unable to set DRM atomic cap: %s\n", mp_strerror(errno));
+        MP_VERBOSE(wl, "Unable to set DRM atomic cap: %s\n", mp_strerror(errno));
         goto done;
     }
 
     res = drmModeGetPlaneResources(fd);
     if (!res) {
-        MP_WARN(wl, "Unable to get DRM plane resources: %s\n", mp_strerror(errno));
+        MP_VERBOSE(wl, "Unable to get DRM plane resources: %s\n", mp_strerror(errno));
         goto done;
     }
 
     if (!res->count_planes) {
-        MP_WARN(wl, "No DRM planes were found.\n");
+        MP_VERBOSE(wl, "No DRM planes were found.\n");
         goto done;
     }
 
@@ -1908,20 +1959,17 @@ static void get_planar_drm_formats(struct vo_wayland_state *wl)
     }
 
     if (index == -1) {
-        MP_WARN(wl, "Unable to get DRM plane: %s\n", mp_strerror(errno));
+        MP_VERBOSE(wl, "Unable to get DRM plane: %s\n", mp_strerror(errno));
         goto done;
     }
 
     plane = drmModeGetPlane(fd, res->planes[index]);
-    wl->num_planar_formats = plane->count_formats;
+    tranche->num_planar_formats = plane->count_formats;
+    tranche->planar_formats = talloc_zero_array(tranche, int, tranche->num_planar_formats);
 
-    if (wl->planar_formats)
-        talloc_free(wl->planar_formats);
-
-    wl->planar_formats = talloc_zero_array(wl, int, wl->num_planar_formats);
-    for (int i = 0; i < wl->num_planar_formats; ++i) {
+    for (int i = 0; i < tranche->num_planar_formats; ++i) {
         MP_DBG(wl, "DRM primary plane supports drm format: %s\n", mp_tag_str(plane->formats[i]));
-        wl->planar_formats[i] = plane->formats[i];
+        tranche->planar_formats[i] = plane->formats[i];
     }
 
 done:
@@ -2722,6 +2770,35 @@ void vo_wayland_handle_scale(struct vo_wayland_state *wl)
                                 lround(mp_rect_h(wl->geometry) / wl->scaling_factor));
 }
 
+bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier)
+{
+#if HAVE_DRM
+    // Tranches are grouped by preference and the first tranche is at the end of
+    // the list. It doesn't really matter for us since we search everything
+    // anyways, but might as well start from the most preferred tranche.
+    struct vo_wayland_tranche *tranche;
+    wl_list_for_each_reverse(tranche, &wl->tranche_list, link) {
+        bool supported_compositor_format = false;
+        struct drm_format *formats = tranche->compositor_formats;
+        for (int i = 0; i < tranche->num_compositor_formats; ++i) {
+            if (formats[i].format != drm_format)
+                continue;
+            if (modifier == formats[i].modifier && modifier != DRM_FORMAT_MOD_INVALID)
+                return true;
+            supported_compositor_format = true;
+        }
+
+        if (supported_compositor_format && tranche->planar_formats) {
+            for (int i = 0; i < tranche->num_planar_formats; i++) {
+                if (drm_format == tranche->planar_formats[i])
+                    return true;
+            }
+        }
+    }
+#endif
+    return false;
+}
+
 bool vo_wayland_init(struct vo *vo)
 {
     if (!getenv("WAYLAND_DISPLAY"))
@@ -2749,6 +2826,7 @@ bool vo_wayland_init(struct vo *vo)
 
     wl_list_init(&wl->output_list);
     wl_list_init(&wl->seat_list);
+    wl_list_init(&wl->tranche_list);
 
     if (!wl->display)
         goto err;

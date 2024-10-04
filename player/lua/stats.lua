@@ -474,7 +474,7 @@ local function get_kbinfo_lines()
            and bind.section ~= "input_forced_console"
            and (
                searched_text == nil or
-               (bind.key .. bind.cmd):lower():find(searched_text, 1, true)
+               (bind.key .. bind.cmd .. (bind.comment or "")):lower():find(searched_text, 1, true)
            )
         then
             active[bind.key] = bind
@@ -1619,6 +1619,7 @@ local function filter_bindings()
                 end
             end
         end,
+        dont_bind_up_down = true,
     })
 end
 
@@ -1749,14 +1750,20 @@ mp.add_key_binding(nil, "display-stats", function() process_key_binding(true) en
 mp.add_key_binding(nil, "display-stats-toggle", function() process_key_binding(false) end,
     {repeatable=false})
 
--- Single invocation bindings without key, can be used in input.conf to create
--- bindings for a specific page: "e script-binding stats/display-page-2"
 for k, _ in pairs(pages) do
-    mp.add_key_binding(nil, "display-page-" .. k,
-        function()
-            curr_page = k
-            process_key_binding(true)
-        end, {repeatable=true})
+    -- Single invocation key bindings for specific pages, e.g.:
+    -- "e script-binding stats/display-page-2"
+    mp.add_key_binding(nil, "display-page-" .. k, function()
+        curr_page = k
+        process_key_binding(true)
+    end, {repeatable=true})
+
+    -- Key bindings to toggle a specific page, e.g.:
+    -- "h script-binding stats/display-page-4-toggle".
+    mp.add_key_binding(nil, "display-page-" .. k .. "-toggle", function()
+        curr_page = k
+        process_key_binding(false)
+    end, {repeatable=true})
 end
 
 -- Reprint stats immediately when VO was reconfigured, only when toggled

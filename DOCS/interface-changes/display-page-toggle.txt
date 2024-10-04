@@ -1,0 +1,1 @@
+add `display-page-n-toggle` script bindings to stats.lua, where n is a page number

@@ -233,7 +233,7 @@ Additional keys can be configured in ``input.conf`` to display the stats::
 And to display a certain page directly::
 
     i script-binding stats/display-page-1
-    e script-binding stats/display-page-2
+    h script-binding stats/display-page-4-toggle
 
 Active key bindings page
 ~~~~~~~~~~~~~~~~~~~~~~~~
