@@ -129,18 +129,23 @@ static bool select_format(struct priv *p, int input_fmt,
     int *upload_fmts = &p->upload_fmts[p->fmt_upload_index[index]];
     int num_upload_fmts = p->fmt_upload_num[index];
 
-    // Select the output format as the upload format if available to avoid double
-    // conversion. Note that this will prevent double conversion but does not
-    // guarantee that the conversion chain is optimal. Conversion during upload
-    // might already be done on hardware, in which case it may be better to
-    // prefer a lighter conversion before upload, instead of going directly to
-    // the output format. However, such cases are uncommon, and in practice,
-    // there is no good way to predict this without hardcoding specific rules.
-    int hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, hw_output_fmt);
+    // Select the best input format from the available upload formats.
+    int hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, input_fmt);
 
-    // Select best input format for the available upload formats otherwise.
-    if (hw_input_fmt != hw_output_fmt)
-        hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, input_fmt);
+    // If the input format is not directly uploadable, conversion will be needed.
+    // Attempt to convert directly to the output format to avoid double conversion.
+    if (input_fmt != hw_input_fmt) {
+        int upload_output_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, hw_output_fmt);
+        // Use this format only if it avoids double conversion, i.e., if we can
+        // upload the output format directly. If that's not the case, just use
+        // the best format for the input format selected earlier, as double
+        // conversion is unavoidable anyway. This approach prefers a closer
+        // conversion before upload and do remaining conversion during upload,
+        // which may be hardware-accelerated.
+        if (upload_output_fmt == hw_output_fmt)
+            hw_input_fmt = upload_output_fmt;
+    }
+
     if (!hw_input_fmt)
         return false;
 
