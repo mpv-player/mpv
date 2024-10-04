@@ -14,6 +14,8 @@ already bound to them:
 ====   ==============================================
 i      Show stats for a fixed duration
 I      Toggle stats (shown until toggled again)
+h      Toggle displaying the input bindings list
+?      Toggle displaying the input bindings list
 ====   ==============================================
 
 While the stats are visible on screen the following key bindings are active,
