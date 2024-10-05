@@ -47,7 +47,7 @@ class MacCommon: Common {
             let previousActiveApp = getActiveApp()
             initApp()
 
-            let (_, wr) = getInitProperties(vo)
+            let (_, wr, _) = getInitProperties(vo)
 
             guard let layer = self.layer else {
                 log.error("Something went wrong, no MetalLayer was initialized")

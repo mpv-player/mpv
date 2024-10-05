@@ -75,7 +75,7 @@ class Common: NSObject {
     }
 
     func initWindow(_ vo: UnsafeMutablePointer<vo>, _ previousActiveApp: NSRunningApplication?) {
-        let (targetScreen, wr) = getInitProperties(vo)
+        let (targetScreen, wr, _) = getInitProperties(vo)
 
         guard let view = self.view else {
             log.error("Something went wrong, no View was initialized")
@@ -120,7 +120,7 @@ class Common: NSObject {
     }
 
     func initView(_ vo: UnsafeMutablePointer<vo>, _ layer: CALayer) {
-        let (_, wr) = getInitProperties(vo)
+        let (_, wr, _) = getInitProperties(vo)
 
         view = View(frame: wr, common: self)
         guard let view = self.view else {
@@ -408,7 +408,7 @@ class Common: NSObject {
     }
 
     func getWindowGeometry(forScreen screen: NSScreen,
-                           videoOut vo: UnsafeMutablePointer<vo>) -> NSRect {
+                           videoOut vo: UnsafeMutablePointer<vo>) -> (NSRect, Bool) {
         let r = screen.convertRectToBacking(screen.frame)
         let targetFrame = option.mac.macos_geometry_calculation == FRAME_VISIBLE
             ? screen.visibleFrame : screen.frame
@@ -434,18 +434,19 @@ class Common: NSObject {
         // flip the y origin again
         let y = CGFloat(-geo.win.y1)
         let x = CGFloat(geo.win.x0)
-        return screen.convertRectFromBacking(NSRect(x: x, y: y, width: width, height: height))
+        let wr = screen.convertRectFromBacking(NSRect(x: x, y: y, width: width, height: height))
+        return (wr, Bool(geo.flags & Int32(VO_WIN_FORCE_POS)))
     }
 
-    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect) {
+    func getInitProperties(_ vo: UnsafeMutablePointer<vo>) -> (NSScreen, NSRect, Bool) {
         guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
             log.error("Something went wrong, no Screen was found")
             exit(1)
         }
 
-        let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
+        let (wr, forcePosition) = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
 
-        return (targetScreen, wr)
+        return (targetScreen, wr, forcePosition)
     }
 
     // call before initApp, because on macOS +10.15 it changes the active App
@@ -535,8 +536,8 @@ class Common: NSObject {
                      TypeHelper.toPointer(&option.voPtr.pointee.autofit_smaller),
                      TypeHelper.toPointer(&option.voPtr.pointee.autofit_larger):
                     DispatchQueue.main.async {
-                        let (_, wr) = self.getInitProperties(vo)
-                        self.window?.updateFrame(wr)
+                        let (_, wr, forcePosition) = self.getInitProperties(vo)
+                        forcePosition ? self.window?.updateFrame(wr) : self.window?.updateSize(wr.size)
                     }
                 default:
                     break

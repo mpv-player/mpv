@@ -92,7 +92,7 @@ class CocoaCB: Common, EventSubscriber {
             return
         }
 
-        let wr = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
+        let (wr, _) = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
         if !(window?.isVisible ?? false) && !(window?.isMiniaturized ?? false) && !NSApp.isHidden {
             window?.makeKeyAndOrderFront(nil)
         }
