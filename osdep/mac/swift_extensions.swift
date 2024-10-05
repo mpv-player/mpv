@@ -73,7 +73,7 @@ extension mp_keymap {
 extension mpv_event_id: CustomStringConvertible {
     public var description: String {
         switch self {
-        case MPV_EVENT_NONE: return "MPV_EVENT_NONE2"
+        case MPV_EVENT_NONE: return "MPV_EVENT_NONE"
         case MPV_EVENT_SHUTDOWN: return "MPV_EVENT_SHUTDOWN"
         case MPV_EVENT_LOG_MESSAGE: return "MPV_EVENT_LOG_MESSAGE"
         case MPV_EVENT_GET_PROPERTY_REPLY: return "MPV_EVENT_GET_PROPERTY_REPLY"
