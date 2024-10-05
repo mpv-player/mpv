@@ -110,6 +110,7 @@ const struct m_sub_options *app_bridge_vo_conf(void)
     return &vo_sub_opts;
 }
 
+#if HAVE_SWIFT
 void cocoa_init_media_keys(void)
 {
     [[AppHub shared] startRemote];
@@ -139,4 +140,4 @@ int cocoa_main(int argc, char *argv[])
 {
     return [(Application *)[Application sharedApplication] main:argc :argv];
 }
-
+#endif
