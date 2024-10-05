@@ -60,7 +60,7 @@ class MacCommon: Common {
                 initWindowState()
             }
 
-            if (window?.unfsContentFramePixel.size ?? NSSize.zero) != wr.size && option.vo.auto_window_resize {
+            if option.vo.auto_window_resize {
                 window?.updateSize(wr.size)
             }
 
