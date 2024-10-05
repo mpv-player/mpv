@@ -501,7 +501,6 @@ jobs:
       fail-fast: false
       matrix:
         sys:
-          - clang32
           - clang64
           - mingw32
           - mingw64
@@ -541,7 +540,7 @@ jobs:
             vulkan-devel:p
 
       - name: Install dependencies
-        if: ${{ matrix.sys != 'clang32' && matrix.sys != 'mingw32' }}
+        if: ${{ matrix.sys != 'mingw32' }}
         run: |
           pacboy --noconfirm -S angleproject cppwinrt libcdio-paranoia rst2pdf \
                                 rubberband uchardet vapoursynth
