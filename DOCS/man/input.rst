@@ -2778,7 +2778,7 @@ Property list
     in the list will be the one that Windows considers associated with the
     window (as determined by the MonitorFromWindow API.) On macOS these are the
     Display Product Names as used in the System Information with a serial number
-    in brackets and only one display name is returned since a window can only be
+    in parentheses and only one display name is returned since a window can only be
     on one screen. On Wayland, these are the wl_output names if protocol
     version >= 4 is used (LVDS-1, HDMI-A-1, X11-1, etc.), or the wl_output model
     reported by the geometry event if protocol version < 4 is used.
