@@ -840,4 +840,3 @@ Available mpv-only filters are:
         Do not use this with ``--vo=gpu``. It will apply filtering twice, since
         most ``--vo=gpu`` options are unconditionally applied to the ``gpu``
         filter. There is no mechanism in mpv to prevent this.
-

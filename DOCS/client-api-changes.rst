@@ -286,4 +286,3 @@ API changes
         - macOS: the "coreaudio" AO spdif code is split into a separate AO
  --- mpv 0.4.0 ---
  1.0    - the API is declared stable
-
