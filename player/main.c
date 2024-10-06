@@ -70,6 +70,8 @@
 #include "command.h"
 #include "screenshot.h"
 
+#include "stream/stream_http.h"
+
 static const char def_config[] =
 #include "etc/builtin.conf.inc"
 ;
@@ -289,6 +291,7 @@ struct MPContext *mp_create(void)
 
     demux_packet_pool_init(mpctx->global);
     stats_global_init(mpctx->global);
+    mp_curl_global_init(mpctx->global);
 
     // Nothing must call mp_msg*() and related before this
     mp_msg_init(mpctx->global);

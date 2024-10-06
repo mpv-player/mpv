@@ -5705,6 +5705,65 @@ Network
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
 
+HTTP backend (libcurl)
+----------------------
+
+When mpv is built with libcurl support, ``http://`` and ``https://`` URLs are
+served by an internal libcurl-based stream backend instead of FFmpeg. The
+backend transparently supports HTTP/1.1, HTTP/2 multiplexing and QUIC, with
+HSTS enabled and TCP keep-alive turned on.
+
+Content compression (gzip, deflate, zstd, brotli) is requested only for
+playlist-like resources where the gain on text payloads is large and byte-range
+seeking is not needed. It is never requested for media payloads, because HTTP
+byte ranges address the encoded representation and seeking through a compressed
+transfer would land at unpredictable offsets.
+
+The backend honors the network options listed above (``--user-agent``,
+``--http-proxy``, ``--http-header-fields``, ``--referrer``, ``--cookies*``,
+``--tls-*``).
+
+If libcurl is not available at build time, or if this backend fails to handle
+a particular request, mpv falls back to FFmpeg's HTTP implementation.
+
+To inspect libcurl's debug output (requests, response headers,
+TLS/connection diagnostics), set ``--msg-level=http=trace``.
+
+``--http-version=<auto|1.0|1.1|2|2tls|2-prior-knowledge|3|3only>``
+    Select the maximum HTTP protocol version libcurl is allowed to negotiate
+    (default: ``auto``, i.e. let libcurl pick). If libcurl was built without
+    HTTP/3 support, it will fallback to ``auto``.
+
+``--http-max-redirects=<0-100>``
+    Maximum number of HTTP redirects to follow before reporting an error
+    (default: 16).
+
+``--http-max-retries=<0-100>``
+    Number of times a single seekable transfer may be transparently
+    re-attempted after a recoverable error (timeout, connection drop,
+    HTTP/2 stream reset, ...) before the stream gives up (default: 5).
+    Non-seekable transfers cannot be retried and ignore this option.
+
+``--http-connect-timeout=<seconds>``
+    TCP/TLS connect timeout in seconds (default: 30, range 0-600). 0 lets
+    libcurl use its built-in default. The overall transfer timeout is
+    controlled by ``--network-timeout``.
+
+``--http-buffer-size=<bytes>``
+    Size of the per-stream producer-side ring buffer that decouples the
+    network thread from the consumer (default: 4 MiB, minimum: 32 KiB).
+    Larger values smooth out network jitter at the cost of memory.
+
+``--http-max-request-size=<bytes>``
+    For seekable streams, split the transfer into Range requests of at most
+    this size (default: 0, i.e. one open-ended request for the whole stream).
+    A non-zero value can help with very long-running connections that some
+    CDNs or proxies recycle aggressively, and is also a common workaround for
+    per-connection bandwidth throttling employed by some CDNs (notably some
+    video hosting services), where each individual Range request is served at
+    full speed but a single long-lived connection is rate-limited. Ignored for
+    non-seekable streams.
+
 DVB
 ---
 
