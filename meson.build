@@ -1540,6 +1540,10 @@ swift = get_option('swift-build').require(
 )
 features += {'swift': swift.allowed()}
 
+if features['cocoa'] and not features['swift'] and get_option('cplayer')
+    error('cplayer enabled but no suitable swift version could be found or was disabled!')
+endif
+
 swift_sources = []
 if features['cocoa'] and features['swift']
     swift_sources += files('osdep/mac/application.swift',
