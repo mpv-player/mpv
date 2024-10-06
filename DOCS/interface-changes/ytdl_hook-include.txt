@@ -1,0 +1,1 @@
+add `ytdl_hook-include` script-opt
