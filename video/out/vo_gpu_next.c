@@ -1518,11 +1518,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        m_config_cache_update(p->opts_cache);
+        update_options(vo);
         update_ra_ctx_options(vo, &p->ra_ctx->opts);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
-        update_render_options(vo);
         vo->want_redraw = true;
 
         // Also re-query the auto profile, in case `update_render_options`
