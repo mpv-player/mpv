@@ -95,6 +95,7 @@ extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options clipboard_conf;
+extern const struct m_sub_options curl_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -925,6 +926,10 @@ static const m_option_t mp_opts[] = {
     {"input-builtin-drag-and-drop", OPT_BOOL(builtin_dnd)},
 
     {"clipboard", OPT_SUBSTRUCT(clipboard_opts, clipboard_conf)},
+
+#if HAVE_LIBCURL
+    {"curl", OPT_SUBSTRUCT(curl_opts, curl_conf)},
+#endif
 
     {"", OPT_SUBSTRUCT(vo, vo_sub_opts)},
     {"", OPT_SUBSTRUCT(demux_opts, demux_conf)},

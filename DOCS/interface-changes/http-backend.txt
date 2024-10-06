@@ -1,0 +1,1 @@
+add libcurl-based stream backend, with new options `--curl-http-version`, `--curl-max-redirects`, `--curl-max-retries`, `--curl-connect-timeout`, `--curl-buffer-size` and `--curl-max-request-size`

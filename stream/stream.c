@@ -61,6 +61,7 @@ extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
+extern const stream_info_t stream_info_curl;
 
 static const stream_info_t *const stream_list[] = {
     &stream_info_mpv,
@@ -90,6 +91,9 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
+#if HAVE_LIBCURL
+    &stream_info_curl,
+#endif
     &stream_info_ffmpeg,
     &stream_info_ffmpeg_unsafe,
 };
