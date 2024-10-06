@@ -285,8 +285,6 @@ static bool query_output_format_and_colorspace(struct mp_log *log,
                                                DXGI_FORMAT *out_fmt,
                                                DXGI_COLOR_SPACE_TYPE *out_cspace)
 {
-    IDXGIOutput *output = NULL;
-    IDXGIOutput6 *output6 = NULL;
     DXGI_OUTPUT_DESC1 desc = { 0 };
     char *monitor_name = NULL;
     bool success = false;
@@ -322,8 +320,6 @@ static bool query_output_format_and_colorspace(struct mp_log *log,
 
 done:
     talloc_free(monitor_name);
-    SAFE_RELEASE(output6);
-    SAFE_RELEASE(output);
     return success;
 }
 
