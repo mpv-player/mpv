@@ -4,6 +4,7 @@ local options = require 'mp.options'
 
 local o = {
     exclude = "",
+    include = "^%w+%.youtube%.com/|^youtube%.com/|^youtu%.be/|^%w+%.twitch%.tv/|^twitch%.tv/",
     try_ytdl_first = false,
     use_manifests = false,
     all_formats = false,
@@ -281,6 +282,26 @@ local function extract_chapters(data, video_length)
     end
     table.sort(ret, function(a, b) return a.time < b.time end)
     return ret
+end
+
+local function is_whitelisted(url)
+    url = url:match("https?://(.+)")
+
+    if url == nil then
+        return false
+    end
+
+    url = url:lower()
+
+    for match in o.include:gmatch('%|?([^|]+)') do
+        if url:find(match) then
+            msg.verbose("URL matches included substring " .. match ..
+                        ". Trying ytdl first.")
+            return true
+        end
+    end
+
+    return false
 end
 
 local function is_blacklisted(url)
@@ -1177,7 +1198,7 @@ end
 local function on_load_hook(load_fail)
     local url = mp.get_property("stream-open-filename", "")
     local force = url:find("^ytdl://")
-    local early = force or o.try_ytdl_first
+    local early = force or o.try_ytdl_first or is_whitelisted(url)
     if early == load_fail then
         return
     end
