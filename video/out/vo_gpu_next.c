@@ -763,8 +763,13 @@ static void update_options(struct vo *vo)
 {
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
-    bool changed = m_config_cache_update(p->opts_cache);
-    changed = m_config_cache_update(p->next_opts_cache) || changed;
+
+    bool opts_changed = m_config_cache_update(p->opts_cache);
+    bool next_opts_changed = m_config_cache_update(p->next_opts_cache);
+    bool changed = opts_changed | next_opts_changed;
+
+    if (next_opts_changed)
+        p->want_reset = true;
     if (changed)
         update_render_options(vo);
 
