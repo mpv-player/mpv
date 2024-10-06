@@ -120,7 +120,7 @@ Essential dependencies (incomplete list):
 
 Libass dependencies (when building libass):
 
-- gcc or clang, yasm on x86 and x86_64
+- gcc or clang, nasm on x86 and x86_64
 - fribidi, freetype, fontconfig development headers (for libass)
 - harfbuzz (required for correct rendering of combining characters, particularly
   for correct rendering of non-English text on macOS, and Arabic/Indic scripts on
@@ -128,7 +128,7 @@ Libass dependencies (when building libass):
 
 FFmpeg dependencies (when building FFmpeg):
 
-- gcc or clang, yasm on x86 and x86_64
+- gcc or clang, nasm on x86 and x86_64
 - OpenSSL or GnuTLS (have to be explicitly enabled when compiling FFmpeg)
 - libx264/libmp3lame/libfdk-aac if you want to use encoding (have to be
   explicitly enabled when compiling FFmpeg)
