@@ -291,7 +291,7 @@ local function is_blacklisted(url)
         end
     end
     if #ytdl.blacklisted > 0 then
-        url = url:match('https?://(.+)')
+        url = url:match('https?://(.+)'):lower()
         for _, exclude in ipairs(ytdl.blacklisted) do
             if url:match(exclude) then
                 msg.verbose('URL matches excluded substring. Skipping.')

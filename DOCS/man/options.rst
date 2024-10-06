@@ -907,6 +907,8 @@ Program Behavior
         should use ``%`` before any of the characters ``^$()%|,.[]*+-?`` to
         match that character.
 
+        URLs are converted to lower case before matching.
+
         .. admonition:: Examples
 
             - ``--script-opts=ytdl_hook-exclude='^youtube%.com'``
