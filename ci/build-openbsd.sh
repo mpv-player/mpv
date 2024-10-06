@@ -7,7 +7,7 @@ mkdir -p subprojects
 cat <<EOF > subprojects/ffmpeg.wrap
 [wrap-git]
 url = https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git
-revision = meson-6.1
+revision = meson-7.1
 depth = 1
 [provide]
 libavcodec = libavcodec_dep
