@@ -527,6 +527,7 @@ jobs:
             lcms2:p
             libarchive:p
             libass:p
+            libcdio-paranoia:p
             libdvdnav:p
             libjpeg-turbo:p
             libplacebo:p
@@ -537,13 +538,14 @@ jobs:
             python:p
             shaderc:p
             spirv-cross:p
+            uchardet:p
+            vapoursynth:p
             vulkan-devel:p
 
       - name: Install dependencies
         if: ${{ matrix.sys != 'mingw32' }}
         run: |
-          pacboy --noconfirm -S angleproject cppwinrt libcdio-paranoia rst2pdf \
-                                rubberband uchardet vapoursynth
+          pacboy --noconfirm -S {angleproject,cppwinrt,rst2pdf,rubberband}:p
 
       - name: Build with meson
         id: build
