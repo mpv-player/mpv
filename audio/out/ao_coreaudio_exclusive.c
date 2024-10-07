@@ -45,6 +45,7 @@
 #include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "audio/out/ao_coreaudio_chmap.h"
@@ -52,6 +53,10 @@
 #include "audio/out/ao_coreaudio_utils.h"
 
 struct priv {
+    // This must be put in the front
+    mp_mutex mutex;
+    mp_cond cond;
+
     AudioDeviceID device;   // selected device
 
     bool paused;
@@ -459,6 +464,8 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     .list_devs = ca_get_device_list,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv){
+        .mutex = MP_STATIC_MUTEX_INITIALIZER,
+        .cond = MP_STATIC_COND_INITIALIZER,
         .hog_pid = -1,
         .stream = 0,
         .stream_idx = -1,

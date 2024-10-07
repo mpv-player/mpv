@@ -475,10 +475,7 @@ static OSStatus ca_change_format_listener(
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format)
 {
-    static struct cb_sem sem = {
-        .mutex = MP_STATIC_MUTEX_INITIALIZER,
-        .cond = MP_STATIC_COND_INITIALIZER,
-    };
+    struct cb_sem *sem = (struct cb_sem*)ao->priv;
 
     OSStatus err = noErr;
     bool format_set = false;
@@ -500,10 +497,10 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     err = AudioObjectAddPropertyListener(stream, &p_addr,
                                          ca_change_format_listener,
-                                         &sem);
+                                         sem);
     CHECK_CA_ERROR("can't add property listener during format change");
 
-    mp_mutex_lock(&sem.mutex);
+    mp_mutex_lock(&sem->mutex);
 
     /* Change the format. */
     err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &change_format);
@@ -522,13 +519,13 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
         if (format_set)
             break;
 
-        if (mp_cond_timedwait_until(&sem.cond, &sem.mutex, wait_until)) {
+        if (mp_cond_timedwait_until(&sem->cond, &sem->mutex, wait_until)) {
             MP_VERBOSE(ao, "reached timeout\n");
             break;
         }
     }
 
-    mp_mutex_unlock(&sem.mutex);
+    mp_mutex_unlock(&sem->mutex);
 
     ca_print_asbd(ao, "actual format in use:", &actual_format);
 
@@ -542,11 +539,10 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     err = AudioObjectRemovePropertyListener(stream, &p_addr,
                                             ca_change_format_listener,
-                                            &sem);
+                                            sem);
     CHECK_CA_ERROR("can't remove property listener");
 
 coreaudio_error:
-    // do not destroy sem; otherwise there may be race condition
     return format_set;
 }
 #endif
