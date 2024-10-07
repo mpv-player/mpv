@@ -1959,7 +1959,7 @@ static void window_reconfig(struct vo_w32_state *w32, bool force)
         vo->dwidth = r.right;
         vo->dheight = r.bottom;
     } else {
-        if (w32->current_fs)
+        if (w32->current_fs || w32->opts->window_maximized)
             rc = &w32->prev_windowrc;
         w32->fit_on_screen = true;
     }
