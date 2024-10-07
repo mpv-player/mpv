@@ -5595,6 +5595,17 @@ them.
     Note that this doesn't affect the special filters ``bilinear`` and
     ``bicubic_fast``, nor does it affect any polar (EWA) scalers.
 
+    On ``--vo=gpu-next``, this also affects polar (EWA) scalers. Certain
+    filter aliases may also implicitly enable antiringing, regardless of this
+    setting (see ``--scale``).
+
+    .. note::
+
+        When downscaling with separable (orthogonal) filters, setting
+        ``--dscale-antiring`` to a value other than 0.0 (default) will reduce
+        scaler quality and produce aliasing artifacts. On ``--vo=gpu-next``,
+        ``--dscale-antiring`` is disabled for separable (orthogonal) filters.
+
 ``--scale-window=<window>``, ``--cscale-window=<window>``, ``--dscale-window=<window>``, ``--tscale-window=<window>``
     (Advanced users only) Choose a custom windowing function for the kernel.
     Defaults to the filter's preferred window if unset. Use
