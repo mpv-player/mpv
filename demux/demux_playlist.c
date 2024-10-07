@@ -517,18 +517,22 @@ static int parse_dir(struct pl_parser *p)
     p->pl->playlist_dir = NULL;
     if (p->autocreate_playlist && p->real_stream->is_local_fs && !p->real_stream->is_directory) {
         bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
+        enum autocreate_mode ext_type = AUTO_NONE;
+        if (str_in_list(ext, p->mp_opts->video_exts)) {
+            ext_type = AUTO_VIDEO;
+        } else if (str_in_list(ext, p->mp_opts->audio_exts)) {
+            ext_type = AUTO_AUDIO;
+        } else if (str_in_list(ext, p->mp_opts->image_exts)) {
+            ext_type = AUTO_IMAGE;
+        }
         switch (p->autocreate_playlist) {
         case 1: // filter
             autocreate = get_directory_filter(p);
+            if(!(autocreate & (ext_type | AUTO_ANY)))
+                autocreate = AUTO_NONE;
             break;
         case 2: // same
-            if (str_in_list(ext, p->mp_opts->video_exts)) {
-                autocreate = AUTO_VIDEO;
-            } else if (str_in_list(ext, p->mp_opts->audio_exts)) {
-                autocreate = AUTO_AUDIO;
-            } else if (str_in_list(ext, p->mp_opts->image_exts)) {
-                autocreate = AUTO_IMAGE;
-            }
+            autocreate = ext_type;
             break;
         }
         int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
