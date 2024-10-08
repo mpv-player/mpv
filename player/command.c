@@ -2541,14 +2541,19 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
 
     char approx_smpte[AV_TIMECODE_STR_SIZE] = {0};
     if (s12m_tc[0] == '\0' && mpctx->vo_chain) {
-        const AVTimecode tcr = {
-            .start = 0,
-            .flags = AV_TIMECODE_FLAG_DROPFRAME,
-            .rate = av_d2q(mpctx->vo_chain->filter->container_fps, INT_MAX),
-            .fps = lrint(mpctx->vo_chain->filter->container_fps),
-        };
-        int frame = lrint(get_current_pos_ratio(mpctx, false) * get_frame_count(mpctx));
-        av_timecode_make_string(&tcr, approx_smpte, frame);
+        unsigned container_fps = lrint(mpctx->vo_chain->filter->container_fps);
+        // Avoid division-by-zero in av_timecode_make_string() if reported
+        // container_fps is or rounds to 0.
+        if (container_fps) {
+            const AVTimecode tcr = {
+                .start = 0,
+                .flags = AV_TIMECODE_FLAG_DROPFRAME,
+                .rate = av_d2q(mpctx->vo_chain->filter->container_fps, INT_MAX),
+                .fps = container_fps,
+            };
+            int frame = lrint(get_current_pos_ratio(mpctx, false) * get_frame_count(mpctx));
+            av_timecode_make_string(&tcr, approx_smpte, frame);
+        }
     }
 
     struct m_sub_property props[] = {
