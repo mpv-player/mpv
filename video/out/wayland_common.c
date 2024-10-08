@@ -528,10 +528,12 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
         return;
     }
 
-    if (!s->xkb_keymap)
-        s->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
-                                                   strnlen(map_str, size),
-                                                   XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    if (s->xkb_keymap)
+        xkb_keymap_unref(s->xkb_keymap);
+
+    s->xkb_keymap = xkb_keymap_new_from_buffer(wl->xkb_context, map_str,
+                                               strnlen(map_str, size),
+                                               XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
     close(fd);
@@ -540,9 +542,10 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
         MP_ERR(wl, "failed to compile keymap\n");
         return;
     }
+    if (s->xkb_state)
+        xkb_state_unref(s->xkb_state);
 
-    if (!s->xkb_state)
-        s->xkb_state = xkb_state_new(s->xkb_keymap);
+    s->xkb_state = xkb_state_new(s->xkb_keymap);
     if (!s->xkb_state) {
         MP_ERR(wl, "failed to create XKB state\n");
         xkb_keymap_unref(s->xkb_keymap);
