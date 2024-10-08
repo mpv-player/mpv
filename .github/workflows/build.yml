@@ -218,17 +218,17 @@ jobs:
         cxx:
           - "clang++"
         os:
-          - "macos-12"
           - "macos-13"
           - "macos-14"
+          - "macos-15"
         include:
-          - os: "macos-12"
-            arch: "intel"
           - os: "macos-13"
             arch: "intel"
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.2"
+          - os: "macos-15"
+            arch: "arm"
     steps:
       - uses: actions/checkout@v4
 
