@@ -274,10 +274,10 @@ Command + f (macOS only)
     Toggle fullscreen (see also ``--fs``).
 
 (The following keybindings open a selector in the console that lets you choose
-from a list of items by typing part of the desired item and/or by navigating
-them with keybindings: ``Down`` and ``Ctrl+n`` go down, ``Up`` and ``Ctrl+p`` go
-up, ``Page down`` and ``Ctrl+f`` scroll down one page, and ``Page up`` and
-``Ctrl+b`` scroll up one page.)
+from a list of items by typing part of the desired item, by clicking the desired
+item, or by navigating them with keybindings: ``Down`` and ``Ctrl+n`` go down,
+``Up`` and ``Ctrl+p`` go up, ``Page down`` and ``Ctrl+f`` scroll down one page,
+and ``Page up`` and ``Ctrl+b`` scroll up one page.)
 
 g-p
     Select a playlist entry.
