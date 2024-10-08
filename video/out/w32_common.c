@@ -1117,7 +1117,10 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
     if (w32->current_fs && !leaving_fullscreen)
         return;
 
-    bool toggle = !w32->opts->window_maximized && IsMaximized(w32->window);
+    bool toggle = w32->opts->window_maximized ^ IsMaximized(w32->window);
+
+    if (toggle && !w32->current_fs && w32->opts->window_maximized)
+        w32->prev_windowrc = w32->windowrc;
 
     WINDOWPLACEMENT wp = { .length = sizeof wp };
     GetWindowPlacement(w32->window, &wp);
@@ -1139,7 +1142,7 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
         }
     }
 
-    if (toggle && !w32->current_fs) {
+    if (toggle && !w32->current_fs && !w32->opts->window_maximized) {
         w32->windowrc = w32->prev_windowrc;
         update_window_state(w32);
     }
