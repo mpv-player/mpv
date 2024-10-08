@@ -576,17 +576,23 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     The program is run in a detached way. mpv doesn't wait until the command
     is completed, but continues playback right after spawning it.
 
-    To get the old behavior, use ``/bin/sh`` and ``-c`` as the first two
-    arguments.
+    If you want to use shell features (e.g. redirections, pipes, etc.) in your
+    command, it is suggested to either write a small shell script and call it
+    with ``run`` or to ``run`` the ``sh`` program with the ``-c`` option and the
+    bit of shell code you want to run.
 
     .. admonition:: Example
 
-        ``run "/bin/sh" "-c" "echo ${title} > /tmp/playing"``
+        ``run sh -c '$>printf %s\\n "$1" > /tmp/playing' _ "${title}"``
 
-        This is not a particularly good example, because it doesn't handle
-        escaping, and a specially prepared file might allow an attacker to
-        execute arbitrary shell commands. It is recommended to write a small
-        shell script, and call that with ``run``.
+        Note that ``${title}`` is passed to ``sh`` as an argument and accessed
+        with ``$1`` instead of being directly injected into the shell code; this
+        allows you to handle titles that contain special shell characters
+        correctly.
+
+        ``_`` is just a dummy argument that sets ``$0`` to "_". It is generally
+        prefered not to use ``$0`` when using ``sh -c`` since it is known to be
+        unreliable in some shells.
 
 ``subprocess``
     Similar to ``run``, but gives more control about process execution to the
