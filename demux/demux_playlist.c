@@ -416,6 +416,9 @@ static bool test_path(struct pl_parser *p, char *path, int autocreate)
     if (autocreate & AUTO_ANY)
         return true;
 
+    if (!strcmp(path, p->real_stream->path))
+        return true;
+
     bstr ext = bstr_get_ext(bstr0(path));
     if (autocreate & AUTO_VIDEO && str_in_list(ext, p->mp_opts->video_exts))
         return true;
