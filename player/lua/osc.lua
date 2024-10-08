@@ -1858,6 +1858,22 @@ layouts["topbar"] = function()
 end
 
 
+local function osc_visible(visible)
+    if state.osc_visible ~= visible then
+        state.osc_visible = visible
+        update_margins()
+    end
+    request_tick()
+end
+
+local function open_selector(type)
+    mp.command("script-binding select/select-" .. type)
+
+    if user_opts.visibility == "auto" then
+        osc_visible(false)
+    end
+end
+
 local function osc_init()
     msg.debug("osc_init")
 
@@ -1925,6 +1941,9 @@ local function osc_init()
         show_message(title)
     end
 
+    ne.eventresponder["shift+mbtn_left_up"] =
+        function () open_selector("playlist") end
+
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(mp.get_property_osd("filename")) end
 
@@ -1943,7 +1962,7 @@ local function osc_init()
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () open_selector("playlist") end
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(get_playlist(), 3) end
 
@@ -1960,7 +1979,7 @@ local function osc_init()
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () open_selector("playlist") end
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(get_playlist(), 3) end
 
@@ -2021,7 +2040,7 @@ local function osc_init()
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () open_selector("chapter") end
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(get_chapterlist(), 3) end
 
@@ -2038,7 +2057,7 @@ local function osc_init()
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () open_selector("chapter") end
     ne.eventresponder["mbtn_right_up"] =
         function () show_message(get_chapterlist(), 3) end
 
@@ -2062,7 +2081,7 @@ local function osc_init()
     ne.eventresponder["mbtn_right_up"] =
         function () set_track("audio", -1) end
     ne.eventresponder["shift+mbtn_left_down"] =
-        function () show_message(get_tracklist("audio"), 2) end
+        function () open_selector("aid") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_down_press"] =
@@ -2088,7 +2107,7 @@ local function osc_init()
     ne.eventresponder["mbtn_right_up"] =
         function () set_track("sub", -1) end
     ne.eventresponder["shift+mbtn_left_down"] =
-        function () show_message(get_tracklist("sub"), 2) end
+        function () open_selector("sid") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_down_press"] =
@@ -2274,6 +2293,8 @@ local function osc_init()
     end
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "mute") end
+    ne.eventresponder["shift+mbtn_left_up"] =
+        function () open_selector("audio-device") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_up_press"] =
@@ -2295,14 +2316,6 @@ local function osc_init()
     prepare_elements()
 
     update_margins()
-end
-
-local function osc_visible(visible)
-    if state.osc_visible ~= visible then
-        state.osc_visible = visible
-        update_margins()
-    end
-    request_tick()
 end
 
 local function show_osc()

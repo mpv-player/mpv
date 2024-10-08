@@ -32,14 +32,16 @@ pl prev
     =============   ================================================
     left-click      play previous file in playlist
     right-click     show playlist
-    shift+L-click   show playlist
+    middle-click    open the playlist selector
+    shift+L-click   open the playlist selector
     =============   ================================================
 
 pl next
     =============   ================================================
     left-click      play next file in playlist
     right-click     show playlist
-    shift+L-click   show playlist
+    middle-click    open the playlist selector
+    shift+L-click   open the playlist selector
     =============   ================================================
 
 title
@@ -49,6 +51,8 @@ title
     =============   ================================================
     left-click      show playlist position and length and full title
     right-click     show filename
+    middle-click    open the playlist selector
+    shift+L-click   open the playlist selector
     =============   ================================================
 
 cache
@@ -63,14 +67,16 @@ skip back
     =============   ================================================
     left-click      go to beginning of chapter / previous chapter
     right-click     show chapters
-    shift+L-click   show chapters
+    middle-click    open the chapter selector
+    shift+L-click   open the chapter selector
     =============   ================================================
 
 skip frwd
     =============   ================================================
     left-click      go to next chapter
     right-click     show chapters
-    shift+L-click   show chapters
+    middle-click    open the chapter selector
+    shift+L-click   open the chapter selector
     =============   ================================================
 
 time elapsed
@@ -101,14 +107,17 @@ audio and sub
     =============   ================================================
     left-click      cycle audio/sub tracks forward
     right-click     cycle audio/sub tracks backwards
-    shift+L-click   show available audio/sub tracks
     mouse wheel     cycle audio/sub tracks forward/backwards
+    middle-click    open the audio/sub track selector
+    shift+L-click   open the audio/sub track selector
     =============   ================================================
 
 vol
     =============   ================================================
     left-click      toggle mute
     mouse wheel     volume up/down
+    middle-click    open the audio device selector
+    shift+L-click   open the audio device selector
     =============   ================================================
 
 fs
