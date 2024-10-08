@@ -127,6 +127,28 @@ static void append_filename(char **s, const char *f)
     talloc_free(append);
 }
 
+// Screenshot base filenames (especially with %{sub-text}) can be longer than
+// filesystems support (255 generally). Truncate it to fit with an extension.
+// If truncation produces an invalid UTF-8 codepoint, then chop that off.
+static void truncate_long_base_filename(char *s, const size_t ext_len)
+{
+    const size_t max_utf8_bytes = 255 - (ext_len + 1); // ext_len+1 for '.'
+    char *basename = mp_basename(s);
+    size_t len = strlen(basename);
+
+    if (len <= max_utf8_bytes)
+        return;
+
+    basename[max_utf8_bytes] = 0;
+
+    for (int i = 1; i <= 3; i++) {
+        if (bstr_parse_utf8_code_length(basename[max_utf8_bytes-i]) > i) {
+            basename[max_utf8_bytes-i] = 0;
+            break;
+        }
+    }
+}
+
 static char *create_fname(struct MPContext *mpctx, char *template,
                           const char *file_ext, int *sequence, int *frameno)
 {
@@ -263,6 +285,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
     }
 
     res = talloc_strdup_append(res, template);
+    truncate_long_base_filename(res, strlen(file_ext));
     res = talloc_asprintf_append(res, ".%s", file_ext);
     char *fname = mp_get_user_path(NULL, mpctx->global, res);
     talloc_free(res);
