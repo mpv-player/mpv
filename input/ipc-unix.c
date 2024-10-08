@@ -32,7 +32,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "input/input.h"
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "options/m_config.h"
 #include "options/options.h"
 #include "options/path.h"

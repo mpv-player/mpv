@@ -19,7 +19,7 @@
 #define MP_JSON_H
 
 // We reuse mpv_node.
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 #define MAX_JSON_DEPTH 50
 

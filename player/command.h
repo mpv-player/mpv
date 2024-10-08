@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "osdep/compiler.h"
 
 struct MPContext;

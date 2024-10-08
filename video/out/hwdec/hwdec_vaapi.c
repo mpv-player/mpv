@@ -33,7 +33,7 @@
 #include "video/vaapi.h"
 
 #if HAVE_VAAPI_DRM
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #endif
 
 #if HAVE_VAAPI_X11
