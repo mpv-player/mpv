@@ -25,6 +25,8 @@
 
 #include "osdep/compiler.h"
 
+#define TERM_MSG_0 "\xFC"
+
 struct mp_log;
 
 // A mp_log instance that never outputs anything.
