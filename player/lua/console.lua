@@ -64,6 +64,7 @@ local styles = {
     fatal = '{\\1c&H5791f9&}',
     suggestion = '{\\1c&Hcc99cc&}',
     selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
+    default_item = '{\\1c&H2fbdfa&}',
     disabled = '{\\1c&Hcccccc&}',
 }
 
@@ -74,6 +75,7 @@ local terminal_styles = {
     error = '\027[31m',
     fatal = '\027[91m',
     selected_suggestion = '\027[7m',
+    default_item = '\027[1m',
     disabled = '\027[38;5;8m',
 }
 
@@ -109,6 +111,7 @@ local selectable_items
 local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
+local default_item
 
 local set_active
 
@@ -417,10 +420,22 @@ local function populate_log_with_matches()
     end
 
     for i = first_match_to_print, last_match_to_print do
+        local style = ''
+        local terminal_style = ''
+
+        if i == selected_match then
+            style = styles.selected_suggestion
+            terminal_style = terminal_styles.selected_suggestion
+        end
+        if matches[i].index == default_item then
+            style = style .. styles.default_item
+            terminal_style = terminal_style .. terminal_styles.default_item
+        end
+
         log[#log + 1] = {
             text = matches[i].text,
-            style = i == selected_match and styles.selected_suggestion or '',
-            terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
+            style = style,
+            terminal_style = terminal_style,
         }
     end
 
@@ -1697,6 +1712,7 @@ set_active = function (active)
             line = ''
             cursor = 1
             selectable_items = nil
+            default_item = nil
             dont_bind_up_down = false
             unbind_mouse()
         end
@@ -1770,6 +1786,7 @@ mp.register_script_message('get-input', function (script_name, args)
     if selectable_items then
         matches = {}
         selected_match = args.default_item or 1
+        default_item = args.default_item
         first_match_to_print = 1
         for i, item in ipairs(selectable_items) do
             matches[i] = { index = i, text = item }
