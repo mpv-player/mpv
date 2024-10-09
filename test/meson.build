@@ -135,7 +135,9 @@ endif
 
 # Supported libavutil versions that work with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
-if libavutil.version().version_compare('>= 59.0.100')
+if libswscale.version().version_compare('>= 8.5.100')
+    refdir = join_paths(source_root, 'test', 'ref', 'swscale_8_5_100')
+elif libavutil.version().version_compare('>= 59.0.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg7')
 elif libavutil.version().version_compare('>= 58.27.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg6')
