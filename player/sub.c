@@ -96,7 +96,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 {
     struct dec_sub *dec_sub = track ? track->d_sub : NULL;
 
-    if (!dec_sub || video_pts == MP_NOPTS_VALUE)
+    if (!dec_sub)
         return true;
 
     if (mpctx->vo_chain) {
