@@ -218,9 +218,7 @@ const struct m_sub_options input_config = {
         {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
         {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
         {"input-dragging-deadzone", OPT_INT(dragging_deadzone)},
-#if HAVE_SDL2_GAMEPAD
-        {"input-gamepad", OPT_BOOL(use_gamepad)},
-#endif
+        {"input-gamepad", OPT_BOOL(use_gamepad), .unavailable = !HAVE_SDL2_GAMEPAD},
         {"window-dragging", OPT_BOOL(allow_win_drag)},
         {0}
     },

@@ -52,6 +52,20 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 
+#if HAVE_WIN32_DESKTOP
+// For old MinGW-w64 compatibility
+#define DWMWCP_DEFAULT 0
+#define DWMWCP_DONOTROUND 1
+#define DWMWCP_ROUND 2
+#define DWMWCP_ROUNDSMALL 3
+
+#define DWMSBT_AUTO 0
+#define DWMSBT_NONE 1
+#define DWMSBT_MAINWINDOW 2
+#define DWMSBT_TRANSIENTWINDOW 3
+#define DWMSBT_TABBEDWINDOW 4
+#endif
+
 static void print_version(struct mp_log *log)
 {
     mp_print_version(log, true);
@@ -136,7 +150,6 @@ static const m_option_t mp_vo_opt_list[] = {
     {"focus-on", OPT_CHOICE(focus_on, {"never", 0}, {"open", 1}, {"all", 2})},
     {"force-render", OPT_BOOL(force_render)},
     {"force-window-position", OPT_BOOL(force_window_position)},
-    {"x11-name", OPT_STRING(winname)},
     {"wayland-app-id", OPT_STRING(appid)},
     {"monitoraspect", OPT_FLOAT(force_monitor_aspect), M_RANGE(0.0, 9.0)},
     {"monitorpixelaspect", OPT_FLOAT(monitor_pixel_aspect),
@@ -185,53 +198,69 @@ static const m_option_t mp_vo_opt_list[] = {
         {"display-vdrop", VS_DISP_VDROP},
         {"display-desync", VS_DISP_NONE},
         {"desync", VS_NONE})},
-#if HAVE_X11
-    {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
+
+    // X11 options
+    {"x11-name", OPT_STRING(winname), .unavailable = !HAVE_X11},
+    {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1}),
+        .unavailable = !HAVE_X11},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
-        {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})},
+        {"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3}),
+        .unavailable = !HAVE_X11},
     {"x11-present", OPT_CHOICE(x11_present,
-        {"no", 0}, {"auto", 1}, {"yes", 2})},
-    {"x11-wid-title", OPT_BOOL(x11_wid_title)},
-#endif
-#if HAVE_WAYLAND
+        {"no", 0}, {"auto", 1}, {"yes", 2}), .unavailable = !HAVE_X11},
+    {"x11-wid-title", OPT_BOOL(x11_wid_title), .unavailable = !HAVE_X11},
+
+    // Wayland options
     {"wayland-configure-bounds", OPT_CHOICE(wl_configure_bounds,
-        {"auto", -1}, {"no", 0}, {"yes", 1})},
+        {"auto", -1}, {"no", 0}, {"yes", 1}), .unavailable = !HAVE_WAYLAND},
     {"wayland-content-type", OPT_CHOICE(wl_content_type, {"auto", -1}, {"none", 0},
-        {"photo", 1}, {"video", 2}, {"game", 3})},
-    {"wayland-disable-vsync", OPT_BOOL(wl_disable_vsync)},
+        {"photo", 1}, {"video", 2}, {"game", 3}), .unavailable = !HAVE_WAYLAND},
+    {"wayland-disable-vsync", OPT_BOOL(wl_disable_vsync),
+        .unavailable = !HAVE_WAYLAND},
     {"wayland-edge-pixels-pointer", OPT_INT(wl_edge_pixels_pointer),
-        M_RANGE(0, INT_MAX)},
+        M_RANGE(0, INT_MAX), .unavailable = !HAVE_WAYLAND},
     {"wayland-edge-pixels-touch", OPT_INT(wl_edge_pixels_touch),
-        M_RANGE(0, INT_MAX)},
-    {"wayland-present", OPT_BOOL(wl_present)},
-#endif
+        M_RANGE(0, INT_MAX), .unavailable = !HAVE_WAYLAND},
+    {"wayland-present", OPT_BOOL(wl_present), .unavailable = !HAVE_WAYLAND},
+
+    // Windows Desktop options
+    {"backdrop-type",
 #if HAVE_WIN32_DESKTOP
-// For old MinGW-w64 compatibility
-#define DWMWCP_DEFAULT 0
-#define DWMWCP_DONOTROUND 1
-#define DWMWCP_ROUND 2
-#define DWMWCP_ROUNDSMALL 3
-
-#define DWMSBT_AUTO 0
-#define DWMSBT_NONE 1
-#define DWMSBT_MAINWINDOW 2
-#define DWMSBT_TRANSIENTWINDOW 3
-#define DWMSBT_TABBEDWINDOW 4
-
-    {"backdrop-type", OPT_CHOICE(backdrop_type, {"auto", DWMSBT_AUTO}, {"none", DWMSBT_NONE},
-        {"mica", DWMSBT_MAINWINDOW}, {"acrylic", DWMSBT_TRANSIENTWINDOW}, {"mica-alt", DWMSBT_TABBEDWINDOW})},
-    {"window-affinity", OPT_CHOICE(window_affinity, {"default", WDA_NONE},
-        {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR})},
-    {"vo-mmcss-profile", OPT_STRING(mmcss_profile)},
-    {"window-corners", OPT_CHOICE(window_corners,
-        {"default", DWMWCP_DEFAULT},
-        {"donotround", DWMWCP_DONOTROUND},
-        {"round", DWMWCP_ROUND},
-        {"roundsmall", DWMWCP_ROUNDSMALL})},
+        OPT_CHOICE(backdrop_type,
+            {"auto", DWMSBT_AUTO}, {"none", DWMSBT_NONE}, {"mica", DWMSBT_MAINWINDOW},
+            {"acrylic", DWMSBT_TRANSIENTWINDOW}, {"mica-alt", DWMSBT_TABBEDWINDOW}),
+#else
+        OPT_CHOICE(backdrop_type, {"auto", 0}, {"none", 0}, {"mica", 0},
+            {"acrylic", 0}, {"mica-alt", 0}),
 #endif
-#if HAVE_EGL_ANDROID
-    {"android-surface-size", OPT_SIZE_BOX(android_surface_size)},
+        .unavailable = !HAVE_WIN32_DESKTOP},
+    {"window-affinity",
+#if HAVE_WIN32_DESKTOP
+        OPT_CHOICE(window_affinity, {"default", WDA_NONE},
+            {"excludefromcapture", WDA_EXCLUDEFROMCAPTURE}, {"monitor", WDA_MONITOR}),
+#else
+        OPT_CHOICE(window_affinity, {"default", 0},
+            {"excludefromcapture", 0}, {"monitor", 0}),
 #endif
+        .unavailable = !HAVE_WIN32_DESKTOP},
+    {"vo-mmcss-profile", OPT_STRING(mmcss_profile), .unavailable = !HAVE_WIN32_DESKTOP},
+    {"window-corners",
+#if HAVE_WIN32_DESKTOP
+        OPT_CHOICE(window_corners,
+            {"default", DWMWCP_DEFAULT},
+            {"donotround", DWMWCP_DONOTROUND},
+            {"round", DWMWCP_ROUND},
+            {"roundsmall", DWMWCP_ROUNDSMALL}),
+#else
+        OPT_CHOICE(window_corners, {"default", 0}, {"donotround", 0},
+            {"round", 0}, {"roundsmall", 0}),
+#endif
+        .unavailable = !HAVE_WIN32_DESKTOP},
+
+    // EGL Android Options
+    {"android-surface-size", OPT_SIZE_BOX(android_surface_size),
+        .unavailable = !HAVE_EGL_ANDROID},
+
     {"swapchain-depth", OPT_INT(swapchain_depth), M_RANGE(1, VO_MAX_SWAPCHAIN_DEPTH)},
     {"override-display-fps", OPT_REPLACED("display-fps-override")},
     {0}
@@ -442,6 +471,7 @@ const struct m_sub_options cuda_conf = {
             M_RANGE(0, INT_MAX)},
         {0}
     },
+    .unavailable = !HAVE_CUDA_HWACCEL,
     .size = sizeof(struct cuda_opts),
     .defaults = &(const struct cuda_opts){
         .cuda_device = -1,
@@ -458,6 +488,7 @@ const struct m_sub_options dvd_conf = {
         {"dvd-angle", OPT_INT(angle), M_RANGE(1, 99)},
         {0}
     },
+    .unavailable = !HAVE_DVDNAV,
     .size = sizeof(struct dvd_opts),
     .defaults = &(const struct dvd_opts){
         .angle = 1,
@@ -535,6 +566,8 @@ static const m_option_t mp_opts[] = {
         .flags = CONF_PRE_PARSE | M_OPT_FILE | UPDATE_TERM},
     {"msg-module", OPT_BOOL(msg_module), .flags = UPDATE_TERM},
     {"msg-time", OPT_BOOL(msg_time), .flags = UPDATE_TERM},
+
+    // Windows Desktop
 #if HAVE_WIN32_DESKTOP
     {"priority", OPT_CHOICE(w32_priority,
         {"no",          0},
@@ -544,44 +577,66 @@ static const m_option_t mp_opts[] = {
         {"normal",      NORMAL_PRIORITY_CLASS},
         {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
         {"idle",        IDLE_PRIORITY_CLASS}),
-        .flags = UPDATE_PRIORITY},
+        .flags = UPDATE_PRIORITY,
+#else
+    {"priority", OPT_CHOICE(w32_priority,
+        {"no",          0},
+        {"realtime",    0},
+        {"high",        0},
+        {"abovenormal", 0},
+        {"normal",      0},
+        {"belownormal", 0},
+        {"idle",        0}),
 #endif
+        .unavailable = !HAVE_WIN32_DESKTOP},
+
+    // Windows Medial Controls
     {"media-controls", OPT_CHOICE(media_controls,
-        {"no", 0}, {"player", 1}, {"yes", 2})},
+        {"no", 0}, {"player", 1}, {"yes", 2}),
+        .unavailable = !HAVE_WIN32_SMTC},
+
     {"config", OPT_BOOL(load_config), .flags = CONF_PRE_PARSE},
     {"config-dir", OPT_STRING(force_configdir),
         .flags = CONF_NOCFG | CONF_PRE_PARSE | M_OPT_FILE},
     {"reset-on-next-file", OPT_STRINGLIST(reset_options)},
 
-#if HAVE_LUA || HAVE_JAVASCRIPT || HAVE_CPLUGINS
-    {"scripts", OPT_PATHLIST(script_files), .flags = M_OPT_FILE},
-    {"script", OPT_CLI_ALIAS("scripts-append")},
-    {"script-opts", OPT_KEYVALUELIST(script_opts)},
-    {"load-scripts", OPT_BOOL(auto_load_scripts)},
-#endif
-#if HAVE_JAVASCRIPT
-    {"js-memory-report", OPT_BOOL(js_memory_report)},
-#endif
-#if HAVE_LUA
-    {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"ytdl-format", OPT_STRING(lua_ytdl_format)},
-    {"ytdl-raw-options", OPT_KEYVALUELIST(lua_ytdl_raw_options)},
-    {"load-stats-overlay", OPT_BOOL(lua_load_stats),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-osd-console", OPT_BOOL(lua_load_console),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
+    // Scripting
+    {"scripts", OPT_PATHLIST(script_files), .flags = M_OPT_FILE,
+        .unavailable = !HAVE_LUA && !HAVE_JAVASCRIPT && !HAVE_CPLUGINS},
+    {"script", OPT_CLI_ALIAS("scripts-append"),
+        .unavailable = !HAVE_LUA && !HAVE_JAVASCRIPT && !HAVE_CPLUGINS},
+    {"script-opts", OPT_KEYVALUELIST(script_opts),
+        .unavailable = !HAVE_LUA && !HAVE_JAVASCRIPT && !HAVE_CPLUGINS},
+    {"load-scripts", OPT_BOOL(auto_load_scripts),
+        .unavailable = !HAVE_LUA && !HAVE_JAVASCRIPT && !HAVE_CPLUGINS},
+
+    // Javascript
+    {"js-memory-report", OPT_BOOL(js_memory_report), .unavailable = !HAVE_JAVASCRIPT},
+
+    // Lua
+    {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .unavailable = !HAVE_LUA},
+    {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .unavailable = !HAVE_LUA},
+    {"ytdl-format", OPT_STRING(lua_ytdl_format),
+        .unavailable = !HAVE_LUA},
+    {"ytdl-raw-options", OPT_KEYVALUELIST(lua_ytdl_raw_options),
+        .unavailable = !HAVE_LUA},
+    {"load-stats-overlay", OPT_BOOL(lua_load_stats), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .unavailable = !HAVE_LUA},
+    {"load-osd-console", OPT_BOOL(lua_load_console), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .unavailable = !HAVE_LUA},
     {"load-auto-profiles",
         OPT_CHOICE(lua_load_auto_profiles, {"no", 0}, {"yes", 1}, {"auto", -1}),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS},
-#endif
+        .flags = UPDATE_BUILTIN_SCRIPTS, .unavailable = !HAVE_LUA},
+    {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .unavailable = !HAVE_LUA},
 
 // ------------------------- stream options --------------------
 
-#if HAVE_DVDNAV
+    // DVD
     {"", OPT_SUBSTRUCT(dvd_opts, dvd_conf)},
-#endif
+
     {"edition", OPT_CHOICE(edition_id, {"auto", -1}), M_RANGE(0, 8190)},
 #if HAVE_LIBBLURAY
     {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
@@ -951,9 +1006,8 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(wingl_opts, wingl_conf)},
 #endif
 
-#if HAVE_CUDA_HWACCEL
+    // CUDA
     {"cuda", OPT_SUBSTRUCT(cuda_opts, cuda_conf)},
-#endif
 
 #if HAVE_VAAPI
     {"vaapi", OPT_SUBSTRUCT(vaapi_opts, vaapi_conf)},

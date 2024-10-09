@@ -207,6 +207,16 @@ static void get_opt_from_id(struct m_config_shadow *shadow, int32_t id,
     *out_opt_index = opt_index;
 }
 
+bool m_config_shadow_opt_unavailable(struct m_config_shadow *shadow,
+                                     int32_t id)
+{
+    int group_index, opt_index;
+    get_opt_from_id(shadow, id, &group_index, &opt_index);
+
+    return shadow->groups[group_index].group->unavailable ||
+           shadow->groups[group_index].group->opts[opt_index].unavailable;
+}
+
 const struct m_option *m_config_shadow_get_opt(struct m_config_shadow *shadow,
                                                int32_t id)
 {

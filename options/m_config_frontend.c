@@ -297,6 +297,13 @@ static struct m_config_option *m_config_get_co_any(const struct m_config *config
         return NULL;
 
     const char *prefix = config->is_toplevel ? "--" : "";
+    if (co->unavailable) {
+        if (!co->warning_was_printed) {
+            MP_WARN(config, "Warning: support for option %s%s is not compiled in the mpv binary.\n",
+                    prefix, co->name);
+            co->warning_was_printed = true;
+        }
+    }
     if (co->opt->type == &m_option_type_alias) {
         char buf[M_CONFIG_MAX_OPT_NAME_LEN];
         const char *alias = m_config_shadow_get_alias_from_opt(config->shadow, co->opt_id,
@@ -555,6 +562,7 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
 
         struct m_config_option co = {
             .name = talloc_strdup(config, opt_name),
+            .unavailable = m_config_shadow_opt_unavailable(config->shadow, optid),
             .opt = m_config_shadow_get_opt(config->shadow, optid),
             .opt_id = optid,
         };
@@ -845,6 +853,8 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         struct m_config_option *co = &sorted[i];
         const struct m_option *opt = co->opt;
         if (strcmp(name, "*") != 0 && !strstr(co->name, name))
+            continue;
+        if (co->unavailable)
             continue;
         MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
