@@ -1786,7 +1786,13 @@ mp.register_script_message('get-input', function (script_name, args)
         matches = {}
         selected_match = args.default_item or 1
         default_item = args.default_item
-        first_match_to_print = 1
+
+        local max_lines = calculate_max_log_lines()
+        first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 2)
+        if first_match_to_print > #selectable_items - max_lines + 2 then
+            first_match_to_print = math.max(1, #selectable_items - max_lines + 2)
+        end
+
         for i, item in ipairs(selectable_items) do
             matches[i] = { index = i, text = item }
         end
