@@ -117,6 +117,7 @@ option('swift-flags', type: 'string', description: 'Optional Swift compiler flag
 
 # Windows features
 option('win32-smtc', type: 'feature', value: 'auto', description: 'Enable Media Control support')
+option('win32-subsystem', type : 'string', value: 'windows', description : 'Windows subsystem to use for mpv.exe')
 
 # manpages
 option('html-build', type: 'feature', value: 'disabled', description: 'HTML manual generation')
