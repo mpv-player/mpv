@@ -819,13 +819,12 @@ static int preinit(struct vo *vo)
         }
     }
 
-    for (int i = 0; i < p->hwdec_ctx.num_hwdecs; i++) {
-        struct ra_hwdec *hw = p->hwdec_ctx.hwdecs[i];
-        if (ra_get_native_resource(p->ctx->ra, "VADisplay")) {
-            p->hwdec_type = HWDEC_VAAPI;
-        } else if (strcmp(hw->driver->name, "drmprime") == 0) {
-            p->hwdec_type = HWDEC_DRMPRIME;
-        }
+    // TODO: Handle the possibility of multiple loaded hwdecs that support
+    // different image formats.
+    if (ra_get_native_resource(p->ctx->ra, "VADisplay")) {
+        p->hwdec_type = HWDEC_VAAPI;
+    } else {
+        p->hwdec_type = HWDEC_DRMPRIME;
     }
 
     if (p->hwdec_type == HWDEC_NONE) {
