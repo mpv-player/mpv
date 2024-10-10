@@ -1950,7 +1950,7 @@ static void window_reconfig(struct vo_w32_state *w32, bool force)
         w32->prev_windowrc = w32->windowrc;
         w32->window_bounds_initialized = true;
         w32->win_force_pos = geo.flags & VO_WIN_FORCE_POS;
-        w32->fit_on_screen = !w32->win_force_pos;
+        w32->fit_on_screen = true;
         goto finish;
     }
 
