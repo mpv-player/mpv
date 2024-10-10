@@ -3118,13 +3118,15 @@ bool vo_wayland_init(struct vo *vo)
     if (create_xdg_surface(wl))
         goto err;
 
+    wl->callback_surface = using_dmabuf_wayland ? wl->video_surface : wl->surface;
+
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
     }
 
     if (wl->color_manager) {
-        wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->surface);
+        wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    xx_color_manager_v4_interface.name);
@@ -3205,7 +3207,6 @@ bool vo_wayland_init(struct vo *vo)
     update_app_id(wl);
     mp_make_wakeup_pipe(wl->wakeup_pipe);
 
-    wl->callback_surface = using_dmabuf_wayland ? wl->video_surface : wl->surface;
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
     wl_surface_commit(wl->surface);
