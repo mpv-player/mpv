@@ -25,7 +25,6 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
-#include "osdep/semaphore.h"
 #include "audio/format.h"
 
 #if HAVE_COREAUDIO || HAVE_AVFOUNDATION
@@ -460,22 +459,22 @@ static OSStatus ca_change_format_listener(
     const AudioObjectPropertyAddress addresses[],
     void *data)
 {
-    mp_sem_t *sem = data;
-    mp_sem_post(sem);
+    struct coreaudio_cb_sem *sem = data;
+    mp_mutex_lock(&sem->mutex);
+    mp_cond_broadcast(&sem->cond);
+    mp_mutex_unlock(&sem->mutex);
     return noErr;
 }
 
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format)
 {
+    struct coreaudio_cb_sem *sem = ao->priv;
+
     OSStatus err = noErr;
     bool format_set = false;
 
     ca_print_asbd(ao, "setting stream physical format:", &change_format);
-
-    mp_sem_t wakeup;
-    if (mp_sem_init(&wakeup, 0, 0))
-        MP_HANDLE_OOM(0);
 
     AudioStreamBasicDescription prev_format;
     err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
@@ -492,8 +491,10 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     err = AudioObjectAddPropertyListener(stream, &p_addr,
                                          ca_change_format_listener,
-                                         &wakeup);
+                                         sem);
     CHECK_CA_ERROR("can't add property listener during format change");
+
+    mp_mutex_lock(&sem->mutex);
 
     /* Change the format. */
     err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &change_format);
@@ -512,11 +513,13 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
         if (format_set)
             break;
 
-        if (mp_sem_timedwait(&wakeup, wait_until)) {
+        if (mp_cond_timedwait_until(&sem->cond, &sem->mutex, wait_until)) {
             MP_VERBOSE(ao, "reached timeout\n");
             break;
         }
     }
+
+    mp_mutex_unlock(&sem->mutex);
 
     ca_print_asbd(ao, "actual format in use:", &actual_format);
 
@@ -530,11 +533,10 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     err = AudioObjectRemovePropertyListener(stream, &p_addr,
                                             ca_change_format_listener,
-                                            &wakeup);
+                                            sem);
     CHECK_CA_ERROR("can't remove property listener");
 
 coreaudio_error:
-    mp_sem_destroy(&wakeup);
     return format_set;
 }
 #endif
