@@ -1174,7 +1174,8 @@ static void update_window_state(struct vo_w32_state *w32)
 
     SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
                  wr.left, wr.top, rect_w(wr), rect_h(wr),
-                 SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+                 SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER |
+                 (!w32->win_force_pos ? SWP_NOMOVE : 0));
 
     // Unmaximize the window if a size change is requested because SetWindowPos
     // doesn't change the window maximized state.
@@ -1932,7 +1933,8 @@ static void window_reconfig(struct vo_w32_state *w32, bool force)
     if (w32->dpi_scale == 0)
         force_update_display_info(w32);
 
-    vo_calc_window_geometry(vo, &screen, &mon, w32->dpi_scale, false, &geo);
+    vo_calc_window_geometry(vo, &screen, &mon, w32->dpi_scale,
+                            !w32->window_bounds_initialized, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = ((w32->o_dwidth != vo->dwidth ||
