@@ -25,14 +25,13 @@
 
 #include "mpv_talloc.h"
 
-#include "misc/bstr.h"
 #include "common/common.h"
 #include "common/global.h"
-#include "misc/bstr.h"
+#include "misc/codepoint_width.h"
 #include "options/options.h"
 #include "options/path.h"
-#include "osdep/terminal.h"
 #include "osdep/io.h"
+#include "osdep/terminal.h"
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 
@@ -372,37 +371,6 @@ static bool test_terminal_level(struct mp_log *log, int lev)
 {
     return lev <= log->terminal_level && log->root->use_terminal &&
            !(lev == MSGL_STATUS && terminal_in_background());
-}
-
-// This is very basic way to infer needed width for a string.
-static int term_disp_width(bstr str)
-{
-    int width = 0;
-
-    while (str.len) {
-        if (bstr_eatstart0(&str, "\033[")) {
-            while (str.len && !((*str.start >= '@' && *str.start <= '~') || *str.start == 'm'))
-                str = bstr_cut(str, 1);
-            str = bstr_cut(str, 1);
-            continue;
-        }
-
-        bstr code = bstr_split_utf8(str, &str);
-        if (code.len == 0)
-            return 0;
-
-        if (code.len == 1 && *code.start == '\n')
-            continue;
-
-        // Only single-width characters are supported
-        width++;
-
-        // Assume that everything before \r should be discarded for simplicity
-        if (code.len == 1 && *code.start == '\r')
-            width = 0;
-    }
-
-    return width;
 }
 
 static void append_terminal_line(struct mp_log *log, int lev,

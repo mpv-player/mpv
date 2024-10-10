@@ -105,6 +105,11 @@ test('format', format)
 language = executable('language', files('language.c'), include_directories: incdir, link_with: test_utils)
 test('language', language)
 
+codepoint_width = executable('codepoint-width', files('codepoint_width.c'),
+                             objects: libmpv.extract_objects('misc/codepoint_width.c'),
+                             include_directories: incdir, link_with: test_utils)
+test('codepoint-width', codepoint_width)
+
 paths_objects = libmpv.extract_objects('options/path.c', path_source)
 paths = executable('paths', 'paths.c', include_directories: incdir,
                    objects: paths_objects, link_with: test_utils)
