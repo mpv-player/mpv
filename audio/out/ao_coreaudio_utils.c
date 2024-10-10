@@ -25,7 +25,6 @@
 #include "audio/out/ao_coreaudio_utils.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
-#include "osdep/threads.h"
 #include "audio/format.h"
 
 #if HAVE_COREAUDIO || HAVE_AVFOUNDATION
@@ -455,17 +454,12 @@ int64_t ca_get_device_latency_ns(struct ao *ao, AudioDeviceID device)
     return MP_TIME_S_TO_NS(latency_frames / sample_rate);
 }
 
-struct cb_sem {
-    mp_mutex mutex;
-    mp_cond cond;
-};
-
 static OSStatus ca_change_format_listener(
     AudioObjectID object, uint32_t n_addresses,
     const AudioObjectPropertyAddress addresses[],
     void *data)
 {
-    struct cb_sem *sem = data;
+    struct coreaudio_cb_sem *sem = data;
     mp_mutex_lock(&sem->mutex);
     mp_cond_broadcast(&sem->cond);
     mp_mutex_unlock(&sem->mutex);
@@ -475,7 +469,7 @@ static OSStatus ca_change_format_listener(
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format)
 {
-    struct cb_sem *sem = (struct cb_sem*)ao->priv;
+    struct coreaudio_cb_sem *sem = ao->priv;
 
     OSStatus err = noErr;
     bool format_set = false;

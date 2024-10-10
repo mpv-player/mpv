@@ -28,6 +28,12 @@
 #include "audio/out/ao.h"
 #include "internal.h"
 #include "osdep/utils-mac.h"
+#include "osdep/threads.h"
+
+struct coreaudio_cb_sem {
+    mp_mutex mutex;
+    mp_cond cond;
+};
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 
