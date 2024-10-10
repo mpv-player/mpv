@@ -3029,7 +3029,7 @@ Property list
     the entries. Unavailable if the file was not originally associated with a
     playlist in some way.
 
-``playlist``
+``playlist`` (RW)
     Playlist, current entry marked. Currently, the raw property value is
     useless.
 
@@ -3080,6 +3080,39 @@ Property list
                 "playing"   MPV_FORMAT_FLAG (same)
                 "title"     MPV_FORMAT_STRING (optional)
                 "id"        MPV_FORMAT_INT64
+
+    Writing this property is also possible using the following format:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY (the new playlist)
+            MPV_FORMAT_STRING (entry from filename)
+
+            MPV_FORMAT_INT64 (take existing entry at index, counts from 0)
+
+            MPV_FORMAT_NODE_MAP (take existing entry from id)
+                "id"        MPV_FORMAT_INT64
+                "current"   MPV_FORMAT_FLAG (optional)
+                "title"     MPV_FORMAT_STRING|MPV_FORMAT_NONE (optional)
+
+            MPV_FORMAT_NODE_MAP (entry from filename)
+                "filename"  MPV_FORMAT_STRING
+                "current"   MPV_FORMAT_FLAG (optional)
+                "title"     MPV_FORMAT_STRING|MPV_FORMAT_NONE (optional)
+
+    .. admonition:: Lua examples
+
+        ``mp.set_property_native("playlist", {1, 0})``
+
+        Swap the first two entries and remove the rest.
+
+        ``mp.set_property_native("playlist", {{filename="foo", current=true}})``
+
+        Replace playlist with a single entry and start playing.
+
+        ``mp.set_property_native("playlist", {1, {id=2}, "bar"})``
+
+        Various ways to specify an entry.
 
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw

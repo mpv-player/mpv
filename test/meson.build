@@ -168,3 +168,5 @@ if refdir != ''
         test('scale-zimg', scale_zimg, args: [refdir, outdir], suite: 'ffmpeg')
     endif
 endif
+
+test('playlist', find_program('test.py'))
