@@ -966,8 +966,11 @@ local function run_ytdl_hook(url)
     end
 
     if allsubs == true then
-        table.insert(command, "--all-subs")
+        table.insert(command, "--sub-langs")
+        table.insert(command, "all")
     end
+    table.insert(command, "--write-srt")
+
     if not use_playlist then
         table.insert(command, "--no-playlist")
     end
