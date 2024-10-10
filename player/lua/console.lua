@@ -64,6 +64,7 @@ local styles = {
     fatal = '{\\1c&H5791f9&}',
     suggestion = '{\\1c&Hcc99cc&}',
     selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
+    default_item = '{\\1c&H2fbdfa&}',
     disabled = '{\\1c&Hcccccc&}',
 }
 
@@ -74,6 +75,7 @@ local terminal_styles = {
     error = '\027[31m',
     fatal = '\027[91m',
     selected_suggestion = '\027[7m',
+    default_item = '\027[1m',
     disabled = '\027[38;5;8m',
 }
 
@@ -109,6 +111,7 @@ local selectable_items
 local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
+local default_item
 
 local set_active
 
@@ -453,11 +456,23 @@ local function populate_log_with_matches(max_width)
     end
 
     for i = first_match_to_print, last_match_to_print do
+        local style = ''
+        local terminal_style = ''
+
+        if i == selected_match then
+            style = styles.selected_suggestion
+            terminal_style = terminal_styles.selected_suggestion
+        end
+        if matches[i].index == default_item then
+            style = style .. styles.default_item
+            terminal_style = terminal_style .. terminal_styles.default_item
+        end
+
         log[#log + 1] = {
             text = (max_width and truncate_utf8(matches[i].text, max_width)
                     or matches[i].text),
-            style = i == selected_match and styles.selected_suggestion or '',
-            terminal_style = i == selected_match and terminal_styles.selected_suggestion or '',
+            style = style,
+            terminal_style = terminal_style,
         }
     end
 
@@ -1619,7 +1634,8 @@ local function get_bindings()
         { 'shift+del',   handle_del                             },
         { 'ins',         handle_ins                             },
         { 'shift+ins',   function() paste(false) end            },
-        { 'mbtn_mid',    function() paste(false, true) end            },
+        { 'mbtn_mid',    function() paste(false, true) end      },
+        { 'mbtn_right',  function() set_active(false) end       },
         { 'left',        function() prev_char() end             },
         { 'ctrl+b',      function() page_up_or_prev_char() end  },
         { 'right',       function() next_char() end             },
@@ -1731,6 +1747,7 @@ set_active = function (active)
             line = ''
             cursor = 1
             selectable_items = nil
+            default_item = nil
             dont_bind_up_down = false
             unbind_mouse()
         end
@@ -1804,7 +1821,14 @@ mp.register_script_message('get-input', function (script_name, args)
     if selectable_items then
         matches = {}
         selected_match = args.default_item or 1
-        first_match_to_print = 1
+        default_item = args.default_item
+
+        local max_lines = calculate_max_log_lines()
+        first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 2)
+        if first_match_to_print > #selectable_items - max_lines + 2 then
+            first_match_to_print = math.max(1, #selectable_items - max_lines + 2)
+        end
+
         for i, item in ipairs(selectable_items) do
             matches[i] = { index = i, text = item }
         end
