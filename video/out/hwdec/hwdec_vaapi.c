@@ -107,8 +107,6 @@ struct priv_owner {
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
     int *formats;
-    int *hwupload_formats;
-    int num_hwupload_formats;
     bool probing_formats; // temporary during init
 
     struct dmabuf_interop dmabuf_interop;
@@ -162,6 +160,8 @@ static struct mp_conversion_filter *get_conversion_filter_desc(int target_imgfmt
 
     return desc;
 }
+
+static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt);
 
 static int init(struct ra_hwdec *hw)
 {
@@ -218,7 +218,8 @@ static int init(struct ra_hwdec *hw)
 
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
-    p->ctx->hwctx.supported_hwupload_formats = p->hwupload_formats;
+    p->ctx->hwctx.try_upload = try_format_upload;
+    p->ctx->hwctx.try_upload_priv = p;
     p->ctx->hwctx.driver_name = hw->driver->name;
     p->ctx->hwctx.get_conversion_filter = get_conversion_filter_desc;
     p->ctx->hwctx.conversion_config = hwconfig;
@@ -439,26 +440,32 @@ err:
     av_buffer_unref(&fref);
 }
 
-static void try_format_upload(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
+static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt)
 {
-    int mp_fmt = pixfmt2imgfmt(pixfmt);
-    if (!mp_fmt || IMGFMT_IS_HWACCEL(mp_fmt))
-        return;
+    struct priv_owner *p = priv;
 
-    // Arbitrarily use the first format we have for the hw_subfmt.
-    struct priv_owner *p = hw->priv;
-    if (!p->formats || !p->formats[0])
-        return;
+    if (IMGFMT_IS_HWACCEL(src_fmt))
+        return true;
 
-    struct mp_image *src = mp_image_alloc(mp_fmt, 2, 2);
+    bool ret = false;
+
+    struct mp_image *src = mp_image_alloc(src_fmt, 16, 16);
     if (!src)
-        return;
+        goto end;
 
     AVBufferRef *hw_pool = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
-    mp_update_av_hw_frames_pool(&hw_pool, p->ctx->av_device_ref, IMGFMT_VAAPI,
-                                p->formats[0], src->w, src->h, false);
+    if (!hw_pool)
+        goto end;
+
+    if (!mp_update_av_hw_frames_pool(&hw_pool, p->ctx->av_device_ref, IMGFMT_VAAPI,
+                                     dst_fmt, src->w, src->h, false))
+    {
+        goto end;
+    }
 
     struct mp_image *dst = mp_av_pool_image_hw_upload(hw_pool, src);
+    if (!dst)
+        goto end;
 
     VADisplay *display = p->display;
     VADRMPRIMESurfaceDescriptor desc = {0};
@@ -469,15 +476,18 @@ static void try_format_upload(struct ra_hwdec *hw, enum AVPixelFormat pixfmt)
     VAStatus status = vaExportSurfaceHandle(display, id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                             flags | VA_EXPORT_SURFACE_READ_ONLY, &desc);
 
-    if (status == VA_STATUS_SUCCESS)
-        MP_TARRAY_APPEND(p, p->hwupload_formats, p->num_hwupload_formats, mp_fmt);
+    if (status != VA_STATUS_SUCCESS)
+        goto end;
 
+    ret = true;
+
+end:
     close_file_descriptors(&desc);
     av_buffer_unref(&hw_pool);
     mp_image_unrefp(&dst);
     mp_image_unrefp(&src);
 
-    return;
+    return ret;
 }
 
 static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
@@ -523,11 +533,6 @@ static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
     for (int n = 0; fmts &&
                     fmts[n] != AV_PIX_FMT_NONE; n++)
         try_format_pixfmt(hw, fmts[n]);
-
-    for (int n = 0; fmts &&
-                    fmts[n] != AV_PIX_FMT_NONE; n++)
-        try_format_upload(hw, fmts[n]);
-    MP_TARRAY_APPEND(p, p->hwupload_formats, p->num_hwupload_formats, 0); // sanity check
 
 err:
     av_hwframe_constraints_free(&fc);

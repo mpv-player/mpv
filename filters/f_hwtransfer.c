@@ -15,6 +15,7 @@
 #include "user_filters.h"
 
 struct priv {
+    struct mp_hwdec_ctx *ctx;
     AVBufferRef *av_device_ctx;
 
     AVBufferRef *hw_pool;
@@ -129,22 +130,50 @@ static bool select_format(struct priv *p, int input_fmt,
     int *upload_fmts = &p->upload_fmts[p->fmt_upload_index[index]];
     int num_upload_fmts = p->fmt_upload_num[index];
 
-    // Select the best input format from the available upload formats.
-    int hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, input_fmt);
-
-    // If the input format is not directly uploadable, conversion will be needed.
-    // Attempt to convert directly to the output format to avoid double conversion.
-    if (input_fmt != hw_input_fmt) {
-        int upload_output_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, hw_output_fmt);
-        // Use this format only if it avoids double conversion, i.e., if we can
-        // upload the output format directly. If that's not the case, just use
-        // the best format for the input format selected earlier, as double
-        // conversion is unavoidable anyway. This approach prefers a closer
-        // conversion before upload and do remaining conversion during upload,
-        // which may be hardware-accelerated.
-        if (upload_output_fmt == hw_output_fmt)
-            hw_input_fmt = upload_output_fmt;
+    if (p->ctx->try_upload) {
+        upload_fmts = talloc_array_ptrtype(NULL, upload_fmts, num_upload_fmts);
+        memcpy(upload_fmts, &p->upload_fmts[p->fmt_upload_index[index]], num_upload_fmts * sizeof(int));
     }
+
+    // Try only upload formats, if all of them fail, give up. We could attempt
+    // using a different hw_output_fmt, can be extended later, if needed.
+    int hw_input_fmt = IMGFMT_NONE;
+    while (num_upload_fmts) {
+        // Select the best input format from the available upload formats.
+        hw_input_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, input_fmt);
+
+        // If the input format is not directly uploadable, conversion will be needed.
+        // Attempt to convert directly to the output format to avoid double conversion.
+        if (input_fmt != hw_input_fmt) {
+            int upload_output_fmt = mp_imgfmt_select_best_list(upload_fmts, num_upload_fmts, hw_output_fmt);
+            // Use this format only if it avoids double conversion, i.e., if we can
+            // upload the output format directly. If that's not the case, just use
+            // the best format for the input format selected earlier, as double
+            // conversion is unavoidable anyway. This approach prefers a closer
+            // conversion before upload and do remaining conversion during upload,
+            // which may be hardware-accelerated.
+            if (upload_output_fmt == hw_output_fmt)
+                hw_input_fmt = upload_output_fmt;
+        }
+
+        if (!hw_input_fmt || !p->ctx->try_upload)
+            break;
+
+        if (p->ctx->try_upload(p->ctx->try_upload_priv, hw_input_fmt, hw_output_fmt))
+            break;
+
+        for (int i = 0; i < num_upload_fmts; i++) {
+            if (upload_fmts[i] != hw_input_fmt)
+                continue;
+            hw_input_fmt = IMGFMT_NONE;
+            MP_TARRAY_REMOVE_AT(upload_fmts, num_upload_fmts, i);
+            break;
+        }
+        assert(hw_input_fmt == IMGFMT_NONE);
+    }
+
+    if (p->ctx->try_upload)
+        talloc_free(upload_fmts);
 
     if (!hw_input_fmt)
         return false;
@@ -275,19 +304,6 @@ static bool vo_supports(struct mp_hwdec_ctx *ctx, int hw_fmt, int sw_fmt)
 
     for (int i = 0; ctx->supported_formats &&  ctx->supported_formats[i]; i++) {
         if (ctx->supported_formats[i] == sw_fmt)
-            return true;
-    }
-
-    return false;
-}
-
-static bool upload_supports(struct mp_hwdec_ctx *ctx, int fmt)
-{
-    if (!ctx->supported_hwupload_formats)
-        return true; // if unset, all formats are allowed
-
-    for (int i = 0; ctx->supported_hwupload_formats[i]; i++) {
-        if (ctx->supported_hwupload_formats[i] == fmt)
             return true;
     }
 
@@ -512,29 +528,15 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
 
                 p->fmt_upload_index[index] = p->num_upload_fmts;
 
-                int *upload_not_supported = NULL;
-                int num_upload_not_supported = 0;
-
                 MP_DBG(f, "  supports:");
                 for (int i = 0; fmts[i] != AV_PIX_FMT_NONE; i++) {
                     int fmt = pixfmt2imgfmt(fmts[i]);
                     if (!fmt)
                         continue;
-                    if (!upload_supports(ctx, fmt)) {
-                        MP_TARRAY_APPEND(NULL, upload_not_supported, num_upload_not_supported, fmt);
-                        continue;
-                    }
                     MP_DBG(f, " %s", mp_imgfmt_to_name(fmt));
                     MP_TARRAY_APPEND(p, p->upload_fmts, p->num_upload_fmts, fmt);
                 }
-                if (num_upload_not_supported) {
-                    MP_DBG(f, "\n  upload not supported:");
-                    for (int i = 0; i < num_upload_not_supported; ++i)
-                        MP_DBG(f, " %s", mp_imgfmt_to_name(upload_not_supported[i]));
-                }
                 MP_DBG(f, "\n");
-
-                talloc_free(upload_not_supported);
 
                 p->fmt_upload_num[index] =
                     p->num_upload_fmts - p->fmt_upload_index[index];
@@ -551,6 +553,7 @@ static bool probe_formats(struct mp_filter *f, int hw_imgfmt, bool use_conversio
     p->av_device_ctx = av_buffer_ref(ctx->av_device_ref);
     if (!p->av_device_ctx)
         return false;
+    p->ctx = ctx;
     p->get_conversion_filter = ctx->get_conversion_filter;
 
     /*
