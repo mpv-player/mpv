@@ -346,10 +346,21 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     if (!count)
         return text;
 
-    int screen_h, font_h;
-    osd_get_text_size(mpctx->osd, &screen_h, &font_h);
+    int max_lines;
+    if (mpctx->video_out && mpctx->opts->video_osd) {
+        int screen_h, font_h;
+        osd_get_text_size(mpctx->osd, &screen_h, &font_h);
+        max_lines = screen_h / MPMAX(font_h, 1);
+    } else {
+        int w = -1;
+        max_lines = 24;
+        terminal_get_size(&w, &max_lines);
+        char *msg = mp_property_expand_escaped_string(mpctx, mpctx->opts->status_msg);
+        max_lines -= msg[0] ? count_lines(msg) : 1;
+        talloc_free(msg);
+    }
     // Subtract 1 for the header.
-    int max_lines = screen_h / MPMAX(font_h, 1) - 1;
+    max_lines--;
 
     char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
     int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
@@ -357,6 +368,8 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     char *tail = skip_n_lines(head, max_lines);
     new = talloc_asprintf_append_buffer(new, "%.*s",
                             (int)(tail ? tail - head : strlen(head)), head);
+    // Strip the final newline to not print it in the terminal.
+    new[strlen(new) - 1] = '\0';
 
     talloc_free(text);
     return new;
