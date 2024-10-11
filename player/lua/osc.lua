@@ -1,7 +1,6 @@
 local assdraw = require 'mp.assdraw'
 local msg = require 'mp.msg'
 local opt = require 'mp.options'
-local utils = require 'mp.utils'
 
 --
 -- Parameters
@@ -27,9 +26,6 @@ local user_opts = {
     deadzonesize = 0.5,         -- size of deadzone
     minmousemove = 0,           -- minimum amount of pixels the mouse has to
                                 -- move between ticks to make the OSC show up
-    iamaprogrammer = false,     -- use native mpv values and disable OSC
-                                -- internal track list management (and some
-                                -- functions that depend on it)
     layout = "bottombar",
     seekbarstyle = "bar",       -- bar, diamond or knob
     seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
@@ -94,8 +90,8 @@ local margins_opts = {
 }
 
 local tick_delay = 1 / 60
-local tracks_osc = {}
-local tracks_mpv = {}
+local audio_track_count = 0
+local sub_track_count = 0
 local window_control_box_width = 80
 local layouts = {}
 local is_december = os.date("*t").month == 12
@@ -152,8 +148,6 @@ local state = {
     marginsREQ = false,                     -- is a margins update pending?
     last_mouseX = nil, last_mouseY = nil,   -- last mouse position, to detect significant mouse movement
     mouse_in_window = false,
-    message_text = nil,
-    message_hide_timer = nil,
     fullscreen = false,
     tick_timer = nil,
     tick_last_time = 0,                     -- when the last tick() was run
@@ -343,13 +337,6 @@ local function get_slider_value(element)
     return get_slider_value_at(element, get_virt_mouse_pos())
 end
 
-local function countone(val)
-    if not user_opts.iamaprogrammer then
-        val = val + 1
-    end
-    return val
-end
-
 -- align:  -1 .. +1
 -- frame:  size of the containing area
 -- obj:    size of the object that should be positioned inside the area
@@ -506,221 +493,20 @@ end
 
 
 --
--- Message display
---
-
--- pos is 1 based
-local function limited_list(prop, pos)
-    local proplist = mp.get_property_native(prop, {})
-    local count = #proplist
-    if count == 0 then
-        return count, proplist
-    end
-
-    local fs = tonumber(mp.get_property('options/osd-font-size'))
-    local max = math.ceil(osc_param.unscaled_y*0.75 / fs)
-    if max % 2 == 0 then
-        max = max - 1
-    end
-    local delta = math.ceil(max / 2) - 1
-    local begi = math.max(math.min(pos - delta, count - max + 1), 1)
-    local endi = math.min(begi + max - 1, count)
-
-    local reslist = {}
-    for i=begi, endi do
-        local item = proplist[i]
-        item.current = (i == pos) and true or nil
-        table.insert(reslist, item)
-    end
-    return count, reslist
-end
-
-local function get_playlist()
-    local pos = mp.get_property_number('playlist-pos', 0) + 1
-    local count, limlist = limited_list('playlist', pos)
-    if count == 0 then
-        return 'Empty playlist.'
-    end
-
-    local message = string.format('Playlist [%d/%d]:\n', pos, count)
-    local show = mp.get_property_native('osd-playlist-entry')
-    local trailing_slash_pattern = mp.get_property("platform") == "windows"
-                                   and "[/\\]+$" or "/+$"
-    for _, v in ipairs(limlist) do
-        local entry = v.title
-        if not entry or show ~= 'title' then
-            entry = v.filename
-            if not entry:find("://") then
-                entry = select(2, utils.split_path(
-                    entry:gsub(trailing_slash_pattern, "")))
-            end
-        end
-        if v.title and show == 'both' then
-            entry = string.format('%s (%s)', v.title, entry)
-        end
-        message = string.format('%s %s %s\n', message,
-            (v.current and '●' or '○'), entry)
-    end
-    return message
-end
-
-local function get_chapterlist()
-    local pos = mp.get_property_number('chapter', 0) + 1
-    local count, limlist = limited_list('chapter-list', pos)
-    if count == 0 then
-        return 'No chapters.'
-    end
-
-    local message = string.format('Chapters [%d/%d]:\n', pos, count)
-    for i, v in ipairs(limlist) do
-        local time = mp.format_time(v.time)
-        local title = v.title
-        if title == nil then
-            title = string.format('Chapter %02d', i)
-        end
-        message = string.format('%s[%s] %s %s\n', message, time,
-            (v.current and '●' or '○'), title)
-    end
-    return message
-end
-
-local function render_message(ass)
-    if state.message_hide_timer and state.message_hide_timer:is_enabled() and
-       state.message_text
-    then
-        local _, lines = string.gsub(state.message_text, "\\N", "")
-
-        local fontsize = tonumber(mp.get_property("options/osd-font-size"))
-        local outline = tonumber(mp.get_property("options/osd-border-size"))
-        local maxlines = math.ceil(osc_param.unscaled_y*0.75 / fontsize)
-        local counterscale = osc_param.playresy / osc_param.unscaled_y
-
-        fontsize = fontsize * counterscale / math.max(0.65 + math.min(lines/maxlines, 1), 1)
-        outline = outline * counterscale / math.max(0.75 + math.min(lines/maxlines, 1)/2, 1)
-
-        local style = "{\\bord" .. outline .. "\\fs" .. fontsize .. "}"
-
-
-        ass:new_event()
-        ass:append(style .. state.message_text)
-    else
-        state.message_text = nil
-    end
-end
-
-local function show_message(text, duration)
-    --print("text: "..text.."   duration: " .. duration)
-    if duration == nil then
-        duration = tonumber(mp.get_property("options/osd-duration")) / 1000
-    elseif type(duration) ~= "number" then
-        print("duration: " .. duration)
-    end
-
-    -- cut the text short, otherwise the following functions
-    -- may slow down massively on huge input
-    text = string.sub(text, 0, 4000)
-
-    state.message_text = mp.command_native({"escape-ass", text})
-
-    if not state.message_hide_timer then
-        state.message_hide_timer = mp.add_timeout(0, request_tick)
-    end
-    state.message_hide_timer:kill()
-    state.message_hide_timer.timeout = duration
-    state.message_hide_timer:resume()
-    request_tick()
-end
-
-
---
 -- Tracklist Management
 --
 
-local nicetypes = {video = "Video", audio = "Audio", sub = "Subtitle"}
-
 -- updates the OSC internal playlists, should be run each time the track-layout changes
 local function update_tracklist()
-    local tracktable = mp.get_property_native("track-list", {})
+    audio_track_count, sub_track_count = 0, 0
 
-    -- by osc_id
-    tracks_osc.video, tracks_osc.audio, tracks_osc.sub = {}, {}, {}
-    -- by mpv_id
-    tracks_mpv.video, tracks_mpv.audio, tracks_mpv.sub = {}, {}, {}
-    for n = 1, #tracktable do
-        if tracktable[n].type ~= "unknown" then
-            local type = tracktable[n].type
-            local mpv_id = tonumber(tracktable[n].id)
-
-            -- by osc_id
-            table.insert(tracks_osc[type], tracktable[n])
-
-            -- by mpv_id
-            tracks_mpv[type][mpv_id] = tracktable[n]
-            tracks_mpv[type][mpv_id].osc_id = #tracks_osc[type]
+    for _, track in pairs(mp.get_property_native("track-list")) do
+        if track.type == "audio" then
+            audio_track_count = audio_track_count + 1
+        elseif track.type == "sub" then
+            sub_track_count = sub_track_count + 1
         end
     end
-end
-
--- return a nice list of tracks of the given type (video, audio, sub)
-local function get_tracklist(type)
-    local message = "Available " .. nicetypes[type] .. " Tracks: "
-    if #tracks_osc[type] == 0 then
-        message = message .. "none"
-    else
-        for n = 1, #tracks_osc[type] do
-            local track = tracks_osc[type][n]
-            local lang, title, selected = "unknown", "", "○"
-            if track.lang ~= nil then lang = track.lang end
-            if track.title ~= nil then title = track.title end
-            if track.id == tonumber(mp.get_property(type)) then
-                selected = "●"
-            end
-            message = message.."\n"..selected.." "..n..": ["..lang.."] "..title
-        end
-    end
-    return message
-end
-
--- relatively change the track of given <type> by <next> tracks
-    --(+1 -> next, -1 -> previous)
-local function set_track(type, next)
-    local current_track_mpv, current_track_osc
-    if mp.get_property(type) == "no" then
-        current_track_osc = 0
-    else
-        current_track_mpv = tonumber(mp.get_property(type))
-        current_track_osc = tracks_mpv[type][current_track_mpv].osc_id
-    end
-    local new_track_osc = (current_track_osc + next) % (#tracks_osc[type] + 1)
-    local new_track_mpv
-    if new_track_osc == 0 then
-        new_track_mpv = "no"
-    else
-        new_track_mpv = tracks_osc[type][new_track_osc].id
-    end
-
-    mp.commandv("set", type, new_track_mpv)
-
-    if new_track_osc == 0 then
-        show_message(nicetypes[type] .. " Track: none")
-    else
-        show_message(nicetypes[type] .. " Track: "
-            .. new_track_osc .. "/" .. #tracks_osc[type]
-            .. " [".. (tracks_osc[type][new_track_osc].lang or "unknown") .."] "
-            .. (tracks_osc[type][new_track_osc].title or ""))
-    end
-end
-
--- get the currently selected track of <type>, OSC-style counted
-local function get_track(type)
-    local track = mp.get_property(type)
-    if track ~= "no" and track ~= nil then
-        local tr = tracks_mpv[type][tonumber(track)]
-        if tr then
-            return tr.osc_id
-        end
-    end
-    return 0
 end
 
 -- WindowControl helpers
@@ -1917,16 +1703,11 @@ local function osc_init()
     end
 
     ne.eventresponder["mbtn_left_up"] = function ()
-        local title = mp.get_property_osd("media-title")
-        if have_pl then
-            title = string.format("[%d/%d] %s", countone(pl_pos - 1),
-                                  pl_count, title)
-        end
-        show_message(title)
+        mp.command("show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'")
     end
 
     ne.eventresponder["mbtn_right_up"] =
-        function () show_message(mp.get_property_osd("filename")) end
+        function () mp.command("show-text ${filename}") end
 
     -- playlist buttons
 
@@ -1939,13 +1720,13 @@ local function osc_init()
         function ()
             mp.commandv("playlist-prev", "weak")
             if user_opts.playlist_osd then
-                show_message(get_playlist(), 3)
+                mp.command("show-text ${playlist} 3000")
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () mp.command("show-text ${playlist} 3000") end
     ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () mp.command("show-text ${playlist} 3000") end
 
     --next
     ne = new_element("pl_next", "button")
@@ -1956,13 +1737,13 @@ local function osc_init()
         function ()
             mp.commandv("playlist-next", "weak")
             if user_opts.playlist_osd then
-                show_message(get_playlist(), 3)
+                mp.command("show-text ${playlist} 3000")
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () mp.command("show-text ${playlist} 3000") end
     ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_playlist(), 3) end
+        function () mp.command("show-text ${playlist} 3000") end
 
 
     -- big buttons
@@ -2017,13 +1798,13 @@ local function osc_init()
         function ()
             mp.commandv("add", "chapter", -1)
             if user_opts.chapters_osd then
-                show_message(get_chapterlist(), 3)
+                mp.command("show-text ${chapter-list} 3000")
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () mp.command("show-text ${chapter-list} 3000") end
     ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () mp.command("show-text ${chapter-list} 3000") end
 
     --ch_next
     ne = new_element("ch_next", "button")
@@ -2034,13 +1815,13 @@ local function osc_init()
         function ()
             mp.commandv("add", "chapter", 1)
             if user_opts.chapters_osd then
-                show_message(get_chapterlist(), 3)
+                mp.command("show-text ${chapter-list} 3000")
             end
         end
     ne.eventresponder["shift+mbtn_left_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () mp.command("show-text ${chapter-list} 3000") end
     ne.eventresponder["mbtn_right_up"] =
-        function () show_message(get_chapterlist(), 3) end
+        function () mp.command("show-text ${chapter-list} 3000") end
 
     --
     update_tracklist()
@@ -2048,53 +1829,45 @@ local function osc_init()
     --cy_audio
     ne = new_element("cy_audio", "button")
 
-    ne.enabled = (#tracks_osc.audio > 0)
+    ne.enabled = audio_track_count > 0
     ne.content = function ()
-        local aid = "–"
-        if get_track("audio") ~= 0 then
-            aid = get_track("audio")
-        end
-        return ("\238\132\134" .. osc_styles.smallButtonsLlabel
-            .. " " .. aid .. "/" .. #tracks_osc.audio)
+        return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
+               (mp.get_property_native("aid") or "-") .. "/" .. audio_track_count)
     end
     ne.eventresponder["mbtn_left_up"] =
-        function () set_track("audio", 1) end
+        function () mp.command("cycle audio") end
     ne.eventresponder["mbtn_right_up"] =
-        function () set_track("audio", -1) end
+        function () mp.command("cycle audio down") end
     ne.eventresponder["shift+mbtn_left_down"] =
-        function () show_message(get_tracklist("audio"), 2) end
+        function () mp.command("show-text ${track-list/audio} 2000") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_down_press"] =
-            function () set_track("audio", 1) end
+            function () mp.command("cycle audio") end
         ne.eventresponder["wheel_up_press"] =
-            function () set_track("audio", -1) end
+            function () mp.command("cycle audio down") end
     end
 
     --cy_sub
     ne = new_element("cy_sub", "button")
 
-    ne.enabled = (#tracks_osc.sub > 0)
+    ne.enabled = sub_track_count > 0
     ne.content = function ()
-        local sid = "–"
-        if get_track("sub") ~= 0 then
-            sid = get_track("sub")
-        end
-        return ("\238\132\135" .. osc_styles.smallButtonsLlabel
-            .. " " .. sid .. "/" .. #tracks_osc.sub)
+        return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
+               (mp.get_property_native("sid") or "-") .. "/" .. sub_track_count)
     end
     ne.eventresponder["mbtn_left_up"] =
-        function () set_track("sub", 1) end
+        function () mp.command("cycle sub") end
     ne.eventresponder["mbtn_right_up"] =
-        function () set_track("sub", -1) end
+        function () mp.command("cycle sub down") end
     ne.eventresponder["shift+mbtn_left_down"] =
-        function () show_message(get_tracklist("sub"), 2) end
+        function () mp.command("show-text ${track-list/sub} 2000") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_down_press"] =
-            function () set_track("sub", 1) end
+            function () mp.command("cycle sub") end
         ne.eventresponder["wheel_up_press"] =
-            function () set_track("sub", -1) end
+            function () mp.command("cycle sub down") end
     end
 
     --tog_fs
@@ -2632,9 +2405,6 @@ local function render()
     -- actual rendering
     local ass = assdraw.ass_new()
 
-    -- Messages
-    render_message(ass)
-
     -- actual OSC
     if state.osc_visible then
         render_elements(ass)
@@ -2776,19 +2546,18 @@ mp.observe_property("chapter-list", "native", function(_, list)
     request_init()
 end)
 
-mp.register_script_message("osc-message", show_message)
+-- These are for backwards compatibility only.
+mp.register_script_message("osc-message", function(message, dur)
+    mp.osd_message(message, dur)
+end)
 mp.register_script_message("osc-chapterlist", function(dur)
-    show_message(get_chapterlist(), dur)
+    mp.command("show-text ${chapter-list} " .. (dur and dur * 1000 or ""))
 end)
 mp.register_script_message("osc-playlist", function(dur)
-    show_message(get_playlist(), dur)
+    mp.command("show-text ${playlist} " .. (dur and dur * 1000 or ""))
 end)
 mp.register_script_message("osc-tracklist", function(dur)
-    local message = {}
-    for k in pairs(nicetypes) do
-        table.insert(message, get_tracklist(k))
-    end
-    show_message(table.concat(message, '\n\n'), dur)
+    mp.command("show-text ${track-list} " .. (dur and dur * 1000 or ""))
 end)
 
 mp.observe_property("fullscreen", "bool", function(_, val)
