@@ -320,13 +320,16 @@ static char *skip_n_lines(char *text, int lines)
 
 static int count_lines(char *text)
 {
+    if (!text[0])
+        return 0;
+
     int count = 0;
     while (text) {
+        count++;
         char *next = strchr(text, '\n');
         if (!next || (next[0] == '\n' && !next[1]))
             break;
         text = next + 1;
-        count++;
     }
     return count;
 }
@@ -337,50 +340,23 @@ static int count_lines(char *text)
 // "text" might be returned as is, or it can be freed and a new allocation is
 // returned.
 // This is only a heuristic - we can't deal with line breaking.
-static char *cut_osd_list(struct MPContext *mpctx, char *text, int pos)
+static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int pos)
 {
+    int count = count_lines(text);
+    if (!count)
+        return text;
+
     int screen_h, font_h;
     osd_get_text_size(mpctx->osd, &screen_h, &font_h);
+    // Subtract 1 for the header.
     int max_lines = screen_h / MPMAX(font_h, 1) - 1;
 
-    if (!text || max_lines < 5)
-        return text;
-
-    int count = count_lines(text);
-    if (count <= max_lines)
-        return text;
-
-    char *new = talloc_strdup(NULL, "");
-
-    int start = MPMAX(pos - max_lines / 2, 0);
-    if (start == 1)
-        start = 0; // avoid weird transition when pad_h becomes visible
-    int pad_h = start > 0;
-
-    int space = max_lines - pad_h - 1;
-    int pad_t = count - start > space;
-    if (!pad_t)
-        start = count - space;
-
-    if (pad_h) {
-        new = talloc_asprintf_append_buffer(new, "\342\206\221 (%d hidden items)\n",
-                                            start);
-    }
-
+    char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
+    int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
     char *head = skip_n_lines(text, start);
-    if (!head) {
-        talloc_free(new);
-        return text;
-    }
-
-    int lines_shown = max_lines - pad_h - pad_t;
-    char *tail = skip_n_lines(head, lines_shown);
+    char *tail = skip_n_lines(head, max_lines);
     new = talloc_asprintf_append_buffer(new, "%.*s",
                             (int)(tail ? tail - head : strlen(head)), head);
-    if (pad_t) {
-        new = talloc_asprintf_append_buffer(new, "\342\206\223 (%d hidden items)\n",
-                                            count - start - lines_shown + 1);
-    }
 
     talloc_free(text);
     return new;
@@ -3337,8 +3313,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
             }
         }
 
-        *(char **)arg =
-            cut_osd_list(mpctx, res, playlist_entry_to_index(pl, pl->current));
+        *(char **)arg = cut_osd_list(mpctx, "Playlist", res,
+                                     playlist_entry_to_index(pl, pl->current));
         return M_PROPERTY_OK;
     }
 
