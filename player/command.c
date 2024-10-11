@@ -2104,6 +2104,22 @@ static const char *track_type_name(struct track *t)
     return NULL;
 }
 
+
+static char *append_track_info(char *res, struct track *track)
+{
+    res = talloc_strdup_append(res, track->selected ? list_current : list_normal);
+    res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
+    if (track->title)
+        res = talloc_asprintf_append(res, "'%s' ", track->title);
+    if (track->lang)
+        res = talloc_asprintf_append(res, "(%s) ", track->lang);
+    if (track->is_external)
+        res = talloc_asprintf_append(res, "(external) ");
+    res = talloc_asprintf_append(res, "\n");
+
+    return res;
+}
+
 static int property_list_tracks(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
@@ -2114,21 +2130,10 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *track = mpctx->tracks[n];
-                if (track->type != type)
-                    continue;
-
-                res = talloc_asprintf_append(res, "%s: ",
-                                             track_type_name(track));
-                res = talloc_strdup_append(res,
-                                track->selected ? list_current : list_normal);
-                res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
-                if (track->title)
-                    res = talloc_asprintf_append(res, "'%s' ", track->title);
-                if (track->lang)
-                    res = talloc_asprintf_append(res, "(%s) ", track->lang);
-                if (track->is_external)
-                    res = talloc_asprintf_append(res, "(external) ");
-                res = talloc_asprintf_append(res, "\n");
+                if (track->type == type) {
+                    res = talloc_asprintf_append(res, "%s: ", track_type_name(track));
+                    res = append_track_info(res, track);
+                }
             }
 
             res = talloc_asprintf_append(res, "\n");
@@ -2143,6 +2148,43 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
         *(char **)arg = res;
         return M_PROPERTY_OK;
     }
+
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = arg;
+
+        int type = -1;
+        if (!strcmp(ka->key, "video")) {
+            type = STREAM_VIDEO;
+        } else if (!strcmp(ka->key, "audio")) {
+            type = STREAM_AUDIO;
+        } else if (!strcmp(ka->key, "sub")) {
+            type = STREAM_SUB;
+        }
+
+        if (type != -1) {
+            char *res;
+
+            switch (ka->action) {
+                case M_PROPERTY_GET_TYPE:
+                    *(struct m_option *)ka->arg = (struct m_option){.type = CONF_TYPE_STRING};
+                    return M_PROPERTY_OK;
+                case M_PROPERTY_PRINT:
+                    res = talloc_asprintf(NULL, "Available %s tracks:\n",
+                              type == STREAM_SUB ? "subtitle" : stream_type_name(type));
+
+                    for (int n = 0; n < mpctx->num_tracks; n++) {
+                        if (mpctx->tracks[n]->type == type)
+                            res = append_track_info(res, mpctx->tracks[n]);
+                    }
+
+                    *(char **)ka->arg = res;
+                    return M_PROPERTY_OK;
+                default:
+                    return M_PROPERTY_NOT_IMPLEMENTED;
+            }
+        }
+    }
+
     return m_property_read_list(action, arg, mpctx->num_tracks,
                                 get_track_entry, mpctx);
 }
