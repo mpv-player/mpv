@@ -493,10 +493,6 @@ Script Commands
 The OSC script listens to certain script commands. These commands can bound
 in ``input.conf``, or sent by other scripts.
 
-``osc-message``
-    Show a message on screen using the OSC. First argument is the message,
-    second the duration in seconds.
-
 ``osc-visibility``
     Controls visibility mode ``never`` / ``auto`` (on mouse move) / ``always``
     and also ``cycle`` to cycle between the modes.
@@ -515,8 +511,3 @@ to set auto mode (the default) with ``b``::
 ``osc-idlescreen``
     Controls the visibility of the mpv logo on idle. Valid arguments are ``yes``,
     ``no``, and ``cycle`` to toggle between yes and no.
-
-``osc-playlist``, ``osc-chapterlist``, ``osc-tracklist``
-    Shows a limited view of the respective type of list using the OSC. First
-    argument is duration in seconds.
-
