@@ -1057,17 +1057,16 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
         }
 
         for (n = 0; n < count; n++) {
-            char *name = chapter_display_name(mpctx, n);
+            char *name = chapter_name(mpctx, n);
             double t = chapter_start_time(mpctx, n);
             char* time = mp_format_time(t, false);
             res = talloc_asprintf_append(res, "%s", time);
             talloc_free(time);
             const char *m = n == cur ? list_current : list_normal;
-            res = talloc_asprintf_append(res, "   %s%s\n", m, name);
-            talloc_free(name);
+            res = talloc_asprintf_append(res, "  %s%s\n", m, name);
         }
 
-        *(char **)arg = res;
+        *(char **)arg = count ? cut_osd_list(mpctx, "Chapters", res, cur) : res;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET: {
