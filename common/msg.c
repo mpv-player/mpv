@@ -521,10 +521,11 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
             break;
         }
 
+        bool clip = bstr_eatstart0(&line, TERM_MSG_0);
         if (print_term) {
             int line_w;
             append_terminal_line(log, lev, line, &root->term_msg_tmp, &line_w,
-                                 bstr_eatstart0(&line, TERM_MSG_0) ? term_w : INT_MAX);
+                                 clip ? term_w : INT_MAX);
             term_msg_lines += (!line_w || !term_w)
                                 ? 1 : (line_w + term_w - 1) / term_w;
         }
