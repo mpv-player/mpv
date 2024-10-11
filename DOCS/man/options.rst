@@ -6149,7 +6149,10 @@ them.
     Controls whether to use mpv's internal vsync for Wayland-base video outputs
     (default: ``auto``). This is mainly useful for benchmarking wayland VOs when
     combined with ``video-sync=display-desync``, ``--audio=no``, and
-    ``--untimed=yes``.
+    ``--untimed=yes``. The special ``auto`` value will disable the internal
+    vsync if the compositor supports the fifo protocol and version 2 of the
+    presentation time protocol when using ``--gpu-api=vulkan``. In any other
+    situation, it is exactly the same as ``yes``.
 
 ``--wayland-present=<yes|no>``
     Enable the use of wayland's presentation time protocol for more accurate
