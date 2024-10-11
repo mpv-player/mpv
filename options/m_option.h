@@ -216,6 +216,8 @@ struct m_sub_options {
     // Change flags passed to mp_option_change_callback() if any option that is
     // directly or indirectly part of this group is changed.
     int change_flags;
+    // If all sub_options require something during compile time to work.
+    bool unavailable;
     // Return further sub-options, for example for optional components. If set,
     // this is called with increasing index (starting from 0), as long as true
     // is returned. If true is returned and *sub is set in any of these calls,
@@ -392,6 +394,10 @@ struct m_option {
 
     // If the option is an alias, use the prefix of sub option.
     bool alias_use_prefix;
+
+    // If the option requires something during compile time to work potentially
+    // flag it is as not unavailable.
+    bool unavailable;
 
     int offset;
 

@@ -161,6 +161,11 @@ bool m_config_shadow_get_next_opt(struct m_config_shadow *shadow, int32_t *p_id)
 // covered by the m_config_cache.
 bool m_config_cache_get_next_opt(struct m_config_cache *cache, int32_t *p_id);
 
+
+// Check if the option is flagged as unavailable.
+bool m_config_shadow_opt_unavailable(struct m_config_shadow *shadow,
+                                     int32_t id);
+
 // Return the m_option that was used to declare this option.
 // id must be a valid option ID as returned by m_config_shadow_get_next_opt() or
 // m_config_cache_get_next_opt().
