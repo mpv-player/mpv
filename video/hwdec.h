@@ -7,6 +7,7 @@
 #include "options/m_option.h"
 
 struct mp_image_pool;
+enum mp_imgfmt;
 
 struct mp_conversion_filter {
     // Name of the conversion filter.
@@ -28,9 +29,12 @@ struct mp_hwdec_ctx {
     // HW format used by the hwdec
     int hw_imgfmt;
 
-    // List of support software formats when doing hwuploads.
+    // Callback to test if the format can be uploaded.
     // If NULL, all possible hwuploads are assumed to be supported.
-    const int *supported_hwupload_formats;
+    bool (*try_upload)(void *p, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt);
+
+    // Private data for try_upload.
+    void *try_upload_priv;
 
     // Getter for conversion filter description, or NULL.
     // This will be used for hardware conversion of frame formats.
