@@ -3098,6 +3098,18 @@ Property list
     ``track-list/count``
         Total number of tracks.
 
+    ``track-list/video``
+        The list of video tracks. This is only usable for printing and its value
+        can't be retrieved.
+
+    ``track-list/audio``
+        The list of audio tracks. This is only usable for printing and its value
+        can't be retrieved.
+
+    ``track-list/sub``
+        The list of sub tracks. This is only usable for printing and its value
+        can't be retrieved.
+
     ``track-list/N/id``
         The ID as it's used for ``--sid``/``--aid``/``--vid``. This is unique
         within tracks of the same type (sub/audio/video), but otherwise not.
