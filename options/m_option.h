@@ -73,7 +73,6 @@ extern const m_option_type_t m_option_type_cycle_dir;
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
 extern const m_option_type_t m_option_type_cli_alias;
-extern const m_option_type_t m_option_type_removed;
 extern const m_option_type_t m_option_type_subconfig;
 
 // Callback used by m_option_type_print_fn options.
@@ -410,9 +409,8 @@ struct m_option {
     // Initialize variable to given default before parsing options
     const void *defval;
 
-    // Print a warning when this option is used (for options with no direct
-    // replacement.)
-    const char *deprecation_message;
+    // Print a warning when this option is used.
+    bool deprecated;
 
     // Optional function that validates a param value for this option.
     m_opt_generic_validate_fn validate;
@@ -637,6 +635,7 @@ extern const char m_option_path_separator;
 #define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 
 #define M_RANGE(a, b) .min = (double) (a), .max = (double) (b)
+#define M_DEPRECATED .deprecated = true
 
 #define OPT_BOOL(field) \
     OPT_TYPED_FIELD(m_option_type_bool, bool, field)
@@ -764,23 +763,15 @@ extern const char m_option_path_separator;
     .type = &m_option_type_alias, .priv = newname, .offset = -1
 
 // If "--optname" was removed, but "--newname" has the same semantics.
-// It will be redirected, and a warning will be printed on first use.
-#define OPT_REPLACED_MSG(newname, msg) \
+// It will be redirected, with a generic deprecation message.
+#define OPT_REPLACED(newname) \
     .type = &m_option_type_alias, .priv = newname, \
-    .deprecation_message = (msg), .offset = -1
-
-// Same, with a generic deprecation message.
-#define OPT_REPLACED(newname) OPT_REPLACED_MSG(newname, "")
+    M_DEPRECATED, .offset = -1
 
 // Alias, resolved on the CLI/config file/profile parser level only.
 #define OPT_CLI_ALIAS(newname) \
     .type = &m_option_type_cli_alias, .priv = newname, \
     .flags = M_OPT_NOPROP, .offset = -1
-
-// "--optname" doesn't exist, but inform the user about a replacement with msg.
-#define OPT_REMOVED(msg) \
-    .type = &m_option_type_removed, .priv = msg, \
-    .deprecation_message = "", .flags = M_OPT_NOPROP, .offset = -1
 
 #define OPT_PRINT(fn) \
     .flags = M_OPT_NOCFG | M_OPT_PRE_PARSE | M_OPT_NOPROP, \
