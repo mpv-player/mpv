@@ -104,6 +104,9 @@ struct vo_wayland_state {
     int primaries_map[PL_COLOR_PRIM_COUNT];
     int transfer_map[PL_COLOR_TRC_COUNT];
 
+    /* commit-timing */
+    bool has_commit_timing;
+
     /* content-type */
     struct wp_content_type_manager_v1 *content_type_manager;
     struct wp_content_type_v1 *content_type;
@@ -112,6 +115,9 @@ struct vo_wayland_state {
     /* cursor-shape */
     /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_manager;
+
+    /* fifo */
+    bool has_fifo;
 
     /* fractional-scale */
     struct wp_fractional_scale_manager_v1 *fractional_scale_manager;
@@ -135,6 +141,7 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
     bool present_clock;
+    bool present_v2;
     bool use_present;
 
     /* single-pixel-buffer */
