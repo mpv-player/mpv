@@ -55,6 +55,10 @@
 #include "cursor-shape-v1.h"
 #endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_38
+#include "fifo-v1.h"
+#endif
+
 #if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 22
 #define HAVE_WAYLAND_1_22
 #endif
@@ -1867,6 +1871,13 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, ver);
     }
 
+#if HAVE_WAYLAND_PROTOCOLS_1_38
+    if (!strcmp(interface, wp_fifo_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->has_fifo = true;
+    }
+#endif
+
     if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, ver);
@@ -1881,6 +1892,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = MPMIN(ver, 2);
+        wl->present_v2 = ver == 2;
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
         wp_presentation_add_listener(wl->presentation, &presentation_listener, wl);
     }

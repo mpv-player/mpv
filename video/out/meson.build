@@ -14,7 +14,7 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
 wl_protocols_source = []
 wl_protocols_headers = []
 
-foreach v: ['1.32', '1.39']
+foreach v: ['1.32', '1.38', '1.39']
     features += {'wayland-protocols-' + v.replace('.', '-'):
         wayland['deps'][2].version().version_compare('>=' + v)}
 endforeach
@@ -22,6 +22,11 @@ endforeach
 if features['wayland-protocols-1-32']
     protocols += [[wl_protocol_dir, 'staging/cursor-shape/cursor-shape-v1.xml'],
                   [wl_protocol_dir, 'unstable/tablet/tablet-unstable-v2.xml']] # required by cursor-shape
+endif
+
+
+if features['wayland-protocols-1-38']
+    protocols += [[wl_protocol_dir, 'staging/fifo/fifo-v1.xml']]
 endif
 
 if features['wayland-protocols-1-39']
