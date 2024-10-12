@@ -859,7 +859,31 @@ local function go_history(new_pos)
 end
 
 -- Go to the specified relative position in the command history (Up, Down)
-local function move_history(amount)
+local function move_history(amount, is_wheel)
+    if is_wheel and selectable_items then
+        local max_lines = calculate_max_log_lines()
+
+        -- Update selected_match only if it's the first or last printed item and
+        -- there are hidden items.
+        if (amount > 0 and selected_match == first_match_to_print
+            and first_match_to_print + max_lines - 2 < #matches)
+           or (amount < 0 and selected_match == first_match_to_print + max_lines - 2
+               and first_match_to_print > 1) then
+            selected_match = selected_match + amount
+        end
+
+        if amount > 0 and first_match_to_print < #matches - max_lines + 2
+           or amount < 0 and first_match_to_print > 1 then
+           -- math.min and math.max would only be needed with amounts other than
+           -- 1 and -1.
+            first_match_to_print = math.min(
+                math.max(first_match_to_print + amount, 1), #matches - max_lines + 2)
+        end
+
+        update()
+        return
+    end
+
     if selectable_items then
         selected_match = selected_match + amount
         if selected_match > #matches then
@@ -1067,12 +1091,7 @@ end
 
 -- Paste text from the window-system's clipboard. 'clip' determines whether the
 -- clipboard or the primary selection buffer is used (on X11 and Wayland only.)
-local function paste(clip, is_wheel)
-    if is_wheel and selectable_items then
-        handle_enter()
-        return
-    end
-
+local function paste(clip)
     local text = get_clipboard(clip)
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
@@ -1558,7 +1577,7 @@ local function get_bindings()
         { 'shift+del',   handle_del                             },
         { 'ins',         handle_ins                             },
         { 'shift+ins',   function() paste(false) end            },
-        { 'mbtn_mid',    function() paste(false, true) end      },
+        { 'mbtn_mid',    function() paste(false) end            },
         { 'mbtn_right',  function() set_active(false) end       },
         { 'left',        function() prev_char() end             },
         { 'ctrl+b',      function() page_up_or_prev_char() end  },
@@ -1566,10 +1585,10 @@ local function get_bindings()
         { 'ctrl+f',      function() page_down_or_next_char() end},
         { 'up',          function() move_history(-1) end        },
         { 'ctrl+p',      function() move_history(-1) end        },
-        { 'wheel_up',    function() move_history(-1) end        },
+        { 'wheel_up',    function() move_history(-1, true) end  },
         { 'down',        function() move_history(1) end         },
         { 'ctrl+n',      function() move_history(1) end         },
-        { 'wheel_down',  function() move_history(1) end         },
+        { 'wheel_down',  function() move_history(1, true) end   },
         { 'wheel_left',  function() end                         },
         { 'wheel_right', function() end                         },
         { 'ctrl+left',   prev_word                              },
