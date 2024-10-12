@@ -414,7 +414,9 @@ end
 local function print_to_terminal()
     -- Clear the log after closing the console.
     if not repl_active then
-        mp.osd_message('')
+        if osd_msg_active then
+            mp.osd_message('')
+        end
         osd_msg_active = false
         return
     end
