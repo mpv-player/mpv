@@ -6749,6 +6749,17 @@ static void cmd_context_menu(void *p)
         vo_control(vo, VOCTRL_SHOW_MENU, NULL);
 }
 
+static void cmd_flush_status_line(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    if (!mpctx->log)
+        return;
+
+    mp_msg_flush_status_line(mpctx->log, cmd->args[0].v.b);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7223,6 +7234,8 @@ const struct mp_cmd_def mp_cmds[] = {
     { "begin-vo-dragging", cmd_begin_vo_dragging },
 
     { "context-menu", cmd_context_menu },
+
+    { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
     {0}
 };
