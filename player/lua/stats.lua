@@ -1525,7 +1525,7 @@ local function print_page(page, after_scroll)
     end
 end
 
-local function update_scale(value)
+local function update_scale(osd_height)
     local scale_with_video
     if o.vidscale == "auto" then
         scale_with_video = mp.get_property_native("osd-scale-by-window")
@@ -1535,8 +1535,8 @@ local function update_scale(value)
 
     -- Calculate scaled metrics.
     local scale = 1
-    if not scale_with_video and value > 0 then
-        scale = 720 / value
+    if not scale_with_video and osd_height > 0 then
+        scale = 720 / osd_height
     end
     font_size = o.font_size * scale
     border_size = o.border_size * scale
@@ -1548,13 +1548,12 @@ local function update_scale(value)
     end
 end
 
-local function handle_osd_height_update(_, value)
-    update_scale(value)
+local function handle_osd_height_update(_, osd_height)
+    update_scale(osd_height)
 end
 
 local function handle_osd_scale_by_window_update()
-    local value = mp.get_property_native("osd-height")
-    update_scale(value)
+    update_scale(mp.get_property_native("osd-height"))
 end
 
 local function clear_screen()
