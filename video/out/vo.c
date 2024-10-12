@@ -597,6 +597,7 @@ static void run_reconfig(void *p)
     mp_mutex_lock(&vo->params_mutex);
     talloc_free(vo->params);
     vo->params = talloc_dup(vo, params);
+    vo->has_peak_detect_values = false;
     mp_mutex_unlock(&vo->params_mutex);
 
     if (vo->driver->reconfig2) {
@@ -611,6 +612,7 @@ static void run_reconfig(void *p)
         mp_mutex_lock(&vo->params_mutex);
         talloc_free(vo->params);
         vo->params = NULL;
+        vo->has_peak_detect_values = false;
         mp_mutex_unlock(&vo->params_mutex);
     }
 
