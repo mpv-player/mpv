@@ -1776,19 +1776,29 @@ mp.register_event("video-reconfig",
 
 --  --script-opts=stats-bindlist=[-]{yes|<TERM-WIDTH>}
 if o.bindlist ~= "no" then
-    mp.command("no-osd set really-quiet yes")
-    if o.bindlist:sub(1, 1) == "-" then
-        o.bindlist = o.bindlist:sub(2)
-        o.no_ass_b0 = ""
-        o.no_ass_b1 = ""
-    end
-    local width = max(40, math.floor(tonumber(o.bindlist) or 79))
-    mp.add_timeout(0, function()  -- wait for all other scripts to finish init
+    -- This is a special mode to print key bindings to the terminal,
+    -- Adjust the print format and level to make it print only the key bindings.
+    mp.set_property("msg-level", "all=no,statusline=status")
+    mp.set_property("term-osd", "force")
+    mp.set_property_bool("msg-module", false)
+    mp.set_property_bool("msg-time", false)
+    -- wait for all other scripts to finish init
+    mp.add_timeout(0, function()
+        if o.bindlist:sub(1, 1) == "-" then
+            o.bindlist = o.bindlist:sub(2)
+            o.no_ass_b0 = ""
+            o.no_ass_b1 = ""
+        end
+        local width = max(40, math.floor(tonumber(o.bindlist) or 79))
         o.ass_formatting = false
         o.no_ass_indent = " "
         o.term_size = { w = width , h = 0}
-        io.write(keybinding_info(false, true) .. "\n")
-        mp.command("quit")
+        mp.osd_message(keybinding_info(false, true))
+        -- wait for next tick to print status line and flush it without clearing
+        mp.add_timeout(0, function()
+            mp.command("flush-status-line no")
+            mp.command("quit")
+        end)
     end)
 end
 
