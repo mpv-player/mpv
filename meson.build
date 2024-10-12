@@ -1814,7 +1814,7 @@ if get_option('cplayer')
     endif
 
     if not win32 and not darwin
-        if meson.can_run_host_binaries()
+        if meson.can_run_host_binaries() and not meson.is_cross_build()
             mpv_desktop_path = join_paths(source_root, 'etc', 'mpv.desktop')
             custom_target('mpv.desktop',
                 depends: mpv,
