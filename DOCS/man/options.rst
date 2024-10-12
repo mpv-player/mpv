@@ -6159,11 +6159,6 @@ them.
     (default) will automatically switch between telling the compositor the content
     is a photo, video or possibly none depending on internal heuristics.
 
-``--wayland-disable-vsync=<yes|no>``
-    Disable mpv's internal vsync for Wayland-based video output (default: no).
-    This is mainly useful for benchmarking wayland VOs when combined with
-    ``video-sync=display-desync``, ``--audio=no``, and ``--untimed=yes``.
-
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 16) to initiate client side
     resize events in the wayland contexts with the mouse. This is only active if
@@ -6172,6 +6167,12 @@ them.
 ``--wayland-edge-pixels-touch=<value>``
     Defines the size of an edge border (default: 32) to initiate client side
     resizes events in the wayland contexts with touch events.
+
+``--wayland-internal-vsync=<no|auto|yes>``
+    Controls whether to use mpv's internal vsync for Wayland-base video outputs
+    (default: ``auto``). This is mainly useful for benchmarking wayland VOs when
+    combined with ``video-sync=display-desync``, ``--audio=no``, and
+    ``--untimed=yes``.
 
 ``--wayland-present=<yes|no>``
     Enable the use of wayland's presentation time protocol for more accurate

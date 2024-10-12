@@ -39,6 +39,7 @@ typedef struct mp_vo_opts {
     int wl_configure_bounds;
     int wl_content_type;
     bool wl_disable_vsync;
+    int wl_internal_vsync;
     int wl_edge_pixels_pointer;
     int wl_edge_pixels_touch;
     bool wl_present;

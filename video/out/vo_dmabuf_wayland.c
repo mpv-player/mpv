@@ -653,7 +653,7 @@ static void flip_page(struct vo *vo)
     wl_surface_commit(wl->osd_surface);
     wl_surface_commit(wl->surface);
 
-    if (!wl->opts->wl_disable_vsync)
+    if (wl->opts->wl_internal_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)
