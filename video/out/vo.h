@@ -486,6 +486,8 @@ struct vo {
     mp_mutex params_mutex;
     // Configured parameters (changed in vo_reconfig)
     struct mp_image_params *params;
+    // Whether the VO sets the max_pq_y/avg_pq_y fields on draw_frame.
+    bool has_peak_detect_values;
     // Target display parameters (VO is responsible for re-/setting)
     struct mp_image_params *target_params;
 

@@ -1192,6 +1192,11 @@ void write_video(struct MPContext *mpctx)
             goto error;
         }
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+    } else {
+        // Update parameters that don't require reconfiguring the VO.
+        mp_mutex_lock(&vo->params_mutex);
+        mp_image_params_update_dynamic(vo->params, p, vo->has_peak_detect_values);
+        mp_mutex_unlock(&vo->params_mutex);
     }
 
     mpctx->time_frame -= get_relative_time(mpctx);

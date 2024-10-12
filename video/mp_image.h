@@ -182,6 +182,9 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2);
 bool mp_image_params_static_equal(const struct mp_image_params *p1,
                                   const struct mp_image_params *p2);
+void mp_image_params_update_dynamic(struct mp_image_params *dst,
+                                    const struct mp_image_params *src,
+                                    bool has_peak_detect_values);
 void mp_image_params_restore_dovi_mapping(struct mp_image_params *params);
 
 void mp_image_params_get_dsize(const struct mp_image_params *p,
