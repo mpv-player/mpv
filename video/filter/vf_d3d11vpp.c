@@ -504,7 +504,8 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
                                p->params.w != p->out_params.w ||
                                p->params.h != p->out_params.h ||
-                               p->opts->nvidia_true_hdr;
+                               p->opts->nvidia_true_hdr ||
+                               p->opts->scaling_mode != SCALING_BASIC;
     }
 
     if (!mp_refqueue_can_output(p->queue))
