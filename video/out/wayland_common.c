@@ -1591,7 +1591,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 #endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
-        ver = 1;
+        ver = MPMIN(ver, 2);
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
         wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
     }
