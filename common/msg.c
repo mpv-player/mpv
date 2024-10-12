@@ -590,16 +590,15 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
     } else {
         write_term_msg(log, lev, root->buffer, &root->term_msg);
 
-        root->term_status_msg.len = 0;
-        if (lev != MSGL_STATUS && root->status_line.len && root->status_log &&
-            is_status_output(root, lev) && test_terminal_level(root->status_log, MSGL_STATUS))
-        {
-            write_term_msg(root->status_log, MSGL_STATUS, root->status_line,
-                           &root->term_status_msg);
-        }
-
         FILE *stream = term_msg_fp(root, lev);
         if (root->term_msg.len) {
+            root->term_status_msg.len = 0;
+            if (lev != MSGL_STATUS && root->status_line.len && root->status_log &&
+                is_status_output(root, lev) && test_terminal_level(root->status_log, MSGL_STATUS))
+            {
+                write_term_msg(root->status_log, MSGL_STATUS, root->status_line,
+                               &root->term_status_msg);
+            }
             fwrite(root->term_msg.start, root->term_msg.len, 1, stream);
             if (root->term_status_msg.len)
                 fwrite(root->term_status_msg.start, root->term_status_msg.len, 1, stream);
