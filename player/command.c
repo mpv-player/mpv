@@ -5807,6 +5807,7 @@ static void cmd_loadfile(void *p)
             mp_write_watch_later_conf(mpctx);
         mp_set_playlist_entry(mpctx, entry);
     }
+    mp_cancel_reset(mpctx->playback_abort);
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
 }
