@@ -365,6 +365,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{SCALER_JINC,        JINC_R3, jinc, .resizable = true}, .polar = true},
     {{SCALER_EWA_LANCZOS, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_JINC},
     {{SCALER_EWA_HANNING, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_HANNING},
+    // See <https://legacy.imagemagick.org/Usage/filter/nicolas/#upsampling>
     {{SCALER_EWA_GINSENG, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_SINC},
     // Slightly sharpened to minimize the 1D step response error (to better
     // preserve horizontal/vertical lines)
