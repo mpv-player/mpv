@@ -5675,6 +5675,9 @@ them.
     ``--linear-upscaling``. (Note that sigmoidization also requires
     linearization, so the ``LINEAR`` rendering step fires in both cases)
 
+    For more information about sigmoidization, see:
+    https://imagemagick.org/Usage/resize/#resize_sigmoidal
+
 ``--sigmoid-center``
     The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
     float between 0.0 and 1.0. Defaults to 0.75 if not specified.
