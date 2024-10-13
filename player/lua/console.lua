@@ -1438,7 +1438,8 @@ local function complete(backwards)
         ['osd-auto'] = true, ['no-osd'] = true, ['osd-bar'] = true,
         ['osd-msg'] = true, ['osd-msg-bar'] = true, ['raw'] = true,
         ['expand-properties'] = true, ['repeatable'] = true,
-        ['nonrepeatable'] = true, ['async'] = true, ['sync'] = true
+        ['nonrepeatable'] = true, ['nonscalable'] = true,
+        ['async'] = true, ['sync'] = true
     }
 
     while tokens[first_useful_token_index] and
