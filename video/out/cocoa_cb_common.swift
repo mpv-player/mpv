@@ -262,6 +262,7 @@ class CocoaCB: Common, EventSubscriber {
 
         uninit()
         uninitCommon()
+        window = nil
 
         layer?.lockCglContext()
         libmpv.uninit()
