@@ -5482,13 +5482,18 @@ them.
 
     ``ewa_lanczossharp``
         A slightly sharpened version of ``ewa_lanczos``. This is the default
-        when using the ``high-quality`` profile.
+        when using the ``high-quality`` profile. Blur value determined by method
+        originally developed by Nicolas Robidoux for Image Magick, see:
+        https://www.imagemagick.org/discourse-server/viewtopic.php?p=89068#p89068
 
     ``ewa_lanczos4sharpest``
         Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
         Prone to ringing, so it's recommended to combine this with an
         anti-ringing shader. On ``--vo=gpu-next``, setting this filter enables
         built-in anti-ringing, so no extra action needs to be taken.
+
+        For more details, see:
+        https://www.imagemagick.org/discourse-server/viewtopic.php?p=128587#p128587
 
     ``mitchell``
         Mitchell-Netravali. Piecewise cubic filter with a support of radius 2.0.
