@@ -368,12 +368,15 @@ const struct filter_kernel mp_filter_kernels[] = {
     // See <https://legacy.imagemagick.org/Usage/filter/nicolas/#upsampling>
     {{SCALER_EWA_GINSENG, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_SINC},
     // Slightly sharpened to minimize the 1D step response error (to better
-    // preserve horizontal/vertical lines)
+    // preserve horizontal/vertical lines). Blur value determined by method
+    // originally developed by Nicolas Robidoux for Image Magick, see:
+    //   <https://www.imagemagick.org/discourse-server/viewtopic.php?p=89068#p89068>
     {{SCALER_EWA_LANCZOSSHARP, JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
         .polar = true, .window = WINDOW_JINC},
     // Similar to the above, but sharpened substantially to the point of
     // minimizing the total impulse response error on an integer grid. Tends
-    // to preserve hash patterns well. Very sharp but rings a lot.
+    // to preserve hash patterns well. Very sharp but rings a lot. See:
+    //   <https://www.imagemagick.org/discourse-server/viewtopic.php?p=128587#p128587>
     {{SCALER_EWA_LANCZOS4SHARPEST, JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
         .polar = true, .window = WINDOW_JINC},
     // Similar to the above, but softened instead, to make even/odd integer
