@@ -7426,11 +7426,14 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
                                       (void *)(uintptr_t)flags);
                 if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
                     sub_redecode_cached_packets(sub);
+                    sub_reset(sub);
                     if (track->selected)
                         reselect_demux_stream(mpctx, track, true);
                 }
             }
         }
+        // For subs on a still image.
+        redraw_subs(mpctx);
         osd_changed(mpctx->osd);
     }
 
