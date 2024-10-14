@@ -22,7 +22,6 @@ class Common: NSObject {
     var option: OptionHelper
     var input: InputHelper?
     var log: LogHelper
-    var vo: UnsafeMutablePointer<vo>?
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.queue")
 
     @objc var window: Window?
@@ -32,6 +31,7 @@ class Common: NSObject {
     var link: CVDisplayLink?
 
     let eventsLock = NSLock()
+    var vo: UnsafeMutablePointer<vo>?
     var events: Int = 0
 
     var lightSensor: io_connect_t = 0
@@ -145,6 +145,7 @@ class Common: NSObject {
     }
 
     func uninitCommon() {
+        eventsLock.withLock { self.vo = nil }
         setCursorVisibility(true)
         stopDisplaylink()
         uninitLightSensor()
@@ -455,23 +456,19 @@ class Common: NSObject {
     }
 
     func flagEvents(_ ev: Int) {
-        eventsLock.lock()
-        events |= ev
-        eventsLock.unlock()
-
-        guard let vo = vo else {
-            log.warning("vo nil in flagEvents")
-            return
+        eventsLock.withLock {
+            events |= ev
+            guard let vo = vo else { return }
+            vo_wakeup(vo)
         }
-        vo_wakeup(vo)
     }
 
     func checkEvents() -> Int {
-        eventsLock.lock()
-        let ev = events
-        events = 0
-        eventsLock.unlock()
-        return ev
+        eventsLock.withLock {
+            let ev = events
+            events = 0
+            return ev
+        }
     }
 
     func windowDidEndAnimation() {}

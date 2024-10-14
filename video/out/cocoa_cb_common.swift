@@ -40,7 +40,7 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
-        self.vo = vo
+        eventsLock.withLock { self.vo = vo }
         input = InputHelper(vo.pointee.input_ctx, option)
 
         if backendState == .uninitialized {
@@ -57,12 +57,13 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     func uninit() {
+        eventsLock.withLock { self.vo = nil }
         window?.orderOut(nil)
         window?.close()
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
-        self.vo = vo
+        eventsLock.withLock { self.vo = vo }
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else if option.vo.auto_window_resize {
