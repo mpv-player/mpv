@@ -2015,6 +2015,7 @@ void mp_play_files(struct MPContext *mpctx)
     }
     // After above is finished; but even if it's skipped.
     mp_msg_set_early_logging(mpctx->global, false);
+    mp_notify(mpctx, MPV_EVENT_INITIALIZED, NULL);
 
     prepare_playlist(mpctx, mpctx->playlist);
 
