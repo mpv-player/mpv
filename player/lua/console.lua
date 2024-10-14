@@ -781,7 +781,7 @@ local function handle_enter()
     clear()
 end
 
-local function highlight_hovered_line()
+local function determine_hovered_item()
     local height = mp.get_property_native('osd-height')
     if height == 0 then
         return
@@ -795,10 +795,12 @@ local function highlight_hovered_line()
     local clicked_line = math.floor(y / height * max_lines + .5)
 
     local offset = first_match_to_print - 1
+    local min_line = 1
     max_lines = calculate_max_log_lines()
 
     -- Subtract 1 line for the position counter.
     if first_match_to_print > 1 or offset + max_lines < #matches then
+        min_line = 2
         offset = offset - 1
     end
 
@@ -807,18 +809,26 @@ local function highlight_hovered_line()
         max_lines = #matches
     end
 
-    if selected_match ~= offset + clicked_line
-        and clicked_line > 0 and clicked_line <= max_lines then
-        selected_match = offset + clicked_line
-        update()
+    if clicked_line >= min_line and clicked_line <= max_lines then
+        return offset + clicked_line
     end
 end
 
 local function bind_mouse()
-    mp.add_forced_key_binding('MOUSE_MOVE', '_console_mouse_move', highlight_hovered_line)
+    mp.add_forced_key_binding('MOUSE_MOVE', '_console_mouse_move', function()
+        local item = determine_hovered_item()
+        if item and item ~= selected_match then
+            selected_match = item
+            update()
+        end
+    end)
+
     mp.add_forced_key_binding('MBTN_LEFT', '_console_mbtn_left', function()
-        highlight_hovered_line()
-        handle_enter()
+        local item = determine_hovered_item()
+        if item then
+            selected_match = item
+            handle_enter()
+        end
     end)
 end
 
