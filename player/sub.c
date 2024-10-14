@@ -130,8 +130,8 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
     // Check if we need to update subtitles for these special cases. Always
     // update on discontinuities like seeking or a new file.
     if (sub_updated || mpctx->redraw_subs || osd_pts == MP_NOPTS_VALUE) {
-        // Always force a redecode of all packets if we have a refresh.
-        if (mpctx->redraw_subs)
+        // Always force a redecode of all packets if we seek on a still image.
+        if (mpctx->redraw_subs && still_image)
             sub_redecode_cached_packets(dec_sub);
 
         // Handle displaying subtitles on terminal; never done for secondary subs
