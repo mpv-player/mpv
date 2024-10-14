@@ -1803,6 +1803,9 @@ static void play_current_file(struct MPContext *mpctx)
     update_screensaver_state(mpctx);
     clear_playlist_paths(mpctx);
 
+    // Clear out subs from the previous file if the video track is a still image.
+    redraw_subs(mpctx);
+
     if (watch_later)
         mp_delete_watch_later_conf(mpctx, mpctx->filename);
 
