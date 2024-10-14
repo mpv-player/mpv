@@ -132,7 +132,7 @@ struct vo_internal {
     bool hasframe_rendered;
     bool request_redraw;            // redraw request from player to VO
     bool want_redraw;               // redraw request from VO to player
-    bool send_reset;                // send VOCTRL_RESET
+    uint8_t send_reset;             // send VOCTRL_RESET (1) or VOCTRL_FRAME_RESET (2)
     bool paused;
     bool wakeup_on_done;
     int queued_events;              // event mask for the user
@@ -1131,14 +1131,16 @@ static MP_THREAD_VOID vo_thread(void *ptr)
         }
         vo->want_redraw = false;
         bool redraw = in->request_redraw;
-        bool send_reset = in->send_reset;
-        in->send_reset = false;
+        uint8_t send_reset = in->send_reset;
+        in->send_reset = 0;
         bool send_pause = in->paused != vo_paused;
         vo_paused = in->paused;
         mp_mutex_unlock(&in->lock);
 
-        if (send_reset)
+        if (send_reset > 0)
             vo->driver->control(vo, VOCTRL_RESET, NULL);
+        if (send_reset == 2)
+            vo->driver->control(vo, VOCTRL_FRAME_RESET, NULL);
         if (send_pause)
             vo->driver->control(vo, vo_paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
         if (wait_until > now && redraw) {
@@ -1226,15 +1228,27 @@ bool vo_want_redraw(struct vo *vo)
     return r;
 }
 
-void vo_seek_reset(struct vo *vo)
+static void send_reset(struct vo *vo, bool forget_all)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     forget_frames(vo);
+    if (forget_all)
+        TA_FREEP(&in->current_frame);
     reset_vsync_timings(vo);
-    in->send_reset = true;
+    in->send_reset = MPMAX(in->send_reset, forget_all ? 2 : 1);
     wakeup_locked(vo);
     mp_mutex_unlock(&in->lock);
+}
+
+void vo_seek_reset(struct vo *vo)
+{
+    send_reset(vo, false);
+}
+
+void vo_eof_reset(struct vo *vo)
+{
+    send_reset(vo, true);
 }
 
 // Whether at least 1 frame was queued or rendered since last seek or reconfig.
