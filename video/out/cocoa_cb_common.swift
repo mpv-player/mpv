@@ -120,35 +120,37 @@ class CocoaCB: Common, EventSubscriber {
         }
 
         libmpv.setRenderICCProfile(colorSpace)
-        layer?.colorspace = getColorSpace()
+        let (isEdr, colorspace) = getColorSpace()
+        layer?.colorspace = colorspace
+        layer?.wantsExtendedDynamicRangeContent = isEdr
     }
 
-    func getColorSpace() -> CGColorSpace? {
+    func getColorSpace() -> (Bool, CGColorSpace?) {
         guard let colorSpace = window?.screen?.colorSpace?.cgColorSpace else {
             log.warning("Couldn't retrieve ICC Profile, no color space available")
-            return nil
+            return (false, nil)
         }
 
         let outputCsp = Int(option.mac.cocoa_cb_output_csp)
 
         switch outputCsp {
-        case MAC_CSP_AUTO: return colorSpace
-        case MAC_CSP_DISPLAY_P3: return CGColorSpace(name: CGColorSpace.displayP3)
-        case MAC_CSP_DISPLAY_P3_HLG: return CGColorSpace(name: CGColorSpace.displayP3_HLG)
-        case MAC_CSP_DCI_P3: return CGColorSpace(name: CGColorSpace.dcip3)
-        case MAC_CSP_BT_2020: return CGColorSpace(name: CGColorSpace.itur_2020)
-        case MAC_CSP_BT_709: return CGColorSpace(name: CGColorSpace.itur_709)
-        case MAC_CSP_SRGB: return CGColorSpace(name: CGColorSpace.sRGB)
-        case MAC_CSP_SRGB_LINEAR: return CGColorSpace(name: CGColorSpace.linearSRGB)
-        case MAC_CSP_RGB_LINEAR: return CGColorSpace(name: CGColorSpace.genericRGBLinear)
-        case MAC_CSP_ADOBE: return CGColorSpace(name: CGColorSpace.adobeRGB1998)
+        case MAC_CSP_AUTO: return (false, colorSpace)
+        case MAC_CSP_DISPLAY_P3: return (true, CGColorSpace(name: CGColorSpace.displayP3))
+        case MAC_CSP_DISPLAY_P3_HLG: return (true, CGColorSpace(name: CGColorSpace.displayP3_HLG))
+        case MAC_CSP_DCI_P3: return (true, CGColorSpace(name: CGColorSpace.dcip3))
+        case MAC_CSP_BT_2020: return (true, CGColorSpace(name: CGColorSpace.itur_2020))
+        case MAC_CSP_BT_709: return (false, CGColorSpace(name: CGColorSpace.itur_709))
+        case MAC_CSP_SRGB: return (false, CGColorSpace(name: CGColorSpace.sRGB))
+        case MAC_CSP_SRGB_LINEAR: return (false, CGColorSpace(name: CGColorSpace.linearSRGB))
+        case MAC_CSP_RGB_LINEAR: return (false, CGColorSpace(name: CGColorSpace.genericRGBLinear))
+        case MAC_CSP_ADOBE: return (false, CGColorSpace(name: CGColorSpace.adobeRGB1998))
         default: break
         }
 
 #if HAVE_MACOS_10_15_4_FEATURES
         if #available(macOS 10.15.4, *) {
             switch outputCsp {
-            case MAC_CSP_DISPLAY_P3_PQ: return CGColorSpace(name: CGColorSpace.displayP3_PQ)
+            case MAC_CSP_DISPLAY_P3_PQ: return (true, CGColorSpace(name: CGColorSpace.displayP3_PQ))
             default: break
             }
         }
@@ -157,8 +159,8 @@ class CocoaCB: Common, EventSubscriber {
 #if HAVE_MACOS_11_FEATURES
         if #available(macOS 11.0, *) {
             switch outputCsp {
-            case MAC_CSP_BT_2100_HLG: return CGColorSpace(name: CGColorSpace.itur_2100_HLG)
-            case MAC_CSP_BT_2100_PQ: return CGColorSpace(name: CGColorSpace.itur_2100_PQ)
+            case MAC_CSP_BT_2100_HLG: return (true, CGColorSpace(name: CGColorSpace.itur_2100_HLG))
+            case MAC_CSP_BT_2100_PQ: return (true, CGColorSpace(name: CGColorSpace.itur_2100_PQ))
             default: break
             }
         }
@@ -167,8 +169,8 @@ class CocoaCB: Common, EventSubscriber {
 #if HAVE_MACOS_12_FEATURES
         if #available(macOS 12.0, *) {
             switch outputCsp {
-            case MAC_CSP_DISPLAY_P3_LINEAR: return CGColorSpace(name: CGColorSpace.linearDisplayP3)
-            case MAC_CSP_BT_2020_LINEAR: return CGColorSpace(name: CGColorSpace.linearITUR_2020)
+            case MAC_CSP_DISPLAY_P3_LINEAR: return (true, CGColorSpace(name: CGColorSpace.linearDisplayP3))
+            case MAC_CSP_BT_2020_LINEAR: return (true, CGColorSpace(name: CGColorSpace.linearITUR_2020))
             default: break
             }
         }
@@ -176,7 +178,7 @@ class CocoaCB: Common, EventSubscriber {
 
         log.warning("Couldn't retrieve configured color space, falling back to auto")
 
-        return colorSpace
+        return (false, colorSpace)
     }
 
     override func windowDidEndAnimation() {

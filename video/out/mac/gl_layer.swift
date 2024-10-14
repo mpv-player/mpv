@@ -106,7 +106,6 @@ class GLLayer: CAOpenGLLayer {
         super.init()
         autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         backgroundColor = NSColor.black.cgColor
-        wantsExtendedDynamicRangeContent = true
 
         if bufferDepth > 8 {
             contentsFormat = .RGBA16Float
