@@ -29,7 +29,7 @@ class MacCommon: Common {
         let log = LogHelper(mp_log_new(vo, vo.pointee.log, "mac"))
         let option = OptionHelper(vo, vo.pointee.global)
         super.init(option, log)
-        self.vo = vo
+        eventsLock.withLock { self.vo = vo }
         input = InputHelper(vo.pointee.input_ctx, option)
         presentation = Presentation(common: self)
         timer = PreciseTimer(common: self)
@@ -41,7 +41,7 @@ class MacCommon: Common {
     }
 
     @objc func config(_ vo: UnsafeMutablePointer<vo>) -> Bool {
-        self.vo = vo
+        eventsLock.withLock { self.vo = vo }
 
         DispatchQueue.main.sync {
             let previousActiveApp = getActiveApp()
