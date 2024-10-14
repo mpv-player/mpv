@@ -659,9 +659,6 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
-    // Even though we just redrew, it may need to be done again for certain
-    // cases of subtitles on an image.
-    redraw_subs(mpctx);
 }
 
 static void clear_underruns(struct MPContext *mpctx)
