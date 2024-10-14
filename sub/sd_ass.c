@@ -60,7 +60,6 @@ struct sd_ass_priv {
     int *packets_animated;
     int num_packets_animated;
     bool check_animated;
-    bool duration_unknown;
 };
 
 struct seen_packet {
@@ -275,9 +274,6 @@ static int init(struct sd *sd)
         ctx->converter = lavc_conv_create(sd);
         if (!ctx->converter)
             return -1;
-
-        if (strcmp(sd->codec->codec, "eia_608") == 0)
-            ctx->duration_unknown = 1;
     }
 
     assobjects_init(sd);
@@ -433,10 +429,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
                                     &sub_duration);
         if (sd->opts->sub_stretch_durations ||
             packet->duration < 0 || sub_duration == UINT32_MAX) {
-            if (!ctx->duration_unknown) {
-                MP_VERBOSE(sd, "Subtitle with unknown duration.\n");
-                ctx->duration_unknown = true;
-            }
+            MP_VERBOSE(sd, "Subtitle with unknown duration.\n");
             sub_duration = UNKNOWN_DURATION;
         }
 
@@ -449,7 +442,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             };
             filter_and_add(sd, &pkt2);
         }
-        if (ctx->duration_unknown) {
+        if (sub_duration == UNKNOWN_DURATION) {
             for (int n = track->n_events - 2; n >= 0; n--) {
                 if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
                     if (track->events[n].Start != track->events[n + 1].Start) {
