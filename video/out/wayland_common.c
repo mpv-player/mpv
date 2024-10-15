@@ -1292,6 +1292,9 @@ static void supported_tf_named(void *data, struct xx_color_manager_v4 *color_man
     struct vo_wayland_state *wl = data;
 
     switch (tf) {
+    case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_BT709:
+        wl->transfer_map[PL_COLOR_TRC_BT_1886] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_BT709;
+        break;
     case XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_SRGB:
         wl->transfer_map[PL_COLOR_TRC_SRGB] = XX_COLOR_MANAGER_V4_TRANSFER_FUNCTION_SRGB;
         break;
