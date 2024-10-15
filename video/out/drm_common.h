@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+
+#include "video/mp_image.h"
 #include "vo.h"
 
 enum {
@@ -29,6 +31,19 @@ enum {
     DRM_OPTS_FORMAT_XBGR8888,
     DRM_OPTS_FORMAT_XBGR2101010,
     DRM_OPTS_FORMAT_YUYV,
+};
+
+// Copied from include/linux/hdmi.h
+enum drm_metadata_type {
+    DRM_STATIC_METADATA_TYPE1 = 0,
+};
+
+// Copied from include/linux/hdmi.h
+enum drm_eotf {
+    DRM_EOTF_TRADITIONAL_GAMMA_SDR,
+    DRM_EOTF_TRADITIONAL_GAMMA_HDR,
+    DRM_EOTF_SMPTE_ST2084,
+    DRM_EOTF_BT_2100_HLG,
 };
 
 struct framebuffer {
@@ -40,6 +55,11 @@ struct framebuffer {
     uint32_t handle;
     uint8_t *map;
     uint32_t id;
+};
+
+struct drm_hdr {
+    struct hdr_output_metadata metadata;
+    uint32_t blob_id;
 };
 
 struct drm_mode {
@@ -72,9 +92,11 @@ struct vo_drm_state {
     drmEventContext ev;
 
     struct drm_atomic_context *atomic_context;
+    struct drm_hdr hdr;
     struct drm_mode mode;
     struct drm_opts *opts;
     struct framebuffer *fb;
+    struct mp_image_params target_params;
     struct mp_log *log;
     struct mp_present *present;
     struct vo *vo;
@@ -99,6 +121,7 @@ bool vo_drm_init(struct vo *vo);
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg);
 
 double vo_drm_get_display_fps(struct vo_drm_state *drm);
+bool vo_drm_set_hdr_metadata(struct vo *vo);
 void vo_drm_set_monitor_par(struct vo *vo);
 void vo_drm_uninit(struct vo *vo);
 void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns);
