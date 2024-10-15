@@ -27,6 +27,7 @@ end)
 
 local chapter_list = {}
 local playlist_cookies = {}
+local playlist_metadata = {}
 
 local function Set (t)
     local set = {}
@@ -1079,6 +1080,11 @@ local function run_ytdl_hook(url)
             return
         end
 
+        playlist_metadata[url] = {
+            playlist_title = json["title"],
+            playlist_id = json["id"]
+        }
+
         local self_redirecting_url =
             json.entries[1]["_type"] ~= "url_transparent" and
             json.entries[1]["webpage_url"] and
@@ -1193,6 +1199,12 @@ local function run_ytdl_hook(url)
         end
 
     else -- probably a video
+        -- add playlist metadata if any belongs to the current video
+        local metadata = playlist_metadata[mp.get_property("playlist-path")] or {}
+        for key, value in pairs(metadata) do
+            json[key] = value
+        end
+
         add_single_video(json)
     end
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
