@@ -44,6 +44,8 @@ void mp_subprocess(struct mp_log *log,
         mp_verbose(log, ", %s", *arg++);
     mp_verbose(log, "]\n");
     mp_subprocess2(opts, res);
-    if (res->error < 0)
-        mp_err(log, "Subprocess failed: %s\n", mp_subprocess_err_str(res->error));
+    if (res->error < 0) {
+        int lev = res->error == MP_SUBPROCESS_EKILLED_BY_US ? MSGL_V : MSGL_ERR;
+        mp_msg(log, lev, "Subprocess failed: %s\n", mp_subprocess_err_str(res->error));
+    }
 }
