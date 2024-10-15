@@ -82,6 +82,22 @@ static const struct ra_ctx_fns *contexts[] = {
     &ra_ctx_d3d11,
 #endif
 
+// Vulkan contexts:
+#if HAVE_VULKAN
+#if HAVE_WIN32_DESKTOP
+    &ra_ctx_vulkan_win,
+#endif
+#if HAVE_WAYLAND
+    &ra_ctx_vulkan_wayland,
+#endif
+#if HAVE_X11
+    &ra_ctx_vulkan_xlib,
+#endif
+#if HAVE_COCOA && HAVE_SWIFT
+    &ra_ctx_vulkan_mac,
+#endif
+#endif
+
 // OpenGL contexts:
 #if HAVE_EGL_ANDROID
     &ra_ctx_android,
@@ -108,26 +124,13 @@ static const struct ra_ctx_fns *contexts[] = {
     &ra_ctx_drm_egl,
 #endif
 
-// Vulkan contexts:
+// Vulkan contexts (fallbacks):
 #if HAVE_VULKAN
-
 #if HAVE_ANDROID
     &ra_ctx_vulkan_android,
 #endif
-#if HAVE_WIN32_DESKTOP
-    &ra_ctx_vulkan_win,
-#endif
-#if HAVE_WAYLAND
-    &ra_ctx_vulkan_wayland,
-#endif
-#if HAVE_X11
-    &ra_ctx_vulkan_xlib,
-#endif
 #if HAVE_VK_KHR_DISPLAY
     &ra_ctx_vulkan_display,
-#endif
-#if HAVE_COCOA && HAVE_SWIFT
-    &ra_ctx_vulkan_mac,
 #endif
 #endif
 };
