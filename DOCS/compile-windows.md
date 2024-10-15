@@ -151,14 +151,6 @@ they will be automatically downloaded and built by Meson.
       & "<Visual Studio Path>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64 -SkipAutomaticLocation | Out-Null
       ```
 2. Install Meson, as outlined in [Getting Meson](https://mesonbuild.com/Getting-meson.html):
-   - **Important**: At the time of writing, there is an issue in Meson with
-     escaping response files.
-
-     See: [mesonbuild/meson#8981](https://github.com/mesonbuild/meson/issues/8981)
-     and [mesonbuild/meson#11715](https://github.com/mesonbuild/meson/pull/11715)
-
-     If you wish to install a fixed version, follow the steps outlined
-     [here](https://github.com/mpv-player/mpv/blob/481e498427fc34956ad24b94157553908f5cd638/.github/workflows/build.yml#L132-L135).
 3. The following build script utilizes the Meson subprojects system to build mpv and its dependencies.
    To make sure all dependency versions are up-to-date, update the subprojects database from Meson's WrapDB.
    Also explicitly download several wraps as some nested projects may pull older versions of them.
