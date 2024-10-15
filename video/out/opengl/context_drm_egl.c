@@ -319,12 +319,15 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     update_framebuffer_from_bo(ctx, frame->bo);
 
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
+    int flags = DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT;
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "FB_ID", drm->fb->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
-    int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request,
-                                  DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT, drm);
+    if (vo_drm_set_hdr_metadata(ctx->vo, false))
+        flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
+
+    int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request, flags, drm);
 
     if (ret)
         MP_WARN(ctx->vo, "Failed to commit atomic request: %s\n", mp_strerror(ret));
@@ -457,17 +460,6 @@ static const struct ra_swapchain_fns drm_egl_swapchain = {
 static void drm_egl_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    struct vo_drm_state *drm = ctx->vo->drm;
-    if (drm) {
-        struct drm_atomic_context *atomic_ctx = drm->atomic_context;
-
-        if (drmModeAtomicCommit(drm->fd, atomic_ctx->request, 0, NULL))
-            MP_ERR(ctx->vo, "Failed to commit atomic request: %s\n",
-                    mp_strerror(errno));
-
-        drmModeAtomicFree(atomic_ctx->request);
-    }
-
     ra_gl_ctx_uninit(ctx);
     vo_drm_uninit(ctx->vo);
 

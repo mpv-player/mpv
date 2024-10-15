@@ -299,6 +299,7 @@ void drm_atomic_destroy_context(struct drm_atomic_context *ctx)
     drm_object_free(ctx->connector);
     drm_object_free(ctx->draw_plane);
     drm_object_free(ctx->drmprime_video_plane);
+    drmModeAtomicFree(ctx->request);
     talloc_free(ctx);
 }
 
