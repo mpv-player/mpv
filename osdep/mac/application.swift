@@ -20,7 +20,6 @@ import Cocoa
 class Application: NSApplication, NSApplicationDelegate {
     var appHub: AppHub { return AppHub.shared }
     var eventManager: NSAppleEventManager { return NSAppleEventManager.shared() }
-    var isBundle: Bool { return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" }
     var playbackThreadId: mp_thread!
     var argc: Int32?
     var argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
@@ -78,20 +77,13 @@ class Application: NSApplication, NSApplicationDelegate {
     }
 
     func setupBundle() {
-        if !isBundle { return }
+        if !appHub.isBundle { return }
 
         // started from finder the first argument after the binary may start with -psn_
         if CommandLine.argc > 1 && CommandLine.arguments[1].hasPrefix("-psn_") {
             argc? = 1
             argv?[1] = nil
         }
-
-        let path = (ProcessInfo.processInfo.environment["PATH"] ?? "") +
-            ":/usr/local/bin:/usr/local/sbin" + // homebrew Intel
-            ":/opt/local/bin:/opt/local/sbin" + // MacPorts
-            ":/opt/homebrew/bin:/opt/homebrew/sbin" // homebrew ARM
-        appHub.log.verbose("Setting Bundle $PATH to: \(path)")
-        _ = path.withCString { setenv("PATH", $0, 1) }
     }
 
     let playbackThread: @convention(c) (UnsafeMutableRawPointer) -> UnsafeMutableRawPointer? = { (ptr: UnsafeMutableRawPointer) in
@@ -108,7 +100,7 @@ class Application: NSApplication, NSApplicationDelegate {
 
         NSApp = self
         NSApp.delegate = self
-        NSApp.setActivationPolicy(isBundle ? .regular : .accessory)
+        NSApp.setActivationPolicy(appHub.isBundle ? .regular : .accessory)
         setupBundle()
         pthread_create(&playbackThreadId, nil, playbackThread, TypeHelper.bridge(obj: self))
         appHub.input.wait()

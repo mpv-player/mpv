@@ -6601,6 +6601,21 @@ them.
     precedence over any other shortcuts, they are not propagated to the mpv core and they can't be
     used in config files like ``input.conf`` or script bindings.
 
+``--macos-bundle-path=path1,path2,...``
+    App Bundles operate in their own shell environment that is different from the one in the
+    terminal. The default PATH variable for all Bundles is ``/usr/bin:/bin:/usr/sbin:/sbin``.
+    Because of that mpv can not find binaries installed by package manager that might be used in
+    scripts for example. This option prepends all given paths to the default Bundle PATH.
+
+    Default value in following order:
+
+    :/usr/local/bin:     homebrew (Intel) install path
+    :/usr/local/sbin:    homebrew (Intel) install path
+    :/opt/local/bin:     MacPorts install path
+    :/opt/local/sbin:    MacPorts install path
+    :/opt/homebrew/bin:  homebrew (ARM) install path
+    :/opt/homebrew/sbin: homebrew (ARM) install path
+
 ``--android-surface-size=<WxH>``
     Set dimensions of the rendering surface used by the Android gpu context.
     Needs to be set by the embedding application if the dimensions change during
