@@ -63,6 +63,7 @@ struct macos_opts {
     int macos_geometry_calculation;
     int macos_render_timer;
     bool macos_menu_shortcuts;
+    char **macos_bundle_path;
     int cocoa_cb_sw_renderer;
     bool cocoa_cb_10bit_context;
     int cocoa_cb_output_csp;
