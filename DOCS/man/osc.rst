@@ -501,6 +501,9 @@ in ``input.conf``, or sent by other scripts.
 ``osc-show``
     Triggers the OSC to show up, just as if user moved mouse.
 
+``osc-hide``
+    Hide the OSC when ``visibility`` is ``auto``.
+
 Example
 
 You could put this into ``input.conf`` to hide the OSC with the ``a`` key and

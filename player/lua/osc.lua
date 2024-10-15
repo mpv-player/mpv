@@ -2735,6 +2735,11 @@ end
 
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.register_script_message("osc-show", show_osc)
+mp.register_script_message("osc-hide", function ()
+    if user_opts.visibility == "auto" then
+        hide_osc()
+    end
+end)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
 
 mp.register_script_message("osc-idlescreen", idlescreen_visibility)
