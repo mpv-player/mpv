@@ -141,6 +141,9 @@ struct track {
     // Current subtitle state (or cached state if selected==false).
     struct dec_sub *d_sub;
 
+    /* Heuristic for potentially redrawing subs. */
+    bool redraw_subs;
+
     // Current decoding state (NULL if selected==false)
     struct mp_decoder_wrapper *dec;
 
@@ -407,9 +410,6 @@ typedef struct MPContext {
      * boundaries of that chapter due to an inaccurate seek. */
     int last_chapter_seek;
     bool last_chapter_flag;
-
-    /* Heuristic for potentially redrawing subs. */
-    bool redraw_subs;
 
     bool paused;            // internal pause state
     bool playback_active;   // not paused, restarting, loading, unloading
