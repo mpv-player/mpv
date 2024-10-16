@@ -22,6 +22,10 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
+#include <libdisplay-info/cta.h>
+#include <libdisplay-info/edid.h>
+#include <libdisplay-info/info.h>
+
 #include "video/mp_image.h"
 #include "vo.h"
 
@@ -128,6 +132,12 @@ struct vo_drm_state {
     struct mp_present *present;
     struct vo *vo;
     struct vt_switcher vt_switcher;
+
+    // libdisplay-info edid stuff
+    struct di_info *info;
+    const struct di_edid_chromaticity_coords *chromaticity;
+    const struct di_cta_hdr_static_metadata_block *hdr_static_metadata;
+    const struct di_cta_colorimetry_block *colorimetry;
 
     bool active;
     bool paused;
