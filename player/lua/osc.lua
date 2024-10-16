@@ -1843,7 +1843,7 @@ local function osc_init()
     ne.eventresponder["mbtn_left_up"] = function ()
         mp.command("script-binding select/select-aid; script-message-to osc osc-hide")
     end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${track-list/audio} 2000") end
     ne.eventresponder["shift+mbtn_right_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
@@ -1866,7 +1866,7 @@ local function osc_init()
     ne.eventresponder["mbtn_left_up"] = function ()
         mp.command("script-binding select/select-sid; script-message-to osc osc-hide")
     end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
     ne.eventresponder["shift+mbtn_right_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
