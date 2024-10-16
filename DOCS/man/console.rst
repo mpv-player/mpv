@@ -98,6 +98,18 @@ Shift+TAB
 Ctrl+l
     Clear all log messages from the console.
 
+MBTN_RIGHT
+    Hide the console.
+
+MBTN_MID
+    Paste text (uses the primary selection on X11 and Wayland).
+
+WHEEL_UP
+    Move back in the command history.
+
+WHEEL_DOWN
+    Move forward in the command history.
+
 Commands
 --------
 
