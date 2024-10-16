@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+. ./ci/build-common.sh
+
 # FFmpeg on openBSD (4.4.4) is too old; use a subproject
 rm -rf subprojects
 mkdir -p subprojects
@@ -19,16 +21,14 @@ libswresample = libswresample_dep
 libswscale = libswscale_dep
 EOF
 
-meson setup build \
-    -Dffmpeg:vulkan=auto \
-    -Dlibmpv=true \
-    -Dlua=enabled \
-    -Dopenal=enabled \
-    -Dpulse=enabled \
-    -Dtests=true \
-    -Dvulkan=enabled \
-    -Ddvdnav=enabled \
-    -Dcdda=enabled
-
+meson setup build $common_args \
+  -Dffmpeg:vulkan=auto \
+  -Dffmpeg:werror=false \
+  -Dlua=enabled \
+  -Dopenal=enabled \
+  -Dpulse=enabled \
+  -Dvulkan=enabled \
+  -Ddvdnav=enabled \
+  -Dcdda=enabled
 meson compile -C build
 ./build/mpv -v --no-config
