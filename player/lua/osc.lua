@@ -1728,9 +1728,8 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] = function ()
-        mp.command("show-text ${playlist} 3000")
-    end
+    ne.eventresponder["mbtn_right_up"] =
+        function () mp.command("show-text ${playlist} 3000") end
 
     --next
     ne = new_element("pl_next", "button")
@@ -1746,9 +1745,8 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] = function ()
-        mp.command("show-text ${playlist} 3000")
-    end
+    ne.eventresponder["mbtn_right_up"] =
+        function () mp.command("show-text ${playlist} 3000") end
 
 
     -- big buttons
@@ -1844,7 +1842,7 @@ local function osc_init()
     ne.eventresponder["mbtn_left_up"] = function ()
         mp.command("script-binding select/select-aid; script-message-to osc osc-hide")
     end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${track-list/audio} 2000") end
     ne.eventresponder["shift+mbtn_right_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
@@ -1867,7 +1865,7 @@ local function osc_init()
     ne.eventresponder["mbtn_left_up"] = function ()
         mp.command("script-binding select/select-sid; script-message-to osc osc-hide")
     end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
     ne.eventresponder["shift+mbtn_right_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
