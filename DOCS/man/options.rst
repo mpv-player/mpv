@@ -3658,9 +3658,9 @@ Window
     is being used.
 
     The auto option enumerates XRandr providers for autodetection. If amd, radeon,
-    intel, or nouveau (the standard x86 Mesa drivers) is found and nvidia is NOT
-    found, presentation feedback is enabled. Other drivers are not assumed to
-    work, so they are not enabled automatically.
+    intel, or nouveau (the standard x86 Mesa drivers) is found presentation
+    feedback is enabled. Other drivers are not assumed to work, so they are not
+    enabled automatically.
 
     ``yes`` or ``no`` can still be passed regardless to enable/disable this
     mechanism in case there is good/bad behavior with whatever your combination
