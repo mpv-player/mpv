@@ -1985,18 +1985,18 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
     }
 }
 
+#if HAVE_DRM
 static bool devices_are_equal(dev_t a, dev_t b)
 {
     bool ret = false;
-#if HAVE_DRM
     drmDevice *deviceA, *deviceB;
     if (!drmGetDeviceFromDevId(a, 0, &deviceA) && !drmGetDeviceFromDevId(b, 0, &deviceB))
         ret = drmDevicesEqual(deviceA, deviceB);
     drmFreeDevice(&deviceA);
     drmFreeDevice(&deviceB);
-#endif
     return ret;
 }
+#endif
 
 static void do_minimize(struct vo_wayland_state *wl)
 {
