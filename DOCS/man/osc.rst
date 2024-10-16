@@ -31,15 +31,17 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
-    right-click     show playlist
-    shift+L-click   show playlist
+    right-click     open the playlist selector
+    shift+L-click   show the playlist
+    middle-click    show the playlist
     =============   ================================================
 
 pl next
     =============   ================================================
     left-click      play next file in playlist
-    right-click     show playlist
-    shift+L-click   show playlist
+    right-click     open the playlist selector
+    shift+L-click   show the playlist
+    middle-click    show the playlist
     =============   ================================================
 
 title
@@ -47,9 +49,8 @@ title
       name while hovering the seekbar.
 
     =============   ================================================
-    left-click      show file and track info
-    middle-click    show filename
-    shift+L-click   show filename
+    left-click      open the playlist selector
+    middle-click    show the filename
     right-click     show file and track info
     =============   ================================================
 
@@ -101,15 +102,17 @@ audio and sub
     | Displays selected track and amount of available tracks
 
     =============   ================================================
-    left-click      cycle audio/sub tracks forward
-    right-click     cycle audio/sub tracks backwards
+    left-click      open the audio/sub track selector
     shift+L-click   show available audio/sub tracks
+    middle-click    show available audio/sub tracks
+    right-click     show available audio/sub tracks
     mouse wheel     cycle audio/sub tracks forward/backwards
     =============   ================================================
 
 vol
     =============   ================================================
     left-click      toggle mute
+    right-click     open the audio device selector
     mouse wheel     volume up/down
     =============   ================================================
 
