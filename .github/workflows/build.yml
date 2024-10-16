@@ -462,6 +462,7 @@ jobs:
                 libcaca \
                 libcdio-paranoia \
                 libdvdnav \
+                libdisplay-info \
                 libplacebo \
                 libXinerama \
                 libxkbcommon \
