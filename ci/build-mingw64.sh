@@ -23,6 +23,8 @@ export LDFLAGS="-fstack-protector-strong"
 export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
 export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
 
+. ./ci/build-common.sh
+
 if [[ "$TARGET" == "i686-"* ]]; then
     export WINEPATH="`$CC -print-file-name=`;/usr/$TARGET/lib"
 fi
@@ -294,16 +296,13 @@ export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
 
-meson setup $build --cross-file "$prefix_dir/crossfile" \
-    --werror                   \
-    -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
-    --buildtype debugoptimized \
-    --force-fallback-for=mujs  \
-    -Dmujs:werror=false        \
-    -Dmujs:default_library=static      \
-    -D{libmpv,tests}=true -Dlua=luajit \
-    -D{shaderc,spirv-cross,d3d11,javascript}=enabled
-
+meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
+  --buildtype debugoptimized \
+  --force-fallback-for=mujs \
+  -Dmujs:werror=false \
+  -Dmujs:default_library=static \
+  -Dlua=luajit \
+  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
 meson compile -C $build
 
 if [ "$2" = pack ]; then
