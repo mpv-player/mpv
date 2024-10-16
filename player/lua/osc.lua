@@ -1703,7 +1703,7 @@ local function osc_init()
     end
 
     ne.eventresponder["mbtn_left_up"] = function ()
-        mp.command("script-binding stats/display-page-5")
+        mp.command("script-binding select/select-playlist; script-message-to osc osc-hide")
     end
     ne.eventresponder["shift+mbtn_left_up"] = function ()
         mp.command("show-text ${filename}")
@@ -1728,8 +1728,9 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("show-text ${playlist} 3000")
+    end
 
     --next
     ne = new_element("pl_next", "button")
@@ -1745,8 +1746,9 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("show-text ${playlist} 3000")
+    end
 
 
     -- big buttons
@@ -1806,8 +1808,9 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${chapter-list} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("script-binding select/select-chapter; script-message-to osc osc-hide")
+    end
 
     --ch_next
     ne = new_element("ch_next", "button")
@@ -1823,8 +1826,9 @@ local function osc_init()
         end
     ne.eventresponder["shift+mbtn_left_up"] =
         function () mp.command("show-text ${chapter-list} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("script-binding select/select-chapter; script-message-to osc osc-hide")
+    end
 
     --
     update_tracklist()
@@ -1837,12 +1841,13 @@ local function osc_init()
         return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("aid") or "-") .. "/" .. audio_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.command("cycle audio") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("cycle audio down") end
+    ne.eventresponder["mbtn_left_up"] = function ()
+        mp.command("script-binding select/select-aid; script-message-to osc osc-hide")
+    end
     ne.eventresponder["shift+mbtn_left_down"] =
         function () mp.command("show-text ${track-list/audio} 2000") end
+    ne.eventresponder["shift+mbtn_right_up"] =
+        function () mp.command("show-text ${track-list/sub} 2000") end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_down_press"] =
@@ -1859,11 +1864,12 @@ local function osc_init()
         return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("sid") or "-") .. "/" .. sub_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.command("cycle sub") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("cycle sub down") end
+    ne.eventresponder["mbtn_left_up"] = function ()
+        mp.command("script-binding select/select-sid; script-message-to osc osc-hide")
+    end
     ne.eventresponder["shift+mbtn_left_down"] =
+        function () mp.command("show-text ${track-list/sub} 2000") end
+    ne.eventresponder["shift+mbtn_right_up"] =
         function () mp.command("show-text ${track-list/sub} 2000") end
 
     if user_opts.scrollcontrols then
@@ -2074,6 +2080,9 @@ local function osc_init()
     end
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "mute") end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("script-binding select/select-audio-device; script-message-to osc osc-hide")
+    end
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_up_press"] =
