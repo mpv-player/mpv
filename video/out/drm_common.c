@@ -627,6 +627,78 @@ success:
     return true;
 }
 
+static void setup_edid(struct vo_drm_state *drm)
+{
+    drmModePropertyBlobRes *blob;
+    for (int i = 0; i < drm->connector->count_props; ++i) {
+        drmModePropertyRes *prop = drmModeGetProperty(drm->fd, drm->connector->props[i]);
+        if (prop && strcmp(prop->name, "EDID") == 0) {
+            blob = drmModeGetPropertyBlob(drm->fd, drm->connector->prop_values[i]);
+        }
+        drmModeFreeProperty(prop);
+        if (blob)
+            break;
+    }
+    if (!blob) {
+        MP_VERBOSE(drm, "Unable to get EDID blob from connector.\n");
+        return;
+    }
+
+    drm->info = di_info_parse_edid(blob->data, blob->length);
+    if (!drm->info) {
+        MP_VERBOSE(drm, "Failed to parse EDID info: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    const struct di_edid *edid = di_info_get_edid(drm->info);
+    if (!edid) {
+        MP_VERBOSE(drm, "Failed to get EDID info: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    drm->chromaticity = di_edid_get_chromaticity_coords(edid);
+
+    const struct di_edid_cta *cta;
+    const struct di_edid_ext *const *exts = di_edid_get_extensions(edid);
+    for (int i = 0; exts[i]; ++i) {
+        if ((cta = di_edid_ext_get_cta(exts[i])))
+            break;
+    }
+
+    if (cta) {
+        const struct di_cta_data_block *const *blocks = di_edid_cta_get_data_blocks(cta);
+        for (int i = 0; blocks[i]; ++i) {
+            drm->hdr_static_metadata = di_cta_data_block_get_hdr_static_metadata(blocks[i]);
+            if (drm->hdr_static_metadata)
+                break;
+        }
+    }
+
+done:
+    if (blob)
+        drmModeFreePropertyBlob(blob);
+}
+
+static bool target_params_supported_by_display(struct vo_drm_state *drm)
+{
+    if (!drm->chromaticity || !drm->hdr_static_metadata)
+        return false;
+
+    const struct di_cta_hdr_static_metadata_block *hdr_static_metadata = drm->hdr_static_metadata;
+    enum pl_color_transfer trc = drm->target_params.color.transfer;
+
+    if (!pl_color_transfer_is_hdr(trc) && !hdr_static_metadata->eotfs->traditional_sdr)
+        return false;
+
+    if (trc == PL_COLOR_TRC_PQ && !hdr_static_metadata->eotfs->pq)
+        return false;
+
+    if (trc == PL_COLOR_TRC_HLG && !hdr_static_metadata->eotfs->hlg)
+        return false;
+
+    return true;
+}
+
 static bool all_digits(const char *str)
 {
     if (str == NULL || str[0] == '\0') {
@@ -1044,6 +1116,8 @@ bool vo_drm_init(struct vo *vo)
     if (!setup_mode(drm))
         goto err;
 
+    setup_edid(drm);
+
     // Universal planes allows accessing all the planes (including primary)
     if (drmSetClientCap(drm->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)) {
         MP_ERR(drm, "Failed to set Universal planes capability\n");
@@ -1088,6 +1162,9 @@ void vo_drm_uninit(struct vo *vo)
 
     restore_sdr(drm);
     destroy_hdr_blob(drm);
+
+    if (drm->info)
+        di_info_destroy(drm->info);
 
     vo_drm_release_crtc(drm);
     if (drm->vt_switcher_active)
@@ -1290,6 +1367,10 @@ bool vo_drm_set_hdr_metadata(struct vo *vo)
 
     destroy_hdr_blob(drm);
     drm->target_params = target_params;
+    if (!target_params_supported_by_display(drm)) {
+        restore_sdr(drm);
+        return false;
+    }
 
     const struct pl_hdr_metadata *hdr = &target_params.color.hdr;
     struct hdr_output_metadata metadata = {
