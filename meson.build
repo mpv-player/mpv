@@ -299,6 +299,11 @@ if cc.has_multi_arguments('-Wformat', '-Werror=format-security')
     flags += '-Werror=format-security'
 endif
 
+if cc.get_id() == 'gcc'
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66425
+    flags +='-Wno-unused-result'
+endif
+
 darwin = host_machine.system() == 'darwin'
 win32 = host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
 posix = not win32
