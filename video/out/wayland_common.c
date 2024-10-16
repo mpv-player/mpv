@@ -2421,7 +2421,7 @@ static void reset_color_management(struct vo_wayland_state *wl)
 
 static int set_colorspace(struct vo_wayland_state *wl)
 {
-    struct pl_color_space color = wl->vo->target_params->color;
+    struct pl_color_space color = wl->target_params.color;
     int xx_primaries = wl->primaries_map[color.primaries];
     int xx_transfer = wl->transfer_map[color.transfer];
 
@@ -2443,15 +2443,15 @@ static int set_colorspace(struct vo_wayland_state *wl)
 
 static void set_color_management(struct vo_wayland_state *wl)
 {
-    struct pl_color_space color = wl->vo->target_params->color;
-    if (!wl->color_surface || wl->unsupported_colorspace || pl_color_space_equal(&color, &wl->target_params.color))
+    struct mp_image_params target_params = vo_get_target_params(wl->vo);
+    if (!wl->color_surface || wl->unsupported_colorspace || pl_color_space_equal(&target_params.color, &wl->target_params.color))
         return;
 
-    wl->target_params = *wl->vo->target_params;
+    wl->target_params = target_params;
     reset_color_management(wl);
     if (set_colorspace(wl))
         return;
-    struct pl_hdr_metadata hdr = wl->vo->target_params->color.hdr;
+    struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
     if (wl->supports_display_primaries) {
         xx_image_description_creator_params_v4_set_mastering_display_primaries(wl->image_creator_params,
                 hdr.prim.red.x * WAYLAND_COLOR_FACTOR, hdr.prim.red.y * WAYLAND_COLOR_FACTOR, hdr.prim.green.x * WAYLAND_COLOR_FACTOR,
