@@ -16,7 +16,7 @@ export AR=$TARGET-ar
 export NM=$TARGET-nm
 export RANLIB=$TARGET-ranlib
 
-export CFLAGS="-O2 -pipe -Wall -D_FORTIFY_SOURCE=2"
+export CFLAGS="-O2 -pipe -Wall"
 export LDFLAGS="-fstack-protector-strong"
 
 # anything that uses pkg-config
