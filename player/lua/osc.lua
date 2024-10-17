@@ -1221,12 +1221,12 @@ layouts["box"] = function ()
     lo.style = osc_styles.vidtitle
     lo.button.maxchars = user_opts.boxmaxchars
 
-    lo = add_layout("pl_prev")
+    lo = add_layout("playlist_prev")
     lo.geometry =
         {x = (posX - pos_offsetX), y = titlerowY, an = 7, w = 12, h = 12}
     lo.style = osc_styles.topButtons
 
-    lo = add_layout("pl_next")
+    lo = add_layout("playlist_next")
     lo.geometry =
         {x = (posX + pos_offsetX), y = titlerowY, an = 9, w = 12, h = 12}
     lo.style = osc_styles.topButtons
@@ -1238,37 +1238,37 @@ layouts["box"] = function ()
     local bigbtnrowY = posY - pos_offsetY + 35
     local bigbtndist = 60
 
-    lo = add_layout("playpause")
+    lo = add_layout("play_pause")
     lo.geometry =
         {x = posX, y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("skipback")
+    lo = add_layout("skip_backward")
     lo.geometry =
         {x = posX - bigbtndist, y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("skipfrwd")
+    lo = add_layout("skip_forward")
     lo.geometry =
         {x = posX + bigbtndist, y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("ch_prev")
+    lo = add_layout("chapter_prev")
     lo.geometry =
         {x = posX - (bigbtndist * 2), y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("ch_next")
+    lo = add_layout("chapter_next")
     lo.geometry =
         {x = posX + (bigbtndist * 2), y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 1, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
@@ -1511,12 +1511,12 @@ local function bar_layout(direction)
     -- Playlist prev/next
     geo = { x = osc_geo.x + padX, y = line1,
             an = 4, w = 18, h = 18 - padY }
-    lo = add_layout("pl_prev")
+    lo = add_layout("playlist_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("pl_next")
+    lo = add_layout("playlist_next")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
 
@@ -1544,17 +1544,17 @@ local function bar_layout(direction)
     -- Playback control buttons
     geo = { x = osc_geo.x + padX + padwc_l, y = line2, an = 4,
             w = buttonW, h = 36 - padY*2}
-    lo = add_layout("playpause")
+    lo = add_layout("play_pause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("ch_prev")
+    lo = add_layout("chapter_prev")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("ch_next")
+    lo = add_layout("chapter_next")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1582,12 +1582,12 @@ local function bar_layout(direction)
 
     -- Track selection buttons
     geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1715,7 +1715,7 @@ local function osc_init()
     -- playlist buttons
 
     -- prev
-    ne = new_element("pl_prev", "button")
+    ne = new_element("playlist_prev", "button")
 
     ne.content = "\238\132\144"
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
@@ -1732,7 +1732,7 @@ local function osc_init()
         function () mp.command("show-text ${playlist} 3000") end
 
     --next
-    ne = new_element("pl_next", "button")
+    ne = new_element("playlist_next", "button")
 
     ne.content = "\238\132\129"
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
@@ -1751,8 +1751,8 @@ local function osc_init()
 
     -- big buttons
 
-    --playpause
-    ne = new_element("playpause", "button")
+    --play_pause
+    ne = new_element("play_pause", "button")
 
     ne.content = function ()
         if mp.get_property("pause") == "yes" then
@@ -1768,8 +1768,8 @@ local function osc_init()
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "pause") end
 
-    --skipback
-    ne = new_element("skipback", "button")
+    --skip_backward
+    ne = new_element("skip_backward", "button")
 
     ne.softrepeat = true
     ne.content = "\238\128\132"
@@ -1780,8 +1780,8 @@ local function osc_init()
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", -30) end
 
-    --skipfrwd
-    ne = new_element("skipfrwd", "button")
+    --skip_forward
+    ne = new_element("skip_forward", "button")
 
     ne.softrepeat = true
     ne.content = "\238\128\133"
@@ -1792,8 +1792,8 @@ local function osc_init()
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", 60) end
 
-    --ch_prev
-    ne = new_element("ch_prev", "button")
+    --chapter_prev
+    ne = new_element("chapter_prev", "button")
 
     ne.enabled = have_ch
     ne.content = "\238\132\132"
@@ -1810,8 +1810,8 @@ local function osc_init()
         mp.command("script-binding select/select-chapter; script-message-to osc osc-hide")
     end
 
-    --ch_next
-    ne = new_element("ch_next", "button")
+    --chapter_next
+    ne = new_element("chapter_next", "button")
 
     ne.enabled = have_ch
     ne.content = "\238\132\133"
@@ -1831,8 +1831,8 @@ local function osc_init()
     --
     update_tracklist()
 
-    --cy_audio
-    ne = new_element("cy_audio", "button")
+    --audio_track
+    ne = new_element("audio_track", "button")
 
     ne.enabled = audio_track_count > 0
     ne.content = function ()
@@ -1854,8 +1854,8 @@ local function osc_init()
             function () mp.command("cycle audio down") end
     end
 
-    --cy_sub
-    ne = new_element("cy_sub", "button")
+    --sub_track
+    ne = new_element("sub_track", "button")
 
     ne.enabled = sub_track_count > 0
     ne.content = function ()
