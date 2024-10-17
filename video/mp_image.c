@@ -851,6 +851,13 @@ bool mp_image_params_static_equal(const struct mp_image_params *p1,
     return mp_image_params_equal(&a, &b);
 }
 
+void mp_image_params_update_dynamic(struct mp_image_params *dst,
+                                    const struct mp_image_params *src)
+{
+    dst->repr.dovi = src->repr.dovi;
+    dst->color.hdr = src->color.hdr;
+}
+
 // Restore color system, transfer, and primaries to their original values
 // before dovi mapping.
 void mp_image_params_restore_dovi_mapping(struct mp_image_params *params)
