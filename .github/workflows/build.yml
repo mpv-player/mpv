@@ -387,7 +387,7 @@ jobs:
       - name: Build with meson
         id: build
         run: |
-              ./ci/build-linux-old.sh
+          ./ci/build-linux-old.sh
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
