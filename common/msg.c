@@ -525,7 +525,7 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
         if (print_term) {
             int line_w;
             append_terminal_line(log, lev, line, &root->term_msg_tmp, &line_w,
-                                 clip ? term_w : INT_MAX);
+                                 clip && term_w ? term_w : INT_MAX);
             term_msg_lines += (!line_w || !term_w)
                                 ? 1 : (line_w + term_w - 1) / term_w;
         }
@@ -536,7 +536,7 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
         int line_w = 0;
         if (str.len && print_term)
             append_terminal_line(log, lev, str, &root->term_msg_tmp, &line_w,
-                                 bstr_eatstart0(&str, TERM_MSG_0) ? term_w : INT_MAX);
+                                 bstr_eatstart0(&str, TERM_MSG_0) && term_w ? term_w : INT_MAX);
         term_msg_lines += !term_w ? (str.len ? 1 : 0)
                                   : (line_w + term_w - 1) / term_w;
     } else if (str.len) {
