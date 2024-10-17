@@ -483,7 +483,7 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
     // Stupidly, this copies it again. One could possibly allocate the packet
     // for writing in the first place (new_demux_packet()) and use
     // demux_packet_shorten().
-    struct demux_packet *npkt = new_demux_packet_from(line, strlen(line));
+    struct demux_packet *npkt = new_demux_packet_from(ft->packet_pool, line, strlen(line));
     if (npkt)
         demux_packet_copy_attribs(npkt, pkt);
 
