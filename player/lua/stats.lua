@@ -1161,7 +1161,8 @@ local function keybinding_info(after_scroll, bindlist)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint(true)), nl="", indent=""})
+    local prefix = bindlist and page.desc or page.desc .. ":" .. scroll_hint(true)
+    append(header, "", {prefix=prefix, nl="", indent=""})
     header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
