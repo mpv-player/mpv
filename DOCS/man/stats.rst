@@ -115,11 +115,10 @@ Configurable Options
 
     Only show the first specified amount of file tags.
 
-``term_width_limit``
-    Default: -1
+``term_clip``
+    Default: yes
 
-    Sets the terminal width.
-    A value of 0 means the width is infinite, -1 means it's automatic.
+    Whether to clip lines to the terminal width.
 
 ``term_height_limit``
     Default: -1
@@ -259,10 +258,10 @@ string, and one should not expect documentation-level grouping accuracy,
 however, it should still be reasonably useful.
 
 Using ``--idle --script-opts-append=stats-bindlist=yes`` will print the list to
-the terminal and quit immediately. By default long lines are shortened to 79
-chars, and terminal escape sequences are enabled. A different length limit can
-be set by changing ``yes`` to a number (at least 40), and escape sequences can
-be disabled by adding ``-`` before the value, e.g. ``...=-yes`` or ``...=-120``.
+the terminal and quit immediately. Long lines are clipped to the terminal width
+unless this is disabled with ``--script-opts-append=stats-term_clip=no``. Escape
+sequences can be disabled by adding ``-`` before ``yes``, i.e.
+``--script-opts-append=stats-bindlist=-yes``.
 
 Like with ``--input-test``, the list includes bindings from ``input.conf`` and
 from user scripts. Use ``--no-config`` to list only built-in bindings.
