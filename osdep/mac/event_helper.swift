@@ -40,21 +40,27 @@ extension EventHelper {
         let format: mpv_format
         let string: String?
         let bool: Bool?
+        let int: Int64?
         let double: Double?
+        let array: [Any?]
 
         init(
             name: String = "",
             format: mpv_format = MPV_FORMAT_NONE,
             string: String? = nil,
             bool: Bool? = nil,
-            double: Double? = nil
+            int: Int64? = nil,
+            double: Double? = nil,
+            array: [Any?] = []
 
         ) {
             self.name = name
             self.format = format
             self.string = string
             self.bool = bool
+            self.int = int
             self.double = double
+            self.array = array
         }
     }
 }
@@ -136,6 +142,17 @@ class EventHelper {
                 event = .init(name: name, format: format, bool: TypeHelper.toBool(property.data))
             case MPV_FORMAT_DOUBLE:
                 event = .init(name: name, format: format, double: TypeHelper.toDouble(property.data))
+            case MPV_FORMAT_NODE:
+                let node = TypeHelper.toNode(property.data)
+                event = .init(
+                    name: name,
+                    format: format,
+                    string: TypeHelper.nodeToString(node),
+                    bool: TypeHelper.nodeToBool(node),
+                    int: TypeHelper.nodeToInt(node),
+                    double: TypeHelper.nodeToDouble(node),
+                    array: TypeHelper.nodeToArray(node)
+                )
             case MPV_FORMAT_NONE:
                 event = .init(name: name, format: format)
             default: break
