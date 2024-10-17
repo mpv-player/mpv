@@ -50,8 +50,6 @@ local user_opts = {
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
-    chapters_osd = true,        -- whether to show chapters OSD on next/prev
-    playlist_osd = true,        -- whether to show playlist OSD on next/prev
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
 
@@ -67,8 +65,53 @@ local user_opts = {
 
     time_pos_outline_color = "#000000",   -- color of the border timecodes in slimbox and TimePosBar
 
-    tick_delay = 1 / 60,                  -- minimum interval between OSC redraws in seconds
-    tick_delay_follow_display_fps = false -- use display fps as the minimum interval
+    tick_delay = 1 / 60,                   -- minimum interval between OSC redraws in seconds
+    tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
+
+    -- luacheck: push ignore
+    -- luacheck: max line length
+    title_mbtn_left_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+    title_mbtn_mid_command = "show-text ${filename}",
+    title_mbtn_right_command = "show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'",
+
+    pl_prev_mbtn_left_command = "playlist-prev; show-text ${playlist} 3000",
+    pl_prev_mbtn_mid_command = "show-text ${playlist} 3000",
+    pl_prev_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+
+    pl_next_mbtn_left_command = "playlist-next; show-text ${playlist} 3000",
+    pl_next_mbtn_mid_command = "show-text ${playlist} 3000",
+    pl_next_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+
+    playpause_mbtn_left_command = "cycle pause",
+    playpause_mbtn_mid_command = "",
+    playpause_mbtn_right_command = "",
+
+    ch_prev_mbtn_left_command = "no-osd add chapter -1; show-text ${chapter-list} 3000",
+    ch_prev_mbtn_mid_command = "show-text ${chapter-list} 3000",
+    ch_prev_mbtn_right_command = "script-binding select/select-chapter; script-message-to osc osc-hide",
+
+    ch_next_mbtn_left_command = "no-osd add chapter 1; show-text ${chapter-list} 3000",
+    ch_next_mbtn_mid_command = "show-text ${chapter-list} 3000",
+    ch_next_mbtn_right_command = "script-binding select/select-chapter; script-message-to osc osc-hide",
+
+    audio_track_mbtn_left_command = "script-binding select/select-aid; script-message-to osc osc-hide",
+    audio_track_mbtn_mid_command = "show-text ${track-list/audio} 2000",
+    audio_track_mbtn_right_command = "show-text ${track-list/audio} 2000",
+    audio_track_wheel_down_command = "cycle audio",
+    audio_track_wheel_up_command = "cycle audio down",
+
+    sub_track_mbtn_left_command = "script-binding select/select-sid; script-message-to osc osc-hide",
+    sub_track_mbtn_mid_command = "show-text ${track-list/sub} 2000",
+    sub_track_mbtn_right_command = "show-text ${track-list/sub} 2000",
+    sub_track_wheel_down_command = "cycle sub",
+    sub_track_wheel_up_command = "cycle sub down",
+
+    volume_mbtn_left_command = "no-osd cycle mute",
+    volume_mbtn_mid_command = "",
+    volume_mbtn_right_command = "script-binding select/select-audio-device; script-message-to osc osc-hide",
+    volume_wheel_down_command = "add volume -5",
+    volume_wheel_up_command = "add volume 5",
+    -- luacheck: pop
 }
 
 local osc_param = { -- calculated by osc_init()
@@ -1263,12 +1306,12 @@ layouts["box"] = function ()
         {x = posX + (bigbtndist * 2), y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 1, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
@@ -1582,12 +1625,12 @@ local function bar_layout(direction)
 
     -- Track selection buttons
     geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1643,6 +1686,14 @@ layouts["topbar"] = function()
     bar_layout(1)
 end
 
+
+local function command_callback(command)
+    if command ~= "" then
+        return function ()
+            mp.command(command)
+        end
+    end
+end
 
 local function osc_init()
     msg.debug("osc_init")
@@ -1702,12 +1753,9 @@ local function osc_init()
         return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
 
-    ne.eventresponder["mbtn_left_up"] = function ()
-        mp.command("show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'")
-    end
-
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${filename}") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.title_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.title_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.title_mbtn_right_command)
 
     -- playlist buttons
 
@@ -1716,34 +1764,18 @@ local function osc_init()
 
     ne.content = "\238\132\144"
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("playlist-prev", "weak")
-            if user_opts.playlist_osd then
-                mp.command("show-text ${playlist} 3000")
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.pl_prev_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.pl_prev_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.pl_prev_mbtn_right_command)
 
     --next
     ne = new_element("pl_next", "button")
 
     ne.content = "\238\132\129"
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("playlist-next", "weak")
-            if user_opts.playlist_osd then
-                mp.command("show-text ${playlist} 3000")
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${playlist} 3000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.pl_next_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.pl_next_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.pl_next_mbtn_right_command)
 
 
     -- big buttons
@@ -1762,8 +1794,9 @@ local function osc_init()
             return ("\238\128\130")
         end
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "pause") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.playpause_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.playpause_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.playpause_mbtn_right_command)
 
     --skipback
     ne = new_element("skipback", "button")
@@ -1794,80 +1827,58 @@ local function osc_init()
 
     ne.enabled = have_ch
     ne.content = "\238\132\132"
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("add", "chapter", -1)
-            if user_opts.chapters_osd then
-                mp.command("show-text ${chapter-list} 3000")
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.ch_prev_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.ch_prev_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.ch_prev_mbtn_right_command)
 
     --ch_next
     ne = new_element("ch_next", "button")
 
     ne.enabled = have_ch
     ne.content = "\238\132\133"
-    ne.eventresponder["mbtn_left_up"] =
-        function ()
-            mp.commandv("add", "chapter", 1)
-            if user_opts.chapters_osd then
-                mp.command("show-text ${chapter-list} 3000")
-            end
-        end
-    ne.eventresponder["shift+mbtn_left_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${chapter-list} 3000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.ch_next_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.ch_next_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.ch_next_mbtn_right_command)
 
     --
     update_tracklist()
 
-    --cy_audio
-    ne = new_element("cy_audio", "button")
+    --audio_track
+    ne = new_element("audio_track", "button")
 
     ne.enabled = audio_track_count > 0
     ne.content = function ()
         return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("aid") or "-") .. "/" .. audio_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.command("cycle audio") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("cycle audio down") end
-    ne.eventresponder["shift+mbtn_left_down"] =
-        function () mp.command("show-text ${track-list/audio} 2000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.audio_track_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
+        user_opts.audio_track_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.audio_track_mbtn_right_command)
 
     if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_down_press"] =
-            function () mp.command("cycle audio") end
-        ne.eventresponder["wheel_up_press"] =
-            function () mp.command("cycle audio down") end
+        ne.eventresponder["wheel_down_press"] = command_callback(
+            user_opts.audio_track_wheel_down_command)
+        ne.eventresponder["wheel_up_press"] = command_callback(
+            user_opts.audio_track_wheel_up_command)
     end
 
-    --cy_sub
-    ne = new_element("cy_sub", "button")
+    --sub_track
+    ne = new_element("sub_track", "button")
 
     ne.enabled = sub_track_count > 0
     ne.content = function ()
         return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("sid") or "-") .. "/" .. sub_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.command("cycle sub") end
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("cycle sub down") end
-    ne.eventresponder["shift+mbtn_left_down"] =
-        function () mp.command("show-text ${track-list/sub} 2000") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.sub_track_mbtn_right_command)
 
     if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_down_press"] =
-            function () mp.command("cycle sub") end
-        ne.eventresponder["wheel_up_press"] =
-            function () mp.command("cycle sub down") end
+        ne.eventresponder["wheel_down_press"] = command_callback(
+            user_opts.sub_track_wheel_down_command)
+        ne.eventresponder["wheel_up_press"] = command_callback(user_opts.sub_track_wheel_up_command)
     end
 
     --tog_fs
@@ -2045,14 +2056,14 @@ local function osc_init()
             return volicon[math.min(4,math.ceil(volume / (100/3)))]
         end
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "mute") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.volume_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.volume_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.volume_mbtn_right_command)
 
     if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_up_press"] =
-            function () mp.commandv("osd-auto", "add", "volume", 5) end
-        ne.eventresponder["wheel_down_press"] =
-            function () mp.commandv("osd-auto", "add", "volume", -5) end
+        ne.eventresponder["wheel_down_press"] = command_callback(
+            user_opts.volume_wheel_down_command)
+        ne.eventresponder["wheel_up_press"] = command_callback(user_opts.volume_wheel_up_command)
     end
 
 
@@ -2711,6 +2722,11 @@ end
 
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.register_script_message("osc-show", show_osc)
+mp.register_script_message("osc-hide", function ()
+    if user_opts.visibility == "auto" then
+        hide_osc()
+    end
+end)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
 
 mp.register_script_message("osc-idlescreen", idlescreen_visibility)
