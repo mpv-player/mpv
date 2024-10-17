@@ -24,6 +24,7 @@ local o = {
     key_scroll_up = "UP",
     key_scroll_down = "DOWN",
     key_search = "/",
+    key_exit = "ESC",
     scroll_lines = 1,
 
     duration = 4,
@@ -135,6 +136,7 @@ local function init_buffers()
 end
 local cache_ahead_buf, cache_speed_buf
 local perf_buffers = {}
+local process_key_binding
 
 local function graph_add_value(graph, value)
     graph.pos = (graph.pos % graph.len) + 1
@@ -1631,6 +1633,21 @@ local function unbind_search()
     mp.remove_key_binding("__forced_"..o.key_search)
 end
 
+local function bind_exit()
+    -- Don't bind in oneshot mode because if ESC is pressed right when the stats
+    -- stop being displayed, it would unintentionally trigger any user-defined
+    -- ESC binding.
+    if not display_timer.oneshot then
+        mp.add_forced_key_binding(o.key_exit, "__forced_" .. o.key_exit, function ()
+            process_key_binding(false)
+        end)
+    end
+end
+
+local function unbind_exit()
+    mp.remove_key_binding("__forced_" .. o.key_exit)
+end
+
 local function update_scroll_bindings(k)
     if pages[k].scroll then
         bind_scroll()
@@ -1660,6 +1677,7 @@ local function add_page_bindings()
         mp.add_forced_key_binding(k, "__forced_"..k, a(k), {repeatable=true})
     end
     update_scroll_bindings(curr_page)
+    bind_exit()
 end
 
 
@@ -1670,10 +1688,11 @@ local function remove_page_bindings()
     end
     unbind_scroll()
     unbind_search()
+    unbind_exit()
 end
 
 
-local function process_key_binding(oneshot)
+process_key_binding = function(oneshot)
     reset_scroll_offsets()
     -- Stats are already being displayed
     if display_timer:is_enabled() then

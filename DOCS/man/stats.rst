@@ -30,15 +30,24 @@ stats:
 0      Internal stuff (scroll)
 ====   ==================
 
+If stats were displayed by toggling, these key bindings are also active:
+
+====   ==================
+ESC    Close the stats
+====   ==================
+
 On pages which support scroll, these key bindings are also active:
 
 ====   ==================
-UP      Scroll one line up
-DOWN    Scroll one line down
+UP     Scroll one line up
+DOWN   Scroll one line down
 ====   ==================
 
-Page 4 also binds ``/`` to search for input bindings by typing part of a binding
-or command.
+On page 4, these key bindings are also active:
+
+====   ==================
+/      Search key bindings
+====   ==================
 
 Configuration
 -------------
@@ -62,6 +71,8 @@ Configurable Options
     Default: 5
 ``key_page_0``
     Default: 0
+``key_exit``
+    Default: ESC
 
     Key bindings for page switching while stats are displayed.
 
