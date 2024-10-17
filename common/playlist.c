@@ -89,6 +89,16 @@ void playlist_entry_unref(struct playlist_entry *e)
     }
 }
 
+static void playlist_entry_remove(struct playlist_entry *entry)
+{
+    entry->pl = NULL;
+    entry->pl_index = -1;
+    ta_set_parent(entry, NULL);
+
+    entry->removed = true;
+    playlist_entry_unref(entry);
+}
+
 void playlist_remove(struct playlist *pl, struct playlist_entry *entry)
 {
     assert(pl && entry->pl == pl);
@@ -101,12 +111,7 @@ void playlist_remove(struct playlist *pl, struct playlist_entry *entry)
     MP_TARRAY_REMOVE_AT(pl->entries, pl->num_entries, entry->pl_index);
     playlist_update_indexes(pl, entry->pl_index, -1);
 
-    entry->pl = NULL;
-    entry->pl_index = -1;
-    ta_set_parent(entry, NULL);
-
-    entry->removed = true;
-    playlist_entry_unref(entry);
+    playlist_entry_remove(entry);
 }
 
 void playlist_clear(struct playlist *pl)
@@ -193,6 +198,68 @@ void playlist_unshuffle(struct playlist *pl)
     if (pl->num_entries)
         qsort(pl->entries, pl->num_entries, sizeof(pl->entries[0]), cmp_unshuffle);
     playlist_update_indexes(pl, 0, -1);
+}
+
+void playlist_reorder(struct playlist *pl, const int *indexes, int num_indexes)
+{
+    int current_pl_index = pl->current ? pl->current->pl_index : -1;
+
+    // Mark all entries removed.
+    for (int i = 0; i < pl->num_entries; i++)
+        pl->entries[i]->pl_index = -1;
+
+    int n = 0;
+
+    // Assign indexes.
+    for (int i = 0; i < num_indexes; i++) {
+        int index = indexes[i];
+        struct playlist_entry *e = playlist_entry_from_index(pl, index);
+
+        if (e && e->pl_index < 0)
+            e->pl_index = n++;
+    }
+
+    if (pl->current && pl->current->pl_index < 0) {
+        pl->current = NULL;
+        pl->current_was_replaced = true;
+
+        // Find next entry that is not removed.
+        for (int i = current_pl_index + 1; i < pl->num_entries; i++) {
+            struct playlist_entry *e = pl->entries[i];
+
+            if (e->pl_index >= 0) {
+                pl->current = e;
+                break;
+            }
+        }
+    }
+
+    // `entries[0..i]`: Holds invariant: `entries[k]->pl_index >= k`
+    // `entries[i..j]`: Removed
+    // `entries[j..]`: Unprocessed
+    //
+    // When `i == n`, the last element will satisfy:
+    // - `entries[n-1]->pl_index >= n-1`
+    // - `entries[n-1]->pl_index < n`
+    // That leaves us with `entries[n-1]->pl_index = n-1`. Applying this logic
+    // to the preceding entries we can conclude that the array is sorted.
+    for (int i = 0, j = 0; j < pl->num_entries; j++) {
+        struct playlist_entry *e = pl->entries[j];
+
+        if (e->pl_index < 0) {
+            playlist_entry_remove(e);
+            continue;
+        }
+
+        pl->entries[i] = e;
+
+        for (int k; (k = pl->entries[i]->pl_index) < i;)
+            MPSWAP(struct playlist_entry *, pl->entries[i], pl->entries[k]);
+
+        i++;
+    }
+
+    pl->num_entries = n;
 }
 
 // (Explicitly ignores current_was_replaced.)
