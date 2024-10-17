@@ -491,6 +491,74 @@ Configurable Options
 
     Use display fps to calculate the interval between OSC redraws.
 
+The following options configure what commands are run when the buttons are
+clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
+
+``title_mbtn_left_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``title_mbtn_mid_command=show-text ${filename}``
+
+``title_mbtn_right_command=show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'``
+
+``pl_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000``
+
+``pl_prev_mbtn_mid_command=show-text ${playlist} 3000``
+
+``pl_prev_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``pl_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000``
+
+``pl_next_mbtn_mid_command=show-text ${playlist} 3000``
+
+``pl_next_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``playpause_mbtn_left_command=cycle pause``
+
+``playpause_mbtn_mid_command=``
+
+``playpause_mbtn_right_command=``
+
+``ch_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-list} 3000``
+
+``ch_prev_mbtn_mid_command=show-text ${chapter-list} 3000``
+
+``ch_prev_mbtn_right_command=script-binding select/select-chapter; script-message-to osc osc-hide``
+
+``ch_next_mbtn_left_command=no-osd add chapter 1; show-text ${chapter-list} 3000``
+
+``ch_next_mbtn_mid_command=show-text ${chapter-list} 3000``
+
+``ch_next_mbtn_right_command=script-binding select/select-chapter; script-message-to osc osc-hide``
+
+``audio_track_mbtn_left_command=script-binding select/select-aid; script-message-to osc osc-hide``
+
+``audio_track_mbtn_mid_command=show-text ${track-list/audio} 2000``
+
+``audio_track_mbtn_right_command=show-text ${track-list/audio} 2000``
+
+``audio_track_wheel_down_command=cycle audio``
+
+``audio_track_wheel_up_command=cycle audio down``
+
+``sub_track_mbtn_left_command=script-binding select/select-sid; script-message-to osc osc-hide``
+
+``sub_track_mbtn_mid_command=show-text ${track-list/sub} 2000``
+
+``sub_track_mbtn_right_command=show-text ${track-list/sub} 2000``
+
+``sub_track_wheel_down_command=cycle sub``
+
+``sub_track_wheel_up_command=cycle sub down``
+
+``volume_mbtn_left_command=no-osd cycle mute``
+
+``volume_mbtn_mid_command=``
+
+``volume_mbtn_right_command=script-binding select/select-audio-device; script-message-to osc osc-hide``
+
+``volume_wheel_down_command=add volume -5``
+
+``volume_wheel_up_command=add volume 5``
 
 Script Commands
 ~~~~~~~~~~~~~~~
