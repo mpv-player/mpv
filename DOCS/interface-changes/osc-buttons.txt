@@ -1,0 +1,4 @@
+change several OSC mouse bindings to select.lua functions
+add script-opts to configure what OSC buttons do when clicked
+remove `osc-playlist_osd` script-opt and behave as if it was off by default; `playlist_osd=yes` can be replicated with `osc-playlist_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000` and `osc-playlist_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000`
+remove `osc-chapters_osd` script-opt and behave as if it was off by default; `chapter_osd=yes` can be replicated with `osc-chapter_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-list} 3000` and `osc-chapter_next_mbtn_left_command=no-osd add chapter 1; show-text ${chapter-list} 3000`
