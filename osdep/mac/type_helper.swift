@@ -77,4 +77,72 @@ class TypeHelper {
     class func toDouble(_ obj: UnsafeMutableRawPointer) -> Double? {
         return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
     }
+
+    // MPV_FORMAT_NODE
+    class func toNode(_ obj: UnsafeMutableRawPointer) -> mpv_node? {
+        return UnsafePointer<mpv_node>(OpaquePointer(obj))?.pointee
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_STRING
+    class func nodeToString(_ node: mpv_node?) -> String? {
+        guard let cString = node?.u.string else { return nil }
+        return String(cString: cString)
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_FLAG
+    class func nodeToBool(_ node: mpv_node?) -> Bool? {
+        guard let flag = node?.u.flag else { return nil }
+        return Bool(flag)
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_INT64
+    class func nodeToInt(_ node: mpv_node?) -> Int64? {
+        return node?.u.int64
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_DOUBLE
+    class func nodeToDouble(_ node: mpv_node?) -> Double? {
+        return node?.u.double_
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_NODE_ARRAY
+    class func nodeToArray(_ node: mpv_node?) -> [Any?] {
+        var array: [Any?] = []
+        guard let list = node?.u.list?.pointee,
+              let values = list.values else { return array }
+
+        for index in 0..<Int(list.num) {
+            array.append(TypeHelper.nodeToAny(values[index]))
+        }
+
+        return array
+    }
+
+    // MPV_FORMAT_NODE > MPV_FORMAT_NODE_MAP
+    class func nodeToDict(_ node: mpv_node?) -> [String: Any?] {
+        var dict: [String: Any?] = [:]
+        guard let list = node?.u.list?.pointee,
+              let values = list.values else { return dict }
+
+        for index in 0..<Int(list.num) {
+            guard var keyPtr = list.keys?[index] else { continue }
+            let key = String(cString: keyPtr)
+            dict[key] = TypeHelper.nodeToAny(values[index])
+        }
+
+        return dict
+    }
+
+    // MPV_FORMAT_NODE
+    class func nodeToAny(_ node: mpv_node) -> Any? {
+        switch node.format {
+        case MPV_FORMAT_STRING: return TypeHelper.nodeToString(node)
+        case MPV_FORMAT_FLAG: return TypeHelper.nodeToBool(node)
+        case MPV_FORMAT_INT64: return TypeHelper.nodeToInt(node)
+        case MPV_FORMAT_DOUBLE: return TypeHelper.nodeToDouble(node)
+        case MPV_FORMAT_NODE_ARRAY: return TypeHelper.nodeToArray(node)
+        case MPV_FORMAT_NODE_MAP: return TypeHelper.nodeToDict(node)
+        default: return nil
+        }
+    }
 }
