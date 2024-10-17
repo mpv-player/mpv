@@ -1263,12 +1263,12 @@ layouts["box"] = function ()
         {x = posX + (bigbtndist * 2), y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 1, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
@@ -1582,12 +1582,12 @@ local function bar_layout(direction)
 
     -- Track selection buttons
     geo = { x = geo.x - tsW - padX, y = geo.y, an = geo.an, w = tsW, h = geo.h }
-    lo = add_layout("cy_sub")
+    lo = add_layout("sub_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("cy_audio")
+    lo = add_layout("audio_track")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1832,8 +1832,8 @@ local function osc_init()
     --
     update_tracklist()
 
-    --cy_audio
-    ne = new_element("cy_audio", "button")
+    --audio_track
+    ne = new_element("audio_track", "button")
 
     ne.enabled = audio_track_count > 0
     ne.content = function ()
@@ -1855,8 +1855,8 @@ local function osc_init()
             function () mp.command("cycle audio down") end
     end
 
-    --cy_sub
-    ne = new_element("cy_sub", "button")
+    --sub_track
+    ne = new_element("sub_track", "button")
 
     ne.enabled = sub_track_count > 0
     ne.content = function ()
