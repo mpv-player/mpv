@@ -397,13 +397,13 @@ static void append_terminal_line(struct mp_log *log, int lev,
 
     const unsigned char *cut_pos = NULL;
     int width = term_disp_width(bstr_splice(*term_msg, start, term_msg->len),
-                                term_w - 3, &cut_pos);
+                                term_w - 1, &cut_pos);
     if (cut_pos) {
         int new_len = cut_pos - term_msg->start;
         bstr rem = {(unsigned char *)cut_pos, term_msg->len - new_len};
         term_msg->len = new_len;
 
-        bstr_xappend(root, term_msg, bstr0("..."));
+        bstr_xappend(root, term_msg, bstr0("\xE2\x80\xA6"));
 
         while (rem.len) {
             if (bstr_eatstart0(&rem, "\033[")) {
