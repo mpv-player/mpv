@@ -1,0 +1,1 @@
+rename `--load-osd-console` to `--load-console`

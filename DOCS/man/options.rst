@@ -1050,7 +1050,7 @@ Program Behavior
     binding (default: yes). By default, the ``i`` key is used (``I`` to make
     the overlay permanent).
 
-``--load-osd-console=<yes|no>``
+``--load-console=<yes|no>``
     Enable the built-in script that shows a console on a key binding and lets
     you enter commands (default: yes). The ````` key is used to show the
     console by default, and ``ESC`` to hide it again.

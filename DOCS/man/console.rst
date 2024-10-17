@@ -3,7 +3,7 @@ CONSOLE
 
 The console is a REPL for mpv input commands. It is displayed on the video
 window. It also shows log messages. It can be disabled entirely using the
-``--load-osd-console=no`` option.
+``--load-console=no`` option.
 
 Keybindings
 -----------
