@@ -50,6 +50,17 @@ class TypeHelper {
         }
     }
 
+    // char ** OPT_STRINGLIST
+    class func toStringArray(_ obj: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?) -> [String] {
+        guard var cStringArray = obj else { return [] }
+        var stringArray: [String] = []
+        while let cString = cStringArray.pointee {
+            stringArray.append(String(cString: cString))
+            cStringArray += 1
+        }
+        return stringArray
+    }
+
     // *(char **) MPV_FORMAT_STRING
     class func toString(_ obj: UnsafeMutableRawPointer?) -> String? {
         guard let str = obj else { return nil }
