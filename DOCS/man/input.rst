@@ -1722,6 +1722,10 @@ This list uses the event name field value, and the C API symbol in brackets:
     ``data``
         The new value of the property.
 
+``initialized`` (``MPV_EVENT_INITIALIZED``)
+    Triggered after initialization is complete, including all scripts.
+    mpv is proceeding to play the file.
+
 The following events also happen, but are deprecated: ``idle``, ``tick``
 Use ``mpv_observe_property()`` (Lua: ``mp.observe_property()``) instead.
 
