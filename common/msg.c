@@ -396,8 +396,9 @@ static void append_terminal_line(struct mp_log *log, int lev,
     bstr_xappend(root, term_msg, text);
 
     const unsigned char *cut_pos = NULL;
+    int ellipsis_width = 1;
     int width = term_disp_width(bstr_splice(*term_msg, start, term_msg->len),
-                                term_w - 1, &cut_pos);
+                                term_w - ellipsis_width, &cut_pos);
     if (cut_pos) {
         int new_len = cut_pos - term_msg->start;
         bstr rem = {(unsigned char *)cut_pos, term_msg->len - new_len};
@@ -419,7 +420,7 @@ static void append_terminal_line(struct mp_log *log, int lev,
         }
 
         bstr_xappend(root, term_msg, bstr0("\n"));
-        width += 3;
+        width += ellipsis_width;
     }
     *line_w = root->isatty[term_msg_fileno(root, lev)]
                 ? width : 0;
