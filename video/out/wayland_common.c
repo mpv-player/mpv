@@ -2426,10 +2426,10 @@ static int set_colorspace(struct vo_wayland_state *wl)
     int xx_transfer = wl->transfer_map[color.transfer];
 
     if (xx_primaries == -1)
-        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", pl_color_primaries_name(color.primaries));
+        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", m_opt_choice_str(pl_csp_prim_names, color.primaries));
 
     if (xx_transfer == -1)
-        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", pl_color_transfer_name(color.transfer));
+        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", m_opt_choice_str(pl_csp_trc_names, color.transfer));
 
     if (xx_primaries == -1 || xx_transfer == -1) {
         wl->unsupported_colorspace = true;
