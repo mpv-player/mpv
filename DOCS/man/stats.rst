@@ -231,6 +231,11 @@ Configurable Options
     ``auto`` scales the text and graphs with the OSD, which is scaled with the
     window or kept at a constant size, depending on the ``--osd-scale-by-window`` option.
 
+``print_escape_sequences``
+    Default: yes
+
+    Whether to print terminal escape sequences.
+
 Note: colors are given as hexadecimal values and use ASS tag order: BBGGRR
 (blue green red).
 

@@ -87,6 +87,7 @@ local o = {
     no_ass_b0 = "\027[0m",
     no_ass_it1 = "\027[3m",
     no_ass_it0 = "\027[0m",
+    print_escape_sequences = true,
 
     bindlist = "no",  -- print page 4 to the terminal on startup and quit mpv
 }
@@ -99,6 +100,13 @@ if o.term_width_limit < 0 then
 end
 if o.term_height_limit < 0 then
     o.term_height_limit = nil
+end
+
+if not o.print_escape_sequences then
+    o.no_ass_b1 = ""
+    o.no_ass_b0 = ""
+    o.no_ass_it1 = ""
+    o.no_ass_it0 = ""
 end
 
 local format = string.format

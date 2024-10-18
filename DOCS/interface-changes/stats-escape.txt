@@ -1,0 +1,1 @@
+add `stats-print_escape_sequences` script-opt
