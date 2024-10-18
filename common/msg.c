@@ -396,7 +396,7 @@ static void append_terminal_line(struct mp_log *log, int lev,
     bstr_xappend(root, term_msg, text);
 
     const unsigned char *cut_pos = NULL;
-    int ellipsis_width = 1;
+    int ellipsis_width = 2;
     int width = term_disp_width(bstr_splice(*term_msg, start, term_msg->len),
                                 term_w - ellipsis_width, &cut_pos);
     if (cut_pos) {
@@ -404,7 +404,7 @@ static void append_terminal_line(struct mp_log *log, int lev,
         bstr rem = {(unsigned char *)cut_pos, term_msg->len - new_len};
         term_msg->len = new_len;
 
-        bstr_xappend(root, term_msg, bstr0("\xE2\x80\xA6"));
+        bstr_xappend(root, term_msg, bstr0(".."));
 
         while (rem.len) {
             if (bstr_eatstart0(&rem, "\033[")) {
