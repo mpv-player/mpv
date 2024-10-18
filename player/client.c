@@ -2114,6 +2114,7 @@ static const char *const event_table[] = {
     [MPV_EVENT_PROPERTY_CHANGE] = "property-change",
     [MPV_EVENT_QUEUE_OVERFLOW] = "event-queue-overflow",
     [MPV_EVENT_HOOK] = "hook",
+    [MPV_EVENT_INITIALIZED] = "initialized",
 };
 
 const char *mpv_event_name(mpv_event_id event)
