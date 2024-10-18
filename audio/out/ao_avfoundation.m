@@ -23,6 +23,8 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "internal.h"
+#include "libavutil/mathematics.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 #include "ta/ta_talloc.h"
 
@@ -46,6 +48,10 @@ struct priv {
     CMAudioFormatDescriptionRef format_description;
     AVObserver *observer;
     int64_t end_time_av;
+
+    struct {
+        int buffer_msec;
+    } options;
 };
 
 static void free_block(void *refcon, void *doomedMemoryBlock, size_t sizeInBytes)
@@ -324,7 +330,7 @@ static int init(struct ao *ao)
     layout = NULL;
 
     // AVSampleBufferAudioRenderer read ahead aggressively
-    ao->device_buffer = ao->samplerate * 2;
+    ao->device_buffer = av_rescale(ao->samplerate, p->options.buffer_msec, 1000);
 
     p->observer = [[AVObserver alloc] initWithAO:ao];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
@@ -389,4 +395,9 @@ const struct ao_driver audio_out_avfoundation = {
     .set_pause      = set_pause,
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
+    .options_prefix = "avfoundation",
+    .options = (const struct m_option[]) {
+        {"buffer", OPT_INT(options.buffer_msec), M_RANGE(1, 2000), OPTDEF_INT(2000)},
+        {0}
+    },
 };
