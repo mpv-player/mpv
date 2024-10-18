@@ -54,14 +54,18 @@ class RemoteCommandCenter: EventSubscriber {
     var chapter: String? { didSet { updateInfoCenter() } }
     var album: String? { didSet { updateInfoCenter() } }
     var artist: String? { didSet { updateInfoCenter() } }
-    var cover: NSImage
+    var path: String?
+    var coverPath: String?
+    var cover: NSImage? { didSet { updateInfoCenter() } }
+    var defaultCover: NSImage
 
+    let queue: DispatchQueue = DispatchQueue(label: "io.mpv.remote.queue")
     var infoCenter: MPNowPlayingInfoCenter { return MPNowPlayingInfoCenter.default() }
     var commandCenter: MPRemoteCommandCenter { return MPRemoteCommandCenter.shared() }
 
     init(_ appHub: AppHub) {
         self.appHub = appHub
-        cover = appHub.getIcon()
+        defaultCover = appHub.getIcon()
 
         configs = [
             commandCenter.pauseCommand: Config(key: MP_KEY_PAUSEONLY, handler: keyHandler),
@@ -103,6 +107,8 @@ class RemoteCommandCenter: EventSubscriber {
         event?.subscribe(self, event: .init(name: "chapter-metadata/title", format: MPV_FORMAT_STRING))
         event?.subscribe(self, event: .init(name: "metadata/by-key/album", format: MPV_FORMAT_STRING))
         event?.subscribe(self, event: .init(name: "metadata/by-key/artist", format: MPV_FORMAT_STRING))
+        event?.subscribe(self, event: .init(name: "path", format: MPV_FORMAT_STRING))
+        event?.subscribe(self, event: .init(name: "track-list", format: MPV_FORMAT_NODE))
     }
 
     func start() {
@@ -144,6 +150,7 @@ class RemoteCommandCenter: EventSubscriber {
     }
 
     func updateInfoCenter() {
+        let cover = cover ?? defaultCover
         infoCenter.playbackState = isPaused ? .paused : .playing
         infoCenter.nowPlayingInfo = (infoCenter.nowPlayingInfo ?? [:]).merging([
             MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
@@ -154,8 +161,46 @@ class RemoteCommandCenter: EventSubscriber {
             MPMediaItemPropertyTitle: title,
             MPMediaItemPropertyArtist: artist ?? chapter ?? "",
             MPMediaItemPropertyAlbumTitle: album ?? "",
-            MPMediaItemPropertyArtwork: MPMediaItemArtwork(boundsSize: cover.size) { _ in return self.cover }
+            MPMediaItemPropertyArtwork: MPMediaItemArtwork(boundsSize: cover.size) { _ in return cover }
         ]) { (_, new) in new }
+    }
+
+    func updateCover(tracks: [Any?]) {
+        var imageCoverPath: String?
+        var externalCoverPath: String?
+
+        for item in tracks {
+            guard let track = item as? [String: Any?] else { continue }
+            if (track["image"] as? Bool) == true {
+                // opened file is an image
+                if track["external"] as? Bool == false && track["albumart"] as? Bool == false && imageCoverPath == nil {
+                    imageCoverPath = path
+                    continue
+                }
+                // external cover
+                if let filename = track["external-filename"] as? String, externalCoverPath == nil {
+                    externalCoverPath = filename
+                    continue
+                }
+            }
+        }
+
+        // read cover image on separate thread
+        queue.async {
+            guard let path = imageCoverPath ?? externalCoverPath else {
+                self.cover = nil
+                self.coverPath = nil
+                return
+            }
+            if self.coverPath == path { return }
+
+            var image = NSImage(contentsOf: URL(fileURLWithPath: path))
+            if let url = URL(string: path), image == nil {
+                image = NSImage(contentsOf: url)
+            }
+            self.cover = image
+            self.coverPath = path
+        }
     }
 
     lazy var keyHandler: ConfigHandler = { event in
@@ -196,6 +241,8 @@ class RemoteCommandCenter: EventSubscriber {
         case "chapter-metadata/title": chapter = event.string
         case "metadata/by-key/album": album = event.string
         case "metadata/by-key/artist": artist = event.string
+        case "path": path = event.string
+        case "track-list": updateCover(tracks: event.array)
         default: break
         }
     }
