@@ -1,9 +1,13 @@
 #!/bin/sh
 set -e
 
-# FFmpeg on openBSD (4.4.4) is too old; use a subproject
 rm -rf subprojects
 mkdir -p subprojects
+# libplacebo on openBSD (6.338.2) is too old; use a subproject
+git clone https://code.videolan.org/videolan/libplacebo.git \
+    --recurse-submodules --shallow-submodules \
+    --depth=1 --branch v7.349 subprojects/libplacebo \
+# FFmpeg on openBSD (4.4.4) is too old; use a subproject
 cat <<EOF > subprojects/ffmpeg.wrap
 [wrap-git]
 url = https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git
