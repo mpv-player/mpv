@@ -22,6 +22,8 @@ local opts = {
     border_size = 1,
     case_sensitive = true,
     history_dedup = true,
+    persist_history = false,
+    history_path = '~~state/console_history.txt',
     font_hw_ratio = 'auto',
 }
 
@@ -93,6 +95,7 @@ local histories = {[id] = {}}
 local history = histories[id]
 local history_pos = 1
 local searching_history = false
+local history_is_dirty = false
 local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
@@ -605,6 +608,10 @@ local function history_add(text)
     end
 
     history[#history + 1] = text
+
+    if id == default_id then
+        history_is_dirty = true
+    end
 end
 
 local function handle_edit()
@@ -752,6 +759,8 @@ local function handle_enter()
         unbind_mouse()
         return
     end
+
+    line = line:match('^%s*(.-)%s*$')
 
     if line == '' and input_caller == nil then
         return
@@ -1738,6 +1747,24 @@ local function show_and_type(text, cursor_pos)
     end
 end
 
+local function read_history()
+    if opts.persist_history == false then
+        return
+    end
+
+    local history_file = io.open(mp.command_native({'expand-path', opts.history_path}))
+
+    if history_file == nil then
+        return
+    end
+
+    for history_line in history_file:lines() do
+        history[#history + 1] = history_line
+    end
+
+    history_file:close()
+end
+
 -- Add a global binding for enabling the REPL. While it's enabled, its bindings
 -- will take over and it can be closed with ESC.
 mp.add_key_binding(nil, 'enable', function()
@@ -1898,5 +1925,52 @@ mp.register_event('log-message', function(e)
     log_add('[' .. e.prefix .. '] ' .. e.text:sub(1, -2), styles[e.level],
             terminal_styles[e.level])
 end)
+
+mp.register_event('shutdown', function ()
+    if opts.persist_history == false or history_is_dirty == false then
+        return
+    end
+
+    history = histories[default_id]
+    local history_to_save = table.concat(history, '\n') .. '\n'
+    local history_path = mp.command_native({'expand-path', opts.history_path})
+
+    -- Reread the history file to get lines that other mpv instances may have
+    -- added.
+    local history_file = io.open(history_path)
+
+    if history_file then
+        for history_line in history_file:lines() do
+            local found = false
+
+            for _, history_line2 in ipairs(history) do
+                if history_line == history_line2 then
+                    found = true
+                    break
+                end
+            end
+
+            if found == false then
+                history_to_save = history_to_save .. history_line .. '\n'
+            end
+        end
+
+        history_file:close()
+    end
+
+    local error
+    history_file, error = io.open(history_path, 'w')
+
+    if history_file == nil then
+        mp.msg.error('Failed to write console history: ' .. error)
+
+        return
+    end
+
+    history_file:write(history_to_save)
+    history_file:close()
+end)
+
+read_history()
 
 collectgarbage()
