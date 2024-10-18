@@ -45,7 +45,7 @@ int mp_mkostemps(char *template, int suffixlen, int flags)
         // not truly random; just a counter would be sufficient).
         size_t fuckmess = mp_rand_next();
         char crap[7] = "";
-        snprintf(crap, sizeof(crap), "%06zx", fuckmess);
+        mp_tprintf_buf(crap, sizeof(crap), "%06zx", fuckmess);
         memcpy(t, crap, 6);
 
         int res = open(template, O_RDWR | O_CREAT | O_EXCL | flags, 0600);

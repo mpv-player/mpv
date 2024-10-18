@@ -143,9 +143,9 @@ static char *fmtmsg_buf(char *buf, size_t buf_size, DWORD errorID)
                              FORMAT_MESSAGE_IGNORE_INSERTS,
                              NULL, errorID, 0, buf, buf_size, NULL);
     if (!n && GetLastError() == ERROR_MORE_DATA) {
-        snprintf(buf, buf_size,
-                 "<Insufficient buffer size (%zd) for error message>",
-                 buf_size);
+        mp_tprintf_buf(buf, buf_size,
+                       "<Insufficient buffer size (%zd) for error message>",
+                       buf_size);
     } else {
         if (n > 0 && buf[n-1] == '\n')
             buf[n-1] = '\0';
