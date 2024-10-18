@@ -27,6 +27,7 @@ end)
 
 local chapter_list = {}
 local playlist_cookies = {}
+local playlist_title = ""
 
 local function Set (t)
     local set = {}
@@ -1065,6 +1066,10 @@ local function run_ytdl_hook(url)
 
     json["proxy"] = json["proxy"] or proxy
 
+    if playlist_title then
+        json["playlist_title"] = playlist_title
+    end
+
     -- what did we get?
     if json["direct"] then
         -- direct URL, nothing to do
@@ -1078,6 +1083,8 @@ local function run_ytdl_hook(url)
             msg.warn("Got empty playlist, nothing to play.")
             return
         end
+
+        playlist_title = json["title"]
 
         local self_redirecting_url =
             json.entries[1]["_type"] ~= "url_transparent" and
