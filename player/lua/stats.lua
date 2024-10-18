@@ -36,7 +36,6 @@ local o = {
     file_tag_max_count = 16,         -- only show the first x file tags
     show_frame_info = false,         -- whether to show the current frame info
     term_clip = true,
-    term_height_limit = -1,          -- overwrites the terminal height
     debug = false,
 
     -- Graph options and style
@@ -92,11 +91,6 @@ local o = {
     bindlist = false,  -- print page 4 to the terminal on startup and quit mpv
 }
 options.read_options(o)
-
-o.term_height_limit = tonumber(o.term_height_limit) or -1
-if o.term_height_limit < 0 then
-    o.term_height_limit = nil
-end
 
 if not o.print_escape_sequences then
     o.no_ass_b1 = ""
@@ -1118,10 +1112,9 @@ end
 -- content     : table of the content where each entry is one line
 -- apply_scroll: scroll the content
 local function finalize_page(header, content, apply_scroll)
-    local term_size = mp.get_property_native("term-size", {})
-    local term_height = o.term_height_limit or term_size.h or 24
+    local term_height = mp.get_property_native("term-size/h", 24)
     local from, to = 1, #content
-    if apply_scroll and term_height > 0 then
+    if apply_scroll then
         -- Up to 40 lines for libass because it can put a big performance toll on
         -- libass to process many lines which end up outside (below) the screen.
         -- In the terminal reduce height by 2 for the status line (can be more then one line)

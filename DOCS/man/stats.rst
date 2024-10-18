@@ -120,12 +120,6 @@ Configurable Options
 
     Whether to clip lines to the terminal width.
 
-``term_height_limit``
-    Default: -1
-
-    Sets the terminal height.
-    A value of 0 means the height is infinite, -1 means it's automatic.
-
 ``plot_perfdata``
     Default: yes
 
