@@ -3114,10 +3114,7 @@ bool vo_wayland_init(struct vo *vo)
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
     }
 
-    // Only bind to vo_dmabuf_wayland for now to avoid conflicting with VK_hdr_layer
-    if (wl->color_manager && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
-        wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
-    } else {
+    if (!wl->color_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    xx_color_manager_v4_interface.name);
     }
@@ -3205,13 +3202,11 @@ bool vo_wayland_init(struct vo *vo)
      * before mpv does anything else. */
     wl_display_roundtrip(wl->display);
 
-    // The compositor needs to at least support parametric otherwise
-    // the protocol is useless for us.
-    // TODO: Use the icc stuff.
-    if (wl->color_manager && !wl->supports_parametric) {
+    // Only bind to vo_dmabuf_wayland for now to avoid conflicting with VK_hdr_layer
+    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
+        wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
+    } else {
         MP_VERBOSE(wl, "Compositor does not support parametic image descriptions!\n");
-        xx_color_management_surface_v4_destroy(wl->color_surface);
-        wl->color_surface = NULL;
     }
 
     return true;
