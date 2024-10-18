@@ -157,6 +157,11 @@ Available audio output drivers are:
         if mpv is not started out of the bundle,
         though playback with spatial audio off always works.
 
+    Currently, due to the implementation of A/V compensation,
+    setting ``--video-sync`` to ``display-resample`` or ``display-vdrop``
+    can alleviate A/V drift on changing playback speed
+    when using this audio output driver.
+
 ``openal``
     OpenAL audio output driver.
 
