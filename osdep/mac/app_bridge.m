@@ -53,6 +53,7 @@ const struct m_sub_options macos_conf = {
             {"callback", RENDER_TIMER_CALLBACK}, {"precise", RENDER_TIMER_PRECISE},
             {"system", RENDER_TIMER_SYSTEM}, {"feedback", RENDER_TIMER_PRESENTATION_FEEDBACK})},
         {"macos-menu-shortcuts", OPT_BOOL(macos_menu_shortcuts)},
+        {"macos-bundle-path", OPT_STRINGLIST(macos_bundle_path)},
         {"cocoa-cb-sw-renderer", OPT_CHOICE(cocoa_cb_sw_renderer,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"cocoa-cb-10bit-context", OPT_BOOL(cocoa_cb_10bit_context)},
@@ -80,6 +81,10 @@ const struct m_sub_options macos_conf = {
         .macos_fs_animation_duration = -1,
         .macos_render_timer = RENDER_TIMER_CALLBACK,
         .macos_menu_shortcuts = true,
+        .macos_bundle_path = (char *[]){
+            "/usr/local/bin", "/usr/local/sbin", "/opt/local/bin", "/opt/local/sbin",
+            "/opt/homebrew/bin", "/opt/homebrew/sbin", NULL
+        },
         .cocoa_cb_sw_renderer = -1,
         .cocoa_cb_10bit_context = true,
         .cocoa_cb_output_csp = MAC_CSP_AUTO,

@@ -38,6 +38,7 @@ class AppHub: NSObject {
 
     let MPV_PROTOCOL: String = "mpv://"
     var isApplication: Bool { return NSApp is Application }
+    var isBundle: Bool { return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" }
     var openEvents: Int = 0
 
     private override init() {
@@ -58,6 +59,12 @@ class AppHub: NSObject {
             option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
             input.option = option
             DispatchQueue.main.sync { menu = MenuBar(self) }
+        }
+        if let bundlePath = option?.mac.macos_bundle_path, isBundle {
+            let path = TypeHelper.toStringArray(bundlePath).joined(separator: ":") + ":" +
+                (ProcessInfo.processInfo.environment["PATH"] ?? "")
+            log.verbose("Setting Bundle PATH to: \(path)")
+            _ = path.withCString { setenv("PATH", $0, 1) }
         }
 
 #if HAVE_MACOS_MEDIA_PLAYER
