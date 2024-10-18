@@ -35,8 +35,7 @@ local o = {
     file_tag_max_length = 128,       -- only show file tags shorter than this length in bytes
     file_tag_max_count = 16,         -- only show the first x file tags
     show_frame_info = false,         -- whether to show the current frame info
-    term_width_limit = -1,           -- overwrites the terminal width
-    term_height_limit = -1,          -- overwrites the terminal height
+    term_clip = true,
     debug = false,
 
     -- Graph options and style
@@ -81,24 +80,23 @@ local o = {
     ass_it0 = "{\\i0}",
     -- Without ASS
     no_ass_nl = "\n",
-    no_ass_indent = "\t",
+    no_ass_indent = "    ",
     no_ass_prefix_sep = " ",
     no_ass_b1 = "\027[1m",
     no_ass_b0 = "\027[0m",
     no_ass_it1 = "\027[3m",
     no_ass_it0 = "\027[0m",
+    print_escape_sequences = true,
 
-    bindlist = "no",  -- print page 4 to the terminal on startup and quit mpv
+    bindlist = false,  -- print page 4 to the terminal on startup and quit mpv
 }
 options.read_options(o)
 
-o.term_width_limit = tonumber(o.term_width_limit) or -1
-o.term_height_limit = tonumber(o.term_height_limit) or -1
-if o.term_width_limit < 0 then
-    o.term_width_limit = nil
-end
-if o.term_height_limit < 0 then
-    o.term_height_limit = nil
+if not o.print_escape_sequences then
+    o.no_ass_b1 = ""
+    o.no_ass_b0 = ""
+    o.no_ass_it1 = ""
+    o.no_ass_it0 = ""
 end
 
 local format = string.format
@@ -1093,47 +1091,6 @@ local function eval_ass_formatting()
     end
 end
 
--- assumptions:
---   s is composed of SGR escape sequences and/or printable UTF8 sequences
---   printable codepoints occupy one terminal cell (we don't have wcwidth)
---   tabstops are 8, 16, 24..., and the output starts at 0 or a tabstop
--- note: if maxwidth <= 2 and s doesn't fit: the result is "..." (more than 2)
-local function term_ellipsis(s, maxwidth)
-    local TAB, ESC, SGR_END = 9, 27, ("m"):byte()
-    local width, ellipsis = 0, "..."
-    local fit_len, in_sgr
-
-    for i = 1, #s do
-        local x = s:byte(i)
-
-        if in_sgr then
-            in_sgr = x ~= SGR_END
-        elseif x == ESC then
-            in_sgr = true
-            ellipsis = "\27[0m..."  -- ensure SGR reset
-        elseif x < 128 or x >= 192 then  -- non UTF8-continuation
-            -- tab adds till the next stop, else add 1
-            width = width + (x == TAB and 8 - width % 8 or 1)
-
-            if fit_len == nil and width > maxwidth - 3 then
-                fit_len = i - 1  -- adding "..." still fits maxwidth
-            end
-            if width > maxwidth then
-                return s:sub(1, fit_len) .. ellipsis
-            end
-        end
-    end
-
-    return s
-end
-
-local function term_ellipsis_array(arr, from, to, max_width)
-    for i = from, to do
-        arr[i] = term_ellipsis(arr[i], max_width)
-    end
-    return arr
-end
-
 -- split str into a table
 -- example: local t = split(s, "\n")
 -- plain: whether pat is a plain string (default false - pat is a pattern)
@@ -1155,11 +1112,9 @@ end
 -- content     : table of the content where each entry is one line
 -- apply_scroll: scroll the content
 local function finalize_page(header, content, apply_scroll)
-    local term_size = mp.get_property_native("term-size", {})
-    local term_width = o.term_width_limit or term_size.w or 80
-    local term_height = o.term_height_limit or term_size.h or 24
+    local term_height = mp.get_property_native("term-size/h", 24)
     local from, to = 1, #content
-    if apply_scroll and term_height > 0 then
+    if apply_scroll then
         -- Up to 40 lines for libass because it can put a big performance toll on
         -- libass to process many lines which end up outside (below) the screen.
         -- In the terminal reduce height by 2 for the status line (can be more then one line)
@@ -1171,10 +1126,10 @@ local function finalize_page(header, content, apply_scroll)
         pages[curr_page].offset = from
     end
     local output = table.concat(header) .. table.concat(content, "", from, to)
-    if not o.use_ass and term_width > 0 then
+    if not o.use_ass and o.term_clip then
+        local clip = mp.get_property("term-clip-cc")
         local t = split(output, "\n", true)
-        -- limit width for the terminal
-        output = table.concat(term_ellipsis_array(t, 1, #t, term_width), "\n")
+        output = clip .. table.concat(t, "\n" .. clip)
     end
     return output, from
 end
@@ -1207,11 +1162,12 @@ local function keybinding_info(after_scroll, bindlist)
     local page = pages[o.key_page_4]
     eval_ass_formatting()
     add_header(header)
-    append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint(true)), nl="", indent=""})
+    local prefix = bindlist and page.desc or page.desc .. ":" .. scroll_hint(true)
+    append(header, "", {prefix=prefix, nl="", indent=""})
     header = {table.concat(header)}
 
     if not kbinfo_lines or not after_scroll then
-        kbinfo_lines = get_kbinfo_lines(o.term_width_limit)
+        kbinfo_lines = get_kbinfo_lines()
     end
 
     return finalize_page(header, kbinfo_lines, not bindlist)
@@ -1793,8 +1749,7 @@ mp.register_event("video-reconfig",
         end
     end)
 
---  --script-opts=stats-bindlist=[-]{yes|<TERM-WIDTH>}
-if o.bindlist ~= "no" then
+if o.bindlist then
     -- This is a special mode to print key bindings to the terminal,
     -- Adjust the print format and level to make it print only the key bindings.
     mp.set_property("msg-level", "all=no,statusline=status")
@@ -1803,15 +1758,8 @@ if o.bindlist ~= "no" then
     mp.set_property_bool("msg-time", false)
     -- wait for all other scripts to finish init
     mp.add_timeout(0, function()
-        if o.bindlist:sub(1, 1) == "-" then
-            o.bindlist = o.bindlist:sub(2)
-            o.no_ass_b0 = ""
-            o.no_ass_b1 = ""
-        end
-        local width = max(40, math.floor(tonumber(o.bindlist) or 79))
         o.ass_formatting = false
         o.no_ass_indent = " "
-        o.term_size = { w = width , h = 0}
         mp.osd_message(keybinding_info(false, true))
         -- wait for next tick to print status line and flush it without clearing
         mp.add_timeout(0, function()
