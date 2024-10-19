@@ -351,30 +351,14 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
         return;
     }
 
-    FILE *f = fopen(filename, "rb");
-    if (!f)
+    bstr data = stream_read_file(filename, NULL, jctx(J)->mpctx->global, limit);
+    if (data.start) {
+        js_pushlstring(J, data.start, data.len);
+    } else {
         js_error(J, "cannot open file: '%s'", filename);
-    add_af_file(af, f);
-
-    int len = MPMIN(limit, 32 * 1024);  // initial allocation, size*2 strategy
-    int got = 0;
-    char *s = NULL;
-    while ((s = talloc_realloc(af, s, char, len))) {
-        int want = len - got;
-        int r = fread(s + got, 1, want, f);
-
-        if (feof(f) || (len == limit && r == want)) {
-            js_pushlstring(J, s, got + r);
-            return;
-        }
-        if (r != want)
-            js_error(J, "cannot read data from file: '%s'", filename);
-
-        got = got + r;
-        len = MPMIN(limit, len * 2);
     }
 
-    js_error(J, "cannot allocate %d bytes for file: '%s'", len, filename);
+    talloc_free(data.start);
 }
 
 // Safely run af_push_file.
