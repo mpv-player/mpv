@@ -60,6 +60,7 @@ cache
 play
     =============   ================================================
     left-click      toggle play/pause
+    right-click     toggle infinite looping
     =============   ================================================
 
 skip back
@@ -517,7 +518,7 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``play_pause_mbtn_mid_command=``
 
-``play_pause_mbtn_right_command=``
+``play_pause_mbtn_right_command=cycle-values loop-file inf no``
 
 ``chapter_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-list} 3000``
 
