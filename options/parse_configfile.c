@@ -165,16 +165,11 @@ int m_config_parse_config_file(m_config_t *config, struct mpv_global *global,
 
     int r = 0;
 
-    struct stream *s = stream_create(conffile, STREAM_READ | STREAM_ORIGIN_DIRECT,
-                                     NULL, global);
-    if (!s)
-        goto done;
-    bstr data = stream_read_complete(s, s, 1000000000);
-    if (!data.start)
-        goto done;
-    r = m_config_parse(config, conffile, data, initial_section, flags);
+    bstr data = stream_read_file2(conffile, NULL, STREAM_ORIGIN_DIRECT | STREAM_READ,
+                                  global, 1000000000);
+    if (data.start)
+        r = m_config_parse(config, conffile, data, initial_section, flags);
 
-done:
-    free_stream(s);
+    talloc_free(data.start);
     return r;
 }
