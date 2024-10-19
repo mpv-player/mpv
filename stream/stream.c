@@ -848,9 +848,15 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size)
 {
-    struct bstr res = {0};
     int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
                 STREAM_LESS_NOISE;
+    return stream_read_file2(filename, talloc_ctx, flags, global, max_size);
+}
+
+struct bstr stream_read_file2(const char *filename, void *talloc_ctx,
+                              int flags, struct mpv_global *global, int max_size)
+{
+    struct bstr res = {0};
     stream_t *s = stream_create(filename, flags, NULL, global);
     if (s) {
         if (s->is_directory)
