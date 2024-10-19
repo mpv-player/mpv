@@ -554,7 +554,14 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
                 ao->driver->set_pause(ao, true);
                 p->queued_time_ns = p->end_time_ns - mp_time_ns();
             } else {
-                p->end_time_ns = p->queued_time_ns + mp_time_ns();
+                int64_t new_end_time_ns = p->queued_time_ns + mp_time_ns();
+                double time_adjustment = MP_TIME_NS_TO_S(new_end_time_ns - p->end_time_ns);
+                p->end_time_ns = new_end_time_ns;
+
+                for (int i = 0; i < p->num_queued_aframes; i++) {
+                    p->queued_aframes[i].start_time += time_adjustment;
+                }
+
                 ao->driver->set_pause(ao, false);
             }
         } else {
