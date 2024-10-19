@@ -84,7 +84,7 @@ local user_opts = {
 
     play_pause_mbtn_left_command = "cycle pause",
     play_pause_mbtn_mid_command = "",
-    play_pause_mbtn_right_command = "",
+    play_pause_mbtn_right_command = "cycle-values loop-file inf no",
 
     chapter_prev_mbtn_left_command = "add chapter -1",
     chapter_prev_mbtn_mid_command = "show-text ${chapter-list} 3000",
