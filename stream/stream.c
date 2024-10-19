@@ -416,7 +416,6 @@ static int stream_create_instance(const stream_info_t *sinfo,
 }
 
 int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
-
 {
     assert(args->url);
 
