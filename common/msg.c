@@ -539,9 +539,10 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
 
     if (lev == MSGL_STATUS) {
         int line_w = 0;
+        bool clip = bstr_eatstart0(&str, TERM_MSG_0);
         if (str.len && print_term)
             append_terminal_line(log, lev, str, &root->term_msg_tmp, &line_w,
-                                 bstr_eatstart0(&str, TERM_MSG_0) && term_w ? term_w : INT_MAX);
+                                 clip && term_w ? term_w : INT_MAX);
         term_msg_lines += !term_w ? (str.len ? 1 : 0)
                                   : (line_w + term_w - 1) / term_w;
     } else if (str.len) {
