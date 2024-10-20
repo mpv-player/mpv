@@ -2,9 +2,20 @@ mpv is a fork of mplayer2, which is a fork of MPlayer.
 
 mpv as a whole is licensed under the GNU General Public License GPL version 2
 or later (called GPLv2+ in this document, see LICENSE.GPL for full license
-text) by default, or the GNU Lesser General Public License LGPL version 2 or
-later (LGPLv2.1+ in this document, see LICENSE.LGPL for full license text) if
-built with the -Dgpl=false configure switch.
+text) by default. The mpv program is licensed the GNU Lesser General Public
+License LGPL version 2 or later (LGPLv2.1+ in this document, see LICENSE.LGPL
+for full license text) if built without using any GPL only files.
+The -Dgpl=false configure switch is provided as a convenience for excluding
+the GPL only files listed below from the build process.
+
+However, do note that the build system is provided "as is" and using the
+-Dgpl=false configure switch does not in itself create a LGPLv2.1+ license
+grant.
+
+Additionally, some non-program parts, such as the documentation and some config
+files listed below, are still built and licensed under their respective licenses
+even when -Dgpl=false is used. Please consult GPLv2+ and LGPLv2.1+ license texts
+for further details on how to distribute these files.
 
 Most source files are LGPLv2.1+ or GPLv2+, but some files are available under
 more liberal licenses, such as BSD, MIT, ISC, and possibly others. Look at the
@@ -26,7 +37,7 @@ See DOCS/contribute.md for binding rules wrt. licensing for contributions.
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
 
-mpv can be built as LGPLv2.1+ with the -Dgpl=false configure option. To add a
+mpv can be built as LGPLv2.1+ without using any GPL only files. To add a
 LGPL mode to mpv, MPlayer code had to be relicensed from GPLv2+ to LGPLv2.1+ by
 asking the MPlayer authors for permission. Since permission could not be
 obtained from everyone, LGPL mode disables the following features, some of them
