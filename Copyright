@@ -26,11 +26,6 @@ See DOCS/contribute.md for binding rules wrt. licensing for contributions.
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
 
-"v2.1+" in this context means "version 2.1 or later".
-
-Some libraries are GPLv2+ or GPLv3+ only. Building mpv with Samba support makes
-it GPLv3+.
-
 mpv can be built as LGPLv2.1+ with the -Dgpl=false configure option. To add a
 LGPL mode to mpv, MPlayer code had to be relicensed from GPLv2+ to LGPLv2.1+ by
 asking the MPlayer authors for permission. Since permission could not be
