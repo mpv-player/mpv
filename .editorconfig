@@ -13,3 +13,11 @@ trim_trailing_whitespace = true
 
 [.git/COMMIT*]
 max_line_length = 72
+
+[{osdep/dirent-win.h,TOOLS/osxbundle/mpv.app/Contents/PkgInfo}]
+charset = unset
+insert_final_newline = unset
+indent_style = unset
+indent_size = unset
+max_line_length = unset
+trim_trailing_whitespace = unset
