@@ -693,6 +693,12 @@ int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
             goto next;
         }
 
+        if (cp == '\t') {
+            // Assume tabstop width is 8
+            current_width = 8 - width % 8;
+            goto next;
+        }
+
         if (cp < 0x20)
             goto next;
 
@@ -736,8 +742,8 @@ int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
             str = cluster_end;
         }
 
-next:
         current_width = MPMIN(current_width, 2);
+next:
         if (width + current_width > max_width) {
             assert(prev_pos < str.start + str.len);
             *cut_pos = prev_pos;
