@@ -46,7 +46,7 @@ int main(void) {
     assert_int_equal(W("\U0001F1F5\U0001F1F1"), 2);
 
     assert_int_equal(W("\n"), 0);              // Newline (should not take up any visual space)
-    assert_int_equal(W("\t"), 0);              // Tab (no visual width itself)
+    assert_int_equal(W("\t"), 8);              // Tab (tabstop assumend to be 8)
     assert_int_equal(W("\0"), 0);              // Null character (non-visible)
 
     assert_int_equal(W("A\u3042"), 3);         // ASCII 'A' + full-width Japanese Hiragana 'あ' (U+3042)
@@ -56,7 +56,7 @@ int main(void) {
     assert_int_equal(W("\U0001F469\u200D\u2764\uFE0F\u200D\U0001F469A\u3042"), 5);
 
     assert_int_equal(W("A\nB"), 2);            // ASCII characters with newline (newline should not affect width)
-    assert_int_equal(W("ABC\tDEF"), 6);        // Tab inside a string (no visual width for '\t')
+    assert_int_equal(W("ABC\tDEF"), 11);       // Tab inside a string
 
     // ASCII characters with color
     assert_int_equal(W("\033[31mABC\033[0m\033[32mDEF\033[0m"), 6);
