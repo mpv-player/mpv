@@ -39,8 +39,7 @@ quite central:
 - Linux X11 video output
 - BSD audio output via OSS
 - NVIDIA/Linux hardware decoding (vdpau, although nvdec usually works)
-- Linux TV input
-- minor features: jack, DVD, CDDA, SMB, CACA, legacy direct3d VO
+- minor features: jack, DVD, CDDA, DVB, CACA, legacy direct3d VO
 Some of these will be fixed in the future. The intended use for LGPL mode is
 with libmpv, and currently it's not recommended to build mpv CLI in LGPL mode
 at all.
@@ -64,9 +63,8 @@ The following files are still GPL only (-Dgpl=false disables them):
     video/vdpau.h                   unknown
     video/vdpau_mixer.*             actual code must be rewritten
     DOCS/man/                       GPLv2+
-    bootstrap.py                    unknown license, probably GPLv2+ or LGPLv2+
     etc/mplayer-input.conf          unknown license, probably GPLv2+
-    mpv.desktop                     unknown license, probably GPLv2+
+    etc/mpv.desktop                 unknown license, probably GPLv2+
     etc/restore-old-bindings.conf   unknown license, probably GPLv2+
 
 None of the cases listed above affect the final binary if it's built as
