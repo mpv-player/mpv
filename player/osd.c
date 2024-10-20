@@ -67,6 +67,11 @@ static char *join_lines(void *ta_ctx, char **parts, int num_parts)
     return res;
 }
 
+static bool term_osd_empty(char *text)
+{
+    return !text || !text[0] || !strcmp(text, TERM_MSG_0);
+}
+
 static void term_osd_update(struct MPContext *mpctx)
 {
     int num_parts = 0;
@@ -75,11 +80,11 @@ static void term_osd_update(struct MPContext *mpctx)
     if (!mpctx->opts->use_terminal)
         return;
 
-    if (mpctx->term_osd_subs && mpctx->term_osd_subs[0])
+    if (!term_osd_empty(mpctx->term_osd_subs))
         parts[num_parts++] = mpctx->term_osd_subs;
-    if (mpctx->term_osd_text && mpctx->term_osd_text[0])
+    if (!term_osd_empty(mpctx->term_osd_text))
         parts[num_parts++] = mpctx->term_osd_text;
-    if (mpctx->term_osd_status && mpctx->term_osd_status[0])
+    if (!term_osd_empty(mpctx->term_osd_status))
         parts[num_parts++] = mpctx->term_osd_status;
 
     char *s = join_lines(mpctx, parts, num_parts);
