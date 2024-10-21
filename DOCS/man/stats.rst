@@ -258,11 +258,11 @@ The keys are grouped automatically using a simple analysis of the command
 string, and one should not expect documentation-level grouping accuracy,
 however, it should still be reasonably useful.
 
-Using ``--idle --script-opts=stats-bindlist=yes`` will print the list to the
-terminal and quit immediately. By default long lines are shortened to 79 chars,
-and terminal escape sequences are enabled. A different length limit can be
-set by changing ``yes`` to a number (at least 40), and escape sequences can be
-disabled by adding ``-`` before the value, e.g. ``...=-yes`` or ``...=-120``.
+Using ``--idle --script-opts-append=stats-bindlist=yes`` will print the list to
+the terminal and quit immediately. By default long lines are shortened to 79
+chars, and terminal escape sequences are enabled. A different length limit can
+be set by changing ``yes`` to a number (at least 40), and escape sequences can
+be disabled by adding ``-`` before the value, e.g. ``...=-yes`` or ``...=-120``.
 
 Like with ``--input-test``, the list includes bindings from ``input.conf`` and
 from user scripts. Use ``--no-config`` to list only built-in bindings.
