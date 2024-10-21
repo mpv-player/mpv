@@ -351,14 +351,17 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
         return;
     }
 
-    bstr data = stream_read_file(filename, NULL, jctx(J)->mpctx->global, limit);
+    // mp.utils.read_file allows partial read up to limit which results in
+    // error for stream_read_file if the file is larger than limit, so use
+    // STREAM_ALLOW_PARTIAL_READ to allow reading returning partial results.
+    int flags = STREAM_READ_FILE_FLAGS_DEFAULT | STREAM_ALLOW_PARTIAL_READ;
+    bstr data = stream_read_file2(filename, af, flags,
+                                  jctx(J)->mpctx->global, limit);
     if (data.start) {
         js_pushlstring(J, data.start, data.len);
     } else {
         js_error(J, "cannot open file: '%s'", filename);
     }
-
-    talloc_free(data.start);
 }
 
 // Safely run af_push_file.

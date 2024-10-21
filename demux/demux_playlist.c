@@ -534,8 +534,7 @@ static int parse_dir(struct pl_parser *p)
             }
             break;
         }
-        int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
-                    STREAM_LESS_NOISE;
+        int flags = STREAM_READ_FILE_FLAGS_DEFAULT;
         bstr dir = mp_dirname(p->real_stream->url);
         if (!dir.len)
             autocreate = AUTO_NONE;
