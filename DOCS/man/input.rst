@@ -3859,8 +3859,6 @@ Property list
         result in an entry with ``comment = "toggle bla", cmd = "cycle bla"``.)
 
     This property is read-only, and change notification is not supported.
-    Currently, there is no mechanism to change key bindings at runtime, other
-    than scripts adding or removing their own bindings.
 
 Inconsistencies between options and properties
 ----------------------------------------------
