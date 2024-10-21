@@ -802,7 +802,7 @@ int stream_skip_bom(struct stream *s)
 
 // Read the rest of the stream into memory (current pos to EOF), and return it.
 //  talloc_ctx: used as talloc parent for the returned allocation
-//  max_size: must be set to >0. If the file is larger than that, it is treated
+//  max_size: must be set to >=0. If the file is larger than that, it is treated
 //            as error. This is a minor robustness measure. If the stream is
 //            created with STREAM_ALLOW_PARTIAL_READ flag, partial result up to
 //            max_size is returned instead.
@@ -814,7 +814,7 @@ int stream_skip_bom(struct stream *s)
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size)
 {
-    if (max_size <= 0 || max_size > STREAM_MAX_READ_SIZE)
+    if (max_size < 0 || max_size > STREAM_MAX_READ_SIZE)
         abort();
     if (s->is_directory)
         return (struct bstr){NULL, 0};
