@@ -50,6 +50,11 @@ static void mac_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
     [p->vo_mac fillVsyncWithInfo:info];
 }
 
+static int mac_vk_color_depth(struct ra_ctx *ctx)
+{
+    return 0;
+}
+
 static bool mac_vk_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -78,6 +83,7 @@ static bool mac_vk_init(struct ra_ctx *ctx)
     struct ra_vk_ctx_params params = {
         .swap_buffers = mac_vk_swap_buffers,
         .get_vsync = mac_vk_get_vsync,
+        .color_depth = mac_vk_color_depth,
     };
 
     VkInstance inst = vk->vkinst->instance;
