@@ -81,7 +81,7 @@ local o = {
     ass_it0 = "{\\i0}",
     -- Without ASS
     no_ass_nl = "\n",
-    no_ass_indent = "\t",
+    no_ass_indent = "    ",
     no_ass_prefix_sep = " ",
     no_ass_b1 = "\027[1m",
     no_ass_b0 = "\027[0m",
