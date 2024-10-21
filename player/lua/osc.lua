@@ -50,8 +50,8 @@ local user_opts = {
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
-    chapters_osd = true,        -- whether to show chapters OSD on next/prev
-    playlist_osd = true,        -- whether to show playlist OSD on next/prev
+    chapters_osd = false,        -- whether to show chapters OSD on next/prev
+    playlist_osd = false,        -- whether to show playlist OSD on next/prev
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
 
