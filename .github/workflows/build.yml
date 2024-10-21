@@ -300,11 +300,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          # workaround to avoid "fatal: unsafe repository" error
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Build with meson
         id: build
         run: |
