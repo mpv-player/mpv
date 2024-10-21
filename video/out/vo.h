@@ -59,6 +59,8 @@ enum {
 enum mp_voctrl {
     /* signal a device reset seek */
     VOCTRL_RESET = 1,
+    /* forget all frames (signalled together with VOCTRL_RESET) */
+    VOCTRL_FRAME_RESET,
     /* Handle input and redraw events, called by vo_check_events() */
     VOCTRL_CHECK_EVENTS,
     /* signal a device pause */
@@ -524,6 +526,7 @@ bool vo_has_frame(struct vo *vo);
 void vo_redraw(struct vo *vo);
 bool vo_want_redraw(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
+void vo_eof_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
