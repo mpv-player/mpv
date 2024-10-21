@@ -354,6 +354,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
     s->path = talloc_strdup(s, path);
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     s->requested_buffer_size = opts->buffer_size;
+    s->allow_partial_read = flags & STREAM_ALLOW_PARTIAL_READ;
 
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
@@ -802,7 +803,9 @@ int stream_skip_bom(struct stream *s)
 // Read the rest of the stream into memory (current pos to EOF), and return it.
 //  talloc_ctx: used as talloc parent for the returned allocation
 //  max_size: must be set to >0. If the file is larger than that, it is treated
-//            as error. This is a minor robustness measure.
+//            as error. This is a minor robustness measure. If the stream is
+//            created with STREAM_ALLOW_PARTIAL_READ flag, partial result up to
+//            max_size is returned instead.
 //  returns: stream contents, or .start/.len set to NULL on error
 // If the file was empty, but no error happened, .start will be non-NULL and
 // .len will be 0.
@@ -821,16 +824,22 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     int padding = 1;
     char *buf = NULL;
     int64_t size = stream_get_size(s) - stream_tell(s);
-    if (size > max_size)
+    if (size > max_size && !s->allow_partial_read)
         return (struct bstr){NULL, 0};
     if (size > 0)
         bufsize = size + padding;
     else
         bufsize = 1000;
+    if (s->allow_partial_read)
+        bufsize = MPMIN(bufsize, max_size + padding);
     while (1) {
         buf = talloc_realloc_size(talloc_ctx, buf, bufsize);
         int readsize = stream_read(s, buf + total_read, bufsize - total_read);
         total_read += readsize;
+        if (total_read >= max_size && s->allow_partial_read) {
+            total_read = max_size;
+            break;
+        }
         if (total_read < bufsize)
             break;
         if (bufsize > max_size) {
