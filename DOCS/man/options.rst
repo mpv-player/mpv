@@ -828,12 +828,15 @@ Program Behavior
 
     ``--scripts`` is a path list option. See `List Options`_ for details.
 
-``--script-opts=key1=value1,key2=value2,...``
+``--script-opt=<key=value>``, ``--script-opts=key1=value1,key2=value2,...``
     Set options for scripts. A script can query an option by key. If an
     option is used and what semantics the option value has depends entirely on
     the loaded scripts. Values not claimed by any scripts are ignored.
 
-    This is a key/value list option. See `List Options`_ for details.
+    Each use of the ``--script-opt`` option will add another option to the
+    internal list, while ``--script-opts`` takes a list of options at once,
+    and overwrites the internal list with it. The latter is a key/value list
+    option. See `List Options`_ for details.
 
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
