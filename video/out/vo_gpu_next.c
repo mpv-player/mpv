@@ -2058,8 +2058,14 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     // Load LUT file
     char *fname = mp_get_user_path(NULL, p->global, lut->path);
     MP_VERBOSE(p, "Loading custom LUT '%s'\n", fname);
-    struct bstr lutdata = stream_read_file(fname, p, p->global, 100000000); // 100 MB
-    lut->lut = pl_lut_parse_cube(p->pllog, lutdata.start, lutdata.len);
+    const int lut_max_size = 1536 << 20; // 1.5 GiB, matches lut cache limit
+    struct bstr lutdata = stream_read_file(fname, NULL, p->global, lut_max_size);
+    if (!lutdata.len) {
+        MP_ERR(p, "Failed to read LUT data from %s, make sure it's a valid file "
+                  "and smaller or equal to %d bytes\n", fname, lut_max_size);
+    } else {
+        lut->lut = pl_lut_parse_cube(p->pllog, lutdata.start, lutdata.len);
+    }
     talloc_free(fname);
     talloc_free(lutdata.start);
 }
