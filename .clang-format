@@ -1,0 +1,20 @@
+BasedOnStyle: Google
+BreakBeforeBraces: Linux
+IndentWidth: 4
+PPIndentWidth: 1
+IndentPPDirectives: AfterHash
+IndentCaseLabels: false
+IncludeBlocks: Preserve
+SortIncludes: true
+SpaceAfterCStyleCast: false
+AllowShortIfStatementsOnASingleLine : Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+Cpp11BracedListStyle: true
+InsertNewlineAtEOF: true
+SpacesInContainerLiterals: false
+BinPackArguments: true
+BinPackParameters: true
