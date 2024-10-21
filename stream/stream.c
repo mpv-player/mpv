@@ -856,9 +856,8 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size)
 {
-    int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
-                STREAM_LESS_NOISE;
-    return stream_read_file2(filename, talloc_ctx, flags, global, max_size);
+    return stream_read_file2(filename, talloc_ctx, STREAM_READ_FILE_FLAGS_DEFAULT,
+                             global, max_size);
 }
 
 struct bstr stream_read_file2(const char *filename, void *talloc_ctx,
