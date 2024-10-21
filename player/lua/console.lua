@@ -830,6 +830,8 @@ local function bind_mouse()
         if item then
             selected_match = item
             handle_enter()
+        else
+            set_active(false)
         end
     end)
 end
