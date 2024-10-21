@@ -55,6 +55,10 @@
 #define STREAM_LESS_NOISE         (1 << 6) // try to log errors only
 #define STREAM_ALLOW_PARTIAL_READ (1 << 7) // allows partial read with stream_read_file()
 
+// Default flags used by stream_read_file().
+#define STREAM_READ_FILE_FLAGS_DEFAULT \
+    (STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY | STREAM_LESS_NOISE)
+
 // end flags for stream_open_ext (the naming convention sucks)
 
 #define STREAM_UNSAFE -3
