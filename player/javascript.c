@@ -354,7 +354,10 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
     // mp.utils.read_file allows partial read up to limit which results in
     // error for stream_read_file if the file is larger than limit, so use
     // STREAM_ALLOW_PARTIAL_READ to allow reading returning partial results.
-    int flags = STREAM_READ_FILE_FLAGS_DEFAULT | STREAM_ALLOW_PARTIAL_READ;
+    // Additionally, disable error logging by stream since the exception
+    // can be caught and handled by a JS script.
+    int flags = STREAM_READ_FILE_FLAGS_DEFAULT | STREAM_ALLOW_PARTIAL_READ |
+                STREAM_SILENT;
     bstr data = stream_read_file2(filename, af, flags,
                                   jctx(J)->mpctx->global, limit);
     if (data.start) {
