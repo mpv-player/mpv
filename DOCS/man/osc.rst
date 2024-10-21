@@ -31,15 +31,17 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
-    right-click     show playlist
-    shift+L-click   show playlist
+    right-click     open the playlist selector
+    shift+L-click   show the playlist
+    middle-click    show the playlist
     =============   ================================================
 
 pl next
     =============   ================================================
     left-click      play next file in playlist
-    right-click     show playlist
-    shift+L-click   show playlist
+    right-click     open the playlist selector
+    shift+L-click   show the playlist
+    middle-click    show the playlist
     =============   ================================================
 
 title
@@ -47,8 +49,9 @@ title
       name while hovering the seekbar.
 
     =============   ================================================
-    left-click      show playlist position and length and full title
-    right-click     show filename
+    left-click      open the playlist selector
+    middle-click    show the filename
+    right-click     show playlist position and length and full title
     =============   ================================================
 
 cache
@@ -57,6 +60,7 @@ cache
 play
     =============   ================================================
     left-click      toggle play/pause
+    right-click     toggle infinite looping
     =============   ================================================
 
 skip back
@@ -99,15 +103,17 @@ audio and sub
     | Displays selected track and amount of available tracks
 
     =============   ================================================
-    left-click      cycle audio/sub tracks forward
-    right-click     cycle audio/sub tracks backwards
+    left-click      open the audio/sub track selector
     shift+L-click   show available audio/sub tracks
+    middle-click    show available audio/sub tracks
+    right-click     show available audio/sub tracks
     mouse wheel     cycle audio/sub tracks forward/backwards
     =============   ================================================
 
 vol
     =============   ================================================
     left-click      toggle mute
+    right-click     open the audio device selector
     mouse wheel     volume up/down
     =============   ================================================
 
@@ -486,6 +492,74 @@ Configurable Options
 
     Use display fps to calculate the interval between OSC redraws.
 
+The following options configure what commands are run when the buttons are
+clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
+
+``title_mbtn_left_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``title_mbtn_mid_command=show-text ${filename}``
+
+``title_mbtn_right_command=show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'``
+
+``pl_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000``
+
+``pl_prev_mbtn_mid_command=show-text ${playlist} 3000``
+
+``pl_prev_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``pl_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000``
+
+``pl_next_mbtn_mid_command=show-text ${playlist} 3000``
+
+``pl_next_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``playpause_mbtn_left_command=cycle pause``
+
+``playpause_mbtn_mid_command=``
+
+``playpause_mbtn_right_command=cycle-values loop-file inf no``
+
+``ch_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-list} 3000``
+
+``ch_prev_mbtn_mid_command=show-text ${chapter-list} 3000``
+
+``ch_prev_mbtn_right_command=script-binding select/select-chapter; script-message-to osc osc-hide``
+
+``ch_next_mbtn_left_command=no-osd add chapter 1; show-text ${chapter-list} 3000``
+
+``ch_next_mbtn_mid_command=show-text ${chapter-list} 3000``
+
+``ch_next_mbtn_right_command=script-binding select/select-chapter; script-message-to osc osc-hide``
+
+``audio_track_mbtn_left_command=script-binding select/select-aid; script-message-to osc osc-hide``
+
+``audio_track_mbtn_mid_command=show-text ${track-list/audio} 2000``
+
+``audio_track_mbtn_right_command=show-text ${track-list/audio} 2000``
+
+``audio_track_wheel_down_command=cycle audio``
+
+``audio_track_wheel_up_command=cycle audio down``
+
+``sub_track_mbtn_left_command=script-binding select/select-sid; script-message-to osc osc-hide``
+
+``sub_track_mbtn_mid_command=show-text ${track-list/sub} 2000``
+
+``sub_track_mbtn_right_command=show-text ${track-list/sub} 2000``
+
+``sub_track_wheel_down_command=cycle sub``
+
+``sub_track_wheel_up_command=cycle sub down``
+
+``volume_mbtn_left_command=no-osd cycle mute``
+
+``volume_mbtn_mid_command=``
+
+``volume_mbtn_right_command=script-binding select/select-audio-device; script-message-to osc osc-hide``
+
+``volume_wheel_down_command=add volume -5``
+
+``volume_wheel_up_command=add volume 5``
 
 Script Commands
 ~~~~~~~~~~~~~~~
@@ -499,6 +573,9 @@ in ``input.conf``, or sent by other scripts.
 
 ``osc-show``
     Triggers the OSC to show up, just as if user moved mouse.
+
+``osc-hide``
+    Hide the OSC when ``visibility`` is ``auto``.
 
 Example
 
