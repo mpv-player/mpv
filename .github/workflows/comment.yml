@@ -7,7 +7,8 @@ on:
 
 jobs:
   pr_comment:
-    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
+    if: github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - env:
@@ -17,8 +18,8 @@ jobs:
           pr=$(gh pr list --state open --json headRefOid,number \
             --jq '.[] | select(.headRefOid == "${{ github.event.workflow_run.head_sha }}") | .number')
           if [ -z "$pr" ]; then
-            echo "No matching pull request found"
-            exit 1
+            echo "No matching open pull request found"
+            exit 0
           fi
 
           artifacts=$(gh api repos/{owner}/{repo}/actions/runs/${{ github.event.workflow_run.id }}/artifacts --jq '.artifacts')
