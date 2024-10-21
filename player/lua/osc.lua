@@ -1008,7 +1008,7 @@ local function add_layout(name)
 
         return elements[name].layout
     else
-        msg.error("Can't add_layout to element \""..name.."\", doesn't exist.")
+        msg.error("Can't add_layout to element '"..name.."', doesn't exist.")
     end
 end
 
@@ -2718,15 +2718,15 @@ mp.register_script_message("osc-idlescreen", idlescreen_visibility)
 -- Validate string type user options
 local function validate_user_opts()
     if layouts[user_opts.layout] == nil then
-        msg.warn("Invalid setting \""..user_opts.layout.."\" for layout")
+        msg.warn("Invalid setting '"..user_opts.layout.."' for layout")
         user_opts.layout = "bottombar"
     end
 
     if user_opts.seekbarstyle ~= "bar" and
        user_opts.seekbarstyle ~= "diamond" and
        user_opts.seekbarstyle ~= "knob" then
-        msg.warn("Invalid setting \"" .. user_opts.seekbarstyle
-            .. "\" for seekbarstyle")
+        msg.warn("Invalid setting '" .. user_opts.seekbarstyle
+            .. "' for seekbarstyle")
         user_opts.seekbarstyle = "bar"
     end
 
@@ -2735,29 +2735,29 @@ local function validate_user_opts()
        user_opts.seekrangestyle ~= "slider" and
        user_opts.seekrangestyle ~= "inverted" and
        user_opts.seekrangestyle ~= "none" then
-        msg.warn("Invalid setting \"" .. user_opts.seekrangestyle
-            .. "\" for seekrangestyle")
+        msg.warn("Invalid setting '" .. user_opts.seekrangestyle
+            .. "' for seekrangestyle")
         user_opts.seekrangestyle = "inverted"
     end
 
     if user_opts.seekrangestyle == "slider" and
        user_opts.seekbarstyle == "bar" then
         msg.warn(
-            "Using \"slider\" seekrangestyle together with \"bar\" seekbarstyle is not supported")
+            "Using 'slider' seekrangestyle together with 'bar' seekbarstyle is not supported")
         user_opts.seekrangestyle = "inverted"
     end
 
     if user_opts.windowcontrols ~= "auto" and
        user_opts.windowcontrols ~= "yes" and
        user_opts.windowcontrols ~= "no" then
-        msg.warn("windowcontrols cannot be \"" ..
-                user_opts.windowcontrols .. "\". Ignoring.")
+        msg.warn("windowcontrols cannot be '" ..
+                user_opts.windowcontrols .. "'. Ignoring.")
         user_opts.windowcontrols = "auto"
     end
     if user_opts.windowcontrols_alignment ~= "right" and
        user_opts.windowcontrols_alignment ~= "left" then
-        msg.warn("windowcontrols_alignment cannot be \"" ..
-                user_opts.windowcontrols_alignment .. "\". Ignoring.")
+        msg.warn("windowcontrols_alignment cannot be '" ..
+                user_opts.windowcontrols_alignment .. "'. Ignoring.")
         user_opts.windowcontrols_alignment = "right"
     end
 
