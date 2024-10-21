@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "demux/packet_pool.h"
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "video/hwdec.h"
@@ -803,6 +804,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
         .priv = params->info->priv_size ?
                     talloc_zero_size(f, params->info->priv_size) : NULL,
         .global = params->global,
+        .packet_pool = demux_packet_pool_get(params->parent ? params->parent->global : params->global),
         .in = talloc(f, struct mp_filter_internal),
     };
     *f->in = (struct mp_filter_internal){
