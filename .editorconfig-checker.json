@@ -1,0 +1,10 @@
+{
+    "Format": "github-actions",
+    "Exclude": [
+        "osdep/dirent-win.h"
+    ],
+    "Disable": {
+        "IndentSize": true,
+        "MaxLineLength": true
+    }
+}
