@@ -557,6 +557,7 @@ static const m_option_t mp_opts[] = {
     {"scripts", OPT_PATHLIST(script_files), .flags = M_OPT_FILE},
     {"script", OPT_CLI_ALIAS("scripts-append")},
     {"script-opts", OPT_KEYVALUELIST(script_opts)},
+    {"script-opt", OPT_CLI_ALIAS("script-opts-append")},
     {"load-scripts", OPT_BOOL(auto_load_scripts)},
 #endif
 #if HAVE_JAVASCRIPT

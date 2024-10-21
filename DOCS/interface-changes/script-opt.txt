@@ -1,0 +1,1 @@
+add `--script-opt` alias for `--script-opts-append`
