@@ -2115,7 +2115,6 @@ static char *append_track_info(char *res, struct track *track)
         res = talloc_asprintf_append(res, "(%s) ", track->lang);
     if (track->is_external)
         res = talloc_asprintf_append(res, "(external) ");
-    res = talloc_asprintf_append(res, "\n");
 
     return res;
 }
@@ -2125,25 +2124,35 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_PRINT) {
-        char *res = NULL;
+        char *res = talloc_strdup(NULL, "");
 
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            bool found = false;
+
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *track = mpctx->tracks[n];
                 if (track->type == type) {
                     res = talloc_asprintf_append(res, "%s: ", track_type_name(track));
                     res = append_track_info(res, track);
+                    res = talloc_asprintf_append(res, "\n");
+                    found = true;
                 }
             }
 
-            res = talloc_asprintf_append(res, "\n");
+            if (found && type < STREAM_TYPE_COUNT - 1) {
+                res = talloc_asprintf_append(res, "\n");
+                found = false;
+            }
         }
 
         struct demuxer *demuxer = mpctx->demuxer;
-        if (demuxer && demuxer->num_editions > 1)
-            res = talloc_asprintf_append(res, "\nEdition: %d of %d\n",
-                                        demuxer->edition + 1,
-                                        demuxer->num_editions);
+        if (demuxer && demuxer->num_editions > 1) {
+            res = talloc_asprintf_append(res, "\nEdition: %d of %d",
+                                         demuxer->edition + 1,
+                                         demuxer->num_editions);
+        } else {
+            res[strlen(res) - 1] = '\0';
+        }
 
         *(char **)arg = res;
         return M_PROPERTY_OK;
@@ -2169,12 +2178,14 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                     *(struct m_option *)ka->arg = (struct m_option){.type = CONF_TYPE_STRING};
                     return M_PROPERTY_OK;
                 case M_PROPERTY_PRINT:
-                    res = talloc_asprintf(NULL, "Available %s tracks:\n",
+                    res = talloc_asprintf(NULL, "Available %s tracks:",
                               type == STREAM_SUB ? "subtitle" : stream_type_name(type));
 
                     for (int n = 0; n < mpctx->num_tracks; n++) {
-                        if (mpctx->tracks[n]->type == type)
+                        if (mpctx->tracks[n]->type == type) {
+                            res = talloc_strdup_append(res, "\n");
                             res = append_track_info(res, mpctx->tracks[n]);
+                        }
                     }
 
                     *(char **)ka->arg = res;
