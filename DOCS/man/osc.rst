@@ -121,6 +121,7 @@ vol
 fs
     =============   ================================================
     left-click      toggle fullscreen
+    right-click     toggle whether the window is maximized
     =============   ================================================
 
 Key Bindings
@@ -561,6 +562,12 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 ``volume_wheel_down_command=add volume -5``
 
 ``volume_wheel_up_command=add volume 5``
+
+``fullscreen_mbtn_left_command="cycle fullscreen"``
+
+``fullscreen_mbtn_mid_command=``
+
+``fullscreen_mbtn_right_command="cycle window-maximized"``
 
 Script Commands
 ~~~~~~~~~~~~~~~
