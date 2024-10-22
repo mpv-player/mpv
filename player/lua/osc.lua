@@ -111,6 +111,10 @@ local user_opts = {
     volume_mbtn_right_command = "script-binding select/select-audio-device; script-message-to osc osc-hide",
     volume_wheel_down_command = "add volume -5",
     volume_wheel_up_command = "add volume 5",
+
+    fullscreen_mbtn_left_command = "cycle fullscreen",
+    fullscreen_mbtn_mid_command = "",
+    fullscreen_mbtn_right_command = "cycle window-maximized",
     -- luacheck: pop
 }
 
@@ -1901,8 +1905,10 @@ local function osc_init()
             return ("\238\132\136")
         end
     end
-    ne.eventresponder["mbtn_left_up"] =
-        function () mp.commandv("cycle", "fullscreen") end
+    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.fullscreen_mbtn_left_command)
+    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
+        user_opts.fullscreen_mbtn_mid_command)
+    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.fullscreen_mbtn_right_command)
 
     --seekbar
     ne = new_element("seekbar", "slider")
