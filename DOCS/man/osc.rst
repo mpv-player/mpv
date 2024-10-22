@@ -85,6 +85,7 @@ seekbar
 
     =============   ================================================
     left-click      seek to position
+    right-click     seek to the nearest chapter
     mouse wheel     seek forward/backward
     =============   ================================================
 

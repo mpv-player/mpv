@@ -1938,6 +1938,10 @@ local function osc_init()
     end
     ne.eventresponder["mouse_move"] = --keyframe seeking when mouse is dragged
         function (element)
+            if not element.state.mbtn_left then
+                return
+            end
+
             -- mouse move events may pile up during seeking and may still get
             -- sent when the user is done seeking, so we need to throw away
             -- identical seeks
@@ -1953,9 +1957,29 @@ local function osc_init()
             end
 
         end
-    ne.eventresponder["mbtn_left_down"] = --exact seeks on single clicks
-        function (element) mp.commandv("seek", get_slider_value(element),
-            "absolute-percent+exact") end
+    ne.eventresponder["mbtn_left_down"] = function (element)
+        element.state.mbtn_left = true
+        mp.commandv("seek", get_slider_value(element), "absolute-percent+exact")
+    end
+    ne.eventresponder["mbtn_left_up"] = function (element)
+        element.state.mbtn_left = false
+    end
+    ne.eventresponder["mbtn_right_up"] = function (element)
+        local chapter
+        local pos = get_slider_value(element)
+        local diff = math.huge
+
+        for i, marker in ipairs(element.slider.markerF()) do
+            if math.abs(pos - marker) < diff then
+                diff = math.abs(pos - marker)
+                chapter = i
+            end
+        end
+
+        if chapter then
+            mp.set_property("chapter", chapter - 1)
+        end
+    end
     ne.eventresponder["reset"] =
         function (element) element.state.lastseek = nil end
 
