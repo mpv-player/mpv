@@ -1779,7 +1779,8 @@ if get_option('cplayer')
     confdir = get_option('sysconfdir')
 
     conf_files = ['etc/mpv.conf', 'etc/input.conf',
-                  'etc/mplayer-input.conf', 'etc/restore-old-bindings.conf']
+                  'etc/mplayer-input.conf', 'etc/restore-old-bindings.conf',
+                  'etc/restore-osc-bindings.conf']
     install_data(conf_files, install_dir: join_paths(datadir, 'doc', 'mpv'))
 
     bash_install_dir = join_paths(datadir, 'bash-completion', 'completions')
