@@ -126,7 +126,7 @@ CLI
 Things such as default key bindings do not necessarily require compatibility.
 However, the release notes should be extremely clear on changes to "important"
 key bindings. Bindings which restore the old behavior should be added to
-restore-old-bindings.conf.
+restore-old-bindings.conf and restore-osc-bindings.conf.
 
 Some option parsing is CLI-only and not available from libmpv or scripting. No
 compatibility guarantees come with them. However, the rules which mpv uses to
