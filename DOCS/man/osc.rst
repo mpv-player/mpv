@@ -123,6 +123,11 @@ fs
     left-click      toggle fullscreen
     =============   ================================================
 
+Since mpv 0.40.0, it is possible to configure the commands to run with mouse
+actions on some interface elements, and the default behaviors of several
+elements were changed. If you miss some older behaviors, look at
+``etc/restore-osc-bindings.conf`` in the mpv git repository.
+
 Key Bindings
 ~~~~~~~~~~~~
 
