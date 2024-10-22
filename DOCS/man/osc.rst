@@ -43,8 +43,8 @@ pl next
     =============   ================================================
 
 title
-    | Displays current media-title, filename, custom title, or target chapter
-      name while hovering the seekbar.
+    | Displays the current playlist position and media-title, filename or custom
+      title, or the target chapter name while hovering the seekbar.
 
     =============   ================================================
     left-click      show playlist position and length and full title
@@ -288,7 +288,7 @@ Configurable Options
     Duration of fade out in ms, 0 = no fade
 
 ``title``
-    Default: ${media-title}
+    Default: ${!playlist-count==1:[${playlist-pos-1}/${playlist-count}] }${media-title}
 
     String that supports property expansion that will be displayed as
     OSC title.

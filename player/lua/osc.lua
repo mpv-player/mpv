@@ -34,7 +34,7 @@ local user_opts = {
     seekrangealpha = 200,       -- transparency of seekranges
     seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     scrollcontrols = true,      -- allow scrolling when hovering certain OSC elements
-    title = "${media-title}",   -- string compatible with property-expansion
+    title = "${!playlist-count==1:[${playlist-pos-1}/${playlist-count}] }${media-title}",
                                 -- to be shown as OSC title
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
