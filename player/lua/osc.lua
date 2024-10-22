@@ -1703,11 +1703,14 @@ local function osc_init()
     end
 
     ne.eventresponder["mbtn_left_up"] = function ()
-        mp.command("show-text '[${playlist-pos-1}/${playlist-count}] ${media-title}'")
+        mp.command("script-binding stats/display-page-5")
     end
-
-    ne.eventresponder["mbtn_right_up"] =
-        function () mp.command("show-text ${filename}") end
+    ne.eventresponder["shift+mbtn_left_up"] = function ()
+        mp.command("show-text ${filename}")
+    end
+    ne.eventresponder["mbtn_right_up"] = function ()
+        mp.command("script-binding stats/display-page-5")
+    end
 
     -- playlist buttons
 

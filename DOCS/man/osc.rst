@@ -47,8 +47,10 @@ title
       title, or the target chapter name while hovering the seekbar.
 
     =============   ================================================
-    left-click      show playlist position and length and full title
-    right-click     show filename
+    left-click      show file and track info
+    middle-click    show filename
+    shift+L-click   show filename
+    right-click     show file and track info
     =============   ================================================
 
 cache
