@@ -117,6 +117,8 @@ void mp_flush_wakeup_pipe(int pipe_end)
 #include <stdio.h>
 #include <stddef.h>
 
+#include "osdep/windows_utils.h"
+
 //copied and modified from libav
 //http://git.libav.org/?p=libav.git;a=blob;f=libavformat/os_support.c;h=a0fcd6c9ba2be4b0dbcc476f6c53587345cc1152;hb=HEADl30
 
@@ -729,9 +731,7 @@ static struct {
 
 static void mp_dl_free(void)
 {
-    if (mp_dl_result.errstring != NULL) {
-        talloc_free(mp_dl_result.errstring);
-    }
+    talloc_free(mp_dl_result.errstring);
 }
 
 static void mp_dl_init(void)
@@ -778,24 +778,8 @@ char *mp_dlerror(void)
     if (mp_dl_result.errcode == 0)
         return NULL;
 
-    // convert error code to a string message
-    LPWSTR werrstring = NULL;
-    FormatMessageW(
-        FORMAT_MESSAGE_FROM_SYSTEM
-            | FORMAT_MESSAGE_IGNORE_INSERTS
-            | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        NULL,
-        mp_dl_result.errcode,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
-        (LPWSTR) &werrstring,
-        0,
-        NULL);
+    mp_dl_result.errstring = talloc_strdup(NULL, mp_HRESULT_to_str(mp_dl_result.errcode));
     mp_dl_result.errcode = 0;
-
-    if (werrstring) {
-        mp_dl_result.errstring = mp_to_utf8(NULL, werrstring);
-        LocalFree(werrstring);
-    }
 
     return mp_dl_result.errstring == NULL
         ? "unknown error"
