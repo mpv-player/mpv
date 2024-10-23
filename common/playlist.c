@@ -444,13 +444,8 @@ void playlist_set_current(struct playlist *pl)
     for (int i = 0; i < pl->num_entries; ++i) {
         if (!pl->entries[i]->playlist_path)
             continue;
-        char *path = pl->entries[i]->playlist_path;
-        if (path[0] != '.')
-            path = mp_path_join(NULL, pl->playlist_dir, mp_basename(pl->entries[i]->playlist_path));
-        bool same = !strcmp(pl->entries[i]->filename, path);
-        if (path != pl->entries[i]->playlist_path)
-            talloc_free(path);
-        if (same) {
+        char *path = mp_normalize_path(pl, pl->entries[i]->playlist_path);
+        if (!strcmp(pl->entries[i]->filename, path)) {
             pl->current = pl->entries[i];
             break;
         }

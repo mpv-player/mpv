@@ -456,7 +456,7 @@ static bool scan_dir(struct pl_parser *p, char *path,
         if (mp_cancel_test(p->s->cancel))
             break;
 
-        char *file = mp_path_join(p, path, ep->d_name);
+        char *file = mp_normalize_path(p, mp_path_join(p, path, ep->d_name));
 
         struct stat st;
         if (stat(file, &st) == 0 && S_ISDIR(st.st_mode)) {

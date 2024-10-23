@@ -351,7 +351,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
     s->info = sinfo;
     s->cancel = args->cancel;
     s->url = talloc_strdup(s, url);
-    s->path = talloc_strdup(s, path);
+    s->path = mp_normalize_path(s, path);
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     s->requested_buffer_size = opts->buffer_size;
     s->allow_partial_read = flags & STREAM_ALLOW_PARTIAL_READ;
