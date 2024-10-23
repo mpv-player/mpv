@@ -924,10 +924,10 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     empty string, ``KEYUP`` will be set on all keys. Otherwise, ``KEYUP`` will
     only be set on the key specified by ``name``.
 
-``keybind <name> <command>``
-    Binds a key to an input command. ``command`` must be a complete command
+``keybind <name> <cmd>``
+    Binds a key to an input command. ``cmd`` must be a complete command
     containing all the desired arguments and flags. Both ``name`` and
-    ``command`` use the ``input.conf`` naming scheme. This is primarily
+    ``cmd`` use the ``input.conf`` naming scheme. This is primarily
     useful for the client API.
 
 ``audio-add <url> [<flags> [<title> [<lang>]]]``
