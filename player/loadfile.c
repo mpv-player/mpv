@@ -284,20 +284,17 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
     APPEND(b, " (%s", codec ? codec : "<unknown>");
     if (s && s->codec->codec_profile)
         APPEND(b, " [%s]", s->codec->codec_profile);
-    if (t->type == STREAM_VIDEO) {
-        if (s && s->codec->disp_w)
-            APPEND(b, " %dx%d", s->codec->disp_w, s->codec->disp_h);
-        if (s && s->codec->fps && !t->image) {
-            char *fps = mp_format_double(NULL, s->codec->fps, 4, false, false, true);
-            APPEND(b, " %s fps", fps);
-            talloc_free(fps);
-        }
-    } else if (t->type == STREAM_AUDIO) {
-        if (s && s->codec->channels.num)
-            APPEND(b, " %dch", s->codec->channels.num);
-        if (s && s->codec->samplerate)
-            APPEND(b, " %d Hz", s->codec->samplerate);
+    if (s && s->codec->disp_w)
+        APPEND(b, " %dx%d", s->codec->disp_w, s->codec->disp_h);
+    if (s && s->codec->fps && !t->image) {
+        char *fps = mp_format_double(NULL, s->codec->fps, 4, false, false, true);
+        APPEND(b, " %s fps", fps);
+        talloc_free(fps);
     }
+    if (s && s->codec->channels.num)
+        APPEND(b, " %dch", s->codec->channels.num);
+    if (s && s->codec->samplerate)
+        APPEND(b, " %d Hz", s->codec->samplerate);
     if (s && s->codec->bitrate) {
         APPEND(b, " %d kbps", (s->codec->bitrate + 500) / 1000);
     } else if (s && s->hls_bitrate) {
