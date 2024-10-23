@@ -216,7 +216,8 @@ bool mp_input_use_media_keys(struct input_ctx *ictx);
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 
 // Binds a command to a key.
-void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command);
+void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command,
+                       const char *desc);
 
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
 
