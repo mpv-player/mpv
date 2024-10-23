@@ -31,7 +31,7 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
-    right-click     open the playlist selector
+    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
     =============   ================================================
@@ -39,7 +39,7 @@ pl prev
 pl next
     =============   ================================================
     left-click      play next file in playlist
-    right-click     open the playlist selector
+    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
     =============   ================================================
@@ -66,14 +66,14 @@ play
 skip back
     =============   ================================================
     left-click      go to beginning of chapter / previous chapter
-    right-click     show chapters
+    right-click     open the chapter selector
     shift+L-click   show chapters
     =============   ================================================
 
 skip frwd
     =============   ================================================
     left-click      go to next chapter
-    right-click     show chapters
+    right-click     open the chapter selector
     shift+L-click   show chapters
     =============   ================================================
 
