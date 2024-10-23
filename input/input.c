@@ -1643,11 +1643,12 @@ void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
     input_unlock(ictx);
 }
 
-void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command)
+void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command,
+                       const char *desc)
 {
     input_lock(ictx);
     bind_keys(ictx, false, (bstr){0}, &key, 1, command,
-              "keybind-command", NULL);
+              "keybind-command", desc);
     input_unlock(ictx);
 }
 
