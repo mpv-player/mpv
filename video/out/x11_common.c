@@ -599,11 +599,11 @@ static void vo_x11_get_bounding_monitors(struct vo_x11_state *x11, long b[4])
         struct xrandr_display *d = &x11->displays[n];
         if (d->rc.y0 < x11->displays[b[0]].rc.y0)
             b[0] = n;
-        if (d->rc.y1 < x11->displays[b[1]].rc.y1)
+        if (d->rc.y1 > x11->displays[b[1]].rc.y1)
             b[1] = n;
         if (d->rc.x0 < x11->displays[b[2]].rc.x0)
             b[2] = n;
-        if (d->rc.x1 < x11->displays[b[3]].rc.x1)
+        if (d->rc.x1 > x11->displays[b[3]].rc.x1)
             b[3] = n;
     }
 }
