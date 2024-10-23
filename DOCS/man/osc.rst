@@ -521,13 +521,13 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``play_pause_mbtn_right_command=cycle-values loop-file inf no``
 
-``chapter_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-list} 3000``
+``chapter_prev_mbtn_left_command=osd-msg add chapter -1``
 
 ``chapter_prev_mbtn_mid_command=show-text ${chapter-list} 3000``
 
 ``chapter_prev_mbtn_right_command=script-binding select/select-chapter; script-message-to osc osc-hide``
 
-``chapter_next_mbtn_left_command=no-osd add chapter 1; show-text ${chapter-list} 3000``
+``chapter_next_mbtn_left_command=osd-msg add chapter 1``
 
 ``chapter_next_mbtn_mid_command=show-text ${chapter-list} 3000``
 
