@@ -1368,6 +1368,11 @@ typedef enum mpv_event_id {
      * See also mpv_event and mpv_event_hook.
      */
     MPV_EVENT_HOOK              = 25,
+    /**
+     * Triggered after initialization is complete, including all scripts.
+     * mpv is proceeding to play the file.
+     */
+    MPV_EVENT_INITIALIZED       = 26,
     // Internal note: adjust INTERNAL_EVENT_BASE when adding new events.
 } mpv_event_id;
 
