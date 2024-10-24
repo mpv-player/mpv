@@ -31,7 +31,7 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
-    right-click     open the playlist selector
+    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
     =============   ================================================
@@ -39,7 +39,7 @@ pl prev
 pl next
     =============   ================================================
     left-click      play next file in playlist
-    right-click     open the playlist selector
+    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
     =============   ================================================
@@ -66,14 +66,14 @@ play
 skip back
     =============   ================================================
     left-click      go to beginning of chapter / previous chapter
-    right-click     show chapters
+    right-click     open the chapter selector
     shift+L-click   show chapters
     =============   ================================================
 
 skip frwd
     =============   ================================================
     left-click      go to next chapter
-    right-click     show chapters
+    right-click     open the chapter selector
     shift+L-click   show chapters
     =============   ================================================
 
@@ -123,6 +123,11 @@ fs
     left-click      toggle fullscreen
     right-click     toggle whether the window is maximized
     =============   ================================================
+
+Since mpv 0.40.0, it is possible to configure the commands to run with mouse
+actions on some interface elements, and the default behaviors of several
+elements were changed. If you miss some older behaviors, look at
+``etc/restore-osc-bindings.conf`` in the mpv git repository.
 
 Key Bindings
 ~~~~~~~~~~~~

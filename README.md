@@ -76,6 +76,9 @@ on every release.
 Changes to the default key bindings are indicated in
 [restore-old-bindings.conf][restore-old-bindings].
 
+Changes to the default OSC bindings are indicated in
+[restore-osc-bindings.conf][restore-osc-bindings].
+
 ## Compilation
 
 
@@ -214,4 +217,5 @@ Most activity happens on the IRC channel and the GitHub issue tracker.
 [interface-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/interface-changes.rst
 [api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
 [restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
+[restore-osc-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-osc-bindings.conf
 [contribute.md]: https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md
