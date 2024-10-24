@@ -23,9 +23,14 @@
 #include "misc/random.h"
 #include "mpv_talloc.h"
 #include "options/path.h"
+#include "misc/khash.h"
 
 #include "demux/demux.h"
 #include "stream/stream.h"
+
+KHASH_MAP_INIT_INT64(playlist_id_map, int)
+
+typedef khash_t(playlist_id_map) playlist_id_map_t;
 
 struct playlist_entry *playlist_entry_new(const char *filename)
 {
@@ -89,6 +94,16 @@ void playlist_entry_unref(struct playlist_entry *e)
     }
 }
 
+void playlist_entry_remove(struct playlist_entry *entry)
+{
+    entry->pl = NULL;
+    entry->pl_index = -1;
+    ta_set_parent(entry, NULL);
+
+    entry->removed = true;
+    playlist_entry_unref(entry);
+}
+
 void playlist_remove(struct playlist *pl, struct playlist_entry *entry)
 {
     assert(pl && entry->pl == pl);
@@ -101,12 +116,7 @@ void playlist_remove(struct playlist *pl, struct playlist_entry *entry)
     MP_TARRAY_REMOVE_AT(pl->entries, pl->num_entries, entry->pl_index);
     playlist_update_indexes(pl, entry->pl_index, -1);
 
-    entry->pl = NULL;
-    entry->pl_index = -1;
-    ta_set_parent(entry, NULL);
-
-    entry->removed = true;
-    playlist_entry_unref(entry);
+    playlist_entry_remove(entry);
 }
 
 void playlist_clear(struct playlist *pl)
@@ -455,4 +465,31 @@ void playlist_set_current(struct playlist *pl)
             break;
         }
     }
+}
+
+playlist_id_map_t *playlist_build_id_map(const struct playlist *pl)
+{
+    khash_t(playlist_id_map) *h = kh_init(playlist_id_map);
+    for (int i = 0; i < pl->num_entries; ++i) {
+        struct playlist_entry *e = pl->entries[i];
+        int absent;
+        khint_t k = kh_put(playlist_id_map, h, e->id, &absent);
+        kh_val(h, k) = i;
+    }
+    return h;
+}
+
+void playlist_destroy_id_map(playlist_id_map_t *h)
+{
+    kh_destroy(playlist_id_map, h);
+}
+
+struct playlist_entry *playlist_entry_from_id(struct playlist *pl, const playlist_id_map_t *h, uint64_t id)
+{
+    khint_t k = kh_get(playlist_id_map, h, id);
+    if (k == kh_end(h))
+        return NULL;
+
+    int index = kh_val(h, k);
+    return pl->entries[index];
 }
