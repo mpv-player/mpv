@@ -157,15 +157,11 @@ struct load_action {
     bool play;
 };
 
-// U+25CB WHITE CIRCLE
-// U+25CF BLACK CIRCLE
 // U+00A0 NO-BREAK SPACE
-#define WHITECIRCLE "\xe2\x97\x8b"
-#define BLACKCIRCLE "\xe2\x97\x8f"
 #define NBSP "\xc2\xa0"
 
-const char list_current[] = BLACKCIRCLE NBSP;
-const char list_normal[] = WHITECIRCLE NBSP;
+const char list_current[] = BLACK_CIRCLE NBSP;
+const char list_normal[] = WHITE_CIRCLE NBSP;
 
 static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
                         enum stream_type mediatype,
