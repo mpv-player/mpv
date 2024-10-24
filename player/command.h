@@ -20,6 +20,7 @@
 
 #include <stdbool.h>
 
+#include "core.h"
 #include "libmpv/client.h"
 #include "osdep/compiler.h"
 
@@ -120,5 +121,7 @@ void mp_hook_add(struct MPContext *mpctx, char *client, int64_t client_id,
 void mark_seek(struct MPContext *mpctx);
 
 void mp_abort_cache_dumping(struct MPContext *mpctx);
+
+char *mp_format_track_metadata(void *ctx, struct track *t);
 
 #endif /* MPLAYER_COMMAND_H */

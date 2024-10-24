@@ -76,8 +76,6 @@
 #include "osdep/subprocess.h"
 #include "osdep/terminal.h"
 
-#include "core.h"
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -2104,19 +2102,68 @@ static const char *track_type_name(struct track *t)
     return NULL;
 }
 
-
 static char *append_track_info(char *res, struct track *track)
 {
     res = talloc_strdup_append(res, track->selected ? list_current : list_normal);
     res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
-    if (track->title)
-        res = talloc_asprintf_append(res, "'%s' ", track->title);
-    if (track->lang)
-        res = talloc_asprintf_append(res, "(%s) ", track->lang);
-    if (track->is_external)
-        res = talloc_asprintf_append(res, "(external) ");
+    res = talloc_strdup_append(res, mp_format_track_metadata(res, track));
 
     return res;
+}
+
+#define bstr_xappend0(ctx, dst, s) bstr_xappend(ctx, dst, bstr0(s))
+#define ADD_FLAG(ctx, dst, flag, first) do {                           \
+    bstr_xappend_asprintf(ctx, &dst, " %s%s", first ? "[" : "", flag); \
+    first = false;                                                     \
+} while(0)
+
+char *mp_format_track_metadata(void *ctx, struct track *t)
+{
+    struct sh_stream *s = t->stream;
+    bstr dst = {0};
+
+    if (t->title)
+        bstr_xappend_asprintf(ctx, &dst, " '%s'", t->title);
+
+    const char *codec = s ? s->codec->codec : NULL;
+    bstr_xappend_asprintf(ctx, &dst, " (%s", codec ? codec : "<unknown>");
+
+    if (s && s->codec->codec_profile)
+        bstr_xappend_asprintf(ctx, &dst, " [%s]", s->codec->codec_profile);
+    if (s && s->codec->disp_w)
+        bstr_xappend_asprintf(ctx, &dst, " %dx%d", s->codec->disp_w, s->codec->disp_h);
+    if (s && s->codec->fps && !t->image) {
+        char *fps = mp_format_double(ctx, s->codec->fps, 4, false, false, true);
+        bstr_xappend_asprintf(ctx, &dst, " %s fps", fps);
+    }
+    if (s && s->codec->channels.num)
+        bstr_xappend_asprintf(ctx, &dst, " %dch", s->codec->channels.num);
+    if (s && s->codec->samplerate)
+        bstr_xappend_asprintf(ctx, &dst, " %d Hz", s->codec->samplerate);
+    if (s && s->codec->bitrate) {
+        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->codec->bitrate + 500) / 1000);
+    } else if (s && s->hls_bitrate) {
+        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->hls_bitrate + 500) / 1000);
+    }
+    bstr_xappend0(ctx, &dst, ")");
+
+    bool first = true;
+    if (t->default_track)
+        ADD_FLAG(ctx, dst, "default", first);
+    if (t->forced_track)
+        ADD_FLAG(ctx, dst, "forced", first);
+    if (t->dependent_track)
+        ADD_FLAG(ctx, dst, "dependent", first);
+    if (t->visual_impaired_track)
+        ADD_FLAG(ctx, dst, "visual-impaired", first);
+    if (t->hearing_impaired_track)
+        ADD_FLAG(ctx, dst, "hearing-impaired", first);
+    if (t->is_external)
+        ADD_FLAG(ctx, dst, "external", first);
+    if (!first)
+        bstr_xappend0(ctx, &dst, "]");
+
+    return bstrto0(ctx, dst);
 }
 
 static int property_list_tracks(void *ctx, struct m_property *prop,
