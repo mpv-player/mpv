@@ -265,6 +265,7 @@ typedef struct demuxer {
     void *priv;   // demuxer-specific internal data
     struct mpv_global *global;
     struct mp_log *log, *glog;
+    struct demux_packet_pool *packet_pool;
     struct demuxer_params *params;
 
     // internal to demux.c
