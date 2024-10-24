@@ -126,6 +126,6 @@ void mp_abort_cache_dumping(struct MPContext *mpctx);
 // U+25CF BLACK CIRCLE
 #define WHITE_CIRCLE "\xe2\x97\x8b"
 #define BLACK_CIRCLE "\xe2\x97\x8f"
-char *mp_format_track_metadata(void *ctx, struct track *t);
+char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang);
 
 #endif /* MPLAYER_COMMAND_H */
