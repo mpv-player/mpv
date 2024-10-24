@@ -207,8 +207,29 @@ static inline void mp_thread_set_name(const char *name)
     talloc_free(wname);
 }
 
-static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread)
+static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread_id)
 {
-    (void) thread;
-    return 0;
+    int64_t thread_time = 0;
+
+    HANDLE thread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, thread_id);
+    if (!thread)
+        return thread_time;
+
+    FILETIME creation_time, exit_time, kernel_time, user_time;
+    if (!GetThreadTimes(thread, &creation_time, &exit_time, &kernel_time, &user_time))
+        goto done;
+
+    ULARGE_INTEGER kernel_time_q;
+    kernel_time_q.LowPart = kernel_time.dwLowDateTime;
+    kernel_time_q.HighPart = kernel_time.dwHighDateTime;
+
+    ULARGE_INTEGER user_time_q;
+    user_time_q.LowPart = user_time.dwLowDateTime;
+    user_time_q.HighPart = user_time.dwHighDateTime;
+
+    thread_time = (kernel_time_q.QuadPart + user_time_q.QuadPart) * 100;
+
+done:
+    CloseHandle(thread);
+    return thread_time;
 }
