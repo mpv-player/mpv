@@ -234,8 +234,6 @@ static void uninit_demuxer(struct MPContext *mpctx)
     talloc_free(demuxers);
 }
 
-#define BLACK_CIRCLE "\xe2\x97\x8f"
-#define WHITE_CIRCLE "\xe2\x97\x8b"
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
 #define FILL(s, n) mp_snprintf_cat(s, sizeof(s), "%*s", n, "")
 
