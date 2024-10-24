@@ -82,7 +82,7 @@ static void *audio_from_av_ref(AVFrame *data)
 
 static void *packet_ref(void *data)
 {
-    return demux_copy_packet(data);
+    return demux_copy_packet(NULL, data);
 }
 
 static const struct frame_handler frame_handlers[] = {
