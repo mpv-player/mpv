@@ -272,7 +272,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
     }
 
     void *ctx = talloc_new(NULL);
-    APPEND(b, " %s", mp_format_track_metadata(ctx, t));
+    APPEND(b, " %s", mp_format_track_metadata(ctx, t, false));
     talloc_free(ctx);
 
     MP_INFO(mpctx, "%s\n", b);

@@ -2102,7 +2102,7 @@ static char *append_track_info(char *res, struct track *track)
 {
     res = talloc_strdup_append(res, track->selected ? list_current : list_normal);
     res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
-    res = talloc_strdup_append(res, mp_format_track_metadata(res, track));
+    res = talloc_strdup_append(res, mp_format_track_metadata(res, track, true));
 
     return res;
 }
@@ -2113,7 +2113,7 @@ static char *append_track_info(char *res, struct track *track)
     first = false;                                                     \
 } while(0)
 
-char *mp_format_track_metadata(void *ctx, struct track *t)
+char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
 {
     struct sh_stream *s = t->stream;
     bstr dst = {0};
@@ -2122,7 +2122,13 @@ char *mp_format_track_metadata(void *ctx, struct track *t)
         bstr_xappend_asprintf(ctx, &dst, " '%s'", t->title);
 
     const char *codec = s ? s->codec->codec : NULL;
-    bstr_xappend_asprintf(ctx, &dst, " (%s", codec ? codec : "<unknown>");
+
+    bstr_xappend0(ctx, &dst, " (");
+
+    if (add_lang && t->lang)
+        bstr_xappend_asprintf(ctx, &dst, "%s ", t->lang);
+
+    bstr_xappend0(ctx, &dst, codec ? codec : "<unknown>");
 
     if (s && s->codec->codec_profile)
         bstr_xappend_asprintf(ctx, &dst, " [%s]", s->codec->codec_profile);
