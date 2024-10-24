@@ -1936,20 +1936,10 @@ static int property_switch_track(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (track) {
-            char *lang = track->lang;
-            if (!lang && type != STREAM_VIDEO) {
-                lang = "unknown";
-            } else if (!lang) {
-                lang = "";
-            }
-
-            if (track->title) {
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
-                                           track->user_tid, lang, track->title);
-            } else {
-                *(char **)arg = talloc_asprintf(NULL, "(%d) %s",
-                                                track->user_tid, lang);
-            }
+            void *talloc_ctx = talloc_new(NULL);
+            *(char **)arg = talloc_asprintf(NULL, "(%d) %s", track->user_tid,
+                mp_format_track_metadata(talloc_ctx, track, true));
+            talloc_free(talloc_ctx);
         } else {
             const char *msg = "no";
             if (!mpctx->playback_initialized &&
