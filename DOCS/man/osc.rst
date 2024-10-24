@@ -535,9 +535,9 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``audio_track_mbtn_left_command=script-binding select/select-aid; script-message-to osc osc-hide``
 
-``audio_track_mbtn_mid_command=show-text ${track-list/audio} 2000``
+``audio_track_mbtn_mid_command=show-text ${track-list/audio} 3000``
 
-``audio_track_mbtn_right_command=show-text ${track-list/audio} 2000``
+``audio_track_mbtn_right_command=show-text ${track-list/audio} 3000``
 
 ``audio_track_wheel_down_command=cycle audio``
 
@@ -545,9 +545,9 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``sub_track_mbtn_left_command=script-binding select/select-sid; script-message-to osc osc-hide``
 
-``sub_track_mbtn_mid_command=show-text ${track-list/sub} 2000``
+``sub_track_mbtn_mid_command=show-text ${track-list/sub} 3000``
 
-``sub_track_mbtn_right_command=show-text ${track-list/sub} 2000``
+``sub_track_mbtn_right_command=show-text ${track-list/sub} 3000``
 
 ``sub_track_wheel_down_command=cycle sub``
 
