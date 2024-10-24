@@ -1,0 +1,2 @@
+deprecate `--wayland-disable-vsync`
+add `--wayland-internal-vsync` as a replacement for `--wayland-disable-vsync`
