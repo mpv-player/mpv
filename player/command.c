@@ -2109,11 +2109,11 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
     bstr dst = {0};
 
     if (t->title)
-        bstr_xappend_asprintf(ctx, &dst, " '%s'", t->title);
+        bstr_xappend_asprintf(ctx, &dst, "'%s' ", t->title);
 
     const char *codec = s ? s->codec->codec : NULL;
 
-    bstr_xappend0(ctx, &dst, " (");
+    bstr_xappend0(ctx, &dst, "(");
 
     if (add_lang && t->lang)
         bstr_xappend_asprintf(ctx, &dst, "%s ", t->lang);
