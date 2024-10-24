@@ -1142,7 +1142,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     vo->target_params = &p->target_params;
 
     if (vo->params) {
-        vo->params->color.hdr = ref_frame.color.hdr;
         // Augment metadata with peak detection max_pq_y / avg_pq_y
         pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
     }
