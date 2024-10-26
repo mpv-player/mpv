@@ -4522,6 +4522,13 @@ OSD
 
     Default: 1.6.
 
+``--osd-bar-marker-style=<none|triangle|line>``
+    Set the OSD bar marker style.
+
+    :none:     Don't draw markers.
+    :triangle: Draw markers as triangles (default).
+    :line:     Draw markers as lines.
+
 ``--osd-blur=<0..20.0>``
     Gaussian blur factor applied to the OSD font border.
     0 means no blur applied (default).

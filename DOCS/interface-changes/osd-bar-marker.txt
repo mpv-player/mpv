@@ -1,1 +1,2 @@
 add `--osd-bar-marker-scale` and `--osd-bar-marker-min-size` options
+add `--osd-bar-marker-style` option
