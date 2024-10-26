@@ -469,19 +469,25 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_rect_ccw(d, 0, 0, width, height);
 
     // chapter marks
-    for (int n = 0; n < obj->progbar_state.num_stops; n++) {
-        float s = obj->progbar_state.stops[n] * width;
-        float size = MPMAX(border * osd->opts->osd_bar_marker_scale,
-                           osd->opts->osd_bar_marker_min_size);
+    if (osd->opts->osd_bar_marker_style) {
+        for (int n = 0; n < obj->progbar_state.num_stops; n++) {
+            float s = obj->progbar_state.stops[n] * width;
+            float size = MPMAX(border * osd->opts->osd_bar_marker_scale,
+                               osd->opts->osd_bar_marker_min_size);
 
-        if (s > size && s < width - size) {
-            ass_draw_move_to(d, s + size, 0);
-            ass_draw_line_to(d, s,        size);
-            ass_draw_line_to(d, s - size, 0);
+            if (osd->opts->osd_bar_marker_style == 2 &&
+                s > size / 2 && s < width - size / 2)
+            { // line
+                ass_draw_rect_cw(d, s - size / 2, 0, s + size / 2, height);
+            } else if (s > size && s < width - size) { //triangle
+                ass_draw_move_to(d, s + size, 0);
+                ass_draw_line_to(d, s,        size);
+                ass_draw_line_to(d, s - size, 0);
 
-            ass_draw_move_to(d, s - size, height);
-            ass_draw_line_to(d, s,        height - size);
-            ass_draw_line_to(d, s + size, height);
+                ass_draw_move_to(d, s - size, height);
+                ass_draw_line_to(d, s,        height - size);
+                ass_draw_line_to(d, s + size, height);
+            }
         }
     }
 
