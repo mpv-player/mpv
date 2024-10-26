@@ -279,6 +279,10 @@ static void uninit(struct vo *vo)
     struct gpu_priv *p = vo->priv;
 
     gl_video_uninit(p->renderer);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = NULL;
+    mp_mutex_unlock(&vo->params_mutex);
+
     if (vo->hwdec_devs) {
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
