@@ -134,17 +134,6 @@ struct mp_subtitle_shared_opts {
     int ass_style_override[2];
 };
 
-struct mp_sub_filter_opts {
-    bool sub_filter_SDH;
-    bool sub_filter_SDH_harder;
-    char *sub_filter_SDH_enclosures;
-    bool rf_enable;
-    bool rf_plain;
-    char **rf_items;
-    char **jsre_items;
-    bool rf_warn;
-};
-
 struct mp_osd_render_opts {
     float osd_bar_align_x;
     float osd_bar_align_y;
@@ -424,7 +413,6 @@ extern const struct m_sub_options cuda_conf;
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_subtitle_shared_sub_opts;
-extern const struct m_sub_options mp_sub_filter_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
 extern const struct m_sub_options filter_conf;
 extern const struct m_sub_options resample_conf;
