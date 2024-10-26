@@ -4512,6 +4512,16 @@ OSD
 
     Default: 0.5.
 
+``--osd-bar-marker-scale=<0-100>``
+    Factor for the OSD bar marker size relative to the OSD bar outline size.
+
+    Default: 1.3.
+
+``--osd-bar-marker-min-size=<size>``
+    Minimum OSD bar marker size.
+
+    Default: 1.6.
+
 ``--osd-blur=<0..20.0>``
     Gaussian blur factor applied to the OSD font border.
     0 means no blur applied (default).

@@ -471,7 +471,8 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // chapter marks
     for (int n = 0; n < obj->progbar_state.num_stops; n++) {
         float s = obj->progbar_state.stops[n] * width;
-        float size = MPMAX(border * 1.3, 1.6);
+        float size = MPMAX(border * osd->opts->osd_bar_marker_scale,
+                           osd->opts->osd_bar_marker_min_size);
 
         if (s > size && s < width - size) {
             ass_draw_move_to(d, s + size, 0);
