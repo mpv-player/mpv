@@ -471,16 +471,16 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // chapter marks
     for (int n = 0; n < obj->progbar_state.num_stops; n++) {
         float s = obj->progbar_state.stops[n] * width;
-        float dent = MPMAX(border * 1.3, 1.6);
+        float size = MPMAX(border * 1.3, 1.6);
 
-        if (s > dent && s < width - dent) {
-            ass_draw_move_to(d, s + dent, 0);
-            ass_draw_line_to(d, s,        dent);
-            ass_draw_line_to(d, s - dent, 0);
+        if (s > size && s < width - size) {
+            ass_draw_move_to(d, s + size, 0);
+            ass_draw_line_to(d, s,        size);
+            ass_draw_line_to(d, s - size, 0);
 
-            ass_draw_move_to(d, s - dent, height);
-            ass_draw_line_to(d, s,        height - dent);
-            ass_draw_line_to(d, s + dent, height);
+            ass_draw_move_to(d, s - size, height);
+            ass_draw_line_to(d, s,        height - size);
+            ass_draw_line_to(d, s + size, height);
         }
     }
 
