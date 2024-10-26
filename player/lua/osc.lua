@@ -1866,7 +1866,9 @@ local function osc_init()
         return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("aid") or "-") .. "/" .. audio_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.audio_track_mbtn_left_command)
+    ne.eventresponder["mbtn_left_up"] = command_callback(audio_track_count == 1
+        and "cycle audio"
+        or user_opts.audio_track_mbtn_left_command)
     ne.eventresponder["shift+mbtn_left_up"] = command_callback(
         user_opts.audio_track_mbtn_mid_command)
     ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.audio_track_mbtn_right_command)
@@ -1886,7 +1888,9 @@ local function osc_init()
         return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
                (mp.get_property_native("sid") or "-") .. "/" .. sub_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_left_command)
+    ne.eventresponder["mbtn_left_up"] = command_callback(sub_track_count == 1
+        and "cycle sub"
+        or user_opts.sub_track_mbtn_left_command)
     ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_mid_command)
     ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.sub_track_mbtn_right_command)
 

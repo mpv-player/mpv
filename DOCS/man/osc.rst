@@ -497,6 +497,9 @@ Configurable Options
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
+When there's only one track of a type, left clicks on track buttons always cycle
+it instead of using the configured command.
+
 ``title_mbtn_left_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
 ``title_mbtn_mid_command=show-text ${filename}``
