@@ -15,17 +15,6 @@
 local utils = require 'mp.utils'
 local assdraw = require 'mp.assdraw'
 
--- Default options
-local opts = {
-    font = "",
-    font_size = 24,
-    border_size = 1.5,
-    scale_with_window = "auto",
-    case_sensitive = true,
-    history_dedup = true,
-    font_hw_ratio = 'auto',
-}
-
 local function detect_platform()
     local platform = mp.get_property_native('platform')
     if platform == 'darwin' or platform == 'windows' then
@@ -36,16 +25,18 @@ local function detect_platform()
     return 'x11'
 end
 
--- Pick a better default font for Windows and macOS
 local platform = detect_platform()
-if platform == 'windows' then
-    opts.font = 'Consolas'
-    opts.case_sensitive = false
-elseif platform == 'darwin' then
-    opts.font = 'Menlo'
-else
-    opts.font = 'monospace'
-end
+
+-- Default options
+local opts = {
+    font = "",
+    font_size = 16,
+    border_size = 1,
+    scale_with_window = "auto",
+    case_sensitive = platform ~= 'windows' and true or false,
+    history_dedup = true,
+    font_hw_ratio = 'auto',
+}
 
 -- Apply user-set options
 require 'mp.options'.read_options(opts)
@@ -117,6 +108,28 @@ local default_item
 local set_active
 
 
+local function get_font()
+    if opts.font ~= '' then
+        return opts.font
+    end
+
+    if selectable_items and not searching_history then
+        return
+    end
+
+    -- Pick a better default font for Windows and macOS
+    if platform == 'windows' then
+        return 'Consolas'
+    end
+
+    if platform == 'darwin' then
+        return 'Menlo'
+    end
+
+    return 'monospace'
+end
+
+
 -- Naive helper function to find the next UTF-8 character in 'str' after 'pos'
 -- by skipping continuation bytes. Assumes 'str' contains valid UTF-8.
 local function next_utf8(str, pos)
@@ -184,7 +197,7 @@ local function normalized_text_width(text, size, horizontal)
     for i = 1, repetitions_left do
         size = size * 0.8
         local ass = assdraw.ass_new()
-        ass.text = template:format(align, size, opts.font, rotation, text)
+        ass.text = template:format(align, size, get_font(), rotation, text)
         local _, _, x1, y1 = measure_bounds(ass.text)
         -- Check if nothing got clipped
         if x1 and x1 < osd_width and y1 < osd_height then
@@ -507,10 +520,12 @@ local function update()
                                  screenx .. ',' .. screeny
     local ass = assdraw.ass_new()
     local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
+    local font = get_font()
     local style = '{\\r' ..
                   '\\1a&H00&\\3a&H00&\\1c&Heeeeee&\\3c&H111111&' ..
                   (has_shadow and '\\4a&H99&\\4c&H000000&' or '') ..
-                  '\\fn' .. opts.font .. '\\fs' .. opts.font_size ..
+                  (font and '\\fn' .. font or '') ..
+                  '\\fs' .. opts.font_size ..
                   '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0' ..
                   (selectable_items and '\\q2' or '\\q1') ..
                   '\\clip(' .. clipping_coordinates .. ')}'
@@ -534,20 +549,24 @@ local function update()
     -- This will render at most screeny / font_size - 1 messages.
 
     local lines_max = calculate_max_log_lines()
-    -- Estimate how many characters fit in one line
-    local width_max = math.floor((screenx - bottom_left_margin -
-                                  mp.get_property_native('osd-margin-x') * 2 * screeny / 720) /
-                                 opts.font_size * get_font_hw_ratio())
+    local suggestion_ass = ''
+    if next(suggestion_buffer) then
+        -- Estimate how many characters fit in one line
+        local width_max = math.floor((screenx - bottom_left_margin -
+                                     mp.get_property_native('osd-margin-x') * 2 * screeny / 720)
+                                     / opts.font_size * get_font_hw_ratio())
 
-    local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
-    local suggestion_ass = style .. styles.suggestion .. suggestions
+        local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
+        lines_max = lines_max - rows
+        suggestion_ass = style .. styles.suggestion .. suggestions .. '\\N'
+    end
 
     populate_log_with_matches()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
     local log_messages = #log_buffer
-    local log_max_lines = math.max(0, lines_max - rows)
+    local log_max_lines = math.max(0, lines_max)
     if log_max_lines < log_messages then
         log_messages = log_max_lines
     end
@@ -560,9 +579,7 @@ local function update()
     ass:an(1)
     ass:pos(bottom_left_margin, screeny - bottom_left_margin - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
-    if #suggestions > 0 then
-        ass:append(suggestion_ass .. '\\N')
-    end
+    ass:append(suggestion_ass)
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
