@@ -162,7 +162,7 @@ local function set_osc_styles()
 
         elementDown = "{\\1c&H" .. osc_color_convert(user_opts.held_element_color) .."}",
         timecodes = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .. "\\3c&HFFFFFF\\fs20}",
-        vidtitle = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs12\\q2}",
+        vidtitle = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs14\\q2}",
         box = "{\\rDefault\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.background_color) .. "\\3c&HFFFFFF}",
 
         topButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
