@@ -814,8 +814,7 @@ local function determine_hovered_item()
     y = y - global_margins.t * height
     -- Calculate how many lines could be printed without decreasing them for
     -- the input line and OSC.
-    local max_lines = height / mp.get_property_native('display-hidpi-scale', 1)
-                      / opts.font_size
+    local max_lines = height / opts.font_size
     local clicked_line = math.floor(y / height * max_lines + .5)
 
     local offset = first_match_to_print - 1
