@@ -20,6 +20,7 @@ local opts = {
     font = "",
     font_size = 16,
     border_size = 1,
+    scale_with_window = "auto",
     case_sensitive = true,
     history_dedup = true,
     font_hw_ratio = 'auto',
@@ -230,6 +231,30 @@ local function ass_escape(str)
     return mp.command_native({'escape-ass', str})
 end
 
+local function should_scale()
+    return opts.scale_with_window == "yes" or
+           (opts.scale_with_window == "auto" and mp.get_property_native("osd-scale-by-window"))
+end
+
+local function get_scaled_osd_dimensions()
+    local w, h, aspect = mp.get_osd_size()
+
+    if w == 0 then
+        return 0, 0
+    end
+
+    if should_scale() then
+        h = 720
+        w = 720 * aspect
+    end
+
+    local scale = mp.get_property_native('display-hidpi-scale')
+    w = w / scale
+    h = h / scale
+
+    return w, h
+end
+
 local function calculate_max_log_lines()
     if not mp.get_property_native('vo-configured')
        or not mp.get_property_native('video-osd') then
@@ -239,8 +264,7 @@ local function calculate_max_log_lines()
                select(2, mp.get_property('term-status-msg'):gsub('\\n', ''))
     end
 
-    return math.floor(mp.get_property_native('osd-height')
-                      / mp.get_property_native('display-hidpi-scale', 1)
+    return math.floor(select(2, get_scaled_osd_dimensions())
                       * (1 - global_margins.t - global_margins.b)
                       / opts.font_size
                       -- Subtract 1 for the input line and 1 for the newline
@@ -474,10 +498,7 @@ local function update()
         return
     end
 
-    local screenx, screeny = mp.get_osd_size()
-    local dpi_scale = mp.get_property_native('display-hidpi-scale', 1)
-    screenx = screenx / dpi_scale
-    screeny = screeny / dpi_scale
+    local screenx, screeny = get_scaled_osd_dimensions()
 
     local bottom_left_margin = 6
 
@@ -782,16 +803,16 @@ local function handle_enter()
 end
 
 local function determine_hovered_item()
-    local height = mp.get_property_native('osd-height')
-    if height == 0 then
-        return
+    local height = select(2, get_scaled_osd_dimensions())
+    local y = mp.get_property_native('mouse-pos').y
+    if should_scale() then
+        y = y * 720 / mp.get_property_native('osd-height')
     end
-
-    local y = mp.get_property_native('mouse-pos').y - global_margins.t * height
+    y = y - global_margins.t * height
     -- Calculate how many lines could be printed without decreasing them for
     -- the input line and OSC.
-    local max_lines = height / mp.get_property_native('display-hidpi-scale')
-    / opts.font_size
+    local max_lines = height / mp.get_property_native('display-hidpi-scale', 1)
+                      / opts.font_size
     local clicked_line = math.floor(y / height * max_lines + .5)
 
     local offset = first_match_to_print - 1
