@@ -260,7 +260,10 @@ local function set_osd(res_x, res_y, text, z)
     state.osd.res_x = res_x
     state.osd.res_y = res_y
     state.osd.data = text
-    state.osd.z = z
+    -- Draw the OSC above the console with visibility auto because the OSC
+    -- receives mouse clicks, and below with visibility always because that is
+    -- needed with box layout.
+    state.osd.z = user_opts.visibility == "auto" and z or -1
     state.osd:update()
 end
 
