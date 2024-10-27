@@ -243,12 +243,13 @@ local function get_scaled_osd_dimensions()
         return 0, 0
     end
 
+    local scale = mp.get_property_native('display-hidpi-scale')
     if should_scale() then
         h = 720
         w = 720 * aspect
+        scale = 1
     end
 
-    local scale = mp.get_property_native('display-hidpi-scale')
     w = w / scale
     h = h / scale
 
