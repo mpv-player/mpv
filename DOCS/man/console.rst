@@ -164,6 +164,12 @@ Configurable Options
 
     Set the font border size used for the REPL and the console.
 
+``scale_with_window``
+    Default: ``auto``
+
+    Whether to scale the console with the window height. Can be ``yes``, ``no``,
+    or ``auto``, which follows the value of ``--osd-scale-by-window``.
+
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
 
