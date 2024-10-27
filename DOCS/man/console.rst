@@ -142,13 +142,13 @@ Configurable Options
     aligned correctly.
 
 ``font_size``
-    Default: 16
+    Default: 24
 
     Set the font size used for the REPL and the console. This will be
     multiplied by ``display-hidpi-scale``.
 
 ``border_size``
-    Default: 1
+    Default: 1.5
 
     Set the font border size used for the REPL and the console.
 
