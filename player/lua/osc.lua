@@ -1691,10 +1691,30 @@ layouts["topbar"] = function()
 end
 
 
-local function command_callback(command)
-    if command ~= "" then
-        return function ()
-            mp.command(command)
+local function bind_mouse_buttons(element_name)
+    for _, button in pairs({"mbtn_left", "mbtn_mid", "mbtn_right"}) do
+        local command = user_opts[element_name .. "_" .. button .. "_command"]
+
+        if command ~= "" then
+            if button == "mbtn_mid" then
+                button = "shift+mbtn_left"
+            end
+
+            elements[element_name].eventresponder[button .. "_up"] = function ()
+                mp.command(command)
+            end
+        end
+    end
+
+    if user_opts.scrollcontrols then
+        for _, button in pairs({"wheel_down", "wheel_up"}) do
+            local command = user_opts[element_name .. "_" .. button .. "_command"]
+
+            if command and command ~= "" then
+                elements[element_name].eventresponder[button .. "_press"] = function ()
+                    mp.command(command)
+                end
+            end
         end
     end
 end
@@ -1756,10 +1776,7 @@ local function osc_init()
         title = title:gsub("\n", " ")
         return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
-
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.title_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.title_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.title_mbtn_right_command)
+    bind_mouse_buttons("title")
 
     -- playlist buttons
 
@@ -1768,24 +1785,14 @@ local function osc_init()
 
     ne.content = "\238\132\144"
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
-    ne.eventresponder["mbtn_left_up"] = command_callback(
-        user_opts.playlist_prev_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.playlist_prev_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(
-        user_opts.playlist_prev_mbtn_right_command)
+    bind_mouse_buttons("playlist_prev")
 
     --next
     ne = new_element("playlist_next", "button")
 
     ne.content = "\238\132\129"
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
-    ne.eventresponder["mbtn_left_up"] = command_callback(
-        user_opts.playlist_next_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.playlist_next_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(
-        user_opts.playlist_next_mbtn_right_command)
+    bind_mouse_buttons("playlist_next")
 
 
     -- big buttons
@@ -1804,11 +1811,7 @@ local function osc_init()
             return ("\238\128\130")
         end
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.play_pause_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.play_pause_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(
-        user_opts.play_pause_mbtn_right_command)
+    bind_mouse_buttons("play_pause")
 
     --skip_backward
     ne = new_element("skip_backward", "button")
@@ -1839,21 +1842,14 @@ local function osc_init()
 
     ne.enabled = have_ch
     ne.content = "\238\132\132"
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.chapter_prev_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.chapter_prev_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(
-        user_opts.chapter_prev_mbtn_right_command)
+    bind_mouse_buttons("chapter_prev")
 
     --chapter_next
     ne = new_element("chapter_next", "button")
 
     ne.enabled = have_ch
     ne.content = "\238\132\133"
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.chapter_next_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.chapter_next_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.chapter_next_mbtn_right_command)
+    bind_mouse_buttons("chapter_next")
 
     --
     update_tracklist()
@@ -1871,17 +1867,7 @@ local function osc_init()
         return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
                aid .. "/" .. audio_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.audio_track_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.audio_track_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.audio_track_mbtn_right_command)
-
-    if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_down_press"] = command_callback(
-            user_opts.audio_track_wheel_down_command)
-        ne.eventresponder["wheel_up_press"] = command_callback(
-            user_opts.audio_track_wheel_up_command)
-    end
+    bind_mouse_buttons("audio_track")
 
     --sub_track
     ne = new_element("sub_track", "button")
@@ -1896,15 +1882,7 @@ local function osc_init()
         return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
                sid .. "/" .. sub_track_count)
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.sub_track_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.sub_track_mbtn_right_command)
-
-    if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_down_press"] = command_callback(
-            user_opts.sub_track_wheel_down_command)
-        ne.eventresponder["wheel_up_press"] = command_callback(user_opts.sub_track_wheel_up_command)
-    end
+    bind_mouse_buttons("sub_track")
 
     --fullscreen
     ne = new_element("fullscreen", "button")
@@ -1915,10 +1893,7 @@ local function osc_init()
             return ("\238\132\136")
         end
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.fullscreen_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(
-        user_opts.fullscreen_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.fullscreen_mbtn_right_command)
+    bind_mouse_buttons("fullscreen")
 
     --seekbar
     ne = new_element("seekbar", "slider")
@@ -2107,15 +2082,7 @@ local function osc_init()
             return volicon[math.min(4,math.ceil(volume / (100/3)))]
         end
     end
-    ne.eventresponder["mbtn_left_up"] = command_callback(user_opts.volume_mbtn_left_command)
-    ne.eventresponder["shift+mbtn_left_up"] = command_callback(user_opts.volume_mbtn_mid_command)
-    ne.eventresponder["mbtn_right_up"] = command_callback(user_opts.volume_mbtn_right_command)
-
-    if user_opts.scrollcontrols then
-        ne.eventresponder["wheel_down_press"] = command_callback(
-            user_opts.volume_wheel_down_command)
-        ne.eventresponder["wheel_up_press"] = command_callback(user_opts.volume_wheel_up_command)
-    end
+    bind_mouse_buttons("volume")
 
 
     -- load layout
