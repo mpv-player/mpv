@@ -30,8 +30,8 @@ local platform = detect_platform()
 -- Default options
 local opts = {
     font = "",
-    font_size = 16,
-    border_size = 1,
+    font_size = 24,
+    border_size = 1.5,
     scale_with_window = "auto",
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
