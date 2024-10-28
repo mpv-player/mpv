@@ -236,24 +236,21 @@ local function should_scale()
            (opts.scale_with_window == "auto" and mp.get_property_native("osd-scale-by-window"))
 end
 
+local function scale_factor()
+    local height = mp.get_property_native('osd-height')
+
+    if should_scale() and height > 0 then
+        return height / 720
+    end
+
+    return mp.get_property_native('display-hidpi-scale', 1)
+end
+
 local function get_scaled_osd_dimensions()
-    local w, h, aspect = mp.get_osd_size()
+    local dims = mp.get_property_native('osd-dimensions')
+    local scale = scale_factor()
 
-    if w == 0 then
-        return 0, 0
-    end
-
-    local scale = mp.get_property_native('display-hidpi-scale')
-    if should_scale() then
-        h = 720
-        w = 720 * aspect
-        scale = 1
-    end
-
-    w = w / scale
-    h = h / scale
-
-    return w, h
+    return dims.w / scale, dims.h /scale
 end
 
 local function calculate_max_log_lines()
@@ -807,11 +804,8 @@ end
 
 local function determine_hovered_item()
     local height = select(2, get_scaled_osd_dimensions())
-    local y = mp.get_property_native('mouse-pos').y
-    if should_scale() then
-        y = y * 720 / mp.get_property_native('osd-height')
-    end
-    y = y - global_margins.t * height
+    local y = mp.get_property_native('mouse-pos').y / scale_factor()
+              - global_margins.t * height
     -- Calculate how many lines could be printed without decreasing them for
     -- the input line and OSC.
     local max_lines = height / opts.font_size
