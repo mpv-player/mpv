@@ -1320,7 +1320,7 @@ layouts["box"] = function ()
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 7, w = 70, h = 18}
     lo.style = osc_styles.smallButtonsL
 
-    lo = add_layout("tog_fs")
+    lo = add_layout("fullscreen")
     lo.geometry =
         {x = posX+pos_offsetX - 25, y = bigbtnrowY, an = 4, w = 25, h = 25}
     lo.style = osc_styles.smallButtonsR
@@ -1617,7 +1617,7 @@ local function bar_layout(direction)
     -- Fullscreen button
     geo = { x = osc_geo.x + osc_geo.w - buttonW - padX - padwc_r, y = geo.y, an = 4,
             w = buttonW, h = geo.h }
-    lo = add_layout("tog_fs")
+    lo = add_layout("fullscreen")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
 
@@ -1906,8 +1906,8 @@ local function osc_init()
         ne.eventresponder["wheel_up_press"] = command_callback(user_opts.sub_track_wheel_up_command)
     end
 
-    --tog_fs
-    ne = new_element("tog_fs", "button")
+    --fullscreen
+    ne = new_element("fullscreen", "button")
     ne.content = function ()
         if state.fullscreen then
             return ("\238\132\137")
