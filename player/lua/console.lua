@@ -926,6 +926,11 @@ local function move_history(amount, is_wheel)
                 math.max(first_match_to_print + amount, 1), #matches - max_lines + 2)
         end
 
+        local item = determine_hovered_item()
+        if item then
+            selected_match = item
+        end
+
         update()
         return
     end
