@@ -410,12 +410,6 @@ Configurable Options
     Update chapter markers positions on duration changes, e.g. live streams.
     The updates are unoptimized - consider disabling it on very low-end systems.
 
-``chapters_osd``, ``playlist_osd``
-    Default: yes
-
-    Whether to display the chapters/playlist at the OSD when left-clicking the
-    next/previous OSC buttons, respectively.
-
 ``chapter_fmt``
     Default: ``Chapter: %s``
 
