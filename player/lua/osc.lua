@@ -1696,10 +1696,6 @@ local function bind_mouse_buttons(element_name)
         local command = user_opts[element_name .. "_" .. button .. "_command"]
 
         if command ~= "" then
-            if button == "mbtn_mid" then
-                button = "shift+mbtn_left"
-            end
-
             elements[element_name].eventresponder[button .. "_up"] = function ()
                 mp.command(command)
             end
@@ -1820,7 +1816,7 @@ local function osc_init()
     ne.content = "\238\128\132"
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", -5) end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["mbtn_mid"] =
         function () mp.commandv("frame-back-step") end
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", -30) end
@@ -1832,7 +1828,7 @@ local function osc_init()
     ne.content = "\238\128\133"
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", 10) end
-    ne.eventresponder["shift+mbtn_left_down"] =
+    ne.eventresponder["mbtn_mid"] =
         function () mp.commandv("frame-step") end
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", 60) end
@@ -2639,13 +2635,13 @@ do_enable_keybindings()
 mp.set_key_bindings({
     {"mbtn_left",           function() process_event("mbtn_left", "up") end,
                             function() process_event("mbtn_left", "down")  end},
-    {"shift+mbtn_left",     function() process_event("shift+mbtn_left", "up") end,
-                            function() process_event("shift+mbtn_left", "down")  end},
+    {"mbtn_mid",            function() process_event("mbtn_mid", "up") end,
+                            function() process_event("mbtn_mid", "down")  end},
     {"mbtn_right",          function() process_event("mbtn_right", "up") end,
                             function() process_event("mbtn_right", "down")  end},
-    -- alias to shift_mbtn_left for single-handed mouse use
-    {"mbtn_mid",            function() process_event("shift+mbtn_left", "up") end,
-                            function() process_event("shift+mbtn_left", "down")  end},
+    -- alias shift+mbtn_left to mbtn_mid for touchpads
+    {"shift+mbtn_left",     function() process_event("mbtn_mid", "up") end,
+                            function() process_event("mbtn_mid", "down")  end},
     {"wheel_up",            function() process_event("wheel_up", "press") end},
     {"wheel_down",          function() process_event("wheel_down", "press") end},
     {"mbtn_left_dbl",       "ignore"},
