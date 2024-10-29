@@ -37,6 +37,7 @@
 #include "audio/fmt-conversion.h"
 #include "filters/filter_internal.h"
 #include "filters/f_utils.h"
+#include "misc/lavc_compat.h"
 #include "mpv_talloc.h"
 #include "ao.h"
 #include "internal.h"
@@ -65,9 +66,13 @@ static bool write_frame(struct ao *ao, struct mp_frame frame);
 
 static bool supports_format(const AVCodec *codec, int format)
 {
-    for (const enum AVSampleFormat *sampleformat = codec->sample_fmts;
-         sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
-         sampleformat++)
+    const enum AVSampleFormat *sampleformat;
+    int ret = mp_avcodec_get_supported_config(NULL, codec,
+                                              AV_CODEC_CONFIG_SAMPLE_FORMAT,
+                                              (const void **)&sampleformat);
+    if (ret >= 0 && !sampleformat)
+        return true;
+    for (; ret >= 0 && *sampleformat != AV_SAMPLE_FMT_NONE; sampleformat++)
     {
         if (af_from_avformat(*sampleformat) == format)
             return true;
@@ -111,8 +116,14 @@ static int init(struct ao *ao)
     AVCodecContext *encoder = ac->enc->encoder;
     const AVCodec *codec = encoder->codec;
 
-    int samplerate = af_select_best_samplerate(ao->samplerate,
-                                               codec->supported_samplerates);
+    const int *samplerates;
+    int ret = mp_avcodec_get_supported_config(NULL, codec,
+                                              AV_CODEC_CONFIG_SAMPLE_RATE,
+                                              (const void **)&samplerates);
+
+    int samplerate = 0;
+    if (ret >= 0)
+        samplerate = af_select_best_samplerate(ao->samplerate, samplerates);
     if (samplerate > 0)
         ao->samplerate = samplerate;
 
