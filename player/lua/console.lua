@@ -278,9 +278,9 @@ local function calculate_max_log_lines()
     return math.floor(select(2, get_scaled_osd_dimensions())
                       * (1 - global_margins.t - global_margins.b)
                       / opts.font_size
-                      -- Subtract 1 for the input line and 1 for the newline
-                      -- between the log and the input line.
-                      - 2)
+                      -- Subtract 1 for the input line and 0.5 for the empty
+                      -- line between the log and the input line.
+                      - 1.5)
 end
 
 -- Takes a list of strings, a max width in characters and
