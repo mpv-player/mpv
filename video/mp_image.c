@@ -519,9 +519,9 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.chroma_location = src->params.chroma_location;
     dst->params.crop = src->params.crop;
     dst->nominal_fps = src->nominal_fps;
-    dst->params.primaries_orig = dst->params.color.primaries;
-    dst->params.transfer_orig = dst->params.color.transfer;
-    dst->params.sys_orig = dst->params.repr.sys;
+    dst->params.primaries_orig = src->params.primaries_orig;
+    dst->params.transfer_orig = src->params.transfer_orig;
+    dst->params.sys_orig = src->params.sys_orig;
 
     // ensure colorspace consistency
     enum pl_color_system dst_forced_csp = mp_image_params_get_forced_csp(&dst->params);
