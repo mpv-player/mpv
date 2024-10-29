@@ -27,6 +27,7 @@
 
 #include "common/common.h"
 #include "options/options.h"
+#include "misc/lavc_compat.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "mpv_talloc.h"
@@ -129,8 +130,11 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     tb.num = 24000;
     tb.den = 1;
 
-    const AVRational *rates = encoder->codec->supported_framerates;
-    if (rates && rates[0].den)
+    const AVRational *rates;
+    int ret = mp_avcodec_get_supported_config(encoder, NULL,
+                                              AV_CODEC_CONFIG_FRAME_RATE,
+                                              (const void **)&rates);
+    if (ret >= 0 && rates && rates[0].den)
         tb = rates[av_find_nearest_q_idx(tb, rates)];
 
     encoder->time_base = av_inv_q(tb);
@@ -161,12 +165,15 @@ static int query_format(struct vo *vo, int format)
     struct priv *vc = vo->priv;
 
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
-    const enum AVPixelFormat *p = vc->enc->encoder->codec->pix_fmts;
+    const enum AVPixelFormat *p;
+    int ret = mp_avcodec_get_supported_config(vc->enc->encoder, NULL,
+                                              AV_CODEC_CONFIG_PIX_FORMAT,
+                                              (const void **)&p);
 
-    if (!p)
+    if (ret >= 0 && !p)
         return 1;
 
-    while (*p != AV_PIX_FMT_NONE) {
+    while (ret >= 0 && p && *p != AV_PIX_FMT_NONE) {
         if (*p == pix_fmt)
             return 1;
         p++;

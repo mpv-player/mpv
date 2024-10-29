@@ -42,6 +42,7 @@
 #include "common/msg.h"
 #include "image_writer.h"
 #include "mpv_talloc.h"
+#include "misc/lavc_compat.h"
 #include "video/fmt-conversion.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -490,9 +491,12 @@ free_data:
 
 static int get_encoder_format(const AVCodec *codec, int srcfmt, bool highdepth)
 {
-    const enum AVPixelFormat *pix_fmts = codec->pix_fmts;
+    const enum AVPixelFormat *pix_fmts;
+    int ret = mp_avcodec_get_supported_config(NULL, codec,
+                                              AV_CODEC_CONFIG_PIX_FORMAT,
+                                              (const void **)&pix_fmts);
     int current = 0;
-    for (int n = 0; pix_fmts && pix_fmts[n] != AV_PIX_FMT_NONE; n++) {
+    for (int n = 0; ret >= 0 && pix_fmts && pix_fmts[n] != AV_PIX_FMT_NONE; n++) {
         int fmt = pixfmt2imgfmt(pix_fmts[n]);
         if (!fmt)
             continue;
