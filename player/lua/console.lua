@@ -825,7 +825,7 @@ local function determine_hovered_item()
     -- Calculate how many lines could be printed without decreasing them for
     -- the input line and OSC.
     local max_lines = height / opts.font_size
-    local clicked_line = math.floor(y / height * max_lines + .5)
+    local clicked_line = math.ceil(y / height * max_lines)
 
     local offset = first_match_to_print - 1
     local min_line = 1
