@@ -1,0 +1,1 @@
+`stats-font_size`, `stats-border_size`, `stats-shadow_x_offset`, `stats-shadow_y_offset` and `stats-plot_bg_border_width` script-opt values result in 2.5 times smaller sizes in order to have the same sizes as the values of equivalent OSD options like `--osd-font-size`. If you customized these sizes, multiply them by 2.5 to get the previous sizes.
