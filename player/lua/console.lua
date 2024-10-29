@@ -79,6 +79,7 @@ local line = ''
 local cursor = 1
 local default_prompt = '>'
 local prompt = default_prompt
+local bottom_left_margin = 6
 local default_id = 'default'
 local id = default_id
 local histories = {[id] = {}}
@@ -275,7 +276,7 @@ local function calculate_max_log_lines()
                select(2, mp.get_property('term-status-msg'):gsub('\\n', ''))
     end
 
-    return math.floor(select(2, get_scaled_osd_dimensions())
+    return math.floor((select(2, get_scaled_osd_dimensions()) - bottom_left_margin)
                       * (1 - global_margins.t - global_margins.b)
                       / opts.font_size
                       -- Subtract 1 for the input line and 0.5 for the empty
@@ -512,8 +513,6 @@ local function update()
     end
 
     local screenx, screeny = get_scaled_osd_dimensions()
-
-    local bottom_left_margin = 6
 
     local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
