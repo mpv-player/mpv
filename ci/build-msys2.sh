@@ -11,6 +11,10 @@ args=(
   -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband,win32-smtc}=enabled
 )
 
+[[ "$SYS" == "clang64" ]] && args+=(
+  -Db_sanitize=address,undefined
+)
+
 meson setup build $common_args "${args[@]}"
 meson compile -C build
 ./build/mpv.com -v --no-config
