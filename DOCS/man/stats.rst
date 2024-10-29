@@ -155,7 +155,7 @@ Configurable Options
     text. Currently, monospaced digits are sufficient.
 
 ``font_size``
-    Default: 8
+    Default: 20
 
     Font size used to render text.
 
@@ -165,7 +165,7 @@ Configurable Options
     Color of the text.
 
 ``border_size``
-    Default: 0.8
+    Default: 2
 
     Size of border drawn around the font.
 
@@ -202,7 +202,7 @@ Configurable Options
     Border color used for drawing graphs.
 
 ``plot_bg_border_width``
-    Default: 0.5
+    Default: 1.25
 
     Border width used for drawing graphs.
 

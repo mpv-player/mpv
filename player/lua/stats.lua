@@ -49,14 +49,14 @@ local o = {
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
-    plot_bg_border_width = 0.5,
+    plot_bg_border_width = 1.25,
 
     -- Text style
     font = "",
     font_mono = "monospace",   -- monospaced digits are sufficient
-    font_size = 8,
+    font_size = 20,
     font_color = "",
-    border_size = 0.8,
+    border_size = 2,
     border_color = "",
     shadow_x_offset = 0.0,
     shadow_y_offset = 0.0,
@@ -1485,9 +1485,10 @@ local function update_scale(osd_height)
     end
 
     -- Calculate scaled metrics.
-    local scale = 1
+    -- Make font_size=n the same size as --osd-font-size=n.
+    local scale = 288 / 720
     if not scale_with_video and osd_height > 0 then
-        scale = 720 / osd_height
+        scale = 288 / osd_height
     end
     font_size = o.font_size * scale
     border_size = o.border_size * scale
