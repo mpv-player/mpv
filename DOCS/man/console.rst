@@ -164,7 +164,7 @@ Configurable Options
     the window.
 
 ``border_size``
-    Default: 1.5
+    Default: 1.32
 
     Set the font border size used for the REPL and the console.
 

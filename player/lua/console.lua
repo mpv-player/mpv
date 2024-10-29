@@ -31,7 +31,7 @@ local platform = detect_platform()
 local opts = {
     font = "",
     font_size = 24,
-    border_size = 1.5,
+    border_size = 1.32,
     scale_with_window = "auto",
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
