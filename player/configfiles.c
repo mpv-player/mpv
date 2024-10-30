@@ -79,8 +79,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     talloc_free(p2);
 
     char *section = NULL;
-    bool encoding = opts->encode_opts &&
-        opts->encode_opts->file && opts->encode_opts->file[0];
+    bool encoding = opts->encode_opts->file && opts->encode_opts->file[0];
     // In encoding mode, we don't want to apply normal config options.
     // So we "divert" normal options into a separate section, and the diverted
     // section is never used - unless maybe it's explicitly referenced from an
