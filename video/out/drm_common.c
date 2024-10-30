@@ -1135,11 +1135,12 @@ static void drm_show_connector_name_and_state_callback(struct mp_log *log, int c
 static void drm_show_available_connectors(struct mp_log *log, int card_no,
                                           const char *card_path)
 {
+    if (card_no)
+        mp_info(log, "\n");
     mp_info(log, "Available connectors for card %d (%s):\n", card_no,
             card_path);
     drm_show_foreach_connector(log, card_no, card_path,
                                drm_show_connector_name_and_state_callback);
-    mp_info(log, "\n");
 }
 
 static void drm_show_connector_modes_callback(struct mp_log *log, int card_no,
@@ -1150,10 +1151,11 @@ static void drm_show_connector_modes_callback(struct mp_log *log, int card_no,
 
     char other_connector_name[MAX_CONNECTOR_NAME_LEN];
     get_connector_name(connector, other_connector_name);
+    if (card_no)
+        mp_info(log, "\n");
     mp_info(log, "Available modes for drm-connector=%d.%s\n",
             card_no, other_connector_name);
     drm_show_available_modes(log, connector);
-    mp_info(log, "\n");
 }
 
 static void drm_show_available_connectors_and_modes(struct mp_log *log,
