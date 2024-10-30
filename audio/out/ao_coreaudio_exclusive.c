@@ -50,6 +50,7 @@
 #include "audio/out/ao_coreaudio_chmap.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
+#include "osdep/mac/compat.h"
 
 struct priv {
     // This must be put in the front
@@ -123,7 +124,7 @@ static OSStatus enable_property_listener(struct ao *ao, bool enabled)
     for (int n = 0; n < MP_ARRAY_SIZE(devs); n++) {
         AudioObjectPropertyAddress addr = {
             .mScope    = kAudioObjectPropertyScopeGlobal,
-            .mElement  = kAudioObjectPropertyElementMaster,
+            .mElement  = kAudioObjectPropertyElementMain,
             .mSelector = selectors[n],
         };
         AudioDeviceID device = devs[n];
