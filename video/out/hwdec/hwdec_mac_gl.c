@@ -19,6 +19,8 @@
 
 #include <assert.h>
 
+#include "osdep/mac/compat.h"
+
 #include <IOSurface/IOSurface.h>
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGL/OpenGL.h>

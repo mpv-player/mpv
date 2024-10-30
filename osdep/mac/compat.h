@@ -19,6 +19,10 @@
 
 #include "config.h"
 
+#ifndef GL_SILENCE_DEPRECATION
+#define GL_SILENCE_DEPRECATION
+#endif
+
 #if !HAVE_MACOS_12_FEATURES
 #define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
 #endif
