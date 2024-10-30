@@ -1936,9 +1936,6 @@ information. They can be manipulated with the ``set``/``add``/``cycle``
 commands, and retrieved with ``show-text``, or anything else that uses property
 expansion. (See `Property Expansion`_.)
 
-The property name is annotated with RW to indicate whether the property is
-generally writable.
-
 If an option is referenced, the property will normally take/return exactly the
 same values as the option. In these cases, properties are merely a way to change
 an option at runtime.
