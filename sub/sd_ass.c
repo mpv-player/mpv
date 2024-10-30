@@ -247,6 +247,10 @@ static void assobjects_init(struct sd *sd)
     ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
 #endif
 
+#if LIBASS_VERSION >= 0x01703010
+    ass_configure_prune(ctx->ass_track, sd->opts->ass_prune_delay * 1000.0);
+#endif
+
     enable_output(sd, true);
 }
 
