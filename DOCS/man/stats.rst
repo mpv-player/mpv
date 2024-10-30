@@ -165,7 +165,7 @@ Configurable Options
     Color of the text.
 
 ``border_size``
-    Default: 2
+    Default: 1.2
 
     Size of border drawn around the font.
 
