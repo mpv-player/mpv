@@ -26,6 +26,7 @@
 #include "osdep/timer.h"
 #include "osdep/endian.h"
 #include "audio/format.h"
+#include "osdep/mac/compat.h"
 
 #if HAVE_COREAUDIO || HAVE_AVFOUNDATION
 #include "audio/out/ao_coreaudio_properties.h"
@@ -97,7 +98,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
         AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
             .mSelector = kAudioHardwarePropertyDeviceForUID,
             .mScope    = kAudioObjectPropertyScopeGlobal,
-            .mElement  = kAudioObjectPropertyElementMaster,
+            .mElement  = kAudioObjectPropertyElementMain,
         };
         err = AudioObjectGetPropertyData(
             kAudioObjectSystemObject, &p_addr, 0, 0, &size, &v);
@@ -377,7 +378,7 @@ static OSStatus ca_change_mixing(struct ao *ao, AudioDeviceID device,
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = kAudioDevicePropertySupportsMixing,
         .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     if (AudioObjectHasProperty(device, &p_addr)) {
@@ -486,7 +487,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     AudioObjectPropertyAddress p_addr = {
         .mSelector = kAudioStreamPropertyPhysicalFormat,
         .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
+        .mElement  = kAudioObjectPropertyElementMain,
     };
 
     err = AudioObjectAddPropertyListener(stream, &p_addr,

@@ -27,6 +27,7 @@
 #include "ao_coreaudio_chmap.h"
 #include "ao_coreaudio_properties.h"
 #include "ao_coreaudio_utils.h"
+#include "osdep/mac/compat.h"
 
 // The timeout for stopping the audio unit after being reset. This allows the
 // device to sleep after playback paused. The duration is chosen to match the
@@ -490,7 +491,7 @@ static bool register_hotplug_cb(struct ao *ao)
         AudioObjectPropertyAddress addr = {
             hotplug_properties[i],
             kAudioObjectPropertyScopeGlobal,
-            kAudioObjectPropertyElementMaster
+            kAudioObjectPropertyElementMain
         };
         err = AudioObjectAddPropertyListener(
             kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
@@ -520,7 +521,7 @@ static void unregister_hotplug_cb(struct ao *ao)
         AudioObjectPropertyAddress addr = {
             hotplug_properties[i],
             kAudioObjectPropertyScopeGlobal,
-            kAudioObjectPropertyElementMaster
+            kAudioObjectPropertyElementMain
         };
         err = AudioObjectRemovePropertyListener(
             kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
