@@ -373,7 +373,6 @@ typedef struct MPOpts {
 
     struct input_opts *input_opts;
 
-    // may be NULL if encoding is not compiled-in
     struct encode_opts *encode_opts;
 
     char *ipc_path;
