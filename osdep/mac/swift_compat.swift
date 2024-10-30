@@ -44,6 +44,10 @@ extension NSDraggingInfo {
 }
 #endif
 
+#if !HAVE_MACOS_12_FEATURES
+let kIOMainPortDefault: mach_port_t = kIOMasterPortDefault
+#endif
+
 #if !HAVE_MACOS_12_FEATURES && HAVE_MACOS_11_FEATURES
 @available(macOS 11.0, *)
 extension CGColorSpace {
