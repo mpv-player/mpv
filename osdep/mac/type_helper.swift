@@ -125,7 +125,7 @@ class TypeHelper {
               let values = list.values else { return dict }
 
         for index in 0..<Int(list.num) {
-            guard var keyPtr = list.keys?[index] else { continue }
+            guard let keyPtr = list.keys?[index] else { continue }
             let key = String(cString: keyPtr)
             dict[key] = TypeHelper.nodeToAny(values[index])
         }
