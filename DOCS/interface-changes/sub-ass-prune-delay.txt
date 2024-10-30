@@ -1,0 +1,2 @@
+add `sub-ass-prune-delay` option to control libass automatic pruning of past
+events
