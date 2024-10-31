@@ -822,29 +822,24 @@ end
 local function determine_hovered_item()
     local height = select(2, get_scaled_osd_dimensions())
     local y = mp.get_property_native('mouse-pos').y / scale_factor()
-              - global_margins.t * height
-    -- Calculate how many lines could be printed without decreasing them for
-    -- the input line and OSC.
-    local max_lines = height / opts.font_size
-    local clicked_line = math.ceil(y / height * max_lines)
+    local log_bottom_pos = height * (1 - global_margins.b)
+                           - bottom_left_margin - 1.5 * opts.font_size
 
-    local offset = first_match_to_print - 1
-    local min_line = 1
-    max_lines = calculate_max_log_lines()
+    if y > log_bottom_pos then
+        return
+    end
 
+    local max_lines = calculate_max_log_lines()
     -- Subtract 1 line for the position counter.
-    if first_match_to_print > 1 or offset + max_lines < #matches then
-        min_line = 2
-        offset = offset - 1
+    if #matches > max_lines then
+        max_lines = max_lines - 1
     end
+    local last = math.min(first_match_to_print - 1 + max_lines, #matches)
 
-    if #matches < max_lines then
-        clicked_line = clicked_line - (max_lines - #matches)
-        max_lines = #matches
-    end
+    local hovered_item = last - math.floor((log_bottom_pos - y) / opts.font_size)
 
-    if clicked_line >= min_line and clicked_line <= max_lines then
-        return offset + clicked_line
+    if hovered_item >= first_match_to_print then
+        return hovered_item
     end
 end
 
