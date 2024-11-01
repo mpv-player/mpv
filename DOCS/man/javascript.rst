@@ -208,6 +208,8 @@ string/boolean/number)
 
 ``mp.input.set_log(log)``
 
+``exit()`` (global)
+
 Additional utilities
 --------------------
 
@@ -255,10 +257,6 @@ text content only.
 
 ``mp.get_script_file()``
     Returns the file name of the current script.
-
-``exit()`` (global)
-    Make the script exit at the end of the current event loop iteration.
-    Note: please remove added key bindings before calling ``exit()``.
 
 ``mp.utils.compile_js(fname, content_str)``
     Compiles the JS code ``content_str`` as file name ``fname`` (without loading

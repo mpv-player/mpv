@@ -646,6 +646,20 @@ are useful only in special situations.
 
     May return invalid/nonsense values if OSD is not initialized yet.
 
+``exit()`` (global)
+    Make the script exit at the end of the current event loop iteration. This
+    does not terminate mpv itself or other scripts.
+
+    This can be polyfilled to support mpv versions older than 0.40 with:
+
+    ::
+
+        if not _G.exit then
+            function exit()
+                mp.keep_running = false
+            end
+        end
+
 mp.msg functions
 ----------------
 
