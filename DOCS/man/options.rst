@@ -6327,6 +6327,48 @@ them.
     The shader name is the base part of the shader filename, without the
     extension. (``--vo=gpu-next`` only)
 
+    Some parameters are filled automatically if the shader requests them.
+    Currently following parameters are available:
+
+    ``PTS``
+        PTS of the current frame in seconds.
+
+    ``chroma_offset_x``
+        chroma offset to the reference plane in x direction.
+
+    ``chroma_offset_y``
+        chroma offset to the reference plane in y direction.
+
+    ``min_luma``
+        Minimum luminance value (in cd/m²).
+
+    ``max_luma``
+        Maximum luminance value (in cd/m²).
+
+    ``max_cll``
+        Maximum Content Light Level (in cd/m²).
+
+    ``max_fall``
+        Maximum Frame Average Light Level (in cd/m²).
+
+    ``scene_max_r``
+        Maximum scene light level of the red channel (in cd/m²).
+
+    ``scene_max_g``
+        Maximum scene light level of the green channel (in cd/m²).
+
+    ``scene_max_b``
+        Maximum scene light level of the blue channel (in cd/m²).
+
+    ``scene_avg``
+        Average scene light level (in cd/m²).
+
+    ``max_pq_y``
+        Maximum PQ luminance (in PQ, 0-1).
+
+    ``avg_pq_y``
+        Average PQ luminance (in PQ, 0-1).
+
 ``--deband``
     Enable the debanding algorithm. This greatly reduces the amount of visible
     banding, blocking and other quantization artifacts, at the expense of
