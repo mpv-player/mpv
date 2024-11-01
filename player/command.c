@@ -6612,7 +6612,7 @@ static void cmd_key(void *p)
     } else {
         int code = mp_input_get_key_from_name(key_name);
         if (code < 0) {
-            MP_ERR(mpctx, "%s is not a valid input name.\n", key_name);
+            MP_ERR(mpctx, "'%s' is not a valid input name.\n", key_name);
             cmd->success = false;
             return;
         }
@@ -6632,7 +6632,7 @@ static void cmd_key_bind(void *p)
     if (comment && !comment[0])
         comment = NULL;
     if (!mp_input_bind_key(mpctx->input, key, bstr0(target_cmd), comment)) {
-        MP_ERR(mpctx, "%s is not a valid input name.\n", key);
+        MP_ERR(mpctx, "'%s' is not a valid input name.\n", key);
         cmd->success = false;
     }
 }
