@@ -1317,6 +1317,13 @@ static int str_list_add(char **add, int n, void *dst, int pre)
     for (ln = 0; lst && lst[ln]; ln++)
         /**/;
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (ln >= 100) {
+        talloc_free(add);
+        return 0;
+    }
+#endif
+
     lst = talloc_realloc(NULL, lst, char *, n + ln + 1);
 
     if (pre) {
@@ -1447,6 +1454,10 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     n = 0;
 
     while (1) {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        if (n >= 100)
+            break;
+#endif
         struct bstr el = get_nextsep(&str, separator, 1);
         res[n] = bstrdup0(NULL, el);
         n++;
