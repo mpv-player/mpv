@@ -64,6 +64,7 @@ local mp_globals = {
             set_osd_ass = {},
         }
     },
+    exit = {},
     unpack = {},
 }
 

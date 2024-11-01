@@ -416,6 +416,10 @@ end
 -- used by default event loop (mp_event_loop()) to decide when to quit
 mp.keep_running = true
 
+function _G.exit()
+    mp.keep_running = false
+end
+
 local event_handlers = {}
 
 function mp.register_event(name, cb)
@@ -455,7 +459,7 @@ function mp.unregister_event(cb)
 end
 
 -- default handlers
-mp.register_event("shutdown", function() mp.keep_running = false end)
+mp.register_event("shutdown", exit)
 mp.register_event("client-message", message_dispatch)
 mp.register_event("property-change", property_change)
 
