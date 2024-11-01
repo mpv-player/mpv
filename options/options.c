@@ -538,8 +538,10 @@ static const m_option_t mp_opts[] = {
     {"dump-stats", OPT_STRING(dump_stats),
         .flags = UPDATE_TERM | CONF_PRE_PARSE | M_OPT_FILE},
     {"msg-color", OPT_BOOL(msg_color), .flags = CONF_PRE_PARSE | UPDATE_TERM},
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"log-file", OPT_STRING(log_file),
         .flags = CONF_PRE_PARSE | M_OPT_FILE | UPDATE_TERM},
+#endif
     {"msg-module", OPT_BOOL(msg_module), .flags = UPDATE_TERM},
     {"msg-time", OPT_BOOL(msg_time), .flags = UPDATE_TERM},
 #if HAVE_WIN32_DESKTOP
