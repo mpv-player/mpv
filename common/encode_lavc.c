@@ -546,7 +546,7 @@ bool encode_lavc_showhelp(struct mp_log *log, struct encode_opts *opts)
         encode_lavc_printoptions(log, c, "  --ofopts=", "           ", NULL,
                                  AV_OPT_FLAG_ENCODING_PARAM,
                                  AV_OPT_FLAG_ENCODING_PARAM);
-        av_free(c);
+        avformat_free_context(c);
         void *iter = NULL;
         while ((format = av_muxer_iterate(&iter))) {
             if (format->priv_class) {
