@@ -1,0 +1,1 @@
+nested edl are no longer supported; flatten the edl or use a playlist with multiple edl entries

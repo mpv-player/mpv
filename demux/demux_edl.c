@@ -451,6 +451,10 @@ static struct timeline_par *build_timeline(struct timeline *root,
         struct tl_part *part = &parts->parts[n];
         struct demuxer *source = NULL;
 
+        if (!bstrcasecmp0(mp_split_proto(bstr0(part->filename), NULL), "edl")) {
+            MP_ERR(root, "Nested EDL is not allowed.\n");
+            goto error;
+        }
         if (tl->dash) {
             part->offset = starttime;
             if (part->length <= 0)
