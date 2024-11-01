@@ -5,6 +5,7 @@ local mp_globals = {
             commandv = {},
             command_native = {},
             command_native_async = {},
+            add_hook = {},
             abort_async_command = {},
             del_property = {},
             get_property = {},
@@ -53,7 +54,6 @@ local mp_globals = {
             },
             -- Not documented
             -- TODO: Document or remove them
-            add_hook = {},
             disable_key_bindings = {},
             enable_key_bindings = {},
             find_config_file = {},
