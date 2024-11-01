@@ -1,0 +1,1 @@
+``glsl-shader-opts`` now has predefined parameters that can be used. See the documentation for available values.
