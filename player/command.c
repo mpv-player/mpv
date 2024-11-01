@@ -6549,7 +6549,7 @@ static void cmd_delete_watch_later_config(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     char *filename = cmd->args[0].v.s;
-    if (filename && !*filename)
+    if (filename && !filename[0])
         filename = NULL;
     mp_delete_watch_later_conf(mpctx, filename);
 }
@@ -6629,7 +6629,7 @@ static void cmd_key_bind(void *p)
     const char *key = cmd->args[0].v.s;
     const char *target_cmd = cmd->args[1].v.s;
     const char *comment = cmd->args[2].v.s;
-    if (comment && !*comment)
+    if (comment && !comment[0])
         comment = NULL;
     if (!mp_input_bind_key(mpctx->input, key, bstr0(target_cmd), comment)) {
         MP_ERR(mpctx, "%s is not a valid input name.\n", key);
