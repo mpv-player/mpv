@@ -42,3 +42,7 @@ bool terminal_try_attach(void)
 {
     return false;
 }
+
+void terminal_set_mouse_input(bool enable)
+{
+}
