@@ -1319,6 +1319,8 @@ static int str_list_add(char **add, int n, void *dst, int pre)
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     if (ln >= 100) {
+        while (n--)
+            talloc_free(add[n]);
         talloc_free(add);
         return 0;
     }
