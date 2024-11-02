@@ -1174,8 +1174,7 @@ static void update_window_state(struct vo_w32_state *w32)
 
     SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
                  wr.left, wr.top, rect_w(wr), rect_h(wr),
-                 SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER |
-                 (!w32->win_force_pos ? SWP_NOMOVE : 0));
+                 SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 
     // Unmaximize the window if a size change is requested because SetWindowPos
     // doesn't change the window maximized state.
