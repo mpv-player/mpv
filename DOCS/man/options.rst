@@ -6812,6 +6812,7 @@ them.
     Automatically configure the output colorspace of the display to pass
     through the input values of the stream (e.g. for HDR passthrough), if
     possible. Requires a supporting driver and ``--vo=gpu-next``.
+    (Default: ``yes``)
 
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
