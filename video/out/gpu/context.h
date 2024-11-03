@@ -41,6 +41,10 @@ struct ra_ctx_fns {
     // display size etc. are determined by it.
     bool (*reconfig)(struct ra_ctx *ctx);
 
+    // Signal if the underlying context can use colorspace/hdr related functionality
+    // on its own.
+    bool (*pass_colorspace)(struct ra_ctx *ctx);
+
     // This behaves exactly like vo_driver.control().
     int (*control)(struct ra_ctx *ctx, int *events, int request, void *arg);
 
