@@ -533,6 +533,9 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                             | ASS_OVERRIDE_BIT_COLORS
                             | ASS_OVERRIDE_BIT_BORDER
                             | ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
+#if LIBASS_VERSION >= 0x01703020
+        set_force_flags |= ASS_OVERRIDE_BIT_BLUR;
+#endif
     }
     if (shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE)
         set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
