@@ -1111,8 +1111,6 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
     if (w32->parent)
         return;
 
-    update_window_style(w32);
-
     // Apply the maximized state on leaving fullscreen.
     if (w32->current_fs && !leaving_fullscreen)
         return;
@@ -1141,6 +1139,8 @@ static void update_maximized_state(struct vo_w32_state *w32, bool leaving_fullsc
             ShowWindow(w32->window, SW_SHOWNOACTIVATE);
         }
     }
+
+    update_window_style(w32);
 
     if (toggle && !w32->current_fs && !w32->opts->window_maximized) {
         w32->windowrc = w32->prev_windowrc;
