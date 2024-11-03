@@ -2545,7 +2545,8 @@ Subtitles
 ``--sub-ass-override=<no|yes|scale|force|strip>``
     Control whether user style overrides should be applied. Note that all of
     these overrides try to be somewhat smart about figuring out whether or not
-    a subtitle is considered a "sign".
+    a subtitle is considered a "sign" and try to be as non-destructive as
+    possible.
 
     :no:    Render subtitles as specified by the subtitle scripts, without
             overrides.
@@ -2554,7 +2555,8 @@ Subtitles
             rendering.
     :scale: Like ``yes``, but also apply ``--sub-scale`` (default).
     :force: Like ``yes``, but also force all ``--sub-*`` options. Can break
-            rendering easily.
+            rendering easily. Certain options aren't overridden if they can
+            potentially be too destructive.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 

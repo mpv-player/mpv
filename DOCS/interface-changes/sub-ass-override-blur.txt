@@ -1,0 +1,1 @@
+`sub-blur` is now applied by `sub-ass-override=force` with new enough libass
