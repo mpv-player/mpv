@@ -708,6 +708,11 @@ static bool drm_egl_reconfig(struct ra_ctx *ctx)
     return true;
 }
 
+static bool drm_egl_pass_colorspace(struct ra_ctx *ctx)
+{
+    return ctx->vo->drm->supported_colorspace;
+}
+
 static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
                            void *arg)
 {
@@ -726,13 +731,14 @@ static void drm_egl_wakeup(struct ra_ctx *ctx)
 }
 
 const struct ra_ctx_fns ra_ctx_drm_egl = {
-    .type           = "opengl",
-    .name           = "drm",
-    .description    = "DRM/EGL",
-    .reconfig       = drm_egl_reconfig,
-    .control        = drm_egl_control,
-    .init           = drm_egl_init,
-    .uninit         = drm_egl_uninit,
-    .wait_events    = drm_egl_wait_events,
-    .wakeup         = drm_egl_wakeup,
+    .type            = "opengl",
+    .name            = "drm",
+    .description     = "DRM/EGL",
+    .reconfig        = drm_egl_reconfig,
+    .pass_colorspace = drm_egl_pass_colorspace,
+    .control         = drm_egl_control,
+    .init            = drm_egl_init,
+    .uninit          = drm_egl_uninit,
+    .wait_events     = drm_egl_wait_events,
+    .wakeup          = drm_egl_wakeup,
 };

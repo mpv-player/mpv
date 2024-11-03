@@ -990,8 +990,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
+    bool pass_colorspace = false;
+    struct pl_color_space hint;
     if (p->next_opts->target_hint && frame->current) {
-        struct pl_color_space hint = frame->current->params.color;
+        hint = frame->current->params.color;
+        if (p->ra_ctx->fns->pass_colorspace && p->ra_ctx->fns->pass_colorspace(p->ra_ctx))
+            pass_colorspace = true;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
         if (opts->target_trc)
@@ -999,7 +1003,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
         apply_target_contrast(p, &hint);
-        pl_swapchain_colorspace_hint(p->sw, &hint);
+        if (!pass_colorspace)
+            pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!p->next_opts->target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
@@ -1142,7 +1147,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
                         ? swframe.fbo->params.format->name : NULL,
         .w = mp_rect_w(p->dst),
         .h = mp_rect_h(p->dst),
-        .color = target.color,
+        .color = pass_colorspace ? hint : target.color,
         .repr = target.repr,
         .rotate = target.rotation,
     };

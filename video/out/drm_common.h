@@ -138,6 +138,7 @@ struct vo_drm_state {
     const struct di_edid_chromaticity_coords *chromaticity;
     const struct di_cta_hdr_static_metadata_block *hdr_static_metadata;
     const struct di_cta_colorimetry_block *colorimetry;
+    bool supported_colorspace;
 
     bool active;
     bool paused;
