@@ -17,8 +17,9 @@ a large part of the user interface and APIs.
 
 Also see compatibility.rst.
 
-This document lists changes to them. New options/commands/etc. are not always
-listed.
+Prior to 0.40.0, only changes had to be listed here and not necessarily new
+additions. After 0.40.0, all changes and additions to options/commands/etc are
+listed here.
 
 **Never** write to this file directly except when making releases. New changes
 are added in the interface-changes directory instead. See contribute.md for more
