@@ -1,5 +1,5 @@
-name: "Report a different Issue"
-description: "Create a report for a runtime related Issue"
+name: "Report an Issue on other platforms"
+description: "Create a report for a runtime related Issue on other platforms"
 labels: []
 body:
 - type: textarea
