@@ -33,7 +33,8 @@ body:
            - Mesa/GPU Driver Version: `glxinfo -B | grep "OpenGL version string"` or `vulkaninfo | grep driverInfo`
            - Window Manager and Version
            - Source of the mpv binary
-           - If known which version of mpv introduced the problem
+           - Latest version of mpv you know without the problem
+           - The time when the problem started to happen (after updating mpv, system, driver, etc.)
            - Possible screenshot or video of visual glitches
 
           If you're not using git master or the latest release, update.
@@ -45,7 +46,8 @@ body:
           - Mesa/GPU Driver Version:
           - Window Manager and Version:
           - Source of mpv:
-          - Introduced in version:
+          - Latest known working version:
+          - Issue started after the following happened:
       render: text
   validations:
       required: true
