@@ -780,7 +780,13 @@ static bool still_displaying(struct vo *vo)
     if (working)
         goto done;
 
-    int64_t frame_end = get_current_frame_end(vo);
+    int64_t frame_end = get_display_synced_frame_end(vo);
+    if (frame_end > 0) {
+        working = frame_end > in->base_vsync;
+        goto done;
+    }
+
+    frame_end = get_current_frame_end(vo);
     if (frame_end < 0)
         goto done;
     working = mp_time_ns() < frame_end;
