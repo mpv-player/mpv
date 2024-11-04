@@ -489,11 +489,14 @@ static void update_vsync_timing_after_swap(struct vo *vo,
     }
 
     in->num_successive_vsyncs++;
-    if (in->num_successive_vsyncs <= DELAY_VSYNC_SAMPLES)
+    if (in->num_successive_vsyncs <= DELAY_VSYNC_SAMPLES) {
+        in->base_vsync = vsync_time;
         return;
+    }
 
     if (vsync_time <= 0 || vsync_time <= prev_vsync) {
         in->prev_vsync = 0;
+        in->base_vsync = 0;
         return;
     }
 
