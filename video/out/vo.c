@@ -760,6 +760,21 @@ static int64_t get_current_frame_end(struct vo *vo)
     return in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
 }
 
+static int64_t get_display_synced_frame_end(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    assert(!in->frame_queued);
+    int64_t res = 0;
+    if (in->base_vsync && in->vsync_interval > 1 && in->current_frame) {
+        res = in->base_vsync;
+        int extra = !!in->rendering;
+        res += (in->current_frame->num_vsyncs + extra) * in->vsync_interval;
+        if (!in->current_frame->display_synced)
+            res = 0;
+    }
+    return res;
+}
+
 static bool still_displaying(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -1340,15 +1355,7 @@ double vo_get_delay(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
-    assert (!in->frame_queued);
-    int64_t res = 0;
-    if (in->base_vsync && in->vsync_interval > 1 && in->current_frame) {
-        res = in->base_vsync;
-        int extra = !!in->rendering;
-        res += (in->current_frame->num_vsyncs + extra) * in->vsync_interval;
-        if (!in->current_frame->display_synced)
-            res = 0;
-    }
+    int64_t res = get_display_synced_frame_end(vo);
     mp_mutex_unlock(&in->lock);
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : 0;
 }
