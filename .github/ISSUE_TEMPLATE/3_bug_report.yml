@@ -37,7 +37,7 @@ body:
       value: |-
           - Platform version:
           - GPU model, driver and version:
-          - Source:
+          - Source of mpv:
           - Introduced in version:
       render: text
   validations:

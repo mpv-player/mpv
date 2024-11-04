@@ -44,7 +44,7 @@ body:
           - GPU Model:
           - Mesa/GPU Driver Version:
           - Window Manager and Version:
-          - Source mpv:
+          - Source of mpv:
           - Introduced in version:
       render: text
   validations:
