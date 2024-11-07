@@ -164,6 +164,7 @@ _ffmpeg_mark=lib/libavcodec.dll.a
 _shaderc () {
     if [ ! -d shaderc ]; then
         $gitclone https://github.com/google/shaderc.git
+        (cd shaderc && git fetch --tags && git checkout v2024.3)
         (cd shaderc && ./utils/git-sync-deps)
     fi
     builddir shaderc
