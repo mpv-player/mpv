@@ -1073,7 +1073,7 @@ static const struct MPOpts mp_default_opts = {
     },
     .image_exts = (char *[]){
         "avif", "bmp", "gif", "j2k", "jp2", "jpeg", "jpg", "jxl", "png",
-        "svg", "tga", "tif", "tiff", "webp", NULL
+        "qoi", "svg", "tga", "tif", "tiff", "webp", NULL
     },
 
     .sub_auto_exts = (char *[]){
