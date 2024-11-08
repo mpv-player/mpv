@@ -386,6 +386,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
     style->Outline = opts->osd_bar_outline_size;
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
+    style->Blur = 0;
 
     style->Alignment = 5;
 
