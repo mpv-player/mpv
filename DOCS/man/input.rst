@@ -970,10 +970,6 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
 
-
-Input Commands that are Possibly Subject to Change
---------------------------------------------------
-
 ``af <operation> <value>``
     Change audio filter chain. See ``vf`` command.
 
