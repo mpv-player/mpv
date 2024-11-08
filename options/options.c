@@ -89,6 +89,7 @@ extern const struct m_obj_list vo_obj_list;
 extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options dvd_conf;
+extern const struct m_sub_options clipboard_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -864,6 +865,8 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
+
+    {"clipboard", OPT_SUBSTRUCT(clipboard_opts, clipboard_conf)},
 
     {"", OPT_SUBSTRUCT(vo, vo_sub_opts)},
     {"", OPT_SUBSTRUCT(demux_opts, demux_conf)},

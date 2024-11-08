@@ -24,6 +24,7 @@
 #include "libmpv/client.h"
 
 #include "audio/aframe.h"
+#include "clipboard/clipboard.h"
 #include "common/common.h"
 #include "filters/f_output_chain.h"
 #include "filters/filter.h"
@@ -285,6 +286,8 @@ typedef struct MPContext {
     enum stop_play_reason stop_play;
     bool playback_initialized; // playloop can be run/is running
     int error_playing;
+
+    struct clipboard_ctx *clipboard;
 
     // Return code to use with PT_QUIT
     int quit_custom_rc;
