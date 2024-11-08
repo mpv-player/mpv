@@ -358,6 +358,8 @@ typedef struct MPOpts {
 
     struct input_opts *input_opts;
 
+    struct clipboard_opts *clipboard_opts;
+
     struct encode_opts *encode_opts;
 
     char *ipc_path;

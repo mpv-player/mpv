@@ -32,6 +32,7 @@
 
 #include "mpv_talloc.h"
 #include "client.h"
+#include "clipboard/clipboard.h"
 #include "external_files.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -7519,6 +7520,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (flags & UPDATE_INPUT)
         mp_input_update_opts(mpctx->input);
+
+    if (flags & UPDATE_CLIPBOARD)
+        reinit_clipboard(mpctx);
 
     if (flags & UPDATE_SUB_EXTS)
         mp_update_subtitle_exts(mpctx->opts);

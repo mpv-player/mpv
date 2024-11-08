@@ -197,6 +197,7 @@ void mp_destroy(struct MPContext *mpctx)
     }
 
     mp_input_uninit(mpctx->input);
+    mp_clipboard_destroy(mpctx->clipboard);
 
     uninit_libav(mpctx->global);
 
