@@ -133,7 +133,6 @@ struct priv {
     bool is_interpolated;
     bool want_reset;
     bool frame_pending;
-    bool redraw;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -2329,6 +2328,9 @@ AV_NOWARN_DEPRECATED(
     }
 
     pars->params.hooks = p->hooks;
+
+    MP_DBG(p, "Render options updated, resetting render state.\n");
+    p->want_reset = true;
 }
 
 const struct vo_driver video_out_gpu_next = {
