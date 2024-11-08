@@ -8,7 +8,7 @@ if (-not (Test-Path $subprojects)) {
 
 # Wrap shaderc to run git-sync-deps and patch unsupported generator expression
 if (-not (Test-Path "$subprojects/shaderc_cmake")) {
-    git clone https://github.com/google/shaderc --depth 1 $subprojects/shaderc_cmake
+    git clone https://github.com/google/shaderc --depth 1 -b v2024.3 $subprojects/shaderc_cmake
     Set-Content -Path "$subprojects/shaderc_cmake/p.diff" -Value @'
 diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
 index d44f62a..54d4719 100644
