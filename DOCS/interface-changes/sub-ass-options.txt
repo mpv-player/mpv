@@ -1,1 +1,2 @@
 rename `--sub-ass-line-spacing` to `--sub-line-spacing`
+rename `--sub-ass-shaper` to `--sub-shaper`
