@@ -273,6 +273,8 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
         os.makedirs(framework_bundle_folder)
     library_target_path = os.path.join(framework_bundle_folder, loader_library_name)
     shutil.copy(library_system_path, library_target_path)
+    library_install_name = os.path.join("@rpath", loader_library_name)
+    install_name_tool_id(library_install_name, library_target_path)
 
 def remove_dev_tools_rapths(binary):
     for path in get_rpaths_dev_tools(binary):
