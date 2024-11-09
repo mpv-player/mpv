@@ -116,7 +116,7 @@ struct mp_subtitle_opts {
     bool use_embedded_fonts;
     char **ass_style_override_list;
     char *ass_styles_file;
-    int ass_hinting;
+    int sub_hinting;
     int sub_shaper;
     double ass_prune_delay;
     bool ass_justify;
