@@ -2521,7 +2521,7 @@ Subtitles
         of animations with some badly authored ASS scripts. It is recommended
         to not use this option, unless really needed.
 
-``--sub-ass-line-spacing=<value>``
+``--sub-line-spacing=<value>``
     Set line spacing value for SSA/ASS renderer.
 
 ``--sub-ass-shaper=<simple|complex>``
