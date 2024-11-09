@@ -537,7 +537,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (converted || shared_opts->ass_style_override[sd->order]) {
         set_sub_pos = 100.0f - shared_opts->sub_pos[sd->order];
         set_line_spacing = opts->sub_line_spacing;
-        set_hinting = opts->ass_hinting;
+        set_hinting = opts->sub_hinting;
     }
     if (total_override || shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE) {
         set_font_scale = opts->sub_scale;
