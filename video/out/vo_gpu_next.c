@@ -772,13 +772,15 @@ static void update_options(struct vo *vo)
         pl_options_set_str(pars, kv[0], kv[1]);
 }
 
-static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
+static void apply_target_contrast(struct priv *p, struct pl_color_space *color, float min_luma)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
 
-    // Auto mode, leave as is
-    if (!opts->target_contrast)
+    // Auto mode, use target value if available
+    if (!opts->target_contrast) {
+        color->hdr.min_luma = min_luma;
         return;
+    }
 
     // Infinite contrast
     if (opts->target_contrast == -1) {
@@ -798,7 +800,8 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
     color->hdr.min_luma = color->hdr.max_luma / opts->target_contrast;
 }
 
-static void apply_target_options(struct priv *p, struct pl_frame *target, float target_peak)
+static void apply_target_options(struct priv *p, struct pl_frame *target,
+                                 float target_peak, float min_luma)
 {
     update_lut(p, &p->next_opts->target_lut);
     target->lut = p->next_opts->target_lut.lut;
@@ -816,7 +819,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target, float 
     if (target_peak && !target->color.hdr.max_luma)
         target->color.hdr.max_luma = target_peak;
     if (!target->color.hdr.min_luma)
-        apply_target_contrast(p, &target->color);
+        apply_target_contrast(p, &target->color, min_luma);
     if (opts->target_gamut) {
         // Ensure resulting gamut still fits inside container
         const struct pl_raw_primaries *gamut, *container;
@@ -984,8 +987,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     target_csp = sw->fns->target_csp
                      ? sw->fns->target_csp(sw)
                      : (struct pl_color_space){ .transfer = PL_COLOR_TRC_PQ };
-    if (!pl_color_transfer_is_hdr(target_csp.transfer))
+    if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         target_csp.hdr.max_luma = 0;
+        target_csp.hdr.min_luma = 0;
+    }
 
     float target_peak = opts->target_peak ? opts->target_peak : target_csp.hdr.max_luma;
     struct pl_color_space hint;
@@ -1002,7 +1007,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = opts->target_trc;
         if (target_peak)
             hint.hdr.max_luma = target_peak;
-        apply_target_contrast(p, &hint);
+        apply_target_contrast(p, &hint, target_csp.hdr.min_luma);
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!target_hint) {
@@ -1033,7 +1038,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target, target_peak);
+    apply_target_options(p, &target, target_peak, target_csp.hdr.min_luma);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
@@ -1408,7 +1413,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
-        apply_target_options(p, &target, opts->target_peak);
+        apply_target_options(p, &target, opts->target_peak, 0);
     } else if (args->native_csp) {
         target.color = image.color;
     } else {
