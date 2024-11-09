@@ -6826,11 +6826,12 @@ them.
         Fully replaces the color decoding. A LUT of this type should ingest the
         image's native colorspace and output normalized non-linear RGB.
 
-``--target-colorspace-hint``
+``--target-colorspace-hint=<auto|yes|no>``
     Automatically configure the output colorspace of the display to pass
     through the input values of the stream (e.g. for HDR passthrough), if
-    possible. Requires a supporting driver and ``--vo=gpu-next``.
-    (Default: ``yes``)
+    possible. In ``auto`` mode (the default), the target colorspace is only set,
+    if the display signals support for HDR colorspace.
+    Requires a supporting driver and ``--vo=gpu-next``. (Default: ``auto``)
 
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
@@ -6928,7 +6929,8 @@ them.
 
     In ``auto`` mode (the default), the chosen peak is an appropriate value
     based on the TRC in use. For SDR curves, it uses 203. For HDR curves, it
-    uses 203 * the transfer function's nominal peak.
+    uses 203 * the transfer function's nominal peak. If available, it will use
+    the target display's peak brightness as reported by the display.
 
     .. note::
 

@@ -170,7 +170,7 @@ struct gl_next_opts {
     struct user_lut lut;
     struct user_lut image_lut;
     struct user_lut target_lut;
-    bool target_hint;
+    int target_hint;
     char **raw_opts;
 };
 
@@ -197,7 +197,7 @@ const struct m_sub_options gl_next_conf = {
         {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
         {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
-        {"target-colorspace-hint", OPT_BOOL(target_hint)},
+        {"target-colorspace-hint", OPT_CHOICE(target_hint, {"auto", -1}, {"no", 0}, {"yes", 1})},
         // No `target-lut-type` because we don't support non-RGB targets
         {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0},
@@ -205,7 +205,7 @@ const struct m_sub_options gl_next_conf = {
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
-        .target_hint = true,
+        .target_hint = -1,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -798,7 +798,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color)
     color->hdr.min_luma = color->hdr.max_luma / opts->target_contrast;
 }
 
-static void apply_target_options(struct priv *p, struct pl_frame *target)
+static void apply_target_options(struct priv *p, struct pl_frame *target, float target_peak)
 {
     update_lut(p, &p->next_opts->target_lut);
     target->lut = p->next_opts->target_lut.lut;
@@ -813,8 +813,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target)
     if (opts->target_trc)
         target->color.transfer = opts->target_trc;
     // If swapchain returned a value use this, override is used in hint
-    if (opts->target_peak && !target->color.hdr.max_luma)
-        target->color.hdr.max_luma = opts->target_peak;
+    if (target_peak && !target->color.hdr.max_luma)
+        target->color.hdr.max_luma = target_peak;
     if (!target->color.hdr.min_luma)
         apply_target_contrast(p, &target->color);
     if (opts->target_gamut) {
@@ -975,9 +975,24 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         p->last_id = id;
     }
 
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
     bool pass_colorspace = false;
+    struct pl_color_space target_csp;
+    // Assume HDR is supported, if query is not available
+    // TODO: Implement this for all backends
+    target_csp = sw->fns->target_csp
+                     ? sw->fns->target_csp(sw)
+                     : (struct pl_color_space){ .transfer = PL_COLOR_TRC_PQ };
+    if (!pl_color_transfer_is_hdr(target_csp.transfer))
+        target_csp.hdr.max_luma = 0;
+
+    float target_peak = opts->target_peak ? opts->target_peak : target_csp.hdr.max_luma;
     struct pl_color_space hint;
-    if (p->next_opts->target_hint && frame->current) {
+    bool target_hint = p->next_opts->target_hint == 1 ||
+                       (p->next_opts->target_hint == -1 &&
+                        pl_color_transfer_is_hdr(target_csp.transfer));
+    if (target_hint && frame->current) {
         hint = frame->current->params.color;
         if (p->ra_ctx->fns->pass_colorspace && p->ra_ctx->fns->pass_colorspace(p->ra_ctx))
             pass_colorspace = true;
@@ -985,17 +1000,16 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.primaries = opts->target_prim;
         if (opts->target_trc)
             hint.transfer = opts->target_trc;
-        if (opts->target_peak)
-            hint.hdr.max_luma = opts->target_peak;
+        if (target_peak)
+            hint.hdr.max_luma = target_peak;
         apply_target_contrast(p, &hint);
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
-    } else if (!p->next_opts->target_hint) {
+    } else if (!target_hint) {
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
     struct pl_swapchain_frame swframe;
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
         if (frame->current) {
@@ -1019,7 +1033,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target);
+    apply_target_options(p, &target, target_peak);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
@@ -1391,9 +1405,10 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         },
     };
 
+    const struct gl_video_opts *opts = p->opts_cache->opts;
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
-        apply_target_options(p, &target);
+        apply_target_options(p, &target, opts->target_peak);
     } else if (args->native_csp) {
         target.color = image.color;
     } else {
@@ -1410,7 +1425,6 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     if (!args->osd)
         osd_flags |= OSD_DRAW_SUB_ONLY;
 
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
         float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
