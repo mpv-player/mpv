@@ -189,6 +189,50 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     return MPMIN(ra_fmt->component_depth[0], desc1.BitsPerColor);
 }
 
+static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+
+    struct pl_color_space ret = {0};
+    DXGI_OUTPUT_DESC1 desc1;
+    if (!mp_get_dxgi_output_desc(p->swapchain, &desc1))
+        return ret;
+
+    ret.hdr.max_luma = desc1.MaxLuminance;
+    ret.hdr.min_luma = desc1.MinLuminance;
+    ret.hdr.prim.blue.x = desc1.BluePrimary[0];
+    ret.hdr.prim.blue.y = desc1.BluePrimary[1];
+    ret.hdr.prim.green.x = desc1.GreenPrimary[0];
+    ret.hdr.prim.green.y = desc1.GreenPrimary[1];
+    ret.hdr.prim.red.x = desc1.RedPrimary[0];
+    ret.hdr.prim.red.y = desc1.RedPrimary[1];
+
+    switch (desc1.ColorSpace) {
+        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
+            ret.primaries = PL_COLOR_PRIM_BT_709;
+            ret.transfer = PL_COLOR_TRC_SRGB;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
+            ret.primaries = PL_COLOR_PRIM_BT_709;
+            ret.transfer = PL_COLOR_TRC_LINEAR;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
+            ret.primaries = PL_COLOR_PRIM_BT_2020;
+            ret.transfer = PL_COLOR_TRC_PQ;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020:
+            ret.primaries = PL_COLOR_PRIM_BT_2020;
+            ret.transfer = PL_COLOR_TRC_SRGB;
+            break;
+        default:
+            ret.primaries = PL_COLOR_PRIM_UNKNOWN;
+            ret.transfer = PL_COLOR_TRC_UNKNOWN;
+            break;
+    }
+
+    return ret;
+}
+
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
@@ -448,6 +492,7 @@ static void d3d11_uninit(struct ra_ctx *ctx)
 
 static const struct ra_swapchain_fns d3d11_swapchain = {
     .color_depth  = d3d11_color_depth,
+    .target_csp   = d3d11_target_color_space,
     .start_frame  = d3d11_start_frame,
     .submit_frame = d3d11_submit_frame,
     .swap_buffers = d3d11_swap_buffers,
