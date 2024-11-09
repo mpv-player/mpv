@@ -552,7 +552,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     }
     ass_set_use_margins(priv, set_use_margins);
     ass_set_line_position(priv, set_sub_pos);
-    ass_set_shaper(priv, opts->ass_shaper);
+    ass_set_shaper(priv, opts->sub_shaper);
     int set_force_flags = 0;
     if (total_override) {
         set_force_flags |= ASS_OVERRIDE_BIT_FONT_NAME
