@@ -774,7 +774,7 @@ static int pass_bind(struct gl_video *p, struct image img)
 static void get_transform(float w, float h, int rotate, bool flip,
                           struct gl_transform *out_tr)
 {
-    int a = rotate % 90 ? 0 : rotate / 90;
+    int a = rotate % 90 ? 0 : (rotate / 90) % 4;
     int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
     int cos90[4] = {1, 0, -1, 0};
     struct gl_transform tr = {{{ cos90[a], sin90[a]},
