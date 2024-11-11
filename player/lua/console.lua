@@ -79,7 +79,6 @@ local line = ''
 local cursor = 1
 local default_prompt = '>'
 local prompt = default_prompt
-local bottom_left_margin = 6
 local default_id = 'default'
 local id = default_id
 local histories = {[id] = {}}
@@ -278,7 +277,7 @@ local function calculate_max_log_lines()
 
     return math.floor((select(2, get_scaled_osd_dimensions())
                        * (1 - global_margins.t - global_margins.b)
-                       - bottom_left_margin)
+                       - mp.get_property_native('osd-margin-y'))
                       / opts.font_size
                       -- Subtract 1 for the input line and 0.5 for the empty
                       -- line between the log and the input line.
@@ -515,6 +514,9 @@ local function update()
 
     local screenx, screeny = get_scaled_osd_dimensions()
 
+    local marginx = mp.get_property_native('osd-margin-x')
+    local marginy = mp.get_property_native('osd-margin-y')
+
     local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  screenx .. ',' .. screeny
@@ -552,8 +554,10 @@ local function update()
     local suggestion_ass = ''
     if next(suggestion_buffer) then
         -- Estimate how many characters fit in one line
-        local width_max = math.floor((screenx - bottom_left_margin -
-                                     mp.get_property_native('osd-margin-x') * 2 * screeny / 720)
+        -- Even with bottom-left anchoring,
+        -- libass/ass_render.c:ass_render_event() subtracts --osd-margin-x from
+        -- the maximum text width twice.
+        local width_max = math.floor((screenx - marginx - marginx * 2 / scale_factor())
                                      / opts.font_size * get_font_hw_ratio())
 
         local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
@@ -577,7 +581,7 @@ local function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(bottom_left_margin, screeny - bottom_left_margin - global_margins.b * screeny)
+    ass:pos(marginx, screeny - marginy - global_margins.b * screeny)
     ass:append(log_ass .. '\\N')
     ass:append(suggestion_ass)
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
@@ -588,7 +592,7 @@ local function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(bottom_left_margin, screeny - bottom_left_margin - global_margins.b * screeny)
+    ass:pos(marginx, screeny - marginy - global_margins.b * screeny)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
@@ -823,7 +827,8 @@ local function determine_hovered_item()
     local height = select(2, get_scaled_osd_dimensions())
     local y = mp.get_property_native('mouse-pos').y / scale_factor()
     local log_bottom_pos = height * (1 - global_margins.b)
-                           - bottom_left_margin - 1.5 * opts.font_size
+                           - mp.get_property_native('osd-margin-y')
+                           - 1.5 * opts.font_size
 
     if y > log_bottom_pos then
         return
