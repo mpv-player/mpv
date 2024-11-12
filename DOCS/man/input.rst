@@ -1530,7 +1530,7 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events
-~~~~~~~~~~~~~~
+--------------
 
 This is a partial list of events. This section describes what
 ``mpv_event_to_node()`` returns, and which is what scripting APIs and the JSON
@@ -1723,7 +1723,7 @@ The following events also happen, but are deprecated: ``idle``, ``tick``
 Use ``mpv_observe_property()`` (Lua: ``mp.observe_property()``) instead.
 
 Hooks
-~~~~~
+-----
 
 Hooks are synchronous events between player core and a script or similar. This
 applies to client API (including the Lua scripting interface). Normally,
