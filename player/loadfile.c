@@ -1935,8 +1935,11 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
         next->playlist_prev_attempt = true;
     if (!next && mpctx->opts->loop_times != 1) {
         if (direction > 0) {
-            if (mpctx->opts->shuffle)
+            if (mpctx->opts->shuffle) {
+                if (!update_loop)
+                    return NULL;
                 playlist_shuffle(mpctx->playlist);
+            }
             next = playlist_get_first(mpctx->playlist);
             if (next && mpctx->opts->loop_times > 1 && update_loop) {
                 mpctx->opts->loop_times--;
