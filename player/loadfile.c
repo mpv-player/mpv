@@ -1257,7 +1257,7 @@ void prefetch_next(struct MPContext *mpctx)
     if (!mpctx->opts->prefetch_open)
         return;
 
-    struct playlist_entry *new_entry = mp_next_file(mpctx, +1, false);
+    struct playlist_entry *new_entry = mp_next_file(mpctx, +1, false, false);
     if (new_entry && !mpctx->open_active && new_entry->filename) {
         MP_VERBOSE(mpctx, "Prefetching: %s\n", new_entry->filename);
         start_open(mpctx, new_entry->filename, new_entry->stream_flags, true);
@@ -1918,7 +1918,7 @@ terminate_playback:
     process_hooks(mpctx, "on_after_end_file");
 
     if (playlist_prev_continue) {
-        struct playlist_entry *e = mp_next_file(mpctx, -1, false);
+        struct playlist_entry *e = mp_next_file(mpctx, -1, false, true);
         if (e) {
             mp_set_playlist_entry(mpctx, e);
             play_current_file(mpctx);
@@ -1930,8 +1930,9 @@ terminate_playback:
 // it can have side-effects and mutate mpctx.
 //  direction: -1 (previous) or +1 (next)
 //  force: if true, don't skip playlist entries marked as failed
+//  update_loop: whether to decrement --loop-playlist=N if it was specified
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
-                                    bool force)
+                                    bool force, bool update_loop)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
     if (next && direction < 0 && !force)
@@ -1941,7 +1942,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
             if (mpctx->opts->shuffle)
                 playlist_shuffle(mpctx->playlist);
             next = playlist_get_first(mpctx->playlist);
-            if (next && mpctx->opts->loop_times > 1) {
+            if (next && mpctx->opts->loop_times > 1 && update_loop) {
                 mpctx->opts->loop_times--;
                 m_config_notify_change_opt_ptr(mpctx->mconfig,
                                                &mpctx->opts->loop_times);
@@ -2000,7 +2001,7 @@ void mp_play_files(struct MPContext *mpctx)
         if (mpctx->stop_play == PT_NEXT_ENTRY || mpctx->stop_play == PT_ERROR ||
             mpctx->stop_play == AT_END_OF_FILE)
         {
-            new_entry = mp_next_file(mpctx, +1, false);
+            new_entry = mp_next_file(mpctx, +1, false, true);
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
             new_entry = mpctx->playlist->current;
         }
