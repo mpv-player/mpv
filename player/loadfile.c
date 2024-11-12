@@ -1250,11 +1250,11 @@ cancel:
 
 void prefetch_next(struct MPContext *mpctx)
 {
-    if (!mpctx->opts->prefetch_open)
+    if (!mpctx->opts->prefetch_open || mpctx->open_active)
         return;
 
     struct playlist_entry *new_entry = mp_next_file(mpctx, +1, false, false);
-    if (new_entry && !mpctx->open_active && new_entry->filename) {
+    if (new_entry && new_entry->filename) {
         MP_VERBOSE(mpctx, "Prefetching: %s\n", new_entry->filename);
         start_open(mpctx, new_entry->filename, new_entry->stream_flags, true);
     }
