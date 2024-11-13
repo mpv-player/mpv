@@ -7381,19 +7381,9 @@ them.
 
     https://libplacebo.org/options/
 
-Miscellaneous
--------------
 
-``--display-tags=tag1,tags2,...``
-    Set the list of tags that should be displayed on the terminal and stats.
-    Tags that are in the list, but are not present in the played file, will not
-    be shown. If a value ends with ``*``, all tags are matched by prefix (though
-    there is no general globbing). Just passing ``*`` essentially filtering.
-
-    The default includes a common list of tags, call mpv with ``--list-options``
-    to see it.
-
-    This is a string list option. See `List Options`_ for details.
+Video Sync
+----------
 
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
@@ -7546,6 +7536,20 @@ Miscellaneous
     the A/V desync cannot be compensated, too high values could lead to chaotic
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
+
+Miscellaneous
+-------------
+
+``--display-tags=tag1,tags2,...``
+    Set the list of tags that should be displayed on the terminal and stats.
+    Tags that are in the list, but are not present in the played file, will not
+    be shown. If a value ends with ``*``, all tags are matched by prefix (though
+    there is no general globbing). Just passing ``*`` essentially filtering.
+
+    The default includes a common list of tags, call mpv with ``--list-options``
+    to see it.
+
+    This is a string list option. See `List Options`_ for details.
 
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
