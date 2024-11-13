@@ -17,22 +17,57 @@
 
 #include "common/common.h"
 #include "clipboard.h"
+#include "player/core.h"
+#include "video/out/vo.h"
+
+struct clipboard_vo_priv {
+    struct MPContext *mpctx;
+};
 
 static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
-    return CLIPBOARD_FAILED;
+    struct clipboard_vo_priv *priv = talloc_ptrtype(cl, priv);
+    priv->mpctx = params->mpctx;
+    cl->priv = priv;
+    return CLIPBOARD_SUCCESS;
 }
 
 static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *out, void *talloc_ctx)
 {
-    return CLIPBOARD_FAILED;
+    struct clipboard_vo_priv *priv = cl->priv;
+    struct vo *vo = priv->mpctx->video_out;
+    struct voctrl_clipboard vc = {
+        .data = *out,
+        .params = *params,
+        .talloc_ctx = talloc_ctx,
+    };
+
+    if (vo && vo_control(vo, VOCTRL_GET_CLIPBOARD, &vc) == VO_TRUE) {
+        *out = vc.data;
+        return CLIPBOARD_SUCCESS;
+    } else {
+        MP_WARN(cl, "VO is not initialized, or it does not support getting clipboard.\n");
+        return CLIPBOARD_FAILED;
+    }
 }
 
 static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *data)
 {
-    return CLIPBOARD_FAILED;
+    struct clipboard_vo_priv *priv = cl->priv;
+    struct vo *vo = priv->mpctx->video_out;
+    struct voctrl_clipboard vc = {
+        .data = *data,
+        .params = *params,
+    };
+
+    if (vo && vo_control(vo, VOCTRL_SET_CLIPBOARD, &vc) == VO_TRUE) {
+        return CLIPBOARD_SUCCESS;
+    } else {
+        MP_WARN(cl, "VO is not initialized, or it does not support setting clipboard.\n");
+        return CLIPBOARD_FAILED;
+    }
 }
 
 const struct clipboard_backend clipboard_backend_vo = {
