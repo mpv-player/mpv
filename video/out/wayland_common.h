@@ -162,8 +162,10 @@ struct vo_wayland_state {
     struct xkb_context *xkb_context;
 
     /* Data offer */
-    struct wl_data_device_manager *dnd_devman;
+    struct wl_data_device_manager *devman;
+    struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
+    struct vo_wayland_data_offer *selection_offer;
 
     /* Cursor */
     struct wl_cursor_theme *cursor_theme;
