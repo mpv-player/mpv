@@ -49,6 +49,7 @@ struct clipboard_data {
 
 struct clipboard_init_params {
     int flags;
+    struct MPContext *mpctx; // For clipboard_vo only
 };
 
 struct clipboard_access_params {

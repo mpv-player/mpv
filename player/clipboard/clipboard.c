@@ -102,7 +102,8 @@ void reinit_clipboard(struct MPContext *mpctx)
 
     struct clipboard_opts *opts = mp_get_config_group(NULL, mpctx->global, &clipboard_conf);
     if (opts->enabled) {
-        mpctx->clipboard = mp_clipboard_create(&(struct clipboard_init_params){0}, mpctx->global);
+        struct clipboard_init_params params = {.mpctx = mpctx};
+        mpctx->clipboard = mp_clipboard_create(&params, mpctx->global);
     }
     talloc_free(opts);
 }
