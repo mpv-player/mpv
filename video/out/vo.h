@@ -30,6 +30,7 @@
 #include "common/common.h"
 #include "options/options.h"
 #include "osdep/threads.h"
+#include "player/clipboard/clipboard.h"
 
 enum {
     // VO needs to redraw
@@ -129,6 +130,10 @@ enum mp_voctrl {
     // Native context menu
     VOCTRL_SHOW_MENU,
     VOCTRL_UPDATE_MENU,
+
+    // Clipboard
+    VOCTRL_GET_CLIPBOARD,               // struct voctrl_clipboard*
+    VOCTRL_SET_CLIPBOARD,
 };
 
 // Helper to expose what kind of content is currently playing to the VO.
@@ -178,6 +183,12 @@ struct voctrl_performance_data {
 struct voctrl_screenshot {
     bool scaled, subs, osd, high_bit_depth, native_csp;
     struct mp_image *res;
+};
+
+struct voctrl_clipboard {
+    struct clipboard_data data;
+    struct clipboard_access_params params;
+    void *talloc_ctx;
 };
 
 enum {
