@@ -653,7 +653,7 @@ mp.options = { read_options: read_options };
 function register_event_handler(t) {
     mp.register_script_message("input-event", function (type, args) {
         if (t[type]) {
-            args = JSON.parse(args)
+            args = args ? JSON.parse(args) : [];
             var result = t[type](args[0], args[1]);
 
             if (type == "complete" && result) {
