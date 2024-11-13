@@ -23,7 +23,7 @@
 
 int mpv_initialize_opts(mpv_handle *ctx, char **options);
 
-#define MAX_INPUT_SIZE (1 << 20)
+#define MAX_INPUT_SIZE 2048
 #define MAX_OPTS_NUM 10000
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
