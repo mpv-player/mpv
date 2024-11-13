@@ -3070,6 +3070,7 @@ bool vo_wayland_init(struct vo *vo)
         .cursor_visible = true,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
+    wl->pending_offer->fd = wl->dnd_offer->fd = wl->selection_offer->fd = -1;
     wl->opts = wl->opts_cache->opts;
 
     wl_list_init(&wl->output_list);
