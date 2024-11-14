@@ -163,8 +163,20 @@ struct osd_style_opts {
     char *fonts_dir;
 };
 
+struct osd_bar_style_opts {
+    float align_x;
+    float align_y;
+    float w;
+    float h;
+    float outline_size;
+    float marker_scale;
+    float marker_min_size;
+    int marker_style;
+};
+
 extern const struct m_sub_options osd_style_conf;
 extern const struct m_sub_options sub_style_conf;
+extern const struct m_sub_options osd_bar_style_conf;
 
 struct osd_state;
 struct osd_object;

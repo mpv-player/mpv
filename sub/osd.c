@@ -116,6 +116,37 @@ const struct m_sub_options sub_style_conf = {
     .change_flags = UPDATE_OSD,
 };
 
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct osd_bar_style_opts
+static const m_option_t bar_style_opts[] = {
+    {"align-x", OPT_FLOAT(align_x), M_RANGE(-1.0, +1.0)},
+    {"align-y", OPT_FLOAT(align_y), M_RANGE(-1.0, +1.0)},
+    {"w", OPT_FLOAT(w), M_RANGE(1, 100)},
+    {"h", OPT_FLOAT(h), M_RANGE(0.1, 50)},
+    {"outline-size", OPT_FLOAT(outline_size), M_RANGE(0, 1000.0)},
+    {"border-size", OPT_ALIAS("osd-bar-outline-size")},
+    {"marker-scale", OPT_FLOAT(marker_scale), M_RANGE(0, 100.0)},
+    {"marker-min-size", OPT_FLOAT(marker_min_size), M_RANGE(0, 1000.0)},
+    {"marker-style", OPT_CHOICE(marker_style,
+        {"none", 0}, {"triangle", 1}, {"line", 2})},
+    {0}
+};
+
+const struct m_sub_options osd_bar_style_conf = {
+    .opts = bar_style_opts,
+    .size = sizeof(struct osd_bar_style_opts),
+    .defaults = &(const struct osd_bar_style_opts){
+        .align_y = 0.5,
+        .w = 75.0,
+        .h = 3.125,
+        .outline_size = 0.5,
+        .marker_scale = 1.3,
+        .marker_min_size = 1.6,
+        .marker_style = 1,
+    },
+    .change_flags = UPDATE_OSD,
+};
+
 bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
     return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
