@@ -389,7 +389,8 @@ Wheel left/right
     Seek forward/backward 10 seconds.
 
 Ctrl+Wheel up/down
-    Change video zoom.
+    Change video zoom keeping the part of the video hovered by the cursor under
+    it.
 
 Context Menu
 -------------
