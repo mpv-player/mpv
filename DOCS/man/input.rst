@@ -1274,13 +1274,15 @@ Scripting Commands
     For completeness, here is how this command works internally. The details
     could change any time. On any matching key event, ``script-message-to``
     or ``script-message`` is called (depending on whether the script name is
-    included), with the following arguments:
+    included), with the following arguments in string format:
 
     1. The string ``key-binding``.
     2. The name of the binding (as established above).
     3. The key state as string (see below).
     4. The key name (since mpv 0.15.0).
     5. The text the key would produce, or empty string if not applicable.
+    6. The scale of the key, such as the ones produced by ``WHEEL_*`` keys.
+       The scale is 1 if the key is nonscalable.
 
     The 5th argument is only set if no modifiers are present (using the shift
     key with a letter is normally not emitted as having a modifier, and results
