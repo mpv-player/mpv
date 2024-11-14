@@ -390,12 +390,6 @@ struct cuda_opts {
     int cuda_device;
 };
 
-struct dvd_opts {
-    int angle;
-    int speed;
-    char *device;
-};
-
 struct filter_opts {
     int deinterlace;
     int field_parity;
@@ -403,7 +397,6 @@ struct filter_opts {
 
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options cuda_conf;
-extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options mp_subtitle_sub_opts;
 extern const struct m_sub_options mp_subtitle_shared_sub_opts;
 extern const struct m_sub_options mp_osd_render_sub_opts;
