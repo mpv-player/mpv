@@ -363,6 +363,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
                             float *o_border)
 {
     struct mp_osd_render_opts *opts = osd->opts;
+    struct osd_bar_style_opts *bar_opts = opts->osd_bar_style;
 
     create_ass_track(osd, obj, &obj->ass);
     ASS_Track *track = obj->ass.track;
@@ -380,10 +381,10 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
     // and each bar ass event gets its own opaque box - breaking the bar.
     style->BorderStyle = 1; // outline
 
-    *o_w = track->PlayResX * (opts->osd_bar_style->w / 100.0);
-    *o_h = track->PlayResY * (opts->osd_bar_style->h / 100.0);
+    *o_w = track->PlayResX * (bar_opts->w / 100.0);
+    *o_h = track->PlayResY * (bar_opts->h / 100.0);
 
-    style->Outline = opts->osd_bar_style->outline_size;
+    style->Outline = bar_opts->outline_size;
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
     style->Blur = 0;
@@ -392,8 +393,8 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 
     *o_border = style->Outline;
 
-    *o_x = get_align(opts->osd_bar_style->align_x, track->PlayResX, *o_w, *o_border);
-    *o_y = get_align(opts->osd_bar_style->align_y, track->PlayResY, *o_h, *o_border);
+    *o_x = get_align(bar_opts->align_x, track->PlayResX, *o_w, *o_border);
+    *o_y = get_align(bar_opts->align_y, track->PlayResY, *o_h, *o_border);
 }
 
 static void update_progbar(struct osd_state *osd, struct osd_object *obj)
@@ -469,14 +470,15 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // the "hole"
     ass_draw_rect_ccw(d, 0, 0, width, height);
 
+    struct osd_bar_style_opts *bar_opts = osd->opts->osd_bar_style;
     // chapter marks
-    if (osd->opts->osd_bar_style->marker_style) {
+    if (bar_opts->marker_style) {
         for (int n = 0; n < obj->progbar_state.num_stops; n++) {
             float s = obj->progbar_state.stops[n] * width;
-            float size = MPMAX(border * osd->opts->osd_bar_style->marker_scale,
-                               osd->opts->osd_bar_style->marker_min_size);
+            float size = MPMAX(border * bar_opts->marker_scale,
+                               bar_opts->marker_min_size);
 
-            if (osd->opts->osd_bar_style->marker_style == 2 &&
+            if (bar_opts->marker_style == 2 &&
                 s > size / 2 && s < width - size / 2)
             { // line
                 ass_draw_rect_cw(d, s - size / 2, 0, s + size / 2, height);
