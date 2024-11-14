@@ -135,17 +135,10 @@ struct mp_subtitle_shared_opts {
 };
 
 struct mp_osd_render_opts {
-    float osd_bar_align_x;
-    float osd_bar_align_y;
-    float osd_bar_w;
-    float osd_bar_h;
-    float osd_bar_outline_size;
-    float osd_bar_marker_scale;
-    float osd_bar_marker_min_size;
-    int osd_bar_marker_style;
     float osd_scale;
     bool osd_scale_by_window;
     struct osd_style_opts *osd_style;
+    struct osd_bar_style_opts *osd_bar_style;
     bool force_rgba_osd;
 };
 

@@ -390,17 +390,8 @@ const struct m_sub_options mp_subtitle_shared_sub_opts = {
 
 const struct m_sub_options mp_osd_render_sub_opts = {
     .opts = (const struct m_option[]){
-        {"osd-bar-align-x", OPT_FLOAT(osd_bar_align_x), M_RANGE(-1.0, +1.0)},
-        {"osd-bar-align-y", OPT_FLOAT(osd_bar_align_y), M_RANGE(-1.0, +1.0)},
-        {"osd-bar-w", OPT_FLOAT(osd_bar_w), M_RANGE(1, 100)},
-        {"osd-bar-h", OPT_FLOAT(osd_bar_h), M_RANGE(0.1, 50)},
-        {"osd-bar-outline-size", OPT_FLOAT(osd_bar_outline_size), M_RANGE(0, 1000.0)},
-        {"osd-bar-border-size", OPT_ALIAS("osd-bar-outline-size")},
-        {"osd-bar-marker-scale", OPT_FLOAT(osd_bar_marker_scale), M_RANGE(0, 100.0)},
-        {"osd-bar-marker-min-size", OPT_FLOAT(osd_bar_marker_min_size), M_RANGE(0, 1000.0)},
-        {"osd-bar-marker-style", OPT_CHOICE(osd_bar_marker_style,
-            {"none", 0}, {"triangle", 1}, {"line", 2})},
         {"osd", OPT_SUBSTRUCT(osd_style, osd_style_conf)},
+        {"osd-bar", OPT_SUBSTRUCT(osd_bar_style, osd_bar_style_conf)},
         {"osd-scale", OPT_FLOAT(osd_scale), M_RANGE(0, 100)},
         {"osd-scale-by-window", OPT_BOOL(osd_scale_by_window)},
         {"force-rgba-osd-rendering", OPT_BOOL(force_rgba_osd)},
@@ -408,13 +399,6 @@ const struct m_sub_options mp_osd_render_sub_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
-        .osd_bar_align_y = 0.5,
-        .osd_bar_w = 75.0,
-        .osd_bar_h = 3.125,
-        .osd_bar_outline_size = 0.5,
-        .osd_bar_marker_scale = 1.3,
-        .osd_bar_marker_min_size = 1.6,
-        .osd_bar_marker_style = 1,
         .osd_scale = 1,
         .osd_scale_by_window = true,
     },
