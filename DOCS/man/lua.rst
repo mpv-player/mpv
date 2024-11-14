@@ -323,6 +323,13 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             If set to ``true``, enables key repeat for this specific binding.
             This option only makes sense when ``complex`` is not set to ``true``.
 
+        ``scalable``
+            If set to ``true``, enables key scaling for this specific binding.
+            This option only makes sense when ``complex`` is set to ``true``.
+            Note that this has no effect if the key binding is invoked by
+            ``script-binding`` command, where the scalability of the command
+            takes precedence.
+
         ``complex``
             If set to ``true``, then ``fn`` is called on key down, repeat and up
             events, with the first argument being a table. This table has the
@@ -349,6 +356,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
                     Text if triggered by a text key, otherwise ``nil``. See
                     description of ``script-binding`` command for details (this
                     field is equivalent to the 5th argument).
+
+                ``scale``
+                    The scale of the key, such as the ones produced by ``WHEEL_*``
+                    keys. The scale is 1 if the key is nonscalable.
 
     Internally, key bindings are dispatched via the ``script-message-to`` or
     ``script-binding`` input commands and ``mp.register_script_message``.
