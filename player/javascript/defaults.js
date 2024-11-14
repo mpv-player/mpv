@@ -246,10 +246,10 @@ mp.get_osd_margins = function get_osd_margins() {
 // {cb: fn, forced: bool, maybe input: str, repeatable: bool, complex: bool}
 var binds = new_cache();
 
-function dispatch_key_binding(name, state, key_name, key_text) {
+function dispatch_key_binding(name, state, key_name, key_text, scale) {
     var cb = binds[name] ? binds[name].cb : false;
     if (cb)  // "script-binding [<script_name>/]<name>" command was invoked
-        cb(state, key_name, key_text);
+        cb(state, key_name, key_text, scale);
 }
 
 var binds_tid = 0;  // flush timer id. actual id's are always true-thy
@@ -307,13 +307,14 @@ function add_binding(forced, key, name, fn, opts) {
             fn({event: "press", is_mouse: false});
         });
         var KEY_STATES = { u: "up", d: "down", r: "repeat", p: "press" };
-        key_data.cb = function key_cb(state, key_name, key_text) {
+        key_data.cb = function key_cb(state, key_name, key_text, scale) {
             fn({
                 event: KEY_STATES[state[0]] || "unknown",
                 is_mouse: state[1] == "m",
                 canceled: state[2] == "c",
                 key_name: key_name || undefined,
-                key_text: key_text || undefined
+                key_text: key_text || undefined,
+                scale: scale ? parseFloat(scale) : 1.0
             });
         }
     } else {
@@ -331,8 +332,9 @@ function add_binding(forced, key, name, fn, opts) {
         }
     }
 
+    var prefix = key_data.scalable ? "" : " nonscalable";
     if (key)
-        key_data.input = key + " script-binding " + mp.script_name + "/" + name;
+        key_data.input = key + prefix + " script-binding " + mp.script_name + "/" + name;
     binds[name] = key_data;  // used by user and/or our (key) script-binding
     sched_bindings_flush();
 }
