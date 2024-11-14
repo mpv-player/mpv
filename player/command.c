@@ -6813,6 +6813,58 @@ static void cmd_flush_status_line(void *p)
     mp_msg_flush_status_line(mpctx->log, cmd->args[0].v.b);
 }
 
+static void cmd_cursor_centric_zoom(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    double zoom = cmd->args[0].v.d * cmd->cmd->scale;
+
+    int x = 0, y = 0;
+    int xs[MAX_TOUCH_POINTS], ys[MAX_TOUCH_POINTS], ids[MAX_TOUCH_POINTS];
+    int count = mp_input_get_touch_pos(mpctx->input, MAX_TOUCH_POINTS, xs, ys, ids);
+    if (count) {
+        for (int i = 0; i < count; i++) {
+            x += xs[i];
+            y += ys[i];
+        }
+        x /= count;
+        y /= count;
+    } else {
+        int hover;
+        mp_input_get_mouse_pos(mpctx->input, &x, &y, &hover);
+    }
+
+    struct mp_osd_res dims = osd_get_vo_res(mpctx->osd);
+    int width = (dims.w - dims.ml - dims.mr) * pow(2, zoom);
+    int height = (dims.h - dims.mt - dims.mb) * pow(2, zoom);
+
+    if (width > dims.w) {
+        int old_cursor_ml = dims.ml - x;
+        int cursor_ml = old_cursor_ml * pow(2, zoom);
+        int ml = cursor_ml + x;
+        // video/out/aspect.c:src_dst_split_scaling() defines ml as:
+        // ml = (osd-width - width) * (video-align-x + 1) / 2 + pan-x * width
+        // So video-align-x is:
+        float align = 2.0 * (ml - mpctx->video_out->opts->pan_x * width) / (dims.w - width) - 1;
+        align = MPMIN(1, MPMAX(-1, align));
+        mp_property_do("video-align-x", M_PROPERTY_SET, &align, mpctx);
+    }
+
+    if (height > dims.h) {
+        int mt = (dims.mt - y) * pow(2, zoom) + y;
+        float align = 2.0 * (mt - mpctx->video_out->opts->pan_y * height) / (dims.h - height) - 1;
+        align = MPMIN(1, MPMAX(-1, align));
+        mp_property_do("video-align-y", M_PROPERTY_SET, &align, mpctx);
+    }
+
+    struct m_property_switch_arg switch_arg = {
+        .inc = zoom,
+        .wrap = false,
+    };
+    change_property_cmd(cmd, "video-zoom", M_PROPERTY_SWITCH, &switch_arg);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7291,6 +7343,11 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
+    { "cursor-centric-zoom", cmd_cursor_centric_zoom, {
+        {"zoom", OPT_DOUBLE(v.d)}, },
+        .allow_auto_repeat = true,
+        .scalable = true,
+    },
     {0}
 };
 
