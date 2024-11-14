@@ -354,7 +354,8 @@ Wheel left/right
     Seek forward/backward 10 seconds.
 
 Ctrl+Wheel up/down
-    Change video zoom.
+    Change video zoom and shift the OSD towards the position hovered by the
+    cursor.
 
 Context Menu
 -------------
