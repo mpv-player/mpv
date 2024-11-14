@@ -481,6 +481,11 @@ struct mp_abort_entry {
                                 // (only valid if client_work_type set)
 };
 
+// U+25CB WHITE CIRCLE
+// U+25CF BLACK CIRCLE
+#define WHITE_CIRCLE "\xe2\x97\x8b"
+#define BLACK_CIRCLE "\xe2\x97\x8f"
+
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
@@ -566,6 +571,7 @@ void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track);
 bool str_in_list(bstr str, char **list);
+char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang);
 
 // osd.c
 void set_osd_bar(struct MPContext *mpctx, int type,
