@@ -672,8 +672,11 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
         scale_units = MPMIN(scale_units, 20);
         for (int i = 0; i < scale_units - 1; i++)
             queue_cmd(ictx, mp_cmd_clone(cmd));
-        if (scale_units)
+        if (scale_units) {
             queue_cmd(ictx, cmd);
+        } else {
+            talloc_free(cmd);
+        }
     }
 }
 
