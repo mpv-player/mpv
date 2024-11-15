@@ -131,7 +131,10 @@ Comments on some symbolic names:
     ``MBTN*`` are aliases for ``MOUSE_BTN*``.
 
 ``WHEEL_*``
-    Mouse wheels (typically).
+    Mouse wheels and touch pads (typically).
+
+    These key are scalable when used with scalable commands if the underlying
+    device supports high-resolution scrolling (e.g. touch pads).
 
 ``AXIS_*``
     Deprecated aliases for ``WHEEL_*``.
