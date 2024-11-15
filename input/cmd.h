@@ -38,8 +38,8 @@ struct mp_cmd_def {
     bool allow_auto_repeat; // react to repeated key events
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
-    bool scalable;
-    bool is_ignore;
+    bool scalable;      // command called with scale for high resolution input
+    bool is_ignore;     // used by ignore command only, avoids queuing commands
     bool is_noisy;      // reduce log level
     bool default_async; // default to MP_ASYNC flag if none set by user
     // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
