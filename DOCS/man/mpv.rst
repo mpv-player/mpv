@@ -1509,6 +1509,8 @@ works like in older mpv releases:
 
 .. include:: select.rst
 
+.. include:: positioning.rst
+
 .. include:: lua.rst
 
 .. include:: javascript.rst
