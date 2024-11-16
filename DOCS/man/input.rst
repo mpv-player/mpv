@@ -1532,9 +1532,6 @@ Remember to quote string arguments in input.conf (see `Flat command syntax`_).
     ``--video-align-y`` to shift the OSD towards the position hovered by the
     cursor, or the average position of touch points if known.
 
-    If the video is smaller than the OSD in one direction, alignment in that
-    direction is centered.
-
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events
