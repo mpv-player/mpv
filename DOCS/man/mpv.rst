@@ -1482,6 +1482,8 @@ works like in older mpv releases:
 
 .. include:: console.rst
 
+.. include:: positioning.rst
+
 .. include:: lua.rst
 
 .. include:: javascript.rst
