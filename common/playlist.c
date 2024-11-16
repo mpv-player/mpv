@@ -159,9 +159,10 @@ void playlist_append_file(struct playlist *pl, const char *filename)
 
 void playlist_populate_playlist_path(struct playlist *pl, const char *path)
 {
+    char *playlist_path = talloc_strdup(pl, path);
     for (int n = 0; n < pl->num_entries; n++) {
         struct playlist_entry *e = pl->entries[n];
-        e->playlist_path = talloc_strdup(e, path);
+        e->playlist_path = playlist_path;
     }
 }
 
@@ -338,6 +339,7 @@ int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
         e->id = ++pl->id_alloc;
         pl->entries[e->pl_index] = e;
         talloc_steal(pl, e);
+        talloc_steal(pl, e->playlist_path);
     }
 
     playlist_update_indexes(pl, dst_index + count, -1);
