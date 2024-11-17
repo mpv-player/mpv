@@ -3024,7 +3024,7 @@ bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, u
 
 bool vo_wayland_init(struct vo *vo)
 {
-    if (!getenv("WAYLAND_DISPLAY"))
+    if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
         goto err;
 
     vo->wl = talloc_zero(NULL, struct vo_wayland_state);

@@ -19,7 +19,7 @@ local function detect_platform()
     local platform = mp.get_property_native('platform')
     if platform == 'darwin' or platform == 'windows' then
         return platform
-    elseif os.getenv('WAYLAND_DISPLAY') then
+    elseif os.getenv('WAYLAND_DISPLAY') or os.getenv('WAYLAND_SOCKET') then
         return 'wayland'
     end
     return 'x11'
