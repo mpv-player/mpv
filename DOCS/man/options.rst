@@ -2925,7 +2925,7 @@ Subtitles
 
     ``--sub-border-size`` is an alias for ``--sub-outline-size``.
 
-    Default: 2.09
+    Default: 1.65
 
 ``--sub-border-style=<outline-and-shadow|opaque-box|background-box>``
     The style of the border.
