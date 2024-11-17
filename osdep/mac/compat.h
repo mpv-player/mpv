@@ -17,12 +17,17 @@
 
 #pragma once
 
+#include <AvailabilityMacros.h>
 #include "config.h"
 
 #ifndef GL_SILENCE_DEPRECATION
 #define GL_SILENCE_DEPRECATION
 #endif
 
-#if !HAVE_MACOS_12_FEATURES
+#ifndef MAC_OS_VERSION_12_0
+#define MAC_OS_VERSION_12_0 120000
+#endif
+
+#if !HAVE_MACOS_12_FEATURES || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_12_0)
 #define kAudioObjectPropertyElementMain kAudioObjectPropertyElementMaster
 #endif
