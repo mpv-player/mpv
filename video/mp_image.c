@@ -488,7 +488,12 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
 static enum pl_color_system mp_image_params_get_forced_csp(struct mp_image_params *params)
 {
     int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
-    return mp_imgfmt_get_forced_csp(imgfmt);
+    enum pl_color_system csp = mp_imgfmt_get_forced_csp(imgfmt);
+
+    if (csp == PL_COLOR_SYSTEM_RGB && params->repr.sys == PL_COLOR_SYSTEM_XYZ)
+        csp = PL_COLOR_SYSTEM_XYZ;
+
+    return csp;
 }
 
 static void assign_bufref(AVBufferRef **dst, AVBufferRef *new)
@@ -955,8 +960,10 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
             params->color.transfer = PL_COLOR_TRC_BT_1886;
     } else if (forced_csp == PL_COLOR_SYSTEM_RGB) {
-        params->repr.sys = PL_COLOR_SYSTEM_RGB;
-        params->repr.levels = PL_COLOR_LEVELS_FULL;
+        if (params->repr.sys == PL_COLOR_SYSTEM_UNKNOWN)
+            params->repr.sys = PL_COLOR_SYSTEM_RGB;
+        if (params->repr.levels == PL_COLOR_LEVELS_UNKNOWN)
+            params->repr.levels = PL_COLOR_LEVELS_FULL;
 
         // The majority of RGB content is either sRGB or (rarely) some other
         // color space which we don't even handle, like AdobeRGB or
