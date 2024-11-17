@@ -625,23 +625,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         .user_data = mpi,
     };
 
-    // mp_image, like AVFrame, likes communicating RGB/XYZ/YCbCr status
-    // implicitly via the image format, rather than the actual tagging.
-    switch (mp_imgfmt_get_forced_csp(par->imgfmt)) {
-    case PL_COLOR_SYSTEM_RGB:
-        frame->repr.sys = PL_COLOR_SYSTEM_RGB;
-        frame->repr.levels = PL_COLOR_LEVELS_FULL;
-        break;
-    case PL_COLOR_SYSTEM_XYZ:
-        frame->repr.sys = PL_COLOR_SYSTEM_XYZ;
-        break;
-    case PL_COLOR_SYSTEM_UNKNOWN:
-        if (!frame->repr.sys)
-            frame->repr.sys = pl_color_system_guess_ycbcr(par->w, par->h);
-        break;
-    default: break;
-    }
-
     if (fp->hwdec) {
 
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par->imgfmt);
