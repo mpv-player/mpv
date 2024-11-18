@@ -525,10 +525,10 @@ local function update()
     local font = get_font()
     local style = '{\\r' ..
                   '\\1a&H00&\\3a&H00&\\1c&Heeeeee&\\3c&H111111&' ..
-                  (has_shadow and '\\4a&H99&\\4c&H000000&' or '') ..
+                  (has_shadow and '\\4a&H99&\\4c&H000000&\\xshad0\\yshad1' or '') ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
-                  '\\bord' .. opts.border_size .. '\\xshad0\\yshad1\\fsp0' ..
+                  '\\bord' .. opts.border_size .. '\\fsp0' ..
                   (selectable_items and '\\q2' or '\\q1') ..
                   '\\clip(' .. clipping_coordinates .. ')}'
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
