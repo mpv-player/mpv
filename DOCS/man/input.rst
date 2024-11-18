@@ -1273,11 +1273,12 @@ Scripting Commands
     This command has a variable number of arguments, and cannot be used with
     named arguments.
 
-``script-binding <name>``
+``script-binding <name> [<arg>]``
     Invoke a script-provided key binding. This can be used to remap key
     bindings provided by external Lua scripts.
 
-    The argument is the name of the binding.
+    ``<name>`` is the name of the binding. ``<arg>`` is a user-provided
+    arbitrary string which can be used to provide extra information.
 
     It can optionally be prefixed with the name of the script, using ``/`` as
     separator, e.g. ``script-binding scriptname/bindingname``. Note that script
@@ -1295,6 +1296,8 @@ Scripting Commands
     5. The text the key would produce, or empty string if not applicable.
     6. The scale of the key, such as the ones produced by ``WHEEL_*`` keys.
        The scale is 1 if the key is nonscalable.
+    7. The user-provided string ``<arg>``, or empty string if the argument is
+       not used.
 
     The 5th argument is only set if no modifiers are present (using the shift
     key with a letter is normally not emitted as having a modifier, and results
