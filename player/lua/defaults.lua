@@ -60,10 +60,10 @@ local function reserve_binding()
     return "__keybinding" .. tostring(message_id)
 end
 
-local function dispatch_key_binding(name, state, key_name, key_text, scale)
+local function dispatch_key_binding(name, state, key_name, key_text, scale, arg)
     local fn = dispatch_key_bindings[name]
     if fn then
-        fn(name, state, key_name, key_text, scale)
+        fn(name, state, key_name, key_text, scale, arg)
     end
 end
 
@@ -201,7 +201,7 @@ local function add_binding(attrs, key, name, fn, rp)
             ["r"] = "repeat",
             ["p"] = "press",
         }
-        key_cb = function(_, state, key_name, key_text, scale)
+        key_cb = function(_, state, key_name, key_text, scale, arg)
             if key_text == "" then
                 key_text = nil
             end
@@ -212,6 +212,7 @@ local function add_binding(attrs, key, name, fn, rp)
                 key_name = key_name,
                 key_text = key_text,
                 scale = tonumber(scale),
+                arg = arg,
             })
         end
         msg_cb = function()
