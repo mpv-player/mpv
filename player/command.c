@@ -6571,11 +6571,11 @@ static void cmd_script_binding(void *p)
     char *scale_s = mp_format_double(NULL, scale, 6, false, false, false);
 
     for (int i = 0; i < scale_units; i++) {
-        event.num_args = 6;
-        event.args = (const char*[6]){"key-binding", name, state,
+        event.num_args = 7;
+        event.args = (const char*[7]){"key-binding", name, state,
                                       incmd->key_name ? incmd->key_name : "",
                                       incmd->key_text ? incmd->key_text : "",
-                                      scale_s};
+                                      scale_s, cmd->args[1].v.s};
         if (mp_client_send_event_dup(mpctx, target,
                                      MPV_EVENT_CLIENT_MESSAGE, &event) < 0)
         {
@@ -7296,7 +7296,12 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "ao-reload", cmd_ao_reload },
 
-    { "script-binding", cmd_script_binding, { {"name", OPT_STRING(v.s)} },
+    { "script-binding", cmd_script_binding,
+        {
+            {"name", OPT_STRING(v.s)},
+            {"arg", OPT_STRING(v.s), OPTDEF_STR(""),
+                .flags = MP_CMD_OPT_ARG},
+        },
         .allow_auto_repeat = true, .on_updown = true, .scalable = true },
 
     { "script-message", cmd_script_message, { {"args", OPT_STRING(v.s)} },
