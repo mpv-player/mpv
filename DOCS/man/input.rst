@@ -293,6 +293,9 @@ Playback Control
     3rd parameter (essentially using a space instead of ``+``). The 3rd
     parameter is still parsed, but is considered deprecated.
 
+    This is a scalable command. See the documentation of ``nonscalable`` input
+    command prefix in `Input Command Prefixes`_ for details.
+
 ``revert-seek [<flags>]``
     Undoes the ``seek`` command, and some other commands that seek (but not
     necessarily all of them). Calling this command once will jump to the
@@ -372,6 +375,9 @@ Property Manipulation
     Add the given value to the property or option. On overflow or underflow,
     clamp the property to the maximum. If ``<value>`` is omitted, assume ``1``.
 
+    This is a scalable command. See the documentation of ``nonscalable`` input
+    command prefix in `Input Command Prefixes`_ for details.
+
 ``multiply <name> <value>``
     Similar to ``add``, but multiplies the property or option with the numeric
     value.
@@ -385,6 +391,9 @@ Property Manipulation
     Whether or not key-repeat is enabled by default depends on the property.
     Currently properties with continuous values are repeatable by default (like
     ``volume``), while discrete values are not (like ``osd-level``).
+
+    This is a scalable command. See the documentation of ``nonscalable`` input
+    command prefix in `Input Command Prefixes`_ for details.
 
 ``cycle-values [<"!reverse">] <property> <value1> [<value2> [...]]``
     Cycle through a list of values. Each invocation of the command will set the
@@ -1301,6 +1310,9 @@ Scripting Commands
 
     Future versions can add more arguments and more key state characters to
     support more input peculiarities.
+
+    This is a scalable command. See the documentation of ``nonscalable`` input
+    command prefix in `Input Command Prefixes`_ for details.
 
 ``load-script <filename>``
     Load a script, similar to the ``--script`` option. Whether this waits for
