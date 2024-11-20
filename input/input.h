@@ -193,6 +193,7 @@ void mp_input_load_config(struct input_ctx *ictx);
 
 // Load a specific input.conf file.
 bool mp_input_load_config_file(struct input_ctx *ictx, char *file);
+bool mp_input_unload_config_file(struct input_ctx *ictx, char *file);
 
 void mp_input_update_opts(struct input_ctx *ictx);
 

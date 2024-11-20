@@ -6623,6 +6623,18 @@ static void cmd_load_input_conf(void *p)
     cmd->success = mp_input_load_config_file(mpctx->input, config_file);
 }
 
+static void cmd_unload_input_conf(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    char *config_file = cmd->args[0].v.s;
+
+    if (!mp_input_unload_config_file(mpctx->input, config_file)) {
+        cmd->success = false;
+        MP_ERR(mpctx, "No key bindings from %s were loaded.\n", config_file);
+    }
+}
+
 static void cmd_load_script(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -7208,6 +7220,7 @@ const struct mp_cmd_def mp_cmds[] = {
     { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s)}} },
 
     { "load-input-conf", cmd_load_input_conf, {{"filename", OPT_STRING(v.s)}} },
+    { "unload-input-conf", cmd_unload_input_conf, {{"filename", OPT_STRING(v.s)}} },
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 

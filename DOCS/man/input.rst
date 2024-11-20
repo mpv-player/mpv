@@ -1068,6 +1068,10 @@ Input and Keybind Commands
     the file was already included, its previous bindings are not reset before it
     is reparsed.
 
+``unload-input-conf <filename>``
+    Remove the key bindings of an input configuration file previously loaded
+    with ``load-input-conf``.
+
 Execution Commands
 ~~~~~~~~~~~~~~~~~~
 

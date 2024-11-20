@@ -1228,10 +1228,9 @@ void mp_input_disable_section(struct input_ctx *ictx, char *name)
     input_unlock(ictx);
 }
 
-void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
+static void enable_section(struct input_ctx *ictx, char *name, int flags)
 {
     bstr bname = bstr0(name);
-    input_lock(ictx);
     bname = normalize_section(ictx, bname);
 
     disable_section(ictx, bname);
@@ -1254,7 +1253,12 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
         MP_TRACE(ictx, " %.*s %d\n", BSTR_P(ictx->active_sections[n].name),
                  ictx->active_sections[n].flags);
     }
+}
 
+void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
+{
+    input_lock(ictx);
+    enable_section(ictx, name, flags);
     input_unlock(ictx);
 }
 
@@ -1467,7 +1471,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
     return n_binds;
 }
 
-static bool parse_config_file(struct input_ctx *ictx, char *file)
+static bool parse_config_file(struct input_ctx *ictx, char *file, char *section)
 {
     bool r = false;
     void *tmp = talloc_new(NULL);
@@ -1479,7 +1483,7 @@ static bool parse_config_file(struct input_ctx *ictx, char *file)
     if (data.start) {
         MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
         bstr_eatstart0(&data, "\xEF\xBB\xBF"); // skip BOM
-        int num = parse_config(ictx, false, data, file, (bstr){0});
+        int num = parse_config(ictx, false, data, file, bstr0(section));
         MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, num);
         r = true;
     } else {
@@ -1513,8 +1517,8 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
     mp_mutex_init(&ictx->mutex);
 
     // Setup default section, so that it does nothing.
-    mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
-                                        MP_INPUT_ALLOW_HIDE_CURSOR);
+    enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
+                               MP_INPUT_ALLOW_HIDE_CURSOR);
 
     return ictx;
 }
@@ -1562,13 +1566,13 @@ void mp_input_load_config(struct input_ctx *ictx)
 
     bool config_ok = false;
     if (ictx->opts->config_file && ictx->opts->config_file[0])
-        config_ok = parse_config_file(ictx, ictx->opts->config_file);
+        config_ok = parse_config_file(ictx, ictx->opts->config_file, NULL);
     if (!config_ok) {
         // Try global conf dir
         void *tmp = talloc_new(NULL);
         char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
         for (int n = 0; files && files[n]; n++)
-            parse_config_file(ictx, files[n]);
+            parse_config_file(ictx, files[n], NULL);
         talloc_free(tmp);
     }
 
@@ -1586,9 +1590,33 @@ void mp_input_load_config(struct input_ctx *ictx)
 bool mp_input_load_config_file(struct input_ctx *ictx, char *file)
 {
     input_lock(ictx);
-    bool result = parse_config_file(ictx, file);
+    bool result = parse_config_file(ictx, file, file);
+    if (result) {
+        enable_section(ictx, file, MP_INPUT_ALLOW_VO_DRAGGING |
+                                   MP_INPUT_ALLOW_HIDE_CURSOR);
+    }
     input_unlock(ictx);
     return result;
+}
+
+bool mp_input_unload_config_file(struct input_ctx *ictx, char *file)
+{
+    input_lock(ictx);
+    bool found = false;
+
+    for (int i = 0; i < ictx->num_sections; i++) {
+        struct cmd_bind_section *bind_section = ictx->sections[i];
+        if (bstr_equals0(bind_section->section, file)) {
+            disable_section(ictx, bind_section->section);
+            remove_binds(bind_section, false);
+            remove_binds(bind_section, true);
+            found = true;
+            break;
+        }
+    }
+
+    input_unlock(ictx);
+    return found;
 }
 
 static void clear_queue(struct cmd_queue *queue)
