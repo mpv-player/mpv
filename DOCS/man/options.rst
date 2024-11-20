@@ -4601,7 +4601,7 @@ OSD
     This option specifies the distance of the OSD to the left, as well as at
     which distance from the right border long OSD text will be broken.
 
-    Default: 15
+    Default: 16
 
 ``--osd-margin-y=<size>``
     Top and bottom screen margin for the OSD in scaled pixels (see
@@ -4609,7 +4609,7 @@ OSD
 
     This option specifies the vertical margins of the OSD.
 
-    Default: 15
+    Default: 16
 
 ``--osd-align-x=<left|center|right>``
     Control to which corner of the screen OSD should be
