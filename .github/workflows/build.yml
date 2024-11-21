@@ -233,6 +233,10 @@ jobs:
           find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete -print
           brew unlink python && brew link --overwrite python
 
+      - name: Unlink pkg-config if the CI runner happens to have it already installed
+        run: |
+          find "$(brew config | grep HOMEBREW_PREFIX | cut -f 2- -d ' ')/bin" -lname '*/pkg-config@0*/*' -print -exec brew unlink pkg-config@0.29.2 \; -quit
+
       - name: Change Xcode version
         if: ${{ matrix.xcode != '' }}
         run: |
