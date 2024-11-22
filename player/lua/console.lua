@@ -1175,20 +1175,6 @@ local function property_list()
         properties[#properties + 1] = 'current-tracks/' .. sub_property
     end
 
-    for _, option in ipairs(mp.get_property_native('options')) do
-        properties[#properties + 1] = 'options/' .. option
-        properties[#properties + 1] = 'file-local-options/' .. option
-        properties[#properties + 1] = 'option-info/' .. option
-
-        for _, sub_property in pairs({
-            'name', 'type', 'set-from-commandline', 'set-locally',
-            'expects-file', 'default-value', 'min', 'max', 'choices',
-        }) do
-            properties[#properties + 1] = 'option-info/' .. option .. '/' ..
-                                          sub_property
-        end
-    end
-
     return properties
 end
 
