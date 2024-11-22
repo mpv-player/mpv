@@ -452,7 +452,7 @@ char *format_file_size(int64_t size);
 #define UPDATE_SCREENSAVER      (1 << 16) // --stop-screensaver
 #define UPDATE_VOL              (1 << 17) // softvol related options
 #define UPDATE_LAVFI_COMPLEX    (1 << 18) // --lavfi-complex
-#define UPDATE_HWDEC            (1 << 20) // --hwdec
+#define UPDATE_VD               (1 << 20) // reinitialize video decoder
 #define UPDATE_DVB_PROG         (1 << 21) // some --dvbin-...
 #define UPDATE_SUB_HARD         (1 << 22) // subtitle opts. that need full reinit
 #define UPDATE_SUB_EXTS         (1 << 23) // update internal list of sub exts
