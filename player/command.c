@@ -6857,6 +6857,14 @@ static void cmd_flush_status_line(void *p)
     mp_msg_flush_status_line(mpctx->log, cmd->args[0].v.b);
 }
 
+static void cmd_notify_property(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    mp_notify_property(mpctx, cmd->args[0].v.s);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7334,6 +7342,8 @@ const struct mp_cmd_def mp_cmds[] = {
     { "context-menu", cmd_context_menu },
 
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
+
+    { "notify-property", cmd_notify_property, { {"property", OPT_STRING(v.s)} } },
 
     {0}
 };
