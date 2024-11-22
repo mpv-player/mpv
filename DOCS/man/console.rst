@@ -89,8 +89,7 @@ Shift+INSERT
     Paste text (uses the primary selection on X11 and Wayland).
 
 TAB and Ctrl+i
-    Complete the text at the cursor. The first press inserts the longest common
-    prefix of the completions, and subsequent presses cycle through them.
+    Cycle through completion suggestions.
 
 Shift+TAB
     Cycle through the completions backwards.
@@ -124,7 +123,8 @@ Commands
             Enter a percent position to seek to and close the console.
 
         ``Ctrl+o script-message-to console type "loadfile ''; keypress ESC" 11``
-            Enter a file or URL to play. Tab completes paths in the filesystem.
+            Enter a file or URL to play, with autocompletion of paths in the
+            filesystem.
 
 Known issues
 ------------
@@ -177,7 +177,7 @@ Configurable Options
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
 
-    Whether Tab completion is case sensitive. Only works with ASCII characters.
+    Whether autocompletion is case sensitive. Only works with ASCII characters.
 
 ``history_dedup``
     Default: true

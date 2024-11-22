@@ -105,6 +105,7 @@ local selected_match = 1
 local first_match_to_print = 1
 local default_item
 
+local complete
 local set_active
 
 
@@ -655,10 +656,20 @@ local function handle_edit()
         for i, match in ipairs(fuzzy_find(line, selectable_items)) do
             matches[i] = { index = match, text = selectable_items[match] }
         end
+
+        update()
+
+        return
     end
 
-    suggestion_buffer = {}
-    update()
+    -- Don't show completions after a command is entered because they move its
+    -- output up, and allow clearing completions by emptying the line.
+    if line == '' then
+        suggestion_buffer = {}
+        update()
+    else
+        complete()
+    end
 
     if input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
@@ -1335,36 +1346,16 @@ local function strip_common_characters(str, prefix)
     max_overlap_length(prefix, str)))
 end
 
--- Find the longest common case-sensitive prefix of the entries in "list".
-local function find_common_prefix(list)
-    local prefix = list[1]
-
-    for i = 2, #list do
-        prefix = prefix:sub(1, common_prefix_length(prefix, list[i]))
-    end
-
-    return prefix
-end
-
--- Return the entries of "list" beginning with "part" and the longest common
--- prefix of the matches.
-local function complete_match(part, list)
-    local completions = {}
-
-    for i, match in ipairs(fuzzy_find(part, list, opts.case_sensitive)) do
-        completions[i] = list[match]
-    end
-
-    local prefix = find_common_prefix(completions)
-
-    if prefix == nil or #prefix < #part then
-        prefix = part
-    end
-
-    return completions, prefix
-end
-
 local function cycle_through_suggestions(backwards)
+    if #suggestion_buffer == 0 then
+        -- Allow Tab completion of commands before typing anything.
+        if line == '' then
+            complete()
+        end
+
+        return
+    end
+
     selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
 
     if selected_suggestion_index > #suggestion_buffer then
@@ -1380,13 +1371,8 @@ local function cycle_through_suggestions(backwards)
     update()
 end
 
--- Complete the option or property at the cursor (TAB)
-local function complete(backwards)
-    if #suggestion_buffer > 0 then
-        cycle_through_suggestions(backwards)
-        return
-    end
-
+-- Show autocompletions.
+complete = function ()
     if input_caller then
         completion_old_line = line
         completion_old_cursor = cursor
@@ -1545,23 +1531,16 @@ local function complete(backwards)
         end
     end
 
-    if completions == nil then
-        return
+    suggestion_buffer = {}
+    selected_suggestion_index = 0
+    completions = completions or {}
+    completion_pos = completion_pos or 1
+    for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
+                                      completions, opts.case_sensitive)) do
+        suggestion_buffer[i] = completions[match]
     end
 
-    local prefix
-    completions, prefix =
-        complete_match(before_cur:sub(completion_pos), completions)
-
-    if #completions == 1 then
-        prefix = prefix .. completion_append
-        after_cur = strip_common_characters(after_cur, completion_append)
-    else
-        suggestion_buffer = completions
-        selected_suggestion_index = 0
-    end
-
-    before_cur = before_cur:sub(1, completion_pos - 1) .. prefix
+    -- Expand ~/ with file completion.
     cursor = before_cur:len() + 1
     line = before_cur .. after_cur
     update()
@@ -1603,9 +1582,9 @@ local function get_bindings()
         { 'alt+b',       prev_word                              },
         { 'ctrl+right',  next_word                              },
         { 'alt+f',       next_word                              },
-        { 'tab',         complete                               },
-        { 'ctrl+i',      complete                               },
-        { 'shift+tab',   function() complete(true) end          },
+        { 'tab',         cycle_through_suggestions              },
+        { 'ctrl+i',      cycle_through_suggestions              },
+        { 'shift+tab',   function() cycle_through_suggestions(true) end },
         { 'ctrl+a',      go_home                                },
         { 'home',        go_home                                },
         { 'ctrl+e',      go_end                                 },
@@ -1839,18 +1818,14 @@ mp.register_script_message('complete', function(list, start_pos)
         return
     end
 
-    local completions, prefix = complete_match(line:sub(start_pos, cursor),
-                                               utils.parse_json(list))
-    local before_cur = line:sub(1, start_pos - 1) .. prefix
-    local after_cur = line:sub(cursor)
-    cursor = before_cur:len() + 1
-    line = before_cur .. after_cur
-
-    if #completions > 1 then
-        suggestion_buffer = completions
-        selected_suggestion_index = 0
-        completion_pos = start_pos
-        completion_append = ''
+    suggestion_buffer = {}
+    selected_suggestion_index = 0
+    local completions = utils.parse_json(list)
+    completion_pos = start_pos
+    completion_append = ''
+    for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
+                                      completions)) do
+        suggestion_buffer[i] = completions[match]
     end
 
     update()
