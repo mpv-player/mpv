@@ -1925,6 +1925,10 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
                 talloc_free(wl->selection_text.start);
                 wl->selection_text = content;
                 content = (bstr){0};
+                mp_cmd_t *cmd = mp_input_parse_cmd(
+                    wl->vo->input_ctx, bstr0("notify-property clipboard"), "<internal>"
+                );
+                mp_input_queue_cmd(wl->vo->input_ctx, cmd);
             }
         }
 
