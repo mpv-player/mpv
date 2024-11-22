@@ -1096,6 +1096,10 @@ local function get_clipboard(clip)
             return res.stdout
         end
     elseif platform == 'wayland' then
+        -- Wayland clipboard is only updated on window focus
+        if clip and mp.get_property_native('focused') then
+            return mp.get_property('clipboard/text', '')
+        end
         local res = utils.subprocess({
             args = { 'wl-paste', clip and '-n' or  '-np' },
             playback_only = false,
@@ -1104,30 +1108,7 @@ local function get_clipboard(clip)
             return res.stdout
         end
     elseif platform == 'windows' then
-        local res = utils.subprocess({
-            args = { 'powershell', '-NoProfile', '-Command', [[& {
-                Trap {
-                    Write-Error -ErrorRecord $_
-                    Exit 1
-                }
-
-                $clip = ""
-                if (Get-Command "Get-Clipboard" -errorAction SilentlyContinue) {
-                    $clip = Get-Clipboard -Raw -Format Text -TextFormatType UnicodeText
-                } else {
-                    Add-Type -AssemblyName PresentationCore
-                    $clip = [Windows.Clipboard]::GetText()
-                }
-
-                $clip = $clip -Replace "`r",""
-                $u8clip = [System.Text.Encoding]::UTF8.GetBytes($clip)
-                [Console]::OpenStandardOutput().Write($u8clip, 0, $u8clip.Length)
-            }]] },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
+        return mp.get_property('clipboard/text', '')
     elseif platform == 'darwin' then
         local res = utils.subprocess({
             args = { 'pbpaste' },
