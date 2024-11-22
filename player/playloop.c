@@ -1211,6 +1211,12 @@ static void handle_eof(struct MPContext *mpctx)
     }
 }
 
+static void handle_clipboard_updates(struct MPContext *mpctx)
+{
+    if (mp_clipboard_data_changed(mpctx->clipboard))
+        mp_notify_property(mpctx, "clipboard");
+}
+
 void run_playloop(struct MPContext *mpctx)
 {
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
@@ -1235,6 +1241,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_playback_time(mpctx);
 
     handle_dummy_ticks(mpctx);
+
+    handle_clipboard_updates(mpctx);
 
     update_osd_msg(mpctx);
 
@@ -1276,6 +1284,7 @@ void run_playloop(struct MPContext *mpctx)
 void mp_idle(struct MPContext *mpctx)
 {
     handle_dummy_ticks(mpctx);
+    handle_clipboard_updates(mpctx);
     mp_wait_events(mpctx);
     mp_process_input(mpctx);
     handle_command_updates(mpctx);
