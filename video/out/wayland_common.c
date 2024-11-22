@@ -847,6 +847,21 @@ static void data_device_handle_selection(void *data, struct wl_data_device *wl_d
     }
     *wl->selection_offer = *wl->pending_offer;
     *wl->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
+    if (!id)
+        return;
+
+    int pipefd[2];
+
+    if (pipe2(pipefd, O_CLOEXEC) == -1) {
+        MP_ERR(wl, "Failed to create selection pipe!\n");
+        return;
+    }
+
+    o = wl->selection_offer;
+    // Only receive plain text for now, may expand later.
+    wl_data_offer_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
+    close(pipefd[1]);
+    o->fd = pipefd[0];
 }
 
 static const struct wl_data_device_listener data_device_listener = {
@@ -1903,6 +1918,11 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
                 assert(o->action >= 0);
                 mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
                                         content, o->action);
+            } else {
+                // Update clipboard text content
+                talloc_free(wl->selection_text.start);
+                wl->selection_text = content;
+                content = (bstr){0};
             }
         }
 
@@ -2858,6 +2878,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     switch (request) {
     case VOCTRL_CHECK_EVENTS: {
         check_fd(wl, wl->dnd_offer, true);
+        check_fd(wl, wl->selection_offer, false);
         *events |= wl->pending_vo_events;
         if (*events & VO_EVENT_RESIZE) {
             *events |= VO_EVENT_EXPOSE;

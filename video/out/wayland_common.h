@@ -166,6 +166,7 @@ struct vo_wayland_state {
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
     struct vo_wayland_data_offer *selection_offer;
+    bstr selection_text;
 
     /* Cursor */
     struct wl_cursor_theme *cursor_theme;
