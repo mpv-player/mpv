@@ -21,19 +21,61 @@
 
 static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
-    return CLIPBOARD_FAILED;
+    return CLIPBOARD_SUCCESS;
 }
 
 static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *out, void *talloc_ctx)
 {
-    return CLIPBOARD_FAILED;
+    if (params->type != CLIPBOARD_DATA_TEXT || !IsClipboardFormatAvailable(CF_UNICODETEXT))
+        return CLIPBOARD_FAILED;
+    if (!OpenClipboard(NULL))
+        return CLIPBOARD_FAILED;
+
+    HANDLE h = GetClipboardData(CF_UNICODETEXT);
+    wchar_t *wdata;
+    if (!h || !(wdata = GlobalLock(h))) {
+        CloseClipboard();
+        return CLIPBOARD_FAILED;
+    }
+
+    int len = WideCharToMultiByte(CP_UTF8, 0, wdata, -1, NULL, 0, NULL, NULL);
+    if (len <= 0)
+        abort();
+    char *data = talloc_array(talloc_ctx, char, len);
+    WideCharToMultiByte(CP_UTF8, 0, wdata, -1, data, len, NULL, NULL);
+    out->type = CLIPBOARD_DATA_TEXT;
+    out->u.text = data;
+
+    GlobalUnlock(h);
+    CloseClipboard();
+    return CLIPBOARD_SUCCESS;
 }
 
 static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *data)
 {
-    return CLIPBOARD_FAILED;
+    if (params->type != CLIPBOARD_DATA_TEXT || data->type != CLIPBOARD_DATA_TEXT)
+        return CLIPBOARD_FAILED;
+    if (!OpenClipboard(NULL))
+        return CLIPBOARD_FAILED;
+
+    int len = MultiByteToWideChar(CP_UTF8, 0, data->u.text, -1, NULL, 0);
+    if (len <= 0)
+        abort();
+    HANDLE h = GlobalAlloc(GMEM_MOVEABLE, len * sizeof(wchar_t));
+    wchar_t *wdata;
+    if (!h || !(wdata = GlobalLock(h))) {
+        CloseClipboard();
+        return CLIPBOARD_FAILED;
+    }
+
+    MultiByteToWideChar(CP_UTF8, 0, data->u.text, -1, wdata, len);
+    GlobalUnlock(h);
+    EmptyClipboard();
+    SetClipboardData(CF_UNICODETEXT, h);
+    CloseClipboard();
+    return CLIPBOARD_SUCCESS;
 }
 
 const struct clipboard_backend clipboard_backend_win32 = {
