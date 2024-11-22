@@ -1,7 +1,7 @@
 #ifndef MP_MISC_NODE_H_
 #define MP_MISC_NODE_H_
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "misc/bstr.h"
 
 void node_init(struct mpv_node *dst, int format, struct mpv_node *parent);

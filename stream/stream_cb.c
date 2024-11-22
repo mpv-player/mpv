@@ -12,7 +12,7 @@
 #include "options/m_option.h"
 #include "options/path.h"
 #include "player/client.h"
-#include "libmpv/stream_cb.h"
+#include "mpv/stream_cb.h"
 #include "misc/thread_tools.h"
 
 struct priv {
