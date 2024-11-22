@@ -3021,6 +3021,15 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return set_screensaver_inhibitor(wl, true);
     case VOCTRL_RESTORE_SCREENSAVER:
         return set_screensaver_inhibitor(wl, false);
+    case VOCTRL_GET_CLIPBOARD: {
+        struct voctrl_clipboard *vc = arg;
+        // TODO: add primary selection support
+        if (vc->params.target != CLIPBOARD_TARGET_CLIPBOARD || vc->params.type != CLIPBOARD_DATA_TEXT)
+            return VO_NOTAVAIL;
+        vc->data.type = CLIPBOARD_DATA_TEXT;
+        vc->data.u.text = bstrto0(vc->talloc_ctx, wl->selection_text);
+        return VO_TRUE;
+    }
     }
 
     return VO_NOTIMPL;
