@@ -376,8 +376,8 @@ local function format_table(list, width_max, rows_max)
     return table.concat(rows, ass_escape('\n')), row_count
 end
 
-local function fuzzy_find(needle, haystacks)
-    local result = require 'mp.fzy'.filter(needle, haystacks)
+local function fuzzy_find(needle, haystacks, case_sensitive)
+    local result = require 'mp.fzy'.filter(needle, haystacks, case_sensitive)
     if line ~= '' then -- Prevent table.sort() from reordering the items.
         table.sort(result, function (i, j)
             return i[3] > j[3]
@@ -1365,45 +1365,17 @@ end
 local function complete_match(part, list)
     local completions = {}
 
-    for _, candidate in pairs(list) do
-        if candidate:sub(1, part:len()) == part then
-            completions[#completions + 1] = candidate
-        end
+    for i, match in ipairs(fuzzy_find(part, list, opts.case_sensitive)) do
+        completions[i] = list[match]
     end
 
     local prefix = find_common_prefix(completions)
 
-    if opts.case_sensitive then
-        return completions, prefix or part
+    if prefix == nil or #prefix < #part then
+        prefix = part
     end
 
-    completions = {}
-    local lower_case_completions = {}
-    local lower_case_part = part:lower()
-
-    for _, candidate in pairs(list) do
-        if candidate:sub(1, part:len()):lower() == lower_case_part then
-            completions[#completions + 1] = candidate
-            lower_case_completions[#lower_case_completions + 1] = candidate:lower()
-        end
-    end
-
-    local lower_case_prefix = find_common_prefix(lower_case_completions)
-
-    -- Behave like GNU readline with completion-ignore-case On.
-    -- part = 'fooBA', completions = {'foobarbaz', 'fooBARqux'} =>
-    -- prefix = 'fooBARqux', lower_case_prefix = 'foobar', return 'fooBAR'
-    if prefix then
-        return completions, prefix:sub(1, lower_case_prefix:len())
-    end
-
-    -- part = 'fooba', completions = {'fooBARbaz', 'fooBarqux'} =>
-    -- prefix = nil, lower_case_prefix ='foobar', return 'fooBAR'
-    if lower_case_prefix then
-        return completions, completions[1]:sub(1, lower_case_prefix:len())
-    end
-
-    return {}, part
+    return completions, prefix
 end
 
 local function cycle_through_suggestions(backwards)
@@ -1599,7 +1571,6 @@ local function complete(backwards)
         prefix = prefix .. completion_append
         after_cur = strip_common_characters(after_cur, completion_append)
     else
-        table.sort(completions)
         suggestion_buffer = completions
         selected_suggestion_index = 0
     end
