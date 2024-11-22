@@ -1866,9 +1866,8 @@ static void destroy_offer(struct vo_wayland_data_offer *o)
     *o = (struct vo_wayland_data_offer){.fd = -1, .action = -1};
 }
 
-static void check_dnd_fd(struct vo_wayland_state *wl)
+static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *o, bool is_dnd)
 {
-    struct vo_wayland_data_offer *o = wl->dnd_offer;
     if (o->fd == -1)
         return;
 
@@ -1879,41 +1878,43 @@ static void check_dnd_fd(struct vo_wayland_state *wl)
     if (fdp.revents & POLLIN) {
         ssize_t data_read = 0;
         const size_t chunk_size = 256;
-        bstr file_list = {
-            .start = talloc_zero_size(NULL, chunk_size),
+        bstr content = {
+            .start = talloc_zero_size(wl, chunk_size),
         };
 
         while (1) {
-            data_read = read(o->fd, file_list.start + file_list.len, chunk_size);
+            data_read = read(o->fd, content.start + content.len, chunk_size);
             if (data_read == -1 && errno == EINTR)
                 continue;
             else if (data_read <= 0)
                 break;
-            file_list.len += data_read;
-            file_list.start = talloc_realloc_size(NULL, file_list.start, file_list.len + chunk_size);
-            memset(file_list.start + file_list.len, 0, chunk_size);
+            content.len += data_read;
+            content.start = talloc_realloc_size(wl, content.start, content.len + chunk_size);
+            memset(content.start + content.len, 0, chunk_size);
         }
 
         if (data_read == -1) {
-            MP_VERBOSE(wl, "DND aborted (read error)\n");
+            MP_VERBOSE(wl, "data offer aborted (read error)\n");
         } else {
-            MP_VERBOSE(wl, "Read %zu bytes from the DND fd\n", file_list.len);
+            MP_VERBOSE(wl, "Read %zu bytes from the data offer fd\n", content.len);
 
-            if (o->offer)
-                wl_data_offer_finish(o->offer);
+            if (is_dnd) {
+                if (o->offer)
+                    wl_data_offer_finish(o->offer);
 
-            assert(o->action >= 0);
-            mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
-                                    file_list, o->action);
+                assert(o->action >= 0);
+                mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
+                                        content, o->action);
+            }
         }
 
-        talloc_free(file_list.start);
+        talloc_free(content.start);
         destroy_offer(o);
     }
 
     if (fdp.revents & (POLLIN | POLLERR | POLLHUP)) {
         if (o->action >= 0)
-            MP_VERBOSE(wl, "DND aborted (hang up or error)\n");
+            MP_VERBOSE(wl, "data offer aborted (hang up or error)\n");
         destroy_offer(o);
     }
 }
@@ -2858,7 +2859,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
     switch (request) {
     case VOCTRL_CHECK_EVENTS: {
-        check_dnd_fd(wl);
+        check_fd(wl, wl->dnd_offer, true);
         *events |= wl->pending_vo_events;
         if (*events & VO_EVENT_RESIZE) {
             *events |= VO_EVENT_EXPOSE;
