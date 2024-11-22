@@ -22,12 +22,14 @@
 
 struct clipboard_opts {
     bool enabled;
+    bool monitor;
 };
 
 #define OPT_BASE_STRUCT struct clipboard_opts
 const struct m_sub_options clipboard_conf = {
     .opts = (const struct m_option[]) {
         {"enable", OPT_BOOL(enabled), .flags = UPDATE_CLIPBOARD},
+        {"monitor", OPT_BOOL(monitor), .flags = UPDATE_CLIPBOARD},
         {0}
     },
     .defaults = &(const struct clipboard_opts) {
@@ -54,6 +56,7 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
     *cl = (struct clipboard_ctx) {
         .log = mp_log_new(cl, global->log, "clipboard"),
         .global = global,
+        .monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
     };
 
     for (int i = 0; i < MP_ARRAY_SIZE(clipboard_backend_list); i++) {
@@ -79,6 +82,13 @@ void mp_clipboard_destroy(struct clipboard_ctx *cl)
     talloc_free(cl);
 }
 
+bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
+{
+    if (cl && cl->backend->data_changed && cl->monitor)
+        return cl->backend->data_changed(cl);
+    return false;
+}
+
 int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *out, void *talloc_ctx)
 {
@@ -102,7 +112,10 @@ void reinit_clipboard(struct MPContext *mpctx)
 
     struct clipboard_opts *opts = mp_get_config_group(NULL, mpctx->global, &clipboard_conf);
     if (opts->enabled) {
-        struct clipboard_init_params params = {.mpctx = mpctx};
+        struct clipboard_init_params params = {
+            .mpctx = mpctx,
+            .flags = opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0,
+        };
         mpctx->clipboard = mp_clipboard_create(&params, mpctx->global);
     }
     talloc_free(opts);

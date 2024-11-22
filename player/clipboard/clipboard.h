@@ -24,6 +24,8 @@
 struct clipboard_ctx;
 struct MPContext;
 
+#define CLIPBOARD_INIT_ENABLE_MONITORING 1
+
 enum clipboard_data_type {
     CLIPBOARD_DATA_TEXT,
     CLIPBOARD_DATA_IMAGE,
@@ -65,6 +67,7 @@ struct clipboard_backend {
     // Return 0 on success, otherwise -1
     int (*init)(struct clipboard_ctx *cl, struct clipboard_init_params *params);
     void (*uninit)(struct clipboard_ctx *cl);
+    bool (*data_changed)(struct clipboard_ctx *cl);
     int (*get_data)(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *out, void *talloc_ctx);
     int (*set_data)(struct clipboard_ctx *cl, struct clipboard_access_params *params,
@@ -76,11 +79,13 @@ struct clipboard_ctx {
     struct mp_log *log;
     void *priv;   // backend-specific internal data
     struct mpv_global *global;
+    bool monitor;
 };
 
 struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
                                           struct mpv_global *global);
 void mp_clipboard_destroy(struct clipboard_ctx *cl);
+bool mp_clipboard_data_changed(struct clipboard_ctx *cl);
 int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *out, void *talloc_ctx);
 int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
