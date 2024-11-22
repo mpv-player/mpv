@@ -4,7 +4,8 @@ import os
 import re
 import subprocess
 import sys
-from typing import Callable, Dict, Optional, Tuple
+from collections.abc import Callable
+from typing import Optional
 
 
 def call(cmd) -> str:
@@ -12,7 +13,7 @@ def call(cmd) -> str:
     ret = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True)
     return ret.stdout
 
-lint_rules: Dict[str, Tuple[Callable, str]] = {}
+lint_rules: dict[str, tuple[Callable, str]] = {}
 
 # A lint rule should return True if everything is okay
 def lint_rule(description: str):
