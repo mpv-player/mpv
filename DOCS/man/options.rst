@@ -7814,3 +7814,18 @@ Miscellaneous
     code is the same.)
 
     Conversion is not applied to metadata that is updated at runtime.
+
+``--clipboard-enable=<yes|no>``
+    (Windows and Wayland only)
+
+    Enable native clipboard support (default: yes). This allows reading and
+    writing to the ``clipboard`` property to get and set clipboard contents.
+
+``--clipboard-monitor=<yes|no>``
+    (Windows only)
+
+    Enable clipboard monitoring so that the ``clipboard`` property can be
+    observed for content changes (default: no). This only affects clipboard
+    implementations which use polling to monitor clipboard updates.
+    Other platforms currently ignore this option and always/never notify
+    changes.
