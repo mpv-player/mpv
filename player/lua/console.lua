@@ -1811,8 +1811,12 @@ mp.register_script_message('get-input', function (script_name, args)
     history = histories[id]
     history_pos = #history + 1
 
-    selectable_items = args.items
-    if selectable_items then
+    if args.items then
+        selectable_items = {}
+        for i, item in ipairs(args.items) do
+            selectable_items[i] = item:gsub("[\r\n].*", "⋯")
+        end
+
         matches = {}
         selected_match = args.default_item or 1
         default_item = args.default_item
