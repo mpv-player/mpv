@@ -1814,7 +1814,7 @@ mp.register_script_message('get-input', function (script_name, args)
     if args.items then
         selectable_items = {}
         for i, item in ipairs(args.items) do
-            selectable_items[i] = item:gsub("[\r\n].*", "⋯")
+            selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
         end
 
         matches = {}
