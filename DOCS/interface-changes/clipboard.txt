@@ -1,0 +1,2 @@
+add `--clipboard-enable` and `--clipboard-monitor` options
+add `clipboard` property

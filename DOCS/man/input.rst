@@ -3893,6 +3893,23 @@ Property list
 
     This property is read-only, and change notification is not supported.
 
+``clipboard``
+    The clipboard contents, only works when native clipboard
+    (``--clipboard-enable``) is supported on the platform.
+    Depending on the platform, some sub-properties, writing to properties,
+    or change notifications are not currently functional.
+
+    This has a number of sub-properties:
+
+    ``clipboard/text`` (RW)
+        The text content in the clipboard (Windows and Wayland only).
+        Writing to this property sets the text clipboard content (Windows only).
+
+    .. note::
+
+        On Wayland, the clipboard content is only updated when the compositor
+        sends a selection data offer (typically when VO window is focused).
+
 Inconsistencies between options and properties
 ----------------------------------------------
 
