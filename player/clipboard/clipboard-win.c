@@ -19,9 +19,25 @@
 #include "common/common.h"
 #include "clipboard.h"
 
+struct clipboard_win_priv {
+    DWORD sequence_number;
+};
+
 static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
+    cl->priv = talloc_zero(cl, struct clipboard_win_priv);
     return CLIPBOARD_SUCCESS;
+}
+
+static bool data_changed(struct clipboard_ctx *cl)
+{
+    struct clipboard_win_priv *priv = cl->priv;
+    DWORD sequence_number = GetClipboardSequenceNumber();
+    if (sequence_number != priv->sequence_number) {
+        priv->sequence_number = sequence_number;
+        return true;
+    }
+    return false;
 }
 
 static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
@@ -82,6 +98,7 @@ const struct clipboard_backend clipboard_backend_win32 = {
     .name = "win32",
     .desc = "Windows clipboard",
     .init = init,
+    .data_changed = data_changed,
     .get_data = get_data,
     .set_data = set_data,
 };

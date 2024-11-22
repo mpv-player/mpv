@@ -24,7 +24,7 @@
 struct clipboard_ctx;
 struct MPContext;
 
-#define CLIPBOARD_INIT_ENABLE_MONITORING 1
+#define CLIPBOARD_INIT_ENABLE_MONITORING (1 << 0)
 
 enum clipboard_data_type {
     CLIPBOARD_DATA_TEXT,
