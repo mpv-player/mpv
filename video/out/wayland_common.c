@@ -1016,7 +1016,9 @@ static void surface_handle_preferred_buffer_scale(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    if (wl->fractional_scale_manager || wl->scaling == scale * WAYLAND_SCALE_FACTOR)
+    if (wl->fractional_scale_manager ||
+        (wl->scaling == scale * WAYLAND_SCALE_FACTOR &&
+         wl->current_output && wl->current_output->has_surface))
         return;
 
     wl->pending_scaling = scale * WAYLAND_SCALE_FACTOR;
@@ -1248,7 +1250,7 @@ static void preferred_scale(void *data,
                             uint32_t scale)
 {
     struct vo_wayland_state *wl = data;
-    if (wl->scaling == scale)
+    if (wl->scaling == scale && wl->current_output && wl->current_output->has_surface)
         return;
 
     wl->pending_scaling = scale;
