@@ -1248,8 +1248,6 @@ static void preferred_scale(void *data,
                             uint32_t scale)
 {
     struct vo_wayland_state *wl = data;
-    if (wl->scaling == scale)
-        return;
 
     wl->pending_scaling = scale;
     wl->scale_configured = true;
