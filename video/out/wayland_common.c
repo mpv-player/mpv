@@ -909,7 +909,7 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     /* If we satisfy this conditional, something about the current
      * output must have changed (resolution, scale, etc). All window
      * geometry and scaling should be recalculated. */
-    if (wl->current_output && wl->current_output->output == wl_output) {
+    if (wl->current_output && wl->current_output == o) {
         set_surface_scaling(wl);
         set_geometry(wl, false);
         prepare_resize(wl);
