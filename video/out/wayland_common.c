@@ -1253,7 +1253,7 @@ static void preferred_scale(void *data,
 
     wl->pending_scaling = scale;
     wl->scale_configured = true;
-    MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
+    MP_VERBOSE(wl, "Obtained preferred fractional scale, %f, from the compositor.\n",
                wl->pending_scaling / WAYLAND_SCALE_FACTOR);
     wl->need_rescale = true;
 
