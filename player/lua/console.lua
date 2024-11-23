@@ -1439,6 +1439,10 @@ complete = function ()
     -- comparisons.
     if before_cur == '' or before_cur:find('[%s;]$') then
         tokens[#tokens + 1] = { text = "", pos = cursor }
+    elseif first_useful_token_index > 1 and
+           command_prefixes[tokens[first_useful_token_index - 1].text] then
+        update()
+        return
     end
 
     local add_actions = {
