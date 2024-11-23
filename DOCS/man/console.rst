@@ -15,7 +15,8 @@ ESC and Ctrl+[
     Hide the console.
 
 ENTER, Ctrl+j and Ctrl+m
-    Run the typed command.
+    Expand the first completion suggestion if present and if none was selected,
+    and run the typed command.
 
 Shift+ENTER
     Type a literal newline character.

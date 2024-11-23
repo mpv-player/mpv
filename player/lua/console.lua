@@ -106,6 +106,7 @@ local first_match_to_print = 1
 local default_item
 
 local complete
+local cycle_through_suggestions
 local set_active
 
 
@@ -821,6 +822,10 @@ local function handle_enter()
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                     utils.format_json({line}))
     else
+        if selected_suggestion_index == 0 then
+            cycle_through_suggestions()
+        end
+
         -- match "help [<text>]", return <text> or "", strip all whitespace
         local help = line:match('^%s*help%s+(.-)%s*$') or
                      (line:match('^%s*help$') and '')
@@ -1346,7 +1351,7 @@ local function strip_common_characters(str, prefix)
     max_overlap_length(prefix, str)))
 end
 
-local function cycle_through_suggestions(backwards)
+cycle_through_suggestions = function (backwards)
     if #suggestion_buffer == 0 then
         -- Allow Tab completion of commands before typing anything.
         if line == '' then
