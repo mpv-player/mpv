@@ -4217,15 +4217,9 @@ Demuxer
     This does **not** work with URLs resolved by the ``youtube-dl`` wrapper,
     and it won't.
 
-    This can give subtly wrong results if per-file options are used, or if
-    options are changed in the time window between prefetching start and next
-    file played.
-
     This can occasionally make wrong prefetching decisions. For example, it
     can't predict whether you go backwards in the playlist, and assumes you
     won't edit the playlist.
-
-    Highly experimental.
 
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
