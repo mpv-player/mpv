@@ -960,10 +960,8 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
             params->color.transfer = PL_COLOR_TRC_BT_1886;
     } else if (forced_csp == PL_COLOR_SYSTEM_RGB) {
-        if (params->repr.sys == PL_COLOR_SYSTEM_UNKNOWN)
-            params->repr.sys = PL_COLOR_SYSTEM_RGB;
-        if (params->repr.levels == PL_COLOR_LEVELS_UNKNOWN)
-            params->repr.levels = PL_COLOR_LEVELS_FULL;
+        params->repr.sys = PL_COLOR_SYSTEM_RGB;
+        params->repr.levels = PL_COLOR_LEVELS_FULL;
 
         // The majority of RGB content is either sRGB or (rarely) some other
         // color space which we don't even handle, like AdobeRGB or
