@@ -470,7 +470,8 @@ local function print_to_terminal()
 
     local suggestions = ''
     for i, suggestion in ipairs(suggestion_buffer) do
-        if i == selected_suggestion_index then
+        if i == selected_suggestion_index or
+           (i == 1 and selected_suggestion_index == 0) then
             suggestions = suggestions .. terminal_styles.selected_suggestion ..
                           suggestion .. '\027[0m'
         else
