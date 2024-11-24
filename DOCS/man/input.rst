@@ -1558,8 +1558,9 @@ Miscellaneous Commands
     Begin window dragging if supported by the current VO. This command should
     only be called while a mouse button is being pressed, otherwise it will
     be ignored. The exact effect of this command depends on the VO implementation
-    of window dragging. For example, on Windows only the left mouse button can
-    begin window dragging, while X11 and Wayland allow other mouse buttons.
+    of window dragging. For example, on Windows and macOS only the left mouse
+    button can begin window dragging, while X11 and Wayland allow other mouse
+    buttons.
 
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
