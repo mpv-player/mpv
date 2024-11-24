@@ -367,7 +367,8 @@ local function format_table(list, width_max, rows_max)
                                   or '%-' .. math.min(column_widths[column], 99) .. 's'
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
-            if i == selected_suggestion_index then
+            if i == selected_suggestion_index or
+               (i == 1 and selected_suggestion_index == 0) then
                 columns[column] = styles.selected_suggestion .. columns[column]
                                   .. '{\\b0}'.. styles.suggestion
             end
