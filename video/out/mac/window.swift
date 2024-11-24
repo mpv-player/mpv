@@ -332,11 +332,13 @@ class Window: NSWindow, NSWindowDelegate {
         zoom(self)
     }
 
-    func updateMovableBackground(_ pos: NSPoint) {
-        if !isInFullscreen {
-            isMovableByWindowBackground = input?.draggable(at: pos) ?? true
-        } else {
-            isMovableByWindowBackground = false
+    func startDragging() {
+        guard let view = common.view, let event = view.lastMouseDownEvent else { return }
+        var pos = view.convert(event.locationInWindow, from: nil)
+        pos = convertPointToBacking(pos)
+
+        if input?.draggable(at: pos) ?? true {
+            performDrag(with: event)
         }
     }
 

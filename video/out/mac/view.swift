@@ -23,6 +23,7 @@ class View: NSView, CALayerDelegate {
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
+    var lastMouseDownEvent: NSEvent?
 
     override var isFlipped: Bool { return true }
     override var acceptsFirstResponder: Bool { return true }
@@ -137,6 +138,7 @@ class View: NSView, CALayerDelegate {
     override func mouseDown(with event: NSEvent) {
         hasMouseDown = event.clickCount <= 1
         input?.processMouse(event: event)
+        lastMouseDownEvent = event
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -176,7 +178,6 @@ class View: NSView, CALayerDelegate {
         point = convertToBacking(point)
         point.y = -point.y
 
-        common.window?.updateMovableBackground(point)
         if !(common.window?.isMoving ?? false) {
             input?.setMouse(position: point)
         }

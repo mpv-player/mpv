@@ -139,8 +139,6 @@ class Common: NSObject {
             DispatchQueue.main.async {
                 self.window?.toggleFullScreen(nil)
             }
-        } else {
-            window?.isMovableByWindowBackground = true
         }
     }
 
@@ -646,6 +644,9 @@ class Common: NSObject {
             DispatchQueue.main.async {
                 self.title = title
             }
+            return VO_TRUE
+        case VOCTRL_BEGIN_DRAGGING:
+            self.window?.startDragging()
             return VO_TRUE
         default:
             return VO_NOTIMPL
