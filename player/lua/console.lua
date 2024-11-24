@@ -808,9 +808,6 @@ local function handle_enter()
     if line == '' and input_caller == nil then
         return
     end
-    if history[#history] ~= line and line ~= '' then
-        history_add(line)
-    end
 
     if selectable_items then
         if #matches > 0 then
@@ -834,6 +831,10 @@ local function handle_enter()
         else
             mp.command(line)
         end
+    end
+
+    if history[#history] ~= line and line ~= '' then
+        history_add(line)
     end
 
     clear()
