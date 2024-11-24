@@ -650,6 +650,17 @@ local function history_add(text)
     history[#history + 1] = text
 end
 
+local function handle_cursor_move()
+    -- Don't show completions after a command is entered because they move its
+    -- output up, and allow clearing completions by emptying the line.
+    if line == '' then
+        suggestion_buffer = {}
+        update()
+    else
+        complete()
+    end
+end
+
 local function handle_edit()
     if selectable_items then
         matches = {}
@@ -664,14 +675,7 @@ local function handle_edit()
         return
     end
 
-    -- Don't show completions after a command is entered because they move its
-    -- output up, and allow clearing completions by emptying the line.
-    if line == '' then
-        suggestion_buffer = {}
-        update()
-    else
-        complete()
-    end
+    handle_cursor_move()
 
     if input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
@@ -714,15 +718,13 @@ end
 -- Move the cursor to the next character (Right)
 local function next_char()
     cursor = next_utf8(line, cursor)
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Move the cursor to the previous character (Left)
 local function prev_char()
     cursor = prev_utf8(line, cursor)
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Clear the current line (Ctrl+C)
@@ -801,7 +803,7 @@ local function handle_enter()
         line = #matches > 0 and matches[selected_match].text or ''
         cursor = #line + 1
         log_buffers[id] = {}
-        update()
+        handle_edit()
         unbind_mouse()
         return
     end
@@ -918,8 +920,7 @@ local function go_history(new_pos)
     end
     cursor = line:len() + 1
     insert_mode = false
-    suggestion_buffer = {}
-    update()
+    handle_edit()
 end
 
 -- Go to the specified relative position in the command history (Up, Down)
@@ -1035,30 +1036,26 @@ local function prev_word()
     -- string in order to do a "backwards" find. This wouldn't be as annoying
     -- to do if Lua didn't insist on 1-based indexing.
     cursor = line:len() - select(2, line:reverse():find('%s*[^%s]*', line:len() - cursor + 2)) + 1
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Move to the end of the current word, or if already at the end, the end of
 -- the next word. (Ctrl+Right)
 local function next_word()
     cursor = select(2, line:find('%s*[^%s]*', cursor)) + 1
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Move the cursor to the beginning of the line (HOME)
 local function go_home()
     cursor = 1
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Move the cursor to the end of the line (END)
 local function go_end()
     cursor = line:len() + 1
-    suggestion_buffer = {}
-    update()
+    handle_cursor_move()
 end
 
 -- Delete from the cursor to the beginning of the word (Ctrl+Backspace)
