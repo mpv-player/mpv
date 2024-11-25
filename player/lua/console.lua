@@ -1459,12 +1459,11 @@ complete = function ()
     completion_pos = before_cur:match('${[=>]?()[%w_/-]*$')
     if completion_pos then
         completions = property_list()
-        completion_append = '} '
+        completion_append = '}'
     elseif #tokens == first_useful_token_index then
         completions = command_list()
         completions[#completions + 1] = 'help'
         completion_pos = first_useful_token.pos
-        completion_append = completion_append .. ' '
     elseif #tokens == first_useful_token_index + 1 then
         if first_useful_token.text == 'set' or
            first_useful_token.text == 'add' or
@@ -1473,7 +1472,6 @@ complete = function ()
            first_useful_token.text == 'multiply' then
             completions = property_list()
             completion_pos = tokens[first_useful_token_index + 1].pos
-            completion_append = completion_append .. ' '
         elseif first_useful_token.text == 'help' then
             completions = command_list()
             completion_pos = tokens[first_useful_token_index + 1].pos
@@ -1483,19 +1481,16 @@ complete = function ()
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_list()
             completion_pos = tokens[first_useful_token_index + 1].pos
-            completion_append = completion_append .. ' '
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             completions = list_option_action_list(first_useful_token.text)
             completion_pos = tokens[first_useful_token_index + 1].pos
-            completion_append = completion_append .. ' '
         elseif has_file_argument(first_useful_token.text) then
             completions, before_cur =
                 handle_file_completion(before_cur, tokens[first_useful_token_index + 1].pos)
         end
     elseif first_useful_token.text == 'cycle-values' then
         completion_pos = tokens[#tokens].pos
-        completion_append = completion_append .. ' '
         completions, before_cur =
             handle_choice_completion(tokens[first_useful_token_index + 1].text,
                                      before_cur, tokens[#tokens].pos)
@@ -1509,7 +1504,6 @@ complete = function ()
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_action_list(tokens[first_useful_token_index + 1].text)
             completion_pos = tokens[first_useful_token_index + 2].pos
-            completion_append = completion_append .. ' '
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             if add_actions[tokens[first_useful_token_index + 1].text] then
