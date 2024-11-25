@@ -2951,6 +2951,16 @@ Subtitles
 
     Default: ``outline-and-shadow``.
 
+    Predefined profiles are available to enable optimized ``background-box`` style
+    for OSD and subtitles.
+
+    .. admonition:: Profiles
+
+        - ``--profile=sub-box`` applies the ``background-box`` style to subtitles
+        - ``--profile=osd-box`` applies the ``background-box`` style to the OSD,
+          including stats and console
+        - ``--profile=box`` applies the ``background-box`` style to both subtitles and OSD
+
 ``--sub-color=<color>``
     Specify the color used for unstyled text subtitles.
 
