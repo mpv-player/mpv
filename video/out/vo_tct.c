@@ -41,7 +41,6 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
-static const bstr TERM_ESC_CLEAR_COLORS    = bstr0_lit("\033[0m");
 static const bstr TERM_ESC_COLOR256_BG     = bstr0_lit("\033[48;5");
 static const bstr TERM_ESC_COLOR256_FG     = bstr0_lit("\033[38;5");
 static const bstr TERM_ESC_COLOR24BIT_BG   = bstr0_lit("\033[48;2");
@@ -160,7 +159,7 @@ static void write_plain(bstr *frame,
             if (buffering <= VO_TCT_BUFFER_PIXEL)
                 print_buffer(frame);
         }
-        bstr_xappend(NULL, frame, TERM_ESC_CLEAR_COLORS);
+        bstr_xappend(NULL, frame, (bstr)bstr0_lit(TERM_ESC_CLEAR_COLORS));
         if (buffering <= VO_TCT_BUFFER_LINE)
             print_buffer(frame);
     }
@@ -197,7 +196,7 @@ static void write_half_blocks(bstr *frame,
             if (buffering <= VO_TCT_BUFFER_PIXEL)
                 print_buffer(frame);
         }
-        bstr_xappend(NULL, frame, TERM_ESC_CLEAR_COLORS);
+        bstr_xappend(NULL, frame, (bstr)bstr0_lit(TERM_ESC_CLEAR_COLORS));
         if (buffering <= VO_TCT_BUFFER_LINE)
             print_buffer(frame);
     }

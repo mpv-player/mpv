@@ -45,6 +45,7 @@
 #include "common/common.h"
 #include "input/input.h"
 #include "input/keycodes.h"
+#include "sub/osd_state.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
@@ -304,6 +305,32 @@ void mark_seek(struct MPContext *mpctx)
     if (now > cmd->last_seek_time + 2.0 || cmd->last_seek_pts == MP_NOPTS_VALUE)
         cmd->last_seek_pts = get_current_time(mpctx);
     cmd->last_seek_time = now;
+}
+
+static char *append_selected_style(struct MPContext *mpctx, char *str)
+{
+    if (!mpctx->video_out || !mpctx->opts->video_osd)
+        return talloc_strdup_append(str, TERM_ESC_REVERSE_COLORS);
+
+    return talloc_asprintf_append(str,
+               "%s{\\b1\\1c&H%x%x%x&\\1a&H%x&\\3c&H%x%x%x&\\3a&H%x&}%s",
+               OSD_ASS_0,
+               mpctx->video_out->osd->opts->osd_selected_color.b,
+               mpctx->video_out->osd->opts->osd_selected_color.g,
+               mpctx->video_out->osd->opts->osd_selected_color.r,
+               255 - mpctx->video_out->osd->opts->osd_selected_color.a,
+               mpctx->video_out->osd->opts->osd_selected_outline_color.b,
+               mpctx->video_out->osd->opts->osd_selected_outline_color.g,
+               mpctx->video_out->osd->opts->osd_selected_outline_color.r,
+               255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a,
+               OSD_ASS_1);
+}
+
+static const char *get_style_reset(struct MPContext *mpctx)
+{
+    return mpctx->video_out && mpctx->opts->video_osd
+        ? OSD_ASS_0"{\\r}"OSD_ASS_1
+        : TERM_ESC_CLEAR_COLORS;
 }
 
 static char *skip_n_lines(char *text, int lines)
@@ -1055,13 +1082,14 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
         }
 
         for (n = 0; n < count; n++) {
+            if (n == cur)
+                res = append_selected_style(mpctx, res);
             char *name = chapter_name(mpctx, n);
             double t = chapter_start_time(mpctx, n);
             char* time = mp_format_time(t, false);
-            res = talloc_asprintf_append(res, "%s", time);
+            res = talloc_asprintf_append(res, "%s  %s%s\n", time, name,
+                                         n == cur ? get_style_reset(mpctx) : "");
             talloc_free(time);
-            const char *m = n == cur ? list_current : list_normal;
-            res = talloc_asprintf_append(res, "  %s%s\n", m, name);
         }
 
         *(char **)arg = count ? cut_osd_list(mpctx, "Chapters", res, cur) : res;
@@ -1166,13 +1194,14 @@ static int property_list_editions(void *ctx, struct m_property *prop,
         for (int n = 0; n < num_editions; n++) {
             struct demux_edition *ed = &editions[n];
 
-            res = talloc_strdup_append(res, n == current ? list_current
-                                                         : list_normal);
+            if (n == current)
+                res = append_selected_style(mpctx, res);
             res = talloc_asprintf_append(res, "%d: ", n);
             char *title = mp_tags_get_str(ed->metadata, "title");
             if (!title)
                 title = "unnamed";
-            res = talloc_asprintf_append(res, "'%s'\n", title);
+            res = talloc_asprintf_append(res, "'%s'%s\n", title,
+                                         n == current ? get_style_reset(mpctx) : "");
         }
 
         *(char **)arg = res;
@@ -3343,8 +3372,9 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 
         for (int n = 0; n < pl->num_entries; n++) {
             struct playlist_entry *e = pl->entries[n];
-            res =  talloc_strdup_append(res, pl->current == e ? list_current
-                                                              : list_normal);
+            if (pl->current == e)
+                res = append_selected_style(mpctx, res);
+            const char *reset = pl->current == e ? get_style_reset(mpctx) : "";
             char *p = e->title;
             if (!p || mpctx->opts->playlist_entry_name > 0) {
                 p = e->filename;
@@ -3355,9 +3385,9 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                 }
             }
             if (!e->title || p == e->title || mpctx->opts->playlist_entry_name == 1) {
-                res = talloc_asprintf_append(res, "%s\n", p);
+                res = talloc_asprintf_append(res, "%s%s\n", p, reset);
             } else {
-                res = talloc_asprintf_append(res, "%s (%s)\n", e->title, p);
+                res = talloc_asprintf_append(res, "%s (%s)%s\n", e->title, p, reset);
             }
         }
 

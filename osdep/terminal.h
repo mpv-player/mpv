@@ -38,6 +38,9 @@
 #define TERM_ESC_ENABLE_MOUSE       "\033[?1003h"
 #define TERM_ESC_DISABLE_MOUSE      "\033[?1003l"
 
+#define TERM_ESC_REVERSE_COLORS     "\033[7m"
+#define TERM_ESC_CLEAR_COLORS       "\033[0m"
+
 struct input_ctx;
 
 /* Global initialization for terminal output. */
