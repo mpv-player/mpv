@@ -392,6 +392,11 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
     return result
 end
 
+local function mpv_color_to_ass(color)
+    return color:sub(8,9) .. color:sub(6,7) ..  color:sub(4,5),
+           string.format('%x', 255 - tonumber('0x' .. color:sub(2,3)))
+end
+
 local function populate_log_with_matches()
     if not selectable_items or selected_match == 0 then
         return
@@ -433,13 +438,17 @@ local function populate_log_with_matches()
         local style = ''
         local terminal_style = ''
 
-        if i == selected_match then
-            style = styles.selected_suggestion
-            terminal_style = terminal_styles.selected_suggestion
-        end
         if matches[i].index == default_item then
-            style = style .. styles.default_item
-            terminal_style = terminal_style .. terminal_styles.default_item
+            style = styles.default_item
+            terminal_style = terminal_styles.default_item
+        end
+        if i == selected_match then
+            local color, alpha = mpv_color_to_ass(mp.get_property('osd-selected-color'))
+            local outline_color, outline_alpha =
+                mpv_color_to_ass(mp.get_property('osd-selected-outline-color'))
+            style = style .. "{\\b1\\1c&H" .. color .. "&\\1a&H" .. alpha ..
+                             "&\\3c&H" .. outline_color .. "&\\3a&H" .. outline_alpha .. "&}"
+            terminal_style = terminal_style .. terminal_styles.selected_suggestion
         end
 
         log[#log + 1] = {

@@ -4592,6 +4592,14 @@ OSD
     Specify the color used for OSD.
     See ``--sub-color`` for details.
 
+``--osd-selected-color=<color>``
+    The color of the selected item in lists.
+    See ``--sub-color`` for details.
+
+``--osd-selected-outline-color=<color>``
+    The outline color of the selected item in lists.
+    See ``--sub-color`` for details.
+
 ``--osd-fractions``
     Show OSD times with fractions of seconds (in millisecond precision). Useful
     to see the exact timestamp of a video frame.

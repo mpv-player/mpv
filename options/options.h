@@ -137,6 +137,8 @@ struct mp_subtitle_shared_opts {
 struct mp_osd_render_opts {
     float osd_scale;
     bool osd_scale_by_window;
+    struct m_color osd_selected_color;
+    struct m_color osd_selected_outline_color;
     struct osd_style_opts *osd_style;
     struct osd_bar_style_opts *osd_bar_style;
     bool force_rgba_osd;
