@@ -70,9 +70,9 @@ local user_opts = {
 
     -- luacheck: push ignore
     -- luacheck: max line length
-    title_mbtn_left_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+    title_mbtn_left_command = "script-binding stats/display-page-5",
     title_mbtn_mid_command = "show-text ${filename}",
-    title_mbtn_right_command = "script-binding stats/display-page-5",
+    title_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
 
     playlist_prev_mbtn_left_command = "playlist-prev",
     playlist_prev_mbtn_mid_command = "show-text ${playlist} 3000",

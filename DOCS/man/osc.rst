@@ -49,9 +49,9 @@ title
       title, or the target chapter name while hovering the seekbar.
 
     =============   ================================================
-    left-click      open the playlist selector
+    left-click      show file and track info
     middle-click    show the filename
-    right-click     show file and track info
+    right-click     open the playlist selector
     =============   ================================================
 
 cache
@@ -496,11 +496,11 @@ Configurable Options
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
-``title_mbtn_left_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+``title_mbtn_left_command=script-binding stats/display-page-5``
 
 ``title_mbtn_mid_command=show-text ${filename}``
 
-``title_mbtn_right_command=script-binding stats/display-page-5``
+``title_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
 ``playlist_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000``
 
