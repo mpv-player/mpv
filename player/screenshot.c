@@ -32,6 +32,7 @@
 #include "misc/dispatch.h"
 #include "misc/node.h"
 #include "misc/thread_tools.h"
+#include "osdep/clipboard.h"
 #include "common/msg.h"
 #include "options/path.h"
 #include "video/mp_image.h"
@@ -497,6 +498,29 @@ void cmd_screenshot_to_file(void *p)
         return;
     }
     cmd->success = write_screenshot(cmd, image, filename, &opts, true);
+    talloc_free(image);
+}
+
+void cmd_screenshot_to_clipboard(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    int mode = cmd->args[0].v.i;
+    struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
+    bool high_depth = image_writer_high_depth(&opts);
+    struct mp_image *image = screenshot_get(mpctx, mode, high_depth);
+    if (!image) {
+        mp_cmd_msg(cmd, MSGL_ERR, "Taking screenshot failed.");
+        cmd->success = false;
+        return;
+    }
+
+    struct m_clipboard_item item = {
+        .type = CLIPBOARD_IMAGE,
+        .image = image,
+    };
+
+    cmd->success = m_clipboard_set(mpctx, &item) == CLIPBOARD_OK;
     talloc_free(image);
 }
 
