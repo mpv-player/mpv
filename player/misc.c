@@ -358,7 +358,6 @@ bool str_in_list(bstr str, char **list)
     bstr_xappend_asprintf(ctx, &dst, " %s%s", first ? "[" : "", flag); \
     first = false;                                                     \
 } while(0)
-#define bstr_xappend0(ctx, dst, s) bstr_xappend(ctx, dst, bstr0(s))
 
 char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
 {

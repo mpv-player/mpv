@@ -118,14 +118,14 @@ static void print_seq3(bstr *frame, struct lut_item *lut, bstr prefix,
     bstr_xappend(NULL, frame, (bstr){ lut[r].str, lut[r].width });
     bstr_xappend(NULL, frame, (bstr){ lut[g].str, lut[g].width });
     bstr_xappend(NULL, frame, (bstr){ lut[b].str, lut[b].width });
-    bstr_xappend(NULL, frame, (bstr)bstr0_lit("m"));
+    bstr_xappend0(NULL, frame, "m");
 }
 
 static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c)
 {
     bstr_xappend(NULL, frame, prefix);
     bstr_xappend(NULL, frame, (bstr){ lut[c].str, lut[c].width });
-    bstr_xappend(NULL, frame, (bstr)bstr0_lit("m"));
+    bstr_xappend0(NULL, frame, "m");
 }
 
 static void print_buffer(bstr *frame)
@@ -155,11 +155,11 @@ static void write_plain(bstr *frame,
             } else {
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
-            bstr_xappend(NULL, frame, (bstr)bstr0_lit(" "));
+            bstr_xappend0(NULL, frame, " ");
             if (buffering <= VO_TCT_BUFFER_PIXEL)
                 print_buffer(frame);
         }
-        bstr_xappend(NULL, frame, (bstr)bstr0_lit(TERM_ESC_CLEAR_COLORS));
+        bstr_xappend0(NULL, frame, TERM_ESC_CLEAR_COLORS);
         if (buffering <= VO_TCT_BUFFER_LINE)
             print_buffer(frame);
     }
@@ -196,7 +196,7 @@ static void write_half_blocks(bstr *frame,
             if (buffering <= VO_TCT_BUFFER_PIXEL)
                 print_buffer(frame);
         }
-        bstr_xappend(NULL, frame, (bstr)bstr0_lit(TERM_ESC_CLEAR_COLORS));
+        bstr_xappend0(NULL, frame, TERM_ESC_CLEAR_COLORS);
         if (buffering <= VO_TCT_BUFFER_LINE)
             print_buffer(frame);
     }
@@ -288,7 +288,7 @@ static void flip_page(struct vo *vo)
             p->opts.term256, p->lut, p->opts.buffering);
     }
 
-    bstr_xappend(NULL, &p->frame_buf, (bstr)bstr0_lit("\n"));
+    bstr_xappend0(NULL, &p->frame_buf, "\n");
     if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
         print_buffer(&p->frame_buf);
 

@@ -150,6 +150,11 @@ struct bstr bstr_strip_linebreaks(struct bstr str);
  */
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
 
+static inline void bstr_xappend0(void *talloc_ctx, bstr *s, const char *append)
+{
+    return bstr_xappend(talloc_ctx, s, bstr0(append));
+}
+
 /**
  * @brief Append a formatted string to the existing bstr.
  *
