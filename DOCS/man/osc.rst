@@ -105,7 +105,7 @@ audio and sub
 
     =============   ================================================
     left-click      cycle audio/sub tracks forward
-    shift+L-click   show available audio/sub tracks
+    shift+L-click   cycle audio/sub tracks backwards
     middle-click    show available audio/sub tracks
     right-click     open the audio/sub track selector
     mouse wheel     cycle audio/sub tracks forward/backwards
@@ -534,7 +534,7 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``audio_track_mbtn_left_command=cycle audio``
 
-``audio_track_mbtn_mid_command=show-text ${track-list/audio} 3000``
+``audio_track_mbtn_mid_command=cycle audio down``
 
 ``audio_track_mbtn_right_command=script-binding select/select-aid; script-message-to osc osc-hide``
 
@@ -544,7 +544,7 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``sub_track_mbtn_left_command=cycle sub``
 
-``sub_track_mbtn_mid_command=show-text ${track-list/sub} 3000``
+``sub_track_mbtn_mid_command=cycle sub down``
 
 ``sub_track_mbtn_right_command=script-binding select/select-sid; script-message-to osc osc-hide``
 
