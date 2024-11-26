@@ -493,6 +493,8 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
         return !t1->attached_picture;
     if (t1->image != t2->image)
         return !t1->image;
+    if (t1->dependent_track != t2->dependent_track)
+        return !t1->dependent_track;
     if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
         t1->stream->hls_bitrate != t2->stream->hls_bitrate)
     {
