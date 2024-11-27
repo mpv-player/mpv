@@ -38,9 +38,6 @@ local opts = {
     font_hw_ratio = 'auto',
 }
 
--- Apply user-set options
-require 'mp.options'.read_options(opts)
-
 local styles = {
     -- Colors are stolen from base16 Eighties by Chris Kempson
     -- and converted to BGR as is required by ASS.
@@ -1876,5 +1873,7 @@ mp.register_event('log-message', function(e)
     log_add('[' .. e.prefix .. '] ' .. e.text:sub(1, -2), styles[e.level],
             terminal_styles[e.level])
 end)
+
+require 'mp.options'.read_options(opts, nil, update)
 
 collectgarbage()
