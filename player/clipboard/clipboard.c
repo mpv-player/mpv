@@ -15,10 +15,12 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "clipboard.h"
+
 #include "common/common.h"
+#include "common/global.h"
 #include "options/m_config.h"
 #include "player/core.h"
-#include "clipboard.h"
 
 struct clipboard_opts {
     bool enabled;

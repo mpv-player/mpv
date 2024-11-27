@@ -18,11 +18,11 @@
 #pragma once
 
 #include "common/common.h"
-#include "common/global.h"
-#include "video/mp_image.h"
 
 struct clipboard_ctx;
+struct mp_image;
 struct MPContext;
+struct mpv_global;
 
 #define CLIPBOARD_INIT_ENABLE_MONITORING (1 << 0)
 
