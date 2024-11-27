@@ -38,7 +38,7 @@ class OptionHelper {
     var vo: mp_vo_opts { return voPtr.pointee }
     var mac: macos_opts { return macPtr.pointee }
 
-    init(_ taParent: UnsafeMutableRawPointer, _ global: OpaquePointer?) {
+    init(_ taParent: UnsafeMutableRawPointer, _ global: UnsafeMutablePointer<mpv_global>?) {
         voCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getVoConf())
         macCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getMacConf())
     }
