@@ -24,6 +24,7 @@
 
 #include "options/m_config.h"
 #include "player/core.h"
+#include "common/global.h"
 #include "input/input.h"
 #include "input/event.h"
 #include "input/keycodes.h"
