@@ -133,6 +133,7 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts 
 static const char *const font_mimetypes[] = {
     "application/x-truetype-font",
     "application/vnd.ms-opentype",
+    "application/x-font-otf",
     "application/x-font-ttf",
     "application/x-font", // probably incorrect
     "application/font-sfnt",
