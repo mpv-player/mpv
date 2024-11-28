@@ -344,6 +344,12 @@ Left double click
 Right click
     Toggle pause on/off.
 
+Middle click
+    Drag to pan through the whole video.
+
+Middle double click
+    Reset pan.
+
 Forward/Back button
     Skip to next/previous entry in playlist.
 
