@@ -90,7 +90,8 @@ struct mp_codec_params {
     unsigned char *extradata;   // codec specific per-stream header
     int extradata_size;
 
-    // Codec specific header data (set by demux_lavf.c only)
+    // Codec specific header data (set by demux_{lavf,mkv,raw}, useful to pass
+    // through stream global side data)
     struct AVCodecParameters *lav_codecpar;
 
     // Timestamp granularity for converting double<->rational timestamps.
