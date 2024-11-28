@@ -44,7 +44,7 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 
     int dummy = 0;
     int n_w = *w, n_h = *h;
-    m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, geo);
+    m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, true, geo);
 
     if (!allow_up && *w <= n_w && *h <= n_h)
         return;
@@ -125,16 +125,9 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
     out_geo->win.x0 = (int)(scr_w - d_w) / 2;
     out_geo->win.y0 = (int)(scr_h - d_h) / 2;
 
-    int old_w = d_w;
-    int old_h = d_h;
-
+    bool center = (opts->force_window_position || force_center) && !opts->geometry.xy_valid;
     m_geometry_apply(&out_geo->win.x0, &out_geo->win.y0, &d_w, &d_h,
-                     scr_w, scr_h, &opts->geometry);
-
-    if ((opts->force_window_position || force_center) && !opts->geometry.xy_valid) {
-        out_geo->win.x0 += old_w / 2 - d_w / 2;
-        out_geo->win.y0 += old_h / 2 - d_h / 2;
-    }
+                     scr_w, scr_h, center, &opts->geometry);
 
     out_geo->win.x0 += screen->x0;
     out_geo->win.y0 += screen->y0;
