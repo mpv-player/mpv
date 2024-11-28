@@ -84,7 +84,7 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
             out->light = MP_CSP_LIGHT_AUTO;
         }
     }
-    if (p->colormatrix != PL_COLOR_SYSTEM_DOLBYVISION && !p->dovi) {
+    if (out->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION) {
         out->primaries_orig = out->color.primaries;
         out->transfer_orig = out->color.transfer;
         out->sys_orig = out->repr.sys;
