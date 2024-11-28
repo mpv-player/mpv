@@ -1688,7 +1688,34 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->rotate = rotate;
     }
 
+    // our vessel to transport global track side data to decoder context;
+    // this gets called in all lavc decoders through `mp_set_avctx_codec_headers`
+    // and its failure causes decoding failure. Thus if this call fails here, it is
+    // likely that decoding of this track would also lead to an error.
+    sh_v->lav_codecpar = mp_codec_params_to_av(sh_v);
+    if (!sh_v->lav_codecpar) {
+        MP_ERR(demuxer, "Failed to create codec parameters for track %d!",
+               track->tnum);
+        goto done;
+    }
+
     if (track->dovi_config) {
+        size_t dovi_size;
+        AVDOVIDecoderConfigurationRecord *dovi = av_dovi_alloc(&dovi_size);
+        MP_HANDLE_OOM(dovi);
+
+        memcpy(dovi, track->dovi_config, dovi_size);
+
+        if (!av_packet_side_data_add(&sh_v->lav_codecpar->coded_side_data,
+                                     &sh_v->lav_codecpar->nb_coded_side_data,
+                                     AV_PKT_DATA_DOVI_CONF,
+                                     dovi, dovi_size, 0))
+        {
+            MP_ERR(demuxer, "Failed to attach Dolby Vision configuration record to "
+                   "codec parameters for track %d!\n", track->tnum);
+            av_free(dovi);
+        }
+
         sh_v->dovi = true;
         sh_v->dv_level = track->dovi_config->dv_level;
         sh_v->dv_profile = track->dovi_config->dv_profile;
@@ -2995,18 +3022,6 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                     int64_t id = add->n_block_add_id ? add->block_add_id : 1;
                     demux_packet_add_blockadditional(dp, id,
                         add->block_additional.start, add->block_additional.len);
-                }
-            }
-            if (track->dovi_config) {
-                size_t dovi_size;
-                AVDOVIDecoderConfigurationRecord *dovi = av_dovi_alloc(&dovi_size);
-                MP_HANDLE_OOM(dovi);
-                memcpy(dovi, track->dovi_config, dovi_size);
-                if (av_packet_add_side_data(dp->avpacket,
-                                            AV_PKT_DATA_DOVI_CONF,
-                                            (uint8_t *)dovi, dovi_size) < 0)
-                {
-                    av_free(dovi);
                 }
             }
 
