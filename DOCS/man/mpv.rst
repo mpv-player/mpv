@@ -311,6 +311,9 @@ g-t
 g-c
     Select a chapter.
 
+g-e
+    Select an edition.
+
 g-l
     Select a subtitle line to seek to. This currently requires ``ffmpeg`` in
     ``PATH``, or in the same folder as mpv on Windows.
