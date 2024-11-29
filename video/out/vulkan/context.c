@@ -172,7 +172,8 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
 pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
                              pl_vk_inst vkinst,
                              pl_log pllog,
-                             VkSurfaceKHR surface)
+                             VkSurfaceKHR surface,
+                             bool allow_software)
 {
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
@@ -230,6 +231,7 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .instance = vkinst->instance,
         .get_proc_addr = vkinst->get_proc_addr,
         .surface = surface,
+        .allow_software = allow_software,
         .async_transfer = opts->async_transfer,
         .async_compute = opts->async_compute,
         .queue_count = opts->queue_count,
@@ -259,7 +261,8 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     p->params = params;
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
 
-    vk->vulkan = mppl_create_vulkan(p->opts, vk->vkinst, vk->pllog, vk->surface);
+    vk->vulkan = mppl_create_vulkan(p->opts, vk->vkinst, vk->pllog, vk->surface,
+                                    ctx->opts.allow_sw);
     if (!vk->vulkan)
         goto error;
 
