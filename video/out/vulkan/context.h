@@ -28,7 +28,8 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
 pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
                              pl_vk_inst vkinst,
                              pl_log pllog,
-                             VkSurfaceKHR surface);
+                             VkSurfaceKHR surface,
+                             bool allow_software);
 
 // Handles a resize request, and updates ctx->vo->dwidth/dheight
 bool ra_vk_ctx_resize(struct ra_ctx *ctx, int width, int height);
