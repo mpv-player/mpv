@@ -1339,6 +1339,18 @@ local function command_flags_at_2nd_argument_list(command)
     return flags[command]
 end
 
+local function list_filter_labels(type)
+    local values = {'all'}
+
+    for _, value in pairs(mp.get_property_native(type)) do
+        if value.label then
+            values[#values + 1] = value.label
+        end
+    end
+
+    return values
+end
+
 local function common_prefix_length(s1, s2)
     local common_count = 0
     for i = 1, #s1 do
@@ -1504,6 +1516,9 @@ complete = function ()
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             completions = list_option_action_list(first_useful_token.text)
+        elseif first_useful_token.text == 'vf-command' or
+               first_useful_token.text == 'af-command' then
+            completions = list_filter_labels(first_useful_token.text:sub(1,2))
         elseif has_file_argument(first_useful_token.text) then
             completions, before_cur = handle_file_completion(before_cur)
         else
