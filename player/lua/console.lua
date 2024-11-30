@@ -1339,6 +1339,25 @@ local function command_flags_at_2nd_argument_list(command)
     return flags[command]
 end
 
+local function list_executables()
+    local executable_map = {}
+    local path = os.getenv('PATH') or ''
+    local separator = platform == 'windows' and ';' or ':'
+
+    for directory in path:gmatch('[^' .. separator .. ']+') do
+        for _, executable in pairs(utils.readdir(directory, 'files') or {}) do
+            executable_map[executable] = true
+        end
+    end
+
+    local executables = {}
+    for executable, _ in pairs(executable_map) do
+        executables[#executables + 1] = executable
+    end
+
+    return executables
+end
+
 local function list_filter_labels(type)
     local values = {'all'}
 
@@ -1513,6 +1532,8 @@ complete = function ()
             completions = profile_list()
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_list()
+        elseif first_useful_token.text == 'run' then
+            completions = list_executables()
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             completions = list_option_action_list(first_useful_token.text)
