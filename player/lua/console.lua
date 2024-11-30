@@ -1264,10 +1264,10 @@ local function file_list(directory)
     return files
 end
 
-local function handle_file_completion(before_cur, path_pos)
+local function handle_file_completion(before_cur)
     local directory, last_component_pos =
-        before_cur:sub(path_pos):match('(.-)()[^' .. path_separator ..']*$')
-    completion_pos = path_pos + last_component_pos - 1
+        before_cur:sub(completion_pos):match('(.-)()[^' .. path_separator ..']*$')
+    completion_pos = completion_pos + last_component_pos - 1
 
     if directory:find('^~' .. path_separator) then
         local home = mp.command_native({'expand-path', '~/'})
@@ -1285,7 +1285,7 @@ local function handle_file_completion(before_cur, path_pos)
     return file_list(directory), before_cur
 end
 
-local function handle_choice_completion(option, before_cur, path_pos)
+local function handle_choice_completion(option, before_cur)
     local info = mp.get_property_native('option-info/' .. option, {})
 
     if info.type == 'Flag' then
@@ -1293,7 +1293,7 @@ local function handle_choice_completion(option, before_cur, path_pos)
     end
 
     if info['expects-file'] then
-        return handle_file_completion(before_cur, path_pos)
+        return handle_file_completion(before_cur)
     end
 
     -- Fix completing the empty value for --dscale and --cscale.
@@ -1437,20 +1437,22 @@ complete = function ()
         return
     end
 
+    completion_pos = tokens[#tokens].pos
+
     local add_actions = {
         ['add'] = true, ['append'] = true, ['pre'] = true, ['set'] = true
     }
 
     local first_useful_token = tokens[first_useful_token_index]
 
-    completion_pos = before_cur:match('${[=>]?()[%w_/-]*$')
-    if completion_pos then
+    local property_pos = before_cur:match('${[=>]?()[%w_/-]*$')
+    if property_pos then
+        completion_pos = property_pos
         completions = property_list()
         completion_append = '}'
     elseif #tokens == first_useful_token_index then
         completions = command_list()
         completions[#completions + 1] = 'help'
-        completion_pos = first_useful_token.pos
     elseif #tokens == first_useful_token_index + 1 then
         if first_useful_token.text == 'set' or
            first_useful_token.text == 'add' or
@@ -1458,66 +1460,49 @@ complete = function ()
            first_useful_token.text == 'cycle-values' or
            first_useful_token.text == 'multiply' then
             completions = property_list()
-            completion_pos = tokens[first_useful_token_index + 1].pos
         elseif first_useful_token.text == 'help' then
             completions = command_list()
-            completion_pos = tokens[first_useful_token_index + 1].pos
         elseif first_useful_token.text == 'apply-profile' then
             completions = profile_list()
-            completion_pos = tokens[first_useful_token_index + 1].pos
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_list()
-            completion_pos = tokens[first_useful_token_index + 1].pos
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             completions = list_option_action_list(first_useful_token.text)
-            completion_pos = tokens[first_useful_token_index + 1].pos
         elseif has_file_argument(first_useful_token.text) then
-            completions, before_cur =
-                handle_file_completion(before_cur, tokens[first_useful_token_index + 1].pos)
+            completions, before_cur = handle_file_completion(before_cur)
         end
     elseif first_useful_token.text == 'cycle-values' then
-        completion_pos = tokens[#tokens].pos
         completions, before_cur =
             handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                     before_cur, tokens[#tokens].pos)
+                                     before_cur)
     elseif #tokens == first_useful_token_index + 2 then
         if first_useful_token.text == 'set' then
-            completion_pos = tokens[#tokens].pos
             completions, before_cur =
                 handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                         before_cur,
-                                         tokens[first_useful_token_index + 2].pos)
+                                         before_cur)
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_action_list(tokens[first_useful_token_index + 1].text)
-            completion_pos = tokens[first_useful_token_index + 2].pos
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             if add_actions[tokens[first_useful_token_index + 1].text] then
-                completion_pos = tokens[#tokens].pos
                 completions, before_cur =
-                    handle_choice_completion(first_useful_token.text,
-                                             before_cur, tokens[#tokens].pos)
+                    handle_choice_completion(first_useful_token.text, before_cur)
             elseif tokens[first_useful_token_index + 1].text == 'remove' then
                 completions = list_option_value_list(first_useful_token.text)
-                completion_pos = tokens[#tokens].pos
             end
         end
     elseif #tokens == first_useful_token_index + 3 then
         if first_useful_token.text == 'change-list' then
             if add_actions[tokens[first_useful_token_index + 2].text] then
-                completion_pos = tokens[#tokens].pos
                 completions, before_cur =
                     handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                             before_cur, tokens[#tokens].pos)
+                                             before_cur)
             elseif tokens[first_useful_token_index + 2].text == 'remove' then
-                completion_pos = tokens[#tokens].pos
                 completions = list_option_value_list(tokens[first_useful_token_index + 1].text)
             end
         elseif first_useful_token.text == 'dump-cache' then
-            completions, before_cur =
-                handle_file_completion(before_cur,
-                                       tokens[first_useful_token_index + 3].pos)
+            completions, before_cur = handle_file_completion(before_cur)
         end
     end
 
