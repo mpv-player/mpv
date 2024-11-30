@@ -100,9 +100,11 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     }
 
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
+    MP_HANDLE_OOM(ctx->avctx);
     ctx->avframe = av_frame_alloc();
+    MP_HANDLE_OOM(ctx->avframe);
     ctx->avpkt = av_packet_alloc();
-    MP_HANDLE_OOM(ctx->avctx && ctx->avframe && ctx->avpkt);
+    MP_HANDLE_OOM(ctx->avpkt);
     ctx->avctx->codec_type = AVMEDIA_TYPE_AUDIO;
     ctx->avctx->codec_id = lavc_codec->id;
     ctx->avctx->pkt_timebase = ctx->codec_timebase;
