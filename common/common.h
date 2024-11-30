@@ -166,8 +166,9 @@ char **mp_dup_str_array(void *tctx, char **s);
 // This macro generally behaves like an assert(), except it will make sure to
 // kill the process even with NDEBUG.
 #define MP_HANDLE_OOM(x) do {   \
-        assert(x);              \
-        if (!(x))               \
+        void *oom_p_ = (x);     \
+        assert(oom_p_);         \
+        if (!oom_p_)            \
             abort();            \
     } while (0)
 

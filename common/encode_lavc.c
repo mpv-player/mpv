@@ -372,7 +372,7 @@ static void encode_lavc_add_stream(struct encoder_context *enc,
         dst->st->sample_aspect_ratio = info->codecpar->sample_aspect_ratio;
 
     if (avcodec_parameters_copy(dst->st->codecpar, info->codecpar) < 0)
-        MP_HANDLE_OOM(0);
+        MP_HANDLE_OOM(NULL);
 
     dst->on_ready = on_ready;
     dst->on_ready_ctx = on_ready_ctx;
