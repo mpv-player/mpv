@@ -6722,7 +6722,8 @@ them.
     Android with ``--gpu-context=android`` only.
 
 ``--gpu-sw``
-    Continue even if a software renderer is detected.
+    Continue even if a software renderer is detected. This only works with
+    OpenGL/Vulkan backends. For d3d11, see ``--d3d11-warp``.
 
 ``--gpu-context=<context1,context2,...[,]>``
     Specify a priority list of the GPU contexts to be used.
