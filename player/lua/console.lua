@@ -1304,6 +1304,41 @@ local function handle_choice_completion(option, before_cur)
     return info.choices, before_cur
 end
 
+local function command_flags_at_1st_argument_list(command)
+    local flags = {
+        ['playlist-next'] = {'weak', 'force'},
+        ['playlist-play-index'] = {'current'},
+        ['playlist-remove'] = {'current'},
+        ['rescan-external-files'] = {'reselect', 'keep-selection'},
+        ['revert-seek'] = {'mark', 'mark-permanent'},
+        ['screenshot'] = {'subtitles', 'video', 'window', 'each-frame'},
+        ['stop'] = {'keep-playlist'},
+    }
+    flags['playlist-prev'] = flags['playlist-next']
+    flags['screenshot-raw'] = flags.screenshot
+
+    return flags[command]
+end
+
+local function command_flags_at_2nd_argument_list(command)
+    local flags = {
+        ['apply-profile'] = {'default', 'restore'},
+        ['loadfile'] = {'replace', 'append', 'append-play', 'insert-next',
+                        'insert-next-play', 'insert-at', 'insert-at-play'},
+        ['screenshot-to-file'] = {'subtitles', 'video', 'window', 'each-frame'},
+        ['seek'] = {'relative', 'absolute', 'absolute-percent',
+                    'relative-percent', 'keyframes', 'exact'},
+        ['sub-add'] = {'select', 'auto', 'cached'},
+        ['sub-seek'] = {'primary', 'secondary'},
+    }
+    flags.loadlist = flags.loadfile
+    flags['audio-add'] = flags['sub-add']
+    flags['video-add'] = flags['sub-add']
+    flags['sub-step'] = flags['sub-seek']
+
+    return flags[command]
+end
+
 local function common_prefix_length(s1, s2)
     local common_count = 0
     for i = 1, #s1 do
@@ -1471,6 +1506,8 @@ complete = function ()
             completions = list_option_action_list(first_useful_token.text)
         elseif has_file_argument(first_useful_token.text) then
             completions, before_cur = handle_file_completion(before_cur)
+        else
+            completions = command_flags_at_1st_argument_list(first_useful_token.text)
         end
     elseif first_useful_token.text == 'cycle-values' then
         completions, before_cur =
@@ -1491,6 +1528,8 @@ complete = function ()
             elseif tokens[first_useful_token_index + 1].text == 'remove' then
                 completions = list_option_value_list(first_useful_token.text)
             end
+        else
+            completions = command_flags_at_2nd_argument_list(first_useful_token.text)
         end
     elseif #tokens == first_useful_token_index + 3 then
         if first_useful_token.text == 'change-list' then
