@@ -344,6 +344,12 @@ Left double click
 Right click
     Toggle pause on/off.
 
+Middle click
+    Drag to pan through the whole video.
+
+Middle double click
+    Reset pan.
+
 Forward/Back button
     Skip to next/previous entry in playlist.
 
@@ -354,7 +360,8 @@ Wheel left/right
     Seek forward/backward 10 seconds.
 
 Ctrl+Wheel up/down
-    Change video zoom.
+    Change video zoom keeping the part of the video hovered by the cursor under
+    it.
 
 Context Menu
 -------------
@@ -1481,6 +1488,8 @@ works like in older mpv releases:
 .. include:: stats.rst
 
 .. include:: console.rst
+
+.. include:: positioning.rst
 
 .. include:: lua.rst
 
