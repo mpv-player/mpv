@@ -173,6 +173,9 @@ L
 Ctrl++ and Ctrl+-
     Adjust audio delay (A/V sync) by +/- 0.1 seconds.
 
+Ctrl+KP_ADD and Ctrl+KP_SUBTRACT
+    Adjust audio delay (A/V sync) by +/- 0.1 seconds.
+
 Shift+g and Shift+f
     Adjust subtitle font size by +/- 10%.
 
@@ -225,6 +228,9 @@ Alt+LEFT, Alt+RIGHT, Alt+UP, Alt+DOWN
     Move the video rectangle (panning).
 
 Alt++ and Alt+-
+    Change video zoom.
+
+Alt+KP_ADD and Alt+KP_SUBTRACT
     Change video zoom.
 
 Alt+BACKSPACE
