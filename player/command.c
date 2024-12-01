@@ -314,7 +314,7 @@ static char *append_selected_style(struct MPContext *mpctx, char *str)
         return talloc_strdup_append(str, TERM_ESC_REVERSE_COLORS);
 
     return talloc_asprintf_append(str,
-               "%s{\\b1\\1c&H%x%x%x&\\1a&H%x&\\3c&H%x%x%x&\\3a&H%x&}%s",
+               "%s{\\b1\\1c&H%02hhx%02hhx%02hhx&\\1a&H%02hhx&\\3c&H%02hhx%02hhx%02hhx&\\3a&H%02hhx&}%s",
                OSD_ASS_0,
                mpctx->video_out->osd->opts->osd_selected_color.b,
                mpctx->video_out->osd->opts->osd_selected_color.g,
