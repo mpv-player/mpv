@@ -58,6 +58,7 @@ typedef struct mp_vo_opts {
     double window_scale;
 
     bool auto_window_resize;
+    bool recenter;
     bool keepaspect;
     bool keepaspect_window;
     bool hidpi_window_scale;

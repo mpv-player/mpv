@@ -1,0 +1,1 @@
+add `--video-recenter` option
