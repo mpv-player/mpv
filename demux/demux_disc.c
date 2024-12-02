@@ -291,6 +291,9 @@ static void add_stream_editions(struct demuxer *demuxer)
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, new);
 
         char *time = mp_format_time(duration, true);
+        double playlist = title;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TITLE_PLAYLIST, &playlist) == STREAM_OK)
+            time = talloc_asprintf_append(time, ") (%05.0f.mpls", playlist);
         mp_tags_set_str(new.metadata, "TITLE",
                         mp_tprintf(42, "title: %u (%s)", title + 1, time));
         talloc_free(time);
