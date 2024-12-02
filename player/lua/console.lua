@@ -1431,7 +1431,8 @@ cycle_through_suggestions = function (backwards)
 
     local before_cur = line:sub(1, completion_pos - 1) ..
                        suggestion_buffer[selected_suggestion_index] .. completion_append
-    line = before_cur .. strip_common_characters(line:sub(cursor), completion_append)
+    line = before_cur .. strip_common_characters(line:sub(cursor),
+        suggestion_buffer[selected_suggestion_index] .. completion_append)
     cursor = before_cur:len() + 1
     update()
 end
