@@ -42,6 +42,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
+#include "options/options.h"
 #include "options/path.h"
 #include "stream.h"
 #include "osdep/timer.h"
@@ -503,7 +504,13 @@ static int bluray_stream_open(stream_t *s)
 
     b->cfg_title = BLURAY_DEFAULT_TITLE;
 
-    if (bstr_equals0(title, "longest") || bstr_equals0(title, "first")) {
+    struct MPOpts *opts = mp_get_config_group(s, s->global, &mp_opt_root);
+    int edition_id = opts->edition_id;
+    talloc_free(opts);
+
+    if (edition_id >= 0) {
+        b->cfg_title = edition_id;
+    } else if (bstr_equals0(title, "longest") || bstr_equals0(title, "first")) {
         b->cfg_title = BLURAY_DEFAULT_TITLE;
     } else if (bstr_equals0(title, "menu")) {
         b->cfg_title = BLURAY_MENU_TITLE;
