@@ -265,6 +265,16 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         bd_seamless_angle_change(b->bd, angle);
         return STREAM_OK;
     }
+    case STREAM_CTRL_GET_TITLE_LENGTH: {
+        int title = *(double *)arg;
+        if (!b->bd || title < 0 || title >= b->num_titles)
+            return STREAM_UNSUPPORTED;
+        const BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
+        if (!ti)
+            return STREAM_UNSUPPORTED;
+        *(double *)arg = BD_TIME_TO_MP(ti->duration);
+        return STREAM_OK;
+    }
     case STREAM_CTRL_GET_LANG: {
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (ti && ti->clip_count) {
