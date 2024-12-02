@@ -86,7 +86,8 @@ enum stream_ctrl {
     STREAM_CTRL_GET_ANGLE,
     STREAM_CTRL_SET_ANGLE,
     STREAM_CTRL_GET_NUM_TITLES,
-    STREAM_CTRL_GET_TITLE_LENGTH,       // double* (in: title number, out: len)
+    STREAM_CTRL_GET_TITLE_LENGTH,    // double* (in: title number, out: len)
+    STREAM_CTRL_GET_TITLE_PLAYLIST,  // double* (in: title number, out: playlist)
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
