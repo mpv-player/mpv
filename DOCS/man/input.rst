@@ -2219,8 +2219,10 @@ Property list
     Current chapter number. The number of the first chapter is 0.
 
 ``edition`` (RW)
-    Current MKV edition number. Setting this property to a different value will
+    Current edition number. Setting this property to a different value will
     restart playback. The number of the first edition is 0.
+
+    For Matroska files, this is the edition. For DVD/Blu-ray, this is the title.
 
     Before mpv 0.31.0, this showed the actual edition selected at runtime, if
     you didn't set the option or property manually. With mpv 0.31.0 and later,
@@ -2238,7 +2240,7 @@ Property list
     Number of chapters.
 
 ``editions``
-    Number of MKV editions.
+    Number of editions.
 
 ``edition-list``
     List of editions, current entry marked.
