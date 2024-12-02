@@ -170,7 +170,6 @@ function mp.flush_keybindings()
             cfg = cfg .. v.bind .. "\n"
         end
         mp.input_define_section(section, cfg, flags)
-        -- TODO: remove the section if the script is stopped
         mp.input_enable_section(section, "allow-hide-cursor+allow-vo-dragging")
     end
 end
