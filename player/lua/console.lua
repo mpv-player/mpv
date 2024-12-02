@@ -1343,10 +1343,17 @@ local function list_executables()
     local executable_map = {}
     local path = os.getenv('PATH') or ''
     local separator = platform == 'windows' and ';' or ':'
+    local exts = {}
+
+    for ext in (os.getenv('PATHEXT') or ''):gmatch('[^;]+') do
+        exts[ext:lower()] = true
+    end
 
     for directory in path:gmatch('[^' .. separator .. ']+') do
         for _, executable in pairs(utils.readdir(directory, 'files') or {}) do
-            executable_map[executable] = true
+            if not next(exts) or exts[(executable:match('%.%w+$') or ''):lower()] then
+                executable_map[executable] = true
+            end
         end
     end
 
