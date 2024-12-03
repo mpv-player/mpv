@@ -1444,6 +1444,7 @@ complete = function ()
         completion_old_cursor = cursor
         mp.commandv('script-message-to', input_caller, 'input-event',
                     'complete', utils.format_json({line:sub(1, cursor - 1)}))
+        update()
         return
     end
 
