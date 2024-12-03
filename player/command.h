@@ -94,7 +94,7 @@ uint64_t mp_get_property_event_mask(const char *name);
 enum {
     // Must start with the first unused positive value in enum mpv_event_id
     // MPV_EVENT_* and MP_EVENT_* must not overlap.
-    INTERNAL_EVENT_BASE = 26,
+    INTERNAL_EVENT_BASE = 27,
     MP_EVENT_CHANGE_ALL,
     MP_EVENT_CACHE_UPDATE,
     MP_EVENT_WIN_RESIZE,
