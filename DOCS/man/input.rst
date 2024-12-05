@@ -3753,6 +3753,11 @@ Property list
     The working directory of the mpv process. Can be useful for JSON IPC users,
     because the command line player usually works with relative paths.
 
+``current-watch-later-dir``
+    The directory in which watch later config files are stored. This returns
+    ``--watch-later-dir``, or the default directory if ``--watch-later-dir`` has
+    not been modified, with tilde placeholders expanded.
+
 ``protocol-list``
     List of protocol prefixes potentially recognized by the player. They are
     returned without trailing ``://`` suffix (which is still always required).
