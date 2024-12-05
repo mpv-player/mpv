@@ -1004,19 +1004,13 @@ local function search_history()
 
     searching_history = true
     selectable_items = {}
-    matches = {}
-    selected_match = 1
     first_match_to_print = 1
 
     for i = 1, #history do
         selectable_items[i] = history[#history + 1 - i]
     end
 
-    for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-        matches[i] = { index = match, text = selectable_items[match] }
-    end
-
-    update()
+    handle_edit()
     bind_mouse()
 end
 
@@ -1811,8 +1805,7 @@ mp.register_script_message('get-input', function (script_name, args)
         for i, item in ipairs(args.items) do
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
         end
-
-        matches = {}
+        handle_edit()
         selected_match = args.default_item or 1
         default_item = args.default_item
 
@@ -1822,9 +1815,6 @@ mp.register_script_message('get-input', function (script_name, args)
             first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
         end
 
-        for i, item in ipairs(selectable_items) do
-            matches[i] = { index = i, text = item }
-        end
         bind_mouse()
     end
 
