@@ -1003,6 +1003,7 @@ local function search_history()
     end
 
     searching_history = true
+    suggestion_buffer = {}
     selectable_items = {}
     first_match_to_print = 1
 
