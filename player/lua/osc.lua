@@ -2025,10 +2025,19 @@ local function osc_init()
             local property = user_opts.remaining_playtime and "playtime-remaining"
                                                            or "time-remaining"
             if state.tc_ms then
-                return (minus..mp.get_property_osd(property .. "/full"))
-            else
-                return (minus..mp.get_property_osd(property))
+                property = property .. "/full"
             end
+            local value = mp.get_property_osd(property)
+            local normal_alpha = 0
+            if state.animation then
+                normal_alpha = mult_alpha(normal_alpha, state.animation)
+            end
+            local alpha = normal_alpha
+            if value:sub(1, 1) == '-' then
+                value = value:sub(2)
+                alpha = 255
+            end
+            return string.format('{\\1a%X}%s{\\1a%X}%s', alpha, minus, normal_alpha, value)
         else
             if state.tc_ms then
                 return (mp.get_property_osd("duration/full"))
