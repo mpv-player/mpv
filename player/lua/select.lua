@@ -396,8 +396,9 @@ mp.add_key_binding(nil, "show-properties", function ()
 
     -- Don't log errors for renamed and removed properties.
     local msg_level_backup = mp.get_property("msg-level")
-    mp.set_property("msg-level", msg_level_backup == "" and "cplayer=no"
-                                 or msg_level_backup .. ",cplayer=no")
+    local level = "cplayer=no,clipboard=error"
+    mp.set_property("msg-level", msg_level_backup == "" and level
+                                 or msg_level_backup .. "," .. level)
 
     for _, property in pairs(mp.get_property_native("property-list")) do
         add_property(property)
