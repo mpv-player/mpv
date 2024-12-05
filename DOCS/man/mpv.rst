@@ -312,7 +312,7 @@ g-c
     Select a chapter.
 
 g-e
-    Select an edition.
+    Select an MKV edition or DVD/Blu-ray title.
 
 g-l
     Select a subtitle line to seek to. This currently requires ``ffmpeg`` in
