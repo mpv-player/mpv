@@ -4,8 +4,8 @@ header = join_paths(build_root, 'osdep/mac/swift.h')
 module = join_paths(build_root, 'osdep/mac/swift.swiftmodule')
 target = join_paths(build_root, 'osdep/mac/swift.o')
 
-swift_flags = ['-frontend', '-c', '-sdk', macos_sdk_path,
-               '-enable-objc-interop', '-emit-objc-header', '-parse-as-library']
+swift_flags = ['-c', '-emit-library', '-static', '-sdk', macos_sdk_path,
+               '-emit-objc-header', '-parse-as-library']
 
 if swift_ver.version_compare('>=6.0')
     swift_flags += ['-swift-version', '5']

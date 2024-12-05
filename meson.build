@@ -1539,7 +1539,7 @@ endif
 xcrun = find_program('xcrun', required: get_option('swift-build').require(darwin))
 swift_ver = '0.0'
 if xcrun.found()
-    swift_prog = find_program(run_command(xcrun, '-find', 'swift', check: true).stdout().strip())
+    swift_prog = find_program(run_command(xcrun, '-find', 'swiftc', check: true).stdout().strip())
     swift_ver_string = run_command(swift_prog, '-version', check: true).stdout()
     verRe = '''
 #!/usr/bin/env python3
