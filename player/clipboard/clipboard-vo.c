@@ -43,7 +43,9 @@ static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         .talloc_ctx = talloc_ctx,
     };
 
-    if (vo && vo_control(vo, VOCTRL_GET_CLIPBOARD, &vc) == VO_TRUE) {
+    if (!vo)
+        return CLIPBOARD_UNAVAILABLE;
+    if (vo_control(vo, VOCTRL_GET_CLIPBOARD, &vc) == VO_TRUE) {
         *out = vc.data;
         return CLIPBOARD_SUCCESS;
     } else {
@@ -62,7 +64,9 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         .params = *params,
     };
 
-    if (vo && vo_control(vo, VOCTRL_SET_CLIPBOARD, &vc) == VO_TRUE) {
+    if (!vo)
+        return CLIPBOARD_UNAVAILABLE;
+    if (vo_control(vo, VOCTRL_SET_CLIPBOARD, &vc) == VO_TRUE) {
         return CLIPBOARD_SUCCESS;
     } else {
         MP_WARN(cl, "VO is not initialized, or it does not support setting clipboard.\n");
