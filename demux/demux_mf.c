@@ -261,7 +261,7 @@ static bool demux_mf_read_packet(struct demuxer *demuxer,
         stream_seek(stream, 0);
         bstr data = stream_read_complete(stream, NULL, MF_MAX_FILE_SIZE);
         if (data.len) {
-            demux_packet_t *dp = new_demux_packet(data.len);
+            demux_packet_t *dp = new_demux_packet(demuxer->packet_pool, data.len);
             if (dp) {
                 memcpy(dp->buffer, data.start, data.len);
                 dp->pts = mf->curr_frame / mf->sh->codec->fps;
