@@ -39,6 +39,7 @@ enum clipboard_target {
 enum clipboard_result {
     CLIPBOARD_SUCCESS = 0,
     CLIPBOARD_FAILED = -1,
+    CLIPBOARD_UNAVAILABLE = -2,
 };
 
 struct clipboard_data {
