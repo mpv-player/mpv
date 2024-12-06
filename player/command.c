@@ -4091,9 +4091,10 @@ static int get_clipboard(struct MPContext *mpctx, void *arg,
     struct clipboard_data data;
     void *tmp = talloc_new(NULL);
 
-    if (mp_clipboard_get_data(mpctx->clipboard, params, &data, tmp) != CLIPBOARD_SUCCESS) {
+    int ret = mp_clipboard_get_data(mpctx->clipboard, params, &data, tmp);
+    if (ret != CLIPBOARD_SUCCESS) {
         talloc_free(tmp);
-        return M_PROPERTY_ERROR;
+        return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
     }
 
     switch (data.type) {
@@ -4121,9 +4122,10 @@ static int set_clipboard(struct MPContext *mpctx, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    if (mp_clipboard_set_data(mpctx->clipboard, params, &data) == CLIPBOARD_SUCCESS)
+    int ret = mp_clipboard_set_data(mpctx->clipboard, params, &data);
+    if (ret == CLIPBOARD_SUCCESS)
         return M_PROPERTY_OK;
-    return M_PROPERTY_ERROR;
+    return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
 }
 
 static int mp_property_clipboard(void *ctx, struct m_property *prop,
