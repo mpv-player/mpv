@@ -89,13 +89,16 @@ Shift+Ctrl+BACKSPACE
     use this to seek around in the file and then return to the exact position
     where you left off.
 
-< and >
+p and n, < and >
     Go backward/forward in the playlist.
+
+P and N
+    Go to the previous/next sub-playlist (e.g. directory or archive).
 
 ENTER
     Go forward in the playlist.
 
-p and SPACE
+SPACE
     Pause (pressing again unpauses).
 
 \.
@@ -148,7 +151,7 @@ w and W
     Decrease/increase pan-and-scan range. The ``e`` key does the same as
     ``W`` currently, but use is discouraged.
 
-o and P
+o
     Show progression bar, elapsed time and total duration on the OSD.
 
 O
