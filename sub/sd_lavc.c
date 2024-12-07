@@ -463,13 +463,15 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
     res->format = SUBBITMAP_BGRA;
 
     double video_par = 0;
-    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
-        opts->stretch_dvd_subs)
-    {
-        // For DVD subs, try to keep the subtitle PAR at display PAR.
-        double par = priv->video_params.p_w / (double)priv->video_params.p_h;
-        if (isnormal(par))
-            video_par = par;
+    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE) {
+        if (opts->stretch_dvd_subs) {
+            // For DVD subs, try to keep the subtitle PAR at display PAR.
+            double par = priv->video_params.p_w / (double)priv->video_params.p_h;
+            if (isnormal(par))
+                video_par = par;
+        } else {
+            video_par = -1;
+        }
     }
     if (priv->avctx->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
         video_par = -1;
