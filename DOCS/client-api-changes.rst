@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.40.0 ---
+ 2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.39.0 ---
  2.4    - mpv_render_param with the MPV_RENDER_PARAM_ICC_PROFILE argument no
           longer has incorrect assumptions about memory allocation and can be
