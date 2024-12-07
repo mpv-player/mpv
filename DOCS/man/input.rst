@@ -2849,6 +2849,9 @@ Property list
 ``focused``
     Whether the window has focus. Might not be supported by all VOs.
 
+``ambient-light``
+    Ambient lighting condition in lux. (macOS only)
+
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
