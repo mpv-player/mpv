@@ -223,6 +223,9 @@ static int resize(struct vo *vo)
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
+    case VOCTRL_UPDATE_RENDER_OPTS:
+        vo_wayland_set_icc_file(vo->wl);
+        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;

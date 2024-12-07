@@ -206,6 +206,7 @@ static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
+    vo_wayland_set_icc_file(wl);
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     wl_surface_commit(wl->surface);
 }

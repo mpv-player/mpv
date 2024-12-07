@@ -28,10 +28,12 @@
 #include "input/input.h"
 #include "input/keycodes.h"
 #include "options/m_config.h"
+#include "options/path.h"
 #include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
+#include "video/out/gpu/video.h"
 #include "wayland_common.h"
 #include "win_state.h"
 
@@ -169,6 +171,11 @@ struct vo_wayland_feedback_pool {
 struct vo_wayland_output {
     struct vo_wayland_state *wl;
     struct wl_output *output;
+    struct xx_color_management_output_v4 *color_output;
+    struct xx_image_description_v4 *output_description;
+    struct xx_image_description_info_v4 *output_information;
+    void *icc_file;
+    uint32_t icc_size;
     struct mp_rect geometry;
     bool has_surface;
     uint32_t id;
@@ -873,6 +880,100 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection,
 };
 
+static void info_done(void *data, struct xx_image_description_info_v4 *image_description_info)
+{
+}
+
+static void icc_file(void *data, struct xx_image_description_info_v4 *image_description_info,
+                     int32_t icc, uint32_t icc_size)
+{
+    struct vo_wayland_output *output = data;
+    void *map = mmap(NULL, icc_size, PROT_READ, MAP_PRIVATE, icc, 0);
+    if (map != MAP_FAILED) {
+        output->icc_file = map;
+        output->icc_size = icc_size;
+    }
+}
+
+static void primaries(void *data, struct xx_image_description_info_v4 *image_description_info,
+                      int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x,
+                      int32_t b_y, int32_t w_x, int32_t w_y)
+{
+}
+
+static void primaries_named(void *data, struct xx_image_description_info_v4 *image_description_info,
+                            uint32_t primaries)
+{
+}
+
+static void tf_power(void *data, struct xx_image_description_info_v4 *image_description_info,
+                     uint32_t eexp)
+{
+}
+
+static void tf_named(void *data, struct xx_image_description_info_v4 *image_description_info,
+                     uint32_t tf)
+{
+}
+
+static void luminances(void *data, struct xx_image_description_info_v4 *image_description_info,
+                       uint32_t min_lum, uint32_t max_lum, uint32_t reference_lum)
+{
+}
+
+static void target_primaries(void *data, struct xx_image_description_info_v4 *image_description_info,
+                             int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x,
+                             int32_t b_y, int32_t w_x, int32_t w_y)
+{
+}
+
+static void target_luminance(void *data, struct xx_image_description_info_v4 *image_description_info,
+                             uint32_t min_lum, uint32_t max_lum)
+{
+}
+
+static void target_max_cll(void *data, struct xx_image_description_info_v4 *image_description_info,
+                           uint32_t max_cll)
+{
+}
+
+static void target_max_fall(void *data, struct xx_image_description_info_v4 *image_description_info,
+                            uint32_t max_fall)
+{
+}
+
+static const struct xx_image_description_info_v4_listener image_description_info_listener = {
+    info_done,
+    icc_file,
+    primaries,
+    primaries_named,
+    tf_power,
+    tf_named,
+    luminances,
+    target_primaries,
+    target_luminance,
+    target_max_cll,
+    target_max_fall,
+};
+
+static void image_description_changed(void *data, struct xx_color_management_output_v4 *color_output)
+{
+    struct vo_wayland_output *output = data;
+
+    if (output->output_description)
+        xx_image_description_v4_destroy(output->output_description);
+    output->output_description = xx_color_management_output_v4_get_image_description(output->color_output);
+
+    if (output->output_information)
+        xx_image_description_info_v4_destroy(output->output_information);
+    output->output_information = xx_image_description_v4_get_information(output->output_description);
+    xx_image_description_info_v4_add_listener(output->output_information, &image_description_info_listener, output);
+}
+
+static const struct xx_color_management_output_v4_listener color_output_listener = {
+    image_description_changed,
+};
+
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t x, int32_t y, int32_t phys_width,
                                    int32_t phys_height, int32_t subpixel,
@@ -928,6 +1029,14 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
         set_surface_scaling(wl);
         set_geometry(wl, false);
         prepare_resize(wl);
+    }
+
+    if (o->color_output)
+        xx_color_management_output_v4_destroy(o->color_output);
+
+    if (wl->color_manager) {
+        o->color_output = xx_color_manager_v4_get_output(wl->color_manager, o->output);
+        xx_color_management_output_v4_add_listener(o->color_output, &color_output_listener, o);
     }
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
@@ -1413,7 +1522,8 @@ static void image_description_ready(void *data, struct xx_image_description_v4 *
                                     uint32_t identity)
 {
     struct vo_wayland_state *wl = data;
-    xx_color_management_surface_v4_set_image_description(wl->color_surface, wl->image_description, 0);
+    if (wl->color_surface)
+        xx_color_management_surface_v4_set_image_description(wl->color_surface, wl->image_description, 0);
 }
 
 static const struct xx_image_description_v4_listener image_description_listener = {
@@ -2399,6 +2509,12 @@ static void remove_output(struct vo_wayland_output *out)
                out->model, out->id);
     wl_list_remove(&out->link);
     wl_output_destroy(out->output);
+    if (out->color_output)
+        xx_color_management_output_v4_destroy(out->color_output);
+    if (out->output_description)
+        xx_image_description_v4_destroy(out->output_description);
+    if (out->output_information)
+        xx_image_description_info_v4_destroy(out->output_information);
     talloc_free(out->make);
     talloc_free(out->model);
     talloc_free(out);
@@ -2952,6 +3068,15 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         *(char ***)arg = get_displays_spanned(wl);
         return VO_TRUE;
     }
+    case VOCTRL_GET_ICC_PROFILE: {
+        if (!wl->current_output)
+            return VO_FALSE;
+        void *icc_file = wl->current_output->icc_file;
+        if (!icc_file)
+            return VO_FALSE;
+        *(bstr *)arg = bstrdup(NULL, (bstr){icc_file, wl->current_output->icc_size});
+        return VO_TRUE;
+    }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (wl->opts->window_maximized || wl->tiled) {
@@ -3250,12 +3375,17 @@ bool vo_wayland_init(struct vo *vo)
      * before mpv does anything else. */
     wl_display_roundtrip(wl->display);
 
-    // Only bind to vo_dmabuf_wayland for now to avoid conflicting with VK_hdr_layer
-    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
+    // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with VK_hdr_layer
+    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland"))
         wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
-    } else {
+
+    if (wl->color_manager && !wl->supports_parametric)
         MP_VERBOSE(wl, "Compositor does not support parametic image descriptions!\n");
-    }
+
+    if (wl->color_manager && !wl->supports_icc)
+        MP_VERBOSE(wl, "Compositor does not support reading icc profiles!\n");
+
+    vo_wayland_set_icc_file(wl);
 
     return true;
 
@@ -3313,6 +3443,49 @@ bool vo_wayland_reconfig(struct vo *vo)
     return true;
 }
 
+void vo_wayland_set_icc_file(struct vo_wayland_state *wl)
+{
+    if (!wl->color_manager)
+        return;
+
+    if (!wl->icc_creator)
+        wl->icc_creator = xx_color_manager_v4_new_icc_creator(wl->color_manager);
+
+    struct mp_icc_opts *icc_opts = NULL;
+    char *fname = NULL;
+    uint32_t fd = -1;
+
+    icc_opts = mp_get_config_group(NULL, wl->vo->global, &mp_icc_conf);
+    if (!icc_opts->profile || !icc_opts->profile[0])
+        goto done;
+
+    fname = mp_get_user_path(NULL, wl->vo->global, icc_opts->profile);
+    fd = open(fname, O_RDONLY);
+    if (fd == -1) {
+        MP_WARN(wl, "Failed to open icc fd: %s\n", mp_strerror(errno));
+        goto done;
+    }
+
+    struct stat st;
+    if (fstat(fd, &st) == 0) {
+        if (st.st_size > 4000000) {
+            MP_WARN(wl, "File size of '%ld' exceeds 4MB limit allowed by the protocol!", st.st_size);
+            goto done;
+        }
+        xx_image_description_creator_icc_v4_set_icc_file(wl->icc_creator, fd, 0, st.st_size);
+        wl->image_description = xx_image_description_creator_icc_v4_create(wl->icc_creator);
+        wl->icc_creator = NULL;
+        xx_image_description_v4_add_listener(wl->image_description, &image_description_listener, wl);
+    }
+
+done:
+    if (fname)
+        talloc_free(fname);
+    if (icc_opts)
+        talloc_free(icc_opts);
+    close(fd);
+}
+
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha)
 {
     const int32_t width = mp_rect_w(wl->geometry);
@@ -3361,6 +3534,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->color_surface)
         xx_color_management_surface_v4_destroy(wl->color_surface);
+
+    if (wl->icc_creator)
+        xx_image_description_creator_icc_v4_destroy(wl->icc_creator);
 
     if (wl->image_creator_params)
         xx_image_description_creator_params_v4_destroy(wl->image_creator_params);
