@@ -43,11 +43,19 @@ static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         .talloc_ctx = talloc_ctx,
     };
 
-    if (vo && vo_control(vo, VOCTRL_GET_CLIPBOARD, &vc) == VO_TRUE) {
+    if (!vo)
+        return CLIPBOARD_UNAVAILABLE;
+    int ret = vo_control(vo, VOCTRL_GET_CLIPBOARD, &vc);
+    switch (ret) {
+    case VO_TRUE:
         *out = vc.data;
         return CLIPBOARD_SUCCESS;
-    } else {
-        MP_WARN(cl, "VO is not initialized, or it does not support getting clipboard.\n");
+    case VO_NOTAVAIL:
+    case VO_NOTIMPL:
+        MP_VERBOSE(cl, "VO does not support getting clipboard in the requested format.\n");
+        return CLIPBOARD_UNAVAILABLE;
+    default:
+        MP_WARN(cl, "Failed getting VO clipboard.\n");
         return CLIPBOARD_FAILED;
     }
 }
@@ -62,10 +70,18 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         .params = *params,
     };
 
-    if (vo && vo_control(vo, VOCTRL_SET_CLIPBOARD, &vc) == VO_TRUE) {
+    if (!vo)
+        return CLIPBOARD_UNAVAILABLE;
+    int ret = vo_control(vo, VOCTRL_SET_CLIPBOARD, &vc);
+    switch (ret) {
+    case VO_TRUE:
         return CLIPBOARD_SUCCESS;
-    } else {
-        MP_WARN(cl, "VO is not initialized, or it does not support setting clipboard.\n");
+    case VO_NOTAVAIL:
+    case VO_NOTIMPL:
+        MP_VERBOSE(cl, "VO does not support setting clipboard in the requested format.\n");
+        return CLIPBOARD_UNAVAILABLE;
+    default:
+        MP_WARN(cl, "Failed setting VO clipboard.\n");
         return CLIPBOARD_FAILED;
     }
 }
