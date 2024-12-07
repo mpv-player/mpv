@@ -122,7 +122,7 @@ static int process(jack_nframes_t nframes, void *arg)
         atomic_load(&p->graph_latency_max) + atomic_load(&p->buffer_size);
 
     int64_t end_time = mp_time_ns();
-    end_time += MP_TIME_S_TO_NS((jack_latency + nframes) / (double)ao->samplerate);
+    end_time += MP_TIME_S_TO_NS(jack_latency) / ao->samplerate;
 
     ao_read_data(ao, buffers, nframes, end_time, NULL, true, true);
 
