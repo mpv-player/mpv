@@ -380,6 +380,73 @@ To use this feature, you need to fill the ``menu-data`` property with menu
 definition data, and add a keybinding to run the ``context-menu`` command,
 which can be done with a user script.
 
+Image Bindings
+--------------
+
+Several key bindings are changed when viewing images:
+
+LEFT, RIGHT, UP, DOWN, h, j, k, l
+    Pan the image when it is larger than the window.
+
+Ctrl+LEFT, Ctrl+RIGHT, Ctrl+UP, Ctrl+DOWN, Ctrl+h, Ctrl+j, Ctrl+k, Ctrl+l
+    Align the image to one of the boundaries of the window when it is larger
+    than the window.
+
+= and -
+    Change the zoom.
+
++ and _
+    Change the zoom slowly.
+
+0
+    Reset the zoom.
+
+u
+    Toggle between showing the image unscaled in its original dimensions and
+    fitting it to the window.
+
+o
+    Fill the window with the image.
+
+s
+    Toggle between showing images for 5 seconds in a slideshow and keeping them
+    open forever.
+
+n
+    Go to the next playlist entry.
+
+p
+    Go to the previous playlist entry.
+
+N
+    Go to the next sub-playlist (e.g. directory or archive).
+
+P
+    Go to the previous sub-playlist.
+
+g-g
+    Go to the first playlist entry.
+
+G
+    Go to the last playlist entry.
+
+r
+    Rotate counterclockwise.
+
+R and t
+    Rotate clockwise.
+
+v
+    Rotate by 180 degrees.
+
+Right click
+    Pan while holding the button, keeping the clicked part of the image under
+    the cursor.
+
+Wheel up/down
+    Change the zoom while keeping the part of the image hovered by the cursor
+    under it.
+
 USAGE
 =====
 
@@ -1037,6 +1104,78 @@ example, ``math`` is defined and gives access to the Lua standard math library.
 
     This feature is subject to change indefinitely. You might be forced to
     adjust your profiles on mpv updates.
+
+Image profile
+-------------------
+
+mpv has a builtin conditional profile that is automatically applied to images
+and restored when switching to a video or audio file. Its options are:
+
+.. admonition:: Builtin profile definition
+
+    ::
+
+        [image]
+        script-opt=osc-deadzonesize=1
+        prefetch-playlist
+        video-recenter
+        video-aspect-override=no
+        input-preprocess-wheel=no
+
+It can be extended in mpv.conf without overwriting it completely:
+
+.. admonition:: Example to enable the screensaver with images
+
+    ::
+
+        [image]
+        stop-screensaver=no
+
+You can stop applying it automatically by specifying an empty ``profile-cond``:
+
+.. admonition:: Example to disable the image conditional profile
+
+   ::
+
+       [image]
+       profile-cond=
+
+This profile uses ``--input-commands`` to enable image specific key bindings.
+This can be disabled with ``input-commands-clr``. Extra commands should be
+specified with ``input-commands-append`` to keep enabling the image key
+bindings. Additional image key bindings can be specified in the ``image``
+section in ``input.conf`` - see the `INPUT.CONF`_ section.
+
+To reset zoom and rotation between images, it is recommended to place
+``reset-on-next-file=video-rotate,video-zoom,panscan,video-unscaled`` in the top
+level of mpv.conf, as enabling it in a conditional profile makes it take effect
+only from the second file.
+
+To start viewing images and videos bigger than the window from the top left
+corner, these options can be set in the top level of mpv.conf:
+
+.. admonition:: Start from the top left:
+
+    ::
+
+        video-align-x=-1
+        video-align-y=-1
+        video-recenter
+        reset-on-next-file=video-align-x,video-align-y
+
+``--vo=gpu-next`` is recommended for better performance on large images, except
+images larger than the max texture size of the GPU API, for which a VO with
+software rendering can be used as fallback.
+
+.. admonition:: Example to display huge images on Wayland:
+
+    ::
+
+        [huge]
+        profile-cond=width > 16384 or height > 16384
+        vo=wlshm
+
+maxImageExtent may be 8192 instead on old iGPUs.
 
 Legacy auto profiles
 --------------------
