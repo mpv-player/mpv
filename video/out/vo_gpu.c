@@ -162,7 +162,7 @@ static void get_and_update_icc_profile(struct gpu_priv *p)
 
 static void get_and_update_ambient_lighting(struct gpu_priv *p)
 {
-    int lux;
+    double lux;
     int r = p->ctx->fns->control(p->ctx, &p->events, VOCTRL_GET_AMBIENT_LUX, &lux);
     if (r == VO_TRUE) {
         gl_video_set_ambient_lux(p->renderer, lux);

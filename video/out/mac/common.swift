@@ -35,7 +35,7 @@ class Common: NSObject {
     var events: Int = 0
 
     var lightSensor: io_connect_t = 0
-    var lastLmu: UInt64 = 0
+    var lastLmu: Double = 0
     var lightSensorIOPort: IONotificationPortRef?
 
     var displaySleepAssertion: IOPMAssertionID = IOPMAssertionID(0)
@@ -239,7 +239,7 @@ class Common: NSObject {
             &displaySleepAssertion)
     }
 
-    func lmuToLux(_ v: UInt64) -> Int {
+    func lmuToLux(_ lmu: Double) -> Double {
         // the polinomial approximation for apple lmu value -> lux was empirically
         // derived by firefox developers (Apple provides no documentation).
         // https://bugzilla.mozilla.org/show_bug.cgi?id=793728
@@ -248,13 +248,12 @@ class Common: NSObject {
         let power_c2: Double = 1 / pow(10, 12)
         let power_c1: Double = 1 / pow(10, 5)
 
-        let lum = Double(v)
-        let term4: Double = -3.0 * power_c4 * pow(lum, 4.0)
-        let term3: Double = 2.6 * power_c3 * pow(lum, 3.0)
-        let term2: Double = -3.4 * power_c2 * pow(lum, 2.0)
-        let term1: Double = 3.9 * power_c1 * lum
+        let term4: Double = -3.0 * power_c4 * pow(lmu, 4.0)
+        let term3: Double = 2.6 * power_c3 * pow(lmu, 3.0)
+        let term2: Double = -3.4 * power_c2 * pow(lmu, 2.0)
+        let term1: Double = 3.9 * power_c1 * lmu
 
-        let lux = Int(ceil(term4 + term3 + term2 + term1 - 0.19))
+        let lux = ceil(term4 + term3 + term2 + term1 - 0.19)
         return lux > 0 ? lux : 0
     }
 
@@ -266,7 +265,7 @@ class Common: NSObject {
 
         var kr = IOConnectCallMethod(com.lightSensor, 0, nil, 0, nil, 0, &values, &outputs, nil, nil)
         if kr == KERN_SUCCESS {
-            var mean = (values[0] + values[1]) / 2
+            var mean: Double = (Double(values[0]) + Double(values[1])) / 2
             if com.lastLmu != mean {
                 com.lastLmu = mean
                 com.lightSensorUpdate()
@@ -589,8 +588,8 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_GET_AMBIENT_LUX:
             if lightSensor != 0 {
-                let lux = data!.assumingMemoryBound(to: Int32.self)
-                lux.pointee = Int32(lmuToLux(lastLmu))
+                let lux = data!.assumingMemoryBound(to: CDouble.self)
+                lux.pointee = lmuToLux(lastLmu)
                 return VO_TRUE
             }
             return VO_NOTIMPL
