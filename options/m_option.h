@@ -482,10 +482,6 @@ char *format_file_size(int64_t size);
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 30)
 
-// These are kept for compatibility with older code.
-#define CONF_NOCFG              M_OPT_NOCFG
-#define CONF_PRE_PARSE          M_OPT_PRE_PARSE
-
 // These flags are used to describe special parser capabilities or behavior.
 
 // The parameter is optional and by default no parameter is preferred. If
