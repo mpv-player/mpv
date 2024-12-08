@@ -435,7 +435,7 @@ const struct m_sub_options gl_video_conf = {
             {"auto", 0}, {"yes", 1}, {"no", -1})},
         {"gamma-factor", OPT_FLOAT(gamma), M_RANGE(0.1, 2.0)},
         {"gamma-auto", OPT_BOOL(gamma_auto),
-            .deprecation_message = "no replacement"},
+            .deprecation_message = "replacement: gamma-auto.lua"},
         {"target-prim", OPT_CHOICE_C(target_prim, pl_csp_prim_names)},
         {"target-trc", OPT_CHOICE_C(target_trc, pl_csp_trc_names)},
         {"target-peak", OPT_CHOICE(target_peak, {"auto", 0}),
@@ -4271,11 +4271,11 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
     return r;
 }
 
-void gl_video_set_ambient_lux(struct gl_video *p, int lux)
+void gl_video_set_ambient_lux(struct gl_video *p, double lux)
 {
     if (p->opts.gamma_auto) {
         p->opts.gamma = gl_video_scale_ambient_lux(16.0, 256.0, 1.0, 1.2, lux);
-        MP_TRACE(p, "ambient light changed: %d lux (gamma: %f)\n", lux,
+        MP_TRACE(p, "ambient light changed: %f lux (gamma: %f)\n", lux,
                  p->opts.gamma);
     }
 }

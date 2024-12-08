@@ -2773,6 +2773,18 @@ static void update_hidpi_window_scale(struct MPContext *mpctx, bool hidpi_scale)
     vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
 }
 
+static int mp_property_ambient_light(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    double lux;
+    if (!vo || vo_control(vo, VOCTRL_GET_AMBIENT_LUX, &lux) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, lux);
+}
+
 static int mp_property_focused(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -4366,6 +4378,7 @@ static const struct m_property mp_properties_base[] = {
     {"estimated-display-fps", mp_property_estimated_display_fps},
     {"vsync-jitter", mp_property_vsync_jitter},
     {"display-hidpi-scale", mp_property_hidpi_scale},
+    {"ambient-light", mp_property_ambient_light},
 
     {"working-directory", mp_property_cwd},
 
@@ -4453,6 +4466,7 @@ static const char *const *const mp_event_property_change[] = {
       "display-height"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_FOCUS, "focused"),
+    E(MP_EVENT_AMBIENT_LIGHTING_CHANGED, "ambient-light"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count", "playlist-current-pos",
       "playlist-playing-pos"),

@@ -39,14 +39,14 @@ void gl_transform_ortho_fbo(struct gl_transform *t, const struct ra_fbo *fbo)
     gl_transform_ortho(t, 0, fbo->tex->params.w, 0, fbo->tex->params.h * y_dir);
 }
 
-float gl_video_scale_ambient_lux(float lmin, float lmax,
-                                 float rmin, float rmax, float lux)
+double gl_video_scale_ambient_lux(float lmin, float lmax,
+                                  float rmin, float rmax, double lux)
 {
     assert(lmax > lmin);
 
-    float num = (rmax - rmin) * (log10(lux) - log10(lmin));
-    float den = log10(lmax) - log10(lmin);
-    float result = num / den + rmin;
+    double num = (rmax - rmin) * (log10(lux) - log10(lmin));
+    double den = log10(lmax) - log10(lmin);
+    double result = num / den + rmin;
 
     // clamp the result
     float max = MPMAX(rmax, rmin);
