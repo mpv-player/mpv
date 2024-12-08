@@ -111,7 +111,7 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func lightSensorUpdate() {
-        libmpv.setRenderLux(lmuToLux(lastLmu))
+        libmpv.setRenderLux(Int(lmuToLux(lastLmu)))
     }
 
     override func updateICCProfile() {
