@@ -333,9 +333,10 @@ function add_binding(forced, key, name, fn, opts) {
         }
     }
 
-    var prefix = key_data.scalable ? "" : " nonscalable";
-    if (key)
+    if (key) {
+        var prefix = (key_data.scalable || !(/WHEEL/i).test(key)) ? "" : " nonscalable";
         key_data.input = key + prefix + " script-binding " + mp.script_name + "/" + name;
+    }
     binds[name] = key_data;  // used by user and/or our (key) script-binding
     sched_bindings_flush();
 }
