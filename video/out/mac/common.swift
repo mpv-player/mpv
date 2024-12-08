@@ -274,7 +274,7 @@ class Common: NSObject {
     }
 
     func lightSensorUpdate() {
-        log.warning("lightSensorUpdate not implemented")
+        flagEvents(VO_EVENT_AMBIENT_LIGHTING_CHANGED)
     }
 
     func initLightSensor() {
