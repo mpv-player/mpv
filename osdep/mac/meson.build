@@ -1,8 +1,6 @@
 # custom swift targets
 bridge = join_paths(source_root, 'osdep/mac/app_bridge_objc.h')
-header = join_paths(build_root, 'osdep/mac/swift.h')
 module = join_paths(build_root, 'osdep/mac/swift.swiftmodule')
-target = join_paths(build_root, 'osdep/mac/swift.o')
 
 swift_flags = ['-c', '-emit-library', '-static', '-sdk', macos_sdk_path,
                '-emit-objc-header', '-parse-as-library']
