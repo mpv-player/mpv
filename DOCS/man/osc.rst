@@ -297,7 +297,12 @@ Configurable Options
 ``fadeduration``
     Default: 200
 
-    Duration of fade out in ms, 0 = no fade
+    Duration of fade effects in ms, 0 = no fade.
+
+``fadein``
+    Default: no
+
+    Enable fade-in.
 
 ``title``
     Default: ${!playlist-count==1:[${playlist-pos-1}/${playlist-count}] }${media-title}
