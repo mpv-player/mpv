@@ -215,7 +215,7 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *path = NULL;
-    if (opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(path))) {
+    if (opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(fname))) {
         path = mp_basename(fname);
     } else {
         path = mp_normalize_path(tmp, fname);
