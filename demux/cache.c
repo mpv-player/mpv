@@ -50,6 +50,7 @@ const struct m_sub_options demux_cache_conf = {
     .defaults = &(const struct demux_cache_opts){
         .unlink_files = 2,
     },
+    .change_flags = UPDATE_DEMUXER,
 };
 
 struct demux_cache {

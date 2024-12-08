@@ -459,7 +459,8 @@ char *format_file_size(int64_t size);
 #define UPDATE_VIDEO            (1 << 24) // force redraw if needed
 #define UPDATE_VO               (1 << 25) // reinit the VO
 #define UPDATE_CLIPBOARD        (1 << 26) // reinit the clipboard
-#define UPDATE_OPT_LAST         (1 << 26)
+#define UPDATE_DEMUXER          (1 << 27) // invalidate prefetched files
+#define UPDATE_OPT_LAST         (1 << 27)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \

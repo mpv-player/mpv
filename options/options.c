@@ -621,7 +621,7 @@ static const m_option_t mp_opts[] = {
 #endif
 
     // demuxer.c - select audio/sub file/demuxer
-    {"demuxer", OPT_STRING(demuxer_name), .help = demuxer_help},
+    {"demuxer", OPT_STRING(demuxer_name), .help = demuxer_help, .flags = UPDATE_DEMUXER},
     {"audio-demuxer", OPT_STRING(audio_demuxer_name), .help = demuxer_help},
     {"sub-demuxer", OPT_STRING(sub_demuxer_name), .help = demuxer_help},
     {"demuxer-thread", OPT_BOOL(demuxer_thread)},
