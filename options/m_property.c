@@ -313,11 +313,12 @@ char *m_properties_expand_string(const struct m_property *prop_list,
             str = bstr_cut(str, term_pos);
             bool have_fallback = bstr_eatstart0(&str, ":");
 
-            if (!skip) {
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-                if (n++ > 10)
-                    break;
+            if (n++ > 10)
+                break;
 #endif
+
+            if (!skip) {
                 skip = expand_property(prop_list, &ret, &ret_len, name,
                                        have_fallback, ctx);
                 if (skip)
