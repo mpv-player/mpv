@@ -215,7 +215,7 @@ struct m_sub_options {
     const void *defaults;
     // Change flags passed to mp_option_change_callback() if any option that is
     // directly or indirectly part of this group is changed.
-    int change_flags;
+    uint64_t change_flags;
     // Return further sub-options, for example for optional components. If set,
     // this is called with increasing index (starting from 0), as long as true
     // is returned. If true is returned and *sub is set in any of these calls,
@@ -385,7 +385,7 @@ struct m_option {
     const m_option_type_t *type;
 
     // See \ref OptionFlags.
-    unsigned int flags;
+    uint64_t flags;
 
     // Always force an option update even if the written value does not change.
     bool force_update;
