@@ -367,7 +367,7 @@ local function format_table(list, width_max, rows_max)
             if i == selected_suggestion_index or
                (i == 1 and selected_suggestion_index == 0) then
                 columns[column] = styles.selected_suggestion .. columns[column]
-                                  .. '{\\b0}'.. styles.suggestion
+                                  .. '{\\b}' .. styles.suggestion
             end
         end
         -- first row is at the bottom
