@@ -472,7 +472,24 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
             video_par = par;
     }
     if (priv->avctx->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
-        video_par = -1;
+    {
+        // For Blu-ray subs on SD video, try to match the video PAR.
+        if (priv->video_params.w == 720 &&
+            (priv->video_params.h == 480 ||
+             priv->video_params.h == 576))
+        {
+            double par = priv->video_params.p_w / (double)priv->video_params.p_h;
+            if (isnormal(par))
+                video_par = par * -1;
+            else
+                video_par = -1;
+        }
+        else
+        {
+            // Force letter-boxing on all other Blu-ray subtitles
+            video_par = -1;
+        }
+    }
     if (opts->stretch_image_subs)
         d.ml = d.mr = d.mt = d.mb = 0;
     int w = priv->avctx->width;
