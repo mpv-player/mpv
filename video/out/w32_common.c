@@ -1907,8 +1907,12 @@ static void run_message_loop(struct vo_w32_state *w32)
 
     // Even if the message loop somehow exits, we still have to respond to
     // external requests until termination is requested.
-    while (!w32->terminate)
+    while (!w32->terminate) {
+        assert(!w32->in_dispatch);
+        w32->in_dispatch = true;
         mp_dispatch_queue_process(w32->dispatch, 1000);
+        w32->in_dispatch = false;
+    }
 }
 
 static void window_reconfig(struct vo_w32_state *w32, bool force)
