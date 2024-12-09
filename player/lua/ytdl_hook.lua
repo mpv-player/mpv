@@ -91,6 +91,7 @@ local codec_map = {
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
     ["avc1%..*"]    = "h264",
+    ["hev1%..*"]    = "hevc",
     ["av01%..*"]    = "av1",
     ["mp4a%..*"]    = "aac",
 }
