@@ -19,7 +19,10 @@
 #define MPLAYER_PLAYLIST_H
 
 #include <stdbool.h>
+
 #include "misc/bstr.h"
+
+typedef struct kh_playlist_id_map_s playlist_id_map_t;
 
 struct playlist_param {
     bstr name, value;
@@ -126,5 +129,11 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
 void playlist_entry_unref(struct playlist_entry *e);
 
 void playlist_set_current(struct playlist *pl);
+
+playlist_id_map_t *playlist_build_id_map(const struct playlist *pl);
+void playlist_destroy_id_map(playlist_id_map_t *h);
+struct playlist_entry *playlist_entry_from_id(struct playlist *pl, const playlist_id_map_t *h, uint64_t id);
+
+void playlist_entry_remove(struct playlist_entry *entry);
 
 #endif
