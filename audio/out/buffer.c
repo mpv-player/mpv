@@ -56,6 +56,7 @@ struct buffer_state {
     struct mp_filter *input;    // connected to queue
     struct mp_aframe *pending;  // last, not fully consumed output
 
+    bool got_eof;               // received eof in recent past
     bool streaming;             // AO streaming active
     bool playing;               // logically playing audio from buffer
     bool paused;                // logically paused
@@ -682,13 +683,19 @@ static bool ao_play_data(struct ao *ao)
             p->streaming = true;
             state.playing = true;
         }
+    } else if (p->streaming && p->got_eof && !samples) {
+        p->got_eof = false;
+        state.playing = false;
+        goto eof;
     }
 
     MP_TRACE(ao, "in=%d space=%d(%d) pl=%d, eof=%d\n",
              samples, space, state.free_samples, p->playing, got_eof);
 
-    if (got_eof)
+    if (got_eof) {
+        p->got_eof = got_eof;
         goto eof;
+    }
 
     return samples > 0 && (samples < space || ao->untimed);
 
