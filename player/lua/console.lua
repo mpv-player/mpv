@@ -533,14 +533,14 @@ local function update()
         return
     end
 
-    local screenx, screeny = get_scaled_osd_dimensions()
+    local osd_w, osd_h = get_scaled_osd_dimensions()
 
-    local marginx = get_margin_x()
-    local marginy = get_margin_y()
+    local margin_x = get_margin_x()
+    local margin_y = get_margin_y()
 
-    local coordinate_top = math.floor(global_margins.t * screeny + 0.5)
+    local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
-                                 screenx .. ',' .. screeny
+                                 osd_w .. ',' .. osd_h
     local ass = assdraw.ass_new()
     local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local font = get_font()
@@ -579,7 +579,7 @@ local function update()
         -- libass/ass_render.c:ass_render_event() subtracts --osd-margin-x from
         -- the maximum text width twice.
         local width_max = math.floor(
-            (screenx - marginx - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
+            (osd_w - margin_x - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
             / opts.font_size * get_font_hw_ratio())
 
         local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
@@ -603,7 +603,7 @@ local function update()
 
     ass:new_event()
     ass:an(1)
-    ass:pos(marginx, screeny - marginy - global_margins.b * screeny)
+    ass:pos(margin_x, osd_h - margin_y - global_margins.b * osd_h)
     ass:append(log_ass .. '\\N')
     ass:append(suggestion_ass)
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
@@ -614,12 +614,12 @@ local function update()
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(1)
-    ass:pos(marginx, screeny - marginy - global_margins.b * screeny)
+    ass:pos(margin_x, osd_h - margin_y - global_margins.b * osd_h)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
 
-    mp.set_osd_ass(screenx, screeny, ass.text)
+    mp.set_osd_ass(osd_w, osd_h, ass.text)
 end
 
 local update_timer = nil
