@@ -237,8 +237,11 @@ local function add_binding(attrs, key, name, fn, rp)
         end
         msg_cb = fn
     end
-    local prefix = scalable and "" or " nonscalable"
     if key and #key > 0 then
+        -- noncritical: only add nonscalable with scalable keys, i.e. WHEEL_*,
+        -- to not print nonscalable in scripts that read input-bindings. See
+        -- nonscalable docs for more information.
+        local prefix = (scalable or not key:upper():find("WHEEL")) and "" or " nonscalable"
         attrs.bind = key .. prefix .. " script-binding " .. mp.script_name .. "/" .. name
     end
     attrs.name = name
