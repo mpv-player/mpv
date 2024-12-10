@@ -321,6 +321,12 @@ g-l
 g-d
     Select an audio device.
 
+g-h
+    Select a file from the history of files whose playback position has been
+    saved (see `RESUMING PLAYBACK`_). Requires
+    ``--write-filename-in-watch-later-config``. This doesn't work with
+    ``--ignore-path-in-watch-later-config``.
+
 g-b
     Select a defined input binding.
 
