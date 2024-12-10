@@ -389,11 +389,6 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
         return 0;
     }
 
-    // Wait until all played.
-    if (mpctx->ao && ao_is_playing(mpctx->ao)) {
-        talloc_free(out_fmt);
-        return 0;
-    }
     // Format change during syncing. Force playback start early, then wait.
     if (ao_c->ao_queue && mp_async_queue_get_frames(ao_c->ao_queue) &&
         mpctx->audio_status == STATUS_SYNCING)
