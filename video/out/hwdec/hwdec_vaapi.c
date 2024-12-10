@@ -442,19 +442,20 @@ err:
 
 static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt)
 {
-    struct priv_owner *p = priv;
-
     if (IMGFMT_IS_HWACCEL(src_fmt))
         return true;
 
     bool ret = false;
+    struct mp_image *src = NULL;
+    struct mp_image *dst = NULL;
+    AVBufferRef *hw_pool = NULL;
+    VADRMPRIMESurfaceDescriptor desc = {0};
 
-    struct mp_image *src = mp_image_alloc(src_fmt, 16, 16);
-    if (!src)
+    if (!(src = mp_image_alloc(src_fmt, 16, 16)))
         goto end;
 
-    AVBufferRef *hw_pool = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
-    if (!hw_pool)
+    struct priv_owner *p = priv;
+    if (!(hw_pool = av_hwframe_ctx_alloc(p->ctx->av_device_ref)))
         goto end;
 
     if (!mp_update_av_hw_frames_pool(&hw_pool, p->ctx->av_device_ref, IMGFMT_VAAPI,
@@ -463,17 +464,13 @@ static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt
         goto end;
     }
 
-    struct mp_image *dst = mp_av_pool_image_hw_upload(hw_pool, src);
-    if (!dst)
+    if (!(dst = mp_av_pool_image_hw_upload(hw_pool, src)))
         goto end;
-
-    VADisplay *display = p->display;
-    VADRMPRIMESurfaceDescriptor desc = {0};
-    VASurfaceID id = va_surface_id(dst);
 
     uint32_t flags = p->dmabuf_interop.composed_layers ?
         VA_EXPORT_SURFACE_COMPOSED_LAYERS : VA_EXPORT_SURFACE_SEPARATE_LAYERS;
-    VAStatus status = vaExportSurfaceHandle(display, id, VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+    VAStatus status = vaExportSurfaceHandle(p->display, va_surface_id(dst),
+                                            VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
                                             flags | VA_EXPORT_SURFACE_READ_ONLY, &desc);
 
     if (status != VA_STATUS_SUCCESS)
