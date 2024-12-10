@@ -188,9 +188,8 @@ V
     Cycle through which video data gets used for ASS rendering.
     See ``--sub-ass-use-video-data`` for more info.
 
-r and R
-    Move subtitles up/down. The ``t`` key does the same as ``R`` currently, but
-    use is discouraged.
+Ctrl+UP and Ctrl+DOWN
+    Move subtitles up/down.
 
 s
     Take a screenshot.
@@ -235,6 +234,12 @@ Alt+KP_ADD and Alt+KP_SUBTRACT
 
 Alt+BACKSPACE
     Reset the pan/zoom settings.
+
+r
+    Rotate the video counter-clockwise.
+
+R and t
+    Rotate the video clockwise.
 
 F8
     Show the playlist and the current position in it.
