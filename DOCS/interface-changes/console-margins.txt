@@ -1,0 +1,1 @@
+add `console-margin-x` and `console-margin-y` script-opts
