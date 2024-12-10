@@ -54,7 +54,7 @@ enum {
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
-                     VO_EVENT_INITIAL_UNBLOCK | VO_EVENT_FOCUS,
+                     VO_EVENT_INITIAL_UNBLOCK | VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED,
 };
 
 enum mp_voctrl {
@@ -115,7 +115,7 @@ enum mp_voctrl {
     VOCTRL_UPDATE_RENDER_OPTS,
 
     VOCTRL_GET_ICC_PROFILE,             // bstr*
-    VOCTRL_GET_AMBIENT_LUX,             // int*
+    VOCTRL_GET_AMBIENT_LUX,             // double*
     VOCTRL_GET_DISPLAY_FPS,             // double*
     VOCTRL_GET_HIDPI_SCALE,             // double*
     VOCTRL_GET_DISPLAY_RES,             // int[2]
