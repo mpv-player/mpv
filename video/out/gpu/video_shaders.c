@@ -836,7 +836,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
 // the caller to have already bound the appropriate SSBO and set up the compute
 // shader metadata
 void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
-                    struct pl_color_space src, struct pl_color_space dst,
+                    const struct pl_color_space *src, const struct pl_color_space *dst,
                     enum mp_csp_light src_light, enum mp_csp_light dst_light,
                     const struct gl_tone_map_opts *opts)
 {
@@ -844,45 +844,45 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
 
     // Some operations need access to the video's luma coefficients, so make
     // them available
-    pl_matrix3x3 rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(src.primaries));
+    pl_matrix3x3 rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(src->primaries));
     gl_sc_uniform_vec3(sc, "src_luma", rgb2xyz.m[1]);
-    rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(dst.primaries));
+    rgb2xyz = pl_get_rgb2xyz_matrix(pl_raw_primaries_get(dst->primaries));
     gl_sc_uniform_vec3(sc, "dst_luma", rgb2xyz.m[1]);
 
     bool need_ootf = src_light != dst_light;
-    if (src_light == MP_CSP_LIGHT_SCENE_HLG && src.hdr.max_luma != dst.hdr.max_luma)
+    if (src_light == MP_CSP_LIGHT_SCENE_HLG && src->hdr.max_luma != dst->hdr.max_luma)
         need_ootf = true;
 
     // All operations from here on require linear light as a starting point,
-    // so we linearize even if src.gamma == dst.transfer when one of the other
+    // so we linearize even if src->gamma == dst->transfer when one of the other
     // operations needs it
-    bool need_linear = src.transfer != dst.transfer ||
-                       src.primaries != dst.primaries ||
-                       src.hdr.max_luma != dst.hdr.max_luma ||
+    bool need_linear = src->transfer != dst->transfer ||
+                       src->primaries != dst->primaries ||
+                       src->hdr.max_luma != dst->hdr.max_luma ||
                        need_ootf;
 
     if (need_linear && !is_linear) {
         // We also pull it up so that 1.0 is the reference white
-        pass_linearize(sc, src.transfer);
+        pass_linearize(sc, src->transfer);
         is_linear = true;
     }
 
     // Pre-scale the incoming values into an absolute scale
-    GLSLF("color.rgb *= vec3(%f);\n", pl_color_transfer_nominal_peak(src.transfer));
+    GLSLF("color.rgb *= vec3(%f);\n", pl_color_transfer_nominal_peak(src->transfer));
 
     if (need_ootf)
-        pass_ootf(sc, src_light, src.hdr.max_luma / MP_REF_WHITE);
+        pass_ootf(sc, src_light, src->hdr.max_luma / MP_REF_WHITE);
 
     // Tone map to prevent clipping due to excessive brightness
-    if (src.hdr.max_luma > dst.hdr.max_luma) {
-        pass_tone_map(sc, src.hdr.max_luma / MP_REF_WHITE,
-                      dst.hdr.max_luma / MP_REF_WHITE, opts);
+    if (src->hdr.max_luma > dst->hdr.max_luma) {
+        pass_tone_map(sc, src->hdr.max_luma / MP_REF_WHITE,
+                      dst->hdr.max_luma / MP_REF_WHITE, opts);
     }
 
     // Adapt to the right colorspace if necessary
-    if (src.primaries != dst.primaries) {
-        const struct pl_raw_primaries *csp_src = pl_raw_primaries_get(src.primaries),
-                                      *csp_dst = pl_raw_primaries_get(dst.primaries);
+    if (src->primaries != dst->primaries) {
+        const struct pl_raw_primaries *csp_src = pl_raw_primaries_get(src->primaries),
+                                      *csp_dst = pl_raw_primaries_get(dst->primaries);
         pl_matrix3x3 m = pl_get_color_mapping_matrix(csp_src, csp_dst,
                                                      PL_INTENT_RELATIVE_COLORIMETRIC);
         gl_sc_uniform_mat3(sc, "cms_matrix", true, &m.m[0][0]);
@@ -896,20 +896,20 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
                      color.rgb = mix(color.rgb, vec3(luma), coeff);
                  })
             GLSLF("float cmax = 1.0/%f * max(max(color.r, color.g), color.b);\n",
-                  dst.hdr.max_luma / MP_REF_WHITE);
+                  dst->hdr.max_luma / MP_REF_WHITE);
             GLSL(if (cmax > 1.0) color.rgb /= cmax;)
         }
     }
 
     if (need_ootf)
-        pass_inverse_ootf(sc, dst_light, dst.hdr.max_luma / MP_REF_WHITE);
+        pass_inverse_ootf(sc, dst_light, dst->hdr.max_luma / MP_REF_WHITE);
 
     // Post-scale the outgoing values from absolute scale to normalized.
     // For SDR, we normalize to the chosen signal peak. For HDR, we normalize
     // to the encoding range of the transfer function.
-    float dst_range = dst.hdr.max_luma / MP_REF_WHITE;
-    if (pl_color_space_is_hdr(&dst))
-        dst_range = pl_color_transfer_nominal_peak(dst.transfer);
+    float dst_range = dst->hdr.max_luma / MP_REF_WHITE;
+    if (pl_color_space_is_hdr(dst))
+        dst_range = pl_color_transfer_nominal_peak(dst->transfer);
 
     GLSLF("color.rgb *= vec3(%f);\n", 1.0 / dst_range);
 
@@ -921,7 +921,7 @@ void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
     }
 
     if (is_linear)
-        pass_delinearize(sc, dst.transfer);
+        pass_delinearize(sc, dst->transfer);
 }
 
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.

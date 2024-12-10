@@ -48,7 +48,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum pl_color_transfer trc);
 
 void pass_color_map(struct gl_shader_cache *sc, bool is_linear,
-                    struct pl_color_space src, struct pl_color_space dst,
+                    const struct pl_color_space *src, const struct pl_color_space *dst,
                     enum mp_csp_light src_light, enum mp_csp_light dst_light,
                     const struct gl_tone_map_opts *opts);
 
