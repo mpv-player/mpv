@@ -104,6 +104,13 @@ struct vo_wayland_state {
     int primaries_map[PL_COLOR_PRIM_COUNT];
     int transfer_map[PL_COLOR_TRC_COUNT];
 
+    /* color-representation */
+    struct wp_color_representation_manager_v1 *color_representation_manager;
+    struct wp_color_representation_v1 *color_representation;
+    int coefficients_map[PL_COLOR_SYSTEM_COUNT];
+    int range_map[PL_COLOR_SYSTEM_COUNT];
+    bool color_representation_set;
+
     /* content-type */
     struct wp_content_type_manager_v1 *content_type_manager;
     struct wp_content_type_v1 *content_type;
