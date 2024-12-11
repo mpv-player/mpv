@@ -153,7 +153,7 @@ command-interface.
 libmpv C API
 ------------
 
-The libmpv client API (such as ``<libmpv/client.h>``) mostly gives access to
+The libmpv client API (such as ``<mpv/client.h>``) mostly gives access to
 the command interface. The API itself (if looked at as a component separate
 from the command interface) is intended to be extremely stable.
 

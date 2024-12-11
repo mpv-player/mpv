@@ -18,7 +18,7 @@
 #include <windows.h>
 #include <string.h>
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "osdep/io.h"
 #include "mpv_talloc.h"
 

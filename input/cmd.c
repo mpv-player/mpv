@@ -27,7 +27,7 @@
 #include "input.h"
 #include "misc/json.h"
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 static void destroy_cmd(void *ptr)
 {

@@ -20,7 +20,7 @@
 
 #include "player/client.h"
 #include "video/out/libmpv.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 
 #include "options/m_config.h"
 #include "player/core.h"
