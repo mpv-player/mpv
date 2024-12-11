@@ -456,14 +456,18 @@ static const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
     {"v", &m_option_type_dummy_flag, M_OPT_NOCFG | M_OPT_NOPROP,
      .offset = -1},
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"playlist", CONF_TYPE_STRING, M_OPT_NOCFG | M_OPT_FILE, .offset = -1},
+#endif
     {"{", &m_option_type_dummy_flag, M_OPT_NOCFG | M_OPT_NOPROP,
      .offset = -1},
     {"}", &m_option_type_dummy_flag, M_OPT_NOCFG | M_OPT_NOPROP,
      .offset = -1},
 
     // handled in m_config.c
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
+#endif
     {"profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
     {"show-profile", CONF_TYPE_STRING, M_OPT_NOCFG | M_OPT_NOPROP |
         M_OPT_OPTIONAL_PARAM,  .offset = -1},
