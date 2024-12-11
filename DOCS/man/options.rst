@@ -4168,18 +4168,20 @@ Demuxer
     opens the URL of the next playlist entry as soon the current URL is fully
     read.
 
+    This is most useful when reading small files where a significant portion of
+    the load time is spent creating a new demuxer thread, such as images, which
+    get fully prefetched.
+
     This does **not** work with URLs resolved by the ``youtube-dl`` wrapper,
     and it won't.
 
-    This can give subtly wrong results if per-file options are used, or if
-    options are changed in the time window between prefetching start and next
-    file played.
+    If ``--demuxer`` and related probing options are changed in the time window
+    between the start of prefetching and the playback of the next file, the old
+    values are used.
 
     This can occasionally make wrong prefetching decisions. For example, it
     can't predict whether you go backwards in the playlist, and assumes you
     won't edit the playlist.
-
-    Highly experimental.
 
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
