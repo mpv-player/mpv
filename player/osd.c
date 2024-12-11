@@ -221,7 +221,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
         if (mpctx->vo_chain) {
             if (mpctx->display_sync_active) {
                 char *r = mp_property_expand_string(mpctx,
-                                            "${?vsync-ratio:${vsync-ratio}}");
+                                            "${?vsync-ratio:${>vsync-ratio}}");
                 if (r[0]) {
                     saddf(&line, " DS: %s/%"PRId64, r,
                           vo_get_delayed_count(mpctx->video_out));
