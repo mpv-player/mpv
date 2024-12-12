@@ -31,17 +31,17 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
-    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
+    right-click     open the playlist selector
     =============   ================================================
 
 pl next
     =============   ================================================
     left-click      play next file in playlist
-    right-click     show the playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
+    right-click     open the playlist selector
     =============   ================================================
 
 title
@@ -505,13 +505,13 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``playlist_prev_mbtn_mid_command=show-text ${playlist} 3000``
 
-``playlist_prev_mbtn_right_command=show-text ${playlist} 3000``
+``playlist_prev_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
 ``playlist_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000``
 
 ``playlist_next_mbtn_mid_command=show-text ${playlist} 3000``
 
-``playlist_next_mbtn_right_command=show-text ${playlist} 3000``
+``playlist_next_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
 ``title_mbtn_left_command=script-binding stats/display-page-5``
 
