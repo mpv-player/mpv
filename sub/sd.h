@@ -81,6 +81,7 @@ struct mp_sub_filter_opts {
 struct sd_filter {
     struct mpv_global *global;
     struct mp_log *log;
+    struct demux_packet_pool *packet_pool;
     struct mp_sub_filter_opts *opts;
     const struct sd_filter_functions *driver;
 
