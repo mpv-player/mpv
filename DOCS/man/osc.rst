@@ -51,7 +51,7 @@ title
     =============   ================================================
     left-click      show file and track info
     middle-click    show the filename
-    right-click     open the playlist selector
+    right-click     show the path
     =============   ================================================
 
 cache
@@ -517,7 +517,7 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``title_mbtn_mid_command=show-text ${filename}``
 
-``title_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+``title_mbtn_right_command=show-text ${path}``
 
 ``play_pause_mbtn_left_command=cycle pause``
 
