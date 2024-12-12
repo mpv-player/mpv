@@ -128,6 +128,7 @@ const struct m_sub_options demux_lavf_conf = {
         .linearize_ts = -1,
         .propagate_opts = true,
     },
+    .change_flags = UPDATE_DEMUXER,
 };
 
 struct format_hack {

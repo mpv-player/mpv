@@ -116,5 +116,6 @@ const struct demuxer_desc demuxer_desc_libarchive = {
             {0}
         },
         .size = sizeof(OPT_BASE_STRUCT),
+        .change_flags = UPDATE_DEMUXER,
     },
 };
