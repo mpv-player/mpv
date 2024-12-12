@@ -255,6 +255,11 @@ General coding
 - If you add features that require intrusive changes, discuss them on the dev
   channel first. There might be a better way to add a feature and it can avoid
   wasted work.
+- Newly added code for any Apple Platform (macOS, iOS, etc), that uses Cocoa or
+  any other object-oriented Framework or API, should be written in Swift instead
+  of Objective-C. This also includes complete rewrites/refactors of existing
+  code. Plain C API usages may stay as C, but can be written in Swift. Existing
+  Objective-C code can stay as is, though Swift rewrites are welcome.
 
 Code of Conduct
 ---------------
