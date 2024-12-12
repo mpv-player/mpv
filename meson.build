@@ -471,8 +471,7 @@ endif
 features += {'android': host_machine.system() == 'android'}
 if features['android']
     dependencies += cc.find_library('android')
-    sources += files('audio/out/ao_audiotrack.c',
-                     'misc/jni.c',
+    sources += files('misc/jni.c',
                      'osdep/android/strnlen.c',
                      'video/out/android_common.c',
                      'video/out/vo_mediacodec_embed.c')
@@ -859,6 +858,12 @@ features += {'openal': openal.found()}
 if features['openal']
     dependencies += openal
     sources += files('audio/out/ao_openal.c')
+endif
+
+features += {'audiotrack':
+    get_option('audiotrack').require(features['android']).allowed()}
+if features['audiotrack']
+    sources += files('audio/out/ao_audiotrack.c')
 endif
 
 opensles = cc.find_library('OpenSLES', required: get_option('opensles'))
