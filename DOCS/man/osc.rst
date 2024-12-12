@@ -501,12 +501,6 @@ Configurable Options
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
-``title_mbtn_left_command=script-binding stats/display-page-5``
-
-``title_mbtn_mid_command=show-text ${filename}``
-
-``title_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
-
 ``playlist_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000``
 
 ``playlist_prev_mbtn_mid_command=show-text ${playlist} 3000``
@@ -518,6 +512,12 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 ``playlist_next_mbtn_mid_command=show-text ${playlist} 3000``
 
 ``playlist_next_mbtn_right_command=show-text ${playlist} 3000``
+
+``title_mbtn_left_command=script-binding stats/display-page-5``
+
+``title_mbtn_mid_command=show-text ${filename}``
+
+``title_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
 ``play_pause_mbtn_left_command=cycle pause``
 
