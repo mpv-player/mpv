@@ -333,9 +333,13 @@ function add_binding(forced, key, name, fn, opts) {
         }
     }
 
-    var prefix = key_data.scalable ? "" : " nonscalable";
-    if (key)
+    if (key) {
+        // noncritical: only add nonscalable with scalable keys, i.e. WHEEL_*,
+        // to not print nonscalable in scripts that read input-bindings. See
+        // nonscalable docs for more information.
+        var prefix = (key_data.scalable || !(/WHEEL/i).test(key)) ? "" : " nonscalable";
         key_data.input = key + prefix + " script-binding " + mp.script_name + "/" + name;
+    }
     binds[name] = key_data;  // used by user and/or our (key) script-binding
     sched_bindings_flush();
 }

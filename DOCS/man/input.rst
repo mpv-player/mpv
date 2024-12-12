@@ -1888,12 +1888,17 @@ prefixes can be specified. They are separated by whitespace.
     For some commands, keeping a key pressed runs the command repeatedly.
     This prefix forces disabling key repeat in any case.
 ``nonscalable``
-    When some commands (e.g. ``add``) are bound to scalable keys associated to a
-    high-precision input device like a touchpad (e.g. ``WHEEL_UP``), the value
-    specified in the command is scaled to smaller steps based on the high
-    resolution input data if available.
+    When some commands (e.g. ``add``) are bound to ``WHEEL_UP``, ``WHEEL_DOWN``,
+    ``WHEEL_LEFT`` or ``WHEEL_RIGHT``, plus any modifiers, and used with a
+    high-precision input device like a touchpad, the value specified in the
+    command is scaled to smaller steps based on the high resolution input data
+    if available.
     This prefix forces disabling this behavior, so the value is always changed
     in the discrete unit specified in the key binding.
+    The exact list of scalable commands can be checked by seeing which commands
+    under `List of Input Commands`_ mention that they are scalable.
+    See also ``mp.add_key_binding`` documentation for how it behaves with high
+    precision scaling.
 ``async``
     Allow asynchronous execution (if possible). Note that only a few commands
     will support this (usually this is explicitly documented). Some commands
