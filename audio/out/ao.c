@@ -57,7 +57,7 @@ extern const struct ao_driver audio_out_sdl;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
-#if HAVE_ANDROID
+#if HAVE_AUDIOTRACK
     &audio_out_audiotrack,
 #endif
 #if HAVE_AUDIOUNIT
