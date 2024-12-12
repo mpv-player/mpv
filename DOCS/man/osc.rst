@@ -50,6 +50,7 @@ title
 
     =============   ================================================
     left-click      show file and track info
+    shift+L-click   show the filename
     middle-click    show the filename
     right-click     show the path
     =============   ================================================
@@ -66,15 +67,17 @@ play
 skip back
     =============   ================================================
     left-click      go to beginning of chapter / previous chapter
-    right-click     open the chapter selector
     shift+L-click   show chapters
+    middle-click    show chapters
+    right-click     open the chapter selector
     =============   ================================================
 
 skip frwd
     =============   ================================================
     left-click      go to next chapter
-    right-click     open the chapter selector
     shift+L-click   show chapters
+    middle-click    show chapters
+    right-click     open the chapter selector
     =============   ================================================
 
 time elapsed
