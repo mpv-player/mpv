@@ -224,22 +224,23 @@ mp.add_key_binding(nil, "select-chapter", function ()
 end)
 
 mp.add_key_binding(nil, "select-edition", function ()
-    local editions = {}
-    local default_item = mp.get_property_native("current-edition")
+    local edition_list = mp.get_property_native("edition-list")
 
-    if default_item == nil then
+    if edition_list == nil or #edition_list == 1 then
         show_error("No available editions.")
         return
     end
 
-    for i, edition in ipairs(mp.get_property_native("edition-list")) do
+    local editions = {}
+
+    for i, edition in ipairs(edition_list) do
         editions[i] = edition.title
     end
 
     input.select({
         prompt = "Select an edition:",
         items = editions,
-        default_item = default_item + 1,
+        default_item = mp.get_property_native("current-edition") + 1,
         submit = function (edition)
             mp.set_property("edition", edition - 1)
         end,
