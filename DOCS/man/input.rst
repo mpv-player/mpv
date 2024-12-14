@@ -120,10 +120,12 @@ is followed by a ``+`` (for example ``ctrl+q``).
 Symbolic key names and modifier names are case-insensitive. Unicode key names
 are case-sensitive just like how keyboard text input would produce.
 
-Another type of key names are hexadecimal key names, that serve as fallback
-for special keys that are neither unicode, nor have a special mpv defined name.
-They will break as soon as mpv adds proper names for them, but can enable you
-to use a key at all if that does not happen.
+Another type of key names are hexadecimal key names, which start with ``0x``,
+followed by the hexadecimal value of the key. The hexadecimal value can be
+either a Unicode code point value, or can serve as fallback for special keys
+that do not have a special mpv defined name. They will break as soon as mpv
+adds proper names for them, but can enable you to use a key at all if that
+does not happen.
 
 All symbolic names are listed by ``--input-keylist``. ``--input-test`` is a
 special mode that prints all input on the OSD.
