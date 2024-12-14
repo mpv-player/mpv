@@ -28,7 +28,7 @@
 #include <EGL/eglext.h>
 #include <drm_fourcc.h>
 
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "video/out/drm_atomic.h"

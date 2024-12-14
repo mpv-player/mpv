@@ -35,7 +35,7 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 #include "msg.h"
 #include "msg_control.h"

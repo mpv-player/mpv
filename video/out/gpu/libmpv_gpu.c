@@ -1,7 +1,7 @@
 #include "config.h"
 #include "hwdec.h"
 #include "libmpv_gpu.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video.h"
 #include "video/out/libmpv.h"
 
