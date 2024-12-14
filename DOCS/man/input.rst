@@ -84,7 +84,7 @@ Key names
 ---------
 
 All mouse and keyboard input is to converted to mpv-specific key names. Key
-names are either special symbolic identifiers representing a physical key, or a
+names are either special symbolic identifiers representing a physical key, or
 text key names, which are unicode code points encoded as UTF-8. These are what
 keyboard input would normally produce, for example ``a`` for the A key. As a
 consequence, mpv uses input translated by the current OS keyboard layout, rather
