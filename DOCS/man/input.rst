@@ -86,9 +86,10 @@ Key names
 All mouse and keyboard input is to converted to mpv-specific key names. Key
 names are either special symbolic identifiers representing a physical key, or
 text key names, which are unicode code points encoded as UTF-8. These are what
-keyboard input would normally produce, for example ``a`` for the A key. As a
-consequence, mpv uses input translated by the current OS keyboard layout, rather
-than physical scan codes.
+keyboard input would normally produce, for example ``a`` for the A key.
+These are influenced by keyboard modifiers which affect produced text, such as
+shift and caps lock. As a consequence, mpv uses input translated by the current
+OS keyboard layout, rather than physical scan codes.
 
 Currently there is the hardcoded assumption that every text key can be
 represented as a single unicode code point (in NFKC form).
@@ -117,7 +118,7 @@ is followed by a ``+`` (for example ``ctrl+q``).
     by mpv.
 
 Symbolic key names and modifier names are case-insensitive. Unicode key names
-are case-sensitive because input bindings typically respect the shift key.
+are case-sensitive just like how keyboard text input would produce.
 
 Another type of key names are hexadecimal key names, that serve as fallback
 for special keys that are neither unicode, nor have a special mpv defined name.
