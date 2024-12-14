@@ -147,10 +147,6 @@ class MacCommon: Common {
         timer?.updatePolicy(periodSeconds: 1 / currentFps())
     }
 
-    override func lightSensorUpdate() {
-        flagEvents(VO_EVENT_AMBIENT_LIGHTING_CHANGED)
-    }
-
     override func updateICCProfile() {
         flagEvents(VO_EVENT_ICC_PROFILE_CHANGED)
     }
