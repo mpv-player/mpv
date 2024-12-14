@@ -116,6 +116,31 @@ local user_opts = {
     fullscreen_mbtn_left_command = "cycle fullscreen",
     fullscreen_mbtn_mid_command = "",
     fullscreen_mbtn_right_command = "cycle window-maximized",
+
+    custom_button_1_content = "",
+    custom_button_1_mbtn_left_command = "",
+    custom_button_1_mbtn_mid_command = "",
+    custom_button_1_mbtn_right_command = "",
+
+    custom_button_2_content = "",
+    custom_button_2_mbtn_left_command = "",
+    custom_button_2_mbtn_mid_command = "",
+    custom_button_2_mbtn_right_command = "",
+
+    custom_button_3_content = "",
+    custom_button_3_mbtn_left_command = "",
+    custom_button_3_mbtn_mid_command = "",
+    custom_button_3_mbtn_right_command = "",
+
+    custom_button_4_content = "",
+    custom_button_4_mbtn_left_command = "",
+    custom_button_4_mbtn_mid_command = "",
+    custom_button_4_mbtn_right_command = "",
+
+    custom_button_5_content = "",
+    custom_button_5_mbtn_left_command = "",
+    custom_button_5_mbtn_mid_command = "",
+    custom_button_5_mbtn_right_command = "",
     -- luacheck: pop
 }
 
@@ -1574,14 +1599,27 @@ local function bar_layout(direction)
 
     local t_l = geo.x + geo.w + padX
 
+    -- Custom buttons
+    local t_r = osc_geo.x + osc_geo.w
+
+    for i = 5, 1, -1 do
+        if elements["custom_button_" .. i] then
+            t_r = t_r - padX
+            geo = { x = t_r, y = geo.y, an = 6, w = geo.w, h = geo.h }
+            t_r = t_r - geo.w
+            lo = add_layout("custom_button_" .. i)
+            lo.geometry = geo
+            lo.style = osc_styles.vidtitleBar
+        end
+    end
+
     -- Cache
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 150, h = geo.h }
+    t_r = t_r - padX
+    geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
+    t_r = t_r - geo.w - padX
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitleBar
-
-    local t_r = geo.x - geo.w - padX*2
 
     -- Title
     geo = { x = t_l, y = geo.y, an = 4,
@@ -2063,6 +2101,16 @@ local function osc_init()
         end
     end
     bind_mouse_buttons("volume")
+
+
+    -- custom buttons
+    for i = 1, 5 do
+        if user_opts["custom_button_" .. i .. "_content"] ~= "" then
+            ne = new_element("custom_button_" .. i, "button")
+            ne.content = user_opts["custom_button_" .. i .. "_content"]
+            bind_mouse_buttons("custom_button_" .. i)
+        end
+    end
 
 
     -- load layout

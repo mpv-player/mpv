@@ -576,6 +576,58 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``fullscreen_mbtn_right_command="cycle window-maximized"``
 
+``custom_button_1_content=``
+
+``custom_button_1_mbtn_left_command=``
+
+``custom_button_1_mbtn_mid_command=``
+
+``custom_button_1_mbtn_right_command=``
+
+``custom_button_2_content=``
+
+``custom_button_2_mbtn_left_command=``
+
+``custom_button_2_mbtn_mid_command=``
+
+``custom_button_2_mbtn_right_command=``
+
+``custom_button_3_content=``
+
+``custom_button_3_mbtn_left_command=``
+
+``custom_button_3_mbtn_mid_command=``
+
+``custom_button_3_mbtn_right_command=``
+
+``custom_button_4_content=``
+
+``custom_button_4_mbtn_left_command=``
+
+``custom_button_4_mbtn_mid_command=``
+
+``custom_button_4_mbtn_right_command=``
+
+``custom_button_5_content=``
+
+``custom_button_5_mbtn_left_command=``
+
+``custom_button_5_mbtn_mid_command=``
+
+``custom_button_5_mbtn_right_command=``
+
+Custom Buttons
+~~~~~~~~~~~~~~
+
+script-opts are available to define up to 5 custom buttons in ``bottombar`` and
+``topbar`` layouts.
+
+.. admonition:: Example to add a loop button
+
+    custom_button_1_content=🔁
+    custom_button_1_mbtn_left_command=cycle-values loop-file inf no
+    custom_button_1_mbtn_right_command=cycle-values loop-playlist inf no
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
