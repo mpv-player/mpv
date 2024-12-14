@@ -2655,7 +2655,7 @@ Subtitles
     default. This also disables libass' incompatible extensions. This currently
     includes bracket pair matching according to the revised Unicode
     Bidirectional Algorithm introduced in Unicode 6.3, and also affects how BiDi
-    runs are split and processed, as well as soft linewrapping of unicode text.
+    runs are split and processed, as well as soft linewrapping of Unicode text.
 
     This affects plaintext (non-ASS) subtitles only. Default: no.
 
