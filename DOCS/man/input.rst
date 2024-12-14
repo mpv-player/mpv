@@ -85,14 +85,14 @@ Key names
 
 All mouse and keyboard input is to converted to mpv-specific key names. Key
 names are either special symbolic identifiers representing a physical key, or
-text key names, which are unicode code points encoded as UTF-8. These are what
+text key names, which are Unicode code points encoded as UTF-8. These are what
 keyboard input would normally produce, for example ``a`` for the A key.
 These are influenced by keyboard modifiers which affect produced text, such as
 shift and caps lock. As a consequence, mpv uses input translated by the current
 OS keyboard layout, rather than physical scan codes.
 
 Currently there is the hardcoded assumption that every text key can be
-represented as a single unicode code point (in NFKC form).
+represented as a single Unicode code point (in NFKC form).
 
 All key names can be combined with the modifiers ``Shift``, ``Ctrl``, ``Alt``,
 ``Meta``. They must be prefixed to the actual key name, where each modifier
