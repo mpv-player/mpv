@@ -353,6 +353,61 @@ mp.add_key_binding(nil, "select-audio-device", function ()
     })
 end)
 
+mp.add_key_binding(nil, "select-watch-later", function ()
+    local watch_later_dir = mp.get_property("current-watch-later-dir")
+
+    if not watch_later_dir then
+        show_warning("No watch later files found.")
+        return
+    end
+
+    local watch_later_files = {}
+
+    for i, file in ipairs(utils.readdir(watch_later_dir, "files") or {}) do
+        watch_later_files[i] = watch_later_dir .. "/" .. file
+    end
+
+    if #watch_later_files == 0 then
+        show_warning("No watch later files found.")
+        return
+    end
+
+    local recent_files = {}
+    for _, watch_later_file in pairs(watch_later_files) do
+        local file_handle = io.open(watch_later_file)
+        if file_handle then
+            local line = file_handle:read()
+            if line and line ~= "# redirect entry" and line:find("^#") then
+                recent_files[#recent_files + 1] = {watch_later_file, line:sub(3)}
+            end
+            file_handle:close()
+        end
+    end
+
+    if #recent_files == 0 then
+        show_warning(mp.get_property_native("write-filename-in-watch-later-config")
+            and "No watch later files found."
+            or "Enable --write-filename-in-watch-later-config to select recent files.")
+        return
+    end
+
+    table.sort(recent_files, function (i, j)
+        return utils.file_info(i[1]).mtime > utils.file_info(j[1]).mtime
+    end)
+
+    for i, recent_file in ipairs(recent_files) do
+        recent_files[i] = recent_file[2]
+    end
+
+    input.select({
+        prompt = "Select a file:",
+        items = recent_files,
+        submit = function (i)
+            mp.commandv("loadfile", recent_files[i])
+        end,
+    })
+end)
+
 mp.add_key_binding(nil, "select-binding", function ()
     local bindings = {}
 
