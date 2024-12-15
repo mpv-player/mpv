@@ -510,6 +510,7 @@ void audio_start_ao(struct MPContext *mpctx);
 void mp_parse_cfgfiles(struct MPContext *mpctx);
 void mp_load_auto_profiles(struct MPContext *mpctx);
 bool mp_load_playback_resume(struct MPContext *mpctx, const char *file);
+char *mp_get_playback_resume_dir(struct MPContext *mpctx);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file);
 struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
