@@ -294,6 +294,11 @@ local function calculate_max_log_lines()
                       - 1.5)
 end
 
+local function should_highlight_completion(i)
+    return i == selected_suggestion_index or
+           (i == 1 and selected_suggestion_index == 0 and input_caller == nil)
+end
+
 -- Takes a list of strings, a max width in characters and
 -- optionally a max row count.
 -- The result contains at least one column.
@@ -375,8 +380,7 @@ local function format_table(list, width_max, rows_max)
                                   or '%-' .. math.min(column_widths[column], 99) .. 's'
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
-            if i == selected_suggestion_index or
-               (i == 1 and selected_suggestion_index == 0) then
+            if should_highlight_completion(i) then
                 columns[column] = styles.selected_suggestion .. columns[column]
                                   .. '{\\b}' .. styles.suggestion
             end
@@ -487,8 +491,7 @@ local function print_to_terminal()
 
     local suggestions = ''
     for i, suggestion in ipairs(suggestion_buffer) do
-        if i == selected_suggestion_index or
-           (i == 1 and selected_suggestion_index == 0) then
+        if should_highlight_completion(i) then
             suggestions = suggestions .. terminal_styles.selected_suggestion ..
                           suggestion .. '\027[0m'
         else
