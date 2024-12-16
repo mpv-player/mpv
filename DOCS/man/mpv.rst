@@ -363,6 +363,10 @@ in the mpv git repository.
 Mouse Control
 -------------
 
+Ctrl+left click
+    Pan while holding the button, keeping the clicked part of the video under
+    the cursor.
+
 Left double click
     Toggle fullscreen on/off.
 
