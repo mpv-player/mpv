@@ -347,11 +347,21 @@ in the mpv git repository.
 Mouse Control
 -------------
 
+Ctrl+left click
+    Pan while holding the button, keeping the clicked part of the image under
+    the cursor.
+
 Left double click
     Toggle fullscreen on/off.
 
 Right click
     Toggle pause on/off.
+
+Middle click
+    Pan through the whole video while holding the button.
+
+Middle double click
+    Reset pan.
 
 Forward/Back button
     Skip to next/previous entry in playlist.
@@ -363,7 +373,8 @@ Wheel left/right
     Seek forward/backward 10 seconds.
 
 Ctrl+Wheel up/down
-    Change video zoom.
+    Change video zoom keeping the part of the video hovered by the cursor under
+    it.
 
 Context Menu
 -------------
@@ -1490,6 +1501,8 @@ works like in older mpv releases:
 .. include:: stats.rst
 
 .. include:: console.rst
+
+.. include:: positioning.rst
 
 .. include:: lua.rst
 
