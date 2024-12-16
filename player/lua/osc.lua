@@ -75,6 +75,10 @@ local user_opts = {
     playlist_prev_mbtn_mid_command = "show-text ${playlist} 3000",
     playlist_prev_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
 
+    menu_mbtn_left_command = "script-binding select/menu; script-message-to osc osc-hide",
+    menu_mbtn_mid_command = "",
+    menu_mbtn_right_command = "",
+
     playlist_next_mbtn_left_command = "playlist-next",
     playlist_next_mbtn_mid_command = "show-text ${playlist} 3000",
     playlist_next_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
@@ -1556,13 +1560,20 @@ local function bar_layout(direction)
     lo.alpha[1] = user_opts.boxalpha
 
 
-    -- Playlist prev/next
+    -- Playlist prev
     geo = { x = osc_geo.x + padX, y = line1,
             an = 4, w = 18, h = 18 - padY }
     lo = add_layout("playlist_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
 
+    -- Menu
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("menu")
+    lo.geometry = geo
+    lo.style = osc_styles.topButtonsBar
+
+    -- Playlist next
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("playlist_next")
     lo.geometry = geo
@@ -1775,16 +1786,19 @@ local function osc_init()
     end
     bind_mouse_buttons("title")
 
-    -- playlist buttons
-
-    -- prev
+    -- playlist prev
     ne = new_element("playlist_prev", "button")
 
     ne.content = "\238\132\144"
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
     bind_mouse_buttons("playlist_prev")
 
-    --next
+    -- menu
+    ne = new_element("menu", "button")
+    ne.content = "☰"
+    bind_mouse_buttons("menu")
+
+    -- playlist next
     ne = new_element("playlist_next", "button")
 
     ne.content = "\238\132\129"
