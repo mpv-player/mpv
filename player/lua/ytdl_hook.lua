@@ -954,7 +954,7 @@ local function run_ytdl_hook(url)
 
     for param, arg in pairs(raw_options) do
         table.insert(command, "--" .. param)
-        if arg ~= "" then
+        if arg ~= "" or param == "proxy" then
             table.insert(command, arg)
         end
         if (param == "sub-lang" or param == "sub-langs" or param == "srt-lang") and (arg ~= "") then
