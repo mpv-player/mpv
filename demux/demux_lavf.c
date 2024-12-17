@@ -675,7 +675,9 @@ static bool is_image(AVStream *st, bool attached_picture, const AVInputFormat *a
         strcmp(avif->name, "gif") == 0 ||
         strcmp(avif->name, "ico") == 0 ||
         strcmp(avif->name, "image2pipe") == 0 ||
-        (st->codecpar->codec_id == AV_CODEC_ID_AV1 && st->nb_frames == 1)
+        ((st->codecpar->codec_id == AV_CODEC_ID_HEVC ||
+          st->codecpar->codec_id == AV_CODEC_ID_AV1)
+         && st->nb_frames == 1)
     );
 }
 
