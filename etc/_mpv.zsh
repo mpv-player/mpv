@@ -33,6 +33,10 @@ local -a tag_order
 zstyle -a ":completion:*:*:$service:*" tag-order tag_order ||
   zstyle  ":completion:*:*:$service:*" tag-order '!urls'
 
+local -a urls
+zstyle -a ":completion:*:*:$service:*:urls" urls urls ||
+  zstyle ":completion:*:*:$service:*:urls" urls av://lavfi:testsrc av://lavfi:sine
+
 typeset -ga _mpv_completion_arguments _mpv_completion_protocols
 
 function _mpv_generate_arguments {
