@@ -58,6 +58,9 @@ local styles = {
     default_item = '{\\1c&H2fbdfa&}',
     disabled = '{\\1c&Hcccccc&}',
 }
+for key, style in pairs(styles) do
+    styles[key] = style .. '{\\1a&H00&\\3c&H111111&\\3a&H00&}'
+end
 
 local terminal_styles = {
     debug = '\027[90m',
@@ -545,7 +548,6 @@ local function update()
     local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local font = get_font()
     local style = '{\\r' ..
-                  '\\1a&H00&\\3a&H00&\\1c&Heeeeee&\\3c&H111111&' ..
                   (has_shadow and '\\4a&H99&\\4c&H000000&\\xshad0\\yshad1' or '') ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
