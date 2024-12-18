@@ -66,7 +66,7 @@ Ctrl+LEFT and Ctrl+RIGHT
     might not always work; see ``sub-seek`` command.
 
 Ctrl+Shift+LEFT and Ctrl+Shift+RIGHT
-    Adjust subtitle delay so that the next or previous subtitle is displayed
+    Adjust subtitle delay so that the previous or next subtitle is displayed
     now. This is especially useful to sync subtitles to audio.
 
 [ and ]
@@ -161,7 +161,7 @@ j and J
     Cycle through the available subtitles.
 
 z and Z
-    Adjust subtitle delay by +/- 0.1 seconds. The ``x`` key does the same as
+    Adjust subtitle delay by -/+ 0.1 seconds. The ``x`` key does the same as
     ``Z`` currently, but use is discouraged.
 
 l
