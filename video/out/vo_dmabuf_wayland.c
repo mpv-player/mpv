@@ -725,6 +725,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int ret;
 
     switch (request) {
+    case VOCTRL_UPDATE_RENDER_OPTS:
+        vo_wayland_set_icc_file(vo->wl);
+        return VO_TRUE;
     case VOCTRL_RESET:
         p->destroy_buffers = true;
         return VO_TRUE;

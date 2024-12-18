@@ -91,8 +91,9 @@ struct vo_wayland_state {
     /* color-management */
     struct xx_color_manager_v4 *color_manager;
     struct xx_color_management_surface_v4 *color_surface;
-    struct xx_image_description_v4 *image_description;
+    struct xx_image_description_creator_icc_v4 *icc_creator;
     struct xx_image_description_creator_params_v4 *image_creator_params;
+    struct xx_image_description_v4 *image_description;
     struct mp_image_params target_params;
     bool supports_icc;
     bool supports_parametric;
@@ -187,6 +188,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
 void vo_wayland_handle_color(struct vo_wayland_state *wl);
 void vo_wayland_handle_scale(struct vo_wayland_state *wl);
+void vo_wayland_set_icc_file(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);
 void vo_wayland_uninit(struct vo *vo);
