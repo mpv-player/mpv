@@ -7815,6 +7815,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         && mpctx->vo_chain->is_sparse && !mpctx->ao_chain
         && mpctx->video_status == STATUS_DRAINING)
         mpctx->time_frame = opts->image_display_duration;
+
+    if (flags & UPDATE_DEMUXER)
+        mpctx->demuxer_changed = true;
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
