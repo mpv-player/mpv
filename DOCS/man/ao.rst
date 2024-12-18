@@ -157,6 +157,18 @@ Available audio output drivers are:
         if mpv is not started out of the bundle,
         though playback with spatial audio off always works.
 
+    Currently, due to the implementation of A/V compensation,
+    setting ``--video-sync`` to ``display-resample`` or ``display-vdrop``
+    can alleviate A/V drift on changing playback speed
+    when using this audio output driver.
+
+    ``--avfoundation-buffer=<1-2000>``
+        Set the audio buffer size in milliseconds. A higher value buffers
+        more data, and has a lower probability of buffer underruns. A smaller
+        value makes the audio stream react faster, e.g. to playback speed
+        changes, soft volume change, and muting/unmuting.
+        The default is 2000ms, which is conservative.
+
 ``openal``
     OpenAL audio output driver.
 
@@ -185,7 +197,8 @@ Available audio output drivers are:
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
-        changes. "native" lets the sound server determine buffers.
+        changes, soft volume change, and muting/unmuting.
+        "native" lets the sound server determine buffers.
 
     ``--pulse-latency-hacks=<yes|no>``
         Enable hacks to workaround PulseAudio timing bugs (default: yes). If

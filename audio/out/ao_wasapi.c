@@ -120,8 +120,6 @@ static bool thread_feed(struct ao *ao)
     double delay_ns;
     hr = get_device_delay(state, &delay_ns);
     EXIT_ON_ERROR(hr);
-    // add the buffer delay
-    delay_ns += frame_count * 1e9 / state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
