@@ -374,7 +374,7 @@ Available video output drivers are:
         Select how to write the pixels to the terminal.
 
         half-blocks
-            Uses unicode LOWER HALF BLOCK character to achieve higher vertical
+            Uses Unicode LOWER HALF BLOCK character to achieve higher vertical
             resolution. (Default.)
         plain
             Uses spaces. Causes vertical resolution to drop twofolds, but in

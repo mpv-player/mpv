@@ -176,7 +176,7 @@ Ctrl++ and Ctrl+-
 Ctrl+KP_ADD and Ctrl+KP_SUBTRACT
     Adjust audio delay (A/V sync) by +/- 0.1 seconds.
 
-Shift+g and Shift+f
+G and F
     Adjust subtitle font size by +/- 10%.
 
 u
