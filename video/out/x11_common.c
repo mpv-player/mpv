@@ -1810,22 +1810,19 @@ void vo_x11_config_vo_window(struct vo *vo)
                             !x11->pseudo_mapped, &geo);
     vo_apply_window_geometry(vo, &geo);
 
-    struct mp_rect rc = geo.win;
+    struct mp_rect rc = !x11->pseudo_mapped || opts->auto_window_resize || opts->geometry.wh_valid ||
+                        opts->geometry.xy_valid ? geo.win : x11->nofsrc;
 
     if (x11->parent) {
         vo_x11_update_geometry(vo);
         rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
 
-    bool reset_size = ((x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc))
-                       && opts->auto_window_resize) || x11->geometry_change;
-    reset_size |= (x11->old_x != rc.x0 || x11->old_y != rc.y0) &&
-                  (x11->geometry_change);
+    bool reset_size = ((x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc))) ||
+                       opts->geometry.wh_valid || opts->geometry.xy_valid;
 
     x11->old_dw = RC_W(rc);
     x11->old_dh = RC_H(rc);
-    x11->old_x = rc.x0;
-    x11->old_y = rc.y0;
 
     if (x11->window_hidden) {
         x11->nofsrc = rc;
@@ -1833,8 +1830,6 @@ void vo_x11_config_vo_window(struct vo *vo)
     } else if (reset_size) {
         vo_x11_highlevel_resize(vo, rc, geo.flags & VO_WIN_FORCE_POS);
     }
-
-    x11->geometry_change = false;
 
     if (opts->ontop)
         vo_x11_setlayer(vo, opts->ontop);
@@ -2069,7 +2064,6 @@ static void vo_x11_set_geometry(struct vo *vo)
     if (!x11->window)
         return;
 
-    x11->geometry_change = true;
     vo_x11_config_vo_window(vo);
 }
 
