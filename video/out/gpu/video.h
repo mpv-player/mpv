@@ -209,9 +209,9 @@ bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *osd,
 void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
                          struct voctrl_screenshot *args);
 
-float gl_video_scale_ambient_lux(float lmin, float lmax,
-                                 float rmin, float rmax, float lux);
-void gl_video_set_ambient_lux(struct gl_video *p, int lux);
+double gl_video_scale_ambient_lux(float lmin, float lmax,
+                                  float rmin, float rmax, double lux);
+void gl_video_set_ambient_lux(struct gl_video *p, double lux);
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data);
 bool gl_video_icc_auto_enabled(struct gl_video *p);
 bool gl_video_gamma_auto_enabled(struct gl_video *p);
