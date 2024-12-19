@@ -1740,7 +1740,7 @@ end
 -- Reprint stats immediately when VO was reconfigured, only when toggled
 mp.register_event("video-reconfig",
     function()
-        if display_timer:is_enabled() then
+        if display_timer:is_enabled() and not display_timer.oneshot then
             print_page(curr_page)
         end
     end)
