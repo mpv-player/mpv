@@ -130,7 +130,6 @@ Commands
 Known issues
 ------------
 
-- Pasting text is slow on Windows
 - Non-ASCII keyboard input has restrictions
 - The cursor keys move between Unicode code-points, not grapheme clusters
 
