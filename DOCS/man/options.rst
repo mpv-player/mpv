@@ -4212,9 +4212,10 @@ Demuxer
     all. The default is ``auto``, which behaves like ``recursive`` with
     ``--shuffle``, and like ``lazy`` otherwise.
 
-``--directory-filter-types=<video,audio,image>``
+``--directory-filter-types=<video,audio,image,archive>``
     Media file types to filter when opening directory. If the list is empty,
-    all files are added to the playlist. (Default: ``video,audio,image``)
+    all files are added to the playlist. (Default:
+    ``video,audio,image,archive``)
 
     This is a string list option. See `List Options`_ for details.
 
@@ -7730,6 +7731,13 @@ Miscellaneous
 
     This is a string list option. See `List Options`_ for details.
     Use ``--help=video-exts`` to see default extensions.
+
+``--archive-exts=ext1,ext2,...``
+    Archive file extentions to try to match when using ``--autocreate-playlist``
+    or ``--directory-filter-types``.
+
+    This is a string list option. See `List Options`_ for details. Use
+    ``--help=archive-exts`` to see the default extensions.
 
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
