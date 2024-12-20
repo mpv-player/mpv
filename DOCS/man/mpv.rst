@@ -360,6 +360,9 @@ Right click
 Middle click
     Pan through the whole video while holding the button.
 
+Middle double click
+    Reset pan.
+
 Forward/Back button
     Skip to next/previous entry in playlist.
 
