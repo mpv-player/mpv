@@ -134,6 +134,7 @@ struct vo_internal {
     bool want_redraw;               // redraw request from VO to player
     bool send_reset;                // send VOCTRL_RESET
     bool paused;
+    bool visible;
     bool wakeup_on_done;
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
@@ -859,6 +860,16 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
     return r;
 }
 
+// Check if the VO reports that the mpv window is visible.
+bool vo_is_visible(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    bool r = in->visible;
+    mp_mutex_unlock(&in->lock);
+    return r;
+}
+
 // Direct the VO thread to put the currently queued image on the screen.
 // vo_is_ready_for_frame() must have returned true before this call.
 // Ownership of frame is handed to the vo.
@@ -996,7 +1007,7 @@ static bool render_frame(struct vo *vo)
 
         stats_time_start(in->stats, "video-draw");
 
-        vo->driver->draw_frame(vo, frame);
+        in->visible = vo->driver->draw_frame(vo, frame);
 
         stats_time_end(in->stats, "video-draw");
 
