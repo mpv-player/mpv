@@ -7731,6 +7731,13 @@ Miscellaneous
     This is a string list option. See `List Options`_ for details.
     Use ``--help=video-exts`` to see default extensions.
 
+``--archive-exts=ext1,ext2,...``
+    Archive file extentions to try to match when using ``--autocreate-playlist``
+    or ``--directory-filter-types``.
+
+    This is a string list option. See `List Options`_ for details. Use
+    ``--help=archive-exts`` to see the default extensions.
+
 ``--autoload-files=<yes|no>``
     Automatically load/select external files (default: yes).
 
