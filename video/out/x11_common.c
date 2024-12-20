@@ -2071,10 +2071,7 @@ bool vo_x11_check_visible(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct mp_vo_opts *opts = x11->opts;
-
-    bool render = !x11->hidden || opts->force_render ||
-                  VS_IS_DISP(opts->video_sync);
-    return render;
+    return !x11->hidden || opts->force_render;
 }
 
 static void vo_x11_set_input_region(struct vo *vo, bool passthrough)
