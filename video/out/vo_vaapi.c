@@ -555,7 +555,7 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
     present_sync_get_info(x11->present, info);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct mp_image *mpi = frame->current;
@@ -564,7 +564,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         struct mp_image *dst = p->swdec_surfaces[p->output_surface];
         if (!dst || va_surface_upload(p, dst, mpi) < 0) {
             MP_WARN(vo, "Could not upload surface.\n");
-            return;
+            goto done;
         }
         mp_image_copy_attributes(dst, mpi);
         mpi = dst;
@@ -573,6 +573,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     p->output_surfaces[p->output_surface] = mpi;
 
     draw_osd(vo);
+
+done:
+    return VO_TRUE;
 }
 
 static void free_subpicture(struct priv *p, struct vaapi_osd_image *img)

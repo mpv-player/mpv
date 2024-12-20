@@ -485,7 +485,7 @@ int mpv_render_context_get_info(mpv_render_context *ctx,
     return res;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vo_priv *p = vo->priv;
     struct mpv_render_context *ctx = p->ctx;
@@ -498,6 +498,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     mp_mutex_unlock(&ctx->lock);
 
     update(ctx);
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

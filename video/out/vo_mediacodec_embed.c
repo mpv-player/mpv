@@ -76,7 +76,7 @@ static void flip_page(struct vo *vo)
     mp_image_unrefp(&p->next_image);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
 
@@ -86,6 +86,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     talloc_free(p->next_image);
     p->next_image = mpi;
+    return VO_TRUE;
 }
 
 static int query_format(struct vo *vo, int format)

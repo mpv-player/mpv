@@ -239,7 +239,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return ret;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
@@ -248,7 +248,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     bool render = vo_wayland_check_visible(vo);
     if (!render)
-        return;
+        return VO_FALSE;
 
     buf = p->free_buffers;
     if (buf) {
@@ -257,7 +257,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         buf = buffer_create(vo, vo->dwidth, vo->dheight);
         if (!buf) {
             wl_surface_attach(wl->surface, NULL, 0, 0);
-            return;
+            goto done;
         }
     }
     if (src) {
@@ -289,6 +289,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         osd_draw_on_image(vo->osd, p->osd, 0, 0, &buf->mpi);
     }
     wl_surface_attach(wl->surface, buf->buffer, 0, 0);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

@@ -407,8 +407,12 @@ struct vo_driver {
      * frame is freed by the caller if the callee did not assume ownership
      * of the frames, but in any case the callee can still modify the
      * contained data and references.
+     *
+     * Return false to signal to the core that rendering is being skipped for
+     * this particular frame. vo.c will sleep for the expected duration of that
+     * frame before advancing forward.
      */
-    void (*draw_frame)(struct vo *vo, struct vo_frame *frame);
+    bool (*draw_frame)(struct vo *vo, struct vo_frame *frame);
 
     /*
      * Blit/Flip buffer to the screen. Must be called after each frame!

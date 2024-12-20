@@ -870,7 +870,7 @@ drop:
     vo_increment_drop_count(vo, 1);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vdpctx *vc = vo->priv;
 
@@ -893,6 +893,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         video_to_output_surface(vo, vc->current_image);
         draw_osd(vo);
     }
+    return VO_TRUE;
 }
 
 // warning: the size and pixel format of surface must match that of the
