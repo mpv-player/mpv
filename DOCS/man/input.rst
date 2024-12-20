@@ -59,7 +59,10 @@ string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
 character), or a symbolic name (as printed by ``--input-keylist``).
 
 ``<section>`` (braced with ``{`` and ``}``) is the input section for this
-command.
+command. Notably, key bindings can be defined in the builtin ``image`` input
+section to enable them only when viewing images. For example:
+
+    SPACE {image} repeatable playlist-next force
 
 ``<command>`` is the command itself. It consists of the command name and
 multiple (or none) arguments, all separated by whitespace. String arguments
