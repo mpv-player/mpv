@@ -533,6 +533,7 @@ int vo_reconfig2(struct vo *vo, struct mp_image *img);
 int vo_control(struct vo *vo, int request, void *data);
 void vo_control_async(struct vo *vo, int request, void *data);
 bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
+bool vo_is_visible(struct vo *vo);
 void vo_queue_frame(struct vo *vo, struct vo_frame *frame);
 void vo_wait_frame(struct vo *vo);
 bool vo_still_displaying(struct vo *vo);
