@@ -1,0 +1,1 @@
+add `--sub-scale-signs` to allow `--sub-scale` to also scale events detected to be signs by libass
