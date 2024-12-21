@@ -157,6 +157,9 @@ Available audio output drivers are:
         if mpv is not started out of the bundle,
         though playback with spatial audio off always works.
 
+``audiounit`` (iOS only)
+    Native iOS audio output driver using ``AudioUnits`` and AudioToolbox.
+
 ``openal``
     OpenAL audio output driver.
 
