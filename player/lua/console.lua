@@ -549,7 +549,7 @@ local function update()
     local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local font = get_font()
     local style = '{\\r' ..
-                  (has_shadow and '\\4a&H99&\\4c&H000000&\\xshad0\\yshad1' or '') ..
+                  (has_shadow and '\\xshad0\\yshad1' or '') ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
                   '\\bord' .. opts.border_size .. '\\fsp0' ..
