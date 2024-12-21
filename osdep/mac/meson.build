@@ -17,29 +17,11 @@ if get_option('optimization') != '0'
     swift_flags += '-O'
 endif
 
-if macos_10_15_4_features.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_10_15_4_FEATURES']
-endif
-
-if macos_11_features.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_11_FEATURES']
-endif
-
-if macos_12_features.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_12_FEATURES']
-endif
-
-if macos_cocoa_cb.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_COCOA_CB']
-endif
-
-if macos_touchbar.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_TOUCHBAR']
-endif
-
-if macos_media_player.allowed()
-    swift_flags += ['-D', 'HAVE_MACOS_MEDIA_PLAYER']
-endif
+foreach feature, allowed: features
+    if allowed
+        swift_flags += ['-D', 'HAVE_@0@'.format(feature.underscorify().to_upper())]
+    endif
+endforeach
 
 extra_flags = get_option('swift-flags').split()
 swift_flags += extra_flags
