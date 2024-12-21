@@ -998,6 +998,9 @@ local function run_ytdl_hook(url)
             if ytdl_cmd then
                 msg.verbose("Found youtube-dl at: " .. ytdl_cmd)
                 ytdl.path = ytdl_cmd
+                if mp.get_opt("ytdl_hook-ytdl_path") == nil then
+                    mp.commandv('no-osd', 'change-list', 'script-opts', 'append', 'ytdl_hook-ytdl_path=' .. ytdl.path)
+                end
                 command[1] = ytdl.path
                 result = exec(command)
                 break
@@ -1012,6 +1015,9 @@ local function run_ytdl_hook(url)
                 else
                     msg.verbose("Found youtube-dl with path " .. path .. " in PATH")
                     ytdl.path = path
+                    if mp.get_opt("ytdl_hook-ytdl_path") == nil then
+                        mp.commandv('no-osd', 'change-list', 'script-opts', 'append', 'ytdl_hook-ytdl_path=' .. ytdl.path)
+                    end
                     break
                 end
             end
