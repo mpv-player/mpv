@@ -239,7 +239,7 @@ static int create_shm(struct vo *vo)
 #endif
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     mp_image_t *mpi = NULL;
@@ -273,7 +273,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
 
     if (p->opts.use_shm && !create_shm(vo))
-        return;
+        goto done;
 
     memcpy_pic(p->buffer, p->frame->planes[0], p->width * BYTES_PER_PX,
                p->height, p->width * BYTES_PER_PX, p->frame->stride[0]);
@@ -282,6 +282,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         av_base64_encode(p->output, p->output_size, p->buffer, p->buffer_size);
 
     talloc_free(mpi);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

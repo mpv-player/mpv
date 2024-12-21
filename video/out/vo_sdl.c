@@ -879,7 +879,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *vc = vo->priv;
 
@@ -894,7 +894,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
         mp_image_t texmpi;
         if (!lock_texture(vo, &texmpi))
-            return;
+            goto done;
 
         mp_image_copy(&texmpi, frame->current);
 
@@ -914,6 +914,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
 
     draw_osd(vo);
+
+done:
+    return VO_TRUE;
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)

@@ -253,14 +253,17 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct mp_image *src = frame->current;
     if (!src)
-        return;
+        goto done;
     // XXX: pan, crop etc.
     mp_sws_scale(p->sws, p->frame, src);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

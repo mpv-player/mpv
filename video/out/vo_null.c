@@ -32,8 +32,9 @@ struct priv {
     double cfg_fps;
 };
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

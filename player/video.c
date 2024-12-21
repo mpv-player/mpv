@@ -943,7 +943,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
 static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
 {
-    handle_display_sync_frame(mpctx, frame);
+    if (!vo_is_visible(mpctx->video_out)) {
+        mpctx->display_sync_active = false;
+    } else {
+        handle_display_sync_frame(mpctx, frame);
+    }
 
     if (mpctx->num_past_frames > 1 &&
         ((mpctx->past_frames[1].num_vsyncs >= 0) != mpctx->display_sync_active))

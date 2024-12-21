@@ -111,15 +111,18 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return resize(vo);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *priv = vo->priv;
     struct mp_image *mpi = frame->current;
     if (!mpi)
-        return;
+        goto done;
     memcpy_pic(priv->dither_buffer, mpi->planes[0], priv->image_width * depth, priv->image_height,
                priv->image_width * depth, mpi->stride[0]);
     caca_dither_bitmap(priv->canvas, 0, 0, priv->screen_w, priv->screen_h, priv->dither, priv->dither_buffer);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

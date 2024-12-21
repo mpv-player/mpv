@@ -708,14 +708,14 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         present_sync_get_info(x11->present, info);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct xvctx *ctx = vo->priv;
 
     wait_for_completion(vo, ctx->num_buffers - 1);
     bool render = vo_x11_check_visible(vo);
     if (!render)
-        return;
+        return VO_FALSE;
 
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
     if (frame->current) {
@@ -729,6 +729,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (frame->current != ctx->original_image)
         ctx->original_image = frame->current;
+
+    return VO_TRUE;
 }
 
 static int query_format(struct vo *vo, int format)

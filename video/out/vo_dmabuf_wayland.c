@@ -592,7 +592,7 @@ done:
     return draw;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
@@ -603,7 +603,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!vo_wayland_check_visible(vo)) {
         if (frame->current)
             talloc_free(frame);
-        return;
+        return VO_FALSE;
     }
 
     if (p->destroy_buffers)
@@ -641,6 +641,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             p->osd_surface_is_mapped = false;
         }
     }
+
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
