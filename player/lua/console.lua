@@ -561,11 +561,12 @@ local function update()
     -- of the drawing. So the cursor doesn't affect layout too much, make it as
     -- thin as possible and make it appear to be 1px wide by giving it 0.5px
     -- horizontal borders.
+    local color, alpha = mpv_color_to_ass(mp.get_property('osd-color'))
     local cheight = opts.font_size * 8
     local cglyph = '{\\rDefault' ..
                    (mp.get_property_native('focused') == false
-                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&') ..
-                   '\\1c&Heeeeee&\\3c&Heeeeee&' ..
+                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H' .. alpha .. '&') ..
+                   '\\1c&Heeeeee&\\3c&H' .. color .. '&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
                    'm 0 0 l 1 0 l 1 ' .. cheight .. ' l 0 ' .. cheight ..
                    '{\\p0}'
