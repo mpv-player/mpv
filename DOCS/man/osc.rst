@@ -274,12 +274,12 @@ Configurable Options
 ``valign``
     Default: 0.8
 
-    Vertical alignment, -1 (top) to 1 (bottom)
+    Vertical alignment in box and slimbox layouts, -1 (top) to 1 (bottom).
 
 ``halign``
     Default: 0.0
 
-    Horizontal alignment, -1 (left) to 1 (right)
+    Horizontal alignment in box and slimbox layouts, -1 (left) to 1 (right).
 
 ``barmargin``
     Default: 0
