@@ -35,6 +35,12 @@
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 
+struct queued_aframe {
+    double pts;
+    double speed;
+    double start_time;
+};
+
 struct buffer_state {
     // Buffer and AO
     mp_mutex lock;
@@ -68,6 +74,9 @@ struct buffer_state {
                                 // This field is only set in ao_set_paused(),
                                 // and is considered as a temporary solution;
                                 // DO NOT USE IT IN OTHER PLACES.
+
+    struct queued_aframe *queued_aframes;
+    int num_queued_aframes;
 
     bool initial_unblocked;
 
@@ -118,13 +127,40 @@ struct mp_async_queue *ao_get_queue(struct ao *ao)
     return p->queue;
 }
 
+// called locked
+static void prune_queued_sameples(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+    int pos;
+    double cur_time = MP_TIME_NS_TO_S(mp_time_ns());
+
+    for (pos = 0; pos <= p->num_queued_aframes; pos++) {
+        if (pos == p->num_queued_aframes || p->queued_aframes[pos].start_time > cur_time)
+            break;
+    }
+
+    // queued_aframes[pos - 1].start_time <= cur_time; keep it
+    // Remove 0 to pos - 2
+    if (pos > 1) {
+        int to_delete = pos - 1;
+        memmove(p->queued_aframes, p->queued_aframes + to_delete, sizeof(struct queued_aframe) * to_delete);
+        p->num_queued_aframes -= to_delete;
+    }
+}
+
 // Special behavior with data==NULL: caller uses p->pending.
-static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
+static int read_buffer(struct ao *ao, void **data, int samples, int64_t start_time_ns, bool *eof,
                        bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     int pos = 0;
+
+    if (eof == NULL) {
+        eof = &(bool){0};
+    }
     *eof = false;
+
+    prune_queued_sameples(ao);
 
     while (p->playing && !p->paused && pos < samples) {
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
@@ -151,6 +187,17 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
             memcpy((char *)data[n] + pos * ao->sstride,
                    fdata[n], copy * ao->sstride);
         }
+
+        if (start_time_ns != -1) {
+            struct queued_aframe qf = {
+                .pts = mp_aframe_get_pts(p->pending),
+                .speed = mp_aframe_get_speed(p->pending),
+                .start_time = MP_TIME_NS_TO_S(start_time_ns),
+            };
+            MP_TARRAY_APPEND(ao, p->queued_aframes, p->num_queued_aframes, qf);
+            start_time_ns += av_rescale(copy, MP_TIME_S_TO_NS(1), ao->samplerate);
+        }
+
         mp_aframe_skip_samples(p->pending, copy);
         pos += copy;
         *eof = false;
@@ -162,6 +209,16 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
         void **pd = (void *)mp_aframe_get_data_rw(p->pending);
         if (pd)
             ao_post_process_data(ao, pd, mp_aframe_get_size(p->pending));
+
+        if (start_time_ns != -1) {
+            struct queued_aframe qf = {
+                .pts = mp_aframe_get_pts(p->pending),
+                .speed = mp_aframe_get_speed(p->pending),
+                .start_time = MP_TIME_NS_TO_S(start_time_ns),
+            };
+            MP_TARRAY_APPEND(ao, p->queued_aframes, p->num_queued_aframes, qf);
+        }
+
         return 1;
     }
 
@@ -179,15 +236,22 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
 }
 
 static int ao_read_data_locked(struct ao *ao, void **data, int samples,
-                               int64_t out_time_ns, bool *eof, bool pad_silence)
+                               int64_t start_time_ns, bool *eof, bool pad_silence)
 {
     struct buffer_state *p = ao->buffer_state;
     assert(!ao->driver->write);
 
-    int pos = read_buffer(ao, data, samples, eof, pad_silence);
+    int pos = read_buffer(ao, data, samples, start_time_ns, eof, pad_silence);
 
-    if (pos > 0)
-        p->end_time_ns = out_time_ns;
+    if (pos > 0) {
+        p->end_time_ns = start_time_ns
+            + MP_TIME_S_TO_NS(pad_silence
+                ? samples   // If pad_silence is true, the ao is expecting a fixed number of samples.
+                : (data     // If pad_silence is false, the ao can handle partial data.
+                    ? pos
+                    : mp_aframe_get_size(p->pending) // If data is not set, the ao is reading frames directly.
+                )) / ao->samplerate;
+    }
 
     if (pos < samples && p->playing && !p->paused) {
         p->playing = false;
@@ -205,9 +269,9 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
 // If this is called in paused mode, it will always return 0.
-// The caller should set out_time_ns to the expected delay until the last sample
+// The caller should set start_time_ns to the expected delay until the first sample
 // reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking)
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t start_time_ns, bool *eof, bool pad_silence, bool blocking)
 {
     struct buffer_state *p = ao->buffer_state;
 
@@ -217,29 +281,47 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, b
         return 0;
     }
 
-    bool eof_buf;
-    if (eof == NULL) {
-        // This is a public API. We want to reduce the cognitive burden of the caller.
-        eof = &eof_buf;
-    }
-
-    int pos = ao_read_data_locked(ao, data, samples, out_time_ns, eof, pad_silence);
+    int pos = ao_read_data_locked(ao, data, samples, start_time_ns, eof, pad_silence);
 
     mp_mutex_unlock(&p->lock);
 
     return pos;
 }
 
+// Read a audio frame. Returns the audio frame.
+// If there is not data (buffer underrun or EOF), NULL is returned.
+// THE CALLER IS RESPONSIBLE FOR DEALLOCATING THE RETURNED FRAME.
+struct mp_aframe *ao_read_frame(struct ao *ao, int64_t start_time_ns, bool *eof, bool blocking)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    if (blocking) {
+        mp_mutex_lock(&p->lock);
+    } else if (mp_mutex_trylock(&p->lock)) {
+        return 0;
+    }
+
+    if (!p->pending) {
+        (void)ao_read_data_locked(ao, NULL, 1, start_time_ns, eof, false);
+    }
+    struct mp_aframe *ret = p->pending;
+    p->pending = NULL;
+
+    mp_mutex_unlock(&p->lock);
+
+    return ret;
+}
+
 // Same as ao_read_data(), but convert data according to *fmt.
 // fmt->src_fmt and fmt->channels must be the same as the AO parameters.
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
-                           void **data, int samples, int64_t out_time_ns)
+                           void **data, int samples, int64_t start_time_ns)
 {
     struct buffer_state *p = ao->buffer_state;
     void *ndata[MP_NUM_CHANNELS] = {0};
 
     if (!ao_need_conversion(fmt))
-        return ao_read_data(ao, data, samples, out_time_ns, NULL, true, true);
+        return ao_read_data(ao, data, samples, start_time_ns, NULL, true, true);
 
     assert(ao->format == fmt->src_fmt);
     assert(ao->channels.num == fmt->channels);
@@ -259,7 +341,7 @@ int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
     for (int n = 0; n < planes; n++)
         ndata[n] = p->convert_buffer + n * src_plane_size;
 
-    int res = ao_read_data(ao, ndata, samples, out_time_ns, NULL, true, true);
+    int res = ao_read_data(ao, ndata, samples, start_time_ns, NULL, true, true);
 
     ao_convert_inplace(fmt, ndata, samples);
     for (int n = 0; n < planes; n++)
@@ -320,6 +402,32 @@ double ao_get_delay(struct ao *ao)
     return driver_delay + pending / (double)ao->samplerate;
 }
 
+double ao_get_playing_pts(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+
+    mp_mutex_lock(&p->lock);
+
+    int pos;
+    double cur_time = MP_TIME_NS_TO_S(mp_time_ns());
+
+    for (pos = 0; pos <= p->num_queued_aframes; pos++) {
+        if (pos == p->num_queued_aframes || p->queued_aframes[pos].start_time > cur_time)
+            break;
+    }
+
+    if (pos == 0) {
+        return MP_NOPTS_VALUE;
+    }
+
+    struct queued_aframe* playing = &p->queued_aframes[pos - 1];
+    double pts = playing->pts + (cur_time - playing->start_time) * playing->speed;
+
+    mp_mutex_unlock(&p->lock);
+
+    return pts;
+}
+
 // Fully stop playback; clear buffers, including queue.
 void ao_reset(struct ao *ao)
 {
@@ -349,6 +457,9 @@ void ao_reset(struct ao *ao)
     p->recover_pause = false;
     p->hw_paused = false;
     p->end_time_ns = 0;
+
+    TA_FREEP(&p->queued_aframes);
+    p->num_queued_aframes = 0;
 
     mp_mutex_unlock(&p->lock);
 
@@ -444,7 +555,14 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
                 ao->driver->set_pause(ao, true);
                 p->queued_time_ns = p->end_time_ns - mp_time_ns();
             } else {
-                p->end_time_ns = p->queued_time_ns + mp_time_ns();
+                int64_t new_end_time_ns = p->queued_time_ns + mp_time_ns();
+                double time_adjustment = MP_TIME_NS_TO_S(new_end_time_ns - p->end_time_ns);
+                p->end_time_ns = new_end_time_ns;
+
+                for (int i = 0; i < p->num_queued_aframes; i++) {
+                    p->queued_aframes[i].start_time += time_adjustment;
+                }
+
                 ao->driver->set_pause(ao, false);
             }
         } else {
@@ -648,7 +766,7 @@ static bool ao_play_data(struct ao *ao)
     bool got_eof = false;
     if (ao->driver->write_frames) {
         TA_FREEP(&p->pending);
-        samples = read_buffer(ao, NULL, 1, &got_eof, false);
+        samples = read_buffer(ao, NULL, 1, -1, &got_eof, false);
         planes = (void **)&p->pending;
     } else {
         if (!realloc_buf(ao, space)) {
@@ -665,7 +783,7 @@ static bool ao_play_data(struct ao *ao)
         }
 
         if (!samples) {
-            samples = read_buffer(ao, planes, space, &got_eof, true);
+            samples = read_buffer(ao, planes, space, -1, &got_eof, true);
             if (p->paused || (ao->stream_silence && !p->playing))
                 samples = space; // read_buffer() sets remainder to silent
         }
