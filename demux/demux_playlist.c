@@ -44,12 +44,13 @@ enum dir_mode {
 };
 
 enum autocreate_mode {
-    AUTO_NONE    = 0,
-    AUTO_VIDEO   = 1 << 0,
-    AUTO_AUDIO   = 1 << 1,
-    AUTO_IMAGE   = 1 << 2,
-    AUTO_ARCHIVE = 1 << 3,
-    AUTO_ANY     = 1 << 4,
+    AUTO_NONE     = 0,
+    AUTO_VIDEO    = 1 << 0,
+    AUTO_AUDIO    = 1 << 1,
+    AUTO_IMAGE    = 1 << 2,
+    AUTO_ARCHIVE  = 1 << 3,
+    AUTO_PLAYLIST = 1 << 4,
+    AUTO_ANY      = 1 << 5,
 };
 
 #define OPT_BASE_STRUCT struct demux_playlist_opts
@@ -73,7 +74,7 @@ struct m_sub_options demux_playlist_conf = {
     .defaults = &(const struct demux_playlist_opts){
         .dir_mode = DIR_AUTO,
         .directory_filter = (char *[]){
-            "video", "audio", "image", "archive", NULL
+            "video", "audio", "image", "archive", "playlist", NULL
         },
     },
 };
@@ -440,6 +441,8 @@ static bool test_path(struct pl_parser *p, char *path, int autocreate)
         return true;
     if (autocreate & AUTO_ARCHIVE && str_in_list(ext, p->mp_opts->archive_exts))
         return true;
+    if (autocreate & AUTO_PLAYLIST && str_in_list(ext, p->mp_opts->playlist_exts))
+        return true;
 
     return false;
 }
@@ -525,6 +528,8 @@ static enum autocreate_mode get_directory_filter(struct pl_parser *p)
         autocreate |= AUTO_IMAGE;
     if (str_in_list(bstr0("archive"), p->opts->directory_filter))
         autocreate |= AUTO_ARCHIVE;
+    if (str_in_list(bstr0("playlist"), p->opts->directory_filter))
+        autocreate |= AUTO_PLAYLIST;
     return autocreate;
 }
 
@@ -549,6 +554,8 @@ static int parse_dir(struct pl_parser *p)
                 autocreate = AUTO_IMAGE;
             } else if (str_in_list(ext, p->mp_opts->archive_exts)) {
                 autocreate = AUTO_ARCHIVE;
+            } else if (str_in_list(ext, p->mp_opts->playlist_exts)) {
+                autocreate = AUTO_PLAYLIST;
             }
             break;
         }

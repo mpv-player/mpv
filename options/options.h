@@ -333,6 +333,7 @@ typedef struct MPOpts {
     char **coverart_whitelist;
     char **video_exts;
     char **archive_exts;
+    char **playlist_exts;
     bool osd_bar_visible;
 
     int w32_priority;

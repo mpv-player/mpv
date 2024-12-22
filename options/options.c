@@ -705,6 +705,7 @@ static const m_option_t mp_opts[] = {
     {"cover-art-whitelist", OPT_STRINGLIST(coverart_whitelist)},
     {"video-exts", OPT_STRINGLIST(video_exts)},
     {"archive-exts", OPT_STRINGLIST(archive_exts)},
+    {"playlist-exts", OPT_STRINGLIST(playlist_exts)},
 
     {"", OPT_SUBSTRUCT(subs_rend, mp_subtitle_sub_opts)},
     {"", OPT_SUBSTRUCT(subs_shared, mp_subtitle_shared_sub_opts)},
@@ -1040,6 +1041,9 @@ static const struct MPOpts mp_default_opts = {
     },
     .archive_exts = (char *[]){
         "zip", "rar", "7z", "cbz", "cbr", NULL
+    },
+    .playlist_exts = (char *[]){
+        "m3u", "m3u8", "pls", "edl", NULL
     },
 
     .sub_auto_exts = (char *[]){
