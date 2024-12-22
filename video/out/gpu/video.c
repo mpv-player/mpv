@@ -434,8 +434,7 @@ const struct m_sub_options gl_video_conf = {
         {"gpu-dumb-mode", OPT_CHOICE(dumb_mode,
             {"auto", 0}, {"yes", 1}, {"no", -1})},
         {"gamma-factor", OPT_FLOAT(gamma), M_RANGE(0.1, 2.0)},
-        {"gamma-auto", OPT_BOOL(gamma_auto),
-            .deprecation_message = "replacement: gamma-auto.lua"},
+        {"gamma-auto", OPT_REMOVED("Replaced by gamma-auto.lua")},
         {"target-prim", OPT_CHOICE_C(target_prim, pl_csp_prim_names)},
         {"target-trc", OPT_CHOICE_C(target_trc, pl_csp_trc_names)},
         {"target-peak", OPT_CHOICE(target_peak, {"auto", 0}),
@@ -667,11 +666,6 @@ static void uninit_rendering(struct gl_video *p)
     gl_video_reset_hooks(p);
 
     gl_sc_reset_error(p->sc);
-}
-
-bool gl_video_gamma_auto_enabled(struct gl_video *p)
-{
-    return p->opts.gamma_auto;
 }
 
 // Warning: profile.start must point to a ta allocation, and the function
@@ -3956,7 +3950,6 @@ static void check_gl_features(struct gl_video *p)
                 },
             },
             .gamma = p->opts.gamma,
-            .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
             .fbo_format = p->opts.fbo_format,
             .background = p->opts.background,
@@ -4269,15 +4262,6 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
             mp_fatal(log, "No error diffusion kernel named '%s' found!\n", s);
     }
     return r;
-}
-
-void gl_video_set_ambient_lux(struct gl_video *p, double lux)
-{
-    if (p->opts.gamma_auto) {
-        p->opts.gamma = gl_video_scale_ambient_lux(16.0, 256.0, 1.0, 1.2, lux);
-        MP_TRACE(p, "ambient light changed: %f lux (gamma: %f)\n", lux,
-                 p->opts.gamma);
-    }
 }
 
 static void *gl_video_dr_alloc_buffer(struct gl_video *p, size_t size)
