@@ -563,7 +563,7 @@ local function update()
     -- horizontal borders.
     local color, alpha = mpv_color_to_ass(mp.get_property('osd-color'))
     local cheight = opts.font_size * 8
-    local cglyph = '{\\rDefault' ..
+    local cglyph = '{\\r\\blur0' ..
                    (mp.get_property_native('focused') == false
                     and '\\alpha&HFF&' or '\\1a&H44&\\3a&H' .. alpha .. '&') ..
                    '\\1c&Heeeeee&\\3c&H' .. color .. '&' ..
