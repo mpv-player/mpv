@@ -565,8 +565,8 @@ local function update()
     local cheight = opts.font_size * 8
     local cglyph = '{\\r\\blur0' ..
                    (mp.get_property_native('focused') == false
-                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H' .. alpha .. '&') ..
-                   '\\1c&Heeeeee&\\3c&H' .. color .. '&' ..
+                    and '\\alpha&HFF&' or '\\3a&H' .. alpha .. '&') ..
+                   '\\3c&H' .. color .. '&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
                    'm 0 0 l 1 0 l 1 ' .. cheight .. ' l 0 ' .. cheight ..
                    '{\\p0}'
