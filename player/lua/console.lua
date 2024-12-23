@@ -1139,16 +1139,8 @@ local function get_clipboard(clip)
         if not res.error then
             return res.stdout
         end
-    elseif platform == 'windows' then
+    elseif platform == 'windows' or platform == 'darwin' then
         return mp.get_property('clipboard/text', '')
-    elseif platform == 'darwin' then
-        local res = utils.subprocess({
-            args = { 'pbpaste' },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
     end
     return ''
 end
