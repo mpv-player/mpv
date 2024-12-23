@@ -3944,7 +3944,7 @@ Property list
     This has a number of sub-properties:
 
     ``clipboard/text`` (RW)
-        The text content in the clipboard (Windows and Wayland only).
+        The text content in the clipboard (Windows, Wayland and macOS only).
         Writing to this property sets the text clipboard content (Windows only).
 
     .. note::
