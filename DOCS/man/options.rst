@@ -2001,8 +2001,8 @@ Audio
     Enable exclusive output mode. In this mode, the system is usually locked
     out, and only mpv will be able to output audio.
 
-    This only works for some audio outputs, such as ``wasapi``, ``coreaudio``
-    and ``pipewire``. Other audio outputs silently ignore this option.
+    This only works for some audio outputs, such as ``wasapi``, ``coreaudio``,
+    ``pipewire`` and ``audiounit``. Other audio outputs silently ignore this option.
     They either have no concept of exclusive mode, or the mpv side of the
     implementation is missing.
 

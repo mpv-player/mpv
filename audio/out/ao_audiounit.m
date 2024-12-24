@@ -115,7 +115,12 @@ static bool init_audiounit(struct ao *ao)
 
     MP_VERBOSE(ao, "max channels: %ld, requested: %d\n", maxChannels, (int)ao->channels.num);
 
-    [instance setCategory:AVAudioSessionCategoryPlayback error:nil];
+    AVAudioSessionCategoryOptions options = 0;
+    if (!(ao->init_flags & AO_INIT_EXCLUSIVE)) {
+        options |= AVAudioSessionCategoryOptionMixWithOthers;
+    }
+
+    [instance setCategory:AVAudioSessionCategoryPlayback withOptions:options error:nil];
     [instance setMode:AVAudioSessionModeMoviePlayback error:nil];
     [instance setActive:YES error:nil];
     [instance setPreferredOutputNumberOfChannels:prefChannels error:nil];
