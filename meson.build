@@ -1571,7 +1571,6 @@ if features['cocoa'] and features['swift']
                            'osdep/mac/clipboard.swift',
                            'osdep/mac/event_helper.swift',
                            'osdep/mac/input_helper.swift',
-                           'osdep/mac/libmpv_helper.swift',
                            'osdep/mac/log_helper.swift',
                            'osdep/mac/menu_bar.swift',
                            'osdep/mac/option_helper.swift',
@@ -1616,7 +1615,8 @@ macos_cocoa_cb = get_option('macos-cocoa-cb').require(
 )
 features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 if features['macos-cocoa-cb']
-    swift_sources += files('video/out/cocoa_cb_common.swift',
+    swift_sources += files('osdep/mac/libmpv_helper.swift',
+                           'video/out/cocoa_cb_common.swift',
                            'video/out/mac/gl_layer.swift')
 endif
 if features['cocoa'] and features['vulkan'] and features['swift']

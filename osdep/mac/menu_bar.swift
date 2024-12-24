@@ -232,7 +232,7 @@ class MenuBar: NSObject {
             Config(type: .separator),
             Config(name: "Report Issue…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/issues/new/choose")
         ]
-        if ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" {
+        if AppHub.shared.isBundle {
             helpMenuConfigs += [
                 Config(name: "Show log File…", action: #selector(showFile(_:)), target: self, url: NSHomeDirectory() + "/Library/Logs/mpv.log")
             ]
