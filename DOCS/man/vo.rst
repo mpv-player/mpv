@@ -14,8 +14,8 @@ in the list.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output driver is ``--vo=gpu``, which is the default. All
-    other drivers are for compatibility or special purposes. If the default
+    The recommended output driver is ``--vo=gpu-next``, which is the default.
+    All other drivers are for compatibility or special purposes. If the default
     does not work, it will fallback to other drivers (in the same order as
     listed by ``--vo=help``).
 
@@ -24,6 +24,17 @@ in the list.
     rendering API), it must be explicitly specified.
 
 Available video output drivers are:
+
+``gpu-next``
+    Video renderer based on ``libplacebo``. This supports almost the same set
+    of features as ``--vo=gpu``. See `GPU renderer options`_ for a list.
+
+    Should generally be faster and higher quality, while also implementing some
+    features specific to ``gpu-next``, but some features may be intentionally
+    omitted or there may be functional differences to ``--vo=gpu``.
+    See here for a list of known differences:
+
+    https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
 ``gpu``
     General purpose, customizable, GPU-accelerated video output driver. It
@@ -54,17 +65,6 @@ Available video output drivers are:
     support, and some macOS setups being very slow with ``rgb16`` but fast
     with ``rgb32f``. If you have problems, you can also try enabling the
     ``--gpu-dumb-mode=yes`` option.
-
-``gpu-next``
-    Experimental video renderer based on ``libplacebo``. This supports almost
-    the same set of features as ``--vo=gpu``. See `GPU renderer options`_ for a
-    list.
-
-    Should generally be faster and higher quality, but some features may still
-    be missing or misbehave. Expect (and report!) bugs. See here for a list of
-    known differences and bugs:
-
-    https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
 ``xv`` (X11 only)
     Uses the XVideo extension to enable hardware-accelerated display. This is
