@@ -3528,6 +3528,13 @@ static int mp_property_cwd(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_current_watch_later_dir(void *ctx, struct m_property *prop,
+                                               int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_strdup_ro(action, arg, mp_get_playback_resume_dir(mpctx));
+}
+
 static int mp_property_protocols(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
@@ -4388,6 +4395,7 @@ static const struct m_property mp_properties_base[] = {
     {"ambient-light", mp_property_ambient_light},
 
     {"working-directory", mp_property_cwd},
+    {"current-watch-later-dir", mp_property_current_watch_later_dir},
 
     {"protocol-list", mp_property_protocols},
     {"decoder-list", mp_property_decoders},
