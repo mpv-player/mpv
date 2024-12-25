@@ -17,6 +17,9 @@ extern const int mp_sws_fast_flags;
 
 bool mp_sws_supported_format(int imgfmt);
 
+int mp_image_swscale(struct mp_image *dst, struct mp_image *src,
+                     struct mpv_global *global, struct mp_log *log);
+
 int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                            float gblur);
 

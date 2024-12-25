@@ -424,6 +424,18 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
     return 0;
 }
 
+int mp_image_swscale(struct mp_image *dst, struct mp_image *src,
+                     struct mpv_global *global, struct mp_log *log)
+{
+    struct mp_sws_context *ctx = mp_sws_alloc(NULL);
+    ctx->log = log;
+    if (global)
+        mp_sws_enable_cmdline_opts(ctx, global);
+    int res = mp_sws_scale(ctx, dst, src);
+    talloc_free(ctx);
+    return res;
+}
+
 int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                            float gblur)
 {
