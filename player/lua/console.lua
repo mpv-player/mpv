@@ -549,7 +549,7 @@ local function update()
     local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local font = get_font()
     local style = '{\\r' ..
-                  (has_shadow and '\\4a&H99&\\4c&H000000&\\xshad0\\yshad1' or '') ..
+                  (has_shadow and '\\xshad0\\yshad1' or '') ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
                   '\\bord' .. opts.border_size .. '\\fsp0' ..
@@ -563,8 +563,8 @@ local function update()
     local cheight = opts.font_size * 8
     local cglyph = '{\\rDefault' ..
                    (mp.get_property_native('focused') == false
-                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&\\4a&H99&') ..
-                   '\\1c&Heeeeee&\\3c&Heeeeee&\\4c&H000000&' ..
+                    and '\\alpha&HFF&' or '\\1a&H44&\\3a&H44&') ..
+                   '\\1c&Heeeeee&\\3c&Heeeeee&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
                    'm 0 0 l 1 0 l 1 ' .. cheight .. ' l 0 ' .. cheight ..
                    '{\\p0}'
