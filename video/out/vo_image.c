@@ -90,16 +90,19 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     if (!frame->current)
-        return;
+        goto done;
 
     p->current = frame->current;
 
     struct mp_osd_res dim = osd_res_from_image_params(vo->params);
     osd_draw_on_image(vo->osd, dim, frame->current->pts, OSD_DRAW_SUB_ONLY, p->current);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

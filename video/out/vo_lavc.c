@@ -182,7 +182,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *voframe)
+static bool draw_frame(struct vo *vo, struct vo_frame *voframe)
 {
     struct priv *vc = vo->priv;
     struct encoder_context *enc = vc->enc;
@@ -190,7 +190,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     AVCodecContext *avc = enc->encoder;
 
     if (voframe->redraw || voframe->repeat || voframe->num_frames < 1)
-        return;
+        goto done;
 
     struct mp_image *mpi = voframe->frames[0];
 
@@ -198,7 +198,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
 
     if (vc->shutdown)
-        return;
+        goto done;
 
     // Lock for shared timestamp fields.
     mp_mutex_lock(&ectx->lock);
@@ -241,6 +241,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     frame->quality = avc->global_quality;
     encoder_encode(enc, frame);
     av_frame_free(&frame);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)

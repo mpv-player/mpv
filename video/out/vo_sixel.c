@@ -378,7 +378,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return ret;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *priv = vo->priv;
     SIXELSTATUS status;
@@ -391,7 +391,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     bool resized     = false;
     update_canvas_dimensions(vo);
     if (!priv->canvas_ok)
-        return;
+        goto done;
 
     if (prev_rows != priv->num_rows || prev_cols != priv->num_cols ||
         prev_width != vo->dwidth || prev_height != vo->dheight)
@@ -409,7 +409,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->repeat && !frame->redraw && !resized) {
         // Frame is repeated, and no need to update OSD either
         priv->skip_frame_draw = true;
-        return;
+        goto done;
     } else {
         // Either frame is new, or OSD has to be redrawn
         priv->skip_frame_draw = false;
@@ -457,6 +457,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (mpi)
         talloc_free(mpi);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
