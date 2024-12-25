@@ -20,8 +20,10 @@ import Cocoa
 class Clipboard: NSObject {
     var pasteboard: NSPasteboard { return NSPasteboard.general }
     var changeCount: Int = 0
+    var ctx: UnsafeMutablePointer<clipboard_ctx>
 
-    @objc override init() {
+    @objc init(context: UnsafeMutablePointer<clipboard_ctx>) {
+        ctx = context
         super.init()
         changeCount = pasteboard.changeCount
     }
