@@ -407,10 +407,11 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
                 talloc_free(image);
                 return NULL;
             }
-            struct mp_sws_context *sws = mp_sws_alloc(NULL);
-            mp_sws_scale(sws, nimage, image);
+            if (mp_image_swscale(nimage, image, mpctx->global, mpctx->log) < 0) {
+                talloc_free(nimage);
+                nimage = NULL;
+            }
             talloc_free(image);
-            talloc_free(sws);
             image = nimage;
         }
     }
@@ -451,14 +452,7 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     dst->params = p;
 
-    struct mp_sws_context *sws = mp_sws_alloc(NULL);
-    sws->log = log;
-    if (global)
-        mp_sws_enable_cmdline_opts(sws, global);
-    bool ok = mp_sws_scale(sws, dst, image) >= 0;
-    talloc_free(sws);
-
-    if (!ok) {
+    if (mp_image_swscale(dst, image, global, log) < 0) {
         mp_err(log, "Error when converting image.\n");
         talloc_free(dst);
         return NULL;
