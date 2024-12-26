@@ -58,7 +58,7 @@ class TitleBar: NSVisualEffectView {
         window.contentView?.addSubview(self, positioned: .above, relativeTo: nil)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        set(appearance: Int(option.mac.macos_title_bar_appearance))
+        set(appearance: option.mac.macos_title_bar_appearance)
         set(material: Int(option.mac.macos_title_bar_material))
         set(color: option.mac.macos_title_bar_color)
     }
@@ -91,12 +91,20 @@ class TitleBar: NSVisualEffectView {
         common.window?.isMoving = false
     }
 
-    func set(appearance: Any) {
-        if appearance is Int {
-            window?.appearance = appearanceFrom(string: String(appearance as? Int ?? 0))
-        } else {
-            window?.appearance = appearanceFrom(string: appearance as? String ?? "auto")
-        }
+    func set(appearance: Int32) {
+        window?.appearance = { switch appearance {
+            case 1: return NSAppearance(named: .aqua)
+            case 2: return NSAppearance(named: .darkAqua)
+            case 3: return NSAppearance(named: .vibrantLight)
+            case 4: return NSAppearance(named: .vibrantDark)
+            case 5: return NSAppearance(named: .accessibilityHighContrastAqua)
+            case 6: return NSAppearance(named: .accessibilityHighContrastDarkAqua)
+            case 7: return NSAppearance(named: .accessibilityHighContrastVibrantLight)
+            case 8: return NSAppearance(named: .accessibilityHighContrastVibrantDark)
+            case 0: return nil
+            default: return nil
+            }
+        }()
     }
 
     func set(material: Any) {
@@ -165,31 +173,6 @@ class TitleBar: NSVisualEffectView {
                                                  selector: #selector(hide),
                                                    object: nil)
         perform(#selector(hide), with: nil, afterDelay: 0.5)
-    }
-
-    func appearanceFrom(string: String) -> NSAppearance? {
-        switch string {
-        case "1", "aqua":
-            return NSAppearance(named: .aqua)
-        case "2", "darkAqua":
-            return NSAppearance(named: .darkAqua)
-        case "3", "vibrantLight":
-            return NSAppearance(named: .vibrantLight)
-        case "4", "vibrantDark":
-            return NSAppearance(named: .vibrantDark)
-        case "5", "aquaHighContrast":
-            return NSAppearance(named: .accessibilityHighContrastAqua)
-        case "6", "darkAquaHighContrast":
-            return NSAppearance(named: .accessibilityHighContrastDarkAqua)
-        case "7", "vibrantLightHighContrast":
-            return NSAppearance(named: .accessibilityHighContrastVibrantLight)
-        case "8", "vibrantDarkHighContrast":
-            return NSAppearance(named: .accessibilityHighContrastVibrantDark)
-        case "0", "auto":
-            return nil
-        default:
-            return nil
-        }
     }
 
     func materialFrom(string: String) -> NSVisualEffectView.Material {
