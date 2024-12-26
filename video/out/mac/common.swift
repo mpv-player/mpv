@@ -664,7 +664,7 @@ class Common: NSObject {
         while option.nextChangedMacOption(property: &opt) {
             switch opt {
             case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_appearance):
-                titleBar?.set(appearance: Int(option.mac.macos_title_bar_appearance))
+                titleBar?.set(appearance: option.mac.macos_title_bar_appearance)
             case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_material):
                 titleBar?.set(material: Int(option.mac.macos_title_bar_material))
             case TypeHelper.toPointer(&option.macPtr.pointee.macos_title_bar_color):
