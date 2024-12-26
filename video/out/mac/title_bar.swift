@@ -108,25 +108,25 @@ class TitleBar: NSVisualEffectView {
     }
 
     func set(material: Int32) {
-        self.material = { switch material {
-            case 0: return .titlebar
-            case 1: return .selection
-            case 2: return .menu
-            case 3: return .popover
-            case 4: return .sidebar
-            case 5: return .headerView
-            case 6: return .sheet
-            case 7: return .windowBackground
-            case 8: return .hudWindow
-            case 9: return .fullScreenUI
-            case 10: return .toolTip
-            case 11: return .contentBackground
-            case 12: return .underWindowBackground
-            case 13: return .underPageBackground
-            case 14: return .dark
-            case 15: return .light
-            case 16: return .mediumLight
-            case 17: return .ultraDark
+        self.material = { switch Int(material) {
+            case MAC_MAT_TITLEBAR: return .titlebar
+            case MAC_MAT_SELECTION: return .selection
+            case MAC_MAT_MENU: return .menu
+            case MAC_MAT_POPOVER: return .popover
+            case MAC_MAT_SIDEBAR: return .sidebar
+            case MAC_MAT_HEADER_VIEW: return .headerView
+            case MAC_MAT_SHEET: return .sheet
+            case MAC_MAT_WINDOW_BACKGROUND: return .windowBackground
+            case MAC_MAT_HUD_WINDOW: return .hudWindow
+            case MAC_MAT_FULL_SCREEN: return .fullScreenUI
+            case MAC_MAT_TOOL_TIP: return .toolTip
+            case MAC_MAT_CONTENT_BACKGROUND: return .contentBackground
+            case MAC_MAT_UNDER_WINDOW_BACKGROUND: return .underWindowBackground
+            case MAC_MAT_UNDER_PAGE_BACKGROUND: return .underPageBackground
+            case MAC_MAT_DARK: return .dark
+            case MAC_MAT_LIGHT: return .light
+            case MAC_MAT_MEDIUM_LIGHT: return .mediumLight
+            case MAC_MAT_ULTRA_DARK: return .ultraDark
             default: return .titlebar
             }
         }()
