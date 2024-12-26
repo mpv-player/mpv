@@ -92,16 +92,16 @@ class TitleBar: NSVisualEffectView {
     }
 
     func set(appearance: Int32) {
-        window?.appearance = { switch appearance {
-            case 1: return NSAppearance(named: .aqua)
-            case 2: return NSAppearance(named: .darkAqua)
-            case 3: return NSAppearance(named: .vibrantLight)
-            case 4: return NSAppearance(named: .vibrantDark)
-            case 5: return NSAppearance(named: .accessibilityHighContrastAqua)
-            case 6: return NSAppearance(named: .accessibilityHighContrastDarkAqua)
-            case 7: return NSAppearance(named: .accessibilityHighContrastVibrantLight)
-            case 8: return NSAppearance(named: .accessibilityHighContrastVibrantDark)
-            case 0: return nil
+        window?.appearance = { switch Int(appearance) {
+            case MAC_APPEAR_AQUA: return NSAppearance(named: .aqua)
+            case MAC_APPEAR_DARK_AQUA: return NSAppearance(named: .darkAqua)
+            case MAC_APPEAR_VIBRANT_LIGHT: return NSAppearance(named: .vibrantLight)
+            case MAC_APPEAR_VIBRANT_DARK: return NSAppearance(named: .vibrantDark)
+            case MAC_APPEAR_AQUA_HC: return NSAppearance(named: .accessibilityHighContrastAqua)
+            case MAC_APPEAR_DARK_AQUA_HC: return NSAppearance(named: .accessibilityHighContrastDarkAqua)
+            case MAC_APPEAR_VIBRANT_LIGHT_HC: return NSAppearance(named: .accessibilityHighContrastVibrantLight)
+            case MAC_APPEAR_VIBRANT_DARK_HC: return NSAppearance(named: .accessibilityHighContrastVibrantDark)
+            case MAC_APPEAR_AUTO: return nil
             default: return nil
             }
         }()
