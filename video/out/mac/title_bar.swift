@@ -132,18 +132,11 @@ class TitleBar: NSVisualEffectView {
         }()
     }
 
-    func set(color: Any) {
-        if color is String {
-            layer?.backgroundColor = NSColor(hex: color as? String ?? "#00000000").cgColor
-        } else {
-            let col = color as? m_color ?? m_color(r: 0, g: 0, b: 0, a: 0)
-            let red   = CGFloat(col.r)/255
-            let green = CGFloat(col.g)/255
-            let blue  = CGFloat(col.b)/255
-            let alpha = CGFloat(col.a)/255
-            layer?.backgroundColor = NSColor(calibratedRed: red, green: green,
-                                             blue: blue, alpha: alpha).cgColor
-        }
+    func set(color: m_color) {
+        layer?.backgroundColor = NSColor(calibratedRed: CGFloat(color.r)/255,
+                                         green: CGFloat(color.g)/255,
+                                         blue: CGFloat(color.b)/255,
+                                         alpha: CGFloat(color.a)/255).cgColor
     }
 
     func show() {
