@@ -59,7 +59,7 @@ class TitleBar: NSVisualEffectView {
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
         set(appearance: option.mac.macos_title_bar_appearance)
-        set(material: Int(option.mac.macos_title_bar_material))
+        set(material: option.mac.macos_title_bar_material)
         set(color: option.mac.macos_title_bar_color)
     }
 
@@ -107,12 +107,29 @@ class TitleBar: NSVisualEffectView {
         }()
     }
 
-    func set(material: Any) {
-        if material is Int {
-            self.material = materialFrom(string: String(material as? Int ?? 0))
-        } else {
-            self.material = materialFrom(string: material as? String ?? "titlebar")
-        }
+    func set(material: Int32) {
+        self.material = { switch material {
+            case 0: return .titlebar
+            case 1: return .selection
+            case 2: return .menu
+            case 3: return .popover
+            case 4: return .sidebar
+            case 5: return .headerView
+            case 6: return .sheet
+            case 7: return .windowBackground
+            case 8: return .hudWindow
+            case 9: return .fullScreenUI
+            case 10: return .toolTip
+            case 11: return .contentBackground
+            case 12: return .underWindowBackground
+            case 13: return .underPageBackground
+            case 14: return .dark
+            case 15: return .light
+            case 16: return .mediumLight
+            case 17: return .ultraDark
+            default: return .titlebar
+            }
+        }()
     }
 
     func set(color: Any) {
@@ -173,29 +190,5 @@ class TitleBar: NSVisualEffectView {
                                                  selector: #selector(hide),
                                                    object: nil)
         perform(#selector(hide), with: nil, afterDelay: 0.5)
-    }
-
-    func materialFrom(string: String) -> NSVisualEffectView.Material {
-        switch string {
-        case "0", "titlebar":               return .titlebar
-        case "1", "selection":              return .selection
-        case "2", "menu":                   return .menu
-        case "3", "popover":                return .popover
-        case "4", "sidebar":                return .sidebar
-        case "5", "headerView":             return .headerView
-        case "6", "sheet":                  return .sheet
-        case "7", "windowBackground":       return .windowBackground
-        case "8", "hudWindow":              return .hudWindow
-        case "9", "fullScreen":             return .fullScreenUI
-        case "10", "toolTip":               return .toolTip
-        case "11", "contentBackground":     return .contentBackground
-        case "12", "underWindowBackground": return .underWindowBackground
-        case "13", "underPageBackground":   return .underPageBackground
-        case "14", "dark":                  return .dark
-        case "15", "light":                 return .light
-        case "16", "mediumLight":           return .mediumLight
-        case "17", "ultraDark":             return .ultraDark
-        default:                            return .titlebar
-        }
     }
 }
