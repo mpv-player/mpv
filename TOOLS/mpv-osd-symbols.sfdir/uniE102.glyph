@@ -1,0 +1,25 @@
+StartChar: uniE102
+Encoding: 57602 57602 35
+Width: 880
+VWidth: 880
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+880 640 m 1
+ 0 640 l 1
+ 0 800 l 1
+ 880 800 l 1
+ 880 640  l 1
+880 320 m 1
+ 0 320 l 1
+ 0 480 l 1
+ 880 480 l 1
+ 880 320 l 1
+880 0 m 1
+ 0 0 l 1
+ 0 160 l 1
+ 880 160 l 1
+ 880 0 l 1
+EndSplineSet
+EndChar

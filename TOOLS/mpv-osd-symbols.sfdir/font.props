@@ -1,4 +1,4 @@
-SplineFontDB: 3.0
+SplineFontDB: 3.2
 FontName: mpv-osd-symbols-Regular
 FullName: mpv-osd-symbols Regular
 FamilyName: mpv-osd-symbols
@@ -22,7 +22,7 @@ OS2Version: 3
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 0
 CreationTime: 1408646554
-ModificationTime: 1576096543
+ModificationTime: 1735420479
 PfmFamily: 81
 TTFWeight: 400
 TTFWidth: 5
@@ -63,7 +63,7 @@ NameList: AGL For New Fonts
 DisplaySize: -72
 AntiAlias: 1
 FitToEm: 0
-WinInfo: 57600 8 2
+WinInfo: 57540 14 11
 BeginPrivate: 8
 BlueValues 31 [-10 0 640 650 720 730 800 810]
 BlueScale 5 0.037
