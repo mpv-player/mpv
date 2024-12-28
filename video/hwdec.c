@@ -44,8 +44,16 @@ struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt_and_type(struct mp_hwdec_device
         struct mp_hwdec_ctx *dev = devs->hwctxs[n];
         AVHWDeviceContext *hw_device_ctx =
             dev->av_device_ref ? (AVHWDeviceContext *)dev->av_device_ref->data : NULL;
-        if (dev->hw_imgfmt == hw_imgfmt &&
-            (!hw_device_ctx || hw_device_ctx->type == device_type)) {
+
+        if (dev->hw_imgfmt != hw_imgfmt)
+            continue;
+
+        // ignore device_type if requested device is AV_HWDEVICE_TYPE_NONE
+        if (device_type == AV_HWDEVICE_TYPE_NONE){
+            res = dev;
+            break;
+        }
+        if (!hw_device_ctx || hw_device_ctx->type == device_type) {
             res = dev;
             break;
         }
