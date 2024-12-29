@@ -3,7 +3,10 @@ bridge = join_paths(source_root, 'osdep/mac/app_bridge_objc.h')
 module = join_paths(build_root, 'osdep/mac/swift.swiftmodule')
 
 swift_flags = ['-c', '-emit-library', '-static', '-sdk', macos_sdk_path,
-               '-emit-objc-header', '-parse-as-library']
+               '-emit-objc-header', '-parse-as-library', '-disable-bridging-pch',
+               '-Xclang-linker', '-fno-objc-msgsend-selector-stubs', '-Xcc', '-fno-objc-msgsend-selector-stubs',
+               #'-Xllvm', '-fno-objc-msgsend-selector-stubs'
+               ]
 
 if swift_ver.version_compare('>=6.0')
     swift_flags += ['-swift-version', '5']
