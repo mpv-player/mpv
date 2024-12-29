@@ -17,6 +17,7 @@
 
 import Cocoa
 import MediaPlayer
+import QuickLookThumbnailing
 
 extension RemoteCommandCenter {
     typealias ConfigHandler = (MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)
@@ -55,8 +56,12 @@ class RemoteCommandCenter: EventSubscriber {
     var album: String? { didSet { updateInfoCenter() } }
     var artist: String? { didSet { updateInfoCenter() } }
     var path: String?
+
+    let coverLock = NSLock()
+    var coverTime: UInt64 = mach_absolute_time()
     var coverPath: String?
     var cover: NSImage? { didSet { updateInfoCenter() } }
+    var coverThumb: NSImage? { didSet { updateInfoCenter() } }
     var defaultCover: NSImage
 
     let queue: DispatchQueue = DispatchQueue(label: "io.mpv.remote.queue")
@@ -150,7 +155,7 @@ class RemoteCommandCenter: EventSubscriber {
     }
 
     func updateInfoCenter() {
-        let cover = cover ?? defaultCover
+        let cover = cover ?? coverThumb ?? defaultCover
         infoCenter.playbackState = isPaused ? .paused : .playing
         infoCenter.nowPlayingInfo = (infoCenter.nowPlayingInfo ?? [:]).merging([
             MPNowPlayingInfoPropertyMediaType: NSNumber(value: MPNowPlayingInfoMediaType.video.rawValue),
@@ -166,6 +171,19 @@ class RemoteCommandCenter: EventSubscriber {
     }
 
     func updateCover(tracks: [Any?]) {
+        coverLock.withLock {
+            coverTime = mach_absolute_time()
+            coverPath = nil
+            cover = nil
+            coverThumb = nil
+
+            // read cover image on separate thread
+            queue.async { self.generateCover(tracks: tracks, time: self.coverTime) }
+            generateCoverThumb(time: self.coverTime)
+        }
+    }
+
+    func generateCover(tracks: [Any?], time: UInt64) {
         var imageCoverPath: String?
         var externalCoverPath: String?
 
@@ -185,21 +203,33 @@ class RemoteCommandCenter: EventSubscriber {
             }
         }
 
-        // read cover image on separate thread
-        queue.async {
-            guard let path = imageCoverPath ?? externalCoverPath else {
-                self.cover = nil
-                self.coverPath = nil
-                return
-            }
-            if self.coverPath == path { return }
+        guard let path = imageCoverPath ?? externalCoverPath, coverPath != path else { return }
 
-            var image = NSImage(contentsOf: URL(fileURLWithPath: path))
-            if let url = URL(string: path), image == nil {
-                image = NSImage(contentsOf: url)
+        var image = NSImage(contentsOf: URL(fileURLWithPath: path))
+        if let url = URL(string: path), image == nil {
+            image = NSImage(contentsOf: url)
+        }
+
+        coverLock.withLock {
+            guard time == coverTime else { return }
+            cover = image
+            coverPath = path
+        }
+    }
+
+    func generateCoverThumb(time: UInt64) {
+        guard let path = path else { return }
+
+        let request = QLThumbnailGenerator.Request(fileAt: URL(fileURLWithPath: path),
+                                                   size: CGSize(width: 2000, height: 2000),
+                                                   scale: 1,
+                                                   representationTypes: .all)
+        QLThumbnailGenerator.shared.generateBestRepresentation(for: request) { thumbnail, _ in
+            self.coverLock.withLock {
+                guard time == self.coverTime else { return }
+                guard let image = thumbnail?.nsImage, thumbnail?.type != .icon else { return }
+                self.coverThumb = image
             }
-            self.cover = image
-            self.coverPath = path
         }
     }
 
