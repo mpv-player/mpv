@@ -310,6 +310,10 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
             return STREAM_ERROR;
         }
 #endif
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        if (p->fd == STDIN_FILENO || p->fd == STDOUT_FILENO || p->fd == STDERR_FILENO)
+            return STREAM_ERROR;
+#endif
         if (is_fdclose)
             p->close = true;
     } else if (!strict_fs && !strcmp(filename, "-")) {
