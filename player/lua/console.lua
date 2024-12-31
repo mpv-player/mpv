@@ -1316,7 +1316,7 @@ end
 local function command_flags_at_1st_argument_list(command)
     local flags = {
         ['playlist-next'] = {'weak', 'force'},
-        ['playlist-play-index'] = {'current'},
+        ['playlist-play-index'] = {'current', 'none'},
         ['playlist-remove'] = {'current'},
         ['rescan-external-files'] = {'reselect', 'keep-selection'},
         ['revert-seek'] = {'mark', 'mark-permanent'},
