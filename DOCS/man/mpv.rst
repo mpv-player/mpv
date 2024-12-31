@@ -295,6 +295,8 @@ item, or by navigating them with keybindings: ``Down`` and ``Ctrl+n`` go down,
 ``Up`` and ``Ctrl+p`` go up, ``Page down`` and ``Ctrl+f`` scroll down one page,
 and ``Page up`` and ``Ctrl+b`` scroll up one page.)
 
+In track selectors, selecting the current tracks disables it.
+
 g-p
     Select a playlist entry.
 
