@@ -226,7 +226,7 @@ end)
 mp.add_key_binding(nil, "select-edition", function ()
     local edition_list = mp.get_property_native("edition-list")
 
-    if edition_list == nil or #edition_list == 1 then
+    if edition_list == nil or #edition_list < 2 then
         show_error("No available editions.")
         return
     end
