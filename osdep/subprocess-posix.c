@@ -35,7 +35,7 @@ extern char **environ;
 #ifdef SIGRTMAX
 #define SIGNAL_MAX SIGRTMAX
 #else
-#define SIGNAL_MAX 32
+#define SIGNAL_MAX 31
 #endif
 
 #define SAFE_CLOSE(fd) do { if ((fd) >= 0) close((fd)); (fd) = -1; } while (0)
@@ -79,7 +79,7 @@ static void reset_signals_child(void)
     sa.sa_handler = SIG_DFL;
     sigemptyset(&sigmask);
 
-    for (int nr = 1; nr < SIGNAL_MAX; nr++)
+    for (int nr = 1; nr <= SIGNAL_MAX; nr++)
         sigaction(nr, &sa, NULL);
     sigprocmask(SIG_SETMASK, &sigmask, NULL);
 }
