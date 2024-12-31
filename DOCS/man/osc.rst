@@ -21,7 +21,7 @@ The Interface
 ::
 
     +---------+----------+------------------------------------------+----------+
-    | pl prev | pl next  |  title                                   |    cache |
+    | pl prev | menu | pl next | title                                   cache |
     +------+--+---+------+---------+-----------+------+-------+-----+-----+----+
     | play | skip | skip | time    |  seekbar  | time | audio | sub | vol | fs |
     |      | back | frwd | elapsed |           | left |       |     |     |    |
@@ -34,6 +34,11 @@ pl prev
     shift+L-click   show the playlist
     middle-click    show the playlist
     right-click     open the playlist selector
+    =============   ================================================
+
+menu
+    =============   ================================================
+    left-click      open the menu
     =============   ================================================
 
 pl next
@@ -509,6 +514,12 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 ``playlist_prev_mbtn_mid_command=show-text ${playlist} 3000``
 
 ``playlist_prev_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``menu_mbtn_left_command=script-binding select/menu; script-message-to osc osc-hide``
+
+``menu_mbtn_mid_command=``
+
+``menu_mbtn_right_command=``
 
 ``playlist_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000``
 

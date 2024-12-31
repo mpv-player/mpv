@@ -334,6 +334,9 @@ g-b
 g-r
     Show the values of all properties.
 
+MENU
+    Show a menu with miscellaneous entries.
+
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
 PAUSE

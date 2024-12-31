@@ -1,7 +1,7 @@
 StartChar: uniE00D
 Encoding: 57357 57357 34
 Width: 880
-Flags: HWO
+Flags: HW
 HStem: 780 20G<200 200>
 VStem: 200 375<400 400 400 800>
 LayerCount: 2
