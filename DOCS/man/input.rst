@@ -2268,9 +2268,8 @@ Property list
         Number of editions. If there are no editions, this can be 0 or 1 (1
         if there's a useless dummy edition).
 
-    ``edition-list/N/id`` (RW)
-        Edition ID as integer. Use this to set the ``edition`` property.
-        Currently, this is the same as the edition index.
+    ``edition-list/N/id``
+        Edition ID as integer. Currently, this is the same as the edition index.
 
     ``edition-list/N/default``
         Whether this is the default edition.
