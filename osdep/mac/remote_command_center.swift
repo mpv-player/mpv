@@ -170,7 +170,7 @@ class RemoteCommandCenter: EventSubscriber {
         ]) { (_, new) in new }
     }
 
-    func updateCover(tracks: [Any?]) {
+    func updateCover(tracks: [Sendable?]) {
         coverLock.withLock {
             coverTime = mach_absolute_time()
             coverPath = nil
@@ -183,12 +183,12 @@ class RemoteCommandCenter: EventSubscriber {
         }
     }
 
-    func generateCover(tracks: [Any?], time: UInt64) {
+    func generateCover(tracks: [Sendable?], time: UInt64) {
         var imageCoverPath: String?
         var externalCoverPath: String?
 
         for item in tracks {
-            guard let track = item as? [String: Any?] else { continue }
+            guard let track = item as? [String: Sendable?] else { continue }
             if (track["image"] as? Bool) == true {
                 // opened file is an image
                 if track["external"] as? Bool == false && track["albumart"] as? Bool == false && imageCoverPath == nil {

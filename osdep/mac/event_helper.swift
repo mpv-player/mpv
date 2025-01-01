@@ -42,7 +42,7 @@ extension EventHelper {
         let bool: Bool?
         let int: Int64?
         let double: Double?
-        let array: [Any?]
+        let array: [Sendable?]
 
         init(
             name: String = "",
@@ -51,8 +51,7 @@ extension EventHelper {
             bool: Bool? = nil,
             int: Int64? = nil,
             double: Double? = nil,
-            array: [Any?] = []
-
+            array: [Sendable?] = []
         ) {
             self.name = name
             self.format = format

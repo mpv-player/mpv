@@ -106,35 +106,35 @@ class TypeHelper {
     }
 
     // MPV_FORMAT_NODE > MPV_FORMAT_NODE_ARRAY
-    class func nodeToArray(_ node: mpv_node?) -> [Any?] {
-        var array: [Any?] = []
+    class func nodeToArray(_ node: mpv_node?) -> [Sendable?] {
+        var array: [Sendable?] = []
         guard let list = node?.u.list?.pointee,
               let values = list.values else { return array }
 
         for index in 0..<Int(list.num) {
-            array.append(TypeHelper.nodeToAny(values[index]))
+            array.append(TypeHelper.nodeToAnyValue(values[index]))
         }
 
         return array
     }
 
     // MPV_FORMAT_NODE > MPV_FORMAT_NODE_MAP
-    class func nodeToDict(_ node: mpv_node?) -> [String: Any?] {
-        var dict: [String: Any?] = [:]
+    class func nodeToDict(_ node: mpv_node?) -> [String: Sendable?] {
+        var dict: [String: Sendable?] = [:]
         guard let list = node?.u.list?.pointee,
               let values = list.values else { return dict }
 
         for index in 0..<Int(list.num) {
             guard let keyPtr = list.keys?[index] else { continue }
             let key = String(cString: keyPtr)
-            dict[key] = TypeHelper.nodeToAny(values[index])
+            dict[key] = TypeHelper.nodeToAnyValue(values[index])
         }
 
         return dict
     }
 
     // MPV_FORMAT_NODE
-    class func nodeToAny(_ node: mpv_node) -> Any? {
+    class func nodeToAnyValue(_ node: mpv_node) -> Sendable? {
         switch node.format {
         case MPV_FORMAT_STRING: return TypeHelper.nodeToString(node)
         case MPV_FORMAT_FLAG: return TypeHelper.nodeToBool(node)
