@@ -474,7 +474,7 @@ Playlist Manipulation
     Go to the first of the previous entries on the playlist with a different
     ``playlist-path``.
 
-``playlist-play-index <integer|current|none>``
+``playlist-play-index <integer|current|none> [<options>]``
     Start (or restart) playback of the given playlist index. In addition to the
     0-based playlist entry index, it supports the following values:
 
@@ -487,6 +487,13 @@ Playlist Manipulation
     <none>
         Playback is stopped. If idle mode (``--idle``) is enabled, the player
         will enter idle mode, otherwise it will exit.
+
+    The second argument is a list of options and values which should be set
+    while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
+    When using the client API, this can be a ``MPV_FORMAT_NODE_MAP`` (or a Lua
+    table), however the values themselves must be strings currently. These
+    options are set during playback, and restored to the previous value at end
+    of playback (see `Per-File Options`_).
 
     This command is similar to ``loadfile`` in that it only manipulates the
     state of what to play next, without waiting until the current file is
