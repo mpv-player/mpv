@@ -1033,7 +1033,6 @@ local function search_history()
     searching_history = true
     suggestion_buffer = {}
     selectable_items = {}
-    first_match_to_print = 1
 
     for i = 1, #history do
         selectable_items[i] = history[#history + 1 - i]
