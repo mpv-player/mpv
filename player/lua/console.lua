@@ -689,10 +689,20 @@ end
 local function handle_edit()
     if selectable_items then
         matches = {}
-        selected_match = 1
-
         for i, match in ipairs(fuzzy_find(line, selectable_items)) do
             matches[i] = { index = match, text = selectable_items[match] }
+        end
+
+        if line == '' and default_item then
+            selected_match = default_item
+
+            local max_lines = calculate_max_log_lines()
+            first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 1)
+            if first_match_to_print > #selectable_items - max_lines + 2 then
+                first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
+            end
+        else
+            selected_match = 1
         end
 
         update()
@@ -1820,16 +1830,8 @@ mp.register_script_message('get-input', function (script_name, args)
         for i, item in ipairs(args.items) do
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
         end
-        handle_edit()
-        selected_match = args.default_item or 1
         default_item = args.default_item
-
-        local max_lines = calculate_max_log_lines()
-        first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 1)
-        if first_match_to_print > #selectable_items - max_lines + 2 then
-            first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
-        end
-
+        handle_edit()
         bind_mouse()
     end
 
