@@ -338,6 +338,11 @@ if posix
     flags += ['-D_GNU_SOURCE']
 endif
 
+if host_machine.system() == 'android'
+    flags += ['-Werror=unguarded-availability',
+              '-D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__']
+endif
+
 if cc.has_link_argument('-Wl,-z,noexecstack')
     link_flags += '-Wl,-z,noexecstack'
 endif
@@ -483,8 +488,7 @@ endif
 features += {'android': host_machine.system() == 'android'}
 if features['android']
     dependencies += cc.find_library('android')
-    sources += files('audio/out/ao_audiotrack.c',
-                     'misc/jni.c',
+    sources += files('misc/jni.c',
                      'osdep/android/strnlen.c',
                      'video/out/android_common.c',
                      'video/out/vo_mediacodec_embed.c')
@@ -865,6 +869,20 @@ features += {'openal': openal.found()}
 if features['openal']
     dependencies += openal
     sources += files('audio/out/ao_openal.c')
+endif
+
+features += {'audiotrack':
+    get_option('audiotrack').require(features['android']).allowed()}
+if features['audiotrack']
+    sources += files('audio/out/ao_audiotrack.c')
+endif
+
+aaudio_opt = get_option('aaudio').require(features['android'])
+aaudio = cc.find_library('aaudio', required: aaudio_opt)
+features += {'aaudio': aaudio.found()}
+if features['aaudio']
+    dependencies += aaudio
+    sources += files('audio/out/ao_aaudio.c')
 endif
 
 opensles = cc.find_library('OpenSLES', required: get_option('opensles'))
