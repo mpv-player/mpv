@@ -78,6 +78,7 @@ typedef struct mp_vo_opts {
     char *mmcss_profile;
     int window_corners;
 
+    bool display_fps_limiter;
     double display_fps_override;
     double timing_offset;
     int video_sync;
