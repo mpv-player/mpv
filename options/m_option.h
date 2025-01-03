@@ -215,7 +215,7 @@ struct m_sub_options {
     const void *defaults;
     // Change flags passed to mp_option_change_callback() if any option that is
     // directly or indirectly part of this group is changed.
-    int change_flags;
+    uint64_t change_flags;
     // Return further sub-options, for example for optional components. If set,
     // this is called with increasing index (starting from 0), as long as true
     // is returned. If true is returned and *sub is set in any of these calls,
@@ -385,7 +385,7 @@ struct m_option {
     const m_option_type_t *type;
 
     // See \ref OptionFlags.
-    unsigned int flags;
+    uint64_t flags;
 
     // Always force an option update even if the written value does not change.
     bool force_update;
@@ -423,62 +423,56 @@ struct m_option {
 
 char *format_file_size(int64_t size);
 
-// The following are also part of the M_OPT_* flags, and are used to update
-// certain groups of options.
-#define UPDATE_TERM             (1 << 0)   // terminal options
-#define UPDATE_SUB_FILT         (1 << 1)   // subtitle filter options
-#define UPDATE_OSD              (1 << 2)   // related to OSD rendering
-#define UPDATE_BUILTIN_SCRIPTS  (1 << 3)   // osc/ytdl/stats
-#define UPDATE_IMGPAR           (1 << 4)   // video image params overrides
-#define UPDATE_INPUT            (1 << 5)   // mostly --input-* options
-#define UPDATE_AUDIO            (1 << 6)   // --audio-channels etc.
-#define UPDATE_PRIORITY         (1 << 7)   // --priority (Windows-only)
-#define UPDATE_SCREENSAVER      (1 << 8)   // --stop-screensaver
-#define UPDATE_VOL              (1 << 9)   // softvol related options
-#define UPDATE_LAVFI_COMPLEX    (1 << 10)  // --lavfi-complex
-#define UPDATE_HWDEC            (1 << 11)  // --hwdec
-#define UPDATE_DVB_PROG         (1 << 12)  // some --dvbin-...
-#define UPDATE_SUB_HARD         (1 << 13)  // subtitle opts. that need full reinit
-#define UPDATE_SUB_EXTS         (1 << 14)  // update internal list of sub exts
-#define UPDATE_VIDEO            (1 << 15)  // force redraw if needed
-#define UPDATE_VO               (1 << 16)  // reinit the VO
-#define UPDATE_CLIPBOARD        (1 << 17)  // reinit the clipboard
-#define UPDATE_OPT_LAST         (1 << 17)
+enum option_flags {
+    // The following are also part of the M_OPT_* flags, and are used to update
+    // certain groups of options.
+    UPDATE_TERM            = (UINT64_C(1) << 0),  // terminal options
+    UPDATE_SUB_FILT        = (UINT64_C(1) << 1),  // subtitle filter options
+    UPDATE_OSD             = (UINT64_C(1) << 2),  // related to OSD rendering
+    UPDATE_BUILTIN_SCRIPTS = (UINT64_C(1) << 3),  // osc/ytdl/stats
+    UPDATE_IMGPAR          = (UINT64_C(1) << 4),  // video image params overrides
+    UPDATE_INPUT           = (UINT64_C(1) << 5),  // mostly --input-* options
+    UPDATE_AUDIO           = (UINT64_C(1) << 6),  // --audio-channels etc.
+    UPDATE_PRIORITY        = (UINT64_C(1) << 7),  // --priority (Windows-only)
+    UPDATE_SCREENSAVER     = (UINT64_C(1) << 8),  // --stop-screensaver
+    UPDATE_VOL             = (UINT64_C(1) << 9),  // softvol related options
+    UPDATE_LAVFI_COMPLEX   = (UINT64_C(1) << 10), // --lavfi-complex
+    UPDATE_HWDEC           = (UINT64_C(1) << 11), // --hwdec
+    UPDATE_DVB_PROG        = (UINT64_C(1) << 12), // some --dvbin-...
+    UPDATE_SUB_HARD        = (UINT64_C(1) << 13), // subtitle opts. that need full reinit
+    UPDATE_SUB_EXTS        = (UINT64_C(1) << 14), // update internal list of sub exts
+    UPDATE_VIDEO           = (UINT64_C(1) << 15), // force redraw if needed
+    UPDATE_VO              = (UINT64_C(1) << 16), // reinit the VO
+    UPDATE_CLIPBOARD       = (UINT64_C(1) << 17), // reinit the clipboard
+    UPDATE_OPT_LAST        = (UINT64_C(1) << 17),
 
-// All bits between of UPDATE_ flags
-#define UPDATE_OPTS_MASK        ((UPDATE_OPT_LAST << 1) - 1)
+    // The option is forbidden in config files.
+    M_OPT_NOCFG     = (UINT64_C(1) << 61),
+    // The option should be set during command line pre-parsing
+    M_OPT_PRE_PARSE = (UINT64_C(1) << 60),
+    // The option expects a file name (or a list of file names)
+    M_OPT_FILE      = (UINT64_C(1) << 59),
+    // Do not add as property.
+    M_OPT_NOPROP    = (UINT64_C(1) << 58),
+    // Enable special semantics for some options when parsing the string "help".
+    M_OPT_HAVE_HELP = (UINT64_C(1) << 57),
 
-// The option is forbidden in config files.
-#define M_OPT_NOCFG             (1 << 30)
+    // type_float/type_double: string "default" is parsed as NaN (and reverse)
+    M_OPT_DEFAULT_NAN      = (UINT64_C(1) << 56),
+    // type time: string "no" maps to MP_NOPTS_VALUE (if unset, NOPTS is
+    // rejected) and parsing: "--no-opt" is parsed as "--opt=no"
+    M_OPT_ALLOW_NO         = (UINT64_C(1) << 55),
+    // type channels: disallow "auto" (still accept ""), limit list to at most 1
+    // item.
+    M_OPT_CHANNELS_LIMITED = (UINT64_C(1) << 54),
+    // type_float/type_double: controls if pretty print should trim trailing
+    // zeros
+    M_OPT_FIXED_LEN_PRINT  = (UINT64_C(1) << 53),
+    // Like M_OPT_TYPE_OPTIONAL_PARAM.
+    M_OPT_OPTIONAL_PARAM   = (UINT64_C(1) << 52),
+};
 
-// The option should be set during command line pre-parsing
-#define M_OPT_PRE_PARSE         (1 << 29)
-
-// The option expects a file name (or a list of file names)
-#define M_OPT_FILE              (1 << 28)
-
-// Do not add as property.
-#define M_OPT_NOPROP            (1 << 27)
-
-// Enable special semantics for some options when parsing the string "help".
-#define M_OPT_HAVE_HELP         (1 << 26)
-
-// type_float/type_double: string "default" is parsed as NaN (and reverse)
-#define M_OPT_DEFAULT_NAN       (1 << 25)
-
-// type time: string "no" maps to MP_NOPTS_VALUE (if unset, NOPTS is rejected)
-// and
-// parsing: "--no-opt" is parsed as "--opt=no"
-#define M_OPT_ALLOW_NO          (1 << 24)
-
-// type channels: disallow "auto" (still accept ""), limit list to at most 1 item.
-#define M_OPT_CHANNELS_LIMITED  (1 << 23)
-
-// type_float/type_double: controls if pretty print should trim trailing zeros
-#define M_OPT_FIXED_LEN_PRINT   (1 << 22)
-
-// Like M_OPT_TYPE_OPTIONAL_PARAM.
-#define M_OPT_OPTIONAL_PARAM    (1 << 21)
+#define UPDATE_OPTS_MASK ((UPDATE_OPT_LAST << 1) - 1)
 
 static_assert(!(UPDATE_OPTS_MASK & M_OPT_OPTIONAL_PARAM), "");
 
