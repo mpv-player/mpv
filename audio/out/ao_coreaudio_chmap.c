@@ -314,6 +314,30 @@ mismatch:;
     return s ? s : l;
 }
 
+AudioChannelLayout *ca_get_acl(struct ao *ao, size_t *out_layout_size)
+{
+    size_t layout_size = sizeof(AudioChannelLayout)
+                         + (ao->channels.num - 1) * sizeof(AudioChannelDescription);
+    AudioChannelLayout *layout = talloc_size(ao, layout_size);
+    layout->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
+    layout->mNumberChannelDescriptions = ao->channels.num;
+    for (int i = 0; i < ao->channels.num; ++i) {
+        AudioChannelDescription *desc = layout->mChannelDescriptions + i;
+        desc->mChannelFlags = kAudioChannelFlags_AllOff;
+        desc->mChannelLabel = mp_speaker_id_to_ca_label(ao->channels.speaker[i]);
+    }
+
+    void *talloc_ctx = talloc_new(NULL);
+    AudioChannelLayout *std_layout = ca_find_standard_layout(talloc_ctx, layout);
+    memmove(layout, std_layout, sizeof(AudioChannelLayout));
+    talloc_free(talloc_ctx);
+    ca_log_layout(ao, MSGL_V, layout);
+
+    if (out_layout_size)
+        *out_layout_size = layout_size;
+    return layout;
+}
+
 
 #define CHMAP(n, ...) &(struct mp_chmap) MP_CONCAT(MP_CHMAP, n) (__VA_ARGS__)
 
