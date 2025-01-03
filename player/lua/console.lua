@@ -549,10 +549,8 @@ local function update()
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  osd_w .. ',' .. osd_h
     local ass = assdraw.ass_new()
-    local has_shadow = mp.get_property('osd-border-style'):find('box$') == nil
     local font = get_font()
     local style = '{\\r' ..
-                  (has_shadow and '\\xshad0\\yshad1' or '') ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
                   '\\bord' .. opts.border_size .. '\\fsp0' ..
