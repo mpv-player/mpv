@@ -175,12 +175,12 @@ Configurable Options
     Color of the text border.
 
 ``shadow_x_offset``
-    Default: 0
+    Default: same as ``--osd-shadow-offset``
 
     The horizontal distance from the text to position the shadow at.
 
 ``shadow_y_offset``
-    Default: 0
+    Default: same as ``--osd-shadow-offset``
 
     The vertical distance from the text to position the shadow at.
 
