@@ -119,6 +119,13 @@ local user_opts = {
     -- luacheck: pop
 }
 
+for i = 1, 99 do
+    user_opts["custom_button_" .. i .. "_content"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_left_command"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_mid_command"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_right_command"] = ""
+end
+
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
@@ -1574,14 +1581,27 @@ local function bar_layout(direction)
 
     local t_l = geo.x + geo.w + padX
 
+    -- Custom buttons
+    local t_r = osc_geo.x + osc_geo.w
+
+    for i = 99, 1, -1 do
+        if elements["custom_button_" .. i] then
+            t_r = t_r - padX
+            geo = { x = t_r, y = geo.y, an = 6, w = geo.w, h = geo.h }
+            t_r = t_r - geo.w
+            lo = add_layout("custom_button_" .. i)
+            lo.geometry = geo
+            lo.style = osc_styles.vidtitleBar
+        end
+    end
+
     -- Cache
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 150, h = geo.h }
+    t_r = t_r - padX
+    geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
+    t_r = t_r - geo.w - padX
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitleBar
-
-    local t_r = geo.x - geo.w - padX*2
 
     -- Title
     geo = { x = t_l, y = geo.y, an = 4,
@@ -2063,6 +2083,16 @@ local function osc_init()
         end
     end
     bind_mouse_buttons("volume")
+
+
+    -- custom buttons
+    for i = 1, 99 do
+        if user_opts["custom_button_" .. i .. "_content"] ~= "" then
+            ne = new_element("custom_button_" .. i, "button")
+            ne.content = user_opts["custom_button_" .. i .. "_content"]
+            bind_mouse_buttons("custom_button_" .. i)
+        end
+    end
 
 
     -- load layout
