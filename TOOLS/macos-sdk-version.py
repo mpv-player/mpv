@@ -30,6 +30,8 @@ def find_macos_sdk():
 
         # use xcode tools when installed, still necessary for xcode versions <12.0
         try:
+            if not xcodebuild:
+                raise ValueError
             sdk_version = check_output(
                 [xcodebuild, "-sdk", "macosx", "-version", "ProductVersion"],
                 encoding="UTF-8",
