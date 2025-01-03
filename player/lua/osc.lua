@@ -119,6 +119,13 @@ local user_opts = {
     -- luacheck: pop
 }
 
+for i = 1, 99 do
+    user_opts["custom_button_" .. i .. "_content"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_left_command"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_mid_command"] = ""
+    user_opts["custom_button_" .. i .. "_mbtn_right_command"] = ""
+end
+
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
@@ -449,6 +456,10 @@ local function get_touchtimeout()
         return 0
     end
     return state.touchtime + (get_hidetimeout() / 1000) - mp.get_time()
+end
+
+local function cache_enabled()
+    return state.cache_state and #state.cache_state["seekable-ranges"] > 0
 end
 
 local function reset_margins()
@@ -1570,14 +1581,27 @@ local function bar_layout(direction)
 
     local t_l = geo.x + geo.w + padX
 
+    -- Custom buttons
+    local t_r = osc_geo.x + osc_geo.w
+
+    for i = 99, 1, -1 do
+        if elements["custom_button_" .. i] then
+            t_r = t_r - padX
+            geo = { x = t_r, y = geo.y, an = 6, w = geo.w, h = geo.h }
+            t_r = t_r - geo.w
+            lo = add_layout("custom_button_" .. i)
+            lo.geometry = geo
+            lo.style = osc_styles.vidtitleBar
+        end
+    end
+
     -- Cache
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 150, h = geo.h }
+    t_r = t_r - padX
+    geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
+    t_r = t_r - geo.w - padX
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitleBar
-
-    local t_r = geo.x - geo.w - padX*2
 
     -- Title
     geo = { x = t_l, y = geo.y, an = 4,
@@ -1912,23 +1936,15 @@ local function osc_init()
         end
     end
     ne.slider.seekRangesF = function()
-        if user_opts.seekrangestyle == "none" then
-            return nil
-        end
-        local cache_state = state.cache_state
-        if not cache_state then
+        if user_opts.seekrangestyle == "none" or not cache_enabled() then
             return nil
         end
         local duration = mp.get_property_number("duration")
         if duration == nil or duration <= 0 then
             return nil
         end
-        local ranges = cache_state["seekable-ranges"]
-        if #ranges == 0 then
-            return nil
-        end
         local nranges = {}
-        for _, range in pairs(ranges) do
+        for _, range in pairs(state.cache_state["seekable-ranges"]) do
             nranges[#nranges + 1] = {
                 ["start"] = 100 * range["start"] / duration,
                 ["end"] = 100 * range["end"] / duration,
@@ -2035,13 +2051,10 @@ local function osc_init()
     ne = new_element("cache", "button")
 
     ne.content = function ()
-        local cache_state = state.cache_state
-        if not (cache_state and cache_state["seekable-ranges"] and
-            #cache_state["seekable-ranges"] > 0) then
-            -- probably not a network stream
+        if not cache_enabled() then
             return ""
         end
-        local dmx_cache = cache_state and cache_state["cache-duration"]
+        local dmx_cache = state.cache_state["cache-duration"]
         local thresh = math.min(state.dmx_cache * 0.05, 5)  -- 5% or 5s
         if dmx_cache and math.abs(dmx_cache - state.dmx_cache) >= thresh then
             state.dmx_cache = dmx_cache
@@ -2070,6 +2083,16 @@ local function osc_init()
         end
     end
     bind_mouse_buttons("volume")
+
+
+    -- custom buttons
+    for i = 1, 99 do
+        if user_opts["custom_button_" .. i .. "_content"] ~= "" then
+            ne = new_element("custom_button_" .. i, "button")
+            ne.content = user_opts["custom_button_" .. i .. "_content"]
+            bind_mouse_buttons("custom_button_" .. i)
+        end
+    end
 
 
     -- load layout
