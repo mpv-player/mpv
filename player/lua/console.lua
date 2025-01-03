@@ -54,7 +54,6 @@ local styles = {
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&}',
     suggestion = '{\\1c&Hcc99cc&}',
-    selected_suggestion = '{\\1c&H2fbdfa&\\b1}',
     disabled = '{\\1c&Hcccccc&}',
 }
 for key, style in pairs(styles) do
@@ -301,6 +300,19 @@ local function should_highlight_completion(i)
            (i == 1 and selected_suggestion_index == 0 and input_caller == nil)
 end
 
+local function mpv_color_to_ass(color)
+    return color:sub(8,9) .. color:sub(6,7) ..  color:sub(4,5),
+           string.format('%x', 255 - tonumber('0x' .. color:sub(2,3)))
+end
+
+local function get_selected_ass()
+    local color, alpha = mpv_color_to_ass(mp.get_property('osd-selected-color'))
+    local outline_color, outline_alpha =
+        mpv_color_to_ass(mp.get_property('osd-selected-outline-color'))
+    return '{\\1c&H' .. color .. '&\\1a&H' .. alpha ..
+           '&\\3c&H' .. outline_color .. '&\\3a&H' .. outline_alpha .. '&}'
+end
+
 -- Takes a list of strings, a max width in characters and
 -- optionally a max row count.
 -- The result contains at least one column.
@@ -383,8 +395,8 @@ local function format_table(list, width_max, rows_max)
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
             if should_highlight_completion(i) then
-                columns[column] = styles.selected_suggestion .. columns[column]
-                                  .. '{\\b}' .. styles.suggestion
+                columns[column] = '{\\b1}' .. get_selected_ass() .. columns[column] ..
+                                  '{\\b\\1a&\\3a&}' .. styles.suggestion
             end
         end
         -- first row is at the bottom
@@ -404,11 +416,6 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
         result[i] = value[1]
     end
     return result
-end
-
-local function mpv_color_to_ass(color)
-    return color:sub(8,9) .. color:sub(6,7) ..  color:sub(4,5),
-           string.format('%x', 255 - tonumber('0x' .. color:sub(2,3)))
 end
 
 local function populate_log_with_matches()
@@ -453,11 +460,7 @@ local function populate_log_with_matches()
         local terminal_style = ''
 
         if i == selected_match or matches[i].index == default_item then
-            local color, alpha = mpv_color_to_ass(mp.get_property('osd-selected-color'))
-            local outline_color, outline_alpha =
-                mpv_color_to_ass(mp.get_property('osd-selected-outline-color'))
-            style = '{\\1c&H' .. color .. '&\\1a&H' .. alpha ..
-                    '&\\3c&H' .. outline_color .. '&\\3a&H' .. outline_alpha .. '&}'
+            style = get_selected_ass()
         end
         if matches[i].index == default_item then
             terminal_style = terminal_styles.default_item
