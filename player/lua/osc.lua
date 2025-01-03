@@ -84,7 +84,7 @@ local user_opts = {
     title_mbtn_right_command = "show-text ${path}",
 
     play_pause_mbtn_left_command = "cycle pause",
-    play_pause_mbtn_mid_command = "",
+    play_pause_mbtn_mid_command = "cycle-values loop-playlist inf no",
     play_pause_mbtn_right_command = "cycle-values loop-file inf no",
 
     chapter_prev_mbtn_left_command = "osd-msg add chapter -1",
