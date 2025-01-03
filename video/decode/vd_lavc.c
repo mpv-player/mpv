@@ -159,6 +159,7 @@ struct hwdec_info {
     enum AVPixelFormat pix_fmt; // if not NONE, select in get_format
     bool use_hw_frames; // set AVCodecContext.hw_frames_ctx
     bool use_hw_device; // set AVCodecContext.hw_device_ctx
+    bool use_hw_internal; // set AVCodecContext.hw_device_ctx
     unsigned int flags; // HWDEC_FLAG_*
 
     // for internal sorting
@@ -340,7 +341,8 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 break;
 
             if ((cfg->methods & AV_CODEC_HW_CONFIG_METHOD_HW_FRAMES_CTX) ||
-                (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX))
+                (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) ||
+                (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_INTERNAL))
             {
                 struct hwdec_info info = info_template;
                 info.lavc_device = cfg->device_type;
@@ -361,6 +363,8 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 // those, so always use hw_frames_ctx if offered.
                 if (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_HW_FRAMES_CTX) {
                     info.use_hw_frames = true;
+                } else if (cfg->methods & AV_CODEC_HW_CONFIG_METHOD_INTERNAL) {
+                    info.use_hw_internal = true;
                 } else {
                     info.use_hw_device = true;
                 }
@@ -458,7 +462,7 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
 
         const struct mp_hwdec_ctx *hw_ctx =
             hwdec_devices_get_by_imgfmt_and_type(ctx->hwdec_devs, imgfmt,
-                                                 hwdec->lavc_device);
+                hwdec->use_hw_internal ? AV_HWDEVICE_TYPE_NONE : hwdec->lavc_device);
 
         if (hw_ctx && hw_ctx->av_device_ref)
             return av_buffer_ref(hw_ctx->av_device_ref);
