@@ -61,7 +61,9 @@ cache
 play
     =============   ================================================
     left-click      toggle play/pause
-    right-click     toggle infinite looping
+    shift+L-click   toggle infinite looping of the playlist
+    middle-click    toggle infinite looping of the playlist
+    right-click     toggle infinite looping of the current file
     =============   ================================================
 
 skip back
@@ -524,7 +526,7 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``play_pause_mbtn_left_command=cycle pause``
 
-``play_pause_mbtn_mid_command=``
+``play_pause_mbtn_mid_command=cycle-values loop-playlist inf no``
 
 ``play_pause_mbtn_right_command=cycle-values loop-file inf no``
 
