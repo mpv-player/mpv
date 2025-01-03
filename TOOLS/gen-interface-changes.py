@@ -60,7 +60,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Accept passing only the major version number and the full 0 version.
-    major_version = -1
+    major_version = None
     if sys.argv[1].isdigit():
         major_version = sys.argv[1]
     else:
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         if len(ver_split) == 3 and ver_split[1].isdigit():
             major_version = ver_split[1]
 
-    if major_version == -1:
+    if not major_version:
         print(f"Invalid version number: {sys.argv[1]}")
         sys.exit(1)
 
