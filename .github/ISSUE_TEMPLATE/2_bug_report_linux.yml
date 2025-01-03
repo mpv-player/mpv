@@ -26,7 +26,7 @@ body:
   attributes:
       label: "Other Information"
       description: >
-          Provide follwing information if applicable.
+          Provide following information if applicable.
            - Linux Version: `cat /etc/os-release | grep "NAME"`
            - Kernel Version: `uname -a`
            - GPU Model: `lspci -nn | grep VGA` or `lshw -C display -numeric`

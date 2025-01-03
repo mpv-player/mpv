@@ -258,7 +258,7 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
         print(">>> could not find loader library " + library_system_path)
         return
 
-    print(">>> modifiying and writing loader json " + loader_name)
+    print(">>> modifying and writing loader json " + loader_name)
     loader_bundle_file = open(loader_bundle_path, "w")
     loader_library_name = os.path.basename(library_system_path)
     library_path = os.path.join(library_relative_folder, loader_library_name)

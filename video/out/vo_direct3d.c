@@ -473,7 +473,7 @@ static bool init_d3d(d3d_priv *priv)
         return false;
     }
 
-    /* Store relevant information reguarding caps of device */
+    /* Store relevant information regarding caps of device */
     texture_caps                  = disp_caps.TextureCaps;
     dev_caps                      = disp_caps.DevCaps;
     priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&

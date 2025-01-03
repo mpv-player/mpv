@@ -166,7 +166,7 @@ static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
-    VAStatus vas;
+    VAStatus status;
 
     for (int i = 0; interop_inits[i]; i++) {
         if (interop_inits[i](hw, &p->dmabuf_interop)) {
@@ -206,9 +206,9 @@ static int init(struct ra_hwdec *hw)
 
     VAConfigID config_id;
     AVVAAPIHWConfig *hwconfig = NULL;
-    vas = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc, NULL,
+    status = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc, NULL,
                          0, &config_id);
-    if (vas == VA_STATUS_SUCCESS) {
+    if (status == VA_STATUS_SUCCESS) {
         hwconfig = av_hwdevice_hwconfig_alloc(p->ctx->av_device_ref);
         hwconfig->config_id = config_id;
     }

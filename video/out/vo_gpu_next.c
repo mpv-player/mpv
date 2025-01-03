@@ -886,7 +886,7 @@ static void update_tm_viz(struct pl_color_map_params *params,
     if (!params->visualize_lut)
         return;
 
-    // Use right half of sceen for TM visualization, constrain to 1:1 AR
+    // Use right half of screen for TM visualization, constrain to 1:1 AR
     const float out_w = fabsf(pl_rect_w(target->crop));
     const float out_h = fabsf(pl_rect_h(target->crop));
     const float size = MPMIN(out_w / 2.0f, out_h);

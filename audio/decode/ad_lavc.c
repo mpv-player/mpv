@@ -200,7 +200,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     if (ret == AVERROR_EOF) {
         // If flushing was initialized earlier and has ended now, make it start
         // over in case we get new packets at some point in the future.
-        // (Dont' reset the filter itself, we want to keep other state.)
+        // (Don't reset the filter itself, we want to keep other state.)
         avcodec_flush_buffers(priv->avctx);
         return ret;
     } else if (ret < 0 && ret != AVERROR(EAGAIN)) {

@@ -272,7 +272,7 @@ static void check_pattern(struct priv *p, int item)
         p->matches++;
     } else {
         p->mismatches++;
-        MP_WARN(p, "wrong pattern, expected %d got %d (hit: %d, mis: %d)\n",
+        MP_WARN(p, "wrong pattern, expected %d got %d (hit: %d, miss: %d)\n",
                 expected, item, p->matches, p->mismatches);
     }
 }

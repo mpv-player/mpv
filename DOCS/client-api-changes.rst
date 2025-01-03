@@ -57,7 +57,7 @@ API changes
           TRACK_SWITCHED, METADATA_UPDATE, CHAPTER_CHANGE events
  --- mpv 0.33.0 ---
  1.109  - add MPV_RENDER_API_TYPE_SW and related (software rendering API)
-        - inactivate the opengl_cb API (always fails to initialize now)
+        - deactivate the opengl_cb API (always fails to initialize now)
           The opengl_cb API was deprecated over 2 years ago. Use the render API
           instead.
  1.108  - Deprecate MPV_EVENT_IDLE

@@ -119,7 +119,7 @@ struct mp_codec_params {
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
     struct pl_color_space color; // colorspace info where available
-    struct pl_color_repr repr;   // color representaion info where available
+    struct pl_color_repr repr;   // color representation info where available
     struct mp_rect crop;         // crop to be applied
 
     bool dovi;
