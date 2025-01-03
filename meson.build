@@ -1535,6 +1535,9 @@ if macos_sdk_version != '0.0'
     add_languages('objc', native: false)
     objc_link_flags = ['-isysroot', macos_sdk_path, '-L/usr/lib', '-L/usr/local/lib']
     add_project_link_arguments(objc_link_flags, language: ['c', 'objc'])
+
+    add_project_arguments(['-fno-objc-msgsend-selector-stubs', '-Qunused-arguments'], language: ['c', 'objc'])
+    add_project_link_arguments(['-fno-objc-msgsend-selector-stubs', '-Qunused-arguments'], language: ['c', 'objc'])
 endif
 
 xcrun = find_program('xcrun', required: get_option('swift-build').require(darwin))
