@@ -328,6 +328,11 @@ g-l
 g-d
     Select an audio device.
 
+g-w
+    Select a file from watch later config files (see `RESUMING PLAYBACK`_) to
+    resume playing. Requires ``--write-filename-in-watch-later-config``. This
+    doesn't work with ``--ignore-path-in-watch-later-config``.
+
 g-b
     Select a defined input binding.
 

@@ -18,6 +18,13 @@ License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 local utils = require "mp.utils"
 local input = require "mp.input"
 
+local function show_warning(message)
+    mp.msg.warn(message)
+    if mp.get_property_native("vo-configured") then
+        mp.osd_message(message)
+    end
+end
+
 local function show_error(message)
     mp.msg.error(message)
     if mp.get_property_native("vo-configured") then
@@ -51,7 +58,7 @@ mp.add_key_binding(nil, "select-playlist", function ()
     end
 
     if #playlist == 0 then
-        show_error("The playlist is empty.")
+        show_warning("The playlist is empty.")
         return
     end
 
@@ -118,7 +125,7 @@ mp.add_key_binding(nil, "select-track", function ()
     end
 
     if #tracks == 0 then
-        show_error("No available tracks.")
+        show_warning("No available tracks.")
         return
     end
 
@@ -134,7 +141,7 @@ mp.add_key_binding(nil, "select-track", function ()
     })
 end)
 
-local function select_track(property, type, prompt, error)
+local function select_track(property, type, prompt, warning)
     local tracks = {}
     local items = {}
     local default_item
@@ -152,7 +159,7 @@ local function select_track(property, type, prompt, error)
     end
 
     if #items == 0 then
-        show_error(error)
+        show_warning(warning)
         return
     end
 
@@ -203,7 +210,7 @@ mp.add_key_binding(nil, "select-chapter", function ()
     local default_item = mp.get_property_native("chapter")
 
     if default_item == nil then
-        show_error("No available chapters.")
+        show_warning("No available chapters.")
         return
     end
 
@@ -227,7 +234,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     local edition_list = mp.get_property_native("edition-list")
 
     if edition_list == nil or #edition_list < 2 then
-        show_error("No available editions.")
+        show_warning("No available editions.")
         return
     end
 
@@ -251,7 +258,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
     local sub = mp.get_property_native("current-tracks/sub")
 
     if sub == nil then
-        show_error("No subtitle is loaded.")
+        show_warning("No subtitle is loaded.")
         return
     end
 
@@ -324,7 +331,7 @@ mp.add_key_binding(nil, "select-audio-device", function ()
     local default_item
 
     if #devices == 0 then
-        show_error("No available audio devices.")
+        show_warning("No available audio devices.")
         return
     end
 
@@ -342,6 +349,62 @@ mp.add_key_binding(nil, "select-audio-device", function ()
         default_item = default_item,
         submit = function (id)
             mp.set_property("audio-device", devices[id].name)
+        end,
+    })
+end)
+
+mp.add_key_binding(nil, "select-watch-later", function ()
+    local watch_later_dir = mp.get_property("current-watch-later-dir")
+
+    if not watch_later_dir then
+        show_warning("No watch later files found.")
+        return
+    end
+
+    local watch_later_files = {}
+
+    for i, file in ipairs(utils.readdir(watch_later_dir, "files") or {}) do
+        watch_later_files[i] = watch_later_dir .. "/" .. file
+    end
+
+    if #watch_later_files == 0 then
+        show_warning("No watch later files found.")
+        return
+    end
+
+    local files = {}
+    for _, watch_later_file in pairs(watch_later_files) do
+        local file_handle = io.open(watch_later_file)
+        if file_handle then
+            local line = file_handle:read()
+            if line and line ~= "# redirect entry" and line:find("^#") then
+                files[#files + 1] = {line:sub(3), utils.file_info(watch_later_file).mtime}
+            end
+            file_handle:close()
+        end
+    end
+
+    if #files == 0 then
+        show_warning(mp.get_property_native("write-filename-in-watch-later-config")
+            and "No watch later files found."
+            or "Enable --write-filename-in-watch-later-config to select recent files.")
+        return
+    end
+
+    table.sort(files, function (i, j)
+        return i[2] > j[2]
+    end)
+
+    local items = {}
+    for i, file in ipairs(files) do
+        items[i] = os.date("(%Y-%m-%d) ", file[2]) .. file[1]
+    end
+
+    input.select({
+        prompt = "Select a file:",
+        items = items,
+        submit = function (i)
+            mp.commandv("loadfile", files[i][1])
         end,
     })
 end)
