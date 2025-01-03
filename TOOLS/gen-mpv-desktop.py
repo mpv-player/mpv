@@ -30,10 +30,10 @@ if __name__ == "__main__":
     if not mpv_desktop["X-KDE-Protocols"]:
         raise ValueError("Missing X-KDE-Protocols entry in mpv.desktop file")
 
-    with open(sys.argv[2], encoding="UTF-8") as mpv_protocols:
+    with open(sys.argv[2], encoding="UTF-8") as mpv_protocols_f:
         mpv_protocols = {
             line.strip(" :/")
-            for line in mpv_protocols.read().splitlines()
+            for line in mpv_protocols_f.read().splitlines()
             if "://" in line
         }
 
