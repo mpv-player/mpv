@@ -277,22 +277,8 @@ static int init(struct ao *ao)
 
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
-    size_t layout_size = sizeof(AudioChannelLayout)
-                         + (ao->channels.num - 1) * sizeof(AudioChannelDescription);
-    layout = talloc_size(ao, layout_size);
-    layout->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
-    layout->mNumberChannelDescriptions = ao->channels.num;
-    for (int i = 0; i < ao->channels.num; ++i) {
-        AudioChannelDescription *desc = layout->mChannelDescriptions + i;
-        desc->mChannelFlags = kAudioChannelFlags_AllOff;
-        desc->mChannelLabel = mp_speaker_id_to_ca_label(ao->channels.speaker[i]);
-    }
-
-    void *talloc_ctx = talloc_new(NULL);
-    AudioChannelLayout *std_layout = ca_find_standard_layout(talloc_ctx, layout);
-    memmove(layout, std_layout, sizeof(AudioChannelLayout));
-    talloc_free(talloc_ctx);
-    ca_log_layout(ao, MSGL_V, layout);
+    size_t layout_size;
+    layout = ca_get_acl(ao, &layout_size);
 
     OSStatus err;
     if ((err = CMAudioFormatDescriptionCreate(
