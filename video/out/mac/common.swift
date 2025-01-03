@@ -240,7 +240,7 @@ class Common: NSObject {
     }
 
     func lmuToLux(_ lmu: Double) -> Double {
-        // the polinomial approximation for apple lmu value -> lux was empirically
+        // the polynomial approximation for apple lmu value -> lux was empirically
         // derived by firefox developers (Apple provides no documentation).
         // https://bugzilla.mozilla.org/show_bug.cgi?id=793728
         let power_c4: Double = 1 / pow(10, 27)

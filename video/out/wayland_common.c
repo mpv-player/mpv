@@ -1463,8 +1463,8 @@ static const struct zxdg_toplevel_decoration_v1_listener decoration_listener = {
     configure_decorations,
 };
 
-static void pres_set_clockid(void *data, struct wp_presentation *pres,
-                             uint32_t clockid)
+static void presentation_set_clockid(void *data, struct wp_presentation *presentation,
+                                     uint32_t clockid)
 {
     struct vo_wayland_state *wl = data;
 
@@ -1472,8 +1472,8 @@ static void pres_set_clockid(void *data, struct wp_presentation *pres,
         wl->present_clock = true;
 }
 
-static const struct wp_presentation_listener pres_listener = {
-    pres_set_clockid,
+static const struct wp_presentation_listener presentation_listener = {
+    presentation_set_clockid,
 };
 
 static void feedback_sync_output(void *data, struct wp_presentation_feedback *fback,
@@ -1775,7 +1775,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = MPMIN(ver, 2);
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
-        wp_presentation_add_listener(wl->presentation, &pres_listener, wl);
+        wp_presentation_add_listener(wl->presentation, &presentation_listener, wl);
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
@@ -1840,7 +1840,7 @@ static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *heigh
     int phys_height = handle_round(wl->scaling, *height);
 
     // Ensure that the size actually changes before we start trying to actually
-    // calculate anything so the wrong constraint for the rezie isn't choosen.
+    // calculate anything so the wrong constraint for the rezie isn't chosen.
     if (wl->resizing && !wl->resizing_constraint &&
         phys_width == mp_rect_w(wl->geometry) && phys_height == mp_rect_h(wl->geometry))
         return;
@@ -3261,7 +3261,7 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
         wl->color_surface = xx_color_manager_v4_get_surface(wl->color_manager, wl->callback_surface);
     } else {
-        MP_VERBOSE(wl, "Compositor does not support parametic image descriptions!\n");
+        MP_VERBOSE(wl, "Compositor does not support parametric image descriptions!\n");
     }
 
     return true;

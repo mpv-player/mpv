@@ -61,7 +61,7 @@ static void playlist_update_indexes(struct playlist *pl, int start, int end)
 }
 
 // Inserts the entry so that it takes "at"'s place, shifting "at" and all
-// further entires to the right (or append to end, if at==NULL).
+// further entries to the right (or append to end, if at==NULL).
 void playlist_insert_at(struct playlist *pl, struct playlist_entry *add,
                         struct playlist_entry *at)
 {

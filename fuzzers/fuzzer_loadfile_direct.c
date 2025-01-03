@@ -29,7 +29,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size <= 1 || data[size - 1] != '\0')
         return 0;
 
-    // Exlude data with null bytes inside
+    // Exclude data with null bytes inside
     if (strlen(data) != size - 1)
         return 0;
 

@@ -27,7 +27,7 @@ void mp_time_init(void);
 // Return time in nanoseconds. Never wraps. Never returns negative values.
 int64_t mp_time_ns(void);
 
-// Return time in nanoseconds. Coverts raw time in nanoseconds to mp time, subtracts init offset.
+// Return time in nanoseconds. Converts raw time in nanoseconds to mp time, subtracts init offset.
 int64_t mp_time_ns_from_raw_time(uint64_t raw_time);
 
 // Return time in seconds. Can have down to 1 nanosecond resolution, but will
@@ -43,7 +43,7 @@ uint64_t mp_raw_time_ns(void);
 void mp_sleep_ns(int64_t ns);
 
 #if HAVE_DARWIN
-// Coverts mach time to raw time in nanoseconds and returns it.
+// Converts mach time to raw time in nanoseconds and returns it.
 uint64_t mp_raw_time_ns_from_mach(uint64_t mach_time);
 #endif
 
