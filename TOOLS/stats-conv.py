@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import re
 import sys
+from typing import Any
 
-import pyqtgraph as pg
-from PyQt6 import QtWidgets
+import pyqtgraph as pg  # type: ignore
+from PyQt6 import QtWidgets  # type: ignore
 
 filename = sys.argv[1]
 
@@ -37,12 +38,18 @@ Currently, the following event types are supported:
 
 """
 
+class Event:
+    name: str
+    vals: list[tuple[float, float]] = []
+    type: str
+    marker = ""
+
 class G:
-    events = {}
+    events: dict[str, Event] = {}
     start = 0.0
     markers = ["o", "s", "t", "d"]
-    curveno = {}
-    sevents = []
+    curveno: dict[Any, int] = {}
+    sevents: list[Event] = []
 
 def find_marker():
     if len(G.markers) == 0:
@@ -50,12 +57,6 @@ def find_marker():
     m = G.markers[0]
     G.markers = G.markers[1:]
     return m
-
-class Event:
-    name = None
-    vals = []
-    type = None
-    marker = ""
 
 def get_event(event, evtype):
     if event not in G.events:
@@ -91,8 +92,8 @@ with open(filename) as file:
         line = line.split("#")[0].strip()
         if not line:
             continue
-        ts, event = line.split(" ", 1)
-        ts = int(ts) / SCALE
+        ts_str, event = line.split(" ", 1)
+        ts = int(ts_str) / SCALE
         if G.start is None:
             G.start = ts
         ts -= G.start
@@ -108,18 +109,16 @@ with open(filename) as file:
                 e.vals.append((ts, 0))
             case ["value", rest]:
                 val, name = rest.split(" ", 1)
-                val = float(val)
                 e = get_event(name, "value")
-                e.vals.append((ts, val))
+                e.vals.append((ts, float(val)))
             case ["event-timed", rest]:
                 val, name = rest.split(" ", 1)
-                val = int(val) / SCALE - G.start
                 e = get_event(name, "event-signal")
-                e.vals.append((val, 1))
+                e.vals.append((int(val) / SCALE - G.start, 1))
             case ["range-timed", rest]:
-                ts1, ts2, name = rest.split(" ", 2)
-                ts1 = int(ts1) / SCALE - G.start
-                ts2 = int(ts2) / SCALE - G.start
+                ts1_str, ts2_str, name = rest.split(" ", 2)
+                ts1 = int(ts1_str) / SCALE - G.start
+                ts2 = int(ts2_str) / SCALE - G.start
                 e = get_event(name, "event")
                 e.vals.append((ts1, 0))
                 e.vals.append((ts1, 1))
@@ -127,10 +126,8 @@ with open(filename) as file:
                 e.vals.append((ts2, 0))
             case ["value-timed", rest]:
                 tsval, val, name = rest.split(" ", 2)
-                tsval = int(tsval) / SCALE - G.start
-                val = float(val)
                 e = get_event(name, "value")
-                e.vals.append((tsval, val))
+                e.vals.append((int(tsval) / SCALE - G.start, float(val)))
             case ["signal", name]:
                 e = get_event(name, "event-signal")
                 e.vals.append((ts, 1))
@@ -163,7 +160,7 @@ ax[0] = win.addPlot()
 if hasval:
     win.nextRow()
     ax[1] = win.addPlot()
-    ax[1].setXLink(ax[0])
+    ax[1].setXLink(ax[0])  # type: ignore
 
 for cur in ax:
     if cur is not None:
@@ -181,6 +178,6 @@ for e in G.sevents:
     else:
         args["pen"] = pg.mkPen(color, width=0)
     G.curveno[cur] += 1
-    cur.plot(*zip(*e.vals), **args)
+    cur.plot(*zip(*e.vals), **args)  # type: ignore
 
 app.exec()
