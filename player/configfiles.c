@@ -472,4 +472,3 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
     }
     return NULL;
 }
-
