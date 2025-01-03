@@ -5792,7 +5792,15 @@ static void cmd_playlist_play_index(void *p)
     if (pos == -2)
         pos = playlist_entry_to_index(pl, pl->current);
 
-    mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
+    struct playlist_entry *entry = playlist_entry_from_index(pl, pos);
+
+    if (entry && cmd->args[1].v.str_list) {
+        char **pairs = cmd->args[1].v.str_list;
+        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
+            playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
+    }
+
+    mp_set_playlist_entry(mpctx, entry);
     if (cmd->on_osd & MP_ON_OSD_MSG)
         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
 }
@@ -7016,6 +7024,7 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
                 M_RANGE(-1, INT_MAX)},
+            {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         }
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },

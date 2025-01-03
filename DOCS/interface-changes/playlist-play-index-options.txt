@@ -1,0 +1,1 @@
+add an options argument to `playlist-play-index`
