@@ -101,4 +101,3 @@ Boolean ca_settable(AudioObjectID id, ca_scope scope, ca_sel selector,
 
     return AudioObjectIsPropertySettable(id, &p_addr, data);
 }
-
