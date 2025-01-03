@@ -35,7 +35,7 @@ def file2string(infilename, infile, outfile):
 
     for c in safe_chars:
         conv[ord(c)] = c
-    for c, esc in ("\nn", "\tt", r"\\", '""'):
+    for c, esc in [("\n", "n"), ("\t", "t"), ("\\", "\\"), ('"', '"')]:
         conv[ord(c)] = "\\" + esc
     for line in infile:
         outfile.write('"' + "".join(conv[c] for c in line) + '"\n')

@@ -35,7 +35,7 @@ def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
 
 def apply_plist_template(plist_file, version):
-    for line in fileinput.input(plist_file, inplace=1):
+    for line in fileinput.input(plist_file, inplace=True):
         print(line.rstrip().replace("${VERSION}", version))
 
 def sign_bundle(binary_name):
