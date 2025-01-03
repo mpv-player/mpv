@@ -12,7 +12,7 @@ It also provides a bunch of convenience macros and debugging facilities.
 
 The TA functions are documented in the implementation files (ta.c, ta_utils.c).
 
-TA is intended to be useable as library independent from mpv. It doesn't
+TA is intended to be usable as library independent from mpv. It doesn't
 depend on anything mpv specific.
 
 Note:

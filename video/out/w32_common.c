@@ -538,7 +538,7 @@ static void begin_dragging(struct vo_w32_state *w32)
     // Unfortunately, the w32->current_fs value is stale because the
     // input is handled in a different thread, and we cannot wait for
     // an up-to-date value before entering the model loop if dragging
-    // needs to be kept resonsive.
+    // needs to be kept responsive.
     // Workaround this by intercepting the loop in the WM_MOVING message,
     // where the up-to-date value is available.
     SystemParametersInfoW(SPI_GETWINARRANGING, 0, &w32->win_arranging, 0);

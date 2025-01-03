@@ -77,7 +77,7 @@ void mp_autoconvert_add_srate(struct mp_autoconvert *c, int rate);
 
 // Reset set of allowed formats back to initial state. (This does not flush
 // any frames or remove currently active filters, although to get reasonable
-// behavior, you need to readd all previously allowed formats, or reset the
+// behavior, you need to re-add all previously allowed formats, or reset the
 // filter.)
 void mp_autoconvert_clear(struct mp_autoconvert *c);
 

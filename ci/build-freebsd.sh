@@ -7,7 +7,7 @@ export CFLAGS="$CFLAGS -isystem/usr/local/include -march=native"
 export CXXFLAGS="$CXXFLAGS -isystem/usr/local/include"
 export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 
-# TODO: readd -Ddvbin=enabled
+# TODO: re-add -Ddvbin=enabled
 
 meson setup build $common_args \
   -Db_sanitize=address,undefined \

@@ -43,7 +43,7 @@ While on master:
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
   the new version.
 
-- Readd -UNKNOWN suffix to version in `MPV_VERSION` file.
+- Re-add -UNKNOWN suffix to version in `MPV_VERSION` file.
 
 If necessary (to e.g. exclude commits already on master), the release can
 be done on a branch with different commit history. The release branch **must**

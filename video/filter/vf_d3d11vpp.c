@@ -34,7 +34,7 @@
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
-// For video procesor extensions identifiers reference see:
+// For video processor extensions identifiers reference see:
 // https://chromium.googlesource.com/chromium/src/+/5f354f38/ui/gl/swap_chain_presenter.cc
 
 #ifndef NVIDIA_PPE_INTERFACE_GUID

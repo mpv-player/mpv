@@ -73,7 +73,7 @@ struct xvctx {
     int cfg_xv_adaptor;
     int cfg_buffers;
     XvAdaptorInfo *ai;
-    XvImageFormatValues *fo;
+    XvImageFormatValues *image_formats;
     unsigned int formats, adaptors, xv_format;
     int current_buf;
     int current_ip_buf;
@@ -483,10 +483,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     ctx->xv_format = 0;
     for (i = 0; i < ctx->formats; i++) {
         MP_VERBOSE(vo, "Xvideo image format: 0x%x (%4.4s) %s\n",
-                   ctx->fo[i].id, (char *) &ctx->fo[i].id,
-                   (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
-        if (ctx->fo[i].id == find_xv_format(ctx->image_format))
-            ctx->xv_format = ctx->fo[i].id;
+                   ctx->image_formats[i].id, (char *) &ctx->image_formats[i].id,
+                   (ctx->image_formats[i].format == XvPacked) ? "packed" : "planar");
+        if (ctx->image_formats[i].id == find_xv_format(ctx->image_format))
+            ctx->xv_format = ctx->image_formats[i].id;
     }
     if (!ctx->xv_format)
         return -1;
@@ -741,7 +741,7 @@ static int query_format(struct vo *vo, int format)
     int fourcc = find_xv_format(format);
     if (fourcc) {
         for (i = 0; i < ctx->formats; i++) {
-            if (ctx->fo[i].id == fourcc)
+            if (ctx->image_formats[i].id == fourcc)
                 return 1;
         }
     }
@@ -756,9 +756,9 @@ static void uninit(struct vo *vo)
     if (ctx->ai)
         XvFreeAdaptorInfo(ctx->ai);
     ctx->ai = NULL;
-    if (ctx->fo) {
-        XFree(ctx->fo);
-        ctx->fo = NULL;
+    if (ctx->image_formats) {
+        XFree(ctx->image_formats);
+        ctx->image_formats = NULL;
     }
     for (i = 0; i < ctx->num_buffers; i++)
         deallocate_xvimage(vo, i);
@@ -860,7 +860,7 @@ static int preinit(struct vo *vo)
     xv_enable_vsync(vo);
     xv_get_max_img_dim(vo, &ctx->max_width, &ctx->max_height);
 
-    ctx->fo = XvListImageFormats(x11->display, ctx->xv_port,
+    ctx->image_formats = XvListImageFormats(x11->display, ctx->xv_port,
                                  (int *) &ctx->formats);
 
     MP_WARN(vo, "Warning: this legacy VO has bad quality and performance, "

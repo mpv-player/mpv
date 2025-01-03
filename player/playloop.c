@@ -541,7 +541,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return -1;
-    double ans = -1;
+    double ret = -1;
     double start = 0;
     double len = get_time_length(mpctx);
     if (use_range) {
@@ -556,18 +556,18 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     }
     double pos = get_current_time(mpctx);
     if (len > 0)
-        ans = MPCLAMP((pos - start) / len, 0, 1);
-    if (ans < 0) {
+        ret = MPCLAMP((pos - start) / len, 0, 1);
+    if (ret < 0) {
         int64_t size = demuxer->filesize;
         if (size > 0 && demuxer->filepos >= 0)
-            ans = MPCLAMP(demuxer->filepos / (double)size, 0, 1);
+            ret = MPCLAMP(demuxer->filepos / (double)size, 0, 1);
     }
     if (use_range) {
         if (mpctx->opts->play_frames > 0)
-            ans = MPMAX(ans, 1.0 -
+            ret = MPMAX(ret, 1.0 -
                     mpctx->max_frames / (double) mpctx->opts->play_frames);
     }
-    return ans;
+    return ret;
 }
 
 // -2 is no chapters, -1 is before first chapter

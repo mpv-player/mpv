@@ -777,7 +777,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         return;
     }
     double now = mp_time_sec();
-    // ignore system doubleclick if we generate these events ourselves
+    // ignore system double-click if we generate these events ourselves
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     int units = 1;
@@ -796,7 +796,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         } else if (code == MP_MBTN_LEFT && ictx->opts->allow_win_drag &&
                    !test_mouse(ictx, ictx->mouse_vo_x, ictx->mouse_vo_y, MP_INPUT_ALLOW_VO_DRAGGING))
         {
-            // This is a mouse left button down event which isn't part of a doubleclick,
+            // This is a mouse left button down event which isn't part of a double-click,
             // and the mouse is on an input section which allows VO dragging.
             // Mark the dragging mouse button down in this case.
             ictx->dragging_button_down = true;
@@ -810,7 +810,7 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
     if (code & MP_KEY_STATE_UP) {
         code &= ~MP_KEY_STATE_UP;
         if (code == MP_MBTN_LEFT) {
-            // This is a mouse left botton up event. Mark the dragging mouse button up.
+            // This is a mouse left button up event. Mark the dragging mouse button up.
             ictx->dragging_button_down = false;
         }
     }

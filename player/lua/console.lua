@@ -1838,7 +1838,7 @@ mp.register_script_message('get-input', function (script_name, args)
 end)
 
 mp.register_script_message('log', function (message)
-    -- input.get's edited handler is invoked after submit, so avoid modifying
+    -- input.get edited handler is invoked after submit, so avoid modifying
     -- the default log.
     if input_caller == nil then
         return

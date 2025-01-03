@@ -13,7 +13,7 @@ local pending_hooks = {}            -- as set (keys only, meaningless values)
 -- profile the condition is evaluated for.
 local current_profile = nil
 
--- Cached set of all top-level mpv properities. Only used for extra validation.
+-- Cached set of all top-level mpv properties. Only used for extra validation.
 local property_set = {}
 for _, property in pairs(mp.get_property_native("property-list")) do
     property_set[property] = true

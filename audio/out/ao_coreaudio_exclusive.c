@@ -232,7 +232,7 @@ static int select_stream(struct ao *ao)
     talloc_free(streams);
 
     if (p->stream_idx < 0) {
-        MP_ERR(ao, "No useable substream found.\n");
+        MP_ERR(ao, "No usable substream found.\n");
         goto coreaudio_error;
     }
 

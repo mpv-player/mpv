@@ -272,7 +272,7 @@ struct demux_internal {
     // -- Access from demuxer thread only
     bool enable_recording;
     struct mp_recorder *recorder;
-    int64_t slave_unbuffered_read_bytes; // value repoted from demuxer impl.
+    int64_t slave_unbuffered_read_bytes; // value reported from demuxer impl.
     int64_t hack_unbuffered_read_bytes;  // for demux_get_bytes_read_hack()
     int64_t cache_unbuffered_read_bytes; // for demux_reader_state.bytes_per_second
     int64_t byte_level_seeks;            // for demux_reader_state.byte_level_seeks

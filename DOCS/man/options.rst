@@ -573,8 +573,8 @@ Playback Control
 
     Known problems:
 
-    - It's fragile. If anything doesn't work, random non-useful behavior may
-      occur. In simple cases, the player will just play nonsense and artifacts.
+    - It's fragile. If anything doesn't work, random behavior may occur.
+      In simple cases, the player will just play nonsense and artifacts.
       In other cases, it may get stuck or heat the CPU. (Exceeding memory usage
       significantly beyond the user-set limits would be a bug, though.)
 
@@ -988,7 +988,7 @@ Program Behavior
         Add thumbnails as video tracks (default: none).
 
         Thumbnails get downloaded when they are added as tracks, so 'all' can
-        have a noticable impact on how long it takes to open the video when
+        have a noticeable impact on how long it takes to open the video when
         there are a lot of thumbnails.
 
     ``use_manifests=<yes|no>``
@@ -2315,7 +2315,7 @@ Audio
             directories.
 
 ``--audio-exts=ext1,ext2,...``
-    Audio file extentions to try to match when using ``--audio-file-auto``,
+    Audio file extensions to try to match when using ``--audio-file-auto``,
     ``--autocreate-playlist`` or ``--directory-filter-types``.
 
     This is a string list option. See `List Options`_ for details.
@@ -2714,7 +2714,7 @@ Subtitles
     (default: no). Normally, the subtitle canvas is fit into the video canvas
     (e.g. letterboxed). Setting this option uses the video size as subtitle
     canvas size. Can be useful to test broken subtitles, which often happen
-    when the video was trancoded, while attempting to keep the old subtitles.
+    when the video was transcoded, while attempting to keep the old subtitles.
 
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
@@ -2748,7 +2748,7 @@ Subtitles
     :all:   Load all subs in the current and ``--sub-file-paths`` directories.
 
 ``--sub-auto-exts=ext1,ext2,...``
-    Subtitle extentions to try and match when using ``--sub-auto``. Note that
+    Subtitle extensions to try and match when using ``--sub-auto``. Note that
     modifying this list will also affect what mpv recognizes as subtitles when
     using drag and drop.
 
@@ -3355,7 +3355,7 @@ Window
 
 ``--ontop-level=<window|system|desktop|level>``
     (macOS only)
-    Sets the level of an ontop window (default: window).
+    Sets the level of an on-top window (default: window).
 
     :window:  On top of all other windows.
     :system:  On top of system elements like Taskbar, Menubar and Dock.
@@ -7710,7 +7710,7 @@ Miscellaneous
     used to disable cover art that is part of the file).
 
 ``--image-exts=ext1,ext2,...``
-    Image file extentions to try to match when using ``--cover-art-auto``,
+    Image file extensions to try to match when using ``--cover-art-auto``,
     ``--autocreate-playlist`` or ``--directory-filter-types``.
 
     This is a string list option. See `List Options`_ for details.
@@ -7726,21 +7726,21 @@ Miscellaneous
     This is a string list option. See `List Options`_ for details.
 
 ``--video-exts=ext1,ext2,...``
-    Video file extentions to try to match when using ``--autocreate-playlist`` or
+    Video file extensions to try to match when using ``--autocreate-playlist`` or
     ``--directory-filter-types``.
 
     This is a string list option. See `List Options`_ for details.
     Use ``--help=video-exts`` to see default extensions.
 
 ``--archive-exts=ext1,ext2,...``
-    Archive file extentions to try to match when using ``--autocreate-playlist``
+    Archive file extensions to try to match when using ``--autocreate-playlist``
     or ``--directory-filter-types``.
 
     This is a string list option. See `List Options`_ for details. Use
     ``--help=archive-exts`` to see the default extensions.
 
 ``--playlist-exts=ext1,ext2,...``
-    Playlist file extentions to try to match when using
+    Playlist file extensions to try to match when using
     ``--autocreate-playlist`` or ``--directory-filter-types``.
 
     This is a string list option. See `List Options`_ for details. Use

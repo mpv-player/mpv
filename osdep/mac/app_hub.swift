@@ -100,7 +100,7 @@ class AppHub: NSObject {
 
     @objc func stopRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
-        log.verbose("Stoping RemoteCommandCenter")
+        log.verbose("Stopping RemoteCommandCenter")
         remote?.stop()
 #endif
     }

@@ -46,7 +46,7 @@ int main(void) {
     assert_int_equal(W("\U0001F1F5\U0001F1F1"), 2);
 
     assert_int_equal(W("\n"), 0);              // Newline (should not take up any visual space)
-    assert_int_equal(W("\t"), 8);              // Tab (tabstop assumend to be 8)
+    assert_int_equal(W("\t"), 8);              // Tab (tabstop assumed to be 8)
     assert_int_equal(W("\0"), 0);              // Null character (non-visible)
 
     assert_int_equal(W("A\u3042"), 3);         // ASCII 'A' + full-width Japanese Hiragana 'あ' (U+3042)

@@ -332,7 +332,7 @@ local function find_and_add_entries()
         extensions = EXTENSIONS
     end
     if not extensions then
-        msg.debug("stopping: no matched extentions list")
+        msg.debug("stopping: no matched extensions list")
         return
     end
 

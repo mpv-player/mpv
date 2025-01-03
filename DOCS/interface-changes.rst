@@ -314,12 +314,12 @@ Interface changes
     - `--save-position-on-quit` and its associated commands now store state files in
       the XDG_STATE_HOME directory by default. This only has an effect on linux/bsd
       systems.
-    - mpv now implictly saves cache files in XDG_CACHE_HOME by default. This only has
+    - mpv now implicitly saves cache files in XDG_CACHE_HOME by default. This only has
       an effect if the user enables options that would lead to cache being stored and
       only makes a difference on linux/bsd systems.
-    - `--cache-on-disk` no longer requires explictly setting the `--cache-dir` option
+    - `--cache-on-disk` no longer requires explicitly setting the `--cache-dir` option
     - add `--icc-cache` and `--gpu-shader-cache` options to control whether or not to
-      save cache files for these features; explictly setting `--icc-cache-dir` and
+      save cache files for these features; explicitly setting `--icc-cache-dir` and
       `--gpu-shader-cache` is no longer required
     - remove the `--tone-mapping-crosstalk` option
     - add `--gamut-mapping-mode=perceptual|relative|saturation|absolute|linear`
@@ -461,7 +461,7 @@ Interface changes
     - deprecate --input-file (there are no plans to remove this short-term,
       but it will probably eventually go away <- that was a lie)
     - deprecate --video-sync=display-adrop (might be removed if it's in the way;
-      undeprecated or readded if it's not too much of a problem)
+      undeprecated or re-added if it's not too much of a problem)
     - deprecate all input section commands (these will be changed/removed, as
       soon as mpv internals do not require them anymore)
     - remove deprecated --playlist-pos alias (use --playlist-start)

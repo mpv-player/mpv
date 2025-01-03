@@ -674,4 +674,3 @@ static struct ra_fns ra_fns_pl = {
     .timer_start            = timer_start_pl,
     .timer_stop             = timer_stop_pl,
 };
-

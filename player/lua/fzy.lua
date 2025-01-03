@@ -150,7 +150,7 @@ end
 -- Compute a matching score.
 --
 -- Args:
---   needle (string): must be a subequence of `haystack`, or the result is
+--   needle (string): must be a subsequence of `haystack`, or the result is
 --     undefined.
 --   haystack (string)
 --   case_sensitive (bool, optional): defaults to false
@@ -180,7 +180,7 @@ end
 -- in the optimal match.
 --
 -- Args:
---   needle (string): must be a subequence of `haystack`, or the result is
+--   needle (string): must be a subsequence of `haystack`, or the result is
 --     undefined.
 --   haystack (string)
 --   case_sensitive (bool, optional): defaults to false
@@ -289,7 +289,7 @@ function fzy.get_score_ceiling()
   return MATCH_MAX_LENGTH * SCORE_MATCH_CONSECUTIVE
 end
 
--- The name of the currently-running implmenetation, "lua" or "native".
+-- The name of the currently-running implementation, "lua" or "native".
 function fzy.get_implementation_name()
   return "lua"
 end

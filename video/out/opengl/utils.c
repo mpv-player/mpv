@@ -221,7 +221,7 @@ static void gl_vao_unbind(struct gl_vao *vao)
 }
 
 // Draw the vertex data (as described by the gl_vao_entry entries) in ptr
-// to the screen. num is the number of vertexes. prim is usually GL_TRIANGLES.
+// to the screen. num is the number of vertices. prim is usually GL_TRIANGLES.
 // If ptr is NULL, then skip the upload, and use the data uploaded with the
 // previous call.
 void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
