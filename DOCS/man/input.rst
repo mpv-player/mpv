@@ -1395,6 +1395,12 @@ Screenshot Commands
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
+``screenshot-to-clipboard [<flags>]``
+    Take a screenshot and save it to the system clipboard.
+
+    The ``flags`` argument is like the first argument to ``screenshot`` and
+    supports ``subtitles``, ``video``, ``window``.
+
 ``screenshot-raw [<flags>]``
     Return a screenshot in memory. This can be used only through the client
     API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
