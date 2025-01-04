@@ -287,6 +287,7 @@ struct priv {
     struct vulkan_display_opts *opts;
     uint32_t width;
     uint32_t height;
+    uint32_t refresh_rate;
 
 #if HAVE_DRM
     struct mpv_opengl_drm_params_v2 drm_params;
@@ -438,6 +439,7 @@ static bool display_init(struct ra_ctx *ctx)
 
     p->width = mode->parameters.visibleRegion.width;
     p->height = mode->parameters.visibleRegion.height;
+    p->refresh_rate = mode->parameters.refreshRate;
 
     struct ra_vk_ctx_params params = {0};
     if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
@@ -471,6 +473,16 @@ static bool display_reconfig(struct ra_ctx *ctx)
 
 static int display_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
+    struct priv *p = ctx->priv;
+    switch (request) {
+    case VOCTRL_GET_DISPLAY_FPS:
+        *(double*)arg = p->refresh_rate / 1000.0;
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_RES:
+        ((int *)arg)[0] = p->width;
+        ((int *)arg)[1] = p->height;
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
