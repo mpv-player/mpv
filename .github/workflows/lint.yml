@@ -21,26 +21,26 @@ jobs:
         run: |
           ./ci/lint-commit-msg.py
 
-  swift-lint:
+  swift:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: norio-nomura/action-swiftlint@3.2.1
 
-  lua-lint:
+  lua:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: lunarmodules/luacheck@v1
 
-  python-lint:
+  ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v2
 
-  editorconfig-lint:
+  editorconfig:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
