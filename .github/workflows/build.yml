@@ -184,7 +184,7 @@ jobs:
           $env:PATH += ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
-          meson test -C build
+          meson test -C build -t 2
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
