@@ -336,7 +336,7 @@ Playback Control
 
     Using it without any arguments gives you the default behavior.
 
-``sub-seek <skip> <flags>``
+``sub-seek <skip> [<flags>]``
     Change video and audio position such that the subtitle event after
     ``<skip>`` subtitle events is displayed. For example, ``sub-seek 1`` skips
     to the next subtitle, ``sub-seek -1`` skips to the previous subtitles, and
@@ -447,7 +447,7 @@ Property Manipulation
 Playlist Manipulation
 ~~~~~~~~~~~~~~~~~~~~~
 
-``playlist-next <flags>``
+``playlist-next [<flags>]``
     Go to the next entry on the playlist.
 
     First argument:
@@ -457,7 +457,7 @@ Playlist Manipulation
     force
         Terminate playback if there are no more files on the playlist.
 
-``playlist-prev <flags>``
+``playlist-prev [<flags>]``
     Go to the previous entry on the playlist.
 
     First argument:
@@ -649,7 +649,7 @@ Track Manipulation
 
     This works by unloading and re-adding the subtitle track.
 
-``sub-step <skip> <flags>``
+``sub-step <skip> [<flags>]``
     Change subtitle timing such, that the subtitle event after the next
     ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
     backwards.
@@ -1348,7 +1348,7 @@ Scripting Commands
 Screenshot Commands
 ~~~~~~~~~~~~~~~~~~~
 
-``screenshot <flags>``
+``screenshot [<flags>]``
     Take a screenshot.
 
     Multiple flags are available (some can be combined with ``+``):
@@ -1382,7 +1382,7 @@ Screenshot Commands
     On success, returns a ``mpv_node`` with a ``filename`` field set to the
     saved screenshot location.
 
-``screenshot-to-file <filename> <flags>``
+``screenshot-to-file <filename> [<flags>]``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
