@@ -35,19 +35,19 @@
 #include "osdep/mac/app_bridge.h"
 
 // complex macros won't get imported to swift so we have to reassign them
-static int SWIFT_MBTN_LEFT       = MP_MBTN_LEFT;
-static int SWIFT_MBTN_MID        = MP_MBTN_MID;
-static int SWIFT_MBTN_RIGHT      = MP_MBTN_RIGHT;
-static int SWIFT_WHEEL_UP        = MP_WHEEL_UP;
-static int SWIFT_WHEEL_DOWN      = MP_WHEEL_DOWN;
-static int SWIFT_WHEEL_LEFT      = MP_WHEEL_LEFT;
-static int SWIFT_WHEEL_RIGHT     = MP_WHEEL_RIGHT;
-static int SWIFT_MBTN_BACK       = MP_MBTN_BACK;
-static int SWIFT_MBTN_FORWARD    = MP_MBTN_FORWARD;
-static int SWIFT_MBTN9           = MP_MBTN9;
+static const int SWIFT_MBTN_LEFT       = MP_MBTN_LEFT;
+static const int SWIFT_MBTN_MID        = MP_MBTN_MID;
+static const int SWIFT_MBTN_RIGHT      = MP_MBTN_RIGHT;
+static const int SWIFT_WHEEL_UP        = MP_WHEEL_UP;
+static const int SWIFT_WHEEL_DOWN      = MP_WHEEL_DOWN;
+static const int SWIFT_WHEEL_LEFT      = MP_WHEEL_LEFT;
+static const int SWIFT_WHEEL_RIGHT     = MP_WHEEL_RIGHT;
+static const int SWIFT_MBTN_BACK       = MP_MBTN_BACK;
+static const int SWIFT_MBTN_FORWARD    = MP_MBTN_FORWARD;
+static const int SWIFT_MBTN9           = MP_MBTN9;
 
-static int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
-static int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
+static const int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
+static const int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 
 static const char *swift_mpv_version = mpv_version;
 static const char *swift_mpv_copyright = mpv_copyright;
