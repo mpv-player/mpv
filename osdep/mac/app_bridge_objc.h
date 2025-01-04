@@ -49,8 +49,8 @@ static const int SWIFT_MBTN9           = MP_MBTN9;
 static const int SWIFT_KEY_MOUSE_LEAVE = MP_KEY_MOUSE_LEAVE;
 static const int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 
-static const char *swift_mpv_version = mpv_version;
-static const char *swift_mpv_copyright = mpv_copyright;
+static const char *const swift_mpv_version = mpv_version;
+static const char *const swift_mpv_copyright = mpv_copyright;
 
 NSData *app_bridge_icon(void);
 void app_bridge_tarray_append(void *t, char ***a, int *i, char *s);
