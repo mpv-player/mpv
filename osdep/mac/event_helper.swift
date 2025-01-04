@@ -105,28 +105,28 @@ class EventHelper {
     func eventLoop() {
         while let mpv = mpv, let event = mpv_wait_event(mpv, 0) {
             if event.pointee.event_id == MPV_EVENT_NONE { break }
-            handle(event: event)
+            handle(event: event.pointee)
         }
     }
 
-    func handle(event: UnsafeMutablePointer<mpv_event>) {
-        switch event.pointee.event_id {
+    func handle(event: mpv_event) {
+        switch event.event_id {
         case MPV_EVENT_PROPERTY_CHANGE:
             handle(property: event)
         default:
-            for (_, subscriber) in events[String(describing: event.pointee.event_id)] ?? [:] {
-                subscriber.handle(event: .init(name: String(describing: event.pointee.event_id)))
+            for (_, subscriber) in events[String(describing: event.event_id)] ?? [:] {
+                subscriber.handle(event: .init(name: String(describing: event.event_id)))
             }
         }
 
-        if event.pointee.event_id == MPV_EVENT_SHUTDOWN {
+        if event.event_id == MPV_EVENT_SHUTDOWN {
             mpv_destroy(mpv)
             mpv = nil
         }
     }
 
-    func handle(property mpvEvent: UnsafeMutablePointer<mpv_event>) {
-        let pData = OpaquePointer(mpvEvent.pointee.data)
+    func handle(property mpvEvent: mpv_event) {
+        let pData = OpaquePointer(mpvEvent.data)
         guard let property = UnsafePointer<mpv_event_property>(pData)?.pointee else {
             return
         }
