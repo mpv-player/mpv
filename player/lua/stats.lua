@@ -192,7 +192,7 @@ local function text_style()
             style = style .. "\\yshad" .. shadow_y_offset
         end
 
-        return style
+        return style .. "}"
     end
 end
 
