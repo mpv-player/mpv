@@ -576,6 +576,21 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``fullscreen_mbtn_right_command="cycle window-maximized"``
 
+Custom Buttons
+~~~~~~~~~~~~~~
+
+Additional script-opts are available to define custom buttons in ``bottombar``
+and ``topbar`` layouts.
+
+.. admonition:: Example to add loop and shuffle buttons
+
+    custom_button_1_content=🔁
+    custom_button_1_mbtn_left_command=cycle-values loop-file inf no
+    custom_button_1_mbtn_right_command=cycle-values loop-playlist inf no
+
+    custom_button_2_content=🔀
+    custom_button_2_mbtn_left_command=playlist-shuffle
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
