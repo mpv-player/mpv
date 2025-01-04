@@ -125,11 +125,9 @@ class RemoteCommandCenter: EventSubscriber {
         updateInfoCenter()
 
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(self.makeCurrent),
-            name: NSApplication.willBecomeActiveNotification,
-            object: nil
-        )
+            forName: NSApplication.willBecomeActiveNotification,
+            object: nil,
+            queue: nil) { _ in self.makeCurrent() }
     }
 
     func stop() {
@@ -148,7 +146,7 @@ class RemoteCommandCenter: EventSubscriber {
         )
     }
 
-    @objc func makeCurrent(notification: NSNotification) {
+    func makeCurrent() {
         infoCenter.playbackState = .paused
         infoCenter.playbackState = .playing
         updateInfoCenter()
