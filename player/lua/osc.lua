@@ -126,6 +126,35 @@ for i = 1, 99 do
     user_opts["custom_button_" .. i .. "_mbtn_right_command"] = ""
 end
 
+local icon_font = "mpv-osd-symbols"
+
+-- Running this in Lua 5.3+ or LuaJIT converts a hexadecimal Unicode code point
+-- to the decimal value of every byte for Lua 5.1 and 5.2 compatibility:
+-- glyph='\u{e000}' output=''
+-- for i = 1, #glyph do output = output .. '\\' .. string.byte(glyph, i) end
+-- print(output)
+local icons = {
+    prev = "\238\132\144",           -- E110
+    next = "\238\132\129",           -- E101
+    pause = "\238\128\130",          -- E002
+    play = "\238\132\129",           -- E101
+    play_backward = "\238\132\144",  -- E110
+    skip_backward = "\238\128\132",  -- E004
+    skip_forward = "\238\128\133",   -- E005
+    chapter_prev = "\238\132\132",   -- E104
+    chapter_next = "\238\132\133",   -- E105
+    audio = "\238\132\134",          -- E106
+    subtitle = "\238\132\135",       -- E107
+    mute = "\238\132\138",           -- E10A
+    volume = {"\238\132\139", "\238\132\140", "\238\132\141", "\238\132\142"},-- E10B E10C E10D E10E
+    fullscreen = "\238\132\136",     -- E108
+    exit_fullscreen = "\238\132\137",-- E109
+    close = "\238\132\149",          -- E115
+    minimize = "\238\132\146",       -- E112
+    maximize = "\238\132\147",       -- E113
+    unmaximize = "\238\132\148",     -- E114
+}
+
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
@@ -163,24 +192,24 @@ local osc_styles
 
 local function set_osc_styles()
     osc_styles = {
-        bigButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
-        smallButtonsL = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsL_color) .. "\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
+        bigButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs50\\fn" .. icon_font .. "}",
+        smallButtonsL = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsL_color) .. "\\3c&HFFFFFF\\fs19\\fn" .. icon_font .. "}",
         smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
-        smallButtonsR = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsR_color) .. "\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
-        topButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
+        smallButtonsR = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.small_buttonsR_color) .. "\\3c&HFFFFFF\\fs30\\fn" .. icon_font .. "}",
+        topButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs12\\fn" .. icon_font .. "}",
 
         elementDown = "{\\1c&H" .. osc_color_convert(user_opts.held_element_color) .."}",
         timecodes = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .. "\\3c&HFFFFFF\\fs20}",
         vidtitle = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs14\\q2}",
         box = "{\\rDefault\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.background_color) .. "\\3c&HFFFFFF}",
 
-        topButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
-        smallButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
+        topButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.top_buttons_color) .. "\\3c&HFFFFFF\\fs18\\fn" .. icon_font .. "}",
+        smallButtonsBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs28\\fn" .. icon_font .. "}",
         timecodesBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.timecode_color) .."\\3c&HFFFFFF\\fs27}",
         timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&H" .. osc_color_convert(user_opts.time_pos_color) .. "\\3c&H" .. osc_color_convert(user_opts.time_pos_outline_color) .. "\\fs30}",
         vidtitleBar = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\3c&HFFFFFF\\fs18\\q2}",
 
-        wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fnmpv-osd-symbols}",
+        wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fn" .. icon_font .. "}",
         wcTitle = "{\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\fs24\\q2}",
         wcBar = "{\\1c&H" .. osc_color_convert(user_opts.background_color) .. "}",
     }
@@ -1127,7 +1156,7 @@ local function window_controls(topbar)
 
     -- Close: 🗙
     local ne = new_element("close", "button")
-    ne.content = "\238\132\149"
+    ne.content = icons.close
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("quit") end
     lo = add_layout("close")
@@ -1136,7 +1165,7 @@ local function window_controls(topbar)
 
     -- Minimize: 🗕
     ne = new_element("minimize", "button")
-    ne.content = "\238\132\146"
+    ne.content = icons.minimize
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "window-minimized") end
     lo = add_layout("minimize")
@@ -1146,9 +1175,9 @@ local function window_controls(topbar)
     -- Maximize: 🗖 /🗗
     ne = new_element("maximize", "button")
     if state.maximized or state.fullscreen then
-        ne.content = "\238\132\148"
+        ne.content = icons.unmaximize
     else
-        ne.content = "\238\132\147"
+        ne.content = icons.maximize
     end
     ne.eventresponder["mbtn_left_up"] =
         function ()
@@ -1824,14 +1853,14 @@ local function osc_init()
     -- prev
     ne = new_element("playlist_prev", "button")
 
-    ne.content = "\238\132\144"
+    ne.content = icons.prev
     ne.enabled = (pl_pos > 1) or (loop ~= "no")
     bind_mouse_buttons("playlist_prev")
 
     --next
     ne = new_element("playlist_next", "button")
 
-    ne.content = "\238\132\129"
+    ne.content = icons.next
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
     bind_mouse_buttons("playlist_next")
 
@@ -1842,15 +1871,13 @@ local function osc_init()
     ne = new_element("play_pause", "button")
 
     ne.content = function ()
-        if mp.get_property("pause") == "yes" then
-            if mp.get_property("play-direction", "forward") ~= "backward" then
-                return ("\238\132\129")
-            else
-                return ("\238\132\144")
-            end
-        else
-            return ("\238\128\130")
+        if not mp.get_property_native("pause") then
+            return icons.pause
         end
+
+        return mp.get_property("play-direction") == "forward"
+            and icons.play
+            or icons.play_backward
     end
     bind_mouse_buttons("play_pause")
 
@@ -1858,7 +1885,7 @@ local function osc_init()
     ne = new_element("skip_backward", "button")
 
     ne.softrepeat = true
-    ne.content = "\238\128\132"
+    ne.content = icons.skip_backward
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", -5) end
     ne.eventresponder["mbtn_mid"] =
@@ -1870,7 +1897,7 @@ local function osc_init()
     ne = new_element("skip_forward", "button")
 
     ne.softrepeat = true
-    ne.content = "\238\128\133"
+    ne.content = icons.skip_forward
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", 10) end
     ne.eventresponder["mbtn_mid"] =
@@ -1882,14 +1909,14 @@ local function osc_init()
     ne = new_element("chapter_prev", "button")
 
     ne.enabled = have_ch
-    ne.content = "\238\132\132"
+    ne.content = icons.chapter_prev
     bind_mouse_buttons("chapter_prev")
 
     --chapter_next
     ne = new_element("chapter_next", "button")
 
     ne.enabled = have_ch
-    ne.content = "\238\132\133"
+    ne.content = icons.chapter_next
     bind_mouse_buttons("chapter_next")
 
     --
@@ -1900,8 +1927,8 @@ local function osc_init()
 
     ne.enabled = audio_track_count > 0
     ne.content = function ()
-        return ("\238\132\134" .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("aid", "-") .. "/" .. audio_track_count)
+        return icons.audio .. osc_styles.smallButtonsLlabel .. " " ..
+               mp.get_property_number("aid", "-") .. "/" .. audio_track_count
     end
     bind_mouse_buttons("audio_track")
 
@@ -1910,19 +1937,15 @@ local function osc_init()
 
     ne.enabled = sub_track_count > 0
     ne.content = function ()
-        return ("\238\132\135" .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("sid", "-") .. "/" .. sub_track_count)
+        return icons.subtitle .. osc_styles.smallButtonsLlabel .. " " ..
+               mp.get_property_number("sid", "-") .. "/" .. sub_track_count
     end
     bind_mouse_buttons("sub_track")
 
     --fullscreen
     ne = new_element("fullscreen", "button")
     ne.content = function ()
-        if state.fullscreen then
-            return ("\238\132\137")
-        else
-            return ("\238\132\136")
-        end
+        return state.fullscreen and icons.exit_fullscreen or icons.fullscreen
     end
     bind_mouse_buttons("fullscreen")
 
@@ -2094,15 +2117,12 @@ local function osc_init()
     ne = new_element("volume", "button")
 
     ne.content = function()
-        local volume = mp.get_property_number("volume", 0)
-        local mute = mp.get_property_native("mute")
-        local volicon = {"\238\132\139", "\238\132\140",
-                         "\238\132\141", "\238\132\142"}
-        if volume == 0 or mute then
-            return "\238\132\138"
-        else
-            return volicon[math.min(4,math.ceil(volume / (100/3)))]
+        local volume = mp.get_property_number("volume")
+        if volume == 0 or mp.get_property_native("mute") then
+            return icons.mute
         end
+
+        return icons.volume[math.min(4, math.ceil(volume / (100/3)))]
     end
     bind_mouse_buttons("volume")
 
