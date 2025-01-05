@@ -466,12 +466,13 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
 }
 
 // mode is the same as in screenshot_get()
-static struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
+static struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode,
+                                           bool high_depth, enum mp_imgfmt format)
 {
-    struct mp_image *mpi = screenshot_get(mpctx, mode, false);
+    struct mp_image *mpi = screenshot_get(mpctx, mode, high_depth);
     if (!mpi)
         return NULL;
-    struct mp_image *res = convert_image(mpi, IMGFMT_BGR0, mpctx->global,
+    struct mp_image *res = convert_image(mpi, format, mpctx->global,
                                          mpctx->log);
     talloc_free(mpi);
     return res;
@@ -557,7 +558,8 @@ void cmd_screenshot_raw(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     struct mpv_node *res = &cmd->result;
 
-    struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i);
+    struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i,
+                                              false, IMGFMT_BGR0);
     if (!img) {
         cmd->success = false;
         return;
