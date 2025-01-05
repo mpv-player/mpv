@@ -192,6 +192,11 @@ static int init(struct ao *ao)
         goto err_out;
     }
     ctx = alcCreateContext(dev, attribs);
+    if (!ctx) {
+        MP_FATAL(ao, "Failed to create OpenAL context\n");
+        alcCloseDevice(dev);
+        goto err_out;
+    }
     alcMakeContextCurrent(ctx);
     alListenerfv(AL_POSITION, position);
     alListenerfv(AL_ORIENTATION, direction);
