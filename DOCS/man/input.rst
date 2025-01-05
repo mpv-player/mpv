@@ -1379,21 +1379,38 @@ Screenshot Commands
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
-``screenshot-raw [<flags>]``
+``screenshot-raw [<flags> [<format>]]``
     Return a screenshot in memory. This can be used only through the client
     API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
-    ``stride`` fields set to obvious contents. The ``format`` field is set to
-    ``bgr0`` by default. This format is organized as ``B8G8R8X8`` (where ``B``
-    is the LSB). The contents of the padding ``X`` are undefined. The ``data``
-    field is of type MPV_FORMAT_BYTE_ARRAY with the actual image data. The image
-    is freed as soon as the result mpv_node is freed. As usual with client API
-    semantics, you are not allowed to write to the image data.
+    ``stride`` fields set to obvious contents.
+
+    The ``format`` field is set to the format of the screenshot image data.
+    This can be controlled by the ``format`` argument. The format can be one of
+    the following:
+
+    bgr0 (default)
+        This format is organized as ``B8G8R8X8`` (where ``B`` is the LSB).
+        The contents of the padding ``X`` are undefined.
+    bgra
+        This format is organized as ``B8G8R8A8`` (where ``B`` is the LSB).
+    rgba
+        This format is organized as ``R8G8B8A8`` (where ``R`` is the LSB).
+    rgba64
+        This format is organized as ``R16G16B16A16`` (where ``R`` is the LSB).
+        Each component occupies 2 bytes per pixel.
+        When this format is used, the image data will be high bit depth, and
+        ``--screenshot-high-bit-depth`` is ignored.
+
+    The ``data`` field is of type MPV_FORMAT_BYTE_ARRAY with the actual image
+    data. The image is freed as soon as the result mpv_node is freed. As usual
+    with client API semantics, you are not allowed to write to the image data.
 
     The ``stride`` is the number of bytes from a pixel at ``(x0, y0)`` to the
-    pixel at ``(x0, y0 + 1)``. This can be larger than ``w * 4`` if the image
+    pixel at ``(x0, y0 + 1)``. This can be larger than ``w * bpp`` if the image
     was cropped, or if there is padding. This number can be negative as well.
-    You access a pixel with ``byte_index = y * stride + x * 4`` (assuming the
-    ``bgr0`` format).
+    You access a pixel with ``byte_index = y * stride + x * bpp``.
+    Here, ``bpp`` is the number of bytes per pixel, which is 8 for ``rgba64``
+    format and 4 for other formats.
 
     The ``flags`` argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.
