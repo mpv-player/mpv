@@ -1,0 +1,1 @@
+add `slimbottombar` and `slimtopbar` OSC layouts optimized for viewing images
