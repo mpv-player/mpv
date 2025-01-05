@@ -38,6 +38,7 @@ local opts = {
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
     font_hw_ratio = 'auto',
+    pause_on_open = false,
 }
 
 local styles = {
@@ -89,6 +90,7 @@ local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
 local global_margins = { t = 0, b = 0 }
+local was_playing = true
 local input_caller
 
 local suggestion_buffer = {}
@@ -1721,12 +1723,21 @@ local function undefine_key_bindings()
     key_bindings = {}
 end
 
+local function pause_playback()
+    was_playing = not mp.get_property_native('pause')
+
+    if opts.pause_on_open and was_playing then
+        mp.set_property_native('pause', true)
+    end
+end
+
 -- Set the REPL visibility ("enable", Esc)
 set_active = function (active)
     if active == repl_active then return end
     if active then
         repl_active = true
         insert_mode = false
+        pause_playback()
         define_key_bindings()
 
         if not input_caller then
@@ -1744,6 +1755,10 @@ set_active = function (active)
         log_buffers[id] = {}
         unbind_mouse()
     else
+        if opts.pause_on_open and was_playing then
+            mp.set_property_native('pause', false)
+        end
+
         repl_active = false
         suggestion_buffer = {}
         undefine_key_bindings()
