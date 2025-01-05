@@ -1489,13 +1489,13 @@ layouts["slimbox"] = function ()
     lo.alpha[3] = user_opts.boxalpha
 end
 
-local function bar_layout(direction)
+local function bar_layout(direction, slim)
     local osc_geo = {
         x = -2,
         y = nil,
         an = (direction < 0) and 7 or 1,
         w = nil,
-        h = 56,
+        h = slim and 25 or 56,
     }
 
     local padX = 9
@@ -1529,10 +1529,16 @@ local function bar_layout(direction)
         osc_param.playresx = osc_param.playresy * osc_param.display_aspect
     end
 
-    osc_geo.y = direction * (54 + user_opts.barmargin)
+    osc_geo.y = direction * (osc_geo.h - 2 + user_opts.barmargin)
     osc_geo.w = osc_param.playresx + 4
     if direction < 0 then
         osc_geo.y = osc_geo.y + osc_param.playresy
+    end
+
+    if direction < 0 then
+        osc_param.video_margins.b = osc_geo.h / osc_param.playresy
+    else
+        osc_param.video_margins.t = osc_geo.h / osc_param.playresy
     end
 
     local line1 = osc_geo.y - direction * (9 + padY)
@@ -1594,13 +1600,23 @@ local function bar_layout(direction)
         lo.style = osc_styles.vidtitleBar
     end
 
-    -- Cache
     t_r = t_r - padX
-    geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
+
+    if slim then
+        -- Fullscreen button
+        geo = { x = t_r, y = geo.y, an = 6, w = buttonW, h = geo.h }
+        lo = add_layout("fullscreen")
+        lo.geometry = geo
+        lo.style = osc_styles.topButtonsBar
+    else
+        -- Cache
+        geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
+        lo = add_layout("cache")
+        lo.geometry = geo
+        lo.style = osc_styles.vidtitleBar
+    end
+
     t_r = t_r - geo.w - padX
-    lo = add_layout("cache")
-    lo.geometry = geo
-    lo.style = osc_styles.vidtitleBar
 
     -- Title
     geo = { x = t_l, y = geo.y, an = 4,
@@ -1611,6 +1627,9 @@ local function bar_layout(direction)
         osc_styles.vidtitleBar,
         geo.x, geo.y-geo.h, geo.w, geo.y+geo.h)
 
+    if slim then
+        return
+    end
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX + padwc_l, y = line2, an = 4,
@@ -1698,12 +1717,6 @@ local function bar_layout(direction)
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.rtype = user_opts["seekrangestyle"]
-
-    if direction < 0 then
-        osc_param.video_margins.b = osc_geo.h / osc_param.playresy
-    else
-        osc_param.video_margins.t = osc_geo.h / osc_param.playresy
-    end
 end
 
 layouts["bottombar"] = function()
@@ -1712,6 +1725,14 @@ end
 
 layouts["topbar"] = function()
     bar_layout(1)
+end
+
+layouts["slimbottombar"] = function()
+    bar_layout(-1, true)
+end
+
+layouts["slimtopbar"] = function()
+    bar_layout(1, true)
 end
 
 
@@ -1909,6 +1930,8 @@ local function osc_init()
     ne = new_element("seekbar", "slider")
 
     ne.enabled = mp.get_property("percent-pos") ~= nil
+                 and user_opts.layout ~= "slimbottombar"
+                 and user_opts.layout ~= "slimtopbar"
     state.slider_element = ne.enabled and ne or nil  -- used for forced_title
     ne.slider.markerF = function ()
         local duration = mp.get_property_number("duration")
