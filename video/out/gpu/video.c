@@ -3586,7 +3586,7 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
     };
 
     params.format = ra_find_unorm_format(p->ra, 1, 4);
-    int mpfmt = IMGFMT_RGB0;
+    int mpfmt = p->has_alpha ? IMGFMT_RGBA : IMGFMT_RGB0;
     if (args->high_bit_depth && p->ra_format.component_bits > 8) {
         const struct ra_format *fmt = ra_find_unorm_format(p->ra, 2, 4);
         if (fmt && fmt->renderable) {
