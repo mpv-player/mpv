@@ -1348,6 +1348,7 @@ local function command_flags_at_2nd_argument_list(command)
         ['loadfile'] = {'replace', 'append', 'append-play', 'insert-next',
                         'insert-next-play', 'insert-at', 'insert-at-play'},
         ['screenshot-to-file'] = {'subtitles', 'video', 'window', 'each-frame'},
+        ['screenshot-raw'] = {'bgr0', 'bgra', 'rgba', 'rgba64'},
         ['seek'] = {'relative', 'absolute', 'absolute-percent',
                     'relative-percent', 'keyframes', 'exact'},
         ['sub-add'] = {'select', 'auto', 'cached'},
