@@ -1148,6 +1148,25 @@ Watch Later
     Ignore path (i.e. use filename only) when using watch later feature.
     (Default: disabled)
 
+Watch History
+-------------
+
+``--save-watch-history``
+    Whether to save which files are played.
+
+    .. warning::
+
+        This option may expose privacy-sensitive information and is thus
+        disabled by default.
+
+``--watch-history-path=<path>``
+    The path in which to store the watch history. Default:
+    ``~~state/watch_history.jsonl`` (see `PATHS`_).
+
+    This file contains one JSON object per line. Its ``time`` field is the UNIX
+    timestamp when the file was opened, its ``path`` field is the normalized
+    path, and its ``title`` field is the title when it was available.
+
 Video
 -----
 
