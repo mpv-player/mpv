@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <assert.h>
+#include <time.h>
 
 #include <libavutil/avutil.h>
 
@@ -44,6 +45,7 @@
 #include "common/encode.h"
 #include "common/stats.h"
 #include "input/input.h"
+#include "misc/json.h"
 #include "misc/language.h"
 
 #include "audio/out/ao.h"
@@ -1521,6 +1523,89 @@ static void load_external_opts(struct MPContext *mpctx)
     mp_waiter_wait(&wait);
 }
 
+static void append_to_watch_history(struct MPContext *mpctx)
+{
+    if (!mpctx->opts->save_watch_history)
+        return;
+
+    void *ctx = talloc_new(NULL);
+    char *history_path = mp_get_user_path(ctx, mpctx->global,
+                                          mpctx->opts->watch_history_path);
+    FILE *history_file = fopen(history_path, "ab");
+
+    if (!history_file) {
+        MP_ERR(mpctx, "Failed to open history file: %s\n",
+               mp_strerror(errno));
+        goto done;
+    }
+
+    char *title = (char *)mp_find_non_filename_media_title(mpctx);
+
+    mpv_node_list *list = talloc_zero(ctx, mpv_node_list);
+    mpv_node node = {
+        .format = MPV_FORMAT_NODE_MAP,
+        .u.list = list,
+    };
+    list->num = title ? 3 : 2;
+    list->keys = talloc_array(ctx, char*, list->num);
+    list->values = talloc_array(ctx, mpv_node, list->num);
+    list->keys[0] = "time";
+    list->values[0] = (struct mpv_node) {
+        .format = MPV_FORMAT_INT64,
+        .u.int64 = time(NULL),
+    };
+    list->keys[1] = "path";
+    list->values[1] = (struct mpv_node) {
+        .format = MPV_FORMAT_STRING,
+        .u.string = mp_normalize_path(ctx, mpctx->filename),
+    };
+    if (title) {
+        list->keys[2] = "title";
+        list->values[2] = (struct mpv_node) {
+            .format = MPV_FORMAT_STRING,
+            .u.string = title,
+        };
+    }
+
+    bstr dst = {0};
+    json_append(&dst, &node, -1);
+    talloc_steal(ctx, dst.start);
+    if (!dst.len) {
+        MP_ERR(mpctx, "Failed to serialize history entry\n");
+        goto done;
+    }
+    bstr_xappend0(ctx, &dst, "\n");
+
+    int seek = fseek(history_file, 0, SEEK_END);
+    off_t history_size = ftell(history_file);
+    if (seek != 0 || history_size == -1) {
+        MP_ERR(mpctx, "Failed to get history file size: %s\n",
+               mp_strerror(errno));
+        fclose(history_file);
+        goto done;
+    }
+
+    bool failed = fwrite(dst.start, dst.len, 1, history_file) != 1 ||
+                  fflush(history_file) != 0;
+
+    if (failed) {
+        MP_ERR(mpctx, "Failed to write to history file: %s\n",
+               mp_strerror(errno));
+
+        int fd = fileno(history_file);
+        if (fd == -1 || ftruncate(fd, history_size) == -1)
+            MP_ERR(mpctx, "Failed to roll-back history file: %s\n",
+                   mp_strerror(errno));
+    }
+
+    if (fclose(history_file) != 0)
+        MP_ERR(mpctx, "Failed to close history file: %s\n",
+               mp_strerror(errno));
+
+done:
+    talloc_free(ctx);
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -1771,6 +1856,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (watch_later)
         mp_delete_watch_later_conf(mpctx, mpctx->filename);
+
+    append_to_watch_history(mpctx);
 
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)

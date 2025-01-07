@@ -1,0 +1,1 @@
+add `--save-watch-history` and `--watch-history-path` options

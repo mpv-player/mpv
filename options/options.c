@@ -813,6 +813,9 @@ static const m_option_t mp_opts[] = {
     {"watch-later-directory", OPT_ALIAS("watch-later-dir")},
     {"watch-later-options", OPT_STRINGLIST(watch_later_options)},
 
+    {"save-watch-history", OPT_BOOL(save_watch_history)},
+    {"watch-history-path", OPT_STRING(watch_history_path), .flags = M_OPT_FILE},
+
     {"ordered-chapters", OPT_BOOL(ordered_chapters)},
     {"ordered-chapters-files", OPT_STRING(ordered_chapters_files),
         .flags = M_OPT_FILE},
@@ -988,6 +991,7 @@ static const struct MPOpts mp_default_opts = {
     .sync_max_factor = 5,
     .load_config = true,
     .position_resume = true,
+    .watch_history_path = "~~state/watch_history.jsonl",
     .autoload_files = true,
     .demuxer_thread = true,
     .demux_termination_timeout = 0.1,
