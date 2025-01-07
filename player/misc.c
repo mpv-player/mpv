@@ -413,3 +413,24 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
 
     return bstrto0(ctx, dst);
 }
+
+const char *mp_find_non_filename_media_title(MPContext *mpctx)
+{
+    const char *name = mpctx->opts->media_title;
+    if (name && name[0])
+        return name;
+    if (mpctx->demuxer) {
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
+        if (name && name[0])
+            return name;
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
+        if (name && name[0])
+            return name;
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
+        if (name && name[0])
+            return name;
+    }
+    if (mpctx->playing && mpctx->playing->title)
+        return mpctx->playing->title;
+    return NULL;
+}
