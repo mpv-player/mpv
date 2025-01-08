@@ -311,6 +311,7 @@ endif
 darwin = host_machine.system() == 'darwin'
 win32 = host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
 posix = not win32
+android = host_machine.system() == 'android'
 
 features += {'darwin': darwin}
 features += {'posix': posix}
@@ -480,7 +481,7 @@ else
     dvd_device = '/dev/dvd'
 endif
 
-features += {'android': host_machine.system() == 'android'}
+features += {'android': android}
 if features['android']
     dependencies += cc.find_library('android')
     sources += files('audio/out/ao_audiotrack.c',
@@ -1835,7 +1836,7 @@ if get_option('cplayer')
         )
     endif
 
-    if not win32 and not darwin
+    if not win32 and not darwin and not android
         if meson.can_run_host_binaries()
             mpv_protocols = custom_target('mpv_protocols',
                 output: 'mpv_protocols',
