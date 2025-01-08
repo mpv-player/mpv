@@ -341,6 +341,9 @@ g-b
 g-r
     Show the values of all properties.
 
+MENU
+    Show a menu with miscellaneous entries.
+
 See `SELECT`_ for more information.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)

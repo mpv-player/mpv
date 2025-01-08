@@ -579,3 +579,65 @@ mp.add_key_binding(nil, "show-properties", function ()
         end,
     })
 end)
+
+mp.add_key_binding(nil, "menu", function ()
+    local sub_track_count = 0
+    local audio_track_count = 0
+    local video_track_count = 0
+    local text_sub_selected = false
+    local is_disc = mp.get_property("current-demuxer") == "disc"
+
+    local image_sub_codecs = {["dvd_subtitle"] = true, ["hdmv_pgs_subtitle"] = true}
+
+    for _, track in pairs(mp.get_property_native("track-list")) do
+        if track.type == "sub" then
+            sub_track_count = sub_track_count + 1
+
+            if track["main-selection"] == 0 and not image_sub_codecs[track.codec] then
+                text_sub_selected = true
+            end
+        elseif track.type == "audio" then
+            audio_track_count = audio_track_count + 1
+        elseif track.type == "video" then
+            video_track_count = video_track_count + 1
+        end
+    end
+
+    local menu = {
+        {"Subtitles", "script-binding select/select-sid", sub_track_count > 0},
+        {"Secondary subtitles", "script-binding select/select-secondary-sid", sub_track_count > 1},
+        {"Subtitle lines", "script-binding select/select-subtitle-line", text_sub_selected},
+        {"Audio tracks", "script-binding select/select-aid", audio_track_count > 1},
+        {"Video tracks", "script-binding select/select-vid", video_track_count > 1},
+        {"Playlist", "script-binding select/select-playlist",
+         mp.get_property_native("playlist-count") > 1},
+        {"Chapters", "script-binding select/select-chapter", mp.get_property("chapter")},
+        {is_disc and "Titles" or "Editions", "script-binding select/select-edition",
+         mp.get_property_native("edition-list/count", 0) > 1},
+        {"Audio devices", "script-binding select/select-audio-device", audio_track_count > 0},
+        {"Key bindings", "script-binding select/select-binding", true},
+        {"History", "script-binding select/select-watch-history", true},
+        {"Watch later", "script-binding select/select-watch-later", true},
+        {"Stats for nerds", "script-binding stats/display-page-1-toggle", true},
+        {"File info", "script-binding stats/display-page-5-toggle", true},
+        {"Help", "script-binding stats/display-page-4-toggle", true},
+    }
+
+    local labels = {}
+    local commands = {}
+
+    for _, entry in ipairs(menu) do
+        if entry[3] then
+            labels[#labels + 1] = entry[1]
+            commands[#commands + 1] = entry[2]
+        end
+    end
+
+    input.select({
+        prompt = "",
+        items = labels,
+        submit = function (i)
+            mp.command(commands[i])
+        end,
+    })
+end)
