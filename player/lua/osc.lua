@@ -2502,7 +2502,7 @@ local function render()
 
     -- submit
     set_osd(osc_param.playresy * osc_param.display_aspect,
-            osc_param.playresy, ass.text, user_opts.layout == "box" and -1 or 1000)
+            osc_param.playresy, ass.text, 1000)
 end
 
 -- called by mpv on every frame
