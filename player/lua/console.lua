@@ -581,7 +581,7 @@ local function update()
     -- Render log messages as ASS.
     -- This will render at most screeny / font_size - 1 messages.
 
-    local lines_max = calculate_max_log_lines()
+    local max_lines = calculate_max_log_lines()
     local suggestion_ass = ''
     if next(suggestion_buffer) then
         -- Estimate how many characters fit in one line
@@ -592,8 +592,8 @@ local function update()
             (osd_w - margin_x - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
             / opts.font_size * get_font_hw_ratio())
 
-        local suggestions, rows = format_table(suggestion_buffer, width_max, lines_max)
-        lines_max = lines_max - rows
+        local suggestions, rows = format_table(suggestion_buffer, width_max, max_lines)
+        max_lines = max_lines - rows
         suggestion_ass = style .. styles.suggestion .. suggestions .. '\\N'
     end
 
@@ -601,12 +601,7 @@ local function update()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
-    local log_messages = #log_buffer
-    local log_max_lines = math.max(0, lines_max)
-    if log_max_lines < log_messages then
-        log_messages = log_max_lines
-    end
-    for i = #log_buffer - log_messages + 1, #log_buffer do
+    for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
         log_ass = log_ass .. style .. log_buffer[i].style ..
                   ass_escape(log_buffer[i].text) .. '\\N'
     end
