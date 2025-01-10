@@ -89,6 +89,7 @@ local searching_history = false
 local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
+local overlay = mp.create_osd_overlay('ass-events')
 local global_margins = { t = 0, b = 0 }
 local was_playing = true
 local input_caller
@@ -480,6 +481,21 @@ local function populate_log_with_matches()
     end
 end
 
+local function update_overlay(data, res_x, res_y, z)
+    if overlay.data == data and
+       overlay.res_x == res_x and
+       overlay.res_y == res_y and
+       overlay.z == z then
+        return
+    end
+
+    overlay.data = data
+    overlay.res_x = res_x
+    overlay.res_y = res_y
+    overlay.z = z
+    overlay:update()
+end
+
 local function print_to_terminal()
     -- Clear the log after closing the console.
     if not repl_active then
@@ -541,7 +557,7 @@ local function update()
 
     -- Clear the OSD if the REPL is not active
     if not repl_active then
-        mp.set_osd_ass(0, 0, '')
+        update_overlay('', 0, 0, 0)
         return
     end
 
@@ -629,7 +645,8 @@ local function update()
     ass:append(cglyph)
     ass:append(style .. '{\\alpha&HFF&}' .. after_cur)
 
-    mp.set_osd_ass(osd_w, osd_h, ass.text)
+    -- z with selectable_items needs to be greater than the OSC's.
+    update_overlay(ass.text, osd_w, osd_h, selectable_items and 2000 or 0)
 end
 
 local update_timer = nil
