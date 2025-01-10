@@ -831,7 +831,7 @@ local function add_single_video(json)
     end
 
     -- set start time
-    if json.start_time or json.section_start and
+    if (json.start_time or json.section_start) and
         not option_was_set("start") and
         not option_was_set_locally("start") then
         local start_time = json.start_time or json.section_start
@@ -840,7 +840,7 @@ local function add_single_video(json)
     end
 
     -- set end time
-    if json.end_time or json.section_end and
+    if (json.end_time or json.section_end) and
         not option_was_set("end") and
         not option_was_set_locally("end") then
         local end_time = json.end_time or json.section_end
