@@ -601,9 +601,24 @@ local function update()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
+    local box = mp.get_property('osd-border-style') == 'background-box'
+
     for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
-        log_ass = log_ass .. style .. log_buffer[i].style ..
-                  ass_escape(log_buffer[i].text) .. '\\N'
+        local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
+
+        -- Put every selectable item in its own event to prevent libass from
+        -- drawing them taller than opts.font_size with taller fonts, which
+        -- makes the hovered item calculation inaccurate and clips the counter.
+        -- But not with background-box, because it makes it look bad by
+        -- overlapping the semitransparent backgrounds of every line.
+        if selectable_items and not box then
+            ass:new_event()
+            ass:an(1)
+            ass:pos(x, y - (1.5 + #log_buffer - i) * opts.font_size)
+            ass:append(log_item)
+        else
+            log_ass = log_ass .. log_item .. '\\N'
+        end
     end
 
     ass:new_event()
