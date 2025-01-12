@@ -152,6 +152,7 @@ they will be automatically downloaded and built by Meson.
       ```
 2. Install Meson, as outlined in [Getting Meson](https://mesonbuild.com/Getting-meson.html):
 3. The following build script utilizes the Meson subprojects system to build mpv and its dependencies.
+   Before proceeding with the next steps, ensure that you run the following commands from the project directory where the `meson.build` file and the `build` folder are located.
    To make sure all dependency versions are up-to-date, update the subprojects database from Meson's WrapDB.
    Also explicitly download several wraps as some nested projects may pull older versions of them.
    ```
