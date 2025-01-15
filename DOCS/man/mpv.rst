@@ -146,7 +146,7 @@ T
 
 w and W
     Decrease/increase pan-and-scan range. The ``e`` key does the same as
-    ``W`` currently, but use is discouraged.
+    ``W`` currently, but use is discouraged. See ``-panscan`` for more info.
 
 o and P
     Show progression bar, elapsed time and total duration on the OSD.
