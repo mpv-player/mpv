@@ -41,6 +41,9 @@ static int append_menu(HMENU hmenu, UINT fMask, UINT fType, UINT fState,
     mii.cbSize = sizeof(mii);
     mii.fMask = MIIM_ID | fMask;
     mii.wID = id++;
+    // menu id must be less than 0xF000 and greater than WM_USER
+    if (id >= 0xF000)
+        id = WM_USER + 100;
 
     if (fMask & MIIM_FTYPE)
         mii.fType = fType;
@@ -218,7 +221,7 @@ void mp_win32_menu_show(struct menu_ctx *ctx, HWND hwnd)
 void mp_win32_menu_update(struct menu_ctx *ctx, struct mpv_node *data)
 {
     while (GetMenuItemCount(ctx->menu) > 0)
-        RemoveMenu(ctx->menu, 0, MF_BYPOSITION);
+        DeleteMenu(ctx->menu, 0, MF_BYPOSITION);
     talloc_free_children(ctx->ta_data);
 
     build_menu(ctx->ta_data, ctx->menu, data);
