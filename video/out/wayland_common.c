@@ -227,6 +227,7 @@ struct vo_wayland_data_offer {
     char *mime_type;
     int fd;
     int mime_score;
+    bool offered_plain_text;
 };
 
 static bool single_output_spanned(struct vo_wayland_state *wl);
@@ -704,6 +705,8 @@ static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
         talloc_replace(wl, o->mime_type, mime_type);
         MP_VERBOSE(wl, "Given data offer with mime type %s\n", o->mime_type);
     }
+    if (o->offer && !o->offered_plain_text)
+        o->offered_plain_text = !strcmp(mime_type, "text/plain;charset=utf-8");
 }
 
 static void data_offer_source_actions(void *data, struct wl_data_offer *offer, uint32_t source_actions)
@@ -859,7 +862,8 @@ static void data_device_handle_selection(void *data, struct wl_data_device *wl_d
 
     o = wl->selection_offer;
     // Only receive plain text for now, may expand later.
-    wl_data_offer_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
+    if (o->offered_plain_text)
+        wl_data_offer_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
     close(pipefd[1]);
     o->fd = pipefd[0];
 }
