@@ -114,6 +114,11 @@ int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_para
     return CLIPBOARD_UNAVAILABLE;
 }
 
+const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl)
+{
+    return cl ? cl->backend->name : NULL;
+}
+
 void reinit_clipboard(struct MPContext *mpctx)
 {
     mp_clipboard_destroy(mpctx->clipboard);
