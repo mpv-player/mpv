@@ -1231,7 +1231,7 @@ local function property_list()
         properties[#properties + 1] = 'current-tracks/' .. sub_property
     end
 
-    for _, sub_property in pairs({'text'}) do
+    for _, sub_property in pairs({'text', 'text-primary'}) do
         properties[#properties + 1] = 'clipboard/' .. sub_property
     end
 
