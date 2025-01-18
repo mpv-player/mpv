@@ -43,6 +43,7 @@ const struct m_sub_options clipboard_conf = {
 // backend list
 extern const struct clipboard_backend clipboard_backend_win32;
 extern const struct clipboard_backend clipboard_backend_mac;
+extern const struct clipboard_backend clipboard_backend_wayland;
 extern const struct clipboard_backend clipboard_backend_vo;
 
 static const struct clipboard_backend *const clipboard_backend_list[] = {
@@ -51,6 +52,9 @@ static const struct clipboard_backend *const clipboard_backend_list[] = {
 #endif
 #if HAVE_COCOA
     &clipboard_backend_mac,
+#endif
+#if HAVE_WAYLAND_PROTOCOLS_1_39
+    &clipboard_backend_wayland,
 #endif
     &clipboard_backend_vo,
 };
