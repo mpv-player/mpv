@@ -7871,10 +7871,14 @@ Miscellaneous
     writing to the ``clipboard`` property to get and set clipboard contents.
 
 ``--clipboard-monitor=<yes|no>``
-    (Windows and macOS only)
+    (Windows, Wayland and macOS only)
 
     Enable clipboard monitoring so that the ``clipboard`` property can be
     observed for content changes (default: no). This only affects clipboard
     implementations which use polling to monitor clipboard updates.
     Other platforms currently ignore this option and always/never notify
     changes.
+
+    On Wayland, this option only has effect on the ``wayland`` backend, and
+    not for the ``vo`` backend. See ``current-clipboard-backend`` property for
+    more details.
