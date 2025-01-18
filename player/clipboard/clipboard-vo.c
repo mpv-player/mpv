@@ -22,12 +22,14 @@
 
 struct clipboard_vo_priv {
     struct MPContext *mpctx;
+    struct mp_log *log;
 };
 
 static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     struct clipboard_vo_priv *priv = talloc_ptrtype(cl, priv);
     priv->mpctx = params->mpctx;
+    priv->log = mp_log_new(priv, cl->log, "vo"),
     cl->priv = priv;
     return CLIPBOARD_SUCCESS;
 }
@@ -52,10 +54,10 @@ static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         return CLIPBOARD_SUCCESS;
     case VO_NOTAVAIL:
     case VO_NOTIMPL:
-        MP_VERBOSE(cl, "VO does not support getting clipboard in the requested format.\n");
+        MP_VERBOSE(priv, "VO does not support getting clipboard in the requested format.\n");
         return CLIPBOARD_UNAVAILABLE;
     default:
-        MP_WARN(cl, "Failed getting VO clipboard.\n");
+        MP_WARN(priv, "Failed getting VO clipboard.\n");
         return CLIPBOARD_FAILED;
     }
 }
@@ -78,10 +80,10 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         return CLIPBOARD_SUCCESS;
     case VO_NOTAVAIL:
     case VO_NOTIMPL:
-        MP_VERBOSE(cl, "VO does not support setting clipboard in the requested format.\n");
+        MP_VERBOSE(priv, "VO does not support setting clipboard in the requested format.\n");
         return CLIPBOARD_UNAVAILABLE;
     default:
-        MP_WARN(cl, "Failed setting VO clipboard.\n");
+        MP_WARN(priv, "Failed setting VO clipboard.\n");
         return CLIPBOARD_FAILED;
     }
 }
