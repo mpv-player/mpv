@@ -37,6 +37,7 @@
 
 // Generated from wayland-protocols
 #include "idle-inhibit-unstable-v1.h"
+#include "text-input-unstable-v3.h"
 #include "linux-dmabuf-unstable-v1.h"
 #include "presentation-time.h"
 #include "xdg-decoration-unstable-v1.h"
@@ -191,6 +192,7 @@ struct vo_wayland_seat {
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
     struct wl_data_device *dnd_ddev;
+    struct vo_wayland_text_input *text_input;
     /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_device;
     uint32_t pointer_enter_serial;
@@ -228,6 +230,13 @@ struct vo_wayland_data_offer {
     int fd;
     int mime_score;
     bool offered_plain_text;
+};
+
+struct vo_wayland_text_input {
+    struct zwp_text_input_v3 *text_input;
+    uint32_t serial;
+    char *commit_string;
+    bool has_focus;
 };
 
 static bool single_output_spanned(struct vo_wayland_state *wl);
@@ -875,6 +884,96 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_motion,
     data_device_handle_drop,
     data_device_handle_selection,
+};
+
+static void enable_ime(struct vo_wayland_text_input *ti)
+{
+    if (!ti->has_focus)
+        return;
+
+    zwp_text_input_v3_enable(ti->text_input);
+    zwp_text_input_v3_set_content_type(
+        ti->text_input,
+        ZWP_TEXT_INPUT_V3_CONTENT_HINT_NONE,
+        ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL);
+    zwp_text_input_v3_set_cursor_rectangle(ti->text_input, 0, 0, 0, 0);
+    zwp_text_input_v3_commit(ti->text_input);
+    ti->serial++;
+}
+
+static void disable_ime(struct vo_wayland_text_input *ti)
+{
+    zwp_text_input_v3_disable(ti->text_input);
+    zwp_text_input_v3_commit(ti->text_input);
+    ti->serial++;
+}
+
+static void text_input_enter(void *data, struct zwp_text_input_v3 *zwp_text_input_v3,
+                             struct wl_surface *surface)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_text_input *ti = s->text_input;
+    struct vo_wayland_state *wl = s->wl;
+
+    ti->has_focus = true;
+
+    if (!wl->opts->input_ime)
+        return;
+
+    enable_ime(ti);
+}
+
+static void text_input_leave(void *data, struct zwp_text_input_v3 *zwp_text_input_v3,
+                             struct wl_surface *surface)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_text_input *ti = s->text_input;
+
+    ti->has_focus = false;
+    disable_ime(ti);
+}
+
+static void text_input_preedit_string(void *data, struct zwp_text_input_v3 *zwp_text_input_v3,
+                                      const char *text, int32_t cursor_begin, int32_t cursor_end)
+{
+}
+
+static void text_input_commit_string(void *data, struct zwp_text_input_v3 *zwp_text_input_v3,
+                                     const char *text)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_text_input *ti = s->text_input;
+
+    talloc_replace(ti, ti->commit_string, text);
+}
+
+static void text_input_delete_surrounding_text(void *data,
+                                               struct zwp_text_input_v3 *zwp_text_input_v3,
+                                               uint32_t before_length, uint32_t after_length)
+{
+}
+
+static void text_input_done(void *data, struct zwp_text_input_v3 *zwp_text_input_v3,
+                            uint32_t serial)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_text_input *ti = s->text_input;
+    struct vo_wayland_state *wl = s->wl;
+
+    if (ti->serial == serial && ti->commit_string)
+        mp_input_put_key_utf8(wl->vo->input_ctx, 0, bstr0(ti->commit_string));
+
+    if (ti->commit_string)
+        TA_FREEP(&ti->commit_string);
+}
+
+static const struct zwp_text_input_v3_listener text_input_listener = {
+    text_input_enter,
+    text_input_leave,
+    text_input_preedit_string,
+    text_input_commit_string,
+    text_input_delete_surrounding_text,
+    text_input_done,
 };
 
 static void output_handle_geometry(void *data, struct wl_output *wl_output,
@@ -1805,6 +1904,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->idle_inhibit_manager = wl_registry_bind(reg, id, &zwp_idle_inhibit_manager_v1_interface, ver);
     }
 
+    if (!strcmp(interface, zwp_text_input_manager_v3_interface.name) && found++) {
+        ver = 1;
+        wl->text_input_manager = wl_registry_bind(reg, id, &zwp_text_input_manager_v3_interface, ver);
+    }
+
     if (found > 1)
         MP_VERBOSE(wl, "Registered interface %s at version %d\n", interface, ver);
 }
@@ -2433,6 +2537,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_touch_destroy(seat->touch);
     if (seat->dnd_ddev)
         wl_data_device_destroy(seat->dnd_ddev);
+    if (seat->text_input)
+        zwp_text_input_v3_destroy(seat->text_input->text_input);
 #if HAVE_WAYLAND_PROTOCOLS_1_32
     if (seat->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
@@ -2744,6 +2850,21 @@ static void toggle_fullscreen(struct vo_wayland_state *wl)
     }
 }
 
+static void toggle_ime(struct vo_wayland_state *wl)
+{
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        struct vo_wayland_text_input *ti = seat->text_input;
+        if (!ti)
+            continue;
+        if (wl->opts->input_ime) {
+            enable_ime(ti);
+        } else {
+            disable_ime(ti);
+        }
+    }
+}
+
 static void toggle_maximized(struct vo_wayland_state *wl)
 {
     if (wl->opts->window_maximized) {
@@ -2935,6 +3056,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                 set_content_type(wl);
             if (opt == &opts->cursor_passthrough)
                 set_input_region(wl, opts->cursor_passthrough);
+            if (opt == &opts->input_ime)
+                toggle_ime(wl);
             if (opt == &opts->fullscreen)
                 toggle_fullscreen(wl);
             if (opt == &opts->window_maximized)
@@ -3248,6 +3371,18 @@ bool vo_wayland_init(struct vo *vo)
                    zwp_idle_inhibit_manager_v1_interface.name);
     }
 
+    if (wl->text_input_manager) {
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            seat->text_input = talloc_zero(seat, struct vo_wayland_text_input);
+            seat->text_input->text_input = zwp_text_input_manager_v3_get_text_input(wl->text_input_manager, seat->seat);
+            zwp_text_input_v3_add_listener(seat->text_input->text_input, &text_input_listener, seat);
+        }
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                    zwp_text_input_manager_v3_interface.name);
+    }
+
     wl->display_fd = wl_display_get_fd(wl->display);
 
     update_app_id(wl);
@@ -3405,6 +3540,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->idle_inhibit_manager)
         zwp_idle_inhibit_manager_v1_destroy(wl->idle_inhibit_manager);
+
+    if (wl->text_input_manager)
+        zwp_text_input_manager_v3_destroy(wl->text_input_manager);
 
     if (wl->presentation)
         wp_presentation_destroy(wl->presentation);

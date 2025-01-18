@@ -3,6 +3,7 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
              [wl_protocol_dir, 'stable/viewporter/viewporter.xml'],
              [wl_protocol_dir, 'stable/xdg-shell/xdg-shell.xml'],
              [wl_protocol_dir, 'unstable/idle-inhibit/idle-inhibit-unstable-v1.xml'],
+             [wl_protocol_dir, 'unstable/text-input/text-input-unstable-v3.xml'],
              [wl_protocol_dir, 'unstable/linux-dmabuf/linux-dmabuf-unstable-v1.xml'],
              [wl_protocol_dir, 'unstable/xdg-decoration/xdg-decoration-unstable-v1.xml'],
              [wl_protocol_dir, 'staging/content-type/content-type-v1.xml'],
