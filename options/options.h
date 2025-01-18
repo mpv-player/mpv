@@ -34,6 +34,7 @@ typedef struct mp_vo_opts {
     bool x11_wid_title;
     bool cursor_passthrough;
     bool native_keyrepeat;
+    bool input_ime;
 
     int wl_configure_bounds;
     int wl_content_type;
