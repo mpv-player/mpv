@@ -4171,6 +4171,12 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
             node_map_add_string(&node, "text", data);
             talloc_free(data);
         }
+        params.target = CLIPBOARD_TARGET_PRIMARY_SELECTION;
+        data = NULL;
+        if (get_clipboard(mpctx, &data, &params) == M_PROPERTY_OK) {
+            node_map_add_string(&node, "text-primary", data);
+            talloc_free(data);
+        }
         *(struct mpv_node *)arg = node;
         return M_PROPERTY_OK;
     }
@@ -4178,7 +4184,9 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
         struct m_property_action_arg *act = arg;
         const char *key = act->key;
 
-        if (strcmp(key, "text"))
+        if (!strcmp(key, "text-primary"))
+            params.target = CLIPBOARD_TARGET_PRIMARY_SELECTION;
+        else if (strcmp(key, "text"))
             return M_PROPERTY_UNKNOWN;
 
         switch (act->action) {
