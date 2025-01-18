@@ -1,2 +1,3 @@
 add `--clipboard-enable` and `--clipboard-monitor` options
 add `clipboard` property
+add `current-clipboard-backend` property
