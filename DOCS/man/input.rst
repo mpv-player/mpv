@@ -3968,10 +3968,36 @@ Property list
         The text content in the clipboard (Windows, Wayland and macOS only).
         Writing to this property sets the text clipboard content (Windows only).
 
+    ``clipboard/text-primary``
+        The text content in the primary selection (Wayland only).
+
     .. note::
 
-        On Wayland, the clipboard content is only updated when the compositor
-        sends a selection data offer (typically when VO window is focused).
+        On Wayland with the ``vo`` clipboard backend, the clipboard content is
+        only updated when the compositor sends a selection data offer
+        (typically when VO window is focused). The ``wayland`` backend typically
+        does not have this limitation.
+        See ``current-clipboard-backend`` property for more details.
+
+``current-clipboard-backend``
+    A string containing the currently active clipboard backend.
+    The following clipboard backends are implemented:
+
+    ``win32``
+        Windows backend.
+
+    ``mac``
+        macOS backend.
+
+    ``wayland``
+        Wayland backend. This backend is only available if the compositor
+        supports the ``zwlr_data_control_manager_v1`` protocol.
+
+    ``vo``
+        VO backend. Requires an active VO window, and support differs across
+        platforms. Currently, this is used as a fallback for Wayland
+        compositors without support for the ``zwlr_data_control_manager_v1``
+        protocol.
 
 Inconsistencies between options and properties
 ----------------------------------------------
