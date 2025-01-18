@@ -90,5 +90,6 @@ int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_para
                           struct clipboard_data *out, void *talloc_ctx);
 int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *data);
+const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl);
 
 void reinit_clipboard(struct MPContext *mpctx);
