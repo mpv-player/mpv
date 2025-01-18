@@ -1048,6 +1048,15 @@ if features['wayland']
     subdir(join_paths('video', 'out'))
 endif
 
+foreach v: ['1.39']
+    features += {'wayland-protocols-' + v.replace('.', '-'):
+        wayland['deps'][2].version().version_compare('>=' + v)}
+endforeach
+
+if features['wayland-protocols-1-39']
+    sources += files('player/clipboard/clipboard-wayland.c')
+endif
+
 features += {'memfd-create': false}
 if features['wayland']
     features += {'memfd-create': cc.has_function('memfd_create',
