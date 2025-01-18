@@ -1179,7 +1179,11 @@ local function get_clipboard(clip)
             return res.stdout
         end
     elseif platform == 'wayland' then
-        -- Wayland clipboard is only updated on window focus
+        if mp.get_property('current-clipboard-backend') == 'wayland' then
+            local property = clip and 'clipboard/text' or 'clipboard/text-primary'
+            return mp.get_property(property, '')
+        end
+        -- Wayland VO clipboard is only updated on window focus
         if clip and mp.get_property_native('focused') then
             return mp.get_property('clipboard/text', '')
         end
