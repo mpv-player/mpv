@@ -4104,6 +4104,13 @@ static int mp_property_udata(void *ctx, struct m_property *prop,
     return ret;
 }
 
+static int mp_property_current_clipboard_backend(void *ctx, struct m_property *p,
+                                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_strdup_ro(action, arg, mp_clipboard_get_backend_name(mpctx->clipboard));
+}
+
 static int get_clipboard(struct MPContext *mpctx, void *arg,
                          struct clipboard_access_params *params)
 {
@@ -4431,6 +4438,7 @@ static const struct m_property mp_properties_base[] = {
     {"term-size", mp_property_term_size},
 
     {"clipboard", mp_property_clipboard},
+    {"current-clipboard-backend", mp_property_current_clipboard_backend},
 
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
