@@ -1644,6 +1644,7 @@ complete = function ()
     completion_buffer = {}
     selected_completion_index = 0
     completions = completions or {}
+    table.sort(completions)
     completion_pos = completion_pos or 1
     for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
                                       completions, opts.case_sensitive)) do
@@ -1932,6 +1933,7 @@ mp.register_script_message('complete', function(list, start_pos)
     completion_buffer = {}
     selected_completion_index = 0
     local completions = utils.parse_json(list)
+    table.sort(completions)
     completion_pos = start_pos
     completion_append = ''
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
