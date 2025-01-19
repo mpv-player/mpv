@@ -410,11 +410,13 @@ end
 
 local function fuzzy_find(needle, haystacks, case_sensitive)
     local result = require 'mp.fzy'.filter(needle, haystacks, case_sensitive)
-    if line ~= '' then -- Prevent table.sort() from reordering the items.
-        table.sort(result, function (i, j)
+    table.sort(result, function (i, j)
+        if i[3] ~= j[3] then
             return i[3] > j[3]
-        end)
-    end
+        end
+
+        return i[1] < j[1]
+    end)
     for i, value in ipairs(result) do
         result[i] = value[1]
     end
