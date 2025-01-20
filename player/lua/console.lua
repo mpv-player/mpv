@@ -538,8 +538,7 @@ local function print_to_terminal()
     osd_msg_active = true
 end
 
--- Render the REPL and console as an ASS OSD
-local function update()
+local function render()
     pending_update = false
 
     -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
@@ -662,7 +661,7 @@ end
 local update_timer = nil
 update_timer = mp.add_periodic_timer(0.05, function()
     if pending_update then
-        update()
+        render()
     else
         update_timer:kill()
     end
@@ -683,7 +682,7 @@ local function log_add(text, style, terminal_style)
 
     if repl_active then
         if not update_timer:is_enabled() then
-            update()
+            render()
             update_timer:resume()
         else
             pending_update = true
@@ -711,7 +710,7 @@ local function handle_cursor_move()
     -- output up, and allow clearing completions by emptying the line.
     if line == '' then
         suggestion_buffer = {}
-        update()
+        render()
     else
         complete()
     end
@@ -736,7 +735,7 @@ local function handle_edit()
             selected_match = 1
         end
 
-        update()
+        render()
 
         return
     end
@@ -939,7 +938,7 @@ local function bind_mouse()
         local item = determine_hovered_item()
         if item and item ~= selected_match then
             selected_match = item
-            update()
+            render()
         end
     end)
 
@@ -1016,7 +1015,7 @@ local function move_history(amount, is_wheel)
             selected_match = item
         end
 
-        update()
+        render()
         return
     end
 
@@ -1027,7 +1026,7 @@ local function move_history(amount, is_wheel)
         elseif selected_match < 1 then
             selected_match = #matches
         end
-        update()
+        render()
         return
     end
 
@@ -1038,7 +1037,7 @@ end
 local function handle_pgup()
     if selectable_items then
         selected_match = math.max(selected_match - calculate_max_log_lines() + 2, 1)
-        update()
+        render()
         return
     end
 
@@ -1049,7 +1048,7 @@ end
 local function handle_pgdown()
     if selectable_items then
         selected_match = math.min(selected_match + calculate_max_log_lines() - 2, #matches)
-        update()
+        render()
         return
     end
 
@@ -1157,7 +1156,7 @@ end
 -- Empty the log buffer of all messages (Ctrl+L)
 local function clear_log_buffer()
     log_buffers[id] = {}
-    update()
+    render()
 end
 
 -- Returns a string of UTF-8 text from the clipboard (or the primary selection)
@@ -1484,7 +1483,7 @@ cycle_through_suggestions = function (backwards)
     line = before_cur .. strip_common_characters(line:sub(cursor),
         suggestion_buffer[selected_suggestion_index] .. completion_append)
     cursor = before_cur:len() + 1
-    update()
+    render()
 end
 
 -- Show autocompletions.
@@ -1494,7 +1493,7 @@ complete = function ()
         completion_old_cursor = cursor
         mp.commandv('script-message-to', input_caller, 'input-event',
                     'complete', utils.format_json({line:sub(1, cursor - 1)}))
-        update()
+        render()
         return
     end
 
@@ -1558,7 +1557,7 @@ complete = function ()
         tokens[#tokens + 1] = { text = "", pos = cursor }
     elseif first_useful_token_index > 1 and
            command_prefixes[tokens[first_useful_token_index - 1].text] then
-        update()
+        render()
         return
     end
 
@@ -1652,7 +1651,7 @@ complete = function ()
     -- Expand ~/ with file completion.
     cursor = before_cur:len() + 1
     line = before_cur .. after_cur
-    update()
+    render()
 end
 
 -- List of input bindings. This is a weird mashup between common GUI text-input
@@ -1805,7 +1804,7 @@ set_active = function (active)
         end
         collectgarbage()
     end
-    update()
+    render()
 end
 
 -- Show the repl if hidden and replace its contents with 'text'
@@ -1829,7 +1828,7 @@ local function show_and_type(text, cursor_pos)
     history_pos = #history + 1
     insert_mode = false
     if repl_active then
-        update()
+        render()
     else
         set_active(true)
     end
@@ -1920,7 +1919,7 @@ mp.register_script_message('set-log', function (log)
         end
     end
 
-    update()
+    render()
 end)
 
 mp.register_script_message('complete', function(list, start_pos)
@@ -1938,15 +1937,15 @@ mp.register_script_message('complete', function(list, start_pos)
         suggestion_buffer[i] = completions[match]
     end
 
-    update()
+    render()
 end)
 
 -- Redraw the REPL when the OSD size changes. This is needed because the
 -- PlayRes of the OSD will need to be adjusted.
-mp.observe_property('osd-width', 'native', update)
-mp.observe_property('osd-height', 'native', update)
-mp.observe_property('display-hidpi-scale', 'native', update)
-mp.observe_property('focused', 'native', update)
+mp.observe_property('osd-width', 'native', render)
+mp.observe_property('osd-height', 'native', render)
+mp.observe_property('display-hidpi-scale', 'native', render)
+mp.observe_property('focused', 'native', render)
 
 mp.observe_property("user-data/osc/margins", "native", function(_, val)
     if type(val) == "table" and type(val.t) == "number" and type(val.b) == "number" then
@@ -1954,7 +1953,7 @@ mp.observe_property("user-data/osc/margins", "native", function(_, val)
     else
         global_margins = { t = 0, b = 0 }
     end
-    update()
+    render()
 end)
 
 -- Enable log messages. In silent mode, mpv will queue log messages in a buffer
@@ -1984,6 +1983,6 @@ mp.register_event('log-message', function(e)
             terminal_styles[e.level])
 end)
 
-require 'mp.options'.read_options(opts, nil, update)
+require 'mp.options'.read_options(opts, nil, render)
 
 collectgarbage()
