@@ -1994,7 +1994,7 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
     if (o->fd == -1)
         return;
 
-    struct pollfd fdp = { o->fd, POLLIN | POLLHUP, 0 };
+    struct pollfd fdp = { .fd = o->fd, .events = POLLIN };
     if (poll(&fdp, 1, 0) <= 0)
         return;
 
