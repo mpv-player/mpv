@@ -1430,9 +1430,8 @@ void vo_drm_wait_on_flip(struct vo_drm_state *drm)
 {
     // poll page flip finish event
     while (drm->waiting_for_flip) {
-        const int timeout_ms = 3000;
         struct pollfd fds[1] = { { .events = POLLIN, .fd = drm->fd } };
-        poll(fds, 1, timeout_ms);
+        mp_poll(fds, 1, MP_TIME_S_TO_NS(3));
         if (fds[0].revents & POLLIN) {
             const int ret = drmHandleEvent(drm->fd, &drm->ev);
             if (ret != 0) {
