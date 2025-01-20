@@ -321,7 +321,7 @@ end
 -- The result contains at least one column.
 -- Rows are cut off from the top if rows_max is specified.
 -- returns a string containing the formatted table and the row count
-local function format_table(list, width_max, rows_max)
+local function format_grid(list, width_max, rows_max)
     if #list == 0 then
         return '', 0
     end
@@ -607,7 +607,7 @@ local function render()
             (osd_w - x - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
             / opts.font_size * get_font_hw_ratio())
 
-        local completions, rows = format_table(completion_buffer, width_max, max_lines)
+        local completions, rows = format_grid(completion_buffer, width_max, max_lines)
         max_lines = max_lines - rows
         completion_ass = style .. styles.completion .. completions .. '\\N'
     end
