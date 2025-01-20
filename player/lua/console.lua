@@ -54,7 +54,7 @@ local styles = {
     warn = '{\\1c&H66ccff&}',
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&}',
-    suggestion = '{\\1c&Hcc99cc&}',
+    completion = '{\\1c&Hcc99cc&}',
     disabled = '{\\1c&Hcccccc&}',
 }
 for key, style in pairs(styles) do
@@ -67,7 +67,7 @@ local terminal_styles = {
     warn = '\027[33m',
     error = '\027[31m',
     fatal = '\027[91m',
-    selected_suggestion = '\027[7m',
+    selected_completion = '\027[7m',
     default_item = '\027[1m',
     disabled = '\027[38;5;8m',
 }
@@ -93,8 +93,8 @@ local global_margins = { t = 0, b = 0 }
 local was_playing = true
 local input_caller
 
-local suggestion_buffer = {}
-local selected_suggestion_index
+local completion_buffer = {}
+local selected_completion_index
 local completion_pos
 local completion_append
 local path_separator = platform == 'windows' and '\\' or '/'
@@ -108,7 +108,7 @@ local first_match_to_print = 1
 local default_item
 
 local complete
-local cycle_through_suggestions
+local cycle_through_completions
 local set_active
 
 
@@ -298,8 +298,8 @@ local function calculate_max_log_lines()
 end
 
 local function should_highlight_completion(i)
-    return i == selected_suggestion_index or
-           (i == 1 and selected_suggestion_index == 0 and input_caller == nil)
+    return i == selected_completion_index or
+           (i == 1 and selected_completion_index == 0 and input_caller == nil)
 end
 
 local function mpv_color_to_ass(color)
@@ -398,7 +398,7 @@ local function format_table(list, width_max, rows_max)
 
             if should_highlight_completion(i) then
                 columns[column] = '{\\b1}' .. get_selected_ass() .. columns[column] ..
-                                  '{\\b\\1a&\\3a&}' .. styles.suggestion
+                                  '{\\b\\1a&\\3a&}' .. styles.completion
             end
         end
         -- first row is at the bottom
@@ -469,7 +469,7 @@ local function populate_log_with_matches()
         end
         if i == selected_match then
             style = style .. '{\\b1}'
-            terminal_style = terminal_style .. terminal_styles.selected_suggestion
+            terminal_style = terminal_style .. terminal_styles.selected_completion
         end
 
         log[#log + 1] = {
@@ -498,15 +498,15 @@ local function print_to_terminal()
         log = log .. clip .. log_line.terminal_style .. log_line.text .. '\027[0m\n'
     end
 
-    local suggestions = ''
-    for i, suggestion in ipairs(suggestion_buffer) do
+    local completions = ''
+    for i, completion in ipairs(completion_buffer) do
         if should_highlight_completion(i) then
-            suggestions = suggestions .. terminal_styles.selected_suggestion ..
-                          suggestion .. '\027[0m'
+            completions = completions .. terminal_styles.selected_completion ..
+                          completion .. '\027[0m'
         else
-            suggestions = suggestions .. suggestion
+            completions = completions .. completion
         end
-        suggestions = suggestions .. (i < #suggestion_buffer and '\t' or '\n')
+        completions = completions .. (i < #completion_buffer and '\t' or '\n')
     end
 
     local before_cur = line:sub(1, cursor - 1)
@@ -516,7 +516,7 @@ local function print_to_terminal()
         after_cur = ' '
     end
 
-    mp.osd_message(log .. suggestions .. prompt .. ' ' .. before_cur ..
+    mp.osd_message(log .. completions .. prompt .. ' ' .. before_cur ..
                   '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
                    after_cur:sub(2), 999)
     osd_msg_active = true
@@ -581,8 +581,8 @@ local function render()
     -- This will render at most screeny / font_size - 1 messages.
 
     local max_lines = calculate_max_log_lines()
-    local suggestion_ass = ''
-    if next(suggestion_buffer) then
+    local completion_ass = ''
+    if next(completion_buffer) then
         -- Estimate how many characters fit in one line
         -- Even with bottom-left anchoring,
         -- libass/ass_render.c:ass_render_event() subtracts --osd-margin-x from
@@ -591,9 +591,9 @@ local function render()
             (osd_w - x - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
             / opts.font_size * get_font_hw_ratio())
 
-        local suggestions, rows = format_table(suggestion_buffer, width_max, max_lines)
+        local completions, rows = format_table(completion_buffer, width_max, max_lines)
         max_lines = max_lines - rows
-        suggestion_ass = style .. styles.suggestion .. suggestions .. '\\N'
+        completion_ass = style .. styles.completion .. completions .. '\\N'
     end
 
     populate_log_with_matches()
@@ -624,7 +624,7 @@ local function render()
     ass:an(1)
     ass:pos(x, y)
     ass:append(log_ass .. '\\N')
-    ass:append(suggestion_ass)
+    ass:append(completion_ass)
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -692,7 +692,7 @@ local function handle_cursor_move()
     -- Don't show completions after a command is entered because they move its
     -- output up, and allow clearing completions by emptying the line.
     if line == '' then
-        suggestion_buffer = {}
+        completion_buffer = {}
         render()
     else
         complete()
@@ -870,8 +870,8 @@ local function handle_enter()
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                     utils.format_json({line}))
     else
-        if selected_suggestion_index == 0 then
-            cycle_through_suggestions()
+        if selected_completion_index == 0 then
+            cycle_through_completions()
         end
 
         -- match "help [<text>]", return <text> or "", strip all whitespace
@@ -1044,7 +1044,7 @@ local function search_history()
     end
 
     searching_history = true
-    suggestion_buffer = {}
+    completion_buffer = {}
     selectable_items = {}
 
     for i = 1, #history do
@@ -1443,8 +1443,8 @@ local function strip_common_characters(str, prefix)
     max_overlap_length(prefix, str)))
 end
 
-cycle_through_suggestions = function (backwards)
-    if #suggestion_buffer == 0 then
+cycle_through_completions = function (backwards)
+    if #completion_buffer == 0 then
         -- Allow Tab completion of commands before typing anything.
         if line == '' then
             complete()
@@ -1453,18 +1453,18 @@ cycle_through_suggestions = function (backwards)
         return
     end
 
-    selected_suggestion_index = selected_suggestion_index + (backwards and -1 or 1)
+    selected_completion_index = selected_completion_index + (backwards and -1 or 1)
 
-    if selected_suggestion_index > #suggestion_buffer then
-        selected_suggestion_index = 1
-    elseif selected_suggestion_index < 1 then
-        selected_suggestion_index = #suggestion_buffer
+    if selected_completion_index > #completion_buffer then
+        selected_completion_index = 1
+    elseif selected_completion_index < 1 then
+        selected_completion_index = #completion_buffer
     end
 
     local before_cur = line:sub(1, completion_pos - 1) ..
-                       suggestion_buffer[selected_suggestion_index] .. completion_append
+                       completion_buffer[selected_completion_index] .. completion_append
     line = before_cur .. strip_common_characters(line:sub(cursor),
-        suggestion_buffer[selected_suggestion_index] .. completion_append)
+        completion_buffer[selected_completion_index] .. completion_append)
     cursor = before_cur:len() + 1
     render()
 end
@@ -1622,13 +1622,13 @@ complete = function ()
         end
     end
 
-    suggestion_buffer = {}
-    selected_suggestion_index = 0
+    completion_buffer = {}
+    selected_completion_index = 0
     completions = completions or {}
     completion_pos = completion_pos or 1
     for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
                                       completions, opts.case_sensitive)) do
-        suggestion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match]
     end
 
     -- Expand ~/ with file completion.
@@ -1673,9 +1673,9 @@ local function get_bindings()
         { 'alt+b',       prev_word                              },
         { 'ctrl+right',  next_word                              },
         { 'alt+f',       next_word                              },
-        { 'tab',         cycle_through_suggestions              },
-        { 'ctrl+i',      cycle_through_suggestions              },
-        { 'shift+tab',   function() cycle_through_suggestions(true) end },
+        { 'tab',         cycle_through_completions              },
+        { 'ctrl+i',      cycle_through_completions              },
+        { 'shift+tab',   function() cycle_through_completions(true) end },
         { 'ctrl+a',      go_home                                },
         { 'home',        go_home                                },
         { 'ctrl+e',      go_end                                 },
@@ -1770,7 +1770,7 @@ set_active = function (active)
         end
 
         repl_active = false
-        suggestion_buffer = {}
+        completion_buffer = {}
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
 
@@ -1910,14 +1910,14 @@ mp.register_script_message('complete', function(list, start_pos)
         return
     end
 
-    suggestion_buffer = {}
-    selected_suggestion_index = 0
+    completion_buffer = {}
+    selected_completion_index = 0
     local completions = utils.parse_json(list)
     completion_pos = start_pos
     completion_append = ''
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
                                       completions)) do
-        suggestion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match]
     end
 
     render()
