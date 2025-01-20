@@ -53,6 +53,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
 #include "dvbin.h"
@@ -678,7 +679,7 @@ static int dvb_streaming_read(stream_t *stream, void *buffer, int size)
             if (pos || tries == 0)
                 break;
             tries--;
-            if (poll(pfds, 1, 2000) <= 0) {
+            if (mp_poll(pfds, 1, MP_TIME_S_TO_NS(2)) <= 0) {
                 MP_ERR(stream, "dvb_streaming_read: failed with "
                         "errno %d when reading %d bytes\n", errno, size - pos);
                 errno = 0;

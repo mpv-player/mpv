@@ -35,6 +35,7 @@
 
 #include "common/common.h"
 #include "osdep/io.h"
+#include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "dvbin.h"
 #include "dvb_tune.h"
@@ -291,7 +292,7 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
     int tm1 = (int)mp_time_sec();
     while (!ok) {
         festatus = 0;
-        if (poll(pfd, 1, tmout * 1000) > 0) {
+        if (mp_poll(pfd, 1, MP_TIME_S_TO_NS(tmout)) > 0) {
             if (pfd[0].revents & POLLPRI) {
                 if (ioctl(fd_frontend, FE_READ_STATUS, &festatus) >= 0) {
                     if (festatus & FE_HAS_LOCK)
