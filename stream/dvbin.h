@@ -89,7 +89,7 @@ typedef struct {
 typedef struct {
     char *cfg_prog;
     int cfg_devno;
-    int cfg_timeout;
+    float cfg_timeout;
     char *cfg_file;
     bool cfg_full_transponder;
     int cfg_channel_switch_offset;

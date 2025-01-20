@@ -278,7 +278,7 @@ static void print_status(dvb_priv_t *priv, fe_status_t festatus)
     MP_VERBOSE(priv, "\n");
 }
 
-static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
+static int check_status(dvb_priv_t *priv, int fd_frontend, float tmout)
 {
     fe_status_t festatus;
     bool ok = false;
@@ -308,7 +308,7 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, int tmout)
 
     if (!(festatus & FE_HAS_LOCK)) {
         MP_ERR(priv, "Not able to lock to the signal on the given frequency, "
-               "timeout: %d\n", tmout);
+               "timeout: %g\n", tmout);
         return -1;
     }
 
@@ -403,7 +403,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                    fe_guard_interval_t guardInterval,
                    fe_bandwidth_t bandwidth,
                    fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier,
-                   int timeout)
+                   float timeout)
 {
     dvb_state_t *state = priv->state;
 
@@ -634,7 +634,7 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth,
              fe_code_rate_t HP_CodeRate,
              fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier,
-             int timeout)
+             float timeout)
 {
     MP_INFO(priv, "Tuning to %s frequency %lu Hz\n",
             get_dvb_delsys(delsys), (long unsigned int) freq);

@@ -5517,7 +5517,7 @@ DVB
     ``channels.conf``, ``--dvbin-full-transponder`` or the magic PID
     ``8192`` are recommended.
 
-``--dvbin-timeout=<1-30>``
+``--dvbin-timeout=<seconds>``
     Maximum number of seconds to wait when trying to tune a frequency before
     giving up (default: 30).
 

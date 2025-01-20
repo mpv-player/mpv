@@ -36,6 +36,6 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              fe_modulation_t modulation, fe_guard_interval_t guardInterval,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth,
              fe_code_rate_t HP_CodeRate, fe_code_rate_t LP_CodeRate,
-             fe_hierarchy_t hier, int timeout);
+             fe_hierarchy_t hier, float timeout);
 
 #endif /* MPLAYER_DVB_TUNE_H */
