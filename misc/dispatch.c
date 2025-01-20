@@ -92,9 +92,9 @@ struct mp_dispatch_queue *mp_dispatch_create(void *ta_parent)
 
 // Set a custom function that should be called to guarantee that the target
 // thread wakes up. This is intended for use with code that needs to block
-// on non-pthread primitives, such as e.g. select(). In the case of select(),
+// on non-pthread primitives, such as e.g. poll(). In the case of poll(),
 // the wakeup_fn could for example write a byte into a "wakeup" pipe in order
-// to unblock the select(). The wakeup_fn is called from the dispatch queue
+// to unblock the poll(). The wakeup_fn is called from the dispatch queue
 // when there are new dispatch items, and the target thread should then enter
 // mp_dispatch_queue_process() as soon as possible.
 // Note that this setter does not do internal synchronization, so you must set
