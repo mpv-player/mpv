@@ -634,7 +634,7 @@ static const m_option_t mp_opts[] = {
     {"prefetch-playlist", OPT_BOOL(prefetch_open)},
     {"cache-pause", OPT_BOOL(cache_pause)},
     {"cache-pause-initial", OPT_BOOL(cache_pause_initial)},
-    {"cache-pause-wait", OPT_FLOAT(cache_pause_wait), M_RANGE(0, DBL_MAX)},
+    {"cache-pause-wait", OPT_FLOAT(cache_pause_wait), M_RANGE(0, FLT_MAX)},
 
 #if HAVE_DVBIN
     {"dvbin", OPT_SUBSTRUCT(stream_dvb_opts, stream_dvb_conf)},
