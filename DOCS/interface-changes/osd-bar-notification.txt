@@ -1,0 +1,2 @@
+change `--osd-on-seek` default to `msg` from `bar`
+disable `--osd-bar` by default
