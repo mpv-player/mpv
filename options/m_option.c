@@ -1137,11 +1137,36 @@ const m_option_type_t m_option_type_aspect = {
 #undef VAL
 #define VAL(x) (*(float *)(x))
 
+static int clamp_float(const m_option_t *opt, double *val)
+{
+    double v = *val;
+    int r = clamp_double(opt, &v);
+    // Handle the case where range is not set and v is finite
+    // but overflows the float range.
+    if (isfinite(v) && v > FLT_MAX) {
+        v = FLT_MAX;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    if (isfinite(v) && v < FLT_MIN) {
+        v = FLT_MIN;
+        r = M_OPT_OUT_OF_RANGE;
+    }
+    *val = v;
+    return r;
+}
+
 static int parse_float(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
     double tmp;
     int r = parse_double(log, opt, name, param, &tmp);
+
+    if (r == 1 && clamp_float(opt, &tmp) < 0) {
+        mp_err(log, "The %.*s option is out of range: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
+
     if (r == 1 && dst)
         VAL(dst) = tmp;
     return r;
@@ -1163,6 +1188,7 @@ static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
 {
     double tmp = VAL(val);
     add_double(opt, &tmp, add, wrap);
+    clamp_float(opt, &tmp);
     VAL(val) = tmp;
 }
 
@@ -1170,6 +1196,7 @@ static void multiply_float(const m_option_t *opt, void *val, double f)
 {
     double tmp = VAL(val);
     multiply_double(opt, &tmp, f);
+    clamp_float(opt, &tmp);
     VAL(val) = tmp;
 }
 
@@ -1177,6 +1204,8 @@ static int float_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     double tmp;
     int r = double_set(opt, &tmp, src);
+    if (r >= 0 && clamp_double(opt, &tmp) < 0)
+        return M_OPT_OUT_OF_RANGE;
     if (r >= 0)
         VAL(dst) = tmp;
     return r;
