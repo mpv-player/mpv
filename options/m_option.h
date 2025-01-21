@@ -398,9 +398,9 @@ struct m_option {
     // Most numeric types restrict the range to [min, max] if min<max (this
     // implies that if min/max are not set, the full range is used). In all
     // cases, the actual range is clamped to the type's native range.
-    // Float types use [DBL_MIN, DBL_MAX], though by setting min or max to
-    // -/+INFINITY, the range can be extended to INFINITY. (This part is buggy
-    // for "float".)
+    // Float type uses [FLT_MIN, FLT_MAX], and double type uses
+    // [DBL_MIN, DBL_MAX], though by setting min or max to -/+INFINITY,
+    // the range can be extended to INFINITY.
     // Preferably use M_RANGE() to set these fields.
     double min, max;
 
