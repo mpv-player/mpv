@@ -1023,7 +1023,6 @@ static const struct MPOpts mp_default_opts = {
     .playback_pitch = 1.,
     .pitch_correction = true,
     .audiofile_auto = -1,
-    .osd_bar_visible = true,
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
     .media_controls = true,

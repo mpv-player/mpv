@@ -4467,7 +4467,7 @@ OSD
     Whether to load the on-screen-controller (default: yes).
 
 ``--osd-bar=<yes|no>``
-    Enable display of the OSD bar (default: yes).
+    Enable display of the OSD bar (default: no).
 
     You can configure this on a per-command basis in input.conf using ``osd-``
     prefixes, see ``Input Command Prefixes``. If you want to disable the OSD
