@@ -1049,7 +1049,7 @@ static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
 
 static void multiply_double(const m_option_t *opt, void *val, double f)
 {
-    *(double *)val *= f;
+    VAL(val) *= f;
     clamp_double(opt, val);
 }
 
@@ -1066,14 +1066,14 @@ static int double_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     }
     if (clamp_double(opt, &val) < 0)
         return M_OPT_OUT_OF_RANGE;
-    *(double *)dst = val;
+    VAL(dst) = val;
     return 1;
 }
 
 static int double_get(const m_option_t *opt, void *ta_parent,
                       struct mpv_node *dst, void *src)
 {
-    double f = *(double *)src;
+    double f = VAL(src);
     if (isnan(f) && (opt->flags & M_OPT_DEFAULT_NAN)) {
         dst->format = MPV_FORMAT_STRING;
         dst->u.string = talloc_strdup(ta_parent, "default");
