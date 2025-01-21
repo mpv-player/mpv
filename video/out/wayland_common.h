@@ -90,10 +90,10 @@ struct vo_wayland_state {
     int wakeup_pipe[2];
 
     /* color-management */
-    struct xx_color_manager_v4 *color_manager;
-    struct xx_color_management_surface_v4 *color_surface;
-    struct xx_image_description_v4 *image_description;
-    struct xx_image_description_creator_params_v4 *image_creator_params;
+    struct wp_color_manager_v1 *color_manager;
+    struct wp_color_management_surface_v1 *color_surface;
+    struct wp_image_description_v1 *image_description;
+    struct wp_image_description_creator_params_v1 *image_creator_params;
     struct mp_image_params target_params;
     bool supports_icc;
     bool supports_parametric;
