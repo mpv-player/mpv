@@ -562,22 +562,29 @@ local function render()
         return
     end
 
+    local ass = assdraw.ass_new()
+
     local osd_w, osd_h = get_scaled_osd_dimensions()
 
     local x = get_margin_x()
     local y = osd_h * (1 - global_margins.b) - get_margin_y()
 
+    local font = get_font()
+    -- Use the same blur value as the rest of the OSD. 288 is the OSD's
+    -- PlayResY.
+    local blur = mp.get_property_native('osd-blur') * osd_h / 288
     local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
     local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
                                  osd_w .. ',' .. osd_h
-    local ass = assdraw.ass_new()
-    local font = get_font()
+
     local style = '{\\r' ..
                   (font and '\\fn' .. font or '') ..
                   '\\fs' .. opts.font_size ..
                   '\\bord' .. opts.border_size .. '\\fsp0' ..
+                  '\\blur' .. blur ..
                   (selectable_items and '\\q2' or '\\q1') ..
                   '\\clip(' .. clipping_coordinates .. ')}'
+
     -- Create the cursor glyph as an ASS drawing. ASS will draw the cursor
     -- inline with the surrounding text, but it sets the advance to the width
     -- of the drawing. So the cursor doesn't affect layout too much, make it as
