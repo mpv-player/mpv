@@ -119,11 +119,11 @@ if get_option('libmpv')
     exe = executable('libmpv-test', 'libmpv_test.c',
                      include_directories: incdir, link_with: libmpv)
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
-    test('libmpv', exe, args: file, timeout: 60, should_fail: not features['lua'])
+    test('libmpv', exe, args: file, timeout: 60, should_fail: not features['lua'], suite: 'libmpv')
 
     exe = executable('libmpv-encode', 'libmpv_encode.c',
                      include_directories: incdir, link_with: libmpv)
-    test('libmpv-encode', exe, timeout: 30)
+    test('libmpv-encode', exe, timeout: 30, suite: 'libmpv')
 
     mpvlib = libmpv
     shared = get_option('default_library') == 'shared'
@@ -134,7 +134,7 @@ if get_option('libmpv')
     if shared
         exe = executable('libmpv-lifetime', sources: 'libmpv_lifetime.c',
                          include_directories: incdir)
-        test('libmpv-lifetime', exe, depends: mpvlib)
+        test('libmpv-lifetime', exe, depends: mpvlib, suite: 'libmpv')
     endif
 endif
 
