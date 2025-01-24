@@ -130,6 +130,15 @@ if get_option('libmpv')
                      include_directories: incdir, link_with: libmpv)
     test('libmpv-test-options', exe, suite: 'libmpv')
 
+    # Old versions of ffmpeg are bugged when setting forced tracks and older
+    # versions of meson don't support the custom version checking argument.
+    if meson.version().version_compare('>= 1.5.0')
+        ffmpeg = find_program('ffmpeg', required: false, version: '>= 6.1', version_argument: '-version')
+        if ffmpeg.found()
+            subdir('samples')
+        endif
+    endif
+
     exe = executable('libmpv-encode', 'libmpv_encode.c',
                      include_directories: incdir, link_with: libmpv)
     test('libmpv-encode', exe, suite: 'libmpv')

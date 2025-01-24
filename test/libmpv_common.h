@@ -85,6 +85,7 @@ static inline void check_api_error(int status)
 static inline void initialize(void)
 {
     check_api_error(mpv_set_option_string(ctx, "vo", "null"));
+    check_api_error(mpv_set_option_string(ctx, "ao", "null"));
     check_api_error(mpv_request_log_messages(ctx, "debug"));
     check_api_error(mpv_initialize(ctx));
 }
