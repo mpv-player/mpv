@@ -356,18 +356,40 @@ Playback Control
     events that have already been displayed, or are within a short prefetch
     range. See `Cache`_ for details on how to control the available prefetch range.
 
-``frame-step``
-    Play one frame, then pause. Does nothing with audio-only playback.
+
+``frame-step [<frames>] [<flags>]``
+    Go forward or backwards by a given amount of frames. If ``<frames>`` is
+    omitted, the value is assumed to be ``1``.
+
+    The second argument consists of flags controlling the frameskip mode:
+
+    play (default)
+        Play the video forward by the desired amount of frames and then pause.
+        This only works with a positive value (i.e. frame stepping forwards).
+    seek
+        Perform a very exact seek that attempts to seek by the desired amount
+        of frames. If ``<frames>`` is ``-1``, this will go exactly to the
+        previous frame.
+
+    Note that the default frameskip mode, play, is more accurate but can be
+    slow depending on how many frames you are skipping (i.e. skipping forward
+    100 frames will play 100 frames of video before stopping). This mode only
+    works when going forwards. Frame stepping back always performs a seek.
+
+    When using seek mode, this can still be very slow (it tries to be precise,
+    not fast), and sometimes fails to behave as expected. How well this works
+    depends on whether precise seeking works correctly (e.g. see the
+    ``--hr-seek-demuxer-offset`` option). Video filters or other video
+    post-processing that modifies timing of frames (e.g. deinterlacing) should
+    usually work, but might make framestepping silently behave incorrectly in
+    corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
+    might make precise seeking slower. Also if the video is VFR, framestepping
+    using seeks will probably not work correctly except for the ``-1`` case.
+
+    This does not work with audio-only playback.
 
 ``frame-back-step``
-    Go back by one frame, then pause. Note that this can be very slow (it tries
-    to be precise, not fast), and sometimes fails to behave as expected. How
-    well this works depends on whether precise seeking works correctly (e.g.
-    see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
-    post-processing that modifies timing of frames (e.g. deinterlacing) should
-    usually work, but might make backstepping silently behave incorrectly in
-    corner cases. Using ``--hr-seek-framedrop=no`` should help, although it
-    might make precise seeking slower.
+    Calls ``frame-step`` with a value of ``-1`` and the ``seek`` flag.
 
     This does not work with audio-only playback.
 

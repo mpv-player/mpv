@@ -203,16 +203,16 @@ void update_screensaver_state(struct MPContext *mpctx)
                                                    : VOCTRL_KILL_SCREENSAVER, NULL);
 }
 
-void add_step_frame(struct MPContext *mpctx, int dir)
+void add_step_frame(struct MPContext *mpctx, int dir, bool use_seek)
 {
     if (!mpctx->vo_chain)
         return;
-    if (dir > 0) {
-        mpctx->step_frames += 1;
+    if (dir > 0 && !use_seek) {
+        mpctx->step_frames += dir;
         set_pause_state(mpctx, false);
-    } else if (dir < 0) {
+    } else {
         if (!mpctx->hrseek_active) {
-            queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, 0);
+            queue_seek(mpctx, MPSEEK_FRAMESTEP, dir, MPSEEK_VERY_EXACT, 0);
             set_pause_state(mpctx, true);
         }
     }
@@ -258,6 +258,16 @@ void reset_playback_state(struct MPContext *mpctx)
     update_core_idle_state(mpctx);
 }
 
+static double calculate_framestep_pts(MPContext *mpctx, double current_time,
+                                      int step_frames)
+{
+    // Crude guess at the pts. Use current_time if step_frames is -1.
+    int previous_frame = mpctx->num_past_frames - 1;
+    int offset = step_frames == -1 ? 0 : step_frames;
+    double pts = mpctx->past_frames[previous_frame].approx_duration * offset;
+    return current_time + pts;
+}
+
 static void mp_seek(MPContext *mpctx, struct seek_params seek)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -285,8 +295,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     case MPSEEK_ABSOLUTE:
         seek_pts = seek.amount;
         break;
-    case MPSEEK_BACKSTEP:
-        seek_pts = current_time;
+    case MPSEEK_FRAMESTEP:
+        seek_pts = calculate_framestep_pts(mpctx, current_time,
+                                           (int)seek.amount);
         hr_seek_very_exact = true;
         break;
     case MPSEEK_RELATIVE:
@@ -389,7 +400,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     if (hr_seek) {
         mpctx->hrseek_active = true;
-        mpctx->hrseek_backstep = seek.type == MPSEEK_BACKSTEP;
+        mpctx->hrseek_backstep = seek.type == MPSEEK_FRAMESTEP && seek.amount == -1;
         mpctx->hrseek_pts = seek_pts * mpctx->play_dir;
 
         // allow decoder to drop frames before hrseek_pts
@@ -445,7 +456,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
         return;
     case MPSEEK_ABSOLUTE:
     case MPSEEK_FACTOR:
-    case MPSEEK_BACKSTEP:
+    case MPSEEK_FRAMESTEP:
     case MPSEEK_CHAPTER:
         *seek = (struct seek_params) {
             .type = type,
