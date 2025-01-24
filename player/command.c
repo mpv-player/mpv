@@ -7702,6 +7702,22 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         }
     }
 
+    if (flags & UPDATE_HWDEC) {
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
+        if (dec) {
+            mp_decoder_wrapper_control(dec, VDCTRL_REINIT, NULL);
+            double last_pts = mpctx->video_pts;
+            if (last_pts != MP_NOPTS_VALUE)
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
+        }
+    }
+
+    if (flags & UPDATE_DVB_PROG) {
+        if (!mpctx->stop_play)
+            mpctx->stop_play = PT_CURRENT_ENTRY;
+    }
+
     if (opt_ptr == &opts->vo->android_surface_size) {
         if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
@@ -7749,17 +7765,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
         mp_wakeup_core(mpctx);
     }
 
-    if (flags & UPDATE_HWDEC) {
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
-        if (dec) {
-            mp_decoder_wrapper_control(dec, VDCTRL_REINIT, NULL);
-            double last_pts = mpctx->video_pts;
-            if (last_pts != MP_NOPTS_VALUE)
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
-        }
-    }
-
     if (opt_ptr == &opts->vo->window_scale)
         update_window_scale(mpctx);
 
@@ -7768,11 +7773,6 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (opt_ptr == &opts->cursor_autohide_delay)
         mpctx->mouse_timer = 0;
-
-    if (flags & UPDATE_DVB_PROG) {
-        if (!mpctx->stop_play)
-            mpctx->stop_play = PT_CURRENT_ENTRY;
-    }
 
     if (opt_ptr == &opts->loop_file) {
         mpctx->remaining_file_loops = opts->loop_file;
