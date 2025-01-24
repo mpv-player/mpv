@@ -440,7 +440,10 @@ jobs:
                 vulkan-headers \
                 zimg
             ./ci/build-openbsd.sh
-            meson test -C build
+            if ! meson test -C build; then
+                cat ./build/meson-logs/testlog.txt
+                exit 1
+            fi
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
@@ -490,7 +493,10 @@ jobs:
                 vulkan-headers \
                 wayland-protocols
             ./ci/build-freebsd.sh
-            meson test -C build
+            if ! meson test -C build; then
+                cat ./build/meson-logs/testlog.txt
+                exit 1
+            fi
 
   msys2:
     runs-on: windows-latest
