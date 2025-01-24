@@ -1180,6 +1180,7 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
     mpctx->open_format = talloc_strdup(NULL, mpctx->opts->demuxer_name);
     mpctx->open_url_flags = url_flags;
     mpctx->open_for_prefetch = for_prefetch && mpctx->opts->demuxer_thread;
+    mpctx->demuxer_changed = false;
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     // Don't allow to open local paths or stdin during fuzzing
@@ -1210,16 +1211,23 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         bool failed = done && !mpctx->open_res_demuxer;
         bool correct_url = strcmp(mpctx->open_url, url) == 0;
 
-        if (correct_url && !failed) {
+        if (correct_url && !mpctx->demuxer_changed && !failed) {
             MP_VERBOSE(mpctx, "Using prefetched/prefetching URL.\n");
-        } else if (correct_url && failed) {
-            MP_VERBOSE(mpctx, "Prefetched URL failed, retrying.\n");
-            cancel_open(mpctx);
         } else {
-            if (done) {
-                MP_VERBOSE(mpctx, "Dropping finished prefetch of wrong URL.\n");
+            if (correct_url && failed) {
+                MP_VERBOSE(mpctx, "Prefetched URL failed, retrying.\n");
+            } else if (mpctx->demuxer_changed) {
+                if (done) {
+                    MP_VERBOSE(mpctx, "Dropping finished prefetch because demuxer options changed.\n");
+                } else {
+                    MP_VERBOSE(mpctx, "Aborting ongoing prefetch because demuxer options changed.\n");
+                }
             } else {
-                MP_VERBOSE(mpctx, "Aborting ongoing prefetch of wrong URL.\n");
+                if (done) {
+                    MP_VERBOSE(mpctx, "Dropping finished prefetch of wrong URL.\n");
+                } else {
+                    MP_VERBOSE(mpctx, "Aborting ongoing prefetch of wrong URL.\n");
+                }
             }
             cancel_open(mpctx);
         }
