@@ -116,14 +116,23 @@ paths = executable('paths', 'paths.c', include_directories: incdir,
 test('paths', paths)
 
 if get_option('libmpv')
-    exe = executable('libmpv-test', 'libmpv_test.c',
-                     include_directories: incdir, link_with: libmpv)
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
-    test('libmpv', exe, args: file, timeout: 60, should_fail: not features['lua'], suite: 'libmpv')
+
+    exe = executable('libmpv-test-file-loading', 'libmpv_test_file_loading.c',
+                     include_directories: incdir, link_with: libmpv)
+    test('libmpv-test-file-loading', exe, args: file, suite: 'libmpv')
+
+    exe = executable('libmpv-test-lavfi-complex', 'libmpv_test_lavfi_complex.c',
+                     include_directories: incdir, link_with: libmpv)
+    test('libmpv-test-lavfi-complex', exe, args: file, suite: 'libmpv')
+
+    exe = executable('libmpv-test-options', 'libmpv_test_options.c',
+                     include_directories: incdir, link_with: libmpv)
+    test('libmpv-test-options', exe, suite: 'libmpv')
 
     exe = executable('libmpv-encode', 'libmpv_encode.c',
                      include_directories: incdir, link_with: libmpv)
-    test('libmpv-encode', exe, timeout: 30, suite: 'libmpv')
+    test('libmpv-encode', exe, suite: 'libmpv')
 
     mpvlib = libmpv
     shared = get_option('default_library') == 'shared'

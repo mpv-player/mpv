@@ -15,81 +15,13 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <inttypes.h>
-#include <libmpv/client.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Stolen from osdep/compiler.h
-#ifdef __GNUC__
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
-#define MP_NORETURN __attribute__((noreturn))
-#else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#define MP_NORETURN
-#endif
-
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef PRINTF_ATTRIBUTE
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
-#endif
+#include "libmpv_common.h"
 
 // Dummy values for test_options_and_properties
 static const char *str = "string";
 static int flag = 1;
 static int64_t int_ = 20;
 static double double_ = 1.5;
-
-// Global handle.
-static mpv_handle *ctx;
-
-MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
-static void fail(const char *fmt, ...)
-{
-    if (fmt) {
-        va_list va;
-        va_start(va, fmt);
-        vfprintf(stderr, fmt, va);
-        va_end(va);
-    }
-    exit(1);
-}
-
-
-static void exit_cleanup(void)
-{
-    if (ctx)
-        mpv_destroy(ctx);
-}
-
-static mpv_event *wrap_wait_event(void)
-{
-    while (1) {
-        mpv_event *ev = mpv_wait_event(ctx, 1);
-
-        if (ev->event_id == MPV_EVENT_NONE) {
-            continue;
-        } else if (ev->event_id == MPV_EVENT_LOG_MESSAGE) {
-            mpv_event_log_message *msg = (mpv_event_log_message*)ev->data;
-            printf("[%s:%s] %s", msg->prefix, msg->level, msg->text);
-            if (msg->log_level <= MPV_LOG_LEVEL_ERROR)
-                fail("error was logged");
-        } else {
-            return ev;
-        }
-    }
-}
-
-static void check_api_error(int status)
-{
-    if (status < 0)
-        fail("mpv API error: %s\n", mpv_error_string(status));
-}
-
-/****/
 
 static void check_double(const char *property, double expect)
 {
@@ -169,60 +101,6 @@ static void set_options_and_properties(const char *options[], const char *proper
     }
 }
 
-/****/
-
-static void test_file_loading(char *file)
-{
-    const char *cmd[] = {"loadfile", file, NULL};
-    check_api_error(mpv_command(ctx, cmd));
-    int loaded = 0;
-    int finished = 0;
-    while (!finished) {
-        mpv_event *event = wrap_wait_event();
-        switch (event->event_id) {
-        case MPV_EVENT_FILE_LOADED:
-            // make sure it loads before exiting
-            loaded = 1;
-            break;
-        case MPV_EVENT_END_FILE:
-            if (loaded)
-                finished = 1;
-            break;
-        }
-    }
-    if (!finished)
-        fail("Unable to load test file!\n");
-}
-
-static void test_lavfi_complex(char *file)
-{
-    const char *cmd[] = {"loadfile", file, NULL};
-    check_api_error(mpv_command(ctx, cmd));
-    int finished = 0;
-    int loaded = 0;
-    while (!finished) {
-        mpv_event *event = wrap_wait_event();
-        switch (event->event_id) {
-        case MPV_EVENT_FILE_LOADED:
-            // Add file as external and toggle lavfi-complex on.
-            if (!loaded) {
-                check_api_error(mpv_set_property_string(ctx, "external-files", file));
-                const char *add_cmd[] = {"video-add", file, "auto", NULL};
-                check_api_error(mpv_command(ctx, add_cmd));
-                check_api_error(mpv_set_property_string(ctx, "lavfi-complex", "[vid1] [vid2] vstack [vo]"));
-            }
-            loaded = 1;
-            break;
-        case MPV_EVENT_END_FILE:
-            if (loaded)
-                finished = 1;
-            break;
-        }
-    }
-    if (!finished)
-        fail("Lavfi complex failed!\n");
-}
-
 // Ensure that setting options/properties work correctly and
 // have the expected values.
 static void test_options_and_properties(void)
@@ -255,8 +133,6 @@ static void test_options_and_properties(void)
 
     set_options_and_properties(options, properties, formats);
 
-    check_api_error(mpv_initialize(ctx));
-
     check_results(options, formats);
     check_results(properties, formats);
 
@@ -273,7 +149,7 @@ static void test_options_and_properties(void)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2)
+    if (argc != 1)
         return 1;
     atexit(exit_cleanup);
 
@@ -281,21 +157,13 @@ int main(int argc, char *argv[])
     if (!ctx)
         return 1;
 
-    check_api_error(mpv_set_option_string(ctx, "vo", "null"));
-    // load osc too to see if it works
-    check_api_error(mpv_set_option_string(ctx, "osc", "yes"));
-    check_api_error(mpv_request_log_messages(ctx, "debug"));
+    initialize();
 
     const char *fmt = "================ TEST: %s ================\n";
-
     printf(fmt, "test_options_and_properties");
     test_options_and_properties();
-    printf(fmt, "test_file_loading");
-    test_file_loading(argv[1]);
-    printf(fmt, "test_lavfi_complex");
-    test_lavfi_complex(argv[1]);
-
     printf("================ SHUTDOWN ================\n");
+
     mpv_command_string(ctx, "quit");
     while (wrap_wait_event()->event_id != MPV_EVENT_SHUTDOWN) {}
 
