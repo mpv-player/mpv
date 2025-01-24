@@ -85,6 +85,7 @@ const struct m_sub_options demux_rawaudio_conf = {
         .samplerate = 44100,
         .aformat = PCM(1, 0, 16, 0), // s16le
     },
+    .change_flags = UPDATE_DEMUXER,
 };
 
 #undef PCM

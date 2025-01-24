@@ -75,6 +75,7 @@ struct m_sub_options demux_playlist_conf = {
             "video", "audio", "image", NULL
         },
     },
+    .change_flags = UPDATE_DEMUXER,
 };
 
 static bool check_mimetype(struct stream *s, const char *const *list)

@@ -443,7 +443,8 @@ char *format_file_size(int64_t size);
 #define UPDATE_VIDEO            (1 << 15)  // force redraw if needed
 #define UPDATE_VO               (1 << 16)  // reinit the VO
 #define UPDATE_CLIPBOARD        (1 << 17)  // reinit the clipboard
-#define UPDATE_OPT_LAST         (1 << 17)
+#define UPDATE_DEMUXER          (1 << 18)  // invalidate --prefetch-playlist's data
+#define UPDATE_OPT_LAST         (1 << 18)
 
 // All bits between of UPDATE_ flags
 #define UPDATE_OPTS_MASK        ((UPDATE_OPT_LAST << 1) - 1)
