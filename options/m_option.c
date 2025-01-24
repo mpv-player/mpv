@@ -1147,8 +1147,8 @@ static int clamp_float(const m_option_t *opt, double *val)
         v = FLT_MAX;
         r = M_OPT_OUT_OF_RANGE;
     }
-    if (isfinite(v) && v < FLT_MIN) {
-        v = FLT_MIN;
+    if (isfinite(v) && v < -FLT_MAX) {
+        v = -FLT_MAX;
         r = M_OPT_OUT_OF_RANGE;
     }
     *val = v;
