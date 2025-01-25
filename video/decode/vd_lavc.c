@@ -65,6 +65,7 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
                           struct bstr name);
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
+#define HWDEC_DEFAULT_CODECS "h264,vc1,hevc,vp8,vp9,av1,prores"
 
 #define OPT_BASE_STRUCT struct vd_lavc_params
 
@@ -140,7 +141,7 @@ const struct m_sub_options vd_lavc_conf = {
         .framedrop = AVDISCARD_NONREF,
         .dr = -1,
         .hwdec_api = (char *[]){"no", NULL,},
-        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
+        .hwdec_codecs = HWDEC_DEFAULT_CODECS,
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
         // for example, if vo_gpu increases the number of reference surfaces for
@@ -497,8 +498,10 @@ static void select_and_set_hwdec(struct mp_filter *vd)
             MP_VERBOSE(vd, "No hardware decoding requested.\n");
             break;
         } else if (!hwdec_codec_allowed(vd, codec)) {
-            MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
-                    "on whitelist.\n", codec);
+            bool default_codecs = !strcmp(ctx->opts->hwdec_codecs, HWDEC_DEFAULT_CODECS);
+            MP_MSG(vd, default_codecs ? MSGL_INFO : MSGL_V,
+                   "Not trying to use hardware decoding: codec %s is not "
+                   "in the --hwdec-codecs whitelist.\n", codec);
             break;
         } else {
             bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
