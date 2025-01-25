@@ -7,17 +7,20 @@ import sys
 from collections.abc import Callable
 from typing import Optional
 
+LintBody = list[str]
+LintFunction = Callable[[LintBody], bool]
+LintRule = tuple[LintFunction, str]
 
-def call(cmd) -> str:
+def call(cmd: list[str]) -> str:
     sys.stdout.flush()
     ret = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, text=True)
     return ret.stdout
 
-lint_rules: dict[str, tuple[Callable, str]] = {}
+lint_rules: dict[str, LintRule] = {}
 
 # A lint rule should return True if everything is okay
-def lint_rule(description: str):
-    def f(func):
+def lint_rule(description: str) -> Callable[[LintFunction], None]:
+    def f(func: LintFunction) -> None:
         assert func.__name__ not in lint_rules
         lint_rules[func.__name__] = (func, description)
     return f
@@ -33,7 +36,7 @@ def get_commit_range() -> Optional[str]:
         if event["created"] or event["forced"]:
             print("Skipping logic on branch creation or force-push")
             return None
-        return event["before"] + "..." + event["after"]
+        return f"{event['before']}...{event['after']}"
     elif event_name == "pull_request":
         base = event["pull_request"]["base"]["sha"]
         head = event["pull_request"]["head"]["sha"]
@@ -70,42 +73,42 @@ NO_PREFIX_WHITELIST = \
     r"^Revert \"(.*)\"|^Reapply \"(.*)\"|^Release [0-9]|^Update MPV_VERSION$"
 
 @lint_rule("Subject line must contain a prefix identifying the sub system")
-def subsystem_prefix(body):
-    return (re.search(NO_PREFIX_WHITELIST, body[0]) or
-            re.search(r"^[\w/\.{},-]+: ", body[0]))
+def subsystem_prefix(body: LintBody) -> bool:
+    return bool(re.search(NO_PREFIX_WHITELIST, body[0]) or
+                re.search(r"^[\w/\.{},-]+: ", body[0]))
 
 @lint_rule("First word after : must be lower case")
-def description_lowercase(body):
+def description_lowercase(body: LintBody) -> bool:
     # Allow all caps for acronyms and options with --
-    return (re.search(NO_PREFIX_WHITELIST, body[0]) or
-            re.search(r": (?:[A-Z]{2,} |--[a-z]|[a-z0-9])", body[0]))
+    return bool(re.search(NO_PREFIX_WHITELIST, body[0]) or
+                re.search(r": (?:[A-Z]{2,} |--[a-z]|[a-z0-9])", body[0]))
 
 @lint_rule("Subject line must not end with a full stop")
-def no_dot(body):
+def no_dot(body: LintBody) -> bool:
     return not body[0].rstrip().endswith(".")
 
 @lint_rule("There must be an empty line between subject and extended description")
-def empty_line(body):
+def empty_line(body: LintBody) -> bool:
     return len(body) == 1 or body[1].strip() == ""
 
 # been seeing this one all over github lately, must be the webshits
 @lint_rule("Do not use 'conventional commits' style")
-def no_cc(body):
+def no_cc(body: LintBody) -> bool:
     return not re.search(r"(?i)^(feat|fix|chore|refactor)[!:(]", body[0])
 
 @lint_rule("History must be linear, no merge commits")
-def no_merge(body):
+def no_merge(body: LintBody) -> bool:
     return not body[0].startswith("Merge ")
 
 @lint_rule("Subject line should be shorter than 72 characters")
-def line_too_long(body):
+def line_too_long(body: LintBody) -> bool:
     revert = re.search(r"^Revert \"(.*)\"|^Reapply \"(.*)\"", body[0])
-    return revert or len(body[0]) <= 72
+    return bool(revert or len(body[0]) <= 72)
 
 @lint_rule(
     "Prefix should not include file extension (use `vo_gpu: ...` not `vo_gpu.c: ...`)",
 )
-def no_file_exts(body):
+def no_file_exts(body: LintBody) -> bool:
     return not re.search(r"[a-z0-9]\.([chm]|cpp|swift|py): ", body[0])
 
 ################################################################################

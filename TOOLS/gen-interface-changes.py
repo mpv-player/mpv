@@ -20,17 +20,18 @@
 # License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pathlib
 import sys
 import textwrap
+from pathlib import Path
 from shutil import which
 from subprocess import check_output
+from typing import TextIO
 
 
-def add_new_entries(docs_dir, out, git):
-    changes_dir = pathlib.Path(docs_dir) / "interface-changes"
+def add_new_entries(docs_dir: Path, out: TextIO, git: str) -> None:
+    changes_dir = Path(docs_dir) / "interface-changes"
     files = []
-    for f in pathlib.Path(changes_dir).glob("*.txt"):
+    for f in Path(changes_dir).glob("*.txt"):
         if f.is_file() and f.name != "example.txt":
             timestamp = check_output([git, "log", "--format=%ct", "-n", "1", "--",
                                       f], encoding="UTF-8")
@@ -72,7 +73,7 @@ if __name__ == "__main__":
         print(f"Invalid version number: {sys.argv[1]}")
         sys.exit(1)
 
-    docs_dir = pathlib.Path(sys.argv[0]).resolve().parents[1] / "DOCS"
+    docs_dir = Path(sys.argv[0]).resolve().parents[1] / "DOCS"
     interface_changes = docs_dir / "interface-changes.rst"
     with open(interface_changes) as f:
         lines = [line.rstrip() for line in f]

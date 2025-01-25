@@ -51,14 +51,14 @@ class G:
     curveno: dict[Any, int] = {}
     sevents: list[Event] = []
 
-def find_marker():
+def find_marker() -> str:
     if len(G.markers) == 0:
         return "o"
     m = G.markers[0]
     G.markers = G.markers[1:]
     return m
 
-def get_event(event, evtype):
+def get_event(event: str, evtype: str) -> Event:
     if event not in G.events:
         e = Event()
         e.name = event
@@ -82,7 +82,7 @@ colors = [
     (0.75, 0, 0.75),
 ]
 
-def mk_color(t):
+def mk_color(t: tuple[float, float, float]) -> Any:
     return pg.mkColor(int(t[0] * 255), int(t[1] * 255), int(t[2] * 255))
 
 SCALE = 1e6 # microseconds to seconds
