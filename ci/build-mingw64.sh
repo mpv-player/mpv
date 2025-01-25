@@ -113,7 +113,7 @@ function build_if_missing {
 ## mpv's dependencies
 
 _iconv () {
-    local ver=1.17
+    local ver=1.18
     gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
@@ -164,7 +164,6 @@ _ffmpeg_mark=lib/libavcodec.dll.a
 _shaderc () {
     if [ ! -d shaderc ]; then
         $gitclone https://github.com/google/shaderc.git
-        (cd shaderc && git fetch --tags && git checkout v2024.3)
         (cd shaderc && ./utils/git-sync-deps)
     fi
     builddir shaderc
@@ -243,7 +242,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=10.0.1
+    local ver=10.2.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
