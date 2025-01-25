@@ -542,7 +542,7 @@ static void stream_dvdnav_close(stream_t *s)
     if (priv->dvd_speed)
         dvd_set_speed(s, priv->filename, -1);
     if (priv->filename)
-        free(priv->filename);
+        talloc_free(priv->filename);
 }
 
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
@@ -553,14 +553,14 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     if (!filename)
         return NULL;
 
-    if (!(priv->filename = strdup(filename)))
+    if (!(priv->filename = mp_get_user_path(NULL, stream->global, filename)))
         return NULL;
 
     priv->dvd_speed = priv->opts->speed;
     dvd_set_speed(stream, priv->filename, priv->dvd_speed);
 
     if (dvdnav_open(&(priv->dvdnav), priv->filename) != DVDNAV_STATUS_OK) {
-        free(priv->filename);
+        talloc_free(priv->filename);
         priv->filename = NULL;
         return NULL;
     }

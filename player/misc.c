@@ -31,6 +31,7 @@
 #include "options/options.h"
 #include "options/m_property.h"
 #include "options/m_config.h"
+#include "options/path.h"
 #include "common/common.h"
 #include "common/encode.h"
 #include "common/playlist.h"
@@ -269,6 +270,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     struct MPOpts *opts = mpctx->opts;
     bool ok = false;
 
+    char *filename = mp_get_user_path(NULL, mpctx->global, opts->stream_dump);
     stream_t *stream = stream_create(source_filename,
                                      STREAM_ORIGIN_DIRECT | STREAM_READ,
                                      mpctx->playback_abort, mpctx->global);
@@ -277,7 +279,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
     int64_t size = stream_get_size(stream);
 
-    FILE *dest = fopen(opts->stream_dump, "wb");
+    FILE *dest = fopen(filename, "wb");
     if (!dest) {
         MP_ERR(mpctx, "Error opening dump file: %s\n", mp_strerror(errno));
         goto done;
@@ -305,6 +307,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     ok &= fclose(dest) == 0;
 done:
     free_stream(stream);
+    talloc_free(filename);
     return ok ? 0 : -1;
 }
 

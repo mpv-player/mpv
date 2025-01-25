@@ -31,6 +31,7 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "osdep/timer.h"
 #include "video/out/vo.h"
 #include "mpv_talloc.h"
@@ -135,7 +136,9 @@ struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
 
     p->muxer->oformat = ctx->oformat;
 
-    p->muxer->url = av_strdup(filename);
+    char *path = mp_get_user_path(NULL, global, filename);
+    p->muxer->url = av_strdup(path);
+    talloc_free(path);
     MP_HANDLE_OOM(p->muxer->url);
 
     return ctx;

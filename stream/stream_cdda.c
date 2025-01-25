@@ -38,6 +38,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 #include "options/options.h"
+#include "options/path.h"
 
 #if !HAVE_GPL
 #error GPL only
@@ -251,11 +252,11 @@ static int open_cdda(stream_t *st)
     int last_track;
 
     if (st->path[0]) {
-        p->device = st->path;
+        p->device = talloc_strdup(priv, st->path);
     } else if (p->cdda_device && p->cdda_device[0]) {
-        p->device = p->cdda_device;
+        p->device = mp_get_user_path(priv, st->global, p->cdda_device);
     } else {
-        p->device = DEFAULT_CDROM_DEVICE;
+        p->device = talloc_strdup(priv, DEFAULT_CDROM_DEVICE);
     }
 
 #if defined(__NetBSD__)
@@ -311,7 +312,6 @@ static int open_cdda(stream_t *st)
     priv->cdp = paranoia_init(cdd);
     if (priv->cdp == NULL) {
         cdda_close(cdd);
-        free(priv);
         return STREAM_ERROR;
     }
 
