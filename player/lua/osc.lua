@@ -44,6 +44,7 @@ local user_opts = {
     timems = false,             -- display timecodes with milliseconds?
     tcspace = 100,              -- timecode spacing (compensate font size estimation)
     visibility = "auto",        -- only used at init to set visibility_mode(...)
+    visibility_modes = "never_auto_always", -- visibility modes to cycle through
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
     windowcontrols = "auto",    -- whether to show window controls
@@ -255,6 +256,7 @@ local state = {
     maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
     chapter_list = {},                      -- sorted by time
+    visibility_modes = {},                  -- visibility_modes to cycle through
     osc_message_warned = false,             -- deprecation warnings
     osc_chapterlist_warned = false,
     osc_playlist_warned = false,
@@ -2774,12 +2776,14 @@ end
 -- the modes only affect internal variables and not stored on its own.
 local function visibility_mode(mode, no_osd)
     if mode == "cycle" then
-        if not state.enabled then
-            mode = "auto"
-        elseif user_opts.visibility ~= "always" then
-            mode = "always"
-        else
-            mode = "never"
+        for i, allowed_mode in ipairs(state.visibility_modes) do
+            if i == #state.visibility_modes then
+                mode = state.visibility_modes[1]
+                break
+            elseif user_opts.visibility == allowed_mode then
+                mode = state.visibility_modes[i + 1]
+                break
+            end
         end
     end
 
@@ -2905,6 +2909,14 @@ local function validate_user_opts()
     for _, color in pairs(colors) do
         if color:find("^#%x%x%x%x%x%x$") == nil then
             msg.warn("'" .. color .. "' is not a valid color")
+        end
+    end
+
+    for str in string.gmatch(user_opts.visibility_modes, "([^_]+)") do
+        if str ~= "auto" and str ~= "always" and str ~= "never" then
+            msg.warn("Ignoring unknown visibility mode '" .. str .."' in list")
+        else
+            table.insert(state.visibility_modes, str)
         end
     end
 end
