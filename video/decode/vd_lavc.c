@@ -65,7 +65,7 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
                           struct bstr name);
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
-#define HWDEC_DEFAULT_CODECS "h264,vc1,hevc,vp8,vp9,av1,prores"
+#define HWDEC_DEFAULT_CODECS "h264,hevc,vp8,vp9,av1,prores"
 
 #define OPT_BASE_STRUCT struct vd_lavc_params
 
