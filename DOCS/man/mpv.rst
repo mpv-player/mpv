@@ -697,7 +697,7 @@ Suffix        Meaning
 -add          Append 1 or more items (same syntax as -set)
 -pre          Prepend 1 or more items (same syntax as -set)
 -clr          Clear the option (remove all items)
--remove       Delete item if present
+-remove       Delete 1 or items if present (same syntax as -set)
 -toggle       Append an item, or remove it if it already exists
 -help         Pseudo operation that prints a help text to the terminal
 ============= ===============================================
@@ -707,10 +707,9 @@ General
 
 Without suffix, the operation used is normally ``-set``.
 
-Although some operations allow specifying multiple items, using this is strongly
-discouraged and deprecated, except for ``-set``. There is a chance that
-operations like ``-add`` and ``-pre`` will work like ``-append`` and accept a
-single, unescaped item only (so the ``,`` separator will not be interpreted and
+Some operations like ``-add`` and ``-pre`` specify multiple items, but be
+aware that you may need to escape the arguments. ``-append`` accepts a single,
+unescaped item only (so the ``,`` separator will not be interpreted and
 is passed on as part of the value).
 
 Some options (like ``--sub-file``, ``--audio-file``, ``--glsl-shader``) are
