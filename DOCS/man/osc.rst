@@ -358,6 +358,12 @@ Configurable Options
 
     Also supports ``never`` and ``always``
 
+``visibility_modes``
+    Default: never_auto_always
+
+    The list of visibility modes to cycle through when calling the
+    osc-visibility cycle script message. Modes are separated by ``_``.
+
 ``boxmaxchars``
     Default: 80
 
