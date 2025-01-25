@@ -28,6 +28,7 @@
 #include "mpv_talloc.h"
 
 #include "options/m_option.h"
+#include "options/path.h"
 #include "audio/format.h"
 #include "ao.h"
 #include "internal.h"
@@ -109,7 +110,7 @@ static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    char *outputfilename = priv->outputfilename;
+    char *outputfilename = mp_get_user_path(priv, ao->global, priv->outputfilename);
     if (!outputfilename) {
         outputfilename = talloc_strdup(priv, priv->waveheader ? "audiodump.wav"
                                                               : "audiodump.pcm");

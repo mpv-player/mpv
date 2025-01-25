@@ -1,0 +1,1 @@
+all options that take filepaths as values are now properly expanded (i.e. ~/ -> /home/$USER)

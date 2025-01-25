@@ -403,17 +403,16 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
     struct mp_log *log = mp_log_new(NULL, global->log, "!playlist_parser");
     mp_verbose(log, "Parsing playlist file %s...\n", file);
 
+    char *path = mp_get_user_path(NULL, global, file);
     struct demuxer_params p = {
         .force_format = "playlist",
         .stream_flags = STREAM_ORIGIN_DIRECT,
     };
-    struct demuxer *d = demux_open_url(file, &p, cancel, global);
-    if (!d) {
-        talloc_free(log);
-        return NULL;
-    }
-
+    struct demuxer *d = demux_open_url(path, &p, cancel, global);
     struct playlist *ret = NULL;
+    if (!d)
+        goto done;
+
     if (d && d->playlist) {
         ret = talloc_zero(NULL, struct playlist);
         playlist_populate_playlist_path(d->playlist, file);
@@ -434,7 +433,9 @@ struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
     if (ret && !ret->num_entries)
         mp_warn(log, "Warning: empty playlist\n");
 
+done:
     talloc_free(log);
+    talloc_free(path);
     return ret;
 }
 

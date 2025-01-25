@@ -115,7 +115,7 @@ void mp_init_paths(struct mpv_global *global, struct MPOpts *opts)
     if (!opts->load_config)
         force_configdir = "";
 
-    global->configdir = talloc_strdup(global, force_configdir);
+    global->configdir = mp_get_user_path(global, global, force_configdir);
 }
 
 char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
