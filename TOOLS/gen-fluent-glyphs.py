@@ -54,15 +54,15 @@ ICONS = {
 }
 
 
-def icon_url(name, size, style):
+def icon_url(name: str, size: int, style: str) -> str:
     snake = name.lower().replace(" ", "_")
     filename = f"ic_fluent_{snake}_{size}_{style}.svg"
     dir_encoded = urllib.parse.quote(name)
     return f"{REPO_BASE}/{dir_encoded}/SVG/{filename}"
 
 
-def download_icons(dest_dir):
-    paths = {}
+def download_icons(dest_dir: str) -> dict[int, str]:
+    paths: dict[int, str] = {}
     seen: dict[str, str] = {}
 
     for cp, (name, size, style, _transform) in ICONS.items():
@@ -88,7 +88,7 @@ def download_icons(dest_dir):
     return paths
 
 
-def import_into_font(svg_paths):
+def import_into_font(svg_paths: dict[int, str]) -> None:
     transforms = {}
     for cp, (_name, _size, _style, transform) in ICONS.items():
         if transform:
@@ -185,7 +185,7 @@ print("Saved to", {SFDIR!r})
         os.unlink(script_path)
 
 
-def main():
+def main() -> None:
     print("Downloading Fluent UI System Icons...")
     with tempfile.TemporaryDirectory() as tmpdir:
         svg_paths = download_icons(tmpdir)

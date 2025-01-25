@@ -24,9 +24,10 @@
 
 import os
 import sys
+from typing import BinaryIO, TextIO
 
 
-def file2string(infilename, infile, outfile):
+def file2string(infilename: str, infile: BinaryIO, outfile: TextIO) -> None:
     outfile.write(f"// Generated from {infilename}\n\n")
 
     conv = [f"\\{c:03o}" for c in range(256)]
