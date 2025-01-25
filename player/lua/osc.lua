@@ -255,6 +255,10 @@ local state = {
     maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
     chapter_list = {},                      -- sorted by time
+    osc_message_warned = false,             -- deprecation warnings
+    osc_chapterlist_warned = false,
+    osc_playlist_warned = false,
+    osc_tracklist_warned = false,
 }
 
 local logo_lines = {
@@ -2653,15 +2657,35 @@ end)
 
 -- These are for backwards compatibility only.
 mp.register_script_message("osc-message", function(message, dur)
+    if not state.osc_message_warned then
+        mp.msg.warn("osc-message is deprecated and may be removed in the future.",
+                    "Use the show-text command instead.")
+        state.osc_message_warned = true
+    end
     mp.osd_message(message, dur)
 end)
 mp.register_script_message("osc-chapterlist", function(dur)
+    if not state.osc_chapterlist_warned then
+        mp.msg.warn("osc-chapterlist is deprecated and may be removed in the future.",
+                    "Use show-text ${chapter-list} instead.")
+        state.osc_chapterlist_warned = true
+    end
     mp.command("show-text ${chapter-list} " .. (dur and dur * 1000 or ""))
 end)
 mp.register_script_message("osc-playlist", function(dur)
+    if not state.osc_playlist_warned then
+        mp.msg.warn("osc-playlist is deprecated and may be removed in the future.",
+                    "Use show-text ${playlist} instead.")
+        state.osc_playlist_warned = true
+    end
     mp.command("show-text ${playlist} " .. (dur and dur * 1000 or ""))
 end)
 mp.register_script_message("osc-tracklist", function(dur)
+    if not state.osc_tracklist_warned then
+        mp.msg.warn("osc-tracklist is deprecated and may be removed in the future.",
+                    "Use show-text ${track-list} instead.")
+        state.osc_tracklist_warned = true
+    end
     mp.command("show-text ${track-list} " .. (dur and dur * 1000 or ""))
 end)
 
