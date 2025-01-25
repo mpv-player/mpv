@@ -614,7 +614,8 @@ in ``input.conf``, or sent by other scripts.
 
 ``osc-visibility``
     Controls visibility mode ``never`` / ``auto`` (on mouse move) / ``always``
-    and also ``cycle`` to cycle between the modes.
+    and also ``cycle`` to cycle between the modes. If a second argument is
+    passed (any value), then the output on the OSD will be silenced.
 
 ``osc-show``
     Triggers the OSC to show up, just as if user moved mouse.
@@ -632,4 +633,5 @@ to set auto mode (the default) with ``b``::
 
 ``osc-idlescreen``
     Controls the visibility of the mpv logo on idle. Valid arguments are ``yes``,
-    ``no``, and ``cycle`` to toggle between yes and no.
+    ``no``, and ``cycle`` to toggle between yes and no. If a second argument is
+    passed (any value), then the output on the OSD will be silenced.
