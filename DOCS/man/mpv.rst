@@ -676,6 +676,7 @@ Suffix        Meaning
 -set          Set a list of items (using ``,`` as separator)
 -append       Append a single item (escapes for the key, no escapes for the value)
 -add          Append 1 or more items (same syntax as -set)
+-clr          Clear the option (remove all items)
 -del          Delete 1 or more keys if present (same syntax as -set)
 -remove       Delete item by key if present (does not interpret escapes)
 ============= ===============================================
