@@ -100,6 +100,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include "dirent-win.h"
 #else
 #include <dirent.h>
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32
@@ -133,6 +134,7 @@ char ***mp_penviron(void);
 #undef off_t
 #define off_t int64_t
 off_t mp_lseek64(int fd, off_t offset, int whence);
+int mp_ftruncate64(int fd, off_t length);
 void *mp_dlopen(const char *filename, int flag);
 void *mp_dlsym(void *handle, const char *symbol);
 char *mp_dlerror(void);
@@ -197,6 +199,9 @@ void mp_globfree(mp_glob_t *pglob);
 
 #undef lseek
 #define lseek(...) mp_lseek64(__VA_ARGS__)
+
+#undef ftruncate
+#define ftruncate(...) mp_ftruncate64(__VA_ARGS__)
 
 #define RTLD_NOW 0
 #define RTLD_LOCAL 0
