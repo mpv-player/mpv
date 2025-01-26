@@ -1,0 +1,1 @@
+remove `vc1` from `hwdec-codecs`'s default value
