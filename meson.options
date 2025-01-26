@@ -8,6 +8,7 @@ option('fuzzers', type: 'boolean', value: false, description: 'fuzzer binaries')
 # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
 # Building it can be disabled only by defining NDEBUG through CFLAGS.
 option('ta-leak-report', type: 'boolean', value: false, description: 'enable ta leak report by default (development only)')
+option('disable-packet-pool', type: 'boolean', value: false, description: 'disable packet pool (development only)')
 
 # misc features
 option('cdda', type: 'feature', value: 'disabled', description: 'cdda support (libcdio)')

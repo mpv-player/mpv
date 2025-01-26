@@ -19,6 +19,8 @@
 
 #include <libavcodec/packet.h>
 
+#include "config.h"
+
 #include "common/global.h"
 #include "osdep/threads.h"
 #include "packet.h"
@@ -33,6 +35,15 @@ static void uninit(void *p)
     struct demux_packet_pool *pool = p;
     demux_packet_pool_clear(pool);
     mp_mutex_destroy(&pool->lock);
+}
+
+static void free_demux_packets(struct demux_packet *dp)
+{
+    while (dp) {
+        struct demux_packet *next = dp->next;
+        free_demux_packet(dp);
+        dp = next;
+    }
 }
 
 void demux_packet_pool_init(struct mpv_global *global)
@@ -59,11 +70,7 @@ void demux_packet_pool_clear(struct demux_packet_pool *pool)
     struct demux_packet *dp = pool->packets;
     pool->packets = NULL;
     mp_mutex_unlock(&pool->lock);
-    while (dp) {
-        struct demux_packet *next = dp->next;
-        free_demux_packet(dp);
-        dp = next;
-    }
+    free_demux_packets(dp);
 }
 
 void demux_packet_pool_push(struct demux_packet_pool *pool,
@@ -86,7 +93,15 @@ void demux_packet_pool_prepend(struct demux_packet_pool *pool,
     mp_mutex_lock(&pool->lock);
     tail->next = pool->packets;
     pool->packets = head;
+#if HAVE_DISABLE_PACKET_POOL
+    struct demux_packet *dp = pool->packets;
+    pool->packets = NULL;
+#endif
     mp_mutex_unlock(&pool->lock);
+
+#if HAVE_DISABLE_PACKET_POOL
+    free_demux_packets(dp);
+#endif
 }
 
 struct demux_packet *demux_packet_pool_pop(struct demux_packet_pool *pool)
