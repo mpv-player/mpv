@@ -18,6 +18,13 @@ License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 local utils = require "mp.utils"
 local input = require "mp.input"
 
+local options = {
+    history_date_format = "%Y-%m-%d %H:%M:%S",
+    hide_history_duplicates = true,
+}
+
+require "mp.options".read_options(options, nil, function () end)
+
 local function show_warning(message)
     mp.msg.warn(message)
     if mp.get_property_native("vo-configured") then
@@ -349,6 +356,87 @@ mp.add_key_binding(nil, "select-audio-device", function ()
         default_item = default_item,
         submit = function (id)
             mp.set_property("audio-device", devices[id].name)
+        end,
+    })
+end)
+
+local function format_history_entry(entry)
+    local status
+    status, entry.time = pcall(os.date, options.history_date_format, entry.time)
+
+    if not status then
+        mp.msg.warn(entry.time)
+    end
+
+    local item = "(" .. entry.time .. ") "
+
+    if entry.title then
+        return item .. entry.title .. " (" .. entry.path .. ")"
+    end
+
+    if entry.path:find("://") then
+        return item .. entry.path
+    end
+
+    local directory, filename = utils.split_path(entry.path)
+
+    return item .. filename .. " (" .. directory .. ")"
+end
+
+mp.add_key_binding(nil, "select-watch-history", function ()
+    local history_file_path = mp.command_native(
+        {"expand-path", mp.get_property("watch-history-path")})
+    local history_file, error_message = io.open(history_file_path)
+    if not history_file then
+        show_warning(mp.get_property_native("save-watch-history")
+                     and error_message
+                     or "Enable --save-watch-history")
+        return
+    end
+
+    local all_entries = {}
+    local line_num = 1
+    for line in history_file:lines() do
+        local entry = utils.parse_json(line)
+        if entry and entry.path then
+            all_entries[#all_entries + 1] = entry
+        else
+            mp.msg.warn(history_file_path .. ": Parse error at line " .. line_num)
+        end
+        line_num = line_num + 1
+    end
+    history_file:close()
+
+    local entries = {}
+    local items = {}
+    local seen = {}
+
+    for i = #all_entries, 1, -1 do
+        local entry = all_entries[i]
+        if not seen[entry.path] or not options.hide_history_duplicates then
+            seen[entry.path] = true
+            entries[#entries + 1] = entry
+            items[#items + 1] = format_history_entry(entry)
+        end
+    end
+
+    items[#items+1] = "Clear history"
+
+    input.select({
+        prompt = "Select a file:",
+        items = items,
+        submit = function (i)
+            if entries[i] then
+                mp.commandv("loadfile", entries[i].path)
+                return
+            end
+
+            error_message = select(2, os.remove(history_file_path))
+            if error_message then
+                show_error(error_message)
+            else
+                mp.osd_message("History cleared.")
+            end
         end,
     })
 end)

@@ -1152,7 +1152,8 @@ Watch History
 -------------
 
 ``--save-watch-history``
-    Whether to save which files are played.
+    Whether to save which files are played. These can be then selected with the
+    default ``g-h`` key binding.
 
     .. warning::
 
