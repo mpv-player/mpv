@@ -166,9 +166,6 @@ struct vo_wayland_state {
 
     /* Data offer */
     struct wl_data_device_manager *devman;
-    struct vo_wayland_data_offer *pending_offer;
-    struct vo_wayland_data_offer *dnd_offer;
-    struct vo_wayland_data_offer *selection_offer;
     bstr selection_text;
 
     /* Cursor */
