@@ -1,8 +1,10 @@
 CONSOLE
 =======
 
-The console is a REPL for mpv input commands. It is displayed on the video
-window. It also shows log messages. It can be disabled entirely using the
+This script provides the ability to process the user's textual input to other
+scripts through the ``mp.input`` API. It also has a builtin mode of operation to
+complete and run mpv input commands and print mpv's log. It can be displayed on
+both the video window and the terminal. It can be disabled entirely using the
 ``--load-console=no`` option.
 
 Keybindings

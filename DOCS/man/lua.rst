@@ -998,11 +998,7 @@ REPL.
         })
 
 ``input.select(table)``
-    Specify a list of items that are presented to the user for selection. The
-    user can type part of the desired item and/or navigate them with
-    keybindings: ``Down`` and ``Ctrl+n`` go down, ``Up`` and ``Ctrl+p`` go up,
-    ``Page down`` and ``Ctrl+f`` scroll down one page, and ``Page up`` and
-    ``Ctrl+b`` scroll up one page.
+    Specify a list of items that are presented to the user for selection.
 
     The following entries of ``table`` are read:
 
