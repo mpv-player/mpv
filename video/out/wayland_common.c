@@ -192,6 +192,9 @@ struct vo_wayland_seat {
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
     struct wl_data_device *dnd_ddev;
+    struct vo_wayland_data_offer *pending_offer;
+    struct vo_wayland_data_offer *dnd_offer;
+    struct vo_wayland_data_offer *selection_offer;
     struct vo_wayland_text_input *text_input;
     /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_device;
@@ -707,7 +710,7 @@ static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->pending_offer;
+    struct vo_wayland_data_offer *o = s->pending_offer;
     int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
     if (o->offer && score > o->mime_score && wl->opts->drag_and_drop != -2) {
         o->mime_score = score;
@@ -726,7 +729,7 @@ static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, u
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->dnd_offer;
+    struct vo_wayland_data_offer *o = s->dnd_offer;
     if (dnd_action && wl->opts->drag_and_drop != -2) {
         if (wl->opts->drag_and_drop >= 0) {
             o->action = wl->opts->drag_and_drop;
@@ -755,8 +758,7 @@ static void data_device_handle_data_offer(void *data, struct wl_data_device *wl_
                                           struct wl_data_offer *id)
 {
     struct vo_wayland_seat *s = data;
-    struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->pending_offer;
+    struct vo_wayland_data_offer *o = s->pending_offer;
     destroy_offer(o);
 
     o->offer = id;
@@ -770,16 +772,16 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->pending_offer;
+    struct vo_wayland_data_offer *o = s->pending_offer;
     if (o->offer != id) {
         MP_FATAL(wl, "DND offer ID mismatch!\n");
         return;
     }
 
-    assert(!wl->dnd_offer->offer);
-    *wl->dnd_offer = *wl->pending_offer;
-    *wl->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
-    o = wl->dnd_offer;
+    assert(!s->dnd_offer->offer);
+    *s->dnd_offer = *s->pending_offer;
+    *s->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
+    o = s->dnd_offer;
     if (wl->opts->drag_and_drop != -2) {
         wl_data_offer_set_actions(id, WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY |
                                       WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
@@ -794,7 +796,7 @@ static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->dnd_offer;
+    struct vo_wayland_data_offer *o = s->dnd_offer;
 
     if (o->offer) {
         if (o->fd != -1)
@@ -815,8 +817,7 @@ static void data_device_handle_motion(void *data, struct wl_data_device *wl_ddev
                                       uint32_t time, wl_fixed_t x, wl_fixed_t y)
 {
     struct vo_wayland_seat *s = data;
-    struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->dnd_offer;
+    struct vo_wayland_data_offer *o = s->dnd_offer;
     wl_data_offer_accept(o->offer, time, o->mime_type);
 }
 
@@ -824,7 +825,7 @@ static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->dnd_offer;
+    struct vo_wayland_data_offer *o = s->dnd_offer;
 
     int pipefd[2];
 
@@ -847,18 +848,18 @@ static void data_device_handle_selection(void *data, struct wl_data_device *wl_d
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
-    struct vo_wayland_data_offer *o = wl->pending_offer;
+    struct vo_wayland_data_offer *o = s->pending_offer;
     if (o->offer != id) {
         MP_FATAL(wl, "Selection offer ID mismatch!\n");
         return;
     }
 
-    if (wl->selection_offer->offer) {
-        destroy_offer(wl->selection_offer);
+    if (s->selection_offer->offer) {
+        destroy_offer(s->selection_offer);
         MP_VERBOSE(wl, "Received a new selection offer. Releasing the previous offer.\n");
     }
-    *wl->selection_offer = *wl->pending_offer;
-    *wl->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
+    *s->selection_offer = *s->pending_offer;
+    *s->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
     if (!id)
         return;
 
@@ -869,7 +870,7 @@ static void data_device_handle_selection(void *data, struct wl_data_device *wl_d
         return;
     }
 
-    o = wl->selection_offer;
+    o = s->selection_offer;
     // Only receive plain text for now, may expand later.
     if (o->offered_plain_text)
         wl_data_offer_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
@@ -1843,6 +1844,10 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         struct vo_wayland_seat *seat = talloc_zero(wl, struct vo_wayland_seat);
         seat->wl   = wl;
         seat->id   = id;
+        seat->pending_offer = talloc_zero(seat, struct vo_wayland_data_offer);
+        seat->dnd_offer = talloc_zero(seat, struct vo_wayland_data_offer);
+        seat->selection_offer = talloc_zero(seat, struct vo_wayland_data_offer);
+        seat->pending_offer->fd = seat->dnd_offer->fd = seat->selection_offer->fd = -1;
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
         wl_list_insert(&wl->seat_list, &seat->link);
@@ -2548,6 +2553,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
 
+    destroy_offer(seat->pending_offer);
+    destroy_offer(seat->dnd_offer);
+    destroy_offer(seat->selection_offer);
+
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
     return;
@@ -3015,8 +3024,11 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
     switch (request) {
     case VOCTRL_CHECK_EVENTS: {
-        check_fd(wl, wl->dnd_offer, true);
-        check_fd(wl, wl->selection_offer, false);
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            check_fd(wl, seat->dnd_offer, true);
+            check_fd(wl, seat->selection_offer, false);
+        }
         *events |= wl->pending_vo_events;
         if (*events & VO_EVENT_RESIZE) {
             *events |= VO_EVENT_EXPOSE;
@@ -3235,13 +3247,9 @@ bool vo_wayland_init(struct vo *vo)
         .scaling = WAYLAND_SCALE_FACTOR,
         .wakeup_pipe = {-1, -1},
         .display_fd = -1,
-        .pending_offer = talloc_zero(wl, struct vo_wayland_data_offer),
-        .dnd_offer = talloc_zero(wl, struct vo_wayland_data_offer),
-        .selection_offer = talloc_zero(wl, struct vo_wayland_data_offer),
         .cursor_visible = true,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
-    wl->pending_offer->fd = wl->dnd_offer->fd = wl->selection_offer->fd = -1;
     wl->opts = wl->opts_cache->opts;
 
     wl_list_init(&wl->output_list);
@@ -3478,10 +3486,6 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     if (!wl)
         return;
-
-    destroy_offer(wl->pending_offer);
-    destroy_offer(wl->dnd_offer);
-    destroy_offer(wl->selection_offer);
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
