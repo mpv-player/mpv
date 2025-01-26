@@ -330,14 +330,15 @@ g-d
 
 g-w
     Select a file from watch later config files (see `RESUMING PLAYBACK`_) to
-    resume playing. Requires ``--write-filename-in-watch-later-config``. This
-    doesn't work with ``--ignore-path-in-watch-later-config``.
+    resume playing. Requires ``--write-filename-in-watch-later-config``.
 
 g-b
     Select a defined input binding.
 
 g-r
     Show the values of all properties.
+
+See `SELECT`_ for more information.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
@@ -1502,6 +1503,8 @@ works like in older mpv releases:
 .. include:: stats.rst
 
 .. include:: console.rst
+
+.. include:: select.rst
 
 .. include:: lua.rst
 
