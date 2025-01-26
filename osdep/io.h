@@ -183,6 +183,7 @@ int mp_glob(const char *restrict pattern, int flags,
 void mp_globfree(mp_glob_t *pglob);
 
 #define fwrite(...) mp_fwrite(__VA_ARGS__)
+#define ftell(...) _ftelli64(__VA_ARGS__)
 #define printf(...) mp_printf(__VA_ARGS__)
 #define fprintf(...) mp_fprintf(__VA_ARGS__)
 #define open(...) mp_open(__VA_ARGS__)
