@@ -353,6 +353,7 @@ if not features['build-date']
 endif
 
 features += {'ta-leak-report': get_option('ta-leak-report')}
+features += {'disable-packet-pool': get_option('disable-packet-pool')}
 
 libdl = dependency('dl', required: false)
 features += {'libdl': libdl.found()}
