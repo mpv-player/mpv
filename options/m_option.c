@@ -1718,6 +1718,10 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         append = true;
     } else if (bstr_endswith0(name, "-append")) {
         append = full_value = true;
+    } else if (bstr_endswith0(name, "-clr")) {
+        if (dst)
+            free_str_list(dst);
+        return 0;
     } else if (op == OP_DEL || op == OP_REMOVE) {
         int n = 0;
         char **res = separate_input_param(opt, param, &n, op);
@@ -1861,6 +1865,7 @@ const m_option_type_t m_option_type_keyvalue_list = {
     .actions = (const struct m_option_action[]){
         {"add"},
         {"append"},
+        {"clr",         M_OPT_TYPE_OPTIONAL_PARAM},
         {"del"},
         {"set"},
         {"remove"},
