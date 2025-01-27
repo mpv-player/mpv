@@ -1944,6 +1944,13 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             goto error;
         }
 
+        // Limit buffer size to 128 MiB to avoid excessive memory allocation on malformed files.
+        if (track->sub_packet_h * track->audiopk_size > (128 << 20)) {
+            MP_WARN(demuxer, "RealAudio packet size too big (%" PRIu32 " MiB) - skipping track\n",
+                    track->sub_packet_h * track->audiopk_size);
+            goto error;
+        }
+
         track->audio_buf =
             talloc_array_size(track, track->sub_packet_h, track->audiopk_size);
         track->audio_timestamp =
