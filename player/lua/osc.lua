@@ -71,6 +71,10 @@ local user_opts = {
 
     -- luacheck: push ignore
     -- luacheck: max line length
+    menu_mbtn_left_command = "script-binding select/menu; script-message-to osc osc-hide",
+    menu_mbtn_mid_command = "",
+    menu_mbtn_right_command = "",
+
     playlist_prev_mbtn_left_command = "playlist-prev",
     playlist_prev_mbtn_mid_command = "show-text ${playlist} 3000",
     playlist_prev_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
@@ -134,6 +138,7 @@ local icon_font = "mpv-osd-symbols"
 -- for i = 1, #glyph do output = output .. '\\' .. string.byte(glyph, i) end
 -- print(output)
 local icons = {
+    menu = "\238\132\130",           -- E102
     prev = "\238\132\144",           -- E110
     next = "\238\132\129",           -- E101
     pause = "\238\128\130",          -- E002
@@ -1603,9 +1608,14 @@ local function bar_layout(direction, slim)
     lo.alpha[1] = user_opts.boxalpha
 
 
+    -- Menu
+    geo = { x = osc_geo.x + padX + 4, y = line1, an = 4, w = 18, h = 18 - padY }
+    lo = add_layout("menu")
+    lo.geometry = geo
+    lo.style = osc_styles.topButtonsBar
+
     -- Playlist prev/next
-    geo = { x = osc_geo.x + padX, y = line1,
-            an = 4, w = 18, h = 18 - padY }
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("playlist_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
@@ -1847,6 +1857,11 @@ local function osc_init()
         return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
     bind_mouse_buttons("title")
+
+    -- menu
+    ne = new_element("menu", "button")
+    ne.content = icons.menu
+    bind_mouse_buttons("menu")
 
     -- playlist buttons
 
