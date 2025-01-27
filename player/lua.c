@@ -49,6 +49,9 @@
 #include "client.h"
 #include "libmpv/client.h"
 
+#include "fzy/bonus.h"
+#include "fzy/match.h"
+
 // List of builtin modules and their contents as strings.
 // All these are generated from player/lua/*.lua
 static const char * const builtin_lua_scripts[][2] = {
@@ -57,9 +60,6 @@ static const char * const builtin_lua_scripts[][2] = {
     },
     {"mp.assdraw",
 #   include "player/lua/assdraw.lua.inc"
-    },
-    {"mp.fzy",
-#   include "player/lua/fzy.lua.inc"
     },
     {"mp.input",
 #   include "player/lua/input.lua.inc"
@@ -114,6 +114,7 @@ static int mp_cpcall (lua_State *L, lua_CFunction func, void *ud)
     lua_pushlightuserdata(L, ud);
     return lua_pcall(L, 1, 0, 0);
 }
+#define lua_objlen(L,i) lua_rawlen(L, (i))
 #endif
 
 // Ensure that the given argument exists, even if it's nil. Can be used to
@@ -1208,6 +1209,78 @@ static int script_get_env_list(lua_State *L)
     return 1;
 }
 
+// The next 2 functions are taken from https://github.com/swarn/fzy-lua/blob/main/src/fzy_native.c
+// Given an array of `count` 0-based indices, push a table on to `L` with
+// equivalent 1-based indices.
+static void push_indices(lua_State * L, index_t const * const indices, int count)
+{
+    lua_createtable(L, count, 0);
+    for (int i = 0; i < count; i++)
+    {
+        // Convert from 0-indexing to 1-indexing.
+        lua_pushinteger(L, indices[i] + 1);
+        lua_rawseti(L, -2, i + 1);
+    }
+}
+
+static int script_filter(lua_State *L)
+{
+    char const * const needle = luaL_checkstring(L, 1);
+    int const needle_len = (int)strlen(needle);
+
+    int const haystacks_idx = 2;
+    luaL_checktype(L, haystacks_idx, LUA_TTABLE);
+    int const haystacks_len = (int)lua_objlen(L, haystacks_idx);
+
+    bool case_sensitive = false;
+    if (lua_gettop(L) > 2)
+        case_sensitive = lua_toboolean(L, 3);
+
+    // Push the result array onto the lua stack.
+    lua_newtable(L);
+    int const result_idx = lua_gettop(L);
+    int result_len = 0;
+
+    // Call `positions` on each haystack string.
+    for (int i = 1; i <= haystacks_len; i++)
+    {
+        lua_rawgeti(L, haystacks_idx, i);
+        char const * haystack = luaL_checkstring(L, -1);
+
+        if (has_match(needle, haystack, case_sensitive))
+        {
+            result_len++;
+
+            // Make the {idx, positions, score} table.
+            lua_createtable(L, 3, 0);
+
+            // Set the idx
+            lua_pushinteger(L, i);
+            lua_rawseti(L, -2, 1);
+
+            // Generate the positions and the score
+            index_t result[MATCH_MAX_LEN];
+            score_t score = match_positions(needle, haystack, result, case_sensitive);
+
+            // Set the positions
+            push_indices(L, result, needle_len);
+            lua_rawseti(L, -2, 2);
+
+            // Set the score
+            lua_pushnumber(L, score);
+            lua_rawseti(L, -2, 3);
+
+            // Add this table to the result
+            lua_rawseti(L, result_idx, result_len);
+        }
+
+        // Pop the current haystack string off the lua stack.
+        lua_pop(L, 1);
+    }
+
+    return 1;
+}
+
 #define FN_ENTRY(name) {#name, script_ ## name, 0}
 #define AF_ENTRY(name) {#name, 0, script_ ## name}
 struct fn_entry {
@@ -1257,6 +1330,11 @@ static const struct fn_entry utils_fns[] = {
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
     FN_ENTRY(get_env_list),
+    {0}
+};
+
+static const struct fn_entry fzy_fns[] = {
+    FN_ENTRY(filter),
     {0}
 };
 
@@ -1338,6 +1416,7 @@ static void add_functions(struct script_ctx *ctx)
 
     register_package_fns(L, "mp", main_fns);
     register_package_fns(L, "mp.utils", utils_fns);
+    register_package_fns(L, "mp.fzy", fzy_fns);
 }
 
 const struct mp_scripting mp_scripting_lua = {
