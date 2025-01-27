@@ -20,13 +20,18 @@ The Interface
 
 ::
 
-    +---------+----------+------------------------------------------+----------+
-    | pl prev | pl next  |  title                                   |    cache |
-    +------+--+---+------+---------+-----------+------+-------+-----+-----+----+
+    +------+---------+---------+-----------------------------------------------+
+    | menu | pl prev | pl next | title                                   cache |
+    +------+------+------+---------+-----------+------+-------+-----+-----+----+
     | play | skip | skip | time    |  seekbar  | time | audio | sub | vol | fs |
     |      | back | frwd | elapsed |           | left |       |     |     |    |
     +------+------+------+---------+-----------+------+-------+-----+-----+----+
 
+
+menu
+    =============   ================================================
+    left-click      open the menu
+    =============   ================================================
 
 pl prev
     =============   ================================================
@@ -507,6 +512,12 @@ Configurable Options
 
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
+
+``menu_mbtn_left_command=script-binding select/menu; script-message-to osc osc-hide``
+
+``menu_mbtn_mid_command=``
+
+``menu_mbtn_right_command=``
 
 ``playlist_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000``
 
