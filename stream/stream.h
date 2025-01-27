@@ -67,6 +67,9 @@
 #define STREAM_ERROR 0
 #define STREAM_OK    1
 
+// EOF value returned by stream_read_char()
+#define STREAM_EOF (-256)
+
 enum stream_ctrl {
     // Certain network protocols
     STREAM_CTRL_AVSEEK,
