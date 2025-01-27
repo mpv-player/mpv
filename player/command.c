@@ -7744,6 +7744,19 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_DEMUXER)
         mpctx->demuxer_changed = true;
 
+    if (flags & UPDATE_AD) {
+        uninit_audio_chain(mpctx);
+        reinit_audio_chain(mpctx);
+    }
+
+    if (flags & UPDATE_VD) {
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        uninit_video_chain(mpctx);
+        reinit_video_chain(mpctx);
+        if (track)
+            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
+    }
+
     if (opt_ptr == &opts->vo->android_surface_size) {
         if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
