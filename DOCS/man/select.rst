@@ -110,14 +110,17 @@ Available script bindings are:
 
         g-w script-binding select/select-watch-later; no-osd set autocreate-playlist filter
 
-``select/select-binding``
+``select-binding``
     List the defined input bindings. You can also select one to run the
     associated command.
 
-``select/show-properties``
+``show-properties``
     List the names and values of all properties. You can also select one to
     print its value on the OSD, which is useful for long values that get
     clipped.
+
+``menu``
+    Show a menu with miscellaneous entries.
 
 Configuration
 -------------
