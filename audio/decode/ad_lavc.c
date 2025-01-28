@@ -72,6 +72,7 @@ const struct m_sub_options ad_lavc_conf = {
         {"o", OPT_KEYVALUELIST(avopts)},
         {0}
     },
+    .change_flags = UPDATE_AD,
     .size = sizeof(struct ad_lavc_params),
     .defaults = &(const struct ad_lavc_params){
         .ac3drc = 0,
