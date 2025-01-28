@@ -7747,12 +7747,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_DEMUXER)
         mpctx->demuxer_changed = true;
 
-    if (flags & UPDATE_AD) {
+    if (flags & UPDATE_AD && mpctx->ao_chain) {
         uninit_audio_chain(mpctx);
         reinit_audio_chain(mpctx);
     }
 
-    if (flags & UPDATE_VD) {
+    if (flags & UPDATE_VD && mpctx->vo_chain) {
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         uninit_video_chain(mpctx);
         reinit_video_chain(mpctx);
