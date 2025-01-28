@@ -2072,9 +2072,9 @@ Audio
     explicitly selected or rejected by the option.
 
     ``-`` at the end of the list suppresses fallback on other available
-    decoders not on the ``--ad`` list. ``+`` in front of an entry forces the
-    decoder. Both of these should not normally be used, because they break
-    normal decoder auto-selection! Both of these methods are deprecated.
+    decoders not on the ``--ad`` list. This should not normally be used,
+    because they break normal decoder auto-selection! The ``-`` mode is
+    deprecated.
 
     .. admonition:: Examples
 
