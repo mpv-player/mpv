@@ -111,7 +111,7 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-lavc-skipidct", OPT_DISCARD(skip_idct)},
         {"vd-lavc-skipframe", OPT_DISCARD(skip_frame)},
         {"vd-lavc-framedrop", OPT_DISCARD(framedrop)},
-        {"vd-lavc-threads", OPT_INT(threads), M_RANGE(0, DBL_MAX)},
+        {"vd-lavc-threads", OPT_INT(threads), M_RANGE(0, DBL_MAX), .flags = UPDATE_VD},
         {"vd-lavc-bitexact", OPT_BOOL(bitexact)},
         {"vd-lavc-assume-old-x264", OPT_BOOL(old_x264)},
         {"vd-lavc-check-hw-profile", OPT_BOOL(check_hw_profile)},
