@@ -114,7 +114,6 @@ static void close_shm(struct priv *p)
         p->buffer = NULL;
     }
     if (p->shm_fd != -1) {
-        shm_unlink(p->shm_path);
         close(p->shm_fd);
         p->shm_fd = -1;
     }
@@ -130,6 +129,10 @@ static void free_bufs(struct vo* vo)
 
     if (p->opts.use_shm) {
         close_shm(p);
+#if HAVE_POSIX_SHM
+        if (p->shm_path)
+            shm_unlink(p->shm_path);
+#endif
     } else {
         talloc_free(p->buffer);
     }
@@ -282,9 +285,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!p->opts.use_shm)
         av_base64_encode(p->output, p->output_size, p->buffer, p->buffer_size);
 
-    talloc_free(mpi);
-
 done:
+    talloc_free(mpi);
     return VO_TRUE;
 }
 
