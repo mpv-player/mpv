@@ -45,6 +45,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     int fd = memfd_create("fuzz_mpv_load", MFD_CLOEXEC | MFD_ALLOW_SEALING);
     if (fd == -1)
         exit(1);
+    if (dup3(fd, 42, O_CLOEXEC) != 42 || close(fd))
+        exit(1);
+    fd = 42;
     ssize_t written = 0;
     while (written < size) {
         ssize_t result = write(fd, data + written, size - written);
@@ -85,7 +88,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 #endif
 
     mpv_terminate_destroy(ctx);
-    close(fd);
+
+    if (close(fd))
+        exit(1);
 
     return 0;
 }
