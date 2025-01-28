@@ -1,0 +1,1 @@
+add `metadata` sub-property for `track-list`

@@ -2004,6 +2004,13 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
                                        : (struct replaygain_data){0};
 
+    struct mp_tags *tags = track->stream ? track->stream->tags : &(struct mp_tags){0};
+    char **tag_list = talloc_zero_array(NULL, char *, tags->num_keys * 2 + 1);
+    for (int i = 0; i < tags->num_keys; i++) {
+        tag_list[2 * i] = talloc_strdup(tag_list, tags->keys[i]);
+        tag_list[2 * i + 1] = talloc_strdup(tag_list, tags->values[i]);
+    }
+
     double par = 0.0;
     if (p.par_h)
         par = p.par_w / (double) p.par_h;
@@ -2087,10 +2094,37 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !p.dovi},
         {"dolby-vision-level", SUB_PROP_INT(p.dv_level),
                         .unavailable = !p.dovi},
+        {"metadata", SUB_PROP_KEYVALUE_LIST(tag_list),
+                        .unavailable = !tags->num_keys},
         {0}
     };
 
-    return m_property_read_sub(props, action, arg);
+    int ret = 0;
+    switch (action) {
+    case M_PROPERTY_KEY_ACTION: ;
+        struct m_property_action_arg *ka = arg;
+        if (!strncmp(ka->key, "metadata/", 9)) {
+            bstr key = {0};
+            char *rem = "";
+            m_property_split_path(ka->key, &key, &rem);
+            ka->key = !rem[0] ? "metadata" : rem;
+            if (rem[0]) {
+                if (!tags || tags->num_keys == 0) {
+                    ret = M_PROPERTY_UNAVAILABLE;
+                } else {
+                    ret = tag_property(action, (void *)ka, tags);
+                }
+                goto done;
+            }
+        }
+        MP_FALLTHROUGH;
+    default:
+        ret = m_property_read_sub(props, action, arg);
+    }
+
+done:
+    talloc_free(tag_list);
+    return ret;
 }
 
 static const char *track_type_name(struct track *t)
