@@ -114,6 +114,7 @@ static void close_shm(struct priv *p)
         p->buffer = NULL;
     }
     if (p->shm_fd != -1) {
+        shm_unlink(p->shm_path);
         close(p->shm_fd);
         p->shm_fd = -1;
     }
