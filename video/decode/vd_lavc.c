@@ -81,13 +81,8 @@ struct vd_lavc_params {
     bool old_x264;
     bool apply_cropping;
     bool check_hw_profile;
-    int software_fallback;
     char **avopts;
     int dr;
-    char **hwdec_api;
-    char *hwdec_codecs;
-    int hwdec_image_format;
-    int hwdec_extra_frames;
 };
 
 static const struct m_opt_choice_alternatives discard_names[] = {
@@ -111,34 +106,61 @@ const struct m_sub_options vd_lavc_conf = {
         {"vd-lavc-skipidct", OPT_DISCARD(skip_idct)},
         {"vd-lavc-skipframe", OPT_DISCARD(skip_frame)},
         {"vd-lavc-framedrop", OPT_DISCARD(framedrop)},
-        {"vd-lavc-threads", OPT_INT(threads), M_RANGE(0, DBL_MAX), .flags = UPDATE_VD},
+        {"vd-lavc-threads", OPT_INT(threads), M_RANGE(0, DBL_MAX)},
         {"vd-lavc-bitexact", OPT_BOOL(bitexact)},
         {"vd-lavc-assume-old-x264", OPT_BOOL(old_x264)},
         {"vd-lavc-check-hw-profile", OPT_BOOL(check_hw_profile)},
-        {"vd-lavc-software-fallback", OPT_CHOICE(software_fallback,
-            {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX)},
         {"vd-lavc-o", OPT_KEYVALUELIST(avopts)},
         {"vd-lavc-dr", OPT_CHOICE(dr,
             {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"vd-apply-cropping", OPT_BOOL(apply_cropping)},
-        {"hwdec", OPT_STRINGLIST(hwdec_api),
-            .help = hwdec_opt_help,
-            .flags = M_OPT_OPTIONAL_PARAM | M_OPT_ALLOW_NO | UPDATE_HWDEC},
-        {"hwdec-codecs", OPT_STRING(hwdec_codecs)},
-        {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format)},
-        {"hwdec-extra-frames", OPT_INT(hwdec_extra_frames), M_RANGE(0, 256)},
         {0}
     },
+    .change_flags = UPDATE_VD,
     .size = sizeof(struct vd_lavc_params),
     .defaults = &(const struct vd_lavc_params){
         .film_grain = -1 /*auto*/,
         .check_hw_profile = true,
-        .software_fallback = 3,
         .skip_loop_filter = AVDISCARD_DEFAULT,
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
         .framedrop = AVDISCARD_NONREF,
         .dr = -1,
+        .apply_cropping = true,
+    },
+};
+
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct hwdec_opts
+
+struct hwdec_opts {
+    int software_fallback;
+    char **hwdec_api;
+    char *hwdec_codecs;
+    int hwdec_image_format;
+    int hwdec_extra_frames;
+};
+
+const struct m_sub_options hwdec_conf = {
+    .opts = (const m_option_t[]){
+        {"hwdec", OPT_STRINGLIST(hwdec_api),
+            .help = hwdec_opt_help,
+            .flags = M_OPT_OPTIONAL_PARAM | M_OPT_ALLOW_NO | UPDATE_HWDEC},
+        {"hwdec-codecs", OPT_STRING(hwdec_codecs),
+            .flags = UPDATE_HWDEC},
+        {"hwdec-extra-frames", OPT_INT(hwdec_extra_frames), M_RANGE(0, 256),
+            .flags = UPDATE_VD},
+        {"hwdec-image-format", OPT_IMAGEFORMAT(hwdec_image_format),
+            .flags = UPDATE_VO},
+        {"hwdec-software-fallback", OPT_CHOICE(software_fallback,
+            {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX),
+            .flags = UPDATE_HWDEC},
+        {"vd-lavc-software-fallback", OPT_REPLACED("hwdec-software-fallback")},
+        {0}
+    },
+    .size = sizeof(struct hwdec_opts),
+    .defaults = &(const struct hwdec_opts){
+        .software_fallback = 3,
         .hwdec_api = (char *[]){"no", NULL,},
         .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores",
         // Maximum number of surfaces the player wants to buffer. This number
@@ -146,7 +168,6 @@ const struct m_sub_options vd_lavc_conf = {
         // for example, if vo_gpu increases the number of reference surfaces for
         // interpolation, this value has to be increased too.
         .hwdec_extra_frames = 6,
-        .apply_cropping = true,
     },
 };
 
@@ -170,6 +191,8 @@ typedef struct lavc_ctx {
     struct mp_log *log;
     struct m_config_cache *opts_cache;
     struct vd_lavc_params *opts;
+    struct m_config_cache *hwdec_opts_cache;
+    struct hwdec_opts *hwdec_opts;
     struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *pic;
@@ -418,7 +441,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
 static bool hwdec_codec_allowed(struct mp_filter *vd, const char *codec)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    bstr s = bstr0(ctx->opts->hwdec_codecs);
+    bstr s = bstr0(ctx->hwdec_opts->hwdec_codecs);
     while (s.len) {
         bstr item;
         bstr_split_tok(s, ",", &item, &s);
@@ -473,13 +496,13 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     const char *codec = ctx->codec->codec;
 
-    m_config_cache_update(ctx->opts_cache);
+    m_config_cache_update(ctx->hwdec_opts_cache);
 
     struct hwdec_info *hwdecs = NULL;
     int num_hwdecs = 0;
     add_all_hwdec_methods(&hwdecs, &num_hwdecs);
 
-    char **hwdec_api = ctx->opts->hwdec_api;
+    char **hwdec_api = ctx->hwdec_opts->hwdec_api;
     for (int i = 0; hwdec_api && hwdec_api[i]; i++) {
         bstr opt = bstr0(hwdec_api[i]);
 
@@ -597,7 +620,7 @@ static void select_and_set_hwdec(struct mp_filter *vd)
     } else {
         // If software fallback is disabled and we get here, all hwdec must
         // have failed. Tell the ctx to always force an eof.
-        if (ctx->opts->software_fallback == INT_MAX) {
+        if (ctx->hwdec_opts->software_fallback == INT_MAX) {
             MP_WARN(ctx, "Software decoding fallback is disabled.\n");
             ctx->force_eof = true;
         } else {
@@ -905,13 +928,13 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
 
     AVHWFramesContext *new_fctx = (void *)new_frames_ctx->data;
 
-    if (ctx->opts->hwdec_image_format)
-        new_fctx->sw_format = imgfmt2pixfmt(ctx->opts->hwdec_image_format);
+    if (ctx->hwdec_opts->hwdec_image_format)
+        new_fctx->sw_format = imgfmt2pixfmt(ctx->hwdec_opts->hwdec_image_format);
 
     // 1 surface is already included by libavcodec. The field is 0 if the
     // hwaccel supports dynamic surface allocation.
     if (new_fctx->initial_pool_size)
-        new_fctx->initial_pool_size += ctx->opts->hwdec_extra_frames - 1;
+        new_fctx->initial_pool_size += ctx->hwdec_opts->hwdec_extra_frames - 1;
 
     const struct hwcontext_fns *fns =
         hwdec_get_hwcontext_fns(new_fctx->device_ctx->type);
@@ -1112,14 +1135,14 @@ static void prepare_decoding(struct mp_filter *vd)
 static void handle_err(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct vd_lavc_params *opts = ctx->opts;
+    struct hwdec_opts *hwdec_opts = ctx->hwdec_opts;
 
     MP_WARN(vd, "Error while decoding frame%s!\n",
             ctx->use_hwdec ? " (hardware decoding)" : "");
 
     if (ctx->use_hwdec) {
         ctx->hwdec_fail_count += 1;
-        if (ctx->hwdec_fail_count >= opts->software_fallback)
+        if (ctx->hwdec_fail_count >= hwdec_opts->software_fallback)
             ctx->hwdec_failed = true;
     }
 }
@@ -1150,7 +1173,7 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
         return ret;
 
     if (ctx->hw_probing && ctx->num_sent_packets < 32 &&
-        ctx->opts->software_fallback <= 32)
+        ctx->hwdec_opts->software_fallback <= 32)
     {
         pkt = pkt ? demux_copy_packet(pkt) : NULL;
         MP_TARRAY_APPEND(ctx, ctx->sent_packets, ctx->num_sent_packets, pkt);
@@ -1406,6 +1429,8 @@ static struct mp_decoder *create(struct mp_filter *parent,
     ctx->log = vd->log;
     ctx->opts_cache = m_config_cache_alloc(ctx, vd->global, &vd_lavc_conf);
     ctx->opts = ctx->opts_cache->opts;
+    ctx->hwdec_opts_cache = m_config_cache_alloc(ctx, vd->global, &hwdec_conf);
+    ctx->hwdec_opts = ctx->hwdec_opts_cache->opts;
     ctx->codec = codec;
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_swpool = mp_image_pool_new(ctx);

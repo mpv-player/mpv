@@ -1826,14 +1826,7 @@ Video
         ``mpv --hwdec=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
-``--vd-lavc-check-hw-profile=<yes|no>``
-    Check hardware decoder profile (default: yes). If ``no`` is set, the
-    highest profile of the hardware decoder is unconditionally selected, and
-    decoding is forced even if the profile of the video is higher than that.
-    The result is most likely broken decoding, but may also help if the
-    detected or reported profiles are somehow incorrect.
-
-``--vd-lavc-software-fallback=<yes|no|N>``
+``--hwdec-software-fallback=<yes|no|N>``
     Fallback to software decoding if the hardware-accelerated decoder fails
     (default: 3). If this is a number, then fallback will be triggered if
     N frames fail to decode in a row. 1 is equivalent to ``yes``.
@@ -1842,6 +1835,13 @@ Video
     a fallback happens, parts of the file will be skipped, approximately by to
     the number of packets that could not be decoded. Values below an unspecified
     count will not have this problem, because mpv retains the packets.
+
+``--vd-lavc-check-hw-profile=<yes|no>``
+    Check hardware decoder profile (default: yes). If ``no`` is set, the
+    highest profile of the hardware decoder is unconditionally selected, and
+    decoding is forced even if the profile of the video is higher than that.
+    The result is most likely broken decoding, but may also help if the
+    detected or reported profiles are somehow incorrect.
 
 ``--vd-lavc-film-grain=<auto|cpu|gpu>``
     Enables film grain application on the GPU. If video decoding is done on
