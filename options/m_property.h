@@ -220,6 +220,8 @@ struct m_sub_property {
     .type = {.type = CONF_TYPE_BOOL}, .value = {.bool_ = (f)}
 #define SUB_PROP_PTS(f) \
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
+#define SUB_PROP_KEYVALUE_LIST(l) \
+    .type = {.type = &m_option_type_keyvalue_list}, .value = {.keyvalue_list = (l)}
 
 int m_property_read_sub_validate(void *ctx, struct m_property *prop,
                                  int action, void *arg);
