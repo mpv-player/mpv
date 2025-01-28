@@ -185,8 +185,6 @@ void mp_destroy(struct MPContext *mpctx)
 
     mp_clients_destroy(mpctx);
 
-    osd_free(mpctx->osd);
-
 #if HAVE_COCOA
     cocoa_set_input_context(NULL);
 #endif
@@ -202,6 +200,10 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
     mp_msg_uninit(mpctx->global);
+
+    osd_free(mpctx->osd);
+    mpctx->osd = NULL;
+
     assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
     mp_mutex_destroy(&mpctx->abort_lock);
