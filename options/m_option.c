@@ -1417,7 +1417,7 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
         str = bstr_cut(str, 1);
         n++;
     }
-    if (n == 0)
+    if (n == 0 && op != OP_NONE)
         return NULL;
 
     char **list = talloc_array(NULL, char *, n + 2);
