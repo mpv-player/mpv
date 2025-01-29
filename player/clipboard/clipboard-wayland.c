@@ -381,6 +381,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
     priv->log = mp_log_new(priv, cl->log, "wayland");
     priv->selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
     priv->primary_selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
+    priv->selection_offer->fd = priv->primary_selection_offer->fd = -1;
     wl_list_init(&priv->seat_list);
     mp_mutex_init(&priv->lock);
 
