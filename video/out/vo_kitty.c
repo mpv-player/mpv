@@ -48,7 +48,7 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
-static inline void write_str(const char *s)
+static inline void write_bstr(bstr bs)
 {
     // On POSIX platforms, write() is the fastest method. It also is the only
     // one that allows atomic writes so mpv’s output will not be interrupted
@@ -57,25 +57,31 @@ static inline void write_str(const char *s)
     // exceeding PIPE_BUF, but at least Linux does seem to implement it that
     // way.
 #if HAVE_POSIX
-    int remain = strlen(s);
+    size_t remain = bs.len;
+    unsigned char *pos = bs.start;
     while (remain > 0) {
-        ssize_t written = write(STDOUT_FILENO, s, remain);
+        ssize_t written = write(STDOUT_FILENO, pos, remain);
         if (written < 0)
             return;
         remain -= written;
-        s += written;
+        pos += written;
     }
 #else
-    printf("%s", s);
+    fwrite(bs.start, 1, bs.len, stdout);
     fflush(stdout);
 #endif
+}
+
+static inline void write_str(unsigned char* s)
+{
+    write_bstr(bstr0(s));
 }
 
 #define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
 #define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s\033\\"
 #define KITTY_ESC_CONTINUE   "\033_Gm=%d;"
-#define KITTY_ESC_END        "\033\\"
-#define KITTY_ESC_DELETE_ALL "\033_Ga=d;\033\\"
+static const bstr KITTY_ESC_END = bstr0_lit("\033\\");
+static const bstr KITTY_ESC_DELETE_ALL = bstr0_lit("\033_Ga=d;\033\\");
 
 struct vo_kitty_opts {
     int width, height, top, left, rows, cols;
@@ -91,6 +97,7 @@ struct priv {
     char    *shm_path, *shm_path_b64;
     int     buffer_size, output_size;
     int     shm_fd;
+    bstr    cmd;
 
     int left, top, width, height, cols, rows;
 
@@ -126,6 +133,7 @@ static void free_bufs(struct vo* vo)
 
     talloc_free(p->frame);
     talloc_free(p->output);
+    talloc_free(p->cmd.start);
 
     if (p->opts.use_shm) {
         close_shm(p);
@@ -177,7 +185,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct priv *p = vo->priv;
 
     vo->want_redraw = true;
-    write_str(KITTY_ESC_DELETE_ALL);
+    write_bstr(KITTY_ESC_DELETE_ALL);
     if (p->opts.config_clear)
         write_str(TERM_ESC_CLEAR_SCREEN);
 
@@ -292,36 +300,40 @@ done:
 
 static void flip_page(struct vo *vo)
 {
-    struct priv* p = vo->priv;
-
-    if (p->buffer == NULL)
+    struct priv *p = vo->priv;
+    if (!p->buffer)
         return;
 
-    char *cmd = talloc_asprintf(NULL, TERM_ESC_GOTO_YX, p->top, p->left);
+    p->cmd.len = 0;
+
+    // Start with ESC to position the cursor
+    bstr_xappend_asprintf(NULL, &p->cmd, TERM_ESC_GOTO_YX, p->top, p->left);
 
     if (p->opts.use_shm) {
-        cmd = talloc_asprintf_append(cmd, KITTY_ESC_IMG_SHM, p->width, p->height, p->shm_path_b64);
+        bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG_SHM,
+                              p->width, p->height, p->shm_path_b64);
     } else {
-        if (p->output == NULL) {
-            talloc_free(cmd);
+        if (!p->output) {
             return;
         }
 
-        cmd = talloc_asprintf_append(cmd, KITTY_ESC_IMG, p->width, p->height);
-        for (int offset = 0, noffset;; offset += noffset) {
-            if (offset)
-                cmd = talloc_asprintf_append(cmd, KITTY_ESC_CONTINUE, offset < p->output_size);
-            noffset = MPMIN(4096, p->output_size - offset);
-            cmd = talloc_strndup_append(cmd, p->output + offset, noffset);
-            cmd = talloc_strdup_append(cmd, KITTY_ESC_END);
+        bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG, p->width, p->height);
 
-            if (offset >= p->output_size)
-                break;
+        for (int offset = 0; offset < p->output_size; ) {
+            int chunk = MPMIN(4096, p->output_size - offset);
+
+            if (offset > 0)
+                bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_CONTINUE,
+                                      offset + chunk < p->output_size);
+
+            // Append at max chunk bytes
+            bstr_xappend(NULL, &p->cmd, (bstr){p->output + offset, chunk});
+            bstr_xappend(NULL, &p->cmd, KITTY_ESC_END);
+            offset += chunk;
         }
     }
 
-    write_str(cmd);
-    talloc_free(cmd);
+    write_bstr(p->cmd);
 
 #if HAVE_POSIX
     if (p->opts.use_shm)
