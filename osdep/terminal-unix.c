@@ -549,9 +549,10 @@ void terminal_uninit(void)
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
         mp_thread_join(input_thread);
-        close_sig_pipes();
-        input_ctx = NULL;
     }
+
+    close_sig_pipes();
+    input_ctx = NULL;
 
     do_deactivate_getch2();
     close_tty();
