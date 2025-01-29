@@ -391,9 +391,9 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
         bstr_xappend_asprintf(ctx, &dst, " %dch", s->codec->channels.num);
     if (s && s->codec->samplerate)
         bstr_xappend_asprintf(ctx, &dst, " %d Hz", s->codec->samplerate);
-    if (s && s->codec->bitrate) {
+    if (s && s->codec->bitrate > 0 && s->codec->bitrate < INT_MAX - 500) {
         bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->codec->bitrate + 500) / 1000);
-    } else if (s && s->hls_bitrate) {
+    } else if (s && s->hls_bitrate > 0 && s->hls_bitrate < INT_MAX - 500) {
         bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->hls_bitrate + 500) / 1000);
     }
     bstr_xappend0(ctx, &dst, ")");
