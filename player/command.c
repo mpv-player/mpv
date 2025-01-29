@@ -1934,8 +1934,8 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
     return direction > 0 ? next : prev;
 }
 
-static int property_switch_track(void *ctx, struct m_property *prop,
-                                 int action, void *arg)
+static int mp_property_switch_track(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
     const int *def = prop->priv;
@@ -2115,8 +2115,8 @@ static char *append_track_info(char *res, struct track *track)
     return res;
 }
 
-static int property_list_tracks(void *ctx, struct m_property *prop,
-                                int action, void *arg)
+static int mp_property_list_tracks(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_PRINT) {
@@ -2196,8 +2196,8 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                                 get_track_entry, mpctx);
 }
 
-static int property_current_tracks(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
+static int mp_property_current_tracks(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
 
@@ -4275,8 +4275,8 @@ static const struct m_property mp_properties_base[] = {
     {"window-id", mp_property_window_id},
 
     {"chapter-list", mp_property_list_chapters},
-    {"track-list", property_list_tracks},
-    {"current-tracks", property_current_tracks},
+    {"track-list", mp_property_list_tracks},
+    {"current-tracks", mp_property_current_tracks},
     {"edition-list", property_list_editions},
 
     {"playlist", mp_property_playlist},
@@ -4298,7 +4298,7 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("audio-codec", "current-tracks/audio/codec-desc"),
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
-    {"aid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_AUDIO}},
+    {"aid", mp_property_switch_track, .priv = (void *)(const int[]){0, STREAM_AUDIO}},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
@@ -4324,7 +4324,7 @@ static const struct m_property mp_properties_base[] = {
     {"container-fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect-override", mp_property_video_aspect_override},
-    {"vid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
+    {"vid", mp_property_switch_track, .priv = (void *)(const int[]){0, STREAM_VIDEO}},
     {"hwdec-current", mp_property_hwdec_current},
     {"hwdec-interop", mp_property_hwdec_interop},
 
@@ -4345,8 +4345,8 @@ static const struct m_property mp_properties_base[] = {
     {"touch-pos", mp_property_touch_pos},
 
     // Subs
-    {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
-    {"secondary-sid", property_switch_track,
+    {"sid", mp_property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
+    {"secondary-sid", mp_property_switch_track,
         .priv = (void *)(const int[]){1, STREAM_SUB}},
     {"sub-delay", mp_property_sub_delay, .priv = (void *)&(const int){0}},
     {"secondary-sub-delay", mp_property_sub_delay,
