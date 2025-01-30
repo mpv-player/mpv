@@ -3735,6 +3735,9 @@ Property list
             loaded. The format is the same as ``subprocess``'s result, capturing
             stdout and stderr.
 
+    ``user-data/mpv/console/open``
+        Whether the console is open.
+
 ``menu-data`` (RW)
     This property stores the raw menu definition. See `Context Menu`_ section for details.
 

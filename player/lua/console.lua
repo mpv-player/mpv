@@ -1780,6 +1780,7 @@ set_active = function (active)
         insert_mode = false
         pause_playback()
         define_key_bindings()
+        mp.set_property_bool('user-data/mpv/console/open', true)
 
         if not input_caller then
             prompt = default_prompt
@@ -1804,6 +1805,7 @@ set_active = function (active)
         completion_buffer = {}
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
+        mp.set_property_bool('user-data/mpv/console/open', false)
 
         if input_caller then
             mp.commandv('script-message-to', input_caller, 'input-event',
@@ -1996,6 +1998,10 @@ mp.register_event('log-message', function(e)
     -- Use color for debug/v/warn/error/fatal messages.
     log_add('[' .. e.prefix .. '] ' .. e.text:sub(1, -2), styles[e.level],
             terminal_styles[e.level])
+end)
+
+mp.register_event('shutdown', function ()
+    mp.del_property('user-data/mpv/console')
 end)
 
 require 'mp.options'.read_options(opts, nil, render)
