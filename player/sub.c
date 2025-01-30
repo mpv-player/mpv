@@ -50,7 +50,6 @@ static void reset_subtitles(struct MPContext *mpctx, struct track *track)
         sub_reset(track->d_sub);
         sub_set_play_dir(track->d_sub, mpctx->play_dir);
     }
-    term_osd_set_subs(mpctx, NULL);
 }
 
 // Only matters for subs on an image.
@@ -69,15 +68,16 @@ void reset_subtitle_state(struct MPContext *mpctx)
 {
     for (int n = 0; n < mpctx->num_tracks; n++)
         reset_subtitles(mpctx, mpctx->tracks[n]);
-    term_osd_set_subs(mpctx, NULL);
+    term_osd_clear_subs(mpctx);
 }
 
 void uninit_sub(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->d_sub) {
-        reset_subtitles(mpctx, track);
-        sub_select(track->d_sub, false);
         int order = get_order(mpctx, track);
+        reset_subtitles(mpctx, track);
+        term_osd_set_subs(mpctx, NULL, order);
+        sub_select(track->d_sub, false);
         osd_set_sub(mpctx->osd, order, NULL);
         sub_destroy(track->d_sub);
         track->d_sub = NULL;
@@ -133,10 +133,16 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         if (track->redraw_subs && still_image)
             sub_redecode_cached_packets(dec_sub);
 
-        // Handle displaying subtitles on terminal; never done for secondary subs
+        // Handle displaying subtitles on terminal.
         if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out) {
             char *text = sub_get_text(dec_sub, video_pts, SD_TEXT_TYPE_PLAIN);
-            term_osd_set_subs(mpctx, text);
+            term_osd_set_subs(mpctx, text, 0);
+            talloc_free(text);
+        }
+
+        if (mpctx->current_track[1][STREAM_SUB] == track && !mpctx->video_out) {
+            char *text = sub_get_text(dec_sub, video_pts, SD_TEXT_TYPE_PLAIN);
+            term_osd_set_subs(mpctx, text, 1);
             talloc_free(text);
         }
 

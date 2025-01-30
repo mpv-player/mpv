@@ -259,7 +259,7 @@ typedef struct MPContext {
     struct osd_state *osd;
     char *term_osd_text;
     char *term_osd_status;
-    char *term_osd_subs;
+    char *term_osd_subs[2];
     char *term_osd_contents;
     char *term_osd_title;
     char *last_window_title;
@@ -585,7 +585,8 @@ void set_osd_bar(struct MPContext *mpctx, int type,
 bool set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
-void term_osd_set_subs(struct MPContext *mpctx, const char *text);
+void term_osd_clear_subs(struct MPContext *mpctx);
+void term_osd_set_subs(struct MPContext *mpctx, const char *text, int order);
 void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size);
 void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 

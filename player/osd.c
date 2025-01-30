@@ -75,13 +75,15 @@ static bool term_osd_empty(char *text)
 static void term_osd_update(struct MPContext *mpctx)
 {
     int num_parts = 0;
-    char *parts[3] = {0};
+    char *parts[4] = {0};
 
     if (!mpctx->opts->use_terminal)
         return;
 
-    if (!term_osd_empty(mpctx->term_osd_subs))
-        parts[num_parts++] = mpctx->term_osd_subs;
+    if (!term_osd_empty(mpctx->term_osd_subs[0]))
+        parts[num_parts++] = mpctx->term_osd_subs[0];
+    if (!term_osd_empty(mpctx->term_osd_subs[1]))
+        parts[num_parts++] = mpctx->term_osd_subs[1];
     if (!term_osd_empty(mpctx->term_osd_text))
         parts[num_parts++] = mpctx->term_osd_text;
     if (!term_osd_empty(mpctx->term_osd_status))
@@ -115,13 +117,19 @@ static void term_osd_update_title(struct MPContext *mpctx)
     mpctx->term_osd_title = talloc_steal(mpctx, s);
 }
 
-void term_osd_set_subs(struct MPContext *mpctx, const char *text)
+void term_osd_clear_subs(struct MPContext *mpctx)
 {
-    if (mpctx->video_out || !text || !mpctx->opts->subs_shared->sub_visibility[0])
+    term_osd_set_subs(mpctx, NULL, 0);
+    term_osd_set_subs(mpctx, NULL, 1);
+}
+
+void term_osd_set_subs(struct MPContext *mpctx, const char *text, int order)
+{
+    if (mpctx->video_out || !text || !mpctx->opts->subs_shared->sub_visibility[order])
         text = ""; // disable
-    if (strcmp(mpctx->term_osd_subs ? mpctx->term_osd_subs : "", text) == 0)
+    if (strcmp(mpctx->term_osd_subs[order] ? mpctx->term_osd_subs[order] : "", text) == 0)
         return;
-    talloc_replace(mpctx, mpctx->term_osd_subs, text);
+    talloc_replace(mpctx, mpctx->term_osd_subs[order], text);
     term_osd_update(mpctx);
 }
 
