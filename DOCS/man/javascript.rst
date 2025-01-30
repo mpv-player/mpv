@@ -404,6 +404,3 @@ non-negligible duration to complete, so we re-calculate ``wait`` afterwards.
 
 ``mp.peek_timers_wait()`` returns the same values as ``mp.process_timers()``
 but without doing anything. Invalid result if called from a timer callback.
-
-Note: ``exit()`` is also registered for the ``shutdown`` event, and its
-implementation is a simple ``mp.keep_running = false``.
