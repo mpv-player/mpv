@@ -3698,6 +3698,16 @@ Property list
     The player itself does not use any data in it (although some builtin scripts may).
     The property is not preserved across player restarts.
 
+    Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
+    read, written, or observed.
+
+    The top-level object itself cannot be written directly; write to sub-paths instead.
+
+    Converting this property or its sub-properties to strings will give a JSON
+    representation. If converting a leaf-level object (i.e. not a map or array)
+    and not using raw mode, the underlying content will be given (e.g. strings will be
+    printed directly, rather than quoted and JSON-escaped).
+
     The following sub-paths are reserved for internal uses or have special semantics:
     ``user-data/osc``, ``user-data/mpv``. Unless noted otherwise, the semantics of
     any properties under these sub-paths can change at any time and may not be relied
@@ -3711,16 +3721,6 @@ Property list
         occupies. Its sub-properties ``l``, ``r``, ``t``, and ``b`` should all be set to
         the left, right, top, and bottom margins respectively.
         Values are between 0.0 and 1.0, normalized to window width/height.
-
-    Sub-paths can be accessed directly; e.g. ``user-data/my-script/state/a`` can be
-    read, written, or observed.
-
-    The top-level object itself cannot be written directly; write to sub-paths instead.
-
-    Converting this property or its sub-properties to strings will give a JSON
-    representation. If converting a leaf-level object (i.e. not a map or array)
-    and not using raw mode, the underlying content will be given (e.g. strings will be
-    printed directly, rather than quoted and JSON-escaped).
 
     ``user-data/mpv/ytdl``
         Data shared by the builtin ytdl hook script.
