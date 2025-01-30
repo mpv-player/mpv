@@ -201,9 +201,3 @@ Configurable Options
     The ratio of font height to font width.
     Adjusts grid width of completions.
     Values in the range 1.8..2.5 make sense for common monospace fonts.
-
-``pause_on_open``
-    Default: no
-
-    Whether to pause playback when the console opens, and resume it when the
-    console is closed, if playback was not already paused.
