@@ -39,6 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v2
+        with:
+          src: ". TOOLS/umpv"
 
   mypy:
     runs-on: ubuntu-latest
@@ -48,6 +50,7 @@ jobs:
         with:
           install_project_dependencies: no
           options: '--check-untyped-defs'
+          paths: ". TOOLS/umpv"
 
   editorconfig:
     runs-on: ubuntu-latest
