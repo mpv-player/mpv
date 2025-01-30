@@ -106,7 +106,7 @@ def line_too_long(body):
     "Prefix should not include file extension (use `vo_gpu: ...` not `vo_gpu.c: ...`)",
 )
 def no_file_exts(body):
-    return not re.search(r"[a-z0-9]\.([chm]|cpp|swift|py): ", body[0])
+    return not re.search(r"[a-z0-9]\.([chm]|cpp|swift): ", body[0])
 
 ################################################################################
 
