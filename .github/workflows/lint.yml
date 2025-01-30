@@ -47,7 +47,7 @@ jobs:
       - uses: python/mypy@master
         with:
           install_project_dependencies: no
-          options: '--check-untyped-defs'
+          options: '--strict'
 
   editorconfig:
     runs-on: ubuntu-latest
