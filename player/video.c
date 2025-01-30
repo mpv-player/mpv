@@ -284,7 +284,7 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     vo_set_paused(vo_c->vo, get_internal_paused(mpctx));
 
     reset_video_state(mpctx);
-    term_osd_set_subs(mpctx, NULL);
+    term_osd_clear_subs(mpctx);
 
     return;
 
