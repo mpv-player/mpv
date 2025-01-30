@@ -1,0 +1,1 @@
+the `path` and `track-list/N/external-filename` properties now always return a full, absolute path

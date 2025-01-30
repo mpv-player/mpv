@@ -2109,10 +2109,7 @@ Property list
     Process-id of mpv.
 
 ``path``
-    Full path of the currently played file. Usually this is exactly the same
-    string you pass on the mpv command line or the ``loadfile`` command, even
-    if it's a relative path. If you expect an absolute path, you will have to
-    determine it yourself, for example by using the ``normalize-path`` command.
+    Full absolute path of the currently played file.
 
 ``stream-open-filename``
     The full path to the currently played media. This is different from
