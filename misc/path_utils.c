@@ -156,23 +156,24 @@ char *mp_getcwd(void *talloc_ctx)
 
 char *mp_normalize_path(void *talloc_ctx, const char *path)
 {
-    assert(talloc_ctx && "mp_normalize_path requires talloc_ctx!");
-
     if (!path)
         return NULL;
 
     if (mp_is_url(bstr0(path)))
         return talloc_strdup(talloc_ctx, path);
 
+    void *tmp = talloc_new(NULL);
     if (!mp_path_is_absolute(bstr0(path))) {
-        char *cwd = mp_getcwd(talloc_ctx);
-        if (!cwd)
+        char *cwd = mp_getcwd(tmp);
+        if (!cwd) {
+            talloc_free(tmp);
             return NULL;
-        path = mp_path_join(talloc_ctx, cwd, path);
+        }
+        path = mp_path_join(tmp, cwd, path);
     }
 
 #if HAVE_DOS_PATHS
-    wchar_t *pathw = mp_from_utf8(NULL, path);
+    wchar_t *pathw = mp_from_utf8(tmp, path);
     wchar_t *read = pathw, *write = pathw;
     wchar_t prev = '\0';
     // preserve leading double backslashes
@@ -192,14 +193,13 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     }
     *write = '\0';
     size_t max_size = wcslen(pathw) + 1;
-    wchar_t *pathc = talloc_array(NULL, wchar_t, max_size);
+    wchar_t *pathc = talloc_array(tmp, wchar_t, max_size);
     HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
     char *ret = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
-    talloc_free(pathw);
-    talloc_free(pathc);
+    talloc_free(tmp);
     return ret;
 #else
-    char *result = talloc_strdup(talloc_ctx, "");
+    char *result = talloc_strdup(tmp, "");
     const char *next;
     const char *end = path + strlen(path);
 
@@ -228,6 +228,7 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
                     char *tmp_result = realpath(path, NULL);
                     result = talloc_strdup(talloc_ctx, tmp_result);
                     free(tmp_result);
+                    talloc_free(tmp);
                     return result;
                 }
         }
@@ -236,6 +237,8 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
         result = talloc_strndup_append_buffer(result, ptr, next - ptr);
     }
 
+    result = talloc_steal(talloc_ctx, result);
+    talloc_free(tmp);
     return result;
 #endif
 }
