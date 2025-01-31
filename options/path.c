@@ -221,6 +221,15 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
     return res;
 }
 
+char *mp_normalize_user_path(void *talloc_ctx, struct mpv_global *global,
+                             const char *path)
+{
+    char *expanded = mp_get_user_path(NULL, global, path);
+    char *normalized = mp_normalize_path(talloc_ctx, expanded);
+    talloc_free(expanded);
+    return normalized;
+}
+
 void mp_mk_user_dir(struct mpv_global *global, const char *type, char *subdir)
 {
     char *dir = mp_find_user_file(NULL, global, type, subdir);
