@@ -1754,8 +1754,8 @@ This list uses the event name field value, and the C API symbol in brackets:
     Start of playback after seek or after file was loaded.
 
 ``shutdown`` (``MPV_EVENT_SHUTDOWN``)
-    Sent when the player quits or when a script terminates. Normally handled
-    automatically. See `Details on the script initialization and lifecycle`_.
+    Sent when the player quits, and the script should terminate. Normally
+    handled automatically. See `Details on the script initialization and lifecycle`_.
 
 ``log-message`` (``MPV_EVENT_LOG_MESSAGE``)
     Receives messages enabled with ``mpv_request_log_messages()`` (Lua:
