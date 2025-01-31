@@ -5924,15 +5924,14 @@ static void cmd_normalize_path(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    void *ctx = talloc_new(NULL);
 
-    char *path = mp_get_user_path(ctx, mpctx->global, cmd->args[0].v.s);
+    char *path = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s);
     cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
-        .u.string = talloc_steal(NULL, mp_normalize_path(ctx, path)),
+        .u.string = mp_normalize_path(NULL, path),
     };
 
-    talloc_free(ctx);
+    talloc_free(path);
 }
 
 static void cmd_escape_ass(void *p)

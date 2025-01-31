@@ -396,8 +396,7 @@ exit:
 
 void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
 {
-    void *ctx = talloc_new(NULL);
-    char *path = mp_normalize_path(ctx, file ? file : mpctx->filename);
+    char *path = mp_normalize_path(NULL, file ? file : mpctx->filename);
     if (!path)
         goto exit;
 
@@ -424,7 +423,7 @@ void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
     }
 
 exit:
-    talloc_free(ctx);
+    talloc_free(path);
 }
 
 bool mp_load_playback_resume(struct MPContext *mpctx, const char *file)

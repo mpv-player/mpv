@@ -53,7 +53,6 @@ struct mpv_deleter {
     }
 };
 using mp_string = std::unique_ptr<char, mpv_deleter>;
-using talloc_ctx = std::unique_ptr<void, mpv_deleter>;
 
 struct mp_node : mpv_node {
     mp_node() = default;
@@ -208,8 +207,7 @@ static void update_thumbnail(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
 
     try {
         if (thumbnail) {
-            talloc_ctx ta_ctx{ talloc_new(nullptr) };
-            mp_string normalized_path{ mp_normalize_path(ta_ctx.get(), thumbnail) };
+            mp_string normalized_path{ mp_normalize_path(nullptr, thumbnail) };
             MP_TRACE(&ctx, "Using thumbnail: %s\n", normalized_path.get());
             auto hstr = winrt::to_hstring(normalized_path.get());
             RandomAccessStreamReference stream_ref{ nullptr };
@@ -225,8 +223,7 @@ static void update_thumbnail(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
             updater.Thumbnail(stream_ref);
         } else {
             if (filepath && !mp_is_url(bstr0(filepath.get()))) {
-                talloc_ctx ta_ctx{ talloc_new(nullptr) };
-                mp_string path{ mp_normalize_path(ta_ctx.get(), filepath.get()) };
+                mp_string path{ mp_normalize_path(nullptr, filepath.get()) };
                 MP_TRACE(&ctx, "Generating thumbnail for: %s\n", path.get());
                 auto storage_file = StorageFile::GetFileFromPathAsync(winrt::to_hstring(path.get()));
 

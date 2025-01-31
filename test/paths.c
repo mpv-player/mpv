@@ -14,10 +14,9 @@ static void test_join(char *file, int line, char *a, char *b, char *c)
 
 static void test_normalize(char *file, int line, char *expected, char *path)
 {
-    void *ctx = talloc_new(NULL);
-    char *normalized = mp_normalize_path(ctx, path);
+    char *normalized = mp_normalize_path(NULL, path);
     assert_string_equal_impl(file, line, normalized, expected);
-    talloc_free(ctx);
+    talloc_free(normalized);
 }
 
 static void test_dirname(char *file, int line, char *path, char *expected)
