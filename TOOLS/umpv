@@ -77,7 +77,7 @@ def start_mpv(files: Iterable[str], socket_path: str) -> None:
         "--",
     ])
     mpv_command.extend(files)
-    subprocess.check_call(mpv_command)
+    subprocess.Popen(mpv_command, start_new_session=True)
 
 def main() -> None:
     files = (os.path.abspath(f) if not is_url(f) else f for f in sys.argv[1:])
