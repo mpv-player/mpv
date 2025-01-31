@@ -1314,6 +1314,8 @@ end
 local function file_list(directory)
     if directory == '' then
         directory = '.'
+    else
+        directory = mp.command_native({'expand-path', directory})
     end
 
     local files = utils.readdir(directory, 'files') or {}
@@ -1328,22 +1330,14 @@ end
 local function handle_file_completion(before_cur)
     local directory, last_component_pos =
         before_cur:sub(completion_pos):match('(.-)()[^' .. path_separator ..']*$')
-    completion_pos = completion_pos + last_component_pos - 1
 
-    if directory:find('^~' .. path_separator) then
-        local home = mp.command_native({'expand-path', '~/'})
-        before_cur = before_cur:sub(1, completion_pos - #directory - 1) ..
-                     home ..
-                     before_cur:sub(completion_pos - #directory + 1)
-        directory = home .. directory:sub(2)
-        completion_pos = completion_pos + #home - 1
-    end
+    completion_pos = completion_pos + last_component_pos - 1
 
     -- Don't use completion_append for file completion to not add quotes after
     -- directories whose entries you may want to complete afterwards.
     completion_append = ''
 
-    return file_list(directory), before_cur
+    return file_list(directory)
 end
 
 local function handle_choice_completion(option, before_cur)
@@ -1362,7 +1356,7 @@ local function handle_choice_completion(option, before_cur)
         info.choices[1] = '""'
     end
 
-    return info.choices, before_cur
+    return info.choices
 end
 
 local function command_flags_at_1st_argument_list(command)
@@ -1511,7 +1505,6 @@ complete = function ()
     end
 
     local before_cur = line:sub(1, cursor - 1)
-    local after_cur = line:sub(cursor)
     local tokens = {}
     local first_useful_token_index = 1
     local completions
@@ -1612,26 +1605,23 @@ complete = function ()
                first_useful_token.text == 'af-command' then
             completions = list_filter_labels(first_useful_token.text:sub(1,2))
         elseif has_file_argument(first_useful_token.text) then
-            completions, before_cur = handle_file_completion(before_cur)
+            completions = handle_file_completion(before_cur)
         else
             completions = command_flags_at_1st_argument_list(first_useful_token.text)
         end
     elseif first_useful_token.text == 'cycle-values' then
-        completions, before_cur =
-            handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                     before_cur)
+        completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                               before_cur)
     elseif #tokens == first_useful_token_index + 2 then
         if first_useful_token.text == 'set' then
-            completions, before_cur =
-                handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                         before_cur)
+            completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                                   before_cur)
         elseif first_useful_token.text == 'change-list' then
             completions = list_option_action_list(tokens[first_useful_token_index + 1].text)
         elseif first_useful_token.text == 'vf' or
                first_useful_token.text == 'af' then
             if add_actions[tokens[first_useful_token_index + 1].text] then
-                completions, before_cur =
-                    handle_choice_completion(first_useful_token.text, before_cur)
+                completions = handle_choice_completion(first_useful_token.text, before_cur)
             elseif tokens[first_useful_token_index + 1].text == 'remove' then
                 completions = list_option_value_list(first_useful_token.text)
             end
@@ -1641,14 +1631,13 @@ complete = function ()
     elseif #tokens == first_useful_token_index + 3 then
         if first_useful_token.text == 'change-list' then
             if add_actions[tokens[first_useful_token_index + 2].text] then
-                completions, before_cur =
-                    handle_choice_completion(tokens[first_useful_token_index + 1].text,
-                                             before_cur)
+                completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
+                                                       before_cur)
             elseif tokens[first_useful_token_index + 2].text == 'remove' then
                 completions = list_option_value_list(tokens[first_useful_token_index + 1].text)
             end
         elseif first_useful_token.text == 'dump-cache' then
-            completions, before_cur = handle_file_completion(before_cur)
+            completions = handle_file_completion(before_cur)
         end
     end
 
@@ -1662,9 +1651,6 @@ complete = function ()
         completion_buffer[i] = completions[match]
     end
 
-    -- Expand ~/ with file completion.
-    cursor = before_cur:len() + 1
-    line = before_cur .. after_cur
     render()
 end
 
