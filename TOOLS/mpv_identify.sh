@@ -94,7 +94,7 @@ EOF
     local key
     for key in $allprops; do
         propstr="${propstr}X-MIDENTIFY: $key \${=$key}$LF"
-        key="$(printf '%s\n' "$key" | tr - _)"
+        key="$(printf '%s\n' "$key" | tr /- __)"
         unset "$nextprefix$key"
     done
 
@@ -112,7 +112,7 @@ EOF
                     fileindex="$((fileindex+1))"
                     nextprefix="${nextprefix}${fileindex}_"
                     for key in $allprops; do
-                        key="$(printf '%s\n' "$key" | tr - _)"
+                        key="$(printf '%s\n' "$key" | tr /- __)"
                         unset "$nextprefix$key"
                     done
                 else
@@ -126,7 +126,7 @@ EOF
                 local key="${line#X-MIDENTIFY: }"
                 local value="${key#* }"
                 key="${key%% *}"
-                key="$(printf '%s\n' "$key" | tr - _)"
+                key="$(printf '%s\n' "$key" | tr /- __)"
                 if [ -n "$nextprefix" ]; then
                     if [ -z "$prefix" ]; then
                         echo >&2 "Got X-MIDENTIFY: without X-MIDENTIFY-START:"
