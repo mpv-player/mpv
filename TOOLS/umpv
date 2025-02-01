@@ -64,7 +64,7 @@ def send_files_to_mpv(sock: socket.socket, files: Iterable[str]) -> None:
         for f in files:
             # escape: \ \n "
             f = f.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
-            sock.send(f'raw loadfile "{f}" append\n'.encode())
+            sock.send(f'raw loadfile "{f}" append-play\n'.encode())
     except Exception:
         print("mpv is terminating or the connection was lost.", file=sys.stderr)
         sys.exit(1)
