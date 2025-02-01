@@ -1,1 +1,2 @@
 change the underlying type of the `aspect`, `par`, and `sar` sub-properties to double from float
+deprecate setting `--video-aspect-override` to `-1` in favor of the newly added `original` choice
