@@ -1,0 +1,1 @@
+change the underlying type of the `aspect`, `par`, and `sar` sub-properties to double from float

@@ -2689,7 +2689,7 @@ Property list
         Video size after cropping.
 
     ``video-params/aspect``
-        Display aspect ratio as float.
+        Display aspect ratio as double.
 
     ``video-params/aspect-name``
         Display aspect ratio name as string. The name corresponds to motion
