@@ -1572,7 +1572,7 @@ Video
 
     This option has no effect if ``--video-unscaled`` option is used.
 
-``--video-aspect-override=<ratio|no>``
+``--video-aspect-override=<ratio|no|original>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played.
 
@@ -1580,7 +1580,8 @@ Video
 
     :0:  disable aspect ratio handling, pretend the video has square pixels
     :no: same as ``0``
-    :-1: use the video stream or container aspect (default)
+    :original: use the video stream or container aspect (default)
+    :-1: same as ``1`` (deprecated)
 
     But note that handling of these special values might change in the future.
 
