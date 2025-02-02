@@ -3,6 +3,7 @@ version_h = vcs_tag(
         '--git-dir=' + join_paths(source_root, '.git'),
         '--work-tree=' + source_root,
         'describe', '--always', '--tags', '--dirty'],
+    fallback: 'v' + meson.project_version(),
     input: 'version.h.in',
     output: 'version.h',
     replace_string: '@VERSION@',
