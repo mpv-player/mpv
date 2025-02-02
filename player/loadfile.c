@@ -836,6 +836,8 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     char *disp_filename = filename;
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
+    else if (mp_is_url(bstr0(disp_filename)))
+        mp_url_unescape_inplace(disp_filename);
 
     struct demuxer_params params = {
         .is_top_level = true,
