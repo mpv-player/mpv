@@ -50,12 +50,6 @@
 // Vendored protocols
 #include "xx-color-management-v4.h"
 
-#if HAVE_DRM
-#include <drm_fourcc.h>
-#include <xf86drm.h>
-#include <xf86drmMode.h>
-#endif
-
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
 #endif
@@ -220,8 +214,6 @@ struct vo_wayland_seat {
 struct vo_wayland_tranche {
     struct drm_format *compositor_formats;
     int num_compositor_formats;
-    uint32_t *planar_formats;
-    int num_planar_formats;
     dev_t device_id;
     struct wl_list link;
 };
@@ -255,7 +247,6 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
-static void get_planar_drm_formats(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -1719,7 +1710,6 @@ static void tranche_target_device(void *data,
     static_assert(sizeof(tranche->device_id) == sizeof(dev_t), "");
 
     wl->current_tranche = tranche;
-    get_planar_drm_formats(wl);
     wl_list_insert(&wl->tranche_list, &tranche->link);
 }
 
@@ -2141,19 +2131,6 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
     }
 }
 
-#if HAVE_DRM
-static bool devices_are_equal(dev_t a, dev_t b)
-{
-    bool ret = false;
-    drmDevice *deviceA, *deviceB;
-    if (!drmGetDeviceFromDevId(a, 0, &deviceA) && !drmGetDeviceFromDevId(b, 0, &deviceB))
-        ret = drmDevicesEqual(deviceA, deviceB);
-    drmFreeDevice(&deviceA);
-    drmFreeDevice(&deviceB);
-    return ret;
-}
-#endif
-
 static void do_minimize(struct vo_wayland_state *wl)
 {
     if (wl->opts->window_minimized)
@@ -2174,117 +2151,6 @@ static char **get_displays_spanned(struct vo_wayland_state *wl)
     }
     MP_TARRAY_APPEND(NULL, names, displays_spanned, NULL);
     return names;
-}
-
-static void get_planar_drm_formats(struct vo_wayland_state *wl)
-{
-#if HAVE_DRM
-    struct vo_wayland_tranche *tranche;
-    wl_list_for_each(tranche, &wl->tranche_list, link) {
-        // If there is a device equality, just copy the pointer over.
-        if (devices_are_equal(tranche->device_id, wl->current_tranche->device_id)) {
-            wl->current_tranche->planar_formats = tranche->planar_formats;
-            wl->current_tranche->num_planar_formats = tranche->num_planar_formats;
-            return;
-        }
-    }
-
-    tranche = wl->current_tranche;
-    drmDevice *device = NULL;
-    drmModePlaneRes *res = NULL;
-    drmModePlane *plane = NULL;
-
-    if (drmGetDeviceFromDevId(tranche->device_id, 0, &device) != 0) {
-        MP_VERBOSE(wl, "Unable to get drm device from device id: %s\n", mp_strerror(errno));
-        goto done;
-    }
-
-    // Pick the first path we get and hope for the best.
-    char *path = NULL;
-    for (int i = 0; i < device->available_nodes; ++i) {
-        if (device->nodes[0]) {
-            path = device->nodes[0];
-            break;
-        }
-    }
-
-    if (!path || !path[0]) {
-        MP_VERBOSE(wl, "Unable to find a valid drm device node.\n");
-        goto done;
-    }
-
-    int fd = open(path, O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
-        MP_VERBOSE(wl, "Unable to open DRM node path '%s': %s\n", path, mp_strerror(errno));
-        goto done;
-    }
-
-    // Need to set this in order to access plane information.
-    if (drmSetClientCap(fd, DRM_CLIENT_CAP_ATOMIC, 1)) {
-        MP_VERBOSE(wl, "Unable to set DRM atomic cap: %s\n", mp_strerror(errno));
-        goto done;
-    }
-
-    res = drmModeGetPlaneResources(fd);
-    if (!res) {
-        MP_VERBOSE(wl, "Unable to get DRM plane resources: %s\n", mp_strerror(errno));
-        goto done;
-    }
-
-    if (!res->count_planes) {
-        MP_VERBOSE(wl, "No DRM planes were found.\n");
-        goto done;
-    }
-
-    // Only check the formats on the first primary plane we find as a crude guess.
-    int index = -1;
-    for (int i = 0; i < res->count_planes; ++i) {
-        drmModeObjectProperties *props = NULL;
-        props = drmModeObjectGetProperties(fd, res->planes[i], DRM_MODE_OBJECT_PLANE);
-        if (!props) {
-            MP_VERBOSE(wl, "Unable to get DRM plane properties: %s\n", mp_strerror(errno));
-            continue;
-        }
-        for (int j = 0; j < props->count_props; ++j) {
-            drmModePropertyRes *prop = drmModeGetProperty(fd, props->props[j]);
-            if (!prop) {
-                MP_VERBOSE(wl, "Unable to get DRM plane property: %s\n", mp_strerror(errno));
-                continue;
-            }
-            if (strcmp(prop->name, "type") == 0) {
-                for (int k = 0; k < prop->count_values; ++k) {
-                    if (prop->values[k] == DRM_PLANE_TYPE_PRIMARY)
-                        index = i;
-                }
-            }
-            drmModeFreeProperty(prop);
-            if (index > -1)
-                break;
-        }
-        drmModeFreeObjectProperties(props);
-        if (index > -1)
-            break;
-    }
-
-    if (index == -1) {
-        MP_VERBOSE(wl, "Unable to get DRM plane: %s\n", mp_strerror(errno));
-        goto done;
-    }
-
-    plane = drmModeGetPlane(fd, res->planes[index]);
-    tranche->num_planar_formats = plane->count_formats;
-    tranche->planar_formats = talloc_zero_array(tranche, int, tranche->num_planar_formats);
-
-    for (int i = 0; i < tranche->num_planar_formats; ++i) {
-        MP_DBG(wl, "DRM primary plane supports drm format: %s\n", mp_tag_str(plane->formats[i]));
-        tranche->planar_formats[i] = plane->formats[i];
-    }
-
-done:
-    drmModeFreePlane(plane);
-    drmModeFreePlaneResources(res);
-    drmFreeDevice(&device);
-#endif
 }
 
 static int get_mods(struct vo_wayland_seat *s)
@@ -3223,30 +3089,17 @@ void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 
 bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier)
 {
-#if HAVE_DRM
     // Tranches are grouped by preference and the first tranche is at the end of
     // the list. It doesn't really matter for us since we search everything
     // anyways, but might as well start from the most preferred tranche.
     struct vo_wayland_tranche *tranche;
     wl_list_for_each_reverse(tranche, &wl->tranche_list, link) {
-        bool supported_compositor_format = false;
         struct drm_format *formats = tranche->compositor_formats;
         for (int i = 0; i < tranche->num_compositor_formats; ++i) {
-            if (formats[i].format != drm_format)
-                continue;
-            if (modifier == formats[i].modifier && modifier != DRM_FORMAT_MOD_INVALID)
+            if (drm_format == formats[i].format && modifier == formats[i].modifier)
                 return true;
-            supported_compositor_format = true;
-        }
-
-        if (supported_compositor_format && tranche->planar_formats) {
-            for (int i = 0; i < tranche->num_planar_formats; i++) {
-                if (drm_format == tranche->planar_formats[i])
-                    return true;
-            }
         }
     }
-#endif
     return false;
 }
 
