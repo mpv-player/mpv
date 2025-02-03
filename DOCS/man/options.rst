@@ -4186,7 +4186,7 @@ Demuxer
 
 ``--prefetch-playlist=<yes|no>``
     Prefetch next playlist entry while playback of the current entry is ending
-    (default: no).
+    (default: yes).
 
     This does not prefill the cache with the video data of the next URL.
     Prefetching video data is supported only for the current playlist entry,
