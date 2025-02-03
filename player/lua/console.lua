@@ -105,6 +105,8 @@ local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
 local default_item
+local item_positions = {}
+local max_item_width = 0
 
 local complete
 local cycle_through_completions
@@ -271,6 +273,12 @@ local function scale_factor()
     return mp.get_property_native('display-hidpi-scale', 1)
 end
 
+local function terminal_output()
+    -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
+    -- which would print the log to the OSD.
+    return not mp.get_property('current-vo') or not mp.get_property_native('video-osd')
+end
+
 local function get_scaled_osd_dimensions()
     local dims = mp.get_property_native('osd-dimensions')
     local scale = scale_factor()
@@ -278,9 +286,12 @@ local function get_scaled_osd_dimensions()
     return dims.w / scale, dims.h /scale
 end
 
+local function get_line_height()
+    return selectable_items and opts.font_size * 1.1 or opts.font_size
+end
+
 local function calculate_max_log_lines()
-    if not mp.get_property_native('vo-configured')
-       or not mp.get_property_native('video-osd') then
+    if terminal_output() then
         -- Subtract 1 for the input line and for each line in the status line.
         -- This does not detect wrapped lines.
         return mp.get_property_native('term-size/h', 24) - 2 -
@@ -290,10 +301,34 @@ local function calculate_max_log_lines()
     return math.floor((select(2, get_scaled_osd_dimensions())
                        * (1 - global_margins.t - global_margins.b)
                        - get_margin_y())
-                      / opts.font_size
+                      / get_line_height()
                       -- Subtract 1 for the input line and 0.5 for the empty
                       -- line between the log and the input line.
                       - 1.5)
+end
+
+local function calculate_max_item_width()
+    if not selectable_items or terminal_output() then
+        return
+    end
+
+    local longest_item = prompt .. ('a'):rep(9)
+    for _, item in pairs(selectable_items) do
+        if #item > #longest_item then
+            longest_item = item
+        end
+    end
+
+    local width_overlay = mp.create_osd_overlay('ass-events')
+    local font = get_font()
+    width_overlay.compute_bounds = true
+    width_overlay.hidden = true
+    width_overlay.res_x, width_overlay.res_y = get_scaled_osd_dimensions()
+    width_overlay.data = '{\\fs' .. opts.font_size ..
+                         (font and '\\fn' .. font or '') .. '\\b1\\q2}' ..
+                         ass_escape(longest_item)
+    local result = width_overlay:update()
+    max_item_width = result.x1 - result.x0
 end
 
 local function should_highlight_completion(i)
@@ -541,9 +576,7 @@ end
 local function render()
     pending_update = false
 
-    -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
-    -- which would print the log to the OSD.
-    if not mp.get_property('current-vo') or not mp.get_property_native('video-osd') then
+    if terminal_output() then
         print_to_terminal()
         return
     end
@@ -625,21 +658,36 @@ local function render()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
-    local box = mp.get_property('osd-border-style') == 'background-box'
+    local line_height = get_line_height()
+    item_positions = {}
+
+    -- Disable background-box for selectable items to not draw separate
+    -- rectangles with different widths, and draw a single rectangle instead.
+    if selectable_items and mp.get_property('osd-border-style') == 'background-box' then
+        style = style .. '{\\4a&Hff&}'
+
+        ass:new_event()
+        ass:an(1)
+        ass:pos(x, y)
+        ass:append('{\\1a&Hff&}')
+        ass:draw_start()
+        ass:rect_cw(0, 0, max_item_width, (1.5 + math.min(#matches, max_lines)) * line_height)
+        ass:draw_stop()
+    end
 
     for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
         local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
 
-        -- Put every selectable item in its own event to prevent libass from
-        -- drawing them taller than opts.font_size with taller fonts, which
-        -- makes the hovered item calculation inaccurate and clips the counter.
-        -- But not with background-box, because it makes it look bad by
-        -- overlapping the semitransparent backgrounds of every line.
-        if selectable_items and not box then
+        if selectable_items then
+            local item_y = y - (1.5 + #log_buffer - i) * line_height
             ass:new_event()
             ass:an(1)
-            ass:pos(x, y - (1.5 + #log_buffer - i) * opts.font_size)
+            ass:pos(x, item_y)
             ass:append(log_item)
+
+            if #matches <= max_lines or i > 1 then -- skip the counter
+                item_positions[#item_positions + 1] = { item_y - line_height, item_y }
+            end
         else
             log_ass = log_ass .. log_item .. '\\N'
         end
@@ -918,27 +966,12 @@ local function handle_enter()
 end
 
 local function determine_hovered_item()
-    local height = select(2, get_scaled_osd_dimensions())
     local y = mp.get_property_native('mouse-pos').y / scale_factor()
-    local log_bottom_pos = height * (1 - global_margins.b)
-                           - get_margin_y()
-                           - 1.5 * opts.font_size
 
-    if y > log_bottom_pos then
-        return
-    end
-
-    local max_lines = calculate_max_log_lines()
-    -- Subtract 1 line for the position counter.
-    if #matches > max_lines then
-        max_lines = max_lines - 1
-    end
-    local last = math.min(first_match_to_print - 1 + max_lines, #matches)
-
-    local hovered_item = last - math.floor((log_bottom_pos - y) / opts.font_size)
-
-    if hovered_item >= first_match_to_print then
-        return hovered_item
+    for i, positions in ipairs(item_positions) do
+        if y >= positions[1] and y <= positions[2] then
+            return first_match_to_print - 1 + i
+        end
     end
 end
 
@@ -1077,6 +1110,7 @@ local function search_history()
         selectable_items[i] = history[#history + 1 - i]
     end
 
+    calculate_max_item_width()
     handle_edit()
     bind_mouse()
 end
@@ -1865,6 +1899,7 @@ mp.register_script_message('get-input', function (script_name, args)
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
         end
         default_item = args.default_item
+        calculate_max_item_width()
         handle_edit()
         bind_mouse()
     end
@@ -1932,11 +1967,12 @@ mp.register_script_message('complete', function(list, start_pos)
     render()
 end)
 
--- Redraw the REPL when the OSD size changes. This is needed because the
--- PlayRes of the OSD will need to be adjusted.
-mp.observe_property('osd-width', 'native', render)
-mp.observe_property('osd-height', 'native', render)
-mp.observe_property('display-hidpi-scale', 'native', render)
+for _, property in pairs({'osd-width', 'osd-height', 'display-hidpi-scale'}) do
+    mp.observe_property(property, 'native', function ()
+        calculate_max_item_width()
+        render()
+    end)
+end
 mp.observe_property('focused', 'native', render)
 
 mp.observe_property("user-data/osc/margins", "native", function(_, val)
