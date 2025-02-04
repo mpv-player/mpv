@@ -32,6 +32,7 @@ local opts = {
     font = "",
     font_size = 24,
     border_size = 1.65,
+    padding = 10,
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
@@ -54,7 +55,6 @@ local styles = {
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&}',
     completion = '{\\1c&Hcc99cc&}',
-    disabled = '{\\1c&Hcccccc&}',
 }
 for key, style in pairs(styles) do
     styles[key] = style .. '{\\3c&H111111&}'
@@ -467,12 +467,6 @@ local function populate_log_with_matches()
     local log = log_buffers[id]
 
     local max_log_lines = calculate_max_log_lines()
-    local print_counter = false
-
-    if #matches > max_log_lines then
-        print_counter = true
-        max_log_lines = max_log_lines - 1
-    end
 
     if selected_match < first_match_to_print then
         first_match_to_print = selected_match
@@ -482,18 +476,6 @@ local function populate_log_with_matches()
 
     local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
                                           #matches)
-
-    if print_counter then
-        log[1] = {
-            text = '',
-            style = styles.disabled .. selected_match .. '/' .. #matches ..
-                    ' {\\fs' .. opts.font_size * 0.75 .. '}[' ..
-                    first_match_to_print .. '-' .. last_match_to_print .. ']',
-            terminal_style = terminal_styles.disabled .. selected_match .. '/' ..
-                             #matches .. ' [' .. first_match_to_print .. '-' ..
-                             last_match_to_print .. ']',
-        }
-    end
 
     for i = first_match_to_print, last_match_to_print do
         local style = ''
@@ -562,6 +544,15 @@ local function print_to_terminal()
         completions = completions .. (i < #completion_buffer and '\t' or '\n')
     end
 
+    local counter = ''
+    if selectable_items and #selectable_items > calculate_max_log_lines() then
+        local digits = math.ceil(math.log(#selectable_items, 10))
+        counter = terminal_styles.disabled ..
+                  '[' .. string.format('%0' .. digits .. 'd', selected_match) ..
+                  '/' .. string.format('%0' .. digits .. 'd', #matches) ..
+                  ']\027[0m '
+    end
+
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
     -- Ensure there is a character with inverted colors to print.
@@ -569,8 +560,8 @@ local function print_to_terminal()
         after_cur = ' '
     end
 
-    mp.osd_message(log .. completions .. prompt .. ' ' .. before_cur ..
-                  '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
+    mp.osd_message(log .. completions .. counter .. prompt .. ' ' .. before_cur
+                   .. '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
                    after_cur:sub(2), 999)
     osd_msg_active = true
 end
@@ -619,6 +610,7 @@ local function render()
     -- Use the same blur value as the rest of the OSD. 288 is the OSD's
     -- PlayResY.
     local blur = mp.get_property_native('osd-blur') * osd_h / 288
+    local border_style = mp.get_property('osd-border-style')
 
     local style = '{\\r' ..
                   (font and '\\fn' .. font or '') ..
@@ -667,13 +659,9 @@ local function render()
 
     populate_log_with_matches()
 
-    local log_ass = ''
-    local log_buffer = log_buffers[id]
-    item_positions = {}
-
     -- Disable background-box for selectable items to not draw separate
     -- rectangles with different widths, and draw a single rectangle instead.
-    if selectable_items and mp.get_property('osd-border-style') == 'background-box' then
+    if selectable_items and border_style == 'background-box' then
         style = style .. '{\\4a&Hff&}'
 
         ass:new_event()
@@ -684,6 +672,10 @@ local function render()
         ass:rect_cw(0, 0, max_item_width, (1.5 + math.min(#matches, max_lines)) * line_height)
         ass:draw_stop()
     end
+
+    local log_ass = ''
+    local log_buffer = log_buffers[id]
+    item_positions = {}
 
     for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
         local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
@@ -697,13 +689,44 @@ local function render()
             ass:pos(x, item_y)
             ass:append(log_item)
 
-            if #matches <= max_lines or i > 1 then -- skip the counter
-                item_positions[#item_positions + 1] =
-                    { item_y - line_height / 2, item_y + line_height / 2 }
-            end
+            item_positions[#item_positions + 1] =
+                { item_y - line_height / 2, item_y + line_height / 2 }
         else
             log_ass = log_ass .. log_item .. '\\N'
         end
+    end
+
+    -- Scrollbar
+    if selectable_items and #matches > max_lines then
+        ass:new_event()
+        ass:an(alignment + 2)
+        ass:pos(x + max_item_width, y)
+        if border_style == 'background-box' then
+            ass:append('{\\4a&Hff&}')
+        end
+        ass:append(selected_match .. '/' .. #matches)
+
+        local start_percentage = (first_match_to_print - 1) / #matches
+        local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
+        if end_percentage - start_percentage < 0.04 then
+            local diff = 0.04 - (end_percentage - start_percentage)
+            start_percentage = start_percentage * (1 - diff)
+            end_percentage = end_percentage + diff * (1 - end_percentage)
+        end
+
+        local max_height = max_lines * line_height
+        local bar_y = alignment == 7
+                      and y + 1.5 * line_height + start_percentage * max_height
+                      or y - 1.5 * line_height - max_height * (1 - end_percentage)
+       local height = max_height * (end_percentage - start_percentage)
+
+        ass:new_event()
+        ass:an(alignment)
+        ass:append('{\\blur0\\4a&Hff&\\bord1}')
+        ass:pos(x + max_item_width + opts.padding - 1, bar_y)
+        ass:draw_start()
+        ass:rect_cw(0, 0, -opts.padding / 2, height)
+        ass:draw_stop()
     end
 
     ass:new_event()
@@ -798,8 +821,8 @@ local function handle_edit()
             selected_match = default_item
 
             local max_lines = calculate_max_log_lines()
-            first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 1)
-            if first_match_to_print > #selectable_items - max_lines + 2 then
+            first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
+            if first_match_to_print > #selectable_items - max_lines + 1 then
                 first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
             end
         else
@@ -1061,18 +1084,18 @@ local function move_history(amount, is_wheel)
         -- Update selected_match only if it's the first or last printed item and
         -- there are hidden items.
         if (amount > 0 and selected_match == first_match_to_print
-            and first_match_to_print + max_lines - 2 < #matches)
-           or (amount < 0 and selected_match == first_match_to_print + max_lines - 2
+            and first_match_to_print - 1 + max_lines < #matches)
+           or (amount < 0 and selected_match == first_match_to_print - 1 + max_lines
                and first_match_to_print > 1) then
             selected_match = selected_match + amount
         end
 
-        if amount > 0 and first_match_to_print < #matches - max_lines + 2
+        if amount > 0 and first_match_to_print < #matches - max_lines + 1
            or amount < 0 and first_match_to_print > 1 then
            -- math.min and math.max would only be needed with amounts other than
            -- 1 and -1.
             first_match_to_print = math.min(
-                math.max(first_match_to_print + amount, 1), #matches - max_lines + 2)
+                math.max(first_match_to_print + amount, 1), #matches - max_lines + 1)
         end
 
         local item = determine_hovered_item()
@@ -1101,7 +1124,7 @@ end
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_log_lines() + 2, 1)
+        selected_match = math.max(selected_match - calculate_max_log_lines() + 1, 1)
         render()
         return
     end
@@ -1112,7 +1135,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 local function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_log_lines() - 2, #matches)
+        selected_match = math.min(selected_match + calculate_max_log_lines() - 1, #matches)
         render()
         return
     end
