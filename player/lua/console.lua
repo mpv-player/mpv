@@ -1837,8 +1837,9 @@ mp.register_script_message('type', function(text, cursor_pos)
 end)
 
 mp.register_script_message('get-input', function (script_name, args)
-    if repl_active then
-        return
+    if repl_active and input_caller and script_name ~= input_caller then
+        mp.commandv('script-message-to', input_caller, 'input-event',
+                    'closed', utils.format_json({line, cursor}))
     end
 
     input_caller = script_name
@@ -1854,6 +1855,7 @@ mp.register_script_message('get-input', function (script_name, args)
     end
     history = histories[id]
     history_pos = #history + 1
+    searching_history = false
 
     if args.items then
         selectable_items = {}
@@ -1863,6 +1865,9 @@ mp.register_script_message('get-input', function (script_name, args)
         default_item = args.default_item
         handle_edit()
         bind_mouse()
+    else
+        selectable_items = nil
+        unbind_mouse()
     end
 
     set_active(true)
