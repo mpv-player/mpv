@@ -319,16 +319,18 @@ local function calculate_max_item_width()
         end
     end
 
-    local width_overlay = mp.create_osd_overlay('ass-events')
+    local osd_w, osd_h = get_scaled_osd_dimensions()
     local font = get_font()
+    local width_overlay = mp.create_osd_overlay('ass-events')
     width_overlay.compute_bounds = true
     width_overlay.hidden = true
-    width_overlay.res_x, width_overlay.res_y = get_scaled_osd_dimensions()
+    width_overlay.res_x = osd_w
+    width_overlay.res_y = osd_h
     width_overlay.data = '{\\fs' .. opts.font_size ..
                          (font and '\\fn' .. font or '') .. '\\b1\\q2}' ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
-    max_item_width = result.x1 - result.x0
+    max_item_width = math.min(result.x1 - result.x0, osd_w - get_margin_x() * 2)
 end
 
 local function should_highlight_completion(i)
@@ -594,19 +596,29 @@ local function render()
     end
 
     local ass = assdraw.ass_new()
-
     local osd_w, osd_h = get_scaled_osd_dimensions()
+    local line_height = get_line_height()
+    local max_lines = calculate_max_log_lines()
 
-    local x = get_margin_x()
-    local y = osd_h * (1 - global_margins.b) - get_margin_y()
+    local x, y, alignment, clipping_coordinates
+    if selectable_items and not searching_history then
+        x = (osd_w - max_item_width) / 2
+        y = osd_h / 2 - (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
+        alignment = 7
+        clipping_coordinates = '0,0,' .. x + max_item_width .. ',' .. osd_h
+    else
+        x = get_margin_x()
+        y = osd_h * (1 - global_margins.b) - get_margin_y()
+        alignment = 1
+        -- Avoid drawing below topbar OSC when there are wrapped lines.
+        local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
+        clipping_coordinates = '0,' .. coordinate_top .. ',' .. osd_w .. ',' .. osd_h
+    end
 
     local font = get_font()
     -- Use the same blur value as the rest of the OSD. 288 is the OSD's
     -- PlayResY.
     local blur = mp.get_property_native('osd-blur') * osd_h / 288
-    local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
-    local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
-                                 osd_w .. ',' .. osd_h
 
     local style = '{\\r' ..
                   (font and '\\fn' .. font or '') ..
@@ -636,7 +648,6 @@ local function render()
     -- Render log messages as ASS.
     -- This will render at most screeny / font_size - 1 messages.
 
-    local max_lines = calculate_max_log_lines()
     local completion_ass = ''
     if next(completion_buffer) then
         -- Estimate how many characters fit in one line
@@ -658,7 +669,6 @@ local function render()
 
     local log_ass = ''
     local log_buffer = log_buffers[id]
-    local line_height = get_line_height()
     item_positions = {}
 
     -- Disable background-box for selectable items to not draw separate
@@ -667,7 +677,7 @@ local function render()
         style = style .. '{\\4a&Hff&}'
 
         ass:new_event()
-        ass:an(1)
+        ass:an(alignment)
         ass:pos(x, y)
         ass:append('{\\1a&Hff&}')
         ass:draw_start()
@@ -679,14 +689,17 @@ local function render()
         local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
 
         if selectable_items then
-            local item_y = y - (1.5 + #log_buffer - i) * line_height
+            local item_y = alignment == 7
+                and y + (1 + i) * line_height
+                or y - (1.5 + #log_buffer - i) * line_height
             ass:new_event()
-            ass:an(1)
+            ass:an(4)
             ass:pos(x, item_y)
             ass:append(log_item)
 
             if #matches <= max_lines or i > 1 then -- skip the counter
-                item_positions[#item_positions + 1] = { item_y - line_height, item_y }
+                item_positions[#item_positions + 1] =
+                    { item_y - line_height / 2, item_y + line_height / 2 }
             end
         else
             log_ass = log_ass .. log_item .. '\\N'
@@ -694,10 +707,11 @@ local function render()
     end
 
     ass:new_event()
-    ass:an(1)
+    ass:an(alignment)
     ass:pos(x, y)
-    ass:append(log_ass .. '\\N')
-    ass:append(completion_ass)
+    if not selectable_items then
+        ass:append(log_ass .. '\\N' .. completion_ass)
+    end
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -705,7 +719,7 @@ local function render()
     -- Redraw the cursor with the REPL text invisible. This will make the
     -- cursor appear in front of the text.
     ass:new_event()
-    ass:an(1)
+    ass:an(alignment)
     ass:pos(x, y)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
