@@ -55,9 +55,9 @@ title
 
     =============   ================================================
     left-click      show file and track info
-    shift+L-click   show the filename
-    middle-click    show the filename
-    right-click     show the path
+    shift+L-click   show the path
+    middle-click    show the path
+    right-click     open the history selector
     =============   ================================================
 
 cache
@@ -539,9 +539,9 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``title_mbtn_left_command=script-binding stats/display-page-5``
 
-``title_mbtn_mid_command=show-text ${filename}``
+``title_mbtn_mid_command=show-text ${path}``
 
-``title_mbtn_right_command=show-text ${path}``
+``title_mbtn_right_command=script-binding select/select-watch-history; script-message-to osc osc-hide``
 
 ``play_pause_mbtn_left_command=cycle pause``
 
