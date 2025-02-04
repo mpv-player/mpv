@@ -6057,6 +6057,9 @@ them.
     supported (for example, on Windows 7 without the platform update), mpv will
     automatically fall back to the older bitblt presentation model.
 
+    flip-model needs presentation needs to be disabled for background
+    transparency to work.
+
 ``--d3d11-sync-interval=<0..4>``
     Schedule each frame to be presented for this number of VBlank intervals.
     (default: 1) Setting to 1 will enable VSync, setting to 0 will disable it.
@@ -7385,6 +7388,8 @@ them.
         Blend the frame against a 16x16 gray/white tiles background (default).
     none
         Do not blend the frame and leave the alpha as is.
+
+    Background transparency on d3d11 requires ``--d3d11-flip=no``.
 
     Before mpv 0.38.0, this option used to accept a color value specifying the
     background color. This is now done by the ``--background-color`` option.
