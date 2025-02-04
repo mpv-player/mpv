@@ -980,10 +980,19 @@ local function handle_enter()
 end
 
 local function determine_hovered_item()
-    local y = mp.get_property_native('mouse-pos').y / scale_factor()
+    local osd_w, _ = get_scaled_osd_dimensions()
+    local scale = scale_factor()
+    local mouse_pos = mp.get_property_native('mouse-pos')
+    local mouse_x = mouse_pos.x / scale
+    local mouse_y = mouse_pos.y / scale
+    local item_x0 = searching_history and get_margin_x() or (osd_w - max_item_width) / 2
+
+    if mouse_x < item_x0 or mouse_x > item_x0 + max_item_width then
+        return
+    end
 
     for i, positions in ipairs(item_positions) do
-        if y >= positions[1] and y <= positions[2] then
+        if mouse_y >= positions[1] and mouse_y <= positions[2] then
             return first_match_to_print - 1 + i
         end
     end
