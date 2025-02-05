@@ -72,8 +72,7 @@ def send_files_to_mpv(sock: socket.socket, files: Iterable[str]) -> None:
 def start_mpv(files: Iterable[str], socket_path: str) -> None:
     mpv_command = shlex.split(os.getenv("MPV", "mpv"))
     mpv_command.extend([
-        "--no-terminal",
-        "--force-window",
+        "--profile=builtin-pseudo-gui",
         f"--input-ipc-server={socket_path}",
         "--",
     ])
