@@ -496,7 +496,7 @@ static void add_sub_group(struct m_config_shadow *shadow, const char *name_prefi
     }
 
     // You can only use UPDATE_ flags here.
-    assert(!(subopts->change_flags & ~(unsigned)UPDATE_OPTS_MASK));
+    assert(!(subopts->change_flags & ~UPDATE_OPTS_MASK));
 
     assert(parent_group_index >= -1 && parent_group_index < shadow->num_groups);
 

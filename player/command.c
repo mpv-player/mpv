@@ -7631,7 +7631,7 @@ static void update_track_switch(struct MPContext *mpctx, int order, int type)
     mp_wakeup_core(mpctx);
 }
 
-void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
+void mp_option_change_callback(void *ctx, struct m_config_option *co, uint64_t flags,
                                bool self_update)
 {
     struct MPContext *mpctx = ctx;
@@ -7655,8 +7655,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
             struct track *track = mpctx->current_track[n][STREAM_SUB];
             struct dec_sub *sub = track ? track->d_sub : NULL;
             if (sub) {
-                int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS,
-                                      (void *)(uintptr_t)flags);
+                int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS, &flags);
                 if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
                     sub_redecode_cached_packets(sub);
                     sub_reset(sub);
