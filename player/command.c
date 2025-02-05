@@ -4673,7 +4673,7 @@ static const struct property_osd_display {
     const char *msg;
 } property_osd_display[] = {
     // general
-    {"loop-playlist", "Loop"},
+    {"loop-playlist", "Loop playlist"},
     {"loop-file", "Loop current file"},
     {"chapter",
      .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
