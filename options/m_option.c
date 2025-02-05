@@ -1408,7 +1408,7 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
                                    int *len, int op)
 {
     char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
-    if (op == OP_REMOVE)
+    if (op == OP_APPEND || op == OP_REMOVE)
         separator = 0; // specially handled
     struct bstr str = param;
     int n = *len;
