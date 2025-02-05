@@ -87,7 +87,7 @@ typedef struct m_config {
     // m_config_notify_change_opt_ptr(). If false, it's caused either by
     // m_config_set_option_*() (and similar) calls or external updates.
     void (*option_change_callback)(void *ctx, struct m_config_option *co,
-                                   int flags, bool self_update);
+                                   uint64_t flags, bool self_update);
     void *option_change_callback_ctx;
 
     // For the command line parser

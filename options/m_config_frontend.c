@@ -383,7 +383,7 @@ const char *m_config_get_positional_option(const struct m_config *config, int p)
 static int handle_set_opt_flags(struct m_config *config,
                                 struct m_config_option *co, int flags)
 {
-    int optflags = co->opt->flags;
+    uint64_t optflags = co->opt->flags;
     bool set = !(flags & M_SETOPT_CHECK_ONLY);
 
     if ((flags & M_SETOPT_PRE_PARSE_ONLY) && !(optflags & M_OPT_PRE_PARSE))
