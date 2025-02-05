@@ -156,6 +156,13 @@ void mp_url_unescape_inplace(char *url)
     }
 }
 
+char *mp_url_unescape(void *talloc_ctx, char *url)
+{
+    char *unescaped = talloc_strdup(talloc_ctx, url);
+    mp_url_unescape_inplace(unescaped);
+    return unescaped;
+}
+
 static const char hex_digits[] = "0123456789ABCDEF";
 
 

@@ -833,11 +833,13 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (!filename || mp_cancel_test(cancel))
         return -1;
 
+    void *unescaped_url = NULL;
     char *disp_filename = filename;
-    if (strncmp(disp_filename, "memory://", 9) == 0)
+    if (strncmp(disp_filename, "memory://", 9) == 0) {
         disp_filename = "memory://"; // avoid noise
-    else if (mp_is_url(bstr0(disp_filename)))
-        mp_url_unescape_inplace(disp_filename);
+    } else if (mp_is_url(bstr0(disp_filename))) {
+        disp_filename = unescaped_url = mp_url_unescape(NULL, disp_filename);
+    }
 
     struct demuxer_params params = {
         .is_top_level = true,
@@ -915,12 +917,14 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
 
     mp_cancel_set_parent(demuxer->cancel, mpctx->playback_abort);
 
+    talloc_free(unescaped_url);
     return first_num;
 
 err_out:
     demux_cancel_and_free(demuxer);
     if (!mp_cancel_test(cancel))
         MP_ERR(mpctx, "Can not open external file %s.\n", disp_filename);
+    talloc_free(unescaped_url);
     return -1;
 }
 
