@@ -38,9 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/ruff-action@v3
+      - name: Check
+        id: check
+        uses: astral-sh/ruff-action@v3
         with:
           src: ". TOOLS/umpv"
+      - name: Suggested changes
+        if: ${{ failure() && steps.check.outcome == 'failure' }}
+        run: ruff check . TOOLS/umpv --diff
 
   mypy:
     runs-on: ubuntu-latest
