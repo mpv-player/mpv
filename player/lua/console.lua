@@ -1550,19 +1550,21 @@ complete = function ()
         ['async'] = true, ['sync'] = true
     }
 
-    while tokens[first_useful_token_index] and
-          command_prefixes[tokens[first_useful_token_index].text] do
-        first_useful_token_index = first_useful_token_index + 1
-    end
-
-    -- Add an empty token if the cursor is after whitespace to simplify
+    -- Add an empty token if the cursor is after whitespace or ; to simplify
     -- comparisons.
     if before_cur == '' or before_cur:find('[%s;]$') then
         tokens[#tokens + 1] = { text = "", pos = cursor }
-    elseif first_useful_token_index > 1 and
-           command_prefixes[tokens[first_useful_token_index - 1].text] then
-        render()
-        return
+    end
+
+    while tokens[first_useful_token_index] and
+          command_prefixes[tokens[first_useful_token_index].text] do
+        if first_useful_token_index == #tokens then
+            completion_buffer = {}
+            render()
+            return
+        end
+
+        first_useful_token_index = first_useful_token_index + 1
     end
 
     completion_pos = tokens[#tokens].pos
