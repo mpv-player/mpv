@@ -1275,7 +1275,7 @@ Video
     Set this option only if you have reason to believe the automatically
     determined value is wrong.
 
-``--hwdec=<api1,api2,...|no|auto|auto-safe|auto-copy>``
+``--hwdec=<api1,api2,...|no|auto|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
     hardware decoding is not possible, mpv will fall back on software decoding.
@@ -1287,26 +1287,28 @@ Video
     to use hardware decoding due to insufficient CPU resources; and even on
     modern systems, sufficiently complex content (eg: 4K60 AV1) may require it.
 
+    This is a string list option. See `List Options`_ for details.
+
     .. note::
 
         Use the ``Ctrl+h`` shortcut to toggle hardware decoding at runtime. It
-        toggles this option between ``auto-safe`` and ``no``.
+        toggles this option between ``auto`` and ``no``.
 
         If you decide you want to use hardware decoding by default, the general
         recommendation is to try out decoding with the command line option, and
         prove to yourself that it works as desired for the content you care
         about. After that, you can add it to your config file.
 
-        When testing, you should start by using ``hwdec=auto-safe`` as it will
+        When testing, you should start by using ``hwdec=auto-`` as it will
         limit itself to choosing from hwdecs that are actively supported by the
         development team. If that doesn't result in working hardware decoding,
-        you can try ``hwdec=auto`` to have it attempt to load every possible
-        hwdec, but if ``auto-safe`` didn't work, you will probably need to know
-        exactly which hwdec matches your hardware and read up on that entry
-        below.
+        you can try ``hwdec=auto-unsafe`` to have it attempt to load every
+        possible hwdec, but if ``auto`` didn't work, you will probably need
+        to know exactly which hwdec matches your hardware and read up on that
+        entry below.
 
-        If ``auto-safe`` or ``auto`` produced the desired results, we recommend
-        just sticking with that and only setting a specific hwdec in your config
+        If ``auto`` produced the desired results, we recommend just
+        sticking with that and only setting a specific hwdec in your config
         file if it is really necessary.
 
         If you use the Ubuntu package, keep in mind that their
@@ -1327,8 +1329,8 @@ Video
           distros which force-enable it by default, such as on Ubuntu). Use the
           ``Ctrl+h`` default binding to enable it at runtime.
         - If you're not sure, but want hardware decoding always enabled by
-          default, put ``hwdec=auto-safe`` into your ``mpv.conf``, and
-          acknowledge that this may cause problems.
+          default, put ``hwdec=yes`` into your ``mpv.conf``, and acknowledge that
+          this may cause problems.
         - If you want to test available hardware decoding methods, pass
           ``--hwdec=auto --hwdec-codecs=all`` and look at the terminal output.
         - If you're a developer, or want to perform elaborate tests, you may
@@ -1337,11 +1339,11 @@ Video
     This option accepts a comma delimited list of ``api`` types, along with certain
     special values:
 
-    :no:        always use software decoding (default)
-    :auto-safe: enable any whitelisted hw decoder (see below)
-    :auto:      forcibly enable any hw decoder found (see below)
-    :yes:       exactly the same as ``auto-safe``
-    :auto-copy: enable best hw decoder with copy-back (see below)
+    :no:          always use software decoding (default)
+    :auto:        enable any whitelisted hw decoder (see below)
+    :auto-unsafe: forcibly enable any hw decoder found (see below)
+    :yes:         exactly the same as ``auto``
+    :auto-safe:   exactly the same as ``auto``
 
     .. note::
 
@@ -1383,34 +1385,40 @@ Video
     :crystalhd: copies video back to system RAM (Any platform supported by hardware)
     :rkmpp:     requires ``--vo=gpu`` (some RockChip devices only)
 
-    ``auto`` tries to automatically enable hardware decoding using the first
-    available method. This still depends what VO you are using. See the list
-    above, for which ``--vo`` and ``gpu-context`` is required for a given
-    hwdec. It will go down the list of available hwdecs until one is
-    successfully initialised. If all of them fail, it will fallback to software
-    decoding.
 
-    ``auto-safe`` is similar to ``auto``, but allows only whitelisted methods
-    that are considered "safe". This is supposed to be a reasonable way to
-    enable hardware decdoding by default in a config file (even though you
-    shouldn't do that anyway; prefer runtime enabling with ``Ctrl+h``). Unlike
-    ``auto``, this will not try to enable unknown or known-to-be-bad methods. In
-    addition, this may disable hardware decoding in other situations when it's
-    known to cause problems, but currently this mechanism is quite primitive.
-    (As an example for something that still causes problems: certain
+    ``auto`` tries to automatically enable hardware decoding using the
+    first available method, but allows only whitelisted methods that are
+    considered "safe". This is supposed to be a reasonable way to enable
+    hardware decoding by default in a config file (even though you shouldn't
+    do that anyway; prefer runtime enabling with ``Ctrl+h``). Unlike
+    ``auto-unsafe``, this will not try to enable unknown or known-to-be-bad
+    methods. In addition, this may disable hardware decoding in other situations
+    when it's known to cause problems, but currently this mechanism is quite
+    primitive. (As an example for something that still causes problems: certain
     combinations of HEVC and Intel chips on Windows tend to cause mpv to crash,
     most likely due to driver bugs.)
 
-    ``auto-copy-safe`` selects the union of methods selected with ``auto-safe``
-    and ``auto-copy``.
+    ``auto-unsafe`` is similar to ``auto``, but without the whitelist.
+    In general, you should never need to use this beyond debugging or
+    development use. Any known unsafe hwdec you want to test can simply be
+    appended to the list option such as ``--hwdec=auto,unsafe-hwdec``.
+    This still depends what VO you are using. See the list above, for which
+    ``--vo`` and ``gpu-context`` is required for a given hwdec. It will go down
+    the list of available hwdecs until one is successfully initialised. If all
+    of them fail, it will fallback to software decoding.
 
     ``auto-copy`` selects only modes that copy the video data back to system
-    memory after decoding. This selects modes like ``vaapi-copy`` (and so on).
-    If none of these work, hardware decoding is disabled. This mode is usually
-    guaranteed to incur no additional quality loss compared to software
-    decoding (assuming modern codecs and an error free video stream), and will
-    allow CPU processing with video filters. This mode works with all video
-    filters and VOs.
+    memory after decoding. This selects modes like ``vaapi-copy`` (and so on),
+    but it only allows whitelisted methods that are considered "safe". If none
+    of these work, hardware decoding is disabled. This mode is usually guaranteed
+    to incur no additional quality loss compared to software decoding (assuming
+    modern codecs and an error free video stream), and will allow CPU processing
+    with video filters. This mode works with all video filters and VOs.
+
+    ``auto-copy-safe`` is an alias for ``auto-copy``
+
+    ``auto-copy-unsafe`` is the same as ``auto-copy`` except that it goes through
+    all methods and not just the whitelisted ones that are considered "safe".
 
     Because these copy the decoded video back to system RAM, they're often less
     efficient than the direct modes, and may not help too much over software
@@ -1422,9 +1430,9 @@ Video
        only the ``vaapi``, ``nvdec``, ``cuda`` and ``vulkan`` methods work with
        Vulkan.
 
-    The ``vaapi`` mode, if used with ``--vo=gpu``, requires Mesa 11, and most
-    likely works with Intel and AMD GPUs only. It also requires the opengl EGL
-    backend.
+    The ``vaapi`` mode, if used with ``--vo=gpu``or ``--vo=gpu-next`` most
+    likely works with Intel and AMD GPUs only. It requires the opengl EGL
+    backend if the GPU does not support drm modifiers.
 
     ``nvdec`` and ``nvdec-copy`` are the newest, and recommended method to do
     hardware decoding on Nvidia GPUs.

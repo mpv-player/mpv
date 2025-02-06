@@ -250,7 +250,7 @@ typedef struct lavc_ctx {
 
 enum {
     HWDEC_FLAG_AUTO         = (1 << 0), // prioritize in autoprobe order
-    HWDEC_FLAG_WHITELIST    = (1 << 1), // whitelist for auto-safe
+    HWDEC_FLAG_WHITELIST    = (1 << 1), // whitelist for auto
 };
 
 struct autoprobe_info {
@@ -508,14 +508,17 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         bstr opt = bstr0(hwdec_api[i]);
 
         bool hwdec_requested = !bstr_equals0(opt, "no");
-        bool hwdec_auto_all = bstr_equals0(opt, "auto") ||
-                            bstr_equals0(opt, "");
-        bool hwdec_auto_safe = bstr_equals0(opt, "auto-safe") ||
+        bool hwdec_auto_safe = bstr_equals0(opt, "auto") ||
+                            bstr_equals0(opt, "auto-safe") ||
+                            bstr_equals0(opt, "auto-copy") ||
                             bstr_equals0(opt, "auto-copy-safe") ||
-                            bstr_equals0(opt, "yes");
+                            bstr_equals0(opt, "yes") ||
+                            bstr_equals0(opt, "");
+        bool hwdec_auto_unsafe = bstr_equals0(opt, "auto-unsafe");
         bool hwdec_auto_copy = bstr_equals0(opt, "auto-copy") ||
-                            bstr_equals0(opt, "auto-copy-safe");
-        bool hwdec_auto = hwdec_auto_all || hwdec_auto_copy || hwdec_auto_safe;
+                            bstr_equals0(opt, "auto-copy-safe") ||
+                            bstr_equals0(opt, "auto-copy-unsafe");
+        bool hwdec_auto = hwdec_auto_unsafe || hwdec_auto_copy || hwdec_auto_safe;
 
         if (!hwdec_requested) {
             MP_VERBOSE(vd, "No hardware decoding requested.\n");
@@ -678,7 +681,7 @@ static void reinit(struct mp_filter *vd)
      * Reset attempted hwdecs so that if the hwdec list is reconfigured
      * we attempt all of them from the beginning. The most practical
      * reason for this is that ctrl+h toggles between `no` and
-     * `auto-safe`, and we want to reevaluate from a clean slate each time.
+     * `auto`, and we want to reevaluate from a clean slate each time.
      */
     TA_FREEP(&ctx->attempted_hwdecs);
     ctx->num_attempted_hwdecs = 0;
