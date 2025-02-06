@@ -7058,7 +7058,8 @@ them.
     Valid values are:
 
     auto
-        Choose the best curve according to internal heuristics. (Default)
+        Maps to ``bt.2390`` when using ``--vo=gpu``, and to ``spline`` with
+        ``--vo=gpu-next``. (Default)
     clip
         Hard-clip any out-of-range values. Use this when you care about
         perfect color accuracy for in-range values at the cost of completely
