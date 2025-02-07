@@ -105,6 +105,7 @@ local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
 local default_item
+local was_cursor_autohide
 
 local complete
 local cycle_through_completions
@@ -1788,6 +1789,10 @@ set_active = function (active)
             default_item = nil
             dont_bind_up_down = false
             unbind_mouse()
+            if was_cursor_autohide then
+                mp.set_property_native('cursor-autohide', was_cursor_autohide)
+                was_cursor_autohide = nil
+            end
         end
         collectgarbage()
     end
@@ -1863,6 +1868,8 @@ mp.register_script_message('get-input', function (script_name, args)
         default_item = args.default_item
         handle_edit()
         bind_mouse()
+        was_cursor_autohide = mp.get_property_native('cursor-autohide')
+        mp.set_property_native('cursor-autohide', 'no')
     end
 
     set_active(true)
