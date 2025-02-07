@@ -218,7 +218,7 @@ Configurable Options
     seekbar or separately if ``seekbarstyle`` is set to ``bar``.
 
 ``seekrangealpha``
-    Default: 200
+    Default: 20
 
     Alpha of the seekable ranges, 0 (opaque) to 255 (fully transparent).
 
