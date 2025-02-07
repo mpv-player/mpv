@@ -205,7 +205,6 @@ const struct m_sub_options gl_next_conf = {
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
-        .target_hint = -1,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,

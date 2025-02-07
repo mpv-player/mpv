@@ -6908,9 +6908,9 @@ them.
 ``--target-colorspace-hint=<auto|yes|no>``
     Automatically configure the output colorspace of the display to pass
     through the input values of the stream (e.g. for HDR passthrough), if
-    possible. In ``auto`` mode (the default), the target colorspace is only set,
+    possible. In ``auto`` mode, the target colorspace is only set,
     if the display signals support for HDR colorspace.
-    Requires a supporting driver and ``--vo=gpu-next``. (Default: ``auto``)
+    Requires a supporting driver and ``--vo=gpu-next``. (Default: ``no``)
 
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
