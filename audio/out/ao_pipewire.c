@@ -273,12 +273,12 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
 
 static float spa_volume_to_mp_volume(float vol)
 {
-        return vol * 100;
+        return 100 * pow(vol, 1/3.); // pow(x, 1/n) is the nth root of x, in lieu of cbrt()
 }
 
 static float mp_volume_to_spa_volume(float vol)
 {
-        return vol / 100;
+        return pow(vol/100, 3); // use cubic volume
 }
 
 static float volume_avg(float* vols, uint32_t n)
