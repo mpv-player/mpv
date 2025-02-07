@@ -169,6 +169,32 @@ Configurable Options
 
     Set the font border size used for the REPL and the console.
 
+``background_alpha``
+    Default: 20
+
+    The transparency of the menu's background. Ranges from 0 (opaque) to 255
+    (fully transparent).
+
+``padding``
+    Default: 10
+
+    The padding of the menu.
+
+``menu_outline_size``
+    Default: 0
+
+    The size of the menu's border.
+
+``menu_outline_color``
+    Default: #FFFFFF
+
+    The color of the menu's border.
+
+``corner_radius``
+    Default: 8
+
+    The radius of the menu's corners.
+
 ``margin_x``
     Default: same as ``--osd-margin-x``
 
