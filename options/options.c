@@ -869,7 +869,9 @@ static const m_option_t mp_opts[] = {
     {"idle", OPT_CHOICE(player_idle_mode,
         {"no",   0}, {"once", 1}, {"yes",  2})},
 
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"input-commands", OPT_STRINGLIST(input_commands)},
+#endif
     {"input-terminal", OPT_BOOL(consolecontrols), .flags = UPDATE_TERM},
 
     {"input-ipc-server", OPT_STRING(ipc_path), .flags = M_OPT_FILE},
