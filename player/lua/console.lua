@@ -32,7 +32,11 @@ local opts = {
     font = "",
     font_size = 24,
     border_size = 1.65,
+    background_alpha = 50,
     padding = 10,
+    menu_outline_size = 0,
+    menu_outline_color = '#FFFFFF',
+    corner_radius = 8,
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
@@ -300,7 +304,7 @@ local function calculate_max_log_lines()
 
     return math.floor((select(2, get_scaled_osd_dimensions())
                        * (1 - global_margins.t - global_margins.b)
-                       - get_margin_y())
+                       - get_margin_y() - (selectable_items and opts.padding * 2 or 0))
                       / get_line_height()
                       -- Subtract 1 for the input line and 0.5 for the empty
                       -- line between the log and the input line.
@@ -330,7 +334,8 @@ local function calculate_max_item_width()
                          (font and '\\fn' .. font or '') .. '\\b1\\q2}' ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
-    max_item_width = math.min(result.x1 - result.x0, osd_w - get_margin_x() * 2)
+    max_item_width = math.min(result.x1 - result.x0,
+                              osd_w - get_margin_x() * 2 - opts.padding * 2)
 end
 
 local function should_highlight_completion(i)
@@ -341,6 +346,10 @@ end
 local function mpv_color_to_ass(color)
     return color:sub(8,9) .. color:sub(6,7) ..  color:sub(4,5),
            string.format('%x', 255 - tonumber('0x' .. color:sub(2,3)))
+end
+
+local function option_color_to_ass(color)
+    return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
 end
 
 local function get_selected_ass()
@@ -659,17 +668,32 @@ local function render()
 
     populate_log_with_matches()
 
-    -- Disable background-box for selectable items to not draw separate
-    -- rectangles with different widths, and draw a single rectangle instead.
-    if selectable_items and border_style == 'background-box' then
-        style = style .. '{\\4a&Hff&}'
+    -- Background
+    if selectable_items and
+       (not searching_history or border_style == 'background-box') then
+        style = style .. '{\\bord0\\blur0\\4a&Hff&}'
+        local back_color, back_alpha = mpv_color_to_ass(mp.get_property(
+            border_style == 'background-box' and 'osd-back-color' or 'osd-outline-color'))
+        if not searching_history then
+            back_alpha = string.format('%x', opts.background_alpha)
+        end
 
         ass:new_event()
         ass:an(alignment)
         ass:pos(x, y)
-        ass:append('{\\1a&Hff&}')
+        ass:append('{\\1c&H' .. back_color .. '&\\1a&H' .. back_alpha ..
+                   '&\\bord' .. opts.menu_outline_size .. '\\3c&H' ..
+                   option_color_to_ass(opts.menu_outline_color) .. '&}')
+        if border_style == 'background-box' then
+            ass:append('{\\4a&Hff&}')
+        end
         ass:draw_start()
-        ass:rect_cw(0, 0, max_item_width, (1.5 + math.min(#matches, max_lines)) * line_height)
+        ass:round_rect_cw(-opts.padding,
+                          opts.padding * (alignment == 7 and -1 or 1),
+                          max_item_width + opts.padding,
+                          (1.5 + math.min(#matches, max_lines)) * line_height +
+                          opts.padding * (alignment == 7 and 1 or 2),
+                          opts.corner_radius, opts.corner_radius)
         ass:draw_stop()
     end
 
@@ -701,10 +725,7 @@ local function render()
         ass:new_event()
         ass:an(alignment + 2)
         ass:pos(x + max_item_width, y)
-        if border_style == 'background-box' then
-            ass:append('{\\4a&Hff&}')
-        end
-        ass:append(selected_match .. '/' .. #matches)
+        ass:append('{\\bord0\\4a&Hff&\\blur0}' .. selected_match .. '/' .. #matches)
 
         local start_percentage = (first_match_to_print - 1) / #matches
         local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
@@ -1008,9 +1029,10 @@ local function determine_hovered_item()
     local mouse_pos = mp.get_property_native('mouse-pos')
     local mouse_x = mouse_pos.x / scale
     local mouse_y = mouse_pos.y / scale
-    local item_x0 = searching_history and get_margin_x() or (osd_w - max_item_width) / 2
+    local item_x0 = (searching_history and get_margin_x() or (osd_w - max_item_width) / 2)
+                    - opts.padding
 
-    if mouse_x < item_x0 or mouse_x > item_x0 + max_item_width then
+    if mouse_x < item_x0 or mouse_x > item_x0 + max_item_width + opts.padding * 2 then
         return
     end
 
