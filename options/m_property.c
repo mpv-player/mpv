@@ -617,19 +617,17 @@ int m_property_read_list(int action, void *arg, int count,
             return M_PROPERTY_NOT_IMPLEMENTED;
         }
         // This is expected of the form "123" or "123/rest"
-        char *next = strchr(ka->key, '/');
-        char *end = NULL;
-        const char *key_end = ka->key + strlen(ka->key);
+        char *end;
         long int item = strtol(ka->key, &end, 10);
         // not a number, trailing characters, etc.
-        if ((end != key_end || ka->key == key_end) && end != next)
+        if (end == ka->key || (end[0] == '/' && !end[1]))
             return M_PROPERTY_UNKNOWN;
         if (item < 0 || item >= count)
             return M_PROPERTY_UNKNOWN;
-        if (next) {
+        if (*end) {
             // Sub-path
             struct m_property_action_arg n_ka = *ka;
-            n_ka.key = next + 1;
+            n_ka.key = end + 1;
             return get_item(item, M_PROPERTY_KEY_ACTION, &n_ka, ctx);
         } else {
             // Direct query
