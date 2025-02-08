@@ -1777,7 +1777,6 @@ local function get_bindings()
         { 'ins',         handle_ins                             },
         { 'shift+ins',   function() paste(false) end            },
         { 'mbtn_mid',    function() paste(false) end            },
-        { 'mbtn_right',  function() set_active(false) end       },
         { 'left',        function() prev_char() end             },
         { 'ctrl+b',      function() page_up_or_prev_char() end  },
         { 'right',       function() next_char() end             },
