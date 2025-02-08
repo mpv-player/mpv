@@ -75,6 +75,7 @@ local repl_active = false
 local osd_msg_active = false
 local insert_mode = false
 local pending_update = false
+local ime_active = mp.get_property_bool('input-ime')
 local line = ''
 local cursor = 1
 local default_prompt = '>'
@@ -1758,6 +1759,8 @@ set_active = function (active)
         insert_mode = false
         define_key_bindings()
         mp.set_property_bool('user-data/mpv/console/open', true)
+        ime_active = mp.get_property_bool('input-ime')
+        mp.set_property_bool('input-ime', true)
 
         if not input_caller then
             prompt = default_prompt
@@ -1779,6 +1782,7 @@ set_active = function (active)
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
         mp.set_property_bool('user-data/mpv/console/open', false)
+        mp.set_property_bool('input-ime', ime_active)
 
         if input_caller then
             mp.commandv('script-message-to', input_caller, 'input-event',
