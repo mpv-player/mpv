@@ -100,9 +100,6 @@ Shift+TAB
 Ctrl+l
     Clear all log messages from the console.
 
-MBTN_RIGHT
-    Hide the console.
-
 MBTN_MID
     Paste text (uses the primary selection on X11 and Wayland).
 
