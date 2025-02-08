@@ -208,6 +208,16 @@ Configurable Options
     Whether to scale the console with the window height. Can be ``yes``, ``no``,
     or ``auto``, which follows the value of ``--osd-scale-by-window``.
 
+``selected_color``
+    Default: ``#222222``
+
+    The color of the selected item.
+
+``selected_back_color``
+    Default: ``#FFFFFF``
+
+    The background color of the selected item.
+
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
 
