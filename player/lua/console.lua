@@ -40,6 +40,8 @@ local opts = {
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
+    selected_color = '#222222',
+    selected_back_color = '#FFFFFF',
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
     font_hw_ratio = 'auto',
@@ -331,7 +333,7 @@ local function calculate_max_item_width()
     width_overlay.res_x = osd_w
     width_overlay.res_y = osd_h
     width_overlay.data = '{\\fs' .. opts.font_size ..
-                         (font and '\\fn' .. font or '') .. '\\b1\\q2}' ..
+                         (font and '\\fn' .. font or '') .. '\\q2}' ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
     max_item_width = math.min(result.x1 - result.x0,
@@ -356,7 +358,7 @@ local function get_selected_ass()
     local color, alpha = mpv_color_to_ass(mp.get_property('osd-selected-color'))
     local outline_color, outline_alpha =
         mpv_color_to_ass(mp.get_property('osd-selected-outline-color'))
-    return '{\\1c&H' .. color .. '&\\1a&H' .. alpha ..
+    return '{\\b1\\1c&H' .. color .. '&\\1a&H' .. alpha ..
            '&\\3c&H' .. outline_color .. '&\\3a&H' .. outline_alpha .. '&}'
 end
 
@@ -442,7 +444,7 @@ local function format_grid(list, width_max, rows_max)
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
             if should_highlight_completion(i) then
-                columns[column] = '{\\b1}' .. get_selected_ass() .. columns[column] ..
+                columns[column] = get_selected_ass() .. columns[column] ..
                                   '{\\b\\1a&\\3a&}' .. styles.completion
             end
         end
@@ -490,14 +492,16 @@ local function populate_log_with_matches()
         local style = ''
         local terminal_style = ''
 
-        if i == selected_match or matches[i].index == default_item then
-            style = get_selected_ass()
-        end
         if matches[i].index == default_item then
             terminal_style = terminal_styles.default_item
         end
         if i == selected_match then
-            style = style .. '{\\b1}'
+            if searching_history and
+               mp.get_property('osd-border-style') == 'outline-and-shadow' then
+                style = get_selected_ass()
+            else
+                style = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
+            end
             terminal_style = terminal_style .. terminal_styles.selected_completion
         end
 
@@ -708,6 +712,23 @@ local function render()
             local item_y = alignment == 7
                 and y + (1 + i) * line_height
                 or y - (1.5 + #log_buffer - i) * line_height
+
+            if (first_match_to_print - 1 + i == selected_match or
+                matches[first_match_to_print - 1 + i].index == default_item)
+               and (not searching_history or border_style == 'background-box') then
+                ass:new_event()
+                ass:an(4)
+                ass:pos(x, item_y)
+                ass:append('{\\blur0\\bord0\\4aH&ff&\\1c&H' ..
+                           option_color_to_ass(opts.selected_back_color) .. '&}')
+                if first_match_to_print - 1 + i ~= selected_match then
+                    ass:append('{\\1aH&dd&}')
+                end
+                ass:draw_start()
+                ass:rect_cw(-opts.padding, 0, max_item_width + opts.padding, line_height)
+                ass:draw_stop()
+            end
+
             ass:new_event()
             ass:an(4)
             ass:pos(x, item_y)
