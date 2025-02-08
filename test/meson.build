@@ -134,7 +134,9 @@ if get_option('libmpv')
     if shared
         exe = executable('libmpv-lifetime', sources: 'libmpv_lifetime.c',
                          include_directories: incdir)
-        test('libmpv-lifetime', exe, depends: mpvlib)
+        libmpv_lifetime_suppr = join_paths(source_root, 'test', 'libmpv_lifetime_suppr.txt')
+        test('libmpv-lifetime', exe, depends: mpvlib,
+             env: 'LSAN_OPTIONS=suppressions=' + libmpv_lifetime_suppr)
     endif
 endif
 
