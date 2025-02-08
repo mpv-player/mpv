@@ -2678,7 +2678,7 @@ Subtitles
 
 ``--sub-ass-video-aspect-override=<no|ratio>``
     Allows passing any arbitrary aspect ratio to libass instead of the video’s
-    actual aspect ratio. Zero or negative aspect ratios are identical to ``no``.
+    actual aspect ratio. Zero aspect ratio is identical to ``no``.
 
     This has no effect if ``sub-ass-use-video-data`` is set to ``none``.
 
