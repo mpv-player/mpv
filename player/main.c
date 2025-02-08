@@ -410,6 +410,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
 
+    mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
+
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
