@@ -1,1 +1,1 @@
-add `--input-ime` to enable or disable the IME on supported VOs (Wayland)
+add `--input-ime` to enable or disable the IME on supported VOs (Windows, Wayland)
