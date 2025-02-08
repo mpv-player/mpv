@@ -2668,7 +2668,7 @@ Subtitles
 
     :none:  Don't forward any video stream information.
     :aspect-ratio: Only forward aspect ratio; fallbacks are used for other properties.
-                   This makes behaviour consistent across different video resolutions.
+                   This makes behavior consistent across different video resolutions.
     :all:   Forward all available information, notably including storage resolution.
 
     For certain kinds of broken ASS files which got repurposed across
