@@ -4494,8 +4494,7 @@ Input
     pre-edit inside of the input popup window if you cannot read the pre-edit
     text in the mpv window.
 
-    Wayland only. On Windows, the IME is currently always enabled. This option
-    is not applicable to terminal input.
+    Wayland and Windows only. This option is not applicable to terminal input.
 
 OSD
 ---
