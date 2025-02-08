@@ -1577,7 +1577,7 @@ Video
     the window, while ``--video-zoom`` can zoom in or out arbitrary amounts, and
     also works with ``--video-unscaled``.
 
-``--video-aspect-override=<ratio|no|original>``
+``--video-aspect-override=<ratio|no>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played.
 
@@ -1585,8 +1585,7 @@ Video
 
     :0:  disable aspect ratio handling, pretend the video has square pixels
     :no: same as ``0``
-    :original: use the video stream or container aspect (default)
-    :-1: same as ``1`` (deprecated)
+    :-1: use the video stream or container aspect (default)
 
     But note that handling of these special values might change in the future.
 
