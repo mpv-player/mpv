@@ -441,6 +441,9 @@ typedef struct MPContext {
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
 
+    struct mp_option_callback *option_callbacks;
+    int num_option_callbacks;
+
     struct mp_ipc_ctx *ipc_ctx;
 
     int64_t builtin_script_ids[6];
