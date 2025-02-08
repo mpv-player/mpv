@@ -1116,19 +1116,6 @@ static int parse_double_aspect(struct mp_log *log, const m_option_t *opt,
             VAL(dst) = 0.0;
         return 1;
     }
-
-    // Potentially allow -1 but forbid all other negative values.
-    if (opt->defval && *(double *)opt->defval == -1) {
-        struct bstr rest;
-        double val = bstrtod(param, &rest);
-        if (bstr_eatstart0(&rest, ":") || bstr_eatstart0(&rest, "/"))
-            val /= bstrtod(rest, &rest);
-        if (val == -1 && dst) {
-            VAL(dst) = -1.0;
-            return 1;
-        }
-    }
-
     return parse_double(log, opt, name, param, dst);
 }
 
