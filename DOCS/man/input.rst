@@ -2563,9 +2563,10 @@ Property list
 ``ao-volume`` (RW)
     System volume. This property is available only if mpv audio output is
     currently active, and only if the underlying implementation supports volume
-    control. What this option does depends on the API. For example, on ALSA
-    this usually changes system-wide audio, while with PulseAudio this controls
-    per-application volume.
+    control. What this option does, or how the value is interpreted depends on
+    the API. For example, on ALSA this usually changes system-wide audio volume
+    on a linear curve, while with PulseAudio this controls per-application volume
+    on a cubic curve.
 
 ``ao-mute`` (RW)
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
