@@ -110,13 +110,6 @@ static int set_parameter(struct render_backend *ctx, mpv_render_param param)
         gl_video_set_icc_profile(p->renderer, bstrdup(NULL, (bstr){data->data, data->size}));
         return 0;
     }
-    case MPV_RENDER_PARAM_AMBIENT_LIGHT: {
-        MP_WARN(ctx, "MPV_RENDER_PARAM_AMBIENT_LIGHT is deprecated and might be "
-                     "removed in the future (replacement: gamma-auto.lua)\n");
-        int lux = *(int *)param.data;
-        gl_video_set_ambient_lux(p->renderer, (double)lux);
-        return 0;
-    }
     default:
         return MPV_ERROR_NOT_IMPLEMENTED;
     }
