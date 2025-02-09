@@ -390,7 +390,7 @@ mp.add_key_binding(nil, "select-watch-history", function ()
     if not history_file then
         show_warning(mp.get_property_native("save-watch-history")
                      and error_message
-                     or "Enable --save-watch-history")
+                     or "Enable --save-watch-history to jump to recently played files.")
         return
     end
 
