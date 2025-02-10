@@ -408,7 +408,8 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/language-mac.c',
+    sources += files('osdep/file_dialog-mac.m',
+                     'osdep/language-mac.c',
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/app_bridge.m',
@@ -513,6 +514,7 @@ if features['win32-desktop']
     endif
     sources += files('input/ipc-win.c',
                      'player/clipboard/clipboard-win.c',
+                     'osdep/file_dialog-win.c',
                      'osdep/language-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
@@ -526,6 +528,10 @@ if not posix and not features['win32-desktop']
     sources += files('input/ipc-dummy.c',
                      'osdep/subprocess-dummy.c',
                      'osdep/terminal-dummy.c')
+endif
+
+if not win32 and not darwin
+    sources += files('osdep/file_dialog-dummy.c')
 endif
 
 # media controls
