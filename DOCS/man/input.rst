@@ -522,12 +522,15 @@ Playlist Manipulation
     restarted if for example the new playlist entry is the same as the previous
     one.
 
-``loadfile <url> [<flags> [<index> [<options>]]]``
+``loadfile [<url> [<flags> [<index> [<options>]]]]``
     Load the given file or URL and play it. Technically, this is just a playlist
     manipulation command (which either replaces the playlist or adds an entry
     to it). Actual file loading happens independently. For example, a
     ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
+
+    The URL argument is optional. If not provided, a file dialog will be shown
+    to select a file.
 
     Second argument:
 
@@ -573,6 +576,10 @@ Playlist Manipulation
         to include the list of options to be set while the file is playing. To address
         this problem, the third argument now needs to be set to -1 if the fourth
         argument needs to be used.
+
+``loaddir [<url> [<flags> [<index> [<options>]]]]``
+    This is the same as ``loadfile``, but it also allows opening directories.
+    When a URL is not provided, a file dialog will be shown to select a directory.
 
 ``loadlist <url> [<flags> [<index>]]``
     Load the given playlist file or URL (like ``--playlist``).

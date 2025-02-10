@@ -74,6 +74,7 @@
 #include "misc/thread_pool.h"
 #include "misc/thread_tools.h"
 
+#include "osdep/file_dialog.h"
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
 #include "osdep/terminal.h"
@@ -5992,42 +5993,106 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     }
 }
 
+char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
+                                const char *title, const char *initial_dir,
+                                const char *initial_selection,
+                                mp_file_dialog_filters *filters,
+                                enum mp_file_dialog_flags flags)
+{
+    static const struct m_option exts_opt = {
+        .type = CONF_TYPE_STRING_LIST
+    };
+    // Clone lists to avoid locking inside the dialog implementation
+    for (int i = 0; filters && filters[i].name; i++) {
+        char **exts = filters[i].extensions;
+        filters[i].extensions = NULL;
+        m_option_copy(&exts_opt, &filters[i].extensions, &exts);
+    }
+    mp_core_unlock(mpctx);
+    char **files = mp_file_dialog_get_files(talloc_ctx,
+                    &(mp_file_dialog_params) {
+                        .log = mpctx->log,
+                        .title = title,
+                        .initial_selection = initial_selection,
+                        .initial_dir = initial_dir,
+                        .filters = filters,
+                        .flags = flags,
+                    });
+    for (int i = 0; filters && filters[i].name; i++)
+        m_option_free(&exts_opt, &filters[i].extensions);
+    mp_core_lock(mpctx);
+
+    return files;
+}
+
 static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    char *filename = cmd->args[0].v.s;
+    char **files = (char*[]){cmd->args[0].v.s, NULL};
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
+    bool load_dir = *(bool*)cmd->priv;
+
+    void *tmp = talloc_new(NULL);
+
+    if (!files || !files[0] || !files[0][0]) {
+        mp_file_dialog_filters filters[] = {
+            {"Video Files", mpctx->opts->video_exts},
+            {"Audio Files", mpctx->opts->audio_exts},
+            {"Image Files", mpctx->opts->image_exts},
+            {"Archive Files", mpctx->opts->archive_exts},
+            {"Playlist Files", mpctx->opts->playlist_exts},
+            {NULL},
+        };
+        files = mp_cmd_get_dialog_files(tmp, mpctx,
+                                        load_dir ? "Open Directory" : "Open file(s)",
+                                        mp_getcwd(tmp), "",
+                                        load_dir ? NULL : filters,
+                                        load_dir ? MP_FILE_DIALOG_DIRECTORY
+                                                 : MP_FILE_DIALOG_FILE | MP_FILE_DIALOG_MULTIPLE);
+    }
+
+    if (!files || !files[0]) {
+        cmd->success = false;
+        talloc_free(tmp);
+        return;
+    }
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
-    struct playlist_entry *entry = playlist_entry_new(path);
-    talloc_free(path);
-    if (cmd->args[3].v.str_list) {
-        char **pairs = cmd->args[3].v.str_list;
-        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
-            playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
-    }
+    struct playlist_entry *first_entry = NULL;
+    for (int n = 0; files[n]; n++) {
+        char *path = mp_get_user_path(tmp, mpctx->global, files[n]);
+        struct playlist_entry *entry = playlist_entry_new(path);
+        if (cmd->args[3].v.str_list) {
+            char **pairs = cmd->args[3].v.str_list;
+            for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
+                playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
+        }
 
-    struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
-    playlist_insert_at(mpctx->playlist, entry, at);
+        struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
+        playlist_insert_at(mpctx->playlist, entry, at);
+
+        if (!first_entry)
+            first_entry = entry;
+    }
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
-    node_map_add_int64(res, "playlist_entry_id", entry->id);
+    node_map_add_int64(res, "playlist_entry_id", first_entry->id);
 
     if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
-        mp_set_playlist_entry(mpctx, entry);
+        mp_set_playlist_entry(mpctx, first_entry);
     }
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
+    talloc_free(tmp);
 }
 
 static void cmd_loadlist(void *p)
@@ -7248,7 +7313,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadfile", cmd_loadfile,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
@@ -7261,6 +7326,26 @@ const struct mp_cmd_def mp_cmds[] = {
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
+        .spawn_thread = true,
+        .priv = &(const bool){false},
+    },
+    { "loaddir", cmd_loadfile,
+        {
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"flags", OPT_CHOICE(v.i,
+                {"replace", 0},
+                {"append", 1},
+                {"append-play", 2},
+                {"insert-next", 3},
+                {"insert-next-play", 4},
+                {"insert-at", 5},
+                {"insert-at-play", 6}),
+                .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
+        .priv = &(const bool){true},
     },
     { "loadlist", cmd_loadlist,
         {
