@@ -1,0 +1,2 @@
+make the URL argument optional for loadfile; it will open a file selection dialog on supported platforms
+add `loaddir` command to select directories using a file dialog
