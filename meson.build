@@ -531,7 +531,7 @@ if not posix and not features['win32-desktop']
 endif
 
 if not win32 and not darwin
-    sources += files('osdep/file_dialog-dummy.c')
+    sources += files('osdep/file_dialog-external.c')
 endif
 
 # media controls
