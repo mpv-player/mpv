@@ -40,6 +40,7 @@
 #include "text-input-unstable-v3.h"
 #include "linux-dmabuf-unstable-v1.h"
 #include "presentation-time.h"
+#include "xdg-activation-v1.h"
 #include "xdg-decoration-unstable-v1.h"
 #include "xdg-shell.h"
 #include "viewporter.h"
@@ -1907,6 +1908,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         xx_color_manager_v4_add_listener(wl->color_manager, &color_manager_listener, wl);
     }
 
+    if (!strcmp(interface, xdg_activation_v1_interface.name) && found++) {
+        ver = 1;
+        wl->xdg_activation = wl_registry_bind(reg, id, &xdg_activation_v1_interface, ver);
+    }
+
     if (!strcmp(interface, zxdg_decoration_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->xdg_decoration_manager = wl_registry_bind(reg, id, &zxdg_decoration_manager_v1_interface, ver);
@@ -2095,6 +2101,16 @@ static bool create_input(struct vo_wayland_state *wl)
     }
 
     return 0;
+}
+
+static void xdg_activate(struct vo_wayland_state *wl)
+{
+    const char *token = getenv("XDG_ACTIVATION_TOKEN");
+    if (token) {
+        MP_VERBOSE(wl, "Activating window with token: '%s'\n", token);
+        xdg_activation_v1_activate(wl->xdg_activation, token, wl->surface);
+        unsetenv("XDG_ACTIVATION_TOKEN");
+    }
 }
 
 static int create_viewports(struct vo_wayland_state *wl)
@@ -3320,6 +3336,13 @@ bool vo_wayland_init(struct vo *vo)
     if (create_xdg_surface(wl))
         goto err;
 
+    if (wl->xdg_activation) {
+        xdg_activate(wl);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+            xdg_activation_v1_interface.name);
+    }
+
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
@@ -3618,6 +3641,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->wm_base)
         xdg_wm_base_destroy(wl->wm_base);
+
+    if (wl->xdg_activation)
+        xdg_activation_v1_destroy(wl->xdg_activation);
 
     if (wl->xdg_decoration_manager)
         zxdg_decoration_manager_v1_destroy(wl->xdg_decoration_manager);
