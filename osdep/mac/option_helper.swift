@@ -24,6 +24,7 @@ extension OptionHelper {
 class OptionHelper {
     var voCachePtr: UnsafeMutablePointer<m_config_cache>
     var macCachePtr: UnsafeMutablePointer<m_config_cache>
+    var rootRawPtr: UnsafeMutableRawPointer
 
     var voPtr: UnsafeMutablePointer<mp_vo_opts> {
         return UnsafeMutablePointer<mp_vo_opts>(OpaquePointer(voCachePtr.pointee.opts))
@@ -31,16 +32,21 @@ class OptionHelper {
     var macPtr: UnsafeMutablePointer<macos_opts> {
         return UnsafeMutablePointer<macos_opts>(OpaquePointer(macCachePtr.pointee.opts))
     }
+    var rootPtr: UnsafeMutablePointer<MPOpts> {
+        return UnsafeMutablePointer<MPOpts>(OpaquePointer(rootRawPtr))
+    }
 
     // these computed properties return a local copy of the struct accessed:
     // - don't use if you rely on the pointers
     // - only for reading
     var vo: mp_vo_opts { return voPtr.pointee }
     var mac: macos_opts { return macPtr.pointee }
+    var root: MPOpts { return rootPtr.pointee }
 
     init(_ taParent: UnsafeMutableRawPointer, _ global: UnsafeMutablePointer<mpv_global>?) {
         voCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getVoConf())
         macCachePtr = m_config_cache_alloc(taParent, global, AppHub.shared.getMacConf())
+        rootRawPtr = mp_get_config_group(taParent, global, AppHub.shared.getRootConf())
     }
 
     func nextChangedOption(property: inout UnsafeMutableRawPointer?) -> Bool {
