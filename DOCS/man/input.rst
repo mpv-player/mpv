@@ -644,9 +644,12 @@ Playlist Manipulation
 Track Manipulation
 ~~~~~~~~~~~~~~~~~~
 
-``sub-add <url> [<flags> [<title> [<lang>]]]``
+``sub-add [<url> [<flags> [<title> [<lang>]]]]``
     Load the given subtitle file or stream. By default, it is selected as
-    current subtitle  after loading.
+    current subtitle after loading.
+
+    The ``url`` argument is optional and if empty, file dialog will be shown to
+    select subtitle file.
 
     The ``flags`` argument is one of the following values:
 
@@ -693,7 +696,7 @@ Track Manipulation
     secondary
         Steps through the secondary subtitles.
 
-``audio-add <url> [<flags> [<title> [<lang>]]]``
+``audio-add [<url> [<flags> [<title> [<lang>]]]]``
     Load the given audio file. See ``sub-add`` command.
 
 ``audio-remove [<id>]``
@@ -702,7 +705,7 @@ Track Manipulation
 ``audio-reload [<id>]``
     Reload the given audio tracks. See ``sub-reload`` command.
 
-``video-add <url> [<flags> [<title> [<lang> [<albumart>]]]]``
+``video-add [<url> [<flags> [<title> [<lang> [<albumart>]]]]]``
     Load the given video file. See ``sub-add`` command for common options.
 
     ``albumart`` (``MPV_FORMAT_FLAG``)

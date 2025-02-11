@@ -6282,8 +6282,42 @@ static void cmd_track_add(void *p)
             return;
         }
     }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
+
+    void *tmp = talloc_new(NULL);
+    char *filename = cmd->args[0].v.s;
+    if (!filename || !filename[0]) {
+        mp_file_dialog_filters filters[] = {
+            {NULL},
+            {NULL},
+        };
+        switch (type) {
+        case STREAM_VIDEO:
+            filters[0] = is_albumart ?
+                (mp_file_dialog_filters){"Image Files", mpctx->opts->image_exts} :
+                (mp_file_dialog_filters){"Video Files", mpctx->opts->video_exts};
+            break;
+        case STREAM_SUB:
+            filters[0] = (mp_file_dialog_filters){"Subtitle Files", mpctx->opts->sub_auto_exts};
+            break;
+        case STREAM_AUDIO:
+            filters[0] = (mp_file_dialog_filters){"Audio Files", mpctx->opts->audio_exts};
+            break;
+        }
+        char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Open file",
+                                               mp_getcwd(tmp), "", filters,
+                                               MP_FILE_DIALOG_FILE);
+        if (files)
+            filename = files[0];
+    }
+
+    if (!filename || !filename[0]) {
+        cmd->success = false;
+        return;
+    }
+
+    int first = mp_add_external_file(mpctx, filename, type,
                                      cmd->abort->cancel, is_albumart);
+    talloc_free(tmp);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -7249,7 +7283,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "sub-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
@@ -7263,7 +7297,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "audio-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
@@ -7277,7 +7311,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "video-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i, {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
