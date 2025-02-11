@@ -5993,6 +5993,16 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     }
 }
 
+static char *get_current_dir(void *talloc_ctx, struct MPContext *mpctx)
+{
+    char *dir = NULL;
+    if (mpctx->filename && !mp_is_url(bstr0(mpctx->filename)))
+        dir = bstrto0(talloc_ctx, mp_dirname(mpctx->filename));
+    if (!dir)
+        dir = mp_getcwd(talloc_ctx);
+    return dir;
+}
+
 char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
                                 const char *title, const char *initial_dir,
                                 const char *initial_selection,
@@ -6008,6 +6018,10 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
         filters[i].extensions = NULL;
         m_option_copy(&exts_opt, &filters[i].extensions, &exts);
     }
+
+    if (!initial_dir || !initial_dir[0])
+        initial_dir = get_current_dir(talloc_ctx, mpctx);
+
     mp_core_unlock(mpctx);
     char **files = mp_file_dialog_get_files(talloc_ctx,
                     &(mp_file_dialog_params) {
@@ -6046,8 +6060,8 @@ static void cmd_loadfile(void *p)
             {NULL},
         };
         files = mp_cmd_get_dialog_files(tmp, mpctx,
-                                        load_dir ? "Open Directory" : "Open file(s)",
-                                        mp_getcwd(tmp), "",
+                                        load_dir ? "Open Directory" : "Open file",
+                                        NULL, "",
                                         load_dir ? NULL : filters,
                                         load_dir ? MP_FILE_DIALOG_DIRECTORY
                                                  : MP_FILE_DIALOG_FILE | MP_FILE_DIALOG_MULTIPLE);
@@ -6304,7 +6318,7 @@ static void cmd_track_add(void *p)
             break;
         }
         char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Open file",
-                                               mp_getcwd(tmp), "", filters,
+                                               NULL, "", filters,
                                                MP_FILE_DIALOG_FILE);
         if (files)
             filename = files[0];
