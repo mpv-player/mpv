@@ -44,7 +44,10 @@ bool vo_android_init(struct vo *vo)
         goto fail;
     }
 
-    assert(vo->opts->WinID != 0 && vo->opts->WinID != -1);
+    if (vo->opts->WinID == 0 || vo->opts->WinID == -1) {
+        MP_FATAL(ctx, "Missing surface pointer\n");
+        goto fail;
+    }
     jobject surface = (jobject)(intptr_t)vo->opts->WinID;
     ctx->native_window = ANativeWindow_fromSurface(env, surface);
     if (!ctx->native_window) {
