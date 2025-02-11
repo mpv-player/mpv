@@ -604,6 +604,9 @@ mp.add_key_binding(nil, "menu", function ()
     end
 
     local menu = {
+        {"Open file(s)", "interactive loadfile", true},
+        {"Open directory", "interactive loaddir", true},
+        {"Load subtitles", "interactive sub-add", true},
         {"Subtitles", "script-binding select/select-sid", sub_track_count > 0},
         {"Secondary subtitles", "script-binding select/select-secondary-sid", sub_track_count > 1},
         {"Subtitle lines", "script-binding select/select-subtitle-line", text_sub_selected},
