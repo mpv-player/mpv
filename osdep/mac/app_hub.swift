@@ -134,4 +134,8 @@ class AppHub: NSObject {
     func getVoConf() -> UnsafePointer<m_sub_options>? {
         return app_bridge_vo_conf()
     }
+
+    func getRootConf() -> UnsafePointer<m_sub_options>? {
+        return app_bridge_root_conf()
+    }
 }

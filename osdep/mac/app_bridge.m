@@ -130,6 +130,11 @@ const struct m_sub_options *app_bridge_vo_conf(void)
     return &vo_sub_opts;
 }
 
+const struct m_sub_options *app_bridge_root_conf(void)
+{
+    return &mp_opt_root;
+}
+
 #if HAVE_SWIFT
 void cocoa_init_media_keys(void)
 {

@@ -56,3 +56,4 @@ NSData *app_bridge_icon(void);
 void app_bridge_tarray_append(void *t, char ***a, int *i, char *s);
 const struct m_sub_options *app_bridge_mac_conf(void);
 const struct m_sub_options *app_bridge_vo_conf(void);
+const struct m_sub_options *app_bridge_root_conf(void);
