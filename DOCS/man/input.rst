@@ -1650,6 +1650,55 @@ Miscellaneous Commands
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
 
+``file-dialog``
+    Shows a file dialog that can be used to select file(s) or a directory to
+    open or save. It is accessible when using commands that require a file path
+    as an argument, such as ``loadfile``, when used with an empty URL argument.
+    Using ``file-dialog`` makes the use standalone.
+
+    The command has the following arguments:
+
+    ``type``
+        The type of dialog to show. Can be one of the following:
+
+        ``open``
+            Open file dialog.
+        ``save``
+            Save file dialog.
+        ``directory``
+            Open directory dialog.
+
+    ``allow-multiple``
+        Allows multiple files to be selected. Only valid for the ``open`` type.
+
+    ``title``
+        The title of the dialog.
+
+    ``initial-selection``
+        The initial selection in the dialog. Useful for save dialogs to suggest
+        a filename.
+
+    ``initial-dir``
+        The initial directory in which to open the dialog.
+
+    ``filter``
+        File type filters. This is a list of key-value pairs, where the key is
+        the filter name and the value is a list of file extensions. Extensions
+        are separated by spaces.
+        Example: ``Video Files=mkv mp4,Audio Files=mp3 aac``.
+
+    ``set-property``
+        The property to set with the selected file.
+
+    Return Value:
+
+    - If a ``set-property`` is set, the first selected file is used to
+      set the given property via ``mp_property_do``. Command returns stats of
+      that operation.
+    - If ``set-property`` is not set, the selected files are returned as an
+      array (``MPV_FORMAT_NODE_ARRAY``), where each file path is stored as a
+      string (``MPV_FORMAT_STRING``).
+
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events

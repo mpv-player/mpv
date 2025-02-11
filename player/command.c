@@ -7043,6 +7043,65 @@ static void cmd_notify_property(void *p)
     mp_notify_property(mpctx, cmd->args[0].v.s);
 }
 
+static void cmd_file_dialog(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    void *tmp = talloc_new(NULL);
+
+    enum mp_file_dialog_flags flags = 0;
+    if (cmd->args[0].v.i == 1) {
+        flags |= MP_FILE_DIALOG_SAVE;
+    } else if (cmd->args[0].v.i == 2) {
+        flags |= MP_FILE_DIALOG_DIRECTORY;
+    }
+    if (cmd->args[1].v.b)
+        flags |= MP_FILE_DIALOG_MULTIPLE;
+
+    mp_file_dialog_filters *filters = NULL;
+    size_t num_filters = 0;
+    char **pairs = cmd->args[5].v.str_list;
+    if (pairs) {
+        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2) {
+            char **exts = NULL;
+            size_t num_exts = 0;
+            bstr ext_list = bstr0(pairs[i + 1]);
+            while (ext_list.len) {
+                bstr e = bstr_split(ext_list, " ", &ext_list);
+                MP_TARRAY_APPEND(tmp, exts, num_exts, bstrto0(tmp, e));
+            }
+            MP_TARRAY_APPEND(tmp, exts, num_exts, NULL);
+            MP_TARRAY_APPEND(tmp, filters, num_filters,
+                             (mp_file_dialog_filters){pairs[i], exts});
+        }
+    }
+    if (num_filters)
+        MP_TARRAY_APPEND(tmp, filters, num_filters, (mp_file_dialog_filters){0});
+
+    char **files = mp_cmd_get_dialog_files(tmp, mpctx, cmd->args[2].v.s,
+                                           cmd->args[4].v.s, cmd->args[3].v.s,
+                                           filters, flags);
+
+    char *set_property = cmd->args[6].v.s;
+    if (!files) {
+        cmd->success = false;
+    } else if (set_property && set_property[0]) {
+        int r = mp_property_do(set_property, M_PROPERTY_SET_STRING, files[0], mpctx);
+        cmd->success = r >= 0;
+    } else {
+        mpv_node_list *list = talloc_zero(NULL, mpv_node_list);
+        for (int i = 0; files[i]; i++) {
+            MP_TARRAY_APPEND(list, list->values, list->num,
+                             (mpv_node){.format = MPV_FORMAT_STRING,
+                                        .u.string = talloc_steal(list, files[i])});
+        }
+        cmd->result = (mpv_node){.format = MPV_FORMAT_NODE_ARRAY, .u = {.list = list}};
+    }
+
+    talloc_free(tmp);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7567,6 +7626,23 @@ const struct mp_cmd_def mp_cmds[] = {
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
     { "notify-property", cmd_notify_property, { {"property", OPT_STRING(v.s)} } },
+
+    { "file-dialog", cmd_file_dialog,
+        {
+            {"type", OPT_CHOICE(v.i,
+                {"open", 0},
+                {"save", 1},
+                {"directory", 2}),
+                .flags = MP_CMD_OPT_ARG},
+            {"allow-multiple", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"initial-selection", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"initial-dir", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"filter", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+            {"set-property", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
+    },
 
     {0}
 };
