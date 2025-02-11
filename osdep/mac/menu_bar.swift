@@ -76,6 +76,7 @@ class MenuBar: NSObject {
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
     var dynamicMenuItems: [Type: [MenuItem]] = [:]
+    let dialog = Dialog()
     let appIcon: NSImage
 
     @objc init(_ appHub: AppHub) {
@@ -311,53 +312,31 @@ class MenuBar: NSObject {
                     return
                 }
                 NSWorkspace.shared.open(path)
-                alert(title: "No Application found to open your config file.", text: "Please open the \(menuConfig.url) file with your preferred text editor in the now open folder to edit your config.")
+                dialog.alert(title: "No Application found to open your config file.", text: "Please open the \(menuConfig.url) file with your preferred text editor in the now open folder to edit your config.")
                 return
             }
 
             if NSWorkspace.shared.open(path) {
-                alert(title: "No config file found.", text: "Please create a \(menuConfig.url) file with your preferred text editor in the now open folder.")
+                dialog.alert(title: "No config file found.", text: "Please create a \(menuConfig.url) file with your preferred text editor in the now open folder.")
                 return
             }
         }
     }
 
     @objc func openFiles() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = true
-
-        if panel.runModal() == .OK {
-            appHub.input.open(files: panel.urls.map { $0.path })
-        }
+        guard let files = dialog.open(directories: true, multiple: true) else { return }
+        appHub.input.open(files: files)
     }
 
     @objc func openPlaylist() {
-        let panel = NSOpenPanel()
-
-        if panel.runModal() == .OK, let url = panel.urls.first {
-            appHub.input.command("loadlist \"\(url.path)\"")
-        }
+        guard let files = dialog.open(directories: false, multiple: false),
+              let file = files.first else { return }
+        appHub.input.command("loadlist \"\(file)\"")
     }
 
     @objc func openUrl() {
-        let alert = NSAlert()
-        alert.messageText = "Open URL"
-        alert.icon = appIcon
-        alert.addButton(withTitle: "Ok")
-        alert.addButton(withTitle: "Cancel")
-
-        let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
-        input.placeholderString = "URL"
-        alert.accessoryView = input
-
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
-            input.becomeFirstResponder()
-        }
-
-        if alert.runModal() == .alertFirstButtonReturn && input.stringValue.count > 0 {
-            appHub.input.open(files: [input.stringValue])
-        }
+        guard let file = dialog.openUrl() else { return }
+        appHub.input.open(files: [file])
     }
 
     @objc func command(_ menuItem: MenuItem) {
@@ -379,16 +358,7 @@ class MenuBar: NSObject {
             return
         }
 
-        alert(title: "No log File found.", text: "You deactivated logging for the Bundle.")
-    }
-
-    func alert(title: String, text: String) {
-        let alert = NSAlert()
-        alert.messageText = title
-        alert.informativeText = text
-        alert.icon = appIcon
-        alert.addButton(withTitle: "Ok")
-        alert.runModal()
+        dialog.alert(title: "No log File found.", text: "You deactivated logging for the Bundle.")
     }
 
     func register(_ selector: Selector, key: Type) {
