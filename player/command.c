@@ -6027,6 +6027,67 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
     return files;
 }
 
+static void cmd_loadfiles(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    char **files = cmd->args[0].v.str_list;
+    struct load_action action = get_load_action(mpctx, cmd->args[1].v.i);
+
+    void *tmp = talloc_new(NULL);
+
+    if (!files || !files[0]) {
+        mp_file_dialog_filters filters[] = {
+            {"Video Files", mpctx->opts->video_exts},
+            {"Audio Files", mpctx->opts->audio_exts},
+            {"Image Files", mpctx->opts->image_exts},
+            {"Archive Files", mpctx->opts->archive_exts},
+            {"Playlist Files", mpctx->opts->playlist_exts},
+            {NULL},
+        };
+        files = mp_cmd_get_dialog_files(tmp, mpctx, "Open file(s)", mp_getcwd(tmp), "",
+                                        filters, MP_FILE_DIALOG_FILE | MP_FILE_DIALOG_MULTIPLE);
+    }
+
+    if (!files || !files[0]) {
+        cmd->success = false;
+        talloc_free(tmp);
+        return;
+    }
+
+    if (action.type == LOAD_TYPE_REPLACE)
+        playlist_clear(mpctx->playlist);
+
+    struct playlist_entry *first_entry = NULL;
+    for (int i = 0; files && files[i]; i++) {
+        char *path = mp_get_user_path(NULL, mpctx->global, files[i]);
+        struct playlist_entry *entry = playlist_entry_new(path);
+        if (!first_entry)
+            first_entry = entry;
+
+        char **pairs = cmd->args[2].v.str_list;
+        for (int j = 0; pairs && pairs[j] && pairs[j + 1]; i += 2)
+            playlist_entry_add_param(entry, bstr0(pairs[j]), bstr0(pairs[j + 1]));
+
+        playlist_insert_at(mpctx->playlist, entry, NULL);
+        talloc_free(path);
+    }
+
+    talloc_free(tmp);
+
+    struct mpv_node *res = &cmd->result;
+    node_init(res, MPV_FORMAT_NODE_MAP, NULL);
+    node_map_add_int64(res, "playlist_entry_id", first_entry->id);
+
+    if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
+        if (mpctx->opts->position_save_on_quit) // requested in issue #1148
+            mp_write_watch_later_conf(mpctx);
+        mp_set_playlist_entry(mpctx, first_entry);
+    }
+    mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+    mp_wakeup_core(mpctx);
+}
+
 static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -7325,6 +7386,18 @@ const struct mp_cmd_def mp_cmds[] = {
         },
         .spawn_thread = true,
         .priv = &(const bool){false},
+    },
+    { "loadfiles", cmd_loadfiles,
+        {
+            {"url", OPT_STRINGLIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+            {"flags", OPT_CHOICE(v.i,
+                {"replace", 0},
+                {"append", 1},
+                {"append-play", 2}),
+                .flags = MP_CMD_OPT_ARG},
+            {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
     },
     { "loaddir", cmd_loadfile,
         {

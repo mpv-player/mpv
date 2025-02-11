@@ -574,6 +574,36 @@ Playlist Manipulation
         this problem, the third argument now needs to be set to -1 if the fourth
         argument needs to be used.
 
+``loadfiles [<URLs> [<flags> [<index> [<options>]]]]``
+    Load the given file or URL and play it. Technically, this is just a playlist
+    manipulation command (which either replaces the playlist or adds an entry
+    to it). Actual file loading happens independently. For example, a
+    ``loadfiles`` command that replaces the current file with a new one returns
+    before the current file is stopped, and the new file even begins loading.
+
+    The URLs argument is optional. If not provided, a file dialog will be shown
+    to select files.
+
+    Second argument:
+
+    <replace> (default)
+        Stop playback of the current file, and play the new file immediately.
+    <append>
+        Append files to the playlist.
+    <append-play>
+        Append files, and if nothing is currently playing, start playback.
+        (Always starts with the added file, even if the playlist was not empty
+        before running this command.)
+
+    The third argument is a list of options and values which should be set
+    while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
+    When using the client API, this can be a ``MPV_FORMAT_NODE_MAP`` (or a Lua
+    table), however the values themselves must be strings currently. These
+    options are set during playback, and restored to the previous value at end
+    of playback (see `Per-File Options`_).
+
+    This command returns id of first added file in the playlist.
+
 ``loaddir [<url> [<flags> [<index> [<options>]]]]``
     This is the same as ``loadfile``, but it also allows opening directories.
     When a URL is not provided, a file dialog will be shown to select a directory.
