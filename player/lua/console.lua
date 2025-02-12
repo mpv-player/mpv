@@ -40,6 +40,7 @@ local opts = {
     font_hw_ratio = 'auto',
 }
 
+local border_color = '{\\3c&H111111&}'
 local styles = {
     -- Colors are stolen from base16 Eighties by Chris Kempson
     -- and converted to BGR as is required by ASS.
@@ -48,17 +49,16 @@ local styles = {
     -- 7a77f2 5791f9 66ccff 99cc99
     -- cccc66 cc9966 cc99cc 537bd2
 
-    debug = '{\\1c&Ha09f93&}',
-    v = '{\\1c&H99cc99&}',
-    warn = '{\\1c&H66ccff&}',
-    error = '{\\1c&H7a77f2&}',
-    fatal = '{\\1c&H5791f9&}',
-    completion = '{\\1c&Hcc99cc&}',
-    disabled = '{\\1c&Hcccccc&}',
+    debug = '{\\1c&Ha09f93&}' .. border_color,
+    v = '{\\1c&H99cc99&}' .. border_color,
+    warn = '{\\1c&H66ccff&}' .. border_color,
+    error = '{\\1c&H7a77f2&}' .. border_color,
+    fatal = '{\\1c&H5791f9&}' .. border_color,
+    completion = '{\\1c&Hcc99cc&}' .. border_color,
+    disabled = '{\\1c&Hcccccc&}' .. border_color,
+    matched_position = '{\\u1}',
+    match_end = '{\\u}',
 }
-for key, style in pairs(styles) do
-    styles[key] = style .. '{\\3c&H111111&}'
-end
 
 local terminal_styles = {
     debug = '\027[90m',
@@ -69,6 +69,8 @@ local terminal_styles = {
     selected_completion = '\027[7m',
     default_item = '\027[1m',
     disabled = '\027[38;5;8m',
+    matched_position = '\027[4m',
+    match_end = '\027[24m',
 }
 
 local repl_active = false
@@ -408,6 +410,7 @@ end
 
 local function fuzzy_find(needle, haystacks, case_sensitive)
     local result = require 'mp.fzy'.filter(needle, haystacks, case_sensitive)
+
     table.sort(result, function (i, j)
         if i[3] ~= j[3] then
             return i[3] > j[3]
@@ -415,9 +418,7 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
 
         return i[1] < j[1]
     end)
-    for i, value in ipairs(result) do
-        result[i] = value[1]
-    end
+
     return result
 end
 
@@ -473,10 +474,55 @@ local function populate_log_with_matches()
             terminal_style = terminal_style .. terminal_styles.selected_completion
         end
 
+        local text = ''
+        local terminal_text = ''
+
+        local start_of_last_match = matches[i].positions[1]
+
+        if not start_of_last_match then
+            terminal_text = matches[i].text
+            text = ass_escape(terminal_text)
+        elseif start_of_last_match > 1 then
+            terminal_text = matches[i].text:sub(1, start_of_last_match - 1)
+            text = ass_escape(terminal_text)
+        end
+
+        for j, pos in ipairs(matches[i].positions) do
+            local last_pos = matches[i].positions[j - 1]
+
+            if last_pos and pos > last_pos + 1 then
+                terminal_text = terminal_text .. terminal_styles.matched_position ..
+                    matches[i].text:sub(start_of_last_match, last_pos) ..
+                    terminal_styles.match_end ..
+                    matches[i].text:sub(last_pos + 1, pos - 1)
+
+                text = text .. styles.matched_position ..
+                    ass_escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                    styles.match_end ..
+                    ass_escape(matches[i].text:sub(last_pos + 1, pos - 1))
+
+                start_of_last_match = pos
+            end
+        end
+
+        if start_of_last_match then
+            local last_pos = matches[i].positions[#matches[i].positions]
+
+            terminal_text = terminal_text .. terminal_styles.matched_position ..
+                            matches[i].text:sub(start_of_last_match, last_pos)
+                            .. terminal_styles.match_end ..
+                            matches[i].text:sub(last_pos + 1)
+
+            text = text .. styles.matched_position ..
+                   ass_escape(matches[i].text:sub(start_of_last_match, last_pos))
+                   .. styles.match_end ..
+                   ass_escape(matches[i].text:sub(last_pos + 1))
+        end
+
         log[#log + 1] = {
-            text = matches[i].text,
-            style = style,
-            terminal_style = terminal_style,
+            text = '',
+            style = style .. text,
+            terminal_style = terminal_style .. terminal_text,
         }
     end
 end
@@ -727,7 +773,11 @@ local function handle_edit()
     if selectable_items then
         matches = {}
         for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-            matches[i] = { index = match, text = selectable_items[match] }
+            matches[i] = {
+                index = match[1],
+                text = selectable_items[match[1]],
+                positions = match[2],
+            }
         end
 
         if line == '' and default_item then
@@ -1648,7 +1698,7 @@ complete = function ()
     completion_pos = completion_pos or 1
     for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
                                       completions, opts.case_sensitive)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
@@ -1924,7 +1974,7 @@ mp.register_script_message('complete', function(list, start_pos)
     completion_append = ''
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
                                       completions)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
