@@ -463,7 +463,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
                           bool forced, struct MPOpts *opts, int preferred_program)
 {
     bool sub = t2->type == STREAM_SUB;
-    if (!opts->autoload_files && t1->is_external != t2->is_external)
+    if (t1->is_external != t2->is_external)
         return !t1->is_external;
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
@@ -617,8 +617,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     }
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
-        pick = NULL;
-    if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
 cleanup:
     talloc_free(langs);
@@ -952,7 +950,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 
     if (opts->sub_auto < 0 && opts->audiofile_auto < 0 && opts->coverart_auto < 0)
         return;
-    if (!opts->autoload_files || strcmp(mpctx->filename, "-") == 0)
+    if (strcmp(mpctx->filename, "-") == 0)
         return;
 
     void *tmp = talloc_new(NULL);

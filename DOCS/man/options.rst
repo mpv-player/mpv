@@ -417,8 +417,7 @@ Playback Control
     On older FFmpeg versions, this will not work in some cases. Some FFmpeg
     demuxers might not respect this option.
 
-    This option does not prevent opening of paired subtitle files and such. Use
-    ``--autoload-files=no`` to prevent this.
+    This option does not prevent opening of paired subtitle files and such.
 
     This option does not always work if you open non-files (for example using
     ``dvd://directory`` would open a whole bunch of files in the given
@@ -7792,17 +7791,6 @@ Miscellaneous
 
     This is a string list option. See `List Options`_ for details. Use
     ``--help=playlist-exts`` to see the default extensions.
-
-``--autoload-files=<yes|no>``
-    Automatically load/select external files (default: yes).
-
-    If set to ``no``, then do not automatically load external files as specified
-    by ``--sub-auto``, ``--audio-file-auto`` and ``--cover-art-auto``. If
-    external files are forcibly added (like with ``--sub-files``), they will
-    not be auto-selected.
-
-    This does not affect playlist expansion, redirection, or other loading of
-    referenced files like with ordered chapters.
 
 ``--stream-record=<file>``
     Write received/read data from the demuxer to the given output file. The

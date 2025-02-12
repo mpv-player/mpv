@@ -694,7 +694,8 @@ static const m_option_t mp_opts[] = {
 
     {"external-files", OPT_PATHLIST(external_files), .flags = M_OPT_FILE},
     {"external-file", OPT_CLI_ALIAS("external-files-append")},
-    {"autoload-files", OPT_BOOL(autoload_files)},
+    {"autoload-files", OPT_BOOL(autoload_files),
+        .deprecation_message = "this option is deprecated and does nothing"},
 
     {"sub-auto", OPT_CHOICE(sub_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
@@ -997,7 +998,6 @@ static const struct MPOpts mp_default_opts = {
     .load_config = true,
     .position_resume = true,
     .watch_history_path = "~~state/watch_history.jsonl",
-    .autoload_files = true,
     .demuxer_thread = true,
     .demux_termination_timeout = 0.1,
     .hls_bitrate = INT_MAX,
