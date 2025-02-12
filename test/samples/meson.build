@@ -20,6 +20,9 @@ common_args = ['-v', 'error', '-y', '-i', video, '-i', audio,
 samples = {
     'eng_default.mkv':
         [ffmpeg, common_args, '-disposition:s:0', 'default', '@OUTPUT@'],
+    'eng_default_audio.mkv':
+        [ffmpeg, common_args, '-metadata:s:a:0', 'language=eng',
+         '-disposition:s:0', 'default', '@OUTPUT@'],
     'eng_default_forced.mkv':
         [ffmpeg, common_args, '-disposition:s:0', 'default+forced', '@OUTPUT@'],
     'eng_forced_matching_audio.mkv':
