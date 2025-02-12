@@ -443,7 +443,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
  * Sort tracks based on the following criteria, and pick the first:
   *0a) track matches tid (always wins)
  * 0b) track is not from --external-file
- * 1) track is external (no_default cancels this)
+ * 1) track is external
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 1c) track matches the program ID of the video
  * 2) earlier match in lang list but not if we're using os_langs
@@ -463,15 +463,11 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
                           bool forced, struct MPOpts *opts, int preferred_program)
 {
     bool sub = t2->type == STREAM_SUB;
-    if (t1->is_external != t2->is_external)
-        return !t1->is_external;
-    bool ext1 = t1->is_external && !t1->no_default;
-    bool ext2 = t2->is_external && !t2->no_default;
-    if (ext1 != ext2) {
+    if (t1->is_external != t2->is_external) {
         if (t1->attached_picture && t2->attached_picture
             && opts->audio_display == 1)
-            return !ext1;
-        return ext1;
+            return !t1->is_external;
+        return t1->is_external;
     }
     if (t1->auto_loaded != t2->auto_loaded)
         return !t1->auto_loaded;
@@ -600,7 +596,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
             bool slang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
-            bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
+            bool subs_fallback = track->is_external || opts->subs_fallback == 2 ||
                                  (opts->subs_fallback == 1 && track->default_track);
             bool subs_no_match = !os_langs ? !mp_match_lang(langs, audio_lang) : !audio_matches;
             bool subs_matching_audio = (subs_no_match || opts->subs_with_matching_audio == 2 ||
@@ -906,8 +902,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             t->title = talloc_strdup(t, mp_basename(disp_filename));
         }
         t->external_filename = talloc_strdup(t, filename);
-        t->no_default = sh->type != filter;
-        t->no_auto_select = t->no_default;
+        t->no_auto_select = sh->type != filter;
         // if we found video, and we are loading cover art, flag as such.
         t->attached_picture = t->type == STREAM_VIDEO && cover_art;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
