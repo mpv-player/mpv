@@ -366,11 +366,11 @@ in the mpv git repository.
 Mouse Control
 -------------
 
+Left and right click
+    Toggle play/pause.
+
 Left double click
     Toggle fullscreen on/off.
-
-Right click
-    Toggle pause on/off.
 
 Forward/Back button
     Skip to next/previous entry in playlist.
