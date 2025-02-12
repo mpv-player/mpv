@@ -2274,6 +2274,9 @@ Audio
     option will add a new audio track. The details are similar to how
     ``--sub-file`` works.
 
+``--audio-file-priority=<yes|no|never>``
+    Similar to ``--sub-file-priority`` but for external audio files.
+
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to
     the sound card. The values that ``<format>`` can adopt are listed below in
@@ -2439,6 +2442,14 @@ Subtitles
     while  ``--sub-file`` takes a single filename, but can be used multiple
     times to add multiple files. Technically, ``--sub-file`` is a CLI/config
     file only alias for  ``--sub-files-append``.
+
+``--sub-file-priority=<yes|no|never>``
+    When loading any type of external subtitle track, choose whether to
+    prioritize its autoselection over other potential aspects of the track
+    (e.g. slang or various --subs-fallback options). This defaults to ``yes``
+    meaning that external subtitle files have priority over internal subtitles.
+    ``no`` removes any special prioritization whereas ``never`` will prefer
+    internal tracks.
 
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
@@ -7770,6 +7781,9 @@ Miscellaneous
     Default: ``AlbumArt,Album,cover,front,AlbumArtSmall,Folder,.folder,thumb``
 
     This is a string list option. See `List Options`_ for details.
+
+``--video-file-priority=<yes|no|never>``
+    Similar to ``--sub-file-priority`` but for external video files.
 
 ``--video-exts=ext1,ext2,...``
     Video file extensions to try to match when using ``--autocreate-playlist`` or

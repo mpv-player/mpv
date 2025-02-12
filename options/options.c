@@ -697,6 +697,13 @@ static const m_option_t mp_opts[] = {
     {"autoload-files", OPT_BOOL(autoload_files),
         .deprecation_message = "this option is deprecated and does nothing"},
 
+    {"sub-file-priority", OPT_CHOICE(sub_file_priority,
+        {"below", -1}, {"normal", 0}, {"above", 1})},
+    {"audio-file-priority", OPT_CHOICE(audio_file_priority,
+        {"below", -1}, {"normal", 0}, {"above", 1})},
+    {"video-file-priority", OPT_CHOICE(video_file_priority,
+        {"below", -1}, {"normal", 0}, {"above", 1})},
+
     {"sub-auto", OPT_CHOICE(sub_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
     {"sub-auto-exts", OPT_STRINGLIST(sub_auto_exts), .flags = UPDATE_SUB_EXTS},
@@ -1033,6 +1040,9 @@ static const struct MPOpts mp_default_opts = {
     .playback_speed = 1.,
     .playback_pitch = 1.,
     .pitch_correction = true,
+    .sub_file_priority = true,
+    .audio_file_priority = true,
+    .video_file_priority = true,
     .audiofile_auto = -1,
     .osd_bar_visible = true,
     .screenshot_template = "mpv-shot%n",
