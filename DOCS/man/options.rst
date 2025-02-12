@@ -154,14 +154,17 @@ Track Selection
 ``--subs-fallback=<yes|default|no>``
     When autoselecting a subtitle track, if no tracks match your preferred languages,
     select a full track even if it doesn't match your preferred subtitle language (default: default).
-    Setting this to `default` means that only streams flagged as `default` will be selected.
+    Setting this to ``default`` means that only streams flagged as ``default`` will be selected.
 
 ``--subs-fallback-forced=<yes|no|always>``
-    When autoselecting a subtitle track, the default value of `yes` will prefer using a forced
+    When autoselecting a subtitle track, the default value of ``yes`` will prefer using a forced
     subtitle track if the subtitle language matches the audio language and matches your list of
-    preferred languages. The special value `always` will only select forced subtitle tracks and
-    never fallback on a non-forced track. Conversely, `no` will never select a forced subtitle
-    track.
+    preferred languages. The special value ``always`` will always select forced subtitle tracks if
+    one exists regardless of the audio language matching or not. ``no`` will never select a forced
+    track. Note that this option acts independently of ``--subs-fallback`` and it is possible that
+    a track that is not selected by this option will get selected anyway because of
+    ``--subs-fallback``. E.g. a track that is tagged as default + forced would be selected with
+    ``--subs-fallback=default`` and ``--subs-fallback-forced=no``.
 
 
 Playback Control
