@@ -531,7 +531,14 @@ if not posix and not features['win32-desktop']
 endif
 
 if not win32 and not darwin
-    sources += files('osdep/file_dialog-external.c')
+    gio = dependency('gio-2.0', required: get_option('gio'))
+    features += {'gio': gio.found()}
+    if features['gio']
+        sources += files('osdep/file_dialog-portal.c')
+        dependencies += gio
+    else
+        sources += files('osdep/file_dialog-external.c')
+    endif
 endif
 
 # media controls
