@@ -69,15 +69,21 @@ extension MenuBar {
     }
 }
 
-class MenuBar: NSObject {
+class MenuBar: NSObject, EventSubscriber {
     unowned let appHub: AppHub
     var option: OptionHelper? { return appHub.option }
+    var event: EventHelper? { return appHub.event }
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
     var dynamicMenuItems: [Type: [MenuItem]] = [:]
     let dialog: Dialog
     let appIcon: NSImage
+    var path: String?
+    var currentDir: URL? {
+        guard let path = path, !path.isUrl() else { return nil }
+        return URL(fileURLWithPath: path).deletingLastPathComponent()
+    }
 
     @objc init(_ appHub: AppHub) {
         self.appHub = appHub
@@ -256,6 +262,8 @@ class MenuBar: NSObject {
         createMenu(parentMenu: mainMenu, configs: menuConfigs)
         NSApp.mainMenu = mainMenu
         NSApp.servicesMenu = servicesMenu
+
+        event?.subscribe(self, event: .init(name: "path", format: MPV_FORMAT_STRING))
     }
 
     func createMenu(parentMenu: NSMenu, configs: [Config]) {
@@ -325,12 +333,12 @@ class MenuBar: NSObject {
     }
 
     @objc func openFiles() {
-        guard let files = dialog.openFiles() else { return }
+        guard let files = dialog.openFiles(path: currentDir) else { return }
         appHub.input.open(files: files)
     }
 
     @objc func openPlaylist() {
-        guard let file = dialog.openPlaylist() else { return }
+        guard let file = dialog.openPlaylist(path: currentDir) else { return }
         appHub.input.command("loadlist \"\(file)\"")
     }
 
@@ -364,6 +372,13 @@ class MenuBar: NSObject {
     func register(_ selector: Selector, key: Type) {
         for menuItem in dynamicMenuItems[key] ?? [] {
             menuItem.action = selector
+        }
+    }
+
+    func handle(event: EventHelper.Event) {
+        switch event.name {
+        case "path": path = event.string
+        default: break
         }
     }
 }
