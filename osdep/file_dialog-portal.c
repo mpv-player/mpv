@@ -26,6 +26,7 @@
 
 struct priv {
     char **files;
+    bool *error;
     GMainLoop *loop;
 };
 
@@ -43,6 +44,8 @@ static void handle_response(GDBusConnection *connection, const gchar *sender_nam
 
     g_autoptr(GVariant) response = NULL;
     g_variant_get(parameters, "(u@a{sv})", NULL, &response);
+
+    *p->error = false;
 
     if (!response)
         return;
@@ -95,9 +98,12 @@ static GVariant *convert_filters_to_gvariant(const mp_file_dialog_filters *f)
     return g_variant_builder_end(&filter_builder);
 }
 
-char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
+char **mp_file_dialog_get_files_portal(void *talloc_ctx,
+                                       const mp_file_dialog_params *params,
+                                       bool *error)
 {
-    struct priv p = {0};
+    struct priv p = { .error = error };
+    *p.error = true;
 
     g_autoptr(GDBusConnection) connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
     if (!connection)
