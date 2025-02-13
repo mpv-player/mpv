@@ -16,7 +16,64 @@
  */
 
 #include <unistd.h>
+
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "libmpv_common.h"
+
+static bool have_english_locale(void)
+{
+#ifdef __APPLE__
+    CFArrayRef arr = CFLocaleCopyPreferredLanguages();
+    if (!arr)
+        return false;
+    CFIndex count = CFArrayGetCount(arr);
+    if (!count)
+        return false;
+
+    bool ret = false;
+    CFRange range = CFRangeMake(0, 2);
+    CFStringRef en = CFStringCreateWithCString(NULL, "en", kCFStringEncodingMacRoman);
+    for (CFIndex i = 0; i < count; i++) {
+        CFStringRef cfstr = CFArrayGetValueAtIndex(arr, i);
+        if (CFStringCompareWithOptions(cfstr, en, range, 0) == 0) {
+            ret = true;
+            break;
+        }
+    }
+    CFRelease(en);
+    return ret;
+#endif
+
+#ifdef _WIN32
+    ULONG count = 0;
+    ULONG size = 0;
+    wchar_t buf[1024];
+
+    if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size)) {
+        for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
+            if (wcsncmp(buf + pos, L"en", 2) == 0)
+                return true;
+        }
+    }
+
+    if (GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size)) {
+        for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
+            if (wcsncmp(buf + pos, L"en", 2) == 0)
+                return true;
+        }
+    }
+
+    return false;
+#endif
+    return true;
+}
 
 static void check_string(const char *property, const char *expect)
 {
@@ -84,6 +141,15 @@ static void test_track_selection(char *file, char *path)
         check_api_error(mpv_set_property_string(ctx, "subs-fallback", "yes"));
         reload_file(path);
         check_string("current-tracks/sub/selected", "yes");
+    } else if (strcmp(file, "locale.mkv") == 0) {
+        // default english subs
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "eng");
+
+        // default german subs
+        check_api_error(mpv_set_property_string(ctx, "subs-match-os-language", "no"));
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "ger");
     } else if (strcmp(file, "multilang.mkv") == 0) {
         // --alang=jpn should select forced jpn subs
         check_api_error(mpv_set_property_string(ctx, "alang", "jpn"));
@@ -185,6 +251,11 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
         return 1;
+
+    if (!strcmp(argv[1], "locale.mkv") && !have_english_locale()) {
+        printf("Non English language detected. Skipping locale test.\n");
+        return 77;
+    }
 
     ctx = mpv_create();
     if (!ctx)
