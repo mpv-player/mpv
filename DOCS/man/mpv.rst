@@ -204,6 +204,9 @@ Ctrl+s
     Take a screenshot, as the window shows it (with subtitles, OSD, and scaled
     video).
 
+HOME
+    Seek to the beginning of the file.
+
 PGUP and PGDWN
     Seek to the beginning of the previous/next chapter. In most cases,
     "previous" will actually go to the beginning of the current chapter; see
