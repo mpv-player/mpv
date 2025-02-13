@@ -143,6 +143,41 @@ static void test_track_selection(char *file, char *path)
         reload_file(path);
         check_string("current-tracks/audio/lang", "ger");
         check_string("current-tracks/sub/lang", "jpn");
+    } else if (strcmp(file, "multilang2.mkv") == 0) {
+        // default jpn subs
+        check_api_error(mpv_set_property_string(ctx, "subs-match-os-language", "no"));
+        check_api_error(mpv_set_property_string(ctx, "alang", "jpn"));
+        reload_file(path);
+        check_string("track-list/3/selected", "yes");
+
+        // forced eng subs
+        check_api_error(mpv_set_property_string(ctx, "alang", "eng"));
+        reload_file(path);
+        check_string("track-list/4/selected", "yes");
+
+        // default jpn subs
+        check_api_error(mpv_set_property_string(ctx, "subs-fallback-forced", "no"));
+        reload_file(path);
+        check_string("track-list/3/selected", "yes");
+
+        // default eng subs
+        check_api_error(mpv_set_property_string(ctx, "slang", "eng"));
+        reload_file(path);
+        check_string("track-list/6/selected", "yes");
+
+        // no subs
+        check_api_error(mpv_set_property_string(ctx, "slang", ""));
+        check_api_error(mpv_set_property_string(ctx, "subs-fallback", "no"));
+        reload_file(path);
+        check_string("track-list/3/selected", "no");
+        check_string("track-list/4/selected", "no");
+        check_string("track-list/5/selected", "no");
+        check_string("track-list/6/selected", "no");
+
+        // untagged eng subs
+        check_api_error(mpv_set_property_string(ctx, "sid", "3"));
+        reload_file(path);
+        check_string("track-list/5/selected", "yes");
     }
 }
 

@@ -39,8 +39,16 @@ samples = {
          '-map', '6:0', '-map', '7:0', '-map', '8:0', '-metadata:s:a:0', 'language=eng',
          '-metadata:s:a:1', 'language=jpn', '-metadata:s:a:2', 'language=ger', '-metadata:s:a:3',
          'language=pol', '-metadata:s:s:0', 'language=eng', '-metadata:s:s:1', 'language=jpn',
-          '-metadata:s:s:2', 'language=ger', '-metadata:s:s:3', 'language=pol', '-disposition:s:0',
-          'default+forced', '-disposition:s:1', 'forced', '-disposition:s:2', 'default', '@OUTPUT@'],
+         '-metadata:s:s:2', 'language=ger', '-metadata:s:s:3', 'language=pol', '-disposition:s:0',
+         'default+forced', '-disposition:s:1', 'forced', '-disposition:s:2', 'default', '@OUTPUT@'],
+    'multilang2.mkv':
+        [ffmpeg, '-v', 'error', '-y', '-i', video, '-i', audio, '-i', audio, '-f', 'srt', '-i', sub,
+         '-i', sub, '-i', sub, '-i', sub, '-c', 'copy', '-map', '0:0', '-map', '1:0', '-map', '2:0',
+         '-map', '3:0', '-map', '4:0', '-map', '5:0', '-map', '6:0', '-metadata:s:a:0', 'language=eng',
+         '-metadata:s:a:1', 'language=jpn', '-metadata:s:s:0', 'language=jpn', '-metadata:s:s:1',
+         'language=eng', '-metadata:s:s:2', 'language=eng', '-metadata:s:s:3', 'language=eng',
+         '-disposition:s:0', 'default', '-disposition:s:1', 'forced', '-disposition:s:3', 'default',
+         '@OUTPUT@'],
 }
 
 foreach name, cmd: samples
