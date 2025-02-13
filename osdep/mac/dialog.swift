@@ -25,22 +25,26 @@ class Dialog {
         self.option = option
     }
 
-    func openFiles() -> [String]? {
+    func openFiles(title: String? = nil, path: URL? = nil) -> [String]? {
          let types: [UTType] = (TypeHelper.toStringArray(option?.root.video_exts) +
             TypeHelper.toStringArray(option?.root.audio_exts) +
             TypeHelper.toStringArray(option?.root.image_exts) +
             TypeHelper.toStringArray(option?.root.archive_exts) +
             TypeHelper.toStringArray(option?.root.playlist_exts)).compactMap { UTType(filenameExtension: $0) }
-        return open(types: types)
+        return open(title: title, path: path, types: types)
     }
 
-    func openPlaylist() -> String? {
+    func openPlaylist(title: String? = nil, path: URL? = nil) -> String? {
         let types: [UTType] = TypeHelper.toStringArray(option?.root.playlist_exts).compactMap { UTType(filenameExtension: $0) }
-        return open(directories: false, multiple: false, types: types)?.first
+        return open(title: title, path: path, directories: false, multiple: false, types: types)?.first
     }
 
-    func open(directories: Bool = true, multiple: Bool = true, types: [UTType] = []) -> [String]? {
+    func open(title: String? = nil, path: URL? = nil, files: Bool = true,
+              directories: Bool = true, multiple: Bool = true, types: [UTType] = []) -> [String]? {
         let panel = NSOpenPanel()
+        panel.title = title ?? panel.title
+        panel.directoryURL = path
+        panel.canChooseFiles = files
         panel.canChooseDirectories = directories
         panel.allowsMultipleSelection = multiple
         panel.allowedContentTypes = types
