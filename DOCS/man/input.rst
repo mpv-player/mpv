@@ -1417,10 +1417,13 @@ Screenshot Commands
     On success, returns a ``mpv_node`` with a ``filename`` field set to the
     saved screenshot location.
 
-``screenshot-to-file <filename> [<flags>]``
+``screenshot-to-file [<filename> [<flags>]]``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
+
+    The filename argument is optional. If not provided, a file dialog will be
+    shown to select a location and name for the file.
 
     The second argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.

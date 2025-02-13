@@ -7394,7 +7394,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "screenshot-to-file", cmd_screenshot_to_file,
         {
-            {"filename", OPT_STRING(v.s)},
+            {"filename", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"video", 0},
                 {"window", 1},
