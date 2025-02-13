@@ -76,7 +76,7 @@ class MenuBar: NSObject {
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
     var dynamicMenuItems: [Type: [MenuItem]] = [:]
-    let dialog = Dialog()
+    let dialog: Dialog
     let appIcon: NSImage
 
     @objc init(_ appHub: AppHub) {
@@ -86,6 +86,7 @@ class MenuBar: NSObject {
         UserDefaults.standard.set(true, forKey: "NSDisabledCharacterPaletteMenuItem")
         NSWindow.allowsAutomaticWindowTabbing = false
         appIcon = appHub.getIcon()
+        dialog = Dialog(appHub.option)
 
         super.init()
 
@@ -324,13 +325,12 @@ class MenuBar: NSObject {
     }
 
     @objc func openFiles() {
-        guard let files = dialog.open(directories: true, multiple: true) else { return }
+        guard let files = dialog.openFiles() else { return }
         appHub.input.open(files: files)
     }
 
     @objc func openPlaylist() {
-        guard let files = dialog.open(directories: false, multiple: false),
-              let file = files.first else { return }
+        guard let file = dialog.openPlaylist() else { return }
         appHub.input.command("loadlist \"\(file)\"")
     }
 

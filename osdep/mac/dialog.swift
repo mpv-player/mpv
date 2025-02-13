@@ -16,12 +16,34 @@
  */
 
 import Cocoa
+import UniformTypeIdentifiers
 
 class Dialog {
-    func open(directories: Bool, multiple: Bool) -> [String]? {
+    var option: OptionHelper?
+
+    init(_ option: OptionHelper? = nil) {
+        self.option = option
+    }
+
+    func openFiles() -> [String]? {
+         let types: [UTType] = (TypeHelper.toStringArray(option?.root.video_exts) +
+            TypeHelper.toStringArray(option?.root.audio_exts) +
+            TypeHelper.toStringArray(option?.root.image_exts) +
+            TypeHelper.toStringArray(option?.root.archive_exts) +
+            TypeHelper.toStringArray(option?.root.playlist_exts)).compactMap { UTType(filenameExtension: $0) }
+        return open(types: types)
+    }
+
+    func openPlaylist() -> String? {
+        let types: [UTType] = TypeHelper.toStringArray(option?.root.playlist_exts).compactMap { UTType(filenameExtension: $0) }
+        return open(directories: false, multiple: false, types: types)?.first
+    }
+
+    func open(directories: Bool = true, multiple: Bool = true, types: [UTType] = []) -> [String]? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = directories
         panel.allowsMultipleSelection = multiple
+        panel.allowedContentTypes = types
 
         if panel.runModal() == .OK {
             return panel.urls.map { $0.path }
