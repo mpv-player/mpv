@@ -6228,9 +6228,7 @@ static void cmd_track_add(void *p)
 
     for (int n = first; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        if (cmd->args[1].v.i == 1) {
-            t->no_default = true;
-        } else if (n == first) {
+        if (cmd->args[1].v.i != 1 && n == first) {
             if (mpctx->playback_initialized) {
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
             } else {

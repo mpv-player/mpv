@@ -53,28 +53,40 @@ static void test_track_selection(char *file, char *path)
         wait_for_file_load();
         check_string("current-tracks/sub/selected", "yes");
 
-        // --subs-falback=no
+        // --subs-fallback=no
         check_api_error(mpv_set_property_string(ctx, "subs-fallback", "no"));
         check_api_error(mpv_command(ctx, cmd));
         wait_for_file_load();
         check_string("track-list/2/selected", "no");
+    } else if (strcmp(file, "eng_default_audio.mkv") == 0) {
+        // --subs-with-matching-audio=no
+        check_api_error(mpv_set_property_string(ctx, "subs-with-matching-audio", "no"));
+        check_api_error(mpv_command(ctx, cmd));
+        wait_for_file_load();
+        check_string("track-list/2/selected", "no");
 
-        // reset options to defaults
-        check_api_error(mpv_set_property_string(ctx, "subs-fallback", "default"));
+        // --subs-with-matching-audio=forced
+        check_api_error(mpv_set_property_string(ctx, "subs-with-matching-audio", "forced"));
+        check_api_error(mpv_command(ctx, cmd));
+        wait_for_file_load();
+        check_string("track-list/2/selected", "no");
     } else if (strcmp(file, "eng_default_forced.mkv") == 0) {
         // --subs-fallback-forced=no
         check_api_error(mpv_set_property_string(ctx, "subs-fallback-forced", "no"));
         check_api_error(mpv_command(ctx, cmd));
         wait_for_file_load();
         check_string("current-tracks/sub/selected", "yes");
-
-        // reset options to defaults
-        check_api_error(mpv_set_property_string(ctx, "subs-fallback-forced", "yes"));
     } else if (strcmp(file, "eng_forced_matching_audio.mkv") == 0) {
         // select forced track
         check_api_error(mpv_command(ctx, cmd));
         wait_for_file_load();
         check_string("current-tracks/sub/selected", "yes");
+
+        // --subs-with-matching-audio=forced
+        check_api_error(mpv_set_property_string(ctx, "subs-with-matching-audio", "forced"));
+        check_api_error(mpv_command(ctx, cmd));
+        wait_for_file_load();
+        check_string("track-list/2/selected", "yes");
     } else if (strcmp(file, "eng_forced_no_matching_audio.mkv") == 0) {
         // forced track should not be selected
         check_api_error(mpv_command(ctx, cmd));
@@ -97,9 +109,6 @@ static void test_track_selection(char *file, char *path)
         check_api_error(mpv_command(ctx, cmd));
         wait_for_file_load();
         check_string("current-tracks/sub/selected", "yes");
-
-        // reset options to defaults
-        check_api_error(mpv_set_property_string(ctx, "subs-fallback", "default"));
     } else if (strcmp(file, "multilang.mkv") == 0) {
         // --alang=jpn should select forced jpn subs
         check_api_error(mpv_set_property_string(ctx, "alang", "jpn"));

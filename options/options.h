@@ -328,6 +328,9 @@ typedef struct MPOpts {
     char **coverart_files;
     char **external_files;
     bool autoload_files;
+    int sub_file_priority;
+    int audio_file_priority;
+    int video_file_priority;
     int sub_auto;
     char **sub_auto_exts;
     int audiofile_auto;

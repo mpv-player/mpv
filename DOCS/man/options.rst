@@ -137,10 +137,12 @@ Track Selection
 
 ``--subs-with-matching-audio=<yes|forced|no>``
     When autoselecting a subtitle track, select it even if the selected audio
-    stream matches you preferred subtitle language (default: yes). If this
-    option is set to ``no``, then no subtitle track that matches the audio
+    stream matches a preferred subtitle language selected with ``--slang``
+    (default: yes). If no ``--slang`` is explicitly set, then this option will
+    instead check for a match between the audio stream and subtitle track. If
+    this option is set to ``no``, then no subtitle track that matches the audio
     language will ever be autoselected by mpv regardless of ``--slang`` or
-    ``subs-fallback``. If set to ``forced``, then only forced subtitles
+    ``--subs-fallback``. If set to ``forced``, then only forced subtitles
     will be selected.
 
 ``--subs-match-os-language=<yes|no>``
@@ -152,14 +154,17 @@ Track Selection
 ``--subs-fallback=<yes|default|no>``
     When autoselecting a subtitle track, if no tracks match your preferred languages,
     select a full track even if it doesn't match your preferred subtitle language (default: default).
-    Setting this to `default` means that only streams flagged as `default` will be selected.
+    Setting this to ``default`` means that only streams flagged as ``default`` will be selected.
 
 ``--subs-fallback-forced=<yes|no|always>``
-    When autoselecting a subtitle track, the default value of `yes` will prefer using a forced
+    When autoselecting a subtitle track, the default value of ``yes`` will prefer using a forced
     subtitle track if the subtitle language matches the audio language and matches your list of
-    preferred languages. The special value `always` will only select forced subtitle tracks and
-    never fallback on a non-forced track. Conversely, `no` will never select a forced subtitle
-    track.
+    preferred languages. The special value ``always`` will always select forced subtitle tracks if
+    one exists regardless of the audio language matching or not. ``no`` will never select a forced
+    track. Note that this option acts independently of ``--subs-fallback`` and it is possible that
+    a track that is not selected by this option will get selected anyway because of
+    ``--subs-fallback``. E.g. a track that is tagged as default + forced would be selected with
+    ``--subs-fallback=default`` and ``--subs-fallback-forced=no``.
 
 
 Playback Control
@@ -412,8 +417,7 @@ Playback Control
     On older FFmpeg versions, this will not work in some cases. Some FFmpeg
     demuxers might not respect this option.
 
-    This option does not prevent opening of paired subtitle files and such. Use
-    ``--autoload-files=no`` to prevent this.
+    This option does not prevent opening of paired subtitle files and such.
 
     This option does not always work if you open non-files (for example using
     ``dvd://directory`` would open a whole bunch of files in the given
@@ -2270,6 +2274,9 @@ Audio
     option will add a new audio track. The details are similar to how
     ``--sub-file`` works.
 
+``--audio-file-priority=<yes|no|never>``
+    Similar to ``--sub-file-priority`` but for external audio files.
+
 ``--audio-format=<format>``
     Select the sample format used for output from the audio filter layer to
     the sound card. The values that ``<format>`` can adopt are listed below in
@@ -2435,6 +2442,14 @@ Subtitles
     while  ``--sub-file`` takes a single filename, but can be used multiple
     times to add multiple files. Technically, ``--sub-file`` is a CLI/config
     file only alias for  ``--sub-files-append``.
+
+``--sub-file-priority=<yes|no|never>``
+    When loading any type of external subtitle track, choose whether to
+    prioritize its autoselection over other potential aspects of the track
+    (e.g. slang or various --subs-fallback options). This defaults to ``yes``
+    meaning that external subtitle files have priority over internal subtitles.
+    ``no`` removes any special prioritization whereas ``never`` will prefer
+    internal tracks.
 
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
@@ -7767,6 +7782,9 @@ Miscellaneous
 
     This is a string list option. See `List Options`_ for details.
 
+``--video-file-priority=<yes|no|never>``
+    Similar to ``--sub-file-priority`` but for external video files.
+
 ``--video-exts=ext1,ext2,...``
     Video file extensions to try to match when using ``--autocreate-playlist`` or
     ``--directory-filter-types``.
@@ -7787,17 +7805,6 @@ Miscellaneous
 
     This is a string list option. See `List Options`_ for details. Use
     ``--help=playlist-exts`` to see the default extensions.
-
-``--autoload-files=<yes|no>``
-    Automatically load/select external files (default: yes).
-
-    If set to ``no``, then do not automatically load external files as specified
-    by ``--sub-auto``, ``--audio-file-auto`` and ``--cover-art-auto``. If
-    external files are forcibly added (like with ``--sub-files``), they will
-    not be auto-selected.
-
-    This does not affect playlist expansion, redirection, or other loading of
-    referenced files like with ordered chapters.
 
 ``--stream-record=<file>``
     Write received/read data from the demuxer to the given output file. The

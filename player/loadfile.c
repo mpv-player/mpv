@@ -437,13 +437,26 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
         add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n));
 }
 
+static int get_external_file_priority(struct MPOpts *opts, struct track *track)
+{
+    switch (track->type) {
+    case STREAM_VIDEO:
+        return opts->video_file_priority;
+    case STREAM_AUDIO:
+        return opts->audio_file_priority;
+    case STREAM_SUB:
+        return opts->sub_file_priority;
+    }
+    return 0;
+}
+
 /* Get the track wanted by the user.
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
  * Sort tracks based on the following criteria, and pick the first:
   *0a) track matches tid (always wins)
- * 0b) track is not from --external-file
- * 1) track is external (no_default cancels this)
+ * 0b) track is not from --external-file and external files are preferred
+ * 1) track is external (no_default cancels this) and external files are preferred
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 1c) track matches the program ID of the video
  * 2) earlier match in lang list but not if we're using os_langs
@@ -463,18 +476,14 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
                           bool forced, struct MPOpts *opts, int preferred_program)
 {
     bool sub = t2->type == STREAM_SUB;
-    if (!opts->autoload_files && t1->is_external != t2->is_external)
-        return !t1->is_external;
-    bool ext1 = t1->is_external && !t1->no_default;
-    bool ext2 = t2->is_external && !t2->no_default;
-    if (ext1 != ext2) {
-        if (t1->attached_picture && t2->attached_picture
-            && opts->audio_display == 1)
-            return !ext1;
-        return ext1;
+    int external_file_priority = get_external_file_priority(opts, t1);
+    if (t1->is_external != t2->is_external) {
+        if (t1->attached_picture && t2->attached_picture)
+            return t1->is_external && opts->audio_display == 2;
+        return t1->is_external && external_file_priority == 1;
     }
-    if (t1->auto_loaded != t2->auto_loaded)
-        return !t1->auto_loaded;
+    if (external_file_priority && t1->auto_loaded != t2->auto_loaded)
+        return !t1->auto_loaded && external_file_priority == -1;
     if (preferred_program != -1 && t1->program_id != -1 && t2->program_id != -1) {
         if ((t1->program_id == preferred_program) !=
             (t2->program_id == preferred_program))
@@ -599,12 +608,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             bool audio_matches = audio_lang && track->lang && !strcasecmp(audio_lang, track->lang);
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
-            bool lang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
-            bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
-                                 (opts->subs_fallback == 1 && track->default_track);
-            bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
+            bool external = track->is_external && get_external_file_priority(opts, track) >= 0;
+            bool slang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
+            bool subs_fallback = opts->subs_fallback == 2 || (opts->subs_fallback == 1 && track->default_track);
+            bool subs_no_match = !os_langs ? !mp_match_lang(langs, audio_lang) : !audio_matches;
+            bool subs_matching_audio = (subs_no_match || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
-            if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
+            if (subs_matching_audio && ((!pick && (forced || external || slang_match || subs_fallback)) ||
                 (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
             {
                 pick = track;
@@ -616,8 +626,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     }
 
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
-        pick = NULL;
-    if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
 cleanup:
     talloc_free(langs);
@@ -907,8 +915,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             t->title = talloc_strdup(t, mp_basename(disp_filename));
         }
         t->external_filename = talloc_strdup(t, filename);
-        t->no_default = sh->type != filter;
-        t->no_auto_select = t->no_default;
+        t->no_auto_select = sh->type != filter;
         // if we found video, and we are loading cover art, flag as such.
         t->attached_picture = t->type == STREAM_VIDEO && cover_art;
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
@@ -951,7 +958,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 
     if (opts->sub_auto < 0 && opts->audiofile_auto < 0 && opts->coverart_auto < 0)
         return;
-    if (!opts->autoload_files || strcmp(mpctx->filename, "-") == 0)
+    if (strcmp(mpctx->filename, "-") == 0)
         return;
 
     void *tmp = talloc_new(NULL);

@@ -1,0 +1,4 @@
+deprecate `--autoload-files`
+add `--sub-file-priority`
+add `--audio-file-priority`
+add `--video-file-priority`
