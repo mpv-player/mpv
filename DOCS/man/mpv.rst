@@ -95,6 +95,9 @@ Shift+Ctrl+BACKSPACE
 ENTER
     Go forward in the playlist.
 
+Shift+HOME and Shift+END
+    Go to the first/last playlist entry.
+
 p and SPACE
     Pause (pressing again unpauses).
 
