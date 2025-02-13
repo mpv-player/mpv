@@ -32,6 +32,11 @@ samples = {
          '-disposition:s:0', 'forced', '@OUTPUT@'],
     'eng_no_default.mkv':
         [ffmpeg, common_args, '@OUTPUT@'],
+    'locale.mkv':
+        [ffmpeg, '-v', 'error', '-y', '-i', video, '-i', audio, '-f', 'srt', '-i', sub, '-i', sub,
+         '-c', 'copy', '-map', '0:0', '-map', '1:0', '-map', '2:0', '-map', '3:0', '-metadata:s:s:0',
+         'language=ger', '-metadata:s:s:1', 'language=eng', '-disposition:s:0', 'default',
+         '-disposition:s:1', 'default', '@OUTPUT@'],
     'multilang.mkv':
         [ffmpeg, '-v', 'error', '-y', '-i', video, '-i', audio, '-i', audio, '-i', audio, '-i', audio,
          '-f', 'srt', '-i', sub, '-i', sub, '-i', sub, '-i', sub, '-c', 'copy', '-map', '0:0',
@@ -57,9 +62,10 @@ foreach name, cmd: samples
         depends: [video, audio],
         command: cmd,
     )
+    env = name == 'locale.mkv' ? 'LANG=C' : []
     testname = 'libmpv-test-' + name
     exe = executable(testname, '../libmpv_test_track_selection.c',
                      include_directories: incdir, link_with: libmpv)
     test(testname, exe, args: [name, target.full_path()],
-         depends: target, suite: 'libmpv')
+         depends: target, env: env, suite: 'libmpv')
 endforeach
