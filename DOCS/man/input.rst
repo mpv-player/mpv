@@ -4027,6 +4027,10 @@ Property list
         compositors without support for the ``zwlr_data_control_manager_v1``
         protocol.
 
+``clock``
+
+    The current local time in hour:minutes format.
+
 Inconsistencies between options and properties
 ----------------------------------------------
 
