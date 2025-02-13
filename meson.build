@@ -536,9 +536,9 @@ if not win32 and not darwin
     if features['gio']
         sources += files('osdep/file_dialog-portal.c')
         dependencies += gio
-    else
-        sources += files('osdep/file_dialog-external.c')
     endif
+    sources += files('osdep/file_dialog-external.c',
+                     'osdep/file_dialog-unix.c')
 endif
 
 # media controls

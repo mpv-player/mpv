@@ -15,7 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog.h"
+#include "file_dialog-external.h"
 
 #include <player/core.h>
 
@@ -132,7 +132,9 @@ static const dialog_func_t dialogs[] = {
     NULL,
 };
 
-char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
+char **mp_file_dialog_get_files_external(void *talloc_ctx,
+                                         const mp_file_dialog_params *params,
+                                         bool *error)
 {
     void *tmp = talloc_new(NULL);
     const char *args[MAX_ARGS] = {0};
@@ -165,6 +167,8 @@ char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *p
         if (res.error == MP_SUBPROCESS_OK)
             break;
     }
+
+    *error = res.error != MP_SUBPROCESS_OK;
 
     char **ret = NULL;
     size_t ret_count = 0;
