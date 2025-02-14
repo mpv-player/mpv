@@ -2,3 +2,4 @@ make the URL argument optional for `loadfile`, `loadlist`, `{sub,audio,video}-ad
 add `loaddir` command to select directories using a file dialog
 add `loadfiles` command to allow appending string list to playlist
 add `file-dialog` command
+add `file-dialog-providers` option
