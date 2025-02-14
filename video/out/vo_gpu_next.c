@@ -2299,10 +2299,10 @@ AV_NOWARN_DEPRECATED(
     pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
     pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
 
+    pars->params.dither_params = NULL;
+    pars->params.error_diffusion = NULL;
+
     switch (opts->dither_algo) {
-    case DITHER_NONE:
-        pars->params.dither_params = NULL;
-        break;
     case DITHER_ERROR_DIFFUSION:
         pars->params.error_diffusion = pl_find_error_diffusion_kernel(opts->error_diffusion);
         if (!pars->params.error_diffusion) {
@@ -2321,8 +2321,10 @@ AV_NOWARN_DEPRECATED(
         break;
     }
 
-    if (opts->dither_depth < 0)
+    if (opts->dither_depth < 0) {
         pars->params.dither_params = NULL;
+        pars->params.error_diffusion = NULL;
+    }
 
     update_icc_opts(p, opts->icc_opts);
 
