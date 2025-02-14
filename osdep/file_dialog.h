@@ -41,6 +41,7 @@ typedef struct mp_file_dialog_params {
     const char *initial_dir;        // The default path to start the dialog at. Optional.
     enum mp_file_dialog_flags flags;        // Flags, see mp_file_dialog_flags
     const mp_file_dialog_filters *filters;  // The filters to apply to the file dialog dialog. Optional.
+    void *parent;                   // The parent window. Optional.
 } mp_file_dialog_params;
 
 /**

@@ -128,7 +128,8 @@ char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *p
         options |= FOS_ALLOWMULTISELECT;
     IFileDialog_SetOptions(file_dialog, options | FOS_FORCEFILESYSTEM);
 
-    hr = IFileDialog_Show(file_dialog, NULL);
+    HWND parent = params->parent ? (HWND)(intptr_t)(*(int64_t*)params->parent) : NULL;
+    hr = IFileDialog_Show(file_dialog, parent);
     if (FAILED(hr))
         goto done;
 

@@ -6022,6 +6022,11 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
     if (!initial_dir || !initial_dir[0])
         initial_dir = get_current_dir(talloc_ctx, mpctx);
 
+    struct vo *vo = mpctx->video_out;
+    int64_t parent = 0;
+    if (mpctx->video_out)
+        vo_control(vo, VOCTRL_GET_WINDOW_ID, &parent);
+
     mp_core_unlock(mpctx);
     char **files = mp_file_dialog_get_files(talloc_ctx,
                     &(mp_file_dialog_params) {
@@ -6031,6 +6036,7 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
                         .initial_dir = initial_dir,
                         .filters = filters,
                         .flags = flags,
+                        .parent = &parent,
                     });
     for (int i = 0; filters && filters[i].name; i++)
         m_option_free(&exts_opt, &filters[i].extensions);
