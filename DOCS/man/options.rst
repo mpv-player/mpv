@@ -1581,13 +1581,18 @@ Video
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played.
 
-    These values have special meaning:
+    This value has special meaning:
+
+    :no: use the method of the ``--video-aspect-method`` option (default)
+
+    These values have special meaning only when the compatibility script is
+    loaded (see note) and will be removed in the future:
 
     :0:  disable aspect ratio handling, pretend the video has square pixels
          (deprecated, use
          ``--video-aspect-override=no --video-aspect-method=ignore`` instead)
-    :no: use the method of the ``--video-aspect-method`` option (default)
-    :-1: same as ``no`` (deprecated)
+    :-1: use ``--video-aspect-method=<bitstream|container>`` behavior,
+         which is the behavior of ``-1`` for mpv 0.39 and earlier (deprecated)
 
     But note that handling of these special values might change in the future.
 
@@ -1596,6 +1601,20 @@ Video
         - ``--video-aspect-override=4:3``  or ``--video-aspect-override=1.3333``
         - ``--video-aspect-override=16:9`` or ``--video-aspect-override=1.7777``
         - ``--no-video-aspect-override`` or ``--video-aspect-override=no``
+
+    .. note::
+
+        Since mpv 0.40, a builtin lua script is now loaded by default to provide
+        compatibility for setting the option to ``0`` or ``-1`` by using
+        ``--video-aspect-method`` for these values and printing deprecation
+        warnings. This can be disabled with ``--load-aspect-compat=no``.
+
+        Note that unlike the behavior up to mpv 0.39, if the option is set to
+        ``-1`` when ``--video-aspect-method=ignore``, the script will always set
+        ``--video-aspect-method=container``.
+
+        This script and the ``--load-aspect-compat`` option will be removed
+        in the future. ``--video-aspect-override=no`` should be used instead.
 
 ``--video-aspect-method=<bitstream|container|ignore>``
     This sets the default video aspect determination method (if the aspect is
