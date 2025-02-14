@@ -1,1 +1,3 @@
 change the underlying type of the `aspect`, `par`, and `sar` sub-properties to double from float
+add `--video-aspect-method=ignore`
+change `--video-aspect-override=no` to respect `--video-aspect-method` option

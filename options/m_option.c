@@ -1113,7 +1113,7 @@ static int parse_double_aspect(struct mp_log *log, const m_option_t *opt,
 {
     if (bstr_equals0(param, "no")) {
         if (dst)
-            VAL(dst) = 0.0;
+            VAL(dst) = -2.0;
         return 1;
     }
     return parse_double(log, opt, name, param, dst);

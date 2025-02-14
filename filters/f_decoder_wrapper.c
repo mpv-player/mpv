@@ -125,9 +125,9 @@ const struct m_sub_options dec_wrapper_conf = {
         {"video-rotate", OPT_CHOICE(video_rotate, {"no", -1}),
             .flags = UPDATE_IMGPAR, M_RANGE(0, 359)},
         {"video-aspect-override", OPT_ASPECT(movie_aspect),
-            .flags = UPDATE_IMGPAR, M_RANGE(-1, 10)},
+            .flags = UPDATE_IMGPAR, M_RANGE(-2, 10)},
         {"video-aspect-method", OPT_CHOICE(aspect_method,
-            {"bitstream", 1}, {"container", 2}),
+            {"bitstream", 1}, {"container", 2}, {"ignore", 3}),
             .flags = UPDATE_IMGPAR},
         {"vd-queue", OPT_SUBSTRUCT(vdec_queue_opts, vdec_queue_conf)},
         {"ad-queue", OPT_SUBSTRUCT(adec_queue_opts, adec_queue_conf)},
@@ -140,7 +140,7 @@ const struct m_sub_options dec_wrapper_conf = {
     .size = sizeof(struct dec_wrapper_opts),
     .defaults = &(const struct dec_wrapper_opts){
         .correct_pts = true,
-        .movie_aspect = -1.,
+        .movie_aspect = -2.,
         .aspect_method = 2,
         .video_reverse_size = 1 * 1024 * 1024 * 1024,
         .audio_reverse_size = 64 * 1024 * 1024,
@@ -561,6 +561,13 @@ static void fix_image_params(struct priv *p,
         if (!quiet)
             MP_VERBOSE(p, "Using bitstream aspect ratio.\n");
         use_container = false;
+    }
+
+    if (opts->aspect_method == 3) {
+        if (!quiet)
+            MP_VERBOSE(p, "Ignoring aspect ratio.\n");
+        use_container = false;
+        m.p_w = m.p_h = 1;
     }
 
     if (use_container && c->par_w > 0 && c->par_h) {
