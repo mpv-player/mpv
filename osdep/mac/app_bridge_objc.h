@@ -23,6 +23,7 @@
 #include "libmpv/render_gl.h"
 
 #include "options/m_config.h"
+#include "osdep/file_dialog.h"
 #include "player/core.h"
 #include "player/clipboard/clipboard.h"
 #include "common/global.h"
