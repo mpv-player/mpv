@@ -4019,12 +4019,12 @@ Property list
 
     ``wayland``
         Wayland backend. This backend is only available if the compositor
-        supports the ``zwlr_data_control_manager_v1`` protocol.
+        supports the ``ext-data-control-v1`` protocol.
 
     ``vo``
         VO backend. Requires an active VO window, and support differs across
         platforms. Currently, this is used as a fallback for Wayland
-        compositors without support for the ``zwlr_data_control_manager_v1``
+        compositors without support for the ``ext-data-control-v1``
         protocol.
 
 ``clock``
