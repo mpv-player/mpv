@@ -1591,9 +1591,12 @@ Video
 
     These values have special meaning:
 
+    :no: use the method of the ``--video-aspect-method`` option (default)
     :0:  disable aspect ratio handling, pretend the video has square pixels
-    :no: same as ``0``
-    :-1: use the video stream or container aspect (default)
+         (deprecated, use
+         ``--video-aspect-override=no --video-aspect-method=ignore`` instead)
+    :-1: strictly prefer the container aspect ratio (deprecated, use
+         ``--video-aspect-override=no --video-aspect-method=container`` instead)
 
     But note that handling of these special values might change in the future.
 
@@ -1603,7 +1606,7 @@ Video
         - ``--video-aspect-override=16:9`` or ``--video-aspect-override=1.7777``
         - ``--no-video-aspect-override`` or ``--video-aspect-override=no``
 
-``--video-aspect-method=<bitstream|container>``
+``--video-aspect-method=<bitstream|container|ignore>``
     This sets the default video aspect determination method (if the aspect is
     _not_ overridden by the user with ``--video-aspect-override`` or others).
 
@@ -1614,6 +1617,8 @@ Video
     :bitstream: Strictly prefer the bitstream aspect ratio, unless the bitstream
                 aspect ratio is not set. This is apparently the default behavior
                 with XBMC/kodi, at least with Matroska.
+    :ignore:    Disable aspect ratio handling, pretend the video has square
+                pixels.
 
     The current default for mpv is ``container``.
 
