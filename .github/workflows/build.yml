@@ -17,7 +17,7 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES'
   pull_request:
-    branches: [master]
+    branches: [master, testing_queue]
     paths-ignore:
       - 'DOCS/**'
       - 'TOOLS/lua/**'

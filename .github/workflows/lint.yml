@@ -7,7 +7,7 @@ on:
       - ci
       - 'release/**'
   pull_request:
-    branches: [master]
+    branches: [master, testing_queue]
 
 jobs:
   commit-msg:
