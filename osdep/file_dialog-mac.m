@@ -17,9 +17,9 @@
 
 #include "file_dialog.h"
 
-#include <player/core.h>
+#include "mac/swift.h"
 
 char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
 {
-    return NULL;
+    return [[[Dialog alloc] init] openDialog:talloc_ctx params:params];
 }

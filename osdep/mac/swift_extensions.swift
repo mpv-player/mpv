@@ -102,6 +102,10 @@ extension Bool {
     init(_ int32: Int32) {
         self.init(int32 != 0)
     }
+
+    init(_ uint32: UInt32) {
+        self.init(uint32 != 0)
+    }
 }
 
 extension Int32 {

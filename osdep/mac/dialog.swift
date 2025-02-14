@@ -21,6 +21,10 @@ import UniformTypeIdentifiers
 class Dialog: NSObject, NSWindowDelegate, NSOpenSavePanelDelegate {
     var option: OptionHelper?
 
+    @objc override init() {
+        super.init()
+    }
+
     init(_ option: OptionHelper? = nil) {
         self.option = option
     }
@@ -55,6 +59,63 @@ class Dialog: NSObject, NSWindowDelegate, NSOpenSavePanelDelegate {
         }
 
         return nil
+    }
+
+    func save(title: String? = nil, name: String? = nil, path: URL? = nil) -> [String]? {
+        let panel = NSSavePanel()
+        panel.title = title ?? panel.title
+        panel.nameFieldStringValue = name ?? panel.nameFieldStringValue
+        panel.directoryURL = path
+        panel.delegate = self
+
+        if panel.runModal() == .OK {
+            if let url = panel.url {
+                return [url.path]
+            }
+        }
+
+        return nil
+    }
+
+    @objc func openDialog(_ tallocCtx: UnsafeMutableRawPointer,
+                          params: UnsafePointer<mp_file_dialog_params>) -> UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>? {
+        let conf = params.pointee
+        let isSave = Bool(conf.flags.rawValue & MP_FILE_DIALOG_SAVE.rawValue)
+        let directories = Bool(conf.flags.rawValue & MP_FILE_DIALOG_DIRECTORY.rawValue)
+        let multiple = Bool(conf.flags.rawValue & MP_FILE_DIALOG_MULTIPLE.rawValue)
+        let title = conf.title != nil ? String(cString: conf.title) : nil
+        let path = conf.initial_dir != nil ? URL(fileURLWithPath: String(cString: conf.initial_dir)): nil
+        let name = conf.initial_selection != nil ? String(cString: conf.initial_selection) : nil
+        var types: [UTType] = []
+
+        if var filters = conf.filters {
+            while filters.pointee.name != nil, let exts = filters.pointee.extensions {
+                types += TypeHelper.toStringArray(exts).compactMap { UTType(filenameExtension: $0) }
+                filters += 1
+            }
+        }
+
+        var paths: [String]?
+        DispatchQueue.main.sync {
+            paths = isSave ? save(title: title, name: name, path: path) :
+                open(title: title, path: path, files: !directories, directories: directories, multiple: multiple, types: types)
+        }
+
+        guard let files = paths else { return nil }
+
+        var retCount: Int32 = 0
+        var ret: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+        for file in files {
+            let item = ta_xstrdup(tallocCtx, file)
+            app_bridge_tarray_append(tallocCtx, &ret, &retCount, item)
+            ta_steal_(ret, item)
+        }
+
+        if retCount > 0 {
+            app_bridge_tarray_append(tallocCtx, &ret, &retCount, nil)
+        }
+
+        return ret
     }
 
     func openUrl() -> String? {
