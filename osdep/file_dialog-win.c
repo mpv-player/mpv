@@ -65,6 +65,9 @@ static wchar_t *create_extensions_pattern(void *talloc_ctx, char **extension)
 
 char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
 {
+    if (!str_in_list(bstr0("native"), params->providers))
+        return NULL;
+
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr))
         return NULL;
