@@ -21,5 +21,8 @@
 
 char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
 {
+    if (!str_in_list(bstr0("native"), params->providers))
+        return NULL;
+
     return [[[Dialog alloc] init] openDialog:talloc_ctx params:params];
 }

@@ -887,6 +887,8 @@ static const m_option_t mp_opts[] = {
     {"screenshot-directory", OPT_ALIAS("screenshot-dir")},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
+    {"file-dialog-providers", OPT_STRINGLIST(file_dialog_providers)},
+
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
@@ -1158,6 +1160,14 @@ static const struct MPOpts mp_default_opts = {
         "video-scale-y",
         "video-align-x",
         "video-align-y",
+        NULL
+    },
+
+    .file_dialog_providers = (char *[]){
+        "native",
+        "portal",
+        "kdialog",
+        "zenity",
         NULL
     },
 };

@@ -7941,3 +7941,11 @@ Miscellaneous
     On Wayland, this option only has effect on the ``wayland`` backend, and
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
+
+``--file-dialog-providers=<providers>``
+    Set of enabled file dialog providers. The default is
+    ``native,portal,kdialog,zenity``. The list is unordered, meaning the
+    priority is implementation-defined. Removing a provider from the list will
+    disable it, clearing the list will disable file dialog support entirely. On
+    Windows and macOS, only the ``native`` provider is used. On other platforms,
+    dialog providers will be probed until one is found.

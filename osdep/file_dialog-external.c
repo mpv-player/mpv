@@ -163,6 +163,10 @@ char **mp_file_dialog_get_files_external(void *talloc_ctx,
     for (int i = 0; dialogs[i]; i++) {
         dialogs[i](tmp, (const char **)opts.args, params);
         opts.exe = opts.args[0];
+        if (!str_in_list(bstr0(opts.exe), params->providers)) {
+            res.error = MP_SUBPROCESS_EGENERIC;
+            continue;
+        }
         mp_subprocess(mp_null_log, &opts, &res);
         if (res.error == MP_SUBPROCESS_OK)
             break;

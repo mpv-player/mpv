@@ -20,6 +20,7 @@
 #include <gio/gio.h>
 
 #include <common/common.h>
+#include <player/core.h>
 
 #define PORTAL_BUS "org.freedesktop.portal.Desktop"
 #define PORTAL_OBJECT "/org/freedesktop/portal/desktop"
@@ -104,6 +105,9 @@ char **mp_file_dialog_get_files_portal(void *talloc_ctx,
 {
     struct priv p = { .error = error };
     *p.error = true;
+
+    if (!str_in_list(bstr0("portal"), params->providers))
+        return NULL;
 
     g_autoptr(GDBusConnection) connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
     if (!connection)

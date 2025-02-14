@@ -42,6 +42,7 @@ typedef struct mp_file_dialog_params {
     enum mp_file_dialog_flags flags;        // Flags, see mp_file_dialog_flags
     const mp_file_dialog_filters *filters;  // The filters to apply to the file dialog dialog. Optional.
     void *parent;                   // The parent window. Optional.
+    char **providers;               // The list of providers to use. Optional.
 } mp_file_dialog_params;
 
 /**
