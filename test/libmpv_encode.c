@@ -106,11 +106,11 @@ static void check_output(FILE *fp)
 
 int main(int argc, char *argv[])
 {
-    atexit(exit_cleanup);
-
     ctx = mpv_create();
     if (!ctx)
         return 1;
+
+    atexit(exit_cleanup);
 
     static char path[] = "./testout.XXXXXX";
 
