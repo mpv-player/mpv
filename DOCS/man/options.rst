@@ -1572,6 +1572,11 @@ Video
 
     This option has no effect if ``--video-unscaled`` option is used.
 
+    The difference between ``--panscan`` and ``--video-zoom`` is that
+    ``--panscan`` can only zoom in until either the video width or height fills
+    the window, while ``--video-zoom`` can zoom in or out arbitrary amounts, and
+    also works with ``--video-unscaled``.
+
 ``--video-aspect-override=<ratio|no|original>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played.
