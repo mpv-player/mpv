@@ -528,7 +528,7 @@ static bool append_lang(size_t *nb, char ***out, char *in)
     MP_TARRAY_GROW(NULL, *out, *nb + 1);
     (*out)[(*nb)++] = in;
     (*out)[*nb] = NULL;
-    ta_set_parent(in, *out);
+    talloc_steal(*out, in);
     return true;
 }
 
