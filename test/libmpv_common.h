@@ -56,6 +56,7 @@ static inline void fail(const char *fmt, ...)
 static inline void exit_cleanup(void)
 {
     mpv_destroy(ctx);
+    ctx = NULL;
 }
 
 static inline mpv_event *wrap_wait_event(void)

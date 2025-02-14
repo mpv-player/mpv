@@ -50,11 +50,12 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
         return 1;
-    atexit(exit_cleanup);
 
     ctx = mpv_create();
     if (!ctx)
         return 1;
+
+    atexit(exit_cleanup);
 
     initialize();
 
