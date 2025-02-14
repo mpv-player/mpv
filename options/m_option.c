@@ -1425,10 +1425,10 @@ static int find_list_bstr(char **list, bstr item)
     return -1;
 }
 
-static char **separate_input_param(const m_option_t *opt, bstr param,
-                                   int *len, int op)
+static char **separate_input_param(struct mp_log *log, const m_option_t *opt,
+                                   bstr param, int *len, int op)
 {
-    char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
+    char separator = OPTION_LIST_SEPARATOR;
     if (op == OP_APPEND || op == OP_REMOVE)
         separator = 0; // specially handled
     struct bstr str = param;
@@ -1438,6 +1438,23 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
         str = bstr_cut(str, 1);
         n++;
     }
+    // Backwards compatibility for path list options.
+    if (opt->priv && n == 1 && separator != 0) {
+        str = param;
+        n = *len;
+        separator = *(char *)opt->priv;
+        while (str.len) {
+            get_nextsep(&str, separator, 0);
+            str = bstr_cut(str, 1);
+            n++;
+        }
+        if (n) {
+            mp_warn(log, "Using '%c' as a separator is deprecated. "
+                    "Use ',' instead for separating items in lists.\n",
+                    OPTION_PATH_SEPARATOR);
+        }
+    }
+
     if (n == 0 && op != OP_NONE)
         return NULL;
 
@@ -1540,7 +1557,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         return 1;
 
     int n = 0;
-    res = separate_input_param(opt, param, &n, op);
+    res = separate_input_param(log, opt, param, &n, op);
     if (!res)
         return M_OPT_INVALID;
 
@@ -1745,7 +1762,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         return 0;
     } else if (op == OP_DEL || op == OP_REMOVE) {
         int n = 0;
-        char **res = separate_input_param(opt, param, &n, op);
+        char **res = separate_input_param(log, opt, param, &n, op);
         if (!res)
             return M_OPT_INVALID;
         lst = dst ? VAL(dst) : NULL;

@@ -637,12 +637,15 @@ the option also allows you to append a single tag with ``--display-tags-append``
 and the tag name can for example contain a literal ``,`` without the need for
 escaping.
 
-String list and path list options
+String list options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 String lists are separated by ``,``. The strings are not parsed or interpreted
-by the option system itself. However, most path or file list options use ``:``
-(Unix) or ``;`` (Windows) as separator, instead of ``,``.
+by the option system itself.
+
+Some options are path/file list options and these used to use ``:`` Unix or
+``;`` (Windows) as a separator instead of ``,``. The old separators still work,
+but this is deprecated and it is strongly recommended to use ``,`` instead.
 
 They support the following operations:
 
