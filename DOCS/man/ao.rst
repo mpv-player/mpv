@@ -10,6 +10,8 @@ syntax is:
 If the list has a trailing ',', mpv will fall back on drivers not contained
 in the list.
 
+This is an object settings list option. See `List Options`_ for details.
+
 .. note::
 
     See ``--ao=help`` for a list of compiled-in audio output drivers sorted by
