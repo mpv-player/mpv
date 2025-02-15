@@ -6117,12 +6117,32 @@ static void cmd_loadlist(void *p)
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
 
+    void *tmp = talloc_new(NULL);
+
+    if (!filename || !filename[0]) {
+        mp_file_dialog_filters filters[] = {
+            {"Playlist Files", mpctx->opts->playlist_exts},
+            {NULL},
+        };
+        char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Open Playlist",
+                                               NULL, "", filters,
+                                               MP_FILE_DIALOG_FILE);
+        if (files)
+            filename = files[0];
+    }
+
+    if (!filename || !filename[0]) {
+        cmd->success = false;
+        talloc_free(tmp);
+        return;
+    }
+
     struct load_action action = get_load_action(mpctx, action_flag);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(tmp, mpctx->global, filename);
     struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
                                               mpctx->global);
-    talloc_free(path);
+    talloc_free(tmp);
 
     if (pl) {
         prepare_playlist(mpctx, pl);
@@ -7456,7 +7476,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadlist", cmd_loadlist,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},

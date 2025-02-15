@@ -581,7 +581,7 @@ Playlist Manipulation
     This is the same as ``loadfile``, but it also allows opening directories.
     When a URL is not provided, a file dialog will be shown to select a directory.
 
-``loadlist <url> [<flags> [<index>]]``
+``loadlist [<url> [<flags> [<index>]]]``
     Load the given playlist file or URL (like ``--playlist``).
 
     Second argument:

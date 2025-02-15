@@ -1,3 +1,3 @@
-make the URL argument optional for `loadfile`, `{sub,audio,video}-add`, `screenshot-to-file`; it will open a file selection dialog on supported platforms
+make the URL argument optional for `loadfile`, `loadlist`, `{sub,audio,video}-add`, `screenshot-to-file`; it will open a file selection dialog on supported platforms
 add `loaddir` command to select directories using a file dialog
 add `file-dialog` command
