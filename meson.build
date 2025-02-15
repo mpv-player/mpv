@@ -537,9 +537,12 @@ if not win32 and not darwin
         sources += files('player/dialog/file_dialog-portal.c')
         dependencies += gio
     endif
-    sources += files('player/dialog/file_dialog-external.c',
-                     'player/dialog/file_dialog-unix.c')
+    sources += files('player/dialog/file_dialog-external.c')
+else
+    features += {'gio': false}
 endif
+
+sources += files('player/dialog/file_dialog.c')
 
 # media controls
 if win32

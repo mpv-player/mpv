@@ -15,7 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog.h"
+#include "file_dialog_detail.h"
 
 #include <windows.h>
 #include <commdlg.h>
@@ -24,7 +24,6 @@
 #include <mpv_talloc.h>
 #include <osdep/io.h>
 #include <osdep/windows_utils.h>
-#include <player/core.h>
 
 static int append_wchar(void *talloc_ctx, wchar_t **pattern, size_t end, const char *str)
 {
@@ -62,10 +61,11 @@ static wchar_t *create_extensions_pattern(void *talloc_ctx, char **extension)
     return pattern;
 }
 
-char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
+static char **get_files(void *talloc_ctx,
+                        const mp_file_dialog_params *params,
+                        bool *error)
 {
-    if (!str_in_list(bstr0("native"), params->providers))
-        return NULL;
+    *error = true;
 
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr))
@@ -154,6 +154,8 @@ char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *p
         itemCount = 1;
     }
 
+    *error = false;
+
     size_t ret_count = 0;
     for (DWORD i = 0; i < itemCount; i++) {
         IShellItem *pItem = NULL;
@@ -182,8 +184,6 @@ char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *p
     if (ret_count)
         MP_TARRAY_APPEND(talloc_ctx, ret, ret_count, NULL);
 
-    assert(ret_count || !ret);
-
 done:
     SAFE_RELEASE(file_open_dialog);
     SAFE_RELEASE(item_array);
@@ -193,3 +193,9 @@ done:
     talloc_free(tmp);
     return ret;
 }
+
+const struct file_dialog_provider file_dialog_win32 = {
+    .name = "win32",
+    .desc = "Native Windows dialog",
+    .get_files = get_files,
+};

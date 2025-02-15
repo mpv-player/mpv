@@ -91,6 +91,7 @@ extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options clipboard_conf;
+extern const struct m_sub_options file_dialog_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -887,7 +888,7 @@ static const m_option_t mp_opts[] = {
     {"screenshot-directory", OPT_ALIAS("screenshot-dir")},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
 
-    {"file-dialog-providers", OPT_STRINGLIST(file_dialog_providers)},
+    {"file-dialog", OPT_SUBSTRUCT(file_dialog_opts, file_dialog_conf)},
 
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
@@ -1160,14 +1161,6 @@ static const struct MPOpts mp_default_opts = {
         "video-scale-y",
         "video-align-x",
         "video-align-y",
-        NULL
-    },
-
-    .file_dialog_providers = (char *[]){
-        "native",
-        "portal",
-        "kdialog",
-        "zenity",
         NULL
     },
 };
