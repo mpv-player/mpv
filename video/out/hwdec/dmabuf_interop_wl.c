@@ -40,23 +40,22 @@ static bool map(struct ra_hwdec_mapper *mapper,
     int layer_no = 0;
     struct dmabuf_interop_priv *mapper_p = mapper->priv;
     uint32_t drm_format = mapper_p->desc.layers[layer_no].format;
+    uint64_t drm_modifier = mapper_p->desc.objects[layer_no].format_modifier;
 
     if (mapper_p->desc.nb_layers != 1) {
         MP_VERBOSE(mapper, "Mapped surface has separate layers - expected composed layers.\n");
         return false;
-    } else if (!ra_compatible_format(mapper->ra, drm_format,
-               mapper_p->desc.objects[0].format_modifier)) {
+    } else if (!ra_compatible_format(mapper->ra, drm_format, drm_modifier)) {
         MP_VERBOSE(mapper, "Mapped surface with format %s; drm format '%s(%016" PRIx64 ")' "
                    "is not supported by compositor and GPU combination.\n",
                    mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
-                   mp_tag_str(drm_format),
-                   mapper_p->desc.objects[0].format_modifier);
+                   mp_tag_str(drm_format), drm_modifier);
         return false;
     }
 
     MP_VERBOSE(mapper, "Supported Wayland display format %s: '%s(%016" PRIx64 ")'\n",
                mp_imgfmt_to_name(mapper->src->params.hw_subfmt),
-               mp_tag_str(drm_format), mapper_p->desc.objects[0].format_modifier);
+               mp_tag_str(drm_format), drm_modifier);
 
     return true;
 }
