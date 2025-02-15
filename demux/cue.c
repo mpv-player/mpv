@@ -214,6 +214,8 @@ struct cue_file *mp_parse_cue(struct bstr data)
             talloc_free(f);
             return NULL;
         case CUE_TRACK: {
+            if (bstr_find0(param, "AUDIO") == -1)
+                break;
             MP_TARRAY_GROW(f, f->tracks, f->num_tracks);
             f->num_tracks += 1;
             cur_track = &f->tracks[f->num_tracks - 1];
