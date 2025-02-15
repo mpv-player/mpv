@@ -19,6 +19,9 @@
 
 #include "file_dialog.h"
 
-char **mp_file_dialog_get_files_external(void *talloc_ctx,
-                                         const mp_file_dialog_params *params,
-                                         bool *error);
+struct file_dialog_provider {
+    const char *name;
+    const char *desc;
+    char **(*get_files)(void *talloc_ctx, const mp_file_dialog_params *params,
+                        bool *error);
+};

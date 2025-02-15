@@ -6027,8 +6027,10 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
     if (mpctx->video_out)
         vo_control(vo, VOCTRL_GET_WINDOW_ID, &parent);
 
-    char **providers = NULL;
-    m_option_copy(&exts_opt, &providers, &mpctx->opts->file_dialog_providers);
+    extern const struct m_sub_options file_dialog_conf;
+    struct file_dialog_opts *opts = mp_get_config_group(talloc_ctx,
+                                                        mpctx->global,
+                                                        &file_dialog_conf);
     mp_core_unlock(mpctx);
     char **files = mp_file_dialog_get_files(talloc_ctx,
                     &(mp_file_dialog_params) {
@@ -6039,11 +6041,10 @@ char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
                         .filters = filters,
                         .flags = flags,
                         .parent = &parent,
-                        .providers = providers,
+                        .opts = opts,
                     });
     for (int i = 0; filters && filters[i].name; i++)
         m_option_free(&exts_opt, &filters[i].extensions);
-    m_option_free(&exts_opt, &providers);
     mp_core_lock(mpctx);
 
     return files;

@@ -15,14 +15,19 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog.h"
+#include "file_dialog_detail.h"
 
 #include <osdep/mac/swift.h>
 
-char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
+static char **get_files(void *talloc_ctx, const mp_file_dialog_params *params,
+                        bool *error)
 {
-    if (!str_in_list(bstr0("native"), params->providers))
-        return NULL;
-
+    *error = false;
     return [[[Dialog alloc] init] openDialog:talloc_ctx params:params];
 }
+
+const struct file_dialog_provider file_dialog_mac = {
+    .name = "mac",
+    .desc = "Native macOS dialog",
+    .get_files = get_files,
+};

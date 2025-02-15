@@ -7942,10 +7942,27 @@ Miscellaneous
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
 
-``--file-dialog-providers=<providers>``
-    Set of enabled file dialog providers. The default is
-    ``native,portal,kdialog,zenity``. The list is unordered, meaning the
-    priority is implementation-defined. Removing a provider from the list will
-    disable it, clearing the list will disable file dialog support entirely. On
-    Windows and macOS, only the ``native`` provider is used. On other platforms,
-    dialog providers will be probed until one is found.
+``--file-dialog-providers=<providers1,providers2,...[,]>``
+    Specify a priority list of the file dialog porviders to be used.
+    You can also pass ``help`` to get a complete list of compiled in porviders.
+    Removing a provider from the list will disable it, clearing the list will
+    disable file dialog support entirely.
+
+    The following file dialog providers are implemented:
+
+    ``win32``
+        Native Windows dialog.
+
+    ``mac``
+        Native macOS dialog.
+
+    ``portal``
+        Desktop FileChooser portal through D-Bus.
+
+    ``kdialog``
+        KDialog run as subprocess.
+
+    ``zenity``
+        Zenity run as subprocess.
+
+    This is an object settings list option. See `List Options`_ for details.

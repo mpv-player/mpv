@@ -15,12 +15,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog-portal.h"
+#include "file_dialog_detail.h"
 
 #include <gio/gio.h>
 
 #include <common/common.h>
-#include <player/core.h>
 
 #define PORTAL_BUS "org.freedesktop.portal.Desktop"
 #define PORTAL_OBJECT "/org/freedesktop/portal/desktop"
@@ -99,15 +98,11 @@ static GVariant *convert_filters_to_gvariant(const mp_file_dialog_filters *f)
     return g_variant_builder_end(&filter_builder);
 }
 
-char **mp_file_dialog_get_files_portal(void *talloc_ctx,
-                                       const mp_file_dialog_params *params,
-                                       bool *error)
+static char **get_files(void *talloc_ctx, const mp_file_dialog_params *params,
+                        bool *error)
 {
     struct priv p = { .error = error };
     *p.error = true;
-
-    if (!str_in_list(bstr0("portal"), params->providers))
-        return NULL;
 
     g_autoptr(GDBusConnection) connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, NULL);
     if (!connection)
@@ -159,3 +154,9 @@ char **mp_file_dialog_get_files_portal(void *talloc_ctx,
 
     return talloc_steal(talloc_ctx, p.files);
 }
+
+const struct file_dialog_provider file_dialog_portal = {
+    .name = "portal",
+    .desc = "Desktop FileChooser portal",
+    .get_files = get_files,
+};
