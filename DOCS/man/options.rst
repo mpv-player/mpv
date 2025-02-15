@@ -7914,3 +7914,30 @@ Miscellaneous
     On Wayland, this option only has effect on the ``wayland`` backend, and
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
+
+``--clipboard-backends=<backend1,backend2,...[,]>``
+    Specify a priority list of the clipboard backends to be used.
+    You can also pass ``help`` to get a complete list of compiled in backends.
+
+    Note that the default clipboard backends are subject to change,
+    and must not be relied upon.
+
+    The following clipboard backends are implemented:
+
+    ``win32``
+        Windows backend.
+
+    ``mac``
+        macOS backend.
+
+    ``wayland``
+        Wayland backend. This backend is only available if the compositor
+        supports the ``ext-data-control-v1`` protocol.
+
+    ``vo``
+        VO backend. Requires an active VO window, and support differs across
+        platforms. Currently, this is used as a fallback for Wayland
+        compositors without support for the ``ext-data-control-v1``
+        protocol, or if the ``wayland`` backend is disabled.
+
+    This is an object settings list option. See `List Options`_ for details.

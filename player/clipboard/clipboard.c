@@ -25,19 +25,7 @@
 struct clipboard_opts {
     bool enabled;
     bool monitor;
-};
-
-#define OPT_BASE_STRUCT struct clipboard_opts
-const struct m_sub_options clipboard_conf = {
-    .opts = (const struct m_option[]) {
-        {"enable", OPT_BOOL(enabled), .flags = UPDATE_CLIPBOARD},
-        {"monitor", OPT_BOOL(monitor), .flags = UPDATE_CLIPBOARD},
-        {0}
-    },
-    .defaults = &(const struct clipboard_opts) {
-        .enabled = true,
-    },
-    .size = sizeof(struct clipboard_opts)
+    struct m_obj_settings *backends;
 };
 
 // backend list
@@ -59,6 +47,48 @@ static const struct clipboard_backend *const clipboard_backend_list[] = {
     &clipboard_backend_vo,
 };
 
+static bool get_desc(struct m_obj_desc *dst, int index)
+{
+    if (index >= MP_ARRAY_SIZE(clipboard_backend_list))
+        return false;
+    const struct clipboard_backend *backend = clipboard_backend_list[index];
+    *dst = (struct m_obj_desc) {
+        .name = backend->name,
+        .description = backend->desc,
+    };
+    return true;
+}
+
+static const struct m_obj_list backend_obj_list = {
+    .get_desc = get_desc,
+    .description = "clipboard backends",
+    .allow_trailer = true,
+    .disallow_positional_parameters = true,
+    .use_global_options = true,
+};
+
+#define OPT_BASE_STRUCT struct clipboard_opts
+const struct m_sub_options clipboard_conf = {
+    .opts = (const struct m_option[]) {
+        {"enable", OPT_BOOL(enabled), .flags = UPDATE_CLIPBOARD},
+        {"monitor", OPT_BOOL(monitor), .flags = UPDATE_CLIPBOARD},
+        {"backends", OPT_SETTINGSLIST(backends, &backend_obj_list),
+         .flags = UPDATE_CLIPBOARD},
+        {0}
+    },
+    .defaults = &(const struct clipboard_opts) {
+        .enabled = true,
+        .backends = (struct m_obj_settings[]) {
+            {.name = "win32", .enabled = true},
+            {.name = "mac", .enabled = true},
+            {.name = "wayland", .enabled = true},
+            {.name = "vo", .enabled = true},
+            {0}
+        }
+    },
+    .size = sizeof(struct clipboard_opts)
+};
+
 struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
                                           struct mpv_global *global)
 {
@@ -68,10 +98,15 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
         .monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
     };
 
-    for (int i = 0; i < MP_ARRAY_SIZE(clipboard_backend_list); i++) {
-        const struct clipboard_backend *backend = clipboard_backend_list[i];
-        if (backend->init(cl, params) == CLIPBOARD_SUCCESS) {
-            MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", backend->name);
+    for (int n = 0; params->backends && params->backends[n].name; n++) {
+        if (!params->backends[n].enabled)
+            continue;
+        for (int i = 0; i < MP_ARRAY_SIZE(clipboard_backend_list); i++) {
+            const struct clipboard_backend *backend = clipboard_backend_list[i];
+            if (strcmp(params->backends[n].name, backend->name))
+                continue;
+            if (backend->init(cl, params) != CLIPBOARD_SUCCESS)
+                break;
             cl->backend = backend;
             goto success;
         }
@@ -81,6 +116,7 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
     talloc_free(cl);
     return NULL;
 success:
+    MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
     return cl;
 }
 
@@ -129,6 +165,7 @@ void reinit_clipboard(struct MPContext *mpctx)
         struct clipboard_init_params params = {
             .mpctx = mpctx,
             .flags = opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0,
+            .backends = opts->backends,
         };
         mpctx->clipboard = mp_clipboard_create(&params, mpctx->global);
     }
