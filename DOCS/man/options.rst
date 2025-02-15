@@ -6839,6 +6839,8 @@ them.
     macvk
         Vulkan on macOS with a metal surface through a translation layer (experimental)
 
+    This is an object settings list option. See `List Options`_ for details.
+
 ``--gpu-api=<type1,type2,...[,]>``
     Specify a priority list of accepted graphics APIs.
 
@@ -6852,6 +6854,8 @@ them.
         Allow only Vulkan (requires a valid/working ``--spirv-compiler``)
     d3d11
         Allow only ``--gpu-context=d3d11``
+
+    This is an object settings list option. See `List Options`_ for details.
 
 ``--opengl-es=<mode>``
     Controls which type of OpenGL context will be accepted:

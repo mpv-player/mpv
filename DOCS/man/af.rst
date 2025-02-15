@@ -8,6 +8,8 @@ syntax is:
     Setup a chain of audio filters. See ``--vf`` (`VIDEO FILTERS`_) for the
     full syntax.
 
+    This is an object settings list option. See `List Options`_ for details.
+
 .. note::
 
     To get a full list of available audio filters, see ``--af=help``.

@@ -23,6 +23,8 @@ The exact syntax is:
     See the ``vf`` command (and ``toggle`` sub-command) for further explanations
     and examples.
 
+    This is an object settings list option. See `List Options`_ for details.
+
     The general filter entry syntax is:
 
         ``["@"<label-name>":"] ["!"] <filter-name> [ "=" <filter-parameter-list> ]``
