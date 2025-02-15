@@ -15,10 +15,12 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "file_dialog-external.h"
+#include "file_dialog_detail.h"
 
-#include <player/core.h>
+#include <assert.h>
+#include <unistd.h>
 
+#include <common/msg.h>
 #include <osdep/subprocess.h>
 
 #define MAX_ARGS 32
@@ -126,15 +128,10 @@ static void zenity(void *talloc_ctx, const char *args[MAX_ARGS],
 typedef void (*dialog_func_t)(void *talloc_ctx, const char *args[MAX_ARGS],
                               const mp_file_dialog_params *params);
 
-static const dialog_func_t dialogs[] = {
-    kdialog,
-    zenity,
-    NULL,
-};
-
-char **mp_file_dialog_get_files_external(void *talloc_ctx,
-                                         const mp_file_dialog_params *params,
-                                         bool *error)
+static char **get_files_external(void *talloc_ctx,
+                                 dialog_func_t dialog,
+                                 const mp_file_dialog_params *params,
+                                 bool *error)
 {
     void *tmp = talloc_new(NULL);
     const char *args[MAX_ARGS] = {0};
@@ -158,20 +155,11 @@ char **mp_file_dialog_get_files_external(void *talloc_ctx,
         opts.num_fds++;
     }
 
+    dialog(tmp, (const char **)opts.args, params);
+    opts.exe = opts.args[0];
+
     struct mp_subprocess_result res;
-
-    for (int i = 0; dialogs[i]; i++) {
-        dialogs[i](tmp, (const char **)opts.args, params);
-        opts.exe = opts.args[0];
-        if (!str_in_list(bstr0(opts.exe), params->providers)) {
-            res.error = MP_SUBPROCESS_EGENERIC;
-            continue;
-        }
-        mp_subprocess(mp_null_log, &opts, &res);
-        if (res.error == MP_SUBPROCESS_OK)
-            break;
-    }
-
+    mp_subprocess(mp_null_log, &opts, &res);
     *error = res.error != MP_SUBPROCESS_OK;
 
     char **ret = NULL;
@@ -193,3 +181,29 @@ char **mp_file_dialog_get_files_external(void *talloc_ctx,
     talloc_free(tmp);
     return ret;
 }
+
+static char **get_files_kdialog(void *talloc_ctx,
+                                const mp_file_dialog_params *params,
+                                bool *error)
+{
+    return get_files_external(talloc_ctx, kdialog, params, error);
+}
+
+static char **get_files_zenity(void *talloc_ctx,
+                               const mp_file_dialog_params *params,
+                               bool *error)
+{
+    return get_files_external(talloc_ctx, zenity, params, error);
+}
+
+const struct file_dialog_provider file_dialog_kdialog = {
+    .name = "kdialog",
+    .desc = "KDialog subprocess",
+    .get_files = get_files_kdialog,
+};
+
+const struct file_dialog_provider file_dialog_zenity = {
+    .name = "zenity",
+    .desc = "Zenity subprocess",
+    .get_files = get_files_zenity,
+};
