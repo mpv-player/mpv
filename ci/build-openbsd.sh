@@ -28,6 +28,7 @@ meson setup build $common_args \
   -Dopenal=enabled \
   -Dpulse=enabled \
   -Dvulkan=enabled \
-  -Ddvdnav=enabled
+  -Ddvdnav=enabled \
+  -Dcdda=disabled
 meson compile -C build
 ./build/mpv -v --no-config
