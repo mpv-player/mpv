@@ -4013,23 +4013,7 @@ Property list
 
 ``current-clipboard-backend``
     A string containing the currently active clipboard backend.
-    The following clipboard backends are implemented:
-
-    ``win32``
-        Windows backend.
-
-    ``mac``
-        macOS backend.
-
-    ``wayland``
-        Wayland backend. This backend is only available if the compositor
-        supports the ``ext-data-control-v1`` protocol.
-
-    ``vo``
-        VO backend. Requires an active VO window, and support differs across
-        platforms. Currently, this is used as a fallback for Wayland
-        compositors without support for the ``ext-data-control-v1``
-        protocol.
+    See ``--clipboard-backends`` option for the list of available backends.
 
 ``clock``
 
