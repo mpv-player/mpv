@@ -11,10 +11,10 @@ option('ta-leak-report', type: 'boolean', value: false, description: 'enable ta 
 option('disable-packet-pool', type: 'boolean', value: false, description: 'disable packet pool (development only)')
 
 # misc features
-option('cdda', type: 'feature', value: 'disabled', description: 'cdda support (libcdio)')
+option('cdda', type: 'feature', value: 'auto', description: 'cdda support (libcdio)')
 option('cplugins', type: 'feature', value: 'auto', description: 'C plugins')
 option('dvbin', type: 'feature', value: 'auto', description: 'DVB input module')
-option('dvdnav', type: 'feature', value: 'disabled', description: 'dvdnav support')
+option('dvdnav', type: 'feature', value: 'auto', description: 'dvdnav support')
 option('iconv', type: 'feature', value: 'auto', description: 'iconv')
 option('javascript', type: 'feature', value: 'auto', description: 'Javascript (MuJS backend)')
 option('jpeg', type: 'feature', value: 'auto', description: 'libjpeg image writer')
