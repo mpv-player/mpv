@@ -23,9 +23,8 @@
 
 #include <mpv_talloc.h>
 #include <osdep/io.h>
+#include <osdep/windows_utils.h>
 #include <player/core.h>
-
-#include "windows_utils.h"
 
 static int append_wchar(void *talloc_ctx, wchar_t **pattern, size_t end, const char *str)
 {

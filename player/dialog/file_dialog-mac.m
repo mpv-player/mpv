@@ -17,7 +17,7 @@
 
 #include "file_dialog.h"
 
-#include "mac/swift.h"
+#include <osdep/mac/swift.h>
 
 char **mp_file_dialog_get_files(void *talloc_ctx, const mp_file_dialog_params *params)
 {

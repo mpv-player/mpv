@@ -19,7 +19,7 @@
 
 #include <player/core.h>
 
-#include "subprocess.h"
+#include <osdep/subprocess.h>
 
 #define MAX_ARGS 32
 

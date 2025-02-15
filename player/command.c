@@ -33,6 +33,7 @@
 #include "mpv_talloc.h"
 #include "client.h"
 #include "clipboard/clipboard.h"
+#include "dialog/file_dialog.h"
 #include "external_files.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -74,7 +75,6 @@
 #include "misc/thread_pool.h"
 #include "misc/thread_tools.h"
 
-#include "osdep/file_dialog.h"
 #include "osdep/io.h"
 #include "osdep/subprocess.h"
 #include "osdep/terminal.h"

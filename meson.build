@@ -408,12 +408,12 @@ cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
-    sources += files('osdep/file_dialog-mac.m',
-                     'osdep/language-mac.c',
+    sources += files('osdep/language-mac.c',
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/app_bridge.m',
-                     'player/clipboard/clipboard-mac.m')
+                     'player/clipboard/clipboard-mac.m',
+                     'player/dialog/file_dialog-mac.m')
     main_fn_source = files('osdep/main-fn-mac.c')
 endif
 
@@ -514,7 +514,7 @@ if features['win32-desktop']
     endif
     sources += files('input/ipc-win.c',
                      'player/clipboard/clipboard-win.c',
-                     'osdep/file_dialog-win.c',
+                     'player/dialog/file_dialog-win.c',
                      'osdep/language-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
@@ -534,11 +534,11 @@ if not win32 and not darwin
     gio = dependency('gio-2.0', required: get_option('gio'))
     features += {'gio': gio.found()}
     if features['gio']
-        sources += files('osdep/file_dialog-portal.c')
+        sources += files('player/dialog/file_dialog-portal.c')
         dependencies += gio
     endif
-    sources += files('osdep/file_dialog-external.c',
-                     'osdep/file_dialog-unix.c')
+    sources += files('player/dialog/file_dialog-external.c',
+                     'player/dialog/file_dialog-unix.c')
 endif
 
 # media controls
