@@ -270,20 +270,22 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         int title = *(double *)arg;
         if (!b->bd || title < 0 || title >= b->num_titles)
             return STREAM_UNSUPPORTED;
-        const BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
+        BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
         if (!ti)
             return STREAM_UNSUPPORTED;
         *(double *)arg = BD_TIME_TO_MP(ti->duration);
+        bd_free_title_info(ti);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_TITLE_PLAYLIST: {
         int title = *(double *)arg;
         if (!b->bd || title < 0 || title >= b->num_titles)
             return STREAM_UNSUPPORTED;
-        const BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
+        BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
         if (!ti)
             return STREAM_UNSUPPORTED;
         *(double *)arg = ti->playlist;
+        bd_free_title_info(ti);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_LANG: {
