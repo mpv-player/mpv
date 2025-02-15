@@ -3884,7 +3884,7 @@ Property list
 
     This has a number of sub-properties. Replace ``<name>`` with the name of
     a top-level option. No guarantee of stability is given to any of these
-    sub-properties - they may change radically in the feature.
+    sub-properties - they may change radically in the future.
 
     ``option-info/<name>/name``
         The name of the option.
