@@ -23,6 +23,7 @@
 #include "input/event.h"
 #include "video/mp_image.h"
 #include "vo.h"
+#include "xdg-activation-v1.h"
 
 struct compositor_format;
 struct vo_wayland_seat;
@@ -142,6 +143,9 @@ struct vo_wayland_state {
 
     /* single-pixel-buffer */
     struct wp_single_pixel_buffer_manager_v1 *single_pixel_manager;
+
+    /* xdg-activation */
+    struct xdg_activation_v1 *xdg_activation;
 
     /* xdg-decoration */
     struct zxdg_decoration_manager_v1 *xdg_decoration_manager;
