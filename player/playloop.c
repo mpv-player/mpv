@@ -121,6 +121,14 @@ static void mp_process_input(struct MPContext *mpctx)
         mp_notify(mpctx, MP_EVENT_INPUT_PROCESSED, NULL);
 }
 
+// Process any queued option callbacks.
+static void handle_option_callbacks(struct MPContext *mpctx)
+{
+    for (int i = 0; i < mpctx->num_option_callbacks; i++)
+        mp_option_run_callback(mpctx, i);
+    mpctx->num_option_callbacks = 0;
+}
+
 double get_relative_time(struct MPContext *mpctx)
 {
     int64_t new_time = mp_time_ns();
@@ -1289,6 +1297,8 @@ void run_playloop(struct MPContext *mpctx)
 
     mp_process_input(mpctx);
 
+    handle_option_callbacks(mpctx);
+
     handle_chapter_change(mpctx);
 
     handle_force_window(mpctx, false);
@@ -1300,6 +1310,7 @@ void mp_idle(struct MPContext *mpctx)
     handle_clipboard_updates(mpctx);
     mp_wait_events(mpctx);
     mp_process_input(mpctx);
+    handle_option_callbacks(mpctx);
     handle_command_updates(mpctx);
     handle_update_cache(mpctx);
     handle_cursor_autohide(mpctx);

@@ -7693,8 +7693,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 {
     struct MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    bool init = !co;
-    void *opt_ptr = init ? NULL : co->data; // NULL on start
+    void *opt_ptr = !co ? NULL : co->data; // NULL on start
 
     if (co)
         mp_notify_property(mpctx, co->name);
@@ -7703,6 +7702,35 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
 
     if (self_update)
         return;
+
+    // Coalesce redundant updates and only keep the newest one.
+    bool drop = false;
+    for (int i = 0; i < mpctx->num_option_callbacks; i++) {
+        if ((mpctx->option_callbacks[i].co && opt_ptr == mpctx->option_callbacks[i].co->data) ||
+            (flags && flags == mpctx->option_callbacks[i].flags))
+            drop = true;
+        if (!drop)
+            continue;
+        if (i < mpctx->num_option_callbacks - 1)
+            mpctx->option_callbacks[i] = mpctx->option_callbacks[i + 1];
+        if (i == mpctx->num_option_callbacks - 1) {
+            mpctx->option_callbacks[i].co = co;
+            mpctx->option_callbacks[i].flags = flags;
+        }
+    }
+
+    if (!drop) {
+        struct mp_option_callback callback = {.co = co, .flags = flags};
+        MP_TARRAY_APPEND(mpctx, mpctx->option_callbacks, mpctx->num_option_callbacks, callback);
+    }
+}
+
+void mp_option_run_callback(struct MPContext *mpctx, int index)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct m_config_option *co = mpctx->option_callbacks[index].co;
+    void *opt_ptr = co ? co->data : NULL;
+    int flags = mpctx->option_callbacks[index].flags;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
@@ -7747,7 +7775,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags,
     if (flags & UPDATE_SUB_EXTS)
         mp_update_subtitle_exts(mpctx->opts);
 
-    if (init || opt_ptr == &opts->ipc_path || opt_ptr == &opts->ipc_client) {
+    if (opt_ptr == &opts->ipc_path || opt_ptr == &opts->ipc_client) {
         mp_uninit_ipc(mpctx->ipc_ctx);
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }
