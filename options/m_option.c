@@ -1113,30 +1113,9 @@ static int parse_double_aspect(struct mp_log *log, const m_option_t *opt,
 {
     if (bstr_equals0(param, "no")) {
         if (dst)
-            VAL(dst) = 0.0;
+            VAL(dst) = -2.0;
         return 1;
     }
-
-    // Potentially allow -1 but forbid all other negative values.
-    if (opt->defval && *(double *)opt->defval == -1) {
-        if (bstr_equals0(param, "original")) {
-            if (dst)
-                VAL(dst) = -1.0;
-            return 1;
-        }
-
-        struct bstr rest;
-        double val = bstrtod(param, &rest);
-        if (bstr_eatstart0(&rest, ":") || bstr_eatstart0(&rest, "/"))
-            val /= bstrtod(rest, &rest);
-        if (val == -1 && dst) {
-            VAL(dst) = -1.0;
-            mp_warn(log, "Setting '%.*s' to '%.*s' is deprecated. "
-                    "Set 'original' instead.\n", BSTR_P(param), BSTR_P(name));
-            return 1;
-        }
-    }
-
     return parse_double(log, opt, name, param, dst);
 }
 

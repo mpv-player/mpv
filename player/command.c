@@ -3134,12 +3134,19 @@ static int mp_property_video_aspect_override(void *ctx, struct m_property *prop,
             *(char **)arg = talloc_asprintf(NULL, "16:10");
         else if (doubles_equal(aspect_ratio, 4.0 / 3.0))
             *(char **)arg = talloc_asprintf(NULL, "4:3");
-        else if (doubles_equal(aspect_ratio, -1.0))
+        else if (aspect_ratio < 0.0)
             *(char **)arg = talloc_asprintf(NULL, "Original");
         else
             *(char **)arg = talloc_asprintf(NULL, "%.3f", aspect_ratio);
 
         return M_PROPERTY_OK;
+    }
+    if (action == M_PROPERTY_SET) {
+        double aspect_ratio = *(double *)arg;
+        if (aspect_ratio == 0 || aspect_ratio == -1) {
+            MP_WARN(mpctx, "Setting video-aspect-override to 0 or -1 is deprecated.\n"
+                           "Use video-aspect-mode instead.\n");
+        }
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }

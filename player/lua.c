@@ -85,6 +85,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@select.lua",
 #   include "player/lua/select.lua.inc"
     },
+    {"@aspect_compat.lua",
+#   include "player/lua/aspect_compat.lua.inc"
+    },
     {0}
 };
 
