@@ -177,15 +177,11 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
 
     MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
 
-    // Supposed to induce a seek reset. Does it even work? I don't know.
-    // It will log some bogus error messages, since the demuxer will try a
-    // low level seek, which will obviously not work. But it will probably
-    // clear its internal buffers.
-    demux_seek(p->slave, 0, SEEK_FACTOR | SEEK_FORCE);
-    stream_drop_buffers(demuxer->stream);
-
     double seek_arg[] = {seek_pts, flags};
     stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
+
+    if (p->slave->desc->drop_buffers)
+        p->slave->desc->drop_buffers(p->slave);
 
     p->seek_reinit = true;
 }
