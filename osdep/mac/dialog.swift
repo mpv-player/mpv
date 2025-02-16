@@ -18,7 +18,7 @@
 import Cocoa
 import UniformTypeIdentifiers
 
-class Dialog {
+class Dialog: NSObject, NSWindowDelegate, NSOpenSavePanelDelegate {
     var option: OptionHelper?
 
     init(_ option: OptionHelper? = nil) {
@@ -48,6 +48,7 @@ class Dialog {
         panel.canChooseDirectories = directories
         panel.allowsMultipleSelection = multiple
         panel.allowedContentTypes = types
+        panel.delegate = self
 
         if panel.runModal() == .OK {
             return panel.urls.map { $0.path }
@@ -66,10 +67,7 @@ class Dialog {
         let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
         input.placeholderString = "URL"
         alert.accessoryView = input
-
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
-            input.becomeFirstResponder()
-        }
+        alert.window.initialFirstResponder = input
 
         if alert.runModal() == .alertFirstButtonReturn && input.stringValue.count > 0 {
             return input.stringValue
@@ -85,5 +83,9 @@ class Dialog {
         alert.icon = AppHub.shared.getIcon()
         alert.addButton(withTitle: "Ok")
         alert.runModal()
+    }
+
+    func windowDidBecomeKey(_ notification: Notification) {
+        AppHub.shared.input.put(key: MP_INPUT_RELEASE_ALL)
     }
 }
