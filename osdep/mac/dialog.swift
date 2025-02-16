@@ -66,10 +66,7 @@ class Dialog {
         let input = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
         input.placeholderString = "URL"
         alert.accessoryView = input
-
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
-            input.becomeFirstResponder()
-        }
+        alert.window.initialFirstResponder = input
 
         if alert.runModal() == .alertFirstButtonReturn && input.stringValue.count > 0 {
             return input.stringValue
