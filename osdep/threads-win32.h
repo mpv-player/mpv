@@ -207,8 +207,4 @@ static inline void mp_thread_set_name(const char *name)
     talloc_free(wname);
 }
 
-static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread)
-{
-    (void) thread;
-    return 0;
-}
+int64_t mp_thread_cpu_time_ns(mp_thread_id thread_id);

@@ -22,6 +22,9 @@
 #include <stdlib.h>
 #include <versionhelpers.h>
 
+#include <intrin.h>
+
+#include "threads.h"
 #include "timer.h"
 
 #include "config.h"
@@ -149,4 +152,126 @@ void mp_raw_time_init(void)
         hires_max = 0;
     }
 #endif
+}
+
+static inline bool cpu_tsc_invariant(void)
+{
+    int cpu_info[4] = {0};
+    __cpuid(cpu_info, 0x80000000);
+
+    // Check if the extended CPUID leaf 0x80000007 is supported by the CPU
+    if (cpu_info[0] >= 0x80000007) {
+        __cpuid(cpu_info, 0x80000007);
+        // Check if the 8th bit in EDX is set (TSC invariant)
+        return (cpu_info[3] & (1 << 8)) != 0;
+    }
+    return false;
+}
+
+static double cpu_tsc_freq_ns(void)
+{
+    static double ticks_per_ns = 0;
+
+    if (ticks_per_ns != 0)
+        return ticks_per_ns;
+
+    static mp_static_mutex mutex = MP_STATIC_MUTEX_INITIALIZER;
+    mp_mutex_lock(&mutex);
+
+    if (!cpu_tsc_invariant()) {
+        ticks_per_ns = -1;
+        goto done;
+    }
+
+    // Try to avoid context switches when comparing QPC to TSC.
+    int previous_priority = GetThreadPriority(GetCurrentThread());
+    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+
+    static uint64_t initial = UINT64_C(-1);
+    static uint64_t initial_time;
+
+    // Remember the initial TSC and QPC values.
+    if (initial == UINT64_C(-1)) {
+        initial = __rdtsc();
+        initial_time = mp_raw_time_ns();
+    }
+
+    uint64_t now = __rdtsc();
+    uint64_t now_time = mp_raw_time_ns();
+
+    SetThreadPriority(GetCurrentThread(), previous_priority);
+
+    // If it has overflowed, try again.
+    if (initial > now) {
+        initial = UINT64_C(-1);
+        goto done;
+    }
+
+    // Compute the frequency of the TSC between the initial time and now. To ensure
+    // the accuracy of the result, we require at least 100 ms to have elapsed.
+    uint64_t elapsed_time = now_time - initial_time;
+    if (elapsed_time >= MP_TIME_MS_TO_NS(100))
+        ticks_per_ns = (double)(now - initial) / elapsed_time;
+
+done:
+    mp_mutex_unlock(&mutex);
+    return ticks_per_ns;
+}
+
+int64_t mp_thread_cpu_time_ns(mp_thread_id thread_id)
+{
+    int64_t thread_time = -1;
+
+    HANDLE thread = OpenThread(THREAD_QUERY_INFORMATION, FALSE, thread_id);
+    if (!thread)
+        return thread_time;
+
+#if !HAVE_UWP && !defined(__aarch64__) && !defined(_M_ARM64)
+
+    // GetThreadTimes() is exactly what we want, but even though it returns
+    // 100ns units, its real resolution is much worse, ~15.6ms in practice.
+    // This is a known and documented issue at this point.
+    // <https://devblogs.microsoft.com/oldnewthing/20161021-00/?p=94565>
+
+    // Instead of using GetThreadTimes(), we use QueryThreadCycleTime() to get the
+    // thread's clock cycle count and convert the result to elapsed time.
+    // This works only on CPUs with an invariant TSC, which is the case for
+    // x86_64/x86, but not for ARM.
+
+    double tsc_ticks_per_ns = cpu_tsc_freq_ns();
+
+    // If the TSC frequency is still being measured, return unsupported time
+    // instead of falling back to GetThreadTimes() to avoid discontinuity in
+    // thread times. This will only occur for the initial calls to this function.
+    if (tsc_ticks_per_ns == 0)
+        goto done;
+
+    if (tsc_ticks_per_ns > 0) {
+        ULONG64 cycle_time;
+        if (QueryThreadCycleTime(thread, &cycle_time)) {
+            thread_time = cycle_time / tsc_ticks_per_ns;
+            goto done;
+        }
+    }
+
+#endif
+
+    FILETIME creation_time, exit_time, kernel_time, user_time;
+    if (!GetThreadTimes(thread, &creation_time, &exit_time, &kernel_time, &user_time))
+        goto done;
+
+    ULARGE_INTEGER kernel_time_q;
+    kernel_time_q.LowPart = kernel_time.dwLowDateTime;
+    kernel_time_q.HighPart = kernel_time.dwHighDateTime;
+
+    ULARGE_INTEGER user_time_q;
+    user_time_q.LowPart = user_time.dwLowDateTime;
+    user_time_q.HighPart = user_time.dwHighDateTime;
+
+    thread_time = (kernel_time_q.QuadPart + user_time_q.QuadPart) * 100;
+
+done:
+    CloseHandle(thread);
+
+    return thread_time;
 }

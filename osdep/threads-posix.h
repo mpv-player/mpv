@@ -247,5 +247,5 @@ static inline int64_t mp_thread_cpu_time_ns(mp_thread_id thread)
     if (pthread_getcpuclockid(thread, &id) == 0 && clock_gettime(id, &ts) == 0)
         return MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
 #endif
-    return 0;
+    return -1;
 }
