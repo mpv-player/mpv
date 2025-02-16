@@ -7896,28 +7896,16 @@ Miscellaneous
 
     Conversion is not applied to metadata that is updated at runtime.
 
-``--clipboard-enable=<yes|no>``
-    (Windows, Wayland and macOS only)
-
-    Enable native clipboard support (default: yes). This allows reading and
-    writing to the ``clipboard`` property to get and set clipboard contents.
-
-``--clipboard-monitor=<yes|no>``
-    (Windows, Wayland and macOS only)
-
-    Enable clipboard monitoring so that the ``clipboard`` property can be
-    observed for content changes (default: no). This only affects clipboard
-    implementations which use polling to monitor clipboard updates.
-    Other platforms currently ignore this option and always/never notify
-    changes.
-
-    On Wayland, this option only has effect on the ``wayland`` backend, and
-    not for the ``vo`` backend. See ``current-clipboard-backend`` property for
-    more details.
-
 ``--clipboard-backends=<backend1,backend2,...[,]>``
     Specify a priority list of the clipboard backends to be used.
     You can also pass ``help`` to get a complete list of compiled in backends.
+
+    If the list is not empty, it enables native clipboard support for the
+    specified backends. This allows reading and writing to the ``clipboard``
+    property to get and set clipboard contents.
+
+    Native clipboard support is enabled by default. To disable this, remove
+    all backends in this list with ``--clipboard-backends-clr``.
 
     Note that the default clipboard backends are subject to change,
     and must not be relied upon.
@@ -7941,3 +7929,16 @@ Miscellaneous
         protocol, or if the ``wayland`` backend is disabled.
 
     This is an object settings list option. See `List Options`_ for details.
+
+``--clipboard-monitor=<yes|no>``
+    (Windows, Wayland and macOS only)
+
+    Enable clipboard monitoring so that the ``clipboard`` property can be
+    observed for content changes (default: no). This only affects clipboard
+    implementations which use polling to monitor clipboard updates.
+    Other platforms currently ignore this option and always/never notify
+    changes.
+
+    On Wayland, this option only has effect on the ``wayland`` backend, and
+    not for the ``vo`` backend. See ``current-clipboard-backend`` property for
+    more details.

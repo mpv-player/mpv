@@ -23,7 +23,6 @@
 #include "player/core.h"
 
 struct clipboard_opts {
-    bool enabled;
     bool monitor;
     struct m_obj_settings *backends;
 };
@@ -70,14 +69,12 @@ static const struct m_obj_list backend_obj_list = {
 #define OPT_BASE_STRUCT struct clipboard_opts
 const struct m_sub_options clipboard_conf = {
     .opts = (const struct m_option[]) {
-        {"enable", OPT_BOOL(enabled), .flags = UPDATE_CLIPBOARD},
         {"monitor", OPT_BOOL(monitor), .flags = UPDATE_CLIPBOARD},
         {"backends", OPT_SETTINGSLIST(backends, &backend_obj_list),
          .flags = UPDATE_CLIPBOARD},
         {0}
     },
     .defaults = &(const struct clipboard_opts) {
-        .enabled = true,
         .backends = (struct m_obj_settings[]) {
             {.name = "win32", .enabled = true},
             {.name = "mac", .enabled = true},
@@ -161,7 +158,7 @@ void reinit_clipboard(struct MPContext *mpctx)
     mpctx->clipboard = NULL;
 
     struct clipboard_opts *opts = mp_get_config_group(NULL, mpctx->global, &clipboard_conf);
-    if (opts->enabled) {
+    if (opts->backends && opts->backends[0].name) {
         struct clipboard_init_params params = {
             .mpctx = mpctx,
             .flags = opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0,
