@@ -3819,9 +3819,6 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
     bool set_backwards = flags & SEEK_SATAN;
     flags &= ~(unsigned)SEEK_SATAN;
 
-    bool force_seek = flags & SEEK_FORCE;
-    flags &= ~(unsigned)SEEK_FORCE;
-
     bool block = flags & SEEK_BLOCK;
     flags &= ~(unsigned)SEEK_BLOCK;
 
@@ -3833,7 +3830,7 @@ static bool queue_seek(struct demux_internal *in, double seek_pts, int flags,
             MP_VERBOSE(in, "Cached seek not possible.\n");
             return false;
         }
-        if (!in->d_thread->seekable && !force_seek) {
+        if (!in->d_thread->seekable) {
             MP_WARN(in, "Cannot seek in this file.\n");
             return false;
         }
