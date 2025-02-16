@@ -1140,6 +1140,50 @@ static int parse_double_aspect(struct mp_log *log, const m_option_t *opt,
     return parse_double(log, opt, name, param, dst);
 }
 
+static void add_double_aspect(const m_option_t *opt, void *val, double add, bool wrap)
+{
+    if (opt->defval && *(double *)opt->defval == -1) {
+        double v = VAL(val);
+        v = v + add;
+
+        if (v == -1) {
+            VAL(val) = v;
+            return;
+        }
+    }
+    return add_double(opt, val, add, wrap);
+}
+
+static void multiply_double_aspect(const m_option_t *opt, void *val, double f)
+{
+    if (opt->defval && *(double *)opt->defval == -1) {
+        double v = VAL(val);
+        v *= f;
+        if (v == -1) {
+            VAL(val) = v;
+            return;
+        }
+    }
+    multiply_double_aspect(opt, val, f);
+}
+
+static int double_set_aspect(const m_option_t *opt, void *dst, struct mpv_node *src)
+{
+    if (opt->defval && *(double *)opt->defval == -1) {
+        double val = 0.0;
+        if (src->format == MPV_FORMAT_INT64) {
+            val = src->u.int64;
+        } else if (src->format == MPV_FORMAT_DOUBLE) {
+            val = src->u.double_;
+        }
+        if (val == -1.0) {
+            VAL(dst) = val;
+            return 1;
+        }
+    }
+    return double_set(opt, dst, src);
+}
+
 const m_option_type_t m_option_type_aspect = {
     .name  = "Aspect",
     .size  = sizeof(double),
@@ -1148,9 +1192,9 @@ const m_option_type_t m_option_type_aspect = {
     .print = print_double,
     .pretty_print = pretty_print_double,
     .copy  = copy_opt,
-    .add = add_double,
-    .multiply = multiply_double,
-    .set   = double_set,
+    .add = add_double_aspect,
+    .multiply = multiply_double_aspect,
+    .set   = double_set_aspect,
     .get   = double_get,
     .equal = double_equal,
 };
