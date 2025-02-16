@@ -2000,9 +2000,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct MPContext *mpctx = ctx;
     struct track *track = mpctx->tracks[item];
 
-    char *external_filename = mp_normalize_user_path(NULL, mpctx->global,
-                                                     track->external_filename);
-
     struct mp_codec_params p =
         track->stream ? *track->stream->codec : (struct mp_codec_params){0};
 
@@ -2054,8 +2051,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"external",    SUB_PROP_BOOL(track->is_external)},
         {"selected",    SUB_PROP_BOOL(track->selected)},
         {"main-selection", SUB_PROP_INT(order), .unavailable = order < 0},
-        {"external-filename", SUB_PROP_STR(external_filename),
-                        .unavailable = !external_filename},
+        {"external-filename", SUB_PROP_STR(track->external_filename),
+                        .unavailable = !track->external_filename},
         {"ff-index",    SUB_PROP_INT(track->ff_index)},
         {"hls-bitrate", SUB_PROP_INT(track->hls_bitrate),
                         .unavailable = !track->hls_bitrate},
@@ -2129,7 +2126,6 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     }
 
 done:
-    talloc_free(external_filename);
     talloc_free(tag_list);
     return ret;
 }
