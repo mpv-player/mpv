@@ -113,6 +113,9 @@ struct vo_wayland_state {
     /* TODO: unvoid these if required wayland protocols is bumped to 1.32+ */
     void *cursor_shape_manager;
 
+    /* fifo */
+    bool has_fifo;
+
     /* fractional-scale */
     struct wp_fractional_scale_manager_v1 *fractional_scale_manager;
     struct wp_fractional_scale_v1 *fractional_scale;
@@ -138,6 +141,7 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
     bool present_clock;
+    bool present_v2;
     bool use_present;
 
     /* single-pixel-buffer */
