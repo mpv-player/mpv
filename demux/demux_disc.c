@@ -332,9 +332,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
         sname = cur->info->name;
 
     p->is_cdda = strcmp(sname, "cdda") == 0;
-    p->is_dvd = strcmp(sname, "dvd") == 0 ||
-                strcmp(sname, "ifo") == 0 ||
-                strcmp(sname, "dvdnav") == 0 ||
+    p->is_dvd = strcmp(sname, "dvdnav") == 0 ||
                 strcmp(sname, "ifo_dvdnav") == 0;
 
     if (p->is_cdda)
