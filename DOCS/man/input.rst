@@ -519,12 +519,15 @@ Playlist Manipulation
     restarted if for example the new playlist entry is the same as the previous
     one.
 
-``loadfile <url> [<flags> [<index> [<options>]]]``
+``loadfile [<url> [<flags> [<index> [<options>]]]]``
     Load the given file or URL and play it. Technically, this is just a playlist
     manipulation command (which either replaces the playlist or adds an entry
     to it). Actual file loading happens independently. For example, a
     ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
+
+    The URL argument is optional. If not provided, a file dialog will be shown
+    to select a file.
 
     Second argument:
 
@@ -571,7 +574,41 @@ Playlist Manipulation
         this problem, the third argument now needs to be set to -1 if the fourth
         argument needs to be used.
 
-``loadlist <url> [<flags> [<index>]]``
+``loadfiles [<URLs> [<flags> [<index> [<options>]]]]``
+    Load the given file or URL and play it. Technically, this is just a playlist
+    manipulation command (which either replaces the playlist or adds an entry
+    to it). Actual file loading happens independently. For example, a
+    ``loadfiles`` command that replaces the current file with a new one returns
+    before the current file is stopped, and the new file even begins loading.
+
+    The URLs argument is optional. If not provided, a file dialog will be shown
+    to select files.
+
+    Second argument:
+
+    <replace> (default)
+        Stop playback of the current file, and play the new file immediately.
+    <append>
+        Append files to the playlist.
+    <append-play>
+        Append files, and if nothing is currently playing, start playback.
+        (Always starts with the added file, even if the playlist was not empty
+        before running this command.)
+
+    The third argument is a list of options and values which should be set
+    while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
+    When using the client API, this can be a ``MPV_FORMAT_NODE_MAP`` (or a Lua
+    table), however the values themselves must be strings currently. These
+    options are set during playback, and restored to the previous value at end
+    of playback (see `Per-File Options`_).
+
+    This command returns id of first added file in the playlist.
+
+``loaddir [<url> [<flags> [<index> [<options>]]]]``
+    This is the same as ``loadfile``, but it also allows opening directories.
+    When a URL is not provided, a file dialog will be shown to select a directory.
+
+``loadlist [<url> [<flags> [<index>]]]``
     Load the given playlist file or URL (like ``--playlist``).
 
     Second argument:
@@ -634,9 +671,12 @@ Playlist Manipulation
 Track Manipulation
 ~~~~~~~~~~~~~~~~~~
 
-``sub-add <url> [<flags> [<title> [<lang>]]]``
+``sub-add [<url> [<flags> [<title> [<lang>]]]]``
     Load the given subtitle file or stream. By default, it is selected as
-    current subtitle  after loading.
+    current subtitle after loading.
+
+    The ``url`` argument is optional and if empty, file dialog will be shown to
+    select subtitle file.
 
     The ``flags`` argument is one of the following values:
 
@@ -683,7 +723,7 @@ Track Manipulation
     secondary
         Steps through the secondary subtitles.
 
-``audio-add <url> [<flags> [<title> [<lang>]]]``
+``audio-add [<url> [<flags> [<title> [<lang>]]]]``
     Load the given audio file. See ``sub-add`` command.
 
 ``audio-remove [<id>]``
@@ -692,7 +732,7 @@ Track Manipulation
 ``audio-reload [<id>]``
     Reload the given audio tracks. See ``sub-reload`` command.
 
-``video-add <url> [<flags> [<title> [<lang> [<albumart>]]]]``
+``video-add [<url> [<flags> [<title> [<lang> [<albumart>]]]]]``
     Load the given video file. See ``sub-add`` command for common options.
 
     ``albumart`` (``MPV_FORMAT_FLAG``)
@@ -1404,10 +1444,13 @@ Screenshot Commands
     On success, returns a ``mpv_node`` with a ``filename`` field set to the
     saved screenshot location.
 
-``screenshot-to-file <filename> [<flags>]``
+``screenshot-to-file [<filename> [<flags>]]``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
+
+    The filename argument is optional. If not provided, a file dialog will be
+    shown to select a location and name for the file.
 
     The second argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.
@@ -1639,6 +1682,55 @@ Miscellaneous Commands
 
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
+
+``file-dialog``
+    Shows a file dialog that can be used to select file(s) or a directory to
+    open or save. It is accessible when using commands that require a file path
+    as an argument, such as ``loadfile``, when used with an empty URL argument.
+    Using ``file-dialog`` makes the use standalone.
+
+    The command has the following arguments:
+
+    ``type``
+        The type of dialog to show. Can be one of the following:
+
+        ``open``
+            Open file dialog.
+        ``save``
+            Save file dialog.
+        ``directory``
+            Open directory dialog.
+
+    ``allow-multiple``
+        Allows multiple files to be selected. Only valid for the ``open`` type.
+
+    ``title``
+        The title of the dialog.
+
+    ``initial-selection``
+        The initial selection in the dialog. Useful for save dialogs to suggest
+        a filename.
+
+    ``initial-dir``
+        The initial directory in which to open the dialog.
+
+    ``filter``
+        File type filters. This is a list of key-value pairs, where the key is
+        the filter name and the value is a list of file extensions. Extensions
+        are separated by spaces.
+        Example: ``Video Files=mkv mp4,Audio Files=mp3 aac``.
+
+    ``set-property``
+        The property to set with the selected file.
+
+    Return Value:
+
+    - If a ``set-property`` is set, the first selected file is used to
+      set the given property via ``mp_property_do``. Command returns stats of
+      that operation.
+    - If ``set-property`` is not set, the selected files are returned as an
+      array (``MPV_FORMAT_NODE_ARRAY``), where each file path is stored as a
+      string (``MPV_FORMAT_STRING``).
 
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
