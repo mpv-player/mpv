@@ -31,7 +31,7 @@ PGDN and Ctrl+f
 
 MBTN_LEFT
     Confirm the selection of the highlighted item, or close the console if
-    clicking above the first item or below the last item.
+    clicking outside of the menu rectangle.
 
 WHEEL_UP
     Scroll up.

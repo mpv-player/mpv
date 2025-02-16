@@ -32,9 +32,16 @@ local opts = {
     font = "",
     font_size = 24,
     border_size = 1.65,
+    background_alpha = 50,
+    padding = 10,
+    menu_outline_size = 0,
+    menu_outline_color = '#FFFFFF',
+    corner_radius = 8,
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
+    selected_color = '#222222',
+    selected_back_color = '#FFFFFF',
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
     font_hw_ratio = 'auto',
@@ -54,7 +61,6 @@ local styles = {
     error = '{\\1c&H7a77f2&}',
     fatal = '{\\1c&H5791f9&}',
     completion = '{\\1c&Hcc99cc&}',
-    disabled = '{\\1c&Hcccccc&}',
 }
 for key, style in pairs(styles) do
     styles[key] = style .. '{\\3c&H111111&}'
@@ -105,6 +111,8 @@ local matches = {}
 local selected_match = 1
 local first_match_to_print = 1
 local default_item
+local item_positions = {}
+local max_item_width = 0
 
 local complete
 local cycle_through_completions
@@ -271,6 +279,12 @@ local function scale_factor()
     return mp.get_property_native('display-hidpi-scale', 1)
 end
 
+local function terminal_output()
+    -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
+    -- which would print the log to the OSD.
+    return not mp.get_property('current-vo') or not mp.get_property_native('video-osd')
+end
+
 local function get_scaled_osd_dimensions()
     local dims = mp.get_property_native('osd-dimensions')
     local scale = scale_factor()
@@ -278,9 +292,12 @@ local function get_scaled_osd_dimensions()
     return dims.w / scale, dims.h /scale
 end
 
+local function get_line_height()
+    return selectable_items and opts.font_size * 1.1 or opts.font_size
+end
+
 local function calculate_max_log_lines()
-    if not mp.get_property_native('vo-configured')
-       or not mp.get_property_native('video-osd') then
+    if terminal_output() then
         -- Subtract 1 for the input line and for each line in the status line.
         -- This does not detect wrapped lines.
         return mp.get_property_native('term-size/h', 24) - 2 -
@@ -289,11 +306,38 @@ local function calculate_max_log_lines()
 
     return math.floor((select(2, get_scaled_osd_dimensions())
                        * (1 - global_margins.t - global_margins.b)
-                       - get_margin_y())
-                      / opts.font_size
+                       - get_margin_y() - (selectable_items and opts.padding * 2 or 0))
+                      / get_line_height()
                       -- Subtract 1 for the input line and 0.5 for the empty
                       -- line between the log and the input line.
                       - 1.5)
+end
+
+local function calculate_max_item_width()
+    if not selectable_items or terminal_output() then
+        return
+    end
+
+    local longest_item = prompt .. ('a'):rep(9)
+    for _, item in pairs(selectable_items) do
+        if #item > #longest_item then
+            longest_item = item
+        end
+    end
+
+    local osd_w, osd_h = get_scaled_osd_dimensions()
+    local font = get_font()
+    local width_overlay = mp.create_osd_overlay('ass-events')
+    width_overlay.compute_bounds = true
+    width_overlay.hidden = true
+    width_overlay.res_x = osd_w
+    width_overlay.res_y = osd_h
+    width_overlay.data = '{\\fs' .. opts.font_size ..
+                         (font and '\\fn' .. font or '') .. '\\q2}' ..
+                         ass_escape(longest_item)
+    local result = width_overlay:update()
+    max_item_width = math.min(result.x1 - result.x0,
+                              osd_w - get_margin_x() * 2 - opts.padding * 2)
 end
 
 local function should_highlight_completion(i)
@@ -306,11 +350,15 @@ local function mpv_color_to_ass(color)
            string.format('%x', 255 - tonumber('0x' .. color:sub(2,3)))
 end
 
+local function option_color_to_ass(color)
+    return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
+end
+
 local function get_selected_ass()
     local color, alpha = mpv_color_to_ass(mp.get_property('osd-selected-color'))
     local outline_color, outline_alpha =
         mpv_color_to_ass(mp.get_property('osd-selected-outline-color'))
-    return '{\\1c&H' .. color .. '&\\1a&H' .. alpha ..
+    return '{\\b1\\1c&H' .. color .. '&\\1a&H' .. alpha ..
            '&\\3c&H' .. outline_color .. '&\\3a&H' .. outline_alpha .. '&}'
 end
 
@@ -396,7 +444,7 @@ local function format_grid(list, width_max, rows_max)
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
             if should_highlight_completion(i) then
-                columns[column] = '{\\b1}' .. get_selected_ass() .. columns[column] ..
+                columns[column] = get_selected_ass() .. columns[column] ..
                                   '{\\b\\1a&\\3a&}' .. styles.completion
             end
         end
@@ -430,12 +478,6 @@ local function populate_log_with_matches()
     local log = log_buffers[id]
 
     local max_log_lines = calculate_max_log_lines()
-    local print_counter = false
-
-    if #matches > max_log_lines then
-        print_counter = true
-        max_log_lines = max_log_lines - 1
-    end
 
     if selected_match < first_match_to_print then
         first_match_to_print = selected_match
@@ -446,30 +488,20 @@ local function populate_log_with_matches()
     local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
                                           #matches)
 
-    if print_counter then
-        log[1] = {
-            text = '',
-            style = styles.disabled .. selected_match .. '/' .. #matches ..
-                    ' {\\fs' .. opts.font_size * 0.75 .. '}[' ..
-                    first_match_to_print .. '-' .. last_match_to_print .. ']',
-            terminal_style = terminal_styles.disabled .. selected_match .. '/' ..
-                             #matches .. ' [' .. first_match_to_print .. '-' ..
-                             last_match_to_print .. ']',
-        }
-    end
-
     for i = first_match_to_print, last_match_to_print do
         local style = ''
         local terminal_style = ''
 
-        if i == selected_match or matches[i].index == default_item then
-            style = get_selected_ass()
-        end
         if matches[i].index == default_item then
             terminal_style = terminal_styles.default_item
         end
         if i == selected_match then
-            style = style .. '{\\b1}'
+            if searching_history and
+               mp.get_property('osd-border-style') == 'outline-and-shadow' then
+                style = get_selected_ass()
+            else
+                style = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
+            end
             terminal_style = terminal_style .. terminal_styles.selected_completion
         end
 
@@ -525,6 +557,15 @@ local function print_to_terminal()
         completions = completions .. (i < #completion_buffer and '\t' or '\n')
     end
 
+    local counter = ''
+    if selectable_items and #selectable_items > calculate_max_log_lines() then
+        local digits = math.ceil(math.log(#selectable_items, 10))
+        counter = terminal_styles.disabled ..
+                  '[' .. string.format('%0' .. digits .. 'd', selected_match) ..
+                  '/' .. string.format('%0' .. digits .. 'd', #matches) ..
+                  ']\027[0m '
+    end
+
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
     -- Ensure there is a character with inverted colors to print.
@@ -532,8 +573,8 @@ local function print_to_terminal()
         after_cur = ' '
     end
 
-    mp.osd_message(log .. completions .. prompt .. ' ' .. before_cur ..
-                  '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
+    mp.osd_message(log .. completions .. counter .. prompt .. ' ' .. before_cur
+                   .. '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
                    after_cur:sub(2), 999)
     osd_msg_active = true
 end
@@ -541,9 +582,7 @@ end
 local function render()
     pending_update = false
 
-    -- Unlike vo-configured, current-vo doesn't become falsy while switching VO,
-    -- which would print the log to the OSD.
-    if not mp.get_property('current-vo') or not mp.get_property_native('video-osd') then
+    if terminal_output() then
         print_to_terminal()
         return
     end
@@ -561,19 +600,30 @@ local function render()
     end
 
     local ass = assdraw.ass_new()
-
     local osd_w, osd_h = get_scaled_osd_dimensions()
+    local line_height = get_line_height()
+    local max_lines = calculate_max_log_lines()
 
-    local x = get_margin_x()
-    local y = osd_h * (1 - global_margins.b) - get_margin_y()
+    local x, y, alignment, clipping_coordinates
+    if selectable_items and not searching_history then
+        x = (osd_w - max_item_width) / 2
+        y = osd_h / 2 - (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
+        alignment = 7
+        clipping_coordinates = '0,0,' .. x + max_item_width .. ',' .. osd_h
+    else
+        x = get_margin_x()
+        y = osd_h * (1 - global_margins.b) - get_margin_y()
+        alignment = 1
+        -- Avoid drawing below topbar OSC when there are wrapped lines.
+        local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
+        clipping_coordinates = '0,' .. coordinate_top .. ',' .. osd_w .. ',' .. osd_h
+    end
 
     local font = get_font()
     -- Use the same blur value as the rest of the OSD. 288 is the OSD's
     -- PlayResY.
     local blur = mp.get_property_native('osd-blur') * osd_h / 288
-    local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
-    local clipping_coordinates = '0,' .. coordinate_top .. ',' ..
-                                 osd_w .. ',' .. osd_h
+    local border_style = mp.get_property('osd-border-style')
 
     local style = '{\\r' ..
                   (font and '\\fn' .. font or '') ..
@@ -603,15 +653,16 @@ local function render()
     -- Render log messages as ASS.
     -- This will render at most screeny / font_size - 1 messages.
 
-    local max_lines = calculate_max_log_lines()
     local completion_ass = ''
     if next(completion_buffer) then
         -- Estimate how many characters fit in one line
         -- Even with bottom-left anchoring,
         -- libass/ass_render.c:ass_render_event() subtracts --osd-margin-x from
         -- the maximum text width twice.
+        -- TODO: --osd-margin-x should scale with osd-width and PlayResX to make
+        -- the calculation accurate.
         local width_max = math.floor(
-            (osd_w - x - mp.get_property_native('osd-margin-x') * 2 / scale_factor())
+            (osd_w - x - mp.get_property_native('osd-margin-x') * 2)
             / opts.font_size * get_font_hw_ratio())
 
         local completions, rows = format_grid(completion_buffer, width_max, max_lines)
@@ -621,33 +672,114 @@ local function render()
 
     populate_log_with_matches()
 
+    -- Background
+    if selectable_items and
+       (not searching_history or border_style == 'background-box') then
+        style = style .. '{\\bord0\\blur0\\4a&Hff&}'
+        local back_color, back_alpha = mpv_color_to_ass(mp.get_property(
+            border_style == 'background-box' and 'osd-back-color' or 'osd-outline-color'))
+        if not searching_history then
+            back_alpha = string.format('%x', opts.background_alpha)
+        end
+
+        ass:new_event()
+        ass:an(alignment)
+        ass:pos(x, y)
+        ass:append('{\\1c&H' .. back_color .. '&\\1a&H' .. back_alpha ..
+                   '&\\bord' .. opts.menu_outline_size .. '\\3c&H' ..
+                   option_color_to_ass(opts.menu_outline_color) .. '&}')
+        if border_style == 'background-box' then
+            ass:append('{\\4a&Hff&}')
+        end
+        ass:draw_start()
+        ass:round_rect_cw(-opts.padding,
+                          opts.padding * (alignment == 7 and -1 or 1),
+                          max_item_width + opts.padding,
+                          (1.5 + math.min(#matches, max_lines)) * line_height +
+                          opts.padding * (alignment == 7 and 1 or 2),
+                          opts.corner_radius, opts.corner_radius)
+        ass:draw_stop()
+    end
+
     local log_ass = ''
     local log_buffer = log_buffers[id]
-    local box = mp.get_property('osd-border-style') == 'background-box'
+    item_positions = {}
 
     for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
         local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
 
-        -- Put every selectable item in its own event to prevent libass from
-        -- drawing them taller than opts.font_size with taller fonts, which
-        -- makes the hovered item calculation inaccurate and clips the counter.
-        -- But not with background-box, because it makes it look bad by
-        -- overlapping the semitransparent backgrounds of every line.
-        if selectable_items and not box then
+        if selectable_items then
+            local item_y = alignment == 7
+                and y + (1 + i) * line_height
+                or y - (1.5 + #log_buffer - i) * line_height
+
+            if (first_match_to_print - 1 + i == selected_match or
+                matches[first_match_to_print - 1 + i].index == default_item)
+               and (not searching_history or border_style == 'background-box') then
+                ass:new_event()
+                ass:an(4)
+                ass:pos(x, item_y)
+                ass:append('{\\blur0\\bord0\\4aH&ff&\\1c&H' ..
+                           option_color_to_ass(opts.selected_back_color) .. '&}')
+                if first_match_to_print - 1 + i ~= selected_match then
+                    ass:append('{\\1aH&dd&}')
+                end
+                ass:draw_start()
+                ass:rect_cw(-opts.padding, 0, max_item_width + opts.padding, line_height)
+                ass:draw_stop()
+            end
+
             ass:new_event()
-            ass:an(1)
-            ass:pos(x, y - (1.5 + #log_buffer - i) * opts.font_size)
+            ass:an(4)
+            ass:pos(x, item_y)
             ass:append(log_item)
+
+            item_positions[#item_positions + 1] =
+                { item_y - line_height / 2, item_y + line_height / 2 }
         else
             log_ass = log_ass .. log_item .. '\\N'
         end
     end
 
+    -- Scrollbar
+    if selectable_items and #matches > max_lines then
+        ass:new_event()
+        ass:an(alignment + 2)
+        ass:pos(x + max_item_width, y)
+        ass:append('{\\bord0\\4a&Hff&\\blur0}' .. selected_match .. '/' .. #matches)
+
+        local start_percentage = (first_match_to_print - 1) / #matches
+        local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
+        if end_percentage - start_percentage < 0.04 then
+            local diff = 0.04 - (end_percentage - start_percentage)
+            if start_percentage < 0.5 then
+                end_percentage = end_percentage + diff
+            else
+                start_percentage = start_percentage - diff
+            end
+        end
+
+        local max_height = max_lines * line_height
+        local bar_y = alignment == 7
+                      and y + 1.5 * line_height + start_percentage * max_height
+                      or y - 1.5 * line_height - max_height * (1 - end_percentage)
+       local height = max_height * (end_percentage - start_percentage)
+
+        ass:new_event()
+        ass:an(alignment)
+        ass:append('{\\blur0\\4a&Hff&\\bord1}')
+        ass:pos(x + max_item_width + opts.padding - 1, bar_y)
+        ass:draw_start()
+        ass:rect_cw(0, 0, -opts.padding / 2, height)
+        ass:draw_stop()
+    end
+
     ass:new_event()
-    ass:an(1)
+    ass:an(alignment)
     ass:pos(x, y)
-    ass:append(log_ass .. '\\N')
-    ass:append(completion_ass)
+    if not selectable_items then
+        ass:append(log_ass .. '\\N' .. completion_ass)
+    end
     ass:append(style .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
     ass:append(style .. after_cur)
@@ -655,7 +787,7 @@ local function render()
     -- Redraw the cursor with the REPL text invisible. This will make the
     -- cursor appear in front of the text.
     ass:new_event()
-    ass:an(1)
+    ass:an(alignment)
     ass:pos(x, y)
     ass:append(style .. '{\\alpha&HFF&}' .. ass_escape(prompt) .. ' ' .. before_cur)
     ass:append(cglyph)
@@ -734,8 +866,8 @@ local function handle_edit()
             selected_match = default_item
 
             local max_lines = calculate_max_log_lines()
-            first_match_to_print = math.max(1, selected_match - math.floor(max_lines / 2) + 1)
-            if first_match_to_print > #selectable_items - max_lines + 2 then
+            first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
+            if first_match_to_print > #selectable_items - max_lines + 1 then
                 first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
             end
         else
@@ -916,27 +1048,22 @@ local function handle_enter()
 end
 
 local function determine_hovered_item()
-    local height = select(2, get_scaled_osd_dimensions())
-    local y = mp.get_property_native('mouse-pos').y / scale_factor()
-    local log_bottom_pos = height * (1 - global_margins.b)
-                           - get_margin_y()
-                           - 1.5 * opts.font_size
+    local osd_w, _ = get_scaled_osd_dimensions()
+    local scale = scale_factor()
+    local mouse_pos = mp.get_property_native('mouse-pos')
+    local mouse_x = mouse_pos.x / scale
+    local mouse_y = mouse_pos.y / scale
+    local item_x0 = (searching_history and get_margin_x() or (osd_w - max_item_width) / 2)
+                    - opts.padding
 
-    if y > log_bottom_pos then
+    if mouse_x < item_x0 or mouse_x > item_x0 + max_item_width + opts.padding * 2 then
         return
     end
 
-    local max_lines = calculate_max_log_lines()
-    -- Subtract 1 line for the position counter.
-    if #matches > max_lines then
-        max_lines = max_lines - 1
-    end
-    local last = math.min(first_match_to_print - 1 + max_lines, #matches)
-
-    local hovered_item = last - math.floor((log_bottom_pos - y) / opts.font_size)
-
-    if hovered_item >= first_match_to_print then
-        return hovered_item
+    for i, positions in ipairs(item_positions) do
+        if mouse_y >= positions[1] and mouse_y <= positions[2] then
+            return first_match_to_print - 1 + i
+        end
     end
 end
 
@@ -1003,18 +1130,18 @@ local function move_history(amount, is_wheel)
         -- Update selected_match only if it's the first or last printed item and
         -- there are hidden items.
         if (amount > 0 and selected_match == first_match_to_print
-            and first_match_to_print + max_lines - 2 < #matches)
-           or (amount < 0 and selected_match == first_match_to_print + max_lines - 2
+            and first_match_to_print - 1 + max_lines < #matches)
+           or (amount < 0 and selected_match == first_match_to_print - 1 + max_lines
                and first_match_to_print > 1) then
             selected_match = selected_match + amount
         end
 
-        if amount > 0 and first_match_to_print < #matches - max_lines + 2
+        if amount > 0 and first_match_to_print < #matches - max_lines + 1
            or amount < 0 and first_match_to_print > 1 then
            -- math.min and math.max would only be needed with amounts other than
            -- 1 and -1.
             first_match_to_print = math.min(
-                math.max(first_match_to_print + amount, 1), #matches - max_lines + 2)
+                math.max(first_match_to_print + amount, 1), #matches - max_lines + 1)
         end
 
         local item = determine_hovered_item()
@@ -1043,7 +1170,7 @@ end
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_log_lines() + 2, 1)
+        selected_match = math.max(selected_match - calculate_max_log_lines() + 1, 1)
         render()
         return
     end
@@ -1054,7 +1181,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 local function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_log_lines() - 2, #matches)
+        selected_match = math.min(selected_match + calculate_max_log_lines() - 1, #matches)
         render()
         return
     end
@@ -1075,6 +1202,7 @@ local function search_history()
         selectable_items[i] = history[#history + 1 - i]
     end
 
+    calculate_max_item_width()
     handle_edit()
     bind_mouse()
 end
@@ -1673,7 +1801,6 @@ local function get_bindings()
         { 'ins',         handle_ins                             },
         { 'shift+ins',   function() paste(false) end            },
         { 'mbtn_mid',    function() paste(false) end            },
-        { 'mbtn_right',  function() set_active(false) end       },
         { 'left',        function() prev_char() end             },
         { 'ctrl+b',      function() page_up_or_prev_char() end  },
         { 'right',       function() next_char() end             },
@@ -1863,6 +1990,7 @@ mp.register_script_message('get-input', function (script_name, args)
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
         end
         default_item = args.default_item
+        calculate_max_item_width()
         handle_edit()
         bind_mouse()
     end
@@ -1930,11 +2058,12 @@ mp.register_script_message('complete', function(list, start_pos)
     render()
 end)
 
--- Redraw the REPL when the OSD size changes. This is needed because the
--- PlayRes of the OSD will need to be adjusted.
-mp.observe_property('osd-width', 'native', render)
-mp.observe_property('osd-height', 'native', render)
-mp.observe_property('display-hidpi-scale', 'native', render)
+for _, property in pairs({'osd-width', 'osd-height', 'display-hidpi-scale'}) do
+    mp.observe_property(property, 'native', function ()
+        calculate_max_item_width()
+        render()
+    end)
+end
 mp.observe_property('focused', 'native', render)
 
 mp.observe_property("user-data/osc/margins", "native", function(_, val)

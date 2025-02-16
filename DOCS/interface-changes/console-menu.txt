@@ -1,0 +1,1 @@
+add `console-background_alpha` `console-menu_outline_size` `console-menu_outline_color` `console-corner_radius` `console-selected_color` and `console-selected_back_color` script-opts

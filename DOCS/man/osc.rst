@@ -38,7 +38,7 @@ pl prev
     left-click      play previous file in playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
-    right-click     open the playlist selector
+    right-click     open the playlist menu
     =============   ================================================
 
 pl next
@@ -46,7 +46,7 @@ pl next
     left-click      play next file in playlist
     shift+L-click   show the playlist
     middle-click    show the playlist
-    right-click     open the playlist selector
+    right-click     open the playlist menu
     =============   ================================================
 
 title
@@ -57,7 +57,7 @@ title
     left-click      show file and track info
     shift+L-click   show the path
     middle-click    show the path
-    right-click     open the history selector
+    right-click     open the history menu
     =============   ================================================
 
 cache
@@ -76,7 +76,7 @@ skip back
     left-click      go to beginning of chapter / previous chapter
     shift+L-click   show chapters
     middle-click    show chapters
-    right-click     open the chapter selector
+    right-click     open the chapter menu
     =============   ================================================
 
 skip frwd
@@ -84,7 +84,7 @@ skip frwd
     left-click      go to next chapter
     shift+L-click   show chapters
     middle-click    show chapters
-    right-click     open the chapter selector
+    right-click     open the chapter menu
     =============   ================================================
 
 time elapsed
@@ -117,14 +117,14 @@ audio and sub
     left-click      cycle audio/sub tracks forward
     shift+L-click   cycle audio/sub tracks backwards
     middle-click    cycle audio/sub tracks backwards
-    right-click     open the audio/sub track selector
+    right-click     open the audio/sub track menu
     mouse wheel     cycle audio/sub tracks forward/backwards
     =============   ================================================
 
 vol
     =============   ================================================
     left-click      toggle mute
-    right-click     open the audio device selector
+    right-click     open the audio device menu
     mouse wheel     volume up/down
     =============   ================================================
 
@@ -218,7 +218,7 @@ Configurable Options
     seekbar or separately if ``seekbarstyle`` is set to ``bar``.
 
 ``seekrangealpha``
-    Default: 200
+    Default: 20
 
     Alpha of the seekable ranges, 0 (opaque) to 255 (fully transparent).
 

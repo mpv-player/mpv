@@ -100,9 +100,6 @@ Shift+TAB
 Ctrl+l
     Clear all log messages from the console.
 
-MBTN_RIGHT
-    Hide the console.
-
 MBTN_MID
     Paste text (uses the primary selection on X11 and Wayland).
 
@@ -169,6 +166,32 @@ Configurable Options
 
     Set the font border size used for the REPL and the console.
 
+``background_alpha``
+    Default: 20
+
+    The transparency of the menu's background. Ranges from 0 (opaque) to 255
+    (fully transparent).
+
+``padding``
+    Default: 10
+
+    The padding of the menu.
+
+``menu_outline_size``
+    Default: 0
+
+    The size of the menu's border.
+
+``menu_outline_color``
+    Default: #FFFFFF
+
+    The color of the menu's border.
+
+``corner_radius``
+    Default: 8
+
+    The radius of the menu's corners.
+
 ``margin_x``
     Default: same as ``--osd-margin-x``
 
@@ -184,6 +207,16 @@ Configurable Options
 
     Whether to scale the console with the window height. Can be ``yes``, ``no``,
     or ``auto``, which follows the value of ``--osd-scale-by-window``.
+
+``selected_color``
+    Default: ``#222222``
+
+    The color of the selected item.
+
+``selected_back_color``
+    Default: ``#FFFFFF``
+
+    The background color of the selected item.
 
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
