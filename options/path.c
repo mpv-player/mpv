@@ -215,9 +215,11 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
             }
         }
     }
-    if (!res)
+    if (!res) {
         res = talloc_strdup(talloc_ctx, path);
-    MP_DBG(global, "user path: '%s' -> '%s'\n", path, res);
+    } else {
+        MP_DBG(global, "user path: '%s' -> '%s'\n", path, res);
+    }
     return res;
 }
 
