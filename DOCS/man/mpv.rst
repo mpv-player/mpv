@@ -95,6 +95,9 @@ Shift+Ctrl+BACKSPACE
 ENTER
     Go forward in the playlist.
 
+Shift+HOME and Shift+END
+    Go to the first/last playlist entry.
+
 p and SPACE
     Pause (pressing again unpauses).
 
@@ -203,6 +206,12 @@ S
 Ctrl+s
     Take a screenshot, as the window shows it (with subtitles, OSD, and scaled
     video).
+
+HOME
+    Seek to the beginning of the file.
+
+END
+    Seek to 1 minute from the end of the file.
 
 PGUP and PGDWN
     Seek to the beginning of the previous/next chapter. In most cases,
