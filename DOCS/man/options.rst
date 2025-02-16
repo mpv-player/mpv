@@ -4488,13 +4488,23 @@ Input
 
 ``--input-ime=<yes|no>``
     Enable keyboard input via an active input method (IME) connected to the VO.
-    (default: yes). The input popup window, if there is any, is always
+    (default: no). The input popup window, if there is any, is always
     positioned at the top left of the window. Whether pre-edit text is drawn
     depends on the platform. You may need to configure your IME to display the
     pre-edit inside of the input popup window if you cannot read the pre-edit
     text in the mpv window.
 
     Wayland and Windows only. This option is not applicable to terminal input.
+
+    .. note::
+
+        Enabling IME can cause problems with key bindings, because mpv cannot
+        detect any key presses when they go into the IME pre-edit area.
+        It is recommended to enable IME on demand only for the duration
+        while text input is expected.
+
+        The builtin console and input selector enable IME for the duration
+        of accepting text input.
 
 OSD
 ---
