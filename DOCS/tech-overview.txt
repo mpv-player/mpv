@@ -68,7 +68,6 @@ ta.h & ta.c:
     as in it doesn't require valgrind.) You can enable it by setting the
     MPV_LEAK_REPORT environment variable to "1":
         export MPV_LEAK_REPORT=1
-    Or permanently by building with --enable-ta-leak-report.
     This will list all unfree'd allocations on exit.
 
     Documentation can be found here:
