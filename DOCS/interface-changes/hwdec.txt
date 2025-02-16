@@ -1,0 +1,1 @@
+`--hwdec=auto` now behaves like `--hwdec=auto-safe`; use `--hwdec=auto-unsafe` to get the old behavior back
