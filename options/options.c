@@ -261,7 +261,6 @@ const struct m_sub_options vo_sub_opts = {
         .keepaspect = true,
         .keepaspect_window = true,
         .native_fs = true,
-        .input_ime = true,
         .taskbar_progress = true,
         .show_in_taskbar = true,
         .border = true,
