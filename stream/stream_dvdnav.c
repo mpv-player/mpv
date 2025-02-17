@@ -587,7 +587,7 @@ static int open_s_internal(stream_t *stream)
     else if (p->opts->device && p->opts->device[0])
         filename = p->opts->device;
     else
-        filename = DEFAULT_DVD_DEVICE;
+        filename = DEFAULT_OPTICAL_DEVICE;
     if (!new_dvdnav_stream(stream, filename)) {
         MP_ERR(stream, "Couldn't open DVD device: %s\n",
                 filename);

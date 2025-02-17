@@ -453,7 +453,7 @@ features += {'ppoll': cc.has_function('ppoll', args: '-D_GNU_SOURCE',
 features += {'memrchr': cc.has_function('memrchr', args: '-D_GNU_SOURCE',
                                         prefix: '#include <string.h>')}
 
-cd_devices = {
+optical_devices = {
     'windows': 'D:',
     'cygwin': 'D:',
     'darwin': '/dev/disk1',
@@ -461,24 +461,10 @@ cd_devices = {
     'openbsd': '/dev/rcd0c',
     'linux': '/dev/sr0',
 }
-if host_machine.system() in cd_devices
-    cd_device = cd_devices[host_machine.system()]
+if host_machine.system() in optical_devices
+    optical_device = optical_devices[host_machine.system()]
 else
-    cd_device = '/dev/cdrom'
-endif
-
-dvd_devices = {
-    'windows': 'D:',
-    'cygwin': 'D:',
-    'darwin': '/dev/diskN',
-    'freebsd': '/dev/cd0',
-    'openbsd': '/dev/rcd0c',
-    'linux': '/dev/sr0',
-}
-if host_machine.system() in cd_devices
-    dvd_device = dvd_devices[host_machine.system()]
-else
-    dvd_device = '/dev/dvd'
+    optical_device = '/dev/cdrom'
 endif
 
 features += {'android': host_machine.system() == 'android'}
@@ -1716,8 +1702,7 @@ endif
 # Set config.h
 conf_data = configuration_data()
 conf_data.set_quoted('CONFIGURATION', meson.build_options())
-conf_data.set_quoted('DEFAULT_DVD_DEVICE', dvd_device)
-conf_data.set_quoted('DEFAULT_CDROM_DEVICE', cd_device)
+conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
 
 # Loop over all features in the build, create a define and add them to config.h
 feature_keys = []

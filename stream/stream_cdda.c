@@ -256,7 +256,7 @@ static int open_cdda(stream_t *st)
     } else if (p->cdda_device && p->cdda_device[0]) {
         p->device = mp_get_user_path(priv, st->global, p->cdda_device);
     } else {
-        p->device = talloc_strdup(priv, DEFAULT_CDROM_DEVICE);
+        p->device = talloc_strdup(priv, DEFAULT_OPTICAL_DEVICE);
     }
 
 #if defined(__NetBSD__)
