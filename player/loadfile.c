@@ -1667,7 +1667,25 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->playing->filename);
     mpctx->playing->reserved += 1;
 
-    mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);
+    bstr filename = bstr0(mpctx->playing->filename);
+    if (bstr_eatstart0(&filename, "mpv://")) {
+        bstr proto = mp_split_proto(filename, NULL);
+        if (proto.len) {
+            if (!bstrcmp0(proto, "mpv")) {
+                MP_ERR(mpctx, "Nested mpv:// is not allowed.\n");
+                goto terminate_playback;
+            }
+            char **safe_protocols = stream_get_proto_list(true);
+            bool safe = str_in_list(proto, safe_protocols);
+            talloc_free(safe_protocols);
+            if (!safe) {
+                MP_ERR(mpctx, "Unsafe protocol '%.*s' opened with mpv://.\n", BSTR_P(proto));
+                goto terminate_playback;
+            }
+        }
+    }
+
+    mpctx->filename = bstrto0(NULL, filename);
     mpctx->stream_open_filename = mpctx->filename;
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_CURRENT_FILE;
@@ -2138,3 +2156,15 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
         mpctx->stop_play = e ? PT_CURRENT_ENTRY : PT_STOP;
     mp_wakeup_core(mpctx);
 }
+
+static int open_mpv(stream_t *st)
+{
+    return STREAM_NO_MATCH;
+}
+
+// This is pseudo-protocol that is used to open mpv from URL handlers
+const stream_info_t stream_info_mpv = {
+    .name = "mpv",
+    .open = open_mpv,
+    .protocols = (const char*const[]){"mpv", NULL},
+};
