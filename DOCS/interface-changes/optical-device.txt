@@ -1,0 +1,1 @@
+specifying an optical device after the schema for the `cdda://`, `dvd://` and `bd://` protocols is deprecated, use the appropriate option (`--cdda-device`) instead
