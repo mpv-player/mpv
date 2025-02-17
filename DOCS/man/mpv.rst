@@ -342,7 +342,7 @@ g-b
 g-r
     Show the values of all properties.
 
-MENU
+g-m, MENU, Ctrl+p
     Show a menu with miscellaneous entries.
 
 See `SELECT`_ for more information.
