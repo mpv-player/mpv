@@ -415,8 +415,10 @@ static int bluray_stream_open_internal(stream_t *s)
     /* find the requested device */
     if (b->cfg_device && b->cfg_device[0]) {
         device = b->cfg_device;
-    } else {
+    } else if (b->opts->bluray_device && b->opts->bluray_device[0]) {
         device = b->opts->bluray_device;
+    } else {
+        device = DEFAULT_OPTICAL_DEVICE;
     }
 
     if (!device || !device[0]) {
