@@ -1299,7 +1299,7 @@ Video
         prove to yourself that it works as desired for the content you care
         about. After that, you can add it to your config file.
 
-        When testing, you should start by using ``hwdec=auto-`` as it will
+        When testing, you should start by using ``hwdec=auto`` as it will
         limit itself to choosing from hwdecs that are actively supported by the
         development team. If that doesn't result in working hardware decoding,
         you can try ``hwdec=auto-unsafe`` to have it attempt to load every
