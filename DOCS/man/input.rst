@@ -370,6 +370,9 @@ Playback Control
         Perform a very exact seek that attempts to seek by the desired amount
         of frames. If ``<frames>`` is ``-1``, this will go exactly to the
         previous frame.
+    mute
+        The same as ``play`` but mutes the audio stream if there is any during
+        the duration of the frame step.
 
     Note that the default frameskip mode, play, is more accurate but can be
     slow depending on how many frames you are skipping (i.e. skipping forward
