@@ -3766,21 +3766,23 @@ Disc Devices
 ------------
 
 ``--cdda-device=<path>``
-    Specify the CD device for CDDA playback (default: ``/dev/cdrom``).
+    Specify the CD device for CDDA playback. The default device path depends on
+    the OS. See the `OPTICAL DRIVES`_ section.
 
 ``--dvd-device=<path>``
-    Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
+    Specify the DVD device or .iso filename. You can
     also specify a directory that contains files previously copied directly
-    from a DVD (with e.g. vobcopy).
+    from a DVD (with e.g. vobcopy). The default device path depends on
+    the OS. See the `OPTICAL DRIVES`_ section.
 
     .. admonition:: Example
 
         ``mpv dvd:// --dvd-device=/path/to/dvd/``
 
 ``--bluray-device=<path>``
-    (Blu-ray only)
     Specify the Blu-ray disc location. Must be a directory with Blu-ray
-    structure.
+    structure. The default device path depends on the OS. See the
+    `OPTICAL DRIVES`_ section.
 
     .. admonition:: Example
 
