@@ -252,6 +252,8 @@ static int open_cdda(stream_t *st)
     int last_track;
 
     if (st->path[0]) {
+        MP_WARN(st, "Setting the device after the schema is deprecated. "
+                "Use --cdda-device instead.\n");
         p->device = talloc_strdup(priv, st->path);
     } else if (p->cdda_device && p->cdda_device[0]) {
         p->device = mp_get_user_path(priv, st->global, p->cdda_device);

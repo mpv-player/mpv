@@ -1298,7 +1298,7 @@ PROTOCOLS
 
     Play a path from  Samba share. (Requires FFmpeg support.)
 
-``bd://[title][/device]`` ``--bluray-device=PATH``
+``bd://[title]`` ``--bluray-device=PATH``
 
     Play a Blu-ray disc. Since libbluray 1.0.1, you can read from ISO files
     by passing them to ``--bluray-device``.
@@ -1310,7 +1310,7 @@ PROTOCOLS
 
     ``bluray://`` is an alias.
 
-``dvd://[title][/device]`` ``--dvd-device=PATH``
+``dvd://[title]`` ``--dvd-device=PATH``
 
     Play a DVD. DVD menus are not supported. If no title is given, the longest
     title is auto-selected. Without ``--dvd-device``, it will probably try
@@ -1338,7 +1338,7 @@ PROTOCOLS
     ``image-2.jpg`` and ``image-10.jpg``, provided that there are no big gaps
     between the files.
 
-``cdda://[device]`` ``--cdrom-device=PATH`` ``--cdda-...``
+``cdda://`` ``--cdda-device=PATH``
 
     Play CD.
 

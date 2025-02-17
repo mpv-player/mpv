@@ -414,6 +414,8 @@ static int bluray_stream_open_internal(stream_t *s)
     char *device = NULL;
     /* find the requested device */
     if (b->cfg_device && b->cfg_device[0]) {
+        MP_WARN(s, "Setting the device after the schema is deprecated. "
+                "Use --bluray-device instead.\n");
         device = b->cfg_device;
     } else if (b->opts->bluray_device && b->opts->bluray_device[0]) {
         device = b->opts->bluray_device;
