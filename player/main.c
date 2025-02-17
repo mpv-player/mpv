@@ -383,6 +383,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     m_config_set_update_dispatch_queue(mpctx->mconfig, mpctx->dispatch);
     // Run all update handlers.
     mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK, false);
+    handle_option_callbacks(mpctx);
 
     if (handle_help_options(mpctx))
         return 1; // help

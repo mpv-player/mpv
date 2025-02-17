@@ -122,7 +122,7 @@ static void mp_process_input(struct MPContext *mpctx)
 }
 
 // Process any queued option callbacks.
-static void handle_option_callbacks(struct MPContext *mpctx)
+void handle_option_callbacks(struct MPContext *mpctx)
 {
     for (int i = 0; i < mpctx->num_option_callbacks; i++)
         mp_option_run_callback(mpctx, i);
