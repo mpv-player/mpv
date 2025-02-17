@@ -1340,7 +1340,18 @@ PROTOCOLS
 
 ``cdda://`` ``--cdda-device=PATH``
 
-    Play CD.
+    Play CD. You can select a specific range of tracks to play by using the
+    ``--start`` and ``--end`` options and specifying chapters. Navigating
+    forwards and backwards through tracks can also be done by navigating through
+    chapters (``PGUP`` and ``PGDOWN`` in the default keybinds).
+
+    .. admonition:: Example
+
+        ::
+
+            mpv cdda:// --start=#4 --end=#6
+
+        This will start from track 4, play track 5, and then end.
 
 ``lavf://...``
 
