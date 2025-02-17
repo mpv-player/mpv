@@ -167,7 +167,7 @@ Configurable Options
     Set the font border size used for the REPL and the console.
 
 ``background_alpha``
-    Default: 20
+    Default: 80
 
     The transparency of the menu's background. Ranges from 0 (opaque) to 255
     (fully transparent).
