@@ -170,21 +170,26 @@ static float compute_replaygain(struct MPContext *mpctx)
     return rgain;
 }
 
-// Called when opts->softvol_volume or opts->softvol_mute were changed.
-void audio_update_volume(struct MPContext *mpctx)
+float audio_get_gain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct ao_chain *ao_c = mpctx->ao_chain;
-    if (!ao_c || !ao_c->ao)
-        return;
-
     float gain = MPMAX(opts->softvol_volume / 100.0, 0);
     gain = pow(gain, 3);
     gain *= compute_replaygain(mpctx);
     gain *= db_gain(opts->softvol_gain);
     if (opts->softvol_mute)
         gain = 0.0;
+    return gain;
+}
 
+// Called when opts->softvol_volume or opts->softvol_mute were changed.
+void audio_update_volume(struct MPContext *mpctx)
+{
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    if (!ao_c || !ao_c->ao)
+        return;
+
+    float gain = audio_get_gain(mpctx);
     ao_set_gain(ao_c->ao, gain);
 }
 

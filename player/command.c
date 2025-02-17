@@ -5735,18 +5735,20 @@ static void cmd_frame_step(void *p)
         return;
     }
 
-    if (flags) {
+    if (flags == 1) {
         if (!cmd->cmd->is_up)
-            add_step_frame(mpctx, frames, flags);
+            add_step_frame(mpctx, frames, true);
     } else {
         if (cmd->cmd->is_up) {
             if (mpctx->step_frames < 1)
                 set_pause_state(mpctx, true);
         } else {
+            if (flags == 2)
+                step_frame_mute(mpctx, true);
             if (cmd->cmd->repeated) {
                 set_pause_state(mpctx, false);
             } else {
-                add_step_frame(mpctx, frames, flags);
+                add_step_frame(mpctx, frames, false);
             }
         }
     }
@@ -7042,7 +7044,8 @@ const struct mp_cmd_def mp_cmds[] = {
             {"frames", OPT_INT(v.i), OPTDEF_INT(1)},
             {"flags", OPT_CHOICE(v.i,
                     {"play", 0},
-                    {"seek", 1}),
+                    {"seek", 1},
+                    {"mute", 2}),
                     .flags = MP_CMD_OPT_ARG},
         },
         .allow_auto_repeat = true,

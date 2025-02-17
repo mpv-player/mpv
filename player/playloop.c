@@ -218,6 +218,15 @@ void add_step_frame(struct MPContext *mpctx, int dir, bool use_seek)
     }
 }
 
+void step_frame_mute(struct MPContext *mpctx, bool mute)
+{
+    if (!mpctx->ao_chain || !mpctx->ao_chain->ao)
+        return;
+
+    float gain = mute ? 0 : audio_get_gain(mpctx);
+    ao_set_gain(mpctx->ao_chain->ao, gain);
+}
+
 // Clear some playback-related fields on file loading or after seeks.
 void reset_playback_state(struct MPContext *mpctx)
 {
