@@ -76,8 +76,8 @@ const struct m_sub_options stream_cdda_conf = {
         {"overlap", OPT_INT(search_overlap), M_RANGE(0, 75)},
         {"toc-offset", OPT_INT(toc_offset)},
         {"skip", OPT_BOOL(skip)},
-        {"span-a", OPT_INT(span[0])},
-        {"span-b", OPT_INT(span[1])},
+        {"span-a", OPT_INT(span[0]), .deprecation_message = "--start=#N"},
+        {"span-b", OPT_INT(span[1]), .deprecation_message = "--end=#N"},
         {"cdtext", OPT_BOOL(cdtext)},
         {0}
     },
