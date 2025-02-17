@@ -68,7 +68,7 @@ struct mp_cmd_ctx {
 
 struct mp_option_callback {
     struct m_config_option *co;
-    int flags;
+    uint64_t flags;
 };
 
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,

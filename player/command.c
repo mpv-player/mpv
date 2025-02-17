@@ -7726,7 +7726,7 @@ void mp_option_run_callback(struct MPContext *mpctx, int index)
     struct MPOpts *opts = mpctx->opts;
     struct m_config_option *co = mpctx->option_callbacks[index].co;
     void *opt_ptr = co ? co->data : NULL;
-    int flags = mpctx->option_callbacks[index].flags;
+    uint64_t flags = mpctx->option_callbacks[index].flags;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
