@@ -42,6 +42,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 
+extern const stream_info_t stream_info_mpv;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_null;
@@ -92,6 +93,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_cb,
     &stream_info_ffmpeg,
     &stream_info_ffmpeg_unsafe,
+    &stream_info_mpv,
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
