@@ -50,8 +50,9 @@
 #include "cue.h"
 
 // Demuxer list
-extern const struct demuxer_desc demuxer_desc_edl;
-extern const struct demuxer_desc demuxer_desc_cue;
+extern const demuxer_desc_t demuxer_desc_mpv;
+extern const demuxer_desc_t demuxer_desc_edl;
+extern const demuxer_desc_t demuxer_desc_cue;
 extern const demuxer_desc_t demuxer_desc_rawaudio;
 extern const demuxer_desc_t demuxer_desc_rawvideo;
 extern const demuxer_desc_t demuxer_desc_mf;
@@ -80,6 +81,7 @@ static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
     &demuxer_desc_null,
+    &demuxer_desc_mpv,
     NULL
 };
 

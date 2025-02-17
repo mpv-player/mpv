@@ -100,6 +100,7 @@ sources = files(
     'demux/demux_mf.c',
     'demux/demux_mkv.c',
     'demux/demux_mkv_timeline.c',
+    'demux/demux_mpv.c',
     'demux/demux_null.c',
     'demux/demux_playlist.c',
     'demux/demux_raw.c',
@@ -189,6 +190,7 @@ sources = files(
     'stream/stream_lavf.c',
     'stream/stream_memory.c',
     'stream/stream_mf.c',
+    'stream/stream_mpv.c',
     'stream/stream_null.c',
     'stream/stream_slice.c',
 
