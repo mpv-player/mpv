@@ -274,8 +274,6 @@ const struct autoprobe_info hwdec_autoprobe_info[] = {
     {"vdpau-copy",      HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"drm",             HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"drm-copy",        HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
-    {"mmal",            HWDEC_FLAG_AUTO},
-    {"mmal-copy",       HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"mediacodec",      HWDEC_FLAG_AUTO},
     {"mediacodec-copy", HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
     {"videotoolbox",    HWDEC_FLAG_AUTO | HWDEC_FLAG_WHITELIST},
@@ -722,10 +720,6 @@ static void init_avctx(struct mp_filter *vd)
     ctx->intra_only = desc && (desc->props & AV_CODEC_PROP_INTRA_ONLY);
 
     ctx->codec_timebase = mp_get_codec_timebase(ctx->codec);
-
-    // This decoder does not read pkt_timebase correctly yet.
-    if (strstr(lavc_codec->name, "_mmal"))
-        ctx->codec_timebase = (AVRational){1, 1000000};
 
     ctx->hwdec_failed = false;
     ctx->hwdec_request_reinit = false;
@@ -1360,8 +1354,6 @@ static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
         AVCodecContext *avctx = ctx->avctx;
         if (!avctx)
             break;
-        if (ctx->use_hwdec && strcmp(ctx->hwdec.method_name, "mmal") == 0)
-            break; // MMAL has arbitrary buffering, thus unknown
         *(int *)arg = avctx->has_b_frames;
         return CONTROL_TRUE;
     }
