@@ -83,6 +83,7 @@ struct clipboard_ctx {
     const struct clipboard_backend *backend; // clipboard description structure
     struct mp_log *log;
     void *priv;   // backend-specific internal data
+    struct mpv_global *global;
     bool monitor;
     // For notifying mp_clipboard_update_data waiters.
     // Lock protects backend and cancel access.
