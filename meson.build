@@ -518,6 +518,7 @@ if features['win32-desktop']
                      'player/clipboard/clipboard-win.c',
                      'osdep/language-win.c',
                      'osdep/terminal-win.c',
+                     'osdep/w32_register.c',
                      'video/out/w32_common.c',
                      'video/out/win32/displayconfig.c',
                      'video/out/win32/droptarget.c',
