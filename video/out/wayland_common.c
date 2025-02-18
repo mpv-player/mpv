@@ -196,8 +196,7 @@ struct vo_wayland_seat {
     struct vo_wayland_data_offer *dnd_offer;
     struct vo_wayland_data_offer *selection_offer;
     struct vo_wayland_text_input *text_input;
-    /* TODO: unvoid this if required wayland protocols is bumped to 1.32+ */
-    void *cursor_shape_device;
+    struct wp_cursor_shape_device_v1 *cursor_shape_device;
     uint32_t pointer_enter_serial;
     uint32_t pointer_button_serial;
     struct xkb_keymap  *xkb_keymap;
