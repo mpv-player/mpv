@@ -40,7 +40,7 @@ static void cr_perror(void)
     LocalFree(error);
 }
 
-static int cr_runproc(wchar_t *name, wchar_t *cmdline)
+static DWORD cr_runproc(wchar_t *name, wchar_t *cmdline)
 {
     DWORD retval = 1;
 
@@ -76,22 +76,25 @@ static int cr_runproc(wchar_t *name, wchar_t *cmdline)
         CloseHandle(pi.hThread);
     }
 
-    return (int)retval;
+    return retval;
 }
 
-int wmain(int argc, wchar_t **argv, wchar_t **envp)
+int mainCRTStartup(void);
+int mainCRTStartup(void)
 {
-    wchar_t *cmd;
-    wchar_t *exe;
+    wchar_t *cmd = GetCommandLineW();
+    wchar_t *exe = LocalAlloc(LMEM_FIXED, MP_PATH_MAX * sizeof(wchar_t));
+    DWORD len = GetModuleFileNameW(NULL, exe, MP_PATH_MAX);
+    if (len < 4 || len == MP_PATH_MAX)
+          ExitProcess(1);
 
-    cmd = GetCommandLineW();
-    exe = LocalAlloc(LPTR, MP_PATH_MAX * sizeof(wchar_t));
-    GetModuleFileNameW(NULL, exe, MP_PATH_MAX);
-    wcscpy(wcsrchr(exe, '.') + 1, L"exe");
+    exe[len - 3] = L'e';
+    exe[len - 2] = L'x';
+    exe[len - 1] = L'e';
 
     // Set an environment variable so the child process can tell whether it
     // was started from this wrapper and attach to the console accordingly
     SetEnvironmentVariableW(L"_started_from_console", L"yes");
 
-    return cr_runproc(exe, cmd);
+    ExitProcess(cr_runproc(exe, cmd));
 }
