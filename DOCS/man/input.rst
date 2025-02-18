@@ -2276,6 +2276,14 @@ Property list
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
+    A value of -1 indicates that the current playback position is before the
+    start of the first chapter,
+
+    Setting this property results in an absolute seek to the start of the
+    chapter. However, if the property is changed with ``add`` or ``cycle``
+    command which results in a decrement in value, it may go to the start of
+    the current chapter instead of the previous chapter.
+    See ``--chapter-seek-threshold`` for details.
 
 ``edition`` (RW)
     Current edition number. Setting this property to a different value will
