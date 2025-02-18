@@ -554,6 +554,13 @@ static void fix_image_params(struct priv *p,
         MP_VERBOSE(p, "Decoder format: %s\n", mp_image_params_to_str(params));
     p->dec_format = *params;
 
+    if (!quiet && opts->movie_aspect == 0)
+        MP_WARN(p, "Setting video-aspect-override to 0 is deprecated.\n"
+                   "Use --video-aspect-override=no --video-aspect-mode=ignore instead.\n");
+    if (!quiet && opts->movie_aspect == -1)
+        MP_WARN(p, "Setting video-aspect-override to -1 is deprecated.\n"
+                   "Use --video-aspect-override=no --video-aspect-mode=container instead.\n");
+
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
     bool use_container = true;
