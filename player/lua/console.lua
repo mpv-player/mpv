@@ -747,7 +747,10 @@ local function render()
         ass:new_event()
         ass:an(alignment + 2)
         ass:pos(x + max_item_width, y)
-        ass:append('{\\bord0\\4a&Hff&\\blur0}' .. selected_match .. '/' .. #matches)
+        if not searching_history or border_style == 'background-box' then
+            ass:append('{\\bord0\\4a&Hff&\\blur0}')
+        end
+        ass:append(selected_match .. '/' .. #matches)
 
         local start_percentage = (first_match_to_print - 1) / #matches
         local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
