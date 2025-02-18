@@ -1514,13 +1514,16 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
 {
     struct vo_wayland_state *wl = data;
     MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
+    wp_image_description_v1_destroy(image_description);
 }
 
 static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
                                     uint32_t identity)
 {
     struct vo_wayland_state *wl = data;
-    wp_color_management_surface_v1_set_image_description(wl->color_surface, wl->image_description, 0);
+    wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description, 0);
+    MP_VERBOSE(wl, "Image description set on color surface.\n");
+    wp_image_description_v1_destroy(image_description);
 }
 
 static const struct wp_image_description_v1_listener image_description_listener = {
@@ -2475,74 +2478,43 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
     zwp_text_input_v3_add_listener(seat->text_input->text_input, &text_input_listener, seat);
 }
 
-static void reset_color_management(struct vo_wayland_state *wl)
-{
-#if HAVE_WAYLAND_PROTOCOLS_1_41
-    if (!wl->color_surface)
-        return;
-
-    if (wl->image_creator_params)
-        wp_image_description_creator_params_v1_destroy(wl->image_creator_params);
-
-    if (wl->image_description) {
-        wp_color_management_surface_v1_unset_image_description(wl->color_surface);
-        wp_image_description_v1_destroy(wl->image_description);
-        wl->image_description = NULL;
-    }
-
-    wl->image_creator_params = wp_color_manager_v1_create_parametric_creator(wl->color_manager);
-    wl->unsupported_colorspace = false;
-#endif
-}
-
-#if HAVE_WAYLAND_PROTOCOLS_1_41
-static int set_colorspace(struct vo_wayland_state *wl)
-{
-    struct pl_color_space color = wl->target_params.color;
-    int primaries = wl->primaries_map[color.primaries];
-    int transfer = wl->transfer_map[color.transfer];
-
-    if (!primaries)
-        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", m_opt_choice_str(pl_csp_prim_names, color.primaries));
-
-    if (!transfer)
-        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", m_opt_choice_str(pl_csp_trc_names, color.transfer));
-
-    if (!primaries || !transfer) {
-        wl->unsupported_colorspace = true;
-        return -1;
-    }
-
-    wp_image_description_creator_params_v1_set_primaries_named(wl->image_creator_params, primaries);
-    wp_image_description_creator_params_v1_set_tf_named(wl->image_creator_params, transfer);
-    return 0;
-}
-#endif
-
 static void set_color_management(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     struct mp_image_params target_params = vo_get_target_params(wl->vo);
-    if (!wl->color_surface || wl->unsupported_colorspace || pl_color_space_equal(&target_params.color, &wl->target_params.color))
+    if (!wl->color_surface || pl_color_space_equal(&target_params.color, &wl->target_params.color))
         return;
 
     wl->target_params = target_params;
-    reset_color_management(wl);
-    if (set_colorspace(wl))
+    wp_color_management_surface_v1_unset_image_description(wl->color_surface);
+
+    struct pl_color_space color = wl->target_params.color;
+    int primaries = wl->primaries_map[color.primaries];
+    int transfer = wl->transfer_map[color.transfer];
+    if (!primaries)
+        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", m_opt_choice_str(pl_csp_prim_names, color.primaries));
+    if (!transfer)
+        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", m_opt_choice_str(pl_csp_trc_names, color.transfer));
+    if (!primaries || !transfer)
         return;
+
+    struct wp_image_description_creator_params_v1 *image_creator_params =
+        wp_color_manager_v1_create_parametric_creator(wl->color_manager);
+    wp_image_description_creator_params_v1_set_primaries_named(image_creator_params, primaries);
+    wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
+
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
     if (wl->supports_display_primaries) {
-        wp_image_description_creator_params_v1_set_mastering_display_primaries(wl->image_creator_params,
+        wp_image_description_creator_params_v1_set_mastering_display_primaries(image_creator_params,
                 hdr.prim.red.x * WAYLAND_COLOR_FACTOR, hdr.prim.red.y * WAYLAND_COLOR_FACTOR, hdr.prim.green.x * WAYLAND_COLOR_FACTOR,
                 hdr.prim.green.y * WAYLAND_COLOR_FACTOR, hdr.prim.blue.x * WAYLAND_COLOR_FACTOR, hdr.prim.blue.y * WAYLAND_COLOR_FACTOR,
                 hdr.prim.white.x * WAYLAND_COLOR_FACTOR, hdr.prim.white.y * WAYLAND_COLOR_FACTOR);
-        wp_image_description_creator_params_v1_set_mastering_luminance(wl->image_creator_params, hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma);
-        wp_image_description_creator_params_v1_set_max_cll(wl->image_creator_params, hdr.max_cll);
-        wp_image_description_creator_params_v1_set_max_fall(wl->image_creator_params, hdr.max_fall);
+        wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params, hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma);
+        wp_image_description_creator_params_v1_set_max_cll(image_creator_params, hdr.max_cll);
+        wp_image_description_creator_params_v1_set_max_fall(image_creator_params, hdr.max_fall);
     }
-    wl->image_description = wp_image_description_creator_params_v1_create(wl->image_creator_params);
-    wl->image_creator_params = NULL;
-    wp_image_description_v1_add_listener(wl->image_description, &image_description_listener, wl);
+    struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
+    wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
 #endif
 }
 
@@ -3104,7 +3076,6 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl)
 {
     if (!wl->vo->target_params)
         return;
-
     set_color_management(wl);
 }
 
@@ -3336,8 +3307,6 @@ bool vo_wayland_reconfig(struct vo *vo)
 
     MP_VERBOSE(wl, "Reconfiguring!\n");
 
-    reset_color_management(wl);
-
     if (!wl->current_output) {
         wl->current_output = find_output(wl);
         if (!wl->current_output)
@@ -3424,12 +3393,6 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->color_surface)
         wp_color_management_surface_v1_destroy(wl->color_surface);
-
-    if (wl->image_creator_params)
-        wp_image_description_creator_params_v1_destroy(wl->image_creator_params);
-
-    if (wl->image_description)
-        wp_image_description_v1_destroy(wl->image_description);
 #endif
 
     if (wl->content_type)
