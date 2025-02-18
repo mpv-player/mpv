@@ -7729,6 +7729,11 @@ Miscellaneous
 ``--media-controls=<yes|no>``
     (Windows only)
     Enable integration of media control interface SystemMediaTransportControls.
+
+    Windows may display "Unknown app" or show a missing mpv icon in the media
+    control panel. To fully support it, you need to register mpv using the
+    ``--install`` command.
+
     Default: yes (except for libmpv)
 
 ``--force-media-title=<string>``
@@ -7945,3 +7950,59 @@ Miscellaneous
     On Wayland, this option only has effect on the ``wayland`` backend, and
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
+
+``--install``
+    (Windows only)
+
+    Registers mpv as a media player on Windows. This includes adding registry
+    entries to associate mpv with media files and protocols, as well as enabling
+    autoplay handlers for Blu-ray, DVD, and CD-Audio.
+
+    Note that the installation is done in-place, so the current mpv.exe path will
+    be used. If you move mpv after installing it, you can re-run this command to
+    update the registry entries. You can also ``--uninstall`` at any time and
+    using any mpv binary that supports this command, it doesn't have to be
+    specifically the one that was used to install it.
+
+    When using this option, mpv will exit after completing the process.
+    To see a detailed list of operations, run mpv with the ``-v`` option.
+
+    The list of the file extensions to register, can be controlled with the
+    ``--video-exts``, ``--audio-exts``, ``--image-exts``, ``--playlist-exts``
+    and ``--archive-exts`` options.
+
+    By default, mpv will be registered for the current user. To register it for
+    all users, run mpv as an administrator with this option. However, this is
+    not recommended, as installing it per user is generally preferable.
+
+    You can uninstall mpv from the Windows Settings or by running mpv with the
+    ``--uninstall`` option.
+
+``--install-rpath=<string>``
+    (Windows only)
+
+    When installing with ``--install``, this option allows you to specify a
+    string that will be prepended to the runtime path whenever mpv is executed.
+
+    This is useful for setting up paths to external libraries required by mpv
+    without adding them to the global PATH environment variable.
+
+    The format of the string follows the same structure as the PATH environment
+    variable, a semicolon-separated list of paths.
+
+``--uninstall``
+    (Windows only)
+
+    Unregisters mpv as a media player on Windows, undoing all changes made by
+    the ``--install`` option. This will not remove mpv binary itself.
+
+    You can use any mpv binary that supports this command, to uninstall, doesn't
+    have to be specifically the one that was used to install it.
+
+    Windows Settings Application entry is tied to the installation path. If you
+    remove the binary, it will not work. However, you can still uninstall it
+    using this command, reinstall it in a new location, or restore mpv to its
+    original location.
+
+    If mpv was previously installed for all users, run this command as an
+    administrator to remove it for all users.

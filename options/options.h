@@ -341,6 +341,7 @@ typedef struct MPOpts {
     char **playlist_exts;
     bool osd_bar_visible;
 
+    struct w32_install_opts *w32_install_opts;
     int w32_priority;
     bool media_controls;
 
