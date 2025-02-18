@@ -257,15 +257,17 @@ static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
 
 // Update cached values for main thread which require access to the decoder
 // thread state. Must run on/locked with decoder thread.
-static void update_cached_values(struct priv *p)
+static int update_cached_values(struct priv *p)
 {
+    int res = CONTROL_UNKNOWN;
     mp_mutex_lock(&p->cache_lock);
 
     p->cur_hwdec = NULL;
     if (p->decoder && p->decoder->control)
-        p->decoder->control(p->decoder->f, VDCTRL_GET_HWDEC, &p->cur_hwdec);
+        res = p->decoder->control(p->decoder->f, VDCTRL_GET_HWDEC, &p->cur_hwdec);
 
     mp_mutex_unlock(&p->cache_lock);
+    return res;
 }
 
 // Lock the decoder thread. This may synchronously wait until the decoder thread
@@ -346,17 +348,18 @@ int mp_decoder_wrapper_control(struct mp_decoder_wrapper *d,
 {
     struct priv *p = d->f->priv;
     int res = CONTROL_UNKNOWN;
+    thread_lock(p);
     if (cmd == VDCTRL_GET_HWDEC) {
+        res = update_cached_values(p);
         mp_mutex_lock(&p->cache_lock);
         *(char **)arg = p->cur_hwdec;
         mp_mutex_unlock(&p->cache_lock);
     } else {
-        thread_lock(p);
         if (p->decoder && p->decoder->control)
             res = p->decoder->control(p->decoder->f, cmd, arg);
         update_cached_values(p);
-        thread_unlock(p);
     }
+    thread_unlock(p);
     return res;
 }
 
