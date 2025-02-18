@@ -32,6 +32,7 @@
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
+#include "video/out/gpu/video.h"
 #include "wayland_common.h"
 #include "win_state.h"
 
@@ -252,6 +253,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
+static void get_compositor_icc_file(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -1403,7 +1405,7 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
     switch (feature) {
     case WP_COLOR_MANAGER_V1_FEATURE_ICC_V2_V4:
         MP_VERBOSE(wl, "Compositor supports ICC creator requests.\n");
-        wl->supports_icc = true; // TODO: actually implement
+        wl->supports_icc = true;
         break;
     case WP_COLOR_MANAGER_V1_FEATURE_PARAMETRIC:
         MP_VERBOSE(wl, "Compositor supports parametric image description creator.\n");
@@ -1529,6 +1531,106 @@ static void image_description_ready(void *data, struct wp_image_description_v1 *
 static const struct wp_image_description_v1_listener image_description_listener = {
     image_description_failed,
     image_description_ready,
+};
+
+static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
+{
+    struct vo_wayland_state *wl = data;
+    wp_image_description_info_v1_destroy(image_description_info);
+    if (!wl->icc_file)
+        MP_VERBOSE(wl, "No ICC profile retrieved from the compositor.\n");
+}
+
+static void info_icc_file(void *data, struct wp_image_description_info_v1 *image_description_info,
+                          int32_t icc, uint32_t icc_size)
+{
+    struct vo_wayland_state *wl = data;
+    if (wl->icc_size) {
+        munmap(wl->icc_file, wl->icc_size);
+        wl->icc_file = NULL;
+        wl->icc_size = 0;
+    }
+
+    void *icc_file = mmap(NULL, icc_size, PROT_READ, MAP_PRIVATE, icc, 0);
+    close(icc);
+
+    if (icc_file != MAP_FAILED) {
+        wl->icc_file = icc_file;
+        wl->icc_size = icc_size;
+    }
+    wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+}
+
+static void info_primaries(void *data, struct wp_image_description_info_v1 *image_description_info,
+                           int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x, int32_t b_y,
+                           int32_t w_x, int32_t w_y)
+{
+}
+
+static void info_primaries_named(void *data, struct wp_image_description_info_v1 *image_description_info,
+                                 uint32_t primaries)
+{
+}
+
+static void info_tf_power(void *data, struct wp_image_description_info_v1 *image_description_info,
+                          uint32_t eexp)
+{
+}
+
+static void info_tf_named(void *data, struct wp_image_description_info_v1 *image_description_info,
+                          uint32_t tf)
+{
+}
+
+static void info_luminances(void *data, struct wp_image_description_info_v1 *image_description_info,
+                            uint32_t min_lum, uint32_t max_lum, uint32_t reference_lum)
+{
+}
+
+static void info_target_primaries(void *data, struct wp_image_description_info_v1 *image_description_info,
+                                  int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x, int32_t b_y,
+                                  int32_t w_x, int32_t w_y)
+{
+}
+
+static void info_target_luminance(void *data, struct wp_image_description_info_v1 *image_description_info,
+                                  uint32_t min_lum, uint32_t max_lum)
+{
+}
+
+static void info_target_max_cll(void *data, struct wp_image_description_info_v1 *image_description_info,
+                                uint32_t max_cll)
+{
+}
+
+static void info_target_max_fall(void *data, struct wp_image_description_info_v1 *image_description_info,
+                                 uint32_t max_fall)
+{
+}
+
+static const struct wp_image_description_info_v1_listener image_description_info_listener = {
+    info_done,
+    info_icc_file,
+    info_primaries,
+    info_primaries_named,
+    info_tf_power,
+    info_tf_named,
+    info_luminances,
+    info_target_primaries,
+    info_target_luminance,
+    info_target_max_cll,
+    info_target_max_fall,
+};
+
+static void preferred_changed(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
+                              uint32_t identity)
+{
+    struct vo_wayland_state *wl = data;
+    get_compositor_icc_file(wl);
+}
+
+static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
+    preferred_changed,
 };
 #endif
 
@@ -2217,6 +2319,18 @@ static int get_mods(struct vo_wayland_seat *s)
             modifiers |= mods[n];
     }
     return modifiers;
+}
+
+static void get_compositor_icc_file(struct vo_wayland_state *wl)
+{
+#if HAVE_WAYLAND_PROTOCOLS_1_41
+    struct wp_image_description_v1 *image_description =
+        wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
+    struct wp_image_description_info_v1 *description_info =
+        wp_image_description_v1_get_information(image_description);
+    wp_image_description_info_v1_add_listener(description_info, &image_description_info_listener, wl);
+    wp_image_description_v1_destroy(image_description);
+#endif
 }
 
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
@@ -2991,6 +3105,15 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         *(char ***)arg = get_displays_spanned(wl);
         return VO_TRUE;
     }
+    case VOCTRL_GET_ICC_PROFILE: {
+        if (!wl->supports_icc)
+            MP_WARN(wl, "Compositor does not support ICC profiles!\n");
+        if (!wl->icc_file)
+            return VO_FALSE;
+        MP_VERBOSE(wl, "Retrieving ICC profile from compositor.\n");
+        *(bstr *)arg = bstrdup(NULL, (bstr){wl->icc_file, wl->icc_size});
+        return VO_TRUE;
+    }
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
         if (wl->opts->window_maximized || wl->tiled) {
@@ -3292,13 +3415,28 @@ bool vo_wayland_init(struct vo *vo)
     wl_display_roundtrip(wl->display);
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-    // Only bind to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
-    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
+    // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
+    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland"))
         wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
-    } else {
-        MP_VERBOSE(wl, "Compositor does not support parametric image descriptions!\n");
+
+    if (wl->color_manager && wl->supports_icc) {
+        wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
+        wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
     }
 #endif
+
+    if (!wl->supports_parametric)
+        MP_VERBOSE(wl, "Compositor does not support parametric image descriptions!\n");
+
+    struct gl_video_opts *gl_opts = mp_get_config_group(NULL, vo->global, &gl_video_conf);
+    if (wl->supports_icc) {
+        // dumb workaround for avoiding -Wunused-function
+        get_compositor_icc_file(wl);
+    } else {
+        int msg_level = gl_opts->icc_opts->profile_auto ? MSGL_WARN : MSGL_V;
+        mp_msg(wl->log, msg_level, "Compositor does not support ICC profiles!\n");
+    }
+    talloc_free(gl_opts);
 
     return true;
 
@@ -3399,6 +3537,9 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->color_surface)
         wp_color_management_surface_v1_destroy(wl->color_surface);
+
+    if (wl->color_surface_feedback)
+        wp_color_management_surface_feedback_v1_destroy(wl->color_surface_feedback);
 #endif
 
     if (wl->content_type)
