@@ -24,18 +24,19 @@
 
 int wmain(int argc, wchar_t **argv, wchar_t **envp);
 
-static void cr_perror(const wchar_t *prefix)
+static void cr_perror(void)
 {
-    wchar_t *error;
+    LPWSTR error = NULL;
+    DWORD len = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                               FORMAT_MESSAGE_FROM_SYSTEM |
+                               FORMAT_MESSAGE_IGNORE_INSERTS,
+                               NULL, GetLastError(),
+                               LANG_USER_DEFAULT,
+                               (LPWSTR)&error, 0, NULL);
 
-    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                   FORMAT_MESSAGE_FROM_SYSTEM |
-                   FORMAT_MESSAGE_IGNORE_INSERTS,
-                   NULL, GetLastError(),
-                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                   (LPWSTR)&error, 0, NULL);
-
-    fwprintf(stderr, L"%ls: %ls", prefix, error);
+    HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+    if (out != INVALID_HANDLE_VALUE && GetConsoleMode(out, &(DWORD){0}))
+        WriteConsoleW(out, error, len, NULL, NULL);
     LocalFree(error);
 }
 
@@ -66,10 +67,8 @@ static int cr_runproc(wchar_t *name, wchar_t *cmdline)
     };
     si.dwFlags = (si.hStdInput || si.hStdOutput || si.hStdError) ? STARTF_USESTDHANDLES : 0;
     PROCESS_INFORMATION pi = {0};
-    if (!CreateProcessW(name, cmdline, NULL, NULL, TRUE, 0,
-                        NULL, NULL, &si, &pi)) {
-
-        cr_perror(L"CreateProcess");
+    if (!CreateProcessW(name, cmdline, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi)) {
+        cr_perror();
     } else {
         WaitForSingleObject(pi.hProcess, INFINITE);
         GetExitCodeProcess(pi.hProcess, &retval);
