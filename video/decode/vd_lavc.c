@@ -652,7 +652,9 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
     mp_info(log, "  no\n");
     mp_info(log, "  auto-safe\n");
     mp_info(log, "  auto-copy\n");
+    mp_info(log, "  auto-unsafe\n");
     mp_info(log, "  auto-copy-safe\n");
+    mp_info(log, "  auto-copy-unsafe\n");
 
     return M_OPT_EXIT;
 }
