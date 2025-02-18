@@ -419,6 +419,10 @@ Property Manipulation
     Add the given value to the property or option. On overflow or underflow,
     clamp the property to the maximum. If ``<value>`` is omitted, assume ``1``.
 
+    Whether or not key-repeat is enabled by default depends on the property.
+    Currently properties with continuous values are repeatable by default (like
+    ``volume``), while discrete values are not (like ``osd-level``).
+
     This is a scalable command. See the documentation of ``nonscalable`` input
     command prefix in `Input Command Prefixes`_ for details.
 
