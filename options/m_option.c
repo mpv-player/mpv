@@ -2906,7 +2906,7 @@ static char *print_rel_time(const m_option_t *opt, const void *val)
     case REL_TIME_RELATIVE:
         return talloc_asprintf(NULL, "%+g", t->pos);
     case REL_TIME_CHAPTER:
-        return talloc_asprintf(NULL, "#%g", t->pos);
+        return talloc_asprintf(NULL, "#%g", t->pos + 1);
     case REL_TIME_PERCENT:
         return talloc_asprintf(NULL, "%g%%", t->pos);
     }
