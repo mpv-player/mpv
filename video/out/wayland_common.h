@@ -92,6 +92,8 @@ struct vo_wayland_state {
     /* color-management */
     struct wp_color_manager_v1 *color_manager;
     struct wp_color_management_surface_v1 *color_surface;
+    struct wp_color_management_surface_feedback_v1 *color_surface_feedback;
+    struct wp_image_description_creator_icc_v1 *icc_creator;
     struct mp_image_params target_params;
     bool supports_icc;
     bool supports_parametric;
@@ -101,6 +103,8 @@ struct vo_wayland_state {
     bool supports_display_primaries;
     int primaries_map[PL_COLOR_PRIM_COUNT];
     int transfer_map[PL_COLOR_TRC_COUNT];
+    void *icc_file;
+    uint32_t icc_size;
 
     /* content-type */
     struct wp_content_type_manager_v1 *content_type_manager;
