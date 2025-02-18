@@ -2327,6 +2327,8 @@ AV_NOWARN_DEPRECATED(
     }
 
     update_icc_opts(p, opts->icc_opts);
+    int events = 0;
+    update_auto_profile(p, &events);
 
     pars->params.num_hooks = 0;
     const struct pl_hook *hook;
