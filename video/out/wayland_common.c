@@ -2509,9 +2509,15 @@ static void set_color_management(struct vo_wayland_state *wl)
                 hdr.prim.red.x * WAYLAND_COLOR_FACTOR, hdr.prim.red.y * WAYLAND_COLOR_FACTOR, hdr.prim.green.x * WAYLAND_COLOR_FACTOR,
                 hdr.prim.green.y * WAYLAND_COLOR_FACTOR, hdr.prim.blue.x * WAYLAND_COLOR_FACTOR, hdr.prim.blue.y * WAYLAND_COLOR_FACTOR,
                 hdr.prim.white.x * WAYLAND_COLOR_FACTOR, hdr.prim.white.y * WAYLAND_COLOR_FACTOR);
-        wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params, hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma);
-        wp_image_description_creator_params_v1_set_max_cll(image_creator_params, hdr.max_cll);
-        wp_image_description_creator_params_v1_set_max_fall(image_creator_params, hdr.max_fall);
+
+        if (hdr.min_luma < hdr.max_luma)
+            wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params, hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma);
+
+        if (hdr.max_cll > hdr.min_luma && hdr.max_cll <= hdr.max_luma)
+            wp_image_description_creator_params_v1_set_max_cll(image_creator_params, hdr.max_cll);
+
+        if (hdr.max_fall > hdr.min_luma && hdr.max_fall <= hdr.max_luma && hdr.max_fall <= hdr.max_cll)
+            wp_image_description_creator_params_v1_set_max_fall(image_creator_params, hdr.max_fall);
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
