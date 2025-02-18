@@ -154,6 +154,8 @@ void mp_raw_time_init(void)
 #endif
 }
 
+#if !HAVE_UWP && !defined(__aarch64__) && !defined(_M_ARM64)
+
 static inline bool cpu_tsc_invariant(void)
 {
     int cpu_info[4] = {0};
@@ -217,6 +219,8 @@ done:
     mp_mutex_unlock(&mutex);
     return ticks_per_ns;
 }
+
+#endif
 
 int64_t mp_thread_cpu_time_ns(mp_thread_id thread_id)
 {
