@@ -1,0 +1,1 @@
+Add `--register` and `--unregister`
