@@ -1430,7 +1430,7 @@ Video
        only the ``vaapi``, ``nvdec``, ``cuda`` and ``vulkan`` methods work with
        Vulkan.
 
-    The ``vaapi`` mode, if used with ``--vo=gpu``or ``--vo=gpu-next`` most
+    The ``vaapi`` mode, if used with ``--vo=gpu`` or ``--vo=gpu-next`` most
     likely works with Intel and AMD GPUs only. It requires the opengl EGL
     backend if the GPU does not support drm modifiers.
 
