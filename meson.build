@@ -339,13 +339,8 @@ if posix
     flags += ['-D_GNU_SOURCE']
 endif
 
-if cc.has_link_argument('-Wl,-z,noexecstack')
-    link_flags += '-Wl,-z,noexecstack'
-endif
-
-if cc.has_link_argument('-Wl,--nxcompat,--no-seh,--dynamicbase')
-    link_flags += '-Wl,--nxcompat,--no-seh,--dynamicbase'
-endif
+link_flags += cc.get_supported_link_arguments(['-Wl,--nxcompat,--no-seh,--dynamicbase',
+                                               '-Wl,-z,noexecstack'])
 
 features += {'build-date': get_option('build-date')}
 if not features['build-date']
