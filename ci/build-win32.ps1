@@ -253,4 +253,5 @@ meson setup build `
     -Dx11=disabled
 ninja -C build mpv.exe mpv.com libmpv.a
 cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
+cp ./etc/mpv-*.bat ./build
 ./build/mpv.com -v --no-config
