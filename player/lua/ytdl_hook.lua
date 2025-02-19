@@ -1215,7 +1215,8 @@ local function on_load_hook(load_fail)
     run_ytdl_hook(url)
 end
 
-mp.add_hook("on_load", 10, function() on_load_hook(false) end)
+-- ensure ytdl hook triggers AFTER profiles have been applied
+mp.add_hook("on_load", 60, function() on_load_hook(false) end)
 mp.add_hook("on_load_fail", 10, function() on_load_hook(true) end)
 
 mp.add_hook("on_load", 20, function ()
