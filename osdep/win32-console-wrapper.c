@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include <windows.h>
+#include <pathcch.h>
 
 // copied from osdep/io.h since this file is standalone
 #define MP_PATH_MAX (32000)
@@ -88,9 +88,11 @@ int mainCRTStartup(void)
     if (len < 4 || len == MP_PATH_MAX)
           ExitProcess(1);
 
-    exe[len - 3] = L'e';
-    exe[len - 2] = L'x';
-    exe[len - 1] = L'e';
+    if (FAILED(PathCchRemoveFileSpec(exe, MP_PATH_MAX)) ||
+        FAILED(PathCchAppendEx(exe, MP_PATH_MAX, L"mpv.exe", PATHCCH_ALLOW_LONG_PATHS)))
+    {
+        ExitProcess(1);
+    }
 
     // Set an environment variable so the child process can tell whether it
     // was started from this wrapper and attach to the console accordingly

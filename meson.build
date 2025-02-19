@@ -1817,6 +1817,7 @@ if get_option('cplayer')
         executable('mpv', wrapper_sources, c_args: ['-municode', '-fno-asynchronous-unwind-tables'],
                    link_args: ['-municode', '-nostartfiles', '-nodefaultlibs'],
                    override_options: ['b_sanitize=none'],
+                   dependencies: cc.find_library('pathcch'),
                    name_suffix: 'com', install: true)
     endif
 
