@@ -212,6 +212,7 @@ jobs:
           name: mpv-${{ matrix.target }}
           path: |
             build/mpv.???
+            build/mpv-*.bat
             build/vulkan-*.dll
             !build/mpv.lib
 

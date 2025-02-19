@@ -8220,7 +8220,7 @@ Miscellaneous
     more details.
 
 ``--register``
-    (Windows only)
+    (Windows only) (available also as mpv-register helper)
 
     Registers mpv as a media player on Windows. This includes adding registry
     entries to associate mpv with media files and protocols, as well as enabling
@@ -8272,7 +8272,7 @@ Miscellaneous
         runs ``Start-Process <mpv path>`` and all will work as expected.
 
 ``--unregister``
-    (Windows only)
+    (Windows only) (available also as mpv-unregister helper)
 
     Unregisters mpv as a media player on Windows, undoing all changes made by
     the ``--register`` option. This will not remove mpv binary itself.
