@@ -1360,6 +1360,8 @@ static int control(struct mp_filter *vd, enum dec_ctrl cmd, void *arg)
         return CONTROL_TRUE;
     }
     case VDCTRL_GET_HWDEC: {
+        if (!ctx->hwdec_notified)
+            return CONTROL_FALSE;
         *(char **)arg = ctx->use_hwdec ? ctx->hwdec.method_name : NULL;
         return CONTROL_TRUE;
     }
