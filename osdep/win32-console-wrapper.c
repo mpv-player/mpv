@@ -82,7 +82,6 @@ static DWORD cr_runproc(wchar_t *name, wchar_t *cmdline)
 int mainCRTStartup(void);
 int mainCRTStartup(void)
 {
-    wchar_t *cmd = GetCommandLineW();
     wchar_t *exe = LocalAlloc(LMEM_FIXED, MP_PATH_MAX * sizeof(wchar_t));
     DWORD len = GetModuleFileNameW(NULL, exe, MP_PATH_MAX);
     if (len < 4 || len == MP_PATH_MAX)
@@ -94,9 +93,26 @@ int mainCRTStartup(void)
         ExitProcess(1);
     }
 
+    // cmd has to be modifiable, as the documentation states:
+    // The Unicode version of this function, CreateProcessW, can modify the
+    // contents of this string.
+#if defined(MPV_INSTALL)
+    wchar_t cmd[] = L"mpv.exe --install";
+#elif defined(MPV_UNINSTALL)
+    wchar_t cmd[] = L"mpv.exe --no-config --uninstall";
+#else
+    wchar_t *cmd = GetCommandLineW();
+
     // Set an environment variable so the child process can tell whether it
     // was started from this wrapper and attach to the console accordingly
     SetEnvironmentVariableW(L"_started_from_console", L"yes");
+#endif
 
     ExitProcess(cr_runproc(exe, cmd));
+}
+
+int WinMainCRTStartup(void);
+int WinMainCRTStartup(void)
+{
+    return mainCRTStartup();
 }

@@ -1813,14 +1813,24 @@ if get_option('cplayer')
     mpv = executable('mpv', main_fn_source, objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: get_option('win32-subsystem'), install: true)
 
+    wrapper_sources = 'osdep/win32-console-wrapper.c'
+    wrapper_c_args = ['-municode', '-fno-asynchronous-unwind-tables']
+    wrapper_kwargs = {
+        'dependencies': cc.find_library('pathcch'),
+        'link_args': ['-municode', '-nostartfiles', '-nodefaultlibs'],
+        'override_options': 'b_sanitize=none',
+        'name_suffix': 'com',
+        'install': true,
+    }
     if win32 and get_option('win32-subsystem') != 'console'
-        wrapper_sources= 'osdep/win32-console-wrapper.c'
-        executable('mpv', wrapper_sources, c_args: ['-municode', '-fno-asynchronous-unwind-tables'],
-                   link_args: ['-municode', '-nostartfiles', '-nodefaultlibs'],
-                   override_options: ['b_sanitize=none'],
-                   dependencies: cc.find_library('pathcch'),
-                   name_suffix: 'com', install: true)
+        executable('mpv', wrapper_sources, c_args: wrapper_c_args, kwargs: wrapper_kwargs)
     endif
+    # `--install`/`--uninstall` wrappers for mpv.exe. These are explicitly not
+    # console; if users want a console, they can use mpv.com directly.
+    executable('mpv-install', wrapper_sources, c_args: wrapper_c_args + '-DMPV_INSTALL',
+               win_subsystem: 'windows', kwargs: wrapper_kwargs)
+    executable('mpv-uninstall', wrapper_sources, c_args: wrapper_c_args + '-DMPV_UNINSTALL',
+               win_subsystem: 'windows', kwargs: wrapper_kwargs)
 
     if darwin
         osxbundle = find_program(join_paths(tools_directory, 'osxbundle.py'), required: true)

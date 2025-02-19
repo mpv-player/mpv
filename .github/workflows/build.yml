@@ -195,7 +195,8 @@ jobs:
         with:
           name: mpv-x86_64-windows-msvc
           path: |
-            build/mpv.???
+            build/mpv.exe
+            build/mpv*.com
             build/vulkan-*.dll
             !build/mpv.lib
 
