@@ -109,6 +109,10 @@ class MacCommon: Common {
         info.pointee.last_queue_display_time = next?.time ?? -1
     }
 
+    @objc func isVisible() -> Bool {
+        return window?.occlusionState.contains(.visible) ?? false
+    }
+
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                       _ inNow: UnsafePointer<CVTimeStamp>,
                                       _ inOutputTime: UnsafePointer<CVTimeStamp>,
