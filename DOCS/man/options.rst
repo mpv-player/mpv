@@ -3696,11 +3696,6 @@ Window
     not accept negative values. mpv will create its own window and set the
     wid window as parent, like with X11.
 
-    On macOS/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
-    to ``intptr_t``. mpv will create its own sub-view. Because macOS does not
-    support window embedding of foreign processes, this works only with libmpv,
-    and will crash when used from the command line.
-
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
