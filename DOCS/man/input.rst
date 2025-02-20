@@ -608,6 +608,76 @@ Playlist Manipulation
     to the end if index is less than 0 or greater than the size of the internal
     playlist. This argument will be ignored for all other actions.
 
+``load [<flags> [<urls> [<arg1> [<arg2> [<arg3> [<arg4>]]]]]]``
+    Load the give files or URLs according to the given flags. This is a more
+    general version of load commands, joining the functionality of ``loadfile``,
+    ``loadlist``, ``sub-add``, ``audio-add``, and ``video-add``.
+
+    The command has the following arguments:
+
+    ``flags``
+        The flags for the load command. You can combine multiple flags with ``+``.
+        Note that not every combination of flags makes sense. For example track
+        selection flags are only useful for tracks, and not for files or playlists.
+
+        The following flags are supported:
+
+            Type of entity to load:
+            ``file`` (default)
+            ``playlist``
+            ``track``
+            ``dir``
+
+            Action to take:
+            ``replace`` (default)
+            ``insert``
+            ``append``
+
+            Position to insert:
+            ``next``
+            ``at``
+            ``end`` (default)
+
+            Start playback flag:
+            ``play``
+
+            Track selection flags:
+            ``select`` (default)
+            ``auto``
+            ``cached``
+
+            Type of media:
+            ``subtitle``
+            ``audio``
+            ``video``
+            ``image``
+
+    ``urls`` (``path list``)
+        The list of files to load. Separated by path separator
+        (: on Unix, ; on Windows). When loading with ``playlist`` flag only the
+        first URL is used.
+
+    The following args are generic and used depending on the flags combination:
+
+    ``arg1`` (``int``)
+        The index to insert the media. Only used with ``insert`` and ``at`` flags.
+
+    ``arg2`` (``string``)
+        The title of the media. Only used with ``track`` flag.
+
+    ``arg3`` (``string``)
+        The language of the media. Only used with ``track`` flag.
+
+    ``arg4`` (``key-value list``)
+        The options used for file loading. ``file`` and ``dir`` flags.
+
+    .. admonition:: Examples
+
+        - ``load file <url>`` replaces the current playing file with the new one.
+        - ``load file+insert+at <url> 55`` inserts the file at index 55.
+        - ``load file+play <url>`` append file to the playlist and start playback, if nothing is playing.
+        - ``load track+subtitle+auto <file> 0 "track title" "eng"`` Loads a subtitle track with the given title and language.
+
 ``playlist-clear``
     Clear the playlist, except the currently played file.
 
