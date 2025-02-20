@@ -147,6 +147,8 @@ struct m_property {
     void *priv;
     // Special-case: mark options for which command.c uses the option-bridge
     bool is_option;
+    // Special-case: option-bridge properties should be processed immediately
+    bool immediate;
 };
 
 struct m_property *m_property_list_find(const struct m_property *list,
