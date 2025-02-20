@@ -1586,6 +1586,24 @@ local function command_flags_at_2nd_argument_list(command)
     return flags[command]
 end
 
+local function handle_flags(command, arg_index, flags)
+    for _, cmd in pairs(mp.get_property_native('command-list')) do
+        if cmd.name == command then
+            if cmd.args[arg_index] and cmd.args[arg_index].type == 'Flags' then
+                break
+            else
+                return
+            end
+        end
+    end
+
+    local plus_pos = flags:find('%+[^%+]*$')
+
+    if plus_pos then
+        completion_pos = completion_pos + plus_pos
+    end
+end
+
 local function list_executables()
     local executable_map = {}
     local path = os.getenv('PATH') or ''
@@ -1801,6 +1819,7 @@ complete = function ()
             completions = handle_file_completion(before_cur)
         else
             completions = command_flags_at_1st_argument_list(first_useful_token.text)
+            handle_flags(first_useful_token.text, 1, tokens[#tokens].text)
         end
     elseif first_useful_token.text == 'cycle-values' then
         completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
@@ -1820,6 +1839,7 @@ complete = function ()
             end
         else
             completions = command_flags_at_2nd_argument_list(first_useful_token.text)
+            handle_flags(first_useful_token.text, 2, tokens[#tokens].text)
         end
     elseif #tokens == first_useful_token_index + 3 then
         if first_useful_token.text == 'change-list' then
