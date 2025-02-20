@@ -534,12 +534,20 @@ if not win32 and not darwin
     gio = dependency('gio-2.0', required: get_option('gio'))
     features += {'gio': gio.found()}
     if features['gio']
-        sources += files('player/dialog/file_dialog-portal.c')
+        sources += files('player/dialog/file_dialog-portal-gio.c')
         dependencies += gio
+    else
+        libsystemd = dependency('libsystemd', required: get_option('libsystemd'))
+        features += {'libsystemd': libsystemd.found()}
+        if features['libsystemd']
+        sources += files('player/dialog/file_dialog-portal-sdbus.c')
+        dependencies += libsystemd
+        endif
     endif
     sources += files('player/dialog/file_dialog-external.c')
 else
     features += {'gio': false}
+    features += {'libsystemd': false}
 endif
 
 sources += files('player/dialog/file_dialog.c')

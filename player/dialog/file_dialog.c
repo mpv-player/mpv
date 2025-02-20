@@ -34,7 +34,7 @@ static const struct file_dialog_provider *const dialogs[] = {
 #if HAVE_COCOA
     &file_dialog_mac,
 #endif
-#if HAVE_GIO
+#if HAVE_GIO || HAVE_LIBSYSTEMD
     &file_dialog_portal,
 #endif
 #if !HAVE_WIN32 && !HAVE_DARWIN

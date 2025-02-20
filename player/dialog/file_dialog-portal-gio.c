@@ -157,6 +157,6 @@ static char **get_files(void *talloc_ctx, const mp_file_dialog_params *params,
 
 const struct file_dialog_provider file_dialog_portal = {
     .name = "portal",
-    .desc = "Desktop FileChooser portal",
+    .desc = "Desktop FileChooser portal (gio)",
     .get_files = get_files,
 };
