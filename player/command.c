@@ -5955,7 +5955,7 @@ static void cmd_escape_ass(void *p)
     };
 }
 
-static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
+static struct load_action get_load_action(int action_flag)
 {
     switch (action_flag) {
     case 0: // replace
@@ -5992,27 +5992,19 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     }
 }
 
-static void cmd_loadfile(void *p)
+static void loadfile(struct mp_cmd_ctx *cmd, char *filename,
+                     struct load_action action, int insert_at_idx,
+                     char **opts)
 {
-    struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    char *filename = cmd->args[0].v.s;
-    int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
-
-    struct load_action action = get_load_action(mpctx, action_flag);
-
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
     char *path = mp_get_user_path(NULL, mpctx->global, filename);
     struct playlist_entry *entry = playlist_entry_new(path);
     talloc_free(path);
-    if (cmd->args[3].v.str_list) {
-        char **pairs = cmd->args[3].v.str_list;
-        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
-            playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
-    }
+    for (int i = 0; opts && opts[i] && opts[i + 1]; i += 2)
+        playlist_entry_add_param(entry, bstr0(opts[i]), bstr0(opts[i + 1]));
 
     struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
     playlist_insert_at(mpctx->playlist, entry, at);
@@ -6030,18 +6022,23 @@ static void cmd_loadfile(void *p)
     mp_wakeup_core(mpctx);
 }
 
-static void cmd_loadlist(void *p)
+static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
+    char **opts = cmd->args[3].v.str_list;
 
-    struct load_action action = get_load_action(mpctx, action_flag);
+    loadfile(cmd, filename, get_load_action(action_flag), insert_at_idx, opts);
+}
 
+static void loadlist(struct mp_cmd_ctx *cmd, char *filename,
+                     struct load_action action, int insert_at_idx)
+{
+    struct MPContext *mpctx = cmd->mpctx;
     char *path = mp_get_user_path(NULL, mpctx->global, filename);
-    struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
+    struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
     talloc_free(path);
 
@@ -6083,6 +6080,16 @@ static void cmd_loadlist(void *p)
         MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
         cmd->success = false;
     }
+}
+
+static void cmd_loadlist(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    char *filename = cmd->args[0].v.s;
+    int action_flag = cmd->args[1].v.i;
+    int insert_at_idx = cmd->args[2].v.i;
+
+    loadlist(cmd, filename, get_load_action(action_flag), insert_at_idx);
 }
 
 static void cmd_playlist_clear(void *p)
@@ -6192,21 +6199,18 @@ static void cmd_show_progress(void *p)
     mp_wakeup_core(mpctx);
 }
 
-static void cmd_track_add(void *p)
+static void track_add(struct mp_cmd_ctx *cmd, char *filename, char *title,
+                      char *lang, int type, bool is_albumart, bool no_default,
+                      bool selected)
 {
-    struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    int type = *(int *)cmd->priv;
-    bool is_albumart = type == STREAM_VIDEO &&
-                       cmd->args[4].v.b;
-
     if (mpctx->stop_play) {
         cmd->success = false;
         return;
     }
 
-    if (cmd->args[1].v.i == 2) {
-        struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
+    if (selected) {
+        struct track *t = find_track_with_url(mpctx, type, filename);
         if (t) {
             if (mpctx->playback_initialized) {
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
@@ -6217,7 +6221,7 @@ static void cmd_track_add(void *p)
             return;
         }
     }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
+    int first = mp_add_external_file(mpctx, filename, type,
                                      cmd->abort->cancel, is_albumart);
     if (first < 0) {
         cmd->success = false;
@@ -6226,7 +6230,7 @@ static void cmd_track_add(void *p)
 
     for (int n = first; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        if (cmd->args[1].v.i == 1) {
+        if (no_default) {
             t->no_default = true;
         } else if (n == first) {
             if (mpctx->playback_initialized) {
@@ -6235,16 +6239,25 @@ static void cmd_track_add(void *p)
                 mark_track_selection(mpctx, 0, t->type, t->user_tid);
             }
         }
-        char *title = cmd->args[2].v.s;
         if (title && title[0])
             t->title = talloc_strdup(t, title);
-        char *lang = cmd->args[3].v.s;
         if (lang && lang[0])
             t->lang = talloc_strdup(t, lang);
     }
 
     if (mpctx->playback_initialized)
         print_track_list(mpctx, "Track added:");
+}
+
+static void cmd_track_add(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    int type = *(int *)cmd->priv;
+    bool is_albumart = type == STREAM_VIDEO && cmd->args[4].v.b;
+
+    track_add(cmd, cmd->args[0].v.s, cmd->args[2].v.s,
+              cmd->args[3].v.s, type, is_albumart, cmd->args[1].v.i == 1,
+              cmd->args[1].v.i == 2);
 }
 
 static void cmd_track_remove(void *p)
