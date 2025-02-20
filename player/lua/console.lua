@@ -1502,6 +1502,7 @@ end
 local function command_flags_at_2nd_argument_list(command)
     local flags = {
         ['apply-profile'] = {'default', 'restore'},
+        ['frame-step'] = {'play', 'seek', 'mute'},
         ['loadfile'] = {'replace', 'append', 'append-play', 'insert-next',
                         'insert-next-play', 'insert-at', 'insert-at-play'},
         ['screenshot-to-file'] = {'subtitles', 'video', 'window', 'each-frame'},
