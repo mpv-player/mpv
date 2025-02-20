@@ -406,6 +406,77 @@ To use this feature, you need to fill the ``menu-data`` property with menu
 definition data, and add a keybinding to run the ``context-menu`` command,
 which can be done with a user script.
 
+Image Bindings
+--------------
+
+When viewing images, the following key bindings optimized for image viewing are
+added. Key bindings not listed here, or those configured by the user in
+``input.conf``, keep behaving like with non-image files.
+
+LEFT, RIGHT, UP, DOWN, h, j, k, l
+    Pan the image when it is larger than the window.
+
+Shift+LEFT, Shift+RIGHT, Shift+UP, Shift+DOWN, H, J, K, L
+    Slowly pan the image when it is larger than the window.
+
+Ctrl+LEFT, Ctrl+RIGHT, Ctrl+UP, Ctrl+DOWN, Ctrl+h, Ctrl+j, Ctrl+k, Ctrl+l
+    Align the image to one of the boundaries of the window when it is larger
+    than the window.
+
+= and -
+    Change the zoom.
+
++ and _
+    Change the zoom slowly.
+
+0
+    Reset zoom and panscan.
+
+u
+    Toggle between showing the image unscaled in its original dimensions and
+    fitting it to the window.
+
+o
+    Fill the window with the image. This makes the image scaled to the window,
+    resets zoom and sets ``--panscan`` to 1. See ``-panscan`` for more info.
+
+r
+    Rotate counterclockwise.
+
+R and t
+    Rotate clockwise.
+
+v
+    Rotate by 180 degrees.
+
+SPACE
+    Toggle between showing images for 5 seconds in a slideshow and keeping them
+    open forever.
+
+[ and ]
+    Decrease/increase the image display duration by 1.
+
+{ and }
+    Halve/double the image display duration.
+
+n
+    Go to the next playlist entry.
+
+p
+    Go to the previous playlist entry.
+
+N
+    Go to the next sub-playlist (e.g. directory or archive).
+
+P
+    Go to the previous sub-playlist.
+
+Wheel up/down
+    Change the zoom while keeping the part of the image hovered by the cursor
+    under it.
+
+See `Image profile`_ for image viewing tips.
+
 USAGE
 =====
 
@@ -1065,6 +1136,77 @@ example, ``math`` is defined and gives access to the Lua standard math library.
 
     This feature is subject to change indefinitely. You might be forced to
     adjust your profiles on mpv updates.
+
+Image profile
+-------------
+
+mpv has a builtin profile called ``builtin-image`` that is automatically applied
+to images and restored when switching to a video or audio file. It enables
+options optimal for image viewing, such as a smaller OSC layout optimized for
+images. Its full contents can be listed with ``mpv
+--show-profile=builtin-image``. It can be disabled with
+``--apply-image-profile=no``.
+
+It can be extended in mpv.conf without overwriting it completely:
+
+.. admonition:: Example to loop image playlists
+
+    ::
+
+        [builtin-image]
+        loop-playlist
+
+``--apply-image-profile`` also enables the image specific key bindings listed in
+`Keyboard Control`_. Additional image key bindings can be specified in the
+``image`` section in ``input.conf``, for example:
+
+    SPACE {image} repeatable playlist-next force
+
+See the `INPUT.CONF`_ section for more information on how to define key
+bindings.
+
+To reset zoom, alignment and rotation between images, it is recommended to place
+``reset-on-next-file=video-zoom,panscan,video-unscaled,video-align-x,video-align-y,video-rotate``
+in the top level of mpv.conf, as enabling it in the conditional profile makes it
+take effect only from the second file.
+
+To start viewing images and videos bigger than the window from the top left
+corner, these options can be set in the top level of mpv.conf along with
+``--reset-on-next-file``:
+
+.. admonition:: Start from the top left:
+
+    ::
+
+        video-align-x=-1
+        video-align-y=-1
+        video-recenter
+
+To enable the screensaver only when images are kept open forever, this profile
+can be added to mpv.conf:
+
+.. admonition:: Example to enable the screensaver:
+
+    ::
+
+        [screensaver]
+        profile-cond=p['current-tracks/video/image'] and not p['current-tracks/video/albumart'] and image_display_duration == math.huge
+        profile-restore=copy
+        stop-screensaver=no
+
+``--vo=gpu-next`` is recommended for better performance with large images,
+except images larger than the max texture size of the GPU API, for which a VO
+with software rendering can be used as fallback:
+
+.. admonition:: Example to display huge images on Wayland:
+
+    ::
+
+        [huge]
+        profile-cond=width > 16384 or height > 16384
+        vo=wlshm
+
+maxImageExtent may be 8192 instead on old iGPUs.
 
 Legacy auto profiles
 --------------------
