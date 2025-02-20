@@ -5296,11 +5296,42 @@ struct cmd_list_ctx {
     int num_sub;
 };
 
+static void substitute_args(struct MPContext *ctx, struct mp_cmd *cmd,
+                            struct mpv_node *replace)
+{
+    // TODO: Allow node array
+    if (!cmd->receive_pipe || replace->format != MPV_FORMAT_STRING)
+        return;
+
+    for (int i = 0; i < cmd->nargs; ++i) {
+        if (!cmd->args[i].substitute)
+            continue;
+        if (cmd->args[i].type->type == CONF_TYPE_BOOL ||
+            cmd->args[i].type->type == CONF_TYPE_FLAG ||
+            cmd->args[i].type->type == CONF_TYPE_INT ||
+            cmd->args[i].type->type == CONF_TYPE_INT64 ||
+            cmd->args[i].type->type == CONF_TYPE_FLOAT ||
+            cmd->args[i].type->type == CONF_TYPE_DOUBLE) {
+            m_option_parse(ctx->log, cmd->args[i].type, bstr0(cmd->name),
+                           bstr0(replace->u.string), &cmd->args[i].v);
+        } else if (cmd->args[i].type->type == CONF_TYPE_STRING) {
+            talloc_replace(cmd, cmd->args[i].v.s, replace->u.string);
+        } else if (cmd->args[i].type->type == CONF_TYPE_STRING_LIST) {
+            // TODO
+        }
+    }
+}
+
 static void continue_cmd_list(struct cmd_list_ctx *list);
 
 static void on_cmd_list_sub_completion(struct mp_cmd_ctx *cmd)
 {
     struct cmd_list_ctx *list = cmd->on_completion_priv;
+    if (cmd->cmd->receive_pipe)
+        mpv_free_node_contents(&list->parent->previous_result);
+
+    if (cmd->cmd->queue_next && cmd->cmd->queue_next->receive_pipe)
+        list->parent->previous_result = cmd->result;
 
     if (list->current_valid && mp_thread_id_equal(list->current_tid, mp_thread_current_id())) {
         list->completed_recursive = true;
@@ -5327,6 +5358,7 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
             list->current_valid = true;
             list->current_tid = mp_thread_current_id();
 
+            substitute_args(list->mpctx, sub, &list->parent->previous_result);
             run_command(list->mpctx, sub, NULL, on_cmd_list_sub_completion, list);
 
             list->current_valid = false;
@@ -5376,7 +5408,8 @@ void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd)
         cmd->on_completion(cmd);
     if (cmd->abort)
         mp_abort_remove(cmd->mpctx, cmd->abort);
-    mpv_free_node_contents(&cmd->result);
+    if (!cmd->cmd->queue_next || !cmd->cmd->queue_next->receive_pipe)
+        mpv_free_node_contents(&cmd->result);
     talloc_free(cmd);
 }
 
@@ -5438,6 +5471,11 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     if (ctx->abort) {
         ctx->abort->coupled_to_playback |= cmd->def->abort_on_playback_end;
         mp_abort_add(mpctx, ctx->abort);
+    }
+
+    if (ctx->on_completion_priv) {
+        struct cmd_list_ctx *list = ctx->on_completion_priv;
+        ctx->previous_result = list->parent->previous_result;
     }
 
     struct MPOpts *opts = mpctx->opts;
