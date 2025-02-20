@@ -97,6 +97,7 @@ struct mp_cmd_arg {
         char **str_list;
         void *p;
     } v;
+    bool substitute;
 };
 
 typedef struct mp_cmd {
@@ -114,6 +115,7 @@ typedef struct mp_cmd {
     bool repeated : 1;
     bool mouse_move : 1;
     bool canceled : 1;
+    bool receive_pipe : 1; // can read output from previous command
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments

@@ -313,7 +313,7 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
 static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
 {
     bstr t = bstr_lstrip(str);
-    int next = bstrcspn(t, WHITESPACE "#;");
+    int next = bstrcspn(t, WHITESPACE "#;|");
     if (!next)
         return false;
     *out_token = bstr_splice(t, 0, next);
@@ -325,6 +325,7 @@ struct parse_ctx {
     struct mp_log *log;
     void *tmp;
     bstr start, str;
+    bool pipe_literal;
 };
 
 static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
@@ -341,6 +342,8 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
             MP_ERR(ctx, "Unterminated double quote: ...>%.*s<.\n", BSTR_P(start));
             return -1;
         }
+        if (bstrcmp0(start, "\"-\"") == 0)
+            ctx->pipe_literal = true;
         return 1;
     }
     if (bstr_eatstart0(&ctx->str, "'")) {
@@ -351,6 +354,8 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
         }
         *out = bstr_splice(ctx->str, 0, next);
         ctx->str = bstr_cut(ctx->str, next+1);
+        if (bstrcmp0(start, "\'-\'") == 0)
+            ctx->pipe_literal = true;
         return 1;
     }
     if (ctx->start.len > 1 && bstr_eatstart0(&ctx->str, "`")) {
@@ -362,6 +367,8 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
             return -1;
         }
         *out = bstr_splice(ctx->str, 0, next);
+        if (bstr_startswith0(ctx->str, "-") && ctx->str.len == 3)
+            ctx->pipe_literal = true;
         ctx->str = bstr_cut(ctx->str, next+2);
         return 1;
     }
@@ -370,7 +377,8 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
 }
 
 static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
-                                    bstr *str, const char *loc)
+                                    bstr *str, const char *loc,
+                                    bool receive_pipe)
 {
     struct parse_ctx *ctx = &(struct parse_ctx){
         .log = log,
@@ -385,6 +393,7 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
         .flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES,
         .scale = 1,
         .scale_units = 1,
+        .receive_pipe = receive_pipe,
     };
 
     ctx->str = bstr_lstrip(ctx->str);
@@ -417,12 +426,17 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
             break;
 
         struct mp_cmd_arg arg = {.type = opt};
-        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
-        if (r < 0) {
-            MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
-                   cmd->name, i + 1, m_option_strerror(r));
-            goto error;
+        if (bstrcmp0(cur_token, "-") == 0 && !ctx->pipe_literal && receive_pipe) {
+            arg.substitute = true;
+        } else {
+            r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
+            if (r < 0) {
+                MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
+                       cmd->name, i + 1, m_option_strerror(r));
+                goto error;
+            }
         }
+        ctx->pipe_literal = false;
 
         MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
     }
@@ -455,7 +469,7 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
 {
     void *tmp = talloc_new(NULL);
     bstr original = str;
-    struct mp_cmd *cmd = parse_cmd_str(log, tmp, &str, loc);
+    struct mp_cmd *cmd = parse_cmd_str(log, tmp, &str, loc, false);
     if (!cmd)
         goto done;
 
@@ -465,7 +479,8 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
         str = bstr_lstrip(str);
         // read_token just to check whether it's trailing whitespace only
         bstr u1, u2;
-        if (!bstr_eatstart0(&str, ";") || !read_token(str, &u1, &u2))
+        bool receive_pipe = bstr_startswith(str, bstr0("|"));
+        if ((!bstr_eatstart0(&str, ";") && !bstr_eatstart0(&str, "|")) || !read_token(str, &u1, &u2))
             break;
         // Multi-command. Since other input.c code uses queue_next for its
         // own purposes, a pseudo-command is used to wrap the command list.
@@ -483,7 +498,7 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
             p_prev = &cmd->queue_next;
             cmd = list;
         }
-        struct mp_cmd *sub = parse_cmd_str(log, tmp, &str, loc);
+        struct mp_cmd *sub = parse_cmd_str(log, tmp, &str, loc, receive_pipe);
         if (!sub) {
             talloc_free(cmd);
             cmd = NULL;

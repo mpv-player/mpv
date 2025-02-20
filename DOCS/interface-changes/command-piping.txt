@@ -1,0 +1,1 @@
+commands can now pipe output into each other e.g. `expand-text "foo" | show-text -`

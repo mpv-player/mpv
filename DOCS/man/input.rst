@@ -69,6 +69,18 @@ You can bind multiple commands to one key. For example:
 
 | a show-text "command 1" ; show-text "command 2"
 
+Some commands also write output to a result. You can pipe the result to the next
+command in a way similar to the shell.
+
+| a expand-text "text" | show-text -
+
+``|`` Is the special character that designates the pipe. It is functionally
+similar to using ``;``. Specifying ``-`` without quotes indicates that the
+argument will receive the output of the previous run command. It is possible
+to specify ``-`` multiple times. Note that ``-`` is only interpreted as a
+special character if there is a preceding command separated by ``|``. Otherwise,
+it will be interpreted as a string literal.
+
 It's also possible to bind a command to a sequence of keys:
 
 | a-b-c show-text "command run after a, b, c have been pressed"

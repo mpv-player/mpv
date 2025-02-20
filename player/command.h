@@ -52,6 +52,7 @@ struct mp_cmd_ctx {
     // completion callback).
     bool success;       // true by default
     struct mpv_node result;
+    struct mpv_node previous_result; // result from the previously run command
     // Command handlers can set this to false if returning from the command
     // handler does not complete the command. It stops the common command code
     // from signaling the completion automatically, and you can call
