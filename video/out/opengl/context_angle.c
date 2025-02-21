@@ -601,7 +601,7 @@ static bool angle_init(struct ra_ctx *ctx)
         .color_depth = angle_color_depth,
         .submit_frame = angle_submit_frame,
     };
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .swap_buffers = angle_swap_buffers,
         .external_swapchain = p->dxgi_swapchain ? &dxgi_swapchain_fns : NULL,
     };

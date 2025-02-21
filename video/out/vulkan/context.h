@@ -3,25 +3,10 @@
 #include "video/out/gpu/context.h"
 #include "common.h"
 
-struct ra_vk_ctx_params {
-    // See ra_swapchain_fns.get_vsync.
-    void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
-
-    // For special contexts (i.e. wayland) that want to check visibility
-    // before drawing a frame.
-    bool (*check_visible)(struct ra_ctx *ctx);
-
-    // In case something special needs to be done on the buffer swap.
-    void (*swap_buffers)(struct ra_ctx *ctx);
-
-    // See ra_swapchain_fns.color_depth.
-    int (*color_depth)(struct ra_ctx *ctx);
-};
-
 // Helpers for ra_ctx based on ra_vk. These initialize ctx->ra and ctx->swchain.
 void ra_vk_ctx_uninit(struct ra_ctx *ctx);
 bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
-                    struct ra_vk_ctx_params params,
+                    struct ra_ctx_params params,
                     VkPresentModeKHR preferred_mode);
 
 // Helper for initializing mpvk_ctx->vulkan

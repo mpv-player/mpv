@@ -59,7 +59,7 @@ static bool win_init(struct ra_ctx *ctx)
          .hwnd = vo_w32_hwnd(ctx->vo),
     };
 
-    struct ra_vk_ctx_params params = {0};
+    struct ra_ctx_params params = {0};
 
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
