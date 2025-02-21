@@ -582,15 +582,12 @@ static int open_s_internal(stream_t *stream)
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 
-    if (p->device && p->device[0]) {
-        MP_WARN(stream, "Setting the device after the schema is deprecated. "
-                "Use --dvd-device instead.\n");
+    if (p->device && p->device[0])
         filename = p->device;
-    } else if (p->opts->device && p->opts->device[0]) {
+    else if (p->opts->device && p->opts->device[0])
         filename = p->opts->device;
-    } else {
+    else
         filename = DEFAULT_OPTICAL_DEVICE;
-    };
     if (!new_dvdnav_stream(stream, filename)) {
         MP_ERR(stream, "Couldn't open DVD device: %s\n",
                 filename);
