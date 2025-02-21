@@ -39,6 +39,7 @@ struct mp_cmd_def {
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
     bool scalable;      // command called with scale for high resolution input
+    bool interactive;   // command is run in interactive mode (e.g. can open file-dialog)
     bool is_ignore;     // used by ignore command only, avoids queuing commands
     bool is_noisy;      // reduce log level
     bool default_async; // default to MP_ASYNC flag if none set by user
@@ -77,6 +78,7 @@ enum mp_cmd_flags {
 
     MP_DISALLOW_REPEAT = 128,   // if used as keybinding, disallow key repeat
     MP_DISALLOW_SCALE = 256,    // if used as keybinding, make it non-scalable
+    MP_INTERACTIVE = 512,       // command is run in interactive mode
 
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
@@ -130,6 +132,8 @@ extern const struct mp_cmd_def mp_cmd_list;
 bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd);
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd);
+
+bool mp_input_is_interactive_cmd(struct mp_cmd *cmd);
 
 void mp_print_cmd_list(struct mp_log *out);
 

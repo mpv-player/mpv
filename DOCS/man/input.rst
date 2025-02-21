@@ -529,8 +529,8 @@ Playlist Manipulation
     ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
 
-    The URL argument is optional. If not provided, a file dialog will be shown
-    to select a file.
+    If the command is run interactively using the ``interactive`` prefix and
+    no ``url`` is provided, a file dialog will be displayed to select a file.
 
     Second argument:
 
@@ -579,7 +579,8 @@ Playlist Manipulation
 
 ``loaddir [<url> [<flags> [<index> [<options>]]]]``
     This is the same as ``loadfile``, but it also allows opening directories.
-    When a URL is not provided, a file dialog will be shown to select a directory.
+    If the command is run interactively using the ``interactive`` prefix and
+    no ``url`` is provided, a file dialog will be displayed to select a directory.
 
 ``loadlist [<url> [<flags> [<index>]]]``
     Load the given playlist file or URL (like ``--playlist``).
@@ -648,8 +649,8 @@ Track Manipulation
     Load the given subtitle file or stream. By default, it is selected as
     current subtitle after loading.
 
-    The ``url`` argument is optional and if empty, file dialog will be shown to
-    select subtitle file.
+    If the command is run interactively using the ``interactive`` prefix and
+    no ``url`` is provided, a file dialog will be displayed to select subtitle file.
 
     The ``flags`` argument is one of the following values:
 
@@ -1422,8 +1423,9 @@ Screenshot Commands
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
 
-    The filename argument is optional. If not provided, a file dialog will be
-    shown to select a location and name for the file.
+    If the command is run interactively using the ``interactive`` prefix and
+    no ``filename`` is provided, a file dialog will be shown to select a
+    location and name for the file.
 
     The second argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.

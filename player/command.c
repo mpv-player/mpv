@@ -6061,7 +6061,7 @@ static void cmd_loadfile(void *p)
 
     void *tmp = talloc_new(NULL);
 
-    if (!files || !files[0] || !files[0][0]) {
+    if ((!files || !files[0] || !files[0][0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
         mp_file_dialog_filters filters[] = {
             {"Video Files", mpctx->opts->video_exts},
             {"Audio Files", mpctx->opts->audio_exts},
@@ -6078,7 +6078,8 @@ static void cmd_loadfile(void *p)
                                                  : MP_FILE_DIALOG_FILE | MP_FILE_DIALOG_MULTIPLE);
     }
 
-    if (!files || !files[0]) {
+    if (!files || !files[0] || !files[0][0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
         cmd->success = false;
         talloc_free(tmp);
         return;
@@ -6130,7 +6131,7 @@ static void cmd_loadlist(void *p)
 
     void *tmp = talloc_new(NULL);
 
-    if (!filename || !filename[0]) {
+    if ((!filename || !filename[0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
         mp_file_dialog_filters filters[] = {
             {"Playlist Files", mpctx->opts->playlist_exts},
             {NULL},
@@ -6143,6 +6144,7 @@ static void cmd_loadlist(void *p)
     }
 
     if (!filename || !filename[0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
         cmd->success = false;
         talloc_free(tmp);
         return;
@@ -6330,7 +6332,7 @@ static void cmd_track_add(void *p)
 
     void *tmp = talloc_new(NULL);
     char *filename = cmd->args[0].v.s;
-    if (!filename || !filename[0]) {
+    if ((!filename || !filename[0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
         mp_file_dialog_filters filters[] = {
             {NULL},
             {NULL},
@@ -6356,6 +6358,7 @@ static void cmd_track_add(void *p)
     }
 
     if (!filename || !filename[0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
         cmd->success = false;
         return;
     }
@@ -7721,6 +7724,7 @@ const struct mp_cmd_def mp_cmds[] = {
             {"set-property", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,
+        .interactive = true,
     },
 
     {0}
