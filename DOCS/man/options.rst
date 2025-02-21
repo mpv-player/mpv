@@ -7923,11 +7923,39 @@ Miscellaneous
 
     Conversion is not applied to metadata that is updated at runtime.
 
-``--clipboard-enable=<yes|no>``
-    (Windows, Wayland and macOS only)
+``--clipboard-backends=<backend1,backend2,...[,]>``
+    Specify a priority list of the clipboard backends to be used.
+    You can also pass ``help`` to get a complete list of compiled in backends.
 
-    Enable native clipboard support (default: yes). This allows reading and
-    writing to the ``clipboard`` property to get and set clipboard contents.
+    If the list is not empty, it enables native clipboard support for the
+    specified backends. This allows reading and writing to the ``clipboard``
+    property to get and set clipboard contents.
+
+    Native clipboard support is enabled by default. To disable this, remove
+    all backends in this list with ``--clipboard-backends-clr``.
+
+    Note that the default clipboard backends are subject to change,
+    and must not be relied upon.
+
+    The following clipboard backends are implemented:
+
+    ``win32``
+        Windows backend.
+
+    ``mac``
+        macOS backend.
+
+    ``wayland``
+        Wayland backend. This backend is only available if the compositor
+        supports the ``ext-data-control-v1`` protocol.
+
+    ``vo``
+        VO backend. Requires an active VO window, and support differs across
+        platforms. Currently, this is used as a fallback for Wayland
+        compositors without support for the ``ext-data-control-v1``
+        protocol, or if the ``wayland`` backend is disabled.
+
+    This is an object settings list option. See `List Options`_ for details.
 
 ``--clipboard-monitor=<yes|no>``
     (Windows, Wayland and macOS only)
