@@ -44,6 +44,8 @@ local opts = {
     selected_back_color = '#FFFFFF',
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
+    persist_history = false,
+    history_path = '~~state/command_history.txt',
     font_hw_ratio = 'auto',
 }
 
@@ -92,6 +94,7 @@ local histories = {[id] = {}}
 local history = histories[id]
 local history_pos = 1
 local searching_history = false
+local history_to_save = ''
 local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
@@ -844,6 +847,10 @@ local function history_add(text)
     end
 
     history[#history + 1] = text
+
+    if id == default_id then
+        history_to_save =  history_to_save .. text .. '\n'
+    end
 end
 
 local function handle_cursor_move()
@@ -1880,6 +1887,44 @@ local function undefine_key_bindings()
     key_bindings = {}
 end
 
+local function read_history()
+    if opts.persist_history == false or history[1] then
+        return
+    end
+
+    local history_file = io.open(mp.command_native({'expand-path', opts.history_path}))
+
+    if history_file == nil then
+        return
+    end
+
+    if opts.history_dedup then
+        local unfiltered_history = {}
+        for command in history_file:lines() do
+            unfiltered_history[#unfiltered_history + 1] = command
+        end
+
+        local history_map = {}
+        for i = #unfiltered_history, 1, -1 do
+            local command = unfiltered_history[i]
+            if not history_map[command] then
+                history[#history + 1] = command
+                history_map[command] = true
+            end
+        end
+
+        for i = 1, #history / 2, 1 do
+            history[i], history[#history - i + 1] = history[#history - i + 1], history[i]
+        end
+    else
+        for command in history_file:lines() do
+            history[#history + 1] = command
+        end
+    end
+
+    history_file:close()
+end
+
 -- Set the REPL visibility ("enable", Esc)
 set_active = function (active)
     if active == repl_active then return end
@@ -1895,6 +1940,7 @@ set_active = function (active)
             prompt = default_prompt
             id = default_id
             history = histories[id]
+            read_history()
             history_pos = #history + 1
             mp.enable_messages('terminal-default')
         end
@@ -2115,6 +2161,21 @@ end)
 
 mp.register_event('shutdown', function ()
     mp.del_property('user-data/mpv/console')
+
+    if opts.persist_history == false or history_to_save == '' then
+        return
+    end
+
+    local history_path = mp.command_native({'expand-path', opts.history_path})
+    local history_file, error_message = io.open(history_path, 'ab')
+
+    if history_file == nil then
+        mp.msg.error('Failed to write the command history: ' .. error_message)
+        return
+    end
+
+    history_file:write(history_to_save)
+    history_file:close()
 end)
 
 require 'mp.options'.read_options(opts, nil, render)
