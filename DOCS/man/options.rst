@@ -6906,14 +6906,6 @@ them.
     other ways (like with the ``--gamma`` option or key bindings and the
     ``gamma`` property), the value is multiplied with the other gamma value.
 
-``--gamma-auto``
-    Automatically corrects the gamma value depending on ambient lighting
-    conditions (adding a gamma boost for bright rooms).
-
-    This option is deprecated and may be removed in the future.
-
-    NOTE: Only implemented on macOS and ``--vo=gpu``.
-
 ``--image-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors
     during image decoding. The exact interpretation of the LUT depends on
