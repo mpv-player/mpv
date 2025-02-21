@@ -195,6 +195,16 @@ Configurable Options
 
     Remove duplicate entries in history as to only keep the latest one.
 
+``persist_history``
+    Default: no
+
+    Whether to save the command history to a file and load it.
+
+``history_path``
+    Default: ``~~state/command_history.txt``
+
+    The file path for ``persist_history`` (see `PATHS`_).
+
 ``font_hw_ratio``
     Default: auto
 
