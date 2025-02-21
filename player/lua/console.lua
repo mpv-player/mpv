@@ -106,6 +106,7 @@ local completion_append
 local path_separator = platform == 'windows' and '\\' or '/'
 local completion_old_line
 local completion_old_cursor
+local commands
 
 local selectable_items
 local matches = {}
@@ -145,9 +146,16 @@ local function get_margin_x()
     return opts.margin_x > -1 and opts.margin_x or mp.get_property_native('osd-margin-x')
 end
 
-
 local function get_margin_y()
     return opts.margin_y > -1 and opts.margin_y or mp.get_property_native('osd-margin-y')
+end
+
+local function get_commands()
+    if not commands then
+        commands = mp.get_property_native('command-list')
+    end
+
+    return commands
 end
 
 
@@ -949,14 +957,13 @@ local function maybe_exit()
 end
 
 local function help_command(param)
-    local cmdlist = mp.get_property_native('command-list')
-    table.sort(cmdlist, function(c1, c2)
+    table.sort(get_commands(), function(c1, c2)
         return c1.name < c2.name
     end)
     local output = ''
     if param == '' then
         output = 'Available commands:\n'
-        for _, cmd in ipairs(cmdlist) do
+        for _, cmd in ipairs(get_commands()) do
             output = output  .. '  ' .. cmd.name
         end
         output = output .. '\n'
@@ -964,7 +971,7 @@ local function help_command(param)
         output = output .. "ESC or Ctrl+d exits the console.\n"
     else
         local cmd = nil
-        for _, curcmd in ipairs(cmdlist) do
+        for _, curcmd in ipairs(get_commands()) do
             if curcmd.name:find(param, 1, true) then
                 cmd = curcmd
                 if curcmd.name == param then
@@ -1344,12 +1351,12 @@ local function text_input(info)
 end
 
 local function command_list()
-    local commands = {}
-    for i, command in ipairs(mp.get_property_native('command-list')) do
-        commands[i] = command.name
+    local cmds = {}
+    for i, command in ipairs(get_commands()) do
+        cmds[i] = command.name
     end
 
-    return commands
+    return cmds
 end
 
 local function property_list()
@@ -1427,7 +1434,7 @@ local function list_option_value_list(option)
 end
 
 local function has_file_argument(candidate_command)
-    for _, command in pairs(mp.get_property_native('command-list')) do
+    for _, command in pairs(get_commands()) do
         if command.name == candidate_command then
             return command.args[1] and
                    (command.args[1].name == 'filename' or command.args[1].name == 'url')
@@ -1520,7 +1527,7 @@ local function command_flags_at_2nd_argument_list(command)
 end
 
 local function handle_flags(command, arg_index, flags)
-    for _, cmd in pairs(mp.get_property_native('command-list')) do
+    for _, cmd in pairs(get_commands()) do
         if cmd.name == command then
             if cmd.args[arg_index] and cmd.args[arg_index].type == 'Flags' then
                 break
