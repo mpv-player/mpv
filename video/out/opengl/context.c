@@ -241,6 +241,10 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
     struct priv *p = sw->priv;
     GL *gl = p->gl;
 
+    // Dumb hack for drm_egl and vo_gpu_next.
+    if (vo_is_gpu_next(sw->ctx->vo))
+        return true;
+
     if (p->opts->use_glfinish)
         gl->Finish();
 
