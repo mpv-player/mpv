@@ -77,7 +77,7 @@ const struct m_sub_options opengl_conf = {
 struct priv {
     GL *gl;
     struct mp_log *log;
-    struct ra_gl_ctx_params params;
+    struct ra_ctx_params params;
     struct opengl_opts *opts;
     struct ra_swapchain_fns fns;
     GLuint main_fb;
@@ -125,7 +125,7 @@ void ra_gl_ctx_uninit(struct ra_ctx *ctx)
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns;
 
-bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_gl_ctx_params params)
+bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_ctx_params params)
 {
     struct ra_swapchain *sw = ctx->swapchain = talloc_ptrtype(NULL, sw);
     *sw = (struct ra_swapchain) {
