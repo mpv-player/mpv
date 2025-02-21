@@ -1344,7 +1344,7 @@ PROTOCOLS
     ``image-2.jpg`` and ``image-10.jpg``, provided that there are no big gaps
     between the files.
 
-``cdda://[device]`` ``--cdrom-device=PATH`` ``--cdda-...``
+``cdda://[device]`` ``--cdda-device=PATH``
 
     Play CD. You can select a specific range of tracks to play by using the
     ``--start`` and ``--end`` options and specifying chapters. Navigating
