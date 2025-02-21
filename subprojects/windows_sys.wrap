@@ -1,0 +1,6 @@
+[wrap-file]
+directory = windows-sys-0.59.0
+source_url =  https://crates.io/api/v1/crates/windows-sys/0.59.0/download
+source_filename = windows-sys-0.59.0.tar.gz
+source_hash = 1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b
+patch_directory = windows_sys
