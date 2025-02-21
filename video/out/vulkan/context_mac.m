@@ -80,7 +80,7 @@ static bool mac_vk_init(struct ra_ctx *ctx)
         .pLayer = p->vo_mac.layer,
     };
 
-    struct ra_vk_ctx_params params = {
+    struct ra_ctx_params params = {
         .swap_buffers = mac_vk_swap_buffers,
         .get_vsync = mac_vk_get_vsync,
         .color_depth = mac_vk_color_depth,

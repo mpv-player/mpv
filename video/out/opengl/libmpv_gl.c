@@ -40,7 +40,7 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
     };
 
     static const struct ra_swapchain_fns empty_swapchain_fns = {0};
-    struct ra_gl_ctx_params gl_params = {
+    struct ra_ctx_params gl_params = {
         // vo_libmpv is essentially like a gigantic external swapchain where
         // the user is in charge of presentation / swapping etc. But we don't
         // actually need to provide any of these functions, since we can just

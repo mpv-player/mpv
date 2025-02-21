@@ -290,7 +290,7 @@ static bool glx_init(struct ra_ctx *ctx)
     if (!success)
         goto uninit;
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = glx_check_visible,
         .swap_buffers = glx_swap_buffers,
         .get_vsync    = glx_get_vsync,

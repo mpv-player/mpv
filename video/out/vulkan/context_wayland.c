@@ -79,7 +79,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
          .surface = ctx->vo->wl->surface,
     };
 
-    struct ra_vk_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = wayland_vk_check_visible,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,

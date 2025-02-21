@@ -53,7 +53,7 @@ static bool android_init(struct ra_ctx *ctx)
          .window = vo_android_native_window(ctx->vo)
     };
 
-    struct ra_vk_ctx_params params = {0};
+    struct ra_ctx_params params = {0};
 
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateAndroidSurfaceKHR(inst, &info, NULL, &vk->surface);

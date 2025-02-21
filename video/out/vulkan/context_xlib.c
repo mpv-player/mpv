@@ -75,7 +75,7 @@ static bool xlib_init(struct ra_ctx *ctx)
          .window = ctx->vo->x11->window,
     };
 
-    struct ra_vk_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = xlib_check_visible,
         .swap_buffers = xlib_vk_swap_buffers,
         .get_vsync = xlib_vk_get_vsync,
