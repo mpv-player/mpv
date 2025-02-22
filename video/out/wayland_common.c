@@ -778,9 +778,11 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
     }
 
     assert(!s->dnd_offer->offer);
+    int action = s->dnd_offer->action;
     *s->dnd_offer = *s->pending_offer;
     *s->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
     o = s->dnd_offer;
+    o->action = action;
     if (wl->opts->drag_and_drop != -2) {
         wl_data_offer_set_actions(id, WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY |
                                       WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
