@@ -5,7 +5,7 @@ add_languages('cpp', native: false)
 fuzzers = []
 
 fuzzers += executable('fuzzer_loadfile_direct', 'fuzzer_loadfile_direct.c',
-                      link_language: 'cpp', include_directories: incdir, link_with: libmpv)
+                      link_language: 'cpp', dependencies: libmpv_dep)
 
 protocols = ['edl', 'file', 'lavf', 'memory']
 demuxers = ['mkv']
@@ -34,8 +34,7 @@ foreach p : protocols
                         'fuzzer_loadfile_direct.c',
                         link_language: 'cpp',
                         c_args: ['-DMPV_PROTO=' + p, '-DMPV_PROTO_' + p.to_upper()],
-                        include_directories: incdir,
-                        link_with: libmpv)
+                        dependencies: libmpv_dep)
 endforeach
 
 foreach demuxer : demuxers
@@ -47,8 +46,7 @@ foreach demuxer : demuxers
                           link_language: 'cpp',
                           c_args: ['-DMPV_LOAD="' + cmd + '"', '-DMPV_LOAD' + cmd_.to_upper(),
                                    '-DMPV_DEMUXER="' + demuxer + '"', '-DMPV_DEMUXER' + demuxer_.to_upper()],
-                          include_directories: incdir,
-                          link_with: libmpv)
+                          dependencies: libmpv_dep)
 endforeach
 
 foreach f : ['MPV_FORMAT_STRING', 'MPV_FORMAT_FLAG', 'MPV_FORMAT_INT64', 'MPV_FORMAT_DOUBLE']
@@ -57,8 +55,7 @@ foreach f : ['MPV_FORMAT_STRING', 'MPV_FORMAT_FLAG', 'MPV_FORMAT_INT64', 'MPV_FO
                           'fuzzer_set_property.c',
                           link_language: 'cpp',
                           c_args: ['-DMPV_FORMAT=' + f, '-DMPV_RUN=' + i],
-                          include_directories: incdir,
-                          link_with: libmpv)
+                          dependencies: libmpv_dep)
   endforeach
 endforeach
 
@@ -67,17 +64,16 @@ foreach cmd : ['file', '-config-file', '-input-conf']
                           'fuzzer_load.c',
                           link_language: 'cpp',
                           c_args: ['-DMPV_LOAD="' + cmd + '"', '-DMPV_LOAD' + cmd.underscorify().to_upper()],
-                          include_directories: incdir,
-                          link_with: libmpv)
+                          dependencies: libmpv_dep)
 endforeach
 
 fuzzers += executable('fuzzer_options_parser', 'fuzzer_options_parser.c',
-                      link_language: 'cpp', include_directories: incdir,
+                      link_language: 'cpp', include_directories: incdir_public,
                       objects: libmpv.extract_all_objects(recursive: true),
                       dependencies: dependencies)
 
 fuzzers += executable('fuzzer_json', 'fuzzer_json.c',
-                      link_language: 'cpp', include_directories: incdir,
+                      link_language: 'cpp', include_directories: [incdir, incdir_public],
                       objects: libmpv.extract_all_objects(recursive: true),
                       dependencies: dependencies)
 

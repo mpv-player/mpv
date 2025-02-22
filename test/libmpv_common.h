@@ -16,12 +16,13 @@
  */
 
 #include <inttypes.h>
-#include <libmpv/client.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <mpv/client.h>
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__

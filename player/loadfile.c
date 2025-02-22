@@ -60,7 +60,6 @@
 
 #include "core.h"
 #include "command.h"
-#include "libmpv/client.h"
 
 // Called from the demuxer thread if a new packet is available, or other changes.
 static void wakeup_demux(void *pctx)

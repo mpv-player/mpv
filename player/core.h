@@ -21,8 +21,6 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 
-#include "libmpv/client.h"
-
 #include "audio/aframe.h"
 #include "clipboard/clipboard.h"
 #include "common/common.h"

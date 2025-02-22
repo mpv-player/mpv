@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <mpv/client.h>
+
 #include "common/msg.h"
 #include "input/input.h"
 #include "misc/json.h"

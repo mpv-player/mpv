@@ -93,7 +93,7 @@ player/core.h:
     usually not accessed by other parts of mpv for the sake of modularization.
 
 player/client.c:
-    This implements the client API (libmpv/client.h). For the most part, this
+    This implements the client API (mpv/client.h). For the most part, this
     just calls into other parts of the player. This also manages a ringbuffer
     of events from player to clients.
 

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <libmpv/client.h>
+#include <mpv/client.h>
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 

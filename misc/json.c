@@ -48,6 +48,8 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <mpv/client.h>
+
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "misc/ctype.h"

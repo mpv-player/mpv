@@ -4,8 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "libmpv/client.h"
-#include "libmpv/stream_cb.h"
+#include "mpv/stream_cb.h"
 #include "misc/bstr.h"
 
 struct MPContext;

@@ -35,9 +35,9 @@
 #include "misc/bstr.h"
 #include "core.h"
 #include "client.h"
-#include "libmpv/client.h"
-#include "libmpv/render.h"
-#include "libmpv/stream_cb.h"
+#include "mpv/client.h"
+#include "mpv/render.h"
+#include "mpv/stream_cb.h"
 
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;

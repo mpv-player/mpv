@@ -16,7 +16,6 @@
  */
 
 #include <inttypes.h>
-#include <libmpv/client.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +27,8 @@
 #else
 #include <unistd.h>
 #endif
+
+#include <mpv/client.h>
 
 // Stolen from osdep/compiler.h
 #ifdef __GNUC__
