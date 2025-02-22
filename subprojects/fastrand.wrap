@@ -1,0 +1,6 @@
+[wrap-file]
+directory = fastrand-2.3.0
+source_url =  https://crates.io/api/v1/crates/fastrand/2.3.0/download
+source_filename = fastrand-2.3.0.tar.gz
+source_hash = 37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be
+patch_directory = fastrand

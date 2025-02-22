@@ -1,0 +1,6 @@
+[wrap-file]
+directory = tempfile-3.17.1
+source_url = https://crates.io/api/v1/crates/tempfile/3.17.1/download
+source_filename = tempfile-3.17.1.tar.gz
+source_hash = 22e5a0acb1f3f55f65cc4a866c361b2fb2a0ff6366785ae6fbb5f85df07ba230
+patch_directory = tempfile

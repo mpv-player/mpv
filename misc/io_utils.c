@@ -56,32 +56,3 @@ int mp_mkostemps(char *template, int suffixlen, int flags)
     errno = EEXIST;
     return -1;
 }
-
-bool mp_save_to_file(const char *filepath, const void *data, size_t size)
-{
-    assert(filepath && data && size);
-
-    bool result = false;
-    char *tmp = talloc_asprintf(NULL, "%sXXXXXX", filepath);
-    int fd = mp_mkostemps(tmp, 0, O_CLOEXEC);
-    if (fd < 0)
-        goto done;
-    FILE *cache = fdopen(fd, "wb");
-    if (!cache) {
-        close(fd);
-        unlink(tmp);
-        goto done;
-    }
-    size_t written = fwrite(data, size, 1, cache);
-    int ret = fclose(cache);
-    if (written > 0 && !ret) {
-        ret = rename(tmp, filepath);
-        result = !ret;
-    } else {
-        unlink(tmp);
-    }
-
-done:
-    talloc_free(tmp);
-    return result;
-}

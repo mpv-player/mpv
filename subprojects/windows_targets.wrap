@@ -1,0 +1,6 @@
+[wrap-file]
+directory = windows-targets-0.53.0
+source_url =  https://crates.io/api/v1/crates/windows-targets/0.53.0/download
+source_filename = windows-targets-0.53.0.tar.gz
+source_hash = b1e4c7e8ceaaf9cb7d7507c974735728ab453b67ef8f18febdd7c11fe59dca8b
+patch_directory = windows_targets
