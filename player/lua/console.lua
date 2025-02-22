@@ -1674,7 +1674,7 @@ complete = function ()
         ['osd-msg'] = true, ['osd-msg-bar'] = true, ['raw'] = true,
         ['expand-properties'] = true, ['repeatable'] = true,
         ['nonrepeatable'] = true, ['nonscalable'] = true,
-        ['async'] = true, ['sync'] = true
+        ['interactive'] = true, ['async'] = true, ['sync'] = true
     }
 
     -- Add an empty token if the cursor is after whitespace or ; to simplify
