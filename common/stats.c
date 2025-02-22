@@ -1,6 +1,8 @@
 #include <stdatomic.h>
 #include <time.h>
 
+#include <libmpv/client.h>
+
 #include "common.h"
 #include "global.h"
 #include "misc/linked_list.h"

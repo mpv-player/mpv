@@ -28,6 +28,8 @@
 #include <fcntl.h>
 #include <assert.h>
 
+#include <libmpv/client.h>
+
 #include "osdep/io.h"
 #include "misc/rendezvous.h"
 
