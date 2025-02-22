@@ -248,7 +248,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     local editions = {}
 
     for i, edition in ipairs(edition_list) do
-        editions[i] = edition.title or "Edition " .. (edition.id + 1)
+        editions[i] = edition.title or ("Edition " .. edition.id + 1)
     end
 
     input.select({
