@@ -511,31 +511,22 @@ static void egl_swap_buffers(struct ra_ctx *ctx)
 static void angle_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
-    if (p->dxgi_swapchain)
-        d3d11_swap_buffers(ctx);
-    else
-        egl_swap_buffers(ctx);
-}
-
-
-static int angle_color_depth(struct ra_swapchain *sw)
-{
-    // Only 8-bit output is supported at the moment
-    return 8;
-}
-
-static bool angle_submit_frame(struct ra_swapchain *sw,
-                               const struct vo_frame *frame)
-{
-    struct priv *p = sw->ctx->priv;
-    bool ret = ra_gl_ctx_submit_frame(sw, frame);
-    if (p->d3d11_context) {
+    if (p->dxgi_swapchain) {
         // DXGI Present doesn't flush the immediate context, which can make
         // timers inaccurate, since the end queries might not be sent until the
         // next frame. Fix this by flushing the context now.
         ID3D11DeviceContext_Flush(p->d3d11_context);
+        d3d11_swap_buffers(ctx);
+    } else {
+        egl_swap_buffers(ctx);
     }
-    return ret;
+}
+
+
+static int angle_color_depth(struct ra_ctx *ctx)
+{
+    // Only 8-bit output is supported at the moment
+    return 8;
 }
 
 static bool angle_init(struct ra_ctx *ctx)
@@ -596,14 +587,9 @@ static bool angle_init(struct ra_ctx *ctx)
     current_ctx = ctx;
     gl->SwapInterval = angle_swap_interval;
 
-    // Custom swapchain impl for the D3D11 swapchain-based surface
-    static const struct ra_swapchain_fns dxgi_swapchain_fns = {
-        .color_depth = angle_color_depth,
-        .submit_frame = angle_submit_frame,
-    };
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
+        .color_depth = p->dxgi_swapchain ? angle_color_depth : NULL,
         .swap_buffers = angle_swap_buffers,
-        .external_swapchain = p->dxgi_swapchain ? &dxgi_swapchain_fns : NULL,
     };
 
     gl->flipped = p->flipped;

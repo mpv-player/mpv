@@ -104,7 +104,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     mpegl_load_functions(&p->gl, wl->log);
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,

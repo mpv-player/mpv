@@ -163,7 +163,7 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     mpegl_load_functions(&p->gl, ctx->log);
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = mpegl_check_visible,
         .swap_buffers = mpegl_swap_buffers,
         .get_vsync    = mpegl_get_vsync,

@@ -388,26 +388,16 @@ static void wait_fence(struct ra_ctx *ctx)
     }
 }
 
-static bool drm_egl_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
-{
-    struct ra_ctx *ctx = sw->ctx;
-    struct priv *p = ctx->priv;
-    struct vo_drm_state *drm = ctx->vo->drm;
-
-    if (!drm->atomic_context->request) {
-        drm->atomic_context->request = drmModeAtomicAlloc();
-        p->drm_params.atomic_request_ptr = &drm->atomic_context->request;
-    }
-
-    return ra_gl_ctx_start_frame(sw, out_fbo);
-}
-
 static bool drm_egl_submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
 {
     struct ra_ctx *ctx = sw->ctx;
     struct vo_drm_state *drm = ctx->vo->drm;
 
     drm->still = frame->still;
+
+    // With gpu-next, only the drm state needs to be updated.
+    if (vo_is_gpu_next(ctx->vo))
+        return true;
 
     return ra_gl_ctx_submit_frame(sw, frame);
 }
@@ -418,6 +408,11 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
     struct priv *p = ctx->priv;
     struct vo_drm_state *drm = ctx->vo->drm;
     const bool drain = drm->paused || drm->still;  // True when we need to drain the swapchain
+
+    if (!drm->atomic_context->request) {
+        drm->atomic_context->request = drmModeAtomicAlloc();
+        p->drm_params.atomic_request_ptr = &drm->atomic_context->request;
+    }
 
     if (!drm->active)
         return;
@@ -452,7 +447,6 @@ static void drm_egl_swap_buffers(struct ra_swapchain *sw)
 }
 
 static const struct ra_swapchain_fns drm_egl_swapchain = {
-    .start_frame   = drm_egl_start_frame,
     .submit_frame  = drm_egl_submit_frame,
     .swap_buffers  = drm_egl_swap_buffers,
 };
@@ -682,7 +676,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         MP_VERBOSE(ctx, "Could not find path to render node.\n");
     }
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .external_swapchain = &drm_egl_swapchain,
         .get_vsync          = &drm_egl_get_vsync,
     };
