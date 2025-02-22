@@ -1308,6 +1308,8 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_option_callbacks(mpctx);
 
+    mp_process_osd_display_queue(mpctx);
+
     handle_chapter_change(mpctx);
 
     handle_force_window(mpctx, false);
@@ -1320,6 +1322,7 @@ void mp_idle(struct MPContext *mpctx)
     mp_wait_events(mpctx);
     mp_process_input(mpctx);
     handle_option_callbacks(mpctx);
+    mp_process_osd_display_queue(mpctx);
     handle_command_updates(mpctx);
     handle_update_cache(mpctx);
     handle_cursor_autohide(mpctx);

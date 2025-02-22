@@ -98,6 +98,9 @@ struct command_ctx {
 
     bool command_opts_processed;
 
+    struct property_osd_display *disp_queue;
+    int num_disp_queue;
+
     struct overlay *overlays;
     int num_overlays;
     // One of these is in use by the OSD; the other one exists so that the
@@ -2296,12 +2299,11 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
+    char *current = NULL;
 
-    if (!dec)
+    if (!dec || !mp_decoder_wrapper_control(dec, VDCTRL_GET_HWDEC, &current))
         return M_PROPERTY_UNAVAILABLE;
 
-    char *current = NULL;
-    mp_decoder_wrapper_control(dec, VDCTRL_GET_HWDEC, &current);
     if (!current || !current[0])
         current = "no";
     return m_property_strdup_ro(action, arg, current);
@@ -4667,6 +4669,12 @@ static const struct property_osd_display {
     float marker;
     // Free-form message (if NULL, osd_name or the property name is used)
     const char *msg;
+    // Needs to wait for callbacks to run before the value can be fetched
+    bool queue;
+    // The property name to query when checking the queue
+    const char *prop_name;
+    // osd_mode
+    int osd_mode;
 } property_osd_display[] = {
     // general
     {"loop-playlist", "Loop playlist"},
@@ -4734,7 +4742,7 @@ static const struct property_osd_display {
     {"ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"
                             "${?=ab-loop-count==0: (disabled)}"},
     {"audio-device", "Audio device"},
-    {"hwdec", .msg = "Hardware decoding: ${hwdec-current}"},
+    {"hwdec", .msg = "Hardware decoding: ${hwdec-current}", .queue = true, .prop_name = "hwdec-current"},
     {"video-aspect-override", "Aspect ratio override"},
     // By default, don't display the following properties on OSD
     {"pause", NULL},
@@ -4744,25 +4752,21 @@ static const struct property_osd_display {
     {0}
 };
 
-static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
+static bool print_property_osd(struct MPContext *mpctx, struct property_osd_display disp)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct property_osd_display disp = {.name = name, .osd_name = name};
 
-    if (!osd_mode)
-        return;
-
-    // look for the command
-    for (const struct property_osd_display *p = property_osd_display; p->name; p++)
-    {
-        if (!strcmp(p->name, name)) {
-            disp = *p;
-            break;
-        }
+    // The property might not be available yet so check first.
+    if (disp.queue) {
+        char *str = NULL;
+        int ret = mp_property_do(disp.prop_name, M_PROPERTY_GET, &str, mpctx);
+        talloc_free(str);
+        if (ret == M_PROPERTY_UNAVAILABLE)
+            return false;
     }
 
-    if (osd_mode == MP_ON_OSD_AUTO) {
-        osd_mode =
+    if (disp.osd_mode == MP_ON_OSD_AUTO) {
+        disp.osd_mode =
             ((disp.msg || disp.osd_name || disp.seek_msg) ? MP_ON_OSD_MSG : 0) |
             ((disp.osd_progbar || disp.seek_bar) ? MP_ON_OSD_BAR : 0);
     }
@@ -4770,42 +4774,39 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
     if (!disp.osd_progbar)
         disp.osd_progbar = ' ';
 
-    if (!disp.osd_name)
-        disp.osd_name = name;
-
     if (disp.seek_msg || disp.seek_bar) {
         mpctx->add_osd_seek_info |=
-            (osd_mode & MP_ON_OSD_MSG ? disp.seek_msg : 0) |
-            (osd_mode & MP_ON_OSD_BAR ? disp.seek_bar : 0);
-        return;
+            (disp.osd_mode & MP_ON_OSD_MSG ? disp.seek_msg : 0) |
+            (disp.osd_mode & MP_ON_OSD_BAR ? disp.seek_bar : 0);
+        return true;
     }
 
     struct m_option prop = {0};
-    mp_property_do(name, M_PROPERTY_GET_CONSTRICTED_TYPE, &prop, mpctx);
-    if ((osd_mode & MP_ON_OSD_BAR)) {
+    mp_property_do(disp.name, M_PROPERTY_GET_CONSTRICTED_TYPE, &prop, mpctx);
+    if ((disp.osd_mode & MP_ON_OSD_BAR)) {
         if (prop.type == CONF_TYPE_INT && prop.min < prop.max) {
             int n = prop.min;
             if (disp.osd_progbar)
                 n = disp.marker;
             int i;
-            if (mp_property_do(name, M_PROPERTY_GET, &i, mpctx) > 0)
+            if (mp_property_do(disp.name, M_PROPERTY_GET, &i, mpctx) > 0)
                 set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, i);
         } else if (prop.type == CONF_TYPE_FLOAT && prop.min < prop.max) {
             float n = prop.min;
             if (disp.osd_progbar)
                 n = disp.marker;
             float f;
-            if (mp_property_do(name, M_PROPERTY_GET, &f, mpctx) > 0)
+            if (mp_property_do(disp.name, M_PROPERTY_GET, &f, mpctx) > 0)
                 set_osd_bar(mpctx, disp.osd_progbar, prop.min, prop.max, n, f);
         }
     }
 
-    if (osd_mode & MP_ON_OSD_MSG) {
+    if (disp.osd_mode & MP_ON_OSD_MSG) {
         void *tmp = talloc_new(NULL);
 
         const char *msg = disp.msg;
         if (!msg)
-            msg = talloc_asprintf(tmp, "%s: ${%s}", disp.osd_name, name);
+            msg = talloc_asprintf(tmp, "%s: ${%s}", disp.osd_name, disp.name);
 
         char *osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
 
@@ -4814,6 +4815,51 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 
         talloc_free(tmp);
     }
+    return true;
+}
+
+static void show_property_osd(struct MPContext *mpctx, const char *name, int osd_mode)
+{
+    struct property_osd_display disp = {.name = name, .osd_name = name};
+
+    if (!osd_mode)
+        return;
+
+    // look for the command
+    for (const struct property_osd_display *p = property_osd_display; p->name; p++) {
+        if (!strcmp(p->name, name)) {
+            disp = *p;
+            break;
+        }
+    }
+
+    disp.osd_mode = osd_mode;
+
+    if (!disp.osd_name)
+        disp.osd_name = name;
+
+    // Must run during the playloop queue.
+    if (disp.queue) {
+        struct command_ctx *cmd = mpctx->command_ctx;
+        MP_TARRAY_APPEND(cmd, cmd->disp_queue, cmd->num_disp_queue, disp);
+        return;
+    }
+
+    print_property_osd(mpctx, disp);
+}
+
+void mp_process_osd_display_queue(struct MPContext *mpctx)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct property_osd_display *disp_queue = {0};
+    int num_disp_queue = 0;
+    for (int i = 0; i < cmd->num_disp_queue; ++i) {
+        struct property_osd_display disp = cmd->disp_queue[i];
+        if (!print_property_osd(mpctx, disp))
+            MP_TARRAY_APPEND(cmd, disp_queue, num_disp_queue, disp);
+    }
+    cmd->disp_queue = disp_queue;
+    cmd->num_disp_queue = num_disp_queue;
 }
 
 static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
