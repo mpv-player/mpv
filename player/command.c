@@ -5980,6 +5980,39 @@ static void cmd_normalize_path(void *p)
     talloc_free(path);
 }
 
+static void cmd_sanitize_path(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+
+    char *path = NULL;
+    void *tmp = talloc_new(NULL);
+    bstr str = bstr0(cmd->args[0].v.s);
+
+    // Try some naive attempts at sanitizing if possible
+    if (mp_is_url(bstr0(cmd->args[0].v.s))) {
+        path = cmd->args[0].v.s;
+    } else if (mp_path_exists(cmd->args[0].v.s)) {
+        path = cmd->args[0].v.s;
+    } else if (bstr_eatstart0(&str, "\"") && bstr_eatend0(&str, "\"")) {
+        char *test_path = bstrto0(tmp, str);
+        if (mp_path_exists(test_path) || bstr_startswith(str, bstr0("~")))
+            path = test_path;
+    } else if (bstr_eatstart0(&str, "\'") && bstr_eatend0(&str, "\'")) {
+        char *test_path = bstrto0(tmp, str);
+        if (mp_path_exists(test_path) || bstr_startswith(str, bstr0("~")))
+            path = test_path;
+    }
+
+    if (!path)
+        path = cmd->args[0].v.s;
+
+    cmd->result = (mpv_node){
+        .format = MPV_FORMAT_STRING,
+        .u.string = talloc_strdup(NULL, path),
+    };
+    talloc_free(tmp);
+}
+
 static void cmd_escape_ass(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -7156,6 +7189,7 @@ const struct mp_cmd_def mp_cmds[] = {
     { "expand-path", cmd_expand_path, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "normalize-path", cmd_normalize_path, { {"filename", OPT_STRING(v.s)} }},
+    { "sanitize-path", cmd_sanitize_path, { {"filename", OPT_STRING(v.s)} }},
     { "escape-ass", cmd_escape_ass, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true,

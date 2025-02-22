@@ -773,6 +773,12 @@ Text Manipulation
 
         This line of Lua prints "/foo/bar" on the OSD.
 
+``sanitize-path <filename>``
+    Attempts to sanitize filepaths by checking if it exists and stripping any
+    surrounding quotes. If the string appears to be a url or has no quotes, it
+    will be returned as is. Note that this will return paths that start with
+    ``~`` and you may possibly need to call ``expand-path`` on the result.
+
 ``escape-ass <text>``
     Modify ``text`` so that commands and functions that interpret ASS tags,
     such as ``osd-overlay`` and ``mp.create_osd_overlay``, will display it
