@@ -107,6 +107,8 @@ extern const struct m_sub_options egl_conf;
 
 extern const struct m_sub_options mp_sub_filter_opts;
 
+extern const struct m_sub_options w32_register_conf;
+
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
     .size = sizeof(struct image_writer_opts),
@@ -514,6 +516,7 @@ static const m_option_t mp_opts[] = {
     {"msg-module", OPT_BOOL(msg_module), .flags = UPDATE_TERM},
     {"msg-time", OPT_BOOL(msg_time), .flags = UPDATE_TERM},
 #if HAVE_WIN32_DESKTOP
+    {"", OPT_SUBSTRUCT(w32_register_opts, w32_register_conf)},
     {"priority", OPT_CHOICE(w32_priority,
         {"no",          0},
         {"realtime",    REALTIME_PRIORITY_CLASS},
