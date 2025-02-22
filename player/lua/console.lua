@@ -114,6 +114,7 @@ local first_match_to_print = 1
 local default_item
 local item_positions = {}
 local max_item_width = 0
+local was_cursor_autohide
 
 local complete
 local cycle_through_completions
@@ -995,6 +996,11 @@ end
 local function unbind_mouse()
     mp.remove_key_binding('_console_mouse_move')
     mp.remove_key_binding('_console_mbtn_left')
+
+    if was_cursor_autohide ~= nil then
+        mp.set_property_native('cursor-autohide', was_cursor_autohide)
+        was_cursor_autohide = nil
+    end
 end
 
 -- Run the current command and clear the line (Enter)
@@ -1083,6 +1089,11 @@ local function bind_mouse()
             set_active(false)
         end
     end)
+
+    if was_cursor_autohide == nil then
+        was_cursor_autohide = mp.get_property_native('cursor-autohide')
+    end
+    mp.set_property_native('cursor-autohide', 'no')
 end
 
 -- Go to the specified position in the command history
