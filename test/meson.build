@@ -90,7 +90,7 @@ gl_video = executable('gl-video', 'gl_video.c', objects: gl_video_objects,
                       link_with: [img_utils, test_utils])
 test('gl-video', gl_video)
 
-json = executable('json', 'json.c', include_directories: incdir, link_with: test_utils)
+json = executable('json', 'json.c', include_directories: [incdir, incdir_public], link_with: test_utils)
 test('json', json)
 
 linked_list = executable('linked-list', files('linked_list.c'), include_directories: incdir)
@@ -150,7 +150,7 @@ if get_option('libmpv')
     endif
     if shared
         exe = executable('libmpv-lifetime', sources: 'libmpv_lifetime.c',
-                         include_directories: incdir)
+                         include_directories: incdir_public)
         test('libmpv-lifetime', exe, depends: mpvlib, suite: 'libmpv')
     endif
 endif
