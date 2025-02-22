@@ -29,7 +29,7 @@ swift_flags += extra_flags
 swift_compile = [swift_prog, swift_flags, '-module-name', 'swift',
                  '-emit-module-path', '@OUTPUT0@', '-import-objc-header', bridge,
                  '-emit-objc-header-path', '@OUTPUT1@', '-o', '@OUTPUT2@',
-                 '@INPUT@', '-I.', '-I' + source_root,
+                 '@INPUT@', '-I.', '-I' + source_root, '-I' + source_root / 'include',
                  '-I' + libplacebo.get_variable('includedir',
                             default_value: source_root / 'subprojects' / 'libplacebo' / 'src' / 'include'),
                  '-I' + libavutil.get_variable('includedir')]

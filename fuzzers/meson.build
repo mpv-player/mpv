@@ -68,12 +68,12 @@ foreach cmd : ['file', '-config-file', '-input-conf']
 endforeach
 
 fuzzers += executable('fuzzer_options_parser', 'fuzzer_options_parser.c',
-                      link_language: 'cpp', include_directories: incdir,
+                      link_language: 'cpp', include_directories: incdir_public,
                       objects: libmpv.extract_all_objects(recursive: true),
                       dependencies: dependencies)
 
 fuzzers += executable('fuzzer_json', 'fuzzer_json.c',
-                      link_language: 'cpp', include_directories: incdir,
+                      link_language: 'cpp', include_directories: [incdir, incdir_public],
                       objects: libmpv.extract_all_objects(recursive: true),
                       dependencies: dependencies)
 
