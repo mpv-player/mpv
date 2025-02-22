@@ -100,14 +100,18 @@ class MacCommon: Common {
         }
     }
 
-     @objc func fillVsync(info: UnsafeMutablePointer<vo_vsync_info>) {
+    @objc func fillVsync(info: UnsafeMutablePointer<vo_vsync_info>) {
         if option.mac.macos_render_timer != RENDER_TIMER_PRESENTATION_FEEDBACK { return }
 
         let next = presentation?.next()
         info.pointee.vsync_duration = next?.duration ?? -1
         info.pointee.skipped_vsyncs = next?.skipped ?? -1
         info.pointee.last_queue_display_time = next?.time ?? -1
-     }
+    }
+
+    @objc func isVisible() -> Bool {
+        return window?.occlusionState.contains(.visible) ?? false
+    }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                       _ inNow: UnsafePointer<CVTimeStamp>,
