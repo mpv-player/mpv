@@ -1952,6 +1952,14 @@ prefixes can be specified. They are separated by whitespace.
     resolution input data if available.
     This prefix forces disabling this behavior, so the value is always changed
     in the discrete unit specified in the key binding.
+``immediate``
+    Several properties are mapped to options. For several of these options,
+    changing them on runtime triggers a callback that is processed during the
+    next playloop. If this prefix is passed in front of a command that
+    manipulates an option value (see `Property Manipulation`_), then the
+    callback for that option value change will be triggered immediately. In
+    most cases, this should never be needed, and it should only be used if
+    working with something that is timing sensitive (e.g. less than a playloop).
 ``async``
     Allow asynchronous execution (if possible). Note that only a few commands
     will support this (usually this is explicitly documented). Some commands

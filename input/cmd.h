@@ -78,6 +78,8 @@ enum mp_cmd_flags {
     MP_DISALLOW_REPEAT = 128,   // if used as keybinding, disallow key repeat
     MP_DISALLOW_SCALE = 256,    // if used as keybinding, make it non-scalable
 
+    MP_IMMEDIATE = 512,         // process property changes immediately
+
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
 };
