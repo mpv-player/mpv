@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libmpv/client.h>
-
 #include "common.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
