@@ -2160,9 +2160,12 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
                 if (o->offer)
                     wl_data_offer_finish(o->offer);
 
-                assert(o->action >= 0);
-                mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
-                                        content, o->action);
+                if (o->action >= 0) {
+                    mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
+                                            content, o->action);
+                } else {
+                    MP_WARN(wl, "Data offer did not have a valid action!\n");
+                }
             } else {
                 // Update clipboard text content
                 talloc_free(wl->selection_text.start);
