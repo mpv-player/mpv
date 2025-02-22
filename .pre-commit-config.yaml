@@ -20,4 +20,3 @@ repos:
   hooks:
     - id: codespell
       args: ["--ignore-words-list", "ALS,als,datas,DNE,enew,HDA,numer,ontop,optionA,Paeth,pathc,inout,requestor"]
-      exclude: ^misc/language.c$
