@@ -261,23 +261,92 @@ mp.add_key_binding(nil, "select-edition", function ()
     })
 end)
 
-local function select_subtitle_line(data)
+local function select_subtitle_line(data, codec)
     local sub_lines = {}
     local sub_times = {}
     local default_item
     local delay = mp.get_property_native("sub-delay")
     local time_pos = mp.get_property_native("time-pos") - delay
     local duration = mp.get_property_native("duration", math.huge)
+    local sub_content = {}
 
-    -- Strip HTML and ASS tags.
-    for line in data:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
-        -- ffmpeg outputs LRCs with minutes > 60 instead of adding hours.
-        sub_times[#sub_times + 1] = line:match("%d+") * 60 + line:match(":([%d%.]*)")
-        sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times], duration) ..
-                                    " " .. line:gsub(".*]", "", 1)
+    -- Strip HTML and ASS tags and process subtitles
+    for line in data:gmatch("[^\n]+") do
+        -- Clean up tags
+        local sub_line = line:gsub("<.->", "")         -- Strip HTML tags
+                             :gsub("{[\\=].-}", "")    -- Remove ASS formatting
+                             :gsub(".-]", "", 1)       -- Remove time info prefix
+                             :gsub("^m[l%s%-%d]+", "") -- Remove graphics code
+                             :gsub("\\h+", " ")        -- Replace '\h' tag
 
-        if sub_times[#sub_times] <= time_pos then
-            default_item = #sub_times
+        if codec == "subrip" or (sub_line ~= "" and sub_line:match("^%s+$") == nil) then
+            local sub_time = line:match("%d+") * 60 + line:match(":([%d%.]*)")
+            local time_seconds = math.floor(sub_time)
+
+            -- Use a dictionary to store the timestamp and content
+            if not sub_content[time_seconds] then
+                -- Initialize content list for that timestamp
+                sub_content[time_seconds] = {}
+            end
+
+            -- If the subtitle content is not already in the list for that timestamp, add it
+            local content_exists = false
+            for _, exist_content in ipairs(sub_content[time_seconds]) do
+                if exist_content == sub_line then
+                    content_exists = true
+                    break
+                end
+            end
+
+            if not content_exists then
+                sub_content[time_seconds][#sub_content[time_seconds] + 1] = sub_line
+            end
+        end
+    end
+
+    -- Process all timestamps and content into selectable subtitle list
+    for time_seconds, contents in pairs(sub_content) do
+        for _, sub_line in ipairs(contents) do
+            sub_times[#sub_times + 1] = time_seconds
+            sub_lines[#sub_lines + 1] = format_time(time_seconds, duration) .. " " .. sub_line
+        end
+    end
+
+    -- Sort by timestamp
+    local function compare_times(a, b)
+        return a < b
+    end
+    local sorted_sub_times = {}
+    for i = 1, #sub_times do
+        sorted_sub_times[i] = sub_times[i]
+    end
+    table.sort(sorted_sub_times, compare_times)
+
+    -- Use a helper table to avoid duplicates
+    local added_times = {}
+
+    -- Rebuild sub_lines and sub_times based on the sorted timestamps
+    local sorted_sub_lines = {}
+    for _, sub_time in ipairs(sorted_sub_times) do
+        -- Iterate over all subtitle content for this timestamp
+        if not added_times[sub_time] then
+            added_times[sub_time] = true
+            for i, time in ipairs(sub_times) do
+                if time == sub_time then
+                    sorted_sub_lines[#sorted_sub_lines + 1] = sub_lines[i]
+                end
+            end
+        end
+    end
+
+    -- Use the sorted subtitle list
+    sub_lines = sorted_sub_lines
+    sub_times = sorted_sub_times
+
+    -- Get the default item (last subtitle before current time position)
+    for i, sub_time in ipairs(sub_times) do
+        if sub_time <= time_pos then
+            default_item = i
         end
     end
 
@@ -341,7 +410,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
             return
         end
 
-        select_subtitle_line(result.stdout)
+        select_subtitle_line(result.stdout, sub.codec)
     end)
 end)
 
