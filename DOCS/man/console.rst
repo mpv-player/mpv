@@ -218,6 +218,11 @@ Configurable Options
 
     The background color of the selected item.
 
+``match_color``
+    Default: ``#0088FF``
+
+    The color of characters that match the searched string.
+
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
 

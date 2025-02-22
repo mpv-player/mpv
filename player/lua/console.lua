@@ -42,6 +42,7 @@ local opts = {
     scale_with_window = "auto",
     selected_color = '#222222',
     selected_back_color = '#FFFFFF',
+    match_color = '#0088FF',
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
     font_hw_ratio = 'auto',
@@ -75,6 +76,8 @@ local terminal_styles = {
     selected_completion = '\027[7m',
     default_item = '\027[1m',
     disabled = '\027[38;5;8m',
+    matched_position = '\027[34m',
+    match_end = '\027[39m',
 }
 
 local repl_active = false
@@ -297,7 +300,7 @@ local function get_line_height()
     return selectable_items and opts.font_size * 1.1 or opts.font_size
 end
 
-local function calculate_max_log_lines()
+local function calculate_max_lines()
     if terminal_output() then
         -- Subtract 1 for the input line and for each line in the status line.
         -- This does not detect wrapped lines.
@@ -464,54 +467,87 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
 
         return i[1] < j[1]
     end)
-    for i, value in ipairs(result) do
-        result[i] = value[1]
-    end
+
     return result
 end
 
-local function populate_log_with_matches()
+local function get_matches_to_print(terminal)
     if not selectable_items or selected_match == 0 then
-        return
+        return {}
     end
 
-    log_buffers[id] = {}
-    local log = log_buffers[id]
-
-    local max_log_lines = calculate_max_log_lines()
+    local items = {}
+    local max_lines = calculate_max_lines()
+    local escape = terminal and function (str) return str end or ass_escape
+    local highlight = terminal and terminal_styles.matched_position or
+                     '{\\1c&H' .. option_color_to_ass(opts.match_color) .. '}'
 
     if selected_match < first_match_to_print then
         first_match_to_print = selected_match
-    elseif selected_match > first_match_to_print + max_log_lines - 1 then
-        first_match_to_print = selected_match - max_log_lines + 1
+    elseif selected_match > first_match_to_print + max_lines - 1 then
+        first_match_to_print = selected_match - max_lines + 1
     end
 
-    local last_match_to_print  = math.min(first_match_to_print + max_log_lines - 1,
+    local last_match_to_print  = math.min(first_match_to_print + max_lines - 1,
                                           #matches)
 
     for i = first_match_to_print, last_match_to_print do
-        local style = ''
-        local terminal_style = ''
+        local item = ''
+        local end_highlight = terminal and terminal_styles.match_end or '{\\1c}'
 
-        if matches[i].index == default_item then
-            terminal_style = terminal_styles.default_item
-        end
-        if i == selected_match then
-            if searching_history and
-               mp.get_property('osd-border-style') == 'outline-and-shadow' then
-                style = get_selected_ass()
-            else
-                style = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
+        if terminal then
+            if matches[i].index == default_item then
+                item = terminal_styles.default_item
             end
-            terminal_style = terminal_style .. terminal_styles.selected_completion
+            if i == selected_match then
+                item = item .. terminal_styles.selected_completion
+            end
+        else
+            if i == selected_match then
+                if searching_history and
+                   mp.get_property('osd-border-style') == 'outline-and-shadow' then
+                    item = get_selected_ass()
+                else
+                    item = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
+                end
+                end_highlight = item
+            end
         end
 
-        log[#log + 1] = {
-            text = matches[i].text,
-            style = style,
-            terminal_style = terminal_style,
-        }
+        local start_of_last_match = matches[i].positions[1]
+
+        if not start_of_last_match then
+            item = item .. escape(matches[i].text)
+        elseif start_of_last_match > 1 then
+            item = item .. escape(matches[i].text:sub(1, start_of_last_match - 1))
+        end
+
+        for j, pos in ipairs(matches[i].positions) do
+            local last_pos = matches[i].positions[j - 1]
+
+            if last_pos and pos > last_pos + 1 then
+                item = item .. highlight ..
+                       escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                       end_highlight ..
+                       escape(matches[i].text:sub(last_pos + 1, pos - 1))
+
+                start_of_last_match = pos
+            end
+        end
+
+        if start_of_last_match then
+            local last_pos = matches[i].positions[#matches[i].positions]
+
+            item = item .. highlight ..
+                   escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                   end_highlight ..
+                   escape(matches[i].text:sub(last_pos + 1))
+        end
+
+        items[#items + 1] = item
     end
+
+    return items
 end
 
 local function update_overlay(data, res_x, res_y, z)
@@ -539,32 +575,35 @@ local function print_to_terminal()
         return
     end
 
-    populate_log_with_matches()
-
     local log = ''
-    local clip = selectable_items and mp.get_property('term-clip-cc') or ''
-    for _, log_line in ipairs(log_buffers[id]) do
-        log = log .. clip .. log_line.terminal_style .. log_line.text .. '\027[0m\n'
-    end
-
-    local completions = ''
-    for i, completion in ipairs(completion_buffer) do
-        if should_highlight_completion(i) then
-            completions = completions .. terminal_styles.selected_completion ..
-                          completion .. '\027[0m'
-        else
-            completions = completions .. completion
-        end
-        completions = completions .. (i < #completion_buffer and '\t' or '\n')
-    end
-
     local counter = ''
-    if selectable_items and #selectable_items > calculate_max_log_lines() then
-        local digits = math.ceil(math.log(#selectable_items, 10))
-        counter = terminal_styles.disabled ..
-                  '[' .. string.format('%0' .. digits .. 'd', selected_match) ..
-                  '/' .. string.format('%0' .. digits .. 'd', #matches) ..
-                  ']\027[0m '
+    if selectable_items then
+        if #selectable_items > calculate_max_lines() then
+            local digits = math.ceil(math.log(#selectable_items, 10))
+            counter = terminal_styles.disabled ..
+                      '[' .. string.format('%0' .. digits .. 'd', selected_match) ..
+                      '/' .. string.format('%0' .. digits .. 'd', #matches) ..
+                      ']\027[0m '
+        end
+
+        local clip = mp.get_property('term-clip-cc')
+        for _, item in ipairs(get_matches_to_print(true)) do
+            log = log .. clip .. item .. '\027[0m\n'
+        end
+    else
+        for _, log_line in ipairs(log_buffers[id]) do
+            log = log .. log_line.terminal_style .. log_line.text .. '\027[0m\n'
+        end
+
+        for i, completion in ipairs(completion_buffer) do
+            if should_highlight_completion(i) then
+                log = log .. terminal_styles.selected_completion ..
+                      completion .. '\027[0m'
+            else
+                log = log .. completion
+            end
+            log = log .. (i < #completion_buffer and '\t' or '\n')
+        end
     end
 
     local before_cur = line:sub(1, cursor - 1)
@@ -574,9 +613,8 @@ local function print_to_terminal()
         after_cur = ' '
     end
 
-    mp.osd_message(log .. completions .. counter .. prompt .. ' ' .. before_cur
-                   .. '\027[7m' .. after_cur:sub(1, 1) .. '\027[0m' ..
-                   after_cur:sub(2), 999)
+    mp.osd_message(log .. counter .. prompt .. ' ' .. before_cur .. '\027[7m' ..
+                   after_cur:sub(1, 1) .. '\027[0m' .. after_cur:sub(2), 999)
     osd_msg_active = true
 end
 
@@ -603,7 +641,7 @@ local function render()
     local ass = assdraw.ass_new()
     local osd_w, osd_h = get_scaled_osd_dimensions()
     local line_height = get_line_height()
-    local max_lines = calculate_max_log_lines()
+    local max_lines = calculate_max_lines()
 
     local x, y, alignment, clipping_coordinates
     if selectable_items and not searching_history then
@@ -651,11 +689,15 @@ local function render()
     local before_cur = ass_escape(line:sub(1, cursor - 1))
     local after_cur = ass_escape(line:sub(cursor))
 
-    -- Render log messages as ASS.
-    -- This will render at most screeny / font_size - 1 messages.
+    local log_ass = ''
+    local log_buffer = log_buffers[id]
+    for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
+        log_ass = log_ass .. style .. log_buffer[i].style ..
+                  ass_escape(log_buffer[i].text) .. '\\N'
+    end
 
     local completion_ass = ''
-    if next(completion_buffer) then
+    if completion_buffer[1] and not selectable_items then
         -- Estimate how many characters fit in one line
         -- Even with bottom-left anchoring,
         -- libass/ass_render.c:ass_render_event() subtracts --osd-margin-x from
@@ -670,8 +712,6 @@ local function render()
         max_lines = max_lines - rows
         completion_ass = style .. styles.completion .. completions .. '\\N'
     end
-
-    populate_log_with_matches()
 
     -- Background
     if selectable_items and
@@ -702,44 +742,36 @@ local function render()
         ass:draw_stop()
     end
 
-    local log_ass = ''
-    local log_buffer = log_buffers[id]
+    local items = get_matches_to_print()
     item_positions = {}
+    for i, item in ipairs(items) do
+        local item_y = alignment == 7
+            and y + (1 + i) * line_height
+            or y - (1.5 + #items - i) * line_height
 
-    for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
-        local log_item = style .. log_buffer[i].style .. ass_escape(log_buffer[i].text)
-
-        if selectable_items then
-            local item_y = alignment == 7
-                and y + (1 + i) * line_height
-                or y - (1.5 + #log_buffer - i) * line_height
-
-            if (first_match_to_print - 1 + i == selected_match or
-                matches[first_match_to_print - 1 + i].index == default_item)
-               and (not searching_history or border_style == 'background-box') then
-                ass:new_event()
-                ass:an(4)
-                ass:pos(x, item_y)
-                ass:append('{\\blur0\\bord0\\4aH&ff&\\1c&H' ..
-                           option_color_to_ass(opts.selected_back_color) .. '&}')
-                if first_match_to_print - 1 + i ~= selected_match then
-                    ass:append('{\\1aH&dd&}')
-                end
-                ass:draw_start()
-                ass:rect_cw(-opts.padding, 0, max_item_width + opts.padding, line_height)
-                ass:draw_stop()
-            end
-
+        if (first_match_to_print - 1 + i == selected_match or
+            matches[first_match_to_print - 1 + i].index == default_item)
+           and (not searching_history or border_style == 'background-box') then
             ass:new_event()
             ass:an(4)
             ass:pos(x, item_y)
-            ass:append(log_item)
-
-            item_positions[#item_positions + 1] =
-                { item_y - line_height / 2, item_y + line_height / 2 }
-        else
-            log_ass = log_ass .. log_item .. '\\N'
+            ass:append('{\\blur0\\bord0\\4aH&ff&\\1c&H' ..
+                       option_color_to_ass(opts.selected_back_color) .. '&}')
+            if first_match_to_print - 1 + i ~= selected_match then
+                ass:append('{\\1aH&dd&}')
+            end
+            ass:draw_start()
+            ass:rect_cw(-opts.padding, 0, max_item_width + opts.padding, line_height)
+            ass:draw_stop()
         end
+
+        ass:new_event()
+        ass:an(4)
+        ass:pos(x, item_y)
+        ass:append(style .. item)
+
+        item_positions[#item_positions + 1] =
+            { item_y - line_height / 2, item_y + line_height / 2 }
     end
 
     -- Scrollbar
@@ -747,7 +779,10 @@ local function render()
         ass:new_event()
         ass:an(alignment + 2)
         ass:pos(x + max_item_width, y)
-        ass:append('{\\bord0\\4a&Hff&\\blur0}' .. selected_match .. '/' .. #matches)
+        if not searching_history or border_style == 'background-box' then
+            ass:append('{\\bord0\\4a&Hff&\\blur0}')
+        end
+        ass:append(selected_match .. '/' .. #matches)
 
         local start_percentage = (first_match_to_print - 1) / #matches
         local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
@@ -857,13 +892,17 @@ local function handle_edit()
     if selectable_items then
         matches = {}
         for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-            matches[i] = { index = match, text = selectable_items[match] }
+            matches[i] = {
+                index = match[1],
+                text = selectable_items[match[1]],
+                positions = match[2],
+            }
         end
 
         if line == '' and default_item then
             selected_match = default_item
 
-            local max_lines = calculate_max_log_lines()
+            local max_lines = calculate_max_lines()
             first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
             if first_match_to_print > #selectable_items - max_lines + 1 then
                 first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
@@ -1004,7 +1043,6 @@ local function handle_enter()
         selectable_items = nil
         line = #matches > 0 and matches[selected_match].text or ''
         cursor = #line + 1
-        log_buffers[id] = {}
         handle_edit()
         unbind_mouse()
         return
@@ -1123,7 +1161,7 @@ end
 -- Go to the specified relative position in the command history (Up, Down)
 local function move_history(amount, is_wheel)
     if is_wheel and selectable_items then
-        local max_lines = calculate_max_log_lines()
+        local max_lines = calculate_max_lines()
 
         -- Update selected_match only if it's the first or last printed item and
         -- there are hidden items.
@@ -1168,7 +1206,7 @@ end
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_log_lines() + 1, 1)
+        selected_match = math.max(selected_match - calculate_max_lines() + 1, 1)
         render()
         return
     end
@@ -1179,7 +1217,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 local function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_log_lines() - 1, #matches)
+        selected_match = math.min(selected_match + calculate_max_lines() - 1, #matches)
         render()
         return
     end
@@ -1193,7 +1231,6 @@ local function search_history()
     end
 
     searching_history = true
-    completion_buffer = {}
     selectable_items = {}
 
     for i = 1, #history do
@@ -1775,7 +1812,7 @@ complete = function ()
     completion_pos = completion_pos or 1
     for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
                                       completions, opts.case_sensitive)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
@@ -1896,10 +1933,7 @@ set_active = function (active)
         end
     elseif searching_history then
         searching_history = false
-        line = ''
-        cursor = 1
         selectable_items = nil
-        log_buffers[id] = {}
         unbind_mouse()
     else
         repl_active = false
@@ -2059,7 +2093,7 @@ mp.register_script_message('complete', function(list, start_pos)
     completion_append = ''
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
                                       completions)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
