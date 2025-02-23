@@ -99,10 +99,24 @@ local function format_flags(track)
 end
 
 local function format_track(track)
+    local title = track.title or ""
+    local filename = mp.get_property_native("filename/no-ext", "")
+                    :gsub("[%(%)%.%%%+%-%*%?%[%]%^%$]", "%%%0")
     local bitrate = track["demux-bitrate"] or track["hls-bitrate"]
 
+    if track.external and title ~= "" then
+        local extension = title:match("%.([^%.]+)$")
+        if filename ~= "" and extension then
+            title = title:gsub(filename .. "%.?", "")
+        end
+        if track.lang and extension
+        and title:lower() == track.lang:lower() .. "." .. extension:lower() then
+            title = extension
+        end
+    end
+
     return (track.selected and "●" or "○") ..
-        (track.title and " " .. track.title or "") ..
+        (title ~= "" and " " .. title or "") ..
         " (" .. (
             (track.lang and track.lang .. " " or "") ..
             (track.codec and track.codec .. " " or "") ..
