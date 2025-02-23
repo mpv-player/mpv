@@ -27,8 +27,7 @@ body:
   attributes:
       label: "Other Information"
       description: >
-          - Windows Version: `ver` (cmd) or
-          `"$([Environment]::OSVersion)/$((gp 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuild).CurrentBuild).$((gp 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name UBR).UBR)"` (PowerShell)
+          - Windows Version: `cmd /c ver`
            - GPU model, driver and version
            - Source of the mpv binary
            - Latest version of mpv you know without the problem
