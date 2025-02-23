@@ -1046,10 +1046,9 @@ int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
     }
     case VOCTRL_PAUSE:
         vo->want_redraw = true;
-        drm->paused = true;
         return VO_TRUE;
-    case VOCTRL_RESUME:
-        drm->paused = false;
+    case VOCTRL_REDRAW:
+        drm->redraw = true;
         return VO_TRUE;
     }
     return VO_NOTIMPL;

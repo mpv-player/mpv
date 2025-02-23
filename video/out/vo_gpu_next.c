@@ -1170,7 +1170,6 @@ done:
     if (!valid) // clear with purple to indicate error
         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
 
-    sw->fns->submit_frame(sw, frame); // for drm_egl
     pl_gpu_flush(gpu);
     p->frame_pending = true;
     return VO_TRUE;
