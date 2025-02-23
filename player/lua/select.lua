@@ -636,8 +636,13 @@ mp.add_key_binding(nil, "menu", function ()
     input.select({
         prompt = "",
         items = labels,
+        keep_open = true,
         submit = function (i)
             mp.command(commands[i])
+
+            if not commands[i]:find("^script%-binding select/") then
+                input.terminate()
+            end
         end,
     })
 end)
