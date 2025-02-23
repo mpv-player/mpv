@@ -664,6 +664,9 @@ function register_event_handler(t) {
                             JSON.stringify(result[0]), result[1]);
             }
         }
+
+        if (type == "closed")
+            mp.unregister_script_message("input-event");
     })
 }
 
