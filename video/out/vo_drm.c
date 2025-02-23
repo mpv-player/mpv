@@ -308,8 +308,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!drm->active)
         goto done;
 
-    drm->still = frame->still;
-
     // we redraw the entire image when OSD needs to be redrawn
     struct framebuffer *fb =  p->bufs[p->front_buf];
     const bool repeat = frame->repeat && !frame->redraw;
@@ -341,12 +339,11 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct vo_drm_state *drm = vo->drm;
-    const bool drain = drm->paused || drm->still;
 
     if (!drm->active)
         return;
 
-    while (drain || p->fb_queue_len > vo->opts->swapchain_depth) {
+    while (drm->redraw || p->fb_queue_len > vo->opts->swapchain_depth) {
         if (drm->waiting_for_flip) {
             vo_drm_wait_on_flip(vo->drm);
             swapchain_step(vo);
@@ -360,6 +357,7 @@ static void flip_page(struct vo *vo)
         }
         queue_flip(vo, p->fb_queue[1]);
     }
+    drm->redraw = false;
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)

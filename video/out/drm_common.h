@@ -141,8 +141,7 @@ struct vo_drm_state {
     bool supported_colorspace;
 
     bool active;
-    bool paused;
-    bool still;
+    bool redraw;
     bool vt_switcher_active;
     bool waiting_for_flip;
 
