@@ -926,9 +926,10 @@ REPL.
 
     ``submit``
         A callback invoked when the user presses Enter. The first argument is
-        the text in the console. You can close the console from within the
-        callback by calling ``input.terminate()``. If you don't, the console
-        stays open and the user can input more text.
+        the text in the console.
+
+    ``keep_open``
+        Whether to keep the console open on submit. Defaults to ``false``.
 
     ``opened``
         A callback invoked when the console is shown. This can be used to
@@ -1013,9 +1014,10 @@ REPL.
 
     ``submit``
         The callback invoked when the user presses Enter. The first argument is
-        the 1-based index of the selected item. Unlike with ``input.get()``, the
-        console is automatically closed on submit without having to call
-        ``input.terminate()``.
+        the 1-based index of the selected item.
+
+    ``keep_open``
+        Whether to keep the console open on submit. Defaults to ``false``.
 
     Example:
 

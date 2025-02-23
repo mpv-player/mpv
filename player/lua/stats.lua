@@ -1562,7 +1562,6 @@ local function filter_bindings()
                 display_timer:resume()
             end
         end,
-        submit = input.terminate,
         closed = function ()
             searched_text = nil
             if display_timer:is_enabled() then
