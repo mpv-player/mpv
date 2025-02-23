@@ -41,6 +41,10 @@ local function register_event_handler(t)
                             utils.format_json(suggestions), completion_start_position)
             end
         end
+
+        if type == "closed" then
+            mp.unregister_script_message("input-event")
+        end
     end)
 end
 
