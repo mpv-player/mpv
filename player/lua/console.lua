@@ -104,6 +104,7 @@ local dont_bind_up_down = false
 local overlay = mp.create_osd_overlay('ass-events')
 local global_margins = { t = 0, b = 0 }
 local input_caller
+local keep_open = false
 
 local completion_buffer = {}
 local selected_completion_index
@@ -1093,7 +1094,6 @@ local function submit()
             mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                         utils.format_json({matches[selected_match].index}))
         end
-        set_active(false)
     elseif input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                     utils.format_json({line}))
@@ -1116,7 +1116,11 @@ local function submit()
         history_add(line)
     end
 
-    clear()
+    if input_caller and not keep_open then
+        set_active(false)
+    elseif not selectable_items then
+        clear()
+    end
 end
 
 local function determine_hovered_item()
@@ -2107,6 +2111,7 @@ mp.register_script_message('get-input', function (script_name, args)
     line = args.default_text or ''
     cursor = args.cursor_position or line:len() + 1
     id = args.id or script_name .. prompt
+    keep_open = args.keep_open
     dont_bind_up_down = args.dont_bind_up_down
     if histories[id] == nil then
         histories[id] = {}
