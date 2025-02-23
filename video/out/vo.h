@@ -66,6 +66,8 @@ enum mp_voctrl {
     VOCTRL_PAUSE,
     /* start/resume playback */
     VOCTRL_RESUME,
+    /* signal a redraw occurred */
+    VOCTRL_REDRAW,
 
     VOCTRL_SET_PANSCAN,
 

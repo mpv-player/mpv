@@ -1104,6 +1104,7 @@ static void do_redraw(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 
     vo->driver->draw_frame(vo, frame);
+    vo->driver->control(vo, VOCTRL_REDRAW, NULL);
     vo->driver->flip_page(vo);
 
     if (frame != &dummy && !vo->driver->frame_owner)
