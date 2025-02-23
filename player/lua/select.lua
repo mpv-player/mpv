@@ -254,38 +254,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     })
 end)
 
-mp.add_key_binding(nil, "select-subtitle-line", function ()
-    local sub = mp.get_property_native("current-tracks/sub")
-
-    if sub == nil then
-        show_warning("No subtitle is loaded.")
-        return
-    end
-
-    if sub.external and sub["external-filename"]:find("^edl://") then
-        sub["external-filename"] = sub["external-filename"]:match('https?://.*')
-                                   or sub["external-filename"]
-    end
-
-    local r = mp.command_native({
-        name = "subprocess",
-        capture_stdout = true,
-        args = sub.external
-            and {"ffmpeg", "-loglevel", "error", "-i", sub["external-filename"],
-                 "-f", "lrc", "-map_metadata", "-1", "-fflags", "+bitexact", "-"}
-            or {"ffmpeg", "-loglevel", "error", "-i", mp.get_property("path"),
-                "-map", "s:" .. sub["id"] - 1, "-f", "lrc", "-map_metadata",
-                "-1", "-fflags", "+bitexact", "-"}
-    })
-
-    if r.error_string == "init" then
-        show_error("Failed to extract subtitles: ffmpeg not found.")
-        return
-    elseif r.status ~= 0 then
-        show_error("Failed to extract subtitles.")
-        return
-    end
-
+local function select_subtitle_line(data)
     local sub_lines = {}
     local sub_times = {}
     local default_item
@@ -294,7 +263,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
     local duration = mp.get_property_native("duration", math.huge)
 
     -- Strip HTML and ASS tags.
-    for line in r.stdout:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
+    for line in data:gsub("<.->", ""):gsub("{\\.-}", ""):gmatch("[^\n]+") do
         -- ffmpeg outputs LRCs with minutes > 60 instead of adding hours.
         sub_times[#sub_times + 1] = line:match("%d+") * 60 + line:match(":([%d%.]*)")
         sub_lines[#sub_lines + 1] = format_time(sub_times[#sub_times], duration) ..
@@ -319,6 +288,54 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
             mp.commandv("seek", sub_times[index] + delay, "absolute")
         end,
     })
+end
+
+mp.add_key_binding(nil, "select-subtitle-line", function ()
+    local sub = mp.get_property_native("current-tracks/sub")
+
+    if sub == nil then
+        show_warning("No subtitle is loaded.")
+        return
+    end
+
+    if sub.external and sub["external-filename"]:find("^edl://") then
+        sub["external-filename"] = sub["external-filename"]:match('https?://.*')
+                                   or sub["external-filename"]
+    end
+
+    if not sub.external or sub["external-filename"]:find("://") then
+        local screenx, screeny = mp.get_osd_size()
+        local osd_align_x = mp.get_property("osd-align-x")
+        mp.osd_message("Subtitle export in progress.", 3)
+        mp.set_osd_ass(screenx, screeny, string.format("{\\an%d}● ",
+            osd_align_x == "right" and 7 or 9))
+    end
+
+    mp.command_native_async({
+        name = "subprocess",
+        capture_stdout = true,
+        args = sub.external
+            and {"ffmpeg", "-loglevel", "error", "-i", sub["external-filename"],
+                 "-f", "lrc", "-map_metadata", "-1", "-fflags", "+bitexact", "-"}
+            or {"ffmpeg", "-loglevel", "error", "-i", mp.get_property("path"),
+                "-map", "s:" .. sub["id"] - 1, "-f", "lrc", "-map_metadata",
+                "-1", "-fflags", "+bitexact", "-"}
+    }, function (success, result)
+        if not sub.external or sub["external-filename"]:find("://") then
+            mp.osd_message("")
+            mp.set_osd_ass(0, 0, "")
+        end
+
+        if result and result.error_string == "init" then
+            show_error("Failed to extract subtitles: ffmpeg not found.")
+            return
+        elseif not success or not result or result.status ~= 0 then
+            show_error("Failed to extract subtitles.")
+            return
+        end
+
+        select_subtitle_line(result.stdout)
+    end)
 end)
 
 mp.add_key_binding(nil, "select-audio-device", function ()
