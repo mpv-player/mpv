@@ -692,6 +692,7 @@ const stream_info_t stream_info_dvdnav = {
     .open = open_s,
     .protocols = (const char*const[]){ "dvd", "dvdnav", NULL },
     .stream_origin = STREAM_ORIGIN_UNSAFE,
+    .safe = true,
 };
 
 static bool check_ifo(const char *path)
@@ -745,4 +746,5 @@ const stream_info_t stream_info_ifo_dvdnav = {
     .open = ifo_dvdnav_stream_open,
     .protocols = (const char*const[]){ "file", "", NULL },
     .stream_origin = STREAM_ORIGIN_UNSAFE,
+    .safe = true,
 };

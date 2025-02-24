@@ -127,6 +127,7 @@ typedef struct stream_info_st {
     char **(*get_protocols)(void);
     bool can_write;     // correctly checks for READ/WRITE modes
     bool local_fs;      // supports STREAM_LOCAL_FS_ONLY
+    bool safe;          // considered to be a safe stream (e.g. suitable for use as a URL handler)
     int stream_origin;  // 0 or set of STREAM_ORIGIN_*; if 0, the same origin
                         // is set, or the stream's open() function handles it
 } stream_info_t;
@@ -282,7 +283,7 @@ void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mp_log *log);
 
 void stream_print_proto_list(struct mp_log *log);
-char **stream_get_proto_list(void);
+char **stream_get_proto_list(bool safe_only);
 bool stream_has_proto(const char *proto);
 
 #endif /* MPLAYER_STREAM_H */

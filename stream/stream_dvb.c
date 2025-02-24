@@ -1159,4 +1159,5 @@ const stream_info_t stream_info_dvb = {
     .open = dvb_open,
     .protocols = (const char *const[]){ "dvb", NULL },
     .stream_origin = STREAM_ORIGIN_UNSAFE,
+    .safe = true,
 };
