@@ -42,6 +42,7 @@ local opts = {
     scale_with_window = "auto",
     selected_color = '#222222',
     selected_back_color = '#FFFFFF',
+    match_color = '#0088FF',
     case_sensitive = platform ~= 'windows' and true or false,
     history_dedup = true,
     font_hw_ratio = 'auto',
@@ -75,6 +76,8 @@ local terminal_styles = {
     selected_completion = '\027[7m',
     default_item = '\027[1m',
     disabled = '\027[38;5;8m',
+    matched_position = '\027[34m',
+    match_end = '\027[39m',
 }
 
 local repl_active = false
@@ -178,6 +181,18 @@ local function len_utf8(str)
         len = len + 1
     end
     return len
+end
+
+local function utf8_positions(str)
+    local pos = 1
+    local positions = {true}
+
+    while pos <= str:len() do
+        pos = next_utf8(str, pos)
+        positions[pos] = true
+    end
+
+    return positions
 end
 
 
@@ -464,9 +479,7 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
 
         return i[1] < j[1]
     end)
-    for i, value in ipairs(result) do
-        result[i] = value[1]
-    end
+
     return result
 end
 
@@ -477,6 +490,9 @@ local function get_matches_to_print(terminal)
 
     local items = {}
     local max_lines = calculate_max_lines()
+    local escape = terminal and function (str) return str end or ass_escape
+    local highlight = terminal and terminal_styles.matched_position or
+                     '{\\1c&H' .. option_color_to_ass(opts.match_color) .. '}'
 
     if selected_match < first_match_to_print then
         first_match_to_print = selected_match
@@ -488,27 +504,68 @@ local function get_matches_to_print(terminal)
                                           #matches)
 
     for i = first_match_to_print, last_match_to_print do
-        local style = ''
+        local item = ''
+        local end_highlight = terminal and terminal_styles.match_end or '{\\1c}'
 
         if terminal then
             if matches[i].index == default_item then
-                style = terminal_styles.default_item
+                item = terminal_styles.default_item
             end
             if i == selected_match then
-                style = style .. terminal_styles.selected_completion
+                item = item .. terminal_styles.selected_completion
             end
         else
             if i == selected_match then
                 if searching_history and
                    mp.get_property('osd-border-style') == 'outline-and-shadow' then
-                    style = get_selected_ass()
+                    item = get_selected_ass()
                 else
-                    style = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
+                    item = '{\\1c&H' .. option_color_to_ass(opts.selected_color) .. '&}'
                 end
+                end_highlight = item
             end
         end
 
-        items[#items + 1] = style .. matches[i].text
+        local char_positions = utf8_positions(matches[i].text)
+        local start_of_last_match = matches[i].positions[1]
+
+        if not start_of_last_match then
+            item = item .. escape(matches[i].text)
+        elseif start_of_last_match > 1 then
+            item = item .. escape(matches[i].text:sub(1, start_of_last_match - 1))
+        end
+
+        for j, pos in ipairs(matches[i].positions) do
+            local last_pos = matches[i].positions[j - 1]
+
+            if last_pos and pos > last_pos + 1 then
+                if char_positions[start_of_last_match] and char_positions[last_pos + 1] then
+                    item = item .. highlight ..
+                           escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                           end_highlight ..
+                           escape(matches[i].text:sub(last_pos + 1, pos - 1))
+                else
+                    item = item .. escape(matches[i].text:sub(start_of_last_match, pos - 1))
+                end
+
+                start_of_last_match = pos
+            end
+        end
+
+        if start_of_last_match then
+            local last_pos = matches[i].positions[#matches[i].positions]
+
+            if char_positions[start_of_last_match] and char_positions[last_pos + 1] then
+                item = item .. highlight ..
+                       escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                       end_highlight ..
+                       escape(matches[i].text:sub(last_pos + 1))
+            else
+                item = item .. escape(matches[i].text:sub(start_of_last_match))
+            end
+        end
+
+        items[#items + 1] = item
     end
 
     return items
@@ -853,7 +910,11 @@ local function handle_edit()
     if selectable_items then
         matches = {}
         for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-            matches[i] = { index = match, text = selectable_items[match] }
+            matches[i] = {
+                index = match[1],
+                text = selectable_items[match[1]],
+                positions = match[2],
+            }
         end
 
         if line == '' and default_item then
@@ -1768,7 +1829,7 @@ complete = function ()
     completion_pos = completion_pos or 1
     for i, match in ipairs(fuzzy_find(before_cur:sub(completion_pos),
                                       completions, opts.case_sensitive)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
@@ -2049,7 +2110,7 @@ mp.register_script_message('complete', function(list, start_pos)
     completion_append = ''
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
                                       completions)) do
-        completion_buffer[i] = completions[match]
+        completion_buffer[i] = completions[match[1]]
     end
 
     render()
