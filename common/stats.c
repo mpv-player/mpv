@@ -132,7 +132,7 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
 
     node_init(out, MPV_FORMAT_NODE_ARRAY, NULL);
 
-#define FMT_T(e) mp_tprintf(80, "%.2f ms", (e))
+#define FMT_T(e) mp_tprintf(80, "%.3f ms", (e))
 
     int64_t now = mp_time_ns();
     if (stats->last_time) {
