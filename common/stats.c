@@ -132,13 +132,15 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
 
     node_init(out, MPV_FORMAT_NODE_ARRAY, NULL);
 
+#define FMT_T(e) mp_tprintf(80, "%.2f ms", (e))
+
     int64_t now = mp_time_ns();
     if (stats->last_time) {
         double t_ms = MP_TIME_NS_TO_MS(now - stats->last_time);
         struct mpv_node *ne = node_array_add(out, MPV_FORMAT_NODE_MAP);
         node_map_add_string(ne, "name", "poll-time");
         node_map_add_double(ne, "value", t_ms);
-        node_map_add_string(ne, "text", mp_tprintf(80, "%.2f ms", t_ms));
+        node_map_add_string(ne, "text", FMT_T(t_ms));
 
         // Very dirty way to reset everything if the stats.lua page was probably
         // closed. Not enough energy left for clean solution. Fuck it.
@@ -182,9 +184,9 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
             }
             double t_cpu = MP_TIME_NS_TO_MS(e->val_th);
             if (e->cpu_start_ns >= 0)
-                add_stat(out, e, "cpu", t_cpu, mp_tprintf(80, "%.2f ms", t_cpu));
+                add_stat(out, e, "cpu", t_cpu, FMT_T(t_cpu));
             double t_rt = MP_TIME_NS_TO_MS(e->val_rt);
-            add_stat(out, e, "time", t_rt, mp_tprintf(80, "%.2f ms", t_rt));
+            add_stat(out, e, "time", t_rt, FMT_T(t_rt));
             e->val_rt = e->val_th = 0;
             break;
         }
@@ -194,7 +196,7 @@ void stats_global_query(struct mpv_global *global, struct mpv_node *out)
                 e->cpu_start_ns = t;
             double t_msec = MP_TIME_NS_TO_MS(t - e->cpu_start_ns);
             if (e->cpu_start_ns >= 0)
-                add_stat(out, e, NULL, t_msec, mp_tprintf(80, "%.2f ms", t_msec));
+                add_stat(out, e, NULL, t_msec, FMT_T(t_msec));
             e->cpu_start_ns = t;
             break;
         }
