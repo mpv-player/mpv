@@ -129,6 +129,8 @@ for i = 1, 99 do
     user_opts["custom_button_" .. i .. "_mbtn_left_command"] = ""
     user_opts["custom_button_" .. i .. "_mbtn_mid_command"] = ""
     user_opts["custom_button_" .. i .. "_mbtn_right_command"] = ""
+    user_opts["custom_button_" .. i .. "_wheel_down_command"] = ""
+    user_opts["custom_button_" .. i .. "_wheel_up_command"] = ""
 end
 
 local icon_font = "mpv-osd-symbols"
