@@ -1734,7 +1734,7 @@ for k, _ in pairs(pages) do
     mp.add_key_binding(nil, "display-page-" .. k .. "-toggle", function()
         curr_page = k
         process_key_binding(false)
-    end, {repeatable=true})
+    end, {repeatable=false})
 end
 
 -- Reprint stats immediately when VO was reconfigured, only when toggled
