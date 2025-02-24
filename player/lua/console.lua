@@ -1072,8 +1072,8 @@ local function unbind_mouse()
     mp.remove_key_binding('_console_mbtn_left')
 end
 
--- Run the current command and clear the line (Enter)
-local function handle_enter()
+-- Run the current command or select the current item
+local function submit()
     if searching_history then
         searching_history = false
         selectable_items = nil
@@ -1152,7 +1152,7 @@ local function bind_mouse()
         local item = determine_hovered_item()
         if item then
             selected_match = item
-            handle_enter()
+            submit()
         else
             set_active(false)
         end
@@ -1880,11 +1880,11 @@ local function get_bindings()
     local bindings = {
         { 'esc',         function() set_active(false) end       },
         { 'ctrl+[',      function() set_active(false) end       },
-        { 'enter',       handle_enter                           },
-        { 'kp_enter',    handle_enter                           },
+        { 'enter',       submit                                 },
+        { 'kp_enter',    submit                                 },
         { 'shift+enter', function() handle_char_input('\n') end },
-        { 'ctrl+j',      handle_enter                           },
-        { 'ctrl+m',      handle_enter                           },
+        { 'ctrl+j',      submit                                 },
+        { 'ctrl+m',      submit                                 },
         { 'bs',          handle_backspace                       },
         { 'shift+bs',    handle_backspace                       },
         { 'ctrl+h',      handle_backspace                       },
