@@ -903,7 +903,14 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         if (sh->title && sh->title[0]) {
             t->title = talloc_strdup(t, sh->title);
         } else {
-            t->title = talloc_strdup(t, mp_basename(disp_filename));
+            bstr parent = {0};
+            if (mpctx->filename)
+                parent = bstr_strip_ext(bstr0(mp_basename(mpctx->filename)));
+            bstr title = bstr0(mp_basename(disp_filename));
+            bstr_eatstart(&title, parent);
+            bstr_eatstart(&title, bstr0("."));
+            if (title.len)
+                t->title = bstrdup0(t, title);
         }
         t->external_filename = mp_normalize_user_path(t, mpctx->global, filename);
         t->no_default = sh->type != filter;
