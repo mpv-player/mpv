@@ -747,6 +747,7 @@ local function render()
         ass:new_event()
         ass:an(alignment + 2)
         ass:pos(x + max_item_width, y)
+        ass:append(style)
         if not searching_history or border_style == 'background-box' then
             ass:append('{\\bord0\\4a&Hff&\\blur0}')
         end
