@@ -82,7 +82,7 @@ local terminal_styles = {
     match_end = '\027[39m',
 }
 
-local repl_active = false
+local open = false
 local osd_msg_active = false
 local insert_mode = false
 local pending_update = false
@@ -599,7 +599,7 @@ end
 
 local function print_to_terminal()
     -- Clear the log after closing the console.
-    if not repl_active then
+    if not open then
         if osd_msg_active then
             mp.osd_message('')
         end
@@ -664,8 +664,8 @@ local function render()
         osd_msg_active = false
     end
 
-    -- Clear the OSD if the REPL is not active
-    if not repl_active then
+    -- Clear the OSD after closing the console
+    if not open then
         update_overlay('', 0, 0, 0)
         return
     end
@@ -850,7 +850,7 @@ local function render()
     ass:append(cglyph)
     ass:append(style .. after_cur)
 
-    -- Redraw the cursor with the REPL text invisible. This will make the
+    -- Redraw the cursor with the input text invisible. This will make the
     -- cursor appear in front of the text.
     ass:new_event()
     ass:an(alignment)
@@ -885,7 +885,7 @@ local function log_add(text, style, terminal_style)
         table.remove(log_buffer, 1)
     end
 
-    if repl_active then
+    if open then
         if not update_timer:is_enabled() then
             render()
             update_timer:resume()
@@ -1014,7 +1014,7 @@ local function clear()
     handle_edit()
 end
 
--- Close the REPL if the current line is empty, otherwise delete the next
+-- Close the console if the current line is empty, otherwise delete the next
 -- character (Ctrl+D)
 local function maybe_exit()
     if line == '' then
@@ -2007,11 +2007,14 @@ local function read_history()
     history_file:close()
 end
 
--- Set the REPL visibility ("enable", Esc)
+-- Open or close the console
 set_active = function (active)
-    if active == repl_active then return end
+    if active == open then
+        return
+    end
+
     if active then
-        repl_active = true
+        open = true
         insert_mode = false
         define_key_bindings()
         mp.set_property_bool('user-data/mpv/console/open', true)
@@ -2031,7 +2034,7 @@ set_active = function (active)
         selectable_items = nil
         unbind_mouse()
     else
-        repl_active = false
+        open = false
         completion_buffer = {}
         undefine_key_bindings()
         mp.enable_messages('silent:terminal-default')
@@ -2054,8 +2057,7 @@ set_active = function (active)
     render()
 end
 
--- Show the repl if hidden and replace its contents with 'text'
--- (script-message-to repl type)
+-- Show the console if hidden and replace its contents with 'text'
 local function show_and_type(text, cursor_pos)
     text = text or ''
     cursor_pos = tonumber(cursor_pos)
@@ -2074,15 +2076,13 @@ local function show_and_type(text, cursor_pos)
     end
     history_pos = #history + 1
     insert_mode = false
-    if repl_active then
+    if open then
         render()
     else
         set_active(true)
     end
 end
 
--- Add a global binding for enabling the REPL. While it's enabled, its bindings
--- will take over and it can be closed with ESC.
 mp.add_key_binding(nil, 'enable', function()
     set_active(true)
 end)
@@ -2091,13 +2091,12 @@ mp.register_script_message('disable', function()
     set_active(false)
 end)
 
--- Add a script-message to show the REPL and fill it with the provided text
 mp.register_script_message('type', function(text, cursor_pos)
     show_and_type(text, cursor_pos)
 end)
 
 mp.register_script_message('get-input', function (script_name, args)
-    if repl_active and input_caller and script_name ~= input_caller then
+    if open and input_caller and script_name ~= input_caller then
         mp.commandv('script-message-to', input_caller, 'input-event',
                     'closed', utils.format_json({line, cursor}))
     end
