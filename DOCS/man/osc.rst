@@ -612,6 +612,12 @@ and ``topbar`` layouts.
     custom_button_2_content=🔀
     custom_button_2_mbtn_left_command=playlist-shuffle
 
+    custom_button_3_content=⏱
+    custom_button_3_mbtn_left_command=add speed 1
+    custom_button_3_mbtn_right_command=set speed 1
+    custom_button_3_wheel_up_command=add speed 0.25
+    custom_button_3_wheel_down_command=add speed -0.25
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
