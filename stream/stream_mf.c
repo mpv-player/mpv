@@ -37,5 +37,5 @@ const stream_info_t stream_info_mf = {
     .name = "mf",
     .open = mf_stream_open,
     .protocols = (const char*const[]){ "mf", NULL },
-    .stream_origin = STREAM_ORIGIN_FS,
+    .stream_origin = STREAM_ORIGIN_FS | STREAM_ORIGIN_UNSAFE,
 };
