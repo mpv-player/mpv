@@ -1990,9 +1990,16 @@ mp.register_script_message('get-input', function (script_name, args)
 
     if args.items then
         selectable_items = {}
+
+        -- Limit the number of characters to prevent libass from freezing mpv.
+        -- Not important for terminal output.
+        local limit = terminal_output() and 5000
+                      or (5 * mp.get_property_native('osd-width') / opts.font_size)
+
         for i, item in ipairs(args.items) do
-            selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, 300)
+            selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, limit)
         end
+
         default_item = args.default_item
         calculate_max_item_width()
         handle_edit()
