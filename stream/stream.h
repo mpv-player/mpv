@@ -282,7 +282,7 @@ void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mp_log *log);
 
 void stream_print_proto_list(struct mp_log *log);
-char **stream_get_proto_list(void);
+char **stream_get_proto_list(bool safe_only);
 bool stream_has_proto(const char *proto);
 
 #endif /* MPLAYER_STREAM_H */

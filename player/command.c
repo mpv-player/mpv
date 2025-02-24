@@ -3557,7 +3557,7 @@ static int mp_property_protocols(void *ctx, struct m_property *prop,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        *(char ***)arg = stream_get_proto_list();
+        *(char ***)arg = stream_get_proto_list(false);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};

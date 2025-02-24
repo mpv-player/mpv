@@ -882,12 +882,14 @@ struct bstr stream_read_file2(const char *filename, void *talloc_ctx,
     return res;
 }
 
-char **stream_get_proto_list(void)
+char **stream_get_proto_list(bool safe_only)
 {
     char **list = NULL;
     int num = 0;
     for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
+        if (safe_only && (stream_info->stream_origin & STREAM_ORIGIN_UNSAFE))
+            continue;
 
         char **get_protocols = stream_info->get_protocols ? stream_info->get_protocols() : NULL;
         char **protocols = get_protocols ? get_protocols : (char **)stream_info->protocols;
@@ -910,7 +912,7 @@ void stream_print_proto_list(struct mp_log *log)
     int count = 0;
 
     mp_info(log, "Protocols:\n\n");
-    char **list = stream_get_proto_list();
+    char **list = stream_get_proto_list(false);
     for (int i = 0; list[i]; i++) {
         mp_info(log, " %s://\n", list[i]);
         count++;
