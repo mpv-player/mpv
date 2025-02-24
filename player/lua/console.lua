@@ -790,7 +790,7 @@ local function render()
             ass:append('{\\blur0\\bord0\\4aH&ff&\\1c&H' ..
                        option_color_to_ass(opts.selected_back_color) .. '&}')
             if first_match_to_print - 1 + i ~= selected_match then
-                ass:append('{\\1aH&dd&}')
+                ass:append('{\\1aH&cc&}')
             end
             ass:draw_start()
             ass:rect_cw(-opts.padding, 0, max_item_width + opts.padding, line_height)
