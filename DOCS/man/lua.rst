@@ -984,8 +984,8 @@ REPL.
     that are used when the console is displayed in the terminal.
 
 ``input.log_error(message)``
-    Helper to add a line to the log buffer with the same color as the one the
-    console uses for errors. Useful when the user submits invalid input.
+    Helper to add a line to the log buffer with the same color as the one used
+    for commands that error. Useful when the user submits invalid input.
 
 ``input.set_log(log)``
     Replace the entire log buffer.

@@ -88,6 +88,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@positioning.lua",
 #   include "player/lua/positioning.lua.inc"
     },
+    {"@commands.lua",
+#   include "player/lua/commands.lua.inc"
+    },
     {0}
 };
 

@@ -1054,9 +1054,11 @@ Program Behavior
     the overlay permanent).
 
 ``--load-console=<yes|no>``
-    Enable the built-in script that shows a console on a key binding and lets
-    you enter commands (default: yes). The ````` key is used to show the
-    console by default, and ``ESC`` to hide it again.
+    Enable the built-in script to handle textual input (default: yes).
+
+``--load-commands=<yes|no>``
+    Enable the built-in script to enter commands in the console (default: yes).
+    The ````` key is used to activate this by default.
 
 ``--load-auto-profiles=<yes|no|auto>``
     Enable the builtin script that does auto profiles (default: auto). See
