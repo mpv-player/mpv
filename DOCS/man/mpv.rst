@@ -383,9 +383,6 @@ Left double click
 Right click
     Toggle pause on/off.
 
-Middle click
-    Pan through the whole video while holding the button.
-
 Forward/Back button
     Skip to next/previous entry in playlist.
 
