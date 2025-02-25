@@ -966,12 +966,14 @@ REPL.
     ``cursor_position``
         The initial cursor position, starting from 1.
 
+    ``history_path``
+        If specified, the path to save and load the history of the entered
+        lines.
+
     ``id``
         An identifier that determines which input history and log buffer to use
-        among the ones stored for ``input.get()`` calls. The input histories
-        and logs are stored in memory and do not persist across different mpv
-        invocations. Defaults to the calling script name with ``prompt``
-        appended.
+        among the ones stored for ``input.get()`` calls. Defaults to the calling
+        script name with ``prompt`` appended.
 
 ``input.terminate()``
     Close the console.
