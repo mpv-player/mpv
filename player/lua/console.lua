@@ -873,6 +873,10 @@ end
 
 -- Add a line to the history and deduplicate
 local function history_add(text)
+    if history[#history] == text or text == '' then
+        return
+    end
+
     if opts.history_dedup then
         -- More recent entries are more likely to be repeated
         for i = #history, 1, -1 do
@@ -1028,9 +1032,7 @@ local function submit()
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                     utils.format_json({line}))
 
-        if history[#history] ~= line and line ~= '' then
-            history_add(line)
-        end
+        history_add(line)
     end
 
     if not keep_open then
@@ -1100,7 +1102,7 @@ local function go_history(new_pos)
     -- If the user was editing a non-history line, save it as the last history
     -- entry. This makes it much less frustrating to accidentally hit Up/Down
     -- while editing a line.
-    if old_pos == #history + 1 and line ~= '' and history[#history] ~= line then
+    if old_pos == #history + 1 then
         history_add(line)
     end
 
