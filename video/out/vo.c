@@ -1098,7 +1098,6 @@ static void do_redraw(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 
     vo->driver->draw_frame(vo, frame);
-    vo->driver->control(vo, VOCTRL_REDRAW, NULL);
     vo->driver->flip_page(vo);
 
     if (frame != &dummy && !vo->driver->frame_owner)
@@ -1180,6 +1179,7 @@ static MP_THREAD_VOID vo_thread(void *ptr)
         if (send_pause)
             vo->driver->control(vo, vo_paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
         if (wait_until > now && redraw) {
+            vo->driver->control(vo, VOCTRL_REDRAW, NULL);
             do_redraw(vo); // now is a good time
             continue;
         }
