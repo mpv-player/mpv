@@ -195,9 +195,10 @@ jobs:
         with:
           name: mpv-x86_64-windows-msvc
           path: |
-            build/mpv.???
+            build/mpv.exe
+            build/mpv*.com
+            build/mpv.pdb
             build/vulkan-*.dll
-            !build/mpv.lib
 
       - name: Save Cache
         uses: actions/cache/save@v4
