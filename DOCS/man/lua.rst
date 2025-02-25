@@ -940,13 +940,12 @@ REPL.
         in the console.
 
     ``complete``
-        A callback invoked when the user presses TAB. The first argument is the
-        text before the cursor. The callback should return a table of the string
-        candidate completion values and the 1-based cursor position from which
-        the completion starts. console.lua will filter the suggestions beginning
-        with the the text between this position and the cursor, sort them
-        alphabetically, insert their longest common prefix, and show them when
-        there are multiple ones.
+        A callback invoked when the user edits the text or moves the cursor. The
+        first argument is the text before the cursor. The callback should return
+        a table of the string candidate completion values and the 1-based cursor
+        position from which the completion starts. console will show the
+        completions that fuzzily match the text between this position and the
+        cursor and allow selecting them.
 
     ``closed``
         A callback invoked when the console is hidden, either because
