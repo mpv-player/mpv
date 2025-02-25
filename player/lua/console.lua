@@ -114,6 +114,7 @@ local completion_append
 local path_separator = platform == 'windows' and '\\' or '/'
 local completion_old_line
 local completion_old_cursor
+local autoselect_completion
 local commands
 
 local selectable_items
@@ -370,7 +371,7 @@ end
 
 local function should_highlight_completion(i)
     return i == selected_completion_index or
-           (i == 1 and selected_completion_index == 0 and input_caller == nil)
+           (i == 1 and selected_completion_index == 0 and autoselect_completion)
 end
 
 local function mpv_color_to_ass(color)
@@ -1095,6 +1096,10 @@ local function submit()
                         utils.format_json({matches[selected_match].index}))
         end
     elseif input_caller then
+        if selected_completion_index == 0 and autoselect_completion then
+            cycle_through_completions()
+        end
+
         mp.commandv('script-message-to', input_caller, 'input-event', 'submit',
                     utils.format_json({line}))
     else
@@ -2088,6 +2093,7 @@ local function show_and_type(text, cursor_pos)
 end
 
 mp.add_key_binding(nil, 'enable', function()
+    autoselect_completion = true
     set_active(true)
 end)
 
@@ -2112,6 +2118,7 @@ mp.register_script_message('get-input', function (script_name, args)
     cursor = args.cursor_position or line:len() + 1
     id = args.id or script_name .. prompt
     keep_open = args.keep_open
+    autoselect_completion = args.autoselect_completion
     dont_bind_up_down = args.dont_bind_up_down
     if histories[id] == nil then
         histories[id] = {}
