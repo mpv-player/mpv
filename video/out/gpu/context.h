@@ -83,13 +83,6 @@ struct ra_ctx_params {
     // ra_gl_ctx_swap_buffers. Required unless you either never call that
     // function or if you override it yourself.
     void (*swap_buffers)(struct ra_ctx *ctx);
-
-    // If this is set to non-NULL, then the ra_gl_ctx will consider the GL
-    // implementation to be using an external swapchain, which disables the
-    // software simulation of --swapchain-depth. Any functions defined by this
-    // ra_swapchain_fns structs will entirely replace the equivalent ra_gl_ctx
-    // functions in the resulting ra_swapchain.
-    const struct ra_swapchain_fns *external_swapchain;
 };
 
 // Extra struct for the swapchain-related functions so they can be easily
