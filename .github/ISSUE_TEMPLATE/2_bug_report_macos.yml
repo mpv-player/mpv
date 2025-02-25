@@ -1,6 +1,7 @@
 name: "Report a macOS Issue"
 description: "Create a report for a runtime related macOS Issue"
 labels: ["os:mac"]
+type: Bug
 body:
 - type: textarea
   attributes:
