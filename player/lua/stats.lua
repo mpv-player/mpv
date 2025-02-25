@@ -1431,12 +1431,12 @@ cache_recorder_timer:kill()
 -- Current page and <page key>:<page function> mapping
 curr_page = o.key_page_1
 pages = {
-    [o.key_page_1] = { f = default_stats, desc = "Default" },
-    [o.key_page_2] = { f = vo_stats, desc = "Extended Frame Timings", scroll = true },
-    [o.key_page_3] = { f = cache_stats, desc = "Cache Statistics" },
-    [o.key_page_4] = { f = keybinding_info, desc = "Active Key Bindings", scroll = true },
-    [o.key_page_5] = { f = track_info, desc = "Selected Tracks Info", scroll = true },
-    [o.key_page_0] = { f = perf_stats, desc = "Internal Performance Info", scroll = true },
+    [o.key_page_1] = { idx = 1, f = default_stats, desc = "Default" },
+    [o.key_page_2] = { idx = 2, f = vo_stats, desc = "Extended Frame Timings", scroll = true },
+    [o.key_page_3] = { idx = 3, f = cache_stats, desc = "Cache Statistics" },
+    [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "Active Key Bindings", scroll = true },
+    [o.key_page_5] = { idx = 5, f = track_info, desc = "Selected Tracks Info", scroll = true },
+    [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
 
@@ -1721,17 +1721,17 @@ mp.add_key_binding(nil, "display-stats", function() process_key_binding(true) en
 mp.add_key_binding(nil, "display-stats-toggle", function() process_key_binding(false) end,
     {repeatable=false})
 
-for k, _ in pairs(pages) do
+for k, page in pairs(pages) do
     -- Single invocation key bindings for specific pages, e.g.:
     -- "e script-binding stats/display-page-2"
-    mp.add_key_binding(nil, "display-page-" .. k, function()
+    mp.add_key_binding(nil, "display-page-" .. page.idx, function()
         curr_page = k
         process_key_binding(true)
     end, {repeatable=true})
 
     -- Key bindings to toggle a specific page, e.g.:
     -- "h script-binding stats/display-page-4-toggle".
-    mp.add_key_binding(nil, "display-page-" .. k .. "-toggle", function()
+    mp.add_key_binding(nil, "display-page-" .. page.idx .. "-toggle", function()
         curr_page = k
         process_key_binding(false)
     end, {repeatable=false})
