@@ -50,6 +50,7 @@ static const struct flag cmd_flags[] = {
     {"osd-msg-bar",         MP_ON_OSD_FLAGS, MP_ON_OSD_MSG | MP_ON_OSD_BAR},
     {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
     {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
+    {"interactive",         0,               MP_INTERACTIVE},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
     {"repeatable",          MP_DISALLOW_REPEAT, MP_ALLOW_REPEAT},
     {"nonrepeatable",       MP_ALLOW_REPEAT,    MP_DISALLOW_REPEAT},
@@ -620,6 +621,11 @@ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
 {
     return cmd->def->scalable && !(cmd->flags & MP_DISALLOW_SCALE);
+}
+
+bool mp_input_is_interactive_cmd(struct mp_cmd *cmd)
+{
+    return cmd->def->interactive || (cmd->flags & MP_INTERACTIVE);
 }
 
 void mp_print_cmd_list(struct mp_log *out)

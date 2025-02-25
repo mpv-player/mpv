@@ -91,6 +91,7 @@ extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options clipboard_conf;
+extern const struct m_sub_options file_dialog_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -887,6 +888,8 @@ static const m_option_t mp_opts[] = {
         .flags = M_OPT_FILE},
     {"screenshot-directory", OPT_ALIAS("screenshot-dir")},
     {"screenshot-sw", OPT_BOOL(screenshot_sw)},
+
+    {"file-dialog", OPT_SUBSTRUCT(file_dialog_opts, file_dialog_conf)},
 
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
