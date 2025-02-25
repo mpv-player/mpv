@@ -2186,7 +2186,7 @@ mp.register_script_message('set-log', function (log)
     render()
 end)
 
-mp.register_script_message('complete', function(list, start_pos)
+mp.register_script_message('complete', function (list, start_pos, append)
     if line ~= completion_old_line or cursor ~= completion_old_cursor then
         return
     end
@@ -2196,7 +2196,7 @@ mp.register_script_message('complete', function(list, start_pos)
     local completions = utils.parse_json(list)
     table.sort(completions)
     completion_pos = start_pos
-    completion_append = ''
+    completion_append = append
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
                                       completions)) do
         completion_buffer[i] = completions[match[1]]
