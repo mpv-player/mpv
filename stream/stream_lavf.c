@@ -528,6 +528,7 @@ const stream_info_t stream_info_ffmpeg = {
     .get_protocols = get_safe_protocols,
     .can_write = true,
     .stream_origin = STREAM_ORIGIN_NET,
+    .safe = true,
 };
 
 // Unlike above, this is not marked as safe, and can contain protocols which
@@ -540,4 +541,5 @@ const stream_info_t stream_info_ffmpeg_unsafe = {
     .get_protocols = get_unsafe_protocols,
     .stream_origin = STREAM_ORIGIN_UNSAFE,
     .can_write = true,
+    .safe = true,
 };

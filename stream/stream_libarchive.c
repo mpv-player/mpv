@@ -624,4 +624,5 @@ const stream_info_t stream_info_libarchive = {
     .name = "libarchive",
     .open = archive_entry_open,
     .protocols = (const char*const[]){ "archive", NULL },
+    .safe = true,
 };
