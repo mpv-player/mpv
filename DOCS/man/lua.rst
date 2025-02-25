@@ -950,6 +950,10 @@ REPL.
         The third and optional return value is a string that will be appended to
         the input line without displaying it in the completions.
 
+    ``autoselect_completion``
+        Whether to automatically select the first completion on submit if one
+        wasn't already manually selected. Defaults to ``false``.
+
     ``closed``
         A callback invoked when the console is hidden, either because
         ``input.terminate()`` was invoked from the other callbacks, or because
