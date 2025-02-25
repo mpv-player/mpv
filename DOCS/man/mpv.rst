@@ -1538,6 +1538,8 @@ works like in older mpv releases:
 
 .. include:: console.rst
 
+.. include:: commands.rst
+
 .. include:: select.rst
 
 .. include:: positioning.rst
