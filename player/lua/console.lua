@@ -93,11 +93,14 @@ local default_prompt = '>'
 local prompt = default_prompt
 local default_id = 'default'
 local id = default_id
+
 local histories = {[id] = {}}
 local history = histories[id]
 local history_pos = 1
 local searching_history = false
-local history_to_save = ''
+local history_paths = {}
+local histories_to_save = {}
+
 local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
@@ -911,8 +914,8 @@ local function history_add(text)
 
     history[#history + 1] = text
 
-    if id == default_id then
-        history_to_save =  history_to_save .. text .. '\n'
+    if history_paths[id] then
+        histories_to_save[id] =  histories_to_save[id] .. text .. '\n'
     end
 end
 
@@ -1979,11 +1982,11 @@ local function undefine_key_bindings()
 end
 
 local function read_history()
-    if opts.persist_history == false or history[1] then
+    if not history_paths[id] or history[1] then
         return
     end
 
-    local history_file = io.open(mp.command_native({'expand-path', opts.history_path}))
+    local history_file = io.open(mp.command_native({'expand-path', history_paths[id]}))
 
     if history_file == nil then
         return
@@ -2034,6 +2037,8 @@ set_active = function (active)
             prompt = default_prompt
             id = default_id
             history = histories[id]
+            history_paths[id] = opts.persist_history and opts.history_path or nil
+            histories_to_save[id] = histories_to_save[id] or ''
             read_history()
             history_pos = #history + 1
             mp.enable_messages('terminal-default')
@@ -2120,11 +2125,15 @@ mp.register_script_message('get-input', function (script_name, args)
     keep_open = args.keep_open
     autoselect_completion = args.autoselect_completion
     dont_bind_up_down = args.dont_bind_up_down
+
     if histories[id] == nil then
         histories[id] = {}
         log_buffers[id] = {}
+        histories_to_save[id] = ''
     end
     history = histories[id]
+    history_paths[id] = args.history_path
+    read_history()
     history_pos = #history + 1
     searching_history = false
 
@@ -2259,20 +2268,17 @@ end)
 mp.register_event('shutdown', function ()
     mp.del_property('user-data/mpv/console')
 
-    if opts.persist_history == false or history_to_save == '' then
-        return
+    for history_id, history_path in pairs(history_paths) do
+        history_path = mp.command_native({'expand-path', history_path})
+        local history_file, error_message = io.open(history_path, 'ab')
+
+        if history_file then
+            history_file:write(histories_to_save[history_id])
+            history_file:close()
+        else
+            mp.msg.error('Failed to write history: ' .. error_message)
+        end
     end
-
-    local history_path = mp.command_native({'expand-path', opts.history_path})
-    local history_file, error_message = io.open(history_path, 'ab')
-
-    if history_file == nil then
-        mp.msg.error('Failed to write the command history: ' .. error_message)
-        return
-    end
-
-    history_file:write(history_to_save)
-    history_file:close()
 end)
 
 require 'mp.options'.read_options(opts, nil, render)
