@@ -1,6 +1,7 @@
 name: "Report a Linux Issue"
 description: "Create a report for a runtime related Linux Issue"
 labels: ["os:linux"]
+type: Bug
 body:
 - type: textarea
   attributes:

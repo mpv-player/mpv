@@ -1,6 +1,7 @@
 name: "Report a Windows Issue"
 description: "Create a report for a runtime related Windows Issue"
 labels: ["os:win"]
+type: Bug
 body:
 - type: textarea
   attributes:

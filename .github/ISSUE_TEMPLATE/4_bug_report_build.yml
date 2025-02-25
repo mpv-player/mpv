@@ -1,6 +1,7 @@
 name: "Report a build Problem"
 description: "Create a report for a build related Issue"
 labels: ["core:meson"]
+type: Bug
 body:
 - type: textarea
   attributes:
