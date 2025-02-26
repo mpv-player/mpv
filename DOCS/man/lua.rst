@@ -330,6 +330,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             ``script-binding`` command, where the scalability of the command
             takes precedence.
 
+        ``interactive``
+            If set to ``true``, the key binding is allowed to prompt the user for
+            interaction, for example, to show a file dialog for file selection.
+
         ``complex``
             If set to ``true``, then ``fn`` is called on key down, repeat and up
             events, with the first argument being a table. This table has the
