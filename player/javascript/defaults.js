@@ -672,6 +672,8 @@ function register_event_handler(t) {
 
 mp.input = {
     get: function(t) {
+        t.has_completions = t.complete !== undefined
+
         mp.commandv("script-message-to", "console", "get-input", mp.script_name,
                     JSON.stringify(t));
 

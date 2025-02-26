@@ -125,13 +125,11 @@ Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
 ``font``
-    Default: a monospace font depending on the platform
+    The font name.
 
-    Set the font used for the console.
-    A monospaced font is necessary to align completions correctly in a grid.
-    If the console was opened by calling ``mp.input.select`` and no font was
-    configured, ``--osd-font`` is used, as alignment is not necessary in that
-    case.
+    When necessary to align completions in a grid, a monospace font depending on
+    the platform is the default. When there are no completions, ``--osd-font``
+    is the default.
 
 ``font_size``
     Default: 24
