@@ -698,7 +698,7 @@ local function render()
     local after_cur = ass_escape(line:sub(cursor))
 
     local log_ass = ''
-    local log_buffer = log_buffers[id]
+    local log_buffer = log_buffers[id] or {}
     for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
         log_ass = log_ass .. style .. log_buffer[i].style ..
                   ass_escape(log_buffer[i].text) .. '\\N'
@@ -1587,21 +1587,8 @@ mp.register_script_message('get-input', function (script_name, args)
     prompt = args.prompt
     line = args.default_text or ''
     cursor = args.cursor_position or line:len() + 1
-    id = args.id or script_name .. prompt
     keep_open = args.keep_open
-    autoselect_completion = args.autoselect_completion
     dont_bind_up_down = args.dont_bind_up_down
-    completion_buffer = {}
-
-    if histories[id] == nil then
-        histories[id] = {}
-        log_buffers[id] = {}
-        histories_to_save[id] = ''
-    end
-    history = histories[id]
-    history_paths[id] = args.history_path
-    read_history()
-    history_pos = #history + 1
     searching_history = false
 
     if args.items then
@@ -1623,6 +1610,19 @@ mp.register_script_message('get-input', function (script_name, args)
     else
         selectable_items = nil
         unbind_mouse()
+        id = args.id or script_name .. prompt
+        completion_buffer = {}
+        autoselect_completion = args.autoselect_completion
+
+        if histories[id] == nil then
+            histories[id] = {}
+            log_buffers[id] = {}
+            histories_to_save[id] = ''
+        end
+        history = histories[id]
+        history_paths[id] = args.history_path
+        read_history()
+        history_pos = #history + 1
     end
 
     set_active(true)
