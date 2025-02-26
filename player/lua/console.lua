@@ -206,6 +206,7 @@ local function measure_bounds(ass_text)
     text_osd.res_x, text_osd.res_y = osd_width, osd_height
     text_osd.data = ass_text
     local res = text_osd:update()
+    text_osd:remove()
     return res.x0, res.y0, res.x1, res.y1
 end
 
@@ -340,6 +341,7 @@ local function calculate_max_item_width()
                          (font and '\\fn' .. font or '') .. '\\q2}' ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
+    width_overlay:remove()
     max_item_width = math.min(result.x1 - result.x0,
                               osd_w - get_margin_x() * 2 - opts.padding * 2)
 end
