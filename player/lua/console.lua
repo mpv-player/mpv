@@ -884,37 +884,35 @@ local function handle_cursor_move()
 end
 
 local function handle_edit()
-    if selectable_items then
-        matches = {}
-        for i, match in ipairs(fuzzy_find(line, selectable_items)) do
-            matches[i] = {
-                index = match[1],
-                text = selectable_items[match[1]],
-                positions = match[2],
-            }
-        end
-
-        if line == '' and default_item then
-            selected_match = default_item
-
-            local max_lines = calculate_max_lines()
-            first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
-            if first_match_to_print > #selectable_items - max_lines + 1 then
-                first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
-            end
-        else
-            selected_match = 1
-        end
-
-        render()
-
+    if not selectable_items then
+        handle_cursor_move()
+        mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
+                    utils.format_json({line}))
         return
     end
 
-    handle_cursor_move()
+    matches = {}
+    for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+        matches[i] = {
+            index = match[1],
+            text = selectable_items[match[1]],
+            positions = match[2],
+        }
+    end
 
-    mp.commandv('script-message-to', input_caller, 'input-event', 'edited',
-                utils.format_json({line}))
+    if line == '' and default_item then
+        selected_match = default_item
+
+        local max_lines = calculate_max_lines()
+        first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
+        if first_match_to_print > #selectable_items - max_lines + 1 then
+            first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
+        end
+    else
+        selected_match = 1
+    end
+
+    render()
 end
 
 -- Insert a character at the current cursor position (any_unicode)
@@ -1097,7 +1095,12 @@ end
 
 -- Go to the specified relative position in the command history (Up, Down)
 local function move_history(amount, is_wheel)
-    if is_wheel and selectable_items then
+    if not selectable_items then
+        go_history(history_pos + amount)
+        return
+    end
+
+    if is_wheel then
         local max_lines = calculate_max_lines()
 
         -- Update selected_match only if it's the first or last printed item and
@@ -1126,18 +1129,13 @@ local function move_history(amount, is_wheel)
         return
     end
 
-    if selectable_items then
-        selected_match = selected_match + amount
-        if selected_match > #matches then
-            selected_match = 1
-        elseif selected_match < 1 then
-            selected_match = #matches
-        end
-        render()
-        return
+    selected_match = selected_match + amount
+    if selected_match > #matches then
+        selected_match = 1
+    elseif selected_match < 1 then
+        selected_match = #matches
     end
-
-    go_history(history_pos + amount)
+    render()
 end
 
 -- Go to the first command in the command history (PgUp)
