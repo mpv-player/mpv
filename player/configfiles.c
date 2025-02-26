@@ -215,8 +215,12 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *path = NULL;
-    if (mp_is_url(bstr0(fname))) {
-        path = fname;
+    bstr play_path = bstr0(fname);
+    // mpv:// should be transparent to the user
+    if (bstr_eatstart0(&play_path, "mpv://"))
+        fname = play_path.start;
+    if (mp_is_url(play_path)) {
+        path = play_path.start;
     } else if (opts->ignore_path_in_watch_later_config) {
         path = mp_basename(fname);
     } else {
