@@ -4032,6 +4032,29 @@ Demuxer
     file and can make a reliable estimate even without an index present (such
     as partial files).
 
+``--demuxer-mkv-crop-compat=<yes|no>``
+    Enable compatibility mode for files that do not fully comply with the
+    Matroska specification. (default: yes)
+
+    Most files containing cropping metadata require this mode to display correctly.
+
+    If this option is enabled, crop metadata will be applied before calculating
+    the video's aspect ratio, ensuring it is cropped accordingly. If this option
+    is disabled, the image will be cropped first and then stretched to match
+    DisplayWidth and DisplayHeight.
+
+    According to the Matroska specification, the Pixel Aspect Ratio (PAR) should
+    be calculated after cropping. However, the majority of files do not adhere
+    to this rule, as it would cause incompatibility with crop-unaware players.
+    Additionally, MKVToolNix does not automatically adjust DisplayWidth and
+    DisplayHeight when cropping metadata is applied, leading to most of files
+    created with it also failing to conform to the specification.
+
+    See for more details:
+    https://github.com/ietf-wg-cellar/matroska-specification/pull/947
+    https://gitlab.com/mbunkus/mkvtoolnix/-/issues/2389
+    https://github.com/mpv-player/mpv/pull/13446
+
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
     (default: stereo).
