@@ -1599,6 +1599,10 @@ mp.register_script_message('get-input', function (script_name, args)
         history_paths[id] = args.history_path
         read_history()
         history_pos = #history + 1
+
+        if line ~= '' then
+            complete()
+        end
     end
 
     set_active(true)
