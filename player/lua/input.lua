@@ -50,6 +50,8 @@ local function register_event_handler(t)
 end
 
 function input.get(t)
+    t.has_completions = t.complete ~= nil
+
     mp.commandv("script-message-to", "console", "get-input",
                 mp.get_script_name(), utils.format_json(get_non_callbacks(t)))
 

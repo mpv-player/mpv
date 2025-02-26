@@ -98,6 +98,7 @@ local completion_append
 local completion_old_line
 local completion_old_cursor
 local autoselect_completion
+local has_completions
 
 local selectable_items
 local matches = {}
@@ -117,7 +118,7 @@ local function get_font()
         return opts.font
     end
 
-    if selectable_items and not searching_history then
+    if not has_completions then
         return
     end
 
@@ -1565,6 +1566,7 @@ mp.register_script_message('get-input', function (script_name, args)
     cursor = args.cursor_position or line:len() + 1
     keep_open = args.keep_open
     default_item = args.default_item
+    has_completions = args.has_completions
     dont_bind_up_down = args.dont_bind_up_down
     searching_history = false
 
