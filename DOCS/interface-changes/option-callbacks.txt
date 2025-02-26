@@ -1,0 +1,2 @@
+several options coalesce callbacks by default and are run on the next playloop instead of immediately
+add `immediate` command prefix to restore the old behavior of immediate option callbacks

@@ -125,7 +125,7 @@ static void mp_process_input(struct MPContext *mpctx)
 void handle_option_callbacks(struct MPContext *mpctx)
 {
     for (int i = 0; i < mpctx->num_option_callbacks; i++)
-        mp_option_run_callback(mpctx, i);
+        mp_option_run_callback(mpctx, &mpctx->option_callbacks[i]);
     mpctx->num_option_callbacks = 0;
 }
 

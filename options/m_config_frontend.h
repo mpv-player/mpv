@@ -48,6 +48,7 @@ struct m_config_option {
     bool is_set_from_cmdline : 1;   // Set by user from command line
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
+    bool immediate : 1;             // Callback should be processed immediately
     bool warning_was_printed : 1;
     int32_t opt_id;                 // For some m_config APIs
     const char *name;               // Full name (ie option-subopt)

@@ -54,6 +54,7 @@ static const struct flag cmd_flags[] = {
     {"repeatable",          MP_DISALLOW_REPEAT, MP_ALLOW_REPEAT},
     {"nonrepeatable",       MP_ALLOW_REPEAT,    MP_DISALLOW_REPEAT},
     {"nonscalable",         0,               MP_DISALLOW_SCALE},
+    {"immediate",           0,               MP_IMMEDIATE},
     {"async",               MP_SYNC_CMD,     MP_ASYNC_CMD},
     {"sync",                MP_ASYNC_CMD,    MP_SYNC_CMD},
     {0}
