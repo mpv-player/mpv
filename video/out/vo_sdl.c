@@ -608,7 +608,7 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
             break;
         }
         case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
+            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y, false);
             break;
         case SDL_MOUSEBUTTONDOWN: {
             int i;

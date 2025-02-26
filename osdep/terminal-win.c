@@ -198,7 +198,7 @@ static void read_input(HANDLE in)
                 int w = 0, h = 0;
                 if (get_font_size(&w, &h)) {
                     mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
-                                                      h * (record->dwMousePosition.Y + 0.5));
+                                                      h * (record->dwMousePosition.Y + 0.5), false);
                 }
                 break;
             }
