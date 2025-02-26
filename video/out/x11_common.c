@@ -1311,7 +1311,7 @@ void vo_x11_check_events(struct vo *vo)
             break;
         case MotionNotify:
             mp_input_set_mouse_pos(x11->input_ctx, Event.xmotion.x,
-                                                   Event.xmotion.y);
+                                                   Event.xmotion.y, false);
             break;
         case LeaveNotify:
             if (Event.xcrossing.mode != NotifyNormal)
