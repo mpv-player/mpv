@@ -849,28 +849,6 @@ update_timer = mp.add_periodic_timer(0.05, function()
 end)
 update_timer:kill()
 
--- Add a line to the log buffer (which is limited to 100 lines)
-local function log_add(text, style, terminal_style)
-    local log_buffer = log_buffers[id]
-    log_buffer[#log_buffer + 1] = {
-        text = text,
-        style = style or '',
-        terminal_style = terminal_style or '',
-    }
-    if #log_buffer > 100 then
-        table.remove(log_buffer, 1)
-    end
-
-    if open then
-        if not update_timer:is_enabled() then
-            render()
-            update_timer:resume()
-        else
-            pending_update = true
-        end
-    end
-end
-
 -- Add a line to the history and deduplicate
 local function history_add(text)
     if history[#history] == text or text == '' then
@@ -1629,12 +1607,32 @@ mp.register_script_message('get-input', function (script_name, args)
     mp.commandv('script-message-to', input_caller, 'input-event', 'opened')
 end)
 
+-- Add a line to the log buffer (which is limited to 100 lines)
 mp.register_script_message('log', function (message)
+    local log_buffer = log_buffers[id]
     message = utils.parse_json(message)
 
-    log_add(message.text,
-            message.error and styles.error or message.style,
-            message.error and terminal_styles.error or message.terminal_style)
+    log_buffer[#log_buffer + 1] = {
+        text = message.text,
+        style = message.error and styles.error or message.style or '',
+        terminal_style = message.error and terminal_styles.error or
+                         message.terminal_style or '',
+    }
+
+    if #log_buffer > 100 then
+        table.remove(log_buffer, 1)
+    end
+
+    if not open then
+        return
+    end
+
+    if not update_timer:is_enabled() then
+        render()
+        update_timer:resume()
+    else
+        pending_update = true
+    end
 end)
 
 mp.register_script_message('set-log', function (log)
