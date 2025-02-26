@@ -1666,7 +1666,7 @@ mp.register_script_message('complete', function (list, start_pos, append)
     table.sort(completions)
     completion_pos = start_pos
     completion_append = append
-    for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor),
+    for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor - 1),
                                       completions)) do
         completion_buffer[i] = completions[match[1]]
     end
