@@ -69,7 +69,7 @@ local open = false
 local osd_msg_active = false
 local insert_mode = false
 local pending_update = false
-local ime_active = mp.get_property_bool('input-ime')
+local ime_active = false
 local line = ''
 local cursor = 1
 local prompt
