@@ -306,7 +306,7 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
             terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
             mp_input_set_mouse_pos(input_ctx,
                 (buf.b[4] - 32.5) * (total_px_width / num_cols),
-                (buf.b[5] - 32.5) * (total_px_height / num_rows));
+                (buf.b[5] - 32.5) * (total_px_height / num_rows), false);
         }
         if (match->type != ENTRY_TYPE_MOUSE_MOVE)
             mp_input_put_key(input_ctx, buf.mods | match->mpkey);

@@ -288,8 +288,8 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(sx));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(sy));
 
-    if (!wl->toplevel_configured)
-        mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+                           wl->toplevel_configured);
     wl->toplevel_configured = false;
 }
 
@@ -310,8 +310,8 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(sx));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(sy));
 
-    if (!wl->toplevel_configured)
-        mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y);
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+                           wl->toplevel_configured);
     wl->toplevel_configured = false;
 }
 

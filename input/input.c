@@ -887,7 +887,7 @@ bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx)
     return r;
 }
 
-static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
+static void set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
 {
     MP_TRACE(ictx, "mouse move %d/%d\n", x, y);
 
@@ -909,7 +909,8 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
         MP_TRACE(ictx, "-> %d/%d\n", x, y);
     }
 
-    ictx->mouse_event_counter++;
+    if (!quiet)
+        ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
     ictx->mouse_vo_y = y;
 
@@ -955,15 +956,15 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y)
 void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
-    set_mouse_pos(ictx, x, y);
+    set_mouse_pos(ictx, x, y, false);
     input_unlock(ictx);
 }
 
-void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
 {
     input_lock(ictx);
     if (ictx->opts->enable_mouse_movements)
-        set_mouse_pos(ictx, x, y);
+        set_mouse_pos(ictx, x, y, quiet);
     input_unlock(ictx);
 }
 
@@ -993,7 +994,7 @@ static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, i
     ictx->touch_points[idx].y = y;
     // Emulate mouse input from the primary touch point (the first one added)
     if (ictx->opts->touch_emulate_mouse && idx == 0)
-        set_mouse_pos(ictx, x, y);
+        set_mouse_pos(ictx, x, y, false);
     notify_touch_update(ictx);
 }
 
@@ -1012,7 +1013,7 @@ void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
                          (struct touch_point){id, x, y});
         // Emulate MBTN_LEFT down if this is the only touch point
         if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 1) {
-            set_mouse_pos(ictx, x, y);
+            set_mouse_pos(ictx, x, y, false);
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
         }
         notify_touch_update(ictx);

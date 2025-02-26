@@ -171,7 +171,7 @@ class InputHelper: NSObject {
         if !mouseEnabled() { return }
         lock.withLock {
             guard let input = input else { return }
-            mp_input_set_mouse_pos(input, Int32(position.x), Int32(position.y))
+            mp_input_set_mouse_pos(input, Int32(position.x), Int32(position.y), false)
         }
     }
 
