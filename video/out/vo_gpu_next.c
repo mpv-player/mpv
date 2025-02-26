@@ -37,6 +37,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
+#include "sub/draw_bmp.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/out/placebo/ra_pl.h"
@@ -290,13 +291,8 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             struct mp_image *src)
 {
     struct priv *p = vo->priv;
-    static const bool subfmt_all[SUBBITMAP_COUNT] = {
-        [SUBBITMAP_LIBASS] = true,
-        [SUBBITMAP_BGRA]   = true,
-    };
-
     double pts = src ? src->pts : 0;
-    struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, subfmt_all);
+    struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, mp_draw_sub_formats);
 
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
