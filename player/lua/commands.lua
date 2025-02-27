@@ -505,7 +505,9 @@ local function complete(before_cur)
             elseif tokens[first_useful_token_index + 2].text == "remove" then
                 completions = list_option_value_list(tokens[first_useful_token_index + 1].text)
             end
-        elseif first_useful_token.text == "dump-cache" then
+        elseif first_useful_token.text == "dump-cache" or
+               (first_useful_token.text == "run" and
+                tokens[first_useful_token_index + 1].text == "mv") then
             completions = handle_file_completion(before_cur)
         end
     end
