@@ -480,6 +480,8 @@ local function complete(before_cur)
     elseif first_useful_token.text == "cycle-values" then
         completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
                                                before_cur)
+    elseif first_useful_token.text == "run" then
+        completions = handle_file_completion(before_cur)
     elseif #tokens == first_useful_token_index + 2 then
         if first_useful_token.text == "set" then
             completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
