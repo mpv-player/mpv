@@ -660,8 +660,13 @@ function register_event_handler(t) {
             var result = t[type].apply(null, args);
 
             if (type == "complete" && result) {
-                mp.commandv("script-message-to", "console", "complete",
-                            JSON.stringify(result[0]), result[1]);
+                if (result[2]) {
+                    mp.commandv("script-message-to", "console", "complete",
+                                JSON.stringify(result[0]), result[1], result[2]);
+                } else {
+                    mp.commandv("script-message-to", "console", "complete",
+                                JSON.stringify(result[0]), result[1]);
+                }
             }
         }
 
@@ -672,6 +677,8 @@ function register_event_handler(t) {
 
 mp.input = {
     get: function(t) {
+        t.has_completions = t.complete !== undefined
+
         mp.commandv("script-message-to", "console", "get-input", mp.script_name,
                     JSON.stringify(t));
 
