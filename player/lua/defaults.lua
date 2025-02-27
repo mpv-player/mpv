@@ -660,16 +660,33 @@ end
 local overlay_mt = {}
 overlay_mt.__index = overlay_mt
 local overlay_new_id = 0
+local overlay_id_pool = {}
 
 function mp.create_osd_overlay(format)
-    overlay_new_id = overlay_new_id + 1
+    local overlay_id
+    if next(overlay_id_pool) then
+        overlay_id = table.remove(overlay_id_pool)
+    else
+        overlay_new_id = overlay_new_id + 1
+        overlay_id = overlay_new_id
+    end
+
     local overlay = {
         format = format,
-        id = overlay_new_id,
+        id = overlay_id,
         data = "",
         res_x = 0,
         res_y = 720,
     }
+
+    -- Lua 5.1 doesn't support __gc on tables, so we need to use a proxy
+    -- we can check for availability of newproxy, it has been removed in Lua 5.2
+    if newproxy then -- luacheck: globals newproxy
+        local proxy = newproxy(true) -- luacheck: globals newproxy
+        getmetatable(proxy).__gc = function() overlay_mt.remove(overlay) end
+        overlay._gc_proxy = proxy
+    end
+
     setmetatable(overlay, overlay_mt)
     return overlay
 end
@@ -677,7 +694,9 @@ end
 function overlay_mt.update(ov)
     local cmd = {}
     for k, v in pairs(ov) do
-        cmd[k] = v
+        if k ~= "_gc_proxy" then
+            cmd[k] = v
+        end
     end
     cmd.name = "osd-overlay"
     cmd.res_x = math.floor(cmd.res_x)
@@ -692,6 +711,11 @@ function overlay_mt.remove(ov)
         format = "none",
         data = "",
     }
+    overlay_id_pool[#overlay_id_pool + 1] = ov.id
+end
+
+if not newproxy then -- luacheck: globals newproxy
+    overlay_mt.__gc = overlay_mt.remove
 end
 
 -- legacy API
