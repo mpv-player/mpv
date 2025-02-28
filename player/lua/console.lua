@@ -102,6 +102,7 @@ local log_buffers = {[id] = {}}
 local key_bindings = {}
 local dont_bind_up_down = false
 local overlay = mp.create_osd_overlay('ass-events')
+local width_overlay = mp.create_osd_overlay('ass-events')
 local global_margins = { t = 0, b = 0 }
 local input_caller
 local keep_open = false
@@ -355,7 +356,6 @@ local function calculate_max_item_width()
 
     local osd_w, osd_h = get_scaled_osd_dimensions()
     local font = get_font()
-    local width_overlay = mp.create_osd_overlay('ass-events')
     width_overlay.compute_bounds = true
     width_overlay.hidden = true
     width_overlay.res_x = osd_w
