@@ -33,12 +33,13 @@ end
 local function register_event_handler(t)
     mp.register_script_message("input-event", function (type, args)
         if t[type] then
-            local suggestions, completion_start_position =
+            local completions, completion_pos, completion_append =
                 t[type](unpack(utils.parse_json(args or "") or {}))
 
-            if type == "complete" and suggestions then
+            if type == "complete" and completions then
                 mp.commandv("script-message-to", "console", "complete",
-                            utils.format_json(suggestions), completion_start_position)
+                            utils.format_json(completions),
+                            unpack({completion_pos, completion_append}))
             end
         end
 
@@ -49,6 +50,8 @@ local function register_event_handler(t)
 end
 
 function input.get(t)
+    t.has_completions = t.complete ~= nil
+
     mp.commandv("script-message-to", "console", "get-input",
                 mp.get_script_name(), utils.format_json(get_non_callbacks(t)))
 
