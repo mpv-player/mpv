@@ -350,6 +350,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                                             FILE_SHARE_READ | FILE_SHARE_WRITE,
                                             &sa, OPEN_EXISTING, 0, NULL);
             fd_data[n].handle_close = true;
+            share_hndls[share_hndl_count++] = fd_data[n].handle;
         }
 
         switch (opts->fds[n].fd) {
