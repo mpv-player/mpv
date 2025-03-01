@@ -336,7 +336,7 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
     if (num_planes && !planes)
         return false;
     uint8_t *old_planes[MP_NUM_CHANNELS];
-    assert(num_planes <= MP_NUM_CHANNELS);
+    mp_assert(num_planes <= MP_NUM_CHANNELS);
     for (int n = 0; n < num_planes; n++)
         old_planes[n] = planes[n];
 
@@ -346,11 +346,11 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
 
     for (int n = 0; n < num_planes; n++) {
         int src = reorder[n];
-        assert(src >= -1 && src < num_planes);
+        mp_assert(src >= -1 && src < num_planes);
         if (src >= 0) {
             planes[n] = old_planes[src];
         } else {
-            assert(next_na < num_planes);
+            mp_assert(next_na < num_planes);
             planes[n] = old_planes[next_na++];
             // The NA planes were never written by avrctx, so clear them.
             af_fill_silence(planes[n],
@@ -488,7 +488,7 @@ static void swresample_process(struct mp_filter *f)
     }
 
     if (input) {
-        assert(!p->input);
+        mp_assert(!p->input);
 
         struct mp_swresample *s = &p->public;
 

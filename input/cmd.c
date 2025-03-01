@@ -142,7 +142,7 @@ static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
         struct mp_cmd_arg arg = {.type = opt};
         if (opt->defval)
             m_option_copy(opt, &arg.v, opt->defval);
-        assert(i <= cmd->nargs);
+        mp_assert(i <= cmd->nargs);
         if (i == cmd->nargs) {
             MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
         } else {
@@ -203,7 +203,7 @@ static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
 
 static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
 {
-    assert(node->format == MPV_FORMAT_NODE_ARRAY);
+    mp_assert(node->format == MPV_FORMAT_NODE_ARRAY);
     mpv_node_list *args = node->u.list;
     int cur = 0;
 
@@ -232,7 +232,7 @@ static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *nod
 
 static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
 {
-    assert(node->format == MPV_FORMAT_NODE_MAP);
+    mp_assert(node->format == MPV_FORMAT_NODE_MAP);
     mpv_node_list *args = node->u.list;
 
     mpv_node *name = node_map_get(node, "name");

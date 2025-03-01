@@ -32,7 +32,7 @@ error:
 void mpvk_uninit(struct mpvk_ctx *vk)
 {
     if (vk->surface) {
-        assert(vk->vkinst);
+        mp_assert(vk->vkinst);
         vkDestroySurfaceKHR(vk->vkinst->instance, vk->surface, NULL);
         vk->surface = VK_NULL_HANDLE;
     }

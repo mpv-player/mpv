@@ -351,7 +351,7 @@ struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
 static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
 {
     size_t size = talloc_get_size(s->start);
-    assert(s->len <= size);
+    mp_assert(s->len <= size);
     if (append_min > size - s->len) {
         if (append_min < size)
             append_min = size; // preallocate in power of 2s

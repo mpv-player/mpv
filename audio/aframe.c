@@ -418,7 +418,7 @@ char *mp_aframe_format_str_buf(char *buf, size_t buf_size, struct mp_aframe *fmt
 // Set data to the audio after the given number of samples (i.e. slice it).
 void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
 {
-    assert(samples >= 0 && samples <= mp_aframe_get_size(f));
+    mp_assert(samples >= 0 && samples <= mp_aframe_get_size(f));
 
     if (av_frame_make_writable(f->av_frame) < 0)
         return; // go complain to ffmpeg

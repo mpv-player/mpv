@@ -434,7 +434,7 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
 
 static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
 {
-    assert(level >= 0 && level <= 3);
+    mp_assert(level >= 0 && level <= 3);
     if (level == 0)
         return;
     char *msg = mpctx->opts->osd_msg[level - 1];

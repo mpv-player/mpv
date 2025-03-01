@@ -132,7 +132,7 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
     pthread_mutexattr_settype(&attr, mutex_type);
     ret = pthread_mutex_init(mutex, &attr);
     pthread_mutexattr_destroy(&attr);
-    assert(!ret);
+    mp_assert(!ret);
     return ret;
 }
 
@@ -143,7 +143,7 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
 
 static inline int mp_cond_init(mp_cond *cond)
 {
-    assert(cond);
+    mp_assert(cond);
 
     int ret = 0;
     pthread_condattr_t attr;
@@ -164,31 +164,31 @@ static inline int mp_cond_init(mp_cond *cond)
 
 static inline int mp_cond_destroy(mp_cond *cond)
 {
-    assert(cond);
+    mp_assert(cond);
     return pthread_cond_destroy(&cond->cond);
 }
 
 static inline int mp_cond_broadcast(mp_cond *cond)
 {
-    assert(cond);
+    mp_assert(cond);
     return pthread_cond_broadcast(&cond->cond);
 }
 
 static inline int mp_cond_signal(mp_cond *cond)
 {
-    assert(cond);
+    mp_assert(cond);
     return pthread_cond_signal(&cond->cond);
 }
 
 static inline int mp_cond_wait(mp_cond *cond, mp_mutex *mutex)
 {
-    assert(cond);
+    mp_assert(cond);
     return pthread_cond_wait(&cond->cond, mutex);
 }
 
 static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t timeout)
 {
-    assert(cond);
+    mp_assert(cond);
 
     timeout = MPMAX(0, timeout);
     // consider anything above 1000 days as infinity

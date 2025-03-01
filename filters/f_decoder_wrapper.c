@@ -279,14 +279,14 @@ static void thread_lock(struct priv *p)
     if (p->dec_dispatch)
         mp_dispatch_lock(p->dec_dispatch);
 
-    assert(!p->dec_thread_lock);
+    mp_assert(!p->dec_thread_lock);
     p->dec_thread_lock = true;
 }
 
 // Undo thread_lock().
 static void thread_unlock(struct priv *p)
 {
-    assert(p->dec_thread_lock);
+    mp_assert(p->dec_thread_lock);
     p->dec_thread_lock = false;
 
     if (p->dec_dispatch)
@@ -321,7 +321,7 @@ static void reset_decoder(struct priv *p)
 static void decf_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->decf == f);
+    mp_assert(p->decf == f);
 
     p->pts = MP_NOPTS_VALUE;
     p->last_format = p->fixed_format = (struct mp_image_params){0};
@@ -366,7 +366,7 @@ int mp_decoder_wrapper_control(struct mp_decoder_wrapper *d,
 static void decf_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->decf == f);
+    mp_assert(p->decf == f);
 
     if (p->decoder) {
         MP_DBG(f, "Uninit decoder.\n");
@@ -896,12 +896,12 @@ static void feed_packet(struct priv *p)
 
     // Flush current data if the packet is a new segment.
     if (is_new_segment(p, p->packet)) {
-        assert(!p->new_segment);
+        mp_assert(!p->new_segment);
         p->new_segment = p->packet.data;
         p->packet = MP_EOF_FRAME;
     }
 
-    assert(p->packet.type == MP_FRAME_PACKET || p->packet.type == MP_FRAME_EOF);
+    mp_assert(p->packet.type == MP_FRAME_PACKET || p->packet.type == MP_FRAME_EOF);
     struct demux_packet *packet =
         p->packet.type == MP_FRAME_PACKET ? p->packet.data : NULL;
 
@@ -1101,7 +1101,7 @@ static void update_queue_config(struct priv *p)
 static void decf_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->decf == f);
+    mp_assert(p->decf == f);
 
     if (m_config_cache_update(p->opt_cache))
         update_queue_config(p);
@@ -1133,7 +1133,7 @@ static MP_THREAD_VOID dec_thread(void *ptr)
 static void public_f_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->public.f == f);
+    mp_assert(p->public.f == f);
 
     if (p->queue) {
         mp_async_queue_reset(p->queue);
@@ -1148,10 +1148,10 @@ static void public_f_reset(struct mp_filter *f)
 static void public_f_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->public.f == f);
+    mp_assert(p->public.f == f);
 
     if (p->dec_thread_valid) {
-        assert(p->dec_dispatch);
+        mp_assert(p->dec_dispatch);
         thread_lock(p);
         p->request_terminate_dec_thread = 1;
         mp_dispatch_interrupt(p->dec_dispatch);

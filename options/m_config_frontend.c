@@ -595,7 +595,7 @@ static void notify_opt(struct m_config *config, void *ptr, bool self_notificatio
     }
     // ptr doesn't point to any config->optstruct field declared in the
     // option list?
-    assert(false);
+    mp_assert(false);
 }
 
 void m_config_notify_change_opt_ptr(struct m_config *config, void *ptr)
@@ -717,7 +717,7 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
                             struct bstr param, int flags)
 {
     int r;
-    assert(config != NULL);
+    mp_assert(config != NULL);
 
     bool negate;
     struct m_config_option *co =
@@ -738,7 +738,7 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
     }
 
     // This is the only mandatory function
-    assert(co->opt->type->parse);
+    mp_assert(co->opt->type->parse);
 
     r = handle_set_opt_flags(config, co, flags);
     if (r <= 0)

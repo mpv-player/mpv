@@ -12,14 +12,14 @@
 void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
 {
     // Other formats need to be initialized manually.
-    assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
+    mp_assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
            format == MPV_FORMAT_FLAG || format == MPV_FORMAT_INT64 ||
            format == MPV_FORMAT_DOUBLE || format == MPV_FORMAT_BYTE_ARRAY ||
            format == MPV_FORMAT_NONE);
 
     void *ta_parent = NULL;
     if (parent) {
-        assert(parent->format == MPV_FORMAT_NODE_MAP ||
+        mp_assert(parent->format == MPV_FORMAT_NODE_MAP ||
                parent->format == MPV_FORMAT_NODE_ARRAY);
         ta_parent = parent->u.list;
     }
@@ -36,7 +36,7 @@ void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
 struct mpv_node *node_array_add(struct mpv_node *dst, int format)
 {
     struct mpv_node_list *list = dst->u.list;
-    assert(dst->format == MPV_FORMAT_NODE_ARRAY && dst->u.list);
+    mp_assert(dst->format == MPV_FORMAT_NODE_ARRAY && dst->u.list);
     MP_TARRAY_GROW(list, list->values, list->num);
     node_init(&list->values[list->num], format, dst);
     return &list->values[list->num++];
@@ -47,16 +47,16 @@ struct mpv_node *node_array_add(struct mpv_node *dst, int format)
 // m_option_type_node memory management rules apply.
 struct mpv_node *node_map_add(struct mpv_node *dst, const char *key, int format)
 {
-    assert(key);
+    mp_assert(key);
     return node_map_badd(dst, bstr0(key), format);
 }
 
 struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format)
 {
-    assert(key.start);
+    mp_assert(key.start);
 
     struct mpv_node_list *list = dst->u.list;
-    assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
+    mp_assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
     MP_TARRAY_GROW(list, list->values, list->num);
     MP_TARRAY_GROW(list, list->keys, list->num);
     list->keys[list->num] = bstrdup0(list, key);
@@ -69,7 +69,7 @@ struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format
 // m_option_type_node memory management rules apply.
 void node_map_add_string(struct mpv_node *dst, const char *key, const char *val)
 {
-    assert(val);
+    mp_assert(val);
 
     struct mpv_node *entry = node_map_add(dst, key, MPV_FORMAT_NONE);
     entry->format = MPV_FORMAT_STRING;
@@ -78,7 +78,7 @@ void node_map_add_string(struct mpv_node *dst, const char *key, const char *val)
 
 void node_map_add_bstr(struct mpv_node *dst, const char *key, bstr val)
 {
-    assert(val.start);
+    mp_assert(val.start);
 
     struct mpv_node *entry = node_map_add(dst, key, MPV_FORMAT_NONE);
     entry->format = MPV_FORMAT_STRING;

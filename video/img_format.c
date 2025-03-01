@@ -480,7 +480,7 @@ bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets)
     if (!(desc.flags & MP_IMGFLAG_PACKED_SS_YUV))
         return false;
 
-    assert(desc.num_planes == 1);
+    mp_assert(desc.num_planes == 1);
 
     // Guess at which positions the additional luma samples are. We iterate
     // starting with the first byte, and then put a luma sample at places

@@ -206,7 +206,7 @@ void mp_chmap_remove_na(struct mp_chmap *map)
 // Add silent (NA) channels to map until map->num >= num.
 void mp_chmap_fill_na(struct mp_chmap *map, int num)
 {
-    assert(num <= MP_NUM_CHANNELS);
+    mp_assert(num <= MP_NUM_CHANNELS);
     while (map->num < num)
         map->speaker[map->num++] = MP_SPEAKER_ID_NA;
 }
@@ -298,7 +298,7 @@ bool mp_chmap_is_lavc(const struct mp_chmap *src)
         return true;
     // lavc's channel layout is a bit mask, and channels are always ordered
     // from LSB to MSB speaker bits, so speaker IDs have to increase.
-    assert(src->num > 0);
+    mp_assert(src->num > 0);
     for (int n = 1; n < src->num; n++) {
         if (src->speaker[n - 1] >= src->speaker[n])
             return false;
@@ -350,7 +350,7 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
     }
 
     for (int n = 0; n < to->num; n++)
-        assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
+        mp_assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
 // Return the number of channels only in a.

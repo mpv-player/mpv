@@ -257,7 +257,7 @@ static const char special_escape[] = {
 
 static void write_json_str(bstr *b, unsigned char *str)
 {
-    assert(str);
+    mp_assert(str);
 
     APPEND(b, "\"");
     while (1) {

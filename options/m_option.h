@@ -18,6 +18,7 @@
 #ifndef MPLAYER_M_OPTION_H
 #define MPLAYER_M_OPTION_H
 
+#include <assert.h>
 #include <float.h>
 #include <string.h>
 #include <stddef.h>

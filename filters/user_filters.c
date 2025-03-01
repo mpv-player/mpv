@@ -154,7 +154,7 @@ struct mp_filter *mp_create_user_filter(struct mp_filter *parent,
         frame_type = MP_FRAME_AUDIO;
         obj_list = &af_obj_list;
     }
-    assert(frame_type && obj_list);
+    mp_assert(frame_type && obj_list);
 
     struct mp_filter *f = NULL;
 
