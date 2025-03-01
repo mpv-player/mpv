@@ -198,7 +198,7 @@ static int dvd_probe(const char *path, const char *ext, const char *sig)
 
     char data[50];
 
-    assert(strlen(sig) <= sizeof(data));
+    mp_assert(strlen(sig) <= sizeof(data));
 
     if (fread(data, 50, 1, temp) == 1) {
         if (memcmp(data, sig, strlen(sig)) == 0)

@@ -66,7 +66,7 @@ static bool recreate_video_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
-    assert(vo_c);
+    mp_assert(vo_c);
 
     return mp_output_chain_update_filters(vo_c->filter, opts->vf_settings);
 }
@@ -139,10 +139,10 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
 {
     struct track *track = vo_c->track;
     if (track) {
-        assert(track->vo_c == vo_c);
+        mp_assert(track->vo_c == vo_c);
         track->vo_c = NULL;
         if (vo_c->dec_src)
-            assert(track->dec->f->pins[0] == vo_c->dec_src);
+            mp_assert(track->dec->f->pins[0] == vo_c->dec_src);
         talloc_free(track->dec->f);
         track->dec = NULL;
     }
@@ -170,7 +170,7 @@ void uninit_video_chain(struct MPContext *mpctx)
 
 int init_video_decoder(struct MPContext *mpctx, struct track *track)
 {
-    assert(!track->dec);
+    mp_assert(!track->dec);
     if (!track->stream)
         goto err_out;
 
@@ -222,7 +222,7 @@ static void filter_update_subtitles(void *ctx, double pts)
 // (track=NULL creates a blank chain, used for lavfi-complex)
 void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 {
-    assert(!mpctx->vo_chain);
+    mp_assert(!mpctx->vo_chain);
 
     if (!mpctx->video_out) {
         struct vo_extra ex = {
@@ -370,7 +370,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 // Generally, if position 0 gets a new frame, this must be called.
 static void handle_new_frame(struct MPContext *mpctx)
 {
-    assert(mpctx->num_next_frames >= 1);
+    mp_assert(mpctx->num_next_frames >= 1);
 
     double frame_time = 0;
     double pts = mpctx->next_frames[0]->pts;
@@ -446,8 +446,8 @@ static bool needs_new_frame(struct MPContext *mpctx)
 // Queue a frame to mpctx->next_frames[]. Call only if needs_new_frame() signals ok.
 static void add_new_frame(struct MPContext *mpctx, struct mp_image *frame)
 {
-    assert(mpctx->num_next_frames < MP_ARRAY_SIZE(mpctx->next_frames));
-    assert(frame);
+    mp_assert(mpctx->num_next_frames < MP_ARRAY_SIZE(mpctx->next_frames));
+    mp_assert(frame);
     mpctx->next_frames[mpctx->num_next_frames++] = frame;
     if (mpctx->num_next_frames == 1)
         handle_new_frame(mpctx);
@@ -967,7 +967,7 @@ static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
 static void calculate_frame_duration(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
-    assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
+    mp_assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
 
     double demux_duration = vo_c->filter->container_fps > 0
                             ? 1.0 / vo_c->filter->container_fps : -1;
@@ -1220,7 +1220,7 @@ void write_video(struct MPContext *mpctx)
     if (!vo_is_ready_for_frame(vo, mpctx->display_sync_active ? -1 : pts))
         return;
 
-    assert(mpctx->num_next_frames >= 1);
+    mp_assert(mpctx->num_next_frames >= 1);
 
     if (mpctx->num_past_frames >= MAX_NUM_VO_PTS)
         mpctx->num_past_frames--;
@@ -1233,7 +1233,7 @@ void write_video(struct MPContext *mpctx)
     calculate_frame_duration(mpctx);
 
     int req = vo_get_num_req_frames(mpctx->video_out);
-    assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
+    mp_assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,

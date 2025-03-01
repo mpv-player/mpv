@@ -649,7 +649,7 @@ static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
 
     // This must be run only before the stream was added, otherwise there
     // will be race conditions with accesses from the user thread.
-    assert(!sh->ds);
+    mp_assert(!sh->ds);
     sh->codec->replaygain_data = rgain;
 }
 
@@ -814,7 +814,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         .last_key_pts = MP_NOPTS_VALUE,
         .highest_pts = MP_NOPTS_VALUE,
     };
-    assert(priv->num_streams == i); // directly mapped
+    mp_assert(priv->num_streams == i); // directly mapped
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, info);
 
     if (sh) {
@@ -1221,7 +1221,7 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     add_new_streams(demux);
     update_metadata(demux);
 
-    assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
+    mp_assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     struct stream_info *info = priv->streams[pkt->stream_index];
     struct sh_stream *stream = info->sh;
     AVStream *st = priv->avfc->streams[pkt->stream_index];

@@ -83,7 +83,7 @@ const stream_info_t stream_info_memory = {
 // Caller may need to set stream.stream_origin correctly.
 struct stream *stream_memory_open(struct mpv_global *global, void *data, int len)
 {
-    assert(len >= 0);
+    mp_assert(len >= 0);
 
     struct stream_open_args sargs = {
         .global = global,

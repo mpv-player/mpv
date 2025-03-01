@@ -152,7 +152,7 @@ static void user_wrapper_process(struct mp_filter *f)
 
     mp_filter_set_error_handler(u->f, f);
     const char *name = u->label ? u->label : u->name;
-    assert(u->name);
+    mp_assert(u->name);
 
     if (!u->failed && mp_filter_has_failed(u->f)) {
         if (u == p->convert_wrapper) {
@@ -268,7 +268,7 @@ static void relink_filter_list(struct chain *p)
             MP_TARRAY_APPEND(p, p->all_filters, p->num_all_filters, filters[i]);
     }
 
-    assert(p->num_all_filters > 0);
+    mp_assert(p->num_all_filters > 0);
 
     p->filters_in = NULL;
     p->filters_out = NULL;
@@ -386,8 +386,8 @@ void mp_output_chain_set_ao(struct mp_output_chain *c, struct ao *ao)
 {
     struct chain *p = c->f->priv;
 
-    assert(p->public.ao_needs_update); // can't just call it any time
-    assert(!p->ao);
+    mp_assert(p->public.ao_needs_update); // can't just call it any time
+    mp_assert(!p->ao);
 
     p->public.ao_needs_update = false;
 
@@ -470,7 +470,7 @@ static void set_speed_any(struct mp_user_filter **filters, int num_filters,
                           int command, double *speed)
 {
     for (int n = num_filters - 1; n >= 0; n--) {
-        assert(*speed);
+        mp_assert(*speed);
         struct mp_filter_command cmd = {
             .type = command,
             .speed = *speed,

@@ -35,7 +35,7 @@ static void free_mixed_frame(void *arg)
 // "base" is used only to set parameters, no image data is referenced.
 struct mp_image *mp_vdpau_mixed_frame_create(struct mp_image *base)
 {
-    assert(base->imgfmt == IMGFMT_VDPAU);
+    mp_assert(base->imgfmt == IMGFMT_VDPAU);
 
     struct mp_vdpau_mixer_frame *frame =
         talloc_zero(NULL, struct mp_vdpau_mixer_frame);

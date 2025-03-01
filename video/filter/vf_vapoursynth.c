@@ -289,10 +289,10 @@ static void VS_CC vs_frame_done(void *userData, const VSFrame *f, int n,
     mp_mutex_lock(&p->lock);
 
     // If these assertions fail, n is an unrequested frame (or filtered twice).
-    assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
+    mp_assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
     int index = n - p->out_frameno;
     MP_TRACE(p, "filtered frame %d (%d)\n", n, index);
-    assert(p->requested[index] == &dummy_img);
+    mp_assert(p->requested[index] == &dummy_img);
 
     if (!res && !p->shutdown) {
         if (p->eof) {
@@ -407,7 +407,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     // This happens on EOF draining and format changes.
     if (p->requested[0] == &dummy_img_eof) {
         MP_VERBOSE(p, "finishing up\n");
-        assert(p->eof);
+        mp_assert(p->eof);
         mp_mutex_unlock(&p->lock);
         destroy_vs(p);
         mp_filter_internal_mark_progress(f);
@@ -567,8 +567,8 @@ static void destroy_vs(struct priv *p)
 
     p->drv->unload(p);
 
-    assert(!p->in_node_active);
-    assert(num_requested(p) == 0); // async callback didn't return?
+    mp_assert(!p->in_node_active);
+    mp_assert(num_requested(p) == 0); // async callback didn't return?
 
     p->shutdown = false;
     p->eof = false;

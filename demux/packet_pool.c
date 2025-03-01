@@ -53,7 +53,7 @@ void demux_packet_pool_init(struct mpv_global *global)
     mp_mutex_init(&pool->lock);
     pool->packets = NULL;
 
-    assert(!global->packet_pool);
+    mp_assert(!global->packet_pool);
     global->packet_pool = pool;
 }
 
@@ -87,8 +87,8 @@ void demux_packet_pool_prepend(struct demux_packet_pool *pool,
 {
     if (!head)
         return;
-    assert(tail);
-    assert(head != tail ? !!head->next : !head->next);
+    mp_assert(tail);
+    mp_assert(head != tail ? !!head->next : !head->next);
 
     mp_mutex_lock(&pool->lock);
     tail->next = pool->packets;

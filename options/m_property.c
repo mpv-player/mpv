@@ -46,7 +46,7 @@ static int m_property_multiply(struct mp_log *log,
                       &opt, ctx);
     if (r != M_PROPERTY_OK)
         return r;
-    assert(opt.type);
+    mp_assert(opt.type);
 
     if (!opt.type->multiply)
         return M_PROPERTY_NOT_IMPLEMENTED;
@@ -105,7 +105,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
     if (r <= 0)
         return r;
-    assert(opt.type);
+    mp_assert(opt.type);
 
     switch (action) {
     case M_PROPERTY_FIXED_LEN_PRINT:
@@ -147,7 +147,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
                           &opt, ctx);
         if (r <= 0)
             return r;
-        assert(opt.type);
+        mp_assert(opt.type);
         if (!opt.type->add)
             return M_PROPERTY_NOT_IMPLEMENTED;
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)

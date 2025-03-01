@@ -88,7 +88,7 @@ static void update_speed_filters(struct MPContext *mpctx)
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
     struct ao_chain *ao_c = mpctx->ao_chain;
-    assert(ao_c);
+    mp_assert(ao_c);
 
     if (!mp_output_chain_update_filters(ao_c->filter, mpctx->opts->af_settings))
         goto fail;
@@ -268,10 +268,10 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
 {
     struct track *track = ao_c->track;
     if (track) {
-        assert(track->ao_c == ao_c);
+        mp_assert(track->ao_c == ao_c);
         track->ao_c = NULL;
         if (ao_c->dec_src)
-            assert(track->dec->f->pins[0] == ao_c->dec_src);
+            mp_assert(track->dec->f->pins[0] == ao_c->dec_src);
         talloc_free(track->dec->f);
         track->dec = NULL;
     }
@@ -338,7 +338,7 @@ done:
 static void ao_chain_set_ao(struct ao_chain *ao_c, struct ao *ao)
 {
     if (ao_c->ao != ao) {
-        assert(!ao_c->ao);
+        mp_assert(!ao_c->ao);
         ao_c->ao = ao;
         ao_c->ao_queue = ao_get_queue(ao_c->ao);
         ao_c->queue_filter = mp_async_queue_create_filter(ao_c->ao_filter,
@@ -359,10 +359,10 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct ao_chain *ao_c = mpctx->ao_chain;
-    assert(ao_c);
+    mp_assert(ao_c);
     struct track *track = ao_c->track;
 
-    assert(ao_c->filter->ao_needs_update);
+    mp_assert(ao_c->filter->ao_needs_update);
 
     // The "ideal" filter output format
     struct mp_aframe *out_fmt = mp_aframe_new_ref(ao_c->filter->output_aformat);
@@ -519,7 +519,7 @@ init_error:
 
 int init_audio_decoder(struct MPContext *mpctx, struct track *track)
 {
-    assert(!track->dec);
+    mp_assert(!track->dec);
     if (!track->stream)
         goto init_error;
 
@@ -564,7 +564,7 @@ static const struct mp_filter_info ao_filter = {
 // (track=NULL creates a blank chain, used for lavfi-complex)
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
 {
-    assert(!mpctx->ao_chain);
+    mp_assert(!mpctx->ao_chain);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 

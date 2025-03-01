@@ -46,7 +46,7 @@ static void af_scaletempo2_process(struct mp_filter *f)
                 return; // no new data yet
             }
         }
-        assert(p->pending || eof);
+        mp_assert(p->pending || eof);
 
         if (!p->initialized) {
             if (!p->pending) {
@@ -88,7 +88,7 @@ static void af_scaletempo2_process(struct mp_filter *f)
         }
     }
 
-    assert(p->pending);
+    mp_assert(p->pending);
     if (mp_scaletempo2_frames_available(p->data, p->speed)) {
         struct mp_aframe *out = mp_aframe_new_ref(p->cur_format);
         int out_samples = p->data->ola_hop_size;
@@ -100,8 +100,8 @@ static void af_scaletempo2_process(struct mp_filter *f)
         mp_aframe_copy_attributes(out, p->pending);
 
         uint8_t **planes = mp_aframe_get_data_rw(out);
-        assert(planes);
-        assert(mp_aframe_get_planes(out) == p->data->channels);
+        mp_assert(planes);
+        mp_assert(mp_aframe_get_planes(out) == p->data->channels);
 
         out_samples = mp_scaletempo2_fill_buffer(p->data,
             (float**)planes, out_samples, p->speed);
@@ -140,7 +140,7 @@ error:
 static bool init_scaletempo2(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    assert(p->pending);
+    mp_assert(p->pending);
 
     if (mp_aframe_get_format(p->pending) != AF_FORMAT_FLOATP)
         return false;

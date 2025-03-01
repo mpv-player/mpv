@@ -174,7 +174,7 @@ static void update_thumbnail(SystemMediaTransportControls &smtc, smtc_ctx &ctx)
     auto track_list = mp_get_property<MPV_FORMAT_NODE>(ctx.mpv, "track-list");
     if (!track_list)
         return;
-    assert(track_list->format == MPV_FORMAT_NODE_ARRAY);
+    mp_assert(track_list->format == MPV_FORMAT_NODE_ARRAY);
     auto list = track_list->u.list;
     const char *thumbnail = nullptr;
     mp_string filepath{ mpv_get_property_string(ctx.mpv, "path") };

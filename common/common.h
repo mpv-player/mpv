@@ -18,7 +18,6 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,6 +30,7 @@
 #include <unistd.h>
 #endif
 
+#include "misc/mp_assert.h"
 #include "osdep/compiler.h"
 #include "mpv_talloc.h"
 

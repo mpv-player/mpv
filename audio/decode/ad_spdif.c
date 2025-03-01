@@ -328,8 +328,8 @@ static void ad_spdif_process(struct mp_filter *da)
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da) < 0)
             goto done;
-        assert(spdif_ctx->avpkt);
-        assert(spdif_ctx->lavf_ctx);
+        mp_assert(spdif_ctx->avpkt);
+        mp_assert(spdif_ctx->lavf_ctx);
     }
 
     spdif_ctx->out_buffer_len  = 0;

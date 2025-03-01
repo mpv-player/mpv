@@ -88,7 +88,7 @@ void mp_abort_playback_async(struct MPContext *mpctx)
 void mp_abort_add(struct MPContext *mpctx, struct mp_abort_entry *abort)
 {
     mp_mutex_lock(&mpctx->abort_lock);
-    assert(!abort->cancel);
+    mp_assert(!abort->cancel);
     abort->cancel = mp_cancel_new(NULL);
     MP_TARRAY_APPEND(NULL, mpctx->abort_list, mpctx->num_abort_list, abort);
     mp_abort_recheck_locked(mpctx, abort);
@@ -108,7 +108,7 @@ void mp_abort_remove(struct MPContext *mpctx, struct mp_abort_entry *abort)
             break;
         }
     }
-    assert(!abort); // should have been in the list
+    mp_assert(!abort); // should have been in the list
     mp_mutex_unlock(&mpctx->abort_lock);
 }
 
@@ -212,9 +212,9 @@ static void uninit_demuxer(struct MPContext *mpctx)
     for (int i = 0; i < mpctx->num_tracks; i++) {
         struct track *track = mpctx->tracks[i];
 
-        assert(!track->dec && !track->d_sub);
-        assert(!track->vo_c && !track->ao_c);
-        assert(!track->sink);
+        mp_assert(!track->dec && !track->d_sub);
+        mp_assert(!track->vo_c && !track->ao_c);
+        mp_assert(!track->sink);
 
         // Demuxers can be added in any order (if they appear mid-stream), and
         // we can't know which tracks uses which, so here's some O(n^2) trash.
@@ -668,7 +668,7 @@ static void check_previous_track_selection(struct MPContext *mpctx)
 void mark_track_selection(struct MPContext *mpctx, int order,
                           enum stream_type type, int value)
 {
-    assert(order >= 0 && order < num_ptracks[type]);
+    mp_assert(order >= 0 && order < num_ptracks[type]);
     mpctx->opts->stream_id[order][type] = value;
     m_config_notify_change_opt_ptr(mpctx->mconfig,
                                    &mpctx->opts->stream_id[order][type]);
@@ -677,9 +677,9 @@ void mark_track_selection(struct MPContext *mpctx, int order,
 void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type,
                        struct track *track, int flags)
 {
-    assert(!track || track->type == type);
-    assert(type >= 0 && type < STREAM_TYPE_COUNT);
-    assert(order >= 0 && order < num_ptracks[type]);
+    mp_assert(!track || track->type == type);
+    mp_assert(type >= 0 && type < STREAM_TYPE_COUNT);
+    mp_assert(order >= 0 && order < num_ptracks[type]);
 
     // Mark the current track selection as explicitly user-requested. (This is
     // different from auto-selection or disabling a track due to errors.)
@@ -1185,10 +1185,10 @@ static void start_open(struct MPContext *mpctx, char *url, int url_flags,
 {
     cancel_open(mpctx);
 
-    assert(!mpctx->open_active);
-    assert(!mpctx->open_cancel);
-    assert(!mpctx->open_res_demuxer);
-    assert(!atomic_load(&mpctx->open_done));
+    mp_assert(!mpctx->open_active);
+    mp_assert(!mpctx->open_cancel);
+    mp_assert(!mpctx->open_res_demuxer);
+    mp_assert(!atomic_load(&mpctx->open_done));
 
     mpctx->open_cancel = mp_cancel_new(NULL);
     mpctx->open_url = talloc_strdup(NULL, url);
@@ -1348,7 +1348,7 @@ static void kill_outputs(struct MPContext *mpctx, struct track *track)
                    track->user_tid);
         mp_switch_track(mpctx, track->type, NULL, 0);
     }
-    assert(!(track->vo_c || track->ao_c));
+    mp_assert(!(track->vo_c || track->ao_c));
 }
 
 // >0: changed, 0: no change, -1: error
@@ -1398,7 +1398,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
                 goto done;
         }
         struct vo_chain *vo_c = mpctx->vo_chain;
-        assert(!vo_c->track);
+        mp_assert(!vo_c->track);
         vo_c->filter_src = pad;
         mp_pin_connect(vo_c->filter->f->pins[0], vo_c->filter_src);
     }
@@ -1413,7 +1413,7 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
                 goto done;
         }
         struct ao_chain *ao_c = mpctx->ao_chain;
-        assert(!ao_c->track);
+        mp_assert(!ao_c->track);
         ao_c->filter_src = pad;
         mp_pin_connect(ao_c->filter->f->pins[0], ao_c->filter_src);
     }
@@ -1435,9 +1435,9 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
             continue;
         if (mp_pin_get_dir(pad) != MP_PIN_IN)
             continue;
-        assert(!mp_pin_is_connected(pad));
+        mp_assert(!mp_pin_is_connected(pad));
 
-        assert(!track->sink);
+        mp_assert(!track->sink);
 
         kill_outputs(mpctx, track);
 
@@ -1623,7 +1623,7 @@ static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    assert(mpctx->stop_play);
+    mp_assert(mpctx->stop_play);
     mpctx->stop_play = 0;
 
     process_hooks(mpctx, "on_before_start_file");
@@ -1670,8 +1670,8 @@ static void play_current_file(struct MPContext *mpctx)
 #endif
 
     mpctx->playing = mpctx->playlist->current;
-    assert(mpctx->playing);
-    assert(mpctx->playing->filename);
+    mp_assert(mpctx->playing);
+    mp_assert(mpctx->playing->filename);
     mpctx->playing->reserved += 1;
 
     mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);
@@ -1712,7 +1712,7 @@ static void play_current_file(struct MPContext *mpctx)
         mpctx->playing->playlist_path)
         MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
-    assert(mpctx->demuxer == NULL);
+    mp_assert(mpctx->demuxer == NULL);
 
     process_hooks(mpctx, "on_load");
     if (mpctx->stop_play)
@@ -2011,7 +2011,7 @@ terminate_playback:
         mpctx->files_played++;
     }
 
-    assert(mpctx->stop_play);
+    mp_assert(mpctx->stop_play);
 
     process_hooks(mpctx, "on_after_end_file");
 
@@ -2136,7 +2136,7 @@ void mp_play_files(struct MPContext *mpctx)
 // e must be on the mpctx->playlist.
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
 {
-    assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
+    mp_assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
     mpctx->playlist->current = e;
     mpctx->playlist->current_was_replaced = false;
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);

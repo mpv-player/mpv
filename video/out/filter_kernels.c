@@ -55,7 +55,7 @@ const struct filter_kernel *mp_find_filter_kernel(enum scaler_filter function)
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
-    assert(filter->f.radius > 0);
+    mp_assert(filter->f.radius > 0);
     double blur = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
     filter->radius = blur * filter->f.radius;
 
@@ -127,7 +127,7 @@ static double sample_filter(struct filter_kernel *filter, double x)
 static void mp_compute_weights(struct filter_kernel *filter, double f,
                                float *out_w)
 {
-    assert(filter->size > 0);
+    mp_assert(filter->size > 0);
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);

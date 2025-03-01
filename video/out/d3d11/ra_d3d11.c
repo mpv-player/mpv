@@ -1250,8 +1250,8 @@ static void blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     struct mp_rect dst_rc = *dst_rc_ptr;
     struct mp_rect src_rc = *src_rc_ptr;
 
-    assert(dst->params.dimensions == 2);
-    assert(src->params.dimensions == 2);
+    mp_assert(dst->params.dimensions == 2);
+    mp_assert(src->params.dimensions == 2);
 
     // A zero-sized target rectangle is a no-op
     if (!mp_rect_w(dst_rc) || !mp_rect_h(dst_rc))

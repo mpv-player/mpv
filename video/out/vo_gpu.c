@@ -303,8 +303,8 @@ static int preinit(struct vo *vo)
     talloc_free(ctx_opts);
     if (!p->ctx)
         goto err_out;
-    assert(p->ctx->ra);
-    assert(p->ctx->swapchain);
+    mp_assert(p->ctx->ra);
+    mp_assert(p->ctx->swapchain);
 
     p->renderer = gl_video_init(p->ctx->ra, vo->log, vo->global);
     gl_video_set_osd_source(p->renderer, vo->osd);

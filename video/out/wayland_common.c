@@ -777,7 +777,7 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
         return;
     }
 
-    assert(!s->dnd_offer->offer);
+    mp_assert(!s->dnd_offer->offer);
     int action = s->dnd_offer->action;
     *s->dnd_offer = *s->pending_offer;
     *s->pending_offer = (struct vo_wayland_data_offer){.fd = -1};

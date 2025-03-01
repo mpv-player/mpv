@@ -165,8 +165,8 @@ fail:
 
 static bool mp_image_alloc_planes(struct mp_image *mpi)
 {
-    assert(!mpi->planes[0]);
-    assert(!mpi->bufs[0]);
+    mp_assert(!mpi->planes[0]);
+    mp_assert(!mpi->bufs[0]);
 
     int align = MP_IMAGE_BYTE_ALIGN;
 
@@ -231,7 +231,7 @@ int mp_image_plane_h(struct mp_image *mpi, int plane)
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
-    assert(w >= 0 && h >= 0);
+    mp_assert(w >= 0 && h >= 0);
     mpi->w = mpi->params.w = w;
     mpi->h = mpi->params.h = h;
 }
@@ -287,8 +287,8 @@ struct mp_image *mp_image_new_copy(struct mp_image *img)
 // Only works with ref-counted images, and can't change image size/format.
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
 {
-    assert(dst->imgfmt == src->imgfmt && dst->w == src->w && dst->h == src->h);
-    assert(dst->bufs[0] && src->bufs[0]);
+    mp_assert(dst->imgfmt == src->imgfmt && dst->w == src->w && dst->h == src->h);
+    mp_assert(dst->bufs[0] && src->bufs[0]);
 
     mp_image_destructor(dst); // unref old
     talloc_free_children(dst);
@@ -429,7 +429,7 @@ bool mp_image_make_writeable(struct mp_image *img)
     if (!new)
         return false;
     mp_image_steal_data(img, new);
-    assert(mp_image_is_writeable(img));
+    mp_assert(mp_image_is_writeable(img));
     return true;
 }
 
@@ -472,9 +472,9 @@ void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
 
 void mp_image_copy(struct mp_image *dst, struct mp_image *src)
 {
-    assert(dst->imgfmt == src->imgfmt);
-    assert(dst->w == src->w && dst->h == src->h);
-    assert(mp_image_is_writeable(dst));
+    mp_assert(dst->imgfmt == src->imgfmt);
+    mp_assert(dst->w == src->w && dst->h == src->h);
+    mp_assert(mp_image_is_writeable(dst));
     for (int n = 0; n < dst->num_planes; n++) {
         int line_bytes = (mp_image_plane_w(dst, n) * dst->fmt.bpp[n] + 7) / 8;
         int plane_h = mp_image_plane_h(dst, n);
@@ -507,7 +507,7 @@ static void assign_bufref(AVBufferRef **dst, AVBufferRef *new)
 
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 {
-    assert(dst != src);
+    mp_assert(dst != src);
 
     dst->pict_type = src->pict_type;
     dst->fields = src->fields;
@@ -564,11 +564,11 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
 // x0/y0 must be naturally aligned.
 void mp_image_crop(struct mp_image *img, int x0, int y0, int x1, int y1)
 {
-    assert(x0 >= 0 && y0 >= 0);
-    assert(x0 <= x1 && y0 <= y1);
-    assert(x1 <= img->w && y1 <= img->h);
-    assert(!(x0 & (img->fmt.align_x - 1)));
-    assert(!(y0 & (img->fmt.align_y - 1)));
+    mp_assert(x0 >= 0 && y0 >= 0);
+    mp_assert(x0 <= x1 && y0 <= y1);
+    mp_assert(x1 <= img->w && y1 <= img->h);
+    mp_assert(!(x0 & (img->fmt.align_x - 1)));
+    mp_assert(!(y0 & (img->fmt.align_y - 1)));
 
     for (int p = 0; p < img->num_planes; ++p) {
         img->planes[p] += (y0 >> img->fmt.ys[p]) * img->stride[p] +
@@ -585,7 +585,7 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc)
 // Repeatedly write count patterns of src[0..src_size] to p.
 static void memset_pattern(void *p, size_t count, uint8_t *src, size_t src_size)
 {
-    assert(src_size >= 1);
+    mp_assert(src_size >= 1);
 
     if (src_size == 1) {
         memset(p, src[0], count);
@@ -632,11 +632,11 @@ static bool endian_swap_bytes(void *d, size_t bytes, size_t word_size)
 // Alpha is cleared to 0 (fully transparent).
 void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 {
-    assert(x0 >= 0 && y0 >= 0);
-    assert(x0 <= x1 && y0 <= y1);
-    assert(x1 <= img->w && y1 <= img->h);
-    assert(!(x0 & (img->fmt.align_x - 1)));
-    assert(!(y0 & (img->fmt.align_y - 1)));
+    mp_assert(x0 >= 0 && y0 >= 0);
+    mp_assert(x0 <= x1 && y0 <= y1);
+    mp_assert(x1 <= img->w && y1 <= img->h);
+    mp_assert(!(x0 & (img->fmt.align_x - 1)));
+    mp_assert(!(y0 & (img->fmt.align_y - 1)));
 
     struct mp_image area = *img;
     struct mp_imgfmt_desc *fmt = &area.fmt;
@@ -1313,8 +1313,8 @@ void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride)
 // You cannot access e.g. individual luma pixels on the luma plane with yuv420p.
 void *mp_image_pixel_ptr(struct mp_image *img, int plane, int x, int y)
 {
-    assert(MP_IS_ALIGNED(x, img->fmt.align_x));
-    assert(MP_IS_ALIGNED(y, img->fmt.align_y));
+    mp_assert(MP_IS_ALIGNED(x, img->fmt.align_x));
+    mp_assert(MP_IS_ALIGNED(y, img->fmt.align_y));
     return mp_image_pixel_ptr_ny(img, plane, x, y);
 }
 
@@ -1323,8 +1323,8 @@ void *mp_image_pixel_ptr(struct mp_image *img, int plane, int x, int y)
 // Useful for addressing luma rows.
 void *mp_image_pixel_ptr_ny(struct mp_image *img, int plane, int x, int y)
 {
-    assert(MP_IS_ALIGNED(x, img->fmt.align_x));
-    assert(MP_IS_ALIGNED(y, 1 << img->fmt.ys[plane]));
+    mp_assert(MP_IS_ALIGNED(x, img->fmt.align_x));
+    mp_assert(MP_IS_ALIGNED(y, 1 << img->fmt.ys[plane]));
     return img->planes[plane] +
            img->stride[plane] * (ptrdiff_t)(y >> img->fmt.ys[plane]) +
            (x >> img->fmt.xs[plane]) * (size_t)img->fmt.bpp[plane] / 8;

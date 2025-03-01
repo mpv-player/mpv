@@ -393,7 +393,7 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
     struct encode_lavc_context *ctx = dst->ctx;
     struct encode_priv *p = ctx->priv;
 
-    assert(dst->st);
+    mp_assert(dst->st);
 
     mp_mutex_lock(&ctx->lock);
 
@@ -407,7 +407,7 @@ static void encode_lavc_add_packet(struct mux_stream *dst, AVPacket *pkt)
     }
 
     pkt->stream_index = dst->st->index;
-    assert(dst->st == p->muxer->streams[pkt->stream_index]);
+    mp_assert(dst->st == p->muxer->streams[pkt->stream_index]);
 
     av_packet_rescale_ts(pkt, dst->encoder_timebase, dst->st->time_base);
 
@@ -842,7 +842,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
 bool encoder_init_codec_and_muxer(struct encoder_context *p,
                                   void (*on_ready)(void *ctx), void *ctx)
 {
-    assert(!avcodec_is_open(p->encoder));
+    mp_assert(!avcodec_is_open(p->encoder));
 
     char **copts = p->type == STREAM_VIDEO
         ? p->options->vopts

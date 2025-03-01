@@ -30,6 +30,7 @@
 
 #include <libavutil/lfg.h>
 
+#include "misc/mp_assert.h"
 #include "mpv_talloc.h"
 #include "dither.h"
 
@@ -54,7 +55,7 @@ struct ctx {
 
 static void makegauss(struct ctx *k, unsigned int sizeb)
 {
-    assert(sizeb >= 1 && sizeb <= MAX_SIZEB);
+    mp_assert(sizeb >= 1 && sizeb <= MAX_SIZEB);
 
     av_lfg_init(&k->avlfg, 123);
 
@@ -94,7 +95,7 @@ static void makegauss(struct ctx *k, unsigned int sizeb)
     for (unsigned int c = 0; c < k->size2; c++) {
         uint64_t oldtotal = total;
         total += k->gauss[c];
-        assert(total >= oldtotal);
+        mp_assert(total >= oldtotal);
     }
 }
 

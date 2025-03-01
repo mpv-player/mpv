@@ -130,7 +130,7 @@ static void copy_plane(struct mp_image *dst, int dst_x, int dst_y,
     int h = (1 << dst->fmt.chroma_ys) - (1 << dst->fmt.ys[p]) + 1;
     size_t size = mp_image_plane_bytes(dst, p, dst_x, w);
 
-    assert(dst->fmt.bpp[p] == src->fmt.bpp[p]);
+    mp_assert(dst->fmt.bpp[p] == src->fmt.bpp[p]);
 
     for (int y = 0; y < h; y++) {
         void *restrict pd = mp_image_pixel_ptr_ny(dst, p, dst_x, dst_y + y);
@@ -144,7 +144,7 @@ static void swap_endian(struct mp_image *dst, int dst_x, int dst_y,
                         struct mp_image *src, int src_x, int src_y,
                         int w, int endian_size)
 {
-    assert(src->fmt.num_planes == dst->fmt.num_planes);
+    mp_assert(src->fmt.num_planes == dst->fmt.num_planes);
 
     for (int p = 0; p < dst->fmt.num_planes; p++) {
         int xs = dst->fmt.xs[p];
@@ -154,7 +154,7 @@ static void swap_endian(struct mp_image *dst, int dst_x, int dst_y,
         // Number of lines on this plane.
         int h = (1 << dst->fmt.chroma_ys) - (1 << dst->fmt.ys[p]) + 1;
 
-        assert(src->fmt.bpp[p] == bpp * 8);
+        mp_assert(src->fmt.bpp[p] == bpp * 8);
 
         for (int y = 0; y < h; y++) {
             void *restrict s = mp_image_pixel_ptr_ny(src, p, src_x, src_y + y);
@@ -447,7 +447,7 @@ static void fringe_rgb_repack(struct mp_repack *rp,
         pb[p] = mp_image_pixel_ptr(b, s, b_x, b_y);
     }
 
-    assert(rp->comp_size == 1 || rp->comp_size == 2);
+    mp_assert(rp->comp_size == 1 || rp->comp_size == 2);
 
     void (*repack)(void *restrict pa, void *restrict pb[], int w, uint8_t *restrict lut,
                    uint8_t s0, uint8_t s1, uint8_t s2) = NULL;
@@ -513,10 +513,10 @@ static void setup_fringe_rgb_packer(struct mp_repack *rp)
     }
 
     rp->comp_size = (desc.bpp[0] + 7) / 8;
-    assert(rp->comp_size == 1 || rp->comp_size == 2);
+    mp_assert(rp->comp_size == 1 || rp->comp_size == 2);
 
     if (desc.endian_shift) {
-        assert(rp->comp_size == 2 && (1 << desc.endian_shift) == 2);
+        mp_assert(rp->comp_size == 2 && (1 << desc.endian_shift) == 2);
         rp->endian_size = 2;
     }
 }
@@ -714,7 +714,7 @@ static void setup_fringe_yuv_packer(struct mp_repack *rp)
 
     if (desc.endian_shift) {
         rp->endian_size = 1 << desc.endian_shift;
-        assert(rp->endian_size == 2);
+        mp_assert(rp->endian_size == 2);
     }
 }
 
@@ -819,7 +819,7 @@ static void repack_float(struct mp_repack *rp,
                          struct mp_image *a, int a_x, int a_y,
                          struct mp_image *b, int b_x, int b_y, int w)
 {
-    assert(rp->f32_comp_size == 1 || rp->f32_comp_size == 2);
+    mp_assert(rp->f32_comp_size == 1 || rp->f32_comp_size == 2);
 
     void (*packer)(void *restrict a, float *restrict b, int w, float fm, float fb, uint32_t max)
         = rp->pack ? (rp->f32_comp_size == 1 ? pa_f32_8 : pa_f32_16)
@@ -853,7 +853,7 @@ static void update_repack_float(struct mp_repack *rp)
     // The fixed point format.
     struct mp_regular_imgfmt desc = {0};
     mp_get_regular_imgfmt(&desc, rp->imgfmt_b);
-    assert(desc.component_size);
+    mp_assert(desc.component_size);
 
     int comp_bits = desc.component_size * 8 + MPMIN(desc.component_pad, 0);
     for (int p = 0; p < desc.num_planes; p++) {
@@ -872,21 +872,21 @@ static void update_repack_float(struct mp_repack *rp)
 void repack_line(struct mp_repack *rp, int dst_x, int dst_y,
                  int src_x, int src_y, int w)
 {
-    assert(rp->configured);
+    mp_assert(rp->configured);
 
     struct repack_step *first = &rp->steps[0];
     struct repack_step *last = &rp->steps[rp->num_steps - 1];
 
-    assert(dst_x >= 0 && dst_y >= 0 && src_x >= 0 && src_y >= 0 && w >= 0);
-    assert(dst_x + w <= MP_ALIGN_UP(last->buf[1]->w, last->fmt[1].align_x));
-    assert(src_x + w <= MP_ALIGN_UP(first->buf[0]->w, first->fmt[0].align_x));
-    assert(dst_y < last->buf[1]->h);
-    assert(src_y < first->buf[0]->h);
-    assert(!(dst_x & (last->fmt[1].align_x - 1)));
-    assert(!(src_x & (first->fmt[0].align_x - 1)));
-    assert(!(w & ((1 << first->fmt[0].chroma_xs) - 1)));
-    assert(!(dst_y & (last->fmt[1].align_y - 1)));
-    assert(!(src_y & (first->fmt[0].align_y - 1)));
+    mp_assert(dst_x >= 0 && dst_y >= 0 && src_x >= 0 && src_y >= 0 && w >= 0);
+    mp_assert(dst_x + w <= MP_ALIGN_UP(last->buf[1]->w, last->fmt[1].align_x));
+    mp_assert(src_x + w <= MP_ALIGN_UP(first->buf[0]->w, first->fmt[0].align_x));
+    mp_assert(dst_y < last->buf[1]->h);
+    mp_assert(src_y < first->buf[0]->h);
+    mp_assert(!(dst_x & (last->fmt[1].align_x - 1)));
+    mp_assert(!(src_x & (first->fmt[0].align_x - 1)));
+    mp_assert(!(w & ((1 << first->fmt[0].chroma_xs) - 1)));
+    mp_assert(!(dst_y & (last->fmt[1].align_y - 1)));
+    mp_assert(!(src_y & (first->fmt[0].align_y - 1)));
 
     for (int n = 0; n < rp->num_steps; n++) {
         struct repack_step *rs = &rp->steps[n];
@@ -1029,7 +1029,7 @@ static bool setup_format_ne(struct mp_repack *rp)
     }
 
     for (int n = 0; n < rp->num_steps - 1; n++)
-        assert(rp->steps[n].fmt[1].id == rp->steps[n + 1].fmt[0].id);
+        mp_assert(rp->steps[n].fmt[1].id == rp->steps[n + 1].fmt[0].id);
 
     return true;
 }
@@ -1115,12 +1115,12 @@ bool repack_config_buffers(struct mp_repack *rp,
 
     rp->configured = false;
 
-    assert(dst && src);
+    mp_assert(dst && src);
 
     int buf_w = MPMAX(dst->w, src->w);
 
-    assert(dst->imgfmt == rs_last->fmt[1].id);
-    assert(src->imgfmt == rs_first->fmt[0].id);
+    mp_assert(dst->imgfmt == rs_last->fmt[1].id);
+    mp_assert(src->imgfmt == rs_first->fmt[0].id);
 
     // Chain/allocate buffers.
 
@@ -1134,7 +1134,7 @@ bool repack_config_buffers(struct mp_repack *rp,
         struct repack_step *rs = &rp->steps[n];
 
         if (!rs->buf[0]) {
-            assert(n > 0);
+            mp_assert(n > 0);
             rs->buf[0] = rp->steps[n - 1].buf[1];
         }
 

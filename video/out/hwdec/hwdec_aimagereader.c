@@ -161,7 +161,7 @@ static int init(struct ra_hwdec *hw)
         MP_ERR(hw, "newWithUsage failed: %d\n", ret);
         return -1;
     }
-    assert(p->reader);
+    mp_assert(p->reader);
 
     ANativeWindow *window;
     ret = p->AImageReader_getWindow(p->reader, &window);
@@ -169,7 +169,7 @@ static int init(struct ra_hwdec *hw)
         MP_ERR(hw, "getWindow failed: %d\n", ret);
         return -1;
     }
-    assert(window);
+    mp_assert(window);
 
     jobject surface = p->ANativeWindow_toSurface(env, window);
     p->surface = (*env)->NewGlobalRef(env, surface);
@@ -197,7 +197,7 @@ static void uninit(struct ra_hwdec *hw)
 
     if (p->surface) {
         JNIEnv *env = MP_JNI_GET_ENV(hw);
-        assert(env);
+        mp_assert(env);
         (*env)->DeleteGlobalRef(env, p->surface);
         p->surface = NULL;
     }
@@ -351,7 +351,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         // flashing frames of render errors.
         return image_available ? -1 : 0;
     }
-    assert(p->image);
+    mp_assert(p->image);
 
     AHardwareBuffer *hwbuf = NULL;
     ret = o->AImage_getHardwareBuffer(p->image, &hwbuf);
@@ -359,7 +359,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         MP_ERR(mapper, "getHardwareBuffer failed: %d\n", ret);
         return -1;
     }
-    assert(hwbuf);
+    mp_assert(hwbuf);
 
     // Update texture size since it may differ
     AHardwareBuffer_Desc d;

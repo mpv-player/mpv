@@ -705,10 +705,10 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
     dvb_priv_t *priv = stream->priv;
     dvb_state_t *state = priv->state;
 
-    assert(adapter < state->adapters_count);
+    mp_assert(adapter < state->adapters_count);
     int devno = state->adapters[adapter].devno;
     dvb_channels_list_t *new_list = state->adapters[adapter].list;
-    assert(n < new_list->NUM_CHANNELS);
+    mp_assert(n < new_list->NUM_CHANNELS);
     dvb_channel_t *channel = &(new_list->channels[n]);
 
     if (state->is_on) {  //the fds are already open and we have to stop the demuxers

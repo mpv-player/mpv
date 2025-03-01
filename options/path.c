@@ -72,7 +72,7 @@ static const char *mp_get_platform_path(void *talloc_ctx,
                                         struct mpv_global *global,
                                         const char *type)
 {
-    assert(talloc_ctx);
+    mp_assert(talloc_ctx);
 
     if (global->configdir) {
         // Return NULL for all platform paths if --no-config is passed
@@ -99,7 +99,7 @@ static const char *mp_get_platform_path(void *talloc_ctx,
     }
 
     if (fallback_type) {
-        assert(strcmp(fallback_type, type) != 0);
+        mp_assert(strcmp(fallback_type, type) != 0);
         return mp_get_platform_path(talloc_ctx, global, fallback_type);
     }
     return NULL;

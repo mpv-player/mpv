@@ -1320,7 +1320,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         qparams.drift_compensation = 0;
 #endif
     status = pl_queue_update(p->queue, &mix, &qparams);
-    assert(status != PL_QUEUE_EOF);
+    mp_assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
         MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");
         return;
@@ -1481,14 +1481,14 @@ done:
 static inline void copy_frame_info_to_mp(struct frame_info *pl,
                                          struct mp_frame_perf *mp) {
     static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
-    assert(pl->count <= VO_PASS_PERF_MAX);
+    mp_assert(pl->count <= VO_PASS_PERF_MAX);
     mp->count = MPMIN(pl->count, VO_PASS_PERF_MAX);
 
     for (int i = 0; i < mp->count; ++i) {
         const struct pl_dispatch_info *pass = &pl->info[i];
 
         static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
-        assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
+        mp_assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
 
         struct mp_pass_perf *perf = &mp->perf[i];
         perf->count = MPMIN(pass->num_samples, VO_PERF_SAMPLE_COUNT);
@@ -1736,8 +1736,8 @@ static void cache_uninit(struct priv *p, struct cache *cache)
     void *ta_ctx = talloc_new(NULL);
     struct file_entry *files = NULL;
     size_t num_files = 0;
-    assert(cache->dir);
-    assert(cache->name);
+    mp_assert(cache->dir);
+    mp_assert(cache->name);
 
     DIR *d = opendir(cache->dir);
     if (!d)
@@ -1816,7 +1816,7 @@ static void uninit(struct vo *vo)
         hwdec_devices_destroy(vo->hwdec_devs);
     }
 
-    assert(p->num_dr_buffers == 0);
+    mp_assert(p->num_dr_buffers == 0);
     mp_mutex_destroy(&p->dr_lock);
 
     cache_uninit(p, &p->shader_cache);
