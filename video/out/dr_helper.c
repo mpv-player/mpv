@@ -30,7 +30,7 @@ static void dr_helper_destroy(void *ptr)
 
     // All references must have been freed on destruction, or we'll have
     // dangling pointers.
-    assert(atomic_load(&dr->dr_in_flight) == 0);
+    mp_assert(atomic_load(&dr->dr_in_flight) == 0);
 
     mp_mutex_destroy(&dr->thread_lock);
 }
@@ -55,7 +55,7 @@ struct dr_helper *dr_helper_create(struct mp_dispatch_queue *dispatch,
 void dr_helper_acquire_thread(struct dr_helper *dr)
 {
     mp_mutex_lock(&dr->thread_lock);
-    assert(!dr->thread_valid); // fails on API user errors
+    mp_assert(!dr->thread_valid); // fails on API user errors
     dr->thread_valid = true;
     dr->thread_id = mp_thread_current_id();
     mp_mutex_unlock(&dr->thread_lock);
@@ -65,8 +65,8 @@ void dr_helper_release_thread(struct dr_helper *dr)
 {
     mp_mutex_lock(&dr->thread_lock);
     // Fails on API user errors.
-    assert(dr->thread_valid);
-    assert(mp_thread_id_equal(dr->thread_id, mp_thread_current_id()));
+    mp_assert(dr->thread_valid);
+    mp_assert(mp_thread_id_equal(dr->thread_id, mp_thread_current_id()));
     dr->thread_valid = false;
     mp_mutex_unlock(&dr->thread_lock);
 }
@@ -81,7 +81,7 @@ static void dr_thread_free(void *ptr)
     struct free_dr_context *ctx = ptr;
 
     unsigned long long v = atomic_fetch_add(&ctx->dr->dr_in_flight, -1);
-    assert(v); // value before sub is 0 - unexpected underflow.
+    mp_assert(v); // value before sub is 0 - unexpected underflow.
 
     av_buffer_unref(&ctx->ref);
     talloc_free(ctx);
@@ -123,14 +123,14 @@ static void sync_get_image(void *ptr)
         return;
 
     // We require exactly 1 AVBufferRef.
-    assert(cmd->res->bufs[0]);
-    assert(!cmd->res->bufs[1]);
+    mp_assert(cmd->res->bufs[0]);
+    mp_assert(!cmd->res->bufs[1]);
 
     // Apply some magic to get it free'd on the DR thread as well. For this to
     // work, we create a dummy-ref that aliases the original ref, which is why
     // the original ref must be writable in the first place. (A newly allocated
     // image should be always writable of course.)
-    assert(mp_image_is_writeable(cmd->res));
+    mp_assert(mp_image_is_writeable(cmd->res));
 
     struct free_dr_context *ctx = talloc_zero(NULL, struct free_dr_context);
     *ctx = (struct free_dr_context){

@@ -18,7 +18,6 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,6 +30,7 @@
 #include <unistd.h>
 #endif
 
+#include "misc/mp_assert.h"
 #include "osdep/compiler.h"
 #include "mpv_talloc.h"
 
@@ -167,7 +167,7 @@ char **mp_dup_str_array(void *tctx, char **s);
 // kill the process even with NDEBUG.
 #define MP_HANDLE_OOM(x) do {   \
         void *oom_p_ = (x);     \
-        assert(oom_p_);         \
+        mp_assert(oom_p_);      \
         if (!oom_p_)            \
             abort();            \
     } while (0)

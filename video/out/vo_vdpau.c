@@ -602,7 +602,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
         MP_ASSERT_UNREACHABLE();
     };
 
-    assert(imgs->packed);
+    mp_assert(imgs->packed);
 
     int r_w = next_pow2(imgs->packed_w);
     int r_h = next_pow2(imgs->packed_h);
@@ -913,7 +913,7 @@ static struct mp_image *read_output_surface(struct vo *vo,
     if (vdp_st != VDP_STATUS_OK)
         return NULL;
 
-    assert(fmt == OUTPUT_RGBA_FORMAT);
+    mp_assert(fmt == OUTPUT_RGBA_FORMAT);
 
     struct mp_image *image = mp_image_alloc(IMGFMT_BGR0, w, h);
     if (!image)

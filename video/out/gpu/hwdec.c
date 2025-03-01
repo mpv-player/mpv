@@ -128,7 +128,7 @@ bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt)
 struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
                                                const struct mp_image_params *params)
 {
-    assert(ra_hwdec_test_format(hwdec, params->imgfmt));
+    mp_assert(ra_hwdec_test_format(hwdec, params->imgfmt));
 
     struct ra_hwdec_mapper *mapper = talloc_ptrtype(NULL, mapper);
     *mapper = (struct ra_hwdec_mapper){
@@ -250,7 +250,7 @@ static void load_hwdecs_all(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *d
 void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
                        const char *type, bool load_all_by_default)
 {
-    assert(ctx->ra_ctx);
+    mp_assert(ctx->ra_ctx);
 
     /*
      * By default, or if the option value is "auto", we will not pre-emptively

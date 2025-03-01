@@ -170,7 +170,7 @@ static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *style,
     event->Duration = 100;
     event->Style = find_style(track, style, 0);
     event->ReadOrder = n;
-    assert(event->Text == NULL);
+    mp_assert(event->Text == NULL);
     if (text)
         event->Text = strdup(text);
     return event;

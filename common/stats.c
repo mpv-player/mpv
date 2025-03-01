@@ -72,14 +72,14 @@ static void stats_destroy(void *p)
     struct stats_base *stats = p;
 
     // All entries must have been destroyed before this.
-    assert(!stats->list.head);
+    mp_assert(!stats->list.head);
 
     mp_mutex_destroy(&stats->lock);
 }
 
 void stats_global_init(struct mpv_global *global)
 {
-    assert(!global->stats);
+    mp_assert(!global->stats);
     struct stats_base *stats = talloc_zero(global, struct stats_base);
     ta_set_destructor(stats, stats_destroy);
     mp_mutex_init(&stats->lock);
@@ -110,7 +110,7 @@ static int cmp_entry(const void *p1, const void *p2)
 void stats_global_query(struct mpv_global *global, struct mpv_node *out)
 {
     struct stats_base *stats = global->stats;
-    assert(stats);
+    mp_assert(stats);
 
     mp_mutex_lock(&stats->lock);
 
@@ -223,7 +223,7 @@ struct stats_ctx *stats_ctx_create(void *ta_parent, struct mpv_global *global,
                                    const char *prefix)
 {
     struct stats_base *base = global->stats;
-    assert(base);
+    mp_assert(base);
 
     struct stats_ctx *ctx = talloc_zero(ta_parent, struct stats_ctx);
     ctx->base = base;
@@ -247,7 +247,7 @@ static struct stat_entry *find_entry(struct stats_ctx *ctx, const char *name)
 
     struct stat_entry *e = talloc_zero(ctx, struct stat_entry);
     snprintf(e->name, sizeof(e->name), "%s", name);
-    assert(strcmp(e->name, name) == 0); // make e->name larger and don't complain
+    mp_assert(strcmp(e->name, name) == 0); // make e->name larger and don't complain
 
     e->full_name = talloc_asprintf(e, "%s/%s", ctx->prefix, e->name);
 

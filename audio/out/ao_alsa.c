@@ -308,7 +308,7 @@ static void replace_submap(struct mp_chmap *dst, struct mp_chmap *a,
     struct mp_chmap t = *dst;
     if (!mp_chmap_is_valid(&t) || mp_chmap_diffn(a, &t) != 0)
         return;
-    assert(a->num == b->num);
+    mp_assert(a->num == b->num);
     for (int n = 0; n < t.num; n++) {
         for (int i = 0; i < a->num; i++) {
             if (t.speaker[n] == a->speaker[i]) {

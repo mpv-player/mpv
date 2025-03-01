@@ -173,7 +173,7 @@ static void vaapi_gl_mapper_uninit(const struct ra_hwdec_mapper *mapper)
 
 #define ADD_ATTRIB(name, value) \
     do { \
-    assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs)); \
+    mp_assert(num_attribs + 3 < MP_ARRAY_SIZE(attribs)); \
     attribs[num_attribs++] = (name); \
     attribs[num_attribs++] = (value); \
     attribs[num_attribs] = EGL_NONE; \

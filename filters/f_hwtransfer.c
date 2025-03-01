@@ -169,7 +169,7 @@ static bool select_format(struct priv *p, int input_fmt,
             MP_TARRAY_REMOVE_AT(upload_fmts, num_upload_fmts, i);
             break;
         }
-        assert(hw_input_fmt == IMGFMT_NONE);
+        mp_assert(hw_input_fmt == IMGFMT_NONE);
     }
 
     if (p->ctx->try_upload)

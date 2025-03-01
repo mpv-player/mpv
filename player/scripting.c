@@ -240,7 +240,7 @@ static char **list_script_files(void *talloc_ctx, char *path)
 static void load_builtin_script(struct MPContext *mpctx, int slot, bool enable,
                                 const char *fname)
 {
-    assert(slot < MP_ARRAY_SIZE(mpctx->builtin_script_ids));
+    mp_assert(slot < MP_ARRAY_SIZE(mpctx->builtin_script_ids));
     int64_t *pid = &mpctx->builtin_script_ids[slot];
     if (*pid > 0 && !mp_client_id_exists(mpctx, *pid))
         *pid = 0; // died

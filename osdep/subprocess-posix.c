@@ -185,13 +185,13 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     }
 
     for (int n = 0; n < opts->num_fds; n++) {
-        assert(!(opts->fds[n].on_read && opts->fds[n].on_write));
+        mp_assert(!(opts->fds[n].on_read && opts->fds[n].on_write));
 
         if (opts->fds[n].on_read && mp_make_cloexec_pipe(comm_pipe[n]) < 0)
             goto done;
 
         if (opts->fds[n].on_write || opts->fds[n].write_buf) {
-            assert(opts->fds[n].on_write && opts->fds[n].write_buf);
+            mp_assert(opts->fds[n].on_write && opts->fds[n].write_buf);
             if (mp_make_cloexec_pipe(comm_pipe[n]) < 0)
                 goto done;
             MPSWAP(int, comm_pipe[n][0], comm_pipe[n][1]);

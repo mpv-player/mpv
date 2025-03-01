@@ -61,7 +61,7 @@ static bool is_fast_dr(GL *gl)
 
 static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
-    assert(framebuffer == 0);
+    mp_assert(framebuffer == 0);
 }
 
 #define FN_OFFS(name) offsetof(GL, name)
@@ -625,7 +625,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                 }
                 break;
             }
-            assert(i < MAX_FN_COUNT);
+            mp_assert(i < MAX_FN_COUNT);
             loaded[i] = ptr;
         }
 

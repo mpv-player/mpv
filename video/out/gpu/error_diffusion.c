@@ -36,7 +36,7 @@ static int compute_rightmost_shifted_column(const struct error_diffusion_kernel 
 
                 // The shift mapping guarantees current column (or left of it)
                 // won't be affected by error diffusion.
-                assert(shifted_x > 0);
+                mp_assert(shifted_x > 0);
 
                 ret = MPMAX(ret, shifted_x);
             }
@@ -75,7 +75,7 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
                           const struct error_diffusion_kernel *k,
                           int tex, int width, int height, int depth, int block_size)
 {
-    assert(block_size <= height);
+    mp_assert(block_size <= height);
 
     // The parallel error diffusion works by applying the shift mapping first.
     // Taking the Floyd and Steinberg algorithm for example. After applying

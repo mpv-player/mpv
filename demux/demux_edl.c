@@ -319,7 +319,7 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                     BSTR_P(ctx.param_names[n]));
         }
     }
-    assert(root->num_pars);
+    mp_assert(root->num_pars);
     for (int n = 0; n < root->num_pars; n++) {
         if (root->pars[n]->num_parts < 1) {
             mp_err(log, "EDL specifies no segments.'\n");
@@ -557,7 +557,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
     if (root->meta)
         mp_tags_merge(root->meta->metadata, edl_root->tags);
 
-    assert(tl->num_parts == parts->num_parts);
+    mp_assert(tl->num_parts == parts->num_parts);
     return tl;
 
 error:

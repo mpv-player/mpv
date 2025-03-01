@@ -205,7 +205,7 @@ static bool read_raw(struct demux_cache *cache, void *ptr, size_t len)
 // Returns a negative value on errors, i.e. writing the file failed.
 int64_t demux_cache_write(struct demux_cache *cache, struct demux_packet *dp)
 {
-    assert(dp->avpacket);
+    mp_assert(dp->avpacket);
 
     // AV_PKT_FLAG_TRUSTED usually means there are embedded pointers and such
     // in the packet data. The pointer will become invalid if the packet is
@@ -215,10 +215,10 @@ int64_t demux_cache_write(struct demux_cache *cache, struct demux_packet *dp)
         return -1;
     }
 
-    assert(!dp->is_cached);
-    assert(dp->len <= INT32_MAX);
-    assert(dp->avpacket->flags >= 0 && dp->avpacket->flags <= INT32_MAX);
-    assert(dp->avpacket->side_data_elems >= 0 &&
+    mp_assert(!dp->is_cached);
+    mp_assert(dp->len <= INT32_MAX);
+    mp_assert(dp->avpacket->flags >= 0 && dp->avpacket->flags <= INT32_MAX);
+    mp_assert(dp->avpacket->side_data_elems >= 0 &&
            dp->avpacket->side_data_elems <= INT32_MAX);
 
     if (!do_seek(cache, cache->file_size))
@@ -262,8 +262,8 @@ int64_t demux_cache_write(struct demux_cache *cache, struct demux_packet *dp)
     for (int n = 0; n < dp->avpacket->side_data_elems; n++) {
         AVPacketSideData *sd = &dp->avpacket->side_data[n];
 
-        assert(sd->size <= INT32_MAX);
-        assert(sd->type >= 0 && sd->type <= INT32_MAX);
+        mp_assert(sd->size <= INT32_MAX);
+        mp_assert(sd->type >= 0 && sd->type <= INT32_MAX);
 
         struct sd_header sd_hd = {
             .av_type = sd->type,

@@ -256,7 +256,7 @@ static void add_pads_direct(struct lavfi *c, int dir, AVFilterContext *f,
 // Parse the user-provided filter graph, and populate the unlinked filter pads.
 static void precreate_graph(struct lavfi *c, bool first_init)
 {
-    assert(!c->graph);
+    mp_assert(!c->graph);
 
     c->failed = false;
 
@@ -358,7 +358,7 @@ static bool is_format_ok(struct mp_frame a, struct mp_frame b)
 
 static void read_pad_input(struct lavfi *c, struct lavfi_pad *pad)
 {
-    assert(pad->dir == MP_PIN_IN);
+    mp_assert(pad->dir == MP_PIN_IN);
 
     if (pad->pending.type || c->draining_recover)
         return;
@@ -431,7 +431,7 @@ static bool init_pads(struct lavfi *c)
             return false;
 
         if (mp_frame_is_data(pad->pending)) {
-            assert(pad->pending.type == pad->type);
+            mp_assert(pad->pending.type == pad->type);
 
             pad->in_fmt = mp_frame_ref(pad->pending);
             if (!pad->in_fmt.type)
@@ -544,7 +544,7 @@ static void dump_graph(struct lavfi *c)
 // initialized, or can't be initialized yet, do nothing.
 static void init_graph(struct lavfi *c)
 {
-    assert(!c->initialized);
+    mp_assert(!c->initialized);
 
     if (!c->graph)
         precreate_graph(c, false);
@@ -600,7 +600,7 @@ static bool feed_input_pads(struct lavfi *c)
     bool progress = false;
     bool was_draining = c->draining_recover;
 
-    assert(c->initialized);
+    mp_assert(c->initialized);
 
     for (int n = 0; n < c->num_in_pads; n++) {
         struct lavfi_pad *pad = c->in_pads[n];
@@ -692,7 +692,7 @@ static bool read_output_pads(struct lavfi *c)
 {
     bool progress = false;
 
-    assert(c->initialized);
+    mp_assert(c->initialized);
 
     for (int n = 0; n < c->num_out_pads; n++) {
         struct lavfi_pad *pad = c->out_pads[n];
@@ -700,7 +700,7 @@ static bool read_output_pads(struct lavfi *c)
         if (!mp_pin_in_needs_data(pad->pin))
             continue;
 
-        assert(pad->buffer);
+        mp_assert(pad->buffer);
 
         int r = AVERROR_EOF;
         if (!pad->buffer_is_eof)

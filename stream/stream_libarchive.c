@@ -80,7 +80,7 @@ static bool probe_zip(struct stream *s)
 static int mp_archive_probe(struct stream *src)
 {
     int flags = 0;
-    assert(stream_tell(src) == 0);
+    mp_assert(stream_tell(src) == 0);
     if (probe_zip(src))
         flags |= MP_ARCHIVE_FLAG_MAYBE_ZIP;
 

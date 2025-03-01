@@ -213,7 +213,7 @@ int mp_rect_subtract(const struct mp_rect *rc1, const struct mp_rect *rc2,
 int mp_snprintf_cat(char *str, size_t size, const char *format, ...)
 {
     size_t len = strnlen(str, size);
-    assert(!size || len < size); // str with no 0-termination is not allowed
+    mp_assert(!size || len < size); // str with no 0-termination is not allowed
     int r;
     va_list ap;
     va_start(ap, format);
@@ -427,6 +427,6 @@ uint32_t mp_round_next_power_of_2(uint32_t v)
 
 int mp_lcm(int x, int y)
 {
-    assert(x && y);
+    mp_assert(x && y);
     return x * (y / av_gcd(x, y));
 }

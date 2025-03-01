@@ -1,6 +1,8 @@
 #ifndef MPV_COMPILER_H
 #define MPV_COMPILER_H
 
+#include <assert.h>
+
 #define MP_EXPAND_ARGS(...) __VA_ARGS__
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L

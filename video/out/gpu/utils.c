@@ -42,7 +42,7 @@ void gl_transform_ortho_fbo(struct gl_transform *t, const struct ra_fbo *fbo)
 double gl_video_scale_ambient_lux(float lmin, float lmax,
                                   float rmin, float rmax, double lux)
 {
-    assert(lmax > lmin);
+    mp_assert(lmax > lmin);
 
     double num = (rmax - rmin) * (log10(lux) - log10(lmin));
     double den = log10(lmax) - log10(lmin);
@@ -87,7 +87,7 @@ static bool ra_buf_pool_grow(struct ra *ra, struct ra_buf_pool *pool)
 struct ra_buf *ra_buf_pool_get(struct ra *ra, struct ra_buf_pool *pool,
                                const struct ra_buf_params *params)
 {
-    assert(!params->initial_data);
+    mp_assert(!params->initial_data);
 
     if (!ra_buf_params_compatible(params, &pool->current_params)) {
         ra_buf_pool_uninit(ra, pool);
@@ -272,7 +272,7 @@ void timer_pool_start(struct timer_pool *pool)
     if (!pool)
         return;
 
-    assert(!pool->running);
+    mp_assert(!pool->running);
     pool->ra->fns->timer_start(pool->ra, pool->timer);
     pool->running = true;
 }
@@ -282,7 +282,7 @@ void timer_pool_stop(struct timer_pool *pool)
     if (!pool)
         return;
 
-    assert(pool->running);
+    mp_assert(pool->running);
     uint64_t res = pool->ra->fns->timer_stop(pool->ra, pool->timer);
     pool->running = false;
 

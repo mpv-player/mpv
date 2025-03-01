@@ -43,7 +43,7 @@ void assert_float_equal_impl(const char *file, int line,
 FILE *test_open_out(const char *outdir, const char *name)
 {
     mp_mkdirp(outdir);
-    assert(mp_path_isdir(outdir));
+    mp_assert(mp_path_isdir(outdir));
     char *path = mp_tprintf(4096, "%s/%s", outdir, name);
     FILE *f = fopen(path, "wb");
     if (!f) {

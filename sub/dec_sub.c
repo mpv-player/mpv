@@ -187,7 +187,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
 struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
                            struct attachment_list *attachments, int order)
 {
-    assert(track->stream && track->stream->type == STREAM_SUB);
+    mp_assert(track->stream && track->stream->type == STREAM_SUB);
 
     struct dec_sub *sub = talloc(NULL, struct dec_sub);
     *sub = (struct dec_sub){
