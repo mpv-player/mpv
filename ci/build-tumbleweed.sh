@@ -3,7 +3,7 @@ set -e
 
 . ./ci/build-common.sh
 
-meson setup build $common_args \
+meson setup build $common_args $@ \
   -Db_sanitize=address,undefined \
   -Dcdda=enabled \
   -Ddvbin=enabled \

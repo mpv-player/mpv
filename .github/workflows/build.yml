@@ -290,24 +290,24 @@ jobs:
       env:
         CC: "${{ matrix.config.cc }}"
         CXX: "${{ matrix.config.cxx }}"
+        CC_LD: "${{ matrix.config.ld }}"
+        CXX_LD: "${{ matrix.config.ld }}"
     strategy:
       matrix:
         config:
-        - {
-            cc: "gcc",
-            cxx: "g++",
-          }
-        - {
-            cc: "clang",
-            cxx: "clang++",
-          }
+          - cc: "gcc"
+            cxx: "g++"
+          - cc: "clang"
+            cxx: "clang++"
+            ld: "lld"
+            args: "-Db_lto=true -Db_lto_mode=thin"
     steps:
       - uses: actions/checkout@v4
 
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-tumbleweed.sh
+          ./ci/build-tumbleweed.sh ${{ matrix.config.args }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
