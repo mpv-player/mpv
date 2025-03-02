@@ -167,9 +167,7 @@ char **mp_dup_str_array(void *tctx, char **s);
 // kill the process even with NDEBUG.
 #define MP_HANDLE_OOM(x) do {   \
         void *oom_p_ = (x);     \
-        mp_assert(oom_p_);      \
-        if (!oom_p_)            \
-            abort();            \
+        mp_require(oom_p_);     \
     } while (0)
 
 #ifdef _MSC_VER
