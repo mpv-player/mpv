@@ -415,7 +415,7 @@ static char *format_delay(double time)
 static int mp_property_generic_option(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
-    MPContext *mpctx = ctx;
+    struct MPContext *mpctx = ctx;
     struct m_config_option *opt =
         m_config_get_co(mpctx->mconfig, bstr0(prop->name));
 
@@ -432,6 +432,7 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
         m_option_copy(opt->opt, arg, opt->data);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
+        opt->immediate = prop->immediate;
         if (m_config_set_option_raw(mpctx->mconfig, opt, arg, 0) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
@@ -5211,8 +5212,17 @@ static void show_property_status(struct mp_cmd_ctx *cmd, const char *name, int r
 static void change_property_cmd(struct mp_cmd_ctx *cmd,
                                 const char *name, int action, void *arg)
 {
+    struct m_property *prop = NULL;
+    if (cmd->cmd->flags & MP_IMMEDIATE) {
+        struct command_ctx *ctx = cmd->mpctx->command_ctx;
+        prop = m_property_list_find(ctx->properties, name);
+        if (prop)
+            prop->immediate = true;
+    }
     int r = mp_property_do(name, action, arg, cmd->mpctx);
     show_property_status(cmd, name, r);
+    if (prop)
+        prop->immediate = false;
 }
 
 static void cmd_cycle_values(void *p)
@@ -7702,6 +7712,13 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, uint64_t f
     if (self_update)
         return;
 
+    // Run options flagged as immediate as soon as possible.
+    if (co && co->immediate) {
+        struct mp_option_callback callback = {.co = co, .flags = flags};
+        mp_option_run_callback(mpctx, &callback);
+        return;
+    }
+
     // Coalesce redundant updates and only keep the newest one.
     bool drop = false;
     for (int i = 0; i < mpctx->num_option_callbacks; i++) {
@@ -7724,12 +7741,12 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, uint64_t f
     }
 }
 
-void mp_option_run_callback(struct MPContext *mpctx, int index)
+void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *callback)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct m_config_option *co = mpctx->option_callbacks[index].co;
+    struct m_config_option *co = callback->co;
     void *opt_ptr = co ? co->data : NULL;
-    uint64_t flags = mpctx->option_callbacks[index].flags;
+    uint64_t flags = callback->flags;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);
