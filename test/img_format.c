@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
             fprintf(f, "    {");
             for (int n = 0; n < MP_MAX_PLANES; n++) {
                 if (n >= d.num_planes) {
-                    mp_assert(d.bpp[n] == 0 && d.xs[n] == 0 && d.ys[n] == 0);
+                    mp_require(d.bpp[n] == 0 && d.xs[n] == 0 && d.ys[n] == 0);
                     continue;
                 }
                 fprintf(f, "%d/[%d:%d] ", d.bpp[n], d.xs[n], d.ys[n]);
@@ -91,24 +91,24 @@ int main(int argc, char *argv[])
                         if (cm.pad)
                             fprintf(f, "/%d", cm.pad);
                     } else {
-                        mp_assert(cm.offset == 0);
-                        mp_assert(cm.pad == 0);
+                        mp_require(cm.offset == 0);
+                        mp_require(cm.pad == 0);
                     }
                 }
                 fprintf(f, "}");
                 if (!(d.flags & (MP_IMGFLAG_PACKED_SS_YUV | MP_IMGFLAG_HAS_COMPS)))
                 {
-                    mp_assert(cm.size == 0);
-                    mp_assert(cm.offset == 0);
-                    mp_assert(cm.pad == 0);
+                    mp_require(cm.size == 0);
+                    mp_require(cm.offset == 0);
+                    mp_require(cm.pad == 0);
                 }
             }
             fprintf(f, "\n");
             if (d.flags & MP_IMGFLAG_PACKED_SS_YUV) {
-                mp_assert(!(d.flags & MP_IMGFLAG_HAS_COMPS));
+                mp_require(!(d.flags & MP_IMGFLAG_HAS_COMPS));
                 uint8_t offsets[10];
                 bool r = mp_imgfmt_get_packed_yuv_locations(mpfmt, offsets);
-                mp_assert(r);
+                mp_require(r);
                 fprintf(f, "       luma_offsets=[");
                 for (int x = 0; x < d.align_x; x++)
                     fprintf(f, " %d", offsets[x]);
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
             fr->width = 128;
             fr->height = 128;
             int err = av_frame_get_buffer(fr, MP_IMAGE_BYTE_ALIGN);
-            mp_assert(err >= 0);
+            mp_require(err >= 0);
             struct mp_image *mpi = mp_image_alloc(mpfmt, fr->width, fr->height);
             if (mpi) {
                 // A rather fuzzy test, which might fail even if there's no bug.
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
             }
             for (int n = avd->nb_components; n < 4; n++) {
                 const AVComponentDescriptor *cd = &avd->comp[n];
-                mp_assert(!cd->plane && !cd->step && !cd->offset && !cd->shift &&
+                mp_require(!cd->plane && !cd->step && !cd->offset && !cd->shift &&
                           !cd->depth);
             }
         }
