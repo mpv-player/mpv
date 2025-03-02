@@ -345,6 +345,8 @@ typedef struct MPOpts {
     int w32_priority;
     bool media_controls;
 
+    struct file_dialog_opts *file_dialog_opts;
+
     struct bluray_opts *stream_bluray_opts;
     struct cdda_opts *stream_cdda_opts;
     struct dvb_opts *stream_dvb_opts;
