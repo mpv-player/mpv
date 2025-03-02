@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdio.h>
 #include <windows.h>
+#include <pathcch.h>
 
 // copied from osdep/io.h since this file is standalone
 #define MP_PATH_MAX (32000)
@@ -82,15 +82,27 @@ static DWORD cr_runproc(wchar_t *name, wchar_t *cmdline)
 int mainCRTStartup(void);
 int mainCRTStartup(void)
 {
-    wchar_t *cmd = GetCommandLineW();
     wchar_t *exe = LocalAlloc(LMEM_FIXED, MP_PATH_MAX * sizeof(wchar_t));
     DWORD len = GetModuleFileNameW(NULL, exe, MP_PATH_MAX);
     if (len < 4 || len == MP_PATH_MAX)
           ExitProcess(1);
 
-    exe[len - 3] = L'e';
-    exe[len - 2] = L'x';
-    exe[len - 1] = L'e';
+    if (FAILED(PathCchRemoveFileSpec(exe, MP_PATH_MAX)) ||
+        FAILED(PathCchAppendEx(exe, MP_PATH_MAX, L"mpv.exe", PATHCCH_ALLOW_LONG_PATHS)))
+    {
+        ExitProcess(1);
+    }
+
+    // cmd has to be modifiable, as the documentation states:
+    // The Unicode version of this function, CreateProcessW, can modify the
+    // contents of this string.
+#if defined(MPV_REGISTER)
+    wchar_t cmd[] = L"mpv.exe --register";
+#elif defined(MPV_UNREGISTER)
+    wchar_t cmd[] = L"mpv.exe --no-config --unregister";
+#else
+    wchar_t *cmd = GetCommandLineW();
+#endif
 
     // Set an environment variable so the child process can tell whether it
     // was started from this wrapper and attach to the console accordingly
