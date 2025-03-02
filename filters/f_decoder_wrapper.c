@@ -633,6 +633,9 @@ static void fix_image_params(struct priv *p,
     pl_color_space_merge(&m.color, &c->color);
     pl_color_repr_merge(&m.repr, &c->repr);
 
+    if (m.chroma_location == PL_CHROMA_UNKNOWN)
+        m.chroma_location = c->chroma_location;
+
     // Guess missing colorspace fields from metadata. This guarantees all
     // fields are at least set to legal values afterwards.
     mp_image_params_guess_csp(&m);
