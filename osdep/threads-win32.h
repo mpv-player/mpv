@@ -24,6 +24,7 @@
 #include "common/common.h"
 #include "timer.h"
 
+#if HAVE_MP_MUTEX_RECURSIVE
 typedef struct {
     char use_cs;
     union {
@@ -31,6 +32,11 @@ typedef struct {
         SRWLOCK srw;
     };
 } mp_mutex;
+#else
+typedef struct {
+    SRWLOCK srw;
+} mp_mutex;
+#endif
 
 typedef CONDITION_VARIABLE mp_cond;
 typedef INIT_ONCE          mp_once;
@@ -44,44 +50,52 @@ typedef DWORD              mp_thread_id;
 
 static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_type mtype)
 {
+#if HAVE_MP_MUTEX_RECURSIVE
     mutex->use_cs = mtype == MP_MUTEX_RECURSIVE;
     if (mutex->use_cs)
         return !InitializeCriticalSectionEx(&mutex->cs, 0, 0);
+#endif
     InitializeSRWLock(&mutex->srw);
     return 0;
 }
 
 static inline int mp_mutex_destroy(mp_mutex *mutex)
 {
+#if HAVE_MP_MUTEX_RECURSIVE
     if (mutex->use_cs)
         DeleteCriticalSection(&mutex->cs);
+#endif
     return 0;
 }
 
 static inline int mp_mutex_lock(mp_mutex *mutex)
 {
-    if (mutex->use_cs) {
+#if HAVE_MP_MUTEX_RECURSIVE
+    if (mutex->use_cs)
         EnterCriticalSection(&mutex->cs);
-    } else {
+    else
+#endif
         AcquireSRWLockExclusive(&mutex->srw);
-    }
     return 0;
 }
 
 static inline int mp_mutex_trylock(mp_mutex *mutex)
 {
+#if HAVE_MP_MUTEX_RECURSIVE
     if (mutex->use_cs)
         return !TryEnterCriticalSection(&mutex->cs);
+#endif
     return !TryAcquireSRWLockExclusive(&mutex->srw);
 }
 
 static inline int mp_mutex_unlock(mp_mutex *mutex)
 {
-    if (mutex->use_cs) {
+#if HAVE_MP_MUTEX_RECURSIVE
+    if (mutex->use_cs)
         LeaveCriticalSection(&mutex->cs);
-    } else {
+    else
+#endif
         ReleaseSRWLockExclusive(&mutex->srw);
-    }
     return 0;
 }
 
@@ -118,11 +132,12 @@ static inline int mp_cond_timedwait(mp_cond *cond, mp_mutex *mutex, int64_t time
     int64_t hrt = mp_start_hires_timers(MP_TIME_MS_TO_NS(timeout));
     BOOL bRet;
 
-    if (mutex->use_cs) {
+#if HAVE_MP_MUTEX_RECURSIVE
+    if (mutex->use_cs)
         bRet = SleepConditionVariableCS(cond, &mutex->cs, timeout);
-    } else {
+    else
+#endif
         bRet = SleepConditionVariableSRW(cond, &mutex->srw, timeout, 0);
-    }
     if (bRet == FALSE)
         ret = GetLastError() == ERROR_TIMEOUT ? ETIMEDOUT : EINVAL;
 
