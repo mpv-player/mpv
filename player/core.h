@@ -638,6 +638,12 @@ struct mp_script_args {
     struct mpv_handle *client;
     const char *filename;
     const char *path;
+#if HAVE_PYTHON
+    char **py_scripts;
+    size_t script_count;
+    struct mpv_handle **clients;
+    char **client_names;
+#endif
 };
 struct mp_scripting {
     const char *name;       // e.g. "lua script"
