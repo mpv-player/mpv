@@ -1403,7 +1403,10 @@ PROTOCOLS
     Play a local file, but assume it's being appended to. This is useful for
     example for files that are currently being downloaded to disk. This will
     block playback, and stop playback only if no new data was appended after
-    a timeout of about 2 seconds.
+    a timeout.
+
+    The timeout span depends on the values of ``--appending-max-retries`` and
+    ``--appending-retry-timeout`` options.
 
     Using this is still a bit of a bad idea, because there is no way to detect
     if a file is actually being appended, or if it's still written. If you're
