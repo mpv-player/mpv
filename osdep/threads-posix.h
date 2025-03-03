@@ -110,9 +110,11 @@ static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_typ
 {
     int mutex_type;
     switch (mtype) {
+#if HAVE_MP_MUTEX_RECURSIVE
     case MP_MUTEX_RECURSIVE:
         mutex_type = PTHREAD_MUTEX_RECURSIVE;
         break;
+#endif
     case MP_MUTEX_NORMAL:
     default:
 #ifndef NDEBUG

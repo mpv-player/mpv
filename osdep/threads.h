@@ -3,9 +3,17 @@
 
 #include "config.h"
 
+#if HAVE_VDPAU
+#define HAVE_MP_MUTEX_RECURSIVE 1
+#else
+#define HAVE_MP_MUTEX_RECURSIVE 0
+#endif
+
 enum mp_mutex_type {
     MP_MUTEX_NORMAL = 0,
+#if HAVE_MP_MUTEX_RECURSIVE
     MP_MUTEX_RECURSIVE,
+#endif
 };
 
 #define mp_mutex_init(mutex) \
