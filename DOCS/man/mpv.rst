@@ -53,11 +53,11 @@ default, the ? key toggles the display of this list.
 Keyboard Control
 ----------------
 
-LEFT and RIGHT
+LEFT / KP_LEFT and RIGHT / KP_RIGHT
     Seek backward/forward 5 seconds. Shift+arrow does a 1 second exact seek
     (see ``--hr-seek``).
 
-UP and DOWN
+UP / KP_UP and DOWN / KP_DOWN
     Seek forward/backward 1 minute. Shift+arrow does a 5 second exact seek (see
     ``--hr-seek``).
 
@@ -92,10 +92,10 @@ Shift+Ctrl+BACKSPACE
 < and >
     Go backward/forward in the playlist.
 
-ENTER
+ENTER and KP_ENTER
     Go forward in the playlist.
 
-Shift+HOME and Shift+END
+Shift+HOME / Shift+KP_HOME and Shift+END / Shift+KP_END
     Go to the first/last playlist entry.
 
 p and SPACE
@@ -207,15 +207,15 @@ Ctrl+s
     Take a screenshot, as the window shows it (with subtitles, OSD, and scaled
     video).
 
-HOME
+HOME and KP_HOME
     Seek to the beginning of the file.
 
-PGUP and PGDWN
+PGUP / KP_PGUP and PGDWN / KP_PGDWN
     Seek to the beginning of the previous/next chapter. In most cases,
     "previous" will actually go to the beginning of the current chapter; see
     ``--chapter-seek-threshold``.
 
-Shift+PGUP and Shift+PGDWN
+Shift+PGUP / Shift+KP_PGUP and Shift+PGDWN / Shift+KP_PGDWN
     Seek backward or forward by 10 minutes. (This used to be mapped to
     PGUP/PGDWN without Shift.)
 
@@ -263,7 +263,7 @@ i and I
     Toggle an overlay displaying the active key bindings. See `STATS`_ for more
     information.
 
-DEL
+DEL and KP_DEL
     Cycle OSC visibility between never / auto (mouse-move) / always
 
 \`
