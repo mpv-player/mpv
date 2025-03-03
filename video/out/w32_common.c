@@ -2236,6 +2236,33 @@ static char **get_disp_names(struct vo_w32_state *w32)
     return data.names;
 }
 
+static bool gui_thread_control_supports(int request)
+{
+    switch (request) {
+    case VOCTRL_VO_OPTS_CHANGED:
+    case VOCTRL_GET_WINDOW_ID:
+    case VOCTRL_GET_HIDPI_SCALE:
+    case VOCTRL_GET_UNFS_WINDOW_SIZE:
+    case VOCTRL_SET_UNFS_WINDOW_SIZE:
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+    case VOCTRL_KILL_SCREENSAVER:
+    case VOCTRL_RESTORE_SCREENSAVER:
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+    case VOCTRL_UPDATE_PLAYBACK_STATE:
+    case VOCTRL_GET_DISPLAY_FPS:
+    case VOCTRL_GET_DISPLAY_RES:
+    case VOCTRL_GET_DISPLAY_NAMES:
+    case VOCTRL_GET_ICC_PROFILE:
+    case VOCTRL_GET_FOCUSED:
+    case VOCTRL_BEGIN_DRAGGING:
+    case VOCTRL_SHOW_MENU:
+    case VOCTRL_UPDATE_MENU:
+        return true;
+    }
+
+    return false;
+}
+
 static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
@@ -2396,7 +2423,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         mp_win32_menu_update(w32->menu_ctx, (struct mpv_node *)arg);
         return VO_TRUE;
     }
-    return VO_NOTIMPL;
+
+    // Keep gui_thread_control_supports() in sync
+    MP_ASSERT_UNREACHABLE();
 }
 
 static void do_control(void *ptr)
@@ -2428,6 +2457,8 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
             mp_dispatch_unlock(w32->dispatch);
         }
         return VO_TRUE;
+    } else if (!gui_thread_control_supports(request)) {
+        return VO_NOTIMPL;
     } else {
         int r;
         void *p[] = {w32, events, &request, arg, &r};
