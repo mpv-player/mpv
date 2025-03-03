@@ -1,6 +1,7 @@
 #ifndef MPV_VDPAU_H
 #define MPV_VDPAU_H
 
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
@@ -64,7 +65,7 @@ struct mp_vdpau_ctx {
     VdpDevice vdp_device;
 
     mp_mutex preempt_lock;
-    bool is_preempted;                  // set to true during unavailability
+    atomic_bool is_preempted;           // set to true during unavailability
     uint64_t preemption_counter;        // incremented after _restoring_
     bool preemption_user_notified;
     double last_preemption_retry_fail;
