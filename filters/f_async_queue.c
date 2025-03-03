@@ -54,7 +54,7 @@ static void unref_queue(struct async_queue *q)
     if (!q)
         return;
     int count = atomic_fetch_add(&q->refcount, -1) - 1;
-    assert(count >= 0);
+    mp_assert(count >= 0);
     if (count == 0) {
         reset_queue(q);
         mp_mutex_destroy(&q->lock);
@@ -112,7 +112,7 @@ static bool is_full(struct async_queue *q)
 static void account_frame(struct async_queue *q, struct mp_frame frame,
                           int dir)
 {
-    assert(dir == 1 || dir == -1);
+    mp_assert(dir == 1 || dir == -1);
 
     q->samples_size += dir * frame_get_samples(q, frame);
     q->byte_size += dir * mp_frame_approx_size(frame);
@@ -137,7 +137,7 @@ void mp_async_queue_set_config(struct mp_async_queue *queue,
 
     cfg.max_bytes = MPCLAMP(cfg.max_bytes, 1, (size_t)-1 / 2);
 
-    assert(cfg.sample_unit == AQUEUE_UNIT_FRAME ||
+    mp_assert(cfg.sample_unit == AQUEUE_UNIT_FRAME ||
            cfg.sample_unit == AQUEUE_UNIT_SAMPLES);
 
     cfg.max_samples = MPMAX(cfg.max_samples, 1);
@@ -246,7 +246,7 @@ static void process_in(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     struct async_queue *q = p->q;
-    assert(q->conn[0] == f);
+    mp_assert(q->conn[0] == f);
 
     mp_mutex_lock(&q->lock);
     if (!q->reading) {
@@ -281,7 +281,7 @@ static void process_out(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     struct async_queue *q = p->q;
-    assert(q->conn[1] == f);
+    mp_assert(q->conn[1] == f);
 
     if (!mp_pin_in_needs_data(f->ppins[0]))
         return;
@@ -295,7 +295,7 @@ static void process_out(struct mp_filter *f)
         struct mp_frame frame = q->frames[q->num_frames - 1];
         q->num_frames -= 1;
         account_frame(q, frame, -1);
-        assert(q->samples_size >= 0);
+        mp_assert(q->samples_size >= 0);
         mp_pin_in_write(f->ppins[0], frame);
         // Notify writer that we need new frames.
         if (q->conn[0])
@@ -336,7 +336,7 @@ static const struct mp_filter_info info_out = {
 
 void mp_async_queue_set_notifier(struct mp_filter *f, struct mp_filter *notify)
 {
-    assert(mp_filter_get_info(f) == &info_in);
+    mp_assert(mp_filter_get_info(f) == &info_in);
     struct priv *p = f->priv;
     if (p->notify != notify) {
         p->notify = notify;
@@ -350,7 +350,7 @@ struct mp_filter *mp_async_queue_create_filter(struct mp_filter *parent,
                                                struct mp_async_queue *queue)
 {
     bool is_in = dir == MP_PIN_IN;
-    assert(queue);
+    mp_assert(queue);
 
     struct mp_filter *f = mp_filter_create(parent, is_in ? &info_in : &info_out);
     if (!f)
@@ -367,7 +367,7 @@ struct mp_filter *mp_async_queue_create_filter(struct mp_filter *parent,
 
     mp_mutex_lock(&q->lock);
     int slot = is_in ? 0 : 1;
-    assert(!q->conn[slot]); // fails if already connected on this end
+    mp_assert(!q->conn[slot]); // fails if already connected on this end
     q->conn[slot] = f;
     mp_mutex_unlock(&q->lock);
 

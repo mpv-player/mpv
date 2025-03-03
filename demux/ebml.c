@@ -282,7 +282,7 @@ static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
 
 static uint64_t ebml_parse_uint(uint8_t *data, int length)
 {
-    assert(length >= 0 && length <= 8);
+    mp_assert(length >= 0 && length <= 8);
     uint64_t r = 0;
     while (length--)
         r = (r << 8) + *data++;
@@ -291,7 +291,7 @@ static uint64_t ebml_parse_uint(uint8_t *data, int length)
 
 static int64_t ebml_parse_sint(uint8_t *data, int length)
 {
-    assert(length >= 0 && length <= 8);
+    mp_assert(length >= 0 && length <= 8);
     if (!length)
         return 0;
     uint64_t r = 0;
@@ -304,7 +304,7 @@ static int64_t ebml_parse_sint(uint8_t *data, int length)
 
 static double ebml_parse_float(uint8_t *data, int length)
 {
-    assert(length == 0 || length == 4 || length == 8);
+    mp_assert(length == 0 || length == 4 || length == 8);
     uint64_t i = ebml_parse_uint(data, length);
     if (length == 4)
         return av_int2float(i);
@@ -318,8 +318,8 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                                uint8_t *data, int size,
                                const struct ebml_elem_desc *type, int level)
 {
-    assert(type->type == EBML_TYPE_SUBELEMENTS);
-    assert(level < 8);
+    mp_assert(type->type == EBML_TYPE_SUBELEMENTS);
+    mp_assert(level < 8);
     MP_TRACE(ctx, "%.*sParsing element %s\n", level, "       ", type->name);
 
     char *s = target;

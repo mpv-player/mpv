@@ -244,7 +244,7 @@ static int check_origin(int src, int new)
 //  returns: bytes copied to dst (limited by len and available buffered data)
 static int ring_copy(struct stream *s, void *dst, int len, int pos)
 {
-    assert(len >= 0);
+    mp_assert(len >= 0);
 
     if (pos < s->buf_start || pos > s->buf_end)
         return 0;
@@ -272,19 +272,19 @@ static int ring_copy(struct stream *s, void *dst, int len, int pos)
 // Does nothing if the size is adequate. Calling this with 0 ensures it uses the
 // default buffer size if possible.
 // The caller must check whether enough data was really allocated.
-//  keep: keep at least [buf_end-keep, buf_end] (used for assert()s only)
+//  keep: keep at least [buf_end-keep, buf_end] (used for mp_assert()s only)
 //  new: new total size of buffer
 //  returns: false if buffer allocation failed, true if reallocated or size ok
 static bool stream_resize_buffer(struct stream *s, int keep, int new)
 {
-    assert(keep >= s->buf_end - s->buf_cur);
-    assert(keep <= new);
+    mp_assert(keep >= s->buf_end - s->buf_cur);
+    mp_assert(keep <= new);
 
     new = MPMAX(new, s->requested_buffer_size);
     new = MPMIN(new, STREAM_MAX_BUFFER_SIZE);
     new = mp_round_next_power_of_2(new);
 
-    assert(keep <= new); // can't fail (if old buffer size was valid)
+    mp_assert(keep <= new); // can't fail (if old buffer size was valid)
 
     if (new == s->buffer_mask + 1)
         return true;
@@ -302,9 +302,9 @@ static bool stream_resize_buffer(struct stream *s, int keep, int new)
     int new_len = 0;
     if (s->buffer)
         new_len = ring_copy(s, nbuf, new, s->buf_start + skip);
-    assert(new_len == old_used_len - skip);
-    assert(old_pos >= skip); // "keep" too low
-    assert(old_pos - skip <= new_len);
+    mp_assert(new_len == old_used_len - skip);
+    mp_assert(old_pos >= skip); // "keep" too low
+    mp_assert(old_pos - skip <= new_len);
     s->buf_start = 0;
     s->buf_cur = old_pos - skip;
     s->buf_end = new_len;
@@ -412,7 +412,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
         return STREAM_ERROR;
     }
 
-    assert(s->seekable == !!s->seek);
+    mp_assert(s->seekable == !!s->seek);
 
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
@@ -425,7 +425,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
 
 int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
 {
-    assert(args->url);
+    mp_assert(args->url);
 
     int r = STREAM_NO_MATCH;
     *ret = NULL;
@@ -498,7 +498,7 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 // Partial reads are possible, even if EOF is not reached.
 static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
-    assert(len >= 0);
+    mp_assert(len >= 0);
     if (len <= 0)
         return 0;
 
@@ -510,7 +510,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
         s->eof = 1;
         return 0;
     }
-    assert(res <= len);
+    mp_assert(res <= len);
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
     s->pos += res;
@@ -524,7 +524,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 //  returns: progress (false on EOF or on OOM or if enough data was available)
 static bool stream_read_more(struct stream *s, int forward)
 {
-    assert(forward >= 0);
+    mp_assert(forward >= 0);
 
     int forward_avail = s->buf_end - s->buf_cur;
     if (forward_avail >= forward)
@@ -532,7 +532,7 @@ static bool stream_read_more(struct stream *s, int forward)
 
     // Avoid that many small reads will lead to many low-level read calls.
     forward = MPMAX(forward, s->requested_buffer_size / 2);
-    assert(forward_avail < forward);
+    mp_assert(forward_avail < forward);
 
     // Keep guaranteed seek-back.
     int buf_old = MPMIN(s->buf_cur - s->buf_start, s->requested_buffer_size / 2);
@@ -542,11 +542,11 @@ static bool stream_read_more(struct stream *s, int forward)
 
     int buf_alloc = s->buffer_mask + 1;
 
-    assert(s->buf_start <= s->buf_cur);
-    assert(s->buf_cur <= s->buf_end);
-    assert(s->buf_cur < buf_alloc * 2);
-    assert(s->buf_end < buf_alloc * 2);
-    assert(s->buf_start < buf_alloc);
+    mp_assert(s->buf_start <= s->buf_cur);
+    mp_assert(s->buf_cur <= s->buf_end);
+    mp_assert(s->buf_cur < buf_alloc * 2);
+    mp_assert(s->buf_end < buf_alloc * 2);
+    mp_assert(s->buf_start < buf_alloc);
 
     // Note: read as much as possible, even if forward is much smaller. Do
     // this because the stream buffer is supposed to set an approx. minimum
@@ -565,12 +565,12 @@ static bool stream_read_more(struct stream *s, int forward)
 
     // May have overwritten old data.
     if (s->buf_end - s->buf_start >= buf_alloc) {
-        assert(s->buf_end >= buf_alloc);
+        mp_assert(s->buf_end >= buf_alloc);
 
         s->buf_start = s->buf_end - buf_alloc;
 
-        assert(s->buf_start <= s->buf_cur);
-        assert(s->buf_cur <= s->buf_end);
+        mp_assert(s->buf_start <= s->buf_cur);
+        mp_assert(s->buf_cur <= s->buf_end);
 
         if (s->buf_start >= buf_alloc) {
             s->buf_start -= buf_alloc;
@@ -580,7 +580,7 @@ static bool stream_read_more(struct stream *s, int forward)
     }
 
     // Must not have overwritten guaranteed old data.
-    assert(s->buf_cur - s->buf_start >= buf_old);
+    mp_assert(s->buf_cur - s->buf_start >= buf_old);
 
     if (s->buf_cur < s->buf_end)
         s->eof = 0;
@@ -592,8 +592,8 @@ static bool stream_read_more(struct stream *s, int forward)
 // Return 0 on EOF, error, or if buf_size was 0.
 int stream_read_partial(stream_t *s, void *buf, int buf_size)
 {
-    assert(s->buf_cur <= s->buf_end);
-    assert(buf_size >= 0);
+    mp_assert(s->buf_cur <= s->buf_end);
+    mp_assert(buf_size >= 0);
     if (s->buf_cur == s->buf_end && buf_size > 0) {
         if (buf_size > (s->buffer_mask + 1) / 2) {
             // Direct read if the buffer is too small anyway.
@@ -735,8 +735,8 @@ bool stream_seek(stream_t *s, int64_t pos)
         int64_t x = pos - (s->pos - (int)s->buf_end);
         if (x >= (int)s->buf_start) {
             s->buf_cur = x;
-            assert(s->buf_cur >= s->buf_start);
-            assert(s->buf_cur <= s->buf_end);
+            mp_assert(s->buf_cur >= s->buf_start);
+            mp_assert(s->buf_cur <= s->buf_end);
             return true;
         }
     }

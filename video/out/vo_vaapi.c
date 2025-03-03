@@ -359,7 +359,7 @@ static int va_surface_upload(struct priv *priv, struct mp_image *va_dst,
     struct mp_image img;
     if (!va_image_map(p->ctx, &p->image, &img))
         return -1;
-    assert(sw_src->w <= img.w && sw_src->h <= img.h);
+    mp_assert(sw_src->w <= img.w && sw_src->h <= img.h);
     mp_image_set_size(&img, sw_src->w, sw_src->h); // copy only visible part
     mp_image_copy(&img, sw_src);
     va_image_unmap(p->ctx, &p->image);

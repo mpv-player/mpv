@@ -45,7 +45,7 @@ void init_imgfmts_list(void)
         enum AVPixelFormat fmt = av_pix_fmt_desc_get_id(avd);
         int mpfmt = pixfmt2imgfmt(fmt);
         if (!mpfmt) {
-            assert(num_pixfmt_unsup < MP_ARRAY_SIZE(pixfmt_unsup));
+            mp_require(num_pixfmt_unsup < MP_ARRAY_SIZE(pixfmt_unsup));
             pixfmt_unsup[num_pixfmt_unsup++] = fmt;
         }
     }
@@ -54,7 +54,7 @@ void init_imgfmts_list(void)
         struct mp_imgfmt_desc d = mp_imgfmt_get_desc(fmt);
         enum AVPixelFormat pixfmt = imgfmt2pixfmt(fmt);
         if (d.id || pixfmt != AV_PIX_FMT_NONE) {
-            assert(num_imgfmts < MP_ARRAY_SIZE(imgfmts)); // enlarge that array
+            mp_require(num_imgfmts < MP_ARRAY_SIZE(imgfmts)); // enlarge that array
             imgfmts[num_imgfmts++] = fmt;
         }
     }

@@ -34,7 +34,7 @@ static const struct mp_chmap speaker_replacements[][2] = {
 // right, or the other way around.
 static bool replace_speakers(struct mp_chmap *map, struct mp_chmap list[2])
 {
-    assert(list[0].num == list[1].num);
+    mp_assert(list[0].num == list[1].num);
     if (!mp_chmap_is_valid(map))
         return false;
     for (int dir = 0; dir < 2; dir++) {
@@ -126,7 +126,7 @@ void mp_chmap_sel_add_waveext_def(struct mp_chmap_sel *s)
 // speakers are allowed.
 void mp_chmap_sel_add_speaker(struct mp_chmap_sel *s, int id)
 {
-    assert(id >= 0 && id < MP_SPEAKER_ID_COUNT);
+    mp_assert(id >= 0 && id < MP_SPEAKER_ID_COUNT);
     s->speakers[id] = true;
 }
 

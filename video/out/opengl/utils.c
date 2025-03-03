@@ -84,7 +84,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     int y_max = y + h;
     if (w <= 0 || h <= 0 || !bpp)
         return;
-    assert(stride > 0);
+    mp_assert(stride > 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
     int slice = h;
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
@@ -108,7 +108,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
 bool gl_read_fbo_contents(GL *gl, int fbo, int dir, GLenum format, GLenum type,
                           int w, int h, uint8_t *dst, int dst_stride)
 {
-    assert(dir == 1 || dir == -1);
+    mp_assert(dir == 1 || dir == -1);
     if (fbo == 0 && gl->es)
         return false; // ES can't read from front buffer
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -146,7 +146,7 @@ static void gl_vao_enable_attribs(struct gl_vao *vao)
         default:
             abort();
         }
-        assert(e->dim_m == 1);
+        mp_assert(e->dim_m == 1);
 
         gl->EnableVertexAttribArray(n);
         gl->VertexAttribPointer(n, e->dim_v, type, normalized,
@@ -158,8 +158,8 @@ void gl_vao_init(struct gl_vao *vao, GL *gl, int stride,
                  const struct ra_renderpass_input *entries,
                  int num_entries)
 {
-    assert(!vao->vao);
-    assert(!vao->buffer);
+    mp_assert(!vao->vao);
+    mp_assert(!vao->buffer);
 
     *vao = (struct gl_vao){
         .gl = gl,

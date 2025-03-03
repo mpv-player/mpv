@@ -7,10 +7,6 @@
 #include "osdep/terminal.h"
 #include "test_utils.h"
 
-#ifdef NDEBUG
-static_assert(false, "don't define NDEBUG for tests");
-#endif
-
 void assert_int_equal_impl(const char *file, int line, int64_t a, int64_t b)
 {
     if (a != b) {
@@ -43,7 +39,7 @@ void assert_float_equal_impl(const char *file, int line,
 FILE *test_open_out(const char *outdir, const char *name)
 {
     mp_mkdirp(outdir);
-    assert(mp_path_isdir(outdir));
+    mp_require(mp_path_isdir(outdir));
     char *path = mp_tprintf(4096, "%s/%s", outdir, name);
     FILE *f = fopen(path, "wb");
     if (!f) {

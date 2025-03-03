@@ -369,7 +369,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 info.pix_fmt = cfg->pix_fmt;
 
                 const char *name = av_hwdevice_get_type_name(cfg->device_type);
-                assert(name); // API violation by libavcodec
+                mp_assert(name); // API violation by libavcodec
 
                 // nvdec hwaccels and the cuvid full decoder clash with their
                 // naming, so fix it here; we also prefer nvdec for the hwaccel.
@@ -406,7 +406,7 @@ static void add_all_hwdec_methods(struct hwdec_info **infos, int *num_infos)
                 const char *name = wrapper;
                 if (!name)
                     name = av_get_pix_fmt_name(info.pix_fmt);
-                assert(name); // API violation by libavcodec
+                mp_assert(name); // API violation by libavcodec
 
                 snprintf(info.method_name, sizeof(info.method_name), "%s", name);
 
@@ -455,7 +455,7 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
                                      bool autoprobe)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    assert(hwdec->lavc_device);
+    mp_assert(hwdec->lavc_device);
 
     if (hwdec->copying) {
         const struct hwcontext_fns *fns =
@@ -706,7 +706,7 @@ static void init_avctx(struct mp_filter *vd)
 
     m_config_cache_update(ctx->opts_cache);
 
-    assert(!ctx->avctx);
+    mp_assert(!ctx->avctx);
 
     const AVCodec *lavc_codec = NULL;
 
@@ -992,7 +992,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     MP_VERBOSE(vd, "Codec profile: %s (0x%x)\n", profile ? profile : "unknown",
                avctx->profile);
 
-    assert(ctx->use_hwdec);
+    mp_assert(ctx->use_hwdec);
 
     ctx->hwdec_request_reinit |= ctx->hwdec_failed;
     ctx->hwdec_failed = false;
@@ -1188,7 +1188,7 @@ static void send_queued_packet(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    assert(ctx->num_requeue_packets);
+    mp_assert(ctx->num_requeue_packets);
 
     if (send_packet(vd, ctx->requeue_packets[0]) != AVERROR(EAGAIN)) {
         talloc_free(ctx->requeue_packets[0]);
@@ -1232,7 +1232,7 @@ static int decode_frame(struct mp_filter *vd)
 
     // If something was decoded successfully, it must return a frame with valid
     // data.
-    assert(ctx->pic->buf[0]);
+    mp_assert(ctx->pic->buf[0]);
 
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     if (!mpi) {

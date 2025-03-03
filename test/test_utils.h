@@ -6,8 +6,8 @@
 
 #include "common/common.h"
 
-#define assert_true(x) assert(x)
-#define assert_false(x) assert(!(x))
+#define assert_true(x) mp_require(x)
+#define assert_false(x) mp_require(!(x))
 #define assert_int_equal(a, b) \
     assert_int_equal_impl(__FILE__, __LINE__, (a), (b))
 #define assert_string_equal(a, b) \

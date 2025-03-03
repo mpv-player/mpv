@@ -152,7 +152,7 @@ void mp_frame_unref(struct mp_frame *frame)
 struct mp_frame mp_frame_ref(struct mp_frame frame)
 {
     if (frame_handlers[frame.type].new_ref) {
-        assert(frame.data);
+        mp_assert(frame.data);
         frame.data = frame_handlers[frame.type].new_ref(frame.data);
         if (!frame.data)
             frame.type = MP_FRAME_NONE;

@@ -190,7 +190,7 @@ static char *x11_atom_name_buf(struct vo_x11_state *x11, Atom atom,
 static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
                               Atom type, int format, int *out_nitems)
 {
-    assert(format == 8 || format == 16 || format == 32);
+    mp_assert(format == 8 || format == 16 || format == 32);
     *out_nitems = 0;
     if (!w)
         return NULL;
@@ -676,7 +676,7 @@ bool vo_x11_init(struct vo *vo)
 {
     char *dispName;
 
-    assert(!vo->x11);
+    mp_assert(!vo->x11);
 
     XInitThreads();
 
@@ -1591,8 +1591,8 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    assert(x11->window == None);
-    assert(!x11->xic);
+    mp_assert(x11->window == None);
+    mp_assert(!x11->xic);
 
     XVisualInfo vinfo_storage;
     if (!vis) {
@@ -1774,7 +1774,7 @@ bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname)
 {
     struct vo_x11_state *x11 = vo->x11;
-    assert(!x11->window);
+    mp_assert(!x11->window);
 
     if (x11->parent) {
         if (x11->parent == x11->rootwin) {
@@ -1801,7 +1801,7 @@ void vo_x11_config_vo_window(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     struct mp_vo_opts *opts = x11->opts;
 
-    assert(x11->window);
+    mp_assert(x11->window);
 
     vo_x11_update_screeninfo(vo);
 

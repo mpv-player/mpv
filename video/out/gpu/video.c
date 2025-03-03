@@ -748,7 +748,7 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum pl_color_primaries prim,
 static struct image image_wrap(struct ra_tex *tex, enum plane_type type,
                                int components)
 {
-    assert(type != PLANE_NONE);
+    mp_assert(type != PLANE_NONE);
     return (struct image){
         .type = type,
         .tex = tex,
@@ -820,7 +820,7 @@ static enum plane_type merge_plane_types(enum plane_type a, enum plane_type b)
 static void pass_get_images(struct gl_video *p, struct video_image *vimg,
                             struct image img[4], struct gl_transform off[4])
 {
-    assert(vimg->mpi);
+    mp_assert(vimg->mpi);
 
     int w = p->image_params.w;
     int h = p->image_params.h;
@@ -1079,7 +1079,7 @@ static void unref_current_image(struct gl_video *p)
     struct video_image *vimg = &p->image;
 
     if (vimg->hwdec_mapped) {
-        assert(p->hwdec_active && p->hwdec_mapper);
+        mp_assert(p->hwdec_active && p->hwdec_mapper);
         ra_hwdec_mapper_unmap(p->hwdec_mapper);
         memset(vimg->planes, 0, sizeof(vimg->planes));
         vimg->hwdec_mapped = false;
@@ -1401,8 +1401,8 @@ static void copy_image(struct gl_video *p, unsigned int *offset, struct image im
     char src[5] = {0};
     char dst[5] = {0};
 
-    assert(*offset + count < sizeof(dst));
-    assert(img.padding + count < sizeof(src));
+    mp_assert(*offset + count < sizeof(dst));
+    mp_assert(img.padding + count < sizeof(src));
 
     int id = pass_bind(p, img);
 
@@ -1503,7 +1503,7 @@ static bool saved_img_find(struct gl_video *p, const char *name,
 static void saved_img_store(struct gl_video *p, const char *name,
                             struct image img)
 {
-    assert(name);
+    mp_assert(name);
 
     for (int i = 0; i < p->num_saved_imgs; i++) {
         if (strcmp(p->saved_imgs[i].name, name) == 0) {
@@ -1762,7 +1762,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
                           double scale_factor,
                           int sizes[])
 {
-    assert(conf);
+    mp_assert(conf);
     if (scaler_conf_eq(scaler->conf, *conf) &&
         scaler->scale_factor == scale_factor &&
         scaler->initialized)
@@ -1827,11 +1827,11 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     int size = scaler->kernel->size;
     int num_components = size > 2 ? 4 : size;
     const struct ra_format *fmt = ra_find_float16_format(p->ra, num_components);
-    assert(fmt);
+    mp_assert(fmt);
 
     int width = (size + num_components - 1) / num_components; // round up
     int stride = width * num_components;
-    assert(size <= stride);
+    mp_assert(size <= stride);
 
     static const int lut_size = 256;
     float *weights = talloc_array(NULL, float, lut_size * stride);
@@ -2061,7 +2061,7 @@ static bool szexp_lookup(void *priv, struct bstr var, float size[2])
 static bool user_hook_cond(struct gl_video *p, struct image img, void *priv)
 {
     struct gl_user_shader_hook *shader = priv;
-    assert(shader);
+    mp_assert(shader);
 
     float res = false;
     struct szexp_ctx ctx = {p, img};
@@ -2073,7 +2073,7 @@ static void user_hook(struct gl_video *p, struct image img,
                       struct gl_transform *trans, void *priv)
 {
     struct gl_user_shader_hook *shader = priv;
-    assert(shader);
+    mp_assert(shader);
     load_shader(p, shader->pass_body);
 
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->pass_desc),
@@ -2671,7 +2671,7 @@ static void pass_colormanage(struct gl_video *p, struct pl_color_space src,
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             dst.primaries = prim_orig;
             dst.transfer = trc_orig;
-            assert(dst.primaries && dst.transfer);
+            mp_assert(dst.primaries && dst.transfer);
         }
     }
 
@@ -3264,7 +3264,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     if (oversample || linear) {
         size = 2;
     } else {
-        assert(tscale->kernel && !tscale->kernel->polar);
+        mp_assert(tscale->kernel && !tscale->kernel->polar);
         size = ceil(tscale->kernel->size);
     }
 
@@ -3272,7 +3272,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     int surface_now = p->surface_now;
     int surface_bse = surface_wrap(surface_now - (radius-1));
     int surface_end = surface_wrap(surface_now + radius);
-    assert(surface_wrap(surface_bse + size-1) == surface_end);
+    mp_assert(surface_wrap(surface_bse + size-1) == surface_end);
 
     // Render new frames while there's room in the queue. Note that technically,
     // this should be done before the step where we find the right frame, but
@@ -3378,7 +3378,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             // the textures are bound in-order and starting at 0, we just
             // assert to make sure this is the case (which it should always be)
             int id = pass_bind(p, img);
-            assert(id == i);
+            mp_assert(id == i);
         }
 
         MP_TRACE(p, "inter frame dur: %f vsync: %f, mix: %f\n",
@@ -3745,7 +3745,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     }
 
     // Software decoding
-    assert(mpi->num_planes == p->plane_count);
+    mp_assert(mpi->num_planes == p->plane_count);
 
     timer_pool_start(p->upload_timer);
     for (int n = 0; n < p->plane_count; n++) {
@@ -4077,7 +4077,7 @@ void gl_video_uninit(struct gl_video *p)
     gc_pending_dr_fences(p, true);
 
     // Should all have been unreffed already.
-    assert(!p->num_dr_buffers);
+    mp_assert(!p->num_dr_buffers);
 
     talloc_free(p);
 }
@@ -4305,7 +4305,7 @@ static void gl_video_dr_free_buffer(void *opaque, uint8_t *data)
     for (int n = 0; n < p->num_dr_buffers; n++) {
         struct dr_buffer *buffer = &p->dr_buffers[n];
         if (buffer->buf->data == data) {
-            assert(!buffer->mpi); // can't be freed while it has a ref
+            mp_assert(!buffer->mpi); // can't be freed while it has a ref
             ra_buf_free(p->ra, &buffer->buf);
             MP_TARRAY_REMOVE_AT(p->dr_buffers, p->num_dr_buffers, n);
             return;
@@ -4351,7 +4351,7 @@ void gl_video_init_hwdecs(struct gl_video *p, struct ra_ctx *ra_ctx,
                           struct mp_hwdec_devices *devs,
                           bool load_all_by_default)
 {
-    assert(!p->hwdec_ctx.ra_ctx);
+    mp_assert(!p->hwdec_ctx.ra_ctx);
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
         .log = p->log,
         .global = p->global,
@@ -4364,7 +4364,7 @@ void gl_video_init_hwdecs(struct gl_video *p, struct ra_ctx *ra_ctx,
 void gl_video_load_hwdecs_for_img_fmt(struct gl_video *p, struct mp_hwdec_devices *devs,
                                       struct hwdec_imgfmt_request *params)
 {
-    assert(p->hwdec_ctx.ra_ctx);
+    mp_assert(p->hwdec_ctx.ra_ctx);
     ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
 }
 

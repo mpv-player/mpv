@@ -105,7 +105,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
-    assert(!p->mapped);
+    mp_assert(!p->mapped);
 
     if (p->vdpgl_surface)
         gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);

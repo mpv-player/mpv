@@ -296,7 +296,7 @@ static struct mp_filter *gpu_create(struct mp_filter *parent, void *options)
     offscreen_ctx_set_current(priv->ctx, true);
 
     priv->renderer = gl_video_init(priv->ctx->ra, f->log, f->global);
-    assert(priv->renderer); // can't fail (strangely)
+    mp_assert(priv->renderer); // can't fail (strangely)
 
     offscreen_ctx_set_current(priv->ctx, false);
 

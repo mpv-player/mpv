@@ -250,8 +250,8 @@ static int repack_entrypoint(void *user, unsigned i, unsigned x0, unsigned x1)
         x0 &= ~(unsigned)(mp_repack_get_align_x(r->repack) - 1);
 
     // mp_repack requirements and zimg guarantees.
-    assert(!(i & (mp_repack_get_align_y(r->repack) - 1)));
-    assert(!(x0 & (mp_repack_get_align_x(r->repack) - 1)));
+    mp_assert(!(i & (mp_repack_get_align_y(r->repack) - 1)));
+    mp_assert(!(x0 & (mp_repack_get_align_x(r->repack) - 1)));
 
     unsigned i_src = i & (r->pack ? r->zmask[0] : ZIMG_BUFFER_MAX);
     unsigned i_dst = i & (r->pack ? ZIMG_BUFFER_MAX : r->zmask[0]);
@@ -275,7 +275,7 @@ static bool wrap_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r,
         // Due to subsampling we may assume the image to be bigger than it
         // actually is (see real_h in setup_format).
         if (mpi->h < y1) {
-            assert(y1 - mpi->h < 4);
+            mp_assert(y1 - mpi->h < 4);
             mp_image_set_size(mpi, mpi->w, y1);
         }
         mp_image_crop(mpi, 0, st->slice_y, mpi->w, y1);
@@ -399,7 +399,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
             zfmt->height = r->real_h = st->slice_h =
                 MPMIN(st->slice_y + st->slice_h, r->real_h) - st->slice_y;
 
-            assert(MP_IS_ALIGNED(r->real_h, 1 << desc.chroma_ys));
+            mp_assert(MP_IS_ALIGNED(r->real_h, 1 << desc.chroma_ys));
         } else {
             // Relies on st->dst being initialized first.
             struct mp_zimg_repack *dst = st->dst;
@@ -486,7 +486,7 @@ static bool allocate_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r)
     r->zmask[0] = zimg_select_buffer_mask(lines);
 
     // Either ZIMG_BUFFER_MAX, or a power-of-2 slice buffer.
-    assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
+    mp_assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
 
     int h = r->zmask[0] == ZIMG_BUFFER_MAX ? r->real_h : r->zmask[0] + 1;
     if (h >= r->real_h) {
@@ -622,7 +622,7 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
             goto fail;
     }
 
-    assert(ctx->num_states == slices);
+    mp_assert(ctx->num_states == slices);
 
     return true;
 
@@ -647,7 +647,7 @@ bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
 
 static void do_convert(struct mp_zimg_state *st)
 {
-    assert(st->graph);
+    mp_assert(st->graph);
 
     // An annoyance.
     zimg_image_buffer *zsrc = &st->src->zbuf;
@@ -700,7 +700,7 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
 
         bool r = mp_thread_pool_run(ctx->tp, do_convert_thread, st);
         // This is guaranteed by the API; and unrolling would be inconvenient.
-        assert(r);
+        mp_assert(r);
     }
 
     do_convert(ctx->states[0]);

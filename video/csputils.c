@@ -224,7 +224,7 @@ static void apply_chromatic_adaptation(struct pl_cie_xy src,
 // This is broken. Use mp_get_csp_uint_mul().
 double mp_get_csp_mul(enum pl_color_system csp, int input_bits, int texture_bits)
 {
-    assert(texture_bits >= input_bits);
+    mp_assert(texture_bits >= input_bits);
 
     // Convenience for some irrelevant cases, e.g. rgb565 or disabling expansion.
     if (!input_bits)
@@ -303,7 +303,7 @@ void mp_get_csp_uint_mul(enum pl_color_system csp, enum pl_color_levels levels,
  */
 static void luma_coeffs(struct pl_transform3x3 *mat, float lr, float lg, float lb)
 {
-    assert(fabs(lr+lg+lb - 1) < 1e-6);
+    mp_assert(fabs(lr+lg+lb - 1) < 1e-6);
     *mat = (struct pl_transform3x3) {
         { {{1, 0,                    2 * (1-lr)          },
            {1, -2 * (1-lb) * lb/lg, -2 * (1-lr) * lr/lg  },

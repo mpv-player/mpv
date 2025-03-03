@@ -131,13 +131,13 @@ static void add_streams(demuxer_t *demuxer)
             if (src->demuxer_id >= 0x20 && src->demuxer_id <= 0x3F)
                 sub = p->dvd_subs[src->demuxer_id - 0x20];
             if (sub) {
-                assert(p->num_streams == n); // directly mapped
+                mp_assert(p->num_streams == n); // directly mapped
                 MP_TARRAY_APPEND(p, p->streams, p->num_streams, sub);
                 continue;
             }
         }
         struct sh_stream *sh = demux_alloc_sh_stream(src->type);
-        assert(p->num_streams == n); // directly mapped
+        mp_assert(p->num_streams == n); // directly mapped
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, sh);
         // Copy all stream fields that might be relevant
         *sh->codec = *src->codec;

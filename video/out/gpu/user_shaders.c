@@ -90,7 +90,7 @@ bool eval_szexpr(struct mp_log *log, void *priv,
         case SZEXP_CONST:
             // Since our SZEXPs are bound by MAX_SZEXP_SIZE, it should be
             // impossible to overflow the stack
-            assert(idx < MAX_SZEXP_SIZE);
+            mp_assert(idx < MAX_SZEXP_SIZE);
             stack[idx++] = expr[i].val.cval;
             continue;
 

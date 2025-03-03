@@ -719,7 +719,7 @@ static int init(struct ao *ao)
         if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
             goto error;
         p->channel_config = layout_map[ao->channels.num];
-        assert(p->channel_config);
+        mp_assert(p->channel_config);
     }
 
     jint buffer_size = MP_JNI_CALL_STATIC_INT(
@@ -743,7 +743,7 @@ static int init(struct ao *ao)
     max = MP_ALIGN_UP(max, bps);
     p->size = MPCLAMP(buffer_size * 2, min, max);
     MP_VERBOSE(ao, "Setting bufferSize = %d (driver=%d, min=%d, max=%d)\n", p->size, buffer_size, min, max);
-    assert(p->size % bps == 0);
+    mp_assert(p->size % bps == 0);
     ao->device_buffer = p->size / bps;
 
     p->chunksize = p->size;

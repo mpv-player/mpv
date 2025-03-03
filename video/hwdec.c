@@ -28,8 +28,8 @@ void hwdec_devices_destroy(struct mp_hwdec_devices *devs)
 {
     if (!devs)
         return;
-    assert(!devs->num_hwctxs); // must have been hwdec_devices_remove()ed
-    assert(!devs->load_api); // must have been unset
+    mp_assert(!devs->num_hwctxs); // must have been hwdec_devices_remove()ed
+    mp_assert(!devs->load_api); // must have been unset
     mp_mutex_destroy(&devs->lock);
     talloc_free(devs);
 }

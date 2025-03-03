@@ -133,8 +133,8 @@ static void thread_pool_dtor(void *ctx)
     for (int n = 0; n < num_threads; n++)
         mp_thread_join(threads[n]);
 
-    assert(pool->num_work == 0);
-    assert(pool->num_threads == 0);
+    mp_assert(pool->num_work == 0);
+    mp_assert(pool->num_threads == 0);
     mp_cond_destroy(&pool->wakeup);
     mp_mutex_destroy(&pool->lock);
 }
@@ -153,9 +153,9 @@ static bool add_thread(struct mp_thread_pool *pool)
 struct mp_thread_pool *mp_thread_pool_create(void *ta_parent, int init_threads,
                                              int min_threads, int max_threads)
 {
-    assert(min_threads >= 0);
-    assert(init_threads <= min_threads);
-    assert(max_threads > 0 && max_threads >= min_threads);
+    mp_assert(min_threads >= 0);
+    mp_assert(init_threads <= min_threads);
+    mp_assert(max_threads > 0 && max_threads >= min_threads);
 
     struct mp_thread_pool *pool = talloc_zero(ta_parent, struct mp_thread_pool);
     talloc_set_destructor(pool, thread_pool_dtor);
@@ -183,7 +183,7 @@ static bool thread_pool_add(struct mp_thread_pool *pool, void (*fn)(void *ctx),
 {
     bool ok = true;
 
-    assert(fn);
+    mp_assert(fn);
 
     mp_mutex_lock(&pool->lock);
     struct work work = {fn, fn_ctx};

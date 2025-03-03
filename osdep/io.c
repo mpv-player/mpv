@@ -811,8 +811,8 @@ int msync(void *addr, size_t length, int flags)
 
 void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
 {
-    assert(addr == NULL); // not implemented
-    assert(flags == MAP_SHARED); // not implemented
+    mp_assert(addr == NULL); // not implemented
+    mp_assert(flags == MAP_SHARED); // not implemented
 
     HANDLE osf = (HANDLE)_get_osfhandle(fd);
     if (!osf) {

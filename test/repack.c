@@ -195,10 +195,10 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
 
     // If both exists, they must be always symmetric.
     if (un && pa) {
-        assert(mp_repack_get_format_src(pa) == mp_repack_get_format_dst(un));
-        assert(mp_repack_get_format_src(un) == mp_repack_get_format_dst(pa));
-        assert(mp_repack_get_align_x(pa) == mp_repack_get_align_x(un));
-        assert(mp_repack_get_align_y(pa) == mp_repack_get_align_y(un));
+        mp_require(mp_repack_get_format_src(pa) == mp_repack_get_format_dst(un));
+        mp_require(mp_repack_get_format_src(un) == mp_repack_get_format_dst(pa));
+        mp_require(mp_repack_get_align_x(pa) == mp_repack_get_align_x(un));
+        mp_require(mp_repack_get_align_y(pa) == mp_repack_get_align_y(un));
     }
 
     int a = 0;
@@ -214,10 +214,10 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
     // Skip the identity ones because they're uninteresting, and add too much
     // noise. But still make sure they behave as expected.
     if (a == imgfmt && b == imgfmt) {
-        assert(is_true_planar(imgfmt));
+        mp_require(is_true_planar(imgfmt));
         // (note that we require alpha-enabled zimg)
-        assert(mp_zimg_supports_in_format(imgfmt));
-        assert(un && pa);
+        mp_require(mp_zimg_supports_in_format(imgfmt));
+        mp_require(un && pa);
         talloc_free(pa);
         talloc_free(un);
         return b;
@@ -230,7 +230,7 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
         return 0;
     }
 
-    assert(a == imgfmt);
+    mp_require(a == imgfmt);
     if (b && b == not_if_fmt) {
         talloc_free(pa);
         talloc_free(un);
@@ -270,7 +270,7 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
         struct mp_image *ib = mp_image_alloc(fmt_b, e->w * 7 * ax, e->h * 6 * ay);
         int sx = 4 * ax, sy = 3 * ay, dx = 3 * ax, dy = 2 * ay;
 
-        assert(ia && ib);
+        mp_require(ia && ib);
 
         mp_image_params_guess_csp(&ia->params);
         mp_image_params_guess_csp(&ib->params);
@@ -289,7 +289,7 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
             struct mp_image *srci = pack ? ib : ia;
 
             bool r = repack_config_buffers(repacker, 0, dsti, 0, srci, NULL);
-            assert(r);
+            mp_require(r);
 
             for (int p = 0; p < srci->num_planes; p++) {
                 uint8_t *ptr = mp_image_pixel_ptr(srci, p, sx, sy);
@@ -335,7 +335,7 @@ static void check_float_repack(int imgfmt, enum pl_color_system csp,
     int bpp = desc.component_size;
     int comp_bits = desc.component_size * 8 + MPMIN(desc.component_pad, 0);
 
-    assert(bpp == 1 || bpp == 2);
+    mp_require(bpp == 1 || bpp == 2);
 
     int w = 1 << (bpp * 8);
 
@@ -346,14 +346,14 @@ static void check_float_repack(int imgfmt, enum pl_color_system csp,
     }
 
     struct mp_image *src = mp_image_alloc(imgfmt, w, 1);
-    assert(src);
+    mp_require(src);
 
     src->params.repr.sys = csp;
     src->params.repr.levels = levels;
     mp_image_params_guess_csp(&src->params);
     // mpv may not allow all combinations
-    assert(src->params.repr.sys == csp);
-    assert(src->params.repr.levels == levels);
+    mp_require(src->params.repr.sys == csp);
+    mp_require(src->params.repr.levels == levels);
 
     for (int p = 0; p < src->num_planes; p++) {
         int val = 0;
@@ -373,13 +373,13 @@ static void check_float_repack(int imgfmt, enum pl_color_system csp,
         mp_repack_create_planar(src->imgfmt, false, REPACK_CREATE_PLANAR_F32);
     struct mp_repack *from_f =
         mp_repack_create_planar(src->imgfmt, true, REPACK_CREATE_PLANAR_F32);
-    assert(to_f && from_f);
+    mp_require(to_f && from_f);
 
     struct mp_image *z_f = mp_image_alloc(mp_repack_get_format_dst(to_f), w, 1);
     struct mp_image *r_f = mp_image_alloc(z_f->imgfmt, w, 1);
     struct mp_image *z_i = mp_image_alloc(src->imgfmt, w, 1);
     struct mp_image *r_i = mp_image_alloc(src->imgfmt, w, 1);
-    assert(z_f && r_f && z_i && r_i);
+    mp_require(z_f && r_f && z_i && r_i);
 
     z_f->params.color = r_f->params.color = z_i->params.color =
         r_i->params.color = src->params.color;

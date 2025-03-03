@@ -159,7 +159,7 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
                            void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                            char *name)
 {
-    assert(wakeup_cb);
+    mp_assert(wakeup_cb);
 
     struct mp_log *log = mp_log_new(NULL, global->log, "ao");
     struct m_obj_desc desc;

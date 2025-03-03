@@ -353,7 +353,7 @@ static struct mp_image *check_alignment(struct mp_log *log,
     // and which in most cases is not larger than decoder output. It is smaller
     // or equal to what most image allocators in mpv/ffmpeg use.
     size_t align = 32;
-    assert(align <= MP_IMAGE_BYTE_ALIGN); // or mp_image_alloc will not cut it
+    mp_assert(align <= MP_IMAGE_BYTE_ALIGN); // or mp_image_alloc will not cut it
 
     bool is_aligned = true;
     for (int p = 0; p < img->num_planes; p++) {

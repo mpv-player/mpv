@@ -75,8 +75,8 @@ static bool init_rubberband(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    assert(!p->rubber);
-    assert(p->pending);
+    mp_assert(!p->rubber);
+    mp_assert(p->pending);
 
     int opts = p->opts->transients | p->opts->detector | p->opts->phase |
                p->opts->window | p->opts->smoothing | p->opts->formant |
@@ -132,7 +132,7 @@ static void af_rubberband_process(struct mp_filter *f)
                 return; // no new data yet
             }
         }
-        assert(p->pending || eof);
+        mp_assert(p->pending || eof);
 
         if (!p->rubber) {
             if (!p->pending) {
@@ -185,7 +185,7 @@ static void af_rubberband_process(struct mp_filter *f)
         }
     }
 
-    assert(p->pending);
+    mp_assert(p->pending);
 
     int out_samples = rubberband_available(p->rubber);
     if (out_samples > 0) {
@@ -199,7 +199,7 @@ static void af_rubberband_process(struct mp_filter *f)
 
         float *out_data[MP_NUM_CHANNELS] = {0};
         uint8_t **planes = mp_aframe_get_data_rw(out);
-        assert(planes);
+        mp_assert(planes);
         int num_planes = mp_aframe_get_planes(out);
         for (int n = 0; n < num_planes; n++)
             out_data[n] = (void *)planes[n];

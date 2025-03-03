@@ -374,7 +374,7 @@ static void destroy_d3d_surfaces(d3d_priv *priv)
 // Allocate video surface.
 static bool d3d_configure_video_objects(d3d_priv *priv)
 {
-    assert(priv->image_format != 0);
+    mp_assert(priv->image_format != 0);
 
     if (!priv->d3d_surface &&
         FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(

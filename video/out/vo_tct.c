@@ -140,7 +140,7 @@ static void write_plain(bstr *frame,
     const unsigned char *source, const int source_stride,
     bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
 {
-    assert(source);
+    mp_assert(source);
     const int tx = (dwidth - swidth) / 2;
     const int ty = (dheight - sheight) / 2;
     for (int y = 0; y < sheight; y++) {
@@ -171,7 +171,7 @@ static void write_half_blocks(bstr *frame,
     unsigned char *source, int source_stride,
     bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
 {
-    assert(source);
+    mp_assert(source);
     const int tx = (dwidth - swidth) / 2;
     const int ty = (dheight - sheight) / 2;
     for (int y = 0; y < sheight * 2; y += 2) {

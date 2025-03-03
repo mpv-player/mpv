@@ -195,7 +195,7 @@ struct termbuf {
 
 static void skip_buf(struct termbuf *b, unsigned int count)
 {
-    assert(count <= b->len);
+    mp_assert(count <= b->len);
 
     memmove(&b->b[0], &b->b[count], b->len - count);
     b->len -= count;
@@ -285,7 +285,7 @@ static void process_input(struct input_ctx *input_ctx, bool timeout)
 
         if (match->replace) {
             int rep = strlen(match->replace);
-            assert(rep <= seq_len);
+            mp_assert(rep <= seq_len);
             memcpy(buf.b, match->replace, rep);
             memmove(buf.b + rep, buf.b + seq_len, buf.len - seq_len);
             buf.len = rep + buf.len - seq_len;
@@ -597,7 +597,7 @@ void terminal_set_mouse_input(bool enable)
 
 void terminal_init(void)
 {
-    assert(!getch2_enabled);
+    mp_assert(!getch2_enabled);
     getch2_enabled = 1;
 
     if (mp_make_wakeup_pipe(stop_cont_pipe) < 0) {

@@ -240,7 +240,7 @@ static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
     if (!out_fbo)
         return true;
 
-    assert(!p->backbuffer);
+    mp_assert(!p->backbuffer);
 
     p->backbuffer = get_backbuffer(sw->ctx);
     if (!p->backbuffer)

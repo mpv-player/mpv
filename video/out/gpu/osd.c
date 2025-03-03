@@ -124,13 +124,13 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     struct ra *ra = ctx->ra;
     bool ok = false;
 
-    assert(imgs->packed);
+    mp_assert(imgs->packed);
 
     int req_w = next_pow2(imgs->packed_w);
     int req_h = next_pow2(imgs->packed_h);
 
     const struct ra_format *fmt = ctx->fmt_table[imgs->format];
-    assert(fmt);
+    mp_assert(fmt);
 
     if (!osd->texture || req_w > osd->w || req_h > osd->h ||
         osd->format != imgs->format)
@@ -206,7 +206,7 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
 bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
                            struct gl_shader_cache *sc)
 {
-    assert(index >= 0 && index < MAX_OSD_PARTS);
+    mp_assert(index >= 0 && index < MAX_OSD_PARTS);
     struct mpgl_osd_part *part = ctx->parts[index];
 
     enum sub_bitmap_format fmt = part->format;

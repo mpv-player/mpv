@@ -90,7 +90,7 @@ void mp_image_pool_clear(struct mp_image_pool *pool)
         struct image_flags *it = img->priv;
         bool referenced;
         pool_lock();
-        assert(it->pool_alive);
+        mp_assert(it->pool_alive);
         it->pool_alive = false;
         referenced = it->referenced;
         pool_unlock();
@@ -108,7 +108,7 @@ static void unref_image(void *opaque, uint8_t *data)
     struct image_flags *it = img->priv;
     bool alive;
     pool_lock();
-    assert(it->referenced);
+    mp_assert(it->referenced);
     it->referenced = false;
     alive = it->pool_alive;
     pool_unlock();
@@ -126,7 +126,7 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     for (int n = 0; n < pool->num_images; n++) {
         struct mp_image *img = pool->images[n];
         struct image_flags *img_it = img->priv;
-        assert(img_it->pool_alive);
+        mp_assert(img_it->pool_alive);
         if (!img_it->referenced) {
             if (img->imgfmt == fmt && img->w == w && img->h == h) {
                 if (pool->use_lru) {
@@ -148,7 +148,7 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     // and unreffing images from other threads does not allocate new images,
     // no synchronization is required here.
     for (int p = 0; p < MP_MAX_PLANES; p++)
-        assert(!!new->bufs[p] == !p); // only 1 AVBufferRef
+        mp_assert(!!new->bufs[p] == !p); // only 1 AVBufferRef
 
     struct mp_image *ref = mp_image_new_dummy_ref(new);
 
@@ -164,7 +164,7 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     }
 
     struct image_flags *it = new->priv;
-    assert(!it->referenced && it->pool_alive);
+    mp_assert(!it->referenced && it->pool_alive);
     it->referenced = true;
     it->order = ++pool->lru_counter;
     return ref;
@@ -236,7 +236,7 @@ bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
     if (!new)
         return false;
     mp_image_steal_data(img, new);
-    assert(mp_image_is_writeable(img));
+    mp_assert(mp_image_is_writeable(img));
     return true;
 }
 
@@ -292,7 +292,7 @@ struct mp_image *mp_image_hw_download(struct mp_image *src,
     if (!imgfmt)
         return NULL;
 
-    assert(src->hwctx);
+    mp_assert(src->hwctx);
     AVHWFramesContext *fctx = (void *)src->hwctx->data;
 
     struct mp_image *dst =

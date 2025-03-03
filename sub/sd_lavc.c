@@ -284,8 +284,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         sub->src_w = MPMAX(sub->src_w, b->x + b->w);
         sub->src_h = MPMAX(sub->src_h, b->y + b->h);
 
-        assert(r->nb_colors > 0);
-        assert(r->nb_colors <= 256);
+        mp_assert(r->nb_colors > 0);
+        mp_assert(r->nb_colors <= 256);
         uint32_t pal[256] = {0};
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
@@ -541,7 +541,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
         res->change_id++;
 
     if (!res->change_id) {
-        assert(priv->prevret_num == res->num_parts);
+        mp_assert(priv->prevret_num == res->num_parts);
         for (int n = 0; n < priv->prevret_num; n++) {
             struct sub_bitmap *a = &res->parts[n];
             struct sub_bitmap *b = &priv->prevret[n];

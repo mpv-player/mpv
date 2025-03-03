@@ -271,7 +271,7 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
         p_prev = &(*p_prev)->queue_next;
     }
     // if this fails, cmd was not in the queue
-    assert(*p_prev == cmd);
+    mp_assert(*p_prev == cmd);
     *p_prev = cmd->queue_next;
 }
 
@@ -1291,7 +1291,7 @@ static void remove_binds(struct cmd_bind_section *bs, bool builtin)
     for (int n = bs->num_binds - 1; n >= 0; n--) {
         if (bs->binds[n].is_builtin == builtin) {
             bind_dealloc(&bs->binds[n]);
-            assert(bs->num_binds >= 1);
+            mp_assert(bs->num_binds >= 1);
             bs->binds[n] = bs->binds[bs->num_binds - 1];
             bs->num_binds--;
         }
@@ -1355,7 +1355,7 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     struct cmd_bind_section *bs = get_bind_section(ictx, section);
     struct cmd_bind *bind = NULL;
 
-    assert(num_keys <= MP_MAX_KEY_DOWN);
+    mp_assert(num_keys <= MP_MAX_KEY_DOWN);
 
     for (int n = 0; n < bs->num_binds; n++) {
         struct cmd_bind *b = &bs->binds[n];
@@ -1792,9 +1792,9 @@ static void input_src_kill(struct mp_input_src *src)
 
 void mp_input_src_init_done(struct mp_input_src *src)
 {
-    assert(!src->in->init_done);
-    assert(src->in->thread_running);
-    assert(mp_thread_id_equal(mp_thread_get_id(src->in->thread), mp_thread_current_id()));
+    mp_assert(!src->in->init_done);
+    mp_assert(src->in->thread_running);
+    mp_assert(mp_thread_id_equal(mp_thread_get_id(src->in->thread), mp_thread_current_id()));
     src->in->init_done = true;
     mp_rendezvous(&src->in->init_done, 0);
 }

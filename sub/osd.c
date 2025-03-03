@@ -543,7 +543,7 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
     double xscale = (double)vidw / frame_w;
     double yscale = (double)vidh / frame_h;
     if (compensate_par < 0) {
-        assert(res.display_par);
+        mp_assert(res.display_par);
         compensate_par = xscale / yscale / res.display_par / compensate_par * -1;
     }
     if (compensate_par > 0)
@@ -589,7 +589,7 @@ struct sub_bitmaps *sub_bitmaps_copy(struct sub_bitmap_copy_cache **p_cache,
 
     // The bitmaps being refcounted is essential for performance, and for
     // not invalidating in->parts[*].bitmap pointers.
-    assert(in->packed && in->packed->bufs[0]);
+    mp_assert(in->packed && in->packed->bufs[0]);
 
     res->packed = mp_image_new_ref(res->packed);
     talloc_steal(res, res->packed);
