@@ -2,16 +2,15 @@ CONSOLE
 =======
 
 This script provides the ability to process the user's textual input to other
-scripts through the ``mp.input`` API. It also has a builtin mode of operation to
-complete and run mpv input commands and print mpv's log. It can be displayed on
-both the video window and the terminal. It can be disabled entirely using the
+scripts through the ``mp.input`` API. It can be displayed on both the video
+window and the terminal. It can be disabled entirely using the
 ``--load-console=no`` option.
 
-Keybindings
------------
+Console can either process free-form text or select from a predefined list of
+items.
 
-\`
-    Show the console.
+Free-form text mode keybindings
+-------------------------------
 
 ESC and Ctrl+[
     Hide the console.
@@ -80,7 +79,7 @@ PGDN
     Stop navigating the command history.
 
 Ctrl+r
-    Search the command history.
+    Search the command history. See `SELECT`_ for the key bindings in this mode.
 
 INSERT
     Toggle insert mode.
@@ -109,23 +108,6 @@ WHEEL_UP
 WHEEL_DOWN
     Move forward in the command history.
 
-Commands
---------
-
-``script-message-to console type <text> [<cursor_pos>]``
-    Show the console and pre-fill it with the provided text, optionally
-    specifying the initial cursor position as a positive integer starting from
-    1.
-
-    .. admonition:: Examples for input.conf
-
-        ``% script-message-to console type "seek  absolute-percent; keypress ESC" 6``
-            Enter a percent position to seek to and close the console.
-
-        ``Ctrl+o script-message-to console type "loadfile ''; keypress ESC" 11``
-            Enter a file or URL to play, with autocompletion of paths in the
-            filesystem.
-
 Known issues
 ------------
 
@@ -139,20 +121,15 @@ This script can be customized through a config file ``script-opts/console.conf``
 placed in mpv's user directory and through the ``--script-opts`` command-line
 option. The configuration syntax is described in `mp.options functions`_.
 
-Key bindings can be changed in a standard way, see for example stats.lua
-documentation.
-
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
 ``font``
-    Default: a monospace font depending on the platform
+    The font name.
 
-    Set the font used for the console.
-    A monospaced font is necessary to align completions correctly in a grid.
-    If the console was opened by calling ``mp.input.select`` and no font was
-    configured, ``--osd-font`` is used, as alignment is not necessary in that
-    case.
+    When necessary to align completions in a grid, a monospace font depending on
+    the platform is the default. When there are no completions, ``--osd-font``
+    is the default.
 
 ``font_size``
     Default: 24
@@ -231,16 +208,6 @@ Configurable Options
     Default: true
 
     Remove duplicate entries in history as to only keep the latest one.
-
-``persist_history``
-    Default: no
-
-    Whether to save the command history to a file and load it.
-
-``history_path``
-    Default: ``~~state/command_history.txt``
-
-    The file path for ``persist_history`` (see `PATHS`_).
 
 ``font_hw_ratio``
     Default: auto

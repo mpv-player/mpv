@@ -940,13 +940,19 @@ REPL.
         in the console.
 
     ``complete``
-        A callback invoked when the user presses TAB. The first argument is the
-        text before the cursor. The callback should return a table of the string
-        candidate completion values and the 1-based cursor position from which
-        the completion starts. console.lua will filter the suggestions beginning
-        with the the text between this position and the cursor, sort them
-        alphabetically, insert their longest common prefix, and show them when
-        there are multiple ones.
+        A callback invoked when the user edits the text or moves the cursor. The
+        first argument is the text before the cursor. The callback should return
+        a table of the string candidate completion values and the 1-based cursor
+        position from which the completion starts. console will show the
+        completions that fuzzily match the text between this position and the
+        cursor and allow selecting them.
+
+        The third and optional return value is a string that will be appended to
+        the input line without displaying it in the completions.
+
+    ``autoselect_completion``
+        Whether to automatically select the first completion on submit if one
+        wasn't already manually selected. Defaults to ``false``.
 
     ``closed``
         A callback invoked when the console is hidden, either because
@@ -960,12 +966,14 @@ REPL.
     ``cursor_position``
         The initial cursor position, starting from 1.
 
+    ``history_path``
+        If specified, the path to save and load the history of the entered
+        lines.
+
     ``id``
         An identifier that determines which input history and log buffer to use
-        among the ones stored for ``input.get()`` calls. The input histories
-        and logs are stored in memory and do not persist across different mpv
-        invocations. Defaults to the calling script name with ``prompt``
-        appended.
+        among the ones stored for ``input.get()`` calls. Defaults to the calling
+        script name with ``prompt`` appended.
 
 ``input.terminate()``
     Close the console.
@@ -976,8 +984,8 @@ REPL.
     that are used when the console is displayed in the terminal.
 
 ``input.log_error(message)``
-    Helper to add a line to the log buffer with the same color as the one the
-    console uses for errors. Useful when the user submits invalid input.
+    Helper to add a line to the log buffer with the same color as the one used
+    for commands that error. Useful when the user submits invalid input.
 
 ``input.set_log(log)``
     Replace the entire log buffer.
