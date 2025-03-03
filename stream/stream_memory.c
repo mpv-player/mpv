@@ -77,6 +77,7 @@ const stream_info_t stream_info_memory = {
     .name = "memory",
     .open2 = open2,
     .protocols = (const char*const[]){ "memory", "hex", NULL },
+    .safe = true,
 };
 
 // The data is copied.

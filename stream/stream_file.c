@@ -410,6 +410,7 @@ const stream_info_t stream_info_file = {
     .can_write = true,
     .local_fs = true,
     .stream_origin = STREAM_ORIGIN_FS,
+    .safe = true,
 };
 
 const stream_info_t stream_info_fd = {
