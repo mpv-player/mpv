@@ -222,9 +222,9 @@ void check_library_versions(struct mp_log *log, int v)
         if (l->buildv > l->runv ||
             AV_VERSION_MAJOR(l->buildv) != AV_VERSION_MAJOR(l->runv))
         {
-            fprintf(stderr, "%s: %d.%d.%d -> %d.%d.%d\n",
-                    l->name, V(l->buildv), V(l->runv));
-            abort();
+            mp_fatal(log, "%s: build version %d.%d.%d incompatible with runtime version %d.%d.%d\n",
+                     l->name, V(l->buildv), V(l->runv));
+            exit(1);
         }
     }
 }
