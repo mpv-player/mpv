@@ -114,6 +114,7 @@ typedef struct mkv_track {
     int stereo_mode;
     struct pl_color_repr repr;
     struct pl_color_space color;
+    enum pl_chroma_location chroma_location;
     uint32_t v_crop_top, v_crop_left, v_crop_right, v_crop_bottom;
     float v_projection_pose_yaw;
     float v_projection_pose_pitch;
@@ -581,6 +582,21 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
     }
 }
 
+static inline enum pl_chroma_location
+chroma_location_from_pos(struct demuxer *demuxer, uint64_t h, uint64_t v)
+{
+    if (h > 2 || v > 2) {
+        MP_WARN(demuxer, "Invalid chroma location: %"PRIu64", %"PRIu64"\n", h, v);
+        return PL_CHROMA_UNKNOWN;
+    }
+    static const enum pl_chroma_location map[3][3] = {
+        { PL_CHROMA_UNKNOWN, PL_CHROMA_UNKNOWN, PL_CHROMA_UNKNOWN },
+        { PL_CHROMA_UNKNOWN, PL_CHROMA_TOP_LEFT, PL_CHROMA_LEFT },
+        { PL_CHROMA_UNKNOWN, PL_CHROMA_TOP_CENTER, PL_CHROMA_CENTER },
+    };
+    return map[h][v];
+}
+
 static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
                               struct ebml_colour *colour)
 {
@@ -591,6 +607,13 @@ static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
         track->repr.sys = pl_system_from_av(colour->matrix_coefficients);
         MP_DBG(demuxer, "|    + Matrix: %s\n",
                    m_opt_choice_str(pl_csp_names, track->repr.sys));
+    }
+    if (colour->n_chroma_siting_horz && colour->n_chroma_siting_vert) {
+        track->chroma_location = chroma_location_from_pos(demuxer,
+                                                          colour->chroma_siting_horz,
+                                                          colour->chroma_siting_vert);
+        MP_DBG(demuxer, "|    + ChromaLocation: %s\n",
+                   m_opt_choice_str(pl_chroma_names, track->chroma_location));
     }
     if (colour->n_primaries) {
         track->color.primaries = pl_primaries_from_av(colour->primaries);
@@ -1690,6 +1713,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->stereo_mode = track->stereo_mode;
     sh_v->repr = track->repr;
     sh_v->color = track->color;
+    sh_v->chroma_location = track->chroma_location;
 
     if (track->v_projection_pose_roll) {
         int rotate = lrintf(fmodf(fmodf(-1 * track->v_projection_pose_roll, 360) + 360, 360));
