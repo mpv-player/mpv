@@ -653,6 +653,15 @@ if features['javascript']
                      'sub/filter_jsre.c')
 endif
 
+
+python3 = dependency('python3-embed', version: '>= 3.10', required: get_option('python'))
+features += {'python': python3.found()}
+if features['python']
+    dependencies += python3
+    sources += files('player/python.c')
+    subdir(join_paths('generated', 'player', 'python'))
+endif
+
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
 features += {'lcms2': lcms2.found()}
 if features['lcms2']
@@ -1701,6 +1710,11 @@ conf_data = configuration_data()
 conf_data.set_quoted('CONFIGURATION', meson.build_options())
 conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
 
+if get_option('pydebug')
+conf_data.set('Py_DEBUG', 1)
+conf_data.set('Py_REF_DEBUG', 1)
+endif
+
 # Loop over all features in the build, create a define and add them to config.h
 feature_keys = []
 foreach feature, allowed: features
@@ -1868,6 +1882,7 @@ summary({'d3d11': features['d3d11'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
+         'python': features['python'],
          'opengl': features['gl'],
          'vulkan': features['vulkan'],
          'wayland': features['wayland'],
