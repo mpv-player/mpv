@@ -93,6 +93,7 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg);
 void mp_notify_property(struct MPContext *mpctx, const char *property);
 
 void handle_command_updates(struct MPContext *mpctx);
+void mp_process_osd_display_queue(struct MPContext *mpctx);
 
 int mp_get_property_id(struct MPContext *mpctx, const char *name);
 uint64_t mp_get_property_event_mask(const char *name);
