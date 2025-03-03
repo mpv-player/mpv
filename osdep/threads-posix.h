@@ -106,22 +106,13 @@ typedef pthread_t       mp_thread;
 #define MP_STATIC_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 #define MP_STATIC_ONCE_INITIALIZER PTHREAD_ONCE_INIT
 
-static inline int mp_mutex_init_type_internal(mp_mutex *mutex, enum mp_mutex_type mtype)
+static inline int mp_mutex_init(mp_mutex *mutex)
 {
-    int mutex_type;
-    switch (mtype) {
-    case MP_MUTEX_RECURSIVE:
-        mutex_type = PTHREAD_MUTEX_RECURSIVE;
-        break;
-    case MP_MUTEX_NORMAL:
-    default:
 #ifndef NDEBUG
-        mutex_type = PTHREAD_MUTEX_ERRORCHECK;
+    int mutex_type = PTHREAD_MUTEX_ERRORCHECK;
 #else
-        mutex_type = PTHREAD_MUTEX_DEFAULT;
+    int mutex_type = PTHREAD_MUTEX_DEFAULT;
 #endif
-        break;
-    }
 
     int ret = 0;
     pthread_mutexattr_t attr;
