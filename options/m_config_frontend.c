@@ -737,6 +737,9 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
         param = bstr0("no");
     }
 
+    if (flags & M_SETOPT_FROM_CONFIG_FILE)
+        co->coalesce = true;
+
     // This is the only mandatory function
     assert(co->opt->type->parse);
 

@@ -49,6 +49,7 @@ struct m_config_option {
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
+    bool coalesce : 1;              // Property changes should be coalesced
     int32_t opt_id;                 // For some m_config APIs
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description

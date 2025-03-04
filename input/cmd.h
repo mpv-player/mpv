@@ -114,6 +114,7 @@ typedef struct mp_cmd {
     bool repeated : 1;
     bool mouse_move : 1;
     bool canceled : 1;
+    bool coalesce : 1;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
