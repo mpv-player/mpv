@@ -118,6 +118,8 @@ struct command_ctx {
     mpv_node udata;
     mpv_node mdata;
 
+    int hwdec_osd_mode;
+
     double cached_window_scale;
 };
 
@@ -4747,9 +4749,16 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
     struct property_osd_display disp = {.name = name, .osd_name = name};
+    struct command_ctx *cmd = mpctx->command_ctx;
 
     if (!osd_mode)
         return;
+
+    // hwdec is a special case that must wait until video reconfig
+    if (strcmp(name, "hwdec") == 0 && !cmd->hwdec_osd_mode) {
+        cmd->hwdec_osd_mode = osd_mode;
+        return;
+    }
 
     // look for the command
     for (const struct property_osd_display *p = property_osd_display; p->name; p++)
@@ -7591,6 +7600,11 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
     if (event == MPV_EVENT_PLAYBACK_RESTART) {
         ctx->last_seek_time = mp_time_sec();
         run_command_opts(mpctx);
+    }
+
+    if (event == MPV_EVENT_VIDEO_RECONFIG && ctx->hwdec_osd_mode) {
+        show_property_osd(mpctx, "hwdec", ctx->hwdec_osd_mode);
+        ctx->hwdec_osd_mode = 0;
     }
 
     if (event == MPV_EVENT_IDLE)
