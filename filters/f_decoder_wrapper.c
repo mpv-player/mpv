@@ -474,6 +474,12 @@ static bool reinit_decoder(struct priv *p)
     return !!p->decoder;
 }
 
+static bool decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
+{
+    struct priv *p = d->f->priv;
+    return reinit_decoder(p);
+}
+
 bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 {
     struct priv *p = d->f->priv;
@@ -1056,7 +1062,7 @@ static void read_frame(struct priv *p)
         if (new_segment->segmented) {
             if (p->codec != new_segment->codec) {
                 p->codec = new_segment->codec;
-                if (!mp_decoder_wrapper_reinit(&p->public))
+                if (!decoder_wrapper_reinit(&p->public))
                     mp_filter_internal_mark_failed(p->decf);
             }
 
