@@ -5304,11 +5304,37 @@ struct cmd_list_ctx {
     int num_sub;
 };
 
+static bool substitute_args(struct MPContext *ctx, struct mp_cmd *cmd,
+                            struct mpv_node *replace)
+{
+    if (!cmd->receive_pipe)
+        return true;
+
+    // Only allow strings for now.
+    if (replace->format != MPV_FORMAT_STRING)
+        return false;
+
+    for (int i = 0; i < cmd->nargs; ++i) {
+        if (!cmd->args[i].substitute)
+            continue;
+        int r = m_option_parse(ctx->log, cmd->args[i].type, bstr0(cmd->name),
+                               bstr0(replace->u.string), &cmd->args[i].v);
+        if (r < 0)
+            return false;
+    }
+    return true;
+}
+
 static void continue_cmd_list(struct cmd_list_ctx *list);
 
 static void on_cmd_list_sub_completion(struct mp_cmd_ctx *cmd)
 {
     struct cmd_list_ctx *list = cmd->on_completion_priv;
+    if (cmd->cmd->receive_pipe)
+        mpv_free_node_contents(&list->parent->previous_result);
+
+    if (cmd->cmd->queue_next && cmd->cmd->queue_next->receive_pipe)
+        list->parent->previous_result = cmd->result;
 
     if (list->current_valid && mp_thread_id_equal(list->current_tid, mp_thread_current_id())) {
         list->completed_recursive = true;
@@ -5335,6 +5361,12 @@ static void continue_cmd_list(struct cmd_list_ctx *list)
             list->current_valid = true;
             list->current_tid = mp_thread_current_id();
 
+            if (!substitute_args(list->mpctx, sub, &list->parent->previous_result)) {
+                MP_ERR(list->mpctx, "Pipe input for command '%s' could not be parsed.\n", sub->name);
+                mpv_free_node_contents(&list->parent->previous_result);
+                talloc_free(sub);
+                continue;
+            }
             run_command(list->mpctx, sub, NULL, on_cmd_list_sub_completion, list);
 
             list->current_valid = false;
@@ -5384,7 +5416,8 @@ void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd)
         cmd->on_completion(cmd);
     if (cmd->abort)
         mp_abort_remove(cmd->mpctx, cmd->abort);
-    mpv_free_node_contents(&cmd->result);
+    if (!cmd->cmd->queue_next || !cmd->cmd->queue_next->receive_pipe)
+        mpv_free_node_contents(&cmd->result);
     talloc_free(cmd);
 }
 
@@ -5446,6 +5479,11 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
     if (ctx->abort) {
         ctx->abort->coupled_to_playback |= cmd->def->abort_on_playback_end;
         mp_abort_add(mpctx, ctx->abort);
+    }
+
+    if (ctx->on_completion_priv) {
+        struct cmd_list_ctx *list = ctx->on_completion_priv;
+        ctx->previous_result = list->parent->previous_result;
     }
 
     struct MPOpts *opts = mpctx->opts;
@@ -5948,6 +5986,39 @@ static void cmd_normalize_path(void *p)
     };
 
     talloc_free(path);
+}
+
+static void cmd_sanitize_path(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+
+    char *path = NULL;
+    void *tmp = talloc_new(NULL);
+    bstr str = bstr0(cmd->args[0].v.s);
+
+    // Try some naive attempts at sanitizing if possible
+    if (mp_is_url(bstr0(cmd->args[0].v.s))) {
+        path = cmd->args[0].v.s;
+    } else if (mp_path_exists(cmd->args[0].v.s)) {
+        path = cmd->args[0].v.s;
+    } else if (bstr_eatstart0(&str, "\"") && bstr_eatend0(&str, "\"")) {
+        char *test_path = bstrto0(tmp, str);
+        if (mp_path_exists(test_path) || bstr_startswith(str, bstr0("~")))
+            path = test_path;
+    } else if (bstr_eatstart0(&str, "\'") && bstr_eatend0(&str, "\'")) {
+        char *test_path = bstrto0(tmp, str);
+        if (mp_path_exists(test_path) || bstr_startswith(str, bstr0("~")))
+            path = test_path;
+    }
+
+    if (!path)
+        path = cmd->args[0].v.s;
+
+    cmd->result = (mpv_node){
+        .format = MPV_FORMAT_STRING,
+        .u.string = talloc_strdup(NULL, path),
+    };
+    talloc_free(tmp);
 }
 
 static void cmd_escape_ass(void *p)
@@ -7126,6 +7197,7 @@ const struct mp_cmd_def mp_cmds[] = {
     { "expand-path", cmd_expand_path, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "normalize-path", cmd_normalize_path, { {"filename", OPT_STRING(v.s)} }},
+    { "sanitize-path", cmd_sanitize_path, { {"filename", OPT_STRING(v.s)} }},
     { "escape-ass", cmd_escape_ass, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true,
