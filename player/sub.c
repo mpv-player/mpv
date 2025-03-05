@@ -76,9 +76,11 @@ void uninit_sub(struct MPContext *mpctx, struct track *track)
     if (track && track->d_sub) {
         int order = get_order(mpctx, track);
         reset_subtitles(mpctx, track);
-        term_osd_set_subs(mpctx, NULL, order);
         sub_select(track->d_sub, false);
-        osd_set_sub(mpctx->osd, order, NULL);
+        if (order >= 0) {
+            term_osd_set_subs(mpctx, NULL, order);
+            osd_set_sub(mpctx->osd, order, NULL);
+        }
         sub_destroy(track->d_sub);
         track->d_sub = NULL;
     }
