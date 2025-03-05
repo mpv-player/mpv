@@ -62,7 +62,7 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y ccache g++-mingw-w64 gcc-multilib meson nasm ninja-build pkgconf ${{ matrix.wine }}
+          sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib meson nasm ninja-build pkgconf ${{ matrix.wine }} wine
 
       - name: Install Meson Wraps
         run: |
