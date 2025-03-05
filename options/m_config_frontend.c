@@ -459,7 +459,7 @@ static int m_config_handle_special_options(struct m_config *config,
         config->recursion_depth += 1;
         config->includefunc(config->includefunc_ctx, param, flags);
         config->recursion_depth -= 1;
-        if (config->recursion_depth == 0 && config->profile_depth == 0)
+        if (config->recursion_depth == 0 && config->profile_stack_depth == 0)
             m_config_finish_default_profile(config, flags);
         return 1;
     }
