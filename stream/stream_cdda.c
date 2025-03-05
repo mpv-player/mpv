@@ -222,8 +222,10 @@ static int control(stream_t *stream, int cmd, void *arg)
         int track = *(double *)arg;
         int start_track = get_track_by_sector(p, p->start_sector);
         int end_track = get_track_by_sector(p, p->end_sector);
+        if (start_track == -1 || end_track == -1)
+            return STREAM_ERROR;
         track += start_track;
-        if (track > end_track)
+        if (track < 0 || track > end_track)
             return STREAM_ERROR;
         int64_t sector = p->cd->disc_toc[track].dwStartSector - p->start_sector;
         int64_t pos = sector * CDIO_CD_FRAMESIZE_RAW;
