@@ -1592,7 +1592,6 @@ static void append_to_watch_history(struct MPContext *mpctx)
     if (seek != 0 || history_size == -1) {
         MP_ERR(mpctx, "Failed to get history file size: %s\n",
                mp_strerror(errno));
-        fclose(history_file);
         goto done;
     }
 
@@ -1609,11 +1608,10 @@ static void append_to_watch_history(struct MPContext *mpctx)
                    mp_strerror(errno));
     }
 
-    if (fclose(history_file) != 0)
-        MP_ERR(mpctx, "Failed to close history file: %s\n",
-               mp_strerror(errno));
-
 done:
+    if (history_file != NULL && fclose(history_file) != 0)
+        MP_ERR(mpctx, "Failed to close history file: %s\n", mp_strerror(errno));
+
     talloc_free(ctx);
 }
 
