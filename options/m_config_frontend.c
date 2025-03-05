@@ -80,7 +80,7 @@ static void list_profiles(struct m_config *config)
         MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
 }
 
-static int show_profile(struct m_config *config, bstr param)
+static int show_profile(struct m_config *config, bstr param, int depth)
 {
     struct m_profile *p;
     if (!param.len) {
@@ -91,33 +91,33 @@ static int show_profile(struct m_config *config, bstr param)
         MP_ERR(config, "Unknown profile '%.*s'.\n", BSTR_P(param));
         return M_OPT_EXIT;
     }
-    if (!config->profile_depth)
+    if (!depth)
         MP_INFO(config, "Profile %s: %s\n", p->name,
                 p->desc ? p->desc : "");
-    config->profile_depth++;
+    depth++;
     if (p->cond) {
-        MP_INFO(config, "%*sprofile-cond=%s\n", config->profile_depth, "",
+        MP_INFO(config, "%*sprofile-cond=%s\n", depth, "",
                 p->cond);
     }
     for (int i = 0; i < p->num_opts; i++) {
-        MP_INFO(config, "%*s%s=%s\n", config->profile_depth, "",
+        MP_INFO(config, "%*s%s=%s\n", depth, "",
                 p->opts[2 * i], p->opts[2 * i + 1]);
 
-        if (config->profile_depth < MAX_PROFILE_DEPTH
+        if (depth < MAX_PROFILE_DEPTH
             && !strcmp(p->opts[2*i], "profile")) {
             char *e, *list = p->opts[2 * i + 1];
             while ((e = strchr(list, ','))) {
                 int l = e - list;
                 if (!l)
                     continue;
-                show_profile(config, (bstr){list, e - list});
+                show_profile(config, (bstr){list, e - list}, depth);
                 list = e + 1;
             }
             if (list[0] != '\0')
-                show_profile(config, bstr0(list));
+                show_profile(config, bstr0(list), depth);
         }
     }
-    config->profile_depth--;
+    depth--;
     return M_OPT_EXIT;
 }
 
@@ -465,7 +465,7 @@ static int m_config_handle_special_options(struct m_config *config,
     }
 
     if (config->use_profiles && strcmp(co->name, "show-profile") == 0)
-        return show_profile(config, bstr0(*(char **)data));
+        return show_profile(config, bstr0(*(char **)data), 0);
 
     if (config->is_toplevel && (strcmp(co->name, "h") == 0 ||
                                 strcmp(co->name, "help") == 0))

@@ -68,7 +68,6 @@ typedef struct m_config {
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
-    int profile_depth;
     char **profile_stack;
     size_t profile_stack_depth;
     // Temporary during profile application.
