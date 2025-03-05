@@ -3191,7 +3191,9 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
             }
 
             case MATROSKA_ID_BLOCKGROUP: {
-                int64_t end = ebml_read_length(s);
+                uint64_t end = ebml_read_length(s);
+                if (end == EBML_UINT_INVALID)
+                    goto find_next_cluster;
                 end += stream_tell(s);
                 if (end > mkv_d->cluster_end)
                     goto find_next_cluster;
