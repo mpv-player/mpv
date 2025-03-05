@@ -631,10 +631,9 @@ dvdnav_opt = get_option('dvdnav').require(
     error_message: 'the build is not GPL!',
 )
 dvdnav = dependency('dvdnav', version: '>= 4.2.0', required: dvdnav_opt)
-dvdread = dependency('dvdread', version: '>= 4.1.0', required: dvdnav_opt)
-features += {'dvdnav': dvdnav.found() and dvdread.found()}
+features += {'dvdnav': dvdnav.found()}
 if features['dvdnav']
-    dependencies += [dvdnav, dvdread]
+    dependencies += dvdnav
     sources += files('stream/stream_dvdnav.c')
 endif
 
