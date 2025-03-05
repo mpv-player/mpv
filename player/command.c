@@ -2115,7 +2115,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
             ka->key = rem;
             if (!rem[0]) {
                 ret = M_PROPERTY_ERROR;
-            } else if (!tags || tags->num_keys == 0) {
+            } else if (tags->num_keys == 0) {
                 ret = M_PROPERTY_UNAVAILABLE;
             } else {
                 ret = tag_property(action, (void *)ka, tags);
