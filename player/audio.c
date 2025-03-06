@@ -873,10 +873,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD))
         reload_audio_output(mpctx);
 
-    if (mpctx->ao && ao_query_and_reset_events(mpctx->ao,
-                                               AO_EVENT_INITIAL_UNBLOCK))
-        ao_unblock(mpctx->ao);
-
     update_throttle(mpctx);
 
     struct ao_chain *ao_c = mpctx->ao_chain;

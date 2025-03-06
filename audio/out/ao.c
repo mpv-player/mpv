@@ -362,7 +362,7 @@ int ao_query_and_reset_events(struct ao *ao, int events)
 }
 
 // Returns events that were set by this calls.
-int ao_add_events(struct ao *ao, int events)
+static int ao_add_events(struct ao *ao, int events)
 {
     unsigned prev_events = atomic_fetch_or(&ao->events_, events);
     unsigned new = events & ~prev_events;

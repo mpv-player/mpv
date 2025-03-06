@@ -1221,6 +1221,10 @@ void write_video(struct MPContext *mpctx)
     if (!vo_is_ready_for_frame(vo, mpctx->display_sync_active ? -1 : pts))
         return;
 
+    // In encoding mode, wait for the ao to finish initializing.
+    if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_AUDIO] && !mpctx->ao)
+        return;
+
     mp_assert(mpctx->num_next_frames >= 1);
 
     if (mpctx->num_past_frames >= MAX_NUM_VO_PTS)
