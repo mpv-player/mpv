@@ -158,7 +158,7 @@ const struct vo_driver video_out_image =
 {
     .description = "Write video frames to image files",
     .name = "image",
-    .untimed = true,
+    .caps = VO_CAP_UNTIMED,
     .priv_size = sizeof(struct priv),
     .preinit = preinit,
     .query_format = query_format,
