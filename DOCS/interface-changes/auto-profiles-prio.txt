@@ -1,0 +1,1 @@
+Change auto profiles hook priority from 50 to 5
