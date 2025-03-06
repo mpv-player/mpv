@@ -297,9 +297,15 @@ done:
     return best_score;
 }
 
-bstr mp_guess_lang_from_filename(bstr name, int *lang_start)
+bstr mp_guess_lang_from_filename(bstr name, int *lang_start, bool *hearing_impaired)
 {
     name = bstr_strip(bstr_strip_ext(name));
+
+    if (lang_start)
+        *lang_start = -1;
+
+    if (hearing_impaired)
+        *hearing_impaired = false;
 
     if (name.len < 2)
         return (bstr){0};
@@ -318,10 +324,30 @@ bstr mp_guess_lang_from_filename(bstr name, int *lang_start)
         i--;
     }
 
+    bool *hi = hearing_impaired ? hearing_impaired : &(bool){0};
+    bool checked_hi = false;
+
     while (true) {
         while (i >= 0 && mp_isalpha(name.start[i])) {
             lang_length++;
             i--;
+        }
+
+        if (i >= 0 && lang_length >= 2 && !checked_hi && name.start[i] == delimiter) {
+            checked_hi = true;
+            static const char *const suffixes[] = { "sdh", "hi", "cc" };
+            bstr tag = { name.start + i + 1, lang_length };
+            for (int n = 0; n < MP_ARRAY_SIZE(suffixes); n++) {
+                if (!bstrcasecmp0(tag, suffixes[n])) {
+                    *hi = true;
+                    break;
+                }
+            }
+            if (*hi) {
+                lang_length = 0;
+                i -= (delimiter != '.') ? 2 : 1;
+                continue;
+            }
         }
 
         // According to

@@ -529,7 +529,7 @@ void mp_abort_trigger_locked(struct MPContext *mpctx,
                              struct mp_abort_entry *abort);
 int mp_add_external_file(struct MPContext *mpctx, char *filename,
                          enum stream_type filter, struct mp_cancel *cancel,
-                         bool cover_art);
+                         bool cover_art, bool hearing_impaired);
 void mark_track_selection(struct MPContext *mpctx, int order,
                           enum stream_type type, int value);
 #define FLAG_MARK_SELECTION 1

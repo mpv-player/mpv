@@ -25,6 +25,7 @@ struct subfn {
     int priority;
     char *fname;
     char *lang;
+    bool hearing_impaired;
 };
 
 struct mpv_global;
