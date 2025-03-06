@@ -228,7 +228,8 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
         os.path.join(os.path.expanduser("~"), ".local/share", loader_relative_folder),
         os.path.join("/usr/local/share", loader_relative_folder),
         os.path.join("/usr/share/vulkan", loader_relative_folder),
-        os.path.join(get_homebrew_prefix(), "share", loader_relative_folder),
+        os.path.join(get_homebrew_prefix(), "etc", loader_relative_folder),
+        os.path.join(get_homebrew_prefix(), "share", loader_relative_folder), # old location
     ]
 
     loader_system_folder = ""
