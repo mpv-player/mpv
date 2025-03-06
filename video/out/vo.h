@@ -204,6 +204,8 @@ enum {
     VO_CAP_FILM_GRAIN   = 1 << 3,
     // VO is drawn untimed and is never redrawn
     VO_CAP_UNTIMED      = 1 << 4,
+    // VO is responsible for freeing frames.
+    VO_CAP_FRAMEOWNER   = 1 << 5,
 };
 
 enum {
@@ -325,9 +327,6 @@ struct vo_driver {
 
     // VO_CAP_* bits
     int caps;
-
-    // The VO is responsible for freeing frames.
-    bool frame_owner;
 
     const char *name;
     const char *description;
