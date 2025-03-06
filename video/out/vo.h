@@ -202,6 +202,8 @@ enum {
     VO_CAP_NORETAIN     = 1 << 2,
     // VO supports applying film grain
     VO_CAP_FILM_GRAIN   = 1 << 3,
+    // VO is drawn untimed and is never redrawn
+    VO_CAP_UNTIMED      = 1 << 4,
 };
 
 enum {
@@ -323,9 +325,6 @@ struct vo_driver {
 
     // VO_CAP_* bits
     int caps;
-
-    // Disable video timing, push frames as quickly as possible, never redraw.
-    bool untimed;
 
     // The VO is responsible for freeing frames.
     bool frame_owner;
