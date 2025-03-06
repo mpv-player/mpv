@@ -97,18 +97,12 @@ struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
 
 // After setting your codec parameters on p->encoder, you call this to "open"
 // the encoder. This also initializes p->mux_stream. Returns false on failure.
-// on_ready is called as soon as the muxer has been initialized. Then you are
-// allowed to write packets with encoder_encode().
-// Warning: the on_ready callback is called asynchronously, so you need to
-// make sure to properly synchronize everything.
-bool encoder_init_codec_and_muxer(struct encoder_context *p,
-                                  void (*on_ready)(void *ctx), void *ctx);
+bool encoder_init_codec_and_muxer(struct encoder_context *p);
 
 // Encode the frame and write the packet. frame is ref'ed as need.
 bool encoder_encode(struct encoder_context *p, AVFrame *frame);
 
-// Return muxer timebase (only available after on_ready() has been called).
-// Caller needs to acquire encode_lavc_context.lock (or call it from on_ready).
+// Return muxer timebase (only available if p->mux_stream is initialized).
 AVRational encoder_get_mux_timebase_unlocked(struct encoder_context *p);
 
 void encoder_update_log(struct mpv_global *global);
