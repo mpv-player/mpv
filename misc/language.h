@@ -25,6 +25,6 @@
 // Result numerically higher => better match. 0 == no match.
 int mp_match_lang(char **langs, const char *lang);
 char **mp_get_user_langs(void);
-bstr mp_guess_lang_from_filename(bstr name, int *lang_start);
+bstr mp_guess_lang_from_filename(bstr name, int *lang_start, bool *hearing_impaired);
 
 #endif /* MP_LANGUAGE_H */

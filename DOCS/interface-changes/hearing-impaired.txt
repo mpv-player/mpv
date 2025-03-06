@@ -1,0 +1,1 @@
+add `hearing-impaired` argument to `sub-add` command
