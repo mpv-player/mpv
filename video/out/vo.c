@@ -1065,7 +1065,7 @@ static bool render_frame(struct vo *vo)
     mp_cond_broadcast(&in->wakeup); // for vo_wait_frame()
 
 done:
-    if (!vo->driver->frame_owner || in->dropped_frame)
+    if (!(vo->driver->caps & VO_CAP_FRAMEOWNER) || in->dropped_frame)
         talloc_free(frame);
     mp_mutex_unlock(&in->lock);
 
@@ -1099,7 +1099,7 @@ static void do_redraw(struct vo *vo)
     vo->driver->draw_frame(vo, frame);
     vo->driver->flip_page(vo);
 
-    if (frame != &dummy && !vo->driver->frame_owner)
+    if (frame != &dummy && !(vo->driver->caps & VO_CAP_FRAMEOWNER))
         talloc_free(frame);
 }
 

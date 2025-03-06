@@ -862,8 +862,7 @@ err:
 const struct vo_driver video_out_dmabuf_wayland = {
     .description = "Wayland dmabuf video output",
     .name = "dmabuf-wayland",
-    .caps = VO_CAP_ROTATE90,
-    .frame_owner = true,
+    .caps = VO_CAP_ROTATE90 | VO_CAP_FRAMEOWNER,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig2 = reconfig,
