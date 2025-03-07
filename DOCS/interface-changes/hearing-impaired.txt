@@ -1,1 +1,1 @@
-add `hearing-impaired` and `visual-impaired` flags to track add command
+add `hearing-impaired`, `visual-impaired` and `attached-picture` flags to track add command
