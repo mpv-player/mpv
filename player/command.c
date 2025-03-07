@@ -151,6 +151,31 @@ struct hook_handler {
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
+enum load_flags {
+    FLAG_FILE      = 1 << 0,
+    FLAG_PLAYLIST  = 1 << 1,
+    FLAG_TRACK     = 1 << 2,
+    FLAG_DIR       = 1 << 3,
+
+    FLAG_REPLACE   = 1 << 4,
+    FLAG_INSERT    = 1 << 5,
+
+    FLAG_NEXT      = 1 << 6,
+    FLAG_AT        = 1 << 7,
+    FLAG_END       = 1 << 8,
+
+    FLAG_PLAY      = 1 << 9,
+
+    FLAG_SELECT    = 1 << 10,
+    FLAG_AUTO      = 1 << 11,
+    FLAG_CACHED    = 1 << 12,
+
+    FLAG_SUBTITLE  = 1 << 13,
+    FLAG_AUDIO     = 1 << 14,
+    FLAG_VIDEO     = 1 << 15,
+    FLAG_IMAGE     = 1 << 16,
+};
+
 enum load_action_type {
     LOAD_TYPE_REPLACE,
     LOAD_TYPE_INSERT_AT,
@@ -5973,7 +5998,7 @@ static void cmd_escape_ass(void *p)
     };
 }
 
-static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
+static struct load_action get_load_action(int action_flag)
 {
     switch (action_flag) {
     case 0: // replace
@@ -6010,56 +6035,65 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     }
 }
 
-static void cmd_loadfile(void *p)
+static void loadfile(struct mp_cmd_ctx *cmd, char **files,
+                     struct load_action action, int insert_at_idx,
+                     char **opts)
 {
-    struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    char *filename = cmd->args[0].v.s;
-    int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
-
-    struct load_action action = get_load_action(mpctx, action_flag);
-
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
-    struct playlist_entry *entry = playlist_entry_new(path);
-    talloc_free(path);
-    if (cmd->args[3].v.str_list) {
-        char **pairs = cmd->args[3].v.str_list;
-        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
-            playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
+    if (!files || !files[0]) {
+        cmd->success = false;
+        return;
     }
 
-    struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
-    playlist_insert_at(mpctx->playlist, entry, at);
+    size_t num_entries = 0;
+    struct playlist_entry *first_entry = NULL;
+    for (int n = 0; files[n]; n++) {
+        char *path = mp_get_user_path(NULL, mpctx->global, files[n]);
+        struct playlist_entry *entry = playlist_entry_new(path);
+        talloc_free(path);
+        for (int i = 0; opts && opts[i] && opts[i + 1]; i += 2)
+            playlist_entry_add_param(entry, bstr0(opts[i]), bstr0(opts[i + 1]));
 
+        struct playlist_entry *at = get_insert_entry(mpctx, &action,
+                                                     insert_at_idx >= 0 ? insert_at_idx + n : -1);
+        playlist_insert_at(mpctx->playlist, entry, at);
+        if (!first_entry)
+            first_entry = entry;
+    }
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
-    node_map_add_int64(res, "playlist_entry_id", entry->id);
+    node_map_add_int64(res, "playlist_entry_id", first_entry->id);
+    node_map_add_int64(res, "num_entries", num_entries);
 
     if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
-        mp_set_playlist_entry(mpctx, entry);
+        mp_set_playlist_entry(mpctx, first_entry);
     }
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
 }
 
-static void cmd_loadlist(void *p)
+static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
+    char **opts = cmd->args[3].v.str_list;
 
-    struct load_action action = get_load_action(mpctx, action_flag);
+    loadfile(cmd, (char *[]){filename, NULL}, get_load_action(action_flag), insert_at_idx, opts);
+}
 
+static void loadlist(struct mp_cmd_ctx *cmd, char *filename,
+                     struct load_action action, int insert_at_idx)
+{
+    struct MPContext *mpctx = cmd->mpctx;
     char *path = mp_get_user_path(NULL, mpctx->global, filename);
-    struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
+    struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
     talloc_free(path);
 
@@ -6101,6 +6135,16 @@ static void cmd_loadlist(void *p)
         MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
         cmd->success = false;
     }
+}
+
+static void cmd_loadlist(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    char *filename = cmd->args[0].v.s;
+    int action_flag = cmd->args[1].v.i;
+    int insert_at_idx = cmd->args[2].v.i;
+
+    loadlist(cmd, filename, get_load_action(action_flag), insert_at_idx);
 }
 
 static void cmd_playlist_clear(void *p)
@@ -6210,59 +6254,121 @@ static void cmd_show_progress(void *p)
     mp_wakeup_core(mpctx);
 }
 
-static void cmd_track_add(void *p)
+static void track_add(struct mp_cmd_ctx *cmd, char **files, char *title,
+                      char *lang, int type, bool is_albumart, bool no_default,
+                      bool selected)
 {
-    struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    int type = *(int *)cmd->priv;
-    bool is_albumart = type == STREAM_VIDEO &&
-                       cmd->args[4].v.b;
-
     if (mpctx->stop_play) {
         cmd->success = false;
         return;
     }
 
-    if (cmd->args[1].v.i == 2) {
-        struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
-        if (t) {
-            if (mpctx->playback_initialized) {
-                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
-                print_track_list(mpctx, "Track switched:");
-            } else {
-                mark_track_selection(mpctx, 0, t->type, t->user_tid);
-            }
-            return;
-        }
-    }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
-                                     cmd->abort->cancel, is_albumart);
-    if (first < 0) {
+    if (!files || !files[0]) {
         cmd->success = false;
         return;
     }
 
-    for (int n = first; n < mpctx->num_tracks; n++) {
-        struct track *t = mpctx->tracks[n];
-        if (cmd->args[1].v.i == 1) {
-            t->no_default = true;
-        } else if (n == first) {
-            if (mpctx->playback_initialized) {
-                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
-            } else {
-                mark_track_selection(mpctx, 0, t->type, t->user_tid);
+    for (int i = 0; files[i]; i++) {
+        if (selected) {
+            struct track *t = find_track_with_url(mpctx, type, files[i]);
+            if (t) {
+                if (mpctx->playback_initialized) {
+                    mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+                    print_track_list(mpctx, "Track switched:");
+                } else {
+                    mark_track_selection(mpctx, 0, t->type, t->user_tid);
+                }
+                return;
             }
         }
-        char *title = cmd->args[2].v.s;
-        if (title && title[0])
-            t->title = talloc_strdup(t, title);
-        char *lang = cmd->args[3].v.s;
-        if (lang && lang[0])
-            t->lang = talloc_strdup(t, lang);
+        int first = mp_add_external_file(mpctx, files[i], type,
+                                        cmd->abort->cancel, is_albumart);
+        if (first < 0) {
+            cmd->success = false;
+            return;
+        }
+
+        for (int n = first; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            if (no_default) {
+                t->no_default = true;
+            } else if (n == first) {
+                if (mpctx->playback_initialized) {
+                    mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+                } else {
+                    mark_track_selection(mpctx, 0, t->type, t->user_tid);
+                }
+            }
+            if (title && title[0])
+                t->title = talloc_strdup(t, title);
+            if (lang && lang[0])
+                t->lang = talloc_strdup(t, lang);
+        }
     }
 
     if (mpctx->playback_initialized)
         print_track_list(mpctx, "Track added:");
+}
+
+static void cmd_track_add(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    int type = *(int *)cmd->priv;
+    bool is_albumart = type == STREAM_VIDEO && cmd->args[4].v.b;
+
+    track_add(cmd, (char *[]){cmd->args[0].v.s, NULL}, cmd->args[2].v.s,
+              cmd->args[3].v.s, type, is_albumart, cmd->args[1].v.i == 1,
+              cmd->args[1].v.i == 2);
+}
+
+static void cmd_load(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    char **files = cmd->args[1].v.str_list;
+
+    if (!files) {
+        cmd->success = false;
+        return;
+    }
+
+    int flags = cmd->args[0].v.i;
+    struct load_action action = {
+        .type = LOAD_TYPE_REPLACE,
+        .play = flags & FLAG_PLAY,
+    };
+    if (flags & FLAG_INSERT) {
+        if (flags & FLAG_END) {
+            action.type = LOAD_TYPE_APPEND;
+        } else if (flags & FLAG_AT) {
+            action.type = LOAD_TYPE_INSERT_AT;
+        } else {
+            action.type = LOAD_TYPE_INSERT_NEXT;
+        }
+    }
+
+    if (flags & FLAG_PLAYLIST) {
+        loadlist(cmd, files[0], action, cmd->args[2].v.i);
+    } else if (flags & FLAG_TRACK) {
+        // track commands should abort with the playback
+        mp_mutex_lock(&mpctx->abort_lock);
+        cmd->abort->coupled_to_playback = true;
+        mp_abort_recheck_locked(mpctx, cmd->abort);
+        mp_mutex_unlock(&mpctx->abort_lock);
+
+        int type = STREAM_SUB;
+        bool is_albumart = flags & FLAG_IMAGE;
+        if (flags & FLAG_AUDIO) {
+            type = STREAM_AUDIO;
+        } else if (flags & FLAG_VIDEO || is_albumart) {
+            type = STREAM_VIDEO;
+        }
+        track_add(cmd, files, cmd->args[3].v.s, cmd->args[4].v.s, type,
+                  is_albumart, flags & FLAG_AUTO, flags & FLAG_CACHED);
+    } else { // FLAG_FILE and FLAG_DIR
+        loadfile(cmd, files, action, cmd->args[2].v.i, cmd->args[5].v.str_list);
+    }
 }
 
 static void cmd_track_remove(void *p)
@@ -7263,6 +7369,42 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"rgba64", 3}),
                 OPTDEF_INT(0)},
         },
+    },
+    { "load", cmd_load,
+        {
+            {"flags", OPT_FLAGS(v.i,
+                {"file", FLAG_FILE},
+                {"playlist", FLAG_PLAYLIST},
+                {"track", FLAG_TRACK},
+                {"dir", FLAG_DIR},
+
+                {"replace", FLAG_REPLACE},
+                {"insert", FLAG_INSERT},
+                {"append", FLAG_INSERT | FLAG_END},
+
+                {"next", FLAG_NEXT},
+                {"at", FLAG_AT},
+                {"end", FLAG_END},
+
+                {"play", FLAG_PLAY},
+
+                {"select", FLAG_SELECT | FLAG_TRACK},
+                {"auto", FLAG_AUTO | FLAG_TRACK},
+                {"cached", FLAG_CACHED | FLAG_TRACK},
+
+                {"subtitle", FLAG_SUBTITLE | FLAG_TRACK},
+                {"audio", FLAG_AUDIO},
+                {"video", FLAG_VIDEO},
+                {"image", FLAG_IMAGE}),
+                .flags = MP_CMD_OPT_ARG},
+            {"arg0", OPT_PATHLIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+            {"arg1", OPT_INT(v.i), .flags = MP_CMD_OPT_ARG},
+            {"arg2", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"arg3", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"arg4", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
+        .can_abort = true,
     },
     { "loadfile", cmd_loadfile,
         {
