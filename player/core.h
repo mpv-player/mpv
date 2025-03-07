@@ -492,9 +492,10 @@ struct mp_abort_entry {
 #define BLACK_CIRCLE "\xe2\x97\x8f"
 
 enum track_flags {
-    TRACK_ATTACHED_PICTURE = 1 << 0,
+    // starts at 4, for cmd_track_add backwards compatibility
     TRACK_HEARING_IMPAIRED = 1 << 2,
     TRACK_VISUAL_IMPAIRED = 1 << 3,
+    TRACK_ATTACHED_PICTURE = 1 << 4,
 };
 
 // audio.c

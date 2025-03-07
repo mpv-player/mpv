@@ -673,6 +673,11 @@ Track Manipulation
 
         Marks the track as suitable for the visually impaired.
 
+    <attached-picture> (only for ``video-add``)
+
+        Marks the track as an attached picture, same as ``albumart`` argument
+        for ```video-add``.
+
     The ``title`` argument sets the track title in the UI.
 
     The ``lang`` argument sets the track language, and can also influence
