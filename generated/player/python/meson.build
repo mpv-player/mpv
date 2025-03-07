@@ -1,4 +1,4 @@
-python_files = ['defaults.py', 'mpv_main_event_loop.py']
+python_files = ['defaults.py']
 foreach file: python_files
     python_file = custom_target(file,
         input: join_paths(source_root, 'player', 'python', file),
