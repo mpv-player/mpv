@@ -52,6 +52,6 @@
             abort();                                           \
     } while (0)
 
-#define mp_assert(expr) do { (void)sizeof(expr);} while (0)
+#define mp_assert(expr) do { (void)sizeof(expr); } while (0)
 
 #endif
