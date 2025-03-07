@@ -654,7 +654,7 @@ if features['javascript']
 endif
 
 
-python3 = dependency('python3-embed', version: '>= 3.10', required: get_option('python'))
+python3 = dependency('python3-embed', version: '>= 3.12', required: get_option('python'))
 features += {'python': python3.found()}
 if features['python']
     dependencies += python3

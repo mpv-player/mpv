@@ -278,8 +278,9 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
 
 #if HAVE_PYTHON
 
-static int64_t mp_load_python_scripts(struct MPContext *mpctx, char **py_scripts, size_t script_count)
-{
+static int64_t mp_load_python_scripts(
+    struct MPContext *mpctx, char **py_scripts, size_t script_count
+) {
     char *ext = "py";
 
     char *script_name = "python";
@@ -293,7 +294,6 @@ static int64_t mp_load_python_scripts(struct MPContext *mpctx, char **py_scripts
     }
 
     struct mpv_handle **clients = talloc_array(NULL, struct mpv_handle *, script_count);
-    char **client_names = talloc_array(NULL, char *, script_count);
 
     // TODO: fix up client name
     // TODO: check for disabled clients
@@ -316,9 +316,10 @@ static int64_t mp_load_python_scripts(struct MPContext *mpctx, char **py_scripts
         } else {
             client_name = script_name_from_filename(tmp, fname);
         }
-        client_names[i] = talloc_strdup(NULL, client_name);
         clients[i] = mp_new_client(mpctx->clients, client_name);
+        // TODO: Check for failure creating clients.
     }
+    talloc_free(tmp);
 
     struct mp_script_args *arg = talloc_ptrtype(NULL, arg);
     *arg = (struct mp_script_args){
@@ -331,7 +332,6 @@ static int64_t mp_load_python_scripts(struct MPContext *mpctx, char **py_scripts
         // thread tries to create the client.
         .client = mp_new_client(mpctx->clients, script_name),
         .clients = clients,
-        .client_names = client_names,
         .py_scripts = py_scripts,
         .script_count = script_count,
     };
@@ -348,7 +348,7 @@ static int64_t mp_load_python_scripts(struct MPContext *mpctx, char **py_scripts
     MP_DBG(arg, "Loading python scripts...\n");
     pthread_t thread;
     // thread detaches itself and never returns
-    pthread_create(&thread, NULL, script_thread, arg);
+    mp_thread_create(&thread, script_thread, arg);
 
     return id;
 }
@@ -392,7 +392,7 @@ bool mp_load_scripts(struct MPContext *mpctx)
     size_t *py_count = talloc_array(NULL, size_t, 2);
     py_count[0] = 0; // file count
     py_count[1] = 2; // array size
-    char **py_scripts = talloc_array(NULL, char *, py_count[1]);
+    char **py_scripts = talloc_array(NULL, char *, 2);
 #endif
     // Load scripts from options
     char **files = mpctx->opts->script_files;
@@ -405,9 +405,15 @@ bool mp_load_scripts(struct MPContext *mpctx)
 
         }
     }
-    if (!mpctx->opts->auto_load_scripts)
+    if (!mpctx->opts->auto_load_scripts) {
+#if HAVE_PYTHON
+        if (py_count[0] > 0) {
+            ok &= mp_load_python_scripts(mpctx, py_scripts, py_count[0]) >= 0;
+        } else talloc_free(py_scripts);
+        talloc_free(py_count);
+#endif
         return ok;
-
+}
     // Load all scripts
     void *tmp = talloc_new(NULL);
     char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, "scripts");
@@ -423,7 +429,9 @@ bool mp_load_scripts(struct MPContext *mpctx)
     talloc_free(tmp);
 
 #if HAVE_PYTHON
-    ok &= mp_load_python_scripts(mpctx, py_scripts, py_count[0]) >= 0;
+    if (py_count[0] > 0) {
+        ok &= mp_load_python_scripts(mpctx, py_scripts, py_count[0]) >= 0;
+    } else talloc_free(py_scripts);
     talloc_free(py_count);
 #endif
 

@@ -5,6 +5,8 @@ The python wrapper module for the embedded and extended functionalities
 import mpv as _mpv
 import sys
 import threading
+import traceback
+from io import StringIO
 from pathlib import Path
 
 __all__ = ['client_name', 'mpv']
@@ -12,9 +14,20 @@ __all__ = ['client_name', 'mpv']
 client_name = Path(_mpv.filename).stem
 
 
+def read_exception(excinfo):
+    f = StringIO()
+    traceback.print_exception(*excinfo, file=f)
+    f.seek(0)
+    try:
+        return f.read()
+    finally:
+        f.close()
+
+
 class Registry:
     script_message = {}
     binds = {}
+    red_flags = []
 
 
 registry = Registry()
@@ -58,7 +71,7 @@ class Mpv:
         if not args:
             return
         msg = ' '.join([str(msg) for msg in args])
-        _mpv.handle_log(level, f"({client_name}) {msg}\n")
+        _mpv.handle_log(level, f"{msg}\n")
 
     def info(self, *args):
         self._log("info", *args)
@@ -103,9 +116,16 @@ class Mpv:
         self.info(f"received event: {event_id}, {data}")
         if event_id == self.MPV_EVENT_CLIENT_MESSAGE:
             cb_name = data[1]
-            if data[2][0] == 'u':
+            if data[2][0] == 'u' and cb_name not in registry.red_flags:
                 self.debug(f"calling callback {cb_name}")
-                registry.script_message[cb_name]()
+                try:
+                    registry.script_message[cb_name]()
+                except:
+                    try:
+                        self.error(read_exception(sys.exc_info()))
+                    except:
+                        pass
+                    registry.red_flags.append(cb_name)
                 self.debug(f"invoked {cb_name}")
 
     def command_string(self, name):
@@ -266,7 +286,7 @@ class Mpv:
         self.next_bid += 1
         key_data.update(id=self.next_bid, builtin=builtin)
         if name is None:
-            name = f"__keybinding{self.next_bid}"  # unique name
+            name = f"keybinding_{key}"  # unique name
 
         def decorate(fn):
             registry.script_message[name] = fn
@@ -296,36 +316,30 @@ class Mpv:
             else:
                 self.debug("failed to enable client-message")
 
-    def handle_event(self, event_id, data):
+    def handle_event(self, arg):
         """
         Returns:
             boolean specifing whether some event loop breaking
             condition has been satisfied.
         """
-        self.debug(f"event_id: {event_id}")
+        event_id, data = arg
+        self.debug(f"event_id: {event_id} data: {data}\n")
         if event_id == self.MPV_EVENT_SHUTDOWN:
-            self.info("shutting down python")
-            return True
+            raise ValueError
         elif event_id == self.MPV_EVENT_NONE:
             return False
         elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
-            self.debug(data)
             setattr(state, *data)
             return False
         else:
             self.process_event(event_id, data)
         return False
 
-    def wait_events(self):
-        while True:
-            event_id, data = _mpv.wait_event(-1)
-            if self.handle_event(event_id, data):
-                break
-
     def run(self):
-        self.debug(f"Running {client_name}")
+        self.flush()
         self.enable_client_message()
-        self.wait_events()
+        self.debug(f"Running {client_name}")
+        _mpv.run_event_loop(self)
 
     def do_clean_up(self):
         raise NotImplementedError

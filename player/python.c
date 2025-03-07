@@ -32,6 +32,7 @@
 #include "longobject.h"
 #include "object.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
 
 #include "mpv_talloc.h"
 
@@ -64,9 +65,6 @@ static const char *const builtin_files[][2] = {
     {"@/defaults.py",
 #   include "generated/player/python/defaults.py.inc"
     },
-    {"@/mpv_main_event_loop.py",
-#   include "generated/player/python/mpv_main_event_loop.py.inc"
-    },
     {0}
 };
 
@@ -81,6 +79,7 @@ typedef struct {
     struct mpv_handle   **clients;
     struct MPContext    *mpctx;
     struct mp_log       *log;
+    void                *tmp_ctx;
     void                *ta_ctx;
     struct stats_ctx    *stats;
 } PyScriptCtx;
@@ -120,7 +119,6 @@ static PyObject *deconstructnode(struct mpv_node *node);
 static PyObject *check_error(int res);
 static void *fmt_talloc(void *ta_ctx, mpv_format format);
 static PyObject *unmakedata(mpv_format format, void *data);
-// static void makedata(void *ta_ctx, mpv_format format, PyObject *obj, void *data);
 
 /*
 * Separation of concern
@@ -128,17 +126,12 @@ static PyObject *unmakedata(mpv_format format, void *data);
 * * Get a list of all python scripts.
 * * Initialize python in it's own thread, as a single client. (call Py_Initialize)
 * * Run scripts in sub interpreters. (This is where the scripts are isolated as virtual clients)
-* * Run an event loop on the the mainThread created from Py_Initialize.
-* * Delegate event actions to the sub interpreters.
-* * Destroy all sub interpreters on MPV_EVENT_SHUTDOWN
-* * Shutdown python. (call Py_Finalize)
 */
+
 // module and type def
 /* ========================================================================== */
 
-PyThreadState *mainThread;
 PyObject *PyInit_mpv(void);
-PyObject *PyInit_mpvmainloop(void);
 
 static PyObject *MpvError;
 
@@ -255,6 +248,42 @@ print_parse_error(const char *msg)
     PyErr_PrintEx(1);
 }
 
+static void mpvclient_run_event_loop(PyObject *self, PyObject *args)
+{
+    PyClientCtx *cctx = get_client_context(self);
+    PyObject *mpv = PyTuple_GetItem(args, 0);
+
+    while (true) {
+        mpv_event *event = mpv_wait_event(cctx->client, -1);
+        if (event->event_id == MPV_EVENT_SHUTDOWN)
+            break;
+        else {
+            PyObject *event_data = PyTuple_New(2);
+            PyTuple_SetItem(event_data, 0, PyLong_FromLong(event->event_id));
+            if (event->event_id == MPV_EVENT_CLIENT_MESSAGE) {
+                mpv_event_client_message *m = (mpv_event_client_message *)event->data;
+                PyObject *data = PyTuple_New(m->num_args);
+                for (int i = 0; i < m->num_args; i++) {
+                    PyTuple_SetItem(data, i, PyUnicode_DecodeFSDefault(m->args[i]));
+                }
+                PyTuple_SetItem(event_data, 1, data);
+            } else if (event->event_id == MPV_EVENT_PROPERTY_CHANGE) {
+                mpv_event_property *p = (mpv_event_property *)event->data;
+                PyObject *data = PyTuple_New(2);
+                PyTuple_SetItem(data, 0, PyUnicode_DecodeFSDefault(p->name));
+                PyTuple_SetItem(data, 1, unmakedata(p->format, p->data));
+                PyTuple_SetItem(event_data, 1, data);
+            } else PyTuple_SetItem(event_data, 1, Py_None);
+
+            PyObject *handler = PyObject_GetAttrString(mpv, "handle_event");
+            if (PyObject_CallOneArg(handler, event_data) == Py_True)
+                break;
+            Py_DECREF(event_data);
+            Py_DECREF(handler);
+        }
+    }
+}
+
 /*
 * args[0]: DEFAULT_TIMEOUT
 * returns: PyLongObject *event_id, PyObject *data
@@ -276,7 +305,6 @@ mpvclient_wait_event(PyObject *mpv, PyObject *args)
     PyObject *ret = PyTuple_New(2);
     PyTuple_SetItem(ret, 0, PyLong_FromLong(event->event_id));
     if (event->event_id == MPV_EVENT_CLIENT_MESSAGE) {
-        MP_INFO(cctx, "some client message\n");
         mpv_event_client_message *m = (mpv_event_client_message *)event->data;
         PyObject *data = PyTuple_New(m->num_args);
         for (int i = 0; i < m->num_args; i++) {
@@ -307,15 +335,15 @@ mpv_extension_ok(PyObject *self, PyObject *args)
 // args: log level, varargs
 static PyObject *script_log(struct mp_log *log, PyObject *args)
 {
-    char *level;
-    char *msg;
+    char **args_ = talloc_array(NULL, char *, 2);
 
-    if (!PyArg_ParseTuple(args, "ss", &level, &msg)) {
+    if (!PyArg_ParseTuple(args, "ss", &args_[0], &args_[1])) {
         print_parse_error("Failed to parse args (script_log)\n");
         Py_RETURN_NONE;
     }
 
-    mp_msg(log, mp_msg_find_level(level), msg, NULL);
+    mp_msg(log, mp_msg_find_level(args_[0]), args_[1], NULL);
+    talloc_free(args_);
     Py_RETURN_NONE;
 }
 
@@ -674,6 +702,8 @@ mpv_input_enable_section(PyObject *mpv, PyObject *args)
 static PyMethodDef Mpv_methods[] = {
     {"extension_ok", (PyCFunction)mpv_extension_ok, METH_VARARGS,             /* METH_VARARGS | METH_KEYWORDS (PyObject *self, PyObject *args, PyObject **kwargs) */
      PyDoc_STR("Just a test method to see if extending is working.")},
+    {"run_event_loop", (PyCFunction)mpvclient_run_event_loop, METH_VARARGS,
+     PyDoc_STR("mpv holds here to listen for events.")},
     {"handle_log", (PyCFunction)handle_log, METH_VARARGS,
      PyDoc_STR("handles log records emitted from python thread.")},
     {"printEx", (PyCFunction)printEx, METH_VARARGS,
@@ -756,51 +786,6 @@ PyMODINIT_FUNC PyInit_mpv(void)
 {
     return PyModuleDef_Init(&mpv_module_def);
 }
-
-static PyMethodDef MpvMainLoop_methods[] = {
-
-    {NULL, NULL, 0, NULL}
-};
-
-
-static int
-mpvmainloop_exec(PyObject *m)
-{
-    if (PyType_Ready(&PyScriptCtx_Type) < 0)
-        return -1;
-
-    if (PyModule_AddType(m, &PyScriptCtx_Type) < 0)
-        return -1;
-
-    return 0;
-}
-
-
-static struct PyModuleDef_Slot mpvmainloop_slots[] = {
-    {Py_mod_exec, mpvmainloop_exec},
-    {Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED},
-    {0, NULL}
-};
-
-
-// mpv python module
-static struct PyModuleDef mpv_main_loop_module_def = {
-    PyModuleDef_HEAD_INIT,
-    "mpvmainloop",
-    NULL,
-    0,
-    MpvMainLoop_methods,
-    mpvmainloop_slots,
-    NULL,
-    NULL,
-    NULL
-};
-
-PyMODINIT_FUNC PyInit_mpvmainloop(void)
-{
-    return PyModuleDef_Init(&mpv_main_loop_module_def);
-}
-
 
 /* ========================================================================== */
 
@@ -1033,7 +1018,7 @@ static MP_THREAD_VOID run_thread(void *p)
     // extension module mpv
     PyObject *client_extension = PyImport_ImportModule("mpv");
     if (PyModule_AddObject(client_extension, "context", (PyObject *)cctx) < 0) {
-        mp_msg(sctx->log, mp_msg_find_level("error"), "%s.\n", "cound not set up context for the module mpv\n");
+        MP_ERR(sctx, "%s.\n", "cound not set up context for the module mpv\n");
         end_interpreter(cctx);
         MP_THREAD_RETURN();
     };
@@ -1045,7 +1030,7 @@ static MP_THREAD_VOID run_thread(void *p)
     PyObject *defaults = load_local_pystrings(builtin_files[0][1], "mpvclient");
 
     if (defaults == NULL) {
-        mp_msg(sctx->log, mp_msg_find_level("error"), "failed to load defaults (AKA. mpvclient) module.\n");
+        MP_ERR(sctx, "failed to load defaults (AKA. mpvclient) module.\n");
         end_interpreter(cctx);
         MP_THREAD_RETURN();
     }
@@ -1055,7 +1040,7 @@ static MP_THREAD_VOID run_thread(void *p)
     PyObject *os = PyImport_ImportModule("os");
     PyObject *path = PyObject_GetAttrString(os, "path");
     if (PyObject_CallMethod(path, "exists", "s", cctx->script) == Py_False) {
-        mp_msg(sctx->log, mp_msg_find_level("error"), "%s does not exists.\n", cctx->script);
+        MP_ERR(sctx, "%s does not exists.\n", cctx->script);
         end_interpreter(cctx);
         MP_THREAD_RETURN();
     }
@@ -1071,28 +1056,22 @@ static MP_THREAD_VOID run_thread(void *p)
     Py_DECREF(path);
 
     if (client == NULL) {
-        mp_msg(sctx->log, mp_msg_find_level("error"), "could not load client. discarding: %s.\n", *cname);
+        MP_ERR(sctx, "could not load client. discarding: %s.\n", *cname);
         end_interpreter(cctx);
         MP_THREAD_RETURN();
     }
 
-
     if (PyObject_HasAttrString(client, "mpv") == 0) {
-        mp_msg(sctx->log, mp_msg_find_level("error"), "illegal client. does not have an 'mpv' instance (use: from mpvclient import mpv). discarding: %s.\n", *cname);
+        MP_ERR(sctx, "illegal client. does not have an 'mpv' instance (use: from mpvclient import mpv). discarding: %s.\n", *cname);
         end_interpreter(cctx);
         MP_THREAD_RETURN();
     }
 
     PyObject *mpv = PyObject_GetAttrString(client, "mpv");
     Py_DECREF(client);
-    PyObject *index = PyLong_FromSize_t(cctx->client_index);
-    PyObject_SetAttrString(mpv, "index", index);
-    Py_DECREF(index);
-    PyObject_CallMethod(mpv, "flush", NULL);
-
     PyObject_CallMethod(mpv, "run", NULL);
 
-    end_interpreter(cctx);
+    // end_interpreter(cctx);
     MP_THREAD_RETURN();
 }
 
@@ -1102,27 +1081,27 @@ init_python_clients(PyScriptCtx *sctx)
 {
     for (size_t i = 0; i < sctx->script_count; i++) {
         PyClientCtx *cctx = PyObject_New(PyClientCtx, &PyClientCtx_Type);
-        cctx->ctx = sctx;
-        cctx->script = sctx->scripts[i];
-        cctx->client_index = i;
-        cctx->ta_ctx = talloc_new(sctx->ta_ctx);
-        cctx->log = sctx->log;
-        cctx->threadState = NULL;
         cctx->client = sctx->clients[i];
-        MP_INFO(cctx, "cctx client_name: %s\n", mpv_client_name(cctx->client));
-        MP_INFO(cctx, "sctx client_name: %s\n", mpv_client_name(sctx->client));
+        cctx->log = mp_client_get_log(cctx->client);
+        cctx->ta_ctx = talloc_new(sctx->ta_ctx);
+        cctx->ctx = sctx;
+        cctx->script = talloc_strdup(cctx->ta_ctx, sctx->scripts[i]);
+        cctx->client_index = i;
+        cctx->threadState = NULL;
         pthread_t thread;
-        pthread_create(&thread, NULL, run_thread, cctx);
+        mp_thread_create(&thread, run_thread, cctx);
     }
+
+    talloc_free(sctx->scripts);
 
     while (true) {
         mpv_event *event = mpv_wait_event(sctx->client, -1);
         if (event->event_id == MPV_EVENT_SHUTDOWN) {
             break;
-        } else if (event->event_id == MPV_EVENT_CLIENT_MESSAGE) {
-            MP_INFO(sctx, "(python client) some client message\n");
         }
     }
+
+    talloc_free(sctx->ta_ctx);
 
     PyErr_PrintEx(0);
     Py_Finalize();
@@ -1135,17 +1114,10 @@ init_python_clients(PyScriptCtx *sctx)
 static int s_load_python(struct mp_script_args *args)
 {
     int ret = 0;
-    MP_INFO(args, "client_name[0]: %s\n", args->client_names[0]);
-    if (args->script_count == 0)
-        return ret;
 
     if (PyImport_AppendInittab("mpv", PyInit_mpv) == -1) {
-        mp_msg(args->log, mp_msg_find_level("error"), "could not extend in-built modules table\n");
-        return -1;
-    }
-
-    if (PyImport_AppendInittab("mpvmainloop", PyInit_mpvmainloop) == -1) {
-        mp_msg(args->log, mp_msg_find_level("error"), "could not extend in-built modules table\n");
+        talloc_free(args->py_scripts);
+        MP_ERR(args, "Could not extend in-built modules table\n");
         return -1;
     }
 
@@ -1161,10 +1133,7 @@ static int s_load_python(struct mp_script_args *args)
     ctx->ta_ctx = talloc_new(NULL);
 
     ret = init_python_clients(ctx);
-
-    // PyErr_PrintEx(0);
-    // Py_Finalize(); // closes the sub interpreters, no need for doing it manually
-    return 0;
+    return ret;
 }
 
 
