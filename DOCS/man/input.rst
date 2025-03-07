@@ -669,6 +669,10 @@ Track Manipulation
 
         Marks the track as suitable for the hearing impaired.
 
+    <visual-impaired>
+
+        Marks the track as suitable for the visually impaired.
+
     The ``title`` argument sets the track title in the UI.
 
     The ``lang`` argument sets the track language, and can also influence
