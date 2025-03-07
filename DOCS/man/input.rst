@@ -663,6 +663,12 @@ Track Manipulation
         (In this case, title/language are ignored, and if the was changed since
         it was loaded, these changes won't be reflected.)
 
+    Additionally the following flags can be added with a ``+``:
+
+    <hearing-impaired>
+
+        Marks the track as suitable for the hearing impaired.
+
     The ``title`` argument sets the track title in the UI.
 
     The ``lang`` argument sets the track language, and can also influence
