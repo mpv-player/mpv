@@ -1,1 +1,1 @@
-add `hearing-impaired` argument to `sub-add` command
+add `hearing-impaired` flag to track add command

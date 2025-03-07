@@ -6215,15 +6215,16 @@ static void cmd_track_add(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     int type = *(int *)cmd->priv;
+    int select = cmd->args[1].v.i & 3;
     bool is_albumart = type == STREAM_VIDEO && cmd->args[4].v.b;
-    bool hearing_impaired = type == STREAM_SUB && cmd->args[4].v.b;
+    bool hearing_impaired = cmd->args[1].v.i & 4;
 
     if (mpctx->stop_play) {
         cmd->success = false;
         return;
     }
 
-    if (cmd->args[1].v.i == 2) {
+    if (select == 2) {
         struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
         if (t) {
             if (mpctx->playback_initialized) {
@@ -6244,7 +6245,7 @@ static void cmd_track_add(void *p)
 
     for (int n = first; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        if (cmd->args[1].v.i == 1) {
+        if (select == 1) {
             t->no_default = true;
         } else if (n == first) {
             if (mpctx->playback_initialized) {
@@ -7148,12 +7149,12 @@ const struct mp_cmd_def mp_cmds[] = {
     { "sub-add", cmd_track_add,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i,
-                {"select", 0}, {"auto", 1}, {"cached", 2}),
+            {"flags", OPT_FLAGS(v.i,
+                {"select", 0}, {"auto", 1}, {"cached", 2},
+                {"hearing-impaired", 1 << 4}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
-            {"hearing-impaired", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
         },
         .priv = &(const int){STREAM_SUB},
         .spawn_thread = true,
@@ -7163,8 +7164,9 @@ const struct mp_cmd_def mp_cmds[] = {
     { "audio-add", cmd_track_add,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i,
-                {"select", 0}, {"auto", 1}, {"cached", 2}),
+            {"flags", OPT_FLAGS(v.i,
+                {"select", 0}, {"auto", 1}, {"cached", 2},
+                {"hearing-impaired", 1 << 4}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
@@ -7177,7 +7179,9 @@ const struct mp_cmd_def mp_cmds[] = {
     { "video-add", cmd_track_add,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i, {"select", 0}, {"auto", 1}, {"cached", 2}),
+            {"flags", OPT_FLAGS(v.i,
+                {"select", 0}, {"auto", 1}, {"cached", 2},
+                {"hearing-impaired", 1 << 4}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
