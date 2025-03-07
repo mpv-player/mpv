@@ -33,6 +33,7 @@
 #include "mpv_talloc.h"
 #include "client.h"
 #include "clipboard/clipboard.h"
+#include "dialog/file_dialog.h"
 #include "external_files.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
@@ -6010,42 +6011,132 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     }
 }
 
+static char *get_current_dir(void *talloc_ctx, struct MPContext *mpctx)
+{
+    char *dir = NULL;
+    if (mpctx->filename && !mp_is_url(bstr0(mpctx->filename)))
+        dir = bstrto0(talloc_ctx, mp_dirname(mpctx->filename));
+    if (!dir)
+        dir = mp_getcwd(talloc_ctx);
+    return dir;
+}
+
+char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
+                                const char *title, const char *initial_dir,
+                                const char *initial_selection,
+                                mp_file_dialog_filters *filters,
+                                enum mp_file_dialog_flags flags)
+{
+    static const struct m_option exts_opt = {
+        .type = CONF_TYPE_STRING_LIST
+    };
+    // Clone lists to avoid locking inside the dialog implementation
+    for (int i = 0; filters && filters[i].name; i++) {
+        char **exts = filters[i].extensions;
+        filters[i].extensions = NULL;
+        m_option_copy(&exts_opt, &filters[i].extensions, &exts);
+    }
+
+    if (!initial_dir || !initial_dir[0])
+        initial_dir = get_current_dir(talloc_ctx, mpctx);
+
+    struct vo *vo = mpctx->video_out;
+    int64_t parent = 0;
+    if (mpctx->video_out)
+        vo_control(vo, VOCTRL_GET_WINDOW_ID, &parent);
+
+    extern const struct m_sub_options file_dialog_conf;
+    struct file_dialog_opts *opts = mp_get_config_group(talloc_ctx,
+                                                        mpctx->global,
+                                                        &file_dialog_conf);
+    mp_core_unlock(mpctx);
+    char **files = mp_file_dialog_get_files(talloc_ctx,
+                    &(mp_file_dialog_params) {
+                        .log = mpctx->log,
+                        .title = title,
+                        .initial_selection = initial_selection,
+                        .initial_dir = initial_dir,
+                        .filters = filters,
+                        .flags = flags,
+                        .parent = &parent,
+                        .opts = opts,
+                    });
+    for (int i = 0; filters && filters[i].name; i++)
+        m_option_free(&exts_opt, &filters[i].extensions);
+    mp_core_lock(mpctx);
+
+    return files;
+}
+
 static void cmd_loadfile(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    char *filename = cmd->args[0].v.s;
+    char **files = (char*[]){cmd->args[0].v.s, NULL};
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
+    bool load_dir = *(bool*)cmd->priv;
+
+    void *tmp = talloc_new(NULL);
+
+    if ((!files || !files[0] || !files[0][0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
+        mp_file_dialog_filters filters[] = {
+            {"Video Files", mpctx->opts->video_exts},
+            {"Audio Files", mpctx->opts->audio_exts},
+            {"Image Files", mpctx->opts->image_exts},
+            {"Archive Files", mpctx->opts->archive_exts},
+            {"Playlist Files", mpctx->opts->playlist_exts},
+            {NULL},
+        };
+        files = mp_cmd_get_dialog_files(tmp, mpctx,
+                                        load_dir ? "Open Directory" : "Open file",
+                                        NULL, "",
+                                        load_dir ? NULL : filters,
+                                        load_dir ? MP_FILE_DIALOG_DIRECTORY
+                                                 : MP_FILE_DIALOG_FILE | MP_FILE_DIALOG_MULTIPLE);
+    }
+
+    if (!files || !files[0] || !files[0][0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
+        cmd->success = false;
+        talloc_free(tmp);
+        return;
+    }
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
-    struct playlist_entry *entry = playlist_entry_new(path);
-    talloc_free(path);
-    if (cmd->args[3].v.str_list) {
-        char **pairs = cmd->args[3].v.str_list;
-        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
-            playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
-    }
+    struct playlist_entry *first_entry = NULL;
+    for (int n = 0; files[n]; n++) {
+        char *path = mp_get_user_path(tmp, mpctx->global, files[n]);
+        struct playlist_entry *entry = playlist_entry_new(path);
+        if (cmd->args[3].v.str_list) {
+            char **pairs = cmd->args[3].v.str_list;
+            for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
+                playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
+        }
 
-    struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
-    playlist_insert_at(mpctx->playlist, entry, at);
+        struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
+        playlist_insert_at(mpctx->playlist, entry, at);
+
+        if (!first_entry)
+            first_entry = entry;
+    }
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
-    node_map_add_int64(res, "playlist_entry_id", entry->id);
+    node_map_add_int64(res, "playlist_entry_id", first_entry->id);
 
     if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
-        mp_set_playlist_entry(mpctx, entry);
+        mp_set_playlist_entry(mpctx, first_entry);
     }
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
+    talloc_free(tmp);
 }
 
 static void cmd_loadlist(void *p)
@@ -6056,12 +6147,33 @@ static void cmd_loadlist(void *p)
     int action_flag = cmd->args[1].v.i;
     int insert_at_idx = cmd->args[2].v.i;
 
+    void *tmp = talloc_new(NULL);
+
+    if ((!filename || !filename[0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
+        mp_file_dialog_filters filters[] = {
+            {"Playlist Files", mpctx->opts->playlist_exts},
+            {NULL},
+        };
+        char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Open Playlist",
+                                               NULL, "", filters,
+                                               MP_FILE_DIALOG_FILE);
+        if (files)
+            filename = files[0];
+    }
+
+    if (!filename || !filename[0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
+        cmd->success = false;
+        talloc_free(tmp);
+        return;
+    }
+
     struct load_action action = get_load_action(mpctx, action_flag);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(tmp, mpctx->global, filename);
     struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
                                               mpctx->global);
-    talloc_free(path);
+    talloc_free(tmp);
 
     if (pl) {
         prepare_playlist(mpctx, pl);
@@ -6235,8 +6347,43 @@ static void cmd_track_add(void *p)
             return;
         }
     }
-    int first = mp_add_external_file(mpctx, cmd->args[0].v.s, type,
+
+    void *tmp = talloc_new(NULL);
+    char *filename = cmd->args[0].v.s;
+    if ((!filename || !filename[0]) && mp_input_is_interactive_cmd(cmd->cmd)) {
+        mp_file_dialog_filters filters[] = {
+            {NULL},
+            {NULL},
+        };
+        switch (type) {
+        case STREAM_VIDEO:
+            filters[0] = is_albumart ?
+                (mp_file_dialog_filters){"Image Files", mpctx->opts->image_exts} :
+                (mp_file_dialog_filters){"Video Files", mpctx->opts->video_exts};
+            break;
+        case STREAM_SUB:
+            filters[0] = (mp_file_dialog_filters){"Subtitle Files", mpctx->opts->sub_auto_exts};
+            break;
+        case STREAM_AUDIO:
+            filters[0] = (mp_file_dialog_filters){"Audio Files", mpctx->opts->audio_exts};
+            break;
+        }
+        char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Open file",
+                                               NULL, "", filters,
+                                               MP_FILE_DIALOG_FILE);
+        if (files)
+            filename = files[0];
+    }
+
+    if (!filename || !filename[0]) {
+        MP_ERR(mpctx, "%s: No url or file provided.\n", cmd->cmd->name);
+        cmd->success = false;
+        return;
+    }
+
+    int first = mp_add_external_file(mpctx, filename, type,
                                      cmd->abort->cancel, is_albumart);
+    talloc_free(tmp);
     if (first < 0) {
         cmd->success = false;
         return;
@@ -6996,6 +7143,65 @@ static void cmd_notify_property(void *p)
     mp_notify_property(mpctx, cmd->args[0].v.s);
 }
 
+static void cmd_file_dialog(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    void *tmp = talloc_new(NULL);
+
+    enum mp_file_dialog_flags flags = 0;
+    if (cmd->args[0].v.i == 1) {
+        flags |= MP_FILE_DIALOG_SAVE;
+    } else if (cmd->args[0].v.i == 2) {
+        flags |= MP_FILE_DIALOG_DIRECTORY;
+    }
+    if (cmd->args[1].v.b)
+        flags |= MP_FILE_DIALOG_MULTIPLE;
+
+    mp_file_dialog_filters *filters = NULL;
+    size_t num_filters = 0;
+    char **pairs = cmd->args[5].v.str_list;
+    if (pairs) {
+        for (int i = 0; pairs[i] && pairs[i + 1]; i += 2) {
+            char **exts = NULL;
+            size_t num_exts = 0;
+            bstr ext_list = bstr0(pairs[i + 1]);
+            while (ext_list.len) {
+                bstr e = bstr_split(ext_list, " ", &ext_list);
+                MP_TARRAY_APPEND(tmp, exts, num_exts, bstrto0(tmp, e));
+            }
+            MP_TARRAY_APPEND(tmp, exts, num_exts, NULL);
+            MP_TARRAY_APPEND(tmp, filters, num_filters,
+                             (mp_file_dialog_filters){pairs[i], exts});
+        }
+    }
+    if (num_filters)
+        MP_TARRAY_APPEND(tmp, filters, num_filters, (mp_file_dialog_filters){0});
+
+    char **files = mp_cmd_get_dialog_files(tmp, mpctx, cmd->args[2].v.s,
+                                           cmd->args[4].v.s, cmd->args[3].v.s,
+                                           filters, flags);
+
+    char *set_property = cmd->args[6].v.s;
+    if (!files) {
+        cmd->success = false;
+    } else if (set_property && set_property[0]) {
+        int r = mp_property_do(set_property, M_PROPERTY_SET_STRING, files[0], mpctx);
+        cmd->success = r >= 0;
+    } else {
+        mpv_node_list *list = talloc_zero(NULL, mpv_node_list);
+        for (int i = 0; files[i]; i++) {
+            MP_TARRAY_APPEND(list, list->values, list->num,
+                             (mpv_node){.format = MPV_FORMAT_STRING,
+                                        .u.string = talloc_steal(list, files[i])});
+        }
+        cmd->result = (mpv_node){.format = MPV_FORMAT_NODE_ARRAY, .u = {.list = list}};
+    }
+
+    talloc_free(tmp);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7143,7 +7349,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "sub-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
@@ -7157,7 +7363,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "audio-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
@@ -7171,7 +7377,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "video-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i, {"select", 0}, {"auto", 1}, {"cached", 2}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
@@ -7240,7 +7446,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "screenshot-to-file", cmd_screenshot_to_file,
         {
-            {"filename", OPT_STRING(v.s)},
+            {"filename", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"video", 0},
                 {"window", 1},
@@ -7266,7 +7472,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadfile", cmd_loadfile,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
@@ -7279,10 +7485,30 @@ const struct mp_cmd_def mp_cmds[] = {
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
+        .spawn_thread = true,
+        .priv = &(const bool){false},
+    },
+    { "loaddir", cmd_loadfile,
+        {
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"flags", OPT_CHOICE(v.i,
+                {"replace", 0},
+                {"append", 1},
+                {"append-play", 2},
+                {"insert-next", 3},
+                {"insert-next-play", 4},
+                {"insert-at", 5},
+                {"insert-at-play", 6}),
+                .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
+        .priv = &(const bool){true},
     },
     { "loadlist", cmd_loadlist,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
@@ -7500,6 +7726,24 @@ const struct mp_cmd_def mp_cmds[] = {
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
     { "notify-property", cmd_notify_property, { {"property", OPT_STRING(v.s)} } },
+
+    { "file-dialog", cmd_file_dialog,
+        {
+            {"type", OPT_CHOICE(v.i,
+                {"open", 0},
+                {"save", 1},
+                {"directory", 2}),
+                .flags = MP_CMD_OPT_ARG},
+            {"allow-multiple", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"initial-selection", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"initial-dir", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+            {"filter", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
+            {"set-property", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
+        },
+        .spawn_thread = true,
+        .interactive = true,
+    },
 
     {0}
 };

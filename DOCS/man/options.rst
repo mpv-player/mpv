@@ -7990,3 +7990,28 @@ Miscellaneous
     On Wayland, this option only has effect on the ``wayland`` backend, and
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
+
+``--file-dialog-providers=<providers1,providers2,...[,]>``
+    Specify a priority list of the file dialog porviders to be used.
+    You can also pass ``help`` to get a complete list of compiled in porviders.
+    Removing a provider from the list will disable it, clearing the list will
+    disable file dialog support entirely.
+
+    The following file dialog providers are implemented:
+
+    ``win32``
+        Native Windows dialog.
+
+    ``mac``
+        Native macOS dialog.
+
+    ``portal``
+        Desktop FileChooser portal through D-Bus.
+
+    ``kdialog``
+        KDialog run as subprocess.
+
+    ``zenity``
+        Zenity run as subprocess.
+
+    This is an object settings list option. See `List Options`_ for details.

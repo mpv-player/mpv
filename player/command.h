@@ -128,4 +128,13 @@ void mark_seek(struct MPContext *mpctx);
 
 void mp_abort_cache_dumping(struct MPContext *mpctx);
 
+enum mp_file_dialog_flags;
+typedef struct mp_file_dialog_filters mp_file_dialog_filters;
+
+char **mp_cmd_get_dialog_files(void *talloc_ctx, struct MPContext *mpctx,
+                               const char *title, const char *initial_dir,
+                               const char *initial_selection,
+                               mp_file_dialog_filters *filters,
+                               enum mp_file_dialog_flags flags);
+
 #endif /* MPLAYER_COMMAND_H */

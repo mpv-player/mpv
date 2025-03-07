@@ -27,6 +27,7 @@
 #include "screenshot.h"
 #include "core.h"
 #include "command.h"
+#include "dialog/file_dialog.h"
 #include "input/cmd.h"
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
@@ -486,6 +487,24 @@ void cmd_screenshot_to_file(void *p)
     int mode = cmd->args[1].v.i;
     struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
 
+    void *tmp = talloc_new(NULL);
+
+    if (!filename || !filename[0]) {
+        mp_file_dialog_filters filters[] = {
+            {"Image Files", mpctx->opts->image_exts},
+            {NULL},
+        };
+        char **files = mp_cmd_get_dialog_files(tmp, mpctx, "Save screenshoot", mp_getcwd(tmp),
+                                               "mpv-screenshot.png", filters, MP_FILE_DIALOG_SAVE);
+        if (files)
+            filename = files[0];
+    }
+
+    if (!filename || !filename[0]) {
+        cmd->success = false;
+        goto done;
+    }
+
     char *ext = mp_splitext(filename, NULL);
     int format = image_writer_format_from_ext(ext);
     if (format)
@@ -495,12 +514,13 @@ void cmd_screenshot_to_file(void *p)
     if (!image) {
         mp_cmd_msg(cmd, MSGL_ERR, "Taking screenshot failed.");
         cmd->success = false;
-        return;
+        goto done;
     }
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(tmp, mpctx->global, filename);
     cmd->success = write_screenshot(cmd, image, path, &opts, true);
     talloc_free(image);
-    talloc_free(path);
+done:
+    talloc_free(tmp);
 }
 
 void cmd_screenshot(void *p)

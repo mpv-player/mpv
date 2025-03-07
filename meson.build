@@ -414,7 +414,8 @@ if features['cocoa']
                      'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/app_bridge.m',
-                     'player/clipboard/clipboard-mac.m')
+                     'player/clipboard/clipboard-mac.m',
+                     'player/dialog/file_dialog-mac.m')
     main_fn_source = files('osdep/main-fn-mac.c')
 endif
 
@@ -515,6 +516,7 @@ if features['win32-desktop']
     endif
     sources += files('input/ipc-win.c',
                      'player/clipboard/clipboard-win.c',
+                     'player/dialog/file_dialog-win.c',
                      'osdep/language-win.c',
                      'osdep/terminal-win.c',
                      'video/out/w32_common.c',
@@ -529,6 +531,20 @@ if not posix and not features['win32-desktop']
                      'osdep/subprocess-dummy.c',
                      'osdep/terminal-dummy.c')
 endif
+
+if not win32 and not darwin
+    gio = dependency('gio-2.0', required: get_option('gio'))
+    features += {'gio': gio.found()}
+    if features['gio']
+        sources += files('player/dialog/file_dialog-portal.c')
+        dependencies += gio
+    endif
+    sources += files('player/dialog/file_dialog-external.c')
+else
+    features += {'gio': false}
+endif
+
+sources += files('player/dialog/file_dialog.c')
 
 # media controls
 if win32
