@@ -1284,7 +1284,7 @@ PROTOCOLS
 
     mpv protocol. This is used for starting mpv from URL handler. The protocol
     is stripped and the rest is passed to the player as a normal open argument.
-    Only safe protocols are allowed to be opened this way.
+    Only safe network protocols are allowed to be opened this way.
 
 ``http://...``, ``https://``, ...
 
