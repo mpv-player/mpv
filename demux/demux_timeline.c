@@ -210,11 +210,9 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
     if (src->current->d)
         return;
 
-    // Note: in delay_open mode, we must _not_ close segments during demuxing,
+    // Note: we must _not_ close segments during demuxing,
     // because demuxed packets have demux_packet.codec set to objects owned
     // by the segments. Closing them would create dangling pointers.
-    if (!src->delay_open)
-        close_lazy_segments(demuxer, src);
 
     struct demuxer_params params = {
         .init_fragment = src->tl->init_fragment,
