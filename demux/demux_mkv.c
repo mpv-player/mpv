@@ -1867,6 +1867,7 @@ static const char *const mkv_audio_tags[][2] = {
     { "A_ALAC",                 "alac" },
     { "A_TTA1",                 "tta" },
     { "A_MLP",                  "mlp" },
+    { "A_ATRAC/AT1",            "atrac1" },
     { NULL },
 };
 
@@ -2100,6 +2101,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         // has an arbitrary "input" samplerate, while libavcodec is fixed to
         // output 48000.
         sh_a->samplerate = 48000;
+    } else if (!strcmp(codec, "atrac1")) {
+        if (sh_a->channels.num > 8)
+            goto error;
+        // ATRAC1 uses a constant frame size.
+        sh_a->block_align = sh_a->channels.num * 212;
     }
 
     // Some files have broken default DefaultDuration set, which will lead to
