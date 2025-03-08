@@ -2092,8 +2092,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         AV_WL16(data + 6, sh_a->channels.num);
         AV_WL16(data + 8, sh_a->bits_per_coded_sample);
         AV_WL32(data + 10, track->a_osfreq);
-        // Bogus: last frame won't be played.
-        AV_WL32(data + 14, 0);
+        mkv_demuxer_t *mkv_d = demuxer->priv;
+        AV_WL32(data + 14, mkv_d->duration * track->a_osfreq);
     } else if (!strcmp(codec, "opus")) {
         // Hardcode the rate libavcodec's opus decoder outputs, so that
         // AV_PKT_DATA_SKIP_SAMPLES actually works. The Matroska header only
