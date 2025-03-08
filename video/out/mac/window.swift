@@ -397,62 +397,100 @@ class Window: NSWindow, NSWindowDelegate {
         let unfsScreenFrame = screen.frame
         let visibleWindow = unfsScreenFrame.intersection(newFrame)
 
+        func easeInOutCubic(_ t: CGFloat) -> CGFloat {
+            return t < 0.5 ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3) / 2
+        }
         // calculate visible area of every side
         let left = newFrame.origin.x - unfsScreenFrame.origin.x
-        let right = unfsScreenFrame.size.width -
-            (newFrame.origin.x - unfsScreenFrame.origin.x + newFrame.size.width)
+        let right = unfsScreenFrame.maxX - newFrame.maxX
         let bottom = newFrame.origin.y - unfsScreenFrame.origin.y
-        let top = unfsScreenFrame.size.height -
-            (newFrame.origin.y - unfsScreenFrame.origin.y + newFrame.size.height)
+        let top = unfsScreenFrame.maxY - newFrame.maxY
 
-        // normalize visible areas, decide which one to take horizontal/vertical
-        var xPer = (unfsScreenFrame.size.width - visibleWindow.size.width)
-        var yPer = (unfsScreenFrame.size.height - visibleWindow.size.height)
-        if xPer != 0 { xPer = (left >= 0 || right < 0 ? left : right) / xPer }
-        if yPer != 0 { yPer = (bottom >= 0 || top < 0 ? bottom : top) / yPer }
+        var hPer: CGFloat = 0.5
+        var vPer: CGFloat = 0.5
 
-        // calculate visible area for every side for target screen
-        let xNewLeft = targetFrame.origin.x +
-            (targetFrame.size.width - visibleWindow.size.width) * xPer
-        let xNewRight = targetFrame.origin.x + targetFrame.size.width -
-            (targetFrame.size.width - visibleWindow.size.width) * xPer - newFrame.size.width
-        let yNewBottom = targetFrame.origin.y +
-            (targetFrame.size.height - visibleWindow.size.height) * yPer
-        let yNewTop = targetFrame.origin.y + targetFrame.size.height -
-            (targetFrame.size.height - visibleWindow.size.height) * yPer - newFrame.size.height
+        let screenWidth = unfsScreenFrame.width
+        let screenHeight = unfsScreenFrame.height
 
-        // calculate new coordinates, decide which one to take horizontal/vertical
-        newFrame.origin.x = left >= 0 || right < 0 ? xNewLeft : xNewRight
-        newFrame.origin.y = bottom >= 0 || top < 0 ? yNewBottom : yNewTop
-
-        // don't place new window on top of a visible menubar
-        let topMar = targetFrame.size.height -
-            (newFrame.origin.y - targetFrame.origin.y + newFrame.size.height)
-        let menuBarHeight = targetFrame.size.height -
-            (targetVisibleFrame.size.height + targetVisibleFrame.origin.y)
-        if topMar < menuBarHeight {
-            newFrame.origin.y -= top - menuBarHeight
+        if left <= 0 {
+            hPer = 0
+        } else if right <= 0 {
+            hPer = 1
+        } else {
+            hPer = easeInOutCubic(left / screenWidth)
         }
+
+        if bottom <= 0 {
+            vPer = 0
+        } else if top <= 0 {
+            vPer = 1
+        } else {
+            vPer = easeInOutCubic(bottom / screenHeight)
+        }
+
+        let newX = targetFrame.origin.x + (targetFrame.width - newFrame.width) * hPer
+        var newY = targetFrame.origin.y + (targetFrame.height - newFrame.height) * vPer
+
+        let distanceFromTopEdge = targetFrame.maxY - (newY + newFrame.height)
+        let menuBarHeight =
+            targetFrame.height - targetVisibleFrame.height - targetVisibleFrame.origin.y
+            + targetFrame.origin.y
+
+        if distanceFromTopEdge < menuBarHeight {
+            let menubarProximity = distanceFromTopEdge / menuBarHeight
+            let smoothingFactor = 1 - easeInOutCubic(max(0, min(1, menubarProximity)))
+            newY -= (menuBarHeight - distanceFromTopEdge) * smoothingFactor
+        }
+
+        newFrame.origin.x = newX
+        newFrame.origin.y = newY
 
         if withoutBounds {
             return newFrame
         }
 
+        func adjustFrameEdge(frame: inout NSRect, 
+                             frameValue: CGFloat, targetValue: CGFloat, 
+                             isHorizontal: Bool, isMax: Bool) {
+            let overAmount = isMax ? 
+                (frameValue - targetValue) : 
+                (targetValue - frameValue)
+            
+            if overAmount > 0 {
+                let pullBackFactor = min(1, overAmount / 20)
+                let adjustment = 2 * pullBackFactor
+                
+                if isHorizontal {
+                    frame.origin.x += isMax ? 
+                        -(overAmount + adjustment) : 
+                        adjustment
+                } else {
+                    frame.origin.y += isMax ? 
+                        -(overAmount + adjustment) : 
+                        adjustment
+                }
+            }
+        }
         // screen bounds right and left
-        if newFrame.origin.x + newFrame.size.width > targetFrame.origin.x + targetFrame.size.width {
-            newFrame.origin.x = targetFrame.origin.x + targetFrame.size.width - newFrame.size.width
-        }
-        if newFrame.origin.x < targetFrame.origin.x {
-            newFrame.origin.x = targetFrame.origin.x
-        }
+        adjustFrameEdge(frame: &newFrame, 
+                       frameValue: newFrame.maxX, targetValue: targetFrame.maxX, 
+                       isHorizontal: true, isMax: true)
 
         // screen bounds top and bottom
-        if newFrame.origin.y + newFrame.size.height > targetFrame.origin.y + targetFrame.size.height {
-            newFrame.origin.y = targetFrame.origin.y + targetFrame.size.height - newFrame.size.height
-        }
-        if newFrame.origin.y < targetFrame.origin.y {
-            newFrame.origin.y = targetFrame.origin.y
-        }
+        adjustFrameEdge(frame: &newFrame, 
+                       frameValue: newFrame.minX, targetValue: targetFrame.minX, 
+                       isHorizontal: true, isMax: false)
+
+        // screen bounds right and left
+        adjustFrameEdge(frame: &newFrame, 
+                       frameValue: newFrame.maxY, targetValue: targetFrame.maxY, 
+                       isHorizontal: false, isMax: true)
+
+        // screen bounds top and bottom
+        adjustFrameEdge(frame: &newFrame, 
+                       frameValue: newFrame.minY, targetValue: targetFrame.minY, 
+                       isHorizontal: false, isMax: false)
+
         return newFrame
     }
 
