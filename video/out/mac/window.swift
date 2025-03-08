@@ -471,15 +471,6 @@ class Window: NSWindow, NSWindowDelegate {
                 }
             }
         }
-        // screen bounds right and left
-        adjustFrameEdge(frame: &newFrame, 
-                       frameValue: newFrame.maxX, targetValue: targetFrame.maxX, 
-                       isHorizontal: true, isMax: true)
-
-        // screen bounds top and bottom
-        adjustFrameEdge(frame: &newFrame, 
-                       frameValue: newFrame.minX, targetValue: targetFrame.minX, 
-                       isHorizontal: true, isMax: false)
 
         // screen bounds right and left
         adjustFrameEdge(frame: &newFrame, 
