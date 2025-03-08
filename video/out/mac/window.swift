@@ -449,11 +449,11 @@ class Window: NSWindow, NSWindowDelegate {
             return newFrame
         }
 
-        func adjustFrameEdge(frame: inout NSRect, 
+        func adjustFrameEdge(frame: inout NSRect,
                              frameValue: CGFloat, targetValue: CGFloat, 
                              isHorizontal: Bool, isMax: Bool) {
-            let overAmount = isMax ? 
-                (frameValue - targetValue) : 
+            let overAmount = isMax ?
+                (frameValue - targetValue) :
                 (targetValue - frameValue)
             
             if overAmount > 0 {
@@ -461,24 +461,30 @@ class Window: NSWindow, NSWindowDelegate {
                 let adjustment = 2 * pullBackFactor
                 
                 if isHorizontal {
-                    frame.origin.x += isMax ? 
+                    frame.origin.x += isMax ?
                         -(overAmount + adjustment) : 
                         adjustment
                 } else {
-                    frame.origin.y += isMax ? 
+                    frame.origin.y += isMax ?
                         -(overAmount + adjustment) : 
                         adjustment
                 }
             }
         }
 
-        // screen bounds right and left
-        adjustFrameEdge(frame: &newFrame, 
+        adjustFrameEdge(frame: &newFrame,
+                       frameValue: newFrame.maxX, targetValue: targetFrame.maxX, 
+                       isHorizontal: true, isMax: true)
+
+        adjustFrameEdge(frame: &newFrame,
+                       frameValue: newFrame.minX, targetValue: targetFrame.minX, 
+                       isHorizontal: true, isMax: false)
+
+        adjustFrameEdge(frame: &newFrame,
                        frameValue: newFrame.maxY, targetValue: targetFrame.maxY, 
                        isHorizontal: false, isMax: true)
 
-        // screen bounds top and bottom
-        adjustFrameEdge(frame: &newFrame, 
+        adjustFrameEdge(frame: &newFrame,
                        frameValue: newFrame.minY, targetValue: targetFrame.minY, 
                        isHorizontal: false, isMax: false)
 
