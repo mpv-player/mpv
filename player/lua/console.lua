@@ -112,6 +112,15 @@ local complete
 local cycle_through_completions
 local set_active
 
+local property_cache = {}
+
+
+local function get_property_cached(name, def)
+    if property_cache[name] ~= nil then
+        return property_cache[name]
+    end
+    return def
+end
 
 local function get_font()
     if opts.font ~= '' then
@@ -188,22 +197,10 @@ end
 -- Functions to calculate the font width.
 local width_length_ratio = 0.5
 local osd_width, osd_height = 100, 100
-
----Update osd resolution if valid
-local function update_osd_resolution()
-    local dim = mp.get_property_native('osd-dimensions')
-    if not dim or dim.w == 0 or dim.h == 0 then
-        return
-    end
-    osd_width = dim.w
-    osd_height = dim.h
-end
-
 local text_osd = mp.create_osd_overlay('ass-events')
 text_osd.compute_bounds, text_osd.hidden = true, true
 
 local function measure_bounds(ass_text)
-    update_osd_resolution()
     text_osd.res_x, text_osd.res_y = osd_width, osd_height
     text_osd.data = ass_text
     local res = text_osd:update()
@@ -255,7 +252,6 @@ local function get_font_hw_ratio()
     if not measured_font_hw_ratio then
         local alphabet = 'abcdefghijklmnopqrstuvwxyz'
         local text = alphabet:rep(3)
-        update_osd_resolution()
         local size, horizontal = fit_on_osd(text)
         local normalized_width = normalized_text_width(text, size * 0.9, horizontal)
         measured_font_hw_ratio = #text / normalized_width * 0.95
@@ -275,13 +271,11 @@ local function should_scale()
 end
 
 local function scale_factor()
-    local height = mp.get_property_native('osd-height')
-
-    if should_scale() and height > 0 then
-        return height / 720
+    if should_scale() and osd_height > 0 then
+        return osd_height / 720
     end
 
-    return mp.get_property_native('display-hidpi-scale', 1)
+    return get_property_cached('display-hidpi-scale', 1)
 end
 
 local function terminal_output()
@@ -291,10 +285,9 @@ local function terminal_output()
 end
 
 local function get_scaled_osd_dimensions()
-    local dims = mp.get_property_native('osd-dimensions')
     local scale = scale_factor()
 
-    return dims.w / scale, dims.h /scale
+    return osd_width / scale, osd_height / scale
 end
 
 local function get_line_height()
@@ -689,7 +682,7 @@ local function render()
     local color, alpha = mpv_color_to_ass(mp.get_property('osd-color'))
     local cheight = opts.font_size * 8
     local cglyph = '{\\r\\blur0' ..
-                   (mp.get_property_native('focused') == false
+                   (get_property_cached('focused') == false
                     and '\\alpha&HFF&' or '\\3a&H' .. alpha .. '&') ..
                    '\\3c&H' .. color .. '&' ..
                    '\\xbord0.5\\ybord0\\xshad0\\yshad1\\p4\\pbo24}' ..
@@ -1281,7 +1274,7 @@ local function get_clipboard(clip)
             return mp.get_property(property, '')
         end
         -- Wayland VO clipboard is only updated on window focus
-        if clip and mp.get_property_native('focused') then
+        if clip and get_property_cached('focused') then
             return mp.get_property('clipboard/text', '')
         end
         local res = utils.subprocess({
@@ -1575,8 +1568,7 @@ mp.register_script_message('get-input', function (script_name, args)
 
         -- Limit the number of characters to prevent libass from freezing mpv.
         -- Not important for terminal output.
-        local limit = terminal_output() and 5000
-                      or (5 * mp.get_property_native('osd-width') / opts.font_size)
+        local limit = terminal_output() and 5000 or (5 * osd_width / opts.font_size)
 
         for i, item in ipairs(args.items) do
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, limit)
@@ -1680,13 +1672,28 @@ mp.register_script_message('complete', function (list, start_pos, append)
     render()
 end)
 
-for _, property in pairs({'osd-width', 'osd-height', 'display-hidpi-scale'}) do
-    mp.observe_property(property, 'native', function ()
-        calculate_max_item_width()
-        render()
-    end)
+local function resize()
+    calculate_max_item_width()
+    render()
 end
-mp.observe_property('focused', 'native', render)
+
+mp.observe_property('osd-dimensions', 'native', function (_, value)
+    if value.w == osd_width and value.h == osd_height then
+        return
+    end
+    osd_width, osd_height = value.w, value.h
+    resize()
+end)
+
+mp.observe_property('display-hidpi-scale', 'native', function (name, value)
+    property_cache[name] = value
+    resize()
+end)
+
+mp.observe_property('focused', 'native', function (name, value)
+    property_cache[name] = value
+    render()
+end)
 
 mp.observe_property("user-data/osc/margins", "native", function(_, val)
     if type(val) == "table" and type(val.t) == "number" and type(val.b) == "number" then
