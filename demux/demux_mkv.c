@@ -1969,12 +1969,16 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             if (flavor >= MP_ARRAY_SIZE(atrc_fl2bps))
                 goto error;
             sh_a->bitrate = atrc_fl2bps[flavor] * 8;
+            if (!track->sub_packet_size || track->audiopk_size % track->sub_packet_size)
+                goto error;
             sh_a->block_align = track->sub_packet_size;
         } else if (!strcmp(track->codec_id, "A_REAL/COOK")) {
             sh_a->codec = "cook";
             if (flavor >= MP_ARRAY_SIZE(cook_fl2bps))
                 goto error;
             sh_a->bitrate = cook_fl2bps[flavor] * 8;
+            if (!track->sub_packet_size || track->audiopk_size % track->sub_packet_size)
+                goto error;
             sh_a->block_align = track->sub_packet_size;
         } else if (!strcmp(track->codec_id, "A_REAL/SIPR")) {
             sh_a->codec = "sipr";
@@ -1985,6 +1989,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         } else if (!strcmp(track->codec_id, "A_REAL/28_8")) {
             sh_a->codec = "ra_288";
             sh_a->bitrate = 3600 * 8;
+            if (track->sub_packet_h & 1)
+                goto error;
+            if (2 * track->audiopk_size != (int64_t)track->sub_packet_h * track->coded_framesize)
+                goto error;
             sh_a->block_align = track->coded_framesize;
         } else if (!strcmp(track->codec_id, "A_REAL/DNET")) {
             sh_a->codec = "ac3";
