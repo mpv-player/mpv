@@ -56,21 +56,24 @@ local completion_pos
 local completion_append
 local last_text
 local last_cursor_position
-local commands
+
+local cache = {}
+
 
 local function get_commands()
-    if not commands then
-        commands = mp.get_property_native("command-list")
+    if cache["commands"] then
+        return cache["commands"]
     end
 
-    return commands
-end
-
-local function help_command(param)
-    table.sort(get_commands(), function(c1, c2)
+    cache["commands"] = mp.get_property_native("command-list")
+    table.sort(cache["commands"], function(c1, c2)
         return c1.name < c2.name
     end)
 
+    return cache["commands"]
+end
+
+local function help_command(param)
     local output = ""
     if param == "" then
         output = "Available commands:\n"
@@ -148,17 +151,21 @@ local function command_list()
 end
 
 local function property_list()
-    local properties = mp.get_property_native("property-list")
+    if cache["property-list"] then
+        return cache["property-list"]
+    end
+
+    cache["property-list"] = mp.get_property_native("property-list")
 
     for _, sub_property in pairs({"video", "audio", "sub", "sub2"}) do
-        properties[#properties + 1] = "current-tracks/" .. sub_property
+        table.insert(cache["property-list"], "current-tracks/" .. sub_property)
     end
 
     for _, sub_property in pairs({"text", "text-primary"}) do
-        properties[#properties + 1] = "clipboard/" .. sub_property
+        table.insert(cache["property-list"], "clipboard/" .. sub_property)
     end
 
-    return properties
+    return cache["property-list"]
 end
 
 local function profile_list()
@@ -171,28 +178,49 @@ local function profile_list()
     return profiles
 end
 
-local function list_option_list()
-    local opts = {}
+local function option_info(option, prop, default)
+    local key = "option-info/" .. option
+    cache[key] = cache[key] or mp.get_property_native(key, false)
 
-    -- Don"t log errors for renamed and removed properties.
+    if not cache[key] then
+        return default
+    end
+
+    if prop then
+        if cache[key][prop] ~= nil then
+            return cache[key][prop]
+        end
+        return default
+    end
+
+    return cache[key]
+end
+
+local function list_option_list()
+    if cache["option-list"] then
+        return cache["option-list"]
+    end
+    cache["option-list"] = {}
+
+    -- Don't log errors for renamed and removed properties.
     -- (Just mp.enable_messages("fatal") still logs them to the terminal.)
     local msg_level_backup = mp.get_property("msg-level")
     mp.set_property("msg-level", msg_level_backup == "" and "cplayer=no"
                                  or msg_level_backup .. ",cplayer=no")
 
     for _, option in pairs(mp.get_property_native("options")) do
-        if mp.get_property("option-info/" .. option .. "/type", ""):find(" list$") then
-            opts[#opts + 1] = option
+        if option_info(option, "type", ""):find(" list$") then
+            table.insert(cache["option-list"], option)
         end
     end
 
     mp.set_property("msg-level", msg_level_backup)
 
-    return opts
+    return cache["option-list"]
 end
 
 local function list_option_action_list(option)
-    local type = mp.get_property("option-info/" .. option .. "/type")
+    local type = option_info(option, "type")
 
     if type == "Key/value list" then
         return {"add", "append", "set", "remove"}
@@ -222,10 +250,16 @@ local function list_option_value_list(option)
 end
 
 local function has_file_argument(candidate_command)
+    local key = "command-file/" .. candidate_command
+    if cache[key] ~= nil then
+        return cache[key]
+    end
+
     for _, command in pairs(get_commands()) do
         if command.name == candidate_command then
-            return command.args[1] and
-                   (command.args[1].name == "filename" or command.args[1].name == "url")
+            cache[key] = command.args[1] and
+                         (command.args[1].name == "filename" or command.args[1].name == "url")
+            return cache[key]
         end
     end
 end
@@ -260,7 +294,7 @@ local function handle_file_completion(before_cur)
 end
 
 local function handle_choice_completion(option, before_cur)
-    local info = mp.get_property_native("option-info/" .. option, {})
+    local info = option_info(option, nil, {})
 
     if info.type == "Flag" then
         return { "no", "yes" }, before_cur
