@@ -450,42 +450,42 @@ class Window: NSWindow, NSWindowDelegate {
         }
 
         func adjustFrameEdge(frame: inout NSRect,
-                             frameValue: CGFloat, targetValue: CGFloat, 
+                             frameValue: CGFloat, targetValue: CGFloat,
                              isHorizontal: Bool, isMax: Bool) {
             let overAmount = isMax ?
                 (frameValue - targetValue) :
                 (targetValue - frameValue)
-            
+
             if overAmount > 0 {
                 let pullBackFactor = min(1, overAmount / 20)
                 let adjustment = 2 * pullBackFactor
-                
+
                 if isHorizontal {
                     frame.origin.x += isMax ?
-                        -(overAmount + adjustment) : 
+                        -(overAmount + adjustment) :
                         adjustment
                 } else {
                     frame.origin.y += isMax ?
-                        -(overAmount + adjustment) : 
+                        -(overAmount + adjustment) :
                         adjustment
                 }
             }
         }
 
         adjustFrameEdge(frame: &newFrame,
-                       frameValue: newFrame.maxX, targetValue: targetFrame.maxX, 
+                       frameValue: newFrame.maxX, targetValue: targetFrame.maxX,
                        isHorizontal: true, isMax: true)
 
         adjustFrameEdge(frame: &newFrame,
-                       frameValue: newFrame.minX, targetValue: targetFrame.minX, 
+                       frameValue: newFrame.minX, targetValue: targetFrame.minX,
                        isHorizontal: true, isMax: false)
 
         adjustFrameEdge(frame: &newFrame,
-                       frameValue: newFrame.maxY, targetValue: targetFrame.maxY, 
+                       frameValue: newFrame.maxY, targetValue: targetFrame.maxY,
                        isHorizontal: false, isMax: true)
 
         adjustFrameEdge(frame: &newFrame,
-                       frameValue: newFrame.minY, targetValue: targetFrame.minY, 
+                       frameValue: newFrame.minY, targetValue: targetFrame.minY,
                        isHorizontal: false, isMax: false)
 
         return newFrame
