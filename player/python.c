@@ -251,13 +251,15 @@ print_parse_error(const char *msg)
 static void mpvclient_run_event_loop(PyObject *self, PyObject *args)
 {
     PyClientCtx *cctx = get_client_context(self);
+    mpv_handle *client = cctx->client;
+    Py_DECREF(cctx);
     PyObject *mpv = PyTuple_GetItem(args, 0);
 
     while (true) {
-        mpv_event *event = mpv_wait_event(cctx->client, -1);
-        if (event->event_id == MPV_EVENT_SHUTDOWN)
+        mpv_event *event = mpv_wait_event(client, -1);
+        if (event->event_id == MPV_EVENT_SHUTDOWN) {
             break;
-        else {
+        } else {
             PyObject *event_data = PyTuple_New(2);
             PyTuple_SetItem(event_data, 0, PyLong_FromLong(event->event_id));
             if (event->event_id == MPV_EVENT_CLIENT_MESSAGE) {
@@ -835,10 +837,9 @@ load_script(char *script_name, PyObject *defaults, const char *client_name)
 static void
 end_interpreter(PyClientCtx *client_ctx)
 {
-    PyErr_PrintEx(0);
+    // PyErr_PrintEx(0);
     Py_EndInterpreter(client_ctx->threadState);
     talloc_free(client_ctx->ta_ctx);
-    PyThreadState_Swap(NULL);
 }
 
 /**********************************************************************
@@ -1072,13 +1073,14 @@ static MP_THREAD_VOID run_thread(void *p)
     PyObject_CallMethod(mpv, "run", NULL);
 
     // end_interpreter(cctx);
+    Py_EndInterpreter(cctx->threadState);
     MP_THREAD_RETURN();
 }
-
 
 static int
 init_python_clients(PyScriptCtx *sctx)
 {
+    mp_thread *pyThreads = talloc_array(sctx->ta_ctx, mp_thread, sctx->script_count);
     for (size_t i = 0; i < sctx->script_count; i++) {
         PyClientCtx *cctx = PyObject_New(PyClientCtx, &PyClientCtx_Type);
         cctx->client = sctx->clients[i];
@@ -1088,8 +1090,9 @@ init_python_clients(PyScriptCtx *sctx)
         cctx->script = talloc_strdup(cctx->ta_ctx, sctx->scripts[i]);
         cctx->client_index = i;
         cctx->threadState = NULL;
-        pthread_t thread;
+        mp_thread thread;
         mp_thread_create(&thread, run_thread, cctx);
+        pyThreads[i] = thread;
     }
 
     talloc_free(sctx->scripts);
@@ -1101,10 +1104,16 @@ init_python_clients(PyScriptCtx *sctx)
         }
     }
 
+
+    for (size_t i = 0; i < sctx->script_count; i++) {
+        mp_thread_join(pyThreads[i]);
+    }
+
     talloc_free(sctx->ta_ctx);
 
-    PyErr_PrintEx(0);
-    Py_Finalize();
+    // PyErr_PrintEx(0);
+    // Py_Finalize();
+    Py_FinalizeEx();
     return 0;
 }
 
