@@ -4,7 +4,6 @@ The python wrapper module for the embedded and extended functionalities
 
 import mpv as _mpv
 import sys
-import threading
 import traceback
 from io import StringIO
 from pathlib import Path
@@ -66,6 +65,9 @@ class Mpv:
     MPV_EVENT_HOOK = 25
 
     observe_properties = {}
+
+    def print_ref_count(self, obj):
+        self.info(f"refcount ({repr(obj)}): {sys.getrefcount(obj)}")
 
     def _log(self, level, *args):
         if not args:
