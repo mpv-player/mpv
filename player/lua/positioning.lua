@@ -83,8 +83,10 @@ local align_to_cursor_bound = false
 
 local function align_to_cursor(_, mouse_pos)
     local dims = mp.get_property_native("osd-dimensions")
-    mp.set_property("video-align-x", (mouse_pos.x * 2 - dims.w) / dims.w)
-    mp.set_property("video-align-y", (mouse_pos.y * 2 - dims.h) / dims.h)
+    local align = (mouse_pos.x * 2 - dims.w) / dims.w
+    mp.set_property("video-align-x", clamp(align, -1, 1))
+    align = (mouse_pos.y * 2 - dims.h) / dims.h
+    mp.set_property("video-align-y", clamp(align, -1, 1))
 end
 
 mp.add_key_binding(nil, "align-to-cursor", function (t)
