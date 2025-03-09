@@ -346,7 +346,7 @@ static int64_t mp_load_python_scripts(
     int64_t id = mpv_client_id(arg->client);
 
     MP_DBG(arg, "Loading python scripts...\n");
-    pthread_t thread;
+    mp_thread thread;
     // thread detaches itself and never returns
     mp_thread_create(&thread, script_thread, arg);
 
