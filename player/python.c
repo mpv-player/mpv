@@ -154,8 +154,6 @@ static PyTypeObject PyMpv_Type;
 
 #define PyCtxObject_Check(v)      Py_IS_TYPE(v, &PyMpv_Type)
 
-PyMpvObject **clients;
-
 static void
 PyMpv_dealloc(PyMpvObject *self)
 {
@@ -823,10 +821,12 @@ load_script(char *script_name, PyObject *defaults, const char *client_name)
     Py_DECREF(args);
     Py_DECREF(mpv);
     if (client == NULL) {
+        Py_DECREF(client);
         talloc_free(pathname);
         return NULL;
     }
     PyObject *client_mod = PyImport_ExecCodeModuleEx(client_name, client, *pathname);
+    Py_DECREF(client);
     talloc_free(pathname);
     if (client_mod == NULL) {
         return NULL;
@@ -1069,7 +1069,6 @@ static MP_THREAD_VOID run_thread(void *p)
     }
 
     PyObject *mpv = PyObject_GetAttrString(client, "mpv");
-    Py_DECREF(client);
     PyObject_CallMethod(mpv, "run", NULL);
 
     // end_interpreter(cctx);

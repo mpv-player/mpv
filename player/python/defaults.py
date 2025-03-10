@@ -327,7 +327,7 @@ class Mpv:
         event_id, data = arg
         self.debug(f"event_id: {event_id} data: {data}\n")
         if event_id == self.MPV_EVENT_SHUTDOWN:
-            raise ValueError
+            raise ValueError("MPV_EVENT_SHUTDOWN must be handled in lower level API.")
         elif event_id == self.MPV_EVENT_NONE:
             return False
         elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
