@@ -39,6 +39,7 @@ pl prev
     shift+L-click   show the playlist
     middle-click    show the playlist
     right-click     open the playlist menu
+    mouse wheel     play the next or previous file
     =============   ================================================
 
 pl next
@@ -47,6 +48,7 @@ pl next
     shift+L-click   show the playlist
     middle-click    show the playlist
     right-click     open the playlist menu
+    mouse wheel     play the next or previous file
     =============   ================================================
 
 title
@@ -531,11 +533,19 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
 ``playlist_prev_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
 
+``playlist_prev_wheel_down_command=no-osd add playlist-pos -1``
+
+``playlist_prev_wheel_up_command=no-osd add playlist-pos 1``
+
 ``playlist_next_mbtn_left_command=playlist-next; show-text ${playlist} 3000``
 
 ``playlist_next_mbtn_mid_command=show-text ${playlist} 3000``
 
 ``playlist_next_mbtn_right_command=script-binding select/select-playlist; script-message-to osc osc-hide``
+
+``playlist_next_wheel_down_command=no-osd add playlist-pos -1``
+
+``playlist_next_wheel_up_command=no-osd add playlist-pos 1``
 
 ``title_mbtn_left_command=script-binding stats/display-page-5``
 

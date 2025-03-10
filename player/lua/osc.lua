@@ -79,10 +79,14 @@ local user_opts = {
     playlist_prev_mbtn_left_command = "playlist-prev",
     playlist_prev_mbtn_mid_command = "show-text ${playlist} 3000",
     playlist_prev_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+    playlist_prev_wheel_down_command = "no-osd add playlist-pos -1",
+    playlist_prev_wheel_up_command = "no-osd add playlist-pos 1",
 
     playlist_next_mbtn_left_command = "playlist-next",
     playlist_next_mbtn_mid_command = "show-text ${playlist} 3000",
     playlist_next_mbtn_right_command = "script-binding select/select-playlist; script-message-to osc osc-hide",
+    playlist_next_wheel_down_command = "no-osd add playlist-pos -1",
+    playlist_next_wheel_up_command = "no-osd add playlist-pos 1",
 
     title_mbtn_left_command = "script-binding stats/display-page-5",
     title_mbtn_mid_command = "show-text ${path}",
