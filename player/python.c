@@ -63,7 +63,7 @@
 // All these are generated from player/python/*.py
 static const char *const builtin_files[][2] = {
     {"@/defaults.py",
-#   include "generated/player/python/defaults.py.inc"
+#   include "player/python/defaults.py.inc"
     },
     {0}
 };
@@ -1072,7 +1072,7 @@ static MP_THREAD_VOID run_thread(void *p)
     PyObject_CallMethod(mpv, "run", NULL);
 
     // end_interpreter(cctx);
-    Py_EndInterpreter(cctx->threadState);
+    // Py_EndInterpreter(cctx->threadState);
     MP_THREAD_RETURN();
 }
 

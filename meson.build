@@ -659,7 +659,7 @@ features += {'python': python3.found()}
 if features['python']
     dependencies += python3
     sources += files('player/python.c')
-    subdir(join_paths('generated', 'player', 'python'))
+    subdir(join_paths('player', 'python'))
 endif
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
