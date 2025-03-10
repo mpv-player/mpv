@@ -105,6 +105,7 @@ static void sws_process(struct mp_filter *f)
         goto error;
 
     mp_image_copy_attributes(dst, src);
+    mp_image_setfmt(dst, dstfmt);
 
     if (s->use_out_params)
         dst->params = s->out_params;

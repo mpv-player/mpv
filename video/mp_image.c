@@ -194,6 +194,17 @@ void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
     mpi->fmt = fmt;
     mpi->imgfmt = fmt.id;
     mpi->num_planes = fmt.num_planes;
+    mpi->params.repr.alpha = (fmt.flags & MP_IMGFLAG_ALPHA) ? PL_ALPHA_INDEPENDENT
+#if PL_API_VER >= 344
+                                                            : PL_ALPHA_NONE;
+#else
+                                                            : PL_ALPHA_UNKNOWN;
+#endif
+    mpi->params.repr.bits = (struct pl_bit_encoding) {
+        .sample_depth = fmt.comps[0].size,
+        .color_depth = fmt.comps[0].size - abs(fmt.comps[0].pad),
+        .bit_shift = MPMAX(0, fmt.comps[0].pad),
+    };
 }
 
 static void mp_image_destructor(void *ptr)
@@ -1073,10 +1084,8 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
-    dst->params.repr = (struct pl_color_repr){
-        .sys = pl_system_from_av(src->colorspace),
-        .levels = pl_levels_from_av(src->color_range),
-    };
+    dst->params.repr.sys = pl_system_from_av(src->colorspace);
+    dst->params.repr.levels = pl_levels_from_av(src->color_range);
 
     dst->params.color = (struct pl_color_space){
         .primaries = pl_primaries_from_av(src->color_primaries),
