@@ -76,7 +76,7 @@ local prompt
 local id
 
 local histories = {}
-local history
+local history = {}
 local history_pos = 1
 local searching_history = false
 local history_paths = {}
