@@ -775,6 +775,8 @@ static void feed_key(struct input_ctx *ictx, int code, double scale,
         mp_cmd_t *cmd = get_cmd_from_keys(ictx, (bstr){0}, code);
         if (!cmd)  // queue dummy cmd so that mouse-pos can notify observers
             cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
+        if (cmd)
+            cmd->notify_event = true;
         queue_cmd(ictx, cmd);
         return;
     }
@@ -921,6 +923,7 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
 
     if (cmd) {
         cmd->mouse_move = true;
+        cmd->notify_event = true;
         cmd->mouse_x = x;
         cmd->mouse_y = y;
         if (should_drop_cmd(ictx, cmd)) {
@@ -981,6 +984,8 @@ static void notify_touch_update(struct input_ctx *ictx)
 {
     // queue dummy cmd so that touch-pos can notify observers
     mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
+    if (cmd)
+        cmd->notify_event = true;
     queue_cmd(ictx, cmd);
 }
 
