@@ -8,7 +8,7 @@ import traceback
 from io import StringIO
 from pathlib import Path
 
-__all__ = ['client_name', 'mpv']
+__all__ = ["client_name", "mpv"]
 
 client_name = Path(_mpv.filename).stem
 
@@ -32,7 +32,7 @@ class Registry:
 registry = Registry()
 
 
-class State(object):
+class State:
     pause = False
 
 
@@ -72,7 +72,7 @@ class Mpv:
     def _log(self, level, *args):
         if not args:
             return
-        msg = ' '.join([str(msg) for msg in args])
+        msg = " ".join([str(msg) for msg in args])
         _mpv.handle_log(level, f"{msg}\n")
 
     def info(self, *args):
@@ -118,14 +118,14 @@ class Mpv:
         self.info(f"received event: {event_id}, {data}")
         if event_id == self.MPV_EVENT_CLIENT_MESSAGE:
             cb_name = data[1]
-            if data[2][0] == 'u' and cb_name not in registry.red_flags:
+            if data[2][0] == "u" and cb_name not in registry.red_flags:
                 self.debug(f"calling callback {cb_name}")
                 try:
                     registry.script_message[cb_name]()
-                except:
+                except Exception:
                     try:
                         self.error(read_exception(sys.exc_info()))
-                    except:
+                    except Exception:
                         pass
                     registry.red_flags.append(cb_name)
                 self.debug(f"invoked {cb_name}")
@@ -138,7 +138,7 @@ class Mpv:
 
     def command(self, node):
         """
-        :type node: can be any data structure that resembles to mpv_node; can be a list of such nodes.
+        :param node: data that resembles an mpv_node; can be a list of such nodes.
         """
         return _mpv.command(node)
 
@@ -160,7 +160,7 @@ class Mpv:
         :param str name: name of the property.
 
         """
-        if not (type(property_name) == str and mpv_format in range(1, 7)):
+        if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
             self.error("TODO: have a pointer to doc string")
             return
         return _mpv.set_property(property_name, mpv_format, data)
@@ -198,7 +198,7 @@ class Mpv:
         return _mpv.del_property(name)
 
     def get_property(self, property_name, mpv_format):
-        if not (type(property_name) == str and mpv_format in range(1, 7)):
+        if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
             self.error("TODO: have a pointer to doc string")
             return
         return _mpv.get_property(property_name, mpv_format)
@@ -248,16 +248,16 @@ class Mpv:
         location = f"py_{client_name}_bs"
 
         builtin_binds = "\n".join(sorted(
-            [binding['input'] for binding in registry.binds.values() \
-                if binding['builtin'] and binding.get('input')]))
+            [binding["input"] for binding in registry.binds.values() \
+                if binding["builtin"] and binding.get("input")]))
         if builtin_binds:
             name = f"py_{client_name}_kbs_builtin"
             self.mpv_input_define_section(name, location, "\n" + builtin_binds, True, client_name)
             self.mpv_input_enable_section(name, self.MP_INPUT_ON_TOP)
 
         reg_binds = "\n".join(sorted(
-            [binding['input'] for binding in registry.binds.values() \
-                if not binding['builtin'] and binding.get('input')]))
+            [binding["input"] for binding in registry.binds.values() \
+                if not binding["builtin"] and binding.get("input")]))
         if reg_binds:
             name = f"py_{client_name}_kbs"
             self.mpv_input_define_section(name, location, "\n" + reg_binds, False, client_name)
@@ -299,7 +299,7 @@ class Mpv:
                 # if (emit or e == "p" or e == "r") and key_data.get("repeatable", False):
                 #     fn()
                 fn()
-            key_data['cb'] = key_cb
+            key_data["cb"] = key_cb
 
         if key is not None:
             key_data["input"] = key + " script-binding " + client_name + "/" + name
