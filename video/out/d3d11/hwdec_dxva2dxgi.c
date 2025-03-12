@@ -162,7 +162,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     ID3D11Device_GetImmediateContext(o->dev11, &p->ctx11);
 
     mapper->dst_params = mapper->src_params;
-    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.imgfmt = IMGFMT_BGR0;
     mapper->dst_params.hw_subfmt = 0;
     return 0;
 }
