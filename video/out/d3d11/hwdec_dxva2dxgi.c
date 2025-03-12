@@ -189,7 +189,7 @@ static struct queue_surf *surf_create(struct ra_hwdec_mapper *mapper)
     bool success = false;
     HRESULT hr;
 
-    struct queue_surf *surf = talloc_ptrtype(p, surf);
+    struct queue_surf *surf = talloc_zero_ptrtype(p, surf);
 
     D3D11_TEXTURE2D_DESC desc11 = {
         .Width = mapper->src->w,
