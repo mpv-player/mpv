@@ -91,6 +91,9 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_new_ptrtype(ta_parent, ptr) \
     (TA_TYPEOF(ptr))ta_alloc_size(ta_parent, sizeof(*ptr))
 
+#define ta_znew_ptrtype(ta_parent, ptr) \
+    (TA_TYPEOF(ptr))ta_zalloc_size(ta_parent, sizeof(*ptr))
+
 #define ta_new_array_ptrtype(ta_parent, ptr, count) \
     (TA_TYPEOF(ptr))ta_new_array_size(ta_parent, sizeof(*(ptr)), count)
 
@@ -133,6 +136,7 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_xznew_array(...)             ta_oom_g(ta_znew_array(__VA_ARGS__))
 #define ta_xnew_array_size(...)         ta_oom_p(ta_new_array_size(__VA_ARGS__))
 #define ta_xnew_ptrtype(...)            ta_oom_g(ta_new_ptrtype(__VA_ARGS__))
+#define ta_xznew_ptrtype(...)           ta_oom_g(ta_znew_ptrtype(__VA_ARGS__))
 #define ta_xnew_array_ptrtype(...)      ta_oom_g(ta_new_array_ptrtype(__VA_ARGS__))
 #define ta_xdup(...)                    ta_oom_g(ta_dup(__VA_ARGS__))
 
