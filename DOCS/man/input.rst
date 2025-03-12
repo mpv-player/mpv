@@ -802,7 +802,7 @@ Configuration Commands
 
     The mode argument:
 
-    ``default``
+    ``apply``
         Apply the profile. Default if the argument is omitted.
 
     ``restore``
