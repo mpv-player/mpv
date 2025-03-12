@@ -80,7 +80,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
                    int x, int y, int w, int h)
 {
     int bpp = gl_bytes_per_pixel(format, type);
-    const uint8_t *data = dataptr;
+    uintptr_t data = (uintptr_t)dataptr;
     int y_max = y + h;
     if (w <= 0 || h <= 0 || !bpp)
         return;
@@ -95,11 +95,11 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
             slice = 1; // very inefficient, but at least it works
     }
     for (; y + slice <= y_max; y += slice) {
-        gl->TexSubImage2D(target, 0, x, y, w, slice, format, type, data);
+        gl->TexSubImage2D(target, 0, x, y, w, slice, format, type, (void *)data);
         data += stride * slice;
     }
     if (y < y_max)
-        gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
+        gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, (void *)data);
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
