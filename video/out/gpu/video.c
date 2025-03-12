@@ -1390,7 +1390,9 @@ static const char *get_tex_swizzle(struct image *img)
 {
     if (!img->tex)
         return "rgba";
-    return img->tex->params.format->luminance_alpha ? "raaa" : "rgba";
+    if (img->tex->params.format->luminance_alpha)
+        return "raaa";
+    return img->tex->params.format->ordered ? "rgba" : "bgra";
 }
 
 // Copy a texture to the vec4 color, while increasing offset. Also applies
