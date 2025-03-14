@@ -4,7 +4,6 @@ set -e
 . ./ci/build-common.sh
 
 # clone exactly the oldest libplacebo we want to support
-rm -rf subprojects
 mkdir -p subprojects
 git clone https://code.videolan.org/videolan/libplacebo.git \
     --recurse-submodules --shallow-submodules \
