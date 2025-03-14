@@ -38,10 +38,11 @@ fam=x86_64
 cat >"$prefix_dir/crossfile" <<EOF
 [built-in options]
 buildtype = 'release'
-wrap_mode = 'nofallback'
+wrap_mode = 'nodownload'
 [binaries]
 c = ['ccache', '${CC}']
 cpp = ['ccache', '${CXX}']
+rust = ['rustc', '--target', '${RUST_TARGET}']
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
