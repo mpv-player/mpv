@@ -4,7 +4,6 @@ set -e
 . ./ci/build-common.sh
 
 # FFmpeg on openBSD (4.4.4) is too old; use a subproject
-rm -rf subprojects
 mkdir -p subprojects
 cat <<EOF > subprojects/ffmpeg.wrap
 [wrap-git]
