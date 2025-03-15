@@ -100,6 +100,7 @@ struct priv {
     bstr    cmd;
 
     int left, top, width, height, cols, rows;
+    double display_par;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -175,6 +176,7 @@ static void set_out_params(struct vo *vo)
         p->opts.top : p->rows * p->dst.y0 / vo->dheight;
     p->left = p->opts.left > 0 ?
         p->opts.left : p->cols * p->dst.x0 / vo->dwidth;
+    p->display_par = p->osd.display_par;
 
     p->buffer_size = 3 * p->width * p->height;
     p->output_size = AV_BASE64_SIZE(p->buffer_size);
@@ -280,7 +282,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         mp_image_clear(p->frame, 0, 0, p->width, p->height);
     }
 
-    struct mp_osd_res res = { .w = p->width, .h = p->height };
+    struct mp_osd_res res = { .w = p->width, .h = p->height, .display_par = p->display_par };
     osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, p->frame);
 
 
