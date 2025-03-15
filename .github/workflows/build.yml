@@ -402,6 +402,10 @@ jobs:
         run: |
           meson test -C build
 
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
+
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
@@ -722,6 +726,10 @@ jobs:
           meson test -C build
         env:
           GGML_NO_BACKTRACE: 1
+
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
