@@ -579,6 +579,10 @@ jobs:
         run: |
           meson test -C build
 
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
+
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
