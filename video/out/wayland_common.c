@@ -49,6 +49,9 @@
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
 
+// Vendored protocols
+#include "color-representation-v1.h"
+
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
 #endif
@@ -1636,6 +1639,79 @@ static const struct wp_color_management_surface_feedback_v1_listener surface_fee
 };
 #endif
 
+static void supported_alpha_mode(void *data, struct wp_color_representation_manager_v1 *wp_color_representation_manager_v1,
+                                 uint32_t alpha_mode)
+{
+    struct vo_wayland_state *wl = data;
+    switch (alpha_mode) {
+    case WP_COLOR_REPRESENTATION_V1_ALPHA_MODE_PREMULTIPLIED_ELECTRICAL:
+        wl->alpha_map[PL_ALPHA_NONE] = alpha_mode;
+        break;
+    case WP_COLOR_REPRESENTATION_V1_ALPHA_MODE_STRAIGHT:
+        wl->alpha_map[PL_ALPHA_INDEPENDENT] = alpha_mode;
+        break;
+    }
+}
+
+static void supported_coefficients_and_ranges(void *data, struct wp_color_representation_manager_v1 *wp_color_representation_manager_v1,
+                                              uint32_t coefficients, uint32_t range)
+{
+    struct vo_wayland_state *wl = data;
+    switch (coefficients) {
+    case WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT709:
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_709] = WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT709;
+        if (range == WP_COLOR_REPRESENTATION_V1_RANGE_FULL) {
+            wl->range_map[PL_COLOR_SYSTEM_BT_709] = range;
+        } else {
+            wl->range_map[PL_COLOR_SYSTEM_BT_709 + PL_COLOR_SYSTEM_COUNT] = range;
+        }
+        break;
+    case WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT601:
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_601] = WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT601;
+        if (range == WP_COLOR_REPRESENTATION_V1_RANGE_FULL) {
+            wl->range_map[PL_COLOR_SYSTEM_BT_601] = range;
+        } else {
+            wl->range_map[PL_COLOR_SYSTEM_BT_601 + PL_COLOR_SYSTEM_COUNT] = range;
+        }
+        break;
+    case WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_SMPTE240:
+        wl->coefficients_map[PL_COLOR_SYSTEM_SMPTE_240M] = WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_SMPTE240;
+        if (range == WP_COLOR_REPRESENTATION_V1_RANGE_FULL) {
+            wl->range_map[PL_COLOR_SYSTEM_SMPTE_240M] = range;
+        } else {
+            wl->range_map[PL_COLOR_SYSTEM_SMPTE_240M + PL_COLOR_SYSTEM_COUNT] = range;
+        }
+        break;
+    case WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT2020:
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_2020_NC] = WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT2020;
+        if (range == WP_COLOR_REPRESENTATION_V1_RANGE_FULL) {
+            wl->range_map[PL_COLOR_SYSTEM_BT_2020_NC] = range;
+        } else {
+            wl->range_map[PL_COLOR_SYSTEM_BT_2020_NC + PL_COLOR_SYSTEM_COUNT] = range;
+        }
+        break;
+    case WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT2020_CL:
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_2020_C] = WP_COLOR_REPRESENTATION_V1_COEFFICIENTS_BT2020_CL;
+        if (range == WP_COLOR_REPRESENTATION_V1_RANGE_FULL) {
+            wl->range_map[PL_COLOR_SYSTEM_BT_2020_C] = range;
+        } else {
+            wl->range_map[PL_COLOR_SYSTEM_BT_2020_C + PL_COLOR_SYSTEM_COUNT] = range;
+        }
+        break;
+    }
+}
+
+static void supported_chroma_location(void *data, struct wp_color_representation_manager_v1 *wp_color_representation_manager_v1,
+                                      uint32_t chroma_location)
+{
+}
+
+static const struct wp_color_representation_manager_v1_listener color_representation_listener = {
+    supported_alpha_mode,
+    supported_coefficients_and_ranges,
+    supported_chroma_location,
+};
+
 static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 {
     switch (mode) {
@@ -1972,6 +2048,12 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
         ver = 1;
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, ver);
+    }
+
+    if (!strcmp(interface, wp_color_representation_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->color_representation_manager = wl_registry_bind(reg, id, &wp_color_representation_manager_v1_interface, ver);
+        wp_color_representation_manager_v1_add_listener(wl->color_representation_manager, &color_representation_listener, wl);
     }
 
     if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
@@ -2642,6 +2724,22 @@ static void set_color_management(struct vo_wayland_state *wl)
 #endif
 }
 
+static void set_color_representation(struct vo_wayland_state *wl)
+{
+    struct mp_image_params target_params = vo_get_target_params(wl->vo);
+    if (!wl->color_representation || pl_color_repr_equal(&target_params.repr, &wl->target_params.repr))
+        return;
+
+    struct pl_color_repr *repr = &target_params.repr;
+    int alpha = wl->alpha_map[repr->alpha];
+    int coefficients = wl->coefficients_map[repr->sys];
+    int range = repr->levels == PL_COLOR_LEVELS_FULL ? wl->range_map[repr->sys] :
+                                wl->range_map[repr->sys + PL_COLOR_SYSTEM_COUNT];
+    if (coefficients && range)
+        wp_color_representation_v1_set_coefficients_and_range(wl->color_representation, coefficients, range);
+    wp_color_representation_v1_set_alpha_mode(wl->color_representation, alpha);
+}
+
 static void set_content_type(struct vo_wayland_state *wl)
 {
     if (!wl->content_type_manager)
@@ -3210,6 +3308,7 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl)
     if (!wl->vo->target_params)
         return;
     set_color_management(wl);
+    set_color_representation(wl);
 }
 
 
@@ -3323,6 +3422,13 @@ bool vo_wayland_init(struct vo *vo)
                    wp_color_manager_v1_interface.name);
     }
 #endif
+
+    if (wl->color_representation_manager) {
+        wl->color_representation = wp_color_representation_manager_v1_create(wl->color_representation_manager, wl->callback_surface);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_color_representation_v1_interface.name);
+    }
 
     if (wl->content_type_manager) {
         wl->content_type = wp_content_type_manager_v1_get_surface_content_type(wl->content_type_manager, wl->surface);
@@ -3545,6 +3651,12 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->color_surface_feedback)
         wp_color_management_surface_feedback_v1_destroy(wl->color_surface_feedback);
 #endif
+
+    if (wl->color_representation_manager)
+        wp_color_representation_manager_v1_destroy(wl->color_representation_manager);
+
+    if (wl->color_representation)
+        wp_color_representation_v1_destroy(wl->color_representation);
 
     if (wl->content_type)
         wp_content_type_v1_destroy(wl->content_type);
