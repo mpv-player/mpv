@@ -917,6 +917,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->no_auto_select = t->no_default;
         t->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
         t->visual_impaired_track = flags & TRACK_VISUAL_IMPAIRED;
+        t->forced_track = flags & TRACK_FORCED;
         // if we found video, and we are loading cover art, flag as such.
         t->attached_picture = t->type == STREAM_VIDEO && (flags & TRACK_ATTACHED_PICTURE);
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))
@@ -987,8 +988,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
         if (e->type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
             goto skip;
 
-        enum track_flags flags = 0;
-        flags |= e->hearing_impaired ? TRACK_HEARING_IMPAIRED : 0;
+        enum track_flags flags = e->flags;
         // when given filter is set to video, we are loading up cover art
         flags |= e->type == STREAM_VIDEO ? TRACK_ATTACHED_PICTURE : 0;
         int first = mp_add_external_file(mpctx, e->fname, e->type, cancel, flags);

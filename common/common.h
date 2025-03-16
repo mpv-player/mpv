@@ -91,6 +91,14 @@ enum video_sync {
     VS_NONE,
 };
 
+enum track_flags {
+    // starts at 4, for cmd_track_add backwards compatibility
+    TRACK_HEARING_IMPAIRED = 1 << 2,
+    TRACK_VISUAL_IMPAIRED = 1 << 3,
+    TRACK_ATTACHED_PICTURE = 1 << 4,
+    TRACK_FORCED = 1 << 5,
+};
+
 #define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
                        (x) == VS_DISP_RESAMPLE_VDROP || \
                        (x) == VS_DISP_RESAMPLE_NONE ||  \

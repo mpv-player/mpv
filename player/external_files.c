@@ -155,8 +155,8 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
 
         bstr lang = {0};
         int start = 0;
-        bool hearing_impaired = false;
-        lang = mp_guess_lang_from_filename(dename, &start, &hearing_impaired);
+        enum track_flags flags = 0;
+        lang = mp_guess_lang_from_filename(dename, &start, &flags);
         if (bstr_case_startswith(tmp_fname_trim, f_fname_trim)) {
             if (lang.len && start == f_fname_trim.len)
                 prio |= 16; // exact movie name + followed by lang
@@ -201,7 +201,7 @@ static void append_dir_subtitles(struct mpv_global *global, struct MPOpts *opts,
                 sub->priority = prio;
                 sub->fname    = subpath;
                 sub->lang     = lang.len ? bstrdup0(*slist, lang) : NULL;
-                sub->hearing_impaired = hearing_impaired;
+                sub->flags    = flags;
             } else
                 talloc_free(subpath);
         }
