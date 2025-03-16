@@ -6305,6 +6305,7 @@ static void cmd_track_reload(void *p)
         flags |= t->attached_picture ? TRACK_ATTACHED_PICTURE : 0;
         flags |= t->hearing_impaired_track ? TRACK_HEARING_IMPAIRED : 0;
         flags |= t->visual_impaired_track ? TRACK_VISUAL_IMPAIRED : 0;
+        flags |= t->forced_track ? TRACK_FORCED : 0;
         mp_remove_track(mpctx, t);
         nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel,
                                       flags);
@@ -6319,9 +6320,12 @@ static void cmd_track_reload(void *p)
     struct track *nt = mpctx->tracks[nt_num];
 
     if (!nt->lang) {
+        enum track_flags flags = 0;
         bstr lang = mp_guess_lang_from_filename(bstr0(nt->external_filename), NULL,
-                                                &nt->hearing_impaired_track);
+                                                &flags);
         nt->lang = bstrto0(nt, lang);
+        nt->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
+        nt->forced_track = flags & TRACK_FORCED;
     }
 
     mp_switch_track(mpctx, nt->type, nt, 0);

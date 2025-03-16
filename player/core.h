@@ -491,13 +491,6 @@ struct mp_abort_entry {
 #define WHITE_CIRCLE "\xe2\x97\x8b"
 #define BLACK_CIRCLE "\xe2\x97\x8f"
 
-enum track_flags {
-    // starts at 4, for cmd_track_add backwards compatibility
-    TRACK_HEARING_IMPAIRED = 1 << 2,
-    TRACK_VISUAL_IMPAIRED = 1 << 3,
-    TRACK_ATTACHED_PICTURE = 1 << 4,
-};
-
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
