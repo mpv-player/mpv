@@ -673,6 +673,10 @@ Track Manipulation
 
         Marks the track as suitable for the visually impaired.
 
+    <forced>
+
+        Marks the track as forced.
+
     <attached-picture> (only for ``video-add``)
 
         Marks the track as an attached picture, same as ``albumart`` argument
