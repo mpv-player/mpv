@@ -818,6 +818,7 @@ local function add_single_video(json)
     -- add chapters
     if json.chapters then
         msg.debug("Adding pre-parsed chapters")
+        chapter_list = {}
         for i = 1, #json.chapters do
             local chapter = json.chapters[i]
             local title = chapter.title or ""
