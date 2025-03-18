@@ -658,7 +658,7 @@ python3 = dependency('python3-embed', version: '>= 3.12', required: get_option('
 features += {'python': python3.found()}
 if features['python']
     dependencies += python3
-    sources += files('player/python.c')
+    sources += files('player/python.c', 'player/py_extend.c')
     subdir(join_paths('player', 'python'))
 endif
 

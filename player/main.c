@@ -77,6 +77,12 @@ static const char def_config[] =
 #include "osdep/win32/smtc.h"
 #endif
 
+#if HAVE_PYTHON
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include "py_extend.h"
+#endif
+
 #if HAVE_COCOA
 #include "osdep/mac/app_bridge.h"
 #endif
@@ -201,6 +207,10 @@ void mp_destroy(struct MPContext *mpctx)
     mp_clipboard_destroy(mpctx->clipboard);
 
     uninit_libav(mpctx->global);
+
+#if HAVE_PYTHON
+    Py_FinalizeEx();
+#endif
 
     mp_msg_uninit(mpctx->global);
     mp_assert(!mpctx->num_abort_list);
@@ -374,6 +384,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     m_config_backup_watch_later_opts(mpctx->mconfig);
 
     mp_input_load_config(mpctx->input);
+
+#if HAVE_PYTHON
+    if (PyImport_AppendInittab("mpv", PyInit_mpv) != -1) {
+        Py_Initialize();
+    }
+#endif
 
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
