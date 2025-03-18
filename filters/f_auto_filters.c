@@ -332,6 +332,127 @@ struct mp_filter *mp_autorotate_create(struct mp_filter *parent)
     return f;
 }
 
+struct vflip_priv {
+    struct mp_subfilter sub;
+    int prev_vflip;
+    int prev_imgfmt;
+    int target_vflip;
+};
+
+static void vflip_process(struct mp_filter *f)
+{
+    struct vflip_priv *p = f->priv;
+
+    if (!mp_subfilter_read(&p->sub))
+        return;
+
+    struct mp_frame frame = p->sub.frame;
+
+    if (mp_frame_is_signaling(frame)) {
+        mp_subfilter_continue(&p->sub);
+        return;
+    }
+
+    if (frame.type != MP_FRAME_VIDEO) {
+        MP_ERR(f, "video input required!\n");
+        return;
+    }
+
+    struct mp_image *img = frame.data;
+
+    if (img->params.vflip == p->prev_vflip &&
+        img->imgfmt == p->prev_imgfmt)
+    {
+        img->params.vflip = p->target_vflip;
+        mp_subfilter_continue(&p->sub);
+        return;
+    }
+
+    if (!mp_subfilter_drain_destroy(&p->sub))
+        return;
+
+    mp_assert(!p->sub.filter);
+
+    int vflip = p->prev_vflip = img->params.vflip;
+    p->target_vflip = vflip;
+    p->prev_imgfmt = img->imgfmt;
+
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+    if (!vflip || (info && info->vflip)) {
+        mp_subfilter_continue(&p->sub);
+        return;
+    }
+
+    if (!mp_sws_supports_input(img->imgfmt)) {
+        MP_ERR(f, "Video vflip with this format not supported\n");
+        mp_subfilter_continue(&p->sub);
+        return;
+    }
+
+    char *args[] = {NULL};
+
+    p->sub.filter = mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vflip", args);
+
+    if (p->sub.filter) {
+        MP_INFO(f, "Inserting vflip filter.\n");
+        p->target_vflip = 0;
+    } else {
+        MP_ERR(f, "could not create vflip filter\n");
+    }
+
+    mp_subfilter_continue(&p->sub);
+}
+
+static void vflip_reset(struct mp_filter *f)
+{
+    struct vflip_priv *p = f->priv;
+
+    mp_subfilter_reset(&p->sub);
+}
+
+static void vflip_destroy(struct mp_filter *f)
+{
+    struct vflip_priv *p = f->priv;
+
+    mp_subfilter_reset(&p->sub);
+    TA_FREEP(&p->sub.filter);
+}
+
+static bool vflip_command(struct mp_filter *f, struct mp_filter_command *cmd)
+{
+    struct vflip_priv *p = f->priv;
+
+    if (cmd->type == MP_FILTER_COMMAND_IS_ACTIVE) {
+        cmd->is_active = !!p->sub.filter;
+        return true;
+    }
+    return false;
+}
+
+static const struct mp_filter_info vflip_filter = {
+    .name = "autovflip",
+    .priv_size = sizeof(struct vflip_priv),
+    .command = vflip_command,
+    .process = vflip_process,
+    .reset = vflip_reset,
+    .destroy = vflip_destroy,
+};
+
+struct mp_filter *mp_autovflip_create(struct mp_filter *parent)
+{
+    struct mp_filter *f = mp_filter_create(parent, &vflip_filter);
+    if (!f)
+        return NULL;
+
+    struct vflip_priv *p = f->priv;
+    p->prev_vflip = -1;
+
+    p->sub.in = mp_filter_add_pin(f, MP_PIN_IN, "in");
+    p->sub.out = mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    return f;
+}
+
 struct aspeed_priv {
     struct mp_subfilter sub;
     double cur_speed, cur_speed_drop;
