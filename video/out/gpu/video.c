@@ -3737,6 +3737,7 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
                     .w = mp_image_plane_w(&layout, n),
                     .h = mp_image_plane_h(&layout, n),
                     .tex = tex[n],
+                    .flipped = layout.params.vflip,
                 };
             }
         } else {
@@ -3750,6 +3751,10 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
     mp_assert(mpi->num_planes == p->plane_count);
 
     timer_pool_start(p->upload_timer);
+
+    if (mpi->params.vflip)
+        mp_image_vflip(mpi);
+
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         if (!plane->tex) {

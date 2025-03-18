@@ -6,6 +6,9 @@
 // hardware decode mode and the deinterlace user option.
 struct mp_filter *mp_deint_create(struct mp_filter *parent);
 
+// Flip according to mp_image.vflip
+struct mp_filter *mp_autovflip_create(struct mp_filter *parent);
+
 // Rotate according to mp_image.rotate and VO capabilities.
 struct mp_filter *mp_autorotate_create(struct mp_filter *parent);
 

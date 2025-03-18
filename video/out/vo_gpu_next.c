@@ -920,6 +920,14 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (frame->still)
         params.frame_mixer = NULL;
 
+    if (frame->current && frame->current->params.vflip) {
+        pl_matrix2x2 m = { .m = {{1, 0}, {0, -1}}, };
+        pars->distort_params.transform.mat = m;
+        params.distort_params = &pars->distort_params;
+    } else {
+        params.distort_params = NULL;
+    }
+
     // pl_queue advances its internal virtual PTS and culls available frames
     // based on this value and the VPS/FPS ratio. Requesting a non-monotonic PTS
     // is an invalid use of pl_queue. Reset it if this happens in an attempt to
@@ -2344,6 +2352,7 @@ const struct vo_driver video_out_gpu_next = {
     .name = "gpu-next",
     .caps = VO_CAP_ROTATE90 |
             VO_CAP_FILM_GRAIN |
+            VO_CAP_VFLIP |
             0x0,
     .preinit = preinit,
     .query_format = query_format,

@@ -206,6 +206,8 @@ enum {
     VO_CAP_UNTIMED      = 1 << 4,
     // VO is responsible for freeing frames.
     VO_CAP_FRAMEOWNER   = 1 << 5,
+    // VO does handle mp_image_params.vflip
+    VO_CAP_VFLIP        = 1 << 6,
 };
 
 enum {
