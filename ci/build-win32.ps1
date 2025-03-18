@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $true
 Set-StrictMode -Version Latest
 
 $subprojects = "subprojects"
