@@ -327,7 +327,7 @@ err_out:
 const struct vo_driver video_out_gpu = {
     .description = "Shader-based GPU Renderer",
     .name = "gpu",
-    .caps = VO_CAP_ROTATE90,
+    .caps = VO_CAP_ROTATE90 | VO_CAP_VFLIP,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

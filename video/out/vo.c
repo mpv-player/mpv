@@ -579,6 +579,9 @@ static void check_vo_caps(struct vo *vo)
                    "video output does not support this.\n", rot);
         }
     }
+    if (vo->params->vflip && !(vo->driver->caps & VO_CAP_VFLIP))
+        MP_WARN(vo, "Video is flagged as vertically flipped, but the "
+                    "video output does not support this.\n");
 }
 
 static void run_reconfig(void *p)
