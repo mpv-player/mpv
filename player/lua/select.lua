@@ -230,7 +230,7 @@ mp.add_key_binding(nil, "select-chapter", function ()
     input.select({
         prompt = "Select a chapter:",
         items = chapters,
-        default_item = default_item + 1,
+        default_item = default_item > -1 and default_item + 1,
         submit = function (chapter)
             mp.set_property("chapter", chapter - 1)
         end,
