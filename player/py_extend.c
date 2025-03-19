@@ -500,7 +500,7 @@ py_mpv_observe_property(PyObject *self, PyObject *args)
     uint64_t *reply_userdata = talloc(tctx, uint64_t);
     PyObject *mpv;
 
-    if (!PyArg_ParseTuple(args, "OsiK", &mpv, name, format, reply_userdata)) {
+    if (!PyArg_ParseTuple(args, "OKsi", &mpv, reply_userdata, name, format)) {
         talloc_free(tctx);
         print_parse_error("Failed to parse args (mpv.observe_property)\n");
         Py_RETURN_NONE;
@@ -518,10 +518,22 @@ py_mpv_observe_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_unobserve_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *ctx = get_client_context(PyTuple_GetItem(args, 0));
-    uint64_t reply_userdata = 0;
-    int err = mpv_unobserve_property(ctx->client, reply_userdata);
+    uint64_t *reply_userdata = talloc(NULL, uint64_t);
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "OK", &mpv, reply_userdata)) {
+        talloc_free(reply_userdata);
+        print_parse_error("Failed to parse args (mpv.unobserve_property)\n");
+        Py_RETURN_NONE;
+    }
+
+    PyClientCtx *ctx = get_client_context(mpv);
+
+    int err = mpv_unobserve_property(ctx->client, *reply_userdata);
+
+    talloc_free(reply_userdata);
     Py_DECREF(ctx);
+
     return check_error(err);
 }
 

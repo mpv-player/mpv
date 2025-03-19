@@ -100,7 +100,6 @@ end_interpreter(PyClientCtx *client_ctx)
 
 static int run_client(PyClientCtx *cctx)
 {
-    // defaults.py
     PyObject *defaults = load_local_pystrings(builtin_files[0][1], "mpvclient");
 
     if (defaults == NULL) {
@@ -128,9 +127,10 @@ static int run_client(PyClientCtx *cctx)
     Py_DECREF(path);
 
     if (client == NULL) {
+        PyErr_PrintEx(0);
         MP_ERR(cctx, "Could not load client. discarding: %s.\n", cname);
         end_interpreter(cctx);
-        return -1;
+        return 0;
     }
 
     if (PyObject_HasAttrString(client, "mpv") == 0) {
@@ -157,9 +157,6 @@ static int run_client(PyClientCtx *cctx)
     PyObject_CallMethod(mpv, "run", NULL);
 
     end_interpreter(cctx);
-    // PyThreadState *threadState = PyThreadState_Swap(NULL);
-    // PyThreadState_Swap(threadState);
-    // Py_EndInterpreter(threadState);
     return 0;
 }
 
