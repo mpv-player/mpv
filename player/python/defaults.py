@@ -8,9 +8,7 @@ import traceback
 from io import StringIO
 from pathlib import Path
 
-__all__ = ["client_name", "mpv"]
-
-client_name = Path(_mpv.filename).stem
+__all__ = ["mpv"]
 
 
 def read_exception(excinfo):
@@ -73,7 +71,7 @@ class Mpv:
         if not args:
             return
         msg = " ".join([str(msg) for msg in args])
-        _mpv.handle_log(level, f"{msg}\n")
+        _mpv.handle_log(self, level, f"{msg}\n")
 
     def info(self, *args):
         self._log("info", *args)
@@ -96,12 +94,15 @@ class Mpv:
             args.append(duration)
         self.commandv("show-text", text)
 
+    _name = None
+
     @property
     def name(self):
-        return client_name
+        return self._name
 
     def read_script(self, filename):
         file_path = Path(filename).resolve()
+        self._name = file_path.stem
         if file_path.is_dir():
             file_path = file_path / "__init__.py"
         with file_path.open("r") as f:
@@ -131,25 +132,25 @@ class Mpv:
                 self.debug(f"invoked {cb_name}")
 
     def command_string(self, name):
-        return _mpv.command_string(name)
+        return _mpv.command_string(self, name)
 
     def commandv(self, name, *args):
-        return _mpv.commandv(name, *args)
+        return _mpv.commandv(self, name, *args)
 
     def command(self, node):
         """
         :param node: data that resembles an mpv_node; can be a list of such nodes.
         """
-        return _mpv.command(node)
+        return _mpv.command(self, node)
 
     def find_config_file(self, filename):
-        return _mpv.find_config_file(filename)
+        return _mpv.find_config_file(self, filename)
 
     def request_event(self, name, enable):
-        return _mpv.request_event(name, enable)
+        return _mpv.request_event(self, name, enable)
 
     def enable_messages(self, level):
-        return _mpv.enable_messages(level)
+        return _mpv.enable_messages(self, level)
 
     def observe_property(self, property_name, mpv_format, reply_userdata=0):
         self.observe_properties[self.name + "___" + property_name] = {
@@ -163,7 +164,7 @@ class Mpv:
         if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
             self.error("TODO: have a pointer to doc string")
             return
-        return _mpv.set_property(property_name, mpv_format, data)
+        return _mpv.set_property(self, property_name, mpv_format, data)
 
     MPV_FORMAT_NODE = 0
     MPV_FORMAT_STRING = 1
@@ -195,13 +196,13 @@ class Mpv:
         return self._set_property(name, self.MPV_FORMAT_NODE, data)
 
     def del_property(self, name):
-        return _mpv.del_property(name)
+        return _mpv.del_property(self, name)
 
     def get_property(self, property_name, mpv_format):
         if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
             self.error("TODO: have a pointer to doc string")
             return
-        return _mpv.get_property(property_name, mpv_format)
+        return _mpv.get_property(self, property_name, mpv_format)
 
     def get_property_string(self, name):
         return self.get_property(name, self.MPV_FORMAT_STRING)
@@ -223,7 +224,7 @@ class Mpv:
 
     def mpv_input_define_section(self, name, location, contents, builtin, owner):
         self.debug(f"define_section args:", name, location, contents, builtin, owner)
-        return _mpv.mpv_input_define_section(name, location, contents, builtin, owner)
+        return _mpv.mpv_input_define_section(self, name, location, contents, builtin, owner)
 
     # If a key binding is not defined in the current section, do not search the
     # other sections for it (like the default section). Instead, an unbound
@@ -242,34 +243,34 @@ class Mpv:
             flags: bitwise flags from the values self.MP_INPUT_*
                     `or` (|) them to pass multiple flags.
         """
-        return _mpv.mpv_input_enable_section(name, flags)
+        return _mpv.mpv_input_enable_section(self, name, flags)
 
     def set_key_bindings_input_section(self):
-        location = f"py_{client_name}_bs"
+        location = f"py_{self.name}_bs"
 
         builtin_binds = "\n".join(sorted(
             [binding["input"] for binding in registry.binds.values() \
                 if binding["builtin"] and binding.get("input")]))
         if builtin_binds:
-            name = f"py_{client_name}_kbs_builtin"
-            self.mpv_input_define_section(name, location, "\n" + builtin_binds, True, client_name)
+            name = f"py_{self.name}_kbs_builtin"
+            self.mpv_input_define_section(name, location, "\n" + builtin_binds, True, self.name)
             self.mpv_input_enable_section(name, self.MP_INPUT_ON_TOP)
 
         reg_binds = "\n".join(sorted(
             [binding["input"] for binding in registry.binds.values() \
                 if not binding["builtin"] and binding.get("input")]))
         if reg_binds:
-            name = f"py_{client_name}_kbs"
-            self.mpv_input_define_section(name, location, "\n" + reg_binds, False, client_name)
+            name = f"py_{self.name}_kbs"
+            self.mpv_input_define_section(name, location, "\n" + reg_binds, False, self.name)
             self.mpv_input_enable_section(name, self.MP_INPUT_ON_TOP)
 
     def set_input_sections(self):
         self.set_key_bindings_input_section()
 
     def flush(self):
-        self.debug(f"Flushing {client_name}")
+        self.debug(f"Flushing {self.name}")
         self.set_input_sections()
-        self.debug(f"Flushed {client_name}")
+        self.debug(f"Flushed {self.name}")
 
     next_bid = 1
 
@@ -302,7 +303,7 @@ class Mpv:
             key_data["cb"] = key_cb
 
         if key is not None:
-            key_data["input"] = key + " script-binding " + client_name + "/" + name
+            key_data["input"] = key + " script-binding " + self.name + "/" + name
         registry.binds[name] = key_data
 
         return decorate
@@ -340,7 +341,7 @@ class Mpv:
     def run(self):
         self.flush()
         self.enable_client_message()
-        self.debug(f"Running {client_name}")
+        self.debug(f"Running {self.name}")
         _mpv.run_event_loop(self)
 
     def do_clean_up(self):
