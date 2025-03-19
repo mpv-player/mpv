@@ -871,7 +871,7 @@ static int py_mpv_m_clear(PyObject *self)
 static struct PyModuleDef py_mpv_module_def = {
     PyModuleDef_HEAD_INIT,
     "mpv",
-    NULL,
+    PyDoc_STR("Extension module container (Python exposed) C function wrappers for controlling mpv (with Python)."),
     0,
     py_mpv_methods,
     py_mpv_slots,
