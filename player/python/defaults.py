@@ -74,11 +74,14 @@ class Mpv:
         msg = " ".join([str(msg) for msg in args])
         _mpv.handle_log(self, level, f"{msg}\n")
 
-    def info(self, *args):
-        self._log("info", *args)
+    def trace(self, *args):
+        self._log("trace", *args)
 
     def debug(self, *args):
         self._log("debug", *args)
+
+    def info(self, *args):
+        self._log("info", *args)
 
     def warn(self, *args):
         self._log("warn", *args)
@@ -117,7 +120,6 @@ class Mpv:
         return _mpv.extension_ok()
 
     def process_event(self, event_id, data):
-        self.info(f"received event: {event_id}, {data}")
         if event_id == self.MPV_EVENT_CLIENT_MESSAGE:
             cb_name = data[1]
             if data[2][0] == "u" and cb_name not in registry.red_flags:
@@ -153,9 +155,19 @@ class Mpv:
     def enable_messages(self, level):
         return _mpv.enable_messages(self, level)
 
-    def observe_property(self, property_name, mpv_format, reply_userdata=0):
-        self.observe_properties[self.name + "___" + property_name] = {
-            "reply_userdata": reply_userdata, "mpv_format": mpv_format}
+    def observe_property(self, property_name, mpv_format):
+        def decorate(func):
+            self.next_bid += 1
+            self.observe_properties[property_name] = {
+                "callback": func, "id": self.next_bid
+            }
+            _mpv.observe_property(self, self.next_bid, property_name, mpv_format)
+        return decorate
+
+
+    def unobserve_property(self, property_name):
+        _mpv.unobserve_property(self, self.observe_properties[property_name]["id"])
+        del self.observe_properties[property_name]
 
     def _set_property(self, property_name, mpv_format, data):
         """
@@ -320,6 +332,16 @@ class Mpv:
             else:
                 self.debug("failed to enable client-message")
 
+    def notify_observer(self, name, data):
+        if (p := self.observe_properties.get(name, None)) is not None:
+            try:
+                p['callback'](data)
+            except Exception:
+                try:
+                    self.error(read_exception(sys.exc_info()))
+                except Exception:
+                    pass
+
     def handle_event(self, arg):
         """
         Returns:
@@ -333,7 +355,9 @@ class Mpv:
         elif event_id == self.MPV_EVENT_NONE:
             return False
         elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
-            setattr(state, *data)
+            name, data = data
+            setattr(state, name, data)
+            self.notify_observer(name, data)
             return False
         else:
             self.process_event(event_id, data)
