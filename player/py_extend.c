@@ -202,22 +202,6 @@ static PyObject* check_error(int err)
 }
 
 
-// args: log level, varargs
-static PyObject *script_log(struct mp_log *log, PyObject *args)
-{
-    char **args_ = talloc_array(NULL, char *, 2);
-
-    if (!PyArg_ParseTuple(args, "ss", &args_[0], &args_[1])) {
-        print_parse_error("Failed to parse args (script_log)\n");
-        Py_RETURN_NONE;
-    }
-
-    mp_msg(log, mp_msg_find_level(args_[0]), args_[1], NULL);
-    talloc_free(args_);
-    Py_RETURN_NONE;
-}
-
-
 static PyClientCtx *
 get_client_context(PyObject *module)
 {
@@ -243,10 +227,24 @@ py_mpv_printEx(PyObject *self, PyObject *args) {
 static PyObject *
 py_mpv_handle_log(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
+    PyObject *mpv;
+    char **args_ = talloc_array(NULL, char *, 2);
+    if (!PyArg_ParseTuple(args, "Oss", &mpv, &args_[0], &args_[1])) {
+        print_parse_error("Failed to parse args (script_log)\n");
+        Py_RETURN_NONE;
+    }
+
+    PyClientCtx *cctx = get_client_context(mpv);
+    if (cctx == NULL) {
+        PyErr_PrintEx(0);
+        Py_RETURN_NONE;
+    }
     struct mp_log *log = cctx->log;
     Py_DECREF(cctx);
-    return script_log(log, args);
+
+    mp_msg(log, mp_msg_find_level(args_[0]), args_[1], NULL);
+    talloc_free(args_);
+    Py_RETURN_NONE;
 }
 
 
@@ -257,16 +255,16 @@ py_mpv_handle_log(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_find_config_file(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
-
     const char **fname = talloc(NULL, const char *);
+    PyObject *mpv;
 
-    if (!PyArg_ParseTuple(args, "s", fname)) {
+    if (!PyArg_ParseTuple(args, "Os", &mpv, fname)) {
         talloc_free(fname);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (find_config_file)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     char *path = mp_find_config_file(cctx->ta_ctx, cctx->mpctx->global, *fname);
     talloc_free(fname);
@@ -286,18 +284,18 @@ py_mpv_find_config_file(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_input_define_section(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
-
-    void *tctx = talloc_new(cctx->ta_ctx);
+    void *tctx = talloc_new(NULL);
 
     char **nlco = talloc_array(tctx, char *, 4);
     bool *builtin = talloc(tctx, bool);
-    if (!PyArg_ParseTuple(args, "sssps", &nlco[0], &nlco[1], &nlco[2], builtin, &nlco[3])) {
+    PyObject *mpv;
+    if (!PyArg_ParseTuple(args, "Osssps", &mpv, &nlco[0], &nlco[1], &nlco[2], builtin, &nlco[3])) {
         talloc_free(tctx);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (mpv.mpv_input_define_section)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     mp_input_define_section(cctx->mpctx->input, nlco[0], nlco[1], nlco[2], *builtin, nlco[3]);
     talloc_free(tctx);
@@ -309,16 +307,19 @@ py_mpv_input_define_section(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_input_enable_section(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
-    void *tctx = talloc_new(cctx->ta_ctx);
+    void *tctx = talloc_new(NULL);
     char **name = talloc(tctx, char *);
     int *flags = talloc(tctx, int);
-    if (!PyArg_ParseTuple(args, "si", name, flags)) {
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "Osi", &mpv, name, flags)) {
         talloc_free(tctx);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (mpv.mpv_input_enable_section)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
+
     mp_input_enable_section(cctx->mpctx->input, *name, *flags);
     talloc_free(tctx);
     Py_DECREF(cctx);
@@ -333,13 +334,15 @@ py_mpv_input_enable_section(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_enable_messages(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
-
     const char *level;
+    PyObject *mpv;
 
-    if (!PyArg_ParseTuple(args, "s", &level)) {
+    if (!PyArg_ParseTuple(args, "Os", &mpv, &level)) {
+        print_parse_error("Failed to parse args (mpv.enable_messages)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     int res = mpv_request_log_messages(cctx->client, level);
     Py_DECREF(cctx);
@@ -359,16 +362,18 @@ py_mpv_enable_messages(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_get_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
     const char **name = talloc(NULL, const char *);
     mpv_format *format = talloc(NULL, mpv_format);
-    if (!PyArg_ParseTuple(args, "si", name, format)) {
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "Osi", &mpv, name, format)) {
         talloc_free(name);
         talloc_free(format);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (mpv.get_property)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     if (*format == MPV_FORMAT_NONE) {
         talloc_free(name);
@@ -407,18 +412,19 @@ py_mpv_get_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_set_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
-    void *tctx = talloc_new(cctx->ta_ctx);
-
+    void *tctx = talloc_new(NULL);
     char **name = talloc(tctx, char *);
     mpv_format *format = talloc(tctx, mpv_format);
     PyObject *value;
-    if (!PyArg_ParseTuple(args, "siO", name, format, &value)) {
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "OsiO", &mpv, name, format, &value)) {
         talloc_free(tctx);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (mpv.set_property)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     int res;
     void *data = fmt_talloc(tctx, *format);
@@ -460,14 +466,16 @@ py_mpv_set_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_del_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
+    const char **p = talloc(NULL, const char *);
+    PyObject *mpv;
 
-    const char **p = talloc(cctx->ta_ctx, const char *);
-    if (!PyArg_ParseTuple(args, "s", p)) {
+    if (!PyArg_ParseTuple(args, "Os", &mpv, p)) {
         talloc_free(p);
         print_parse_error("Failed to parse args (mpv.del_property)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     int res = mpv_del_property(cctx->client, *p);
 
@@ -486,17 +494,20 @@ py_mpv_del_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_observe_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *ctx = get_client_context(self);
-    void *tctx = talloc_new(ctx->ta_ctx);
+    void *tctx = talloc_new(NULL);
     const char **name = talloc(tctx, const char *);
     mpv_format *format = talloc(tctx, mpv_format);
     uint64_t *reply_userdata = talloc(tctx, uint64_t);
-    if (!PyArg_ParseTuple(args, "siK", name, format, reply_userdata)) {
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "OsiK", &mpv, name, format, reply_userdata)) {
         talloc_free(tctx);
-        Py_DECREF(ctx);
         print_parse_error("Failed to parse args (mpv.observe_property)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *ctx = get_client_context(mpv);
+
     int err = mpv_observe_property(ctx->client, *reply_userdata, *name, *format);
     talloc_free(tctx);
     Py_DECREF(ctx);
@@ -507,7 +518,7 @@ py_mpv_observe_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_unobserve_property(PyObject *self, PyObject *args)
 {
-    PyClientCtx *ctx = get_client_context(self);
+    PyClientCtx *ctx = get_client_context(PyTuple_GetItem(args, 0));
     uint64_t reply_userdata = 0;
     int err = mpv_unobserve_property(ctx->client, reply_userdata);
     Py_DECREF(ctx);
@@ -518,9 +529,9 @@ py_mpv_unobserve_property(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_command(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
+    PyClientCtx *cctx = get_client_context(PyTuple_GetItem(args, 0));
     struct mpv_node *cmd = NULL;
-    makenode(cctx->ta_ctx, PyTuple_GetItem(args, 0), cmd);
+    makenode(cctx->ta_ctx, PyTuple_GetItem(args, 1), cmd);
     struct mpv_node *result = talloc(cctx->ta_ctx, struct mpv_node);
     if (!PyObject_IsTrue(check_error(mpv_command_node(cctx->client, cmd, result)))) {
         mp_msg(cctx->log, mp_msg_find_level("error"), "failed to run node command\n");
@@ -532,16 +543,21 @@ py_mpv_command(PyObject *self, PyObject *args)
 }
 
 
+/**
+ * @param args tuple
+ *              :param PyObject* mpv:
+ *              :param str *args:
+ */
 static PyObject *
 py_mpv_commandv(PyObject *self, PyObject *args)
 {
     Py_ssize_t arg_length = PyTuple_Size(args);
-    const char **argv = talloc_array(NULL, const char *, arg_length + 1);
-    for (Py_ssize_t i = 0; i < arg_length; i++) {
-        argv[i] = talloc_strdup(argv, PyUnicode_AsUTF8(PyTuple_GetItem(args, i)));
+    const char **argv = talloc_array(NULL, const char *, arg_length);
+    for (Py_ssize_t i = 0; i < (arg_length - 1); i++) {
+        argv[i] = talloc_strdup(argv, PyUnicode_AsUTF8(PyTuple_GetItem(args, i + 1)));
     }
-    argv[arg_length] = NULL;
-    PyClientCtx *cctx = get_client_context(self);
+    argv[arg_length - 1] = NULL;
+    PyClientCtx *cctx = get_client_context(PyTuple_GetItem(args, 0));
     int ret = mpv_command(cctx->client, argv);
     Py_DECREF(cctx);
     talloc_free(argv);
@@ -553,16 +569,16 @@ py_mpv_commandv(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_command_string(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
+    const char **s = talloc(NULL, const char *);
+    PyObject *mpv;
 
-    const char **s = talloc(cctx->ta_ctx, const char *);
-
-    if (!PyArg_ParseTuple(args, "s", s)) {
+    if (!PyArg_ParseTuple(args, "Os", &mpv, s)) {
         talloc_free(s);
-        Py_DECREF(cctx);
         print_parse_error("Failed to parse args (mpv.command_string)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
 
     int res = mpv_command_string(cctx->client, *s);
     talloc_free(s);
@@ -577,32 +593,24 @@ py_mpv_command_string(PyObject *self, PyObject *args)
  *              :param int enable:
  */
 static PyObject *
-request_event_(struct mpv_handle *client, PyObject *args)
+py_mpv_request_event(PyObject *self, PyObject *args)
 {
     int *args_ = talloc_array(NULL, int, 2);
-    if (!PyArg_ParseTuple(args, "ii", &args_[0], &args_[1])) {
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "Oii", &mpv, &args_[0], &args_[1])) {
         talloc_free(args_);
-        print_parse_error("Failed to parse args (request_event_)\n");
+        print_parse_error("Failed to parse args (mpv.request_event)\n");
         Py_RETURN_NONE;
     }
 
-    int err = mpv_request_event(client, args_[0], args_[1]);
+    PyClientCtx *cctx = get_client_context(mpv);
+
+    int err = mpv_request_event(cctx->client, args_[0], args_[1]);
     talloc_free(args_);
-
-    return check_error(err);
-}
-
-
-// args: int, int
-static PyObject *
-py_mpv_request_event(PyObject *self, PyObject *args)
-{
-    PyClientCtx *cctx = get_client_context(self);
-
-    PyObject *ret = request_event_(cctx->client, args);
     Py_DECREF(cctx);
 
-    return ret;
+    return check_error(err);
 }
 
 
@@ -613,17 +621,22 @@ py_mpv_request_event(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_wait_event(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
     int *timeout = talloc(NULL, int);
-    if (!PyArg_ParseTuple(args, "i", timeout)) {
-        Py_DECREF(cctx);
+    PyObject *mpv;
+
+    if (!PyArg_ParseTuple(args, "Oi", &mpv, timeout)) {
         talloc_free(timeout);
         print_parse_error("Failed to parse args (mpv.wait_event)\n");
         Py_RETURN_NONE;
     }
+
+    PyClientCtx *cctx = get_client_context(mpv);
+
     mpv_event *event = mpv_wait_event(cctx->client, *timeout);
+
     talloc_free(timeout);
     Py_DECREF(cctx);
+
     PyObject *ret = PyTuple_New(2);
     PyTuple_SetItem(ret, 0, PyLong_FromLong(event->event_id));
     if (event->event_id == MPV_EVENT_CLIENT_MESSAGE) {
@@ -647,12 +660,12 @@ py_mpv_wait_event(PyObject *self, PyObject *args)
 }
 
 
-static void py_mpv_run_event_loop(PyObject *self, PyObject *args)
+static PyObject *py_mpv_run_event_loop(PyObject *self, PyObject *args)
 {
-    PyClientCtx *cctx = get_client_context(self);
+    PyObject *mpv = PyTuple_GetItem(args, 0);
+    PyClientCtx *cctx = get_client_context(mpv);
     mpv_handle *client = cctx->client;
     Py_DECREF(cctx);
-    PyObject *mpv = PyTuple_GetItem(args, 0);
 
     while (true) {
         mpv_event *event = mpv_wait_event(client, -1);
@@ -683,6 +696,7 @@ static void py_mpv_run_event_loop(PyObject *self, PyObject *args)
             Py_DECREF(handler);
         }
     }
+    Py_RETURN_NONE;
 }
 
 
@@ -727,23 +741,108 @@ static PyMethodDef py_mpv_methods[] = {
 };
 
 
+static PyTypeObject PyMpv_Type;
+static PyObject *MpvError;
+
+
+typedef struct {
+    PyObject_HEAD
+
+    PyObject *pympv_attr;
+} PyMpvObject;
+
+
+#define PyCtxObject_Check(v)      Py_IS_TYPE(v, &PyMpv_Type)
+
+
+static void
+PyMpv_dealloc(PyMpvObject *self)
+{
+    PyObject_Free(self);
+}
+
+
+static PyObject *
+setup(PyObject *self, PyObject *args)
+{
+    Py_RETURN_NONE;
+}
+
+
+static PyMethodDef PyMpv_methods[] = {
+    {"setup", (PyCFunction)setup, METH_VARARGS,
+     PyDoc_STR("Just a test method to see if extending is working.")},
+    {NULL, NULL, 0, NULL}                                                 /* Sentinal */
+};
+
+
+static PyObject *
+PyMpv_getattro(PyMpvObject *self, PyObject *name)
+{
+    if (self->pympv_attr != NULL) {
+        PyObject *v = PyDict_GetItemWithError(self->pympv_attr, name);
+        if (v != NULL) {
+            Py_INCREF(v);
+            return v;
+        }
+        else if (PyErr_Occurred()) {
+            return NULL;
+        }
+    }
+    return PyObject_GenericGetAttr((PyObject *)self, name);
+}
+
+
+static int
+PyMpv_setattr(PyMpvObject *self, const char *name, PyObject *v)
+{
+    if (self->pympv_attr == NULL) {
+        self->pympv_attr = PyDict_New();
+        if (self->pympv_attr == NULL)
+            return -1;
+    }
+    if (v == NULL) {
+        int rv = PyDict_DelItemString(self->pympv_attr, name);
+        if (rv < 0 && PyErr_ExceptionMatches(PyExc_KeyError))
+            PyErr_SetString(PyExc_AttributeError,
+                "delete non-existing PyMpv attribute");
+        return rv;
+    }
+    else
+        return PyDict_SetItemString(self->pympv_attr, name, v);
+}
+
+
+static PyTypeObject PyMpv_Type = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "mpv.Mpv",
+    .tp_basicsize = sizeof(PyMpvObject),
+    .tp_dealloc = (destructor)PyMpv_dealloc,
+    .tp_getattr = (getattrfunc)0,
+    .tp_setattr = (setattrfunc)PyMpv_setattr,
+    .tp_getattro = (getattrofunc)PyMpv_getattro,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_methods = PyMpv_methods,
+};
+
+
 static int
 py_mpv_exec(PyObject *m)
 {
-    // if (PyType_Ready(&PyMpv_Type) < 0)
-    //     return -1;
-    //
-    // if (MpvError == NULL) {
-    //     MpvError = PyErr_NewException("mpv.error", NULL, NULL);
-    //     if (MpvError == NULL)
-    //         return -1;
-    // }
-    // int rc = PyModule_AddType(m, (PyTypeObject *)MpvError);
-    // if (rc < 0)
-    //     return -1;
-    //
-    // if (PyModule_AddType(m, &PyMpv_Type) < 0)
-    //     return -1;
+    if (PyType_Ready(&PyMpv_Type) < 0)
+        return -1;
+
+    if (MpvError == NULL) {
+        MpvError = PyErr_NewException("mpv.error", NULL, NULL);
+        if (MpvError == NULL)
+            return -1;
+    }
+    int rc = PyModule_AddType(m, (PyTypeObject *)MpvError);
+    if (rc < 0)
+        return -1;
+
+    if (PyModule_AddType(m, &PyMpv_Type) < 0)
+        return -1;
 
     return 0;
 }
