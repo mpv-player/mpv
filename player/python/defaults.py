@@ -2,13 +2,14 @@
 The python wrapper module for the embedded and extended functionalities
 """
 
-import mpv as _mpv
+import mpv as _mpv  # extension module, see: player/py_extend.c
+
 import sys
 import traceback
 from io import StringIO
 from pathlib import Path
 
-__all__ = ["mpv"]
+__all__ = ["mpv", "Mpv"]
 
 
 def read_exception(excinfo):
@@ -41,7 +42,7 @@ class Mpv:
     """
 
     This class wraps the mpv client (/libmpv) API hooks defined in the
-    embedded/extended python. See: player/python.c
+    embedded/extended python. See: player/py_extend.c
 
     """
     MPV_EVENT_NONE = 0
@@ -102,13 +103,13 @@ class Mpv:
 
     def read_script(self, filename):
         file_path = Path(filename).resolve()
-        self._name = file_path.stem
         if file_path.is_dir():
             file_path = file_path / "__init__.py"
         with file_path.open("r") as f:
             return str(file_path), f.read()
 
-    def compile_script(self, filename):
+    def compile_script(self, filename, client_name):
+        self._name = client_name
         file_path, source = self.read_script(filename)
         return file_path, compile(source, file_path, "exec")
 

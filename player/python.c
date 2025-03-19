@@ -66,7 +66,7 @@ load_script(const char *script_name, PyObject *defaults, const char *client_name
     PyObject *mpv = PyObject_GetAttrString(defaults, "mpv");
 
     const char **pathname = talloc(NULL, const char *);
-    PyObject *args = PyObject_CallMethod(mpv, "compile_script", "s", script_name);
+    PyObject *args = PyObject_CallMethod(mpv, "compile_script", "ss", script_name, client_name);
     if (args == NULL) {
         return NULL;
     }
@@ -114,7 +114,7 @@ static int run_client(PyClientCtx *cctx)
     if (PyObject_CallMethod(path, "exists", "s", cctx->filename) == Py_False) {
         MP_ERR(cctx, "%s does not exists.\n", cctx->filename);
         end_interpreter(cctx);
-        return -1;
+        return 0;
     }
 
     PyObject *mpv = PyObject_GetAttrString(defaults, "mpv");
@@ -136,8 +136,23 @@ static int run_client(PyClientCtx *cctx)
     if (PyObject_HasAttrString(client, "mpv") == 0) {
         MP_ERR(cctx, "illegal client. does not have an 'mpv' instance (use: from mpvclient import mpv). discarding: %s.\n", cname);
         end_interpreter(cctx);
+        return 0;
+    }
+
+    PyObject *client_mpv = PyObject_GetAttrString(client, "mpv");
+    PyObject *Mpv = PyObject_GetAttrString(defaults, "Mpv");
+
+    int isins = PyObject_IsInstance(client_mpv, Mpv);
+    if (isins == 0) {
+        MP_ERR(cctx, "illegal client. 'mpv' instance is not an instance of mpvclient.Mpv (use: from mpvclient import mpv). discarding: %s.\n", cname);
+        end_interpreter(cctx);
+        return 0;
+    } else if (isins == -1) {
+        end_interpreter(cctx);
         return -1;
     }
+    Py_DECREF(client_mpv);
+    Py_DECREF(Mpv);
 
     PyObject_CallMethod(mpv, "run", NULL);
 
