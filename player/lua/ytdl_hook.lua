@@ -251,11 +251,11 @@ end
 local function time_to_secs(time_string)
     local ret
 
-    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)%p*%s")
+    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)")
     if a ~= nil then
         ret = (a*3600 + b*60 + c)
     else
-        a, b = time_string:match("(%d%d?):(%d%d)%p*%s")
+        a, b = time_string:match("(%d%d?):(%d%d)")
         if a ~= nil then
             ret = (a*60 + b)
         end
