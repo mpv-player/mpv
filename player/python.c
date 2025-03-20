@@ -28,7 +28,7 @@
 // List of builtin modules and their contents as strings.
 // All these are generated from player/python/*.py
 static const char *const builtin_files[][2] = {
-    {"@/defaults.py",
+    {"@/defaults.py",  // internal_name: mpvclient
 #   include "player/python/defaults.py.inc"
     },
     {0}

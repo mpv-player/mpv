@@ -33,6 +33,7 @@ typedef struct {
 } PyClientCtx;
 
 
-PyObject *PyInit_mpv(void);
+// PyObject *PyInit_mpv(void);
+PyMODINIT_FUNC PyInit_mpv(void);
 
 #endif
