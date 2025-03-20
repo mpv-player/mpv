@@ -209,7 +209,7 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
 #if HAVE_PYTHON
-    Py_FinalizeEx();
+    if (Py_IsInitialized()) Py_FinalizeEx();
 #endif
 
     mp_msg_uninit(mpctx->global);

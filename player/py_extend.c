@@ -105,9 +105,6 @@ static void makenode(void *ta_ctx, PyObject *obj, struct mpv_node *node) {
 }
 
 
-/**
- * TODO: Make it dynamically loadable.
- */
 static PyObject *
 deconstructnode(struct mpv_node *node)
 {
@@ -148,8 +145,7 @@ deconstructnode(struct mpv_node *node)
 
 
 /**
- * Sort of a wrapper around deconstructnode.
- * TODO: Make it dynamically loadable.
+ * A wrapper around deconstructnode.
  */
 static PyObject *
 unmakedata(mpv_format format, void *data)
@@ -862,16 +858,10 @@ py_mpv_exec(PyObject *m)
 
 static struct PyModuleDef_Slot py_mpv_slots[] = {
     {Py_mod_exec, py_mpv_exec},
-    // {Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED},
     {Py_mod_multiple_interpreters, Py_MOD_PER_INTERPRETER_GIL_SUPPORTED},
     {0, NULL}
 };
 
-
-// static void py_mpv_m_free(void *self)
-// {
-//     PyObject_Free(self);
-// }
 
 static int py_mpv_m_clear(PyObject *self)
 {
