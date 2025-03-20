@@ -2,7 +2,8 @@
 The python wrapper module for the embedded and extended functionalities
 """
 
-import mpv as _mpv  # extension module, see: player/py_extend.c
+# extension module, see: player/py_extend.c
+import mpv as _mpv  # type: ignore
 
 import sys
 import traceback
@@ -23,9 +24,9 @@ def read_exception(excinfo):
 
 
 class Registry:
-    script_message = {}
-    binds = {}
-    red_flags = []
+    script_message: dict = {}
+    binds: dict = {}
+    red_flags: list[str] = []
 
 
 registry = Registry()
@@ -63,7 +64,7 @@ class Mpv:
     MPV_EVENT_QUEUE_OVERFLOW = 24
     MPV_EVENT_HOOK = 25
 
-    observe_properties = {}
+    observe_properties: dict = {}
 
     def print_ref_count(self, obj):
         self.info(f"refcount ({repr(obj)}): {sys.getrefcount(obj)}")
@@ -236,7 +237,7 @@ class Mpv:
         return self.get_property(name, self.MPV_FORMAT_NODE)
 
     def mpv_input_define_section(self, name, location, contents, builtin, owner):
-        self.debug(f"define_section args:", name, location, contents, builtin, owner)
+        self.debug("define_section args:", name, location, contents, builtin, owner)
         return _mpv.mpv_input_define_section(self, name, location, contents, builtin, owner)
 
     # If a key binding is not defined in the current section, do not search the
