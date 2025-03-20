@@ -66,6 +66,9 @@ class Mpv:
 
     observe_properties: dict = {}
 
+    def get_opt(self, key, default):
+        return self.get_property_node("options/script-opts").get(key, default)
+
     def print_ref_count(self, obj):
         self.info(f"refcount ({repr(obj)}): {sys.getrefcount(obj)}")
 
