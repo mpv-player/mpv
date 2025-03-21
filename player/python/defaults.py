@@ -163,7 +163,7 @@ class Mpv:
         def decorate(func):
             self.next_bid += 1
             self.observe_properties[property_name] = {
-                "callback": func, "id": self.next_bid
+                "callback": func, "id": self.next_bid,
             }
             _mpv.observe_property(self, self.next_bid, property_name, mpv_format)
         return decorate
@@ -340,7 +340,7 @@ class Mpv:
     def notify_observer(self, name, data):
         if (p := self.observe_properties.get(name, None)) is not None:
             try:
-                p['callback'](data)
+                p["callback"](data)
             except Exception:
                 try:
                     self.error(read_exception(sys.exc_info()))
