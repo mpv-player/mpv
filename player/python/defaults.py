@@ -293,12 +293,13 @@ class Mpv:
 
     def add_binding(self, key=None, name=None, builtin=False, **opts):
         """
-        Args:
-            opts: boolean memebers (repeatable, complex)
-            builtin: whether to put the binding in the builtin section;
-                        this means if the user defines bindings
-                        using "{name}", they won't be ignored or overwritten - instead,
-                        they are preferred to the bindings defined with this call
+        :param str key:
+        :param str name:
+        :param bool builtin: whether to put the binding in the builtin section;
+            this means if the user defines bindings
+            using "{name}", they won't be ignored or overwritten - instead,
+            they are preferred to the bindings defined with this call
+        :param dict opts: boolean members (repeatable, complex)
         """
         # copied from defaults.js (not sure what e and emit is yet)
         self.debug(f"loading binding {key}")
@@ -349,7 +350,7 @@ class Mpv:
     def handle_event(self, arg):
         """
         Returns:
-            boolean specifing whether some event loop breaking
+            boolean specifying whether some event loop breaking
             condition has been satisfied.
         """
         event_id, data = arg
