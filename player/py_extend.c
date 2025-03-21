@@ -745,7 +745,7 @@ static PyMethodDef py_mpv_methods[] = {
      PyDoc_STR("runs mpv_command_node given py structure(s, as in list) convertible to mpv_node as the only argument.")},
     {"wait_event", (PyCFunction)py_mpv_wait_event, METH_VARARGS,
      PyDoc_STR("Listens for mpv_event and returns event_id and event_data")},
-    {NULL, NULL, 0, NULL}                                                     /* Sentinal */
+    {NULL, NULL, 0, NULL}                                                     /* Sentinel */
 };
 
 
@@ -780,7 +780,7 @@ setup(PyObject *self, PyObject *args)
 static PyMethodDef PyMpv_methods[] = {
     {"setup", (PyCFunction)setup, METH_VARARGS,
      PyDoc_STR("Just a test method to see if extending is working.")},
-    {NULL, NULL, 0, NULL}                                                 /* Sentinal */
+    {NULL, NULL, 0, NULL}                                                 /* Sentinel */
 };
 
 
