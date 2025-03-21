@@ -194,6 +194,7 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
         "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
+        "VK_KHR_video_maintenance2", /* VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME */
     };
 
 #ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
