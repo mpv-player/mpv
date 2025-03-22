@@ -78,15 +78,30 @@ static inline void write_str(unsigned char* s)
 }
 
 #define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
-#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s\033\\"
+#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s"
 #define KITTY_ESC_CONTINUE   "\033_Gm=%d;"
 static const bstr KITTY_ESC_END = bstr0_lit("\033\\");
-static const bstr KITTY_ESC_DELETE_ALL = bstr0_lit("\033_Ga=d;\033\\");
+static const bstr KITTY_ESC_DELETE_ALL = bstr0_lit("\033_Ga=d;");
+
+static const bstr DCS_TMUX_PREFIX = bstr0_lit("\033Ptmux;\033");
+static const bstr DCS_SCREEN_PREFIX = bstr0_lit("\033P\033");
+static const bstr DCS_SUFFIX = bstr0_lit("\033\\");
+
+#define DCS_GUARD_INTERNAL(PRIV, BODY, FUNC, ...) { \
+    if (PRIV->dcs_prefix.len > 0) FUNC(__VA_ARGS__ p->dcs_prefix); \
+    BODY; \
+    if (PRIV->dcs_prefix.len > 0) FUNC(__VA_ARGS__ DCS_SUFFIX); \
+}
+
+#define DCS_GUARD_WRITE(PRIV, BODY) DCS_GUARD_INTERNAL(PRIV, BODY, write_bstr)
+#define DCS_GUARD_APPEND(PRIV, BODY) \
+    DCS_GUARD_INTERNAL(PRIV, BODY, bstr_xappend, NULL, &PRIV->cmd,)
 
 struct vo_kitty_opts {
     int width, height, top, left, rows, cols;
     bool config_clear, alt_screen;
     bool use_shm;
+    bool auto_multiplexer_passthrough;
 };
 
 struct priv {
@@ -98,6 +113,7 @@ struct priv {
     int     buffer_size, output_size;
     int     shm_fd;
     bstr    cmd;
+    bstr    dcs_prefix;
 
     int left, top, width, height, cols, rows;
     double display_par;
@@ -187,7 +203,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct priv *p = vo->priv;
 
     vo->want_redraw = true;
-    write_bstr(KITTY_ESC_DELETE_ALL);
+
+    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_DELETE_ALL));
+    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_END));
+
     if (p->opts.config_clear)
         write_str(TERM_ESC_CLEAR_SCREEN);
 
@@ -311,28 +330,33 @@ static void flip_page(struct vo *vo)
     p->cmd.len = 0;
 
     // Start with ESC to position the cursor
-    bstr_xappend_asprintf(NULL, &p->cmd, TERM_ESC_GOTO_YX, p->top, p->left);
+    DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd, TERM_ESC_GOTO_YX,
+                          p->top, p->left));
 
     if (p->opts.use_shm) {
-        bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG_SHM,
-                              p->width, p->height, p->shm_path_b64);
+        DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
+                              KITTY_ESC_IMG_SHM, p->width, p->height,
+                              p->shm_path_b64));
+        DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
     } else {
         if (!p->output) {
             return;
         }
 
-        bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG, p->width, p->height);
+        DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG,
+                              p->width, p->height));
 
         for (int offset = 0; offset < p->output_size; ) {
             int chunk = MPMIN(4096, p->output_size - offset);
 
             if (offset > 0)
-                bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_CONTINUE,
-                                      offset + chunk < p->output_size);
+                DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
+                                    KITTY_ESC_CONTINUE,
+                                    offset + chunk < p->output_size));
 
             // Append at max chunk bytes
             bstr_xappend(NULL, &p->cmd, (bstr){p->output + offset, chunk});
-            bstr_xappend(NULL, &p->cmd, KITTY_ESC_END);
+            DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
             offset += chunk;
         }
     }
@@ -383,6 +407,14 @@ static int preinit(struct vo *vo)
     }
 #endif
 
+    if (p->opts.auto_multiplexer_passthrough) {
+        if (getenv("TMUX")) {
+            p->dcs_prefix = DCS_TMUX_PREFIX;
+        } else if (getenv("STY")) {
+            p->dcs_prefix = DCS_SCREEN_PREFIX;
+        }
+    }
+
     write_str(TERM_ESC_HIDE_CURSOR);
     terminal_set_mouse_input(true);
     if (p->opts.alt_screen)
@@ -410,6 +442,8 @@ static void uninit(struct vo *vo)
 #if HAVE_POSIX
     sigaction(SIGWINCH, &saved_sigaction, NULL);
 #endif
+
+    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_DELETE_ALL));
 
     write_str(TERM_ESC_RESTORE_CURSOR);
     terminal_set_mouse_input(false);
@@ -452,6 +486,7 @@ const struct vo_driver video_out_kitty = {
         {"config-clear", OPT_BOOL(opts.config_clear), },
         {"alt-screen", OPT_BOOL(opts.alt_screen), },
         {"use-shm", OPT_BOOL(opts.use_shm), },
+        {"auto-multiplexer-passthrough", OPT_BOOL(opts.auto_multiplexer_passthrough), },
         {0}
     },
     .options_prefix = "vo-kitty",
