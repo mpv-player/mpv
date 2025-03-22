@@ -1725,8 +1725,8 @@ mp.add_key_binding(nil, "enable", function ()
     mp.command("script-message-to commands open")
 end)
 
-mp.register_script_message("type", function (text, cursor_pos)
-    mp.commandv("script-message-to", "commands", "type", unpack({text, cursor_pos}))
+mp.register_script_message("type", function (...)
+    mp.commandv("script-message-to", "commands", "type", ...)
 end)
 
 require "mp.options".read_options(opts, nil, render)
