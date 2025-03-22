@@ -455,6 +455,14 @@ Available video output drivers are:
 
         This option is not implemented on Windows.
 
+    ``--vo-kitty-auto-multiplexer-passthrough=<yes|no>`` (default: no)
+        Automatically detect terminal multiplexer to passthrough escape
+        sequences. This allows the image protocol to work in multiplexers that
+        might not support the kitty image protocol by passing through the
+        escape sequences directly to the terminal.
+
+        Currently only supports tmux and GNU screen.
+
 ``sixel``
     Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
     ``xterm``.
