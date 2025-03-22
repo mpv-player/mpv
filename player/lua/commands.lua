@@ -590,6 +590,12 @@ mp.register_event("log-message", function(e)
     -- OSD display itself.
     if e.level == "trace" then return end
 
+    -- Avoid logging debug messages infinitely.
+    if e.prefix == "cplayer" and
+       e.text:find('^Run command: script%-message%-to, flags=64, args=%[target="console"') then
+        return
+    end
+
     -- Use color for debug/v/warn/error/fatal messages.
     input.log("[" .. e.prefix .. "] " .. e.text:sub(1, -2), styles[e.level],
               terminal_styles[e.level])
