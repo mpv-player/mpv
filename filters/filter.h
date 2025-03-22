@@ -405,6 +405,7 @@ struct mp_stream_info {
 
     struct mp_hwdec_devices *hwdec_devs;
     struct osd_state *osd;
+    bool vflip;
     bool rotate90;
     struct vo *dr_vo; // for calling vo_get_image()
 };

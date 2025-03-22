@@ -744,7 +744,7 @@ static int preinit(struct vo *vo)
 const struct vo_driver video_out_libmpv = {
     .description = "render API for libmpv",
     .name = "libmpv",
-    .caps = VO_CAP_ROTATE90,
+    .caps = VO_CAP_ROTATE90 | VO_CAP_VFLIP,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
