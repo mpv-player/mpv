@@ -84,6 +84,24 @@ int main(int argc, char *argv[])
                 fprintf(f, " endian_bytes=%d", 1 << d.endian_shift);
             for (int x = 0; x < MP_NUM_COMPONENTS; x++) {
                 struct mp_imgfmt_comp_desc cm = d.comps[x];
+                if (avd && x < avd->nb_components) {
+                    const AVComponentDescriptor *cd = &avd->comp[x];
+                    // Validate only if padding is not 0. fill_pixdesc_layout()
+                    // uses some heuristics to convert AVComponentDescriptor
+                    // to mp_imgfmt_comp_desc. Some formats, mostly packed ones,
+                    // are not fully supported. See fill_pixdesc_layout()
+                    // for more details.
+                    if (cm.pad) {
+                        struct pl_bit_encoding be = {
+                            .sample_depth = cm.size,
+                            .color_depth = cm.size - abs(cm.pad),
+                            .bit_shift = MPMAX(0, cm.pad),
+                        };
+                        mp_require(be.color_depth == cd->depth);
+                        mp_require(be.sample_depth == MP_ALIGN_UP(cd->depth, 8));
+                        mp_require(be.bit_shift == cd->shift);
+                    }
+                }
                 fprintf(f, " {");
                 if (cm.plane == n) {
                     if (cm.size) {
