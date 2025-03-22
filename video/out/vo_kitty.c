@@ -346,18 +346,31 @@ static void flip_page(struct vo *vo)
         DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG,
                               p->width, p->height));
 
-        for (int offset = 0; offset < p->output_size; ) {
-            int chunk = MPMIN(4096, p->output_size - offset);
+        int output_size = p->output_size - 1;
+        int offset = 0;
+
+        for (; offset < output_size; ) {
+            int chunk = MPMIN(4096, output_size - offset);
 
             if (offset > 0)
                 DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
                                     KITTY_ESC_CONTINUE,
-                                    offset + chunk < p->output_size));
+                                    offset + chunk < output_size));
 
             // Append at max chunk bytes
             bstr_xappend(NULL, &p->cmd, (bstr){p->output + offset, chunk});
             DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
             offset += chunk;
+        }
+
+        // When the data is less than or equal to chunk size the final packet
+        // isn't sent, i.e. an escape sequence with `m=0`.
+        // This ensures that an escape sequence with `m=0` is sent and
+        // terminals stay happy
+        if (offset == 0) {
+            DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
+                                KITTY_ESC_CONTINUE, 0));
+            DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
         }
     }
 
