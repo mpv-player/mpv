@@ -87,16 +87,6 @@ static const bstr DCS_TMUX_PREFIX = bstr0_lit("\033Ptmux;\033");
 static const bstr DCS_SCREEN_PREFIX = bstr0_lit("\033P\033");
 static const bstr DCS_SUFFIX = bstr0_lit("\033\\");
 
-#define DCS_GUARD_INTERNAL(PRIV, BODY, FUNC, ...) { \
-    if (PRIV->dcs_prefix.len > 0) FUNC(__VA_ARGS__ p->dcs_prefix); \
-    BODY; \
-    if (PRIV->dcs_prefix.len > 0) FUNC(__VA_ARGS__ DCS_SUFFIX); \
-}
-
-#define DCS_GUARD_WRITE(PRIV, BODY) DCS_GUARD_INTERNAL(PRIV, BODY, write_bstr)
-#define DCS_GUARD_APPEND(PRIV, BODY) \
-    DCS_GUARD_INTERNAL(PRIV, BODY, bstr_xappend, NULL, &PRIV->cmd,)
-
 struct vo_kitty_opts {
     int width, height, top, left, rows, cols;
     bool config_clear, alt_screen;
@@ -114,6 +104,7 @@ struct priv {
     int     shm_fd;
     bstr    cmd;
     bstr    dcs_prefix;
+    bstr    dcs_suffix;
 
     int left, top, width, height, cols, rows;
     double display_par;
@@ -129,6 +120,35 @@ struct priv {
 static struct sigaction saved_sigaction = {0};
 static bool resized;
 #endif
+
+static inline void write_bstr_passthrough(struct priv *p, bstr bs)
+{
+    write_bstr(p->dcs_prefix);
+    write_bstr(bs);
+    write_bstr(p->dcs_suffix);
+}
+
+static inline void bstr_xappend_passthrough(struct priv *p, bstr *bs,
+                                            bstr append)
+{
+    bstr_xappend(NULL, bs, p->dcs_prefix);
+    bstr_xappend(NULL, bs, append);
+    bstr_xappend(NULL, bs, p->dcs_suffix);
+}
+
+static inline void bstr_xappend_asprintf_passthrough(struct priv *p, bstr *bs,
+                                                     const char *fmt, ...)
+{
+    bstr_xappend(NULL, bs, p->dcs_prefix);
+
+
+    va_list ap;
+    va_start(ap, fmt);
+    bstr_xappend_vasprintf(NULL, bs, fmt, ap);
+    va_end(ap);
+
+    bstr_xappend(NULL, bs, p->dcs_suffix);
+}
 
 static void close_shm(struct priv *p)
 {
@@ -204,8 +224,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     vo->want_redraw = true;
 
-    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_DELETE_ALL));
-    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_END));
+    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
+    write_bstr_passthrough(p, KITTY_ESC_END);
 
     if (p->opts.config_clear)
         write_str(TERM_ESC_CLEAR_SCREEN);
@@ -330,21 +350,20 @@ static void flip_page(struct vo *vo)
     p->cmd.len = 0;
 
     // Start with ESC to position the cursor
-    DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd, TERM_ESC_GOTO_YX,
-                          p->top, p->left));
+    bstr_xappend_asprintf_passthrough(p, &p->cmd, TERM_ESC_GOTO_YX,
+                                      p->top, p->left);
 
     if (p->opts.use_shm) {
-        DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
-                              KITTY_ESC_IMG_SHM, p->width, p->height,
-                              p->shm_path_b64));
-        DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
+        bstr_xappend_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
+                                          p->width, p->height, p->shm_path_b64);
+        bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
     } else {
         if (!p->output) {
             return;
         }
 
-        DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd, KITTY_ESC_IMG,
-                              p->width, p->height));
+        bstr_xappend_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
+                                          p->width, p->height);
 
         int output_size = p->output_size - 1;
         int offset = 0;
@@ -353,13 +372,13 @@ static void flip_page(struct vo *vo)
             int chunk = MPMIN(4096, output_size - offset);
 
             if (offset > 0)
-                DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
-                                    KITTY_ESC_CONTINUE,
-                                    offset + chunk < output_size));
+                bstr_xappend_asprintf_passthrough(p, &p->cmd,
+                                                  KITTY_ESC_CONTINUE,
+                                                  offset + chunk < output_size);
 
             // Append at max chunk bytes
-            bstr_xappend(NULL, &p->cmd, (bstr){p->output + offset, chunk});
-            DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
+            bstr_xappend(p, &p->cmd, (bstr){p->output + offset, chunk});
+            bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
             offset += chunk;
         }
 
@@ -368,9 +387,9 @@ static void flip_page(struct vo *vo)
         // This ensures that an escape sequence with `m=0` is sent and
         // terminals stay happy
         if (offset == 0) {
-            DCS_GUARD_APPEND(p, bstr_xappend_asprintf(NULL, &p->cmd,
-                                KITTY_ESC_CONTINUE, 0));
-            DCS_GUARD_APPEND(p, bstr_xappend(NULL, &p->cmd, KITTY_ESC_END));
+            bstr_xappend_asprintf_passthrough(p, &p->cmd,
+                                              KITTY_ESC_CONTINUE, 0);
+            bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
         }
     }
 
@@ -426,6 +445,9 @@ static int preinit(struct vo *vo)
         } else if (getenv("STY")) {
             p->dcs_prefix = DCS_SCREEN_PREFIX;
         }
+
+        if (p->dcs_prefix.len)
+            p->dcs_suffix = DCS_SUFFIX;
     }
 
     write_str(TERM_ESC_HIDE_CURSOR);
@@ -456,7 +478,7 @@ static void uninit(struct vo *vo)
     sigaction(SIGWINCH, &saved_sigaction, NULL);
 #endif
 
-    DCS_GUARD_WRITE(p, write_bstr(KITTY_ESC_DELETE_ALL));
+    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
 
     write_str(TERM_ESC_RESTORE_CURSOR);
     terminal_set_mouse_input(false);
