@@ -213,6 +213,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
+    p->cmd.start = talloc_zero(NULL, char);
+
     if (!p->opts.use_shm) {
         p->buffer = talloc_array(NULL, uint8_t, p->buffer_size);
         p->output = talloc_array(NULL, char, p->output_size);
