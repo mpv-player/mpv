@@ -1076,12 +1076,17 @@ static void do_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    if (!vo->config_ok || (vo->driver->caps & VO_CAP_NORETAIN) ||
-        (vo->driver->caps & VO_CAP_UNTIMED))
+    if (!vo->config_ok)
         return;
 
     mp_mutex_lock(&in->lock);
     in->request_redraw = false;
+
+    if (vo->driver->caps & (VO_CAP_NORETAIN | VO_CAP_UNTIMED)) {
+        mp_mutex_unlock(&in->lock);
+        return;
+    }
+
     bool full_redraw = in->dropped_frame;
     struct vo_frame *frame = vo_frame_ref(in->current_frame);
     if (frame)
