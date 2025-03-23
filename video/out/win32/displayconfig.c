@@ -91,6 +91,33 @@ static DISPLAYCONFIG_PATH_INFO *get_path(UINT32 num_paths,
     return NULL;
 }
 
+static DISPLAYCONFIG_PATH_INFO *get_path_from_friendly(UINT32 num_paths,
+                                                       DISPLAYCONFIG_PATH_INFO* paths,
+                                                       const wchar_t *monitor_friendly_device_name)
+{
+    // Search for a path with a matching device name
+    for (UINT32 i = 0; i < num_paths; i++) {
+        // Send a GET_TARGET_NAME request
+        DISPLAYCONFIG_TARGET_DEVICE_NAME target = {
+            .header = {
+                .size = sizeof target,
+                .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME,
+                .adapterId = paths[i].targetInfo.adapterId,
+                .id = paths[i].targetInfo.id,
+            }
+        };
+        if (DisplayConfigGetDeviceInfo(&target.header) != ERROR_SUCCESS)
+            return NULL;
+
+        // Check if the device name matches
+        if (!wcscmp(monitor_friendly_device_name,
+                    target.monitorFriendlyDeviceName))
+            return &paths[i];
+    }
+
+    return NULL;
+}
+
 static double get_refresh_rate_from_mode(DISPLAYCONFIG_MODE_INFO *mode)
 {
     if (mode->infoType != DISPLAYCONFIG_MODE_INFO_TYPE_TARGET)
@@ -137,4 +164,46 @@ double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device)
 end:
     talloc_free(ctx);
     return freq;
+}
+
+wchar_t *mp_w32_displayconfig_get_device_from_friendly_name(
+    const wchar_t *monitor_friendly_device_name)
+{
+    void *ctx = talloc_new(NULL);
+    wchar_t *gdi_device_name = NULL;
+
+    // Get the current display configuration
+    UINT32 num_paths;
+    DISPLAYCONFIG_PATH_INFO *paths;
+    UINT32 num_modes;
+    DISPLAYCONFIG_MODE_INFO *modes;
+    if (get_config(ctx, &num_paths, &paths, &num_modes, &modes))
+        goto end;
+
+    // Get the path for the specified monitor
+    DISPLAYCONFIG_PATH_INFO *path;
+    if (!(path = get_path_from_friendly(num_paths,
+                                        paths,
+                                        monitor_friendly_device_name)))
+        goto end;
+
+    // Get the GDI device name from the path
+    DISPLAYCONFIG_SOURCE_DEVICE_NAME source = {
+        .header = {
+            .size = sizeof source,
+            .type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME,
+            .adapterId = path->sourceInfo.adapterId,
+            .id = path->sourceInfo.id,
+        }
+    };
+    if (DisplayConfigGetDeviceInfo(&source.header) != ERROR_SUCCESS)
+        goto end;
+
+    gdi_device_name = talloc_memdup(NULL,
+                                    source.viewGdiDeviceName,
+                                    sizeof(source.viewGdiDeviceName));
+
+end:
+    talloc_free(ctx);
+    return gdi_device_name;
 }
