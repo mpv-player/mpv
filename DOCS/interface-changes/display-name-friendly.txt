@@ -1,0 +1,1 @@
+add `display-name/friendly` property on Windows to obtain display names from EDID

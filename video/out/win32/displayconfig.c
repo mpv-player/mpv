@@ -207,3 +207,46 @@ end:
     talloc_free(ctx);
     return gdi_device_name;
 }
+
+wchar_t *mp_w32_displayconfig_get_friendly_name_from_device(
+    const wchar_t *device)
+{
+    void *ctx = talloc_new(NULL);
+    wchar_t *monitor_friendly_device_name = NULL;
+
+    // Get the current display configuration
+    UINT32 num_paths;
+    DISPLAYCONFIG_PATH_INFO *paths;
+    UINT32 num_modes;
+    DISPLAYCONFIG_MODE_INFO *modes;
+    if (get_config(ctx, &num_paths, &paths, &num_modes, &modes))
+        goto end;
+
+    // Get the path for the specified monitor
+    DISPLAYCONFIG_PATH_INFO *path;
+    if (!(path = get_path(num_paths, paths, device)))
+        goto end;
+
+    // Get the friendly name from the path
+    DISPLAYCONFIG_TARGET_DEVICE_NAME target = {
+        .header = {
+            .size = sizeof target,
+            .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME,
+            .adapterId = path->targetInfo.adapterId,
+            .id = path->targetInfo.id,
+        }
+    };
+    if (DisplayConfigGetDeviceInfo(&target.header) != ERROR_SUCCESS)
+        goto end;
+
+    if (!target.flags.friendlyNameFromEdid)
+        goto end;
+
+    monitor_friendly_device_name = talloc_memdup(NULL,
+                                                 target.monitorFriendlyDeviceName,
+                                                 sizeof(target.monitorFriendlyDeviceName));
+
+end:
+    talloc_free(ctx);
+    return monitor_friendly_device_name;
+}

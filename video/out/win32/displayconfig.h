@@ -30,4 +30,10 @@ double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device);
 wchar_t *mp_w32_displayconfig_get_device_from_friendly_name(
     const wchar_t *monitor_friendly_device_name);
 
+// Given a GDI monitor device name, get a friendly monitor device name
+// using the DisplayConfig API. Returns NULL on failure.
+// The caller is responsible for releasing the result with talloc_free.
+wchar_t *mp_w32_displayconfig_get_friendly_name_from_device(
+    const wchar_t *device);
+
 #endif
