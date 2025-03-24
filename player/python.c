@@ -103,7 +103,8 @@ static int run_client(PyClientCtx *cctx)
     PyObject *defaults = load_local_pystrings(builtin_files[0][1], "mpvclient");
 
     if (defaults == NULL) {
-        MP_ERR(cctx, "failed to load defaults (AKA. mpvclient) module.\n");
+        PyErr_PrintEx(0);
+        MP_ERR(cctx, "Failed to load defaults (AKA. mpvclient) module.\n");
         end_interpreter(cctx);
         return -1;
     }
