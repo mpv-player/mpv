@@ -7,6 +7,7 @@ import mpv as _mpv  # type: ignore
 
 import sys
 import traceback
+import typing
 from io import StringIO
 from pathlib import Path
 
@@ -39,6 +40,118 @@ class State:
 state = State()
 
 
+class Options:
+
+    def typeconv(self, desttypeval, val):
+        if isinstance(desttypeval, bool):
+            if val == "yes":
+                val = True
+            elif val == "no":
+                val = False
+            else:
+                mpv.error("Error: Can't convert '" + val + "' to boolean!")
+                val = None
+        elif isinstance(desttypeval, int):
+            try:
+                val = int(val)
+            except ValueError:
+                mpv.error("Error: Can't convert '" + val + "' to number!")
+                val = None
+        return val
+
+    def read_options(self, options: dict, identifier: str,
+        on_update: typing.Callable[typing.Any, typing.Any]
+    ):
+        option_types = options.copy()
+
+        if identifier is None:
+            identifier = mpv.name
+
+        mpv.debug(f"reading options for {identifier}")
+
+        # read config file
+        conffilename = f"script-opts/{identifier}.conf"
+        conffile = mpv.find_config_file(conffilename)
+        if conffile is None:
+            mpv.debug(f"{conffilename} not found.")
+            conffilename = f"lua-settings/{identifier}.conf"
+            conffile = mpv.find_config_file(conffilename)
+            if conffile:
+                mpv.warn("lua-settings/ is deprecated, use directory script-opts/")
+
+        f = conffile and open(conffile, "r")
+        if not f:
+            mpv.debug(f"{conffilename} not found.")
+        else:
+            # config exists, read values
+            mpv.info("Opened config file " + conffilename + ".")
+            linecounter = 1
+            for line in f.lines():
+                if line[-1:] == "\r":
+                    line = line[:-1]
+
+                if not line.startswith("#"):
+                    eqpos = line.find("=")
+                    if eqpos != -1:
+                        key = line[:eqpos].strip()
+                        val = line[eqpos+1:].strip()
+
+                        if (desttypeval := option_types.get(key, None)) is None:
+                            mpv.warn(f"{conffilename}:{linecounter} unknown key '{key}', ignoring")
+                        else:
+                            convval = self.typeconv(desttypeval, val)
+                            if convval is None:
+                                mpv.error(conffilename+":"+linecounter+
+                                    " error converting value '" + val +
+                                    "' for key '" + key + "'")
+                            else:
+                                options[key] = convval
+                linecounter += 1
+            f.close()
+
+        # parse command-line options
+        prefix = identifier + "-"
+        # command line options are always applied on top of these
+        conf_and_default_opts = options.copy()
+
+        def parse_opts(full, opt):
+            for key, val in full.items():
+                if key.find(prefix) == 0:
+                    key = key[len(prefix):]
+
+                    # match found values with defaults
+                    if (desttypeval := option_types.get(key)) is None:
+                        mpv.warn("script-opts: unknown key " + key + ", ignoring")
+                    else:
+                        convval = typeconv(desttypeval, val)
+                        if convval is None:
+                            mpv.error("script-opts: error converting value '" + val +
+                                "' for key '" + key + "'")
+                        else:
+                            opt[key] = convval
+
+        # initial
+        parse_opts(mpv.get_property_native("options/script-opts"), options)
+
+        # runtime updates
+        if on_update:
+            last_opts = options.copy()
+
+            @mpv.observe_property("options/script-opts", mpv.MPV_FORMAT_NODE)
+            def on_option_change(val):
+                new_opts = conf_and_default_opts.copy()
+                parse_opts(val, new_opts)
+                changelist = {}
+                for k, v in new_opts.items():
+                    if last_opts[k] != v:
+                        # copy to user
+                        options[k] = v
+                        changelist[k] = True
+                last_opts = new_opts
+                if changelist.keys():
+                    on_update(changelist)
+
+
 class Mpv:
     """
 
@@ -65,6 +178,8 @@ class Mpv:
     MPV_EVENT_HOOK = 25
 
     observe_properties: dict = {}
+
+    options = Options()
 
     def get_opt(self, key, default):
         return self.get_property_node("options/script-opts").get(key, default)
