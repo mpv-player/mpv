@@ -1455,8 +1455,9 @@ if features['vaapi']
                      'video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
-features += {'dmabuf-interop-gl': features['egl'] and features['drm']}
+features += {'dmabuf-interop-gl': features['egl'] and drm.found()}
 if features['dmabuf-interop-gl']
+    dependencies += drm.partial_dependency(includes: true, compile_args: true)
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
 
