@@ -1051,8 +1051,8 @@ if features['wayland'] and features['memfd-create']
 endif
 
 dmabuf_wayland = get_option('dmabuf-wayland').require(
-    features['drm'] and features['memfd-create'] and features['wayland'],
-    error_message: 'drm, memfd-create or wayland was not found!',
+    features['memfd-create'] and features['wayland'],
+    error_message: 'memfd-create or wayland was not found!',
 )
 features += {'dmabuf-wayland': dmabuf_wayland.allowed()}
 if features['dmabuf-wayland']
