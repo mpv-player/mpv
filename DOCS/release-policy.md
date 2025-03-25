@@ -1,7 +1,7 @@
 Release Policy
 ==============
 
-Once or twice a year, a new release is cut off of the master branch and is
+Once or twice a year, a new release is cut off of the master branch and
 assigned a 0.X.Y version number, where X is incremented each time a release
 contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
@@ -61,58 +61,54 @@ Here is a template that can be used for writing the `RELEASE_NOTES` file:
 Release 0.X.Y
 =============
 
-This release requires FFmpeg <ver> or newer.
+We are excited to announce the release of mpv 0.X.Y.
 
-Features
---------
+Key highlights:
 
-New
-~~~
+* List of notable stuff
+
+This release requires FFmpeg <ver> or newer and libplacebo <ver> or newer.
+
+# Features
+
+## New
 
 - List of new features
 
 
-Changed
-~~~~~~~
+## Changed
 
 - List of changed features
 
 
-Removed
-~~~~~~~
+## Removed
 
 - List of removed features
 
 
-Options and Commands
---------------------
+# Options and Commands
 
-Added
-~~~~~
+## Added
 
 - List of added options and commands
 
 
-Changed
-~~~~~~~
+## Changed
 
 - List of changed options and commands
 
 
-Deprecated
-~~~~~~~~~~
+## Deprecated
 
 - List of deprecated options and commands
 
 
-Removed
-~~~~~~~
+## Removed
 
 - List of removed options and commands
 
 
-Fixes and Minor Enhancements
-----------------------------
+# Fixes and Minor Enhancements
 
 - List of fixes and minor enhancements
 
@@ -121,8 +117,9 @@ This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log <start>..<end>`
-in the git repository.
+A complete changelog can be seen by running `git log start..end`
+in the git repository or by visiting
+<https://github.com/mpv-player/mpv/compare/start...end>.
 ```
 
 When creating a new point release its changes should be added on top of the
@@ -131,7 +128,9 @@ the current 0.X branch will be included. This way the `RELEASE_NOTES` file
 can be used by distributors as changelog for point releases too.
 
 The changelog of lists all changes since the last release, including those
-that have been backported to patch releases already.
+that have been backported to patch releases already. Except for the
+"Key highlights" section they are ordered chronologically with older commits
+at the top.
 
 Some additional advice:
 - Especially for features, try to reword the messages so that the user-visible
