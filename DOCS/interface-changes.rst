@@ -30,7 +30,141 @@ Interface changes
 
 ::
 
+ --- mpv 0.41.0 ---
  --- mpv 0.40.0 ---
+    - undeprecate list option suffixes that work with multiple items
+    - add `-del` to string list and keyvalue list options
+    - add `-clr` to keyvalue list options
+    - undeprecate `--gamma-factor`
+    - the `path` and `track-list/N/external-filename` properties now always
+      return a full, absolute path
+    - rename `--vd-lavc-software-fallback` to `--hwdec-software-fallback`
+    - rename `--sub-ass-line-spacing` to `--sub-line-spacing`
+    - rename `--sub-ass-shaper` to `--sub-shaper`
+    - rename `--sub-ass-hinting` to `--sub-hinting`
+    - rename `--load-osd-console` to `--load-console`
+    - remove `stats-term_width_limit` script-opt
+    - add `stats-term_clip` script-opt
+    - remove `stats-term_height_limit` script-opt
+    - remove `player` argument form `--media-controls`, it's handled internally
+      now.
+    - make `script-binding` command scalable; add `nonscalable` command prefix
+      to restore the old behavior
+    - deprecate `osc-message` script message in favor of `show-text` command
+    - deprecate `osc-chapterlist` script message in favor of `show-text
+      ${chapter-list}`
+    - deprecate `osc-playlist` script message in favor of `show-text
+      ${playlist}`
+    - deprecate `osc-tracklist` script message in favor of `show-text ${track-
+      list}`
+    - add `visibility_modes` script-opt to osc
+    - deprecate `--wayland-disable-vsync`
+    - add `--wayland-internal-vsync` as a replacement for `--wayland-disable-
+      vsync`
+    - deprecate `--cdda-span-a` and `--cdda-span-b`
+    - commands.lua is split out of console.lua. commands.lua runs and completes
+      commands and adds mpv's log entries to the console's log, while
+      console.lua handles the UI for other scripts
+    - add `--load-commands` option
+    - `script-binding console/enable` becomes `script-binding commands/open`,
+      though the console one is kept as an alias
+    - `script-message-to console type` becomes `script-message-to commands
+      type`, though the console one is kept as an alias. This also now
+      automatically closes the console after running the command.
+    - change the underlying type of the `aspect`, `par`, and `sar` sub-
+      properties to double from float
+    - add `--video-aspect-method=ignore`
+    - change `--video-aspect-override=no` to respect `--video-aspect-method`
+      option
+    - deprecate setting `--video-aspect-override` to `0` and `-1`
+    - change several OSC mouse bindings to select.lua functions
+    - add script-opts to configure what OSC buttons do when clicked
+    - remove `osc-playlist_osd` script-opt and behave as if it was off by
+      default; `playlist_osd=yes` can be replicated with `osc-
+      playlist_prev_mbtn_left_command=playlist-prev; show-text ${playlist} 3000`
+      and `osc-playlist_next_mbtn_left_command=playlist-next; show-text
+      ${playlist} 3000`
+    - remove `osc-chapters_osd` script-opt and behave as if it was off by
+      default; `chapter_osd=yes` can be replicated with `osc-
+      chapter_prev_mbtn_left_command=no-osd add chapter -1; show-text ${chapter-
+      list} 3000` and `osc-chapter_next_mbtn_left_command=no-osd add chapter 1;
+      show-text ${chapter-list} 3000`
+    - add script-opts to define custom buttons
+    - change `--prefetch-playlist`'s default to `yes`
+    - change `--osd-back-color` and `--sub-back-color` defaults to #AF000000
+    - change `--geometry` so that it no longer unconditionally moves the window
+      on platforms where that is possible. Use `--force-window-position` or add
+      `+50%+50%` to your geometry command to get the old behavior back.
+    - all options that take filepaths as values are now properly expanded (i.e.
+      ~/ -> /home/$USER)
+    - all commands that take filepaths as arguments are now properly expanded
+      (i.e. ~/ -> /home/$USER)
+    - add `ytdl_hook-include` script-opt
+    - add `video-frame-info/gop-timecode`, `video-frame-info/smpte-timecode` and
+      `video-frame-info/estimated-smpte-timecode`
+    - add `term-clip-cc`
+    - add `sub-ass-prune-delay` option to control libass automatic pruning of
+      past
+    - events
+    - add `slimbottombar` and `slimtopbar` OSC layouts optimized for viewing
+      images
+    - add `osc-fadein` script-opt
+    - add `mpv://` protocol
+    - add `metadata` sub-property for `track-list`
+    - add `keep_open` flag to `mp.input.get()` and `mp.input.select()`
+    - `mp.input.get()` now closes automatically on submit, pass `keep_open =
+      true` to restore the old behavior
+    - add `autoselect_completion` flag to `mp.input.get()`
+    - add `history_path` key to `mp.input.get()`
+    - add `hearing-impaired`, `visual-impaired` and `attached-picture` flags to
+      track add command
+    - add `format` argument to `screenshot-raw` command
+    - add `display-page-n-toggle` script bindings to stats.lua, where n is a
+      page number
+    - add `demuxer-mkv-crop-compat` option
+    - add `current-watch-later-dir` property
+    - add `console-scale_with_window` script-opt
+    - add `console-margin-x` and `console-margin-y` script-opts
+    - add `console-background_alpha` `console-menu_outline_size` `console-
+      menu_outline_color` `console-corner_radius` `console-selected_color` and
+      `console-selected_back_color` script-opts
+    - add `--video-recenter` option
+    - add `nvidia-true-hdr` mode to vf_d3d11vpp
+    - add `--sub-scale-signs` to allow `--sub-scale` to also scale events
+      detected to be signs by libass
+    - add `--script-opt` alias for `--script-opts-append`
+    - add `--save-watch-history` and `--watch-history-path` options
+    - add `--osd-selected-color` and `--osd-selected-outline-color` options
+    - add `--osd-bar-marker-scale` and `--osd-bar-marker-min-size` options
+    - add `--osd-bar-marker-style` option
+    - add `--input-ime` to enable or disable the IME on supported VOs (Windows,
+      Wayland)
+    - add `--clipboard-monitor` option
+    - add `clipboard` property
+    - add `current-clipboard-backend` property
+    - add `--clipboard-backends` option
+    - add `--archive-exts`
+    - add `archive` to `--directory-filter-types`' default
+    - add `--playlist-exts`
+    - add `playlist` to `--directory-filter-types`' default
+    - add --audio-exclusive option support for ao=audiounit and make non-
+      exclusive the new default
+    - `sub-blur` is now applied by `sub-ass-override=force` with new enough
+      libass
+    - `stats-font_size`, `stats-border_size`, `stats-shadow_x_offset`, `stats-
+      shadow_y_offset` and `stats-plot_bg_border_width` script-opt values result
+      in 2.5 times smaller sizes in order to have the same sizes as the values
+      of equivalent OSD options like `--osd-font-size`. If you customized these
+      sizes, multiply them by 2.5 to get the previous sizes.
+    - ``glsl-shader-opts`` now has predefined parameters that can be used. See
+      the documentation for available values.
+    - `--hwdec=auto` now behaves like `--hwdec=auto-safe`; use `--hwdec=auto-
+      unsafe` to get the old behavior back
+    - Change auto profiles hook priority from 50 to 5
+    - add optional `frames` and `flags` arguments to `frame-step` command
+      controlling the direction and amount of frames mpv steps through
+    - add optional `mute` flag to `frame-step` command which mutes the player
+      during the duration of the frame step
  --- mpv 0.39.0 ---
     - turn `--cover-art-whitelist` into a list option
     - reserve `user-data/osc` and `user-data/mpv` sub-paths for internal use

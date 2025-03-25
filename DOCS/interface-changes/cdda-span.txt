@@ -1,1 +1,0 @@
-deprecate `--cdda-span-a` and `--cdda-span-b`

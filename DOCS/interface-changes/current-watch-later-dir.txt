@@ -1,1 +1,0 @@
-add `current-watch-later-dir` property

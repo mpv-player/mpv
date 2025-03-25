@@ -1,1 +1,0 @@
-make `script-binding` command scalable; add `nonscalable` command prefix to restore the old behavior

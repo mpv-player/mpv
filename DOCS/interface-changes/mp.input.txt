@@ -1,4 +1,0 @@
-add `keep_open` flag to `mp.input.get()` and `mp.input.select()`
-`mp.input.get()` now closes automatically on submit, pass `keep_open = true` to restore the old behavior
-add `autoselect_completion` flag to `mp.input.get()`
-add `history_path` key to `mp.input.get()`

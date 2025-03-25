@@ -1,5 +1,0 @@
-deprecate `osc-message` script message in favor of `show-text` command
-deprecate `osc-chapterlist` script message in favor of `show-text ${chapter-list}`
-deprecate `osc-playlist` script message in favor of `show-text ${playlist}`
-deprecate `osc-tracklist` script message in favor of `show-text ${track-list}`
-add `visibility_modes` script-opt to osc

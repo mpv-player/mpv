@@ -1,1 +1,0 @@
-change `--osd-back-color` and `--sub-back-color` defaults to #AF000000

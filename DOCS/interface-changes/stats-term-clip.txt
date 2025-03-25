@@ -1,3 +1,0 @@
-remove `stats-term_width_limit` script-opt
-add `stats-term_clip` script-opt
-remove `stats-term_height_limit` script-opt

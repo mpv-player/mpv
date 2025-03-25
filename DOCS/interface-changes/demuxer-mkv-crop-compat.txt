@@ -1,1 +1,0 @@
-add `demuxer-mkv-crop-compat` option

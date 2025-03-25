@@ -1,2 +1,0 @@
-all options that take filepaths as values are now properly expanded (i.e. ~/ -> /home/$USER)
-all commands that take filepaths as arguments are now properly expanded (i.e. ~/ -> /home/$USER)

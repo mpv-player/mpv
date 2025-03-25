@@ -1,2 +1,0 @@
-- add optional `frames` and `flags` arguments to `frame-step` command controlling the direction and amount of frames mpv steps through
-- add optional `mute` flag to `frame-step` command which mutes the player during the duration of the frame step

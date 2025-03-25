@@ -1,4 +1,0 @@
-add `--clipboard-monitor` option
-add `clipboard` property
-add `current-clipboard-backend` property
-add `--clipboard-backends` option

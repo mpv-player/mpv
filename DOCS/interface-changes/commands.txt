@@ -1,4 +1,0 @@
-commands.lua is split out of console.lua. commands.lua runs and completes commands and adds mpv's log entries to the console's log, while console.lua handles the UI for other scripts
-add `--load-commands` option
-`script-binding console/enable` becomes `script-binding commands/open`, though the console one is kept as an alias
-`script-message-to console type` becomes `script-message-to commands type`, though the console one is kept as an alias. This also now automatically closes the console after running the command.

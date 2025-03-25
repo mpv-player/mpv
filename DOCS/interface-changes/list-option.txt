@@ -1,3 +1,0 @@
-undeprecate list option suffixes that work with multiple items
-add `-del` to string list and keyvalue list options
-add `-clr` to keyvalue list options

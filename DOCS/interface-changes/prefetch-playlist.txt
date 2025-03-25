@@ -1,1 +1,0 @@
-change `--prefetch-playlist`'s default to `yes`
