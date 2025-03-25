@@ -17,7 +17,7 @@
 
 #include "dmabuf_interop.h"
 
-#include <drm_fourcc.h>
+#include <libdrm/drm_fourcc.h>
 #include <EGL/egl.h>
 #include "video/out/opengl/ra_gl.h"
 

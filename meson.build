@@ -934,6 +934,7 @@ drm = dependency('libdrm', version: '>= 2.4.105', required: get_option('drm'))
 libdisplay_info = dependency('libdisplay-info', version: '>= 0.1.1', required: get_option('drm'))
 features += {'drm': drm.found() and libdisplay_info.found() and
              (features['vt.h'] or features['consio.h'] or features['wsdisplay-usl-io.h'])}
+features += {'drm-fourcc': features['drm'] or cc.has_header('libdrm/drm_fourcc.h')}
 if features['drm']
     dependencies += [drm, libdisplay_info]
     sources += files('video/drmprime.c',
@@ -1455,7 +1456,7 @@ if features['vaapi']
                      'video/out/hwdec/dmabuf_interop_pl.c')
 endif
 
-features += {'dmabuf-interop-gl': features['egl'] and features['drm']}
+features += {'dmabuf-interop-gl': features['egl'] and features['drm-fourcc']}
 if features['dmabuf-interop-gl']
     sources += files('video/out/hwdec/dmabuf_interop_gl.c')
 endif
