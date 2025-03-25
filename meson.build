@@ -1820,7 +1820,7 @@ if get_option('cplayer')
 
     if win32 and get_option('win32-subsystem') != 'console'
         wrapper_sources= 'osdep/win32-console-wrapper.c'
-        executable('mpv', wrapper_sources, c_args: ['-municode', '-fno-asynchronous-unwind-tables'],
+        executable('mpv', wrapper_sources, c_args: ['-municode', '-fno-asynchronous-unwind-tables', '-fno-stack-protector'],
                    link_args: ['-municode', '-nostartfiles', '-nodefaultlibs'],
                    override_options: ['b_sanitize=none'],
                    name_suffix: 'com', install: true)
