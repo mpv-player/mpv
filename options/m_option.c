@@ -1572,15 +1572,15 @@ static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 static char *print_str_list(const m_option_t *opt, const void *src)
 {
     char **lst = NULL;
-    char *ret = NULL;
+    char *ret = talloc_strdup(NULL, "");
     const char sep = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
 
     if (!(src && VAL(src)))
-        return talloc_strdup(NULL, "");
+        return ret;
     lst = VAL(src);
 
     for (int i = 0; lst[i]; i++) {
-        if (ret)
+        if (i > 0)
             ret = talloc_strndup_append_buffer(ret, &sep, 1);
         ret = talloc_strdup_append_buffer(ret, lst[i]);
     }
