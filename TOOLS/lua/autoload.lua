@@ -412,4 +412,10 @@ local function find_and_add_entries()
     end
 end
 
+local function enable()
+    o.disabled = false
+    find_and_add_entries()
+end
+
 mp.register_event("start-file", find_and_add_entries)
+mp.add_key_binding(nil, "enable", enable)
