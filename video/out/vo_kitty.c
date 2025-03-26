@@ -128,26 +128,25 @@ static inline void write_bstr_passthrough(struct priv *p, bstr bs)
     write_bstr(p->dcs_suffix);
 }
 
-static inline void bstr_xappend_passthrough(struct priv *p, bstr *bs,
-                                            bstr append)
+static inline void append_passthrough(struct priv *p, bstr *bs, bstr append)
 {
-    bstr_xappend(NULL, bs, p->dcs_prefix);
-    bstr_xappend(NULL, bs, append);
-    bstr_xappend(NULL, bs, p->dcs_suffix);
+    bstr_xappend(p, bs, p->dcs_prefix);
+    bstr_xappend(p, bs, append);
+    bstr_xappend(p, bs, p->dcs_suffix);
 }
 
-static inline void bstr_xappend_asprintf_passthrough(struct priv *p, bstr *bs,
+PRINTF_ATTRIBUTE(3, 4)
+static inline void append_asprintf_passthrough(struct priv *p, bstr *bs,
                                                      const char *fmt, ...)
 {
-    bstr_xappend(NULL, bs, p->dcs_prefix);
-
+    bstr_xappend(p, bs, p->dcs_prefix);
 
     va_list ap;
     va_start(ap, fmt);
-    bstr_xappend_vasprintf(NULL, bs, fmt, ap);
+    bstr_xappend_vasprintf(p, bs, fmt, ap);
     va_end(ap);
 
-    bstr_xappend(NULL, bs, p->dcs_suffix);
+    bstr_xappend(p, bs, p->dcs_suffix);
 }
 
 static void close_shm(struct priv *p)
@@ -170,7 +169,6 @@ static void free_bufs(struct vo* vo)
 
     talloc_free(p->frame);
     talloc_free(p->output);
-    talloc_free(p->cmd.start);
 
     if (p->opts.use_shm) {
         close_shm(p);
@@ -251,8 +249,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
-
-    p->cmd.start = talloc_zero(NULL, char);
 
     if (!p->opts.use_shm) {
         p->buffer = talloc_array(NULL, uint8_t, p->buffer_size);
@@ -350,20 +346,19 @@ static void flip_page(struct vo *vo)
     p->cmd.len = 0;
 
     // Start with ESC to position the cursor
-    bstr_xappend_asprintf_passthrough(p, &p->cmd, TERM_ESC_GOTO_YX,
-                                      p->top, p->left);
+    append_asprintf_passthrough(p, &p->cmd, TERM_ESC_GOTO_YX, p->top, p->left);
 
     if (p->opts.use_shm) {
-        bstr_xappend_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
-                                          p->width, p->height, p->shm_path_b64);
-        bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
+        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
+                                    p->width, p->height, p->shm_path_b64);
+        append_passthrough(p, &p->cmd, KITTY_ESC_END);
     } else {
         if (!p->output) {
             return;
         }
 
-        bstr_xappend_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
-                                          p->width, p->height);
+        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
+                                    p->width, p->height);
 
         int output_size = p->output_size - 1;
         int offset = 0;
@@ -372,13 +367,12 @@ static void flip_page(struct vo *vo)
             int chunk = MPMIN(4096, output_size - offset);
 
             if (offset > 0)
-                bstr_xappend_asprintf_passthrough(p, &p->cmd,
-                                                  KITTY_ESC_CONTINUE,
-                                                  offset + chunk < output_size);
+                append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE,
+                                            offset + chunk < output_size);
 
             // Append at max chunk bytes
             bstr_xappend(p, &p->cmd, (bstr){p->output + offset, chunk});
-            bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
+            append_passthrough(p, &p->cmd, KITTY_ESC_END);
             offset += chunk;
         }
 
@@ -387,9 +381,8 @@ static void flip_page(struct vo *vo)
         // This ensures that an escape sequence with `m=0` is sent and
         // terminals stay happy
         if (offset == 0) {
-            bstr_xappend_asprintf_passthrough(p, &p->cmd,
-                                              KITTY_ESC_CONTINUE, 0);
-            bstr_xappend_passthrough(p, &p->cmd, KITTY_ESC_END);
+            append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE, 0);
+            append_passthrough(p, &p->cmd, KITTY_ESC_END);
         }
     }
 
