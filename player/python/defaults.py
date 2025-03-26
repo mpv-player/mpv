@@ -60,7 +60,7 @@ class Options:
                 val = None
         return val
 
-    def read_options(self, options: dict, identifier: str,
+    def read_options(self, options: dict, identifier: typing.Optional[str] = None,
         on_update: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
     ):
         option_types = options.copy()
@@ -180,12 +180,36 @@ class Mpv:
     observe_properties: dict = {}
 
     options = Options()
-    threads: list = []
 
-    def add_timeout(self, sec, func, *args, **kwargs):
+    enabled_events: list = []
+    event_handlers: dict = {}
+
+    def register_event(self, name):
+
+        def decorate(fn):
+            self.request_event(name)
+            l = self.event_handlers.get(name, [])
+            l.append(fn)
+            self.event_handlers[name] = l
+
+        return decorate
+
+    threads: dict = {}
+
+    @property
+    def timers(self):
+        return self.threads
+
+    def add_timeout(self, sec, func, *args, name=None, **kwargs):
         t = Timer(sec, func, args=args, kwargs=kwargs)
         t.start()
-        self.threads.append(t)
+        if name is None:
+            self.next_bid += 1
+            name = "timer" + str(self.next_bid)
+        self.threads[name] = t;
+
+    def clear_timer(self, name):
+        self.threads.pop(name).cancel()
 
     def get_opt(self, key, default):
         return self.get_property_node("options/script-opts").get(key, default)
@@ -259,6 +283,16 @@ class Mpv:
                     registry.red_flags.append(cb_name)
                 self.debug(f"invoked {cb_name}")
 
+        elif event_id in self.enabled_events:
+            for cb in self.event_handlers.get(event_id, []):
+                try:
+                    cb()
+                except Exception:
+                    try:
+                        self.error(read_exception(sys.exc_info()))
+                    except Exception:
+                        pass
+
     def command_string(self, name):
         return _mpv.command_string(self, name)
 
@@ -274,8 +308,13 @@ class Mpv:
     def find_config_file(self, filename):
         return _mpv.find_config_file(self, filename)
 
-    def request_event(self, name, enable):
-        return _mpv.request_event(self, name, enable)
+    def request_event(self, name):
+        if name not in self.enabled_events:
+            try:
+                self.debug(f"Requesting event {name} (enable)")
+                return _mpv.request_event(self, name, 1)  # _mpv.request_event(mpv, event, enable)
+            finally:
+                self.enabled_events.append(name)
 
     def enable_messages(self, level):
         return _mpv.enable_messages(self, level)
@@ -453,7 +492,7 @@ class Mpv:
     def enable_client_message(self):
         if registry.binds:
             self.debug("enabling client message")
-            if self.request_event(self.MPV_EVENT_CLIENT_MESSAGE, 1):
+            if self.request_event(self.MPV_EVENT_CLIENT_MESSAGE):
                 self.debug("client-message enabled")
             else:
                 self.debug("failed to enable client-message")
@@ -475,7 +514,8 @@ class Mpv:
             condition has been satisfied.
         """
         event_id, data = arg
-        self.debug(f"event_id: {event_id} data: {data}\n")
+        if event_id != self.MPV_EVENT_NONE:
+            self.debug(f"event_id: {event_id} data: {data}\n")
         if event_id == self.MPV_EVENT_SHUTDOWN:
             raise ValueError("MPV_EVENT_SHUTDOWN must be handled in lower level API.")
         elif event_id == self.MPV_EVENT_NONE:
@@ -497,10 +537,10 @@ class Mpv:
         self.clean_up()
 
     def clean_up(self):
-        self.clear_timeout()
+        self.clear_timers()
 
-    def clear_timeout(self):
-        while self.threads:
-            self.threads.pop(0).cancel()
+    def clear_timers(self):
+        for name in self.threads.keys():
+            self.clear_timer(name)
 
 mpv = Mpv()

@@ -271,7 +271,7 @@ py_mpv_find_config_file(PyObject *self, PyObject *args)
         return ret;
     } else {
         talloc_free(path);
-        PyErr_SetString(PyExc_FileNotFoundError, "Not found");
+        // PyErr_SetString(PyExc_FileNotFoundError, "Not found");
         Py_RETURN_NONE;
     }
 }
