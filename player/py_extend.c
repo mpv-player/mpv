@@ -676,7 +676,12 @@ static PyObject *py_mpv_run_event_loop(PyObject *self, PyObject *args)
     Py_DECREF(cctx);
 
     while (true) {
-        mpv_event *event = mpv_wait_event(client, -1);
+        // mpv_event *event = mpv_wait_event(client, -1);
+        /**
+         * Do NOT put -1 for it's an io blocking call
+         * let other potential threads survive
+         */
+        mpv_event *event = mpv_wait_event(client, 0.05);
         if (event->event_id == MPV_EVENT_SHUTDOWN) {
             break;
         } else {
