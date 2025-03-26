@@ -1,0 +1,1 @@
+add `--vo-kitty-auto-multiplexer-passthrough=<yes|no>`
