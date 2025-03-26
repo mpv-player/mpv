@@ -1067,9 +1067,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     }
 
     bool toggle_fs = w32->current_fs != new_fs;
-    w32->opts->fullscreen = w32->current_fs = new_fs;
-    m_config_cache_write_opt(w32->opts_cache,
-                             &w32->opts->fullscreen);
+    w32->current_fs = new_fs;
 
     if (toggle_fs && (!w32->opts->window_maximized || w32->unmaximize)) {
         if (w32->current_fs) {
