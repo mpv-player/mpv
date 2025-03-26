@@ -8,6 +8,7 @@ import mpv as _mpv  # type: ignore
 import sys
 import traceback
 import typing
+from threading import Timer
 from io import StringIO
 from pathlib import Path
 
@@ -60,7 +61,7 @@ class Options:
         return val
 
     def read_options(self, options: dict, identifier: str,
-        on_update: typing.Callable[typing.Any, typing.Any]
+        on_update: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
     ):
         option_types = options.copy()
 
@@ -79,14 +80,14 @@ class Options:
             if conffile:
                 mpv.warn("lua-settings/ is deprecated, use directory script-opts/")
 
-        f = conffile and open(conffile, "r")
+        f = conffile and open(conffile)
         if not f:
             mpv.debug(f"{conffilename} not found.")
         else:
             # config exists, read values
             mpv.info("Opened config file " + conffilename + ".")
             linecounter = 1
-            for line in f.lines():
+            for line in f.readlines():
                 if line[-1:] == "\r":
                     line = line[:-1]
 
@@ -101,7 +102,7 @@ class Options:
                         else:
                             convval = self.typeconv(desttypeval, val)
                             if convval is None:
-                                mpv.error(conffilename+":"+linecounter+
+                                mpv.error(conffilename+":"+str(linecounter)+
                                     " error converting value '" + val +
                                     "' for key '" + key + "'")
                             else:
@@ -123,7 +124,7 @@ class Options:
                     if (desttypeval := option_types.get(key)) is None:
                         mpv.warn("script-opts: unknown key " + key + ", ignoring")
                     else:
-                        convval = typeconv(desttypeval, val)
+                        convval = self.typeconv(desttypeval, val)
                         if convval is None:
                             mpv.error("script-opts: error converting value '" + val +
                                 "' for key '" + key + "'")
@@ -131,14 +132,14 @@ class Options:
                             opt[key] = convval
 
         # initial
-        parse_opts(mpv.get_property_native("options/script-opts"), options)
+        parse_opts(mpv.get_property_node("options/script-opts"), options)
 
         # runtime updates
         if on_update:
-            last_opts = options.copy()
 
             @mpv.observe_property("options/script-opts", mpv.MPV_FORMAT_NODE)
             def on_option_change(val):
+                last_opts = options.copy()
                 new_opts = conf_and_default_opts.copy()
                 parse_opts(val, new_opts)
                 changelist = {}
@@ -147,8 +148,7 @@ class Options:
                         # copy to user
                         options[k] = v
                         changelist[k] = True
-                last_opts = new_opts
-                if changelist.keys():
+                if changelist.keys() and on_update is not None:
                     on_update(changelist)
 
 
@@ -180,6 +180,12 @@ class Mpv:
     observe_properties: dict = {}
 
     options = Options()
+    threads: list = []
+
+    def add_timeout(self, sec, func, *args, **kwargs):
+        t = Timer(sec, func, args=args, kwargs=kwargs)
+        t.start()
+        self.threads.append(t)
 
     def get_opt(self, key, default):
         return self.get_property_node("options/script-opts").get(key, default)
@@ -488,9 +494,13 @@ class Mpv:
         self.enable_client_message()
         self.debug(f"Running {self.name}")
         _mpv.run_event_loop(self)
+        self.clean_up()
 
-    def do_clean_up(self):
-        raise NotImplementedError
+    def clean_up(self):
+        self.clear_timeout()
 
+    def clear_timeout(self):
+        while self.threads:
+            self.threads.pop(0).cancel()
 
 mpv = Mpv()
