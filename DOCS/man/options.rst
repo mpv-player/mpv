@@ -1042,6 +1042,9 @@ Program Behavior
         - ``--ytdl-raw-options=proxy=[http://127.0.0.1:3128]``
         - ``--ytdl-raw-options-append=proxy=http://127.0.0.1:3128``
 
+``--ytdl-extract-chapters=<yes|no>``
+    Enable chapter extracting from youtube-dl video description (default: yes).
+
 ``--js-memory-report=<yes|no>``
     Enable memory reporting for javascript scripts in the stats overlay.
     This is disabled by default because it has an overhead and increases
