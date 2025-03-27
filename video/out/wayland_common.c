@@ -3504,8 +3504,8 @@ bool vo_wayland_reconfig(struct vo *vo)
 
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha)
 {
-    const int32_t width = mp_rect_w(wl->geometry);
-    const int32_t height = mp_rect_h(wl->geometry);
+    const int32_t width = mp_rect_w(wl->geometry) / wl->scaling_factor;
+    const int32_t height = mp_rect_h(wl->geometry) / wl->scaling_factor;
     if (!alpha) {
         struct wl_region *region = wl_compositor_create_region(wl->compositor);
         wl_region_add(region, 0, 0, width, height);
