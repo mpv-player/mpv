@@ -1,0 +1,1 @@
+add `--ytdl-extract-chapters` option
