@@ -648,7 +648,9 @@ local function render()
     local x, y, alignment, clipping_coordinates
     if selectable_items and not searching_history then
         x = (osd_w - max_item_width) / 2
-        y = osd_h / 2 - (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
+        y = osd_h *
+            (global_margins.t + (1 - global_margins.t - global_margins.b) / 2) -
+            (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
         alignment = 7
         clipping_coordinates = "0,0," .. x + max_item_width .. "," .. osd_h
     else
