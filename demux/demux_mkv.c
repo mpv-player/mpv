@@ -2200,16 +2200,16 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
             // [0x30..0x37] are component tags utilized for
             // non-mobile captioning service ("profile A").
             if (component_tag >= 0x30 && component_tag <= 0x37)
-                lav->profile = FF_PROFILE_ARIB_PROFILE_A;
+                lav->profile = AV_PROFILE_ARIB_PROFILE_A;
             break;
         case 0x0012:
             // component tag 0x87 signifies a mobile/partial reception
             // (1seg) captioning service ("profile C").
             if (component_tag == 0x87)
-                lav->profile = FF_PROFILE_ARIB_PROFILE_C;
+                lav->profile = AV_PROFILE_ARIB_PROFILE_C;
             break;
         }
-        if (lav->profile == FF_PROFILE_UNKNOWN)
+        if (lav->profile == AV_PROFILE_UNKNOWN)
             MP_WARN(demuxer, "ARIB caption profile %02x / %04x not supported.\n",
                     component_tag, data_component_id);
     }
