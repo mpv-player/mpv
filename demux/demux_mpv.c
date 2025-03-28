@@ -30,6 +30,7 @@ static int open_mpv(struct demuxer *demuxer, enum demux_check check)
         return -1;
 
     demuxer->playlist = talloc_zero(demuxer, struct playlist);
+    mp_url_unescape_inplace(s->path);
     playlist_append_file(demuxer->playlist, s->path);
     playlist_set_stream_flags(demuxer->playlist, demuxer->stream_origin);
     demuxer->fully_read = true;
