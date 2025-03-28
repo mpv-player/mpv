@@ -210,22 +210,23 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        cc:
-          - "clang"
-        cxx:
-          - "clang++"
         os:
           - "macos-13"
           - "macos-14"
           - "macos-15"
+        arch:
+          - "arm"
+          - "intel"
+        exclude:
+          - arch: "arm"
+            os: "macos-13"
+          - arch: "intel"
+            os: "macos-14"
+          - arch: "intel"
+            os: "macos-15"
         include:
-          - os: "macos-13"
-            arch: "intel"
           - os: "macos-14"
-            arch: "arm"
             xcode: "Xcode_15.2"
-          - os: "macos-15"
-            arch: "arm"
     steps:
       - uses: actions/checkout@v4
 
@@ -254,8 +255,8 @@ jobs:
         run: |
           ./ci/build-macos.sh
         env:
-          CC: "${{ matrix.cc }}"
-          CXX: "${{ matrix.cxx }}"
+          CC: "clang"
+          CXX: "clang++"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
 
       - name: Create App Bundle
