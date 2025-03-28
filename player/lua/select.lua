@@ -620,6 +620,8 @@ mp.add_key_binding(nil, "menu", function ()
         {"Watch later", "script-binding select/select-watch-later", true},
         {"Stats for nerds", "script-binding stats/display-page-1-toggle", true},
         {"File info", "script-binding stats/display-page-5-toggle", mp.get_property("filename")},
+        {"Edit config file", "script-binding utils/edit-config-file", true},
+        {"Edit key bindings", "script-binding utils/edit-input-conf", true},
         {"Help", "script-binding stats/display-page-4-toggle", true},
     }
 
