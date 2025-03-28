@@ -767,8 +767,8 @@ suboptions can be specified in this way.
 
     ::
 
-        # Don't allow new windows to be larger than the screen.
-        autofit-larger=100%x100%
+        # Don't allow new windows to be larger than 90% of the screen size.
+        autofit-larger=90%x90%
         # Enable hardware decoding if available, =yes is implied.
         hwdec
         # Spaces don't have to be escaped.
