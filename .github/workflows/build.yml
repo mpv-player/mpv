@@ -217,6 +217,9 @@ jobs:
         arch:
           - "arm"
           - "intel"
+        ffmpeg:
+          - "binary-ffmpeg"
+          - "ffmpeg+libzvbi"
         exclude:
           - arch: "arm"
             os: "macos-13"
@@ -224,6 +227,8 @@ jobs:
             os: "macos-14"
           - arch: "intel"
             os: "macos-15"
+          - ffmpeg: "ffmpeg+libzvbi"
+            os: "macos-14"
         include:
           - os: "macos-14"
             xcode: "Xcode_15.2"
@@ -244,11 +249,28 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/${{ matrix.xcode }}.app
 
-      - name: Install dependencies
+      - name: Install common dependencies
         run: |
           brew update
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
-            luajit libass ffmpeg meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
+            luajit libass meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
+
+      - name: Install binary ffmpeg
+        if: ${{ matrix.ffmpeg == 'binary-ffmpeg' }}
+        run: |
+          brew install -q ffmpeg
+
+      - name: Compile and install ffmpeg with libzvbi support
+        if: ${{ matrix.ffmpeg != 'binary-ffmpeg' }}
+        run: |
+          brew tap lescanauxdiscrets/tap
+          brew install -q lescanauxdiscrets/tap/zvbi
+          brew tap homebrew-ffmpeg/ffmpeg
+          brew install -q homebrew-ffmpeg/ffmpeg/ffmpeg --with-aribb24 --with-dvd --with-libdvdnav --with-libdvdread \
+            --with-jpeg-xl --with-libaribb24 --with-libbluray --with-libplacebo --with-librist --with-libsoxr \
+            --with-libssh --with-libvidstab --with-libvmaf --with-libzvbi --with-opencore-amr --with-openjpeg \
+            --with-openssl --with-rav1e --with-rubberband --with-speex --with-srt --with-svt-av1 --with-tesseract \
+            --with-webp --with-zeromq --with-zimg
 
       - name: Build with meson
         id: build
@@ -281,7 +303,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mpv-${{ matrix.os }}-${{ matrix.arch }}
+          name: mpv-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ffmpeg != 'binary-ffmpeg' && '-zvbi' || '' }}
           path: mpv.tar.gz
 
   linux:
