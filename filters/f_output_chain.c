@@ -376,6 +376,7 @@ void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
 
     p->stream_info.hwdec_devs = vo ? vo->hwdec_devs : NULL;
     p->stream_info.osd = vo ? vo->osd : NULL;
+    p->stream_info.vflip = vo ? vo->driver->caps & VO_CAP_VFLIP : false;
     p->stream_info.rotate90 = vo ? vo->driver->caps & VO_CAP_ROTATE90 : false;
     p->stream_info.dr_vo = vo;
     p->vo = vo;
@@ -651,6 +652,13 @@ static void create_video_things(struct chain *p)
     if (!f->f)
         abort();
     MP_TARRAY_APPEND(p, p->pre_filters, p->num_pre_filters, f);
+
+    f = create_wrapper_filter(p);
+    f->name = "autovflip";
+    f->f = mp_autovflip_create(f->wrapper);
+    if (!f->f)
+        abort();
+    MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, f);
 
     f = create_wrapper_filter(p);
     f->name = "autorotate";
