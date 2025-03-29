@@ -27,6 +27,11 @@ local function clamp(value, min, max)
 end
 
 mp.add_key_binding(nil, "pan-x", function (t)
+    if t.arg == nil or t.arg == "" then
+        mp.osd_message("Usage: script-binding positioning/pan-x <amount>")
+        return
+    end
+
     if t.event == "up" then
         return
     end
@@ -42,6 +47,11 @@ mp.add_key_binding(nil, "pan-x", function (t)
 end, { complex = true, scalable = true })
 
 mp.add_key_binding(nil, "pan-y", function (t)
+    if t.arg == nil or t.arg == "" then
+        mp.osd_message("Usage: script-binding positioning/pan-y <amount>")
+        return
+    end
+
     if t.event == "up" then
         return
     end
@@ -114,6 +124,11 @@ end, { complex = true })
 
 
 mp.add_key_binding(nil, "cursor-centric-zoom", function (t)
+    if t.arg == nil or t.arg == "" then
+        mp.osd_message("Usage: script-binding positioning/cursor-centric-zoom <amount>")
+        return
+    end
+
     local amount = t.arg * t.scale
 
     local command = (options.suppress_osd and "no-osd " or "") ..
