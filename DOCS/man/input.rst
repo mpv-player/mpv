@@ -2930,6 +2930,11 @@ Property list
     version >= 4 is used (LVDS-1, HDMI-A-1, X11-1, etc.), or the wl_output model
     reported by the geometry event if protocol version < 4 is used.
 
+    ``display-names/friendly``
+        These are the human-friendly names obtained from the monitor EDID
+        (Dell AW3223DW, LC34G55T, etc.). These follow the same order as
+        ``display-names`` (Windows only)
+
 ``display-fps``
     The refresh rate of the current display. Currently, this is the lowest FPS
     of any display covered by the video, as retrieved by the underlying system

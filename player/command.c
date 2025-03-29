@@ -2823,6 +2823,25 @@ static int mp_property_focused(void *ctx, struct m_property *prop,
     return m_property_bool_ro(action, arg, focused);
 }
 
+static int get_display_names_subkey(struct vo *vo, int action,
+                                    void *arg, enum mp_voctrl voctrl)
+{
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        char **display_names;
+        if (vo_control(vo, voctrl, &display_names) < 1)
+            return M_PROPERTY_UNAVAILABLE;
+
+        *(char ***)arg = display_names;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -2831,20 +2850,15 @@ static int mp_property_display_names(void *ctx, struct m_property *prop,
     if (!vo)
         return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET: {
-        char** display_names;
-        if (vo_control(vo, VOCTRL_GET_DISPLAY_NAMES, &display_names) < 1)
-            return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *const ka = arg;
+        if (strcmp(ka->key, "friendly"))
+            return M_PROPERTY_UNKNOWN;
 
-        *(char ***)arg = display_names;
-        return M_PROPERTY_OK;
+        return get_display_names_subkey(vo, ka->action, ka->arg,
+                                        VOCTRL_GET_DISPLAY_NAMES_FRIENDLY);
     }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return get_display_names_subkey(vo, action, arg, VOCTRL_GET_DISPLAY_NAMES);
 }
 
 static int mp_property_vo_configured(void *ctx, struct m_property *prop,
@@ -4511,8 +4525,8 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-state"),
     E(MP_EVENT_WIN_RESIZE, "current-window-scale", "osd-width", "osd-height",
       "osd-par", "osd-dimensions"),
-    E(MP_EVENT_WIN_STATE, "display-names", "display-fps", "display-width",
-      "display-height"),
+    E(MP_EVENT_WIN_STATE, "display-names", "display-names/friendly", "display-fps",
+      "display-width", "display-height"),
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_FOCUS, "focused"),
     E(MP_EVENT_AMBIENT_LIGHTING_CHANGED, "ambient-light"),

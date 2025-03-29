@@ -106,6 +106,10 @@ enum mp_voctrl {
     // names for displays the window is on
     VOCTRL_GET_DISPLAY_NAMES,
 
+    // char *** (NULL terminated array compatible with CONF_TYPE_STRING_LIST)
+    // human-friendly names for displays the window is on
+    VOCTRL_GET_DISPLAY_NAMES_FRIENDLY,
+
     // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
     // Deprecated for VOCTRL_SCREENSHOT with corresponding flags.
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
