@@ -124,12 +124,12 @@ option. The configuration syntax is described in `mp.options functions`_.
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
-``font``
-    The font name.
+``monospace_font``
+    Default: platform dependent
 
-    When necessary to align completions in a grid, a monospace font depending on
-    the platform is the default. When there are no completions, ``--osd-font``
-    is the default.
+    The monospace font used when there are completions to align in a grid.
+
+    When there are no completions, ``--osd-font`` is used.
 
 ``font_size``
     Default: 24

@@ -1,0 +1,2 @@
+add `console-monospace_font` script-opt
+remove `console-font` script-opt
