@@ -220,7 +220,7 @@ class Mpv:
     def clear_timer(self, name):
         self.threads.pop(name).cancel()
 
-    def get_opt(self, key, default):
+    def get_opt(self, key, default=None):
         return self.get_property_node("options/script-opts").get(key, default)
 
     def print_ref_count(self, obj):
