@@ -51,21 +51,21 @@ fmt_talloc(void *ta_ctx, mpv_format format)
 }
 
 
-static void makenode(void *ta_ctx, PyObject *obj, struct mpv_node *node) {
+static void makenode(void *ta_ctx, PyObject *obj, mpv_node *node) {
     if (obj == Py_None) {
         node->format = MPV_FORMAT_NONE;
     }
     else if (PyBool_Check(obj)) {
         node->format = MPV_FORMAT_FLAG;
-        node->u.flag = (int) PyObject_IsTrue(obj);
-    }
-    else if (PyLong_Check(obj)) {
-        node->format = MPV_FORMAT_INT64;
-        node->u.int64 = (int64_t) PyLong_AsLongLong(obj);
+        node->u.flag = !!PyObject_IsTrue(obj);
     }
     else if (PyFloat_Check(obj)) {
         node->format = MPV_FORMAT_DOUBLE;
         node->u.double_ = PyFloat_AsDouble(obj);
+    }
+    else if (PyLong_Check(obj)) {
+        node->format = MPV_FORMAT_INT64;
+        node->u.int64 = (int64_t) PyLong_AsLongLong(obj);
     }
     else if (PyUnicode_Check(obj)) {
         node->format = MPV_FORMAT_STRING;
@@ -73,23 +73,25 @@ static void makenode(void *ta_ctx, PyObject *obj, struct mpv_node *node) {
     }
     else if (PyList_Check(obj)) {
         node->format = MPV_FORMAT_NODE_ARRAY;
-        node->u.list = talloc(ta_ctx, struct mpv_node_list);
+        mpv_node_list *list = talloc(ta_ctx, mpv_node_list);
+        node->u.list = list;
         int l = (int) PyList_Size(obj);
-        node->u.list->num = l;
-        node->u.list->keys = NULL;
-        node->u.list->values = talloc_array(ta_ctx, struct mpv_node, l);
+        list->num = l;
+        list->keys = NULL;
+        list->values = talloc_array(ta_ctx, mpv_node, l);
         for (int i = 0; i < l; i++) {
             PyObject *child = PyList_GetItem(obj, i);
-            makenode(ta_ctx, child, &node->u.list->values[i]);
+            makenode(ta_ctx, child, &list->values[i]);
         }
     }
     else if (PyDict_Check(obj)) {
         node->format = MPV_FORMAT_NODE_MAP;
-        node->u.list = talloc(ta_ctx, struct mpv_node_list);
+        mpv_node_list *map = talloc_zero(ta_ctx, mpv_node_list);
+        node->u.list = map;
         int l = (int) PyDict_Size(obj);
-        node->u.list->num = l;
-        node->u.list->keys = talloc_array(ta_ctx, char *, l);
-        node->u.list->values = talloc_array(ta_ctx, struct mpv_node, l);
+        map->num = l;
+        map->keys = talloc_array(ta_ctx, char *, l);
+        map->values = talloc_array(ta_ctx, mpv_node, l);
 
         PyObject *key, *value;
         Py_ssize_t pos = 0;
@@ -97,9 +99,10 @@ static void makenode(void *ta_ctx, PyObject *obj, struct mpv_node *node) {
             if (!PyUnicode_Check(key)) {
                 PyErr_Format(PyExc_TypeError, "node keys must be 'str'");
             }
-            int i = (int) pos;
-            node->u.list->keys[i] = talloc_strdup(ta_ctx, (char *)PyUnicode_AsUTF8(key));
-            makenode(ta_ctx, value, &node->u.list->values[i]);
+            // pos starts from 1;
+            int i = (int) pos - 1;
+            map->keys[i] = talloc_strdup(ta_ctx, (char *)PyUnicode_AsUTF8(key));
+            makenode(ta_ctx, value, &map->values[i]);
         }
     }
 }

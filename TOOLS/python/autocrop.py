@@ -71,7 +71,7 @@ def is_enough_time(seconds):
 
 
 def is_cropable(time_needed):
-    if mpv.get_property_node('current-tracks/video/image'):
+    if mpv.get_property_node("current-tracks/video/image"):
         mpv.warn("autocrop only works for videos.")
         return False
 
@@ -189,8 +189,7 @@ def detect_crop():
     limit = options["detect_limit"]
     round = options["detect_round"]
 
-    mpv.command_string('%s vf pre @%s:cropdetect=limit=%s:round=%d:reset=0' % (
-        command_prefix, cropdetect_label, limit, round))
+    mpv.command_string(f"{command_prefix} vf pre @{cropdetect_label}:cropdetect=limit={limit}:round={round}:reset=0")
 
     # Wait to gather data.
     mpv.add_timeout(time_needed, detect_end, name="detect_crop")
@@ -213,7 +212,7 @@ def on_start():
     if is_delay_needed:
 
         # Verify if there is enough time for autocrop.
-        time_needed = options["auto_delay"] + options["detect_seconds"]
+        time_needed = options["auto_delay"] + options["detect_seconds"]  # type: ignore
 
         if not is_cropable(time_needed):
             return
