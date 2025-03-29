@@ -29,7 +29,7 @@ local platform = detect_platform()
 
 -- Default options
 local opts = {
-    font = "",
+    monospace_font = "",
     font_size = 24,
     border_size = 1.65,
     background_alpha = 80,
@@ -126,12 +126,12 @@ local function get_property_cached(name, def)
 end
 
 local function get_font()
-    if opts.font ~= "" then
-        return opts.font
-    end
-
     if not has_completions then
         return
+    end
+
+    if opts.monospace_font ~= "" then
+        return opts.monospace_font
     end
 
     -- Pick a better default font for Windows and macOS
