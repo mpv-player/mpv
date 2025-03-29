@@ -28,7 +28,6 @@ def read_exception(excinfo):
 class Registry:
     script_message: dict = {}
     binds: dict = {}
-    red_flags: list[str] = []
 
 
 registry = Registry()
@@ -181,6 +180,16 @@ class Mpv:
 
     options = Options()
 
+    messages: dict = {}
+
+    def register_script_message(self, name):
+        def decorate(fn):
+            self.messages[name] = fn
+        return decorate
+
+    def unregister_script_message(self, name):
+        del self.messages[name]
+
     enabled_events: list = []
     event_handlers: dict = {}
 
@@ -206,7 +215,7 @@ class Mpv:
         if name is None:
             self.next_bid += 1
             name = "timer" + str(self.next_bid)
-        self.threads[name] = t;
+        self.threads[name] = t
 
     def clear_timer(self, name):
         self.threads.pop(name).cancel()
@@ -268,30 +277,27 @@ class Mpv:
     def extension_ok(self) -> bool:
         return _mpv.extension_ok()
 
+    def call_catch_ex(self, func, *args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            try:
+                self.error(read_exception(sys.exc_info()))
+            except Exception:
+                pass
+
     def process_event(self, event_id, data):
         if event_id == self.MPV_EVENT_CLIENT_MESSAGE:
-            cb_name = data[1]
-            if data[2][0] == "u" and cb_name not in registry.red_flags:
-                self.debug(f"calling callback {cb_name}")
-                try:
-                    registry.script_message[cb_name]()
-                except Exception:
-                    try:
-                        self.error(read_exception(sys.exc_info()))
-                    except Exception:
-                        pass
-                    registry.red_flags.append(cb_name)
-                self.debug(f"invoked {cb_name}")
+            if data[0] != "key-binding":
+                self.call_catch_ex(self.messages[data[0]])
+            else:
+                cb_name = data[1]
+                if data[2][0] == "u" and cb_name:
+                    self.call_catch_ex(registry.script_message[cb_name])
 
         elif event_id in self.enabled_events:
             for cb in self.event_handlers.get(event_id, []):
-                try:
-                    cb()
-                except Exception:
-                    try:
-                        self.error(read_exception(sys.exc_info()))
-                    except Exception:
-                        pass
+                self.call_catch_ex(cb)
 
     def command_string(self, name):
         return _mpv.command_string(self, name)
@@ -338,7 +344,7 @@ class Mpv:
         :param str name: name of the property.
 
         """
-        if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
+        if not (isinstance(property_name, str) and mpv_format in range(1, 10)):
             self.error("TODO: have a pointer to doc string")
             return
         return _mpv.set_property(self, property_name, mpv_format, data)
@@ -376,7 +382,7 @@ class Mpv:
         return _mpv.del_property(self, name)
 
     def get_property(self, property_name, mpv_format):
-        if not (isinstance(property_name, str) and mpv_format in range(1, 7)):
+        if not (isinstance(property_name, str) and mpv_format in range(1, 10)):
             self.error("TODO: have a pointer to doc string")
             return
         return _mpv.get_property(self, property_name, mpv_format)
@@ -499,13 +505,7 @@ class Mpv:
 
     def notify_observer(self, name, data):
         if (p := self.observe_properties.get(name, None)) is not None:
-            try:
-                p["callback"](data)
-            except Exception:
-                try:
-                    self.error(read_exception(sys.exc_info()))
-                except Exception:
-                    pass
+            self.call_catch_ex(p["callback"], data)
 
     def handle_event(self, arg):
         """

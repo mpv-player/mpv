@@ -5,4 +5,4 @@ from mpvclient import mpv  # type: ignore
 def on_audio_device_list_change(data):
     mpv.info("Audio device list changed:")
     for d in data:
-        mpv.info("  - '" + d['name'] + "' (" + d["description"] + ")")
+        mpv.info("  - '" + d["name"] + "' (" + d["description"] + ")")
