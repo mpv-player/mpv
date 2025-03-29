@@ -1307,12 +1307,20 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
-    /* Reuse old size if either of these are 0. */
-    if (width == 0 || height == 0) {
+    /* Reuse old size if both of these are 0. */
+    if (width == 0 && height == 0) {
         if (!wl->locked_size) {
             wl->geometry = wl->window_size;
         }
         goto resize;
+    }
+
+    // If either of these is 0, we're allowed to grow in that dimension. Start
+    // at current window size in that case.
+    if (width == 0) {
+        width = mp_rect_w(wl->window_size);
+    } else if (height == 0) {
+        height = mp_rect_h(wl->window_size);
     }
 
     if (!wl->locked_size) {
