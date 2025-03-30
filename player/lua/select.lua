@@ -200,16 +200,8 @@ mp.add_key_binding(nil, "select-vid", function ()
 end)
 
 local function format_time(t, duration)
-    local h = math.floor(t / (60 * 60))
-    t = t - (h * 60 * 60)
-    local m = math.floor(t / 60)
-    local s = t - (m * 60)
-
-    if duration >= 60 * 60 or h > 0 then
-        return string.format("%.2d:%.2d:%.2d", h, m, s)
-    end
-
-    return string.format("%.2d:%.2d", m, s)
+    local fmt = math.max(t, duration) >= 60 * 60 and "%H:%M:%S" or "%M:%S"
+    return mp.format_time(t, fmt)
 end
 
 mp.add_key_binding(nil, "select-chapter", function ()
