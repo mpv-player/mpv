@@ -1,0 +1,1 @@
+`--subs-with-matching-audio` will now take effect even if `--slang` is not explicitly set
