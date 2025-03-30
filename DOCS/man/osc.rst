@@ -603,20 +603,22 @@ Custom Buttons
 Additional script-opts are available to define custom buttons in ``bottombar``
 and ``topbar`` layouts.
 
-.. admonition:: Example to add loop and shuffle buttons
+.. admonition:: Example to add loop, shuffle and speed buttons
 
-    custom_button_1_content=🔁
-    custom_button_1_mbtn_left_command=cycle-values loop-file inf no
-    custom_button_1_mbtn_right_command=cycle-values loop-playlist inf no
+    ::
 
-    custom_button_2_content=🔀
-    custom_button_2_mbtn_left_command=playlist-shuffle
+        custom_button_1_content=🔁
+        custom_button_1_mbtn_left_command=cycle-values loop-file inf no
+        custom_button_1_mbtn_right_command=cycle-values loop-playlist inf no
 
-    custom_button_3_content=⏱
-    custom_button_3_mbtn_left_command=add speed 1
-    custom_button_3_mbtn_right_command=set speed 1
-    custom_button_3_wheel_up_command=add speed 0.25
-    custom_button_3_wheel_down_command=add speed -0.25
+        custom_button_2_content=🔀
+        custom_button_2_mbtn_left_command=playlist-shuffle
+
+        custom_button_3_content=⏱
+        custom_button_3_mbtn_left_command=add speed 1
+        custom_button_3_mbtn_right_command=set speed 1
+        custom_button_3_wheel_up_command=add speed 0.25
+        custom_button_3_wheel_down_command=add speed -0.25
 
 Script Commands
 ~~~~~~~~~~~~~~~
