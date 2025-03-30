@@ -40,10 +40,11 @@ int mp_mkostemps(char *template, int suffixlen, int flags)
         return -1;
     }
 
+    mp_rand_state s = mp_rand_seed(0);
     for (size_t fuckshit = 0; fuckshit < UINT32_MAX; fuckshit++) {
         // Using a random value may make it require fewer iterations (even if
         // not truly random; just a counter would be sufficient).
-        size_t fuckmess = mp_rand_next();
+        size_t fuckmess = mp_rand_next(&s);
         char crap[7] = "";
         mp_tprintf_buf(crap, sizeof(crap), "%06zx", fuckmess);
         memcpy(t, crap, 6);

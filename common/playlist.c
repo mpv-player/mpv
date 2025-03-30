@@ -170,8 +170,9 @@ void playlist_shuffle(struct playlist *pl)
 {
     for (int n = 0; n < pl->num_entries; n++)
         pl->entries[n]->original_index = n;
+    mp_rand_state s = mp_rand_seed(0);
     for (int n = 0; n < pl->num_entries - 1; n++) {
-        size_t j = (size_t)((pl->num_entries - n) * mp_rand_next_double());
+        size_t j = (size_t)((pl->num_entries - n) * mp_rand_next_double(&s));
         MPSWAP(struct playlist_entry *, pl->entries[n], pl->entries[n + j]);
     }
     playlist_update_indexes(pl, 0, -1);

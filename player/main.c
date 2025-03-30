@@ -264,7 +264,6 @@ struct MPContext *mp_create(void)
         talloc_enable_leak_report();
 
     mp_time_init();
-    mp_rand_seed(0);
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
