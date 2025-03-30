@@ -22,6 +22,8 @@
 
 #include <libavutil/random_seed.h>
 
+#include "common/common.h"
+#include "misc/mp_assert.h"
 #include "osdep/timer.h"
 #include "random.h"
 
@@ -83,4 +85,18 @@ uint64_t mp_rand_next(mp_rand_state *s)
 double mp_rand_next_double(mp_rand_state *s)
 {
     return (mp_rand_next(s) >> 11) * 0x1.0p-53;
+}
+
+// <https://web.archive.org/web/20250321082025/
+// https://www.pcg-random.org/posts/bounded-rands.html#bitmask-with-rejection-unbiased-apples-method>
+uint32_t mp_rand_in_range32(mp_rand_state *s, uint32_t min, uint32_t max)
+{
+    mp_assert(min < max);
+    uint32_t range = max - min;
+    uint32_t mask = mp_round_next_power_of_2(range) - 1;
+    uint32_t ret;
+    do {
+        ret = mp_rand_next(s) & mask;
+    } while (ret >= range);
+    return min + ret;
 }
