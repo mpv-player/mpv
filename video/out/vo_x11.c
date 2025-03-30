@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 #include <libswscale/swscale.h>
@@ -38,7 +39,10 @@
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/mman.h>
 #include <X11/extensions/XShm.h>
+#include <X11/Xlib-xcb.h>
+#include <xcb/shm.h>
 
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
@@ -76,13 +80,25 @@ struct priv {
 
     int Shmem_Flag;
     XShmSegmentInfo Shminfo[2];
+    char shmname[128];
     int Shm_Warned_Slow;
 };
 
 static bool resize(struct vo *vo);
 
+static Bool XShmAttachFd(Display *dpy, XShmSegmentInfo *shminfo)
+{
+    xcb_connection_t *xcb_conn = XGetXCBConnection(dpy);
+
+    shminfo->shmseg = xcb_generate_id(xcb_conn);
+    xcb_shm_attach_fd(xcb_conn, shminfo->shmseg, shminfo->shmid,
+                      shminfo->readOnly);
+    return 1;
+}
+
 static bool getMyXImage(struct priv *p, int foo)
 {
+    size_t len;
     struct vo *vo = p->vo;
     if (vo->x11->display_is_local && XShmQueryExtension(vo->x11->display)) {
         p->Shmem_Flag = 1;
@@ -102,16 +118,19 @@ static bool getMyXImage(struct priv *p, int foo)
             MP_WARN(vo, "Shared memory error,disabling ( Ximage error )\n");
             goto shmemerror;
         }
-        p->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
-                                       p->myximage[foo]->bytes_per_line *
-                                       p->myximage[foo]->height,
-                                       IPC_CREAT | 0777);
+        len = p->myximage[foo]->bytes_per_line * p->myximage[foo]->height;
+        memcpy(p->shmname, "/tmp/mpv-x11-XXXXXXXXXX", sizeof(p->shmname));
+        p->Shminfo[foo].shmid = shm_mkstemp(p->shmname);
         if (p->Shminfo[foo].shmid < 0) {
             XDestroyImage(p->myximage[foo]);
             MP_WARN(vo, "Shared memory error,disabling ( seg id error )\n");
             goto shmemerror;
         }
-        p->Shminfo[foo].shmaddr = (char *) shmat(p->Shminfo[foo].shmid, 0, 0);
+        p->Shminfo[foo].shmaddr = mmap(NULL, len,
+                                       PROT_READ | PROT_WRITE,
+                                       MAP_SHARED | __MAP_NOFAULT,
+                                       p->Shminfo[foo].shmid, 0);
+        ftruncate(p->Shminfo[foo].shmid, len);
 
         if (p->Shminfo[foo].shmaddr == ((char *) -1)) {
             XDestroyImage(p->myximage[foo]);
@@ -120,11 +139,11 @@ static bool getMyXImage(struct priv *p, int foo)
         }
         p->myximage[foo]->data = p->Shminfo[foo].shmaddr;
         p->Shminfo[foo].readOnly = False;
-        XShmAttach(vo->x11->display, &p->Shminfo[foo]);
+        XShmAttachFd(vo->x11->display, &p->Shminfo[foo]);
 
         XSync(vo->x11->display, False);
 
-        shmctl(p->Shminfo[foo].shmid, IPC_RMID, 0);
+        shm_unlink(p->shmname);
     } else {
 shmemerror:
         p->Shmem_Flag = 0;
@@ -151,6 +170,7 @@ static void freeMyXImage(struct priv *p, int foo)
     if (p->Shmem_Flag) {
         XShmDetach(vo->x11->display, &p->Shminfo[foo]);
         XDestroyImage(p->myximage[foo]);
+        close(p->Shminfo[foo].shmid);
         shmdt(p->Shminfo[foo].shmaddr);
     } else {
         if (p->myximage[foo]) {
