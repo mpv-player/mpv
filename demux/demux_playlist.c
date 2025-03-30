@@ -700,7 +700,8 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         bstr proto = mp_split_proto(bstr0(demuxer->filename), NULL);
         // Don't add base path to self-expanding protocols
         if (bstrcasecmp0(proto, "memory") && bstrcasecmp0(proto, "lavf") &&
-            bstrcasecmp0(proto, "hex") && bstrcasecmp0(proto, "data"))
+            bstrcasecmp0(proto, "hex") && bstrcasecmp0(proto, "data") &&
+            bstrcasecmp0(proto, "fd"))
         {
             playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
         }
