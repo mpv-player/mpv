@@ -46,3 +46,9 @@ uint64_t mp_rand_next(mp_rand_state *s);
  * distribution, and update the state accordingly.
  */
 double mp_rand_next_double(mp_rand_state *s);
+
+/*
+ * Return a 32 bit integer in the range [min, max) with uniform distribution.
+ * Caller should ensure `min < max`.
+ */
+uint32_t mp_rand_in_range32(mp_rand_state *s, uint32_t min, uint32_t max);
