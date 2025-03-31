@@ -387,6 +387,7 @@ typedef struct MPOpts {
     struct vulkan_opts *vulkan_opts;
     struct vulkan_display_opts *vulkan_display_opts;
     struct spirv_opts *spirv_opts;
+    struct madvr_opts *madvr_opts;
     struct d3d11_opts *d3d11_opts;
     struct d3d11va_opts *d3d11va_opts;
     struct macos_opts *macos_opts;

@@ -125,7 +125,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
     }
 #endif
 
-    ctx->pllog = mppl_log_create(ctx, ctx->log);
+    ctx->pllog = mppl_log_create2(ctx, ctx->log, vo->driver->name);
     if (!ctx->pllog)
         goto err_out;
 

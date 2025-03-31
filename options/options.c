@@ -79,6 +79,7 @@ extern const struct m_sub_options ra_ctx_conf;
 extern const struct m_sub_options gl_video_conf;
 extern const struct m_sub_options gl_next_conf;
 extern const struct m_sub_options ao_alsa_conf;
+extern const struct m_sub_options madvr_conf;
 
 extern const struct m_sub_options demux_conf;
 extern const struct m_sub_options demux_cache_conf;
@@ -904,6 +905,9 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(gl_video_opts, gl_video_conf)},
     {"", OPT_SUBSTRUCT(gl_next_opts, gl_next_conf)},
     {"", OPT_SUBSTRUCT(spirv_opts, spirv_conf)},
+#if HAVE_VO_MADVR
+    {"", OPT_SUBSTRUCT(madvr_opts, madvr_conf)},
+#endif
 
 #if HAVE_GL
     {"", OPT_SUBSTRUCT(opengl_opts, opengl_conf)},

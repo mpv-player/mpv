@@ -65,6 +65,15 @@ pl_log mppl_log_create(void *tactx, struct mp_log *log)
     });
 }
 
+pl_log mppl_log_create2(void *tactx, struct mp_log *log, const char *name)
+{
+    return pl_log_create(PL_API_VER, &(struct pl_log_params) {
+        .log_cb     = log_cb,
+        .log_level  = determine_pl_log_level(log),
+        .log_priv   = mp_log_new(tactx, log, name),
+    });
+}
+
 void mppl_log_set_probing(pl_log log, bool probing)
 {
     struct pl_log_params params = log->params;

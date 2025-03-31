@@ -66,6 +66,7 @@ extern const struct vo_driver video_out_wlshm;
 extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
 extern const struct vo_driver video_out_kitty;
+extern const struct vo_driver video_out_madvr;
 
 static const struct vo_driver *const video_out_drivers[] =
 {
@@ -73,6 +74,9 @@ static const struct vo_driver *const video_out_drivers[] =
     &video_out_mediacodec_embed,
 #endif
     &video_out_gpu,
+#if HAVE_VO_MADVR
+    &video_out_madvr,
+#endif
     &video_out_gpu_next,
 #if HAVE_VDPAU
     &video_out_vdpau,

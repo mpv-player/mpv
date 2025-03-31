@@ -537,6 +537,14 @@ else
     features += {'win32-smtc': false}
 endif
 
+if win32
+    sources += 'video/out/vo_madvr.c'
+    features += {'vo-madvr': true}
+    subdir('osdep/DirectShow')
+else
+    features += {'vo-madvr': false}
+endif
+
 features += {'glob-posix': cc.has_function('glob', prefix: '#include <glob.h>')}
 
 features += {'glob-win32': win32 and not features['glob-posix']}
