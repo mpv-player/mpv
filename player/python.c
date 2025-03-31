@@ -167,6 +167,11 @@ static int s_load_python(struct mp_script_args *args)
 {
     int ret = 0;
 
+    if (!args->mpctx->opts->enable_python) {
+        MP_WARN(args, "%s\n", "Python has NOT been initialized. Be sure to set option 'enable-python' to 'yes'");
+        return ret;
+    }
+
     PyInterpreterConfig config = {
         .use_main_obmalloc = 0,
         .allow_fork = 0,
