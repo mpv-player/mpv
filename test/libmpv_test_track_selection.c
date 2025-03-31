@@ -20,6 +20,8 @@
 #endif
 
 #ifdef _WIN32
+#include <assert.h>
+
 #include <io.h>
 #include <windows.h>
 #else
@@ -30,6 +32,19 @@
 
 #ifndef F_OK
 #define F_OK 0
+#endif
+
+#ifdef _WIN32
+static bool any_starts_with(const wchar_t *buffer, ULONG count, const wchar_t *str)
+{
+    for (ULONG pos = 0, i = 0; i < count; ++i) {
+        assert(buffer[pos]);
+        if (wcsncmp(buffer + pos, str, wcslen(str)) == 0)
+            return true;
+        pos += wcslen(buffer + pos) + 1;
+    }
+    return false;
+}
 #endif
 
 static bool have_english_locale(void)
@@ -57,23 +72,22 @@ static bool have_english_locale(void)
 #endif
 
 #ifdef _WIN32
-    ULONG count = 0;
-    ULONG size = 0;
     wchar_t buf[1024];
+    ULONG size = _countof(buf);
+    ULONG count = 0;
 
-    if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size)) {
-        for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
-            if (wcsncmp(buf + pos, L"en", 2) == 0)
-                return true;
-        }
-    }
+    if (!GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
+        fail("GetUserPreferredUILanguages failed: %#lx\n", GetLastError());
 
-    if (GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size)) {
-        for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
-            if (wcsncmp(buf + pos, L"en", 2) == 0)
-                return true;
-        }
-    }
+    if (any_starts_with(buf, count, L"en"))
+        return true;
+
+    size = _countof(buf);
+    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
+        fail("GetSystemPreferredUILanguages failed: %#lx\n", GetLastError());
+
+    if (any_starts_with(buf, count, L"en"))
+        return true;
 
     return false;
 #endif
