@@ -135,13 +135,8 @@ $projects = @(
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
         Revision = "meson-7.1"
         Provides = @(
-            "libavcodec = libavcodec_dep",
-            "libavdevice = libavdevice_dep",
-            "libavfilter = libavfilter_dep",
-            "libavformat = libavformat_dep",
-            "libavutil = libavutil_dep",
-            "libswresample = libswresample_dep",
-            "libswscale = libswscale_dep"
+            "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
+            "program_names = ffmpeg"
         )
     },
     @{
@@ -207,7 +202,7 @@ meson setup build `
     -Dgpl=true `
     -Dffmpeg:gpl=enabled `
     -Dffmpeg:tests=enabled `
-    -Dffmpeg:programs=disabled `
+    -Dffmpeg:programs=enabled `
     -Dffmpeg:sdl2=disabled `
     -Dffmpeg:vulkan=auto `
     -Dffmpeg:libdav1d=enabled `
