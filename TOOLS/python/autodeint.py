@@ -55,7 +55,7 @@ def del_filter_if_present(label):
 
 
 def add_vf(label, filter):
-    return mpv.command_string('vf add @%s:%s' % (label, filter))
+    return mpv.command_string("vf add @%s:%s" % (label, filter))
 
 
 def stop_detect():
@@ -136,10 +136,10 @@ def start_detect():
     del_filter_if_present(dominance_label)
 
     # insert the detection filters
-    if not (add_vf(detect_label, 'idet') and
-            add_vf(dominance_label, 'setfield=mode=auto') and
-            add_vf(pullup_label, 'lavfi-pullup') and
-            add_vf(ivtc_detect_label, 'idet')):
+    if not (add_vf(detect_label, "idet") and
+            add_vf(dominance_label, "setfield=mode=auto") and
+            add_vf(pullup_label, "lavfi-pullup") and
+            add_vf(ivtc_detect_label, "idet")):
         mpv.error("failed to insert detection filters")
         return
 
