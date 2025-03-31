@@ -209,7 +209,9 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
 #if HAVE_PYTHON
-    if (Py_IsInitialized()) Py_FinalizeEx();
+    if (mpctx->opts->enable_python) {
+        if (Py_IsInitialized()) Py_FinalizeEx();
+    }
 #endif
 
     mp_msg_uninit(mpctx->global);
@@ -386,8 +388,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     mp_input_load_config(mpctx->input);
 
 #if HAVE_PYTHON
-    if (PyImport_AppendInittab("mpv", PyInit_mpv) != -1) {
-        Py_Initialize();
+    if (mpctx->opts->enable_python) {
+        if (PyImport_AppendInittab("mpv", PyInit_mpv) != -1) Py_Initialize();
     }
 #endif
 

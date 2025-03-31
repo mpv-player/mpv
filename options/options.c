@@ -540,6 +540,9 @@ static const m_option_t mp_opts[] = {
 #if HAVE_JAVASCRIPT
     {"js-memory-report", OPT_BOOL(js_memory_report)},
 #endif
+#if HAVE_PYTHON
+    {"enable-python", OPT_BOOL(enable_python)},
+#endif
 #if HAVE_LUA
     {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS},
     {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS},
@@ -979,6 +982,9 @@ static const struct MPOpts mp_default_opts = {
     .osd_level = 1,
     .osd_on_seek = 1,
     .osd_duration = 1000,
+#if HAVE_PYTHON
+    .enable_python = false,
+#endif
 #if HAVE_LUA
     .lua_load_osc = true,
     .lua_load_ytdl = true,
