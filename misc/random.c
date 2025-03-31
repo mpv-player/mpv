@@ -19,7 +19,6 @@
  */
 
 #include <stdint.h>
-#include <string.h>
 
 #include <libavutil/random_seed.h>
 
@@ -49,12 +48,10 @@ mp_rand_state mp_rand_seed(uint64_t seed)
 #endif
 
     if (seed == 0) {
-        uint8_t buf[sizeof(seed)];
-        if (av_random_bytes(buf, sizeof(buf)) < 0) {
-            seed = mp_raw_time_ns();
-        } else {
-            memcpy(&seed, buf, sizeof(seed));
+        if (av_random_bytes((void *)ret.v, sizeof(ret.v)) == 0) {
+            return ret;
         }
+        seed = mp_raw_time_ns();
     }
 
     ret.v[0] = seed;
