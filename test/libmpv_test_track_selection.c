@@ -15,17 +15,22 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #ifdef _WIN32
+#include <io.h>
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #include "libmpv_common.h"
+
+#ifndef F_OK
+#define F_OK 0
+#endif
 
 static bool have_english_locale(void)
 {
