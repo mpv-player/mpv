@@ -52,6 +52,8 @@ mp_rand_state mp_rand_seed(uint64_t seed)
             return ret;
         }
         seed = mp_raw_time_ns();
+        seed ^= (uintptr_t)&mp_rand_seed; // ASLR, hopefully
+        seed += (uintptr_t)&ret; // stack position
     }
 
     ret.v[0] = seed;
