@@ -165,6 +165,7 @@ jobs:
         id: build
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
+                                                             $_ -ne 'C:\Program Files\CMake\bin' -and `
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
           $env:PATH += ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
@@ -180,6 +181,7 @@ jobs:
         id: tests
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
+                                                             $_ -ne 'C:\Program Files\CMake\bin' -and `
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
           $env:PATH += ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
