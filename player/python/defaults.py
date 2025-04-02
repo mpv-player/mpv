@@ -277,6 +277,9 @@ class Mpv:
     def extension_ok(self) -> bool:
         return _mpv.extension_ok()
 
+    def read_ex(self):
+        return read_exception(sys.exc_info())
+
     def call_catch_ex(self, func, *args, **kwargs):
         try:
             func(*args, **kwargs)
@@ -286,7 +289,8 @@ class Mpv:
             except Exception:
                 pass
 
-    def process_event(self, event_id, data):
+    def process_event(self, event_id, event):
+        data = event["data"]
         if event_id == self.MPV_EVENT_CLIENT_MESSAGE:
             if data[0] != "key-binding":
                 self.call_catch_ex(self.messages[data[0]])
@@ -295,9 +299,12 @@ class Mpv:
                 if data[2][0] == "u" and cb_name:
                     self.call_catch_ex(registry.script_message[cb_name])
 
+        elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
+            self.notify_observer(event)
+
         elif event_id in self.enabled_events:
             for cb in self.event_handlers.get(event_id, []):
-                self.call_catch_ex(cb)
+                self.call_catch_ex(cb, event)
 
     def command_string(self, name):
         return _mpv.command_string(self, name)
@@ -310,6 +317,29 @@ class Mpv:
         :param node: data that resembles an mpv_node; can be a list of such nodes.
         """
         return _mpv.command(self, node)
+
+    async_call_table: dict = {}
+    async_last_id = 0
+
+    def command_node_async(self, node):
+        self.async_last_id += 1
+        return _mpv.command_node_async(self, self.async_last_id, node)
+
+    def command_node_async_callback(self, node):
+        def decorate(callback):
+            res = self.command_node_async(node)
+            if not res:
+                error = None  # TODO: figure out error
+                self.add_timeout(0, callback, False, None, error)
+                return res
+            t = {"callback": callback, "id": self.async_last_id}
+            self.async_call_table[self.async_last_id] = t
+            return t
+        return decorate
+
+    def abort_async_command(self, t):
+        if id := t["id"]:
+            _mpv.abort_async_command(self, id)
 
     def find_config_file(self, filename):
         return _mpv.find_config_file(self, filename)
@@ -328,16 +358,19 @@ class Mpv:
     def observe_property(self, property_name, mpv_format):
         def decorate(func):
             self.next_bid += 1
-            self.observe_properties[property_name] = {
+            self.observe_properties[self.next_bid] = {
                 "callback": func, "id": self.next_bid,
             }
             _mpv.observe_property(self, self.next_bid, property_name, mpv_format)
         return decorate
 
 
-    def unobserve_property(self, property_name):
-        _mpv.unobserve_property(self, self.observe_properties[property_name]["id"])
-        del self.observe_properties[property_name]
+    def unobserve_property(self, id):
+        if id not in self.observe_properties:
+            self.error(f"Unknown property observer id: {id}")
+            return
+        _mpv.unobserve_property(self, id)
+        del self.observe_properties[id]
 
     def _set_property(self, property_name, mpv_format, data):
         """
@@ -503,35 +536,48 @@ class Mpv:
             else:
                 self.debug("failed to enable client-message")
 
-    def notify_observer(self, name, data):
-        if (p := self.observe_properties.get(name, None)) is not None:
-            self.call_catch_ex(p["callback"], data)
+    def notify_observer(self, event):
+        setattr(state, event["data"]["name"], event["data"]["value"])
+        if (p := self.observe_properties.get(event["reply_userdata"], None)) is not None:
+            self.call_catch_ex(p["callback"], event["data"]["value"])
 
-    def handle_event(self, arg):
+    def handle_event(self, event):
         """
         Returns:
             boolean specifying whether some event loop breaking
             condition has been satisfied.
         """
-        event_id, data = arg
+        event_id = event["event_id"]
+
         if event_id != self.MPV_EVENT_NONE:
-            self.debug(f"event_id: {event_id} data: {data}\n")
-        if event_id == self.MPV_EVENT_SHUTDOWN:
-            raise ValueError("MPV_EVENT_SHUTDOWN must be handled in lower level API.")
-        elif event_id == self.MPV_EVENT_NONE:
-            return False
-        elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
-            name, data = data
-            setattr(state, name, data)
-            self.notify_observer(name, data)
-            return False
+            self.debug(f"event: {event}\n")
         else:
-            self.process_event(event_id, data)
-        return False
+            return True
+
+        self.process_event(event_id, event)
+
+        if event_id == self.MPV_EVENT_SHUTDOWN:
+            return False
+
+        return True
+
+    def command_reply(self, event):
+        item_id, data = event["reply_userdata"], event["data"]
+        t = self.async_call_table[item_id]
+        cb = t["callback"]
+        del self.async_call_table[item_id]
+
+        if event["error"]:
+            self.call_catch_ex(cb, False, None, event["error_message"])
+        else:
+            self.call_catch_ex(cb, True, data, None)
 
     def run(self):
         self.flush()
         self.enable_client_message()
+
+        self.register_event(self.MPV_EVENT_COMMAND_REPLY)(self.command_reply)
+
         self.debug(f"Running {self.name}")
         _mpv.run_event_loop(self)
         self.clean_up()
@@ -542,5 +588,6 @@ class Mpv:
     def clear_timers(self):
         for name in self.threads.keys():
             self.clear_timer(name)
+
 
 mpv = Mpv()

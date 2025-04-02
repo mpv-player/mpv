@@ -96,7 +96,7 @@ def restore_hwdec():
         hwdec_backup = None
 
 
-def cleanup():
+def cleanup(data=None):
     remove_cropdetect()
     # Kill all timers.
     mpv.clear_timers()
@@ -195,7 +195,7 @@ def detect_crop():
     mpv.add_timeout(time_needed, detect_end, name="detect_crop")
 
 
-def on_start():
+def on_start(data):
 
     # Clean up at the beginning.
     cleanup()
