@@ -89,8 +89,9 @@ static void run_script(struct mp_script_args *arg)
     if (arg->backend->load(arg) < 0)
         MP_ERR(arg, "Could not load %s script %s\n", arg->backend->name, arg->filename);
 
-    mpv_destroy(arg->client);
+    mpv_handle *client = arg->client;
     talloc_free(arg);
+    mpv_destroy(client);
 }
 
 static MP_THREAD_VOID script_thread(void *p)
