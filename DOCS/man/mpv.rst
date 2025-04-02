@@ -1547,6 +1547,8 @@ works like in older mpv releases:
 
 .. include:: positioning.rst
 
+.. include:: utils.rst
+
 .. include:: lua.rst
 
 .. include:: javascript.rst
