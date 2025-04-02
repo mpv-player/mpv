@@ -93,8 +93,8 @@ static void
 end_interpreter(PyClientCtx *client_ctx)
 {
     // PyErr_PrintEx(0);
-    Py_EndInterpreter(client_ctx->threadState);
     talloc_free(client_ctx->ta_ctx);
+    Py_EndInterpreter(client_ctx->threadState);
 }
 
 
@@ -103,7 +103,7 @@ static int run_client(PyClientCtx *cctx)
     PyObject *defaults = load_local_pystrings(builtin_files[0][1], "mpvclient");
 
     if (defaults == NULL) {
-        PyErr_PrintEx(0);
+        PyErr_PrintEx(1);
         MP_ERR(cctx, "Failed to load defaults (AKA. mpvclient) module.\n");
         end_interpreter(cctx);
         return -1;
@@ -128,7 +128,7 @@ static int run_client(PyClientCtx *cctx)
     Py_DECREF(path);
 
     if (client == NULL) {
-        PyErr_PrintEx(0);
+        PyErr_PrintEx(1);
         MP_ERR(cctx, "Could not load client. discarding: %s.\n", cname);
         end_interpreter(cctx);
         return 0;
@@ -197,7 +197,7 @@ static int s_load_python(struct mp_script_args *args)
 
     ret = run_client(ctx);
 
-    if (ret == -1) PyErr_PrintEx(0);
+    if (ret == -1) PyErr_PrintEx(1);
 
     return ret;
 }
