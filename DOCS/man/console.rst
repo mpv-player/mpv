@@ -90,6 +90,9 @@ Ctrl+v
 Shift+INSERT
     Paste text (uses the primary selection on X11 and Wayland).
 
+Ctrl+y
+    Copy the current line to the clipboard.
+
 TAB and Ctrl+i
     Cycle through completions.
 
