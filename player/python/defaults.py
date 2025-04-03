@@ -25,14 +25,6 @@ def read_exception(excinfo):
         f.close()
 
 
-class Registry:
-    script_message: dict = {}
-    binds: dict = {}
-
-
-registry = Registry()
-
-
 class State:
     pause = False
 
@@ -226,35 +218,35 @@ class Mpv:
     def print_ref_count(self, obj):
         self.info(f"refcount ({repr(obj)}): {sys.getrefcount(obj)}")
 
-    def _log(self, level, *args):
+    def log(self, level, *args):
         if not args:
             return
         msg = " ".join([str(msg) for msg in args])
         _mpv.handle_log(self, level, f"{msg}\n")
 
     def trace(self, *args):
-        self._log("trace", *args)
+        self.log("trace", *args)
 
     def debug(self, *args):
-        self._log("debug", *args)
+        self.log("debug", *args)
 
     def info(self, *args):
-        self._log("info", *args)
+        self.log("info", *args)
 
     def warn(self, *args):
-        self._log("warn", *args)
+        self.log("warn", *args)
 
     def error(self, *a):
-        self._log("error", *a)
+        self.log("error", *a)
 
     def fatal(self, *a):
-        self._log("fatal", *a)
+        self.log("fatal", *a)
 
-    def osd_message(self, text, duration=None):
-        args = [text]
-        if duration is not None:
-            args.append(duration)
-        self.commandv("show-text", text)
+    def osd_message(self, text, duration=-1, osd_level=None):
+        args = [text, duration]
+        if osd_level is not None:
+            args.append(osd_level)
+        self.commandv("show-text", *args)
 
     _name = None
 
@@ -296,8 +288,10 @@ class Mpv:
                 self.call_catch_ex(self.messages[data[0]])
             else:
                 cb_name = data[1]
-                if data[2][0] == "u" and cb_name:
-                    self.call_catch_ex(registry.script_message[cb_name])
+                binding = self.binds[cb_name]
+                if data[2][0] == "u" or (binding.get("repeatable", False) \
+                        and data[2][0] == "r"):
+                    self.call_catch_ex(binding["cb"])
 
         elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
             self.notify_observer(event)
@@ -306,10 +300,12 @@ class Mpv:
             for cb in self.event_handlers.get(event_id, []):
                 self.call_catch_ex(cb, event)
 
-    def command_string(self, name):
-        return _mpv.command_string(self, name)
+    def command_string(self, command_string):
+        return _mpv.command_string(self, command_string)
 
     def commandv(self, name, *args):
+        if len(args) > 50:
+            raise ValueError("Too many arguments")
         return _mpv.commandv(self, name, *args)
 
     def command(self, node):
@@ -372,7 +368,7 @@ class Mpv:
         _mpv.unobserve_property(self, id)
         del self.observe_properties[id]
 
-    def _set_property(self, property_name, mpv_format, data):
+    def set_property(self, property_name, mpv_format, data):
         """
         :param str name: name of the property.
 
@@ -394,22 +390,22 @@ class Mpv:
     MPV_FORMAT_BYTE_ARRAY = 9
 
     def set_property_string(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_STRING, str(data))
+        return self.set_property(name, self.MPV_FORMAT_STRING, str(data))
 
     def set_property_osd(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_OSD_STRING, str(data))
+        return self.set_property(name, self.MPV_FORMAT_OSD_STRING, str(data))
 
     def set_property_bool(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_FLAG, 1 if bool(data) else 0)
+        return self.set_property(name, self.MPV_FORMAT_FLAG, 1 if bool(data) else 0)
 
     def set_property_int(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_INT64, int(data))
+        return self.set_property(name, self.MPV_FORMAT_INT64, int(data))
 
     def set_property_float(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_DOUBLE, float(data))
+        return self.set_property(name, self.MPV_FORMAT_DOUBLE, float(data))
 
     def set_property_node(self, name, data):
-        return self._set_property(name, self.MPV_FORMAT_NODE, data)
+        return self.set_property(name, self.MPV_FORMAT_NODE, data)
 
     def del_property(self, name):
         return _mpv.del_property(self, name)
@@ -465,7 +461,7 @@ class Mpv:
         location = f"py_{self.name}_bs"
 
         builtin_binds = "\n".join(sorted(
-            [binding["input"] for binding in registry.binds.values() \
+            [binding["input"] for binding in self.binds.values() \
                 if binding["builtin"] and binding.get("input")]))
         if builtin_binds:
             name = f"py_{self.name}_kbs_builtin"
@@ -473,7 +469,7 @@ class Mpv:
             self.mpv_input_enable_section(name, self.MP_INPUT_ON_TOP)
 
         reg_binds = "\n".join(sorted(
-            [binding["input"] for binding in registry.binds.values() \
+            [binding["input"] for binding in self.binds.values() \
                 if not binding["builtin"] and binding.get("input")]))
         if reg_binds:
             name = f"py_{self.name}_kbs"
@@ -488,18 +484,10 @@ class Mpv:
         self.set_input_sections()
         self.debug(f"Flushed {self.name}")
 
+    binds: dict = {}
     next_bid = 1
 
     def add_binding(self, key=None, name=None, builtin=False, **opts):
-        """
-        :param str key:
-        :param str name:
-        :param bool builtin: whether to put the binding in the builtin section;
-            this means if the user defines bindings
-            using "{name}", they won't be ignored or overwritten - instead,
-            they are preferred to the bindings defined with this call
-        :param dict opts: boolean members (repeatable, complex)
-        """
         # copied from defaults.js (not sure what e and emit is yet)
         self.debug(f"loading binding {key}")
         key_data = opts
@@ -509,32 +497,23 @@ class Mpv:
             name = f"keybinding_{key}"  # unique name
 
         def decorate(fn):
-            registry.script_message[name] = fn
-
-            def key_cb(state):
-                # mpv.debug(state)
-                # emit = state[1] == "m" if e == "u" else e == "d"
-                # if (emit or e == "p" or e == "r") and key_data.get("repeatable", False):
-                #     fn()
-                fn()
-            key_data["cb"] = key_cb
+            key_data["cb"] = fn
 
         if key is not None:
             key_data["input"] = key + " script-binding " + self.name + "/" + name
-        registry.binds[name] = key_data
+        self.binds[name] = key_data
 
         return decorate
 
     def has_binding(self):
-        return bool(registry.binds)
+        return bool(self.binds)
 
     def enable_client_message(self):
-        if registry.binds:
-            self.debug("enabling client message")
-            if self.request_event(self.MPV_EVENT_CLIENT_MESSAGE):
-                self.debug("client-message enabled")
-            else:
-                self.debug("failed to enable client-message")
+        self.debug("enabling client message")
+        if self.request_event(self.MPV_EVENT_CLIENT_MESSAGE):
+            self.debug("client-message enabled")
+        else:
+            self.debug("failed to enable client-message")
 
     def notify_observer(self, event):
         setattr(state, event["data"]["name"], event["data"]["value"])

@@ -3,21 +3,6 @@
 from mpvclient import mpv
 
 
-def join(sep, arr, count):
-    r = ""
-    if count == None:
-        count = len(arr)
-
-    for i in range(count):
-        if i > 0:
-            r += sep
-        # r += utils.to_string(arr[i])
-        # TODO: what is utils.to_string?
-        r += str(arr[i])
-
-    return r
-
-
 @mpv.observe_property("vo-configured", mpv.MPV_FORMAT_FLAG)
 def vo_configured(v):
     if not v:
