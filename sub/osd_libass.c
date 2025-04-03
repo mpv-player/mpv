@@ -184,9 +184,7 @@ static void clear_ass(struct ass_state *ass)
 
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 {
-    // 0xFF is never valid UTF-8, so we can use it to escape OSD symbols.
-    // (Same trick as OSD_ASS_0/OSD_ASS_1.)
-    snprintf(buffer, buffer_size, "\xFF%c", osd_function);
+    snprintf(buffer, buffer_size, OSD_CODEPOINTS_ESCAPE "%c", osd_function);
 }
 
 void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
@@ -195,20 +193,29 @@ void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
     bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
-        if (in[0] == '\xFF' && in[1]) {
+        size_t len = strlen(OSD_CODEPOINTS_ESCAPE);
+        if (!strncmp(in, OSD_CODEPOINTS_ESCAPE, len) && in[len]) {
             bstr_xappend(NULL, dst, bstr0(ASS_USE_OSD_FONT));
-            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[1]);
+            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[len]);
             bstr_xappend(NULL, dst, bstr0("{\\r}"));
-            in += 2;
+            in += len + 1;
             continue;
         }
-        if (*in == OSD_ASS_0[0] || *in == OSD_ASS_1[0]) {
-            escape_ass = *in == OSD_ASS_1[0];
-            in += 1;
+        len = strlen(OSD_ASS_0);
+        if (!strncmp(in, OSD_ASS_0, len)) {
+            escape_ass = false;
+            in += len;
             continue;
         }
-        if (*in == TERM_MSG_0[0]) {
-            in += 1;
+        len = strlen(OSD_ASS_1);
+        if (!strncmp(in, OSD_ASS_1, len)) {
+            escape_ass = true;
+            in += len;
+            continue;
+        }
+        len = strlen(TERM_MSG_0);
+        if (!strncmp(in, TERM_MSG_0, len)) {
+            in += len;
             continue;
         }
         if (escape_ass && *in == '{')
