@@ -476,17 +476,19 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             };
             filter_and_add(sd, &pkt2);
         }
-        if (sub_duration == UNKNOWN_DURATION) {
-            for (int n = track->n_events - 2; n >= 0; n--) {
-                if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
-                    if (track->events[n].Start != track->events[n + 1].Start) {
-                        track->events[n].Duration = track->events[n + 1].Start -
-                                                    track->events[n].Start;
-                    } else {
-                        track->events[n].Duration = track->events[n + 1].Duration;
-                    }
+        for (int n = track->n_events - 1; n >= 0; n--) {
+            if (track->events[track->n_events - 1].Start == track->events[n].Start)
+                continue;
+            if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
+                if (track->events[n].Start < track->events[n + 1].Start) {
+                    track->events[n].Duration = track->events[n + 1].Start -
+                                                track->events[n].Start;
+                } else if (track->events[n].Start == track->events[n + 1].Start) {
+                    track->events[n].Duration = track->events[n + 1].Duration;
                 }
             }
+            if (n > 0 && track->events[n].Start != track->events[n - 1].Start)
+                break;
         }
     } else {
         // Note that for this packet format, libass has an internal mechanism
