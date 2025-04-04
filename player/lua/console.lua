@@ -40,12 +40,14 @@ local opts = {
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
-    selected_color = "#222222",
-    selected_back_color = "#FFFFFF",
+    focused_color = "#222222",
+    focused_back_color = "#FFFFFF",
     match_color = "#0088FF",
     case_sensitive = platform ~= "windows" and true or false,
     history_dedup = true,
     font_hw_ratio = "auto",
+    selected_color = "",
+    selected_back_color = "",
 }
 
 local styles = {
@@ -102,7 +104,7 @@ local has_completions
 
 local selectable_items
 local matches = {}
-local selected_match = 1
+local focused_match = 1
 local first_match_to_print = 1
 local default_item
 local item_positions = {}
@@ -465,7 +467,7 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
 end
 
 local function get_matches_to_print(terminal)
-    if not selectable_items or selected_match == 0 then
+    if not selectable_items or focused_match == 0 then
         return {}
     end
 
@@ -475,10 +477,10 @@ local function get_matches_to_print(terminal)
     local highlight = terminal and terminal_styles.matched_position or
                      "{\\1c&H" .. option_color_to_ass(opts.match_color) .. "}"
 
-    if selected_match < first_match_to_print then
-        first_match_to_print = selected_match
-    elseif selected_match > first_match_to_print + max_lines - 1 then
-        first_match_to_print = selected_match - max_lines + 1
+    if focused_match < first_match_to_print then
+        first_match_to_print = focused_match
+    elseif focused_match > first_match_to_print + max_lines - 1 then
+        first_match_to_print = focused_match - max_lines + 1
     end
 
     local last_match_to_print  = math.min(first_match_to_print + max_lines - 1,
@@ -492,16 +494,16 @@ local function get_matches_to_print(terminal)
             if matches[i].index == default_item then
                 item = terminal_styles.default_item
             end
-            if i == selected_match then
+            if i == focused_match then
                 item = item .. terminal_styles.selected_completion
             end
         else
-            if i == selected_match then
+            if i == focused_match then
                 if searching_history and
                    mp.get_property("osd-border-style") == "outline-and-shadow" then
                     item = get_selected_ass()
                 else
-                    item = "{\\1c&H" .. option_color_to_ass(opts.selected_color) .. "&}"
+                    item = "{\\1c&H" .. option_color_to_ass(opts.focused_color) .. "&}"
                 end
                 end_highlight = item
             end
@@ -583,7 +585,7 @@ local function print_to_terminal()
         if #selectable_items > calculate_max_lines() then
             local digits = math.ceil(math.log(#selectable_items, 10))
             counter = terminal_styles.disabled ..
-                      "[" .. string.format("%0" .. digits .. "d", selected_match) ..
+                      "[" .. string.format("%0" .. digits .. "d", focused_match) ..
                       "/" .. string.format("%0" .. digits .. "d", #matches) ..
                       "]\027[0m "
         end
@@ -751,15 +753,15 @@ local function render()
             and y + (1 + i) * line_height
             or y - (1.5 + #items - i) * line_height
 
-        if (first_match_to_print - 1 + i == selected_match or
+        if (first_match_to_print - 1 + i == focused_match or
             matches[first_match_to_print - 1 + i].index == default_item)
            and (not searching_history or border_style == "background-box") then
             ass:new_event()
             ass:an(4)
             ass:pos(x, item_y)
             ass:append("{\\blur0\\bord0\\4aH&ff&\\1c&H" ..
-                       option_color_to_ass(opts.selected_back_color) .. "&}")
-            if first_match_to_print - 1 + i ~= selected_match then
+                       option_color_to_ass(opts.focused_back_color) .. "&}")
+            if first_match_to_print - 1 + i ~= focused_match then
                 ass:append("{\\1aH&cc&}")
             end
             ass:draw_start()
@@ -785,7 +787,7 @@ local function render()
         if not searching_history or border_style == "background-box" then
             ass:append("{\\bord0\\4a&Hff&\\blur0}")
         end
-        ass:append(selected_match .. "/" .. #matches)
+        ass:append(focused_match .. "/" .. #matches)
 
         local start_percentage = (first_match_to_print - 1) / #matches
         local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
@@ -895,15 +897,15 @@ local function handle_edit()
     end
 
     if line == "" and default_item then
-        selected_match = default_item
+        focused_match = default_item
 
         local max_lines = calculate_max_lines()
-        first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
+        first_match_to_print = math.max(1, focused_match + 1 - math.ceil(max_lines / 2))
         if first_match_to_print > #selectable_items - max_lines + 1 then
             first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
         end
     else
-        selected_match = 1
+        focused_match = 1
     end
 
     render()
@@ -982,7 +984,7 @@ local function submit()
     if searching_history then
         searching_history = false
         selectable_items = nil
-        line = #matches > 0 and matches[selected_match].text or ""
+        line = #matches > 0 and matches[focused_match].text or ""
         cursor = #line + 1
         handle_edit()
         unbind_mouse()
@@ -992,7 +994,7 @@ local function submit()
     if selectable_items then
         if #matches > 0 then
             mp.commandv("script-message-to", input_caller, "input-event", "submit",
-                        utils.format_json({matches[selected_match].index}))
+                        utils.format_json({matches[focused_match].index}))
         end
     else
         if selected_completion_index == 0 and autoselect_completion then
@@ -1035,8 +1037,8 @@ end
 local function bind_mouse()
     mp.add_forced_key_binding("MOUSE_MOVE", "_console_mouse_move", function()
         local item = determine_hovered_item()
-        if item and item ~= selected_match then
-            selected_match = item
+        if item and item ~= focused_match then
+            focused_match = item
             render()
         end
     end)
@@ -1044,7 +1046,7 @@ local function bind_mouse()
     mp.add_forced_key_binding("MBTN_LEFT", "_console_mbtn_left", function()
         local item = determine_hovered_item()
         if item then
-            selected_match = item
+            focused_match = item
             submit()
         else
             set_active(false)
@@ -1097,13 +1099,13 @@ local function move_history(amount, is_wheel)
     if is_wheel then
         local max_lines = calculate_max_lines()
 
-        -- Update selected_match only if it's the first or last printed item and
+        -- Update focused_match only if it's the first or last printed item and
         -- there are hidden items.
-        if (amount > 0 and selected_match == first_match_to_print
+        if (amount > 0 and focused_match == first_match_to_print
             and first_match_to_print - 1 + max_lines < #matches)
-           or (amount < 0 and selected_match == first_match_to_print - 1 + max_lines
+           or (amount < 0 and focused_match == first_match_to_print - 1 + max_lines
                and first_match_to_print > 1) then
-            selected_match = selected_match + amount
+            focused_match = focused_match + amount
         end
 
         if amount > 0 and first_match_to_print < #matches - max_lines + 1
@@ -1116,18 +1118,18 @@ local function move_history(amount, is_wheel)
 
         local item = determine_hovered_item()
         if item then
-            selected_match = item
+            focused_match = item
         end
 
         render()
         return
     end
 
-    selected_match = selected_match + amount
-    if selected_match > #matches then
-        selected_match = 1
-    elseif selected_match < 1 then
-        selected_match = #matches
+    focused_match = focused_match + amount
+    if focused_match > #matches then
+        focused_match = 1
+    elseif focused_match < 1 then
+        focused_match = #matches
     end
     render()
 end
@@ -1135,7 +1137,7 @@ end
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_lines() + 1, 1)
+        focused_match = math.max(focused_match - calculate_max_lines() + 1, 1)
         render()
         return
     end
@@ -1146,7 +1148,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 local function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_lines() - 1, #matches)
+        focused_match = math.min(focused_match + calculate_max_lines() - 1, #matches)
         render()
         return
     end
@@ -1730,5 +1732,15 @@ mp.register_script_message("type", function (...)
 end)
 
 require "mp.options".read_options(opts, nil, render)
+
+if opts.selected_color ~= "" then
+    opts.focused_color = opts.selected_color
+    mp.msg.warn("selected_color has been replaced by focused_color")
+end
+
+if opts.selected_back_color ~= "" then
+    opts.focused_back_color = opts.selected_back_color
+    mp.msg.warn("selected_back_color has been replaced by focused_back_color")
+end
 
 collectgarbage()

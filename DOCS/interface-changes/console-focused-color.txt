@@ -1,0 +1,2 @@
+rename `console-selected_color` script-opt to `console-focused_color`
+rename `console-selected_back_color` script-opt to `console-focused_back_color`
