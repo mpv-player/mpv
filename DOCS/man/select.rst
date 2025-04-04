@@ -14,13 +14,13 @@ When using ``mp.input.select``, the key bindings listed in `CONSOLE`_ are
 extended with the following:
 
 ENTER, Ctrl+j and Ctrl+m
-    Confirm the selection of the highlighted item.
+    Select the focused item.
 
 UP and Ctrl+p
-    Select the item above, or the last one when the first item is selected.
+    Focus the item above, or the last one when the first item is selected.
 
 DOWN and Ctrl+n
-    Select the item below, or the first one when the last item is selected.
+    Focus the item below, or the first one when the last item is selected.
 
 PGUP and Ctrl+b
     Scroll up one page.
@@ -29,8 +29,8 @@ PGDN and Ctrl+f
     Scroll down one page.
 
 MBTN_LEFT
-    Confirm the selection of the highlighted item, or close the console if
-    clicking outside of the menu rectangle.
+    Select the item under the cursor, or close the console if clicking outside
+    of the menu rectangle.
 
 WHEEL_UP
     Scroll up.
