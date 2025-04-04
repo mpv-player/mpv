@@ -206,9 +206,9 @@ Configurable Options
     this option, prefixing queries with ``'`` enables exact matching.
 
 ``case_sensitive``
-    Default: no on Windows, yes on other platforms.
+    Default: no
 
-    Whether autocompletion is case sensitive. Only works with ASCII characters.
+    Whether exact searches are case sensitive. Only works with ASCII characters.
 
 ``history_dedup``
     Default: true

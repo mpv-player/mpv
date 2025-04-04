@@ -44,7 +44,7 @@ local opts = {
     selected_back_color = "#FFFFFF",
     match_color = "#0088FF",
     exact_match = false,
-    case_sensitive = platform ~= "windows" and true or false,
+    case_sensitive = false,
     history_dedup = true,
     font_hw_ratio = "auto",
 }
@@ -452,8 +452,8 @@ local function format_grid(list, width_max, rows_max)
     return table.concat(rows, ass_escape("\n")), row_count
 end
 
-local function fuzzy_find(needle, haystacks, case_sensitive)
-    local result = require "mp.fzy".filter(needle, haystacks, case_sensitive)
+local function fuzzy_find(needle, haystacks)
+    local result = require "mp.fzy".filter(needle, haystacks)
     table.sort(result, function (i, j)
         if i[3] ~= j[3] then
             return i[3] > j[3]
