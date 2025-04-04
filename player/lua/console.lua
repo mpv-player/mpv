@@ -350,7 +350,7 @@ local function mpv_color_to_ass(color)
            string.format("%x", 255 - tonumber("0x" .. color:sub(2,3)))
 end
 
-local function option_color_to_ass(color)
+local function color_option_to_ass(color)
     return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
 end
 
@@ -524,7 +524,7 @@ local function get_matches_to_print(terminal)
     local max_lines = calculate_max_lines()
     local escape = terminal and function (str) return str end or ass_escape
     local highlight = terminal and terminal_styles.matched_position or
-                     "{\\1c&H" .. option_color_to_ass(opts.match_color) .. "}"
+                     "{\\1c&H" .. color_option_to_ass(opts.match_color) .. "}"
 
     if focused_match < first_match_to_print then
         first_match_to_print = focused_match
@@ -552,7 +552,7 @@ local function get_matches_to_print(terminal)
                    mp.get_property("osd-border-style") == "outline-and-shadow" then
                     item = get_selected_ass()
                 else
-                    item = "{\\1c&H" .. option_color_to_ass(opts.focused_color) .. "&}"
+                    item = "{\\1c&H" .. color_option_to_ass(opts.focused_color) .. "&}"
                 end
                 end_highlight = item
             end
@@ -783,7 +783,7 @@ local function render()
         ass:pos(x, y)
         ass:append("{\\1c&H" .. back_color .. "&\\1a&H" .. back_alpha ..
                    "&\\bord" .. opts.menu_outline_size .. "\\3c&H" ..
-                   option_color_to_ass(opts.menu_outline_color) .. "&}")
+                   color_option_to_ass(opts.menu_outline_color) .. "&}")
         if border_style == "background-box" then
             ass:append("{\\4a&Hff&}")
         end
@@ -811,7 +811,7 @@ local function render()
             ass:an(4)
             ass:pos(x, item_y)
             ass:append("{\\blur0\\bord0\\4aH&ff&\\1c&H" ..
-                       option_color_to_ass(opts.focused_back_color) .. "&}")
+                       color_option_to_ass(opts.focused_back_color) .. "&}")
             if first_match_to_print - 1 + i ~= focused_match then
                 ass:append("{\\1aH&cc&}")
             end
