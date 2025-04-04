@@ -199,6 +199,12 @@ Configurable Options
 
     The color of characters that match the searched string.
 
+``exact_match``
+    Default: no
+
+    Whether to match menu search queries exactly instead of fuzzily. Without
+    this option, prefixing queries with ``'`` enables exact matching.
+
 ``case_sensitive``
     Default: no on Windows, yes on other platforms.
 
