@@ -179,6 +179,22 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     avctx->width = image->w;
     avctx->height = image->h;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
+
+    /*
+     * tagging avctx->bits_per_raw_sample indicates the number of significant
+     * bits. For example, if the original video was 10-bit, and the GPU buffer is
+     * 16-bit, this tells lavc that only 10 bits are significant. lavc encoders may
+     * ignore this value, but some codecs can make use of it (for example, PNG's
+     * sBIT chunk or JXL's bit depth header)
+     */
+    if (memcmp(image->fmt.bpp, ctx->original_format.bpp, sizeof(image->fmt.bpp))) {
+        const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(imgfmt2pixfmt(ctx->original_format.id));
+        int depth = 0;
+        for (int i = 0; i < desc->nb_components; i++)
+            depth = MPMAX(depth, desc->comp[i].depth);
+        avctx->bits_per_raw_sample = depth;
+    }
+
     if (codec->id == AV_CODEC_ID_MJPEG) {
         // Annoying deprecated garbage for the jpg encoder.
         if (image->params.repr.levels == PL_COLOR_LEVELS_FULL)
