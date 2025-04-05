@@ -9,4 +9,6 @@
 #include "threads-posix.h"
 #endif
 
+#include "osdep/compiler.h"  // for thread_local
+
 #endif
