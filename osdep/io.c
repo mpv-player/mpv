@@ -721,7 +721,7 @@ int mp_ftruncate64(int fd, off_t length)
     return -1;
 }
 
-_Thread_local
+thread_local
 static struct {
     DWORD errcode;
     char *errstring;
