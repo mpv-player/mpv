@@ -199,10 +199,16 @@ Configurable Options
 
     The color of characters that match the searched string.
 
-``case_sensitive``
-    Default: no on Windows, yes on other platforms.
+``exact_match``
+    Default: no
 
-    Whether autocompletion is case sensitive. Only works with ASCII characters.
+    Whether to match menu search queries exactly instead of fuzzily. Without
+    this option, prefixing queries with ``'`` enables exact matching.
+
+``case_sensitive``
+    Default: no
+
+    Whether exact searches are case sensitive. Only works with ASCII characters.
 
 ``history_dedup``
     Default: true

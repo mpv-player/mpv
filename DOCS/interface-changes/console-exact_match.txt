@@ -1,0 +1,2 @@
+add `console-exact_match` script-opt
+make `console-case_sensitive` only affect exact searches and change the to default to no on platforms other than Windows

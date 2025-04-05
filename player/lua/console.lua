@@ -43,7 +43,8 @@ local opts = {
     selected_color = "#222222",
     selected_back_color = "#FFFFFF",
     match_color = "#0088FF",
-    case_sensitive = platform ~= "windows" and true or false,
+    exact_match = false,
+    case_sensitive = false,
     history_dedup = true,
     font_hw_ratio = "auto",
 }
@@ -451,8 +452,8 @@ local function format_grid(list, width_max, rows_max)
     return table.concat(rows, ass_escape("\n")), row_count
 end
 
-local function fuzzy_find(needle, haystacks, case_sensitive)
-    local result = require "mp.fzy".filter(needle, haystacks, case_sensitive)
+local function fuzzy_find(needle, haystacks)
+    local result = require "mp.fzy".filter(needle, haystacks)
     table.sort(result, function (i, j)
         if i[3] ~= j[3] then
             return i[3] > j[3]
@@ -460,6 +461,54 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
 
         return i[1] < j[1]
     end)
+
+    return result
+end
+
+local function find_matches(needle, haystacks)
+    if not opts.exact_match and needle:sub(1, 1) ~= "'" then
+        return fuzzy_find(needle, haystacks)
+    end
+
+    if not opts.exact_match then
+        needle = needle:sub(2)
+    end
+
+    if not opts.case_sensitive then
+        needle = needle:lower()
+    end
+
+    local result = {}
+    local needle_words = {}
+
+    for word in needle:gmatch("%S+") do
+        needle_words[#needle_words + 1] = word
+    end
+
+    for i, haystack in ipairs(haystacks) do
+        if not opts.case_sensitive then
+            haystack = haystack:lower()
+        end
+
+        local matching_positions = {}
+        for _, word in pairs(needle_words) do
+            local start, e = haystack:find(word, 1, true)
+
+            if start then
+                for j = start, e do
+                    matching_positions[#matching_positions + 1] = j
+                end
+            else
+                matching_positions = nil
+                break
+            end
+        end
+
+        if matching_positions then
+            table.sort(matching_positions)
+            result[#result + 1] = { i, matching_positions }
+        end
+    end
 
     return result
 end
@@ -886,7 +935,7 @@ local function handle_edit()
     end
 
     matches = {}
-    for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+    for i, match in ipairs(find_matches(line, selectable_items)) do
         matches[i] = {
             index = match[1],
             text = selectable_items[match[1]],

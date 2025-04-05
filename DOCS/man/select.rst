@@ -10,9 +10,8 @@ console and do operations on the selected item. It can be disabled using the
 Key bindings
 ------------
 
-When using ``mp.input.select``, typing printable characters does a fuzzy search
-of the presented items, and key bindings listed in `CONSOLE`_ are extended with
-the following:
+When using ``mp.input.select``, the key bindings listed in `CONSOLE`_ are
+extended with the following:
 
 ENTER, Ctrl+j and Ctrl+m
     Confirm the selection of the highlighted item.
@@ -38,6 +37,12 @@ WHEEL_UP
 
 WHEEL_DOWN
     Scroll down.
+
+Typing printable characters does a fuzzy search of the presented items.
+
+If the query starts with ``'``, only exact matches are filtered. You can also
+specify multiple search terms delimited by spaces, and only items matching all
+terms are filtered.
 
 Script bindings
 ---------------
