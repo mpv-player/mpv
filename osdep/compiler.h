@@ -22,6 +22,10 @@
 #define MP_UNUSED
 #endif
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ < 202311L) && !defined(thread_local)
+#define thread_local _Thread_local
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 #define PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(printf, a1, a2)))
 #define SCANF_ATTRIBUTE(a1, a2) __attribute__((format(scanf, a1, a2)))
