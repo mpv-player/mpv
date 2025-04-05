@@ -707,7 +707,7 @@ static int init(struct ao *ao)
         AudioFormat.CHANNEL_OUT_5POINT1 | AudioFormat.CHANNEL_OUT_BACK_CENTER,
         AudioFormat.CHANNEL_OUT_7POINT1_SURROUND,
     };
-    static_assert(MP_ARRAY_SIZE(layout_map) == MP_ARRAY_SIZE(layouts), "");
+    mp_static_assert(MP_ARRAY_SIZE(layout_map) == MP_ARRAY_SIZE(layouts), "");
     if (p->format == AudioFormat.ENCODING_IEC61937) {
         p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
     } else {

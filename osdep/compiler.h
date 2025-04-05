@@ -10,16 +10,19 @@
 #define MP_FALLTHROUGH [[fallthrough]]
 #define MP_WARN_UNUSED_RESULT [[nodiscard]]
 #define MP_UNUSED [[maybe_unused]]
+#define mp_static_assert static_assert
 #elif defined(__GNUC__) || defined(__clang__)
 #define MP_NORETURN __attribute__((noreturn))
 #define MP_FALLTHROUGH __attribute__((fallthrough))
 #define MP_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #define MP_UNUSED __attribute__((unused))
+#define mp_static_assert _Static_assert
 #else
 #define MP_NORETURN
 #define MP_FALLTHROUGH do {} while (0)
 #define MP_WARN_UNUSED_RESULT
 #define MP_UNUSED
+#define mp_static_assert _Static_assert
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)

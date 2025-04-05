@@ -32,7 +32,7 @@
 #include "zimg.h"
 #include "config.h"
 
-static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
+mp_static_assert(MP_IMAGE_BYTE_ALIGN >= ZIMG_ALIGN, "");
 
 #define HAVE_ZIMG_ALPHA (ZIMG_API_VERSION >= ZIMG_MAKE_API_VERSION(2, 4))
 

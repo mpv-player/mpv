@@ -484,7 +484,7 @@ char *format_file_size(int64_t size);
 // Like M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (UINT64_C(1) << 54)
 
-static_assert(!(UPDATE_OPTS_MASK & M_OPT_OPTIONAL_PARAM), "");
+mp_static_assert(!(UPDATE_OPTS_MASK & M_OPT_OPTIONAL_PARAM), "");
 
 // These flags are used to describe special parser capabilities or behavior.
 

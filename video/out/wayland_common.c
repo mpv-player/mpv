@@ -1825,7 +1825,7 @@ static void tranche_target_device(void *data,
         memcpy(&tranche->device_id, id, sizeof(dev_t));
         break;
     }
-    static_assert(sizeof(tranche->device_id) == sizeof(dev_t), "");
+    mp_static_assert(sizeof(tranche->device_id) == sizeof(dev_t), "");
 
     wl->current_tranche = tranche;
     wl_list_insert(&wl->tranche_list, &tranche->link);
@@ -2423,8 +2423,8 @@ static int lookupkey(int key)
         mpkey = lookup_keymap_table(keymap, key);
 
     // XFree86 keysym range; typically contains obscure "extra" keys
-    static_assert(MP_KEY_UNKNOWN_RESERVED_START + (0x1008FFFF - 0x10080000) <=
-                  MP_KEY_UNKNOWN_RESERVED_LAST, "");
+    mp_static_assert(MP_KEY_UNKNOWN_RESERVED_START + (0x1008FFFF - 0x10080000) <=
+                     MP_KEY_UNKNOWN_RESERVED_LAST, "");
     if (!mpkey && key >= 0x10080001 && key <= 0x1008FFFF)
         mpkey = MP_KEY_UNKNOWN_RESERVED_START + (key - 0x10080000);
 

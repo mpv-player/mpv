@@ -1488,14 +1488,14 @@ done:
 
 static inline void copy_frame_info_to_mp(struct frame_info *pl,
                                          struct mp_frame_perf *mp) {
-    static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
+    mp_static_assert(MP_ARRAY_SIZE(pl->info) == MP_ARRAY_SIZE(mp->perf), "");
     mp_assert(pl->count <= VO_PASS_PERF_MAX);
     mp->count = MPMIN(pl->count, VO_PASS_PERF_MAX);
 
     for (int i = 0; i < mp->count; ++i) {
         const struct pl_dispatch_info *pass = &pl->info[i];
 
-        static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
+        mp_static_assert(VO_PERF_SAMPLE_COUNT >= MP_ARRAY_SIZE(pass->samples), "");
         mp_assert(pass->num_samples <= MP_ARRAY_SIZE(pass->samples));
 
         struct mp_pass_perf *perf = &mp->perf[i];

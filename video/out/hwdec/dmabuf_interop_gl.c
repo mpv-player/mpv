@@ -143,8 +143,8 @@ static bool vaapi_gl_mapper_init(struct ra_hwdec_mapper *mapper,
         return false;
     }
 
-    static_assert(MP_ARRAY_SIZE(desc->planes) == AV_DRM_MAX_PLANES, "");
-    static_assert(MP_ARRAY_SIZE(mapper->tex) == AV_DRM_MAX_PLANES, "");
+    mp_static_assert(MP_ARRAY_SIZE(desc->planes) == AV_DRM_MAX_PLANES, "");
+    mp_static_assert(MP_ARRAY_SIZE(mapper->tex) == AV_DRM_MAX_PLANES, "");
 
     // remember format to allow texture recreation
     for (int n = 0; n < desc->num_planes; n++) {

@@ -16,7 +16,7 @@
 
 // Excuse the utter stupidity.
 #define UNFUCK(v) ((v) > 0 ? (v) : pixfmt2imgfmt(-(v)))
-static_assert(IMGFMT_START > 0, "");
+mp_static_assert(IMGFMT_START > 0, "");
 #define IMGFMT_GBRP (-AV_PIX_FMT_GBRP)
 #define IMGFMT_GBRAP (-AV_PIX_FMT_GBRAP)
 
