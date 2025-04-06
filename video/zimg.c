@@ -198,6 +198,18 @@ static zimg_color_primaries_e mp_to_z_prim(enum pl_color_primaries prim)
     }
 }
 
+#if HAVE_ZIMG_ALPHA
+static zimg_alpha_type_e pl_to_z_alpha(enum pl_alpha_mode alpha)
+{
+    switch (alpha) {
+    case PL_ALPHA_UNKNOWN:       return ZIMG_ALPHA_STRAIGHT;
+    case PL_ALPHA_INDEPENDENT:   return ZIMG_ALPHA_STRAIGHT;
+    case PL_ALPHA_PREMULTIPLIED: return ZIMG_ALPHA_PREMULTIPLIED;
+    default:                     return ZIMG_ALPHA_NONE;
+    }
+}
+#endif
+
 static void destroy_zimg(struct mp_zimg_context *ctx)
 {
     for (int n = 0; n < ctx->num_states; n++) {
@@ -378,8 +390,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
             r->z_planes[3] = n; // alpha, always plane 4 in zimg
 
 #if HAVE_ZIMG_ALPHA
-            zfmt->alpha = fmt.repr.alpha == PL_ALPHA_PREMULTIPLIED
-                ? ZIMG_ALPHA_PREMULTIPLIED : ZIMG_ALPHA_STRAIGHT;
+            zfmt->alpha = pl_to_z_alpha(fmt.repr.alpha);
 #else
             return false;
 #endif

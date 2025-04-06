@@ -120,6 +120,9 @@ const struct m_opt_choice_alternatives pl_alpha_names[] = {
     {"auto",        PL_ALPHA_UNKNOWN},
     {"straight",    PL_ALPHA_INDEPENDENT},
     {"premul",      PL_ALPHA_PREMULTIPLIED},
+#if PL_API_VER >= 344
+    {"none",        PL_ALPHA_NONE},
+#endif
     {0}
 };
 
