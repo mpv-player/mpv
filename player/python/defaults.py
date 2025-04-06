@@ -218,29 +218,40 @@ class Mpv:
     def print_ref_count(self, obj):
         self.info(f"refcount ({repr(obj)}): {sys.getrefcount(obj)}")
 
+    MPV_LOG_LEVEL_FATAL = 0
+    MPV_LOG_LEVEL_ERROR = 1
+    MPV_LOG_LEVEL_WARN  = 2
+    MPV_LOG_LEVEL_INFO  = 3
+    MPV_LOG_LEVEL_V     = 5
+    MPV_LOG_LEVEL_DEBUG = 6
+    MPV_LOG_LEVEL_TRACE = 7
+
     def log(self, level, *args):
         if not args:
             return
         msg = " ".join([str(msg) for msg in args])
-        _mpv.handle_log(self, level, f"{msg}\n")
+        _mpv.handle_log(self, level, bytes(msg, "utf-8"))
 
     def trace(self, *args):
-        self.log("trace", *args)
+        self.log(self.MPV_LOG_LEVEL_TRACE, *args)
 
     def debug(self, *args):
-        self.log("debug", *args)
+        self.log(self.MPV_LOG_LEVEL_DEBUG, *args)
+
+    def verbose(self, *args):
+        self.log(self.MPV_LOG_LEVEL_V, *args)
 
     def info(self, *args):
-        self.log("info", *args)
+        self.log(self.MPV_LOG_LEVEL_INFO, *args)
 
     def warn(self, *args):
-        self.log("warn", *args)
+        self.log(self.MPV_LOG_LEVEL_WARN, *args)
 
     def error(self, *a):
-        self.log("error", *a)
+        self.log(self.MPV_LOG_LEVEL_ERROR, *a)
 
     def fatal(self, *a):
-        self.log("fatal", *a)
+        self.log(self.MPV_LOG_LEVEL_FATAL, *a)
 
     def osd_message(self, text, duration=-1, osd_level=None):
         args = [text, duration]
@@ -272,14 +283,31 @@ class Mpv:
     def read_ex(self):
         return read_exception(sys.exc_info())
 
-    def call_catch_ex(self, func, *args, **kwargs):
+    def call_catch_ex(self, func, *args, default=None, log_level=None, **kwargs):
+        """
+        :param typing.Callable func:
+        :param tuple[typing.Any] args:
+        :param dict[str, typing.Any] kwargs:
+        :param typing.Any default: return value when func fails with exception.
+        :param int log_level: log level to register the message at when func fails with an exception.
+
+        Executes :param:`func` passing in the given :param:`args` and
+        :param:`kwargs` and returns the :param:`func` 's return value. In case
+        an exception has occurred, it returns the value found in
+        :param:`default`.
+        """
+
+        if log_level is None:
+            log_level = self.MPV_LOG_LEVEL_ERROR
+
         try:
-            func(*args, **kwargs)
+            return func(*args, **kwargs)
         except Exception:
             try:
-                self.error(read_exception(sys.exc_info()))
+                self.log(log_level, read_exception(sys.exc_info()))
             except Exception:
                 pass
+            return default
 
     def process_event(self, event_id, event):
         data = event["data"]
@@ -312,7 +340,7 @@ class Mpv:
         """
         :param node: data that resembles an mpv_node; can be a list of such nodes.
         """
-        return _mpv.command(self, node)
+        return self.sanitize(_mpv.command(self, node))
 
     async_call_table: dict = {}
     async_last_id = 0
@@ -414,7 +442,7 @@ class Mpv:
         if not (isinstance(property_name, str) and mpv_format in range(1, 10)):
             self.error("TODO: have a pointer to doc string")
             return
-        return _mpv.get_property(self, property_name, mpv_format)
+        return self.sanitize(_mpv.get_property(self, property_name, mpv_format))
 
     def get_property_string(self, name):
         return self.get_property(name, self.MPV_FORMAT_STRING)
@@ -520,6 +548,37 @@ class Mpv:
         if (p := self.observe_properties.get(event["reply_userdata"], None)) is not None:
             self.call_catch_ex(p["callback"], event["data"]["value"])
 
+    def sanitize(self, value):
+        if isinstance(value, dict):
+            return self._traverse_dict(value)
+        elif isinstance(value, (list, tuple)):
+            return self._traverse_sequence(value)
+        else:
+            return self.sanitize_string(value)
+
+    def _traverse_sequence(self, sequence):
+        make_tuple = False
+        if isinstance(sequence, tuple):
+            make_tuple = True
+            sequence = list(sequence)
+        for i, value in enumerate(sequence):
+            sequence[i] = self.sanitize(value)
+        if make_tuple:
+            sequence = tuple(sequence)
+        return sequence
+
+    def _traverse_dict(self, data):
+        for key, value in data.items():
+            data[key] = self.sanitize(value)
+        return data
+
+    def sanitize_string(self, value):
+        def sanitize():
+            if isinstance(value, bytes):
+                return value.decode("utf-8")
+            return value
+        return self.call_catch_ex(sanitize, default=value, log_level=mpv.MPV_LOG_LEVEL_WARN)
+
     def handle_event(self, event):
         """
         Returns:
@@ -533,7 +592,7 @@ class Mpv:
         else:
             return True
 
-        self.process_event(event_id, event)
+        self.process_event(event_id, self.sanitize(event))
 
         if event_id == self.MPV_EVENT_SHUTDOWN:
             return False
@@ -552,20 +611,22 @@ class Mpv:
             self.call_catch_ex(cb, True, data, None)
 
     def run(self):
-        self.flush()
-        self.enable_client_message()
+        def _run():
+            self.flush()
+            self.enable_client_message()
 
-        self.register_event(self.MPV_EVENT_COMMAND_REPLY)(self.command_reply)
+            self.register_event(self.MPV_EVENT_COMMAND_REPLY)(self.command_reply)
 
-        self.debug(f"Running {self.name}")
-        _mpv.run_event_loop(self)
-        self.clean_up()
+            self.debug(f"Running {self.name}")
+            _mpv.run_event_loop(self)
+            self.clean_up()
+        self.call_catch_ex(_run)
 
     def clean_up(self):
         self.clear_timers()
 
     def clear_timers(self):
-        for name in self.threads.keys():
+        for name in list(self.threads.keys()):
             self.clear_timer(name)
 
 

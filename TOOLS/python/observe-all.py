@@ -15,10 +15,14 @@ def observe(name):
 
 
 for name in mpv.get_property_node("property-list"):
-    if name not in ["osd-sym-cc", "osd-ass-cc", "term-clip-cc", "screenshot-template"]:
-        observe(name)
+    observe(name)
+    # if name not in ["osd-sym-cc", "osd-ass-cc", "term-clip-cc",
+    #     "screenshot-template"  # fails with: *** %n in writable segment detected ***
+    # ]:
+    #     observe(name)
 
 
 for name in mpv.get_property_node("options"):
-    if name not in ["screenshot-template"]:
-        observe("options/" + name)
+    observe(name)
+    # if name not in ["screenshot-template"]:
+    #     observe("options/" + name)
