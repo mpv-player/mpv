@@ -162,7 +162,6 @@ static int run_client(PyClientCtx *cctx)
 }
 
 
-/************************************************************************************************/
 static int s_load_python(struct mp_script_args *args)
 {
     int ret = 0;

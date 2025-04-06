@@ -71,6 +71,10 @@ static void makenode(void *ta_ctx, PyObject *obj, mpv_node *node) {
         node->format = MPV_FORMAT_STRING;
         node->u.string = talloc_strdup(ta_ctx, (char *)PyUnicode_AsUTF8(obj));
     }
+    else if (PyBytes_Check(obj)) {
+        node->format = MPV_FORMAT_STRING;
+        node->u.string = talloc_strdup(ta_ctx, (char *)PyBytes_AsString(obj));
+    }
     else if (PyList_Check(obj)) {
         node->format = MPV_FORMAT_NODE_ARRAY;
         mpv_node_list *list = talloc(ta_ctx, mpv_node_list);
@@ -127,7 +131,8 @@ deconstructnode(struct mpv_node *node)
         return PyFloat_FromDouble(node->u.double_);
     }
     else if (node->format == MPV_FORMAT_STRING) {
-        return PyUnicode_FromString(node->u.string);
+        // return PyUnicode_FromString(node->u.string);
+        return PyBytes_FromString(node->u.string);
     }
     else if (node->format == MPV_FORMAT_NODE_ARRAY) {
         PyObject *lnode = PyList_New(node->u.list->num);
@@ -157,7 +162,8 @@ unmakedata(mpv_format format, void *data)
     switch (format) {
         case MPV_FORMAT_STRING:
         case MPV_FORMAT_OSD_STRING:
-            ret = PyUnicode_DecodeFSDefault((char *)data);
+            // ret = PyUnicode_DecodeFSDefault((char *)data);
+            ret = PyBytes_FromString((char *)data);
             break;
         case MPV_FORMAT_FLAG:
             ret = PyLong_FromLong(*(int *)data);
@@ -246,23 +252,19 @@ py_mpv_printEx(PyObject *self, PyObject *args) {
 static PyObject *
 py_mpv_handle_log(PyObject *self, PyObject *args)
 {
-    PyObject *mpv;
-    char **args_ = talloc_array(NULL, char *, 2);
-    if (!PyArg_ParseTuple(args, "Oss", &mpv, &args_[0], &args_[1])) {
-        print_parse_error("Failed to parse args (script_log)\n");
+    PyObject *mpv, *bytes;
+    int *level = talloc(NULL, int);
+    if (!PyArg_ParseTuple(args, "OiO", &mpv, level, &bytes)) {
+        talloc_free(level);
+        print_parse_error("Failed to parse args (mpv.handle_log)\n");
         Py_RETURN_NONE;
     }
 
     PyClientCtx *cctx = get_client_context(mpv);
-    if (cctx == NULL) {
-        PyErr_PrintEx(1);
-        Py_RETURN_NONE;
-    }
-    struct mp_log *log = cctx->log;
-    Py_DECREF(cctx);
 
-    mp_msg(log, mp_msg_find_level(args_[0]), args_[1], NULL);
-    talloc_free(args_);
+    MP_MSG(cctx, *level, "%s\n", PyBytes_AsString(bytes));
+    Py_DECREF(cctx);
+    talloc_free(level);
     Py_RETURN_NONE;
 }
 
@@ -451,7 +453,12 @@ py_mpv_set_property(PyObject *self, PyObject *args)
     switch (*format) {
         case MPV_FORMAT_STRING:
         case MPV_FORMAT_OSD_STRING:
-            *(char **)data = talloc_strdup(data, PyUnicode_AsUTF8(value));
+            if (PyBytes_Check(value)) {
+                *(char **)data = talloc_strdup(data, PyBytes_AsString(value));
+            }
+            else {
+                *(char **)data = talloc_strdup(data, PyUnicode_AsUTF8(value));
+            }
             break;
         case MPV_FORMAT_FLAG:
             *(int *)data = PyLong_AsLong(value);
@@ -567,7 +574,7 @@ py_mpv_command(PyObject *self, PyObject *args)
     makenode(cctx->ta_ctx, PyTuple_GetItem(args, 1), cmd);
     struct mpv_node *result = talloc(tmp, struct mpv_node);
     if (!PyObject_IsTrue(check_error(mpv_command_node(cctx->client, cmd, result)))) {
-        mp_msg(cctx->log, mp_msg_find_level("error"), "failed to run node command\n");
+        MP_ERR(cctx, "failed to run node command\n");
         talloc_free(tmp);
         Py_DECREF(cctx);
         Py_RETURN_NONE;
