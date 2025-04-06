@@ -615,7 +615,7 @@ const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
         if (c->value == value)
             return c->name;
     }
-    return NULL;
+    mp_require(false && "Invalid choice value!");
 }
 
 static void print_choice_values(struct mp_log *log, const struct m_option *opt)
