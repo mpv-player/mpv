@@ -1,6 +1,10 @@
 PYTHON SCRIPTING
 ================
 
+..
+    Useful links
+    ASS markup: https://aegisub.org/docs/latest/ass_tags/
+
 mpv can load Python scripts. (See `Script location`_.)
 
 

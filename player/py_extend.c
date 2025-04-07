@@ -571,7 +571,7 @@ py_mpv_command(PyObject *self, PyObject *args)
     PyClientCtx *cctx = get_client_context(PyTuple_GetItem(args, 0));
     void *tmp = talloc_new(cctx->ta_ctx);
     struct mpv_node *cmd = talloc(tmp, struct mpv_node);
-    makenode(cctx->ta_ctx, PyTuple_GetItem(args, 1), cmd);
+    makenode(tmp, PyTuple_GetItem(args, 1), cmd);
     struct mpv_node *result = talloc(tmp, struct mpv_node);
     if (!PyObject_IsTrue(check_error(mpv_command_node(cctx->client, cmd, result)))) {
         MP_ERR(cctx, "failed to run node command\n");
@@ -579,9 +579,10 @@ py_mpv_command(PyObject *self, PyObject *args)
         Py_DECREF(cctx);
         Py_RETURN_NONE;
     }
+    PyObject *ret = deconstructnode(result);
     talloc_free(tmp);
     Py_DECREF(cctx);
-    return deconstructnode(result);
+    return ret;
 }
 
 

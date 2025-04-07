@@ -5,6 +5,7 @@ The python wrapper module for the embedded and extended functionalities
 # extension module, see: player/py_extend.c
 import mpv as _mpv  # type: ignore
 
+import math
 import sys
 import traceback
 import typing
@@ -143,6 +144,74 @@ class Options:
                     on_update(changelist)
 
 
+class Ass:
+    scale = 4
+    text = ""
+    def append(self, s):
+        self.text += s
+
+    def draw_start(self):
+        self.text = "%s{\\p%d}" % (self.text, self.scale)
+
+    def draw_stop(self):
+        self.text += "{\\p0}"
+
+    def pos(self, x, y):
+        self.append("{\\pos(%f,%f)}" % (x, y))
+
+    def rect_cw(self, x0, y0, x1, y1):
+        self.move_to(x0, y0)
+        self.line_to(x1, y0)
+        self.line_to(x1, y1)
+        self.line_to(x0, y1)
+
+    def move_to(self, x, y):
+        self.append(" m")
+        self.coord(x, y)
+
+    def line_to(self, x, y):
+        self.append(" l")
+        self.coord(x, y)
+
+    def coord(self, x, y):
+        scale = 2 ** (self.scale - 1)
+        ix = math.ceil(x * scale)
+        iy = math.ceil(y * scale)
+        self.text = "%s %d %d" % (self.text, ix, iy)
+
+
+class OSDOverlay:
+    next_assid = 1
+    def __init__(self, format):
+        self.format = format
+        OSDOverlay.next_assid += 1
+        self.id = OSDOverlay.next_assid
+        self.data = ""
+        self.res_x = 0
+        self.res_y = 720
+        self.z = 0
+
+    def update(self):
+        cmd = self.__dict__.copy()
+        cmd["name"] = "osd-overlay"
+        cmd["res_x"] = round(cmd["res_x"])
+        cmd["res_y"] = round(cmd["res_y"])
+        
+        return mpv.sanitize(mpv.command(cmd))
+
+    def remove(self):
+        try:
+            mpv.command({
+                "name": "osd-overlay",
+                "format": "none",
+                "id": self.id,
+                "data": ""
+            })
+        except Exception:
+            return False
+        return True
+
+
 class Mpv:
     """
 
@@ -172,6 +241,12 @@ class Mpv:
 
     options = Options()
 
+    def create_osd_overlay(self, format = "ass-events"):
+        return OSDOverlay(format)
+
+    def ass_new(self):
+        return Ass()
+
     messages: dict = {}
 
     def register_script_message(self, name):
@@ -196,10 +271,31 @@ class Mpv:
         return decorate
 
     threads: dict = {}
+    periodic_timer_meta: dict = {}
 
     @property
     def timers(self):
         return self.threads
+
+    def disable_timer(self, name):
+        self.periodic_timer_meta[name]["disabled"] = True
+        self.clear_timer(name)
+
+    def add_periodic_timer(self, sec, func, *args, name=None, **kwargs):
+        if name is None:
+            self.next_bid += 1
+            name = f"timer{self.next_bid}"
+        self.periodic_timer_meta[name] = {
+            "sec": sec,
+            "disabled": False
+        }
+        def do(*a, **kw):
+            func(*a, **kw)
+
+            if not self.periodic_timer_meta[name]["disabled"]:
+                self.add_timeout(sec, do, *a, name=name, **kw)
+
+        self.add_timeout(sec, do, *args, name=name, **kwargs)
 
     def add_timeout(self, sec, func, *args, name=None, **kwargs):
         t = Timer(sec, func, args=args, kwargs=kwargs)
@@ -626,6 +722,8 @@ class Mpv:
         self.clear_timers()
 
     def clear_timers(self):
+        for name in self.periodic_timer_meta.keys():
+            self.disable_timer(name)
         for name in list(self.threads.keys()):
             self.clear_timer(name)
 
