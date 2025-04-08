@@ -517,8 +517,9 @@ static void resize(struct vo *vo)
 
     const int width = mp_rect_w(wl->geometry);
     const int height = mp_rect_h(wl->geometry);
+    vo_get_src_dst_rects(vo, &src, &dst, &p->screen_osd_res);
 
-    if (width == 0 || height == 0)
+    if (width == 0 || height == 0 || mp_rect_w(dst) == 0 || mp_rect_h(dst) == 0)
         return;
 
     vo_wayland_set_opaque_region(wl, false);
