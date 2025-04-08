@@ -833,6 +833,13 @@ static void init_avctx(struct mp_filter *vd)
         goto error;
     }
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (avctx->width > 8192 || avctx->height > 8192) {
+        MP_ERR(vd, "Frame size too big %" PRIu32 "x%" PRIu32 ".\n", avctx->width, avctx->height);
+        goto error;
+    }
+#endif
+
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)
         goto error;
