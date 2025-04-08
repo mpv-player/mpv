@@ -3009,7 +3009,7 @@ static bool obj_settings_list_insert_at(struct mp_log *log,
     // items, and it quickly starts taking ages to add all items.
     if (num > 100) {
         mp_warn(log, "Object settings list capacity exceeded: "
-                     "a maximum of 100 elements is allowed.");
+                     "a maximum of 100 elements is allowed.\n");
         return false;
     }
     if (idx < 0)
