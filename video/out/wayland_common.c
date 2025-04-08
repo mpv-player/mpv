@@ -73,6 +73,13 @@
 #define XDG_TOPLEVEL_STATE_SUSPENDED 9
 #endif
 
+#ifndef XDG_TOPLEVEL_STATE_CONSTRAINED_LEFT_SINCE_VERSION
+#define XDG_TOPLEVEL_STATE_CONSTRAINED_LEFT 10
+#define XDG_TOPLEVEL_STATE_CONSTRAINED_RIGHT 11
+#define XDG_TOPLEVEL_STATE_CONSTRAINED_TOP 12
+#define XDG_TOPLEVEL_STATE_CONSTRAINED_BOTTOM 13
+#endif
+
 // From the fractional scale protocol
 #define WAYLAND_SCALE_FACTOR 120.0
 
@@ -1255,6 +1262,14 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         case XDG_TOPLEVEL_STATE_SUSPENDED:
             is_suspended = true;
             break;
+        case XDG_TOPLEVEL_STATE_CONSTRAINED_LEFT:
+        case XDG_TOPLEVEL_STATE_CONSTRAINED_RIGHT:
+            wl->resizing_constraint = MP_WIDTH_CONSTRAINT;
+            break;
+        case XDG_TOPLEVEL_STATE_CONSTRAINED_TOP:
+        case XDG_TOPLEVEL_STATE_CONSTRAINED_BOTTOM:
+            wl->resizing_constraint = MP_HEIGHT_CONSTRAINT;
+            break;
         }
     }
 
@@ -2011,7 +2026,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, xdg_wm_base_interface.name) && found++) {
-        ver = MPMIN(ver, 6); /* Cap at 6 in case new events are added later. */
+        ver = MPMIN(ver, 7); /* Cap at 7 in case new events are added later. */
         wl->wm_base = wl_registry_bind(reg, id, &xdg_wm_base_interface, ver);
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
