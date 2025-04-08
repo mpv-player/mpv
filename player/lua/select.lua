@@ -238,6 +238,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     end
 
     local editions = {}
+    local default_item = mp.get_property_native("current-edition")
 
     for i, edition in ipairs(edition_list) do
         editions[i] = edition.title or ("Edition " .. edition.id + 1)
@@ -246,7 +247,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     input.select({
         prompt = "Select an edition:",
         items = editions,
-        default_item = mp.get_property_native("current-edition") + 1,
+        default_item = default_item > -1 and default_item + 1,
         submit = function (edition)
             mp.set_property("edition", edition - 1)
         end,
