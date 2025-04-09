@@ -27,16 +27,16 @@
 from mpvclient import mpv  # type: ignore
 
 script_name = mpv.name
-detect_label = "%s-detect" % script_name
-pullup_label = "%s" % script_name
-dominance_label = "%s-dominance" % script_name
-ivtc_detect_label = "%s-ivtc-detect" % script_name
+detect_label = f"{script_name}-detect"
+pullup_label = script_name
+dominance_label = f"{script_name}-dominance"
+ivtc_detect_label = f"{script_name}-ivtc-detect"
 
 progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3
 
 # number of seconds to gather cropdetect data
 try:
-    detect_seconds = float(mpv.get_opt("%s.detect_seconds" % script_name, 4))
+    detect_seconds = float(mpv.get_opt(f"{script_name}.detect_seconds", 4))
 except ValueError:
     detect_seconds = 4
 
@@ -54,8 +54,8 @@ def del_filter_if_present(label):
     return False
 
 
-def add_vf(label, filter):
-    return mpv.command_string("vf add @%s:%s" % (label, filter))
+def add_vf(label, filter):  # noqa: A002
+    return mpv.command_string(f"vf add @{label}:{filter}")
 
 
 def stop_detect():
@@ -65,7 +65,7 @@ def stop_detect():
 
 def judge(label):
     # get the metadata
-    result = mpv.get_property_node("vf-metadata/%s" % label)
+    result = mpv.get_property_node(f"vf-metadata/{label}")
     num_tff          = float(result["lavfi.idet.multiple.tff"])
     num_bff          = float(result["lavfi.idet.multiple.bff"])
     num_progressive  = float(result["lavfi.idet.multiple.progressive"])
@@ -114,7 +114,7 @@ def select_filter():
 
     # handle the ivtc detection filter results
     if ivtc_verdict == progressive:
-        mpv.info("telecined with %s field dominance: using pullup" % dominance)
+        mpv.info(f"telecined with {dominance} field dominance: using pullup")
         stop_detect()
     else:
         mpv.info("interlaced with " + dominance +

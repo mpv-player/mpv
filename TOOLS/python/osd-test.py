@@ -1,10 +1,10 @@
-from mpvclient import mpv
+from mpvclient import mpv  # type: ignore
 
 things = []
 for _ in range(2):
     things.append({
         "osd1": mpv.create_osd_overlay("ass-events"),
-        "osd2": mpv.create_osd_overlay("ass-events")
+        "osd2": mpv.create_osd_overlay("ass-events"),
     })
 
 things[0]["text"] = "{\\an5}hello\\Nworld"
@@ -19,7 +19,7 @@ def the_do_hickky_thing():
         res = thing["osd1"].update()
 
         thing["osd2"].hidden = True
-        if res != None and res["x0"] != None:
+        if res is not None and res["x0"] is not None:
             draw = mpv.ass_new()
             draw.append("{\\alpha&H80}")
             draw.draw_start()

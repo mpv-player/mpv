@@ -1,5 +1,5 @@
 import math
-from mpvclient import mpv
+from mpvclient import mpv  # type: ignore
 
 
 def lux_to_gamma(lmin, lmax, rmin, rmax, lux):

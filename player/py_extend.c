@@ -205,23 +205,24 @@ print_parse_error(const char *msg)
 {
     PyErr_PrintEx(1);
 
-    char message[200];
-    snprintf(message, sizeof(message), "%s\n%s",
+    char *message = talloc_asprintf(NULL, "%s\n%s",
         "Below is the line describing the above exception location", msg);
 
     PyErr_SetString(PyExc_Exception, message);
+    talloc_free(message);
     PyErr_PrintEx(1);
 }
 
 
-static PyObject *check_error(int err)
+static PyObject *check_error(int err, char *suffix)
 {
     if (err >= 0) {
         Py_RETURN_TRUE;
     }
     const char *errstr = mpv_error_string(err);
-    // printf("%s\n", errstr);
-    PyErr_SetString(PyExc_Exception, errstr);
+    char *msg = talloc_asprintf(NULL, "%s %s", suffix, errstr);
+    PyErr_SetString(PyExc_Exception, msg);
+    talloc_free(msg);
     PyErr_PrintEx(1);  // clearing it out lets python to continue (or use: PyErr_Clear())
     Py_RETURN_NONE;
 }
@@ -371,7 +372,7 @@ py_mpv_enable_messages(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_Exception, "Invalid Log Error");
         Py_RETURN_NONE;
     }
-    return check_error(res);
+    return check_error(res, "");
 }
 
 
@@ -383,13 +384,13 @@ py_mpv_enable_messages(PyObject *self, PyObject *args)
 static PyObject *
 py_mpv_get_property(PyObject *self, PyObject *args)
 {
-    const char **name = talloc(NULL, const char *);
-    mpv_format *format = talloc(NULL, mpv_format);
+    void *tmp = talloc_new(NULL);
+    const char **name = talloc(tmp, const char *);
+    mpv_format *format = talloc(tmp, mpv_format);
     PyObject *mpv;
 
     if (!PyArg_ParseTuple(args, "Osi", &mpv, name, format)) {
-        talloc_free(name);
-        talloc_free(format);
+        talloc_free(tmp);
         print_parse_error("Failed to parse args (mpv.get_property)\n");
         Py_RETURN_NONE;
     }
@@ -397,30 +398,28 @@ py_mpv_get_property(PyObject *self, PyObject *args)
     PyClientCtx *cctx = get_client_context(mpv);
 
     if (*format == MPV_FORMAT_NONE) {
-        talloc_free(name);
-        talloc_free(format);
+        talloc_free(tmp);
         Py_DECREF(cctx);
         Py_RETURN_NONE;
     }
 
-    void *out = fmt_talloc(NULL, *format);
+    void *out = fmt_talloc(tmp, *format);
     int err;
     if (*format == MPV_FORMAT_STRING || *format == MPV_FORMAT_OSD_STRING) {
         err = mpv_get_property(cctx->client, *name, *format, &out);
     } else {
         err = mpv_get_property(cctx->client, *name, *format, out);
     }
-    talloc_free(name);
     Py_DECREF(cctx);
     if (err >= 0) {
         PyObject *ret = unmakedata(*format, out);
-        talloc_free(out);
-        talloc_free(format);
+        talloc_free(tmp);
         return ret;
     }
-    talloc_free(out);
-    talloc_free(format);
-    return check_error(err);
+    char *suffix = talloc_asprintf(tmp, "(mpv.get_property) property_name: '%s' (format: '%d')::", *name, *format);
+    PyObject *ret = check_error(err, suffix);
+    talloc_free(tmp);
+    return ret;
 }
 
 
@@ -481,7 +480,7 @@ py_mpv_set_property(PyObject *self, PyObject *args)
     res = mpv_set_property(cctx->client, *name, *format, data);
     talloc_free(tctx);
     Py_DECREF(cctx);
-    return check_error(res);
+    return check_error(res, "");
 }
 
 
@@ -507,7 +506,7 @@ py_mpv_del_property(PyObject *self, PyObject *args)
 
     talloc_free(p);
     Py_DECREF(cctx);
-    return check_error(res);
+    return check_error(res, "");
 }
 
 
@@ -538,7 +537,7 @@ py_mpv_observe_property(PyObject *self, PyObject *args)
     int err = mpv_observe_property(ctx->client, *reply_userdata, *name, *format);
     talloc_free(tctx);
     Py_DECREF(ctx);
-    return check_error(err);
+    return check_error(err, "");
 }
 
 
@@ -561,7 +560,7 @@ py_mpv_unobserve_property(PyObject *self, PyObject *args)
     talloc_free(reply_userdata);
     Py_DECREF(ctx);
 
-    return check_error(err);
+    return check_error(err, "");
 }
 
 
@@ -573,7 +572,7 @@ py_mpv_command(PyObject *self, PyObject *args)
     struct mpv_node *cmd = talloc(tmp, struct mpv_node);
     makenode(tmp, PyTuple_GetItem(args, 1), cmd);
     struct mpv_node *result = talloc(tmp, struct mpv_node);
-    if (!PyObject_IsTrue(check_error(mpv_command_node(cctx->client, cmd, result)))) {
+    if (!PyObject_IsTrue(check_error(mpv_command_node(cctx->client, cmd, result), ""))) {
         MP_ERR(cctx, "failed to run node command\n");
         talloc_free(tmp);
         Py_DECREF(cctx);
@@ -604,7 +603,7 @@ py_mpv_commandv(PyObject *self, PyObject *args)
     int ret = mpv_command(cctx->client, argv);
     Py_DECREF(cctx);
     talloc_free(argv);
-    return check_error(ret);
+    return check_error(ret, "");
 }
 
 
@@ -626,7 +625,7 @@ py_mpv_command_string(PyObject *self, PyObject *args)
     int res = mpv_command_string(cctx->client, *s);
     talloc_free(s);
     Py_DECREF(cctx);
-    return check_error(res);
+    return check_error(res, "");
 }
 
 
@@ -653,7 +652,7 @@ py_mpv_command_node_async(PyObject *self, PyObject *args)
     talloc_free(command_id);
     talloc_free(tmp);
     Py_DECREF(cctx);
-    return check_error(res);
+    return check_error(res, "");
 }
 
 
@@ -672,6 +671,65 @@ py_mpv_abort_async_command(PyObject *self, PyObject *args)
 
     Py_DECREF(cctx);
     Py_RETURN_NONE;
+}
+
+
+static PyObject *
+py_mpv_hook_add(PyObject *self, PyObject *args)
+{
+    PyObject *mpv;
+    void *tmp = talloc_new(NULL);
+    uint64_t *reply_userdata = talloc(tmp, uint64_t);
+    char **name = talloc(tmp, char *);
+    int *priority = talloc(tmp, int);
+
+    if (!PyArg_ParseTuple(args, "OKsi", &mpv, reply_userdata, name, priority)) {
+        talloc_free(tmp);
+        print_parse_error("Failed to parse args (mpv.hook_add)\n");
+        Py_RETURN_NONE;
+    }
+
+    PyClientCtx *ctx = get_client_context(mpv);
+
+    int err = mpv_hook_add(ctx->client, *reply_userdata, *name, *priority);
+    Py_DECREF(ctx);
+    if (err >= 0) {
+        talloc_free(tmp);
+        Py_RETURN_TRUE;
+    }
+    char *suffix = talloc_asprintf(tmp, "(mpv.hook_add) (%ld) '%s' '%d':",
+        *reply_userdata, *name, *priority);
+    PyObject *ret = check_error(err, suffix);
+    talloc_free(tmp);
+    return ret;
+}
+
+
+static PyObject *
+py_mpv_hook_continue(PyObject *self, PyObject *args)
+{
+    PyObject *mpv;
+    void *tmp = talloc_new(NULL);
+    uint64_t *id = talloc(tmp, uint64_t);
+
+    if (!PyArg_ParseTuple(args, "OK", &mpv, id)) {
+        talloc_free(tmp);
+        print_parse_error("Failed to parse args (mpv.hook_continue)\n");
+        Py_RETURN_NONE;
+    }
+
+    PyClientCtx *ctx = get_client_context(mpv);
+    int err = mpv_hook_continue(ctx->client, *id);
+    Py_DECREF(ctx);
+    if (err >= 0) {
+        talloc_free(tmp);
+        Py_RETURN_TRUE;
+    }
+
+    char *suffix = talloc_asprintf(tmp, "(mpv.hook_continue) '%ld':", *id);
+    PyObject *ret = check_error(err, suffix);
+    talloc_free(tmp);
+    return ret;
 }
 
 
@@ -698,7 +756,7 @@ py_mpv_request_event(PyObject *self, PyObject *args)
     talloc_free(args_);
     Py_DECREF(cctx);
 
-    return check_error(err);
+    return check_error(err, "");
 }
 
 
@@ -786,6 +844,12 @@ static PyObject *py_mpv_run_event_loop(PyObject *self, PyObject *args)
         } else if (event->event_id == MPV_EVENT_COMMAND_REPLY) {
             mpv_event_command *result_node = (mpv_event_command *)event->data;
             PyDict_SetItemString(ed, "data", deconstructnode(&result_node->result));
+        } else if (event->event_id == MPV_EVENT_HOOK) {
+            mpv_event_hook *hook = (mpv_event_hook *)event->data;
+            PyObject *data = PyDict_New();
+            PyDict_SetItemString(data, "name", PyUnicode_DecodeFSDefault(hook->name));
+            PyDict_SetItemString(data, "id", PyLong_FromUnsignedLongLong(hook->id));
+            PyDict_SetItemString(ed, "data", data);
         } else PyDict_SetItemString(ed, "data", Py_None);
 
         if (PyObject_CallMethod(mpv, "handle_event", "O", ed) == Py_False) {
@@ -837,6 +901,10 @@ static PyMethodDef py_mpv_methods[] = {
      PyDoc_STR("runs mpv_command_node_async given a command_id and py structure(s, as in list) convertible to mpv_node.")},
     {"abort_async_command", (PyCFunction)py_mpv_abort_async_command, METH_VARARGS,
      PyDoc_STR("given an async command id, aborts it.")},
+    {"hook_add", (PyCFunction)py_mpv_hook_add, METH_VARARGS,
+     PyDoc_STR("")},
+    {"hook_continue", (PyCFunction)py_mpv_hook_continue, METH_VARARGS,
+     PyDoc_STR("")},
     {"wait_event", (PyCFunction)py_mpv_wait_event, METH_VARARGS,
      PyDoc_STR("Listens for mpv_event and returns event_id and event_data")},
     {NULL, NULL, 0, NULL}                                                     /* Sentinel */

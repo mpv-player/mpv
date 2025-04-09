@@ -83,7 +83,7 @@ def is_cropable(time_needed):
 
 
 def remove_cropdetect():
-    for filter in mpv.get_property_node("vf"):
+    for filter in mpv.get_property_node("vf"):  # noqa: A001
         if filter["label"] == cropdetect_label:
             mpv.command_string(f"{command_prefix} vf remove @{filter["label"]}")
             return
@@ -123,8 +123,8 @@ def apply_crop(meta):
         return
 
     # Apply crop.
-    mpv.command_string("%s set file-local-options/video-crop %sx%s+%s+%s" %
-                             (command_prefix, meta["w"], meta["h"], meta["x"], meta["y"]))
+    mpv.command_string("{} set file-local-options/video-crop {}x{}+{}+{}".format(
+        command_prefix, meta["w"], meta["h"], meta["x"], meta["y"]))
 
 
 def detect_end():
@@ -182,14 +182,10 @@ def detect_crop():
     hwdec_current = mpv.get_property_string("hwdec-current")
 
     if not hwdec_current.endswith("-copy") and hwdec_current not in ["no", "crystalhd", "rkmpp"]:
-        hwdec_backup = mpv.get_property_string("hwdec")
         mpv.set_property_string("hwdec", "no")
 
-    # Insert the cropdetect filter.
-    limit = options["detect_limit"]
-    round = options["detect_round"]
-
-    mpv.command_string(f"{command_prefix} vf pre @{cropdetect_label}:cropdetect=limit={limit}:round={round}:reset=0")
+    mpv.command_string(f"{command_prefix} vf pre @{cropdetect_label}:"
+        "cropdetect=limit={limit}:round={round}:reset=0")
 
     # Wait to gather data.
     mpv.add_timeout(time_needed, detect_end, name="detect_crop")
@@ -236,7 +232,7 @@ def on_toggle():
 
     # Cropped => Remove it.
     if mpv.get_property_string("video-crop") != "":
-        mpv.command_string("%s set file-local-options/video-crop ''" % command_prefix)
+        mpv.command_string(f"{command_prefix} set file-local-options/video-crop ''")
         return
 
     # Detecting => Leave it.

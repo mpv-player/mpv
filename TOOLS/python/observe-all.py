@@ -4,7 +4,7 @@
 # remote files), so you should in general only watch properties you
 # are interested in.
 
-from mpvclient import mpv
+from mpvclient import mpv  #type: ignore
 
 
 def observe(name):

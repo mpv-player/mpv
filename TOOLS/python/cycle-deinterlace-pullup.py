@@ -15,10 +15,11 @@
 # TODO: It might make sense to use hardware assisted vdpaupp=pullup,
 # if available, but I don't have hardware to test it. Patch welcome.
 
-from mpvclient import mpv
+from mpvclient import mpv  # type: ignore
 
 script_name = mpv.name
-pullup_label = "%s-pullup" % script_name
+pullup_label = f"{script_name}-pullup"
+
 
 def pullup_on():
     for vf in mpv.get_property_node("vf"):
@@ -26,15 +27,16 @@ def pullup_on():
             return "yes"
     return "no"
 
+
 def do_cycle():
     if pullup_on() == "yes":
         # if pullup is on remove it
-        mpv.command_string("vf remove @%s:pullup" % pullup_label)
+        mpv.command_string(f"vf remove @{pullup_label}:pullup")
         return
     elif mpv.get_property_string("deinterlace") == "yes":
         # if deinterlace is on, turn it off and insert pullup filter
         mpv.set_property_string("deinterlace", "no")
-        mpv.command_string("vf add @%s:pullup" % pullup_label)
+        mpv.command_string(f"vf add @{pullup_label}:pullup")
         return
     else:
         # if neither is on, turn on deinterlace
@@ -46,5 +48,5 @@ def do_cycle():
 def cycle_deinterlace_pullup_handler():
     do_cycle()
     # independently determine current state and give user feedback
-    mpv.osd_message("deinterlace: %s\npullup: %s" % (
+    mpv.osd_message("deinterlace: {}\npullup: {}".format(
             mpv.get_property_string("deinterlace"), pullup_on()))
