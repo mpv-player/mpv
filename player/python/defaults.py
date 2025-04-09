@@ -151,13 +151,13 @@ class Ass:
         self.text += s
 
     def draw_start(self):
-        self.text = "%s{\\p%d}" % (self.text, self.scale)
+        self.text = "%s{\\p%d}" % (self.text, self.scale)  # noqa: UP031
 
     def draw_stop(self):
         self.text += "{\\p0}"
 
     def pos(self, x, y):
-        self.append("{\\pos(%f,%f)}" % (x, y))
+        self.append("{\\pos(%f,%f)}" % (x, y))  # noqa: UP031
 
     def rect_cw(self, x0, y0, x1, y1):
         self.move_to(x0, y0)
@@ -177,12 +177,12 @@ class Ass:
         scale = 2 ** (self.scale - 1)
         ix = math.ceil(x * scale)
         iy = math.ceil(y * scale)
-        self.text = "%s %d %d" % (self.text, ix, iy)
+        self.text = f"{self.text} {ix} {iy}"
 
 
 class OSDOverlay:
     next_assid = 1
-    def __init__(self, format):
+    def __init__(self, format):  # noqa: A002
         self.format = format
         OSDOverlay.next_assid += 1
         self.id = OSDOverlay.next_assid
@@ -196,7 +196,7 @@ class OSDOverlay:
         cmd["name"] = "osd-overlay"
         cmd["res_x"] = round(cmd["res_x"])
         cmd["res_y"] = round(cmd["res_y"])
-        
+
         return mpv.sanitize(mpv.command(cmd))
 
     def remove(self):
@@ -205,7 +205,7 @@ class OSDOverlay:
                 "name": "osd-overlay",
                 "format": "none",
                 "id": self.id,
-                "data": ""
+                "data": "",
             })
         except Exception:
             return False
@@ -241,7 +241,7 @@ class Mpv:
 
     options = Options()
 
-    def create_osd_overlay(self, format = "ass-events"):
+    def create_osd_overlay(self, format = "ass-events"):  # noqa: A002
         return OSDOverlay(format)
 
     def ass_new(self):
@@ -264,9 +264,9 @@ class Mpv:
 
         def decorate(fn):
             self.request_event(name)
-            l = self.event_handlers.get(name, [])
-            l.append(fn)
-            self.event_handlers[name] = l
+            handler_list = self.event_handlers.get(name, [])
+            handler_list.append(fn)
+            self.event_handlers[name] = handler_list
 
         return decorate
 
@@ -287,7 +287,7 @@ class Mpv:
             name = f"timer{self.next_bid}"
         self.periodic_timer_meta[name] = {
             "sec": sec,
-            "disabled": False
+            "disabled": False,
         }
         def do(*a, **kw):
             func(*a, **kw)
@@ -384,8 +384,8 @@ class Mpv:
         :param typing.Callable func:
         :param tuple[typing.Any] args:
         :param dict[str, typing.Any] kwargs:
-        :param typing.Any default: return value when func fails with exception.
-        :param int log_level: log level to register the message at when func fails with an exception.
+        :param typing.Any default: return value when func fails with exception
+        :param int log_level: log level to register the message at when func fails with an exception
 
         Executes :param:`func` passing in the given :param:`args` and
         :param:`kwargs` and returns the :param:`func` 's return value. In case
@@ -419,6 +419,10 @@ class Mpv:
 
         elif event_id == self.MPV_EVENT_PROPERTY_CHANGE:
             self.notify_observer(event)
+
+        elif event_id == self.MPV_EVENT_HOOK:
+            self.run_hook(data["name"], event["reply_userdata"])
+            _mpv.hook_continue(self, data["id"])
 
         elif event_id in self.enabled_events:
             for cb in self.event_handlers.get(event_id, []):
@@ -458,8 +462,8 @@ class Mpv:
         return decorate
 
     def abort_async_command(self, t):
-        if id := t["id"]:
-            _mpv.abort_async_command(self, id)
+        if command_id := t["id"]:
+            _mpv.abort_async_command(self, command_id)
 
     def find_config_file(self, filename):
         return _mpv.find_config_file(self, filename)
@@ -471,6 +475,21 @@ class Mpv:
                 return _mpv.request_event(self, name, 1)  # _mpv.request_event(mpv, event, enable)
             finally:
                 self.enabled_events.append(name)
+
+    hooks: dict = {}
+    hook_id = 0
+
+    def add_hook(self, name, priority):
+        def decorate(func):
+            self.hook_id += 1
+            if name not in self.hooks:
+                self.hooks[name] = {}
+            self.hooks[name][self.hook_id] = func
+            _mpv.hook_add(self, self.hook_id, name, priority)
+        return decorate
+
+    def run_hook(self, hook_name, reply_userdata):
+        self.call_catch_ex(self.hooks[hook_name][reply_userdata])
 
     def enable_messages(self, level):
         return _mpv.enable_messages(self, level)
@@ -485,7 +504,7 @@ class Mpv:
         return decorate
 
 
-    def unobserve_property(self, id):
+    def unobserve_property(self, id):  # noqa: A002
         if id not in self.observe_properties:
             self.error(f"Unknown property observer id: {id}")
             return

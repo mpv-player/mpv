@@ -60,11 +60,11 @@ def parse_value(value):
         return None
 
 
-def format_value(value, dB):
-    return f"{value}{dB}"
+def format_value(value, decibel):
+    return f"{value}{decibel}"
 
 
-def show_osd(filter):
+def show_osd(filter):  # noqa: A002
     global o
     if not o["show_osd"]:
         return
@@ -102,7 +102,8 @@ def get_filter():
     ))
 
     for param in params:
-        af[len(af) - 1]["params"][param["name"]] = format_value(o["default_" + param["name"]], param["dB"])  # type: ignore
+        af[len(af) - 1]["params"][param["name"]] = format_value(
+            o["default_" + param["name"]], param["dB"])  # type: ignore
 
     return af, len(af)
 

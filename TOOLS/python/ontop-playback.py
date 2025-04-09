@@ -1,7 +1,7 @@
 # makes mpv disable ontop when pausing and re-enable it again when resuming playback
 # please note that this won't do anything if ontop was not enabled before pausing
 
-from mpvclient import mpv
+from mpvclient import mpv  # type: ignore
 
 was_ontop = False
 

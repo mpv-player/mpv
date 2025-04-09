@@ -1,6 +1,6 @@
 # Test script for some command API details.
 
-from mpvclient import mpv
+from mpvclient import mpv  # type: ignore
 
 
 @mpv.observe_property("vo-configured", mpv.MPV_FORMAT_FLAG)
