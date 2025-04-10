@@ -676,14 +676,9 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         present_sync_get_info(wl->present, info);
 }
 
-static bool is_supported_fmt(int fmt)
-{
-    return (fmt == IMGFMT_DRMPRIME || fmt == IMGFMT_VAAPI);
-}
-
 static int query_format(struct vo *vo, int format)
 {
-    return is_supported_fmt(format);
+    return format == IMGFMT_DRMPRIME || format == IMGFMT_VAAPI;
 }
 
 static const int32_t transform_enum_lut[4][2] = {
@@ -841,19 +836,10 @@ static int preinit(struct vo *vo)
         .global = p->global,
         .ra_ctx = p->ctx,
     };
-    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, NULL, true);
 
-    // Loop through hardware accelerated formats and only request known
-    // supported formats.
-    for (int i = IMGFMT_VDPAU_OUTPUT; i < IMGFMT_AVPIXFMT_START; ++i) {
-        if (is_supported_fmt(i)) {
-            struct hwdec_imgfmt_request params = {
-                .imgfmt = i,
-                .probing = false,
-            };
-            ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, &params);
-        }
-    }
+    // Initialize all possible hwdec drivers.
+    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "vaapi", false);
+    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "drmprime", false);
 
     for (int i = 0; i < p->hwdec_ctx.num_hwdecs; i++) {
         struct ra_hwdec *hw = p->hwdec_ctx.hwdecs[i];
