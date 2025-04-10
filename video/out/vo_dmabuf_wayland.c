@@ -689,6 +689,23 @@ static int reconfig(struct vo *vo, struct mp_image *img)
 {
     struct priv *p = vo->priv;
 
+    switch (img->imgfmt) {
+    case IMGFMT_VAAPI:
+        p->hwdec_type = HWDEC_VAAPI;
+        break;
+    case IMGFMT_DRMPRIME:
+        p->hwdec_type = HWDEC_DRMPRIME;
+        break;
+    default:
+        p->hwdec_type = HWDEC_NONE;
+    }
+
+    if (p->hwdec_type == HWDEC_NONE) {
+        MP_ERR(vo, "Format '%s' is not a valid hardware accelerated format!\n",
+               mp_imgfmt_to_name(img->imgfmt));
+        return VO_ERROR;
+    }
+
     if (img->params.force_window) {
         p->force_window = true;
         goto done;
@@ -840,20 +857,6 @@ static int preinit(struct vo *vo)
     // Initialize all possible hwdec drivers.
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "vaapi", false);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "drmprime", false);
-
-    for (int i = 0; i < p->hwdec_ctx.num_hwdecs; i++) {
-        struct ra_hwdec *hw = p->hwdec_ctx.hwdecs[i];
-        if (ra_get_native_resource(p->ctx->ra, "VADisplay")) {
-            p->hwdec_type = HWDEC_VAAPI;
-        } else if (strcmp(hw->driver->name, "drmprime") == 0) {
-            p->hwdec_type = HWDEC_DRMPRIME;
-        }
-    }
-
-    if (p->hwdec_type == HWDEC_NONE) {
-        MP_ERR(vo, "No valid hardware decoding driver could be loaded!\n");
-        goto err;
-    }
 
     p->src = (struct mp_rect){0, 0, 0, 0};
     return 0;
