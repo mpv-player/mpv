@@ -200,6 +200,7 @@ struct vo_wayland_seat {
     struct wp_cursor_shape_device_v1 *cursor_shape_device;
     uint32_t pointer_enter_serial;
     uint32_t pointer_button_serial;
+    uint32_t last_serial;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
     uint32_t keyboard_code;
@@ -280,6 +281,7 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
 
     s->pointer_enter_serial = serial;
     set_cursor_visibility(s, wl->cursor_visible);
@@ -298,6 +300,7 @@ static void pointer_handle_leave(void *data, struct wl_pointer *pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_LEAVE);
 }
 
@@ -321,6 +324,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
@@ -466,6 +470,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     // Note: the position should still be saved here for VO dragging handling.
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
@@ -490,6 +495,7 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     mp_input_remove_touch_point(wl->vo->input_ctx, id);
     wl->last_button_seat = NULL;
 }
@@ -587,6 +593,7 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     s->has_keyboard_input = true;
     s->keyboard_entering = true;
     guess_focus(wl);
@@ -601,6 +608,7 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     s->has_keyboard_input = false;
     s->keyboard_code = 0;
     s->mpkey = 0;
@@ -614,6 +622,7 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
                                 uint32_t state)
 {
     struct vo_wayland_seat *s = data;
+    s->last_serial = serial;
     handle_key_input(s, key, state, false);
 }
 
@@ -624,6 +633,7 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
 
     if (s->xkb_state) {
         xkb_state_update_mask(s->xkb_state, mods_depressed, mods_latched,
