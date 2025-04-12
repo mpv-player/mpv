@@ -192,7 +192,7 @@ struct vo_wayland_seat {
     struct wl_keyboard *keyboard;
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
-    struct wl_data_device *dnd_ddev;
+    struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
     struct vo_wayland_data_offer *selection_offer;
@@ -263,7 +263,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void remove_seat(struct vo_wayland_seat *seat);
-static void seat_create_dnd_ddev(struct vo_wayland_seat *seat);
+static void seat_create_data_device(struct vo_wayland_seat *seat);
 static void seat_create_text_input(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
@@ -1982,7 +1982,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_list_insert(&wl->seat_list, &seat->link);
 
         if (wl->devman)
-            seat_create_dnd_ddev(seat);
+            seat_create_data_device(seat);
 
         if (wl->text_input_manager)
             seat_create_text_input(seat);
@@ -2580,8 +2580,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_pointer_destroy(seat->pointer);
     if (seat->touch)
         wl_touch_destroy(seat->touch);
-    if (seat->dnd_ddev)
-        wl_data_device_destroy(seat->dnd_ddev);
+    if (seat->data_device)
+        wl_data_device_destroy(seat->data_device);
     if (seat->text_input)
         zwp_text_input_v3_destroy(seat->text_input->text_input);
 #if HAVE_WAYLAND_PROTOCOLS_1_32
@@ -2602,10 +2602,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
     return;
 }
 
-static void seat_create_dnd_ddev(struct vo_wayland_seat *seat)
+static void seat_create_data_device(struct vo_wayland_seat *seat)
 {
-    seat->dnd_ddev = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
-    wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
+    seat->data_device = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
+    wl_data_device_add_listener(seat->data_device, &data_device_listener, seat);
 }
 
 static void seat_create_text_input(struct vo_wayland_seat *seat)
@@ -3380,8 +3380,8 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->devman) {
         struct vo_wayland_seat *seat;
         wl_list_for_each(seat, &wl->seat_list, link) {
-            if (!seat->dnd_ddev)
-                seat_create_dnd_ddev(seat);
+            if (!seat->data_device)
+                seat_create_data_device(seat);
         }
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
