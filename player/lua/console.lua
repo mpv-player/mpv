@@ -1554,7 +1554,7 @@ mp.register_script_message("get-input", function (script_name, args)
 
     input_caller = script_name
     args = utils.parse_json(args)
-    prompt = args.prompt
+    prompt = args.prompt or ""
     line = args.default_text or ""
     cursor = tonumber(args.cursor_position) or line:len() + 1
     keep_open = args.keep_open
