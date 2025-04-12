@@ -4019,8 +4019,8 @@ Property list
     This property is read-only, and change notification is not supported.
 
 ``clipboard``
-    The clipboard contents, only works when native clipboard
-    (``--clipboard-enable``) is supported on the platform.
+    The clipboard contents. Only works when native clipboard is supported on the
+    platform.
     Depending on the platform, some sub-properties, writing to properties,
     or change notifications are not currently functional.
 
