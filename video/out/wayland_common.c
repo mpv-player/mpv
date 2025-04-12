@@ -196,6 +196,7 @@ struct vo_wayland_seat {
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
     struct vo_wayland_data_offer *selection_offer;
+    struct wl_data_source *data_source;
     struct vo_wayland_text_input *text_input;
     struct wp_cursor_shape_device_v1 *cursor_shape_device;
     uint32_t pointer_enter_serial;
@@ -896,6 +897,70 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_motion,
     data_device_handle_drop,
     data_device_handle_selection,
+};
+
+static void data_source_handle_target(void *data, struct wl_data_source *wl_data_source,
+                                      const char *mime_type)
+{
+}
+
+static void data_source_handle_send(void *data, struct wl_data_source *wl_data_source,
+                                    const char *mime_type, int32_t fd)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+    int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
+    if (score >= 0) {
+        struct pollfd fdp = { .fd = fd, .events = POLLOUT };
+        if (poll(&fdp, 1, 0) <= 0)
+            goto cleanup;
+        if (fdp.revents & (POLLERR | POLLHUP)) {
+            MP_VERBOSE(wl, "data source send aborted (write error)\n");
+            goto cleanup;
+        }
+
+        if (fdp.revents & POLLOUT) {
+            ssize_t data_written = write(fd, wl->selection_text.start, wl->selection_text.len);
+            if (data_written == -1) {
+                MP_VERBOSE(wl, "data source send aborted (write error)\n");
+            } else {
+                MP_VERBOSE(wl, "%zu bytes written to the data source fd\n", data_written);
+            }
+        }
+    }
+
+cleanup:
+    close(fd);
+}
+
+static void data_source_handle_cancelled(void *data, struct wl_data_source *wl_data_source)
+{
+    // This can happen when another client sets selection, which invalidates the current source.
+    struct vo_wayland_seat *s = data;
+    wl_data_source_destroy(wl_data_source);
+    s->data_source = NULL;
+}
+
+static void data_source_handle_dnd_drop_performed(void *data, struct wl_data_source *wl_data_source)
+{
+}
+
+static void data_source_handle_dnd_finished(void *data, struct wl_data_source *wl_data_source)
+{
+}
+
+static void data_source_handle_action(void *data, struct wl_data_source *wl_data_source,
+                                      uint32_t dnd_action)
+{
+}
+
+static const struct wl_data_source_listener data_source_listener = {
+    data_source_handle_target,
+    data_source_handle_send,
+    data_source_handle_cancelled,
+    data_source_handle_dnd_drop_performed,
+    data_source_handle_dnd_finished,
+    data_source_handle_action,
 };
 
 static void enable_ime(struct vo_wayland_text_input *ti)
@@ -2597,9 +2662,22 @@ static void remove_seat(struct vo_wayland_seat *seat)
     destroy_offer(seat->dnd_offer);
     destroy_offer(seat->selection_offer);
 
+    if (seat->data_source)
+        wl_data_source_destroy(seat->data_source);
+
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
     return;
+}
+
+static void seat_create_data_source(struct vo_wayland_seat *seat)
+{
+    seat->data_source = wl_data_device_manager_create_data_source(seat->wl->devman);
+    wl_data_source_offer(seat->data_source, "text/plain;charset=utf-8");
+    wl_data_source_offer(seat->data_source, "text/plain");
+    wl_data_source_offer(seat->data_source, "text");
+    wl_data_source_add_listener(seat->data_source, &data_source_listener, seat);
+    wl_data_device_set_selection(seat->data_device, seat->data_source, seat->last_serial);
 }
 
 static void seat_create_data_device(struct vo_wayland_seat *seat)
@@ -3223,6 +3301,22 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             return VO_NOTAVAIL;
         vc->data.type = CLIPBOARD_DATA_TEXT;
         vc->data.u.text = bstrto0(vc->talloc_ctx, wl->selection_text);
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_CLIPBOARD: {
+        struct voctrl_clipboard *vc = arg;
+        // TODO: add primary selection support
+        if (vc->params.target != CLIPBOARD_TARGET_CLIPBOARD || vc->params.type != CLIPBOARD_DATA_TEXT)
+            return VO_NOTIMPL;
+        if (vc->data.type != CLIPBOARD_DATA_TEXT)
+            return VO_NOTIMPL;
+        talloc_free(wl->selection_text.start);
+        wl->selection_text = bstrdup(wl, bstr0(vc->data.u.text));
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            if (seat->last_serial && !seat->data_source && wl->devman)
+                seat_create_data_source(seat);
+        }
         return VO_TRUE;
     }
     }
