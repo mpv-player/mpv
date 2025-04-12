@@ -1993,7 +1993,7 @@ Audio
     If this is enabled (default), playing with a speed different from normal
     automatically inserts the ``scaletempo2`` audio filter. You can insert
     filters besides ``scaletempo2`` and modify their params using
-    `Conditional auto profiles`:
+    `Conditional auto profiles`_:
 
     ::
 
