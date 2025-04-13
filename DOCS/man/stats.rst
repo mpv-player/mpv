@@ -127,10 +127,16 @@ Configurable Options
 
 ``plot_vsync_ratio``
     Default: yes
+
 ``plot_vsync_jitter``
     Default: yes
 
     Show graphs for vsync and jitter values (page 1). Only when toggled.
+
+``plot_cache``
+    Default: yes
+
+    Show graphs for cache values (page 3). Only when toggled.
 
 ``plot_tonemapping_lut``
     Default: no
