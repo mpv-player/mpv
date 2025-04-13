@@ -1710,7 +1710,7 @@ conf_data = configuration_data()
 conf_data.set_quoted('CONFIGURATION', meson.build_options())
 conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
 
-if get_option('pydebug')
+if get_option('buildtype') == 'debugoptimized'
 conf_data.set('Py_DEBUG', 1)
 conf_data.set('Py_REF_DEBUG', 1)
 endif

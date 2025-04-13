@@ -34,20 +34,22 @@ Has the following keys::
         data: any;
     }
 
-- `event_id`; represents an `mpv_event`. See: `Event id`_.
+- `event_id`; represents an `mpv_event_id`. See: `Event id`_.
 - `reply_userdata`; unique id number for a request event.
 - `error`; one of mpv's error number or 0.
 - `error_message`; (optional) description of the error.
-- `data`; it's type varies depending on the `event_id`.
-    - if `event_id == MPV_EVENT_CLIENT_MESSAGE`::
+- `data`; type varies depending on the `event_id`::
 
-        data: tuple[str]
+        (MPV_EVENT_CLIENT_MESSAGE)data: tuple[str];
 
-    - if `event_id == MPV_EVENT_PROPERTY_CHANGE`::
-
-        data: {
+        (MPV_EVENT_PROPERTY_CHANGE)data: {
             name: str;  # name of the property
             value: any;  # value of the property
+        }
+
+        (MPV_EVENT_HOOK)data: {
+            name: str;  # hook_name
+            id: int;  # id to use to call _mpv.hook_continue
         }
 
 
