@@ -726,7 +726,7 @@ py_mpv_hook_continue(PyObject *self, PyObject *args)
         Py_RETURN_TRUE;
     }
 
-    char *suffix = talloc_asprintf(tmp, "(mpv.hook_continue) '%ld':", *id);
+    char *suffix = talloc_asprintf(tmp, "(mpv.hook_continue) '%" PRIu64 "':", *id);
     PyObject *ret = check_error(err, suffix);
     talloc_free(tmp);
     return ret;
