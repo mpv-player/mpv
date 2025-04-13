@@ -1,0 +1,1 @@
+add `stats-plot_cache` script-opt
