@@ -348,17 +348,17 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
     if (fds[1].revents & POLLIN)
         return false;
 
-    if (fds[2].revents & (POLLERR | POLLHUP | POLLNVAL))
-        destroy_offer(wl->selection_offer);
-
-    if (fds[3].revents & (POLLERR | POLLHUP | POLLNVAL))
-        destroy_offer(wl->primary_selection_offer);
-
     if (fds[2].revents & POLLIN)
         get_selection_data(wl, wl->selection_offer, false);
 
     if (fds[3].revents & POLLIN)
         get_selection_data(wl, wl->primary_selection_offer, true);
+
+    if (fds[2].revents & (POLLERR | POLLHUP | POLLNVAL))
+        destroy_offer(wl->selection_offer);
+
+    if (fds[3].revents & (POLLERR | POLLHUP | POLLNVAL))
+        destroy_offer(wl->primary_selection_offer);
 
     wl_display_dispatch_pending(wl->display);
     return true;
