@@ -119,6 +119,7 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     create_ass_renderer(osd, ass);
 
     ASS_Track *track = ass->track;
+    struct mp_osd_render_opts *opts = osd->opts;
     if (!track)
         track = ass->track = ass_new_track(ass->library);
 
@@ -129,6 +130,9 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->ScaledBorderAndShadow = true;
 #if LIBASS_VERSION >= 0x01600010
     ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
+#endif
+#if LIBASS_VERSION >= 0x01703010
+    ass_configure_prune(track, opts->osd_ass_prune_delay * 1000.0);
 #endif
     update_playres(ass, &obj->vo_res);
 }
