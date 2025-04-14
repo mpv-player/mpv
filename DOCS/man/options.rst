@@ -4814,6 +4814,10 @@ OSD
     Set the delay for automatic pruning of events from memory in libass.
     Disabled by default. See also ``--sub-ass-prune-delay``.
 
+``--osd-shaper=<simple|complex>``
+    Set the text layout engine used by libass for the OSD. Default: simple.
+    See also ``--sub-shaper``
+
 Screenshot
 ----------
 

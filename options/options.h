@@ -151,6 +151,7 @@ struct mp_osd_render_opts {
     double osd_ass_prune_delay;
     int osd_glyph_limit;
     int osd_bitmap_max_size;
+    int osd_shaper;
 };
 
 typedef struct MPOpts {
