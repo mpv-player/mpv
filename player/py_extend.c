@@ -697,7 +697,7 @@ py_mpv_hook_add(PyObject *self, PyObject *args)
         talloc_free(tmp);
         Py_RETURN_TRUE;
     }
-    char *suffix = talloc_asprintf(tmp, "(mpv.hook_add) (%ld) '%s' '%d':",
+    char *suffix = talloc_asprintf(tmp, "(mpv.hook_add) (%" PRIu64 ") '%s' '%d':",
         *reply_userdata, *name, *priority);
     PyObject *ret = check_error(err, suffix);
     talloc_free(tmp);
