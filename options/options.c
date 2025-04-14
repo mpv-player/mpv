@@ -327,7 +327,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-ass-hinting", OPT_REPLACED("sub-hinting")},
         {"sub-shaper", OPT_CHOICE(sub_shaper, {"simple", 0}, {"complex", 1})},
         {"sub-ass-shaper", OPT_REPLACED("sub-shaper")},
-        {"sub-ass-prune-delay", OPT_DOUBLE(ass_prune_delay), M_RANGE(-1.0, DBL_MAX)},
+        {"sub-ass-prune-delay", OPT_DOUBLE(ass_prune_delay), M_RANGE(-1.0, 10000.0)},
         {"sub-ass-justify", OPT_BOOL(ass_justify)},
         {"sub-scale-by-window", OPT_BOOL(sub_scale_by_window)},
         {"sub-scale-with-window", OPT_BOOL(sub_scale_with_window)},
@@ -409,6 +409,7 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         {"osd-selected-color", OPT_COLOR(osd_selected_color)},
         {"osd-selected-outline-color", OPT_COLOR(osd_selected_outline_color)},
         {"force-rgba-osd-rendering", OPT_BOOL(force_rgba_osd)},
+        {"osd-prune-delay", OPT_DOUBLE(osd_ass_prune_delay), M_RANGE(-1.0, 10000.0)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -417,6 +418,7 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         .osd_scale_by_window = true,
         .osd_selected_color = {250, 189, 47, 255},
         .osd_selected_outline_color = {0, 0, 0, 255},
+        .osd_ass_prune_delay = -1.0,
     },
     .change_flags = UPDATE_OSD,
 };

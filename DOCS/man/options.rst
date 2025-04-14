@@ -4786,6 +4786,10 @@ OSD
 ``--osd-fonts-dir=<path>``
     See ``--sub-fonts-dir`` for details.  Defaults to ``~~/fonts``.
 
+``--osd-prune-delay=<-1|seconds>``
+    Set the delay for automatic pruning of events from memory in libass.
+    Disabled by default. See also ``--sub-ass-prune-delay``.
+
 Screenshot
 ----------
 
