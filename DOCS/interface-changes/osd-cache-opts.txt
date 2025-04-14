@@ -1,1 +1,3 @@
 add `--osd-prune-delay`
+add `--osd-glyph-limit`
+add `--osd-bitmap-max-size`

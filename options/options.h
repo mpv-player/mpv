@@ -147,6 +147,8 @@ struct mp_osd_render_opts {
     struct osd_bar_style_opts *osd_bar_style;
     bool force_rgba_osd;
     double osd_ass_prune_delay;
+    int osd_glyph_limit;
+    int osd_bitmap_max_size;
 };
 
 typedef struct MPOpts {
