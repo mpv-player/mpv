@@ -127,6 +127,8 @@ struct mp_subtitle_opts {
     bool sub_clear_on_seek;
     int teletext_page;
     bool sub_past_video_end;
+    int sub_glyph_limit;
+    int sub_bitmap_max_size;
     char **sub_avopts;
 };
 

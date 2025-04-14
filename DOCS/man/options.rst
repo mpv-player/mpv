@@ -2617,6 +2617,18 @@ Subtitles
         from forward to backward during runtime for events that were already
         "seen" and need to be rendered again, if those events got pruned.
 
+``--sub-glyph-limit=<value>``
+    Set the maximum number of cached glyphs in libass cache for the subtitle
+    track. 0 means libass uses its default value.
+
+    Default: 0.
+
+``--sub-bitmap-max-size=<value>``
+    Set the maximum bitmap cache size in libass cache for the subtitle track. 0
+    means libass uses its default value. This accepts values in MB.
+
+    Default: 0.
+
 ``--sub-ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4

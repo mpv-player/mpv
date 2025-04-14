@@ -338,6 +338,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-past-video-end", OPT_BOOL(sub_past_video_end)},
         {"sub-ass-force-style", OPT_REPLACED("sub-ass-style-overrides")},
         {"sub-lavc-o", OPT_KEYVALUELIST(sub_avopts), .flags = UPDATE_SUB_HARD},
+        {"sub-glyph-limit", OPT_INT(sub_glyph_limit)},
+        {"sub-bitmap-max-size", OPT_INT(sub_bitmap_max_size)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
