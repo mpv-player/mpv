@@ -4786,6 +4786,18 @@ OSD
 ``--osd-fonts-dir=<path>``
     See ``--sub-fonts-dir`` for details.  Defaults to ``~~/fonts``.
 
+``--osd-glyph-limit=<value>``
+    Set the maximum number of cached glyphs in libass cache for the OSD.
+    0 means libass uses its default value.
+
+    Default: 0.
+
+``--osd-bitmap-max-size=<value>``
+    Set the maximum bitmap cache size in libass cache for the OSD. 0 means
+    libass uses its default value. This accepts values in MB.
+
+    Default: 0.
+
 ``--osd-prune-delay=<-1|seconds>``
     Set the delay for automatic pruning of events from memory in libass.
     Disabled by default. See also ``--sub-ass-prune-delay``.

@@ -134,6 +134,7 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
 #if LIBASS_VERSION >= 0x01703010
     ass_configure_prune(track, opts->osd_ass_prune_delay * 1000.0);
 #endif
+    ass_set_cache_limits(ass->render, opts->osd_glyph_limit, opts->osd_bitmap_max_size);
     update_playres(ass, &obj->vo_res);
 }
 
