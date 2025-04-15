@@ -116,7 +116,17 @@ jobs:
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
 
   win32:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            arch: "x64"
+            os: "windows-latest"
+          - target: aarch64-pc-windows-msvc
+            arch: "arm64"
+            os: "windows-11-arm"
     env:
       VS: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise"
       CC: "ccache clang"
@@ -144,8 +154,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: x86_64-windows-msvc-${{ steps.get_time.outputs.timestamp }}
-          restore-keys: x86_64-windows-msvc-
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ matrix.target }}-
 
       - name: Install dependencies
         run: |
@@ -169,7 +179,7 @@ jobs:
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
           $env:PATH += ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           ./ci/build-win32.ps1
 
       - name: Print build log
@@ -185,7 +195,7 @@ jobs:
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
           $env:PATH += ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           meson test -C build -t 2
 
       - name: Print meson test log
@@ -195,7 +205,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mpv-x86_64-windows-msvc
+          name: mpv-${{ matrix.target }}
           path: |
             build/mpv.???
             build/vulkan-*.dll
@@ -206,7 +216,7 @@ jobs:
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: x86_64-windows-msvc-${{ steps.get_time.outputs.timestamp }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
 
   macos:
     runs-on: ${{ matrix.os }}
@@ -502,14 +512,19 @@ jobs:
             fi
 
   msys2:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        sys:
-          - clang64
-          - mingw64
-          - ucrt64
+        include:
+          - sys: "clang64"
+            os: "windows-latest"
+          - sys: "mingw64"
+            os: "windows-latest"
+          - sys: "ucrt64"
+            os: "windows-latest"
+          - sys: "clangarm64"
+            os: "windows-11-arm"
     defaults:
       run:
         shell: msys2 {0}
