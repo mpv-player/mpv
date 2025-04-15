@@ -211,12 +211,13 @@ meson setup build `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
     -Dlibass:test=enabled `
+    -Dlibjpeg-turbo:tests=disabled `
     -Dlibusb:tests=false `
     -Dlibusb:examples=false `
     -Dlibplacebo:demos=false `
     -Dlibplacebo:lcms=enabled `
     -Dlibplacebo:shaderc=enabled `
-    -Dlibplacebo:tests=true `
+    -Dlibplacebo:tests=false `
     -Dlibplacebo:vulkan=enabled `
     -Dlibplacebo:d3d11=enabled `
     -Dxxhash:inline-all=true `

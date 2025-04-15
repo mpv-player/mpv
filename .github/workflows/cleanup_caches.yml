@@ -13,7 +13,8 @@ jobs:
           gh cache list -L 100 --json id,key,ref -S last_accessed_at -O desc --jq '
             map(select(.key | startswith("x86_64-w64-mingw32-") or
                               startswith("i686-w64-mingw32-") or
-                              startswith("x86_64-windows-msvc-"))) |
+                              startswith("aarch64-pc-windows-msvc-") or
+                              startswith("x86_64-pc-windows-msvc-"))) |
             group_by(.ref) |
             map({
               ref: .[0].ref,
