@@ -161,6 +161,9 @@ O
 v
     Toggle subtitle visibility.
 
+Alt+v
+    Toggle secondary subtitle visibility.
+
 j and J
     Cycle through the available subtitles.
 
