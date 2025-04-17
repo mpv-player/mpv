@@ -22,6 +22,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/hdr_dynamic_metadata.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/intreadwrite.h>
 
 #include "common/av_common.h"
@@ -43,6 +44,7 @@ void demux_packet_unref_contents(struct demux_packet *dp)
         av_packet_free(&dp->avpacket);
         dp->buffer = NULL;
         dp->len = 0;
+        dp->is_wrapped_avframe = false;
     }
 }
 
@@ -166,6 +168,7 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->dts = src->dts;
     dst->duration = src->duration;
     dst->pos = src->pos;
+    dst->is_wrapped_avframe = src->is_wrapped_avframe;
     dst->segmented = src->segmented;
     dst->start = src->start;
     dst->end = src->end;
@@ -209,6 +212,31 @@ size_t demux_packet_estimate_total_size(struct demux_packet *dp)
     if (dp->avpacket) {
         mp_assert(!dp->is_cached);
         size += ROUND_ALLOC(dp->len);
+        if (dp->is_wrapped_avframe) {
+            mp_require(dp->buffer);
+
+            const AVFrame *frame = (AVFrame *)dp->buffer;
+            if (frame->hw_frames_ctx) {
+                const AVHWFramesContext *hwctx = (AVHWFramesContext *)frame->hw_frames_ctx->data;
+                int r = av_image_get_buffer_size(hwctx->sw_format, hwctx->width, hwctx->height, 16);
+                mp_require(r >= 0);
+                size += ROUND_ALLOC(r);
+            }
+            for (int i = 0; i < MP_ARRAY_SIZE(frame->buf) && frame->buf[i]; ++i)
+                size += ROUND_ALLOC(frame->buf[i]->size);
+
+            size += ROUND_ALLOC(frame->nb_extended_buf * sizeof(frame->extended_buf[0]));
+            for (int i = 0; i < frame->nb_extended_buf; ++i) {
+                size += ROUND_ALLOC(sizeof(*frame->extended_buf[i]));
+                size += ROUND_ALLOC(frame->extended_buf[i]->size);
+            }
+
+            size += ROUND_ALLOC(frame->nb_side_data * sizeof(frame->side_data[0]));
+            for (int i = 0; i < frame->nb_side_data; ++i) {
+                size += ROUND_ALLOC(sizeof(*frame->side_data[i]));
+                size += ROUND_ALLOC(frame->side_data[i]->size);
+            }
+        }
         size += ROUND_ALLOC(sizeof(AVPacket));
         size += 8 * sizeof(void *); // ta  overhead
         size += ROUND_ALLOC(sizeof(AVBufferRef));

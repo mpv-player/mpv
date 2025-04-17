@@ -2047,7 +2047,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     record_packet(in, dp);
 
-    if (in->cache && in->d_user->opts->disk_cache) {
+    if (in->cache && in->d_user->opts->disk_cache && !dp->is_wrapped_avframe) {
         int64_t pos = demux_cache_write(in->cache, dp);
         if (pos >= 0) {
             demux_packet_unref_contents(dp);
