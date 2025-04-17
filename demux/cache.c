@@ -216,6 +216,7 @@ int64_t demux_cache_write(struct demux_cache *cache, struct demux_packet *dp)
     }
 
     mp_assert(!dp->is_cached);
+    mp_assert(!dp->is_wrapped_avframe);
     mp_assert(dp->len <= INT32_MAX);
     mp_assert(dp->avpacket->flags >= 0 && dp->avpacket->flags <= INT32_MAX);
     mp_assert(dp->avpacket->side_data_elems >= 0 &&
