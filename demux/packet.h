@@ -53,6 +53,9 @@ typedef struct demux_packet {
     // If true, cached_data is valid, while buffer/len are not.
     bool is_cached : 1;
 
+    // If true, this is a wrapped AVFrame
+    bool is_wrapped_avframe : 1;
+
     // segmentation (ordered chapters, EDL)
     bool segmented;
     struct mp_codec_params *codec;  // set to non-NULL iff segmented is set
