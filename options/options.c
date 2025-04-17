@@ -1072,7 +1072,7 @@ static const struct MPOpts mp_default_opts = {
         "zip", "rar", "7z", "cbz", "cbr", NULL
     },
     .playlist_exts = (char *[]){
-        "m3u", "m3u8", "pls", "edl", NULL
+        "cue", "edl", "m3u", "m3u8", "pls", NULL
     },
 
     .sub_auto_exts = (char *[]){
