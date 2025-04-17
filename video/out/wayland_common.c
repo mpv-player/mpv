@@ -922,7 +922,7 @@ static void data_source_handle_send(void *data, struct wl_data_source *wl_data_s
         if (fdp.revents & POLLOUT) {
             ssize_t data_written = write(fd, wl->selection_text.start, wl->selection_text.len);
             if (data_written == -1) {
-                MP_VERBOSE(wl, "data source send aborted (write error)\n");
+                MP_VERBOSE(wl, "data source send aborted (write error: %s)\n", mp_strerror(errno));
             } else {
                 MP_VERBOSE(wl, "%zu bytes written to the data source fd\n", data_written);
             }
@@ -2236,7 +2236,7 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
         }
 
         if (data_read == -1) {
-            MP_VERBOSE(wl, "data offer aborted (read error)\n");
+            MP_VERBOSE(wl, "data offer aborted (read error: %s)\n", mp_strerror(errno));
         } else {
             MP_VERBOSE(wl, "Read %zu bytes from the data offer fd\n", content.len);
 
