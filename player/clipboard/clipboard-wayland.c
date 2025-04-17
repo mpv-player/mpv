@@ -203,7 +203,7 @@ static void data_source_handle_send(void *data,
             ssize_t data_written = write(fd, text.start, text.len);
             mp_mutex_unlock(&wl->lock);
             if (data_written == -1) {
-                MP_VERBOSE(wl, "data source send aborted (write error)\n");
+                MP_VERBOSE(wl, "data source send aborted (write error: %s)\n", mp_strerror(errno));
             } else {
                 MP_VERBOSE(wl, "%zu bytes written to the data source fd\n", data_written);
             }
@@ -382,7 +382,7 @@ static void get_selection_data(struct clipboard_wayland_priv *wl, struct clipboa
     }
 
     if (data_read == -1) {
-        MP_VERBOSE(wl, "data offer aborted (read error)\n");
+        MP_VERBOSE(wl, "data offer aborted (read error: %s)\n", mp_strerror(errno));
     } else {
         MP_VERBOSE(wl, "Read %zu bytes from the data offer fd\n", content.len);
         // Update clipboard text content
