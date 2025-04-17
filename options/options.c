@@ -424,6 +424,7 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         .osd_selected_color = {250, 189, 47, 255},
         .osd_selected_outline_color = {0, 0, 0, 255},
         .osd_ass_prune_delay = -1.0,
+        .osd_shaper = 1,
     },
     .change_flags = UPDATE_OSD,
 };

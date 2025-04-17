@@ -4818,7 +4818,7 @@ OSD
     Disabled by default. See also ``--sub-ass-prune-delay``.
 
 ``--osd-shaper=<simple|complex>``
-    Set the text layout engine used by libass for the OSD. Default: simple.
+    Set the text layout engine used by libass for the OSD. Default: complex.
     See also ``--sub-shaper``
 
 Screenshot
