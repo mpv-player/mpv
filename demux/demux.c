@@ -63,6 +63,9 @@ extern const demuxer_desc_t demuxer_desc_directory;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+#if HAVE_SUBRANDR
+extern const demuxer_desc_t demuxer_desc_sbr;
+#endif
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
@@ -76,6 +79,9 @@ static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_matroska,
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,
+#endif
+#if HAVE_SUBRANDR
+    &demuxer_desc_sbr,
 #endif
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
