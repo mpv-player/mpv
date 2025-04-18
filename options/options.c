@@ -1085,6 +1085,7 @@ static const struct MPOpts mp_default_opts = {
         "scc",
         "smi",
         "srt",
+        "srv3",
         "ssa",
         "sub",
         "sup",
@@ -1092,6 +1093,7 @@ static const struct MPOpts mp_default_opts = {
         "utf-8",
         "utf8",
         "vtt",
+        "ytt",
         NULL
     },
 
