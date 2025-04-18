@@ -36,9 +36,15 @@
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
+#if HAVE_SUBRANDR
+extern const struct sd_functions sd_sbr;
+#endif
 
 static const struct sd_functions *const sd_list[] = {
     &sd_lavc,
+#if HAVE_SUBRANDR
+    &sd_sbr,
+#endif
     &sd_ass,
     NULL
 };
