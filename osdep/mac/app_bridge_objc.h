@@ -18,6 +18,8 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include <libswscale/swscale.h>
+
 #include "player/client.h"
 #include "video/out/libmpv.h"
 #include "mpv/render_gl.h"
@@ -26,10 +28,12 @@
 #include "player/core.h"
 #include "player/clipboard/clipboard.h"
 #include "common/global.h"
+#include "common/msg.h"
 #include "input/input.h"
 #include "input/event.h"
 #include "input/keycodes.h"
 #include "video/out/win_state.h"
+#include "video/sws_utils.h"
 
 #include "osdep/main-fn.h"
 #include "osdep/mac/app_bridge.h"
