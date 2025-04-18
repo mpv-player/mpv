@@ -1307,7 +1307,9 @@ end
 
 -- Empty the log buffer of all messages (Ctrl+L)
 local function clear_log_buffer()
-    log_buffers[id] = {}
+    if not selectable_items then
+        log_buffers[id] = {}
+    end
     render()
 end
 
