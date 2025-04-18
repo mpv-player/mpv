@@ -4028,9 +4028,10 @@ Property list
 
     ``clipboard/text`` (RW)
         The text content in the clipboard (Windows, Wayland and macOS only).
-        Writing to this property sets the text clipboard content (Windows only).
+        Writing to this property sets the text clipboard content
+        (Windows, Wayland and macOS only).
 
-    ``clipboard/text-primary``
+    ``clipboard/text-primary`` (RW)
         The text content in the primary selection (Wayland only).
 
     .. note::

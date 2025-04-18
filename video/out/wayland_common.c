@@ -192,14 +192,16 @@ struct vo_wayland_seat {
     struct wl_keyboard *keyboard;
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
-    struct wl_data_device *dnd_ddev;
+    struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
     struct vo_wayland_data_offer *selection_offer;
+    struct wl_data_source *data_source;
     struct vo_wayland_text_input *text_input;
     struct wp_cursor_shape_device_v1 *cursor_shape_device;
     uint32_t pointer_enter_serial;
     uint32_t pointer_button_serial;
+    uint32_t last_serial;
     struct xkb_keymap  *xkb_keymap;
     struct xkb_state   *xkb_state;
     uint32_t keyboard_code;
@@ -262,7 +264,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void remove_seat(struct vo_wayland_seat *seat);
-static void seat_create_dnd_ddev(struct vo_wayland_seat *seat);
+static void seat_create_data_device(struct vo_wayland_seat *seat);
 static void seat_create_text_input(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
@@ -280,6 +282,7 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
 
     s->pointer_enter_serial = serial;
     set_cursor_visibility(s, wl->cursor_visible);
@@ -298,6 +301,7 @@ static void pointer_handle_leave(void *data, struct wl_pointer *pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_LEAVE);
 }
 
@@ -321,6 +325,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *wl_pointer,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     state = state == WL_POINTER_BUTTON_STATE_PRESSED ? MP_KEY_STATE_DOWN
                                                      : MP_KEY_STATE_UP;
 
@@ -466,6 +471,7 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     // Note: the position should still be saved here for VO dragging handling.
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
@@ -490,6 +496,7 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     mp_input_remove_touch_point(wl->vo->input_ctx, id);
     wl->last_button_seat = NULL;
 }
@@ -587,6 +594,7 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     s->has_keyboard_input = true;
     s->keyboard_entering = true;
     guess_focus(wl);
@@ -601,6 +609,7 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *wl_keyboard,
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
     s->has_keyboard_input = false;
     s->keyboard_code = 0;
     s->mpkey = 0;
@@ -614,6 +623,7 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *wl_keyboard,
                                 uint32_t state)
 {
     struct vo_wayland_seat *s = data;
+    s->last_serial = serial;
     handle_key_input(s, key, state, false);
 }
 
@@ -624,6 +634,7 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *wl_keyboar
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    s->last_serial = serial;
 
     if (s->xkb_state) {
         xkb_state_update_mask(s->xkb_state, mods_depressed, mods_latched,
@@ -886,6 +897,70 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_motion,
     data_device_handle_drop,
     data_device_handle_selection,
+};
+
+static void data_source_handle_target(void *data, struct wl_data_source *wl_data_source,
+                                      const char *mime_type)
+{
+}
+
+static void data_source_handle_send(void *data, struct wl_data_source *wl_data_source,
+                                    const char *mime_type, int32_t fd)
+{
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+    int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
+    if (score >= 0) {
+        struct pollfd fdp = { .fd = fd, .events = POLLOUT };
+        if (poll(&fdp, 1, 0) <= 0)
+            goto cleanup;
+        if (fdp.revents & (POLLERR | POLLHUP)) {
+            MP_VERBOSE(wl, "data source send aborted (write error)\n");
+            goto cleanup;
+        }
+
+        if (fdp.revents & POLLOUT) {
+            ssize_t data_written = write(fd, wl->selection_text.start, wl->selection_text.len);
+            if (data_written == -1) {
+                MP_VERBOSE(wl, "data source send aborted (write error: %s)\n", mp_strerror(errno));
+            } else {
+                MP_VERBOSE(wl, "%zu bytes written to the data source fd\n", data_written);
+            }
+        }
+    }
+
+cleanup:
+    close(fd);
+}
+
+static void data_source_handle_cancelled(void *data, struct wl_data_source *wl_data_source)
+{
+    // This can happen when another client sets selection, which invalidates the current source.
+    struct vo_wayland_seat *s = data;
+    wl_data_source_destroy(wl_data_source);
+    s->data_source = NULL;
+}
+
+static void data_source_handle_dnd_drop_performed(void *data, struct wl_data_source *wl_data_source)
+{
+}
+
+static void data_source_handle_dnd_finished(void *data, struct wl_data_source *wl_data_source)
+{
+}
+
+static void data_source_handle_action(void *data, struct wl_data_source *wl_data_source,
+                                      uint32_t dnd_action)
+{
+}
+
+static const struct wl_data_source_listener data_source_listener = {
+    data_source_handle_target,
+    data_source_handle_send,
+    data_source_handle_cancelled,
+    data_source_handle_dnd_drop_performed,
+    data_source_handle_dnd_finished,
+    data_source_handle_action,
 };
 
 static void enable_ime(struct vo_wayland_text_input *ti)
@@ -1963,7 +2038,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl_list_insert(&wl->seat_list, &seat->link);
 
         if (wl->devman)
-            seat_create_dnd_ddev(seat);
+            seat_create_data_device(seat);
 
         if (wl->text_input_manager)
             seat_create_text_input(seat);
@@ -2152,7 +2227,7 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
         }
 
         if (data_read == -1) {
-            MP_VERBOSE(wl, "data offer aborted (read error)\n");
+            MP_VERBOSE(wl, "data offer aborted (read error: %s)\n", mp_strerror(errno));
         } else {
             MP_VERBOSE(wl, "Read %zu bytes from the data offer fd\n", content.len);
 
@@ -2561,8 +2636,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_pointer_destroy(seat->pointer);
     if (seat->touch)
         wl_touch_destroy(seat->touch);
-    if (seat->dnd_ddev)
-        wl_data_device_destroy(seat->dnd_ddev);
+    if (seat->data_device)
+        wl_data_device_destroy(seat->data_device);
     if (seat->text_input)
         zwp_text_input_v3_destroy(seat->text_input->text_input);
 #if HAVE_WAYLAND_PROTOCOLS_1_32
@@ -2578,15 +2653,28 @@ static void remove_seat(struct vo_wayland_seat *seat)
     destroy_offer(seat->dnd_offer);
     destroy_offer(seat->selection_offer);
 
+    if (seat->data_source)
+        wl_data_source_destroy(seat->data_source);
+
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
     return;
 }
 
-static void seat_create_dnd_ddev(struct vo_wayland_seat *seat)
+static void seat_create_data_source(struct vo_wayland_seat *seat)
 {
-    seat->dnd_ddev = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
-    wl_data_device_add_listener(seat->dnd_ddev, &data_device_listener, seat);
+    seat->data_source = wl_data_device_manager_create_data_source(seat->wl->devman);
+    wl_data_source_offer(seat->data_source, "text/plain;charset=utf-8");
+    wl_data_source_offer(seat->data_source, "text/plain");
+    wl_data_source_offer(seat->data_source, "text");
+    wl_data_source_add_listener(seat->data_source, &data_source_listener, seat);
+    wl_data_device_set_selection(seat->data_device, seat->data_source, seat->last_serial);
+}
+
+static void seat_create_data_device(struct vo_wayland_seat *seat)
+{
+    seat->data_device = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
+    wl_data_device_add_listener(seat->data_device, &data_device_listener, seat);
 }
 
 static void seat_create_text_input(struct vo_wayland_seat *seat)
@@ -3206,6 +3294,22 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         vc->data.u.text = bstrto0(vc->talloc_ctx, wl->selection_text);
         return VO_TRUE;
     }
+    case VOCTRL_SET_CLIPBOARD: {
+        struct voctrl_clipboard *vc = arg;
+        // TODO: add primary selection support
+        if (vc->params.target != CLIPBOARD_TARGET_CLIPBOARD || vc->params.type != CLIPBOARD_DATA_TEXT)
+            return VO_NOTIMPL;
+        if (vc->data.type != CLIPBOARD_DATA_TEXT)
+            return VO_NOTIMPL;
+        talloc_free(wl->selection_text.start);
+        wl->selection_text = bstrdup(wl, bstr0(vc->data.u.text));
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            if (seat->last_serial && !seat->data_source && wl->devman)
+                seat_create_data_source(seat);
+        }
+        return VO_TRUE;
+    }
     }
 
     return VO_NOTIMPL;
@@ -3360,8 +3464,8 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->devman) {
         struct vo_wayland_seat *seat;
         wl_list_for_each(seat, &wl->seat_list, link) {
-            if (!seat->dnd_ddev)
-                seat_create_dnd_ddev(seat);
+            if (!seat->data_device)
+                seat_create_data_device(seat);
         }
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s (ver. 3) protocol!\n",
