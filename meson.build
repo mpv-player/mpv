@@ -1070,7 +1070,10 @@ x11 = {
              dependency('xscrnsaver', version: '>= 1.0.0', required: x11_opt),
              dependency('xext', version: '>= 1.0.0', required: x11_opt),
              dependency('xpresent', version: '>= 1.0.0', required: x11_opt),
-             dependency('xrandr', version: '>= 1.4.0', required: x11_opt)],
+             dependency('xrandr', version: '>= 1.4.0', required: x11_opt),
+             dependency('x11-xcb', version: '>= 1.8.9', required: x11_opt),
+             dependency('xcb-shm', version: '>= 1.16', required: x11_opt),
+             dependency('xcb', version: '>= 1.16', required: x11_opt),]
 }
 x11_deps = true
 foreach dep: x11['deps']
