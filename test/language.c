@@ -40,20 +40,25 @@ int main(void)
     assert_int_equal(mp_match_lang(LANGS("en")                   , "eng")    , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("eng")                  , "en")     , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("en")                   , "en")     , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("cs")                   , "cze")    , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("ces")                  , "cze")    , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("pt-BR", "pt-PT", "pt") , "pt-PT")  , INT_MAX - 1);
     assert_int_equal(mp_match_lang(LANGS("pt-BR", "en-US", "pt") , "pt-PT")  , INT_MAX - 1000);
     assert_int_equal(mp_match_lang(LANGS("pl-PL")                , "pol")    , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("pl-PL")                , "eng")    , 0);
     assert_int_equal(mp_match_lang(LANGS("gsw-u-sd-chzh") , "gsw-u-sd-chzh") , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("gsw-u-sd")      , "gsw-u-sd-chzh") , INT_MAX - 1000);
-    assert_int_equal(mp_match_lang(LANGS("gsw-u-sd-chzh") , "gsw-u")         , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("gsw-chzh")      , "gsw-u-sd-chzh") , INT_MAX - 1000);
     assert_int_equal(mp_match_lang(LANGS("ax")            , "en")            , 0);
     assert_int_equal(mp_match_lang(LANGS("en")            , "ax")            , 0);
     assert_int_equal(mp_match_lang(LANGS("ax")            , "ax")            , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("ax")            , "")              , 0);
     assert_int_equal(mp_match_lang(LANGS("ax")            , NULL)            , 0);
     assert_int_equal(mp_match_lang(LANGS("")              , "ax")            , 0);
+    assert_int_equal(mp_match_lang(LANGS("")              , "")              , 0);
     assert_int_equal(mp_match_lang((char*[]){NULL}        , "ax")            , 0);
+    assert_int_equal(mp_match_lang(NULL                   , NULL)            , 0);
+    assert_int_equal(mp_match_lang((char*[]){NULL}        , NULL)            , 0);
 
     void *ta_ctx = talloc_new(NULL);
 
@@ -111,6 +116,21 @@ int main(void)
     TEST_LANG_GUESS("foo.forced.hi.srt", "", -1, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
     TEST_LANG_GUESS("foo.hi.srt", "", -1, TRACK_HEARING_IMPAIRED);
     TEST_LANG_GUESS("foo.forced.srt", "", -1, TRACK_FORCED);
+
+    TEST_LANG_GUESS("en.srt", "en", 0, 0);
+    TEST_LANG_GUESS("en.hi.srt", "en", 0, TRACK_HEARING_IMPAIRED);
+    TEST_LANG_GUESS("[en-US][hi].srt", "en-US", 0, TRACK_HEARING_IMPAIRED);
+    TEST_LANG_GUESS("(en-US)(hi).srt", "en-US", 0, TRACK_HEARING_IMPAIRED);
+
+    TEST_LANG_GUESS("foo.hi.en.srt", "en", 6, 0);
+    TEST_LANG_GUESS("foo.en-US)(hi).srt", "", -1, TRACK_HEARING_IMPAIRED);
+    TEST_LANG_GUESS("foo.en-US)(hi.srt", "", -1, 0);
+    TEST_LANG_GUESS("foo(en-US](hi).srt", "", -1, TRACK_HEARING_IMPAIRED);
+
+    TEST_LANG_GUESS("en-US", "", -1, 0);
+    TEST_LANG_GUESS("[en-US][hi]", "", -1, 0);
+    TEST_LANG_GUESS("foo.en-US", "", -1, 0);
+    TEST_LANG_GUESS(".srt", "", -1, 0);
 
     talloc_free(ta_ctx);
 }
