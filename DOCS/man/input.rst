@@ -3875,6 +3875,11 @@ Property list
     meson version used to compile mpv is older than 1.1.0, then a hardcoded
     string of a few, arbitrary options is displayed instead.
 
+``mpv-full-configuration``
+    The full list of enabled features available in the current build. The
+    feature names are listed in ``meson.options`` and the string is space
+    separated.
+
 ``ffmpeg-version``
     The contents of the ``av_version_info()`` API call. This is a string which
     identifies the build in some way, either through a release version number,

@@ -3653,6 +3653,12 @@ static int mp_property_configuration(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, CONFIGURATION);
 }
 
+static int mp_property_full_configuration(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    return m_property_strdup_ro(action, arg, FULLCONFIG);
+}
+
 static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -4444,6 +4450,7 @@ static const struct m_property mp_properties_base[] = {
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
+    {"mpv-full-configuration", mp_property_full_configuration},
     {"ffmpeg-version", mp_property_ffmpeg},
     {"libass-version", mp_property_libass_version},
     {"platform", mp_property_platform},
