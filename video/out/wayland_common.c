@@ -1017,11 +1017,11 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     o->geometry.x1 += o->geometry.x0;
     o->geometry.y1 += o->geometry.y0;
 
-    MP_VERBOSE(o->wl, "Registered output %s %s (0x%x):\n"
+    MP_VERBOSE(o->wl, "Registered output %s %s (%s) (0x%x):\n"
                "\tx: %dpx, y: %dpx\n"
                "\tw: %dpx (%dmm), h: %dpx (%dmm)\n"
                "\tscale: %f\n"
-               "\tHz: %f\n", o->make, o->model, o->id, o->geometry.x0,
+               "\tHz: %f\n", o->make, o->model, o->name, o->id, o->geometry.x0,
                o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
                mp_rect_h(o->geometry), o->phys_height,
                o->scale / WAYLAND_SCALE_FACTOR, o->refresh_rate);
