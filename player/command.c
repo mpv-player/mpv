@@ -25,7 +25,12 @@
 #include <math.h>
 #include <sys/types.h>
 
+#include "config.h" // for HAVE_SUBRANDR
+
 #include <ass/ass.h>
+#if HAVE_SUBRANDR
+#include <subrandr/subrandr.h>
+#endif
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
 #include <libavutil/timecode.h>
@@ -3757,6 +3762,19 @@ static int mp_property_libass_version(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, ass_library_version());
 }
 
+static int mp_property_subrandr_version(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+#if HAVE_SUBRANDR
+    uint32_t major, minor, patch;
+    sbr_library_version(&major, &minor, &patch);
+    const char *result = mp_tprintf(33, "%" PRIu32 ".%" PRIu32 ".%" PRIu32, major, minor, patch);
+    return m_property_strdup_ro(action, arg, result);
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
 static int mp_property_platform(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
@@ -4540,6 +4558,7 @@ static const struct m_property mp_properties_base[] = {
     {"mpv-configuration", mp_property_configuration},
     {"ffmpeg-version", mp_property_ffmpeg},
     {"libass-version", mp_property_libass_version},
+    {"subrandr-version", mp_property_subrandr_version},
     {"platform", mp_property_platform},
 
     {"options", mp_property_options},
