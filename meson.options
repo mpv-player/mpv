@@ -60,6 +60,7 @@ option('d3d11', type: 'feature', value: 'auto', description: 'Direct3D 11 video 
 option('direct3d', type: 'feature', value: 'auto', description: 'Direct3D support')
 option('dmabuf-wayland', type: 'feature', value: 'auto', description: 'dmabuf-wayland video output')
 option('drm', type: 'feature', value: 'auto', description: 'Direct Rendering Manager (DRM)')
+option('v4l2request', type: 'feature', value: 'auto', description: 'FFmpeg v4l2 request API')
 option('egl', type: 'feature', value: 'auto', description: 'EGL 1.4')
 option('egl-android', type: 'feature', value: 'auto', description: 'Android EGL support')
 option('egl-angle', type: 'feature', value: 'auto', description: 'OpenGL ANGLE headers')

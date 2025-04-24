@@ -1503,6 +1503,15 @@ if features['videotoolbox-pl']
     sources += files('video/out/hwdec/hwdec_vt_pl.m')
 endif
 
+v4l2reqest = get_option('v4l2request').require(
+  cc.has_header('libavutil/hwcontext_v4l2request.h'),
+  error_message: 'need ffmpeg 7.1 with v4l2 request API',
+)
+features += {'v4l2request': v4l2reqest.allowed()}
+if features['v4l2request']
+    sources += files('video/out/hwdec/hwdec_v4l2request.c')
+endif
+
 
 # macOS features
 macos_sdk_version_py = ''
