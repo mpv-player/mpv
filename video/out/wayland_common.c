@@ -239,6 +239,8 @@ struct vo_wayland_tablet_tool {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_tool_v2 *tablet_tool;
+    struct wp_cursor_shape_device_v1 *cursor_shape_device;
+    uint32_t proximity_serial;
     struct wl_list link;
 };
 
@@ -693,6 +695,9 @@ static void tablet_tool_handle_proximity_in(void *data,
                                             struct zwp_tablet_v2 *tablet,
                                             struct wl_surface *surface)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->proximity_serial = serial;
+    set_cursor_visibility(tablet_tool->seat, true);
 }
 
 static void tablet_tool_handle_proximity_out(void *data,
@@ -962,6 +967,11 @@ static void tablet_tool_handle_added(void *data,
     tablet_tool->wl = wl;
     tablet_tool->seat = seat;
     tablet_tool->tablet_tool = id;
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (wl->cursor_shape_manager)
+        tablet_tool->cursor_shape_device = wp_cursor_shape_manager_v1_get_tablet_tool_v2(
+            wl->cursor_shape_manager, tablet_tool->tablet_tool);
+#endif
     zwp_tablet_tool_v2_add_listener(tablet_tool->tablet_tool, &tablet_tool_listener, tablet_tool);
     wl_list_insert(&seat->tablet_tool_list, &tablet_tool->link);
 }
@@ -3203,9 +3213,14 @@ static void remove_tablet(struct vo_wayland_tablet *tablet)
 static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
 {
     struct vo_wayland_state *wl = tablet_tool->wl;
+    struct vo_wayland_seat *seat = tablet_tool->seat;
     MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
 
     wl_list_remove(&tablet_tool->link);
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (seat->cursor_shape_device)
+        wp_cursor_shape_device_v1_destroy(tablet_tool->cursor_shape_device);
+#endif
     zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
     talloc_free(tablet_tool);
 }
@@ -3414,9 +3429,31 @@ static void set_content_type(struct vo_wayland_state *wl)
 static void set_cursor_shape(struct vo_wayland_seat *s)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_32
-    wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_enter_serial,
-                                        WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+    if (s->cursor_shape_device)
+        wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_enter_serial,
+                                            WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+
+    struct vo_wayland_tablet_tool *tablet_tool;
+    wl_list_for_each(tablet_tool, &s->tablet_tool_list, link) {
+        if (tablet_tool->cursor_shape_device)
+            wp_cursor_shape_device_v1_set_shape(tablet_tool->cursor_shape_device,
+                                                tablet_tool->proximity_serial,
+                                                WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+    }
 #endif
+}
+
+static void set_cursor(struct vo_wayland_seat *s, struct wl_surface *cursor_surface,
+                       int32_t hotspot_x, int32_t hotspot_y)
+{
+    wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial,
+                          cursor_surface, hotspot_x, hotspot_y);
+
+    struct vo_wayland_tablet_tool *tablet_tool;
+    wl_list_for_each(tablet_tool, &s->tablet_tool_list, link) {
+        zwp_tablet_tool_v2_set_cursor(tablet_tool->tablet_tool, tablet_tool->proximity_serial,
+                                      cursor_surface, hotspot_x, hotspot_y);
+    }
 }
 
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
@@ -3426,7 +3463,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
     struct vo_wayland_state *wl = s->wl;
     wl->cursor_visible = on;
     if (on) {
-        if (s->cursor_shape_device) {
+        if (s->wl->cursor_shape_manager) {
             set_cursor_shape(s);
         } else {
             if (spawn_cursor(wl))
@@ -3436,8 +3473,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
             if (!buffer)
                 return VO_FALSE;
             double scale = MPMAX(wl->scaling_factor, 1);
-            wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, wl->cursor_surface,
-                                  img->hotspot_x / scale, img->hotspot_y / scale);
+            set_cursor(s, wl->cursor_surface, img->hotspot_x / scale, img->hotspot_y / scale);
             wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
                                         lround(img->height / scale));
             wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
@@ -3445,7 +3481,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
         }
         wl_surface_commit(wl->cursor_surface);
     } else {
-        wl_pointer_set_cursor(s->pointer, s->pointer_enter_serial, NULL, 0, 0);
+        set_cursor(s, NULL, 0, 0);
     }
     return VO_TRUE;
 }
