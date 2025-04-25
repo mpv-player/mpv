@@ -709,11 +709,30 @@ static void tablet_tool_handle_down(void *data,
                                     struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
                                     uint32_t serial)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    struct vo_wayland_state *wl = tablet_tool->wl;
+    tablet_tool->seat->last_serial = serial;
+
+    enum xdg_toplevel_resize_edge edge;
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
+        !wl->locked_size && !wl->opts->border &&
+        check_for_resize(wl, wl->opts->wl_edge_pixels_touch, &edge))
+    {
+        xdg_toplevel_resize(wl->xdg_toplevel, tablet_tool->seat->seat, serial, edge);
+        return;
+    }
+
+    tablet_tool->seat->pointer_button_serial = serial;
+    wl->last_button_seat = tablet_tool->seat;
+    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN | tablet_tool->seat->mpmod);
 }
 
 static void tablet_tool_handle_up(void *data,
                                   struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->seat->wl->last_button_seat = NULL;
+    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP | tablet_tool->seat->mpmod);
 }
 
 static void tablet_tool_handle_motion(void *data,
@@ -721,6 +740,15 @@ static void tablet_tool_handle_motion(void *data,
                                       wl_fixed_t x,
                                       wl_fixed_t y)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    struct vo_wayland_state *wl = tablet_tool->wl;
+
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y));
+
+    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+                           wl->toplevel_configured);
+    wl->toplevel_configured = false;
 }
 
 static void tablet_tool_handle_pressure(void *data,
@@ -767,6 +795,30 @@ static void tablet_tool_handle_button(void *data,
                                       uint32_t button,
                                       uint32_t state)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->seat->last_serial = serial;
+
+    switch (button) {
+        case BTN_STYLUS:
+            button = MP_MBTN_MID;
+            break;
+        case BTN_STYLUS2:
+            button = MP_MBTN_RIGHT;
+            break;
+        case BTN_STYLUS3:
+            button = MP_MBTN_BACK;
+            break;
+        default:
+            button = 0;
+            break;
+    }
+
+    state = state == ZWP_TABLET_TOOL_V2_BUTTON_STATE_PRESSED
+        ? MP_KEY_STATE_DOWN
+        : MP_KEY_STATE_UP;
+
+    if (button)
+        mp_input_put_key(tablet_tool->wl->vo->input_ctx, button | state | tablet_tool->seat->mpmod);
 }
 
 static void tablet_tool_handle_frame(void *data,
