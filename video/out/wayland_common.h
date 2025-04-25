@@ -190,6 +190,7 @@ struct vo_wayland_state {
     struct wl_cursor       *default_cursor;
     struct wl_surface      *cursor_surface;
     bool                    cursor_visible;
+    bool                    tablet_tool_cursor_visible;
     int                     allocated_cursor_scale;
     struct vo_wayland_seat *last_button_seat;
 };

@@ -239,6 +239,8 @@ struct vo_wayland_tablet_tool {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_tool_v2 *tablet_tool;
+    struct wp_cursor_shape_device_v1 *cursor_shape_device;
+    uint32_t proximity_serial;
     struct wl_list link;
 };
 
@@ -304,6 +306,7 @@ static int get_mods(struct vo_wayland_seat *seat);
 static int greatest_common_divisor(int a, int b);
 static int handle_round(int scale, int n);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
+static int set_tablet_tool_cursor_visibility(struct vo_wayland_seat *s, struct vo_wayland_tablet_tool *tablet_tool, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
@@ -685,11 +688,16 @@ static void tablet_tool_handle_proximity_in(void *data,
                                             struct zwp_tablet_v2 *tablet,
                                             struct wl_surface *surface)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->proximity_serial = serial;
+    set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, true);
 }
 
 static void tablet_tool_handle_proximity_out(void *data,
                                              struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, false);
 }
 
 static void tablet_tool_handle_down(void *data,
@@ -951,9 +959,15 @@ static void tablet_tool_handle_added(void *data,
     MP_VERBOSE(wl, "Adding tablet tool %p\n", id);
 
     struct vo_wayland_tablet_tool *tablet_tool = talloc_zero(seat, struct vo_wayland_tablet_tool);
-    tablet_tool->wl          = wl;
-    tablet_tool->seat        = seat;
-    tablet_tool->tablet_tool = id;
+    tablet_tool->wl                      = wl;
+    tablet_tool->seat                    = seat;
+    tablet_tool->tablet_tool             = id;
+    tablet_tool->cursor_shape_device     = NULL;
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (wl->cursor_shape_manager)
+        tablet_tool->cursor_shape_device = wp_cursor_shape_manager_v1_get_tablet_tool_v2(
+            wl->cursor_shape_manager, tablet_tool->tablet_tool);
+#endif
     zwp_tablet_tool_v2_add_listener(tablet_tool->tablet_tool, &tablet_tool_listener, tablet_tool);
     wl_list_insert(&seat->tablet_tool_list, &tablet_tool->link);
 }
@@ -3160,9 +3174,14 @@ static void remove_tablet(struct vo_wayland_tablet *tablet)
 static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
 {
     struct vo_wayland_state *wl = tablet_tool->wl;
+    struct vo_wayland_seat *seat = tablet_tool->seat;
     MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
 
     wl_list_remove(&tablet_tool->link);
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+        if (seat->cursor_shape_device)
+            wp_cursor_shape_device_v1_destroy(tablet_tool->cursor_shape_device);
+#endif
     zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
     talloc_free(tablet_tool);
 }
@@ -3407,6 +3426,44 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
     return VO_TRUE;
 }
 
+static int set_tablet_tool_cursor_visibility(struct vo_wayland_seat *s,
+                                             struct vo_wayland_tablet_tool *tablet_tool,
+                                             bool on)
+{
+    // TODO: avoid duplication with set_cursor_visibility
+    if (!s)
+        return VO_FALSE;
+    struct vo_wayland_state *wl = s->wl;
+    wl->tablet_tool_cursor_visible = on;
+    if (on) {
+        if (tablet_tool->cursor_shape_device) {
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+            wp_cursor_shape_device_v1_set_shape(tablet_tool->cursor_shape_device,
+                                                tablet_tool->proximity_serial,
+                                                WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+#endif
+        } else {
+            if (spawn_cursor(wl))
+                return VO_FALSE;
+            struct wl_cursor_image *img = wl->default_cursor->images[0];
+            struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
+            if (!buffer)
+                return VO_FALSE;
+            double scale = MPMAX(wl->scaling_factor, 1);
+            zwp_tablet_tool_v2_set_cursor(tablet_tool->tablet_tool, tablet_tool->proximity_serial, wl->cursor_surface,
+                                  img->hotspot_x / scale, img->hotspot_y / scale);
+            wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
+                                        lround(img->height / scale));
+            wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
+            wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
+        }
+        wl_surface_commit(wl->cursor_surface);
+    } else {
+        zwp_tablet_tool_v2_set_cursor(tablet_tool->tablet_tool, tablet_tool->proximity_serial, NULL, 0, 0);
+    }
+    return VO_TRUE;
+}
+
 static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
 {
     bool unavailable = true;
@@ -3416,6 +3473,12 @@ static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
         if (seat->pointer) {
             unavailable = false;
             if (set_cursor_visibility(seat, on) == VO_FALSE)
+                failed = true;
+        }
+        struct vo_wayland_tablet_tool *tablet_tool;
+        wl_list_for_each(tablet_tool, &seat->tablet_tool_list, link) {
+            unavailable = false;
+            if (set_tablet_tool_cursor_visibility(seat, tablet_tool, on) == VO_FALSE)
                 failed = true;
         }
     }
@@ -3990,6 +4053,7 @@ bool vo_wayland_init(struct vo *vo)
         .wakeup_pipe = {-1, -1},
         .display_fd = -1,
         .cursor_visible = true,
+        .tablet_tool_cursor_visible = true,
         .last_zero_copy = -1,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
