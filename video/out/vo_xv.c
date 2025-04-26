@@ -616,7 +616,6 @@ static void deallocate_xvimage(struct vo *vo, int foo)
     ctx->Shminfo[foo] = (XShmSegmentInfo){0};
 
     XSync(vo->x11->display, False);
-    return;
 }
 
 static inline void put_xvimage(struct vo *vo, XvImage *xvi)

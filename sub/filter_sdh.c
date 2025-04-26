@@ -130,8 +130,6 @@ static void copy_ass(struct sd_filter *sd, char **rpp, struct buffer *buf)
         }
     }
     *rpp = rp;
-
-    return;
 }
 
 static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
@@ -219,8 +217,6 @@ static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *
         return;
     }
     *rpp = rp;
-
-    return;
 }
 
 // Check for text enclosed in symbols, like (SOUND)

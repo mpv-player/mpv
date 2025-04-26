@@ -79,7 +79,6 @@ static void remove_seat(struct clipboard_wayland_seat *seat)
         ext_data_control_source_v1_destroy(seat->primary_selection_source);
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
-    return;
 }
 
 static void destroy_offer(struct clipboard_wayland_data_offer *o)
