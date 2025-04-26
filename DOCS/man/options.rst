@@ -6138,6 +6138,14 @@ them.
     support D3D11. While the extended GPU features will work with WARP, they
     can be very slow.
 
+``--d3d11-output-mode=<auto|window|composition>``
+    Use a specific output mode for creating the D3D11 swapchain. "composition"
+    will not create a window. If you want to use the D3D11 GPU backend in WinUI
+    applications, you need to set this to "composition". "window" will create
+    a window and use the DWM to present the video. "auto" is the same as
+    "window". After creating the swapchain, you can get the swapchain address
+    (int64 type value) by getting the ``display-swapchain`` property.
+
 ``--d3d11-feature-level=<12_1|12_0|11_1|11_0|10_1|10_0|9_3|9_2|9_1>``
     Select a specific feature level when using the D3D11 GPU backend. By
     default, the highest available feature level is used. This option can be

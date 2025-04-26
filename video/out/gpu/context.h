@@ -12,6 +12,7 @@ struct ra_ctx_opts {
     bool want_alpha;      // create an alpha framebuffer if possible
     bool debug;           // enable debugging layers/callbacks etc.
     bool probing;        // the backend was auto-probed
+    bool composition;    // enable swapchain composition
     struct m_obj_settings *context_list; // list of `ra_ctx_fns.name` to probe
     struct m_obj_settings *context_type_list;  // list of `ra_ctx_fns.type` to probe
 };
