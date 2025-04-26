@@ -3015,6 +3015,12 @@ Property list
     Read-only - mpv's window id. May not always be available, i.e due to window
     not being opened yet or not being supported by the VO.
 
+``display-swapchain``
+    Read-only - Direct3D 11 swapchain address. Returns an int64 type value
+    representing the memory address of the D3D11 swapchain. May not always be
+    available, i.e due to rendering context not being created yet or not being
+    supported by the VO.
+
 ``mouse-pos``
     Read-only - last known mouse position, normalized to OSD dimensions.
 
