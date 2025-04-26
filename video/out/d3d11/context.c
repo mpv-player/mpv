@@ -36,6 +36,7 @@ struct d3d11_opts {
     int output_format;
     int color_space;
     bool exclusive_fs;
+    int output_mode;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -82,6 +83,12 @@ const struct m_sub_options d3d11_conf = {
             .flags = UPDATE_VO,
         },
         {"d3d11-exclusive-fs", OPT_BOOL(exclusive_fs)},
+        {"d3d11-output-mode", OPT_CHOICE(output_mode,
+            {"auto", -1},
+            {"window", 0},
+            {"composition", 1}),
+            .flags = UPDATE_VO,
+        },
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -92,6 +99,7 @@ const struct m_sub_options d3d11_conf = {
         .adapter_name = NULL,
         .output_format = DXGI_FORMAT_UNKNOWN,
         .color_space = -1,
+        .output_mode = -1,
     },
     .size = sizeof(struct d3d11_opts)
 };
@@ -157,7 +165,8 @@ static bool resize(struct ra_ctx *ctx)
 
 static bool d3d11_reconfig(struct ra_ctx *ctx)
 {
-    vo_w32_config(ctx->vo);
+    if (!ctx->opts.composition)
+        vo_w32_config(ctx->vo);
     return resize(ctx);
 }
 
@@ -454,7 +463,7 @@ static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg
         fullscreen_switch_needed = false;
     }
 
-    ret = vo_w32_control(ctx->vo, events, request, arg);
+    ret = ctx->opts.composition ? VO_TRUE : vo_w32_control(ctx->vo, events, request, arg);
 
     // if entering full screen, handle d3d11 after general windowing stuff
     if (fullscreen_switch_needed && p->vo_opts->fullscreen) {
@@ -481,7 +490,11 @@ static void d3d11_uninit(struct ra_ctx *ctx)
     if (ctx->ra)
         ra_tex_free(ctx->ra, &p->backbuffer);
     SAFE_RELEASE(p->swapchain);
-    vo_w32_uninit(ctx->vo);
+    if (!ctx->opts.composition) {
+        vo_w32_uninit(ctx->vo);
+    } else {
+        vo_w32_swapchain(ctx->vo, NULL);
+    }
     SAFE_RELEASE(p->device);
 
     // Destroy the RA last to prevent objects we hold from showing up in D3D's
@@ -534,10 +547,11 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!ctx->ra)
         goto error;
 
-    if (!vo_w32_init(ctx->vo))
+    ctx->opts.composition = p->opts->output_mode == 1;
+    if (!ctx->opts.composition && !vo_w32_init(ctx->vo))
         goto error;
 
-    if (ctx->opts.want_alpha)
+    if (!ctx->opts.composition && ctx->opts.want_alpha)
         vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 
     UINT usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
@@ -548,7 +562,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
     }
 
     struct d3d11_swapchain_opts scopts = {
-        .window = vo_w32_hwnd(ctx->vo),
+        .window = ctx->opts.composition ? NULL : vo_w32_hwnd(ctx->vo),
         .width = ctx->vo->dwidth,
         .height = ctx->vo->dheight,
         .format = p->opts->output_format,
@@ -563,6 +577,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
         goto error;
 
+    if (ctx->opts.composition)
+        vo_w32_swapchain(ctx->vo, p->swapchain);
+
     return true;
 
 error:
@@ -572,6 +589,8 @@ error:
 
 static void d3d11_update_render_opts(struct ra_ctx *ctx)
 {
+    if (ctx->opts.composition)
+        return;
     vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 }
 

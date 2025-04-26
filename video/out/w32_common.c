@@ -2499,6 +2499,11 @@ HWND vo_w32_hwnd(struct vo *vo)
     return w32->window; // immutable, so no synchronization needed
 }
 
+void vo_w32_swapchain(struct vo *vo, void *swapchain)
+{
+    vo->display_swapchain = swapchain;
+}
+
 void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx)
 {
     struct vo_w32_state *w32 = vo->w32;

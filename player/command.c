@@ -2512,6 +2512,23 @@ static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
     return o_params;
 }
 
+static int mp_property_vo_display_swapchain(void *ctx, struct m_property *prop,
+    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    void *swapchain_ptr = vo_get_display_swapchain(vo);
+    if (swapchain_ptr == NULL)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int64_t swapchain = (intptr_t)swapchain_ptr;
+
+    return m_property_int64_ro(action, arg, swapchain);
+}
+
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -2834,7 +2851,7 @@ static int mp_property_display_names(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct vo *vo = mpctx->video_out;
-    if (!vo)
+    if (!vo || vo->display_swapchain)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -4318,6 +4335,7 @@ static const struct m_property mp_properties_base[] = {
     {"deinterlace-active", mp_property_deinterlace},
     {"idle-active", mp_property_idle},
     {"window-id", mp_property_window_id},
+    {"display-swapchain", mp_property_vo_display_swapchain},
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", mp_property_list_tracks},

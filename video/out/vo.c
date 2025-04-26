@@ -1417,6 +1417,11 @@ double vo_get_display_fps(struct vo *vo)
     return res;
 }
 
+void * vo_get_display_swapchain(struct vo *vo)
+{
+    return vo->display_swapchain;
+}
+
 // Set specific event flags, and wakeup the playback core if needed.
 // vo_query_and_reset_events() can retrieve the events again.
 void vo_event(struct vo *vo, int event)
