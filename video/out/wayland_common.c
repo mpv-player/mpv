@@ -610,6 +610,7 @@ static void tablet_tool_handle_proximity_in(void *data,
     struct vo_wayland_tablet_tool *tablet_tool = data;
     tablet_tool->proximity_serial = serial;
     set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, true);
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, true);
 }
 
 static void tablet_tool_handle_proximity_out(void *data,
@@ -617,6 +618,7 @@ static void tablet_tool_handle_proximity_out(void *data,
 {
     struct vo_wayland_tablet_tool *tablet_tool = data;
     set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, false);
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, false);
 }
 
 static void tablet_tool_handle_down(void *data,
@@ -638,7 +640,7 @@ static void tablet_tool_handle_down(void *data,
 
     tablet_tool->seat->pointer_button_serial = serial;
     wl->last_button_seat = tablet_tool->seat;
-    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN | tablet_tool->seat->mpmod);
+    mp_input_tablet_tool_down(tablet_tool->wl->vo->input_ctx);
 }
 
 static void tablet_tool_handle_up(void *data,
@@ -646,7 +648,7 @@ static void tablet_tool_handle_up(void *data,
 {
     struct vo_wayland_tablet_tool *tablet_tool = data;
     tablet_tool->seat->wl->last_button_seat = NULL;
-    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP | tablet_tool->seat->mpmod);
+    mp_input_tablet_tool_up(tablet_tool->wl->vo->input_ctx);
 }
 
 static void tablet_tool_handle_motion(void *data,
@@ -660,7 +662,7 @@ static void tablet_tool_handle_motion(void *data,
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y));
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+    mp_input_set_tablet_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
                            wl->toplevel_configured);
     wl->toplevel_configured = false;
 }
@@ -731,9 +733,7 @@ static void tablet_tool_handle_button(void *data,
         ? MP_KEY_STATE_DOWN
         : MP_KEY_STATE_UP;
 
-    if (button) {
-        mp_input_put_key(tablet_tool->wl->vo->input_ctx, button | state | tablet_tool->seat->mpmod);
-    }
+    mp_input_tablet_tool_button(tablet_tool->wl->vo->input_ctx, button, state);
 }
 
 static void tablet_tool_handle_frame(void *data,
