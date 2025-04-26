@@ -698,11 +698,14 @@ static void tablet_tool_handle_proximity_in(void *data,
     struct vo_wayland_tablet_tool *tablet_tool = data;
     tablet_tool->proximity_serial = serial;
     set_cursor_visibility(tablet_tool->seat, true);
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, true);
 }
 
 static void tablet_tool_handle_proximity_out(void *data,
                                              struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
 {
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, false);
 }
 
 static void tablet_tool_handle_down(void *data,
@@ -724,7 +727,7 @@ static void tablet_tool_handle_down(void *data,
 
     tablet_tool->seat->pointer_button_serial = serial;
     wl->last_button_seat = tablet_tool->seat;
-    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN | tablet_tool->seat->mpmod);
+    mp_input_tablet_tool_down(tablet_tool->wl->vo->input_ctx);
 }
 
 static void tablet_tool_handle_up(void *data,
@@ -732,7 +735,7 @@ static void tablet_tool_handle_up(void *data,
 {
     struct vo_wayland_tablet_tool *tablet_tool = data;
     tablet_tool->seat->wl->last_button_seat = NULL;
-    mp_input_put_key(tablet_tool->wl->vo->input_ctx, MP_MBTN_LEFT | MP_KEY_STATE_UP | tablet_tool->seat->mpmod);
+    mp_input_tablet_tool_up(tablet_tool->wl->vo->input_ctx);
 }
 
 static void tablet_tool_handle_motion(void *data,
@@ -746,7 +749,7 @@ static void tablet_tool_handle_motion(void *data,
     wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x));
     wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y));
 
-    mp_input_set_mouse_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+    mp_input_set_tablet_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
                            wl->toplevel_configured);
     wl->toplevel_configured = false;
 }
@@ -799,26 +802,25 @@ static void tablet_tool_handle_button(void *data,
     tablet_tool->seat->last_serial = serial;
 
     switch (button) {
-        case BTN_STYLUS:
-            button = MP_MBTN_MID;
-            break;
-        case BTN_STYLUS2:
-            button = MP_MBTN_RIGHT;
-            break;
-        case BTN_STYLUS3:
-            button = MP_MBTN_BACK;
-            break;
-        default:
-            button = 0;
-            break;
+    case BTN_STYLUS:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN1;
+        break;
+    case BTN_STYLUS2:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN2;
+        break;
+    case BTN_STYLUS3:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN3;
+        break;
+    default:
+        button = 0;
+        break;
     }
 
     state = state == ZWP_TABLET_TOOL_V2_BUTTON_STATE_PRESSED
         ? MP_KEY_STATE_DOWN
         : MP_KEY_STATE_UP;
 
-    if (button)
-        mp_input_put_key(tablet_tool->wl->vo->input_ctx, button | state | tablet_tool->seat->mpmod);
+    mp_input_tablet_tool_button(tablet_tool->wl->vo->input_ctx, button, state);
 }
 
 static void tablet_tool_handle_frame(void *data,

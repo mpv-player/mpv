@@ -161,6 +161,13 @@
 
 #define MP_KEY_MOUSE_BTN_COUNT (MP_MBTN_END - MP_MBTN_BASE)
 
+/* tablet buttons */
+#define MP_KEY_TABLET                     (MP_KEY_BASE+0xD0)
+#define MP_KEY_TABLET_TOOL_TIP            (MP_KEY_TABLET+1)
+#define MP_KEY_TABLET_TOOL_STYLUS_BTN1    (MP_KEY_TABLET+2)
+#define MP_KEY_TABLET_TOOL_STYLUS_BTN2    (MP_KEY_TABLET+3)
+#define MP_KEY_TABLET_TOOL_STYLUS_BTN3    (MP_KEY_TABLET+4)
+
 /* game controller keys */
 #define MP_KEY_GAMEPAD                    (MP_KEY_BASE+0xF0)
 #define MP_KEY_GAMEPAD_ACTION_DOWN        (MP_KEY_GAMEPAD+0)
