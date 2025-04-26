@@ -311,7 +311,6 @@ static void precreate_graph(struct lavfi *c, bool first_init)
 error:
     free_graph(c);
     c->failed = true;
-    return;
 }
 
 // Ensure to send EOF to each input pad, so the graph can be drained properly.

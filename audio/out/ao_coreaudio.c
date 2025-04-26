@@ -275,7 +275,6 @@ static void init_physical_format(struct ao *ao)
 
 coreaudio_error:
     talloc_free(tmp);
-    return;
 }
 
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd, AudioChannelLayout *layout, size_t layout_size)

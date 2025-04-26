@@ -2543,7 +2543,6 @@ static void remove_output(struct vo_wayland_output *out)
     talloc_free(out->make);
     talloc_free(out->model);
     talloc_free(out);
-    return;
 }
 
 static void remove_seat(struct vo_wayland_seat *seat)
@@ -2580,7 +2579,6 @@ static void remove_seat(struct vo_wayland_seat *seat)
 
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
-    return;
 }
 
 static void seat_create_dnd_ddev(struct vo_wayland_seat *seat)

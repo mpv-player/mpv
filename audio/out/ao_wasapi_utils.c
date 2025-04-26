@@ -643,7 +643,6 @@ exit_label:
     SAFE_RELEASE(state->pSessionControl);
     MP_WARN(state, "Error setting audio session name: %s\n",
             mp_HRESULT_to_str(hr));
-    return;
 }
 
 static void init_volume_control(struct wasapi_state *state)

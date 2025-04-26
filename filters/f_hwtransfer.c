@@ -654,7 +654,6 @@ static void hwdownload_process(struct mp_filter *f)
 
 passthrough:
     mp_pin_in_write(f->ppins[1], frame);
-    return;
 }
 
 static const struct mp_filter_info hwdownload_filter = {
