@@ -26,8 +26,8 @@
 #define L(s) { #s, sizeof(#s) - 1 }
 
 static const struct lang {
-    struct { const char s[3]; uint8_t l; } match;
-    struct { const char s[3]; uint8_t l; } canonical;
+    struct { const char s[3] MP_NONSTRING; uint8_t l; } match;
+    struct { const char s[3] MP_NONSTRING; uint8_t l; } canonical;
 } langmap[] = {
     {L(aa), L(aar)},
     {L(ab), L(abk)},
