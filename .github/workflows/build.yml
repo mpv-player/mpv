@@ -36,13 +36,15 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 500M
+      TARGET: ${{ matrix.arch }}-w64-mingw32
+      RUST_TARGET: ${{ matrix.arch }}-pc-windows-gnu
     strategy:
       fail-fast: false
       matrix:
         include:
-          - target: i686-w64-mingw32
+          - arch: i686
             wine: wine32
-          - target: x86_64-w64-mingw32
+          - arch: x86_64
             wine: wine64
     steps:
       - uses: actions/checkout@v4
@@ -55,32 +57,32 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
-          restore-keys: ${{ matrix.target }}-
+          key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ env.TARGET }}-
 
       - name: Install dependencies
         run: |
+          rustup target add ${{ env.RUST_TARGET }}
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib meson nasm ninja-build pkgconf ${{ matrix.wine }} wine
+          sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib python3-pip nasm ninja-build pkgconf ${{ matrix.wine }} wine
+          # TODO: Switch to release version when this is available https://github.com/mesonbuild/meson/commit/5d9b9739ddc34a9db966a0034ab5ffb652ec4f56
+          python -m pip install git+https://github.com/mesonbuild/meson
 
       - name: Install Meson Wraps
         run: |
           mkdir subprojects -p
           meson wrap install mujs
+          meson subprojects download
 
       - name: Build libraries
         run: |
           ./ci/build-mingw64.sh
-        env:
-          TARGET: ${{ matrix.target }}
 
       - name: Build with meson
         id: build
         run: |
           ./ci/build-mingw64.sh meson pack
-        env:
-          TARGET: ${{ matrix.target }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -105,7 +107,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: mpv-${{ matrix.target }}
+          name: mpv-${{ env.TARGET }}
           path: mpv-git-*.zip
 
       - name: Save Cache
@@ -113,7 +115,7 @@ jobs:
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
 
   win32:
     runs-on: ${{ matrix.os }}
@@ -131,9 +133,11 @@ jobs:
       VS: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise"
       CC: "ccache clang"
       CXX: "ccache clang++"
-      CC_LD: "lld"
-      CXX_LD: "lld"
+      CC_LD: "lld-link"
+      CXX_LD: "lld-link"
       WINDRES: "llvm-rc"
+      RUST_LD: "lld-link"
+      RUSTC: "rustc --target ${{ matrix.target }}"
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: "${{ github.workspace }}\\.ccache"
       CCACHE_MAXSIZE: 500M
@@ -159,8 +163,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install meson
+          # TODO: Switch to release version when this is available https://github.com/mesonbuild/meson/commit/e574889f68c5a9c6d94344db731405809843ed37
+          python -m pip install git+https://github.com/mesonbuild/meson
           choco install ccache nasm
+
+      - name: Install Rustup
+        # TODO: Remove after https://github.com/actions/partner-runner-images/issues/77
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        run: |
+          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile "$env:TEMP\rustup-init.exe"
+           & "$env:TEMP\rustup-init.exe" --default-toolchain none --profile=minimal -y
+          "$env:USERPROFILE\.cargo\bin" | Out-File -Append -Encoding ascii $env:GITHUB_PATH
+          "CARGO_HOME=$env:USERPROFILE\.cargo" | Out-File -Append -Encoding  ascii $env:GITHUB_ENV
+
+      - name: Update Rust toolchain
+        if: ${{ matrix.os == 'windows-11-arm' }}
+        run: |
+          rustup update --no-self-update stable
+          rustup default stable
 
       - name: Update Meson WrapDB
         run: |
@@ -259,7 +279,7 @@ jobs:
         run: |
           brew update
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
-            luajit libass ffmpeg meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
+            luajit libass ffmpeg meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
       - name: Build with meson
         id: build
@@ -317,6 +337,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          zypper --non-interactive install rust
+
       - name: Build with meson
         id: build
         run: |
@@ -333,6 +357,10 @@ jobs:
           export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
           meson test -C build
 
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
+
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
@@ -347,6 +375,10 @@ jobs:
         CXX: "clang++"
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          zypper --non-interactive install rust
 
       - name: Build with meson
         id: build
@@ -391,6 +423,7 @@ jobs:
               libxscrnsaver-dev \
               meson \
               musl-dev \
+              rust \
               samurai
 
       - name: Build with meson
@@ -444,6 +477,7 @@ jobs:
                 pulseaudio \
                 python3 \
                 rubberband \
+                rust \
                 sdl2 \
                 shaderc \
                 spirv-cross \
@@ -498,6 +532,7 @@ jobs:
                 pulseaudio \
                 python3 \
                 rubberband \
+                rust \
                 sekrit-twc-zimg \
                 sdl2 \
                 sndio \
@@ -560,6 +595,7 @@ jobs:
             python:p
             rst2pdf:p
             rubberband:p
+            rust:p
             shaderc:p
             spirv-cross:p
             uchardet:p
@@ -582,6 +618,10 @@ jobs:
         id: tests
         run: |
           meson test -C build
+
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
