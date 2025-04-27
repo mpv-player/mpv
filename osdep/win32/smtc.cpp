@@ -23,7 +23,14 @@
 
 #include <windows.h>
 #include <systemmediatransportcontrolsinterop.h>
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic warning "-Wtemplate-body"
+#endif
 #include <winrt/Windows.Foundation.h>
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
 #include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Media.h>
 #include <winrt/Windows.Storage.h>
