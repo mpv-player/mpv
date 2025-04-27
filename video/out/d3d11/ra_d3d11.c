@@ -1500,7 +1500,7 @@ static size_t vbuf_upload(struct ra *ra, void *data, size_t size)
     return offset;
 }
 
-static const char cache_magic[4] = "RD11";
+static const char cache_magic[4] MP_NONSTRING = "RD11";
 static const uint32_t cache_version = 4;
 
 struct cache_header {
