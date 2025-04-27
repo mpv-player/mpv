@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
 #include <math.h>
 
 #include <subrandr/subrandr.h>
@@ -22,8 +23,27 @@
 #include "common/common.h"
 #include "demux/packet.h"
 #include "misc/bstr.h"
+#include "options/m_config.h"
+#include "options/m_option.h"
 #include "stream/stream.h"
 #include "demux.h"
+
+#define OPT_BASE_STRUCT struct demux_textsub_opts
+struct demux_textsub_opts {
+    int probesize;
+};
+
+const struct m_sub_options demux_textsub_conf = {
+    .opts = (const m_option_t[]) {
+        {"probesize", OPT_INT(probesize), M_RANGE(32, INT_MAX)},
+        {0}
+    },
+    .size = sizeof(struct demux_textsub_opts),
+    .defaults = &(const struct demux_textsub_opts){
+        .probesize = 128,
+    },
+    .change_flags = UPDATE_DEMUXER,
+};
 
 struct format_codec_info {
     const char *codec;
@@ -48,8 +68,6 @@ static const struct textsub_ext TEXT_FORMAT_EXTS[] = {
     {NULL}
 };
 
-static const int SUBRANDR_PROBE_SIZE = 128;
-
 struct demux_textsub_priv {
     bstr content;
     bool exhausted;
@@ -60,13 +78,15 @@ static int demux_open_textsub(struct demuxer *demuxer, enum demux_check check)
     bstr filename = bstr0(demuxer->filename);
     struct format_codec_info codec_info = {NULL, NULL};
 
+    struct demux_textsub_opts *opts = mp_get_config_group(demuxer, demuxer->global, &demux_textsub_conf);
+
     for (const struct textsub_ext *ext = TEXT_FORMAT_EXTS; ext->ext; ++ext) {
         if (bstr_endswith0(filename, ext->ext))
             codec_info = ext->codec_info;
     }
 
     if (!codec_info.codec) {
-        int probe_size = stream_peek(demuxer->stream, SUBRANDR_PROBE_SIZE);
+        int probe_size = stream_peek(demuxer->stream, opts->probesize);
         uint8_t *probe_buffer = demuxer->stream->buffer;
 
         sbr_subtitle_format fmt = sbr_probe_text((const char *)probe_buffer, (size_t)probe_size);
