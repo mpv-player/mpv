@@ -429,6 +429,8 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
         // Some archives may have no filenames, or libarchive won't return some.
         const char *fn = archive_entry_pathname(entry);
         char buf[64];
+        if (!fn || bstr_validate_utf8(bstr0(fn)) < 0)
+            fn = archive_entry_pathname_utf8(entry);
         if (!fn || bstr_validate_utf8(bstr0(fn)) < 0) {
             snprintf(buf, sizeof(buf), "mpv_unknown#%d", mpa->entry_num);
             fn = buf;
