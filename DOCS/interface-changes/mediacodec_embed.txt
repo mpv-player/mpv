@@ -1,0 +1,1 @@
+mediacodec_embed is no longer the default `vo` on Android, set the option explicitly if you want to use it and are aware of the limitations.
