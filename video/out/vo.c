@@ -69,11 +69,10 @@ extern const struct vo_driver video_out_kitty;
 
 static const struct vo_driver *const video_out_drivers[] =
 {
-#if HAVE_ANDROID
-    &video_out_mediacodec_embed,
-#endif
+    // high-quality and well-supported VOs first:
     &video_out_gpu,
     &video_out_gpu_next,
+
 #if HAVE_VDPAU
     &video_out_vdpau,
 #endif
@@ -85,6 +84,9 @@ static const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_XV
     &video_out_xv,
+#endif
+#if HAVE_ANDROID
+    &video_out_mediacodec_embed,
 #endif
 #if HAVE_SDL2_VIDEO
     &video_out_sdl,
@@ -100,6 +102,7 @@ static const struct vo_driver *const video_out_drivers[] =
 #endif
     &video_out_libmpv,
     &video_out_null,
+
     // should not be auto-selected
     &video_out_image,
     &video_out_tct,
