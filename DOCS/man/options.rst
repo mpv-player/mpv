@@ -21,7 +21,7 @@ Track Selection
           audio.
 
 ``--slang=<languagecode[,languagecode,...]>``
-    Equivalent to ``--alang``, for subtitle tracks.
+    Analogous to ``--alang``, for subtitle tracks.
 
     This is a string list option. See `List Options`_ for details.
 
@@ -35,7 +35,7 @@ Track Selection
           Portuguese subtitles if available, and otherwise any Portuguese subtitles.
 
 ``--vlang=<...>``
-    Equivalent to ``--alang`` and ``--slang``, for video tracks.
+    Analogous to ``--alang`` and ``--slang``, for video tracks.
 
     This is a string list option. See `List Options`_ for details.
 
@@ -2367,7 +2367,7 @@ Audio
     Use ``--help=audio-exts`` to see default extensions.
 
 ``--audio-file-paths=<path1:path2:...>``
-    Equivalent to ``--sub-file-paths`` option, but for auto-loaded audio files.
+    Analogous to ``--sub-file-paths`` option, but for auto-loaded audio files.
 
     This is a path list option. See `List Options`_ for details.
 
