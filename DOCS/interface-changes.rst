@@ -31,6 +31,7 @@ Interface changes
 ::
 
  --- mpv 0.41.0 ---
+    - add `--input-tablet-emulate-mouse` option
  --- mpv 0.40.0 ---
     - undeprecate list option suffixes that work with multiple items
     - add `-del` to string list and keyvalue list options
