@@ -63,6 +63,8 @@ struct ra_ctx_fns {
     void (*uninit)(struct ra_ctx *ctx);
 };
 
+typedef struct pl_color_space pl_color_space_t;
+
 // These are a set of helpers for ra_ctx providers based on ra_gl.
 // The init function also initializes ctx->ra and ctx->swapchain, so the user
 // doesn't have to do this manually. (Similarly, the uninit function will
@@ -75,6 +77,9 @@ struct ra_ctx_params {
 
     // See ra_swapchain_fns.color_depth.
     int (*color_depth)(struct ra_ctx *ctx);
+
+    // Preferred device color space. Optional.
+    pl_color_space_t (*preferred_csp)(struct ra_ctx *ctx);
 
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
@@ -103,8 +108,6 @@ struct ra_fbo {
     // the frame buffer as.
     struct pl_color_space color_space;
 };
-
-typedef struct pl_color_space pl_color_space_t;
 
 struct ra_swapchain_fns {
     // Gets the current framebuffer depth in bits (0 if unknown). Optional.

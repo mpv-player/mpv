@@ -105,6 +105,7 @@ struct vo_wayland_state {
     int transfer_map[PL_COLOR_TRC_COUNT];
     void *icc_file;
     uint32_t icc_size;
+    struct pl_color_space preferred_csp;
 
     /* color-representation */
     struct wp_color_representation_manager_v1 *color_representation_manager;
@@ -194,6 +195,7 @@ struct vo_wayland_state {
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
+struct pl_color_space vo_wayland_preferred_csp(struct vo *vo);
 bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier);
 bool vo_wayland_init(struct vo *vo);
 bool vo_wayland_reconfig(struct vo *vo);

@@ -33,6 +33,11 @@ static bool wayland_vk_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
+static pl_color_space_t wayland_vk_preferred_csp(struct ra_ctx *ctx)
+{
+    return vo_wayland_preferred_csp(ctx->vo);
+}
+
 static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
@@ -83,6 +88,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .check_visible = wayland_vk_check_visible,
+        .preferred_csp = wayland_vk_preferred_csp,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,
     };
