@@ -246,6 +246,14 @@ struct vo_wayland_text_input {
     bool has_focus;
 };
 
+struct vo_wayland_preferred_description_info {
+    struct vo_wayland_state *wl;
+    bool is_parametric;
+    struct pl_color_space csp;
+    void *icc_file;
+    uint32_t icc_size;
+};
+
 static bool single_output_spanned(struct vo_wayland_state *wl);
 
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
@@ -259,7 +267,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
-static void get_compositor_icc_file(struct vo_wayland_state *wl);
+static void get_compositor_preferred_description(struct vo_wayland_state *wl, bool parametric);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -1511,36 +1519,46 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
     }
 }
 
+static enum pl_color_transfer map_tf(uint32_t tf)
+{
+    switch (tf) {
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886: return PL_COLOR_TRC_BT_1886;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB: return PL_COLOR_TRC_SRGB;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR: return PL_COLOR_TRC_LINEAR;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA22: return PL_COLOR_TRC_GAMMA22;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA28: return PL_COLOR_TRC_GAMMA28;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST428: return PL_COLOR_TRC_ST428;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ: return PL_COLOR_TRC_PQ;
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_HLG: return PL_COLOR_TRC_HLG;
+        default: return PL_COLOR_TRC_UNKNOWN;
+    }
+}
+
 static void supported_tf_named(void *data, struct wp_color_manager_v1 *color_manager,
                                uint32_t tf)
 {
     struct vo_wayland_state *wl = data;
+    enum pl_color_transfer pl_tf = map_tf(tf);
 
-    switch (tf) {
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886:
-        wl->transfer_map[PL_COLOR_TRC_BT_1886] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB:
-        wl->transfer_map[PL_COLOR_TRC_SRGB] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR:
-        wl->transfer_map[PL_COLOR_TRC_LINEAR] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA22:
-        wl->transfer_map[PL_COLOR_TRC_GAMMA22] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA22;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA28:
-        wl->transfer_map[PL_COLOR_TRC_GAMMA28] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA28;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST428:
-        wl->transfer_map[PL_COLOR_TRC_ST428] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST428;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ:
-        wl->transfer_map[PL_COLOR_TRC_PQ] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_ST2084_PQ;
-        break;
-    case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_HLG:
-        wl->transfer_map[PL_COLOR_TRC_HLG] = WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_HLG;
-        break;
+    if (pl_tf == PL_COLOR_TRC_UNKNOWN)
+        return;
+
+    wl->transfer_map[pl_tf] = tf;
+}
+
+static enum pl_color_primaries map_primaries(uint32_t primaries)
+{
+    switch (primaries) {
+        case WP_COLOR_MANAGER_V1_PRIMARIES_PAL: return PL_COLOR_PRIM_BT_601_525;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_NTSC: return PL_COLOR_PRIM_BT_601_625;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_SRGB: return PL_COLOR_PRIM_BT_709;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_PAL_M: return PL_COLOR_PRIM_BT_470M;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_BT2020: return PL_COLOR_PRIM_BT_2020;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_ADOBE_RGB: return PL_COLOR_PRIM_ADOBE;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_DCI_P3: return PL_COLOR_PRIM_DCI_P3;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_DISPLAY_P3: return PL_COLOR_PRIM_DISPLAY_P3;
+        case WP_COLOR_MANAGER_V1_PRIMARIES_GENERIC_FILM: return PL_COLOR_PRIM_FILM_C;
+        default: return PL_COLOR_PRIM_UNKNOWN;
     }
 }
 
@@ -1548,36 +1566,12 @@ static void supported_primaries_named(void *data, struct wp_color_manager_v1 *co
                                       uint32_t primaries)
 {
     struct vo_wayland_state *wl = data;
+    enum pl_color_primaries pl_primaries = map_primaries(primaries);
 
-    switch (primaries) {
-    case WP_COLOR_MANAGER_V1_PRIMARIES_PAL:
-        wl->primaries_map[PL_COLOR_PRIM_BT_601_525] = WP_COLOR_MANAGER_V1_PRIMARIES_PAL;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_NTSC:
-        wl->primaries_map[PL_COLOR_PRIM_BT_601_625] = WP_COLOR_MANAGER_V1_PRIMARIES_NTSC;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_SRGB:
-        wl->primaries_map[PL_COLOR_PRIM_BT_709] = WP_COLOR_MANAGER_V1_PRIMARIES_SRGB;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_PAL_M:
-        wl->primaries_map[PL_COLOR_PRIM_BT_470M] = WP_COLOR_MANAGER_V1_PRIMARIES_PAL_M;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_BT2020:
-        wl->primaries_map[PL_COLOR_PRIM_BT_2020] = WP_COLOR_MANAGER_V1_PRIMARIES_BT2020;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_ADOBE_RGB:
-        wl->primaries_map[PL_COLOR_PRIM_ADOBE] = WP_COLOR_MANAGER_V1_PRIMARIES_ADOBE_RGB;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_DCI_P3:
-        wl->primaries_map[PL_COLOR_PRIM_DCI_P3] = WP_COLOR_MANAGER_V1_PRIMARIES_DCI_P3;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_DISPLAY_P3:
-        wl->primaries_map[PL_COLOR_PRIM_DISPLAY_P3] = WP_COLOR_MANAGER_V1_PRIMARIES_DISPLAY_P3;
-        break;
-    case WP_COLOR_MANAGER_V1_PRIMARIES_GENERIC_FILM:
-        wl->primaries_map[PL_COLOR_PRIM_FILM_C] = WP_COLOR_MANAGER_V1_PRIMARIES_GENERIC_FILM;
-        break;
-    }
+    if (pl_primaries == PL_COLOR_PRIM_UNKNOWN)
+        return;
+
+    wl->primaries_map[pl_primaries] = primaries;
 }
 
 static void color_manager_done(void *data, struct wp_color_manager_v1 *color_manager)
@@ -1616,30 +1610,40 @@ static const struct wp_image_description_v1_listener image_description_listener 
 
 static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
 {
-    struct vo_wayland_state *wl = data;
+    struct vo_wayland_preferred_description_info *wd = data;
+    struct vo_wayland_state *wl = wd->wl;
     wp_image_description_info_v1_destroy(image_description_info);
-    if (!wl->icc_file)
-        MP_VERBOSE(wl, "No ICC profile retrieved from the compositor.\n");
+    if (wd->is_parametric) {
+        wl->preferred_csp = wd->csp;
+    } else {
+        if (wd->icc_file) {
+            if (wl->icc_size) {
+                munmap(wl->icc_file, wl->icc_size);
+            }
+            wl->icc_file = wd->icc_file;
+            wl->icc_size = wd->icc_size;
+            wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+        } else {
+            MP_VERBOSE(wl, "No ICC profile retrieved from the compositor.\n");
+        }
+    }
+    talloc_free(wd);
 }
 
 static void info_icc_file(void *data, struct wp_image_description_info_v1 *image_description_info,
                           int32_t icc, uint32_t icc_size)
 {
-    struct vo_wayland_state *wl = data;
-    if (wl->icc_size) {
-        munmap(wl->icc_file, wl->icc_size);
-        wl->icc_file = NULL;
-        wl->icc_size = 0;
-    }
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (wd->is_parametric)
+        return;
 
     void *icc_file = mmap(NULL, icc_size, PROT_READ, MAP_PRIVATE, icc, 0);
     close(icc);
 
     if (icc_file != MAP_FAILED) {
-        wl->icc_file = icc_file;
-        wl->icc_size = icc_size;
+        wd->icc_file = icc_file;
+        wd->icc_size = icc_size;
     }
-    wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
 }
 
 static void info_primaries(void *data, struct wp_image_description_info_v1 *image_description_info,
@@ -1651,6 +1655,10 @@ static void info_primaries(void *data, struct wp_image_description_info_v1 *imag
 static void info_primaries_named(void *data, struct wp_image_description_info_v1 *image_description_info,
                                  uint32_t primaries)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.primaries = map_primaries(primaries);
 }
 
 static void info_tf_power(void *data, struct wp_image_description_info_v1 *image_description_info,
@@ -1661,6 +1669,10 @@ static void info_tf_power(void *data, struct wp_image_description_info_v1 *image
 static void info_tf_named(void *data, struct wp_image_description_info_v1 *image_description_info,
                           uint32_t tf)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.transfer = map_tf(tf);
 }
 
 static void info_luminances(void *data, struct wp_image_description_info_v1 *image_description_info,
@@ -1672,21 +1684,45 @@ static void info_target_primaries(void *data, struct wp_image_description_info_v
                                   int32_t r_x, int32_t r_y, int32_t g_x, int32_t g_y, int32_t b_x, int32_t b_y,
                                   int32_t w_x, int32_t w_y)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.hdr.prim.red.x = (float)r_x / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.red.y = (float)r_y / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.green.x = (float)g_x / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.green.y = (float)g_y / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.blue.x = (float)b_x / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.blue.y = (float)b_y / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.white.x = (float)w_x / WAYLAND_COLOR_FACTOR;
+    wd->csp.hdr.prim.white.y = (float)w_y / WAYLAND_COLOR_FACTOR;
 }
 
 static void info_target_luminance(void *data, struct wp_image_description_info_v1 *image_description_info,
                                   uint32_t min_lum, uint32_t max_lum)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.hdr.min_luma = (float)min_lum / WAYLAND_MIN_LUM_FACTOR;
+    wd->csp.hdr.max_luma = (float)max_lum;
 }
 
 static void info_target_max_cll(void *data, struct wp_image_description_info_v1 *image_description_info,
                                 uint32_t max_cll)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.hdr.max_cll = (float)max_cll;
 }
 
 static void info_target_max_fall(void *data, struct wp_image_description_info_v1 *image_description_info,
                                  uint32_t max_fall)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->csp.hdr.max_fall = (float)max_fall;
 }
 
 static const struct wp_image_description_info_v1_listener image_description_info_listener = {
@@ -1707,7 +1743,10 @@ static void preferred_changed(void *data, struct wp_color_management_surface_fee
                               uint32_t identity)
 {
     struct vo_wayland_state *wl = data;
-    get_compositor_icc_file(wl);
+    if (wl->supports_icc)
+        get_compositor_preferred_description(wl, false);
+    if (wl->supports_parametric)
+        get_compositor_preferred_description(wl, true);
 }
 
 static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
@@ -2479,14 +2518,22 @@ static int get_mods(struct vo_wayland_seat *s)
     return modifiers;
 }
 
-static void get_compositor_icc_file(struct vo_wayland_state *wl)
+static void get_compositor_preferred_description(struct vo_wayland_state *wl, bool parametric)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-    struct wp_image_description_v1 *image_description =
-        wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
+    struct vo_wayland_preferred_description_info *wd = talloc_zero(NULL, struct vo_wayland_preferred_description_info);
+    wd->wl = wl;
+    wd->is_parametric = parametric;
+
+    struct wp_image_description_v1 *image_description;
+    if (parametric) {
+        image_description = wp_color_management_surface_feedback_v1_get_preferred_parametric(wl->color_surface_feedback);
+    } else {
+        image_description = wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
+    }
     struct wp_image_description_info_v1 *description_info =
         wp_image_description_v1_get_information(image_description);
-    wp_image_description_info_v1_add_listener(description_info, &image_description_info_listener, wl);
+    wp_image_description_info_v1_add_listener(description_info, &image_description_info_listener, wd);
     wp_image_description_v1_destroy(image_description);
 #endif
 }
@@ -3221,6 +3268,12 @@ bool vo_wayland_check_visible(struct vo *vo)
     return render;
 }
 
+struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    return wl->preferred_csp;
+}
+
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -3472,6 +3525,7 @@ bool vo_wayland_init(struct vo *vo)
         .cursor_visible = true,
         .last_zero_copy = -1,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
+        .preferred_csp = (struct pl_color_space) { .transfer = PL_COLOR_TRC_SRGB, .primaries = PL_COLOR_PRIM_BT_709 },
     };
     wl->opts = wl->opts_cache->opts;
 
@@ -3647,19 +3701,22 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland"))
         wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
 
-    if (wl->color_manager && wl->supports_icc) {
+    if (wl->color_manager && (wl->supports_parametric || wl->supports_icc)) {
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
     }
 #endif
 
-    if (!wl->supports_parametric)
+    if (wl->supports_parametric)
+        get_compositor_preferred_description(wl, true);
+    else
         MP_VERBOSE(wl, "Compositor does not support parametric image descriptions!\n");
+
 
     struct gl_video_opts *gl_opts = mp_get_config_group(NULL, vo->global, &gl_video_conf);
     if (wl->supports_icc) {
         // dumb workaround for avoiding -Wunused-function
-        get_compositor_icc_file(wl);
+        get_compositor_preferred_description(wl, false);
     } else {
         int msg_level = gl_opts->icc_opts->profile_auto ? MSGL_WARN : MSGL_V;
         mp_msg(wl->log, msg_level, "Compositor does not support ICC profiles!\n");
@@ -3741,6 +3798,9 @@ void vo_wayland_uninit(struct vo *vo)
         return;
 
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
+
+    // Ensure that any in-flight vo_wayland_preferred_description_info get deallocated.
+    wl_display_roundtrip(wl->display);
 
     if (wl->compositor)
         wl_compositor_destroy(wl->compositor);
