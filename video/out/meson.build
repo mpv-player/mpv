@@ -13,7 +13,7 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
 wl_protocols_source = []
 wl_protocols_headers = []
 
-foreach v: ['1.32', '1.38', '1.39', '1.41']
+foreach v: ['1.32', '1.38', '1.39', '1.41', '1.44']
     features += {'wayland-protocols-' + v.replace('.', '-'):
         wayland['deps'][2].version().version_compare('>=' + v)}
 endforeach
@@ -34,6 +34,10 @@ endif
 
 if features['wayland-protocols-1-41']
     protocols += [[wl_protocol_dir, 'staging/color-management/color-management-v1.xml']]
+endif
+
+if features['wayland-protocols-1-44']
+    protocols += [[wl_protocol_dir, 'staging/color-representation/color-representation-v1.xml']]
 endif
 
 foreach p: protocols
