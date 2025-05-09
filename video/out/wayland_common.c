@@ -1596,8 +1596,8 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
     wp_image_description_v1_destroy(image_description);
 }
 
-static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
-                                    uint32_t identity)
+static void image_description_ready2(void *data, struct wp_image_description_v1 *image_description,
+                                     uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
     wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description, 0);
@@ -1605,9 +1605,16 @@ static void image_description_ready(void *data, struct wp_image_description_v1 *
     wp_image_description_v1_destroy(image_description);
 }
 
+static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
+                                    uint32_t identity)
+{
+    image_description_ready2(data, image_description, 0, identity);
+}
+
 static const struct wp_image_description_v1_listener image_description_listener = {
     image_description_failed,
     image_description_ready,
+    image_description_ready2,
 };
 
 static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
@@ -1699,15 +1706,22 @@ static const struct wp_image_description_info_v1_listener image_description_info
     info_target_max_fall,
 };
 
-static void preferred_changed(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
-                              uint32_t identity)
+static void preferred_changed2(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
+                               uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
     get_compositor_icc_file(wl);
 }
 
+static void preferred_changed(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
+                              uint32_t identity)
+{
+    preferred_changed2(data, color_surface_feedback, 0, identity);
+}
+
 static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
     preferred_changed,
+    preferred_changed2,
 };
 #endif
 
@@ -2102,7 +2116,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!strcmp(interface, wp_color_manager_v1_interface.name) && found++) {
-        ver = 1;
+        ver = MPMIN(ver, 2); /* Cap at 2 in case new events are added later. */
         wl->color_manager = wl_registry_bind(reg, id, &wp_color_manager_v1_interface, ver);
         wp_color_manager_v1_add_listener(wl->color_manager, &color_manager_listener, wl);
     }
