@@ -9,7 +9,9 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
              [wl_protocol_dir, 'staging/content-type/content-type-v1.xml'],
              [wl_protocol_dir, 'staging/fractional-scale/fractional-scale-v1.xml'],
              [wl_protocol_dir, 'staging/single-pixel-buffer/single-pixel-buffer-v1.xml'],
-             [wl_protocol_dir, 'staging/xdg-activation/xdg-activation-v1.xml']]
+             [wl_protocol_dir, 'staging/xdg-activation/xdg-activation-v1.xml'],
+             # the tablet protocol can be updated to stable once minimum wayland-protocol version is >=1.35
+             [wl_protocol_dir, 'unstable/tablet/tablet-unstable-v2.xml']]
 wl_protocols_source = []
 wl_protocols_headers = []
 
@@ -19,8 +21,7 @@ foreach v: ['1.32', '1.38', '1.39', '1.41']
 endforeach
 
 if features['wayland-protocols-1-32']
-    protocols += [[wl_protocol_dir, 'staging/cursor-shape/cursor-shape-v1.xml'],
-                  [wl_protocol_dir, 'unstable/tablet/tablet-unstable-v2.xml']] # required by cursor-shape
+    protocols += [[wl_protocol_dir, 'staging/cursor-shape/cursor-shape-v1.xml']]
 endif
 
 

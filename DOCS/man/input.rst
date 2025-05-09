@@ -3058,6 +3058,17 @@ Property list
                 "y"        MPV_FORMAT_INT64
                 "id"       MPV_FORMAT_INT64
 
+``tablet-pos``
+    Read-only - last known tablet tool (pen) position, normalized to OSD dimensions.
+
+    Has the following sub-properties:
+
+    ``tablet-pos/x``, ``tablet-pos/y``
+        Last known coordinates of the tablet tool.
+    ``tablet-pos/tool-in-proximity``,
+        Boolean - whether a tablet tool is currently in proximity of the tablet
+        surface / hovers above the tablet surface.
+
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.
     The extradata is returned as a string as-is. This property is not
