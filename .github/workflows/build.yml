@@ -587,3 +587,53 @@ jobs:
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
+
+  chimera-muon:
+    runs-on: ubuntu-latest
+    container:
+      image: chimeralinux/chimera:latest
+
+    steps:
+      - name: Install dependencies
+        # Add pc:dvdnav after https://github.com/muon-build/muon/issues/133 is fixed.
+        run: |
+          apk add cmd:clang cmd:ffmpeg cmd:pkgconf cmd:tar \
+                  pc:alsa pc:caca pc:egl pc:ffnvcodec pc:jack \
+                  pc:libarchive pc:libass pc:libavcodec pc:libavfilter \
+                  pc:libavformat pc:libavutil pc:libbluray pc:libcdio \
+                  pc:libcdio_paranoia pc:libcurl pc:libdisplay-info pc:libdrm \
+                  pc:libpipewire-0.3 pc:libpkgconf pc:libplacebo pc:libpulse \
+                  pc:libsixel pc:libswresample pc:libswscale pc:libva pc:luajit \
+                  pc:rubberband pc:uchardet pc:vapoursynth pc:vapoursynth-script \
+                  pc:wayland-client pc:wayland-cursor pc:wayland-protocols \
+                  pc:xkbcommon pc:xpresent pc:xrandr pc:xscrnsaver pc:xv pc:zimg
+          # Wa are Alpine now! Apparently, only Alpine is allowed to use musl...
+          # Needed for actions/checkout.
+          sed '/^ID="/s/chimera/alpine/' /etc/os-release > /tmp/os-release
+          mv /tmp/os-release /etc/os-release
+
+      - uses: actions/checkout@master
+        with:
+          repository: muon-build/muon
+
+      - name: Install muon
+        run: |
+          ./bootstrap.sh build
+          ./build/muon-bootstrap setup build
+          ./build/muon-bootstrap -C build samu
+          ./build/muon-bootstrap -C build install
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: muon setup -Dtests=true build
+
+      - name: Build
+        run: muon samu -C build
+
+      - name: Tests
+        working-directory: build
+        run: muon test
+
+      - name: Analyze meson.build
+        run: muon analyze
