@@ -130,7 +130,7 @@ $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
-        Revision = "meson-7.1"
+        Revision = "1906f749ca3e0407f22206cf9d8ba8740394ebfa"
         Provides = @(
             "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
             "program_names = ffmpeg"
