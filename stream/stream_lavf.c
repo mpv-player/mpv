@@ -199,12 +199,18 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
             av_dict_set(dict, "cookies", cookies, 0);
     }
     av_dict_set(dict, "tls_verify", opts->tls_verify ? "1" : "0", 0);
-    if (opts->tls_ca_file)
-        av_dict_set(dict, "ca_file", opts->tls_ca_file, 0);
-    if (opts->tls_cert_file)
-        av_dict_set(dict, "cert_file", opts->tls_cert_file, 0);
-    if (opts->tls_key_file)
-        av_dict_set(dict, "key_file", opts->tls_key_file, 0);
+    if (opts->tls_ca_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_ca_file);
+        av_dict_set(dict, "ca_file", file, 0);
+    }
+    if (opts->tls_cert_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_cert_file);
+        av_dict_set(dict, "cert_file", file, 0);
+    }
+    if (opts->tls_key_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_key_file);
+        av_dict_set(dict, "key_file", file, 0);
+    }
     char *cust_headers = talloc_strdup(temp, "");
     if (opts->referrer) {
         cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
