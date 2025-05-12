@@ -122,15 +122,25 @@ opts.add_cmake_defines({
     'BUILD_SHARED_LIBS': 'OFF',
 })
 libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
-libjxl_dep = libjxl_proj.dependency('jxl')
+libjxl_dep = declare_dependency(dependencies: [
+    libjxl_proj.dependency('jxl'),
+    libjxl_proj.dependency('jxl_base'),
+    libjxl_proj.dependency('jxl_cms'),
+    libjxl_proj.dependency('hwy'),
+    libjxl_proj.dependency('brotlicommon'),
+    libjxl_proj.dependency('brotlidec'),
+    libjxl_proj.dependency('brotlienc'),
+])
 meson.override_dependency('libjxl', libjxl_dep)
+libjxl_threads_dep = libjxl_proj.dependency('jxl_threads')
+meson.override_dependency('libjxl_threads', libjxl_threads_dep)
 "@
 
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
-        Revision = "1906f749ca3e0407f22206cf9d8ba8740394ebfa"
+        Revision = "meson-7.1"
         Provides = @(
             "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
             "program_names = ffmpeg"
