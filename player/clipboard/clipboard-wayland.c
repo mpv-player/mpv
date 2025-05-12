@@ -298,6 +298,7 @@ static void create_data_sources(struct clipboard_wayland_priv *wl)
             seat_create_data_source(seat, true);
         }
     }
+    wl_display_flush(wl->display);
 }
 
 static void clipboard_wayland_uninit(struct clipboard_wayland_priv *wl)
