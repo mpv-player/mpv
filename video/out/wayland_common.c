@@ -3088,7 +3088,7 @@ static void begin_dragging(struct vo_wayland_state *wl)
 {
     struct vo_wayland_seat *s = wl->last_button_seat;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
-        !wl->locked_size && s)
+        !wl->opts->fullscreen && s)
     {
         xdg_toplevel_move(wl->xdg_toplevel, s->seat, s->pointer_button_serial);
         wl->last_button_seat = NULL;
