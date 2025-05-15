@@ -1,0 +1,2 @@
+add `--appending-max-retries` option
+add `--appending-retry-timeout` option

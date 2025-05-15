@@ -35,6 +35,7 @@
 #include "common/msg.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
 
@@ -85,6 +86,26 @@ typedef enum _FSINFOCLASS {
 #endif
 #endif
 
+
+struct appending_opts {
+    double retry_timeout;
+    int max_retries;
+};
+
+#define OPT_BASE_STRUCT struct appending_opts
+const struct m_sub_options stream_appending_conf = {
+    .opts = (const struct m_option[]) {
+        {"retry-timeout", OPT_DOUBLE(retry_timeout), M_RANGE(0.1, 1.0)},
+        {"max-retries", OPT_INT(max_retries), M_RANGE(2, 1000)},
+        {0},
+    },
+    .size = sizeof(struct appending_opts),
+    .defaults = &(const struct appending_opts){
+        .retry_timeout = 0.2,
+        .max_retries = 10,
+    },
+};
+
 struct priv {
     int fd;
     bool close;
@@ -93,11 +114,8 @@ struct priv {
     bool appending;
     int64_t orig_size;
     struct mp_cancel *cancel;
+    struct appending_opts *opts;
 };
-
-// Total timeout = RETRY_TIMEOUT * MAX_RETRIES
-#define RETRY_TIMEOUT 0.2
-#define MAX_RETRIES 10
 
 static int64_t get_size(stream_t *s)
 {
@@ -129,13 +147,20 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
     }
 #endif
 
-    for (int retries = 0; retries < MAX_RETRIES; retries++) {
+    int max_retries = p->opts->max_retries;
+    double retry_timeout = p->opts->retry_timeout;
+
+    for (int retries = 0; retries < max_retries; retries++) {
+        int64_t size = get_size(s);
+
+        MP_DBG(s, "appending retry %d/%d @ pos %"PRId64"/%"PRId64" (timeout=%lf)\n",
+               retries, max_retries, s->pos, size, retry_timeout);
+
         int r = read(p->fd, buffer, max_len);
         if (r > 0)
             return r;
 
         // Try to detect and handle files being appended during playback.
-        int64_t size = get_size(s);
         if (p->regular_file && size > p->orig_size && !p->appending) {
             MP_WARN(s, "File is apparently being appended to, will keep "
                     "retrying with timeouts.\n");
@@ -145,7 +170,7 @@ static int fill_buffer(stream_t *s, void *buffer, int max_len)
         if (!p->appending || p->use_poll)
             break;
 
-        if (mp_cancel_wait(p->cancel, RETRY_TIMEOUT))
+        if (mp_cancel_wait(p->cancel, retry_timeout))
             break;
     }
 
@@ -279,6 +304,8 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     *p = (struct priv) {
         .fd = -1,
     };
+    p->opts = mp_get_config_group(stream, stream->global,
+                                          &stream_appending_conf);
     stream->priv = p;
     stream->is_local_fs = true;
 
