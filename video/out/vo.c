@@ -70,8 +70,8 @@ extern const struct vo_driver video_out_kitty;
 static const struct vo_driver *const video_out_drivers[] =
 {
     // high-quality and well-supported VOs first:
-    &video_out_gpu,
     &video_out_gpu_next,
+    &video_out_gpu,
 
 #if HAVE_VDPAU
     &video_out_vdpau,
