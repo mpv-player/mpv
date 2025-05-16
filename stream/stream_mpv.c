@@ -29,6 +29,6 @@ static int open_mpv(stream_t *st)
 const stream_info_t stream_info_mpv = {
     .name = "mpv",
     .open = open_mpv,
-    .stream_origin = STREAM_ORIGIN_NET,
+    .stream_origin = STREAM_ORIGIN_FS,
     .protocols = (const char*const[]){"mpv", NULL},
 };
