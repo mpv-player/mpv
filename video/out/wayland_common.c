@@ -48,6 +48,7 @@
 #include "content-type-v1.h"
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
+#include "tablet-unstable-v2.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
@@ -192,6 +193,8 @@ struct vo_wayland_seat {
     struct wl_keyboard *keyboard;
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
+    struct zwp_tablet_seat_v2 *tablet_seat;
+    struct wl_list tablet_tool_list;
     struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
@@ -217,6 +220,15 @@ struct vo_wayland_seat {
     bool keyboard_entering;
     uint32_t *keyboard_entering_keys;
     int num_keyboard_entering_keys;
+};
+
+struct vo_wayland_tablet_tool {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_tool_v2 *tablet_tool;
+    struct wp_cursor_shape_device_v1 *cursor_shape_device;
+    uint32_t proximity_serial;
+    struct wl_list link;
 };
 
 struct vo_wayland_tranche {
@@ -250,6 +262,7 @@ static int get_mods(struct vo_wayland_seat *seat);
 static int greatest_common_divisor(int a, int b);
 static int handle_round(int scale, int n);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
+static int set_tablet_tool_cursor_visibility(struct vo_wayland_seat *s, struct vo_wayland_tablet_tool *tablet_tool, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
@@ -265,6 +278,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void remove_output(struct vo_wayland_output *out);
 static void remove_seat(struct vo_wayland_seat *seat);
 static void seat_create_data_device(struct vo_wayland_seat *seat);
+static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat);
 static void seat_create_text_input(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
@@ -542,6 +556,254 @@ static const struct wl_touch_listener touch_listener = {
     touch_handle_cancel,
     touch_handle_shape,
     touch_handle_orientation,
+};
+
+static void tablet_tool_handle_type(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    uint32_t tool_type)
+{
+}
+
+static void tablet_tool_handle_hardware_serial(void *data,
+                                               struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                               uint32_t hardware_serial_hi,
+                                               uint32_t hardware_serial_lo)
+{
+}
+
+static void tablet_tool_handle_hardware_id_wacom(void *data,
+                                                 struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                                 uint32_t hardware_id_hi,
+                                                 uint32_t hardware_id_lo)
+{
+}
+
+static void tablet_tool_handle_capability(void *data,
+                                          struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                          uint32_t capability)
+{
+}
+
+static void tablet_tool_handle_done(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+}
+
+static void tablet_tool_handle_removed(void *data,
+                                       struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    struct vo_wayland_state *wl = tablet_tool->wl;
+
+    MP_VERBOSE(wl, "Removing tablet tool %p\n", zwp_tablet_tool_v2);
+
+    wl_list_remove(&tablet_tool->link);
+    zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
+    talloc_free(tablet_tool);
+}
+
+static void tablet_tool_handle_proximity_in(void *data,
+                                            struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                            uint32_t serial,
+                                            struct zwp_tablet_v2 *tablet,
+                                            struct wl_surface *surface)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->proximity_serial = serial;
+    set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, true);
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, true);
+}
+
+static void tablet_tool_handle_proximity_out(void *data,
+                                             struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    set_tablet_tool_cursor_visibility(tablet_tool->seat, tablet_tool, false);
+    mp_input_set_tablet_tool_in_proximity(tablet_tool->wl->vo->input_ctx, false);
+}
+
+static void tablet_tool_handle_down(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    uint32_t serial)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    struct vo_wayland_state *wl = tablet_tool->wl;
+    tablet_tool->seat->last_serial = serial;
+
+    enum xdg_toplevel_resize_edge edge;
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
+        !wl->locked_size && !wl->opts->border &&
+        check_for_resize(wl, wl->opts->wl_edge_pixels_touch, &edge))
+    {
+        xdg_toplevel_resize(wl->xdg_toplevel, tablet_tool->seat->seat, serial, edge);
+        return;
+    }
+
+    tablet_tool->seat->pointer_button_serial = serial;
+    wl->last_button_seat = tablet_tool->seat;
+    mp_input_tablet_tool_down(tablet_tool->wl->vo->input_ctx);
+}
+
+static void tablet_tool_handle_up(void *data,
+                                  struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->seat->wl->last_button_seat = NULL;
+    mp_input_tablet_tool_up(tablet_tool->wl->vo->input_ctx);
+}
+
+static void tablet_tool_handle_motion(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      wl_fixed_t x,
+                                      wl_fixed_t y)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    struct vo_wayland_state *wl = tablet_tool->wl;
+
+    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x));
+    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y));
+
+    mp_input_set_tablet_pos(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y,
+                           wl->toplevel_configured);
+    wl->toplevel_configured = false;
+}
+
+static void tablet_tool_handle_pressure(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        uint32_t pressure)
+{
+}
+
+static void tablet_tool_handle_distance(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        uint32_t distance)
+{
+}
+
+static void tablet_tool_handle_tilt(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    wl_fixed_t tilt_x,
+                                    wl_fixed_t tilt_y)
+{
+}
+
+static void tablet_tool_handle_rotation(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        wl_fixed_t degrees)
+{
+}
+
+static void tablet_tool_handle_slider(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      int32_t position)
+{
+}
+
+static void tablet_tool_handle_wheel(void *data,
+                                     struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                     wl_fixed_t degrees,
+                                     int32_t clicks)
+{
+}
+
+static void tablet_tool_handle_button(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      uint32_t serial,
+                                      uint32_t button,
+                                      uint32_t state)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    tablet_tool->seat->last_serial = serial;
+
+    switch (button) {
+    case BTN_STYLUS:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN1;
+        break;
+    case BTN_STYLUS2:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN2;
+        break;
+    case BTN_STYLUS3:
+        button = MP_KEY_TABLET_TOOL_STYLUS_BTN3;
+        break;
+    default:
+        button = 0;
+        break;
+    }
+
+    state = state == ZWP_TABLET_TOOL_V2_BUTTON_STATE_PRESSED
+        ? MP_KEY_STATE_DOWN
+        : MP_KEY_STATE_UP;
+
+    mp_input_tablet_tool_button(tablet_tool->wl->vo->input_ctx, button, state);
+}
+
+static void tablet_tool_handle_frame(void *data,
+                                     struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                     uint32_t time)
+{
+}
+
+static const struct zwp_tablet_tool_v2_listener tablet_tool_listener = {
+    tablet_tool_handle_type,
+    tablet_tool_handle_hardware_serial,
+    tablet_tool_handle_hardware_id_wacom,
+    tablet_tool_handle_capability,
+    tablet_tool_handle_done,
+    tablet_tool_handle_removed,
+    tablet_tool_handle_proximity_in,
+    tablet_tool_handle_proximity_out,
+    tablet_tool_handle_down,
+    tablet_tool_handle_up,
+    tablet_tool_handle_motion,
+    tablet_tool_handle_pressure,
+    tablet_tool_handle_distance,
+    tablet_tool_handle_tilt,
+    tablet_tool_handle_rotation,
+    tablet_tool_handle_slider,
+    tablet_tool_handle_wheel,
+    tablet_tool_handle_button,
+    tablet_tool_handle_frame,
+};
+
+static void tablet_handle_added(void *data,
+                                struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                struct zwp_tablet_v2 *id)
+{
+}
+
+static void tablet_tool_handle_added(void *data,
+                                     struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                     struct zwp_tablet_tool_v2 *id)
+{
+    struct vo_wayland_seat *seat = data;
+    struct vo_wayland_state *wl = seat->wl;
+
+    MP_VERBOSE(wl, "Adding tablet tool %p\n", id);
+
+    struct vo_wayland_tablet_tool *tablet_tool = talloc_zero(seat, struct vo_wayland_tablet_tool);
+    tablet_tool->wl                      = wl;
+    tablet_tool->seat                    = seat;
+    tablet_tool->tablet_tool             = id;
+    tablet_tool->cursor_shape_device     = NULL;
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+    if (wl->cursor_shape_manager)
+        tablet_tool->cursor_shape_device = wp_cursor_shape_manager_v1_get_tablet_tool_v2(
+            wl->cursor_shape_manager, tablet_tool->tablet_tool);
+#endif
+    zwp_tablet_tool_v2_add_listener(tablet_tool->tablet_tool, &tablet_tool_listener, tablet_tool);
+    wl_list_insert(&seat->tablet_tool_list, &tablet_tool->link);
+}
+
+static void tablet_pad_handle_added(void *data,
+                                    struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                    struct zwp_tablet_pad_v2 *id)
+{
+}
+
+static const struct zwp_tablet_seat_v2_listener tablet_seat_listener = {
+    tablet_handle_added,
+    tablet_tool_handle_added,
+    tablet_pad_handle_added,
 };
 
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
@@ -2042,6 +2304,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->dnd_offer = talloc_zero(seat, struct vo_wayland_data_offer);
         seat->selection_offer = talloc_zero(seat, struct vo_wayland_data_offer);
         seat->pending_offer->fd = seat->dnd_offer->fd = seat->selection_offer->fd = -1;
+        wl_list_init(&seat->tablet_tool_list);
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
         wl_list_insert(&wl->seat_list, &seat->link);
@@ -2051,6 +2314,18 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
         if (wl->text_input_manager)
             seat_create_text_input(seat);
+
+        if (wl->wp_tablet_manager)
+            seat_create_tablet_seat(wl, seat);
+    }
+
+    if (!strcmp(interface, zwp_tablet_manager_v2_interface.name) && found++) {
+        ver = 1;
+        wl->wp_tablet_manager = wl_registry_bind(reg, id, &zwp_tablet_manager_v2_interface, ver);
+
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link)
+            seat_create_tablet_seat(wl, seat);
     }
 
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
@@ -2657,6 +2932,18 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
 
+    struct vo_wayland_tablet_tool *tablet_tool;
+    wl_list_for_each(tablet_tool, &seat->tablet_tool_list, link) {
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+        if (seat->cursor_shape_device)
+            wp_cursor_shape_device_v1_destroy(tablet_tool->cursor_shape_device);
+#endif
+        zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
+    }
+
+    if (seat->tablet_seat)
+        zwp_tablet_seat_v2_destroy(seat->tablet_seat);
+
     destroy_offer(seat->pending_offer);
     destroy_offer(seat->dnd_offer);
     destroy_offer(seat->selection_offer);
@@ -2682,6 +2969,12 @@ static void seat_create_data_device(struct vo_wayland_seat *seat)
 {
     seat->data_device = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
     wl_data_device_add_listener(seat->data_device, &data_device_listener, seat);
+}
+
+static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat)
+{
+    seat->tablet_seat = zwp_tablet_manager_v2_get_tablet_seat(wl->wp_tablet_manager, seat->seat);
+    zwp_tablet_seat_v2_add_listener(seat->tablet_seat, &tablet_seat_listener, seat);
 }
 
 static void seat_create_text_input(struct vo_wayland_seat *seat)
@@ -2794,6 +3087,44 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
     return VO_TRUE;
 }
 
+static int set_tablet_tool_cursor_visibility(struct vo_wayland_seat *s,
+                                             struct vo_wayland_tablet_tool *tablet_tool,
+                                             bool on)
+{
+    // TODO: avoid duplication with set_cursor_visibility
+    if (!s)
+        return VO_FALSE;
+    struct vo_wayland_state *wl = s->wl;
+    wl->tablet_tool_cursor_visible = on;
+    if (on) {
+        if (tablet_tool->cursor_shape_device) {
+#if HAVE_WAYLAND_PROTOCOLS_1_32
+            wp_cursor_shape_device_v1_set_shape(tablet_tool->cursor_shape_device,
+                                                tablet_tool->proximity_serial,
+                                                WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
+#endif
+        } else {
+            if (spawn_cursor(wl))
+                return VO_FALSE;
+            struct wl_cursor_image *img = wl->default_cursor->images[0];
+            struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
+            if (!buffer)
+                return VO_FALSE;
+            double scale = MPMAX(wl->scaling_factor, 1);
+            zwp_tablet_tool_v2_set_cursor(tablet_tool->tablet_tool, tablet_tool->proximity_serial, wl->cursor_surface,
+                                  img->hotspot_x / scale, img->hotspot_y / scale);
+            wp_viewport_set_destination(wl->cursor_viewport, lround(img->width / scale),
+                                        lround(img->height / scale));
+            wl_surface_attach(wl->cursor_surface, buffer, 0, 0);
+            wl_surface_damage_buffer(wl->cursor_surface, 0, 0, img->width, img->height);
+        }
+        wl_surface_commit(wl->cursor_surface);
+    } else {
+        zwp_tablet_tool_v2_set_cursor(tablet_tool->tablet_tool, tablet_tool->proximity_serial, NULL, 0, 0);
+    }
+    return VO_TRUE;
+}
+
 static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
 {
     bool unavailable = true;
@@ -2803,6 +3134,12 @@ static int set_cursor_visibility_all_seats(struct vo_wayland_state *wl, bool on)
         if (seat->pointer) {
             unavailable = false;
             if (set_cursor_visibility(seat, on) == VO_FALSE)
+                failed = true;
+        }
+        struct vo_wayland_tablet_tool *tablet_tool;
+        wl_list_for_each(tablet_tool, &seat->tablet_tool_list, link) {
+            unavailable = false;
+            if (set_tablet_tool_cursor_visibility(seat, tablet_tool, on) == VO_FALSE)
                 failed = true;
         }
     }
@@ -3371,6 +3708,7 @@ bool vo_wayland_init(struct vo *vo)
         .wakeup_pipe = {-1, -1},
         .display_fd = -1,
         .cursor_visible = true,
+        .tablet_tool_cursor_visible = true,
         .last_zero_copy = -1,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
     };
@@ -3770,6 +4108,9 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_seat *seat, *seat_tmp;
     wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link)
         remove_seat(seat);
+
+    if (wl->wp_tablet_manager)
+        zwp_tablet_manager_v2_destroy(wl->wp_tablet_manager);
 
     if (wl->display)
         wl_display_disconnect(wl->display);

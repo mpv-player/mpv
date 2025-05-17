@@ -172,6 +172,7 @@ struct vo_wayland_state {
     /* Input */
     struct wl_list seat_list;
     struct xkb_context *xkb_context;
+    struct zwp_tablet_manager_v2 *wp_tablet_manager;
 
     /* Data offer */
     struct wl_data_device_manager *devman;
@@ -182,6 +183,7 @@ struct vo_wayland_state {
     struct wl_cursor       *default_cursor;
     struct wl_surface      *cursor_surface;
     bool                    cursor_visible;
+    bool                    tablet_tool_cursor_visible;
     int                     allocated_cursor_scale;
     struct vo_wayland_seat *last_button_seat;
 };
