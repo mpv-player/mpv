@@ -83,7 +83,7 @@ static void feed(struct ao *ao)
         ao_stop_streaming(ao);
     }
     if (real_sample_count == 0) {
-        return;
+        goto finish;
     }
 
     if ((err = CMBlockBufferCreateWithMemoryBlock(
