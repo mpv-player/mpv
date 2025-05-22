@@ -911,6 +911,7 @@ static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
                          const char *url, int flags, AVDictionary **options)
 {
     struct demuxer *demuxer = s->opaque;
+    mp_require(demuxer);
     MP_ERR(demuxer, "Not opening '%s' due to --access-references=no.\n", url);
     return AVERROR(EACCES);
 }
@@ -919,6 +920,7 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
                           const char *url, int flags, AVDictionary **options)
 {
     struct demuxer *demuxer = s->opaque;
+    mp_require(demuxer);
     lavf_priv_t *priv = demuxer->priv;
 
     if (options && priv->opts->propagate_opts) {
@@ -953,6 +955,7 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
 static int nested_io_close2(struct AVFormatContext *s, AVIOContext *pb)
 {
     struct demuxer *demuxer = s->opaque;
+    mp_require(demuxer);
     lavf_priv_t *priv = demuxer->priv;
 
     for (int n = 0; n < priv->num_nested; n++) {
