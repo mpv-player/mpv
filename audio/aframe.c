@@ -123,7 +123,6 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
     if (!av_frame || av_frame->width > 0 || av_frame->height > 0)
         return NULL;
 
-#if HAVE_AV_CHANNEL_LAYOUT
     if (!av_channel_layout_check(&av_frame->ch_layout))
         return NULL;
 
@@ -131,7 +130,6 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
     if (!mp_chmap_from_av_layout(&converted_map, &av_frame->ch_layout)) {
         return NULL;
     }
-#endif
 
     int format = af_from_avformat(av_frame->format);
     if (!format && av_frame->format != AV_SAMPLE_FMT_NONE)
@@ -144,15 +142,7 @@ struct mp_aframe *mp_aframe_from_avframe(struct AVFrame *av_frame)
         abort();
 
     frame->format = format;
-#if !HAVE_AV_CHANNEL_LAYOUT
-    mp_chmap_from_lavc(&frame->chmap, frame->av_frame->channel_layout);
-
-    // FFmpeg being a stupid POS again
-    if (frame->chmap.num != frame->av_frame->channels)
-        mp_chmap_from_channels(&frame->chmap, av_frame->channels);
-#else
     frame->chmap = converted_map;
-#endif
 
     if (av_frame->opaque_ref) {
         struct avframe_opaque *op = (void *)av_frame->opaque_ref->data;
@@ -221,15 +211,8 @@ void mp_aframe_config_copy(struct mp_aframe *dst, struct mp_aframe *src)
     dst->av_frame->sample_rate = src->av_frame->sample_rate;
     dst->av_frame->format = src->av_frame->format;
 
-#if !HAVE_AV_CHANNEL_LAYOUT
-    dst->av_frame->channel_layout = src->av_frame->channel_layout;
-    // FFmpeg being a stupid POS again
-    dst->av_frame->channels = src->av_frame->channels;
-#else
-    if (av_channel_layout_copy(&dst->av_frame->ch_layout,
-                               &src->av_frame->ch_layout) < 0)
+    if (av_channel_layout_copy(&dst->av_frame->ch_layout, &src->av_frame->ch_layout) < 0)
         abort();
-#endif
 }
 
 // Copy "soft" attributes from src to dst, excluding things which affect
@@ -339,20 +322,9 @@ bool mp_aframe_set_chmap(struct mp_aframe *frame, struct mp_chmap *in)
     if (mp_aframe_is_allocated(frame) && in->num != frame->chmap.num)
         return false;
 
-#if !HAVE_AV_CHANNEL_LAYOUT
-    uint64_t lavc_layout = mp_chmap_to_lavc_unchecked(in);
-    if (!lavc_layout && in->num)
-        return false;
-#endif
     frame->chmap = *in;
-
-#if !HAVE_AV_CHANNEL_LAYOUT
-    frame->av_frame->channel_layout = lavc_layout;
-    // FFmpeg being a stupid POS again
-    frame->av_frame->channels = frame->chmap.num;
-#else
     mp_chmap_to_av_layout(&frame->av_frame->ch_layout, in);
-#endif
+
     return true;
 }
 
@@ -446,7 +418,7 @@ char *mp_aframe_format_str_buf(char *buf, size_t buf_size, struct mp_aframe *fmt
 // Set data to the audio after the given number of samples (i.e. slice it).
 void mp_aframe_skip_samples(struct mp_aframe *f, int samples)
 {
-    assert(samples >= 0 && samples <= mp_aframe_get_size(f));
+    mp_assert(samples >= 0 && samples <= mp_aframe_get_size(f));
 
     if (av_frame_make_writable(f->av_frame) < 0)
         return; // go complain to ffmpeg
@@ -600,7 +572,7 @@ bool mp_aframe_set_silence(struct mp_aframe *f, int offset, int samples)
 bool mp_aframe_reverse(struct mp_aframe *f)
 {
     int format = mp_aframe_get_format(f);
-    size_t bps = af_fmt_to_bytes(format);
+    int bps = af_fmt_to_bytes(format);
     if (!af_fmt_is_pcm(format) || bps > 16)
         return false;
 

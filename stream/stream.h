@@ -32,24 +32,32 @@
 // it's guaranteed that you can seek back by <= of this size again.
 #define STREAM_BUFFER_SIZE 2048
 
+// Maximum size of a complete read.
+#define STREAM_MAX_READ_SIZE (INT_MAX - 1)
+
 // flags for stream_open_ext (this includes STREAM_READ and STREAM_WRITE)
 
 // stream->mode
-#define STREAM_READ             0
-#define STREAM_WRITE            (1 << 0)
+#define STREAM_READ               0
+#define STREAM_WRITE              (1 << 0)
 
-#define STREAM_SILENT           (1 << 1)
+#define STREAM_SILENT             (1 << 1)
 
 // Origin value for "security". This is an integer within the flags bit-field.
-#define STREAM_ORIGIN_DIRECT    (1 << 2) // passed from cmdline or loadfile
-#define STREAM_ORIGIN_FS        (2 << 2) // referenced from playlist on unix FS
-#define STREAM_ORIGIN_NET       (3 << 2) // referenced from playlist on network
-#define STREAM_ORIGIN_UNSAFE    (4 << 2) // from a grotesque source
+#define STREAM_ORIGIN_DIRECT      (1 << 2) // passed from cmdline or loadfile
+#define STREAM_ORIGIN_FS          (2 << 2) // referenced from playlist on unix FS
+#define STREAM_ORIGIN_NET         (3 << 2) // referenced from playlist on network
+#define STREAM_ORIGIN_UNSAFE      (4 << 2) // from a grotesque source
 
-#define STREAM_ORIGIN_MASK      (7 << 2) // for extracting origin value from flags
+#define STREAM_ORIGIN_MASK        (7 << 2) // for extracting origin value from flags
 
-#define STREAM_LOCAL_FS_ONLY    (1 << 5) // stream_file only, no URLs
-#define STREAM_LESS_NOISE       (1 << 6) // try to log errors only
+#define STREAM_LOCAL_FS_ONLY      (1 << 5) // stream_file only, no URLs
+#define STREAM_LESS_NOISE         (1 << 6) // try to log errors only
+#define STREAM_ALLOW_PARTIAL_READ (1 << 7) // allows partial read with stream_read_file()
+
+// Default flags used by stream_read_file().
+#define STREAM_READ_FILE_FLAGS_DEFAULT \
+    (STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY | STREAM_LESS_NOISE)
 
 // end flags for stream_open_ext (the naming convention sucks)
 
@@ -58,6 +66,9 @@
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
+
+// EOF value returned by stream_read_char()
+#define STREAM_EOF (-256)
 
 enum stream_ctrl {
     // Certain network protocols
@@ -78,7 +89,8 @@ enum stream_ctrl {
     STREAM_CTRL_GET_ANGLE,
     STREAM_CTRL_SET_ANGLE,
     STREAM_CTRL_GET_NUM_TITLES,
-    STREAM_CTRL_GET_TITLE_LENGTH,       // double* (in: title number, out: len)
+    STREAM_CTRL_GET_TITLE_LENGTH,    // double* (in: title number, out: len)
+    STREAM_CTRL_GET_TITLE_PLAYLIST,  // double* (in: title number, out: playlist)
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
@@ -111,6 +123,8 @@ typedef struct stream_info_st {
     // Alternative to open(). Only either open() or open2() can be set.
     int (*open2)(struct stream *st, const struct stream_open_args *args);
     const char *const *protocols;
+    // Alternative to protocols. For stream_lavf.
+    char **(*get_protocols)(void);
     bool can_write;     // correctly checks for READ/WRITE modes
     bool local_fs;      // supports STREAM_LOCAL_FS_ONLY
     int stream_origin;  // 0 or set of STREAM_ORIGIN_*; if 0, the same origin
@@ -147,9 +161,10 @@ typedef struct stream {
     bool seekable : 1; // presence of general byte seeking support
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool is_network : 1; // I really don't know what this is for
-    bool is_local_file : 1; // from the filesystem
+    bool is_local_fs : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
+    bool allow_partial_read : 1; // allows partial read with stream_read_file()
     struct mp_log *log;
     struct mpv_global *global;
 
@@ -223,6 +238,9 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size);
 struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size);
+// Like stream_read_file(), but allows specifying flags like with stream_create().
+struct bstr stream_read_file2(const char *filename, void *talloc_ctx,
+                              int flags, struct mpv_global *global, int max_size);
 
 int stream_control(stream_t *s, int cmd, void *arg);
 void free_stream(stream_t *s);
@@ -242,6 +260,7 @@ struct stream *stream_create(const char *url, int flags,
 stream_t *open_output_stream(const char *filename, struct mpv_global *global);
 
 void mp_url_unescape_inplace(char *buf);
+char *mp_url_unescape(void *talloc_ctx, char *url);
 char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
 
 // stream_memory.c
@@ -263,7 +282,7 @@ void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mp_log *log);
 
 void stream_print_proto_list(struct mp_log *log);
-char **stream_get_proto_list(void);
+char **stream_get_proto_list(bool safe_only);
 bool stream_has_proto(const char *proto);
 
 #endif /* MPLAYER_STREAM_H */

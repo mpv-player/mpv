@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include <strings.h>
 #include <assert.h>
 
 #include "osdep/io.h"
@@ -30,6 +29,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "demux/demux.h"
 #include "misc/bstr.h"
 #include "misc/thread_tools.h"
 #include "common/msg.h"
@@ -42,6 +42,7 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 
+extern const stream_info_t stream_info_mpv;
 extern const stream_info_t stream_info_cdda;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_null;
@@ -63,11 +64,10 @@ extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
 
 static const stream_info_t *const stream_list[] = {
+    &stream_info_mpv,
 #if HAVE_CDDA
     &stream_info_cdda,
 #endif
-    &stream_info_ffmpeg,
-    &stream_info_ffmpeg_unsafe,
     &stream_info_avdevice,
 #if HAVE_DVBIN
     &stream_info_dvb,
@@ -92,6 +92,8 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
+    &stream_info_ffmpeg,
+    &stream_info_ffmpeg_unsafe,
 };
 
 // Because of guarantees documented on STREAM_BUFFER_SIZE.
@@ -154,6 +156,13 @@ void mp_url_unescape_inplace(char *url)
             url[o++] = url[i++];
         }
     }
+}
+
+char *mp_url_unescape(void *talloc_ctx, char *url)
+{
+    char *unescaped = talloc_strdup(talloc_ctx, url);
+    mp_url_unescape_inplace(unescaped);
+    return unescaped;
 }
 
 static const char hex_digits[] = "0123456789ABCDEF";
@@ -237,7 +246,7 @@ static int check_origin(int src, int new)
 //  returns: bytes copied to dst (limited by len and available buffered data)
 static int ring_copy(struct stream *s, void *dst, int len, int pos)
 {
-    assert(len >= 0);
+    mp_assert(len >= 0);
 
     if (pos < s->buf_start || pos > s->buf_end)
         return 0;
@@ -265,19 +274,19 @@ static int ring_copy(struct stream *s, void *dst, int len, int pos)
 // Does nothing if the size is adequate. Calling this with 0 ensures it uses the
 // default buffer size if possible.
 // The caller must check whether enough data was really allocated.
-//  keep: keep at least [buf_end-keep, buf_end] (used for assert()s only)
+//  keep: keep at least [buf_end-keep, buf_end] (used for mp_assert()s only)
 //  new: new total size of buffer
 //  returns: false if buffer allocation failed, true if reallocated or size ok
 static bool stream_resize_buffer(struct stream *s, int keep, int new)
 {
-    assert(keep >= s->buf_end - s->buf_cur);
-    assert(keep <= new);
+    mp_assert(keep >= s->buf_end - s->buf_cur);
+    mp_assert(keep <= new);
 
     new = MPMAX(new, s->requested_buffer_size);
     new = MPMIN(new, STREAM_MAX_BUFFER_SIZE);
     new = mp_round_next_power_of_2(new);
 
-    assert(keep <= new); // can't fail (if old buffer size was valid)
+    mp_assert(keep <= new); // can't fail (if old buffer size was valid)
 
     if (new == s->buffer_mask + 1)
         return true;
@@ -295,9 +304,9 @@ static bool stream_resize_buffer(struct stream *s, int keep, int new)
     int new_len = 0;
     if (s->buffer)
         new_len = ring_copy(s, nbuf, new, s->buf_start + skip);
-    assert(new_len == old_used_len - skip);
-    assert(old_pos >= skip); // "keep" too low
-    assert(old_pos - skip <= new_len);
+    mp_assert(new_len == old_used_len - skip);
+    mp_assert(old_pos >= skip); // "keep" too low
+    mp_assert(old_pos - skip <= new_len);
     s->buf_start = 0;
     s->buf_cur = old_pos - skip;
     s->buf_end = new_len;
@@ -325,11 +334,16 @@ static int stream_create_instance(const stream_info_t *sinfo,
         if (!sinfo->local_fs)
             return STREAM_NO_MATCH;
     } else {
-        for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
-            path = match_proto(url, sinfo->protocols[n]);
+        char **get_protocols = sinfo->get_protocols ? sinfo->get_protocols() : NULL;
+        char **protocols = get_protocols ? get_protocols : (char **)sinfo->protocols;
+
+        for (int n = 0; protocols && protocols[n]; n++) {
+            path = match_proto(url, protocols[n]);
             if (path)
                 break;
         }
+
+        talloc_free(get_protocols);
 
         if (!path)
             return STREAM_NO_MATCH;
@@ -349,13 +363,14 @@ static int stream_create_instance(const stream_info_t *sinfo,
     s->path = talloc_strdup(s, path);
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
     s->requested_buffer_size = opts->buffer_size;
+    s->allow_partial_read = flags & STREAM_ALLOW_PARTIAL_READ;
 
     if (flags & STREAM_LESS_NOISE)
         mp_msg_set_max_level(s->log, MSGL_WARN);
 
-    bool opt;
-    mp_read_option_raw(s->global, "access-references", &m_option_type_bool, &opt);
-    s->access_references = opt;
+    struct demux_opts *demux_opts = mp_get_config_group(s, s->global, &demux_conf);
+    s->access_references = demux_opts->access_references;
+    talloc_free(demux_opts);
 
     MP_VERBOSE(s, "Opening %s\n", url);
 
@@ -399,7 +414,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
         return STREAM_ERROR;
     }
 
-    assert(s->seekable == !!s->seek);
+    mp_assert(s->seekable == !!s->seek);
 
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
@@ -411,9 +426,8 @@ static int stream_create_instance(const stream_info_t *sinfo,
 }
 
 int stream_create_with_args(struct stream_open_args *args, struct stream **ret)
-
 {
-    assert(args->url);
+    mp_assert(args->url);
 
     int r = STREAM_NO_MATCH;
     *ret = NULL;
@@ -471,8 +485,13 @@ struct stream *stream_create(const char *url, int flags,
 
 stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 {
-    return stream_create(filename, STREAM_ORIGIN_DIRECT | STREAM_WRITE,
-                         NULL, global);
+    struct stream *s = stream_create(filename, STREAM_ORIGIN_DIRECT | STREAM_WRITE,
+                                     NULL, global);
+    if (s && s->is_directory) {
+        free_stream(s);
+        s = NULL;
+    }
+    return s;
 }
 
 // Read function bypassing the local stream buffer. This will not write into
@@ -481,7 +500,7 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 // Partial reads are possible, even if EOF is not reached.
 static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
-    assert(len >= 0);
+    mp_assert(len >= 0);
     if (len <= 0)
         return 0;
 
@@ -493,7 +512,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
         s->eof = 1;
         return 0;
     }
-    assert(res <= len);
+    mp_assert(res <= len);
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
     s->pos += res;
@@ -507,7 +526,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 //  returns: progress (false on EOF or on OOM or if enough data was available)
 static bool stream_read_more(struct stream *s, int forward)
 {
-    assert(forward >= 0);
+    mp_assert(forward >= 0);
 
     int forward_avail = s->buf_end - s->buf_cur;
     if (forward_avail >= forward)
@@ -515,7 +534,7 @@ static bool stream_read_more(struct stream *s, int forward)
 
     // Avoid that many small reads will lead to many low-level read calls.
     forward = MPMAX(forward, s->requested_buffer_size / 2);
-    assert(forward_avail < forward);
+    mp_assert(forward_avail < forward);
 
     // Keep guaranteed seek-back.
     int buf_old = MPMIN(s->buf_cur - s->buf_start, s->requested_buffer_size / 2);
@@ -525,11 +544,11 @@ static bool stream_read_more(struct stream *s, int forward)
 
     int buf_alloc = s->buffer_mask + 1;
 
-    assert(s->buf_start <= s->buf_cur);
-    assert(s->buf_cur <= s->buf_end);
-    assert(s->buf_cur < buf_alloc * 2);
-    assert(s->buf_end < buf_alloc * 2);
-    assert(s->buf_start < buf_alloc);
+    mp_assert(s->buf_start <= s->buf_cur);
+    mp_assert(s->buf_cur <= s->buf_end);
+    mp_assert(s->buf_cur < buf_alloc * 2);
+    mp_assert(s->buf_end < buf_alloc * 2);
+    mp_assert(s->buf_start < buf_alloc);
 
     // Note: read as much as possible, even if forward is much smaller. Do
     // this because the stream buffer is supposed to set an approx. minimum
@@ -548,12 +567,12 @@ static bool stream_read_more(struct stream *s, int forward)
 
     // May have overwritten old data.
     if (s->buf_end - s->buf_start >= buf_alloc) {
-        assert(s->buf_end >= buf_alloc);
+        mp_assert(s->buf_end >= buf_alloc);
 
         s->buf_start = s->buf_end - buf_alloc;
 
-        assert(s->buf_start <= s->buf_cur);
-        assert(s->buf_cur <= s->buf_end);
+        mp_assert(s->buf_start <= s->buf_cur);
+        mp_assert(s->buf_cur <= s->buf_end);
 
         if (s->buf_start >= buf_alloc) {
             s->buf_start -= buf_alloc;
@@ -563,7 +582,7 @@ static bool stream_read_more(struct stream *s, int forward)
     }
 
     // Must not have overwritten guaranteed old data.
-    assert(s->buf_cur - s->buf_start >= buf_old);
+    mp_assert(s->buf_cur - s->buf_start >= buf_old);
 
     if (s->buf_cur < s->buf_end)
         s->eof = 0;
@@ -575,8 +594,8 @@ static bool stream_read_more(struct stream *s, int forward)
 // Return 0 on EOF, error, or if buf_size was 0.
 int stream_read_partial(stream_t *s, void *buf, int buf_size)
 {
-    assert(s->buf_cur <= s->buf_end);
-    assert(buf_size >= 0);
+    mp_assert(s->buf_cur <= s->buf_end);
+    mp_assert(buf_size >= 0);
     if (s->buf_cur == s->buf_end && buf_size > 0) {
         if (buf_size > (s->buffer_mask + 1) / 2) {
             // Direct read if the buffer is too small anyway.
@@ -594,7 +613,7 @@ int stream_read_partial(stream_t *s, void *buf, int buf_size)
 int stream_read_char_fallback(stream_t *s)
 {
     uint8_t c;
-    return stream_read_partial(s, &c, 1) ? c : -256;
+    return stream_read_partial(s, &c, 1) ? c : STREAM_EOF;
 }
 
 int stream_read(stream_t *s, void *mem, int total)
@@ -718,8 +737,8 @@ bool stream_seek(stream_t *s, int64_t pos)
         int64_t x = pos - (s->pos - (int)s->buf_end);
         if (x >= (int)s->buf_start) {
             s->buf_cur = x;
-            assert(s->buf_cur >= s->buf_start);
-            assert(s->buf_cur <= s->buf_end);
+            mp_assert(s->buf_cur >= s->buf_start);
+            mp_assert(s->buf_cur <= s->buf_end);
             return true;
         }
     }
@@ -792,8 +811,10 @@ int stream_skip_bom(struct stream *s)
 
 // Read the rest of the stream into memory (current pos to EOF), and return it.
 //  talloc_ctx: used as talloc parent for the returned allocation
-//  max_size: must be set to >0. If the file is larger than that, it is treated
-//            as error. This is a minor robustness measure.
+//  max_size: must be set to >=0. If the file is larger than that, it is treated
+//            as error. This is a minor robustness measure. If the stream is
+//            created with STREAM_ALLOW_PARTIAL_READ flag, partial result up to
+//            max_size is returned instead.
 //  returns: stream contents, or .start/.len set to NULL on error
 // If the file was empty, but no error happened, .start will be non-NULL and
 // .len will be 0.
@@ -802,24 +823,32 @@ int stream_skip_bom(struct stream *s)
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size)
 {
-    if (max_size > 1000000000)
+    if (max_size < 0 || max_size > STREAM_MAX_READ_SIZE)
         abort();
+    if (s->is_directory)
+        return (struct bstr){NULL, 0};
 
     int bufsize;
     int total_read = 0;
     int padding = 1;
     char *buf = NULL;
     int64_t size = stream_get_size(s) - stream_tell(s);
-    if (size > max_size)
+    if (size > max_size && !s->allow_partial_read)
         return (struct bstr){NULL, 0};
     if (size > 0)
         bufsize = size + padding;
     else
         bufsize = 1000;
+    if (s->allow_partial_read)
+        bufsize = MPMIN(bufsize, max_size + padding);
     while (1) {
         buf = talloc_realloc_size(talloc_ctx, buf, bufsize);
         int readsize = stream_read(s, buf + total_read, bufsize - total_read);
         total_read += readsize;
+        if (total_read >= max_size && s->allow_partial_read) {
+            total_read = max_size;
+            break;
+        }
         if (total_read < bufsize)
             break;
         if (bufsize > max_size) {
@@ -836,34 +865,45 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 struct bstr stream_read_file(const char *filename, void *talloc_ctx,
                              struct mpv_global *global, int max_size)
 {
+    return stream_read_file2(filename, talloc_ctx, STREAM_READ_FILE_FLAGS_DEFAULT,
+                             global, max_size);
+}
+
+struct bstr stream_read_file2(const char *filename, void *talloc_ctx,
+                              int flags, struct mpv_global *global, int max_size)
+{
     struct bstr res = {0};
-    int flags = STREAM_ORIGIN_DIRECT | STREAM_READ | STREAM_LOCAL_FS_ONLY |
-                STREAM_LESS_NOISE;
     stream_t *s = stream_create(filename, flags, NULL, global);
     if (s) {
-        res = stream_read_complete(s, talloc_ctx, max_size);
-        free_stream(s);
+        if (s->is_directory)
+            mp_err(s->log, "Failed to open %s (not a file).\n", filename);
+        else
+            res = stream_read_complete(s, talloc_ctx, max_size);
     }
+    free_stream(s);
     return res;
 }
 
-char **stream_get_proto_list(void)
+char **stream_get_proto_list(bool safe_only)
 {
     char **list = NULL;
     int num = 0;
     for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
-
-        if (!stream_info->protocols)
+        if (safe_only && (stream_info->stream_origin & STREAM_ORIGIN_UNSAFE))
             continue;
 
-        for (int j = 0; stream_info->protocols[j]; j++) {
-            if (*stream_info->protocols[j] == '\0')
-               continue;
+        char **get_protocols = stream_info->get_protocols ? stream_info->get_protocols() : NULL;
+        char **protocols = get_protocols ? get_protocols : (char **)stream_info->protocols;
 
-            MP_TARRAY_APPEND(NULL, list, num,
-                                talloc_strdup(NULL, stream_info->protocols[j]));
+        for (int j = 0; protocols && protocols[j]; j++) {
+            if (*protocols[j] == '\0')
+                continue;
+
+            MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(list, protocols[j]));
         }
+
+        talloc_free(get_protocols);
     }
     MP_TARRAY_APPEND(NULL, list, num, NULL);
     return list;
@@ -874,11 +914,10 @@ void stream_print_proto_list(struct mp_log *log)
     int count = 0;
 
     mp_info(log, "Protocols:\n\n");
-    char **list = stream_get_proto_list();
+    char **list = stream_get_proto_list(false);
     for (int i = 0; list[i]; i++) {
         mp_info(log, " %s://\n", list[i]);
         count++;
-        talloc_free(list[i]);
     }
     talloc_free(list);
     mp_info(log, "\nTotal: %d protocols\n", count);
@@ -889,10 +928,20 @@ bool stream_has_proto(const char *proto)
     for (int i = 0; i < MP_ARRAY_SIZE(stream_list); i++) {
         const stream_info_t *stream_info = stream_list[i];
 
-        for (int j = 0; stream_info->protocols && stream_info->protocols[j]; j++) {
-            if (strcmp(stream_info->protocols[j], proto) == 0)
-                return true;
+        bool match = false;
+        char **get_protocols = stream_info->get_protocols ? stream_info->get_protocols() : NULL;
+        char **protocols = get_protocols ? get_protocols : (char **)stream_info->protocols;
+
+        for (int j = 0; protocols && protocols[j]; j++) {
+            if (strcmp(protocols[j], proto) == 0) {
+                match = true;
+                break;
+            }
         }
+
+        talloc_free(get_protocols);
+        if (match)
+            return match;
     }
 
     return false;

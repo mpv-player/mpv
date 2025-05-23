@@ -21,11 +21,11 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <strings.h>
 #include <assert.h>
 
 #include "config.h"
 
+#include "common/common.h"
 #include "common/msg.h"
 
 #if HAVE_UCHARDET
@@ -101,18 +101,6 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
 const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
                              const char *user_cp, int flags)
 {
-    if (strcasecmp(user_cp, "enca") == 0 || strcasecmp(user_cp, "guess") == 0 ||
-        strcasecmp(user_cp, "uchardet") == 0 || strchr(user_cp, ':'))
-    {
-        mp_err(log, "This syntax for the --sub-codepage option was deprecated "
-                    "and has been removed.\n");
-        if (strncasecmp(user_cp, "utf8:", 5) == 0) {
-            user_cp = user_cp + 5;
-        } else {
-            user_cp = "";
-        }
-    }
-
     if (user_cp[0] == '+') {
         mp_verbose(log, "Forcing charset '%s'.\n", user_cp + 1);
         return user_cp + 1;
@@ -126,7 +114,8 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
 
     int r = bstr_validate_utf8(buf);
     if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF))) {
-        mp_verbose(log, "Data looks like UTF-8, ignoring user-provided charset.\n");
+        if (strcmp(user_cp, "auto") != 0 && !mp_charset_is_utf8(user_cp))
+            mp_verbose(log, "Data looks like UTF-8, ignoring user-provided charset.\n");
         return "utf-8";
     }
 
@@ -176,7 +165,7 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
     // Force CP949 over EUC-KR since iconv distinguishes them and
     // EUC-KR causes error on CP949 encoded data
     if (strcasecmp(cp, "EUC-KR") == 0)
-      cp = "CP949";
+        cp = "CP949";
 
     iconv_t icdsc;
     if ((icdsc = iconv_open("UTF-8", cp)) == (iconv_t) (-1)) {
@@ -234,9 +223,10 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
 
     outbuf[osize - oleft - 1] = 0;
     return (bstr){outbuf, osize - oleft - 1};
-#endif
 
 failure:
+#endif
+
     if (flags & MP_NO_LATIN1_FALLBACK) {
         return buf;
     } else {

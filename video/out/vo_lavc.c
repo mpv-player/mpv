@@ -23,8 +23,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <libplacebo/utils/libav.h>
+
 #include "common/common.h"
 #include "options/options.h"
+#include "misc/lavc_compat.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "mpv_talloc.h"
@@ -112,8 +115,8 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     encoder->width = width;
     encoder->height = height;
     encoder->pix_fmt = pix_fmt;
-    encoder->colorspace = mp_csp_to_avcol_spc(params->color.space);
-    encoder->color_range = mp_csp_levels_to_avcol_range(params->color.levels);
+    encoder->colorspace = pl_system_to_av(params->repr.sys);
+    encoder->color_range = pl_levels_to_av(params->repr.levels);
 
     AVRational tb;
 
@@ -127,8 +130,11 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     tb.num = 24000;
     tb.den = 1;
 
-    const AVRational *rates = encoder->codec->supported_framerates;
-    if (rates && rates[0].den)
+    const AVRational *rates;
+    int ret = mp_avcodec_get_supported_config(encoder, NULL,
+                                              AV_CODEC_CONFIG_FRAME_RATE,
+                                              (const void **)&rates);
+    if (ret >= 0 && rates && rates[0].den)
         tb = rates[av_find_nearest_q_idx(tb, rates)];
 
     encoder->time_base = av_inv_q(tb);
@@ -159,12 +165,15 @@ static int query_format(struct vo *vo, int format)
     struct priv *vc = vo->priv;
 
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
-    const enum AVPixelFormat *p = vc->enc->encoder->codec->pix_fmts;
+    const enum AVPixelFormat *p;
+    int ret = mp_avcodec_get_supported_config(vc->enc->encoder, NULL,
+                                              AV_CODEC_CONFIG_PIX_FORMAT,
+                                              (const void **)&p);
 
-    if (!p)
+    if (ret >= 0 && !p)
         return 1;
 
-    while (*p != AV_PIX_FMT_NONE) {
+    while (ret >= 0 && p && *p != AV_PIX_FMT_NONE) {
         if (*p == pix_fmt)
             return 1;
         p++;
@@ -173,7 +182,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *voframe)
+static bool draw_frame(struct vo *vo, struct vo_frame *voframe)
 {
     struct priv *vc = vo->priv;
     struct encoder_context *enc = vc->enc;
@@ -181,7 +190,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     AVCodecContext *avc = enc->encoder;
 
     if (voframe->redraw || voframe->repeat || voframe->num_frames < 1)
-        return;
+        goto done;
 
     struct mp_image *mpi = voframe->frames[0];
 
@@ -189,10 +198,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     osd_draw_on_image(vo->osd, dim, mpi->pts, OSD_DRAW_SUB_ONLY, mpi);
 
     if (vc->shutdown)
-        return;
+        goto done;
 
     // Lock for shared timestamp fields.
-    pthread_mutex_lock(&ectx->lock);
+    mp_mutex_lock(&ectx->lock);
 
     double pts = mpi->pts;
     double outpts = pts;
@@ -212,8 +221,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
         outpts = pts + ectx->discontinuity_pts_offset;
     }
 
-    outpts += encoder_get_offset(enc);
-
     if (!enc->options->rawts) {
         // calculate expected pts of next video frame
         double timeunit = av_q2d(avc->time_base);
@@ -224,7 +231,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
             ectx->next_in_pts = nextpts;
     }
 
-    pthread_mutex_unlock(&ectx->lock);
+    mp_mutex_unlock(&ectx->lock);
 
     AVFrame *frame = mp_image_to_av_frame(mpi);
     MP_HANDLE_OOM(frame);
@@ -234,6 +241,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *voframe)
     frame->quality = avc->global_quality;
     encoder_encode(enc, frame);
     av_frame_free(&frame);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
@@ -249,8 +259,8 @@ const struct vo_driver video_out_lavc = {
     .encode = true,
     .description = "video encoding using libavcodec",
     .name = "lavc",
+    .caps = VO_CAP_UNTIMED,
     .initially_blocked = true,
-    .untimed = true,
     .priv_size = sizeof(struct priv),
     .preinit = preinit,
     .query_format = query_format,

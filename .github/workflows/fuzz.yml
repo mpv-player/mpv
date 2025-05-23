@@ -1,0 +1,54 @@
+name: Pull Request Fuzzing
+on:
+  pull_request:
+    branches: [master]
+    paths-ignore:
+        - 'DOCS/**'
+        - 'TOOLS/lua/**'
+        - '.editorconfig'
+        - '.github/ISSUE_TEMPLATE/**'
+        - '.github/PULL_REQUEST_TEMPLATE'
+        - '.gitignore'
+        - 'Copyright'
+        - 'README.md'
+        - 'RELEASE_NOTES'
+permissions: {}
+jobs:
+  Fuzzing:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined, memory]
+    steps:
+    - name: Build Fuzzers (${{ matrix.sanitizer }})
+      id: build
+      uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+      with:
+        oss-fuzz-project-name: 'mpv'
+        language: c
+        sanitizer: ${{ matrix.sanitizer }}
+    - name: Run Fuzzers (${{ matrix.sanitizer }})
+      uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+      with:
+        oss-fuzz-project-name: 'mpv'
+        language: c
+        fuzz-seconds: 1200
+        sanitizer: ${{ matrix.sanitizer }}
+        report-ooms: true
+        report-timeouts: true
+        output-sarif: true
+    - name: Upload Crash
+      uses: actions/upload-artifact@v4
+      if: failure() && steps.build.outcome == 'success'
+      with:
+        name: ${{ matrix.sanitizer }}-artifacts
+        path: ./out/artifacts
+    - name: Upload Sarif
+      if: always() && steps.build.outcome == 'success'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: cifuzz-sarif/results.sarif
+        checkout_path: cifuzz-sarif

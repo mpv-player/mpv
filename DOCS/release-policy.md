@@ -1,7 +1,7 @@
 Release Policy
 ==============
 
-Once or twice a year, a new release is cut off of the master branch and is
+A few times a year, a new release is cut off of the master branch and
 assigned a 0.X.Y version number, where X is incremented each time a release
 contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
@@ -24,10 +24,15 @@ While on master:
 
 - Update the `RELEASE_NOTES` file, replacing the previous release notes.
 
-- Update the `VERSION` file.
+- Update the `MPV_VERSION` file.
 
-- Update `DOCS/client-api-changes.rst` and `DOCS/interface-changes.rst`
-  (in particular, update the last version numbers if necessary)
+- Update `DOCS/client-api-changes.rst` (in particular, update the last version
+  number if necessary)
+
+- Run `TOOLS/gen-interface-changes.py` to refresh `DOCS/interface-changes.rst`,
+  and edit manually as necessary.
+
+- Delete all `.txt` files in `DOCS/interface-changes/` except for `example.txt`.
 
 - Create signed commit with changes.
 
@@ -36,11 +41,11 @@ While on master:
 - Push release branch (`release/0.X`) and tag to GitHub.
 
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
-  the new version.
+  the new version. Check the "Create a discussion for this release" box.
 
-- Readd -UNKNOWN suffix to version in `VERSION` file.
+- Re-add -UNKNOWN suffix to version in `MPV_VERSION` file and commit.
 
-If necessary (to e.g. exclude commits already on master), the release can
+If necessary (e.g. to exclude commits already on master), the release can
 be done on a branch with different commit history. The release branch **must**
 then be merged to master so `git describe` will pick up the tag.
 
@@ -50,64 +55,60 @@ This does not apply to patch releases, which are tagged directly on the
 Release notes template
 ----------------------
 
-Here is a template that can be used for writing the `RELEASE_NOTES` file:
+Here is a template that should be used for writing the `RELEASE_NOTES` file:
 
 ```markdown
 Release 0.X.Y
 =============
 
-This release requires FFmpeg <ver> or newer.
+We are excited to announce the release of mpv 0.X.Y.
 
-Features
---------
+Key highlights:
 
-New
-~~~
+* List of notable stuff
+
+This release requires FFmpeg <ver> or newer and libplacebo <ver> or newer.
+
+# Features
+
+## New
 
 - List of new features
 
 
-Changed
-~~~~~~~
+## Changed
 
 - List of changed features
 
 
-Removed
-~~~~~~~
+## Removed
 
 - List of removed features
 
 
-Options and Commands
---------------------
+# Options and Commands
 
-Added
-~~~~~
+## Added
 
 - List of added options and commands
 
 
-Changed
-~~~~~~~
+## Changed
 
 - List of changed options and commands
 
 
-Deprecated
-~~~~~~~~~~
+## Deprecated
 
 - List of deprecated options and commands
 
 
-Removed
-~~~~~~~
+## Removed
 
 - List of removed options and commands
 
 
-Fixes and Minor Enhancements
-----------------------------
+# Fixes and Minor Enhancements
 
 - List of fixes and minor enhancements
 
@@ -116,8 +117,9 @@ This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log <start>..<end>`
-in the git repository.
+A complete changelog can be seen by running `git log start..end`
+in the git repository or by visiting
+<https://github.com/mpv-player/mpv/compare/start...end>.
 ```
 
 When creating a new point release its changes should be added on top of the
@@ -125,8 +127,10 @@ When creating a new point release its changes should be added on top of the
 the current 0.X branch will be included. This way the `RELEASE_NOTES` file
 can be used by distributors as changelog for point releases too.
 
-The changelog of lists all changes since the last release, including those
-that have been backported to patch releases already.
+The changelog lists all changes since the last release, including those
+that have been backported to patch releases already. Except for the
+"Key highlights" section they are ordered chronologically with older commits
+at the top.
 
 Some additional advice:
 - Especially for features, try to reword the messages so that the user-visible

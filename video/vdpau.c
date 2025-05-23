@@ -46,12 +46,10 @@ static void preemption_callback(VdpDevice device, void *context)
 {
     struct mp_vdpau_ctx *ctx = context;
 
-    pthread_mutex_lock(&ctx->preempt_lock);
     ctx->is_preempted = true;
-    pthread_mutex_unlock(&ctx->preempt_lock);
 }
 
-static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
+static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing, bool preempted)
 {
     Display *x11 = ctx->x11;
     VdpStatus vdp_st;
@@ -80,7 +78,7 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
     vdp_st = vdp_device_create_x11(x11, DefaultScreen(x11), &ctx->vdp_device,
                                    &get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
-        if (ctx->is_preempted) {
+        if (preempted || ctx->is_preempted) {
             MP_DBG(ctx, "Error calling vdp_device_create_x11 while preempted: %d\n",
                    vdp_st);
         } else {
@@ -127,7 +125,8 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
 
 static int handle_preemption(struct mp_vdpau_ctx *ctx)
 {
-    if (!ctx->is_preempted)
+    // Note that this function is guarded by the preempt_lock mutex.
+    if (!atomic_exchange(&ctx->is_preempted, false))
         return 0;
     mark_vdpau_objects_uninitialized(ctx);
     if (!ctx->preemption_user_notified) {
@@ -138,17 +137,29 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
      * second to avoid using 100% CPU. */
     if (ctx->last_preemption_retry_fail &&
         mp_time_sec() - ctx->last_preemption_retry_fail < 1.0)
-        return -1;
-    if (win_x11_init_vdpau_procs(ctx, false) < 0) {
-        ctx->last_preemption_retry_fail = mp_time_sec();
-        return -1;
+    {
+        goto error;
     }
+    if (win_x11_init_vdpau_procs(ctx, false, true) < 0) {
+        ctx->last_preemption_retry_fail = mp_time_sec();
+        goto error;
+    }
+
+    // If preemption_callback has been called during our recovery attempt, we
+    // need to retry the recovery. This check is not strictly necessary, because
+    // we would act on the next check anyway, but it doesn't hurt.
+    if (ctx->is_preempted)
+        return -1;
+
     ctx->preemption_user_notified = false;
     ctx->last_preemption_retry_fail = 0;
-    ctx->is_preempted = false;
     ctx->preemption_counter++;
     MP_INFO(ctx, "Recovered from display preemption.\n");
-    return 1;
+    return 0;
+
+error:
+    ctx->is_preempted = true;
+    return -1;
 }
 
 // Check whether vdpau display preemption happened. The caller provides a
@@ -163,7 +174,7 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
 int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
 {
     int r = 1;
-    pthread_mutex_lock(&ctx->preempt_lock);
+    mp_mutex_lock(&ctx->preempt_lock);
 
     const void *p[4] = {&(uint32_t){0}};
     uint32_t stride[4] = {4};
@@ -182,7 +193,7 @@ int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
         r = 0; // signal recovery after preemption
     }
 
-    pthread_mutex_unlock(&ctx->preempt_lock);
+    mp_mutex_unlock(&ctx->preempt_lock);
     return r;
 }
 
@@ -196,10 +207,10 @@ static void release_decoder_surface(void *ptr)
     struct surface_ref *r = ptr;
     struct mp_vdpau_ctx *ctx = r->ctx;
 
-    pthread_mutex_lock(&ctx->pool_lock);
-    assert(ctx->video_surfaces[r->index].in_use);
+    mp_mutex_lock(&ctx->pool_lock);
+    mp_assert(ctx->video_surfaces[r->index].in_use);
     ctx->video_surfaces[r->index].in_use = false;
-    pthread_mutex_unlock(&ctx->pool_lock);
+    mp_mutex_unlock(&ctx->pool_lock);
 
     talloc_free(r);
 }
@@ -207,7 +218,7 @@ static void release_decoder_surface(void *ptr)
 static struct mp_image *create_ref(struct mp_vdpau_ctx *ctx, int index)
 {
     struct surface_entry *e = &ctx->video_surfaces[index];
-    assert(!e->in_use);
+    mp_assert(!e->in_use);
     e->in_use = true;
     e->age = ctx->age_counter++;
     struct surface_ref *ref = talloc_ptrtype(NULL, ref);
@@ -238,7 +249,7 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
         rgb_format = (VdpChromaType)-1;
     }
 
-    pthread_mutex_lock(&ctx->pool_lock);
+    mp_mutex_lock(&ctx->pool_lock);
 
     // Destroy all unused surfaces that don't have matching parameters
     for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
@@ -263,10 +274,10 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
     for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
         struct surface_entry *e = &ctx->video_surfaces[n];
         if (!e->in_use && e->allocated) {
-            assert(e->w == w && e->h == h);
-            assert(e->chroma == chroma);
-            assert(e->rgb_format == rgb_format);
-            assert(e->rgb == rgb);
+            mp_assert(e->w == w && e->h == h);
+            mp_assert(e->chroma == chroma);
+            mp_assert(e->rgb_format == rgb_format);
+            mp_assert(e->rgb == rgb);
             if (surface_index >= 0) {
                 struct surface_entry *other = &ctx->video_surfaces[surface_index];
                 if (other->age < e->age)
@@ -283,9 +294,9 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
     for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
         struct surface_entry *e = &ctx->video_surfaces[n];
         if (!e->in_use) {
-            assert(e->surface == VDP_INVALID_HANDLE);
-            assert(e->osurface == VDP_INVALID_HANDLE);
-            assert(!e->allocated);
+            mp_assert(e->surface == VDP_INVALID_HANDLE);
+            mp_assert(e->osurface == VDP_INVALID_HANDLE);
+            mp_assert(!e->allocated);
             e->chroma = chroma;
             e->rgb_format = rgb_format;
             e->rgb = rgb;
@@ -317,7 +328,7 @@ done: ;
     if (surface_index >= 0)
         mpi = create_ref(ctx, surface_index);
 
-    pthread_mutex_unlock(&ctx->pool_lock);
+    mp_mutex_unlock(&ctx->pool_lock);
 
     if (!mpi)
         MP_ERR(ctx, "no surfaces available in mp_vdpau_get_video_surface\n");
@@ -339,7 +350,7 @@ static void free_device_ref(struct AVHWDeviceContext *hwctx)
 
     for (int i = 0; i < MAX_VIDEO_SURFACES; i++) {
         // can't hold references past context lifetime
-        assert(!ctx->video_surfaces[i].in_use);
+        mp_assert(!ctx->video_surfaces[i].in_use);
         if (ctx->video_surfaces[i].surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->video_surface_destroy(ctx->video_surfaces[i].surface);
             CHECK_VDP_WARNING(ctx, "Error when calling vdp_video_surface_destroy");
@@ -363,8 +374,8 @@ static void free_device_ref(struct AVHWDeviceContext *hwctx)
     if (ctx->close_display)
         XCloseDisplay(ctx->x11);
 
-    pthread_mutex_destroy(&ctx->pool_lock);
-    pthread_mutex_destroy(&ctx->preempt_lock);
+    mp_mutex_destroy(&ctx->pool_lock);
+    mp_mutex_destroy(&ctx->preempt_lock);
     talloc_free(ctx);
 }
 
@@ -388,15 +399,15 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
             .av_device_ref = avref,
         },
     };
-    mpthread_mutex_init_recursive(&ctx->preempt_lock);
-    pthread_mutex_init(&ctx->pool_lock, NULL);
+    mp_mutex_init(&ctx->preempt_lock);
+    mp_mutex_init(&ctx->pool_lock);
 
     hwctx->free = free_device_ref;
     hwctx->user_opaque = ctx;
 
     mark_vdpau_objects_uninitialized(ctx);
 
-    if (win_x11_init_vdpau_procs(ctx, probing) < 0) {
+    if (win_x11_init_vdpau_procs(ctx, probing, false) < 0) {
         mp_vdpau_destroy(ctx);
         return NULL;
     }

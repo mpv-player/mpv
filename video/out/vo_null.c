@@ -32,23 +32,23 @@ struct priv {
     double cfg_fps;
 };
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
-    talloc_free(mpi);
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (p->cfg_fps) {
-        int64_t ft = 1e6 / p->cfg_fps;
-        int64_t prev_vsync = mp_time_us() / ft;
+        int64_t ft = 1e9 / p->cfg_fps;
+        int64_t prev_vsync = mp_time_ns() / ft;
         int64_t target_time = (prev_vsync + 1) * ft;
         for (;;) {
-            int64_t now = mp_time_us();
+            int64_t now = mp_time_ns();
             if (now >= target_time)
                 break;
-            mp_sleep_us(target_time - now);
+            mp_sleep_ns(target_time - now);
         }
     }
 }
@@ -93,7 +93,7 @@ const struct vo_driver video_out_null = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),

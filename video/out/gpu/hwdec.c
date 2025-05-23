@@ -34,17 +34,16 @@ extern const struct ra_hwdec_driver ra_hwdec_dxva2gldx;
 extern const struct ra_hwdec_driver ra_hwdec_d3d11va;
 extern const struct ra_hwdec_driver ra_hwdec_dxva2dxgi;
 extern const struct ra_hwdec_driver ra_hwdec_cuda;
-extern const struct ra_hwdec_driver ra_hwdec_rpi_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime;
 extern const struct ra_hwdec_driver ra_hwdec_drmprime_overlay;
 extern const struct ra_hwdec_driver ra_hwdec_aimagereader;
 extern const struct ra_hwdec_driver ra_hwdec_vulkan;
 
 const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
-#if HAVE_VAAPI_EGL || HAVE_VAAPI_LIBPLACEBO
+#if HAVE_VAAPI
     &ra_hwdec_vaapi,
 #endif
-#if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL
+#if HAVE_VIDEOTOOLBOX_GL || HAVE_IOS_GL || HAVE_VIDEOTOOLBOX_PL
     &ra_hwdec_videotoolbox,
 #endif
 #if HAVE_D3D_HWACCEL
@@ -70,9 +69,6 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_VDPAU_GL_X11
     &ra_hwdec_vdpau,
 #endif
-#if HAVE_RPI_MMAL
-    &ra_hwdec_rpi_overlay,
-#endif
 #if HAVE_DRM
     &ra_hwdec_drmprime,
     &ra_hwdec_drmprime_overlay,
@@ -80,7 +76,7 @@ const struct ra_hwdec_driver *const ra_hwdec_drivers[] = {
 #if HAVE_ANDROID_MEDIA_NDK
     &ra_hwdec_aimagereader,
 #endif
-#if HAVE_VULKAN_INTEROP
+#if HAVE_VULKAN
     &ra_hwdec_vulkan,
 #endif
 
@@ -132,7 +128,7 @@ bool ra_hwdec_test_format(struct ra_hwdec *hwdec, int imgfmt)
 struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
                                                const struct mp_image_params *params)
 {
-    assert(ra_hwdec_test_format(hwdec, params->imgfmt));
+    mp_assert(ra_hwdec_test_format(hwdec, params->imgfmt));
 
     struct ra_hwdec_mapper *mapper = talloc_ptrtype(NULL, mapper);
     *mapper = (struct ra_hwdec_mapper){
@@ -254,7 +250,7 @@ static void load_hwdecs_all(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *d
 void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
                        const char *type, bool load_all_by_default)
 {
-    assert(ctx->ra_ctx);
+    mp_assert(ctx->ra_ctx);
 
     /*
      * By default, or if the option value is "auto", we will not pre-emptively
@@ -355,4 +351,14 @@ int ra_hwdec_driver_get_imgfmt_for_name(const char *name)
         }
     }
     return IMGFMT_NONE;
+}
+
+enum AVHWDeviceType ra_hwdec_driver_get_device_type_for_name(const char *name)
+{
+    for (int i = 0; ra_hwdec_drivers[i]; i++) {
+        if (!strcmp(ra_hwdec_drivers[i]->name, name)) {
+            return ra_hwdec_drivers[i]->device_type;
+        }
+    }
+    return AV_HWDEVICE_TYPE_NONE;
 }

@@ -14,16 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdatomic.h>
 
 #include <windows.h>
 #include <ole2.h>
+#include <shellapi.h>
 #include <shobjidl.h>
 
 #include "common/msg.h"
 #include "common/common.h"
 #include "input/input.h"
 #include "input/event.h"
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "osdep/windows_utils.h"
 #include "mpv_talloc.h"
@@ -156,8 +157,10 @@ static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
                 wchar_t *buf = talloc_array(NULL, wchar_t, len + 1);
 
                 if (DragQueryFileW(drop, i, buf, len + 1) == len) {
-                    char *fname = mp_to_utf8(files, buf);
+                    wchar_t *target = mp_w32_get_shell_link_target(buf);
+                    char *fname = mp_to_utf8(files, target ? target : buf);
                     files[recvd_files++] = fname;
+                    talloc_free(target);
 
                     MP_VERBOSE(t, "received dropped file: %s\n", fname);
                 } else {

@@ -1,0 +1,56 @@
+name: "Request a new Feature"
+description: "Create a request for a new feature"
+labels: ["meta:feature-request"]
+type: Feature
+body:
+- type: textarea
+  attributes:
+      label: "Expected behavior of the wanted feature"
+      description: >
+          Before requesting a new feature, make sure it hasn't been
+          [requested yet](https://github.com/mpv-player/mpv/labels/meta%3Afeature-request),
+          and isn't already supported by [mpv](https://mpv.io/manual/master/),
+          [ffmpeg](https://ffmpeg.org/documentation.html), or existing
+          [mpv scripts](https://github.com/mpv-player/mpv/wiki/User-Scripts).
+
+
+          If you are not sure about this, ask on
+          [mpv Discussions](https://github.com/mpv-player/mpv/discussions) and
+          [mpv IRC channel](https://mpv.io/community/) first before opening a feature request.
+  validations:
+      required: true
+- type: textarea
+  attributes:
+      label: "Alternative behavior of the wanted feature"
+- type: textarea
+  attributes:
+      label: "Log File"
+      description: >
+          Even if you think it's not necessary at first, it might help us later to find
+          possible issues. Make a log file with `--log-file=output.txt`, which is our preferred way,
+          and attach it to the issue.
+
+
+          If you have trouble producing a log file, you can alternatively use `-v -v`, save the
+          terminal output to a file, and attach it to the issue.
+- type: textarea
+  attributes:
+      label: "Sample Files"
+      placeholder: "Drag and drop sample files here"
+      description: >
+          Please provide sample files in the case you request a format/codec/container dependent
+          feature, and it could help us test and implement it.
+
+
+          Preferably files should be attached directly within the text field below. Due to GitHub's
+          upload restriction, you may need to archive the sample file first and upload it as `.zip`
+          file. If the sample file is too big to attach directly, use a solution that is easy to
+          access with possible long-term retention. Possible services include, but are not limited
+          to, the following:
+
+          - [0x0.st](https://0x0.st/) (no long-term retention)
+           - [Dropbox](https://www.dropbox.com)
+           - [Google Drive](https://www.google.com/drive/)
+           - [iCLoud Drive](https://www.icloud.com/iclouddrive/)
+           - [MediaFire](https://www.mediafire.com/)
+           - [OneDrive](https://onedrive.live.com/)

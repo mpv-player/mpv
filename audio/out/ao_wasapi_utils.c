@@ -18,12 +18,23 @@
  */
 
 #include <math.h>
-#include <wchar.h>
+
 #include <windows.h>
-#include <errors.h>
+// Workaround for redefinition of some guids in mingw. ks.h has to be included
+// before other ks*.h headers, but mingw fails then.
+#ifdef __MINGW32__
+#include <mmreg.h>
 #include <ksguid.h>
+#else
+#include <ks.h>
+#include <ksguid.h>
+#include <mmreg.h>
+#endif
+#include <mmsystem.h>
 #include <ksmedia.h>
 #include <avrt.h>
+#include <propsys.h>
+#include <functiondiscoverykeys_devpkey.h>
 
 #include "audio/format.h"
 #include "osdep/timer.h"
@@ -31,36 +42,81 @@
 #include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
-DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
-                   0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
-                   0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
-DEFINE_PROPERTYKEY(mp_PKEY_Device_DeviceDesc,
-                   0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
-                   0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
-// CEA 861 subformats
-// should work on vista
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS,
-            0x00000008, 0x0000, 0x0010, 0x80, 0x00,
+#ifdef _MSC_VER
+// Define some GUIDs that are defined only in C++ interfaces.
+DEFINE_GUID(KSDATAFORMAT_SPECIFIER_NONE,
+            0xf6417d6, 0xc318, 0x11d0, 0xa4, 0x3f,
+            0, 0xa0, 0xc9, 0x22, 0x31, 0x96);
+DEFINE_GUID(CLSID_MMDeviceEnumerator,
+            0xbcde0395, 0xe52f, 0x467c, 0x8e, 0x3d,
+            0xc4, 0x57, 0x92, 0x91, 0x69, 0x2e);
+DEFINE_GUID(IID_IAudioClient,
+            0x1cb9ad4c, 0xdbfa, 0x4c32, 0xb1, 0x78, 0xc2,
+            0xf5, 0x68, 0xa7, 0x03, 0xb2);
+DEFINE_GUID(IID_IAudioClock,
+            0xcd63314f, 0x3fba, 0x4a1b, 0x81, 0x2c, 0xef, 0x96,
+            0x35, 0x87, 0x28, 0xe7);
+DEFINE_GUID(IID_IAudioEndpointVolume,
+            0x5cdf2c82, 0x841e, 0x4546, 0x97, 0x22,
+            0x0c, 0xf7, 0x40, 0x78, 0x22, 0x9a);
+DEFINE_GUID(IID_IAudioRenderClient,
+            0xf294acfc, 0x3146, 0x4483, 0xa7, 0xbf,
+            0xad, 0xdc, 0xa7, 0xc2, 0x60, 0xe2);
+DEFINE_GUID(IID_IAudioSessionControl,
+            0xf4b1a599, 0x7266, 0x4319, 0xa8, 0xca,
+            0xe7, 0x0a, 0xcb, 0x11, 0xe8, 0xcd);
+DEFINE_GUID(IID_IMMDeviceEnumerator,
+            0xa95664d2, 0x9614, 0x4f35, 0xa7, 0x46,
+            0xde, 0x8d, 0xb6, 0x36, 0x17, 0xe6);
+DEFINE_GUID(IID_IMMNotificationClient,
+            0x7991eec9, 0x7e89, 0x4d85, 0x83, 0x90,
+            0x6c, 0x70, 0x3c, 0xec, 0x60, 0xc0);
+DEFINE_GUID(IID_ISimpleAudioVolume,
+            0x87ce5498, 0x68d6, 0x44e5, 0x92, 0x15,
+            0x6d, 0xa4, 0x7e, 0xf8, 0x83, 0xd8);
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DTS
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DTS,
+            WAVE_FORMAT_DTS, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL,
-            0x00000092, 0x0000, 0x0010, 0x80, 0x00,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL,
+            WAVE_FORMAT_DOLBY_AC3_SPDIF, 0x0000, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-// might require 7+
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_AAC,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_AAC
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_AAC,
             0x00000006, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3,
-            0x00000004, 0x0cea, 0x0010, 0x80, 0x00,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3,
+            0x00000005, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS,
             0x0000000a, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD,
             0x0000000b, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP,
+#endif
+
+#ifndef KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP
+DEFINE_GUID(KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP,
             0x0000000c, 0x0cea, 0x0010, 0x80, 0x00,
             0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+#endif
 
 struct wasapi_sample_fmt {
     int mp_format;  // AF_FORMAT_*
@@ -82,13 +138,13 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
     // aka S24 (with conversion on output)
     {AF_FORMAT_S32,     24, 24, &KSDATAFORMAT_SUBTYPE_PCM},
     {AF_FORMAT_FLOAT,   32, 32, &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT},
-    {AF_FORMAT_S_AC3,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL},
-    {AF_FORMAT_S_DTS,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS},
-    {AF_FORMAT_S_AAC,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_AAC},
-    {AF_FORMAT_S_MP3,   16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3},
-    {AF_FORMAT_S_TRUEHD, 16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP},
-    {AF_FORMAT_S_EAC3,  16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS},
-    {AF_FORMAT_S_DTSHD, 16, 16, &mp_KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD},
+    {AF_FORMAT_S_AC3,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL},
+    {AF_FORMAT_S_DTS,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DTS},
+    {AF_FORMAT_S_AAC,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_AAC},
+    {AF_FORMAT_S_MP3,   16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_MPEG3},
+    {AF_FORMAT_S_TRUEHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP},
+    {AF_FORMAT_S_EAC3,  16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS},
+    {AF_FORMAT_S_DTSHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD},
     {0},
 };
 
@@ -143,7 +199,19 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 
     wformat->SubFormat                   = *format_to_subtype(format->mp_format);
     wformat->Samples.wValidBitsPerSample = format->used_msb;
-    wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
+
+    uint64_t chans = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask = chans;
+
+    if (wformat->Format.nChannels > 8 || wformat->dwChannelMask != chans) {
+        // IAudioClient::IsFormatSupported tend to fallback to stereo for closest
+        // format match when there are more channels. Remix to standard layout.
+        // Also if input channel mask has channels outside 32-bits override it
+        // and hope for the best...
+        wformat->dwChannelMask = KSAUDIO_SPEAKER_7POINT1_SURROUND;
+        wformat->Format.nChannels = 8;
+    }
+
     update_waveformat_datarate(wformat);
 }
 
@@ -236,7 +304,8 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
              (unsigned) wf->nSamplesPerSec);
     return buf;
 }
-#define waveformat_to_str(wf) waveformat_to_str_buf((char[64]){0}, 64, (wf))
+#define waveformat_to_str_(wf, sz) waveformat_to_str_buf((char[sz]){0}, sz, (wf))
+#define waveformat_to_str(wf) waveformat_to_str_(wf, MP_NUM_CHANNELS * 4 + 42)
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
@@ -372,7 +441,7 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
          "3.0", "3.0(back)",
          "quad", "quad(side)", "3.1",
          "5.0(side)", "4.1",
-         "5.1(side)", "6.0", "6.0(front)", "hexagonal"
+         "5.1(side)", "6.0", "6.0(front)", "hexagonal",
          "6.1(back)", "6.1(front)", "7.0", "7.0(front)",
          "7.1(wide)", "7.1(wide-side)", "7.1(rear)", "octagonal", NULL};
 
@@ -549,16 +618,17 @@ static void init_session_display(struct wasapi_state *state, const char *name) {
                                          (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
-    wchar_t path[MAX_PATH] = {0};
-    GetModuleFileNameW(NULL, path, MAX_PATH);
+    wchar_t *path = talloc_array(NULL, wchar_t, MP_PATH_MAX);
+    GetModuleFileNameW(NULL, path, MP_PATH_MAX);
     hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
+    talloc_free(path);
     if (FAILED(hr)) {
         // don't goto exit_label here since SetDisplayName might still work
         MP_WARN(state, "Error setting audio session icon: %s\n",
                 mp_HRESULT_to_str(hr));
     }
 
-    assert(name);
+    mp_assert(name);
     if (!name)
         return;
 
@@ -573,7 +643,6 @@ exit_label:
     SAFE_RELEASE(state->pSessionControl);
     MP_WARN(state, "Error setting audio session name: %s\n",
             mp_HRESULT_to_str(hr));
-    return;
 }
 
 static void init_volume_control(struct wasapi_state *state)
@@ -583,7 +652,7 @@ static void init_volume_control(struct wasapi_state *state)
         MP_DBG(state, "Activating pEndpointVolume interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice,
                                          &IID_IAudioEndpointVolume,
-                                         CLSCTX_ALL, NULL,
+                                         CLSCTX_INPROC_SERVER, NULL,
                                          (void **)&state->pEndpointVolume);
         EXIT_ON_ERROR(hr);
 
@@ -612,16 +681,28 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     struct wasapi_state *state = ao->priv;
 
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
-    REFERENCE_TIME devicePeriod;
-    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod,
-                                              NULL);
-    MP_VERBOSE(state, "Device period: %.2g ms\n",
-               (double) devicePeriod / 10000.0 );
+    REFERENCE_TIME defaultPeriod, minPeriod;
+    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&defaultPeriod,
+                                              &minPeriod);
+    MP_VERBOSE(state, "Device period: default %lld us, minimum %lld us\n",
+               defaultPeriod / 10, minPeriod / 10);
 
-    REFERENCE_TIME bufferDuration = devicePeriod;
+    // per Microsoft:
+    // * hnsBufferDuration = hnsPeriodicity = 0 for shared mode
+    // * hnsBufferDuration = hnsPeriodicity != 0 for exclusive mode
+    // https://learn.microsoft.com/en-us/windows/win32/api/audioclient/nf-audioclient-iaudioclient-initialize
+    REFERENCE_TIME bufferDuration;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
-        // for shared mode, use integer multiple of device period close to 50ms
-        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
+        bufferDuration = 0;
+    } else if (state->opt_exclusive_buffer == 0) {
+        bufferDuration = defaultPeriod;
+    } else {
+        if (state->opt_exclusive_buffer > 0 && !align_hack) {
+            MP_VERBOSE(state, "Requested buffer duration: %d us\n",
+                       state->opt_exclusive_buffer);
+        }
+        bufferDuration = MPMAX((REFERENCE_TIME) state->opt_exclusive_buffer * 10,
+                               minPeriod);
     }
 
     // handle unsupported buffer size if AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED was
@@ -634,15 +715,15 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
              * state->bufferFrameCount));
     }
 
-    REFERENCE_TIME bufferPeriod =
-        state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ? bufferDuration : 0;
+    if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+        MP_VERBOSE(state, "Trying buffer duration %lld us\n", bufferDuration / 10);
 
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
                                  AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
                                  bufferDuration,
-                                 bufferPeriod,
+                                 bufferDuration,
                                  &(state->format.Format),
                                  NULL);
     EXIT_ON_ERROR(hr);
@@ -666,8 +747,8 @@ static HRESULT fix_format(struct ao *ao, bool align_hack)
     bufferDuration = (REFERENCE_TIME) (0.5 +
         (10000.0 * 1000 / state->format.Format.nSamplesPerSec
          * state->bufferFrameCount));
-    MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
-               state->bufferFrameCount, (double) bufferDuration / 10000.0 );
+    MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%lld us)\n",
+               state->bufferFrameCount, bufferDuration / 10);
 
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);
@@ -705,7 +786,7 @@ static char* get_device_name(struct mp_log *l, void *talloc_ctx, IMMDevice *pDev
     HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
     EXIT_ON_ERROR(hr);
 
-    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName,
+    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName,
                                  &devname);
     EXIT_ON_ERROR(hr);
 
@@ -763,7 +844,7 @@ static struct enumerator *create_enumerator(struct mp_log *log)
     struct enumerator *e = talloc_zero(NULL, struct enumerator);
     e->log = log;
     HRESULT hr = CoCreateInstance(
-        &CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+        &CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER, &IID_IMMDeviceEnumerator,
         (void **)&e->pEnumerator);
     EXIT_ON_ERROR(hr);
 
@@ -831,7 +912,7 @@ static bool load_device(struct mp_log *l,
                            IMMDevice **ppDevice, LPWSTR deviceID)
 {
     IMMDeviceEnumerator *pEnumerator = NULL;
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER,
                                   &IID_IMMDeviceEnumerator,
                                   (void **)&pEnumerator);
     EXIT_ON_ERROR(hr);
@@ -932,7 +1013,7 @@ bool wasapi_thread_init(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
-    int64_t retry_wait = 1;
+    int64_t retry_wait = MP_TIME_US_TO_NS(1);
     bool align_hack = false;
     HRESULT hr;
 
@@ -945,7 +1026,7 @@ retry:
 
         MP_DBG(ao, "Activating pAudioClient interface\n");
         hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
-                                         CLSCTX_ALL, NULL,
+                                         CLSCTX_INPROC_SERVER, NULL,
                                          (void **)&state->pAudioClient);
         if (FAILED(hr)) {
             MP_FATAL(ao, "Error activating device: %s\n",
@@ -1015,13 +1096,13 @@ retry:
         goto retry;
     case AUDCLNT_E_DEVICE_IN_USE:
     case AUDCLNT_E_DEVICE_INVALIDATED:
-        if (retry_wait > 8) {
+        if (retry_wait > MP_TIME_US_TO_NS(8)) {
             MP_FATAL(ao, "Bad device retry failed\n");
             return false;
         }
         wasapi_thread_uninit(ao);
-        MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
-        mp_sleep_us(retry_wait);
+        MP_WARN(ao, "Retrying in %"PRId64" ns\n", retry_wait);
+        mp_sleep_ns(retry_wait);
         retry_wait *= 2;
         goto retry;
     }

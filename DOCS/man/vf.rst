@@ -23,6 +23,8 @@ The exact syntax is:
     See the ``vf`` command (and ``toggle`` sub-command) for further explanations
     and examples.
 
+    This is an object settings list option. See `List Options`_ for details.
+
     The general filter entry syntax is:
 
         ``["@"<label-name>":"] ["!"] <filter-name> [ "=" <filter-parameter-list> ]``
@@ -44,18 +46,16 @@ The exact syntax is:
     the ``lavfi`` filter, which uses a very similar syntax as mpv (MPlayer
     historically) to specify filters and their parameters.
 
+.. note::
+
+    ``--vf`` can only take a single track as input, even if the filter supports
+    dynamic input. Filters that require multiple inputs can't be used.
+    Use ``--lavfi-complex`` for such a use case. This also applies for ``--af``.
+
 Filters can be manipulated at run time. You can use ``@`` labels as described
 above in combination with the ``vf`` command (see `COMMAND INTERFACE`_) to get
 more control over this. Initially disabled filters with ``!`` are useful for
 this as well.
-
-You can also set defaults for each filter. The defaults are applied before the
-normal filter parameters. This is deprecated and never worked for the
-libavfilter bridge.
-
-``--vf-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
-    Set defaults for each filter. (Deprecated. ``--af-defaults`` is deprecated
-    as well.)
 
 .. note::
 
@@ -105,15 +105,10 @@ filter list.
     compared. (Passing multiple filters is currently still possible, but
     deprecated.)
 
-``-vf-toggle=filter``
+``--vf-toggle=filter``
     Add the given filter to the list if it was not present yet, or remove it
     from the list if it was present. Matching of filters works as described in
     ``--vf-remove``.
-
-``--vf-del=filter``
-    Sort of like ``--vf-remove``, but also accepts an index number. Index
-    numbers start at 0, negative numbers address the end of the list (-1 is the
-    last). Deprecated.
 
 ``--vf-clr``
     Completely empties the filter list.
@@ -199,7 +194,7 @@ Available mpv-only filters are:
         space if the system video driver supports it, but not input and output
         levels. The ``scale`` video filter can configure color space and input
         levels, but only if the output format is RGB (if the video output driver
-        supports RGB output, you can force this with ``-vf scale,format=rgba``).
+        supports RGB output, you can force this with ``--vf=scale,format=rgba``).
 
         If this option is set to ``auto`` (which is the default), the video's
         color space flag will be used. If that flag is unset, the color space
@@ -211,10 +206,13 @@ Available mpv-only filters are:
         Available color spaces are:
 
         :auto:          automatic selection (default)
-        :bt.601:        ITU-R BT.601 (SD)
-        :bt.709:        ITU-R BT.709 (HD)
-        :bt.2020-ncl:   ITU-R BT.2020 non-constant luminance system
-        :bt.2020-cl:    ITU-R BT.2020 constant luminance system
+        :bt.601:        ITU-R Rec. BT.601 (SD)
+        :bt.709:        ITU-R Rec. BT.709 (HD)
+        :bt.2020-ncl:   ITU-R Rec. BT.2020 (non-constant luminance)
+        :bt.2020-cl:    ITU-R Rec. BT.2020 (constant luminance)
+        :bt.2100-pq:    ITU-R Rec. BT.2100 ICtCp PQ variant
+        :bt.2100-hlg:   ITU-R Rec. BT.2100 ICtCp HLG variant
+        :dolbyvision:   Dolby Vision
         :smpte-240m:    SMPTE-240M
 
     ``<colorlevels>``
@@ -320,18 +318,22 @@ Available mpv-only filters are:
         Whether or not to include Dolby Vision metadata (default: yes). If
         disabled, any Dolby Vision metadata will be stripped from frames.
 
+    ``<hdr10plus=yes|no>``
+        Whether or not to include HDR10+ metadata (default: yes). If
+        disabled, any HDR10+ metadata will be stripped from frames.
+
     ``<film-grain=yes|no>``
         Whether or not to include film grain metadata (default: yes). If
         disabled, any film grain metadata will be stripped from frames.
+
+    ``<chroma-location>``
+        Set the chroma loc of the video. Use
+        ``--vf=format:chroma-location=help`` to list all available modes.
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Use
         ``--vf=format:stereo-in=help`` to list all available modes. Check with
         the ``stereo3d`` filter documentation to see what the names mean.
-
-    ``<stereo-out>``
-        Set the stereo mode the video should be displayed as. Takes the
-        same values as the ``stereo-in`` option.
 
     ``<rotate>``
         Set the rotation the video is assumed to be encoded with in degrees.
@@ -355,13 +357,14 @@ Available mpv-only filters are:
         Force a specific scaler backend, if applicable. This is a debug option
         and could go away any time.
 
-    ``<alpha=auto|straight|premul>``
+    ``<alpha=auto|straight|premul|none>``
         Set the kind of alpha the video uses. Undefined effect if the image
         format has no alpha channel (could be ignored or cause an error,
         depending on how mpv internals evolve). Setting this may or may not
         cause downstream image processing to treat alpha differently, depending
         on support. With ``convert`` and zimg used, this will convert the alpha.
         libswscale and other FFmpeg components completely ignore this.
+        ``none`` is available only starting from libplacebo vN.344.0.
 
 ``lavfi=graph[:sws-flags[:o=opts]]``
     Filter video using FFmpeg's libavfilter.
@@ -433,7 +436,7 @@ Available mpv-only filters are:
             subtitle colors and video under the influence of the video equalizer
             settings.
 
-``vapoursynth=file:buffered-frames:concurrent-frames``
+``vapoursynth=file:buffered-frames:concurrent-frames:user-data``
     Loads a VapourSynth filter script. This is intended for streamed
     processing: mpv actually provides a source filter, instead of using a
     native VapourSynth video source. The mpv source will answer frame
@@ -559,6 +562,10 @@ Available mpv-only filters are:
         By default, this uses the special value ``auto``, which sets the option
         to the number of detected logical CPU cores.
 
+    ``user-data``
+        Optional arbitrary string that is passed to the script. Default to empty
+        string if not set.
+
     The following ``.vpy`` script variables are defined by mpv:
 
     ``video_in``
@@ -576,7 +583,7 @@ Available mpv-only filters are:
         completely broken (e.g. 0 or NaN). Even if the value is correct,
         if another filter changes the real FPS (by dropping or inserting
         frames), the value of this variable will not be useful. Note that
-        the ``--fps`` command line option overrides this value.
+        the ``--container-fps-override`` command line option overrides this value.
 
         Useful for some filters which insist on having a FPS.
 
@@ -585,9 +592,13 @@ Available mpv-only filters are:
 
     ``display_res``
         Resolution of the current display. This is an integer array with the
-        first entry corresponding to the width and the second entry coresponding
+        first entry corresponding to the width and the second entry corresponding
         to the height. These values can be 0. Note that this will not respond to
         monitor changes and may not work on all platforms.
+
+    ``user_data``
+        User data passed from the filter. This variable always exists, and defaults
+        to empty string.
 
 ``vavpp``
     VA-API video post processing. Requires the system to support VA-API,
@@ -679,11 +690,33 @@ Available mpv-only filters are:
             Apply high quality VDPAU scaling (needs capable hardware).
 
 ``d3d11vpp``
-    Direct3D 11 video post processing. Currently requires D3D11 hardware
-    decoding for use.
+    Direct3D 11 video post-processing. Requires a D3D11 context and works best
+    with hardware decoding. Software frames are automatically uploaded to hardware
+    for processing.
 
+    ``format``
+        Convert to the selected image format, e.g., nv12, p010, etc. (default: don't change).
+        Format names can be queried with ``--vf=d3d11vpp=format=help``.
+        Note that only a limited subset is supported, and actual support depends
+        on your hardware. Normally, this shouldn't be changed unless some
+        processing only works with a specific format, in which case it can be
+        selected here.
     ``deint=<yes|no>``
         Whether deinterlacing is enabled (default: no).
+    ``scale``
+        Scaling factor for the video frames (default: 1.0).
+    ``scaling-mode=<standard,intel,nvidia>``
+        Select the scaling mode to be used. Note that this only enables the
+        appropriate processing extensions; whether it actually works or not
+        depends on your hardware and the settings in your GPU driver's control
+        panel (default: standard).
+
+        standard
+            Default scaling mode as decided by d3d11vpp implementation.
+        intel
+            Intel Video Super Resolution.
+        nvidia
+            NVIDIA RTX Super Resolution.
     ``interlaced-only=<yes|no>``
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
@@ -692,6 +725,8 @@ Available mpv-only filters are:
         which algorithm is actually selected. ``none`` always falls back. On
         most if not all hardware, this option will probably do nothing, because
         a video processor usually supports all modes or none.
+    ``nvidia-true-hdr``
+        Enable NVIDIA RTX Video HDR processing.
 
 ``fingerprint=...``
     Compute video frame fingerprints and provide them as metadata. Actually, it
@@ -765,11 +800,21 @@ Available mpv-only filters are:
         read information from this filter instead.
 
 ``gpu=...``
-    Convert video to RGB using the OpenGL renderer normally used with
-    ``--vo=gpu``. This requires that the EGL implementation supports off-screen
-    rendering on the default display. (This is the case with Mesa.)
+    Convert video to RGB using the Vulkan or OpenGL renderer normally used with
+    ``--vo=gpu``. In case of OpenGL, this requires that the EGL implementation
+    supports off-screen rendering on the default display. (This is the case with
+    Mesa.)
 
     Sub-options:
+
+    ``api=<type>``
+        The value ``type`` selects the rendering API. You can also pass
+        ``help`` to get a complete list of compiled in backends.
+
+        egl
+            EGL (default if available)
+        vulkan
+            Vulkan
 
     ``w=<pixels>``, ``h=<pixels>``
         Size of the output in pixels (default: 0). If not positive, this will
@@ -798,4 +843,3 @@ Available mpv-only filters are:
         Do not use this with ``--vo=gpu``. It will apply filtering twice, since
         most ``--vo=gpu`` options are unconditionally applied to the ``gpu``
         filter. There is no mechanism in mpv to prevent this.
-

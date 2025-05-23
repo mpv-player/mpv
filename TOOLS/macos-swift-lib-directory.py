@@ -8,8 +8,9 @@ import sys
 from shutil import which
 from subprocess import check_output
 
+
 def find_swift_lib():
-    swift_lib_dir = os.environ.get('SWIFT_LIB_DYNAMIC', '')
+    swift_lib_dir = os.environ.get("SWIFT_LIB_DYNAMIC", "")
     if swift_lib_dir:
         return swift_lib_dir
 
@@ -27,7 +28,10 @@ def find_swift_lib():
 
     xcode_path = check_output([xcode_select, "-p"], encoding="UTF-8")
 
-    swift_lib_dir = os.path.join(xcode_path, "Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx")
+    swift_lib_dir = os.path.join(
+        xcode_path,
+        "Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx",
+    )
     if os.path.isdir(swift_lib_dir):
         return swift_lib_dir
 

@@ -25,6 +25,7 @@
 
 struct priv {
     struct mpvk_ctx vk;
+    bool use_fifo;
 };
 
 static bool wayland_vk_check_visible(struct ra_ctx *ctx)
@@ -35,8 +36,9 @@ static bool wayland_vk_check_visible(struct ra_ctx *ctx)
 static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
+    struct priv *p = ctx->priv;
 
-    if (!wl->opts->disable_vsync)
+    if ((!p->use_fifo && wl->opts->wl_internal_vsync == 1) || wl->opts->wl_internal_vsync == 2)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)
@@ -77,7 +79,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
          .surface = ctx->vo->wl->surface,
     };
 
-    struct ra_vk_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = wayland_vk_check_visible,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,
@@ -90,13 +92,14 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    /* Because in Wayland clients render whenever they receive a callback from
-     * the compositor, and the fact that the compositor usually stops sending
-     * callbacks once the surface is no longer visible, using FIFO here would
-     * mean the entire player would block on acquiring swapchain images. Hence,
-     * use MAILBOX to guarantee that there'll always be a swapchain image and
-     * the player won't block waiting on those */
-    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_MAILBOX_KHR))
+    /* If the Wayland compositor does not support fifo and presentation time
+     * v2 protocols, the compositor will stop sending callbacks if the surface
+     * is no longer visible. This means using FIFO would block the entire vo
+     * thread which is just not good. Use MAILBOX for those compositors to
+     * avoid indefinite blocking. */
+    struct vo_wayland_state *wl = ctx->vo->wl;
+    p->use_fifo = wl->has_fifo && wl->present_v2 && wl->opts->wl_internal_vsync != 2;
+    if (!ra_vk_ctx_init(ctx, vk, params, p->use_fifo ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR))
         goto error;
 
     ra_add_native_resource(ctx->ra, "wl", ctx->vo->wl->display);
@@ -118,7 +121,7 @@ static bool resize(struct ra_ctx *ctx)
     const int32_t height = mp_rect_h(wl->geometry);
 
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
-    vo_wayland_handle_fractional_scale(wl);
+    vo_wayland_handle_scale(wl);
     return ra_vk_ctx_resize(ctx, width, height);
 }
 
@@ -142,9 +145,9 @@ static void wayland_vk_wakeup(struct ra_ctx *ctx)
     vo_wayland_wakeup(ctx->vo);
 }
 
-static void wayland_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void wayland_vk_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_wayland_wait_events(ctx->vo, until_time_us);
+    vo_wayland_wait_events(ctx->vo, until_time_ns);
 }
 
 static void wayland_vk_update_render_opts(struct ra_ctx *ctx)
@@ -157,6 +160,7 @@ static void wayland_vk_update_render_opts(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {
     .type               = "vulkan",
     .name               = "waylandvk",
+    .description        = "Wayland/Vulkan",
     .reconfig           = wayland_vk_reconfig,
     .control            = wayland_vk_control,
     .wakeup             = wayland_vk_wakeup,

@@ -50,13 +50,16 @@ static bool win_init(struct ra_ctx *ctx)
     if (!vo_w32_init(ctx->vo))
         goto error;
 
+    if (ctx->opts.want_alpha)
+        vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
+
     VkWin32SurfaceCreateInfoKHR wininfo = {
          .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
          .hinstance = HINST_THISCOMPONENT,
          .hwnd = vo_w32_hwnd(ctx->vo),
     };
 
-    struct ra_vk_ctx_params params = {0};
+    struct ra_ctx_params params = {0};
 
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
@@ -96,11 +99,18 @@ static int win_control(struct ra_ctx *ctx, int *events, int request, void *arg)
     return ret;
 }
 
+static void win_update_render_opts(struct ra_ctx *ctx)
+{
+    vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
+}
+
 const struct ra_ctx_fns ra_ctx_vulkan_win = {
-    .type           = "vulkan",
-    .name           = "winvk",
-    .reconfig       = win_reconfig,
-    .control        = win_control,
-    .init           = win_init,
-    .uninit         = win_uninit,
+    .type               = "vulkan",
+    .name               = "winvk",
+    .description        = "Win32/Vulkan",
+    .reconfig           = win_reconfig,
+    .control            = win_control,
+    .update_render_opts = win_update_render_opts,
+    .init               = win_init,
+    .uninit             = win_uninit,
 };

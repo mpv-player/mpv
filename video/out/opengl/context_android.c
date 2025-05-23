@@ -90,7 +90,7 @@ static bool android_init(struct ra_ctx *ctx)
 
     mpegl_load_functions(&p->gl, ctx->log);
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .swap_buffers = android_swap_buffers,
     };
 
@@ -123,6 +123,7 @@ static int android_control(struct ra_ctx *ctx, int *events, int request, void *a
 const struct ra_ctx_fns ra_ctx_android = {
     .type           = "opengl",
     .name           = "android",
+    .description    = "Android/EGL",
     .reconfig       = android_reconfig,
     .control        = android_control,
     .init           = android_init,

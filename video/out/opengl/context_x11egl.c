@@ -18,7 +18,6 @@
 #include <assert.h>
 
 #include <X11/Xlib.h>
-#include <X11/extensions/Xpresent.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -164,7 +163,7 @@ static bool mpegl_init(struct ra_ctx *ctx)
 
     mpegl_load_functions(&p->gl, ctx->log);
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = mpegl_check_visible,
         .swap_buffers = mpegl_swap_buffers,
         .get_vsync    = mpegl_get_vsync,
@@ -208,14 +207,15 @@ static void mpegl_wakeup(struct ra_ctx *ctx)
     vo_x11_wakeup(ctx->vo);
 }
 
-static void mpegl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void mpegl_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_x11_wait_events(ctx->vo, until_time_us);
+    vo_x11_wait_events(ctx->vo, until_time_ns);
 }
 
 const struct ra_ctx_fns ra_ctx_x11_egl = {
     .type           = "opengl",
     .name           = "x11egl",
+    .description    = "X11/EGL",
     .reconfig       = mpegl_reconfig,
     .control        = mpegl_control,
     .wakeup         = mpegl_wakeup,

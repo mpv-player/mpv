@@ -96,13 +96,7 @@ AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c)
     avp->bit_rate = c->bitrate;
     avp->block_align = c->block_align;
 
-#if !HAVE_AV_CHANNEL_LAYOUT
-    avp->channels = c->channels.num;
-    if (!mp_chmap_is_unknown(&c->channels))
-        avp->channel_layout = mp_chmap_to_lavc(&c->channels);
-#else
     mp_chmap_to_av_layout(&avp->ch_layout, &c->channels);
-#endif
 
     return avp;
 error:
@@ -143,12 +137,14 @@ AVRational mp_get_codec_timebase(const struct mp_codec_params *c)
 
     // If the timebase is too coarse, raise its precision, or small adjustments
     // to timestamps done between decoder and demuxer could be lost.
+    int64_t den = tb.den;
     if (av_q2d(tb) > 0.001) {
-        AVRational r = av_div_q(tb, (AVRational){1, 1000});
-        tb.den *= (r.num + r.den - 1) / r.den;
+        int64_t scaling_num = tb.num * INT64_C(1000);
+        int64_t scaling_den = tb.den;
+        den *= (scaling_num + scaling_den - 1) / scaling_den;
     }
 
-    av_reduce(&tb.num, &tb.den, tb.num, tb.den, INT_MAX);
+    av_reduce(&tb.num, &tb.den, tb.num, den, INT_MAX);
 
     if (tb.num < 1 || tb.den < 1)
         tb = AV_TIME_BASE_Q;
@@ -263,8 +259,20 @@ char **mp_get_lavf_demuxers(void)
         const AVInputFormat *cur = av_demuxer_iterate(&iter);
         if (!cur)
             break;
-        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(NULL, cur->name));
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(list, cur->name));
     }
+    MP_TARRAY_APPEND(NULL, list, num, NULL);
+    return list;
+}
+
+char **mp_get_lavf_protocols(void)
+{
+    char **list = NULL;
+    int num = 0;
+    void *opaque = NULL;
+    const char *name;
+    while ((name = avio_enum_protocols(&opaque, 0)))
+        MP_TARRAY_APPEND(NULL, list, num, talloc_strdup(list, name));
     MP_TARRAY_APPEND(NULL, list, num, NULL);
     return list;
 }
@@ -401,4 +409,15 @@ void mp_free_av_packet(AVPacket **pkt)
         (*pkt)->buf = NULL;
     }
     av_packet_free(pkt);
+}
+
+void mp_codec_info_from_av(const AVCodecContext *avctx, struct mp_codec_params *c)
+{
+    c->codec_profile = av_get_profile_name(avctx->codec, avctx->profile);
+    if (!c->codec_profile)
+        c->codec_profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
+    c->codec = avctx->codec_descriptor->name;
+    c->codec_desc = avctx->codec_descriptor->long_name;
+    c->decoder = avctx->codec->name;
+    c->decoder_desc = avctx->codec->long_name;
 }

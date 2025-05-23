@@ -74,26 +74,25 @@ static int vulkan_init(struct ra_hwdec *hw)
      * one is the decode queue.
      */
     uint32_t num_qf = 0;
-    VkQueueFamilyProperties *qf = NULL;
-    vkGetPhysicalDeviceQueueFamilyProperties(vk->vulkan->phys_device, &num_qf, NULL);
+    VkQueueFamilyProperties2 *qf = NULL;
+    VkQueueFamilyVideoPropertiesKHR *qf_vid = NULL;
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk->vulkan->phys_device, &num_qf, NULL);
     if (!num_qf)
         goto error;
 
-    qf = talloc_array(NULL, VkQueueFamilyProperties, num_qf);
-    vkGetPhysicalDeviceQueueFamilyProperties(vk->vulkan->phys_device, &num_qf, qf);
-
-    int decode_index = -1, decode_count = 0;
+    qf = talloc_array(NULL, VkQueueFamilyProperties2, num_qf);
+    qf_vid = talloc_array(NULL, VkQueueFamilyVideoPropertiesKHR, num_qf);
     for (int i = 0; i < num_qf; i++) {
-        /*
-         * Pick the first discovered decode queue that we find. Maybe a day will
-         * come when this needs to be smarter, but I'm sure a bunch of other
-         * things will have to change too.
-         */
-        if ((qf[i].queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
-            decode_index = i;
-            decode_count = qf[i].queueCount;
-        }
+        qf_vid[i] = (VkQueueFamilyVideoPropertiesKHR) {
+            .sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_VIDEO_PROPERTIES_KHR,
+        };
+        qf[i] = (VkQueueFamilyProperties2) {
+            .sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2,
+            .pNext = &qf_vid[i],
+        };
     }
+
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk->vulkan->phys_device, &num_qf, qf);
 
     hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VULKAN);
     if (!hw_device_ctx)
@@ -114,6 +113,40 @@ static int vulkan_init(struct ra_hwdec *hw)
     device_hwctx->nb_enabled_inst_extensions = vk->vkinst->num_extensions;
     device_hwctx->enabled_dev_extensions = vk->vulkan->extensions;
     device_hwctx->nb_enabled_dev_extensions = vk->vulkan->num_extensions;
+
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(59, 34, 100)
+    device_hwctx->nb_qf = 0;
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_graphics.index,
+        .num = vk->vulkan->queue_graphics.count,
+        .flags = VK_QUEUE_GRAPHICS_BIT,
+    };
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_transfer.index,
+        .num = vk->vulkan->queue_transfer.count,
+        .flags = VK_QUEUE_TRANSFER_BIT,
+    };
+    device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+        .idx = vk->vulkan->queue_compute.index,
+        .num = vk->vulkan->queue_compute.count,
+        .flags = VK_QUEUE_COMPUTE_BIT,
+    };
+    for (int i = 0; i < num_qf; i++) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
+            device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+                .idx = i,
+                .num = qf[i].queueFamilyProperties.queueCount,
+                .flags = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
+                .video_caps = qf_vid[i].videoCodecOperations,
+            };
+        }
+    }
+#else
+    int decode_index = -1;
+    for (int i = 0; i < num_qf; i++) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_VIDEO_DECODE_BIT_KHR)
+            decode_index = i;
+    }
     device_hwctx->queue_family_index = vk->vulkan->queue_graphics.index;
     device_hwctx->nb_graphics_queues = vk->vulkan->queue_graphics.count;
     device_hwctx->queue_family_tx_index = vk->vulkan->queue_transfer.index;
@@ -121,7 +154,8 @@ static int vulkan_init(struct ra_hwdec *hw)
     device_hwctx->queue_family_comp_index = vk->vulkan->queue_compute.index;
     device_hwctx->nb_comp_queues = vk->vulkan->queue_compute.count;
     device_hwctx->queue_family_decode_index = decode_index;
-    device_hwctx->nb_decode_queues = decode_count;
+    device_hwctx->nb_decode_queues = qf[decode_index].queueFamilyProperties.queueCount;
+#endif
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
@@ -137,10 +171,12 @@ static int vulkan_init(struct ra_hwdec *hw)
     hwdec_devices_add(hw->devs, &p->hwctx);
 
     talloc_free(qf);
+    talloc_free(qf_vid);
     return 0;
 
  error:
     talloc_free(qf);
+    talloc_free(qf_vid);
     av_buffer_unref(&hw_device_ctx);
     return -1;
 }
@@ -187,7 +223,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     AVVkFrame *vkf = p->vkf;
 
     int num_images;
-    for (num_images = 0; (vkf->img[num_images] != NULL); num_images++);
+    for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
 
     for (int i = 0; (p->tex[i] != NULL); i++) {
         pl_tex *tex = &p->tex[i];
@@ -236,8 +272,18 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     const AVVulkanFramesContext *vkfc = hwfc->hwctx;
     AVVkFrame *vkf = (AVVkFrame *) mapper->src->planes[0];
 
+    /*
+     * We need to use the dimensions from the HW Frames Context for the
+     * textures, as the underlying images may be larger than the logical frame
+     * size. This most often happens with 1080p content where the actual frame
+     * height is 1088.
+     */
+    struct mp_image raw_layout;
+    mp_image_setfmt(&raw_layout, p->layout.params.imgfmt);
+    mp_image_set_size(&raw_layout, hwfc->width, hwfc->height);
+
     int num_images;
-    for (num_images = 0; (vkf->img[num_images] != NULL); num_images++);
+    for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
     const VkFormat *vk_fmt = av_vkfmt_from_pixfmt(hwfc->sw_format);
 
     vkfc->lock_frame(hwfc, vkf);
@@ -269,8 +315,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 
         *tex = pl_vulkan_wrap(p_owner->gpu, pl_vulkan_wrap_params(
             .image = vkf->img[index],
-            .width = mp_image_plane_w(&p->layout, i),
-            .height = mp_image_plane_h(&p->layout, i),
+            .width = mp_image_plane_w(&raw_layout, i),
+            .height = mp_image_plane_h(&raw_layout, i),
             .format = vk_fmt[i],
             .usage = vkfc->usage,
             .aspect = aspect,
@@ -310,6 +356,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 const struct ra_hwdec_driver ra_hwdec_vulkan = {
     .name = "vulkan",
     .imgfmts = {IMGFMT_VULKAN, 0},
+    .device_type = AV_HWDEVICE_TYPE_VULKAN,
     .priv_size = sizeof(struct vulkan_hw_priv),
     .init = vulkan_init,
     .uninit = vulkan_uninit,

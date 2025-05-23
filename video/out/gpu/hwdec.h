@@ -1,6 +1,8 @@
 #ifndef MPGL_HWDEC_H_
 #define MPGL_HWDEC_H_
 
+#include <libavutil/hwcontext.h>
+
 #include "video/mp_image.h"
 #include "context.h"
 #include "ra.h"
@@ -18,12 +20,8 @@ struct ra_hwdec_ctx {
     int num_hwdecs;
 };
 
-int ra_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
-                          struct bstr name, const char **value);
-
-int ra_hwdec_validate_drivers_only_opt(struct mp_log *log,
-                                       const m_option_t *opt,
-                                       struct bstr name, const char **value);
+OPT_STRING_VALIDATE_FUNC(ra_hwdec_validate_opt);
+OPT_STRING_VALIDATE_FUNC(ra_hwdec_validate_drivers_only_opt);
 
 void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
                        const char *opt, bool load_all_by_default);
@@ -110,6 +108,9 @@ struct ra_hwdec_driver {
     // Terminated with a 0 entry. (Extend the array size as needed.)
     const int imgfmts[3];
 
+    // The underlying ffmpeg hw device type this hwdec corresponds to.
+    enum AVHWDeviceType device_type;
+
     // Create the hwdec device. It must add it to hw->devs, if applicable.
     int (*init)(struct ra_hwdec *hw);
     void (*uninit)(struct ra_hwdec *hw);
@@ -152,5 +153,9 @@ int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img);
 // Get the primary image format for the given driver name.
 // Returns IMGFMT_NONE if the name doesn't get matched.
 int ra_hwdec_driver_get_imgfmt_for_name(const char *name);
+
+// Get the primary hw device type for the given driver name.
+// Returns AV_HWDEVICE_TYPE_NONE if the name doesn't get matched.
+enum AVHWDeviceType ra_hwdec_driver_get_device_type_for_name(const char *name);
 
 #endif

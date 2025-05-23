@@ -37,7 +37,7 @@ Player
 * ``--keep-open`` option to stop the player from closing the window and
   exiting after playback ends.
 * A client API, that allows embedding **mpv** into applications
-  (see ``libmpv/client.h`` in the sources).
+  (see ``mpv/client.h`` in the sources).
 
 Input
 ~~~~~
@@ -135,10 +135,10 @@ Miscellaneous
 * Support for precise scrolling which scales the parameter of commands. If the
   input doesn't support precise scrolling the scale factor stays 1.
 * Allow changing/adjusting video filters at runtime. (This is also used to make
-  the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise).
+  the ``D`` key insert vf_bwdif if deinterlacing is not supported otherwise).
 * Improved support for .cue files.
 
-Mac OS X
+macOS
 ~~~~~~~~
 
 * Native OpenGL backend.
@@ -177,7 +177,7 @@ Internal changes
 * General code cleanups (including refactoring or rewrites of many parts).
 * New build system.
 * Many bug fixes and removal of long-standing issues.
-* Generally preferring FFmpeg/Libav over internal demuxers, decoders, and
+* Generally preferring FFmpeg over internal demuxers, decoders, and
   filters.
 
 Detailed Listing of User-visible Changes
@@ -214,7 +214,7 @@ Command Line Switches
     ``-af volnorm``             (removed; use acompressor ffmpeg filter instead)
     ``-afm hwac3``              ``--ad=spdif:ac3,spdif:dts``
     ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
-    ``-aspect``                 ``--video-aspect``
+    ``-aspect``                 ``--video-aspect-override``
     ``-ass-bottom-margin``      ``--vf=sub=bottom:top``
     ``-ass``                    ``--sub-ass``
     ``-audiofile-cache``        (removed; the main cache settings are used)
@@ -229,7 +229,7 @@ Command Line Switches
     ``-endpos``                 ``--length``
     ``-fixed-vo``               (removed; always the default)
     ``-font``                   ``--osd-font``
-    ``-forcedsubsonly``         ``--sub-forced-only``
+    ``-forcedsubsonly``         ``--sub-forced-events-only``
     ``-forceidx``               ``--index``
     ``-format``                 ``--audio-format``
     ``-fsmode-dontuse``         (removed)
@@ -321,9 +321,9 @@ input.conf and Slave Commands
     +--------------------------------+----------------------------------------+
     | ``pt_step -1 [0|1]``           | ``playlist-prev [weak|force] (same)``  |
     +--------------------------------+----------------------------------------+
-    | ``switch_ratio [<ratio>]``     | ``set video-aspect <ratio>``           |
+    | ``switch_ratio [<ratio>]``     | ``set video-aspect-override <ratio>``  |
     |                                |                                        |
-    |                                | ``set video-aspect 0`` (reset aspect)  |
+    |                                | ``set video-aspect-override 0`` (reset)|
     +--------------------------------+----------------------------------------+
     | ``step_property_osd <prop>``   | ``cycle <prop> <step>`` (wraps),       |
     | ``<step> <dir>``               | ``add <prop> <step>`` (clamps).        |
@@ -410,7 +410,7 @@ Slave mode
   `JSON IPC`_ for more information.
 
 * **mpv** also provides a client API, which can be used to embed the player
-  by loading it as shared library. (See ``libmpv/client.h`` in the sources.)
+  by loading it as shared library. (See ``mpv/client.h`` in the sources.)
   It might also be possible to implement a custom slave mode-like protocol
   using Lua scripting.
 

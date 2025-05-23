@@ -23,10 +23,6 @@
 
 #include "chmap.h"
 
-#if HAVE_AV_CHANNEL_LAYOUT
-
 bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src);
 
 void mp_chmap_to_av_layout(AVChannelLayout *dst, const struct mp_chmap *src);
-
-#endif

@@ -29,7 +29,16 @@ All of these are important for interfacing both with end users and API users
 (which include Lua scripts, libmpv, and the JSON IPC). As such, they constitute
 a large part of the user interface and APIs.
 
-All incompatible changes to this must be declared in interface-changes.rst.
+Certain options and commands may have documented default values. These default
+values are considered a part of the API since scripts may already rely on these
+documented behaviors. Changing these defaults are considered incompatible
+changes and must be documented. Undocumented default values do not subject to
+this requirement, and it is recommended to discourage such usage in the related
+documentations if there is a need to frequently change such defaults.
+
+All incompatible changes to this must be declared in interface-changes.rst,
+which include the types of changes, the impact of these changes, and suggested
+actions to address such impact so that the incompatibility is alleviated.
 (This may also list compatible additions, but it's not a requirement.)
 
 Degrees of importance and compatibility preservation
@@ -49,8 +58,17 @@ functionality still works, and a replacement is available (if technically
 reasonable). For example, a feature deprecated in mpv 0.30.0 may be removed in
 mpv 0.32.0. Minor releases do not count towards this.
 
+Under extraordinary circumstances, such as missed incompatible changes that are
+already included in a release, critical security fixes, or a severe shortage of
+developer time to address the known incompatible changes, important/often used
+parts may be broken immediately, but the change must be extensively documented:
+all of the related documentations (including manpage, interface-changes.rst,
+etc., retrospectively modified if applicable) must clearly state the following:
+the fact that the change is a breaking change; the version when the breaking
+change happened; and the reason, impact, and suggested remedy actions.
+
 Less useful parts can be broken immediately, but must come with some sort of
-removal warning-
+removal warning.
 
 Parts for debugging and testing may be removed any time, potentially even
 without any sort of documentation.
@@ -108,7 +126,7 @@ CLI
 Things such as default key bindings do not necessarily require compatibility.
 However, the release notes should be extremely clear on changes to "important"
 key bindings. Bindings which restore the old behavior should be added to
-restore-old-bindings.conf.
+restore-old-bindings.conf and restore-osc-bindings.conf.
 
 Some option parsing is CLI-only and not available from libmpv or scripting. No
 compatibility guarantees come with them. However, the rules which mpv uses to
@@ -135,7 +153,7 @@ command-interface.
 libmpv C API
 ------------
 
-The libmpv client API (such as ``<libmpv/client.h>``) mostly gives access to
+The libmpv client API (such as ``<mpv/client.h>``) mostly gives access to
 the command interface. The API itself (if looked at as a component separate
 from the command interface) is intended to be extremely stable.
 

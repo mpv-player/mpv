@@ -17,23 +17,24 @@
 
 import Cocoa
 
-class View: NSView {
+class View: NSView, CALayerDelegate {
     unowned var common: Common
-    var mpv: MPVHelper? { get { return common.mpv } }
+    var input: InputHelper? { return common.input }
 
     var tracker: NSTrackingArea?
     var hasMouseDown: Bool = false
+    var lastMouseDownEvent: NSEvent?
 
     override var isFlipped: Bool { return true }
     override var acceptsFirstResponder: Bool { return true }
-
 
     init(frame: NSRect, common com: Common) {
         common = com
         super.init(frame: frame)
         autoresizingMask = [.width, .height]
         wantsBestResolutionOpenGLSurface = true
-        registerForDraggedTypes([ .fileURLCompat, .URLCompat, .string ])
+        wantsExtendedDynamicRangeOpenGLSurface = true
+        registerForDraggedTypes([ .fileURL, .URL, .string ])
     }
 
     required init?(coder: NSCoder) {
@@ -52,55 +53,39 @@ class View: NSView {
         addTrackingArea(tracker!)
 
         if containsMouseLocation() {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
+            input?.put(key: SWIFT_KEY_MOUSE_LEAVE)
         }
     }
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         guard let types = sender.draggingPasteboard.types else { return [] }
-        if types.contains(.fileURLCompat) || types.contains(.URLCompat) || types.contains(.string) {
+        if types.contains(.fileURL) || types.contains(.URL) || types.contains(.string) {
             return .copy
         }
         return []
     }
 
-    func isURL(_ str: String) -> Bool {
-        // force unwrapping is fine here, regex is guaranteed to be valid
-        let regex = try! NSRegularExpression(pattern: "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$",
-                                             options: .caseInsensitive)
-        let isURL = regex.numberOfMatches(in: str,
-                                     options: [],
-                                       range: NSRange(location: 0, length: str.count))
-        return isURL > 0
-    }
-
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pb = sender.draggingPasteboard
         guard let types = pb.types else { return false }
+        var files: [String] = []
 
-        if types.contains(.fileURLCompat) || types.contains(.URLCompat) {
-            if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] {
-                let files = urls.map { $0.absoluteString }
-                EventsResponder.sharedInstance().handleFilesArray(files)
-                return true
-            }
+        if types.contains(.fileURL) || types.contains(.URL) {
+             guard let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL] else { return false }
+             files = urls.map { $0.absoluteString }
         } else if types.contains(.string) {
             guard let str = pb.string(forType: .string) else { return false }
-            var filesArray: [String] = []
-
-            for val in str.components(separatedBy: "\n") {
-                let url = val.trimmingCharacters(in: .whitespacesAndNewlines)
+            files = str.components(separatedBy: "\n").compactMap {
+                let url = $0.trimmingCharacters(in: .whitespacesAndNewlines)
                 let path = (url as NSString).expandingTildeInPath
-                if isURL(url) {
-                    filesArray.append(url)
-                } else if path.starts(with: "/") {
-                    filesArray.append(path)
-                }
+                if url.isUrl() { return url }
+                if path.starts(with: "/") { return path }
+                return nil
             }
-            EventsResponder.sharedInstance().handleFilesArray(filesArray)
-            return true
         }
-        return false
+        if files.isEmpty { return false }
+        input?.open(files: files)
+        return true
     }
 
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
@@ -116,92 +101,65 @@ class View: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_ENTER, 0)
+        if input?.mouseEnabled() ?? true {
+            input?.put(key: SWIFT_KEY_MOUSE_ENTER)
         }
         common.updateCursorVisibility()
     }
 
     override func mouseExited(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            cocoa_put_key_with_modifiers(SWIFT_KEY_MOUSE_LEAVE, 0)
+        if input?.mouseEnabled() ?? true {
+            input?.put(key: SWIFT_KEY_MOUSE_LEAVE)
         }
         common.titleBar?.hide()
         common.setCursorVisibility(true)
     }
 
     override func mouseMoved(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseMovement(event)
-        }
+        signalMouseMovement(event)
         common.titleBar?.show()
     }
 
     override func mouseDragged(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseMovement(event)
-        }
+        signalMouseMovement(event)
     }
 
     override func mouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = event.clickCount <= 1
+        input?.processMouse(event: event)
+        lastMouseDownEvent = event
     }
 
     override func mouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
         common.window?.isMoving = false
+        input?.processMouse(event: event)
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = event.clickCount <= 1
+        input?.processMouse(event: event)
     }
 
     override func rightMouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
+        input?.processMouse(event: event)
     }
 
     override func otherMouseDown(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseDown(event)
-        }
+        hasMouseDown = event.clickCount <= 1
+        input?.processMouse(event: event)
     }
 
     override func otherMouseUp(with event: NSEvent) {
-        if mpv?.mouseEnabled() ?? true {
-            signalMouseUp(event)
-        }
+        hasMouseDown = false
+        input?.processMouse(event: event)
     }
 
     override func magnify(with event: NSEvent) {
-        event.phase == .ended ?
-            common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
-
+        common.window?.isAnimating = event.phase != .ended
+        event.phase == .ended ? common.windowDidEndLiveResize() : common.windowWillStartLiveResize()
         common.window?.addWindowScale(Double(event.magnification))
-    }
-
-    func signalMouseDown(_ event: NSEvent) {
-        signalMouseEvent(event, MP_KEY_STATE_DOWN)
-        if event.clickCount > 1 {
-            signalMouseEvent(event, MP_KEY_STATE_UP)
-        }
-    }
-
-    func signalMouseUp(_ event: NSEvent) {
-        signalMouseEvent(event, MP_KEY_STATE_UP)
-    }
-
-    func signalMouseEvent(_ event: NSEvent, _ state: UInt32) {
-        hasMouseDown = state == MP_KEY_STATE_DOWN
-        let mpkey = getMpvButton(event)
-        cocoa_put_key_with_modifiers((mpkey | Int32(state)), Int32(event.modifierFlags.rawValue))
     }
 
     func signalMouseMovement(_ event: NSEvent) {
@@ -209,48 +167,13 @@ class View: NSView {
         point = convertToBacking(point)
         point.y = -point.y
 
-        common.window?.updateMovableBackground(point)
         if !(common.window?.isMoving ?? false) {
-            mpv?.setMousePosition(point)
+            input?.setMouse(position: point)
         }
-    }
-
-    func preciseScroll(_ event: NSEvent) {
-        var delta: Double
-        var cmd: Int32
-
-        if abs(event.deltaY) >= abs(event.deltaX) {
-            delta = Double(event.deltaY) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-        } else {
-            delta = Double(event.deltaX) * 0.1
-            cmd = delta > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT
-        }
-
-        mpv?.putAxis(cmd, delta: abs(delta))
     }
 
     override func scrollWheel(with event: NSEvent) {
-        if !(mpv?.mouseEnabled() ?? true) {
-            return
-        }
-
-        if event.hasPreciseScrollingDeltas {
-            preciseScroll(event)
-        } else {
-            let modifiers = event.modifierFlags
-            let deltaX = modifiers.contains(.shift) ? event.scrollingDeltaY : event.scrollingDeltaX
-            let deltaY = modifiers.contains(.shift) ? event.scrollingDeltaX : event.scrollingDeltaY
-            var mpkey: Int32
-
-            if abs(deltaY) >= abs(deltaX) {
-                mpkey = deltaY > 0 ? SWIFT_WHEEL_UP : SWIFT_WHEEL_DOWN
-            } else {
-                mpkey = deltaX > 0 ? SWIFT_WHEEL_RIGHT : SWIFT_WHEEL_LEFT
-            }
-
-            cocoa_put_key_with_modifiers(mpkey, Int32(modifiers.rawValue))
-        }
+        input?.processWheel(event: event)
     }
 
     func containsMouseLocation() -> Bool {
@@ -281,17 +204,5 @@ class View: NSView {
     func canHideCursor() -> Bool {
         guard let window = common.window else { return false }
         return !hasMouseDown && containsMouseLocation() && window.isKeyWindow
-    }
-
-    func getMpvButton(_ event: NSEvent) -> Int32 {
-        let buttonNumber = event.buttonNumber
-        switch (buttonNumber) {
-            case 0:  return SWIFT_MBTN_LEFT
-            case 1:  return SWIFT_MBTN_RIGHT
-            case 2:  return SWIFT_MBTN_MID
-            case 3:  return SWIFT_MBTN_BACK
-            case 4:  return SWIFT_MBTN_FORWARD
-            default: return SWIFT_MBTN9 + Int32(buttonNumber - 5)
-        }
     }
 }

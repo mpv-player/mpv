@@ -17,9 +17,9 @@
 
 #include <stddef.h>
 #include <limits.h>
-#include <strings.h>
 #include <assert.h>
 #include <libavutil/dict.h>
+#include "common.h"
 #include "tags.h"
 #include "misc/bstr.h"
 
@@ -141,4 +141,11 @@ void mp_tags_copy_from_av_dictionary(struct mp_tags *tags,
     AVDictionaryEntry *entry = NULL;
     while ((entry = av_dict_get(av_dict, "", entry, AV_DICT_IGNORE_SUFFIX)))
         mp_tags_set_str(tags, entry->key, entry->value);
+}
+
+void mp_tags_move_from_av_dictionary(struct mp_tags *tags,
+                                     struct AVDictionary **av_dict_ptr)
+{
+    mp_tags_copy_from_av_dictionary(tags, *av_dict_ptr);
+    av_dict_free(av_dict_ptr);
 }

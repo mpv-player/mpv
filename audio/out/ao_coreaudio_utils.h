@@ -22,10 +22,18 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <inttypes.h>
 #include <stdbool.h>
+
+#include "config.h"
 #include "common/msg.h"
 #include "audio/out/ao.h"
 #include "internal.h"
-#include "osdep/apple_utils.h"
+#include "osdep/utils-mac.h"
+#include "osdep/threads.h"
+
+struct coreaudio_cb_sem {
+    mp_mutex mutex;
+    mp_cond cond;
+};
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 
@@ -45,7 +53,7 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
     } while (0)
 
 void ca_get_device_list(struct ao *ao, struct ao_device_list *list);
-#if HAVE_COREAUDIO
+#if HAVE_COREAUDIO || HAVE_AVFOUNDATION
 OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device);
 #endif
 
@@ -60,16 +68,16 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
                        AudioStreamBasicDescription *old,
                        AudioStreamBasicDescription *new);
 
-int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
+int64_t ca_frames_to_ns(struct ao *ao, uint32_t frames);
 int64_t ca_get_latency(const AudioTimeStamp *ts);
 
-#if HAVE_COREAUDIO
+#if HAVE_COREAUDIO || HAVE_AVFOUNDATION
 bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream);
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_disable_mixing(struct ao *ao, AudioDeviceID device, bool *changed);
 OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed);
-int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device);
+int64_t ca_get_device_latency_ns(struct ao *ao, AudioDeviceID device);
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format);
 #endif

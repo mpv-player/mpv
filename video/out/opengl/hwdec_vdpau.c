@@ -105,7 +105,7 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
-    assert(!p->mapped);
+    mp_assert(!p->mapped);
 
     if (p->vdpgl_surface)
         gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);
@@ -239,6 +239,7 @@ const struct ra_hwdec_driver ra_hwdec_vdpau = {
     .name = "vdpau-gl",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_VDPAU, 0},
+    .device_type = AV_HWDEVICE_TYPE_VDPAU,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

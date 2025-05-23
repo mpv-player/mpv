@@ -51,9 +51,9 @@ int mp_natural_sort_cmp(const char *name1, const char *name2)
                 name2++;
             }
         } else {
-            if (mp_tolower(name1[0]) < mp_tolower(name2[0]))
+            if ((unsigned char)mp_tolower(name1[0]) < (unsigned char)mp_tolower(name2[0]))
                 return -1;
-            if (mp_tolower(name1[0]) > mp_tolower(name2[0]))
+            if ((unsigned char)mp_tolower(name1[0]) > (unsigned char)mp_tolower(name2[0]))
                 return 1;
             name1++;
             name2++;

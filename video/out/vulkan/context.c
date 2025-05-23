@@ -15,11 +15,15 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
+#include <libavutil/uuid.h>
+
 #include "options/m_config.h"
 #include "video/out/placebo/ra_pl.h"
+#include "video/out/placebo/utils.h"
 
 #include "context.h"
-#include "utils.h"
 
 struct vulkan_opts {
     char *device; // force a specific GPU
@@ -29,59 +33,76 @@ struct vulkan_opts {
     bool async_compute;
 };
 
-static int vk_validate_dev(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, const char **value)
+static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 {
-    struct bstr param = bstr0(*value);
     int ret = M_OPT_INVALID;
-    VkResult res;
+    void *ta_ctx = talloc_new(NULL);
+    pl_log pllog = mppl_log_create(ta_ctx, log);
+    if (!pllog)
+        goto done;
 
     // Create a dummy instance to validate/list the devices
-    VkInstanceCreateInfo info = {
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-    };
+    mppl_log_set_probing(pllog, true);
+    pl_vk_inst inst = pl_vk_inst_create(pllog, pl_vk_inst_params());
+    mppl_log_set_probing(pllog, false);
+    if (!inst)
+        goto done;
 
-    VkInstance inst;
-    VkPhysicalDevice *devices = NULL;
     uint32_t num = 0;
-
-    res = vkCreateInstance(&info, NULL, &inst);
+    VkResult res = vkEnumeratePhysicalDevices(inst->instance, &num, NULL);
     if (res != VK_SUCCESS)
         goto done;
 
-    res = vkEnumeratePhysicalDevices(inst, &num, NULL);
+    VkPhysicalDevice *devices = talloc_array(ta_ctx, VkPhysicalDevice, num);
+    res = vkEnumeratePhysicalDevices(inst->instance, &num, devices);
     if (res != VK_SUCCESS)
         goto done;
 
-    devices = talloc_array(NULL, VkPhysicalDevice, num);
-    vkEnumeratePhysicalDevices(inst, &num, devices);
-    if (res != VK_SUCCESS)
-        goto done;
-
+    struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
     if (help) {
         mp_info(log, "Available vulkan devices:\n");
         ret = M_OPT_EXIT;
     }
 
+    AVUUID param_uuid;
+    bool is_uuid = av_uuid_parse(*value, param_uuid) == 0;
+
     for (int i = 0; i < num; i++) {
-        VkPhysicalDeviceProperties prop;
-        vkGetPhysicalDeviceProperties(devices[i], &prop);
+        VkPhysicalDeviceIDPropertiesKHR id_prop = { 0 };
+        id_prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR;
+
+        VkPhysicalDeviceProperties2KHR prop2 = { 0 };
+        prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR;
+        prop2.pNext = &id_prop;
+
+        vkGetPhysicalDeviceProperties2(devices[i], &prop2);
+
+        const VkPhysicalDeviceProperties *prop = &prop2.properties;
 
         if (help) {
-            mp_info(log, "  '%s' (GPU %d, ID %x:%x)\n", prop.deviceName, i,
-                    (unsigned)prop.vendorID, (unsigned)prop.deviceID);
-        } else if (bstr_equals0(param, prop.deviceName)) {
+            char device_uuid[37];
+            av_uuid_unparse(id_prop.deviceUUID, device_uuid);
+            mp_info(log, "  '%s' (GPU %d, PCI ID %x:%x, UUID %s)\n",
+                    prop->deviceName, i, (unsigned)prop->vendorID,
+                    (unsigned)prop->deviceID, device_uuid);
+        } else if (bstr_equals0(param, prop->deviceName)) {
+            ret = 0;
+            goto done;
+        } else if (is_uuid && av_uuid_equal(param_uuid, id_prop.deviceUUID)) {
             ret = 0;
             goto done;
         }
     }
 
     if (!help)
-        mp_err(log, "No device with name '%.*s'!\n", BSTR_P(param));
+        mp_err(log, "No device with %s '%.*s'!\n", is_uuid ? "UUID" : "name",
+               BSTR_P(param));
 
 done:
-    talloc_free(devices);
+    pl_vk_inst_destroy(&inst);
+    pl_log_destroy(&pllog);
+    talloc_free(ta_ctx);
     return ret;
 }
 
@@ -98,7 +119,6 @@ const struct m_sub_options vulkan_conf = {
         {"vulkan-queue-count", OPT_INT(queue_count), M_RANGE(1, 8)},
         {"vulkan-async-transfer", OPT_BOOL(async_transfer)},
         {"vulkan-async-compute", OPT_BOOL(async_compute)},
-        {"vulkan-disable-events", OPT_REMOVED("Unused")},
         {0}
     },
     .size = sizeof(struct vulkan_opts),
@@ -108,12 +128,13 @@ const struct m_sub_options vulkan_conf = {
         .async_transfer = true,
         .async_compute = true,
     },
+    .change_flags = UPDATE_VO,
 };
 
 struct priv {
     struct mpvk_ctx *vk;
     struct vulkan_opts *opts;
-    struct ra_vk_ctx_params params;
+    struct ra_ctx_params params;
     struct ra_tex proxy_tex;
 };
 
@@ -148,24 +169,16 @@ void ra_vk_ctx_uninit(struct ra_ctx *ctx)
     TA_FREEP(&ctx->swapchain);
 }
 
-bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
-                    struct ra_vk_ctx_params params,
-                    VkPresentModeKHR preferred_mode)
+pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
+                             pl_vk_inst vkinst,
+                             pl_log pllog,
+                             VkSurfaceKHR surface,
+                             bool allow_software)
 {
-    struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
-    sw->ctx = ctx;
-    sw->fns = &vulkan_swapchain;
-
-    struct priv *p = sw->priv = talloc_zero(sw, struct priv);
-    p->vk = vk;
-    p->params = params;
-    p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
-
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     };
 
-#if HAVE_VULKAN_INTEROP
     /*
      * Request the additional extensions and features required to make full use
      * of the ffmpeg Vulkan hwcontext and video decoding capability.
@@ -173,17 +186,29 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     const char *opt_extensions[] = {
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
+#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+        VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
+#endif
         VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
-        // This is a literal string as it's not in the official headers yet.
-        "VK_MESA_video_decode_av1",
+        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
+        "VK_KHR_video_maintenance2", /* VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME */
     };
+
+#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+    VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
+        .shaderObject = true,
+    };
+#endif
 
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
-        .pNext = NULL,
+#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+        .pNext = &shader_object_feature,
+#endif
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
@@ -196,25 +221,49 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     };
 
     features.pNext = &atomic_float_feature;
-#endif
 
-    assert(vk->pllog);
-    assert(vk->vkinst);
-    vk->vulkan = pl_vulkan_create(vk->pllog, &(struct pl_vulkan_params) {
-        .instance = vk->vkinst->instance,
-        .get_proc_addr = vk->vkinst->get_proc_addr,
-        .surface = vk->surface,
-        .async_transfer = p->opts->async_transfer,
-        .async_compute = p->opts->async_compute,
-        .queue_count = p->opts->queue_count,
-        .device_name = p->opts->device,
-#if HAVE_VULKAN_INTEROP
+    AVUUID param_uuid = { 0 };
+    bool is_uuid = opts->device &&
+                   av_uuid_parse(opts->device, param_uuid) == 0;
+
+    mp_assert(pllog);
+    mp_assert(vkinst);
+    struct pl_vulkan_params device_params = {
+        .instance = vkinst->instance,
+        .get_proc_addr = vkinst->get_proc_addr,
+        .surface = surface,
+        .allow_software = allow_software,
+        .async_transfer = opts->async_transfer,
+        .async_compute = opts->async_compute,
+        .queue_count = opts->queue_count,
         .extra_queues = VK_QUEUE_VIDEO_DECODE_BIT_KHR,
         .opt_extensions = opt_extensions,
         .num_opt_extensions = MP_ARRAY_SIZE(opt_extensions),
-#endif
         .features = &features,
-    });
+        .device_name = is_uuid ? NULL : opts->device,
+    };
+    if (is_uuid)
+        av_uuid_copy(device_params.device_uuid, param_uuid);
+
+    return pl_vulkan_create(pllog, &device_params);
+
+}
+
+bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
+                    struct ra_ctx_params params,
+                    VkPresentModeKHR preferred_mode)
+{
+    struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
+    sw->ctx = ctx;
+    sw->fns = &vulkan_swapchain;
+
+    struct priv *p = sw->priv = talloc_zero(sw, struct priv);
+    p->vk = vk;
+    p->params = params;
+    p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
+
+    vk->vulkan = mppl_create_vulkan(p->opts, vk->vkinst, vk->pllog, vk->surface,
+                                    ctx->opts.allow_sw);
     if (!vk->vulkan)
         goto error;
 
@@ -228,9 +277,6 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .surface = vk->surface,
         .present_mode = preferred_mode,
         .swapchain_depth = ctx->vo->opts->swapchain_depth,
-        // mpv already handles resize events, so gracefully allow suboptimal
-        // swapchains to exist in order to make resizing even smoother
-        .allow_suboptimal = true,
     };
 
     if (p->opts->swap_mode >= 0) // user override
@@ -274,7 +320,11 @@ char *ra_vk_ctx_get_device_name(struct ra_ctx *ctx)
 
 static int color_depth(struct ra_swapchain *sw)
 {
-    return 0; // TODO: implement this somehow?
+    struct priv *p = sw->priv;
+    if (p->params.color_depth)
+        return p->params.color_depth(sw->ctx);
+
+    return -1;
 }
 
 static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)

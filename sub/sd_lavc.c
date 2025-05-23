@@ -56,6 +56,7 @@ struct seekpoint {
 };
 
 struct sd_lavc_priv {
+    struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVPacket *avpkt;
     AVRational pkt_timebase;
@@ -83,6 +84,7 @@ static int init(struct sd *sd)
     case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
+    case AV_CODEC_ID_ARIB_CAPTION:
         break;
     default:
         return -1;
@@ -92,11 +94,33 @@ static int init(struct sd *sd)
     AVCodecContext *ctx = NULL;
     const AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
-        goto error;
+        goto error_probe;
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
-        goto error;
+        goto error_probe;
+
+    mp_set_avopts(sd->log, ctx, sd->opts->sub_avopts);
+
+    switch (cid) {
+    case AV_CODEC_ID_DVB_TELETEXT: {
+        int64_t format;
+        int ret = av_opt_get_int(ctx, "txt_format", AV_OPT_SEARCH_CHILDREN, &format);
+        // format == 0 is bitmap
+        if (!ret && format)
+            goto error_probe;
+        break;
+    }
+    case AV_CODEC_ID_ARIB_CAPTION: {
+        int64_t format;
+        int ret = av_opt_get_int(ctx, "sub_type", AV_OPT_SEARCH_CHILDREN, &format);
+        if (!ret && format != SUBTITLE_BITMAP)
+            goto error_probe;
+        break;
+    }
+    }
+
     priv->avpkt = av_packet_alloc();
+    priv->codec = sd->codec;
     if (!priv->avpkt)
         goto error;
     if (mp_set_avctx_codec_headers(ctx, sd->codec) < 0)
@@ -112,8 +136,9 @@ static int init(struct sd *sd)
     priv->packer = talloc_zero(priv, struct bitmap_packer);
     return 0;
 
- error:
+error:
     MP_FATAL(sd, "Could not open libavcodec subtitle decoder\n");
+error_probe:
     avcodec_free_context(&ctx);
     mp_free_av_packet(&priv->avpkt);
     talloc_free(priv);
@@ -195,8 +220,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
             MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
             continue;
         }
-        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && (opts->forced_subs_only == 1 ||
-            (opts->forced_subs_only && sd->forced_only_def)))
+        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->sub_forced_events_only)
             continue;
         if (r->w <= 0 || r->h <= 0)
             continue;
@@ -260,8 +284,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         sub->src_w = MPMAX(sub->src_w, b->x + b->w);
         sub->src_h = MPMAX(sub->src_h, b->y + b->h);
 
-        assert(r->nb_colors > 0);
-        assert(r->nb_colors <= 256);
+        mp_assert(r->nb_colors > 0);
+        mp_assert(r->nb_colors <= 256);
         uint32_t pal[256] = {0};
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
@@ -301,16 +325,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
     double endpts = MP_NOPTS_VALUE;
-    double duration = packet->duration;
     AVSubtitle sub;
-
-    // libavformat sets duration==0, even if the duration is unknown. Some files
-    // also have actually subtitle packets with duration explicitly set to 0
-    // (yes, at least some of such mkv files were muxed by libavformat).
-    // Assume there are no bitmap subs that actually use duration==0 for
-    // hidden subtitle events.
-    if (duration == 0)
-        duration = -1;
 
     if (pts == MP_NOPTS_VALUE)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
@@ -318,15 +333,25 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     mp_set_av_packet(priv->avpkt, packet, &priv->pkt_timebase);
 
     if (ctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
-        char page[4];
-        snprintf(page, sizeof(page), "%d", opts->teletext_page);
-        av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+        if (!opts->teletext_page) {
+            av_opt_set(ctx, "txt_page", "subtitle", AV_OPT_SEARCH_CHILDREN);
+        } else if (opts->teletext_page == -1) {
+            av_opt_set(ctx, "txt_page", "*", AV_OPT_SEARCH_CHILDREN);
+        } else {
+            char page[4];
+            snprintf(page, sizeof(page), "%d", opts->teletext_page);
+            av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+        }
     }
 
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, priv->avpkt);
     if (res < 0 || !got_sub)
         return;
+
+    mp_codec_info_from_av(ctx, priv->codec);
+
+    packet->sub_duration = sub.end_display_time;
 
     if (sub.pts != AV_NOPTS_VALUE)
         pts = sub.pts / (double)AV_TIME_BASE;
@@ -335,12 +360,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (sub.end_display_time > sub.start_display_time &&
             sub.end_display_time != UINT32_MAX)
         {
-            duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
+            endpts = pts + sub.end_display_time / 1000.0;
         }
         pts += sub.start_display_time / 1000.0;
-
-        if (duration >= 0)
-            endpts = pts + duration;
 
         // set end time of previous sub
         struct sub *prev = &priv->subs[0];
@@ -398,8 +420,8 @@ static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
         if (!sub->valid)
             continue;
         if (pts == MP_NOPTS_VALUE ||
-            ((sub->pts == MP_NOPTS_VALUE || pts + SUB_GAP_THRESHOLD >= sub->pts) &&
-             (sub->endpts == MP_NOPTS_VALUE || pts - SUB_GAP_THRESHOLD <= sub->endpts)))
+            ((sub->pts == MP_NOPTS_VALUE || pts + 1e-6 >= sub->pts) &&
+             (sub->endpts == MP_NOPTS_VALUE || pts + 1e-6 < sub->endpts)))
         {
             // Ignore "trailing" subtitles with unknown length after 1 minute.
             if (sub->endpts == MP_NOPTS_VALUE && pts >= sub->pts + 60)
@@ -416,6 +438,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
 {
     struct sd_lavc_priv *priv = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
+    struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
 
     priv->current_pts = pts;
 
@@ -449,7 +472,24 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
             video_par = par;
     }
     if (priv->avctx->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
-        video_par = -1;
+    {
+        // For Blu-ray subs on SD video, try to match the video PAR.
+        if (priv->video_params.w == 720 &&
+            (priv->video_params.h == 480 ||
+             priv->video_params.h == 576))
+        {
+            double par = priv->video_params.p_w / (double)priv->video_params.p_h;
+            if (isnormal(par))
+                video_par = par * -1;
+            else
+                video_par = -1;
+        }
+        else
+        {
+            // Force letter-boxing on all other Blu-ray subtitles
+            video_par = -1;
+        }
+    }
     if (opts->stretch_image_subs)
         d.ml = d.mr = d.mt = d.mb = 0;
     int w = priv->avctx->width;
@@ -463,8 +503,8 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
         h = MPMAX(priv->video_params.h, current->src_h);
     }
 
-    if (opts->sub_pos != 100.0f && opts->ass_style_override) {
-        float offset = (100.0f - opts->sub_pos) / 100.0f * h;
+    if (shared_opts->sub_pos[sd->order] != 100.0f && shared_opts->ass_style_override[sd->order]) {
+        float offset = (100.0f - shared_opts->sub_pos[sd->order]) / 100.0f * h;
 
         for (int n = 0; n < res->num_parts; n++) {
             struct sub_bitmap *sub = &res->parts[n];
@@ -482,7 +522,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
 
     osd_rescale_bitmaps(res, w, h, d, video_par);
 
-    if (opts->sub_scale != 1.0 && opts->ass_style_override) {
+    if (opts->sub_scale != 1.0 && shared_opts->ass_style_override[sd->order]) {
         for (int n = 0; n < res->num_parts; n++) {
             struct sub_bitmap *sub = &res->parts[n];
 
@@ -501,7 +541,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
         res->change_id++;
 
     if (!res->change_id) {
-        assert(priv->prevret_num == res->num_parts);
+        mp_assert(priv->prevret_num == res->num_parts);
         for (int n = 0; n < priv->prevret_num; n++) {
             struct sub_bitmap *a = &res->parts[n];
             struct sub_bitmap *b = &priv->prevret[n];

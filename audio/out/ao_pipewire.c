@@ -20,6 +20,14 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// For FreeBSD where spa/param/audio/raw.h expects those to be defined
+#include "osdep/endian.h"
+#ifndef __BYTE_ORDER
+#define __BYTE_ORDER    BYTE_ORDER
+#define __LITTLE_ENDIAN LITTLE_ENDIAN
+#define __BIG_ENDIAN    BIG_ENDIAN
+#endif
+
 #include <pipewire/pipewire.h>
 #include <pipewire/global.h>
 #include <spa/param/audio/format-utils.h>
@@ -27,6 +35,7 @@
 #include <spa/utils/result.h>
 #include <math.h>
 
+#include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
@@ -35,15 +44,13 @@
 #include "internal.h"
 #include "osdep/timer.h"
 
-#if !PW_CHECK_VERSION(0, 3, 50)
-static inline int pw_stream_get_time_n(struct pw_stream *stream, struct pw_time *time, size_t size) {
-	return pw_stream_get_time(stream, time);
+#if !PW_CHECK_VERSION(1, 0, 4)
+static uint64_t pw_stream_get_nsec(struct pw_stream *stream)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return SPA_TIMESPEC_TO_NSEC(&ts);
 }
-#endif
-
-#if !PW_CHECK_VERSION(0, 3, 57)
-// Earlier versions segfault on zeroed hooks
-#define spa_hook_remove(hook) if ((hook)->link.prev) spa_hook_remove(hook)
 #endif
 
 enum init_state {
@@ -86,7 +93,7 @@ struct id_list {
     struct spa_list node;
 };
 
-static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
+static enum spa_audio_format af_fmt_to_pw(enum af_format format)
 {
     switch (format) {
     case AF_FORMAT_U8:          return SPA_AUDIO_FORMAT_U8;
@@ -99,9 +106,21 @@ static enum spa_audio_format af_fmt_to_pw(struct ao *ao, enum af_format format)
     case AF_FORMAT_S32P:        return SPA_AUDIO_FORMAT_S32P;
     case AF_FORMAT_FLOATP:      return SPA_AUDIO_FORMAT_F32P;
     case AF_FORMAT_DOUBLEP:     return SPA_AUDIO_FORMAT_F64P;
-    default:
-                                MP_WARN(ao, "Unhandled format %d\n", format);
-                                return SPA_AUDIO_FORMAT_UNKNOWN;
+    default:                    return SPA_AUDIO_FORMAT_UNKNOWN;
+    }
+}
+
+static enum spa_audio_iec958_codec af_fmt_to_codec(enum af_format format)
+{
+    switch (format) {
+    case AF_FORMAT_S_AAC:    return SPA_AUDIO_IEC958_CODEC_MPEG2_AAC;
+    case AF_FORMAT_S_AC3:    return SPA_AUDIO_IEC958_CODEC_AC3;
+    case AF_FORMAT_S_DTS:    return SPA_AUDIO_IEC958_CODEC_DTS;
+    case AF_FORMAT_S_DTSHD:  return SPA_AUDIO_IEC958_CODEC_DTSHD;
+    case AF_FORMAT_S_EAC3:   return SPA_AUDIO_IEC958_CODEC_EAC3;
+    case AF_FORMAT_S_MP3:    return SPA_AUDIO_IEC958_CODEC_MPEG;
+    case AF_FORMAT_S_TRUEHD: return SPA_AUDIO_IEC958_CODEC_TRUEHD;
+    default:                 return SPA_AUDIO_IEC958_CODEC_UNKNOWN;
     }
 }
 
@@ -133,6 +152,11 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
     case MP_SPEAKER_ID_SDL:  return SPA_AUDIO_CHANNEL_SL;
     case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SL;
     case MP_SPEAKER_ID_LFE2: return SPA_AUDIO_CHANNEL_LFE2;
+    case MP_SPEAKER_ID_TSL:  return SPA_AUDIO_CHANNEL_TSL;
+    case MP_SPEAKER_ID_TSR:  return SPA_AUDIO_CHANNEL_TSR;
+    case MP_SPEAKER_ID_BFC:  return SPA_AUDIO_CHANNEL_BC;
+    case MP_SPEAKER_ID_BFL:  return SPA_AUDIO_CHANNEL_BLC;
+    case MP_SPEAKER_ID_BFR:  return SPA_AUDIO_CHANNEL_BRC;
     case MP_SPEAKER_ID_NA:   return SPA_AUDIO_CHANNEL_NA;
     default:
                              MP_WARN(ao, "Unhandled channel %d\n", mp_speaker_id);
@@ -149,18 +173,15 @@ static void on_process(void *userdata)
     void *data[MP_NUM_CHANNELS];
 
     if ((b = pw_stream_dequeue_buffer(p->stream)) == NULL) {
-        MP_WARN(ao, "out of buffers: %s\n", strerror(errno));
+        MP_WARN(ao, "out of buffers: %s\n", mp_strerror(errno));
         return;
     }
 
     struct spa_buffer *buf = b->buffer;
 
-    int bytes_per_channel = buf->datas[0].maxsize / ao->channels.num;
-    int nframes = bytes_per_channel / ao->sstride;
-#if PW_CHECK_VERSION(0, 3, 49)
+    int nframes = buf->datas[0].maxsize / ao->sstride;
     if (b->requested != 0)
         nframes = MPMIN(b->requested, nframes);
-#endif
 
     for (int i = 0; i < buf->n_datas; i++)
         data[i] = buf->datas[i].data;
@@ -171,12 +192,14 @@ static void on_process(void *userdata)
     if (time.rate.num == 0)
         time.rate.num = 1;
 
-    int64_t end_time = mp_time_us();
-    /* time.queued is always going to be 0, so we don't need to care */
-    end_time += (nframes * 1e6 / ao->samplerate) +
-                ((float) time.delay * SPA_USEC_PER_SEC * time.rate.num / time.rate.denom);
+    int64_t end_time = mp_time_ns();
+    end_time += MP_TIME_S_TO_NS(nframes) / ao->samplerate;
+    end_time += MP_TIME_S_TO_NS(time.delay) * time.rate.num / time.rate.denom;
+    end_time += MP_TIME_S_TO_NS(time.queued) / ao->samplerate;
+    end_time += MP_TIME_S_TO_NS(time.buffered) / ao->samplerate;
+    end_time -= pw_stream_get_nsec(p->stream) - time.now;
 
-    int samples = ao_read_data(ao, data, nframes, end_time);
+    int samples = ao_read_data(ao, data, nframes, end_time, NULL, false, false);
     b->size = samples;
 
     for (int i = 0; i < buf->n_datas; i++) {
@@ -209,7 +232,7 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
     if (param == NULL || id != SPA_PARAM_Format)
         return;
 
-    int buffer_size = ao->device_buffer * af_fmt_to_bytes(ao->format) * ao->channels.num;
+    int buffer_size = ao->device_buffer * ao->sstride;
 
     params[0] = spa_pod_builder_add_object(&b,
                     SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
@@ -487,10 +510,11 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (pw_thread_loop_start(p->loop) < 0)
         goto error;
 
-    context = pw_context_new(
-            pw_thread_loop_get_loop(p->loop),
-            pw_properties_new(PW_KEY_CONFIG_NAME, "client-rt.conf", NULL),
-            0);
+    struct pw_properties *props = NULL;
+#if !PW_CHECK_VERSION(1, 3, 81)
+    props = pw_properties_new(PW_KEY_CONFIG_NAME, "client-rt.conf", NULL);
+#endif
+    context = pw_context_new(pw_thread_loop_get_loop(p->loop), props, 0);
     if (!context)
         goto error;
 
@@ -501,7 +525,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!p->core) {
         MP_MSG(ao, ao->probing ? MSGL_V : MSGL_ERR,
                "Could not connect to context '%s': %s\n",
-               p->options.remote, strerror(errno));
+               p->options.remote, mp_strerror(errno));
         pw_context_destroy(context);
         goto error;
     }
@@ -575,24 +599,41 @@ static int init(struct ao *ao)
 
     pw_properties_setf(props, PW_KEY_NODE_RATE, "1/%d", ao->samplerate);
 
-    enum spa_audio_format spa_format = af_fmt_to_pw(ao, ao->format);
-    if (spa_format == SPA_AUDIO_FORMAT_UNKNOWN) {
-        ao->format = AF_FORMAT_FLOATP;
-        spa_format = SPA_AUDIO_FORMAT_F32P;
+    if (af_fmt_is_spdif(ao->format)) {
+        enum spa_audio_iec958_codec spa_codec = af_fmt_to_codec(ao->format);
+        if (spa_codec == SPA_AUDIO_IEC958_CODEC_UNKNOWN) {
+            MP_ERR(ao, "Unhandled codec %d\n", ao->format);
+            goto error_props;
+        }
+
+        struct spa_audio_info_iec958 audio_info = {
+            .codec = spa_codec,
+            .rate = ao->samplerate,
+        };
+
+        params[0] = spa_format_audio_iec958_build(&b, SPA_PARAM_EnumFormat, &audio_info);
+        if (!params[0])
+            goto error_props;
+    } else {
+        enum spa_audio_format spa_format = af_fmt_to_pw(ao->format);
+        if (spa_format == SPA_AUDIO_FORMAT_UNKNOWN) {
+            MP_ERR(ao, "Unhandled format %d\n", ao->format);
+            goto error_props;
+        }
+
+        struct spa_audio_info_raw audio_info = {
+            .format = spa_format,
+            .rate = ao->samplerate,
+            .channels = ao->channels.num,
+        };
+
+        for (int i = 0; i < ao->channels.num; i++)
+            audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
+
+        params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
+        if (!params[0])
+            goto error_props;
     }
-
-    struct spa_audio_info_raw audio_info = {
-        .format = spa_format,
-        .rate = ao->samplerate,
-        .channels = ao->channels.num,
-    };
-
-    for (int i = 0; i < ao->channels.num; i++)
-        audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
-
-    params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
-    if (!params[0])
-        goto error_props;
 
     if (af_fmt_is_planar(ao->format)) {
         ao->num_planes = ao->channels.num;
@@ -657,6 +698,15 @@ static void start(struct ao *ao)
     pw_thread_loop_lock(p->loop);
     pw_stream_set_active(p->stream, true);
     pw_thread_loop_unlock(p->loop);
+}
+
+static bool set_pause(struct ao *ao, bool paused)
+{
+    struct priv *p = ao->priv;
+    pw_thread_loop_lock(p->loop);
+    pw_stream_set_active(p->stream, !paused);
+    pw_thread_loop_unlock(p->loop);
+    return true;
 }
 
 #define CONTROL_RET(r) (!r ? CONTROL_OK : CONTROL_ERROR)
@@ -850,7 +900,7 @@ const struct ao_driver audio_out_pipewire = {
     .uninit      = uninit,
     .reset       = reset,
     .start       = start,
-
+    .set_pause   = set_pause,
     .control     = control,
 
     .hotplug_init   = hotplug_init,

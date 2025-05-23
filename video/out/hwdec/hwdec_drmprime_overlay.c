@@ -29,7 +29,7 @@
 #include "video/hwdec.h"
 #include "common/msg.h"
 #include "options/m_config.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/drm_atomic.h"
 #include "video/out/drm_common.h"
 #include "video/out/drm_prime.h"
@@ -88,7 +88,7 @@ static void set_current_frame(struct ra_hwdec *hw, struct drm_frame *frame)
     }
 }
 
-static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h ,struct mp_rect *src, struct mp_rect *dst)
+static void scale_dst_rect(struct ra_hwdec *hw, int source_w, int source_h, struct mp_rect *src, struct mp_rect *dst)
 {
     struct priv *p = hw->priv;
 
@@ -328,6 +328,7 @@ const struct ra_hwdec_driver ra_hwdec_drmprime_overlay = {
     .name = "drmprime-overlay",
     .priv_size = sizeof(struct priv),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
+    .device_type = AV_HWDEVICE_TYPE_DRM,
     .init = init,
     .overlay_frame = overlay_frame,
     .uninit = uninit,

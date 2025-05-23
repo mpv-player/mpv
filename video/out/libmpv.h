@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "libmpv/render.h"
+#include "mpv/render.h"
 #include "vo.h"
 
 // Helper for finding a parameter value. It returns the direct pointer to the

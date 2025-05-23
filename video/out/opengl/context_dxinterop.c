@@ -30,11 +30,6 @@
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
-// mingw-w64 header typo?
-#ifndef IDirect3DSwapChain9Ex_GetBackBuffer
-#define IDirect3DSwapChain9Ex_GetBackBuffer IDirect3DSwapChain9EX_GetBackBuffer
-#endif
-
 struct priv {
     GL gl;
 
@@ -552,10 +547,8 @@ static bool dxgl_init(struct ra_ctx *ctx)
     if (d3d_size_dependent_create(ctx) < 0)
         goto fail;
 
-    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .swap_buffers = dxgl_swap_buffers,
-        .external_swapchain = &empty_swapchain_fns,
     };
 
     gl->flipped = true;
@@ -598,6 +591,7 @@ static int dxgl_control(struct ra_ctx *ctx, int *events, int request,
 const struct ra_ctx_fns ra_ctx_dxgl = {
     .type         = "opengl",
     .name         = "dxinterop",
+    .description  = "WGL rendering/Direct3D 9Ex presentation",
     .init         = dxgl_init,
     .reconfig     = dxgl_reconfig,
     .control      = dxgl_control,

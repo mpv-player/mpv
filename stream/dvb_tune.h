@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_DVB_TUNE_H
@@ -37,6 +36,6 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              fe_modulation_t modulation, fe_guard_interval_t guardInterval,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth,
              fe_code_rate_t HP_CodeRate, fe_code_rate_t LP_CodeRate,
-             fe_hierarchy_t hier, int timeout);
+             fe_hierarchy_t hier, float timeout);
 
 #endif /* MPLAYER_DVB_TUNE_H */

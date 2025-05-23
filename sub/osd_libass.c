@@ -41,10 +41,6 @@ static const char osd_font_pfb[] =
 static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
                        ASS_Image **img_list, bool *changed);
 
-void osd_init_backend(struct osd_state *osd)
-{
-}
-
 static void create_ass_renderer(struct osd_state *osd, struct ass_state *ass)
 {
     if (ass->render)
@@ -123,6 +119,7 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     create_ass_renderer(osd, ass);
 
     ASS_Track *track = ass->track;
+    struct mp_osd_render_opts *opts = osd->opts;
     if (!track)
         track = ass->track = ass_new_track(ass->library);
 
@@ -131,9 +128,14 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
     track->Kerning = true;
     track->ScaledBorderAndShadow = true;
+    ass_set_shaper(ass->render, opts->osd_shaper);
 #if LIBASS_VERSION >= 0x01600010
     ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+#if LIBASS_VERSION >= 0x01703010
+    ass_configure_prune(track, opts->osd_ass_prune_delay * 1000.0);
+#endif
+    ass_set_cache_limits(ass->render, opts->osd_glyph_limit, opts->osd_bitmap_max_size);
     update_playres(ass, &obj->vo_res);
 }
 
@@ -174,7 +176,7 @@ static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *style,
     event->Duration = 100;
     event->Style = find_style(track, style, 0);
     event->ReadOrder = n;
-    assert(event->Text == NULL);
+    mp_assert(event->Text == NULL);
     if (text)
         event->Text = strdup(text);
     return event;
@@ -188,31 +190,50 @@ static void clear_ass(struct ass_state *ass)
 
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 {
-    // 0xFF is never valid UTF-8, so we can use it to escape OSD symbols.
-    // (Same trick as OSD_ASS_0/OSD_ASS_1.)
-    snprintf(buffer, buffer_size, "\xFF%c", osd_function);
+    snprintf(buffer, buffer_size, OSD_CODEPOINTS_ESCAPE "%c", osd_function);
 }
 
-static void mangle_ass(bstr *dst, const char *in)
+void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
 {
     const char *start = in;
     bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
-        if (in[0] == '\xFF' && in[1]) {
+        size_t len = strlen(OSD_CODEPOINTS_ESCAPE);
+        if (!strncmp(in, OSD_CODEPOINTS_ESCAPE, len) && in[len]) {
             bstr_xappend(NULL, dst, bstr0(ASS_USE_OSD_FONT));
-            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[1]);
+            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[len]);
             bstr_xappend(NULL, dst, bstr0("{\\r}"));
-            in += 2;
+            in += len + 1;
             continue;
         }
-        if (*in == OSD_ASS_0[0] || *in == OSD_ASS_1[0]) {
-            escape_ass = *in == OSD_ASS_1[0];
-            in += 1;
+        len = strlen(OSD_ASS_0);
+        if (!strncmp(in, OSD_ASS_0, len)) {
+            escape_ass = false;
+            in += len;
+            continue;
+        }
+        len = strlen(OSD_ASS_1);
+        if (!strncmp(in, OSD_ASS_1, len)) {
+            escape_ass = true;
+            in += len;
+            continue;
+        }
+        len = strlen(TERM_MSG_0);
+        if (!strncmp(in, TERM_MSG_0, len)) {
+            in += len;
             continue;
         }
         if (escape_ass && *in == '{')
             bstr_xappend(NULL, dst, bstr0("\\"));
+        // Replace newlines with \N for escape-ass. This is necessary to apply
+        // ASS tags past newlines and to preserve consecutive newlines with
+        // osd-overlay because update_external() adds a ASS event per line.
+        if (replace_newlines && *in == '\n') {
+            bstr_xappend(NULL, dst, bstr0("\\N"));
+            in += 1;
+            continue;
+        }
         // Libass will strip leading whitespace
         if (in[0] == ' ' && (in == start || in[-1] == '\n')) {
             bstr_xappend(NULL, dst, bstr0("\\h"));
@@ -231,7 +252,7 @@ static ASS_Event *add_osd_ass_event_escaped(ASS_Track *track, const char *style,
                                             const char *text)
 {
     bstr buf = {0};
-    mangle_ass(&buf, text);
+    osd_mangle_ass(&buf, text, false);
     ASS_Event *e = add_osd_ass_event(track, style, buf.start);
     talloc_free(buf.start);
     return e;
@@ -248,7 +269,7 @@ static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
 
     double playresy = obj->ass.track->PlayResY;
     // Compensate for libass and mp_ass_set_style scaling the font etc.
-    if (!opts->osd_scale_by_window)
+    if (!opts->osd_scale_by_window && obj->vo_res.h)
         playresy *= 720.0 / obj->vo_res.h;
 
     ASS_Style *style = get_style(&obj->ass, "OSD");
@@ -268,12 +289,12 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
 
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_OSD];
     ASS_Style *style = prepare_osd_ass(osd, obj);
     *out_screen_h = obj->ass.track->PlayResY - style->MarginV;
     *out_font_h = style->FontSize;
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 // align: -1 .. +1
@@ -355,6 +376,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
                             float *o_border)
 {
     struct mp_osd_render_opts *opts = osd->opts;
+    struct osd_bar_style_opts *bar_opts = opts->osd_bar_style;
 
     create_ass_track(osd, obj, &obj->ass);
     ASS_Track *track = obj->ass.track;
@@ -367,32 +389,25 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 
     mp_ass_set_style(style, track->PlayResY, opts->osd_style);
 
-    if (osd->opts->osd_style->back_color.a) {
-        // override the default osd opaque-box into plain outline. Otherwise
-        // the opaque box is not aligned with the bar (even without shadow),
-        // and each bar ass event gets its own opaque box - breaking the bar.
-        style->BackColour = MP_ASS_COLOR(opts->osd_style->shadow_color);
-        style->BorderStyle = 1; // outline
-    }
+    // override the default osd opaque-box into plain outline. Otherwise
+    // the opaque box is not aligned with the bar (even without shadow),
+    // and each bar ass event gets its own opaque box - breaking the bar.
+    style->BorderStyle = 1; // outline
 
-    *o_w = track->PlayResX * (opts->osd_bar_w / 100.0);
-    *o_h = track->PlayResY * (opts->osd_bar_h / 100.0);
+    *o_w = track->PlayResX * (bar_opts->w / 100.0);
+    *o_h = track->PlayResY * (bar_opts->h / 100.0);
 
-    float base_size = 0.03125;
-    style->Outline *= *o_h / track->PlayResY / base_size;
-    // So that the chapter marks have space between them
-    style->Outline = MPMIN(style->Outline, *o_h / 5.2);
-    // So that the border is not 0
-    style->Outline = MPMAX(style->Outline, *o_h / 32.0);
+    style->Outline = bar_opts->outline_size;
     // Rendering with shadow is broken (because there's more than one shape)
     style->Shadow = 0;
+    style->Blur = 0;
 
     style->Alignment = 5;
 
     *o_border = style->Outline;
 
-    *o_x = get_align(opts->osd_bar_align_x, track->PlayResX, *o_w, *o_border);
-    *o_y = get_align(opts->osd_bar_align_y, track->PlayResY, *o_h, *o_border);
+    *o_x = get_align(bar_opts->align_x, track->PlayResX, *o_w, *o_border);
+    *o_y = get_align(bar_opts->align_y, track->PlayResY, *o_h, *o_border);
 }
 
 static void update_progbar(struct osd_state *osd, struct osd_object *obj)
@@ -425,7 +440,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
 
-    if (osd->opts->osd_style->back_color.a) {
+    if (osd->opts->osd_style->back_color.a && osd->opts->osd_style->border_style != 1) {
         // the bar style always ignores the --osd-back-color config - it messes
         // up the bar. draw an artificial box at the original back color.
         struct m_color bc = osd->opts->osd_style->back_color;
@@ -468,19 +483,27 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     // the "hole"
     ass_draw_rect_ccw(d, 0, 0, width, height);
 
+    struct osd_bar_style_opts *bar_opts = osd->opts->osd_bar_style;
     // chapter marks
-    for (int n = 0; n < obj->progbar_state.num_stops; n++) {
-        float s = obj->progbar_state.stops[n] * width;
-        float dent = border * 1.3;
+    if (bar_opts->marker_style) {
+        for (int n = 0; n < obj->progbar_state.num_stops; n++) {
+            float s = obj->progbar_state.stops[n] * width;
+            float size = MPMAX(border * bar_opts->marker_scale,
+                               bar_opts->marker_min_size);
 
-        if (s > dent && s < width - dent) {
-            ass_draw_move_to(d, s + dent, 0);
-            ass_draw_line_to(d, s,        dent);
-            ass_draw_line_to(d, s - dent, 0);
+            if (bar_opts->marker_style == 2 &&
+                s > size / 2 && s < width - size / 2)
+            { // line
+                ass_draw_rect_cw(d, s - size / 2, 0, s + size / 2, height);
+            } else if (s > size && s < width - size) { //triangle
+                ass_draw_move_to(d, s + size, 0);
+                ass_draw_line_to(d, s,        size);
+                ass_draw_line_to(d, s - size, 0);
 
-            ass_draw_move_to(d, s - dent, height);
-            ass_draw_line_to(d, s,        height - dent);
-            ass_draw_line_to(d, s + dent, height);
+                ass_draw_move_to(d, s - size, height);
+                ass_draw_line_to(d, s,        height - size);
+                ass_draw_line_to(d, s + size, height);
+            }
         }
     }
 
@@ -534,7 +557,7 @@ static int cmp_zorder(const void *pa, const void *pb)
 
 void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
     bool zorder_changed = false;
     int index = -1;
@@ -616,12 +639,12 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     }
 
 done:
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
 {
-    pthread_mutex_lock(&osd->lock);
+    mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
     for (int n = obj->num_externals - 1; n >= 0; n--) {
         struct osd_external *e = obj->externals[n];
@@ -632,7 +655,7 @@ void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
             osd->want_redraw_notification = true;
         }
     }
-    pthread_mutex_unlock(&osd->lock);
+    mp_mutex_unlock(&osd->lock);
 }
 
 static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
@@ -662,8 +685,14 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
                                            struct osd_object *obj, int format)
 {
-    if (obj->type == OSDTYPE_OSD && obj->osd_changed)
-        update_osd(osd, obj);
+    if (obj->type == OSDTYPE_OSD) {
+        if (obj->osd_changed) {
+            update_osd(osd, obj);
+        } else {
+            mp_require(obj->ass_packer);
+            goto done;
+        }
+    }
 
     if (!obj->ass_packer)
         obj->ass_packer = mp_ass_packer_alloc(obj);
@@ -681,9 +710,10 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
         }
     }
 
+done:;
     struct sub_bitmaps out_imgs = {0};
     mp_ass_packer_pack(obj->ass_packer, obj->ass_imgs, obj->num_externals + 1,
-                       obj->changed, format, &out_imgs);
+                       obj->changed, false, format, &out_imgs);
 
     obj->changed = false;
 

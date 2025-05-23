@@ -18,10 +18,9 @@
 #ifndef MP_AO_INTERNAL_H_
 #define MP_AO_INTERNAL_H_
 
+#include <stdatomic.h>
 #include <stdbool.h>
-#include <pthread.h>
 
-#include "osdep/atomic.h"
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */
@@ -29,7 +28,7 @@ struct ao {
     int samplerate;
     struct mp_chmap channels;
     int format;                 // one of AF_FORMAT_...
-    int bps;                    // bytes per second (per plane)
+    int64_t bps;                // bytes per second (per plane)
     int sstride;                // size of a sample on each plane
                                 // (format_size*num_channels/num_planes)
     int num_planes;
@@ -63,7 +62,7 @@ struct ao {
     atomic_uint events_;
 
     // Float gain multiplicator
-    mp_atomic_float gain;
+    _Atomic float gain;
 
     int buffer;
     double def_buffer;
@@ -109,6 +108,7 @@ struct mp_pcm_state {
  *          start
  *     Optional for both types:
  *          control
+ *          set_pause
  *  a) ->write is called to queue audio. push.c creates a thread to regularly
  *     refill audio device buffers with ->write, but all driver functions are
  *     always called under an exclusive lock.
@@ -116,8 +116,6 @@ struct mp_pcm_state {
  *          reset
  *          write
  *          get_state
- *     Optional:
- *          set_pause
  *  b) ->write must be NULL. ->start must be provided, and should make the
  *     audio API start calling the audio callback. Your audio callback should
  *     in turn call ao_read_data() to get audio data. Most functions are
@@ -150,6 +148,9 @@ struct ao_driver {
     // Stop all audio playback, clear buffers, back to state after init().
     // Optional for pull AOs.
     void (*reset)(struct ao *ao);
+    // pull based: set pause state. Only called after start() and before reset().
+    //             The return value is ignored.
+    //             The pausing state is also cleared by reset().
     // push based: set pause state. Only called after start() and before reset().
     //             returns success (this is intended for paused=true; if it
     //             returns false, playback continues, and the core emulates via
@@ -158,7 +159,7 @@ struct ao_driver {
     bool (*set_pause)(struct ao *ao, bool paused);
     // pull based: start the audio callback
     // push based: start playing queued data
-    //             AO should call ao_wakeup_playthread() if a period boundary
+    //             AO should call ao_wakeup() if a period boundary
     //             is crossed, or playback stops due to external reasons
     //             (including underruns or device removal)
     //             must set mp_pcm_state.playing; unset on error/underrun/end
@@ -200,7 +201,7 @@ struct ao_driver {
 
 // These functions can be called by AOs.
 
-int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us);
+int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
@@ -228,9 +229,11 @@ bool ao_can_convert_inplace(struct ao_convert_fmt *fmt);
 bool ao_need_conversion(struct ao_convert_fmt *fmt);
 void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples);
 
-void ao_wakeup_playthread(struct ao *ao);
+void ao_wakeup(struct ao *ao);
 
 int ao_read_data_converted(struct ao *ao, struct ao_convert_fmt *fmt,
-                           void **data, int samples, int64_t out_time_us);
+                           void **data, int samples, int64_t out_time_ns);
+
+void ao_stop_streaming(struct ao *ao);
 
 #endif

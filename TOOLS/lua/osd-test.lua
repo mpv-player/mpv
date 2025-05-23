@@ -1,7 +1,7 @@
 local assdraw = require 'mp.assdraw'
 local utils = require 'mp.utils'
 
-things = {}
+local things = {}
 for i = 1, 2 do
     things[i] = {
         osd1 = mp.create_osd_overlay("ass-events"),

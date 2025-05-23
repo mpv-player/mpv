@@ -26,7 +26,6 @@
 #include "common/msg.h"
 #include "options/options.h"
 #include "common/common.h"
-#include "common/global.h"
 
 #include "stream/stream.h"
 #include "sub/dec_sub.h"
@@ -51,23 +50,37 @@ static void reset_subtitles(struct MPContext *mpctx, struct track *track)
         sub_reset(track->d_sub);
         sub_set_play_dir(track->d_sub, mpctx->play_dir);
     }
-    term_osd_set_subs(mpctx, NULL);
+}
+
+// Only matters for subs on an image.
+void redraw_subs(struct MPContext *mpctx)
+{
+    for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
+        if (mpctx->current_track[n][STREAM_SUB] &&
+            mpctx->current_track[n][STREAM_SUB]->d_sub)
+        {
+            mpctx->current_track[n][STREAM_SUB]->redraw_subs = true;
+        }
+    }
 }
 
 void reset_subtitle_state(struct MPContext *mpctx)
 {
     for (int n = 0; n < mpctx->num_tracks; n++)
         reset_subtitles(mpctx, mpctx->tracks[n]);
-    term_osd_set_subs(mpctx, NULL);
+    term_osd_clear_subs(mpctx);
 }
 
 void uninit_sub(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->d_sub) {
+        int order = get_order(mpctx, track);
         reset_subtitles(mpctx, track);
         sub_select(track->d_sub, false);
-        int order = get_order(mpctx, track);
-        osd_set_sub(mpctx->osd, order, NULL);
+        if (order >= 0) {
+            term_osd_set_subs(mpctx, NULL, order);
+            osd_set_sub(mpctx->osd, order, NULL);
+        }
         sub_destroy(track->d_sub);
         track->d_sub = NULL;
     }
@@ -84,7 +97,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 {
     struct dec_sub *dec_sub = track ? track->d_sub : NULL;
 
-    if (!dec_sub || video_pts == MP_NOPTS_VALUE)
+    if (!dec_sub)
         return true;
 
     if (mpctx->vo_chain) {
@@ -93,6 +106,15 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
 
+    // Checking if packets have special animations is relatively expensive.
+    // This is only needed if we are rendering ASS subtitles with no video
+    // being played.
+    bool still_image = mpctx->video_out && ((mpctx->video_status == STATUS_EOF &&
+                       mpctx->opts->subs_rend->sub_past_video_end) ||
+                       !mpctx->current_track[0][STREAM_VIDEO] ||
+                       mpctx->current_track[0][STREAM_VIDEO]->image);
+    sub_control(dec_sub, SD_CTRL_SET_ANIMATED_CHECK, &still_image);
+
     if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
         // Assume fully_read implies no interleaved audio/video streams.
         // (Reading packets will change the demuxer position.)
@@ -100,33 +122,42 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
         sub_preload(dec_sub);
     }
 
-    if (!sub_read_packets(dec_sub, video_pts, mpctx->paused))
-        return false;
+    bool packets_read = false;
+    bool sub_updated = false;
+    sub_read_packets(dec_sub, video_pts, mpctx->paused, &packets_read, &sub_updated);
 
-    // Handle displaying subtitles on terminal; never done for secondary subs
-    if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out) {
-        char *text = sub_get_text(dec_sub, video_pts, SD_TEXT_TYPE_PLAIN);
-        term_osd_set_subs(mpctx, text);
-        talloc_free(text);
-    }
+    double osd_pts = osd_get_force_video_pts(mpctx->osd);
 
-    // Handle displaying subtitles on VO with no video being played. This is
-    // quite different, because normally subtitles are redrawn on new video
-    // frames, using the video frames' timestamps.
-    if (mpctx->video_out && mpctx->video_status == STATUS_EOF &&
-        (mpctx->opts->subs_rend->sub_past_video_end ||
-         !mpctx->current_track[0][STREAM_VIDEO] ||
-         mpctx->current_track[0][STREAM_VIDEO]->attached_picture)) {
-        if (osd_get_force_video_pts(mpctx->osd) != video_pts) {
-            osd_set_force_video_pts(mpctx->osd, video_pts);
-            osd_query_and_reset_want_redraw(mpctx->osd);
-            vo_redraw(mpctx->video_out);
-            // Force an arbitrary minimum FPS
-            mp_set_timeout(mpctx, 0.1);
+    // Check if we need to update subtitles for these special cases. Always
+    // update on discontinuities like seeking or a new file.
+    if (sub_updated || track->redraw_subs || osd_pts == MP_NOPTS_VALUE) {
+        // Always force a redecode of all packets if we seek on a still image.
+        if (track->redraw_subs && still_image)
+            sub_redecode_cached_packets(dec_sub);
+
+        // Handle displaying subtitles on terminal.
+        if (track->selected && track->type == STREAM_SUB && !mpctx->video_out) {
+            char *text = sub_get_text(dec_sub, video_pts, SD_TEXT_TYPE_PLAIN);
+            int order = get_order(mpctx, track);
+            if (order >= 0)
+                term_osd_set_subs(mpctx, text, order);
+            talloc_free(text);
+        }
+
+        // Handle displaying subtitles on VO with no video being played. This is
+        // quite different, because normally subtitles are redrawn on new video
+        // frames, using the video frames' timestamps.
+        if (still_image) {
+            if (osd_pts != video_pts) {
+                osd_set_force_video_pts(mpctx->osd, video_pts);
+                osd_query_and_reset_want_redraw(mpctx->osd);
+                vo_redraw(mpctx->video_out);
+            }
         }
     }
 
-    return true;
+    track->redraw_subs = false;
+    return packets_read;
 }
 
 // Return true if the subtitles for the given PTS are ready; false if the player
@@ -164,7 +195,7 @@ static struct attachment_list *get_all_attachments(struct MPContext *mpctx)
 
 static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
-    assert(!track->d_sub);
+    mp_assert(!track->d_sub);
 
     if (!track->demuxer || !track->stream)
         return false;
@@ -189,7 +220,7 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     if (!track || !track->stream || track->stream->type != STREAM_SUB)
         return;
 
-    assert(!track->d_sub);
+    mp_assert(!track->d_sub);
 
     if (!init_subdec(mpctx, track)) {
         error_on_track(mpctx, track);
@@ -199,12 +230,20 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     sub_select(track->d_sub, true);
     int order = get_order(mpctx, track);
     osd_set_sub(mpctx->osd, order, track->d_sub);
-    sub_control(track->d_sub, SD_CTRL_SET_TOP, &order);
 
     // When paused we have to wait for packets to be available.
-    // So just retry until we get a packet in this case.
-    if (mpctx->playback_initialized)
-        while (!update_subtitles(mpctx, mpctx->playback_pts) && mpctx->paused);
+    // Retry on a timeout until we get a packet. If still not successful,
+    // then queue it for later in the playloop (but this will have a delay).
+    if (mpctx->playback_initialized) {
+        track->demuxer_ready = false;
+        int64_t end = mp_time_ns() + MP_TIME_MS_TO_NS(50);
+        while (!track->demuxer_ready && mp_time_ns() < end)
+            track->demuxer_ready = update_subtitles(mpctx, mpctx->playback_pts) ||
+                                  !mpctx->paused;
+        if (!track->demuxer_ready)
+            mp_wakeup_core(mpctx);
+
+    }
 }
 
 void reinit_sub_all(struct MPContext *mpctx)

@@ -7,7 +7,7 @@
 // The following type values are defined:
 //  "home"          the native mpv-specific user config dir
 //  "old_home"      same as "home", but lesser priority (compatibility)
-//  "osxbundle"     OSX bundle resource path
+//  "osxbundle"     macOS bundle resource path
 //  "global"        the least priority, global config file location
 //  "desktop"       path to desktop contents
 //
@@ -26,7 +26,7 @@ typedef const char *(*mp_get_platform_path_cb)(void *talloc_ctx, const char *typ
 const char *mp_get_platform_path_darwin(void *talloc_ctx, const char *type);
 const char *mp_get_platform_path_uwp(void *talloc_ctx, const char *type);
 const char *mp_get_platform_path_win(void *talloc_ctx, const char *type);
-const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type);
+const char *mp_get_platform_path_mac(void *talloc_ctx, const char *type);
 const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type);
 
 #endif

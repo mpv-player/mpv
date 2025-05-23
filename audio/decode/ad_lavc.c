@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdbool.h>
 #include <assert.h>
 
@@ -34,7 +33,6 @@
 #include "audio/fmt-conversion.h"
 #include "common/av_common.h"
 #include "common/codecs.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"
@@ -44,6 +42,7 @@
 #include "options/options.h"
 
 struct priv {
+    struct mp_codec_params *codec;
     AVCodecContext *avctx;
     AVFrame *avframe;
     AVPacket *avpkt;
@@ -73,6 +72,7 @@ const struct m_sub_options ad_lavc_conf = {
         {"o", OPT_KEYVALUELIST(avopts)},
         {0}
     },
+    .change_flags = UPDATE_AD,
     .size = sizeof(struct ad_lavc_params),
     .defaults = &(const struct ad_lavc_params){
         .ac3drc = 0,
@@ -87,7 +87,6 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     struct MPOpts *mpopts = mp_get_config_group(ctx, da->global, &mp_opt_root);
     struct ad_lavc_params *opts =
         mp_get_config_group(ctx, da->global, &ad_lavc_conf);
-    AVCodecContext *lavc_context;
     const AVCodec *lavc_codec;
 
     ctx->codec_timebase = mp_get_codec_timebase(codec);
@@ -101,52 +100,48 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
         return false;
     }
 
-    lavc_context = avcodec_alloc_context3(lavc_codec);
-    ctx->avctx = lavc_context;
+    ctx->avctx = avcodec_alloc_context3(lavc_codec);
+    MP_HANDLE_OOM(ctx->avctx);
     ctx->avframe = av_frame_alloc();
+    MP_HANDLE_OOM(ctx->avframe);
     ctx->avpkt = av_packet_alloc();
-    MP_HANDLE_OOM(ctx->avctx && ctx->avframe && ctx->avpkt);
-    lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
-    lavc_context->codec_id = lavc_codec->id;
-    lavc_context->pkt_timebase = ctx->codec_timebase;
+    MP_HANDLE_OOM(ctx->avpkt);
+    ctx->avctx->codec_type = AVMEDIA_TYPE_AUDIO;
+    ctx->avctx->codec_id = lavc_codec->id;
+    ctx->avctx->pkt_timebase = ctx->codec_timebase;
 
     if (opts->downmix && mpopts->audio_output_channels.num_chmaps == 1) {
         const struct mp_chmap *requested_layout =
             &mpopts->audio_output_channels.chmaps[0];
-#if !HAVE_AV_CHANNEL_LAYOUT
-        lavc_context->request_channel_layout =
-            mp_chmap_to_lavc(requested_layout);
-#else
         AVChannelLayout av_layout = { 0 };
         mp_chmap_to_av_layout(&av_layout, requested_layout);
 
         // Always try to set requested output layout - currently only something
         // supported by AC3, MLP/TrueHD, DTS and the fdk-aac wrapper.
-        av_opt_set_chlayout(lavc_context, "downmix", &av_layout,
+        av_opt_set_chlayout(ctx->avctx, "downmix", &av_layout,
                             AV_OPT_SEARCH_CHILDREN);
 
         av_channel_layout_uninit(&av_layout);
-#endif
     }
 
     // Always try to set - option only exists for AC3 at the moment
-    av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
+    av_opt_set_double(ctx->avctx, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
 
     // Let decoder add AV_FRAME_DATA_SKIP_SAMPLES.
-    av_opt_set(lavc_context, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
+    av_opt_set(ctx->avctx, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
 
-    mp_set_avopts(da->log, lavc_context, opts->avopts);
+    mp_set_avopts(da->log, ctx->avctx, opts->avopts);
 
-    if (mp_set_avctx_codec_headers(lavc_context, codec) < 0) {
+    if (mp_set_avctx_codec_headers(ctx->avctx, codec) < 0) {
         MP_ERR(da, "Could not set decoder parameters.\n");
         return false;
     }
 
-    mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
+    mp_set_avcodec_threads(da->log, ctx->avctx, opts->threads);
 
     /* open it */
-    if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
+    if (avcodec_open2(ctx->avctx, lavc_codec, NULL) < 0) {
         MP_ERR(da, "Could not open codec.\n");
         return false;
     }
@@ -156,7 +151,7 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     return true;
 }
 
-static void destroy(struct mp_filter *da)
+static void ad_lavc_destroy(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
 
@@ -165,7 +160,7 @@ static void destroy(struct mp_filter *da)
     mp_free_av_packet(&ctx->avpkt);
 }
 
-static void reset(struct mp_filter *da)
+static void ad_lavc_reset(struct mp_filter *da)
 {
     struct priv *ctx = da->priv;
 
@@ -206,7 +201,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     if (ret == AVERROR_EOF) {
         // If flushing was initialized earlier and has ended now, make it start
         // over in case we get new packets at some point in the future.
-        // (Dont' reset the filter itself, we want to keep other state.)
+        // (Don't reset the filter itself, we want to keep other state.)
         avcodec_flush_buffers(priv->avctx);
         return ret;
     } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
@@ -218,6 +213,9 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
 
     if (!priv->avframe->buf[0])
         return ret;
+
+    mp_codec_info_from_av(avctx, priv->codec);
+    mp_chmap_from_av_layout(&priv->codec->channels, &avctx->ch_layout);
 
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
@@ -276,7 +274,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     return ret;
 }
 
-static void process(struct mp_filter *ad)
+static void ad_lavc_process(struct mp_filter *ad)
 {
     struct priv *priv = ad->priv;
 
@@ -286,9 +284,9 @@ static void process(struct mp_filter *ad)
 static const struct mp_filter_info ad_lavc_filter = {
     .name = "ad_lavc",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = ad_lavc_process,
+    .reset = ad_lavc_reset,
+    .destroy = ad_lavc_destroy,
 };
 
 static struct mp_decoder *create(struct mp_filter *parent,
@@ -305,12 +303,17 @@ static struct mp_decoder *create(struct mp_filter *parent,
     da->log = mp_log_new(da, parent->log, NULL);
 
     struct priv *priv = da->priv;
+    priv->codec = codec;
     priv->public.f = da;
 
     if (!init(da, codec, decoder)) {
         talloc_free(da);
         return NULL;
     }
+
+    codec->codec_desc = priv->avctx->codec_descriptor->long_name;
+    mp_chmap_from_av_layout(&priv->codec->channels, &priv->avctx->ch_layout);
+
     return &priv->public;
 }
 

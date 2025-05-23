@@ -168,6 +168,7 @@ bool ta_strndup_append_buffer(char **str, const char *a, size_t n)
     return strndup_append_at(str, size, a, n);
 }
 
+TA_PRF(3, 0)
 static bool ta_vasprintf_append_at(char **str, size_t at, const char *fmt,
                                    va_list ap)
 {
@@ -263,27 +264,6 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap)
     if (size > 0)
         size -= 1;
     return ta_vasprintf_append_at(str, size, fmt, ap);
-}
-
-
-void *ta_oom_p(void *p)
-{
-    if (!p)
-        abort();
-    return p;
-}
-
-void ta_oom_b(bool b)
-{
-    if (!b)
-        abort();
-}
-
-char *ta_oom_s(char *s)
-{
-    if (!s)
-        abort();
-    return s;
 }
 
 void *ta_xmemdup(void *ta_parent, void *ptr, size_t size)

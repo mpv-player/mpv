@@ -3,8 +3,10 @@ JSON IPC
 
 mpv can be controlled by external programs using the JSON-based IPC protocol.
 It can be enabled by specifying the path to a unix socket or a named pipe using
-the option ``--input-ipc-server``. Clients can connect to this socket and send
-commands to the player or receive events from it.
+the option ``--input-ipc-server``, or the file descriptor number of a unix socket
+or a named pipe using ``--input-ipc-client``.
+Clients can connect to this socket and send commands to the player or receive
+events from it.
 
 .. warning::
 

@@ -2,10 +2,20 @@
 #define MP_HWDEC_H_
 
 #include <libavutil/buffer.h>
+#include <libavutil/hwcontext.h>
 
 #include "options/m_option.h"
 
 struct mp_image_pool;
+enum mp_imgfmt;
+
+struct mp_conversion_filter {
+    // Name of the conversion filter.
+    const char *name;
+
+    // Arguments for the conversion filter.
+    char **args;
+};
 
 struct mp_hwdec_ctx {
     const char *driver_name; // NULL if unknown/not loaded
@@ -18,6 +28,23 @@ struct mp_hwdec_ctx {
     const int *supported_formats;
     // HW format used by the hwdec
     int hw_imgfmt;
+
+    // Callback to test if the format can be uploaded.
+    // If NULL, all possible hwuploads are assumed to be supported.
+    bool (*try_upload)(void *p, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt);
+
+    // Private data for try_upload.
+    void *try_upload_priv;
+
+    // Getter for conversion filter description, or NULL.
+    // This will be used for hardware conversion of frame formats.
+    // If available the talloc allocated mp_conversion_filter is returned,
+    // Caller is responsible to free the allocation.
+    struct mp_conversion_filter *(*get_conversion_filter)(int imgfmt);
+
+    // The libavutil hwconfig to be used when querying constraints for the
+    // conversion filter. Can be NULL if no special config is required.
+    void *conversion_config;
 };
 
 // Used to communicate hardware decoder device handles from VO to video decoder.
@@ -26,8 +53,9 @@ struct mp_hwdec_devices;
 struct mp_hwdec_devices *hwdec_devices_create(void);
 void hwdec_devices_destroy(struct mp_hwdec_devices *devs);
 
-struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt(struct mp_hwdec_devices *devs,
-                                                 int hw_imgfmt);
+struct mp_hwdec_ctx *hwdec_devices_get_by_imgfmt_and_type(struct mp_hwdec_devices *devs,
+                                                          int hw_imgfmt,
+                                                          enum AVHWDeviceType device_type);
 
 // For code which still strictly assumes there is 1 (or none) device.
 struct mp_hwdec_ctx *hwdec_devices_get_first(struct mp_hwdec_devices *devs);

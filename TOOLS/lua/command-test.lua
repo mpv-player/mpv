@@ -2,7 +2,7 @@
 
 local utils = require("mp.utils")
 
-function join(sep, arr, count)
+local function join(sep, arr, count)
     local r = ""
     if count == nil then
         count = #arr
@@ -31,19 +31,19 @@ mp.observe_property("vo-configured", "bool", function(_, v)
     mp.set_property("screenshot-format", "png")
     mp.set_property("screenshot-png-compression", "9")
 
-    timer = mp.add_periodic_timer(0.1, function() print("I'm alive") end)
+    local timer = mp.add_periodic_timer(0.1, function() print("I'm alive") end)
     timer:resume()
 
     print("Slow screenshot command...")
-    res, err = mp.command_native({"screenshot"})
-    print("done, res: " .. utils.to_string(res))
+    local result = mp.command_native({"screenshot"})
+    print("done, res: " .. utils.to_string(result))
 
     print("Slow screenshot async command...")
-    res, err = mp.command_native_async({"screenshot"}, function(res)
+    result = mp.command_native_async({"screenshot"}, function(res)
         print("done (async), res: " .. utils.to_string(res))
         timer:kill()
     end)
-    print("done (sending), res: " .. utils.to_string(res))
+    print("done (sending), res: " .. utils.to_string(result))
 
     print("Broken screenshot async command...")
     mp.command_native_async({"screenshot-to-file", "/nonexistent/bogus.png"},
@@ -51,7 +51,11 @@ mp.observe_property("vo-configured", "bool", function(_, v)
             print("done err scr.: " .. join(" ", {res, val, err}))
         end)
 
-    mp.command_native_async({name = "subprocess", args = {"sh", "-c", "echo hi && sleep 10s"}, capture_stdout = true},
+    mp.command_native_async({
+        name = "subprocess",
+        args = {"sh", "-c", "echo hi && sleep 10s"},
+        capture_stdout = true
+    },
         function(res, val, err)
             print("done subprocess: " .. join(" ", {res, val, err}))
         end)
@@ -78,13 +82,13 @@ mp.observe_property("vo-configured", "bool", function(_, v)
 
     mp.command_native_async({name = "subprocess", args = {"wc", "-c"},
                              stdin_data = "hello", capture_stdout = true},
-        function(res, val, err)
+        function(_, val)
             print("Should be '5': " .. val.stdout)
         end)
     -- blocking stdin by default
     mp.command_native_async({name = "subprocess", args = {"cat"},
                              capture_stdout = true},
-        function(res, val, err)
+        function(_, val)
             print("Should be 0: " .. #val.stdout)
         end)
     -- stdin + detached
@@ -92,7 +96,7 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                              args = {"bash", "-c", "(sleep 5s ; cat)"},
                              stdin_data = "this should appear after 5s.\n",
                              detach = true},
-        function(res, val, err)
+        function(_, val)
             print("5s test: " .. val.status)
         end)
 
@@ -105,7 +109,8 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                        playback_only = false, args = {"sleep", "inf"}})
 end)
 
-function freeze_test(playback_only)
+local counter
+local function freeze_test(playback_only)
     -- This "freezes" the script, should be killed via timeout.
     counter = counter and counter + 1 or 0
     print("freeze! " .. counter)

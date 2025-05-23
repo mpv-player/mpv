@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This script emulates "unique application" functionality on Linux. When starting
+This script emulates "unique application" functionality. When starting
 playback with this script, it will try to reuse an already running instance of
 mpv (but only if that was started with umpv). Other mpv instances (not started
 by umpv) are ignored, and the script doesn't know about them.
@@ -26,62 +26,78 @@ Note: you can supply custom mpv path and options with the MPV environment
       is already running), this will be ignored.
 """
 
-import sys
 import os
-import socket
-import errno
-import subprocess
-import string
 import shlex
+import socket
+import string
+import subprocess
+import sys
+from collections.abc import Iterable
+from typing import BinaryIO
 
-files = sys.argv[1:]
 
-# this is the same method mpv uses to decide this
-def is_url(filename):
+def is_url(filename: str) -> bool:
     parts = filename.split("://", 1)
     if len(parts) < 2:
         return False
     # protocol prefix has no special characters => it's an URL
-    allowed_symbols = string.ascii_letters + string.digits + '_'
+    allowed_symbols = string.ascii_letters + string.digits + "_"
     prefix = parts[0]
-    return all(map(lambda c: c in allowed_symbols, prefix))
+    return all(c in allowed_symbols for c in prefix)
 
-# make them absolute; also makes them safe against interpretation as options
-def make_abs(filename):
-    if not is_url(filename):
-        return os.path.abspath(filename)
-    return filename
-files = (make_abs(f) for f in files)
+def get_socket_path() -> str:
+    if os.name == "nt":
+        return r"\\.\pipe\umpv"
 
-SOCK = os.path.join(os.getenv("XDG_RUNTIME_DIR", os.getenv("HOME")), ".umpv_socket")
+    base_dir = (
+        os.getenv("UMPV_SOCKET_DIR") or
+        os.getenv("XDG_RUNTIME_DIR") or
+        os.getenv("HOME") or
+        os.getenv("TMPDIR")
+    )
 
-sock = None
-try:
-    sock = socket.socket(socket.AF_UNIX)
-    sock.connect(SOCK)
-except socket.error as e:
-    if e.errno == errno.ECONNREFUSED:
-        sock = None
-        pass  # abandoned socket
-    elif e.errno == errno.ENOENT:
-        sock = None
-        pass # doesn't exist
-    else:
-        raise e
+    if not base_dir:
+        raise Exception("Could not determine a base directory for the socket. "
+                        "Ensure that one of the following environment variables is set: "
+                        "UMPV_SOCKET_DIR, XDG_RUNTIME_DIR, HOME or TMPDIR.")
 
-if sock:
-    # Unhandled race condition: what if mpv is terminating right now?
-    for f in files:
-        # escape: \ \n "
-        f = f.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-        f = "\"" + f + "\""
-        sock.send(("raw loadfile " + f + " append\n").encode("utf-8"))
-else:
-    # Let mpv recreate socket if it doesn't already exist.
+    return os.path.join(base_dir, ".umpv")
 
-    opts = shlex.split(os.getenv("MPV") or "mpv")
-    opts.extend(["--no-terminal", "--force-window", "--input-ipc-server=" + SOCK,
-                 "--"])
-    opts.extend(files)
+def send_files_to_mpv(conn: socket.socket | BinaryIO, files: Iterable[str]) -> None:
+    try:
+        send = conn.send if isinstance(conn, socket.socket) else conn.write
+        for f in files:
+            f = f.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+            send(f'raw loadfile "{f}" append-play\n'.encode())
+    except Exception:
+        print("mpv is terminating or the connection was lost.", file=sys.stderr)
+        sys.exit(1)
 
-    subprocess.check_call(opts)
+def start_mpv(files: Iterable[str], socket_path: str) -> None:
+    mpv = "mpv" if os.name != "nt" else "mpv.exe"
+    mpv_command = shlex.split(os.getenv("MPV", mpv))
+    mpv_command.extend([
+        "--profile=builtin-pseudo-gui",
+        f"--input-ipc-server={socket_path}",
+        "--",
+    ])
+    mpv_command.extend(files)
+    subprocess.Popen(mpv_command, start_new_session=True)
+
+def main() -> None:
+    files = (os.path.abspath(f) if not is_url(f) else f for f in sys.argv[1:])
+    socket_path = get_socket_path()
+
+    try:
+        if os.name == "nt":
+            with open(socket_path, "r+b", buffering=0) as pipe:
+                send_files_to_mpv(pipe, files)
+        else:
+            with socket.socket(socket.AF_UNIX) as sock:
+                sock.connect(socket_path)
+                send_files_to_mpv(sock, files)
+    except (FileNotFoundError, ConnectionRefusedError):
+        start_mpv(files, socket_path)
+
+if __name__ == "__main__":
+    main()

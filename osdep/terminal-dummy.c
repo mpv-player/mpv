@@ -1,5 +1,7 @@
 #include "terminal.h"
 
+#include "misc/bstr.h"
+
 void terminal_init(void)
 {
 }
@@ -25,11 +27,22 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
 {
 }
 
-void mp_write_console_ansi(void *wstream, char *buf)
+PRINTF_ATTRIBUTE(2, 0)
+int mp_console_vfprintf(void *wstream, const char *format, va_list args)
 {
+    return 0;
+}
+
+int mp_console_write(void *wstream, bstr str)
+{
+    return 0;
 }
 
 bool terminal_try_attach(void)
 {
     return false;
+}
+
+void terminal_set_mouse_input(bool enable)
+{
 }

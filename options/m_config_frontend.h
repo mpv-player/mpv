@@ -17,19 +17,18 @@
 
 #pragma once
 
+#include <stdatomic.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "common/common.h"
-#include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "m_config_core.h"
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
 #include "options/m_option.h"
-#include "osdep/atomic.h"
 
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that
@@ -50,6 +49,7 @@ struct m_config_option {
     bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
+    bool coalesce : 1;              // Property changes should be coalesced
     int32_t opt_id;                 // For some m_config APIs
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
@@ -69,7 +69,8 @@ typedef struct m_config {
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
-    int profile_depth;
+    char **profile_stack;
+    size_t profile_stack_depth;
     // Temporary during profile application.
     struct m_opt_backup **profile_backup_tmp;
     int profile_backup_flags;
@@ -88,7 +89,7 @@ typedef struct m_config {
     // m_config_notify_change_opt_ptr(). If false, it's caused either by
     // m_config_set_option_*() (and similar) calls or external updates.
     void (*option_change_callback)(void *ctx, struct m_config_option *co,
-                                   int flags, bool self_update);
+                                   uint64_t flags, bool self_update);
     void *option_change_callback_ctx;
 
     // For the command line parser
@@ -115,10 +116,9 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
 // different sub-options for every filter (represented by separate desc
 // structs).
 // args is an array of key/value pairs (args=[k0, v0, k1, v1, ..., NULL]).
-// name/defaults is only needed for the legacy af-defaults/vf-defaults options.
 struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
-    const char *name, struct m_obj_settings *defaults, char **args);
+    char **args);
 
 // Like m_config_from_obj_desc_and_args(), but don't allocate option the
 // struct, i.e. m_config.optstruct==NULL. This is used by the sub-option

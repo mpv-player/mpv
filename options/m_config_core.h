@@ -131,13 +131,6 @@ bool m_config_cache_write_opt(struct m_config_cache *cache, void *ptr);
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
                           const struct m_sub_options *group);
 
-// Read a single global option in a thread-safe way. For multiple options,
-// use m_config_cache. The option must exist and match the provided type (the
-// type is used as a sanity check only). Performs semi-expensive lookup.
-// Warning: new code must not use this.
-void mp_read_option_raw(struct mpv_global *global, const char *name,
-                        const struct m_option_type *type, void *dst);
-
 // Allocate a priv struct that is backed by global options (like AOs and VOs,
 // anything that uses m_obj_list.use_global_options == true).
 // The result contains a snapshot of the current option values of desc->options.
@@ -181,6 +174,10 @@ const struct m_option *m_config_shadow_get_opt(struct m_config_shadow *shadow,
 // m_config_cache_get_next_opt().
 const char *m_config_shadow_get_opt_name(struct m_config_shadow *shadow,
                                          int32_t id, char *buf, size_t buf_size);
+
+// Resolve alias mapping from opt.
+const char *m_config_shadow_get_alias_from_opt(struct m_config_shadow *shadow, int32_t id,
+                                               char *buf, size_t buf_size);
 
 // Pointer to default value, using m_option.type. NULL if option without data.
 // id must be a valid option ID as returned by m_config_shadow_get_next_opt() or

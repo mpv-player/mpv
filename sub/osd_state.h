@@ -1,10 +1,10 @@
 #ifndef MP_OSD_STATE_H_
 #define MP_OSD_STATE_H_
 
-#include <pthread.h>
+#include <stdatomic.h>
 
-#include "osdep/atomic.h"
 #include "osd.h"
+#include "osdep/threads.h"
 
 enum mp_osdtype {
     OSDTYPE_SUB,
@@ -66,12 +66,12 @@ struct osd_external {
 };
 
 struct osd_state {
-    pthread_mutex_t lock;
+    mp_mutex lock;
 
     struct osd_object *objs[MAX_OSD_PARTS];
 
     bool render_subs_in_filter;
-    mp_atomic_double force_video_pts;
+    _Atomic double force_video_pts;
 
     bool want_redraw;
     bool want_redraw_notification;
@@ -88,7 +88,6 @@ struct osd_state {
 // defined in osd_libass.c
 struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
                                            struct osd_object *obj, int format);
-void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
 
 #endif

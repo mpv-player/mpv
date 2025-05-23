@@ -18,12 +18,13 @@
 #ifndef MP_JSON_H
 #define MP_JSON_H
 
-// We reuse mpv_node.
-#include "libmpv/client.h"
-
 #define MAX_JSON_DEPTH 50
 
+struct bstr;
+struct mpv_node;
+
 int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth);
+int json_append(struct bstr *b, const struct mpv_node *src, int indent);
 void json_skip_whitespace(char **src);
 int json_write(char **s, struct mpv_node *src);
 int json_write_pretty(char **s, struct mpv_node *src);

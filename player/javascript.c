@@ -17,11 +17,8 @@
 
 #include <assert.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <math.h>
 #include <stdint.h>
 
@@ -45,7 +42,7 @@
 #include "core.h"
 #include "command.h"
 #include "client.h"
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js
@@ -354,30 +351,20 @@ static void af_push_file(js_State *J, const char *fname, int limit, void *af)
         return;
     }
 
-    FILE *f = fopen(filename, "rb");
-    if (!f)
+    // mp.utils.read_file allows partial read up to limit which results in
+    // error for stream_read_file if the file is larger than limit, so use
+    // STREAM_ALLOW_PARTIAL_READ to allow reading returning partial results.
+    // Additionally, disable error logging by stream since the exception
+    // can be caught and handled by a JS script.
+    int flags = STREAM_READ_FILE_FLAGS_DEFAULT | STREAM_ALLOW_PARTIAL_READ |
+                STREAM_SILENT;
+    bstr data = stream_read_file2(filename, af, flags,
+                                  jctx(J)->mpctx->global, limit);
+    if (data.start) {
+        js_pushlstring(J, data.start, data.len);
+    } else {
         js_error(J, "cannot open file: '%s'", filename);
-    add_af_file(af, f);
-
-    int len = MPMIN(limit, 32 * 1024);  // initial allocation, size*2 strategy
-    int got = 0;
-    char *s = NULL;
-    while ((s = talloc_realloc(af, s, char, len))) {
-        int want = len - got;
-        int r = fread(s + got, 1, want, f);
-
-        if (feof(f) || (len == limit && r == want)) {
-            js_pushlstring(J, s, got + r);
-            return;
-        }
-        if (r != want)
-            js_error(J, "cannot read data from file: '%s'", filename);
-
-        got = got + r;
-        len = MPMIN(limit, len * 2);
     }
-
-    js_error(J, "cannot allocate %d bytes for file: '%s'", len, filename);
 }
 
 // Safely run af_push_file.
@@ -535,8 +522,7 @@ static int s_load_javascript(struct mp_script_args *args)
     js_Alloc alloc_fn = NULL;
     void *actx = NULL;
 
-    char *mem_report = getenv("MPV_LEAK_REPORT");
-    if (mem_report && strcmp(mem_report, "1") == 0) {
+    if (args->mpctx->opts->js_memory_report) {
         alloc_fn = mp_js_alloc;
         actx = ctx;
     }
@@ -1257,7 +1243,7 @@ static void add_functions(js_State *J, struct script_ctx *ctx)
 
 // main export of this file, used by cplayer to load js scripts
 const struct mp_scripting mp_scripting_js = {
-    .name = "javascript",
+    .name = "js",
     .file_ext = "js",
     .load = s_load_javascript,
 };

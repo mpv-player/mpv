@@ -16,18 +16,19 @@
  */
 
 #include <string.h>
-#include <pthread.h>
 
 #include "options/path.h"
+#include "osdep/threads.h"
 #include "path.h"
 
 #include "config.h"
 
-static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
+static mp_once path_init_once = MP_STATIC_ONCE_INITIALIZER;
 
 static char mpv_home[512];
 static char old_home[512];
 static char mpv_cache[512];
+static char old_cache[512];
 
 static void path_init(void)
 {
@@ -41,8 +42,10 @@ static void path_init(void)
     }
 
     // Maintain compatibility with old ~/.mpv
-    if (home && home[0])
+    if (home && home[0]) {
         snprintf(old_home, sizeof(old_home), "%s/.mpv", home);
+        snprintf(old_cache, sizeof(old_cache), "%s/.mpv/cache", home);
+    }
 
     if (home && home[0])
         snprintf(mpv_cache, sizeof(mpv_cache), "%s/Library/Caches/io.mpv", home);
@@ -51,14 +54,15 @@ static void path_init(void)
     // config dir only.
     if (mp_path_exists(old_home) && !mp_path_exists(mpv_home)) {
         snprintf(mpv_home, sizeof(mpv_home), "%s", old_home);
-        snprintf(mpv_cache, sizeof(mpv_cache), "%s", old_home);
+        snprintf(mpv_cache, sizeof(mpv_cache), "%s", old_cache);
         old_home[0] = '\0';
+        old_cache[0] = '\0';
     }
 }
 
 const char *mp_get_platform_path_darwin(void *talloc_ctx, const char *type)
 {
-    pthread_once(&path_init_once, path_init);
+    mp_exec_once(&path_init_once, path_init);
     if (strcmp(type, "home") == 0)
         return mpv_home;
     if (strcmp(type, "old_home") == 0)

@@ -13,17 +13,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <assert.h>
 
 #define TA_NO_WRAPPERS
 #include "ta.h"
-
-// Note: the actual minimum alignment is dictated by malloc(). It doesn't
-//       make sense to set this value higher than malloc's alignment.
-#define MIN_ALIGN 16
 
 #if !defined(TA_MEMORY_DEBUGGING)
     #if !defined(NDEBUG)
@@ -52,6 +49,7 @@ struct ta_header {
 
 #define CANARY 0xD3ADB3EF
 
+#define MIN_ALIGN _Alignof(max_align_t)
 union aligned_header {
     struct ta_header ta;
     // Make sure to satisfy typical alignment requirements
@@ -267,9 +265,9 @@ void ta_set_destructor(void *ptr, void (*destructor)(void *))
 
 #if TA_MEMORY_DEBUGGING
 
-#include <pthread.h>
+#include "osdep/threads.h"
 
-static pthread_mutex_t ta_dbg_mutex = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex ta_dbg_mutex = MP_STATIC_MUTEX_INITIALIZER;
 static bool enable_leak_check; // pretty much constant
 static struct ta_header leak_node;
 static char allocation_is_string;
@@ -278,12 +276,12 @@ static void ta_dbg_add(struct ta_header *h)
 {
     h->canary = CANARY;
     if (enable_leak_check) {
-        pthread_mutex_lock(&ta_dbg_mutex);
+        mp_mutex_lock(&ta_dbg_mutex);
         h->leak_next = &leak_node;
         h->leak_prev = leak_node.leak_prev;
         leak_node.leak_prev->leak_next = h;
         leak_node.leak_prev = h;
-        pthread_mutex_unlock(&ta_dbg_mutex);
+        mp_mutex_unlock(&ta_dbg_mutex);
     }
 }
 
@@ -302,10 +300,10 @@ static void ta_dbg_remove(struct ta_header *h)
 {
     ta_dbg_check_header(h);
     if (h->leak_next) { // assume checking for !=NULL invariant ok without lock
-        pthread_mutex_lock(&ta_dbg_mutex);
+        mp_mutex_lock(&ta_dbg_mutex);
         h->leak_next->leak_prev = h->leak_prev;
         h->leak_prev->leak_next = h->leak_next;
-        pthread_mutex_unlock(&ta_dbg_mutex);
+        mp_mutex_unlock(&ta_dbg_mutex);
         h->leak_next = h->leak_prev = NULL;
     }
     h->canary = 0;
@@ -321,7 +319,7 @@ static size_t get_children_size(struct ta_header *h)
 
 static void print_leak_report(void)
 {
-    pthread_mutex_lock(&ta_dbg_mutex);
+    mp_mutex_lock(&ta_dbg_mutex);
     if (leak_node.leak_next && leak_node.leak_next != &leak_node) {
         size_t size = 0;
         size_t num_blocks = 0;
@@ -356,19 +354,19 @@ static void print_leak_report(void)
         }
         fprintf(stderr, "%zu bytes in %zu blocks.\n", size, num_blocks);
     }
-    pthread_mutex_unlock(&ta_dbg_mutex);
+    mp_mutex_unlock(&ta_dbg_mutex);
 }
 
 void ta_enable_leak_report(void)
 {
-    pthread_mutex_lock(&ta_dbg_mutex);
+    mp_mutex_lock(&ta_dbg_mutex);
     enable_leak_check = true;
     if (!leak_node.leak_prev && !leak_node.leak_next) {
         leak_node.leak_prev = &leak_node;
         leak_node.leak_next = &leak_node;
         atexit(print_leak_report);
     }
-    pthread_mutex_unlock(&ta_dbg_mutex);
+    mp_mutex_unlock(&ta_dbg_mutex);
 }
 
 /* Set a (static) string that will be printed if the memory allocation in ptr

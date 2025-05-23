@@ -1,9 +1,9 @@
-#include <pthread.h>
 #include <windows.h>
 
 #include "angle_dynamic.h"
 
 #include "common/common.h"
+#include "osdep/threads.h"
 
 #if HAVE_EGL_ANGLE_LIB
 bool angle_load(void)
@@ -16,7 +16,7 @@ bool angle_load(void)
 ANGLE_FNS(ANGLE_DECL)
 
 static bool angle_loaded;
-static pthread_once_t angle_load_once = PTHREAD_ONCE_INIT;
+static mp_once angle_load_once = MP_STATIC_ONCE_INITIALIZER;
 
 static void angle_do_load(void)
 {
@@ -33,7 +33,7 @@ static void angle_do_load(void)
 
 bool angle_load(void)
 {
-    pthread_once(&angle_load_once, angle_do_load);
+    mp_exec_once(&angle_load_once, angle_do_load);
     return angle_loaded;
 }
 #endif

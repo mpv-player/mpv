@@ -35,7 +35,7 @@ static void free_mixed_frame(void *arg)
 // "base" is used only to set parameters, no image data is referenced.
 struct mp_image *mp_vdpau_mixed_frame_create(struct mp_image *base)
 {
-    assert(base->imgfmt == IMGFMT_VDPAU);
+    mp_assert(base->imgfmt == IMGFMT_VDPAU);
 
     struct mp_vdpau_mixer_frame *frame =
         talloc_zero(NULL, struct mp_vdpau_mixer_frame);
@@ -193,7 +193,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
     if (!opts->chroma_deint)
         SET_VIDEO_ATTR(SKIP_CHROMA_DEINTERLACE, uint8_t, 1);
 
-    struct mp_cmat yuv2rgb;
+    struct pl_transform3x3 yuv2rgb;
     VdpCSCMatrix matrix;
 
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
@@ -204,7 +204,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
 
     for (int r = 0; r < 3; r++) {
         for (int c = 0; c < 3; c++)
-            matrix[r][c] = yuv2rgb.m[r][c];
+            matrix[r][c] = yuv2rgb.mat.m[r][c];
         matrix[r][3] = yuv2rgb.c[r];
     }
 
@@ -277,7 +277,7 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
     CHECK_VDP_ERROR(mixer, "Error when calling vdp_video_surface_get_parameters");
 
     if (!mixer->initialized || !opts_equal(opts, &mixer->opts) ||
-        !mp_image_params_equal(&video->params, &mixer->image_params) ||
+        !mp_image_params_static_equal(&video->params, &mixer->image_params) ||
         mixer->current_w != s_w || mixer->current_h != s_h ||
         mixer->current_chroma_type != s_chroma_type)
     {

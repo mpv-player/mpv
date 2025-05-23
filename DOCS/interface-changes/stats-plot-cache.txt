@@ -1,0 +1,2 @@
+add `stats-plot_cache` script-opt
+disable `stats-plot_{perfdata,vsync_ratio,vsync_jitter}` by default

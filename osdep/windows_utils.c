@@ -15,18 +15,21 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
 #include <inttypes.h>
+#include <stdatomic.h>
+#include <stdio.h>
 
 #include <windows.h>
 #include <errors.h>
 #include <audioclient.h>
 #include <d3d9.h>
 #include <dxgi1_2.h>
+#include <ole2.h>
+#include <shobjidl.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
 #include "windows_utils.h"
+#include "mpv_talloc.h"
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {
@@ -140,9 +143,9 @@ static char *fmtmsg_buf(char *buf, size_t buf_size, DWORD errorID)
                              FORMAT_MESSAGE_IGNORE_INSERTS,
                              NULL, errorID, 0, buf, buf_size, NULL);
     if (!n && GetLastError() == ERROR_MORE_DATA) {
-        snprintf(buf, buf_size,
-                 "<Insufficient buffer size (%zd) for error message>",
-                 buf_size);
+        mp_tprintf_buf(buf, buf_size,
+                       "<Insufficient buffer size (%zd) for error message>",
+                       buf_size);
     } else {
         if (n > 0 && buf[n-1] == '\n')
             buf[n-1] = '\0';
@@ -164,7 +167,7 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
                              struct w32_create_anon_pipe_opts *opts)
 {
-    static atomic_ulong counter = ATOMIC_VAR_INIT(0);
+    static atomic_ulong counter = 0;
 
     // Generate pipe name
     unsigned long id = atomic_fetch_add(&counter, 1);
@@ -226,4 +229,23 @@ bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
 error:
     *server = *client = INVALID_HANDLE_VALUE;
     return false;
+}
+
+wchar_t *mp_w32_get_shell_link_target(wchar_t *path)
+{
+    IShellLink *psl = NULL;
+    IPersistFile *ppf = NULL;
+    wchar_t *buf = talloc_array(NULL, wchar_t, MAX_PATH + 1);
+
+    if (FAILED(CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLinkW, (void**)&psl)) ||
+        FAILED(IShellLinkW_QueryInterface(psl, &IID_IPersistFile, (void**)&ppf)) ||
+        FAILED(IPersistFile_Load(ppf, path, STGM_READ)) ||
+        FAILED(IShellLinkW_GetPath(psl, buf, MAX_PATH, NULL, 0)))
+    {
+        TA_FREEP(&buf);
+    }
+
+    SAFE_RELEASE(psl);
+    SAFE_RELEASE(ppf);
+    return buf;
 }

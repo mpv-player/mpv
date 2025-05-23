@@ -14,12 +14,12 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <errno.h>
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <poll.h>
@@ -27,7 +27,6 @@
 
 #include "common/common.h"
 #include "misc/linked_list.h"
-#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
 
@@ -35,10 +34,10 @@
 
 uintptr_t mp_waiter_wait(struct mp_waiter *waiter)
 {
-    pthread_mutex_lock(&waiter->lock);
+    mp_mutex_lock(&waiter->lock);
     while (!waiter->done)
-        pthread_cond_wait(&waiter->wakeup, &waiter->lock);
-    pthread_mutex_unlock(&waiter->lock);
+        mp_cond_wait(&waiter->wakeup, &waiter->lock);
+    mp_mutex_unlock(&waiter->lock);
 
     uintptr_t ret = waiter->value;
 
@@ -50,8 +49,8 @@ uintptr_t mp_waiter_wait(struct mp_waiter *waiter)
     // following functions will do nearly nothing. This is true for Windows
     // and Linux. But some lesser OSes still might allocate kernel objects
     // when initializing mutexes, so destroy them here.
-    pthread_mutex_destroy(&waiter->lock);
-    pthread_cond_destroy(&waiter->wakeup);
+    mp_mutex_destroy(&waiter->lock);
+    mp_cond_destroy(&waiter->wakeup);
 
     memset(waiter, 0xCA, sizeof(*waiter)); // for debugging
 
@@ -60,25 +59,25 @@ uintptr_t mp_waiter_wait(struct mp_waiter *waiter)
 
 void mp_waiter_wakeup(struct mp_waiter *waiter, uintptr_t value)
 {
-    pthread_mutex_lock(&waiter->lock);
-    assert(!waiter->done);
+    mp_mutex_lock(&waiter->lock);
+    mp_assert(!waiter->done);
     waiter->done = true;
     waiter->value = value;
-    pthread_cond_signal(&waiter->wakeup);
-    pthread_mutex_unlock(&waiter->lock);
+    mp_cond_signal(&waiter->wakeup);
+    mp_mutex_unlock(&waiter->lock);
 }
 
 bool mp_waiter_poll(struct mp_waiter *waiter)
 {
-    pthread_mutex_lock(&waiter->lock);
+    mp_mutex_lock(&waiter->lock);
     bool r = waiter->done;
-    pthread_mutex_unlock(&waiter->lock);
+    mp_mutex_unlock(&waiter->lock);
     return r;
 }
 
 struct mp_cancel {
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_mutex lock;
+    mp_cond wakeup;
 
     // Semaphore state and "mirrors".
     atomic_bool triggered;
@@ -103,7 +102,7 @@ static void cancel_destroy(void *p)
 {
     struct mp_cancel *c = p;
 
-    assert(!c->slaves.head); // API user error
+    mp_assert(!c->slaves.head); // API user error
 
     mp_cancel_set_parent(c, NULL);
 
@@ -112,13 +111,13 @@ static void cancel_destroy(void *p)
         close(c->wakeup_pipe[1]);
     }
 
-#ifdef __MINGW32__
+#ifdef _WIN32
     if (c->win32_event)
         CloseHandle(c->win32_event);
 #endif
 
-    pthread_mutex_destroy(&c->lock);
-    pthread_cond_destroy(&c->wakeup);
+    mp_mutex_destroy(&c->lock);
+    mp_cond_destroy(&c->wakeup);
 }
 
 struct mp_cancel *mp_cancel_new(void *talloc_ctx)
@@ -126,11 +125,11 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
     struct mp_cancel *c = talloc_ptrtype(talloc_ctx, c);
     talloc_set_destructor(c, cancel_destroy);
     *c = (struct mp_cancel){
-        .triggered = ATOMIC_VAR_INIT(false),
+        .triggered = false,
         .wakeup_pipe = {-1, -1},
     };
-    pthread_mutex_init(&c->lock, NULL);
-    pthread_cond_init(&c->wakeup, NULL);
+    mp_mutex_init(&c->lock);
+    mp_cond_init(&c->wakeup);
     return c;
 }
 
@@ -138,7 +137,7 @@ static void trigger_locked(struct mp_cancel *c)
 {
     atomic_store(&c->triggered, true);
 
-    pthread_cond_broadcast(&c->wakeup); // condition bound to c->triggered
+    mp_cond_broadcast(&c->wakeup); // condition bound to c->triggered
 
     if (c->cb)
         c->cb(c->cb_ctx);
@@ -149,7 +148,7 @@ static void trigger_locked(struct mp_cancel *c)
     if (c->wakeup_pipe[1] >= 0)
         (void)write(c->wakeup_pipe[1], &(char){0}, 1);
 
-#ifdef __MINGW32__
+#ifdef _WIN32
     if (c->win32_event)
         SetEvent(c->win32_event);
 #endif
@@ -157,14 +156,14 @@ static void trigger_locked(struct mp_cancel *c)
 
 void mp_cancel_trigger(struct mp_cancel *c)
 {
-    pthread_mutex_lock(&c->lock);
+    mp_mutex_lock(&c->lock);
     trigger_locked(c);
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 }
 
 void mp_cancel_reset(struct mp_cancel *c)
 {
-    pthread_mutex_lock(&c->lock);
+    mp_mutex_lock(&c->lock);
 
     atomic_store(&c->triggered, false);
 
@@ -177,12 +176,12 @@ void mp_cancel_reset(struct mp_cancel *c)
         }
     }
 
-#ifdef __MINGW32__
+#ifdef _WIN32
     if (c->win32_event)
         ResetEvent(c->win32_event);
 #endif
 
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 }
 
 bool mp_cancel_test(struct mp_cancel *c)
@@ -192,13 +191,13 @@ bool mp_cancel_test(struct mp_cancel *c)
 
 bool mp_cancel_wait(struct mp_cancel *c, double timeout)
 {
-    struct timespec ts = mp_rel_time_to_timespec(timeout);
-    pthread_mutex_lock(&c->lock);
+    int64_t wait_until = mp_time_ns_add(mp_time_ns(), timeout);
+    mp_mutex_lock(&c->lock);
     while (!mp_cancel_test(c)) {
-        if (pthread_cond_timedwait(&c->wakeup, &c->lock, &ts))
+        if (mp_cond_timedwait_until(&c->wakeup, &c->lock, wait_until))
             break;
     }
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 
     return mp_cancel_test(c);
 }
@@ -213,11 +212,11 @@ static void retrigger_locked(struct mp_cancel *c)
 
 void mp_cancel_set_cb(struct mp_cancel *c, void (*cb)(void *ctx), void *ctx)
 {
-    pthread_mutex_lock(&c->lock);
+    mp_mutex_lock(&c->lock);
     c->cb = cb;
     c->cb_ctx = ctx;
     retrigger_locked(c);
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 }
 
 void mp_cancel_set_parent(struct mp_cancel *slave, struct mp_cancel *parent)
@@ -228,41 +227,48 @@ void mp_cancel_set_parent(struct mp_cancel *slave, struct mp_cancel *parent)
     if (slave->parent == parent)
         return;
     if (slave->parent) {
-        pthread_mutex_lock(&slave->parent->lock);
+        mp_mutex_lock(&slave->parent->lock);
         LL_REMOVE(siblings, &slave->parent->slaves, slave);
-        pthread_mutex_unlock(&slave->parent->lock);
+        mp_mutex_unlock(&slave->parent->lock);
     }
     slave->parent = parent;
     if (slave->parent) {
-        pthread_mutex_lock(&slave->parent->lock);
+        mp_mutex_lock(&slave->parent->lock);
         LL_APPEND(siblings, &slave->parent->slaves, slave);
         retrigger_locked(slave->parent);
-        pthread_mutex_unlock(&slave->parent->lock);
+        mp_mutex_unlock(&slave->parent->lock);
     }
 }
 
 int mp_cancel_get_fd(struct mp_cancel *c)
 {
-    pthread_mutex_lock(&c->lock);
+    mp_mutex_lock(&c->lock);
     if (c->wakeup_pipe[0] < 0) {
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wstringop-overflow="
+#endif
         mp_make_wakeup_pipe(c->wakeup_pipe);
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
         retrigger_locked(c);
     }
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 
 
     return c->wakeup_pipe[0];
 }
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 void *mp_cancel_get_event(struct mp_cancel *c)
 {
-    pthread_mutex_lock(&c->lock);
+    mp_mutex_lock(&c->lock);
     if (!c->win32_event) {
         c->win32_event = CreateEventW(NULL, TRUE, FALSE, NULL);
         retrigger_locked(c);
     }
-    pthread_mutex_unlock(&c->lock);
+    mp_mutex_unlock(&c->lock);
 
     return c->win32_event;
 }

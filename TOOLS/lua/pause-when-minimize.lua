@@ -4,7 +4,7 @@
 
 local did_minimize = false
 
-mp.observe_property("window-minimized", "bool", function(name, value)
+mp.observe_property("window-minimized", "bool", function(_, value)
     local pause = mp.get_property_native("pause")
     if value == true then
         if pause == false then

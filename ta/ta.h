@@ -91,6 +91,9 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_new_ptrtype(ta_parent, ptr) \
     (TA_TYPEOF(ptr))ta_alloc_size(ta_parent, sizeof(*ptr))
 
+#define ta_znew_ptrtype(ta_parent, ptr) \
+    (TA_TYPEOF(ptr))ta_zalloc_size(ta_parent, sizeof(*ptr))
+
 #define ta_new_array_ptrtype(ta_parent, ptr, count) \
     (TA_TYPEOF(ptr))ta_new_array_size(ta_parent, sizeof(*(ptr)), count)
 
@@ -98,6 +101,16 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 
 #define ta_dup(ta_parent, ptr) \
     (TA_TYPEOF(ptr))ta_memdup(ta_parent, ptr, sizeof(*(ptr)))
+
+#define ta_replace(ta_parent, str, replace)             \
+    do {                                                \
+        if (!(str)) {                                   \
+            (str) = ta_xstrdup((ta_parent), (replace)); \
+        } else {                                        \
+            *(str) = '\0';                              \
+            ta_xstrdup_append(&(str), (replace));       \
+        }                                               \
+    } while (0)
 
 // Ugly macros that crash on OOM.
 // All of these mirror real functions (with a 'x' added after the 'ta_'
@@ -123,6 +136,7 @@ bool ta_vasprintf_append_buffer(char **str, const char *fmt, va_list ap) TA_PRF(
 #define ta_xznew_array(...)             ta_oom_g(ta_znew_array(__VA_ARGS__))
 #define ta_xnew_array_size(...)         ta_oom_p(ta_new_array_size(__VA_ARGS__))
 #define ta_xnew_ptrtype(...)            ta_oom_g(ta_new_ptrtype(__VA_ARGS__))
+#define ta_xznew_ptrtype(...)           ta_oom_g(ta_znew_ptrtype(__VA_ARGS__))
 #define ta_xnew_array_ptrtype(...)      ta_oom_g(ta_new_array_ptrtype(__VA_ARGS__))
 #define ta_xdup(...)                    ta_oom_g(ta_dup(__VA_ARGS__))
 
@@ -144,9 +158,26 @@ void *ta_xrealloc_size(void *ta_parent, void *ptr, size_t size);
 #define ta_xrealloc_size(...)   ta_dbg_set_loc(ta_xrealloc_size(__VA_ARGS__), TA_LOC)
 #endif
 
-void ta_oom_b(bool b);
-char *ta_oom_s(char *s);
-void *ta_oom_p(void *p);
+static inline void *ta_oom_p(void *p)
+{
+    if (!p)
+        abort();
+    return p;
+}
+
+static inline void ta_oom_b(bool b)
+{
+    if (!b)
+        abort();
+}
+
+static inline char *ta_oom_s(char *s)
+{
+    if (!s)
+        abort();
+    return s;
+}
+
 // Generic pointer
 #define ta_oom_g(ptr) (TA_TYPEOF(ptr))ta_oom_p(ptr)
 

@@ -15,16 +15,18 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "common/common.h"
 #include "context.h"
 #include "options/m_config.h"
 #include "utils.h"
+#include "video/out/placebo/utils.h"
 
 #if HAVE_DRM
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/drm_common.h"
 #endif
 
@@ -214,35 +216,36 @@ done:
 }
 
 static int print_display_info(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name) {
-    VkResult res;
-    VkPhysicalDevice *devices = NULL;
+                              struct bstr name)
+{
+    void *ta_ctx = talloc_new(NULL);
+    pl_log pllog = mppl_log_create(ta_ctx, log);
+    if (!pllog)
+        goto done;
 
     // Create a dummy instance to list the resources
-    VkInstanceCreateInfo info = {
-        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .enabledExtensionCount = 1,
-        .ppEnabledExtensionNames = (const char*[]) {
-            VK_KHR_DISPLAY_EXTENSION_NAME
+    mppl_log_set_probing(pllog, true);
+    pl_vk_inst inst = pl_vk_inst_create(pllog, pl_vk_inst_params(
+        .extensions = (const char *[]){
+            VK_KHR_DISPLAY_EXTENSION_NAME,
         },
-    };
-
-    VkInstance inst = NULL;
-    res = vkCreateInstance(&info, NULL, &inst);
-    if (res != VK_SUCCESS) {
+        .num_extensions = 1,
+    ));
+    mppl_log_set_probing(pllog, false);
+    if (!inst) {
         mp_warn(log, "Unable to create Vulkan instance.\n");
         goto done;
     }
 
     uint32_t num_devices = 0;
-    vkEnumeratePhysicalDevices(inst, &num_devices, NULL);
-    if (!num_devices) {
+    VkResult res = vkEnumeratePhysicalDevices(inst->instance, &num_devices, NULL);
+    if (res != VK_SUCCESS || !num_devices) {
         mp_info(log, "No Vulkan devices detected.\n");
         goto done;
     }
 
-    devices = talloc_array(NULL, VkPhysicalDevice, num_devices);
-    vkEnumeratePhysicalDevices(inst, &num_devices, devices);
+    VkPhysicalDevice *devices = talloc_array(ta_ctx, VkPhysicalDevice, num_devices);
+    res = vkEnumeratePhysicalDevices(inst->instance, &num_devices, devices);
     if (res != VK_SUCCESS) {
         mp_warn(log, "Failed enumerating physical devices.\n");
         goto done;
@@ -254,8 +257,9 @@ static int print_display_info(struct mp_log *log, const struct m_option *opt,
     }
 
 done:
-    talloc_free(devices);
-    vkDestroyInstance(inst, NULL);
+    pl_vk_inst_destroy(&inst);
+    pl_log_destroy(&pllog);
+    talloc_free(ta_ctx);
     return M_OPT_EXIT;
 }
 
@@ -275,6 +279,7 @@ const struct m_sub_options vulkan_display_conf = {
     },
     .size = sizeof(struct vulkan_display_opts),
     .defaults = &(struct vulkan_display_opts) {0},
+    .change_flags = UPDATE_VO,
 };
 
 struct priv {
@@ -282,6 +287,7 @@ struct priv {
     struct vulkan_display_opts *opts;
     uint32_t width;
     uint32_t height;
+    uint32_t refresh_rate;
 
 #if HAVE_DRM
     struct mpv_opengl_drm_params_v2 drm_params;
@@ -296,7 +302,7 @@ static void open_render_fd(struct ra_ctx *ctx, const char *render_path)
     p->drm_params.render_fd = open(render_path, O_RDWR | O_CLOEXEC);
     if (p->drm_params.render_fd == -1) {
         MP_WARN(ctx, "Failed to open render node: %s\n",
-                strerror(errno));
+                mp_strerror(errno));
     }
 }
 
@@ -433,8 +439,9 @@ static bool display_init(struct ra_ctx *ctx)
 
     p->width = mode->parameters.visibleRegion.width;
     p->height = mode->parameters.visibleRegion.height;
+    p->refresh_rate = mode->parameters.refreshRate;
 
-    struct ra_vk_ctx_params params = {0};
+    struct ra_ctx_params params = {0};
     if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
         goto error;
 
@@ -466,26 +473,25 @@ static bool display_reconfig(struct ra_ctx *ctx)
 
 static int display_control(struct ra_ctx *ctx, int *events, int request, void *arg)
 {
+    struct priv *p = ctx->priv;
+    switch (request) {
+    case VOCTRL_GET_DISPLAY_FPS:
+        *(double*)arg = p->refresh_rate / 1000.0;
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_RES:
+        ((int *)arg)[0] = p->width;
+        ((int *)arg)[1] = p->height;
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
-}
-
-static void display_wakeup(struct ra_ctx *ctx)
-{
-    // TODO
-}
-
-static void display_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
-{
-    // TODO
 }
 
 const struct ra_ctx_fns ra_ctx_vulkan_display = {
     .type           = "vulkan",
     .name           = "displayvk",
+    .description    = "VK_KHR_display",
     .reconfig       = display_reconfig,
     .control        = display_control,
-    .wakeup         = display_wakeup,
-    .wait_events    = display_wait_events,
     .init           = display_init,
     .uninit         = display_uninit,
 };

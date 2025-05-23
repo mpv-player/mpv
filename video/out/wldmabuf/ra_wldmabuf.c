@@ -28,18 +28,11 @@ static void destroy(struct ra *ra)
     talloc_free(ra->priv);
 }
 
-bool ra_compatible_format(struct ra* ra, uint32_t drm_format, uint64_t modifier)
+bool ra_compatible_format(struct ra *ra, uint32_t drm_format, uint64_t modifier)
 {
-    struct priv* p = ra->priv;
+    struct priv *p = ra->priv;
     struct vo_wayland_state *wl = p->vo->wl;
-    const wayland_format *formats = wl->format_map;
-
-    for (int i = 0; i < wl->format_size / sizeof(wayland_format); i++) {
-        if (drm_format == formats[i].format && modifier == formats[i].modifier)
-            return true;
-    }
-
-    return false;
+    return vo_wayland_valid_format(wl, drm_format, modifier);
 }
 
 static struct ra_fns ra_fns_wldmabuf = {

@@ -8,7 +8,7 @@ You can encode files from one format/codec to another using this facility.
 
 ``--of=<format>``
     Specifies the output format (overrides autodetection by the file name
-    extension of the file specified by ``-o``). See ``--of=help`` for a full
+    extension of the file specified by ``--o``). See ``--of=help`` for a full
     list of supported formats.
 
 ``--ofopts=<options>``
@@ -28,10 +28,6 @@ You can encode files from one format/codec to another using this facility.
     Specifies the output audio codec. See ``--oac=help`` for a full list of
     supported codecs.
 
-``--oaoffset=<value>``
-    Shifts audio data by the given time (in seconds) by adding/removing
-    samples at the start. Deprecated.
-
 ``--oacopts=<options>``
     Specifies the output audio codec options for libavcodec.
     See ``--oacopts=help`` for a full list of supported options.
@@ -50,17 +46,9 @@ You can encode files from one format/codec to another using this facility.
     ``--oacopts=""``
         Completely empties the options list.
 
-``--oafirst``
-    Force the audio stream to become the first stream in the output.
-    By default, the order is unspecified. Deprecated.
-
 ``--ovc=<codec>``
     Specifies the output video codec. See ``--ovc=help`` for a full list of
     supported codecs.
-
-``--ovoffset=<value>``
-    Shifts video data by the given time (in seconds) by shifting the pts
-    values. Deprecated.
 
 ``--ovcopts=<options>``
     Specifies the output video codec options for libavcodec.
@@ -83,19 +71,14 @@ You can encode files from one format/codec to another using this facility.
     ``--ovcopts=""``
         Completely empties the options list.
 
-``--ovfirst``
-    Force the video stream to become the first stream in the output.
-    By default, the order is unspecified. Deprecated.
-
 ``--orawts``
     Copies input pts to the output video (not supported by some output
     container formats, e.g. AVI). In this mode, discontinuities are not fixed
     and all pts are passed through as-is. Never seek backwards or use multiple
     input files in this mode!
 
-``--no-ocopy-metadata``
-    Turns off copying of metadata from input files to output files when
-    encoding (which is enabled by default).
+``--ocopy-metadata=<yes|no>``
+    Copy metadata from input files to output files when encoding (default: yes).
 
 ``--oset-metadata=<metadata-tag[,metadata-tag,...]>``
     Specifies metadata to include in the output file.

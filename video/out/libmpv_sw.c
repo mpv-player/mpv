@@ -1,4 +1,4 @@
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "libmpv.h"
 #include "sub/osd.h"
 #include "video/sws_utils.h"
@@ -162,7 +162,7 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
 
     struct mp_image *img = frame->current;
     if (img) {
-        assert(p->src_params.imgfmt);
+        mp_assert(p->src_params.imgfmt);
 
         mp_image_clear_rc_inv(&wrap_img, p->dst_rc);
 

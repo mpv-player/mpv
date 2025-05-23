@@ -162,7 +162,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     ID3D11Device_GetImmediateContext(o->dev11, &p->ctx11);
 
     mapper->dst_params = mapper->src_params;
-    mapper->dst_params.imgfmt = IMGFMT_RGB0;
+    mapper->dst_params.imgfmt = IMGFMT_BGR0;
     mapper->dst_params.hw_subfmt = 0;
     return 0;
 }
@@ -189,7 +189,7 @@ static struct queue_surf *surf_create(struct ra_hwdec_mapper *mapper)
     bool success = false;
     HRESULT hr;
 
-    struct queue_surf *surf = talloc_ptrtype(p, surf);
+    struct queue_surf *surf = talloc_zero_ptrtype(p, surf);
 
     D3D11_TEXTURE2D_DESC desc11 = {
         .Width = mapper->src->w,
@@ -466,6 +466,7 @@ const struct ra_hwdec_driver ra_hwdec_dxva2dxgi = {
     .name = "dxva2-dxgi",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_DXVA2, 0},
+    .device_type = AV_HWDEVICE_TYPE_DXVA2,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

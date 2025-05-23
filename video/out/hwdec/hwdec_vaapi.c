@@ -18,10 +18,10 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h>
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_vaapi.h>
+#include <libavutil/pixdesc.h>
 #include <va/va_drmcommon.h>
 
 #include "config.h"
@@ -33,7 +33,7 @@
 #include "video/vaapi.h"
 
 #if HAVE_VAAPI_DRM
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #endif
 
 #if HAVE_VAAPI_X11
@@ -85,16 +85,18 @@ static const struct va_create_native create_native_cbs[] = {
 #if HAVE_VAAPI_DRM
     {"drm",     create_drm_va_display},
 #endif
+    {0}
 };
 
 static VADisplay *create_native_va_display(struct ra *ra, struct mp_log *log)
 {
-    for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
-        const struct va_create_native *disp = &create_native_cbs[n];
+    const struct va_create_native *disp = create_native_cbs;
+    while (disp->name) {
         mp_verbose(log, "Trying to open a %s VA display...\n", disp->name);
         VADisplay *display = disp->create(ra);
         if (display)
             return display;
+        disp++;
     }
     return NULL;
 }
@@ -113,27 +115,58 @@ struct priv_owner {
 static void uninit(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
-    if (p->ctx)
+    if (p->ctx) {
         hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
+        if (p->ctx->hwctx.conversion_config) {
+            AVVAAPIHWConfig *hwconfig = p->ctx->hwctx.conversion_config;
+            vaDestroyConfig(p->ctx->display, hwconfig->config_id);
+            av_freep(&p->ctx->hwctx.conversion_config);
+        }
+    }
     va_destroy(p->ctx);
 }
 
-const static dmabuf_interop_init interop_inits[] = {
+static const dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif
-#if HAVE_DMABUF_INTEROP_PL
     dmabuf_interop_pl_init,
-#endif
 #if HAVE_DMABUF_WAYLAND
     dmabuf_interop_wl_init,
 #endif
     NULL
 };
 
+static struct mp_conversion_filter *get_conversion_filter_desc(int target_imgfmt)
+{
+    const AVPixFmtDescriptor *pixfmt_desc = av_pix_fmt_desc_get(imgfmt2pixfmt(target_imgfmt));
+    if (!pixfmt_desc)
+        return NULL;
+
+    bool rgb = pixfmt_desc->flags & AV_PIX_FMT_FLAG_RGB;
+
+    struct mp_conversion_filter *desc = talloc_ptrtype(NULL, desc);
+    desc->name = "scale_vaapi";
+    desc->args = talloc_array_ptrtype(desc, desc->args, rgb ? 5 : 3);
+
+    int i = 0;
+    desc->args[i++] = "format";
+    desc->args[i++] = (char *)pixfmt_desc->name;
+    if (rgb) {
+        desc->args[i++] = "out_range";
+        desc->args[i++] = "full";
+    }
+    desc->args[i++] = NULL;
+
+    return desc;
+}
+
+static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt);
+
 static int init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
+    VAStatus status;
 
     for (int i = 0; interop_inits[i]; i++) {
         if (interop_inits[i](hw, &p->dmabuf_interop)) {
@@ -171,12 +204,25 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
+    VAConfigID config_id;
+    AVVAAPIHWConfig *hwconfig = NULL;
+    status = vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc, NULL,
+                         0, &config_id);
+    if (status == VA_STATUS_SUCCESS) {
+        hwconfig = av_hwdevice_hwconfig_alloc(p->ctx->av_device_ref);
+        hwconfig->config_id = config_id;
+    }
+
     // it's now safe to set the display resource
     ra_add_native_resource(hw->ra_ctx->ra, "VADisplay", p->display);
 
     p->ctx->hwctx.hw_imgfmt = IMGFMT_VAAPI;
     p->ctx->hwctx.supported_formats = p->formats;
+    p->ctx->hwctx.try_upload = try_format_upload;
+    p->ctx->hwctx.try_upload_priv = p;
     p->ctx->hwctx.driver_name = hw->driver->name;
+    p->ctx->hwctx.get_conversion_filter = get_conversion_filter_desc;
+    p->ctx->hwctx.conversion_config = hwconfig;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;
 }
@@ -226,7 +272,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
 
     if (mapper->ra->num_formats &&
             !ra_get_imgfmt_desc(mapper->ra, mapper->dst_params.imgfmt, &desc))
-       return -1;
+        return -1;
 
     p->num_planes = desc.num_planes;
     mp_image_set_params(&p->layout, &mapper->dst_params);
@@ -245,10 +291,10 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
     return 0;
 }
 
-static void close_file_descriptors(VADRMPRIMESurfaceDescriptor desc)
+static void close_file_descriptors(const VADRMPRIMESurfaceDescriptor *desc)
 {
-    for (int i = 0; i < desc.num_objects; i++)
-        close(desc.objects[i].fd);
+    for (int i = 0; i < desc->num_objects; i++)
+        close(desc->objects[i].fd);
 }
 
 static int mapper_map(struct ra_hwdec_mapper *mapper)
@@ -269,7 +315,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     if (!CHECK_VA_STATUS_LEVEL(mapper, "vaExportSurfaceHandle()",
                                p_owner->probing_formats ? MSGL_DEBUG : MSGL_ERR))
     {
-        close_file_descriptors(desc);
+        close_file_descriptors(&desc);
         goto err;
     }
     vaSyncSurface(display, va_surface_id(mapper->src));
@@ -392,6 +438,53 @@ err:
     talloc_free(s);
     av_frame_free(&frame);
     av_buffer_unref(&fref);
+}
+
+static bool try_format_upload(void *priv, enum mp_imgfmt src_fmt, enum mp_imgfmt dst_fmt)
+{
+    if (IMGFMT_IS_HWACCEL(src_fmt))
+        return true;
+
+    bool ret = false;
+    struct mp_image *src = NULL;
+    struct mp_image *dst = NULL;
+    AVBufferRef *hw_pool = NULL;
+    VADRMPRIMESurfaceDescriptor desc = {0};
+
+    if (!(src = mp_image_alloc(src_fmt, 16, 16)))
+        goto end;
+
+    struct priv_owner *p = priv;
+    if (!(hw_pool = av_hwframe_ctx_alloc(p->ctx->av_device_ref)))
+        goto end;
+
+    if (!mp_update_av_hw_frames_pool(&hw_pool, p->ctx->av_device_ref, IMGFMT_VAAPI,
+                                     dst_fmt, src->w, src->h, false))
+    {
+        goto end;
+    }
+
+    if (!(dst = mp_av_pool_image_hw_upload(hw_pool, src)))
+        goto end;
+
+    uint32_t flags = p->dmabuf_interop.composed_layers ?
+        VA_EXPORT_SURFACE_COMPOSED_LAYERS : VA_EXPORT_SURFACE_SEPARATE_LAYERS;
+    VAStatus status = vaExportSurfaceHandle(p->display, va_surface_id(dst),
+                                            VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2,
+                                            flags | VA_EXPORT_SURFACE_READ_ONLY, &desc);
+
+    if (status != VA_STATUS_SUCCESS)
+        goto end;
+
+    ret = true;
+
+end:
+    close_file_descriptors(&desc);
+    av_buffer_unref(&hw_pool);
+    mp_image_unrefp(&dst);
+    mp_image_unrefp(&src);
+
+    return ret;
 }
 
 static void try_format_config(struct ra_hwdec *hw, AVVAAPIHWConfig *hwconfig)
@@ -529,6 +622,7 @@ const struct ra_hwdec_driver ra_hwdec_vaapi = {
     .name = "vaapi",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_VAAPI, 0},
+    .device_type = AV_HWDEVICE_TYPE_VAAPI,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

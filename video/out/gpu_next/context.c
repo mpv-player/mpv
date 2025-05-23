@@ -88,6 +88,7 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
     ctx->swapchain = pl_d3d11_create_swapchain(d3d11,
         pl_d3d11_swapchain_params(
             .swapchain = swapchain,
+            .disable_10bit_sdr = ra_d3d11_ctx_prefer_8bit_output_format(ctx->ra_ctx),
         )
     );
     if (!ctx->swapchain) {
@@ -106,13 +107,10 @@ err_out:
 }
 #endif // HAVE_D3D11
 
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
+struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
 {
     struct gpu_ctx *ctx = talloc_zero(NULL, struct gpu_ctx);
     ctx->log = vo->log;
-
-    struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, vo->global, &ra_ctx_conf);
-    ctx_opts->want_alpha = gl_opts->alpha_mode == ALPHA_YES;
     ctx->ra_ctx = ra_ctx_create(vo, *ctx_opts);
     if (!ctx->ra_ctx)
         goto err_out;
@@ -145,18 +143,17 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts)
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
         struct GL *gl = ra_gl_get(ctx->ra_ctx->ra);
-        pl_opengl opengl = pl_opengl_create(ctx->pllog,
-            pl_opengl_params(
-                .debug = ctx_opts->debug,
-                .allow_software = ctx_opts->allow_sw,
-                .get_proc_addr_ex = (void *) gl->get_fn,
-                .proc_ctx = gl->fn_ctx,
-# if HAVE_EGL
-                .egl_display = eglGetCurrentDisplay(),
-                .egl_context = eglGetCurrentContext(),
-# endif
-            )
+        struct pl_opengl_params params = *pl_opengl_params(
+            .debug = ctx_opts->debug,
+            .allow_software = ctx_opts->allow_sw,
+            .get_proc_addr_ex = (void *) gl->get_fn,
+            .proc_ctx = gl->fn_ctx,
         );
+# if HAVE_EGL
+        params.egl_display = eglGetCurrentDisplay();
+        params.egl_context = eglGetCurrentContext();
+# endif
+        pl_opengl opengl = pl_opengl_create(ctx->pllog, &params);
         if (!opengl)
             goto err_out;
         ctx->gpu = opengl->gpu;

@@ -83,7 +83,8 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 void mp_input_put_key(struct input_ctx *ictx, int code);
 
 // Like mp_input_put_key(), but ignore mouse disable option for mouse buttons.
-void mp_input_put_key_artificial(struct input_ctx *ictx, int code);
+// value can be used like with mp_input_put_wheel(), use 1 if not applicable.
+void mp_input_put_key_artificial(struct input_ctx *ictx, int code, double value);
 
 // Like mp_input_put_key(), but process all UTF-8 characters in the given
 // string as key events.
@@ -94,12 +95,22 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value);
 
 // Update mouse position (in window coordinates).
-void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet);
 
 // Like mp_input_set_mouse_pos(), but ignore mouse disable option.
 void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y);
 
 void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y, int *hover);
+
+// Add/Update/Remove a touch point (in window coordinates).
+void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y);
+void mp_input_update_touch_point(struct input_ctx *ictx, int id, int x, int y);
+void mp_input_remove_touch_point(struct input_ctx *ictx, int id);
+
+// Get the positions of the touch points. xs and ys are arrays of at least
+// count elements. ids is an array of at least count elements to uniquely
+// identify touch points. Return the current number of touch points.
+int mp_input_get_touch_pos(struct input_ctx *ictx, int count, int *xs, int *ys, int *ids);
 
 // Return whether we want/accept mouse input.
 bool mp_input_mouse_enabled(struct input_ctx *ictx);
@@ -177,7 +188,11 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
                                 void (*wakeup_cb)(void *ctx),
                                 void *wakeup_ctx);
 
+// Load the configured input.conf files.
 void mp_input_load_config(struct input_ctx *ictx);
+
+// Load a specific input.conf file.
+bool mp_input_load_config_file(struct input_ctx *ictx, char *file);
 
 void mp_input_update_opts(struct input_ctx *ictx);
 
@@ -200,8 +215,9 @@ bool mp_input_use_media_keys(struct input_ctx *ictx);
 // Like mp_input_parse_cmd_strv, but also run the command.
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd);
 
-// Binds a command to a key.
-void mp_input_bind_key(struct input_ctx *ictx, int key, bstr command);
+// Binds a command to a key. Returns true if the bind is successful.
+bool mp_input_bind_key(struct input_ctx *ictx, const char *key, bstr command,
+                       const char *desc);
 
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
 

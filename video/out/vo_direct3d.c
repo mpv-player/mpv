@@ -102,6 +102,7 @@ typedef struct d3d_priv {
     struct mp_osd_res osd_res;
     int image_format;           /**< mplayer image format */
     struct mp_image_params params;
+    struct mp_image_params dst_params;
 
     D3DFORMAT movie_src_fmt;        /**< Movie colorspace format (depends on
                                     the movie's codec) */
@@ -373,7 +374,7 @@ static void destroy_d3d_surfaces(d3d_priv *priv)
 // Allocate video surface.
 static bool d3d_configure_video_objects(d3d_priv *priv)
 {
-    assert(priv->image_format != 0);
+    mp_assert(priv->image_format != 0);
 
     if (!priv->d3d_surface &&
         FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(
@@ -472,7 +473,7 @@ static bool init_d3d(d3d_priv *priv)
         return false;
     }
 
-    /* Store relevant information reguarding caps of device */
+    /* Store relevant information regarding caps of device */
     texture_caps                  = disp_caps.TextureCaps;
     dev_caps                      = disp_caps.DevCaps;
     priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&
@@ -850,9 +851,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     d3d_priv *priv = vo->priv;
 
     switch (request) {
-    case VOCTRL_REDRAW_FRAME:
-        d3d_draw_frame(priv);
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
         priv->vo->want_redraw = true;
@@ -898,6 +896,18 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     if (!resize_d3d(priv))
         return VO_ERROR;
+
+    priv->dst_params = *params;
+    for (const struct fmt_entry *cur = &fmt_table[0]; cur->mplayer_fmt; ++cur) {
+        if (cur->fourcc == priv->desktop_fmt) {
+            priv->dst_params.imgfmt = cur->mplayer_fmt;
+            break;
+        }
+    }
+    mp_image_params_guess_csp(&priv->dst_params);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &priv->dst_params;
+    mp_mutex_unlock(&vo->params_mutex);
 
     return 0; /* Success */
 }
@@ -993,7 +1003,7 @@ static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
     return true;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
@@ -1003,17 +1013,20 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (!get_video_buffer(priv, &buffer))
         goto done;
 
-    mp_image_copy(&buffer, mpi);
+    if (!frame->current)
+        goto done;
+
+    mp_image_copy(&buffer, frame->current);
 
     d3d_unlock_video_objects(priv);
 
     priv->have_image = true;
-    priv->osd_pts = mpi->pts;
+    priv->osd_pts = frame->current->pts;
 
     d3d_draw_frame(priv);
 
 done:
-    talloc_free(mpi);
+    return VO_TRUE;
 }
 
 static mp_image_t *get_window_screenshot(d3d_priv *priv)
@@ -1081,8 +1094,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     return image;
 
 error_exit:
-    if (image)
-        talloc_free(image);
+    talloc_free(image);
     if (surface)
         IDirect3DSurface9_Release(surface);
     return NULL;
@@ -1242,7 +1254,7 @@ const struct vo_driver video_out_direct3d = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),

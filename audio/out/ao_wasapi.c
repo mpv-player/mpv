@@ -36,7 +36,8 @@ static UINT64 uint64_scale(UINT64 x, UINT64 num, UINT64 den)
         + ((x % den) * (num % den)) / den;
 }
 
-static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
+static HRESULT get_device_delay(struct wasapi_state *state, double *delay_ns)
+{
     UINT64 sample_count = atomic_load(&state->sample_count);
     UINT64 position, qpc_position;
     HRESULT hr;
@@ -54,7 +55,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
                                           state->format.Format.nSamplesPerSec,
                                           state->clock_frequency);
     INT64 diff = sample_count - sample_position;
-    *delay_us = diff * 1e6 / state->format.Format.nSamplesPerSec;
+    *delay_ns = diff * 1e9 / state->format.Format.nSamplesPerSec;
 
     // Correct for any delay in IAudioClock_GetPosition above.
     // This should normally be very small (<1 us), but just in case. . .
@@ -65,16 +66,16 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     // ignore the above calculation if it yields more than 10 seconds (due to
     // possible overflow inside IAudioClock_GetPosition)
     if (qpc_diff < 10 * 10000000) {
-        *delay_us -= qpc_diff / 10.0; // convert to us
+        *delay_ns -= qpc_diff * 100.0; // convert to ns
     } else {
         MP_VERBOSE(state, "Insane qpc delay correction of %g seconds. "
                    "Ignoring it.\n", qpc_diff / 10000000.0);
     }
 
-    if (sample_count > 0 && *delay_us <= 0) {
-        MP_WARN(state, "Under-run: Device delay: %g us\n", *delay_us);
+    if (sample_count > 0 && *delay_ns <= 0) {
+        MP_WARN(state, "Under-run: Device delay: %g ns\n", *delay_ns);
     } else {
-        MP_TRACE(state, "Device delay: %g us\n", *delay_us);
+        MP_TRACE(state, "Device delay: %g ns\n", *delay_ns);
     }
 
     return S_OK;
@@ -116,11 +117,11 @@ static bool thread_feed(struct ao *ao)
     MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
              frame_count, padding);
 
-    double delay_us;
-    hr = get_device_delay(state, &delay_us);
+    double delay_ns;
+    hr = get_device_delay(state, &delay_ns);
     EXIT_ON_ERROR(hr);
     // add the buffer delay
-    delay_us += frame_count * 1e6 / state->format.Format.nSamplesPerSec;
+    delay_ns += frame_count * 1e9 / state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
@@ -131,7 +132,7 @@ static bool thread_feed(struct ao *ao)
 
     ao_read_data_converted(ao, &state->convert_format,
                            (void **)data, frame_count,
-                           mp_time_us() + (int64_t)llrint(delay_us));
+                           mp_time_ns() + (int64_t)llrint(delay_ns));
 
     // note, we can't use ao_read_data return value here since we already
     // committed to frame_count above in the GetBuffer call
@@ -149,14 +150,32 @@ exit_label:
     return false;
 }
 
+static void thread_pause(struct ao *ao)
+{
+    struct wasapi_state *state = ao->priv;
+    MP_DBG(state, "Thread Pause\n");
+    HRESULT hr = IAudioClient_Stop(state->pAudioClient);
+    if (FAILED(hr))
+        MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
+}
+
+static void thread_unpause(struct ao *ao)
+{
+    struct wasapi_state *state = ao->priv;
+    MP_DBG(state, "Thread Unpause\n");
+    HRESULT hr = IAudioClient_Start(state->pAudioClient);
+    if (FAILED(hr)) {
+        MP_ERR(state, "IAudioClient_Start returned %s\n",
+               mp_HRESULT_to_str(hr));
+    }
+}
+
 static void thread_reset(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     HRESULT hr;
     MP_DBG(state, "Thread Reset\n");
-    hr = IAudioClient_Stop(state->pAudioClient);
-    if (FAILED(hr))
-        MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
+    thread_pause(ao);
 
     hr = IAudioClient_Reset(state->pAudioClient);
     if (FAILED(hr))
@@ -171,19 +190,14 @@ static void thread_resume(struct ao *ao)
     MP_DBG(state, "Thread Resume\n");
     thread_reset(ao);
     thread_feed(ao);
-
-    HRESULT hr = IAudioClient_Start(state->pAudioClient);
-    if (FAILED(hr)) {
-        MP_ERR(state, "IAudioClient_Start returned %s\n",
-               mp_HRESULT_to_str(hr));
-    }
+    thread_unpause(ao);
 }
 
 static void thread_wakeup(void *ptr)
 {
     struct ao *ao = ptr;
     struct wasapi_state *state = ao->priv;
-    SetEvent(state->hWake);
+    SetEvent(state->hUserWake);
 }
 
 static void set_thread_state(struct ao *ao,
@@ -198,7 +212,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     struct wasapi_state *state = ao->priv;
-    mpthread_set_name("wasapi event");
+    mp_thread_set_name("ao/wasapi");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ok = wasapi_thread_init(ao);
@@ -208,17 +222,25 @@ static DWORD __stdcall AudioThread(void *lpParameter)
 
     MP_DBG(ao, "Entering dispatch loop\n");
     while (true) {
-        if (WaitForSingleObject(state->hWake, INFINITE) != WAIT_OBJECT_0)
-            MP_ERR(ao, "Unexpected return value from WaitForSingleObject\n");
+        HANDLE handles[] = {state->hWake, state->hUserWake};
+        switch (WaitForMultipleObjects(MP_ARRAY_SIZE(handles), handles, FALSE, INFINITE)) {
+        case WAIT_OBJECT_0:
+            // fill twice on under-full buffer (see comment in thread_feed)
+            if (thread_feed(ao) && thread_feed(ao))
+                MP_ERR(ao, "Unable to fill buffer fast enough\n");
+            continue;
+        case WAIT_OBJECT_0 + 1:
+            break;
+        default:
+            MP_ERR(ao, "Unexpected return value from WaitForMultipleObjects\n");
+            break;
+        }
 
         mp_dispatch_queue_process(state->dispatch, 0);
 
         int thread_state = atomic_load(&state->thread_state);
         switch (thread_state) {
         case WASAPI_THREAD_FEED:
-            // fill twice on under-full buffer (see comment in thread_feed)
-            if (thread_feed(ao) && thread_feed(ao))
-                MP_ERR(ao, "Unable to fill buffer fast enough\n");
             break;
         case WASAPI_THREAD_RESET:
             thread_reset(ao);
@@ -229,6 +251,12 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         case WASAPI_THREAD_SHUTDOWN:
             thread_reset(ao);
             goto exit_label;
+        case WASAPI_THREAD_PAUSE:
+            thread_pause(ao);
+            break;
+        case WASAPI_THREAD_UNPAUSE:
+            thread_unpause(ao);
+            break;
         default:
             MP_ERR(ao, "Unhandled thread state: %d\n", thread_state);
         }
@@ -248,7 +276,7 @@ static void uninit(struct ao *ao)
 {
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = ao->priv;
-    if (state->hWake)
+    if (state->hWake && state->hUserWake)
         set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
     if (state->hAudioThread &&
@@ -260,6 +288,7 @@ static void uninit(struct ao *ao)
 
     SAFE_DESTROY(state->hInitDone,   CloseHandle(state->hInitDone));
     SAFE_DESTROY(state->hWake,       CloseHandle(state->hWake));
+    SAFE_DESTROY(state->hUserWake,   CloseHandle(state->hUserWake));
     SAFE_DESTROY(state->hAudioThread,CloseHandle(state->hAudioThread));
 
     wasapi_change_uninit(ao);
@@ -293,7 +322,8 @@ static int init(struct ao *ao)
 
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
-    if (!state->hInitDone || !state->hWake) {
+    state->hUserWake = CreateEventW(NULL, FALSE, FALSE, NULL);
+    if (!state->hInitDone || !state->hWake || !state->hUserWake) {
         MP_FATAL(ao, "Error creating events\n");
         uninit(ao);
         return -1;
@@ -348,7 +378,7 @@ static int thread_control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg
     case AOCONTROL_GET_VOLUME:
         IAudioEndpointVolume_GetMasterVolumeLevelScalar(
             state->pEndpointVolume, &volume);
-        *(float *)arg = volume;
+        *(float *)arg = volume * 100.f;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
         volume = (*(float *)arg) / 100.f;
@@ -378,7 +408,7 @@ static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
     switch(cmd) {
     case AOCONTROL_GET_VOLUME:
         ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume, &volume);
-        *(float *)arg = volume;
+        *(float *)arg = volume * 100.f;
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
         volume = (*(float *)arg) / 100.f;
@@ -417,7 +447,7 @@ static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
         MP_WARN(ao, "Error setting audio session name: %s\n",
                 mp_HRESULT_to_str(hr));
 
-        assert(ao->client_name);
+        mp_assert(ao->client_name);
         if (!ao->client_name)
             return CONTROL_ERROR;
 
@@ -463,6 +493,12 @@ static void audio_resume(struct ao *ao)
     set_thread_state(ao, WASAPI_THREAD_RESUME);
 }
 
+static bool audio_set_pause(struct ao *ao, bool paused)
+{
+    set_thread_state(ao, paused ? WASAPI_THREAD_PAUSE : WASAPI_THREAD_UNPAUSE);
+    return true;
+}
+
 static void hotplug_uninit(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug uninit\n");
@@ -496,8 +532,15 @@ const struct ao_driver audio_out_wasapi = {
     .control        = control,
     .reset          = audio_reset,
     .start          = audio_resume,
+    .set_pause      = audio_set_pause,
     .list_devs      = wasapi_list_devs,
     .hotplug_init   = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
     .priv_size      = sizeof(wasapi_state),
+    .options_prefix = "wasapi",
+    .options        = (const struct m_option[]) {
+        {"exclusive-buffer", OPT_CHOICE(opt_exclusive_buffer,
+            {"default", 0}, {"min", -1}), M_RANGE(1, 2000000)},
+        {0}
+    },
 };

@@ -17,49 +17,49 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <windows.h>
+
 #include "misc/language.h"
-#include "mpv_talloc.h"
+#include "misc/mp_assert.h"
 #include "osdep/io.h"
 
-#include <windows.h>
+
+static void apppend_langs(char ***ret, size_t *ret_count, wchar_t *buf, ULONG count)
+{
+    for (ULONG pos = 0, i = 0; i < count; ++i) {
+        mp_assert(buf[pos]);
+        char *item = mp_to_utf8(NULL, buf + pos);
+        MP_TARRAY_APPEND(NULL, *ret, *ret_count, item);
+        talloc_steal(*ret, item);
+    }
+}
 
 char **mp_get_user_langs(void)
 {
-    size_t nb = 0;
     char **ret = NULL;
-    ULONG got_count = 0;
-    ULONG got_size = 0;
-    if (!GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &got_count, NULL, &got_size) ||
-        got_size == 0)
-        return NULL;
+    size_t ret_count = 0;
+    wchar_t *buf = NULL;
+    ULONG size, count;
 
-    wchar_t *buf = talloc_array(NULL, wchar_t, got_size);
+    if (!GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, NULL, &size))
+        goto done;
 
-    if (!GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &got_count, buf, &got_size) ||
-        got_size == 0)
-        goto cleanup;
+    MP_TARRAY_GROW(NULL, buf, size);
+    if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
+        apppend_langs(&ret, &ret_count, buf, count);
 
-    for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
-        ret = talloc_realloc(NULL, ret, char*, (nb + 2));
-        ret[nb++] = mp_to_utf8(ret, buf + pos);
-    }
-    ret[nb] = NULL;
+    size = 0;
+    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, NULL, &size))
+        goto done;
 
-    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &got_count, NULL, &got_size))
-        goto cleanup;
+    MP_TARRAY_GROW(NULL, buf, size);
+    if (GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
+        apppend_langs(&ret, &ret_count, buf, count);
 
-    buf = talloc_realloc(NULL, buf, wchar_t, got_size);
+done:
+    if (ret_count)
+        MP_TARRAY_APPEND(NULL, ret, ret_count, NULL);
 
-    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &got_count, buf, &got_size))
-        goto cleanup;
-
-    for (ULONG pos = 0; buf[pos]; pos += wcslen(buf + pos) + 1) {
-        ret = talloc_realloc(NULL, ret, char*, (nb + 2));
-        ret[nb++] = mp_to_utf8(ret, buf + pos);
-    }
-    ret[nb] = NULL;
-
-cleanup:
     talloc_free(buf);
     return ret;
 }

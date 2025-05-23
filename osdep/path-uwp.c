@@ -27,9 +27,13 @@ WINBASEAPI DWORD WINAPI GetCurrentDirectoryW(DWORD nBufferLength, LPWSTR lpBuffe
 const char *mp_get_platform_path_uwp(void *talloc_ctx, const char *type)
 {
     if (strcmp(type, "home") == 0) {
-        wchar_t homeDir[_MAX_PATH];
-        if (GetCurrentDirectoryW(_MAX_PATH, homeDir) != 0)
-            return mp_to_utf8(talloc_ctx, homeDir);
+        DWORD count = GetCurrentDirectoryW(0, NULL);
+        wchar_t *home_dir = talloc_array(NULL, wchar_t, count);
+        if (GetCurrentDirectoryW(count, home_dir) != 0) {
+            char *ret = mp_to_utf8(talloc_ctx, home_dir);
+            talloc_free(home_dir);
+            return ret;
+        }
     }
     return NULL;
 }

@@ -57,7 +57,7 @@ void repack_line(struct mp_repack *rp, int dst_x, int dst_y,
 // not respected - the caller needs to make sure dst is always writable.
 // The images can have different sizes (as repack_line() lets you use different
 // target coordinates for dst/src).
-// This also allocaters potentially required temporary buffers.
+// This also allocates potentially required temporary buffers.
 //  dst_flags: REPACK_BUF_* flags for dst
 //  dst: where repack_line() writes to
 //  src_flags: REPACK_BUF_* flags for src

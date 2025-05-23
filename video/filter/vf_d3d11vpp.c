@@ -34,18 +34,51 @@
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
-// missing in MinGW
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND 0x1
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB 0x2
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE 0x4
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION 0x8
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE 0x10
-#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION 0x20
+// For video processor extensions identifiers reference see:
+// https://chromium.googlesource.com/chromium/src/+/5f354f38/ui/gl/swap_chain_presenter.cc
+
+#ifndef NVIDIA_PPE_INTERFACE_GUID
+DEFINE_GUID(NVIDIA_PPE_INTERFACE_GUID,
+            0xd43ce1b3, 0x1f4b, 0x48ac, 0xba, 0xee,
+            0xc3, 0xc2, 0x53, 0x75, 0xe6, 0xf7);
+#endif
+
+#ifndef NVIDIA_TRUE_HDR_INTERFACE_GUID
+DEFINE_GUID(NVIDIA_TRUE_HDR_INTERFACE_GUID,
+            0xfdd62bb4, 0x620b, 0x4fd7, 0x9a, 0xb3,
+            0x1e, 0x59, 0xd0, 0xd5, 0x44, 0xb3);
+#endif
+
+#ifndef INTEL_VPE_INTERFACE_GUID
+DEFINE_GUID(INTEL_VPE_INTERFACE_GUID,
+            0xedd1d4b9, 0x8659, 0x4cbc, 0xa4, 0xd6,
+            0x98, 0x31, 0xa2, 0x16, 0x3a, 0xc3);
+#endif
+
+static const unsigned int intel_vpe_fn_version = 0x1;
+static const unsigned int intel_vpe_version    = 0x3;
+
+static const unsigned int intel_vpe_fn_scaling  = 0x37;
+static const unsigned int intel_vpe_scaling_vsr = 0x2;
+
+static const unsigned int intel_vpe_fn_mode      = 0x20;
+static const unsigned int intel_vpe_mode_preproc = 0x1;
+
+enum scaling_mode {
+    SCALING_BASIC,
+    SCALING_INTEL_VSR,
+    SCALING_NVIDIA_RTX,
+};
 
 struct opts {
     bool deint_enabled;
+    float scale;
+    int scaling_mode;
     bool interlaced_only;
     int mode;
+    int field_parity;
+    int format;
+    bool nvidia_true_hdr;
 };
 
 struct priv {
@@ -61,58 +94,17 @@ struct priv {
     ID3D11VideoProcessorEnumerator *vp_enum;
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
 
-    DXGI_FORMAT out_format;
-
     bool require_filtering;
 
     struct mp_image_params params, out_params;
     int c_w, c_h;
 
-    struct mp_image_pool *pool;
+    AVBufferRef *av_device_ref;
+    AVBufferRef *hw_pool;
 
     struct mp_refqueue *queue;
 };
 
-static void release_tex(void *arg)
-{
-    ID3D11Texture2D *texture = arg;
-
-    ID3D11Texture2D_Release(texture);
-}
-
-static struct mp_image *alloc_pool(void *pctx, int fmt, int w, int h)
-{
-    struct mp_filter *vf = pctx;
-    struct priv *p = vf->priv;
-    HRESULT hr;
-
-    ID3D11Texture2D *texture = NULL;
-    D3D11_TEXTURE2D_DESC texdesc = {
-        .Width = w,
-        .Height = h,
-        .Format = p->out_format,
-        .MipLevels = 1,
-        .ArraySize = 1,
-        .SampleDesc = { .Count = 1 },
-        .Usage = D3D11_USAGE_DEFAULT,
-        .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-    };
-    hr = ID3D11Device_CreateTexture2D(p->vo_dev, &texdesc, NULL, &texture);
-    if (FAILED(hr))
-        return NULL;
-
-    struct mp_image *mpi = mp_image_new_custom_ref(NULL, texture, release_tex);
-    MP_HANDLE_OOM(mpi);
-
-    mp_image_setfmt(mpi, IMGFMT_D3D11);
-    mp_image_set_size(mpi, w, h);
-    mpi->params.hw_subfmt = p->out_params.hw_subfmt;
-
-    mpi->planes[0] = (void *)texture;
-    mpi->planes[1] = (void *)(intptr_t)0;
-
-    return mpi;
-}
 
 static void flush_frames(struct mp_filter *vf)
 {
@@ -133,6 +125,99 @@ static void destroy_video_proc(struct mp_filter *vf)
     p->vp_enum = NULL;
 }
 
+static void enable_nvidia_rtx_extension(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct nvidia_ext {
+        unsigned int version;
+        unsigned int method;
+        unsigned int enable;
+    } ext = {1, 2, 1};
+
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     0,
+                                                                     &NVIDIA_PPE_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+
+    if (FAILED(hr)) {
+        MP_WARN(vf, "Failed to enable NVIDIA RTX Super Resolution: %s\n", mp_HRESULT_to_str(hr));
+    } else {
+        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled\n");
+    }
+}
+
+static void enable_nvidia_true_hdr(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct nvidia_ext {
+        unsigned int version;
+        unsigned int method;
+        unsigned int enable : 1;
+        unsigned int reserved : 31;
+    } ext = {4, 3, 1};
+
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     0,
+                                                                     &NVIDIA_TRUE_HDR_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+
+    if (FAILED(hr)) {
+        MP_WARN(vf, "Failed to enable NVIDIA RTX Video HDR: %s\n", mp_HRESULT_to_str(hr));
+    } else {
+        MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled\n");
+    }
+}
+
+static void enable_intel_vsr_extension(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    struct intel_vpe_ext {
+        unsigned int function;
+        const void* param;
+    } ext;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_version, &intel_vpe_version};
+    HRESULT hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     &INTEL_VPE_INTERFACE_GUID,
+                                                                     sizeof(ext),
+                                                                     &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_mode, &intel_vpe_mode_preproc};
+    hr = ID3D11VideoContext_VideoProcessorSetOutputExtension(p->video_ctx,
+                                                             p->video_proc,
+                                                             &INTEL_VPE_INTERFACE_GUID,
+                                                             sizeof(ext),
+                                                             &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    ext = (struct intel_vpe_ext){intel_vpe_fn_scaling, &intel_vpe_scaling_vsr};
+    hr = ID3D11VideoContext_VideoProcessorSetStreamExtension(p->video_ctx,
+                                                             p->video_proc,
+                                                             0,
+                                                             &INTEL_VPE_INTERFACE_GUID,
+                                                             sizeof(ext),
+                                                             &ext);
+    if (FAILED(hr))
+        goto failed;
+
+    MP_VERBOSE(vf, "Intel Video Super Resolution enabled\n");
+    return;
+
+failed:
+    MP_WARN(vf, "Failed to enable Intel Video Super Resolution: %s\n", mp_HRESULT_to_str(hr));
+}
+
 static int recreate_video_proc(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -144,13 +229,20 @@ static int recreate_video_proc(struct mp_filter *vf)
         .InputFrameFormat = p->d3d_frame_format,
         .InputWidth = p->c_w,
         .InputHeight = p->c_h,
-        .OutputWidth = p->params.w,
-        .OutputHeight = p->params.h,
+        .OutputWidth = p->out_params.w,
+        .OutputHeight = p->out_params.h,
     };
     hr = ID3D11VideoDevice_CreateVideoProcessorEnumerator(p->video_dev, &vpdesc,
                                                           &p->vp_enum);
     if (FAILED(hr))
         goto fail;
+
+    if (!p->opts->mode && p->opts->deint_enabled)
+        p->opts->mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+
+    int rindex = p->opts->mode ? -1 : 0;
+    if (rindex == 0)
+        goto create;
 
     D3D11_VIDEO_PROCESSOR_CAPS caps;
     hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorCaps(p->vp_enum, &caps);
@@ -160,7 +252,6 @@ static int recreate_video_proc(struct mp_filter *vf)
     MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
                (int)caps.RateConversionCapsCount, p->opts->mode);
 
-    int rindex = -1;
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
         hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorRateConversionCaps
@@ -182,6 +273,7 @@ static int recreate_video_proc(struct mp_filter *vf)
 
     // TODO: so, how do we select which rate conversion mode the processor uses?
 
+create:
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
     if (FAILED(hr)) {
@@ -210,8 +302,8 @@ static int recreate_video_proc(struct mp_filter *vf)
                                                          FALSE, 0);
 
     D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
-        .YCbCr_Matrix = p->params.color.space != MP_CSP_BT_601,
-        .Nominal_Range = p->params.color.levels == MP_CSP_LEVELS_TV ? 1 : 2,
+        .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
+        .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
     };
     ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
                                                          p->video_proc,
@@ -220,10 +312,56 @@ static int recreate_video_proc(struct mp_filter *vf)
                                                          p->video_proc,
                                                          &csp);
 
+    switch (p->opts->scaling_mode) {
+    case SCALING_INTEL_VSR:
+        enable_intel_vsr_extension(vf);
+        break;
+    case SCALING_NVIDIA_RTX:
+        enable_nvidia_rtx_extension(vf);
+        break;
+    }
+
+    if (p->opts->nvidia_true_hdr)
+        enable_nvidia_true_hdr(vf);
+
     return 0;
 fail:
     destroy_video_proc(vf);
     return -1;
+}
+
+static struct mp_image *alloc_out(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ref,
+                                     IMGFMT_D3D11, p->out_params.hw_subfmt,
+                                     p->out_params.w, p->out_params.h, false))
+    {
+        MP_ERR(vf, "Failed to create hw pool\n");
+        return NULL;
+    }
+
+    AVHWFramesContext *hw_frame_ctx = (void *)p->hw_pool->data;
+    AVD3D11VAFramesContext *d3d11va_frames_ctx = hw_frame_ctx->hwctx;
+    d3d11va_frames_ctx->BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+    AVFrame *av_frame = av_frame_alloc();
+    MP_HANDLE_OOM(av_frame);
+    if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
+        MP_ERR(vf, "Failed to allocate frame from hw pool\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+
+    struct mp_image *img = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!img) {
+        MP_ERR(vf, "Internal error when converting AVFrame\n");
+        return NULL;
+    }
+
+    return img;
 }
 
 static struct mp_image *render(struct mp_filter *vf)
@@ -234,7 +372,7 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
-    out = mp_image_pool_get(p->pool, IMGFMT_D3D11, p->params.w, p->params.h);
+    out = alloc_out(vf);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
         goto cleanup;
@@ -249,6 +387,12 @@ static struct mp_image *render(struct mp_filter *vf)
     int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
+    // mp_image_copy_attributes overwrites the height and width
+    // set it the size back if we are using scale
+    mp_image_set_size(out, p->out_params.w, p->out_params.h);
+    // mp_image_copy_attributes will set the crop value to the origin
+    // width and height, set the crop back to the default state
+    out->params.crop = p->out_params.crop;
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
     if (!mp_refqueue_should_deint(p->queue)) {
@@ -339,17 +483,28 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
 
     struct mp_image *in_fmt = mp_refqueue_execute_reinit(p->queue);
     if (in_fmt) {
-        mp_image_pool_clear(p->pool);
+        av_buffer_unref(&p->hw_pool);
 
         destroy_video_proc(vf);
 
         p->params = in_fmt->params;
         p->out_params = p->params;
+        p->out_params.w = (int)(p->opts->scale * p->params.w);
+        p->out_params.w += p->out_params.w % 2 != 0;
+        p->out_params.h = (int)(p->opts->scale * p->params.h);
+        p->out_params.h += p->out_params.h % 2 != 0;
+        p->out_params.crop.x0 = lrintf(p->opts->scale * p->out_params.crop.x0);
+        p->out_params.crop.x1 = lrintf(p->opts->scale * p->out_params.crop.x1);
+        p->out_params.crop.y0 = lrintf(p->opts->scale * p->out_params.crop.y0);
+        p->out_params.crop.y1 = lrintf(p->opts->scale * p->out_params.crop.y1);
 
-        p->out_params.hw_subfmt = IMGFMT_NV12;
-        p->out_format = DXGI_FORMAT_NV12;
+        if (p->opts->format)
+            p->out_params.hw_subfmt = p->opts->format;
 
-        p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt;
+        p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
+                               p->params.w != p->out_params.w ||
+                               p->params.h != p->out_params.h ||
+                               p->opts->nvidia_true_hdr;
     }
 
     if (!mp_refqueue_can_output(p->queue))
@@ -376,7 +531,8 @@ static void uninit(struct mp_filter *vf)
 
     flush_frames(vf);
     talloc_free(p->queue);
-    talloc_free(p->pool);
+    av_buffer_unref(&p->hw_pool);
+    av_buffer_unref(&p->av_device_ref);
 
     if (p->video_ctx)
         ID3D11VideoContext_Release(p->video_ctx);
@@ -434,10 +590,12 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
     struct mp_hwdec_ctx *hwctx =
-        hwdec_devices_get_by_imgfmt(info->hwdec_devs, IMGFMT_D3D11);
+        hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, IMGFMT_D3D11,
+                                             AV_HWDEVICE_TYPE_D3D11VA);
     if (!hwctx || !hwctx->av_device_ref)
         goto fail;
-    AVHWDeviceContext *avhwctx = (void *)hwctx->av_device_ref->data;
+    p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
+    AVHWDeviceContext *avhwctx = (void *)p->av_device_ref->data;
     AVD3D11VADeviceContext *d3dctx = avhwctx->hwctx;
 
     p->vo_dev = d3dctx->device;
@@ -458,10 +616,6 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     if (FAILED(hr))
         goto fail;
 
-    p->pool = mp_image_pool_new(f);
-    mp_image_pool_set_allocator(p->pool, alloc_pool, f);
-    mp_image_pool_set_lru(p->pool);
-
     mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
 
     mp_refqueue_set_refs(p->queue, 0, 0);
@@ -469,6 +623,7 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
         (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
         MP_MODE_OUTPUT_FIELDS |
         (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
+    mp_refqueue_set_parity(p->queue, p->opts->field_parity);
 
     return f;
 
@@ -479,7 +634,13 @@ fail:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
+    {"format", OPT_IMAGEFORMAT(format)},
     {"deint", OPT_BOOL(deint_enabled)},
+    {"scale", OPT_FLOAT(scale)},
+    {"scaling-mode", OPT_CHOICE(scaling_mode,
+        {"standard", SCALING_BASIC},
+        {"intel", SCALING_INTEL_VSR},
+        {"nvidia", SCALING_NVIDIA_RTX})},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
     {"mode", OPT_CHOICE(mode,
         {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
@@ -488,6 +649,11 @@ static const m_option_t vf_opts_fields[] = {
         {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
         {"ivctc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
         {"none", 0})},
+    {"parity", OPT_CHOICE(field_parity,
+        {"tff", MP_FIELD_PARITY_TFF},
+        {"bff", MP_FIELD_PARITY_BFF},
+        {"auto", MP_FIELD_PARITY_AUTO})},
+    {"nvidia-true-hdr", OPT_BOOL(nvidia_true_hdr)},
     {0}
 };
 
@@ -497,8 +663,11 @@ const struct mp_user_filter_entry vf_d3d11vpp = {
         .name = "d3d11vpp",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
-            .deint_enabled = true,
-            .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
+            .deint_enabled = false,
+            .scale = 1.0,
+            .scaling_mode = SCALING_BASIC,
+            .mode = 0,
+            .field_parity = MP_FIELD_PARITY_AUTO,
         },
         .options = vf_opts_fields,
     },

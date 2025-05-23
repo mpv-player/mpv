@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
@@ -62,7 +61,7 @@ static bool is_fast_dr(GL *gl)
 
 static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer)
 {
-    assert(framebuffer == 0);
+    mp_assert(framebuffer == 0);
 }
 
 #define FN_OFFS(name) offsetof(GL, name)
@@ -398,7 +397,7 @@ static const struct gl_functions gl_functions[] = {
         .provides = MPGL_CAP_NESTED_ARRAY,
     },
     // Swap control, always an OS specific extension
-    // The OSX code loads this manually.
+    // The macOS code loads this manually.
     {
         .extension = "GLX_SGI_swap_control",
         .functions = (const struct gl_function[]) {
@@ -626,7 +625,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                 }
                 break;
             }
-            assert(i < MAX_FN_COUNT);
+            mp_assert(i < MAX_FN_COUNT);
             loaded[i] = ptr;
         }
 

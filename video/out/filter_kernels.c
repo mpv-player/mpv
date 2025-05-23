@@ -5,10 +5,10 @@
  * (https://github.com/glumpy/glumpy/blob/master/glumpy/library/build-spatial-filters.py)
  *
  * Also see:
- * - http://vector-agg.cvs.sourceforge.net/viewvc/vector-agg/agg-2.5/include/agg_image_filters.h
+ * - https://sourceforge.net/p/agg/svn/HEAD/tree/agg-2.4/include/agg_image_filters.h
  * - Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
  *   dither plugin for avisynth from the same author:
- *   https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ *   https://gitlab.com/EleonoreMizo/fmtconv/-/tree/master/src/fmtc
  * - Paul Heckbert's "zoom"
  * - XBMC: ConvolutionKernels.cpp etc.
  *
@@ -32,23 +32,19 @@
 
 // NOTE: all filters are designed for discrete convolution
 
-const struct filter_window *mp_find_filter_window(const char *name)
+const struct filter_window *mp_find_filter_window(enum scaler_filter function)
 {
-    if (!name)
-        return NULL;
-    for (const struct filter_window *w = mp_filter_windows; w->name; w++) {
-        if (strcmp(w->name, name) == 0)
+    for (const struct filter_window *w = mp_filter_windows; w->function; w++) {
+        if (w->function == function)
             return w;
     }
     return NULL;
 }
 
-const struct filter_kernel *mp_find_filter_kernel(const char *name)
+const struct filter_kernel *mp_find_filter_kernel(enum scaler_filter function)
 {
-    if (!name)
-        return NULL;
-    for (const struct filter_kernel *k = mp_filter_kernels; k->f.name; k++) {
-        if (strcmp(k->f.name, name) == 0)
+    for (const struct filter_kernel *k = mp_filter_kernels; k->f.function; k++) {
+        if (k->f.function == function)
             return k;
     }
     return NULL;
@@ -59,17 +55,20 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name)
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
-    assert(filter->f.radius > 0);
+    mp_assert(filter->f.radius > 0);
+    double blur = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
+    filter->radius = blur * filter->f.radius;
+
     // Only downscaling requires widening the filter
     filter->filter_scale = MPMAX(1.0, inv_scale);
-    double src_radius = filter->f.radius * filter->filter_scale;
+    double src_radius = filter->radius * filter->filter_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
         filter->size = 1; // Not meaningful for EWA/polar scalers.
         // Safety precaution to avoid generating a gigantic shader
         if (src_radius > 16.0) {
             src_radius = 16.0;
-            filter->filter_scale = src_radius / filter->f.radius;
+            filter->filter_scale = src_radius / filter->radius;
             return false;
         }
         return true;
@@ -89,7 +88,7 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
-        filter->filter_scale = (filter->size/2.0) / filter->f.radius;
+        filter->filter_scale = (filter->size/2.0) / filter->radius;
         return false;
     }
 }
@@ -116,7 +115,7 @@ static double sample_window(struct filter_window *kernel, double x)
 static double sample_filter(struct filter_kernel *filter, double x)
 {
     // The window is always stretched to the entire kernel
-    double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
+    double w = sample_window(&filter->w, x / filter->radius * filter->w.radius);
     double k = w * sample_window(&filter->f, x);
     return k < 0 ? (1 - filter->clamp) * k : k;
 }
@@ -128,7 +127,7 @@ static double sample_filter(struct filter_kernel *filter, double x)
 static void mp_compute_weights(struct filter_kernel *filter, double f,
                                float *out_w)
 {
-    assert(filter->size > 0);
+    mp_assert(filter->size > 0);
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);
@@ -158,10 +157,10 @@ void mp_compute_lut(struct filter_kernel *filter, int count, int stride,
         filter->radius_cutoff = 0.0;
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
-            double r = x * filter->f.radius / (count - 1);
+            double r = x * filter->radius / (count - 1);
             out_array[x] = sample_filter(filter, r);
 
-            if (fabs(out_array[x]) > filter->value_cutoff)
+            if (fabs(out_array[x]) > 1e-3f)
                 filter->radius_cutoff = r;
         }
     } else {
@@ -211,15 +210,6 @@ static double quadric(params *p, double x)
         return 0.5 * t * t;
     }
     return 0.0;
-}
-
-#define POW3(x) ((x) <= 0 ? 0 : (x) * (x) * (x))
-static double bicubic(params *p, double x)
-{
-    return (1.0/6.0) * (      POW3(x + 2)
-                        - 4 * POW3(x + 1)
-                        + 6 * POW3(x)
-                        - 4 * POW3(x - 1));
 }
 
 static double bessel_i0(double x)
@@ -341,69 +331,81 @@ static double sphinx(params *p, double x)
 }
 
 const struct filter_window mp_filter_windows[] = {
-    {"box",            1,   box},
-    {"triangle",       1,   triangle},
-    {"bartlett",       1,   triangle},
-    {"cosine",         M_PI_2, cosine},
-    {"hanning",        1,   hanning},
-    {"tukey",          1,   hanning, .taper = 0.5},
-    {"hamming",        1,   hamming},
-    {"quadric",        1.5, quadric},
-    {"welch",          1,   welch},
-    {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
-    {"blackman",       1,   blackman, .params = {0.16, NAN} },
-    {"gaussian",       2,   gaussian, .params = {1.00, NAN} },
-    {"sinc",           1,   sinc},
-    {"jinc",           1.2196698912665045, jinc},
-    {"sphinx",         1.4302966531242027, sphinx},
+    {WINDOW_BOX,      1,   box},
+    {WINDOW_TRIANGLE, 1,   triangle},
+    {WINDOW_BARTLETT, 1,   triangle},
+    {WINDOW_COSINE,   M_PI_2, cosine},
+    {WINDOW_HANNING,  1,   hanning},
+    {WINDOW_TUKEY,    1,   hanning, .taper = 0.5},
+    {WINDOW_HAMMING,  1,   hamming},
+    {WINDOW_QUADRIC,  1.5, quadric},
+    {WINDOW_WELCH,    1,   welch},
+    {WINDOW_KAISER,   1,   kaiser,   .params = {6.33, NAN} },
+    {WINDOW_BLACKMAN, 1,   blackman, .params = {0.16, NAN} },
+    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN} },
+    {WINDOW_SINC,     1,   sinc},
+    {WINDOW_JINC,     1.2196698912665045, jinc},
+    {WINDOW_SPHINX,   1.4302966531242027, sphinx},
     {0}
 };
 
+#define JINC_R3 3.2383154841662362
+#define JINC_R4 4.2410628637960699
+
 const struct filter_kernel mp_filter_kernels[] = {
     // Spline filters
-    {{"spline16",       2,   spline16}},
-    {{"spline36",       3,   spline36}},
-    {{"spline64",       4,   spline64}},
+    {{SCALER_SPLINE16, 2, spline16}},
+    {{SCALER_SPLINE36, 3, spline36}},
+    {{SCALER_SPLINE64, 4, spline64}},
     // Sinc filters
-    {{"sinc",           2,  sinc, .resizable = true}},
-    {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
-    {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
+    {{SCALER_SINC,    2,  sinc, .resizable = true}},
+    {{SCALER_LANCZOS, 3,  sinc, .resizable = true}, .window = WINDOW_SINC},
+    {{SCALER_GINSENG, 3,  sinc, .resizable = true}, .window = WINDOW_JINC},
     // Jinc filters
-    {{"jinc",           3,  jinc, .resizable = true}, .polar = true},
-    {{"ewa_lanczos",    3,  jinc, .resizable = true}, .polar = true, .window = "jinc"},
-    {{"ewa_hanning",    3,  jinc, .resizable = true}, .polar = true, .window = "hanning" },
-    {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
-    // Radius is based on the true jinc radius, slightly sharpened as per
-    // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
-    {{"ewa_lanczossharp", 3.2383154841662362, jinc, .blur = 0.9812505644269356,
-          .resizable = true}, .polar = true, .window = "jinc"},
-    // Similar to the above, but softened instead. This one makes hash patterns
-    // disappear completely. Blur determined by trial and error.
-    {{"ewa_lanczossoft", 3.2383154841662362, jinc, .blur = 1.015,
-          .resizable = true}, .polar = true, .window = "jinc"},
+    {{SCALER_JINC,        JINC_R3, jinc, .resizable = true}, .polar = true},
+    {{SCALER_EWA_LANCZOS, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_JINC},
+    {{SCALER_EWA_HANNING, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_HANNING},
+    // See <https://legacy.imagemagick.org/Usage/filter/nicolas/#upsampling>
+    {{SCALER_EWA_GINSENG, JINC_R3, jinc, .resizable = true}, .polar = true, .window = WINDOW_SINC},
+    // Slightly sharpened to minimize the 1D step response error (to better
+    // preserve horizontal/vertical lines). Blur value determined by method
+    // originally developed by Nicolas Robidoux for Image Magick, see:
+    //   <https://www.imagemagick.org/discourse-server/viewtopic.php?p=89068#p89068>
+    {{SCALER_EWA_LANCZOSSHARP, JINC_R3, jinc, .blur = 0.9812505837223707, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
+    // Similar to the above, but sharpened substantially to the point of
+    // minimizing the total impulse response error on an integer grid. Tends
+    // to preserve hash patterns well. Very sharp but rings a lot. See:
+    //   <https://www.imagemagick.org/discourse-server/viewtopic.php?p=128587#p128587>
+    {{SCALER_EWA_LANCZOS4SHARPEST, JINC_R4, jinc, .blur = 0.8845120932605005, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
+    // Similar to the above, but softened instead, to make even/odd integer
+    // contributions exactly symmetrical. Designed to smooth out hash patterns.
+    {{SCALER_EWA_LANCZOSSOFT, JINC_R3, jinc, .blur = 1.0164667662867047, .resizable = true},
+        .polar = true, .window = WINDOW_JINC},
     // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
     // Blur parameter picked to match orthogonal and diagonal contributions
-    {{"haasnsoft", 3.2383154841662362, jinc, .blur = 1.11, .resizable = true},
-          .polar = true, .window = "hanning"},
+    {{SCALER_HAASNSOFT, JINC_R3, jinc, .blur = 1.11, .resizable = true},
+        .polar = true, .window = WINDOW_HANNING},
     // Cubic filters
-    {{"bicubic",        2,   bicubic}},
-    {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
-    {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
-    {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
-    {{"robidoux",       2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),
-                                                  113 / (58 + 216 * M_SQRT2)} }},
-    {{"robidouxsharp",  2,   cubic_bc, .params = {6 / (13 + 7 * M_SQRT2),
-                                                  7 / (2 + 12 * M_SQRT2)} }},
-    {{"ewa_robidoux",   2,   cubic_bc, .params = {12 / (19 + 9 * M_SQRT2),
-                                                  113 / (58 + 216 * M_SQRT2)}},
-            .polar = true},
-    {{"ewa_robidouxsharp", 2,cubic_bc, .params = {6 / (13 + 7 * M_SQRT2),
-                                                  7 / (2 + 12 * M_SQRT2)}},
-            .polar = true},
+    {{SCALER_BICUBIC,       2, cubic_bc, .params = {1.0, 0.0} }},
+    {{SCALER_HERMITE,       1, cubic_bc, .params = {0.0, 0.0} }},
+    {{SCALER_CATMULL_ROM,   2, cubic_bc, .params = {0.0, 0.5} }},
+    {{SCALER_MITCHELL,      2, cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
+    {{SCALER_ROBIDOUX,      2, cubic_bc,
+      .params = {12 / (19 + 9 * M_SQRT2), 113 / (58 + 216 * M_SQRT2)} }},
+    {{SCALER_ROBIDOUXSHARP, 2, cubic_bc,
+      .params = {6 / (13 + 7 * M_SQRT2), 7 / (2 + 12 * M_SQRT2)} }},
+    {{SCALER_EWA_ROBIDOUX,  2, cubic_bc,
+      .params = {12 / (19 + 9 * M_SQRT2), 113 / (58 + 216 * M_SQRT2)}},
+        .polar = true},
+    {{SCALER_EWA_ROBIDOUXSHARP, 2,cubic_bc,
+      .params = {6 / (13 + 7 * M_SQRT2), 7 / (2 + 12 * M_SQRT2)}},
+        .polar = true},
     // Miscellaneous filters
-    {{"box",            1,   box, .resizable = true}},
-    {{"nearest",        0.5, box}},
-    {{"triangle",       1,   triangle, .resizable = true}},
-    {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
+    {{SCALER_BOX,      1,   box, .resizable = true}},
+    {{SCALER_NEAREST,  0.5, box}},
+    {{SCALER_TRIANGLE, 1,   triangle, .resizable = true}},
+    {{SCALER_GAUSSIAN, 2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
     {{0}}
 };

@@ -53,10 +53,19 @@ typedef struct demux_packet {
     // If true, cached_data is valid, while buffer/len are not.
     bool is_cached : 1;
 
+    // If true, this is a wrapped AVFrame
+    bool is_wrapped_avframe : 1;
+
     // segmentation (ordered chapters, EDL)
     bool segmented;
     struct mp_codec_params *codec;  // set to non-NULL iff segmented is set
     double start, end;              // set to non-NOPTS iff segmented is set
+
+    // subtitles only
+    int animated; // -1 is unknown
+    bool seen;
+    int seen_pos;
+    double sub_duration;
 
     // private
     struct demux_packet *next;
@@ -65,14 +74,18 @@ typedef struct demux_packet {
 } demux_packet_t;
 
 struct AVBufferRef;
+struct demux_packet_pool;
 
-struct demux_packet *new_demux_packet(size_t len);
-struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt);
-struct demux_packet *new_demux_packet_from(void *data, size_t len);
-struct demux_packet *new_demux_packet_from_buf(struct AVBufferRef *buf);
+struct demux_packet *new_demux_packet(struct demux_packet_pool *pool, size_t len);
+struct demux_packet *new_demux_packet_from_avpacket(struct demux_packet_pool *pool,
+                                                    struct AVPacket *avpkt);
+struct demux_packet *new_demux_packet_from(struct demux_packet_pool *pool,
+                                           void *data, size_t len);
+struct demux_packet *new_demux_packet_from_buf(struct demux_packet_pool *pool,
+                                               struct AVBufferRef *buf);
 void demux_packet_shorten(struct demux_packet *dp, size_t len);
 void free_demux_packet(struct demux_packet *dp);
-struct demux_packet *demux_copy_packet(struct demux_packet *dp);
+struct demux_packet *demux_copy_packet(struct demux_packet_pool *pool, struct demux_packet *dp);
 size_t demux_packet_estimate_total_size(struct demux_packet *dp);
 
 void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *src);

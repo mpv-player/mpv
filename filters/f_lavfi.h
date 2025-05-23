@@ -31,6 +31,7 @@ struct mp_lavfi *mp_lavfi_create_filter(struct mp_filter *parent,
                                         char **graph_opts,
                                         const char *filter, char **filter_opts);
 
+struct mp_log;
 // Print libavfilter list for --vf/--af
 void print_lavfi_help_list(struct mp_log *log, int media_type);
 
@@ -39,3 +40,5 @@ void print_lavfi_help(struct mp_log *log, const char *name, int media_type);
 
 // Return whether the given filter exists and has the required media_type in/outs.
 bool mp_lavfi_is_usable(const char *name, int media_type);
+
+const char **mp_get_lavfi_filters(void *talloc_ctx, int media_type);

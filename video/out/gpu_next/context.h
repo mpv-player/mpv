@@ -21,8 +21,8 @@
 
 struct mp_log;
 struct ra_ctx;
+struct ra_ctx_opts;
 struct vo;
-struct gl_video_opts;
 
 struct gpu_ctx {
     struct mp_log *log;
@@ -35,6 +35,6 @@ struct gpu_ctx {
     void *priv;
 };
 
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct gl_video_opts *gl_opts);
+struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts);
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h);
 void gpu_ctx_destroy(struct gpu_ctx **ctxp);

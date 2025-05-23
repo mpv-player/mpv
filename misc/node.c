@@ -1,6 +1,9 @@
-#include "common/common.h"
-
 #include "node.h"
+
+#include <mpv/client.h>
+
+#include "common/common.h"
+#include "bstr.h"
 
 // Init a node with the given format. If parent is not NULL, it is set as
 // parent allocation according to m_option_type_node rules (which means
@@ -9,14 +12,14 @@
 void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
 {
     // Other formats need to be initialized manually.
-    assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
+    mp_assert(format == MPV_FORMAT_NODE_MAP || format == MPV_FORMAT_NODE_ARRAY ||
            format == MPV_FORMAT_FLAG || format == MPV_FORMAT_INT64 ||
            format == MPV_FORMAT_DOUBLE || format == MPV_FORMAT_BYTE_ARRAY ||
            format == MPV_FORMAT_NONE);
 
     void *ta_parent = NULL;
     if (parent) {
-        assert(parent->format == MPV_FORMAT_NODE_MAP ||
+        mp_assert(parent->format == MPV_FORMAT_NODE_MAP ||
                parent->format == MPV_FORMAT_NODE_ARRAY);
         ta_parent = parent->u.list;
     }
@@ -33,7 +36,7 @@ void node_init(struct mpv_node *dst, int format, struct mpv_node *parent)
 struct mpv_node *node_array_add(struct mpv_node *dst, int format)
 {
     struct mpv_node_list *list = dst->u.list;
-    assert(dst->format == MPV_FORMAT_NODE_ARRAY && dst->u.list);
+    mp_assert(dst->format == MPV_FORMAT_NODE_ARRAY && dst->u.list);
     MP_TARRAY_GROW(list, list->values, list->num);
     node_init(&list->values[list->num], format, dst);
     return &list->values[list->num++];
@@ -44,16 +47,16 @@ struct mpv_node *node_array_add(struct mpv_node *dst, int format)
 // m_option_type_node memory management rules apply.
 struct mpv_node *node_map_add(struct mpv_node *dst, const char *key, int format)
 {
-    assert(key);
+    mp_assert(key);
     return node_map_badd(dst, bstr0(key), format);
 }
 
 struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format)
 {
-    assert(key.start);
+    mp_assert(key.start);
 
     struct mpv_node_list *list = dst->u.list;
-    assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
+    mp_assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
     MP_TARRAY_GROW(list, list->values, list->num);
     MP_TARRAY_GROW(list, list->keys, list->num);
     list->keys[list->num] = bstrdup0(list, key);
@@ -66,11 +69,20 @@ struct mpv_node *node_map_badd(struct mpv_node *dst, struct bstr key, int format
 // m_option_type_node memory management rules apply.
 void node_map_add_string(struct mpv_node *dst, const char *key, const char *val)
 {
-    assert(val);
+    mp_assert(val);
 
     struct mpv_node *entry = node_map_add(dst, key, MPV_FORMAT_NONE);
     entry->format = MPV_FORMAT_STRING;
     entry->u.string = talloc_strdup(dst->u.list, val);
+}
+
+void node_map_add_bstr(struct mpv_node *dst, const char *key, bstr val)
+{
+    mp_assert(val.start);
+
+    struct mpv_node *entry = node_map_add(dst, key, MPV_FORMAT_NONE);
+    entry->format = MPV_FORMAT_STRING;
+    entry->u.string = bstrto0(dst->u.list, val);
 }
 
 void node_map_add_int64(struct mpv_node *dst, const char *key, int64_t v)
@@ -108,7 +120,7 @@ mpv_node *node_map_bget(mpv_node *src, struct bstr key)
 
 // Note: for MPV_FORMAT_NODE_MAP, this (incorrectly) takes the order into
 //       account, instead of treating it as set.
-bool equal_mpv_value(const void *a, const void *b, mpv_format format)
+bool equal_mpv_value(const void *a, const void *b, int format)
 {
     switch (format) {
     case MPV_FORMAT_NONE:

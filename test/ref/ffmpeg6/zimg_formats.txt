@@ -1,0 +1,249 @@
+           0bgr    Zin   Zout  SWSin  SWSout |
+           0rgb    Zin   Zout  SWSin  SWSout |
+           abgr    Zin   Zout  SWSin  SWSout |
+           argb    Zin   Zout  SWSin  SWSout |
+         ayuv64    Zin   Zout  SWSin  SWSout |
+       ayuv64be    Zin   Zout                |
+   bayer_bggr16                SWSin         |
+ bayer_bggr16be                SWSin         |
+    bayer_bggr8                SWSin         |
+   bayer_gbrg16                SWSin         |
+ bayer_gbrg16be                SWSin         |
+    bayer_gbrg8                SWSin         |
+   bayer_grbg16                SWSin         |
+ bayer_grbg16be                SWSin         |
+    bayer_grbg8                SWSin         |
+   bayer_rggb16                SWSin         |
+ bayer_rggb16be                SWSin         |
+    bayer_rggb8                SWSin         |
+           bgr0    Zin   Zout  SWSin  SWSout |
+          bgr24    Zin   Zout  SWSin  SWSout |
+           bgr4                       SWSout |
+         bgr444    Zin   Zout  SWSin  SWSout |
+       bgr444be    Zin   Zout  SWSin  SWSout |
+          bgr48    Zin   Zout  SWSin  SWSout |
+        bgr48be    Zin   Zout  SWSin  SWSout |
+      bgr4_byte    Zin   Zout  SWSin  SWSout |
+         bgr555    Zin   Zout  SWSin  SWSout |
+       bgr555be    Zin   Zout  SWSin  SWSout |
+         bgr565    Zin   Zout  SWSin  SWSout |
+       bgr565be    Zin   Zout  SWSin  SWSout |
+           bgr8    Zin   Zout  SWSin  SWSout |
+           bgra    Zin   Zout  SWSin  SWSout |
+         bgra64    Zin   Zout  SWSin  SWSout |
+       bgra64be    Zin   Zout  SWSin  SWSout |
+           cuda                              |
+          d3d11                              |
+    d3d11va_vld                              |
+      drm_prime                              |
+      dxva2_vld                              |
+          gbrap    Zin   Zout  SWSin  SWSout |
+        gbrap10    Zin   Zout  SWSin  SWSout |
+      gbrap10be    Zin   Zout  SWSin  SWSout |
+        gbrap12    Zin   Zout  SWSin  SWSout |
+      gbrap12be    Zin   Zout  SWSin  SWSout |
+        gbrap14    Zin   Zout  SWSin  SWSout |
+      gbrap14be    Zin   Zout  SWSin  SWSout |
+        gbrap16    Zin   Zout  SWSin  SWSout |
+      gbrap16be    Zin   Zout  SWSin  SWSout |
+       gbrapf32    Zin   Zout  SWSin  SWSout |
+     gbrapf32be    Zin   Zout  SWSin  SWSout |
+           gbrp    Zin   Zout  SWSin  SWSout |
+          gbrp1    Zin   Zout                |
+         gbrp10    Zin   Zout  SWSin  SWSout |
+       gbrp10be    Zin   Zout  SWSin  SWSout |
+         gbrp12    Zin   Zout  SWSin  SWSout |
+       gbrp12be    Zin   Zout  SWSin  SWSout |
+         gbrp14    Zin   Zout  SWSin  SWSout |
+       gbrp14be    Zin   Zout  SWSin  SWSout |
+         gbrp16    Zin   Zout  SWSin  SWSout |
+       gbrp16be    Zin   Zout  SWSin  SWSout |
+          gbrp2    Zin   Zout                |
+          gbrp3    Zin   Zout                |
+          gbrp4    Zin   Zout                |
+          gbrp5    Zin   Zout                |
+          gbrp6    Zin   Zout                |
+          gbrp9    Zin   Zout  SWSin  SWSout |
+        gbrp9be    Zin   Zout  SWSin  SWSout |
+        gbrpf32    Zin   Zout  SWSin  SWSout |
+      gbrpf32be    Zin   Zout  SWSin  SWSout |
+           gray    Zin   Zout  SWSin  SWSout |
+         gray10    Zin   Zout  SWSin  SWSout |
+       gray10be    Zin   Zout  SWSin  SWSout |
+         gray12    Zin   Zout  SWSin  SWSout |
+       gray12be    Zin   Zout  SWSin  SWSout |
+         gray14    Zin   Zout  SWSin  SWSout |
+       gray14be    Zin   Zout  SWSin  SWSout |
+         gray16    Zin   Zout  SWSin  SWSout |
+       gray16be    Zin   Zout  SWSin  SWSout |
+          gray9    Zin   Zout  SWSin  SWSout |
+        gray9be    Zin   Zout  SWSin  SWSout |
+       grayaf32    Zin   Zout                |
+        grayf32    Zin   Zout  SWSin  SWSout |
+      grayf32be    Zin   Zout  SWSin  SWSout |
+     mediacodec                              |
+           mmal                              |
+          monob    Zin   Zout  SWSin  SWSout |
+          monow    Zin   Zout  SWSin  SWSout |
+           nv12    Zin   Zout  SWSin  SWSout |
+           nv16    Zin   Zout  SWSin  SWSout |
+           nv20    Zin   Zout                |
+         nv20be    Zin   Zout                |
+           nv21    Zin   Zout  SWSin  SWSout |
+           nv24    Zin   Zout  SWSin  SWSout |
+           nv42    Zin   Zout  SWSin  SWSout |
+         opencl                              |
+           p010    Zin   Zout  SWSin  SWSout |
+         p010be    Zin   Zout  SWSin  SWSout |
+           p012    Zin   Zout  SWSin  SWSout |
+         p012be    Zin   Zout  SWSin  SWSout |
+           p016    Zin   Zout  SWSin  SWSout |
+         p016be    Zin   Zout  SWSin  SWSout |
+           p210    Zin   Zout  SWSin  SWSout |
+         p210be    Zin   Zout  SWSin  SWSout |
+           p212    Zin   Zout  SWSin  SWSout |
+         p212be    Zin   Zout  SWSin  SWSout |
+           p216    Zin   Zout  SWSin  SWSout |
+         p216be    Zin   Zout  SWSin  SWSout |
+           p410    Zin   Zout  SWSin  SWSout |
+         p410be    Zin   Zout  SWSin  SWSout |
+           p412    Zin   Zout  SWSin  SWSout |
+         p412be    Zin   Zout  SWSin  SWSout |
+           p416    Zin   Zout  SWSin  SWSout |
+         p416be    Zin   Zout  SWSin  SWSout |
+           pal8    Zin         SWSin         |
+            qsv                              |
+           rgb0    Zin   Zout  SWSin  SWSout |
+          rgb24    Zin   Zout  SWSin  SWSout |
+          rgb30    Zin   Zout  SWSin  SWSout |
+           rgb4                       SWSout |
+         rgb444    Zin   Zout  SWSin  SWSout |
+       rgb444be    Zin   Zout  SWSin  SWSout |
+          rgb48    Zin   Zout  SWSin  SWSout |
+        rgb48be    Zin   Zout  SWSin  SWSout |
+      rgb4_byte    Zin   Zout  SWSin  SWSout |
+         rgb555    Zin   Zout  SWSin  SWSout |
+       rgb555be    Zin   Zout  SWSin  SWSout |
+         rgb565    Zin   Zout  SWSin  SWSout |
+       rgb565be    Zin   Zout  SWSin  SWSout |
+           rgb8    Zin   Zout  SWSin  SWSout |
+           rgba    Zin   Zout  SWSin  SWSout |
+         rgba64    Zin   Zout  SWSin  SWSout |
+       rgba64be    Zin   Zout  SWSin  SWSout |
+        rgbaf16                SWSin         |
+      rgbaf16be                SWSin         |
+        rgbaf32                              |
+      rgbaf32be                              |
+         rgbf32                              |
+       rgbf32be                              |
+        uyvy422    Zin   Zout  SWSin  SWSout |
+      uyyvyy411    Zin   Zout                |
+          vaapi                              |
+          vdpau                              |
+   vdpau_output                              |
+   videotoolbox                              |
+         vulkan                              |
+           vuya    Zin   Zout  SWSin  SWSout |
+           vuyx    Zin   Zout  SWSin  SWSout |
+        x2bgr10    Zin   Zout  SWSin  SWSout |
+      x2bgr10be    Zin   Zout                |
+      x2rgb10be    Zin   Zout                |
+           xv30    Zin   Zout  SWSin  SWSout |
+         xv30be    Zin   Zout                |
+           xv36    Zin   Zout  SWSin  SWSout |
+         xv36be    Zin   Zout                |
+           xvmc                              |
+          xyz12    Zin   Zout  SWSin  SWSout |
+        xyz12be    Zin   Zout  SWSin  SWSout |
+             y1    Zin   Zout                |
+           y210    Zin   Zout  SWSin  SWSout |
+         y210be    Zin   Zout                |
+           y212    Zin   Zout  SWSin  SWSout |
+         y212be    Zin   Zout                |
+           ya16    Zin   Zout  SWSin  SWSout |
+         ya16be    Zin   Zout  SWSin  SWSout |
+            ya8    Zin   Zout  SWSin  SWSout |
+          yap16    Zin   Zout                |
+           yap8    Zin   Zout                |
+        yuv410p    Zin   Zout  SWSin  SWSout |
+       yuv410pf    Zin   Zout                |
+        yuv411p    Zin   Zout  SWSin  SWSout |
+       yuv411pf    Zin   Zout                |
+        yuv420p    Zin   Zout  SWSin  SWSout |
+      yuv420p10    Zin   Zout  SWSin  SWSout |
+    yuv420p10be    Zin   Zout  SWSin  SWSout |
+      yuv420p12    Zin   Zout  SWSin  SWSout |
+    yuv420p12be    Zin   Zout  SWSin  SWSout |
+      yuv420p14    Zin   Zout  SWSin  SWSout |
+    yuv420p14be    Zin   Zout  SWSin  SWSout |
+      yuv420p16    Zin   Zout  SWSin  SWSout |
+    yuv420p16be    Zin   Zout  SWSin  SWSout |
+       yuv420p9    Zin   Zout  SWSin  SWSout |
+     yuv420p9be    Zin   Zout  SWSin  SWSout |
+       yuv420pf    Zin   Zout                |
+        yuv422p    Zin   Zout  SWSin  SWSout |
+      yuv422p10    Zin   Zout  SWSin  SWSout |
+    yuv422p10be    Zin   Zout  SWSin  SWSout |
+      yuv422p12    Zin   Zout  SWSin  SWSout |
+    yuv422p12be    Zin   Zout  SWSin  SWSout |
+      yuv422p14    Zin   Zout  SWSin  SWSout |
+    yuv422p14be    Zin   Zout  SWSin  SWSout |
+      yuv422p16    Zin   Zout  SWSin  SWSout |
+    yuv422p16be    Zin   Zout  SWSin  SWSout |
+       yuv422p9    Zin   Zout  SWSin  SWSout |
+     yuv422p9be    Zin   Zout  SWSin  SWSout |
+       yuv422pf    Zin   Zout                |
+        yuv440p    Zin   Zout  SWSin  SWSout |
+      yuv440p10    Zin   Zout  SWSin  SWSout |
+    yuv440p10be    Zin   Zout  SWSin  SWSout |
+      yuv440p12    Zin   Zout  SWSin  SWSout |
+    yuv440p12be    Zin   Zout  SWSin  SWSout |
+       yuv440pf    Zin   Zout                |
+        yuv444p    Zin   Zout  SWSin  SWSout |
+      yuv444p10    Zin   Zout  SWSin  SWSout |
+    yuv444p10be    Zin   Zout  SWSin  SWSout |
+      yuv444p12    Zin   Zout  SWSin  SWSout |
+    yuv444p12be    Zin   Zout  SWSin  SWSout |
+      yuv444p14    Zin   Zout  SWSin  SWSout |
+    yuv444p14be    Zin   Zout  SWSin  SWSout |
+      yuv444p16    Zin   Zout  SWSin  SWSout |
+    yuv444p16be    Zin   Zout  SWSin  SWSout |
+       yuv444p9    Zin   Zout  SWSin  SWSout |
+     yuv444p9be    Zin   Zout  SWSin  SWSout |
+       yuv444pf    Zin   Zout                |
+      yuva410pf    Zin   Zout                |
+      yuva411pf    Zin   Zout                |
+       yuva420p    Zin   Zout  SWSin  SWSout |
+     yuva420p10    Zin   Zout  SWSin  SWSout |
+   yuva420p10be    Zin   Zout  SWSin  SWSout |
+     yuva420p16    Zin   Zout  SWSin  SWSout |
+   yuva420p16be    Zin   Zout  SWSin  SWSout |
+      yuva420p9    Zin   Zout  SWSin  SWSout |
+    yuva420p9be    Zin   Zout  SWSin  SWSout |
+      yuva420pf    Zin   Zout                |
+       yuva422p    Zin   Zout  SWSin  SWSout |
+     yuva422p10    Zin   Zout  SWSin  SWSout |
+   yuva422p10be    Zin   Zout  SWSin  SWSout |
+     yuva422p12    Zin   Zout  SWSin  SWSout |
+   yuva422p12be    Zin   Zout  SWSin  SWSout |
+     yuva422p16    Zin   Zout  SWSin  SWSout |
+   yuva422p16be    Zin   Zout  SWSin  SWSout |
+      yuva422p9    Zin   Zout  SWSin  SWSout |
+    yuva422p9be    Zin   Zout  SWSin  SWSout |
+      yuva422pf    Zin   Zout                |
+      yuva440pf    Zin   Zout                |
+       yuva444p    Zin   Zout  SWSin  SWSout |
+     yuva444p10    Zin   Zout  SWSin  SWSout |
+   yuva444p10be    Zin   Zout  SWSin  SWSout |
+     yuva444p12    Zin   Zout  SWSin  SWSout |
+   yuva444p12be    Zin   Zout  SWSin  SWSout |
+     yuva444p16    Zin   Zout  SWSin  SWSout |
+   yuva444p16be    Zin   Zout  SWSin  SWSout |
+      yuva444p9    Zin   Zout  SWSin  SWSout |
+    yuva444p9be    Zin   Zout  SWSin  SWSout |
+      yuva444pf    Zin   Zout                |
+       yuvj411p    Zin   Zout  SWSin  SWSout |
+       yuvj422p    Zin   Zout  SWSin  SWSout |
+       yuvj440p    Zin   Zout  SWSin  SWSout |
+        yuyv422    Zin   Zout  SWSin  SWSout |
+        yvyu422    Zin   Zout  SWSin  SWSout |

@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <mpv/client.h>
+
 #include "common/msg.h"
 #include "input/input.h"
 #include "misc/json.h"
@@ -76,7 +78,7 @@ static void mpv_node_map_add_string(void *ta_parent, mpv_node *src, const char *
 static void mpv_format_command_reply(void *ta_parent, mpv_event *event,
                                      mpv_node *dst)
 {
-    assert(event->event_id == MPV_EVENT_COMMAND_REPLY);
+    mp_assert(event->event_id == MPV_EVENT_COMMAND_REPLY);
     mpv_event_command *cmd = event->data;
 
     mpv_node_map_add_int64(ta_parent, dst, "request_id", event->reply_userdata);

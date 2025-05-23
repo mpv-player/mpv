@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <pthread.h>
-
 #include "config.h"
 
 #include <libavcodec/avcodec.h>
@@ -28,20 +26,21 @@
 #include <libavutil/hwcontext_dxva2.h>
 #endif
 
-#include "common/common.h"
 #include "common/av_common.h"
+#include "common/common.h"
+#include "osdep/threads.h"
+#include "osdep/windows_utils.h"
 #include "video/fmt-conversion.h"
 #include "video/hwdec.h"
-#include "video/mp_image.h"
 #include "video/mp_image_pool.h"
-#include "osdep/windows_utils.h"
+#include "video/mp_image.h"
 
 #include "d3d.h"
 
 HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
 PFN_D3D11_CREATE_DEVICE d3d11_D3D11CreateDevice;
 
-static pthread_once_t d3d_load_once = PTHREAD_ONCE_INIT;
+static mp_once d3d_load_once = MP_STATIC_ONCE_INITIALIZER;
 
 #if !HAVE_UWP
 static void d3d_do_load(void)
@@ -65,7 +64,7 @@ static void d3d_do_load(void)
 
 void d3d_load_dlls(void)
 {
-    pthread_once(&d3d_load_once, d3d_do_load);
+    mp_exec_once(&d3d_load_once, d3d_do_load);
 }
 
 // Test if Direct3D11 can be used by us. Basically, this prevents trying to use
@@ -187,7 +186,7 @@ AVBufferRef *d3d9_wrap_device_ref(IDirect3DDevice9 *device)
     if (FAILED(hr))
         goto fail;
 
-    IDirect3DDeviceManager9_ResetDevice(hwctx->devmgr, device, reset_token);
+    hr = IDirect3DDeviceManager9_ResetDevice(hwctx->devmgr, device, reset_token);
     if (FAILED(hr))
         goto fail;
 

@@ -3,12 +3,14 @@
 -- particular for ao=wasapi, since the internal IMMNotificationClient code that
 -- normally triggers ao-reload will not be running in this case.
 
-function do_reload()
+local reloading
+
+local function do_reload()
     mp.command("ao-reload")
     reloading = nil
 end
 
-function on_audio_device_list_change()
+local function on_audio_device_list_change()
     if mp.get_property("current-ao") == "null" and not reloading then
         mp.msg.verbose("audio-device-list changed: reloading audio")
         -- avoid calling ao-reload too often

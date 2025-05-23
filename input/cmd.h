@@ -23,7 +23,7 @@
 #include "misc/bstr.h"
 #include "options/m_option.h"
 
-#define MP_CMD_DEF_MAX_ARGS 9
+#define MP_CMD_DEF_MAX_ARGS 11
 #define MP_CMD_OPT_ARG M_OPT_OPTIONAL_PARAM
 
 struct mp_log;
@@ -38,8 +38,8 @@ struct mp_cmd_def {
     bool allow_auto_repeat; // react to repeated key events
     bool on_updown;     // always emit it on both up and down key events
     bool vararg;        // last argument can be given 0 to multiple times
-    bool scalable;
-    bool is_ignore;
+    bool scalable;      // command called with scale for high resolution input
+    bool is_ignore;     // used by ignore command only, avoids queuing commands
     bool is_noisy;      // reduce log level
     bool default_async; // default to MP_ASYNC flag if none set by user
     // If you set this, handler() must ensure mp_cmd_ctx_complete() is called
@@ -75,6 +75,9 @@ enum mp_cmd_flags {
     MP_ASYNC_CMD = 32,          // do not wait for command to complete
     MP_SYNC_CMD = 64,           // block on command completion
 
+    MP_DISALLOW_REPEAT = 128,   // if used as keybinding, disallow key repeat
+    MP_DISALLOW_SCALE = 256,    // if used as keybinding, make it non-scalable
+
     MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
                       MP_ON_OSD_BAR | MP_ON_OSD_MSG,
 };
@@ -103,13 +106,16 @@ typedef struct mp_cmd {
     int flags; // mp_cmd_flags bitfield
     char *original;
     char *desc; // (usually NULL since stripped away later)
-    char *input_section;
+    bstr input_section;
     bool is_up_down : 1;
     bool is_up : 1;
     bool emit_on_up : 1;
     bool is_mouse_button : 1;
     bool repeated : 1;
     bool mouse_move : 1;
+    bool notify_event : 1;
+    bool canceled : 1;
+    bool coalesce : 1;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
@@ -150,7 +156,5 @@ void mp_cmd_dump(struct mp_log *log, int msgl, char *header, struct mp_cmd *cmd)
 
 // This creates a copy of a command (used by the auto repeat stuff).
 struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
-
-extern const struct m_option_type m_option_type_cycle_dir;
 
 #endif

@@ -37,6 +37,20 @@
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB   0x00000001
 #endif
 
+struct wingl_opts {
+    int wingl_dwm_flush;
+};
+
+#define OPT_BASE_STRUCT struct wingl_opts
+const struct m_sub_options wingl_conf = {
+    .opts = (const struct m_option[]) {
+        {"opengl-dwmflush", OPT_CHOICE(wingl_dwm_flush,
+            {"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})},
+        {0}
+    },
+    .size = sizeof(struct wingl_opts),
+};
+
 struct priv {
     GL gl;
 
@@ -44,6 +58,8 @@ struct priv {
     int current_swapinterval;
 
     int (GLAPIENTRY *real_wglSwapInterval)(int);
+    struct m_config_cache *opts_cache;
+    struct wingl_opts *opts;
 
     HGLRC context;
     HDC hdc;
@@ -80,6 +96,7 @@ static bool create_dc(struct ra_ctx *ctx)
 
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
+    pfd.cAlphaBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
     int pf = ChoosePixelFormat(hdc, &pfd);
 
@@ -247,14 +264,10 @@ static void wgl_swap_buffers(struct ra_ctx *ctx)
     // default if we don't DwmFLush
     int new_swapinterval = p->opt_swapinterval;
 
-    int dwm_flush_opt;
-    mp_read_option_raw(ctx->global, "opengl-dwmflush", &m_option_type_choice,
-                       &dwm_flush_opt);
-
-    if (dwm_flush_opt >= 0) {
-        if ((dwm_flush_opt == 1 && !ctx->vo->opts->fullscreen) ||
-            (dwm_flush_opt == 2) ||
-            (dwm_flush_opt == 0 && compositor_active(ctx)))
+    if (p->opts->wingl_dwm_flush >= 0) {
+        if ((p->opts->wingl_dwm_flush == 1 && !ctx->vo->opts->fullscreen) ||
+            (p->opts->wingl_dwm_flush == 2) ||
+            (p->opts->wingl_dwm_flush == 0 && compositor_active(ctx)))
         {
             if (DwmFlush() == S_OK)
                 new_swapinterval = 0;
@@ -275,8 +288,14 @@ static bool wgl_init(struct ra_ctx *ctx)
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
     GL *gl = &p->gl;
 
+    p->opts_cache = m_config_cache_alloc(ctx, ctx->global, &wingl_conf);
+    p->opts = p->opts_cache->opts;
+
     if (!vo_w32_init(ctx->vo))
-        goto fail;
+        return false;
+
+    if (ctx->opts.want_alpha)
+        vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 
     vo_w32_run_on_thread(ctx->vo, create_ctx, ctx);
     if (!p->context)
@@ -293,7 +312,7 @@ static bool wgl_init(struct ra_ctx *ctx)
     gl->SwapInterval = wgl_swap_interval;
     p->current_swapinterval = -1;
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .swap_buffers = wgl_swap_buffers,
     };
 
@@ -353,11 +372,18 @@ static int wgl_control(struct ra_ctx *ctx, int *events, int request, void *arg)
     return ret;
 }
 
+static void wgl_update_render_opts(struct ra_ctx *ctx)
+{
+    vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
+}
+
 const struct ra_ctx_fns ra_ctx_wgl = {
-    .type           = "opengl",
-    .name           = "win",
-    .init           = wgl_init,
-    .reconfig       = wgl_reconfig,
-    .control        = wgl_control,
-    .uninit         = wgl_uninit,
+    .type               = "opengl",
+    .name               = "win",
+    .description        = "Win32/WGL",
+    .init               = wgl_init,
+    .reconfig           = wgl_reconfig,
+    .control            = wgl_control,
+    .update_render_opts = wgl_update_render_opts,
+    .uninit             = wgl_uninit,
 };

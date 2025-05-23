@@ -48,7 +48,7 @@
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
-static inline void write_str(const char *s)
+static inline void write_bstr(bstr bs)
 {
     // On POSIX platforms, write() is the fastest method. It also is the only
     // one that allows atomic writes so mpv’s output will not be interrupted
@@ -57,30 +57,41 @@ static inline void write_str(const char *s)
     // exceeding PIPE_BUF, but at least Linux does seem to implement it that
     // way.
 #if HAVE_POSIX
-    int remain = strlen(s);
+    size_t remain = bs.len;
+    unsigned char *pos = bs.start;
     while (remain > 0) {
-        ssize_t written = write(STDOUT_FILENO, s, remain);
+        ssize_t written = write(STDOUT_FILENO, pos, remain);
         if (written < 0)
             return;
         remain -= written;
-        s += written;
+        pos += written;
     }
 #else
-    printf("%s", s);
+    fwrite(bs.start, 1, bs.len, stdout);
     fflush(stdout);
 #endif
 }
 
+static inline void write_str(unsigned char* s)
+{
+    write_bstr(bstr0(s));
+}
+
 #define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
-#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s\033\\"
+#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s"
 #define KITTY_ESC_CONTINUE   "\033_Gm=%d;"
-#define KITTY_ESC_END        "\033\\"
-#define KITTY_ESC_DELETE_ALL "\033_Ga=d;\033\\"
+static const bstr KITTY_ESC_END = bstr0_lit("\033\\");
+static const bstr KITTY_ESC_DELETE_ALL = bstr0_lit("\033_Ga=d;");
+
+static const bstr DCS_TMUX_PREFIX = bstr0_lit("\033Ptmux;\033");
+static const bstr DCS_SCREEN_PREFIX = bstr0_lit("\033P\033");
+static const bstr DCS_SUFFIX = bstr0_lit("\033\\");
 
 struct vo_kitty_opts {
     int width, height, top, left, rows, cols;
     bool config_clear, alt_screen;
     bool use_shm;
+    bool auto_multiplexer_passthrough;
 };
 
 struct priv {
@@ -91,8 +102,12 @@ struct priv {
     char    *shm_path, *shm_path_b64;
     int     buffer_size, output_size;
     int     shm_fd;
+    bstr    cmd;
+    bstr    dcs_prefix;
+    bstr    dcs_suffix;
 
     int left, top, width, height, cols, rows;
+    double display_par;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -105,6 +120,34 @@ struct priv {
 static struct sigaction saved_sigaction = {0};
 static bool resized;
 #endif
+
+static inline void write_bstr_passthrough(struct priv *p, bstr bs)
+{
+    write_bstr(p->dcs_prefix);
+    write_bstr(bs);
+    write_bstr(p->dcs_suffix);
+}
+
+static inline void append_passthrough(struct priv *p, bstr *bs, bstr append)
+{
+    bstr_xappend(p, bs, p->dcs_prefix);
+    bstr_xappend(p, bs, append);
+    bstr_xappend(p, bs, p->dcs_suffix);
+}
+
+PRINTF_ATTRIBUTE(3, 4)
+static inline void append_asprintf_passthrough(struct priv *p, bstr *bs,
+                                                     const char *fmt, ...)
+{
+    bstr_xappend(p, bs, p->dcs_prefix);
+
+    va_list ap;
+    va_start(ap, fmt);
+    bstr_xappend_vasprintf(p, bs, fmt, ap);
+    va_end(ap);
+
+    bstr_xappend(p, bs, p->dcs_suffix);
+}
 
 static void close_shm(struct priv *p)
 {
@@ -129,6 +172,10 @@ static void free_bufs(struct vo* vo)
 
     if (p->opts.use_shm) {
         close_shm(p);
+#if HAVE_POSIX_SHM
+        if (p->shm_path)
+            shm_unlink(p->shm_path);
+#endif
     } else {
         talloc_free(p->buffer);
     }
@@ -163,6 +210,7 @@ static void set_out_params(struct vo *vo)
         p->opts.top : p->rows * p->dst.y0 / vo->dheight;
     p->left = p->opts.left > 0 ?
         p->opts.left : p->cols * p->dst.x0 / vo->dwidth;
+    p->display_par = p->osd.display_par;
 
     p->buffer_size = 3 * p->width * p->height;
     p->output_size = AV_BASE64_SIZE(p->buffer_size);
@@ -173,7 +221,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct priv *p = vo->priv;
 
     vo->want_redraw = true;
-    write_str(KITTY_ESC_DELETE_ALL);
+
+    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
+    write_bstr_passthrough(p, KITTY_ESC_END);
+
     if (p->opts.config_clear)
         write_str(TERM_ESC_CLEAR_SCREEN);
 
@@ -239,7 +290,7 @@ static int create_shm(struct vo *vo)
 #endif
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     mp_image_t *mpi = NULL;
@@ -268,12 +319,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         mp_image_clear(p->frame, 0, 0, p->width, p->height);
     }
 
-    struct mp_osd_res res = { .w = p->width, .h = p->height };
+    struct mp_osd_res res = { .w = p->width, .h = p->height, .display_par = p->display_par };
     osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, p->frame);
 
 
     if (p->opts.use_shm && !create_shm(vo))
-        return;
+        goto done;
 
     memcpy_pic(p->buffer, p->frame->planes[0], p->width * BYTES_PER_PX,
                p->height, p->width * BYTES_PER_PX, p->frame->stride[0]);
@@ -281,41 +332,61 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     if (!p->opts.use_shm)
         av_base64_encode(p->output, p->output_size, p->buffer, p->buffer_size);
 
+done:
     talloc_free(mpi);
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
 {
-    struct priv* p = vo->priv;
-
-    if (p->buffer == NULL)
+    struct priv *p = vo->priv;
+    if (!p->buffer)
         return;
 
-    char *cmd = talloc_asprintf(NULL, TERM_ESC_GOTO_YX, p->top, p->left);
+    p->cmd.len = 0;
+
+    // Start with ESC to position the cursor
+    append_asprintf_passthrough(p, &p->cmd, TERM_ESC_GOTO_YX, p->top, p->left);
 
     if (p->opts.use_shm) {
-        cmd = talloc_asprintf_append(cmd, KITTY_ESC_IMG_SHM, p->width, p->height, p->shm_path_b64);
+        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
+                                    p->width, p->height, p->shm_path_b64);
+        append_passthrough(p, &p->cmd, KITTY_ESC_END);
     } else {
-        if (p->output == NULL) {
-            talloc_free(cmd);
+        if (!p->output) {
             return;
         }
 
-        cmd = talloc_asprintf_append(cmd, KITTY_ESC_IMG, p->width, p->height);
-        for (int offset = 0, noffset;; offset += noffset) {
-            if (offset)
-                cmd = talloc_asprintf_append(cmd, KITTY_ESC_CONTINUE, offset < p->output_size);
-            noffset = MPMIN(4096, p->output_size - offset);
-            cmd = talloc_strndup_append(cmd, p->output + offset, noffset);
-            cmd = talloc_strdup_append(cmd, KITTY_ESC_END);
+        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
+                                    p->width, p->height);
 
-            if (offset >= p->output_size)
-                break;
+        int output_size = p->output_size - 1;
+        int offset = 0;
+
+        for (; offset < output_size; ) {
+            int chunk = MPMIN(4096, output_size - offset);
+
+            if (offset > 0)
+                append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE,
+                                            offset + chunk < output_size);
+
+            // Append at max chunk bytes
+            bstr_xappend(p, &p->cmd, (bstr){p->output + offset, chunk});
+            append_passthrough(p, &p->cmd, KITTY_ESC_END);
+            offset += chunk;
+        }
+
+        // When the data is less than or equal to chunk size the final packet
+        // isn't sent, i.e. an escape sequence with `m=0`.
+        // This ensures that an escape sequence with `m=0` is sent and
+        // terminals stay happy
+        if (offset == 0) {
+            append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE, 0);
+            append_passthrough(p, &p->cmd, KITTY_ESC_END);
         }
     }
 
-    write_str(cmd);
-    talloc_free(cmd);
+    write_bstr(p->cmd);
 
 #if HAVE_POSIX
     if (p->opts.use_shm)
@@ -340,8 +411,9 @@ static int preinit(struct vo *vo)
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
 
 #if HAVE_POSIX
-    struct sigaction sa;
-    sa.sa_handler = handle_winch;
+    struct sigaction sa = {
+        .sa_handler = handle_winch,
+    };
     sigaction(SIGWINCH, &sa, &saved_sigaction);
 #endif
 
@@ -360,7 +432,19 @@ static int preinit(struct vo *vo)
     }
 #endif
 
+    if (p->opts.auto_multiplexer_passthrough) {
+        if (getenv("TMUX")) {
+            p->dcs_prefix = DCS_TMUX_PREFIX;
+        } else if (getenv("STY")) {
+            p->dcs_prefix = DCS_SCREEN_PREFIX;
+        }
+
+        if (p->dcs_prefix.len)
+            p->dcs_suffix = DCS_SUFFIX;
+    }
+
     write_str(TERM_ESC_HIDE_CURSOR);
+    terminal_set_mouse_input(true);
     if (p->opts.alt_screen)
         write_str(TERM_ESC_ALT_SCREEN);
 
@@ -387,7 +471,10 @@ static void uninit(struct vo *vo)
     sigaction(SIGWINCH, &saved_sigaction, NULL);
 #endif
 
+    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
+
     write_str(TERM_ESC_RESTORE_CURSOR);
+    terminal_set_mouse_input(false);
 
     if (p->opts.alt_screen) {
         write_str(TERM_ESC_NORMAL_SCREEN);
@@ -427,6 +514,7 @@ const struct vo_driver video_out_kitty = {
         {"config-clear", OPT_BOOL(opts.config_clear), },
         {"alt-screen", OPT_BOOL(opts.alt_screen), },
         {"use-shm", OPT_BOOL(opts.use_shm), },
+        {"auto-multiplexer-passthrough", OPT_BOOL(opts.auto_multiplexer_passthrough), },
         {0}
     },
     .options_prefix = "vo-kitty",

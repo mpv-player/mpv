@@ -23,6 +23,7 @@
 #include <libswresample/swresample.h>
 
 #include "audio/aframe.h"
+#include "audio/chmap_avchannel.h"
 #include "audio/fmt-conversion.h"
 #include "audio/format.h"
 #include "common/common.h"
@@ -270,22 +271,20 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     out_ch_layout = fudge_layout_conversion(p, in_ch_layout, out_ch_layout);
 
     // Real conversion; output is input to avrctx_out.
-    av_opt_set_int(p->avrctx, "in_channel_layout",  in_ch_layout, 0);
-    av_opt_set_int(p->avrctx, "out_channel_layout", out_ch_layout, 0);
+    AVChannelLayout in_layout, out_layout;
+    mp_chmap_to_av_layout(&in_layout, &in_lavc);
+    mp_chmap_to_av_layout(&out_layout, &out_lavc);
+    av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
+    av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
     av_opt_set_int(p->avrctx, "in_sample_rate",     p->in_rate, 0);
     av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
     av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
     av_opt_set_int(p->avrctx, "out_sample_fmt",     out_samplefmtp, 0);
 
-    // Just needs the correct number of channels for deplanarization.
-    struct mp_chmap fake_chmap;
-    mp_chmap_set_unknown(&fake_chmap, map_out.num);
-    uint64_t fake_out_ch_layout = mp_chmap_to_lavc_unchecked(&fake_chmap);
-    if (!fake_out_ch_layout)
-        goto error;
-    av_opt_set_int(p->avrctx_out, "in_channel_layout",  fake_out_ch_layout, 0);
-    av_opt_set_int(p->avrctx_out, "out_channel_layout", fake_out_ch_layout, 0);
-
+    AVChannelLayout fake_layout;
+    av_channel_layout_default(&fake_layout, map_out.num);
+    av_opt_set_chlayout(p->avrctx_out, "in_chlayout", &fake_layout, 0);
+    av_opt_set_chlayout(p->avrctx_out, "out_chlayout", &fake_layout, 0);
     av_opt_set_int(p->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(p->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(p->avrctx_out, "in_sample_rate",     p->out_rate, 0);
@@ -311,7 +310,7 @@ error:
     return false;
 }
 
-static void reset(struct mp_filter *f)
+static void swresample_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -334,8 +333,10 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
 
     int num_planes = mp_aframe_get_planes(mpa);
     uint8_t **planes = mp_aframe_get_data_rw(mpa);
+    if (num_planes && !planes)
+        return false;
     uint8_t *old_planes[MP_NUM_CHANNELS];
-    assert(num_planes <= MP_NUM_CHANNELS);
+    mp_assert(num_planes <= MP_NUM_CHANNELS);
     for (int n = 0; n < num_planes; n++)
         old_planes[n] = planes[n];
 
@@ -345,11 +346,11 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
 
     for (int n = 0; n < num_planes; n++) {
         int src = reorder[n];
-        assert(src >= -1 && src < num_planes);
+        mp_assert(src >= -1 && src < num_planes);
         if (src >= 0) {
             planes[n] = old_planes[src];
         } else {
-            assert(next_na < num_planes);
+            mp_assert(next_na < num_planes);
             planes[n] = old_planes[next_na++];
             // The NA planes were never written by avrctx, so clear them.
             af_fill_silence(planes[n],
@@ -455,7 +456,7 @@ error:
     return MP_NO_FRAME;
 }
 
-static void process(struct mp_filter *f)
+static void swresample_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -487,7 +488,7 @@ static void process(struct mp_filter *f)
     }
 
     if (input) {
-        assert(!p->input);
+        mp_assert(!p->input);
 
         struct mp_swresample *s = &p->public;
 
@@ -616,7 +617,7 @@ double mp_swresample_get_delay(struct mp_swresample *s)
     return get_delay(p);
 }
 
-static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+static bool swresample_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *p = f->priv;
 
@@ -628,7 +629,7 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
     return false;
 }
 
-static void destroy(struct mp_filter *f)
+static void swresample_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -639,10 +640,10 @@ static void destroy(struct mp_filter *f)
 static const struct mp_filter_info swresample_filter = {
     .name = "swresample",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .command = command,
-    .reset = reset,
-    .destroy = destroy,
+    .process = swresample_process,
+    .command = swresample_command,
+    .reset = swresample_reset,
+    .destroy = swresample_destroy,
 };
 
 struct mp_swresample *mp_swresample_create(struct mp_filter *parent,

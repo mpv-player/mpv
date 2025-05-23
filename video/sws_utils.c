@@ -21,9 +21,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/bswap.h>
 #include <libavutil/opt.h>
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
 #include <libavutil/pixdesc.h>
-#endif
+#include <libplacebo/utils/libav.h>
 
 #include "config.h"
 
@@ -74,8 +73,8 @@ const struct m_sub_options sws_conf = {
             {"spline",          SWS_SPLINE})},
         {"lgb", OPT_FLOAT(lum_gblur), M_RANGE(0, 100.0)},
         {"cgb", OPT_FLOAT(chr_gblur), M_RANGE(0, 100.0)},
-        {"cvs", OPT_INT(chr_vshift)},
-        {"chs", OPT_INT(chr_hshift)},
+        {"cvs", OPT_INT(chr_vshift), M_RANGE(-100, 100)},
+        {"chs", OPT_INT(chr_hshift), M_RANGE(-100, 100)},
         {"ls", OPT_FLOAT(lum_sharpen), M_RANGE(-100.0, 100.0)},
         {"cs", OPT_FLOAT(chr_sharpen), M_RANGE(-100.0, 100.0)},
         {"fast", OPT_BOOL(fast)},
@@ -156,11 +155,11 @@ bool mp_sws_supports_formats(struct mp_sws_context *ctx,
            sws_isSupportedOutput(imgfmt2pixfmt(imgfmt_out));
 }
 
-static int mp_csp_to_sws_colorspace(enum mp_csp csp)
+static int pl_csp_to_sws_colorspace(enum pl_color_system csp)
 {
     // The SWS_CS_* macros are just convenience redefinitions of the
     // AVCOL_SPC_* macros, inside swscale.h.
-    return mp_csp_to_avcol_spc(csp);
+    return pl_system_to_av(csp);
 }
 
 static bool cache_valid(struct mp_sws_context *ctx)
@@ -289,11 +288,11 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         return -1;
     }
 
-    int s_csp = mp_csp_to_sws_colorspace(src.color.space);
-    int s_range = src.color.levels == MP_CSP_LEVELS_PC;
+    int s_csp = pl_csp_to_sws_colorspace(src.repr.sys);
+    int s_range = src.repr.levels == PL_COLOR_LEVELS_FULL;
 
-    int d_csp = mp_csp_to_sws_colorspace(dst.color.space);
-    int d_range = dst.color.levels == MP_CSP_LEVELS_PC;
+    int d_csp = pl_csp_to_sws_colorspace(src.repr.sys);
+    int d_range = dst.repr.levels == PL_COLOR_LEVELS_FULL;
 
     av_opt_set_int(ctx->sws, "sws_flags", ctx->flags, 0);
 
@@ -308,10 +307,9 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     av_opt_set_double(ctx->sws, "param0", ctx->params[0], 0);
     av_opt_set_double(ctx->sws, "param1", ctx->params[1], 0);
 
-    int cr_src = mp_chroma_location_to_av(src.chroma_location);
-    int cr_dst = mp_chroma_location_to_av(dst.chroma_location);
+    int cr_src = pl_chroma_to_av(src.chroma_location);
+    int cr_dst = pl_chroma_to_av(dst.chroma_location);
     int cr_xpos, cr_ypos;
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(57, 37, 100)
     if (av_chroma_location_enum_to_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {
         av_opt_set_int(ctx->sws, "src_h_chr_pos", cr_xpos, 0);
         av_opt_set_int(ctx->sws, "src_v_chr_pos", cr_ypos, 0);
@@ -320,16 +318,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         av_opt_set_int(ctx->sws, "dst_h_chr_pos", cr_xpos, 0);
         av_opt_set_int(ctx->sws, "dst_v_chr_pos", cr_ypos, 0);
     }
-#else
-    if (avcodec_enum_to_chroma_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {
-        av_opt_set_int(ctx->sws, "src_h_chr_pos", cr_xpos, 0);
-        av_opt_set_int(ctx->sws, "src_v_chr_pos", cr_ypos, 0);
-    }
-    if (avcodec_enum_to_chroma_pos(&cr_xpos, &cr_ypos, cr_dst) >= 0) {
-        av_opt_set_int(ctx->sws, "dst_h_chr_pos", cr_xpos, 0);
-        av_opt_set_int(ctx->sws, "dst_v_chr_pos", cr_ypos, 0);
-    }
-#endif
 
     // This can fail even with normal operation, e.g. if a conversion path
     // simply does not support these settings.
@@ -365,7 +353,7 @@ static struct mp_image *check_alignment(struct mp_log *log,
     // and which in most cases is not larger than decoder output. It is smaller
     // or equal to what most image allocators in mpv/ffmpeg use.
     size_t align = 32;
-    assert(align <= MP_IMAGE_BYTE_ALIGN); // or mp_image_alloc will not cut it
+    mp_assert(align <= MP_IMAGE_BYTE_ALIGN); // or mp_image_alloc will not cut it
 
     bool is_aligned = true;
     for (int p = 0; p < img->num_planes; p++) {
@@ -407,11 +395,11 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         return mp_zimg_convert(ctx->zimg, dst, src) ? 0 : -1;
 #endif
 
-    if (src->params.color.space == MP_CSP_XYZ && dst->params.color.space != MP_CSP_XYZ) {
+    if (src->params.repr.sys == PL_COLOR_SYSTEM_XYZ && dst->params.repr.sys != PL_COLOR_SYSTEM_XYZ) {
         // swsscale has hardcoded gamma 2.2 internally and 2.6 for XYZ
-        dst->params.color.gamma = MP_CSP_TRC_GAMMA22;
+        dst->params.color.transfer = PL_COLOR_TRC_GAMMA22;
         // and sRGB primaries...
-        dst->params.color.primaries = MP_CSP_PRIM_BT_709;
+        dst->params.color.primaries = PL_COLOR_PRIM_BT_709;
         // it doesn't adjust white point though, but it is not worth to support
         // this case. It would require custom prim with equal energy white point
         // and sRGB primaries.
@@ -434,16 +422,6 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
         mp_image_copy(dst, a_dst);
 
     return 0;
-}
-
-int mp_image_swscale(struct mp_image *dst, struct mp_image *src,
-                     int my_sws_flags)
-{
-    struct mp_sws_context *ctx = mp_sws_alloc(NULL);
-    ctx->flags = my_sws_flags;
-    int res = mp_sws_scale(ctx, dst, src);
-    talloc_free(ctx);
-    return res;
 }
 
 int mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,

@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 #include <time.h>
 #include <errno.h>
@@ -101,6 +100,10 @@ const struct keymap_entry keys[] = {
     {SDLK_LEFT, MP_KEY_LEFT},
     {SDLK_DOWN, MP_KEY_DOWN},
     {SDLK_UP, MP_KEY_UP},
+    {SDLK_KP_PLUS, MP_KEY_KPADD},
+    {SDLK_KP_MINUS, MP_KEY_KPSUBTRACT},
+    {SDLK_KP_MULTIPLY, MP_KEY_KPMULTIPLY},
+    {SDLK_KP_DIVIDE, MP_KEY_KPDIVIDE},
     {SDLK_KP_ENTER, MP_KEY_KPENTER},
     {SDLK_KP_1, MP_KEY_KP1},
     {SDLK_KP_2, MP_KEY_KP2},
@@ -450,7 +453,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     struct mp_rect screenrc;
 
     update_screeninfo(vo, &screenrc);
-    vo_calc_window_geometry(vo, &screenrc, &geo);
+    vo_calc_window_geometry(vo, &screenrc, &screenrc, 1.0, false, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     int win_w = vo->dwidth;
@@ -520,10 +523,13 @@ static void wakeup(struct vo *vo)
     SDL_PushEvent(&event);
 }
 
-static void wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_ns)
 {
-    int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+    int64_t wait_ns = until_time_ns - mp_time_ns();
+    // Round-up to 1ms for short timeouts (100us, 1000us]
+    if (wait_ns > MP_TIME_US_TO_NS(100))
+        wait_ns = MPMAX(wait_ns, MP_TIME_MS_TO_NS(1));
+    int timeout_ms = MPCLAMP(wait_ns / MP_TIME_MS_TO_NS(1), 0, 10000);
     SDL_Event ev;
 
     while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
@@ -543,6 +549,10 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
                 break;
             case SDL_WINDOWEVENT_LEAVE:
                 mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+                break;
+            case SDL_WINDOWEVENT_FOCUS_LOST:
+            case SDL_WINDOWEVENT_FOCUS_GAINED:
+                vo_event(vo, VO_EVENT_FOCUS);
                 break;
             }
             break;
@@ -598,7 +608,7 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
             break;
         }
         case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y);
+            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y, false);
             break;
         case SDL_MOUSEBUTTONDOWN: {
             int i;
@@ -620,9 +630,9 @@ static void wait_events(struct vo *vo, int64_t until_time_us)
         }
         case SDL_MOUSEWHEEL: {
 #if SDL_VERSION_ATLEAST(2, 0, 4)
-            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -0.1 : 0.1;
+            double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1;
 #else
-            double multiplier = 0.1;
+            double multiplier = 1;
 #endif
             int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
             mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
@@ -869,7 +879,7 @@ static int query_format(struct vo *vo, int format)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *vc = vo->priv;
 
@@ -879,20 +889,16 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     SDL_SetTextureBlendMode(vc->tex, SDL_BLENDMODE_NONE);
 
-    if (mpi) {
-        vc->osd_pts = mpi->pts;
+    if (frame->current) {
+        vc->osd_pts = frame->current->pts;
 
         mp_image_t texmpi;
-        if (!lock_texture(vo, &texmpi)) {
-            talloc_free(mpi);
-            return;
-        }
+        if (!lock_texture(vo, &texmpi))
+            goto done;
 
-        mp_image_copy(&texmpi, mpi);
+        mp_image_copy(&texmpi, frame->current);
 
         SDL_UnlockTexture(vc->tex);
-
-        talloc_free(mpi);
     }
 
     SDL_Rect src, dst;
@@ -908,6 +914,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
 
     draw_osd(vo);
+
+done:
+    return VO_TRUE;
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)
@@ -940,9 +949,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         }
         return 1;
     }
-    case VOCTRL_REDRAW_FRAME:
-        draw_image(vo, NULL);
-        return 1;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
@@ -963,6 +969,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_WINDOW_TITLE:
         SDL_SetWindowTitle(vc->window, (char *)data);
         return true;
+    case VOCTRL_GET_FOCUSED:
+        *(bool *)data = SDL_GetWindowFlags(vc->window) & SDL_WINDOW_INPUT_FOCUS;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
@@ -987,7 +996,7 @@ const struct vo_driver video_out_sdl = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
+    .draw_frame = draw_frame,
     .uninit = uninit,
     .flip_page = flip_page,
     .wait_events = wait_events,

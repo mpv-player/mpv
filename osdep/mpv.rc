@@ -33,7 +33,7 @@ VS_VERSION_INFO VERSIONINFO
                 VALUE "CompanyName", "mpv"
                 VALUE "FileDescription", "mpv"
                 VALUE "FileVersion", VERSION
-                VALUE "LegalCopyright", MPVCOPYRIGHT
+                VALUE "LegalCopyright", MPVCOPYRIGHT_W
                 VALUE "OriginalFilename", "mpv.exe"
                 VALUE "ProductName", "mpv"
                 VALUE "ProductVersion", VERSION

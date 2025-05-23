@@ -110,7 +110,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
 
 static void vaapi_pl_unmap(struct ra_hwdec_mapper *mapper)
 {
-    for (int n = 0; n < 4; n++)
+    for (int n = 0; n < MP_ARRAY_SIZE(mapper->tex); n++)
         ra_tex_free(mapper->ra, &mapper->tex[n]);
 }
 

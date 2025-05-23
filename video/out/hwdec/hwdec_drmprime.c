@@ -23,12 +23,14 @@
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_drm.h>
+#include <libavutil/pixdesc.h>
 #include <xf86drm.h>
 
 #include "config.h"
 
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "options/m_config.h"
+#include "video/fmt-conversion.h"
 #include "video/out/drm_common.h"
 #include "video/out/gpu/hwdec.h"
 #include "video/out/hwdec/dmabuf_interop.h"
@@ -50,17 +52,29 @@ static void uninit(struct ra_hwdec *hw)
     av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
-const static dmabuf_interop_init interop_inits[] = {
+static const dmabuf_interop_init interop_inits[] = {
 #if HAVE_DMABUF_INTEROP_GL
     dmabuf_interop_gl_init,
 #endif
-#if HAVE_DMABUF_INTEROP_PL
+#if HAVE_VAAPI
     dmabuf_interop_pl_init,
 #endif
 #if HAVE_DMABUF_WAYLAND
     dmabuf_interop_wl_init,
 #endif
     NULL
+};
+
+/**
+ * Due to the fact that Raspberry Pi support only exists in forked ffmpegs and
+ * also requires custom pixel formats, we need some way to work with those formats
+ * without introducing any build time dependencies. We do this by looking up the
+ * pixel formats by name. As rpi is an important target platform for this hwdec
+ * we don't really have the luxury of ignoring these forks.
+ */
+static const char *forked_pix_fmt_names[] = {
+    "rpi4_8",
+    "rpi4_10",
 };
 
 static int init(struct ra_hwdec *hw)
@@ -117,6 +131,19 @@ static int init(struct ra_hwdec *hw)
     int num_formats = 0;
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_NV12);
     MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_420P);
+    MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_NV16));
+    MP_TARRAY_APPEND(p, p->formats, num_formats, IMGFMT_P010);
+#ifdef AV_PIX_FMT_P210
+    MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(AV_PIX_FMT_P210));
+#endif
+
+    for (int i = 0; i < MP_ARRAY_SIZE(forked_pix_fmt_names); i++) {
+        enum AVPixelFormat fmt = av_get_pix_fmt(forked_pix_fmt_names[i]);
+        if (fmt != AV_PIX_FMT_NONE) {
+            MP_TARRAY_APPEND(p, p->formats, num_formats, pixfmt2imgfmt(fmt));
+        }
+    }
+
     MP_TARRAY_APPEND(p, p->formats, num_formats, 0); // terminate it
 
     p->hwctx.hw_imgfmt = IMGFMT_DRMPRIME;
@@ -280,6 +307,7 @@ const struct ra_hwdec_driver ra_hwdec_drmprime = {
     .name = "drmprime",
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
+    .device_type = AV_HWDEVICE_TYPE_DRM,
     .init = init,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){

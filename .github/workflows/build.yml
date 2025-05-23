@@ -6,12 +6,32 @@ on:
       - master
       - ci
       - 'release/**'
+    paths-ignore:
+      - 'DOCS/**'
+      - 'TOOLS/lua/**'
+      - '.editorconfig'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE'
+      - '.gitignore'
+      - 'Copyright'
+      - 'README.md'
+      - 'RELEASE_NOTES'
   pull_request:
     branches: [master]
+    paths-ignore:
+      - 'DOCS/**'
+      - 'TOOLS/lua/**'
+      - '.editorconfig'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE'
+      - '.gitignore'
+      - 'Copyright'
+      - 'README.md'
+      - 'RELEASE_NOTES'
 
 jobs:
   mingw:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -19,15 +39,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [i686-w64-mingw32, x86_64-w64-mingw32]
+        include:
+          - target: i686-w64-mingw32
+            wine: wine32
+          - target: x86_64-w64-mingw32
+            wine: wine64
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get time
         id: get_time
         run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v3
+      - name: Restore cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
@@ -37,8 +62,12 @@ jobs:
         run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y autoconf automake pkg-config g++-mingw-w64 gcc-multilib python3-pip ninja-build nasm wine wine32 wine64 ccache
-          sudo python3 -m pip install meson
+          sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib meson nasm ninja-build pkgconf ${{ matrix.wine }} wine
+
+      - name: Install Meson Wraps
+        run: |
+          mkdir subprojects -p
+          meson wrap install mujs
 
       - name: Build libraries
         run: |
@@ -56,19 +85,138 @@ jobs:
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
-          cat ./build/meson-logs/meson-log.txt
+          cat ./mingw_build/meson-logs/meson-log.txt
 
       - name: Functional test
-        id: tests
         run: |
-          cd artifact && wine64 ./mpv.com -v --no-config
+          cd artifact && wine ./mpv.com -v --no-config
         env:
           WINEDEBUG: '+loaddll'
 
-      - uses: actions/upload-artifact@v3
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C mingw_build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./mingw_build/meson-logs/testlog.txt
+
+      - uses: actions/upload-artifact@v4
         with:
           name: mpv-${{ matrix.target }}
           path: mpv-git-*.zip
+
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+
+  win32:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            arch: "x64"
+            os: "windows-latest"
+          - target: aarch64-pc-windows-msvc
+            arch: "arm64"
+            os: "windows-11-arm"
+    env:
+      VS: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise"
+      CC: "ccache clang"
+      CXX: "ccache clang++"
+      CC_LD: "lld"
+      CXX_LD: "lld"
+      WINDRES: "llvm-rc"
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: "${{ github.workspace }}\\.ccache"
+      CCACHE_MAXSIZE: 500M
+    steps:
+      - name: Disable autocrlf
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@v4
+
+      - name: Get time
+        id: get_time
+        run: |
+          "timestamp=$((Get-Date).Ticks)" >> $env:GITHUB_OUTPUT
+
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
+          restore-keys: ${{ matrix.target }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install meson
+          choco install ccache nasm
+
+      - name: Update Meson WrapDB
+        run: |
+          meson wrap update-db
+          # Explicitly download wraps, as nested projects may have older versions of them.
+          meson wrap install expat
+          meson wrap install harfbuzz
+          meson wrap install libpng
+          meson wrap install zlib
+
+      - name: Build
+        id: build
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
+                                                             $_ -ne 'C:\Program Files\CMake\bin' -and `
+                                                             $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
+          $env:PATH += ';C:\Program Files\NASM'
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
+          ./ci/build-win32.ps1
+
+      - name: Print build log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
+                                                             $_ -ne 'C:\Program Files\CMake\bin' -and `
+                                                             $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
+          $env:PATH += ';C:\Program Files\NASM'
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
+          meson test -C build -t 2
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-${{ matrix.target }}
+          path: |
+            build/mpv.???
+            build/vulkan-*.dll
+            !build/mpv.lib
+
+      - name: Save Cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
 
   macos:
     runs-on: ${{ matrix.os }}
@@ -76,21 +224,42 @@ jobs:
       matrix:
         cc:
           - "clang"
+        cxx:
+          - "clang++"
         os:
-          - "macos-11"
-          - "macos-12"
+          - "macos-13"
+          - "macos-14"
+          - "macos-15"
+        include:
+          - os: "macos-13"
+            arch: "intel"
+          - os: "macos-14"
+            arch: "arm"
+            xcode: "Xcode_15.2"
+          - os: "macos-15"
+            arch: "arm"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Remove stray upstream python binary symlinks under /usr/local
         run: |
           find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete -print
           brew unlink python && brew link --overwrite python
 
+      - name: Unlink pkg-config if the CI runner happens to have it already installed
+        run: |
+          find "$(brew config | grep HOMEBREW_PREFIX | cut -f 2- -d ' ')/bin" -lname '*/pkg-config@0*/*' -print -exec brew unlink pkg-config@0.29.2 \; -quit
+
+      - name: Change Xcode version
+        if: ${{ matrix.xcode != '' }}
+        run: |
+          sudo xcode-select -s /Applications/${{ matrix.xcode }}.app
+
       - name: Install dependencies
         run: |
           brew update
-          brew install autoconf automake pkg-config libtool python freetype fribidi little-cms2 lua@5.1 libass ffmpeg meson
+          brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
+            luajit libass ffmpeg meson uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
       - name: Build with meson
         id: build
@@ -98,7 +267,13 @@ jobs:
           ./ci/build-macos.sh
         env:
           CC: "${{ matrix.cc }}"
+          CXX: "${{ matrix.cxx }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
+
+      - name: Create App Bundle
+        run: |
+          meson compile -C build macos-bundle
+          tar -czvf mpv.tar.gz -C build mpv.app
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -115,29 +290,113 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-${{ matrix.os }}-${{ matrix.arch }}
+          path: mpv.tar.gz
+
   linux:
-    runs-on: "ubuntu-22.04"
+    runs-on: ubuntu-latest
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
-        CC: "${{ matrix.cc }}"
+        CC: "${{ matrix.config.cc }}"
+        CXX: "${{ matrix.config.cxx }}"
+        CC_LD: "${{ matrix.config.ld }}"
+        CXX_LD: "${{ matrix.config.ld }}"
     strategy:
       matrix:
-        cc:
-          - "gcc"
-          - "clang"
+        config:
+          - cc: "gcc"
+            cxx: "g++"
+            args: "-Db_ndebug=true"
+          - cc: "clang"
+            cxx: "clang++"
+            ld: "lld"
+            args: "-Db_lto=true -Db_lto_mode=thin"
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          # workaround to avoid "fatal: unsafe repository" error
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: actions/checkout@v4
 
       - name: Build with meson
         id: build
         run: |
-          ./ci/build-tumbleweed.sh
+          ./ci/build-tumbleweed.sh ${{ matrix.config.args }}
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
+  linux-fuzz:
+    runs-on: ubuntu-latest
+    container:
+      image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
+      env:
+        CC: "clang"
+        CXX: "clang++"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with meson
+        id: build
+        run: |
+          meson setup build \
+            --werror        \
+            -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
+            -Dfuzzers=true -Dlibmpv=true -Dcplayer=false
+          meson compile -C build fuzzers
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+  linux-ffmpeg-6-1:
+    runs-on: ubuntu-latest
+    container:
+      # We want to test ffmpeg 6.1.1 which alpine 3.19 has exactly.
+      # Furthermore, this is a very minimal build of mpv without commonly
+      # used features to test build compatibility. Musl is a nice bonus as well
+      image: alpine:3.19
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apk update
+          apk add \
+              binutils \
+              ffmpeg-dev \
+              gcc \
+              git \
+              g++ \
+              libass-dev \
+              lua5.2-dev \
+              pulseaudio-dev \
+              libx11-dev \
+              libxfixes-dev \
+              libxkbcommon-dev \
+              libxrandr-dev \
+              libxpresent-dev \
+              libxscrnsaver-dev \
+              meson \
+              musl-dev \
+              samurai
+
+      - name: Build with meson
+        id: build
+        run: |
+          ./ci/build-linux-old.sh
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -154,79 +413,128 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
-  freebsd:
-    runs-on: macos-12 # until https://github.com/actions/runner/issues/385
+  openbsd:
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
     steps:
-    - uses: actions/checkout@v3
-    - name: Test in FreeBSD VM
-      uses: vmactions/freebsd-vm@v0
+    - uses: actions/checkout@v4
+    - name: Test in OpenBSD VM
+      uses: cross-platform-actions/action@v0.28.0
       with:
-        mem: 8192
-        copyback: false
-        usesh: true
-        prepare: |
-            # Update to latest release channel
-            mkdir -p /usr/local/etc/pkg/repos
-            echo "FreeBSD: { url: "pkg+http://pkg.freebsd.org/\${ABI}/latest" }" \
-                > /usr/local/etc/pkg/repos/FreeBSD.conf
-            pkg update
-            # Requested in ci/build-freebsd.sh
-            pkg install -y \
+        operating_system: openbsd
+        version: '7.7'
+        run: |
+            sudo pkg_add -U \
                 cmake \
-                evdev-proto \
                 ffmpeg \
-                libplacebo \
-                libxkbcommon \
-                libXinerama \
-                libxpresent \
-                luajit \
-                meson \
-                openal-soft \
-                pkgconf \
-                python3 \
-                sdl2 \
-                sndio \
-                vulkan-headers \
-                wayland-protocols \
-                #
-            # Optionally auto-enabled
-            pkg install -y \
-                alsa-lib \
-                jackit \
-                libXv \
+                git \
                 libarchive \
                 libbluray \
                 libcaca \
                 libcdio-paranoia \
                 libdvdnav \
-                mujs \
-                pipewire \
+                libiconv \
+                libplacebo \
+                libv4l \
+                libxkbcommon \
+                luajit \
+                meson \
+                openal \
+                pkgconf \
                 pulseaudio \
+                python3 \
+                rubberband \
+                sdl2 \
+                shaderc \
+                spirv-cross \
+                spirv-headers \
+                uchardet \
+                vulkan-loader \
+                vulkan-headers \
+                zimg
+            ./ci/build-openbsd.sh
+            if ! meson test -C build; then
+                cat ./build/meson-logs/testlog.txt
+                exit 1
+            fi
+
+  freebsd:
+    runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
+    timeout-minutes: 30 # avoid any weirdness with the VM
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test in FreeBSD VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        operating_system: freebsd
+        version: '14.2'
+        run: |
+            sudo pkg update
+            sudo pkg install -y \
+                alsa-lib \
+                cmake \
+                evdev-proto \
+                ffmpeg \
+                git \
+                iconv \
+                jackit \
+                libarchive \
+                libbluray \
+                libcaca \
+                libcdio-paranoia \
+                libdvdnav \
+                libdisplay-info \
+                libplacebo \
+                libXinerama \
+                libxkbcommon \
+                libxpresent \
+                libXv \
+                luajit \
+                meson \
+                mujs \
+                openal-soft \
+                pipewire \
+                pkgconf \
+                pulseaudio \
+                python3 \
                 rubberband \
                 sekrit-twc-zimg \
+                sdl2 \
+                sndio \
                 uchardet \
                 v4l_compat \
-                #
-        run: |
-          ./ci/build-freebsd.sh
-          meson test -C build
+                vulkan-headers \
+                wayland-protocols
+            ./ci/build-freebsd.sh
+            if ! meson test -C build; then
+                cat ./build/meson-logs/testlog.txt
+                exit 1
+            fi
 
   msys2:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        sys:
-          - clang32
-          - clang64
-          - mingw32
-          - mingw64
-          - ucrt64
+        include:
+          - sys: "clang64"
+            os: "windows-latest"
+          - sys: "mingw64"
+            os: "windows-latest"
+          - sys: "ucrt64"
+            os: "windows-latest"
+          - sys: "clangarm64"
+            os: "windows-11-arm"
     defaults:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v3
+      - name: Disable autocrlf
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.sys }}
@@ -236,7 +544,7 @@ jobs:
             angleproject:p
             ca-certificates:p
             cc:p
-            diffutils:p
+            cppwinrt:p
             ffmpeg:p
             lcms2:p
             libarchive:p
@@ -256,12 +564,14 @@ jobs:
             spirv-cross:p
             uchardet:p
             vapoursynth:p
-            vulkan:p
+            vulkan-devel:p
 
       - name: Build with meson
         id: build
         run: |
           ./ci/build-msys2.sh meson
+        env:
+          SYS: ${{ matrix.sys }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}

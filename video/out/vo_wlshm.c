@@ -21,8 +21,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <libswscale/swscale.h>
-
 #include "osdep/endian.h"
 #include "present_sync.h"
 #include "sub/osd.h"
@@ -31,6 +29,8 @@
 #include "video/sws_utils.h"
 #include "vo.h"
 #include "wayland_common.h"
+
+#define IMGFMT_WL_RGB MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB)
 
 struct buffer {
     struct vo *vo;
@@ -85,7 +85,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
     uint8_t *data;
     struct buffer *buf;
 
-    stride = MP_ALIGN_UP(width * 4, 16);
+    stride = MP_ALIGN_UP(width * 4, MP_IMAGE_BYTE_ALIGN);
     size = height * stride;
     fd = vo_wayland_allocate_memfd(vo, size);
     if (fd < 0)
@@ -164,7 +164,8 @@ err:
 
 static int query_format(struct vo *vo, int format)
 {
-    return sws_isSupportedInput(imgfmt2pixfmt(format));
+    struct priv *p = vo->priv;
+    return mp_sws_supports_formats(p->sws, IMGFMT_WL_RGB, format) ? 1 : 0;
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -195,21 +196,26 @@ static int resize(struct vo *vo)
     vo->dwidth = width;
     vo->dheight = height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = MP_SELECT_LE_BE(IMGFMT_BGR0, IMGFMT_0RGB),
+        .imgfmt = IMGFMT_WL_RGB,
         .w = width,
         .h = height,
         .p_w = 1,
         .p_h = 1,
     };
     mp_image_params_guess_csp(&p->sws->dst);
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst;
+    mp_mutex_unlock(&vo->params_mutex);
+
     while (p->free_buffers) {
         buf = p->free_buffers;
         p->free_buffers = buf->next;
         talloc_free(buf);
     }
 
-    vo_wayland_handle_fractional_scale(wl);
+    vo_wayland_handle_scale(wl);
 
     return mp_sws_reinit(p->sws);
 }
@@ -233,7 +239,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return ret;
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct vo_wayland_state *wl = vo->wl;
@@ -242,7 +248,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     bool render = vo_wayland_check_visible(vo);
     if (!render)
-        return;
+        return VO_FALSE;
 
     buf = p->free_buffers;
     if (buf) {
@@ -251,19 +257,19 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         buf = buffer_create(vo, vo->dwidth, vo->dheight);
         if (!buf) {
             wl_surface_attach(wl->surface, NULL, 0, 0);
-            return;
+            goto done;
         }
     }
     if (src) {
         struct mp_image dst = buf->mpi;
         struct mp_rect src_rc;
         struct mp_rect dst_rc;
-        src_rc.x0 = MP_ALIGN_DOWN(p->src.x0, MPMAX(src->fmt.align_x, 4));
-        src_rc.y0 = MP_ALIGN_DOWN(p->src.y0, MPMAX(src->fmt.align_y, 4));
+        src_rc.x0 = MP_ALIGN_DOWN(p->src.x0, src->fmt.align_x);
+        src_rc.y0 = MP_ALIGN_DOWN(p->src.y0, src->fmt.align_y);
         src_rc.x1 = p->src.x1 - (p->src.x0 - src_rc.x0);
         src_rc.y1 = p->src.y1 - (p->src.y0 - src_rc.y0);
-        dst_rc.x0 = MP_ALIGN_DOWN(p->dst.x0, MPMAX(dst.fmt.align_x, 4));
-        dst_rc.y0 = MP_ALIGN_DOWN(p->dst.y0, MPMAX(dst.fmt.align_y, 4));
+        dst_rc.x0 = MP_ALIGN_DOWN(p->dst.x0, dst.fmt.align_x);
+        dst_rc.y0 = MP_ALIGN_DOWN(p->dst.y0, dst.fmt.align_y);
         dst_rc.x1 = p->dst.x1 - (p->dst.x0 - dst_rc.x0);
         dst_rc.y1 = p->dst.y1 - (p->dst.y0 - dst_rc.y0);
         mp_image_crop_rc(src, src_rc);
@@ -283,6 +289,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         osd_draw_on_image(vo->osd, p->osd, 0, 0, &buf->mpi);
     }
     wl_surface_attach(wl->surface, buf->buffer, 0, 0);
+
+done:
+    return VO_TRUE;
 }
 
 static void flip_page(struct vo *vo)
@@ -293,7 +302,7 @@ static void flip_page(struct vo *vo)
                              vo->dheight);
     wl_surface_commit(wl->surface);
 
-    if (!wl->opts->disable_vsync)
+    if (wl->opts->wl_internal_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)

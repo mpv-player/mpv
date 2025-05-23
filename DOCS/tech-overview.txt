@@ -11,7 +11,7 @@ player/*.c:
     * main():
         * basic initializations (e.g. init_libav() and more)
         * pre-parse command line (verbosity level, config file locations)
-        * load config files (parse_cfgfiles())
+        * load config files (mp_parse_cfgfiles())
         * parse command line, add files from the command line to playlist
           (m_config_parse_mp_command_line())
         * check help options etc. (call handle_help_options()), possibly exit
@@ -45,7 +45,7 @@ player/*.c:
     Things worth saying about the playback core:
     - most state is in MPContext (core.h), which is not available to the
       subsystems (and should not be made available)
-    - the currently played tracks are in mpctx->current_tracks, and decoder
+    - the currently played tracks are in mpctx->current_track, and decoder
       state in track.dec/d_sub
     - the other subsystems rarely call back into the frontend, and the frontend
       polls them instead (probably a good thing)
@@ -68,7 +68,6 @@ ta.h & ta.c:
     as in it doesn't require valgrind.) You can enable it by setting the
     MPV_LEAK_REPORT environment variable to "1":
         export MPV_LEAK_REPORT=1
-    Or permanently by building with --enable-ta-leak-report.
     This will list all unfree'd allocations on exit.
 
     Documentation can be found here:
@@ -94,7 +93,7 @@ player/core.h:
     usually not accessed by other parts of mpv for the sake of modularization.
 
 player/client.c:
-    This implements the client API (libmpv/client.h). For the most part, this
+    This implements the client API (mpv/client.h). For the most part, this
     just calls into other parts of the player. This also manages a ringbuffer
     of events from player to clients.
 
@@ -126,15 +125,16 @@ options/options.h, options/options.c
 
     ... to get a copy of its options.
 
-    See m_config.h (below) how to access options.
+    See m_config_core.h (below) how to access options.
 
-    The actual option parser is spread over m_option.c, m_config.c, and
-    parse_commandline.c, and uses the option table in options.c.
+    The actual option parser is spread over m_option.c, m_config_frontend.c,
+    and parse_commandline.c, and uses the option table in options.c.
 
-options/m_config.h & m_config.c:
-    Code for querying and managing options. This (unfortunately) contains both
-    declarations for the "legacy-ish" global m_config struct, and ways to access
-    options in a threads-safe way anywhere, like m_config_cache_alloc().
+options/m_config_*.h & m_config_*.c:
+    Code for querying and managing options. m_config_frontend.h contains
+    declarations for the "legacy-ish" global m_config struct, while
+    m_config_core.h provides ways to access options in a threads-safe way
+    anywhere, like m_config_cache_alloc().
 
     m_config_cache_alloc() lets anyone read, observe, and write options in any
     thread. The only state it needs is struct mpv_global, which is an opaque
@@ -165,16 +165,15 @@ stream/*:
     E.g. if mpv sees "http://something" on the command line, it will pick
     stream_lavf.c based on the prefix, and pass the rest of the filename to it.
 
-    Some stream inputs are quite special: stream_dvd.c turns DVDs into mpeg
+    Some stream inputs are quite special: stream_dvdnav.c turns DVDs into mpeg
     streams (DVDs are actually a bunch of vob files etc. on a filesystem),
-    stream_tv.c provides TV input including channel switching.
 
     Some stream inputs are just there to invoke special demuxers, like
     stream_mf.c. (Basically to make the prefix "mf://" do something special.)
 
 demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
-    are split in packets. Packets (see demux_packet.h) are mostly byte chunks
+    are split in packets. Packets (see packet.h) are mostly byte chunks
     tagged with a playback time (PTS). These packets are passed to the decoders.
 
     Most demuxers have been removed from this fork, and the only important and
@@ -189,6 +188,14 @@ demux/:
     cache, which is implemented as a list of packets. The cache is complex
     because it support seeking, multiple ranges, prefetching, and so on.
 
+filters/:
+    Filter related code. filter.c contains the generic filtering framework
+    which converts input frames to output frames (audio, video, or demux
+    packet data). f_decoder_wrapper.c is a source filter which connects the
+    frontend with the actual audio and video decoders. f_output_chain.c handles
+    VO/AO output conversions. f_autoconvert.c automatically inserts the
+    appropriate conversion filters if format conversion is needed.
+
 video/:
     This contains several things related to audio/video decoding, as well as
     video filters.
@@ -197,22 +204,18 @@ video/:
     internally.
 
 video/decode/:
-    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c
-    handles most of connecting the frontend with the actual decoder.
+    vd_*.c are video decoders. (There's only vd_lavc.c left.)
 
 video/filter/:
-    vf_*.c and vf.c form the video filter chain. They are fed by the video
-    decoder, and output the filtered images to the VOs though vf_vo.c. By
-    default, no video filters (except vf_vo) are used. vf_scale is automatically
-    inserted if the video output can't handle the video format used by the
-    decoder.
+    vf_*.c are video filters. They are fed by the video decoder, and output the
+    filtered images to the VOs. By default, no video filters are used.
 
 video/out/:
     Video output. They also create GUI windows and handle user input. In most
     cases, the windowing code is shared among VOs, like x11_common.c for X11 and
     w32_common.c for Windows. The VOs stand between frontend and windowing code.
-    vo_gpu can pick a windowing system at runtime, e.g. the same binary can
-    provide both X11 and Cocoa support on OSX.
+    vo_gpu and vo_gpu_next can pick a windowing system at runtime, e.g. the same
+    binary can provide both X11 and Cocoa support on macOS.
 
     VOs can be reconfigured at runtime. A vo_reconfig() call can change the video
     resolution and format, without destroying the window.
@@ -224,13 +227,13 @@ audio/:
     compressed formats used for spdif.)
 
 audio/decode/:
-    ad_*.c and dec_audio.c handle audio decoding. ad_lavc.c is the
-    decoder using ffmpeg. ad_spdif.c is not really a decoder, but is used for
-    compressed audio passthrough.
+    ad_*.c handle audio decoding. ad_lavc.c is the decoder using ffmpeg.
+    ad_spdif.c is not really a decoder, but is used for compressed audio
+    passthrough.
 
 audio/filter/:
-    Audio filter chain. af_lavrresample is inserted if any form of conversion
-    between audio formats is needed.
+    Audio filters. af_scaletempo2 is inserted by default if playback is different
+    from normal speed.
 
 audio/out/:
     Audio outputs.
@@ -238,9 +241,9 @@ audio/out/:
     Unlike VOs, AOs can't be reconfigured on a format change. On audio format
     changes, the AO will simply be closed and re-opened.
 
-    There are wrappers to support for two types of audio APIs: push.c and
-    pull.c. ao.c calls into one of these. They contain generic code to deal
-    with the data flow these APIs impose.
+    buffer.c is the wrapper to support for two types of audio APIs: push and
+    pull. ao.c calls into that. It contains generic code to deal with the data
+    flow these APIs impose.
 
     Note that mpv synchronizes the video to the audio. That's the reason
     why buggy audio drivers can have a bad influence on playback quality.
@@ -257,10 +260,7 @@ sub/:
     in turn asks dec_sub.c for subtitle overlay bitmaps, which relays the
     request to one of the sd_*.c subtitle decoders/renderers.
 
-    Subtitle loading is in demux/. The MPlayer subreader.c is mostly gone - parts
-    of it survive in demux_subreader.c. It's used as last fallback, or to handle
-    some text subtitle types on Libav. It should go away eventually. Normally,
-    subtitles are loaded via demux_lavf.c.
+    Subtitle loading is in demux/. Normally, subtitles are loaded via demux_lavf.c.
 
     The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
     as they are demuxed. All text subtitles are rendered by sd_ass.c. If text
@@ -272,8 +272,8 @@ sub/:
     sd_ass.c's internal state.
 
 etc/:
-    The file input.conf is actually integrated into the mpv binary by the
-    build system. It contains the default keybindings.
+    The files input.conf and builtin.conf are actually integrated into the mpv
+    binary by the build system. They contain the default configs and keybindings.
 
 Best practices and Concepts within mpv
 ======================================
@@ -430,12 +430,11 @@ like a log file or the internal console.lua script.
 Locking
 -------
 
-See generally available literature. In mpv, we use pthread for this.
+See generally available literature. In mpv, we use mp_thread for this.
 
 Always keep locking clean. Don't skip locking just because it will work "in
 practice". (See undefined behavior section.) If your use case is simple, you may
-use C11 atomics (osdep/atomic.h for partial C99 support), but most likely you
-will only hurt yourself and others.
+use C11 atomics, but most likely you will only hurt yourself and others.
 
 Always make clear which fields in a struct are protected by which lock. If a
 field is immutable, or simply not thread-safe (e.g. state for a single worker
@@ -556,13 +555,13 @@ Condition variables
 -------------------
 
 They're used whenever a thread needs to wait for something, without nonsense
-like sleep calls or busy waiting. mpv uses the standard pthread API for this.
-There's a lot of literature on it. Read it.
+like sleep calls or busy waiting. mpv uses the mp_thread API for this.
+There's a lot of literature on condition variables, threading in general. Read it.
 
 For initial understanding, it may be helpful to know that condition variables
-are not variables that signal a condition. pthread_cond_t does not have any
-state per-se. Maybe pthread_cond_t would better be named pthread_interrupt_t,
-because its sole purpose is to interrupt a thread waiting via pthread_cond_wait()
+are not variables that signal a condition. mp_cond does not have any
+state per-se. Maybe mp_cond would better be named mp_interrupt,
+because its sole purpose is to interrupt a thread waiting via mp_cond_wait()
 (or similar). The "something" in "waiting for something" can be called
 predicate (to avoid confusing it with "condition"). Consult literature for the
 proper terms.
@@ -571,24 +570,24 @@ The very short version is...
 
 Shared declarations:
 
-    pthread_mutex_t lock;
-    pthread_cond_t cond_var;
+    mp_mutex lock;
+    mp_cond cond_var;
     struct something state_var; // protected by lock, changes signaled by cond_var
 
 Waiter thread:
 
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
 
     // Wait for a change in state_var. We want to wait until predicate_fulfilled()
     // returns true.
     // Must be a loop for 2 reasons:
     //  1. cond_var may be associated with other conditions too
-    //  2. pthread_cond_wait() can have sporadic wakeups
+    //  2. mp_cond_wait() can have sporadic wakeups
     while (!predicate_fulfilled(&state_var)) {
         // This unlocks, waits for cond_var to be signaled, and then locks again.
         // The _whole_ point of cond_var is that unlocking and waiting for the
         // signal happens atomically.
-        pthread_cond_wait(&cond_var, &lock);
+        mp_cond_wait(&cond_var, &lock);
     }
 
     // Here you may react to the state change. The state cannot change
@@ -596,43 +595,43 @@ Waiter thread:
     // and reacquire it).
     // ...
 
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
 
 Signaler thread:
 
-    pthread_mutex_lock(&lock);
+    mp_mutex_lock(&lock);
 
     // Something changed. Update the shared variable with the new state.
     update_state(&state_var);
 
     // Notify that something changed. This will wake up the waiter thread if
-    // it's blocked in pthread_cond_wait(). If not, nothing happens.
-    pthread_cond_broadcast(&cond_var);
+    // it's blocked in mp_cond_wait(). If not, nothing happens.
+    mp_cond_broadcast(&cond_var);
 
     // Fun fact: good implementations wake up the waiter only when the lock is
     // released, to reduce kernel scheduling overhead.
-    pthread_mutex_unlock(&lock);
+    mp_mutex_unlock(&lock);
 
 Some basic rules:
     1. Always access your state under proper locking
-    2. Always check your predicate before every call to pthread_cond_wait()
-       (And don't call pthread_cond_wait() if the predicate is fulfilled.)
-    3. Always call pthread_cond_wait() in a loop
+    2. Always check your predicate before every call to mp_cond_wait()
+       (And don't call mp_cond_wait() if the predicate is fulfilled.)
+    3. Always call mp_cond_wait() in a loop
        (And only if your predicate failed without releasing the lock..)
-    4. Always call pthread_cond_broadcast()/_signal() inside of its associated
+    4. Always call mp_cond_broadcast()/_signal() inside of its associated
        lock
 
 mpv sometimes violates rule 3, and leaves "retrying" (i.e. looping) to the
 caller.
 
 Common pitfalls:
-    - Thinking that pthread_cond_t is some kind of semaphore, or holds any
+    - Thinking that mp_cond is some kind of semaphore, or holds any
        application state or the user predicate (it _only_ wakes up threads
-       that are at the same time blocking on pthread_cond_wait() and friends,
+       that are at the same time blocking on mp_cond_wait() and friends,
        nothing else)
-    - Changing the predicate, but not updating all pthread_cond_broadcast()/
+    - Changing the predicate, but not updating all mp_cond_broadcast()/
       _signal() calls correctly
-    - Forgetting that pthread_cond_wait() unlocks the lock (other threads can
+    - Forgetting that mp_cond_wait() unlocks the lock (other threads can
       and must acquire the lock)
     - Holding multiple nested locks while trying to wait (=> deadlock, violates
       the lock order anyway)

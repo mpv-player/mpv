@@ -32,6 +32,20 @@ API changes
 
 ::
 
+ --- mpv 0.40.0 ---
+ 2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
+ --- mpv 0.39.0 ---
+ 2.4    - mpv_render_param with the MPV_RENDER_PARAM_ICC_PROFILE argument no
+          longer has incorrect assumptions about memory allocation and can be
+          correctly used.
+ --- mpv 0.38.0 ---
+ 2.3    - partially revert the changes from API version 1.27, remove libmpv as
+          the default VO and move it to the bottom of the auto-probing order.
+          This restores the prior behavior on all platforms other than macOS,
+          but still auto selects libmpv/cocoa-cb on macOS if it was built with
+          support for cocoa-cb.
+ --- mpv 0.37.0 ---
+ 2.2    - add mpv_time_ns()
  --- mpv 0.36.0 ---
  2.1    - add mpv_del_property()
  --- mpv 0.35.0 ---
@@ -43,7 +57,7 @@ API changes
           TRACK_SWITCHED, METADATA_UPDATE, CHAPTER_CHANGE events
  --- mpv 0.33.0 ---
  1.109  - add MPV_RENDER_API_TYPE_SW and related (software rendering API)
-        - inactivate the opengl_cb API (always fails to initialize now)
+        - deactivate the opengl_cb API (always fails to initialize now)
           The opengl_cb API was deprecated over 2 years ago. Use the render API
           instead.
  1.108  - Deprecate MPV_EVENT_IDLE
@@ -271,7 +285,6 @@ API changes
         - extend the "--start" option; a leading "+", which was previously
           insignificant is now significant
         - add "cache-free" and "cache-used" properties
-        - OSX: the "coreaudio" AO spdif code is split into a separate AO
+        - macOS: the "coreaudio" AO spdif code is split into a separate AO
  --- mpv 0.4.0 ---
  1.0    - the API is declared stable
-

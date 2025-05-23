@@ -47,14 +47,14 @@ static void resize(struct ra_ctx *ctx)
     const int32_t width = mp_rect_w(wl->geometry);
     const int32_t height = mp_rect_h(wl->geometry);
 
+    vo_wayland_handle_scale(wl);
+
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
     if (p->egl_window)
         wl_egl_window_resize(p->egl_window, width, height, 0, 0);
 
     wl->vo->dwidth  = width;
     wl->vo->dheight = height;
-
-    vo_wayland_handle_fractional_scale(wl);
 }
 
 static bool wayland_egl_check_visible(struct ra_ctx *ctx)
@@ -69,7 +69,7 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 
     eglSwapBuffers(p->egl_display, p->egl_surface);
 
-    if (!wl->opts->disable_vsync)
+    if (wl->opts->wl_internal_vsync)
         vo_wayland_wait_frame(wl);
 
     if (wl->use_present)
@@ -104,7 +104,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     mpegl_load_functions(&p->gl, wl->log);
 
-    struct ra_gl_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,
@@ -198,9 +198,9 @@ static void wayland_egl_wakeup(struct ra_ctx *ctx)
     vo_wayland_wakeup(ctx->vo);
 }
 
-static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void wayland_egl_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_wayland_wait_events(ctx->vo, until_time_us);
+    vo_wayland_wait_events(ctx->vo, until_time_ns);
 }
 
 static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
@@ -220,6 +220,7 @@ static bool wayland_egl_init(struct ra_ctx *ctx)
 const struct ra_ctx_fns ra_ctx_wayland_egl = {
     .type               = "opengl",
     .name               = "wayland",
+    .description        = "Wayland/EGL",
     .reconfig           = wayland_egl_reconfig,
     .control            = wayland_egl_control,
     .wakeup             = wayland_egl_wakeup,

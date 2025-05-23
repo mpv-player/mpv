@@ -24,6 +24,8 @@
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
+#include "demux/demux.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
 #include "options/m_config.h"
@@ -197,12 +199,18 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
             av_dict_set(dict, "cookies", cookies, 0);
     }
     av_dict_set(dict, "tls_verify", opts->tls_verify ? "1" : "0", 0);
-    if (opts->tls_ca_file)
-        av_dict_set(dict, "ca_file", opts->tls_ca_file, 0);
-    if (opts->tls_cert_file)
-        av_dict_set(dict, "cert_file", opts->tls_cert_file, 0);
-    if (opts->tls_key_file)
-        av_dict_set(dict, "key_file", opts->tls_key_file, 0);
+    if (opts->tls_ca_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_ca_file);
+        av_dict_set(dict, "ca_file", file, 0);
+    }
+    if (opts->tls_cert_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_cert_file);
+        av_dict_set(dict, "cert_file", file, 0);
+    }
+    if (opts->tls_key_file) {
+        char *file = mp_get_user_path(temp, global, opts->tls_key_file);
+        av_dict_set(dict, "key_file", file, 0);
+    }
     char *cust_headers = talloc_strdup(temp, "");
     if (opts->referrer) {
         cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
@@ -234,6 +242,100 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
     mp_set_avdict(dict, opts->avopts);
 
     talloc_free(temp);
+}
+
+#define PROTO(...) (const char *[]){__VA_ARGS__, NULL}
+
+// List of safe protocols and their aliases
+static const char **safe_protos[] = {
+    PROTO("data"),
+    PROTO("gopher"),
+    PROTO("gophers"),
+    PROTO("http", "dav", "webdav"),
+    PROTO("httpproxy"),
+    PROTO("https", "davs", "webdavs"),
+    PROTO("ipfs"),
+    PROTO("ipns"),
+    PROTO("mmsh", "mms", "mmshttp"),
+    PROTO("mmst"),
+    PROTO("rist"),
+    PROTO("rtmp"),
+    PROTO("rtmpe"),
+    PROTO("rtmps"),
+    PROTO("rtmpt"),
+    PROTO("rtmpte"),
+    PROTO("rtmpts"),
+    PROTO("rtp"),
+    PROTO("srt"),
+    PROTO("srtp"),
+    NULL,
+};
+
+static char **get_safe_protocols(void)
+{
+    int num = 0;
+    char **protocols = NULL;
+    char **ffmpeg_demuxers = mp_get_lavf_demuxers();
+    char **ffmpeg_protos = mp_get_lavf_protocols();
+
+    for (int i = 0; ffmpeg_protos[i]; i++) {
+        for (int j = 0; safe_protos[j]; j++) {
+            if (strcmp(ffmpeg_protos[i], safe_protos[j][0]) != 0)
+                continue;
+            for (int k = 0; safe_protos[j][k]; k++)
+                MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, safe_protos[j][k]));
+            break;
+        }
+    }
+
+    // rtsp is a demuxer not protocol in ffmpeg so it is handled separately
+    for (int i = 0; ffmpeg_demuxers[i]; i++) {
+        if (strcmp("rtsp", ffmpeg_demuxers[i]) == 0) {
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "rtsp"));
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "rtsps"));
+            break;
+        }
+    }
+
+    MP_TARRAY_APPEND(NULL, protocols, num, NULL);
+
+    talloc_free(ffmpeg_demuxers);
+    talloc_free(ffmpeg_protos);
+
+    return protocols;
+}
+
+static char **get_unsafe_protocols(void)
+{
+    int num = 0;
+    char **protocols = NULL;
+    char **safe_protocols = get_safe_protocols();
+    char **ffmpeg_protos = mp_get_lavf_protocols();
+
+    for (int i = 0; ffmpeg_protos[i]; i++) {
+        bool safe_protocol = false;
+        for (int j = 0; safe_protocols[j]; j++) {
+            if (strcmp(ffmpeg_protos[i], safe_protocols[j]) == 0) {
+                safe_protocol = true;
+                break;
+            }
+        }
+        // Skip to avoid name conflict with builtin mpv protocol.
+        if (strcmp(ffmpeg_protos[i], "bluray") == 0 || strcmp(ffmpeg_protos[i], "dvd") == 0)
+            continue;
+
+        if (!safe_protocol)
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, ffmpeg_protos[i]));
+    }
+
+    MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "ffmpeg"));
+    MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, "lavf"));
+
+    MP_TARRAY_APPEND(NULL, protocols, num, NULL);
+
+    talloc_free(ffmpeg_protos);
+    talloc_free(safe_protocols);
+    return protocols;
 }
 
 // Escape http URLs with unescaped, invalid characters in them.
@@ -285,16 +387,16 @@ static int open_f(stream_t *stream)
     }
 
     // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
-    // Replace "webdav://" with "http://" and "webdavs://" with "https://"
+    // Replace "dav://" or "webdav://" with "http://" and "davs://" or "webdavs://" with "https://"
     bstr b_filename = bstr0(filename);
     if (bstr_eatstart0(&b_filename, "mms://") ||
         bstr_eatstart0(&b_filename, "mmshttp://"))
     {
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
-    } else if (bstr_eatstart0(&b_filename, "webdav://"))
+    } else if (bstr_eatstart0(&b_filename, "dav://") || bstr_eatstart0(&b_filename, "webdav://"))
     {
         filename = talloc_asprintf(temp, "http://%.*s", BSTR_P(b_filename));
-    } else if (bstr_eatstart0(&b_filename, "webdavs://"))
+    } else if (bstr_eatstart0(&b_filename, "davs://") || bstr_eatstart0(&b_filename, "webdavs://"))
     {
         filename = talloc_asprintf(temp, "https://%.*s", BSTR_P(b_filename));
     }
@@ -322,7 +424,7 @@ static int open_f(stream_t *stream)
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
             MP_ERR(stream, "Protocol not found. Make sure"
-                   " ffmpeg/Libav is compiled with networking support.\n");
+                   " FFmpeg is compiled with networking support.\n");
         goto out;
     }
 
@@ -401,7 +503,21 @@ static struct mp_tags *read_icy(stream_t *s)
         packet = bstr_cut(packet, i + head.len);
         int end = bstr_find(packet, bstr0("\';"));
         packet = bstr_splice(packet, 0, end);
+
+        bool allocated = false;
+        struct demux_opts *opts = mp_get_config_group(NULL, s->global, &demux_conf);
+        const char *charset = mp_charset_guess(s, s->log, packet, opts->meta_cp, 0);
+        if (charset && !mp_charset_is_utf8(charset)) {
+            bstr conv = mp_iconv_to_utf8(s->log, packet, charset, 0);
+            if (conv.start && conv.start != packet.start) {
+                allocated = true;
+                packet = conv;
+            }
+        }
         mp_tags_set_bstr(res, bstr0("icy-title"), packet);
+        talloc_free(opts);
+        if (allocated)
+            talloc_free(packet.start);
     }
 
     av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
@@ -413,16 +529,11 @@ done:
 }
 
 const stream_info_t stream_info_ffmpeg = {
-  .name = "ffmpeg",
-  .open = open_f,
-  .protocols = (const char *const[]){
-     "rtmp", "rtsp", "rtsps", "http", "https", "mms", "mmst", "mmsh", "mmshttp",
-     "rtp", "httpproxy", "rtmpe", "rtmps", "rtmpt", "rtmpte", "rtmpts", "srt",
-     "rist", "srtp", "gopher", "gophers", "data", "ipfs", "ipns", "webdav",
-     "webdavs",
-     NULL },
-  .can_write = true,
-  .stream_origin = STREAM_ORIGIN_NET,
+    .name = "ffmpeg",
+    .open = open_f,
+    .get_protocols = get_safe_protocols,
+    .can_write = true,
+    .stream_origin = STREAM_ORIGIN_NET,
 };
 
 // Unlike above, this is not marked as safe, and can contain protocols which
@@ -430,13 +541,9 @@ const stream_info_t stream_info_ffmpeg = {
 // pseudo-demuxer, which in turn gives access to filters that can access the
 // local filesystem.)
 const stream_info_t stream_info_ffmpeg_unsafe = {
-  .name = "ffmpeg",
-  .open = open_f,
-  .protocols = (const char *const[]){
-     "lavf", "ffmpeg", "udp", "ftp", "tcp", "tls", "unix", "sftp", "md5",
-     "concat", "smb",
-     NULL },
-  .stream_origin = STREAM_ORIGIN_UNSAFE,
-  .can_write = true,
+    .name = "ffmpeg",
+    .open = open_f,
+    .get_protocols = get_unsafe_protocols,
+    .stream_origin = STREAM_ORIGIN_UNSAFE,
+    .can_write = true,
 };
-

@@ -26,8 +26,10 @@
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
-// This is probably arbitrary.
-// sd_lavc_conv might indirectly still assume this PlayResY, though.
+// These PlayResX and PlayResY values are arbitrary and taken from lavc.
+// lavc assumes these values when converting to ass generally. Moreover, these
+// values are also used by default in VSFilter, so it isn't that arbitrary.
+#define MP_ASS_FONT_PLAYRESX 384
 #define MP_ASS_FONT_PLAYRESY 288
 
 #define MP_ASS_RGBA(r, g, b, a) \
@@ -40,6 +42,7 @@ struct MPOpts;
 struct mpv_global;
 struct mp_osd_res;
 struct osd_style_opts;
+struct mp_log;
 
 void mp_ass_flush_old_events(ASS_Track *track, long long ts);
 void mp_ass_set_style(ASS_Style *style, double res_y,
@@ -54,7 +57,7 @@ struct sub_bitmaps;
 struct mp_ass_packer;
 struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent);
 void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
-                        int num_image_lists, bool changed,
+                        int num_image_lists, bool changed, bool video_color_space,
                         int preferred_osd_format, struct sub_bitmaps *out);
 void mp_ass_get_bb(ASS_Image *image_list, ASS_Track *track,
                    struct mp_osd_res *res, double *out_rc);

@@ -80,7 +80,7 @@ struct vdpctx {
 
     struct mp_image                   *current_image;
     int64_t                            current_pts;
-    int                                current_duration;
+    int64_t                            current_duration;
 
     int                                output_surface_w, output_surface_h;
     int                                rotation;
@@ -104,9 +104,9 @@ struct vdpctx {
     int                                surface_num; // indexes output_surfaces
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
-    float                              user_fps;
+    double                             user_fps;
     bool                               composite_detect;
-    int                                vsync_interval;
+    int64_t                            vsync_interval;
     uint64_t                           last_queue_time;
     uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
     uint64_t                           last_ideal_time;
@@ -279,7 +279,7 @@ static void resize(struct vo *vo)
     vc->flip_offset_us = vo->opts->fullscreen ?
                          1000LL * vc->flip_offset_fs :
                          1000LL * vc->flip_offset_window;
-    vo_set_queue_params(vo, vc->flip_offset_us, 1);
+    vo_set_queue_params(vo, vc->flip_offset_us * 1000, 1);
 
     if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight ||
         vc->rotation != vo->params->rotate)
@@ -602,7 +602,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
         MP_ASSERT_UNREACHABLE();
     };
 
-    assert(imgs->packed);
+    mp_assert(imgs->packed);
 
     int r_w = next_pow2(imgs->packed_w);
     int r_h = next_pow2(imgs->packed_h);
@@ -721,12 +721,12 @@ static int update_presentation_queue_status(struct vo *vo)
             break;
         if (vc->vsync_interval > 1) {
             uint64_t qtime = vc->queue_time[vc->query_surface_num];
-            int diff = ((int64_t)vtime - (int64_t)qtime) / 1e6;
-            MP_TRACE(vo, "Queue time difference: %d ms\n", diff);
+            double diff = MP_TIME_NS_TO_MS((int64_t)vtime - (int64_t)qtime);
+            MP_TRACE(vo, "Queue time difference: %.4f ms\n", diff);
             if (vtime < qtime + vc->vsync_interval / 2)
-                MP_VERBOSE(vo, "Frame shown too early (%d ms)\n", diff);
+                MP_VERBOSE(vo, "Frame shown too early (%.4f ms)\n", diff);
             if (vtime > qtime + vc->vsync_interval)
-                MP_VERBOSE(vo, "Frame shown late (%d ms)\n", diff);
+                MP_VERBOSE(vo, "Frame shown late (%.4f ms)\n", diff);
         }
         vc->query_surface_num = WRAP_ADD(vc->query_surface_num, 1,
                                          vc->num_output_surfaces);
@@ -754,8 +754,8 @@ static void flip_page(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    int64_t pts_us = vc->current_pts;
-    int duration = vc->current_duration;
+    int64_t pts_ns = vc->current_pts;
+    int64_t duration = vc->current_duration;
 
     vc->dropped_frame = true; // changed at end if false
 
@@ -766,14 +766,9 @@ static void flip_page(struct vo *vo)
     if (vc->user_fps > 0) {
         vc->vsync_interval = 1e9 / vc->user_fps;
     } else if (vc->user_fps == 0) {
-        vc->vsync_interval = vo_get_vsync_interval(vo) * 1000;
+        vc->vsync_interval = vo_get_vsync_interval(vo);
     }
     vc->vsync_interval = MPMAX(vc->vsync_interval, 1);
-
-    if (duration > INT_MAX / 1000)
-        duration = -1;
-    else
-        duration *= 1000;
 
     if (vc->vsync_interval == 1)
         duration = -1;  // Make sure drop logic is disabled
@@ -782,8 +777,8 @@ static void flip_page(struct vo *vo)
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_VDP_WARNING(vo, "Error when calling vdp_presentation_queue_get_time");
 
-    int64_t rel_pts_ns = (pts_us - mp_time_us()) * 1000;
-    if (!pts_us || rel_pts_ns < 0)
+    int64_t rel_pts_ns = pts_ns - mp_time_ns();
+    if (!pts_ns || rel_pts_ns < 0)
         rel_pts_ns = 0;
 
     uint64_t now = vdp_time;
@@ -875,7 +870,7 @@ drop:
     vo_increment_drop_count(vo, 1);
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vdpctx *vc = vo->priv;
 
@@ -898,6 +893,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         video_to_output_surface(vo, vc->current_image);
         draw_osd(vo);
     }
+    return VO_TRUE;
 }
 
 // warning: the size and pixel format of surface must match that of the
@@ -917,7 +913,7 @@ static struct mp_image *read_output_surface(struct vo *vo,
     if (vdp_st != VDP_STATUS_OK)
         return NULL;
 
-    assert(fmt == OUTPUT_RGBA_FORMAT);
+    mp_assert(fmt == OUTPUT_RGBA_FORMAT);
 
     struct mp_image *image = mp_image_alloc(IMGFMT_BGR0, w, h);
     if (!image)
@@ -1076,9 +1072,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         checked_resize(vo);
         return VO_TRUE;
-    case VOCTRL_SET_EQUALIZER:
-        vo->want_redraw = true;
-        return true;
     case VOCTRL_RESET:
         forget_frames(vo, true);
         return true;
@@ -1124,7 +1117,7 @@ const struct vo_driver video_out_vdpau = {
         {"denoise", OPT_FLOAT(denoise), M_RANGE(0, 1)},
         {"sharpen", OPT_FLOAT(sharpen), M_RANGE(-1, 1)},
         {"hqscaling", OPT_INT(hqscaling), M_RANGE(0, 9)},
-        {"fps", OPT_FLOAT(user_fps)},
+        {"fps", OPT_DOUBLE(user_fps)},
         {"composite-detect", OPT_BOOL(composite_detect), OPTDEF_INT(1)},
         {"queuetime-windowed", OPT_INT(flip_offset_window), OPTDEF_INT(50)},
         {"queuetime-fs", OPT_INT(flip_offset_fs), OPTDEF_INT(50)},
@@ -1133,9 +1126,6 @@ const struct vo_driver video_out_vdpau = {
         {"colorkey", OPT_COLOR(colorkey),
             .defval = &(const struct m_color){.r = 2, .g = 5, .b = 7, .a = 255}},
         {"force-yuv", OPT_BOOL(force_yuv)},
-        {"queuetime_windowed", OPT_REPLACED("queuetime-windowed")},
-        {"queuetime_fs", OPT_REPLACED("queuetime-fs")},
-        {"output_surfaces", OPT_REPLACED("output-surfaces")},
         {NULL},
     },
     .options_prefix = "vo-vdpau",

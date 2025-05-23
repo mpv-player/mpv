@@ -399,7 +399,8 @@ fail:
     for (int n = 0; n < 4; n++)
         desc->comps[n] = (struct mp_imgfmt_comp_desc){0};
     // Average bit size fallback.
-    desc->num_planes = av_pix_fmt_count_planes(fmt);
+    int num_planes = av_pix_fmt_count_planes(fmt);
+    desc->num_planes = MPCLAMP(num_planes, 0, MP_MAX_PLANES);
     for (int p = 0; p < desc->num_planes; p++) {
         int ls = av_image_get_linesize(fmt, 256, p);
         desc->bpp[p] = ls > 0 ? ls * 8 / 256 : 0;
@@ -479,7 +480,7 @@ bool mp_imgfmt_get_packed_yuv_locations(int imgfmt, uint8_t *luma_offsets)
     if (!(desc.flags & MP_IMGFLAG_PACKED_SS_YUV))
         return false;
 
-    assert(desc.num_planes == 1);
+    mp_assert(desc.num_planes == 1);
 
     // Guess at which positions the additional luma samples are. We iterate
     // starting with the first byte, and then put a luma sample at places
@@ -664,18 +665,18 @@ static bool validate_regular_imgfmt(const struct mp_regular_imgfmt *fmt)
     return true;
 }
 
-static enum mp_csp get_forced_csp_from_flags(int flags)
+static enum pl_color_system get_forced_csp_from_flags(int flags)
 {
     if (flags & MP_IMGFLAG_COLOR_XYZ)
-        return MP_CSP_XYZ;
+        return PL_COLOR_SYSTEM_XYZ;
 
     if (flags & MP_IMGFLAG_COLOR_RGB)
-        return MP_CSP_RGB;
+        return PL_COLOR_SYSTEM_RGB;
 
-    return MP_CSP_AUTO;
+    return PL_COLOR_SYSTEM_UNKNOWN;
 }
 
-enum mp_csp mp_imgfmt_get_forced_csp(int imgfmt)
+enum pl_color_system mp_imgfmt_get_forced_csp(int imgfmt)
 {
     return get_forced_csp_from_flags(mp_imgfmt_get_desc(imgfmt).flags);
 }

@@ -3,7 +3,7 @@
 
 local was_ontop = false
 
-mp.observe_property("pause", "bool", function(name, value)
+mp.observe_property("pause", "bool", function(_, value)
     local ontop = mp.get_property_native("ontop")
     if value then
         if ontop then

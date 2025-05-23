@@ -1,6 +1,6 @@
 defaults_js = custom_target('defaults.js',
-    input: join_paths(source_root, 'player', 'javascript', 'defaults.js'),
+    input: 'defaults.js',
     output: 'defaults.js.inc',
-    command: [file2string, '@INPUT@', '@OUTPUT@'],
+    command: [file2string, '@INPUT@', '@OUTPUT@', '@SOURCE_ROOT@'],
 )
 sources += defaults_js

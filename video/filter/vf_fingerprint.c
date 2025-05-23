@@ -102,9 +102,10 @@ static void f_process(struct mp_filter *f)
 
     // Try to achieve minimum conversion, even if it makes the fingerprints less
     // "portable" across source video.
+    p->scaled->params.repr = mpi->params.repr;
     p->scaled->params.color = mpi->params.color;
     // Make output always full range; no reason to lose precision.
-    p->scaled->params.color.levels = MP_CSP_LEVELS_PC;
+    p->scaled->params.repr.levels = PL_COLOR_LEVELS_FULL;
 
     if (!mp_zimg_convert(p->zimg, p->scaled, mpi)) {
         if (!p->fallback_warning) {

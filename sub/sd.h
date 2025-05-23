@@ -9,14 +9,27 @@
 #define SUB_GAP_THRESHOLD 0.210
 // don't change timings if durations are smaller
 #define SUB_GAP_KEEP 0.4
+// slight offset when sub seeking or sub stepping
+#define SUB_SEEK_OFFSET 0.01
+#define SUB_SEEK_WITHOUT_VIDEO_OFFSET 0.1
+
+enum ass_style_override {
+    ASS_STYLE_OVERRIDE_NONE,
+    ASS_STYLE_OVERRIDE_YES,
+    ASS_STYLE_OVERRIDE_SCALE,
+    ASS_STYLE_OVERRIDE_FORCE,
+    ASS_STYLE_OVERRIDE_STRIP,
+};
 
 struct sd {
     struct mpv_global *global;
     struct mp_log *log;
     struct mp_subtitle_opts *opts;
+    struct mp_subtitle_shared_opts *shared_opts;
 
     const struct sd_functions *driver;
     void *priv;
+    int order;
 
     struct attachment_list *attachments;
     struct mp_codec_params *codec;
@@ -24,8 +37,6 @@ struct sd {
     // Set to false as soon as the decoder discards old subtitle events.
     // (only needed if sd_functions.accept_packets_in_advance == false)
     bool preload_ok;
-
-    bool forced_only_def;
 };
 
 struct sd_functions {
@@ -48,17 +59,29 @@ struct sd_functions {
 
 // lavc_conv.c
 struct lavc_conv;
-struct lavc_conv *lavc_conv_create(struct mp_log *log,
-                                   const struct mp_codec_params *mp_codec);
+struct lavc_conv *lavc_conv_create(struct sd *sd);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);
 char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet,
                         double *sub_pts, double *sub_duration);
+bool lavc_conv_is_styled(struct lavc_conv *priv);
 void lavc_conv_reset(struct lavc_conv *priv);
 void lavc_conv_uninit(struct lavc_conv *priv);
+
+struct mp_sub_filter_opts {
+    bool sub_filter_SDH;
+    bool sub_filter_SDH_harder;
+    char *sub_filter_SDH_enclosures;
+    bool rf_enable;
+    bool rf_plain;
+    char **rf_items;
+    char **jsre_items;
+    bool rf_warn;
+};
 
 struct sd_filter {
     struct mpv_global *global;
     struct mp_log *log;
+    struct demux_packet_pool *packet_pool;
     struct mp_sub_filter_opts *opts;
     const struct sd_filter_functions *driver;
 
@@ -104,8 +127,10 @@ int sd_ass_fmt_offset(const char *event_format);
 bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset);
 
 // convert \0-terminated "Text" (ass) content to plaintext, possibly in-place.
-// result.start is out, result.len is MIN(out_siz, strlen(in)) or smaller.
-// if there's room: out[result.len] is set to \0. out == in is allowed.
-bstr sd_ass_to_plaintext(char *out, size_t out_siz, const char *in);
+// result.start is *out, result.len is strlen(in) or smaller.
+// (*out)[result.len] is always set to \0. *out == in is allowed.
+// *out must be a talloc-allocated buffer or NULL, and will be reallocated if needed.
+// *out will not be reallocated if *out == in.
+bstr sd_ass_to_plaintext(char **out, const char *in);
 
 #endif

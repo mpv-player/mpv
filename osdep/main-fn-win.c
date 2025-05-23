@@ -1,13 +1,22 @@
 #include <windows.h>
-
-#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
-#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
-#endif
+#include <shellapi.h>
 
 #include "common/common.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 #include "osdep/main-fn.h"
+
+#ifndef HEAP_OPTIMIZE_RESOURCES_CURRENT_VERSION
+
+#define HEAP_OPTIMIZE_RESOURCES_CURRENT_VERSION  1
+#define HeapOptimizeResources ((HEAP_INFORMATION_CLASS)3)
+
+typedef struct HEAP_OPTIMIZE_RESOURCES_INFORMATION {
+    DWORD Version;
+    DWORD Flags;
+} HEAP_OPTIMIZE_RESOURCES_INFORMATION;
+
+#endif
 
 static bool is_valid_handle(HANDLE h)
 {
@@ -30,18 +39,21 @@ static void microsoft_nonsense(void)
     // Enable heap corruption detection
     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
 
-    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-    WINBOOL (WINAPI *pSetSearchPathMode)(DWORD Flags) =
-        (WINBOOL (WINAPI *)(DWORD))GetProcAddress(kernel32, "SetSearchPathMode");
+    // Allow heap cache optimization and memory decommit
+    HEAP_OPTIMIZE_RESOURCES_INFORMATION heap_info = {
+        .Version = HEAP_OPTIMIZE_RESOURCES_CURRENT_VERSION
+    };
+    HeapSetInformation(NULL, HeapOptimizeResources, &heap_info,
+                       sizeof(heap_info));
 
     // Always use safe search paths for DLLs and other files, ie. never use the
     // current directory
     SetDllDirectoryW(L"");
-    if (pSetSearchPathMode)
-        pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
+    SetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE |
+                      BASE_SEARCH_PATH_PERMANENT);
 }
 
-int main(int argc_, char **argv_)
+int main(void)
 {
     microsoft_nonsense();
 
@@ -75,4 +87,9 @@ int main(int argc_, char **argv_)
 
     talloc_free(argv_u8);
     return ret;
+}
+
+int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cmdline, int cmdshow)
+{
+    return main();
 }

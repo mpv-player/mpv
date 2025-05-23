@@ -52,6 +52,11 @@ static const char *const speaker_names[MP_SPEAKER_ID_COUNT][2] = {
     [MP_SPEAKER_ID_SDL]         = {"sdl",  "surround direct left"},
     [MP_SPEAKER_ID_SDR]         = {"sdr",  "surround direct right"},
     [MP_SPEAKER_ID_LFE2]        = {"lfe2", "low frequency 2"},
+    [MP_SPEAKER_ID_TSL]         = {"tsl",  "top side left"},
+    [MP_SPEAKER_ID_TSR]         = {"tsr",  "top side right"},
+    [MP_SPEAKER_ID_BFC]         = {"bfc",  "bottom front center"},
+    [MP_SPEAKER_ID_BFL]         = {"bfl",  "bottom front left"},
+    [MP_SPEAKER_ID_BFR]         = {"bfr",  "bottom front right"},
     [MP_SPEAKER_ID_NA]          = {"na",   "not available"},
 };
 
@@ -83,7 +88,7 @@ static const char *const std_layout_names[][2] = {
     {"6.0(front)",      "fl-fr-flc-frc-sl-sr"},
     {"hexagonal",       "fl-fr-fc-bl-br-bc"},
     {"6.1",             "fl-fr-fc-lfe-bc-sl-sr"},
-    {"6.1(back)",       "fl-fr-fc-lfe-bl-br-bc"}, // lavc calls this "6.1" too
+    {"6.1(back)",       "fl-fr-fc-lfe-bl-br-bc"},
     {"6.1(top)",        "fl-fr-fc-lfe-bl-br-tc"}, // not in lavc
     {"6.1(front)",      "fl-fr-lfe-flc-frc-sl-sr"},
     {"7.0",             "fl-fr-fc-bl-br-sl-sr"},
@@ -93,8 +98,13 @@ static const char *const std_layout_names[][2] = {
     {"7.1(alsa)",       "fl-fr-bl-br-fc-lfe-sl-sr"}, // not in lavc
     {"7.1(wide)",       "fl-fr-fc-lfe-bl-br-flc-frc"},
     {"7.1(wide-side)",  "fl-fr-fc-lfe-flc-frc-sl-sr"},
+    {"7.1(top)",        "fl-fr-fc-lfe-bl-br-tfl-tfr"},
     {"7.1(rear)",       "fl-fr-fc-lfe-bl-br-sdl-sdr"}, // not in lavc
     {"octagonal",       "fl-fr-fc-bl-br-bc-sl-sr"},
+    {"cube",            "fl-fr-bl-br-tfl-tfr-tbl-tbr"},
+    {"hexadecagonal",   "fl-fr-fc-bl-br-bc-sl-sr-tfc-tfl-tfr-tbl-tbc-tbr-wl-wr"},
+    {"downmix",         "fl-fr"},
+    {"22.2",            "fl-fr-fc-lfe-bl-br-flc-frc-bc-sl-sr-tc-tfl-tfc-tfr-tbl-tbc-tbr-lfe2-tsl-tsr-bfc-bfl-bfr"},
     {"auto",            ""}, // not in lavc
     {0}
 };
@@ -196,7 +206,7 @@ void mp_chmap_remove_na(struct mp_chmap *map)
 // Add silent (NA) channels to map until map->num >= num.
 void mp_chmap_fill_na(struct mp_chmap *map, int num)
 {
-    assert(num <= MP_NUM_CHANNELS);
+    mp_assert(num <= MP_NUM_CHANNELS);
     while (map->num < num)
         map->speaker[map->num++] = MP_SPEAKER_ID_NA;
 }
@@ -229,8 +239,8 @@ void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels)
     }
 }
 
-// Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
-// Speakers not representable by ffmpeg/libav are dropped.
+// Return the ffmpeg channel layout as in <libavutil/channel_layout.h>.
+// Speakers not representable by ffmpeg are dropped.
 // Warning: this ignores the order of the channels, and will return a channel
 //          mask even if the order is different from libavcodec's.
 //          Also, "unknown" channel maps are translated to non-sense channel
@@ -253,7 +263,7 @@ uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
     return mask;
 }
 
-// Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
+// Return the ffmpeg channel layout as in <libavutil/channel_layout.h>.
 // Returns 0 if the channel order doesn't match lavc's or if it's invalid.
 uint64_t mp_chmap_to_lavc(const struct mp_chmap *src)
 {
@@ -262,7 +272,7 @@ uint64_t mp_chmap_to_lavc(const struct mp_chmap *src)
     return mp_chmap_to_lavc_unchecked(src);
 }
 
-// Set channel map from the ffmpeg/libav channel layout as in
+// Set channel map from the ffmpeg channel layout as in
 // <libavutil/channel_layout.h>.
 // If the number of channels exceed MP_NUM_CHANNELS, set dst to empty.
 void mp_chmap_from_lavc(struct mp_chmap *dst, uint64_t src)
@@ -288,7 +298,7 @@ bool mp_chmap_is_lavc(const struct mp_chmap *src)
         return true;
     // lavc's channel layout is a bit mask, and channels are always ordered
     // from LSB to MSB speaker bits, so speaker IDs have to increase.
-    assert(src->num > 0);
+    mp_assert(src->num > 0);
     for (int n = 1; n < src->num; n++) {
         if (src->speaker[n - 1] >= src->speaker[n])
             return false;
@@ -340,7 +350,7 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
     }
 
     for (int n = 0; n < to->num; n++)
-        assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
+        mp_assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
 // Return the number of channels only in a.

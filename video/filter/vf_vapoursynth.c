@@ -19,24 +19,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include <pthread.h>
 #include <limits.h>
 #include <assert.h>
 
-#include <VapourSynth.h>
-#include <VSHelper.h>
+#include <VapourSynth4.h>
+#include <VSScript4.h>
 
 #include <libavutil/rational.h>
 #include <libavutil/cpu.h>
+#include <libplacebo/utils/libav.h>
 
 #include "common/msg.h"
-#include "options/m_option.h"
-#include "options/path.h"
 #include "filters/f_autoconvert.h"
 #include "filters/f_utils.h"
-#include "filters/filter.h"
 #include "filters/filter_internal.h"
+#include "filters/filter.h"
 #include "filters/user_filters.h"
+#include "options/m_option.h"
+#include "options/path.h"
+#include "osdep/threads.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
@@ -45,6 +46,7 @@ struct vapoursynth_opts {
     char *file;
     int maxbuffer;
     int maxrequests;
+    char *user_data;
 
     const struct script_driver *drv;
 };
@@ -56,13 +58,13 @@ struct priv {
 
     VSCore *vscore;
     const VSAPI *vsapi;
-    VSNodeRef *out_node;
-    VSNodeRef *in_node;
+    VSNode *out_node;
+    VSNode *in_node;
 
     const struct script_driver *drv;
     // drv_vss
-    bool vs_initialized;
-    struct VSScript *se;
+    const VSSCRIPTAPI *vs_script_api;
+    VSScript *vs_script;
 
     struct mp_filter *f;
     struct mp_pin *in_pin;
@@ -70,8 +72,8 @@ struct priv {
     // Format for which VS is currently configured.
     struct mp_image_params fmt_in;
 
-    pthread_mutex_t lock;
-    pthread_cond_t wakeup;
+    mp_mutex lock;
+    mp_cond wakeup;
 
     // --- the following members are all protected by lock
     struct mp_image **buffered; // oldest image first
@@ -107,72 +109,50 @@ struct script_driver {
     void (*unload)(struct priv *p);             // unload script and maybe vs
 };
 
-struct mpvs_fmt {
-    VSPresetFormat vs;
-    int bits, xs, ys;
-};
-
-static const struct mpvs_fmt mpvs_fmt_table[] = {
-    {pfYUV420P8,  8,  1, 1},
-    {pfYUV420P9,  9,  1, 1},
-    {pfYUV420P10, 10, 1, 1},
-    {pfYUV420P16, 16, 1, 1},
-    {pfYUV422P8,  8,  1, 0},
-    {pfYUV422P9,  9,  1, 0},
-    {pfYUV422P10, 10, 1, 0},
-    {pfYUV422P16, 16, 1, 0},
-    {pfYUV410P8,  8,  2, 2},
-    {pfYUV411P8,  8,  2, 0},
-    {pfYUV440P8,  8,  0, 1},
-    {pfYUV444P8,  8,  0, 0},
-    {pfYUV444P9,  9,  0, 0},
-    {pfYUV444P10, 10, 0, 0},
-    {pfYUV444P16, 16, 0, 0},
-    {pfNone}
-};
-
-static bool compare_fmt(int imgfmt, const struct mpvs_fmt *vs)
-{
-    struct mp_regular_imgfmt rfmt;
-    if (!mp_get_regular_imgfmt(&rfmt, imgfmt))
+static bool get_valid_mp_regular_imgfmt(struct mp_regular_imgfmt *reg_fmt, int imgfmt) {
+    if (!mp_get_regular_imgfmt(reg_fmt, imgfmt))
         return false;
-    if (rfmt.component_pad > 0)
+    if (reg_fmt->component_pad > 0)
         return false;
-    if (rfmt.chroma_xs != vs->xs || rfmt.chroma_ys != vs->ys)
-        return false;
-    if (rfmt.component_size * 8 + rfmt.component_pad != vs->bits)
-        return false;
-    if (rfmt.num_planes != 3)
+    if (reg_fmt->num_planes != 3)
         return false;
     for (int n = 0; n < 3; n++) {
-        if (rfmt.planes[n].num_components != 1)
+        if (reg_fmt->planes[n].num_components != 1)
             return false;
-        if (rfmt.planes[n].components[0] != n + 1)
+        if (reg_fmt->planes[n].components[0] != n + 1)
             return false;
     }
     return true;
 }
 
-static VSPresetFormat mp_to_vs(int imgfmt)
+static bool mp_to_vs(struct priv *p, VSVideoFormat *vsfmt, int imgfmt)
 {
-    for (int n = 0; mpvs_fmt_table[n].bits; n++) {
-        const struct mpvs_fmt *vsentry = &mpvs_fmt_table[n];
-        if (compare_fmt(imgfmt, vsentry))
-            return vsentry->vs;
-    }
-    return pfNone;
+    struct mp_regular_imgfmt reg_fmt;
+    if (!get_valid_mp_regular_imgfmt(&reg_fmt, imgfmt))
+        return false;
+
+    int rfmt_bits = reg_fmt.component_size * 8 + reg_fmt.component_pad;
+    return p->vsapi->queryVideoFormat(vsfmt, cfYUV,
+                                      reg_fmt.component_type == MP_COMPONENT_TYPE_FLOAT ? stFloat : stInteger,
+                                      rfmt_bits, reg_fmt.chroma_xs, reg_fmt.chroma_ys, p->vscore);
 }
 
-static int mp_from_vs(VSPresetFormat vs)
+static int mp_from_vs(const VSVideoFormat *vsfmt)
 {
-    for (int n = 0; mpvs_fmt_table[n].bits; n++) {
-        const struct mpvs_fmt *vsentry = &mpvs_fmt_table[n];
-        if (vsentry->vs == vs) {
-            for (int imgfmt = IMGFMT_START; imgfmt < IMGFMT_END; imgfmt++) {
-                if (compare_fmt(imgfmt, vsentry))
-                    return imgfmt;
+    if (vsfmt->colorFamily == cfYUV) {
+        for (int imgfmt = IMGFMT_START + 1; imgfmt < IMGFMT_END; imgfmt++) {
+            struct mp_regular_imgfmt reg_fmt;
+            if (!get_valid_mp_regular_imgfmt(&reg_fmt, imgfmt))
+                continue;
+
+            int rfmt_bits = reg_fmt.component_size * 8 + reg_fmt.component_pad;
+            if ((reg_fmt.component_type == MP_COMPONENT_TYPE_FLOAT) == (vsfmt->sampleType == stFloat) &&
+                rfmt_bits == vsfmt->bitsPerSample &&
+                reg_fmt.chroma_xs == vsfmt->subSamplingW &&
+                reg_fmt.chroma_ys == vsfmt->subSamplingH)
+            {
+                return imgfmt;
             }
-            break;
         }
     }
     return 0;
@@ -182,18 +162,19 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
                                           struct mp_image *img)
 {
     struct mp_image_params *params = &img->params;
-    p->vsapi->propSetInt(map, "_SARNum", params->p_w, 0);
-    p->vsapi->propSetInt(map, "_SARDen", params->p_h, 0);
-    if (params->color.levels) {
-        p->vsapi->propSetInt(map, "_ColorRange",
-                params->color.levels == MP_CSP_LEVELS_TV, 0);
+    p->vsapi->mapSetInt(map, "_SARNum", params->p_w, 0);
+    p->vsapi->mapSetInt(map, "_SARDen", params->p_h, 0);
+    if (params->repr.levels) {
+        p->vsapi->mapSetInt(map, "_ColorRange",
+                params->repr.levels == PL_COLOR_LEVELS_LIMITED, 0);
     }
     // The docs explicitly say it uses libavcodec values.
-    p->vsapi->propSetInt(map, "_ColorSpace",
-            mp_csp_to_avcol_spc(params->color.space), 0);
+    p->vsapi->mapSetInt(map, "_ColorSpace",
+            pl_system_to_av(params->repr.sys), 0);
     if (params->chroma_location) {
-        p->vsapi->propSetInt(map, "_ChromaLocation",
-                params->chroma_location == MP_CHROMA_CENTER, 0);
+        // 0=left, 1=center, 2=topleft, 3=top, 4=bottomleft, 5=bottom.
+        p->vsapi->mapSetInt(map, "_ChromaLocation",
+                params->chroma_location - 1, 0);
     }
     char pict_type = 0;
     switch (img->pict_type) {
@@ -202,45 +183,53 @@ static void copy_mp_to_vs_frame_props_map(struct priv *p, VSMap *map,
     case 3: pict_type = 'B'; break;
     }
     if (pict_type)
-        p->vsapi->propSetData(map, "_PictType", &pict_type, 1, 0);
+        p->vsapi->mapSetData(map, "_PictType", &pict_type, 1, dtUtf8, 0);
     int field = 0;
     if (img->fields & MP_IMGFIELD_INTERLACED)
         field = img->fields & MP_IMGFIELD_TOP_FIRST ? 2 : 1;
-    p->vsapi->propSetInt(map, "_FieldBased", field, 0);
+    p->vsapi->mapSetInt(map, "_FieldBased", field, 0);
+
+    // Don't increase the reference count. It is not intended to be read externally,
+    // and we know it will be alive when we retrieve it.
+    p->vsapi->mapSetData(map, "_MP_IMAGE", (const char *)img, sizeof(*img), dtBinary, 0);
 }
 
-static int set_vs_frame_props(struct priv *p, VSFrameRef *frame,
+static int set_vs_frame_props(struct priv *p, VSFrame *frame,
                               struct mp_image *img, int dur_num, int dur_den)
 {
-    VSMap *map = p->vsapi->getFramePropsRW(frame);
+    VSMap *map = p->vsapi->getFramePropertiesRW(frame);
     if (!map)
         return -1;
-    p->vsapi->propSetInt(map, "_DurationNum", dur_num, 0);
-    p->vsapi->propSetInt(map, "_DurationDen", dur_den, 0);
+    p->vsapi->mapSetInt(map, "_DurationNum", dur_num, 0);
+    p->vsapi->mapSetInt(map, "_DurationDen", dur_den, 0);
     copy_mp_to_vs_frame_props_map(p, map, img);
     return 0;
 }
 
-static VSFrameRef *alloc_vs_frame(struct priv *p, struct mp_image_params *fmt)
+static VSFrame *alloc_vs_frame(struct priv *p, struct mp_image_params *fmt)
 {
-    const VSFormat *vsfmt =
-        p->vsapi->getFormatPreset(mp_to_vs(fmt->imgfmt), p->vscore);
-    return p->vsapi->newVideoFrame(vsfmt, fmt->w, fmt->h, NULL, p->vscore);
+    VSVideoFormat vsfmt;
+    if (mp_to_vs(p, &vsfmt, fmt->imgfmt))
+        return p->vsapi->newVideoFrame(&vsfmt, fmt->w, fmt->h, NULL, p->vscore);
+
+    return NULL;
 }
 
-static struct mp_image map_vs_frame(struct priv *p, const VSFrameRef *ref,
-                                    bool w)
+static struct mp_image map_vs_frame(struct priv *p, const VSFrame *ref,
+                                    bool w, struct mp_image *ref_image)
 {
-    const VSFormat *fmt = p->vsapi->getFrameFormat(ref);
+    const VSVideoFormat *fmt = p->vsapi->getVideoFrameFormat(ref);
 
     struct mp_image img = {0};
-    mp_image_setfmt(&img, mp_from_vs(fmt->id));
+    if (ref_image)
+        img = *ref_image;
+    mp_image_setfmt(&img, mp_from_vs(fmt));
     mp_image_set_size(&img, p->vsapi->getFrameWidth(ref, 0),
                             p->vsapi->getFrameHeight(ref, 0));
 
     for (int n = 0; n < img.num_planes; n++) {
         if (w) {
-            img.planes[n] = p->vsapi->getWritePtr((VSFrameRef *)ref, n);
+            img.planes[n] = p->vsapi->getWritePtr((VSFrame *)ref, n);
         } else {
             img.planes[n] = (uint8_t *)p->vsapi->getReadPtr(ref, n);
         }
@@ -261,38 +250,49 @@ static void drain_oldest_buffered_frame(struct priv *p)
     p->in_frameno++;
 }
 
-static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
-                                VSNodeRef *node, const char *errorMsg)
+static void VS_CC vs_frame_done(void *userData, const VSFrame *f, int n,
+                                VSNode *node, const char *errorMsg)
 {
     struct priv *p = userData;
 
     struct mp_image *res = NULL;
     if (f) {
-        struct mp_image img = map_vs_frame(p, f, false);
-        struct mp_image dummy = {.params = p->fmt_in};
-        mp_image_copy_attributes(&img, &dummy);
+        const VSMap *map = p->vsapi->getFramePropertiesRO(f);
+        if (!map)
+            MP_ERR(p, "Failed to get frame properties!");
+        struct mp_image *mpi = NULL;
+        if (map) {
+            mpi = (void *)p->vsapi->mapGetData(map, "_MP_IMAGE", 0, NULL);
+            if (!mpi)
+                MP_ERR(p, "Failed to get mp_image attributes!");
+        }
+        struct mp_image img = map_vs_frame(p, f, false, mpi);
         img.pkt_duration = -1;
-        const VSMap *map = p->vsapi->getFramePropsRO(f);
+        if (mpi && (mpi->params.w != img.w || mpi->params.h != img.h))
+            img.params.crop = (struct mp_rect){0, 0, img.w, img.h};
         if (map) {
             int err1, err2;
-            int num = p->vsapi->propGetInt(map, "_DurationNum", 0, &err1);
-            int den = p->vsapi->propGetInt(map, "_DurationDen", 0, &err2);
+            int num = p->vsapi->mapGetInt(map, "_DurationNum", 0, &err1);
+            int den = p->vsapi->mapGetInt(map, "_DurationDen", 0, &err2);
             if (!err1 && !err2)
                 img.pkt_duration = num / (double)den;
         }
-        if (img.pkt_duration < 0)
+        if (img.pkt_duration < 0) {
             MP_ERR(p, "No PTS after filter at frame %d!\n", n);
+        } else {
+            img.nominal_fps = 1.0 / img.pkt_duration;
+        }
         res = mp_image_new_copy(&img);
         p->vsapi->freeFrame(f);
     }
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
 
     // If these assertions fail, n is an unrequested frame (or filtered twice).
-    assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
+    mp_assert(n >= p->out_frameno && n < p->out_frameno + p->max_requests);
     int index = n - p->out_frameno;
     MP_TRACE(p, "filtered frame %d (%d)\n", n, index);
-    assert(p->requested[index] == &dummy_img);
+    mp_assert(p->requested[index] == &dummy_img);
 
     if (!res && !p->shutdown) {
         if (p->eof) {
@@ -303,8 +303,8 @@ static void VS_CC vs_frame_done(void *userData, const VSFrameRef *f, int n,
         }
     }
     p->requested[index] = res;
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
     mp_filter_wakeup(p->f);
 }
 
@@ -312,7 +312,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
 
     if (p->failed) {
         // Not sure what we do on errors, but at least don't deadlock.
@@ -331,7 +331,7 @@ static void vf_vapoursynth_process(struct mp_filter *f)
             if (p->out_node && !p->eof) {
                 MP_VERBOSE(p, "initiate EOF\n");
                 p->eof = true;
-                pthread_cond_broadcast(&p->wakeup);
+                mp_cond_broadcast(&p->wakeup);
             }
             if (!p->out_node && mp_pin_in_needs_data(f->ppins[1])) {
                 MP_VERBOSE(p, "return EOF\n");
@@ -355,11 +355,11 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                     MP_VERBOSE(p, "draining VS for format change\n");
                     mp_pin_out_unread(p->in_pin, frame);
                     p->eof = true;
-                    pthread_cond_broadcast(&p->wakeup);
+                    mp_cond_broadcast(&p->wakeup);
                     mp_filter_internal_mark_progress(f);
                     goto done;
                 }
-                pthread_mutex_unlock(&p->lock);
+                mp_mutex_unlock(&p->lock);
                 if (p->out_node)
                     destroy_vs(p);
                 p->fmt_in = mpi->params;
@@ -369,13 +369,13 @@ static void vf_vapoursynth_process(struct mp_filter *f)
                     mp_filter_internal_mark_failed(f);
                     return;
                 }
-                pthread_mutex_lock(&p->lock);
+                mp_mutex_lock(&p->lock);
             }
             if (p->out_pts == MP_NOPTS_VALUE)
                 p->out_pts = mpi->pts;
             p->frames_sent++;
             p->buffered[p->num_buffered++] = mpi;
-            pthread_cond_broadcast(&p->wakeup);
+            mp_cond_broadcast(&p->wakeup);
         } else if (frame.type != MP_FRAME_NONE) {
             MP_ERR(p, "discarding unknown frame type\n");
             mp_frame_unref(&frame);
@@ -407,8 +407,8 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     // This happens on EOF draining and format changes.
     if (p->requested[0] == &dummy_img_eof) {
         MP_VERBOSE(p, "finishing up\n");
-        assert(p->eof);
-        pthread_mutex_unlock(&p->lock);
+        mp_assert(p->eof);
+        mp_mutex_unlock(&p->lock);
         destroy_vs(p);
         mp_filter_internal_mark_progress(f);
         return;
@@ -431,44 +431,18 @@ static void vf_vapoursynth_process(struct mp_filter *f)
     }
 
 done:
-    pthread_mutex_unlock(&p->lock);
+    mp_mutex_unlock(&p->lock);
 }
 
-static void VS_CC infiltInit(VSMap *in, VSMap *out, void **instanceData,
-                             VSNode *node, VSCore *core, const VSAPI *vsapi)
-{
-    struct priv *p = *instanceData;
-    // The number of frames of our input node is obviously unknown. The user
-    // could for example seek any time, randomly "ending" the clip.
-    // This specific value was suggested by the VapourSynth developer.
-    int enough_for_everyone = INT_MAX / 16;
-
-    // Note: this is called from createFilter, so no need for locking.
-
-    VSVideoInfo fmt = {
-        .format = p->vsapi->getFormatPreset(mp_to_vs(p->fmt_in.imgfmt), p->vscore),
-        .width = p->fmt_in.w,
-        .height = p->fmt_in.h,
-        .numFrames = enough_for_everyone,
-    };
-    if (!fmt.format) {
-        p->vsapi->setError(out, "Unsupported input format.\n");
-        return;
-    }
-
-    p->vsapi->setVideoInfo(&fmt, 1, node);
-    p->in_node_active = true;
-}
-
-static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
-    void **instanceData, void **frameData,
+static const VSFrame *VS_CC infiltGetFrame(int frameno, int activationReason,
+    void *instanceData, void **frameData,
     VSFrameContext *frameCtx, VSCore *core,
     const VSAPI *vsapi)
 {
-    struct priv *p = *instanceData;
-    VSFrameRef *ret = NULL;
+    struct priv *p = instanceData;
+    VSFrame *ret = NULL;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     MP_TRACE(p, "VS asking for frame %d (at %d)\n", frameno, p->in_frameno);
     while (1) {
         if (p->shutdown) {
@@ -484,7 +458,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 p->vsapi->setFilterError("Could not allocate VS frame", frameCtx);
                 break;
             }
-            struct mp_image vsframe = map_vs_frame(p, ret, true);
+            struct mp_image vsframe = map_vs_frame(p, ret, true, NULL);
             mp_image_clear(&vsframe, 0, 0, p->fmt_in.w, p->fmt_in.h);
             struct mp_image dummy = {0};
             mp_image_set_params(&dummy, &p->fmt_in);
@@ -506,7 +480,7 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
             // queue new frames.
             if (p->num_buffered) {
                 drain_oldest_buffered_frame(p);
-                pthread_cond_broadcast(&p->wakeup);
+                mp_cond_broadcast(&p->wakeup);
                 mp_filter_wakeup(p->f);
                 continue;
             }
@@ -531,19 +505,19 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 break;
             }
 
-            pthread_mutex_unlock(&p->lock);
-            struct mp_image vsframe = map_vs_frame(p, ret, true);
+            mp_mutex_unlock(&p->lock);
+            struct mp_image vsframe = map_vs_frame(p, ret, true, NULL);
             mp_image_copy(&vsframe, img);
             int res = 1e6;
             int dur = img->pkt_duration * res + 0.5;
             set_vs_frame_props(p, ret, img, dur, res);
-            pthread_mutex_lock(&p->lock);
+            mp_mutex_lock(&p->lock);
             break;
         }
-        pthread_cond_wait(&p->wakeup, &p->lock);
+        mp_cond_wait(&p->wakeup, &p->lock);
     }
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
     return ret;
 }
 
@@ -551,10 +525,10 @@ static void VS_CC infiltFree(void *instanceData, VSCore *core, const VSAPI *vsap
 {
     struct priv *p = instanceData;
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->in_node_active = false;
-    pthread_cond_broadcast(&p->wakeup);
-    pthread_mutex_unlock(&p->lock);
+    mp_cond_broadcast(&p->wakeup);
+    mp_mutex_unlock(&p->lock);
 }
 
 // number of getAsyncFrame calls in progress
@@ -575,13 +549,13 @@ static void destroy_vs(struct priv *p)
     MP_DBG(p, "destroying VS filters\n");
 
     // Wait until our frame callbacks return.
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->initializing = false;
     p->shutdown = true;
-    pthread_cond_broadcast(&p->wakeup);
+    mp_cond_broadcast(&p->wakeup);
     while (num_requested(p))
-        pthread_cond_wait(&p->wakeup, &p->lock);
-    pthread_mutex_unlock(&p->lock);
+        mp_cond_wait(&p->wakeup, &p->lock);
+    mp_mutex_unlock(&p->lock);
 
     MP_DBG(p, "all requests terminated\n");
 
@@ -593,8 +567,8 @@ static void destroy_vs(struct priv *p)
 
     p->drv->unload(p);
 
-    assert(!p->in_node_active);
-    assert(num_requested(p) == 0); // async callback didn't return?
+    mp_assert(!p->in_node_active);
+    mp_assert(num_requested(p) == 0); // async callback didn't return?
 
     p->shutdown = false;
     p->eof = false;
@@ -618,7 +592,7 @@ static void destroy_vs(struct priv *p)
 
 static int reinit_vs(struct priv *p, struct mp_image *input)
 {
-    VSMap *vars = NULL, *in = NULL, *out = NULL;
+    VSMap *vars = NULL;
     int res = -1;
 
     destroy_vs(p);
@@ -639,29 +613,41 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
         goto error;
     }
 
-    in = p->vsapi->createMap();
-    out = p->vsapi->createMap();
-    vars = p->vsapi->createMap();
-    if (!in || !out || !vars)
-        goto error;
+    // The number of frames of our input node is obviously unknown. The user
+    // could for example seek any time, randomly "ending" the clip.
+    // This specific value was suggested by the VapourSynth developer.
+    int enough_for_everyone = INT_MAX / 16;
 
-    p->vsapi->createFilter(in, out, "Input", infiltInit, infiltGetFrame,
-                           infiltFree, fmSerial, 0, p, p->vscore);
-    int vserr;
-    p->in_node = p->vsapi->propGetNode(out, "clip", 0, &vserr);
+    VSVideoInfo vi_in = {
+        .width = p->fmt_in.w,
+        .height = p->fmt_in.h,
+        .numFrames = enough_for_everyone,
+    };
+    if (!mp_to_vs(p, &vi_in.format, p->fmt_in.imgfmt)) {
+        MP_FATAL(p, "Unsupported input format.\n");
+        goto error;
+    }
+
+    p->in_node = p->vsapi->createVideoFilter2("Input", &vi_in, infiltGetFrame, infiltFree,
+                                              fmParallel, NULL, 0, p, p->vscore);
     if (!p->in_node) {
         MP_FATAL(p, "Could not get our own input node.\n");
         goto error;
     }
+    p->in_node_active = true;
 
-    if (p->vsapi->propSetNode(vars, "video_in", p->in_node, 0))
+    vars = p->vsapi->createMap();
+    if (!vars)
+        goto error;
+
+    if (p->vsapi->mapSetNode(vars, "video_in", p->in_node, 0))
         goto error;
 
     int d_w, d_h;
     mp_image_params_get_dsize(&p->fmt_in, &d_w, &d_h);
 
-    p->vsapi->propSetInt(vars, "video_in_dw", d_w, 0);
-    p->vsapi->propSetInt(vars, "video_in_dh", d_h, 0);
+    p->vsapi->mapSetInt(vars, "video_in_dw", d_w, 0);
+    p->vsapi->mapSetInt(vars, "video_in_dh", d_h, 0);
 
     struct mp_stream_info *info = mp_filter_find_stream_info(p->f);
     double container_fps = input->nominal_fps;
@@ -677,9 +663,10 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
             display_res[1] = tmp[1];
         }
     }
-    p->vsapi->propSetFloat(vars, "container_fps", container_fps, 0);
-    p->vsapi->propSetFloat(vars, "display_fps", display_fps, 0);
-    p->vsapi->propSetIntArray(vars, "display_res", display_res, 2);
+    p->vsapi->mapSetFloat(vars, "container_fps", container_fps, 0);
+    p->vsapi->mapSetFloat(vars, "display_fps", display_fps, 0);
+    p->vsapi->mapSetIntArray(vars, "display_res", display_res, 2);
+    p->vsapi->mapSetData(vars, "user_data", p->opts->user_data, -1, dtUtf8, 0);
 
     if (p->drv->load(p, vars) < 0)
         goto error;
@@ -688,21 +675,19 @@ static int reinit_vs(struct priv *p, struct mp_image *input)
         goto error;
     }
 
-    const VSVideoInfo *vi = p->vsapi->getVideoInfo(p->out_node);
-    if (!mp_from_vs(vi->format->id)) {
+    const VSVideoInfo *vi_out = p->vsapi->getVideoInfo(p->out_node);
+    if (!mp_from_vs(&vi_out->format)) {
         MP_FATAL(p, "Unsupported output format.\n");
         goto error;
     }
 
-    pthread_mutex_lock(&p->lock);
+    mp_mutex_lock(&p->lock);
     p->initializing = false;
-    pthread_mutex_unlock(&p->lock);
+    mp_mutex_unlock(&p->lock);
     MP_DBG(p, "initialized.\n");
     res = 0;
 error:
     if (p->vsapi) {
-        p->vsapi->freeMap(in);
-        p->vsapi->freeMap(out);
         p->vsapi->freeMap(vars);
     }
     if (res < 0)
@@ -724,8 +709,8 @@ static void vf_vapoursynth_destroy(struct mp_filter *f)
     destroy_vs(p);
     p->drv->uninit(p);
 
-    pthread_cond_destroy(&p->wakeup);
-    pthread_mutex_destroy(&p->lock);
+    mp_cond_destroy(&p->wakeup);
+    mp_mutex_destroy(&p->lock);
 
     mp_filter_free_children(f);
 }
@@ -758,8 +743,8 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
     p->drv = p->opts->drv;
     p->f = f;
 
-    pthread_mutex_init(&p->lock, NULL);
-    pthread_cond_init(&p->wakeup, NULL);
+    mp_mutex_init(&p->lock);
+    mp_cond_init(&p->wakeup);
 
     if (!p->opts->file || !p->opts->file[0]) {
         MP_FATAL(p, "'file' parameter must be set.\n");
@@ -779,9 +764,11 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
     if (!conv)
         goto error;
 
-    for (int n = 0; mpvs_fmt_table[n].bits; n++) {
-        int imgfmt = mp_from_vs(mpvs_fmt_table[n].vs);
-        if (imgfmt)
+    for (int imgfmt = IMGFMT_START + 1; imgfmt < IMGFMT_END; imgfmt++) {
+        // due to the lack of access to VapourSynth at this point, the formats
+        // added to autoconvert is a superset of what's actually needed
+        struct mp_regular_imgfmt reg_fmt;
+        if (get_valid_mp_regular_imgfmt(&reg_fmt, imgfmt))
             mp_autoconvert_add_imgfmt(conv, imgfmt, 0);
     }
 
@@ -811,58 +798,56 @@ static const m_option_t vf_opts_fields[] = {
         OPTDEF_INT(4)},
     {"concurrent-frames", OPT_CHOICE(maxrequests, {"auto", -1}),
         M_RANGE(1, 99), OPTDEF_INT(-1)},
+    {"user-data", OPT_STRING(user_data), OPTDEF_STR("")},
     {0}
 };
 
-#include <VSScript.h>
-
 static int drv_vss_init(struct priv *p)
 {
-    if (!vsscript_init()) {
+    p->vs_script_api = getVSScriptAPI(VSSCRIPT_API_VERSION);
+    if (!p->vs_script_api) {
         MP_FATAL(p, "Could not initialize VapourSynth scripting.\n");
         return -1;
     }
-    p->vs_initialized = true;
     return 0;
 }
 
 static void drv_vss_uninit(struct priv *p)
 {
-    if (p->vs_initialized)
-        vsscript_finalize();
-    p->vs_initialized = false;
+    p->vs_script_api = NULL;
 }
 
 static int drv_vss_load_core(struct priv *p)
 {
     // First load an empty script to get a VSScript, so that we get the vsapi
     // and vscore.
-    if (vsscript_createScript(&p->se))
+    p->vs_script = p->vs_script_api->createScript(NULL);
+    if (!p->vs_script)
         return -1;
-    p->vsapi = vsscript_getVSApi();
-    p->vscore = vsscript_getCore(p->se);
+    p->vsapi = p->vs_script_api->getVSAPI(VAPOURSYNTH_API_VERSION);
+    p->vscore = p->vs_script_api->getCore(p->vs_script);
     return 0;
 }
 
 static int drv_vss_load(struct priv *p, VSMap *vars)
 {
-    vsscript_setVariable(p->se, vars);
+    p->vs_script_api->setVariables(p->vs_script, vars);
 
-    if (vsscript_evaluateFile(&p->se, p->script_path, 0)) {
-        MP_FATAL(p, "Script evaluation failed:\n%s\n", vsscript_getError(p->se));
+    if (p->vs_script_api->evaluateFile(p->vs_script, p->script_path)) {
+        MP_FATAL(p, "Script evaluation failed:\n%s\n", p->vs_script_api->getError(p->vs_script));
         return -1;
     }
-    p->out_node = vsscript_getOutput(p->se, 0);
+    p->out_node = p->vs_script_api->getOutputNode(p->vs_script, 0);
     return 0;
 }
 
 static void drv_vss_unload(struct priv *p)
 {
-    if (p->se)
-        vsscript_freeScript(p->se);
-    p->se = NULL;
+    if (p->vs_script)
+        p->vs_script_api->freeScript(p->vs_script);
     p->vsapi = NULL;
     p->vscore = NULL;
+    p->vs_script = NULL;
 }
 
 static const struct script_driver drv_vss = {

@@ -2,7 +2,7 @@
 #include "context.h"
 #include "ra_gl.h"
 #include "options/m_config.h"
-#include "libmpv/render_gl.h"
+#include "mpv/render_gl.h"
 #include "video/out/gpu/libmpv_gpu.h"
 #include "video/out/gpu/ra.h"
 
@@ -39,26 +39,22 @@ static int init(struct libmpv_gpu_context *ctx, mpv_render_param *params)
         .allow_sw = true,
     };
 
-    static const struct ra_swapchain_fns empty_swapchain_fns = {0};
-    struct ra_gl_ctx_params gl_params = {
-        // vo_libmpv is essentially like a gigantic external swapchain where
-        // the user is in charge of presentation / swapping etc. But we don't
-        // actually need to provide any of these functions, since we can just
-        // not call them to begin with - so just set it to an empty object to
-        // signal to ra_gl_p that we don't care about its latency emulation
-        // functionality
-        .external_swapchain = &empty_swapchain_fns
-    };
-
+    // vo_libmpv is essentially like a gigantic external swapchain where
+    // the user is in charge of presentation / swapping etc. But we don't
+    // actually need to provide any of these functions, since we can just
+    // not call them to begin with - so just set it to an empty object to
+    // signal to ra_gl_p that we don't care about its latency emulation
+    // functionality
+    struct ra_ctx_params gl_params = {0};
     p->gl->SwapInterval = NULL; // we shouldn't randomly change this, so lock it
     if (!ra_gl_ctx_init(p->ra_ctx, p->gl, gl_params))
         return MPV_ERROR_UNSUPPORTED;
 
-    bool debug;
-    mp_read_option_raw(ctx->global, "gpu-debug", &m_option_type_bool, &debug);
-    p->ra_ctx->opts.debug = debug;
-    p->gl->debug_context = debug;
-    ra_gl_set_debug(p->ra_ctx->ra, debug);
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, ctx->global, &ra_ctx_conf);
+    p->ra_ctx->opts.debug = ctx_opts->debug;
+    p->gl->debug_context = ctx_opts->debug;
+    ra_gl_set_debug(p->ra_ctx->ra, ctx_opts->debug);
+    talloc_free(ctx_opts);
 
     ctx->ra_ctx = p->ra_ctx;
 

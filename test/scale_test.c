@@ -10,7 +10,7 @@ static struct mp_image *gen_repack_test_img(int w, int h, int bytes, bool rgb,
     struct mp_regular_imgfmt planar_desc = {
         .component_type = MP_COMPONENT_TYPE_UINT,
         .component_size = bytes,
-        .forced_csp = rgb ? MP_CSP_RGB : 0,
+        .forced_csp = rgb ? PL_COLOR_SYSTEM_RGB : 0,
         .num_planes = alpha ? 4 : 3,
         .planes = {
             {1, {rgb ? 2 : 1}},
@@ -20,9 +20,9 @@ static struct mp_image *gen_repack_test_img(int w, int h, int bytes, bool rgb,
         },
     };
     int mpfmt = mp_find_regular_imgfmt(&planar_desc);
-    assert(mpfmt);
+    mp_require(mpfmt);
     struct mp_image *mpi = mp_image_alloc(mpfmt, w, h);
-    assert(mpi);
+    mp_require(mpi);
 
     // Well, I have no idea what makes a good test image. So here's some crap.
     // This contains bars/tiles of solid colors. For each of R/G/B, it toggles
@@ -60,8 +60,9 @@ static void dump_image(struct scale_test *stest, const char *name,
     struct image_writer_opts opts = image_writer_opts_defaults;
     opts.format = AV_CODEC_ID_PNG;
 
-    if (!write_image(img, &opts, path, NULL, NULL)) {
+    if (!write_image(img, &opts, path, NULL, NULL, true)) {
         printf("Failed to write '%s'.\n", path);
+        fflush(stdout);
         abort();
     }
 }
@@ -72,12 +73,12 @@ static void dump_image(struct scale_test *stest, const char *name,
 static void assert_imgs_equal(struct scale_test *stest, FILE *f,
                               struct mp_image *ref, struct mp_image *new)
 {
-    assert(ref->imgfmt == new->imgfmt);
-    assert(ref->w == new->w);
-    assert(ref->h == new->h);
+    mp_require(ref->imgfmt == new->imgfmt);
+    mp_require(ref->w == new->w);
+    mp_require(ref->h == new->h);
 
-    assert(ref->fmt.flags & MP_IMGFLAG_BYTE_ALIGNED);
-    assert(ref->fmt.bpp[0]);
+    mp_require(ref->fmt.flags & MP_IMGFLAG_BYTE_ALIGNED);
+    mp_require(ref->fmt.bpp[0]);
 
     for (int p = 0; p < ref->num_planes; p++) {
         for (int y = 0; y < ref->h; y++) {
@@ -101,7 +102,7 @@ static void assert_imgs_equal(struct scale_test *stest, FILE *f,
 
 void repack_test_run(struct scale_test *stest)
 {
-    char *logname = mp_tprintf(80, "%s.log", stest->test_name);
+    char *logname = mp_tprintf(80, "../%s.log", stest->test_name);
     FILE *f = test_open_out(stest->outdir, logname);
 
     if (!stest->sws) {
@@ -129,7 +130,7 @@ void repack_test_run(struct scale_test *stest)
             if (!mp_get_regular_imgfmt(&rdesc, ofmt))
                 continue;
         }
-        if (rdesc.num_planes > 1 || rdesc.forced_csp != MP_CSP_RGB)
+        if (rdesc.num_planes > 1 || rdesc.forced_csp != PL_COLOR_SYSTEM_RGB)
             continue;
 
         struct mp_image *test_img = NULL;
@@ -154,29 +155,29 @@ void repack_test_run(struct scale_test *stest)
                 mp_imgfmt_to_name(test_img->imgfmt));
 
         struct mp_image *dst = mp_image_alloc(mpfmt, test_img->w, test_img->h);
-        assert(dst);
+        mp_require(dst);
 
         // This tests packing.
         bool ok = stest->fns->scale(stest->fns_priv, dst, test_img);
-        assert(ok);
+        mp_require(ok);
 
         // Cross-check with swscale in the other direction.
         // (Mostly so we don't have to worry about padding.)
         struct mp_image *src2 =
             mp_image_alloc(test_img->imgfmt, test_img->w, test_img->h);
-        assert(src2);
+        mp_require(src2);
         ok = mp_sws_scale(stest->sws, src2, dst) >= 0;
         assert_imgs_equal(stest, f, test_img, src2);
 
         // Assume the other conversion direction also works.
-        assert(stest->fns->supports_fmts(stest->fns_priv, test_img->imgfmt, mpfmt));
+        mp_require(stest->fns->supports_fmts(stest->fns_priv, test_img->imgfmt, mpfmt));
 
         struct mp_image *back = mp_image_alloc(test_img->imgfmt, dst->w, dst->h);
-        assert(back);
+        mp_require(back);
 
         // This tests unpacking.
         ok = stest->fns->scale(stest->fns_priv, back, dst);
-        assert(ok);
+        mp_require(ok);
 
         assert_imgs_equal(stest, f, test_img, back);
 

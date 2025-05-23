@@ -88,7 +88,7 @@ struct gl_user_shader_tex {
 // valid shader block parsed.
 void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
                        void *priv,
-                       bool (*dohook)(void *p, struct gl_user_shader_hook hook),
+                       bool (*dohook)(void *p, const struct gl_user_shader_hook *hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex));
 
 // Evaluate a szexp, given a lookup function for named textures

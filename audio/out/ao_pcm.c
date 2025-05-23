@@ -28,13 +28,14 @@
 #include "mpv_talloc.h"
 
 #include "options/m_option.h"
+#include "options/path.h"
 #include "audio/format.h"
 #include "ao.h"
 #include "internal.h"
 #include "common/msg.h"
 #include "osdep/endian.h"
 
-#ifdef __MINGW32__
+#ifdef _WIN32
 // for GetFileType to detect pipes
 #include <windows.h>
 #include <io.h>
@@ -86,7 +87,7 @@ static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
     fput16le(WAV_ID_FORMAT_EXTENSIBLE, fp);
     fput16le(ao->channels.num, fp);
     fput32le(ao->samplerate, fp);
-    fput32le(ao->bps, fp);
+    fput32le(MPCLAMP(ao->bps, 0, UINT32_MAX), fp);
     fput16le(ao->channels.num * (bits / 8), fp);
     fput16le(bits, fp);
 
@@ -109,7 +110,7 @@ static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    char *outputfilename = priv->outputfilename;
+    char *outputfilename = mp_get_user_path(priv, ao->global, priv->outputfilename);
     if (!outputfilename) {
         outputfilename = talloc_strdup(priv, priv->waveheader ? "audiodump.wav"
                                                               : "audiodump.pcm");
@@ -145,7 +146,7 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt_to_bytes(ao->format);
+    ao->bps = ao->channels.num * (int64_t)ao->samplerate * af_fmt_to_bytes(ao->format);
 
     MP_INFO(ao, "File: %s (%s)\nPCM: Samplerate: %d Hz Channels: %d Format: %s\n",
             outputfilename,
@@ -172,7 +173,7 @@ static void uninit(struct ao *ao)
 
     if (priv->waveheader) {    // Rewrite wave header
         bool broken_seek = false;
-#ifdef __MINGW32__
+#ifdef _WIN32
         // Windows, in its usual idiocy "emulates" seeks on pipes so it always
         // looks like they work. So we have to detect them brute-force.
         broken_seek = FILE_TYPE_DISK !=

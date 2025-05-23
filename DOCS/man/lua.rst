@@ -7,7 +7,6 @@ mpv provides the built-in module ``mp``, which contains functions to send
 commands to the mpv core and to retrieve information about playback state, user
 settings, file information, and so on.
 
-These scripts can be used to control mpv in a similar way to slave mode.
 Technically, the Lua code uses the client API internally.
 
 Example
@@ -62,8 +61,8 @@ that uses the ``.foo`` file extension.
 mpv also appends the top level directory of the script to the start of Lua's
 package path so you can import scripts from there too. Be aware that this will
 shadow Lua libraries that use the same package path. (Single file scripts do not
-include mpv specific directory the Lua package path. This was silently changed
-in mpv 0.32.0.)
+include mpv specific directories in the Lua package path. This was silently
+changed in mpv 0.32.0.)
 
 Using a script directory is the recommended way to package a script that
 consists of multiple source files, or requires other files (you can use
@@ -86,7 +85,8 @@ own event handlers which you have registered with ``mp.register_event``, or
 timers added with ``mp.add_timeout`` or similar. Note that since the
 script starts execution concurrently with player initialization, some properties
 may not be populated with meaningful values until the relevant subsystems have
-initialized.
+initialized. Rather than retrieving these properties at the top of scripts, you
+should use ``mp.observe_property`` or read them within event handlers.
 
 When the player quits, all scripts will be asked to terminate. This happens via
 a ``shutdown`` event, which by default will make the event loop return. If your
@@ -199,7 +199,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Whether this works and how long it takes depends on the command and the
     situation. The abort call itself is asynchronous. Does not return anything.
 
-``mp.del_property(name [,def])``
+``mp.del_property(name)``
     Delete the given property. See ``mp.get_property`` and `Properties`_ for more
     information about properties. Most properties cannot be deleted.
 
@@ -292,6 +292,18 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     After calling this function, key presses will cause the function ``fn`` to
     be called (unless the user remapped the key with another binding).
+    However, if the key binding is canceled , the function will not be called,
+    unless ``complex`` flag is set to ``true``, where the function will be
+    called with the ``canceled`` entry set to ``true``.
+
+    For example, a canceled key binding can happen in the following situations:
+
+    - If key A is pressed while key B is being held down, key B is logically
+      released ("canceled" by key A), which stops the current autorepeat
+      action key B has.
+    - If key A is pressed while a mouse button is being held down, the mouse
+      button is logically released, but the mouse button's action will not be
+      called, unless ``complex`` flag is set to ``true``.
 
     The ``name`` argument should be a short symbolic string. It allows the user
     to remap the key binding via input.conf using the ``script-message``
@@ -303,24 +315,36 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     or pass the ``fn`` argument in place of the name. The latter is not
     recommended and is handled for compatibility only.)
 
-    The last argument is used for optional flags. This is a table, which can
-    have the following entries:
+    The ``flags`` argument is used for optional parameters. This is a table,
+    which can have the following entries:
 
         ``repeatable``
             If set to ``true``, enables key repeat for this specific binding.
+            This option only makes sense when ``complex`` is not set to ``true``.
+
+        ``scalable``
+            If set to ``true``, enables key scaling for this specific binding.
+            This option only makes sense when ``complex`` is set to ``true``.
+            Note that this has no effect if the key binding is invoked by
+            ``script-binding`` command, where the scalability of the command
+            takes precedence.
 
         ``complex``
-            If set to ``true``, then ``fn`` is called on both key up and down
-            events (as well as key repeat, if enabled), with the first
-            argument being a table. This table has the following entries (and
-            may contain undocumented ones):
+            If set to ``true``, then ``fn`` is called on key down, repeat and up
+            events, with the first argument being a table. This table has the
+            following entries (and may contain undocumented ones):
 
                 ``event``
                     Set to one of the strings ``down``, ``repeat``, ``up`` or
-                    ``press`` (the latter if key up/down can't be tracked).
+                    ``press`` (the latter if key up/down/repeat can't be
+                    tracked), which indicates the key's logical state.
 
                 ``is_mouse``
-                    Boolean Whether the event was caused by a mouse button.
+                    Boolean: Whether the event was caused by a mouse button.
+
+                ``canceled``
+                    Boolean: Whether the event was canceled.
+                    Not all types of cancellations set this flag.
 
                 ``key_name``
                     The name of they key that triggered this, or ``nil`` if
@@ -331,6 +355,15 @@ The ``mp`` module is preloaded, although it can be loaded manually with
                     Text if triggered by a text key, otherwise ``nil``. See
                     description of ``script-binding`` command for details (this
                     field is equivalent to the 5th argument).
+
+                ``scale``
+                    The scale of the key, such as the ones produced by ``WHEEL_*``
+                    keys. The scale is 1 if the key is nonscalable.
+
+                ``arg``
+                    User-provided string in the ``arg`` argument in the
+                    ``script-binding`` command if the key binding is invoked
+                    by that command.
 
     Internally, key bindings are dispatched via the ``script-message-to`` or
     ``script-binding`` input commands and ``mp.register_script_message``.
@@ -426,9 +459,9 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     This depends on the property, and it's a valid feature request to ask for
     better update handling of a specific property.
 
-    If the ``type`` is ``none`` or ``nil``, sporadic property change events are
-    possible. This means the change function ``fn`` can be called even if the
-    property doesn't actually change.
+    If the ``type`` is ``none`` or ``nil``, the change function ``fn`` will be
+    called sporadically even if the property doesn't actually change. You should
+    therefore avoid using these types.
 
     You always get an initial change notification. This is meant to initialize
     the user's state to the current value of the property.
@@ -438,17 +471,21 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     that are equal to the ``fn`` parameter. This uses normal Lua ``==``
     comparison, so be careful when dealing with closures.
 
-``mp.add_timeout(seconds, fn)``
+``mp.add_timeout(seconds, fn [, disabled])``
     Call the given function fn when the given number of seconds has elapsed.
     Note that the number of seconds can be fractional. For now, the timer's
     resolution may be as low as 50 ms, although this will be improved in the
     future.
 
+    If the ``disabled`` argument is set to ``true`` or a truthy value, the
+    timer will wait to be manually started with a call to its ``resume()``
+    method.
+
     This is a one-shot timer: it will be removed when it's fired.
 
     Returns a timer object. See ``mp.add_periodic_timer`` for details.
 
-``mp.add_periodic_timer(seconds, fn)``
+``mp.add_periodic_timer(seconds, fn [, disabled])``
     Call the given function periodically. This is like ``mp.add_timeout``, but
     the timer is re-added after the function fn is run.
 
@@ -497,7 +534,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
         seconds = 0
         timer = mp.add_periodic_timer(1, function()
             print("called every second")
-            # stop it after 10 seconds
+            -- stop it after 10 seconds
             seconds = seconds + 1
             if seconds >= 10 then
                 timer:kill()
@@ -625,6 +662,20 @@ are useful only in special situations.
 
     May return invalid/nonsense values if OSD is not initialized yet.
 
+``exit()`` (global)
+    Make the script exit at the end of the current event loop iteration. This
+    does not terminate mpv itself or other scripts.
+
+    This can be polyfilled to support mpv versions older than 0.40 with:
+
+    ::
+
+        if not _G.exit then
+            function exit()
+                mp.keep_running = false
+            end
+        end
+
 mp.msg functions
 ----------------
 
@@ -680,13 +731,13 @@ with values found in the config-file and the command-line (in that order).
 
 Example implementation::
 
-    require 'mp.options'
     local options = {
         optionA = "defaultvalueA",
         optionB = -0.5,
         optionC = true,
     }
-    read_options(options, "myscript")
+
+    require "mp.options".read_options(options, "myscript")
     print(options.optionA)
 
 
@@ -857,6 +908,137 @@ strictly part of the guaranteed API.
 ``utils.to_string(v)``
     Turn the given value into a string. Formats tables and their contents. This
     doesn't do anything special; it is only needed because Lua is terrible.
+
+mp.input functions
+--------------------
+
+This module lets scripts get textual input from the user using the console
+REPL.
+
+``input.get(table)``
+    Show the console to let the user enter text.
+
+    The following entries of ``table`` are read:
+
+    ``prompt``
+        The string to be displayed before the input field.
+
+    ``submit``
+        A callback invoked when the user presses Enter. The first argument is
+        the text in the console.
+
+    ``keep_open``
+        Whether to keep the console open on submit. Defaults to ``false``.
+
+    ``opened``
+        A callback invoked when the console is shown. This can be used to
+        present a list of options with ``input.set_log()``.
+
+    ``edited``
+        A callback invoked when the text changes. The first argument is the text
+        in the console.
+
+    ``complete``
+        A callback invoked when the user edits the text or moves the cursor. The
+        first argument is the text before the cursor. The callback should return
+        a table of the string candidate completion values and the 1-based cursor
+        position from which the completion starts. console will show the
+        completions that fuzzily match the text between this position and the
+        cursor and allow selecting them.
+
+        The third and optional return value is a string that will be appended to
+        the input line without displaying it in the completions.
+
+    ``autoselect_completion``
+        Whether to automatically select the first completion on submit if one
+        wasn't already manually selected. Defaults to ``false``.
+
+    ``closed``
+        A callback invoked when the console is hidden, either because
+        ``input.terminate()`` was invoked from the other callbacks, or because
+        the user closed it with a key binding. The first argument is the text in
+        the console, and the second argument is the cursor position.
+
+    ``default_text``
+        A string to pre-fill the input field with.
+
+    ``cursor_position``
+        The initial cursor position, starting from 1.
+
+    ``history_path``
+        If specified, the path to save and load the history of the entered
+        lines.
+
+    ``id``
+        An identifier that determines which input history and log buffer to use
+        among the ones stored for ``input.get()`` calls. Defaults to the calling
+        script name with ``prompt`` appended.
+
+``input.terminate()``
+    Close the console.
+
+``input.log(message, style, terminal_style)``
+    Add a line to the log buffer. ``style`` can contain additional ASS tags to
+    apply to ``message``, and ``terminal_style`` can contain escape sequences
+    that are used when the console is displayed in the terminal.
+
+``input.log_error(message)``
+    Helper to add a line to the log buffer with the same color as the one used
+    for commands that error. Useful when the user submits invalid input.
+
+``input.set_log(log)``
+    Replace the entire log buffer.
+
+    ``log`` is a table of strings, or tables with ``text``, ``style`` and
+    ``terminal_style`` keys.
+
+    Example:
+
+    ::
+
+        input.set_log({
+            "regular text",
+            {
+                text = "error text",
+                style = "{\\c&H7a77f2&}",
+                terminal_style = "\027[31m",
+            }
+        })
+
+``input.select(table)``
+    Specify a list of items that are presented to the user for selection.
+
+    The following entries of ``table`` are read:
+
+    ``prompt``
+        The string to be displayed before the input field.
+
+    ``items``
+        The table of the entries to choose from.
+
+    ``default_item``
+        The 1-based integer index of the preselected item.
+
+    ``submit``
+        The callback invoked when the user presses Enter. The first argument is
+        the 1-based index of the selected item.
+
+    ``keep_open``
+        Whether to keep the console open on submit. Defaults to ``false``.
+
+    Example:
+
+        ::
+
+            input.select({
+                items = {
+                    "First playlist entry",
+                    "Second playlist entry",
+                },
+                submit = function (id)
+                    mp.commandv("playlist-play-index", id - 1)
+                end,
+            })
 
 Events
 ------

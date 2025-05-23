@@ -21,6 +21,7 @@
 
 #include <libavutil/common.h>
 #include <libavutil/error.h>
+#include <libavutil/mathematics.h>
 
 #include "mpv_talloc.h"
 #include "misc/bstr.h"
@@ -93,6 +94,25 @@ char *mp_format_time(double time, bool fractions)
     return mp_format_time_fmt(fractions ? "%H:%M:%S.%T" : "%H:%M:%S", time);
 }
 
+char *mp_format_double(void *talloc_ctx, double val, int precision,
+                       bool plus_sign, bool percent_sign, bool trim)
+{
+    bstr str = {0};
+    const char *fmt = plus_sign ? "%+.*f" : "%.*f";
+    bstr_xappend_asprintf(talloc_ctx, &str, fmt, precision, val);
+    size_t pos = str.len;
+    if (trim) {
+        while (--pos && str.start[pos] == '0')
+            str.len--;
+        if (str.start[pos] == '.')
+            str.len--;
+    }
+    if (percent_sign)
+        bstr_xappend(talloc_ctx, &str, bstr0("%"));
+    str.start[str.len] = '\0';
+    return str.start;
+}
+
 // Set rc to the union of rc and rc2
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *rc2)
 {
@@ -120,10 +140,41 @@ bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
     return rc->x1 > rc->x0 && rc->y1 > rc->y0;
 }
 
-bool mp_rect_equals(struct mp_rect *rc1, struct mp_rect *rc2)
+bool mp_rect_equals(const struct mp_rect *rc1, const struct mp_rect *rc2)
 {
     return rc1->x0 == rc2->x0 && rc1->y0 == rc2->y0 &&
            rc1->x1 == rc2->x1 && rc1->y1 == rc2->y1;
+}
+
+// Rotate mp_rect by 90 degrees increments
+void mp_rect_rotate(struct mp_rect *rc, int w, int h, int rotation)
+{
+    rotation %= 360;
+
+    if (rotation >= 180) {
+        rotation -= 180;
+        MPSWAP(int, rc->x0, rc->x1);
+        MPSWAP(int, rc->y0, rc->y1);
+    }
+
+    if (rotation == 90) {
+        *rc = (struct mp_rect) {
+            .x0 = rc->y1,
+            .y0 = rc->x0,
+            .x1 = rc->y0,
+            .y1 = rc->x1,
+        };
+    }
+
+    if (rc->x1 < rc->x0) {
+        rc->x0 = w - rc->x0;
+        rc->x1 = w - rc->x1;
+    }
+
+    if (rc->y1 < rc->y0) {
+        rc->y0 = h - rc->y0;
+        rc->y1 = h - rc->y1;
+    }
 }
 
 // Compute rc1-rc2, put result in res_array, return number of rectangles in
@@ -162,7 +213,7 @@ int mp_rect_subtract(const struct mp_rect *rc1, const struct mp_rect *rc2,
 int mp_snprintf_cat(char *str, size_t size, const char *format, ...)
 {
     size_t len = strnlen(str, size);
-    assert(!size || len < size); // str with no 0-termination is not allowed
+    mp_assert(!size || len < size); // str with no 0-termination is not allowed
     int r;
     va_list ap;
     va_start(ap, format);
@@ -222,7 +273,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     if (code->start[0] == 'u' && code->len >= 5) {
         bstr num = bstr_splice(*code, 1, 5);
         uint32_t c = bstrtoll(num, &num, 16);
-        if (num.len)
+        if (num.len || c > 0x10FFFF)
             return false;
         if (c >= 0xd800 && c <= 0xdbff) {
             if (code->len < 5 + 6 // udddd + \udddd
@@ -348,7 +399,7 @@ char **mp_dup_str_array(void *tctx, char **s)
 //  mp_log2(32) == 5
 unsigned int mp_log2(uint32_t v)
 {
-#if defined(__GNUC__) && __GNUC__ >= 4
+#if (defined(__GNUC__) && __GNUC__ >= 4) || defined(__clang__)
     return v ? 31 - __builtin_clz(v) : 0;
 #else
     for (int x = 31; x >= 0; x--) {
@@ -372,4 +423,10 @@ uint32_t mp_round_next_power_of_2(uint32_t v)
         return v;
     int l = mp_log2(v) + 1;
     return l == 32 ? 0 : (uint32_t)1 << l;
+}
+
+int mp_lcm(int x, int y)
+{
+    mp_assert(x && y);
+    return x * (y / av_gcd(x, y));
 }

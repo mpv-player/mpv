@@ -27,16 +27,17 @@ otherwise, the documented Lua options, script directories, loading, etc apply to
 JavaScript files too.
 
 Script initialization and lifecycle is the same as with Lua, and most of the Lua
-functions at the modules ``mp``, ``mp.utils``, ``mp.msg`` and ``mp.options`` are
-available to JavaScript with identical APIs - including running commands,
-getting/setting properties, registering events/key-bindings/hooks, etc.
+functions in the modules ``mp``, ``mp.utils``, ``mp.msg``, ``mp.options`` and
+``mp.input`` are available to JavaScript with identical APIs - including running
+commands, getting/setting properties, registering events/key-bindings/hooks,
+etc.
 
 Differences from Lua
 --------------------
 
-No need to load modules. ``mp``, ``mp.utils``,  ``mp.msg`` and ``mp.options``
-are preloaded, and you can use e.g. ``var cwd = mp.utils.getcwd();`` without
-prior setup.
+No need to load modules. ``mp``, ``mp.utils``,  ``mp.msg``, ``mp.options`` and
+``mp.input`` are preloaded, and you can use e.g. ``var cwd =
+mp.utils.getcwd();`` without prior setup.
 
 Errors are slightly different. Where the Lua APIs return ``nil`` for error,
 the JavaScript ones return ``undefined``. Where Lua returns ``something, error``
@@ -195,6 +196,20 @@ meta-paths like ``~~/foo`` (other JS file functions do expand meta paths).
 ``mp.options.read_options(obj [, identifier [, on_update]])`` (types:
 string/boolean/number)
 
+``mp.input.get(obj)``
+
+``mp.input.select(obj)``
+
+``mp.input.terminate()``
+
+``mp.input.log(message, style)``
+
+``mp.input.log_error(message)``
+
+``mp.input.set_log(log)``
+
+``exit()`` (global)
+
 Additional utilities
 --------------------
 
@@ -242,10 +257,6 @@ text content only.
 
 ``mp.get_script_file()``
     Returns the file name of the current script.
-
-``exit()`` (global)
-    Make the script exit at the end of the current event loop iteration.
-    Note: please remove added key bindings before calling ``exit()``.
 
 ``mp.utils.compile_js(fname, content_str)``
     Compiles the JS code ``content_str`` as file name ``fname`` (without loading

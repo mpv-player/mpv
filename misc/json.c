@@ -48,6 +48,8 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <mpv/client.h>
+
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "misc/ctype.h"
@@ -255,6 +257,8 @@ static const char special_escape[] = {
 
 static void write_json_str(bstr *b, unsigned char *str)
 {
+    mp_assert(str);
+
     APPEND(b, "\"");
     while (1) {
         unsigned char *cur = str;
@@ -287,7 +291,7 @@ static void add_indent(bstr *b, int indent)
         bstr_xappend(NULL, b, bstr0(" "));
 }
 
-static int json_append(bstr *b, const struct mpv_node *src, int indent)
+int json_append(bstr *b, const struct mpv_node *src, int indent)
 {
     switch (src->format) {
     case MPV_FORMAT_NONE:

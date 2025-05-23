@@ -25,6 +25,10 @@
 
 #include "osdep/compiler.h"
 
+// Escape code for TERM_MSG codes. PU2 (U+0092) followed by 't'.
+#define TERM_MSG_ESCAPE "\xC2\x92" "t"
+#define TERM_MSG_0 TERM_MSG_ESCAPE "0"
+
 struct mp_log;
 
 // A mp_log instance that never outputs anything.
@@ -51,7 +55,8 @@ struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
 
 void mp_msg(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
-void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va);
+void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
+    PRINTF_ATTRIBUTE(3, 0);
 
 int mp_msg_level(struct mp_log *log);
 

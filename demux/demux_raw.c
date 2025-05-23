@@ -17,7 +17,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 
 #include <libavcodec/avcodec.h>
@@ -86,6 +85,7 @@ const struct m_sub_options demux_rawaudio_conf = {
         .samplerate = 44100,
         .aformat = PCM(1, 0, 16, 0), // s16le
     },
+    .change_flags = UPDATE_DEMUXER,
 };
 
 #undef PCM
@@ -273,7 +273,8 @@ static bool raw_read_packet(struct demuxer *demuxer, struct demux_packet **pkt)
     if (demuxer->stream->eof)
         return false;
 
-    struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
+    struct demux_packet *dp = new_demux_packet(demuxer->packet_pool,
+                                               p->frame_size * p->read_frames);
     if (!dp) {
         MP_ERR(demuxer, "Can't read packet.\n");
         return true;

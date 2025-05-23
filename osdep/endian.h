@@ -9,6 +9,10 @@
 #define BYTE_ORDER      __BYTE_ORDER
 #define LITTLE_ENDIAN   __LITTLE_ENDIAN
 #define BIG_ENDIAN      __BIG_ENDIAN
+#elif defined(__BYTE_ORDER__)
+#define BYTE_ORDER      __BYTE_ORDER__
+#define LITTLE_ENDIAN   __ORDER_LITTLE_ENDIAN__
+#define BIG_ENDIAN      __ORDER_BIG_ENDIAN__
 #elif defined(__DARWIN_BYTE_ORDER)
 #define BYTE_ORDER      __DARWIN_BYTE_ORDER
 #define LITTLE_ENDIAN   __DARWIN_LITTLE_ENDIAN

@@ -5,13 +5,13 @@ General
 -------
 
 The main contact for mpv development is IRC, specifically #mpv
-and #mpv-devel on Libera.chat. Github is used for code review and
+and #mpv-devel on Libera.chat. GitHub is used for code review and
 long term discussions.
 
 Sending patches
 ---------------
 
-- Make a github pull request, or send a link to a plaintext patch created with
+- Make a GitHub pull request, or send a link to a plaintext patch created with
   ``git format-patch``.
 - Plain diffs posted as pastebins are not acceptable! (Especially if the http
   link returns HTML.) They only cause extra work for everyone, because they lack
@@ -42,7 +42,7 @@ Copyright of contributions
   this. If the license of the code is not LGPLv2.1+, you must mention this.
 - These license statements are legally binding.
 - Don't use fake names (something that looks like an actual name, and may be
-  someone else's name, but is not your legal name). Using a pseudonyms is
+  someone else's name, but is not your legal name). Using a pseudonym is
   allowed if it can be used to identify or contact you, even if whatever
   account you used to submit the patch dies.
 - Do not add your name to the license header. This convention is not used by
@@ -111,13 +111,13 @@ Always squash fixup commits when making changes to pull requests
 - If you make fixup commits to your pull request, you should generally squash
   them with "git rebase -i". We prefer to have pull requests in a merge
   ready state.
-- We don't squash-merge (nor do we use github's feature that does this) because
+- We don't squash-merge (nor do we use GitHub's feature that does this) because
   pull requests with multiple commits are perfectly legitimate, and the only
   thing that makes sense in non-trivial cases.
 - With complex pull requests, it *may* make sense to keep them separate, but
   they should be clearly marked as such. Reviewing commits is generally easier
   with fixups squashed.
-- Reviewers are encouraged to look at individual commits instead of github's
+- Reviewers are encouraged to look at individual commits instead of GitHub's
   "changes from all commits" view (which just encourages bad git and review
   practices).
 
@@ -131,16 +131,31 @@ Touching user-visible parts may require updating the mpv docs
 - Changes to command line options (addition/modification/removal) must be
   documented in options.rst.
 - Changes to input properties or input commands must be documented in input.rst.
-- All incompatible changes to the user interface (options, properties, commands)
-  must be documented with a small note in interface-changes.rst. (Additions may
-  be documented there as well, but this isn't required.)
 - Changes to the libmpv API must be reflected in the libmpv's headers doxygen,
   and in client-api-changes.rst.
+
+Interface change policy
+-----------------------
+
+- All incompatible changes to the user interface (options, properties, commands)
+  must be documented by making a new text file with a txt extension containing a
+  small note in the DOCS/interface-changes directory.
+- The name of the file should be brief and related to the commit that makes the
+  change. The content of the file should begin with the type of the change
+  (add, remove, deprecate, change, rename, etc.). If the file contains multiple
+  changes, the change which causes the most serious compatibility issues should
+  be placed first.
+- Grouping multiple related changes in the same file is also OK. Just be sure to
+  put each separate change on a different line.
+- Documenting additions in DOCS/interface-changes is optional but encouraged.
+- interface-changes.rst is never directly updated except when making new major
+  releases.
+- See DOCS/interface-changes/example.txt for an example.
 
 Code formatting
 ---------------
 
-mpv uses C99 with K&R formatting, with some exceptions.
+mpv uses C11 with K&R formatting, with some exceptions.
 
 - Use the K&R indent style.
 - Use 4 spaces of indentation, never use tabs (except in Makefiles).
@@ -153,9 +168,9 @@ mpv uses C99 with K&R formatting, with some exceptions.
         some_function(a, b, c);
     }
     ```
-- Break lines on 80 columns. There is a hard limit of 85 columns. You may ignore
+- Break lines on 80 columns. There is a hard limit of 100 columns. You may ignore
   this limit if there's a strong case that not breaking the line will increase
-  readability. Going over 85 columns might provoke endless discussions about
+  readability. Going over 100 columns might provoke endless discussions about
   whether such a limit is needed or not, so avoid it.
 - If the body of an if/for/while statement has more than 1 physical lines, then
   always add braces, even if they're technically redundant.
@@ -224,21 +239,27 @@ New code must follow the following conventions:
 General coding
 --------------
 
-- Use C99. Also freely make use of C99 features if it's appropriate, such as
-  stdbool.h. (Except VLA and complex number types.)
+- Use C11. Also freely make use of C11 features if it's appropriate, but do not
+  use VLA and complex number types.
 - Don't use non-standard language (such as GNU C-only features). In some cases
   they may be warranted, if they are optional (such as attributes enabling
   printf-like format string checks). "#pragma once" is allowed as an exception.
-  But in general, standard C99 must be used.
+  But in general, standard C11 must be used.
 - The same applies to libc functions. We have to be Windows-compatible too. Use
-  functions guaranteed by C99 or POSIX only, unless your use is guarded by a
-  configure check. There is some restricted use of C11 (ask on IRC for details).
+  functions guaranteed by C11 or POSIX only, unless your use is guarded by a
+  configure check. Be mindful of MinGW-specifics since C11 support is not always
+  guaranteed.
 - Prefer fusing declaration and initialization, rather than putting declarations
   on the top of a block. Obvious data flow is more important than avoiding
   mixing declarations and statements, which is just a C90 artifact.
 - If you add features that require intrusive changes, discuss them on the dev
   channel first. There might be a better way to add a feature and it can avoid
   wasted work.
+- Newly added code for any Apple Platform (macOS, iOS, etc), that uses Cocoa or
+  any other object-oriented Framework or API, should be written in Swift instead
+  of Objective-C. This also includes complete rewrites/refactors of existing
+  code. Plain C API usages may stay as C, but can be written in Swift. Existing
+  Objective-C code can stay as is, though Swift rewrites are welcome.
 
 Code of Conduct
 ---------------

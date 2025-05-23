@@ -26,7 +26,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "input/input.h"
-#include "libmpv/client.h"
+#include "mpv/client.h"
 #include "options/m_config.h"
 #include "options/options.h"
 #include "player/client.h"
@@ -36,7 +36,7 @@ struct mp_ipc_ctx {
     struct mp_client_api *client_api;
     const wchar_t *path;
 
-    pthread_t thread;
+    mp_thread thread;
     HANDLE death_event;
 };
 
@@ -198,10 +198,8 @@ static void report_read_error(struct client_arg *arg, DWORD error)
     }
 }
 
-static void *client_thread(void *p)
+static MP_THREAD_VOID client_thread(void *p)
 {
-    pthread_detach(pthread_self());
-
     struct client_arg *arg = p;
     char buf[4096];
     HANDLE wakeup_event = CreateEventW(NULL, TRUE, FALSE, NULL);
@@ -210,7 +208,9 @@ static void *client_thread(void *p)
     DWORD ioerr = 0;
     DWORD r;
 
-    mpthread_set_name(arg->client_name);
+    char *tname = talloc_asprintf(NULL, "ipc/%s", arg->client_name);
+    mp_thread_set_name(tname);
+    talloc_free(tname);
 
     arg->write_ol.hEvent = CreateEventW(NULL, TRUE, TRUE, NULL);
     if (!wakeup_event || !ol.hEvent || !arg->write_ol.hEvent) {
@@ -303,9 +303,10 @@ done:
         CloseHandle(arg->write_ol.hEvent);
 
     CloseHandle(arg->client_h);
-    mpv_destroy(arg->client);
+    mpv_handle *client = arg->client;
     talloc_free(arg);
-    return NULL;
+    mpv_destroy(client);
+    MP_THREAD_RETURN();
 }
 
 static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
@@ -313,12 +314,13 @@ static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
     client->client = mp_new_client(ctx->client_api, client->client_name),
     client->log    = mp_client_get_log(client->client);
 
-    pthread_t client_thr;
-    if (pthread_create(&client_thr, NULL, client_thread, client)) {
+    mp_thread client_thr;
+    if (mp_thread_create(&client_thr, client_thread, client)) {
         mpv_destroy(client->client);
         CloseHandle(client->client_h);
         talloc_free(client);
     }
+    mp_thread_detach(client_thr);
 }
 
 static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, HANDLE h)
@@ -339,7 +341,7 @@ bool mp_ipc_start_anon_client(struct mp_ipc_ctx *ctx, struct mpv_handle *h,
     return false;
 }
 
-static void *ipc_thread(void *p)
+static MP_THREAD_VOID ipc_thread(void *p)
 {
     // Use PIPE_TYPE_MESSAGE | PIPE_READMODE_BYTE so message framing is
     // maintained for message-mode clients, but byte-mode clients can still
@@ -356,9 +358,10 @@ static void *ipc_thread(void *p)
     HANDLE client = INVALID_HANDLE_VALUE;
     int client_num = 0;
 
-    mpthread_set_name("ipc named pipe listener");
+    mp_thread_set_name("ipc/named-pipe");
     MP_VERBOSE(arg, "Starting IPC master\n");
 
+    OVERLAPPED ol = {0};
     SECURITY_ATTRIBUTES sa = {
         .nLength = sizeof sa,
         .lpSecurityDescriptor = create_restricted_sd(),
@@ -368,7 +371,7 @@ static void *ipc_thread(void *p)
         goto done;
     }
 
-    OVERLAPPED ol = { .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
+    ol = (OVERLAPPED){ .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
     if (!ol.hEvent) {
         MP_ERR(arg, "Couldn't create event");
         goto done;
@@ -448,7 +451,7 @@ done:
         CloseHandle(server);
     if (ol.hEvent)
         CloseHandle(ol.hEvent);
-    return NULL;
+    MP_THREAD_RETURN();
 }
 
 struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
@@ -461,6 +464,25 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .log = mp_log_new(arg, global->log, "ipc"),
         .client_api = client_api,
     };
+
+    if (opts->ipc_client && opts->ipc_client[0]) {
+        int fd = -1;
+        bstr str = bstr0(opts->ipc_client);
+        if (bstr_eatstart0(&str, "fd://") && str.len) {
+            long long ll = bstrtoll(str, &str, 0);
+            if (!str.len && ll >= 0 && ll <= INT_MAX)
+                fd = ll;
+        }
+        if (fd < 0) {
+            MP_ERR(arg, "Invalid IPC client argument: '%s'\n", opts->ipc_client);
+        } else {
+            HANDLE h = (HANDLE)_get_osfhandle(fd);
+            if (h && h != INVALID_HANDLE_VALUE && (intptr_t)h != -2)
+                ipc_start_client_json(arg, -1, h);
+            else
+                MP_ERR(arg, "Invalid IPC client fd: '%d'\n", fd);
+        }
+    }
 
     if (!opts->ipc_path || !*opts->ipc_path)
         goto out;
@@ -480,7 +502,7 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     if (!(arg->death_event = CreateEventW(NULL, TRUE, FALSE, NULL)))
         goto out;
 
-    if (pthread_create(&arg->thread, NULL, ipc_thread, arg))
+    if (mp_thread_create(&arg->thread, ipc_thread, arg))
         goto out;
 
     talloc_free(opts);
@@ -500,7 +522,7 @@ void mp_uninit_ipc(struct mp_ipc_ctx *arg)
         return;
 
     SetEvent(arg->death_event);
-    pthread_join(arg->thread, NULL);
+    mp_thread_join(arg->thread);
 
     CloseHandle(arg->death_event);
     talloc_free(arg);

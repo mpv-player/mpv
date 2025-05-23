@@ -24,7 +24,6 @@
 #include <unistd.h>
 
 #include <drm_fourcc.h>
-#include <libswscale/swscale.h>
 
 #include "common/msg.h"
 #include "drm_atomic.h"
@@ -33,22 +32,23 @@
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
+#include "video/out/present_sync.h"
 #include "video/sws_utils.h"
 #include "vo.h"
 
 #define IMGFMT_XRGB8888 IMGFMT_BGR0
-#if BYTE_ORDER == BIG_ENDIAN
-#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10BE)
-#else
-#define IMGFMT_XRGB2101010 pixfmt2imgfmt(AV_PIX_FMT_GBRP10LE)
-#endif
+#define IMGFMT_XBGR8888 IMGFMT_RGB0
+#define IMGFMT_XRGB2101010 \
+    pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2RGB10LE, AV_PIX_FMT_X2RGB10BE))
+#define IMGFMT_XBGR2101010 \
+    pixfmt2imgfmt(MP_SELECT_LE_BE(AV_PIX_FMT_X2BGR10LE, AV_PIX_FMT_X2BGR10BE))
+#define IMGFMT_YUYV pixfmt2imgfmt(AV_PIX_FMT_YUYV422)
 
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
 
 struct drm_frame {
     struct framebuffer *fb;
-    struct drm_vsync_tuple vsync;
 };
 
 struct priv {
@@ -118,12 +118,31 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     fb->handle = creq.handle;
 
     // select format
-    if (drm->opts->drm_format == DRM_OPTS_FORMAT_XRGB2101010) {
+    switch (drm->opts->drm_format) {
+    case DRM_OPTS_FORMAT_XRGB2101010:
         p->drm_format = DRM_FORMAT_XRGB2101010;
         p->imgfmt = IMGFMT_XRGB2101010;
-    } else {
-        p->drm_format = DRM_FORMAT_XRGB8888;;
+        break;
+    case DRM_OPTS_FORMAT_XBGR2101010:
+        p->drm_format = DRM_FORMAT_XRGB2101010;
+        p->imgfmt = IMGFMT_XRGB2101010;
+        break;
+    case DRM_OPTS_FORMAT_XBGR8888:
+        p->drm_format = DRM_FORMAT_XBGR8888;
+        p->imgfmt = IMGFMT_XBGR8888;
+        break;
+    case DRM_OPTS_FORMAT_YUYV:
+        p->drm_format = DRM_FORMAT_YUYV;
+        p->imgfmt = IMGFMT_YUYV;
+        break;
+    default:
+        if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
+            MP_VERBOSE(vo, "Requested format not supported by VO, "
+                       "falling back to xrgb8888\n");
+        }
+        p->drm_format = DRM_FORMAT_XRGB8888;
         p->imgfmt = IMGFMT_XRGB8888;
+        break;
     }
 
     // create framebuffer object for the dumb-buffer
@@ -172,14 +191,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vo->dheight = drm->fb->height;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
 
-    int w = p->dst.x1 - p->dst.x0;
-    int h = p->dst.y1 - p->dst.y0;
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(p->imgfmt);
+    p->dst.x0 = MP_ALIGN_DOWN(p->dst.x0, fmt.align_x);
+    p->dst.y0 = MP_ALIGN_DOWN(p->dst.y0, fmt.align_y);
 
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = p->imgfmt,
-        .w = w,
-        .h = h,
+        .w = mp_rect_w(p->dst),
+        .h = mp_rect_h(p->dst),
         .p_w = 1,
         .p_h = 1,
     };
@@ -200,10 +220,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    drm->vsync_info.vsync_duration = 0;
-    drm->vsync_info.skipped_vsyncs = -1;
-    drm->vsync_info.last_queue_display_time = -1;
-
+    mp_mutex_lock(&vo->params_mutex);
+    vo->target_params = &p->sws->dst; // essentially constant, so this is okay
+    mp_mutex_unlock(&vo->params_mutex);
     vo->want_redraw = true;
     return 0;
 }
@@ -243,35 +262,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, struct framebuffer *buf)
             osd_draw_on_image(vo->osd, p->osd, 0, 0, p->cur_frame);
         }
 
-        if (p->drm_format == DRM_FORMAT_XRGB2101010) {
-            // Pack GBRP10 image into XRGB2101010 for DRM
-            const int w = p->cur_frame->w;
-            const int h = p->cur_frame->h;
-
-            const int g_padding = p->cur_frame->stride[0]/sizeof(uint16_t) - w;
-            const int b_padding = p->cur_frame->stride[1]/sizeof(uint16_t) - w;
-            const int r_padding = p->cur_frame->stride[2]/sizeof(uint16_t) - w;
-            const int fbuf_padding = buf->stride/sizeof(uint32_t) - w;
-
-            uint16_t *g_ptr = (uint16_t*)p->cur_frame->planes[0];
-            uint16_t *b_ptr = (uint16_t*)p->cur_frame->planes[1];
-            uint16_t *r_ptr = (uint16_t*)p->cur_frame->planes[2];
-            uint32_t *fbuf_ptr = (uint32_t*)buf->map;
-            for (unsigned y = 0; y < h; ++y) {
-                for (unsigned x = 0; x < w; ++x) {
-                    *fbuf_ptr++ = (*r_ptr++ << 20) | (*g_ptr++ << 10) | (*b_ptr++);
-                }
-                g_ptr += g_padding;
-                b_ptr += b_padding;
-                r_ptr += r_padding;
-                fbuf_ptr += fbuf_padding;
-            }
-        } else { // p->drm_format == DRM_FORMAT_XRGB8888
-            memcpy_pic(buf->map, p->cur_frame->planes[0],
-                       p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
-                       buf->stride,
-                       p->cur_frame->stride[0]);
-        }
+        memcpy_pic(buf->map, p->cur_frame->planes[0],
+                   p->cur_frame->w * BYTES_PER_PIXEL, p->cur_frame->h,
+                   buf->stride,
+                   p->cur_frame->stride[0]);
     }
 
     if (mpi != p->last_input) {
@@ -283,12 +277,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, struct framebuffer *buf)
 static void enqueue_frame(struct vo *vo, struct framebuffer *fb)
 {
     struct priv *p = vo->priv;
-    struct vo_drm_state *drm = vo->drm;
 
-    drm->vsync.sbc++;
     struct drm_frame *new_frame = talloc(p, struct drm_frame);
     new_frame->fb = fb;
-    new_frame->vsync = drm->vsync;
     MP_TARRAY_APPEND(p, p->fb_queue, p->fb_queue_len, new_frame);
 }
 
@@ -309,15 +300,13 @@ static void swapchain_step(struct vo *vo)
     }
 }
 
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vo_drm_state *drm = vo->drm;
     struct priv *p = vo->priv;
 
     if (!drm->active)
-        return;
-
-    drm->still = frame->still;
+        goto done;
 
     // we redraw the entire image when OSD needs to be redrawn
     struct framebuffer *fb =  p->bufs[p->front_buf];
@@ -328,29 +317,21 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     enqueue_frame(vo, fb);
+
+done:
+    return VO_TRUE;
 }
 
 static void queue_flip(struct vo *vo, struct drm_frame *frame)
 {
-    struct priv *p = vo->priv;
     struct vo_drm_state *drm = vo->drm;
 
     drm->fb = frame->fb;
 
-    // Alloc and fill the data struct for the page flip callback
-    struct drm_pflip_cb_closure *data = talloc(p, struct drm_pflip_cb_closure);
-    data->frame_vsync = &frame->vsync;
-    data->vsync = &drm->vsync;
-    data->vsync_info = &drm->vsync_info;
-    data->waiting_for_flip = &drm->waiting_for_flip;
-    data->log = vo->log;
-
     int ret = drmModePageFlip(drm->fd, drm->crtc_id,
-                              drm->fb->id, DRM_MODE_PAGE_FLIP_EVENT, data);
-    if (ret) {
+                              drm->fb->id, DRM_MODE_PAGE_FLIP_EVENT, drm);
+    if (ret)
         MP_WARN(vo, "Failed to queue page flip: %s\n", mp_strerror(errno));
-        talloc_free(data);
-    }
     drm->waiting_for_flip = !ret;
 }
 
@@ -358,12 +339,11 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct vo_drm_state *drm = vo->drm;
-    const bool drain = drm->paused || drm->still;
 
     if (!drm->active)
         return;
 
-    while (drain || p->fb_queue_len > vo->opts->swapchain_depth) {
+    while (drm->redraw || p->fb_queue_len > vo->opts->swapchain_depth) {
         if (drm->waiting_for_flip) {
             vo_drm_wait_on_flip(vo->drm);
             swapchain_step(vo);
@@ -377,6 +357,13 @@ static void flip_page(struct vo *vo)
         }
         queue_flip(vo, p->fb_queue[1]);
     }
+    drm->redraw = false;
+}
+
+static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+{
+    struct vo_drm_state *drm = vo->drm;
+    present_sync_get_info(drm->present, info);
 }
 
 static void uninit(struct vo *vo)
@@ -435,7 +422,8 @@ err:
 
 static int query_format(struct vo *vo, int format)
 {
-    return sws_isSupportedInput(imgfmt2pixfmt(format));
+    struct priv *p = vo->priv;
+    return mp_sws_supports_formats(p->sws, p->imgfmt, format) ? 1 : 0;
 }
 
 static int control(struct vo *vo, uint32_t request, void *arg)
@@ -462,7 +450,7 @@ const struct vo_driver video_out_drm = {
     .control = control,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
-    .get_vsync = vo_drm_get_vsync,
+    .get_vsync = get_vsync,
     .uninit = uninit,
     .wait_events = vo_drm_wait_events,
     .wakeup = vo_drm_wakeup,

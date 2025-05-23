@@ -29,7 +29,12 @@ enum {
     MP_MODE_INTERLACED_ONLY = (1 << 2), // only deinterlace marked frames
 };
 
+#define MP_FIELD_PARITY_AUTO -1
+#define MP_FIELD_PARITY_TFF 0
+#define MP_FIELD_PARITY_BFF 1
+
 void mp_refqueue_set_mode(struct mp_refqueue *q, int flags);
+void mp_refqueue_set_parity(struct mp_refqueue *q, int parity);
 bool mp_refqueue_should_deint(struct mp_refqueue *q);
 bool mp_refqueue_is_top_field(struct mp_refqueue *q);
 bool mp_refqueue_top_field_first(struct mp_refqueue *q);

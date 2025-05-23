@@ -27,7 +27,7 @@
 #include "input.h"
 #include "misc/json.h"
 
-#include "libmpv/client.h"
+#include "mpv/client.h"
 
 static void destroy_cmd(void *ptr)
 {
@@ -51,9 +51,11 @@ static const struct flag cmd_flags[] = {
     {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
     {"expand-properties",   0,               MP_EXPAND_PROPERTIES},
     {"raw",                 MP_EXPAND_PROPERTIES, 0},
-    {"repeatable",          0,               MP_ALLOW_REPEAT},
+    {"repeatable",          MP_DISALLOW_REPEAT, MP_ALLOW_REPEAT},
+    {"nonrepeatable",       MP_ALLOW_REPEAT,    MP_DISALLOW_REPEAT},
+    {"nonscalable",         0,               MP_DISALLOW_SCALE},
     {"async",               MP_SYNC_CMD,     MP_ASYNC_CMD},
-    {"sync",                MP_ASYNC_CMD,     MP_SYNC_CMD},
+    {"sync",                MP_ASYNC_CMD,    MP_SYNC_CMD},
     {0}
 };
 
@@ -140,7 +142,7 @@ static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
         struct mp_cmd_arg arg = {.type = opt};
         if (opt->defval)
             m_option_copy(opt, &arg.v, opt->defval);
-        assert(i <= cmd->nargs);
+        mp_assert(i <= cmd->nargs);
         if (i == cmd->nargs) {
             MP_TARRAY_APPEND(cmd, cmd->args, cmd->nargs, arg);
         } else {
@@ -201,7 +203,7 @@ static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
 
 static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
 {
-    assert(node->format == MPV_FORMAT_NODE_ARRAY);
+    mp_assert(node->format == MPV_FORMAT_NODE_ARRAY);
     mpv_node_list *args = node->u.list;
     int cur = 0;
 
@@ -230,7 +232,7 @@ static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *nod
 
 static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
 {
-    assert(node->format == MPV_FORMAT_NODE_MAP);
+    mp_assert(node->format == MPV_FORMAT_NODE_MAP);
     mpv_node_list *args = node->u.list;
 
     mpv_node *name = node_map_get(node, "name");
@@ -611,19 +613,20 @@ bool mp_input_is_repeatable_cmd(struct mp_cmd *cmd)
     if (cmd->def == &mp_cmd_list && cmd->args[0].v.p)
         cmd = cmd->args[0].v.p;  // list - only 1st cmd is considered
 
-    return (cmd->def->allow_auto_repeat) || (cmd->flags & MP_ALLOW_REPEAT);
+    return (cmd->def->allow_auto_repeat && !(cmd->flags & MP_DISALLOW_REPEAT)) ||
+           (cmd->flags & MP_ALLOW_REPEAT);
 }
 
 bool mp_input_is_scalable_cmd(struct mp_cmd *cmd)
 {
-    return cmd->def->scalable;
+    return cmd->def->scalable && !(cmd->flags & MP_DISALLOW_SCALE);
 }
 
 void mp_print_cmd_list(struct mp_log *out)
 {
     for (int i = 0; mp_cmds[i].name; i++) {
         const struct mp_cmd_def *def = &mp_cmds[i];
-        mp_info(out, "%-20.20s", def->name);
+        mp_info(out, "%-25s", def->name);
         for (int j = 0; j < MP_CMD_DEF_MAX_ARGS && def->args[j].type; j++) {
             const struct m_option *arg = &def->args[j];
             bool is_opt = arg->defval || (arg->flags & MP_CMD_OPT_ARG);
@@ -635,37 +638,3 @@ void mp_print_cmd_list(struct mp_log *out)
         mp_info(out, "\n");
     }
 }
-
-static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
-                           struct bstr name, struct bstr param, void *dst)
-{
-    double val;
-    if (bstrcmp0(param, "up") == 0) {
-        val = +1;
-    } else if (bstrcmp0(param, "down") == 0) {
-        val = -1;
-    } else {
-        return m_option_type_double.parse(log, opt, name, param, dst);
-    }
-    *(double *)dst = val;
-    return 1;
-}
-
-static char *print_cycle_dir(const m_option_t *opt, const void *val)
-{
-    return talloc_asprintf(NULL, "%f", *(double *)val);
-}
-
-static void copy_opt(const m_option_t *opt, void *dst, const void *src)
-{
-    if (dst && src)
-        memcpy(dst, src, opt->type->size);
-}
-
-const struct m_option_type m_option_type_cycle_dir = {
-    .name = "up|down",
-    .parse = parse_cycle_dir,
-    .print = print_cycle_dir,
-    .copy = copy_opt,
-    .size = sizeof(double),
-};

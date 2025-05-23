@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "misc/bstr.h"
 
-#define MP_NUM_CHANNELS 16
+#define MP_NUM_CHANNELS 64
 
 // Speaker a channel can be assigned to.
 // This corresponds to WAVEFORMATEXTENSIBLE channel mask bit indexes.
@@ -55,6 +55,11 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_SDL,          // SURROUND_DIRECT_LEFT
     MP_SPEAKER_ID_SDR,          // SURROUND_DIRECT_RIGHT
     MP_SPEAKER_ID_LFE2,         // LOW_FREQUENCY_2
+    MP_SPEAKER_ID_TSL,          // TOP_SIDE_LEFT
+    MP_SPEAKER_ID_TSR,          // TOP_SIDE_RIGHT,
+    MP_SPEAKER_ID_BFC,          // BOTTOM_FRONT_CENTER
+    MP_SPEAKER_ID_BFL,          // BOTTOM_FRONT_LEFT
+    MP_SPEAKER_ID_BFR,          // BOTTOM_FRONT_RIGHT
 
     // Speaker IDs >= 64 are not representable in WAVEFORMATEXTENSIBLE or libav*.
 
@@ -124,10 +129,12 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
 int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b);
 
 char *mp_chmap_to_str_buf(char *buf, size_t buf_size, const struct mp_chmap *src);
-#define mp_chmap_to_str(m) mp_chmap_to_str_buf((char[64]){0}, 64, (m))
+#define mp_chmap_to_str_(m, sz) mp_chmap_to_str_buf((char[sz]){0}, sz, (m))
+#define mp_chmap_to_str(m) mp_chmap_to_str_(m, MP_NUM_CHANNELS * 4)
 
 char *mp_chmap_to_str_hr_buf(char *buf, size_t buf_size, const struct mp_chmap *src);
-#define mp_chmap_to_str_hr(m) mp_chmap_to_str_hr_buf((char[128]){0}, 128, (m))
+#define mp_chmap_to_str_hr_(m, sz) mp_chmap_to_str_hr_buf((char[sz]){0}, sz, (m))
+#define mp_chmap_to_str_hr(m) mp_chmap_to_str_hr_(m, MP_NUM_CHANNELS * 4)
 
 bool mp_chmap_from_str(struct mp_chmap *dst, bstr src);
 

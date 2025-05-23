@@ -29,10 +29,11 @@
 #include "video/out/filter_kernels.h"
 
 struct scaler_fun {
-    char *name;
+    int function;
     float params[2];
     float blur;
     float taper;
+    const struct m_opt_choice_alternatives *functions;
 };
 
 struct scaler_config {
@@ -40,7 +41,6 @@ struct scaler_config {
     struct scaler_fun window;
     float radius;
     float antiring;
-    float cutoff;
     float clamp;
 };
 
@@ -53,7 +53,6 @@ struct scaler {
     struct ra_tex *lut;
     struct ra_tex *sep_fbo;
     bool insufficient;
-    int lut_size;
 
     // kernel points here
     struct filter_kernel kernel_storage;
@@ -74,11 +73,10 @@ enum dither_algo {
     DITHER_ERROR_DIFFUSION,
 };
 
-enum alpha_mode {
-    ALPHA_NO = 0,
-    ALPHA_YES,
-    ALPHA_BLEND,
-    ALPHA_BLEND_TILES,
+enum background_type {
+    BACKGROUND_NONE = 0,
+    BACKGROUND_COLOR,
+    BACKGROUND_TILES,
 };
 
 enum blend_subs_mode {
@@ -102,14 +100,6 @@ enum tone_mapping {
     TONE_MAPPING_ST2094_10,
 };
 
-enum tone_mapping_mode {
-    TONE_MAP_MODE_AUTO,
-    TONE_MAP_MODE_RGB,
-    TONE_MAP_MODE_MAX,
-    TONE_MAP_MODE_HYBRID,
-    TONE_MAP_MODE_LUMA,
-};
-
 enum gamut_mode {
     GAMUT_AUTO,
     GAMUT_CLIP,
@@ -128,7 +118,6 @@ struct gl_tone_map_opts {
     float curve_param;
     float max_boost;
     bool inverse;
-    int mode;
     int compute_peak;
     float decay_rate;
     float scene_threshold_low;
@@ -143,13 +132,13 @@ struct gl_tone_map_opts {
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
-    int scaler_lut_size;
     float gamma;
     bool gamma_auto;
     int target_prim;
     int target_trc;
     int target_peak;
     int target_contrast;
+    int target_gamut;
     struct gl_tone_map_opts tone_map;
     bool correct_downscaling;
     bool linear_downscaling;
@@ -166,9 +155,9 @@ struct gl_video_opts {
     int temporal_dither_period;
     char *error_diffusion;
     char *fbo_format;
-    int alpha_mode;
+    int background;
     bool use_rectangle;
-    struct m_color background;
+    struct m_color background_color;
     bool interpolation;
     float interpolation_threshold;
     int blend_subs;
@@ -195,7 +184,8 @@ enum {
     RENDER_FRAME_SUBS = 1 << 0,
     RENDER_FRAME_OSD = 1 << 1,
     RENDER_FRAME_VF_SUBS = 1 << 2,
-    RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD,
+    RENDER_SCREEN_COLOR = 1 << 3, // 3D LUT and dithering
+    RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD | RENDER_SCREEN_COLOR,
 };
 
 struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
@@ -205,7 +195,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
-                           struct ra_fbo fbo, int flags);
+                           const struct ra_fbo *fbo, int flags);
 void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
@@ -219,13 +209,12 @@ bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *osd,
 void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
                          struct voctrl_screenshot *args);
 
-float gl_video_scale_ambient_lux(float lmin, float lmax,
-                                 float rmin, float rmax, float lux);
-void gl_video_set_ambient_lux(struct gl_video *p, int lux);
+double gl_video_scale_ambient_lux(float lmin, float lmax,
+                                  float rmin, float rmax, double lux);
+void gl_video_set_ambient_lux(struct gl_video *p, double lux);
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data);
 bool gl_video_icc_auto_enabled(struct gl_video *p);
 bool gl_video_gamma_auto_enabled(struct gl_video *p);
-struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p);
 
 void gl_video_reset(struct gl_video *p);
 bool gl_video_showing_interpolated_frame(struct gl_video *p);
@@ -244,5 +233,6 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo);
 struct mp_image *gl_video_get_image(struct gl_video *p, int imgfmt, int w, int h,
                                     int stride_align, int flags);
 
+struct mp_image_params *gl_video_get_target_params_ptr(struct gl_video *p);
 
 #endif

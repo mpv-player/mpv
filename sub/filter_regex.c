@@ -64,7 +64,7 @@ static struct demux_packet *rf_filter(struct sd_filter *ft,
     bool drop = false;
 
     if (ft->opts->rf_plain)
-        sd_ass_to_plaintext(text, strlen(text), text);
+        sd_ass_to_plaintext(&text, text);
 
     for (int n = 0; n < p->num_regexes; n++) {
         int err = regexec(&p->regexes[n], text, 0, NULL, 0);

@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <sndio.h>
 
+#include "config.h"
+
 #include "options/m_option.h"
 #include "common/msg.h"
 
@@ -292,7 +294,7 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
     state->delay = p->delay / (double)p->par.rate;
 
     /* report unexpected EOF / underrun */
-    if ((state->queued_samples && state->queued_samples &&
+    if ((state->queued_samples &&
         (state->queued_samples < state->free_samples) &&
         p->playing) || sio_eof(p->hdl))
     {
@@ -301,7 +303,7 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
                 state->free_samples, state->queued_samples, state->delay);
         p->playing = false;
         state->playing = p->playing;
-        ao_wakeup_playthread(ao);
+        ao_wakeup(ao);
     } else {
         state->playing = p->playing;
     }

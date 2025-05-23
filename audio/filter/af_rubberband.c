@@ -75,12 +75,12 @@ static bool init_rubberband(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    assert(!p->rubber);
-    assert(p->pending);
+    mp_assert(!p->rubber);
+    mp_assert(p->pending);
 
     int opts = p->opts->transients | p->opts->detector | p->opts->phase |
                p->opts->window | p->opts->smoothing | p->opts->formant |
-               p->opts->pitch | p->opts->channels | 
+               p->opts->pitch | p->opts->channels |
 #if HAVE_RUBBERBAND_3
                p->opts->engine |
 #endif
@@ -105,7 +105,7 @@ static bool init_rubberband(struct mp_filter *f)
     return true;
 }
 
-static void process(struct mp_filter *f)
+static void af_rubberband_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -132,7 +132,7 @@ static void process(struct mp_filter *f)
                 return; // no new data yet
             }
         }
-        assert(p->pending || eof);
+        mp_assert(p->pending || eof);
 
         if (!p->rubber) {
             if (!p->pending) {
@@ -185,7 +185,7 @@ static void process(struct mp_filter *f)
         }
     }
 
-    assert(p->pending);
+    mp_assert(p->pending);
 
     int out_samples = rubberband_available(p->rubber);
     if (out_samples > 0) {
@@ -199,7 +199,7 @@ static void process(struct mp_filter *f)
 
         float *out_data[MP_NUM_CHANNELS] = {0};
         uint8_t **planes = mp_aframe_get_data_rw(out);
-        assert(planes);
+        mp_assert(planes);
         int num_planes = mp_aframe_get_planes(out);
         for (int n = 0; n < num_planes; n++)
             out_data[n] = (void *)planes[n];
@@ -233,7 +233,7 @@ error:
     mp_filter_internal_mark_failed(f);
 }
 
-static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
+static bool af_rubberband_command(struct mp_filter *f, struct mp_filter_command *cmd)
 {
     struct priv *p = f->priv;
 
@@ -263,7 +263,7 @@ static bool command(struct mp_filter *f, struct mp_filter_command *cmd)
     return false;
 }
 
-static void reset(struct mp_filter *f)
+static void af_rubberband_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -274,7 +274,7 @@ static void reset(struct mp_filter *f)
     TA_FREEP(&p->pending);
 }
 
-static void destroy(struct mp_filter *f)
+static void af_rubberband_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -286,10 +286,10 @@ static void destroy(struct mp_filter *f)
 static const struct mp_filter_info af_rubberband_filter = {
     .name = "rubberband",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .command = command,
-    .reset = reset,
-    .destroy = destroy,
+    .process = af_rubberband_process,
+    .command = af_rubberband_command,
+    .reset = af_rubberband_reset,
+    .destroy = af_rubberband_destroy,
 };
 
 static struct mp_filter *af_rubberband_create(struct mp_filter *parent,

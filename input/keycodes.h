@@ -82,10 +82,11 @@
 #define MP_KEY_CHANNEL_DOWN     (MP_KEY_MM_BASE+22)
 #define MP_KEY_PLAYONLY         (MP_KEY_MM_BASE+23)
 #define MP_KEY_PAUSEONLY        (MP_KEY_MM_BASE+24)
-#define MP_KEY_BACK             (MP_KEY_MM_BASE+25)
-#define MP_KEY_TOOLS            (MP_KEY_MM_BASE+26)
-#define MP_KEY_ZOOMIN           (MP_KEY_MM_BASE+27)
-#define MP_KEY_ZOOMOUT          (MP_KEY_MM_BASE+28)
+#define MP_KEY_GO_BACK          (MP_KEY_MM_BASE+25)
+#define MP_KEY_GO_FORWARD       (MP_KEY_MM_BASE+26)
+#define MP_KEY_TOOLS            (MP_KEY_MM_BASE+27)
+#define MP_KEY_ZOOMIN           (MP_KEY_MM_BASE+28)
+#define MP_KEY_ZOOMOUT          (MP_KEY_MM_BASE+29)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)
@@ -106,6 +107,19 @@
 #define MP_KEY_KPINS    (MP_KEY_KEYPAD+11)
 #define MP_KEY_KPDEL    (MP_KEY_KEYPAD+12)
 #define MP_KEY_KPENTER  (MP_KEY_KEYPAD+13)
+#define MP_KEY_KPHOME  (MP_KEY_KEYPAD+14)
+#define MP_KEY_KPEND  (MP_KEY_KEYPAD+15)
+#define MP_KEY_KPPGUP  (MP_KEY_KEYPAD+16)
+#define MP_KEY_KPPGDOWN  (MP_KEY_KEYPAD+17)
+#define MP_KEY_KPRIGHT  (MP_KEY_KEYPAD+18)
+#define MP_KEY_KPLEFT  (MP_KEY_KEYPAD+19)
+#define MP_KEY_KPDOWN  (MP_KEY_KEYPAD+20)
+#define MP_KEY_KPUP  (MP_KEY_KEYPAD+21)
+#define MP_KEY_KPBEGIN  (MP_KEY_KEYPAD+22)
+#define MP_KEY_KPADD  (MP_KEY_KEYPAD+23)
+#define MP_KEY_KPSUBTRACT  (MP_KEY_KEYPAD+24)
+#define MP_KEY_KPMULTIPLY  (MP_KEY_KEYPAD+25)
+#define MP_KEY_KPDIVIDE  (MP_KEY_KEYPAD+26)
 
 // Mouse events from VOs
 #define MP_MBTN_BASE     ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY|MP_KEY_EMIT_ON_UP)
@@ -207,15 +221,17 @@
 #define MP_KEY_ANY_UNICODE      (MP_KEY_INTERN+5)
 // For mp_input_put_key(): release all keys that are down.
 #define MP_INPUT_RELEASE_ALL    (MP_KEY_INTERN+6)
+// For mp_input_put_key(): release all touch points.
+#define MP_TOUCH_RELEASE_ALL    (MP_KEY_INTERN+7)
 
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
-// This is a fixed part of the keycode, not a modifier than can change.
+// This is a fixed part of the keycode, not a modifier that can change.
 #define MP_KEY_EMIT_ON_UP      (1u<<22)
 
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 // Also means both key-down key-up events produce emit bound commands.
-// This is a fixed part of the keycode, not a modifier than can change.
+// This is a fixed part of the keycode, not a modifier that can change.
 #define MP_NO_REPEAT_KEY       (1u<<23)
 
 /* Modifiers added to individual keys */
@@ -234,6 +250,9 @@
 // release keys at all with UP. If input is unreliable, use MP_INPUT_RELEASE_ALL
 // or don't use MP_KEY_STATE_DOWN in the first place.
 #define MP_KEY_STATE_UP        (1u<<29)
+
+// Only set the key state without triggering key bindings.
+#define MP_KEY_STATE_SET_ONLY  (1u<<30)
 
 #define MP_KEY_MODIFIER_MASK (MP_KEY_MODIFIER_SHIFT | MP_KEY_MODIFIER_CTRL | \
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META | \

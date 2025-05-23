@@ -46,4 +46,8 @@ struct w32_create_anon_pipe_opts {
 bool mp_w32_create_anon_pipe(HANDLE *server, HANDLE *client,
                              struct w32_create_anon_pipe_opts *opts);
 
+// Returns the target of the shell link in talloc memory if the path is a
+// resolvable shell link, otherwise returns NULL.
+wchar_t *mp_w32_get_shell_link_target(wchar_t *path);
+
 #endif

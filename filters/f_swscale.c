@@ -68,7 +68,7 @@ bool mp_sws_supports_input(int imgfmt)
     return sws_isSupportedInput(imgfmt2pixfmt(imgfmt));
 }
 
-static void process(struct mp_filter *f)
+static void sws_process(struct mp_filter *f)
 {
     struct mp_sws_filter *s = f->priv;
 
@@ -105,6 +105,7 @@ static void process(struct mp_filter *f)
         goto error;
 
     mp_image_copy_attributes(dst, src);
+    mp_image_setfmt(dst, dstfmt);
 
     if (s->use_out_params)
         dst->params = s->out_params;
@@ -124,13 +125,12 @@ static void process(struct mp_filter *f)
 error:
     mp_frame_unref(&frame);
     mp_filter_internal_mark_failed(f);
-    return;
 }
 
 static const struct mp_filter_info sws_filter = {
     .name = "swscale",
     .priv_size = sizeof(struct mp_sws_filter),
-    .process = process,
+    .process = sws_process,
 };
 
 struct mp_sws_filter *mp_sws_filter_create(struct mp_filter *parent)

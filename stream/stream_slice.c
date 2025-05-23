@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 #include "common/common.h"
 #include "options/m_option.h"
@@ -61,7 +60,7 @@ static int64_t get_size(struct stream *s)
     if (size <= 0)
         return size;
     if (size <= p->slice_start)
-      return 0;
+        return 0;
     if (p->slice_max_end)
         size = MPMIN(size, p->slice_max_end);
     return size - p->slice_start;
@@ -123,7 +122,7 @@ static int parse_slice_range(stream_t *stream)
     }
 
     if (max_end_is_offset)
-      p->slice_max_end += p->slice_start;
+        p->slice_max_end += p->slice_start;
 
     if (p->slice_max_end && p->slice_max_end < p->slice_start) {
         MP_ERR(stream, "The byte range end (%"PRId64") can't be smaller than the start (%"PRId64"): '%s'\n",
@@ -158,7 +157,11 @@ static int open2(struct stream *stream, const struct stream_open_args *args)
         return inner_ret;
     }
 
-    if (!p->inner->seekable) {
+    if (p->inner->is_directory) {
+        MP_FATAL(stream, "Inner stream '%s' is a directory\n", p->inner->url);
+        free_stream(p->inner);
+        return STREAM_ERROR;
+    } else if (!p->inner->seekable) {
         MP_FATAL(stream, "Non-seekable stream '%s' can't be used with 'slice://'\n", p->inner->url);
         free_stream(p->inner);
         return STREAM_ERROR;

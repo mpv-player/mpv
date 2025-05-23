@@ -17,7 +17,7 @@ static void wakeup(void *ctx)
     mp_filter_wakeup(f);
 }
 
-static void process(struct mp_filter *f)
+static void demux_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -45,14 +45,14 @@ static void process(struct mp_filter *f)
     mp_pin_in_write(f->ppins[0], frame);
 }
 
-static void reset(struct mp_filter *f)
+static void demux_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
     p->eof_returned = false;
 }
 
-static void destroy(struct mp_filter *f)
+static void demux_destroy(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
@@ -62,9 +62,9 @@ static void destroy(struct mp_filter *f)
 static const struct mp_filter_info demux_filter = {
     .name = "demux_in",
     .priv_size = sizeof(struct priv),
-    .process = process,
-    .reset = reset,
-    .destroy = destroy,
+    .process = demux_process,
+    .reset = demux_reset,
+    .destroy = demux_destroy,
 };
 
 struct mp_filter *mp_demux_in_create(struct mp_filter *parent,

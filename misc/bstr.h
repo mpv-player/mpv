@@ -56,6 +56,8 @@ static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
     return r;
 }
 
+#define bstr0_lit(s) {(unsigned char *)(s), sizeof("" s) - 1}
+
 static inline struct bstr bstr0(const char *s)
 {
     return (struct bstr){(unsigned char *)s, s ? strlen(s) : 0};
@@ -77,7 +79,7 @@ struct bstr bstr_splice(struct bstr str, int start, int end);
 long long bstrtoll(struct bstr str, struct bstr *rest, int base);
 double bstrtod(struct bstr str, struct bstr *rest);
 void bstr_lower(struct bstr str);
-int bstr_sscanf(struct bstr str, const char *format, ...);
+int bstr_sscanf(struct bstr str, const char *format, ...) SCANF_ATTRIBUTE(2, 3);
 
 // Decode a string containing hexadecimal data. All whitespace will be silently
 // ignored. When successful, this allocates a new array to store the output.
@@ -133,10 +135,58 @@ static inline struct bstr bstr_getline(struct bstr str, struct bstr *rest)
 // and will remove the trailing \n or \r\n sequence.
 struct bstr bstr_strip_linebreaks(struct bstr str);
 
+/**
+ * @brief Append a string to the existing bstr.
+ *
+ * This function appends the content of the `append` bstr to the `s` bstr.
+ * `s->start` is expected to be a talloc allocation (which can be resized) or NULL.
+ * A null terminator ('\0') is always appended for convenience. If `s->start`
+ * is NULL, the `talloc_ctx` will be used as the parent context to allocate
+ * memory.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the `append` string is appended.
+ * @param append      The string to append to `s`.
+ */
 void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
-void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
+
+static inline void bstr_xappend0(void *talloc_ctx, bstr *s, const char *append)
+{
+    return bstr_xappend(talloc_ctx, s, bstr0(append));
+}
+
+/**
+ * @brief Append a formatted string to the existing bstr.
+ *
+ * This function works like bstr_xappend() but appends a formatted string using
+ * a format string and additional arguments. The formatted string is created
+ * using vsnprintf. The function takes care of resizing the destination
+ * buffer if necessary.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the formatted string is appended.
+ * @param fmt         The format string (same as in vsnprintf).
+ * @param ...         Additional arguments for the format string.
+ * @return            The number of characters added (excluding the null terminator)
+ *                    or a negative value on error.
+ */
+int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
     PRINTF_ATTRIBUTE(3, 4);
-void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
+
+/**
+ * @brief Append a formatted string to the existing bstr using a va_list.
+ *
+ * This function is identical to bstr_xappend_asprintf() but takes a `va_list`
+ * instead of a variable number of arguments.
+ *
+ * @param talloc_ctx  The parent talloc context.
+ * @param s           The destination bstr to which the formatted string is appended.
+ * @param fmt         The format string (same as in printf).
+ * @param ap          The `va_list` containing the arguments for the format string.
+ * @return            The number of characters added (excluding the null terminator)
+ *                    or a negative value on error.
+ */
+int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
     PRINTF_ATTRIBUTE(3, 0);
 
 // If s starts/ends with prefix, return true and return the rest of the string
@@ -222,6 +272,12 @@ static inline bool bstr_eatend0(struct bstr *s, const char *prefix)
 {
     return bstr_eatend(s, bstr0(prefix));
 }
+
+#ifdef _WIN32
+
+int bstr_to_wchar(void *talloc_ctx, struct bstr s, wchar_t **ret);
+
+#endif
 
 // create a pair (not single value!) for "%.*s" printf syntax
 #define BSTR_P(bstr) (int)((bstr).len), ((bstr).start ? (char*)(bstr).start : "")

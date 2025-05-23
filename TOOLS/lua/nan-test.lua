@@ -3,10 +3,10 @@
 
 local utils = require 'mp.utils'
 
-prop_name = "scale-param1"
+local prop_name = "scale-param1"
 
 -- internal NaN, return string "default" instead of NaN
-v = mp.get_property_native(prop_name, "fail")
+local v = mp.get_property_native(prop_name, "fail")
 print("Exp:", "string", "\"default\"")
 print("Got:", type(v), utils.to_string(v))
 
@@ -25,7 +25,7 @@ print("Exp:", "number", 123)
 print("Got:", type(v), utils.to_string(v))
 
 -- try to set an actual NaN
-st, msg = mp.set_property_number(prop_name, 0.0/0)
+local st, msg = mp.set_property_number(prop_name, 0.0/0)
 print("Exp:", nil, "<message>")
 print("Got:", st, msg)
 

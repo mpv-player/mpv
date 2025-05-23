@@ -210,11 +210,9 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
     if (src->current->d)
         return;
 
-    // Note: in delay_open mode, we must _not_ close segments during demuxing,
+    // Note: we must _not_ close segments during demuxing,
     // because demuxed packets have demux_packet.codec set to objects owned
     // by the segments. Closing them would create dangling pointers.
-    if (!src->delay_open)
-        close_lazy_segments(demuxer, src);
 
     struct demuxer_params params = {
         .init_fragment = src->tl->init_fragment,
@@ -595,7 +593,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
             .sh = new,
         };
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, vs);
-        assert(demux_get_stream(demuxer, p->num_streams - 1) == new);
+        mp_assert(demux_get_stream(demuxer, p->num_streams - 1) == new);
         MP_TARRAY_APPEND(src, src->streams, src->num_streams, vs);
     }
 
@@ -610,7 +608,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
         }
 
         if (!part->source)
-            assert(tl->dash || tl->delay_open);
+            mp_assert(tl->dash || tl->delay_open);
 
         struct segment *seg = talloc_ptrtype(src, seg);
         *seg = (struct segment){

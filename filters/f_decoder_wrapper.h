@@ -18,6 +18,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "filter.h"
 
@@ -41,10 +42,6 @@ struct mp_decoder_wrapper {
 // wrapper is destroyed.
 struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src);
-
-// For informational purposes.
-void mp_decoder_wrapper_get_desc(struct mp_decoder_wrapper *d,
-                                 char *buf, size_t buf_size);
 
 // Legacy decoder framedrop control.
 void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num);

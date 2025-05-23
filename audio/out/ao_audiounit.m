@@ -94,10 +94,10 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     for (int n = 0; n < ao->num_planes; n++)
         planes[n] = buffer_list->mBuffers[n].mData;
 
-    int64_t end = mp_time_us();
-    end += p->device_latency * 1e6;
-    end += ca_get_latency(ts) + ca_frames_to_us(ao, frames);
-    ao_read_data(ao, planes, frames, end);
+    int64_t end = mp_time_ns();
+    end += MP_TIME_S_TO_NS(p->device_latency);
+    end += ca_get_latency(ts) + ca_frames_to_ns(ao, frames);
+    ao_read_data(ao, planes, frames, end, NULL, true, true);
     return noErr;
 }
 
@@ -115,7 +115,12 @@ static bool init_audiounit(struct ao *ao)
 
     MP_VERBOSE(ao, "max channels: %ld, requested: %d\n", maxChannels, (int)ao->channels.num);
 
-    [instance setCategory:AVAudioSessionCategoryPlayback error:nil];
+    AVAudioSessionCategoryOptions options = 0;
+    if (!(ao->init_flags & AO_INIT_EXCLUSIVE)) {
+        options |= AVAudioSessionCategoryOptionMixWithOthers;
+    }
+
+    [instance setCategory:AVAudioSessionCategoryPlayback withOptions:options error:nil];
     [instance setMode:AVAudioSessionModeMoviePlayback error:nil];
     [instance setActive:YES error:nil];
     [instance setPreferredOutputNumberOfChannels:prefChannels error:nil];

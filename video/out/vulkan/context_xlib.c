@@ -75,7 +75,7 @@ static bool xlib_init(struct ra_ctx *ctx)
          .window = ctx->vo->x11->window,
     };
 
-    struct ra_vk_ctx_params params = {
+    struct ra_ctx_params params = {
         .check_visible = xlib_check_visible,
         .swap_buffers = xlib_vk_swap_buffers,
         .get_vsync = xlib_vk_get_vsync,
@@ -126,14 +126,15 @@ static void xlib_wakeup(struct ra_ctx *ctx)
     vo_x11_wakeup(ctx->vo);
 }
 
-static void xlib_wait_events(struct ra_ctx *ctx, int64_t until_time_us)
+static void xlib_wait_events(struct ra_ctx *ctx, int64_t until_time_ns)
 {
-    vo_x11_wait_events(ctx->vo, until_time_us);
+    vo_x11_wait_events(ctx->vo, until_time_ns);
 }
 
 const struct ra_ctx_fns ra_ctx_vulkan_xlib = {
     .type           = "vulkan",
     .name           = "x11vk",
+    .description    = "X11/Vulkan",
     .reconfig       = xlib_reconfig,
     .control        = xlib_control,
     .wakeup         = xlib_wakeup,

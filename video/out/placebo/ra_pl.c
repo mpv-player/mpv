@@ -26,7 +26,7 @@ static pl_timer get_active_timer(const struct ra *ra);
 
 struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
 {
-    assert(gpu);
+    mp_assert(gpu);
 
     struct ra *ra = talloc_zero(NULL, struct ra);
     ra->log = log;
@@ -450,8 +450,6 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         .glsl_shader = params->type == RA_RENDERPASS_TYPE_COMPUTE
                             ? params->compute_shader
                             : params->frag_shader,
-        .cached_program = params->cached_program.start,
-        .cached_program_len = params->cached_program.len,
     };
 
     struct pl_blend_params blend_params;
@@ -505,11 +503,6 @@ static struct ra_renderpass *renderpass_create_pl(struct ra *ra,
         .priv = talloc_steal(pass, priv),
     };
 
-    pass->params.cached_program = (struct bstr) {
-        .start = (void *) priv->pass->params.cached_program,
-        .len = priv->pass->params.cached_program_len,
-    };
-
     // fall through
 error:
     talloc_free(tmp);
@@ -541,7 +534,7 @@ static void renderpass_run_pl(struct ra *ra,
                 .data = val->data,
             });
         } else {
-            struct pl_desc_binding bind;
+            struct pl_desc_binding bind = {0};
             switch (inp->type) {
             case RA_VARTYPE_TEX:
             case RA_VARTYPE_IMG_W: {
@@ -681,4 +674,3 @@ static struct ra_fns ra_fns_pl = {
     .timer_start            = timer_start_pl,
     .timer_stop             = timer_stop_pl,
 };
-

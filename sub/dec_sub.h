@@ -16,8 +16,8 @@ struct sd;
 
 enum sd_ctrl {
     SD_CTRL_SUB_STEP,
+    SD_CTRL_SET_ANIMATED_CHECK,
     SD_CTRL_SET_VIDEO_PARAMS,
-    SD_CTRL_SET_TOP,
     SD_CTRL_SET_VIDEO_DEF_FPS,
     SD_CTRL_UPDATE_OPTS,
 };
@@ -25,6 +25,7 @@ enum sd_ctrl {
 enum sd_text_type {
     SD_TEXT_TYPE_PLAIN,
     SD_TEXT_TYPE_ASS,
+    SD_TEXT_TYPE_ASS_FULL,
 };
 
 struct sd_times {
@@ -43,10 +44,13 @@ void sub_destroy(struct dec_sub *sub);
 
 bool sub_can_preload(struct dec_sub *sub);
 void sub_preload(struct dec_sub *sub);
-bool sub_read_packets(struct dec_sub *sub, double video_pts, bool force);
+void sub_redecode_cached_packets(struct dec_sub *sub);
+void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
+                      bool *packets_read, bool *sub_updated);
 struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
                                     int format, double pts);
 char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type);
+char *sub_ass_get_extradata(struct dec_sub *sub);
 struct sd_times sub_get_times(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);

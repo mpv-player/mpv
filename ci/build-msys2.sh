@@ -1,25 +1,17 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-meson setup build            \
-  -D cdda=enabled            \
-  -D d3d-hwaccel=enabled     \
-  -D d3d11=enabled           \
-  -D dvdnav=enabled          \
-  -D egl-angle-lib=enabled   \
-  -D egl-angle-win32=enabled \
-  -D jpeg=enabled            \
-  -D lcms2=enabled           \
-  -D libarchive=enabled      \
-  -D libbluray=enabled       \
-  -D libmpv=true             \
-  -D lua=enabled             \
-  -D pdf-build=enabled       \
-  -D rubberband=enabled      \
-  -D shaderc=enabled         \
-  -D spirv-cross=enabled     \
-  -D tests=true              \
-  -D uchardet=enabled        \
-  -D vapoursynth=enabled
+. ./ci/build-common.sh
+
+args=(
+  -D{cdda,d3d-hwaccel,d3d11,dvdnav,jpeg,lcms2,libarchive}=enabled
+  -D{libbluray,lua,shaderc,spirv-cross,uchardet,vapoursynth}=enabled
+  -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband,win32-smtc}=enabled
+)
+
+[[ "$SYS" == "clang64" ]] && args+=(
+  -Db_sanitize=address,undefined
+)
+
+meson setup build $common_args "${args[@]}"
 meson compile -C build
-cp ./build/player/mpv.com ./build
 ./build/mpv.com -v --no-config

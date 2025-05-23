@@ -1,73 +1,75 @@
 CONSOLE
 =======
 
-The console is a REPL for mpv input commands. It is displayed on the video
-window. It also shows log messages. It can be disabled entirely using the
-``--load-osd-console=no`` option.
+This script provides the ability to process the user's textual input to other
+scripts through the ``mp.input`` API. It can be displayed on both the video
+window and the terminal. It can be disabled entirely using the
+``--load-console=no`` option.
 
-Keybindings
------------
+Console can either process free-form text or select from a predefined list of
+items.
 
-\`
-    Show the console.
+Free-form text mode keybindings
+-------------------------------
 
-ESC
+ESC and Ctrl+[
     Hide the console.
 
-ENTER, Ctrl+J and Ctrl+M
-    Run the typed command.
+ENTER, Ctrl+j and Ctrl+m
+    Select the first completion if one wasn't already manually selected, and run
+    the typed command.
 
 Shift+ENTER
     Type a literal newline character.
 
-LEFT and Ctrl+B
+LEFT and Ctrl+b
     Move the cursor to the previous character.
 
-RIGHT and Ctrl+F
+RIGHT and Ctrl+f
     Move the cursor to the next character.
 
-Ctrl+LEFT and Alt+B
+Ctrl+LEFT and Alt+b
     Move the cursor to the beginning of the current word, or if between words,
     to the beginning of the previous word.
 
-Ctrl+RIGHT and Alt+F
+Ctrl+RIGHT and Alt+f
     Move the cursor to the end of the current word, or if between words, to the
     end of the next word.
 
-HOME and Ctrl+A
+HOME and Ctrl+a
     Move the cursor to the start of the current line.
 
-END and Ctrl+E
+END and Ctrl+e
     Move the cursor to the end of the current line.
 
-BACKSPACE and Ctrl+H
+BACKSPACE and Ctrl+h
     Delete the previous character.
 
-Ctrl+D
+Ctrl+d
     Hide the console if the current line is empty, otherwise delete the next
     character.
 
-Ctrl+BACKSPACE and Ctrl+W
+Ctrl+BACKSPACE and Ctrl+w
     Delete text from the cursor to the beginning of the current word, or if
     between words, to the beginning of the previous word.
 
-Ctrl+DEL and Alt+D
+Ctrl+DEL and Alt+d
     Delete text from the cursor to the end of the current word, or if between
     words, to the end of the next word.
 
-Ctrl+U
+Ctrl+u
     Delete text from the cursor to the beginning of the current line.
 
-Ctrl+K
+Ctrl+k
     Delete text from the cursor to the end of the current line.
 
-Ctrl+C
+Ctrl+c
     Clear the current line.
 
-UP and Ctrl+P
+UP and Ctrl+p
     Move back in the command history.
 
-DOWN and Ctrl+N
+DOWN and Ctrl+n
     Move forward in the command history.
 
 PGUP
@@ -76,37 +78,39 @@ PGUP
 PGDN
     Stop navigating the command history.
 
+Ctrl+r
+    Search the command history. See `SELECT`_ for the key bindings in this mode.
+
 INSERT
     Toggle insert mode.
 
-Ctrl+V
+Ctrl+v
     Paste text (uses the clipboard on X11 and Wayland).
 
 Shift+INSERT
     Paste text (uses the primary selection on X11 and Wayland).
 
-TAB and Ctrl+I
-    Complete the command or property name at the cursor.
+TAB and Ctrl+i
+    Cycle through completions.
 
-Ctrl+L
+Shift+TAB
+    Cycle through the completions backwards.
+
+Ctrl+l
     Clear all log messages from the console.
 
-Commands
---------
+MBTN_MID
+    Paste text (uses the primary selection on X11 and Wayland).
 
-``script-message-to console type <text> [<cursor_pos>]``
-    Show the console and pre-fill it with the provided text, optionally
-    specifying the initial cursor position as a positive integer starting from
-    1.
+WHEEL_UP
+    Move back in the command history.
 
-    .. admonition:: Example for input.conf
-
-        ``% script-message-to console type "seek  absolute-percent" 6``
+WHEEL_DOWN
+    Move forward in the command history.
 
 Known issues
 ------------
 
-- Pasting text is slow on Windows
 - Non-ASCII keyboard input has restrictions
 - The cursor keys move between Unicode code-points, not grapheme clusters
 
@@ -115,41 +119,105 @@ Configuration
 
 This script can be customized through a config file ``script-opts/console.conf``
 placed in mpv's user directory and through the ``--script-opts`` command-line
-option. The configuration syntax is described in `ON SCREEN CONTROLLER`_.
-
-Key bindings can be changed in a standard way, see for example stats.lua
-documentation.
+option. The configuration syntax is described in `mp.options functions`_.
 
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
-``scale``
-    Default: 1
+``monospace_font``
+    Default: platform dependent
 
-    All drawing is scaled by this value, including the text borders and the
-    cursor.
+    The monospace font used when there are completions to align in a grid.
 
-    If the VO backend in use has HiDPI scale reporting implemented, the option
-    value is scaled with the reported HiDPI scale.
-
-``font``
-    Default: unset (picks a hardcoded font depending on detected platform)
-
-    Set the font used for the REPL and the console. This probably doesn't
-    have to be a monospaced font.
+    When there are no completions, ``--osd-font`` is used.
 
 ``font_size``
-    Default: 16
+    Default: 24
 
-    Set the font size used for the REPL and the console. This will be
-    multiplied by "scale".
+    The font size. This will be multiplied by ``display-hidpi-scale`` when the
+    console is not scaled with the window.
 
 ``border_size``
-    Default: 1
+    Default: 1.65
 
-    Set the font border size used for the REPL and the console.
+    The font border size.
+
+``background_alpha``
+    Default: 80
+
+    The transparency of the menu's background. Ranges from 0 (opaque) to 255
+    (fully transparent).
+
+``padding``
+    Default: 10
+
+    The padding of the menu.
+
+``menu_outline_size``
+    Default: 0
+
+    The size of the menu's border.
+
+``menu_outline_color``
+    Default: #FFFFFF
+
+    The color of the menu's border.
+
+``corner_radius``
+    Default: 8
+
+    The radius of the menu's corners.
+
+``margin_x``
+    Default: same as ``--osd-margin-x``
+
+    The margin from the left of the window.
+
+``margin_y``
+    Default: same as ``--osd-margin-y``
+
+    The margin from the bottom of the window.
+
+``scale_with_window``
+    Default: ``auto``
+
+    Whether to scale the console with the window height. Can be ``yes``, ``no``,
+    or ``auto``, which follows the value of ``--osd-scale-by-window``.
+
+``focused_color``
+    Default: ``#222222``
+
+    The color of the focused item.
+
+``focused_back_color``
+    Default: ``#FFFFFF``
+
+    The background color of the focused item.
+
+``match_color``
+    Default: ``#0088FF``
+
+    The color of characters that match the searched string.
+
+``exact_match``
+    Default: no
+
+    Whether to match menu search queries exactly instead of fuzzily. Without
+    this option, prefixing queries with ``'`` enables exact matching.
+
+``case_sensitive``
+    Default: no
+
+    Whether exact searches are case sensitive. Only works with ASCII characters.
 
 ``history_dedup``
     Default: true
 
     Remove duplicate entries in history as to only keep the latest one.
+
+``font_hw_ratio``
+    Default: auto
+
+    The ratio of font height to font width.
+    Adjusts grid width of completions.
+    Values in the range 1.8..2.5 make sense for common monospace fonts.

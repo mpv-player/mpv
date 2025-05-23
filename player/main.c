@@ -21,21 +21,20 @@
 #include <math.h>
 #include <assert.h>
 #include <string.h>
-#include <pthread.h>
 #include <locale.h>
 
 #include "config.h"
 
-#if HAVE_LIBPLACEBO
 #include <libplacebo/config.h>
-#endif
 
 #include "mpv_talloc.h"
 
 #include "misc/dispatch.h"
+#include "misc/random.h"
 #include "misc/thread_pool.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/main-fn.h"
 
@@ -46,6 +45,7 @@
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "common/common.h"
+#include "common/encode_lavc.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "common/stats.h"
@@ -57,6 +57,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "input/input.h"
+#include "demux/packet_pool.h"
 
 #include "audio/out/ao.h"
 #include "misc/thread_tools.h"
@@ -72,22 +73,22 @@ static const char def_config[] =
 #include "etc/builtin.conf.inc"
 ;
 
+#if HAVE_WIN32_SMTC
+#include "osdep/win32/smtc.h"
+#endif
+
 #if HAVE_COCOA
-#include "osdep/macosx_events.h"
+#include "osdep/mac/app_bridge.h"
 #endif
 
 #ifndef FULLCONFIG
 #define FULLCONFIG "(missing)\n"
 #endif
 
-#if !HAVE_STDATOMIC
-pthread_mutex_t mp_atomic_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
-
 enum exit_reason {
-  EXIT_NONE,
-  EXIT_NORMAL,
-  EXIT_ERROR,
+    EXIT_NONE,
+    EXIT_NORMAL,
+    EXIT_ERROR,
 };
 
 const char mp_help_text[] =
@@ -102,19 +103,18 @@ const char mp_help_text[] =
 " --playlist=<file> specify playlist file\n"
 "\n"
 " --list-options    list all mpv options\n"
-" --h=<string>      print options which contain the given string in their name\n"
-"\n";
+" --h=<string>      print options which contain the given string in their name\n";
 
-static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
+static mp_static_mutex terminal_owner_lock = MP_STATIC_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
 
 static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
 {
-    pthread_mutex_lock(&terminal_owner_lock);
+    mp_mutex_lock(&terminal_owner_lock);
     bool r = terminal_owner == old;
     if (r)
         terminal_owner = new;
-    pthread_mutex_unlock(&terminal_owner_lock);
+    mp_mutex_unlock(&terminal_owner_lock);
     return r;
 }
 
@@ -145,6 +145,9 @@ void mp_update_logging(struct MPContext *mpctx, bool preinit)
 
     if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);
+
+    if (enabled)
+        encoder_update_log(mpctx->global);
 }
 
 void mp_print_version(struct mp_log *log, int always)
@@ -153,15 +156,12 @@ void mp_print_version(struct mp_log *log, int always)
     mp_msg(log, v, "%s %s\n", mpv_version, mpv_copyright);
     if (strcmp(mpv_builddate, "UNKNOWN"))
         mp_msg(log, v, " built on %s\n", mpv_builddate);
-#if HAVE_LIBPLACEBO
     mp_msg(log, v, "libplacebo version: %s\n", PL_VERSION);
-#endif
     check_library_versions(log, v);
-    mp_msg(log, v, "\n");
     // Only in verbose mode.
     if (!always) {
         mp_msg(log, MSGL_V, "Configuration: " CONFIGURATION "\n");
-        mp_msg(log, MSGL_V, "List of enabled features: %s\n", FULLCONFIG);
+        mp_msg(log, MSGL_V, "List of enabled features: " FULLCONFIG "\n");
         #ifdef NDEBUG
             mp_msg(log, MSGL_V, "Built with NDEBUG.\n");
         #endif
@@ -198,13 +198,14 @@ void mp_destroy(struct MPContext *mpctx)
     }
 
     mp_input_uninit(mpctx->input);
+    mp_clipboard_destroy(mpctx->clipboard);
 
     uninit_libav(mpctx->global);
 
     mp_msg_uninit(mpctx->global);
-    assert(!mpctx->num_abort_list);
+    mp_assert(!mpctx->num_abort_list);
     talloc_free(mpctx->abort_list);
-    pthread_mutex_destroy(&mpctx->abort_lock);
+    mp_mutex_destroy(&mpctx->abort_lock);
     talloc_free(mpctx->mconfig); // destroy before dispatch
     talloc_free(mpctx);
 }
@@ -230,6 +231,9 @@ static bool handle_help_options(struct MPContext *mpctx)
 
 static int cfg_include(void *ctx, char *filename, int flags)
 {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    return 1;
+#endif
     struct MPContext *mpctx = ctx;
     char *fname = mp_get_user_path(NULL, mpctx->global, filename);
     int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global, fname, NULL, flags);
@@ -256,9 +260,7 @@ struct MPContext *mp_create(void)
     }
 
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (!enable_talloc)
-        enable_talloc = HAVE_TA_LEAK_REPORT ? "1" : "0";
-    if (strcmp(enable_talloc, "1") == 0)
+    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
 
     mp_time_init();
@@ -276,10 +278,11 @@ struct MPContext *mp_create(void)
         .play_dir = 1,
     };
 
-    pthread_mutex_init(&mpctx->abort_lock, NULL);
+    mp_mutex_init(&mpctx->abort_lock);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
+    demux_packet_pool_init(mpctx->global);
     stats_global_init(mpctx->global);
 
     // Nothing must call mp_msg*() and related before this
@@ -329,7 +332,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    assert(!mpctx->initialized);
+    mp_assert(!mpctx->initialized);
 
     // Preparse the command line, so we can init the terminal early.
     if (options) {
@@ -379,6 +382,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     m_config_set_update_dispatch_queue(mpctx->mconfig, mpctx->dispatch);
     // Run all update handlers.
     mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK, false);
+    handle_option_callbacks(mpctx);
 
     if (handle_help_options(mpctx))
         return 1; // help
@@ -397,9 +401,16 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_STATS(mpctx, "start init");
 
 #if HAVE_COCOA
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "osx");
+    mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
     cocoa_set_mpv_handle(ctx);
 #endif
+
+#if HAVE_WIN32_SMTC
+    if (opts->media_controls)
+        mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
+#endif
+
+    mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(mpctx->global);
@@ -407,8 +418,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             MP_INFO(mpctx, "Encoding initialization failed.\n");
             return -1;
         }
-        m_config_set_profile(mpctx->mconfig, "encoding", 0);
-        mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 
     mp_load_scripts(mpctx);

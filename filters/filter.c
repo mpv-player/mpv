@@ -1,12 +1,13 @@
 #include <math.h>
-#include <pthread.h>
+#include <stdatomic.h>
 
 #include <libavutil/hwcontext.h>
 
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "osdep/atomic.h"
+#include "demux/packet_pool.h"
+#include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "video/hwdec.h"
 #include "video/img_format.h"
@@ -90,7 +91,7 @@ struct filter_runner {
 
     // For async notifications only. We don't bother making this fine grained
     // across filters.
-    pthread_mutex_t async_lock;
+    mp_mutex async_lock;
 
     // Wakeup is pending. Protected by async_lock.
     bool async_wakeup_sent;
@@ -146,7 +147,7 @@ static void add_pending(struct mp_filter *f)
 static void add_pending_pin(struct mp_pin *p)
 {
     struct mp_filter *f = p->manual_connection;
-    assert(f);
+    mp_assert(f);
 
     if (f->in->pending)
         return;
@@ -167,28 +168,28 @@ static void add_pending_pin(struct mp_pin *p)
 static void filter_recursive(struct mp_pin *p)
 {
     struct mp_filter *f = p->conn->manual_connection;
-    assert(f);
+    mp_assert(f);
     struct filter_runner *r = f->in->runner;
 
     // Never do internal filtering recursively.
     if (r->filtering)
         return;
 
-    assert(!r->recursive);
+    mp_assert(!r->recursive);
     r->recursive = p;
 
     // Also don't lose the pending state, which the user may or may not
     // care about.
     r->external_pending |= mp_filter_graph_run(r->root_filter);
 
-    assert(r->recursive == p);
+    mp_assert(r->recursive == p);
     r->recursive = NULL;
 }
 
 void mp_filter_internal_mark_progress(struct mp_filter *f)
 {
     struct filter_runner *r = f->in->runner;
-    assert(r->filtering); // only call from f's process()
+    mp_assert(r->filtering); // only call from f's process()
     add_pending(f);
 }
 
@@ -196,7 +197,7 @@ void mp_filter_internal_mark_progress(struct mp_filter *f)
 // sync notifications don't need any locking.
 static void flush_async_notifications(struct filter_runner *r)
 {
-    pthread_mutex_lock(&r->async_lock);
+    mp_mutex_lock(&r->async_lock);
     for (int n = 0; n < r->num_async_pending; n++) {
         struct mp_filter *f = r->async_pending[n];
         add_pending(f);
@@ -204,21 +205,21 @@ static void flush_async_notifications(struct filter_runner *r)
     }
     r->num_async_pending = 0;
     r->async_wakeup_sent = false;
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 bool mp_filter_graph_run(struct mp_filter *filter)
 {
     struct filter_runner *r = filter->in->runner;
-    assert(filter == r->root_filter); // user is supposed to call this on root only
+    mp_assert(filter == r->root_filter); // user is supposed to call this on root only
 
     int64_t end_time = 0;
     if (isfinite(r->max_run_time))
-        end_time = mp_add_timeout(mp_time_us(), MPMAX(r->max_run_time, 0));
+        end_time = mp_time_ns_add(mp_time_ns(), MPMAX(r->max_run_time, 0));
 
     // (could happen with separate filter graphs calling each other, for now
     // ignore this issue as we don't use such a setup anywhere)
-    assert(!r->filtering);
+    mp_assert(!r->filtering);
 
     r->filtering = true;
 
@@ -230,11 +231,11 @@ bool mp_filter_graph_run(struct mp_filter *filter)
         if (atomic_exchange_explicit(&r->interrupt_flag, false,
                                      memory_order_acq_rel))
         {
-            pthread_mutex_lock(&r->async_lock);
+            mp_mutex_lock(&r->async_lock);
             if (!r->async_wakeup_sent && r->wakeup_cb)
                 r->wakeup_cb(r->wakeup_ctx);
             r->async_wakeup_sent = true;
-            pthread_mutex_unlock(&r->async_lock);
+            mp_mutex_unlock(&r->async_lock);
             exit_req = true;
         }
 
@@ -261,7 +262,7 @@ bool mp_filter_graph_run(struct mp_filter *filter)
         if (next->in->info->process)
             next->in->info->process(next);
 
-        if (end_time && mp_time_us() >= end_time)
+        if (end_time && mp_time_ns() >= end_time)
             mp_filter_graph_interrupt(r->root_filter);
     }
 
@@ -287,8 +288,8 @@ bool mp_pin_transfer_data(struct mp_pin *dst, struct mp_pin *src)
 
 bool mp_pin_in_needs_data(struct mp_pin *p)
 {
-    assert(p->dir == MP_PIN_IN);
-    assert(!p->within_conn);
+    mp_assert(p->dir == MP_PIN_IN);
+    mp_assert(!p->within_conn);
     return p->conn && p->conn->manual_connection && p->conn->data_requested;
 }
 
@@ -300,7 +301,7 @@ bool mp_pin_in_write(struct mp_pin *p, struct mp_frame frame)
         mp_frame_unref(&frame);
         return false;
     }
-    assert(p->conn->data.type == MP_FRAME_NONE);
+    mp_assert(p->conn->data.type == MP_FRAME_NONE);
     p->conn->data = frame;
     p->conn->data_requested = false;
     add_pending_pin(p->conn);
@@ -310,8 +311,8 @@ bool mp_pin_in_write(struct mp_pin *p, struct mp_frame frame)
 
 bool mp_pin_out_has_data(struct mp_pin *p)
 {
-    assert(p->dir == MP_PIN_OUT);
-    assert(!p->within_conn);
+    mp_assert(p->dir == MP_PIN_OUT);
+    mp_assert(!p->within_conn);
     return p->conn && p->conn->manual_connection && p->data.type != MP_FRAME_NONE;
 }
 
@@ -346,13 +347,13 @@ struct mp_frame mp_pin_out_read(struct mp_pin *p)
 
 void mp_pin_out_unread(struct mp_pin *p, struct mp_frame frame)
 {
-    assert(p->dir == MP_PIN_OUT);
-    assert(!p->within_conn);
-    assert(p->conn && p->conn->manual_connection);
+    mp_assert(p->dir == MP_PIN_OUT);
+    mp_assert(!p->within_conn);
+    mp_assert(p->conn && p->conn->manual_connection);
     // Unread is allowed strictly only if you didn't do anything else with
     // the pin since the time you read it.
-    assert(!mp_pin_out_has_data(p));
-    assert(!p->data_requested);
+    mp_assert(!mp_pin_out_has_data(p));
+    mp_assert(!p->data_requested);
     p->data = frame;
 }
 
@@ -391,14 +392,14 @@ static void init_connection(struct mp_pin *p)
     struct mp_pin *out = find_connected_end(p->other);
 
     // These are the "outer" pins by definition, they have no user connections.
-    assert(!in->user_conn);
-    assert(!out->user_conn);
+    mp_assert(!in->user_conn);
+    mp_assert(!out->user_conn);
 
     // This and similar checks enforce the same root filter requirement.
     if (in->manual_connection)
-        assert(in->manual_connection->in->runner == runner);
+        mp_assert(in->manual_connection->in->runner == runner);
     if (out->manual_connection)
-        assert(out->manual_connection->in->runner == runner);
+        mp_assert(out->manual_connection->in->runner == runner);
 
     // Logically, the ends are always manual connections. A pin chain without
     // manual connections at the ends is still disconnected (or if this
@@ -407,18 +408,18 @@ static void init_connection(struct mp_pin *p)
     if (!in->manual_connection || !out->manual_connection)
         return;
 
-    assert(in->dir == MP_PIN_IN);
-    assert(out->dir == MP_PIN_OUT);
+    mp_assert(in->dir == MP_PIN_IN);
+    mp_assert(out->dir == MP_PIN_OUT);
 
     struct mp_pin *cur = in;
     while (cur) {
-        assert(!cur->within_conn && !cur->other->within_conn);
-        assert(!cur->conn && !cur->other->conn);
-        assert(!cur->data_requested); // unused for in pins
-        assert(!cur->data.type); // unused for in pins
-        assert(!cur->other->data_requested); // unset for unconnected out pins
-        assert(!cur->other->data.type); // unset for unconnected out pins
-        assert(cur->owner->in->runner == runner);
+        mp_assert(!cur->within_conn && !cur->other->within_conn);
+        mp_assert(!cur->conn && !cur->other->conn);
+        mp_assert(!cur->data_requested); // unused for in pins
+        mp_assert(!cur->data.type); // unused for in pins
+        mp_assert(!cur->other->data_requested); // unset for unconnected out pins
+        mp_assert(!cur->other->data.type); // unset for unconnected out pins
+        mp_assert(cur->owner->in->runner == runner);
         cur->within_conn = cur->other->within_conn = true;
         cur = cur->other->user_conn;
     }
@@ -435,11 +436,11 @@ static void init_connection(struct mp_pin *p)
 
 void mp_pin_connect(struct mp_pin *dst, struct mp_pin *src)
 {
-    assert(src->dir == MP_PIN_OUT);
-    assert(dst->dir == MP_PIN_IN);
+    mp_assert(src->dir == MP_PIN_OUT);
+    mp_assert(dst->dir == MP_PIN_IN);
 
     if (dst->user_conn == src) {
-        assert(src->user_conn == dst);
+        mp_assert(src->user_conn == dst);
         return;
     }
 
@@ -482,8 +483,8 @@ static void deinit_connection(struct mp_pin *p)
     while (p) {
         p->conn = p->other->conn = NULL;
         p->within_conn = p->other->within_conn = false;
-        assert(!p->other->data_requested); // unused for in pins
-        assert(!p->other->data.type); // unused for in pins
+        mp_assert(!p->other->data_requested); // unused for in pins
+        mp_assert(!p->other->data.type); // unused for in pins
         p->data_requested = false;
         if (p->data.type)
             MP_VERBOSE(p->owner, "dropping frame due to pin disconnect\n");
@@ -583,8 +584,8 @@ bool mp_filter_has_failed(struct mp_filter *filter)
 static void reset_pin(struct mp_pin *p)
 {
     if (!p->conn || p->dir != MP_PIN_OUT) {
-        assert(!p->data.type);
-        assert(!p->data_requested);
+        mp_assert(!p->data.type);
+        mp_assert(!p->data_requested);
     }
     mp_frame_unref(&p->data);
     p->data_requested = false;
@@ -592,6 +593,9 @@ static void reset_pin(struct mp_pin *p)
 
 void mp_filter_reset(struct mp_filter *filter)
 {
+    if (!filter)
+        return;
+
     for (int n = 0; n < filter->in->num_children; n++)
         mp_filter_reset(filter->in->children[n]);
 
@@ -608,9 +612,9 @@ void mp_filter_reset(struct mp_filter *filter)
 struct mp_pin *mp_filter_add_pin(struct mp_filter *f, enum mp_pin_dir dir,
                                  const char *name)
 {
-    assert(dir == MP_PIN_IN || dir == MP_PIN_OUT);
-    assert(name && name[0]);
-    assert(!mp_filter_get_named_pin(f, name));
+    mp_assert(dir == MP_PIN_IN || dir == MP_PIN_OUT);
+    mp_assert(name && name[0]);
+    mp_assert(!mp_filter_get_named_pin(f, name));
 
     // "Public" pin
     struct mp_pin *p = talloc_ptrtype(NULL, p);
@@ -647,7 +651,7 @@ void mp_filter_remove_pin(struct mp_filter *f, struct mp_pin *p)
     if (!p)
         return;
 
-    assert(p->owner == f);
+    mp_assert(p->owner == f);
     mp_pin_disconnect(p);
     mp_pin_disconnect(p->other);
 
@@ -658,7 +662,7 @@ void mp_filter_remove_pin(struct mp_filter *f, struct mp_pin *p)
             break;
         }
     }
-    assert(index >= 0);
+    mp_assert(index >= 0);
 
     talloc_free(f->pins[index]);
     talloc_free(f->ppins[index]);
@@ -685,7 +689,8 @@ struct mp_stream_info *mp_filter_find_stream_info(struct mp_filter *f)
     return NULL;
 }
 
-struct mp_hwdec_ctx *mp_filter_load_hwdec_device(struct mp_filter *f, int imgfmt)
+struct mp_hwdec_ctx *mp_filter_load_hwdec_device(struct mp_filter *f, int imgfmt,
+                                                 enum AVHWDeviceType device_type)
 {
     struct mp_stream_info *info = mp_filter_find_stream_info(f);
     if (!info || !info->hwdec_devs)
@@ -697,13 +702,13 @@ struct mp_hwdec_ctx *mp_filter_load_hwdec_device(struct mp_filter *f, int imgfmt
     };
     hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
 
-    return hwdec_devices_get_by_imgfmt(info->hwdec_devs, imgfmt);
+    return hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, imgfmt, device_type);
 }
 
 static void filter_wakeup(struct mp_filter *f, bool mark_only)
 {
     struct filter_runner *r = f->in->runner;
-    pthread_mutex_lock(&r->async_lock);
+    mp_mutex_lock(&r->async_lock);
     if (!f->in->async_pending) {
         f->in->async_pending = true;
         // (not using a talloc parent for thread safety reasons)
@@ -714,7 +719,7 @@ static void filter_wakeup(struct mp_filter *f, bool mark_only)
             r->wakeup_cb(r->wakeup_ctx);
         r->async_wakeup_sent = true;
     }
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 void mp_filter_wakeup(struct mp_filter *f)
@@ -730,14 +735,14 @@ void mp_filter_mark_async_progress(struct mp_filter *f)
 void mp_filter_graph_set_max_run_time(struct mp_filter *f, double seconds)
 {
     struct filter_runner *r = f->in->runner;
-    assert(f == r->root_filter); // user is supposed to call this on root only
+    mp_assert(f == r->root_filter); // user is supposed to call this on root only
     r->max_run_time = seconds;
 }
 
 void mp_filter_graph_interrupt(struct mp_filter *f)
 {
     struct filter_runner *r = f->in->runner;
-    assert(f == r->root_filter); // user is supposed to call this on root only
+    mp_assert(f == r->root_filter); // user is supposed to call this on root only
     atomic_store(&r->interrupt_flag, true);
 }
 
@@ -783,8 +788,8 @@ static void filter_destructor(void *p)
     }
 
     if (r->root_filter == f) {
-        assert(!f->in->parent);
-        pthread_mutex_destroy(&r->async_lock);
+        mp_assert(!f->in->parent);
+        mp_mutex_destroy(&r->async_lock);
         talloc_free(r->async_pending);
         talloc_free(r);
     }
@@ -799,6 +804,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
         .priv = params->info->priv_size ?
                     talloc_zero_size(f, params->info->priv_size) : NULL,
         .global = params->global,
+        .packet_pool = demux_packet_pool_get(params->parent ? params->parent->global : params->global),
         .in = talloc(f, struct mp_filter_internal),
     };
     *f->in = (struct mp_filter_internal){
@@ -808,7 +814,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
     };
 
     if (!f->in->runner) {
-        assert(params->global);
+        mp_assert(params->global);
 
         f->in->runner = talloc(NULL, struct filter_runner);
         *f->in->runner = (struct filter_runner){
@@ -816,7 +822,7 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
             .root_filter = f,
             .max_run_time = INFINITY,
         };
-        pthread_mutex_init(&f->in->runner->async_lock, NULL);
+        mp_mutex_init(&f->in->runner->async_lock);
     }
 
     if (!f->global)
@@ -843,8 +849,8 @@ struct mp_filter *mp_filter_create_with_params(struct mp_filter_params *params)
 struct mp_filter *mp_filter_create(struct mp_filter *parent,
                                    const struct mp_filter_info *info)
 {
-    assert(parent);
-    assert(info);
+    mp_assert(parent);
+    mp_assert(info);
     struct mp_filter_params params = {
         .info = info,
         .parent = parent,
@@ -871,11 +877,11 @@ void mp_filter_graph_set_wakeup_cb(struct mp_filter *root,
                                    void (*wakeup_cb)(void *ctx), void *ctx)
 {
     struct filter_runner *r = root->in->runner;
-    assert(root == r->root_filter); // user is supposed to call this on root only
-    pthread_mutex_lock(&r->async_lock);
+    mp_assert(root == r->root_filter); // user is supposed to call this on root only
+    mp_mutex_lock(&r->async_lock);
     r->wakeup_cb = wakeup_cb;
     r->wakeup_ctx = ctx;
-    pthread_mutex_unlock(&r->async_lock);
+    mp_mutex_unlock(&r->async_lock);
 }
 
 static const char *filt_name(struct mp_filter *f)

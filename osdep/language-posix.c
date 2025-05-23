@@ -39,7 +39,12 @@ char **mp_get_user_langs(void)
     for (const char *langList = getenv("LANGUAGE"); langList && *langList;) {
         size_t len = strcspn(langList, ":");
         MP_TARRAY_GROW(NULL, ret, nb);
-        ret[nb++] = talloc_strndup(ret, langList, len);
+        char *lang = talloc_strndup(ret, langList, len);
+        for (int i = 0; i < len; i++) {
+            if (lang[i] == '_')
+                lang[i] = '-';
+        }
+        ret[nb++] = lang;
         langList += len;
         while (*langList == ':')
             langList++;
@@ -56,7 +61,13 @@ char **mp_get_user_langs(void)
             }
 
             MP_TARRAY_GROW(NULL, ret, nb);
-            ret[nb++] = talloc_strndup(ret, envval, len);
+            char *lang = talloc_strndup(ret, envval, len);
+            for (int j = 0; j < len; j++) {
+                if (lang[j] == '_')
+                    lang[j] = '-';
+            }
+
+            ret[nb++] = lang;
         }
     }
 

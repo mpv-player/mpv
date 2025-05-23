@@ -25,6 +25,7 @@
 #include "common/msg.h"
 #include "demux/demux.h"
 #include "demux/packet.h"
+#include "demux/packet_pool.h"
 #include "demux/stheader.h"
 
 #include "recorder.h"
@@ -41,6 +42,7 @@
 struct mp_recorder {
     struct mpv_global *global;
     struct mp_log *log;
+    struct demux_packet_pool *packet_pool;
 
     struct mp_recorder_sink **streams;
     int num_streams;
@@ -75,8 +77,10 @@ struct mp_recorder_sink {
 static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
 {
     enum AVMediaType av_type = mp_to_av_stream_type(sh->type);
+    int ret = -1;
+    AVCodecParameters *avp = NULL;
     if (av_type == AVMEDIA_TYPE_UNKNOWN)
-        return -1;
+        goto done;
 
     struct mp_recorder_sink *rst = talloc(priv, struct mp_recorder_sink);
     *rst = (struct mp_recorder_sink) {
@@ -88,11 +92,11 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
     };
 
     if (!rst->av_stream || !rst->avpkt)
-        return -1;
+        goto done;
 
-    AVCodecParameters *avp = mp_codec_params_to_av(sh->codec);
+    avp = mp_codec_params_to_av(sh->codec);
     if (!avp)
-        return -1;
+        goto done;
 
     // Check if we get the same codec_id for the output format;
     // otherwise clear it to have a chance at muxing
@@ -108,15 +112,20 @@ static int add_stream(struct mp_recorder *priv, struct sh_stream *sh)
         avp->video_delay = 16;
 
     if (avp->codec_id == AV_CODEC_ID_NONE)
-        return -1;
+        goto done;
 
     if (avcodec_parameters_copy(rst->av_stream->codecpar, avp) < 0)
-        return -1;
+        goto done;
 
+    ret = 0;
     rst->av_stream->time_base = mp_get_codec_timebase(sh->codec);
 
     MP_TARRAY_APPEND(priv, priv->streams, priv->num_streams, rst);
-    return 0;
+
+done:
+    if (avp)
+        avcodec_parameters_free(&avp);
+    return ret;
 }
 
 struct mp_recorder *mp_recorder_create(struct mpv_global *global,
@@ -130,6 +139,7 @@ struct mp_recorder *mp_recorder_create(struct mpv_global *global,
 
     priv->global = global;
     priv->log = mp_log_new(priv, global->log, "recorder");
+    priv->packet_pool = demux_packet_pool_get(global);
 
     if (!num_streams) {
         MP_ERR(priv, "No streams.\n");
@@ -254,6 +264,8 @@ static void mux_packet(struct mp_recorder_sink *rst,
 
     if (av_interleaved_write_frame(priv->mux, new_packet) < 0)
         MP_ERR(priv, "Failed writing packet.\n");
+
+    av_packet_free(&new_packet);
 }
 
 // Write all packets available in the stream queue
@@ -403,7 +415,7 @@ void mp_recorder_feed_packet(struct mp_recorder_sink *rst,
         return;
     }
 
-    pkt = demux_copy_packet(pkt);
+    pkt = demux_copy_packet(rst->owner->packet_pool, pkt);
     if (!pkt)
         return;
     MP_TARRAY_APPEND(rst, rst->packets, rst->num_packets, pkt);

@@ -124,13 +124,13 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     struct ra *ra = ctx->ra;
     bool ok = false;
 
-    assert(imgs->packed);
+    mp_assert(imgs->packed);
 
     int req_w = next_pow2(imgs->packed_w);
     int req_h = next_pow2(imgs->packed_h);
 
     const struct ra_format *fmt = ctx->fmt_table[imgs->format];
-    assert(fmt);
+    mp_assert(fmt);
 
     if (!osd->texture || req_w > osd->w || req_h > osd->h ||
         osd->format != imgs->format)
@@ -206,7 +206,7 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
 bool mpgl_osd_draw_prepare(struct mpgl_osd *ctx, int index,
                            struct gl_shader_cache *sc)
 {
-    assert(index >= 0 && index < MAX_OSD_PARTS);
+    mp_assert(index >= 0 && index < MAX_OSD_PARTS);
     struct mpgl_osd_part *part = ctx->parts[index];
 
     enum sub_bitmap_format fmt = part->format;
@@ -286,7 +286,7 @@ static void get_3d_side_by_side(int stereo_mode, int div[2])
 }
 
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
-                          struct gl_shader_cache *sc, struct ra_fbo fbo)
+                          struct gl_shader_cache *sc, const struct ra_fbo *fbo)
 {
     struct mpgl_osd_part *part = ctx->parts[index];
 
@@ -312,7 +312,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     const int *factors = &blend_factors[part->format][0];
     gl_sc_blend(sc, factors[0], factors[1], factors[2], factors[3]);
 
-    gl_sc_dispatch_draw(sc, fbo.tex, false, vertex_vao, MP_ARRAY_SIZE(vertex_vao),
+    gl_sc_dispatch_draw(sc, fbo->tex, false, vertex_vao, MP_ARRAY_SIZE(vertex_vao),
                         sizeof(struct vertex), part->vertices, part->num_vertices);
 }
 

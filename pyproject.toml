@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "F", # pyflakes
+    "E", "W", # pycodestyle
+    "N", # pep8-naming
+    "UP", # pyupgrade
+    "A", # flake8-builtins
+    "Q", # flake8-quotes
+    "COM", # flake8-commas
+]

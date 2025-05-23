@@ -14,4 +14,5 @@ const stream_info_t stream_info_edl = {
     .name = "edl",
     .open = s_open,
     .protocols = (const char*const[]){"edl", NULL},
+    .stream_origin = STREAM_ORIGIN_FS,
 };

@@ -121,76 +121,79 @@ static void mp_zimg_update_from_cmdline(struct mp_zimg_context *ctx)
     ctx->opts = *opts;
 }
 
-static zimg_chroma_location_e mp_to_z_chroma(enum mp_chroma_location cl)
+static zimg_chroma_location_e pl_to_z_chroma(enum pl_chroma_location cl)
 {
     switch (cl) {
-    case MP_CHROMA_TOPLEFT:     return ZIMG_CHROMA_TOP_LEFT;
-    case MP_CHROMA_LEFT:        return ZIMG_CHROMA_LEFT;
-    case MP_CHROMA_CENTER:      return ZIMG_CHROMA_CENTER;
-    default:                    return ZIMG_CHROMA_LEFT;
+    case PL_CHROMA_LEFT:          return ZIMG_CHROMA_LEFT;
+    case PL_CHROMA_CENTER:        return ZIMG_CHROMA_CENTER;
+    case PL_CHROMA_TOP_LEFT:      return ZIMG_CHROMA_TOP_LEFT;
+    case PL_CHROMA_TOP_CENTER:    return ZIMG_CHROMA_TOP;
+    case PL_CHROMA_BOTTOM_LEFT:   return ZIMG_CHROMA_BOTTOM_LEFT;
+    case PL_CHROMA_BOTTOM_CENTER: return ZIMG_CHROMA_BOTTOM;
+    default:                      return ZIMG_CHROMA_LEFT;
     }
 }
 
-static zimg_matrix_coefficients_e mp_to_z_matrix(enum mp_csp csp)
+static zimg_matrix_coefficients_e pl_to_z_matrix(enum pl_color_system csp)
 {
     switch (csp) {
-    case MP_CSP_BT_601:         return ZIMG_MATRIX_BT470_BG;
-    case MP_CSP_BT_709:         return ZIMG_MATRIX_BT709;
-    case MP_CSP_SMPTE_240M:     return ZIMG_MATRIX_ST240_M;
-    case MP_CSP_BT_2020_NC:     return ZIMG_MATRIX_BT2020_NCL;
-    case MP_CSP_BT_2020_C:      return ZIMG_MATRIX_BT2020_CL;
-    case MP_CSP_RGB:            return ZIMG_MATRIX_RGB;
-    case MP_CSP_XYZ:            return ZIMG_MATRIX_RGB;
-    case MP_CSP_YCGCO:          return ZIMG_MATRIX_YCGCO;
+    case PL_COLOR_SYSTEM_BT_601:         return ZIMG_MATRIX_BT470_BG;
+    case PL_COLOR_SYSTEM_BT_709:         return ZIMG_MATRIX_BT709;
+    case PL_COLOR_SYSTEM_SMPTE_240M:     return ZIMG_MATRIX_ST240_M;
+    case PL_COLOR_SYSTEM_BT_2020_NC:     return ZIMG_MATRIX_BT2020_NCL;
+    case PL_COLOR_SYSTEM_BT_2020_C:      return ZIMG_MATRIX_BT2020_CL;
+    case PL_COLOR_SYSTEM_RGB:            return ZIMG_MATRIX_RGB;
+    case PL_COLOR_SYSTEM_XYZ:            return ZIMG_MATRIX_RGB;
+    case PL_COLOR_SYSTEM_YCGCO:          return ZIMG_MATRIX_YCGCO;
     default:                    return ZIMG_MATRIX_BT709;
     }
 }
 
-static zimg_transfer_characteristics_e mp_to_z_trc(enum mp_csp_trc trc)
+static zimg_transfer_characteristics_e pl_to_z_trc(enum pl_color_transfer trc)
 {
     switch (trc) {
-    case MP_CSP_TRC_BT_1886:    return ZIMG_TRANSFER_BT709;
-    case MP_CSP_TRC_SRGB:       return ZIMG_TRANSFER_IEC_61966_2_1;
-    case MP_CSP_TRC_LINEAR:     return ZIMG_TRANSFER_LINEAR;
-    case MP_CSP_TRC_GAMMA22:    return ZIMG_TRANSFER_BT470_M;
-    case MP_CSP_TRC_GAMMA28:    return ZIMG_TRANSFER_BT470_BG;
-    case MP_CSP_TRC_PQ:         return ZIMG_TRANSFER_ST2084;
-    case MP_CSP_TRC_HLG:        return ZIMG_TRANSFER_ARIB_B67;
+    case PL_COLOR_TRC_BT_1886:    return ZIMG_TRANSFER_BT709;
+    case PL_COLOR_TRC_SRGB:       return ZIMG_TRANSFER_IEC_61966_2_1;
+    case PL_COLOR_TRC_LINEAR:     return ZIMG_TRANSFER_LINEAR;
+    case PL_COLOR_TRC_GAMMA22:    return ZIMG_TRANSFER_BT470_M;
+    case PL_COLOR_TRC_GAMMA28:    return ZIMG_TRANSFER_BT470_BG;
+    case PL_COLOR_TRC_PQ:         return ZIMG_TRANSFER_ST2084;
+    case PL_COLOR_TRC_HLG:        return ZIMG_TRANSFER_ARIB_B67;
 #if HAVE_ZIMG_ST428
-    case MP_CSP_TRC_ST428:      return ZIMG_TRANSFER_ST428;
+    case PL_COLOR_TRC_ST428:      return ZIMG_TRANSFER_ST428;
 #endif
-    case MP_CSP_TRC_GAMMA18:    // ?
-    case MP_CSP_TRC_GAMMA20:
-    case MP_CSP_TRC_GAMMA24:
-    case MP_CSP_TRC_GAMMA26:
-    case MP_CSP_TRC_PRO_PHOTO:
-    case MP_CSP_TRC_V_LOG:
-    case MP_CSP_TRC_S_LOG1:
-    case MP_CSP_TRC_S_LOG2:     // ?
+    case PL_COLOR_TRC_GAMMA18:    // ?
+    case PL_COLOR_TRC_GAMMA20:
+    case PL_COLOR_TRC_GAMMA24:
+    case PL_COLOR_TRC_GAMMA26:
+    case PL_COLOR_TRC_PRO_PHOTO:
+    case PL_COLOR_TRC_V_LOG:
+    case PL_COLOR_TRC_S_LOG1:
+    case PL_COLOR_TRC_S_LOG2:     // ?
     default:                    return ZIMG_TRANSFER_BT709;
     }
 }
 
-static zimg_color_primaries_e mp_to_z_prim(enum mp_csp_prim prim)
+static zimg_color_primaries_e mp_to_z_prim(enum pl_color_primaries prim)
 {
     switch (prim) {
-    case MP_CSP_PRIM_BT_601_525:return ZIMG_PRIMARIES_ST170_M;
-    case MP_CSP_PRIM_BT_601_625:return ZIMG_PRIMARIES_BT470_BG;
-    case MP_CSP_PRIM_BT_709:    return ZIMG_PRIMARIES_BT709;
-    case MP_CSP_PRIM_BT_2020:   return ZIMG_PRIMARIES_BT2020;
-    case MP_CSP_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
-    case MP_CSP_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
-    case MP_CSP_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
-    case MP_CSP_PRIM_EBU_3213:  return ZIMG_PRIMARIES_EBU3213_E;
-    case MP_CSP_PRIM_FILM_C:    return ZIMG_PRIMARIES_FILM;
-    case MP_CSP_PRIM_CIE_1931:
-    case MP_CSP_PRIM_APPLE:     // ?
-    case MP_CSP_PRIM_ADOBE:
-    case MP_CSP_PRIM_PRO_PHOTO:
-    case MP_CSP_PRIM_V_GAMUT:
-    case MP_CSP_PRIM_S_GAMUT:   // ?
-    case MP_CSP_PRIM_ACES_AP0:
-    case MP_CSP_PRIM_ACES_AP1:
+    case PL_COLOR_PRIM_BT_601_525:return ZIMG_PRIMARIES_ST170_M;
+    case PL_COLOR_PRIM_BT_601_625:return ZIMG_PRIMARIES_BT470_BG;
+    case PL_COLOR_PRIM_BT_709:    return ZIMG_PRIMARIES_BT709;
+    case PL_COLOR_PRIM_BT_2020:   return ZIMG_PRIMARIES_BT2020;
+    case PL_COLOR_PRIM_BT_470M:   return ZIMG_PRIMARIES_BT470_M;
+    case PL_COLOR_PRIM_DCI_P3:    return ZIMG_PRIMARIES_ST431_2;
+    case PL_COLOR_PRIM_DISPLAY_P3:return ZIMG_PRIMARIES_ST432_1;
+    case PL_COLOR_PRIM_EBU_3213:  return ZIMG_PRIMARIES_EBU3213_E;
+    case PL_COLOR_PRIM_FILM_C:    return ZIMG_PRIMARIES_FILM;
+    case PL_COLOR_PRIM_CIE_1931:
+    case PL_COLOR_PRIM_APPLE:     // ?
+    case PL_COLOR_PRIM_ADOBE:
+    case PL_COLOR_PRIM_PRO_PHOTO:
+    case PL_COLOR_PRIM_V_GAMUT:
+    case PL_COLOR_PRIM_S_GAMUT:   // ?
+    case PL_COLOR_PRIM_ACES_AP0:
+    case PL_COLOR_PRIM_ACES_AP1:
     default:                    return ZIMG_PRIMARIES_BT709;
     }
 }
@@ -247,8 +250,8 @@ static int repack_entrypoint(void *user, unsigned i, unsigned x0, unsigned x1)
         x0 &= ~(unsigned)(mp_repack_get_align_x(r->repack) - 1);
 
     // mp_repack requirements and zimg guarantees.
-    assert(!(i & (mp_repack_get_align_y(r->repack) - 1)));
-    assert(!(x0 & (mp_repack_get_align_x(r->repack) - 1)));
+    mp_assert(!(i & (mp_repack_get_align_y(r->repack) - 1)));
+    mp_assert(!(x0 & (mp_repack_get_align_x(r->repack) - 1)));
 
     unsigned i_src = i & (r->pack ? r->zmask[0] : ZIMG_BUFFER_MAX);
     unsigned i_dst = i & (r->pack ? ZIMG_BUFFER_MAX : r->zmask[0]);
@@ -272,7 +275,7 @@ static bool wrap_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r,
         // Due to subsampling we may assume the image to be bigger than it
         // actually is (see real_h in setup_format).
         if (mpi->h < y1) {
-            assert(y1 - mpi->h < 4);
+            mp_assert(y1 - mpi->h < 4);
             mp_image_set_size(mpi, mpi->w, y1);
         }
         mp_image_crop(mpi, 0, st->slice_y, mpi->w, y1);
@@ -375,7 +378,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
             r->z_planes[3] = n; // alpha, always plane 4 in zimg
 
 #if HAVE_ZIMG_ALPHA
-            zfmt->alpha = fmt.alpha == MP_ALPHA_PREMUL
+            zfmt->alpha = fmt.repr.alpha == PL_ALPHA_PREMULTIPLIED
                 ? ZIMG_ALPHA_PREMULTIPLIED : ZIMG_ALPHA_STRAIGHT;
 #else
             return false;
@@ -396,7 +399,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
             zfmt->height = r->real_h = st->slice_h =
                 MPMIN(st->slice_y + st->slice_h, r->real_h) - st->slice_y;
 
-            assert(MP_IS_ALIGNED(r->real_h, 1 << desc.chroma_ys));
+            mp_assert(MP_IS_ALIGNED(r->real_h, 1 << desc.chroma_ys));
         } else {
             // Relies on st->dst being initialized first.
             struct mp_zimg_repack *dst = st->dst;
@@ -414,7 +417,7 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     zfmt->color_family = ZIMG_COLOR_YUV;
     if (desc.num_planes <= 2) {
         zfmt->color_family = ZIMG_COLOR_GREY;
-    } else if (fmt.color.space == MP_CSP_RGB || fmt.color.space == MP_CSP_XYZ) {
+    } else if (fmt.repr.sys == PL_COLOR_SYSTEM_RGB || fmt.repr.sys == PL_COLOR_SYSTEM_XYZ) {
         zfmt->color_family = ZIMG_COLOR_RGB;
     }
 
@@ -441,16 +444,16 @@ static bool setup_format(zimg_image_format *zfmt, struct mp_zimg_repack *r,
     // (Formats like P010 are basically reported as P016.)
     zfmt->depth = desc.component_size * 8 + MPMIN(0, desc.component_pad);
 
-    zfmt->pixel_range = fmt.color.levels == MP_CSP_LEVELS_PC ?
+    zfmt->pixel_range = fmt.repr.levels == PL_COLOR_LEVELS_FULL ?
                         ZIMG_RANGE_FULL : ZIMG_RANGE_LIMITED;
 
-    zfmt->matrix_coefficients = mp_to_z_matrix(fmt.color.space);
-    zfmt->transfer_characteristics = mp_to_z_trc(fmt.color.gamma);
-    // For MP_CSP_XYZ only valid primaries are defined in ST 428-1
-    zfmt->color_primaries = fmt.color.space == MP_CSP_XYZ
+    zfmt->matrix_coefficients = pl_to_z_matrix(fmt.repr.sys);
+    zfmt->transfer_characteristics = pl_to_z_trc(fmt.color.transfer);
+    // For PL_COLOR_SYSTEM_XYZ only valid primaries are defined in ST 428-1
+    zfmt->color_primaries = fmt.repr.sys == PL_COLOR_SYSTEM_XYZ
                                 ? ZIMG_PRIMARIES_ST428
                                 : mp_to_z_prim(fmt.color.primaries);
-    zfmt->chroma_location = mp_to_z_chroma(fmt.chroma_location);
+    zfmt->chroma_location = pl_to_z_chroma(fmt.chroma_location);
 
     if (ctx && ctx->opts.fast) {
         // mpv's default for RGB output slows down zimg significantly.
@@ -483,7 +486,7 @@ static bool allocate_buffer(struct mp_zimg_state *st, struct mp_zimg_repack *r)
     r->zmask[0] = zimg_select_buffer_mask(lines);
 
     // Either ZIMG_BUFFER_MAX, or a power-of-2 slice buffer.
-    assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
+    mp_assert(r->zmask[0] == ZIMG_BUFFER_MAX || MP_IS_POWER_OF_2(r->zmask[0] + 1));
 
     int h = r->zmask[0] == ZIMG_BUFFER_MAX ? r->real_h : r->zmask[0] + 1;
     if (h >= r->real_h) {
@@ -548,8 +551,8 @@ static bool mp_zimg_state_init(struct mp_zimg_context *ctx,
         params.allow_approximate_gamma = 1;
 
     // leave at default for SDR, which means 100 cd/m^2 for zimg
-    if (ctx->dst.color.sig_peak > 0 && mp_trc_is_hdr(ctx->dst.color.gamma))
-        params.nominal_peak_luminance = ctx->dst.color.sig_peak * MP_REF_WHITE;
+    if (ctx->dst.color.hdr.max_luma > 0 && pl_color_space_is_hdr(&ctx->dst.color))
+        params.nominal_peak_luminance = ctx->dst.color.hdr.max_luma;
 
     st->graph = zimg_filter_graph_build(&src_fmt, &dst_fmt, &params);
     if (!st->graph) {
@@ -619,7 +622,7 @@ bool mp_zimg_config(struct mp_zimg_context *ctx)
             goto fail;
     }
 
-    assert(ctx->num_states == slices);
+    mp_assert(ctx->num_states == slices);
 
     return true;
 
@@ -644,7 +647,7 @@ bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
 
 static void do_convert(struct mp_zimg_state *st)
 {
-    assert(st->graph);
+    mp_assert(st->graph);
 
     // An annoyance.
     zimg_image_buffer *zsrc = &st->src->zbuf;
@@ -697,7 +700,7 @@ bool mp_zimg_convert(struct mp_zimg_context *ctx, struct mp_image *dst,
 
         bool r = mp_thread_pool_run(ctx->tp, do_convert_thread, st);
         // This is guaranteed by the API; and unrolling would be inconvenient.
-        assert(r);
+        mp_assert(r);
     }
 
     do_convert(ctx->states[0]);

@@ -18,13 +18,14 @@
 #ifndef MPLAYER_X11_COMMON_H
 #define MPLAYER_X11_COMMON_H
 
-#include <stdint.h>
+#include <stdatomic.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include "common/common.h"
-#include "osdep/atomic.h"
 
 #include "config.h"
 #if !HAVE_GPL
@@ -60,7 +61,7 @@ struct vo_x11_state {
     int display_is_local;
     int ws_width;
     int ws_height;
-    int dpi_scale;
+    double dpi_scale;
     struct mp_rect screenrc;
     char *window_title;
 
@@ -70,7 +71,6 @@ struct vo_x11_state {
 
     int xrandr_event;
     bool has_mesa;
-    bool has_nvidia;
 
     bool screensaver_enabled;
     bool dpms_touched;
@@ -91,6 +91,8 @@ struct vo_x11_state {
     bool window_hidden; // the window was mapped at least once
     bool pseudo_mapped; // not necessarily mapped, but known window size
     int fs;     // whether we assume the window is in fullscreen mode
+
+    bool init_fs; // whether mpv was launched with --fs
 
     bool mouse_cursor_visible; // whether we want the cursor to be visible (only
                                // takes effect when the window is focused)
@@ -119,9 +121,6 @@ struct vo_x11_state {
     bool size_changed_during_fs;
     bool pos_changed_during_fs;
 
-    /* One of the autofit/geometry options changed at runtime. */
-    bool geometry_change;
-
     XComposeStatus compose_status;
 
     /* XShm stuff */
@@ -136,10 +135,9 @@ struct vo_x11_state {
     Atom dnd_requested_action;
     Window dnd_src_window;
 
-    /* dragging the window */
-    bool win_drag_button1_down;
-
     Atom icc_profile_property;
+
+    XEvent last_button_event;
 };
 
 bool vo_x11_init(struct vo *vo);
@@ -154,7 +152,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 void vo_x11_present(struct vo *vo);
 void vo_x11_sync_swap(struct vo *vo);
 void vo_x11_wakeup(struct vo *vo);
-void vo_x11_wait_events(struct vo *vo, int64_t until_time_us);
+void vo_x11_wait_events(struct vo *vo, int64_t until_time_ns);
 
 void vo_x11_silence_xlib(int dir);
 
