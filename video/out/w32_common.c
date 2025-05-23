@@ -789,13 +789,66 @@ static HMONITOR get_monitor(int id)
     return data.mon;
 }
 
+struct get_monitor_by_name_data {
+    const wchar_t *target;
+    HMONITOR mon;
+};
+
+static BOOL CALLBACK get_monitor_by_name_proc(HMONITOR mon, HDC dc, LPRECT r,
+                                              LPARAM p)
+{
+    struct get_monitor_by_name_data *const data = (struct get_monitor_by_name_data*)p;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(mon, (MONITORINFO*)&mi)) {
+        if (!wcscmp(mi.szDevice, data->target)) {
+            data->mon = mon;
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static HMONITOR get_monitor_by_name(const wchar_t* name)
+{
+    struct get_monitor_by_name_data data = {
+        .target = name,
+    };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_by_name_proc, (LPARAM)&data);
+    return data.mon;
+}
+
 static HMONITOR get_default_monitor(struct vo_w32_state *w32)
 {
-    const int id = w32->current_fs ? w32->opts->fsscreen_id :
-                                     w32->opts->screen_id;
+    const int screen_id = w32->opts->fullscreen
+        ? w32->opts->fsscreen_id : w32->opts->screen_id;
+    const char *const screen_name = w32->opts->fullscreen
+        ? w32->opts->fsscreen_name : w32->opts->screen_name;
 
-    // Handle --fs-screen=<all|default> and --screen=default
-    if (id < 0) {
+    if (screen_id >= 0) {
+        HMONITOR mon = get_monitor(screen_id);
+        if (mon)
+            return mon;
+        MP_WARN(w32, "Screen %d does not exist, falling back to primary\n", screen_id);
+    } else if (screen_name) {
+        wchar_t *wide_name = mp_from_utf8(NULL, screen_name);
+        wchar_t *const gdi_from_friendly_name =
+            mp_w32_displayconfig_get_device_from_friendly_name(wide_name);
+        if (gdi_from_friendly_name)
+        {
+            // The name corresponded to a friendly display name.
+            // Discard the friendly name and use the GDI name
+            // we obtained from DisplayConfig instead.
+            talloc_free(wide_name);
+            wide_name = gdi_from_friendly_name;
+        }
+        HMONITOR mon = get_monitor_by_name(wide_name);
+        talloc_free(wide_name);
+        if (mon)
+            return mon;
+        MP_WARN(w32, "Screen name %s does not exist, falling back to primary\n", screen_name);
+    } else {
+        // Handle --fs-screen=<all|default> and --screen=default
         if (w32->win_force_pos && !w32->current_fs) {
             // Get window from forced position
             return MonitorFromRect(&w32->windowrc, MONITOR_DEFAULTTOPRIMARY);
@@ -804,11 +857,6 @@ static HMONITOR get_default_monitor(struct vo_w32_state *w32)
             return MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
         }
     }
-
-    HMONITOR mon = get_monitor(id);
-    if (mon)
-        return mon;
-    MP_VERBOSE(w32, "Screen %d does not exist, falling back to primary\n", id);
     return MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
 }
 
@@ -2195,7 +2243,22 @@ struct disp_names_data {
     HMONITOR assoc;
     int count;
     char **names;
+    bool friendly;
 };
+
+static void disp_names_append(HMONITOR mon, struct disp_names_data *data)
+{
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(mon, (MONITORINFO*)&mi)) {
+        wchar_t *friendly_name = NULL;
+        if (data->friendly) {
+            friendly_name = mp_w32_displayconfig_get_friendly_name_from_device(mi.szDevice);
+        }
+        wchar_t *name = friendly_name ? friendly_name : mi.szDevice;
+        MP_TARRAY_APPEND(NULL, data->names, data->count, mp_to_utf8(NULL, name));
+        talloc_free(friendly_name);
+    }
+}
 
 static BOOL CALLBACK disp_names_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
 {
@@ -2205,30 +2268,25 @@ static BOOL CALLBACK disp_names_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
     if (mon == data->assoc)
         return TRUE;
 
-    MONITORINFOEXW mi = { .cbSize = sizeof mi };
-    if (GetMonitorInfoW(mon, (MONITORINFO*)&mi)) {
-        MP_TARRAY_APPEND(NULL, data->names, data->count,
-                         mp_to_utf8(NULL, mi.szDevice));
-    }
+    disp_names_append(mon, data);
     return TRUE;
 }
 
-static char **get_disp_names(struct vo_w32_state *w32)
+static char **get_disp_names(struct vo_w32_state *w32, bool friendly)
 {
     // Get the client area of the window in screen space
     RECT rect = { 0 };
     GetClientRect(w32->window, &rect);
     MapWindowPoints(w32->window, NULL, (POINT*)&rect, 2);
 
-    struct disp_names_data data = { .assoc = w32->monitor };
+    struct disp_names_data data = {
+        .assoc = w32->monitor,
+        .friendly = friendly,
+    };
 
     // Make sure the monitor that Windows considers to be associated with the
     // window is first in the list
-    MONITORINFOEXW mi = { .cbSize = sizeof mi };
-    if (GetMonitorInfoW(data.assoc, (MONITORINFO*)&mi)) {
-        MP_TARRAY_APPEND(NULL, data.names, data.count,
-                         mp_to_utf8(NULL, mi.szDevice));
-    }
+    disp_names_append(data.assoc, &data);
 
     // Get the names of the other monitors that intersect the client rect
     EnumDisplayMonitors(NULL, &rect, disp_names_proc, (LPARAM)&data);
@@ -2252,6 +2310,7 @@ static bool gui_thread_control_supports(int request)
     case VOCTRL_GET_DISPLAY_FPS:
     case VOCTRL_GET_DISPLAY_RES:
     case VOCTRL_GET_DISPLAY_NAMES:
+    case VOCTRL_GET_DISPLAY_NAMES_FRIENDLY:
     case VOCTRL_GET_ICC_PROFILE:
     case VOCTRL_GET_FOCUSED:
     case VOCTRL_BEGIN_DRAGGING:
@@ -2399,7 +2458,10 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         ((int *)arg)[1] = monrc.bottom - monrc.top;
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_NAMES:
-        *(char ***)arg = get_disp_names(w32);
+        *(char ***)arg = get_disp_names(w32, false);
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_NAMES_FRIENDLY:
+        *(char ***)arg = get_disp_names(w32, true);
         return VO_TRUE;
     case VOCTRL_GET_ICC_PROFILE:
         update_display_info(w32);
