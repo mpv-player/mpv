@@ -200,6 +200,7 @@ struct vo_wayland_seat {
     struct zwp_tablet_seat_v2 *tablet_seat;
     struct wl_list tablet_list;
     struct wl_list tablet_tool_list;
+    struct wl_list tablet_pad_list;
     struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
@@ -238,6 +239,13 @@ struct vo_wayland_tablet_tool {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_tool_v2 *tablet_tool;
+    struct wl_list link;
+};
+
+struct vo_wayland_tablet_pad {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_pad_v2 *tablet_pad;
     struct wl_list link;
 };
 
@@ -295,6 +303,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void remove_output(struct vo_wayland_output *out);
 static void remove_tablet(struct vo_wayland_tablet *tablet);
 static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool);
+static void remove_tablet_pad(struct vo_wayland_tablet_pad *tablet_pad);
 static void remove_seat(struct vo_wayland_seat *seat);
 static void seat_create_data_device(struct vo_wayland_seat *seat);
 static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat);
@@ -759,6 +768,70 @@ static const struct zwp_tablet_tool_v2_listener tablet_tool_listener = {
     tablet_tool_handle_frame,
 };
 
+static void tablet_pad_handle_group(void *data,
+                                    struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                    struct zwp_tablet_pad_group_v2 *pad_group)
+{
+}
+
+static void tablet_pad_handle_path(void *data,
+                                   struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                   const char *path)
+{
+}
+
+static void tablet_pad_handle_buttons(void *data,
+                                      struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                      uint32_t buttons)
+{
+}
+
+static void tablet_pad_handle_done(void *data,
+                                   struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2)
+{
+}
+
+static void tablet_pad_handle_button(void *data,
+                                     struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                     uint32_t time,
+                                     uint32_t button,
+                                     uint32_t state)
+{
+}
+
+static void tablet_pad_handle_enter(void *data,
+                                    struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                    uint32_t serial,
+                                    struct zwp_tablet_v2 *tablet,
+                                    struct wl_surface *surface)
+{
+}
+
+static void tablet_pad_handle_leave(void *data,
+                                    struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
+                                    uint32_t serial,
+                                    struct wl_surface *surface)
+{
+}
+
+static void tablet_pad_handle_removed(void *data,
+                                      struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2)
+{
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    remove_tablet_pad(tablet_pad);
+}
+
+static const struct zwp_tablet_pad_v2_listener tablet_pad_listener = {
+    tablet_pad_handle_group,
+    tablet_pad_handle_path,
+    tablet_pad_handle_buttons,
+    tablet_pad_handle_done,
+    tablet_pad_handle_button,
+    tablet_pad_handle_enter,
+    tablet_pad_handle_leave,
+    tablet_pad_handle_removed,
+};
+
 static void tablet_handle_added(void *data,
                                 struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
                                 struct zwp_tablet_v2 *id)
@@ -797,6 +870,17 @@ static void tablet_pad_handle_added(void *data,
                                     struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
                                     struct zwp_tablet_pad_v2 *id)
 {
+    struct vo_wayland_seat *seat = data;
+    struct vo_wayland_state *wl = seat->wl;
+
+    MP_VERBOSE(wl, "Adding tablet pad %p\n", id);
+
+    struct vo_wayland_tablet_pad *tablet_pad = talloc_zero(seat, struct vo_wayland_tablet_pad);
+    tablet_pad->wl = wl;
+    tablet_pad->seat = seat;
+    tablet_pad->tablet_pad = id;
+    zwp_tablet_pad_v2_add_listener(id, &tablet_pad_listener, tablet_pad);
+    wl_list_insert(&seat->tablet_pad_list, &tablet_pad->link);
 }
 
 static const struct zwp_tablet_seat_v2_listener tablet_seat_listener = {
@@ -2393,6 +2477,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->pending_offer->fd = seat->dnd_offer->fd = seat->selection_offer->fd = -1;
         wl_list_init(&seat->tablet_list);
         wl_list_init(&seat->tablet_tool_list);
+        wl_list_init(&seat->tablet_pad_list);
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
         wl_list_insert(&wl->seat_list, &seat->link);
@@ -3024,6 +3109,16 @@ static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
     talloc_free(tablet_tool);
 }
 
+static void remove_tablet_pad(struct vo_wayland_tablet_pad *tablet_pad)
+{
+    struct vo_wayland_state *wl = tablet_pad->wl;
+    MP_VERBOSE(wl, "Removing tablet pad %p\n", tablet_pad->tablet_pad);
+
+    wl_list_remove(&tablet_pad->link);
+    zwp_tablet_pad_v2_destroy(tablet_pad->tablet_pad);
+    talloc_free(tablet_pad);
+}
+
 static void remove_seat(struct vo_wayland_seat *seat)
 {
     if (!seat)
@@ -3051,6 +3146,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
         xkb_keymap_unref(seat->xkb_keymap);
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
+
+    struct vo_wayland_tablet_pad *tablet_pad, *tablet_pad_tmp;
+    wl_list_for_each_safe(tablet_pad, tablet_pad_tmp, &seat->tablet_pad_list, link)
+        remove_tablet_pad(tablet_pad);
 
     struct vo_wayland_tablet_tool *tablet_tool, *tablet_tool_tmp;
     wl_list_for_each_safe(tablet_tool, tablet_tool_tmp, &seat->tablet_tool_list, link)
