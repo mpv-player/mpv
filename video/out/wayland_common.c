@@ -198,6 +198,7 @@ struct vo_wayland_seat {
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
     struct zwp_tablet_seat_v2 *tablet_seat;
+    struct wl_list tablet_list;
     struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
@@ -223,6 +224,13 @@ struct vo_wayland_seat {
     bool keyboard_entering;
     uint32_t *keyboard_entering_keys;
     int num_keyboard_entering_keys;
+};
+
+struct vo_wayland_tablet {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_v2 *tablet;
+    struct wl_list link;
 };
 
 struct vo_wayland_tranche {
@@ -277,6 +285,7 @@ static void prepare_resize(struct vo_wayland_state *wl);
 static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
+static void remove_tablet(struct vo_wayland_tablet *tablet);
 static void remove_seat(struct vo_wayland_seat *seat);
 static void seat_create_data_device(struct vo_wayland_seat *seat);
 static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat);
@@ -559,10 +568,60 @@ static const struct wl_touch_listener touch_listener = {
     touch_handle_orientation,
 };
 
+static void tablet_handle_name(void *data,
+                               struct zwp_tablet_v2 *zwp_tablet_v2,
+                               const char *name)
+{
+}
+
+static void tablet_handle_id(void *data,
+                             struct zwp_tablet_v2 *zwp_tablet_v2,
+                             uint32_t vid,
+                             uint32_t pid)
+{
+}
+
+static void tablet_handle_path(void *data,
+                               struct zwp_tablet_v2 *zwp_tablet_v2,
+                               const char *path)
+{
+}
+
+static void tablet_handle_done(void *data,
+                               struct zwp_tablet_v2 *zwp_tablet_v2)
+{
+}
+
+static void tablet_handle_removed(void *data,
+                                  struct zwp_tablet_v2 *zwp_tablet_v2)
+{
+    struct vo_wayland_tablet *tablet = data;
+    remove_tablet(tablet);
+}
+
+static const struct zwp_tablet_v2_listener tablet_listener = {
+    tablet_handle_name,
+    tablet_handle_id,
+    tablet_handle_path,
+    tablet_handle_done,
+    tablet_handle_removed,
+};
+
 static void tablet_handle_added(void *data,
                                 struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
                                 struct zwp_tablet_v2 *id)
 {
+    struct vo_wayland_seat *seat = data;
+    struct vo_wayland_state *wl = seat->wl;
+
+    MP_VERBOSE(wl, "Adding tablet %p\n", id);
+
+    struct vo_wayland_tablet *tablet = talloc_zero(seat, struct vo_wayland_tablet);
+    tablet->wl = wl;
+    tablet->seat = seat;
+    tablet->tablet = id;
+    zwp_tablet_v2_add_listener(id, &tablet_listener, tablet);
+    wl_list_insert(&seat->tablet_list, &tablet->link);
 }
 
 static void tablet_tool_handle_added(void *data,
@@ -2169,6 +2228,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->dnd_offer = talloc_zero(seat, struct vo_wayland_data_offer);
         seat->selection_offer = talloc_zero(seat, struct vo_wayland_data_offer);
         seat->pending_offer->fd = seat->dnd_offer->fd = seat->selection_offer->fd = -1;
+        wl_list_init(&seat->tablet_list);
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
         wl_list_insert(&wl->seat_list, &seat->link);
@@ -2780,6 +2840,16 @@ static void remove_output(struct vo_wayland_output *out)
     talloc_free(out);
 }
 
+static void remove_tablet(struct vo_wayland_tablet *tablet)
+{
+    struct vo_wayland_state *wl = tablet->wl;
+    MP_VERBOSE(wl, "Removing tablet %p\n", tablet->tablet);
+
+    wl_list_remove(&tablet->link);
+    zwp_tablet_v2_destroy(tablet->tablet);
+    talloc_free(tablet);
+}
+
 static void remove_seat(struct vo_wayland_seat *seat)
 {
     if (!seat)
@@ -2807,6 +2877,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
         xkb_keymap_unref(seat->xkb_keymap);
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
+
+    struct vo_wayland_tablet *tablet, *tablet_tmp;
+    wl_list_for_each_safe(tablet, tablet_tmp, &seat->tablet_list, link)
+        remove_tablet(tablet);
 
     if (seat->tablet_seat)
         zwp_tablet_seat_v2_destroy(seat->tablet_seat);
