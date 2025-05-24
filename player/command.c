@@ -3141,8 +3141,12 @@ static int mp_property_tablet_pos(void *ctx, struct m_property *prop,
         bool tool_stylus_btn1_pressed;
         bool tool_stylus_btn2_pressed;
         bool tool_stylus_btn3_pressed;
+        bool pad_focus;
+        bool *pad_buttons_pressed;
+        int pad_buttons;
         mp_input_get_tablet_pos(mpctx->input, &xs, &ys, &tool_in_proximity, &tool_down,
-            &tool_stylus_btn1_pressed, &tool_stylus_btn2_pressed, &tool_stylus_btn3_pressed);
+            &tool_stylus_btn1_pressed, &tool_stylus_btn2_pressed, &tool_stylus_btn3_pressed,
+            &pad_focus, &pad_buttons_pressed, &pad_buttons);
 
         struct mpv_node node;
         node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
@@ -3153,6 +3157,14 @@ static int mp_property_tablet_pos(void *ctx, struct m_property *prop,
         node_map_add_string(&node, "tool-stylus-btn1", tool_stylus_btn1_pressed ? "pressed" : "released");
         node_map_add_string(&node, "tool-stylus-btn2", tool_stylus_btn2_pressed ? "pressed" : "released");
         node_map_add_string(&node, "tool-stylus-btn3", tool_stylus_btn3_pressed ? "pressed" : "released");
+        node_map_add_flag(&node, "pad-focus", pad_focus);
+
+        struct mpv_node *args = node_map_add(&node, "pad-btns", MPV_FORMAT_NODE_MAP);
+        for (int i = 0; i < pad_buttons; i++) {
+            char *name = mp_tprintf(2, "%d", i + 1);
+            node_map_add_string(args, name, pad_buttons_pressed[i] ? "pressed" : "released");
+        }
+
         *(struct mpv_node *)arg = node;
         return M_PROPERTY_OK;
     }

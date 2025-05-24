@@ -248,6 +248,7 @@ struct vo_wayland_tablet_pad {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_pad_v2 *tablet_pad;
+    uint32_t buttons; // number of buttons on pad
     struct wl_list tablet_pad_group_list;
     struct wl_list link;
 };
@@ -943,6 +944,11 @@ static void tablet_pad_handle_buttons(void *data,
                                       struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
                                       uint32_t buttons)
 {
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    struct vo_wayland_state *wl = tablet_pad->wl;
+
+    MP_VERBOSE(wl, "       %i buttons\n", buttons);
+    tablet_pad->buttons = buttons;
 }
 
 static void tablet_pad_handle_done(void *data,
@@ -956,6 +962,14 @@ static void tablet_pad_handle_button(void *data,
                                      uint32_t button,
                                      uint32_t state)
 {
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    struct vo_wayland_state *wl = tablet_pad->wl;
+
+    state = state == ZWP_TABLET_PAD_V2_BUTTON_STATE_PRESSED
+        ? MP_KEY_STATE_DOWN
+        : MP_KEY_STATE_UP;
+
+    mp_input_tablet_pad_button(wl->vo->input_ctx, button, state);
 }
 
 static void tablet_pad_handle_enter(void *data,
@@ -964,6 +978,9 @@ static void tablet_pad_handle_enter(void *data,
                                     struct zwp_tablet_v2 *tablet,
                                     struct wl_surface *surface)
 {
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    struct vo_wayland_state *wl = tablet_pad->wl;
+    mp_input_set_tablet_pad_focus(wl->vo->input_ctx, true, tablet_pad->buttons);
 }
 
 static void tablet_pad_handle_leave(void *data,
@@ -971,6 +988,9 @@ static void tablet_pad_handle_leave(void *data,
                                     uint32_t serial,
                                     struct wl_surface *surface)
 {
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    struct vo_wayland_state *wl = tablet_pad->wl;
+    mp_input_set_tablet_pad_focus(wl->vo->input_ctx, false, 0);
 }
 
 static void tablet_pad_handle_removed(void *data,
