@@ -78,6 +78,7 @@ struct cmd_bind_section {
 };
 
 #define MP_MAX_SOURCES 10
+#define MP_MAX_TABLET_PAD_BUTTONS 10
 
 struct active_section {
     bstr name;
@@ -159,12 +160,15 @@ struct input_ctx {
     int num_touch_points;
 
     int tablet_x, tablet_y;
-    // Indicates tablet tools in proximity
+    // Indicates tablet tools in proximity / close to tablet surface
     bool tablet_tool_in_proximity;
     bool tablet_tool_down;
     bool tablet_tool_stylus_btn1_pressed;
     bool tablet_tool_stylus_btn2_pressed;
     bool tablet_tool_stylus_btn3_pressed;
+    bool tablet_pad_focus;
+    bool tablet_pad_buttons_pressed[MP_MAX_TABLET_PAD_BUTTONS];
+    int tablet_pad_buttons;
 
     unsigned int mouse_event_counter;
 
@@ -1162,6 +1166,38 @@ void mp_input_tablet_tool_button(struct input_ctx *ictx, int button, int state)
     input_unlock(ictx);
 }
 
+void mp_input_set_tablet_pad_focus(struct input_ctx *ictx, bool focus, int buttons)
+{
+    MP_TRACE(ictx, "tablet pad focus %s\n", focus ? "enter" : "leave");
+
+    input_lock(ictx);
+    ictx->tablet_pad_focus = focus;
+    if (!focus) {
+        for (int i = 0; i < ictx->tablet_pad_buttons; i++)
+            ictx->tablet_pad_buttons_pressed[i] = false;
+    }
+    ictx->tablet_pad_buttons = buttons;
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_tablet_pad_button(struct input_ctx *ictx, int button, int state)
+{
+    MP_TRACE(ictx, "tablet pad button %d %s%s \n",
+             button,
+             (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
+             (state & MP_KEY_STATE_UP) ? "released" : "");
+
+    input_lock(ictx);
+    if (button < MP_MAX_TABLET_PAD_BUTTONS)
+        ictx->tablet_pad_buttons_pressed[button] = state == MP_KEY_STATE_DOWN;
+    else
+        MP_WARN(ictx, "Tablet pad button %d outside of range!\n", button);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
 void mp_input_set_tablet_pos(struct input_ctx *ictx, int x, int y, bool quiet)
 {
     MP_TRACE(ictx, "tablet tool position %d/%d \n", x, y);
@@ -1180,7 +1216,10 @@ void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
                              bool *tool_in_proximity, bool *tool_down,
                              bool *tool_stylus_btn1_pressed,
                              bool *tool_stylus_btn2_pressed,
-                             bool *tool_stylus_btn3_pressed)
+                             bool *tool_stylus_btn3_pressed,
+                             bool *pad_focus,
+                             bool **pad_buttons_pressed,
+                             int *pad_buttons)
 {
     input_lock(ictx);
     *x = ictx->tablet_x;
@@ -1190,6 +1229,9 @@ void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
     *tool_stylus_btn1_pressed = ictx->tablet_tool_stylus_btn1_pressed;
     *tool_stylus_btn2_pressed = ictx->tablet_tool_stylus_btn2_pressed;
     *tool_stylus_btn3_pressed = ictx->tablet_tool_stylus_btn3_pressed;
+    *pad_focus = ictx->tablet_pad_focus;
+    *pad_buttons_pressed = ictx->tablet_pad_buttons_pressed;
+    *pad_buttons = ictx->tablet_pad_buttons;
     input_unlock(ictx);
 }
 
