@@ -3118,6 +3118,10 @@ Property list
         The state of the tablet tool tip, ``up`` or ``down.``
     ``tablet-pos/tool-stylus-btn1``, ``tablet-pos/tool-stylus-btn2``, ``tablet-pos/tool-stylus-btn3``
         The state of tablet tool side buttons, ``pressed`` or ``released``.
+    ``tablet-pos/pad-focus``
+        Boolean - whether a tablet pad is currently focused.
+    ``tablet-pos/pad-btns/N``
+        The state of the Nth tablet pad button, ``pressed`` or ``released``.
 
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.
