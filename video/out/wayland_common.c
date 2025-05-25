@@ -199,6 +199,7 @@ struct vo_wayland_seat {
     struct wl_touch    *touch;
     struct zwp_tablet_seat_v2 *tablet_seat;
     struct wl_list tablet_list;
+    struct wl_list tablet_tool_list;
     struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
@@ -230,6 +231,13 @@ struct vo_wayland_tablet {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_v2 *tablet;
+    struct wl_list link;
+};
+
+struct vo_wayland_tablet_tool {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_tool_v2 *tablet_tool;
     struct wl_list link;
 };
 
@@ -286,6 +294,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
                             struct wp_presentation_feedback *fback);
 static void remove_output(struct vo_wayland_output *out);
 static void remove_tablet(struct vo_wayland_tablet *tablet);
+static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool);
 static void remove_seat(struct vo_wayland_seat *seat);
 static void seat_create_data_device(struct vo_wayland_seat *seat);
 static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat);
@@ -607,6 +616,149 @@ static const struct zwp_tablet_v2_listener tablet_listener = {
     tablet_handle_removed,
 };
 
+static void tablet_tool_handle_type(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    uint32_t tool_type)
+{
+}
+
+static void tablet_tool_handle_hardware_serial(void *data,
+                                               struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                               uint32_t hardware_serial_hi,
+                                               uint32_t hardware_serial_lo)
+{
+}
+
+static void tablet_tool_handle_hardware_id_wacom(void *data,
+                                                 struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                                 uint32_t hardware_id_hi,
+                                                 uint32_t hardware_id_lo)
+{
+}
+
+static void tablet_tool_handle_capability(void *data,
+                                          struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                          uint32_t capability)
+{
+}
+
+static void tablet_tool_handle_done(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+}
+
+static void tablet_tool_handle_removed(void *data,
+                                       struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+    struct vo_wayland_tablet_tool *tablet_tool = data;
+    remove_tablet_tool(tablet_tool);
+}
+
+static void tablet_tool_handle_proximity_in(void *data,
+                                            struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                            uint32_t serial,
+                                            struct zwp_tablet_v2 *tablet,
+                                            struct wl_surface *surface)
+{
+}
+
+static void tablet_tool_handle_proximity_out(void *data,
+                                             struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+}
+
+static void tablet_tool_handle_down(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    uint32_t serial)
+{
+}
+
+static void tablet_tool_handle_up(void *data,
+                                  struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2)
+{
+}
+
+static void tablet_tool_handle_motion(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      wl_fixed_t x,
+                                      wl_fixed_t y)
+{
+}
+
+static void tablet_tool_handle_pressure(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        uint32_t pressure)
+{
+}
+
+static void tablet_tool_handle_distance(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        uint32_t distance)
+{
+}
+
+static void tablet_tool_handle_tilt(void *data,
+                                    struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                    wl_fixed_t tilt_x,
+                                    wl_fixed_t tilt_y)
+{
+}
+
+static void tablet_tool_handle_rotation(void *data,
+                                        struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                        wl_fixed_t degrees)
+{
+}
+
+static void tablet_tool_handle_slider(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      int32_t position)
+{
+}
+
+static void tablet_tool_handle_wheel(void *data,
+                                     struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                     wl_fixed_t degrees,
+                                     int32_t clicks)
+{
+}
+
+static void tablet_tool_handle_button(void *data,
+                                      struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                      uint32_t serial,
+                                      uint32_t button,
+                                      uint32_t state)
+{
+}
+
+static void tablet_tool_handle_frame(void *data,
+                                     struct zwp_tablet_tool_v2 *zwp_tablet_tool_v2,
+                                     uint32_t time)
+{
+}
+
+static const struct zwp_tablet_tool_v2_listener tablet_tool_listener = {
+    tablet_tool_handle_type,
+    tablet_tool_handle_hardware_serial,
+    tablet_tool_handle_hardware_id_wacom,
+    tablet_tool_handle_capability,
+    tablet_tool_handle_done,
+    tablet_tool_handle_removed,
+    tablet_tool_handle_proximity_in,
+    tablet_tool_handle_proximity_out,
+    tablet_tool_handle_down,
+    tablet_tool_handle_up,
+    tablet_tool_handle_motion,
+    tablet_tool_handle_pressure,
+    tablet_tool_handle_distance,
+    tablet_tool_handle_tilt,
+    tablet_tool_handle_rotation,
+    tablet_tool_handle_slider,
+    tablet_tool_handle_wheel,
+    tablet_tool_handle_button,
+    tablet_tool_handle_frame,
+};
+
 static void tablet_handle_added(void *data,
                                 struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
                                 struct zwp_tablet_v2 *id)
@@ -628,6 +780,17 @@ static void tablet_tool_handle_added(void *data,
                                      struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
                                      struct zwp_tablet_tool_v2 *id)
 {
+    struct vo_wayland_seat *seat = data;
+    struct vo_wayland_state *wl = seat->wl;
+
+    MP_VERBOSE(wl, "Adding tablet tool %p\n", id);
+
+    struct vo_wayland_tablet_tool *tablet_tool = talloc_zero(seat, struct vo_wayland_tablet_tool);
+    tablet_tool->wl = wl;
+    tablet_tool->seat = seat;
+    tablet_tool->tablet_tool = id;
+    zwp_tablet_tool_v2_add_listener(tablet_tool->tablet_tool, &tablet_tool_listener, tablet_tool);
+    wl_list_insert(&seat->tablet_tool_list, &tablet_tool->link);
 }
 
 static void tablet_pad_handle_added(void *data,
@@ -2229,6 +2392,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         seat->selection_offer = talloc_zero(seat, struct vo_wayland_data_offer);
         seat->pending_offer->fd = seat->dnd_offer->fd = seat->selection_offer->fd = -1;
         wl_list_init(&seat->tablet_list);
+        wl_list_init(&seat->tablet_tool_list);
         seat->seat = wl_registry_bind(reg, id, &wl_seat_interface, ver);
         wl_seat_add_listener(seat->seat, &seat_listener, seat);
         wl_list_insert(&wl->seat_list, &seat->link);
@@ -2850,6 +3014,16 @@ static void remove_tablet(struct vo_wayland_tablet *tablet)
     talloc_free(tablet);
 }
 
+static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
+{
+    struct vo_wayland_state *wl = tablet_tool->wl;
+    MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
+
+    wl_list_remove(&tablet_tool->link);
+    zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
+    talloc_free(tablet_tool);
+}
+
 static void remove_seat(struct vo_wayland_seat *seat)
 {
     if (!seat)
@@ -2877,6 +3051,10 @@ static void remove_seat(struct vo_wayland_seat *seat)
         xkb_keymap_unref(seat->xkb_keymap);
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
+
+    struct vo_wayland_tablet_tool *tablet_tool, *tablet_tool_tmp;
+    wl_list_for_each_safe(tablet_tool, tablet_tool_tmp, &seat->tablet_tool_list, link)
+        remove_tablet_tool(tablet_tool);
 
     struct vo_wayland_tablet *tablet, *tablet_tmp;
     wl_list_for_each_safe(tablet, tablet_tmp, &seat->tablet_list, link)
