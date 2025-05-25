@@ -48,6 +48,7 @@
 #include "content-type-v1.h"
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
+#include "tablet-unstable-v2.h"
 
 #if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
@@ -196,6 +197,7 @@ struct vo_wayland_seat {
     struct wl_keyboard *keyboard;
     struct wl_pointer  *pointer;
     struct wl_touch    *touch;
+    struct zwp_tablet_seat_v2 *tablet_seat;
     struct wl_data_device *data_device;
     struct vo_wayland_data_offer *pending_offer;
     struct vo_wayland_data_offer *dnd_offer;
@@ -277,6 +279,7 @@ static void remove_feedback(struct vo_wayland_feedback_pool *fback_pool,
 static void remove_output(struct vo_wayland_output *out);
 static void remove_seat(struct vo_wayland_seat *seat);
 static void seat_create_data_device(struct vo_wayland_seat *seat);
+static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat);
 static void seat_create_text_input(struct vo_wayland_seat *seat);
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode);
 static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
@@ -554,6 +557,30 @@ static const struct wl_touch_listener touch_listener = {
     touch_handle_cancel,
     touch_handle_shape,
     touch_handle_orientation,
+};
+
+static void tablet_handle_added(void *data,
+                                struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                struct zwp_tablet_v2 *id)
+{
+}
+
+static void tablet_tool_handle_added(void *data,
+                                     struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                     struct zwp_tablet_tool_v2 *id)
+{
+}
+
+static void tablet_pad_handle_added(void *data,
+                                    struct zwp_tablet_seat_v2 *zwp_tablet_seat_v2,
+                                    struct zwp_tablet_pad_v2 *id)
+{
+}
+
+static const struct zwp_tablet_seat_v2_listener tablet_seat_listener = {
+    tablet_handle_added,
+    tablet_tool_handle_added,
+    tablet_pad_handle_added,
 };
 
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *wl_keyboard,
@@ -2151,6 +2178,9 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
         if (wl->text_input_manager)
             seat_create_text_input(seat);
+
+        if (wl->wp_tablet_manager)
+            seat_create_tablet_seat(wl, seat);
     }
 
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
@@ -2234,6 +2264,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     if (!strcmp(interface, zwp_text_input_manager_v3_interface.name) && found++) {
         ver = 1;
         wl->text_input_manager = wl_registry_bind(reg, id, &zwp_text_input_manager_v3_interface, ver);
+    }
+
+    if (!strcmp(interface, zwp_tablet_manager_v2_interface.name) && found++) {
+        ver = 1;
+        wl->wp_tablet_manager = wl_registry_bind(reg, id, &zwp_tablet_manager_v2_interface, ver);
     }
 
     if (found > 1)
@@ -2773,6 +2808,9 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->xkb_state)
         xkb_state_unref(seat->xkb_state);
 
+    if (seat->tablet_seat)
+        zwp_tablet_seat_v2_destroy(seat->tablet_seat);
+
     destroy_offer(seat->pending_offer);
     destroy_offer(seat->dnd_offer);
     destroy_offer(seat->selection_offer);
@@ -2798,6 +2836,12 @@ static void seat_create_data_device(struct vo_wayland_seat *seat)
 {
     seat->data_device = wl_data_device_manager_get_data_device(seat->wl->devman, seat->seat);
     wl_data_device_add_listener(seat->data_device, &data_device_listener, seat);
+}
+
+static void seat_create_tablet_seat(struct vo_wayland_state *wl, struct vo_wayland_seat *seat)
+{
+    seat->tablet_seat = zwp_tablet_manager_v2_get_tablet_seat(wl->wp_tablet_manager, seat->seat);
+    zwp_tablet_seat_v2_add_listener(seat->tablet_seat, &tablet_seat_listener, seat);
 }
 
 static void seat_create_text_input(struct vo_wayland_seat *seat)
@@ -3683,6 +3727,17 @@ bool vo_wayland_init(struct vo *vo)
                     zwp_text_input_manager_v3_interface.name);
     }
 
+    if (wl->wp_tablet_manager) {
+        struct vo_wayland_seat *seat;
+        wl_list_for_each(seat, &wl->seat_list, link) {
+            if (!seat->tablet_seat)
+                seat_create_tablet_seat(wl, seat);
+        }
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                    zwp_tablet_manager_v2_interface.name);
+    }
+
     wl->display_fd = wl_display_get_fd(wl->display);
 
     update_app_id(wl);
@@ -3944,6 +3999,9 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_seat *seat, *seat_tmp;
     wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link)
         remove_seat(seat);
+
+    if (wl->wp_tablet_manager)
+        zwp_tablet_manager_v2_destroy(wl->wp_tablet_manager);
 
     if (wl->display)
         wl_display_disconnect(wl->display);
