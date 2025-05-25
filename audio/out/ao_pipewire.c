@@ -234,12 +234,16 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
 
     int buffer_size = ao->device_buffer * ao->sstride;
 
-    params[0] = spa_pod_builder_add_object(&b,
-                    SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
-                    SPA_PARAM_BUFFERS_blocks,     SPA_POD_Int(ao->num_planes),
-                    SPA_PARAM_BUFFERS_size,       SPA_POD_CHOICE_RANGE_Int(
-                                                    buffer_size, 0, INT32_MAX),
-                    SPA_PARAM_BUFFERS_stride,     SPA_POD_Int(ao->sstride));
+    struct spa_pod_frame f;
+    spa_pod_builder_push_object(&b, &f, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers);
+    spa_pod_builder_add(&b, SPA_PARAM_BUFFERS_blocks,  SPA_POD_Int(ao->num_planes), 0);
+    if (buffer_size > 0) {
+        spa_pod_builder_prop(&b, SPA_PARAM_BUFFERS_size, 0);
+        spa_pod_builder_add(&b, SPA_POD_CHOICE_RANGE_Int(buffer_size, 1, INT32_MAX));
+    }
+    spa_pod_builder_add(&b, SPA_PARAM_BUFFERS_stride, SPA_POD_Int(ao->sstride), 0);
+    params[0] = spa_pod_builder_pop(&b, &f);
+
     if (!params[0]) {
         MP_ERR(ao, "Could not build parameter pod\n");
         return;
