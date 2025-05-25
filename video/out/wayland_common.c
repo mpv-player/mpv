@@ -246,6 +246,30 @@ struct vo_wayland_tablet_pad {
     struct vo_wayland_state *wl;
     struct vo_wayland_seat *seat;
     struct zwp_tablet_pad_v2 *tablet_pad;
+    struct wl_list tablet_pad_group_list;
+    struct wl_list link;
+};
+
+struct vo_wayland_tablet_pad_group {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_pad_group_v2 *tablet_pad_group;
+    struct wl_list tablet_pad_ring_list;
+    struct wl_list tablet_pad_strip_list;
+    struct wl_list link;
+};
+
+struct vo_wayland_tablet_pad_ring {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_pad_ring_v2 *tablet_pad_ring;
+    struct wl_list link;
+};
+
+struct vo_wayland_tablet_pad_strip {
+    struct vo_wayland_state *wl;
+    struct vo_wayland_seat *seat;
+    struct zwp_tablet_pad_strip_v2 *tablet_pad_strip;
     struct wl_list link;
 };
 
@@ -768,10 +792,86 @@ static const struct zwp_tablet_tool_v2_listener tablet_tool_listener = {
     tablet_tool_handle_frame,
 };
 
+static void tablet_tool_pad_group_handle_buttons(void *data,
+                                                 struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2,
+                                                 struct wl_array *buttons)
+{
+}
+
+static void tablet_tool_pad_group_handle_ring(void *data,
+                                              struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2,
+                                              struct zwp_tablet_pad_ring_v2 *ring)
+{
+    struct vo_wayland_tablet_pad_group *tablet_pad_group = data;
+    struct vo_wayland_state *wl = tablet_pad_group->wl;
+    struct vo_wayland_seat *seat = tablet_pad_group->seat;
+
+    struct vo_wayland_tablet_pad_ring *tablet_pad_ring = talloc_zero(seat, struct vo_wayland_tablet_pad_ring);
+    tablet_pad_ring->wl = wl;
+    tablet_pad_ring->seat = seat;
+    tablet_pad_ring->tablet_pad_ring = ring;
+    wl_list_insert(&tablet_pad_group->tablet_pad_ring_list, &tablet_pad_ring->link);
+}
+
+static void tablet_tool_pad_group_handle_strip(void *data,
+                                               struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2,
+                                               struct zwp_tablet_pad_strip_v2 *strip)
+{
+    struct vo_wayland_tablet_pad_group *tablet_pad_group = data;
+    struct vo_wayland_state *wl = tablet_pad_group->wl;
+    struct vo_wayland_seat *seat = tablet_pad_group->seat;
+
+    struct vo_wayland_tablet_pad_strip *tablet_pad_strip = talloc_zero(seat, struct vo_wayland_tablet_pad_strip);
+    tablet_pad_strip->wl = wl;
+    tablet_pad_strip->seat = seat;
+    tablet_pad_strip->tablet_pad_strip = strip;
+    wl_list_insert(&tablet_pad_group->tablet_pad_strip_list, &tablet_pad_strip->link);
+}
+
+static void tablet_tool_pad_group_handle_modes(void *data,
+                                               struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2,
+                                               uint32_t modes)
+{
+}
+
+static void tablet_tool_pad_group_handle_done(void *data,
+                                              struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2)
+{
+}
+
+static void tablet_tool_pad_group_handle_mode_switch(void *data,
+                                                     struct zwp_tablet_pad_group_v2 *zwp_tablet_pad_group_v2,
+                                                     uint32_t time,
+                                                     uint32_t serial,
+                                                     uint32_t mode)
+{
+}
+
+static const struct zwp_tablet_pad_group_v2_listener tablet_pad_group_listener = {
+    tablet_tool_pad_group_handle_buttons,
+    tablet_tool_pad_group_handle_ring,
+    tablet_tool_pad_group_handle_strip,
+    tablet_tool_pad_group_handle_modes,
+    tablet_tool_pad_group_handle_done,
+    tablet_tool_pad_group_handle_mode_switch
+};
+
 static void tablet_pad_handle_group(void *data,
                                     struct zwp_tablet_pad_v2 *zwp_tablet_pad_v2,
                                     struct zwp_tablet_pad_group_v2 *pad_group)
 {
+    struct vo_wayland_tablet_pad *tablet_pad = data;
+    struct vo_wayland_state *wl = tablet_pad->wl;
+    struct vo_wayland_seat *seat = tablet_pad->seat;
+
+    struct vo_wayland_tablet_pad_group *tablet_pad_group = talloc_zero(seat, struct vo_wayland_tablet_pad_group);
+    tablet_pad_group->wl = wl;
+    tablet_pad_group->seat = seat;
+    tablet_pad_group->tablet_pad_group = pad_group;
+    wl_list_init(&tablet_pad_group->tablet_pad_ring_list);
+    wl_list_init(&tablet_pad_group->tablet_pad_strip_list);
+    zwp_tablet_pad_group_v2_add_listener(pad_group, &tablet_pad_group_listener, tablet_pad_group);
+    wl_list_insert(&tablet_pad->tablet_pad_group_list, &tablet_pad_group->link);
 }
 
 static void tablet_pad_handle_path(void *data,
@@ -879,6 +979,7 @@ static void tablet_pad_handle_added(void *data,
     tablet_pad->wl = wl;
     tablet_pad->seat = seat;
     tablet_pad->tablet_pad = id;
+    wl_list_init(&tablet_pad->tablet_pad_group_list);
     zwp_tablet_pad_v2_add_listener(id, &tablet_pad_listener, tablet_pad);
     wl_list_insert(&seat->tablet_pad_list, &tablet_pad->link);
 }
@@ -3113,6 +3214,26 @@ static void remove_tablet_pad(struct vo_wayland_tablet_pad *tablet_pad)
 {
     struct vo_wayland_state *wl = tablet_pad->wl;
     MP_VERBOSE(wl, "Removing tablet pad %p\n", tablet_pad->tablet_pad);
+
+    struct vo_wayland_tablet_pad_group *tablet_pad_group, *tablet_pad_group_tmp;
+    wl_list_for_each_safe(tablet_pad_group, tablet_pad_group_tmp, &tablet_pad->tablet_pad_group_list, link) {
+        struct vo_wayland_tablet_pad_ring *tablet_pad_ring, *tablet_pad_ring_tmp;
+        wl_list_for_each_safe(tablet_pad_ring, tablet_pad_ring_tmp, &tablet_pad_group->tablet_pad_ring_list, link) {
+            wl_list_remove(&tablet_pad_ring->link);
+            zwp_tablet_pad_ring_v2_destroy(tablet_pad_ring->tablet_pad_ring);
+            talloc_free(tablet_pad_ring);
+        }
+        struct vo_wayland_tablet_pad_strip *tablet_pad_strip, *tablet_pad_strip_tmp;
+        wl_list_for_each_safe(tablet_pad_strip, tablet_pad_strip_tmp, &tablet_pad_group->tablet_pad_strip_list, link) {
+            wl_list_remove(&tablet_pad_strip->link);
+            zwp_tablet_pad_strip_v2_destroy(tablet_pad_strip->tablet_pad_strip);
+            talloc_free(tablet_pad_strip);
+        }
+
+        wl_list_remove(&tablet_pad_group->link);
+        zwp_tablet_pad_group_v2_destroy(tablet_pad_group->tablet_pad_group);
+        talloc_free(tablet_pad_group);
+    }
 
     wl_list_remove(&tablet_pad->link);
     zwp_tablet_pad_v2_destroy(tablet_pad->tablet_pad);
