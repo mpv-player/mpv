@@ -344,11 +344,12 @@ mp.add_key_binding(nil, "select-audio-device", function ()
     end
 
     input.select({
-        prompt = "Select an audio device:",
+        prompt = "Select an audio device (and ao):",
         items = items,
         default_item = default_item,
         submit = function (id)
             mp.set_property("audio-device", devices[id].name)
+            mp.set_property("ao", devices[id].ao)
         end,
     })
 end)
