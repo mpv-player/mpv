@@ -2226,6 +2226,12 @@ static void update_render_options(struct vo *vo)
 #else
     pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
 #endif
+    pars->params.tile_size = opts->background_tile_size * 2;
+    for (int i = 0; i < 2; ++i) {
+        pars->params.tile_colors[i][0] = opts->background_tile_color[i].r / 255.0f;
+        pars->params.tile_colors[i][1] = opts->background_tile_color[i].g / 255.0f;
+        pars->params.tile_colors[i][2] = opts->background_tile_color[i].b / 255.0f;
+    }
 
     pars->params.corner_rounding = p->next_opts->corner_rounding;
     pars->params.correct_subpixel_offsets = !opts->scaler_resizes_only;
