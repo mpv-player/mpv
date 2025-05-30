@@ -538,7 +538,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 { .cmd = DTV_TUNE },
             };
             struct dtv_properties cmdseq = {
-                .num = sizeof(p) / sizeof(p[0]),
+                .num = MP_ARRAY_SIZE(p),
                 .props = p
             };
             if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
@@ -566,7 +566,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 { .cmd = DTV_TUNE },
             };
             struct dtv_properties cmdseq = {
-                .num = sizeof(p) / sizeof(p[0]),
+                .num = MP_ARRAY_SIZE(p),
                 .props = p
             };
             if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
@@ -587,7 +587,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 { .cmd = DTV_TUNE },
             };
             struct dtv_properties cmdseq = {
-                .num = sizeof(p) / sizeof(p[0]),
+                .num = MP_ARRAY_SIZE(p),
                 .props = p
             };
             if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
@@ -606,7 +606,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                 { .cmd = DTV_TUNE },
             };
             struct dtv_properties cmdseq = {
-                .num = sizeof(p) / sizeof(p[0]),
+                .num = MP_ARRAY_SIZE(p),
                 .props = p
             };
             if (dvbv5_tune(priv, fd_frontend, delsys, &cmdseq) != 0) {
