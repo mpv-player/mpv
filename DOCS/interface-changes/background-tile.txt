@@ -1,0 +1,2 @@
+add `--background-tile-size` option
+add `--background-tile-color-0` and `--background-tile-color-1` options
