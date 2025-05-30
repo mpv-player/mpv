@@ -7474,7 +7474,10 @@ them.
         Blend the frame against the background color (``--background-color``,
         normally black).
     tiles
-        Blend the frame against a 16x16 gray/white tiles background (default).
+        Blend the frame against a checkerboard pattern with colors specified
+        in the ``--background-tile-color-0`` and ``--background-tile-color-1``
+        options and tile size specified in the ``--background-tile-size`` option
+        (default).
     none
         Do not blend the frame and leave the alpha as is.
 
@@ -7485,8 +7488,18 @@ them.
     Use that instead.
 
 ``--background-color=<color>``
-    Color used to draw parts of the mpv window not covered by video. See the
-    ``--sub-color`` option for how colors are defined.
+    Color used to draw parts of the mpv window not covered by video in
+    ``--background=color`` mode.
+    See the ``--sub-color`` option for how colors are defined.
+
+``--background-tile-color-0=<color>``, ``--background-tile-color-1=<color>``
+    Colors used to draw parts of the mpv window not covered by video in
+    ``--background=tiles`` mode.
+    See the ``--sub-color`` option for how colors are defined.
+
+``--background-tile-size=<1-4096>``
+    Tile size used to draw parts of the mpv window not covered by video in
+    ``--background=tiles`` mode (default: 16).
 
 ``--border-background=<none|color|tiles>``
     Same as ``--background`` but only applies to the black bar/border area of
