@@ -119,6 +119,8 @@ static int init(struct sd *sd)
     }
     }
 
+    MP_VERBOSE(sd, "Using subtitle decoder %s\n", sub_codec->name);
+
     priv->avpkt = av_packet_alloc();
     priv->codec = sd->codec;
     if (!priv->avpkt)
@@ -217,7 +219,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         struct sub_bitmap *b = &sub->inbitmaps[sub->count];
 
         if (r->type != SUBTITLE_BITMAP) {
-            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
+            MP_ERR(sd, "unsupported subtitle type from decoder (%d)\n", r->type);
             continue;
         }
         if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->sub_forced_events_only)
