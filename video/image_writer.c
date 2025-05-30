@@ -175,6 +175,8 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     if (!avctx)
         goto print_open_fail;
 
+    MP_VERBOSE(ctx, "Using encoder %s\n", codec->name);
+
     avctx->time_base = AV_TIME_BASE_Q;
     avctx->width = image->w;
     avctx->height = image->h;
@@ -191,6 +193,7 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
         int depth = 0;
         for (int i = 0; i < MP_ARRAY_SIZE(ctx->original_format.comps); i++)
             depth = MPMAX(depth, ctx->original_format.comps[i].size);
+        MP_DBG(ctx, "tagging bits_per_raw_sample=%d\n", depth);
         avctx->bits_per_raw_sample = depth;
     }
 
@@ -628,7 +631,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
     if (mp_image_params_equal(&p, &image->params))
         return mp_image_new_ref(image);
 
-    mp_verbose(log, "will convert image to %s\n", mp_imgfmt_to_name(p.imgfmt));
+    mp_verbose(log, "converted: %s\n", mp_image_params_to_str(&p));
 
     struct mp_image *src = image;
     if (mp_image_crop_valid(&src->params) &&
