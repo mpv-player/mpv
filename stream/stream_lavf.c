@@ -370,7 +370,7 @@ static int open_f(stream_t *stream)
         MP_ERR(stream, "No URL\n");
         goto out;
     }
-    for (int i = 0; i < sizeof(prefix) / sizeof(prefix[0]); i++)
+    for (int i = 0; i < MP_ARRAY_SIZE(prefix); i++)
         if (!strncmp(filename, prefix[i], strlen(prefix[i])))
             filename += strlen(prefix[i]);
     if (!strncmp(filename, "rtsp:", 5) || !strncmp(filename, "rtsps:", 6)) {

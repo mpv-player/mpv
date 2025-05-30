@@ -1100,9 +1100,9 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     // NONE is a bit random, but the intention is: don't modify colors.
     if (trackcsp == YCBCR_NONE)
         return;
-    if (trackcsp < sizeof(ass_csp) / sizeof(ass_csp[0]))
+    if (trackcsp < MP_ARRAY_SIZE(ass_csp))
         csp = ass_csp[trackcsp];
-    if (trackcsp < sizeof(ass_levels) / sizeof(ass_levels[0]))
+    if (trackcsp <  MP_ARRAY_SIZE(ass_levels))
         levels = ass_levels[trackcsp];
     if (trackcsp == YCBCR_DEFAULT) {
         csp = PL_COLOR_SYSTEM_BT_601;

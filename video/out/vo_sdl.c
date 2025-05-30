@@ -256,7 +256,7 @@ static bool is_good_renderer(SDL_RendererInfo *ri,
 
     int i, j;
     for (i = 0; i < ri->num_texture_formats; ++i)
-        for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
+        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
             if (ri->texture_formats[i] == formats[j].sdl)
                 if (formats[j].is_rgba) {
                     if (osd_format)
@@ -468,7 +468,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     Uint32 texfmt = SDL_PIXELFORMAT_UNKNOWN;
     int i, j;
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
-        for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
+        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
                 if (params->imgfmt == formats[j].mpv)
                     texfmt = formats[j].sdl;
@@ -589,7 +589,7 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
             // The default config does not use Ctrl, so this is fine...
             int keycode = 0;
             int i;
-            for (i = 0; i < sizeof(keys) / sizeof(keys[0]); ++i)
+            for (i = 0; i < MP_ARRAY_SIZE(keys); ++i)
                 if (keys[i].sdl == ev.key.keysym.sym) {
                     keycode = keys[i].mpv;
                     break;
@@ -612,7 +612,7 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
             break;
         case SDL_MOUSEBUTTONDOWN: {
             int i;
-            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
+            for (i = 0; i < MP_ARRAY_SIZE(mousebtns); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
                     mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_DOWN);
                     break;
@@ -621,7 +621,7 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
         }
         case SDL_MOUSEBUTTONUP: {
             int i;
-            for (i = 0; i < sizeof(mousebtns) / sizeof(mousebtns[0]); ++i)
+            for (i = 0; i < MP_ARRAY_SIZE(mousebtns); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
                     mp_input_put_key(vo->input_ctx, mousebtns[i].mpv | MP_KEY_STATE_UP);
                     break;
@@ -872,7 +872,7 @@ static int query_format(struct vo *vo, int format)
     struct priv *vc = vo->priv;
     int i, j;
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
-        for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
+        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
                 if (format == formats[j].mpv)
                     return 1;
