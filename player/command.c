@@ -5756,7 +5756,10 @@ static void cmd_frame_step(void *p)
     }
 
     if (flags == 1) {
-        if (!cmd->cmd->is_up)
+        // frame-step command has on_updown set so it is called on both down
+        // and up, but stepping should only be triggered when it matches the
+        // emit_on_up flag.
+        if (cmd->cmd->is_up == cmd->cmd->emit_on_up)
             add_step_frame(mpctx, frames, true);
     } else {
         if (cmd->cmd->is_up) {
