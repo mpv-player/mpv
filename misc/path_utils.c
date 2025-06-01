@@ -298,7 +298,7 @@ void mp_mkdirp(const char *dir)
         if (cdir)
             *cdir = 0;
 
-        mkdir(path, 0700);
+        mkdir(path, 0777);
 
         if (cdir)
             *cdir++ = '/';
