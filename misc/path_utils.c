@@ -287,6 +287,9 @@ bstr mp_split_proto(bstr path, bstr *out_url)
 
 void mp_mkdirp(const char *dir)
 {
+    if (mp_path_exists(dir))
+        return;
+
     char *path = talloc_strdup(NULL, dir);
     char *cdir = path + 1;
 
