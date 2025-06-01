@@ -306,9 +306,7 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
         }
 
         char *full_dir = bstrto0(fname, mp_dirname(fname));
-        if (!mp_path_exists(full_dir)) {
-            mp_mkdirp(full_dir);
-        }
+        mp_mkdirp(full_dir);
 
         if (!mp_path_exists(fname))
             return fname;
