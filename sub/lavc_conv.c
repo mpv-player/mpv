@@ -73,6 +73,8 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     if (mp_set_avctx_codec_headers(avctx, sd->codec) < 0)
         goto error;
 
+    MP_VERBOSE(sd, "Using subtitle decoder %s\n", codec->name);
+
     priv->avpkt = av_packet_alloc();
     priv->avpkt_vtt = av_packet_alloc();
     if (!priv->avpkt || !priv->avpkt_vtt)
