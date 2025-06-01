@@ -1546,8 +1546,12 @@ static void append_to_watch_history(struct MPContext *mpctx)
     void *ctx = talloc_new(NULL);
     char *history_path = mp_get_user_path(ctx, mpctx->global,
                                           mpctx->opts->watch_history_path);
-    FILE *history_file = fopen(history_path, "ab");
+    char *history_path_dir = bstrto0(ctx, mp_dirname(history_path));
+    if (!mp_path_exists(history_path_dir)) {
+        mp_mkdirp(history_path_dir);
+    }
 
+    FILE *history_file = fopen(history_path, "ab");
     if (!history_file) {
         MP_ERR(mpctx, "Failed to open history file: %s\n",
                mp_strerror(errno));
