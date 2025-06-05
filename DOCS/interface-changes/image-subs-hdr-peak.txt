@@ -1,0 +1,1 @@
+add `--image-subs-hdr-peak` option
