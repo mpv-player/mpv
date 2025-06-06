@@ -989,7 +989,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // TODO: Implement this for all backends
     target_csp = sw->fns->target_csp
                      ? sw->fns->target_csp(sw)
-                     : (struct pl_color_space){ .transfer = PL_COLOR_TRC_PQ };
+                     : DEFAULT_TARGET_CSP;
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         target_csp.hdr.max_luma = 0;
         target_csp.hdr.min_luma = 0;
@@ -1004,10 +1004,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         hint = frame->current->params.color;
         if (p->ra_ctx->fns->pass_colorspace && p->ra_ctx->fns->pass_colorspace(p->ra_ctx))
             pass_colorspace = true;
-        if (opts->target_prim)
-            hint.primaries = opts->target_prim;
-        if (opts->target_trc)
-            hint.transfer = opts->target_trc;
+        enum pl_color_primaries primaries = opts->target_prim ? opts->target_prim : target_csp.primaries;
+        if (primaries)
+            hint.primaries = primaries;
+        enum pl_color_transfer transfer = opts->target_trc ? opts->target_trc : target_csp.transfer;
+        if (transfer)
+            hint.transfer = transfer;
         if (target_peak)
             hint.hdr.max_luma = target_peak;
         apply_target_contrast(p, &hint, target_csp.hdr.min_luma);
