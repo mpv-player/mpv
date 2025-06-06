@@ -32,9 +32,7 @@ if features['wayland-protocols-1-39']
     protocols += [[wl_protocol_dir, 'staging/ext-data-control/ext-data-control-v1.xml']]
 endif
 
-if features['wayland-protocols-1-41']
-    protocols += [[wl_protocol_dir, 'staging/color-management/color-management-v1.xml']]
-endif
+protocols += [['color-management-v1.xml']]
 
 foreach p: protocols
     xml = join_paths(p)
