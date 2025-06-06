@@ -8,6 +8,7 @@ repos:
     - id: check-json
     - id: check-shebang-scripts-are-executable
     - id: check-xml
+      exclude: ^TOOLS/mpv-osd-symbols.sfdir/font.props$
     - id: check-yaml
     - id: end-of-file-fixer
       exclude: ^TOOLS/osxbundle/mpv.app/Contents/PkgInfo$
