@@ -2779,6 +2779,13 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was transcoded, while attempting to keep the old subtitles.
 
+``--image-subs-hdr-peak=<yes|no>``
+    Set the peak of the image subtitles to 203 nits for HDR output. This may
+    make image captions look brighter in HDR video. Can get a darker brighter
+    of image subtitles by disabling it. (``--vo=gpu-next`` only)
+
+    Enabled by default.
+
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
 
