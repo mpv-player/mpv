@@ -161,6 +161,7 @@ jobs:
         run: |
           python -m pip install meson
           choco install ccache nasm
+          ./ci/install-cmake.ps1 -arch ${{ matrix.arch }}
 
       - name: Update Meson WrapDB
         run: |
@@ -177,7 +178,7 @@ jobs:
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
                                                              $_ -ne 'C:\Program Files\CMake\bin' -and `
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
-          $env:PATH += ';C:\Program Files\NASM'
+          $env:PATH = "$pwd\cmake\bin;" + $env:PATH + ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           ./ci/build-win32.ps1
@@ -193,7 +194,7 @@ jobs:
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
                                                              $_ -ne 'C:\Program Files\CMake\bin' -and `
                                                              $_ -ne 'C:\Strawberry\c\bin' }) -join ';'
-          $env:PATH += ';C:\Program Files\NASM'
+          $env:PATH = "$pwd\cmake\bin;" + $env:PATH + ';C:\Program Files\NASM'
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           meson test -C build -t 2
