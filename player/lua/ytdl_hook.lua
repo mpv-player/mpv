@@ -85,6 +85,7 @@ local codec_map = {
     ["avc1%..*"]    = "h264",
     ["av01%..*"]    = "av1",
     ["mp4a%..*"]    = "aac",
+    ["hev1%..*"]    = "hevc",
 }
 
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
