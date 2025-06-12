@@ -180,6 +180,15 @@ $projects = @(
         Path = "$subprojects/libjxl-cmake.wrap"
         URL = "https://github.com/libjxl/libjxl"
         Revision = "main"
+    },
+    @{
+        Path = "$subprojects/aom.wrap"
+        URL = "https://aomedia.googlesource.com/aom"
+        Revision = "main"
+        Method = "cmake"
+        Provides = @(
+            "aom = aom_dep"
+        )
     }
 )
 
@@ -214,6 +223,7 @@ meson setup build `
     -Dffmpeg:vulkan=auto `
     -Dffmpeg:libdav1d=enabled `
     -Dffmpeg:libjxl=enabled `
+    -Dffmpeg:libaom=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
