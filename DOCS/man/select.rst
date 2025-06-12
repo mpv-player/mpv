@@ -28,6 +28,9 @@ PGUP and Ctrl+b
 PGDN and Ctrl+f
     Scroll down one page.
 
+Ctrl+y
+    Copy the focused item to the clipboard.
+
 MBTN_LEFT
     Select the item under the cursor, or close the console if clicking outside
     of the menu rectangle.
