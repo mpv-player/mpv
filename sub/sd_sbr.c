@@ -145,8 +145,12 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         bitmap->stride = (*bitmaps->packed).stride[0];
 
         sbr_renderer_set_subtitles(ctx->sbr_renderer, ctx->sbr_subtitles);
-        sbr_renderer_render(ctx->sbr_renderer, &context, t, bitmap->bitmap,
-                            dim.w, dim.h, bitmap->stride >> 2);
+        if (sbr_renderer_render(ctx->sbr_renderer, &context, t, bitmap->bitmap,
+                                dim.w, dim.h, bitmap->stride >> 2) < 0) {
+            const char *error = sbr_get_last_error_string();
+            mp_err(sd->log, "Failed to render frame: %s\n", error);
+            return NULL;
+        }
     }
 
     return sub_bitmaps_copy(NULL, bitmaps);
