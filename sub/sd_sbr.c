@@ -49,7 +49,10 @@ static void enable_output(struct sd *sd, bool enable)
         ctx->sbr_renderer = NULL;
     } else {
         ctx->sbr_renderer = sbr_renderer_create(ctx->sbr_library);
-        mp_require(ctx->sbr_renderer);
+        if (!ctx->sbr_renderer) {
+            const char *error = sbr_get_last_error_string();
+            mp_err(sd->log, "Failed to create renderer: %s\n", error);
+        }
     }
 }
 
@@ -60,11 +63,17 @@ static int init(struct sd *sd)
     if (strcmp(sd->codec->codec, "subrandr/srv3"))
         return -1;
 
+    sbr_library *library = sbr_library_init();
+    if (!library) {
+        const char *error = sbr_get_last_error_string();
+        mp_err(sd->log, "Failed to initialize library: %s\n", error);
+        return -1;
+    }
+
     struct sd_sbr_priv *ctx = talloc_zero(sd, struct sd_sbr_priv);
     sd->priv = ctx;
 
-    ctx->sbr_library = sbr_library_init();
-    mp_require(ctx->sbr_library);
+    ctx->sbr_library = library;
     ctx->bitmaps = talloc_zero(ctx, struct sub_bitmaps);
     ctx->bitmaps->format = SUBBITMAP_BGRA;
     ctx->bitmaps->num_parts = 1;
@@ -96,6 +105,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         NULL
     );
     packet->sub_duration = packet->duration;
+
+    if (!ctx->sbr_subtitles) {
+        const char *error = sbr_get_last_error_string();
+        mp_err(sd->log, "Failed to load subtitles: %s\n", error);
+    }
 }
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
@@ -146,8 +160,12 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         bitmap->stride = (*bitmaps->packed).stride[0];
 
         sbr_renderer_set_subtitles(ctx->sbr_renderer, ctx->sbr_subtitles);
-        sbr_renderer_render(ctx->sbr_renderer, &context, t, bitmap->bitmap,
-                            dim.w, dim.h, bitmap->stride >> 2);
+        if (sbr_renderer_render(ctx->sbr_renderer, &context, t, bitmap->bitmap,
+                                dim.w, dim.h, bitmap->stride >> 2) < 0) {
+            const char *error = sbr_get_last_error_string();
+            mp_err(sd->log, "Failed to render frame: %s\n", error);
+            return NULL;
+        }
     }
 
     return sub_bitmaps_copy(NULL, bitmaps);
