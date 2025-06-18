@@ -595,7 +595,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (sub) {
             // Subtitle specific auto-selecting crap.
-            bool audio_matches = audio_lang && track->lang && !strcasecmp(audio_lang, track->lang);
+            bool audio_matches = mp_match_lang((char *[]){ (char *)audio_lang, NULL }, track->lang) > 0;
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
             bool lang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
