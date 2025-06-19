@@ -25,6 +25,9 @@ samples = {
     'eng_forced_matching_audio.mkv':
         [ffmpeg, common_args, '-metadata:s:a:0', 'language=eng',
          '-disposition:s:0', 'forced', '@OUTPUT@'],
+    'eng_forced_matching_audio_region.mkv':
+        [ffmpeg, common_args, '-metadata:s:a:0', 'language=en-US',
+         '-disposition:s:0', 'forced', '@OUTPUT@'],
     'eng_forced_no_matching_audio.mkv':
         [ffmpeg, common_args, '-disposition:s:0', 'forced', '@OUTPUT@'],
     'eng_forced_always_audio.mkv':
