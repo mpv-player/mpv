@@ -138,7 +138,8 @@ static void test_track_selection(char *file, char *path)
         check_api_error(mpv_set_property_string(ctx, "subs-fallback-forced", "no"));
         reload_file(path);
         check_string("current-tracks/sub/selected", "yes");
-    } else if (strcmp(file, "eng_forced_matching_audio.mkv") == 0) {
+    } else if (strcmp(file, "eng_forced_matching_audio.mkv") == 0 ||
+              (strcmp(file, "eng_forced_matching_audio_region.mkv") == 0)) {
         // select forced track
         reload_file(path);
         check_string("current-tracks/sub/selected", "yes");
