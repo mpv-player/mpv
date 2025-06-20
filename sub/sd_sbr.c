@@ -98,6 +98,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         NULL
     );
     packet->sub_duration = packet->duration;
+
+    if (!ctx->sbr_subtitles) {
+        const char *error = sbr_get_last_error_string();
+        mp_err(sd->log, "Failed to load subtitles: %s\n", error);
+    }
 }
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
