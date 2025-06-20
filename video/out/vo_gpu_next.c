@@ -995,7 +995,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         target_csp.hdr.min_luma = 0;
     }
 
-    float target_peak = opts->target_peak ? opts->target_peak : target_csp.hdr.max_luma;
+    float target_peak = opts->target_peak
+                      ? opts->target_peak
+                      : (p->next_opts->target_hint ? target_csp.hdr.max_luma : 0);
     struct pl_color_space hint;
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
