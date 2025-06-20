@@ -357,6 +357,13 @@ if features['libdl']
     dependencies += libdl
 endif
 
+subrandr = dependency('subrandr', version: ['>= 0.1.0', '<= 0.2.0'], required: get_option('subrandr'))
+features += {'subrandr': subrandr.found()}
+if features['subrandr']
+    sources += files('demux/demux_textsub.c', 'sub/sd_sbr.c')
+    dependencies += subrandr
+endif
+
 # C11 atomics are mandatory but linking to the library is not always required.
 dependencies += cc.find_library('atomic', required: false)
 
