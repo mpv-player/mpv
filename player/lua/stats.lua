@@ -298,9 +298,15 @@ end
 -- exclude: Optional table containing keys which are considered invalid values
 --          for this property. Specifying this will replace empty string as
 --          default invalid value (nil is always invalid).
-local function append_property(s, prop, attr, excluded)
+-- cached : If true, use get_property_cached instead of get_property_osd
+local function append_property(s, prop, attr, excluded, cached)
     excluded = excluded or {[""] = true}
-    local ret = mp.get_property_osd(prop)
+    local ret
+    if cached then
+        ret = get_property_cached(prop)
+    else
+        ret = mp.get_property_osd(prop)
+    end
     if not ret or excluded[ret] then
         if o.debug then
             print("No value for property: " .. prop)
@@ -920,8 +926,8 @@ local function add_video_out(s)
     append(s, "", {prefix="Display:", nl=o.nl .. o.nl, indent=""})
     append(s, vo, {prefix_sep="", nl="", indent=""})
 
-    append(s, get_property_cached("display-names"), {prefix_sep="", prefix="(", suffix=")",
-           no_prefix_markup=true, nl="", indent=" "})
+    append_property(s, "display-names", {prefix_sep="", prefix="(", suffix=")",
+                    no_prefix_markup=true, nl="", indent=" "}, nil, true)
     append(s, mp.get_property_native("current-gpu-context"),
            {prefix="Context:", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append_property(s, "avsync", {prefix="A-V:"})
@@ -986,9 +992,9 @@ local function add_video(s)
             append(s, track["decoder"], {prefix="[", nl="", indent=" ", prefix_sep="",
                    no_prefix_markup=true, suffix="]"})
         end
-        append(s, get_property_cached("hwdec-current"), {prefix="HW:", nl="",
-               indent=o.prefix_sep .. o.prefix_sep,
-               no_prefix_markup=false, suffix=""}, {no=true, [""]=true})
+        append_property(s, "hwdec-current", {prefix="HW:", nl="",
+                        indent=o.prefix_sep .. o.prefix_sep,
+                        no_prefix_markup=false, suffix=""}, {no=true, [""]=true}, true)
     end
     local has_prefix = false
     if o.show_frame_info then
