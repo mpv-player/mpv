@@ -165,6 +165,7 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
     bool delayed_peak;
+    bool image_subs_hdr_peak;
     int border_background;
     float corner_rounding;
     bool inter_preserve;
@@ -186,6 +187,7 @@ const struct m_opt_choice_alternatives lut_types[] = {
 #define OPT_BASE_STRUCT struct gl_next_opts
 const struct m_sub_options gl_next_conf = {
     .opts = (const struct m_option[]) {
+        {"image-subs-hdr-peak", OPT_BOOL(image_subs_hdr_peak)},
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
         {"border-background", OPT_CHOICE(border_background,
             {"none",  BACKGROUND_NONE},
@@ -206,6 +208,7 @@ const struct m_sub_options gl_next_conf = {
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
+        .image_subs_hdr_peak = true,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -288,7 +291,7 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
 static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct osd_state *state, struct pl_frame *frame,
-                            struct mp_image *src)
+                            struct mp_image *src, bool target_hint)
 {
     struct priv *p = vo->priv;
     double pts = src ? src->pts : 0;
@@ -368,7 +371,8 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                 // Seems like HDR subtitles are targeting SDR white
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
                     ol->color.hdr = (struct pl_hdr_metadata) {
-                        .max_luma = PL_COLOR_SDR_WHITE,
+                        .max_luma = (!target_hint || p->next_opts->image_subs_hdr_peak)
+                                    ? PL_COLOR_SDR_WHITE : 0.0f,
                     };
                 }
             }
@@ -1044,7 +1048,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     apply_target_options(p, &target, target_peak, target_csp.hdr.min_luma);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
-                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
+                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current
+                    , target_hint);
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
@@ -1115,7 +1120,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                     };
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     PL_OVERLAY_COORDS_DST_CROP,
-                                    &fp->subs, image, mpi);
+                                    &fp->subs, image, mpi, target_hint);
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
@@ -1434,6 +1439,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         osd_flags |= OSD_DRAW_SUB_ONLY;
 
     struct frame_priv *fp = mpi->priv;
+    bool target_hint = false;
     if (opts->blend_subs) {
         float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
         float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
@@ -1448,11 +1454,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         };
         update_overlays(vo, res, osd_flags,
                         PL_OVERLAY_COORDS_DST_CROP,
-                        &fp->subs, &image, mpi);
+                        &fp->subs, &image, mpi, target_hint);
     } else {
         // Disable overlays when blend_subs is disabled
         update_overlays(vo, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
-                        &p->osd_state, &target, mpi);
+                        &p->osd_state, &target, mpi, target_hint);
         image.num_overlays = 0;
     }
 
