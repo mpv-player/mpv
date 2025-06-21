@@ -227,6 +227,7 @@ end
 local state = {
     showtime = nil,                         -- time of last invocation (last mouse move)
     touchtime = nil,                        -- time of last invocation (last touch event)
+    touchpoints = {},                       -- current touch points
     osc_visible = false,
     anistart = nil,                         -- time when the animation started
     anitype = nil,                          -- current type of animation
@@ -240,6 +241,7 @@ local state = {
     initREQ = false,                        -- is a re-init request pending?
     marginsREQ = false,                     -- is a margins update pending?
     last_mouseX = nil, last_mouseY = nil,   -- last mouse position, to detect significant mouse movement
+    last_touchX = -1, last_touchY = -1,     -- last touch position
     mouse_in_window = false,
     fullscreen = false,
     tick_timer = nil,
@@ -333,9 +335,19 @@ local function get_virt_scale_factor()
     return osc_param.playresx / w, osc_param.playresy / h
 end
 
+local function recently_touched()
+    if state.touchtime == nil then
+        return false
+    end
+    return state.touchtime + 1 >= mp.get_time()
+end
+
 -- return mouse position in virtual ASS coordinates (playresx/y)
 local function get_virt_mouse_pos()
-    if state.mouse_in_window then
+    if recently_touched() then
+        local sx, sy = get_virt_scale_factor()
+        return state.last_touchX * sx, state.last_touchY * sy
+    elseif state.mouse_in_window then
         local sx, sy = get_virt_scale_factor()
         local x, y = mp.get_mouse_pos()
         return x * sx, y * sy
@@ -2242,9 +2254,17 @@ local function mouse_leave()
     state.mouse_in_window = false
 end
 
-local function handle_touch()
-    --remember last time of invocation (touch event)
-    state.touchtime = mp.get_time()
+local function handle_touch(_, touchpoints)
+    --remember last touch points
+    if touchpoints then
+        state.touchpoints = touchpoints
+        if #touchpoints > 0 then
+            --remember last time of invocation (touch event)
+            state.touchtime = mp.get_time()
+            state.last_touchX = touchpoints[1].x
+            state.last_touchY = touchpoints[1].y
+        end
+    end
 end
 
 
