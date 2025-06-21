@@ -67,6 +67,8 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
+    vo_wayland_handle_color(wl);
+
     eglSwapBuffers(p->egl_display, p->egl_surface);
 
     if (wl->opts->wl_internal_vsync)
