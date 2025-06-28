@@ -2813,6 +2813,9 @@ static void set_color_management(struct vo_wayland_state *wl)
 static void set_color_representation(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_44
+    if (!wl->color_representation_manager)
+        return;
+
     if (wl->color_representation_surface)
         wp_color_representation_surface_v1_destroy(wl->color_representation_surface);
 
