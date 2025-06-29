@@ -41,6 +41,7 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
 // Handlers for the user-facing commands.
 void cmd_screenshot(void *p);
 void cmd_screenshot_to_file(void *p);
+void cmd_screenshot_to_clipboard(void *p);
 void cmd_screenshot_raw(void *p);
 
 #endif /* MPLAYER_SCREENSHOT_H */
