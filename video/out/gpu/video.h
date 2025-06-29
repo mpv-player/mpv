@@ -158,6 +158,8 @@ struct gl_video_opts {
     int background;
     bool use_rectangle;
     struct m_color background_color;
+    struct m_color background_tile_color[2];
+    int background_tile_size;
     bool interpolation;
     float interpolation_threshold;
     int blend_subs;
