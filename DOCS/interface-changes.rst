@@ -31,6 +31,7 @@ Interface changes
 ::
 
  --- mpv 0.41.0 ---
+    - add `--d3d11-output-mode` enable use specific output mode for creating the D3D11 swapchain.
  --- mpv 0.40.0 ---
     - undeprecate list option suffixes that work with multiple items
     - add `-del` to string list and keyvalue list options
