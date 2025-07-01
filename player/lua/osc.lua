@@ -2738,6 +2738,8 @@ end)
 
 mp.observe_property("display-fps", "number", set_tick_delay)
 mp.observe_property("pause", "bool", pause_state)
+mp.observe_property("volume", "number", request_tick)
+mp.observe_property("mute", "bool", request_tick)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
 mp.observe_property("vo-configured", "bool", request_tick)
 mp.observe_property("playback-time", "number", request_tick)
