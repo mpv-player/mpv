@@ -59,6 +59,7 @@ static const struct {
     { CUE_UNUSED, "REM" },
     { CUE_UNUSED, "SONGWRITER" },
     { CUE_UNUSED, "MESSAGE" },
+    { CUE_UNUSED, "MCN" },
     { -1 },
 };
 
