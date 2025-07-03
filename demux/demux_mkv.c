@@ -746,7 +746,7 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         MP_DBG(demuxer, "|   + Colorspace: %#"PRIx32"\n", track->colorspace);
     }
     if (video->n_stereo_mode) {
-        const char *name = MP_STEREO3D_NAME(video->stereo_mode);
+        const char *name = MP_STEREO3D_NAME_DEF(video->stereo_mode, NULL);
         if (name) {
             track->stereo_mode = video->stereo_mode;
             MP_DBG(demuxer, "|   + StereoMode: %s\n", name);

@@ -611,11 +611,20 @@ const m_option_type_t m_option_type_byte_size = {
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value)
 {
+    const char *val = m_opt_choice_str_def(choices, value, NULL);
+    if (val)
+        return val;
+    mp_require(false && "Invalid choice value!");
+}
+
+const char *m_opt_choice_str_def(const struct m_opt_choice_alternatives *choices,
+                                 int value, const char *def)
+{
     for (const struct m_opt_choice_alternatives *c = choices; c->name; c++) {
         if (c->value == value)
             return c->name;
     }
-    mp_require(false && "Invalid choice value!");
+    return def;
 }
 
 static void print_choice_values(struct mp_log *log, const struct m_option *opt)
