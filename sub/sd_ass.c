@@ -567,7 +567,6 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if (total_override) {
         set_force_flags |= ASS_OVERRIDE_BIT_FONT_NAME
                             | ASS_OVERRIDE_BIT_FONT_SIZE_FIELDS
-                            | ASS_OVERRIDE_BIT_COLORS
                             | ASS_OVERRIDE_BIT_BORDER;
         if (!opts->sub_scale_signs)
             set_force_flags |= ASS_OVERRIDE_BIT_SELECTIVE_FONT_SCALE;
@@ -584,6 +583,9 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     if ((converted || shared_opts->ass_style_override[sd->order]) && opts->ass_justify)
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
+    if (opts->ass_override_colors)
+        set_force_flags |= ASS_OVERRIDE_BIT_COLORS;
+
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
     mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, opts->sub_style);

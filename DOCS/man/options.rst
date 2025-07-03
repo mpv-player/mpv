@@ -2668,6 +2668,12 @@ Subtitles
 
     Default: strip.
 
+``--sub-ass-override-colors``
+    Enables overriding ass subtitle dialogue colors with the user default ones
+    (defined with ``--sub-color`` / ``--sub-outline-color``).
+
+    Default: no.
+
 ``--sub-ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in the ASS format.
