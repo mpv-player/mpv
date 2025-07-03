@@ -61,10 +61,7 @@ enum mp_stereo3d_mode {
 
 extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
-#define MP_STEREO3D_NAME(x) m_opt_choice_str(mp_stereo3d_names, x)
-
-#define MP_STEREO3D_NAME_DEF(x, def) \
-    (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
+#define MP_STEREO3D_NAME_DEF(x, def) m_opt_choice_str_def(mp_stereo3d_names, x, def)
 
 // For many colorspace conversions, in particular those involving HDR, an
 // implicit reference white level is needed. Since this magic constant shows up
