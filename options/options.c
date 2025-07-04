@@ -1018,7 +1018,6 @@ static const struct MPOpts mp_default_opts = {
     .demuxer_thread = true,
     .demux_termination_timeout = 0.1,
     .hls_bitrate = INT_MAX,
-    .prefetch_open = true,
     .cache_pause = true,
     .cache_pause_wait = 1.0,
     .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
