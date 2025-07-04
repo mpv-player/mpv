@@ -7419,7 +7419,8 @@ them.
     2.4 function.
 
 ``--icc-use-luma``
-    Use ICC profile luminance value. (Only for ``--vo=gpu-next``)
+    Use ICC profile luminance value. Applies only to HDR targets.
+    (Only for ``--vo=gpu-next``)
 
 ``--lut=<file>``
     Specifies a custom LUT (in Adobe .cube format) to apply to the colors
