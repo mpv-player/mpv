@@ -2779,6 +2779,18 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was transcoded, while attempting to keep the old subtitles.
 
+``--image-subs-hdr-peak=<sdr|video|100-10000>``
+    Controls the image subtitle peak of hdr video, sdr means ``PL_COLOR_SDR_WHITE``,
+    video uses video data，you can also specify a value. (``--vo=gpu-next`` only)
+
+    Default: sdr.
+
+``--sub-hdr-peak=<sdr|10-203>``
+    Controls the image subtitle peak of hdr video, sdr means ``PL_COLOR_SDR_WHITE``,
+    you can also specify a value. (``--vo=gpu-next`` only)
+
+    Default: sdr.
+
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
 

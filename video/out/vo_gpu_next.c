@@ -165,6 +165,8 @@ static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
     bool delayed_peak;
+    int sub_hdr_peak;
+    int image_subs_hdr_peak;
     int border_background;
     float corner_rounding;
     bool inter_preserve;
@@ -186,6 +188,10 @@ const struct m_opt_choice_alternatives lut_types[] = {
 #define OPT_BASE_STRUCT struct gl_next_opts
 const struct m_sub_options gl_next_conf = {
     .opts = (const struct m_option[]) {
+        {"sub-hdr-peak", OPT_CHOICE(sub_hdr_peak, {"sdr", 0}),
+            M_RANGE(10, 203)},
+        {"image-subs-hdr-peak", OPT_CHOICE(image_subs_hdr_peak, {"sdr", 0}, {"video", -1}),
+            M_RANGE(100, 10000)},
         {"allow-delayed-peak-detect", OPT_BOOL(delayed_peak)},
         {"border-background", OPT_CHOICE(border_background,
             {"none",  BACKGROUND_NONE},
@@ -206,6 +212,8 @@ const struct m_sub_options gl_next_conf = {
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
         .inter_preserve = true,
+        .sub_hdr_peak = 0,
+        .image_subs_hdr_peak = 0,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -365,10 +373,12 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             // Infer bitmap colorspace from source
             if (src) {
                 ol->color = src->params.color;
-                // Seems like HDR subtitles are targeting SDR white
-                if (pl_color_transfer_is_hdr(ol->color.transfer)) {
+                int image_subs_hdr_peak = p->next_opts->image_subs_hdr_peak;
+                if (pl_color_transfer_is_hdr(ol->color.transfer) && image_subs_hdr_peak != -1) {
                     ol->color.hdr = (struct pl_hdr_metadata) {
-                        .max_luma = PL_COLOR_SDR_WHITE,
+                        .max_luma = (image_subs_hdr_peak == 0) ?
+                                    PL_COLOR_SDR_WHITE :
+                                    image_subs_hdr_peak,
                     };
                 }
             }
@@ -376,6 +386,13 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         case SUBBITMAP_LIBASS:
             if (src && item->video_color_space && !pl_color_space_is_hdr(&src->params.color))
                 ol->color = src->params.color;
+            // The maximum target peak of HDR text subtitle should not exceed the SDR white
+            int sub_hdr_peak = p->next_opts->sub_hdr_peak;
+            if (src && pl_color_transfer_is_hdr(src->params.color.transfer)) {
+                ol->color.hdr = (struct pl_hdr_metadata) {
+                    .max_luma = (sub_hdr_peak == 0) ? PL_COLOR_SDR_WHITE : sub_hdr_peak,
+                };
+            }
             ol->mode = PL_OVERLAY_MONOCHROME;
             ol->repr.alpha = PL_ALPHA_INDEPENDENT;
             break;
