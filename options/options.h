@@ -124,7 +124,7 @@ struct mp_subtitle_opts {
     int sub_shaper;
     double ass_prune_delay;
     bool ass_justify;
-    bool ass_override_colors;
+    int ass_override_colors;
     bool sub_clear_on_seek;
     int teletext_page;
     bool sub_past_video_end;
