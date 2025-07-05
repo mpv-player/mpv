@@ -813,12 +813,6 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     // If swapchain returned a value use this, override is used in hint
     if (target_peak && !target->color.hdr.max_luma)
         target->color.hdr.max_luma = target_peak;
-    // Don't set a target peak for SDR output. It rarely makes sense. If there's
-    // a use case for it, we likely need separate options for SDR, as the target
-    // peak almost never matches what we have in HDR mode.
-    if (!pl_color_transfer_is_hdr(target->color.transfer))
-        target->color.hdr.max_luma = 0;
-    // Note that we still set min_luma in SDR mode, for bt.1886.
     if (!target->color.hdr.min_luma)
         apply_target_contrast(p, &target->color, min_luma);
     if (opts->target_gamut) {
@@ -843,7 +837,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
         tbits->sample_depth = dither_depth;
     }
 
-    if (opts->icc_opts->icc_use_luma && pl_color_transfer_is_hdr(target->color.transfer)) {
+    if (opts->icc_opts->icc_use_luma) {
         p->icc_params.max_luma = 0.0f;
     } else {
         pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
