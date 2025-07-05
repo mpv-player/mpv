@@ -22,6 +22,9 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (size > MAX_FUZZ_SIZE)
+        return 0;
+
     void *tmp = talloc_new(NULL);
     char *s = talloc_array_ptrtype(tmp, s, size + 1);
     memcpy(s, data, size);
