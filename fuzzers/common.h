@@ -25,6 +25,8 @@
 
 #include <mpv/client.h>
 
+#define MAX_FUZZ_SIZE (100 << 10) // 100 KiB
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 
 #define MPV_STRINGIFY_(X) #X

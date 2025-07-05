@@ -19,6 +19,9 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (size > MAX_FUZZ_SIZE)
+        return 0;
+
     size_t value_len;
     switch (MPV_FORMAT)
     {

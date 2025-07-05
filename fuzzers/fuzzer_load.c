@@ -27,6 +27,9 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (size > MAX_FUZZ_SIZE)
+        return 0;
+
 #ifdef MPV_LOAD_CONFIG_FILE
     // config file size limit, see m_config_parse_config_file()
     if (size > 1000000000)
