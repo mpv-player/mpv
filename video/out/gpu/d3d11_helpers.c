@@ -674,8 +674,14 @@ static HRESULT create_swapchain_1_2(ID3D11Device *dev, IDXGIFactory2 *factory,
         desc.BufferCount = 1;
     }
 
-    hr = IDXGIFactory2_CreateSwapChainForHwnd(factory, (IUnknown*)dev,
+    if (opts->window == NULL) {
+        desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        hr = IDXGIFactory2_CreateSwapChainForComposition(factory, (IUnknown*)dev,
+        &desc, NULL, &swapchain1);
+    } else {
+        hr = IDXGIFactory2_CreateSwapChainForHwnd(factory, (IUnknown*)dev,
         opts->window, &desc, NULL, NULL, &swapchain1);
+    }
     if (FAILED(hr))
         goto done;
     hr = IDXGISwapChain1_QueryInterface(swapchain1, &IID_IDXGISwapChain,
