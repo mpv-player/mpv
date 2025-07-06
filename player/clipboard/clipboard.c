@@ -40,7 +40,7 @@ static const struct clipboard_backend *const clipboard_backend_list[] = {
 #if HAVE_COCOA
     &clipboard_backend_mac,
 #endif
-#if HAVE_WAYLAND_PROTOCOLS_1_39
+#if HAVE_WAYLAND && HAVE_WAYLAND_PROTOCOLS_1_39
     &clipboard_backend_wayland,
 #endif
     &clipboard_backend_vo,
