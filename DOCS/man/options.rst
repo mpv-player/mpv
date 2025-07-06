@@ -6993,6 +6993,8 @@ them.
         CIE 1931 RGB (not to be confused with CIE XYZ)
     dci-p3
         DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
+    display-p3
+        DCI-P3 with a D65 white point
     v-gamut
         Panasonic V-Gamut (VARICAM) primaries
     s-gamut
