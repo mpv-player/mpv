@@ -347,6 +347,10 @@ bstr mp_guess_lang_from_filename(bstr name, int *lang_start, enum track_flags *f
                 *f |= TRACK_FORCED;
                 matched = true;
             }
+            if (!bstrcasecmp0(tag, "default")) {
+                *f |= TRACK_DEFAULT;
+                matched = true;
+            }
             if (matched) {
                 lang_length = 0;
                 i -= (delimiter != '.') ? 2 : 1;

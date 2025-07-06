@@ -97,6 +97,7 @@ enum track_flags {
     TRACK_VISUAL_IMPAIRED = 1 << 3,
     TRACK_ATTACHED_PICTURE = 1 << 4,
     TRACK_FORCED = 1 << 5,
+    TRACK_DEFAULT = 1 << 6,
 };
 
 #define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \

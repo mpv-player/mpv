@@ -81,6 +81,9 @@ int main(void)
     TEST_LANG_GUESS("foo.en-US.forced.srt", "en-US", 3, TRACK_FORCED);
     TEST_LANG_GUESS("foo.en-US.forced.sdh.srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
     TEST_LANG_GUESS("foo.en-US.sdh.forced.srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
+    TEST_LANG_GUESS("foo.en-US.default.srt", "en-US", 3, TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo.en-US.default.sdh.srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo.en-US.sdh.default.srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
     TEST_LANG_GUESS("foo.en-simple.srt", "en-simple", 3, 0);
     TEST_LANG_GUESS("foo.sgn-FSL.srt", "sgn-FSL", 3, 0);
     TEST_LANG_GUESS("foo.gsw-u-sd-chzh.srt", "gsw-u-sd-chzh", 3, 0);
@@ -96,6 +99,9 @@ int main(void)
     TEST_LANG_GUESS("foo[en-US][forced].srt", "en-US", 3, TRACK_FORCED);
     TEST_LANG_GUESS("foo[en-US][forced][sdh].srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
     TEST_LANG_GUESS("foo[en-US][sdh][forced].srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
+    TEST_LANG_GUESS("foo[en-US][default].srt", "en-US", 3, TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo[en-US][default][sdh].srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo[en-US][sdh][default].srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
     TEST_LANG_GUESS("foo[].srt", "", -1, 0);
 
     TEST_LANG_GUESS("foo(en).srt", "en", 3, 0);
@@ -105,12 +111,19 @@ int main(void)
     TEST_LANG_GUESS("foo(en-US)(forced).srt", "en-US", 3, TRACK_FORCED);
     TEST_LANG_GUESS("foo(en-US)(forced)(sdh).srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
     TEST_LANG_GUESS("foo(en-US)(sdh)(forced).srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
+    TEST_LANG_GUESS("foo(en-US)(default).srt", "en-US", 3, TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo(en-US)(default)(sdh).srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo(en-US)(sdh)(default).srt", "en-US", 3, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
     TEST_LANG_GUESS("foo().srt", "", -1, 0);
 
     TEST_LANG_GUESS("foo.hi.forced.srt", "", -1, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
     TEST_LANG_GUESS("foo.forced.hi.srt", "", -1, TRACK_HEARING_IMPAIRED | TRACK_FORCED);
+    TEST_LANG_GUESS("foo.hi.default.srt", "", -1, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo.default.hi.srt", "", -1, TRACK_HEARING_IMPAIRED | TRACK_DEFAULT);
+    TEST_LANG_GUESS("foo.default.forced.srt", "", -1, TRACK_DEFAULT | TRACK_FORCED);
     TEST_LANG_GUESS("foo.hi.srt", "", -1, TRACK_HEARING_IMPAIRED);
     TEST_LANG_GUESS("foo.forced.srt", "", -1, TRACK_FORCED);
+    TEST_LANG_GUESS("foo.default.srt", "", -1, TRACK_DEFAULT);
 
     talloc_free(ta_ctx);
 }
