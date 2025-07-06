@@ -286,6 +286,11 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
+_subrandr () {
+    RUSTFLAGS="-L$prefix_dir/lib" build_subrandr "$prefix_dir" "$RUST_TARGET"
+}
+_subrandr_mark=lib/libsubrandr.dll.a
+
 for x in iconv zlib shaderc spirv-cross nv-headers dav1d lcms2; do
     build_if_missing $x
 done
@@ -296,6 +301,12 @@ fi
 for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
     build_if_missing $x
 done
+if [[ "$TARGET" != "i686-"* ]]; then
+    build_if_missing subrandr
+    subrandr_enabled="-Dsubrandr=enabled"
+else
+    subrandr_enabled=""
+fi
 
 ## mpv
 
@@ -313,7 +324,8 @@ meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
   -Dmujs:werror=false \
   -Dmujs:default_library=static \
   -Dlua=luajit \
-  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
+  -D{shaderc,spirv-cross,d3d11,javascript}=enabled \
+  $subrandr_enabled
 meson compile -C $build
 
 if [ "$2" = pack ]; then
@@ -330,7 +342,7 @@ if [ "$2" = pack ]; then
     pushd artifact/tmp
     dlls=(
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
-        av*.dll sw*.dll postproc-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
+        av*.dll sw*.dll {postproc,subrandr}-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
         lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2}.dll zlib1.dll
     )
     if [[ -f vulkan-1.dll ]]; then
