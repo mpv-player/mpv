@@ -44,6 +44,7 @@ jobs:
             wine: wine32
           - target: x86_64-w64-mingw32
             wine: wine64
+            rustc-target: x86_64-pc-windows-gnu
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +65,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib meson nasm ninja-build pkgconf ${{ matrix.wine }} wine
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rustc-target }}
+
       - name: Install Meson Wraps
         run: |
           mkdir subprojects -p
@@ -74,6 +80,7 @@ jobs:
           ./ci/build-mingw64.sh
         env:
           TARGET: ${{ matrix.target }}
+          RUSTC_TARGET: ${{ matrix.rustc-target }}
 
       - name: Build with meson
         id: build
@@ -566,6 +573,7 @@ jobs:
             uchardet:p
             vapoursynth:p
             vulkan-devel:p
+            rust:p
 
       - name: Build with meson
         id: build
