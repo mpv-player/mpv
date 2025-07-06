@@ -209,12 +209,15 @@ static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
 
     ret.hdr.max_luma = desc1.MaxLuminance;
     ret.hdr.min_luma = desc1.MinLuminance;
+    ret.hdr.max_fall = desc1.MaxFullFrameLuminance;
     ret.hdr.prim.blue.x = desc1.BluePrimary[0];
     ret.hdr.prim.blue.y = desc1.BluePrimary[1];
     ret.hdr.prim.green.x = desc1.GreenPrimary[0];
     ret.hdr.prim.green.y = desc1.GreenPrimary[1];
     ret.hdr.prim.red.x = desc1.RedPrimary[0];
     ret.hdr.prim.red.y = desc1.RedPrimary[1];
+    ret.hdr.prim.white.x = desc1.WhitePoint[0];
+    ret.hdr.prim.white.y = desc1.WhitePoint[1];
 
     switch (desc1.ColorSpace) {
         case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
