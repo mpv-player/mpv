@@ -2817,6 +2817,18 @@ Property list
     ``video-params/avg-pq-y``
         Average PQ luminance of a frame, as reported by peak detection (in PQ, 0-1)
 
+    ``video-params/prim-red-x``, ``video-params/prim-red-y``
+        Red primary chromaticity coordinates, available only if differs from ``video-params/primaries``
+
+    ``video-params/prim-green-x``, ``video-params/prim-green-y``
+        Green primary chromaticity coordinates, available only if differs from ``video-params/primaries``
+
+    ``video-params/prim-blue-x``, ``video-params/prim-blue-y``
+        Blue primary chromaticity coordinates, available only if differs from ``video-params/primaries``
+
+    ``video-params/prim-white-x``, ``video-params/prim-white-y``
+        White point chromaticity coordinates, available only if differs from ``video-params/primaries``
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2852,6 +2864,14 @@ Property list
             "scene-max-b"       MPV_FORMAT_DOUBLE
             "max-pq-y"          MPV_FORMAT_DOUBLE
             "avg-pq-y"          MPV_FORMAT_DOUBLE
+            "prim-red-x"        MPV_FORMAT_DOUBLE
+            "prim-red-y"        MPV_FORMAT_DOUBLE
+            "prim-green-x"      MPV_FORMAT_DOUBLE
+            "prim-green-y"      MPV_FORMAT_DOUBLE
+            "prim-blue-x"       MPV_FORMAT_DOUBLE
+            "prim-blue-y"       MPV_FORMAT_DOUBLE
+            "prim-white-x"      MPV_FORMAT_DOUBLE
+            "prim-white-y"      MPV_FORMAT_DOUBLE
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling

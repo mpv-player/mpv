@@ -888,7 +888,21 @@ local function append_img_params(s, r, ro)
 
     -- Group these together to save vertical space
     append(s, r["colormatrix"], {prefix="Colormatrix:"})
-    append(s, r["primaries"], {prefix="Primaries:", nl="", indent=indent})
+    if r["prim-red-x"] or r["prim-red-y"] or
+       r["prim-green-x"] or r["prim-green-y"] or
+       r["prim-blue-x"] or r["prim-blue-y"] or
+       r["prim-white-x"] or r["prim-white-y"] then
+        append(s, string.format("[%.3f %.3f, %.3f %.3f, %.3f %.3f, %.3f %.3f]",
+                                r["prim-red-x"] or 0, r["prim-red-y"] or 0,
+                                r["prim-green-x"] or 0, r["prim-green-y"] or 0,
+                                r["prim-blue-x"] or 0, r["prim-blue-y"] or 0,
+                                r["prim-white-x"] or 0, r["prim-white-y"] or 0),
+            {prefix="Primaries:", nl="", indent=indent})
+        append(s, r["primaries"], {prefix="in", nl="", indent=" ", prefix_sep=" ",
+                                   no_prefix_markup=true})
+    else
+        append(s, r["primaries"], {prefix="Primaries:", nl="", indent=indent})
+    end
     append(s, r["gamma"], {prefix="Transfer:", nl="", indent=indent})
 end
 
