@@ -7023,6 +7023,84 @@ them.
     if the display signals support for HDR colorspace.
     Requires a supporting driver and ``--vo=gpu-next``. (Default: ``no``)
 
+``--target-colorspace-hint-mode=<target|source>``
+    Select which metadata to use for the ``--target-colorspace-hint``.
+    (Only for ``--vo=gpu-next``)
+
+    target
+        Uses metadata based on the target display's actual capabilities. This
+        mode adapts the source content to the target display before output.
+        Note: HDR primaries are not overridden by the ``--target-prim`` option
+        this only affects the enclosing container for the colorspace.
+
+    source
+        Uses the source content's metadata. This is the traditional
+        "HDR passthrough" mode (SDR too), where it is assumed that the compositor
+        and display will handle the colorspace directly and perform any necessary
+        mappings.
+
+    Default is ``target``. If target display parameters are not available, this
+    will fall back to ``source``. Note that this is done on individual properties
+    basis, i.e. it will merge source params into target for unknown properties,
+    though not the other way around.
+
+    ``--target-*`` options override the metadata in both modes.
+
+    .. note::
+        It is highly recommended to use ``--target-colorspace-hint=<auto|yes>``
+        to ensure the output colorspace is set correctly. This is crucial for
+        all non-sRGB content, even SDR, to allow the compositor, driver, and
+        display to properly interpret the signal.
+
+        Unfortunately, it's not as easy as it sounds. While mpv performs
+        high-quality color processing, we cannot guarantee what will happen
+        after the signal leaves mpv. Therefore, you may need to adjust additional
+        settings to ensure proper output. A one-size-fits-all default is not
+        feasible.
+
+        Now with the backstory out of the way:
+
+        For HDR output the default of ``target`` should work fine, it will
+        automatically infer the best target HDR parameters and surface format.
+        For compatibility, displays are assumed to be in HDR mode, unless it's
+        reported otherwise. (you can override this with ``--target-trc``).
+        This way the HDR metadata is set and hopefully the compositor will
+        handle the rest. If the input is SDR, it will be converted to PQ with
+        primaries set to source values.
+
+        For SDR output, for targets where mpv cannot determine whether the target
+        is HDR or SDR, you can use ``source`` mode. Metadata set will match the
+        input colorspace. In case of HDR input, it will be passthrough as-is.
+        Alternatively, you can use ``target`` mode and set ``--target-trc`` to
+        a SDR transfer function. This way any input will be converted to SDR.
+
+        Use the stats display to verify the input and output colorspace settings.
+
+        TL;DR: Use ``--target-colorspace-hint=auto`` and adjust ``--target-*``
+        parameters to match your target display capabilities, until it looks best
+        for you. Use `Conditional auto profiles`_ for specific adjustments. Avoid
+        using ``--target-colorspace-hint=no`` unless it's sRGB content, but even
+        then it's better to set the colorspace metadata.
+
+    .. note::
+        Additional chatter about the "HDR passthrough" mode: There is a belief
+        that this mode should send the source HDR signal as-is to the display,
+        and the display will magically handle it, no matter what. This is not
+        always true. In some cases it is better to send the HDR signal
+        tone-mapped to the target display's capabilities, and the best way to do
+        this is within mpv itself.
+
+        This is generally handled by either the compositor or the GPU driver.
+        You can probably find HDR "calibration" options somewhere in your system.
+
+        You can choose which metadata to send to the display and manually tweak
+        it using the ``--target-*`` options. You can also try
+        ``--inverse-tone-mapping`` if you want to make everything appear more
+        HDR-like.
+
+        Your mileage may vary, this highly depends on the target display, there
+        is no single answer, but try experimenting, you may be surprised.
+
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
     this colorspace when ICC color management is not being used. Valid values
@@ -7252,8 +7330,10 @@ them.
         Specifies the contrast (slope) at the knee point. Defaults to 1.0.
 
 ``--inverse-tone-mapping``
-    If set, allows inverse tone mapping (expanding SDR to HDR). Not supported
-    by all tone mapping curves. Use with caution. (``--vo=gpu-next`` only)
+    If set, allows inverse tone mapping (expanding dynamic range). Can be used
+    for upscaling SDR content to HDR, or for making HDR content brighter.
+    Not supported by all tone mapping curves. Use with caution.
+    (``--vo=gpu-next`` only)
 
 ``--tone-mapping-max-boost=<1.0..10.0>``
     Upper limit for how much the tone mapping algorithm is allowed to boost
