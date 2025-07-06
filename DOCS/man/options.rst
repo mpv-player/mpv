@@ -2779,6 +2779,20 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was transcoded, while attempting to keep the old subtitles.
 
+``--image-subs-hdr-peak=<sdr|video|10-10000>``
+    Controls the image subtitle diffuse white level in cd/m² (nits) for HDR
+    output. ``sdr`` is 203 cd/m² for standard SDR white, while ``video``
+    uses video metadata. (``--vo=gpu-next`` only)
+
+    Default: sdr
+
+``--sub-hdr-peak=<sdr|10-10000>``
+    Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
+    for HDR output. ``sdr`` is 203 cd/m² for standard SDR white.
+    (``--vo=gpu-next`` only)
+
+    Default: sdr
+
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
 
