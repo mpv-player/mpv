@@ -815,7 +815,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color, 
 }
 
 static void apply_target_options(struct priv *p, struct pl_frame *target,
-                                 float min_luma)
+                                 float min_luma, bool hint)
 {
     update_lut(p, &p->next_opts->target_lut);
     target->lut = p->next_opts->target_lut.lut;
@@ -823,16 +823,16 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
 
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    if (p->output_levels)
-        target->repr.levels = p->output_levels;
-    if (opts->target_prim)
-        target->color.primaries = opts->target_prim;
-    if (opts->target_trc)
-        target->color.transfer = opts->target_trc;
     // If swapchain returned a value use this, override is used in hint
-    if (opts->target_peak && !target->color.hdr.max_luma)
+    if (p->output_levels && (!target->repr.levels || !hint))
+        target->repr.levels = p->output_levels;
+    if (opts->target_prim && (!target->color.primaries || !hint))
+        target->color.primaries = opts->target_prim;
+    if (opts->target_trc && (!target->color.transfer || !hint))
+        target->color.transfer = opts->target_trc;
+    if (opts->target_peak && (!target->color.hdr.max_luma || !hint))
         target->color.hdr.max_luma = opts->target_peak;
-    if (!target->color.hdr.min_luma)
+    if ((!target->color.hdr.min_luma || !hint))
         apply_target_contrast(p, &target->color, min_luma);
     if (opts->target_gamut) {
         // Ensure resulting gamut still fits inside container
@@ -1083,7 +1083,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target, target_csp.hdr.min_luma);
+    apply_target_options(p, &target, target_csp.hdr.min_luma, target_hint);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
@@ -1458,7 +1458,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
-        apply_target_options(p, &target, 0);
+        apply_target_options(p, &target, 0, false);
     } else if (args->native_csp) {
         target.color = image.color;
     } else {
