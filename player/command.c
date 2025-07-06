@@ -2434,6 +2434,8 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
     bool has_cie_y     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_CIE_Y);
     bool has_hdr10     = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10);
     bool has_hdr10plus = pl_hdr_metadata_contains(hdr, PL_HDR_METADATA_HDR10PLUS);
+    bool custom_prim   = pl_primaries_valid(&hdr->prim) &&
+                         !pl_raw_primaries_similar(&hdr->prim, pl_raw_primaries_get(p->color.primaries));
 
     bool has_crop = mp_rect_w(p->crop) > 0 && mp_rect_h(p->crop) > 0;
     const char *aspect_name = get_aspect_ratio_name(d_w / (double)d_h);
@@ -2489,6 +2491,14 @@ static int property_imgparams(const struct mp_image_params *p, int action, void 
         {"scene-avg",   SUB_PROP_FLOAT(hdr->scene_avg),    .unavailable = !has_hdr10plus},
         {"max-pq-y",    SUB_PROP_FLOAT(hdr->max_pq_y),     .unavailable = !has_cie_y},
         {"avg-pq-y",    SUB_PROP_FLOAT(hdr->avg_pq_y),     .unavailable = !has_cie_y},
+        {"prim-red-x",   SUB_PROP_FLOAT(hdr->prim.red.x),  .unavailable = !custom_prim },
+        {"prim-red-y",   SUB_PROP_FLOAT(hdr->prim.red.y),  .unavailable = !custom_prim },
+        {"prim-green-x", SUB_PROP_FLOAT(hdr->prim.green.x),.unavailable = !custom_prim },
+        {"prim-green-y", SUB_PROP_FLOAT(hdr->prim.green.y),.unavailable = !custom_prim },
+        {"prim-blue-x",  SUB_PROP_FLOAT(hdr->prim.blue.x), .unavailable = !custom_prim },
+        {"prim-blue-y",  SUB_PROP_FLOAT(hdr->prim.blue.y), .unavailable = !custom_prim },
+        {"prim-white-x", SUB_PROP_FLOAT(hdr->prim.white.x),.unavailable = !custom_prim },
+        {"prim-white-y", SUB_PROP_FLOAT(hdr->prim.white.y),.unavailable = !custom_prim },
         {0}
     };
 
