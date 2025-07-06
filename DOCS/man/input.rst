@@ -676,6 +676,10 @@ Track Manipulation
 
         Marks the track as forced.
 
+    <default>
+
+        Marks the track as default.
+
     <attached-picture> (only for ``video-add``)
 
         Marks the track as an attached picture, same as ``albumart`` argument
