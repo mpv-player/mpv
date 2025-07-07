@@ -292,7 +292,7 @@ static bool query_output_format_and_colorspace(struct mp_log *log,
     if (!out_fmt || !out_cspace)
         return false;
 
-    if (!mp_get_dxgi_output_desc(swapchain, &desc)) {
+    if (!mp_dxgi_output_desc_from_swapchain(swapchain, &desc)) {
         mp_err(log, "Failed to query swap chain's output information\n");
         goto done;
     }
@@ -985,23 +985,104 @@ done:
     return success;
 }
 
-bool mp_get_dxgi_output_desc(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc)
+bool mp_dxgi_output_desc_from_hwnd(HWND hwnd, DXGI_OUTPUT_DESC1 *desc)
 {
-    bool ret = false;
-    IDXGIOutput *output = NULL;
-    IDXGIOutput6 *output6 = NULL;
+    if (!load_d3d11_functions(NULL))
+        return false;
 
-    if (FAILED(IDXGISwapChain_GetContainingOutput(swapchain, &output)))
-        goto done;
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
+    if (!monitor)
+        return false;
 
-    if (FAILED(IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6, (void**)&output6)))
-        goto done;
+    IDXGIFactory1 *factory = NULL;
+    if (FAILED(pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&factory)))
+        return false;
 
-    ret = SUCCEEDED(IDXGIOutput6_GetDesc1(output6, desc));
+    bool result = false;
+    bool found = false;
+    for (UINT adapter_idx = 0; !found; adapter_idx++) {
+        IDXGIAdapter1 *adapter;
+        if (FAILED(IDXGIFactory1_EnumAdapters1(factory, adapter_idx, &adapter)))
+            break;
 
-done:
-    SAFE_RELEASE(output);
-    SAFE_RELEASE(output6);
+        for (UINT output_idx = 0; !found; output_idx++) {
+            IDXGIOutput *output;
+            if (FAILED(IDXGIAdapter1_EnumOutputs(adapter, output_idx, &output)))
+                break;
+
+            DXGI_OUTPUT_DESC output_desc;
+            if (SUCCEEDED(IDXGIOutput_GetDesc(output, &output_desc)) &&
+                output_desc.Monitor == monitor)
+            {
+                found = true;
+                IDXGIOutput6 *output6;
+                if (SUCCEEDED(IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6, (void**)&output6))) {
+                    result = SUCCEEDED(IDXGIOutput6_GetDesc1(output6, desc));
+                    SAFE_RELEASE(output6);
+                }
+            }
+            SAFE_RELEASE(output);
+        }
+        SAFE_RELEASE(adapter);
+    }
+
+    SAFE_RELEASE(factory);
+
+    return result;
+}
+
+bool mp_dxgi_output_desc_from_swapchain(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc)
+{
+    DXGI_SWAP_CHAIN_DESC swap_desc;
+    // IDXGISwapChain::GetContainingOutput is not used because DXGI cache the
+    // output params and doesn't react to the changes. Instead go through the
+    // HWND and create a fresh DXGI factory.
+    if (SUCCEEDED(IDXGISwapChain_GetDesc(swapchain, &swap_desc)))
+        return mp_dxgi_output_desc_from_hwnd(swap_desc.OutputWindow, desc);
+    return false;
+}
+
+struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc)
+{
+    struct pl_color_space ret = {0};
+    if (!desc)
+        return ret;
+
+    ret.hdr.max_luma = desc->MaxLuminance;
+    ret.hdr.min_luma = desc->MinLuminance;
+    ret.hdr.max_fall = desc->MaxFullFrameLuminance;
+    ret.hdr.prim.blue.x = desc->BluePrimary[0];
+    ret.hdr.prim.blue.y = desc->BluePrimary[1];
+    ret.hdr.prim.green.x = desc->GreenPrimary[0];
+    ret.hdr.prim.green.y = desc->GreenPrimary[1];
+    ret.hdr.prim.red.x = desc->RedPrimary[0];
+    ret.hdr.prim.red.y = desc->RedPrimary[1];
+    ret.hdr.prim.white.x = desc->WhitePoint[0];
+    ret.hdr.prim.white.y = desc->WhitePoint[1];
+
+    switch (desc->ColorSpace) {
+        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
+            ret.primaries = PL_COLOR_PRIM_BT_709;
+            ret.transfer = PL_COLOR_TRC_SRGB;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
+            ret.primaries = PL_COLOR_PRIM_BT_709;
+            ret.transfer = PL_COLOR_TRC_LINEAR;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
+            ret.primaries = PL_COLOR_PRIM_BT_2020;
+            ret.transfer = PL_COLOR_TRC_PQ;
+            break;
+        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020:
+            ret.primaries = PL_COLOR_PRIM_BT_2020;
+            ret.transfer = PL_COLOR_TRC_SRGB;
+            break;
+        default:
+            ret.primaries = PL_COLOR_PRIM_UNKNOWN;
+            ret.transfer = PL_COLOR_TRC_UNKNOWN;
+            break;
+    }
+
     return ret;
 }
 

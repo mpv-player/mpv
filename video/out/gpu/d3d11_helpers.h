@@ -66,7 +66,10 @@ IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
                                    bstr requested_adapter_name,
                                    bstr *listing);
 
-bool mp_get_dxgi_output_desc(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc);
+bool mp_dxgi_output_desc_from_hwnd(HWND hwnd, DXGI_OUTPUT_DESC1 *desc);
+bool mp_dxgi_output_desc_from_swapchain(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc);
+
+struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc);
 
 OPT_STRING_VALIDATE_FUNC(mp_dxgi_validate_adapter);
 
