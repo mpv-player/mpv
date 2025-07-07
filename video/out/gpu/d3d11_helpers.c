@@ -60,10 +60,12 @@ static bool load_d3d11_functions(struct mp_log *log)
 {
     mp_exec_once(&d3d11_once, d3d11_load);
     if (!pD3D11CreateDevice || !pCreateDXGIFactory1) {
-        mp_fatal(log, "Failed to load base d3d11 functionality: "
-                      "CreateDevice: %s, CreateDXGIFactory1: %s\n",
-                 pD3D11CreateDevice ? "success" : "failure",
-                 pCreateDXGIFactory1 ? "success": "failure");
+        if (log) {
+            mp_fatal(log, "Failed to load base d3d11 functionality: "
+                        "CreateDevice: %s, CreateDXGIFactory1: %s\n",
+                    pD3D11CreateDevice ? "success" : "failure",
+                    pCreateDXGIFactory1 ? "success": "failure");
+        }
         return false;
     }
 

@@ -16,6 +16,7 @@
  */
 
 #include "video/out/gpu/context.h"
+#include "video/out/gpu/d3d11_helpers.h"
 #include "video/out/w32_common.h"
 
 #include "common.h"
@@ -36,6 +37,24 @@ static void win_uninit(struct ra_ctx *ctx)
     ra_vk_ctx_uninit(ctx);
     mpvk_uninit(&p->vk);
     vo_w32_uninit(ctx->vo);
+}
+
+static int color_depth(struct ra_ctx *ctx)
+{
+    DXGI_OUTPUT_DESC1 desc;
+    if (mp_dxgi_output_desc_from_hwnd(vo_w32_hwnd(ctx->vo), &desc))
+        return desc.BitsPerColor;
+
+    return -1;
+}
+
+static struct pl_color_space preferred_csp(struct ra_ctx *ctx)
+{
+    DXGI_OUTPUT_DESC1 desc;
+    if (mp_dxgi_output_desc_from_hwnd(vo_w32_hwnd(ctx->vo), &desc))
+        return mp_dxgi_desc_to_color_space(&desc);
+
+    return (struct pl_color_space){0};
 }
 
 static bool win_init(struct ra_ctx *ctx)
@@ -59,7 +78,10 @@ static bool win_init(struct ra_ctx *ctx)
          .hwnd = vo_w32_hwnd(ctx->vo),
     };
 
-    struct ra_ctx_params params = {0};
+    struct ra_ctx_params params = {
+        .color_depth = color_depth,
+        .preferred_csp = preferred_csp,
+    };
 
     VkInstance inst = vk->vkinst->instance;
     VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
