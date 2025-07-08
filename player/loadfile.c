@@ -1670,7 +1670,7 @@ static void play_current_file(struct MPContext *mpctx)
     reset_playback_state(mpctx);
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-    if (mpctx->playlist->num_entries > 10)
+    if (mpctx->playlist->num_entries > 3)
         goto terminate_playback;
 #endif
 
