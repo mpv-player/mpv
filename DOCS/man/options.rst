@@ -7017,11 +7017,20 @@ them.
         image's native colorspace and output normalized non-linear RGB.
 
 ``--target-colorspace-hint=<auto|yes|no>``
-    Automatically configure the output colorspace of the display to pass
-    through the input values of the stream (e.g. for HDR passthrough), if
-    possible. In ``auto`` mode, the target colorspace is only set,
-    if the display signals support for HDR colorspace.
-    Requires a supporting driver and ``--vo=gpu-next``. (Default: ``no``)
+    When enabled, output colorspace metadata will be set on the swapchain
+    depending on the GPU context and platform this may affect compositor/display.
+    This can be used for "HDR passthrough" and to set the output colorspace
+    for SDR content. In ``auto`` mode, the target colorspace is only set if the
+    current display parameters are known. Currently, this is supported on
+    Wayland, D3D11 and winvk contexts. The ``yes`` option will always try to set
+    the colorspace, you may need to adjust the ``--target-*`` options to match
+    your display capabilities.
+    Requires a supporting driver and ``--vo=gpu-next``. (Default: ``auto``)
+
+    .. note::
+        Auto detected target colorspace metadata is not guaranteed to be always
+        best choice. It depends on your compositor, driver, and display
+        capabilities. However in most cases ``auto`` mode should work fine.
 
 ``--target-colorspace-hint-mode=<target|source>``
     Select which metadata to use for the ``--target-colorspace-hint``.

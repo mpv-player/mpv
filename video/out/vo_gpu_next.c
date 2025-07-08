@@ -216,6 +216,7 @@ const struct m_sub_options gl_next_conf = {
         .inter_preserve = true,
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
         .image_subs_hdr_peak = PL_COLOR_SDR_WHITE,
+        .target_hint = -1,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -1009,11 +1010,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
         target_csp = sw->fns->target_csp(sw);
-    // Assume HDR is supported, if query is not available
-    if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
-      target_csp = (struct pl_color_space){
-          .transfer = opts->target_trc ? opts->target_trc : PL_COLOR_TRC_PQ };
-    }
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         // Don't use reported display peak in SDR mode. Mostly because libplacebo
         // forcefully switches to PQ if hinting hdr metadata, ignoring the transfer
@@ -1028,7 +1024,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_color_space hint;
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
-                        pl_color_transfer_is_hdr(target_csp.transfer));
+                        target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
+    // Assume HDR is supported, if target_csp() is not available
+    if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
+        target_csp = (struct pl_color_space){
+            .transfer = opts->target_trc ? opts->target_trc : PL_COLOR_TRC_PQ };
+    }
     if (target_hint && frame->current) {
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;

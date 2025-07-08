@@ -1,0 +1,1 @@
+Change `--target-colorspace-hint` to `auto` by default. Auto mode will also enable hint for SDR formats if target metadata is reported by current output context.
