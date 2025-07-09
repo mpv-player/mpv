@@ -2786,12 +2786,22 @@ Subtitles
 
     Default: sdr
 
+    This option is disabled when ``--blend-subtitles=no`` and ``--target-colorspace-hint=no``
+    are both used. It is not guaranteed to work if ``--blend-subtitles=no`` and
+    ``--target-colorspace-hint=auto`` are both used (see ``--target-colorspace-hint``
+    for details).
+
 ``--sub-hdr-peak=<sdr|10-10000>``
     Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
     for HDR output. ``sdr`` is 203 cd/m² for standard SDR white.
     (``--vo=gpu-next`` only)
 
     Default: sdr
+
+    This option is disabled when ``--blend-subtitles=no`` and ``--target-colorspace-hint=no``
+    are both used. It is not guaranteed to work if ``--blend-subtitles=no`` and
+    ``--target-colorspace-hint=auto`` are both used (see ``--target-colorspace-hint``
+    for details).
 
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
