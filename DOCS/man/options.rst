@@ -7032,7 +7032,7 @@ them.
         best choice. It depends on your compositor, driver, and display
         capabilities. However in most cases ``auto`` mode should work fine.
 
-``--target-colorspace-hint-mode=<target|source>``
+``--target-colorspace-hint-mode=<target|source|source-dynamic>``
     Select which metadata to use for the ``--target-colorspace-hint``.
     (Only for ``--vo=gpu-next``)
 
@@ -7047,6 +7047,13 @@ them.
         "HDR passthrough" mode (SDR too), where it is assumed that the compositor
         and display will handle the colorspace directly and perform any necessary
         mappings.
+
+    source-dynamic
+        The same as ``source``, but uses dynamic per-scene metadata instead of
+        static HDR10. This is experimental and depends on the display's ability
+        to react to metadata changes. Note that this does not send full HDR10+
+        or Dolby Vision metadata, but uses that information to produce HDR10
+        with per-scene luminance values.
 
     Default is ``target``. If target display parameters are not available, this
     will fall back to ``source``. Note that this is done on individual properties

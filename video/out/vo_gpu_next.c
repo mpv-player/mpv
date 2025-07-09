@@ -206,7 +206,7 @@ const struct m_sub_options gl_next_conf = {
         {"image-lut-type", OPT_CHOICE_C(image_lut.type, lut_types)},
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_CHOICE(target_hint, {"auto", -1}, {"no", 0}, {"yes", 1})},
-        {"target-colorspace-hint-mode", OPT_CHOICE(target_hint_mode, {"target", 0}, {"source", 1})},
+        {"target-colorspace-hint-mode", OPT_CHOICE(target_hint_mode, {"target", 0}, {"source", 1}, {"source-dynamic", 2})},
         // No `target-lut-type` because we don't support non-RGB targets
         {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0},
@@ -1068,6 +1068,15 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         hint = *(p->next_opts->target_hint_mode == 0 ? target : source);
         if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
             pl_color_space_merge(&hint, source);
+        if (p->next_opts->target_hint_mode == 2) { // source-dynamic
+            pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+                .color      = &hint,
+                .metadata   = PL_HDR_METADATA_ANY,
+                .scaling    = PL_HDR_NITS,
+                .out_min    = &hint.hdr.min_luma,
+                .out_max    = &hint.hdr.max_luma,
+            ));
+        }
         // Infer missing bits now. This is important so that we don't lose
         // information after user option overrides. For example, if the user
         // sets target_trc to PQ, but the hint(source) is SDR, we want to fill
