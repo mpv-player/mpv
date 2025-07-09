@@ -2781,17 +2781,19 @@ Subtitles
 
 ``--image-subs-hdr-peak=<sdr|video|10-10000>``
     Controls the image subtitle diffuse white level in cd/m² (nits) for HDR
-    output. ``sdr`` is 203 cd/m² for standard SDR white, while ``video``
-    uses video metadata. (``--vo=gpu-next`` only)
+    output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white, while
+    ``video`` uses video metadata. (``--vo=gpu-next`` only)
 
-    Default: sdr
+    This also affects image subtitle brightness in HDR tone mapping with
+    ``--blend-subtitles=<yes|video>``.
 
 ``--sub-hdr-peak=<sdr|10-10000>``
     Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
-    for HDR output. ``sdr`` is 203 cd/m² for standard SDR white.
+    for HDR output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white.
     (``--vo=gpu-next`` only)
 
-    Default: sdr
+    This also affects text subtitle brightness in HDR tone mapping with
+    ``--blend-subtitles=<yes|video>``.
 
 ``--sub-ass=<yes|no>``
     Render ASS subtitles natively (default: yes).
