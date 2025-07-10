@@ -2779,17 +2779,26 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was transcoded, while attempting to keep the old subtitles.
 
-``--image-subs-hdr-peak=<sdr|video|10-10000>``
-    Controls the image subtitle diffuse white level in cd/m² (nits) for HDR
-    output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white, while
-    ``video`` uses video metadata. (``--vo=gpu-next`` only)
+``--overlay-luminance=<sdr|video|10-10000>``
+    Controls the overlays and image subtitle diffuse white level in cd/m² (nits)
+    for HDR output (default: ``video``). ``sdr`` is 203 cd/m² for standard SDR
+    white, while ``video`` uses video metadata.
+    (``--vo=gpu-next`` only)
 
-    This also affects image subtitle brightness in HDR tone mapping with
+    This also affects overlays and image subtitle brightness in HDR tone
+    mapping with ``--blend-subtitles=<yes|video>``.
+
+``--sub-luminance=<sdr|10-10000>``
+    Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
+    for HDR output (default: ``sdr``). ``sdr`` is 203 cd/m² for standard SDR white.
+    (``--vo=gpu-next`` only)
+
+    This also affects text subtitle brightness in HDR tone mapping with
     ``--blend-subtitles=<yes|video>``.
 
-``--sub-hdr-peak=<sdr|10-10000>``
-    Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
-    for HDR output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white.
+``--sub-ass-luminance=<sdr|10-10000>``
+    Controls the ASS subtitle diffuse white level in cd/m² (nits) for HDR output
+    (default: ``sdr``). ``sdr`` is 203 cd/m² for standard SDR white.
     (``--vo=gpu-next`` only)
 
     This also affects text subtitle brightness in HDR tone mapping with
