@@ -320,11 +320,19 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
         }
     }
     mp_assert(root->num_pars);
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (root->num_pars > 3)
+        goto error;
+#endif
     for (int n = 0; n < root->num_pars; n++) {
         if (root->pars[n]->num_parts < 1) {
             mp_err(log, "EDL specifies no segments.'\n");
             goto error;
         }
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        if (root->pars[n]->num_parts > 3)
+            goto error;
+#endif
     }
     return root;
 error:
