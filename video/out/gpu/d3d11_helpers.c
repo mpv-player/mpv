@@ -29,48 +29,38 @@
 
 #include "d3d11_helpers.h"
 
-// Windows 8 enum value, not present in mingw-w64 headers
-#define DXGI_ADAPTER_FLAG_SOFTWARE (2)
-typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
+#define DECLARE_DLL_FUNCTION(name, dll, type)                     \
+    static type p##name##_;                                       \
+    static HMODULE name##_module_;                                \
+    static void name##_unload(void)                               \
+    {                                                             \
+        p##name##_ = NULL;                                        \
+        if (name##_module_)                                       \
+            FreeLibrary(name##_module_);                          \
+    }                                                             \
+    static void name##_load(void)                                 \
+    {                                                             \
+        name##_module_ = LoadLibraryW(dll);                       \
+        if (!name##_module_) {                                    \
+            p##name##_ = NULL;                                    \
+            return;                                               \
+        }                                                         \
+        p##name##_ = (type)GetProcAddress(name##_module_, #name); \
+        atexit(name##_unload);                                    \
+    }                                                             \
+    static type get_##name(void)                                  \
+    {                                                             \
+        static mp_once name##_once = MP_STATIC_ONCE_INITIALIZER;  \
+        mp_exec_once(&name##_once, name##_load);                  \
+        return p##name##_;                                        \
+    }
+
 typedef HRESULT(WINAPI *PFN_DXGI_GET_DEBUG_INTERFACE)(REFIID riid, void **ppDebug);
+typedef HRESULT(WINAPI *PFN_CREATE_DXGI_FACTORY)(REFIID riid, void **ppFactory);
 
-static mp_once d3d11_once = MP_STATIC_ONCE_INITIALIZER;
-static PFN_D3D11_CREATE_DEVICE pD3D11CreateDevice = NULL;
-static PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = NULL;
-static PFN_DXGI_GET_DEBUG_INTERFACE pDXGIGetDebugInterface = NULL;
-static void d3d11_load(void)
-{
-    HMODULE d3d11   = LoadLibraryW(L"d3d11.dll");
-    HMODULE dxgilib = LoadLibraryW(L"dxgi.dll");
-    HMODULE dxgidebuglib = LoadLibraryW(L"dxgidebug.dll");
-    if (!d3d11 || !dxgilib)
-        return;
-
-    pD3D11CreateDevice = (PFN_D3D11_CREATE_DEVICE)
-        GetProcAddress(d3d11, "D3D11CreateDevice");
-    pCreateDXGIFactory1 = (PFN_CREATE_DXGI_FACTORY)
-        GetProcAddress(dxgilib, "CreateDXGIFactory1");
-    if (dxgidebuglib) {
-        pDXGIGetDebugInterface = (PFN_DXGI_GET_DEBUG_INTERFACE)
-            GetProcAddress(dxgidebuglib, "DXGIGetDebugInterface");
-    }
-}
-
-static bool load_d3d11_functions(struct mp_log *log)
-{
-    mp_exec_once(&d3d11_once, d3d11_load);
-    if (!pD3D11CreateDevice || !pCreateDXGIFactory1) {
-        if (log) {
-            mp_fatal(log, "Failed to load base d3d11 functionality: "
-                        "CreateDevice: %s, CreateDXGIFactory1: %s\n",
-                    pD3D11CreateDevice ? "success" : "failure",
-                    pCreateDXGIFactory1 ? "success": "failure");
-        }
-        return false;
-    }
-
-    return true;
-}
+DECLARE_DLL_FUNCTION(D3D11CreateDevice, L"d3d11.dll", PFN_D3D11_CREATE_DEVICE)
+DECLARE_DLL_FUNCTION(CreateDXGIFactory1, L"dxgi.dll", PFN_CREATE_DXGI_FACTORY)
+DECLARE_DLL_FUNCTION(DXGIGetDebugInterface, L"dxgidebug.dll", PFN_DXGI_GET_DEBUG_INTERFACE)
 
 #define D3D11_DXGI_ENUM(prefix, define) { case prefix ## define: return #define; }
 
@@ -294,7 +284,7 @@ static bool query_output_format_and_colorspace(struct mp_log *log,
     if (!out_fmt || !out_cspace)
         return false;
 
-    if (!mp_dxgi_output_desc_from_swapchain(swapchain, &desc)) {
+    if (!mp_dxgi_output_desc_from_swapchain(NULL, swapchain, &desc)) {
         mp_err(log, "Failed to query swap chain's output information\n");
         goto done;
     }
@@ -363,6 +353,12 @@ IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
     HRESULT hr = S_OK;
     IDXGIFactory1 *factory;
     IDXGIAdapter1 *picked_adapter = NULL;
+
+    PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = get_CreateDXGIFactory1();
+    if (!pCreateDXGIFactory1) {
+        mp_fatal(log, "Failed to load CreateDXGIFactory1 function.\n");
+        return NULL;
+    }
 
     hr = pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&factory);
     if (FAILED(hr)) {
@@ -457,6 +453,12 @@ static HRESULT create_device(struct mp_log *log, IDXGIAdapter1 *adapter,
                              bool warp, bool debug, int max_fl, int min_fl,
                              ID3D11Device **dev)
 {
+    PFN_D3D11_CREATE_DEVICE pD3D11CreateDevice = get_D3D11CreateDevice();
+    if (!pD3D11CreateDevice) {
+        mp_fatal(log, "Failed to load D3D11CreateDevice function.\n");
+        return E_FAIL;
+    }
+
     const D3D_FEATURE_LEVEL *levels;
     int levels_len = get_feature_levels(max_fl, min_fl, &levels);
     if (!levels_len) {
@@ -476,10 +478,6 @@ bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
                                      bstr *listing)
 {
     IDXGIAdapter1 *picked_adapter = NULL;
-
-    if (!load_d3d11_functions(log)) {
-        return false;
-    }
 
     if ((picked_adapter = mp_get_dxgi_adapter(log, adapter_name, listing))) {
         SAFE_RELEASE(picked_adapter);
@@ -508,10 +506,6 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
     IDXGIAdapter1 *adapter = NULL;
     bool success = false;
     HRESULT hr;
-
-    if (!load_d3d11_functions(log)) {
-        goto done;
-    }
 
     adapter = mp_get_dxgi_adapter(log, bstr0(adapter_name), NULL);
 
@@ -987,24 +981,46 @@ done:
     return success;
 }
 
-bool mp_dxgi_output_desc_from_hwnd(HWND hwnd, DXGI_OUTPUT_DESC1 *desc)
+void mp_dxgi_factory_uninit(struct mp_dxgi_factory_ctx *ctx)
 {
-    if (!load_d3d11_functions(NULL))
-        return false;
+    if (!ctx)
+        return;
+
+    SAFE_RELEASE(ctx->factory);
+    SAFE_RELEASE(ctx->last_matched_output);
+}
+
+bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
+                                   HWND hwnd, DXGI_OUTPUT_DESC1 *desc)
+{
+    struct mp_dxgi_factory_ctx tmp = {0};
+    if (!ctx)
+        ctx = &tmp;
 
     HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
     if (!monitor)
         return false;
 
-    IDXGIFactory1 *factory = NULL;
-    if (FAILED(pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&factory)))
-        return false;
+    if (!ctx->factory || !IDXGIFactory1_IsCurrent(ctx->factory)) {
+        mp_dxgi_factory_uninit(ctx);
+        PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = get_CreateDXGIFactory1();
+        if (FAILED(pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&ctx->factory)))
+            return false;
+    }
 
     bool result = false;
+    if (ctx->last_matched_output &&
+        SUCCEEDED(IDXGIOutput6_GetDesc1(ctx->last_matched_output, desc)) &&
+        desc->Monitor == monitor)
+    {
+        result = true;
+        goto done;
+    }
+
     bool found = false;
     for (UINT adapter_idx = 0; !found; adapter_idx++) {
         IDXGIAdapter1 *adapter;
-        if (FAILED(IDXGIFactory1_EnumAdapters1(factory, adapter_idx, &adapter)))
+        if (FAILED(IDXGIFactory1_EnumAdapters1(ctx->factory, adapter_idx, &adapter)))
             break;
 
         for (UINT output_idx = 0; !found; output_idx++) {
@@ -1020,7 +1036,8 @@ bool mp_dxgi_output_desc_from_hwnd(HWND hwnd, DXGI_OUTPUT_DESC1 *desc)
                 IDXGIOutput6 *output6;
                 if (SUCCEEDED(IDXGIOutput_QueryInterface(output, &IID_IDXGIOutput6, (void**)&output6))) {
                     result = SUCCEEDED(IDXGIOutput6_GetDesc1(output6, desc));
-                    SAFE_RELEASE(output6);
+                    SAFE_RELEASE(ctx->last_matched_output);
+                    ctx->last_matched_output = output6;
                 }
             }
             SAFE_RELEASE(output);
@@ -1028,19 +1045,21 @@ bool mp_dxgi_output_desc_from_hwnd(HWND hwnd, DXGI_OUTPUT_DESC1 *desc)
         SAFE_RELEASE(adapter);
     }
 
-    SAFE_RELEASE(factory);
-
+done:
+    mp_dxgi_factory_uninit(&tmp);
     return result;
 }
 
-bool mp_dxgi_output_desc_from_swapchain(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc)
+bool mp_dxgi_output_desc_from_swapchain(struct mp_dxgi_factory_ctx *ctx,
+                                        IDXGISwapChain *swapchain,
+                                        DXGI_OUTPUT_DESC1 *desc)
 {
     DXGI_SWAP_CHAIN_DESC swap_desc;
     // IDXGISwapChain::GetContainingOutput is not used because DXGI cache the
     // output params and doesn't react to the changes. Instead go through the
     // HWND and create a fresh DXGI factory.
     if (SUCCEEDED(IDXGISwapChain_GetDesc(swapchain, &swap_desc)))
-        return mp_dxgi_output_desc_from_hwnd(swap_desc.OutputWindow, desc);
+        return mp_dxgi_output_desc_from_hwnd(ctx, swap_desc.OutputWindow, desc);
     return false;
 }
 
@@ -1091,11 +1110,10 @@ struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc)
 void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue)
 {
-    load_d3d11_functions(log);
-
     *iqueue = NULL;
     *debug = NULL;
 
+    PFN_DXGI_GET_DEBUG_INTERFACE pDXGIGetDebugInterface = get_DXGIGetDebugInterface();
     if (!pDXGIGetDebugInterface)
         return;
 

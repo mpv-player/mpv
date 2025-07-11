@@ -28,6 +28,7 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 struct priv {
     struct mpvk_ctx vk;
+    struct mp_dxgi_factory_ctx dxgi_ctx;
 };
 
 static void win_uninit(struct ra_ctx *ctx)
@@ -37,12 +38,15 @@ static void win_uninit(struct ra_ctx *ctx)
     ra_vk_ctx_uninit(ctx);
     mpvk_uninit(&p->vk);
     vo_w32_uninit(ctx->vo);
+    mp_dxgi_factory_uninit(&p->dxgi_ctx);
 }
 
 static int color_depth(struct ra_ctx *ctx)
 {
+    struct priv *p = ctx->priv;
+
     DXGI_OUTPUT_DESC1 desc;
-    if (mp_dxgi_output_desc_from_hwnd(vo_w32_hwnd(ctx->vo), &desc))
+    if (mp_dxgi_output_desc_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(ctx->vo), &desc))
         return desc.BitsPerColor;
 
     return -1;
@@ -50,8 +54,10 @@ static int color_depth(struct ra_ctx *ctx)
 
 static struct pl_color_space preferred_csp(struct ra_ctx *ctx)
 {
+    struct priv *p = ctx->priv;
+
     DXGI_OUTPUT_DESC1 desc;
-    if (mp_dxgi_output_desc_from_hwnd(vo_w32_hwnd(ctx->vo), &desc))
+    if (mp_dxgi_output_desc_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(ctx->vo), &desc))
         return mp_dxgi_desc_to_color_space(&desc);
 
     return (struct pl_color_space){0};

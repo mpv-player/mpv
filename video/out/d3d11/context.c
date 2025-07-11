@@ -121,6 +121,8 @@ struct priv {
     int64_t last_sync_qpc_time;
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
+
+    struct mp_dxgi_factory_ctx dxgi_ctx;
 };
 
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
@@ -175,7 +177,7 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     DXGI_OUTPUT_DESC1 desc1;
-    if (!mp_dxgi_output_desc_from_swapchain(p->swapchain, &desc1))
+    if (!mp_dxgi_output_desc_from_swapchain(&p->dxgi_ctx, p->swapchain, &desc1))
         desc1.BitsPerColor = 0;
 
     DXGI_SWAP_CHAIN_DESC desc;
@@ -200,8 +202,10 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
 
 static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
 {
+    struct priv *p = sw->priv;
+
     DXGI_OUTPUT_DESC1 desc;
-    if (mp_dxgi_output_desc_from_hwnd(vo_w32_hwnd(sw->ctx->vo), &desc))
+    if (mp_dxgi_output_desc_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(sw->ctx->vo), &desc))
         return mp_dxgi_desc_to_color_space(&desc);
 
     return (struct pl_color_space){0};
@@ -461,6 +465,7 @@ static void d3d11_uninit(struct ra_ctx *ctx)
         vo_w32_swapchain(ctx->vo, NULL);
     }
     SAFE_RELEASE(p->device);
+    mp_dxgi_factory_uninit(&p->dxgi_ctx);
 
     // Destroy the RA last to prevent objects we hold from showing up in D3D's
     // leak checker
