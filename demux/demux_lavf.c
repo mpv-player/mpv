@@ -94,7 +94,9 @@ const struct m_sub_options demux_lavf_conf = {
         {"demuxer-lavf-probescore", OPT_INT(probescore),
          M_RANGE(1, AVPROBE_SCORE_MAX)},
         {"demuxer-lavf-hacks", OPT_BOOL(hacks)},
+#ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
         {"demuxer-lavf-o", OPT_KEYVALUELIST(avopts)},
+#endif
         {"sub-codepage", OPT_STRING(sub_cp)},
         {"rtsp-transport", OPT_CHOICE(rtsp_transport,
             {"lavf", 0},
