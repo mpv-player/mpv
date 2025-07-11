@@ -218,6 +218,7 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
         .init_fragment = src->tl->init_fragment,
         .skip_lavf_probing = src->tl->dash,
         .stream_flags = demuxer->stream_origin,
+        .depth = demuxer->depth + 1,
     };
     src->current->d = demux_open_url(src->current->url, &params,
                                      demuxer->cancel, demuxer->global);

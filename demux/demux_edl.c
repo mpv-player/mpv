@@ -344,6 +344,7 @@ static struct demuxer *open_source(struct timeline *root,
     struct demuxer_params params = {
         .init_fragment = tl->init_fragment,
         .stream_flags = root->stream_origin,
+        .depth = root->demuxer->depth + 1,
     };
     struct demuxer *d = demux_open_url(filename, &params, root->cancel,
                                        root->global);
@@ -435,6 +436,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
         struct demuxer_params params = {
             .init_fragment = tl->init_fragment,
             .stream_flags = root->stream_origin,
+            .depth = root->demuxer->depth + 1,
         };
         tl->track_layout = demux_open_url("memory://", &params, root->cancel,
                                           root->global);

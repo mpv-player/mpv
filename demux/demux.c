@@ -3268,6 +3268,11 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     if (mp_cancel_test(sinfo->cancel))
         return NULL;
 
+    if (params && params->depth > 10) {
+        mp_err(log, "Demuxer recursion depth exceeded.\n");
+        return NULL;
+    }
+
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     struct m_config_cache *opts_cache =
         m_config_cache_alloc(demuxer, global, &demux_conf);
@@ -3291,6 +3296,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .opts_cache = opts_cache,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .depth = params ? params->depth : 0,
     };
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
@@ -3355,6 +3361,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 params2.timeline = tl;
                 params2.is_top_level = params && params->is_top_level;
                 params2.stream_record = params && params->stream_record;
+                params2.depth = params ? params->depth + 1 : 0;
                 sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
                                     NULL, sinfo, &params2, DEMUX_CHECK_FORCE);

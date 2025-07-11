@@ -200,6 +200,8 @@ typedef struct demux_attachment
 
 struct demuxer_params {
     bool is_top_level; // if true, it's not a sub-demuxer (enables cache etc.)
+    int depth;         // depth of the demuxer tree, 0 for top-level, each
+                       // nested demuxer increases depth by 1
     char *force_format;
     int matroska_num_wanted_uids;
     struct matroska_segment_uid *matroska_wanted_uids;
@@ -238,6 +240,7 @@ typedef struct demuxer {
     bool is_streaming; // implies a "slow" input, such as network or FUSE
     int stream_origin; // any STREAM_ORIGIN_* (set from source stream)
     bool access_references; // allow opening other files/URLs
+    int depth; // demuxer depth, 0 for top-level
 
     struct demux_opts *opts;
     struct m_config_cache *opts_cache;
