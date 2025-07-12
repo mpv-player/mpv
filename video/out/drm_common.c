@@ -44,7 +44,6 @@
 #include "common/msg.h"
 #include "misc/ctype.h"
 #include "options/m_config.h"
-#include "options/path.h"
 #include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
@@ -944,7 +943,7 @@ static bool card_has_connection(const char *path)
 static void get_primary_device_path(struct vo_drm_state *drm)
 {
     if (drm->opts->device_path) {
-        drm->card_path = mp_get_user_path(drm, drm->vo->global, drm->opts->device_path);
+        drm->card_path = talloc_strdup(drm, drm->opts->device_path);
         return;
     }
 
