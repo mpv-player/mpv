@@ -42,6 +42,7 @@
 #include "common/stats.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
+#include "video/out/gpu/video.h"
 #include "sub/osd.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
@@ -334,6 +335,7 @@ error:
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
 {
     struct mp_vo_opts *opts = mp_get_config_group(NULL, global, &vo_sub_opts);
+    struct gl_video_opts *gl_opts = mp_get_config_group(NULL, global, &gl_video_conf);
     struct m_obj_settings *vo_list = opts->video_driver_list;
     struct vo *vo = NULL;
     // first try the preferred drivers, with their optional subdevice param:
@@ -355,11 +357,15 @@ autoprobe:
         const struct vo_driver *driver = video_out_drivers[i];
         if (driver == &video_out_null)
             break;
+        // reject gpu-next from autoprobing, if blend-subtitles=video is requested
+        if (driver == &video_out_gpu_next && gl_opts->blend_subs == BLEND_SUBS_VIDEO)
+            continue;
         vo = vo_create(true, global, ex, (char *)driver->name);
         if (vo)
             goto done;
     }
 done:
+    talloc_free(gl_opts);
     talloc_free(opts);
     return vo;
 }
