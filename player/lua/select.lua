@@ -551,9 +551,19 @@ mp.add_key_binding(nil, "select-watch-later", function ()
     for _, watch_later_file in pairs(watch_later_files) do
         local file_handle = io.open(watch_later_file)
         if file_handle then
-            local line = file_handle:read()
-            if line and line ~= "# redirect entry" and line:find("^#") then
-                files[#files + 1] = {line:sub(3), utils.file_info(watch_later_file).mtime}
+            local line1 = file_handle:read()
+            if line1 and line1 ~= "# redirect entry" and line1:find("^#") then
+                local entry = {
+                    path = line1:sub(3),
+                    time = utils.file_info(watch_later_file).mtime
+                }
+                for line in file_handle:lines() do
+                    if line:find("^# title: ") then
+                        entry.title = line:sub(10)
+                        break
+                    end
+                end
+                files[#files + 1] = entry
             end
             file_handle:close()
         end
@@ -567,19 +577,19 @@ mp.add_key_binding(nil, "select-watch-later", function ()
     end
 
     table.sort(files, function (i, j)
-        return i[2] > j[2]
+        return i.time > j.time
     end)
 
     local items = {}
-    for i, file in ipairs(files) do
-        items[i] = os.date("(%Y-%m-%d) ", file[2]) .. file[1]
+    for i, entry in ipairs(files) do
+        items[i] = format_history_entry(entry)
     end
 
     input.select({
         prompt = "Select a file:",
         items = items,
         submit = function (i)
-            mp.commandv("loadfile", files[i][1])
+            mp.commandv("loadfile", files[i].path)
         end,
     })
 end)
