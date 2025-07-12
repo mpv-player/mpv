@@ -18,6 +18,6 @@ bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
 #define MP_SUB_BB_LIST_MAX 15
 
 int mp_get_sub_bb_list(struct sub_bitmaps *sbs, struct mp_rect *out_rc_list,
-                       int rc_list_count);
+                       int rc_list_count, int padding);
 
 #endif
