@@ -100,13 +100,16 @@ static void remove_intersecting_rcs(struct mp_rect *list, int *count)
 // NOTE: some callers assume that sub bitmaps are never split or partially
 //       covered by returned rectangles.
 int mp_get_sub_bb_list(struct sub_bitmaps *sbs, struct mp_rect *out_rc_list,
-                       int rc_list_count)
+                       int rc_list_count, int padding)
 {
     int M = MERGE_RC_PIXELS;
     int num_rc = 0;
     for (int n = 0; n < sbs->num_parts; n++) {
         struct sub_bitmap *sb = &sbs->parts[n];
-        struct mp_rect bb = {sb->x, sb->y, sb->x + sb->dw, sb->y + sb->dh};
+        struct mp_rect bb = {sb->x - padding,
+                             sb->y - padding,
+                             sb->x + sb->dw + padding,
+                             sb->y + sb->dh + padding};
         bool intersects = false;
         for (int r = 0; r < num_rc; r++) {
             struct mp_rect *rc = &out_rc_list[r];
