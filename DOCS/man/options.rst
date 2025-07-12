@@ -2797,7 +2797,7 @@ Subtitles
 
 ``--image-subs-hdr-peak=<sdr|video|10-10000>``
     Controls the image subtitle diffuse white level in cd/m² (nits) for HDR
-    output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white, while
+    videos (default: 1000). ``sdr`` is 203 cd/m² for standard SDR white, while
     ``video`` uses video metadata. (``--vo=gpu-next`` only)
 
     This also affects image subtitle brightness in HDR tone mapping with
