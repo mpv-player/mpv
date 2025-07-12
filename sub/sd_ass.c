@@ -29,7 +29,6 @@
 #include "config.h"
 #include "options/m_config.h"
 #include "options/options.h"
-#include "options/path.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "demux/demux.h"
@@ -109,14 +108,11 @@ static const struct sd_filter_functions *const filters[] = {
 
 // Add default styles, if the track does not have any styles yet.
 // Apply style overrides if the user provides any.
-static void mp_ass_add_default_styles(struct sd *sd, ASS_Track *track, struct mp_subtitle_opts *opts,
-                                      struct mp_subtitle_shared_opts *shared_opts)
+static void mp_ass_add_default_styles(ASS_Track *track, struct mp_subtitle_opts *opts,
+                                      struct mp_subtitle_shared_opts *shared_opts, int order)
 {
-    if (opts->ass_styles_file && shared_opts->ass_style_override[sd->order]) {
-        char *file = mp_get_user_path(NULL, sd->global, opts->ass_styles_file);
-        ass_read_styles(track, file, NULL);
-        talloc_free(file);
-    }
+    if (opts->ass_styles_file && shared_opts->ass_style_override[order])
+        ass_read_styles(track, opts->ass_styles_file, NULL);
 
     if (track->n_styles == 0) {
         if (!track->PlayResY) {
@@ -131,7 +127,7 @@ static void mp_ass_add_default_styles(struct sd *sd, ASS_Track *track, struct mp
         mp_ass_set_style(style, track->PlayResY, opts->sub_style);
     }
 
-    if (shared_opts->ass_style_override[sd->order])
+    if (shared_opts->ass_style_override[order])
         ass_process_force_style(track);
 }
 
@@ -260,7 +256,7 @@ static void assobjects_init(struct sd *sd)
     ctx->shadow_track = ass_new_track(ctx->ass_library);
     ctx->shadow_track->PlayResX = MP_ASS_FONT_PLAYRESX;
     ctx->shadow_track->PlayResY = MP_ASS_FONT_PLAYRESY;
-    mp_ass_add_default_styles(sd, ctx->shadow_track, opts, shared_opts);
+    mp_ass_add_default_styles(ctx->shadow_track, opts, shared_opts, sd->order);
 
     char *extradata = sd->codec->extradata;
     int extradata_size = sd->codec->extradata_size;
@@ -271,7 +267,7 @@ static void assobjects_init(struct sd *sd)
     if (extradata)
         ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
 
-    mp_ass_add_default_styles(sd, ctx->ass_track, opts, shared_opts);
+    mp_ass_add_default_styles(ctx->ass_track, opts, shared_opts, sd->order);
 
 #if LIBASS_VERSION >= 0x01302000
     ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);

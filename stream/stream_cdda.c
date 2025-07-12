@@ -38,7 +38,6 @@
 #include "options/m_option.h"
 #include "options/m_config.h"
 #include "options/options.h"
-#include "options/path.h"
 
 #if !HAVE_GPL
 #error GPL only
@@ -254,11 +253,11 @@ static int open_cdda(stream_t *st)
     int last_track;
 
     if (st->path[0]) {
-        p->device = talloc_strdup(priv, st->path);
+        p->device = st->path;
     } else if (p->cdda_device && p->cdda_device[0]) {
-        p->device = mp_get_user_path(priv, st->global, p->cdda_device);
+        p->device = p->cdda_device;
     } else {
-        p->device = talloc_strdup(priv, DEFAULT_OPTICAL_DEVICE);
+        p->device = DEFAULT_OPTICAL_DEVICE;
     }
 
 #if defined(__NetBSD__)

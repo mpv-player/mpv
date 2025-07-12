@@ -552,7 +552,7 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     if (!filename)
         return NULL;
 
-    if (!(priv->filename = mp_get_user_path(priv, stream->global, filename)))
+    if (!(priv->filename = talloc_strdup(priv, filename)))
         return NULL;
 
     priv->dvd_speed = priv->opts->speed;
