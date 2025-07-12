@@ -38,6 +38,10 @@ Available video output drivers are:
 
     https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
+    ``gpu-next`` won't be automatically selected if the ``--blend-subtitles=video``
+    option is set, as it does not support blending subtitles at video resolution.
+    It can still be selected, if  ``--vo=gpu-next`` is specified explicitly.
+
 ``gpu``
     General purpose, customizable, GPU-accelerated video output driver. It
     supports extended scaling methods, dithering, color management, custom
