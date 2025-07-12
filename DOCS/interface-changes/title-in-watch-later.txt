@@ -1,0 +1,1 @@
+add --write-title-in-watch-later-config option

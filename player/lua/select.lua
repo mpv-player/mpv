@@ -517,9 +517,20 @@ mp.add_key_binding(nil, "select-watch-later", function ()
     for _, watch_later_file in pairs(watch_later_files) do
         local file_handle = io.open(watch_later_file)
         if file_handle then
-            local line = file_handle:read()
-            if line and line ~= "# redirect entry" and line:find("^#") then
-                files[#files + 1] = {line:sub(3), utils.file_info(watch_later_file).mtime}
+            local line1 = file_handle:read()
+            local line2 = file_handle:read()
+            if line1 and line1 ~= "# redirect entry" and line1:find("^#") then
+                local file_path = line1:sub(3)
+                local display_name = file_path
+                if mp.get_property_bool("write-title-in-watch-later-config") then
+                    if line2 and line2:find("^#") then
+                        display_name = line2:sub(3)
+                        if file_path:find("https://") or file_path:find("http://") then
+                            display_name = "[Web] " .. display_name
+                        end
+                    end
+                end
+                files[#files + 1] = {file_path, utils.file_info(watch_later_file).mtime, display_name}
             end
             file_handle:close()
         end
@@ -538,7 +549,7 @@ mp.add_key_binding(nil, "select-watch-later", function ()
 
     local items = {}
     for i, file in ipairs(files) do
-        items[i] = os.date("(%Y-%m-%d) ", file[2]) .. file[1]
+        items[i] = os.date("(%Y-%m-%d) ", file[2]) .. file[3]
     end
 
     input.select({
