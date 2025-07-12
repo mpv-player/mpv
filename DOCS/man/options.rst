@@ -1151,6 +1151,18 @@ Watch Later
         This option may expose privacy-sensitive information and is thus
         disabled by default.
 
+``--write-title-in-watch-later-config``
+    Prepend the watch later config files with the title of the file they refer
+    to. Only works when ``--write-filename-in-watch-later-config`` is enabled.
+    Saved as a comment below the filename comment (see
+    ``--write-filename-in-watch-later-config``)
+
+    .. warning::
+
+        This option may expose privacy-sensitive information and is thus
+        disabled by default.
+
+
 ``--ignore-path-in-watch-later-config``
     Ignore path (i.e. use filename only) when using watch later feature.
     (Default: disabled)
