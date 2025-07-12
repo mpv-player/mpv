@@ -1809,7 +1809,7 @@ static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
 
     char *dir;
     if (dir_opt && dir_opt[0]) {
-        dir = mp_get_user_path(vo, p->global, dir_opt);
+        dir = talloc_strdup(vo, dir_opt);
     } else {
         dir = mp_find_user_file(vo, p->global, "cache", "");
     }
@@ -2111,9 +2111,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
             return p->user_hooks[i].hook;
     }
 
-    char *fname = mp_get_user_path(NULL, p->global, path);
-    bstr shader = stream_read_file(fname, p, p->global, 1000000000); // 1GB
-    talloc_free(fname);
+    bstr shader = stream_read_file(path, p, p->global, 1000000000); // 1GB
 
     const struct pl_hook *hook = NULL;
     if (shader.len)
@@ -2156,10 +2154,9 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     if (p->icc_path && strcmp(opts->profile, p->icc_path) == 0)
         return; // ICC profile hasn't changed
 
-    char *fname = mp_get_user_path(NULL, p->global, opts->profile);
+    char *fname = opts->profile;
     MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
     struct bstr icc = stream_read_file(fname, p, p->global, 100000000); // 100 MB
-    talloc_free(fname);
     update_icc(p, icc);
 
     // Update cached path
@@ -2182,7 +2179,7 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     talloc_replace(p, lut->path, lut->opt);
 
     // Load LUT file
-    char *fname = mp_get_user_path(NULL, p->global, lut->path);
+    char *fname = lut->path;
     MP_VERBOSE(p, "Loading custom LUT '%s'\n", fname);
     const int lut_max_size = 1536 << 20; // 1.5 GiB, matches lut cache limit
     struct bstr lutdata = stream_read_file(fname, NULL, p->global, lut_max_size);
@@ -2192,7 +2189,6 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     } else {
         lut->lut = pl_lut_parse_cube(p->pllog, lutdata.start, lutdata.len);
     }
-    talloc_free(fname);
     talloc_free(lutdata.start);
 }
 
