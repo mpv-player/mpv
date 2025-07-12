@@ -1649,8 +1649,6 @@ static bool parse_config_file(struct input_ctx *ictx, char *file)
     bool r = false;
     void *tmp = talloc_new(NULL);
 
-    file = mp_get_user_path(tmp, ictx->global, file);
-
     bstr data = stream_read_file2(file, tmp, STREAM_ORIGIN_DIRECT | STREAM_READ,
                                   ictx->global, 1000000);
     if (data.start) {
