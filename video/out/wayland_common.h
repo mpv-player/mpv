@@ -180,6 +180,7 @@ struct vo_wayland_state {
     /* Input */
     struct wl_list seat_list;
     struct xkb_context *xkb_context;
+    struct zwp_tablet_manager_v2 *wp_tablet_manager;
 
     /* Data offer */
     struct wl_data_device_manager *devman;
