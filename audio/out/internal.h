@@ -131,10 +131,6 @@ struct ao_driver {
     const char *name;
     // Description shown with --ao=help.
     const char *description;
-    // This requires waiting for a AO_EVENT_INITIAL_UNBLOCK event before the
-    // first write() call is done. Encode mode uses this, and push mode
-    // respects it automatically (don't use with pull mode).
-    bool initially_blocked;
     // If true, write units of entire frames. The write() call is modified to
     // use data==mp_aframe. Useful for encoding AO only.
     bool write_frames;
