@@ -823,6 +823,8 @@ static const m_option_t mp_opts[] = {
     {"save-position-on-quit", OPT_BOOL(position_save_on_quit)},
     {"write-filename-in-watch-later-config",
         OPT_BOOL(write_filename_in_watch_later_config)},
+    {"write-title-in-watch-later-config",
+        OPT_BOOL(write_title_in_watch_later_config)},
     {"ignore-path-in-watch-later-config",
         OPT_BOOL(ignore_path_in_watch_later_config)},
     {"watch-later-dir", OPT_STRING(watch_later_dir),
