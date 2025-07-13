@@ -3632,7 +3632,10 @@ static int mp_property_current_watch_later_dir(void *ctx, struct m_property *pro
                                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg, mp_get_playback_resume_dir(mpctx));
+    char *dir = mp_get_playback_resume_dir(mpctx);
+    int r = m_property_strdup_ro(action, arg, dir);
+    talloc_free(dir);
+    return r;
 }
 
 static int mp_property_protocols(void *ctx, struct m_property *prop,
