@@ -19,6 +19,7 @@
 #include <limits.h>
 
 #include <subrandr/subrandr.h>
+#include <subrandr/logging.h>
 
 #include "mpv_talloc.h"
 
@@ -56,6 +57,37 @@ static void enable_output(struct sd *sd, bool enable)
     }
 }
 
+static inline int mp_level_from_sbr_log_level(sbr_log_level level)
+{
+    switch (level) {
+        case SBR_LOG_LEVEL_TRACE:
+            return MSGL_TRACE;
+        case SBR_LOG_LEVEL_DEBUG:
+            return MSGL_DEBUG;
+        case SBR_LOG_LEVEL_INFO: // fallthrough
+        case SBR_LOG_LEVEL_WARN:
+            return MSGL_V;
+        case SBR_LOG_LEVEL_ERROR: // fallthrough
+        default:
+            return MSGL_WARN;
+    }
+}
+
+static void mp_msg_sbr_log_callback(sbr_log_level level,
+                                    const char *source, size_t source_len,
+                                    const char *message, size_t message_len,
+                                    void *user_data)
+{
+    struct sd *sd = user_data;
+    int mp_level = mp_level_from_sbr_log_level(level);
+
+    if (mp_msg_test(sd->log, mp_level)) {
+        if (source_len > 0)
+            mp_msg(sd->log, mp_level, "[%.*s] ", (int)source_len, source);
+        mp_msg(sd->log, mp_level, "%.*s\n", (int)message_len, message);
+    }
+}
+
 static int init(struct sd *sd)
 {
     if (!sd->codec->codec)
@@ -74,6 +106,8 @@ static int init(struct sd *sd)
     sd->priv = ctx;
 
     ctx->sbr_library = library;
+    sbr_library_set_log_callback(ctx->sbr_library, mp_msg_sbr_log_callback, sd);
+
     ctx->bitmaps = talloc_zero(ctx, struct sub_bitmaps);
     ctx->bitmaps->format = SUBBITMAP_BGRA;
     ctx->bitmaps->num_parts = 1;
