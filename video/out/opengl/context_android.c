@@ -109,9 +109,24 @@ static bool android_reconfig(struct ra_ctx *ctx)
     if (!vo_android_surface_size(ctx->vo, &w, &h))
         return false;
 
+    // Update native window buffer geometry to prevent screen tearing
+    ANativeWindow *native_window = vo_android_native_window(ctx->vo);
+    if (native_window) {
+        ANativeWindow_setBuffersGeometry(native_window, w, h, 0);
+    }
+
     ctx->vo->dwidth = w;
     ctx->vo->dheight = h;
     ra_gl_ctx_resize(ctx->swapchain, w, h, 0);
+
+    // Force buffer sync to prevent tearing in paused state
+    struct priv *p = ctx->priv;
+    if (p->egl_display && p->egl_surface) {
+        GL *gl = &p->gl;
+        gl->Clear(GL_COLOR_BUFFER_BIT);
+        eglSwapBuffers(p->egl_display, p->egl_surface);
+    }
+
     return true;
 }
 
