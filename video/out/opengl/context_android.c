@@ -118,13 +118,17 @@ static bool android_reconfig(struct ra_ctx *ctx)
     ctx->vo->dwidth = w;
     ctx->vo->dheight = h;
     ra_gl_ctx_resize(ctx->swapchain, w, h, 0);
-
-    // Force buffer sync to prevent tearing in paused state
+    
+    // Force a buffer swap to sync the new geometry
+    // This ensures the surface is updated even when paused
     struct priv *p = ctx->priv;
     if (p->egl_display && p->egl_surface) {
-        GL *gl = &p->gl;
-        gl->Clear(GL_COLOR_BUFFER_BIT);
-        eglSwapBuffers(p->egl_display, p->egl_surface);
+        struct ra_fbo fbo;
+        if (ctx->swapchain->fns->start_frame(ctx->swapchain, &fbo)) {
+            // Submit an empty frame to force buffer synchronization
+            ctx->swapchain->fns->submit_frame(ctx->swapchain, NULL);
+            ctx->swapchain->fns->swap_buffers(ctx->swapchain);
+        }
     }
 
     return true;
