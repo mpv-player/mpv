@@ -3479,7 +3479,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                                       fbo->tex->params.w, fbo->tex->params.h,
                                       fmt);
                 }
-                const struct ra_fbo *dest_fbo = r ? &(struct ra_fbo) { p->output_tex } : fbo;
+                const struct ra_fbo *dest_fbo =
+                    r ? &(struct ra_fbo) { .tex = p->output_tex, .color_space = fbo->color_space } : fbo;
                 p->output_tex_valid = r;
                 pass_draw_to_screen(p, dest_fbo, flags);
             }
