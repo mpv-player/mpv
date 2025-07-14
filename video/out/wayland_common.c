@@ -2853,10 +2853,11 @@ static void set_color_management(struct vo_wayland_state *wl)
 
     pl_color_space_infer(&wl->target_params.color);
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
+    bool is_hdr = pl_color_transfer_is_hdr(color.transfer);
     bool use_metadata = hdr_metadata_valid(&hdr);
     if (!use_metadata)
         MP_VERBOSE(wl, "supplied HDR metadata does not conform to the wayland color management protocol. It will not be used.\n");
-    if (wl->supports_display_primaries && use_metadata) {
+    if (wl->supports_display_primaries && is_hdr && use_metadata) {
         wp_image_description_creator_params_v1_set_mastering_display_primaries(image_creator_params,
                 lrintf(hdr.prim.red.x * WAYLAND_COLOR_FACTOR),
                 lrintf(hdr.prim.red.y * WAYLAND_COLOR_FACTOR),
