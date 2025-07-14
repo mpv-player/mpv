@@ -348,10 +348,10 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
                 .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
                 .color = {
-                    (c >> 24) / 255.0,
-                    ((c >> 16) & 0xFF) / 255.0,
-                    ((c >> 8) & 0xFF) / 255.0,
-                    1.0 - (c & 0xFF) / 255.0,
+                    (c >> 24) / 255.0f,
+                    ((c >> 16) & 0xFF) / 255.0f,
+                    ((c >> 8) & 0xFF) / 255.0f,
+                    (255 - (c & 0xFF)) / 255.0f,
                 }
             };
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
