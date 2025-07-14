@@ -6498,6 +6498,14 @@ them.
         The image, after conversion to RGB, but before
         ``--blend-subtitles=video`` is applied.
 
+        .. note::
+            With ``--vo=gpu``, ``MAIN`` and ``MAINPRESUB`` are separate shader
+            stages, this allows rendering overlays directly onto the pre-scaled
+            video stage. ``--vo=gpu-next`` does not support this feature,
+            and as such, the ``MAINPRESUB`` shader stage does not exist.
+            It is still valid to refer to this name in shaders, but it is
+            handled identically to ``MAIN``.
+
     MAIN (resizable)
         The main image, after conversion to RGB but before upscaling.
 
