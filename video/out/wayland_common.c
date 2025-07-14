@@ -2683,6 +2683,27 @@ static int handle_round(int scale, int n)
     return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
 }
 
+static bool hdr_metadata_valid(struct pl_hdr_metadata *hdr)
+{
+    // Always return a hard failure if this condition fails.
+    if (hdr->min_luma >= hdr->max_luma)
+        return false;
+
+    // If max_cll or max_fall are invalid, set them to zero.
+    if (hdr->max_cll && (hdr->max_cll <= hdr->min_luma || hdr->max_cll > hdr->max_luma))
+        hdr->max_cll = 0;
+
+    if (hdr->max_fall && (hdr->max_fall <= hdr->min_luma || hdr->max_fall > hdr->max_luma))
+        hdr->max_fall = 0;
+
+    if (hdr->max_cll && hdr->max_fall && hdr->max_fall > hdr->max_cll) {
+        hdr->max_cll = 0;
+        hdr->max_fall = 0;
+    }
+
+    return true;
+}
+
 static void prepare_resize(struct vo_wayland_state *wl)
 {
     const int32_t width = lrint(mp_rect_w(wl->geometry) / wl->scaling_factor);
@@ -2831,7 +2852,10 @@ static void set_color_management(struct vo_wayland_state *wl)
     wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
 
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
-    if (wl->supports_display_primaries) {
+    bool use_metadata = hdr_metadata_valid(&hdr);
+    if (!use_metadata)
+        MP_VERBOSE(wl, "supplied HDR metadata does not conform to the wayland color management protocol. It will not be used.\n");
+    if (wl->supports_display_primaries && use_metadata) {
         wp_image_description_creator_params_v1_set_mastering_display_primaries(image_creator_params,
                 lrintf(hdr.prim.red.x * WAYLAND_COLOR_FACTOR),
                 lrintf(hdr.prim.red.y * WAYLAND_COLOR_FACTOR),
@@ -2842,15 +2866,10 @@ static void set_color_management(struct vo_wayland_state *wl)
                 lrintf(hdr.prim.white.x * WAYLAND_COLOR_FACTOR),
                 lrintf(hdr.prim.white.y * WAYLAND_COLOR_FACTOR));
 
-        if (hdr.min_luma < hdr.max_luma)
-            wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
-                lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
-
-        if (hdr.max_cll > hdr.min_luma && hdr.max_cll <= hdr.max_luma)
-            wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
-
-        if (hdr.max_fall > hdr.min_luma && hdr.max_fall <= hdr.max_luma && hdr.max_fall <= hdr.max_cll)
-            wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
+        wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
+            lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
+        wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
+        wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
