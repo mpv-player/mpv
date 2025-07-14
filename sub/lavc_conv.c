@@ -104,6 +104,8 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     priv->extradata = talloc_strndup(priv, avctx->subtitle_header,
                                      avctx->subtitle_header_size);
     mp_codec_info_from_av(avctx, sd->codec);
+    // Keep original codec name, which get_lavc_format() may have transformed
+    sd->codec->codec = priv->codec;
     return priv;
 
  error:
