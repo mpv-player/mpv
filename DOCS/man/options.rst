@@ -6851,7 +6851,7 @@ them.
     macOS only.
 
 ``--macos-render-timer=<timer>``
-    Sets the mode (default: callback) for syncing the rendering of frames to the display's
+    Sets the mode (default: feedback) for syncing the rendering of frames to the display's
     vertical refresh rate.
     macOS and Vulkan (macvk) only.
 

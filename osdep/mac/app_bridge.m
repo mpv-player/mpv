@@ -94,7 +94,7 @@ const struct m_sub_options macos_conf = {
     .defaults = &(const struct macos_opts){
         .macos_title_bar_color = {0, 0, 0, 0},
         .macos_fs_animation_duration = -1,
-        .macos_render_timer = RENDER_TIMER_CALLBACK,
+        .macos_render_timer = RENDER_TIMER_PRESENTATION_FEEDBACK,
         .macos_menu_shortcuts = true,
         .macos_bundle_path = (char *[]){
             "/usr/local/bin", "/usr/local/sbin", "/opt/local/bin", "/opt/local/sbin",
