@@ -3456,6 +3456,7 @@ static void set_color_management(struct vo_wayland_state *wl)
     wp_image_description_creator_params_v1_set_primaries_named(image_creator_params, primaries);
     wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
 
+    pl_color_space_infer(&wl->target_params.color);
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
     bool use_metadata = hdr_metadata_valid(&hdr);
     if (!use_metadata)
