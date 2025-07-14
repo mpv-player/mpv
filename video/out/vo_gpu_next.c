@@ -1060,14 +1060,26 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Assume HDR is supported, if target_csp() is not available
     if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
         target_csp = (struct pl_color_space){
-            .transfer = opts->target_trc ? opts->target_trc : PL_COLOR_TRC_PQ };
+            .transfer = opts->target_trc ? opts->target_trc : pl_color_space_hdr10.transfer };
     }
     if (target_hint && frame->current) {
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;
-        hint = *(p->next_opts->target_hint_mode == 0 ? target : source);
-        if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
-            pl_color_space_merge(&hint, source);
+        hint = *source;
+        if (p->next_opts->target_hint_mode == 0) {
+            hint = *target;
+            if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
+                pl_color_space_merge(&hint, source);
+            // Restore target luminance if it was present, note that we check
+            // max_luma only, this make sure that max_cll/max_fall is not take
+            // from source.
+            if (target->hdr.max_luma) {
+                hint.hdr.max_luma = target->hdr.max_luma;
+                hint.hdr.min_luma = target->hdr.min_luma;
+                hint.hdr.max_cll  = target->hdr.max_cll;
+                hint.hdr.max_fall = target->hdr.max_fall;
+            }
+        }
         if (p->next_opts->target_hint_mode == 2) { // source-dynamic
             pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
                 .color      = &hint,
@@ -1081,7 +1093,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // information after user option overrides. For example, if the user
         // sets target_trc to PQ, but the hint(source) is SDR, we want to fill
         // in SDR luminance values instead of the default PQ range.
-        pl_color_space_infer(&hint);
+        struct pl_color_space source_csp = *source;
+        pl_color_space_infer_map(&source_csp, &hint);
         // Always prefer target luminance and transfer for inverse tone mapping
         if (pl_color_transfer_is_hdr(target->transfer) && opts->tone_map.inverse) {
             hint.transfer     = target->transfer;
@@ -1129,7 +1142,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target, target_csp.hdr.min_luma, target_hint && !pass_colorspace);
+    apply_target_options(p, &target, hint.hdr.min_luma, target_hint && !pass_colorspace);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
