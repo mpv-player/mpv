@@ -20,9 +20,10 @@
 
 #include "common/common.h"
 #include "common/playlist.h"
+#include "misc/natural_sort.h"
+#include "misc/path_utils.h"
 #include "options/m_config.h"
 #include "stream/stream.h"
-#include "misc/natural_sort.h"
 #include "demux.h"
 
 #include "stream/stream_libarchive.h"
@@ -75,7 +76,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     struct playlist *pl = talloc_zero(demuxer, struct playlist);
     demuxer->playlist = pl;
 
-    char *prefix = mp_url_escape(mpa, demuxer->stream->url, "~|");
+    char *prefix = mp_normalize_path(NULL, mp_url_escape(mpa, demuxer->stream->url, "~|"));
 
     char **files = NULL;
     int num_files = 0;
@@ -86,6 +87,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
                                   mpa->entry_filename);
         MP_TARRAY_APPEND(mpa, files, num_files, f);
     }
+    talloc_free(prefix);
 
     if (files)
         qsort(files, num_files, sizeof(files[0]), cmp_filename);
