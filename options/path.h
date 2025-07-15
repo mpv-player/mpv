@@ -55,7 +55,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
                        const char *path);
 
 // Same as mp_get_user_path but also normalizes the path if it happens to be
-// relative. Requires a talloc_ctx.
+// relative.
 char *mp_normalize_user_path(void *talloc_ctx, struct mpv_global *global,
                              const char *path);
 
