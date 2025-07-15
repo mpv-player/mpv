@@ -329,9 +329,8 @@ static bool pack_libass(struct mp_ass_packer *p, struct sub_bitmaps *res)
 
 static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
 {
-    int padding = p->packer->padding;
     struct mp_rect bb_list[MP_SUB_BB_LIST_MAX];
-    int num_bb = mp_get_sub_bb_list(res, bb_list, MP_SUB_BB_LIST_MAX, padding);
+    int num_bb = mp_get_sub_bb_list(res, bb_list, MP_SUB_BB_LIST_MAX);
 
     struct sub_bitmaps imgs = {
         .change_id = res->change_id,
@@ -348,6 +347,7 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
     if (!pack(p, &imgs, IMGFMT_BGRA))
         return false;
 
+    int padding = p->packer->padding;
     uint8_t *base = imgs.packed->planes[0];
     int stride = imgs.packed->stride[0];
 
@@ -355,10 +355,10 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
         struct mp_rect bb = bb_list[n];
         struct sub_bitmap *b = &imgs.parts[n];
 
-        b->x = bb.x0 + padding;
-        b->y = bb.y0 + padding;
-        b->w = b->dw = mp_rect_w(bb) - padding * 2;
-        b->h = b->dh = mp_rect_h(bb) - padding * 2;
+        b->x = bb.x0;
+        b->y = bb.y0;
+        b->w = b->dw = mp_rect_w(bb);
+        b->h = b->dh = mp_rect_h(bb);
         b->stride = stride;
         b->bitmap = base + b->stride * b->src_y + b->src_x * 4;
         memset_pic(b->bitmap, 0, b->w * 4, b->h, b->stride);
@@ -376,8 +376,8 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
                           b->bitmap, b->stride,
                           s->x - b->x, s->y - b->y,
                           s->libass.color);
-            fill_padding_4(b->bitmap, b->w, b->h, b->stride, padding);
         }
+        fill_padding_4(b->bitmap, b->w, b->h, b->stride, padding);
     }
 
     *res = imgs;
