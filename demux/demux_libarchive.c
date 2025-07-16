@@ -76,7 +76,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     struct playlist *pl = talloc_zero(demuxer, struct playlist);
     demuxer->playlist = pl;
 
-    char *prefix = mp_normalize_path(NULL, mp_url_escape(mpa, demuxer->stream->url, "~|"));
+    char *prefix = mp_normalize_path(NULL, mp_url_escape(mpa, demuxer->stream->url, "~|%"));
 
     char **files = NULL;
     int num_files = 0;
