@@ -1076,6 +1076,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         target_csp.hdr.max_cll = 0;
         target_csp.hdr.max_fall = 0;
     }
+    // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
+    // reports it as maxFALL directly, but this doesn't mean the same thing.
+    target_csp.hdr.max_fall = 0;
 
     struct pl_color_space hint;
     bool target_hint = p->next_opts->target_hint == 1 ||
@@ -1112,6 +1115,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 .out_min    = &hint.hdr.min_luma,
                 .out_max    = &hint.hdr.max_luma,
             ));
+            // Set maxCLL to dynamic max luminance. Note that libplacebo uses
+            // max luminace as maxCLL in practice.
+            hint.hdr.max_cll = hint.hdr.max_luma;
+            // Keep maxFALL from static metadata, unless its value is too high.
+            // Could be set to 0, but let's keep it for now.
+            if (hint.hdr.max_fall > hint.hdr.max_cll)
+                hint.hdr.max_fall = 0;
         }
         // Infer missing bits now. This is important so that we don't lose
         // information after user option overrides. For example, if the user
@@ -1135,6 +1145,20 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+        // Always set maxCLL, display uses this metadata and we shouldn't let it
+        // fallback to default value.
+        if (!hint.hdr.max_cll)
+            hint.hdr.max_cll = hint.hdr.max_luma;
+        // If tone mapping is required, adjust maxCLL and maxFALL
+        if (source->hdr.max_luma > hint.hdr.max_luma || opts->tone_map.inverse) {
+            // Set maxCLL to the target luminance if it's not already lower
+            if (!hint.hdr.max_cll || hint.hdr.max_luma < hint.hdr.max_cll || opts->tone_map.inverse)
+                hint.hdr.max_cll = hint.hdr.max_luma;
+            // There's no reliable way to estimate maxFALL here
+            hint.hdr.max_fall = 0;
+        }
+        if (hint.hdr.max_cll && hint.hdr.max_fall > hint.hdr.max_cll)
+            hint.hdr.max_fall = 0;
         apply_target_contrast(p, &hint, hint.hdr.min_luma);
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
