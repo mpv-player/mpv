@@ -91,6 +91,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"@commands.lua",
 #   include "player/lua/commands.lua.inc"
     },
+    {"@misc.lua",
+#   include "player/lua/misc.lua.inc"
+    },
     {0}
 };
 
