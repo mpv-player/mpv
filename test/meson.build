@@ -22,8 +22,10 @@ test_utils_files = [
     'options/m_config_core.c',
     'options/m_config_frontend.c',
     'options/m_option.c',
+    'options/path.c',
     'osdep/io.c',
     'osdep/timer.c',
+    path_source,
     timer_source,
     'ta/ta.c',
     'ta/ta_talloc.c',
@@ -110,9 +112,7 @@ codepoint_width = executable('codepoint-width', files('codepoint_width.c'),
                              include_directories: incdir, link_with: test_utils)
 test('codepoint-width', codepoint_width)
 
-paths_objects = libmpv.extract_objects('options/path.c', path_source)
-paths = executable('paths', 'paths.c', include_directories: incdir,
-                   objects: paths_objects, link_with: test_utils)
+paths = executable('paths', 'paths.c', include_directories: incdir, link_with: test_utils)
 test('paths', paths)
 
 if get_option('libmpv')

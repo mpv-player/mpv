@@ -431,9 +431,7 @@ static int bluray_stream_open_internal(stream_t *s)
         bd_set_debug_mask(0);
 
     /* open device */
-    char *device_tmp = mp_get_user_path(NULL, s->global, device);
-    BLURAY *bd = bd_open(device_tmp, NULL);
-    talloc_free(device_tmp);
+    BLURAY *bd = bd_open(device, NULL);
     if (!bd) {
         MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
         ret = STREAM_UNSUPPORTED;

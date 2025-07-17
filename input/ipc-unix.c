@@ -389,7 +389,7 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     *arg = (struct mp_ipc_ctx){
         .log        = mp_log_new(arg, global->log, "ipc"),
         .client_api = client_api,
-        .path       = mp_get_user_path(arg, global, opts->ipc_path),
+        .path       = talloc_strdup(arg, opts->ipc_path),
         .death_pipe = {-1, -1},
     };
 
