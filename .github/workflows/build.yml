@@ -166,21 +166,6 @@ jobs:
           choco install ccache nasm
           ./ci/install-cmake.ps1 -arch ${{ matrix.arch }}
 
-      - name: Install Rustup
-        # TODO: Remove after https://github.com/actions/partner-runner-images/issues/77
-        if: ${{ matrix.os == 'windows-11-arm' }}
-        run: |
-          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile "$env:TEMP\rustup-init.exe"
-          & "$env:TEMP\rustup-init.exe" --default-toolchain none --profile=minimal -y
-          "$env:USERPROFILE\.cargo\bin" | Out-File -Append $env:GITHUB_PATH
-          "CARGO_HOME=$env:USERPROFILE\.cargo" | Out-File -Append $env:GITHUB_ENV
-
-      - name: Update Rust toolchain
-        if: ${{ matrix.os == 'windows-11-arm' }}
-        run: |
-          rustup update --no-self-update stable
-          rustup default stable
-
       - name: Update Meson WrapDB
         run: |
           meson wrap update-db
