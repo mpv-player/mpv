@@ -827,7 +827,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
     // If swapchain returned a value use this, override is used in hint
-    if (p->output_levels && (!target->repr.levels || !hint))
+    if (p->output_levels)
         target->repr.levels = p->output_levels;
     if (opts->target_prim && (!target->color.primaries || !hint))
         target->color.primaries = opts->target_prim;
