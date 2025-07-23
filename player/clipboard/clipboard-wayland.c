@@ -27,6 +27,8 @@
 #include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
+static const uint8_t MESSAGE_DEATH = 0;
+
 struct clipboard_wayland_data_offer {
     struct ext_data_control_offer_v1 *offer;
     char *mime_type;
@@ -503,7 +505,7 @@ static void uninit(struct clipboard_ctx *cl)
     struct clipboard_wayland_priv *priv = cl->priv;
     if (!priv)
         return;
-    (void)write(priv->message_pipe[1], &(char){0}, 1);
+    (void)write(priv->message_pipe[1], &MESSAGE_DEATH, sizeof(MESSAGE_DEATH));
     mp_thread_join(priv->thread);
     close(priv->message_pipe[0]);
     close(priv->message_pipe[1]);
