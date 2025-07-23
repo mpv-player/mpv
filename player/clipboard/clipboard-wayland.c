@@ -28,6 +28,7 @@
 #include "osdep/threads.h"
 
 static const uint8_t MESSAGE_DEATH = 0;
+static const uint8_t MESSAGE_CREATE_SOURCES = 1;
 
 struct clipboard_wayland_data_offer {
     struct ext_data_control_offer_v1 *offer;
@@ -435,8 +436,14 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
         return false;
     }
 
-    if (fds[1].revents & POLLIN)
-        return false;
+    if (fds[1].revents & POLLIN) {
+        uint8_t msg = 0;
+        if (read(wl->message_pipe[0], &msg, sizeof(msg)) == sizeof(msg) && msg == MESSAGE_CREATE_SOURCES) {
+            create_data_sources(wl);
+        } else {
+            return false;
+        }
+    }
 
     if (fds[2].revents & POLLIN)
         get_selection_data(wl, wl->selection_offer, false);
@@ -570,7 +577,7 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         break;
     }
     mp_mutex_unlock(&priv->lock);
-    create_data_sources(priv);
+    (void)write(priv->message_pipe[1], &MESSAGE_CREATE_SOURCES, sizeof(MESSAGE_CREATE_SOURCES));
     return CLIPBOARD_SUCCESS;
 }
 
