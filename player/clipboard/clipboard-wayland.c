@@ -36,7 +36,7 @@ struct clipboard_wayland_data_offer {
 struct clipboard_wayland_priv {
     mp_mutex lock;
     // accessed by both threads
-    int death_pipe[2];
+    int message_pipe[2];
     bstr selection_text;
     bstr primary_selection_text;
     bool data_changed;
@@ -410,7 +410,7 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
 
     struct pollfd fds[] = {
         {.fd = wl->display_fd,    .events = POLLIN },
-        {.fd = wl->death_pipe[0], .events = POLLIN },
+        {.fd = wl->message_pipe[0], .events = POLLIN },
         {.fd = wl->selection_offer->fd, .events = POLLIN },
         {.fd = wl->primary_selection_offer->fd, .events = POLLIN },
     };
@@ -471,7 +471,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     cl->priv = talloc_zero(cl, struct clipboard_wayland_priv);
     struct clipboard_wayland_priv *priv = cl->priv;
-    priv->death_pipe[0] = priv->death_pipe[1] = priv->display_fd = -1;
+    priv->message_pipe[0] = priv->message_pipe[1] = priv->display_fd = -1;
     priv->log = mp_log_new(priv, cl->log, "wayland");
     priv->selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
     priv->primary_selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
@@ -479,7 +479,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
     wl_list_init(&priv->seat_list);
     mp_mutex_init(&priv->lock);
 
-    if (mp_make_wakeup_pipe(priv->death_pipe) < 0)
+    if (mp_make_wakeup_pipe(priv->message_pipe) < 0)
         goto pipe_err;
     if (!clipboard_wayland_init(priv))
         goto init_err;
@@ -490,8 +490,8 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 thread_err:
     clipboard_wayland_uninit(priv);
 init_err:
-    close(priv->death_pipe[0]);
-    close(priv->death_pipe[1]);
+    close(priv->message_pipe[0]);
+    close(priv->message_pipe[1]);
 pipe_err:
     mp_mutex_destroy(&priv->lock);
     TA_FREEP(&cl->priv);
@@ -503,10 +503,10 @@ static void uninit(struct clipboard_ctx *cl)
     struct clipboard_wayland_priv *priv = cl->priv;
     if (!priv)
         return;
-    (void)write(priv->death_pipe[1], &(char){0}, 1);
+    (void)write(priv->message_pipe[1], &(char){0}, 1);
     mp_thread_join(priv->thread);
-    close(priv->death_pipe[0]);
-    close(priv->death_pipe[1]);
+    close(priv->message_pipe[0]);
+    close(priv->message_pipe[1]);
     mp_mutex_destroy(&priv->lock);
     TA_FREEP(&cl->priv);
 }
