@@ -26,11 +26,17 @@ struct entry {
     &(struct mpv_node_list) {                                               \
         .num = sizeof(VAL_LIST(__VA_ARGS__)) / sizeof(struct mpv_node),     \
         .values = VAL_LIST(__VA_ARGS__)}}}
+#define EMPTY_NODE_ARRAY {.format = MPV_FORMAT_NODE_ARRAY, .u = { .list =    \
+    &(struct mpv_node_list) {                                               \
+        .num = 0}}}
 #define NODE_MAP(k, v) {.format = MPV_FORMAT_NODE_MAP, .u = { .list =       \
     &(struct mpv_node_list) {                                               \
         .num = sizeof(VAL_LIST(v)) / sizeof(struct mpv_node),               \
         .values = VAL_LIST(v),                                              \
         .keys = (char**)(const char *[]){k}}}}
+#define EMPTY_NODE_MAP {.format = MPV_FORMAT_NODE_MAP, .u = { .list =       \
+    &(struct mpv_node_list) {                                               \
+        .num = 0}}}
 
 static const struct entry entries[] = {
     { "null", "null", NODE_NONE()},
@@ -44,12 +50,12 @@ static const struct entry entries[] = {
     { TEXT("a\u2c29"), TEXT("aⰩ"), NODE_STR("a\342\260\251")},
     { "[1,2,3]", "[1,2,3]",
         NODE_ARRAY(NODE_INT64(1), NODE_INT64(2), NODE_INT64(3))},
-    { "[ ]", "[]", NODE_ARRAY()},
+    { "[ ]", "[]", EMPTY_NODE_ARRAY},
     { "[1,,2]", .expect_fail = true},
     { "[,]", .expect_fail = true},
     { TEXT({"a":1, "b":2}), TEXT({"a":1,"b":2}),
         NODE_MAP(L("a", "b"), L(NODE_INT64(1), NODE_INT64(2)))},
-    { "{ }", "{}", NODE_MAP(L(), L())},
+    { "{ }", "{}", EMPTY_NODE_MAP},
     { TEXT({"a":b}), .expect_fail = true},
     { TEXT({1a:"b"}), .expect_fail = true},
 
