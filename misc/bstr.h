@@ -152,7 +152,7 @@ void bstr_xappend(void *talloc_ctx, bstr *s, bstr append);
 
 static inline void bstr_xappend0(void *talloc_ctx, bstr *s, const char *append)
 {
-    return bstr_xappend(talloc_ctx, s, bstr0(append));
+    bstr_xappend(talloc_ctx, s, bstr0(append));
 }
 
 /**
