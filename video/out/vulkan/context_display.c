@@ -309,7 +309,7 @@ static void open_render_fd(struct ra_ctx *ctx, const char *render_path)
 static bool drm_setup(struct ra_ctx *ctx, int display_idx,
                       VkPhysicalDevicePCIBusInfoPropertiesEXT *pci_props)
 {
-    drmDevice *devs[32] = {};
+    drmDevice *devs[32] = {0};
     int count = drmGetDevices2(0, devs, MP_ARRAY_SIZE(devs));
     for (int i = 0; i < count; i++) {
         drmDevice *dev = devs[i];
