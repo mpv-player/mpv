@@ -5,9 +5,7 @@
 #include <libavutil/hwcontext.h>
 
 #include "options/m_option.h"
-
-struct mp_image_pool;
-enum mp_imgfmt;
+#include "video/img_format.h"
 
 struct mp_conversion_filter {
     // Name of the conversion filter.
