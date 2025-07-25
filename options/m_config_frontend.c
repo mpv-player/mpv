@@ -635,7 +635,7 @@ int m_config_set_option_raw(struct m_config *config,
 
     m_config_mark_co_flags(co, flags);
 
-    m_option_copy_and_expand(config->global, co->opt, co->data, data);
+    m_option_copy(co->opt, co->data, data);
     if (m_config_cache_write_opt(config->cache, co->data))
         force_self_notify_change_opt(config, co, false);
 

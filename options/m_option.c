@@ -43,7 +43,6 @@
 #include "misc/node.h"
 #include "m_option.h"
 #include "m_config_frontend.h"
-#include "path.h"
 
 #if HAVE_DOS_PATHS
 #define OPTION_PATH_SEPARATOR ';'
@@ -1271,15 +1270,6 @@ static void copy_str(const m_option_t *opt, void *dst, const void *src)
         talloc_replace(NULL, VAL(dst), VAL(src));
 }
 
-static void expand_str(struct mpv_global *global, const m_option_t *opt,
-                       void *dst, const void *src)
-{
-    if (dst && src) {
-        talloc_free(VAL(dst));
-        VAL(dst) = mp_get_user_path(NULL, global, VAL(src));
-    }
-}
-
 static int str_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     if (src->format != MPV_FORMAT_STRING)
@@ -1313,16 +1303,15 @@ static void free_str(void *src)
 }
 
 const m_option_type_t m_option_type_string = {
-    .name   = "String",
-    .size   = sizeof(char *),
-    .parse  = parse_str,
-    .print  = print_str,
-    .copy   = copy_str,
-    .expand = expand_str,
-    .free   = free_str,
-    .set    = str_set,
-    .get    = str_get,
-    .equal  = str_equal,
+    .name  = "String",
+    .size  = sizeof(char *),
+    .parse = parse_str,
+    .print = print_str,
+    .copy  = copy_str,
+    .free  = free_str,
+    .set   = str_set,
+    .get   = str_get,
+    .equal = str_equal,
 };
 
 //////////// String list
@@ -1558,8 +1547,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
-static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
-                               void *dst, const void *src)
+static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 {
     int n;
     char **d, **s;
@@ -1579,26 +1567,10 @@ static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
     for (n = 0; s[n] != NULL; n++)
         /* NOTHING */;
     d = talloc_array(NULL, char *, n + 1);
-    for (; n >= 0; n--) {
-        if (global) {
-            d[n] = mp_get_user_path(NULL, global, s[n]);
-        } else {
-            d[n] = talloc_strdup(NULL, s[n]);
-        }
-    }
+    for (; n >= 0; n--)
+        d[n] = talloc_strdup(NULL, s[n]);
 
     VAL(dst) = d;
-}
-
-static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
-{
-    copy_str_list_impl(NULL, opt, dst, src);
-}
-
-static void expand_str_list(struct mpv_global *global, const m_option_t *opt,
-                            void *dst, const void *src)
-{
-    copy_str_list_impl(global, opt, dst, src);
 }
 
 static char *print_str_list(const m_option_t *opt, const void *src)
@@ -1680,16 +1652,15 @@ static bool str_list_equal(const m_option_t *opt, void *a, void *b)
 }
 
 const m_option_type_t m_option_type_string_list = {
-    .name   = "String list",
-    .size   = sizeof(char **),
-    .parse  = parse_str_list,
-    .print  = print_str_list,
-    .copy   = copy_str_list,
-    .expand = expand_str_list,
-    .free   = free_str_list,
-    .get    = str_list_get,
-    .set    = str_list_set,
-    .equal  = str_list_equal,
+    .name  = "String list",
+    .size  = sizeof(char **),
+    .parse = parse_str_list,
+    .print = print_str_list,
+    .copy  = copy_str_list,
+    .free  = free_str_list,
+    .get   = str_list_get,
+    .set   = str_list_set,
+    .equal = str_list_equal,
     .actions = (const struct m_option_action[]){
         {"add"},
         {"append"},
