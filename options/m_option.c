@@ -1469,84 +1469,6 @@ static int str_list_remove(char **remove, int n, void *dst)
     return found;
 }
 
-static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param, void *dst,
-                               int default_op)
-{
-    char **res;
-    int op = default_op;
-
-    if (bstr_endswith0(name, "-add")) {
-        op = OP_ADD;
-    } else if (bstr_endswith0(name, "-append")) {
-        op = OP_APPEND;
-    } else if (bstr_endswith0(name, "-pre")) {
-        op = OP_PRE;
-    } else if (bstr_endswith0(name, "-clr")) {
-        op = OP_CLR;
-    } else if (bstr_endswith0(name, "-del")) {
-        op = OP_DEL;
-    } else if (bstr_endswith0(name, "-set")) {
-        op = OP_NONE;
-    } else if (bstr_endswith0(name, "-toggle")) {
-        op = OP_TOGGLE;
-    } else if (bstr_endswith0(name, "-remove")) {
-        op = OP_REMOVE;
-    }
-
-    if (op == OP_TOGGLE || op == OP_REMOVE) {
-        if (dst) {
-            res = talloc_array(NULL, char *, 2);
-            res[0] = bstrdup0(res, param);
-            res[1] = NULL;
-            bool found = str_list_remove(res, 2, dst);
-            if (found)
-                return 1;
-        }
-        if (op == OP_REMOVE)
-            return 1; // ignore if not found
-        op = OP_APPEND;
-    }
-
-    // Clear the list ??
-    if (op == OP_CLR) {
-        if (dst)
-            free_str_list(dst);
-        return 0;
-    }
-
-    // All other ops need a param
-    if (param.len == 0 && op != OP_NONE)
-        return M_OPT_MISSING_PARAM;
-
-    if (!dst)
-        return 1;
-
-    int n = 0;
-    res = separate_input_param(opt, param, &n, op);
-    if (!res)
-        return M_OPT_INVALID;
-
-    switch (op) {
-    case OP_ADD:
-    case OP_APPEND:
-        return str_list_add(res, n, dst, 0);
-    case OP_PRE:
-        return str_list_add(res, n, dst, 1);
-    case OP_DEL:
-        return str_list_remove(res, n, dst);
-    }
-
-    if (VAL(dst))
-        free_str_list(dst);
-    VAL(dst) = res;
-
-    if (!res[0])
-        free_str_list(dst);
-
-    return 1;
-}
-
 static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 {
     int n;
@@ -1628,7 +1550,78 @@ static int str_list_get(const m_option_t *opt, void *ta_parent,
 static int parse_str_list(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param, void *dst)
 {
-    return parse_str_list_impl(log, opt, name, param, dst, OP_NONE);
+    char **res;
+    int op = OP_NONE;
+
+    if (bstr_endswith0(name, "-add")) {
+        op = OP_ADD;
+    } else if (bstr_endswith0(name, "-append")) {
+        op = OP_APPEND;
+    } else if (bstr_endswith0(name, "-pre")) {
+        op = OP_PRE;
+    } else if (bstr_endswith0(name, "-clr")) {
+        op = OP_CLR;
+    } else if (bstr_endswith0(name, "-del")) {
+        op = OP_DEL;
+    } else if (bstr_endswith0(name, "-set")) {
+        op = OP_NONE;
+    } else if (bstr_endswith0(name, "-toggle")) {
+        op = OP_TOGGLE;
+    } else if (bstr_endswith0(name, "-remove")) {
+        op = OP_REMOVE;
+    }
+
+    if (op == OP_TOGGLE || op == OP_REMOVE) {
+        if (dst) {
+            res = talloc_array(NULL, char *, 2);
+            res[0] = bstrdup0(res, param);
+            res[1] = NULL;
+            bool found = str_list_remove(res, 2, dst);
+            if (found)
+                return 1;
+        }
+        if (op == OP_REMOVE)
+            return 1; // ignore if not found
+        op = OP_APPEND;
+    }
+
+    // Clear the list ??
+    if (op == OP_CLR) {
+        if (dst)
+            free_str_list(dst);
+        return 0;
+    }
+
+    // All other ops need a param
+    if (param.len == 0 && op != OP_NONE)
+        return M_OPT_MISSING_PARAM;
+
+    if (!dst)
+        return 1;
+
+    int n = 0;
+    res = separate_input_param(opt, param, &n, op);
+    if (!res)
+        return M_OPT_INVALID;
+
+    switch (op) {
+    case OP_ADD:
+    case OP_APPEND:
+        return str_list_add(res, n, dst, 0);
+    case OP_PRE:
+        return str_list_add(res, n, dst, 1);
+    case OP_DEL:
+        return str_list_remove(res, n, dst);
+    }
+
+    if (VAL(dst))
+        free_str_list(dst);
+    VAL(dst) = res;
+
+    if (!res[0])
+        free_str_list(dst);
+
+    return 1;
 }
 
 static bool str_list_equal(const m_option_t *opt, void *a, void *b)
