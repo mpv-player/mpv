@@ -43,6 +43,7 @@
 #include "misc/node.h"
 #include "m_option.h"
 #include "m_config_frontend.h"
+#include "path.h"
 
 #if HAVE_DOS_PATHS
 #define OPTION_PATH_SEPARATOR ';'
@@ -1248,12 +1249,21 @@ const m_option_type_t m_option_type_float = {
 #undef VAL
 #define VAL(x) (*(char **)(x))
 
+// Potentially expand a param if it is M_OPT_FILE
+static char *expand_param(void *talloc_ctx, struct mp_log *log,
+                          const m_option_t *opt, struct bstr param)
+{
+    if (opt->flags & M_OPT_FILE && !(opt->flags & M_OPT_PRE_PARSE))
+        return mp_get_user_path(talloc_ctx, log, param);
+    return bstrdup0(talloc_ctx, param);
+}
+
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
     if (dst) {
         talloc_free(VAL(dst));
-        VAL(dst) = bstrdup0(NULL, param);
+        VAL(dst) = expand_param(NULL, log, opt, param);
     }
 
     return 0;
@@ -1435,7 +1445,7 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
             break;
 #endif
         struct bstr el = get_nextsep(&str, separator, 1);
-        list[n] = bstrdup0(NULL, el);
+        list[n] = expand_param(NULL, NULL, opt, el);
         n++;
         if (!str.len)
             break;
@@ -1574,7 +1584,7 @@ static int parse_str_list(struct mp_log *log, const m_option_t *opt,
     if (op == OP_TOGGLE || op == OP_REMOVE) {
         if (dst) {
             res = talloc_array(NULL, char *, 2);
-            res[0] = bstrdup0(res, param);
+            res[0] = expand_param(res, log, opt, param);
             res[1] = NULL;
             bool found = str_list_remove(res, 2, dst);
             if (found)
