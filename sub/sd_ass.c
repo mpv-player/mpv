@@ -232,7 +232,7 @@ static void enable_output(struct sd *sd, bool enable)
         ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
 
         mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_style,
-                               sd->global, sd->log);
+                               sd->log);
     }
 }
 
@@ -242,7 +242,7 @@ static void assobjects_init(struct sd *sd)
     struct mp_subtitle_opts *opts = sd->opts;
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
 
-    ctx->ass_library = mp_ass_init(sd->global, sd->opts->sub_style, sd->log);
+    ctx->ass_library = mp_ass_init(sd->opts->sub_style, sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);
