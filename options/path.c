@@ -194,16 +194,15 @@ char *mp_find_config_file(void *talloc_ctx, struct mp_log *log,
 }
 
 char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
-                       const char *path)
+                       bstr path)
 {
-    if (!path)
+    if (!path.len)
         return NULL;
     char *res = NULL;
-    bstr bpath = bstr0(path);
-    if (bstr_eatstart0(&bpath, "~")) {
+    if (bstr_eatstart0(&path, "~")) {
         // parse to "~" <prefix> "/" <rest>
         bstr prefix, rest;
-        if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
+        if (bstr_split_tok(path, "/", &prefix, &rest)) {
             const char *rest0 = rest.start; // ok in this case
             if (bstr_equals0(prefix, "~")) {
                 res = mp_find_config_file(talloc_ctx, log, rest0);
@@ -229,9 +228,9 @@ char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
         }
     }
     if (!res) {
-        res = talloc_strdup(talloc_ctx, path);
+        res = bstrdup0(talloc_ctx, path);
     } else if (log) {
-        mp_dbg(log, "user path: '%s' -> '%s'\n", path, res);
+        mp_dbg(log, "user path: '%.*s' -> '%s'\n", BSTR_P(path), res);
     }
     return res;
 }
@@ -239,7 +238,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
 char *mp_normalize_user_path(void *talloc_ctx, struct mp_log *log,
                              const char *path)
 {
-    char *expanded = mp_get_user_path(NULL, log, path);
+    char *expanded = mp_get_user_path(NULL, log, bstr0(path));
     char *normalized = mp_normalize_path(talloc_ctx, expanded);
     talloc_free(expanded);
     return normalized;
