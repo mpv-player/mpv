@@ -54,7 +54,7 @@
 static void load_all_cfgfiles(struct MPContext *mpctx, char *section,
                               char *filename)
 {
-    char **cf = mp_find_all_config_files(NULL, mpctx->global, filename);
+    char **cf = mp_find_all_config_files(NULL, mpctx->log, filename);
     for (int i = 0; cf && cf[i]; i++)
         m_config_parse_config_file(mpctx->mconfig, mpctx->global, cf[i], section, 0);
     talloc_free(cf);
@@ -67,10 +67,10 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    mp_mk_user_dir(mpctx->global, "home", "");
+    mp_mk_user_dir(mpctx->log, "home", "");
 
-    char *p1 = mp_get_user_path(NULL, mpctx->global, "~~home/");
-    char *p2 = mp_get_user_path(NULL, mpctx->global, "~~old_home/");
+    char *p1 = mp_get_user_path(NULL, mpctx->log, "~~home/");
+    char *p2 = mp_get_user_path(NULL, mpctx->log, "~~old_home/");
     if (strcmp(p1, p2) != 0 && mp_path_exists(p2)) {
         MP_WARN(mpctx, "Warning, two config dirs found:\n   %s (main)\n"
                 "   %s (bogus)\nYou should merge or delete the second one.\n",
@@ -136,7 +136,7 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
         if (try_load_config(mpctx, cfg, FILE_LOCAL_FLAGS, MSGL_INFO))
             return;
 
-        if ((confpath = mp_find_config_file(NULL, mpctx->global, name))) {
+        if ((confpath = mp_find_config_file(NULL, mpctx->log, name))) {
             try_load_config(mpctx, confpath, FILE_LOCAL_FLAGS, MSGL_INFO);
 
             talloc_free(confpath);
@@ -203,7 +203,7 @@ char *mp_get_playback_resume_dir(struct MPContext *mpctx)
     if (wl_dir && wl_dir[0]) {
         wl_dir = talloc_strdup(NULL, wl_dir);
     } else {
-        wl_dir = mp_find_user_file(NULL, mpctx->global, "state", MP_WATCH_LATER_CONF);
+        wl_dir = mp_find_user_file(NULL, mpctx->log, "state", MP_WATCH_LATER_CONF);
     }
     return wl_dir;
 }

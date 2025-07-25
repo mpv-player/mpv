@@ -254,7 +254,7 @@ static void load_paths(struct mpv_global *global, struct MPOpts *opts,
     }
 
     // Load subtitles in ~/.mpv/sub (or similar) limiting sub fuzziness
-    char *mp_subdir = mp_find_config_file(NULL, global, cfg_path);
+    char *mp_subdir = mp_find_config_file(NULL, global->log, cfg_path);
     if (mp_subdir) {
         append_dir_subtitles(global, opts, slist, nsubs, bstr0(mp_subdir),
                              fname, 1, type);

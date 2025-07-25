@@ -909,7 +909,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             if (title.len)
                 t->title = bstrdup0(t, title);
         }
-        t->external_filename = mp_normalize_user_path(t, mpctx->global, filename);
+        t->external_filename = mp_normalize_user_path(t, mpctx->log, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
         t->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;

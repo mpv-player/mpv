@@ -1047,7 +1047,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         return global_dvb_state;
 
     struct mp_log *log = stream->log;
-    struct mpv_global *global = stream->global;
 
     dvb_state_t *state = talloc_zero(NULL, dvb_state_t);
     state->switching_channel = false;
@@ -1124,11 +1123,11 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     conf_file = priv->opts->cfg_file;
                 } else {
                     talloc_ctx = talloc_new(NULL);
-                    conf_file = mp_find_config_file(talloc_ctx, global, conf_file_name);
+                    conf_file = mp_find_config_file(talloc_ctx, log, conf_file_name);
                     if (conf_file) {
                         mp_verbose(log, "Ignoring other channels.conf files.\n");
                     } else {
-                        conf_file = mp_find_config_file(talloc_ctx, global,
+                        conf_file = mp_find_config_file(talloc_ctx, log,
                                         "channels.conf");
                     }
                 }

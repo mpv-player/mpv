@@ -561,7 +561,7 @@ void gl_sc_set_cache_dir(struct gl_shader_cache *sc, char *dir)
     if (dir && dir[0]) {
         dir = talloc_strdup(NULL, dir);
     } else {
-        dir = mp_find_user_file(NULL, sc->global, "cache", "");
+        dir = mp_find_user_file(NULL, sc->log, "cache", "");
     }
     sc->cache_dir = talloc_strdup(sc, dir);
     talloc_free(dir);
@@ -580,7 +580,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
 
     if (sc->cache_dir && sc->cache_dir[0]) {
         // Try to load it from a disk cache.
-        cache_dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
+        cache_dir = mp_get_user_path(tmp, sc->log, sc->cache_dir);
 
         struct AVSHA *sha = av_sha_alloc();
         MP_HANDLE_OOM(sha);
