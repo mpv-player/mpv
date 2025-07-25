@@ -203,9 +203,10 @@ char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
         // parse to "~" <prefix> "/" <rest>
         bstr prefix, rest;
         if (bstr_split_tok(path, "/", &prefix, &rest)) {
-            const char *rest0 = rest.start; // ok in this case
             if (bstr_equals0(prefix, "~")) {
+                char *rest0 = bstrdup0(NULL, rest);
                 res = mp_find_config_file(talloc_ctx, log, rest0);
+                talloc_free(rest0);
                 if (!res) {
                     void *tmp = talloc_new(NULL);
                     const char *p = mp_get_platform_path(tmp, "home");
