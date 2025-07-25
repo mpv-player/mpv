@@ -97,7 +97,7 @@ static bool vaapi_pl_map(struct ra_hwdec_mapper *mapper,
         mapper->tex[n] = ratex;
 
         MP_TRACE(mapper, "Object %d with fd %d imported as %p\n",
-                id, fd, ratex);
+                id, fd, (void *) ratex);
 
         layer_plane++;
         if (layer_plane == p->desc.layers[layer].nb_planes) {
