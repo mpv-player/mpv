@@ -340,7 +340,7 @@ static const char *get_builtin_file(const char *name)
 // Push up to limit bytes of file fname: from builtin_files, else from the OS.
 static void af_push_file(js_State *J, const char *fname, int limit, void *af)
 {
-    char *filename = mp_get_user_path(af, jctx(J)->mpctx->global, fname);
+    char *filename = mp_get_user_path(af, jctx(J)->mpctx->log, fname);
     MP_VERBOSE(jctx(J), "Reading file '%s'\n", filename);
     if (limit < 0)
         limit = INT_MAX - 1;
@@ -583,7 +583,7 @@ static void script_log(js_State *J)
 static void script_find_config_file(js_State *J, void *af)
 {
     const char *fname = js_tostring(J, 1);
-    char *path = mp_find_config_file(af, jctx(J)->mpctx->global, fname);
+    char *path = mp_find_config_file(af, jctx(J)->mpctx->log, fname);
     if (path) {
         js_pushstring(J, path);
     } else {
@@ -949,7 +949,7 @@ static void script__write_file(js_State *J, void *af)
     if (strstr(fname, prefix) != fname)  // simple protection for incorrect use
         js_error(J, "File name must be prefixed with '%s'", prefix);
     fname += strlen(prefix);
-    fname = mp_get_user_path(af, jctx(J)->mpctx->global, fname);
+    fname = mp_get_user_path(af, jctx(J)->mpctx->log, fname);
     MP_VERBOSE(jctx(J), "%s file '%s'\n", opstr, fname);
 
     FILE *f = fopen(fname, append ? "ab" : "wb");

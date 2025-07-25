@@ -366,7 +366,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         if (cache_dir && cache_dir[0]) {
             cache_dir = talloc_strdup(tmp, cache_dir);
         } else {
-            cache_dir = mp_find_user_file(tmp, p->global, "cache", "");
+            cache_dir = mp_find_user_file(tmp, p->log, "cache", "");
         }
 
         if (cache_dir && cache_dir[0]) {

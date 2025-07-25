@@ -24,41 +24,43 @@
 #include "misc/bstr.h"
 #include "misc/path_utils.h"
 
-struct mpv_global;
+struct mp_log;
 struct MPOpts;
 
-void mp_init_paths(struct mpv_global *global, struct MPOpts *opts);
+void mp_init_paths(struct MPOpts *opts, struct mp_log *log);
+
+/* Passing NULL to log is allowed for all of the below functions. */
 
 // Search for the input filename in several paths. These include user and global
 // config locations by default. Some platforms may implement additional platform
 // related lookups (i.e.: macOS inside an application bundle).
-char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
+char *mp_find_config_file(void *talloc_ctx, struct mp_log *log,
                           const char *filename);
 
 // Search for local writable user files within a specific kind of user dir
 // as documented in osdep/path.h. This returns a result even if the file does
 // not exist. Calling it with filename="" is equivalent to retrieving the path
 // to the dir.
-char *mp_find_user_file(void *talloc_ctx, struct mpv_global *global,
+char *mp_find_user_file(void *talloc_ctx, struct mp_log *log,
                         const char *type, const char *filename);
 
 // Find all instances of the given config file. Paths are returned in order
 // from lowest to highest priority. filename can contain multiple names
 // separated with '|', with the first having highest priority.
-char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
+char **mp_find_all_config_files(void *talloc_ctx, struct mp_log *log,
                                 const char *filename);
 
 // Normally returns a talloc_strdup'ed copy of the path, except for special
 // paths starting with '~'. Used to allow the user explicitly reference a
 // file from the user's home or mpv config directory.
-char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
+char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
                        const char *path);
 
 // Same as mp_get_user_path but also normalizes the path if it happens to be
 // relative.
-char *mp_normalize_user_path(void *talloc_ctx, struct mpv_global *global,
+char *mp_normalize_user_path(void *talloc_ctx, struct mp_log *log,
                              const char *path);
 
-void mp_mk_user_dir(struct mpv_global *global, const char *type, char *subdir);
+void mp_mk_user_dir(struct mp_log *log, const char *type, char *subdir);
 
 #endif /* MPLAYER_PATH_H */

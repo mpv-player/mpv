@@ -235,7 +235,7 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return 1;
 #endif
     struct MPContext *mpctx = ctx;
-    char *fname = mp_get_user_path(NULL, mpctx->global, filename);
+    char *fname = mp_get_user_path(NULL, mpctx->log, filename);
     int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global, fname, NULL, flags);
     talloc_free(fname);
     return r;
@@ -340,7 +340,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
                                        &opts->verbose, options);
     }
 
-    mp_init_paths(mpctx->global, opts);
+    mp_init_paths(opts, mpctx->log);
     mp_msg_set_early_logging(mpctx->global, true);
     mp_update_logging(mpctx, true);
 
