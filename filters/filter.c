@@ -892,10 +892,10 @@ static const char *filt_name(struct mp_filter *f)
 static void dump_pin_state(struct mp_filter *f, struct mp_pin *pin)
 {
     MP_WARN(f, "  [%p] %s %s c=%s[%p] f=%s[%p] m=%s[%p] %s %s %s\n",
-        pin, pin->name, pin->dir == MP_PIN_IN ? "->" : "<-",
-        pin->user_conn ? filt_name(pin->user_conn->owner) : "-", pin->user_conn,
-        pin->conn ? filt_name(pin->conn->owner) : "-", pin->conn,
-        filt_name(pin->manual_connection), pin->manual_connection,
+        (void *)pin, pin->name, pin->dir == MP_PIN_IN ? "->" : "<-",
+        pin->user_conn ? filt_name(pin->user_conn->owner) : "-", (void *) pin->user_conn,
+        pin->conn ? filt_name(pin->conn->owner) : "-", (void *) pin->conn,
+        filt_name(pin->manual_connection), (void *) pin->manual_connection,
         pin->within_conn ? "(within)" : "",
         pin->data_requested ? "(request)" : "",
         mp_frame_type_str(pin->data.type));
@@ -903,8 +903,8 @@ static void dump_pin_state(struct mp_filter *f, struct mp_pin *pin)
 
 void mp_filter_dump_states(struct mp_filter *f)
 {
-    MP_WARN(f, "%s[%p] (%s[%p])\n", filt_name(f), f,
-            filt_name(f->in->parent), f->in->parent);
+    MP_WARN(f, "%s[%p] (%s[%p])\n", filt_name(f), (void *) f,
+            filt_name(f->in->parent), (void *) f->in->parent);
     for (int n = 0; n < f->num_pins; n++) {
         dump_pin_state(f, f->pins[n]);
         dump_pin_state(f, f->ppins[n]);
