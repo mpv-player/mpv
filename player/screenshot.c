@@ -264,7 +264,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
 
     res = talloc_strdup_append(res, template);
     res = talloc_asprintf_append(res, ".%s", file_ext);
-    char *fname = mp_get_user_path(NULL, mpctx->screenshot_ctx->log, res);
+    char *fname = mp_get_user_path(NULL, mpctx->screenshot_ctx->log, bstr0(res));
     talloc_free(res);
     return fname;
 
@@ -494,7 +494,7 @@ void cmd_screenshot_to_file(void *p)
         cmd->success = false;
         return;
     }
-    char *path = mp_get_user_path(NULL, mpctx->screenshot_ctx->log, filename);
+    char *path = mp_get_user_path(NULL, mpctx->screenshot_ctx->log, bstr0(filename));
     cmd->success = write_screenshot(cmd, image, path, &opts, true);
     talloc_free(image);
     talloc_free(path);

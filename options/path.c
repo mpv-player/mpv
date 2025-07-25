@@ -121,7 +121,7 @@ void mp_init_paths(struct MPOpts *opts, struct mp_log *log)
     if (!opts->load_config)
         force_configdir = "";
 
-    global_configdir = mp_get_user_path(opts, log, force_configdir);
+    global_configdir = mp_get_user_path(opts, log, bstr0(force_configdir));
     talloc_set_destructor(global_configdir, global_configdir_destroy);
 }
 
@@ -188,19 +188,19 @@ char *mp_find_config_file(void *talloc_ctx, struct mp_log *log,
 }
 
 char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
-                       const char *path)
+                       bstr path)
 {
-    if (!path)
+    if (!path.start)
         return NULL;
     char *res = NULL;
-    bstr bpath = bstr0(path);
-    if (bstr_eatstart0(&bpath, "~")) {
+    if (bstr_eatstart0(&path, "~")) {
         // parse to "~" <prefix> "/" <rest>
         bstr prefix, rest;
-        if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
-            const char *rest0 = rest.start; // ok in this case
+        if (bstr_split_tok(path, "/", &prefix, &rest)) {
             if (bstr_equals0(prefix, "~")) {
+                char *rest0 = bstrdup0(NULL, rest);
                 res = mp_find_config_file(talloc_ctx, log, rest0);
+                talloc_free(rest0);
                 if (!res) {
                     void *tmp = talloc_new(NULL);
                     const char *p = mp_get_platform_path(tmp, "home");
@@ -223,9 +223,9 @@ char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
         }
     }
     if (!res) {
-        res = talloc_strdup(talloc_ctx, path);
+        res = bstrdup0(talloc_ctx, path);
     } else {
-        mp_dbg(log, "user path: '%s' -> '%s'\n", path, res);
+        mp_dbg(log, "user path: '%.*s' -> '%s'\n", BSTR_P(path), res);
     }
     return res;
 }
@@ -233,7 +233,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mp_log *log,
 char *mp_normalize_user_path(void *talloc_ctx, struct mp_log *log,
                              const char *path)
 {
-    char *expanded = mp_get_user_path(NULL, log, path);
+    char *expanded = mp_get_user_path(NULL, log, bstr0(path));
     char *normalized = mp_normalize_path(talloc_ctx, expanded);
     talloc_free(expanded);
     return normalized;

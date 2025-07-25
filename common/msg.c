@@ -760,7 +760,7 @@ static bool check_new_path(struct mp_log *log, char *opt,
     void *tmp = talloc_new(NULL);
     bool res = false;
 
-    char *new_path = mp_get_user_path(tmp, log, opt);
+    char *new_path = mp_get_user_path(tmp, log, bstr0(opt));
     if (!new_path)
         new_path = "";
 
