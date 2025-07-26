@@ -494,10 +494,8 @@ void cmd_screenshot_to_file(void *p)
         cmd->success = false;
         return;
     }
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
-    cmd->success = write_screenshot(cmd, image, path, &opts, true);
+    cmd->success = write_screenshot(cmd, image, filename, &opts, true);
     talloc_free(image);
-    talloc_free(path);
 }
 
 void cmd_screenshot(void *p)

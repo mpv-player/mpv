@@ -5243,19 +5243,17 @@ static void cmd_osd_overlay(void *p)
 
 static struct track *find_track_with_url(struct MPContext *mpctx, int type, const char *url)
 {
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(url));
     struct track *t = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track && track->type == type && track->is_external) {
             char *normalized = mp_normalize_user_path(NULL, mpctx->global, track->external_filename);
-            t = strcmp(normalized, path) == 0 ? track : NULL;
+            t = strcmp(normalized, url) == 0 ? track : NULL;
             talloc_free(normalized);
             if (t)
                 break;
         }
     }
-    talloc_free(path);
     return t;
 }
 
@@ -6043,15 +6041,11 @@ static void cmd_expand_path(void *p)
 static void cmd_normalize_path(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
-    struct MPContext *mpctx = cmd->mpctx;
 
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(cmd->args[0].v.s));
     cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
-        .u.string = mp_normalize_path(NULL, path),
+        .u.string = mp_normalize_path(NULL, cmd->args[0].v.s),
     };
-
-    talloc_free(path);
 }
 
 static void cmd_escape_ass(void *p)
@@ -6117,9 +6111,7 @@ static void cmd_loadfile(void *p)
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
-    struct playlist_entry *entry = playlist_entry_new(path);
-    talloc_free(path);
+    struct playlist_entry *entry = playlist_entry_new(filename);
     if (cmd->args[3].v.str_list) {
         char **pairs = cmd->args[3].v.str_list;
         for (int i = 0; pairs[i] && pairs[i + 1]; i += 2)
@@ -6152,11 +6144,8 @@ static void cmd_loadlist(void *p)
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
-    struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
+    struct playlist *pl = playlist_parse_file(filename, cmd->abort->cancel,
                                               mpctx->global);
-    talloc_free(path);
-
     if (pl) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
@@ -6938,11 +6927,8 @@ static void cmd_load_config_file(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    void *ctx = talloc_new(NULL);
-    char *config_file = mp_get_user_path(ctx, mpctx->global, bstr0(cmd->args[0].v.s));
     int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global,
-                                       config_file, NULL, 0);
-    talloc_free(ctx);
+                                       cmd->args[0].v.s, NULL, 0);
 
     if (r < 1) {
         cmd->success = false;
@@ -6957,9 +6943,7 @@ static void cmd_load_input_conf(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    char *config_file = mp_get_user_path(NULL, mpctx->global, bstr0(cmd->args[0].v.s));
-    cmd->success = mp_input_load_config_file(mpctx->input, config_file);
-    talloc_free(config_file);
+    cmd->success = mp_input_load_config_file(mpctx->input, cmd->args[0].v.s);
 }
 
 static void cmd_load_script(void *p)
@@ -6968,6 +6952,7 @@ static void cmd_load_script(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     char *script = cmd->args[0].v.s;
+    // mp_load_user_script expands the path for us
     int64_t id = mp_load_user_script(mpctx, script);
     if (id > 0) {
         struct mpv_node *res = &cmd->result;
@@ -7035,19 +7020,16 @@ static void run_dump_cmd(struct mp_cmd_ctx *cmd, double start, double end,
         return;
     }
 
-    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
     mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping started.");
 
-    if (!demux_cache_dump_set(mpctx->demuxer, start, end, path)) {
+    if (!demux_cache_dump_set(mpctx->demuxer, start, end, filename)) {
         mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping stopped.");
         mp_cmd_ctx_complete(cmd);
-        talloc_free(path);
         return;
     }
 
     ctx->cache_dump_cmd = cmd;
     cache_dump_poll(mpctx);
-    talloc_free(path);
 }
 
 static void cmd_dump_cache(void *p)
@@ -7244,7 +7226,8 @@ const struct mp_cmd_def mp_cmds[] = {
         .is_noisy = true },
     { "expand-path", cmd_expand_path, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
-    { "normalize-path", cmd_normalize_path, { {"filename", OPT_STRING(v.s)} }},
+    { "normalize-path", cmd_normalize_path, { {"filename", OPT_STRING(v.s),
+        .flags = M_OPT_FILE } }},
     { "escape-ass", cmd_escape_ass, { {"text", OPT_STRING(v.s)} },
         .is_noisy = true },
     { "show-progress", cmd_show_progress, .allow_auto_repeat = true,
@@ -7252,7 +7235,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "sub-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_FLAGS(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2},
                 {"hearing-impaired", TRACK_HEARING_IMPAIRED},
@@ -7270,7 +7253,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "audio-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_FLAGS(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2},
                 {"hearing-impaired", TRACK_HEARING_IMPAIRED},
@@ -7288,7 +7271,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "video-add", cmd_track_add,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_FLAGS(v.i,
                 {"select", 0}, {"auto", 1}, {"cached", 2},
                 {"hearing-impaired", TRACK_HEARING_IMPAIRED},
@@ -7363,7 +7346,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "screenshot-to-file", cmd_screenshot_to_file,
         {
-            {"filename", OPT_STRING(v.s)},
+            {"filename", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_CHOICE(v.i,
                 {"video", 0},
                 {"window", 1},
@@ -7389,7 +7372,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadfile", cmd_loadfile,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
@@ -7405,7 +7388,7 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "loadlist", cmd_loadlist,
         {
-            {"url", OPT_STRING(v.s)},
+            {"url", OPT_STRING(v.s), .flags = M_OPT_FILE},
             {"flags", OPT_CHOICE(v.i,
                 {"replace", 0},
                 {"append", 1},
@@ -7569,7 +7552,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "write-watch-later-config", cmd_write_watch_later_config },
     { "delete-watch-later-config", cmd_delete_watch_later_config,
-        {{"filename", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG} }},
+        {{"filename", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG | M_OPT_FILE} }},
 
     { "mouse", cmd_mouse, { {"x", OPT_INT(v.i)},
                             {"y", OPT_INT(v.i)},
@@ -7594,9 +7577,11 @@ const struct mp_cmd_def mp_cmds[] = {
             .flags = MP_CMD_OPT_ARG}, }
     },
 
-    { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s)}} },
+    { "load-config-file", cmd_load_config_file, {{"filename", OPT_STRING(v.s),
+                                                  .flags = M_OPT_FILE}} },
 
-    { "load-input-conf", cmd_load_input_conf, {{"filename", OPT_STRING(v.s)}} },
+    { "load-input-conf", cmd_load_input_conf, {{"filename", OPT_STRING(v.s),
+                                                .flags = M_OPT_FILE}} },
 
     { "load-script", cmd_load_script, {{"filename", OPT_STRING(v.s)}} },
 
@@ -7604,12 +7589,14 @@ const struct mp_cmd_def mp_cmds[] = {
                                         .flags = M_OPT_ALLOW_NO},
                                       {"end", OPT_TIME(v.d),
                                         .flags = M_OPT_ALLOW_NO},
-                                      {"filename", OPT_STRING(v.s)} },
+                                      {"filename", OPT_STRING(v.s),
+                                        .flags = M_OPT_FILE} },
         .exec_async = true,
         .can_abort = true,
     },
 
-    { "ab-loop-dump-cache", cmd_dump_cache_ab, { {"filename", OPT_STRING(v.s)} },
+    { "ab-loop-dump-cache", cmd_dump_cache_ab, { {"filename", OPT_STRING(v.s),
+                                                  .flags = M_OPT_FILE} },
         .exec_async = true,
         .can_abort = true,
     },
