@@ -1848,6 +1848,15 @@ Video
         ``mpv --hwdec=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
+``--hwdec-threads=<N>``
+    Number of threads used for hardware decoding (default: 4). This, as opposed
+    to vd-queue, enables frame and slice threading in libavcodec. It can help
+    with pipelining the decoding process and improve performance. The exact
+    behavior depends on the hardware decoder API used.
+
+    If this is set to 0, the number of threads will be automatically determined
+    by the number of CPU cores available.
+
 ``--hwdec-software-fallback=<yes|no|N>``
     Fallback to software decoding if the hardware-accelerated decoder fails
     (default: 3). If this is a number, then fallback will be triggered if
