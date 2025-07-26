@@ -2832,6 +2832,7 @@ Subtitles
     using drag and drop.
 
     This is a string list option. See `List Options`_ for details.
+    Use ``--help=sub-auto-exts`` to see default extensions.
 
 ``--sub-codepage=<codepage>``
     You can use this option to specify the subtitle codepage. uchardet will be
