@@ -119,6 +119,14 @@ Available script bindings are:
     print its value on the OSD, which is useful for long values that get
     clipped.
 
+``edit-config-file``
+    Open ``mpv.conf`` in the system text editor, creating it if it doesn't
+    already exist.
+
+``edit-input-conf``
+    Open ``input.conf`` in the system text editor, creating it if it doesn't
+    already exist.
+
 ``menu``
     Show a menu with miscellaneous entries.
 
