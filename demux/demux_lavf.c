@@ -303,7 +303,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
     int ret = stream_read_partial(stream, buf, size);
 
     MP_TRACE(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
-             ret, stream, buf, size, stream_tell(stream), stream->eof);
+             ret, (void *) stream, buf, size, stream_tell(stream), stream->eof);
     return ret ? ret : AVERROR_EOF;
 }
 
@@ -315,7 +315,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     if (!stream)
         return -1;
 
-    MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
+    MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", (void *) stream, pos,
              whence == SEEK_END ? "end" :
              whence == SEEK_CUR ? "cur" :
              whence == SEEK_SET ? "set" : "size");

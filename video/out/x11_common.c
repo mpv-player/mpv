@@ -315,7 +315,7 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
     int lev = atomic_load(&x11_error_silence) ? MSGL_V : MSGL_ERR;
     mp_msg(log, lev, "X11 error: %s\n", msg);
     mp_msg(log, lev, "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
-               event->type, event->display, event->resourceid, event->serial);
+               event->type, (void *) event->display, event->resourceid, event->serial);
     mp_msg(log, lev, "Error code: %x, request code: %x, minor code: %x\n",
            event->error_code, event->request_code, event->minor_code);
 

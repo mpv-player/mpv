@@ -419,7 +419,7 @@ static int preinit(struct vo *vo)
 
 #if HAVE_POSIX_SHM
     if (p->opts.use_shm) {
-        p->shm_path = talloc_asprintf(vo, "/mpv-kitty-%p", vo);
+        p->shm_path = talloc_asprintf(vo, "/mpv-kitty-%p", (void *) vo);
         int p_size = strlen(p->shm_path) - 1;
         int b64_size = AV_BASE64_SIZE(p_size);
         p->shm_path_b64 = talloc_array(vo, char, b64_size);

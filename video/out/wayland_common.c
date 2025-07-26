@@ -1017,7 +1017,7 @@ static void tablet_handle_added(void *data,
     struct vo_wayland_seat *seat = data;
     struct vo_wayland_state *wl = seat->wl;
 
-    MP_VERBOSE(wl, "Adding tablet %p\n", id);
+    MP_VERBOSE(wl, "Adding tablet %p\n", (void *) id);
 
     struct vo_wayland_tablet *tablet = talloc_zero(seat, struct vo_wayland_tablet);
     tablet->wl = wl;
@@ -1034,7 +1034,7 @@ static void tablet_tool_handle_added(void *data,
     struct vo_wayland_seat *seat = data;
     struct vo_wayland_state *wl = seat->wl;
 
-    MP_VERBOSE(wl, "Adding tablet tool %p\n", id);
+    MP_VERBOSE(wl, "Adding tablet tool %p\n", (void *) id);
 
     struct vo_wayland_tablet_tool *tablet_tool = talloc_zero(seat, struct vo_wayland_tablet_tool);
     tablet_tool->wl = wl;
@@ -1056,7 +1056,7 @@ static void tablet_pad_handle_added(void *data,
     struct vo_wayland_seat *seat = data;
     struct vo_wayland_state *wl = seat->wl;
 
-    MP_VERBOSE(wl, "Adding tablet pad %p\n", id);
+    MP_VERBOSE(wl, "Adding tablet pad %p\n", (void *) id);
 
     struct vo_wayland_tablet_pad *tablet_pad = talloc_zero(seat, struct vo_wayland_tablet_pad);
     tablet_pad->wl = wl;
@@ -3289,7 +3289,7 @@ static void remove_output(struct vo_wayland_output *out)
 static void remove_tablet(struct vo_wayland_tablet *tablet)
 {
     struct vo_wayland_state *wl = tablet->wl;
-    MP_VERBOSE(wl, "Removing tablet %p\n", tablet->tablet);
+    MP_VERBOSE(wl, "Removing tablet %p\n", (void *) tablet->tablet);
 
     wl_list_remove(&tablet->link);
     zwp_tablet_v2_destroy(tablet->tablet);
@@ -3300,7 +3300,7 @@ static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
 {
     struct vo_wayland_state *wl = tablet_tool->wl;
     struct vo_wayland_seat *seat = tablet_tool->seat;
-    MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
+    MP_VERBOSE(wl, "Removing tablet tool %p\n", (void *) tablet_tool->tablet_tool);
 
     wl_list_remove(&tablet_tool->link);
 #if HAVE_WAYLAND_PROTOCOLS_1_32
@@ -3314,7 +3314,7 @@ static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
 static void remove_tablet_pad(struct vo_wayland_tablet_pad *tablet_pad)
 {
     struct vo_wayland_state *wl = tablet_pad->wl;
-    MP_VERBOSE(wl, "Removing tablet pad %p\n", tablet_pad->tablet_pad);
+    MP_VERBOSE(wl, "Removing tablet pad %p\n", (void *) tablet_pad->tablet_pad);
 
     struct vo_wayland_tablet_pad_group *tablet_pad_group, *tablet_pad_group_tmp;
     wl_list_for_each_safe(tablet_pad_group, tablet_pad_group_tmp, &tablet_pad->tablet_pad_group_list, link) {
