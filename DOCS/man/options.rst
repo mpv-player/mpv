@@ -1004,18 +1004,15 @@ Program Behavior
 
         I have no idea.
 
-``--ytdl-format=<ytdl|best|worst|mp4|webm|...>``
-    Video format/quality that is directly passed to youtube-dl. The possible
-    values are specific to the website and the video, for a given url the
-    available formats can be found with the command
-    ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
-    available aliases.
-    (Default: ``bestvideo+bestaudio/best``)
+``--ytdl-format=<|ytdl|best|worst|mp4|webm|...>``
+    Format selection string that is directly passed to youtube-dl.
+    The possible values are specific to the website and the video, for a given
+    URL the available formats can be found with the command
+    ``youtube-dl -F URL``. See youtube-dl's documentation for available aliases.
+    (Default: empty)
 
-    The ``ytdl`` value does not pass a ``--format`` option to youtube-dl at all,
-    and thus does not override its default. Note that sometimes youtube-dl
-    returns a format that mpv cannot use, and in these cases the mpv default
-    may work better.
+    An empty value or ``ytdl`` does not pass a ``--format`` option to youtube-dl
+    at all, and thus uses its default format selection behavior.
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be
