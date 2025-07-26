@@ -127,6 +127,9 @@ Available script bindings are:
     Open ``input.conf`` in the system text editor, creating it if it doesn't
     already exist.
 
+``open-docs``
+    Open mpv's online documentation in the browser.
+
 ``menu``
     Show a menu with miscellaneous entries.
 
