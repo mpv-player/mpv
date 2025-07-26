@@ -1249,12 +1249,23 @@ const m_option_type_t m_option_type_float = {
 #undef VAL
 #define VAL(x) (*(char **)(x))
 
+// Potentially expand a param if it is M_OPT_FILE
+static char *expand_param(void *talloc_ctx, struct mp_log *log,
+                          const m_option_t *opt, struct bstr param)
+{
+    if (opt->flags & M_OPT_FILE) {
+        return mp_get_user_path(talloc_ctx, log, param);
+    } else {
+        return bstrdup0(talloc_ctx, param);
+    }
+}
+
 static int parse_str(struct mp_log *log, const m_option_t *opt,
                      struct bstr name, struct bstr param, void *dst)
 {
     if (dst) {
         talloc_free(VAL(dst));
-        VAL(dst) = bstrdup0(NULL, param);
+        VAL(dst) = expand_param(NULL, log, opt, param);
     }
 
     return 0;
@@ -1269,15 +1280,6 @@ static void copy_str(const m_option_t *opt, void *dst, const void *src)
 {
     if (dst && src)
         talloc_replace(NULL, VAL(dst), VAL(src));
-}
-
-static void expand_str(struct mpv_global *global, const m_option_t *opt,
-                       void *dst, const void *src)
-{
-    if (dst && src) {
-        talloc_free(VAL(dst));
-        VAL(dst) = mp_get_user_path(NULL, global, VAL(src));
-    }
 }
 
 static int str_set(const m_option_t *opt, void *dst, struct mpv_node *src)
@@ -1313,16 +1315,15 @@ static void free_str(void *src)
 }
 
 const m_option_type_t m_option_type_string = {
-    .name   = "String",
-    .size   = sizeof(char *),
-    .parse  = parse_str,
-    .print  = print_str,
-    .copy   = copy_str,
-    .expand = expand_str,
-    .free   = free_str,
-    .set    = str_set,
-    .get    = str_get,
-    .equal  = str_equal,
+    .name  = "String",
+    .size  = sizeof(char *),
+    .parse = parse_str,
+    .print = print_str,
+    .copy  = copy_str,
+    .free  = free_str,
+    .set   = str_set,
+    .get   = str_get,
+    .equal = str_equal,
 };
 
 //////////// String list
@@ -1446,7 +1447,7 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
             break;
 #endif
         struct bstr el = get_nextsep(&str, separator, 1);
-        list[n] = bstrdup0(NULL, el);
+        list[n] = expand_param(NULL, NULL, opt, el);
         n++;
         if (!str.len)
             break;
@@ -1480,86 +1481,7 @@ static int str_list_remove(char **remove, int n, void *dst)
     return found;
 }
 
-static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param, void *dst,
-                               int default_op)
-{
-    char **res;
-    int op = default_op;
-
-    if (bstr_endswith0(name, "-add")) {
-        op = OP_ADD;
-    } else if (bstr_endswith0(name, "-append")) {
-        op = OP_APPEND;
-    } else if (bstr_endswith0(name, "-pre")) {
-        op = OP_PRE;
-    } else if (bstr_endswith0(name, "-clr")) {
-        op = OP_CLR;
-    } else if (bstr_endswith0(name, "-del")) {
-        op = OP_DEL;
-    } else if (bstr_endswith0(name, "-set")) {
-        op = OP_NONE;
-    } else if (bstr_endswith0(name, "-toggle")) {
-        op = OP_TOGGLE;
-    } else if (bstr_endswith0(name, "-remove")) {
-        op = OP_REMOVE;
-    }
-
-    if (op == OP_TOGGLE || op == OP_REMOVE) {
-        if (dst) {
-            res = talloc_array(NULL, char *, 2);
-            res[0] = bstrdup0(res, param);
-            res[1] = NULL;
-            bool found = str_list_remove(res, 2, dst);
-            if (found)
-                return 1;
-        }
-        if (op == OP_REMOVE)
-            return 1; // ignore if not found
-        op = OP_APPEND;
-    }
-
-    // Clear the list ??
-    if (op == OP_CLR) {
-        if (dst)
-            free_str_list(dst);
-        return 0;
-    }
-
-    // All other ops need a param
-    if (param.len == 0 && op != OP_NONE)
-        return M_OPT_MISSING_PARAM;
-
-    if (!dst)
-        return 1;
-
-    int n = 0;
-    res = separate_input_param(opt, param, &n, op);
-    if (!res)
-        return M_OPT_INVALID;
-
-    switch (op) {
-    case OP_ADD:
-    case OP_APPEND:
-        return str_list_add(res, n, dst, 0);
-    case OP_PRE:
-        return str_list_add(res, n, dst, 1);
-    case OP_DEL:
-        return str_list_remove(res, n, dst);
-    }
-
-    if (VAL(dst))
-        free_str_list(dst);
-    VAL(dst) = res;
-
-    if (!res[0])
-        free_str_list(dst);
-
-    return 1;
-}
-
-static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
-                               void *dst, const void *src)
+static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 {
     int n;
     char **d, **s;
@@ -1579,26 +1501,10 @@ static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
     for (n = 0; s[n] != NULL; n++)
         /* NOTHING */;
     d = talloc_array(NULL, char *, n + 1);
-    for (; n >= 0; n--) {
-        if (global) {
-            d[n] = mp_get_user_path(NULL, global, s[n]);
-        } else {
-            d[n] = talloc_strdup(NULL, s[n]);
-        }
-    }
+    for (; n >= 0; n--)
+        d[n] = talloc_strdup(NULL, s[n]);
 
     VAL(dst) = d;
-}
-
-static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
-{
-    copy_str_list_impl(NULL, opt, dst, src);
-}
-
-static void expand_str_list(struct mpv_global *global, const m_option_t *opt,
-                            void *dst, const void *src)
-{
-    copy_str_list_impl(global, opt, dst, src);
 }
 
 static char *print_str_list(const m_option_t *opt, const void *src)
@@ -1656,7 +1562,78 @@ static int str_list_get(const m_option_t *opt, void *ta_parent,
 static int parse_str_list(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param, void *dst)
 {
-    return parse_str_list_impl(log, opt, name, param, dst, OP_NONE);
+    char **res;
+    int op = OP_NONE;
+
+    if (bstr_endswith0(name, "-add")) {
+        op = OP_ADD;
+    } else if (bstr_endswith0(name, "-append")) {
+        op = OP_APPEND;
+    } else if (bstr_endswith0(name, "-pre")) {
+        op = OP_PRE;
+    } else if (bstr_endswith0(name, "-clr")) {
+        op = OP_CLR;
+    } else if (bstr_endswith0(name, "-del")) {
+        op = OP_DEL;
+    } else if (bstr_endswith0(name, "-set")) {
+        op = OP_NONE;
+    } else if (bstr_endswith0(name, "-toggle")) {
+        op = OP_TOGGLE;
+    } else if (bstr_endswith0(name, "-remove")) {
+        op = OP_REMOVE;
+    }
+
+    if (op == OP_TOGGLE || op == OP_REMOVE) {
+        if (dst) {
+            res = talloc_array(NULL, char *, 2);
+            res[0] = expand_param(res, log, opt, param);
+            res[1] = NULL;
+            bool found = str_list_remove(res, 2, dst);
+            if (found)
+                return 1;
+        }
+        if (op == OP_REMOVE)
+            return 1; // ignore if not found
+        op = OP_APPEND;
+    }
+
+    // Clear the list ??
+    if (op == OP_CLR) {
+        if (dst)
+            free_str_list(dst);
+        return 0;
+    }
+
+    // All other ops need a param
+    if (param.len == 0 && op != OP_NONE)
+        return M_OPT_MISSING_PARAM;
+
+    if (!dst)
+        return 1;
+
+    int n = 0;
+    res = separate_input_param(opt, param, &n, op);
+    if (!res)
+        return M_OPT_INVALID;
+
+    switch (op) {
+    case OP_ADD:
+    case OP_APPEND:
+        return str_list_add(res, n, dst, 0);
+    case OP_PRE:
+        return str_list_add(res, n, dst, 1);
+    case OP_DEL:
+        return str_list_remove(res, n, dst);
+    }
+
+    if (VAL(dst))
+        free_str_list(dst);
+    VAL(dst) = res;
+
+    if (!res[0])
+        free_str_list(dst);
+
+    return 1;
 }
 
 static bool str_list_equal(const m_option_t *opt, void *a, void *b)
@@ -1680,16 +1657,15 @@ static bool str_list_equal(const m_option_t *opt, void *a, void *b)
 }
 
 const m_option_type_t m_option_type_string_list = {
-    .name   = "String list",
-    .size   = sizeof(char **),
-    .parse  = parse_str_list,
-    .print  = print_str_list,
-    .copy   = copy_str_list,
-    .expand = expand_str_list,
-    .free   = free_str_list,
-    .get    = str_list_get,
-    .set    = str_list_set,
-    .equal  = str_list_equal,
+    .name  = "String list",
+    .size  = sizeof(char **),
+    .parse = parse_str_list,
+    .print = print_str_list,
+    .copy  = copy_str_list,
+    .free  = free_str_list,
+    .get   = str_list_get,
+    .set   = str_list_set,
+    .equal = str_list_equal,
     .actions = (const struct m_option_action[]){
         {"add"},
         {"append"},

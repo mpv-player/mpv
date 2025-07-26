@@ -202,7 +202,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
 
 int64_t mp_load_user_script(struct MPContext *mpctx, const char *fname)
 {
-    char *path = mp_get_user_path(NULL, mpctx->global, fname);
+    char *path = mp_get_user_path(NULL, mpctx->log, bstr0(fname));
     int64_t ret = mp_load_script(mpctx, path);
     talloc_free(path);
     return ret;
@@ -287,7 +287,7 @@ bool mp_load_scripts(struct MPContext *mpctx)
 
     // Load all scripts
     void *tmp = talloc_new(NULL);
-    char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, "scripts");
+    char **scriptsdir = mp_find_all_config_files(tmp, mpctx->log, "scripts");
     for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
         files = list_script_files(tmp, scriptsdir[i]);
         for (int n = 0; files && files[n]; n++)

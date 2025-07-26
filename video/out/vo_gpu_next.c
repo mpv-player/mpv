@@ -1811,7 +1811,7 @@ static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
     if (dir_opt && dir_opt[0]) {
         dir = talloc_strdup(vo, dir_opt);
     } else {
-        dir = mp_find_user_file(vo, p->global, "cache", "");
+        dir = mp_find_user_file(vo, p->log, "cache", "");
     }
     if (!dir || !dir[0])
         return;
