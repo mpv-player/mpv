@@ -743,7 +743,6 @@ static void init_avctx(struct mp_filter *vd)
 
     if (ctx->use_hwdec) {
         avctx->opaque = vd;
-        avctx->thread_count = 1;
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
         if (!lavc_param->check_hw_profile)
             avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
@@ -777,9 +776,9 @@ static void init_avctx(struct mp_filter *vd)
         if (ctx->hwdec.copying)
             ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
         ctx->hw_probing = true;
-    } else {
-        mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
+
+    mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
 
     if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
         avctx->opaque = vd;
