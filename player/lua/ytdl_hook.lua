@@ -918,11 +918,7 @@ local function run_ytdl_hook(url)
         msg.verbose("Video disabled. Only using audio")
     end
 
-    if format == "" then
-        format = "bestvideo+bestaudio/best"
-    end
-
-    if format ~= "ytdl" then
+    if format ~= "" and format ~= "ytdl" then
         table.insert(command, "--format")
         table.insert(command, format)
     end
