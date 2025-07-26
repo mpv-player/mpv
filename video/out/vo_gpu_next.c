@@ -416,7 +416,7 @@ struct frame_priv {
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
                                   struct pl_bit_encoding *out_bits,
-                                  enum mp_imgfmt imgfmt)
+                                  enum mp_imgfmt imgfmt, bool use_uint)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
     if (!desc.num_planes || !(desc.flags & MP_IMGFLAG_HAS_COMPS))
@@ -498,7 +498,7 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         data->pixel_stride = desc.bpp[p] / 8;
         data->type = (desc.flags & MP_IMGFLAG_TYPE_FLOAT)
                             ? PL_FMT_FLOAT
-                            : PL_FMT_UNORM;
+                            : (use_uint ? PL_FMT_UINT : PL_FMT_UNORM);
     }
 
     if (any_padded && !out_bits)
@@ -607,6 +607,23 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
     ra_hwdec_mapper_unmap(p->hwdec_mapper);
 }
 
+static bool format_supported(struct vo *vo, int format, bool use_uint)
+{
+    struct priv *p = vo->priv;
+    struct pl_bit_encoding bits;
+    struct pl_plane_data data[4] = {0};
+    int planes = plane_data_from_imgfmt(data, &bits, format, use_uint);
+    if (!planes)
+        return false;
+
+    for (int i = 0; i < planes; i++) {
+        if (!pl_plane_find_fmt(p->gpu, NULL, &data[i]))
+            return false;
+    }
+
+    return true;
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -670,7 +687,14 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     } else { // swdec
 
         struct pl_plane_data data[4] = {0};
-        frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt);
+        bool use_uint = false;
+
+        // At this point, we know that the format is supported, query_format()
+        // makes sure of that. Just check if we should use UINT as a fallback.
+        if (!format_supported(vo, mpi->imgfmt, false))
+            use_uint = true;
+
+        frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt, use_uint);
         for (int n = 0; n < frame->num_planes; n++) {
             struct pl_plane *plane = &frame->planes[n];
             data[n].width = mp_image_plane_w(mpi, n);
@@ -1311,18 +1335,11 @@ static int query_format(struct vo *vo, int format)
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
 
-    struct pl_bit_encoding bits;
-    struct pl_plane_data data[4] = {0};
-    int planes = plane_data_from_imgfmt(data, &bits, format);
-    if (!planes)
-        return false;
+    bool supported = format_supported(vo, format, false);
+    if (!supported)
+        supported = format_supported(vo, format, true);
 
-    for (int i = 0; i < planes; i++) {
-        if (!pl_plane_find_fmt(p->gpu, NULL, &data[i]))
-            return false;
-    }
-
-    return true;
+    return supported;
 }
 
 static void resize(struct vo *vo)
