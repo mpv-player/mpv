@@ -678,6 +678,10 @@ mp.add_key_binding(nil, "edit-input-conf", function ()
     edit_config_file("input.conf")
 end)
 
+mp.add_key_binding(nil, "open-docs", function ()
+    system_open("https://mpv.io/manual/")
+end)
+
 mp.add_key_binding(nil, "menu", function ()
     local sub_track_count = 0
     local audio_track_count = 0
@@ -721,6 +725,7 @@ mp.add_key_binding(nil, "menu", function ()
         {"Edit config file", "script-binding select/edit-config-file", true},
         {"Edit key bindings", "script-binding select/edit-input-conf", true},
         {"Help", "script-binding stats/display-page-4-toggle", true},
+        {"Online documentation", "script-binding select/open-docs", true},
     }
 
     local labels = {}
