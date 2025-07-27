@@ -913,9 +913,10 @@ static void uninit_avctx(struct mp_filter *vd)
     ctx->use_hwdec = false;
 }
 
-static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
+static int init_generic_hwaccel(struct AVCodecContext *avctx, enum AVPixelFormat hw_fmt)
 {
-    struct lavc_ctx *ctx = vd->priv;
+    struct mp_filter *vd = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = vd->priv;
     AVBufferRef *new_frames_ctx = NULL;
 
     if (!ctx->hwdec.use_hw_frames)
@@ -926,7 +927,7 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         goto error;
     }
 
-    if (avcodec_get_hw_frames_parameters(ctx->avctx,
+    if (avcodec_get_hw_frames_parameters(avctx,
                                 ctx->hwdec_dev, hw_fmt, &new_frames_ctx) < 0)
     {
         MP_VERBOSE(ctx, "Hardware decoding of this stream is unsupported?\n");
@@ -971,8 +972,8 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         new_frames_ctx = NULL;
     }
 
-    ctx->avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
-    if (!ctx->avctx->hw_frames_ctx)
+    avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
+    if (!avctx->hw_frames_ctx)
         goto error;
 
     av_buffer_unref(&new_frames_ctx);
@@ -1007,7 +1008,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     enum AVPixelFormat select = AV_PIX_FMT_NONE;
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec.pix_fmt == fmt[i]) {
-            if (init_generic_hwaccel(vd, fmt[i]) < 0)
+            if (init_generic_hwaccel(avctx, fmt[i]) < 0)
                 break;
             select = fmt[i];
             break;
