@@ -183,7 +183,7 @@ static int best_overlap_offset_float(struct priv *s)
     float *target = (float *)s->buf_overlap + num_channels;
     int num_samples = s->samples_overlap - num_channels;
     int step_size = 3;
-    float history[3] = {};
+    float history[3] = {0};
 
     float best_distance = FLT_MAX;
     int best_offset_approx = 0;
@@ -232,7 +232,7 @@ static int best_overlap_offset_s16(struct priv *s)
     int16_t *target = (int16_t *)s->buf_overlap + num_channels;
     int num_samples = s->samples_overlap - num_channels;
     int step_size = 3;
-    int32_t history[3] = {};
+    int32_t history[3] = {0};
 
     int32_t best_distance = INT32_MAX;
     int best_offset_approx = 0;
