@@ -72,3 +72,44 @@ foreach name, cmd: samples
     test(testname, exe, args: [name, target.full_path()],
          depends: target, env: env, suite: 'libmpv')
 endforeach
+
+
+sdh_default = join_paths(source_root, 'test', 'samples', 'sdh_default.srt')
+sdh_mixed = join_paths(source_root, 'test', 'samples', 'sdh_mixed.srt')
+sdh_all = join_paths(source_root, 'test', 'samples', 'sdh_all.srt')
+sdh_mismatch = join_paths(source_root, 'test', 'samples', 'sdh_mismatch.srt')
+
+sdh_samples = {
+    'sdh_default':
+        [ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_default, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+    'sdh_mixed':
+        [ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_mixed, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+    'sdh_all':
+        [ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_all, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+    'sdh_mismatch':
+        [ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_mismatch, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+}
+
+foreach name, cmd: sdh_samples
+    target = custom_target(name,
+        output: name + '.mkv',
+        depends: [audio],
+        command: cmd,
+    )
+    defaultname = 'libmpv-test-' + name
+    exe = executable(defaultname, '../libmpv_test_sdh_filter.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
+    hardername = 'libmpv-test-' + name + '_harder'
+    test(defaultname, exe, args: [name, target.full_path()],
+         depends: target, suite: 'libmpv')
+    test(hardername, exe, args: [name, target.full_path(), 'yes'],
+         depends: target, suite: 'libmpv')
+endforeach
