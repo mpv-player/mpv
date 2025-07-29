@@ -3162,13 +3162,13 @@ Subtitles
     Default: ``no``.
 
 ``--sub-filter-sdh-enclosures=<string>``
-    Specify a string of characters that ``--sub-filter-sdh`` will use to potentially
-    remove text. Text that is enclosed within characters specified by this string will
-    be removed. Note that bracket characters with known pairs (such as ``(`` or ``[``)
-    will be mapped internally to their matching right hand character, so you only need
-    to specify left hand characters.
+    Specify pairs of characters that ``--sub-filter-sdh`` will use to
+    potentially remove text. This is a string list option. See `List Options`_
+    for details. Text that is enclosed within each specified pair will be
+    removed. Note that parenthesis pairs (normal and full width) are treated as
+    a special case and require ``--sub-fitler-sdh-harder`` to be removed.
 
-    Default: ``([（``.
+    Default: ``(),[],（）``
 
 ``--sub-filter-regex-...=...``
     Set a list of regular expressions to match on text subtitles, and remove any
