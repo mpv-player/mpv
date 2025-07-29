@@ -24,20 +24,7 @@
 
 #include <mpv/client.h>
 
-// Stolen from osdep/compiler.h
-#ifdef __GNUC__
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
-#define MP_NORETURN __attribute__((noreturn))
-#else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#define MP_NORETURN
-#endif
-
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef PRINTF_ATTRIBUTE
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
-#endif
+#include "osdep/compiler.h"
 
 // Global handle.
 static mpv_handle *ctx;
@@ -84,10 +71,58 @@ static inline void check_api_error(int status)
         fail("mpv API error: %s\n", mpv_error_string(status));
 }
 
+MP_UNUSED static void check_double(const char *property, double expect)
+{
+    double result_double;
+    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_DOUBLE, &result_double));
+    if (expect != result_double)
+        fail("Double: expected '%f' but got '%f'!\n", expect, result_double);
+}
+
+MP_UNUSED static void check_flag(const char *property, int expect)
+{
+    int result_flag;
+    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_FLAG, &result_flag));
+    if (expect != result_flag)
+        fail("Flag: expected '%d' but got '%d'!\n", expect, result_flag);
+}
+
+MP_UNUSED static void check_int(const char *property, int64_t expect)
+{
+    int64_t result_int;
+    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_INT64, &result_int));
+    if (expect != result_int)
+        fail("Int: expected '%" PRId64 "' but got '%" PRId64 "'!\n", expect, result_int);
+}
+
+MP_UNUSED static inline void check_string(const char *property, const char *expect)
+{
+    char *result_string;
+    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_STRING, &result_string));
+    if (strcmp(expect, result_string) != 0)
+        fail("String: expected '%s' but got '%s'!\n", expect, result_string);
+    mpv_free(result_string);
+}
+
 static inline void initialize(void)
 {
     check_api_error(mpv_set_option_string(ctx, "vo", "null"));
     check_api_error(mpv_set_option_string(ctx, "ao", "null"));
     check_api_error(mpv_request_log_messages(ctx, "debug"));
     check_api_error(mpv_initialize(ctx));
+}
+
+static inline void reload_file(const char *path)
+{
+    const char *cmd[] = {"loadfile", path, NULL};
+    check_api_error(mpv_command(ctx, cmd));
+    bool loaded = false;
+    while (!loaded) {
+        mpv_event *event = wrap_wait_event();
+        switch (event->event_id) {
+        case MPV_EVENT_FILE_LOADED:
+            loaded = true;
+            break;
+        }
+    }
 }

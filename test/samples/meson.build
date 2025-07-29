@@ -68,7 +68,7 @@ foreach name, cmd: samples
     env = name == 'locale.mkv' ? 'LANG=C' : []
     testname = 'libmpv-test-' + name
     exe = executable(testname, '../libmpv_test_track_selection.c',
-                     dependencies: libmpv_dep)
+                     include_directories: incdir, dependencies: libmpv_dep)
     test(testname, exe, args: [name, target.full_path()],
          depends: target, env: env, suite: 'libmpv')
 endforeach
