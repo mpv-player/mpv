@@ -3880,6 +3880,11 @@ Property list
     The working directory of the mpv process. Can be useful for JSON IPC users,
     because the command line player usually works with relative paths.
 
+``current-watch-history-path``
+    The path in which the watch history file is stored. This will return the
+    value of ``--watch-history-path`` or the default path if
+    ``--watch-history-path`` has not been set with tilde placeholders expanded.
+
 ``current-watch-later-dir``
     The directory in which watch later config files are stored. This returns
     ``--watch-later-dir``, or the default directory if ``--watch-later-dir`` has
