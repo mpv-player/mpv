@@ -437,8 +437,7 @@ local function format_history_entry(entry)
 end
 
 mp.add_key_binding(nil, "select-watch-history", function ()
-    local history_file_path = mp.command_native(
-        {"expand-path", mp.get_property("watch-history-path")})
+    local history_file_path = mp.get_property("current-watch-history-path")
     local history_file, error_message = io.open(history_file_path)
     if not history_file then
         show_warning(mp.get_property_native("save-watch-history")
