@@ -1,0 +1,2 @@
+change `--watch-history-path` to be unset by default
+use the `current-watch-history-path` property to get the path instead

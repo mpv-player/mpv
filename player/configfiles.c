@@ -197,6 +197,17 @@ static bool copy_mtime(const char *f1, const char *f2)
     return true;
 }
 
+char *mp_get_watch_history_path(void *talloc_ctx, struct MPContext *mpctx)
+{
+    char *history_path = mpctx->opts->watch_history_path;
+    if (history_path && history_path[0]) {
+        history_path = talloc_strdup(talloc_ctx, history_path);
+    } else {
+        history_path = mp_find_user_file(talloc_ctx, mpctx->global, "state", "watch_history.jsonl");
+    }
+    return history_path;
+}
+
 char *mp_get_playback_resume_dir(struct MPContext *mpctx)
 {
     char *wl_dir = mpctx->opts->watch_later_dir;

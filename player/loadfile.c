@@ -1545,9 +1545,7 @@ static void append_to_watch_history(struct MPContext *mpctx)
         return;
 
     void *ctx = talloc_new(NULL);
-    char *history_path = mpctx->opts->watch_history_path;
-    if (!history_path || !history_path[0])
-        history_path = mp_find_user_file(ctx, mpctx->global, "state", "watch_history.jsonl");
+    char *history_path = mp_get_watch_history_path(NULL, mpctx);
     char *history_path_dir = bstrto0(ctx, mp_dirname(history_path));
     mp_mkdirp(history_path_dir);
 
