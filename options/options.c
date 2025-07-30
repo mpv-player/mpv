@@ -1013,7 +1013,6 @@ static const struct MPOpts mp_default_opts = {
     .sync_max_factor = 5,
     .load_config = true,
     .position_resume = true,
-    .watch_history_path = "~~state/watch_history.jsonl",
     .autoload_files = true,
     .demuxer_thread = true,
     .demux_termination_timeout = 0.1,
