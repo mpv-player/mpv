@@ -740,7 +740,11 @@ local function add_single_video(json)
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
     if mp.get_property("force-media-title", "") == "" then
-        mp.set_property("file-local-options/force-media-title", json.title)
+        if json.extractor == "twitch:stream" then
+                mp.set_property("file-local-options/force-media-title", json.description)
+        else
+                mp.set_property("file-local-options/force-media-title", json.title)
+        end
     end
 
     -- set hls-bitrate for dash track selection
