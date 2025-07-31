@@ -3738,12 +3738,24 @@ Window
     On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
     ``uint32_t`` (all Windows handles are 32-bit), this is important as mpv will
     not accept negative values. mpv will create its own window and set the
-    wid window as parent, like with X11.
+    wid window as parent, like with X11. The value ``0`` is interpreted
+    specially, and mpv will draw on top of the desktop wallpaper and below
+    desktop icons.
 
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
     ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec``).
+
+    .. note::
+
+        On win32, if desktop wallpaper transition occurs (e.g. setting desktop
+        slideshow of multiple images in Windows settings) and an ID value ``0``
+        is used, Windows may sometimes destroy the window mpv is attached to.
+        mpv will simply treat this as a quit signal in this case.
+
+        To prevent this from happening, set a static desktop wallpaper,
+        such as single image or pure color.
 
 ``--window-dragging=<yes|no>``
     Move the window when clicking on it and moving the mouse pointer (default: yes).
