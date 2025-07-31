@@ -100,6 +100,7 @@ struct vo_w32_state {
     HWND parent; // 0 normally, set in embedding mode
     HHOOK parent_win_hook;
     HWINEVENTHOOK parent_evt_hook;
+    bool embed_desktop;
 
     struct menu_ctx *menu_ctx;
 
@@ -2025,6 +2026,36 @@ static void w32_api_load(struct vo_w32_state *w32)
                 (void *)GetProcAddress(uxtheme_dll, MAKEINTRESOURCEA(135));
 }
 
+static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lparam)
+{
+    HWND *workerw = (HWND *)lparam;
+    HWND defview = FindWindowExW(hwnd, NULL, L"SHELLDLL_DefView", NULL);
+    if (defview) {
+        *workerw = FindWindowExW(NULL, hwnd, L"WorkerW", NULL);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+// Find the "WorkerW" HWND to attach to, which is the desktop wallpaper HWND.
+static HWND get_workerw_hwnd(void)
+{
+    HWND progman = FindWindowW(L"Progman", NULL);
+    // 24H2 or later
+    HWND workerw = FindWindowExW(progman, NULL, L"WorkerW", NULL);
+    // Previous Windows versions
+    if (!workerw)
+        EnumWindows(EnumWindowsProc, (LPARAM)&workerw);
+    return workerw;
+}
+
+// Enter the "raised desktop" mode with wallpaper and icons on separate HWNDs.
+static void set_raised_desktop(void)
+{
+    HWND progman = FindWindowW(L"Progman", NULL);
+    SendMessageTimeout(progman, 0x052c, 0xd, 1, SMTO_NORMAL, 1000, NULL);
+}
+
 static MP_THREAD_VOID gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
@@ -2035,8 +2066,13 @@ static MP_THREAD_VOID gui_thread(void *ptr)
 
     w32_api_load(w32);
 
-    if (w32->opts->WinID >= 0)
+    if (w32->opts->WinID == 0) {
+        set_raised_desktop();
+        w32->parent = get_workerw_hwnd();
+        w32->embed_desktop = true;
+    } else if (w32->opts->WinID > 0) {
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
+    }
 
     ATOM cls = get_window_class();
     if (w32->parent) {
@@ -2148,6 +2184,10 @@ done:
         ITaskbarList3_Release(w32->taskbar_list3);
     if (ole_ok)
         OleUninitialize();
+    // Some Windows versions do not redraw the desktop wallpaper when mpv exits,
+    // so force a redraw here.
+    if (w32->embed_desktop)
+        set_raised_desktop();
     SetThreadExecutionState(ES_CONTINUOUS);
     MP_THREAD_RETURN();
 }
