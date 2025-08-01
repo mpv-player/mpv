@@ -595,9 +595,9 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #if LIBASS_VERSION >= 0x01600010
     if (converted) {
         ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
-        if (!opts->sub_vsfilter_bidi_compat) {
+        if (opts->sub_vsfilter_bidi_compat != 0) {
             for (int n = 0; n < track->n_styles; n++) {
-                track->styles[n].Encoding = -1;
+                track->styles[n].Encoding = opts->sub_vsfilter_bidi_compat;
             }
             ass_track_set_feature(track, ASS_FEATURE_BIDI_BRACKETS, 1);
             ass_track_set_feature(track, ASS_FEATURE_WHOLE_TEXT_LAYOUT, 1);
