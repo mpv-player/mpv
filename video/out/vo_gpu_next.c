@@ -1135,6 +1135,21 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+        // max_cll is not used in tone mapping, set it to source value.
+        if (!hint.hdr.max_cll)
+            hint.hdr.max_cll = source->hdr.max_cll;
+        // If tone mapping is required, adjust maxCLL and maxFALL.
+        if (source->hdr.max_luma > hint.hdr.max_luma || opts->tone_map.inverse) {
+            // Set maxCLL to the target luminance if it's not already lower.
+            if (!hint.hdr.max_cll || hint.hdr.max_luma < hint.hdr.max_cll || opts->tone_map.inverse)
+                hint.hdr.max_cll = hint.hdr.max_luma;
+            // There's no reliable way to estimate maxFALL here.
+            // Scaling it linearly with max_luma would be inaccurate, depending
+            // on tone mapping curve. Just reset it to 0.
+            hint.hdr.max_fall = 0;
+        }
+        if (!hint.hdr.max_cll && hint.hdr.max_fall > hint.hdr.max_cll)
+            hint.hdr.max_fall = 0;
         apply_target_contrast(p, &hint, hint.hdr.min_luma);
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
