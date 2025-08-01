@@ -743,7 +743,6 @@ static void init_avctx(struct mp_filter *vd)
 
     if (ctx->use_hwdec) {
         avctx->opaque = vd;
-        avctx->thread_count = 1;
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
         if (!lavc_param->check_hw_profile)
             avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
@@ -777,9 +776,9 @@ static void init_avctx(struct mp_filter *vd)
         if (ctx->hwdec.copying)
             ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
         ctx->hw_probing = true;
-    } else {
-        mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
+
+    mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
 
     if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
         avctx->opaque = vd;
@@ -913,9 +912,10 @@ static void uninit_avctx(struct mp_filter *vd)
     ctx->use_hwdec = false;
 }
 
-static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
+static int init_generic_hwaccel(struct AVCodecContext *avctx, enum AVPixelFormat hw_fmt)
 {
-    struct lavc_ctx *ctx = vd->priv;
+    struct mp_filter *vd = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = vd->priv;
     AVBufferRef *new_frames_ctx = NULL;
 
     if (!ctx->hwdec.use_hw_frames)
@@ -926,7 +926,7 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         goto error;
     }
 
-    if (avcodec_get_hw_frames_parameters(ctx->avctx,
+    if (avcodec_get_hw_frames_parameters(avctx,
                                 ctx->hwdec_dev, hw_fmt, &new_frames_ctx) < 0)
     {
         MP_VERBOSE(ctx, "Hardware decoding of this stream is unsupported?\n");
@@ -971,8 +971,8 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         new_frames_ctx = NULL;
     }
 
-    ctx->avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
-    if (!ctx->avctx->hw_frames_ctx)
+    avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
+    if (!avctx->hw_frames_ctx)
         goto error;
 
     av_buffer_unref(&new_frames_ctx);
@@ -1007,7 +1007,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     enum AVPixelFormat select = AV_PIX_FMT_NONE;
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec.pix_fmt == fmt[i]) {
-            if (init_generic_hwaccel(vd, fmt[i]) < 0)
+            if (init_generic_hwaccel(avctx, fmt[i]) < 0)
                 break;
             select = fmt[i];
             break;
