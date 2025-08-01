@@ -114,7 +114,7 @@ struct mp_subtitle_opts {
     bool ass_use_margins;
     bool sub_use_margins;
     int ass_vsfilter_color_compat;
-    bool sub_vsfilter_bidi_compat;
+    int sub_vsfilter_bidi_compat;
     int ass_use_video_data;
     double ass_video_aspect;
     bool use_embedded_fonts;
