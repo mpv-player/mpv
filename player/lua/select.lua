@@ -633,6 +633,55 @@ mp.add_key_binding(nil, "show-properties", function ()
     })
 end)
 
+local function system_open(path)
+    local platform = mp.get_property("platform")
+    local args
+    if platform == "windows" then
+        args = {"rundll32", "url.dll,FileProtocolHandler", path}
+    elseif platform == "darwin" then
+        args = {"open", path}
+    else
+        args = {"gio", "open", path}
+    end
+
+    mp.commandv("run", unpack(args))
+end
+
+local function edit_config_file(filename)
+    if not mp.get_property_bool("config") then
+        show_warning("Editing config files with --no-config is not supported.")
+        return
+    end
+
+    local path = mp.find_config_file(filename)
+
+    if not path then
+        path = mp.command_native({"expand-path", "~~/" .. filename})
+        local file_handle, error_message = io.open(path, "w")
+
+        if not file_handle then
+            show_error(error_message)
+            return
+        end
+
+        file_handle:close()
+    end
+
+    system_open(path)
+end
+
+mp.add_key_binding(nil, "edit-config-file", function ()
+    edit_config_file("mpv.conf")
+end)
+
+mp.add_key_binding(nil, "edit-input-conf", function ()
+    edit_config_file("input.conf")
+end)
+
+mp.add_key_binding(nil, "open-docs", function ()
+    system_open("https://mpv.io/manual/")
+end)
+
 mp.add_key_binding(nil, "menu", function ()
     local sub_track_count = 0
     local audio_track_count = 0
@@ -673,7 +722,10 @@ mp.add_key_binding(nil, "menu", function ()
         {"Watch later", "script-binding select/select-watch-later", true},
         {"Stats for nerds", "script-binding stats/display-page-1-toggle", true},
         {"File info", "script-binding stats/display-page-5-toggle", mp.get_property("filename")},
+        {"Edit config file", "script-binding select/edit-config-file", true},
+        {"Edit key bindings", "script-binding select/edit-input-conf", true},
         {"Help", "script-binding stats/display-page-4-toggle", true},
+        {"Online documentation", "script-binding select/open-docs", true},
     }
 
     local labels = {}
@@ -693,7 +745,7 @@ mp.add_key_binding(nil, "menu", function ()
         submit = function (i)
             mp.command(commands[i])
 
-            if not commands[i]:find("^script%-binding select/") then
+            if not commands[i]:find("^script%-binding select/select") then
                 input.terminate()
             end
         end,
