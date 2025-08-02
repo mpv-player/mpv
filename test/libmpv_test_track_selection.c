@@ -94,30 +94,6 @@ static bool have_english_locale(void)
     return true;
 }
 
-static void check_string(const char *property, const char *expect)
-{
-    char *result_string;
-    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_STRING, &result_string));
-    if (strcmp(expect, result_string) != 0)
-        fail("String: expected '%s' but got '%s'!\n", expect, result_string);
-    mpv_free(result_string);
-}
-
-static void reload_file(const char *path)
-{
-    const char *cmd[] = {"loadfile", path, NULL};
-    check_api_error(mpv_command(ctx, cmd));
-    bool loaded = false;
-    while (!loaded) {
-        mpv_event *event = wrap_wait_event();
-        switch (event->event_id) {
-        case MPV_EVENT_FILE_LOADED:
-            loaded = true;
-            break;
-        }
-    }
-}
-
 static void test_track_selection(char *file, char *path)
 {
     int ret = access(path, F_OK);

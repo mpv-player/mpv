@@ -1,0 +1,3 @@
+1
+00:00:00,000 --> 00:00:02,000
+[Everything][should][be][removed][except][maybe](this)

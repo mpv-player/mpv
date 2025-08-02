@@ -23,39 +23,6 @@ static int flag = 1;
 static int64_t int_ = 20;
 static double double_ = 1.5;
 
-static void check_double(const char *property, double expect)
-{
-    double result_double;
-    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_DOUBLE, &result_double));
-    if (expect != result_double)
-        fail("Double: expected '%f' but got '%f'!\n", expect, result_double);
-}
-
-static void check_flag(const char *property, int expect)
-{
-    int result_flag;
-    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_FLAG, &result_flag));
-    if (expect != result_flag)
-        fail("Flag: expected '%d' but got '%d'!\n", expect, result_flag);
-}
-
-static void check_int(const char *property, int64_t expect)
-{
-    int64_t result_int;
-    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_INT64, &result_int));
-    if (expect != result_int)
-        fail("Int: expected '%" PRId64 "' but got '%" PRId64 "'!\n", expect, result_int);
-}
-
-static void check_string(const char *property, const char *expect)
-{
-    char *result_string;
-    check_api_error(mpv_get_property(ctx, property, MPV_FORMAT_STRING, &result_string));
-    if (strcmp(expect, result_string) != 0)
-        fail("String: expected '%s' but got '%s'!\n", expect, result_string);
-    mpv_free(result_string);
-}
-
 static void check_results(const char *properties[], enum mpv_format formats[])
 {
     for (int i = 0; properties[i]; i++) {

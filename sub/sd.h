@@ -70,7 +70,7 @@ void lavc_conv_uninit(struct lavc_conv *priv);
 struct mp_sub_filter_opts {
     bool sub_filter_SDH;
     bool sub_filter_SDH_harder;
-    char *sub_filter_SDH_enclosures;
+    char **sub_filter_SDH_enclosures;
     bool rf_enable;
     bool rf_plain;
     char **rf_items;
