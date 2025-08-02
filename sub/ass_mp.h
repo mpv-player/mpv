@@ -39,7 +39,6 @@
 #define MP_ASS_COLOR(c) MP_ASS_RGBA((c).r, (c).g, (c).b, (c).a)
 
 struct MPOpts;
-struct mpv_global;
 struct mp_osd_res;
 struct osd_style_opts;
 struct mp_log;
@@ -49,9 +48,8 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
                       const struct osd_style_opts *opts);
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
-                            struct mpv_global *global, struct mp_log *log);
-ASS_Library *mp_ass_init(struct mpv_global *global,
-                         struct osd_style_opts *opts, struct mp_log *log);
+                            struct mp_log *log);
+ASS_Library *mp_ass_init(struct osd_style_opts *opts, struct mp_log *log);
 
 struct sub_bitmaps;
 struct mp_ass_packer;

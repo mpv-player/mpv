@@ -1165,8 +1165,11 @@ Watch History
         disabled by default.
 
 ``--watch-history-path=<path>``
-    The path in which to store the watch history. Default:
-    ``~~state/watch_history.jsonl`` (see `FILES`_).
+    The path in which to store the watch history.
+
+    If this option is unset, the file will be stored as ``watch_history.jsonl``
+    in the local state directory. This is usually ``~/.local/state/mpv/`` (see
+    `FILES`_).
 
     This file contains one JSON object per line. Its ``time`` field is the UNIX
     timestamp when the file was opened, its ``path`` field is the normalized

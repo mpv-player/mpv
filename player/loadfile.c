@@ -909,7 +909,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             if (title.len)
                 t->title = bstrdup0(t, title);
         }
-        t->external_filename = mp_normalize_user_path(t, mpctx->global, filename);
+        t->external_filename = mp_normalize_user_path(t, mpctx->log, filename);
         t->no_default = sh->type != filter;
         t->no_auto_select = t->no_default;
         t->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
@@ -1545,7 +1545,7 @@ static void append_to_watch_history(struct MPContext *mpctx)
         return;
 
     void *ctx = talloc_new(NULL);
-    char *history_path = mpctx->opts->watch_history_path;
+    char *history_path = mp_get_watch_history_path(NULL, mpctx);
     char *history_path_dir = bstrto0(ctx, mp_dirname(history_path));
     mp_mkdirp(history_path_dir);
 

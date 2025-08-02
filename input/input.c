@@ -1741,7 +1741,7 @@ void mp_input_load_config(struct input_ctx *ictx)
     if (!config_ok) {
         // Try global conf dir
         void *tmp = talloc_new(NULL);
-        char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
+        char **files = mp_find_all_config_files(tmp, ictx->log, "input.conf");
         for (int n = 0; files && files[n]; n++)
             parse_config_file(ictx, files[n]);
         talloc_free(tmp);

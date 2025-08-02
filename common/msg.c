@@ -754,13 +754,13 @@ static void terminate_log_file_thread(struct mp_log_root *root)
 
 // If opt is different from *current_path, update *current_path and return true.
 // No lock must be held; passed values must be accessible without.
-static bool check_new_path(struct mpv_global *global, char *opt,
+static bool check_new_path(struct mp_log *log, char *opt,
                            char **current_path)
 {
     void *tmp = talloc_new(NULL);
     bool res = false;
 
-    char *new_path = mp_get_user_path(tmp, global, opt);
+    char *new_path = mp_get_user_path(tmp, log, bstr0(opt));
     if (!new_path)
         new_path = "";
 
@@ -804,7 +804,7 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
     atomic_fetch_add(&root->reload_counter, 1);
     mp_mutex_unlock(&root->lock);
 
-    if (check_new_path(global, opts->log_file, &root->log_path)) {
+    if (check_new_path(global->log, opts->log_file, &root->log_path)) {
         terminate_log_file_thread(root);
         if (root->log_path) {
             root->log_file = fopen(root->log_path, "wb");
@@ -851,7 +851,7 @@ void mp_msg_update_msglevels(struct mpv_global *global, struct MPOpts *opts)
         }
     }
 
-    if (check_new_path(global, opts->dump_stats, &root->stats_path)) {
+    if (check_new_path(global->log, opts->dump_stats, &root->stats_path)) {
         bool open_error = false;
 
         mp_mutex_lock(&root->lock);
