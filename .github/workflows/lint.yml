@@ -12,10 +12,11 @@ on:
 jobs:
   commit-msg:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 50
+          sparse-checkout: ci/lint-commit-msg.py
 
       - name: Lint
         run: |
