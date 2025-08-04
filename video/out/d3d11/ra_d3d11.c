@@ -2256,7 +2256,7 @@ static void destroy(struct ra *ra)
     talloc_free(ra);
 }
 
-static struct ra_fns ra_fns_d3d11 = {
+static const struct ra_fns ra_fns_d3d11 = {
     .destroy            = destroy,
     .tex_create         = tex_create,
     .tex_destroy        = tex_destroy,
