@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "ra_gl.h"
 
-static struct ra_fns ra_fns_gl;
+static const struct ra_fns ra_fns_gl;
 
 // For ra.priv
 struct ra_gl {
@@ -1183,7 +1183,7 @@ static void gl_debug_marker(struct ra *ra, const char *msg)
         gl_check_error(p->gl, ra->log, msg);
 }
 
-static struct ra_fns ra_fns_gl = {
+static const struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
     .tex_destroy            = gl_tex_destroy,
