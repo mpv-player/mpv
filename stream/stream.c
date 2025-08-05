@@ -58,7 +58,6 @@ extern const stream_info_t stream_info_ifo_dvdnav;
 extern const stream_info_t stream_info_dvdnav;
 extern const stream_info_t stream_info_bdmv_dir;
 extern const stream_info_t stream_info_bluray;
-extern const stream_info_t stream_info_bdnav;
 extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
@@ -79,7 +78,6 @@ static const stream_info_t *const stream_list[] = {
 #if HAVE_LIBBLURAY
     &stream_info_bdmv_dir,
     &stream_info_bluray,
-    &stream_info_bdnav,
 #endif
 #if HAVE_LIBARCHIVE
     &stream_info_libarchive,
