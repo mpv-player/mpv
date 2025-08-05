@@ -39,6 +39,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/global.h"
 #include "misc/json.h"
 #include "misc/node.h"
 #include "m_option.h"
@@ -61,8 +62,9 @@ const char m_option_path_separator = OPTION_PATH_SEPARATOR;
 #define OPT_INT_MAX(opt, T, Tm) ((opt)->min < (opt)->max \
     ? ((opt)->max >= (double)(Tm) ? (Tm) : (T)((opt)->max)) : (Tm))
 
-int m_option_parse(struct mp_log *log, const m_option_t *opt,
-                   struct bstr name, struct bstr param, void *dst)
+int m_option_parse(struct mpv_global *global, struct mp_log *log,
+                   const m_option_t *opt, struct bstr name,
+                   struct bstr param, void *dst)
 {
     int r = M_OPT_INVALID;
     if (bstr_equals0(param, "help") && opt->help) {
@@ -71,7 +73,12 @@ int m_option_parse(struct mp_log *log, const m_option_t *opt,
             return r;
     }
 
-    r = opt->type->parse(log, opt, name, param, dst);
+    if (opt->flags & M_OPT_FILE && opt->type->expand) {
+        r = opt->type->expand(global, opt, name, param, dst);
+    } else {
+        r = opt->type->parse(log, opt, name, param, dst);
+    }
+
     if (r < 0)
         return r;
 
@@ -120,11 +127,11 @@ int m_option_required_params(const m_option_t *opt)
     return 1;
 }
 
-int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
+int m_option_set_node_or_string(struct mpv_global *global, const m_option_t *opt,
                                 struct bstr name, void *dst, struct mpv_node *src)
 {
     if (src->format == MPV_FORMAT_STRING) {
-        return m_option_parse(log, opt, name, bstr0(src->u.string), dst);
+        return m_option_parse(global, global->log, opt, name, bstr0(src->u.string), dst);
     } else {
         return m_option_set_node(opt, dst, src);
     }
@@ -1260,6 +1267,18 @@ static int parse_str(struct mp_log *log, const m_option_t *opt,
     return 0;
 }
 
+static int expand_str(struct mpv_global *global, const m_option_t *opt,
+                       struct bstr name, struct bstr param, void *dst)
+{
+    if (dst) {
+        talloc_free(VAL(dst));
+        VAL(dst) = mp_get_user_path(NULL, global, param);
+    }
+
+    return 0;
+}
+
+
 static char *print_str(const m_option_t *opt, const void *val)
 {
     return talloc_strdup(NULL, VAL(val) ? VAL(val) : "");
@@ -1269,15 +1288,6 @@ static void copy_str(const m_option_t *opt, void *dst, const void *src)
 {
     if (dst && src)
         talloc_replace(NULL, VAL(dst), VAL(src));
-}
-
-static void expand_str(struct mpv_global *global, const m_option_t *opt,
-                       void *dst, const void *src)
-{
-    if (dst && src) {
-        talloc_free(VAL(dst));
-        VAL(dst) = mp_get_user_path(NULL, global, bstr0(VAL(src)));
-    }
 }
 
 static int str_set(const m_option_t *opt, void *dst, struct mpv_node *src)
@@ -1316,9 +1326,9 @@ const m_option_type_t m_option_type_string = {
     .name   = "String",
     .size   = sizeof(char *),
     .parse  = parse_str,
+    .expand = expand_str,
     .print  = print_str,
     .copy   = copy_str,
-    .expand = expand_str,
     .free   = free_str,
     .set    = str_set,
     .get    = str_get,
@@ -1419,8 +1429,8 @@ static int find_list_bstr(char **list, bstr item)
     return -1;
 }
 
-static char **separate_input_param(const m_option_t *opt, bstr param,
-                                   int *len, int op)
+static char **separate_input_param(struct mpv_global *global, const m_option_t *opt,
+                                   bstr param, int *len, int op)
 {
     char separator = opt->priv ? *(char *)opt->priv : OPTION_LIST_SEPARATOR;
     if (op == OP_APPEND || op == OP_REMOVE)
@@ -1446,7 +1456,8 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
             break;
 #endif
         struct bstr el = get_nextsep(&str, separator, 1);
-        list[n] = bstrdup0(NULL, el);
+        list[n] = global ? mp_get_user_path(NULL, global, el) :
+                  bstrdup0(NULL, el);
         n++;
         if (!str.len)
             break;
@@ -1480,12 +1491,12 @@ static int str_list_remove(char **remove, int n, void *dst)
     return found;
 }
 
-static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
-                               struct bstr name, struct bstr param, void *dst,
-                               int default_op)
+static int parse_str_list_impl(struct mpv_global *global, struct mp_log *log,
+                               const m_option_t *opt, struct bstr name,
+                               struct bstr param, void *dst)
 {
     char **res;
-    int op = default_op;
+    int op = OP_NONE;
 
     if (bstr_endswith0(name, "-add")) {
         op = OP_ADD;
@@ -1508,7 +1519,8 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     if (op == OP_TOGGLE || op == OP_REMOVE) {
         if (dst) {
             res = talloc_array(NULL, char *, 2);
-            res[0] = bstrdup0(res, param);
+            res[0] = global ? mp_get_user_path(res, global, param) :
+                     bstrdup0(res, param);
             res[1] = NULL;
             bool found = str_list_remove(res, 2, dst);
             if (found)
@@ -1534,7 +1546,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
         return 1;
 
     int n = 0;
-    res = separate_input_param(opt, param, &n, op);
+    res = separate_input_param(global, opt, param, &n, op);
     if (!res)
         return M_OPT_INVALID;
 
@@ -1558,8 +1570,7 @@ static int parse_str_list_impl(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
-static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
-                               void *dst, const void *src)
+static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
 {
     int n;
     char **d, **s;
@@ -1579,26 +1590,10 @@ static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
     for (n = 0; s[n] != NULL; n++)
         /* NOTHING */;
     d = talloc_array(NULL, char *, n + 1);
-    for (; n >= 0; n--) {
-        if (global) {
-            d[n] = mp_get_user_path(NULL, global, bstr0(s[n]));
-        } else {
-            d[n] = talloc_strdup(NULL, s[n]);
-        }
-    }
+    for (; n >= 0; n--)
+        d[n] = talloc_strdup(NULL, s[n]);
 
     VAL(dst) = d;
-}
-
-static void copy_str_list(const m_option_t *opt, void *dst, const void *src)
-{
-    copy_str_list_impl(NULL, opt, dst, src);
-}
-
-static void expand_str_list(struct mpv_global *global, const m_option_t *opt,
-                            void *dst, const void *src)
-{
-    copy_str_list_impl(global, opt, dst, src);
 }
 
 static char *print_str_list(const m_option_t *opt, const void *src)
@@ -1656,8 +1651,15 @@ static int str_list_get(const m_option_t *opt, void *ta_parent,
 static int parse_str_list(struct mp_log *log, const m_option_t *opt,
                           struct bstr name, struct bstr param, void *dst)
 {
-    return parse_str_list_impl(log, opt, name, param, dst, OP_NONE);
+    return parse_str_list_impl(NULL, log, opt, name, param, dst);
 }
+
+static int expand_str_list(struct mpv_global *global, const m_option_t *opt,
+                           struct bstr name, struct bstr param, void *dst)
+{
+    return parse_str_list_impl(global, global->log, opt, name, param, dst);
+}
+
 
 static bool str_list_equal(const m_option_t *opt, void *a, void *b)
 {
@@ -1683,9 +1685,9 @@ const m_option_type_t m_option_type_string_list = {
     .name   = "String list",
     .size   = sizeof(char **),
     .parse  = parse_str_list,
+    .expand = expand_str_list,
     .print  = print_str_list,
     .copy   = copy_str_list,
-    .expand = expand_str_list,
     .free   = free_str_list,
     .get    = str_list_get,
     .set    = str_list_set,
@@ -1757,7 +1759,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
         return 0;
     } else if (op == OP_DEL || op == OP_REMOVE) {
         int n = 0;
-        char **res = separate_input_param(opt, param, &n, op);
+        char **res = separate_input_param(NULL, opt, param, &n, op);
         if (!res)
             return M_OPT_INVALID;
         lst = dst ? VAL(dst) : NULL;

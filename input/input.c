@@ -350,7 +350,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
             "CLOSE_WIN was received. This pseudo key can be remapped too,\n"
             "but --input-test will always quit when receiving it.\n");
         const char *args[] = {"quit", NULL};
-        mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, args);
+        mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->global, args);
         return res;
     }
 
@@ -378,7 +378,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
 
     MP_INFO(ictx, "%s\n", msg);
     const char *args[] = {"show-text", msg, NULL};
-    mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, args);
+    mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->global, args);
     talloc_free(msg);
     return res;
 }
@@ -517,7 +517,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, bstr force_section,
         cmd = find_any_bind_for_key(ictx, force_section, MP_KEY_UNMAPPED);
     if (!cmd) {
         if (code == MP_KEY_CLOSE_WIN)
-            return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
+            return mp_input_parse_cmd_strv(ictx->global, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
         if (MP_KEY_IS_MOUSE_MOVE(code))
             msgl = MSGL_TRACE;
@@ -1810,13 +1810,13 @@ bool mp_input_use_media_keys(struct input_ctx *ictx)
 struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,
                                   const char *location)
 {
-    return mp_input_parse_cmd_str(ictx->log, str, location);
+    return mp_input_parse_cmd_str(ictx->global, str, location);
 }
 
 void mp_input_run_cmd(struct input_ctx *ictx, const char **cmd)
 {
     input_lock(ictx);
-    queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
+    queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->global, cmd));
     input_unlock(ictx);
 }
 
@@ -2034,7 +2034,7 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
             if (term) {
                 bstr s = {in->cmd_buffer, in->cmd_buffer_size};
                 s = bstr_strip(s);
-                struct mp_cmd *cmd = mp_input_parse_cmd_str(src->log, s, "<>");
+                struct mp_cmd *cmd = mp_input_parse_cmd_str(src->global, s, "<>");
                 if (cmd) {
                     input_lock(src->input_ctx);
                     queue_cmd(src->input_ctx, cmd);

@@ -34,7 +34,7 @@
 #include "common/msg.h"
 #include "common/common.h"
 
-static int m_property_multiply(struct mp_log *log,
+static int m_property_multiply(struct mpv_global *global,
                                const struct m_property *prop_list,
                                const char *property, double f, void *ctx)
 {
@@ -42,7 +42,7 @@ static int m_property_multiply(struct mp_log *log,
     struct m_option opt = {0};
     int r;
 
-    r = m_property_do(log, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
+    r = m_property_do(global, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
                       &opt, ctx);
     if (r != M_PROPERTY_OK)
         return r;
@@ -51,11 +51,11 @@ static int m_property_multiply(struct mp_log *log,
     if (!opt.type->multiply)
         return M_PROPERTY_NOT_IMPLEMENTED;
 
-    r = m_property_do(log, prop_list, property, M_PROPERTY_GET, &val, ctx);
+    r = m_property_do(global, prop_list, property, M_PROPERTY_GET, &val, ctx);
     if (r != M_PROPERTY_OK)
         return r;
     opt.type->multiply(&opt, &val, f);
-    r = m_property_do(log, prop_list, property, M_PROPERTY_SET, &val, ctx);
+    r = m_property_do(global, prop_list, property, M_PROPERTY_SET, &val, ctx);
     m_option_free(&opt, &val);
     return r;
 }
@@ -94,8 +94,8 @@ static int do_action(const struct m_property *prop_list, const char *name,
     return prop->call(ctx, prop, action, arg);
 }
 
-// (as a hack, log can be NULL on read-only paths)
-int m_property_do(struct mp_log *log, const struct m_property *prop_list,
+// (as a hack, global can be NULL on read-only paths)
+int m_property_do(struct mpv_global *global, const struct m_property *prop_list,
                   const char *name, int action, void *arg, void *ctx)
 {
     union m_option_value val = m_option_value_default;
@@ -130,20 +130,20 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     }
     case M_PROPERTY_SET_STRING: {
         struct mpv_node node = { .format = MPV_FORMAT_STRING, .u.string = arg };
-        return m_property_do(log, prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
+        return m_property_do(global, prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
     }
     case M_PROPERTY_MULTIPLY: {
-        return m_property_multiply(log, prop_list, name, *(double *)arg, ctx);
+        return m_property_multiply(global, prop_list, name, *(double *)arg, ctx);
     }
     case M_PROPERTY_SWITCH: {
-        if (!log)
+        if (!global)
             return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
         // Fallback to m_option
-        r = m_property_do(log, prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE,
+        r = m_property_do(global, prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE,
                           &opt, ctx);
         if (r <= 0)
             return r;
@@ -187,12 +187,12 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return r;
     }
     case M_PROPERTY_SET_NODE: {
-        if (!log)
+        if (!global)
             return M_PROPERTY_ERROR;
         if ((r = do_action(prop_list, name, M_PROPERTY_SET_NODE, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
-        int err = m_option_set_node_or_string(log, &opt, bstr0(name), &val, arg);
+        int err = m_option_set_node_or_string(global, &opt, bstr0(name), &val, arg);
         if (err == M_OPT_UNKNOWN) {
             r = M_PROPERTY_NOT_IMPLEMENTED;
         } else if (err < 0) {

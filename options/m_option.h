@@ -311,6 +311,12 @@ struct m_option_type {
     int (*parse)(struct mp_log *log, const m_option_t *opt,
                  struct bstr name, struct bstr param, void *dst);
 
+    // Exactly the same as parse but will potentially perform a path expansion if
+    // the underlying option is a string with paths (M_OPT_FILE). This is for
+    // options that take paths as argument values.
+    int (*expand)(struct mpv_global *global, const m_option_t *opt,
+                  struct bstr name, struct bstr param, void *dst);
+
     // Print back a value in string form.
     /** \param opt The option to print.
      *  \param val Pointer to the memory holding the data to be printed.
@@ -331,12 +337,6 @@ struct m_option_type {
      *  \param src Pointer to the source memory.
      */
     void (*copy)(const m_option_t *opt, void *dst, const void *src);
-
-    // Exactly the same as copy but will potentially perform a path expansion if
-    // the underlying option is a string with paths (M_OPT_FILE). This is for
-    // options that take paths as argument values.
-    void (*expand)(struct mpv_global *global, const m_option_t *opt,
-                   void *dst, const void *src);
 
     // Free the data allocated for a save slot.
     /** This is only needed for dynamic types like strings.
@@ -548,8 +548,9 @@ char *m_option_strerror(int code);
 // happen should the parse function pointer be utilized by itself.
 //
 // See \ref m_option_type::parse.
-int m_option_parse(struct mp_log *log, const m_option_t *opt,
-                   struct bstr name, struct bstr param, void *dst);
+int m_option_parse(struct mpv_global *global, struct mp_log *log,
+                   const m_option_t *opt, struct bstr name,
+                   struct bstr param, void *dst);
 
 // Helper to print options, see \ref m_option_type::print.
 static inline char *m_option_print(const m_option_t *opt, const void *val_ptr)
@@ -581,17 +582,6 @@ static inline void m_option_copy(const m_option_t *opt, void *dst,
         opt->type->copy(opt, dst, src);
 }
 
-// Expand and copy the string if M_OPT_FILE. Do a raw copy otherwise.
-static inline void m_option_copy_and_expand(struct mpv_global *global, const m_option_t *opt,
-                                            void *dst, const void *src)
-{
-    if (opt->flags & M_OPT_FILE && opt->type->expand) {
-        opt->type->expand(global, opt, dst, src);
-    } else {
-        m_option_copy(opt, dst, src);
-    }
-}
-
 // Helper around \ref m_option_type::free.
 static inline void m_option_free(const m_option_t *opt, void *dst)
 {
@@ -609,7 +599,7 @@ static inline int m_option_set_node(const m_option_t *opt, void *dst,
 }
 
 // Call m_option_parse for strings, m_option_set_node otherwise.
-int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
+int m_option_set_node_or_string(struct mpv_global *global, const m_option_t *opt,
                                 struct bstr name, void *dst, struct mpv_node *src);
 
 // see m_option_type.get

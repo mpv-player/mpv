@@ -20,6 +20,7 @@
 #include "misc/bstr.h"
 #include "misc/node.h"
 #include "common/common.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 
@@ -156,31 +157,31 @@ static bool finish_cmd(struct mp_log *log, struct mp_cmd *cmd)
     return true;
 }
 
-static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
+static bool set_node_arg(struct mpv_global *global, struct mp_cmd *cmd, int i,
                          mpv_node *val)
 {
     const char *name = get_arg_name(cmd->def, i);
 
     const struct m_option *opt = get_arg_type(cmd->def, i);
     if (!opt) {
-        mp_err(log, "Command %s: has only %d arguments.\n", cmd->name, i);
+        mp_err(global->log, "Command %s: has only %d arguments.\n", cmd->name, i);
         return false;
     }
 
     if (i < cmd->nargs && cmd->args[i].type) {
-        mp_err(log, "Command %s: argument %s was already set.\n", cmd->name, name);
+        mp_err(global->log, "Command %s: argument %s was already set.\n", cmd->name, name);
         return false;
     }
 
     struct mp_cmd_arg arg = {.type = opt};
     void *dst = &arg.v;
-    int r = m_option_set_node_or_string(log, opt, bstr0(cmd->name), dst, val);
+    int r = m_option_set_node_or_string(global, opt, bstr0(cmd->name), dst, val);
     if (r < 0) {
         if (val->format == MPV_FORMAT_STRING) {
-            mp_err(log, "Command %s: argument %s can't be parsed: %s.\n",
+            mp_err(global->log, "Command %s: argument %s can't be parsed: %s.\n",
                    cmd->name, name, m_option_strerror(r));
         } else {
-            mp_err(log, "Command %s: argument %s has incompatible type.\n",
+            mp_err(global->log, "Command %s: argument %s has incompatible type.\n",
                    cmd->name, name);
         }
         return false;
@@ -196,7 +197,7 @@ static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
     return true;
 }
 
-static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
+static bool cmd_node_array(struct mpv_global *global, struct mp_cmd *cmd, mpv_node *node)
 {
     mp_assert(node->format == MPV_FORMAT_NODE_ARRAY);
     mpv_node_list *args = node->u.list;
@@ -213,19 +214,19 @@ static bool cmd_node_array(struct mp_log *log, struct mp_cmd *cmd, mpv_node *nod
     bstr cmd_name = {0};
     if (cur < args->num && args->values[cur].format == MPV_FORMAT_STRING)
         cmd_name = bstr0(args->values[cur++].u.string);
-    if (!find_cmd(log, cmd, cmd_name))
+    if (!find_cmd(global->log, cmd, cmd_name))
         return false;
 
     int first = cur;
     for (int i = 0; i < args->num - first; i++) {
-        if (!set_node_arg(log, cmd, cmd->nargs, &args->values[cur++]))
+        if (!set_node_arg(global, cmd, cmd->nargs, &args->values[cur++]))
             return false;
     }
 
     return true;
 }
 
-static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
+static bool cmd_node_map(struct mpv_global *global, struct mp_cmd *cmd, mpv_node *node)
 {
     mp_assert(node->format == MPV_FORMAT_NODE_MAP);
     mpv_node_list *args = node->u.list;
@@ -234,11 +235,11 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
     if (!name || name->format != MPV_FORMAT_STRING)
         return false;
 
-    if (!find_cmd(log, cmd, bstr0(name->u.string)))
+    if (!find_cmd(global->log, cmd, bstr0(name->u.string)))
         return false;
 
     if (cmd->def->vararg) {
-        mp_err(log, "Command %s: this command uses a variable number of "
+        mp_err(global->log, "Command %s: this command uses a variable number of "
                "arguments, which does not work with named arguments.\n",
                cmd->name);
         return false;
@@ -272,11 +273,11 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
             }
 
             if (arg < 0) {
-                mp_err(log, "Command %s: no argument %s.\n", cmd->name, key);
+                mp_err(global->log, "Command %s: no argument %s.\n", cmd->name, key);
                 return false;
             }
 
-            if (!set_node_arg(log, cmd, arg, val))
+            if (!set_node_arg(global, cmd, arg, val))
                 return false;
         }
     }
@@ -284,7 +285,7 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
     return true;
 }
 
-struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
+struct mp_cmd *mp_input_parse_cmd_node(struct mpv_global *global, mpv_node *node)
 {
     struct mp_cmd *cmd = talloc_ptrtype(NULL, cmd);
     talloc_set_destructor(cmd, destroy_cmd);
@@ -292,12 +293,12 @@ struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, mpv_node *node)
 
     bool res = false;
     if (node->format == MPV_FORMAT_NODE_ARRAY) {
-        res = cmd_node_array(log, cmd, node);
+        res = cmd_node_array(global, cmd, node);
     } else if (node->format == MPV_FORMAT_NODE_MAP) {
-        res = cmd_node_map(log, cmd, node);
+        res = cmd_node_map(global, cmd, node);
     }
 
-    res = res && finish_cmd(log, cmd);
+    res = res && finish_cmd(global->log, cmd);
 
     if (!res)
         TA_FREEP(&cmd);
@@ -364,11 +365,11 @@ static int pctx_read_token(struct parse_ctx *ctx, bstr *out)
     return read_token(ctx->str, &ctx->str, out) ? 1 : 0;
 }
 
-static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
+static struct mp_cmd *parse_cmd_str(struct mpv_global *global, void *tmp,
                                     bstr *str, const char *loc)
 {
     struct parse_ctx *ctx = &(struct parse_ctx){
-        .log = log,
+        .log = global->log,
         .tmp = tmp,
         .str = *str,
         .start = *str,
@@ -412,7 +413,7 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
             break;
 
         struct mp_cmd_arg arg = {.type = opt};
-        r = m_option_parse(ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
+        r = m_option_parse(global, ctx->log, opt, bstr0(cmd->name), cur_token, &arg.v);
         if (r < 0) {
             MP_ERR(ctx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));
@@ -446,11 +447,11 @@ error:
     return NULL;
 }
 
-mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
+mp_cmd_t *mp_input_parse_cmd_str(struct mpv_global *global, bstr str, const char *loc)
 {
     void *tmp = talloc_new(NULL);
     bstr original = str;
-    struct mp_cmd *cmd = parse_cmd_str(log, tmp, &str, loc);
+    struct mp_cmd *cmd = parse_cmd_str(global, tmp, &str, loc);
     if (!cmd)
         goto done;
 
@@ -478,7 +479,7 @@ mp_cmd_t *mp_input_parse_cmd_str(struct mp_log *log, bstr str, const char *loc)
             p_prev = &cmd->queue_next;
             cmd = list;
         }
-        struct mp_cmd *sub = parse_cmd_str(log, tmp, &str, loc);
+        struct mp_cmd *sub = parse_cmd_str(global, tmp, &str, loc);
         if (!sub) {
             talloc_free(cmd);
             cmd = NULL;
@@ -504,7 +505,7 @@ done:
     return cmd;
 }
 
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv)
+struct mp_cmd *mp_input_parse_cmd_strv(struct mpv_global *global, const char **argv)
 {
     int count = 0;
     while (argv[count])
@@ -516,7 +517,7 @@ struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv)
         items[n] = (mpv_node){.format = MPV_FORMAT_STRING,
                               .u = {.string = (char *)argv[n]}};
     }
-    struct mp_cmd *res = mp_input_parse_cmd_node(log, &node);
+    struct mp_cmd *res = mp_input_parse_cmd_node(global, &node);
     talloc_free(items);
     return res;
 }

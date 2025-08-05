@@ -4685,7 +4685,7 @@ int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
-    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    int r = m_property_do(ctx->global, cmd->properties, name, action, val, ctx);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
         struct m_option option_type = {0};
@@ -4974,7 +4974,7 @@ static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
     struct m_obj_settings *new_chain = NULL;
     m_option_copy(co->opt, &new_chain, co->data);
 
-    int r = m_option_parse(log, co->opt, bstr0(optname), bstr0(arg), &new_chain);
+    int r = m_option_parse(mpctx->global, log, co->opt, bstr0(optname), bstr0(arg), &new_chain);
     if (r >= 0)
         r = set_filters(mpctx, mediatype, new_chain);
 
@@ -5361,7 +5361,7 @@ static void cmd_cycle_values(void *p)
     int current = -1;
     for (int n = first; n < cmd->num_args; n++) {
         union m_option_value val = m_option_value_default;
-        if (m_option_parse(mpctx->log, &prop, bstr0(name),
+        if (m_option_parse(mpctx->global, mpctx->log, &prop, bstr0(name),
                            bstr0(cmd->args[n].v.s), &val) < 0)
             continue;
 
@@ -5772,7 +5772,7 @@ static void cmd_change_list(void *p)
     }
 
     char *optname = mp_tprintf(80, "%s-%s", name, op); // the dirty truth
-    int r = m_option_parse(mpctx->log, &prop, bstr0(optname), bstr0(value), &val);
+    int r = m_option_parse(mpctx->global, mpctx->log, &prop, bstr0(optname), bstr0(value), &val);
     if (r >= 0 && mp_property_do(name, M_PROPERTY_SET, &val, mpctx) <= 0)
         r = -1;
     m_option_free(&prop, &val);

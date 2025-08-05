@@ -1143,13 +1143,13 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
 
 int mpv_command(mpv_handle *ctx, const char **args)
 {
-    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args), NULL);
+    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->mpctx->global, args), NULL);
 }
 
 int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
 {
     struct mpv_node rn = {.format = MPV_FORMAT_NONE};
-    int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->log, args), result ? &rn : NULL);
+    int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->mpctx->global, args), result ? &rn : NULL);
     if (result && r >= 0)
         *result = rn;
     return r;
@@ -1158,7 +1158,7 @@ int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
 int mpv_command_ret(mpv_handle *ctx, const char **args, mpv_node *result)
 {
     struct mpv_node rn = {.format = MPV_FORMAT_NONE};
-    int r = run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args), result ? &rn : NULL);
+    int r = run_client_command(ctx, mp_input_parse_cmd_strv(ctx->mpctx->global, args), result ? &rn : NULL);
     if (result && r >= 0)
         *result = rn;
     return r;
@@ -1240,12 +1240,12 @@ static int run_async_cmd(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 
 int mpv_command_async(mpv_handle *ctx, uint64_t ud, const char **args)
 {
-    return run_async_cmd(ctx, ud, mp_input_parse_cmd_strv(ctx->log, args));
+    return run_async_cmd(ctx, ud, mp_input_parse_cmd_strv(ctx->mpctx->global, args));
 }
 
 int mpv_command_node_async(mpv_handle *ctx, uint64_t ud, mpv_node *args)
 {
-    return run_async_cmd(ctx, ud, mp_input_parse_cmd_node(ctx->log, args));
+    return run_async_cmd(ctx, ud, mp_input_parse_cmd_node(ctx->mpctx->global, args));
 }
 
 void mpv_abort_async_command(mpv_handle *ctx, uint64_t reply_userdata)

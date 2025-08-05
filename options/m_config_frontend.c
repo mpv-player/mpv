@@ -635,7 +635,7 @@ int m_config_set_option_raw(struct m_config *config,
 
     m_config_mark_co_flags(co, flags);
 
-    m_option_copy_and_expand(config->global, co->opt, co->data, data);
+    m_option_copy(co->opt, co->data, data);
     if (m_config_cache_write_opt(config->cache, co->data))
         force_self_notify_change_opt(config, co, false);
 
@@ -759,7 +759,7 @@ int m_config_set_option_cli(struct m_config *config, struct bstr name,
     if (co->data)
         m_option_copy(co->opt, &val, co->data);
 
-    r = m_option_parse(config->log, co->opt, name, param, &val);
+    r = m_option_parse(config->global, config->log, co->opt, name, param, &val);
 
     if (r >= 0)
         r = m_config_set_option_raw(config, co, &val, flags);
@@ -788,7 +788,7 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     // the old value, as opposed to e.g. appending to lists.
     union m_option_value val = m_option_value_default;
 
-    r = m_option_set_node_or_string(mp_null_log, co->opt, name, &val, data);
+    r = m_option_set_node_or_string(config->global, co->opt, name, &val, data);
     if (r >= 0)
         r = m_config_set_option_raw(config, co, &val, flags);
 
@@ -959,7 +959,7 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
         return 0;
     }
     if (bstr_equals0(name, profile_restore_mode_opt.name)) {
-        return m_option_parse(config->log, &profile_restore_mode_opt, name, val,
+        return m_option_parse(config->global, config->log, &profile_restore_mode_opt, name, val,
                               &p->restore_mode);
     }
 

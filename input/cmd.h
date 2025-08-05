@@ -137,16 +137,16 @@ void mp_print_cmd_list(struct mp_log *out);
 
 // Parse text and return corresponding struct mp_cmd.
 // The location parameter is for error messages.
-struct mp_cmd *mp_input_parse_cmd_str(struct mp_log *log, bstr str,
+struct mp_cmd *mp_input_parse_cmd_str(struct mpv_global *global, bstr str,
                                       const char *loc);
 
 // Similar to mp_input_parse_cmd(), but takes a list of strings instead.
 // Also, MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES are not set by default.
 // Keep in mind that these functions (naturally) don't take multiple commands,
 // i.e. a ";" argument does not start a new command.
-struct mp_cmd *mp_input_parse_cmd_strv(struct mp_log *log, const char **argv);
+struct mp_cmd *mp_input_parse_cmd_strv(struct mpv_global *global, const char **argv);
 
-struct mp_cmd *mp_input_parse_cmd_node(struct mp_log *log, struct mpv_node *node);
+struct mp_cmd *mp_input_parse_cmd_node(struct mpv_global *global, struct mpv_node *node);
 
 // After getting a command from mp_input_get_cmd you need to free it using this
 // function

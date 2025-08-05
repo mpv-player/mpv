@@ -158,7 +158,7 @@ struct m_property *m_property_list_find(const struct m_property *list,
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation
 // returns: one of mp_property_return
-int m_property_do(struct mp_log *log, const struct m_property* prop_list,
+int m_property_do(struct mpv_global *global, const struct m_property* prop_list,
                   const char* property_name, int action, void* arg, void *ctx);
 
 // Given a path of the form "a/b/c", this function will set *prefix to "a",

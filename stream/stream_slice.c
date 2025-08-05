@@ -112,12 +112,12 @@ static int parse_slice_range(stream_t *stream)
         .type = &m_option_type_byte_size,
     };
 
-    if (m_option_parse(stream->log, &opt, bstr0("slice_start"), start, &p->slice_start) < 0)
+    if (m_option_parse(stream->global, stream->log, &opt, bstr0("slice_start"), start, &p->slice_start) < 0)
         return STREAM_ERROR;
 
     bool max_end_is_offset = bstr_startswith0(end, "+");
     if (has_end) {
-        if (m_option_parse(stream->log, &opt, bstr0("slice_max_end"), end, &p->slice_max_end) < 0)
+        if (m_option_parse(stream->global, stream->log, &opt, bstr0("slice_max_end"), end, &p->slice_max_end) < 0)
             return STREAM_ERROR;
     }
 
