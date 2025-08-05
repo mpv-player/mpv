@@ -674,7 +674,7 @@ if features['libavdevice']
     dependencies += libavdevice
 endif
 
-libbluray = dependency('libbluray', version: '>= 0.3.0', required: get_option('libbluray'))
+libbluray = dependency('libbluray', version: '>= 0.5.0', required: get_option('libbluray'))
 features += {'libbluray': libbluray.found()}
 if features['libbluray']
     dependencies += libbluray
