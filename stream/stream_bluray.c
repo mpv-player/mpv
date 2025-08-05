@@ -443,7 +443,6 @@ static int bluray_stream_open_internal(stream_t *s)
         goto err;
     }
 
-    int title_guess = BLURAY_DEFAULT_TITLE;
     /* check for available titles on disc */
     b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
     if (!b->num_titles) {
@@ -455,7 +454,6 @@ static int bluray_stream_open_internal(stream_t *s)
     MP_INFO(s, "List of available titles:\n");
 
     /* parse titles information */
-    uint64_t max_duration = 0;
     for (int i = 0; i < b->num_titles; i++) {
         BLURAY_TITLE_INFO *ti = bd_get_title_info(bd, i, 0);
         if (!ti)
@@ -465,12 +463,6 @@ static int bluray_stream_open_internal(stream_t *s)
         MP_INFO(s, "idx: %3d duration: %s (playlist: %05d.mpls)\n",
                     i, time, ti->playlist);
         talloc_free(time);
-
-        /* try to guess which title may contain the main movie */
-        if (ti->duration > max_duration) {
-            max_duration = ti->duration;
-            title_guess = i;
-        }
 
         bd_free_title_info(ti);
     }
@@ -482,7 +474,7 @@ static int bluray_stream_open_internal(stream_t *s)
     // initialize libbluray event queue
     bd_get_event(bd, NULL);
 
-    select_initial_title(s, title_guess);
+    select_initial_title(s, bd_get_main_title(bd));
 
     s->fill_buffer = bluray_stream_fill_buffer;
     s->close       = bluray_stream_close;
