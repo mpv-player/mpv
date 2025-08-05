@@ -181,19 +181,19 @@ char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
 }
 
 char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
-                       const char *path)
+                       struct bstr path)
 {
-    if (!path)
+    if (!path.start)
         return NULL;
     char *res = NULL;
-    bstr bpath = bstr0(path);
-    if (bstr_eatstart0(&bpath, "~")) {
+    if (bstr_eatstart0(&path, "~")) {
         // parse to "~" <prefix> "/" <rest>
         bstr prefix, rest;
-        if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
-            const char *rest0 = rest.start; // ok in this case
+        if (bstr_split_tok(path, "/", &prefix, &rest)) {
             if (bstr_equals0(prefix, "~")) {
+                char *rest0 = bstrdup0(NULL, rest);
                 res = mp_find_config_file(talloc_ctx, global, rest0);
+                talloc_free(rest0);
                 if (!res) {
                     void *tmp = talloc_new(NULL);
                     const char *p = mp_get_platform_path(tmp, global, "home");
@@ -216,9 +216,9 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
         }
     }
     if (!res) {
-        res = talloc_strdup(talloc_ctx, path);
+        res = bstrdup0(talloc_ctx, path);
     } else {
-        MP_DBG(global, "user path: '%s' -> '%s'\n", path, res);
+        MP_DBG(global, "user path: '%.*s' -> '%s'\n", BSTR_P(path), res);
     }
     return res;
 }
@@ -226,7 +226,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
 char *mp_normalize_user_path(void *talloc_ctx, struct mpv_global *global,
                              const char *path)
 {
-    char *expanded = mp_get_user_path(NULL, global, path);
+    char *expanded = mp_get_user_path(NULL, global, bstr0(path));
     char *normalized = mp_normalize_path(talloc_ctx, expanded);
     talloc_free(expanded);
     return normalized;

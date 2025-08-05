@@ -193,7 +193,7 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
     if (opts->cookies_enabled) {
         char *file = opts->cookies_file;
         if (file && file[0])
-            file = mp_get_user_path(temp, global, file);
+            file = mp_get_user_path(temp, global, bstr0(file));
         char *cookies = cookies_lavf(temp, global, log, file);
         if (cookies && cookies[0])
             av_dict_set(dict, "cookies", cookies, 0);

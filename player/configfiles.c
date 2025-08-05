@@ -69,8 +69,8 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
 
     mp_mk_user_dir(mpctx->global, "home", "");
 
-    char *p1 = mp_get_user_path(NULL, mpctx->global, "~~home/");
-    char *p2 = mp_get_user_path(NULL, mpctx->global, "~~old_home/");
+    char *p1 = mp_get_user_path(NULL, mpctx->global, bstr0("~~home/"));
+    char *p2 = mp_get_user_path(NULL, mpctx->global, bstr0("~~old_home/"));
     if (strcmp(p1, p2) != 0 && mp_path_exists(p2)) {
         MP_WARN(mpctx, "Warning, two config dirs found:\n   %s (main)\n"
                 "   %s (bogus)\nYou should merge or delete the second one.\n",

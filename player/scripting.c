@@ -202,7 +202,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
 
 int64_t mp_load_user_script(struct MPContext *mpctx, const char *fname)
 {
-    char *path = mp_get_user_path(NULL, mpctx->global, fname);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(fname));
     int64_t ret = mp_load_script(mpctx, path);
     talloc_free(path);
     return ret;

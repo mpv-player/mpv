@@ -1276,7 +1276,7 @@ static void expand_str(struct mpv_global *global, const m_option_t *opt,
 {
     if (dst && src) {
         talloc_free(VAL(dst));
-        VAL(dst) = mp_get_user_path(NULL, global, VAL(src));
+        VAL(dst) = mp_get_user_path(NULL, global, bstr0(VAL(src)));
     }
 }
 
@@ -1581,7 +1581,7 @@ static void copy_str_list_impl(struct mpv_global *global, const m_option_t *opt,
     d = talloc_array(NULL, char *, n + 1);
     for (; n >= 0; n--) {
         if (global) {
-            d[n] = mp_get_user_path(NULL, global, s[n]);
+            d[n] = mp_get_user_path(NULL, global, bstr0(s[n]));
         } else {
             d[n] = talloc_strdup(NULL, s[n]);
         }

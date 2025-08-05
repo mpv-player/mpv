@@ -580,7 +580,7 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
 
     if (sc->cache_dir && sc->cache_dir[0]) {
         // Try to load it from a disk cache.
-        cache_dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
+        cache_dir = mp_get_user_path(tmp, sc->global, bstr0(sc->cache_dir));
 
         struct AVSHA *sha = av_sha_alloc();
         MP_HANDLE_OOM(sha);

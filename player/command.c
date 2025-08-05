@@ -5243,7 +5243,7 @@ static void cmd_osd_overlay(void *p)
 
 static struct track *find_track_with_url(struct MPContext *mpctx, int type, const char *url)
 {
-    char *path = mp_get_user_path(NULL, mpctx->global, url);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(url));
     struct track *t = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -6036,7 +6036,7 @@ static void cmd_expand_path(void *p)
 
     cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
-        .u.string = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s)
+        .u.string = mp_get_user_path(NULL, mpctx->global, bstr0(cmd->args[0].v.s)),
     };
 }
 
@@ -6045,7 +6045,7 @@ static void cmd_normalize_path(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    char *path = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(cmd->args[0].v.s));
     cmd->result = (mpv_node){
         .format = MPV_FORMAT_STRING,
         .u.string = mp_normalize_path(NULL, path),
@@ -6117,7 +6117,7 @@ static void cmd_loadfile(void *p)
     if (action.type == LOAD_TYPE_REPLACE)
         playlist_clear(mpctx->playlist);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
     struct playlist_entry *entry = playlist_entry_new(path);
     talloc_free(path);
     if (cmd->args[3].v.str_list) {
@@ -6152,7 +6152,7 @@ static void cmd_loadlist(void *p)
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
     struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
                                               mpctx->global);
     talloc_free(path);
@@ -6939,7 +6939,7 @@ static void cmd_load_config_file(void *p)
     struct MPContext *mpctx = cmd->mpctx;
 
     void *ctx = talloc_new(NULL);
-    char *config_file = mp_get_user_path(ctx, mpctx->global, cmd->args[0].v.s);
+    char *config_file = mp_get_user_path(ctx, mpctx->global, bstr0(cmd->args[0].v.s));
     int r = m_config_parse_config_file(mpctx->mconfig, mpctx->global,
                                        config_file, NULL, 0);
     talloc_free(ctx);
@@ -6957,7 +6957,7 @@ static void cmd_load_input_conf(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    char *config_file = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s);
+    char *config_file = mp_get_user_path(NULL, mpctx->global, bstr0(cmd->args[0].v.s));
     cmd->success = mp_input_load_config_file(mpctx->input, config_file);
     talloc_free(config_file);
 }
@@ -7035,7 +7035,7 @@ static void run_dump_cmd(struct mp_cmd_ctx *cmd, double start, double end,
         return;
     }
 
-    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    char *path = mp_get_user_path(NULL, mpctx->global, bstr0(filename));
     mp_cmd_msg(cmd, MSGL_INFO, "Cache dumping started.");
 
     if (!demux_cache_dump_set(mpctx->demuxer, start, end, path)) {

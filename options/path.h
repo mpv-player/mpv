@@ -52,7 +52,7 @@ char **mp_find_all_config_files(void *talloc_ctx, struct mpv_global *global,
 // paths starting with '~'. Used to allow the user explicitly reference a
 // file from the user's home or mpv config directory.
 char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
-                       const char *path);
+                       struct bstr path);
 
 // Same as mp_get_user_path but also normalizes the path if it happens to be
 // relative.
