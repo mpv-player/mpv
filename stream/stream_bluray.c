@@ -624,9 +624,11 @@ static int bdmv_dir_stream_open(stream_t *stream)
 {
     struct bluray_priv_s *priv = talloc_ptrtype(stream, priv);
     stream->priv = priv;
+    struct MPOpts *opts = mp_get_config_group(NULL, stream->global, &mp_opt_root);
     *priv = (struct bluray_priv_s){
-        .cfg_title = BLURAY_DEFAULT_TITLE,
+        .cfg_title = opts->edition_id >= 0 ? opts->edition_id : BLURAY_DEFAULT_TITLE,
     };
+    talloc_free(opts);
 
     if (!stream->access_references)
         goto unsupported;
