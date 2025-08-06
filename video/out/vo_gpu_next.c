@@ -2182,7 +2182,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 
 static void update_lut(struct priv *p, struct user_lut *lut)
 {
-    if (!lut->opt) {
+    if (!lut->opt || !lut->opt[0]) {
         pl_lut_free(&lut->lut);
         TA_FREEP(&lut->path);
         return;
