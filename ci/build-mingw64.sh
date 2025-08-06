@@ -221,11 +221,24 @@ _vulkan_loader () {
 }
 _vulkan_loader_mark=lib/libvulkan-1.dll.a
 
+_libdovi () {
+    [ -d libdovi ] || $gitclone https://github.com/quietvoid/dovi_tool.git libdovi
+    builddir libdovi
+    local CARGO_BUILD_TARGET_DIR=$PWD
+    local arch=x86_64
+    [[ "$TARGET" == "i686-"* ]] && arch=i686
+    cargo cinstall --manifest-path ../dolby_vision/Cargo.toml --prefix $prefix_dir \
+        --target $arch-pc-windows-gnu \
+        --release --meson-paths --library-type cdylib
+    popd
+}
+_libdovi_mark=lib/libdovi.dll.a
+
 _libplacebo () {
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
     meson setup .. --cross-file "$prefix_dir/crossfile" \
-        -Ddemos=false -D{opengl,d3d11,lcms}=enabled
+        -Ddemos=false -D{opengl,d3d11,lcms,libdovi}=enabled
     makeplusinstall
     popd
 }
@@ -293,7 +306,7 @@ if [[ "$TARGET" != "i686-"* ]]; then
     build_if_missing vulkan-headers
     build_if_missing vulkan-loader
 fi
-for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
+for x in ffmpeg libdovi libplacebo freetype fribidi harfbuzz libass luajit; do
     build_if_missing $x
 done
 
@@ -331,7 +344,7 @@ if [ "$2" = pack ]; then
     dlls=(
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
         av*.dll sw*.dll postproc-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
-        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2}.dll zlib1.dll
+        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2,dovi}.dll zlib1.dll
     )
     if [[ -f vulkan-1.dll ]]; then
         dlls+=(vulkan-1.dll)
