@@ -48,6 +48,13 @@ static inline bool str_startswith(const char *str, size_t str_len,
     return !memcmp(str, prefix, prefix_len);
 }
 
+static inline void set_fontconfig_sysroot(void)
+{
+#ifdef MPV_FONTCONFIG_SYSROOT
+    setenv("FONTCONFIG_SYSROOT", MPV_STRINGIFY(MPV_FONTCONFIG_SYSROOT), 1);
+#endif
+}
+
 #ifndef PLAYBACK_TIME_LIMIT
 #define PLAYBACK_TIME_LIMIT 5
 #endif

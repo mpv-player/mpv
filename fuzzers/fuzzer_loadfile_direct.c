@@ -39,6 +39,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
 #endif
 
+    set_fontconfig_sysroot();
+
     mpv_handle *ctx = mpv_create();
     if (!ctx)
         exit(1);
