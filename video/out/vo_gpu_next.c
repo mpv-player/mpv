@@ -2252,6 +2252,11 @@ static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
 static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath,
                              const struct pl_hook *hook)
 {
+    for (int i = 0; i < hook->num_parameters; i++) {
+        const struct pl_hook_par *hp = &hook->parameters[i];
+        memcpy(hp->data, &hp->initial, sizeof(*hp->data));
+    }
+
     if (!opts)
         return;
 
@@ -2259,11 +2264,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
     struct bstr shadername;
     if (!mp_splitext(basename, &shadername))
         shadername = bstr0(basename);
-
-    for (int i = 0; i < hook->num_parameters; i++) {
-        const struct pl_hook_par *hp = &hook->parameters[i];
-        memcpy(hp->data, &hp->initial, sizeof(*hp->data));
-    }
 
     for (int n = 0; opts[n * 2]; n++) {
         struct bstr k = bstr0(opts[n * 2 + 0]);
