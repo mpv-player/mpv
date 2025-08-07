@@ -1051,7 +1051,7 @@ static int preinit(struct vo *vo)
 
     MP_WARN(vo, "Warning: this compatibility VO is low quality and may "
                 "have issues with OSD, scaling, screenshots and more.\n"
-                "vo=gpu is the preferred choice in any case and "
+                "vo=gpu-next is the preferred choice in any case and "
                 "includes VDPAU support via hwdec=vdpau or vdpau-copy.\n");
 
     return 0;
