@@ -1130,6 +1130,8 @@ static MP_THREAD_VOID open_demux_thread(void *ctx)
         .is_top_level = true,
         .allow_playlist_create = mpctx->playlist->num_entries <= 1 &&
                                  !mpctx->playlist->playlist_dir,
+        .playlist_params = mpctx->playing->params,
+        .num_playlist_params = mpctx->playing->num_params,
     };
     struct demuxer *demux =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);

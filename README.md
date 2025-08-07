@@ -150,6 +150,56 @@ statically linked against those.
 
 If you want to build a Windows binary, see [Windows compilation][windows_compilation].
 
+## Widevine/ClearKey DRM Support
+
+This version of mpv includes support for playing Widevine and ClearKey protected streams from M3U files. This is achieved by integrating the Kodi `inputstream.adaptive` addon.
+
+### Usage
+
+To play a DRM protected stream, you need to provide a special M3U file with `#KODIPROP` tags. These tags provide the necessary information for the `inputstream.adaptive` addon to work.
+
+**Example for ClearKey:**
+```
+#EXTINF:-1,My ClearKey Stream
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=mpd
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=df45afa2b59811e88c759c0e65bb016a:d83ca45ce7965fde7b5309292213fddf
+https://example.com/manifest.mpd
+```
+
+**Example for Widevine:**
+```
+#EXTINF:-1,My Widevine Stream
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.license_type=com.widevine.alpha
+#KODIPROP:inputstream.adaptive.license_key=https://example.com/license
+https://example.com/manifest.mpd
+```
+
+### Building on Windows
+
+A build script `build_windows.sh` is provided to automate the build process on Windows using MSYS2.
+
+To build the project, run the following command in an MSYS2 terminal:
+```bash
+./build_windows.sh
+```
+The script will install all the necessary dependencies, build `inputstream.adaptive` and `mpv`, and create a `dist` directory with all the binaries.
+
+**Note on Widevine CDM:**
+
+The build script will prompt you to provide the `widevinecdm.dll` file. This file is required for playing Widevine protected streams. You can get this file from a Google Chrome installation. It's usually located in a path like:
+`C:\Program Files (x86)\Google\Chrome\Application\<version>\WidevineCdm\_platform_specific\win_x64\`
+
+You need to copy the `widevinecdm.dll` file to the `cdm` directory that is created by the build script.
+
+**Limitations:**
+
+The current implementation has some limitations:
+- The mock Kodi API is not complete. It only implements the functions that are necessary for `inputstream.adaptive` to work. Some features of the addon might not work correctly.
+- The build script does not automatically copy all the necessary DLLs to the `dist` directory. You might need to copy some DLLs from your MSYS2 installation manually.
+
 
 ## Release cycle
 

@@ -215,6 +215,8 @@ struct demuxer_params {
     int stream_flags;
     struct stream *external_stream; // if set, use this, don't open or close streams
     bool allow_playlist_create;
+    struct playlist_param *playlist_params;
+    int num_playlist_params;
     // result
     bool demuxer_failed;
 };

@@ -268,6 +268,8 @@ ok:
     }
 
     char *title = NULL;
+    struct playlist_param *kodi_props = NULL;
+    int num_kodi_props = 0;
     while (line.len || !pl_eof(p)) {
         bstr line_dup = line;
         if (bstr_eatstart0(&line_dup, "#EXTINF:")) {
@@ -275,6 +277,12 @@ ok:
             if (bstr_split_tok(line_dup, ",", &duration, &btitle) && btitle.len) {
                 talloc_free(title);
                 title = bstrto0(NULL, btitle);
+            }
+        } else if (bstr_eatstart0(&line_dup, "#KODIPROP:")) {
+            bstr key, value;
+            if (bstr_split_tok(line_dup, "=", &key, &value)) {
+                MP_TARRAY_APPEND(p, kodi_props, num_kodi_props,
+                                 ((struct playlist_param){key, value}));
             }
         } else if (bstr_startswith0(line_dup, "#EXT-X-")) {
             p->format = "hls";
@@ -284,6 +292,11 @@ ok:
             talloc_free(fn);
             e->title = talloc_steal(e, title);
             title = NULL;
+            if (num_kodi_props > 0) {
+                playlist_entry_add_params(e, kodi_props, num_kodi_props);
+                kodi_props = NULL;
+                num_kodi_props = 0;
+            }
             playlist_insert_at(p->pl, e, NULL);
         }
         pl_free_line(p, line);
@@ -291,6 +304,7 @@ ok:
     }
     pl_free_line(p, line);
     talloc_free(title);
+    talloc_free(kodi_props);
     return 0;
 }
 
