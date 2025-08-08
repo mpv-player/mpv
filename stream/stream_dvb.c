@@ -1118,12 +1118,11 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     continue;
                 }
 
-                void *talloc_ctx = NULL;
+                void *talloc_ctx = talloc_new(NULL);
                 char *conf_file;
                 if (priv->opts->cfg_file && priv->opts->cfg_file[0]) {
-                    conf_file = priv->opts->cfg_file;
+                    conf_file = mp_get_user_path(talloc_ctx, global, priv->opts->cfg_file);
                 } else {
-                    talloc_ctx = talloc_new(NULL);
                     conf_file = mp_find_config_file(talloc_ctx, global, conf_file_name);
                     if (conf_file) {
                         mp_verbose(log, "Ignoring other channels.conf files.\n");
