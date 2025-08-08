@@ -247,10 +247,13 @@ static void load_paths(struct mpv_global *global, struct MPOpts *opts,
                        char **paths, char *cfg_path, int type)
 {
     for (int i = 0; paths && paths[i]; i++) {
-        char *path = mp_path_join_bstr(*slist, mp_dirname(fname),
-                                       bstr0(paths[i]));
+        char *expanded_path = mp_get_user_path(NULL, global, paths[i]);
+        char *path = mp_path_join_bstr(
+            *slist, mp_dirname(fname),
+            bstr0(expanded_path ? expanded_path : paths[i]));
         append_dir_subtitles(global, opts, slist, nsubs, bstr0(path),
                              fname, 0, type);
+        talloc_free(expanded_path);
     }
 
     // Load subtitles in ~/.mpv/sub (or similar) limiting sub fuzziness
