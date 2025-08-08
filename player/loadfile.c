@@ -857,8 +857,11 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
 
     mp_core_unlock(mpctx);
 
+    char *path = mp_get_user_path(NULL, mpctx->global, filename);
     struct demuxer *demuxer =
-        demux_open_url(filename, &params, cancel, mpctx->global);
+        demux_open_url(path, &params, cancel, mpctx->global);
+    talloc_free(path);
+
     if (demuxer)
         enable_demux_thread(mpctx, demuxer);
 
@@ -1076,7 +1079,7 @@ static void load_chapters(struct MPContext *mpctx)
     bool free_src = false;
     char *chapter_file = mpctx->opts->chapter_file;
     if (chapter_file && chapter_file[0]) {
-        chapter_file = talloc_strdup(NULL, chapter_file);
+        chapter_file = mp_get_user_path(NULL, mpctx->global, chapter_file);
         mp_core_unlock(mpctx);
         struct demuxer_params p = {
             .stream_flags = STREAM_ORIGIN_DIRECT,

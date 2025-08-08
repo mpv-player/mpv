@@ -66,13 +66,16 @@ struct priv {
     struct vo_image_opts *opts;
 
     struct mp_image *current;
+    char *dir;
     int frame;
 };
 
 static bool checked_mkdir(struct vo *vo, const char *buf)
 {
-    MP_INFO(vo, "Creating output directory '%s'...\n", buf);
-    if (mkdir(buf, 0755) < 0) {
+    struct priv *p = vo->priv;
+    p->dir = mp_get_user_path(vo, vo->global, buf);
+    MP_INFO(vo, "Creating output directory '%s'...\n", p->dir);
+    if (mkdir(p->dir, 0755) < 0) {
         char *errstr = mp_strerror(errno);
         if (errno == EEXIST) {
             struct stat stat_p;
@@ -117,8 +120,8 @@ static void flip_page(struct vo *vo)
     char *filename = talloc_asprintf(t, "%08d.%s", p->frame,
                                      image_writer_file_ext(p->opts->opts));
 
-    if (p->opts->outdir && strlen(p->opts->outdir))
-        filename = mp_path_join(t, p->opts->outdir, filename);
+    if (p->dir && strlen(p->dir))
+        filename = mp_path_join(t, p->dir, filename);
 
     MP_INFO(vo, "Saving %s\n", filename);
     write_image(p->current, p->opts->opts, filename, vo->global, vo->log, true);
