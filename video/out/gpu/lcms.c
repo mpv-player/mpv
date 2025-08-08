@@ -73,10 +73,11 @@ static void load_profile(struct gl_lcms *p)
     if (!p->opts->profile || !p->opts->profile[0])
         return;
 
-    char *fname = p->opts->profile;
+    char *fname = mp_get_user_path(NULL, p->global, p->opts->profile);
     MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
     struct bstr iccdata = stream_read_file(fname, p, p->global,
                                            100000000); // 100 MB
+    talloc_free(fname);
     if (!iccdata.len)
         return;
 
@@ -364,7 +365,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
         char *cache_dir = p->opts->cache_dir;
         if (cache_dir && cache_dir[0]) {
-            cache_dir = talloc_strdup(tmp, cache_dir);
+            cache_dir = mp_get_user_path(tmp, p->global, cache_dir);
         } else {
             cache_dir = mp_find_user_file(tmp, p->global, "cache", "");
         }

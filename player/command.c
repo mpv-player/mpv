@@ -6957,9 +6957,8 @@ static void cmd_load_input_conf(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    char *config_file = mp_get_user_path(NULL, mpctx->global, cmd->args[0].v.s);
+    char *config_file = cmd->args[0].v.s;
     cmd->success = mp_input_load_config_file(mpctx->input, config_file);
-    talloc_free(config_file);
 }
 
 static void cmd_load_script(void *p)

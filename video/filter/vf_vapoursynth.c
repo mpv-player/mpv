@@ -750,7 +750,7 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
         MP_FATAL(p, "'file' parameter must be set.\n");
         goto error;
     }
-    p->script_path = talloc_strdup(p, p->opts->file);
+    p->script_path = mp_get_user_path(p, f->global, p->opts->file);
 
     p->max_requests = p->opts->maxrequests;
     if (p->max_requests < 0)
