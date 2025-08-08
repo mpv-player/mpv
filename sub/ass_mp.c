@@ -131,7 +131,7 @@ ASS_Library *mp_ass_init(struct mpv_global *global,
                          struct osd_style_opts *opts, struct mp_log *log)
 {
     char *path = opts->fonts_dir && opts->fonts_dir[0] ?
-                 talloc_strdup(NULL, opts->fonts_dir) :
+                 mp_get_user_path(NULL, global, opts->fonts_dir) :
                  mp_find_config_file(NULL, global, "fonts");
     mp_dbg(log, "ASS library version: 0x%x (runtime 0x%x)\n",
            (unsigned)LIBASS_VERSION, ass_library_version());

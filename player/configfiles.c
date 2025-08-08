@@ -201,7 +201,7 @@ char *mp_get_playback_resume_dir(struct MPContext *mpctx)
 {
     char *wl_dir = mpctx->opts->watch_later_dir;
     if (wl_dir && wl_dir[0]) {
-        wl_dir = talloc_strdup(NULL, wl_dir);
+        wl_dir = mp_get_user_path(NULL, mpctx->global, wl_dir);
     } else {
         wl_dir = mp_find_user_file(NULL, mpctx->global, "state", MP_WATCH_LATER_CONF);
     }

@@ -105,7 +105,7 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
 
     char *cache_dir = cache->opts->cache_dir;
     if (cache_dir && cache_dir[0]) {
-        cache_dir = talloc_strdup(NULL, cache_dir);
+        cache_dir = mp_get_user_path(NULL, global, cache_dir);
     } else {
         cache_dir = mp_find_user_file(NULL, global, "cache", "");
     }
