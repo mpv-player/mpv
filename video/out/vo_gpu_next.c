@@ -1085,8 +1085,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
                         target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
-    if (p->icc_profile)
-        target_hint = false;
     // Assume HDR is supported, if target_csp() is not available
     if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
         target_csp = (struct pl_color_space){
@@ -1163,6 +1161,22 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         if (hint.hdr.max_cll && hint.hdr.max_fall > hint.hdr.max_cll)
             hint.hdr.max_fall = 0;
         apply_target_contrast(p, &hint, hint.hdr.min_luma);
+        if (p->icc_profile)
+            hint = p->icc_profile->csp;
+        if (opts->icc_opts->icc_use_luma) {
+            p->icc_params.max_luma = 0.0f;
+        } else {
+            pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+                .color    = &hint,
+                .metadata = PL_HDR_METADATA_HDR10, // use only static HDR nits
+                .scaling  = PL_HDR_NITS,
+                .out_max  = &p->icc_params.max_luma,
+            ));
+        }
+        pl_icc_update(p->pllog, &p->icc_profile, NULL, &p->icc_params);
+        // Update again after possible max_luma change
+        if (p->icc_profile)
+            hint = p->icc_profile->csp;
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!target_hint) {
