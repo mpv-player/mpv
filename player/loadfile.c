@@ -598,12 +598,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             bool audio_matches = mp_match_lang((char *[]){ (char *)audio_lang, NULL }, track->lang) > 0;
             bool forced = track->forced_track && (opts->subs_fallback_forced == 2 ||
                           (audio_matches && opts->subs_fallback_forced == 1));
-            bool lang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
+            bool slang_match = !os_langs && mp_match_lang(langs, track->lang) > 0;
             bool subs_fallback = (track->is_external && !track->no_default) || opts->subs_fallback == 2 ||
                                  (opts->subs_fallback == 1 && track->default_track);
-            bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
+            bool subs_no_match = !os_langs ? !mp_match_lang(langs, audio_lang) : !audio_matches;
+            bool subs_matching_audio = (subs_no_match || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
-            if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
+            if (subs_matching_audio && ((!pick && (forced || slang_match || subs_fallback)) ||
                 (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
             {
                 pick = track;
