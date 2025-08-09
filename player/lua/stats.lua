@@ -829,8 +829,8 @@ local function append_hdr(s, hdr, video_out)
             indent = o.prefix_sep .. o.prefix_sep
         end
         if should_show(hdr["max-cll"]) then
-            append(s, hdr["max-cll"], {prefix="MaxCLL:", suffix=" cd/m²", nl="",
-                                       indent=indent})
+            append(s, string.format("%.0f", hdr["max-cll"]), {prefix="MaxCLL:",
+                                    suffix=" cd/m²", nl="", indent=indent})
             indent = o.prefix_sep .. o.prefix_sep
         end
         if hdr["max-fall"] and hdr["max-fall"] > 0 then
