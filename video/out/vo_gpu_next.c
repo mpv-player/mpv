@@ -1084,6 +1084,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
                         target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
+    if (p->icc_profile)
+        target_hint = false;
     // Assume HDR is supported, if target_csp() is not available
     if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
         target_csp = (struct pl_color_space){
