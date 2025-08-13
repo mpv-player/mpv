@@ -7045,6 +7045,9 @@ them.
     Requires a supporting driver and ``--vo=gpu-next``. (Default: ``auto``)
 
     .. note::
+        When `--icc-profile` is used colorspace hint is disabled.
+
+    .. note::
         Auto detected target colorspace metadata is not guaranteed to be always
         best choice. It depends on your compositor, driver, and display
         capabilities. However in most cases ``auto`` mode should work fine.
