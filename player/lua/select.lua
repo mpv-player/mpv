@@ -552,19 +552,31 @@ mp.add_key_binding(nil, "select-watch-later", function ()
         local file_handle = io.open(watch_later_file)
         if file_handle then
             local line1 = file_handle:read()
-            if line1 and line1 ~= "# redirect entry" and line1:find("^#") then
-                local entry = {
-                    path = line1:sub(3),
-                    time = utils.file_info(watch_later_file).mtime
-                }
+            local is_redirect = false
+
+            if line1 == "# redirect entry" then
+                is_redirect = true
+                line1 = file_handle:read()
+            end
+
+            if line1 and line1:find("^#") then
+                local entry = {}
+
                 for line in file_handle:lines() do
                     if line:find("^# title: ") then
                         entry.title = line:sub(10)
                         break
                     end
                 end
-                files[#files + 1] = entry
+
+                if not is_redirect or entry.title then
+                    entry.path = line1:sub(3)
+                    entry.time = utils.file_info(watch_later_file).mtime
+
+                    files[#files + 1] = entry
+                end
             end
+
             file_handle:close()
         end
     end
