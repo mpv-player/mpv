@@ -826,6 +826,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color, 
     // Infinite contrast
     if (opts->target_contrast == -1) {
         color->hdr.min_luma = 1e-7;
+        mp_assert(color->hdr.min_luma > 0);
         return;
     }
 
@@ -1080,7 +1081,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // reports it as maxFALL directly, but this doesn't mean the same thing.
     target_csp.hdr.max_fall = 0;
 
-    struct pl_color_space hint;
+    struct pl_color_space hint = {0};
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
                         target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
