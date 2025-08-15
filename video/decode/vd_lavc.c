@@ -1026,10 +1026,8 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         }
     }
 
-    if (select == AV_PIX_FMT_NONE) {
+    if (select == AV_PIX_FMT_NONE)
         ctx->hwdec_failed = true;
-        select = avcodec_default_get_format(avctx, fmt);
-    }
 
     const char *name = av_get_pix_fmt_name(select);
     MP_VERBOSE(vd, "Requesting pixfmt '%s' from decoder.\n", name ? name : "-");
