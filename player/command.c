@@ -6349,12 +6349,21 @@ static void cmd_track_add(void *p)
                 mark_track_selection(mpctx, 0, t->type, t->user_tid);
             }
         }
+
+        flags = 0;
+        bstr lang = mp_guess_lang_from_filename(bstr0(t->external_filename), NULL,
+                    &flags);
+        t->lang = bstrdup0(t, lang);
+        t->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
+        t->forced_track = flags & TRACK_FORCED;
+        t->default_track = flags & TRACK_DEFAULT;
+
         char *title = cmd->args[2].v.s;
         if (title && title[0])
             t->title = talloc_strdup(t, title);
-        char *lang = cmd->args[3].v.s;
-        if (lang && lang[0])
-            t->lang = talloc_strdup(t, lang);
+        char *lang_arg = cmd->args[3].v.s;
+        if (lang_arg && lang_arg[0])
+            talloc_replace(t, t->lang, lang_arg);
     }
 
     if (mpctx->playback_initialized)
