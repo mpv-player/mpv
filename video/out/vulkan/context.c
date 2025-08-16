@@ -186,29 +186,148 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     const char *opt_extensions[] = {
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
-        VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
-#endif
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
-        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
-        "VK_KHR_video_maintenance2", /* VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME */
+        VK_KHR_ZERO_INITIALIZE_WORKGROUP_MEMORY_EXTENSION_NAME,
+        /*
+         * Extensions below this point are newer than our minimum required Vulkan
+         * headers and so we only activate them if the build time headers contain
+         * them.
+         */
+#ifdef VK_EXT_shader_object
+        VK_EXT_SHADER_OBJECT_EXTENSION_NAME, /* 1.3.246 */
+#endif
+#ifdef VK_KHR_cooperative_matrix
+        VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME, /* 1.3.255 */
+#endif
+#ifdef VK_KHR_video_maintenance1
+        VK_KHR_VIDEO_MAINTENANCE_1_EXTENSION_NAME, /* 1.3.274 */
+#endif
+#ifdef VK_KHR_shader_expect_assume
+        VK_KHR_SHADER_EXPECT_ASSUME_EXTENSION_NAME, /* 1.3.276 */
+#endif
+#ifdef VK_KHR_shader_subgroup_rotate
+        VK_KHR_SHADER_SUBGROUP_ROTATE_EXTENSION_NAME, /* 1.3.276 */
+#endif
+        /*
+         * Because the AV1 extension does not require a feature flag to be enabled,
+         * we can include it as a string literal and have it work.
+         */
+        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME 1.3.277 */
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+        VK_KHR_SHADER_RELAXED_EXTENDED_INSTRUCTION_EXTENSION_NAME, /* 1.3.288 */
+#endif
+#ifdef VK_KHR_video_maintenance2
+        VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME, /* 1.4.306 */
+#endif
+#ifdef VK_KHR_video_decode_vp9
+        VK_KHR_VIDEO_DECODE_VP9_EXTENSION_NAME, /* 1.4.317 */
+#endif
     };
 
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+    /*
+     * The following chain of conditional extension features must be constructed
+     * in descending vulkan version order. This ensures that if one is present,
+     * the next extension that chains on to it will also be present.
+     */
+
+#ifdef VK_KHR_video_decode_vp9
+     VkPhysicalDeviceVideoDecodeVP9FeaturesKHR video_decode_vp9_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_DECODE_VP9_FEATURES_KHR,
+        .videoDecodeVP9 = true,
+    };
+#endif
+
+#ifdef VK_KHR_video_maintenance2
+    VkPhysicalDeviceVideoMaintenance2FeaturesKHR video_maintenance_2_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_2_FEATURES_KHR,
+#ifdef VK_KHR_video_decode_vp9
+        .pNext = &video_decode_vp9_feature,
+#endif
+        .videoMaintenance2 = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+    VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR shader_relaxed_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_RELAXED_EXTENDED_INSTRUCTION_FEATURES_KHR,
+#ifdef VK_KHR_video_maintenance2
+        .pNext = &video_maintenance_2_feature,
+#endif
+        .shaderRelaxedExtendedInstruction = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_subgroup_rotate
+    VkPhysicalDeviceShaderSubgroupRotateFeaturesKHR shader_subgroup_rotate_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_ROTATE_FEATURES_KHR,
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+        .pNext = &shader_relaxed_feature,
+#endif
+       .shaderSubgroupRotate = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_expect_assume
+    VkPhysicalDeviceShaderExpectAssumeFeaturesKHR shader_expect_assume_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_EXPECT_ASSUME_FEATURES_KHR,
+#ifdef VK_KHR_shader_subgroup_rotate
+        .pNext = &shader_subgroup_rotate_feature,
+#endif
+       .shaderExpectAssume = true,
+    };
+#endif
+
+#ifdef VK_KHR_video_maintenance1
+    VkPhysicalDeviceVideoMaintenance1FeaturesKHR video_maintenance_1_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_1_FEATURES_KHR,
+#ifdef VK_KHR_shader_expect_assume
+        .pNext = &shader_expect_assume_feature,
+#endif
+        .videoMaintenance1 = true,
+    };
+#endif
+
+#ifdef VK_KHR_cooperative_matrix
+     VkPhysicalDeviceCooperativeMatrixFeaturesKHR cooperative_matrix_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_KHR,
+#ifdef VK_KHR_video_maintenance1
+        .pNext = &video_maintenance_1_feature,
+#endif
+        .cooperativeMatrix = true,
+    };
+#endif
+
+#ifdef VK_EXT_shader_object
     VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
+#ifdef VK_KHR_cooperative_matrix
+        .pNext = &cooperative_matrix_feature,
+#endif
         .shaderObject = true,
     };
 #endif
 
-    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zero_init_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR,
+#ifdef VK_EXT_shader_object
         .pNext = &shader_object_feature,
 #endif
+       .shaderZeroInitializeWorkgroupMemory = true,
+    };
+
+    VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+        .pNext = &zero_init_feature,
+       .dynamicRendering = true,
+    };
+
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
+        .pNext = &dynamic_rendering_feature,
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
@@ -220,7 +339,31 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .shaderBufferFloat32AtomicAdd = true,
     };
 
-    features.pNext = &atomic_float_feature;
+    VkPhysicalDeviceVulkan12Features recommended_vk12 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+        .pNext = &atomic_float_feature,
+        .scalarBlockLayout = true,
+        .shaderBufferInt64Atomics = true,
+        .uniformBufferStandardLayout = true,
+    };
+
+    VkPhysicalDeviceVulkan11Features recommended_vk11 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
+        .pNext = &recommended_vk12,
+        .storageBuffer16BitAccess = true,
+        .uniformAndStorageBuffer16BitAccess = true,
+    };
+
+    VkPhysicalDeviceFeatures2 recommended_features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &recommended_vk11,
+        .features = {
+            .shaderInt16 = true,
+            .shaderFloat64 = true,
+        },
+    };
+
+    features.pNext = &recommended_features;
 
     AVUUID param_uuid = { 0 };
     bool is_uuid = opts->device &&
