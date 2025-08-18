@@ -1094,6 +1094,10 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;
         hint = *source;
+        // Apply target contrast to the hint, this is important for SDR, because
+        // libplacebo defaults to 1000:1 contrast ratio otherwise.
+        if (!hint.hdr.min_luma)
+            hint.hdr.min_luma = target->hdr.min_luma;
         if (p->next_opts->target_hint_mode == 0) {
             hint = *target;
             if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
@@ -1113,7 +1117,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 .color      = &hint,
                 .metadata   = PL_HDR_METADATA_ANY,
                 .scaling    = PL_HDR_NITS,
-                .out_min    = &hint.hdr.min_luma,
+                .out_min    = !hint.hdr.min_luma ? &hint.hdr.min_luma : NULL,
                 .out_max    = &hint.hdr.max_luma,
             ));
             // Set maxCLL to dynamic max luminance. Note that libplacebo uses
@@ -1180,6 +1184,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!target_hint) {
+        if (!hint.hdr.min_luma)
+            hint.hdr.min_luma = target_csp.hdr.min_luma;
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
