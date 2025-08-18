@@ -168,4 +168,8 @@ class MacCommon: Common {
         layer?.contentsScale = window?.backingScaleFactor ?? 1
         windowDidResize()
     }
+
+    override func windowDidChangeOcclusionState() {
+        flagEvents(VO_EVENT_EXPOSE)
+    }
 }
