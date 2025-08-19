@@ -3908,6 +3908,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
     switch (request) {
     case VOCTRL_CHECK_EVENTS: {
+        wayland_dispatch_events(wl, 1, 0);
         struct vo_wayland_seat *seat;
         wl_list_for_each(seat, &wl->seat_list, link) {
             check_fd(wl, seat->dnd_offer, true);
