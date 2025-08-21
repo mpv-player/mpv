@@ -2689,7 +2689,7 @@ Property list
 
 ``hwdec-current``
     The current hardware decoding in use. If decoding is active, return one of
-    the values used by the ``hwdec`` option/property. ``no``/false indicates
+    the values used by the ``hwdec`` option/property. ``no`` indicates
     software decoding. If no decoder is loaded, the property is unavailable.
 
 ``hwdec-interop``
