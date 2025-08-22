@@ -302,6 +302,7 @@ typedef struct MPOpts {
     int keep_open;
     bool keep_open_pause;
     double image_display_duration;
+    bool apply_image_profile;
     char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];
     char **stream_lang[STREAM_TYPE_COUNT];
