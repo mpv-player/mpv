@@ -2317,6 +2317,26 @@ static void supported_coefficients_and_ranges(void *data, struct wp_color_repres
     }
 }
 
+static int map_supported_chroma_location(enum pl_chroma_location chroma_location)
+{
+    switch (chroma_location) {
+    case PL_CHROMA_LEFT:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_0;
+    case PL_CHROMA_CENTER:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_1;
+    case PL_CHROMA_TOP_LEFT:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_2;
+    case PL_CHROMA_TOP_CENTER:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_3;
+    case PL_CHROMA_BOTTOM_LEFT:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_4;
+    case PL_CHROMA_BOTTOM_CENTER:
+        return WP_COLOR_REPRESENTATION_SURFACE_V1_CHROMA_LOCATION_TYPE_5;
+    default:
+        return 0;
+    }
+}
+
 static void color_representation_done(void *data, struct wp_color_representation_manager_v1 *color_representation_manager)
 {
 }
@@ -3491,12 +3511,16 @@ static void set_color_representation(struct vo_wayland_state *wl)
     int coefficients = wl->coefficients_map[repr.sys];
     int range = repr.levels == PL_COLOR_LEVELS_FULL ? wl->range_map[repr.sys] :
                                 wl->range_map[repr.sys + PL_COLOR_SYSTEM_COUNT];
+    int chroma_location = map_supported_chroma_location(wl->target_params.chroma_location);
 
     if (coefficients && range)
         wp_color_representation_surface_v1_set_coefficients_and_range(wl->color_representation_surface, coefficients, range);
 
     if (alpha)
         wp_color_representation_surface_v1_set_alpha_mode(wl->color_representation_surface, alpha);
+
+    if (chroma_location)
+        wp_color_representation_surface_v1_set_chroma_location(wl->color_representation_surface, chroma_location);
 #endif
 }
 
@@ -4112,7 +4136,8 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl)
         return;
     struct mp_image_params target_params = vo_get_target_params(wl->vo);
     if (pl_color_space_equal(&target_params.color, &wl->target_params.color) &&
-        pl_color_repr_equal(&target_params.repr, &wl->target_params.repr))
+        pl_color_repr_equal(&target_params.repr, &wl->target_params.repr) &&
+        target_params.chroma_location == wl->target_params.chroma_location)
         return;
     wl->target_params = target_params;
     set_color_management(wl);
