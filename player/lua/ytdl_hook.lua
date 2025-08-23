@@ -1140,7 +1140,9 @@ local function run_ytdl_hook(url)
                 local playlist_url = nil
 
                 -- links without protocol as returned by --flat-playlist
-                if not site:find("://") then
+                if not site then
+                    msg.error("Playlist entry does not have unique URL, can't add it.")
+                elseif not site:find("://") then
                     -- youtube extractor provides only IDs,
                     -- others come prefixed with the extractor name and ":"
                     local prefix = site:find(":") and "ytdl://" or
