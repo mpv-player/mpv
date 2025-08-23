@@ -120,6 +120,7 @@ opts = cmake.subproject_options()
 opts.add_cmake_defines({
     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
     'BUILD_SHARED_LIBS': 'OFF',
+    'BUILD_TESTING': 'OFF',
 })
 libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
 libjxl_dep = declare_dependency(dependencies: [
