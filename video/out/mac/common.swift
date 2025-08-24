@@ -43,6 +43,7 @@ class Common: NSObject {
     var appNotificationObservers: [NSObjectProtocol] = []
 
     var cursorVisibilityWanted: Bool = true
+    var needsInitialDraw: Bool = true
 
     var title: String = "mpv" {
         didSet { if let window = window { window.title = title } }
@@ -469,6 +470,14 @@ class Common: NSObject {
             events = 0
             return ev
         }
+    }
+
+    func windowDidMiniaturize() {
+        needsInitialDraw = false
+    }
+
+    func windowDidBecomeMain() {
+        needsInitialDraw = false
     }
 
     func windowDidEndAnimation() {}
