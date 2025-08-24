@@ -110,7 +110,9 @@ class MacCommon: Common {
     }
 
     @objc func isVisible() -> Bool {
-        return window?.occlusionState.contains(.visible) ?? false || option.vo.force_render
+        return window?.occlusionState.contains(.visible) ?? false ||
+               option.vo.force_render ||
+               needsInitialDraw
     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
