@@ -3648,7 +3648,7 @@ Window
 
 ``--force-render``
     Forces mpv to always render frames regardless of the visibility of the
-    window. Currently only affects X11 and Wayland VOs since they are the
+    window. Currently only affects X11, Wayland and macvk VOs since they are the
     only ones that have this optimization (i.e. everything else always renders
     regardless of visibility).
 
