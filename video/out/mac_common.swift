@@ -24,6 +24,7 @@ class MacCommon: Common {
     var timer: PreciseTimer?
     var swapTime: UInt64 = 0
     let swapLock: NSCondition = NSCondition()
+    var initialRender = false
 
     @objc init(_ vo: UnsafeMutablePointer<vo>) {
         let log = LogHelper(mp_log_new(vo, vo.pointee.log, "mac"))
@@ -110,7 +111,10 @@ class MacCommon: Common {
     }
 
     @objc func isVisible() -> Bool {
-        return window?.occlusionState.contains(.visible) ?? false || option.vo.force_render
+        defer { initialRender = true }
+        return window?.occlusionState.contains(.visible) ?? false ||
+               option.vo.force_render ||
+               !initialRender
     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
