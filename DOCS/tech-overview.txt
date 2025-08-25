@@ -272,8 +272,9 @@ sub/:
     sd_ass.c's internal state.
 
 etc/:
-    The files input.conf and builtin.conf are actually integrated into the mpv
-    binary by the build system. They contain the default configs and keybindings.
+    The files input.conf, builtin.conf and menu.conf are actually integrated
+    into the mpv binary by the build system. They contain the default configs
+    and keybindings.
 
 Best practices and Concepts within mpv
 ======================================
