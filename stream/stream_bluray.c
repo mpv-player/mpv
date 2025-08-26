@@ -462,8 +462,8 @@ static int bluray_stream_open_internal(stream_t *s)
             continue;
 
         char *time = mp_format_time(ti->duration / 90000, false);
-        MP_INFO(s, "idx: %3d duration: %s (playlist: %05d.mpls)\n",
-                    i, time, ti->playlist);
+        MP_INFO(s, "idx: %3d duration: %s angles: %2d (playlist: %05d.mpls)\n",
+                    i, time, ti->angle_count, ti->playlist);
         talloc_free(time);
 
         bd_free_title_info(ti);
