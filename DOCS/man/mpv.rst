@@ -402,11 +402,6 @@ Ctrl+Wheel up/down
 Context Menu
 -------------
 
-.. warning::
-
-    This feature is experimental. It may not work with all VOs. A libass based
-    fallback may be implemented in the future.
-
 Context Menu is a menu that pops up on the video window on user interaction
 (mouse right click, etc.).
 
@@ -1547,6 +1542,8 @@ works like in older mpv releases:
 .. include:: commands.rst
 
 .. include:: select.rst
+
+.. include:: context_menu.rst
 
 .. include:: positioning.rst
 
