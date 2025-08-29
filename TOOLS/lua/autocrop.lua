@@ -205,7 +205,7 @@ local function detect_crop()
         return
     end
 
-    local hwdec_current = mp.get_property("hwdec-current")
+    local hwdec_current = mp.get_property("hwdec-current", "no")
     if hwdec_current:find("-copy$") == nil and hwdec_current ~= "no" and
        hwdec_current ~= "crystalhd" and hwdec_current ~= "rkmpp" then
         hwdec_backup = mp.get_property("hwdec")
