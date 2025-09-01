@@ -1031,6 +1031,16 @@ local function unbind_mouse()
     mp.remove_key_binding("_console_mbtn_left")
 end
 
+local function after_cur_matches_completion()
+    local token = line:sub(completion_pos)
+
+    for _, completion in pairs(completion_buffer) do
+        if completion == token:sub(1, #completion) then
+            return true
+        end
+    end
+end
+
 -- Run the current command or select the current item
 local function submit()
     if searching_history then
@@ -1049,7 +1059,8 @@ local function submit()
                         utils.format_json({matches[focused_match].index}))
         end
     else
-        if selected_completion_index == 0 and autoselect_completion then
+        if selected_completion_index == 0 and autoselect_completion
+           and not after_cur_matches_completion() then
             cycle_through_completions()
         end
 
