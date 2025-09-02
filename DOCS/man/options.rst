@@ -1066,6 +1066,11 @@ Program Behavior
     Enable the builtin script that lets you select from lists of items (default:
     yes). By default, its keybindings start with the ``g`` key.
 
+``--load-context-menu=<yes|no>``
+    Enable the builtin script that implements a context menu. Defaults to
+    ``yes`` on platforms where integration with a native context menu is not
+    implemented, and to ``no`` on platform where it is.
+
 ``--load-positioning=<yes|no>``
     Enable the builtin script that provides various keybindings to pan videos
     and images (default: yes).
