@@ -222,6 +222,76 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
 
+  win32-cross:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            host_arch: amd64
+            target: x86_64-pc-windows-msvc
+            arch: x86_64
+          - os: ubuntu-24.04
+            host_arch: amd64
+            target: aarch64-pc-windows-msvc
+            arch: aarch64
+          - os: ubuntu-24.04-arm
+            host_arch: arm64
+            target: x86_64-pc-windows-msvc
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            host_arch: arm64
+            target: aarch64-pc-windows-msvc
+            arch: aarch64
+    env:
+      ARCH: "${{ matrix.arch }}"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get time
+        id: get_time
+        run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y python3-pip nasm ninja-build pkgconf golang msitools
+          python -m pip install meson
+          sudo GOBIN=/usr/bin go install go.chromium.org/luci/cipd/client/cmd/...@latest
+          sudo cipd install fuchsia/third_party/clang/linux-${{ matrix.host_arch }} latest -root /usr/local/fuchsia-clang
+          echo "PATH=/usr/local/fuchsia-clang/bin:$PATH" >> $GITHUB_ENV
+          git clone --depth 1 -b master https://github.com/mstorsjo/msvc-wine.git
+          python ./msvc-wine/vsdownload.py --dest $PWD/winsdk --accept-license
+          ./msvc-wine/install.sh $PWD/winsdk
+          echo "WINSDK=$PWD/winsdk" >> $GITHUB_ENV
+
+      - name: Update Meson WrapDB
+        run: |
+          meson wrap update-db
+          # Explicitly download wraps, as nested projects may have older versions of them.
+          meson wrap install expat
+          meson wrap install harfbuzz
+          meson wrap install libpng
+          meson wrap install zlib
+
+      - name: Build
+        run: |
+          ./ci/build-win32.sh
+
+      - name: Print build log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mpv-${{ matrix.target }}-cross-on-${{ matrix.os }}
+          path: |
+            build/mpv.???
+            build/vulkan-*.dll
+            !build/mpv.lib
+
   macos:
     runs-on: ${{ matrix.os }}
     strategy:
