@@ -89,6 +89,12 @@ local codec_map = {
     ["hev1%..*"]    = "hevc",
 }
 
+local has_subrandr = mp.get_property_native("subrandr-version") ~= nil
+
+if has_subrandr then
+    codec_map["srv3"] = "subrandr/srv3"
+end
+
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
 -- Fun fact: mpv will not really use the codec, but will still try to initialize
 -- the codec on track selection (just to scrap it), meaning it's only a hint,
@@ -906,10 +912,15 @@ local function run_ytdl_hook(url)
     local allsubs = true
     local proxy = nil
     local use_playlist = false
+    local wanted_sub_formats = "ass/srt/best"
+
+    if has_subrandr then
+        wanted_sub_formats = "srv3/" .. wanted_sub_formats
+    end
 
     local command = {
         ytdl.path, "--no-warnings", "-J", "--flat-playlist",
-        "--sub-format", "ass/srt/best"
+        "--sub-format", wanted_sub_formats
     }
 
     -- Checks if video option is "no", change format accordingly,
