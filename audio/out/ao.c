@@ -556,22 +556,22 @@ void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e)
 {
     struct ao_device_desc c = *e;
-    const char *dname = ao->driver->name;
+    c.ao = ao->driver->name;
     char buf[80];
     if (!c.desc || !c.desc[0]) {
         if (c.name && c.name[0]) {
             c.desc = c.name;
         } else if (list->num_devices) {
             // Assume this is the default device.
-            snprintf(buf, sizeof(buf), "Default (%s)", dname);
+            snprintf(buf, sizeof(buf), "Default (%s)", c.ao);
             c.desc = buf;
         } else {
             // First default device (and maybe the only one).
             c.desc = "Default";
         }
     }
-    c.name = (c.name && c.name[0]) ? talloc_asprintf(list, "%s/%s", dname, c.name)
-                                   : talloc_strdup(list, dname);
+    c.name = (c.name && c.name[0]) ? talloc_asprintf(list, "%s/%s", c.ao, c.name)
+                                   : talloc_strdup(list, c.ao);
     c.desc = talloc_strdup(list, c.desc);
     MP_TARRAY_APPEND(list, list->devices, list->num_devices, c);
 }
