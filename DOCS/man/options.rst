@@ -3388,6 +3388,9 @@ Window
     example if ``--length`` is used to reduce the length to 1 frame, or if
     you seek to the last frame.
 
+    The effective duration is now `--speed` aware, which was not the case in
+    older mpv versions before v0.41.0.
+
     This option does not affect the framerate used for ``mf://`` or
     ``--merge-files``. For that, use ``--mf-fps`` instead.
 
