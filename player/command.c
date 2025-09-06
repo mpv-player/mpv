@@ -8148,7 +8148,7 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
     if (opt_ptr == &opts->image_display_duration && mpctx->vo_chain
         && mpctx->vo_chain->is_sparse && !mpctx->ao_chain
         && mpctx->video_status == STATUS_DRAINING)
-        mpctx->time_frame = opts->image_display_duration;
+        mpctx->time_frame = opts->image_display_duration / opts->playback_speed;
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
