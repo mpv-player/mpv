@@ -74,20 +74,15 @@
 #define AACS_ERROR_NO_DK          -8 /* no matching device key */
 
 
-struct bluray_opts {
-    char *bluray_device;
-    int angle;
-};
-
-#define OPT_BASE_STRUCT struct bluray_opts
+#define OPT_BASE_STRUCT struct mp_bluray_opts
 const struct m_sub_options stream_bluray_conf = {
     .opts = (const struct m_option[]) {
         {"device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
         {"angle", OPT_INT(angle), M_RANGE(1, 999)},
         {0},
     },
-    .size = sizeof(struct bluray_opts),
-    .defaults = &(const struct bluray_opts){
+    .size = sizeof(struct mp_bluray_opts),
+    .defaults = &(const struct mp_bluray_opts){
         .angle = 1,
     },
 };
@@ -104,7 +99,7 @@ struct bluray_priv_s {
     int cfg_playlist;
     char *cfg_device;
 
-    struct bluray_opts *opts;
+    struct mp_bluray_opts *opts;
     struct m_config_cache *opts_cache;
 };
 

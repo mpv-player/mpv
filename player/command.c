@@ -8035,6 +8035,15 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         }
     }
 
+    if (opt_ptr == &opts->stream_bluray_opts->angle) {
+        struct demuxer *demuxer = mpctx->demuxer;
+        if (mpctx->playback_initialized && demuxer) {
+            if (!mpctx->stop_play)
+                mpctx->stop_play = PT_CURRENT_ENTRY;
+            mp_wakeup_core(mpctx);
+        }
+    }
+
     if (opt_ptr == &opts->pause)
         set_pause_state(mpctx, opts->pause);
 
