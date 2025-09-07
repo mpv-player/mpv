@@ -1,0 +1,5 @@
+[wrap-git]
+directory = isolang
+url = https://github.com/humenda/isolang-rs.git
+revision = 2e184a9a9d29d82561aedf2a3f5b91b9b78c7d1f
+patch_directory = isolang
