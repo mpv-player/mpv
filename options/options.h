@@ -154,6 +154,11 @@ struct mp_osd_render_opts {
     int osd_shaper;
 };
 
+struct mp_bluray_opts {
+    char *bluray_device;
+    int angle;
+};
+
 typedef struct MPOpts {
     bool property_print_help;
     bool use_terminal;
@@ -354,7 +359,7 @@ typedef struct MPOpts {
     int w32_priority;
     bool media_controls;
 
-    struct bluray_opts *stream_bluray_opts;
+    struct mp_bluray_opts *stream_bluray_opts;
     struct cdda_opts *stream_cdda_opts;
     struct dvb_opts *stream_dvb_opts;
     struct lavf_opts *stream_lavf_opts;
