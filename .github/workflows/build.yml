@@ -237,6 +237,7 @@ jobs:
         include:
           - os: "macos-13"
             arch: "intel"
+            xcode: "Xcode_14.1"
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.2"
