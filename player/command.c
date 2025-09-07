@@ -326,11 +326,11 @@ static char *append_selected_style(struct MPContext *mpctx, char *str)
                mpctx->video_out->osd->opts->osd_selected_color.b,
                mpctx->video_out->osd->opts->osd_selected_color.g,
                mpctx->video_out->osd->opts->osd_selected_color.r,
-               255 - mpctx->video_out->osd->opts->osd_selected_color.a,
+               (uint8_t)(255 - mpctx->video_out->osd->opts->osd_selected_color.a),
                mpctx->video_out->osd->opts->osd_selected_outline_color.b,
                mpctx->video_out->osd->opts->osd_selected_outline_color.g,
                mpctx->video_out->osd->opts->osd_selected_outline_color.r,
-               255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a,
+               (uint8_t)(255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a),
                OSD_ASS_1);
 }
 
