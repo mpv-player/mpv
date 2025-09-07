@@ -16,7 +16,7 @@
  */
 
 #if !swift(>=5.7)
-extension NSCondition {
+extension NSLocking {
     func withLock<R>(_ body: () throws -> R) rethrows -> R {
         self.lock()
         defer { self.unlock() }
