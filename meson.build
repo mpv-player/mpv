@@ -1525,7 +1525,11 @@ if macos_sdk_version != '0.0'
     add_project_link_arguments(objc_link_flags, language: ['c', 'objc'])
 endif
 
-xcrun = find_program('xcrun', required: get_option('swift-build').require(darwin))
+swift = get_option('swift-build').require(
+    darwin and features['cocoa'],
+    error_message: 'cocoa was not found',
+)
+xcrun = find_program('xcrun', required: swift)
 swift_ver = '0.0'
 if xcrun.found()
     swift_prog = find_program(run_command(xcrun, '-find', 'swiftc', check: true).stdout().strip())
@@ -1543,7 +1547,7 @@ sys.stdout.write(swift_ver)
 endif
 
 swift = get_option('swift-build').require(
-    darwin and macos_sdk_version.version_compare('>= 10.15') and swift_ver.version_compare('>= 4.1'),
+    swift.allowed() and macos_sdk_version.version_compare('>= 10.15') and swift_ver.version_compare('>= 4.1'),
     error_message: 'A suitable macos sdk version or swift version could not be found!',
 )
 features += {'swift': swift.allowed()}
