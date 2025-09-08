@@ -58,6 +58,7 @@ static void print_version(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
+extern const struct m_sub_options stream_appending_conf;
 extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
@@ -569,6 +570,7 @@ static const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
+    {"appending", OPT_SUBSTRUCT(stream_appending_opts, stream_appending_conf)},
 #if HAVE_DVDNAV
     {"dvd", OPT_SUBSTRUCT(dvd_opts, dvd_conf)},
 #endif
