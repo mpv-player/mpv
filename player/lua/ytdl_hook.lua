@@ -908,12 +908,13 @@ local function run_ytdl_hook(url)
 
     local format = mp.get_property("options/ytdl-format")
     local raw_options = mp.get_property_native("options/ytdl-raw-options")
+    local prefer_srv3 = mp.get_property_native("options/ytdl-prefer-srv3")
     local allsubs = true
     local proxy = nil
     local use_playlist = false
     local wanted_sub_formats = "ass/srt/best"
 
-    if has_subrandr then
+    if prefer_srv3 then
         wanted_sub_formats = "srv3/" .. wanted_sub_formats
     end
 

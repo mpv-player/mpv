@@ -557,6 +557,9 @@ static const m_option_t mp_opts[] = {
     {"ytdl-format", OPT_STRING(lua_ytdl_format)},
     {"ytdl-raw-options", OPT_KEYVALUELIST(lua_ytdl_raw_options)},
     {"ytdl-extract-chapters", OPT_BOOL(lua_ytdl_extract_chapters)},
+#if HAVE_SUBRANDR
+    {"ytdl-prefer-srv3", OPT_BOOL(lua_ytdl_prefer_srv3)},
+#endif
     {"load-stats-overlay", OPT_BOOL(lua_load_stats),
         .flags = UPDATE_BUILTIN_SCRIPTS},
     {"load-console", OPT_BOOL(lua_load_console),
