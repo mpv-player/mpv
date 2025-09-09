@@ -227,10 +227,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - "macos-13"
-          - "macos-14"
-          - "macos-15"
         include:
           - os: "macos-13"
             arch: "intel"
@@ -240,6 +236,10 @@ jobs:
             xcode: "Xcode_15.2"
           - os: "macos-15"
             arch: "arm"
+          - os: "macos-15"
+            arch: "test"
+            swift: "-target arm64-apple-macosx10.15"
+            target: "10.15"
     steps:
       - uses: actions/checkout@v4
 
@@ -269,8 +269,11 @@ jobs:
           ./ci/build-macos.sh
         env:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
+          SWIFT_FLAGS: "${{ matrix.swift }}"
+          MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
 
       - name: Create App Bundle
+        if: ${{ matrix.arch != 'test' }}
         run: |
           meson compile -C build macos-bundle
           tar -czvf mpv.tar.gz -C build mpv.app
@@ -291,6 +294,7 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
       - uses: actions/upload-artifact@v4
+        if: ${{ matrix.arch != 'test' }}
         with:
           name: mpv-${{ matrix.os }}-${{ matrix.arch }}
           path: mpv.tar.gz
