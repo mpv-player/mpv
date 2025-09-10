@@ -829,8 +829,7 @@ local function add_single_video(json)
             end
             table.insert(chapter_list, {time=chapter.start_time, title=title})
         end
-    elseif json.description ~= nil and json.duration ~= nil and
-        mp.get_property_bool("ytdl-extract-chapters") then
+    elseif json.description ~= nil and json.duration ~= nil then
         chapter_list = extract_chapters(json.description, json.duration)
     end
 
