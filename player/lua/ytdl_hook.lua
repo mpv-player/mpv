@@ -250,35 +250,6 @@ local function url_is_safe(url)
     return safe
 end
 
-local function time_to_secs(time_string)
-    local ret
-
-    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)")
-    if a ~= nil then
-        ret = (a*3600 + b*60 + c)
-    else
-        a, b = time_string:match("(%d%d?):(%d%d)")
-        if a ~= nil then
-            ret = (a*60 + b)
-        end
-    end
-
-    return ret
-end
-
-local function extract_chapters(data, video_length)
-    local ret = {}
-
-    for line in data:gmatch("[^\r\n]+") do
-        local time = time_to_secs(line)
-        if time and (time < video_length) then
-            table.insert(ret, {time = time, title = line})
-        end
-    end
-    table.sort(ret, function(a, b) return a.time < b.time end)
-    return ret
-end
-
 local function is_whitelisted(url)
     url = url:match("https?://(.+)")
 
@@ -829,8 +800,6 @@ local function add_single_video(json)
             end
             table.insert(chapter_list, {time=chapter.start_time, title=title})
         end
-    elseif json.description ~= nil and json.duration ~= nil then
-        chapter_list = extract_chapters(json.description, json.duration)
     end
 
     -- set start time
