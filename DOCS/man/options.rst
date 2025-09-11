@@ -3891,6 +3891,10 @@ Disc Devices
     Some DVDs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
 
+``--bluray-angle=<ID>``
+    Some Blu-ray discs contain scenes that can be viewed from multiple angles.
+    This option tells mpv which angle to use (default: 1).
+
 
 
 Equalizer

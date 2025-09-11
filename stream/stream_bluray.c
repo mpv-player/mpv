@@ -74,17 +74,17 @@
 #define AACS_ERROR_NO_DK          -8 /* no matching device key */
 
 
-struct bluray_opts {
-    char *bluray_device;
-};
-
-#define OPT_BASE_STRUCT struct bluray_opts
+#define OPT_BASE_STRUCT struct mp_bluray_opts
 const struct m_sub_options stream_bluray_conf = {
     .opts = (const struct m_option[]) {
         {"device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+        {"angle", OPT_INT(angle), M_RANGE(1, 999)},
         {0},
     },
-    .size = sizeof(struct bluray_opts),
+    .size = sizeof(struct mp_bluray_opts),
+    .defaults = &(const struct mp_bluray_opts){
+        .angle = 1,
+    },
 };
 
 struct bluray_priv_s {
@@ -99,7 +99,7 @@ struct bluray_priv_s {
     int cfg_playlist;
     char *cfg_device;
 
-    struct bluray_opts *opts;
+    struct mp_bluray_opts *opts;
     struct m_config_cache *opts_cache;
 };
 
@@ -409,6 +409,12 @@ static int bluray_stream_open_internal(stream_t *s)
 {
     struct bluray_priv_s *b = s->priv;
 
+    struct m_config_cache *opts_cache =
+        m_config_cache_alloc(s, s->global, &stream_bluray_conf);
+
+    b->opts_cache = opts_cache;
+    b->opts = opts_cache->opts;
+
     int ret = 0;
     char *device = NULL;
     /* find the requested device */
@@ -457,13 +463,15 @@ static int bluray_stream_open_internal(stream_t *s)
 
     /* parse titles information */
     for (int i = 0; i < b->num_titles; i++) {
+        /* the information we're accessing (duration, playlist, angle count)
+         * doesn't depend on the angle */
         BLURAY_TITLE_INFO *ti = bd_get_title_info(bd, i, 0);
         if (!ti)
             continue;
 
         char *time = mp_format_time(ti->duration / 90000, false);
-        MP_INFO(s, "idx: %3d duration: %s (playlist: %05d.mpls)\n",
-                    i, time, ti->playlist);
+        MP_INFO(s, "idx: %3d duration: %s angles: %2d (playlist: %05d.mpls)\n",
+                    i, time, ti->angle_count, ti->playlist);
         talloc_free(time);
 
         bd_free_title_info(ti);
@@ -477,6 +485,11 @@ static int bluray_stream_open_internal(stream_t *s)
     bd_get_event(bd, NULL);
 
     select_initial_title(s, bd_get_main_title(bd));
+
+    if (!bd_select_angle(bd, b->opts->angle - 1))
+        MP_WARN(s, "Couldn't select angle '%d'.\n", b->opts->angle - 1);
+
+    b->current_angle = bd_get_current_angle(bd);
 
     s->fill_buffer = bluray_stream_fill_buffer;
     s->close       = bluray_stream_close;
@@ -497,12 +510,6 @@ static int bluray_stream_open(stream_t *s)
 {
     struct bluray_priv_s *b = talloc_zero(s, struct bluray_priv_s);
     s->priv = b;
-
-    struct m_config_cache *opts_cache =
-        m_config_cache_alloc(s, s->global, &stream_bluray_conf);
-
-    b->opts_cache = opts_cache;
-    b->opts = opts_cache->opts;
 
     bstr title, bdevice, rest = { .len = 0 };
     bstr_split_tok(bstr0(s->path), "/", &title, &bdevice);
