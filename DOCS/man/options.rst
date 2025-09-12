@@ -1039,6 +1039,15 @@ Program Behavior
 ``--ytdl-extract-chapters=<yes|no>``
     Enable chapter extracting from youtube-dl video description (default: yes).
 
+``--ytdl-prefer-srv3=<yes|no>``
+    Allow youtube-dl to download srv3 subtitles and prefer them over other
+    formats (default: no). This will prepend `srv3/` to the default allowed
+    ytdl `--sub-format`s. Using srv3 will make YouTube subtitles display more
+    accurately but ignore most of the various `--sub-*` options that override
+    styling.
+
+    Only available if mpv was compiled with subrandr enabled.
+
 ``--js-memory-report=<yes|no>``
     Enable memory reporting for javascript scripts in the stats overlay.
     This is disabled by default because it has an overhead and increases
