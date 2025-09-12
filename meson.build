@@ -406,13 +406,18 @@ add_project_link_arguments(link_flags, language: ['c', 'cpp', 'objc'])
 
 
 # osdep
+if darwin
+    path_source = files('osdep/path-darwin.c')
+    timer_source = files('osdep/timer-darwin.c')
+endif
+
 cocoa = dependency('appleframeworks', modules: ['Cocoa', 'IOKit', 'QuartzCore'],
                    required: get_option('cocoa'))
 features += {'cocoa': cocoa.found()}
 if features['cocoa']
     dependencies += cocoa
+    path_source += files('osdep/path-mac.m')
     sources += files('osdep/language-mac.c',
-                     'osdep/path-mac.m',
                      'osdep/utils-mac.c',
                      'osdep/mac/app_bridge.m',
                      'player/clipboard/clipboard-mac.m')
@@ -420,7 +425,6 @@ if features['cocoa']
 endif
 
 if posix
-    path_source = files('osdep/path-unix.c')
     if not get_option('fuzzers') and cc.has_function('fork', prefix : '#include <unistd.h>')
         sources += files('osdep/subprocess-posix.c')
     else
@@ -437,12 +441,8 @@ if posix and not features['cocoa']
     main_fn_source = files('osdep/main-fn-unix.c')
 endif
 
-if darwin
-    path_source = files('osdep/path-darwin.c')
-    timer_source = files('osdep/timer-darwin.c')
-endif
-
 if posix and not darwin
+    path_source = files('osdep/path-unix.c')
     timer_source = files('osdep/timer-linux.c')
 endif
 

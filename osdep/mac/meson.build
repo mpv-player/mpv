@@ -5,6 +5,14 @@ module = join_paths(build_root, 'osdep/mac/swift.swiftmodule')
 swift_flags = ['-c', '-emit-library', '-static', '-sdk', macos_sdk_path,
                '-emit-objc-header', '-parse-as-library']
 
+# fallback to old swift frontend build
+if swift_ver.version_compare('<5.8')
+    message('Falling back to old swift frontend build')
+    swift_prog = find_program(run_command(xcrun, '-find', 'swift', check: true).stdout().strip())
+    swift_flags = ['-frontend', '-c', '-sdk', macos_sdk_path,
+                   '-enable-objc-interop', '-emit-objc-header', '-parse-as-library']
+endif
+
 if swift_ver.version_compare('>=6.0')
     swift_flags += ['-swift-version', '5']
 endif
