@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+feature_set=${3:-minimal}
+
 prefix_dir=$PWD/mingw_prefix
 mkdir -p "$prefix_dir"
 ln -snf . "$prefix_dir/usr"
@@ -301,19 +303,42 @@ done
 
 [ -z "$1" ] && exit 0
 
+mpv_feature_set_args=(
+    --cross-file $prefix_dir/crossfile
+    --force-fallback-for=mujs
+    -Dlua=luajit
+    -Dmujs:default_library=static
+    -Dmujs:werror=false
+)
+
+#expands to -D${feature}=enabled
+mpv_features=(shaderc spirv-cross d3d11 javascript)
+
+if [ "$feature_set" = "full" ]; then
+    mpv_feature_set_args+=(
+        --buildtype release
+        -Db_ndebug=true
+        -Db_lto=true
+        -Dlibmpv=true
+    )
+else
+    mpv_feature_set_args+=(
+        $common_args
+        --buildtype debugoptimized
+    )
+fi
+
+for feature in "${mpv_features[@]}"; do
+    mpv_feature_set_args+=("-D${feature}=enabled")
+done
+
 CFLAGS+=" -I'$prefix_dir/include'"
 LDFLAGS+=" -L'$prefix_dir/lib'"
 export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
 
-meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
-  --buildtype debugoptimized \
-  --force-fallback-for=mujs \
-  -Dmujs:werror=false \
-  -Dmujs:default_library=static \
-  -Dlua=luajit \
-  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
+meson setup $build "${mpv_feature_set_args[@]}"
 meson compile -C $build
 
 if [ "$2" = pack ]; then
