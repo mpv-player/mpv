@@ -239,6 +239,7 @@ jobs:
           - os: "macos-13"
             arch: "intel"
             xcode: "Xcode_14.1"
+            homebrew: "2e821e2d8ae38540311cd6ec60f6e1b23d61d167"
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.2"
@@ -263,7 +264,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew update
+          if [[ -n "${{ matrix.homebrew }}" ]]; then
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            cd "$(brew --repo homebrew/core)"
+            git checkout --force ${{ matrix.homebrew }}
+          else
+            brew update
+          fi
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
