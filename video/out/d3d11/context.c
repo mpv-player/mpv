@@ -202,6 +202,9 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
 
 static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
 {
+    if (sw->ctx->opts.composition)
+        return (struct pl_color_space){0};
+
     struct priv *p = sw->priv;
 
     DXGI_OUTPUT_DESC1 desc;
