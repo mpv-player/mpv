@@ -1006,6 +1006,15 @@ local function run_ytdl_hook(url)
     if result.status ~= 0 or json == "" then
         json = nil
     elseif json then
+        -- trim any preceding text before JSON
+        local start = json:find("{", 1, true)
+        if start == nil then
+            msg.error("youtube-dl failed: couldn't find JSON data")
+            return
+        elseif start > 1 then
+            json = json:sub(start)
+        end
+
         json, parse_err = utils.parse_json(json)
     end
 
