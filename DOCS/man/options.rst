@@ -6937,6 +6937,13 @@ them.
 
     Android with ``--gpu-context=android`` only.
 
+``--d3d11-composition-size=<WxH>``
+    Set size of the output for d3d11 composition mode.
+    When use composition mode, there is no window, must set the output size by
+    the embedding application.
+
+    Windows with ``--gpu-context=d3d11`` and  ``--d3d11-output-mode=composition`` only.
+
 ``--gpu-sw``
     Continue even if a software renderer is detected. This only works with
     OpenGL/Vulkan backends. For d3d11, see ``--d3d11-warp``.

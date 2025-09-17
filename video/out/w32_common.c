@@ -2544,6 +2544,22 @@ void vo_w32_swapchain(struct vo *vo, void *swapchain)
     vo->display_swapchain = swapchain;
 }
 
+bool vo_w32_composition_size(struct vo *vo)
+{
+    int w = vo->opts->d3d11_composition_size.w;
+    int h = vo->opts->d3d11_composition_size.h;
+
+    if (w <= 0 || h <= 0) {
+        MP_ERR(vo, "Failed to get height and width!\n");
+        return false;
+    }
+
+    vo->dwidth = w;
+    vo->dheight = h;
+
+    return true;
+}
+
 void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx)
 {
     struct vo_w32_state *w32 = vo->w32;
