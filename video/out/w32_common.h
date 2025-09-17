@@ -32,6 +32,7 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
 void vo_w32_config(struct vo *vo);
 HWND vo_w32_hwnd(struct vo *vo);
 void vo_w32_swapchain(struct vo *vo, void *swapchain);
+bool vo_w32_composition_size(struct vo *vo);
 void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx);
 void vo_w32_set_transparency(struct vo *vo, bool enable);
 

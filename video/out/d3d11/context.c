@@ -167,8 +167,11 @@ static bool resize(struct ra_ctx *ctx)
 
 static bool d3d11_reconfig(struct ra_ctx *ctx)
 {
-    if (!ctx->opts.composition)
+    if (ctx->opts.composition) {
+        vo_w32_composition_size(ctx->vo);
+    } else {
         vo_w32_config(ctx->vo);
+    }
     return resize(ctx);
 }
 
@@ -522,6 +525,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
 
     ctx->opts.composition = p->opts->output_mode == 1;
     if (!ctx->opts.composition && !vo_w32_init(ctx->vo))
+        goto error;
+
+    if (ctx->opts.composition && !vo_w32_composition_size(ctx->vo))
         goto error;
 
     if (!ctx->opts.composition && ctx->opts.want_alpha)

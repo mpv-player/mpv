@@ -86,6 +86,8 @@ typedef struct mp_vo_opts {
 
     struct m_geometry android_surface_size;
 
+    struct m_geometry d3d11_composition_size;
+
     int swapchain_depth;  // max number of images to render ahead
 
     struct m_geometry video_crop;
