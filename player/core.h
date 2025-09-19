@@ -32,6 +32,10 @@
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 
+#ifdef __linux__
+#include "osdep/linux-als.h"
+#endif
+
 // definitions used internally by the core player code
 
 enum stop_play_reason {
@@ -469,6 +473,11 @@ typedef struct MPContext {
     //     to true.
     struct demuxer *open_res_demuxer;
     int open_res_error;
+
+#ifdef __linux__
+    struct mp_linux_als *als_state; // lazily initialized on first use
+#endif
+
 } MPContext;
 
 // Contains information about an asynchronous work item, how it can be aborted,
