@@ -77,7 +77,17 @@ static bool android_reconfig(struct ra_ctx *ctx)
     if (!vo_android_surface_size(ctx->vo, &w, &h))
         return false;
 
+    // Update native window buffer geometry to prevent screen tearing
+    ANativeWindow *native_window = vo_android_native_window(ctx->vo);
+    if (native_window) {
+        ANativeWindow_setBuffersGeometry(native_window, w, h, 0);
+    }
+
     ra_vk_ctx_resize(ctx, w, h);
+
+    // Force redraw to sync buffers in paused state
+    ctx->vo->want_redraw = true;
+
     return true;
 }
 
