@@ -1,0 +1,1 @@
+Set `--macos-render-timer` to `feedback` by default.
