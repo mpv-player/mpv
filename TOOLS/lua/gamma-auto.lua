@@ -19,4 +19,11 @@ local function lux_changed(_, lux)
     mp.set_property_number("gamma-factor", gamma)
 end
 
-mp.observe_property("ambient-light", "number", lux_changed)
+if mp.get_property("platform") == "linux" then
+    -- observing ambient-light isn't supported on Linux
+    mp.add_periodic_timer(1, function()
+        lux_changed(nil, mp.get_property_number("ambient-light"))
+    end)
+else
+    mp.observe_property("ambient-light", "number", lux_changed)
+end
