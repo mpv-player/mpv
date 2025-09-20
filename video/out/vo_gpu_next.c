@@ -175,6 +175,7 @@ struct gl_next_opts {
     struct user_lut target_lut;
     int target_hint;
     int target_hint_mode;
+    bool target_hint_strict;
     char **raw_opts;
 };
 
@@ -207,6 +208,7 @@ const struct m_sub_options gl_next_conf = {
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_CHOICE(target_hint, {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"target-colorspace-hint-mode", OPT_CHOICE(target_hint_mode, {"target", 0}, {"source", 1}, {"source-dynamic", 2})},
+        {"target-colorspace-hint-strict", OPT_BOOL(target_hint_strict)},
         // No `target-lut-type` because we don't support non-RGB targets
         {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0},
@@ -217,6 +219,7 @@ const struct m_sub_options gl_next_conf = {
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
         .image_subs_hdr_peak = PL_COLOR_SDR_WHITE,
         .target_hint = -1,
+        .target_hint_strict = true,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -1220,7 +1223,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target, hint.hdr.min_luma, target_hint && !pass_colorspace);
+    bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
+    apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
