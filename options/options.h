@@ -184,6 +184,7 @@ typedef struct MPOpts {
     char *lua_ytdl_format;
     char **lua_ytdl_raw_options;
     bool lua_ytdl_extract_chapters;
+    bool lua_ytdl_prefer_srv3;
     bool lua_load_stats;
     bool lua_load_console;
     int lua_load_auto_profiles;
@@ -372,6 +373,9 @@ typedef struct MPOpts {
     struct demux_playlist_opts *demux_playlist;
     struct demux_lavf_opts *demux_lavf;
     struct demux_mkv_opts *demux_mkv;
+#if HAVE_SUBRANDR
+    struct demux_sbr_opts *demux_sbr;
+#endif
 
     struct demux_opts *demux_opts;
     struct demux_cache_opts *demux_cache_opts;
