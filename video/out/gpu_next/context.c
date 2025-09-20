@@ -161,7 +161,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
         mppl_log_set_probing(ctx->pllog, false);
 
         ctx->swapchain = pl_opengl_create_swapchain(opengl, pl_opengl_swapchain_params(
-            .max_swapchain_depth = vo->opts->swapchain_depth,
+            .max_swapchain_depth = vo_swapchain_depth(vo),
             .framebuffer.flipped = gl->flipped,
         ));
         if (!ctx->swapchain)

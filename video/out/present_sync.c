@@ -57,14 +57,14 @@ void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *inf
     LL_APPEND(list_node, present, cur);
 }
 
-struct mp_present *mp_present_initialize(void *talloc_ctx, struct mp_vo_opts *opts, int entries)
+struct mp_present *mp_present_initialize(void *talloc_ctx, struct vo *vo, int entries)
 {
     struct mp_present *present = talloc_zero(talloc_ctx, struct mp_present);
     for (int i = 0; i < entries; i++) {
         struct mp_present_entry *entry = talloc_zero(present, struct mp_present_entry);
         LL_APPEND(list_node, present, entry);
     }
-    present->opts = opts;
+    present->vo = vo;
     return present;
 }
 
@@ -114,7 +114,7 @@ void present_sync_update_values(struct mp_present *present, int64_t ust,
     struct mp_present_entry *cur = present->head;
     int index = 0;
     while (cur && ++index) {
-        if (!cur->ust || index == present->opts->swapchain_depth)
+        if (!cur->ust || index == vo_swapchain_depth(present->vo))
             break;
         cur = cur->list_node.next;
     }

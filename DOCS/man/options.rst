@@ -1999,6 +1999,8 @@ Video
     upper limit, the implementation can use a lower latency than requested
     internally. A setting of 1 means that the VO will wait for every frame to
     become visible before starting to render the next frame. (Default: 3)
+    If ``--video-sync=display-*`` is used, this option is ignored and the depth
+    is always 1.
 
 Audio
 -----

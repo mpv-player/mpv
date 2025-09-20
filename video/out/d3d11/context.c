@@ -511,7 +511,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .allow_warp = p->opts->warp != 0,
         .force_warp = p->opts->warp == 1,
         .max_feature_level = p->opts->feature_level,
-        .max_frame_latency = ctx->vo->opts->swapchain_depth,
+        .max_frame_latency = vo_swapchain_depth(ctx->vo),
         .adapter_name = p->opts->adapter_name,
     };
     if (!mp_d3d11_create_present_device(ctx->log, &dopts, &p->device))
@@ -550,7 +550,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .flip = p->opts->flip,
         // Add one frame for the backbuffer and one frame of "slack" to reduce
         // contention with the window manager when acquiring the backbuffer
-        .length = ctx->vo->opts->swapchain_depth + 2,
+        .length = vo_swapchain_depth(ctx->vo) + 2,
         .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))

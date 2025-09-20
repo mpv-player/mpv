@@ -1533,3 +1533,10 @@ struct mp_image_params vo_get_target_params(struct vo *vo)
     mp_mutex_unlock(&vo->params_mutex);
     return p;
 }
+
+int vo_swapchain_depth(struct vo *vo)
+{
+    if (!VS_IS_DISP(vo->opts->video_sync))
+        return vo->opts->swapchain_depth;
+    return 1;
+}
