@@ -548,9 +548,8 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .color_space = p->opts->color_space,
         .configured_csp = &p->swapchain_csp,
         .flip = p->opts->flip,
-        // Add one frame for the backbuffer and one frame of "slack" to reduce
-        // contention with the window manager when acquiring the backbuffer
-        .length = vo_swapchain_depth(ctx->vo) + 2,
+        // Add one frame for the backbuffer
+        .length = vo_swapchain_depth(ctx->vo) + 1,
         .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
