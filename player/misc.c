@@ -278,6 +278,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
         goto done;
 
     int64_t size = stream_get_size(stream);
+    int64_t start_pos = stream->pos;
 
     FILE *dest = fopen(filename, "wb");
     if (!dest) {
@@ -289,9 +290,15 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
     while (mpctx->stop_play == KEEP_PLAYING && ok) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
-            uint64_t pos = stream->pos;
-            MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
-                   (long long int)pos, (long long int)size);
+            int64_t pos = stream->pos;
+            if (size > 0 && pos >= start_pos) {
+                double percent = 100.0 * (pos - start_pos) / (size - start_pos);
+                MP_MSG(mpctx, MSGL_STATUS, "Dumping %" PRId64 "/%" PRId64 " (%.2f%%)...",
+                       pos, size, percent);
+            } else {
+                MP_MSG(mpctx, MSGL_STATUS, "Dumping %" PRId64 "/%" PRId64 "...",
+                       pos, size);
+            }
         }
         uint8_t buf[4096];
         int len = stream_read(stream, buf, sizeof(buf));
