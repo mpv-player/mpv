@@ -2837,12 +2837,24 @@ static int mp_property_ambient_light(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
+#ifdef __linux__
+    if (!mpctx->als_state) {
+        mpctx->als_state = mp_linux_als_create(mpctx, mpctx->global);
+    }
+
+    double lux;
+    if (mp_linux_als_get_lux(mpctx->als_state, &lux) < 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, lux);
+#else
     struct vo *vo = mpctx->video_out;
     double lux;
     if (!vo || vo_control(vo, VOCTRL_GET_AMBIENT_LUX, &lux) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_double_ro(action, arg, lux);
+#endif
 }
 
 static int mp_property_focused(void *ctx, struct m_property *prop,
