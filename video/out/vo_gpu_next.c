@@ -1146,6 +1146,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             pass_colorspace = true;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
+        if (opts->target_gamut) {
+            // Ensure resulting gamut still fits inside container
+            const struct pl_raw_primaries *gamut, *container;
+            gamut = pl_raw_primaries_get(opts->target_gamut);
+            container = pl_raw_primaries_get(hint.primaries);
+            hint.hdr.prim = pl_primaries_clip(gamut, container);
+        }
         if (opts->target_trc)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
