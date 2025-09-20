@@ -1,0 +1,1 @@
+add `--target-colorspace-hint-strict` option
