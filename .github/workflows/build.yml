@@ -344,6 +344,10 @@ jobs:
           export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
           meson test -C build
 
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
+
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
@@ -597,6 +601,10 @@ jobs:
         id: tests
         run: |
           meson test -C build
+
+      - name: Lint Rust
+        run: |
+          ninja -C build clippy
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
