@@ -63,7 +63,7 @@ static void test_sdh_filter(char *file, char *path, char *harder)
         switch (event->event_id) {
         case MPV_EVENT_PROPERTY_CHANGE: {
             mpv_event_property *prop = event->data;
-            if (strcmp(prop->name, "sub-text") == 0) {
+            if (prop->format == MPV_FORMAT_STRING && strcmp(prop->name, "sub-text") == 0) {
                 char *value = *(char **)(prop->data);
                 if (!value || strcmp(expect, value) != 0)
                     fail("String: expected '%s' but got '%s'!\n", expect, value);
@@ -90,6 +90,9 @@ int main(int argc, char *argv[])
 
     const char *fmt = "================ TEST: %s %s ================\n";
     printf(fmt, "test_sdh_filter", argv[1]);
+    // Set pause and start from 1 second to ensure the subtitle is loaded.
+    mpv_set_property_string(ctx, "pause", "yes");
+    mpv_set_property_string(ctx, "start", "1");
     mpv_observe_property(ctx, 0, "sub-text", MPV_FORMAT_STRING);
     test_sdh_filter(argv[1], argv[2], argv[3]);
     printf("================ SHUTDOWN ================\n");
