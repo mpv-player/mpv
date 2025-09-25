@@ -89,6 +89,10 @@ local codec_map = {
     ["hev1%..*"]    = "hevc",
 }
 
+if mp.get_property_native("subrandr-version") ~= nil then
+    codec_map["srv3"] = "subrandr/srv3"
+end
+
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
 -- Fun fact: mpv will not really use the codec, but will still try to initialize
 -- the codec on track selection (just to scrap it), meaning it's only a hint,
