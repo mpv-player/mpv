@@ -31,6 +31,7 @@
 #include "sub/osd.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
+#include "osdep/als.h"
 
 // definitions used internally by the core player code
 
@@ -469,6 +470,8 @@ typedef struct MPContext {
     //     to true.
     struct demuxer *open_res_demuxer;
     int open_res_error;
+
+    struct mp_als *als_state; // lazily initialized on first use
 } MPContext;
 
 // Contains information about an asynchronous work item, how it can be aborted,
