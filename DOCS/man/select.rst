@@ -7,6 +7,8 @@ providing script bindings that gather and format the data to be selected in the
 console and do operations on the selected item. It can be disabled using the
 ``--load-select=no`` option.
 
+This script is also used to populate the context menu.
+
 Key bindings
 ------------
 
@@ -156,6 +158,9 @@ Available script bindings are:
 ``menu``
     Show a menu with miscellaneous entries.
 
+``context-menu``
+    Show the context menu.
+
 Configuration
 -------------
 
@@ -176,3 +181,20 @@ Configurable options
     Default: yes
 
     Whether to show only the last of history entries with the same path.
+
+``menu_conf_path``
+    Default: ~~/menu.conf (see `FILES`_).
+
+    The path from which to read the custom context menu definition (see `CONTEXT
+    MENU`_).
+
+``max_playlist_items``
+    Default: 25
+
+    The maximum number of playlist entries in the context menu.
+
+``populate_menu_data``
+    Default: yes, except for libmpv
+
+    Whether observe the properties referenced in ``menu.conf`` and update
+    ``menu-data`` with suitable menu items after mpv's window is created.

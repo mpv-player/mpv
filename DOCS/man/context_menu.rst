@@ -1,5 +1,5 @@
-CONTEXT MENU SCRIPT
-===================
+CONTEXT MENU
+============
 
 The context menu is a menu that pops up on the video window. By default, it is
 bound to right click.
@@ -7,7 +7,8 @@ bound to right click.
 menu.conf
 ---------
 
-You can define your own menu in ``~~/menu.conf`` (see `FILES`_). It is
+You can define your own menu in ``~~/menu.conf`` (see `FILES`_), or an
+alternative path specified with ``--script-opt=select-menu_conf_path``. It is
 recommended to use the default ``menu.conf`` from
 https://github.com/mpv-player/mpv/blob/master/etc/menu.conf as an example to get
 started.
@@ -29,6 +30,19 @@ submenu with the relative items: ``$playlist``, ``$tracks``, ``$video-tracks``,
 ``$audio-tracks``, ``$sub-tracks``, ``$secondary-sub-tracks``, ``$chapters``,
 ``$editions``, ``$audio-devices``, ``$profiles``. These menus are automatically
 disabled when empty.
+
+To use the native context menu, you need to fill the ``menu-data`` property with
+menu definition data, and call the ``context-menu`` command. In builtin scripts,
+this is done by ``select.lua``, which parses ``menu.conf`` to populate
+``menu-data``. It then calls the ``context-menu`` command on platforms where
+integration with the native context menu is implemented, while on platforms
+where it is not, it opens ``context_menu.lua``.
+
+On platforms without integration with the native context menu,
+``context_menu.lua`` can be disabled entirely using the
+``--load-context-menu=no`` option. On platforms where the integration is
+implemented, it is already disabled by default, and ``--load-context-menu=yes``
+will make ``select.lua`` use it.
 
 Script messages
 ---------------
