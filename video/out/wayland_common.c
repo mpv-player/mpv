@@ -3467,7 +3467,6 @@ static void set_color_management(struct vo_wayland_state *wl)
     wp_image_description_creator_params_v1_set_primaries_named(image_creator_params, primaries);
     wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
 
-    pl_color_space_infer(&wl->target_params.color);
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
     bool is_hdr = pl_color_transfer_is_hdr(color.transfer);
     bool use_metadata = hdr_metadata_valid(&hdr);
@@ -4135,6 +4134,7 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl)
     if (!wl->vo->target_params)
         return;
     struct mp_image_params target_params = vo_get_target_params(wl->vo);
+    pl_color_space_infer(&target_params.color);
     if (pl_color_space_equal(&target_params.color, &wl->target_params.color) &&
         pl_color_repr_equal(&target_params.repr, &wl->target_params.repr) &&
         target_params.chroma_location == wl->target_params.chroma_location)
