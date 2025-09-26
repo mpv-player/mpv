@@ -6104,21 +6104,17 @@ static void cmd_escape_ass(void *p)
 
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
-    switch (action_flag) {
-    case 0: // replace
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
-    case 1: // append
-        return (struct load_action){LOAD_TYPE_APPEND, .play = false};
-    case 2: // append-play
-        return (struct load_action){LOAD_TYPE_APPEND, .play = true};
-    case 3: // insert-next
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = false};
-    case 4: // insert-next-play
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = true};
-    case 5: // insert-at
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = false};
-    case 6: // insert-at-play
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = true};
+    int type = action_flag & 3;
+    bool play = (action_flag >> 3) & 1;
+    switch (type) {
+    case 0:
+        return (struct load_action){LOAD_TYPE_REPLACE, .play = play};
+    case 1:
+        return (struct load_action){LOAD_TYPE_APPEND, .play = play};
+    case 2:
+        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = play};
+    case 3:
+        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = play};
     default: // default: replace
         return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
     }
@@ -7431,14 +7427,16 @@ const struct mp_cmd_def mp_cmds[] = {
     { "loadfile", cmd_loadfile,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i,
-                {"replace", 0},
-                {"append", 1},
-                {"append-play", 2},
-                {"insert-next", 3},
-                {"insert-next-play", 4},
-                {"insert-at", 5},
-                {"insert-at-play", 6}),
+            {"flags", OPT_FLAGS(v.i,
+                {"replace", 4|0},
+                {"append", 4|1},
+                {"insert-next", 4|2},
+                {"insert-at", 4|3},
+                {"play", 32|8},
+                // backwards compatibility
+                {"append-play", (4|1) + (16|8)},
+                {"insert-next-play", (4|2) + (16|8)},
+                {"insert-at-play", (4|3) + (16|8)}),
                 .flags = MP_CMD_OPT_ARG},
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
@@ -7447,14 +7445,16 @@ const struct mp_cmd_def mp_cmds[] = {
     { "loadlist", cmd_loadlist,
         {
             {"url", OPT_STRING(v.s)},
-            {"flags", OPT_CHOICE(v.i,
-                {"replace", 0},
-                {"append", 1},
-                {"append-play", 2},
-                {"insert-next", 3},
-                {"insert-next-play", 4},
-                {"insert-at", 5},
-                {"insert-at-play", 6}),
+            {"flags", OPT_FLAGS(v.i,
+                {"replace", 4|0},
+                {"append", 4|1},
+                {"insert-next", 4|2},
+                {"insert-at", 4|3},
+                {"play", 32|8},
+                // backwards compatibility
+                {"append-play", (4|1) + (16|8)},
+                {"insert-next-play", (4|2) + (16|8)},
+                {"insert-at-play", (4|3) + (16|8)}),
                 .flags = MP_CMD_OPT_ARG},
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
         },
