@@ -399,16 +399,6 @@ Ctrl+Wheel up/down
     Change video zoom keeping the part of the video hovered by the cursor under
     it.
 
-Context Menu
--------------
-
-Context Menu is a menu that pops up on the video window on user interaction
-(mouse right click, etc.).
-
-To use this feature, you need to fill the ``menu-data`` property with menu
-definition data, and add a keybinding to run the ``context-menu`` command,
-which can be done with a user script.
-
 USAGE
 =====
 
