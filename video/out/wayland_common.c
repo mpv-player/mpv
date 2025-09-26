@@ -2108,6 +2108,7 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
 {
     struct vo_wayland_state *wl = data;
     MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
+    wp_color_management_surface_v1_unset_image_description(wl->color_surface);
     wp_image_description_v1_destroy(image_description);
 }
 
@@ -3450,8 +3451,6 @@ static void set_color_management(struct vo_wayland_state *wl)
     if (!wl->color_surface)
         return;
 
-    wp_color_management_surface_v1_unset_image_description(wl->color_surface);
-
     struct pl_color_space color = wl->target_params.color;
     int primaries = wl->primaries_map[color.primaries];
     int transfer = wl->transfer_map[color.transfer];
@@ -3459,8 +3458,10 @@ static void set_color_management(struct vo_wayland_state *wl)
         MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", m_opt_choice_str(pl_csp_prim_names, color.primaries));
     if (!transfer)
         MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", m_opt_choice_str(pl_csp_trc_names, color.transfer));
-    if (!primaries || !transfer)
+    if (!primaries || !transfer) {
+        wp_color_management_surface_v1_unset_image_description(wl->color_surface);
         return;
+    }
 
     struct wp_image_description_creator_params_v1 *image_creator_params =
         wp_color_manager_v1_create_parametric_creator(wl->color_manager);
