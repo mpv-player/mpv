@@ -291,7 +291,6 @@ static void w32_register(struct MPContext *mpctx)
 
     // Register URL handler
     reg_add_str(log, root, KEY_MPV_PROG_ID("url"), NULL, L"URL:mpv");
-    reg_add_str(log, root, KEY_MPV_PROG_ID("url"), L"URL Protocol", L"");
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("url"), L"EditFlags", FTA_Show);
     reg_add_str(log, root, KEY_MPV_PROG_ID("url"), L"FriendlyTypeName",
                 L"mpv URL handler");
