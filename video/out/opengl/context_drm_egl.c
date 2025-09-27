@@ -385,7 +385,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
     }
     enqueue_bo(ctx, new_bo);
 
-    while (drm->redraw || p->gbm.num_bos > vo_swapchain_depth(ctx->vo) ||
+    while (drm->redraw || p->gbm.num_bos > ctx->vo->opts->swapchain_depth ||
            !gbm_surface_has_free_buffers(p->gbm.surface)) {
         if (drm->waiting_for_flip) {
             vo_drm_wait_on_flip(drm);
