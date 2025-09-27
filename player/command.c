@@ -7789,8 +7789,10 @@ void run_command_opts(struct MPContext *mpctx)
     for (int i = 0; opts->input_commands[i]; i++) {
         struct mp_cmd *cmd = mp_input_parse_cmd(mpctx->input, bstr0(opts->input_commands[i]),
                                                 "the command line");
-        cmd->coalesce = true;
-        mp_input_queue_cmd(mpctx->input, cmd);
+        if (cmd) {
+            cmd->coalesce = true;
+            mp_input_queue_cmd(mpctx->input, cmd);
+        }
     }
     ctx->command_opts_processed = true;
 }
