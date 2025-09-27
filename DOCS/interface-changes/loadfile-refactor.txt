@@ -1,0 +1,1 @@
+the `loadfile` and `loadlist` commands can now take multiple flags (i.e. `append+play`)
