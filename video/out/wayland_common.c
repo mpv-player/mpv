@@ -3491,6 +3491,10 @@ static void set_color_management(struct vo_wayland_state *wl)
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
+
+    /* Do a round trip to ensure the image description gets set before
+     * vo->driver->flip_page calls wl_surface_commit on us */
+    wl_display_roundtrip(wl->display);
 #endif
 }
 
