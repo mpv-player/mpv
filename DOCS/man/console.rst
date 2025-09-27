@@ -151,6 +151,11 @@ Configurable Options
     The transparency of the menu's background. Ranges from 0 (opaque) to 255
     (fully transparent).
 
+``gap``
+    Default: 0.2
+
+    The gap between menu items, specified as a percentage the font size.
+
 ``padding``
     Default: 10
 
