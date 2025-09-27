@@ -305,6 +305,22 @@ static void w32_register(struct MPContext *mpctx)
     mp_assert(safe_protocols);
     char *protocols_str = NULL;
     for (int i = 0; safe_protocols[i]; ++i) {
+        mp_require(strlen(safe_protocols[i]) < 41);
+        char *protocol_key = mp_tprintf(61, "Software\\Classes\\%s", safe_protocols[i]);
+        wchar_t *protocol_key_w = mp_from_utf8(tmp, protocol_key);
+
+        HKEY key;
+        LRESULT res = RegOpenKeyExW(root, protocol_key_w, 0, KEY_READ, &key);
+        if (res == ERROR_FILE_NOT_FOUND) {
+            // Add protocol definition only if it doesn't already exist
+            char *protocol_name = mp_tprintf(61, "URL:%s", safe_protocols[i]);
+            reg_add_str(log, root, protocol_key_w, NULL, mp_from_utf8(tmp, protocol_name));
+            reg_add_str(log, root, protocol_key_w, L"URL Protocol", L"");
+            reg_add_dwr(log, root, protocol_key_w, L"EditFlags", FTA_Show);
+        } else if (res == ERROR_SUCCESS) {
+            RegCloseKey(key);
+        }
+
         reg_add_str(log, root, KEY_MPV_CAPABILITIES L"\\URLAssociations",
                     mp_from_utf8(tmp, safe_protocols[i]),
                     MPV_PROG_ID("url"));
