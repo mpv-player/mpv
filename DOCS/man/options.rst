@@ -7176,6 +7176,14 @@ them.
         Your mileage may vary, this highly depends on the target display, there
         is no single answer, but try experimenting, you may be surprised.
 
+``--target-colorspace-hint-strict``
+    When enabled (default), the configured swapchain colorspace (with the hint)
+    will be respected. In this mode, the ``--target-*`` options act only as a
+    hint, while the negotiated swapchain format is used for rendering output.
+    This ensures correct results, since downstream processing depends on the
+    signaled colorspace. When disabled, the swapchain colorspace will be
+    overridden to match the ``--target-*`` options. (Only for ``--vo=gpu-next``)
+
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
     this colorspace when ICC color management is not being used. Valid values
@@ -7310,6 +7318,13 @@ them.
     colorspace (into which values will be encoded), and ``--target-gamut`` to
     the gamut you want to limit colors to. Takes the same values as
     ``--target-prim``. (Only for ``--vo=gpu-next``)
+
+    .. note::
+
+        If the selected gamut is wider, it will be limited to ``--target-prim``.
+        Additionally, if ``--target-colorspace-hint`` is specified, the signaled
+        gamut will be limited to the supported gamut of the swapchain. Which may
+        differ from the requested ``--target-prim``.
 
 ``--target-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors
