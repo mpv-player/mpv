@@ -297,7 +297,7 @@ local function get_scaled_osd_dimensions()
 end
 
 local function get_line_height()
-    return selectable_items and opts.font_size * 1.1 or opts.font_size
+    return selectable_items and opts.font_size * 1.2 or opts.font_size
 end
 
 local function calculate_max_lines()
