@@ -343,7 +343,7 @@ static void flip_page(struct vo *vo)
     if (!drm->active)
         return;
 
-    while (drm->redraw || p->fb_queue_len > vo_swapchain_depth(vo)) {
+    while (drm->redraw || p->fb_queue_len > vo->opts->swapchain_depth) {
         if (drm->waiting_for_flip) {
             vo_drm_wait_on_flip(vo->drm);
             swapchain_step(vo);
@@ -389,7 +389,7 @@ static int preinit(struct vo *vo)
         goto err;
 
     struct vo_drm_state *drm = vo->drm;
-    p->buf_count = vo_swapchain_depth(vo) + 1;
+    p->buf_count = vo->opts->swapchain_depth + 1;
     p->bufs = talloc_zero_array(p, struct framebuffer *, p->buf_count);
 
     p->front_buf = 0;

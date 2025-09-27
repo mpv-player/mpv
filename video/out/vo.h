@@ -578,6 +578,4 @@ struct vo_frame *vo_frame_ref(struct vo_frame *frame);
 struct mp_image_params vo_get_current_params(struct vo *vo);
 struct mp_image_params vo_get_target_params(struct vo *vo);
 
-int vo_swapchain_depth(struct vo *vo);
-
 #endif /* MPLAYER_VIDEO_OUT_H */
