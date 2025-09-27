@@ -32,9 +32,9 @@ Configurable Options
     The font size.
 
 ``gap``
-    Default: 3
+    Default: 0.2
 
-    The gap between menu items.
+    The gap between menu items, specified as a percentage the font size.
 
 ``padding_x``
     Default: 8

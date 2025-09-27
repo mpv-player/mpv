@@ -19,7 +19,7 @@ local assdraw = require "mp.assdraw"
 
 local options = {
     font_size = 14,
-    gap = 3,
+    gap = 0.2,
     padding_x = 8,
     padding_y = 4,
     menu_outline_size = 0,
@@ -166,7 +166,7 @@ local function calculate_width(menu_items, osd_w, osd_h, checkbox)
 end
 
 local function get_line_height()
-    return options.font_size + options.gap
+    return options.font_size * (1 + options.gap)
 end
 
 local function calculate_height(menu_items)
