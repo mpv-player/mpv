@@ -419,7 +419,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     struct pl_vulkan_swapchain_params pl_params = {
         .surface = vk->surface,
         .present_mode = preferred_mode,
-        .swapchain_depth = vo_swapchain_depth(ctx->vo),
+        .swapchain_depth = ctx->vo->opts->swapchain_depth,
     };
 
     if (p->opts->swap_mode >= 0) // user override
