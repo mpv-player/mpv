@@ -351,10 +351,13 @@ g-b
 g-r
     Show the values of all properties.
 
-g-m, MENU, Ctrl+p
+g-m, Ctrl+p
     Show a menu with miscellaneous entries.
 
 See `SELECT`_ for more information.
+
+MENU, Shift+F10
+    Show the context menu (see `CONTEXT MENU`_).
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
@@ -384,7 +387,7 @@ Left double click
     Toggle fullscreen on/off.
 
 Right click
-    Toggle pause on/off.
+    Show the context menu (see `CONTEXT MENU`_).
 
 Forward/Back button
     Skip to next/previous entry in playlist.
@@ -398,16 +401,6 @@ Wheel left/right
 Ctrl+Wheel up/down
     Change video zoom keeping the part of the video hovered by the cursor under
     it.
-
-Context Menu
--------------
-
-Context Menu is a menu that pops up on the video window on user interaction
-(mouse right click, etc.).
-
-To use this feature, you need to fill the ``menu-data`` property with menu
-definition data, and add a keybinding to run the ``context-menu`` command,
-which can be done with a user script.
 
 USAGE
 =====
