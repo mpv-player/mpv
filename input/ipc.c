@@ -18,6 +18,7 @@
 #include <mpv/client.h>
 
 #include "common/msg.h"
+#include "common/msg_control.h"
 #include "input/input.h"
 #include "misc/json.h"
 #include "misc/node.h"
@@ -343,6 +344,30 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
             }
             rc = mpv_request_event(client, event, enable);
         }
+    } else if (cmd && !strcmp("msg", cmd)) {
+        if (cmd_node->u.list->num < 3) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        for (int i = 1; i < cmd_node->u.list->num; i++) {
+            if (cmd_node->u.list->values[i].format != MPV_FORMAT_STRING) {
+                rc = MPV_ERROR_INVALID_PARAMETER;
+                goto error;
+            }
+        }
+
+        int level = mp_msg_find_level(cmd_node->u.list->values[1].u.string);
+        if (level < 0) {
+            rc = MPV_ERROR_INVALID_PARAMETER;
+            goto error;
+        }
+
+        for (int i = 2; i < cmd_node->u.list->num; i++) {
+            mp_msg(log, level, (i == 2 ? "%s" : " %s"),
+                    cmd_node->u.list->values[i].u.string);
+        }
+        mp_msg(log, level, "\n");
     } else {
         mpv_node result_node = {0};
 

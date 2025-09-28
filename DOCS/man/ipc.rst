@@ -316,6 +316,20 @@ extra commands can also be used as part of the protocol:
     lead to breakages with future mpv releases. Instead, make a feature request,
     and ask for a proper event that returns the information you need.
 
+``msg``
+    Write a log message using the client's log instance. The first parameter to
+    this command is the log-level and must be one of the log levels accepted by
+    the ``mp.msg.log`` Lua function. The parameters after must all be strings.
+    Spaces are inserted to separate multiple parameters. A newline is added to
+    the end.
+
+    Example:
+
+    ::
+
+        { "command": ["msg", "error", "hello", "from", "IPC", "client!"] }
+        { "error": "success" }
+
 ``enable_event``, ``disable_event``
     Enables or disables the named event. Mirrors the ``mpv_request_event`` C
     API function. If the string ``all`` is used instead of an event name, all
