@@ -4474,7 +4474,8 @@ void vo_wayland_uninit(struct vo *vo)
     mp_input_put_key(wl->vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
     // Ensure that any in-flight vo_wayland_preferred_description_info get deallocated.
-    wl_display_roundtrip(wl->display);
+    if (wl->display)
+        wl_display_roundtrip(wl->display);
 
     if (wl->compositor)
         wl_compositor_destroy(wl->compositor);
