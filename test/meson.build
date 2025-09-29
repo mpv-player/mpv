@@ -139,7 +139,8 @@ if get_option('libmpv')
         endif
     endif
 
-    exe = executable('libmpv-encode', 'libmpv_encode.c', dependencies: libmpv_dep)
+    exe = executable('libmpv-encode', 'libmpv_encode.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-encode', exe, suite: 'libmpv')
 
     mpvlib = libmpv
