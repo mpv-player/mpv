@@ -174,7 +174,7 @@ static inline void reload_file(const char *path)
     while (!loaded) {
         mpv_event *event = wrap_wait_event();
         switch (event->event_id) {
-        case MPV_EVENT_FILE_LOADED:
+        case MPV_EVENT_PLAYBACK_RESTART:
             loaded = true;
             break;
         }
