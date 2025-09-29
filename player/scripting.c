@@ -331,6 +331,7 @@ static void init_sym_table(struct mp_script_args *args, void *lib) {
     INIT_SYM(mpv_create_client);
     INIT_SYM(mpv_create_weak_client);
     INIT_SYM(mpv_load_config_file);
+    INIT_SYM(mpv_get_time_ns);
     INIT_SYM(mpv_get_time_us);
     INIT_SYM(mpv_free_node_contents);
     INIT_SYM(mpv_set_option);
