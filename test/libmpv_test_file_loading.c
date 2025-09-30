@@ -20,7 +20,7 @@
 static void test_file_loading(char *file)
 {
     const char *cmd[] = {"loadfile", file, NULL};
-    check_api_error(mpv_command(ctx, cmd));
+    command(cmd);
     bool loaded = false;
     bool finished = false;
     while (!finished) {
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     test_file_loading(argv[1]);
     printf("================ SHUTDOWN ================\n");
 
-    mpv_command_string(ctx, "quit");
+    command_string("quit");
     while (wrap_wait_event()->event_id != MPV_EVENT_SHUTDOWN) {}
 
     return 0;
