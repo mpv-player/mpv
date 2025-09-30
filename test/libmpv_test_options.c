@@ -49,20 +49,20 @@ static void set_options_and_properties(const char *options[], const char *proper
     for (int i = 0; options[i]; i++) {
         switch (formats[i]) {
         case MPV_FORMAT_STRING:
-            check_api_error(mpv_set_option(ctx, options[i], formats[i], &str));
-            check_api_error(mpv_set_property(ctx, properties[i], formats[i], &str));
+            set_option_or_property(options[i], formats[i], &str, true);
+            set_option_or_property(properties[i], formats[i], &str, false);
             break;
         case MPV_FORMAT_FLAG:
-            check_api_error(mpv_set_option(ctx, options[i], formats[i], &flag));
-            check_api_error(mpv_set_property(ctx, properties[i], formats[i], &flag));
+            set_option_or_property(options[i], formats[i], &flag, true);
+            set_option_or_property(properties[i], formats[i], &flag, false);
             break;
         case MPV_FORMAT_INT64:
-            check_api_error(mpv_set_option(ctx, options[i], formats[i], &int_));
-            check_api_error(mpv_set_property(ctx, properties[i], formats[i], &int_));
+            set_option_or_property(options[i], formats[i], &int_, true);
+            set_option_or_property(properties[i], formats[i], &int_, false);
             break;
         case MPV_FORMAT_DOUBLE:
-            check_api_error(mpv_set_option(ctx, options[i], formats[i], &double_));
-            check_api_error(mpv_set_property(ctx, properties[i], formats[i], &double_));
+            set_option_or_property(options[i], formats[i], &double_, true);
+            set_option_or_property(properties[i], formats[i], &double_, false);
             break;
         }
     }
@@ -105,7 +105,7 @@ static void test_options_and_properties(void)
 
     // Ensure the format is still MPV_FORMAT_FLAG for these property types.
     mpv_node result_node;
-    check_api_error(mpv_get_property(ctx, "idle-active", MPV_FORMAT_NODE, &result_node));
+    get_property("idle-active", MPV_FORMAT_NODE, &result_node);
     if (result_node.format != MPV_FORMAT_FLAG)
         fail("Node: expected mpv format '%d' but got '%d'!\n", MPV_FORMAT_FLAG, result_node.format);
 
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     test_options_and_properties();
     printf("================ SHUTDOWN ================\n");
 
-    mpv_command_string(ctx, "quit");
+    command_string("quit");
     while (wrap_wait_event()->event_id != MPV_EVENT_SHUTDOWN) {}
 
     return 0;

@@ -93,19 +93,19 @@ int main(int argc, char *argv[])
     out_path = path;
 #endif
 
-    check_api_error(mpv_set_option_string(ctx, "o", out_path));
-    check_api_error(mpv_set_option_string(ctx, "of", "matroska"));
-    check_api_error(mpv_set_option_string(ctx, "end", "1.5"));
-    check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
-    check_api_error(mpv_set_option_string(ctx, "msg-level", "all=v"));
+    set_property_string("o", out_path);
+    set_property_string("of", "matroska");
+    set_property_string("end", "1.5");
+    set_property_string("terminal", "yes");
+    set_property_string("msg-level", "all=v");
 
     if (mpv_initialize(ctx) != 0)
         return 1;
 
-    check_api_error(mpv_set_option_string(ctx, "idle", "once"));
+    set_property_string("idle", "once");
 
     const char *cmd[] = {"loadfile", "av://lavfi:testsrc", NULL};
-    check_api_error(mpv_command(ctx, cmd));
+    command(cmd);
 
     wait_done();
     mpv_destroy(ctx);
