@@ -47,6 +47,8 @@ static inline void fail(const char *fmt, ...)
         vfprintf(stderr, fmt, va);
         va_end(va);
     }
+    fflush(stdout);
+    fflush(stderr);
     exit(1);
 }
 
