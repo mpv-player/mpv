@@ -111,6 +111,7 @@ local function platform_is_windows()
     return mp.get_property_native("platform") == "windows"
 end
 
+
 local function exec(args)
     return mp.command_native({
         name = "subprocess",
@@ -976,14 +977,16 @@ local function run_ytdl_hook(url)
             else
                 msg.verbose("No youtube-dl found with path " .. path .. exesuf ..
                             " in config directories")
-                command[1] = path
+                -- Try to expand the path (handles ~ and relative paths)
+                local expanded_path = utils.get_user_path(path)
+                command[1] = expanded_path .. exesuf
                 result = exec(command)
                 if result.error_string == "init" then
                     msg.verbose("youtube-dl with path " .. path ..
                                 " not found in PATH or not enough permissions")
                 else
                     msg.verbose("Found youtube-dl with path " .. path .. " in PATH")
-                    ytdl.path = path
+                    ytdl.path = expanded_path .. exesuf
                     break
                 end
             end
