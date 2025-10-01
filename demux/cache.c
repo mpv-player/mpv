@@ -116,6 +116,7 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     mp_mkdirp(cache_dir);
     cache->filename = mp_path_join(cache, cache_dir, "mpv-cache-XXXXXX.dat");
     cache->fd = mp_mkostemps(cache->filename, 4, O_CLOEXEC);
+    talloc_free(cache_dir);
     if (cache->fd < 0) {
         MP_ERR(cache, "Failed to create cache temporary file.\n");
         goto fail;

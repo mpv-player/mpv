@@ -167,8 +167,11 @@ static bool resize(struct ra_ctx *ctx)
 
 static bool d3d11_reconfig(struct ra_ctx *ctx)
 {
-    if (!ctx->opts.composition)
+    if (ctx->opts.composition) {
+        vo_w32_composition_size(ctx->vo);
+    } else {
         vo_w32_config(ctx->vo);
+    }
     return resize(ctx);
 }
 
@@ -202,6 +205,9 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
 
 static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
 {
+    if (sw->ctx->opts.composition)
+        return (struct pl_color_space){0};
+
     struct priv *p = sw->priv;
 
     DXGI_OUTPUT_DESC1 desc;
@@ -521,6 +527,9 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!ctx->opts.composition && !vo_w32_init(ctx->vo))
         goto error;
 
+    if (ctx->opts.composition && !vo_w32_composition_size(ctx->vo))
+        goto error;
+
     if (!ctx->opts.composition && ctx->opts.want_alpha)
         vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 
@@ -539,9 +548,8 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .color_space = p->opts->color_space,
         .configured_csp = &p->swapchain_csp,
         .flip = p->opts->flip,
-        // Add one frame for the backbuffer and one frame of "slack" to reduce
-        // contention with the window manager when acquiring the backbuffer
-        .length = ctx->vo->opts->swapchain_depth + 2,
+        // Add one frame for the backbuffer
+        .length = ctx->vo->opts->swapchain_depth + 1,
         .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))

@@ -35,7 +35,7 @@ bool ra_compatible_format(struct ra *ra, uint32_t drm_format, uint64_t modifier)
     return vo_wayland_valid_format(wl, drm_format, modifier);
 }
 
-static struct ra_fns ra_fns_wldmabuf = {
+static const struct ra_fns ra_fns_wldmabuf = {
     .destroy                = destroy,
 };
 

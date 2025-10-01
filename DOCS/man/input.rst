@@ -2689,7 +2689,7 @@ Property list
 
 ``hwdec-current``
     The current hardware decoding in use. If decoding is active, return one of
-    the values used by the ``hwdec`` option/property. ``no``/false indicates
+    the values used by the ``hwdec`` option/property. ``no`` indicates
     software decoding. If no decoder is loaded, the property is unavailable.
 
 ``hwdec-interop``
@@ -3102,6 +3102,26 @@ Property list
                 "x"        MPV_FORMAT_INT64
                 "y"        MPV_FORMAT_INT64
                 "id"       MPV_FORMAT_INT64
+
+``tablet-pos``
+    Read-only - last known tablet tool (pen) position, normalized to OSD dimensions,
+    and tool state.
+
+    Has the following sub-properties:
+
+    ``tablet-pos/x``, ``tablet-pos/y``
+        Last known coordinates of the tablet tool.
+    ``tablet-pos/tool-in-proximity``
+        Boolean - whether a tablet tool is currently in proximity of the tablet
+        surface / hovers above the tablet surface.
+    ``tablet-pos/tool-tip``,
+        The state of the tablet tool tip, ``up`` or ``down.``
+    ``tablet-pos/tool-stylus-btn1``, ``tablet-pos/tool-stylus-btn2``, ``tablet-pos/tool-stylus-btn3``
+        The state of tablet tool side buttons, ``pressed`` or ``released``.
+    ``tablet-pos/pad-focus``
+        Boolean - whether a tablet pad is currently focused.
+    ``tablet-pos/pad-btns/N``
+        The state of the Nth tablet pad button, ``pressed`` or ``released``.
 
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.

@@ -326,11 +326,11 @@ static char *append_selected_style(struct MPContext *mpctx, char *str)
                mpctx->video_out->osd->opts->osd_selected_color.b,
                mpctx->video_out->osd->opts->osd_selected_color.g,
                mpctx->video_out->osd->opts->osd_selected_color.r,
-               255 - mpctx->video_out->osd->opts->osd_selected_color.a,
+               (uint8_t)(255 - mpctx->video_out->osd->opts->osd_selected_color.a),
                mpctx->video_out->osd->opts->osd_selected_outline_color.b,
                mpctx->video_out->osd->opts->osd_selected_outline_color.g,
                mpctx->video_out->osd->opts->osd_selected_outline_color.r,
-               255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a,
+               (uint8_t)(255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a),
                OSD_ASS_1);
 }
 
@@ -559,8 +559,12 @@ static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-    case M_PROPERTY_GET:
-        return m_property_strdup_ro(action, arg, mpctx->stream_open_filename);
+    case M_PROPERTY_GET: {
+        char *path = mp_normalize_path(NULL, mpctx->stream_open_filename);
+        int r = m_property_strdup_ro(action, arg, path);
+        talloc_free(path);
+        return r;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -3124,6 +3128,55 @@ static int mp_property_touch_pos(void *ctx, struct m_property *prop,
                                 get_touch_pos, (void *)pos);
 }
 
+static int mp_property_tablet_pos(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+
+    case M_PROPERTY_GET: {
+        int xs, ys;
+        bool tool_in_proximity;
+        bool tool_down;
+        bool tool_stylus_btn1_pressed;
+        bool tool_stylus_btn2_pressed;
+        bool tool_stylus_btn3_pressed;
+        bool pad_focus;
+        bool *pad_buttons_pressed;
+        int pad_buttons;
+        mp_input_get_tablet_pos(mpctx->input, &xs, &ys, &tool_in_proximity, &tool_down,
+            &tool_stylus_btn1_pressed, &tool_stylus_btn2_pressed, &tool_stylus_btn3_pressed,
+            &pad_focus, &pad_buttons_pressed, &pad_buttons);
+
+        struct mpv_node node;
+        node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
+        node_map_add_int64(&node, "x", xs);
+        node_map_add_int64(&node, "y", ys);
+        node_map_add_flag(&node, "tool-in-proximity", tool_in_proximity);
+        node_map_add_string(&node, "tool-tip", tool_down ? "down" : "up");
+        node_map_add_string(&node, "tool-stylus-btn1", tool_stylus_btn1_pressed ? "pressed" : "released");
+        node_map_add_string(&node, "tool-stylus-btn2", tool_stylus_btn2_pressed ? "pressed" : "released");
+        node_map_add_string(&node, "tool-stylus-btn3", tool_stylus_btn3_pressed ? "pressed" : "released");
+        node_map_add_flag(&node, "pad-focus", pad_focus);
+
+        struct mpv_node *args = node_map_add(&node, "pad-btns", MPV_FORMAT_NODE_MAP);
+        for (int i = 0; i < pad_buttons; i++) {
+            char *name = mp_tprintf(2, "%d", i + 1);
+            node_map_add_string(args, name, pad_buttons_pressed[i] ? "pressed" : "released");
+        }
+
+        *(struct mpv_node *)arg = node;
+        return M_PROPERTY_OK;
+    }
+    }
+
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Video fps (RO)
 static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -3583,7 +3636,10 @@ static int mp_property_current_watch_later_dir(void *ctx, struct m_property *pro
                                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_strdup_ro(action, arg, mp_get_playback_resume_dir(mpctx));
+    char *dir = mp_get_playback_resume_dir(mpctx);
+    int r = m_property_strdup_ro(action, arg, dir);
+    talloc_free(dir);
+    return r;
 }
 
 static int mp_property_protocols(void *ctx, struct m_property *prop,
@@ -4416,6 +4472,7 @@ static const struct m_property mp_properties_base[] = {
 
     {"mouse-pos", mp_property_mouse_pos},
     {"touch-pos", mp_property_touch_pos},
+    {"tablet-pos", mp_property_tablet_pos},
 
     // Subs
     {"sid", mp_property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
@@ -4553,7 +4610,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count", "playlist-current-pos",
       "playlist-playing-pos"),
-    E(MP_EVENT_INPUT_PROCESSED, "mouse-pos", "touch-pos"),
+    E(MP_EVENT_INPUT_PROCESSED, "mouse-pos", "touch-pos", "tablet-pos"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
 };
 #undef E
@@ -7732,8 +7789,10 @@ void run_command_opts(struct MPContext *mpctx)
     for (int i = 0; opts->input_commands[i]; i++) {
         struct mp_cmd *cmd = mp_input_parse_cmd(mpctx->input, bstr0(opts->input_commands[i]),
                                                 "the command line");
-        cmd->coalesce = true;
-        mp_input_queue_cmd(mpctx->input, cmd);
+        if (cmd) {
+            cmd->coalesce = true;
+            mp_input_queue_cmd(mpctx->input, cmd);
+        }
     }
     ctx->command_opts_processed = true;
 }
@@ -7912,6 +7971,9 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         struct mp_decoder_wrapper *dec = track ? track->dec : NULL;
         if (dec) {
             mp_decoder_wrapper_control(dec, VDCTRL_REINIT, NULL);
+            // filter chain might not change (which normally triggers this), but
+            // hwdec will.
+            mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
             double last_pts = mpctx->video_pts;
             if (last_pts != MP_NOPTS_VALUE)
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
@@ -7939,7 +8001,7 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
             queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
     }
 
-    if (opt_ptr == &opts->vo->android_surface_size) {
+    if (opt_ptr == &opts->vo->android_surface_size || opt_ptr == &opts->vo->d3d11_composition_size) {
         if (mpctx->video_out)
             vo_control(mpctx->video_out, VOCTRL_EXTERNAL_RESIZE, NULL);
     }
@@ -7974,6 +8036,17 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
             }
         }
     }
+
+#if HAVE_LIBBLURAY
+    if (opt_ptr == &opts->stream_bluray_opts->angle) {
+        struct demuxer *demuxer = mpctx->demuxer;
+        if (mpctx->playback_initialized && demuxer && demuxer->stream && strcmp(demuxer->stream->info->name, "bdvm/bluray")) {
+            int angle = opts->stream_bluray_opts->angle - 1;
+            stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
+            demux_flush(demuxer);
+        }
+    }
+#endif
 
     if (opt_ptr == &opts->pause)
         set_pause_state(mpctx, opts->pause);

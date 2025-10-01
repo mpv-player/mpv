@@ -402,11 +402,6 @@ Ctrl+Wheel up/down
 Context Menu
 -------------
 
-.. warning::
-
-    This feature is experimental. It may not work with all VOs. A libass based
-    fallback may be implemented in the future.
-
 Context Menu is a menu that pops up on the video window on user interaction
 (mouse right click, etc.).
 
@@ -590,7 +585,7 @@ Name             Meaning
 ``~~global/``    The global config path (such as ``/etc/mpv``), if available
                  (not on win32).
 ``~~osxbundle/`` The macOS bundle resource path (macOS only).
-``~~desktop/``   The path to the desktop (win32, macOS).
+``~~desktop/``   The path to the desktop.
 ``~~exe_dir/``   The path to the directory containing ``mpv.exe`` (for config
                  file purposes, ``$MPV_HOME`` will override this) (win32 only).
 ``~~cache/``     The path to application cache data (``~/.cache/mpv/``).
@@ -1547,6 +1542,8 @@ works like in older mpv releases:
 .. include:: commands.rst
 
 .. include:: select.rst
+
+.. include:: context_menu.rst
 
 .. include:: positioning.rst
 

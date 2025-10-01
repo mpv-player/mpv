@@ -112,6 +112,27 @@ void mp_input_remove_touch_point(struct input_ctx *ictx, int id);
 // identify touch points. Return the current number of touch points.
 int mp_input_get_touch_pos(struct input_ctx *ictx, int count, int *xs, int *ys, int *ids);
 
+// Set tablet tool proximity and process tool tip down/up and buttons
+void mp_input_set_tablet_tool_in_proximity(struct input_ctx *ictx, bool in_proximity);
+void mp_input_tablet_tool_down(struct input_ctx *ictx);
+void mp_input_tablet_tool_up(struct input_ctx *ictx);
+void mp_input_tablet_tool_button(struct input_ctx *ictx, int button, int state);
+void mp_input_set_tablet_pad_focus(struct input_ctx *ictx, bool focus, int buttons);
+void mp_input_tablet_pad_button(struct input_ctx *ictx, int button, int state);
+
+// Update tablet position (in window coordinates).
+void mp_input_set_tablet_pos(struct input_ctx *ictx, int x, int y, bool quiet);
+
+void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
+                             bool *tool_in_proximity,
+                             bool *tool_down,
+                             bool *tool_stylus_btn1_pressed,
+                             bool *tool_stylus_btn2_pressed,
+                             bool *tool_stylus_btn3_pressed,
+                             bool *pad_focus,
+                             bool **pad_buttons_pressed,
+                             int *pad_buttons);
+
 // Return whether we want/accept mouse input.
 bool mp_input_mouse_enabled(struct input_ctx *ictx);
 

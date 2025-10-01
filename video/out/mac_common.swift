@@ -110,7 +110,9 @@ class MacCommon: Common {
     }
 
     @objc func isVisible() -> Bool {
-        return window?.occlusionState.contains(.visible) ?? false
+        return window?.occlusionState.contains(.visible) ?? false ||
+               option.vo.force_render ||
+               needsInitialDraw
     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
@@ -167,5 +169,9 @@ class MacCommon: Common {
     override func windowDidChangeBackingProperties() {
         layer?.contentsScale = window?.backingScaleFactor ?? 1
         windowDidResize()
+    }
+
+    override func windowDidChangeOcclusionState() {
+        flagEvents(VO_EVENT_EXPOSE)
     }
 }

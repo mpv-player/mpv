@@ -54,6 +54,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!name_len || name_len != size - value_len - 1)
         return 0;
 
+    set_fontconfig_sysroot();
+
     mpv_handle *ctx = mpv_create();
     if (!ctx)
         exit(1);

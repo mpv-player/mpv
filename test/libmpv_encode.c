@@ -98,7 +98,7 @@ static void check_output(FILE *fp)
     char magic[4];
     fseek(fp, 0, SEEK_SET);
     size_t ret = fread(magic, sizeof(magic), 1, fp);
-    static const char ebml_magic[] = {26, 69, 223, 163};
+    static const uint8_t ebml_magic[] = {26, 69, 223, 163};
     if (ret != 1 || memcmp(magic, ebml_magic, sizeof(magic)) != 0)
         fail("output was not Matroska\n");
 

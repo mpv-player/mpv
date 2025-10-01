@@ -93,16 +93,6 @@ static void select_format(struct ao *ao, const AVCodec *codec)
     }
 }
 
-static void on_ready(void *ptr)
-{
-    struct ao *ao = ptr;
-    struct priv *ac = ao->priv;
-
-    ac->worst_time_base = encoder_get_mux_timebase_unlocked(ac->enc);
-
-    ao_add_events(ao, AO_EVENT_INITIAL_UNBLOCK);
-}
-
 // open & setup audio device
 static int init(struct ao *ao)
 {
@@ -147,9 +137,10 @@ static int init(struct ao *ao)
     encoder->sample_fmt = af_to_avformat(ao->format);
     encoder->bits_per_raw_sample = ac->sample_size * 8;
 
-    if (!encoder_init_codec_and_muxer(ac->enc, on_ready, ao))
+    if (!encoder_init_codec_and_muxer(ac->enc))
         goto fail;
 
+    ac->worst_time_base = encoder_get_mux_timebase_unlocked(ac->enc);
     ac->pcmhack = 0;
     if (encoder->frame_size <= 1)
         ac->pcmhack = av_get_bits_per_sample(encoder->codec_id) / 8;
@@ -328,7 +319,6 @@ const struct ao_driver audio_out_lavc = {
     .encode = true,
     .description = "audio encoding using libavcodec",
     .name      = "lavc",
-    .initially_blocked = true,
     .write_frames = true,
     .priv_size = sizeof(struct priv),
     .init      = init,

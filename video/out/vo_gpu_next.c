@@ -175,6 +175,7 @@ struct gl_next_opts {
     struct user_lut target_lut;
     int target_hint;
     int target_hint_mode;
+    bool target_hint_strict;
     char **raw_opts;
 };
 
@@ -207,6 +208,7 @@ const struct m_sub_options gl_next_conf = {
         {"target-lut", OPT_STRING(target_lut.opt), .flags = M_OPT_FILE},
         {"target-colorspace-hint", OPT_CHOICE(target_hint, {"auto", -1}, {"no", 0}, {"yes", 1})},
         {"target-colorspace-hint-mode", OPT_CHOICE(target_hint_mode, {"target", 0}, {"source", 1}, {"source-dynamic", 2})},
+        {"target-colorspace-hint-strict", OPT_BOOL(target_hint_strict)},
         // No `target-lut-type` because we don't support non-RGB targets
         {"libplacebo-opts", OPT_KEYVALUELIST(raw_opts)},
         {0},
@@ -217,6 +219,7 @@ const struct m_sub_options gl_next_conf = {
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
         .image_subs_hdr_peak = PL_COLOR_SDR_WHITE,
         .target_hint = -1,
+        .target_hint_strict = true,
     },
     .size = sizeof(struct gl_next_opts),
     .change_flags = UPDATE_VIDEO,
@@ -348,10 +351,10 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
                 .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
                 .color = {
-                    (c >> 24) / 255.0,
-                    ((c >> 16) & 0xFF) / 255.0,
-                    ((c >> 8) & 0xFF) / 255.0,
-                    1.0 - (c & 0xFF) / 255.0,
+                    (c >> 24) / 255.0f,
+                    ((c >> 16) & 0xFF) / 255.0f,
+                    ((c >> 8) & 0xFF) / 255.0f,
+                    (255 - (c & 0xFF)) / 255.0f,
                 }
             };
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
@@ -416,7 +419,7 @@ struct frame_priv {
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
                                   struct pl_bit_encoding *out_bits,
-                                  enum mp_imgfmt imgfmt)
+                                  enum mp_imgfmt imgfmt, bool use_uint)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
     if (!desc.num_planes || !(desc.flags & MP_IMGFLAG_HAS_COMPS))
@@ -498,7 +501,7 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
         data->pixel_stride = desc.bpp[p] / 8;
         data->type = (desc.flags & MP_IMGFLAG_TYPE_FLOAT)
                             ? PL_FMT_FLOAT
-                            : PL_FMT_UNORM;
+                            : (use_uint ? PL_FMT_UINT : PL_FMT_UNORM);
     }
 
     if (any_padded && !out_bits)
@@ -607,6 +610,23 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
     ra_hwdec_mapper_unmap(p->hwdec_mapper);
 }
 
+static bool format_supported(struct vo *vo, int format, bool use_uint)
+{
+    struct priv *p = vo->priv;
+    struct pl_bit_encoding bits;
+    struct pl_plane_data data[4] = {0};
+    int planes = plane_data_from_imgfmt(data, &bits, format, use_uint);
+    if (!planes)
+        return false;
+
+    for (int i = 0; i < planes; i++) {
+        if (!pl_plane_find_fmt(p->gpu, NULL, &data[i]))
+            return false;
+    }
+
+    return true;
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -670,7 +690,14 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     } else { // swdec
 
         struct pl_plane_data data[4] = {0};
-        frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt);
+        bool use_uint = false;
+
+        // At this point, we know that the format is supported, query_format()
+        // makes sure of that. Just check if we should use UINT as a fallback.
+        if (!format_supported(vo, mpi->imgfmt, false))
+            use_uint = true;
+
+        frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt, use_uint);
         for (int n = 0; n < frame->num_planes; n++) {
             struct pl_plane *plane = &frame->planes[n];
             data[n].width = mp_image_plane_w(mpi, n);
@@ -802,6 +829,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color, 
     // Infinite contrast
     if (opts->target_contrast == -1) {
         color->hdr.min_luma = 1e-7;
+        mp_assert(color->hdr.min_luma > 0);
         return;
     }
 
@@ -827,7 +855,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     // Colorspace overrides
     const struct gl_video_opts *opts = p->opts_cache->opts;
     // If swapchain returned a value use this, override is used in hint
-    if (p->output_levels && (!target->repr.levels || !hint))
+    if (p->output_levels)
         target->repr.levels = p->output_levels;
     if (opts->target_prim && (!target->color.primaries || !hint))
         target->color.primaries = opts->target_prim;
@@ -1052,36 +1080,63 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         target_csp.hdr.max_cll = 0;
         target_csp.hdr.max_fall = 0;
     }
+    // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
+    // reports it as maxFALL directly, but this doesn't mean the same thing.
+    target_csp.hdr.max_fall = 0;
 
-    struct pl_color_space hint;
+    struct pl_color_space hint = {0};
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 &&
                         target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
     // Assume HDR is supported, if target_csp() is not available
     if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
         target_csp = (struct pl_color_space){
-            .transfer = opts->target_trc ? opts->target_trc : PL_COLOR_TRC_PQ };
+            .transfer = opts->target_trc ? opts->target_trc : pl_color_space_hdr10.transfer };
     }
     if (target_hint && frame->current) {
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;
-        hint = *(p->next_opts->target_hint_mode == 0 ? target : source);
-        if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
-            pl_color_space_merge(&hint, source);
+        hint = *source;
+        // Apply target contrast to the hint, this is important for SDR, because
+        // libplacebo defaults to 1000:1 contrast ratio otherwise.
+        if (!hint.hdr.min_luma)
+            hint.hdr.min_luma = target->hdr.min_luma;
+        if (p->next_opts->target_hint_mode == 0) {
+            hint = *target;
+            if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
+                pl_color_space_merge(&hint, source);
+            // Restore target luminance if it was present, note that we check
+            // max_luma only, this make sure that max_cll/max_fall is not take
+            // from source.
+            if (target->hdr.max_luma) {
+                hint.hdr.max_luma = target->hdr.max_luma;
+                hint.hdr.min_luma = target->hdr.min_luma;
+                hint.hdr.max_cll  = target->hdr.max_cll;
+                hint.hdr.max_fall = target->hdr.max_fall;
+            }
+        }
         if (p->next_opts->target_hint_mode == 2) { // source-dynamic
             pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
                 .color      = &hint,
                 .metadata   = PL_HDR_METADATA_ANY,
                 .scaling    = PL_HDR_NITS,
-                .out_min    = &hint.hdr.min_luma,
+                .out_min    = !hint.hdr.min_luma ? &hint.hdr.min_luma : NULL,
                 .out_max    = &hint.hdr.max_luma,
             ));
+            // Set maxCLL to dynamic max luminance. Note that libplacebo uses
+            // max luminace as maxCLL in practice.
+            hint.hdr.max_cll = hint.hdr.max_luma;
+            // Keep maxFALL from static metadata, unless its value is too high.
+            // Could be set to 0, but let's keep it for now.
+            if (hint.hdr.max_fall > hint.hdr.max_cll)
+                hint.hdr.max_fall = 0;
         }
         // Infer missing bits now. This is important so that we don't lose
         // information after user option overrides. For example, if the user
         // sets target_trc to PQ, but the hint(source) is SDR, we want to fill
         // in SDR luminance values instead of the default PQ range.
-        pl_color_space_infer(&hint);
+        struct pl_color_space source_csp = *source;
+        pl_color_space_infer_map(&source_csp, &hint);
         // Always prefer target luminance and transfer for inverse tone mapping
         if (pl_color_transfer_is_hdr(target->transfer) && opts->tone_map.inverse) {
             hint.transfer     = target->transfer;
@@ -1094,14 +1149,53 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             pass_colorspace = true;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
+        if (opts->target_gamut) {
+            // Ensure resulting gamut still fits inside container
+            const struct pl_raw_primaries *gamut, *container;
+            gamut = pl_raw_primaries_get(opts->target_gamut);
+            container = pl_raw_primaries_get(hint.primaries);
+            hint.hdr.prim = pl_primaries_clip(gamut, container);
+        }
         if (opts->target_trc)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+        // Always set maxCLL, display uses this metadata and we shouldn't let it
+        // fallback to default value.
+        if (!hint.hdr.max_cll)
+            hint.hdr.max_cll = hint.hdr.max_luma;
+        // If tone mapping is required, adjust maxCLL and maxFALL
+        if (source->hdr.max_luma > hint.hdr.max_luma || opts->tone_map.inverse) {
+            // Set maxCLL to the target luminance if it's not already lower
+            if (!hint.hdr.max_cll || hint.hdr.max_luma < hint.hdr.max_cll || opts->tone_map.inverse)
+                hint.hdr.max_cll = hint.hdr.max_luma;
+            // There's no reliable way to estimate maxFALL here
+            hint.hdr.max_fall = 0;
+        }
+        if (hint.hdr.max_cll && hint.hdr.max_fall > hint.hdr.max_cll)
+            hint.hdr.max_fall = 0;
         apply_target_contrast(p, &hint, hint.hdr.min_luma);
+        if (p->icc_profile)
+            hint = p->icc_profile->csp;
+        if (opts->icc_opts->icc_use_luma) {
+            p->icc_params.max_luma = 0.0f;
+        } else {
+            pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+                .color    = &hint,
+                .metadata = PL_HDR_METADATA_HDR10, // use only static HDR nits
+                .scaling  = PL_HDR_NITS,
+                .out_max  = &p->icc_params.max_luma,
+            ));
+        }
+        pl_icc_update(p->pllog, &p->icc_profile, NULL, &p->icc_params);
+        // Update again after possible max_luma change
+        if (p->icc_profile)
+            hint = p->icc_profile->csp;
         if (!pass_colorspace)
             pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!target_hint) {
+        if (!hint.hdr.min_luma)
+            hint.hdr.min_luma = target_csp.hdr.min_luma;
         pl_swapchain_colorspace_hint(p->sw, NULL);
     }
 
@@ -1129,7 +1223,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    apply_target_options(p, &target, target_csp.hdr.min_luma, target_hint && !pass_colorspace);
+    bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
+    apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
@@ -1190,20 +1285,23 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 if (frame->redraw)
                     p->osd_sync++;
                 if (fp->osd_sync < p->osd_sync) {
-                    float rx = pl_rect_w(p->dst) / pl_rect_w(image->crop);
-                    float ry = pl_rect_h(p->dst) / pl_rect_h(image->crop);
+                    float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
+                    float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
+                    float rx = w / pl_rect_w(image->crop);
+                    float ry = h / pl_rect_h(image->crop);
                     struct mp_osd_res res = {
-                        .w = pl_rect_w(p->dst),
-                        .h = pl_rect_h(p->dst),
+                        .w = w,
+                        .h = h,
                         .ml = -image->crop.x0 * rx,
                         .mr = (image->crop.x1 - vo->params->w) * rx,
                         .mt = -image->crop.y0 * ry,
                         .mb = (image->crop.y1 - vo->params->h) * ry,
                         .display_par = 1.0,
                     };
+                    enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
+                        ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
-                                    PL_OVERLAY_COORDS_DST_CROP,
-                                    &fp->subs, image, mpi);
+                                    rel, &fp->subs, image, mpi);
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
@@ -1295,18 +1393,11 @@ static int query_format(struct vo *vo, int format)
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
 
-    struct pl_bit_encoding bits;
-    struct pl_plane_data data[4] = {0};
-    int planes = plane_data_from_imgfmt(data, &bits, format);
-    if (!planes)
-        return false;
+    bool supported = format_supported(vo, format, false);
+    if (!supported)
+        supported = format_supported(vo, format, true);
 
-    for (int i = 0; i < planes; i++) {
-        if (!pl_plane_find_fmt(p->gpu, NULL, &data[i]))
-            return false;
-    }
-
-    return true;
+    return supported;
 }
 
 static void resize(struct vo *vo)
@@ -1523,20 +1614,23 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
 
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
-        float rx = pl_rect_w(dst) / pl_rect_w(image.crop);
-        float ry = pl_rect_h(dst) / pl_rect_h(image.crop);
+        float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
+        float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
+        float rx = w / pl_rect_w(image.crop);
+        float ry = h / pl_rect_h(image.crop);
         struct mp_osd_res res = {
-            .w = pl_rect_w(dst),
-            .h = pl_rect_h(dst),
+            .w = w,
+            .h = h,
             .ml = -image.crop.x0 * rx,
             .mr = (image.crop.x1 - vo->params->w) * rx,
             .mt = -image.crop.y0 * ry,
             .mb = (image.crop.y1 - vo->params->h) * ry,
             .display_par = 1.0,
         };
+        enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
+            ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
         update_overlays(vo, res, osd_flags,
-                        PL_OVERLAY_COORDS_DST_CROP,
-                        &fp->subs, &image, mpi);
+                        rel, &fp->subs, &image, mpi);
     } else {
         // Disable overlays when blend_subs is disabled
         update_overlays(vo, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
@@ -2149,7 +2243,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
 
 static void update_lut(struct priv *p, struct user_lut *lut)
 {
-    if (!lut->opt) {
+    if (!lut->opt || !lut->opt[0]) {
         pl_lut_free(&lut->lut);
         TA_FREEP(&lut->path);
         return;
@@ -2220,6 +2314,11 @@ static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
 static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath,
                              const struct pl_hook *hook)
 {
+    for (int i = 0; i < hook->num_parameters; i++) {
+        const struct pl_hook_par *hp = &hook->parameters[i];
+        memcpy(hp->data, &hp->initial, sizeof(*hp->data));
+    }
+
     if (!opts)
         return;
 
@@ -2227,11 +2326,6 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
     struct bstr shadername;
     if (!mp_splitext(basename, &shadername))
         shadername = bstr0(basename);
-
-    for (int i = 0; i < hook->num_parameters; i++) {
-        const struct pl_hook_par *hp = &hook->parameters[i];
-        memcpy(hp->data, &hp->initial, sizeof(*hp->data));
-    }
 
     for (int n = 0; opts[n * 2]; n++) {
         struct bstr k = bstr0(opts[n * 2 + 0]);

@@ -166,21 +166,6 @@ jobs:
           choco install ccache nasm
           ./ci/install-cmake.ps1 -arch ${{ matrix.arch }}
 
-      - name: Install Rustup
-        # TODO: Remove after https://github.com/actions/partner-runner-images/issues/77
-        if: ${{ matrix.os == 'windows-11-arm' }}
-        run: |
-          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile "$env:TEMP\rustup-init.exe"
-          & "$env:TEMP\rustup-init.exe" --default-toolchain none --profile=minimal -y
-          "$env:USERPROFILE\.cargo\bin" | Out-File -Append $env:GITHUB_PATH
-          "CARGO_HOME=$env:USERPROFILE\.cargo" | Out-File -Append $env:GITHUB_ENV
-
-      - name: Update Rust toolchain
-        if: ${{ matrix.os == 'windows-11-arm' }}
-        run: |
-          rustup update --no-self-update stable
-          rustup default stable
-
       - name: Update Meson WrapDB
         run: |
           meson wrap update-db
@@ -227,6 +212,7 @@ jobs:
           name: mpv-${{ matrix.target }}
           path: |
             build/mpv.???
+            build/mpv-*.bat
             build/vulkan-*.dll
             !build/mpv.lib
 
@@ -241,22 +227,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        cc:
-          - "clang"
-        cxx:
-          - "clang++"
-        os:
-          - "macos-13"
-          - "macos-14"
-          - "macos-15"
         include:
           - os: "macos-13"
             arch: "intel"
+            xcode: "Xcode_14.1"
+            homebrew: "2e821e2d8ae38540311cd6ec60f6e1b23d61d167"
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.2"
           - os: "macos-15"
             arch: "arm"
+          - os: "macos-15"
+            arch: "test"
+            swift: "-target arm64-apple-macosx10.15"
+            target: "10.15"
     steps:
       - uses: actions/checkout@v4
 
@@ -276,7 +260,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew update
+          if [[ -n "${{ matrix.homebrew }}" ]]; then
+            export HOMEBREW_NO_AUTO_UPDATE=1
+            cd "$(brew --repo homebrew/core)"
+            git checkout --force ${{ matrix.homebrew }}
+          else
+            brew update
+          fi
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
 
@@ -285,11 +275,12 @@ jobs:
         run: |
           ./ci/build-macos.sh
         env:
-          CC: "${{ matrix.cc }}"
-          CXX: "${{ matrix.cxx }}"
           TRAVIS_OS_NAME: "${{ matrix.os }}"
+          SWIFT_FLAGS: "${{ matrix.swift }}"
+          MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
 
       - name: Create App Bundle
+        if: ${{ matrix.arch != 'test' }}
         run: |
           meson compile -C build macos-bundle
           tar -czvf mpv.tar.gz -C build mpv.app
@@ -310,6 +301,7 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
       - uses: actions/upload-artifact@v4
+        if: ${{ matrix.arch != 'test' }}
         with:
           name: mpv-${{ matrix.os }}-${{ matrix.arch }}
           path: mpv.tar.gz

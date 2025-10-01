@@ -192,7 +192,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         if ((r = do_action(prop_list, name, M_PROPERTY_SET_NODE, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
-        int err = m_option_set_node_or_string(log, &opt, name, &val, arg);
+        int err = m_option_set_node_or_string(log, &opt, bstr0(name), &val, arg);
         if (err == M_OPT_UNKNOWN) {
             r = M_PROPERTY_NOT_IMPLEMENTED;
         } else if (err < 0) {

@@ -593,7 +593,7 @@ static inline int m_option_set_node(const m_option_t *opt, void *dst,
 
 // Call m_option_parse for strings, m_option_set_node otherwise.
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
-                                const char *name, void *dst, struct mpv_node *src);
+                                struct bstr name, void *dst, struct mpv_node *src);
 
 // see m_option_type.get
 static inline int m_option_get_node(const m_option_t *opt, void *ta_parent,

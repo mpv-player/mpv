@@ -1,0 +1,1 @@
+the `--sub-sdh-enclosures` option is now a string list option

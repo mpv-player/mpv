@@ -1,3 +1,3 @@
-the value of --tls-ca-file is now expanded as a path
-the value of --tls-cert-file is now expanded as a path
-the value of --tls-key-file is now expanded as a path
+the value of `--tls-ca-file` is now expanded as a path
+the value of `--tls-cert-file` is now expanded as a path
+the value of `--tls-key-file` is now expanded as a path

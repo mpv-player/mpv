@@ -558,6 +558,7 @@ class Window: NSWindow, NSWindowDelegate {
     }
 
     func windowDidMiniaturize(_ notification: Notification) {
+        common.windowDidMiniaturize()
         option.setOption(minimized: true)
     }
 
@@ -571,6 +572,10 @@ class Window: NSWindow, NSWindowDelegate {
 
     func windowDidBecomeKey(_ notification: Notification) {
         common.updateCursorVisibility()
+    }
+
+    func windowDidBecomeMain(_ notification: Notification) {
+        common.windowDidBecomeMain()
     }
 
     func windowDidChangeOcclusionState(_ notification: Notification) {

@@ -77,6 +77,10 @@ static const char def_config[] =
 #include "osdep/win32/smtc.h"
 #endif
 
+#if HAVE_WIN32_DESKTOP
+#include "osdep/w32_register.h"
+#endif
+
 #if HAVE_COCOA
 #include "osdep/mac/app_bridge.h"
 #endif
@@ -386,6 +390,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (handle_help_options(mpctx))
         return 1; // help
+
+#if HAVE_WIN32_DESKTOP
+    if (mp_w32_handle_register(mpctx))
+        return 1; // register/unregister
+#endif
 
     check_library_versions(mp_null_log, 0);
 

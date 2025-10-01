@@ -49,7 +49,7 @@ Configurable Options
 ``history_path``
     Default: ``~~state/command_history.txt``
 
-    The file path for ``persist_history`` (see `PATHS`_).
+    The file path for ``persist_history`` (see `FILES`_).
 
 ``remember_input``
     Default: yes

@@ -61,6 +61,12 @@ class TitleBar: NSVisualEffectView {
         set(appearance: option.mac.macos_title_bar_appearance)
         set(material: option.mac.macos_title_bar_material)
         set(color: option.mac.macos_title_bar_color)
+
+        // workaround for mouse up events that are prevented by system events like snap to position
+        NSEvent.addLocalMonitorForEvents(matching: .leftMouseUp) { (event) -> NSEvent? in
+            self.common.window?.isMoving = false
+            return event
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -87,8 +93,6 @@ class TitleBar: NSVisualEffectView {
                 window?.zoom(self)
             }
         }
-
-        common.window?.isMoving = false
     }
 
     func set(appearance: Int32) {

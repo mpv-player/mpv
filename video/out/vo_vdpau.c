@@ -1034,7 +1034,7 @@ static int preinit(struct vo *vo)
 
     if (mp_vdpau_guess_if_emulated(vc->mpvdp)) {
         MP_WARN(vo, "VDPAU is most likely emulated via VA-API.\n"
-                    "This is inefficient. Use --vo=gpu instead.\n");
+                    "This is inefficient. Use VA-API directly instead.\n");
     }
 
     // Mark everything as invalid first so uninit() can tell what has been
@@ -1051,7 +1051,7 @@ static int preinit(struct vo *vo)
 
     MP_WARN(vo, "Warning: this compatibility VO is low quality and may "
                 "have issues with OSD, scaling, screenshots and more.\n"
-                "vo=gpu is the preferred choice in any case and "
+                "vo=gpu-next is the preferred choice in any case and "
                 "includes VDPAU support via hwdec=vdpau or vdpau-copy.\n");
 
     return 0;

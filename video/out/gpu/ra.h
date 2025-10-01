@@ -5,7 +5,7 @@
 
 // Handle for a rendering API backend.
 struct ra {
-    struct ra_fns *fns;
+    const struct ra_fns *fns;
     void *priv;
 
     int glsl_version;       // GLSL version (e.g. 300 => 3.0)

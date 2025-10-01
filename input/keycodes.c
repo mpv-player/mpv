@@ -127,6 +127,11 @@ static const struct key_name key_names[] = {
     { MP_MBTN_MID_DBL, "MBTN_MID_DBL" },
     { MP_MBTN_RIGHT_DBL, "MBTN_RIGHT_DBL" },
 
+    { MP_KEY_TABLET_TOOL_TIP, "TABLET_TOOL_TIP" },
+    { MP_KEY_TABLET_TOOL_STYLUS_BTN1, "TABLET_TOOL_STYLUS_BTN1" },
+    { MP_KEY_TABLET_TOOL_STYLUS_BTN2, "TABLET_TOOL_STYLUS_BTN2" },
+    { MP_KEY_TABLET_TOOL_STYLUS_BTN3, "TABLET_TOOL_STYLUS_BTN3" },
+
     { MP_KEY_GAMEPAD_ACTION_DOWN, "GAMEPAD_ACTION_DOWN" },
     { MP_KEY_GAMEPAD_ACTION_RIGHT, "GAMEPAD_ACTION_RIGHT" },
     { MP_KEY_GAMEPAD_ACTION_LEFT, "GAMEPAD_ACTION_LEFT" },
@@ -336,7 +341,7 @@ int mp_input_get_keys_from_string(char *name, int max_num_keys,
     n = 0;
     for (end = strchr(ptr, '-'); ; end = strchr(ptr, '-')) {
         if (end && end[1] != '\0') {
-            if (end[1] == '-')
+            if (*ptr == '-' && end[1] == '-')
                 end = &end[1];
             end[0] = '\0';
         }

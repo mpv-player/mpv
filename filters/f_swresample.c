@@ -109,7 +109,7 @@ static int rate_from_speed(int rate, double speed)
     return lrint(rate * speed);
 }
 
-static struct mp_chmap fudge_pairs[][2] = {
+static const struct mp_chmap fudge_pairs[][2] = {
     {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
     {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
     {MP_CHMAP2(SDL, SDR), MP_CHMAP2(SL,  SR)},

@@ -174,21 +174,16 @@ static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
 
     struct mp_cmd_arg arg = {.type = opt};
     void *dst = &arg.v;
-    if (val->format == MPV_FORMAT_STRING) {
-        int r = m_option_parse(log, opt, bstr0(cmd->name),
-                                bstr0(val->u.string), dst);
-        if (r < 0) {
+    int r = m_option_set_node_or_string(log, opt, bstr0(cmd->name), dst, val);
+    if (r < 0) {
+        if (val->format == MPV_FORMAT_STRING) {
             mp_err(log, "Command %s: argument %s can't be parsed: %s.\n",
                    cmd->name, name, m_option_strerror(r));
-            return false;
-        }
-    } else {
-        int r = m_option_set_node(opt, dst, val);
-        if (r < 0) {
+        } else {
             mp_err(log, "Command %s: argument %s has incompatible type.\n",
                    cmd->name, name);
-            return false;
         }
+        return false;
     }
 
     // (leave unset arguments blank, to be set later or checked by finish_cmd())

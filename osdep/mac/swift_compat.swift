@@ -16,7 +16,7 @@
  */
 
 #if !swift(>=5.7)
-extension NSCondition {
+extension NSLocking {
     func withLock<R>(_ body: () throws -> R) rethrows -> R {
         self.lock()
         defer { self.unlock() }
@@ -49,5 +49,20 @@ extension NSDraggingInfo {
 extension CGColorSpace {
     static let itur_2100_HLG: CFString = kCGColorSpaceITUR_2100_HLG
     static let itur_2100_PQ: CFString = kCGColorSpaceITUR_2100_PQ
+}
+#endif
+
+#if !HAVE_MACOS_11_FEATURES
+@available(macOS 11.0, *)
+public struct UTType: Sendable {
+    public init?(filenameExtension: String) {}
+}
+
+extension NSSavePanel {
+    @available(macOS 11.0, *)
+    public var allowedContentTypes: [UTType] {
+        get { return [] }
+        set { _ = newValue }
+    }
 }
 #endif

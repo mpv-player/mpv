@@ -986,7 +986,8 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             }
         }
         if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
-            params->color.transfer = PL_COLOR_TRC_BT_1886;
+            params->color.transfer = params->repr.levels == PL_COLOR_LEVELS_LIMITED ?
+                                        PL_COLOR_TRC_BT_1886 : PL_COLOR_TRC_SRGB;
     } else if (forced_csp == PL_COLOR_SYSTEM_RGB) {
         params->repr.sys = PL_COLOR_SYSTEM_RGB;
         params->repr.levels = PL_COLOR_LEVELS_FULL;

@@ -106,7 +106,10 @@ int mp_get_sub_bb_list(struct sub_bitmaps *sbs, struct mp_rect *out_rc_list,
     int num_rc = 0;
     for (int n = 0; n < sbs->num_parts; n++) {
         struct sub_bitmap *sb = &sbs->parts[n];
-        struct mp_rect bb = {sb->x, sb->y, sb->x + sb->dw, sb->y + sb->dh};
+        struct mp_rect bb = {sb->x,
+                             sb->y,
+                             sb->x + sb->dw,
+                             sb->y + sb->dh};
         bool intersects = false;
         for (int r = 0; r < num_rc; r++) {
             struct mp_rect *rc = &out_rc_list[r];

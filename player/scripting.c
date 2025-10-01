@@ -270,6 +270,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, 5, mpctx->opts->lua_load_select, "@select.lua");
     load_builtin_script(mpctx, 6, mpctx->opts->lua_load_positioning, "@positioning.lua");
     load_builtin_script(mpctx, 7, mpctx->opts->lua_load_commands, "@commands.lua");
+    load_builtin_script(mpctx, 8, mpctx->opts->lua_load_context_menu, "@context_menu.lua");
 }
 
 bool mp_load_scripts(struct MPContext *mpctx)
@@ -330,6 +331,7 @@ static void init_sym_table(struct mp_script_args *args, void *lib) {
     INIT_SYM(mpv_create_client);
     INIT_SYM(mpv_create_weak_client);
     INIT_SYM(mpv_load_config_file);
+    INIT_SYM(mpv_get_time_ns);
     INIT_SYM(mpv_get_time_us);
     INIT_SYM(mpv_free_node_contents);
     INIT_SYM(mpv_set_option);

@@ -146,6 +146,7 @@ local icons = {
     next = "\238\132\129",           -- E101
     pause = "\238\128\130",          -- E002
     play = "\238\132\129",           -- E101
+    clock = "\238\128\134",          -- E006
     play_backward = "\238\132\144",  -- E110
     skip_backward = "\238\128\132",  -- E004
     skip_forward = "\238\128\133",   -- E005
@@ -1906,6 +1907,10 @@ local function osc_init()
     ne = new_element("play_pause", "button")
 
     ne.content = function ()
+        if mp.get_property_bool("paused-for-cache") ~= false then
+            return icons.clock
+        end
+
         if not mp.get_property_native("pause") then
             return icons.pause
         end

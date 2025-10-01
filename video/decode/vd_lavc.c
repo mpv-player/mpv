@@ -140,6 +140,7 @@ struct hwdec_opts {
     char *hwdec_codecs;
     int hwdec_image_format;
     int hwdec_extra_frames;
+    int hwdec_threads;
 };
 
 const struct m_sub_options hwdec_conf = {
@@ -156,6 +157,7 @@ const struct m_sub_options hwdec_conf = {
         {"hwdec-software-fallback", OPT_CHOICE(software_fallback,
             {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX),
             .flags = UPDATE_HWDEC},
+        {"hwdec-threads", OPT_INT(hwdec_threads), M_RANGE(0, DBL_MAX)},
         {"vd-lavc-software-fallback", OPT_REPLACED("hwdec-software-fallback")},
         {0}
     },
@@ -169,6 +171,7 @@ const struct m_sub_options hwdec_conf = {
         // for example, if vo_gpu increases the number of reference surfaces for
         // interpolation, this value has to be increased too.
         .hwdec_extra_frames = 6,
+        .hwdec_threads = 4,
     },
 };
 
@@ -741,9 +744,9 @@ static void init_avctx(struct mp_filter *vd)
     if (!ctx->avpkt)
         goto error;
 
+    int threads = lavc_param->threads;
     if (ctx->use_hwdec) {
         avctx->opaque = vd;
-        avctx->thread_count = 1;
         avctx->hwaccel_flags |= AV_HWACCEL_FLAG_IGNORE_LEVEL;
         if (!lavc_param->check_hw_profile)
             avctx->hwaccel_flags |= AV_HWACCEL_FLAG_ALLOW_PROFILE_MISMATCH;
@@ -777,9 +780,17 @@ static void init_avctx(struct mp_filter *vd)
         if (ctx->hwdec.copying)
             ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
         ctx->hw_probing = true;
-    } else {
-        mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
+
+        threads = ctx->hwdec_opts->hwdec_threads;
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(62, 11, 100)
+        // Vulkan threading was not safe before 62.11.100
+        bstr hwdec_name = bstr0(ctx->hwdec.name);
+        if (bstr_endswith0(hwdec_name, "vulkan") || bstr_endswith0(hwdec_name, "vulkan-copy"))
+            threads = 1;
+#endif
     }
+
+    mp_set_avcodec_threads(vd->log, avctx, threads);
 
     if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
         avctx->opaque = vd;
@@ -913,9 +924,10 @@ static void uninit_avctx(struct mp_filter *vd)
     ctx->use_hwdec = false;
 }
 
-static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
+static int init_generic_hwaccel(struct AVCodecContext *avctx, enum AVPixelFormat hw_fmt)
 {
-    struct lavc_ctx *ctx = vd->priv;
+    struct mp_filter *vd = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = vd->priv;
     AVBufferRef *new_frames_ctx = NULL;
 
     if (!ctx->hwdec.use_hw_frames)
@@ -926,7 +938,7 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         goto error;
     }
 
-    if (avcodec_get_hw_frames_parameters(ctx->avctx,
+    if (avcodec_get_hw_frames_parameters(avctx,
                                 ctx->hwdec_dev, hw_fmt, &new_frames_ctx) < 0)
     {
         MP_VERBOSE(ctx, "Hardware decoding of this stream is unsupported?\n");
@@ -971,8 +983,8 @@ static int init_generic_hwaccel(struct mp_filter *vd, enum AVPixelFormat hw_fmt)
         new_frames_ctx = NULL;
     }
 
-    ctx->avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
-    if (!ctx->avctx->hw_frames_ctx)
+    avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
+    if (!avctx->hw_frames_ctx)
         goto error;
 
     av_buffer_unref(&new_frames_ctx);
@@ -1007,17 +1019,15 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     enum AVPixelFormat select = AV_PIX_FMT_NONE;
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         if (ctx->hwdec.pix_fmt == fmt[i]) {
-            if (init_generic_hwaccel(vd, fmt[i]) < 0)
+            if (init_generic_hwaccel(avctx, fmt[i]) < 0)
                 break;
             select = fmt[i];
             break;
         }
     }
 
-    if (select == AV_PIX_FMT_NONE) {
+    if (select == AV_PIX_FMT_NONE)
         ctx->hwdec_failed = true;
-        select = avcodec_default_get_format(avctx, fmt);
-    }
 
     const char *name = av_get_pix_fmt_name(select);
     MP_VERBOSE(vd, "Requesting pixfmt '%s' from decoder.\n", name ? name : "-");

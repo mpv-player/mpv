@@ -884,7 +884,7 @@ static void hotplug_uninit(struct ao *ao)
 
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
-    ao_device_list_add(list, ao, &(struct ao_device_desc){});
+    ao_device_list_add(list, ao, &(struct ao_device_desc){0});
 
     if (for_each_sink(ao, add_device_to_list, list) < 0)
         MP_WARN(ao, "Could not list devices, list may be incomplete\n");

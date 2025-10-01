@@ -1004,18 +1004,15 @@ Program Behavior
 
         I have no idea.
 
-``--ytdl-format=<ytdl|best|worst|mp4|webm|...>``
-    Video format/quality that is directly passed to youtube-dl. The possible
-    values are specific to the website and the video, for a given url the
-    available formats can be found with the command
-    ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
-    available aliases.
-    (Default: ``bestvideo+bestaudio/best``)
+``--ytdl-format=<|ytdl|best|worst|mp4|webm|...>``
+    Format selection string that is directly passed to youtube-dl.
+    The possible values are specific to the website and the video, for a given
+    URL the available formats can be found with the command
+    ``youtube-dl -F URL``. See youtube-dl's documentation for available aliases.
+    (Default: empty)
 
-    The ``ytdl`` value does not pass a ``--format`` option to youtube-dl at all,
-    and thus does not override its default. Note that sometimes youtube-dl
-    returns a format that mpv cannot use, and in these cases the mpv default
-    may work better.
+    An empty value or ``ytdl`` does not pass a ``--format`` option to youtube-dl
+    at all, and thus uses its default format selection behavior.
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be
@@ -1068,6 +1065,11 @@ Program Behavior
 ``--load-select=<yes|no>``
     Enable the builtin script that lets you select from lists of items (default:
     yes). By default, its keybindings start with the ``g`` key.
+
+``--load-context-menu=<yes|no>``
+    Enable the builtin script that implements a context menu. Defaults to
+    ``yes`` on platforms where integration with a native context menu is not
+    implemented, and to ``no`` on platform where it is.
 
 ``--load-positioning=<yes|no>``
     Enable the builtin script that provides various keybindings to pan videos
@@ -1169,7 +1171,7 @@ Watch History
 
 ``--watch-history-path=<path>``
     The path in which to store the watch history. Default:
-    ``~~state/watch_history.jsonl`` (see `PATHS`_).
+    ``~~state/watch_history.jsonl`` (see `FILES`_).
 
     This file contains one JSON object per line. Its ``time`` field is the UNIX
     timestamp when the file was opened, its ``path`` field is the normalized
@@ -1851,6 +1853,15 @@ Video
         ``mpv --hwdec=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
+``--hwdec-threads=<N>``
+    Number of threads used for hardware decoding (default: 4). This, as opposed
+    to vd-queue, enables frame and slice threading in libavcodec. It can help
+    with pipelining the decoding process and improve performance. The exact
+    behavior depends on the hardware decoder API used.
+
+    If this is set to 0, the number of threads will be automatically determined
+    by the number of CPU cores available.
+
 ``--hwdec-software-fallback=<yes|no|N>``
     Fallback to software decoding if the hardware-accelerated decoder fails
     (default: 3). If this is a number, then fallback will be triggered if
@@ -1987,7 +1998,7 @@ Video
     missed vsyncs, but increases visible latency. This option only mandates an
     upper limit, the implementation can use a lower latency than requested
     internally. A setting of 1 means that the VO will wait for every frame to
-    become visible before starting to render the next frame. (Default: 3)
+    become visible before starting to render the next frame. (Default: 2)
 
 Audio
 -----
@@ -2832,6 +2843,7 @@ Subtitles
     using drag and drop.
 
     This is a string list option. See `List Options`_ for details.
+    Use ``--help=sub-auto-exts`` to see default extensions.
 
 ``--sub-codepage=<codepage>``
     You can use this option to specify the subtitle codepage. uchardet will be
@@ -3164,13 +3176,13 @@ Subtitles
     Default: ``no``.
 
 ``--sub-filter-sdh-enclosures=<string>``
-    Specify a string of characters that ``--sub-filter-sdh`` will use to potentially
-    remove text. Text that is enclosed within characters specified by this string will
-    be removed. Note that bracket characters with known pairs (such as ``(`` or ``[``)
-    will be mapped internally to their matching right hand character, so you only need
-    to specify left hand characters.
+    Specify pairs of characters that ``--sub-filter-sdh`` will use to
+    potentially remove text. This is a string list option. See `List Options`_
+    for details. Text that is enclosed within each specified pair will be
+    removed. Note that parenthesis pairs (normal and full width) are treated as
+    a special case and require ``--sub-fitler-sdh-harder`` to be removed.
 
-    Default: ``([（``.
+    Default: ``(),[],（）``
 
 ``--sub-filter-regex-...=...``
     Set a list of regular expressions to match on text subtitles, and remove any
@@ -3641,7 +3653,7 @@ Window
 
 ``--force-render``
     Forces mpv to always render frames regardless of the visibility of the
-    window. Currently only affects X11 and Wayland VOs since they are the
+    window. Currently only affects X11, Wayland and macvk VOs since they are the
     only ones that have this optimization (i.e. everything else always renders
     regardless of visibility).
 
@@ -3713,11 +3725,14 @@ Window
     environments. This functionality was removed in 0.33.0, but it is possible to
     call the ``xdg-screensaver`` command line program from a user script instead.
 
-``--wid=<ID>``
+``--wid=<ID|-1>``
     This tells mpv to attach to an existing window. If a VO is selected that
     supports this option, it will use that window for video output. mpv will
     scale the video to the size of this window, and will add black bars to
     compensate if the aspect ratio of the video is different.
+
+    An ID of value ``-1`` is interpreted specially, and mpv will detach from
+    the currently attached window to its own window.
 
     On X11, the ID is interpreted as a ``Window`` on X11. Unlike
     MPlayer/mplayer2, mpv always creates its own window, and sets the wid
@@ -3728,12 +3743,24 @@ Window
     On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
     ``uint32_t`` (all Windows handles are 32-bit), this is important as mpv will
     not accept negative values. mpv will create its own window and set the
-    wid window as parent, like with X11.
+    wid window as parent, like with X11. The value ``0`` is interpreted
+    specially, and mpv will draw on top of the desktop wallpaper and below
+    desktop icons.
 
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with
     ``--vo=gpu --gpu-context=android`` (with or without ``--hwdec=mediacodec``).
+
+    .. note::
+
+        On win32, if desktop wallpaper transition occurs (e.g. setting desktop
+        slideshow of multiple images in Windows settings) and an ID value ``0``
+        is used, Windows may sometimes destroy the window mpv is attached to.
+        mpv will simply treat this as a quit signal in this case.
+
+        To prevent this from happening, set a static desktop wallpaper,
+        such as single image or pure color.
 
 ``--window-dragging=<yes|no>``
     Move the window when clicking on it and moving the mouse pointer (default: yes).
@@ -3867,6 +3894,10 @@ Disc Devices
 
 ``--dvd-angle=<ID>``
     Some DVDs contain scenes that can be viewed from multiple angles.
+    This option tells mpv which angle to use (default: 1).
+
+``--bluray-angle=<ID>``
+    Some Blu-ray discs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
 
 
@@ -4541,6 +4572,11 @@ Input
     for the touch events (default: yes). This is useful for compatibility
     for mouse key bindings and scripts which read mouse positions for platforms
     which do not support ``--native-touch=no`` (e.g. Wayland).
+
+``--input-tablet-emulate-mouse=<yes|no>``
+    Emulate mouse move and button presses for tablet events (default: yes).
+
+    Wayland only.
 
 ``--input-dragging-deadzone=<N>``
     Begin the built-in window dragging when the mouse moves outside a deadzone of
@@ -5618,8 +5654,11 @@ DVB
 ``--dvbin-file=<filename>``
     Instructs mpv to read the channels list from ``<filename>``. The default is
     in the mpv configuration directory (usually ``~/.config/mpv``) with the
-    filename ``channels.conf.{sat,ter,cbl,atsc,isdbt}`` (based on your card
-    type) or ``channels.conf`` as a last resort.
+    filename ``channels.conf.{sat,sat1,ter,ter1,cbl,atsc,isdbt}`` (based on your
+    card type) or ``channels.conf`` as a last resort.
+    For cards supporting multiple delivery systems of the same kind, i.e.
+    DVB-T/T2 or DVB-S/S2, T2/S2 is assumed, unless the file extension
+    is ``ter1`` or ``sat1``.
     Please note that using specific file name with card type is recommended,
     since the legacy channel format is not fully standardized
     so autodetection of the delivery system may fail otherwise.
@@ -6493,6 +6532,14 @@ them.
         The image, after conversion to RGB, but before
         ``--blend-subtitles=video`` is applied.
 
+        .. note::
+            With ``--vo=gpu``, ``MAIN`` and ``MAINPRESUB`` are separate shader
+            stages, this allows rendering overlays directly onto the pre-scaled
+            video stage. ``--vo=gpu-next`` does not support this feature,
+            and as such, the ``MAINPRESUB`` shader stage does not exist.
+            It is still valid to refer to this name in shaders, but it is
+            handled identically to ``MAIN``.
+
     MAIN (resizable)
         The main image, after conversion to RGB but before upscaling.
 
@@ -6890,6 +6937,13 @@ them.
 
     Android with ``--gpu-context=android`` only.
 
+``--d3d11-composition-size=<WxH>``
+    Set size of the output for d3d11 composition mode.
+    When use composition mode, there is no window, must set the output size by
+    the embedding application.
+
+    Windows with ``--gpu-context=d3d11`` and  ``--d3d11-output-mode=composition`` only.
+
 ``--gpu-sw``
     Continue even if a software renderer is detected. This only works with
     OpenGL/Vulkan backends. For d3d11, see ``--d3d11-warp``.
@@ -7063,6 +7117,9 @@ them.
     ``--target-*`` options override the metadata in both modes.
 
     .. note::
+        The ICC profile always takes precedence over any metadata.
+
+    .. note::
         It is highly recommended to use ``--target-colorspace-hint=<auto|yes>``
         to ensure the output colorspace is set correctly. This is crucial for
         all non-sRGB content, even SDR, to allow the compositor, driver, and
@@ -7116,6 +7173,14 @@ them.
 
         Your mileage may vary, this highly depends on the target display, there
         is no single answer, but try experimenting, you may be surprised.
+
+``--target-colorspace-hint-strict``
+    When enabled (default), the configured swapchain colorspace (with the hint)
+    will be respected. In this mode, the ``--target-*`` options act only as a
+    hint, while the negotiated swapchain format is used for rendering output.
+    This ensures correct results, since downstream processing depends on the
+    signaled colorspace. When disabled, the swapchain colorspace will be
+    overridden to match the ``--target-*`` options. (Only for ``--vo=gpu-next``)
 
 ``--target-prim=<value>``
     Specifies the primaries of the display. Video colors will be adapted to
@@ -7251,6 +7316,13 @@ them.
     colorspace (into which values will be encoded), and ``--target-gamut`` to
     the gamut you want to limit colors to. Takes the same values as
     ``--target-prim``. (Only for ``--vo=gpu-next``)
+
+    .. note::
+
+        If the selected gamut is wider, it will be limited to ``--target-prim``.
+        Additionally, if ``--target-colorspace-hint`` is specified, the signaled
+        gamut will be limited to the supported gamut of the swapchain. Which may
+        differ from the requested ``--target-prim``.
 
 ``--target-lut=<file>``
     Specifies a custom LUT file (in Adobe .cube format) to apply to the colors
@@ -7580,6 +7652,19 @@ them.
 
     If ``video`` is selected, the behavior is similar to ``yes``, but subs are
     drawn at the video's native resolution, and scaled along with the video.
+
+    .. note:: ``--vo=gpu-next`` with ``--blend-subtitles=video`` will
+              correctly follow ``--video-rotate`` if rotated in 90-degree steps.
+
+    .. warning:: With ``--vo=gpu-next``, the ``--blend-subtitles=video`` mode
+                 blends the subtitles after scaling the video, similar to
+                 ``--blend-subtitles=yes``. The difference is that the subtitles
+                 are rendered at the video's native resolution and then scaled
+                 separately to blend with the video. This is useful for
+                 performance reasons, as it allows subtitles to be rendered at a
+                 lower resolution, but it does not have the same effect as
+                 hardsubbing, which would require blending before scaling. This
+                 may change in the future.
 
     .. warning:: This changes the way subtitle colors are handled. Normally,
                  subtitle colors are assumed to be in sRGB and color managed as
@@ -7915,6 +8000,11 @@ Miscellaneous
 ``--media-controls=<yes|no>``
     (Windows only)
     Enable integration of media control interface SystemMediaTransportControls.
+
+    Windows may display "Unknown app" or show a missing mpv icon in the media
+    control panel. To fully support it, you need to register mpv using the
+    ``--register`` command.
+
     Default: yes (except for libmpv)
 
 ``--force-media-title=<string>``
@@ -8159,3 +8249,72 @@ Miscellaneous
     On Wayland, this option only has effect on the ``wayland`` backend, and
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
+
+``--register``
+    (Windows only) (available also as mpv-register helper)
+
+    Registers mpv as a media player on Windows. This includes adding registry
+    entries to associate mpv with media files and protocols, as well as enabling
+    autoplay handlers for Blu-ray, DVD, and CD-Audio.
+
+    Note that the registration is done in-place, so the current mpv.exe path will
+    be used. If you move mpv after registering it, you can re-run this command to
+    update the registry entries. You can also ``--unregister`` at any time and
+    using any mpv binary that supports this command, it doesn't have to be
+    specifically the one that was used to register it.
+
+    When using this option, mpv will exit after completing the process.
+    To see a detailed list of operations, run mpv with the ``-v`` option.
+
+    The list of the file extensions to register, can be controlled with the
+    ``--video-exts``, ``--audio-exts``, ``--image-exts``, ``--playlist-exts``
+    and ``--archive-exts`` options.
+
+    By default, mpv will be registered for the current user. To register it for
+    all users, run mpv as an administrator with this option. However, this is
+    not recommended, as registering it per user is generally preferable.
+
+    You can unregister mpv from the Windows Settings or by running mpv with the
+    ``--unregister`` option.
+
+``--register-rpath=<string>``
+    (Windows only)
+
+    When registering with ``--register``, this option allows you to specify the
+    path(s) to prepend so that mpv can find the necessary DLLs. The specified
+    string will be prepended to the runtime PATH whenever mpv is executed.
+
+    This is useful for setting up paths to external libraries required by mpv
+    without adding them to the global PATH environment variable.
+
+    The format of the string follows the same structure as the PATH environment
+    variable, a semicolon-separated list of paths.
+
+    .. note::
+
+        This sets the ``App Paths`` for mpv in the Windows registry, which
+        Windows Shell uses to locate the executable and its dependencies. As a
+        result, mpv can be launched seamlessly in most cases, but not in every
+        scenario. Notably, running mpv from the command line does not use
+        `ShellExecute` under the hood, it uses `CreateProcess`, which does not
+        handle the ``App Paths`` registry key.
+
+        To work around this, you can create a small wrapper PowerShell script that
+        runs ``Start-Process <mpv path>`` and all will work as expected.
+
+``--unregister``
+    (Windows only) (available also as mpv-unregister helper)
+
+    Unregisters mpv as a media player on Windows, undoing all changes made by
+    the ``--register`` option. This will not remove mpv binary itself.
+
+    You can use any mpv binary that supports this command, to unregister, doesn't
+    have to be specifically the one that was used to register it.
+
+    Windows Settings Application entry is tied to the mpv.exe path. If you
+    remove the binary, it will not work. However, you can still unregister it
+    using this command, register it in a new location, or restore mpv to its
+    original location.
+
+    If mpv was previously registered for all users, run this command as an
+    administrator to remove it for all users.

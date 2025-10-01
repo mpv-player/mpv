@@ -206,6 +206,7 @@ struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent)
 {
     struct mp_ass_packer *p = talloc_zero(ta_parent, struct mp_ass_packer);
     p->packer = talloc_zero(p, struct bitmap_packer);
+    p->packer->padding = 1; // assume bilinear sampling
     return p;
 }
 
@@ -256,18 +257,68 @@ static bool pack(struct mp_ass_packer *p, struct sub_bitmaps *res, int imgfmt)
     return true;
 }
 
+static void fill_padding_1(uint8_t *base, int w, int h, int stride, int padding)
+{
+    for (int row = 0; row < h; ++row) {
+        uint8_t *row_ptr = base + row * stride;
+        uint8_t left_pixel = row_ptr[0];
+        uint8_t right_pixel = row_ptr[w - 1];
+
+        for (int i = 1; i <= padding; ++i)
+            row_ptr[-i] = left_pixel;
+
+        for (int i = 0; i < padding; ++i)
+            row_ptr[w + i] = right_pixel;
+    }
+
+    int row_bytes = (w + 2 * padding);
+    uint8_t *top_row = base - padding;
+    for (int i = 1; i <= padding; ++i)
+        memcpy(base - i * stride - padding, top_row, row_bytes);
+
+    uint8_t *last_row = base + (h - 1) * stride - padding;
+    for (int i = 0; i < padding; ++i)
+        memcpy(base + (h + i) * stride - padding, last_row, row_bytes);
+}
+
+static void fill_padding_4(uint8_t *base, int w, int h, int stride, int padding)
+{
+    for (int row = 0; row < h; ++row) {
+        uint32_t *row_ptr = (uint32_t *)(base + row * stride);
+        uint32_t left_pixel = row_ptr[0];
+        uint32_t right_pixel = row_ptr[w - 1];
+
+        for (int i = 1; i <= padding; ++i)
+            row_ptr[-i] = left_pixel;
+
+        for (int i = 0; i < padding; ++i)
+            row_ptr[w + i] = right_pixel;
+    }
+
+    int row_bytes = (w + 2 * padding) * 4;
+    uint8_t *top_row = base - padding * 4;
+    for (int i = 1; i <= padding; ++i)
+        memcpy(base - i * stride - padding * 4, top_row, row_bytes);
+
+    uint8_t *last_row = base + (h - 1) * stride - padding * 4;
+    for (int i = 0; i < padding; ++i)
+        memcpy(base + (h + i) * stride - padding * 4, last_row, row_bytes);
+}
+
 static bool pack_libass(struct mp_ass_packer *p, struct sub_bitmaps *res)
 {
     if (!pack(p, res, IMGFMT_Y8))
         return false;
 
+    int padding = p->packer->padding;
+    uint8_t *base = res->packed->planes[0];
+    int stride = res->packed->stride[0];
+
     for (int n = 0; n < res->num_parts; n++) {
         struct sub_bitmap *b = &res->parts[n];
-
-        int stride = res->packed->stride[0];
-        void *pdata =
-            (uint8_t *)res->packed->planes[0] + b->src_y * stride + b->src_x;
+        void *pdata = base + b->src_y * stride + b->src_x;
         memcpy_pic(pdata, b->bitmap, b->w, b->h, stride, b->stride);
+        fill_padding_1(pdata, b->w, b->h, stride, padding);
 
         b->bitmap = pdata;
         b->stride = stride;
@@ -296,18 +347,20 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
     if (!pack(p, &imgs, IMGFMT_BGRA))
         return false;
 
+    int padding = p->packer->padding;
+    uint8_t *base = imgs.packed->planes[0];
+    int stride = imgs.packed->stride[0];
+
     for (int n = 0; n < num_bb; n++) {
         struct mp_rect bb = bb_list[n];
         struct sub_bitmap *b = &imgs.parts[n];
 
         b->x = bb.x0;
         b->y = bb.y0;
-        b->w = b->dw = bb.x1 - bb.x0;
-        b->h = b->dh = bb.y1 - bb.y0;
-        b->stride = imgs.packed->stride[0];
-        b->bitmap = (uint8_t *)imgs.packed->planes[0] +
-                    b->stride * b->src_y + b->src_x * 4;
-
+        b->w = b->dw = mp_rect_w(bb);
+        b->h = b->dh = mp_rect_h(bb);
+        b->stride = stride;
+        b->bitmap = base + b->stride * b->src_y + b->src_x * 4;
         memset_pic(b->bitmap, 0, b->w * 4, b->h, b->stride);
 
         for (int i = 0; i < res->num_parts; i++) {
@@ -315,15 +368,16 @@ static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
 
             // Assume mp_get_sub_bb_list() never splits sub bitmaps
             // So we don't clip/adjust the size of the sub bitmap
-            if (s->x > bb.x1 || s->x + s->w < bb.x0 ||
-                s->y > bb.y1 || s->y + s->h < bb.y0)
+            if (s->x >= b->x + b->w || s->x + s->w <= b->x ||
+                s->y >= b->y + b->h || s->y + s->h <= b->y)
                 continue;
 
             draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
                           b->bitmap, b->stride,
-                          s->x - bb.x0, s->y - bb.y0,
+                          s->x - b->x, s->y - b->y,
                           s->libass.color);
         }
+        fill_padding_4(b->bitmap, b->w, b->h, b->stride, padding);
     }
 
     *res = imgs;

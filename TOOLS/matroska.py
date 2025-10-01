@@ -88,6 +88,8 @@ elements_matroska = (
                 "FlagEnabled, b9, uint",
                 "FlagDefault, 88, uint",
                 "FlagForced, 55aa, uint",
+                "FlagHearingImpaired, 55ab, uint",
+                "FlagVisualImpaired, 55ac, uint",
                 "FlagLacing, 9c, uint",
                 "MinCache, 6de7, uint",
                 "MaxCache, 6df8, uint",

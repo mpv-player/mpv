@@ -445,7 +445,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     the property will be passed as second argument to ``fn``, using
     ``mp.get_property_<type>`` to retrieve it. This means if ``type`` is for
     example ``string``, ``fn`` is roughly called as in
-    ``fn(name, mp.get_property_string(name))``.
+    ``fn(name, mp.get_property(name))``.
 
     If possible, change events are coalesced. If a property is changed a bunch
     of times in a row, only the last change triggers the change function. (The

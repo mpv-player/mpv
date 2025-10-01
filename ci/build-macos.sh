@@ -18,7 +18,8 @@ meson setup build $common_args \
   -Dobjc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
   -D{gl,iconv,lcms2,lua,jpeg,plain-gl,zlib}=enabled \
   -D{cocoa,coreaudio,gl-cocoa,videotoolbox-gl,videotoolbox-pl}=enabled \
-  -D{swift-build,macos-cocoa-cb,macos-media-player,macos-touchbar,vulkan}=enabled
+  -D{swift-build,macos-cocoa-cb,macos-media-player,macos-touchbar,vulkan}=enabled \
+  -Dswift-flags="${SWIFT_FLAGS}"
 
 meson compile -C build -j4
 meson install -C build

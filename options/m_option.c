@@ -120,15 +120,10 @@ int m_option_required_params(const m_option_t *opt)
 }
 
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
-                                const char *name, void *dst, struct mpv_node *src)
+                                struct bstr name, void *dst, struct mpv_node *src)
 {
     if (src->format == MPV_FORMAT_STRING) {
-        // The af and vf option unfortunately require this, because the
-        // option name includes the "action".
-        bstr optname = bstr0(name), a, b;
-        if (bstr_split_tok(optname, "/", &a, &b))
-            optname = b;
-        return m_option_parse(log, opt, optname, bstr0(src->u.string), dst);
+        return m_option_parse(log, opt, name, bstr0(src->u.string), dst);
     } else {
         return m_option_set_node(opt, dst, src);
     }

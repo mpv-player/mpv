@@ -37,7 +37,7 @@ struct lavc_conv {
     AVCodecContext *avctx;
     AVPacket *avpkt;
     AVPacket *avpkt_vtt;
-    char *codec;
+    const char *codec;
     char *extradata;
     AVSubtitle cur;
     char **cur_list;
@@ -60,7 +60,7 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     priv->log = sd->log;
     priv->opts = sd->opts;
     priv->cur_list = talloc_array(priv, char*, 0);
-    priv->codec = talloc_strdup(priv, sd->codec->codec);
+    priv->codec = sd->codec->codec;
     AVCodecContext *avctx = NULL;
     AVDictionary *opts = NULL;
     const char *fmt = get_lavc_format(priv->codec);
@@ -104,6 +104,8 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     priv->extradata = talloc_strndup(priv, avctx->subtitle_header,
                                      avctx->subtitle_header_size);
     mp_codec_info_from_av(avctx, sd->codec);
+    // Keep original codec name, which get_lavc_format() may have transformed
+    sd->codec->codec = priv->codec;
     return priv;
 
  error:

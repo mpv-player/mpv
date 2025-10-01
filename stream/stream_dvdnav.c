@@ -710,7 +710,9 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     if (!stream->access_references)
         goto unsupported;
 
-    priv->track = TITLE_LONGEST;
+    struct MPOpts *opts = mp_get_config_group(NULL, stream->global, &mp_opt_root);
+    priv->track = opts->edition_id >= 0 ? opts->edition_id : TITLE_LONGEST;
+    talloc_free(opts);
 
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)

@@ -82,6 +82,7 @@ local codec_map = {
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
+    ["vp9%..*"]     = "vp9",
     ["avc1%..*"]    = "h264",
     ["av01%..*"]    = "av1",
     ["mp4a%..*"]    = "aac",
@@ -892,26 +893,6 @@ local function add_single_video(json)
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
 end
 
-local function check_version(ytdl_path)
-    local command = {
-        name = "subprocess",
-        capture_stdout = true,
-        args = {ytdl_path, "--version"}
-    }
-    local version_string = mp.command_native(command).stdout
-    local year, month, day = string.match(version_string, "(%d+).(%d+).(%d+)")
-
-    -- sanity check
-    if tonumber(year) < 2000 or tonumber(month) > 12 or
-        tonumber(day) > 31 then
-        return
-    end
-    local version_ts = os.time{year=year, month=month, day=day}
-    if os.difftime(os.time(), version_ts) > 60*60*24*90 then
-        msg.warn("It appears that your youtube-dl version is severely out of date.")
-    end
-end
-
 local function run_ytdl_hook(url)
     local start_time = os.clock()
 
@@ -938,11 +919,7 @@ local function run_ytdl_hook(url)
         msg.verbose("Video disabled. Only using audio")
     end
 
-    if format == "" then
-        format = "bestvideo+bestaudio/best"
-    end
-
-    if format ~= "ytdl" then
+    if format ~= "" and format ~= "ytdl" then
         table.insert(command, "--format")
         table.insert(command, format)
     end
@@ -1050,9 +1027,6 @@ local function run_ytdl_hook(url)
             err = err .. "unexpected error occurred"
         end
         msg.error(err)
-        if parse_err or string.find(ytdl_err, "yt%-dl%.org/bug") then
-            check_version(ytdl.path)
-        end
         return
     end
 
@@ -1167,7 +1141,9 @@ local function run_ytdl_hook(url)
                 local playlist_url = nil
 
                 -- links without protocol as returned by --flat-playlist
-                if not site:find("://") then
+                if not site then
+                    msg.error("Playlist entry does not have unique URL, can't add it.")
+                elseif not site:find("://") then
                     -- youtube extractor provides only IDs,
                     -- others come prefixed with the extractor name and ":"
                     local prefix = site:find(":") and "ytdl://" or
