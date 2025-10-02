@@ -374,7 +374,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             if (prev->endpts == MP_NOPTS_VALUE || prev->endpts > pts)
                 prev->endpts = pts;
 
-            if (opts->sub_fix_timing && pts - prev->endpts <= SUB_GAP_THRESHOLD)
+            if (opts->sub_fix_timing && pts - prev->endpts <= opts->sub_fix_timing_threshold / 1000.0)
                 prev->endpts = pts;
 
             for (int n = 0; n < priv->num_seekpoints; n++) {
