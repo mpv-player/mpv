@@ -427,7 +427,7 @@ jobs:
 
   openbsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 30 # avoid any weirdness with the VM
+    timeout-minutes: 15 # avoid any weirdness with the VM
     steps:
     - uses: actions/checkout@v4
     - name: Test in OpenBSD VM
@@ -473,7 +473,7 @@ jobs:
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 30 # avoid any weirdness with the VM
+    timeout-minutes: 15 # avoid any weirdness with the VM
     steps:
     - uses: actions/checkout@v4
     - name: Test in FreeBSD VM
