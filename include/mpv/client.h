@@ -248,7 +248,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 5)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 6)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1767,6 +1767,18 @@ MPV_EXPORT void mpv_wakeup(mpv_handle *ctx);
  * @param d arbitrary userdata passed to cb
  */
 MPV_EXPORT void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d);
+
+ /**
+ * Set a custom function that should be called on new audio data.
+ * Raw PCM is passed in as an argument to the callback, the format should be set before init using appropriate options.
+ *
+ * This can only be used with ao_libmpv and must be called before the ao is initialized (so before playback starts).
+ * Only one audio callback can be set per instance.
+ *
+ * @param cb function that should be called on audio data
+ * @param d arbitrary userdata passed to cb
+ */
+MPV_EXPORT void mpv_set_audio_callback(mpv_handle *ctx, void (*cb)(void *d, const void *data, int bytes), void *d);
 
 /**
  * Block until all asynchronous requests are done. This affects functions like
