@@ -2,6 +2,7 @@
 #define MPV_COMPILER_H
 
 #include <assert.h>
+#include <stdio.h>
 
 #define MP_EXPAND_ARGS(...) __VA_ARGS__
 
@@ -53,18 +54,28 @@
 #define MP_ASSERT_UNREACHABLE() ((void)0)
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
-#define MP_PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(printf, a1, a2)))
-#define MP_SCANF_ATTRIBUTE(a1, a2) __attribute__((format(scanf, a1, a2)))
-#else
-#define MP_PRINTF_ATTRIBUTE(a1, a2)
-#define MP_SCANF_ATTRIBUTE(a1, a2)
+#ifdef __MINGW_PRINTF_FORMAT
+#define MP_PRINTF_FORMAT __MINGW_PRINTF_FORMAT
+#elif __has_attribute(format)
+#define MP_PRINTF_FORMAT __printf__
 #endif
 
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef MP_PRINTF_ATTRIBUTE
-#define MP_PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
+#ifdef __MINGW_SCANF_FORMAT
+#define MP_SCANF_FORMAT __MINGW_SCANF_FORMAT
+#elif __has_attribute(format)
+#define MP_SCANF_FORMAT __scanf__
+#endif
+
+#ifdef MP_PRINTF_FORMAT
+#define MP_PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(MP_PRINTF_FORMAT, a1, a2)))
+#else
+#define MP_PRINTF_ATTRIBUTE(a1, a2)
+#endif
+
+#ifdef MP_SCANF_FORMAT
+#define MP_SCANF_ATTRIBUTE(a1, a2) __attribute__((format(MP_SCANF_FORMAT, a1, a2)))
+#else
+#define MP_SCANF_ATTRIBUTE(a1, a2)
 #endif
 
 #endif
