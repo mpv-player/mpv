@@ -18,13 +18,13 @@ bool gl_sc_error_state(struct gl_shader_cache *sc);
 void gl_sc_reset_error(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...)
-    PRINTF_ATTRIBUTE(2, 3);
+    MP_PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
-    PRINTF_ATTRIBUTE(2, 3);
+    MP_PRINTF_ATTRIBUTE(2, 3);
 void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text);
 void gl_sc_paddf(struct gl_shader_cache *sc, const char *textf, ...)
-    PRINTF_ATTRIBUTE(2, 3);
+    MP_PRINTF_ATTRIBUTE(2, 3);
 
 // A hint that the next data-type (i.e. non-binding) uniform is expected to
 // change frequently. This refers to the _f, _i, _vecN etc. uniform types.
@@ -34,7 +34,7 @@ void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
 void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
                               struct ra_tex *tex);
 void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
-                char *format, ...) PRINTF_ATTRIBUTE(4, 5);
+                char *format, ...) MP_PRINTF_ATTRIBUTE(4, 5);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, float f[2]);

@@ -585,7 +585,7 @@ const char *mp_find_non_filename_media_title(MPContext *mpctx);
 void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val);
 bool set_osd_msg(struct MPContext *mpctx, int level, int time,
-                 const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
+                 const char* fmt, ...) MP_PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
 void term_osd_clear_subs(struct MPContext *mpctx);
 void term_osd_set_subs(struct MPContext *mpctx, const char *text, int order);

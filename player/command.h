@@ -77,7 +77,7 @@ void run_command(struct MPContext *mpctx, struct mp_cmd *cmd,
                  void *on_completion_priv);
 void run_command_opts(struct MPContext *mpctx);
 void mp_cmd_ctx_complete(struct mp_cmd_ctx *cmd);
-PRINTF_ATTRIBUTE(3, 4)
+MP_PRINTF_ATTRIBUTE(3, 4)
 void mp_cmd_msg(struct mp_cmd_ctx *cmd, int status, const char *msg, ...);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str);

@@ -2,6 +2,7 @@
 #define MPV_COMPILER_H
 
 #include <assert.h>
+#include <stdio.h>
 
 #define MP_EXPAND_ARGS(...) __VA_ARGS__
 
@@ -30,26 +31,51 @@
 #define __has_attribute(x) 0
 #endif
 
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+
 #if __has_attribute(nonstring)
 #define MP_NONSTRING __attribute__((nonstring))
 #else
 #define MP_NONSTRING
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(printf, a1, a2)))
-#define SCANF_ATTRIBUTE(a1, a2) __attribute__((format(scanf, a1, a2)))
-#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), __builtin_unreachable())
+#ifndef NDEBUG
+#define MP_ASSERT_UNREACHABLE() assert(!"unreachable")
+#elif __has_builtin(__builtin_unreachable)
+#define MP_ASSERT_UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define MP_ASSERT_UNREACHABLE(msg) __assume(0)
+#elif __STDC_VERSION__ >= 202311L
+#include <stddef.h>
+#define MP_ASSERT_UNREACHABLE() unreachable()
 #else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#define SCANF_ATTRIBUTE(a1, a2)
-#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
+#define MP_ASSERT_UNREACHABLE() ((void)0)
 #endif
 
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef PRINTF_ATTRIBUTE
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
+#ifdef __MINGW_PRINTF_FORMAT
+#define MP_PRINTF_FORMAT __MINGW_PRINTF_FORMAT
+#elif __has_attribute(format)
+#define MP_PRINTF_FORMAT __printf__
+#endif
+
+#ifdef __MINGW_SCANF_FORMAT
+#define MP_SCANF_FORMAT __MINGW_SCANF_FORMAT
+#elif __has_attribute(format)
+#define MP_SCANF_FORMAT __scanf__
+#endif
+
+#ifdef MP_PRINTF_FORMAT
+#define MP_PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(MP_PRINTF_FORMAT, a1, a2)))
+#else
+#define MP_PRINTF_ATTRIBUTE(a1, a2)
+#endif
+
+#ifdef MP_SCANF_FORMAT
+#define MP_SCANF_ATTRIBUTE(a1, a2) __attribute__((format(MP_SCANF_FORMAT, a1, a2)))
+#else
+#define MP_SCANF_ATTRIBUTE(a1, a2)
 #endif
 
 #endif
