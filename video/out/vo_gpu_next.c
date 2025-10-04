@@ -1089,7 +1089,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                        (p->next_opts->target_hint == -1 &&
                         target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
     // Assume HDR is supported, if target_csp() is not available
-    if (target_csp.transfer == PL_COLOR_TRC_UNKNOWN) {
+    // TODO: Remove this fallback when all backends support target_csp()
+    bool target_unknown = target_csp.transfer == PL_COLOR_TRC_UNKNOWN;
+    if (target_unknown) {
         target_csp = (struct pl_color_space){
             .transfer = opts->target_trc ? opts->target_trc : pl_color_space_hdr10.transfer };
     }
@@ -1105,6 +1107,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint = *target;
             if (pl_color_transfer_is_hdr(hint.transfer) && !pl_primaries_valid(&hint.hdr.prim))
                 pl_color_space_merge(&hint, source);
+            if (target_unknown && !opts->target_trc && !pl_color_transfer_is_hdr(source->transfer))
+                hint = *source;
             // Restore target luminance if it was present, note that we check
             // max_luma only, this make sure that max_cll/max_fall is not take
             // from source.
