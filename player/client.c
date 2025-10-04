@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdatomic.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -1927,6 +1928,43 @@ static bool gen_log_message_event(struct mpv_handle *ctx)
         }
     }
     return false;
+}
+
+static int mp_msg_level_from_mpv_level(mpv_log_level lev)
+{
+    switch (lev) {
+        case MPV_LOG_LEVEL_FATAL:
+            return MSGL_FATAL;
+        case MPV_LOG_LEVEL_ERROR:
+            return MSGL_ERR;
+        case MPV_LOG_LEVEL_WARN:
+            return MSGL_WARN;
+        case MPV_LOG_LEVEL_INFO:
+            return MSGL_INFO;
+        case MPV_LOG_LEVEL_V:
+            return MSGL_V;
+        case MPV_LOG_LEVEL_DEBUG:
+            return MSGL_DEBUG;
+        case MPV_LOG_LEVEL_TRACE:
+            return MSGL_TRACE;
+    }
+    return -1;
+}
+
+void mpv_msg_va(mpv_handle *ctx, mpv_log_level lev, const char *format, va_list va)
+{
+    int msgl = mp_msg_level_from_mpv_level(lev);
+    if (msgl < 0)
+        return;
+    mp_msg_va(ctx->log, msgl, format, va);
+}
+
+void mpv_msg(mpv_handle *ctx, mpv_log_level lev, const char *format, ...)
+{
+    va_list va;
+    va_start(va, format);
+    mpv_msg_va(ctx, lev, format, va);
+    va_end(va);
 }
 
 int mpv_get_wakeup_pipe(mpv_handle *ctx)

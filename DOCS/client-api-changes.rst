@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ --- mpv 0.41.0 ---
+ 2.6    - add functions to write log messages using the log instance of the
+          mpv_handle: mpv_msg(), mpv_msg_va(), mpv_msg_err(), ...
  --- mpv 0.40.0 ---
  2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.39.0 ---

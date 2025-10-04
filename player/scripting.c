@@ -357,6 +357,8 @@ static void init_sym_table(struct mp_script_args *args, void *lib) {
     INIT_SYM(mpv_event_to_node);
     INIT_SYM(mpv_request_event);
     INIT_SYM(mpv_request_log_messages);
+    INIT_SYM(mpv_msg);
+    INIT_SYM(mpv_msg_va);
     INIT_SYM(mpv_wait_event);
     INIT_SYM(mpv_wakeup);
     INIT_SYM(mpv_set_wakeup_callback);

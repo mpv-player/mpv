@@ -23,6 +23,7 @@
 #ifndef MPV_CLIENT_API_H_
 #define MPV_CLIENT_API_H_
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -41,6 +42,19 @@
 #define MPV_DECLTYPE decltype
 #else
 #define MPV_DECLTYPE __typeof__
+#endif
+
+// Stolen from osdep/compiler.h
+#if defined(__GNUC__) || defined(__clang__)
+#define MPV_PRINTF_ATTRIBUTE(a1, a2) __attribute__((format(printf, a1, a2)))
+#else
+#define MPV_PRINTF_ATTRIBUTE(a1, a2)
+#endif
+
+// Broken crap with __USE_MINGW_ANSI_STDIO
+#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
+#undef MPV_PRINTF_ATTRIBUTE
+#define MPV_PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
 #endif
 
 #ifdef __cplusplus
@@ -248,7 +262,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 5)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(2, 6)
 
 /**
  * The API user is allowed to "#define MPV_ENABLE_DEPRECATED 0" before
@@ -1683,6 +1697,41 @@ MPV_EXPORT int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable
 MPV_EXPORT int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);
 
 /**
+ * Write a log message using the log instance of the mpv_handle.
+ *
+ * Safe to be called from mpv render API threads.
+ *
+ * @param lev See enum mpv_log_level.
+ * @param format printf-style format string
+ */
+MPV_EXPORT void mpv_msg(mpv_handle *ctx, mpv_log_level lev, const char *format, ...)
+    MPV_PRINTF_ATTRIBUTE(3, 4);
+
+/**
+ * Same as mpv_msg but takes a va_list.
+ */
+MPV_EXPORT void mpv_msg_va(mpv_handle *ctx, mpv_log_level lev, const char *format, va_list va)
+    MPV_PRINTF_ATTRIBUTE(3, 0);
+
+/**
+ * @defgroup msg_macros Convenience macros for mpv_msg
+ *
+ * @{
+ */
+
+#define mpv_msg_fatal(ctx, ...)     mpv_msg(ctx, MPV_LOG_LEVEL_FATAL, __VA_ARGS__)
+#define mpv_msg_err(ctx, ...)       mpv_msg(ctx, MPV_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define mpv_msg_warn(ctx, ...)      mpv_msg(ctx, MPV_LOG_LEVEL_WARN, __VA_ARGS__)
+#define mpv_msg_info(ctx, ...)      mpv_msg(ctx, MPV_LOG_LEVEL_INFO, __VA_ARGS__)
+#define mpv_msg_verbose(ctx, ...)   mpv_msg(ctx, MPV_LOG_LEVEL_V, __VA_ARGS__)
+#define mpv_msg_dbg(ctx, ...)       mpv_msg(ctx, MPV_LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define mpv_msg_trace(ctx, ...)     mpv_msg(ctx, MPV_LOG_LEVEL_TRACE, __VA_ARGS__)
+
+/**
+ * @}
+ */
+
+/**
  * Wait for the next event, or until the timeout expires, or if another thread
  * makes a call to mpv_wakeup(). Passing 0 as timeout will never wait, and
  * is suitable for polling.
@@ -2008,6 +2057,10 @@ MPV_DEFINE_SYM_PTR(mpv_request_event)
 #define mpv_request_event pfn_mpv_request_event
 MPV_DEFINE_SYM_PTR(mpv_request_log_messages)
 #define mpv_request_log_messages pfn_mpv_request_log_messages
+MPV_DEFINE_SYM_PTR(mpv_msg)
+#define mpv_msg pfn_mpv_msg
+MPV_DEFINE_SYM_PTR(mpv_msg_va)
+#define mpv_msg_va pfn_mpv_msg_va
 MPV_DEFINE_SYM_PTR(mpv_wait_event)
 #define mpv_wait_event pfn_mpv_wait_event
 MPV_DEFINE_SYM_PTR(mpv_wakeup)
