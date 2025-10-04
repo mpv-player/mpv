@@ -48,7 +48,7 @@ FILE *test_open_out(const char *outdir, const char *name);
 // just define these as stubs that do nothing.
 struct mp_log;
 void mp_msg(struct mp_log *log, int lev, const char *format, ...)
-    PRINTF_ATTRIBUTE(3, 4);
+    MP_PRINTF_ATTRIBUTE(3, 4);
 int mp_msg_find_level(const char *s);
 int mp_msg_level(struct mp_log *log);
 void mp_msg_set_max_level(struct mp_log *log, int lev);

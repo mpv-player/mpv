@@ -66,7 +66,7 @@ void terminal_set_mouse_input(bool enable);
 
 // Windows only.
 int mp_console_vfprintf(void *wstream, const char *format, va_list args)
-    PRINTF_ATTRIBUTE(2, 0);
+    MP_PRINTF_ATTRIBUTE(2, 0);
 int mp_console_write(void *wstream, bstr str);
 bool mp_check_console(void *handle);
 
