@@ -7095,6 +7095,7 @@ them.
         mode adapts the source content to the target display before output.
         Note: HDR primaries are not overridden by the ``--target-prim`` option
         this only affects the enclosing container for the colorspace.
+        ``--target-gamut`` can be used to limit the output gamut if needed.
 
     source
         Uses the source content's metadata. This is the traditional
