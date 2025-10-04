@@ -79,7 +79,7 @@ struct bstr bstr_splice(struct bstr str, int start, int end);
 long long bstrtoll(struct bstr str, struct bstr *rest, int base);
 double bstrtod(struct bstr str, struct bstr *rest);
 void bstr_lower(struct bstr str);
-int bstr_sscanf(struct bstr str, const char *format, ...) SCANF_ATTRIBUTE(2, 3);
+int bstr_sscanf(struct bstr str, const char *format, ...) MP_SCANF_ATTRIBUTE(2, 3);
 
 // Decode a string containing hexadecimal data. All whitespace will be silently
 // ignored. When successful, this allocates a new array to store the output.
@@ -171,7 +171,7 @@ static inline void bstr_xappend0(void *talloc_ctx, bstr *s, const char *append)
  *                    or a negative value on error.
  */
 int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
-    PRINTF_ATTRIBUTE(3, 4);
+    MP_PRINTF_ATTRIBUTE(3, 4);
 
 /**
  * @brief Append a formatted string to the existing bstr using a va_list.
@@ -187,7 +187,7 @@ int bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
  *                    or a negative value on error.
  */
 int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
-    PRINTF_ATTRIBUTE(3, 0);
+    MP_PRINTF_ATTRIBUTE(3, 0);
 
 // If s starts/ends with prefix, return true and return the rest of the string
 // in s.

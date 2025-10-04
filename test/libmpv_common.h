@@ -37,7 +37,7 @@
 
 // Global handle.
 static mpv_handle *ctx;
-MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
+MP_NORETURN MP_PRINTF_ATTRIBUTE(1, 2)
 
 static inline void fail(const char *fmt, ...)
 {
