@@ -617,6 +617,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     // Reuse the solid buffer so the osd can be visible
     if (p->force_window) {
+        wp_viewport_set_source(wl->video_viewport, wl_fixed_from_int(-1),
+                               wl_fixed_from_int(-1), wl_fixed_from_int(-1),
+                               wl_fixed_from_int(-1));
         wl_surface_attach(wl->video_surface, p->solid_buffer, 0, 0);
         wl_surface_damage_buffer(wl->video_surface, 0, 0, 1, 1);
     }
