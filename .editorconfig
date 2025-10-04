@@ -21,3 +21,6 @@ indent_style = unset
 indent_size = unset
 max_line_length = unset
 trim_trailing_whitespace = unset
+
+[menu.conf]
+indent_style = tab
