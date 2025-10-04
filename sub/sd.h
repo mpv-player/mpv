@@ -5,10 +5,6 @@
 #include "demux/packet.h"
 #include "misc/bstr.h"
 
-// up to 210 ms overlaps or gaps are removed
-#define SUB_GAP_THRESHOLD 0.210
-// don't change timings if durations are smaller
-#define SUB_GAP_KEEP 0.4
 // slight offset when sub seeking or sub stepping
 #define SUB_SEEK_OFFSET 0.01
 #define SUB_SEEK_WITHOUT_VIDEO_OFFSET 0.1

@@ -670,8 +670,8 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     // Try to fix small gaps and overlaps.
     ASS_Track *track = priv->ass_track;
-    int threshold = SUB_GAP_THRESHOLD * 1000;
-    int keep = SUB_GAP_KEEP * 1000;
+    int threshold = sd->opts->sub_fix_timing_threshold;
+    int keep = sd->opts->sub_fix_timing_keep;
 
     // Find the "current" event.
     ASS_Event *ev[2] = {0};

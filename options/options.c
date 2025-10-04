@@ -304,6 +304,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"stretch-image-subs-to-screen", OPT_BOOL(stretch_image_subs)},
         {"image-subs-video-resolution", OPT_BOOL(image_subs_video_res)},
         {"sub-fix-timing", OPT_BOOL(sub_fix_timing)},
+        {"sub-fix-timing-threshold", OPT_INT(sub_fix_timing_threshold)},
+        {"sub-fix-timing-keep", OPT_INT(sub_fix_timing_keep)},
         {"sub-stretch-durations", OPT_BOOL(sub_stretch_durations)},
         {"sub-gauss", OPT_FLOAT(sub_gauss), M_RANGE(0.0, 3.0)},
         {"sub-gray", OPT_BOOL(sub_gray)},
@@ -351,6 +353,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
     .defaults = &(OPT_BASE_STRUCT){
         .sub_speed = 1.0,
         .ass_enabled = true,
+        .sub_fix_timing_threshold = 210,
+        .sub_fix_timing_keep = 400,
         .sub_scale_by_window = true,
         .sub_use_margins = true,
         .sub_scale_with_window = true,
