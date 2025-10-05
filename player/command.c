@@ -7104,6 +7104,25 @@ static void cmd_notify_property(void *p)
     mp_notify_property(mpctx, cmd->args[0].v.s);
 }
 
+static void cmd_msg(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+
+    if (cmd->num_args < 2)
+        return;
+
+    int level = mp_msg_find_level(cmd->args[0].v.s);
+    if (level < 0)
+        return;
+
+    struct mp_log *log = mp_log_new(NULL, mpctx->log, cmd->cmd->sender);
+    for (int i = 1; i < cmd->num_args; i++)
+        mp_msg(log, level, (i == 1 ? "%s" : " %s"), cmd->args[i].v.s);
+    mp_msg(log, level, "\n");
+    talloc_free(log);
+}
+
 /* This array defines all known commands.
  * The first field the command name used in libmpv and input.conf.
  * The second field is the handler function (see mp_cmd_def.handler and
@@ -7622,6 +7641,9 @@ const struct mp_cmd_def mp_cmds[] = {
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
     { "notify-property", cmd_notify_property, { {"property", OPT_STRING(v.s)} } },
+
+    { "msg", cmd_msg, { {"level", OPT_STRING(v.s)}, {"message", OPT_STRING(v.s)} },
+        .is_noisy = true, .vararg = true },
 
     {0}
 };
