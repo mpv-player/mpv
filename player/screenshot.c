@@ -43,8 +43,9 @@
 
 #include "video/csputils.h"
 
-#define MODE_FULL_WINDOW 1
+#define MODE_SCALED 1
 #define MODE_SUBTITLES 2
+#define MODE_OSD 4
 
 typedef struct screenshot_ctx {
     struct MPContext *mpctx;
@@ -324,14 +325,13 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
 
 static void add_osd(struct MPContext *mpctx, struct mp_image *image, int mode)
 {
-    bool window = mode == MODE_FULL_WINDOW;
-    struct mp_osd_res res = window ? osd_get_vo_res(mpctx->video_out->osd) :
+    struct mp_osd_res res = (mode & MODE_SCALED) ? osd_get_vo_res(mpctx->video_out->osd) :
                             osd_res_from_image_params(&image->params);
-    if (mode == MODE_SUBTITLES || window) {
+    if (mode & MODE_SUBTITLES) {
         osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                           OSD_DRAW_SUB_ONLY, image);
     }
-    if (window) {
+    if (mode & MODE_OSD) {
         osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                           OSD_DRAW_OSD_ONLY, image);
     }
@@ -342,8 +342,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
 {
     struct mp_image *image = NULL;
     const struct image_writer_opts *imgopts = mpctx->opts->screenshot_image_opts;
-    if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
-        mode = 0;
+    if ((mode & MODE_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
+        mode &= ~MODE_SUBTITLES;
 
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
         return NULL;
@@ -351,11 +351,13 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
     bool use_sw = mpctx->opts->screenshot_sw;
-    bool window = mode == MODE_FULL_WINDOW;
+    bool scaled = mode & MODE_SCALED;
+    bool subs = mode & MODE_SUBTITLES;
+    bool osd = mode & MODE_OSD;
     struct voctrl_screenshot ctrl = {
-        .scaled = window,
-        .subs = mode != 0,
-        .osd = window,
+        .scaled = scaled,
+        .subs = subs,
+        .osd = osd,
         .high_bit_depth = high_depth && imgopts->high_bit_depth,
         .native_csp = image_writer_flexible_csp(imgopts),
     };
@@ -363,7 +365,9 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &ctrl);
     image = ctrl.res;
 
-    if (!use_sw && !image && window)
+    // VOCTRL_SCREENSHOT_WIN gets the complete rendered image so it's only
+    // usable for scaled+sub+osd screenshots.
+    if (!use_sw && !image && scaled && subs && osd)
         vo_control(mpctx->video_out, VOCTRL_SCREENSHOT_WIN, &image);
 
     if (!image) {
@@ -381,7 +385,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
         image = nimage;
     }
 
-    if (use_sw && image && window) {
+    if (use_sw && image && scaled) {
         if (mp_image_crop_valid(&image->params) &&
             (mp_rect_w(image->params.crop) != image->w ||
              mp_rect_h(image->params.crop) != image->h))
@@ -506,14 +510,14 @@ void cmd_screenshot(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     struct mpv_node *res = &cmd->result;
-    int mode = cmd->args[0].v.i & 3;
+    int mode = cmd->args[0].v.i & 7;
     bool each_frame_toggle = (cmd->args[0].v.i | cmd->args[1].v.i) & 8;
     bool each_frame_mode = cmd->args[0].v.i & 16;
 
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
-    if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
-        mode = 0;
+    if ((mode & MODE_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
+        mode &= ~MODE_SUBTITLES;
 
     if (!each_frame_mode) {
         if (each_frame_toggle) {

@@ -1419,22 +1419,30 @@ Screenshot Commands
 
     Multiple flags are available (some can be combined with ``+``):
 
+    <video>
+        Save the video image in its original resolution, without OSD or
+        subtitles. This is the default when no flag is specified, and it does
+        not need to be explicitly added when combined with other flags.
+    <scaled>
+        Save the video image in the current playback resolution.
     <subtitles> (default)
-        Save the video image, in its original resolution, and with subtitles.
+        Save the video image with subtitles.
         Some video outputs may still include the OSD in the output under certain
         circumstances.
-    <video>
-        Like ``subtitles``, but typically without OSD or subtitles. The exact
-        behavior depends on the selected video output.
+    <osd>
+        Save the video image with OSD.
     <window>
-        Save the contents of the mpv window. Typically scaled, with OSD and
-        subtitles. The exact behavior depends on the selected video output.
+        Save the contents of the mpv window, with OSD and subtitles.
+        This is an alias of ``scaled+subtitles+osd``.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
         screenshots. Note that you should disable frame-dropping when using
         this mode - or you might receive duplicate images in cases when a
         frame was dropped. This flag can be combined with the other flags,
         e.g. ``video+each-frame``.
+
+    The exact behaviors of all flags other than ``each-frame`` depend on the
+    selected video output.
 
     Older mpv versions required passing ``single`` and ``each-frame`` as
     second argument (and did not have flags). This syntax is still understood,
