@@ -1462,9 +1462,10 @@ Screenshot Commands
     expansion as described in `Property Expansion`_.
 
 ``screenshot-raw [<flags> [<format>]]``
-    Return a screenshot in memory. This can be used only through the client
-    API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
-    ``stride`` fields set to obvious contents.
+    Return a screenshot in memory. This can be used only through the client API
+    or from a script using ``mp.command_native``. The MPV_FORMAT_NODE_MAP
+    returned by this command has the ``w``, ``h``, ``stride`` fields set to
+    obvious contents.
 
     The ``format`` field is set to the format of the screenshot image data.
     This can be controlled by the ``format`` argument. The format can be one of
