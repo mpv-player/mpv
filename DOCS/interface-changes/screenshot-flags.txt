@@ -1,0 +1,1 @@
+add `scaled` and `osd` flags to screenshot commands
