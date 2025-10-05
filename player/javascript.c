@@ -29,7 +29,6 @@
 #include "common/common.h"
 #include "options/m_property.h"
 #include "common/msg.h"
-#include "common/msg_control.h"
 #include "common/stats.h"
 #include "options/m_option.h"
 #include "input/input.h"
@@ -563,21 +562,6 @@ static int checkopt(js_State *J, int idx, const char *def, const char *opts[],
             return i;
     }
     js_error(J, "Invalid %s '%s'", desc, opt);
-}
-
-// args: level as string and a variable numbers of args to print. adds final \n
-static void script_log(js_State *J)
-{
-    const char *level = js_tostring(J, 1);
-    int msgl = mp_msg_find_level(level);
-    if (msgl < 0)
-        js_error(J, "Invalid log level '%s'", level);
-
-    struct mp_log *log = jctx(J)->log;
-    for (int top = js_gettop(J), i = 2; i < top; i++)
-        mp_msg(log, msgl, (i == 2 ? "%s" : " %s"), js_tostring(J, i));
-    mp_msg(log, msgl, "\n");
-    push_success(J);
 }
 
 static void script_find_config_file(js_State *J, void *af)
@@ -1155,7 +1139,6 @@ struct fn_entry {
 // Names starting with underscore are wrapped at @defaults.js
 // FN_ENTRY is a normal js C function, AF_ENTRY is an autofree js C function.
 static const struct fn_entry main_fns[] = {
-    FN_ENTRY(log, 1),
     AF_ENTRY(wait_event, 1),
     FN_ENTRY(_request_event, 2),
     AF_ENTRY(find_config_file, 1),
