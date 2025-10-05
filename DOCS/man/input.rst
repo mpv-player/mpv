@@ -824,6 +824,10 @@ Text Manipulation
 
     .. note:: Lua and JS code should use the provided ``mp.msg`` modules.
 
+``msg-prefix <level> <prefix> <message> [...]``
+    Same as ``msg``, but allows writing messages using ``prefix`` as the prefix
+    instead of the name of the client that sent the command.
+
 Configuration Commands
 ~~~~~~~~~~~~~~~~~~~~~~
 
