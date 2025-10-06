@@ -3484,6 +3484,11 @@ static void set_color_management(struct vo_wayland_state *wl)
         return;
     }
 
+    MP_VERBOSE(wl, "Generating image creator params:\n");
+    MP_VERBOSE(wl, "primaries: %s, transfer: %s\n",
+               m_opt_choice_str(pl_csp_prim_names, color.primaries),
+               m_opt_choice_str(pl_csp_trc_names, color.transfer));
+
     struct wp_image_description_creator_params_v1 *image_creator_params =
         wp_color_manager_v1_create_parametric_creator(wl->color_manager);
     wp_image_description_creator_params_v1_set_primaries_named(image_creator_params, primaries);
@@ -3496,6 +3501,14 @@ static void set_color_management(struct vo_wayland_state *wl)
         MP_VERBOSE(wl, "supplied HDR metadata does not conform to the wayland color management protocol. It will not be used.\n");
     if (is_hdr && use_metadata) {
         if (wl->supports_display_primaries) {
+            MP_VERBOSE(wl,"raw prims: red.x=%f, red.y=%f,\n"
+                          "           green.x=%f, green.y=%f,\n"
+                          "           blue.x=%f,  blue.y=%f,\n"
+                          "           white.x=%f, white.y=%f\n",
+                            hdr.prim.red.x, hdr.prim.red.y,
+                            hdr.prim.green.x, hdr.prim.green.y,
+                            hdr.prim.blue.x, hdr.prim.blue.y,
+                            hdr.prim.white.x, hdr.prim.white.y);
             wp_image_description_creator_params_v1_set_mastering_display_primaries(image_creator_params,
                 lrintf(hdr.prim.red.x * WAYLAND_COLOR_FACTOR),
                 lrintf(hdr.prim.red.y * WAYLAND_COLOR_FACTOR),
@@ -3506,9 +3519,11 @@ static void set_color_management(struct vo_wayland_state *wl)
                 lrintf(hdr.prim.white.x * WAYLAND_COLOR_FACTOR),
                 lrintf(hdr.prim.white.y * WAYLAND_COLOR_FACTOR));
 
+            MP_VERBOSE(wl, "min_luma: %f, max_luma: %f\n", hdr.min_luma, hdr.max_luma);
             wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
                 lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
         }
+        MP_VERBOSE(wl, "max_cll: %f, max_fall: %f\n", hdr.max_cll, hdr.max_fall);
         wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
         wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
