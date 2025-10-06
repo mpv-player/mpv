@@ -61,6 +61,10 @@ struct vf_format_opts {
     int force_scaler;
     bool dovi;
     bool hdr10plus;
+    float min_luma;
+    float max_luma;
+    float max_cll;
+    float max_fall;
     bool film_grain;
 };
 
@@ -190,6 +194,18 @@ static void vf_format_process(struct mp_filter *f)
             img->params.color.hdr.ootf = (struct pl_hdr_bezier){0};
         }
 
+        if (priv->opts->min_luma)
+            img->params.color.hdr.min_luma = priv->opts->min_luma;
+
+        if (priv->opts->max_luma)
+            img->params.color.hdr.max_luma = priv->opts->max_luma;
+
+        if (priv->opts->max_cll)
+            img->params.color.hdr.max_cll = priv->opts->max_cll;
+
+        if (priv->opts->max_fall)
+            img->params.color.hdr.max_fall = priv->opts->max_fall;
+
         if (!priv->opts->film_grain)
             av_buffer_unref(&img->film_grain);
 
@@ -254,6 +270,10 @@ static const m_option_t vf_opts_fields[] = {
     {"convert", OPT_BOOL(convert)},
     {"dolbyvision", OPT_BOOL(dovi)},
     {"hdr10plus", OPT_BOOL(hdr10plus)},
+    {"min-luma", OPT_FLOAT(min_luma), M_RANGE(0, 10000)},
+    {"max-luma", OPT_FLOAT(max_luma), M_RANGE(0, 10000)},
+    {"max_cll", OPT_FLOAT(max_cll), M_RANGE(0, 10000)},
+    {"max_fall", OPT_FLOAT(max_fall), M_RANGE(0, 10000)},
     {"film-grain", OPT_BOOL(film_grain)},
     {"force-scaler", OPT_CHOICE(force_scaler,
                                 {"auto", MP_SWS_AUTO},
