@@ -3550,6 +3550,8 @@ static void set_color_representation(struct vo_wayland_state *wl)
     int range = repr.levels == PL_COLOR_LEVELS_FULL ? wl->range_map[repr.sys] :
                                 wl->range_map[repr.sys + PL_COLOR_SYSTEM_COUNT];
     int chroma_location = map_supported_chroma_location(wl->target_params.chroma_location);
+    enum mp_imgfmt imgfmt = wl->target_params.hw_subfmt ? wl->target_params.hw_subfmt : wl->target_params.imgfmt;
+    bool is_420_subsampled = mp_imgfmt_is_420_subsampled(imgfmt);
 
     MP_VERBOSE(wl, "Setting color representation:\n");
     if (coefficients && range) {
@@ -3564,7 +3566,7 @@ static void set_color_representation(struct vo_wayland_state *wl)
         wp_color_representation_surface_v1_set_alpha_mode(wl->color_representation_surface, alpha);
     }
 
-    if (chroma_location) {
+    if (is_420_subsampled && chroma_location) {
         MP_VERBOSE(wl, "  Chroma location: %s\n", m_opt_choice_str(pl_chroma_names, wl->target_params.chroma_location));
         wp_color_representation_surface_v1_set_chroma_location(wl->color_representation_surface, chroma_location);
     }
