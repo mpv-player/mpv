@@ -7708,9 +7708,12 @@ them.
     Tile size used to draw parts of the mpv window not covered by video in
     ``--background=tiles`` mode (default: 16).
 
-``--border-background=<none|color|tiles>``
+``--border-background=<none|color|tiles|blur>``
     Same as ``--background`` but only applies to the black bar/border area of
     the window. ``vo=gpu-next`` only. Defaults to ``color``.
+
+``--background-blur-radius=<radius>``
+    The blur radius (in pixels) to use for ``--border-background=blur``
 
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have
