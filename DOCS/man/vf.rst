@@ -269,7 +269,7 @@ Available mpv-only filters are:
        This option only affects video output drivers that perform color management.
 
        If this option is set to ``auto`` (which is the default), the gamma will
-       be set to BT.1886 for YCbCr content, sRGB for RGB content and Linear for
+       be set to BT.1886 for YCbCr content, sRGB for RGB content and st428 for
        XYZ content.
 
        Available gamma functions are:
@@ -290,6 +290,7 @@ Available mpv-only filters are:
        :v-log:        Panasonic V-Log transfer curve
        :s-log1:       Sony S-Log1 transfer curve
        :s-log2:       Sony S-Log2 transfer curve
+       :st428:        Digital Cinema Distribution Master (XYZ)
 
     ``<sig-peak>``
         Reference peak illumination for the video file, relative to the
