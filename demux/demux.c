@@ -3188,7 +3188,7 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     struct cue_file *f = mp_parse_cue(bstr0(cue));
     if (f) {
         if (mp_check_embedded_cue(f) < 0) {
-            MP_WARN(demuxer, "Embedded cue sheet references more than one file. "
+            MP_WARN(demuxer, "Embedded cue sheet references zero or multiple files. "
                     "Ignoring it.\n");
         } else {
             for (int n = 0; n < f->num_tracks; n++) {
