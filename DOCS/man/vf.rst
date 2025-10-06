@@ -323,6 +323,27 @@ Available mpv-only filters are:
         Whether or not to include HDR10+ metadata (default: yes). If
         disabled, any HDR10+ metadata will be stripped from frames.
 
+    ``<min-luma>``
+        Set the minimum luminance value for the mastering display metadata.
+        This is a float value in nits (cd/m²).
+
+        .. note::
+
+            0.0 means undefined, which is the default. To set 0.0 as actual value,
+            use a very small value like 1e-6.
+
+    ``<max-luma>``
+        Set the maximum luminance value for the mastering display metadata.
+        This is a float value in nits (cd/m²).
+
+    ``<max_cll>``
+        Set the maximum content light level for the mastering display
+        metadata. This is a float value in nits (cd/m²).
+
+    ``<max_fall>``
+        Set the maximum frame-average light level for the mastering
+        display metadata. This is a float value in nits (cd/m²).
+
     ``<film-grain=yes|no>``
         Whether or not to include film grain metadata (default: yes). If
         disabled, any film grain metadata will be stripped from frames.
