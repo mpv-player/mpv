@@ -823,3 +823,9 @@ int mp_imgfmt_select_best_list(int *dst, int num_dst, int src)
         best = best ? mp_imgfmt_select_best(best, dst[n], src) : dst[n];
     return best;
 }
+
+bool mp_imgfmt_is_420_subsampled(enum mp_imgfmt fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    return desc.chroma_xs == 1 && desc.chroma_ys == 1;
+}
