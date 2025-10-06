@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.41.0 ---
+ 2.6    - add mpv_set_audio_callback()
  --- mpv 0.40.0 ---
  2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.39.0 ---
