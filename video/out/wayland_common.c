@@ -3551,14 +3551,23 @@ static void set_color_representation(struct vo_wayland_state *wl)
                                 wl->range_map[repr.sys + PL_COLOR_SYSTEM_COUNT];
     int chroma_location = map_supported_chroma_location(wl->target_params.chroma_location);
 
-    if (coefficients && range)
+    MP_VERBOSE(wl, "Setting color representation:\n");
+    if (coefficients && range) {
+        MP_VERBOSE(wl, "  Coefficients: %s, Range: %s\n",
+                   m_opt_choice_str(pl_csp_names, repr.sys),
+                   m_opt_choice_str(pl_csp_levels_names, repr.levels));
         wp_color_representation_surface_v1_set_coefficients_and_range(wl->color_representation_surface, coefficients, range);
+    }
 
-    if (alpha)
+    if (alpha) {
+        MP_VERBOSE(wl, "  Alpha mode: %s\n", m_opt_choice_str(pl_alpha_names, repr.alpha));
         wp_color_representation_surface_v1_set_alpha_mode(wl->color_representation_surface, alpha);
+    }
 
-    if (chroma_location)
+    if (chroma_location) {
+        MP_VERBOSE(wl, "  Chroma location: %s\n", m_opt_choice_str(pl_chroma_names, wl->target_params.chroma_location));
         wp_color_representation_surface_v1_set_chroma_location(wl->color_representation_surface, chroma_location);
+    }
 #endif
 }
 
