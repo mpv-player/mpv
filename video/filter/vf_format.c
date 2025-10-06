@@ -256,7 +256,7 @@ static const m_option_t vf_opts_fields[] = {
     {"primaries", OPT_CHOICE_C(primaries, pl_csp_prim_names)},
     {"gamma", OPT_CHOICE_C(gamma, pl_csp_trc_names)},
     {"transfer", OPT_ALIAS("gamma")},
-    {"sig-peak", OPT_FLOAT(sig_peak)},
+    {"sig-peak", OPT_FLOAT(sig_peak), .deprecation_message = "use max-luma"},
     {"light", OPT_CHOICE_C(light, mp_csp_light_names)},
     {"chroma-location", OPT_CHOICE_C(chroma_location, pl_chroma_names)},
     {"stereo-in", OPT_CHOICE_C(stereo_in, mp_stereo3d_names)},
