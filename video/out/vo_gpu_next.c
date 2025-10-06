@@ -168,6 +168,7 @@ struct gl_next_opts {
     int sub_hdr_peak;
     int image_subs_hdr_peak;
     int border_background;
+    float background_blur_radius;
     float corner_rounding;
     bool inter_preserve;
     struct user_lut lut;
@@ -198,7 +199,13 @@ const struct m_sub_options gl_next_conf = {
         {"border-background", OPT_CHOICE(border_background,
             {"none",  BACKGROUND_NONE},
             {"color", BACKGROUND_COLOR},
-            {"tiles", BACKGROUND_TILES})},
+            {"tiles", BACKGROUND_TILES}
+#if PL_API_VER < 355
+            )},
+#else
+            ,{"blur", BACKGROUND_BLUR})},
+        {"background-blur-radius", OPT_FLOAT(background_blur_radius)},
+#endif
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
@@ -215,6 +222,7 @@ const struct m_sub_options gl_next_conf = {
     },
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
+        .background_blur_radius = 16.0f,
         .inter_preserve = true,
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
         .image_subs_hdr_peak = PL_COLOR_SDR_WHITE,
@@ -2402,13 +2410,19 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_fbos = opts->dumb_mode == 1;
 
 #if PL_API_VER >= 346
-    int map_background_types[3] = {
-        PL_CLEAR_SKIP,  // BACKGROUND_NONE
-        PL_CLEAR_COLOR, // BACKGROUND_COLOR
-        PL_CLEAR_TILES, // BACKGROUND_TILES
+    static const int map_background_types[] = {
+        [BACKGROUND_NONE]  = PL_CLEAR_SKIP,
+        [BACKGROUND_COLOR] = PL_CLEAR_COLOR,
+        [BACKGROUND_TILES] = PL_CLEAR_TILES,
+#if PL_API_VER >= 355
+        [BACKGROUND_BLUR]  = PL_CLEAR_BLUR,
+#endif
     };
     pars->params.background = map_background_types[opts->background];
     pars->params.border = map_background_types[p->next_opts->border_background];
+#if PL_API_VER >= 355
+    pars->params.blur_radius = p->next_opts->background_blur_radius;
+#endif
 #else
     pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
 #endif
