@@ -340,7 +340,7 @@ static void resolve_positional_arg(void *avobj, char **name)
 
     char *end = NULL;
     int pos = strtol(*name + 1, &end, 10);
-    if (!end || *end)
+    if (!end || *end || pos < 0)
         return;
 
     const AVOption *opt = NULL;
