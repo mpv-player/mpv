@@ -261,8 +261,8 @@ Available mpv-only filters are:
         :dci-p3:       DCI-P3 (Digital Cinema)
         :v-gamut:      Panasonic V-Gamut primaries
 
-    ``<gamma>``
-       Gamma function the source file was encoded with. Normally this should be set
+    ``<transfer>`` or ``<gamma>``
+       Transfer function the source file was encoded with. Normally this should be set
        in the file header, but when playing broken or mistagged files this can be
        used to override the setting.
 

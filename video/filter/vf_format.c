@@ -239,6 +239,7 @@ static const m_option_t vf_opts_fields[] = {
     {"colorlevels", OPT_CHOICE_C(colorlevels, pl_csp_levels_names)},
     {"primaries", OPT_CHOICE_C(primaries, pl_csp_prim_names)},
     {"gamma", OPT_CHOICE_C(gamma, pl_csp_trc_names)},
+    {"transfer", OPT_ALIAS("gamma")},
     {"sig-peak", OPT_FLOAT(sig_peak)},
     {"light", OPT_CHOICE_C(light, mp_csp_light_names)},
     {"chroma-location", OPT_CHOICE_C(chroma_location, pl_chroma_names)},
