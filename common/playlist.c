@@ -31,7 +31,8 @@ struct playlist_entry *playlist_entry_new(const char *filename)
 {
     struct playlist_entry *e = talloc_zero(NULL, struct playlist_entry);
     char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
-    e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
+    e->filename = mp_normalize_path(e, local_filename ? local_filename : filename);
+    talloc_free(local_filename);
     e->stream_flags = STREAM_ORIGIN_DIRECT;
     e->original_index = -1;
     return e;
