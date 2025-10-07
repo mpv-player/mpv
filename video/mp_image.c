@@ -1032,11 +1032,16 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.hdr = pl_hdr_metadata_empty;
     }
 
-    if (params->chroma_location == PL_CHROMA_UNKNOWN) {
-        if (params->repr.levels == PL_COLOR_LEVELS_LIMITED)
-            params->chroma_location = PL_CHROMA_LEFT;
-        if (params->repr.levels == PL_COLOR_LEVELS_FULL)
-            params->chroma_location = PL_CHROMA_CENTER;
+    if (mp_imgfmt_is_subsampled(params->hw_subfmt ? params->hw_subfmt : params->imgfmt)) {
+        if (params->chroma_location == PL_CHROMA_UNKNOWN) {
+            if (params->repr.levels == PL_COLOR_LEVELS_LIMITED)
+                params->chroma_location = PL_CHROMA_LEFT;
+            if (params->repr.levels == PL_COLOR_LEVELS_FULL)
+                params->chroma_location = PL_CHROMA_CENTER;
+        }
+    } else {
+        // Set to center for non-subsampled formats.
+        params->chroma_location = PL_CHROMA_CENTER;
     }
 
     if (params->light == MP_CSP_LIGHT_AUTO) {
