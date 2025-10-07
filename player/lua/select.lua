@@ -43,16 +43,13 @@ mp.add_key_binding(nil, "select-playlist", function ()
     local playlist = {}
     local default_item
     local show = mp.get_property_native("osd-playlist-entry")
-    local trailing_slash_pattern = mp.get_property("platform") == "windows"
-                                   and "[/\\]+$" or "/+$"
 
     for i, entry in ipairs(mp.get_property_native("playlist")) do
         playlist[i] = entry.title
         if not playlist[i] or show ~= "title" then
             playlist[i] = entry.filename
             if not playlist[i]:find("://") then
-                playlist[i] = select(2, utils.split_path(
-                    playlist[i]:gsub(trailing_slash_pattern, "")))
+                playlist[i] = select(2, utils.split_path(playlist[i]))
             end
         end
         if entry.title and show == "both" then
