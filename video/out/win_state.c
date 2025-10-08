@@ -77,6 +77,9 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 //  force_center: force centering x/y in the middle of the given screen even if
 //                opts->force_window_position is not set. ignored if the user
 //                supplies valid x/y coordinates on their own.
+//  size_constraint: if non-NULL, the resulting size will be limited by the size
+//                   specified in this geometry. This applies to both autofit
+//                   and geometry options.
 // Use vo_apply_window_geometry() to copy the result into the vo.
 // NOTE: currently, all windowing backends do their own handling of window
 //       geometry additional to this code. This is to deal with initial window
@@ -85,7 +88,8 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 void vo_calc_window_geometry(struct vo *vo, struct mp_vo_opts *opts,
                              const struct mp_rect *screen,
                              const struct mp_rect *monitor, double dpi_scale,
-                             bool force_center, struct vo_win_geometry *out_geo)
+                             bool force_center, struct vo_win_geometry *out_geo,
+                             struct m_geometry *size_constraint)
 {
     *out_geo = (struct vo_win_geometry){0};
 
@@ -120,6 +124,8 @@ void vo_calc_window_geometry(struct vo *vo, struct mp_vo_opts *opts,
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true, true);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_smaller, true, false);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false, true);
+    if (size_constraint)
+        apply_autofit(&d_w, &d_h, scr_w, scr_h, size_constraint, false, true);
 
     out_geo->win.x0 = (int)(scr_w - d_w) / 2;
     out_geo->win.y0 = (int)(scr_h - d_h) / 2;
@@ -127,6 +133,15 @@ void vo_calc_window_geometry(struct vo *vo, struct mp_vo_opts *opts,
     bool center = (opts->force_window_position || force_center) && !opts->geometry.xy_valid;
     m_geometry_apply(&out_geo->win.x0, &out_geo->win.y0, &d_w, &d_h,
                      scr_w, scr_h, center, &opts->geometry);
+
+    if (size_constraint) {
+        int old_w = d_w, old_h = d_h;
+        apply_autofit(&d_w, &d_h, scr_w, scr_h, size_constraint, false, true);
+        if (!opts->geometry.xy_valid) {
+            out_geo->win.x0 += (old_w - d_w) / 2;
+            out_geo->win.y0 += (old_h - d_h) / 2;
+        }
+    }
 
     out_geo->win.x0 += screen->x0;
     out_geo->win.y0 += screen->y0;
