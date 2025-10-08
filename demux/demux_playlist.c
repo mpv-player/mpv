@@ -101,7 +101,6 @@ struct pl_parser {
     bool error;
     bool probing;
     bool force;
-    bool add_base;
     bool line_allocated;
     int autocreate_playlist;
     enum demux_check check_level;
@@ -219,9 +218,19 @@ static void pl_free_line(struct pl_parser *p, bstr line)
 
 static void pl_add(struct pl_parser *p, bstr entry)
 {
-    char *s = bstrto0(NULL, entry);
-    playlist_append_file(p->pl, s);
-    talloc_free(s);
+    char *path;
+    bstr proto = mp_split_proto(bstr0(p->s->url), NULL);
+    // Don't add base path to self-expanding protocols
+    if (!mp_is_url(entry) && bstrcasecmp0(proto, "memory") &&
+        bstrcasecmp0(proto, "lavf") && bstrcasecmp0(proto, "hex") &&
+        bstrcasecmp0(proto, "data") && bstrcasecmp0(proto, "fd")) {
+        path = mp_path_join_bstr(NULL, mp_dirname(p->s->url), entry);
+    } else {
+        path = bstrto0(NULL, entry);
+    }
+
+    playlist_append_file(p->pl, path);
+    talloc_free(path);
 }
 
 static bool pl_eof(struct pl_parser *p)
@@ -281,12 +290,10 @@ ok:
             // must happen through demux_lavf.
             p->format = "hls";
         } else if (line_dup.len > 0 && !bstr_startswith0(line_dup, "#")) {
-            char *fn = bstrto0(NULL, line_dup);
-            struct playlist_entry *e = playlist_entry_new(fn);
-            talloc_free(fn);
+            pl_add(p, line);
+            struct playlist_entry *e = playlist_get_last(p->pl);
             e->title = talloc_steal(e, title);
             title = NULL;
-            playlist_insert_at(p->pl, e, NULL);
         }
         pl_free_line(p, line);
         line = pl_get_line(p);
@@ -597,7 +604,6 @@ static int parse_dir(struct pl_parser *p)
 
     scan_dir(p, path, dir_stack, 0, autocreate);
 
-    p->add_base = false;
     ret = p->pl->num_entries > 0 ? 0 : -1;
 
 done:
@@ -664,7 +670,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->log = demuxer->log;
     p->pl = talloc_zero(p, struct playlist);
     p->real_stream = demuxer->stream;
-    p->add_base = true;
 
     struct demux_opts *opts = mp_get_config_group(p, p->global, &demux_conf);
     p->codepage = opts->meta_cp;
@@ -698,16 +703,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
     bool ok = fmt->parse(p) >= 0 && !p->error;
-    if (p->add_base) {
-        bstr proto = mp_split_proto(bstr0(demuxer->filename), NULL);
-        // Don't add base path to self-expanding protocols
-        if (bstrcasecmp0(proto, "memory") && bstrcasecmp0(proto, "lavf") &&
-            bstrcasecmp0(proto, "hex") && bstrcasecmp0(proto, "data") &&
-            bstrcasecmp0(proto, "fd"))
-        {
-            playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
-        }
-    }
     playlist_set_stream_flags(p->pl, demuxer->stream_origin);
     demuxer->playlist = talloc_steal(demuxer, p->pl);
     demuxer->filetype = p->format ? p->format : fmt->name;
