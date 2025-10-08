@@ -82,12 +82,11 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 //       geometry additional to this code. This is to deal with initial window
 //       placement, fullscreen handling, avoiding resize on reconfig() with no
 //       size change, multi-monitor stuff, and possibly more.
-void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
+void vo_calc_window_geometry(struct vo *vo, struct mp_vo_opts *opts,
+                             const struct mp_rect *screen,
                              const struct mp_rect *monitor, double dpi_scale,
                              bool force_center, struct vo_win_geometry *out_geo)
 {
-    struct mp_vo_opts *opts = vo->opts;
-
     *out_geo = (struct vo_win_geometry){0};
 
     // The case of calling this function even though no video was configured
