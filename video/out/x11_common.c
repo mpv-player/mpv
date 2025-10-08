@@ -1806,7 +1806,7 @@ void vo_x11_config_vo_window(struct vo *vo)
 
     struct vo_win_geometry geo;
     vo_calc_window_geometry(vo, opts, &x11->screenrc, &x11->screenrc, x11->dpi_scale,
-                            !x11->pseudo_mapped, &geo);
+                            !x11->pseudo_mapped, &geo, NULL);
     vo_apply_window_geometry(vo, &geo);
 
     struct mp_rect rc = !x11->pseudo_mapped || opts->auto_window_resize || opts->geometry.wh_valid ||

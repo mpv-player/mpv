@@ -1963,7 +1963,7 @@ static void window_reconfig(struct vo_w32_state *w32, bool force)
         force_update_display_info(w32);
 
     vo_calc_window_geometry(vo, w32->opts, &screen, &mon, w32->dpi_scale,
-                            !w32->window_bounds_initialized, &geo);
+                            !w32->window_bounds_initialized, &geo, NULL);
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = ((w32->o_dwidth != vo->dwidth ||
