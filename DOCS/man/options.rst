@@ -7342,6 +7342,18 @@ them.
     encoding into the target colorspace, so after the application of
     ``--target-trc``. (Only for ``--vo=gpu-next``)
 
+``--hdr-reference-white=<auto|10-1000000>``
+    Specifies the assumed peak brightness of the mastering display for SDR
+    content, in cd/m² (nits). This is used as HDR diffuse white level for SDR
+    content. Essentially this is the SDR brightness in HDR container.
+    Default is 203 cd/m². (Only for ``--vo=gpu-next``)
+
+    .. note::
+
+        This option overrides the ``--target-peak`` if is set and the target
+        transfer function is SDR. This way you can control SDR output separately
+        from HDR output.
+
 ``--tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping images onto the target
     display. This is relevant for both HDR->SDR conversion as well as gamut

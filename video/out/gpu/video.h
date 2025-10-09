@@ -138,6 +138,7 @@ struct gl_video_opts {
     int target_prim;
     int target_trc;
     int target_peak;
+    int hdr_reference_white;
     int target_contrast;
     int target_gamut;
     struct gl_tone_map_opts tone_map;
