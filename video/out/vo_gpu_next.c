@@ -671,6 +671,10 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         .user_data = mpi,
     };
 
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
+        frame->color.hdr.max_luma = opts->hdr_reference_white;
+
     if (fp->hwdec) {
 
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par.imgfmt);
@@ -871,6 +875,10 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
         target->color.transfer = opts->target_trc;
     if (opts->target_peak && (!target->color.hdr.max_luma || !hint))
         target->color.hdr.max_luma = opts->target_peak;
+    if (opts->hdr_reference_white && (!target->color.hdr.max_luma || !hint) &&
+        !pl_color_transfer_is_hdr(target->color.transfer)) {
+        target->color.hdr.max_luma = opts->hdr_reference_white;
+    }
     if ((!target->color.hdr.min_luma || !hint))
         apply_target_contrast(p, &target->color, min_luma);
     if (opts->target_gamut) {
@@ -1172,6 +1180,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
+        if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(hint.transfer))
+            hint.hdr.max_luma = opts->hdr_reference_white;
         // Always set maxCLL, display uses this metadata and we shouldn't let it
         // fallback to default value.
         if (!hint.hdr.max_cll)
