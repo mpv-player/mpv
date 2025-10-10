@@ -183,6 +183,7 @@ struct vo_wayland_output {
     int phys_width;
     int phys_height;
     int scale;
+    enum wl_output_transform transform;
     double refresh_rate;
     char *make;
     char *model;
@@ -1595,6 +1596,7 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
     output->geometry.y0 = y;
     output->phys_width = phys_width;
     output->phys_height = phys_height;
+    output->transform = transform;
 }
 
 static void output_handle_mode(void *data, struct wl_output *wl_output,
@@ -1607,8 +1609,14 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
     if (!(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
-    output->geometry.x1 = width;
-    output->geometry.y1 = height;
+    if (output->transform % 2) {
+        output->geometry.x1 = height;
+        output->geometry.y1 = width;
+    } else {
+        output->geometry.x1 = width;
+        output->geometry.y1 = height;
+    }
+
     output->flags = flags;
     output->refresh_rate = (double)refresh * 0.001;
 }
