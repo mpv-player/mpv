@@ -1016,15 +1016,15 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->color.transfer = PL_COLOR_TRC_UNKNOWN;
     }
 
-    if (!params->color.hdr.max_luma) {
-        if (params->color.transfer == PL_COLOR_TRC_HLG) {
-            params->color.hdr.max_luma = 1000; // reference display
-        } else {
-            // If the signal peak is unknown, we're forced to pick the TRC's
-            // nominal range as the signal peak to prevent clipping
-            params->color.hdr.max_luma = pl_color_transfer_nominal_peak(params->color.transfer) * MP_REF_WHITE;
-        }
-    }
+    // If the signal peak is unknown, we're forced to pick the TRC's
+    // nominal range as the signal peak to prevent clipping
+    pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+        .color      = &params->color,
+        .metadata   = PL_HDR_METADATA_HDR10,
+        .scaling    = PL_HDR_NORM,
+        .out_min    = NULL,
+        .out_max    = &params->color.hdr.max_luma,
+    ));
 
     if (!pl_color_space_is_hdr(&params->color)) {
         // Some clips have leftover HDR metadata after conversion to SDR, so to
