@@ -1021,8 +1021,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
         .color      = &params->color,
         .metadata   = PL_HDR_METADATA_HDR10,
-        .scaling    = PL_HDR_NORM,
-        .out_min    = NULL,
+        .scaling    = PL_HDR_NITS,
         .out_max    = &params->color.hdr.max_luma,
     ));
 
