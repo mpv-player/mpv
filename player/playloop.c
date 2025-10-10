@@ -1063,7 +1063,9 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         int config_format = 0;
         uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
         vo_query_formats(vo, fmts);
-        for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
+        if (fmts[IMGFMT_RGBA - IMGFMT_START])
+            config_format = IMGFMT_RGBA;
+        for (int fmt = IMGFMT_START; fmt < IMGFMT_END && !config_format; fmt++) {
             if (fmts[fmt - IMGFMT_START]) {
                 config_format = fmt;
                 break;
@@ -1080,7 +1082,9 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .w = w,   .h = h,
             .p_w = 1, .p_h = 1,
             .force_window = true,
+            .color = pl_color_space_srgb,
         };
+        mp_image_params_guess_csp(&p);
         if (vo_reconfig(vo, &p) < 0)
             goto err;
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
