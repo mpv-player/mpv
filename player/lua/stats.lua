@@ -1001,8 +1001,7 @@ local function add_video(s)
 
     local track = mp.get_property_native("current-tracks/video")
     append(s, "", {prefix=track and track.image and "Image:" or "Video:", nl=o.nl .. o.nl, indent=""})
-    if track then
-        append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""})
+    if track and append(s, track["codec-desc"], {prefix_sep="", nl="", indent=""}) then
         append(s, track["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
                no_prefix_markup=true, suffix="]"})
         if track["codec"] ~= track["decoder"] then
