@@ -571,6 +571,7 @@ local function activate_shortcut(info)
 
    if info.key_text == " " then
        activate_focused_item(true)
+       return
    end
 
    for i, item in ipairs(items[focused_level]) do
