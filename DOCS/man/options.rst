@@ -7354,6 +7354,19 @@ them.
         transfer function is SDR. This way you can control SDR output separately
         from HDR output.
 
+``--linearize-srgb-as-power22``
+    When enabled, sRGB is linearized using a pure gamma 2.2 function, instead of
+    the sRGB piecewise function. There is some disagreement regarding the sRGB
+    specification and whether it should be treated as a piecewise function.
+    Many displays are actually gamma 2.2, and content mastered for PC is typically
+    affected by that. Disabled by default. (Only for ``--vo=gpu-next``)
+
+    See for more details:
+    https://community.acescentral.com/t/srgb-piece-wise-eotf-vs-pure-gamma/4024
+    https://github.com/KhronosGroup/DataFormat/issues/19
+    https://gitlab.freedesktop.org/pq/color-and-hdr/-/issues/12
+    https://github.com/dylanraga/win11hdr-srgb-to-gamma2.2-icm
+
 ``--tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping images onto the target
     display. This is relevant for both HDR->SDR conversion as well as gamut
