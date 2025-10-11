@@ -701,12 +701,27 @@ static void script_get_property_bool(js_State *J)
         js_pushboolean(J, result);
 }
 
+// true if we don't lose (too much) precision when casting to int64
+static bool same_as_int64(double d)
+{
+    // The range checks also validly filter inf and nan, so behavior is defined
+    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
+}
+
 // args: name, number
 static void script_set_property_number(js_State *J)
 {
     double v = js_tonumber(J, 2);
     mpv_handle *h = jclient(J);
-    int e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
+    // If the number might be an integer, then set it as integer. The mpv core
+    // will (probably) convert INT64 to DOUBLE when setting, but not the other
+    // way around.
+    int e;
+    if (same_as_int64(v)) {
+        e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_INT64, &(int64_t){v});
+    } else {
+        e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
+    }
     push_status(J, e);
 }
 
@@ -1051,13 +1066,6 @@ static int get_obj_properties(void *ta_ctx, char ***keys, js_State *J, int idx)
 
     js_pop(J, 1);  // the iterator
     return length;
-}
-
-// true if we don't lose (too much) precision when casting to int64
-static bool same_as_int64(double d)
-{
-    // The range checks also validly filter inf and nan, so behavior is defined
-    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
 }
 
 static int jsL_checkint(js_State *J, int idx)
