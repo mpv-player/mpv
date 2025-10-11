@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import fileinput
 import os
+import re
 import shutil
 import subprocess
 from optparse import OptionParser
@@ -48,12 +49,12 @@ def sign_bundle(binary_name):
                 subprocess.run(["codesign", "--force", "-s", "-", path])
     subprocess.run(["codesign", "--force", "-s", "-", bundle_path(binary_name)])
 
-def bundle_version(src_path):
+def bundle_version(build_path):
     version = "UNKNOWN"
-    version_path = os.path.join(src_path, "MPV_VERSION")
-    if os.path.exists(version_path):
-        x = open(version_path)
-        version = x.read()
+    version_h_path = os.path.join(build_path, "common", "version.h")
+    if os.path.exists(version_h_path):
+        x = open(version_h_path)
+        version = re.findall(r"#define\s+VERSION\s+\"v(.+)\"", x.read())[0]
         x.close()
     return version
 
@@ -70,9 +71,10 @@ def main():
         parser.error("incorrect number of arguments")
     else:
         binary_name = args[0]
+        build_path = os.path.dirname(binary_name)
         src_path = args[1] if len(args) > 1 else "."
 
-    version = bundle_version(src_path).rstrip()
+    version = bundle_version(build_path).rstrip()
 
     print(f"Creating macOS application bundle (version: {version})...")
     print("> copying bundle skeleton")
