@@ -675,6 +675,21 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
         frame->color.hdr.max_luma = opts->hdr_reference_white;
 
+    if (opts->linearize_srgb_as_power22 && frame->color.transfer == PL_COLOR_TRC_SRGB) {
+        // The sRGB EOTF is a pure gamma 2.2 function. There is some disagreement
+        // regarding the sRGB specification and whether it should be treated
+        // as a piecewise function. Many displays are actually gamma 2.2, and content
+        // mastered for PC is typically affected by that. Therefore, linearize it
+        // as such to avoid raised blacks.
+        // See:
+        // IEC 61966-2-1-1999
+        // <https://community.acescentral.com/t/srgb-piece-wise-eotf-vs-pure-gamma/4024>
+        // <https://github.com/KhronosGroup/DataFormat/issues/19>
+        // <https://gitlab.freedesktop.org/pq/color-and-hdr/-/issues/12>
+        // <https://github.com/dylanraga/win11hdr-srgb-to-gamma2.2-icm>
+        frame->color.transfer = PL_COLOR_TRC_GAMMA22;
+    }
+
     if (fp->hwdec) {
 
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par.imgfmt);
