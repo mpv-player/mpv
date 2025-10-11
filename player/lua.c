@@ -32,7 +32,6 @@
 #include "common/common.h"
 #include "options/m_property.h"
 #include "common/msg.h"
-#include "common/msg_control.h"
 #include "common/stats.h"
 #include "options/m_option.h"
 #include "input/input.h"
@@ -497,39 +496,6 @@ error_out:
         lua_close(ctx->state);
     talloc_free(ctx);
     return r;
-}
-
-static int check_loglevel(lua_State *L, int arg)
-{
-    const char *level = luaL_checkstring(L, arg);
-    int n = mp_msg_find_level(level);
-    if (n >= 0)
-        return n;
-    luaL_error(L, "Invalid log level '%s'", level);
-    abort();
-}
-
-static int script_log(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-
-    int msgl = check_loglevel(L, 1);
-
-    int last = lua_gettop(L);
-    lua_getglobal(L, "tostring"); // args... tostring
-    for (int i = 2; i <= last; i++) {
-        lua_pushvalue(L, -1); // args... tostring tostring
-        lua_pushvalue(L, i); // args... tostring tostring args[i]
-        lua_call(L, 1, 1); // args... tostring str
-        const char *s = lua_tostring(L, -1);
-        if (s == NULL)
-            return luaL_error(L, "Invalid argument");
-        mp_msg(ctx->log, msgl, (i == 2 ? "%s" : " %s"), s);
-        lua_pop(L, 1);  // args... tostring
-    }
-    mp_msg(ctx->log, msgl, "\n");
-
-    return 0;
 }
 
 static int script_find_config_file(lua_State *L)
@@ -1226,7 +1192,6 @@ struct fn_entry {
 };
 
 static const struct fn_entry main_fns[] = {
-    FN_ENTRY(log),
     AF_ENTRY(raw_wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
