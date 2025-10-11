@@ -33,7 +33,7 @@ local options = {
     seconds_to_close_submenus = 0.2,
 }
 
-local open_menus
+local open_menus = {}
 local items
 local focused_level = 1
 local focused_index
@@ -181,15 +181,15 @@ local function calculate_height(menu_items)
 end
 
 local function add_menu(menu_items, x, y)
-    if not menu_items[1] then
-        return
-    end
-
     local visible_items = {}
     for _, item in ipairs(menu_items) do
         if not has_state(item, "hidden") then
             visible_items[#visible_items + 1] = item
         end
+    end
+
+    if not visible_items[1] then
+        return
     end
 
     local checkbox = has_checkbox(visible_items)
@@ -628,6 +628,10 @@ mp.register_script_message("open", function ()
 
     add_menu(mp.get_property_native("menu-data"), x, y)
 
+    if not open_menus[1] then
+        return
+    end
+
     render()
 
     for key, fn in pairs(bindings) do
@@ -638,6 +642,10 @@ mp.register_script_message("open", function ()
     end
 end)
 
-mp.register_script_message("select", activate_focused_item)
+mp.register_script_message("select", function ()
+    if open_menus[1] then
+        activate_focused_item()
+    end
+end)
 
 require "mp.options".read_options(options)
