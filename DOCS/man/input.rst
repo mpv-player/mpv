@@ -2967,7 +2967,7 @@ Property list
     Whether the window has focus. Might not be supported by all VOs.
 
 ``ambient-light``
-    Ambient lighting condition in lux. (macOS only)
+    Ambient lighting condition in lux. Only observable on macOS (macOS and Linux only)
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
