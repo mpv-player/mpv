@@ -409,6 +409,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .early_flush = -1,
     .shader_cache = true,
     .hwdec_interop = "auto",
+    .treat_srgb_as_power22 = 1, // input
 };
 
 static OPT_STRING_VALIDATE_FUNC(validate_error_diffusion_opt);
@@ -445,6 +446,8 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(10, 10000)},
         {"hdr-reference-white", OPT_CHOICE(hdr_reference_white, {"auto", 0}),
             M_RANGE(10, 10000)},
+        {"treat-srgb-as-power22", OPT_CHOICE(treat_srgb_as_power22,
+            {"no", 0}, {"input", 1}, {"output", 2}, {"both", 1|2}, {"auto", 1|2|4})},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
             M_RANGE(10, 10 / PL_COLOR_HDR_BLACK)},
         {"target-gamut", OPT_CHOICE_C(target_gamut, pl_csp_prim_names)},

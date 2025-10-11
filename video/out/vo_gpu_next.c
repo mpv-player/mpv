@@ -675,6 +675,13 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
         frame->color.hdr.max_luma = opts->hdr_reference_white;
 
+
+    if (opts->treat_srgb_as_power22 & 1 && frame->color.transfer == PL_COLOR_TRC_SRGB) {
+        // The sRGB EOTF is a pure gamma 2.2 function. See reference display in
+        // IEC 61966-2-1-1999. Linearize sRGB to display light.
+        frame->color.transfer = PL_COLOR_TRC_GAMMA22;
+    }
+
     if (fp->hwdec) {
 
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par.imgfmt);
@@ -1246,6 +1253,34 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     pl_frame_from_swapchain(&target, &swframe);
     bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
+    if (target.color.transfer == PL_COLOR_TRC_SRGB) {
+        // sRGB reference display is pure 2.2 power function, see IEC 61966-2-1-1999.
+        if (opts->treat_srgb_as_power22 & 2)
+            target.color.transfer = PL_COLOR_TRC_GAMMA22;
+
+        // TODO: Vulkan on Wayland currently interprets VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+        // in ambiguous way, depending if compositor advertises sRGB support.
+        // There is currently no clear path forward to resolve this ambiguity.
+        // Depending how it's resolved in Wayland Protocol, Mesa, things will
+        // change.
+        // See: <https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/456>
+#ifdef _WIN32
+        // Windows uses the sRGB piecewise function. Send piecewise sRGB to
+        // Windows in HDR mode so that it can be converted to PQ, the same way
+        // as mpv does internally. Note that in SDR mode, even with ACM enabled,
+        // Windows assumes the display is sRGB. It doesn't perform gamma
+        // conversion, or any conversions would roundtrip back to sRGB.
+        // In which case the EOTF depends on the display.
+        // Ideally, compositors would agree on how to handle sRGB, but I’ll
+        // leave that part of the story for the reader to explore.
+        // Note: Older Windows versions, without ACM, were not able to convert
+        // sRGB to PQ output. We are not concerned about this case, as it would
+        // look wrong anyway.
+        bool target_pq = !target_unknown && target_csp.transfer == PL_COLOR_TRC_PQ;
+        if (opts->treat_srgb_as_power22 & 4 && target_pq)
+            target.color.transfer = PL_COLOR_TRC_SRGB;
+#endif
+    }
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
@@ -1621,6 +1656,17 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         target.color = image.color;
     } else {
         target.color = pl_color_space_srgb;
+    }
+
+    // sRGB reference display is pure 2.2 power function, see IEC 61966-2-1-1999.
+    // Round-trip back to sRGB if the source is also sRGB. In other cases, we
+    // use piecewise sRGB transfer function, as this is likely the be expected
+    // for file encoding.
+    if (opts->treat_srgb_as_power22 & 1 &&
+        target.color.transfer == PL_COLOR_TRC_SRGB &&
+        mpi->params.color.transfer == PL_COLOR_TRC_SRGB)
+    {
+        target.color.transfer = PL_COLOR_TRC_GAMMA22;
     }
 
     apply_crop(&image, src, mpi->params.w, mpi->params.h);

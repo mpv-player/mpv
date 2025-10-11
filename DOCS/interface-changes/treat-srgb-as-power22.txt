@@ -1,0 +1,1 @@
+add `--treat-srgb-as-power22`

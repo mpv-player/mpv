@@ -7354,6 +7354,16 @@ them.
         transfer function is SDR. This way you can control SDR output separately
         from HDR output.
 
+``--treat-srgb-as-power22=<no|input|output|both|auto>``
+    When enabled, sRGB is (de)linearized using a pure power 2.2 curve instead of
+    the standard sRGB piecewise transfer function.
+
+    ``auto`` behaves like ``both``, with possible platform-specific adjustments
+    to ensure a consistent appearance. Depending on the platform, the sRGB EOTF
+    used by the system compositor may differ.
+
+    The default is ``input``. (Only for ``--vo=gpu-next``)
+
 ``--tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping images onto the target
     display. This is relevant for both HDR->SDR conversion as well as gamut
