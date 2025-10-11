@@ -4046,11 +4046,42 @@ Property list
 
 ``command-list``
     The list of input commands. This returns an array of maps, where each map
-    node represents a command. This map currently only has a single entry:
-    ``name`` for the name of the command. (This property is supposed to be a
-    replacement for ``--input-cmdlist``. The option dumps some more
-    information, but it's a valid feature request to extend this property if
-    needed.)
+    node represents a command. This map has the following entries:
+
+    ``name``
+        The name of the command.
+
+    ``vararg``
+        Whether the command accepts a variable number of arguments.
+
+    ``args``
+        An array of maps, where each map node represents an argument with the
+        following entries:
+
+        ``name``
+            The name of the argument.
+
+        ``type``
+            The name of the argument type, like ``String`` or ``Integer``.
+
+        ``optional``
+            Whether the argument is optional.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each command entry)
+                "name"    MPV_FORMAT_STRING
+                "vararg"  MPV_FORMAT_FLAG
+                "args"    MPV_FORMAT_NODE_ARRAY
+                    MPV_FORMAT_NODE_MAP
+                        "name"     MPV_FORMAT_STRING
+                        "type"     MPV_FORMAT_STRING
+                        "optional" MPV_FORMAT_FLAG
 
 ``input-bindings``
     The list of current input key bindings. This returns an array of maps,
