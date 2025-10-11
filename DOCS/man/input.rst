@@ -3960,6 +3960,12 @@ Property list
     somewhat weird form (apparently "hex BCD"), indicating the release version
     of the libass library linked to mpv.
 
+``subrandr-version``
+    The value of ``sbr_library_version()`` as a string in the format
+    ``<major>.<minor>.<patch>``, indicating the release version of the subrandr
+    library at runtime. This property is unavailable if mpv is not compiled
+    with subrandr enabled.
+
 ``platform``
     Returns a string describing what target platform mpv was built for. The value
     of this is dependent on what the underlying build system detects. Some of the
