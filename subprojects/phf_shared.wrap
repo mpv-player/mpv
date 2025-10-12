@@ -1,0 +1,6 @@
+[wrap-file]
+directory = phf_shared-0.11.3
+source_url =  https://crates.io/api/v1/crates/phf_shared/0.11.3/download
+source_filename = phf_shared-0.11.3.tar.gz
+source_hash = 67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5
+patch_directory = phf_shared
