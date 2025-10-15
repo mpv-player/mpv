@@ -98,6 +98,22 @@ typedef const char * const (mp_ch_layout_tuple)[2];
     {7, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g)}}
 #define MP_CHMAP8(a, b, c, d, e, f, g, h) \
     {8, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h)}}
+#define MP_CHMAP9(a, b, c, d, e, f, g, h, i) \
+    {9, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i)}}
+#define MP_CHMAP10(a, b, c, d, e, f, g, h, i, j) \
+    {10, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j)}}
+#define MP_CHMAP11(a, b, c, d, e, f, g, h, i, j, k) \
+    {11, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k)}},
+#define MP_CHMAP12(a, b, c, d, e, f, g, h, i, j, k, l) \
+    {12, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k), MP_SP(l)}}
+#define MP_CHMAP13(a, b, c, d, e, f, g, h, i, j, k, l, m) \
+    {13, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k), MP_SP(l), MP_SP(m)}}
+#define MP_CHMAP14(a, b, c, d, e, f, g, h, i, j, k, l, m, n) \
+    {14, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k), MP_SP(l), MP_SP(m), MP_SP(n)}}
+#define MP_CHMAP15(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) \
+    {15, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k), MP_SP(l), MP_SP(m), MP_SP(n), MP_SP(o)}}
+#define MP_CHMAP16(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) \
+    {16, {MP_SP(a), MP_SP(b), MP_SP(c), MP_SP(d), MP_SP(e), MP_SP(f), MP_SP(g), MP_SP(h), MP_SP(i), MP_SP(j), MP_SP(k), MP_SP(l), MP_SP(m), MP_SP(n), MP_SP(o), MP_SP(p)}}
 
 #define MP_CHMAP_INIT_MONO {1, {MP_SPEAKER_ID_FC}}
 #define MP_CHMAP_INIT_STEREO MP_CHMAP2(FL, FR)
