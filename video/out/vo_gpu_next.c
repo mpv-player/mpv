@@ -1092,7 +1092,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // set in the hint. But also because setting target peak in SDR mode is
         // very specific usecase, needs proper calibration, users can set it manually.
         target_csp.hdr.max_luma = 0;
-        target_csp.hdr.min_luma = 0;
         target_csp.hdr.max_cll = 0;
         target_csp.hdr.max_fall = 0;
     }
