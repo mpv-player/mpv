@@ -446,7 +446,7 @@ const struct m_sub_options gl_video_conf = {
         {"hdr-reference-white", OPT_CHOICE(hdr_reference_white, {"auto", 0}),
             M_RANGE(10, 10000)},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
-            M_RANGE(10, 1000000)},
+            M_RANGE(10, 10 / PL_COLOR_HDR_BLACK)},
         {"target-gamut", OPT_CHOICE_C(target_gamut, pl_csp_prim_names)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
             {"auto",     TONE_MAPPING_AUTO},
