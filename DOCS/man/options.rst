@@ -7354,6 +7354,36 @@ them.
         transfer function is SDR. This way you can control SDR output separately
         from HDR output.
 
+``--sdr-adjust-gamma=<auto|yes|no>``
+    SDR transfer functions are often ambiguous or mismatched. Even if files are
+    tagged with a specific function (e.g. ``bt.709``), the actual content may
+    not match. For example, most screen capture software tags its output as
+    ``bt.709``, but the content is usually a direct sRGB capture.
+
+    On the target side, "sRGB" is also ambiguous, some displays are factory
+    calibrated to a pure power 2.2 gamma, while others may use the sRGB
+    piecewise curve. Both of which are typically configured as "sRGB" in the
+    swapchain configuration. Similar inconsistencies exist across compositor
+    implementations of color management, as different platforms handle this in
+    different ways. See also ``--treat-srgb-as-power22``.
+    Additionally, ``bt.1886`` requires display contrast ratio to be known for
+    correct rendering, which is often unavailable. Use``--target-contrast`` to
+    specify it.
+
+    This option controls whether SDR content should have its gamma adjusted.
+    It only applies to the "sRGB" swapchain target configuration, since that is
+    the most common and ambiguous case. If set to ``no``, content tagged as
+    ``sRGB``, ``gamma2.2`` or ``bt.1886`` will be rendered as-is. If set to
+    ``yes``, it will be converted based on the available metadata.
+
+    ``auto`` (default) behaves like ``no``, except when ``--target-trc`` is
+    explicitly set, in which case it behaves like ``yes``.
+
+    Generally it's recommended to enable this option, if you can ensure that
+    both source and target metadata is correct.
+
+    (Only for ``--vo=gpu-next``)
+
 ``--treat-srgb-as-power22=<no|input|output|both|auto>``
     When enabled, sRGB is (de)linearized using a pure power 2.2 curve instead of
     the standard sRGB piecewise transfer function.

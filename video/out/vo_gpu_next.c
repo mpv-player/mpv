@@ -1253,6 +1253,17 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     pl_frame_from_swapchain(&target, &swframe);
     bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
+    if (target.color.transfer == PL_COLOR_TRC_SRGB && frame->current &&
+        ((opts->sdr_adjust_gamma == 0 && opts->target_trc == PL_COLOR_TRC_UNKNOWN) ||
+         opts->sdr_adjust_gamma == -1))
+    {
+        switch (frame->current->params.color.transfer) {
+        case PL_COLOR_TRC_BT_1886:
+        case PL_COLOR_TRC_GAMMA22:
+        case PL_COLOR_TRC_SRGB:
+            target.color.transfer = frame->current->params.color.transfer;
+        }
+    }
     if (target.color.transfer == PL_COLOR_TRC_SRGB) {
         // sRGB reference display is pure 2.2 power function, see IEC 61966-2-1-1999.
         if (opts->treat_srgb_as_power22 & 2)
