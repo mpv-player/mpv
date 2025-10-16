@@ -1,1 +1,2 @@
 add `--treat-srgb-as-power22`
+add `--sdr-adjust-gamma`

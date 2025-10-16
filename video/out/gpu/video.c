@@ -446,6 +446,8 @@ const struct m_sub_options gl_video_conf = {
             M_RANGE(10, 10000)},
         {"hdr-reference-white", OPT_CHOICE(hdr_reference_white, {"auto", 0}),
             M_RANGE(10, 10000)},
+        {"sdr-adjust-gamma", OPT_CHOICE(sdr_adjust_gamma,
+            {"auto", 0}, {"yes", 1}, {"no", -1})},
         {"treat-srgb-as-power22", OPT_CHOICE(treat_srgb_as_power22,
             {"no", 0}, {"input", 1}, {"output", 2}, {"both", 1|2}, {"auto", 1|2|4})},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
