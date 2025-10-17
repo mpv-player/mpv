@@ -89,7 +89,9 @@ local searching_history = false
 local history_paths = {}
 local histories_to_save = {}
 
+local MAX_LOG_LINES = 10000
 local log_buffers = {}
+local log_offset = 0
 local key_bindings = {}
 local dont_bind_up_down = false
 local global_margins = { t = 0, b = 0 }
@@ -757,7 +759,9 @@ local function render()
 
     local log_ass = ""
     local log_buffer = log_buffers[id] or {}
-    for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
+    log_offset = math.max(math.min(log_offset, #log_buffer - max_lines), 0)
+    for i = #log_buffer - math.min(max_lines, #log_buffer) - log_offset + 1,
+            #log_buffer - log_offset do
         log_ass = log_ass .. style .. log_buffer[i].style ..
                   ass_escape(log_buffer[i].text) .. "\\N"
     end
@@ -1335,6 +1339,15 @@ local function clear_log_buffer()
     render()
 end
 
+local function scroll_log(amount)
+    if selectable_items then
+        return
+    end
+
+    log_offset = log_offset + amount
+    render()
+end
+
 -- Returns a string of UTF-8 text from the clipboard (or the primary selection)
 local function get_clipboard(clip)
     if platform == "x11" then
@@ -1495,6 +1508,8 @@ local function get_bindings()
         { "down",        function() move_history(1) end         },
         { "ctrl+n",      function() move_history(1) end         },
         { "wheel_down",  function() move_history(1, true) end   },
+        { "shift+up",    function() scroll_log(1)  end          },
+        { "shift+down",  function() scroll_log(-1) end          },
         { "wheel_left",  function() end                         },
         { "wheel_right", function() end                         },
         { "ctrl+left",   prev_word                              },
@@ -1674,6 +1689,7 @@ mp.register_script_message("get-input", function (script_name, args)
         selectable_items = nil
         unbind_mouse()
         id = args.id or script_name .. prompt
+        log_offset = 0
         completion_buffer = {}
         autoselect_completion = args.autoselect_completion
 
@@ -1696,7 +1712,7 @@ mp.register_script_message("get-input", function (script_name, args)
     mp.commandv("script-message-to", input_caller, "input-event", "opened")
 end)
 
--- Add a line to the log buffer (which is limited to 100 lines)
+-- Add a line to the log buffer
 mp.register_script_message("log", function (message)
     local log_buffer = log_buffers[id]
     message = utils.parse_json(message)
@@ -1708,12 +1724,16 @@ mp.register_script_message("log", function (message)
                          message.terminal_style or "",
     }
 
-    if #log_buffer > 100 then
+    if #log_buffer > MAX_LOG_LINES then
         table.remove(log_buffer, 1)
     end
 
     if not open then
         return
+    end
+
+    if log_offset > 0 then
+        log_offset = log_offset + 1
     end
 
     if not update_timer:is_enabled() then
