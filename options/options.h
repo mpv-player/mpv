@@ -185,7 +185,6 @@ typedef struct MPOpts {
     bool lua_load_ytdl;
     char *lua_ytdl_format;
     char **lua_ytdl_raw_options;
-    bool lua_ytdl_extract_chapters;
     bool lua_load_stats;
     bool lua_load_console;
     int lua_load_auto_profiles;
