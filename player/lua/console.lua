@@ -114,6 +114,7 @@ local first_match_to_print = 1
 local default_item
 local item_positions = {}
 local max_item_width = 0
+local horizontal_offset = 0
 
 local complete
 local cycle_through_completions
@@ -716,7 +717,7 @@ local function render()
             (global_margins.t + (1 - global_margins.t - global_margins.b) / 2) -
             (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
         alignment = 7
-        clipping_coordinates = "0,0," .. x + max_item_width .. "," .. osd_h
+        clipping_coordinates = x .. ",0," .. x + max_item_width .. "," .. osd_h
     else
         x = get_margin_x()
         y = osd_h * (1 - global_margins.b) - get_margin_y()
@@ -837,7 +838,7 @@ local function render()
 
         ass:new_event()
         ass:an(4)
-        ass:pos(x, item_y)
+        ass:pos(x - horizontal_offset, item_y)
         ass:append(style .. item)
 
         item_positions[#item_positions + 1] =
@@ -1211,6 +1212,11 @@ local function move_history(amount, is_wheel)
     render()
 end
 
+local function horizontal_scroll(amount)
+    horizontal_offset = math.max(horizontal_offset + amount, 0)
+    render()
+end
+
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
@@ -1240,6 +1246,7 @@ local function search_history()
 
     searching_history = true
     selectable_items = {}
+    horizontal_offset = 0
 
     for i = 1, #history do
         selectable_items[i] = history[#history + 1 - i]
@@ -1512,6 +1519,12 @@ local function get_bindings()
         { "shift+down",  function() scroll_log(-1) end          },
         { "wheel_left",  function() end                         },
         { "wheel_right", function() end                         },
+        { "shift+left",  function() horizontal_scroll(-25) end  },
+        { "shift+right", function() horizontal_scroll( 25) end  },
+        { "wheel_left",  function() horizontal_scroll(-25) end  },
+        { "wheel_right", function() horizontal_scroll( 25) end  },
+        { "shift+wheel_up",   function() horizontal_scroll(-25) end },
+        { "shift+wheel_down", function() horizontal_scroll( 25) end },
         { "ctrl+left",   prev_word                              },
         { "alt+b",       prev_word                              },
         { "ctrl+right",  next_word                              },
@@ -1668,6 +1681,7 @@ mp.register_script_message("get-input", function (script_name, args)
 
     if args.items then
         selectable_items = {}
+        horizontal_offset = 0
 
         -- Limit the number of characters to prevent libass from freezing mpv.
         -- Not important for terminal output.
