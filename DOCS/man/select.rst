@@ -28,6 +28,12 @@ PGUP and Ctrl+b
 PGDN and Ctrl+f
     Scroll down one page.
 
+Shift+LEFT
+    Scroll left.
+
+Shift+RIGHT
+    Scroll right.
+
 Ctrl+y
     Copy the focused item to the clipboard.
 
@@ -40,6 +46,12 @@ WHEEL_UP
 
 WHEEL_DOWN
     Scroll down.
+
+WHEEL_LEFT and Shift+WHEEL_DOWN
+    Scroll left.
+
+WHEEL_RIGHT and Shift+WHEEL_UP
+    Scroll right.
 
 Typing printable characters does a fuzzy search of the presented items.
 
