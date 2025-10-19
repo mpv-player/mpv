@@ -168,13 +168,16 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
 
     struct sbr_subtitle_context context = (sbr_subtitle_context) {
         .dpi = 72,
-        .padding_top = (int32_t)dim.mt << 6,
-        .padding_bottom = (int32_t)dim.mb << 6,
-        .padding_left = (int32_t)dim.ml << 6,
-        .padding_right = (int32_t)dim.mr << 6,
         .video_height = (int32_t)(dim.h - dim.mt - dim.mb) << 6,
         .video_width = (int32_t)(dim.w - dim.ml - dim.mr) << 6,
     };
+
+    if (opts->sub_use_margins) {
+        context.padding_top = (int32_t)dim.mt << 6;
+        context.padding_bottom = (int32_t)dim.mb << 6;
+        context.padding_left = (int32_t)dim.ml << 6;
+        context.padding_right = (int32_t)dim.mr << 6;
+    }
 
     unsigned t = lrint(pts * 1000);
 
@@ -193,6 +196,13 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
         ++bitmaps->change_id;
 
         bitmap->bitmap = bitmaps->packed->planes[0];
+        if (!opts->sub_use_margins) {
+            bitmap->x = dim.ml;
+            bitmap->y = dim.mt;
+        } else {
+            bitmap->x = 0;
+            bitmap->y = 0;
+        }
         bitmap->w = dim.w;
         bitmap->h = dim.h;
         bitmap->dw = dim.w;
