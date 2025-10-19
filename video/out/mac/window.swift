@@ -78,13 +78,11 @@ class Window: NSWindow, NSWindowDelegate {
 
         // workaround for an AppKit bug where the NSWindow can't be placed on a
         // none Main screen NSScreen outside the Main screen's frame bounds
-        if let wantedScreen = screen, screen != NSScreen.main {
-            var absoluteWantedOrigin = contentRect.origin
-            absoluteWantedOrigin.x += wantedScreen.frame.origin.x
-            absoluteWantedOrigin.y += wantedScreen.frame.origin.y
+        if screen != NSScreen.main {
+            let absolutePos = absolutePosition(for: contentRect, screen: screen)
 
-            if absoluteWantedOrigin != self.frame.origin {
-                self.setFrameOrigin(absoluteWantedOrigin)
+            if absolutePos.origin != self.frame.origin {
+                self.setFrameOrigin(absolutePos.origin)
             }
         }
 
@@ -342,11 +340,11 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
-    func updateFrame(_ rect: NSRect) {
+    func updateFrame(_ rect: NSRect, _ screen: NSScreen? = nil) {
         if rect != frame {
             unfsContentFrame = rect
             if !isInFullscreen {
-                let cRect = frameRect(forContentRect: rect)
+                let cRect = absolutePosition(for: frameRect(forContentRect: rect), screen: screen)
                 setFrame(cRect, display: true)
                 common.windowDidUpdateFrame()
             }
@@ -369,6 +367,14 @@ class Window: NSWindow, NSWindowDelegate {
         super.setFrame(frameRect, display: flag)
 
         if keepAspect { contentAspectRatio = unfsContentFrame.size }
+    }
+
+    func absolutePosition(for rect: NSRect, screen: NSScreen?) -> NSRect {
+        guard let tScreen = screen else { return rect }
+        var absolutePosition = rect
+        absolutePosition.origin.x += tScreen.frame.origin.x
+        absolutePosition.origin.y += tScreen.frame.origin.y
+        return absolutePosition
     }
 
     func centeredContentSize(for rect: NSRect, size sz: NSSize) -> NSRect {
