@@ -42,6 +42,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "input/input.h"
 #include "misc/ctype.h"
 #include "options/m_config.h"
 #include "options/path.h"
@@ -400,6 +401,10 @@ bool vo_drm_acquire_crtc(struct vo_drm_state *drm)
         MP_ERR(drm, "Failed to commit ModeSetting atomic request: %s\n", mp_strerror(errno));
         goto err;
     }
+
+    // Make input_ctx know about the geometry so that libinput inputs can be processed.
+    struct mp_rect rc = {0, 0, drm->width, drm->height};
+    mp_input_set_mouse_transform(drm->vo->input_ctx, &rc, NULL);
 
     drmModeAtomicFree(request);
     return true;
