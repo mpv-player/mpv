@@ -955,9 +955,11 @@ static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
     }
 
     if (!mpctx->display_sync_active) {
-        mpctx->speed_factor_a = 1.0;
-        mpctx->speed_factor_v = 1.0;
-        update_playback_speed(mpctx);
+        if (mpctx->num_past_frames > 1 && mpctx->past_frames[1].num_vsyncs >= 0) {
+            mpctx->speed_factor_a = 1.0;
+            mpctx->speed_factor_v = 1.0;
+            update_playback_speed(mpctx);
+        }
 
         update_av_diff(mpctx, mpctx->time_frame > 0 ?
             mpctx->time_frame * mpctx->video_speed : 0);
