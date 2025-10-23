@@ -1699,8 +1699,8 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (outputs == 1)
         update_output_geometry(wl, old_geometry, old_output_geometry);
 
-    MP_VERBOSE(wl, "Surface entered output %s %s (0x%x), scale = %f, refresh rate = %f Hz\n",
-               wl->current_output->make, wl->current_output->model,
+    MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
+               wl->current_output->make, wl->current_output->model, wl->current_output->name,
                wl->current_output->id, wl->scaling_factor, wl->current_output->refresh_rate);
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
@@ -3319,8 +3319,8 @@ static void remove_output(struct vo_wayland_output *out)
     if (!out)
         return;
 
-    MP_VERBOSE(out->wl, "Deregistering output %s %s (0x%x)\n", out->make,
-               out->model, out->id);
+    MP_VERBOSE(out->wl, "Deregistering output %s %s (%s) (0x%x)\n", out->make,
+               out->model, out->name, out->id);
     wl_list_remove(&out->link);
     wl_output_destroy(out->output);
     talloc_free(out->make);
