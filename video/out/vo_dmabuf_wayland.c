@@ -552,6 +552,8 @@ static void resize(struct vo *vo)
     vo->target_params->rotate = (vo->params->rotate % 90) * 90;
     vo->target_params->vflip = vo->params->vflip;
     mp_mutex_unlock(&vo->params_mutex);
+
+    vo->want_redraw = true;
 }
 
 static bool draw_osd(struct vo *vo, struct mp_image *cur, double pts)
