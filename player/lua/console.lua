@@ -1693,7 +1693,9 @@ mp.register_script_message("get-input", function (script_name, args)
         end
 
         for i, item in ipairs(args.items) do
-            selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, limit)
+            local last = next_utf8(item, limit) - 1
+            selectable_items[i] = item:gsub("[\r\n].*", "…"):sub(1, last) ..
+                                  (last < #item and "…" or "")
         end
 
         calculate_max_item_width()
