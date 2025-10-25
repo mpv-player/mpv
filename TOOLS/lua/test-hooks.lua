@@ -1,7 +1,7 @@
 local utils = require("mp.utils")
 
 local function hardsleep()
-    os.execute("sleep 1s")
+    os.execute("sleep 1")
 end
 
 local hooks = {"on_before_start_file", "on_load", "on_load_fail",
