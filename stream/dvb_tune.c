@@ -300,7 +300,7 @@ static int check_status(dvb_priv_t *priv, int fd_frontend, float tmout)
                 }
             }
         }
-        usleep(10000);
+        mp_sleep_ns(MP_TIME_MS_TO_NS(10));
         int tm2 = (int)mp_time_sec();
         if ((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
             ok = true;
@@ -345,17 +345,17 @@ static int diseqc_send_msg(int fd, fe_sec_voltage_t v, struct diseqc_cmd *cmd,
         return -1;
     if (ioctl(fd, FE_SET_VOLTAGE, v) < 0)
         return -1;
-    usleep(15 * 1000);
+    mp_sleep_ns(MP_TIME_MS_TO_NS(15));
     if (ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &cmd->cmd) < 0)
         return -1;
-    usleep(cmd->wait * 1000);
-    usleep(15 * 1000);
+    mp_sleep_ns(MP_TIME_MS_TO_NS(cmd->wait));
+    mp_sleep_ns(MP_TIME_MS_TO_NS(15));
     if (ioctl(fd, FE_DISEQC_SEND_BURST, b) < 0)
         return -1;
-    usleep(15 * 1000);
+    mp_sleep_ns(MP_TIME_MS_TO_NS(15));
     if (ioctl(fd, FE_SET_TONE, t) < 0)
         return -1;
-    usleep(100000);
+    mp_sleep_ns(MP_TIME_MS_TO_NS(100));
 
     return 0;
 }
