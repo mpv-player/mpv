@@ -207,6 +207,7 @@ struct input_opts {
     bool use_alt_gr;
     bool use_gamepad;
     bool use_media_keys;
+    bool use_libinput;
     bool default_bindings;
     bool builtin_bindings;
     bool builtin_dragging;
@@ -243,6 +244,9 @@ const struct m_sub_options input_config = {
         {"input-dragging-deadzone", OPT_INT(dragging_deadzone)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
+#endif
+#if HAVE_LIBINPUT
+        {"input-libinput", OPT_BOOL(use_libinput)},
 #endif
         {"window-dragging", OPT_BOOL(allow_win_drag)},
         {0}
@@ -892,6 +896,14 @@ void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
         if (ictx->mouse_src_mangle)
             ictx->mouse_src = *src;
     }
+    input_unlock(ictx);
+}
+
+void mp_input_get_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst)
+{
+    input_lock(ictx);
+    if (ictx->mouse_mangle)
+        *dst = ictx->mouse_dst;
     input_unlock(ictx);
 }
 
@@ -1795,6 +1807,7 @@ void mp_input_load_config(struct input_ctx *ictx)
     }
 
     bool use_gamepad = ictx->opts->use_gamepad;
+    bool use_libinput = ictx->opts->use_libinput;
     input_unlock(ictx);
 
 #if HAVE_SDL2_GAMEPAD
@@ -1802,6 +1815,12 @@ void mp_input_load_config(struct input_ctx *ictx)
         mp_input_sdl_gamepad_add(ictx);
 #else
     (void)use_gamepad;
+#endif
+#if HAVE_LIBINPUT
+    if (use_libinput)
+        mp_input_libinput_add(ictx);
+#else
+    (void)use_libinput;
 #endif
 }
 
