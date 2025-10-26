@@ -1333,13 +1333,8 @@ end
 -- Returns a string of UTF-8 text from the clipboard (or the primary selection)
 local function get_clipboard(clip)
     if platform == "x11" then
-        local res = utils.subprocess({
-            args = { "xclip", "-selection", clip and "clipboard" or "primary", "-out" },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
+        local property = clip and "clipboard/text" or "clipboard/text-primary"
+        return mp.get_property(property, "")
     elseif platform == "wayland" then
         if mp.get_property("current-clipboard-backend") == "wayland" then
             local property = clip and "clipboard/text" or "clipboard/text-primary"
