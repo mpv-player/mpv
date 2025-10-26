@@ -8279,6 +8279,15 @@ Miscellaneous
     not for the ``vo`` backend. See ``current-clipboard-backend`` property for
     more details.
 
+``--clipboard-xwayland=<yes|no>``
+    Enable X11 clipboard backend in suspected Wayland environments
+    (default: no).
+
+    Depending on the Wayland compositor, using X11 backend may result in mpv
+    unable to acquire clipboard data from native Wayland clients. Disabling the
+    X11 backend when Wayland backend is unavailable makes mpv fallback to the
+    VO backend which allows clipboard to work properly.
+
 ``--register``
     (Windows only) (available also as mpv-register helper)
 
