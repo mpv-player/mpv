@@ -8252,6 +8252,10 @@ Miscellaneous
     ``mac``
         macOS backend.
 
+    ``x11``
+        X11 backend. This backend is only available if the X server
+        supports the ``Xfixes`` extension.
+
     ``wayland``
         Wayland backend. This backend is only available if the compositor
         supports the ``ext-data-control-v1`` protocol.
@@ -8265,8 +8269,6 @@ Miscellaneous
     This is an object settings list option. See `List Options`_ for details.
 
 ``--clipboard-monitor=<yes|no>``
-    (Windows, Wayland and macOS only)
-
     Enable clipboard monitoring so that the ``clipboard`` property can be
     observed for content changes (default: no). This only affects clipboard
     implementations which use polling to monitor clipboard updates.
