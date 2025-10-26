@@ -773,6 +773,13 @@ if features['vapoursynth']
     sources += files('video/filter/vf_vapoursynth.c')
 endif
 
+xfixes = dependency('xfixes', version: '>= 1.0.0', required: get_option('x11-clipboard'))
+features += {'x11-clipboard': xfixes.found()}
+if features['x11-clipboard']
+    dependencies += xfixes
+    sources += files('player/clipboard/clipboard-x11.c')
+endif
+
 zimg = dependency('zimg', version: '>= 2.9', required: get_option('zimg'))
 features += {'zimg': zimg.found()}
 if features['zimg']

@@ -35,6 +35,7 @@ option('uwp', type: 'feature', value: 'disabled', description: 'Universal Window
 option('vapoursynth', type: 'feature', value: 'auto', description: 'VapourSynth filter bridge')
 option('vector', type: 'feature', value: 'auto', description: 'GCC vector instructions')
 option('win32-threads', type: 'feature', value: 'auto', description: 'win32 native threading')
+option('x11-clipboard', type: 'feature', value: 'auto', description: 'X11 clipboard backend')
 option('zimg', type: 'feature', value: 'auto', description: 'libzimg support (high quality software scaler)')
 option('zlib', type: 'feature', value: 'auto', description: 'zlib')
 
