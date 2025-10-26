@@ -8056,7 +8056,9 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
 #if HAVE_LIBBLURAY
     if (opt_ptr == &opts->stream_bluray_opts->angle) {
         struct demuxer *demuxer = mpctx->demuxer;
-        if (mpctx->playback_initialized && demuxer && demuxer->stream && strcmp(demuxer->stream->info->name, "bdvm/bluray")) {
+        if (mpctx->playback_initialized && demuxer && demuxer->stream &&
+                (!strcmp(demuxer->stream->info->name, "bd") ||
+                 !strcmp(demuxer->stream->info->name, "bdmv/bluray"))) {
             int angle = opts->stream_bluray_opts->angle - 1;
             stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
         }
