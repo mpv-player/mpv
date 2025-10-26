@@ -25,6 +25,7 @@ struct MPContext;
 struct mpv_global;
 
 #define CLIPBOARD_INIT_ENABLE_MONITORING (1 << 0)
+#define CLIPBOARD_INIT_ENABLE_XWAYLAND   (1 << 1)
 
 enum clipboard_data_type {
     CLIPBOARD_DATA_TEXT,
