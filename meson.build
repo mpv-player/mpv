@@ -774,9 +774,10 @@ if features['vapoursynth']
 endif
 
 xfixes = dependency('xfixes', version: '>= 1.0.0', required: get_option('x11-clipboard'))
-features += {'x11-clipboard': xfixes.found()}
+libx11 = dependency('x11', version: '>= 1.0.0', required: get_option('x11-clipboard'))
+features += {'x11-clipboard': xfixes.found() and libx11.found()}
 if features['x11-clipboard']
-    dependencies += xfixes
+    dependencies += [xfixes, libx11]
     sources += files('player/clipboard/clipboard-x11.c')
 endif
 
