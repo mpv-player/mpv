@@ -88,7 +88,7 @@ body:
           at `~/Library/Logs/mpv.log`. You can jump to that file via the `Help > Show log File…` menu.
 
 
-          If you have trouble producing a log file, you can alternatively use `--gpu-debug -v -v`,
+          If you have trouble producing a log file, you can alternatively use `--gpu-debug --msg-time -v -v`,
           save the terminal output to a file, and attach it to the issue.
 
 

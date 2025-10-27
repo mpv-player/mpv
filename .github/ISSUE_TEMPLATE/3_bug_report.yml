@@ -87,7 +87,7 @@ body:
           attach it to the issue.
 
 
-          If you have trouble producing a log file, you can alternatively use `--gpu-debug -v -v`,
+          If you have trouble producing a log file, you can alternatively use `--gpu-debug --msg-time -v -v`,
           save the terminal output to a file, and attach it to the issue.
 
 
