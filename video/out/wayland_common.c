@@ -303,6 +303,9 @@ struct vo_wayland_preferred_description_info {
     struct vo_wayland_state *wl;
     bool is_parametric;
     struct pl_color_space csp;
+    float min_luma;
+    float max_luma;
+    float ref_luma;
     void *icc_file;
     uint32_t icc_size;
 };
@@ -2154,6 +2157,10 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         wl->preferred_csp = wd->csp;
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, &wl->preferred_csp);
+        if (wd->csp.hdr.max_luma > wd->ref_luma) {
+            // Always prefer the PQ transfer for HDR output.
+            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
+        }
     } else {
         if (wd->icc_file) {
             if (wl->icc_size) {
@@ -2217,6 +2224,12 @@ static void info_tf_named(void *data, struct wp_image_description_info_v1 *image
 static void info_luminances(void *data, struct wp_image_description_info_v1 *image_description_info,
                             uint32_t min_lum, uint32_t max_lum, uint32_t reference_lum)
 {
+    struct vo_wayland_preferred_description_info *wd = data;
+    if (!wd->is_parametric)
+        return;
+    wd->min_luma = min_lum / (float)WAYLAND_MIN_LUM_FACTOR;
+    wd->max_luma = max_lum;
+    wd->ref_luma = reference_lum;
 }
 
 static void info_target_primaries(void *data, struct wp_image_description_info_v1 *image_description_info,
