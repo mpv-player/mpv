@@ -1072,7 +1072,7 @@ local function add_audio(s)
     local merge = function(rr, rro, prop)
         local a = rr[prop] or rro[prop]
         local b = rro[prop] or rr[prop]
-        return (a == b or a == nil) and a or (a .. " ➜ " .. b)
+        return (a == b or a == nil) and a or (a .. " -> " .. b)
     end
 
     append(s, "", {prefix="Audio:", nl=o.nl .. o.nl, indent=""})
