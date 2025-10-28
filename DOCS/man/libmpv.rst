@@ -22,7 +22,7 @@ You can write C plugins for mpv. These use the libmpv API, although they do not
 use the libmpv library itself.
 
 They are enabled by default if compiler supports linking with the ``-rdynamic``
-flag on Linux/BSD platforms. On Windows the are always enabled.
+flag on Linux/BSD platforms. On Windows they are always enabled.
 
 C plugins location
 ------------------
