@@ -1131,6 +1131,14 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 pl_color_space_merge(&hint, source);
             if (target_unknown && !opts->target_trc && !pl_color_transfer_is_hdr(source->transfer))
                 hint = *source;
+            // Vulkan doesn't have support for gamma 2.2 transfer function,
+            // so even though requested preferred color space is gamma 2.2, we
+            // fallback to sRGB. sRGB itself is ambiguous, but at least we have
+            // options to control the behavior.
+            // TODO: Revise this after fix for linear transfers lands in libplacebo.
+            // <https://code.videolan.org/videolan/libplacebo/-/merge_requests/759>
+            if (hint.transfer == PL_COLOR_TRC_GAMMA22)
+                hint.transfer = PL_COLOR_TRC_SRGB;
             // Restore target luminance if it was present, note that we check
             // max_luma only, this make sure that max_cll/max_fall is not take
             // from source.
