@@ -2158,7 +2158,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, &wl->preferred_csp);
         if (wd->csp.hdr.max_luma > wd->ref_luma) {
-            // Always prefer the PQ transfer for HDR output.
+            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
             wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
         }
     } else {
