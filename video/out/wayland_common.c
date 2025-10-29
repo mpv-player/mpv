@@ -2000,19 +2000,22 @@ static const struct wp_fractional_scale_v1_listener fractional_scale_listener = 
     preferred_scale,
 };
 
-static void log_color_space(struct mp_log *log, const struct pl_color_space *csp)
+static void log_color_space(struct mp_log *log, struct vo_wayland_preferred_description_info *wd)
 {
+    const struct pl_color_space *csp = &wd->csp;
     mp_verbose(log,
         "transfer: %s, primaries: %s\n"
-        "max_cll=%f, max_fall=%f, min_luma=%f, max_luma=%f\n"
-        "raw prims: red.x=%f,   red.y=%f,\n"
-        "           green.x=%f, green.y=%f,\n"
-        "           blue.x=%f,  blue.y=%f,\n"
-        "           white.x=%f, white.y=%f\n",
+        "transfer: min_luma=%f, max_luma=%f, ref_luma=%f\n"
+        "target: min_luma=%f, max_luma=%f, max_cll=%f, max_fall=%f\n"
+        "        raw prims: red.x=%f,   red.y=%f,\n"
+        "                   green.x=%f, green.y=%f,\n"
+        "                   blue.x=%f,  blue.y=%f,\n"
+        "                   white.x=%f, white.y=%f\n",
         m_opt_choice_str(pl_csp_trc_names,   csp->transfer),
         m_opt_choice_str(pl_csp_prim_names, csp->primaries),
-        csp->hdr.max_cll,  csp->hdr.max_fall,
-        csp->hdr.min_luma, csp->hdr.max_luma,
+        wd->min_luma, wd->max_luma, wd->ref_luma,
+        csp->hdr.min_luma,  csp->hdr.max_luma,
+        csp->hdr.max_cll, csp->hdr.max_fall,
         csp->hdr.prim.red.x,   csp->hdr.prim.red.y,
         csp->hdr.prim.green.x, csp->hdr.prim.green.y,
         csp->hdr.prim.blue.x,  csp->hdr.prim.blue.y,
@@ -2156,7 +2159,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     if (wd->is_parametric) {
         wl->preferred_csp = wd->csp;
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
-        log_color_space(wl->log, &wl->preferred_csp);
+        log_color_space(wl->log, wd);
         if (wd->csp.hdr.max_luma > wd->ref_luma) {
             MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
             wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
