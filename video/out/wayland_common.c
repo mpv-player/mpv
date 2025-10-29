@@ -346,6 +346,14 @@ static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect o
                                    struct mp_rect old_output_geometry);
 static void destroy_offer(struct vo_wayland_data_offer *o);
 
+#ifndef HAVE_WL_DISPLAY_CREATE_QUEUE_WITH_NAME
+struct wl_event_queue *
+wl_display_create_queue_with_name(struct wl_display *display, const char *name)
+{
+    return wl_display_create_queue(display);
+}
+#endif
+
 /* Wayland listener boilerplate */
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface,
