@@ -739,19 +739,16 @@ if features['rubberband']
     sources += files('audio/filter/af_rubberband.c')
 endif
 
-sdl2 = dependency('sdl2', required: get_option('sdl2'))
-features += {'sdl2': sdl2.found()}
-if features['sdl2']
-    dependencies += sdl2
-endif
+sdl2 = dependency('sdl2', required: false)
 
 sdl2_gamepad = get_option('sdl2-gamepad').require(
-    features['sdl2'],
+    sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 features += {'sdl2-gamepad': sdl2_gamepad.allowed()}
 if features['sdl2-gamepad']
     sources += files('input/sdl_gamepad.c')
+    dependencies += sdl2
 endif
 
 uchardet_opt = get_option('uchardet').require(
@@ -895,12 +892,13 @@ if features['pulse']
 endif
 
 sdl2_audio = get_option('sdl2-audio').require(
-    features['sdl2'],
+    sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 features += {'sdl2-audio': sdl2_audio.allowed()}
 if features['sdl2-audio']
     sources += files('audio/out/ao_sdl.c')
+    dependencies += sdl2
 endif
 
 sndio = dependency('sndio', required: get_option('sndio'))
@@ -975,12 +973,13 @@ if features['jpeg']
 endif
 
 sdl2_video = get_option('sdl2-video').require(
-    features['sdl2'],
+    sdl2.found(),
     error_message: 'sdl2 was not found!',
 )
 features += {'sdl2-video': sdl2_video.allowed()}
 if features['sdl2-video']
     sources += files('video/out/vo_sdl.c')
+    dependencies += sdl2
 endif
 
 shaderc = dependency('shaderc', required:
