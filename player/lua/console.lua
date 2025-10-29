@@ -789,7 +789,7 @@ local function render()
         ass:pos(x, y)
         ass:append("{\\1c&H" .. back_color .. "&\\1a&H" .. back_alpha ..
                    "&\\bord" .. opts.menu_outline_size .. "\\3c&H" ..
-                   color_option_to_ass(opts.menu_outline_color) .. "&}")
+                   color_option_to_ass(opts.menu_outline_color) .. "\\blur0&}")
         if border_style == "background-box" then
             ass:append("{\\4a&Hff&}")
         end

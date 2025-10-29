@@ -387,7 +387,8 @@ local function render()
 
     local background_style = "{\\1c&H" .. back_color .. "&" ..
                        "&\\bord" .. options.menu_outline_size .. "\\3c&H" ..
-                       color_option_to_ass(options.menu_outline_color) .. "&}"
+                       color_option_to_ass(options.menu_outline_color) ..
+                       "\\blur0&}"
     if border_style == "background-box" then
         background_style = background_style .. "{\\4a&Hff&}"
     end
