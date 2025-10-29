@@ -1876,6 +1876,10 @@ if get_option('fuzzers')
     subdir('fuzzers')
 endif
 
+if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
+    warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
+endif
+
 summary({'d3d11': features['d3d11'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
