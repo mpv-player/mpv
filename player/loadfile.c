@@ -20,6 +20,10 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <time.h>
+#include <ctype.h>
+#include <string.h>
+
+// (helpers moved below includes to ensure prototypes are visible)
 
 #include <libavutil/avutil.h>
 
@@ -47,6 +51,7 @@
 #include "input/input.h"
 #include "misc/json.h"
 #include "misc/language.h"
+#include "misc/bstr.h"
 
 #include "audio/out/ao.h"
 #include "filters/f_decoder_wrapper.h"
@@ -938,6 +943,86 @@ err_out:
     return -1;
 }
 
+// Helpers for sub-auto=closest selection
+static bool is_suffix_token(const char *tkn)
+{
+    int len = (int)strlen(tkn);
+    bool alpha = true;
+    for (int i = 0; i < len; i++)
+        alpha &= isalpha((unsigned char)tkn[i]) != 0;
+    if (alpha && (len == 2 || len == 3))
+        return true;
+    const char *special[] = {"eng","en","es","fr","de","pt","ru","jp","ja","zh","chs","cht","sub","subs","sdh","forced","cc",NULL};
+    for (int i = 0; special[i]; i++)
+        if (strcmp(tkn, special[i]) == 0)
+            return true;
+    return false;
+}
+
+static char *normalize_base_name(void *ta_ctx, const char *path)
+{
+    struct bstr base = bstr0(mp_basename(path));
+    base = bstr_strip_ext(base);
+    char *tmpbuf = talloc_strndup(ta_ctx, base.start, base.len);
+    for (int i = 0; tmpbuf[i]; i++)
+        tmpbuf[i] = tolower((unsigned char)tmpbuf[i]);
+    char **tokens = NULL;
+    int ntok = 0;
+    char *p = tmpbuf;
+    while (*p) {
+        while (*p && !isalnum((unsigned char)*p)) p++;
+        if (!*p) break;
+        char *start = p;
+        while (*p && isalnum((unsigned char)*p)) p++;
+        char save = *p; *p = '\0';
+        MP_TARRAY_APPEND(ta_ctx, tokens, ntok, talloc_strdup(ta_ctx, start));
+        *p = save;
+    }
+    while (ntok > 0 && is_suffix_token(tokens[ntok - 1]))
+        ntok--;
+    char *out = talloc_strdup(ta_ctx, "");
+    for (int i = 0; i < ntok; i++)
+        out = talloc_asprintf_append_buffer(out, "%s", tokens[i]);
+    if (!out[0])
+        out = talloc_strdup(ta_ctx, tmpbuf);
+    return out;
+}
+
+static int levenshtein_dist(const char *a, const char *b)
+{
+    int la = (int)strlen(a), lb = (int)strlen(b);
+    if (la == 0) return lb;
+    if (lb == 0) return la;
+    int *prev = talloc_array(NULL, int, lb + 1);
+    int *curr = talloc_array(NULL, int, lb + 1);
+    for (int j = 0; j <= lb; j++) prev[j] = j;
+    for (int i = 1; i <= la; i++) {
+        curr[0] = i;
+        for (int j = 1; j <= lb; j++) {
+            int cost = a[i - 1] == b[j - 1] ? 0 : 1;
+            int del = prev[j] + 1;
+            int ins = curr[j - 1] + 1;
+            int sub = prev[j - 1] + cost;
+            int m = del < ins ? del : ins;
+            curr[j] = m < sub ? m : sub;
+        }
+        int *tmpv = prev; prev = curr; curr = tmpv;
+    }
+    int d = prev[lb];
+    talloc_free(prev);
+    talloc_free(curr);
+    return d;
+}
+
+static double similarity_ratio(const char *a, const char *b)
+{
+    int la = (int)strlen(a), lb = (int)strlen(b);
+    int m = la > lb ? la : lb;
+    if (m == 0) return 1.0;
+    int d = levenshtein_dist(a, b);
+    return 1.0 - (double)d / (double)m;
+}
+
 // to be run on a worker thread, locked (temporarily unlocks core)
 static void open_external_files(struct MPContext *mpctx, char **files,
                                 enum stream_type filter)
@@ -974,6 +1059,38 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
             sc[mpctx->tracks[n]->type]++;
     }
 
+    // Preselect single best subtitle if sub-auto=closest
+    int best_sub_index = -1;
+    if (opts->sub_auto == 3) {
+        void *selctx = talloc_new(tmp);
+        char *movie_norm = normalize_base_name(selctx, mpctx->filename);
+        double best_score = -1.0;
+        for (int i = 0; list && list[i].fname; i++) {
+            struct subfn *e = &list[i];
+            if (e->type != STREAM_SUB)
+                continue;
+            // apply the same basic eligibility checks as the loading loop
+            bool already_loaded = false;
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                if (t->demuxer && strcmp(t->demuxer->filename, e->fname) == 0) {
+                    already_loaded = true; break;
+                }
+            }
+            if (already_loaded)
+                continue;
+            if (!sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
+                continue;
+            char *cand_norm = normalize_base_name(selctx, e->fname);
+            double score = similarity_ratio(movie_norm, cand_norm);
+            if (score > best_score) {
+                best_score = score;
+                best_sub_index = i;
+            }
+        }
+        talloc_free(selctx);
+    }
+
     for (int i = 0; list && list[i].fname; i++) {
         struct subfn *e = &list[i];
 
@@ -987,6 +1104,9 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
         if (e->type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
         if (e->type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
+            goto skip;
+
+        if (opts->sub_auto == 3 && e->type == STREAM_SUB && i != best_sub_index)
             goto skip;
 
         enum track_flags flags = e->flags;
