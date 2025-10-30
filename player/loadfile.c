@@ -23,7 +23,6 @@
 #include <ctype.h>
 #include <string.h>
 
-// (helpers moved below includes to ensure prototypes are visible)
 
 #include <libavutil/avutil.h>
 
@@ -1023,6 +1022,85 @@ static double similarity_ratio(const char *a, const char *b)
     return 1.0 - (double)d / (double)m;
 }
 
+// Returns true if a season/episode could be parsed.
+// Recognizes common patterns like S01E02, s1e2, or 1x02 (case-insensitive).
+static bool parse_season_episode(const char *path, int *out_season, int *out_episode)
+{
+    if (out_season) *out_season = -1;
+    if (out_episode) *out_episode = -1;
+    if (!path)
+        return false;
+
+    // Work on a lowercase copy of the basename to simplify matching.
+    void *ta = talloc_new(NULL);
+    const char *base = mp_basename(path);
+    char *s = talloc_strdup(ta, base);
+    for (int i = 0; s[i]; i++)
+        s[i] = tolower((unsigned char)s[i]);
+
+    int season = -1, episode = -1;
+
+    // Try SxxEyy pattern
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == 's') {
+            int j = i + 1;
+            int val_s = 0, num_s = 0;
+            while (isdigit((unsigned char)s[j])) {
+                val_s = val_s * 10 + (s[j] - '0');
+                num_s++; j++;
+            }
+            if (num_s > 0 && s[j] == 'e') {
+                j++;
+                int val_e = 0, num_e = 0;
+                while (isdigit((unsigned char)s[j])) {
+                    val_e = val_e * 10 + (s[j] - '0');
+                    num_e++; j++;
+                }
+                if (num_e > 0) {
+                    season = val_s;
+                    episode = val_e;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Fallback: N x M pattern (e.g., 1x02)
+    if (season < 0 || episode < 0) {
+        for (int i = 0; s[i]; i++) {
+            if (isdigit((unsigned char)s[i])) {
+                int j = i;
+                int val_s = 0, num_s = 0;
+                while (isdigit((unsigned char)s[j])) {
+                    val_s = val_s * 10 + (s[j] - '0');
+                    num_s++; j++;
+                }
+                if (num_s > 0 && s[j] == 'x') {
+                    j++;
+                    int val_e = 0, num_e = 0;
+                    while (isdigit((unsigned char)s[j])) {
+                        val_e = val_e * 10 + (s[j] - '0');
+                        num_e++; j++;
+                    }
+                    if (num_e > 0) {
+                        season = val_s;
+                        episode = val_e;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    talloc_free(ta);
+    if (season >= 0 && episode >= 0) {
+        if (out_season) *out_season = season;
+        if (out_episode) *out_episode = episode;
+        return true;
+    }
+    return false;
+}
+
 // to be run on a worker thread, locked (temporarily unlocks core)
 static void open_external_files(struct MPContext *mpctx, char **files,
                                 enum stream_type filter)
@@ -1064,7 +1142,10 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
     if (opts->sub_auto == 3) {
         void *selctx = talloc_new(tmp);
         char *movie_norm = normalize_base_name(selctx, mpctx->filename);
+        int mv_season = -1, mv_episode = -1;
+        bool mv_has_se = parse_season_episode(mpctx->filename, &mv_season, &mv_episode);
         double best_score = -1.0;
+        int best_match_se = 0; // 1 if S/E match; prefer this over plain similarity
         for (int i = 0; list && list[i].fname; i++) {
             struct subfn *e = &list[i];
             if (e->type != STREAM_SUB)
@@ -1083,7 +1164,15 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
                 continue;
             char *cand_norm = normalize_base_name(selctx, e->fname);
             double score = similarity_ratio(movie_norm, cand_norm);
-            if (score > best_score) {
+            int cand_season = -1, cand_episode = -1;
+            int match_se = 0;
+            if (mv_has_se && parse_season_episode(e->fname, &cand_season, &cand_episode)) {
+                if (mv_season == cand_season && mv_episode == cand_episode)
+                    match_se = 1;
+            }
+            // Prefer exact S/E match first, then similarity score.
+            if (match_se > best_match_se || (match_se == best_match_se && score > best_score)) {
+                best_match_se = match_se;
                 best_score = score;
                 best_sub_index = i;
             }
