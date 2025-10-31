@@ -203,7 +203,7 @@ end
 
 -- Functions to calculate the font width.
 local width_length_ratio = 0.5
-local osd_width, osd_height = 100, 100
+local osd_width, osd_height = 0, 0
 local text_osd = mp.create_osd_overlay("ass-events")
 text_osd.compute_bounds, text_osd.hidden = true, true
 
@@ -1651,7 +1651,12 @@ mp.register_script_message("get-input", function (script_name, args)
 
         -- Limit the number of characters to prevent libass from freezing mpv.
         -- Not important for terminal output.
-        local limit = terminal_output() and 5000 or (5 * osd_width / opts.font_size)
+        local limit
+        if osd_width == 0 or terminal_output() then
+            limit = 5000
+        else
+            limit = 5 * osd_width / opts.font_size
+        end
 
         for i, item in ipairs(args.items) do
             selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, limit)
