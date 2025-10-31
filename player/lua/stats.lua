@@ -823,7 +823,7 @@ local function append_hdr(s, hdr, video_out)
     local has_fall = hdr["max-fall"] and hdr["max-fall"] > 0
 
     if has_dml or has_cll or has_fall then
-        append(s, "", {prefix="HDR10:"})
+        append(s, "", {prefix=video_out and "" or "HDR10:", prefix_sep=video_out and "" or nil})
         if has_dml then
             -- libplacebo uses close to zero values as "defined zero"
             hdr["min-luma"] = hdr["min-luma"] <= 1e-6 and 0 or hdr["min-luma"]
