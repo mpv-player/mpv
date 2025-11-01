@@ -1037,6 +1037,7 @@ foreach dep: wayland['deps']
     endif
 endforeach
 features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'].found()}
+features += {'wl_display_create_queue_with_name': wayland['deps'][0].version().version_compare('>=1.23.0')}
 
 if features['wayland']
     subdir(join_paths('video', 'out'))
