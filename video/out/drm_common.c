@@ -797,7 +797,7 @@ static bool mode_match(const drmModeModeInfo *mode,
                        unsigned int height,
                        double refresh)
 {
-    if (isnan(refresh)) {
+    if (mp_isnan(refresh)) {
         return
             (mode->hdisplay == width) &&
             (mode->vdisplay == height);
