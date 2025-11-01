@@ -523,12 +523,16 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
+
     char *filename = talloc_strdup(NULL, mpctx->filename);
-    if (mp_is_url(bstr0(filename)))
-        mp_url_unescape_inplace(filename);
-    char *f = (char *)mp_basename(filename);
-    if (!f[0])
+    char *f;
+    if (mp_is_url(bstr0(filename))) {
         f = filename;
+        mp_url_unescape_inplace(f);
+    } else {
+        f = mp_basename(filename);
+    }
+
     if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
         if (strcmp(ka->key, "no-ext") == 0) {
