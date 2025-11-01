@@ -35,9 +35,10 @@ def copy_bundle(binary_name, src_path):
 def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
 
-def apply_plist_template(plist_file, version):
+def apply_plist_template(plist_file, version, category):
+    print(">> setting bundle category to " + category)
     for line in fileinput.input(plist_file, inplace=True):
-        print(line.rstrip().replace("${VERSION}", version))
+        print(line.rstrip().replace("${VERSION}", version).replace("${CATEGORY}", category))
 
 def sign_bundle(binary_name):
     sign_directories = ["Contents/Frameworks", "Contents/MacOS"]
@@ -64,6 +65,9 @@ def main():
     parser.add_option("-s", "--skip-deps", action="store_false", dest="deps",
                       default=True,
                       help="don't bundle the dependencies")
+    parser.add_option("-c", "--category", action="store", dest="category",
+                      type="choice", choices=["video", "games"], default="video",
+                      help="sets bundle category")
 
     (options, args) = parser.parse_args()
 
@@ -82,7 +86,7 @@ def main():
     print("> copying binary")
     copy_binary(binary_name)
     print("> generating Info.plist")
-    apply_plist_template(target_plist(binary_name), version)
+    apply_plist_template(target_plist(binary_name), version, options.category)
 
     if options.deps:
         print("> bundling dependencies")

@@ -1844,7 +1844,7 @@ if get_option('cplayer')
         custom_target('macos-bundle',
             output: 'mpv.app',
             depends: version_h,
-            command: [osxbundle, mpv, '@SOURCE_ROOT@'],
+            command: [osxbundle, mpv, '@SOURCE_ROOT@', '-c', get_option('macos-bundle-category')],
         )
     endif
 

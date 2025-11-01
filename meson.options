@@ -110,6 +110,7 @@ option('macos-12-features', type: 'feature', value: 'auto', description: 'macOS 
 option('macos-cocoa-cb', type: 'feature', value: 'auto', description: 'macOS libmpv backend')
 option('macos-media-player', type: 'feature', value: 'auto', description: 'macOS Media Player support')
 option('macos-touchbar', type: 'feature', value: 'auto', description: 'macOS Touch Bar support')
+option('macos-bundle-category', type : 'combo', choices : ['video', 'games'], value : 'video', description: 'macOS bundle category')
 option('swift-build', type: 'feature', value: 'auto', description: 'macOS Swift build tools')
 option('swift-flags', type: 'string', description: 'Optional Swift compiler flags')
 
