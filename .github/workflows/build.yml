@@ -237,6 +237,7 @@ jobs:
             xcode: "Xcode_15.2"
           - os: "macos-15"
             arch: "arm"
+          - os: "macos-15-intel"
           - os: "macos-15"
             arch: "test"
             swift: "-target arm64-apple-macosx10.15"
@@ -303,7 +304,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ matrix.arch != 'test' }}
         with:
-          name: mpv-${{ matrix.os }}-${{ matrix.arch }}
+          name: mpv-${{ matrix.os }}${{ matrix.arch != '' && format('-{0}', matrix.arch) || '' }}
           path: mpv.tar.gz
 
   linux:
