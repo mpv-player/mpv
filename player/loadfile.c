@@ -20,6 +20,9 @@
 #include <inttypes.h>
 #include <assert.h>
 #include <time.h>
+#include <ctype.h>
+#include <string.h>
+
 
 #include <libavutil/avutil.h>
 
@@ -47,6 +50,7 @@
 #include "input/input.h"
 #include "misc/json.h"
 #include "misc/language.h"
+#include "misc/bstr.h"
 
 #include "audio/out/ao.h"
 #include "filters/f_decoder_wrapper.h"
@@ -938,6 +942,165 @@ err_out:
     return -1;
 }
 
+// Helpers for sub-auto=closest selection
+static bool is_suffix_token(const char *tkn)
+{
+    int len = (int)strlen(tkn);
+    bool alpha = true;
+    for (int i = 0; i < len; i++)
+        alpha &= isalpha((unsigned char)tkn[i]) != 0;
+    if (alpha && (len == 2 || len == 3))
+        return true;
+    const char *special[] = {"eng","en","es","fr","de","pt","ru","jp","ja","zh","chs","cht","sub","subs","sdh","forced","cc",NULL};
+    for (int i = 0; special[i]; i++)
+        if (strcmp(tkn, special[i]) == 0)
+            return true;
+    return false;
+}
+
+static char *normalize_base_name(void *ta_ctx, const char *path)
+{
+    struct bstr base = bstr0(mp_basename(path));
+    base = bstr_strip_ext(base);
+    char *tmpbuf = talloc_strndup(ta_ctx, base.start, base.len);
+    for (int i = 0; tmpbuf[i]; i++)
+        tmpbuf[i] = tolower((unsigned char)tmpbuf[i]);
+    char **tokens = NULL;
+    int ntok = 0;
+    char *p = tmpbuf;
+    while (*p) {
+        while (*p && !isalnum((unsigned char)*p)) p++;
+        if (!*p) break;
+        char *start = p;
+        while (*p && isalnum((unsigned char)*p)) p++;
+        char save = *p; *p = '\0';
+        MP_TARRAY_APPEND(ta_ctx, tokens, ntok, talloc_strdup(ta_ctx, start));
+        *p = save;
+    }
+    while (ntok > 0 && is_suffix_token(tokens[ntok - 1]))
+        ntok--;
+    char *out = talloc_strdup(ta_ctx, "");
+    for (int i = 0; i < ntok; i++)
+        out = talloc_asprintf_append_buffer(out, "%s", tokens[i]);
+    if (!out[0])
+        out = talloc_strdup(ta_ctx, tmpbuf);
+    return out;
+}
+
+static int levenshtein_dist(const char *a, const char *b)
+{
+    int la = (int)strlen(a), lb = (int)strlen(b);
+    if (la == 0) return lb;
+    if (lb == 0) return la;
+    int *prev = talloc_array(NULL, int, lb + 1);
+    int *curr = talloc_array(NULL, int, lb + 1);
+    for (int j = 0; j <= lb; j++) prev[j] = j;
+    for (int i = 1; i <= la; i++) {
+        curr[0] = i;
+        for (int j = 1; j <= lb; j++) {
+            int cost = a[i - 1] == b[j - 1] ? 0 : 1;
+            int del = prev[j] + 1;
+            int ins = curr[j - 1] + 1;
+            int sub = prev[j - 1] + cost;
+            int m = del < ins ? del : ins;
+            curr[j] = m < sub ? m : sub;
+        }
+        int *tmpv = prev; prev = curr; curr = tmpv;
+    }
+    int d = prev[lb];
+    talloc_free(prev);
+    talloc_free(curr);
+    return d;
+}
+
+static double similarity_ratio(const char *a, const char *b)
+{
+    int la = (int)strlen(a), lb = (int)strlen(b);
+    int m = la > lb ? la : lb;
+    if (m == 0) return 1.0;
+    int d = levenshtein_dist(a, b);
+    return 1.0 - (double)d / (double)m;
+}
+
+// Returns true if a season/episode could be parsed.
+// Recognizes common patterns like S01E02, s1e2, or 1x02 (case-insensitive).
+static bool parse_season_episode(const char *path, int *out_season, int *out_episode)
+{
+    if (out_season) *out_season = -1;
+    if (out_episode) *out_episode = -1;
+    if (!path)
+        return false;
+
+    // Work on a lowercase copy of the basename to simplify matching.
+    void *ta = talloc_new(NULL);
+    const char *base = mp_basename(path);
+    char *s = talloc_strdup(ta, base);
+    for (int i = 0; s[i]; i++)
+        s[i] = tolower((unsigned char)s[i]);
+
+    int season = -1, episode = -1;
+
+    // Try SxxEyy pattern
+    for (int i = 0; s[i]; i++) {
+        if (s[i] == 's') {
+            int j = i + 1;
+            int val_s = 0, num_s = 0;
+            while (isdigit((unsigned char)s[j])) {
+                val_s = val_s * 10 + (s[j] - '0');
+                num_s++; j++;
+            }
+            if (num_s > 0 && s[j] == 'e') {
+                j++;
+                int val_e = 0, num_e = 0;
+                while (isdigit((unsigned char)s[j])) {
+                    val_e = val_e * 10 + (s[j] - '0');
+                    num_e++; j++;
+                }
+                if (num_e > 0) {
+                    season = val_s;
+                    episode = val_e;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Fallback: N x M pattern (e.g., 1x02)
+    if (season < 0 || episode < 0) {
+        for (int i = 0; s[i]; i++) {
+            if (isdigit((unsigned char)s[i])) {
+                int j = i;
+                int val_s = 0, num_s = 0;
+                while (isdigit((unsigned char)s[j])) {
+                    val_s = val_s * 10 + (s[j] - '0');
+                    num_s++; j++;
+                }
+                if (num_s > 0 && s[j] == 'x') {
+                    j++;
+                    int val_e = 0, num_e = 0;
+                    while (isdigit((unsigned char)s[j])) {
+                        val_e = val_e * 10 + (s[j] - '0');
+                        num_e++; j++;
+                    }
+                    if (num_e > 0) {
+                        season = val_s;
+                        episode = val_e;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    talloc_free(ta);
+    if (season >= 0 && episode >= 0) {
+        if (out_season) *out_season = season;
+        if (out_episode) *out_episode = episode;
+        return true;
+    }
+    return false;
+}
+
 // to be run on a worker thread, locked (temporarily unlocks core)
 static void open_external_files(struct MPContext *mpctx, char **files,
                                 enum stream_type filter)
@@ -974,6 +1137,49 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
             sc[mpctx->tracks[n]->type]++;
     }
 
+    // Preselect single best subtitle if sub-auto=closest
+    int best_sub_index = -1;
+    if (opts->sub_auto == 3) {
+        void *selctx = talloc_new(tmp);
+        char *movie_norm = normalize_base_name(selctx, mpctx->filename);
+        int mv_season = -1, mv_episode = -1;
+        bool mv_has_se = parse_season_episode(mpctx->filename, &mv_season, &mv_episode);
+        double best_score = -1.0;
+        int best_match_se = 0; // 1 if S/E match; prefer this over plain similarity
+        for (int i = 0; list && list[i].fname; i++) {
+            struct subfn *e = &list[i];
+            if (e->type != STREAM_SUB)
+                continue;
+            // apply the same basic eligibility checks as the loading loop
+            bool already_loaded = false;
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                if (t->demuxer && strcmp(t->demuxer->filename, e->fname) == 0) {
+                    already_loaded = true; break;
+                }
+            }
+            if (already_loaded)
+                continue;
+            if (!sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
+                continue;
+            char *cand_norm = normalize_base_name(selctx, e->fname);
+            double score = similarity_ratio(movie_norm, cand_norm);
+            int cand_season = -1, cand_episode = -1;
+            int match_se = 0;
+            if (mv_has_se && parse_season_episode(e->fname, &cand_season, &cand_episode)) {
+                if (mv_season == cand_season && mv_episode == cand_episode)
+                    match_se = 1;
+            }
+            // Prefer exact S/E match first, then similarity score.
+            if (match_se > best_match_se || (match_se == best_match_se && score > best_score)) {
+                best_match_se = match_se;
+                best_score = score;
+                best_sub_index = i;
+            }
+        }
+        talloc_free(selctx);
+    }
+
     for (int i = 0; list && list[i].fname; i++) {
         struct subfn *e = &list[i];
 
@@ -987,6 +1193,9 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
         if (e->type == STREAM_AUDIO && !sc[STREAM_VIDEO])
             goto skip;
         if (e->type == STREAM_VIDEO && (sc[STREAM_VIDEO] || !sc[STREAM_AUDIO]))
+            goto skip;
+
+        if (opts->sub_auto == 3 && e->type == STREAM_SUB && i != best_sub_index)
             goto skip;
 
         enum track_flags flags = e->flags;

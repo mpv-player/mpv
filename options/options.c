@@ -722,7 +722,7 @@ static const m_option_t mp_opts[] = {
     {"autoload-files", OPT_BOOL(autoload_files)},
 
     {"sub-auto", OPT_CHOICE(sub_auto,
-        {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
+        {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2}, {"closest", 3})},
     {"sub-auto-exts", OPT_STRINGLIST(sub_auto_exts), .flags = UPDATE_SUB_EXTS},
     {"audio-file-auto", OPT_CHOICE(audiofile_auto,
         {"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})},
