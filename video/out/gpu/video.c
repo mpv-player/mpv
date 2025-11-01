@@ -1750,7 +1750,7 @@ static void load_shader(struct gl_video *p, struct bstr body)
 // Semantic equality
 static bool double_seq(double a, double b)
 {
-    return (isnan(a) && isnan(b)) || a == b;
+    return (mp_isnan(a) && mp_isnan(b)) || a == b;
 }
 
 static bool scaler_fun_eq(struct scaler_fun a, struct scaler_fun b)
@@ -1817,9 +1817,9 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         scaler->kernel->w = *t_window;
 
     for (int n = 0; n < 2; n++) {
-        if (!isnan(conf->kernel.params[n]))
+        if (!mp_isnan(conf->kernel.params[n]))
             scaler->kernel->f.params[n] = conf->kernel.params[n];
-        if (!isnan(conf->window.params[n]))
+        if (!mp_isnan(conf->window.params[n]))
             scaler->kernel->w.params[n] = conf->window.params[n];
     }
 
@@ -3368,7 +3368,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             // position itself
             double vsync_dist = t->vsync_interval / t->ideal_frame_duration,
                    threshold = tscale->conf.kernel.params[0];
-            threshold = isnan(threshold) ? 0.0 : threshold;
+            threshold = mp_isnan(threshold) ? 0.0 : threshold;
             mix = (1 - mix) / vsync_dist;
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
