@@ -133,7 +133,7 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>LSApplicationCategoryType</key>
-    <string>public.app-category.games</string>
+    <string>public.app-category.${CATEGORY}</string>
     <key>LSEnvironment</key>
     <dict>
       <key>MallocNanoZone</key>
