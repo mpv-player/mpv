@@ -109,3 +109,30 @@ extension Int32 {
         self.init(bool ? 1 : 0)
     }
 }
+
+extension MTLPixelFormat {
+    public var name: String {
+        switch self {
+        case .bgra8Unorm: return "bgra8Unorm"
+        case .bgra8Unorm_srgb: return "bgra8Unorm_srgb"
+        case .rgba16Float: return "rgba16Float"
+        case .rgb10a2Unorm: return "rgb10a2Unorm"
+        case .bgr10a2Unorm: return "bgr10a2Unorm"
+        default: break
+        }
+
+#if HAVE_MACOS_11_FEATURES
+        if #available(macOS 11.0, *) {
+            switch self {
+            case .bgra10_xr: return "bgra10_xr"
+            case .bgra10_xr_srgb: return "bgra10_xr_srgb"
+            case .bgr10_xr: return "bgr10_xr"
+            case .bgr10_xr_srgb: return "bgr10_xr_srgb"
+            default: break
+            }
+        }
+#endif
+
+        return "raw pixel format " + String(self.rawValue)
+    }
+}
