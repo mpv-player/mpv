@@ -136,3 +136,17 @@ extension MTLPixelFormat {
         return "raw pixel format " + String(self.rawValue)
     }
 }
+
+extension CGColorSpace {
+    public var longName: String {
+        let description = String(describing: self)
+        guard let colorSpaceName = self.name as? String,
+              let regex = try? NSRegularExpression(pattern: ".*\\((.*)\\)", options: .caseInsensitive),
+              let result = regex.firstMatch(in: description, options: [], range: NSRange(location: 0, length: description.count)),
+              let range = Range(result.range(at: 1), in: description) else { return description }
+
+        let nameList = description[range].components(separatedBy: "; ").filter { !$0.hasPrefix("kCGColorSpace") }
+        let simpleName = colorSpaceName.replacingOccurrences(of: "kCGColorSpace", with: "")
+        return "\(simpleName) (\(nameList.joined(separator: ", ")))"
+    }
+}
