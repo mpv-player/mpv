@@ -41,11 +41,23 @@ class MetalLayer: CAMetalLayer {
         }
     }
 
+    // workaround for nil to none-nil values, oldValue is same as current in those cases
+    var previousColorspace: CGColorSpace?
+    override var colorspace: CGColorSpace? {
+        didSet {
+            if colorspace != previousColorspace {
+                log.verbose("Metal layer colorspace changed: \(colorspace?.longName ?? "nil")")
+            }
+            previousColorspace = colorspace
+        }
+    }
+
     init(common com: MacCommon) {
         common = com
         super.init()
 
         pixelFormat = .rgba16Float
+        previousColorspace = colorspace
         backgroundColor = NSColor.black.cgColor
     }
 
