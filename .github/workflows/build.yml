@@ -233,6 +233,8 @@ jobs:
             xcode: "Xcode_15.0"
           - os: "macos-15"
             arch: "arm"
+          - os: "macos-26"
+            arch: "arm"
           - os: "macos-15"
             arch: "test"
             swift: "-target arm64-apple-macosx10.15"
