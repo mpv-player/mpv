@@ -20,6 +20,7 @@ import QuartzCore
 
 class MetalLayer: CAMetalLayer {
     unowned var common: MacCommon
+    var log: LogHelper { return common.log }
 
     // workaround for a MoltenVK workaround that sets the drawableSize to 1x1 to forcefully complete
     // the presentation, this causes flicker and the drawableSize possibly staying at 1x1
@@ -28,6 +29,14 @@ class MetalLayer: CAMetalLayer {
         set {
             if Int(newValue.width) > 1 && Int(newValue.height) > 1 {
                 super.drawableSize = newValue
+            }
+        }
+    }
+
+    override var pixelFormat: MTLPixelFormat {
+        didSet {
+            if pixelFormat != oldValue {
+                log.verbose("Metal layer pixel format changed: \(pixelFormat.name)")
             }
         }
     }
