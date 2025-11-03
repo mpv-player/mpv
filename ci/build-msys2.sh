@@ -12,6 +12,10 @@ args=(
   -Db_sanitize=address,undefined
 )
 
+[[ "$SYS" == "clangarm64" ]] && args+=(
+  -Dpdf-build=disabled
+)
+
 meson setup build $common_args "${args[@]}"
 meson compile -C build
 ./build/mpv.com -v --no-config
