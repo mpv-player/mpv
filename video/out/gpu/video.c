@@ -409,7 +409,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .early_flush = -1,
     .shader_cache = true,
     .hwdec_interop = "auto",
-    .treat_srgb_as_power22 = 1, // input
+    .treat_srgb_as_power22 = 1|2|4, // auto
 };
 
 static OPT_STRING_VALIDATE_FUNC(validate_error_diffusion_opt);
