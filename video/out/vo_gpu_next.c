@@ -1101,6 +1101,15 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         target_csp.hdr.max_luma = 0;
         target_csp.hdr.max_cll = 0;
         target_csp.hdr.max_fall = 0;
+
+        // For min_luma specifically, if the display reports a value below the
+        // sRGB reference display minimum luminance, assume it's an OLED display
+        // and set min_luma to HDR black. Otherwise, leave it to the reference
+        // display value which shouldn't be too different from the reported
+        // value.
+        float ref_min_luma = PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST;
+        target_csp.hdr.min_luma = target_csp.hdr.min_luma < ref_min_luma ?
+                                  PL_COLOR_HDR_BLACK : ref_min_luma;
     }
     // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
     // reports it as maxFALL directly, but this doesn't mean the same thing.
