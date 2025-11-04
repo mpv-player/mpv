@@ -7392,7 +7392,7 @@ them.
     to ensure a consistent appearance. Depending on the platform, the sRGB EOTF
     used by the system compositor may differ.
 
-    The default is ``input``. (Only for ``--vo=gpu-next``)
+    The default is ``auto``. (Only for ``--vo=gpu-next``)
 
 ``--tone-mapping=<value>``
     Specifies the algorithm used for tone-mapping images onto the target
