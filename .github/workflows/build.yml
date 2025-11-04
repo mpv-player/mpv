@@ -364,7 +364,6 @@ jobs:
         run: |
           meson setup build \
             --werror        \
-            -Dc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
             -Dfuzzers=true -Dlibmpv=true -Dcplayer=false
           meson compile -C build fuzzers
 
