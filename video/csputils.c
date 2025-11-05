@@ -72,6 +72,7 @@ const struct m_opt_choice_alternatives pl_csp_prim_names[] = {
     {"film-c",      PL_COLOR_PRIM_FILM_C},
     {"aces-ap0",    PL_COLOR_PRIM_ACES_AP0},
     {"aces-ap1",    PL_COLOR_PRIM_ACES_AP1},
+    {"vgamut",      PL_COLOR_PRIM_V_GAMUT},
     {0}
 };
 
@@ -93,6 +94,7 @@ const struct m_opt_choice_alternatives pl_csp_trc_names[] = {
     {"s-log1",      PL_COLOR_TRC_S_LOG1},
     {"s-log2",      PL_COLOR_TRC_S_LOG2},
     {"st428",       PL_COLOR_TRC_ST428},
+    {"vlog",        PL_COLOR_TRC_V_LOG},
     {0}
 };
 
