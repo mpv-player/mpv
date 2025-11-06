@@ -200,11 +200,25 @@ void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
 #else
                                                             : PL_ALPHA_UNKNOWN;
 #endif
-    mpi->params.repr.bits = (struct pl_bit_encoding) {
-        .sample_depth = fmt.comps[0].size,
-        .color_depth = fmt.comps[0].size - abs(fmt.comps[0].pad),
-        .bit_shift = MPMAX(0, fmt.comps[0].pad),
-    };
+    // Calculate bit encoding from all components (excluding alpha)
+    struct pl_bit_encoding bits = {0};
+    const int num_comps = mp_imgfmt_desc_get_num_comps(&fmt);
+    for (int c = 0; c < MPMIN(num_comps, 3); c++) {
+        struct pl_bit_encoding cbits = {
+            .sample_depth = fmt.comps[c].size,
+            .color_depth  = fmt.comps[c].size - abs(fmt.comps[c].pad),
+            .bit_shift    = MPMAX(fmt.comps[c].pad, 0),
+        };
+
+        if (bits.sample_depth && !pl_bit_encoding_equal(&bits, &cbits)) {
+            // Bit encoding differs between components, cannot handle this
+            bits = (struct pl_bit_encoding) {0};
+            break;
+        }
+
+        bits = cbits;
+    }
+    mpi->params.repr.bits = bits;
 }
 
 static void mp_image_destructor(void *ptr)
