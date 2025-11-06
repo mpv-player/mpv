@@ -43,6 +43,9 @@ char *mp_basename(const char *path)
 {
     char *s;
 
+    /* otherwise the check below finds the wrong index */
+    mp_path_strip_trailing_separator((char *)path);
+
 #if HAVE_DOS_PATHS
     if (!mp_is_url(bstr0(path))) {
         s = strrchr(path, '\\');
