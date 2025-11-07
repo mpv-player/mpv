@@ -175,14 +175,9 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *video_file = NULL;
-            if (mpctx->filename)
-                video_file = mp_basename(mpctx->filename);
+            char *video_file = mpctx->filename;
+            char *name = video_file ? mp_basename_or_url(video_file) : "NO_FILE";
 
-            if (!video_file)
-                video_file = "NO_FILE";
-
-            char *name = video_file;
             if (fmt == 'F')
                 name = stripext(res, video_file);
             append_filename(&res, name);
