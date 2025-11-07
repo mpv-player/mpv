@@ -57,7 +57,7 @@ char *mp_basename(const char *path)
     }
 #endif
     s = strrchr(path, '/');
-    return s ? s + 1 : (char *)path;
+    return s && strlen(s) > 1 ? s + 1 : (char *)path;
 }
 
 struct bstr mp_dirname(const char *path)
@@ -80,8 +80,8 @@ static const char mp_path_separators[] = "/";
 // Mutates path and removes a trailing '/' (or '\' on Windows)
 void mp_path_strip_trailing_separator(char *path)
 {
-    size_t len = strlen(path);
-    if (len > 0 && strchr(mp_path_separators, path[len - 1]))
+    size_t len;
+    while ((len=strlen(path)) > 0 && strchr(mp_path_separators, path[len - 1]))
         path[len - 1] = '\0';
 }
 
