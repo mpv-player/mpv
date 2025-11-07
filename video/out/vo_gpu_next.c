@@ -1094,6 +1094,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
         target_csp.primaries = get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
+        // limit min_luma to 1000:1 contrast ratio in SDR mode
+        if (target_csp.hdr.min_luma > PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST)
+            target_csp.hdr.min_luma = 0;
         // Don't use reported display peak in SDR mode. Mostly because libplacebo
         // forcefully switches to PQ if hinting hdr metadata, ignoring the transfer
         // set in the hint. But also because setting target peak in SDR mode is
