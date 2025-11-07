@@ -41,17 +41,18 @@
 
 char *mp_basename(const char *path)
 {
+    if (mp_is_url(bstr0(path)))
+        return (char *)path;
+
     char *s;
 
 #if HAVE_DOS_PATHS
-    if (!mp_is_url(bstr0(path))) {
-        s = strrchr(path, '\\');
-        if (s)
-            path = s + 1;
-        s = strrchr(path, ':');
-        if (s)
-            path = s + 1;
-    }
+    s = strrchr(path, '\\');
+    if (s)
+        path = s + 1;
+    s = strrchr(path, ':');
+    if (s)
+        path = s + 1;
 #endif
     s = strrchr(path, '/');
     return s ? s + 1 : (char *)path;

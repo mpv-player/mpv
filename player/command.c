@@ -3508,12 +3508,9 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
             const char *reset = pl->current == e ? get_style_reset(mpctx) : "";
             char *p = e->title;
             if (!p || mpctx->opts->playlist_entry_name > 0) {
-                p = e->filename;
-                if (!mp_is_url(bstr0(p))) {
-                    char *s = mp_basename(e->filename);
-                    if (s[0])
-                        p = s;
-                }
+                p = mp_basename(e->filename);
+                if (!p[0])
+                    p = e->filename;
             }
             if (!e->title || p == e->title || mpctx->opts->playlist_entry_name == 1) {
                 res = talloc_asprintf_append(res, "%s%s\n", p, reset);

@@ -215,9 +215,7 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *path = NULL;
-    if (mp_is_url(bstr0(fname))) {
-        path = fname;
-    } else if (opts->ignore_path_in_watch_later_config) {
+    if (opts->ignore_path_in_watch_later_config) {
         path = mp_basename(fname);
     } else {
         path = mp_normalize_path(tmp, fname);
@@ -255,7 +253,7 @@ static bool needs_config_quoting(const char *s)
 
 static void write_filename(struct MPContext *mpctx, FILE *file, char *filename)
 {
-    if (mpctx->opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(filename)))
+    if (mpctx->opts->ignore_path_in_watch_later_config)
         filename = mp_basename(filename);
 
     if (mpctx->opts->write_filename_in_watch_later_config) {
@@ -287,7 +285,7 @@ static void write_redirect(struct MPContext *mpctx, char *path)
 
 static void write_redirects_for_parent_dirs(struct MPContext *mpctx, char *path)
 {
-    if (mp_is_url(bstr0(path)) || mpctx->opts->ignore_path_in_watch_later_config)
+    if (mpctx->opts->ignore_path_in_watch_later_config)
         return;
 
     // Write redirect entries for the file's parent directories to allow
@@ -412,7 +410,7 @@ void mp_delete_watch_later_conf(struct MPContext *mpctx, const char *file)
     unlink(fname);
     talloc_free(fname);
 
-    if (mp_is_url(bstr0(path)) || mpctx->opts->ignore_path_in_watch_later_config)
+    if (mpctx->opts->ignore_path_in_watch_later_config)
         goto exit;
 
     bstr dir = mp_dirname(path);
