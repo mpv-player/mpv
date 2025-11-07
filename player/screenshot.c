@@ -176,20 +176,20 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *video_file = NULL;
-            if (mpctx->filename) {
-                if (mp_is_url(bstr0(mpctx->filename)))
-                    video_file = mp_basename(mp_url_unescape(res, mpctx->filename));
-                else
-                    video_file = mp_basename(mpctx->filename);
+            char *name;
+            if (!mpctx->filename) {
+                name = "NO_FILE";
+            } else if (bstr_endswith0(bstr0(mpctx->filename), "/")) {
+                name = mpctx->filename;
+            } else {
+                name = mp_basename(mpctx->filename);
             }
 
-            if (!video_file)
-                video_file = "NO_FILE";
+            if (mp_is_url(bstr0(mpctx->filename)))
+                name = mp_url_unescape(res, name);
 
-            char *name = video_file;
             if (fmt == 'F')
-                name = stripext(res, video_file);
+                name = stripext(res, name);
             append_filename(&res, name);
             break;
         }
