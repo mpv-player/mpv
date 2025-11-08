@@ -68,6 +68,14 @@ class MetalLayer: CAMetalLayer {
         }
     }
 
+    override var displaySyncEnabled: Bool {
+        didSet {
+            if displaySyncEnabled != oldValue {
+                log.verbose("Metal layer display sync \(displaySyncEnabled ? "active" : "inactive")")
+            }
+        }
+    }
+
     init(common com: MacCommon) {
         common = com
         super.init()
