@@ -218,8 +218,8 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
     if (!mapper->src)
         goto end;
 
-    AVHWFramesContext *hwfc = (AVHWFramesContext *) mapper->src->hwctx->data;;
-    const AVVulkanFramesContext *vkfc = hwfc->hwctx;;
+    AVHWFramesContext *hwfc = (AVHWFramesContext *) mapper->src->hwctx->data;
+    const AVVulkanFramesContext *vkfc = hwfc->hwctx;
     AVVkFrame *vkf = p->vkf;
 
     int num_images;
