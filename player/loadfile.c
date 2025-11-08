@@ -51,6 +51,7 @@
 #include "misc/json.h"
 #include "misc/language.h"
 #include "misc/bstr.h"
+#include "misc/string_similarity.h"
 
 #include "audio/out/ao.h"
 #include "filters/f_decoder_wrapper.h"
@@ -942,86 +943,6 @@ err_out:
     return -1;
 }
 
-// Helpers for sub-auto=closest selection
-static bool is_suffix_token(const char *tkn)
-{
-    int len = (int)strlen(tkn);
-    bool alpha = true;
-    for (int i = 0; i < len; i++)
-        alpha &= isalpha((unsigned char)tkn[i]) != 0;
-    if (alpha && (len == 2 || len == 3))
-        return true;
-    const char *special[] = {"eng","en","es","fr","de","pt","ru","jp","ja","zh","chs","cht","sub","subs","sdh","forced","cc",NULL};
-    for (int i = 0; special[i]; i++)
-        if (strcmp(tkn, special[i]) == 0)
-            return true;
-    return false;
-}
-
-static char *normalize_base_name(void *ta_ctx, const char *path)
-{
-    struct bstr base = bstr0(mp_basename(path));
-    base = bstr_strip_ext(base);
-    char *tmpbuf = talloc_strndup(ta_ctx, base.start, base.len);
-    for (int i = 0; tmpbuf[i]; i++)
-        tmpbuf[i] = tolower((unsigned char)tmpbuf[i]);
-    char **tokens = NULL;
-    int ntok = 0;
-    char *p = tmpbuf;
-    while (*p) {
-        while (*p && !isalnum((unsigned char)*p)) p++;
-        if (!*p) break;
-        char *start = p;
-        while (*p && isalnum((unsigned char)*p)) p++;
-        char save = *p; *p = '\0';
-        MP_TARRAY_APPEND(ta_ctx, tokens, ntok, talloc_strdup(ta_ctx, start));
-        *p = save;
-    }
-    while (ntok > 0 && is_suffix_token(tokens[ntok - 1]))
-        ntok--;
-    char *out = talloc_strdup(ta_ctx, "");
-    for (int i = 0; i < ntok; i++)
-        out = talloc_asprintf_append_buffer(out, "%s", tokens[i]);
-    if (!out[0])
-        out = talloc_strdup(ta_ctx, tmpbuf);
-    return out;
-}
-
-static int levenshtein_dist(const char *a, const char *b)
-{
-    int la = (int)strlen(a), lb = (int)strlen(b);
-    if (la == 0) return lb;
-    if (lb == 0) return la;
-    int *prev = talloc_array(NULL, int, lb + 1);
-    int *curr = talloc_array(NULL, int, lb + 1);
-    for (int j = 0; j <= lb; j++) prev[j] = j;
-    for (int i = 1; i <= la; i++) {
-        curr[0] = i;
-        for (int j = 1; j <= lb; j++) {
-            int cost = a[i - 1] == b[j - 1] ? 0 : 1;
-            int del = prev[j] + 1;
-            int ins = curr[j - 1] + 1;
-            int sub = prev[j - 1] + cost;
-            int m = del < ins ? del : ins;
-            curr[j] = m < sub ? m : sub;
-        }
-        int *tmpv = prev; prev = curr; curr = tmpv;
-    }
-    int d = prev[lb];
-    talloc_free(prev);
-    talloc_free(curr);
-    return d;
-}
-
-static double similarity_ratio(const char *a, const char *b)
-{
-    int la = (int)strlen(a), lb = (int)strlen(b);
-    int m = la > lb ? la : lb;
-    if (m == 0) return 1.0;
-    int d = levenshtein_dist(a, b);
-    return 1.0 - (double)d / (double)m;
-}
-
 // Returns true if a season/episode could be parsed.
 // Recognizes common patterns like S01E02, s1e2, or 1x02 (case-insensitive).
 static bool parse_season_episode(const char *path, int *out_season, int *out_episode)
@@ -1141,7 +1062,7 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
     int best_sub_index = -1;
     if (opts->sub_auto == 3) {
         void *selctx = talloc_new(tmp);
-        char *movie_norm = normalize_base_name(selctx, mpctx->filename);
+        char *movie_norm = mp_normalize_base_name(selctx, mpctx->filename);
         int mv_season = -1, mv_episode = -1;
         bool mv_has_se = parse_season_episode(mpctx->filename, &mv_season, &mv_episode);
         double best_score = -1.0;
@@ -1162,8 +1083,8 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
                 continue;
             if (!sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
                 continue;
-            char *cand_norm = normalize_base_name(selctx, e->fname);
-            double score = similarity_ratio(movie_norm, cand_norm);
+            char *cand_norm = mp_normalize_base_name(selctx, e->fname);
+            double score = mp_similarity_ratio(movie_norm, cand_norm);
             int cand_season = -1, cand_episode = -1;
             int match_se = 0;
             if (mv_has_se && parse_season_episode(e->fname, &cand_season, &cand_episode)) {
