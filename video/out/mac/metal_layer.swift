@@ -52,6 +52,14 @@ class MetalLayer: CAMetalLayer {
         }
     }
 
+    override var edrMetadata: CAEDRMetadata? {
+        didSet {
+            if edrMetadata != oldValue {
+                log.verbose("Metal layer HDR metadata changed: \(edrMetadata?.description ?? "nil")")
+            }
+        }
+    }
+
     init(common com: MacCommon) {
         common = com
         super.init()
