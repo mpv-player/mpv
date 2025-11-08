@@ -22,6 +22,10 @@
 #include <stdbool.h>
 #include "misc/bstr.h"
 
+/* Return pointer to last path segment or the original argument if it is a URL
+ */
+#define mp_basename_or_url(p) (mp_is_url(bstr0(p)) ? (char *)p : mp_basename(p))
+
 // Return pointer to filename part of path
 
 char *mp_basename(const char *path);
