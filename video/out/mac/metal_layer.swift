@@ -60,6 +60,14 @@ class MetalLayer: CAMetalLayer {
         }
     }
 
+    override var wantsExtendedDynamicRangeContent: Bool {
+        didSet {
+            if wantsExtendedDynamicRangeContent != oldValue {
+                log.verbose("Metal layer HDR \(wantsExtendedDynamicRangeContent ? "active" : "inactive")")
+            }
+        }
+    }
+
     init(common com: MacCommon) {
         common = com
         super.init()
