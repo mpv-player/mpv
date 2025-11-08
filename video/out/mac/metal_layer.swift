@@ -76,6 +76,14 @@ class MetalLayer: CAMetalLayer {
         }
     }
 
+    override var isOpaque: Bool {
+       didSet {
+            if isOpaque != oldValue {
+                log.verbose("Metal layer is opaque (direct-to-display possible): \(isOpaque)")
+            }
+        }
+    }
+
     init(common com: MacCommon) {
         common = com
         super.init()
