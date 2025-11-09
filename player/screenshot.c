@@ -70,10 +70,8 @@ void screenshot_init(struct MPContext *mpctx)
 
 static char *stripext(void *talloc_ctx, const char *s)
 {
-    const char *end = strrchr(s, '.');
-    if (!end)
-        end = s + strlen(s);
-    return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
+    bstr root;
+    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : (char *)s;
 }
 
 static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
