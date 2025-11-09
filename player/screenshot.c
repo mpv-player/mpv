@@ -69,14 +69,6 @@ void screenshot_init(struct MPContext *mpctx)
     };
 }
 
-static char *stripext(void *talloc_ctx, const char *s)
-{
-    const char *end = strrchr(s, '.');
-    if (!end)
-        end = s + strlen(s);
-    return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
-}
-
 static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
                              const char *filename, struct image_writer_opts *opts,
                              bool overwrite)
@@ -189,7 +181,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
                 name = mp_url_unescape(res, name);
 
             if (fmt == 'F')
-                name = stripext(res, name);
+                name = mp_strip_ext(res, name);
             append_filename(&res, name);
             break;
         }
