@@ -1882,6 +1882,7 @@ if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
 endif
 
 summary({'d3d11': features['d3d11'],
+         'drm': features['drm'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
