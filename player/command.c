@@ -526,7 +526,7 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     char *filename = talloc_strdup(NULL, mpctx->filename);
     if (mp_is_url(bstr0(filename)))
         mp_url_unescape_inplace(filename);
-    char *f = (char *)mp_basename(filename);
+    char *f = mp_basename_or_url(filename);
     if (!f[0])
         f = filename;
     if (action == M_PROPERTY_KEY_ACTION) {
