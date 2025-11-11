@@ -100,6 +100,12 @@ char *mp_splitext(const char *path, bstr *root)
     return (char *)split + 1;
 }
 
+char *mp_stripext(void *talloc_ctx, const char *s)
+{
+    bstr root;
+    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : (char *)s;
+}
+
 bool mp_path_is_absolute(struct bstr path)
 {
     if (path.len && strchr(mp_path_separators, path.start[0]))
