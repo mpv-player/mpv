@@ -31,6 +31,8 @@ void screenshot_init(struct MPContext *mpctx);
 // Called by the playback core on each iteration.
 void handle_each_frame_screenshot(struct MPContext *mpctx);
 
+struct mp_image *capture_screenshot(struct MPContext *mpctx, int mode);
+
 /* Return the image converted to the given format. If the pixel aspect ratio is
  * not 1:1, the image is scaled as well. Returns NULL on failure.
  * If global!=NULL, use command line scaler options etc.
