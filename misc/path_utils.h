@@ -33,6 +33,9 @@ char *mp_basename(const char *path);
  */
 char *mp_splitext(const char *path, bstr *root);
 
+// This is a shorthand to remove the extension
+char *mp_strip_ext(void *talloc_ctx, const char *s);
+
 /* Return struct bstr referencing directory part of path, or if that
  * would be empty, ".".
  */
