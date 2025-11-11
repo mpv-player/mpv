@@ -150,7 +150,7 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
     case MP_SPEAKER_ID_WL:   return SPA_AUDIO_CHANNEL_FL;
     case MP_SPEAKER_ID_WR:   return SPA_AUDIO_CHANNEL_FR;
     case MP_SPEAKER_ID_SDL:  return SPA_AUDIO_CHANNEL_SL;
-    case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SL;
+    case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SR;
     case MP_SPEAKER_ID_LFE2: return SPA_AUDIO_CHANNEL_LFE2;
     case MP_SPEAKER_ID_TSL:  return SPA_AUDIO_CHANNEL_TSL;
     case MP_SPEAKER_ID_TSR:  return SPA_AUDIO_CHANNEL_TSR;
