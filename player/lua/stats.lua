@@ -690,7 +690,7 @@ end
 
 local function add_file(s, print_cache, print_tags)
     append(s, "", {prefix="File:", nl="", indent=""})
-    append_property(s, "filename", {prefix_sep="", nl="", indent=""})
+    append_property(s, "filename", {prefix_sep="", nl="", indent="", max_len=32})
     if mp.get_property_osd("filename") ~= mp.get_property_osd("media-title") then
         append_property(s, "media-title", {prefix="Title:"})
     end
