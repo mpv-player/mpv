@@ -207,6 +207,19 @@ local function text_style()
 end
 
 
+local function ellipsize(text, max_len)
+    assert(text, "no text")
+    max_len = max_len or 80
+    if max_len < 6 or text:len() <= max_len then
+        return text end
+
+    local middle = max_len/2 + max_len%2
+    local ellipsized = ("%s...%s"):format(text:sub(1, middle-1), text:sub(-middle+2))
+
+    return assert(ellipsized:len() == max_len, "lengths don't match") and ellipsized
+end
+
+
 local function has_vo_window()
     return mp.get_property_native("vo-configured") and mp.get_property_native("video-osd")
 end
