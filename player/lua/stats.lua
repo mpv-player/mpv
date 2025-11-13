@@ -291,6 +291,9 @@ local function append(s, str, attr)
     attr.no_prefix_markup = attr.no_prefix_markup or false
     attr.prefix = attr.no_prefix_markup and attr.prefix or bold(attr.prefix)
 
+    -- squeeze str to fit the desired length
+    str = attr.max_len and ellipsize(str, attr.max_len) or str
+
     local index = #s + (attr.nl == "" and 0 or 1)
     s[index] = s[index] or ""
     s[index] = s[index] .. format("%s%s%s%s%s%s", attr.nl, attr.indent,
