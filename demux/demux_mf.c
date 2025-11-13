@@ -100,7 +100,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     }
 
     if (strchr(filename, ',')) {
-        mp_info(log, "filelist: %s\n", filename);
+        mp_info(log, "filelist: %s\n", filename ? filename : "(null)");
         bstr bfilename = bstr0(filename);
 
         while (bfilename.len) {
@@ -191,15 +191,15 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     if (bad_spec || nspec != 1) {
         mp_err(log,
                "unsupported expr format: '%s' - exactly one format specifier of the form %%[.][NUM]d is expected\n",
-               filename);
+               filename ? filename : "(null)");
         goto exit_mf;
     }
 
-    mp_info(log, "search expr: %s\n", filename);
+    mp_info(log, "search expr: %s\n", filename ? filename : "(null)");
 
     while (error_count < 5) {
         if (snprintf(fname, fname_avail, filename, count++) >= fname_avail) {
-            mp_err(log, "format result too long: '%s'\n", filename);
+            mp_err(log, "format result too long: '%s'\n", filename ? filename : "(null)");
             goto exit_mf;
         }
         if (!mp_path_exists(fname)) {

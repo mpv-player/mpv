@@ -142,6 +142,7 @@ sources = files(
     'misc/json.c',
     'misc/language.c',
     'misc/natural_sort.c',
+    'misc/string_similarity.c',
     'misc/node.c',
     'misc/path_utils.c',
     'misc/random.c',
