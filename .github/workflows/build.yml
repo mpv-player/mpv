@@ -497,7 +497,7 @@ jobs:
                 libplacebo \
                 libXinerama \
                 libxkbcommon \
-                libxpresent \
+                libXpresent \
                 libXv \
                 luajit \
                 meson \
