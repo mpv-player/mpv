@@ -648,6 +648,7 @@ iconv = dependency('iconv', required: get_option('iconv'))
 features += {'iconv': iconv.found()}
 if features['iconv']
     dependencies += iconv
+    add_project_arguments('-DWINICONV_CONST=', language: ['c', 'objc'])
 endif
 
 javascript = dependency('mujs', version: '>= 1.0.0', required: get_option('javascript'))
