@@ -3523,7 +3523,9 @@ static void set_color_representation(struct vo_wayland_state *wl)
     enum mp_imgfmt imgfmt = wl->target_params.hw_subfmt ? wl->target_params.hw_subfmt : wl->target_params.imgfmt;
     bool is_420_subsampled = mp_imgfmt_is_420_subsampled(imgfmt);
 
-    MP_VERBOSE(wl, "Setting color representation:\n");
+    if ((coefficients && range) || alpha || (is_420_subsampled && chroma_location))
+        MP_VERBOSE(wl, "Setting color representation:\n");
+
     if (coefficients && range) {
         MP_VERBOSE(wl, "  Coefficients: %s, Range: %s\n",
                    m_opt_choice_str(pl_csp_names, repr.sys),
