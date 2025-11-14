@@ -145,6 +145,8 @@ const struct m_sub_options ao_conf = {
         {"audio-client-name", OPT_STRING(audio_client_name), .flags = UPDATE_AUDIO},
         {"audio-buffer", OPT_DOUBLE(audio_buffer),
             .flags = UPDATE_AUDIO, M_RANGE(0, 10)},
+        {"audio-set-media-role", OPT_BOOL(audio_set_media_role),
+            .flags = UPDATE_AUDIO},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -180,6 +182,7 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
         .log = mp_log_new(ao, log, name),
         .def_buffer = opts->audio_buffer,
         .client_name = talloc_strdup(ao, opts->audio_client_name),
+        .set_media_role = opts->audio_set_media_role
     };
     talloc_free(opts);
     ao->priv = m_config_group_from_desc(ao, ao->log, global, &desc, name);

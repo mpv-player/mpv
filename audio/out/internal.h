@@ -55,6 +55,9 @@ struct ao {
     // Application name to report to the audio API.
     char *client_name;
 
+    // Whether mpv should set the media role to the audio server
+    bool set_media_role;
+
     // Used during init: if init fails, redirect to this ao
     char *redirect;
 
