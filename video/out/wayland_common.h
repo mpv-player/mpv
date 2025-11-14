@@ -95,7 +95,6 @@ struct vo_wayland_state {
     struct wp_color_management_surface_feedback_v1 *color_surface_feedback;
     struct wp_image_description_creator_icc_v1 *icc_creator;
     struct mp_image_params target_params;
-    bool supports_icc;
     bool supports_parametric;
     bool supports_primaries;
     bool supports_tf_power;
