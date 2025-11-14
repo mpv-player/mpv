@@ -2387,6 +2387,11 @@ Audio
     if you want to force a different audio profile (e.g. with PulseAudio),
     or to set your own application name when using libmpv.
 
+``--audio-set-media-role=<yes|no>``
+    If enabled, mpv will set the appropriate media role on supported audio
+    servers depending on whether mpv is playing a video with audio or an
+    audio only file. Default: no.
+
 ``--audio-buffer=<seconds>``
     Set the audio output minimum buffer. The audio device might actually create
     a larger buffer if it pleases. If the device creates a smaller buffer,
