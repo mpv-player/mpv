@@ -323,7 +323,7 @@ static int spawn_cursor(struct vo_wayland_state *wl);
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
-static void get_compositor_preferred_description(struct vo_wayland_state *wl, bool parametric);
+static void get_compositor_preferred_description(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -2034,10 +2034,6 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
     struct vo_wayland_state *wl = data;
 
     switch (feature) {
-    case WP_COLOR_MANAGER_V1_FEATURE_ICC_V2_V4:
-        MP_VERBOSE(wl, "Compositor supports ICC creator requests.\n");
-        wl->supports_icc = true;
-        break;
     case WP_COLOR_MANAGER_V1_FEATURE_PARAMETRIC:
         MP_VERBOSE(wl, "Compositor supports parametric image description creator.\n");
         wl->supports_parametric = true;
@@ -2298,10 +2294,7 @@ static void preferred_changed(void *data, struct wp_color_management_surface_fee
                               uint32_t identity)
 {
     struct vo_wayland_state *wl = data;
-    if (wl->supports_icc)
-        get_compositor_preferred_description(wl, false);
-    if (wl->supports_parametric)
-        get_compositor_preferred_description(wl, true);
+    get_compositor_preferred_description(wl);
 }
 
 static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
@@ -3104,7 +3097,7 @@ static int get_mods(struct vo_wayland_seat *s)
     return modifiers;
 }
 
-static void get_compositor_preferred_description(struct vo_wayland_state *wl, bool parametric)
+static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     struct vo_wayland_preferred_description_info *wd = talloc_zero(NULL, struct vo_wayland_preferred_description_info);
@@ -3112,7 +3105,7 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl, bo
     wd->is_parametric = parametric;
 
     struct wp_image_description_v1 *image_description;
-    if (parametric) {
+    if (wl->supports_parametric) {
         image_description = wp_color_management_surface_feedback_v1_get_preferred_parametric(wl->color_surface_feedback);
     } else {
         image_description = wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
@@ -4084,8 +4077,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_ICC_PROFILE: {
-        if (!wl->supports_icc)
-            MP_WARN(wl, "Compositor does not support ICC profiles!\n");
         if (!wl->icc_file)
             return VO_FALSE;
         MP_VERBOSE(wl, "Retrieving ICC profile from compositor.\n");
@@ -4441,28 +4432,12 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland"))
         wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
 
-    if (wl->color_manager && (wl->supports_parametric || wl->supports_icc)) {
+    if (wl->color_manager) {
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
     }
 #endif
-
-    if (wl->supports_parametric)
-        get_compositor_preferred_description(wl, true);
-    else
-        MP_VERBOSE(wl, "Compositor does not support parametric image descriptions!\n");
-
-
-    struct gl_video_opts *gl_opts = mp_get_config_group(NULL, vo->global, &gl_video_conf);
-    if (wl->supports_icc) {
-        // dumb workaround for avoiding -Wunused-function
-        get_compositor_preferred_description(wl, false);
-    } else {
-        int msg_level = gl_opts->icc_opts->profile_auto ? MSGL_WARN : MSGL_V;
-        mp_msg(wl->log, msg_level, "Compositor does not support ICC profiles!\n");
-    }
-    talloc_free(gl_opts);
-
+    get_compositor_preferred_description(wl);
     return true;
 
 err:
