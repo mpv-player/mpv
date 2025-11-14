@@ -137,6 +137,23 @@ libjxl_threads_dep = libjxl_proj.dependency('jxl_threads')
 meson.override_dependency('libjxl_threads', libjxl_threads_dep)
 "@
 
+if (-not (Test-Path "$subprojects/aom")) {
+    New-Item -Path "$subprojects/aom" -ItemType Directory | Out-Null
+}
+Set-Content -Path "$subprojects/aom/meson.build" -Value @"
+project('aom', 'cpp', version: '3.13.1')
+cmake = import('cmake')
+opts = cmake.subproject_options()
+opts.add_cmake_defines({
+    'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+    'BUILD_SHARED_LIBS': 'OFF',
+    'BUILD_TESTING': 'OFF',
+})
+aom_proj = cmake.subproject('aom-cmake', options: opts)
+aom_dep = aom_proj.dependency('aom')
+meson.override_dependency('aom', aom_dep)
+"@
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -183,13 +200,9 @@ $projects = @(
         Revision = "main"
     },
     @{
-        Path = "$subprojects/aom.wrap"
+        Path = "$subprojects/aom-cmake.wrap"
         URL = "https://aomedia.googlesource.com/aom"
         Revision = "main"
-        Method = "cmake"
-        Provides = @(
-            "aom = aom_dep"
-        )
     }
 )
 
