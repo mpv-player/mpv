@@ -7377,10 +7377,13 @@ them.
     ``yes``, it will be converted based on the available metadata.
 
     ``auto`` (default) behaves like ``no``, except when ``--target-trc`` is
-    explicitly set, in which case it behaves like ``yes``.
+    explicitly set, in which case it behaves like ``yes``. Besides, on macOS it
+    should always behaves like ``yes``.
 
     Generally it's recommended to enable this option, if you can ensure that
-    both source and target metadata is correct.
+    both source and target metadata is correct. On color-managed platforms, the
+    target metadata is likely to be accurate. However, the accuracy of the
+    source metadata might not be guaranteed.
 
     (Only for ``--vo=gpu-next``)
 
