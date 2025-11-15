@@ -46,7 +46,7 @@
 #elif __has_builtin(__builtin_unreachable)
 #define MP_ASSERT_UNREACHABLE() __builtin_unreachable()
 #elif defined(_MSC_VER)
-#define MP_ASSERT_UNREACHABLE(msg) __assume(0)
+#define MP_ASSERT_UNREACHABLE() __assume(0)
 #elif __STDC_VERSION__ >= 202311L
 #include <stddef.h>
 #define MP_ASSERT_UNREACHABLE() unreachable()
