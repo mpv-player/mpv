@@ -1882,7 +1882,8 @@ if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
     warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
 endif
 
-summary({'d3d11': features['d3d11'],
+summary({'cocoa': features['cocoa'] and features['swift'],
+         'd3d11': features['d3d11'],
          'drm': features['drm'],
          'javascript': features['javascript'],
          'libmpv': get_option('libmpv'),
