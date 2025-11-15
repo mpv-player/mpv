@@ -405,6 +405,11 @@ static int init(struct ao *ao)
     }
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME, ao->client_name);
 
+    if (ao->set_media_role)
+        (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE,
+                               ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC
+                               ? "music" : "video");
+
     if (!(format = pa_format_info_new()))
         goto unlock_and_fail;
 
