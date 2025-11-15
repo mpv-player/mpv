@@ -301,7 +301,6 @@ struct vo_wayland_text_input {
 
 struct vo_wayland_preferred_description_info {
     struct vo_wayland_state *wl;
-    bool is_parametric;
     struct pl_color_space csp;
     float min_luma;
     float max_luma;
@@ -2152,7 +2151,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     struct vo_wayland_preferred_description_info *wd = data;
     struct vo_wayland_state *wl = wd->wl;
     wp_image_description_info_v1_destroy(image_description_info);
-    if (wd->is_parametric) {
+    if (!wd->icc_file) {
         wl->preferred_csp = wd->csp;
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, wd);
@@ -2161,16 +2160,12 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
             wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
         }
     } else {
-        if (wd->icc_file) {
-            if (wl->icc_size) {
-                munmap(wl->icc_file, wl->icc_size);
-            }
-            wl->icc_file = wd->icc_file;
-            wl->icc_size = wd->icc_size;
-            wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
-        } else {
-            MP_VERBOSE(wl, "No ICC profile retrieved from the compositor.\n");
+        if (wl->icc_size) {
+            munmap(wl->icc_file, wl->icc_size);
         }
+        wl->icc_file = wd->icc_file;
+        wl->icc_size = wd->icc_size;
+        wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
     }
     talloc_free(wd);
 }
@@ -2179,9 +2174,6 @@ static void info_icc_file(void *data, struct wp_image_description_info_v1 *image
                           int32_t icc, uint32_t icc_size)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (wd->is_parametric)
-        return;
-
     void *icc_file = mmap(NULL, icc_size, PROT_READ, MAP_PRIVATE, icc, 0);
     close(icc);
 
@@ -2201,8 +2193,6 @@ static void info_primaries_named(void *data, struct wp_image_description_info_v1
                                  uint32_t primaries)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.primaries = map_primaries(primaries);
 }
 
@@ -2215,8 +2205,6 @@ static void info_tf_named(void *data, struct wp_image_description_info_v1 *image
                           uint32_t tf)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.transfer = map_tf(tf);
 }
 
@@ -2224,8 +2212,6 @@ static void info_luminances(void *data, struct wp_image_description_info_v1 *ima
                             uint32_t min_lum, uint32_t max_lum, uint32_t reference_lum)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->min_luma = min_lum / (float)WAYLAND_MIN_LUM_FACTOR;
     wd->max_luma = max_lum;
     wd->ref_luma = reference_lum;
@@ -2236,8 +2222,6 @@ static void info_target_primaries(void *data, struct wp_image_description_info_v
                                   int32_t w_x, int32_t w_y)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.hdr.prim.red.x = (float)r_x / WAYLAND_COLOR_FACTOR;
     wd->csp.hdr.prim.red.y = (float)r_y / WAYLAND_COLOR_FACTOR;
     wd->csp.hdr.prim.green.x = (float)g_x / WAYLAND_COLOR_FACTOR;
@@ -2252,8 +2236,6 @@ static void info_target_luminance(void *data, struct wp_image_description_info_v
                                   uint32_t min_lum, uint32_t max_lum)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.hdr.min_luma = (float)min_lum / WAYLAND_MIN_LUM_FACTOR;
     wd->csp.hdr.max_luma = (float)max_lum;
 }
@@ -2262,8 +2244,6 @@ static void info_target_max_cll(void *data, struct wp_image_description_info_v1 
                                 uint32_t max_cll)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.hdr.max_cll = (float)max_cll;
 }
 
@@ -2271,8 +2251,6 @@ static void info_target_max_fall(void *data, struct wp_image_description_info_v1
                                  uint32_t max_fall)
 {
     struct vo_wayland_preferred_description_info *wd = data;
-    if (!wd->is_parametric)
-        return;
     wd->csp.hdr.max_fall = (float)max_fall;
 }
 
@@ -3102,7 +3080,6 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     struct vo_wayland_preferred_description_info *wd = talloc_zero(NULL, struct vo_wayland_preferred_description_info);
     wd->wl = wl;
-    wd->is_parametric = parametric;
 
     struct wp_image_description_v1 *image_description;
     if (wl->supports_parametric) {
