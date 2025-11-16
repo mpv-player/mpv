@@ -2037,18 +2037,6 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
         MP_VERBOSE(wl, "Compositor supports parametric image description creator.\n");
         wl->supports_parametric = true;
         break;
-    case WP_COLOR_MANAGER_V1_FEATURE_SET_PRIMARIES:
-        MP_VERBOSE(wl, "Compositor supports setting primaries.\n");
-        wl->supports_primaries = true;
-        break;
-    case WP_COLOR_MANAGER_V1_FEATURE_SET_TF_POWER:
-        MP_VERBOSE(wl, "Compositor supports setting transfer functions.\n");
-        wl->supports_tf_power = true;
-        break;
-    case WP_COLOR_MANAGER_V1_FEATURE_SET_LUMINANCES:
-        MP_VERBOSE(wl, "Compositor supports setting luminances.\n");
-        wl->supports_luminances = true;
-        break;
     case WP_COLOR_MANAGER_V1_FEATURE_SET_MASTERING_DISPLAY_PRIMARIES:
         MP_VERBOSE(wl, "Compositor supports setting mastering display primaries.\n");
         wl->supports_display_primaries = true;

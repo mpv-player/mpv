@@ -96,9 +96,6 @@ struct vo_wayland_state {
     struct wp_image_description_creator_icc_v1 *icc_creator;
     struct mp_image_params target_params;
     bool supports_parametric;
-    bool supports_primaries;
-    bool supports_tf_power;
-    bool supports_luminances;
     bool supports_display_primaries;
     int primaries_map[PL_COLOR_PRIM_COUNT];
     int transfer_map[PL_COLOR_TRC_COUNT];
