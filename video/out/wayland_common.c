@@ -3066,6 +3066,9 @@ static int get_mods(struct vo_wayland_seat *s)
 static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
+    if (!wl->color_surface_feedback)
+        return;
+
     struct vo_wayland_preferred_description_info *wd = talloc_zero(NULL, struct vo_wayland_preferred_description_info);
     wd->wl = wl;
 
@@ -3439,7 +3442,7 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
 static void set_color_management(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-    if (!wl->color_surface)
+    if (!wl->color_surface && !wl->supports_parametric)
         return;
 
     struct pl_color_space color = wl->target_params.color;
@@ -4272,11 +4275,19 @@ bool vo_wayland_init(struct vo *vo)
     }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-    if (!wl->color_manager) {
+    if (wl->color_manager) {
+        wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
+        wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
+        // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
+        if (!strcmp(wl->vo->driver->name, "dmabuf-wayland"))
+            wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+    } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_manager_v1_interface.name);
     }
 #endif
+
+    get_compositor_preferred_description(wl);
 
 #if HAVE_WAYLAND_PROTOCOLS_1_44
     if (!wl->color_representation_manager) {
@@ -4390,17 +4401,6 @@ bool vo_wayland_init(struct vo *vo)
      * before mpv does anything else. */
     wl_display_roundtrip(wl->display);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
-    // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
-    if (wl->color_manager && wl->supports_parametric && !strcmp(wl->vo->driver->name, "dmabuf-wayland"))
-        wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
-
-    if (wl->color_manager) {
-        wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
-        wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
-    }
-#endif
-    get_compositor_preferred_description(wl);
     return true;
 
 err:
