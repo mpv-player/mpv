@@ -3081,12 +3081,8 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
     struct vo_wayland_preferred_description_info *wd = talloc_zero(NULL, struct vo_wayland_preferred_description_info);
     wd->wl = wl;
 
-    struct wp_image_description_v1 *image_description;
-    if (wl->supports_parametric) {
-        image_description = wp_color_management_surface_feedback_v1_get_preferred_parametric(wl->color_surface_feedback);
-    } else {
-        image_description = wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
-    }
+    struct wp_image_description_v1 *image_description =
+        wp_color_management_surface_feedback_v1_get_preferred(wl->color_surface_feedback);
     struct wp_image_description_info_v1 *description_info =
         wp_image_description_v1_get_information(image_description);
     wp_image_description_info_v1_add_listener(description_info, &image_description_info_listener, wd);
