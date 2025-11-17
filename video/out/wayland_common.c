@@ -2115,6 +2115,7 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
                                      uint32_t cause, const char *msg)
 {
     struct vo_wayland_state *wl = data;
+    wl->image_desc_done = true;
     MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
     wp_color_management_surface_v1_unset_image_description(wl->color_surface);
     wp_image_description_v1_destroy(image_description);
@@ -2124,6 +2125,7 @@ static void image_description_ready(void *data, struct wp_image_description_v1 *
                                     uint32_t identity)
 {
     struct vo_wayland_state *wl = data;
+    wl->image_desc_done = true;
     wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description, 0);
     MP_TRACE(wl, "Image description set on color surface.\n");
     wp_image_description_v1_destroy(image_description);
@@ -3501,7 +3503,10 @@ static void set_color_management(struct vo_wayland_state *wl)
         wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
+    wl_proxy_set_queue((struct wl_proxy *)image_description, wl->cm_queue);
+    wl->image_desc_done = false;
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
+    wl_display_roundtrip_queue(wl->display, wl->cm_queue);
 #endif
 }
 
@@ -4279,8 +4284,10 @@ bool vo_wayland_init(struct vo *vo)
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
         // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
-        if (!strcmp(wl->vo->driver->name, "dmabuf-wayland"))
+        if (!strcmp(wl->vo->driver->name, "dmabuf-wayland")) {
             wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+            wl->cm_queue = wl_display_create_queue(wl->display);
+        }
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_manager_v1_interface.name);
@@ -4499,6 +4506,9 @@ void vo_wayland_uninit(struct vo *vo)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
+    if (wl->cm_queue)
+        wl_event_queue_destroy(wl->cm_queue);
+
     if (wl->color_manager)
         wp_color_manager_v1_destroy(wl->color_manager);
 
