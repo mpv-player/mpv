@@ -3442,7 +3442,7 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
 static void set_color_management(struct vo_wayland_state *wl)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-    if (!wl->color_surface && !wl->supports_parametric)
+    if (!wl->color_surface || !wl->supports_parametric)
         return;
 
     struct pl_color_space color = wl->target_params.color;
