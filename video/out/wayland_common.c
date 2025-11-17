@@ -182,6 +182,7 @@ struct vo_wayland_output {
     uint32_t flags;
     int phys_width;
     int phys_height;
+    int transform;
     int scale;
     double refresh_rate;
     char *make;
@@ -1597,6 +1598,7 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
     output->geometry.y0 = y;
     output->phys_width = phys_width;
     output->phys_height = phys_height;
+    output->transform = transform;
 }
 
 static void output_handle_mode(void *data, struct wl_output *wl_output,
@@ -1620,16 +1622,20 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     struct vo_wayland_output *o = data;
     struct vo_wayland_state *wl = o->wl;
 
+    if (o->transform % 2)
+        MPSWAP(int, o->geometry.x1, o->geometry.y1);
+
     o->geometry.x1 += o->geometry.x0;
     o->geometry.y1 += o->geometry.y0;
 
     MP_VERBOSE(o->wl, "Registered output %s %s (%s) (0x%x):\n"
                "\tx: %dpx, y: %dpx\n"
                "\tw: %dpx (%dmm), h: %dpx (%dmm)\n"
+               "\ttransform: %d\n"
                "\tscale: %f\n"
                "\tHz: %f\n", o->make, o->model, o->name, o->id, o->geometry.x0,
                o->geometry.y0, mp_rect_w(o->geometry), o->phys_width,
-               mp_rect_h(o->geometry), o->phys_height,
+               mp_rect_h(o->geometry), o->phys_height, o->transform,
                o->scale / WAYLAND_SCALE_FACTOR, o->refresh_rate);
 
     /* If we satisfy this conditional, something about the current
