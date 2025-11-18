@@ -304,10 +304,12 @@ static int AudioTrack_New(struct ao *ao)
         MP_JNI_EXCEPTION_LOG(ao);
         tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setUsage, AudioAttributes.USAGE_MEDIA);
         MP_JNI_LOCAL_FREEP(&tmp);
-        jint content_type = (ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC) ?
-            AudioAttributes.CONTENT_TYPE_MUSIC : AudioAttributes.CONTENT_TYPE_MOVIE;
-        tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, content_type);
-        MP_JNI_LOCAL_FREEP(&tmp);
+        if (ao->set_media_role) {
+            jint content_type = (ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC) ?
+                AudioAttributes.CONTENT_TYPE_MUSIC : AudioAttributes.CONTENT_TYPE_MOVIE;
+            tmp = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.setContentType, content_type);
+            MP_JNI_LOCAL_FREEP(&tmp);
+        }
         jobject attr = MP_JNI_CALL_OBJECT(attr_builder, AudioAttributesBuilder.build);
         MP_JNI_LOCAL_FREEP(&attr_builder);
 
