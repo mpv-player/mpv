@@ -7377,7 +7377,8 @@ them.
     ``yes``, it will be converted based on the available metadata.
 
     ``auto`` (default) behaves like ``no``, except when ``--target-trc`` is
-    explicitly set, in which case it behaves like ``yes``.
+    explicitly set, in which case it behaves like ``yes``. On macOS it
+    should always behave like ``yes``.
 
     Generally it's recommended to enable this option, if you can ensure that
     both source and target metadata is correct. Besides, on color managed
