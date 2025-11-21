@@ -31,7 +31,8 @@ struct playlist_entry *playlist_entry_new(const char *filename)
 {
     struct playlist_entry *e = talloc_zero(NULL, struct playlist_entry);
     char *local_filename = mp_file_url_to_filename(e, bstr0(filename));
-    e->filename = local_filename ? local_filename : talloc_strdup(e, filename);
+    e->filename = mp_normalize_path(e, local_filename ? local_filename : filename);
+    talloc_free(local_filename);
     e->stream_flags = STREAM_ORIGIN_DIRECT;
     e->original_index = -1;
     return e;
@@ -304,20 +305,6 @@ exit:
     return entry;
 }
 
-void playlist_add_base_path(struct playlist *pl, bstr base_path)
-{
-    if (base_path.len == 0 || bstrcmp0(base_path, ".") == 0)
-        return;
-    for (int n = 0; n < pl->num_entries; n++) {
-        struct playlist_entry *e = pl->entries[n];
-        if (!mp_is_url(bstr0(e->filename))) {
-            char *new_file = mp_path_join_bstr(e, base_path, bstr0(e->filename));
-            talloc_free(e->filename);
-            e->filename = new_file;
-        }
-    }
-}
-
 void playlist_set_stream_flags(struct playlist *pl, int flags)
 {
     for (int n = 0; n < pl->num_entries; n++)
@@ -446,15 +433,8 @@ void playlist_set_current(struct playlist *pl)
         return;
 
     for (int i = 0; i < pl->num_entries; ++i) {
-        if (!pl->entries[i]->playlist_path)
-            continue;
-        char *path = pl->entries[i]->playlist_path;
-        if (path[0] != '.')
-            path = mp_path_join(NULL, pl->playlist_dir, mp_basename(pl->entries[i]->playlist_path));
-        bool same = !strcmp(pl->entries[i]->filename, path);
-        if (path != pl->entries[i]->playlist_path)
-            talloc_free(path);
-        if (same) {
+        if (pl->entries[i]->playlist_path &&
+            !strcmp(pl->entries[i]->filename, pl->entries[i]->playlist_path)) {
             pl->current = pl->entries[i];
             break;
         }
