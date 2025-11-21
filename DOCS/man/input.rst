@@ -1893,10 +1893,10 @@ Hooks
 
 Hooks are synchronous events between player core and a script or similar. This
 applies to client API (including the Lua scripting interface). Normally,
-events are supposed to be asynchronous, and the hook API provides an awkward
-and obscure way to handle events that require stricter coordination. There are
-no API stability guarantees made. Not following the protocol exactly can make
-the player freeze randomly. Basically, nobody should use this API.
+events are supposed to be asynchronous, and the hook API provides a way to
+handle events that require stricter coordination. Not following the protocol
+exactly can make the player freeze. Use with caution, avoid if synchronous event
+handling is not required.
 
 The C API is described in the header files. The Lua API is described in the
 Lua section.
