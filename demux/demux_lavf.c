@@ -760,7 +760,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         const uint8_t *sd = mp_av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX);
         if (sd) {
             double r = av_display_rotation_get((int32_t *)sd);
-            if (!isnan(r))
+            if (!mp_isnan(r))
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
 

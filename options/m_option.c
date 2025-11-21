@@ -1021,7 +1021,7 @@ done:
 static char *print_double(const m_option_t *opt, const void *val)
 {
     double f = VAL(val);
-    if (isnan(f) && (opt->flags & M_OPT_DEFAULT_NAN))
+    if (mp_isnan(f) && (opt->flags & M_OPT_DEFAULT_NAN))
         return talloc_strdup(NULL, "default");
     return talloc_asprintf(NULL, "%f", f);
 }
@@ -1029,7 +1029,7 @@ static char *print_double(const m_option_t *opt, const void *val)
 static char *pretty_print_double(const m_option_t *opt, const void *val)
 {
     double f = VAL(val);
-    if (isnan(f))
+    if (mp_isnan(f))
         return print_double(opt, val);
     return mp_format_double(NULL, f, 4, false, false, !(opt->flags & M_OPT_FIXED_LEN_PRINT));
 }
@@ -1078,7 +1078,7 @@ static int double_get(const m_option_t *opt, void *ta_parent,
                       struct mpv_node *dst, void *src)
 {
     double f = VAL(src);
-    if (isnan(f) && (opt->flags & M_OPT_DEFAULT_NAN)) {
+    if (mp_isnan(f) && (opt->flags & M_OPT_DEFAULT_NAN)) {
         dst->format = MPV_FORMAT_STRING;
         dst->u.string = talloc_strdup(ta_parent, "default");
     } else {
@@ -1091,8 +1091,8 @@ static int double_get(const m_option_t *opt, void *ta_parent,
 static bool double_equal(const m_option_t *opt, void *a, void *b)
 {
     double fa = VAL(a), fb = VAL(b);
-    if (isnan(fa) || isnan(fb))
-        return isnan(fa) == isnan(fb);
+    if (mp_isnan(fa) || mp_isnan(fb))
+        return mp_isnan(fa) == mp_isnan(fb);
     return fa == fb;
 }
 
