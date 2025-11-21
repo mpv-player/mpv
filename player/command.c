@@ -8027,7 +8027,8 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         run_command_opts(mpctx);
     }
 
-    if (opt_ptr == &opts->playback_speed || opt_ptr == &opts->playback_pitch) {
+    if (opt_ptr == &opts->playback_speed || opt_ptr == &opts->playback_pitch ||
+        opt_ptr == &opts->pitch_correction) {
         update_playback_speed(mpctx);
         mp_wakeup_core(mpctx);
     }
