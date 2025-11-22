@@ -2146,10 +2146,22 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     struct vo_wayland_state *wl = wd->wl;
     wp_image_description_info_v1_destroy(image_description_info);
     if (!wd->icc_file) {
-        wl->preferred_csp = wd->csp;
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, wd);
-        if (wd->csp.hdr.max_luma > wd->ref_luma) {
+        // Wayland luminances are always in reference to the reference luminance. That is,
+        // if max_luma == 2*ref_luma, then there is 2x headroom above paper white. On the
+        // other hand, libplacebo hardcodes PL_COLOR_SDR_WHITE as the reference luminance.
+        // We must scale all wayland values to correspond to the libplacebo scale,
+        // otherwise libplacebo will assume that there is too little or too much headroom
+        // when ref_luma != PL_COLOR_SDR_WHITE.
+        float a = wd->min_luma;
+        float b = (PL_COLOR_SDR_WHITE - a) / (wd->ref_luma - a);
+        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + a;
+        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + a;
+        wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + a;
+        wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + a;
+        wl->preferred_csp = wd->csp;
+        if (wd->csp.hdr.max_luma > PL_COLOR_SDR_WHITE) {
             MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
             wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
         }
