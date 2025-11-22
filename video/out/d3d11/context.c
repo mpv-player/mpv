@@ -203,7 +203,8 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     return MPMIN(ra_fmt->component_depth[0], desc1.BitsPerColor);
 }
 
-static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
+static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw,
+                                                      float source_max_luma)
 {
     if (sw->ctx->opts.composition)
         return (struct pl_color_space){0};

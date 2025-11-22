@@ -79,7 +79,7 @@ struct ra_ctx_params {
     int (*color_depth)(struct ra_ctx *ctx);
 
     // Preferred device color space. Optional.
-    pl_color_space_t (*preferred_csp)(struct ra_ctx *ctx);
+    pl_color_space_t (*preferred_csp)(struct ra_ctx *ctx, float source_max_luma);
 
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
@@ -114,7 +114,7 @@ struct ra_swapchain_fns {
     int (*color_depth)(struct ra_swapchain *sw);
 
     // Target device color space. Optional.
-    pl_color_space_t (*target_csp)(struct ra_swapchain *sw);
+    pl_color_space_t (*target_csp)(struct ra_swapchain *sw, float source_max_luma);
 
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function

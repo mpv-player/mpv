@@ -2174,10 +2174,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
                 wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
         }
         wl->preferred_csp = wd->csp;
-        if (wd->csp.hdr.max_luma != PL_COLOR_SDR_WHITE && !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
-        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
@@ -3984,10 +3980,59 @@ bool vo_wayland_check_visible(struct vo *vo)
     return render;
 }
 
-struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
+struct pl_color_space vo_wayland_preferred_csp(struct vo *vo, float source_max_luma)
 {
     struct vo_wayland_state *wl = vo->wl;
-    return wl->preferred_csp;
+    struct pl_color_space csp = wl->preferred_csp;
+    if (!pl_color_transfer_is_hdr(csp.transfer)) {
+        // For transfer functions for which pl_color_transfer_is_hdr returns false, mpv
+        // discards the HDR metadata and assumes a max_luma of PL_COLOR_SDR_WHITE.
+        // Similarly, mesa discards the HDR metadata for such transfer functions.
+        // Therefore, if there is any reason for us to preserve the HDR metadata, we need
+        // to switch to a transfer function for which pl_color_transfer_is_hdr returns
+        // true. PL_COLOR_TRC_PQ is the most widely supported transfer function of that
+        // kind. If VK_COLOR_SPACE_HDR10_ST2084_EXT is not available, then libplacebo will
+        // still try to fall back to another HDR transfer function so that mesa passes the
+        // metadata on to the compositor. (Therefore, using any HDR transfer function here
+        // would do since we cannot actually know which transfer function the compositor
+        // prefers.)
+
+        // The default assumption by all components in the pipeline is that the maximum
+        // luminance for non-HDR transfer functions is paper white. Therefore, we don't
+        // have to handle this case.
+        if (csp.hdr.max_luma != PL_COLOR_SDR_WHITE) {
+            // Otherwise, if we are doing inverse tone mapping, which is indicated by
+            // source_max_luma == INFINITY, then libplacebo always needs to know the exact
+            // max_luma of the display since that is the target we want to hit.
+            if (source_max_luma == INFINITY)
+                csp.transfer = PL_COLOR_TRC_PQ;
+            // Otherwise, if the max_luma of the source is brighter than paper white, then
+            // libplacebo will always perform tone mapping. To do this correctly, it will
+            // need to know the exact max_luma of the display.
+            if (source_max_luma > PL_COLOR_SDR_WHITE)
+                csp.transfer = PL_COLOR_TRC_PQ;
+            // Otherwise, if max_luma of the display is less than paper white, there are
+            // two cases:
+            //   1. source_max_luma >  csp.hdr.max_luma: In this case, we want libplacebo
+            //      to tone map to the max_luma of the display.
+            //   2. source_max_luma <= csp.hdr.max_luma: In this case, we still need to
+            //      tell the compositor that the max_luma of our images is
+            //      < csp.hdr.max_luma since otherwise it will assume that the max_luma of
+            //      or images is paper white and might do its own tone mapping down to
+            //      csp.hdr.max_luma.
+            // So in both cases we need to pass the actual max_luma of the display through
+            // the pipeline.
+            if (csp.hdr.max_luma < PL_COLOR_SDR_WHITE)
+                csp.transfer = PL_COLOR_TRC_PQ;
+
+            // NOTE: If source_max_luma > csp.hdr.max_luma, which seems to be missing from
+            // the conditions above, then either source_max_luma > PL_COLOR_SDR_WHITE, in
+            // which case we hit the second branch above, or
+            // csp.hdr.max_luma < source_max_luma <= PL_COLOR_WHITE in which case we hit
+            // the third branch above.
+        }
+    }
+    return csp;
 }
 
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
