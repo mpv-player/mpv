@@ -385,6 +385,17 @@ struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index)
     return index >= 0 && index < pl->num_entries ? pl->entries[index] : NULL;
 }
 
+// Return entry for a specific entry id.
+// Return NULL if not found.
+struct playlist_entry *playlist_entry_from_id(struct playlist *pl, int64_t id)
+{
+    for (int i = 0; i < pl->num_entries; ++i) {
+        if (pl->entries[i]->id == (uint64_t)id)
+            return pl->entries[i];
+    }
+    return NULL;
+}
+
 struct playlist *playlist_parse_file(const char *file, struct mp_cancel *cancel,
                                      struct mpv_global *global)
 {
