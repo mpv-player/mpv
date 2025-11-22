@@ -6247,14 +6247,20 @@ static void cmd_playlist_play_index(void *p)
     struct playlist *pl = mpctx->playlist;
     int pos = cmd->args[0].v.i;
     bool preserve_options = cmd->num_args >= 2 && cmd->args[1].v.b;
+    int64_t id = cmd->args[2].v.i64;
 
-    if (pos == -2)
-        pos = playlist_entry_to_index(pl, pl->current);
+    struct playlist_entry *entry;
+    if (pos == -3)
+        entry = playlist_entry_from_id(pl, id);
+    else if (pos == -2)
+        entry = pl->current;
+    else
+        entry = playlist_entry_from_index(pl, pos);
 
     if (preserve_options && pl->current && pos == pl->current->pl_index)
         pl->current->reloading = true;
 
-    mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
+    mp_set_playlist_entry(mpctx, entry);
     if (cmd->on_osd & MP_ON_OSD_MSG)
         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
 }
@@ -7530,9 +7536,13 @@ const struct mp_cmd_def mp_cmds[] = {
         .priv = &(const int){-1} },
     { "playlist-play-index", cmd_playlist_play_index,
         {
-            {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
+            {"index", OPT_CHOICE(v.i,
+                {"id", -3},
+                {"current", -2},
+                {"none", -1}),
                 M_RANGE(-1, INT_MAX)},
             {"preserve-options", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"id", OPT_INT64(v.i64), .flags = MP_CMD_OPT_ARG},
         }
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
