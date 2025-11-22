@@ -5,6 +5,13 @@
 // - The names of function expressions are not required, but are used in stack
 //   traces. We name them where useful to show up (fname:#line always shows).
 
+mp.log = function(level) {
+    var cmd = ["msg", level];
+    for (var i = 1; i < arguments.length; i++)
+        cmd.push(String(arguments[i]))
+    mp.command_native(cmd);
+}
+
 mp.msg = { log: mp.log };
 mp.msg.verbose = mp.log.bind(null, "v");
 var levels = ["fatal", "error", "warn", "info", "debug", "trace"];
