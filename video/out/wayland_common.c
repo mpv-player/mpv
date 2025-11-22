@@ -2161,10 +2161,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + a;
         wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + a;
         wl->preferred_csp = wd->csp;
-        if (wd->csp.hdr.max_luma > PL_COLOR_SDR_WHITE) {
-            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
-        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
@@ -3971,10 +3967,40 @@ bool vo_wayland_check_visible(struct vo *vo)
     return render;
 }
 
-struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
+struct pl_color_space vo_wayland_preferred_csp(struct vo *vo, float source_max_luma)
 {
     struct vo_wayland_state *wl = vo->wl;
-    return wl->preferred_csp;
+    struct pl_color_space csp = wl->preferred_csp;
+    if (!pl_color_transfer_is_hdr(csp.transfer)) {
+        // Transfer functions for which pl_color_transfer_is_hdr returns false have some
+        // limitations: mpv discards the HDR info for them, libplacebo does not use
+        // floating point buffers for them [1], mesa discards HDR info for them. Therefore,
+        // we must change the transfer function to one where pl_color_transfer_is_hdr
+        // returns true if we need HDR-like behavior. If you look at that function, you can
+        // see that PL_COLOR_TRC_PQ is the only viable choice even though PL_COLOR_TRC_LINEAR
+        // would be more efficient (libplacebo uses 16-bits-per-channel formats either way).
+        //
+        // [1]: Except for PL_COLOR_TRC_LINEAR, but we cannot use that one due to the other
+        //      limitations.
+
+        float max_luma = source_max_luma;
+        // INFINITY is a sentinel value used to indicate that we want to perform inverse
+        // tone mapping.
+        if (source_max_luma == INFINITY)
+            max_luma = csp.hdr.max_luma;
+
+        // If the source is brighter than what the display permits, we must tone map.
+        // Since mpv throws the HDR metadata away for SDR transfer functions, we must
+        // switch to an HDR transfer function if max_luma is not the default.
+        if (max_luma > csp.hdr.max_luma && csp.hdr.max_luma != PL_COLOR_SDR_WHITE)
+            csp.transfer = PL_COLOR_TRC_PQ;
+        // If the source is brighter than reference white, we cannot use an SDR transfer
+        // function because libplacebo will not use a floating point buffer for them and
+        // we would need to store values greater than 1.0 in the buffer to reach max_luma.
+        if (max_luma > PL_COLOR_SDR_WHITE)
+            csp.transfer = PL_COLOR_TRC_PQ;
+    }
+    return csp;
 }
 
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
