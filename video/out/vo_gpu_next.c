@@ -1089,8 +1089,16 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     bool pass_colorspace = false;
     struct pl_color_space target_csp = {0};
     // TODO: Implement this for all backends
-    if (sw->fns->target_csp)
-        target_csp = sw->fns->target_csp(sw);
+    if (sw->fns->target_csp) {
+        float source_max_luma = 0.0f;
+        if (frame->current) {
+            source_max_luma = frame->current->params.color.hdr.max_luma;
+            if (opts->tone_map.inverse)
+                // Sentinel value to use the maximum luminance supported by the display.
+                source_max_luma = INFINITY;
+        }
+        target_csp = sw->fns->target_csp(sw, source_max_luma);
+    }
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
         target_csp.primaries = get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
