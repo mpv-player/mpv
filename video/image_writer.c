@@ -188,13 +188,14 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
      * 16-bit, this tells lavc that only 10 bits are significant. lavc encoders may
      * ignore this value, but some codecs can make use of it (for example, PNG's
      * sBIT chunk or JXL's bit depth header)
+     *
+     * This only works when screenshot-sw=yes is set. With hardware screenshots,
+     * the "original" is whatever is in the GPU buffer, which is likely to be at
+     * full bit depth already.
      */
-    if (memcmp(image->fmt.bpp, ctx->original_format.bpp, sizeof(image->fmt.bpp))) {
-        int depth = 0;
-        for (int i = 0; i < MP_ARRAY_SIZE(ctx->original_format.comps); i++)
-            depth = MPMAX(depth, ctx->original_format.comps[i].size);
-        MP_DBG(ctx, "tagging bits_per_raw_sample=%d\n", depth);
-        avctx->bits_per_raw_sample = depth;
+    if (image->params.repr.bits.color_depth != image->params.repr.bits.sample_depth) {
+        MP_DBG(ctx, "tagging bits_per_raw_sample=%d\n", image->params.repr.bits.color_depth);
+        avctx->bits_per_raw_sample = image->params.repr.bits.color_depth;
     }
 
     if (codec->id == AV_CODEC_ID_MJPEG) {
