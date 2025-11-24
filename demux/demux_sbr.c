@@ -121,10 +121,6 @@ static int demux_open_sbr(struct demuxer *demuxer, enum demux_check check)
     stream->codec->codec_desc = codec_info.codec_desc;
     demux_add_sh_stream(demuxer, stream);
 
-    // Note that while in practice seeking on this stream is not possible,
-    // if `demuxer->seekable` is `false` then a warning is emitted when one
-    // tries to seek in the player which is undesirable. Therefore we mark
-    // it as seekable and make seeking a no-op instead.
     demuxer->seekable = true;
     demuxer->fully_read = true;
     demux_close_stream(demuxer);
@@ -153,13 +149,19 @@ static bool demux_read_packet_sbr(struct demuxer *demuxer, struct demux_packet *
 
 static void demux_seek_sbr(struct demuxer *demuxer, double seek_pts, int flags)
 {
-    // We only ever emit one packet, no seeking needed or possible.
+    struct demux_sbr_priv *priv = demuxer->priv;
+
+    // When a seek is performed all cached subtitle packets are invalidated
+    // which could lead us to abruptly stop displaying subtitles if we don't
+    // emit a new packet (`sub_read_packets` understandably assumes that
+    // no packets = no subtitles to update).
+    priv->exhausted = false;
 }
 
 static void demux_switched_tracks_sbr(struct demuxer *demuxer)
 {
-    struct demux_sbr_priv *ctx = demuxer->priv;
-    ctx->exhausted = false;
+    struct demux_sbr_priv *priv = demuxer->priv;
+    priv->exhausted = false;
 }
 
 
