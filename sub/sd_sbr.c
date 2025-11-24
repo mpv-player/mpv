@@ -138,6 +138,12 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         fmt,
         NULL
     );
+
+    // Since `demux_sbr` only ever sends us one packet,
+    // we treat it as a giant "animated" packet to make sure we don't
+    // stop updating the subtitles after one frame if nothing else is
+    // driving updates (like if no video is being played).
+    packet->animated = true;
     packet->sub_duration = packet->duration;
 
     if (!ctx->sbr_subtitles) {
