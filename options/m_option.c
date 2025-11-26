@@ -609,7 +609,7 @@ const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
     const char *val = m_opt_choice_str_def(choices, value, NULL);
     if (val)
         return val;
-    mp_require(false && "Invalid choice value!");
+    return "<unknown>";
 }
 
 const char *m_opt_choice_str_def(const struct m_opt_choice_alternatives *choices,
