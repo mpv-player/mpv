@@ -964,8 +964,12 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->repr.sys != PL_COLOR_SYSTEM_BT_2100_HLG &&
             params->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION &&
             params->repr.sys != PL_COLOR_SYSTEM_SMPTE_240M &&
-            params->repr.sys != PL_COLOR_SYSTEM_YCGCO)
-        {
+            params->repr.sys != PL_COLOR_SYSTEM_YCGCO
+#if PL_API_VER >= 358
+            && params->repr.sys != PL_COLOR_SYSTEM_YCGCO_RE
+            && params->repr.sys != PL_COLOR_SYSTEM_YCGCO_RO
+#endif
+        ) {
             // Makes no sense, so guess instead
             // YCGCO should be separate, but libavcodec disagrees
             params->repr.sys = PL_COLOR_SYSTEM_UNKNOWN;
