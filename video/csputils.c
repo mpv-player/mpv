@@ -43,6 +43,10 @@ const struct m_opt_choice_alternatives pl_csp_names[] = {
     {"rgb",         PL_COLOR_SYSTEM_RGB},
     {"xyz",         PL_COLOR_SYSTEM_XYZ},
     {"ycgco",       PL_COLOR_SYSTEM_YCGCO},
+#if PL_API_VER >= 358
+    {"ycgco-re",    PL_COLOR_SYSTEM_YCGCO_RE},
+    {"ycgco-ro",    PL_COLOR_SYSTEM_YCGCO_RO},
+#endif
     {0}
 };
 
