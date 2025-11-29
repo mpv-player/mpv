@@ -102,6 +102,7 @@ struct vo_wayland_state {
     void *icc_file;
     uint32_t icc_size;
     struct pl_color_space preferred_csp;
+    bool image_desc_done;
 
     /* color-representation */
     struct wp_color_representation_manager_v1 *color_representation_manager;
