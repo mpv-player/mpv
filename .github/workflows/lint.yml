@@ -13,7 +13,7 @@ jobs:
   commit-msg:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 50
 
@@ -24,20 +24,20 @@ jobs:
   swift:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: norio-nomura/action-swiftlint@3.2.1
 
   lua:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: lunarmodules/luacheck@v1
 
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check
         id: check
         uses: astral-sh/ruff-action@v3
@@ -50,7 +50,7 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: python/mypy@master
         with:
           install_project_dependencies: no
@@ -60,12 +60,12 @@ jobs:
   editorconfig:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: editorconfig-checker/action-editorconfig-checker@main
       - run: editorconfig-checker -config .editorconfig-checker.json
 
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: pre-commit/action@v3.0.1
