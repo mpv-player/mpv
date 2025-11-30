@@ -115,7 +115,7 @@ function build_if_missing {
 
 _iconv () {
     local ver=1.18
-    gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
+    gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
     makeplusinstall
