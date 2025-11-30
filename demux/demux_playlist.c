@@ -106,7 +106,7 @@ struct pl_parser {
     int autocreate_playlist;
     enum demux_check check_level;
     struct stream *real_stream;
-    char *format;
+    const char *format;
     char *codepage;
     struct demux_playlist_opts *opts;
     struct MPOpts *mp_opts;
@@ -277,6 +277,8 @@ ok:
                 title = bstrto0(NULL, btitle);
             }
         } else if (bstr_startswith0(line_dup, "#EXT-X-")) {
+            // Note that this is only used for user advice. Actual HLS demuxing
+            // must happen through demux_lavf.
             p->format = "hls";
         } else if (line_dup.len > 0 && !bstr_startswith0(line_dup, "#")) {
             char *fn = bstrto0(NULL, line_dup);
