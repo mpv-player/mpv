@@ -205,9 +205,6 @@ static const struct format_hack format_hacks[] = {
 
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
-    // Let's open files with extremely generic extensions (.bin) with a
-    // demuxer that doesn't have a probe function! NO.
-    BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
     {0}
