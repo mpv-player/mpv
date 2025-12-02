@@ -170,7 +170,7 @@ meson.override_dependency('aom', aom_dep)
 if (-not (Test-Path "$subprojects/subrandr")) {
     git clone https://github.com/afishhh/subrandr --depth 1 $subprojects/subrandr
     Set-Content -Path "$subprojects/subrandr/meson.build" -Value @"
-project('subrandr', 'c', version: '1.0.1')
+project('subrandr', 'c', version: '1.1.0')
 cargo = find_program('cargo', required: true)
 cc = meson.get_compiler('c')
 subrandr_build = custom_target(

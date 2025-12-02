@@ -29,6 +29,8 @@ enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
     SUBBITMAP_BGRA,     // IMGFMT_BGRA (MSB=A, LSB=B), scaled, premultiplied alpha
+    SUBBITMAP_SUBRANDR, // contains `sbr_output_image`s, must be converted to
+                        // SUBBITMAP_BGRA during packing
 
     SUBBITMAP_COUNT
 };
@@ -47,9 +49,14 @@ struct sub_bitmap {
     // with the bitmap pointer.)
     int src_x, src_y;
 
-    struct {
-        uint32_t color;
-    } libass;
+    union {
+        struct {
+            uint32_t color;
+        } libass;
+        struct {
+            const struct sbr_output_image *image;
+        } subrandr;
+    };
 };
 
 struct sub_bitmaps {

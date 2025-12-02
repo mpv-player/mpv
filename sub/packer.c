@@ -26,6 +26,9 @@
 
 #include <ass/ass.h>
 #include <ass/ass_types.h>
+#if HAVE_SUBRANDR
+#include <subrandr/subrandr.h>
+#endif
 
 #include "common/common.h"
 #include "packer.h"
@@ -36,6 +39,7 @@
 
 struct mp_sub_packer {
     struct sub_bitmap *cached_parts; // only for the array memory
+    struct sub_bitmap *cached_subrandr_images;
     struct mp_image *cached_img;
     struct sub_bitmaps cached_subs;
     bool cached_subs_valid;
@@ -321,3 +325,103 @@ void mp_sub_packer_pack_ass(struct mp_sub_packer *p, ASS_Image **image_lists,
     p->cached_subs.change_id = 0;
     p->cached_subs_valid = true;
 }
+
+#if HAVE_SUBRANDR
+// Pack the images in `res` into a BGRA8 atlas and populate `res->parts`
+// with instances of the images as described by `pass`.
+static bool pack_subrandr(struct mp_sub_packer *p, struct sub_bitmaps *res,
+                          struct sbr_instanced_raster_pass *pass)
+{
+    if (!pack(p, res, IMGFMT_BGRA))
+        return false;
+
+    int padding = p->packer->padding;
+    sbr_bgra8 *base = (sbr_bgra8 *)res->packed->planes[0];
+    int byte_stride = res->packed->stride[0];
+    int pixel_stride = byte_stride / 4;
+    struct sbr_output_instance *instances = sbr_instanced_raster_pass_get_instances(pass);
+
+    for (int n = 0; n < res->num_parts; n++) {
+        struct sub_bitmap *b = &res->parts[n];
+        sbr_output_image_rasterize_into(b->subrandr.image, pass, b->src_x, b->src_y,
+                                        base, res->packed_w, res->packed_h, pixel_stride);
+
+        void *pdata = base + b->src_y * pixel_stride + b->src_x;
+        fill_padding_4(pdata, b->w, b->h, byte_stride, padding);
+        b->bitmap = pdata;
+    }
+
+    res->parts = NULL;
+    res->num_parts = 0;
+    res->format = SUBBITMAP_BGRA;
+    for (struct sbr_output_instance *instance = instances; instance; instance = instance->next) {
+        if (!instance->base->user_data)
+            continue;
+
+        MP_TARRAY_GROW(p, p->cached_parts, res->num_parts);
+        res->parts = p->cached_parts;
+        struct sub_bitmap *inst_b = &res->parts[res->num_parts];
+        struct sub_bitmap *image_b = &p->cached_subrandr_images[(size_t)instance->base->user_data - 1];
+
+        *inst_b = (struct sub_bitmap){
+            .x = instance->dst_x,      .y = instance->dst_y,
+            .dw = instance->dst_width, .dh = instance->dst_height,
+            .w = instance->src_width,  .h = instance->src_height,
+            .src_x = image_b->src_x + instance->src_off_x,
+            .src_y = image_b->src_y + instance->src_off_y,
+            .bitmap = image_b->bitmap, .stride = byte_stride,
+        };
+        res->num_parts++;
+    }
+
+    return true;
+}
+
+// Pack the images in `pass` into a single image, make `out` point to it,
+// and populate `out->parts` to correctly describe all instances in `pass`.
+void mp_sub_packer_pack_sbr(struct mp_sub_packer *p, sbr_instanced_raster_pass *pass,
+                            struct sub_bitmaps *out)
+{
+    *out = (struct sub_bitmaps){.change_id = 1};
+    p->cached_subs_valid = false;
+
+    struct sub_bitmaps res = {
+        .change_id = (unsigned)p->cached_subs.change_id + 1,
+        .format = SUBBITMAP_SUBRANDR,
+        .parts = p->cached_parts,
+        .video_color_space = false,
+    };
+
+    struct sbr_output_instance *instances = sbr_instanced_raster_pass_get_instances(pass);
+    for (struct sbr_output_instance *instance = instances; instance; instance = instance->next) {
+        // If `user_data` is non-null then this base image was already appended.
+        if (instance->base->user_data)
+            continue;
+
+        MP_TARRAY_GROW(p, p->cached_subrandr_images, res.num_parts);
+        res.parts = p->cached_subrandr_images;
+        struct sub_bitmap *b = &res.parts[res.num_parts];
+        b->subrandr.image = instance->base;
+        b->w = instance->base->width, b->h = instance->base->height;
+        // Store the index of the `sub_bitmap` for this output image into `user_data`.
+        // This index is incremented by one to differentiate index `0` from an absent index.
+        // Will be read in `pack_subrandr` after packing to determine where each image
+        // was actually packed to in the atlas.
+        instance->base->user_data = (void *)(uintptr_t)(res.num_parts + 1);
+        res.num_parts++;
+    }
+
+    if (!pack_subrandr(p, &res, pass))
+        return;
+
+    *out = res;
+    p->cached_subs = res;
+    p->cached_subs_valid = true;
+}
+
+const struct sub_bitmaps *mp_sub_packer_get_cached(struct mp_sub_packer *p) {
+    if (p->cached_subs_valid)
+        return &p->cached_subs;
+    return NULL;
+}
+#endif
