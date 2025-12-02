@@ -356,7 +356,7 @@ if features['libdl']
     dependencies += libdl
 endif
 
-subrandr = dependency('subrandr', version: '>= 1.0.0', required: get_option('subrandr'))
+subrandr = dependency('subrandr', version: '>= 1.1.0', required: get_option('subrandr'))
 features += {'subrandr': subrandr.found()}
 if features['subrandr']
     sources += files('demux/demux_sbr.c', 'sub/sd_sbr.c')
