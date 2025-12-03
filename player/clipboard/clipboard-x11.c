@@ -186,11 +186,12 @@ static bool clipboard_x11_dispatch_events(struct clipboard_x11_priv *x11, int64_
             MP_TRACE(x11, "XEvent: %d\n", event.type);
             if (event.type == x11->XFixesSelectionNotifyEvent) {
                 XFixesSelectionNotifyEvent *ev = (XFixesSelectionNotifyEvent *)&event;
-                if (ev->owner != x11->window &&
-                    (ev->selection == XA(x11, CLIPBOARD) || ev->selection == XA_PRIMARY))
-                {
+                if (ev->owner != x11->window && ev->selection == XA(x11, CLIPBOARD)) {
                     XConvertSelection(x11->display, ev->selection, XA(x11, UTF8_STRING),
-                                      XA(x11, MPV_SELECTION), x11->window, CurrentTime);
+                                      XA(x11, MPV_CLIPBOARD), x11->window, CurrentTime);
+                } else if (ev->owner != x11->window && ev->selection == XA_PRIMARY) {
+                    XConvertSelection(x11->display, ev->selection, XA(x11, UTF8_STRING),
+                                      XA(x11, MPV_PRIMARY), x11->window, CurrentTime);
                 }
             } else if (event.type == SelectionRequest) {
                 clipboard_x11_handle_selection_request(x11, &event);
