@@ -6358,12 +6358,22 @@ static void cmd_track_add(void *p)
                 mark_track_selection(mpctx, 0, t->type, t->user_tid);
             }
         }
+
+        flags = 0;
+        bstr lang = mp_guess_lang_from_filename(bstr0(t->external_filename), NULL,
+                    &flags);
+        if (lang.len)
+            t->lang = bstrto0(t, lang);
+        t->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
+        t->forced_track = flags & TRACK_FORCED;
+        t->default_track = flags & TRACK_DEFAULT;
+
         char *title = cmd->args[2].v.s;
         if (title && title[0])
             t->title = talloc_strdup(t, title);
-        char *lang = cmd->args[3].v.s;
-        if (lang && lang[0])
-            t->lang = talloc_strdup(t, lang);
+        char *lang_arg = cmd->args[3].v.s;
+        if (lang_arg && lang_arg[0])
+            talloc_replace(t, t->lang, lang_arg);
     }
 
     if (mpctx->playback_initialized)
@@ -6401,9 +6411,11 @@ static void cmd_track_reload(void *p)
 
     struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
     int nt_num = -1;
+    char *lang = NULL;
 
     if (t && t->is_external && t->external_filename) {
         char *filename = talloc_strdup(NULL, t->external_filename);
+        lang = talloc_steal(NULL, t->lang);
         enum track_flags flags = 0;
         flags |= t->attached_picture ? TRACK_ATTACHED_PICTURE : 0;
         flags |= t->hearing_impaired_track ? TRACK_HEARING_IMPAIRED : 0;
@@ -6418,19 +6430,16 @@ static void cmd_track_reload(void *p)
 
     if (nt_num < 0) {
         cmd->success = false;
+        talloc_free(lang);
         return;
     }
 
     struct track *nt = mpctx->tracks[nt_num];
 
-    if (!nt->lang) {
-        enum track_flags flags = 0;
-        bstr lang = mp_guess_lang_from_filename(bstr0(nt->external_filename), NULL,
-                                                &flags);
-        nt->lang = bstrto0(nt, lang);
-        nt->hearing_impaired_track = flags & TRACK_HEARING_IMPAIRED;
-        nt->forced_track = flags & TRACK_FORCED;
-        nt->default_track = flags & TRACK_DEFAULT;
+    if (nt->lang) {
+        talloc_free(lang);
+    } else {
+        nt->lang = talloc_steal(nt, lang);
     }
 
     mp_switch_track(mpctx, nt->type, nt, 0);
