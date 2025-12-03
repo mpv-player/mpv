@@ -21,6 +21,8 @@
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
+#include <audio/out/ao_libmpv.h>
+#include <audio/out/internal.h>
 
 #include "mpv_talloc.h"
 
@@ -446,6 +448,9 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
                              mpctx, mpctx->encode_lavc_ctx, out_rate,
                              out_format, out_channels);
+
+    if (strcmp(mpctx->ao->driver->name, "libmpv") == 0)
+        ao_libmpv_set_cb(mpctx->ao, mpctx->ao_libmpv_cb, mpctx->ao_libmpv_userdata);
 
     int ao_rate = 0;
     int ao_format = 0;
