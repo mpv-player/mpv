@@ -79,6 +79,7 @@ struct ao_opts {
     char *audio_device;
     char *audio_client_name;
     double audio_buffer;
+    bool audio_set_media_role;
 };
 
 struct ao *ao_init_best(struct mpv_global *global,
