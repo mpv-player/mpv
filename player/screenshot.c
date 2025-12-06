@@ -68,14 +68,6 @@ void screenshot_init(struct MPContext *mpctx)
     };
 }
 
-static char *stripext(void *talloc_ctx, const char *s)
-{
-    const char *end = strrchr(s, '.');
-    if (!end)
-        end = s + strlen(s);
-    return talloc_asprintf(talloc_ctx, "%.*s", (int)(end - s), s);
-}
-
 static bool write_screenshot(struct mp_cmd_ctx *cmd, struct mp_image *img,
                              const char *filename, struct image_writer_opts *opts,
                              bool overwrite)
@@ -175,16 +167,11 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *video_file = NULL;
-            if (mpctx->filename)
-                video_file = mp_basename(mpctx->filename);
+            char *video_file = mpctx->filename;
+            char *name = video_file ? mp_basename_or_url(video_file) : "NO_FILE";
 
-            if (!video_file)
-                video_file = "NO_FILE";
-
-            char *name = video_file;
             if (fmt == 'F')
-                name = stripext(res, video_file);
+                name = mp_stripext(res, name);
             append_filename(&res, name);
             break;
         }
@@ -300,9 +287,6 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
             void *t = fname;
             dir = mp_get_user_path(t, ctx->mpctx->global, dir);
             fname = mp_path_join(NULL, dir, fname);
-
-            mp_mkdirp(dir);
-
             talloc_free(t);
         }
 
