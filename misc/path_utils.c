@@ -163,11 +163,13 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
         return talloc_strdup(talloc_ctx, path);
 
     void *tmp = talloc_new(NULL);
+    char *result;
+
     if (!mp_path_is_absolute(bstr0(path))) {
         char *cwd = mp_getcwd(tmp);
         if (!cwd) {
-            talloc_free(tmp);
-            return NULL;
+            result = talloc_strdup(talloc_ctx, path);
+            goto exit;
         }
         path = mp_path_join(tmp, cwd, path);
     }
@@ -195,11 +197,9 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     size_t max_size = wcslen(pathw) + 1;
     wchar_t *pathc = talloc_array(tmp, wchar_t, max_size);
     HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
-    char *ret = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
-    talloc_free(tmp);
-    return ret;
+    result = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
 #else
-    char *result = talloc_strdup(tmp, "");
+    result = talloc_strdup(tmp, "");
     const char *next;
     const char *end = path + strlen(path);
 
@@ -226,10 +226,10 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
                 // long as the symlinked path doesn't change.
                 if (ptr[0] == '.' && ptr[1] == '.') {
                     char *tmp_result = realpath(path, NULL);
-                    result = talloc_strdup(talloc_ctx, tmp_result);
+                    result = talloc_strdup(talloc_ctx,
+                                           tmp_result ? tmp_result : path);
                     free(tmp_result);
-                    talloc_free(tmp);
-                    return result;
+                    goto exit;
                 }
         }
 
@@ -238,9 +238,11 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     }
 
     result = talloc_steal(talloc_ctx, result);
+#endif
+
+exit:
     talloc_free(tmp);
     return result;
-#endif
 }
 
 bool mp_path_exists(const char *path)
