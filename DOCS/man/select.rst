@@ -7,6 +7,8 @@ providing script bindings that gather and format the data to be selected in the
 console and do operations on the selected item. It can be disabled using the
 ``--load-select=no`` option.
 
+This script is also used to populate the context menu.
+
 Key bindings
 ------------
 
@@ -141,6 +143,9 @@ Available script bindings are:
 ``menu``
     Show a menu with miscellaneous entries.
 
+``context-menu``
+    Show the context menu.
+
 Configuration
 -------------
 
@@ -161,3 +166,26 @@ Configurable options
     Default: yes
 
     Whether to show only the last of history entries with the same path.
+
+``menu_conf_path``
+    Default: ~~/menu.conf (see `FILES`_).
+
+    The path from which to read the custom context menu definition (see `CONTEXT
+    MENU`_).
+
+``max_playlist_items``
+    Default: 25
+
+    The maximum number of playlist entries in the context menu.
+
+``use_context_menu_script``
+    Default: auto
+
+    Whether to use the native context menu or ``context_menu.lua``.
+
+    ``auto`` means ``context_menu.lua`` is used with
+    ``--load-context-menu=yes``, and the native context menu is attempted to be
+    used with ``--load-context-menu=no``.
+
+    ``yes`` allows using a fork of ``context_menu.lua`` with
+    ``--load-context-menu=no``.
