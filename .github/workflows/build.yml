@@ -162,7 +162,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install meson
+          python -m pip install meson==1.9.2
           choco install ccache nasm
           ./ci/install-cmake.ps1 -arch ${{ matrix.arch }}
 
