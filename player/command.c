@@ -5408,10 +5408,6 @@ struct cmd_list_ctx {
     bool current_valid;
     mp_thread_id current_tid;
     bool completed_recursive;
-
-    // list of sub commands yet to run
-    struct mp_cmd **sub;
-    int num_sub;
 };
 
 static void continue_cmd_list(struct cmd_list_ctx *list);
