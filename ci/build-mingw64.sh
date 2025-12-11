@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+feature_set=${3:-minimal}
+
 prefix_dir=$PWD/mingw_prefix
 mkdir -p "$prefix_dir"
 ln -snf . "$prefix_dir/usr"
@@ -165,6 +167,14 @@ _ffmpeg () {
         --disable-{doc,programs}
         --enable-muxer=spdif --enable-encoder=mjpeg,png --enable-libdav1d
     )
+    if [ "$feature_set" = "full" ]; then
+        args+=(
+            --enable-libdvdread
+            --enable-libdvdnav
+            --enable-libbluray
+            --enable-libxml2
+        )
+    fi 
     pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
     ../configure "${args[@]}"
     makeplusinstall
@@ -286,14 +296,83 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in iconv zlib shaderc spirv-cross nv-headers dav1d lcms2; do
+_libdvdcss () {
+    [ -d libdvdcss ] || $gitclone https://code.videolan.org/videolan/libdvdcss.git
+    builddir libdvdcss
+    meson setup .. --cross-file "$prefix_dir/crossfile"
+    makeplusinstall
+    popd
+}
+_libdvdcss_mark=lib/libdvdcss.dll.a
+
+_libdvdread () {
+    [ -d libdvdread ] || $gitclone https://code.videolan.org/videolan/libdvdread.git
+    builddir libdvdread
+    meson setup .. --cross-file "$prefix_dir/crossfile" -Dlibdvdcss=enabled
+    makeplusinstall
+    popd
+}
+_libdvdread_mark=lib/libdvdread.dll.a
+
+_libdvdnav () {
+    [ -d libdvdnav ] || $gitclone https://code.videolan.org/videolan/libdvdnav.git
+    builddir libdvdnav
+    meson setup .. --cross-file "$prefix_dir/crossfile"
+    makeplusinstall
+    popd
+}
+_libdvdnav_mark=lib/libdvdnav.dll.a
+
+_libxml2 () {
+    [ -d libxml2 ] || $gitclone https://gitlab.gnome.org/GNOME/libxml2.git
+    builddir libxml2
+    # TODO: libxml2 is unable to find iconv
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
+        -Dthreads=enabled \
+        -Diconv=disabled \
+        -Dthread-alloc=enabled
+    makeplusinstall
+    popd
+}
+_libxml2_mark=lib/libxml2.dll.a
+
+_libudfread () {
+    [ -d libudfread ] || $gitclone https://code.videolan.org/videolan/libudfread.git
+    builddir libudfread
+    meson setup .. --cross-file "$prefix_dir/crossfile"
+    makeplusinstall
+    popd
+}
+_libudfread_mark=lib/libudfread.dll.a
+
+_libbluray () {
+    [ -d libbluray ] || $gitclone https://code.videolan.org/videolan/libbluray.git
+    builddir libbluray
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
+        -Denable_tools=false -Dbdj_jar=disabled -Djava9=false -Dlibxml2=enabled
+    makeplusinstall
+    popd
+}
+_libbluray_mark=lib/libbluray.dll.a
+
+BUILD_FIRST_STEP=(iconv zlib shaderc spirv-cross nv-headers dav1d lcms2 freetype)
+BUILD_SECOND_STEP=(ffmpeg libplacebo fribidi harfbuzz libass luajit)
+
+if [ "$feature_set" = "full" ]; then
+    # Build order is important. 
+    # Each library here must be built before the ones that depend on it
+    # eg : libdvdnav depends on libdvdread
+    BUILD_FIRST_STEP+=(libdvdcss libdvdread libdvdnav libxml2 libbluray)
+fi
+
+for x in "${BUILD_FIRST_STEP[@]}"; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
     build_if_missing vulkan-headers
     build_if_missing vulkan-loader
 fi
-for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
+for x in "${BUILD_SECOND_STEP[@]}"; do
     build_if_missing $x
 done
 
@@ -301,19 +380,41 @@ done
 
 [ -z "$1" ] && exit 0
 
+mpv_feature_set_args=(
+    --cross-file $prefix_dir/crossfile
+    --force-fallback-for=mujs
+    -Dlua=luajit
+    -Dmujs:default_library=static
+    -Dmujs:werror=false
+)
+
+mpv_features=(shaderc spirv-cross d3d11 javascript)
+
+if [ "$feature_set" = "full" ]; then
+    mpv_feature_set_args+=(
+        --buildtype release
+        -Db_ndebug=true
+        -Db_lto=true
+        -Dlibmpv=true
+    )
+else
+    mpv_feature_set_args+=(
+        $common_args
+        --buildtype debugoptimized
+    )
+fi
+
+for feature in "${mpv_features[@]}"; do
+    mpv_feature_set_args+=("-D${feature}=enabled")
+done
+
 CFLAGS+=" -I'$prefix_dir/include'"
 LDFLAGS+=" -L'$prefix_dir/lib'"
 export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
 
-meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
-  --buildtype debugoptimized \
-  --force-fallback-for=mujs \
-  -Dmujs:werror=false \
-  -Dmujs:default_library=static \
-  -Dlua=luajit \
-  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
+meson setup $build "${mpv_feature_set_args[@]}"
 meson compile -C $build
 
 if [ "$2" = pack ]; then
@@ -335,6 +436,9 @@ if [ "$2" = pack ]; then
     )
     if [[ -f vulkan-1.dll ]]; then
         dlls+=(vulkan-1.dll)
+    fi
+    if [[ "$feature_set" = "full" ]]; then
+        dlls+=(lib{xml2,bluray,dvdnav,dvdread,dvdcss}-[0-9]*.dll)
     fi
     mv -v "${dlls[@]}" ..
     popd
