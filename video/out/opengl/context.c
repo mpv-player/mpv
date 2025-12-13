@@ -305,11 +305,11 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
+static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw, float source_max_luma)
 {
     struct priv *p = sw->priv;
     if (p->params.preferred_csp)
-        return p->params.preferred_csp(sw->ctx);
+        return p->params.preferred_csp(sw->ctx, source_max_luma);
     return (pl_color_space_t){0};
 }
 
