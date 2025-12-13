@@ -605,6 +605,7 @@ subdir('player/javascript')
 subdir('player/lua')
 subdir('sub')
 
+xcrun = find_program('xcrun', required: darwin)
 if darwin
     subdir(join_paths('TOOLS', 'osxbundle'))
 endif
@@ -1553,7 +1554,6 @@ swift = get_option('swift-build').require(
     darwin and features['cocoa'],
     error_message: 'cocoa was not found',
 )
-xcrun = find_program('xcrun', required: swift)
 swift_ver = '0.0'
 if xcrun.found()
     swift_prog = find_program(run_command(xcrun, '-find', 'swiftc', check: true).stdout().strip())
@@ -1856,7 +1856,7 @@ if get_option('cplayer')
         osxbundle = find_program(join_paths(tools_directory, 'osxbundle.py'), required: true)
         custom_target('macos-bundle',
             output: 'mpv.app',
-            depends: version_h,
+            depends: [version_h, mac_icon, mac_bundle_icon],
             command: [osxbundle, mpv, '@SOURCE_ROOT@', '-c', get_option('macos-bundle-category')],
         )
     endif

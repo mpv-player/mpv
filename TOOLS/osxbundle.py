@@ -25,6 +25,12 @@ def target_binary(binary_name):
     return os.path.join(target_directory(binary_name),
                         os.path.basename(binary_name))
 
+def target_asset(binary_name, asset_name):
+    return os.path.join(bundle_path(binary_name), "Contents", "Resources", asset_name)
+
+def source_asset(build_path, asset_name):
+    return os.path.join(build_path, "TOOLS", "osxbundle", asset_name)
+
 def copy_bundle(binary_name, src_path):
     if os.path.isdir(bundle_path(binary_name)):
         shutil.rmtree(bundle_path(binary_name))
@@ -34,6 +40,10 @@ def copy_bundle(binary_name, src_path):
 
 def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
+
+def copy_icons(binary_name, build_path):
+    shutil.copy(source_asset(build_path, "Assets.car"), target_asset(binary_name, "Assets.car"))
+    shutil.copy(source_asset(build_path, "icon.icns"), target_asset(binary_name, "icon.icns"))
 
 def apply_plist_template(plist_file, version, category):
     print(">> setting bundle category to " + category)
@@ -83,6 +93,8 @@ def main():
     print(f"Creating macOS application bundle (version: {version})...")
     print("> copying bundle skeleton")
     copy_bundle(binary_name, src_path)
+    print("> copying icons")
+    copy_icons(binary_name, build_path)
     print("> copying binary")
     copy_binary(binary_name)
     print("> generating Info.plist")
