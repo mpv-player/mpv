@@ -11,7 +11,7 @@ repos:
       exclude: ^TOOLS/mpv-osd-symbols.sfdir/font.props$
     - id: check-yaml
     - id: end-of-file-fixer
-      exclude: ^TOOLS/osxbundle/mpv.app/Contents/PkgInfo$
+      exclude: ^(TOOLS/osxbundle/mpv.app/Contents/PkgInfo|TOOLS/osxbundle/icon.icon/icon.json)$
     - id: fix-byte-order-marker
     - id: mixed-line-ending
     - id: trailing-whitespace

@@ -605,6 +605,7 @@ subdir('player/javascript')
 subdir('player/lua')
 subdir('sub')
 
+xcrun = find_program('xcrun', required: darwin)
 if darwin
     subdir(join_paths('TOOLS', 'osxbundle'))
 endif
@@ -1553,7 +1554,6 @@ swift = get_option('swift-build').require(
     darwin and features['cocoa'],
     error_message: 'cocoa was not found',
 )
-xcrun = find_program('xcrun', required: swift)
 swift_ver = '0.0'
 if xcrun.found()
     swift_prog = find_program(run_command(xcrun, '-find', 'swiftc', check: true).stdout().strip())
