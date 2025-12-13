@@ -318,11 +318,12 @@ static int init(struct ao *ao)
     p->AAudioStreamBuilder_setDataCallback(builder, data_callback, ao);
 
     if (p->device_api >= 28) {
-        p->AAudioStreamBuilder_setContentType(builder,
-                                              (ao->init_flags &
-                                               AO_INIT_MEDIA_ROLE_MUSIC)
-                                                  ? AAUDIO_CONTENT_TYPE_MUSIC
-                                                  : AAUDIO_CONTENT_TYPE_MOVIE);
+        if (ao->set_media_role)
+            p->AAudioStreamBuilder_setContentType(builder,
+                                                  (ao->init_flags &
+                                                   AO_INIT_MEDIA_ROLE_MUSIC)
+                                                      ? AAUDIO_CONTENT_TYPE_MUSIC
+                                                      : AAUDIO_CONTENT_TYPE_MOVIE);
         p->AAudioStreamBuilder_setUsage(builder, AAUDIO_USAGE_MEDIA);
         p->AAudioStreamBuilder_setSessionId(builder, p->session_id);
     }
