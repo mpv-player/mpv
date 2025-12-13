@@ -1856,7 +1856,7 @@ if get_option('cplayer')
         osxbundle = find_program(join_paths(tools_directory, 'osxbundle.py'), required: true)
         custom_target('macos-bundle',
             output: 'mpv.app',
-            depends: version_h,
+            depends: [version_h, mac_icon, mac_bundle_icon],
             command: [osxbundle, mpv, '@SOURCE_ROOT@', '-c', get_option('macos-bundle-category')],
         )
     endif
