@@ -74,7 +74,7 @@ static void clamp_size(int size, int *start, int *end)
 }
 
 static void src_dst_split_scaling(int src_size, int dst_size,
-                                  int scaled_src_size,
+                                  int64_t scaled_src_size,
                                   float zoom, float align, float pan, float scale,
                                   bool recenter,
                                   int *src_start, int *src_end,
@@ -95,8 +95,8 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     *osd_margin_b = dst_size - *dst_end;
 
     // Clip to screen
-    int s_src = *src_end - *src_start;
-    int s_dst = *dst_end - *dst_start;
+    int64_t s_src = (int64_t)*src_end - *src_start;
+    int64_t s_dst = (int64_t)*dst_end - *dst_start;
     if (*dst_start < 0) {
         int border = -(*dst_start) * s_src / s_dst;
         *src_start += border;
