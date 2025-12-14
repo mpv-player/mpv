@@ -14,7 +14,7 @@ trim_trailing_whitespace = true
 [.git/COMMIT*]
 max_line_length = 72
 
-[{osdep/dirent-win.h,TOOLS/osxbundle/mpv.app/Contents/PkgInfo}]
+[{osdep/dirent-win.h,TOOLS/osxbundle/mpv.app/Contents/PkgInfo,TOOLS/osxbundle/mpv.app/Contents/Resources/Assets.car}]
 charset = unset
 insert_final_newline = unset
 indent_style = unset
