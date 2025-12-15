@@ -256,8 +256,6 @@ static void dealloc_vo(struct vo *vo)
 
     // These must be free'd before vo->in->dispatch.
     talloc_free(vo->opts_cache);
-    talloc_free(vo->gl_opts_cache);
-    talloc_free(vo->eq_opts_cache);
     mp_mutex_destroy(&vo->params_mutex);
 
     mp_mutex_destroy(&vo->in->lock);
@@ -307,9 +305,6 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
 
     m_config_cache_set_dispatch_change_cb(vo->opts_cache, vo->in->dispatch,
                                           update_opts, vo);
-
-    vo->gl_opts_cache = m_config_cache_alloc(NULL, global, &gl_video_conf);
-    vo->eq_opts_cache = m_config_cache_alloc(NULL, global, &mp_csp_equalizer_conf);
 
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)

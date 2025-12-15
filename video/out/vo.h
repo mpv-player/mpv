@@ -504,8 +504,6 @@ struct vo {
 
     struct m_config_cache *opts_cache; // cache for ->opts
     struct mp_vo_opts *opts;
-    struct m_config_cache *gl_opts_cache;
-    struct m_config_cache *eq_opts_cache;
 
     bool want_redraw;   // redraw as soon as possible
 
