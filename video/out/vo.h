@@ -465,11 +465,13 @@ struct vo {
     struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
     void *priv;
     struct mpv_global *global;
-    struct vo_x11_state *x11;
-    struct vo_w32_state *w32;
-    struct vo_wayland_state *wl;
-    struct vo_android_state *android;
-    struct vo_drm_state *drm;
+    union {
+        struct vo_x11_state *x11;
+        struct vo_w32_state *w32;
+        struct vo_wayland_state *wl;
+        struct vo_android_state *android;
+        struct vo_drm_state *drm;
+    };
     struct mp_hwdec_devices *hwdec_devs;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
