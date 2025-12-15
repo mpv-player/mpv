@@ -1182,8 +1182,17 @@ static MP_THREAD_VOID vo_thread(void *ptr)
         if (send_pause)
             vo->driver->control(vo, vo_paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
         if (wait_until > now && redraw) {
-            vo->driver->control(vo, VOCTRL_REDRAW, NULL);
-            do_redraw(vo); // now is a good time
+            // Allow manual redraws at most at slightly over display fps.
+            int64_t max_interval = (MP_TIME_S_TO_NS(1) / MPMAX(in->display_fps, 10)) / 1.1;
+            // Some windowing platforms break if we submit frames too fast.
+            if (vo->previous_redraw_time + max_interval <= now) {
+                vo->driver->control(vo, VOCTRL_REDRAW, NULL);
+                do_redraw(vo); // now is a good time
+                vo->previous_redraw_time = now;
+            } else {
+                in->request_redraw = true;
+                wait_vo(vo, now + max_interval);
+            }
             continue;
         }
         if (vo->want_redraw) // might have been set by VOCTRLs

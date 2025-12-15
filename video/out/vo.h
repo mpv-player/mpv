@@ -508,6 +508,7 @@ struct vo {
     struct mp_vo_opts *opts;
 
     bool want_redraw;   // redraw as soon as possible
+    int64_t previous_redraw_time;
 
     // current window state
     int dwidth;
