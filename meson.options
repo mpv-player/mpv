@@ -57,6 +57,7 @@ option('sndio', type: 'feature', value: 'auto', description: 'sndio audio output
 option('wasapi', type: 'feature', value: 'auto', description: 'WASAPI audio output')
 
 # video output features
+option('amf', type: 'feature', value: 'auto', description: 'AMD AMF')
 option('caca', type: 'feature', value: 'auto', description: 'CACA')
 option('cocoa', type: 'feature', value: 'auto', description: 'Cocoa')
 option('d3d11', type: 'feature', value: 'auto', description: 'Direct3D 11 video output')

@@ -750,6 +750,57 @@ Available mpv-only filters are:
     ``nvidia-true-hdr``
         Enable NVIDIA RTX Video HDR processing.
 
+``amf_frc``
+    AMD Frame Rate Conversion filter. Requires AMD hardware and drivers
+    supporting AMF FRC.
+
+    AMF FRC is a technique for achieving high-end video frame rate conversion
+    results from lower frame rate video inputs. The filter doubles the input
+    frame rate by generating intermediate frames.
+
+    AMF FRC only supports D3D11 input currently. Use `--hwdec=d3d11va` or
+    `--vf-pre=format=d3d11` to upload the data. `--d3d11va-zero-copy` is also
+    recommended for better performance.
+
+    ``profile=<auto|low|high|super>``
+        Selects the quality profile for frame rate conversion.
+
+        ``auto`` (default)
+            Select profile based on input resolution. Uses ``high`` for
+            resolutions up to 1440p, and ``super`` for 1440p and higher.
+        ``low``
+            Less levels of hierarchical motion search. Only recommended for
+            extremely low resolutions.
+        ``high``
+            Recommended for any resolution up to 1440p.
+        ``super``
+            More levels of hierarchical motion search. Recommended for
+            resolutions 1440p or higher.
+
+    ``mv-search=<native|performance>``
+        Selects the motion vector search mode.
+
+        ``native`` (default)
+            Conduct motion search on the full resolution of source images.
+        ``performance``
+            Conduct motion search on the down scaled source images.
+            Recommended for APU or low end GPU for better performance.
+
+    ``fallback``
+        In case confidence is too low to do interpolation, fall back to simple
+        frame blending. If not set, the filter will repeat the last frame instead.
+        (default: no)
+
+    ``indicator``
+        Specifies whether or not the FRC indicator square is shown in the top
+        left corner of the video. (default: no)
+
+    ``future-frame``
+        When enabled, the information contained in the next frame in the
+        sequence will be used in FRC interpolation calculations, in addition to
+        the current pair of frames. This will introduce one extra frame time of
+        latency. (default: yes)
+
 ``fingerprint=...``
     Compute video frame fingerprints and provide them as metadata. Actually, it
     currently barely deserved to be called ``fingerprint``, because it does not

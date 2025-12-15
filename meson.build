@@ -1401,6 +1401,13 @@ if features['d3d-hwaccel']
                      'video/filter/vf_d3d11vpp.c')
 endif
 
+amf = cc.has_header('AMF/core/Factory.h', required:
+    get_option('amf').require(features['d3d-hwaccel']))
+features += {'amf': amf}
+if features['amf']
+    sources += files('video/filter/vf_amf.c')
+endif
+
 if features['d3d-hwaccel'] and features['egl-angle']
     sources += files('video/out/opengl/hwdec_d3d11egl.c')
 endif
