@@ -2508,7 +2508,7 @@ local function render()
                 if state.osc_visible then
                     mp.enable_key_bindings("window-controls-title", "allow-vo-dragging")
                 else
-                    mp.disable_key_bindings("window-controls-title", "allow-vo-dragging")
+                    mp.disable_key_bindings("window-controls-title")
                 end
                 state.windowcontrols_title = state.osc_visible
             end
