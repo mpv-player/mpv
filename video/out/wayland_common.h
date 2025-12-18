@@ -62,6 +62,7 @@ struct vo_wayland_state {
     int bounded_width;
     int reduced_height;
     int reduced_width;
+    bool first_enter_done;
 
     /* State */
     bool activated;

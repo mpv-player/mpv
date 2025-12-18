@@ -1704,8 +1704,13 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
             ++outputs;
     }
 
-    if (outputs == 1)
+    if (outputs == 1) {
+        if (!wl->first_enter_done)
+            set_geometry(wl, true);
         update_output_geometry(wl, old_geometry, old_output_geometry);
+    }
+
+    wl->first_enter_done = true;
 
     MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
                wl->current_output->make, wl->current_output->model, wl->current_output->name,
