@@ -23,6 +23,9 @@
 
 #include <libavutil/buffer.h>
 #include <libavutil/hwcontext.h>
+#if HAVE_D3D11
+#include <libavutil/hwcontext_d3d11va.h>
+#endif
 #if HAVE_VULKAN
 #include <libavutil/hwcontext_vulkan.h>
 #endif
@@ -401,6 +404,13 @@ bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
                 AVVulkanFramesContext *vk_frames = hw_frames->hwctx;
                 vk_frames->flags = AV_VK_FRAME_FLAG_DISABLE_MULTIPLANE;
             }
+        }
+#endif
+
+#if HAVE_D3D11
+        if (format == AV_PIX_FMT_D3D11) {
+            AVD3D11VAFramesContext *d3d11va_frames_ctx = hw_frames->hwctx;
+            d3d11va_frames_ctx->BindFlags |= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
         }
 #endif
 

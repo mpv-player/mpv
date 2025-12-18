@@ -342,10 +342,6 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
         return NULL;
     }
 
-    AVHWFramesContext *hw_frame_ctx = (void *)p->hw_pool->data;
-    AVD3D11VAFramesContext *d3d11va_frames_ctx = hw_frame_ctx->hwctx;
-    d3d11va_frames_ctx->BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
     AVFrame *av_frame = av_frame_alloc();
     MP_HANDLE_OOM(av_frame);
     if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
