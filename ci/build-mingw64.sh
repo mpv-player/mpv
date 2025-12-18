@@ -155,6 +155,17 @@ _lcms2 () {
 }
 _lcms2_mark=lib/liblcms2.dll.a
 
+_amf_headers () {
+    local ver=1.5.0
+    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz"
+    pushd amf-headers-v${ver}
+    mkdir -p "$prefix_dir/include"
+    cp -r AMF "$prefix_dir/include/"
+    touch "$prefix_dir/include/AMF/core/Version.h"
+    popd
+}
+_amf_headers_mark=include/AMF/core/Version.h
+
 _ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
     builddir ffmpeg
@@ -291,7 +302,7 @@ _subrandr () {
 }
 _subrandr_mark=lib/libsubrandr.dll.a
 
-for x in iconv zlib shaderc spirv-cross nv-headers dav1d lcms2; do
+for x in iconv zlib shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
@@ -321,7 +332,7 @@ meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
   -Dmujs:werror=false \
   -Dmujs:default_library=static \
   -Dlua=luajit \
-  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
+  -D{amf,shaderc,spirv-cross,d3d11,javascript}=enabled
 meson compile -C $build
 
 if [ "$2" = pack ]; then

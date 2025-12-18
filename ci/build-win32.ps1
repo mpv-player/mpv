@@ -7,6 +7,19 @@ if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
 
+$amfVersion = "1.5.0"
+$amfUrl = "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v$amfVersion/AMF-headers-v$amfVersion.tar.gz"
+$amfArchive = "AMF-headers-v$amfVersion.tar.gz"
+$amfExtractPath = "$subprojects/amf-headers"
+if (-not (Test-Path $amfArchive)) {
+    Invoke-WebRequest -Uri $amfUrl -OutFile $amfArchive
+}
+if (-not (Test-Path "$amfExtractPath/AMF")) {
+    New-Item -Path $amfExtractPath -ItemType Directory -Force | Out-Null
+    tar -xzf $amfArchive --strip-components=1 -C $amfExtractPath
+}
+$amfExtractPath = Resolve-Path $amfExtractPath
+
 # Wrap shaderc to run git-sync-deps and patch unsupported generator expression
 if (-not (Test-Path "$subprojects/shaderc_cmake")) {
     git clone https://github.com/google/shaderc --depth 1 $subprojects/shaderc_cmake
@@ -227,6 +240,7 @@ clone-recursive = true
 meson setup build `
     --wrap-mode=forcefallback `
     -Ddefault_library=static `
+    -Dc_args="-I$amfExtractPath" `
     -Dlibmpv=true `
     -Dtests=true `
     -Dgpl=true `
@@ -254,6 +268,7 @@ meson setup build `
     -Dxxhash:inline-all=true `
     -Dxxhash:cli=false `
     -Dluajit:amalgam=true `
+    -Damf=enabled `
     -Dd3d11=enabled `
     -Dvulkan=enabled `
     -Djavascript=enabled `
