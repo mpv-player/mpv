@@ -555,6 +555,7 @@ jobs:
           update: true
           install: git
           pacboy: >-
+            amf-headers:p
             angleproject:p
             ca-certificates:p
             cc:p
