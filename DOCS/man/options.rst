@@ -1359,17 +1359,17 @@ Video
 
     Actively supported hwdecs:
 
-    :d3d11va:   requires ``--vo=gpu`` with ``--gpu-context=d3d11`` or
+    :d3d11va:   requires ``--vo=gpu`` or ``--vo=gpu-next`` with ``--gpu-context=d3d11`` or
                 ``--gpu-context=angle`` (Windows 8+ only)
     :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
-    :videotoolbox: requires ``--vo=gpu`` (macOS 10.8 and up),
+    :videotoolbox: requires ``--vo=gpu`` or ``--vo=gpu-next`` (macOS 10.8 and up),
                    or ``--vo=libmpv`` (iOS 9.0 and up)
     :videotoolbox-copy: copies video back into system RAM (macOS 10.8 or iOS 9.0 and up)
-    :vaapi:     requires ``--vo=gpu``, ``--vo=vaapi`` or ``--vo=dmabuf-wayland`` (Linux only)
+    :vaapi:     requires ``--vo=gpu``, ``--vo=gpu-next``, ``--vo=vaapi`` or ``--vo=dmabuf-wayland`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with some GPUs or Windows)
-    :nvdec:     requires ``--vo=gpu`` (Any platform CUDA is available)
+    :nvdec:     requires ``--vo=gpu`` or ``--vo=gpu-next`` (Any platform CUDA is available)
     :nvdec-copy: copies video back to system RAM (Any platform CUDA is available)
-    :drm:       requires ``--vo=gpu`` (Linux only)
+    :drm:       requires ``--vo=gpu`` or ``--vo=gpu-next`` (Linux only)
     :drm-copy:   copies video back to system RAM (Linux only)
     :vulkan:    requires ``--vo=gpu-next`` (Any platform with Vulkan Video Decoding)
     :vulkan-copy: copies video back to system RAM (Any platform with Vulkan Video Decoding)
