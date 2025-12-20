@@ -2133,7 +2133,8 @@ static void image_description_ready2(void *data, struct wp_image_description_v1 
                                     uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
-    wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description, 0);
+    wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description,
+                                                         WP_COLOR_MANAGER_V1_RENDER_INTENT_PERCEPTUAL);
     MP_TRACE(wl, "Image description set on color surface.\n");
     wp_image_description_v1_destroy(image_description);
 }
