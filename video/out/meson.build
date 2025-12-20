@@ -14,7 +14,7 @@ protocols = [[wl_protocol_dir, 'stable/presentation-time/presentation-time.xml']
 wl_protocols_source = []
 wl_protocols_headers = []
 
-foreach v: ['1.32', '1.38', '1.39', '1.41', '1.44']
+foreach v: ['1.32', '1.38', '1.39', '1.41', '1.44', '1.47']
     features += {'wayland-protocols-' + v.replace('.', '-'):
         wayland['deps'][2].version().version_compare('>=' + v)}
 endforeach

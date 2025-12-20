@@ -2054,6 +2054,9 @@ static enum pl_color_transfer map_tf(uint32_t tf)
 {
     switch (tf) {
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886: return PL_COLOR_TRC_BT_1886;
+#if HAVE_WAYLAND_PROTOCOLS_1_47
+        case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_COMPOUND_POWER_2_4: // fallthrough
+#endif
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB: return PL_COLOR_TRC_SRGB;
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR: return PL_COLOR_TRC_LINEAR;
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA22: return PL_COLOR_TRC_GAMMA22;
@@ -2126,8 +2129,8 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
     wp_image_description_v1_destroy(image_description);
 }
 
-static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
-                                    uint32_t identity)
+static void image_description_ready2(void *data, struct wp_image_description_v1 *image_description,
+                                    uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
     wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description, 0);
@@ -2135,9 +2138,18 @@ static void image_description_ready(void *data, struct wp_image_description_v1 *
     wp_image_description_v1_destroy(image_description);
 }
 
+static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
+                                    uint32_t identity)
+{
+    image_description_ready2(data, image_description, 0, identity);
+}
+
 static const struct wp_image_description_v1_listener image_description_listener = {
     image_description_failed,
     image_description_ready,
+#if HAVE_WAYLAND_PROTOCOLS_1_47
+    image_description_ready2,
+#endif
 };
 
 static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
@@ -2287,15 +2299,24 @@ static const struct wp_image_description_info_v1_listener image_description_info
     info_target_max_fall,
 };
 
-static void preferred_changed(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
-                              uint32_t identity)
+static void preferred_changed2(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
+                              uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
     get_compositor_preferred_description(wl);
 }
 
+static void preferred_changed(void *data, struct wp_color_management_surface_feedback_v1 *color_surface_feedback,
+                              uint32_t identity)
+{
+    preferred_changed2(data, color_surface_feedback, 0, identity);
+}
+
 static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
     preferred_changed,
+#if HAVE_WAYLAND_PROTOCOLS_1_47
+    preferred_changed2,
+#endif
 };
 #endif
 
@@ -2781,7 +2802,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!strcmp(interface, wp_color_manager_v1_interface.name) && found++) {
+#if HAVE_WAYLAND_PROTOCOLS_1_47
+        ver = MPMIN(ver, 2);
+#else
         ver = 1;
+#endif
         wl->color_manager = wl_registry_bind(reg, id, &wp_color_manager_v1_interface, ver);
         wp_color_manager_v1_add_listener(wl->color_manager, &color_manager_listener, wl);
     }
@@ -3257,18 +3282,22 @@ static int handle_round(int scale, int n)
     return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
 }
 
-static bool hdr_metadata_valid(struct pl_hdr_metadata *hdr)
+static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metadata *hdr)
 {
     // Always return a hard failure if this condition fails.
     if (hdr->min_luma >= hdr->max_luma)
         return false;
 
     // If max_cll or max_fall are invalid, set them to zero.
-    if (hdr->max_cll && (hdr->max_cll <= hdr->min_luma || hdr->max_cll > hdr->max_luma))
+    if (wp_color_manager_v1_get_version(wl->color_manager) == 1) {
+      if (hdr->max_cll &&
+         (hdr->max_cll <= hdr->min_luma || hdr->max_cll > hdr->max_luma))
         hdr->max_cll = 0;
 
-    if (hdr->max_fall && (hdr->max_fall <= hdr->min_luma || hdr->max_fall > hdr->max_luma))
+      if (hdr->max_fall &&
+         (hdr->max_fall <= hdr->min_luma || hdr->max_fall > hdr->max_luma))
         hdr->max_fall = 0;
+    }
 
     if (hdr->max_cll && hdr->max_fall && hdr->max_fall > hdr->max_cll) {
         hdr->max_cll = 0;
@@ -3500,7 +3529,7 @@ static void set_color_management(struct vo_wayland_state *wl)
 
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
     bool is_hdr = pl_color_transfer_is_hdr(color.transfer);
-    bool use_metadata = hdr_metadata_valid(&hdr);
+    bool use_metadata = hdr_metadata_valid(wl, &hdr);
     if (!use_metadata)
         MP_VERBOSE(wl, "supplied HDR metadata does not conform to the wayland color management protocol. It will not be used.\n");
     if (is_hdr && use_metadata) {
