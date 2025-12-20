@@ -49,14 +49,8 @@
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
 #include "tablet-unstable-v2.h"
-
-#if HAVE_WAYLAND_PROTOCOLS_1_32
 #include "cursor-shape-v1.h"
-#endif
-
-#if HAVE_WAYLAND_PROTOCOLS_1_38
 #include "fifo-v1.h"
-#endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
 #include "color-management-v1.h"
@@ -68,10 +62,6 @@
 
 #ifndef CLOCK_MONOTONIC_RAW
 #define CLOCK_MONOTONIC_RAW 4
-#endif
-
-#ifndef XDG_TOPLEVEL_STATE_SUSPENDED_SINCE_VERSION
-#define XDG_TOPLEVEL_STATE_SUSPENDED 9
 #endif
 
 // From the fractional scale protocol
@@ -1039,11 +1029,9 @@ static void tablet_tool_handle_added(void *data,
     tablet_tool->wl = wl;
     tablet_tool->seat = seat;
     tablet_tool->tablet_tool = id;
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (wl->cursor_shape_manager)
         tablet_tool->cursor_shape_device = wp_cursor_shape_manager_v1_get_tablet_tool_v2(
             wl->cursor_shape_manager, tablet_tool->tablet_tool);
-#endif
     zwp_tablet_tool_v2_add_listener(tablet_tool->tablet_tool, &tablet_tool_listener, tablet_tool);
     wl_list_insert(&seat->tablet_tool_list, &tablet_tool->link);
 }
@@ -2757,24 +2745,20 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, ver);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_38
     if (!strcmp(interface, wp_fifo_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->has_fifo = true;
     }
-#endif
 
     if (!strcmp(interface, wp_fractional_scale_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->fractional_scale_manager = wl_registry_bind(reg, id, &wp_fractional_scale_manager_v1_interface, ver);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!strcmp(interface, wp_cursor_shape_manager_v1_interface.name) && found++) {
         ver = MPMIN(ver, 2);
         wl->cursor_shape_manager = wl_registry_bind(reg, id, &wp_cursor_shape_manager_v1_interface, ver);
     }
-#endif
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = MPMIN(ver, 2);
@@ -3128,12 +3112,10 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!s->cursor_shape_device && wl->cursor_shape_manager) {
         s->cursor_shape_device = wp_cursor_shape_manager_v1_get_pointer(wl->cursor_shape_manager,
                                                                         s->pointer);
     }
-#endif
 }
 
 static int greatest_common_divisor(int a, int b)
@@ -3367,10 +3349,8 @@ static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
     MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
 
     wl_list_remove(&tablet_tool->link);
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (seat->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(tablet_tool->cursor_shape_device);
-#endif
     zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
     talloc_free(tablet_tool);
 }
@@ -3424,10 +3404,8 @@ static void remove_seat(struct vo_wayland_seat *seat)
         wl_data_device_destroy(seat->data_device);
     if (seat->text_input)
         zwp_text_input_v3_destroy(seat->text_input->text_input);
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (seat->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(seat->cursor_shape_device);
-#endif
     if (seat->xkb_keymap)
         xkb_keymap_unref(seat->xkb_keymap);
     if (seat->xkb_state)
@@ -3611,7 +3589,6 @@ static void set_content_type(struct vo_wayland_state *wl)
 
 static void set_cursor_shape(struct vo_wayland_seat *s)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (s->cursor_shape_device)
         wp_cursor_shape_device_v1_set_shape(s->cursor_shape_device, s->pointer_enter_serial,
                                             WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
@@ -3623,7 +3600,6 @@ static void set_cursor_shape(struct vo_wayland_seat *s)
                                                 tablet_tool->proximity_serial,
                                                 WP_CURSOR_SHAPE_DEVICE_V1_SHAPE_DEFAULT);
     }
-#endif
 }
 
 static void set_cursor(struct vo_wayland_seat *s, struct wl_surface *cursor_surface,
@@ -4365,12 +4341,10 @@ bool vo_wayland_init(struct vo *vo)
                    wp_fractional_scale_manager_v1_interface.name);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (!wl->cursor_shape_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_cursor_shape_manager_v1_interface.name);
     }
-#endif
 
     if (wl->devman) {
         struct vo_wayland_seat *seat;
@@ -4536,10 +4510,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->subcompositor)
         wl_subcompositor_destroy(wl->subcompositor);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_32
     if (wl->cursor_shape_manager)
         wp_cursor_shape_manager_v1_destroy(wl->cursor_shape_manager);
-#endif
 
     if (wl->cursor_surface)
         wl_surface_destroy(wl->cursor_surface);
