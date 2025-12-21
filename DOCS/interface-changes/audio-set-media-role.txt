@@ -1,1 +1,0 @@
-add --audio-set-media-role, disabled by default. This effectively changes the behavior for ao_pipewire

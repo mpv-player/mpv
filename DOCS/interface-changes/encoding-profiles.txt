@@ -1,1 +1,0 @@
-`encoding-profiles.conf` is no longer installed by default into the system configuration directory and is instead installed in the data directory

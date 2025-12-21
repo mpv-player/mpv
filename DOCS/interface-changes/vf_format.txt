@@ -1,5 +1,0 @@
-add `--vf=format=transfer` alias
-add `--vf=format=min-luma`
-add `--vf=format=max-luma`
-add `--vf=format=max-cll`
-add `--vf=format=max-fall`

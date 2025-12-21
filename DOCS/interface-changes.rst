@@ -30,7 +30,72 @@ Interface changes
 
 ::
 
+ --- mpv 0.42.0 ---
  --- mpv 0.41.0 ---
+    - the value of `--tls-ca-file` is now expanded as a path
+    - the value of `--tls-cert-file` is now expanded as a path
+    - the value of `--tls-key-file` is now expanded as a path
+    - the `--sub-sdh-enclosures` option is now a string list option
+    - rename `console-selected_color` script-opt to `console-focused_color`
+    - rename `console-selected_back_color` script-opt to `console-
+      focused_back_color`
+    - mediacodec_embed is no longer the default `vo` on Android. Set the option
+      explicitly if you want to use it and are aware of the limitations.
+    - change `--target-colorspace-hint` to `auto` by default. Auto mode will
+      also enable hint for SDR formats if target metadata is reported by current
+      output context.
+    - change `--prefetch-playlist` default to `no`
+    - add `--clipboard-xwayland` option
+    - add `video-params/prim-*` properties
+    - add `stats-plot_cache` script-opt
+    - disable `stats-plot_{perfdata,vsync_ratio,vsync_jitter}` by default
+    - add `scaled` and `osd` flags to screenshot commands
+    - add `forced` flag to track add commands
+    - add `default` flag to track add commands
+    - add `console-monospace_font` script-opt
+    - remove `console-font` script-opt
+    - add `console-gap` script-opt
+    - add `console-exact_match` script-opt
+    - make `console-case_sensitive` only affect exact searches and change the to
+      default to no on platforms other than Windows
+    - add `commands-remember_input` script-opt
+    - add `--wid=0` support for win32
+    - add `--vo-kitty-auto-multiplexer-passthrough=<yes|no>`
+    - add `--vf=format=transfer` alias
+    - add `--vf=format=min-luma`
+    - add `--vf=format=max-luma`
+    - add `--vf=format=max-cll`
+    - add `--vf=format=max-fall`
+    - add `--treat-srgb-as-power22`
+    - add `--sdr-adjust-gamma`
+    - add `--target-colorspace-hint-strict` option
+    - add `--target-colorspace-hint-mode` option
+    - add `--sub-hdr-peak` option
+    - add `--sub-fix-timing-threshold`
+    - add `--sub-fix-timing-keep`
+    - add `--register` and `--unregister`
+    - add `--osd-prune-delay`
+    - add `--osd-glyph-limit`
+    - add `--osd-bitmap-max-size`
+    - add `--sub-glyph-limit`
+    - add `--sub-bitmap-max-size`
+    - add `--osd-shaper`
+    - add `--input-tablet-emulate-mouse` option
+    - add `--image-subs-hdr-peak` option
+    - add `--hwdec-threads`
+    - add `--hdr-reference-white`
+    - add `--d3d11-output-mode` enable use specific output mode for creating the
+      D3D11 swapchain
+    - add `--d3d11-composition-size=<WxH>` support for d3d11 composition mode
+    - add `--border-background=blur`
+    - add `--background-blur-radius`
+    - add `--bluray-angle`
+    - add `--background-tile-size` option
+    - add `--background-tile-color-0` and `--background-tile-color-1` options
+    - add --audio-set-media-role, disabled by default. This effectively changes
+      the behavior for ao_pipewire
+    - `encoding-profiles.conf` is no longer installed by default into the system
+      configuration directory and is instead installed in the data directory
  --- mpv 0.40.0 ---
     - undeprecate list option suffixes that work with multiple items
     - add `-del` to string list and keyvalue list options

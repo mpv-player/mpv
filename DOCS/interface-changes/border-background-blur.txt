@@ -1,2 +1,0 @@
-add `--border-background=blur`
-add `--background-blur-radius`

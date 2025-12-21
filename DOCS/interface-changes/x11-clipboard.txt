@@ -1,2 +1,0 @@
-add `x11` clipboard backend
-add `--clipboard-xwayland` option
