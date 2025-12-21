@@ -142,6 +142,8 @@ class EventHelper {
                 event = .init(name: name, format: format, bool: TypeHelper.toBool(property.data))
             case MPV_FORMAT_DOUBLE:
                 event = .init(name: name, format: format, double: TypeHelper.toDouble(property.data))
+            case MPV_FORMAT_INT64:
+                event = .init(name: name, format: format, int: TypeHelper.toInt(property.data))
             case MPV_FORMAT_NODE:
                 let node = TypeHelper.toNode(property.data)
                 event = .init(
