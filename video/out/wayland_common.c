@@ -3255,6 +3255,7 @@ static int handle_round(int scale, int n)
 
 static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metadata *hdr)
 {
+#if HAVE_WAYLAND_PROTOCOLS_1_41
     // Always return a hard failure if this condition fails.
     if (hdr->min_luma >= hdr->max_luma)
         return false;
@@ -3274,6 +3275,7 @@ static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metada
         hdr->max_cll = 0;
         hdr->max_fall = 0;
     }
+#endif
 
     return true;
 }
