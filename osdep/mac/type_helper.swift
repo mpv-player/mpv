@@ -78,6 +78,11 @@ class TypeHelper {
         return UnsafePointer<Double>(OpaquePointer(obj))?.pointee
     }
 
+    // MPV_FORMAT_INT64
+    class func toInt(_ obj: UnsafeMutableRawPointer) -> Int64? {
+        return UnsafePointer<Int64>(OpaquePointer(obj))?.pointee
+    }
+
     // MPV_FORMAT_NODE
     class func toNode(_ obj: UnsafeMutableRawPointer) -> mpv_node? {
         return UnsafePointer<mpv_node>(OpaquePointer(obj))?.pointee
