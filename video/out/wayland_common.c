@@ -3253,6 +3253,7 @@ static int handle_round(int scale, int n)
     return (scale * n + WAYLAND_SCALE_FACTOR / 2) / WAYLAND_SCALE_FACTOR;
 }
 
+#if HAVE_WAYLAND_PROTOCOLS_1_41
 static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metadata *hdr)
 {
     // Always return a hard failure if this condition fails.
@@ -3277,6 +3278,7 @@ static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metada
 
     return true;
 }
+#endif
 
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
 {
