@@ -2723,7 +2723,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, wl_shm_interface.name) && found++) {
-        ver = 1;
+        ver = MPMIN(ver, 2);
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, ver);
     }
 
