@@ -373,10 +373,10 @@ jobs:
   linux-ffmpeg-6-1:
     runs-on: ubuntu-latest
     container:
-      # We want to test ffmpeg 6.1.1 which alpine 3.19 has exactly.
-      # Furthermore, this is a very minimal build of mpv without commonly
-      # used features to test build compatibility. Musl is a nice bonus as well
-      image: alpine:3.19
+      # We want to test ffmpeg 6.1.2, which Alpine 3.21 includes.
+      # Also test compatibility with Wayland Protocols 1.38 and Wayland libs 1.23.
+      # Musl support is an added bonus.
+      image: alpine:3.21
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencies
@@ -400,7 +400,9 @@ jobs:
               meson \
               musl-dev \
               rust \
-              samurai
+              samurai \
+              wayland-dev \
+              wayland-protocols
 
       - name: Build with meson
         id: build

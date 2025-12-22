@@ -11,6 +11,7 @@ git clone https://code.videolan.org/videolan/libplacebo.git \
 
 meson setup build $common_args \
  -Dlibplacebo:vulkan=disabled \
- -Dlua=enabled
+ -Dlua=enabled \
+ -Dwayland=enabled
 meson compile -C build
 ./build/mpv -v --no-config
