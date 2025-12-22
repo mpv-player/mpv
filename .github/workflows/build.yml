@@ -391,6 +391,7 @@ jobs:
               libass-dev \
               lua5.2-dev \
               pulseaudio-dev \
+              libplacebo-dev \
               libx11-dev \
               libxfixes-dev \
               libxkbcommon-dev \
