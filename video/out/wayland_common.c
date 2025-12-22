@@ -39,7 +39,7 @@
 // Generated from wayland-protocols
 #include "idle-inhibit-unstable-v1.h"
 #include "text-input-unstable-v3.h"
-#include "linux-dmabuf-unstable-v1.h"
+#include "linux-dmabuf-v1.h"
 #include "presentation-time.h"
 #include "xdg-activation-v1.h"
 #include "xdg-decoration-unstable-v1.h"
