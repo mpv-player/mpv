@@ -43,7 +43,7 @@
 #endif
 
 // Generated from wayland-protocols
-#include "linux-dmabuf-unstable-v1.h"
+#include "linux-dmabuf-v1.h"
 #include "viewporter.h"
 #include "single-pixel-buffer-v1.h"
 
