@@ -2663,7 +2663,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
-        ver = 4;
+        ver = MPMIN(ver, 5);
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, ver);
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
