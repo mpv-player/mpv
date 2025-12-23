@@ -25,7 +25,7 @@ struct clipboard_mac_priv {
 static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     struct clipboard_mac_priv *p = cl->priv = talloc_zero(cl, struct clipboard_mac_priv);
-    p->clipboard = [[Clipboard alloc] init];
+    p->clipboard = [[Clipboard alloc] initWithContext:cl];
     return CLIPBOARD_SUCCESS;
 }
 
