@@ -12,14 +12,12 @@ if [[ "$SYS" == "clang64" ]]; then
     args+=(
       -Db_sanitize=address,undefined
     )
-else
-    # currently building with subrandr on clang64+asan
-    # causes a weird crash (https://github.com/msys2/MINGW-packages/issues/25267)
-    echo "::group::Building subrandr"
-    build_subrandr "/$SYS"
-    echo "::endgroup::"
-    args+=(-Dsubrandr=enabled)
 fi
+
+echo "::group::Building subrandr"
+build_subrandr "/$SYS"
+echo "::endgroup::"
+args+=(-Dsubrandr=enabled)
 
 [[ "$SYS" == "clangarm64" ]] && args+=(
   -Dpdf-build=disabled
