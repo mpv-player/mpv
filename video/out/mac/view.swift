@@ -28,6 +28,14 @@ class View: NSView, CALayerDelegate {
     override var isFlipped: Bool { return true }
     override var acceptsFirstResponder: Bool { return true }
 
+    override var isOpaque: Bool {
+        if let metalLayer = layer as? MetalLayer {
+            return !metalLayer.isOpaque
+        }
+
+        return true
+    }
+
     init(frame: NSRect, common com: Common) {
         common = com
         super.init(frame: frame)
