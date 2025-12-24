@@ -95,6 +95,21 @@ static int init(struct sd *sd)
     if (strcmp(sd->codec->codec, "subrandr/srv3"))
         return -1;
 
+    uint32_t major, minor, patch;
+    sbr_library_version(&major, &minor, &patch);
+
+    MP_VERBOSE(sd, "subrandr version: %u.%u.%u", SUBRANDR_MAJOR, SUBRANDR_MINOR, SUBRANDR_PATCH);
+    if(SUBRANDR_MAJOR != major || SUBRANDR_MINOR != minor || SUBRANDR_PATCH != patch)
+        MP_VERBOSE(sd, " (runtime %u.%u.%u)", major, minor, patch);
+    MP_VERBOSE(sd, "\n");
+
+    if (major != SUBRANDR_MAJOR || (int32_t)minor < SUBRANDR_MINOR) {
+        MP_ERR(sd, "build version %u.%u.%u incompatible with runtime version "
+                   "%u.%u.%u, disabling...\n", SUBRANDR_MAJOR, SUBRANDR_MINOR,
+               SUBRANDR_PATCH, major, minor, patch);
+        return -1;
+    }
+
     sbr_library *library = sbr_library_init();
     if (!library) {
         const char *error = sbr_get_last_error_string();
