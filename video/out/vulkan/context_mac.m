@@ -127,6 +127,9 @@ static bool mac_vk_reconfig(struct ra_ctx *ctx)
     struct priv *p = ctx->priv;
     if (![p->vo_mac config:ctx->vo])
         return false;
+
+    [p->vo_mac updateWithAlpha:ctx->opts.want_alpha];
+
     return true;
 }
 
@@ -143,12 +146,19 @@ static int mac_vk_control(struct ra_ctx *ctx, int *events, int request, void *ar
     return ret;
 }
 
+static void mac_vk_update_render_opts(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    [p->vo_mac updateWithAlpha:ctx->opts.want_alpha];
+}
+
 const struct ra_ctx_fns ra_ctx_vulkan_mac = {
-    .type           = "vulkan",
-    .name           = "macvk",
-    .description    = "mac/Vulkan (via Metal)",
-    .reconfig       = mac_vk_reconfig,
-    .control        = mac_vk_control,
-    .init           = mac_vk_init,
-    .uninit         = mac_vk_uninit,
+    .type               = "vulkan",
+    .name               = "macvk",
+    .description        = "mac/Vulkan (via Metal)",
+    .reconfig           = mac_vk_reconfig,
+    .control            = mac_vk_control,
+    .update_render_opts = mac_vk_update_render_opts,
+    .init               = mac_vk_init,
+    .uninit             = mac_vk_uninit,
 };
