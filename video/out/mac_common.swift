@@ -115,6 +115,10 @@ class MacCommon: Common {
                needsInitialDraw
     }
 
+    @objc func update(alpha: Bool) {
+        layer?.wantsAlpha = alpha
+    }
+
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                       _ inNow: UnsafePointer<CVTimeStamp>,
                                       _ inOutputTime: UnsafePointer<CVTimeStamp>,
