@@ -83,6 +83,7 @@ class MetalLayer: CAMetalLayer {
         set {
             if isOpaque == wantsAlpha {
                 super.isOpaque = !wantsAlpha
+                backgroundColor = (wantsAlpha ? NSColor.clear : NSColor.black).cgColor
                 log.verbose("Metal layer is opaque (direct-to-display possible): \(isOpaque)")
             }
         }

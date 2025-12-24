@@ -117,6 +117,10 @@ class MacCommon: Common {
 
     @objc func update(alpha: Bool) {
         layer?.wantsAlpha = alpha
+        DispatchQueue.main.sync {
+            window?.isOpaque = !alpha
+            window?.backgroundColor = alpha ? NSColor.clear : nil
+        }
     }
 
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
