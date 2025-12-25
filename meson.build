@@ -657,12 +657,33 @@ if features['iconv']
     add_project_arguments('-DWINICONV_CONST=', language: ['c', 'objc'])
 endif
 
-javascript = dependency('mujs', version: '>= 1.0.0', required: get_option('javascript'))
-features += {'javascript': javascript.found()}
+javascript_opt = get_option('javascript')
+javascript_impl = get_option('javascript-impl')
+javascript_dep = disabler()
+javascript_sources = []
+
+if not javascript_opt.disabled()
+    if javascript_impl == 'mujs'
+        javascript_dep = dependency('mujs', version: '>= 1.0.0',
+                                    required: javascript_opt)
+        if javascript_dep.found()
+            javascript_sources += files('player/javascript.c',
+                                         'sub/filter_jsre.c')
+        endif
+    else
+        javascript_dep = dependency('quickjs-ng', version: '>= 0.11.0',
+                                    fallback: ['quickjs', 'qjs_dep'],
+                                    required: javascript_opt)
+        if javascript_dep.found()
+            javascript_sources += files('player/javascript_quickjs.c')
+        endif
+    endif
+endif
+
+features += {'javascript': javascript_dep.found()}
 if features['javascript']
-    dependencies += javascript
-    sources += files('player/javascript.c',
-                     'sub/filter_jsre.c')
+    dependencies += javascript_dep
+    sources += javascript_sources
 endif
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))

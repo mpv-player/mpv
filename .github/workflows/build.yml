@@ -71,7 +71,7 @@ jobs:
       - name: Install Meson Wraps
         run: |
           mkdir subprojects -p
-          meson wrap install mujs
+          meson wrap install quickjs-ng
           meson subprojects download
 
       - name: Build libraries

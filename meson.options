@@ -13,7 +13,13 @@ option('cplugins', type: 'feature', value: 'auto', description: 'C plugins')
 option('dvbin', type: 'feature', value: 'auto', description: 'DVB input module')
 option('dvdnav', type: 'feature', value: 'auto', description: 'dvdnav support')
 option('iconv', type: 'feature', value: 'auto', description: 'iconv')
-option('javascript', type: 'feature', value: 'auto', description: 'Javascript (MuJS backend)')
+option('javascript', type: 'feature', value: 'auto', description: 'Javascript (MuJS/quickjs-ng backend)')
+option('javascript-impl',
+    type: 'combo',
+    choices: ['mujs', 'quickjs-ng'],
+    value: 'mujs',
+    description: 'Javascript implementation backend, auto'
+)
 option('jpeg', type: 'feature', value: 'auto', description: 'libjpeg image writer')
 option('lcms2', type: 'feature', value: 'auto', description: 'LCMS2 support')
 option('libarchive', type: 'feature', value: 'auto', description: 'libarchive wrapper for reading zip files and more')
