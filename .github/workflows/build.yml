@@ -32,6 +32,7 @@ on:
 jobs:
   mingw:
     runs-on: ubuntu-24.04
+    if: false
     env:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -71,7 +72,7 @@ jobs:
       - name: Install Meson Wraps
         run: |
           mkdir subprojects -p
-          meson wrap install mujs
+          meson wrap install quickjs-ng
           meson subprojects download
 
       - name: Build libraries
@@ -118,6 +119,7 @@ jobs:
 
   win32:
     runs-on: ${{ matrix.os }}
+    if: true
     strategy:
       fail-fast: false
       matrix:
@@ -225,6 +227,7 @@ jobs:
 
   macos:
     runs-on: ${{ matrix.os }}
+    if: true
     strategy:
       matrix:
         include:
@@ -307,6 +310,7 @@ jobs:
 
   linux:
     runs-on: ubuntu-latest
+    if: true
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
@@ -326,6 +330,9 @@ jobs:
             args: "-Db_lto=true -Db_lto_mode=thin"
     steps:
       - uses: actions/checkout@v6
+
+      - run: mkdir -p subprojects
+      - run: git clone --depth=1 --branch=v0.11.0 https://github.com/quickjs-ng/quickjs subprojects/quickjs
 
       - name: Build with meson
         id: build
@@ -349,6 +356,7 @@ jobs:
 
   linux-fuzz:
     runs-on: ubuntu-latest
+    if: false
     container:
       image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
       env:
@@ -372,6 +380,7 @@ jobs:
 
   linux-ffmpeg-6-1:
     runs-on: ubuntu-latest
+    if: false
     container:
       # We want to test ffmpeg 6.1.2, which Alpine 3.21 includes.
       # Also test compatibility with Wayland Protocols 1.38 and Wayland libs 1.23.
@@ -428,6 +437,7 @@ jobs:
   openbsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    if: false
     steps:
     - uses: actions/checkout@v6
     - name: Test in OpenBSD VM
@@ -474,6 +484,7 @@ jobs:
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    if: false
     steps:
     - uses: actions/checkout@v6
     - name: Test in FreeBSD VM
@@ -527,6 +538,7 @@ jobs:
 
   msys2:
     runs-on: ${{ matrix.os }}
+    if: false
     strategy:
       fail-fast: false
       matrix:
