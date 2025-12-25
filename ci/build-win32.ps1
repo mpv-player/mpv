@@ -252,6 +252,7 @@ meson setup build `
     -Dffmpeg:libdav1d=enabled `
     -Dffmpeg:libjxl=enabled `
     -Dffmpeg:libaom=enabled `
+    -Dharfbuzz:freetype=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
@@ -270,6 +271,7 @@ meson setup build `
     -Dluajit:amalgam=true `
     -Damf=enabled `
     -Dd3d11=enabled `
+    -Dsubrandr=enabled `
     -Dvulkan=enabled `
     -Djavascript=enabled `
     -Dwin32-smtc=enabled `
