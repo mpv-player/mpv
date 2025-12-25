@@ -52,7 +52,7 @@ static const struct mp_scripting *const scripting_backends[] = {
     &mp_scripting_cplugin,
 #endif
 #if HAVE_JAVASCRIPT
-    &mp_scripting_js,
+&mp_scripting_js,
 #endif
     &mp_scripting_run,
     NULL
