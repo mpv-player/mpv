@@ -167,6 +167,52 @@ aom_dep = aom_proj.dependency('aom')
 meson.override_dependency('aom', aom_dep)
 "@
 
+if (-not (Test-Path "$subprojects/subrandr")) {
+    git clone https://github.com/afishhh/subrandr --depth 1 $subprojects/subrandr
+    Set-Content -Path "$subprojects/subrandr/meson.build" -Value @"
+project('subrandr', 'c', version: '1.0.1')
+cargo = find_program('cargo', required: true)
+cc = meson.get_compiler('c')
+subrandr_build = custom_target(
+  'subrandr-build',
+  output: 'subrandr.stamp',
+  command: [
+    cargo,
+    '-Z', 'unstable-options',
+    '-C', '@CURRENT_SOURCE_DIR@',
+    'xtask', 'install',
+    '--prefix=' + meson.current_build_dir(),
+    '--static-library', 'true',
+    '--shared-library', 'false'
+  ],
+  console: true
+)
+subrandr_lib = custom_target(
+  'subrandr-copy',
+  input: subrandr_build,
+  output: 'subrandr.lib',
+  command: ['cp', meson.current_build_dir() / 'lib' / 'subrandr.lib', '@OUTPUT@']
+)
+harfbuzz = dependency('harfbuzz', default_options: ['freetype=enabled'])
+dep = declare_dependency(
+  sources: subrandr_build,
+  link_with: subrandr_lib,
+  dependencies: [
+    harfbuzz,
+    # those deps are hardcoded, because parsing rustc native-static-libs, would
+    # be lots of code for little benefit, those libs won't really change.
+    cc.find_library('dbghelp', required: true),
+    cc.find_library('kernel32', required: true),
+    cc.find_library('ntdll', required: true),
+    cc.find_library('userenv', required: true),
+    cc.find_library('ws2_32', required: true)
+  ],
+  compile_args: ['-I' + meson.current_build_dir() / 'include'],
+)
+meson.override_dependency('subrandr', dep)
+"@
+}
+
 $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
@@ -241,7 +287,7 @@ meson setup build `
     --wrap-mode=forcefallback `
     -Ddefault_library=static `
     -Dc_args="-I$amfExtractPath" `
-    -Dlibmpv=true `
+    -Dlibmpv=false `
     -Dtests=true `
     -Dgpl=true `
     -Dffmpeg:gpl=enabled `
@@ -252,6 +298,7 @@ meson setup build `
     -Dffmpeg:libdav1d=enabled `
     -Dffmpeg:libjxl=enabled `
     -Dffmpeg:libaom=enabled `
+    -Dharfbuzz:freetype=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
     -Dlcms2:tiff=disabled `
@@ -270,6 +317,7 @@ meson setup build `
     -Dluajit:amalgam=true `
     -Damf=enabled `
     -Dd3d11=enabled `
+    -Dsubrandr=enabled `
     -Dvulkan=enabled `
     -Djavascript=enabled `
     -Dwin32-smtc=enabled `
@@ -279,7 +327,7 @@ meson setup build `
     -Drubberband=disabled `
     -Dwayland=disabled `
     -Dx11=disabled
-ninja -C build mpv.exe mpv.com libmpv.a
+ninja -C build mpv.exe mpv.com
 cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 cp ./etc/mpv-*.bat ./build
 ./build/mpv.com -v --no-config
