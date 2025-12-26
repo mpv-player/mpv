@@ -661,8 +661,8 @@ javascript = dependency('mujs', version: '>= 1.0.0', required: get_option('javas
 features += {'javascript': javascript.found()}
 if features['javascript']
     dependencies += javascript
-    sources += files('player/javascript.c',
-                     'sub/filter_jsre.c')
+    sources += files('player/javascript_mujs.c',
+                     'sub/filter_jsre_mujs.c')
 endif
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
