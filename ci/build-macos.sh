@@ -4,7 +4,6 @@ set -e
 
 . ./ci/build-common.sh
 
-FFMPEG_SYSROOT="${HOME}/deps/sysroot"
 MPV_INSTALL_PREFIX="${HOME}/out/mpv"
 MPV_VARIANT="${TRAVIS_OS_NAME}"
 
@@ -12,7 +11,7 @@ if [[ -d "./build/${MPV_VARIANT}" ]] ; then
     rm -rf "./build/${MPV_VARIANT}"
 fi
 
-PKG_CONFIG_PATH="${FFMPEG_SYSROOT}/lib/pkgconfig/:$(brew --prefix libarchive)/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
+PKG_CONFIG_PATH="$(brew --prefix libarchive)/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
 meson setup build $common_args \
   -Dprefix="${MPV_INSTALL_PREFIX}" \
   -Dobjc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
