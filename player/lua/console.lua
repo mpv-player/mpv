@@ -342,8 +342,10 @@ local function calculate_max_item_width()
                          (font and "\\fn" .. font or "") .. "\\q2}" ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
-    max_item_width = math.min(result.x1 - result.x0,
-                              osd_w - get_margin_x() * 2 - opts.padding * 2)
+    if result.x0 then
+        max_item_width = math.min(result.x1 - result.x0,
+                                  osd_w - get_margin_x() * 2 - opts.padding * 2)
+    end
 end
 
 local function should_highlight_completion(i)
