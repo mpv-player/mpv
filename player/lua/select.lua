@@ -304,7 +304,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
                              :gsub("^%s*(.-)%s*$", "%1")      -- Strip whitespace
                              :gsub("^m%s[mbl%s%-%d%.]+$", "") -- Remove graphics code
 
-        if sub.codec == "subrip" or (sub_line ~= "" and sub_line:match("^%s+$") == nil) then
+        if sub.codec == "text" or (sub_line ~= "" and sub_line:match("^%s+$") == nil) then
             local sub_time = line:match("%d+") * 60 + line:match(":([%d%.]*)")
             local time_seconds = math.floor(sub_time)
             sub_content[time_seconds] = sub_content[time_seconds] or {}
