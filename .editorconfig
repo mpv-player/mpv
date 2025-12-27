@@ -11,6 +11,10 @@ indent_size = 4
 max_line_length = 80
 trim_trailing_whitespace = true
 
+[*.{yaml,yml}]
+indent_size = 2
+quote_type = 'double'
+
 [.git/COMMIT*]
 max_line_length = 72
 

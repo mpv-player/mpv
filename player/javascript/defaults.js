@@ -1,9 +1,20 @@
 "use strict";
+
+console.log('running', 'defaults.js');
+
+console.log(1);
+console.log(2);
+console.log(3);
+
+console.log(mp.script_name);
+console.log(Object.keys(mp).length, JSON.stringify(Object.keys(mp)));
+
 (function main_default_js(g) {
 // - g is the global object.
 // - User callbacks called without 'this', global only if callee is non-strict.
 // - The names of function expressions are not required, but are used in stack
 //   traces. We name them where useful to show up (fname:#line always shows).
+
 
 mp.msg = { log: mp.log };
 mp.msg.verbose = mp.log.bind(null, "v");
