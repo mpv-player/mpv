@@ -135,8 +135,6 @@ jobs:
       CC_LD: "lld-link"
       CXX_LD: "lld-link"
       WINDRES: "llvm-rc"
-      RUST_LD: "lld-link"
-      RUSTC: "rustc --target ${{ matrix.target }}"
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: "${{ github.workspace }}\\.ccache"
       CCACHE_MAXSIZE: 500M
@@ -166,6 +164,46 @@ jobs:
           choco install ccache nasm
           ./ci/install-cmake.ps1 -arch ${{ matrix.arch }}
 
+      - name: Checkout pkgconf
+        uses: actions/checkout@v6
+        with:
+          repository: pkgconf/pkgconf
+          ref: pkgconf-2.5.1
+          path: pkgconf
+
+      - name: Build pkgconf
+        shell: pwsh
+        working-directory: pkgconf
+        run: |
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
+          meson setup build -Dtests=disabled -Dprefix="${{ runner.temp }}\install"
+          meson install -Cbuild
+          echo "${{ runner.temp }}\install\bin" >> "$env:GITHUB_PATH"
+
+      - name: Build pkgconf
+        shell: pwsh
+        run: |
+          ls "${{ runner.temp }}\install\bin"
+          pkgconf --version
+          pkg-config --version
+          echo "PKG_CONFIG=${{ runner.temp }}\install\bin\pkgconf.exe" >> $env:GITHUB_ENV
+
+      - name: Checkout subrandr
+        uses: actions/checkout@v6
+        with:
+          repository: afishhh/subrandr
+          ref: msvc-static-lib
+          path: subrandr
+
+      - name: Build subrandr
+        working-directory: subrandr
+        run: |
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
+          cargo xtask install --prefix="${{ runner.temp }}\install" --static-library true --shared-library false
+          echo "PKG_CONFIG_PATH=${{ runner.temp }}\install\lib\pkgconfig" >> $env:GITHUB_ENV
+
       - name: Update Meson WrapDB
         run: |
           meson wrap update-db
@@ -177,6 +215,9 @@ jobs:
 
       - name: Build
         id: build
+        env:
+          RUST_LD: "lld-link"
+          RUSTC: "rustc --target ${{ matrix.target }}"
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -ne 'C:\Program Files\LLVM\bin' -and `
                                                              $_ -ne 'C:\Program Files\CMake\bin' -and `
