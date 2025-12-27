@@ -214,9 +214,10 @@ static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
 
 static bool wayland_egl_init(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_init(ctx->vo))
-        return false;
-    return egl_create_context(ctx);
+    if (vo_wayland_init(ctx->vo) && egl_create_context(ctx))
+        return true;
+    vo_wayland_uninit(ctx->vo);
+    return false;
 }
 
 const struct ra_ctx_fns ra_ctx_wayland_egl = {
