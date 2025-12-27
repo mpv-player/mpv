@@ -18,6 +18,7 @@
 #include <math.h>
 #include <limits.h>
 
+#define SBR_ALLOW_UNSTABLE
 #include <subrandr/subrandr.h>
 #include <subrandr/logging.h>
 
@@ -28,16 +29,16 @@
 #include "common/common.h"
 #include "demux/packet_pool.h"
 #include "demux/stheader.h"
+#include "sub/packer.h"
 #include "sub/osd.h"
-#include "video/mp_image.h"
 #include "sd.h"
 
 struct sd_sbr_priv {
     struct sbr_library *sbr_library;
     struct sbr_renderer *sbr_renderer;
     struct sbr_subtitles *sbr_subtitles;
-    struct mp_osd_res osd;
-    struct sub_bitmaps *bitmaps;
+    struct mp_osd_res prev_osd;
+    struct mp_sub_packer *packer;
 };
 
 static void enable_output(struct sd *sd, bool enable)
@@ -123,10 +124,7 @@ static int init(struct sd *sd)
     ctx->sbr_library = library;
     sbr_library_set_log_callback(ctx->sbr_library, mp_msg_sbr_log_callback, sd);
 
-    ctx->bitmaps = talloc_zero(ctx, struct sub_bitmaps);
-    ctx->bitmaps->format = SUBBITMAP_BGRA;
-    ctx->bitmaps->num_parts = 1;
-    ctx->bitmaps->parts = talloc_zero(ctx->bitmaps, struct sub_bitmap);
+    ctx->packer = mp_sub_packer_alloc(ctx);
 
     enable_output(sd, true);
 
@@ -173,8 +171,6 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     struct sd_sbr_priv *ctx = sd->priv;
     struct mp_subtitle_opts *opts = sd->opts;
 
-    ctx->osd = dim;
-
     if (pts == MP_NOPTS_VALUE || !ctx->sbr_renderer || !ctx->sbr_subtitles)
         return NULL;
 
@@ -196,51 +192,41 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
 
     unsigned t = lrint(pts * 1000);
 
-    struct sub_bitmaps *bitmaps = ctx->bitmaps;
-    struct sub_bitmap *bitmap = bitmaps->parts;
+    struct sub_bitmaps res;
+    const struct sub_bitmaps *cached = mp_sub_packer_get_cached(ctx->packer);
 
-    bool size_did_change = bitmap->w != dim.w || bitmap->h != dim.h;
-    if (size_did_change || sbr_renderer_did_change(ctx->sbr_renderer, &context, t)) {
-        talloc_free(bitmaps->packed);
-
-        bitmaps->packed = mp_image_alloc(IMGFMT_BGRA, dim.w, dim.h);
-        mp_require(bitmaps->packed);
-        bitmaps->packed_h = dim.h;
-        bitmaps->packed_w = dim.w;
-        bitmaps->packed->params.repr.alpha = PL_ALPHA_PREMULTIPLIED;
-        ++bitmaps->change_id;
-
-        bitmap->bitmap = bitmaps->packed->planes[0];
-        if (!opts->sub_use_margins) {
-            bitmap->x = dim.ml;
-            bitmap->y = dim.mt;
-        } else {
-            bitmap->x = 0;
-            bitmap->y = 0;
-        }
-        bitmap->w = dim.w;
-        bitmap->h = dim.h;
-        bitmap->dw = dim.w;
-        bitmap->dh = dim.h;
-        bitmap->stride = (*bitmaps->packed).stride[0];
-
+    bool redraw_required = ctx->prev_osd.w != dim.w || ctx->prev_osd.h != dim.h ||
+                           !cached || sbr_renderer_did_change(ctx->sbr_renderer, &context, t);
+    if (redraw_required) {
         sbr_renderer_set_subtitles(ctx->sbr_renderer, ctx->sbr_subtitles);
-        if (sbr_renderer_render(ctx->sbr_renderer, &context, t, bitmap->bitmap,
-                                dim.w, dim.h, bitmap->stride >> 2) < 0) {
+        sbr_instanced_raster_pass *pass = sbr_renderer_render_instanced(ctx->sbr_renderer, &context, t, 0);
+        if (!pass) {
             const char *error = sbr_get_last_error_string();
             mp_err(sd->log, "Failed to render frame: %s\n", error);
             return NULL;
         }
-    }
 
-    return sub_bitmaps_copy(NULL, bitmaps);
+        ctx->prev_osd = dim;
+
+        mp_sub_packer_pack_sbr(ctx->packer, pass, &res);
+        sbr_instanced_raster_pass_finish(pass);
+
+        if (!opts->sub_use_margins)
+            for (int i = 0; i < res.num_parts; ++i) {
+                struct sub_bitmap *part = &res.parts[i];
+                part->x += dim.ml;
+                part->y += dim.mt;
+            }
+    } else
+        res = *cached;
+
+    return sub_bitmaps_copy(NULL, &res);
 }
 
 static void uninit(struct sd *sd)
 {
     struct sd_sbr_priv *ctx = sd->priv;
 
-    talloc_free(ctx->bitmaps->packed);
     enable_output(sd, false);
     if (ctx->sbr_subtitles)
         sbr_subtitles_destroy(ctx->sbr_subtitles);

@@ -203,6 +203,7 @@ sources = files(
     'sub/lavc_conv.c',
     'sub/osd.c',
     'sub/osd_libass.c',
+    'sub/packer.c',
     'sub/sd_ass.c',
     'sub/sd_lavc.c',
 
