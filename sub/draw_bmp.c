@@ -354,10 +354,10 @@ static void draw_rgba(uint8_t *dst, ptrdiff_t dst_stride,
             unsigned int dstg = (dstpix >>  8) & 0xFF;
             unsigned int dstr = (dstpix >> 16) & 0xFF;
             unsigned int dsta = (dstpix >> 24) & 0xFF;
-            dstb = srcb + dstb * (255 * 255 - srca) / (255 * 255);
-            dstg = srcg + dstg * (255 * 255 - srca) / (255 * 255);
-            dstr = srcr + dstr * (255 * 255 - srca) / (255 * 255);
-            dsta = srca + dsta * (255 * 255 - srca) / (255 * 255);
+            dstb = srcb + dstb * (255 - srca) / 255;
+            dstg = srcg + dstg * (255 - srca) / 255;
+            dstr = srcr + dstr * (255 - srca) / 255;
+            dsta = srca + dsta * (255 - srca) / 255;
             dstrow[x] = dstb | (dstg << 8) | (dstr << 16) | (dsta << 24);
         }
         dst += dst_stride;
