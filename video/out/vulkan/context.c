@@ -69,8 +69,12 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
     bool is_uuid = av_uuid_parse(*value, param_uuid) == 0;
 
     for (int i = 0; i < num; i++) {
+        VkPhysicalDeviceDriverProperties driver_prop = { 0 };
+        driver_prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
+
         VkPhysicalDeviceIDPropertiesKHR id_prop = { 0 };
         id_prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR;
+        id_prop.pNext = &driver_prop;
 
         VkPhysicalDeviceProperties2KHR prop2 = { 0 };
         prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR;
@@ -83,9 +87,10 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
         if (help) {
             char device_uuid[37];
             av_uuid_unparse(id_prop.deviceUUID, device_uuid);
-            mp_info(log, "  '%s' (GPU %d, PCI ID %x:%x, UUID %s)\n",
+            mp_info(log, "  '%s' (GPU %d, PCI ID %x:%x, UUID %s, Driver %s)\n",
                     prop->deviceName, i, (unsigned)prop->vendorID,
-                    (unsigned)prop->deviceID, device_uuid);
+                    (unsigned)prop->deviceID, device_uuid,
+                    driver_prop.driverName);
         } else if (bstr_equals0(param, prop->deviceName)) {
             ret = 0;
             goto done;
