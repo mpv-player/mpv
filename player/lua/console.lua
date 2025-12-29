@@ -543,6 +543,11 @@ local function get_matches_to_print(terminal)
     local last_match_to_print  = math.min(first_match_to_print + max_lines - 1,
                                           #matches)
 
+    if last_match_to_print - first_match_to_print + 1 < math.min(max_lines, #matches) and
+       last_match_to_print >= math.min(max_lines, #matches) then
+        first_match_to_print = last_match_to_print - math.min(max_lines, #matches) + 1
+    end
+
     for i = first_match_to_print, last_match_to_print do
         local item = ""
         local end_highlight = terminal and terminal_styles.match_end or "{\\1c}"
