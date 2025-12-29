@@ -358,9 +358,7 @@ if [ "$2" = pack ]; then
     mv -v "${dlls[@]}" ..
     popd
 
-    echo "Archiving:"
     pushd artifact
     rm -rf tmp
-    zip -9r "../mpv-git-$(date +%F)-$(git rev-parse --short HEAD)-${TARGET%%-*}.zip" -- *
     popd
 fi

@@ -104,10 +104,18 @@ jobs:
         run: |
           cat ./mingw_build/meson-logs/testlog.txt
 
+      - name: Artifact name
+        id: artifact
+        run: |
+          VERSION_FILE=$(find . -path "*/common/version.h" -type f | head -n 1)
+          VER=$(grep VERSION "$VERSION_FILE" | cut -d'"' -f2)
+          PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
+          echo "name=mpv-$VER$PR-${{ github.run_id }}-$TARGET" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v5
         with:
-          name: mpv-${{ env.TARGET }}
-          path: mpv-git-*.zip
+          name: ${{ steps.artifact.outputs.name }}
+          path: artifact/*
 
       - name: Save Cache
         uses: actions/cache/save@v4
@@ -207,9 +215,18 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+      - name: Artifact name
+        id: artifact
+        run: |
+          $VERSION_FILE = gci . -r -Filter "version.h" | ? { $_.FullName -match "[/\\]common[/\\]version\.h$" } | select -First 1 -exp FullName
+          $VER = (sls $VERSION_FILE -Pattern 'VERSION').Line -replace '.*"([^"]+)".*', '$1'
+          $PR = if ("${{ github.event.pull_request.number }}") { "-pr${{ github.event.pull_request.number }}" } else { "" }
+          $name = "mpv-$VER$PR-${{ github.run_id }}-${{ matrix.target }}"
+          "name=$name" >> $env:GITHUB_OUTPUT
+
       - uses: actions/upload-artifact@v5
         with:
-          name: mpv-${{ matrix.target }}
+          name: ${{ steps.artifact.outputs.name }}
           path: |
             build/mpv.???
             build/mpv-*.bat
@@ -299,10 +316,19 @@ jobs:
         run: |
           cat ./build/meson-logs/testlog.txt
 
+      - name: Artifact name
+        id: artifact
+        run: |
+          VERSION_FILE=$(find . -path "*/common/version.h" -type f | head -n 1)
+          VER=$(grep VERSION "$VERSION_FILE" | cut -d'"' -f2)
+          TARGET=${{ matrix.os }}${{ matrix.arch != '' && format('-{0}', matrix.arch) || '' }}
+          PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
+          echo "name=mpv-$VER$PR-${{ github.run_id }}-$TARGET" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v5
         if: ${{ matrix.arch != 'test' }}
         with:
-          name: mpv-${{ matrix.os }}${{ matrix.arch != '' && format('-{0}', matrix.arch) || '' }}
+          name: ${{ steps.artifact.outputs.name }}
           path: mpv.tar.gz
 
   linux:
