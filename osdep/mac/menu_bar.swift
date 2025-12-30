@@ -301,8 +301,8 @@ class MenuBar: NSObject, EventSubscriber {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "mpv",
             .applicationIcon: appIcon,
-            .applicationVersion: String(cString: swift_mpv_version),
-            .init(rawValue: "Copyright"): String(cString: swift_mpv_copyright)
+            .applicationVersion: InfoHelper.mpvVersion,
+            .init(rawValue: "Copyright"): InfoHelper.mpvCopyright
         ])
     }
 
