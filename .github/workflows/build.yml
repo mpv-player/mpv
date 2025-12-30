@@ -232,6 +232,13 @@ jobs:
             build/mpv-*.bat
             build/vulkan-*.dll
             !build/mpv.lib
+            !build/mpv.pdb
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.artifact.outputs.name }}-pdb
+          path: |
+            build/mpv.pdb
 
       - name: Save Cache
         uses: actions/cache/save@v4
