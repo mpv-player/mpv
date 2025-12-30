@@ -4,6 +4,7 @@ labels: ["os:mac"]
 type: Bug
 body:
 - type: textarea
+  id: mpv_information
   attributes:
       label: "mpv Information"
       placeholder: |
@@ -24,6 +25,7 @@ body:
   validations:
       required: false
 - type: textarea
+  id: other_info
   attributes:
       label: "Other Information"
       description: >
@@ -46,6 +48,7 @@ body:
   validations:
       required: true
 - type: textarea
+  id: reproduction_steps
   attributes:
       label: "Reproduction Steps"
       description: >
@@ -67,18 +70,21 @@ body:
   validations:
       required: true
 - type: textarea
+  id: expected_behavior
   attributes:
       label: "Expected Behavior"
       placeholder: "What were you expecting?"
   validations:
       required: true
 - type: textarea
+  id: actual_behavior
   attributes:
       label: "Actual Behavior"
       placeholder: "What happened instead?"
   validations:
       required: true
 - type: textarea
+  id: log_file
   attributes:
       label: "Log File"
       placeholder: "Drag and drop log file here (Don't paste content directly)"
@@ -104,6 +110,7 @@ body:
   validations:
       required: true
 - type: textarea
+  id: sample_files
   attributes:
       label: "Sample Files"
       placeholder: "Drag and drop sample files here"
