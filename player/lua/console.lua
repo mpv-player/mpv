@@ -48,8 +48,6 @@ local opts = {
     case_sensitive = false,
     history_dedup = true,
     font_hw_ratio = "auto",
-    selected_color = "",
-    selected_back_color = "",
 }
 
 local styles = {
@@ -1820,15 +1818,5 @@ mp.register_script_message("type", function (...)
 end)
 
 require "mp.options".read_options(opts, nil, render)
-
-if opts.selected_color ~= "" then
-    opts.focused_color = opts.selected_color
-    mp.msg.warn("selected_color has been replaced by focused_color")
-end
-
-if opts.selected_back_color ~= "" then
-    opts.focused_back_color = opts.selected_back_color
-    mp.msg.warn("selected_back_color has been replaced by focused_back_color")
-end
 
 collectgarbage()
