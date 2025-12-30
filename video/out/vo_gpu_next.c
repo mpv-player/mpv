@@ -1002,6 +1002,15 @@ static enum pl_color_primaries get_best_prim_container(const struct pl_raw_prima
 static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
+static void reset(struct priv *p)
+{
+    pl_renderer_flush_cache(p->rr);
+    pl_queue_reset(p->queue);
+    p->last_pts = 0.0;
+    p->last_id = 0;
+    p->want_reset = false;
+}
+
 static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -1056,13 +1065,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     for (int n = 0; n < frame->num_frames; n++) {
         int id = frame->frame_id + n;
 
-        if (p->want_reset) {
-            pl_renderer_flush_cache(p->rr);
-            pl_queue_reset(p->queue);
-            p->last_pts = 0.0;
-            p->last_id = 0;
-            p->want_reset = false;
-        }
+        if (p->want_reset)
+            reset(p);
 
         if (id <= p->last_id)
             continue; // ignore already seen frames
@@ -1831,8 +1835,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     case VOCTRL_RESET:
-        // Defer until the first new frame (unique ID) actually arrives
-        p->want_reset = true;
+        reset(p);
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA: {
