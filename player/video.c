@@ -103,6 +103,8 @@ void reset_video_state(struct MPContext *mpctx)
         if (t && t->dec)
             mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
     }
+    if (mpctx->video_out)
+        vo_forget_frames(mpctx->video_out);
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);

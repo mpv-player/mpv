@@ -1537,3 +1537,13 @@ struct mp_image_params vo_get_target_params(struct vo *vo)
     mp_mutex_unlock(&vo->params_mutex);
     return p;
 }
+
+void vo_forget_frames(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    forget_frames(vo);
+    TA_FREEP(&in->frame_queued);
+    TA_FREEP(&in->current_frame);
+    mp_mutex_unlock(&in->lock);
+}

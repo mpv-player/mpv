@@ -579,4 +579,6 @@ struct vo_frame *vo_frame_ref(struct vo_frame *frame);
 struct mp_image_params vo_get_current_params(struct vo *vo);
 struct mp_image_params vo_get_target_params(struct vo *vo);
 
+void vo_forget_frames(struct vo *vo);
+
 #endif /* MPLAYER_VIDEO_OUT_H */
