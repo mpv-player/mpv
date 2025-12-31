@@ -18,6 +18,7 @@
 class InfoHelper {
     static var mpvVersion: String { return String(cString: swift_mpv_version) }
     static var mpvCopyright: String { return String(cString: swift_mpv_copyright) }
+    static var mpvBuilddate: String { return String(cString: swift_mpv_builddate) }
 
     static var libplaceboVersion: String { return String(cString: app_bridge_pl_version()) }
 

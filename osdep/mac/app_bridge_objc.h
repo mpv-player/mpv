@@ -64,6 +64,7 @@ static const int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 
 static const char *const swift_mpv_version = mpv_version;
 static const char *const swift_mpv_copyright = mpv_copyright;
+static const char *const swift_mpv_builddate = mpv_builddate;
 
 const char *app_bridge_pl_version(void);
 
