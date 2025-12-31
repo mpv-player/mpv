@@ -52,6 +52,8 @@ static const int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 static const char *const swift_mpv_version = mpv_version;
 static const char *const swift_mpv_copyright = mpv_copyright;
 
+const char *app_bridge_pl_version(void);
+
 NSData *app_bridge_icon(void);
 void app_bridge_tarray_append(void *t, char ***a, int *i, char *s);
 const struct m_sub_options *app_bridge_mac_conf(void);

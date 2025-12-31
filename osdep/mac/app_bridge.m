@@ -110,6 +110,11 @@ static const char app_icon[] =
 #include "TOOLS/osxbundle/icon.icns.inc"
 ;
 
+const char *app_bridge_pl_version(void)
+{
+    return PL_VERSION;
+}
+
 NSData *app_bridge_icon(void)
 {
     return [NSData dataWithBytesNoCopy:(void *)app_icon length:sizeof(app_icon) - 1 freeWhenDone:NO];
