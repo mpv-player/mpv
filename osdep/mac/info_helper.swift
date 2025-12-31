@@ -16,6 +16,40 @@
  */
 
 class InfoHelper {
+    static var version: String {
+        return """
+            \(mpvVersion) \(mpvCopyright)
+
+            """ +
+            (mpvBuilddate == "UNKNOWN" ? "" : " built on \(mpvBuilddate)\n") +
+            """
+            libplacebo version: \(libplaceboVersion)
+            FFmpeg version: \(ffmpegVersion)
+            FFmpeg library versions:
+               libavcodec      \(libavcodecVersion)
+
+            """ +
+            (libavdeviceVersion == nil ? "" : "   libavdevice     \(libavdeviceVersion ?? "")\n") +
+            """
+               libavfilter     \(libavfilterVersion)
+               libavformat     \(libavformatVersion)
+               libavutil       \(libavutilVersion)
+               libswresample   \(libswresampleVersion)
+               libswscale      \(libswscaleVersion)
+            """
+    }
+
+    static var system: String {
+        return """
+            - macOS version: \(systemVersion)
+            - Source of mpv:
+            - Latest known working version:
+            - Issue started after the following happened:
+            """
+    }
+
+    static var systemVersion: String { return ProcessInfo.processInfo.operatingSystemVersionString.replacingOccurrences(of: "Version ", with: "") }
+
     static var mpvVersion: String { return String(cString: swift_mpv_version) }
     static var mpvCopyright: String { return String(cString: swift_mpv_copyright) }
     static var mpvBuilddate: String { return String(cString: swift_mpv_builddate) }

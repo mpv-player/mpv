@@ -238,7 +238,12 @@ class MenuBar: NSObject, EventSubscriber {
             Config(name: "Release Notes…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/blob/master/RELEASE_NOTES"),
             Config(name: "Keyboard Shortcuts…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/blob/master/etc/input.conf"),
             Config(type: .separator),
-            Config(name: "Report Issue…", action: #selector(url(_:)), target: self, url: "https://github.com/mpv-player/mpv/issues/new/choose")
+            Config(name: "Report Issue…", action: #selector(url(_:)),
+                   target: self,
+                   url: "https://github.com/mpv-player/mpv/issues/new?template=2_bug_report_macos.yml" +
+                        "&mpv_info=" + (InfoHelper.version.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? "") +
+                        "&other_info=" + (InfoHelper.system.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? "")
+            )
         ]
         if AppHub.shared.isBundle {
             helpMenuConfigs += [
