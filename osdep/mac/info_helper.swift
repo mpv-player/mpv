@@ -20,4 +20,6 @@ class InfoHelper {
     static var mpvCopyright: String { return String(cString: swift_mpv_copyright) }
 
     static var libplaceboVersion: String { return String(cString: app_bridge_pl_version()) }
+
+    static var ffmpegVersion: String { return String(FFMPEG_VERSION) }
 }

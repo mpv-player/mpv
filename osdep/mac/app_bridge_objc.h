@@ -18,6 +18,8 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include <libavutil/ffversion.h>
+
 #include "player/client.h"
 #include "video/out/libmpv.h"
 #include "mpv/render_gl.h"
