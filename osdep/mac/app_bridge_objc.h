@@ -18,7 +18,18 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include "config.h"
+
 #include <libavutil/ffversion.h>
+#include <libavcodec/version.h>
+#include <libavfilter/version.h>
+#include <libavformat/version.h>
+#include <libavutil/version.h>
+#include <libswresample/version.h>
+#include <libswscale/version.h>
+#if HAVE_LIBAVDEVICE
+#include <libavdevice/version.h>
+#endif
 
 #include "player/client.h"
 #include "video/out/libmpv.h"

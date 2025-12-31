@@ -22,4 +22,17 @@ class InfoHelper {
     static var libplaceboVersion: String { return String(cString: app_bridge_pl_version()) }
 
     static var ffmpegVersion: String { return String(FFMPEG_VERSION) }
+    static var libavcodecVersion: String { return "\(LIBAVCODEC_VERSION_MAJOR).\(LIBAVCODEC_VERSION_MINOR).\(LIBAVCODEC_VERSION_MICRO)" }
+    static var libavfilterVersion: String { return "\(LIBAVFILTER_VERSION_MAJOR).\(LIBAVFILTER_VERSION_MINOR).\(LIBAVFILTER_VERSION_MICRO)" }
+    static var libavformatVersion: String { return "\(LIBAVFORMAT_VERSION_MAJOR).\(LIBAVFORMAT_VERSION_MINOR).\(LIBAVFORMAT_VERSION_MICRO)" }
+    static var libavutilVersion: String { return "\(LIBAVUTIL_VERSION_MAJOR).\(LIBAVUTIL_VERSION_MINOR).\(LIBAVUTIL_VERSION_MICRO)" }
+    static var libswresampleVersion: String { return "\(LIBSWRESAMPLE_VERSION_MAJOR).\(LIBSWRESAMPLE_VERSION_MINOR).\(LIBSWRESAMPLE_VERSION_MICRO)" }
+    static var libswscaleVersion: String { return "\(LIBSWSCALE_VERSION_MAJOR).\(LIBSWSCALE_VERSION_MINOR).\(LIBSWSCALE_VERSION_MICRO)" }
+    static var libavdeviceVersion: String? {
+#if HAVE_LIBAVDEVICE
+        return "\(LIBAVDEVICE_VERSION_MAJOR).\(LIBAVDEVICE_VERSION_MINOR).\(LIBAVDEVICE_VERSION_MICRO)"
+#else
+        return nil
+#endif
+    }
 }
