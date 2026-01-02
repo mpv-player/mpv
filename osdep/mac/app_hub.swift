@@ -51,10 +51,13 @@ class AppHub: NSObject {
     }
 
     @objc func initMpv(_ mpv: OpaquePointer) {
+
+        log.log = mp_log_new(nil, mp_client_get_log(mpv), "app")
+        log.verbose("AppHub: initMpv enter")
+
         event = EventHelper(self, mpv)
         if let mpv = event?.mpv {
             self.mpv = mpv
-            log.log = mp_log_new(nil, mp_client_get_log(mpv), "app")
             option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
             input.option = option
             DispatchQueue.main.sync { menu = MenuBar(self) }
@@ -76,6 +79,7 @@ class AppHub: NSObject {
     }
 
     @objc func initInput(_ input: OpaquePointer?) {
+        if !isApplication { return }
         log.verbose("Initialising Input")
         self.input.signal(input: input)
     }
@@ -86,6 +90,15 @@ class AppHub: NSObject {
         log.verbose("Initialising CocoaCB")
         DispatchQueue.main.sync {
             self.cocoaCb = self.cocoaCb ?? CocoaCB(mpv_create_client(mpv, "cocoacb"))
+        }
+#endif
+    }
+
+    @objc func initCocoaCbWithView(_ view: NSView) {
+#if HAVE_MACOS_COCOA_CB
+        log.verbose("Initialising CocoaCB (embedded view)")
+        DispatchQueue.main.sync {
+            self.cocoaCb = CocoaCB(mpv_create_client(mpv, "cocoacb"), view)
         }
 #endif
     }

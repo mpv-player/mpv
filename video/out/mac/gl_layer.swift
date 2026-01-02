@@ -210,7 +210,11 @@ class GLLayer: CAOpenGLLayer {
     }
 
     override func copyCGLContext(forPixelFormat pf: CGLPixelFormatObj) -> CGLContextObj {
-        contentsScale = cocoaCB.window?.backingScaleFactor ?? 1.0
+        if cocoaCB.isEmbedded {
+            contentsScale = cocoaCB.externalView?.window?.backingScaleFactor ?? 1.0
+        } else {
+            contentsScale = cocoaCB.window?.backingScaleFactor ?? 1.0
+        }
         return cglContext
     }
 
