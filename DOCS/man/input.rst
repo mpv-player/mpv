@@ -3960,6 +3960,11 @@ Property list
     somewhat weird form (apparently "hex BCD"), indicating the release version
     of the libass library linked to mpv.
 
+``libplacebo-version``
+    The contents of the ``PL_VERSION`` macro. This is a string which identifies
+    the build in some way, either through a release version number, or a git
+    hash.
+
 ``subrandr-version``
     The value of ``sbr_library_version()`` as a string in the format
     ``<major>.<minor>.<patch>``, indicating the release version of the subrandr
