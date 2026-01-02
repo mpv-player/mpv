@@ -3763,6 +3763,22 @@ Window
     specially, and mpv will draw on top of the desktop wallpaper and below
     desktop icons.
 
+    On macOS/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
+    to ``intptr_t``. mpv will create its own sub-view.
+    The following constraints apply:
+
+    - This is only supported with libmpv. Specifying a wid with mpv cli will
+      end with an error
+    - The supplied NSView pointer must be from the same process into which
+      libmpv is loaded. Since macOS does not support cross-process window
+      access, attempts trying to do so will always crash
+    - The process needs to have an NSApplication with event loop running
+      on the main thread
+    - The wid must be set after mpv_create() and before mpv_initialize()
+      and cannot be changed afterwards
+    - The only supported vo is libmpv, which will be automatically set when
+      a wid is provided
+
     On Android, the ID is interpreted as ``android.view.Surface``. Pass it as a
     value cast to ``intptr_t``. Use with ``--vo=mediacodec_embed`` and
     ``--hwdec=mediacodec`` for direct rendering using MediaCodec, or with

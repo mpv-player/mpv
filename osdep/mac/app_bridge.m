@@ -161,6 +161,11 @@ void cocoa_init_cocoa_cb(void)
     [[AppHub shared] initCocoaCb];
 }
 
+void cocoa_init_embedded_view(int64_t wid)
+{
+[[AppHub shared] initCocoaCbWithView:(__bridge NSView *)(void *)wid];
+}
+
 int cocoa_main(int argc, char *argv[])
 {
     return [(Application *)[Application sharedApplication] main:argc :argv];
