@@ -11,6 +11,9 @@ meson setup build $common_args \
   -Dpulse=enabled \
   -Dvulkan=enabled \
   -Ddvdnav=enabled \
-  -Dcdda=disabled
+  -Dcdda=disabled \
+  -Dsdl2-gamepad=enabled \
+  -Dsdl2-audio=enabled \
+  -Dsdl2-video=enabled
 meson compile -C build
 ./build/mpv -v --no-config
