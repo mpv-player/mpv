@@ -516,10 +516,7 @@ static int mp_property_path(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
-    char *path = mp_normalize_path(NULL, mpctx->filename);
-    int r = m_property_strdup_ro(action, arg, path);
-    talloc_free(path);
-    return r;
+    return m_property_strdup_ro(action, arg, mpctx->filename);
 }
 
 static int mp_property_filename(void *ctx, struct m_property *prop,
@@ -565,12 +562,8 @@ static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-    case M_PROPERTY_GET: {
-        char *path = mp_normalize_path(NULL, mpctx->stream_open_filename);
-        int r = m_property_strdup_ro(action, arg, path);
-        talloc_free(path);
-        return r;
-    }
+    case M_PROPERTY_GET:
+        return m_property_strdup_ro(action, arg, mpctx->stream_open_filename);
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
