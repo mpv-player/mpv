@@ -291,7 +291,8 @@ jobs:
             brew update
           fi
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
-            luajit libass ffmpeg meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers
+            luajit libass ffmpeg meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
 
       - name: Build with meson
         id: build
