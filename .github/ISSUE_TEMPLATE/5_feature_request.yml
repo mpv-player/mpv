@@ -4,6 +4,7 @@ labels: ["meta:feature-request"]
 type: Feature
 body:
 - type: textarea
+  id: expected_behavior
   attributes:
       label: "Expected behavior of the wanted feature"
       description: >
@@ -20,9 +21,11 @@ body:
   validations:
       required: true
 - type: textarea
+  id: alternative_behavior
   attributes:
       label: "Alternative behavior of the wanted feature"
 - type: textarea
+  id: log_file
   attributes:
       label: "Log File"
       description: >
@@ -34,6 +37,7 @@ body:
           If you have trouble producing a log file, you can alternatively use `-v -v`, save the
           terminal output to a file, and attach it to the issue.
 - type: textarea
+  id: sample_files
   attributes:
       label: "Sample Files"
       placeholder: "Drag and drop sample files here"

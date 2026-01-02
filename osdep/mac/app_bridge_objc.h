@@ -18,6 +18,19 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include "config.h"
+
+#include <libavutil/ffversion.h>
+#include <libavcodec/version.h>
+#include <libavfilter/version.h>
+#include <libavformat/version.h>
+#include <libavutil/version.h>
+#include <libswresample/version.h>
+#include <libswscale/version.h>
+#if HAVE_LIBAVDEVICE
+#include <libavdevice/version.h>
+#endif
+
 #include "player/client.h"
 #include "video/out/libmpv.h"
 #include "mpv/render_gl.h"
@@ -51,6 +64,9 @@ static const int SWIFT_KEY_MOUSE_ENTER = MP_KEY_MOUSE_ENTER;
 
 static const char *const swift_mpv_version = mpv_version;
 static const char *const swift_mpv_copyright = mpv_copyright;
+static const char *const swift_mpv_builddate = mpv_builddate;
+
+const char *app_bridge_pl_version(void);
 
 NSData *app_bridge_icon(void);
 void app_bridge_tarray_append(void *t, char ***a, int *i, char *s);

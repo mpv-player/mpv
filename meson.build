@@ -1601,6 +1601,7 @@ if features['cocoa'] and features['swift']
                            'osdep/mac/clipboard.swift',
                            'osdep/mac/dialog.swift',
                            'osdep/mac/event_helper.swift',
+                           'osdep/mac/info_helper.swift',
                            'osdep/mac/input_helper.swift',
                            'osdep/mac/log_helper.swift',
                            'osdep/mac/menu_bar.swift',
