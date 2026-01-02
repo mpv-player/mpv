@@ -115,6 +115,14 @@ class MacCommon: Common {
                needsInitialDraw
     }
 
+    @objc func update(alpha: Bool) {
+        layer?.wantsAlpha = alpha
+        DispatchQueue.main.sync {
+            window?.isOpaque = !alpha
+            window?.backgroundColor = alpha ? NSColor.clear : nil
+        }
+    }
+
     override func displayLinkCallback(_ displayLink: CVDisplayLink,
                                       _ inNow: UnsafePointer<CVTimeStamp>,
                                       _ inOutputTime: UnsafePointer<CVTimeStamp>,
