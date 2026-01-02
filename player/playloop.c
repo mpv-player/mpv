@@ -1318,6 +1318,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_option_callbacks(mpctx);
 
     handle_chapter_change(mpctx);
+
+    handle_force_window(mpctx, false);
 }
 
 void mp_idle(struct MPContext *mpctx)
