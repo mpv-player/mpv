@@ -1,3 +1,6 @@
+# you don't need to review this file, I'll revert this changes later.
+# it's for my local developing convenience.
+
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 Set-StrictMode -Version Latest
@@ -6,19 +9,6 @@ $subprojects = "subprojects"
 if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
-
-$amfVersion = "1.5.0"
-$amfUrl = "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v$amfVersion/AMF-headers-v$amfVersion.tar.gz"
-$amfArchive = "AMF-headers-v$amfVersion.tar.gz"
-$amfExtractPath = "$subprojects/amf-headers"
-if (-not (Test-Path $amfArchive)) {
-    Invoke-WebRequest -Uri $amfUrl -OutFile $amfArchive
-}
-if (-not (Test-Path "$amfExtractPath/AMF")) {
-    New-Item -Path $amfExtractPath -ItemType Directory -Force | Out-Null
-    tar -xzf $amfArchive --strip-components=1 -C $amfExtractPath
-}
-$amfExtractPath = Resolve-Path $amfExtractPath
 
 # Wrap shaderc to run git-sync-deps and patch unsupported generator expression
 if (-not (Test-Path "$subprojects/shaderc_cmake")) {
@@ -188,6 +178,14 @@ $projects = @(
         Revision = "master"
     },
     @{
+        Path = "$subprojects/quickjs.wrap"
+        URL = "https://github.com/quickjs-ng/quickjs"
+        Revision = "v0.11.0"
+        Provides = @(
+            "quickjs = quickjs_dep"
+        )
+    },
+    @{
         Path = "$subprojects/dav1d.wrap"
         URL = "https://code.videolan.org/videolan/dav1d"
         Revision = "master"
@@ -237,10 +235,21 @@ clone-recursive = true
     Set-Content -Path $project.Path -Value $content
 }
 
+# $env:VS="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise"
+$env:CC="clang"
+$env:CXX="clang++"
+$env:CC_LD="lld-link"
+$env:CXX_LD="lld-link"
+$env:WINDRES="llvm-rc"
+$env:RUST_LD="lld-link"
+# $env:RUSTC="rustc --target ${{ matrix.target }}"
+# $env:CCACHE_BASEDIR=${{ github.workspace }}
+# $env:CCACHE_DIR="${{ github.workspace }}\\.ccache"
+# $env:CCACHE_MAXSIZE=500M
+
 meson setup build `
     --wrap-mode=forcefallback `
     -Ddefault_library=static `
-    -Dc_args="-I$amfExtractPath" `
     -Dlibmpv=true `
     -Dtests=true `
     -Dgpl=true `
@@ -268,7 +277,7 @@ meson setup build `
     -Dxxhash:inline-all=true `
     -Dxxhash:cli=false `
     -Dluajit:amalgam=true `
-    -Damf=enabled `
+    -Damf=disabled `
     -Dd3d11=enabled `
     -Dvulkan=enabled `
     -Djavascript=enabled `
