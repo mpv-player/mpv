@@ -21,9 +21,16 @@ local input = require "mp.input"
 local options = {
     history_date_format = "%Y-%m-%d %H:%M:%S",
     hide_history_duplicates = true,
+    menu_conf_path = "~~/menu.conf",
+    max_playlist_items = 25,
+    use_context_menu_script = "auto",
 }
 
 require "mp.options".read_options(options, nil, function () end)
+
+local platform = mp.get_property("platform")
+local trailing_slash_pattern = platform == "windows"
+                               and "[/\\]+$" or "/+$"
 
 local function show_warning(message)
     mp.msg.warn(message)
@@ -39,25 +46,42 @@ local function show_error(message)
     end
 end
 
+local function to_map(t)
+    local map = {}
+
+    for _, value in pairs(t) do
+        map[value] = true
+    end
+
+    return map
+end
+
+local function format_playlist_entry(entry, show)
+    local item = entry.title
+
+    if not item or show ~= "title" then
+        item = entry.filename
+
+        if not item:find("://") then
+            item = select(2, utils.split_path(
+                item:gsub(trailing_slash_pattern, "")))
+        end
+
+        if entry.title and show == "both" then
+            item = entry.title .. " (" .. item .. ")"
+        end
+    end
+
+    return item
+end
+
 mp.add_key_binding(nil, "select-playlist", function ()
     local playlist = {}
     local default_item
     local show = mp.get_property_native("osd-playlist-entry")
-    local trailing_slash_pattern = mp.get_property("platform") == "windows"
-                                   and "[/\\]+$" or "/+$"
 
     for i, entry in ipairs(mp.get_property_native("playlist")) do
-        playlist[i] = entry.title
-        if not playlist[i] or show ~= "title" then
-            playlist[i] = entry.filename
-            if not playlist[i]:find("://") then
-                playlist[i] = select(2, utils.split_path(
-                    playlist[i]:gsub(trailing_slash_pattern, "")))
-            end
-        end
-        if entry.title and show == "both" then
-            playlist[i] = string.format("%s (%s)", entry.title, playlist[i])
-        end
+        playlist[i] = format_playlist_entry(entry, show)
 
         if entry.playing then
             default_item = i
@@ -229,6 +253,10 @@ mp.add_key_binding(nil, "select-chapter", function ()
     })
 end)
 
+local function format_edition(edition)
+    return edition.title or ("Edition " .. edition.id + 1)
+end
+
 mp.add_key_binding(nil, "select-edition", function ()
     local edition_list = mp.get_property_native("edition-list")
 
@@ -241,7 +269,7 @@ mp.add_key_binding(nil, "select-edition", function ()
     local default_item = mp.get_property_native("current-edition")
 
     for i, edition in ipairs(edition_list) do
-        editions[i] = edition.title or ("Edition " .. edition.id + 1)
+        editions[i] = format_edition(edition)
     end
 
     input.select({
@@ -381,6 +409,10 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
     })
 end)
 
+local function format_audio_device(device)
+    return device.name .. " (" .. device.description .. ")"
+end
+
 mp.add_key_binding(nil, "select-audio-device", function ()
     local devices = mp.get_property_native("audio-device-list")
     local items = {}
@@ -396,7 +428,7 @@ mp.add_key_binding(nil, "select-audio-device", function ()
     end
 
     for i, device in ipairs(devices) do
-        items[i] = device.name .. " (" .. device.description .. ")"
+        items[i] = format_audio_device(device)
 
         if device.name == selected_device then
             default_item = i
@@ -550,7 +582,7 @@ mp.add_key_binding(nil, "select-watch-later", function ()
     })
 end)
 
-mp.add_key_binding(nil, "select-binding", function ()
+local function get_active_bindings()
     local bindings = {}
 
     for _, binding in pairs(mp.get_property_native("input-bindings")) do
@@ -559,13 +591,20 @@ mp.add_key_binding(nil, "select-binding", function ()
                (bindings[binding.key].is_weak and not binding.is_weak) or
                (binding.is_weak == bindings[binding.key].is_weak and
                 binding.priority > bindings[binding.key].priority)
-        ) then
+        ) and not binding.section:find("^input_forced_")
+          -- OSC sections
+          and binding.section ~= "input"
+          and binding.section ~= "window-controls" then
             bindings[binding.key] = binding
         end
     end
 
+    return bindings
+end
+
+mp.add_key_binding(nil, "select-binding", function ()
     local items = {}
-    for _, binding in pairs(bindings) do
+    for _, binding in pairs(get_active_bindings()) do
         if binding.cmd ~= "ignore" then
             items[#items + 1] = binding.key .. " " .. binding.cmd
         end
@@ -634,7 +673,6 @@ mp.add_key_binding(nil, "show-properties", function ()
 end)
 
 local function system_open(path)
-    local platform = mp.get_property("platform")
     local args
     if platform == "windows" then
         args = {"rundll32", "url.dll,FileProtocolHandler", path}
@@ -689,7 +727,7 @@ mp.add_key_binding(nil, "menu", function ()
     local text_sub_selected = false
     local is_disc = mp.get_property("current-demuxer") == "disc"
 
-    local image_sub_codecs = {["dvd_subtitle"] = true, ["hdmv_pgs_subtitle"] = true}
+    local image_sub_codecs = to_map({"dvd_subtitle", "hdmv_pgs_subtitle"})
 
     for _, track in pairs(mp.get_property_native("track-list")) do
         if track.type == "sub" then
@@ -752,3 +790,538 @@ mp.add_key_binding(nil, "menu", function ()
         end,
     })
 end)
+
+
+local menu = {} -- contains wrappers of menu_data's items
+local menu_data = {}
+local observed_properties = {}
+local property_cache = {}
+local active_bindings = {}
+local property_set = {}
+local property_items = {}
+local have_dirty_items = false
+local current_item
+
+local function on_property_change(name, value)
+    property_cache[name] = value
+
+    if property_items[name] then
+        for item, _ in pairs(property_items[name]) do
+            item.dirty = true
+        end
+        have_dirty_items = true
+    end
+end
+
+function _G.get(name, default)
+    if not observed_properties[name] then
+        local result, err = mp.get_property_native(name)
+
+        if err == "property not found" and not property_set(name:match("^([^/]+)")) then
+            mp.msg.error("Property '" .. name .. "' was not found.")
+            return default
+        end
+
+        observed_properties[name] = true
+        property_cache[name] = result
+        mp.observe_property(name, "native", on_property_change)
+    end
+
+    if current_item then
+        if not property_items[name] then
+            property_items[name] = {}
+        end
+
+        property_items[name][current_item] = true
+    end
+
+    if property_cache[name] == nil then
+        return default
+    end
+
+    return property_cache[name]
+end
+
+local function magic_get(name)
+    return get(name:gsub("_", "-"), nil)
+end
+
+local evil_magic = {}
+setmetatable(evil_magic, {
+    __index = function(_, key)
+        if _G[key] ~= nil then
+            return _G[key]
+        end
+
+        return magic_get(key)
+    end,
+})
+
+_G.p = {}
+setmetatable(p, {
+    __index = function(_, key)
+        return magic_get(key)
+    end,
+})
+
+local function compile_condition(chunk, chunkname)
+    chunk = "return " .. chunk
+    chunkname = 'Menu entry "' .. chunkname .. '"'
+
+    local compiled_chunk, err
+
+    -- luacheck: push
+    -- luacheck: ignore setfenv loadstring
+    if setfenv then -- lua 5.1
+        compiled_chunk, err = loadstring(chunk, chunkname)
+        if compiled_chunk then
+            setfenv(compiled_chunk, evil_magic)
+        end
+    else -- lua 5.2
+        compiled_chunk, err = load(chunk, chunkname, "t", evil_magic)
+    end
+    -- luacheck: pop
+
+    if not compiled_chunk then
+        mp.msg.error(chunkname .. " : " .. err)
+        compiled_chunk = function() return false end
+    end
+
+    return compiled_chunk
+end
+
+local function evaluate_condition(chunk, chunkname)
+    local status, result
+    status, result = pcall(chunk)
+
+    if not status then
+        mp.msg.verbose(chunkname .. " error on evaluating: " .. result)
+        return false
+    end
+
+    return not not result
+end
+
+local function toggle_state(states, state, add)
+    for i, existing_state in ipairs(states) do
+        if existing_state == state then
+            if add then
+                return
+            end
+
+            table.remove(states, i)
+        end
+    end
+
+    if add then
+        states[#states + 1] = state
+    end
+end
+
+local function on_idle()
+    if not have_dirty_items then
+        return
+    end
+
+    have_dirty_items = false
+
+    for _, item in pairs(menu) do
+        if item.dirty then
+            item:update()
+            item.dirty = false
+        end
+    end
+
+    mp.set_property_native("menu-data", menu_data)
+end
+
+local function clamp_submenu(submenu, max, cmd)
+    if #submenu <= max then
+       return submenu
+    end
+
+    local mid = 1
+    for i, item in pairs(submenu) do
+        if item.state then
+            mid = i
+            break
+        end
+    end
+
+    local offset = math.floor(max / 2)
+    local first = mid + 1 - offset
+    local last = mid + offset
+
+    if first < 1 then
+        first = 1
+        last = max
+    end
+
+    if last > #submenu then
+        first = math.max(#submenu - max + 1, 1)
+        last = #submenu
+    end
+
+    local clamped = {}
+
+    if first > 1 then
+        clamped[1] = {
+            title = "…",
+            cmd = cmd,
+            shortcut = first - 1 .. " more",
+        }
+    end
+
+    for i = first, last do
+        clamped[#clamped + 1] = submenu[i]
+    end
+
+    if last < #submenu then
+        clamped[#clamped + 1] = {
+            title = "…",
+            cmd = cmd,
+            shortcut = #submenu - last .. " more",
+        }
+    end
+
+    return clamped
+end
+
+local function playlist()
+    local items = {}
+    local show = get("osd-playlist-entry")
+
+    for i, entry in ipairs(get("playlist")) do
+        items[i] = {
+            title = format_playlist_entry(entry, show),
+            cmd = "playlist-play-index " .. (i - 1)
+        }
+
+        if entry.playing then
+            items[i].state = {"checked"}
+        end
+    end
+
+    return clamp_submenu(items, options.max_playlist_items,
+                         "script-binding select/select-playlist")
+end
+
+local function tracks(property, type)
+    local items = {}
+
+    for _, track in ipairs(get("track-list")) do
+        if track.type == type then
+            items[#items + 1] = {
+                -- Remove the circles since checkmarks are already added.
+                title = format_track(track):sub(5),
+                cmd = "set " .. property .. " " .. track.id,
+            }
+
+            if track.selected then
+                items[#items].cmd = "set " .. property .. " no"
+                items[#items].state = {"checked"}
+            end
+        end
+    end
+
+    return items
+end
+
+local function chapters()
+    local items = {}
+    local current_chapter = get("chapter", -1)
+    local duration = mp.get_property_native("duration", math.huge)
+
+    for i, chapter in ipairs(get("chapter-list")) do
+        items[i] = {
+            title = chapter.title,
+            cmd = "set chapter " .. (i - 1),
+            shortcut = format_time(chapter.time, duration),
+        }
+
+        if i == current_chapter + 1 then
+            items[i].state = {"checked"}
+        end
+    end
+
+    return items
+end
+
+local function editions()
+    local items = {}
+    local current_edition = get("current-edition", -1)
+
+    for i, edition in ipairs(get("edition-list", {})) do
+        items[i] = {
+            title = format_edition(edition),
+            cmd = "set edition " .. (i - 1),
+        }
+
+        if i == current_edition + 1 then
+            items[i].state = {"checked"}
+        end
+    end
+
+    return items
+end
+
+local function audio_devices()
+    local items = {}
+    local selected_device = get("audio-device")
+
+    for i, device in ipairs(get("audio-device-list")) do
+        items[i] = {
+            title = format_audio_device(device),
+            cmd = "set audio-device " .. device.name,
+        }
+
+        if device.name == selected_device then
+            items[i].state = {"checked"}
+        end
+    end
+
+    return items
+end
+
+local function profiles()
+    local items = {}
+    for i, profile in pairs(get("profile-list")) do
+        items[i] = profile.name
+    end
+    table.sort(items)
+
+    for i, profile in ipairs(items) do
+        items[i] = {
+            title = profile,
+            cmd = "apply-profile " .. profile,
+        }
+    end
+
+    return items
+end
+
+local builtin_submenus = {
+    ["$playlist"] = playlist,
+    ["$video-tracks"] = function () return tracks("video", "video") end,
+    ["$audio-tracks"] = function () return tracks("audio", "audio") end,
+    ["$sub-tracks"] = function () return tracks("sub", "sub") end,
+    ["$secondary-sub-tracks"] = function () return tracks("secondary-sid", "sub") end,
+    ["$chapters"] = chapters,
+    ["$editions"] = editions,
+    ["$audio-devices"] = audio_devices,
+    ["$profiles"] = profiles,
+}
+
+local submenu_commands = {
+    ["$playlist"] = "script-binding select/select-playlist",
+    ["$video-tracks"] = "script-binding select/select-vid",
+    ["$audio-tracks"] = "script-binding select/select-aid",
+    ["$sub-tracks"] = "script-binding select/select-sid",
+    ["$secondary-sub-tracks"] = "script-binding select/select-secondary-sid",
+    ["$chapters"] = "script-binding select/select-chapter",
+    ["$editions"] = "script-binding select/select-edition",
+    ["$audio-devices"] = "script-binding select/select-audio-device",
+}
+
+local function get_shortcut(cmd)
+    local shortcuts = {}
+    local uncommon_keys = to_map({
+        "MBTN_BACK", "MBTN_FORWARD", "POWER", "PLAY", "PAUSE", "PLAYPAUSE",
+        "PLAYONLY", "PAUSEONLY", "STOP", "FORWARD", "REWIND", "NEXT", "PREV",
+        "VOLUME_UP", "VOLUME_DOWN", "MUTE", "CLOSE_WIN",
+    })
+
+    for _, binding in pairs(active_bindings) do
+        if binding.cmd == cmd and not uncommon_keys[binding.key]
+           and not binding.key:find("KP_") then
+            shortcuts[#shortcuts + 1] = binding.key
+        end
+    end
+
+    return table.concat(shortcuts, ",")
+end
+
+local function update_builtin_submenu(item)
+    item.item.submenu = builtin_submenus[item.builtin_submenu]()
+
+    local min = item.builtin_submenu == "$editions" and 2 or 1
+    item.item.state = #item.item.submenu < min and {"disabled"} or {}
+end
+
+local function update_state(item)
+    for state, compiled_condition in pairs(item.compiled_conditions) do
+        toggle_state(item.item.state, state,
+                     evaluate_condition(compiled_condition, item.item.title))
+    end
+end
+
+local function parse_menu_item(line)
+    local tokens = {}
+    local separator = "\t+"
+    for token in line:gmatch("(.-)" .. separator) do
+        tokens[#tokens + 1] = token
+    end
+    tokens[#tokens + 1] = line:gsub(".*" .. separator, "")
+
+    if tokens[1] == "" then
+        return { type = "separator" }
+    end
+
+    local item = {
+        item = {
+            title = tokens[1],
+            state = {},
+        },
+        compiled_conditions = {},
+    }
+
+    current_item = item
+
+    if builtin_submenus[tokens[2]] then
+        item.builtin_submenu = tokens[2]
+        item.item.shortcut = get_shortcut(submenu_commands[item.builtin_submenu])
+
+        -- Observing large playlist slows down changing file.
+        if item.builtin_submenu == "$playlist" and
+           mp.get_property_native("playlist-count") > 999 then
+            item.item.cmd = submenu_commands[item.builtin_submenu]
+            return item
+        end
+
+        item.item.type = "submenu"
+        item.update = update_builtin_submenu
+        item:update()
+        return item
+    end
+
+    local state_start = 3
+    for _, state in pairs({"checked", "disabled", "hidden"}) do
+        if not tokens[2] or tokens[2]:find("^" .. state .. "=") then
+            state_start = 2
+            break
+        end
+    end
+
+    if state_start == 2 then
+        item.item.type = "submenu"
+        item.item.submenu = {}
+    else
+        item.item.cmd = tokens[2]
+        item.item.shortcut = get_shortcut(tokens[2])
+    end
+
+    for i = state_start, #tokens do
+        local state, condition = tokens[i]:match("(.-)=(.*)")
+
+        if not state then
+            return false
+        end
+
+        item.compiled_conditions[state] = compile_condition(condition, tokens[1])
+        if evaluate_condition(item.compiled_conditions[state], tokens[1]) then
+            table.insert(item.item.state, state)
+        end
+    end
+
+    item.update = update_state
+    item:update()
+
+    return item
+end
+
+local function get_menu_conf()
+    local menu_conf
+    local file_handle = io.open(mp.command_native({"expand-path", options.menu_conf_path}))
+    if file_handle then
+        menu_conf = file_handle:read("*a")
+        file_handle:close()
+    else
+        menu_conf = mp.get_property("default-menu")
+    end
+
+    local lines = {}
+    for line in menu_conf:gmatch("(.-)\n") do
+        lines[#lines + 1] = line
+    end
+
+    return lines
+end
+
+local function parse_menu_conf()
+    property_set = to_map(mp.get_property_native("property-list"))
+    active_bindings = get_active_bindings()
+
+    local lines = get_menu_conf()
+    local last_leading_whitespace = ""
+    local menus_by_depth = { [""] = menu_data }
+
+    for i, line in ipairs(lines) do
+        local leading_whitespace = line:match("^%s*")
+        local item = parse_menu_item(line:gsub("^%s*", ""))
+
+        if not item then
+            show_error("menu.conf is malformed: " .. line ..
+                       " contains tabs not used as separators")
+            return
+        end
+
+        if item.item then
+            menu[#menu + 1] = item
+            item = item.item
+        end
+
+        if #leading_whitespace > #last_leading_whitespace then
+            local last_menu = menus_by_depth[last_leading_whitespace]
+
+            if not last_menu[#last_menu].submenu then
+                show_error("menu.conf is malformed: " .. line ..
+                           " has leading whitespace but no parent menu was defined")
+                return
+            end
+
+            menus_by_depth[leading_whitespace] = last_menu[#last_menu].submenu
+        end
+
+        if line == "" then
+            -- Determine the depth of the separator from the next line.
+            table.insert(menus_by_depth[lines[i + 1]:match("%s*")], item)
+        else
+            table.insert(menus_by_depth[leading_whitespace], item)
+            last_leading_whitespace = leading_whitespace
+        end
+    end
+
+    property_set = nil
+    active_bindings = nil
+    current_item = nil
+
+    mp.set_property_native("menu-data", menu_data)
+
+    mp.register_idle(on_idle)
+end
+
+mp.add_key_binding(nil, "context-menu", function (info)
+    if info.event == "repeat" then
+        return
+    end
+
+    if not menu_data[1] then
+        parse_menu_conf()
+    end
+
+    local use_context_menu_script = options.use_context_menu_script == "yes"
+        or mp.get_property_native("load-context-menu")
+
+    if not info.is_mouse then
+        if info.event == "down" then
+            mp.command(use_context_menu_script
+                           and "script-message-to context_menu open"
+                           or "context-menu")
+        end
+    elseif use_context_menu_script then
+        mp.commandv("script-message-to", "context_menu",
+                    info.event == "down" and "open" or "select")
+    elseif info.event == (platform == "windows" and "up" or "down") then
+        mp.command("context-menu")
+    end
+end, { complex = true })

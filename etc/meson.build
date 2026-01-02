@@ -9,7 +9,7 @@ foreach size: icons
     sources += icon
 endforeach
 
-etc_files = ['input.conf', 'builtin.conf']
+etc_files = ['input.conf', 'builtin.conf', 'menu.conf']
 foreach file: etc_files
     etc_file = custom_target(file,
         input: file,
