@@ -2831,7 +2831,7 @@ Subtitles
         rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
         override the styling of ASS subtitles, but should be avoided in general.
 
-``--sub-auto=<no|exact|fuzzy|all>``
+``--sub-auto=<no|exact|fuzzy|all|closest>``
     Load additional subtitle files matching the video filename. The parameter
     specifies how external subtitle files are matched. ``exact`` is enabled by
     default.
@@ -2839,8 +2839,11 @@ Subtitles
     :no:    Don't automatically load external subtitle files.
     :exact: Load the media filename with subtitle file extension and possibly
             language suffixes (default).
-    :fuzzy: Load all subs containing the media filename.
-    :all:   Load all subs in the current and ``--sub-file-paths`` directories.
+    :fuzzy:   Load all subs containing the media filename.
+    :all:     Load all subs in the current and ``--sub-file-paths`` directories.
+    :closest: Load exactly one external subtitle: the single file whose filename
+              is most similar to the media's base name. Language/flag suffixes
+              like ``.en``, ``.eng``, ``.forced`` are ignored for similarity.
 
 ``--sub-auto-exts=ext1,ext2,...``
     Subtitle extensions to try and match when using ``--sub-auto``. Note that
