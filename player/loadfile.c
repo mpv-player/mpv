@@ -2145,6 +2145,8 @@ void mp_play_files(struct MPContext *mpctx)
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
 {
     mp_assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
+    if (mpctx->opts->position_save_on_quit) // requested in issue #1148
+        mp_write_watch_later_conf(mpctx);
     mpctx->playlist->current = e;
     mpctx->playlist->current_was_replaced = false;
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
