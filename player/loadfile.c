@@ -341,7 +341,21 @@ void update_demuxer_properties(struct MPContext *mpctx)
             struct mp_log *log = mp_log_new(NULL, mpctx->log, "!display-tags");
             if (!had_output)
                 mp_info(log, "File tags:\n");
-            mp_info(log, " %s: %s\n", info->keys[n], info->values[n]);
+            mp_info(log, " %s: ", info->keys[n]);
+            const char *p = info->values[n];
+            while (*p) {
+                int len = strcspn(p, "\x8\xa\xb\xc\xd");
+                mp_info(log, "%.*s", len, p);
+                p += len;
+                if (*p == '\r')
+                    mp_info(log, " ");
+                // Align continued lines with header
+                if (*p == '\n')
+                    mp_info(log, "\n %-*s  ", (int)strlen(info->keys[n]), "");
+                if (*p)
+                    p++;
+            }
+            mp_info(log, "\n");
             had_output = true;
             talloc_free(log);
         }
