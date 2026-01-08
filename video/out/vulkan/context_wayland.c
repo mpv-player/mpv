@@ -28,6 +28,14 @@ struct priv {
     bool use_fifo;
 };
 
+static int wayland_vk_color_depth(struct ra_ctx *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wl;
+    // If compositor supports color management, assume it is capable of
+    // dithering on its own. Otherwise fallback to 8-bit color depth.
+    return wl->color_manager ? 0 : 8;
+}
+
 static bool wayland_vk_check_visible(struct ra_ctx *ctx)
 {
     return vo_wayland_check_visible(ctx->vo);
@@ -87,6 +95,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
     };
 
     struct ra_ctx_params params = {
+        .color_depth = wayland_vk_color_depth,
         .check_visible = wayland_vk_check_visible,
         .preferred_csp = wayland_vk_preferred_csp,
         .swap_buffers = wayland_vk_swap_buffers,
