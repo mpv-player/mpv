@@ -7116,7 +7116,8 @@ static void cmd_context_menu(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     struct vo *vo = mpctx->video_out;
 
-    if (vo)
+    // If emit_on_up is not set, that's means command has been called directly.
+    if (vo && (cmd->cmd->is_up == cmd->cmd->emit_on_up || !cmd->cmd->emit_on_up))
         vo_control(vo, VOCTRL_SHOW_MENU, NULL);
 }
 
@@ -7659,7 +7660,7 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "begin-vo-dragging", cmd_begin_vo_dragging },
 
-    { "context-menu", cmd_context_menu },
+    { "context-menu", cmd_context_menu, .allow_auto_repeat = false, .on_updown = true },
 
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
