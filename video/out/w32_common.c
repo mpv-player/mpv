@@ -32,6 +32,7 @@
 
 #include "options/m_config.h"
 #include "options/options.h"
+#include "player/client.h"
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "input/event.h"
@@ -48,6 +49,7 @@
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
 #include "misc/dispatch.h"
+#include "misc/node.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"
 
@@ -191,6 +193,8 @@ struct vo_w32_state {
     bool unmaximize;
 
     HIMC imc;
+
+    mpv_node menu_data;
 };
 
 static inline int get_system_metrics(struct vo_w32_state *w32, int metric)
@@ -1768,6 +1772,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_SHOWMENU:
         mp_win32_menu_show(w32->menu_ctx, w32->window);
         break;
+    case WM_INITMENU:
+        mp_win32_menu_update(w32->menu_ctx, &w32->menu_data);
+        break;
     case WM_TOUCH: {
         UINT count = LOWORD(wParam);
         TOUCHINPUT *inputs = talloc_array_ptrtype(NULL, inputs, count);
@@ -2459,8 +2466,11 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_SHOW_MENU:
         PostMessageW(w32->window, WM_SHOWMENU, 0, 0);
         return VO_TRUE;
-    case VOCTRL_UPDATE_MENU:
-        mp_win32_menu_update(w32->menu_ctx, (struct mpv_node *)arg);
+    case VOCTRL_UPDATE_MENU:;
+        const m_option_t menu_data_type = {.type = CONF_TYPE_NODE};
+        m_option_free(&menu_data_type, &w32->menu_data);
+        m_option_copy(&menu_data_type, &w32->menu_data, arg);
+        talloc_steal(w32, node_get_alloc(&w32->menu_data));
         return VO_TRUE;
     }
 
