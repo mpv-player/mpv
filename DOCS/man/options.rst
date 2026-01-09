@@ -6013,7 +6013,7 @@ them.
     auto
         Automatic selection.
         On ``--vo=gpu``: detected depth or 8 bpc otherwise
-        On ``--vo=gpu-next``: detected depth or 8 bpc (for SDR target)
+        On ``--vo=gpu-next``: detected depth
     8
         Dither to 8 bit output.
 
