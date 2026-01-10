@@ -5,6 +5,10 @@ on:
     workflows: [build]
     types: [completed]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   cache:
     runs-on: ubuntu-latest

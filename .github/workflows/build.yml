@@ -29,6 +29,10 @@ on:
       - 'README.md'
       - 'RELEASE_NOTES'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   mingw:
     runs-on: ubuntu-24.04
