@@ -159,9 +159,9 @@ struct hook_handler {
 
 enum load_action_type {
     LOAD_TYPE_REPLACE,
-    LOAD_TYPE_INSERT_AT,
-    LOAD_TYPE_INSERT_NEXT,
     LOAD_TYPE_APPEND,
+    LOAD_TYPE_INSERT_NEXT,
+    LOAD_TYPE_INSERT_AT,
 };
 
 struct load_action {
@@ -6106,18 +6106,7 @@ static struct load_action get_load_action(struct MPContext *mpctx, int action_fl
 {
     int type = action_flag & 3;
     bool play = (action_flag >> 3) & 1;
-    switch (type) {
-    case 0:
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = play};
-    case 1:
-        return (struct load_action){LOAD_TYPE_APPEND, .play = play};
-    case 2:
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = play};
-    case 3:
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = play};
-    default: // default: replace
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
-    }
+    return (struct load_action){type, .play = play};
 }
 
 static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct load_action *action,
