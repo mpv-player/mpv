@@ -84,6 +84,7 @@ class MetalLayer: CAMetalLayer {
             let isForced = newValue == wantsAlpha
             if isOpaque == wantsAlpha || isForced {
                 super.isOpaque = !wantsAlpha
+                backgroundColor = (wantsAlpha ? NSColor.clear : NSColor.black).cgColor
                 log.verbose("Metal layer is opaque (direct-to-display possible): \(isOpaque)" + (isForced ? " (forced)" : ""))
             }
         }
