@@ -160,7 +160,9 @@ struct hook_handler {
 enum load_action_type {
     LOAD_TYPE_REPLACE,
     LOAD_TYPE_APPEND,
+    LOAD_TYPE_PREPEND,
     LOAD_TYPE_INSERT_NEXT,
+    LOAD_TYPE_INSERT_PREV,
     LOAD_TYPE_INSERT_AT,
 };
 
@@ -6104,8 +6106,8 @@ static void cmd_escape_ass(void *p)
 
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
-    int type = action_flag & 3;
-    bool play = (action_flag >> 3) & 1;
+    int type = action_flag & 7;
+    bool play = (action_flag >> 4) & 1;
     return (struct load_action){type, .play = play};
 }
 
@@ -6115,8 +6117,12 @@ static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct l
     switch (action->type) {
     case LOAD_TYPE_INSERT_NEXT:
         return playlist_get_next(mpctx->playlist, +1);
+    case LOAD_TYPE_INSERT_PREV:
+        return mpctx->playing ? mpctx->playing : playlist_entry_from_index(mpctx->playlist, 0);
     case LOAD_TYPE_INSERT_AT:
         return playlist_entry_from_index(mpctx->playlist, insert_at_idx);
+    case LOAD_TYPE_PREPEND:
+        return playlist_entry_from_index(mpctx->playlist, 0);
     case LOAD_TYPE_REPLACE:
     case LOAD_TYPE_APPEND:
     default:
@@ -7417,15 +7423,17 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", 8|0},
+                {"append", 8|1},
+                {"prepend", 8|2},
+                {"insert-next", 8|3},
+                {"insert-prev", 8|4},
+                {"insert-at", 8|5},
+                {"play", 32|16},
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
+                {"append-play", (8|1) + (32|16)},
+                {"insert-next-play", (8|3) + (32|16)},
+                {"insert-at-play", (8|5) + (32|16)}),
                 .flags = MP_CMD_OPT_ARG},
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
@@ -7435,15 +7443,17 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", 8|0},
+                {"append", 8|1},
+                {"prepend", 8|2},
+                {"insert-next", 8|3},
+                {"insert-prev", 8|4},
+                {"insert-at", 8|5},
+                {"play", 32|16},
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
+                {"append-play", (8|1) + (32|16)},
+                {"insert-next-play", (8|3) + (32|16)},
+                {"insert-at-play", (8|5) + (32|16)}),
                 .flags = MP_CMD_OPT_ARG},
             {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
         },
