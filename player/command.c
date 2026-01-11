@@ -730,7 +730,7 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
     if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
-        *(char **)arg = mp_format_double(NULL, mpctx->last_av_difference, 4,
+        *(char **)arg = mp_format_double(NULL, mpctx->last_av_difference, 5,
                                          true, false, action != M_PROPERTY_FIXED_LEN_PRINT);
         return M_PROPERTY_OK;
     }
