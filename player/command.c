@@ -487,7 +487,7 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
     }
 
     if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
-        *(char **)arg = mp_format_double(NULL, (val - 1) * 100, 2, true,
+        *(char **)arg = mp_format_double(NULL, (val - 1) * 100, 4, true,
                                          true, action != M_PROPERTY_FIXED_LEN_PRINT);
         return M_PROPERTY_OK;
     }
