@@ -1190,7 +1190,6 @@ static MP_THREAD_VOID vo_thread(void *ptr)
                 do_redraw(vo); // now is a good time
                 vo->previous_redraw_time = now;
             } else {
-                in->request_redraw = true;
                 wait_vo(vo, now + max_interval);
             }
             continue;
