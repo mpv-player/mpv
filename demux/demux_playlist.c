@@ -218,19 +218,19 @@ static void pl_free_line(struct pl_parser *p, bstr line)
 
 static void pl_add(struct pl_parser *p, bstr entry)
 {
-    char *path;
+    void *ctx = talloc_new(NULL);
+    char *path = mp_get_user_path(ctx, p->global, bstrto0(ctx, entry));
+
     bstr proto = mp_split_proto(bstr0(p->s->url), NULL);
     // Don't add base path to self-expanding protocols
     if (!mp_is_url(entry) && bstrcasecmp0(proto, "memory") &&
         bstrcasecmp0(proto, "lavf") && bstrcasecmp0(proto, "hex") &&
         bstrcasecmp0(proto, "data") && bstrcasecmp0(proto, "fd")) {
-        path = mp_path_join_bstr(NULL, mp_dirname(p->s->url), entry);
-    } else {
-        path = bstrto0(NULL, entry);
+        path = mp_path_join_bstr(ctx, mp_dirname(p->s->url), bstr0(path));
     }
 
     playlist_append_file(p->pl, path);
-    talloc_free(path);
+    talloc_free(ctx);
 }
 
 static bool pl_eof(struct pl_parser *p)
