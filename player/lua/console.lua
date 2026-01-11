@@ -96,6 +96,7 @@ local key_bindings = {}
 local dont_bind_up_down = false
 local global_margins = { t = 0, b = 0 }
 local input_caller
+local input_caller_handler
 local keep_open = false
 
 local completion_buffer = {}
@@ -949,7 +950,7 @@ end
 local function handle_edit()
     if not selectable_items then
         handle_cursor_move()
-        mp.commandv("script-message-to", input_caller, "input-event", "edited",
+        mp.commandv("script-message-to", input_caller, input_caller_handler, "edited",
                     utils.format_json({line}))
         return
     end
@@ -1070,7 +1071,7 @@ local function submit()
 
     if selectable_items then
         if #matches > 0 then
-            mp.commandv("script-message-to", input_caller, "input-event", "submit",
+            mp.commandv("script-message-to", input_caller, input_caller_handler, "submit",
                         utils.format_json({matches[focused_match].index}))
         end
     else
@@ -1079,7 +1080,7 @@ local function submit()
             cycle_through_completions()
         end
 
-        mp.commandv("script-message-to", input_caller, "input-event", "submit",
+        mp.commandv("script-message-to", input_caller, input_caller_handler, "submit",
                     utils.format_json({line}))
 
         history_add(line)
@@ -1481,7 +1482,7 @@ end
 complete = function ()
     completion_old_line = line
     completion_old_cursor = cursor
-    mp.commandv("script-message-to", input_caller, "input-event",
+    mp.commandv("script-message-to", input_caller, input_caller_handler,
                 "complete", utils.format_json({line:sub(1, cursor - 1)}))
     render()
 end
@@ -1651,7 +1652,7 @@ set_active = function (active)
         unbind_mouse()
         mp.set_property_bool("user-data/mpv/console/open", false)
         mp.set_property_bool("input-ime", ime_active)
-        mp.commandv("script-message-to", input_caller, "input-event",
+        mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
         collectgarbage()
     end
@@ -1662,13 +1663,14 @@ mp.register_script_message("disable", function()
     set_active(false)
 end)
 
-mp.register_script_message("get-input", function (script_name, args)
-    if open and script_name ~= input_caller then
-        mp.commandv("script-message-to", input_caller, "input-event",
+mp.register_script_message("get-input", function (script_name, handler_id, args)
+    if open then
+        mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
     end
 
     input_caller = script_name
+    input_caller_handler = handler_id
     args = utils.parse_json(args)
     prompt = args.prompt or ""
     line = args.default_text or ""
@@ -1721,11 +1723,15 @@ mp.register_script_message("get-input", function (script_name, args)
 
         if line ~= "" then
             complete()
+        elseif open then
+            -- This is needed to update the prompt if a new request is
+            -- received while another is still active.
+            render()
         end
     end
 
     set_active(true)
-    mp.commandv("script-message-to", input_caller, "input-event", "opened")
+    mp.commandv("script-message-to", input_caller, input_caller_handler, "opened")
 end)
 
 -- Add a line to the log buffer

@@ -653,8 +653,13 @@ mp.options = { read_options: read_options };
 /**********************************************************************
 *  input
 *********************************************************************/
+var input_handle_counter = 1;
+
 function register_event_handler(t) {
-    mp.register_script_message("input-event", function (type, args) {
+    var handler_id = "input-event/" + input_handle_counter;
+    input_handle_counter += 1;
+
+    mp.register_script_message(handler_id, function (type, args) {
         if (t[type]) {
             args = args ? JSON.parse(args) : [];
             var result = t[type].apply(null, args);
@@ -666,18 +671,19 @@ function register_event_handler(t) {
         }
 
         if (type == "closed")
-            mp.unregister_script_message("input-event");
+            mp.unregister_script_message(handler_id);
     })
+
+    return handler_id;
 }
 
 mp.input = {
     get: function(t) {
-        t.has_completions = t.complete !== undefined
+        t.has_completions = t.complete !== undefined;
+        var handler_id = register_event_handler(t);
 
-        mp.commandv("script-message-to", "console", "get-input", mp.script_name,
-                    JSON.stringify(t));
-
-        register_event_handler(t)
+        mp.commandv("script-message-to", "console", "get-input",
+                    mp.script_name, handler_id, JSON.stringify(t));
     },
     terminate: function () {
         mp.commandv("script-message-to", "console", "disable");

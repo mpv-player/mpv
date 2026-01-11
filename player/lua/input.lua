@@ -17,6 +17,7 @@ License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 
 local utils = require "mp.utils"
 local input = {}
+local handle_counter = 1
 
 local function get_non_callbacks(t)
     local non_callbacks = {}
@@ -31,7 +32,10 @@ local function get_non_callbacks(t)
 end
 
 local function register_event_handler(t)
-    mp.register_script_message("input-event", function (type, args)
+    local handler_id = "input-event/"..handle_counter
+    handle_counter = handle_counter + 1
+
+    mp.register_script_message(handler_id, function (type, args)
         if t[type] then
             local completions, completion_pos, completion_append =
                 t[type](unpack(utils.parse_json(args or "") or {}))
@@ -44,18 +48,19 @@ local function register_event_handler(t)
         end
 
         if type == "closed" then
-            mp.unregister_script_message("input-event")
+            mp.unregister_script_message(handler_id)
         end
     end)
+
+    return handler_id
 end
 
 function input.get(t)
     t.has_completions = t.complete ~= nil
 
+    local handler_id = register_event_handler(t)
     mp.commandv("script-message-to", "console", "get-input",
-                mp.get_script_name(), utils.format_json(get_non_callbacks(t)))
-
-    register_event_handler(t)
+                mp.get_script_name(), handler_id, utils.format_json(get_non_callbacks(t)))
 end
 
 input.select = input.get
