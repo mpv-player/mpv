@@ -582,7 +582,6 @@ static int init(struct ao *ao)
         PW_KEY_APP_NAME, ao->client_name,
         PW_KEY_APP_ID, ao->client_name,
         PW_KEY_APP_ICON_NAME, ao->client_name,
-        PW_KEY_NODE_ALWAYS_PROCESS, "true",
         PW_KEY_TARGET_OBJECT, ao->device,
         NULL
     );
