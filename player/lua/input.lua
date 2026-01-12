@@ -49,9 +49,13 @@ local function register_event_handler(t)
                 t[type](unpack(utils.parse_json(args or "") or {}))
 
             if type == "complete" and completions then
-                mp.commandv("script-message-to", "console", "complete",
-                            utils.format_json(completions), completion_pos,
-                            completion_append or "")
+                mp.commandv("script-message-to", "console", "complete", utils.format_json({
+                                client_name = mp.get_script_name(),
+                                handler_id = handler_id,
+                                list = completions,
+                                start_pos = completion_pos,
+                                append = completion_append or "",
+                            }))
             end
         end
 

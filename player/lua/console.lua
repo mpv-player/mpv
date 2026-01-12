@@ -1792,17 +1792,20 @@ mp.register_script_message("set-log", function (log)
     render()
 end)
 
-mp.register_script_message("complete", function (list, start_pos, append)
-    if line ~= completion_old_line or cursor ~= completion_old_cursor then
+mp.register_script_message("complete", function (message)
+    message = utils.parse_json(message)
+
+    if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler
+       or line ~= completion_old_line or cursor ~= completion_old_cursor then
         return
     end
 
     completion_buffer = {}
     selected_completion_index = 0
-    local completions = utils.parse_json(list)
+    local completions = message.list
     table.sort(completions)
-    completion_pos = start_pos
-    completion_append = append
+    completion_pos = message.start_pos
+    completion_append = message.append
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor - 1),
                                       completions)) do
         completion_buffer[i] = completions[match[1]]
