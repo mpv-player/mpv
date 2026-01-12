@@ -1659,8 +1659,12 @@ set_active = function (active)
     render()
 end
 
-mp.register_script_message("disable", function()
-    set_active(false)
+mp.register_script_message("disable", function(message)
+    message = utils.parse_json(message or "")
+
+    if not message or message.client_name == input_caller then
+        set_active(false)
+    end
 end)
 
 mp.register_script_message("get-input", function (args)

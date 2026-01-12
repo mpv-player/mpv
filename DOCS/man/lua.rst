@@ -976,7 +976,8 @@ REPL.
         script name with ``prompt`` appended.
 
 ``input.terminate()``
-    Close the console.
+    Closes any currently active input request. This will not close
+    requests made by other scripts.
 
 ``input.log(message, style, terminal_style)``
     Add a line to the log buffer. ``style`` can contain additional ASS tags to

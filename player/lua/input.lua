@@ -19,6 +19,7 @@ local utils = require "mp.utils"
 local input = {}
 
 local handle_counter = 0
+local latest_handler_id
 
 local function get_non_callbacks(t)
     local non_callbacks = {}
@@ -35,8 +36,14 @@ end
 local function register_event_handler(t)
     local handler_id = "input-event/"..handle_counter
     handle_counter = handle_counter + 1
+    latest_handler_id = handler_id
 
     mp.register_script_message(handler_id, function (type, args)
+        -- do not process events (other than closed) for an input that has been overwritten
+        if latest_handler_id ~= handler_id and type ~= "closed" then
+            return
+        end
+
         if t[type] then
             local completions, completion_pos, completion_append =
                 t[type](unpack(utils.parse_json(args or "") or {}))
@@ -68,7 +75,9 @@ end
 input.select = input.get
 
 function input.terminate()
-    mp.commandv("script-message-to", "console", "disable")
+    mp.commandv("script-message-to", "console", "disable", utils.format_json({
+                    client_name = mp.get_script_name(),
+                }))
 end
 
 function input.log(message, style, terminal_style)

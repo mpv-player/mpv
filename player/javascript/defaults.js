@@ -654,11 +654,16 @@ mp.options = { read_options: read_options };
 *  input
 *********************************************************************/
 var input_handle_counter = 0;
+var latest_handler_id;
 
 function register_event_handler(t) {
     var handler_id = "input-event/" + input_handle_counter++;
+    latest_handler_id = handler_id;
 
     mp.register_script_message(handler_id, function (type, args) {
+        if (latest_handler_id !== handler_id && type !== "closed")
+            return;
+
         if (t[type]) {
             args = args ? JSON.parse(args) : [];
             var result = t[type].apply(null, args);
@@ -685,7 +690,9 @@ mp.input = {
         mp.commandv("script-message-to", "console", "get-input", JSON.stringify(t));
     },
     terminate: function () {
-        mp.commandv("script-message-to", "console", "disable");
+        mp.commandv("script-message-to", "console", "disable", JSON.stringify({
+                        client_name: mp.script_name,
+                    }));
     },
     log: function (message, style, terminal_style) {
         mp.commandv("script-message-to", "console", "log", JSON.stringify({
