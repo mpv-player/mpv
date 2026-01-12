@@ -669,8 +669,13 @@ function register_event_handler(t) {
             var result = t[type].apply(null, args);
 
             if (type == "complete" && result) {
-                mp.commandv("script-message-to", "console", "complete",
-                            JSON.stringify(result[0]), result[1], result[2] || "");
+                mp.commandv("script-message-to", "console", "complete", JSON.stringify({
+                                client_name: mp.script_name,
+                                handler_id: handler_id,
+                                list: result[0],
+                                start_pos: result[1],
+                                append: result[2] || "",
+                            }));
             }
         }
 
