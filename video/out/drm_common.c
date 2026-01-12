@@ -648,7 +648,7 @@ static void setup_edid(struct vo_drm_state *drm)
 
     drm->chromaticity = di_edid_get_chromaticity_coords(edid);
 
-    const struct di_edid_cta *cta;
+    const struct di_edid_cta *cta = NULL;
     const struct di_edid_ext *const *exts = di_edid_get_extensions(edid);
     while (*exts && !(cta = di_edid_ext_get_cta(*exts++)));
 
