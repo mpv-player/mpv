@@ -261,6 +261,19 @@ General coding
   code. Plain C API usages may stay as C, but can be written in Swift. Existing
   Objective-C code can stay as is, though Swift rewrites are welcome.
 
+AI-assisted Contributions
+-------------------------
+
+If you have used an AI/LLM for your contribution, you must disclose this in the
+PR description. Such contributions are not forbidden, but the submitter takes
+full responsibility for the code changes. This includes having full
+understanding of the code (knowing what was changed and why) and the ability to
+participate in the code review process with human-written responses. This also
+includes confirming that the code can be submitted under the same license as the
+relevant files (usually LGPLv2 or GPLv2).
+
+Clearly vibe-coded patches will not be considered.
+
 Code of Conduct
 ---------------
 
