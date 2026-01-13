@@ -4282,6 +4282,10 @@ bool vo_wayland_init(struct vo *vo)
         goto err;
     }
 
+    if (wl_list_empty(&wl->seat_list))
+        MP_WARN(wl, "No input seats found or compositor doesn't support %s, "
+                    "input devices won't work\n", wl_seat_interface.name);
+
     /* Can't be initialized during registry due to multi-protocol dependence */
     if (create_viewports(wl))
         goto err;
