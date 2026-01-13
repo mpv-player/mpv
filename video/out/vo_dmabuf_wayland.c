@@ -103,6 +103,7 @@ struct priv {
 
     bool destroy_buffers;
     bool force_window;
+    bool vo_is_waiting;
     enum hwdec_type hwdec_type;
 
     struct mp_image_params target_params;
@@ -626,6 +627,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         wl_surface_damage_buffer(wl->video_surface, 0, 0, 1, 1);
     }
 
+    if (wl->color_surface && (!wl->image_description_processed || p->vo_is_waiting)) {
+        vo_wait_on_vo(vo, !wl->image_description_processed);
+        p->vo_is_waiting = !wl->image_description_processed;
+    }
+
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
         buf = buffer_get(vo, frame);
@@ -660,10 +666,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 static void flip_page(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
+    struct priv *p = vo->priv;
 
-    wl_surface_commit(wl->osd_surface);
-    wl_surface_commit(wl->video_surface);
-    wl_surface_commit(wl->surface);
+    if (!p->vo_is_waiting) {
+        wl_surface_commit(wl->osd_surface);
+        wl_surface_commit(wl->video_surface);
+        wl_surface_commit(wl->surface);
+    }
 
     if (wl->opts->wl_internal_vsync)
         vo_wayland_wait_frame(wl);
