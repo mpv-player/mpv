@@ -148,7 +148,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         packet->buffer,
         packet->len,
         fmt,
-        NULL
+        sd->lang
     );
 
     // Since `demux_sbr` only ever sends us one packet,
