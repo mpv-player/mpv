@@ -5185,7 +5185,7 @@ Software Scaler
         a and b are the bicubic b and c parameters.
 
 ``--zimg-scaler-chroma=...``
-    Same as ``--zimg-scaler``, for for chroma interpolation (default: bilinear).
+    Same as ``--zimg-scaler``, for chroma interpolation (default: bilinear).
 
 ``--zimg-scaler-chroma-param-a``, ``--zimg-scaler-chroma-param-b``
     Same as ``--zimg-scaler-param-a`` / ``--zimg-scaler-param-b``, for chroma.
