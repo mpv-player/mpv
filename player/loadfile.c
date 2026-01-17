@@ -745,6 +745,20 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         reselect_demux_stream(mpctx, current, false);
     }
 
+    // For the edge case of switching from no video to a still image, we need to
+    // flush the ass events of any sub track for potential animations.
+    if (type == STREAM_VIDEO && order == 0 && !current && track->image) {
+        for (int n = 0; n < num_ptracks[STREAM_SUB]; n++) {
+            struct track *sub_track = mpctx->current_track[n][STREAM_SUB];
+            if (sub_track && sub_track->d_sub) {
+                sub_control(sub_track->d_sub, SD_CTRL_RESET_SOFT, NULL);
+                sub_reset(sub_track->d_sub);
+                if (sub_track->selected)
+                    reselect_demux_stream(mpctx, sub_track, true);
+            }
+        }
+    }
+
     mpctx->current_track[order][type] = track;
 
     if (track) {
