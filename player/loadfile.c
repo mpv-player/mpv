@@ -617,13 +617,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                                  (opts->subs_fallback == 1 && track->default_track);
             bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
+            if (!subs_matching_audio)
+                continue;
+            if (!forced && !lang_match && !subs_fallback)
+                continue;
             track->forced_select = forced;
-            if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
-                (pick && compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program))))
-            {
-                pick = track;
-            }
-        } else if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program)) {
+        }
+        if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program)) {
             pick = track;
         }
     }
