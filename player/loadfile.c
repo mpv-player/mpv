@@ -473,7 +473,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
  */
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs, bool os_langs,
-                          bool forced, struct MPOpts *opts, int preferred_program)
+                          struct MPOpts *opts, int preferred_program)
 {
     bool sub = t2->type == STREAM_SUB;
     if (!opts->autoload_files && t1->is_external != t2->is_external)
@@ -496,7 +496,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
     int l1 = mp_match_lang(langs, t1->lang), l2 = mp_match_lang(langs, t2->lang);
     if (!os_langs && l1 != l2)
         return l1 > l2;
-    if (forced)
+    if (t1->forced_select)
         return t1->forced_track;
     if (t1->default_track != t2->default_track && !t2->forced_select)
         return t1->default_track;
@@ -617,13 +617,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                                  (opts->subs_fallback == 1 && track->default_track);
             bool subs_matching_audio = (!mp_match_lang(langs, audio_lang) || opts->subs_with_matching_audio == 2 ||
                                         (opts->subs_with_matching_audio == 1 && track->forced_track));
+            track->forced_select = forced;
             if (subs_matching_audio && ((!pick && (forced || lang_match || subs_fallback)) ||
-                (pick && compare_track(track, pick, langs, os_langs, forced, mpctx->opts, preferred_program))))
+                (pick && compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program))))
             {
                 pick = track;
-                pick->forced_select = forced;
             }
-        } else if (!pick || compare_track(track, pick, langs, os_langs, false, mpctx->opts, preferred_program)) {
+        } else if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program)) {
             pick = track;
         }
     }
