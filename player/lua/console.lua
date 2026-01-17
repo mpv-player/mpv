@@ -1710,7 +1710,7 @@ mp.register_script_message("get-input", function (args)
     else
         selectable_items = nil
         unbind_mouse()
-        id = args.id or args.client_name .. prompt
+        id = args.id
         log_offset = 0
         completion_buffer = {}
         autoselect_completion = args.autoselect_completion
@@ -1740,8 +1740,13 @@ end)
 
 -- Add a line to the log buffer
 mp.register_script_message("log", function (message)
-    local log_buffer = log_buffers[id]
-    message = utils.parse_json(message)
+    message = utils.parse_json(message or "")
+    if not message or not message.log_id then
+        return
+    end
+
+    local log_buffer = log_buffers[message.log_id]
+    if not log_buffer then return end
 
     log_buffer[#log_buffer + 1] = {
         text = message.text,
@@ -1754,7 +1759,7 @@ mp.register_script_message("log", function (message)
         table.remove(log_buffer, 1)
     end
 
-    if not open then
+    if not open or message.log_id ~= id then
         return
     end
 
@@ -1770,9 +1775,13 @@ mp.register_script_message("log", function (message)
     end
 end)
 
-mp.register_script_message("set-log", function (log)
+mp.register_script_message("set-log", function (log_id, log)
+    if not log_id or not log then
+        return
+    end
+
     log = utils.parse_json(log)
-    log_buffers[id] = {}
+    log_buffers[log_id] = {}
 
     for i = 1, #log do
         if type(log[i]) == "table" then
@@ -1789,7 +1798,9 @@ mp.register_script_message("set-log", function (log)
         end
     end
 
-    render()
+    if log_id == id then
+        render()
+    end
 end)
 
 mp.register_script_message("complete", function (message)

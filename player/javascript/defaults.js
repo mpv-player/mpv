@@ -655,6 +655,7 @@ mp.options = { read_options: read_options };
 *********************************************************************/
 var input_handle_counter = 0;
 var latest_handler_id;
+var latest_log_id;
 
 function register_event_handler(t) {
     var handler_id = "input-event/" + input_handle_counter++;
@@ -686,13 +687,19 @@ function register_event_handler(t) {
     return handler_id;
 }
 
+function input_request(t) {
+    t.has_completions = t.complete !== undefined;
+    t.client_name = mp.script_name;
+    t.handler_id = register_event_handler(t);
+
+    mp.commandv("script-message-to", "console", "get-input", JSON.stringify(t));
+}
+
 mp.input = {
     get: function(t) {
-        t.has_completions = t.complete !== undefined;
-        t.client_name = mp.script_name;
-        t.handler_id = register_event_handler(t);
-
-        mp.commandv("script-message-to", "console", "get-input", JSON.stringify(t));
+        t.id = t.id || mp.script_name + (t.prompt || "");
+        latest_log_id = t.id;
+        return input_request(t);
     },
     terminate: function () {
         mp.commandv("script-message-to", "console", "disable", JSON.stringify({
@@ -701,21 +708,27 @@ mp.input = {
     },
     log: function (message, style, terminal_style) {
         mp.commandv("script-message-to", "console", "log", JSON.stringify({
+                        log_id: latest_log_id,
                         text: message,
                         style: style,
                         terminal_style: terminal_style,
                    }));
     },
     log_error: function (message) {
-        mp.commandv("script-message-to", "console", "log",
-                    JSON.stringify({ text: message, error: true }));
+        mp.commandv("script-message-to", "console", "log", JSON.stringify({
+                        log_id: latest_log_id,
+                        text: message,
+                        error: true,
+                    }));
     },
     set_log: function (log) {
-        mp.commandv("script-message-to", "console", "set-log",
-                    JSON.stringify(log));
+        if (latest_log_id) {
+            mp.commandv("script-message-to", "console", "set-log",
+                        latest_log_id, JSON.stringify(log));
+        }
     }
 }
-mp.input.select = mp.input.get
+mp.input.select = input_request;
 
 /**********************************************************************
  *  various
