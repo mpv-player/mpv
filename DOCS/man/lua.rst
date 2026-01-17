@@ -980,16 +980,18 @@ REPL.
     requests made by other scripts.
 
 ``input.log(message, style, terminal_style)``
-    Add a line to the log buffer. ``style`` can contain additional ASS tags to
-    apply to ``message``, and ``terminal_style`` can contain escape sequences
-    that are used when the console is displayed in the terminal.
+    Add a line to the log buffer of the latest ``input.get()`` request.
+    ``style`` can contain additional ASS tags to apply to ``message``,
+    and ``terminal_style`` can contain escape sequences that are used
+    when the console is displayed in the terminal.
 
 ``input.log_error(message)``
-    Helper to add a line to the log buffer with the same color as the one used
+    Helper to add an error line to the log buffer of the latest ``input.get()``
+    request. The line is styled with the same color as the one used
     for commands that error. Useful when the user submits invalid input.
 
 ``input.set_log(log)``
-    Replace the entire log buffer.
+    Replace the entire log buffer of the latest ``input.get()`` request.
 
     ``log`` is a table of strings, or tables with ``text``, ``style`` and
     ``terminal_style`` keys.
