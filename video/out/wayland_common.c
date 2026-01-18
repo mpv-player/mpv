@@ -288,7 +288,6 @@ struct vo_wayland_text_input {
 
 struct vo_wayland_preferred_description_info {
     struct vo_wayland_state *wl;
-    bool info_done;
     struct pl_color_space csp;
     float min_luma;
     float max_luma;
@@ -2140,7 +2139,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
 {
     struct vo_wayland_preferred_description_info *wd = data;
     struct vo_wayland_state *wl = wd->wl;
-    wd->info_done = true;
+    wl->image_description_info_done = true;
     wp_image_description_info_v1_destroy(image_description_info);
     if (!wd->icc_file) {
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
@@ -3110,10 +3109,11 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
     struct wp_image_description_info_v1 *description_info =
         wp_image_description_v1_get_information(image_description);
     struct wl_event_queue *image_description_info_queue = wl_display_create_queue_with_name(wl->display, "image description info queue");
+    wl->image_description_info_done = false;
     wl_proxy_set_queue((struct wl_proxy *)description_info, image_description_info_queue);
     wp_image_description_info_v1_add_listener(description_info, &image_description_info_listener, wd);
     while (wl_display_dispatch_queue(wl->display, image_description_info_queue) > 0)
-        if (wd->info_done)
+        if (wl->image_description_info_done)
             break;
     wp_image_description_v1_destroy(image_description);
     wl_event_queue_destroy(image_description_info_queue);
