@@ -572,9 +572,16 @@ jobs:
         include:
           - sys: "clang64"
             os: "windows-latest"
+            auto-var-init: "uninitialized"
           - sys: "clang64"
             os: "windows-latest"
             asan: true
+          - sys: "clang64"
+            os: "windows-latest"
+            auto-var-init: "zero"
+          - sys: "clang64"
+            os: "windows-latest"
+            auto-var-init: "pattern"
           - sys: "mingw64"
             os: "windows-latest"
           - sys: "ucrt64"
@@ -631,6 +638,7 @@ jobs:
         env:
           SYS: ${{ matrix.sys }}
           ASAN: ${{ matrix.asan }}
+          AUTO_VAR_INIT: ${{ matrix.auto-var-init }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}

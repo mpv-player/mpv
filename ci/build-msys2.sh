@@ -14,6 +14,13 @@ if [[ -n "$ASAN" ]]; then
     )
 fi
 
+if [[ -n "$AUTO_VAR_INIT" ]]; then
+    args+=(
+        -Dc_args="-ftrivial-auto-var-init=$AUTO_VAR_INIT"
+        -Dcpp_args="-ftrivial-auto-var-init=$AUTO_VAR_INIT"
+    )
+fi
+
 echo "::group::Building subrandr"
 build_subrandr "/$SYS"
 echo "::endgroup::"
