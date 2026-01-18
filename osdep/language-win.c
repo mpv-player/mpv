@@ -39,7 +39,7 @@ char **mp_get_user_langs(void)
     char **ret = NULL;
     size_t ret_count = 0;
     wchar_t *buf = NULL;
-    ULONG size, count;
+    ULONG size = 0, count;
 
     if (!GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, NULL, &size))
         goto done;
