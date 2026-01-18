@@ -216,14 +216,9 @@ void add_step_frame(struct MPContext *mpctx, int dir, bool use_seek)
 {
     if (!mpctx->vo_chain)
         return;
-    if (dir > 0 && !use_seek) {
-        mpctx->step_frames += dir;
-        set_pause_state(mpctx, false);
-    } else {
-        if (!mpctx->hrseek_active) {
-            queue_seek(mpctx, MPSEEK_FRAMESTEP, dir, MPSEEK_VERY_EXACT, 0);
-            set_pause_state(mpctx, true);
-        }
+    if (!mpctx->hrseek_active) {
+        queue_seek(mpctx, MPSEEK_FRAMESTEP, dir, MPSEEK_VERY_EXACT, 0);
+        set_pause_state(mpctx, true);
     }
 }
 
