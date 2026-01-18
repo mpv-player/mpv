@@ -201,6 +201,15 @@ static void test_track_selection(char *file, char *path)
         reload_file(path);
         check_string("current-tracks/audio/lang", "ger");
         check_string("current-tracks/sub/lang", "jpn");
+
+        // default+forced eng subs should be selected
+        set_property_string("alang", "jpn");
+        set_property_string("slang", "");
+        set_property_string("subs-with-matching-audio", "yes");
+        set_property_string("subs-fallback-forced", "always");
+        reload_file(path);
+        check_string("current-tracks/audio/lang", "jpn");
+        check_string("current-tracks/sub/lang", "eng");
     } else if (strcmp(file, "multilang2.mkv") == 0) {
         // default jpn subs
         set_property_string("subs-match-os-language", "no");
