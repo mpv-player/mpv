@@ -572,6 +572,9 @@ jobs:
         include:
           - sys: "clang64"
             os: "windows-latest"
+          - sys: "clang64"
+            os: "windows-latest"
+            asan: true
           - sys: "mingw64"
             os: "windows-latest"
           - sys: "ucrt64"
@@ -627,6 +630,7 @@ jobs:
           ./ci/build-msys2.sh meson
         env:
           SYS: ${{ matrix.sys }}
+          ASAN: ${{ matrix.asan }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}

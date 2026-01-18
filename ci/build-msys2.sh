@@ -8,7 +8,7 @@ args=(
   -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband,win32-smtc}=enabled
 )
 
-if [[ "$SYS" == "clang64" ]]; then
+if [[ -n "$ASAN" ]]; then
     args+=(
       -Db_sanitize=address,undefined
     )
