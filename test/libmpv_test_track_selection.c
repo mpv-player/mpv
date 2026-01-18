@@ -137,7 +137,8 @@ static void test_track_selection(char *file, char *path)
         set_property_string("subs-fallback", "yes");
         reload_file(path);
         check_string("current-tracks/sub/selected", "yes");
-    } else if (strcmp(file, "locale.mkv") == 0) {
+    } else if (strcmp(file, "locale.mkv") == 0 ||
+               strcmp(file, "locale_forced.mkv") == 0) {
         // default english subs
         reload_file(path);
         check_string("current-tracks/sub/lang", "eng");
@@ -257,7 +258,9 @@ int main(int argc, char *argv[])
     if (argc < 3)
         return 1;
 
-    if (!strcmp(argv[1], "locale.mkv") && !have_english_locale()) {
+    const char *locale_test_prefix = "locale";
+    if (strncmp(argv[1], locale_test_prefix, strlen(locale_test_prefix)) == 0 &&
+        !have_english_locale()) {
         printf("Non English language detected. Skipping locale test.\n");
         return 77;
     }
