@@ -112,6 +112,7 @@ struct mpv_render_context {
 };
 
 const struct render_backend_fns *render_backends[] = {
+    &render_backend_gpu_next,
     &render_backend_gpu,
     &render_backend_sw,
     NULL
