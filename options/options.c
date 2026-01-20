@@ -533,6 +533,7 @@ static const m_option_t mp_opts[] = {
 #endif
     {"msg-module", OPT_BOOL(msg_module), .flags = UPDATE_TERM},
     {"msg-time", OPT_BOOL(msg_time), .flags = UPDATE_TERM},
+    {"msg-status-stderr", OPT_BOOL(msg_status_stderr), .flags = UPDATE_TERM},
 #if HAVE_WIN32_DESKTOP
     {"", OPT_SUBSTRUCT(w32_register_opts, w32_register_conf)},
     {"priority", OPT_CHOICE(w32_priority,
