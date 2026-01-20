@@ -1166,7 +1166,7 @@ static MP_THREAD_VOID vo_thread(void *ptr)
                 wakeup_core(vo);
             }
         }
-        if (vo->want_redraw && !in->want_redraw) {
+        if (vo->want_redraw) {
             in->want_redraw = true;
             wakeup_core(vo);
         }
