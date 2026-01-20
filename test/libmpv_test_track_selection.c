@@ -143,6 +143,60 @@ static void test_track_selection(char *file, char *path)
         set_property_string("subs-match-os-language", "no");
         reload_file(path);
         check_string("current-tracks/sub/lang", "ger");
+    } else if (strcmp(file, "locale_complex.mkv") == 0) {
+        set_property_string("subs-fallback", "yes");
+        set_property_string("subs-match-os-language", "yes");
+
+        // default+forced eng subs to match audio
+        set_property_string("alang", "eng");
+        reload_file(path);
+        check_string("current-tracks/audio/lang", "eng");
+        check_string("current-tracks/sub/lang", "eng");
+        // among all eng subs, track 4 should be selected
+        check_int("current-tracks/sub/id", 4);
+
+        // forced jpn subs to match audio
+        set_property_string("alang", "jpn");
+        reload_file(path);
+        check_string("current-tracks/audio/lang", "jpn");
+        check_string("current-tracks/sub/lang", "jpn");
+
+        // default, non-forced ger subs
+        set_property_string("alang", "ger");
+        reload_file(path);
+        check_string("current-tracks/audio/lang", "ger");
+        check_string("current-tracks/sub/lang", "ger");
+
+        // default+forced pol subs to match audio
+        set_property_string("alang", "pol");
+        reload_file(path);
+        check_string("current-tracks/audio/lang", "pol");
+        check_string("current-tracks/sub/lang", "pol");
+
+        // default+forced pol subs (first default track)
+        set_property_string("subs-match-os-language", "no");
+        set_property_string("subs-fallback-forced", "always");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "pol");
+
+        // default+forced eng subs to match OS lang
+        set_property_string("subs-match-os-language", "yes");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "eng");
+        // among all eng subs, track 4 should be selected
+        check_int("current-tracks/sub/id", 4);
+
+        // default, non-forced ger subs
+        set_property_string("subs-fallback-forced", "no");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "ger");
+
+        // default+forced eng subs to match slang
+        set_property_string("slang", "eng");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "eng");
+        // among all eng subs, track 4 should be selected
+        check_int("current-tracks/sub/id", 4);
     } else if (strcmp(file, "multilang.mkv") == 0) {
         // --alang=jpn should select forced jpn subs
         set_property_string("alang", "jpn");
