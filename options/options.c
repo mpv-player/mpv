@@ -1080,7 +1080,8 @@ static const struct MPOpts mp_default_opts = {
     },
     .audio_exts = (char *[]){
         "aac", "ac3", "aiff", "ape", "au", "dts", "eac3", "flac", "m4a", "mka",
-        "mp3", "oga", "ogg", "ogm", "opus", "thd", "wav", "wma", "wv", NULL
+        "mp1", "mp2", "mp3", "mpc", "oga", "ogg", "ogm", "opus", "tak", "thd",
+        "tta", "wav", "wma", "wv", NULL
     },
     .image_exts = (char *[]){
         "avif", "bmp", "gif", "heic", "heif", "j2k", "jp2", "jpeg", "jpg",
