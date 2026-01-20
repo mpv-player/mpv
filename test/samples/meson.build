@@ -45,6 +45,16 @@ samples = {
          '-c', 'copy', '-map', '0:0', '-map', '1:0', '-map', '2:0', '-map', '3:0', '-metadata:s:s:0',
          'language=ger', '-metadata:s:s:1', 'language=eng', '-disposition:s:0', 'default+forced',
          '-disposition:s:1', 'default+forced', '@OUTPUT@'],
+    'locale_complex.mkv':
+        [ffmpeg, '-v', 'error', '-y', '-i', video, '-i', audio, '-f', 'srt', '-i', sub, '-c', 'copy',
+         '-map', '0:0', '-map', '1:0', '-map', '1:0', '-map', '1:0', '-map', '1:0',
+         '-map', '2:0', '-map', '2:0', '-map', '2:0', '-map', '2:0', '-map', '2:0', '-map', '2:0',
+         '-metadata:s:a:0', 'language=eng', '-metadata:s:a:1', 'language=jpn',
+         '-metadata:s:a:2', 'language=ger', '-metadata:s:a:3', 'language=pol',
+         '-metadata:s:s:0', 'language=eng', '-metadata:s:s:1', 'language=jpn', '-metadata:s:s:2', 'language=pol',
+         '-metadata:s:s:3', 'language=eng', '-metadata:s:s:4', 'language=ger', '-metadata:s:s:5', 'language=eng',
+         '-disposition:s:1', 'forced', '-disposition:s:2', 'default+forced', '-disposition:s:3', 'default+forced',
+         '-disposition:s:4', 'default', '-disposition:s:5', 'default+forced', '@OUTPUT@'],
     'multilang.mkv':
         [ffmpeg, '-v', 'error', '-y', '-i', video, '-i', audio, '-i', audio, '-i', audio, '-i', audio,
          '-f', 'srt', '-i', sub, '-i', sub, '-i', sub, '-i', sub, '-c', 'copy', '-map', '0:0',
