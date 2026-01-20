@@ -300,6 +300,28 @@ static void test_track_selection(char *file, char *path)
         set_property_string("sid", "3");
         reload_file(path);
         check_string("track-list/5/selected", "yes");
+    } else if (strcmp(file, "multiprogram.ts") == 0) {
+        set_property_string("subs-match-os-language", "no");
+        set_property_string("vid", "2");
+
+        // no subs are selected by default
+        reload_file(path);
+        check_string("track-list/1/selected", "no");
+        check_string("track-list/3/selected", "no");
+
+        // because subs-fallback=default, the jpn track cannot be chosen
+        // so we choose the eng track despite it having the wrong program ID
+        set_property_string("slang", "eng");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "eng");
+        check_string("track-list/1/selected", "yes");
+
+        // the jpn track is selected to match video program ID
+        // even though the user requested eng subtitles
+        set_property_string("subs-fallback", "yes");
+        reload_file(path);
+        check_string("current-tracks/sub/lang", "jpn");
+        check_string("track-list/3/selected", "yes");
     }
 }
 

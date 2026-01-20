@@ -12,6 +12,7 @@ audio = custom_target('audio.flac',
 )
 
 sub = join_paths(source_root, 'test', 'samples', 'sub.srt')
+img_sub = join_paths(source_root, 'test', 'samples', 'img_sub.idx')
 
 common_args = ['-v', 'error', '-y', '-i', video, '-i', audio,
                '-f', 'srt', '-i', sub, '-c', 'copy',
@@ -72,6 +73,11 @@ samples = {
          'language=eng', '-metadata:s:s:2', 'language=eng', '-metadata:s:s:3', 'language=eng',
          '-disposition:s:0', 'default', '-disposition:s:1', 'forced', '-disposition:s:3', 'default',
          '@OUTPUT@'],
+    'multiprogram.ts':
+        [ffmpeg, '-v', 'error', '-y', '-i', video, '-f', 'vobsub', '-i', img_sub,
+         '-c:v', 'copy', '-c:s', 'dvbsub', '-map', '0:0', '-map', '1:0', '-map', '0:0', '-map', '1:0',
+         '-metadata:s:s:0', 'language=eng', '-metadata:s:s:1', 'language=jpn',
+         '-program', 'program_num=1:st=0:st=1', '-program', 'program_num=2:st=2:st=3', '@OUTPUT@'],
 }
 
 foreach name, cmd: samples
