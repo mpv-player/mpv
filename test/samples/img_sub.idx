@@ -1,0 +1,16 @@
+# VobSub index file, v7 (do not modify this line!)
+size: 1280x720
+org: 0, 0
+scale: 100%, 100%
+alpha: 100%
+smooth: OFF
+fadein/out: 50, 50
+align: OFF at LEFT TOP
+time offset: 0
+forced subs: OFF
+palette: 000000, ffffff, 000000, 000000, 828282, 828282, 828282, ffffff, 828282, bababa, 828282, 828282, 828282, 828282, 828282, 828282
+custom colors: OFF, tridx: 0000, colors: 000000, 000000, 000000, 000000
+langidx: 0
+id: en, index: 0
+timestamp: 00:00:00:000, filepos: 000000000
+timestamp: 00:00:01:000, filepos: 000000800
