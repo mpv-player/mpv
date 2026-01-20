@@ -47,6 +47,9 @@
 #include "core.h"
 #include "client.h"
 
+#include <audio/out/internal.h>
+#include <audio/out/ao_libmpv.h>
+
 /*
  * Locking hierarchy:
  *
@@ -2244,4 +2247,14 @@ bool mp_streamcb_lookup(struct mpv_global *g, const char *protocol,
     }
     mp_mutex_unlock(&clients->lock);
     return found;
+}
+
+void mpv_set_audio_callback(mpv_handle *ctx, void (*cb)(void *userdata, const void *data, int bytes), void *userdata)
+{
+    lock_core(ctx);
+
+    ctx->mpctx->ao_libmpv_cb = cb;
+    ctx->mpctx->ao_libmpv_userdata = userdata;
+
+    unlock_core(ctx);
 }
