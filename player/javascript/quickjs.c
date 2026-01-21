@@ -14,26 +14,26 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <quickjs.h>
-
-#include "client.h"
-#include "command.h"
-#include "common/common.h"
-#include "common/msg.h"
-#include "common/msg_control.h"
-#include "common/stats.h"
-#include "core.h"
-#include "input/input.h"
-#include "misc/bstr.h"
-#include "mpv/client.h"
-#include "mpv_talloc.h"
-#include "options/m_option.h"
-#include "options/m_property.h"
-#include "options/path.h"
-#include "osdep/io.h"
-#include "stream/stream.h"
 #include <quickjs-libc.h>
 #include <quickjs.h>
+
+#include "../client.h"
+#include "../command.h"
+#include "../common/common.h"
+#include "../common/msg.h"
+#include "../common/msg_control.h"
+#include "../common/stats.h"
+#include "../core.h"
+#include "../input/input.h"
+#include "../misc/bstr.h"
+#include "../mpv_talloc.h"
+#include "../options/m_option.h"
+#include "../options/m_property.h"
+#include "../options/path.h"
+#include "../osdep/io.h"
+#include "../stream/stream.h"
+#include "mpv/client.h"
+#include "ta/ta.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/javascript/*.js
@@ -62,8 +62,8 @@ static struct script_ctx *jctx(JSContext *ctx) {
 static mpv_handle *jclient(JSContext *ctx) { return jctx(ctx)->client; }
 
 static JSValue node_to_js(JSContext *ctx, const mpv_node *node);
-static void js_to_node(void *ta_ctx, mpv_node *dst, JSContext *ctx,
-                       JSValueConst val);
+static int js_to_node(void *ta_ctx, mpv_node *dst, JSContext *ctx,
+                      JSValueConst val);
 
 // Utilities ---------------------------------------------------------------
 static void set_last_error(struct script_ctx *ctx, bool iserr,
@@ -134,6 +134,10 @@ static bool js_is_truthy(JSContext *ctx, JSValueConst v) {
   return JS_ToBool(ctx, v) == 1;
 }
 
+static inline int js_get_tag(JSValueConst v) {
+  return JS_VALUE_GET_NORM_TAG(v);
+}
+
 // Builtin file lookup -----------------------------------------------------
 static const char *get_builtin_file(const char *name) {
   for (int n = 0; builtin_files[n][0]; n++) {
@@ -149,8 +153,9 @@ static JSValue read_file_limit(JSContext *ctx, const char *fname, int limit) {
 
   char *filename = mp_get_user_path(af, jctx(ctx)->mpctx->global, fname);
   MP_VERBOSE(jctx(ctx), "Reading file '%s'\n", filename);
-  if (limit < 0)
+  if (limit < 0) {
     limit = INT_MAX - 1;
+  }
 
   const char *builtin = get_builtin_file(filename);
   if (builtin) {
@@ -174,6 +179,7 @@ out:
 }
 
 // Logging ----------------------------------------------------------------
+// TS: (level: string, ...message: any[]) => boolean
 static JSValue js_log(JSContext *ctx, JSValueConst this_val, int argc,
                       JSValueConst *argv) {
   if (argc < 1)
@@ -199,10 +205,6 @@ static JSValue js_log(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 // Basic helpers ----------------------------------------------------------
-static bool same_as_int64(double d) {
-  return d >= INT64_MIN && d <= (double)INT64_MAX && d == (int64_t)d;
-}
-
 static int checkopt(JSContext *ctx, JSValueConst val, const char *def,
                     const char *opts[], const char *desc) {
   const char *opt;
@@ -225,6 +227,7 @@ static int checkopt(JSContext *ctx, JSValueConst val, const char *def,
 }
 
 // mpv property and command helpers --------------------------------------
+// TS: (cmd: string) => boolean
 static JSValue js_command(JSContext *ctx, JSValueConst this_val, int argc,
                           JSValueConst *argv) {
   if (argc < 1)
@@ -235,6 +238,7 @@ static JSValue js_command(JSContext *ctx, JSValueConst this_val, int argc,
   return push_status(ctx, r);
 }
 
+// TS: (...args: string[]) => boolean
 static JSValue js_commandv(JSContext *ctx, JSValueConst this_val, int argc,
                            JSValueConst *argv) {
   const char *cargv[MP_CMD_MAX_ARGS + 1];
@@ -250,6 +254,7 @@ static JSValue js_commandv(JSContext *ctx, JSValueConst this_val, int argc,
   return push_status(ctx, r);
 }
 
+// TS: (name: string, value: string) => boolean
 static JSValue js_set_property(JSContext *ctx, JSValueConst this_val, int argc,
                                JSValueConst *argv) {
   if (argc < 2)
@@ -262,6 +267,7 @@ static JSValue js_set_property(JSContext *ctx, JSValueConst this_val, int argc,
   return push_status(ctx, r);
 }
 
+// TS: (name: string, value: boolean) => boolean
 static JSValue js_set_property_bool(JSContext *ctx, JSValueConst this_val,
                                     int argc, JSValueConst *argv) {
   if (argc < 2)
@@ -273,24 +279,41 @@ static JSValue js_set_property_bool(JSContext *ctx, JSValueConst this_val,
   return push_status(ctx, r);
 }
 
+// TS: (name: string, value: number) => boolean
 static JSValue js_set_property_number(JSContext *ctx, JSValueConst this_val,
                                       int argc, JSValueConst *argv) {
   if (argc < 2)
     return JS_ThrowTypeError(ctx, "set_property_number expects 2 args");
   const char *name = js_to_cstring(ctx, argv[0]);
-  double v = js_to_number(ctx, argv[1]);
+  int tag = JS_VALUE_GET_NORM_TAG(argv[1]);
   mpv_handle *h = jclient(ctx);
   int r;
-  if (same_as_int64(v)) {
-    int64_t iv = (int64_t)v;
+  switch (tag) {
+  case JS_TAG_INT: {
+    int64_t iv = 0;
+    if (JS_ToInt64(ctx, &iv, argv[1]) < 0) {
+      JS_FreeCString(ctx, name);
+      return JS_EXCEPTION;
+    }
     r = mpv_set_property(h, name, MPV_FORMAT_INT64, &iv);
-  } else {
+    break;
+  }
+  case JS_TAG_FLOAT64: {
+    double dv = JS_VALUE_GET_FLOAT64(argv[1]);
+    r = mpv_set_property(h, name, MPV_FORMAT_DOUBLE, &dv);
+    break;
+  }
+  default: {
+    double v = js_to_number(ctx, argv[1]);
     r = mpv_set_property(h, name, MPV_FORMAT_DOUBLE, &v);
+    break;
+  }
   }
   JS_FreeCString(ctx, name);
   return push_status(ctx, r);
 }
 
+// TS: (name: string, def?: any) => string | undefined
 static JSValue js_get_property_string(JSContext *ctx, const char *name,
                                       JSValueConst def) {
   char *res = NULL;
@@ -306,6 +329,7 @@ static JSValue js_get_property_string(JSContext *ctx, const char *name,
   return ret;
 }
 
+// TS: (name: string, def?: any) => string | undefined
 static JSValue js_get_property(JSContext *ctx, JSValueConst this_val, int argc,
                                JSValueConst *argv) {
   if (argc < 1)
@@ -317,6 +341,7 @@ static JSValue js_get_property(JSContext *ctx, JSValueConst this_val, int argc,
   return ret;
 }
 
+// TS: (name: string, def?: any) => boolean | undefined
 static JSValue js_get_property_bool(JSContext *ctx, JSValueConst this_val,
                                     int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -334,6 +359,7 @@ static JSValue js_get_property_bool(JSContext *ctx, JSValueConst this_val,
   return JS_NewBool(ctx, result);
 }
 
+// TS: (name: string, def?: any) => number | undefined
 static JSValue js_get_property_number(JSContext *ctx, JSValueConst this_val,
                                       int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -351,6 +377,7 @@ static JSValue js_get_property_number(JSContext *ctx, JSValueConst this_val,
   return JS_NewFloat64(ctx, result);
 }
 
+// TS: (name: string) => boolean
 static JSValue js_del_property(JSContext *ctx, JSValueConst this_val, int argc,
                                JSValueConst *argv) {
   if (argc < 1)
@@ -400,28 +427,29 @@ static JSValue node_to_js(JSContext *ctx, const mpv_node *node) {
   }
 }
 
-static bool js_try_get_buffer(JSContext *ctx, JSValueConst val, uint8_t **data,
-                              size_t *size) {
+// Returns 1 if buffer found, 0 if not a buffer, -1 on error
+static int js_try_get_buffer(JSContext *ctx, JSValueConst val, uint8_t **data,
+                             size_t *size) {
   if (JS_IsArrayBuffer(val)) {
     *data = JS_GetArrayBuffer(ctx, size, val);
-    return *data != NULL;
+    return *data ? 1 : -1;
   }
 
   size_t off = 0, len = 0;
   JSValue buffer = JS_GetTypedArrayBuffer(ctx, val, &off, &len, NULL);
   if (JS_IsException(buffer))
-    return false;
+    return -1;
   if (JS_IsArrayBuffer(buffer)) {
     *data = JS_GetArrayBuffer(ctx, size, buffer);
     JS_FreeValue(ctx, buffer);
-    if (*data) {
-      *data += off;
-      *size = len;
-      return true;
-    }
+    if (!*data)
+      return -1;
+    *data += off;
+    *size = len;
+    return 1;
   }
   JS_FreeValue(ctx, buffer);
-  return false;
+  return 0;
 }
 
 static int get_obj_properties(void *ta_ctx, JSContext *ctx, JSValueConst obj,
@@ -429,109 +457,141 @@ static int get_obj_properties(void *ta_ctx, JSContext *ctx, JSValueConst obj,
   JSPropertyEnum *props = NULL;
   uint32_t len = 0;
   if (JS_GetOwnPropertyNames(ctx, &props, &len, obj,
-                             JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY))
+                             JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY)) {
     return -1;
+  }
 
-  *keys = talloc_new(ta_ctx);
+  *keys = talloc_array(ta_ctx, char *, len);
   for (uint32_t i = 0; i < len; i++) {
     const char *name = JS_AtomToCString(ctx, props[i].atom);
-    MP_TARRAY_APPEND(ta_ctx, *keys, i, talloc_strdup(ta_ctx, name));
+    *keys[i] = talloc_strdup(ta_ctx, name);
     JS_FreeCString(ctx, name);
   }
   JS_FreePropertyEnum(ctx, props, len);
   return len;
 }
 
-static void js_to_node(void *ta_ctx, mpv_node *dst, JSContext *ctx,
-                       JSValueConst val) {
-  if (JS_IsUndefined(val) || JS_IsNull(val)) {
+// Converts a JS value to an mpv_node. Returns 0 on success, -1 on error
+static int js_to_node(void *ta_ctx, mpv_node *dst, JSContext *ctx,
+                      JSValueConst val) {
+  int tag = js_get_tag(val);
+
+  switch (tag) {
+  case JS_TAG_UNDEFINED:
+  case JS_TAG_NULL:
     dst->format = MPV_FORMAT_NONE;
-    return;
-  }
-
-  if (JS_IsBool(val)) {
+    return 0;
+  case JS_TAG_BOOL: {
+    int b = JS_ToBool(ctx, val);
+    if (b < 0)
+      return -1;
     dst->format = MPV_FORMAT_FLAG;
-    dst->u.flag = js_is_truthy(ctx, val);
-    return;
+    dst->u.flag = b;
+    return 0;
   }
-
-  if (JS_IsNumber(val)) {
-    double d = js_to_number(ctx, val);
-    if (same_as_int64(d)) {
-      dst->format = MPV_FORMAT_INT64;
-      dst->u.int64 = (int64_t)d;
-    } else {
-      dst->format = MPV_FORMAT_DOUBLE;
-      dst->u.double_ = d;
-    }
-    return;
+  case JS_TAG_INT: {
+    int64_t i = 0;
+    if (JS_ToInt64(ctx, &i, val) < 0)
+      return -1;
+    dst->format = MPV_FORMAT_INT64;
+    dst->u.int64 = i;
+    return 0;
   }
-
-  if (JS_IsString(val)) {
+  case JS_TAG_FLOAT64:
+    dst->format = MPV_FORMAT_DOUBLE;
+    dst->u.double_ = JS_VALUE_GET_FLOAT64(val);
+    return 0;
+  case JS_TAG_STRING: {
     const char *s = JS_ToCString(ctx, val);
+    if (!s)
+      return -1;
     dst->format = MPV_FORMAT_STRING;
-    dst->u.string = talloc_strdup(ta_ctx, s ? s : "");
+    dst->u.string = talloc_strdup(ta_ctx, s);
     JS_FreeCString(ctx, s);
-    return;
+    return 0;
   }
-
-  uint8_t *buf = NULL;
-  size_t buf_len = 0;
-  if (js_try_get_buffer(ctx, val, &buf, &buf_len)) {
-    dst->format = MPV_FORMAT_BYTE_ARRAY;
-    mpv_byte_array *ba = talloc(ta_ctx, mpv_byte_array);
-    ba->data = talloc_memdup(ba, buf, buf_len);
-    ba->size = buf_len;
-    dst->u.ba = ba;
-    return;
-  }
-
-  if (JS_IsArray(val)) {
-    int64_t len = 0;
-    JS_GetLength(ctx, val, &len);
-
-    dst->format = MPV_FORMAT_NODE_ARRAY;
-    dst->u.list = talloc(ta_ctx, struct mpv_node_list);
-    dst->u.list->keys = NULL;
-    dst->u.list->num = len;
-    dst->u.list->values = talloc_array(ta_ctx, mpv_node, len);
-    for (uint32_t i = 0; i < len; i++) {
-      JSValue v = JS_GetPropertyUint32(ctx, val, i);
-      js_to_node(ta_ctx, &dst->u.list->values[i], ctx, v);
-      JS_FreeValue(ctx, v);
+  case JS_TAG_OBJECT: {
+    uint8_t *buf = NULL;
+    size_t buf_len = 0;
+    int buf_res = js_try_get_buffer(ctx, val, &buf, &buf_len);
+    if (buf_res < 0)
+      return -1;
+    if (buf_res > 0) {
+      dst->format = MPV_FORMAT_BYTE_ARRAY;
+      mpv_byte_array *ba = talloc(ta_ctx, mpv_byte_array);
+      ba->data = talloc_memdup(ba, buf, buf_len);
+      ba->size = buf_len;
+      dst->u.ba = ba;
+      return 0;
     }
-    return;
-  }
 
-  if (JS_IsObject(val)) {
+    if (JS_IsArray(val)) {
+      int64_t len = 0;
+      if (JS_GetLength(ctx, val, &len) < 0)
+        return -1;
+
+      dst->format = MPV_FORMAT_NODE_ARRAY;
+      dst->u.list = talloc(ta_ctx, struct mpv_node_list);
+      dst->u.list->keys = NULL;
+      dst->u.list->num = len;
+      dst->u.list->values = talloc_array(ta_ctx, mpv_node, len);
+      for (uint32_t i = 0; i < len; i++) {
+        JSValue v = JS_GetPropertyUint32(ctx, val, i);
+        if (JS_IsException(v)) {
+          JS_FreeValue(ctx, v);
+          return -1;
+        }
+        if (js_to_node(ta_ctx, &dst->u.list->values[i], ctx, v) < 0) {
+          JS_FreeValue(ctx, v);
+          return -1;
+        }
+        JS_FreeValue(ctx, v);
+      }
+      return 0;
+    }
+
     dst->format = MPV_FORMAT_NODE_MAP;
     dst->u.list = talloc(ta_ctx, struct mpv_node_list);
     int len = get_obj_properties(ta_ctx, ctx, val, &dst->u.list->keys);
+    if (len < 0) {
+      return -1;
+    }
     dst->u.list->num = len;
     dst->u.list->values = talloc_array(ta_ctx, mpv_node, len);
     for (int i = 0; i < len; i++) {
       JSValue v = JS_GetPropertyStr(ctx, val, dst->u.list->keys[i]);
-      js_to_node(ta_ctx, &dst->u.list->values[i], ctx, v);
+      if (JS_IsException(v)) {
+        JS_FreeValue(ctx, v);
+        return -1;
+      }
+      if (js_to_node(ta_ctx, &dst->u.list->values[i], ctx, v) < 0) {
+        JS_FreeValue(ctx, v);
+        return -1;
+      }
       JS_FreeValue(ctx, v);
     }
-    return;
+    return 0;
   }
-
-  const char *s = JS_ToCString(ctx, val);
-  dst->format = MPV_FORMAT_STRING;
-  dst->u.string = talloc_strdup(ta_ctx, s ? s : "");
-  JS_FreeCString(ctx, s);
+  default: {
+    return -1;
+  }
+  }
 }
 
 // Property native conversions -------------------------------------------
+// TS: (name: string, value: any) => boolean
 static JSValue js_set_property_native(JSContext *ctx, JSValueConst this_val,
                                       int argc, JSValueConst *argv) {
   if (argc < 2)
     return JS_ThrowTypeError(ctx, "set_property_native expects 2 args");
   const char *name = js_to_cstring(ctx, argv[0]);
   void *af = talloc_new(NULL);
-  mpv_node node;
-  js_to_node(af, &node, ctx, argv[1]);
+  mpv_node node = {0};
+  if (js_to_node(af, &node, ctx, argv[1]) < 0) {
+    JS_FreeCString(ctx, name);
+    talloc_free(af);
+    return JS_EXCEPTION;
+  }
   int r = mpv_set_property(jclient(ctx), name, MPV_FORMAT_NODE, &node);
   JS_FreeCString(ctx, name);
   mpv_free_node_contents(&node);
@@ -539,6 +599,7 @@ static JSValue js_set_property_native(JSContext *ctx, JSValueConst this_val,
   return push_status(ctx, r);
 }
 
+// TS: (name: string, def?: any) => any | undefined
 static JSValue js_get_property_native(JSContext *ctx, JSValueConst this_val,
                                       int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -563,6 +624,7 @@ static JSValue js_get_property_native(JSContext *ctx, JSValueConst this_val,
   return ret;
 }
 
+// TS: (name: string, def?: any) => string | undefined
 static JSValue js_get_property_osd(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -586,6 +648,7 @@ static JSValue js_get_property_osd(JSContext *ctx, JSValueConst this_val,
 }
 
 // Events, observe, commands ---------------------------------------------
+// TS: (event: string, enable: boolean) => boolean
 static JSValue js_request_event(JSContext *ctx, JSValueConst this_val, int argc,
                                 JSValueConst *argv) {
   if (argc < 2)
@@ -605,6 +668,7 @@ static JSValue js_request_event(JSContext *ctx, JSValueConst this_val, int argc,
   return push_failure(ctx, "Unknown event name");
 }
 
+// TS: (level: string) => boolean
 static JSValue js_enable_messages(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -619,6 +683,8 @@ static JSValue js_enable_messages(JSContext *ctx, JSValueConst this_val,
   return push_status(ctx, r);
 }
 
+// TS: (id: number, name: string, fmt: "none" | "native" | "bool" | "string" |
+// "number") => boolean
 static JSValue js_observe_property(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv) {
   if (argc < 3)
@@ -638,6 +704,7 @@ static JSValue js_observe_property(JSContext *ctx, JSValueConst this_val,
   return push_status(ctx, r);
 }
 
+// TS: (id: number) => boolean
 static JSValue js_unobserve_property(JSContext *ctx, JSValueConst this_val,
                                      int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -646,14 +713,19 @@ static JSValue js_unobserve_property(JSContext *ctx, JSValueConst this_val,
   return push_status(ctx, mpv_unobserve_property(jclient(ctx), id));
 }
 
+// TS: (cmd: any, def?: any) => any
 static JSValue js_command_native(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv) {
-  if (argc < 1)
+  if (argc < 1) {
     return JS_ThrowTypeError(ctx, "command_native expects native node");
+  }
   JSValue def = argc >= 2 ? argv[1] : JS_UNDEFINED;
   void *af = talloc_new(NULL);
   mpv_node cmd = {0};
-  js_to_node(af, &cmd, ctx, argv[0]);
+  if (js_to_node(af, &cmd, ctx, argv[0]) < 0) {
+    talloc_free(af);
+    return JS_EXCEPTION;
+  }
   mpv_node result = {0};
   int r = mpv_command_node(jclient(ctx), &cmd, &result);
   JSValue ret;
@@ -671,6 +743,7 @@ static JSValue js_command_native(JSContext *ctx, JSValueConst this_val,
   return ret;
 }
 
+// TS: (id: number, cmd: any) => boolean
 static JSValue js_command_native_async(JSContext *ctx, JSValueConst this_val,
                                        int argc, JSValueConst *argv) {
   if (argc < 2)
@@ -678,13 +751,17 @@ static JSValue js_command_native_async(JSContext *ctx, JSValueConst this_val,
   uint64_t id = js_to_uint64_checked(ctx, argv[0], 1);
   void *af = talloc_new(NULL);
   mpv_node cmd = {0};
-  js_to_node(af, &cmd, ctx, argv[1]);
+  if (js_to_node(af, &cmd, ctx, argv[1]) < 0) {
+    talloc_free(af);
+    return JS_EXCEPTION;
+  }
   int r = mpv_command_node_async(jclient(ctx), id, &cmd);
   mpv_free_node_contents(&cmd);
   talloc_free(af);
   return push_status(ctx, r);
 }
 
+// TS: (id: number) => boolean
 static JSValue js_abort_async(JSContext *ctx, JSValueConst this_val, int argc,
                               JSValueConst *argv) {
   if (argc < 1)
@@ -695,11 +772,14 @@ static JSValue js_abort_async(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 // Time and input ---------------------------------------------------------
+// TS: () => number
 static JSValue js_get_time_ms(JSContext *ctx, JSValueConst this_val, int argc,
                               JSValueConst *argv) {
   return JS_NewFloat64(ctx, mpv_get_time_us(jclient(ctx)) / 1000.0);
 }
 
+// TS: (section: string, x0: number, y0: number, x1: number, y1: number) =>
+// boolean
 static JSValue js_input_set_section_mouse_area(JSContext *ctx,
                                                JSValueConst this_val, int argc,
                                                JSValueConst *argv) {
@@ -718,6 +798,7 @@ static JSValue js_input_set_section_mouse_area(JSContext *ctx,
   return push_success(ctx);
 }
 
+// TS: (timeSec: number, fmt?: string) => string
 static JSValue js_format_time(JSContext *ctx, JSValueConst this_val, int argc,
                               JSValueConst *argv) {
   if (argc < 1)
@@ -739,11 +820,13 @@ static JSValue js_format_time(JSContext *ctx, JSValueConst this_val, int argc,
   return ret;
 }
 
+// TS: () => number
 static JSValue js_get_wakeup_pipe(JSContext *ctx, JSValueConst this_val,
                                   int argc, JSValueConst *argv) {
   return JS_NewInt32(ctx, mpv_get_wakeup_pipe(jclient(ctx)));
 }
 
+// TS: (name: string, priority: number, id: number) => boolean
 static JSValue js_hook_add(JSContext *ctx, JSValueConst this_val, int argc,
                            JSValueConst *argv) {
   if (argc < 3)
@@ -756,6 +839,7 @@ static JSValue js_hook_add(JSContext *ctx, JSValueConst this_val, int argc,
   return push_status(ctx, r);
 }
 
+// TS: (id: number) => boolean
 static JSValue js_hook_continue(JSContext *ctx, JSValueConst this_val, int argc,
                                 JSValueConst *argv) {
   if (argc < 1)
@@ -765,6 +849,7 @@ static JSValue js_hook_continue(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 // Utils ------------------------------------------------------------------
+// TS: (path?: string, filter?: "all" | "files" | "dirs" | "normal") => string[]
 static JSValue js_readdir(JSContext *ctx, JSValueConst this_val, int argc,
                           JSValueConst *argv) {
   const char *filters[] = {"all", "files", "dirs", "normal", NULL};
@@ -812,6 +897,8 @@ static JSValue js_readdir(JSContext *ctx, JSValueConst this_val, int argc,
   return arr;
 }
 
+// TS: (file: string) => {mode: number; size: number; atime: number; mtime:
+// number; ctime: number; is_file: boolean; is_dir: boolean}
 static JSValue js_file_info(JSContext *ctx, JSValueConst this_val, int argc,
                             JSValueConst *argv) {
   if (argc < 1)
@@ -836,6 +923,7 @@ static JSValue js_file_info(JSContext *ctx, JSValueConst this_val, int argc,
   return obj;
 }
 
+// TS: (path: string) => [string, string]
 static JSValue js_split_path(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
   if (argc < 1)
@@ -849,6 +937,7 @@ static JSValue js_split_path(JSContext *ctx, JSValueConst this_val, int argc,
   return arr;
 }
 
+// TS: (a: string, b: string) => string
 static JSValue js_join_path(JSContext *ctx, JSValueConst this_val, int argc,
                             JSValueConst *argv) {
   if (argc < 2)
@@ -864,10 +953,12 @@ static JSValue js_join_path(JSContext *ctx, JSValueConst this_val, int argc,
   return ret;
 }
 
+// TS: (append: boolean, name: string, data: string) => boolean
 static JSValue js_write_file(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
-  if (argc < 3)
+  if (argc < 3) {
     return JS_ThrowTypeError(ctx, "_write_file expects append, name, data");
+  }
   bool append = js_is_truthy(ctx, argv[0]);
   const char *fname_js = js_to_cstring(ctx, argv[1]);
   const char *data_js = js_to_cstring(ctx, argv[2]);
@@ -897,24 +988,29 @@ static JSValue js_write_file(JSContext *ctx, JSValueConst this_val, int argc,
   fclose(f);
   JS_FreeCString(ctx, data_js);
   talloc_free(fname);
-  if (len != wrote)
+  if (len != wrote) {
     return JS_ThrowInternalError(ctx, "Cannot %s to file", opstr);
+  }
   return JS_NewBool(ctx, true);
 }
 
+// TS: (name: string, limit?: number) => string
 static JSValue js_read_file(JSContext *ctx, JSValueConst this_val, int argc,
                             JSValueConst *argv) {
-  if (argc < 1)
+  if (argc < 1) {
     return JS_ThrowTypeError(ctx, "read_file expects filename");
+  }
   int limit = -1;
-  if (argc >= 2 && !JS_IsUndefined(argv[1]))
+  if (argc >= 2 && !JS_IsUndefined(argv[1])) {
     limit = (int)js_to_int64_checked(ctx, argv[1], 2);
+  }
   const char *fname = js_to_cstring(ctx, argv[0]);
   JSValue ret = read_file_limit(ctx, fname, limit);
   JS_FreeCString(ctx, fname);
   return ret;
 }
 
+// TS: (name: string) => string | undefined
 static JSValue js_getenv(JSContext *ctx, JSValueConst this_val, int argc,
                          JSValueConst *argv) {
   if (argc < 1)
@@ -927,6 +1023,7 @@ static JSValue js_getenv(JSContext *ctx, JSValueConst this_val, int argc,
   return JS_UNDEFINED;
 }
 
+// TS: () => string[]
 static JSValue js_get_env_list(JSContext *ctx, JSValueConst this_val, int argc,
                                JSValueConst *argv) {
   JSValue arr = JS_NewArray(ctx);
@@ -935,6 +1032,7 @@ static JSValue js_get_env_list(JSContext *ctx, JSValueConst this_val, int argc,
   return arr;
 }
 
+// TS: (name: string, code: string) => any
 static JSValue js_compile_js(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
   if (argc < 2)
@@ -948,6 +1046,7 @@ static JSValue js_compile_js(JSContext *ctx, JSValueConst this_val, int argc,
   return ret;
 }
 
+// TS: () => boolean
 static JSValue js_gc(JSContext *ctx, JSValueConst this_val, int argc,
                      JSValueConst *argv) {
   JS_RunGC(JS_GetRuntime(ctx));
@@ -955,6 +1054,7 @@ static JSValue js_gc(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 // Events waiting ---------------------------------------------------------
+// TS: (timeoutSec?: number) => any
 static JSValue js_wait_event(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
   double timeout =
@@ -968,6 +1068,7 @@ static JSValue js_wait_event(JSContext *ctx, JSValueConst this_val, int argc,
 }
 
 // Misc helpers -----------------------------------------------------------
+// TS: (name: string) => string | undefined
 static JSValue js_find_config_file(JSContext *ctx, JSValueConst this_val,
                                    int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -983,11 +1084,13 @@ static JSValue js_find_config_file(JSContext *ctx, JSValueConst this_val,
   return push_failure(ctx, "not found");
 }
 
+// TS: () => string
 static JSValue js_last_error(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
   return JS_NewString(ctx, jctx(ctx)->last_error_str);
 }
 
+// TS: (message: string) => void
 static JSValue js_set_last_error(JSContext *ctx, JSValueConst this_val,
                                  int argc, JSValueConst *argv) {
   if (argc < 1)
@@ -1036,7 +1139,8 @@ static const struct fn_entry main_fns[] = {
     {"input_set_section_mouse_area", 5, js_input_set_section_mouse_area},
     {"last_error", 0, js_last_error},
     {"_set_last_error", 1, js_set_last_error},
-    {0}};
+    {0},
+};
 
 static const struct fn_entry utils_fns[] = {
     {"readdir", 2, js_readdir},
@@ -1049,46 +1153,39 @@ static const struct fn_entry utils_fns[] = {
     {"getenv", 1, js_getenv},
     {"compile_js", 2, js_compile_js},
     {"_gc", 1, js_gc},
-    {0}};
+    {0},
+};
 
 static void add_package_fns(JSContext *ctx, JSValue obj,
                             const struct fn_entry *e) {
   for (int n = 0; e[n].name; n++) {
-    printf("add functions %s to mp object\n", e[n].name);
-
     JS_SetPropertyStr(ctx, obj, e[n].name,
                       JS_NewCFunction(ctx, e[n].fn, e[n].name, e[n].length));
   }
 }
 
 static int setup_functions(JSContext *ctx, struct script_ctx *sctx) {
-  printf("setup global mp object\n");
   JSValue global = JS_GetGlobalObject(ctx);
 
-  printf("create mp object\n");
   JSValue mp = JS_NewObject(ctx);
 
-  printf("add functions to mp object\n");
   add_package_fns(ctx, mp, main_fns);
 
-  printf("set script_name\n");
   JS_SetPropertyStr(ctx, mp, "script_name",
                     JS_NewString(ctx, mpv_client_name(sctx->client)));
 
-  printf("set script_file\n");
   JS_SetPropertyStr(ctx, mp, "script_file", JS_NewString(ctx, sctx->filename));
 
   if (sctx->path) {
-    printf("set script_path\n");
     JS_SetPropertyStr(ctx, mp, "script_path", JS_NewString(ctx, sctx->path));
   }
 
   JSValue utils = JS_NewObject(ctx);
-  printf("add functions to utils object\n");
   add_package_fns(ctx, utils, utils_fns);
+  // take ownership, no need to free
   JS_SetPropertyStr(ctx, mp, "utils", utils);
 
-  printf("set global mp object\n");
+  // take ownership, no need to free
   JS_SetPropertyStr(ctx, global, "mp", mp);
 
   JS_FreeValue(ctx, global);
@@ -1101,49 +1198,32 @@ static JSValue eval_string(JSContext *ctx, const char *code, const char *name) {
 }
 
 static int run_script(JSContext *ctx, struct script_ctx *sctx) {
-  JSValue r = JS_UNDEFINED;
   js_std_add_helpers(ctx, 0, 0);
-  printf("setup function\n");
 
-  if (setup_functions(ctx, sctx))
+  if (setup_functions(ctx, sctx)) {
     return -1;
+  }
 
-  //   const char *norm_err_proto_js =
-  //       "if (Error().stackTrace && !Error().stack) {\n"
-  //       "    Object.defineProperty(Error.prototype, 'stack', {\n"
-  //       "        get: function() { return this.name + ': ' + this.message
-  //       + " "this.stackTrace; }\n" "    });\n"
-  //       "}\n";
+  JSValue r = JS_UNDEFINED;
 
-  //   r = eval_string(ctx, norm_err_proto_js, "@/norm_err.js");
-  //   if (JS_IsException(r))
-  //     goto error;
-  //   JS_FreeValue(ctx, r);
-
-  printf("run defaults.js\n");
   const char *def = builtin_files[0][1];
   r = eval_string(ctx, def, "@/defaults.js");
   if (JS_IsException(r)) {
-    printf("failed to run defaults.js\n");
     goto error;
   }
   JS_FreeValue(ctx, r);
 
-  printf("read script content\n");
   JSValue main_code = read_file_limit(ctx, sctx->filename, -1);
   if (JS_IsException(main_code)) {
-    printf("failed to read main script\n");
     goto error;
   }
 
   size_t len;
   const char *src = JS_ToCStringLen(ctx, &len, main_code);
-  printf("eval main code\n");
   r = JS_Eval(ctx, src, len, sctx->filename, JS_EVAL_TYPE_GLOBAL);
   JS_FreeCString(ctx, src);
   JS_FreeValue(ctx, main_code);
   if (JS_IsException(r)) {
-    printf("failed to eval main code\n");
     goto error;
   }
   JS_FreeValue(ctx, r);
@@ -1176,8 +1256,6 @@ error: {
 }
 
 static int load_quickjs(struct mp_script_args *args) {
-  printf("load js script with quickjs\n");
-
   struct script_ctx *ctx = talloc_ptrtype(NULL, ctx);
   *ctx = (struct script_ctx){
       .client = args->client,
@@ -1192,24 +1270,20 @@ static int load_quickjs(struct mp_script_args *args) {
   };
   stats_register_thread_cputime(ctx->stats, "cpu");
 
-  printf("new runtime\n");
   ctx->rt = JS_NewRuntime();
   if (!ctx->rt)
     goto error_out;
-  printf("new context\n");
   ctx->qctx = JS_NewContext(ctx->rt);
   if (!ctx->qctx)
     goto error_out;
 
-  printf("set context\n");
   JS_SetContextOpaque(ctx->qctx, ctx);
 
-  printf("set no last error\n");
   set_last_error(ctx, 0, NULL);
 
-  printf("run js script\n");
-  if (run_script(ctx->qctx, ctx))
+  if (run_script(ctx->qctx, ctx)) {
     goto error_out;
+  }
 
   JS_FreeContext(ctx->qctx);
   JS_FreeRuntime(ctx->rt);
