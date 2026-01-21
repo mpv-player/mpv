@@ -204,7 +204,15 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
     // Set rotation from mp_image params (same as vo_gpu_next.c line 670)
     // This is critical for iPhone videos and other rotated content
-    frame->rotation = mpi->params.rotate / 90;
+    int rotation_quarter_turns = mpi->params.rotate / 90;
+    frame->rotation = rotation_quarter_turns;
+    
+    // Debug: log rotation to help diagnose subtitle rotation issues
+    // Use MSGL_WARN to ensure it's visible even when log level is set to warn
+    if (rotation_quarter_turns != 0) {
+        mp_msg(p->log, MSGL_WARN, "[gpu_next] Source frame rotation: %d (rotate=%d degrees)\n",
+               rotation_quarter_turns, mpi->params.rotate);
+    }
     
     // Store vflip in user_data context for later use in render params
     // vflip will be applied via distort_params.transform.mat in pl_video_render()
@@ -342,14 +350,57 @@ static void update_overlays(struct pl_video *p, struct mp_osd_res res,
         talloc_free(entry->parts);
         entry->parts = talloc_array(p, struct pl_overlay_part, item->num_parts);
 
+        // Debug: log subtitle coordinates and source rotation
+        int src_rotation = 0;
+        if (src) {
+            src_rotation = src->params.rotate / 90;
+        }
+        // Log subtitle info when subtitles are present (limited to avoid spam)
+        static int subtitle_log_count = 0;
+        if (item->num_parts > 0 && subtitle_log_count++ < 5) {
+            const struct sub_bitmap *first = &item->parts[0];
+            mp_msg(p->log, MSGL_INFO, "[gpu_next] Subtitle info: src_rotation=%d, "
+                   "first_part: x=%d y=%d dw=%d dh=%d, res: w=%d h=%d, crop: x0=%.1f y0=%.1f x1=%.1f y1=%.1f, coords=%d\n",
+                   src_rotation, first->x, first->y, first->dw, first->dh, res.w, res.h,
+                   frame->crop.x0, frame->crop.y0, frame->crop.x1, frame->crop.y1, (int)coords);
+        }
+        
         for (int i = 0; i < item->num_parts; i++) {
             const struct sub_bitmap *b = &item->parts[i];
             if (b->dw == 0 || b->dh == 0)
                 continue;
             uint32_t c = b->libass.color;
+
+            // When target crop Y is reversed (y0 > y1) due to FLIP_Y=1, mpv's OSD
+            // coordinates are in normal Y-up space, but libplacebo expects Y-down.
+            // We need to flip subtitle Y coordinates to match the rendering space.
+            float dst_x0 = b->x;
+            float dst_y0 = b->y;
+            float dst_x1 = b->x + b->dw;
+            float dst_y1 = b->y + b->dh;
+            
+            // Check if crop is Y-reversed (this happens with FLIP_Y=1)
+            bool crop_y_reversed = frame->crop.y1 < frame->crop.y0;
+            if (coords == PL_OVERLAY_COORDS_DST_FRAME && crop_y_reversed) {
+                // Try alternative flip: just flip each coordinate without swapping
+                // This might be what libplacebo expects when crop is reversed
+                float temp_y0 = dst_y0;
+                float temp_y1 = dst_y1;
+                dst_y0 = res.h - temp_y0;  // Flip y0 only
+                dst_y1 = res.h - temp_y1;  // Flip y1 only
+                
+                // Debug: log the flip operation (first 3 times only)
+                static int flip_log_count = 0;
+                if (flip_log_count++ < 3) {
+                    mp_msg(p->log, MSGL_INFO, "[gpu_next] Flipping subtitle Y (alt): "
+                           "original y0=%.0f y1=%.0f -> flipped y0=%.0f y1=%.0f (res.h=%d, crop y0=%.1f y1=%.1f)\n",
+                           temp_y0, temp_y1, dst_y0, dst_y1, res.h, frame->crop.y0, frame->crop.y1);
+                }
+            }
+
             struct pl_overlay_part part = {
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
-                .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
+                .dst = { dst_x0, dst_y0, dst_x1, dst_y1 },
                 .color = {
                     (c >> 24) / 255.0f,
                     ((c >> 16) & 0xFF) / 255.0f,
@@ -383,6 +434,9 @@ static void update_overlays(struct pl_video *p, struct mp_osd_res res,
     talloc_free(subs);
 }
 
+// Equivalent to vo_gpu_next.c's apply_crop(), but tailored for libmpv render API.
+// The dst rectangle returned by mp_get_src_dst_rects() can be rotated/flipped;
+// libplacebo expects an unrotated crop rectangle. This helper normalizes it.
 void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_tex)
 {
     // Build target color space from mpv options instead of hardcoding sRGB
@@ -453,12 +507,30 @@ void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_t
         target_color = pl_color_space_srgb;
     }
     
+    // Debug: check source rotation if available
+    int source_rotation = 0;
+    if (frame && frame->current) {
+        source_rotation = frame->current->params.rotate / 90;
+        if (source_rotation != 0) {
+            mp_msg(p->log, MSGL_WARN, "[gpu_next] Current frame rotation: %d (rotate=%d degrees)\n",
+                   source_rotation, frame->current->params.rotate);
+        }
+    }
+    
+    // libmpv render API note:
+    // The embedder (native/mpv_render_gl.mm) passes MPV_RENDER_PARAM_FLIP_Y=1 when
+    // rendering into an OpenGL FBO. This makes the effective target coordinate
+    // system Y-up. mpv's mp_get_src_dst_rects() produces dst in that coordinate
+    // space, so we must apply dst with reversed Y for libplacebo.
     struct pl_frame target_frame = {
         .num_planes = 1,
         .planes[0] = { .texture = target_tex, .components = 4, .component_mapping = {0,1,2,3} },
-        .crop = { .x0 = p->current_dst.x0, .y0 = p->current_dst.y1, .x1 = p->current_dst.x1, .y1 = p->current_dst.y0 },
+        // Apply dst rect with reversed Y to match FLIP_Y=1
+        .crop = { .x0 = p->current_dst.x0, .y0 = p->current_dst.y1,
+                  .x1 = p->current_dst.x1, .y1 = p->current_dst.y0 },
         .color = target_color,
         .repr = pl_color_repr_rgb,
+        .rotation = 0,  // Target is always unrotated - source rotation is handled in map_frame
     };
 
     if (frame && frame->current && frame->frame_id > p->last_frame_id) {
