@@ -1,4 +1,3 @@
-#include "subprojects/quickjs/quickjs.h"
 #include <string.h>
 #include <sys/types.h>
 
