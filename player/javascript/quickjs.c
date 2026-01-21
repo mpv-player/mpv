@@ -104,8 +104,9 @@ static bool pushed_error(JSContext *ctx, int err, JSValueConst def,
 
 static const char *js_to_cstring(JSContext *ctx, JSValueConst v) {
   const char *s = JS_ToCString(ctx, v);
-  if (!s)
+  if (!s) {
     JS_ThrowTypeError(ctx, "expected string");
+  }
   return s;
 }
 
@@ -118,8 +119,9 @@ static double js_to_number(JSContext *ctx, JSValueConst v) {
 
 static int64_t js_to_int64_checked(JSContext *ctx, JSValueConst v, int idx) {
   double d = js_to_number(ctx, v);
-  if (!(d >= INT64_MIN && d <= (double)INT64_MAX))
+  if (!(d >= INT64_MIN && d <= (double)INT64_MAX)) {
     JS_ThrowRangeError(ctx, "int out of range at index %d", idx);
+  }
   return (int64_t)d;
 }
 
@@ -783,18 +785,17 @@ static JSValue js_get_time_ms(JSContext *ctx, JSValueConst this_val, int argc,
 static JSValue js_input_set_section_mouse_area(JSContext *ctx,
                                                JSValueConst this_val, int argc,
                                                JSValueConst *argv) {
-  if (argc < 5)
+  if (argc < 5) {
     return JS_ThrowTypeError(ctx,
                              "input_set_section_mouse_area expects 5 args");
-  const char *section_const = js_to_cstring(ctx, argv[0]);
-  char *section = talloc_strdup(NULL, section_const);
-  JS_FreeCString(ctx, section_const);
-  mp_input_set_section_mouse_area(jctx(ctx)->mpctx->input, section,
+  }
+  const char *section = js_to_cstring(ctx, argv[0]);
+  mp_input_set_section_mouse_area(jctx(ctx)->mpctx->input, (char *)section,
                                   js_to_int64_checked(ctx, argv[1], 2),
                                   js_to_int64_checked(ctx, argv[2], 3),
                                   js_to_int64_checked(ctx, argv[3], 4),
                                   js_to_int64_checked(ctx, argv[4], 5));
-  talloc_free(section);
+  JS_FreeCString(ctx, section);
   return push_success(ctx);
 }
 
