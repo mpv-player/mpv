@@ -25,6 +25,7 @@
 
 #include "mpv_talloc.h"
 
+#include "misc/codepoint_width.h"
 #include "misc/thread_pool.h"
 #include "misc/thread_tools.h"
 #include "osdep/io.h"
@@ -909,8 +910,18 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
             bstr title = bstr0(mp_basename(disp_filename));
             bstr_eatstart(&title, parent);
             bstr_eatstart(&title, bstr0("."));
-            if (title.len)
+
+            const unsigned char *cut_pos = NULL;
+            if (mp_is_url(bstr0(disp_filename))
+                && mpctx->opts->max_track_url_title_max_length)
+                term_disp_width(title, mpctx->opts->max_track_url_title_max_length,
+                                &cut_pos);
+            if (cut_pos) {
+                title.len = cut_pos - title.start;
+                t->title = talloc_asprintf(t, "%.*s\u2026", BSTR_P(title));
+            } else if (title.len) {
                 t->title = bstrdup0(t, title);
+            }
         }
         t->external_filename = mp_normalize_user_path(t, mpctx->global, filename);
         t->no_default = sh->type != filter;

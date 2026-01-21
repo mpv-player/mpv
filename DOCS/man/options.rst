@@ -4698,6 +4698,13 @@ OSD
 
     Default: ``title``.
 
+``--osd-track-url-title-max-length=<length>``
+    Truncate URL track titles to ``length`` characters. Wide unicode characters
+    count as multiple characters to make this work correctly with terminal
+    output. Set to 0 to disable.
+
+    Default: 90.
+
 ``--osd-bar-align-x=<-1-1>``
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
     Fractional values (like 0.5) are allowed.
