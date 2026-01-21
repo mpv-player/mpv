@@ -858,7 +858,7 @@ or at runtime with the ``apply-profile <name>`` command.
         [network]
         demuxer-max-back-bytes=512MiB
         # reference a builtin profile
-        profile=fast
+        profile=low-latency
 
 Runtime profiles
 ----------------
