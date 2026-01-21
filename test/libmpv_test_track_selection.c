@@ -82,10 +82,6 @@ static bool have_english_locale(void)
     if (any_starts_with(buf, count, L"en"))
         return true;
 
-    size = _countof(buf);
-    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
-        fail("GetSystemPreferredUILanguages failed: %#lx\n", GetLastError());
-
     if (any_starts_with(buf, count, L"en"))
         return true;
 

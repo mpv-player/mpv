@@ -48,14 +48,6 @@ char **mp_get_user_langs(void)
     if (GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
         apppend_langs(&ret, &ret_count, buf, count);
 
-    size = 0;
-    if (!GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, NULL, &size))
-        goto done;
-
-    MP_TARRAY_GROW(NULL, buf, size);
-    if (GetSystemPreferredUILanguages(MUI_LANGUAGE_NAME, &count, buf, &size))
-        apppend_langs(&ret, &ret_count, buf, count);
-
 done:
     if (ret_count)
         MP_TARRAY_APPEND(NULL, ret, ret_count, NULL);
