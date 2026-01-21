@@ -425,6 +425,9 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .surface = vk->surface,
         .present_mode = preferred_mode,
         .swapchain_depth = ctx->vo->opts->swapchain_depth,
+#if PL_API_VER >= 359
+        .alpha_bits = ctx->opts.want_alpha ? 8 : 0,
+#endif
     };
 
     if (p->opts->swap_mode >= 0) // user override
