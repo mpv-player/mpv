@@ -150,6 +150,9 @@ Available script bindings are:
 ``open-docs``
     Open mpv's online documentation in the browser.
 
+``open-chat``
+    Open mpv's chat in the browser.
+
 ``menu``
     Show a menu with miscellaneous entries.
 
