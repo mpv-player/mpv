@@ -820,8 +820,9 @@ Program Behavior
     (Default: ``yes``)
 
 ``--script=<filename>``, ``--scripts=file1.lua:file2.lua:...``
-    Load a Lua script. The second option allows you to load multiple scripts by
-    separating them with the path separator (``:`` on Unix, ``;`` on Windows).
+    Load a script (Lua or JS) or a C plugin. The second option allows you to
+    load multiple scripts by separating them with the path separator (``:`` on
+    Unix, ``;`` on Windows).
 
     ``--scripts`` is a path list option. See `List Options`_ for details.
 
