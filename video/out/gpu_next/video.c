@@ -19,6 +19,9 @@
 #include "video/out/vo.h"
 #include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
+#include "options/m_config.h"
+#include "options/options.h"
+#include "video/out/gpu/video.h"  // For struct gl_video_opts
 
 struct pl_video_osd_entry {
     pl_tex tex;
@@ -33,6 +36,7 @@ struct pl_video_osd_state {
 
 struct pl_video {
     struct mp_log *log;
+    struct mpv_global *global;
     struct ra *ra;
     pl_gpu gpu;
     pl_renderer renderer;
@@ -53,6 +57,7 @@ struct pl_video {
     int num_sub_tex;
 
     struct mp_csp_equalizer_state *video_eq;
+    struct m_config_cache *opts_cache;
 };
 
 struct frame_priv {
@@ -221,6 +226,7 @@ struct pl_video *pl_video_init(struct mpv_global *global, struct mp_log *log, st
 {
     struct pl_video *p = talloc_zero(NULL, struct pl_video);
     p->log = log;
+    p->global = global;
     p->ra = ra;
     p->gpu = ra_pl_get(ra);
     
@@ -243,6 +249,11 @@ struct pl_video *pl_video_init(struct mpv_global *global, struct mp_log *log, st
     p->osd_fmt[SUBBITMAP_BGRA]   = pl_find_fmt(p->gpu, PL_FMT_UNORM, 4, 8, 8, 0);
 
     p->video_eq = mp_csp_equalizer_create(p, global);
+    
+    // Cache gl_video options to access target-prim, target-trc, target-peak, etc.
+    // Similar to vo_gpu_next.c: use gl_video_conf to access gl_video_opts
+    extern const struct m_sub_options gl_video_conf;
+    p->opts_cache = m_config_cache_alloc(p, global, &gl_video_conf);
 
     return p;
 }
@@ -367,11 +378,79 @@ static void update_overlays(struct pl_video *p, struct mp_osd_res res,
 
 void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_tex)
 {
+    // Build target color space from mpv options instead of hardcoding sRGB
+    // This fixes HDR overexposure - libplacebo needs to know the correct target colorspace
+    // Reference: vo_gpu_next.c apply_target_options() and draw_frame()
+    struct pl_color_space target_color = {0};  // Start with empty, let libplacebo infer
+    
+    if (p->opts_cache) {
+        m_config_cache_update(p->opts_cache);
+        // opts_cache now points directly to gl_video_opts (via gl_video_conf)
+        const struct gl_video_opts *gopts = p->opts_cache->opts;
+        
+        // Access target color space settings from gl_video_opts
+        if (gopts) {
+            
+            // Similar to vo_gpu_next.c line 1120-1121: if target_trc is not set, default to HDR10
+            // But we also need to check the source to decide
+            if (frame && frame->current) {
+                const struct pl_color_space *source = &frame->current->params.color;
+                
+                // If target_trc is not explicitly set, infer from source or default to HDR10 for HDR content
+                if (gopts->target_trc) {
+                    target_color.transfer = gopts->target_trc;
+                } else if (pl_color_transfer_is_hdr(source->transfer)) {
+                    // If source is HDR and target_trc is auto, use HDR10 transfer
+                    target_color.transfer = pl_color_space_hdr10.transfer;
+                } else {
+                    // Default to sRGB for SDR
+                    target_color = pl_color_space_srgb;
+                }
+            } else {
+                // No frame yet, default to sRGB
+                target_color = pl_color_space_srgb;
+            }
+            
+            // Set target primaries (e.g., bt.2020, display-p3)
+            // Only set if explicitly configured (not 0/auto)
+            if (gopts->target_prim)
+                target_color.primaries = gopts->target_prim;
+            
+            // Set target peak brightness in nits (max_luma)
+            // This is critical for correct HDR tone mapping
+            // Only set if explicitly configured (not 0/auto)
+            if (gopts->target_peak > 0) {
+                target_color.hdr.max_luma = gopts->target_peak;
+            } else if (pl_color_transfer_is_hdr(target_color.transfer)) {
+                // If HDR but no explicit peak, use nominal HDR10 peak
+                pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+                    .color = &target_color,
+                    .metadata = PL_HDR_METADATA_HDR10,
+                    .scaling = PL_HDR_NITS,
+                    .out_max = &target_color.hdr.max_luma
+                ));
+            }
+            
+            // Set target contrast (affects min_luma)
+            if (gopts->target_contrast > 0) {
+                // min_luma will be computed from contrast in apply_target_contrast
+                // For now, set to 0 to let libplacebo compute
+                target_color.hdr.min_luma = 0.0;
+            }
+        } else {
+            // No opts available, default to sRGB
+            target_color = pl_color_space_srgb;
+        }
+    } else {
+        // No opts_cache, default to sRGB
+        target_color = pl_color_space_srgb;
+    }
+    
     struct pl_frame target_frame = {
         .num_planes = 1,
         .planes[0] = { .texture = target_tex, .components = 4, .component_mapping = {0,1,2,3} },
         .crop = { .x0 = p->current_dst.x0, .y0 = p->current_dst.y1, .x1 = p->current_dst.x1, .y1 = p->current_dst.y0 },
-        .color = pl_color_space_srgb,
+        .color = target_color,
         .repr = pl_color_repr_rgb,
     };
 
