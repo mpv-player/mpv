@@ -9,6 +9,7 @@
 #include "libplacebo/colorspace.h"
 #include "libplacebo/filters.h"
 #include "libplacebo/gpu.h"
+#include "libplacebo/options.h"
 #include "libplacebo/renderer.h"
 #include "sub/draw_bmp.h"
 #include "sub/osd.h"
@@ -201,6 +202,12 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         return false;
     }
 
+    // Set rotation from mp_image params (same as vo_gpu_next.c line 670)
+    // This is critical for iPhone videos and other rotated content
+    frame->rotation = mpi->params.rotate / 90;
+    
+    // Store vflip in user_data context for later use in render params
+    // vflip will be applied via distort_params.transform.mat in pl_video_render()
     frame->user_data = mpi;
     return true;
 }
@@ -513,6 +520,17 @@ void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_t
     color_adj.gamma      = cparams.gamma;
 
     params.color_adjustment = &color_adj;
+
+    // Handle vertical flip (vflip) - same as vo_gpu_next.c line 1026-1031
+    // iPhone videos and other content may have vflip metadata that needs to be applied
+    static struct pl_distort_params distort_params;
+    if (frame && frame->current && frame->current->params.vflip) {
+        pl_matrix2x2 m = { .m = {{1, 0}, {0, -1}}, };
+        distort_params.transform.mat = m;
+        params.distort_params = &distort_params;
+    } else {
+        params.distort_params = NULL;
+    }
 
     if (!pl_render_image_mix(p->renderer, &mix, &target_frame, &params)) {
         mp_msg(p->log, MSGL_ERR, "Rendering failed.\n");
