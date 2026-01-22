@@ -434,8 +434,11 @@ static int js_try_get_buffer(JSContext *ctx, JSValueConst val, uint8_t **data,
 
     size_t off = 0, len = 0;
     JSValue buffer = JS_GetTypedArrayBuffer(ctx, val, &off, &len, NULL);
-    if (JS_IsException(buffer))
-        return -1;
+    if (JS_IsException(buffer)) {
+        JSValue exc = JS_GetException(ctx); // swallow type errors for non-TA
+        JS_FreeValue(ctx, exc);
+        return 0;
+    }
     if (JS_IsArrayBuffer(buffer)) {
         *data = JS_GetArrayBuffer(ctx, size, buffer);
         JS_FreeValue(ctx, buffer);
