@@ -972,8 +972,8 @@ static JSValue js_write_file(JSContext *ctx, JSValueConst this_val, int argc,
         return JS_ThrowRangeError(ctx, "File name must be prefixed with '%s'",
                                   prefix);
     }
-    fname_js += strlen(prefix);
-    char *fname = mp_get_user_path(NULL, jctx(ctx)->mpctx->global, fname_js);
+    char *fname = mp_get_user_path(NULL, jctx(ctx)->mpctx->global,
+                                   fname_js + strlen(prefix));
     JS_FreeCString(ctx, fname_js);
     MP_VERBOSE(jctx(ctx), "%s file '%s'\n", opstr, fname);
 
