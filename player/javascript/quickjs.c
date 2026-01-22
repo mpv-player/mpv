@@ -1031,16 +1031,28 @@ static JSValue js_get_env_list(JSContext *ctx, JSValueConst this_val, int argc,
     return arr;
 }
 
-// TS: (name: string, code: string) => any
+// TS: (filename: string, code: string) => Function
 static JSValue js_compile_js(JSContext *ctx, JSValueConst this_val, int argc,
                              JSValueConst *argv) {
     if (argc < 2)
         return JS_ThrowTypeError(ctx, "compile_js expects filename, code");
-    const char *name = js_to_cstring(ctx, argv[0]);
+
     const char *code = js_to_cstring(ctx, argv[1]);
-    JSValue ret = JS_Eval(ctx, code, strlen(code), name,
-                          JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_COMPILE_ONLY);
-    JS_FreeCString(ctx, name);
+
+    JSValue global = JS_GetGlobalObject(ctx);
+    JSValue ctor = JS_GetPropertyStr(ctx, global, "Function");
+    if (!JS_IsFunction(ctx, ctor)) {
+        JS_FreeValue(ctx, ctor);
+        JS_FreeValue(ctx, global);
+        JS_FreeCString(ctx, code);
+        return JS_ThrowInternalError(ctx, "global.Function is not callable");
+    }
+
+    JSValue arg = JS_NewString(ctx, code);
+    JSValue ret = JS_CallConstructor(ctx, ctor, 1, &arg);
+    JS_FreeValue(ctx, arg);
+    JS_FreeValue(ctx, ctor);
+    JS_FreeValue(ctx, global);
     JS_FreeCString(ctx, code);
     return ret;
 }
