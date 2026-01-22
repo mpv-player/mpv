@@ -5779,7 +5779,7 @@ them.
     ``catmull_rom``
         Catmull-Rom spline. Similar to ``mitchell``, but with ``B`` and ``C``
         set to ``0.0`` and ``0.5`` respectively. This filter is sharper than
-        ``mitchell``, but prone to ringing.
+        ``mitchell``, but prone to ringing. This is the default for ``cscale``.
 
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
@@ -5800,7 +5800,7 @@ them.
 ``--cscale=<filter>``
     As ``--scale``, but for interpolating chroma information. If the image is
     not subsampled, this option is ignored entirely. If this option is unset,
-    the filter implied by ``--scale`` will be applied.
+    the filter implied by ``--scale`` will be applied. Default is ``catmull_rom``.
 
 ``--dscale=<filter>``
     Like ``--scale``, but apply these filters on downscaling instead.
