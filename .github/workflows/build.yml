@@ -303,8 +303,6 @@ jobs:
             libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
 
       - run: mkdir -p subprojects
-      # not sure why meson can't find quickjs-ng if we install it with `meson wrap install quickjs-ng`
-      - run: git clone --depth=1 --branch=v0.11.0 https://github.com/quickjs-ng/quickjs subprojects/quickjs
 
       - name: Build with meson
         id: build
@@ -375,8 +373,6 @@ jobs:
       - uses: actions/checkout@v6
 
       - run: mkdir -p subprojects
-      # not sure why meson can't find quickjs-ng if we install it with `meson wrap install quickjs-ng`
-      - run: git clone --depth=1 --branch=v0.11.0 https://github.com/quickjs-ng/quickjs subprojects/quickjs
 
       - name: Build with meson
         id: build
