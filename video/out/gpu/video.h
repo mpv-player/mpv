@@ -194,6 +194,9 @@ enum {
     RENDER_FRAME_DEF = RENDER_FRAME_SUBS | RENDER_FRAME_OSD | RENDER_SCREEN_COLOR,
 };
 
+void scaler_conf_merge(struct scaler_config *dst, const struct scaler_config *src,
+                       enum scaler_unit unit);
+
 struct gl_video *gl_video_init(struct ra *ra, struct mp_log *log,
                                struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);

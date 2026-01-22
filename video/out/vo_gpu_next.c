@@ -2199,8 +2199,13 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
     const struct scaler_config *cfg = &opts->scaler[unit];
-    if (cfg->kernel.function == SCALER_INHERIT)
-        cfg = &opts->scaler[SCALER_SCALE];
+    struct scaler_config tmp;
+    if (cfg->kernel.function == SCALER_INHERIT) {
+        tmp = *cfg;
+        scaler_conf_merge(&tmp, &opts->scaler[SCALER_SCALE], unit);
+        cfg = &tmp;
+    }
+
     const char *kernel_name = m_opt_choice_str(cfg->kernel.functions,
                                                cfg->kernel.function);
 

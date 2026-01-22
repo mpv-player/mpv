@@ -1772,21 +1772,50 @@ static bool scaler_conf_eq(struct scaler_config a, struct scaler_config b)
            a.clamp == b.clamp;
 }
 
+void scaler_conf_merge(struct scaler_config *dst, const struct scaler_config *src,
+                       enum scaler_unit unit)
+{
+    if (dst->kernel.function != SCALER_INHERIT)
+        return;
+    mp_assert(src->kernel.function != SCALER_INHERIT);
+    dst->kernel.function = src->kernel.function;
+
+    const struct scaler_config *def = &gl_video_opts_def.scaler[unit];
+    for (int i = 0; i < MP_ARRAY_SIZE(dst->kernel.params); i++) {
+        if (isnan(dst->kernel.params[i]) || dst->kernel.params[i] == def->kernel.params[i])
+            dst->kernel.params[i] = src->kernel.params[i];
+        if (isnan(dst->window.params[i]) || dst->window.params[i] == def->window.params[i])
+            dst->window.params[i] = src->window.params[i];
+    }
+    if (dst->kernel.blur == def->kernel.blur)
+        dst->kernel.blur = src->kernel.blur;
+    if (dst->kernel.taper == def->kernel.taper)
+        dst->kernel.taper = src->kernel.taper;
+    if (dst->window.taper == def->window.taper)
+        dst->window.taper = src->window.taper;
+    if (dst->clamp == def->clamp)
+        dst->clamp = src->clamp;
+    if (dst->radius == def->radius)
+        dst->radius = src->radius;
+    if (dst->antiring == def->antiring)
+        dst->antiring = src->antiring;
+    if (dst->window.function == def->window.function)
+        dst->window.function = src->window.function;
+}
+
 static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
                           const struct scaler_config *conf,
                           double scale_factor,
                           int sizes[])
 {
     mp_assert(conf);
+    mp_assert(conf->kernel.function != SCALER_INHERIT);
     if (scaler_conf_eq(scaler->conf, *conf) &&
         scaler->scale_factor == scale_factor &&
         scaler->initialized)
         return;
 
     uninit_scaler(p, scaler);
-
-    if (conf->kernel.function == SCALER_INHERIT)
-        conf = &p->opts.scaler[SCALER_SCALE];
 
     struct filter_kernel bare_window;
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.function);
@@ -2369,9 +2398,12 @@ static void pass_read_video(struct gl_video *p)
             continue;
 
         const struct scaler_config *conf = &p->opts.scaler[scaler_id];
-
-        if (conf->kernel.function == SCALER_INHERIT)
-            conf = &p->opts.scaler[SCALER_SCALE];
+        struct scaler_config tmp;
+        if (conf->kernel.function == SCALER_INHERIT) {
+            tmp = *conf;
+            scaler_conf_merge(&tmp, &p->opts.scaler[SCALER_SCALE], scaler_id);
+            conf = &tmp;
+        }
 
         struct scaler *scaler = &p->scaler[scaler_id];
 
@@ -2545,10 +2577,10 @@ static void pass_scale_main(struct gl_video *p)
         p->texture_offset.t[0] = roundf(p->texture_offset.t[0]);
         p->texture_offset.t[1] = roundf(p->texture_offset.t[1]);
     }
-    if (downscaling &&
-        p->opts.scaler[SCALER_DSCALE].kernel.function != SCALER_INHERIT) {
+    if (downscaling) {
         scaler_conf = p->opts.scaler[SCALER_DSCALE];
         scaler = &p->scaler[SCALER_DSCALE];
+        scaler_conf_merge(&scaler_conf, &p->opts.scaler[SCALER_SCALE], SCALER_DSCALE);
     }
 
     // When requesting correct-downscaling and the clip is anamorphic, and
