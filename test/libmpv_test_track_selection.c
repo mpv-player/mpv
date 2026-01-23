@@ -309,12 +309,13 @@ static void test_track_selection(char *file, char *path)
         check_string("track-list/1/selected", "no");
         check_string("track-list/3/selected", "no");
 
-        // because subs-fallback=default, the jpn track cannot be chosen
-        // so we choose the eng track despite it having the wrong program ID
+        // the eng track cannot be selected due to having the wrong program ID
+        // because subs-fallback=default, the jpn track cannot be chosen either
+        // so we get no subs
         set_property_string("slang", "eng");
         reload_file(path);
-        check_string("current-tracks/sub/lang", "eng");
-        check_string("track-list/1/selected", "yes");
+        check_string("track-list/1/selected", "no");
+        check_string("track-list/3/selected", "no");
 
         // the jpn track is selected to match video program ID
         // even though the user requested eng subtitles

@@ -473,7 +473,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
  */
 // Return whether t1 is preferred over t2
 static bool compare_track(struct track *t1, struct track *t2, char **langs, bool os_langs,
-                          struct MPOpts *opts, int preferred_program)
+                          struct MPOpts *opts)
 {
     bool sub = t2->type == STREAM_SUB;
     bool ext1 = t1->is_external && !t1->no_default;
@@ -486,11 +486,6 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
     }
     if (t1->auto_loaded != t2->auto_loaded)
         return !t1->auto_loaded;
-    if (preferred_program != -1 && t1->program_id != -1 && t2->program_id != -1) {
-        if ((t1->program_id == preferred_program) !=
-            (t2->program_id == preferred_program))
-            return t1->program_id == preferred_program;
-    }
     int l1 = mp_match_lang(langs, t1->lang), l2 = mp_match_lang(langs, t2->lang);
     if (!os_langs && l1 != l2)
         return l1 > l2;
@@ -605,6 +600,9 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             continue;
         if (!opts->autoload_files && track->is_external)
             continue;
+        if (preferred_program != -1 && !track->is_external &&
+            track->program_id != -1 && track->program_id != preferred_program)
+            continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
         if (sub) {
@@ -623,7 +621,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                 continue;
             track->forced_select = forced;
         }
-        if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts, preferred_program)) {
+        if (!pick || compare_track(track, pick, langs, os_langs, mpctx->opts)) {
             pick = track;
         }
     }
