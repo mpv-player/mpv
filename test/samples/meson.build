@@ -2,7 +2,7 @@
 video = custom_target('video.mkv',
     output: 'video.mkv',
     command: [ffmpeg, '-v', 'error', '-y', '-f', 'lavfi', '-i',
-              'testsrc=duration=2:size=1280x720', '@OUTPUT@'],
+              'testsrc=duration=2:size=1280x720', '-c:v', 'mpeg2video', '@OUTPUT@'],
 )
 
 audio = custom_target('audio.flac',
