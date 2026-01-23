@@ -2327,6 +2327,10 @@ static void supported_coefficients_and_ranges(void *data, struct wp_color_repres
     struct vo_wayland_state *wl = data;
     int offset = range == WP_COLOR_REPRESENTATION_SURFACE_V1_RANGE_FULL ? 0 : PL_COLOR_SYSTEM_COUNT;
     switch (coefficients) {
+    case WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_IDENTITY:
+        wl->coefficients_map[PL_COLOR_SYSTEM_RGB] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_IDENTITY;
+        wl->range_map[PL_COLOR_SYSTEM_RGB + offset] = range;
+        break;
     case WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_BT709:
         wl->coefficients_map[PL_COLOR_SYSTEM_BT_709] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_BT709;
         wl->range_map[PL_COLOR_SYSTEM_BT_709 + offset] = range;
