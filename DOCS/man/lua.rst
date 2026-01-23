@@ -929,7 +929,12 @@ REPL.
         the text in the console.
 
     ``keep_open``
-        Whether to keep the console open on submit. Defaults to ``false``.
+        Whether to keep the console open on submit, allowing further input.
+        Defaults to ``false``.
+
+        If calling ``input.get()`` or ``input.select()`` again from inside the
+        ``submit`` callback, setting this option to ``true`` allows a seamless
+        transition without the console closing and reopening.
 
     ``opened``
         A callback invoked when the console is shown. This can be used to
@@ -1028,7 +1033,12 @@ REPL.
         the 1-based index of the selected item.
 
     ``keep_open``
-        Whether to keep the console open on submit. Defaults to ``false``.
+        Whether to keep the console open on submit, allowing further input.
+        Defaults to ``false``.
+
+        If calling ``input.get()`` or ``input.select()`` again from inside the
+        ``submit`` callback, setting this option to ``true`` allows a seamless
+        transition without the console closing and reopening.
 
     Example:
 
