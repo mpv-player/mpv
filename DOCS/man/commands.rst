@@ -27,7 +27,7 @@ Commands
         ``% script-message-to commands type "seek  absolute-percent" 6``
             Enter a percent position to seek to.
 
-        ``Ctrl+o script-message-to console type "loadfile ''" 11``
+        ``Ctrl+o script-message-to commands type "loadfile ''" 11``
             Enter a file or URL to play, with autocompletion of paths in the
             filesystem.
 
