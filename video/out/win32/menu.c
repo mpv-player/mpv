@@ -28,22 +28,26 @@ struct menu_ctx {
     HWND  hwnd;
     bool  updated;
     HMENU menu;
+    HMENU sys_menu;
     void *ta_data; // talloc context for MENUITEMINFOW.dwItemData
 };
 
+#define SYS_MENU_MPV_START_ID (WM_USER + 100) // separator + submenu
+#define MENU_MPV_START_ID (SYS_MENU_MPV_START_ID + 2)
+
 // append menu item to HMENU
 static int append_menu(HMENU hmenu, UINT fMask, UINT fType, UINT fState,
-                       wchar_t *title, HMENU submenu, void *data)
+                       wchar_t *title, HMENU submenu, UINT item_id, void *data)
 {
-    static UINT id = WM_USER + 100;
+    static UINT id = MENU_MPV_START_ID;
     MENUITEMINFOW mii = {0};
 
     mii.cbSize = sizeof(mii);
     mii.fMask = MIIM_ID | fMask;
-    mii.wID = id++;
+    mii.wID = item_id ? item_id : id++;
     // menu id must be less than 0xF000 and greater than WM_USER
     if (id >= 0xF000)
-        id = WM_USER + 100;
+        id = MENU_MPV_START_ID;
 
     if (fMask & MIIM_FTYPE)
         mii.fType = fType;
@@ -157,7 +161,7 @@ static void build_menu(void *talloc_ctx, HMENU hmenu, struct mpv_node *node)
             continue;
 
         if (strcmp(type, "separator") == 0) {
-            append_menu(hmenu, MIIM_FTYPE, MFT_SEPARATOR, 0, NULL, NULL, NULL);
+            append_menu(hmenu, MIIM_FTYPE, MFT_SEPARATOR, 0, NULL, NULL, 0, NULL);
         } else {
             if (title == NULL || title[0] == '\0')
                 continue;
@@ -176,7 +180,7 @@ static void build_menu(void *talloc_ctx, HMENU hmenu, struct mpv_node *node)
             }
             int id = append_menu(hmenu, fMask, 0, (UINT)fState,
                                  build_title(talloc_ctx, title, shortcut),
-                                 submenu, talloc_strdup(talloc_ctx, cmd));
+                                 submenu, 0, talloc_strdup(talloc_ctx, cmd));
             if (id > 0 && grayed)
                 EnableMenuItem(hmenu, id, MF_BYCOMMAND | MF_GRAYED);
         }
@@ -189,12 +193,18 @@ struct menu_ctx *mp_win32_menu_init(HWND hwnd)
     ctx->hwnd = hwnd;
     ctx->updated = false;
     ctx->menu = CreatePopupMenu();
+    ctx->sys_menu = GetSystemMenu(hwnd, FALSE);
     ctx->ta_data = talloc_new(ctx);
+    append_menu(ctx->sys_menu, MIIM_FTYPE, MFT_SEPARATOR, 0, NULL, NULL,
+                SYS_MENU_MPV_START_ID + 0, NULL);
+    append_menu(ctx->sys_menu, MIIM_STRING | MIIM_SUBMENU, 0, 0, L"mpv", ctx->menu,
+                SYS_MENU_MPV_START_ID + 1, NULL);
     return ctx;
 }
 
 void mp_win32_menu_uninit(struct menu_ctx *ctx)
 {
+    GetSystemMenu(ctx->hwnd, TRUE);
     DestroyMenu(ctx->menu);
     talloc_free(ctx);
 }
@@ -224,18 +234,18 @@ void mp_win32_menu_update(struct menu_ctx *ctx, struct mpv_node *data)
         DeleteMenu(ctx->menu, 0, MF_BYPOSITION);
     talloc_free_children(ctx->ta_data);
 
+    bool has_menu = data->format == MPV_FORMAT_NODE_ARRAY &&
+                    data->u.list->num > 0;
+
+    EnableMenuItem(ctx->sys_menu, SYS_MENU_MPV_START_ID + 0, MF_BYCOMMAND |
+                   (has_menu ? MF_ENABLED : MF_GRAYED));
+    EnableMenuItem(ctx->sys_menu, SYS_MENU_MPV_START_ID + 1, MF_BYCOMMAND |
+                   (has_menu ? MF_ENABLED : MF_GRAYED));
+
+    if (!has_menu)
+        return;
+
     build_menu(ctx->ta_data, ctx->menu, data);
-    if (!ctx->updated) {
-        append_menu(GetSystemMenu(ctx->hwnd, FALSE), MIIM_FTYPE, MFT_SEPARATOR, 0, NULL, NULL, NULL);
-        append_menu(GetSystemMenu(ctx->hwnd, FALSE), MIIM_STRING | MIIM_SUBMENU, 0, 0,
-                    build_title(ctx->ta_data, "mpv", NULL), ctx->menu, NULL);
-        ctx->updated = true;
-    } else if (data->format != MPV_FORMAT_NODE_ARRAY) {
-        // recreate ctx->menu because it is destroyed here
-        GetSystemMenu(ctx->hwnd, TRUE);
-        ctx->menu = CreatePopupMenu();
-        ctx->updated = false;
-    }
 }
 
 const char* mp_win32_menu_get_cmd(struct menu_ctx *ctx, UINT id)
