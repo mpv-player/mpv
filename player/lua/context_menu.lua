@@ -128,6 +128,24 @@ local function get_right_aligned_text(item)
            (item.submenu and "▸" or "")
 end
 
+local function set_hint(item)
+    if not item.title then
+        return
+    end
+
+    local hint_pos, _, hint = item.title:find("^&([^&])")
+
+    if not hint_pos then
+        hint_pos, _, hint = item.title:find("[^&]&([^&])")
+        if hint_pos then
+            hint_pos = hint_pos + 1
+        end
+    end
+
+    item.hint_pos = hint_pos
+    item.hint = hint
+end
+
 local function calculate_width(menu_items, osd_w, osd_h, checkbox)
     local titles = {}
     for _, item in pairs(menu_items) do
@@ -185,6 +203,7 @@ local function add_menu(menu_items, x, y)
     for _, item in ipairs(menu_items) do
         if not has_state(item, "hidden") then
             visible_items[#visible_items + 1] = item
+            set_hint(item)
         end
     end
 
@@ -274,7 +293,13 @@ local function append_item(ass, menu, level, style, item, item_y,
         ass:append("{\\1a&HFF&}✔ {\\1a&}")
     end
 
-    ass:append(escape(item.title))
+    if item.hint then
+        ass:append(escape(item.title:sub(1, item.hint_pos - 1):gsub("&&", "&")) ..
+                   "{\\u1}" .. item.hint .. "{\\u}"  ..
+                   escape(item.title:sub(item.hint_pos + 2):gsub("&&", "&")))
+    else
+        ass:append(escape(item.title:gsub("&&", "&")))
+    end
 
     if item.submenu or item.shortcut then
         ass:new_event()
@@ -576,7 +601,7 @@ local function activate_shortcut(info)
    end
 
    for i, item in ipairs(items[focused_level]) do
-        if (item.data.title or ""):sub(1, 1):lower() == info.key_text then
+        if (item.data.hint or ""):lower() == info.key_text then
            focused_index = i
            activate_focused_item(true)
            break
