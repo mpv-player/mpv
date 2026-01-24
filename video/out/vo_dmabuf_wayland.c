@@ -743,6 +743,7 @@ done:
     p->target_params = img->params;
     // Restore fallback layer parameters if available.
     mp_image_params_restore_dovi_mapping(&p->target_params);
+    mp_image_params_guess_csp(&p->target_params);
     // Strip metadata that is not understood anyway.
     struct pl_hdr_metadata *hdr = &p->target_params.color.hdr;
     hdr->scene_max[0] = hdr->scene_max[1] = hdr->scene_max[2] = 0;
