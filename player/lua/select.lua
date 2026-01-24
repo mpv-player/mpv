@@ -690,7 +690,11 @@ mp.add_key_binding(nil, "menu", function ()
     local text_sub_selected = false
     local is_disc = mp.get_property("current-demuxer") == "disc"
 
-    local image_sub_codecs = {["dvd_subtitle"] = true, ["hdmv_pgs_subtitle"] = true}
+    local image_sub_codecs = {
+        ["dvb_subtitle"] = true,
+        ["dvd_subtitle"] = true,
+        ["hdmv_pgs_subtitle"] = true,
+    }
 
     for _, track in pairs(mp.get_property_native("track-list")) do
         if track.type == "sub" then
