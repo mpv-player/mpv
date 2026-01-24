@@ -133,7 +133,8 @@ struct vo_internal {
 
     bool hasframe;
     bool hasframe_rendered;
-    bool request_redraw;            // redraw request from player to VO
+    uint32_t redraw_req_id;         // redraw request from player to VO
+    uint32_t last_redraw_id;        // last handled redraw request
     bool want_redraw;               // redraw request from VO to player
     bool send_reset;                // send VOCTRL_RESET
     bool paused;
@@ -994,8 +995,9 @@ static bool render_frame(struct vo *vo)
         in->prev_vsync = now;
     in->expecting_vsync = use_vsync;
 
-    // Store the initial value before we unlock.
-    bool request_redraw = in->request_redraw;
+    // We store the id here to detect if new requests come in
+    // while we are unlocked and rendering.
+    uint32_t redraw_req_id = in->redraw_req_id;
 
     if (in->dropped_frame) {
         in->drop_count += 1;
@@ -1053,14 +1055,17 @@ static bool render_frame(struct vo *vo)
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
     } else {
-        // If the initial redraw request was true or mpv is still playing,
-        // then we can clear it here since we just performed a redraw, or the
-        // next loop will draw what we need. However if there initially is
-        // no redraw request, then something can change this (i.e. the OSD)
-        // while the vo was unlocked. If we are paused, don't touch
-        // in->request_redraw in that case.
-        if (request_redraw || !in->paused)
-            in->request_redraw = false;
+        // If playing (!paused), we set the last_redraw_id to the newest redraw_req_id
+        // because the next render loop will handle it anyway.
+        // If paused, we set the last_redraw_id to the redraw_req_id
+        // we snapshot before unlocking and just handled.
+        // Since new requests will have a differing id, the vo_thread will detect the mismatch
+        // and handle the redraw.
+        if (!in->paused) {
+            in->last_redraw_id = in->redraw_req_id;
+        } else {
+            in->last_redraw_id = redraw_req_id;
+        }
     }
 
     if (in->current_frame && in->current_frame->num_vsyncs &&
@@ -1088,7 +1093,7 @@ static void do_redraw(struct vo *vo)
         return;
 
     mp_mutex_lock(&in->lock);
-    in->request_redraw = false;
+    in->last_redraw_id = in->redraw_req_id;
 
     if (vo->driver->caps & (VO_CAP_NORETAIN | VO_CAP_UNTIMED)) {
         mp_mutex_unlock(&in->lock);
@@ -1179,7 +1184,7 @@ static MP_THREAD_VOID vo_thread(void *ptr)
             in->wakeup_on_done = false;
         }
         vo->want_redraw = false;
-        bool redraw = in->request_redraw;
+        bool redraw = in->redraw_req_id != in->last_redraw_id;
         bool send_reset = in->send_reset;
         in->send_reset = false;
         bool send_pause = in->paused != vo_paused;
@@ -1237,8 +1242,8 @@ void vo_set_paused(struct vo *vo, bool paused)
     mp_mutex_lock(&in->lock);
     if (in->paused != paused) {
         in->paused = paused;
-        if (in->paused && in->dropped_frame) {
-            in->request_redraw = true;
+        if (in->paused) {
+            in->redraw_req_id++;
             wakeup_core(vo);
         }
         reset_vsync_timings(vo);
@@ -1267,8 +1272,13 @@ void vo_redraw(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
-    if (!in->request_redraw) {
-        in->request_redraw = true;
+    // Increment redraw_req_id if the VO is currently up-to-date,
+    // or if the VO is busy rendering.
+    // If rendering, the VO thread is processing a previous request snapshot.
+    // We increment the counter to ensure this new request is not lost/coalesced,
+    // so a second redraw is forced after the current one completes.
+    if (in->redraw_req_id == in->last_redraw_id || in->rendering) {
+        in->redraw_req_id++;
         in->want_redraw = false;
         wakeup_locked(vo);
     }
