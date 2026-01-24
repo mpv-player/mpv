@@ -1,0 +1,6 @@
+[wrap-file]
+directory = phf-0.11.3
+source_url =  https://crates.io/api/v1/crates/phf/0.11.3/download
+source_filename = phf-0.11.3.tar.gz
+source_hash = 1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078
+patch_directory = phf

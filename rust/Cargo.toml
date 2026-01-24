@@ -1,0 +1,11 @@
+[package]
+name = "libmpv_rs"
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+# Using git version for unreleased ISO 639-2{t,b} support
+isolang = { git = "https://github.com/humenda/isolang-rs", rev = "2e184a9a9d29d82561aedf2a3f5b91b9b78c7d1f" }
+language-tags = "0.3.2"

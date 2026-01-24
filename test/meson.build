@@ -14,7 +14,6 @@ test_utils_files = [
     'misc/bstr.c',
     'misc/dispatch.c',
     'misc/json.c',
-    'misc/language.c',
     'misc/node.c',
     'misc/path_utils.c',
     'misc/random.c',
@@ -102,7 +101,7 @@ test('timer', timer)
 format = executable('format', files('format.c'), include_directories: incdir, link_with: test_utils)
 test('format', format)
 
-language = executable('language', files('language.c'), include_directories: incdir, link_with: test_utils)
+language = executable('language', files('language.c'), include_directories: incdir, link_with: [test_utils, libmpv_rs])
 test('language', language)
 
 codepoint_width = executable('codepoint-width', files('codepoint_width.c'),

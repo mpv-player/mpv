@@ -1,6 +1,4 @@
 /*
- * Language code utility functions
- *
  * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or
@@ -17,17 +15,4 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_LANGUAGE_H
-#define MP_LANGUAGE_H
-
-#include "misc/bstr.h"
-#include "common/common.h"
-
-// Result numerically higher => better match. 0 == no match.
-int mp_match_lang(char **langs, const char *lang);
-char **mp_get_user_langs(void);
-bstr mp_guess_lang_from_filename(bstr name, int *lang_start, enum track_flags *flags);
-
-static_assert(sizeof(enum track_flags) == sizeof(int), "See enum TrackFlags in language.rs");
-
-#endif /* MP_LANGUAGE_H */
+pub mod language;
