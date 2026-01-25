@@ -1,0 +1,17 @@
+#!/bin/sh
+# Wrapper script for mpv on macOS
+# This script allows for specifying default command line arguments
+# while still accepting arguments passed when opening files
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Path to the actual mpv binary
+MPV_BINARY="$SCRIPT_DIR/mpv"
+
+# Default arguments can be specified here
+# Example: DEFAULT_ARGS="--force-window --keep-open"
+DEFAULT_ARGS=""
+
+# Execute mpv with default arguments followed by any passed arguments
+exec "$MPV_BINARY" $DEFAULT_ARGS "$@"
