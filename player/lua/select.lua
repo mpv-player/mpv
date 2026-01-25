@@ -556,7 +556,10 @@ mp.add_key_binding(nil, "select-binding", function ()
                (bindings[binding.key].is_weak and not binding.is_weak) or
                (binding.is_weak == bindings[binding.key].is_weak and
                 binding.priority > bindings[binding.key].priority)
-        ) then
+        ) and not binding.section:find("^input_forced_")
+          -- OSC sections
+          and binding.section ~= "input"
+          and binding.section ~= "window-controls" then
             bindings[binding.key] = binding
         end
     end
