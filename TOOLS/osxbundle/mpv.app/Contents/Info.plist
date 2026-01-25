@@ -117,7 +117,7 @@
       </dict>
     </array>
     <key>CFBundleExecutable</key>
-    <string>mpv</string>
+    <string>mpv-wrapper</string>
     <key>CFBundleIconFile</key>
     <string>icon</string>
     <key>CFBundleIconName</key>
