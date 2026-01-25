@@ -351,10 +351,13 @@ g-b
 g-r
     Show the values of all properties.
 
-g-m, MENU, Ctrl+p
+g-m, Ctrl+p
     Show a menu with miscellaneous entries.
 
 See `SELECT`_ for more information.
+
+MENU, Shift+F10
+    Show the context menu (see `CONTEXT MENU`_).
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
