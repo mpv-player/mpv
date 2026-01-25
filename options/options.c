@@ -1166,6 +1166,7 @@ static const struct MPOpts mp_default_opts = {
         "aid",
         "vid",
         "sid",
+        "sub-files",
         "sub-delay",
         "sub-speed",
         "sub-pos",

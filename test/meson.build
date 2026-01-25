@@ -130,6 +130,10 @@ if get_option('libmpv')
                      include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-options', exe, suite: 'libmpv')
 
+    exe = executable('libmpv-test-watch-later-integration', 'libmpv_test_watch_later_integration.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
+    test('libmpv-test-watch-later-integration', exe, args: file, suite: 'libmpv', timeout: 60)
+
     # Old versions of ffmpeg are bugged when setting forced tracks and older
     # versions of meson don't support the custom version checking argument.
     if meson.version().version_compare('>= 1.5.0')

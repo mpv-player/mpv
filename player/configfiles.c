@@ -343,6 +343,19 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
             fprintf(file, "%s=%f\n", pname, pos);
             continue;
         }
+
+        // Save external subtitle tracks added via sub-add or drag-and-drop.
+        // Skip auto-loaded subs (from sub-auto) as they'll be loaded again.
+        if (strcmp(pname, "sub-files") == 0) {
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                if (t->type == STREAM_SUB && t->is_external && 
+                    t->external_filename && !t->auto_loaded)
+                    fprintf(file, "sub-files-append=%s\n", t->external_filename);
+            }
+            continue;
+        }
+
         // Only store it if it's different from the initial value.
         if (m_config_watch_later_backup_opt_changed(mpctx->mconfig, pname)) {
             char *val = NULL;
