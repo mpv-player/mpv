@@ -14,4 +14,10 @@ MPV_BINARY="$SCRIPT_DIR/mpv"
 DEFAULT_ARGS=""
 
 # Execute mpv with default arguments followed by any passed arguments
-exec "$MPV_BINARY" $DEFAULT_ARGS "$@"
+# Note: DEFAULT_ARGS is intentionally unquoted to allow proper argument splitting
+if [ -n "$DEFAULT_ARGS" ]; then
+    # shellcheck disable=SC2086
+    exec "$MPV_BINARY" $DEFAULT_ARGS "$@"
+else
+    exec "$MPV_BINARY" "$@"
+fi
