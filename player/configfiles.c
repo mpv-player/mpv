@@ -338,6 +338,18 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     char **watch_later_options = mpctx->opts->watch_later_options;
     for (int i = 0; watch_later_options && watch_later_options[i]; i++) {
         char *pname = watch_later_options[i];
+
+        // Skip duplicate option names (e.g., from -add on an existing default)
+        bool duplicate = false;
+        for (int j = 0; j < i; j++) {
+            if (strcmp(watch_later_options[j], pname) == 0) {
+                duplicate = true;
+                break;
+            }
+        }
+        if (duplicate)
+            continue;
+
         // Always save start if we have it in the array.
         if (write_start && strcmp(pname, "start") == 0) {
             fprintf(file, "%s=%f\n", pname, pos);
