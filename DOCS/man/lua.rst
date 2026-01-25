@@ -950,6 +950,12 @@ REPL.
         The third and optional return value is a string that will be appended to
         the input line without displaying it in the completions.
 
+        A function is passed as the second argument to the callback. The return
+        values can instead be passed as arguments to this function, allowing
+        completions to be processed asynchronously. This function can only be
+        called once, and only for the latest complete event, in which case it returns
+        ``true``. Otherwise it does nothing and returns ``false``.
+
     ``autoselect_completion``
         Whether to automatically select the first completion on submit if one
         wasn't already manually selected. Defaults to ``false``.
