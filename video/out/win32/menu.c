@@ -197,7 +197,7 @@ struct menu_ctx *mp_win32_menu_init(HWND hwnd)
     ctx->ta_data = talloc_new(ctx);
     append_menu(ctx->sys_menu, MIIM_FTYPE, MFT_SEPARATOR, 0, NULL, NULL,
                 SYS_MENU_MPV_START_ID + 0, NULL);
-    append_menu(ctx->sys_menu, MIIM_STRING | MIIM_SUBMENU, 0, 0, L"mpv", ctx->menu,
+    append_menu(ctx->sys_menu, MIIM_STRING | MIIM_SUBMENU, 0, 0, L"mp&v", ctx->menu,
                 SYS_MENU_MPV_START_ID + 1, NULL);
     return ctx;
 }
