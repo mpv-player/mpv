@@ -346,13 +346,30 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
         // Save external subtitle tracks added via sub-add or drag-and-drop.
         // Skip auto-loaded subs (from sub-auto) as they'll be loaded again.
+        // Deduplicate by checking if we've already written this path.
         if (strcmp(pname, "sub-files") == 0) {
+            char **written = NULL;
+            int num_written = 0;
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *t = mpctx->tracks[n];
                 if (t->type == STREAM_SUB && t->is_external && 
                     t->external_filename && !t->auto_loaded)
-                    fprintf(file, "sub-files-append=%s\n", t->external_filename);
+                {
+                    // Check for duplicates
+                    bool already_written = false;
+                    for (int w = 0; w < num_written; w++) {
+                        if (strcmp(written[w], t->external_filename) == 0) {
+                            already_written = true;
+                            break;
+                        }
+                    }
+                    if (!already_written) {
+                        fprintf(file, "sub-files-append=%s\n", t->external_filename);
+                        MP_TARRAY_APPEND(NULL, written, num_written, t->external_filename);
+                    }
+                }
             }
+            talloc_free(written);
             continue;
         }
 
