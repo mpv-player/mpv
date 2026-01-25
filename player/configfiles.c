@@ -338,11 +338,53 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     char **watch_later_options = mpctx->opts->watch_later_options;
     for (int i = 0; watch_later_options && watch_later_options[i]; i++) {
         char *pname = watch_later_options[i];
+
+        // Skip duplicate option names (e.g., from -add on an existing default)
+        bool duplicate = false;
+        for (int j = 0; j < i; j++) {
+            if (strcmp(watch_later_options[j], pname) == 0) {
+                duplicate = true;
+                break;
+            }
+        }
+        if (duplicate)
+            continue;
+
         // Always save start if we have it in the array.
         if (write_start && strcmp(pname, "start") == 0) {
             fprintf(file, "%s=%f\n", pname, pos);
             continue;
         }
+
+        // Save external subtitle tracks added via sub-add or drag-and-drop.
+        // Skip auto-loaded subs (from sub-auto) as they'll be loaded again.
+        // Deduplicate by checking if we've already written this path.
+        if (strcmp(pname, "sub-files") == 0) {
+            char **written = NULL;
+            int num_written = 0;
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *t = mpctx->tracks[n];
+                if (t->type == STREAM_SUB && t->is_external && 
+                    t->external_filename && !t->auto_loaded)
+                {
+                    // Check for duplicates
+                    bool already_written = false;
+                    for (int w = 0; w < num_written; w++) {
+                        if (strcmp(written[w], t->external_filename) == 0) {
+                            already_written = true;
+                            break;
+                        }
+                    }
+                    if (!already_written) {
+                        fprintf(file, "sub-files-append=%s\n", t->external_filename);
+                        MP_TARRAY_APPEND(NULL, written, num_written, t->external_filename);
+                    }
+                }
+            }
+            talloc_free(written);
+            continue;
+        }
+
         // Only store it if it's different from the initial value.
         if (m_config_watch_later_backup_opt_changed(mpctx->mconfig, pname)) {
             char *val = NULL;
