@@ -62,6 +62,16 @@ static bool wayland_egl_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
+static pl_color_space_t wayland_egl_preferred_csp(struct ra_ctx *ctx)
+{
+    pl_color_space_t pref = vo_wayland_preferred_csp(ctx->vo);
+    // We do not support color management for OpenGL, but if it matches transfer
+    // we still can use luminance information.
+    if (pref.transfer == PL_COLOR_TRC_GAMMA22 || pref.transfer == PL_COLOR_TRC_SRGB)
+        return pref;
+    return pl_color_space_srgb;
+}
+
 static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -108,6 +118,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
+        .preferred_csp      = wayland_egl_preferred_csp,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,
     };
