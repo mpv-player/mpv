@@ -1271,6 +1271,22 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             target.color.transfer = frame->current->params.color.transfer;
         }
     }
+#ifdef __linux__
+    // This is a nasty break of abstraction, but we are constrained by Vulkan WSI.
+    // We are not only breaking module separation here, but also depending on
+    // Mesa specific behavior... oh well.
+    // Mesa's Wayland Vulkan WSI doesn't set primary color volume luminance
+    // values, only HDR metadata as requested by vkSetHdrMetadataEXT.
+    // However, for BT.1886 transfer function, proper luminance values are
+    // required to agree with compositor, so we have to override them.
+    // Instead of doing correct thing (like using Wayland protocol directly),
+    // let's hardcode the luminance values.
+    if (!target_unknown && strict_sw_params && target.color.transfer == PL_COLOR_TRC_BT_1886) {
+        target.color.hdr.max_luma = PL_COLOR_SDR_WHITE;
+        // 10_000:1 contrast, as defined default for BT.1886 in Wayland protocol.
+        target.color.hdr.min_luma = target.color.hdr.max_luma / 10000;
+    }
+#endif
     if (target.color.transfer == PL_COLOR_TRC_SRGB) {
         // sRGB reference display is pure 2.2 power function, see IEC 61966-2-1-1999.
         if (opts->treat_srgb_as_power22 & 2)
