@@ -874,6 +874,11 @@ Program Behavior
     Show the description and content of a profile. Lists all profiles if no
     parameter is provided.
 
+``--apply-image-profile=<yes|no>``
+    Whether to apply the ``builtin-image`` profile and enable the ``image``
+    input section when viewing an image without audio, and to restore them when
+    switching to a video or audio file (default: yes).
+
 ``--use-filedir-conf``
     Look for a file-specific configuration file in the same directory as the
     file that is being played. See `File-specific Configuration Files`_.
@@ -1624,7 +1629,7 @@ Video
                 aspect ratio is not set. This is apparently the default behavior
                 with XBMC/kodi, at least with Matroska.
     :ignore:    Disable aspect ratio handling, pretend the video has square
-                pixels.
+                pixels. This is the default for images.
 
     The current default for mpv is ``container``.
 
@@ -1721,11 +1726,11 @@ Video
     when the video becomes smaller than the window in the respective direction
 
     After zooming in until the video is bigger than the window, panning with
-    `--video-align-x` and/or `--video-align-y`, and zooming out until the video
-    is smaller than the window, this is useful to recenter the video in the
-    window.
+    ``--video-align-x`` and/or ``--video-align-y``, and zooming out until the
+    video is smaller than the window, this is useful to recenter the video in
+    the window.
 
-    Default: no.
+    Default: no. The default is changed to yes for images.
 
 ``--video-margin-ratio-left=<val>``, ``--video-margin-ratio-right=<val>``, ``--video-margin-ratio-top=<val>``, ``--video-margin-ratio-bottom=<val>``
     Set extra video margins on each border (default: 0). Each value is a ratio
@@ -3442,7 +3447,7 @@ Window
     (Windows only)
     Enable/disable playback progress rendering in taskbar (Windows 7 and above).
 
-    Enabled by default.
+    Enabled by default, except for images.
 
 ``--snap-window``
     (Windows only) Snap the player window to screen edges.
@@ -4556,6 +4561,9 @@ Input
 
     Note that disabling the preprocessing does not affect any filtering done
     by the OS/driver before these events are delivered to mpv, if any.
+
+    This defaults to no for images to allow diagonal panning when the touchpad
+    is bound to pan commands.
 
 ``--input-right-alt-gr=<yes|no>``
     (macOS and Windows only)
