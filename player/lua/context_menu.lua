@@ -601,7 +601,7 @@ local function activate_shortcut(info)
    end
 
    for i, item in ipairs(items[focused_level]) do
-        if (item.data.hint or ""):lower() == info.key_text then
+        if (item.data.hint or ""):lower() == info.key_text:lower() then
            focused_index = i
            activate_focused_item(true)
            break
