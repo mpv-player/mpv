@@ -276,6 +276,7 @@ typedef struct MPOpts {
     char *osd_status_msg;
     char *osd_msg[3];
     int playlist_entry_name;
+    int max_track_url_title_max_length;
     int player_idle_mode;
     char **input_commands;
     bool consolecontrols;

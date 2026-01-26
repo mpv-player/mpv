@@ -893,6 +893,8 @@ static const m_option_t mp_opts[] = {
 
     {"osd-playlist-entry", OPT_CHOICE(playlist_entry_name,
         {"title", 0}, {"filename", 1}, {"both", 2})},
+    {"osd-track-url-title-max-length", OPT_INT(max_track_url_title_max_length),
+        M_RANGE(0, INT_MAX)},
 
     {"video-osd", OPT_BOOL(video_osd), .flags = UPDATE_OSD},
 
@@ -1004,6 +1006,7 @@ static const struct MPOpts mp_default_opts = {
     .osd_level = 1,
     .osd_on_seek = 1,
     .osd_duration = 1000,
+    .max_track_url_title_max_length = 90,
 #if HAVE_LUA
     .lua_load_osc = true,
     .lua_load_ytdl = true,
