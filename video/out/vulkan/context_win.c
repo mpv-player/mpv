@@ -52,7 +52,7 @@ static int color_depth(struct ra_ctx *ctx)
     return -1;
 }
 
-static struct pl_color_space preferred_csp(struct ra_ctx *ctx)
+static struct pl_color_space preferred_csp(struct ra_ctx *ctx, float source_max_luma)
 {
     struct priv *p = ctx->priv;
 
