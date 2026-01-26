@@ -590,6 +590,14 @@ local function handle_click()
     activate_focused_item()
 end
 
+local function handle_esc()
+    if focused_level > 1 then
+        close_submenu()
+    else
+        close()
+    end
+end
+
 local function activate_shortcut(info)
     if info.event == "up" then
         return
@@ -623,7 +631,7 @@ local bindings = {
     PGUP = focus_first,
     PGDWN = focus_last,
     ENTER = function () activate_focused_item(true) end,
-    ESC = function () close() end,
+    ESC = handle_esc,
     ANY_UNICODE = activate_shortcut,
 }
 for _, key in pairs({"UP", "DOWN", "LEFT", "RIGHT", "HOME", "END", "PGUP",
