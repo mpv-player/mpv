@@ -1,0 +1,1 @@
+add `hwdec-min-size` and set its default to 360

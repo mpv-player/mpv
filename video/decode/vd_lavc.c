@@ -141,6 +141,7 @@ struct hwdec_opts {
     int hwdec_image_format;
     int hwdec_extra_frames;
     int hwdec_threads;
+    int hwdec_min_size;
 };
 
 const struct m_sub_options hwdec_conf = {
@@ -158,6 +159,8 @@ const struct m_sub_options hwdec_conf = {
             {"no", INT_MAX}, {"yes", 1}), M_RANGE(1, INT_MAX),
             .flags = UPDATE_HWDEC},
         {"hwdec-threads", OPT_INT(hwdec_threads), M_RANGE(0, DBL_MAX)},
+        {"hwdec-min-size", OPT_INT(hwdec_min_size), M_RANGE(0, INT_MAX),
+            .flags = UPDATE_HWDEC},
         {"vd-lavc-software-fallback", OPT_REPLACED("hwdec-software-fallback")},
         {0}
     },
@@ -172,6 +175,7 @@ const struct m_sub_options hwdec_conf = {
         // interpolation, this value has to be increased too.
         .hwdec_extra_frames = 6,
         .hwdec_threads = 4,
+        .hwdec_min_size = 360,
     },
 };
 
@@ -527,6 +531,13 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         } else if (!hwdec_codec_allowed(vd, codec)) {
             MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
                     "on whitelist.\n", codec);
+            break;
+        } else if (MPMAX(ctx->codec->disp_h, ctx->codec->disp_w) <
+                         ctx->hwdec_opts->hwdec_min_size) {
+            MP_VERBOSE(vd, "Not trying to use hardware decoding: "
+                           "video resolution %dx%d is below minimum %d.\n",
+                       ctx->codec->disp_w, ctx->codec->disp_h,
+                       ctx->hwdec_opts->hwdec_min_size);
             break;
         } else {
             bool hwdec_name_supported = false;  // relevant only if !hwdec_auto

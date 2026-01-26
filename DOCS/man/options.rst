@@ -1556,6 +1556,13 @@ Video
     older hardware. d3d11va can always use ``yuv420p``, which uses an opaque
     format, with likely no advantages.
 
+``--hwdec-min-size=<number>``
+    Minimum size in pixels for hwdec to be used. Hardware decoding will only be
+    attempted if either the height or width is equal to or greater than this
+    value. This can be used to avoid using hwdec for small videos where CPU
+    decoding may be more efficient than hardware decoding. Setting to 0 disables
+    this check. (Default: 360)
+
 ``--cuda-decode-device=<auto|0..>``
     Choose the GPU device used for decoding when using the ``cuda`` or
     ``nvdec`` hwdecs with the OpenGL GPU backend, and with the ``cuda-copy``
