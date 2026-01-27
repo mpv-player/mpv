@@ -2149,6 +2149,14 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
             MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
             wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
         }
+        // In SDR output everything is relative, so rescale reference white
+        // to PL_COLOR_SDR_WHITE
+        if (!pl_color_space_is_hdr(&wl->preferred_csp)) {
+            wl->preferred_csp.hdr.min_luma *= PL_COLOR_SDR_WHITE / wd->ref_luma;
+            wl->preferred_csp.hdr.max_luma *= PL_COLOR_SDR_WHITE / wd->ref_luma;
+            wl->preferred_csp.hdr.max_cll  *= PL_COLOR_SDR_WHITE / wd->ref_luma;
+            wl->preferred_csp.hdr.max_fall *= PL_COLOR_SDR_WHITE / wd->ref_luma;
+        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
