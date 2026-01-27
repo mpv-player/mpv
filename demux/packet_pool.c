@@ -79,6 +79,10 @@ void demux_packet_pool_push(struct demux_packet_pool *pool,
     if (!dp)
         return;
     dp->next = NULL;
+    // On single packet push, clear instantly. Unlike prepend, where multiple
+    // packets may be prepended at once, there is no performance issue with
+    // clearing a single packet here.
+    demux_packet_unref(dp);
     demux_packet_pool_prepend(pool, dp, dp);
 }
 
