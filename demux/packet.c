@@ -85,13 +85,13 @@ void demux_packet_unref(struct demux_packet *dp)
 static struct demux_packet *packet_create(struct demux_packet_pool *pool)
 {
     struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
-    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
     if (!dp) {
         dp = talloc(NULL, struct demux_packet);
         talloc_set_destructor(dp, packet_destroy);
+        set_packet_defaults(dp);
     }
-    set_packet_defaults(dp);
-    dp->avpacket = avpkt ? avpkt : av_packet_alloc();
+    if (!dp->avpacket)
+        dp->avpacket = av_packet_alloc();
     MP_HANDLE_OOM(dp->avpacket);
     return dp;
 }
