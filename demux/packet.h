@@ -95,5 +95,6 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
                                      void *data, size_t size);
 
 void demux_packet_unref_contents(struct demux_packet *dp);
+void demux_packet_unref(struct demux_packet *dp);
 
 #endif /* MPLAYER_DEMUX_PACKET_H */
