@@ -54,13 +54,8 @@ static void packet_destroy(void *ptr)
     demux_packet_unref_contents(dp);
 }
 
-static struct demux_packet *packet_create(struct demux_packet_pool *pool)
+static void set_packet_defaults(struct demux_packet *dp)
 {
-    struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
-    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
-    if (!dp)
-        dp = talloc(NULL, struct demux_packet);
-    talloc_set_destructor(dp, packet_destroy);
     *dp = (struct demux_packet) {
         .pts = MP_NOPTS_VALUE,
         .dts = MP_NOPTS_VALUE,
@@ -71,6 +66,31 @@ static struct demux_packet *packet_create(struct demux_packet_pool *pool)
         .stream = -1,
         .animated = -1,
     };
+}
+
+// This frees a packet backing allocations, but does not free dp itself, or
+// AVPacket inside dp, which is restored to default state.
+void demux_packet_unref(struct demux_packet *dp)
+{
+    if (!dp)
+        return;
+    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
+    if (avpkt)
+        av_packet_unref(avpkt);
+    ta_free_children(dp);
+    set_packet_defaults(dp);
+    dp->avpacket = avpkt;
+}
+
+static struct demux_packet *packet_create(struct demux_packet_pool *pool)
+{
+    struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
+    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
+    if (!dp) {
+        dp = talloc(NULL, struct demux_packet);
+        talloc_set_destructor(dp, packet_destroy);
+    }
+    set_packet_defaults(dp);
     dp->avpacket = avpkt ? avpkt : av_packet_alloc();
     MP_HANDLE_OOM(dp->avpacket);
     return dp;
