@@ -373,10 +373,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             .tex = entry->tex,
             .parts = entry->parts,
             .num_parts = entry->num_parts,
-            .color = {
-                .primaries = PL_COLOR_PRIM_BT_709,
-                .transfer = PL_COLOR_TRC_SRGB,
-            },
+            .color = pl_color_space_srgb,
             .coords = coords,
         };
 

@@ -3038,13 +3038,8 @@ static void pass_draw_osd(struct gl_video *p, int osd_flags, int frame_flags,
         // When subtitles need to be color managed, assume they're in sRGB
         // (for lack of anything saner to do)
         if (cms) {
-            static const struct pl_color_space csp_srgb = {
-                .primaries = PL_COLOR_PRIM_BT_709,
-                .transfer = PL_COLOR_TRC_SRGB,
-            };
-
-            pass_colormanage(p, csp_srgb, MP_CSP_LIGHT_DISPLAY, &fbo->color_space,
-                             frame_flags, true);
+            pass_colormanage(p, pl_color_space_srgb, MP_CSP_LIGHT_DISPLAY,
+                             &fbo->color_space, frame_flags, true);
         }
         mpgl_osd_draw_finish(p->osd, n, p->sc, fbo);
     }

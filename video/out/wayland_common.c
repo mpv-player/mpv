@@ -4252,7 +4252,7 @@ bool vo_wayland_init(struct vo *vo)
         .cursor_visible = true,
         .last_zero_copy = -1,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
-        .preferred_csp = (struct pl_color_space) { .transfer = PL_COLOR_TRC_SRGB, .primaries = PL_COLOR_PRIM_BT_709 },
+        .preferred_csp = pl_color_space_srgb,
     };
     wl->opts = wl->opts_cache->opts;
 
