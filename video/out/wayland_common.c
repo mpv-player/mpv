@@ -2149,6 +2149,13 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     if (!wd->icc_file) {
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, wd);
+        // We don't support extended ranges output where luminance exceeds
+        // maximum nominal luminance range (1.0), so switch to PQ.
+        if (fabsf(wd->csp.hdr.max_luma / wd->ref_luma - 1.0f) > 1e-4f &&
+            !pl_color_transfer_is_hdr(wd->csp.transfer)) {
+            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
+            wd->csp.transfer = PL_COLOR_TRC_PQ;
+        }
         // Wayland luminances are always in reference to the reference luminance. That is,
         // if max_luma == 2*ref_luma, then there is 2x headroom above paper white. On the
         // other hand, libplacebo hardcodes PL_COLOR_SDR_WHITE as the reference luminance.
@@ -2156,13 +2163,17 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         // otherwise libplacebo will assume that there is too little or too much headroom
         // when ref_luma != PL_COLOR_SDR_WHITE.
         float a = wd->min_luma;
-        float b = (PL_COLOR_SDR_WHITE - PL_COLOR_HDR_BLACK) / (wd->ref_luma - a);
-        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + PL_COLOR_HDR_BLACK;
-        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + PL_COLOR_HDR_BLACK;
+        // Wayland treats all transfers as display referred, don't scale min
+        // luminance, and hope compositors will do the right thing mapping it,
+        // or to be specific, not mapping it, because we set the same value.
+        float c = wd->min_luma;
+        float b = (PL_COLOR_SDR_WHITE - c) / (wd->ref_luma - a);
+        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + c;
+        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + c;
         if (wd->csp.hdr.max_cll != 0)
-            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + c;
         if (wd->csp.hdr.max_fall != 0)
-            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + c;
         // Ensure that min_luma doesn't become negative.
         wd->csp.hdr.min_luma = MPMAX(wd->csp.hdr.min_luma, 0.0);
         // Since we want to do some exact comparisons of max_luma with PL_COLOR_SDR_WHITE,
@@ -2175,10 +2186,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
                 wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
         }
         wl->preferred_csp = wd->csp;
-        if (wd->csp.hdr.max_luma != PL_COLOR_SDR_WHITE && !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
-        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
