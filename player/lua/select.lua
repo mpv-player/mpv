@@ -820,9 +820,24 @@ local function on_property_change(name, value)
     end
 end
 
+local none_getters = {
+    -- Only retrieve playlist when playlist-count is not huge to not kill
+    -- performance. playlist is observed with type none to receive every
+    -- MP_EVENT_CHANGE_PLAYLIST.
+    playlist = function ()
+        if mp.get_property_native("playlist-count") < 100 then
+            return mp.get_property_native("playlist")
+        end
+    end,
+}
+
+local function on_none_property_change(name)
+    on_property_change(name, none_getters[name]())
+end
+
 function _G.get(name, default)
     if not observed_properties[name] then
-        local result, err = mp.get_property_native(name)
+        local result, err = (none_getters[name] or mp.get_property_native)(name)
 
         if err == "property not found" and not property_set(name:match("^([^/]+)")) then
             mp.msg.error("Property '" .. name .. "' was not found.")
@@ -831,7 +846,12 @@ function _G.get(name, default)
 
         observed_properties[name] = true
         property_cache[name] = result
-        mp.observe_property(name, "native", on_property_change)
+
+        if none_getters[name] then
+            mp.observe_property(name, "none", on_none_property_change)
+        else
+            mp.observe_property(name, "native", on_property_change)
+        end
     end
 
     if current_item then
@@ -995,18 +1015,14 @@ local function clamp_submenu(submenu, max, cmd)
 end
 
 local function playlist()
-    -- playlist is NOT observed. Observe playlist-count and playlist-pos and
-    -- only retrieve playlist when playlist-count is not huge to not kill
-    -- performance.
-    get("playlist-pos")
-    if get("playlist-count") > 99 then
+    if not get("playlist") then
         return
     end
 
     local items = {}
     local show = get("osd-playlist-entry")
 
-    for i, entry in ipairs(mp.get_property_native("playlist")) do
+    for i, entry in ipairs(get("playlist")) do
         items[i] = {
             title = format_playlist_entry(entry, show):gsub("&", "&&"),
             cmd = "playlist-play-index " .. (i - 1)
