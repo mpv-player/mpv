@@ -65,6 +65,9 @@ enum mp_voctrl {
     VOCTRL_RESUME,
     /* signal a redraw occurred */
     VOCTRL_REDRAW,
+    /* set the color space on the output
+       the argument will be updated to reflect the state of output */
+    VOCTRL_COLOR_SPACE_HINT, // struct pl_color_space*
 
     VOCTRL_SET_PANSCAN,
 

@@ -4189,6 +4189,24 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         }
         return VO_TRUE;
     }
+    case VOCTRL_COLOR_SPACE_HINT: {
+#if HAVE_WAYLAND_PROTOCOLS_1_41
+        if (wl->color_manager && !wl->color_surface)
+            wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+#endif
+        if (!wl->color_surface)
+            return VO_NOTAVAIL;
+        struct pl_color_space *csp = arg;
+        int primaries = wl->primaries_map[csp->primaries];
+        int transfer = wl->transfer_map[csp->transfer];
+        // We could do fancy negotiation here, but we can just fallback to good old sRGB.
+        if (!primaries || !transfer) {
+            *csp = pl_color_space_srgb;
+            // but gamma2.2...
+            csp->transfer = PL_COLOR_TRC_GAMMA22;
+        }
+        return VO_TRUE;
+    }
     }
 
     return VO_NOTIMPL;
