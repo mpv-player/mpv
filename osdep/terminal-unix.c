@@ -466,7 +466,8 @@ static MP_THREAD_VOID terminal_thread(void *ptr)
         }
         if (fds[1].revents & POLLIN) {
             int8_t c = -1;
-            (void)read(stop_cont_pipe[0], &c, 1);
+            while (read(stop_cont_pipe[0], &c, 1) == 1)
+                continue;
             if (c == PIPE_STOP) {
                 do_deactivate_getch2();
                 if (isatty(STDERR_FILENO)) {
