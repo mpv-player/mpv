@@ -715,6 +715,8 @@ mp.input = {
                    }));
     },
     log_error: function (message) {
+        mp.msg.warn("log_error is deprecated and will be removed.")
+
         mp.commandv("script-message-to", "console", "log", JSON.stringify({
                         log_id: latest_log_id,
                         text: message,
