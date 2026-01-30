@@ -1015,12 +1015,13 @@ local function clamp_submenu(submenu, max, cmd)
 end
 
 local function playlist()
+    local show = get("osd-playlist-entry")
+
     if not get("playlist") then
         return
     end
 
     local items = {}
-    local show = get("osd-playlist-entry")
 
     for i, entry in ipairs(get("playlist")) do
         items[i] = {
