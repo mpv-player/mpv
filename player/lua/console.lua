@@ -761,9 +761,10 @@ local function render()
 
     local log_ass = ""
     local log_buffer = log_buffers[id] or {}
-    log_offset = math.max(math.min(log_offset, #log_buffer - max_lines), 0)
-    for i = #log_buffer - math.min(max_lines, #log_buffer) - log_offset + 1,
-            #log_buffer - log_offset do
+    log_offset = math.max(math.min(log_offset, #log_buffer - 1), 0)
+    local last = #log_buffer - log_offset
+    local first = math.max(last - math.min(max_lines, #log_buffer) + 1, 1)
+    for i = first, last do
         log_ass = log_ass .. style .. log_buffer[i].style ..
                   ass_escape(log_buffer[i].text) .. "\\N"
     end
