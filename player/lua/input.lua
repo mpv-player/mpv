@@ -102,6 +102,8 @@ function input.log(message, style, terminal_style)
 end
 
 function input.log_error(message)
+    mp.msg.warn("log_error is deprecated and will be removed.")
+
     mp.commandv("script-message-to", "console", "log", utils.format_json({
                     log_id = latest_log_id,
                     text = message,

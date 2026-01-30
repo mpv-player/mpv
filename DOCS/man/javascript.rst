@@ -204,8 +204,6 @@ string/boolean/number)
 
 ``mp.input.log(message, style)``
 
-``mp.input.log_error(message)``
-
 ``mp.input.set_log(log)``
 
 ``exit()`` (global)
