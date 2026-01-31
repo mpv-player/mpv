@@ -1305,7 +1305,7 @@ local function get_menu_conf()
     end
 
     local lines = {}
-    for line in menu_conf:gmatch("(.-)\n") do
+    for line in menu_conf:gmatch("(.-)\r?\n") do
         lines[#lines + 1] = line
     end
 
