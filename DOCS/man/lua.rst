@@ -419,7 +419,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     and the function fn is a Lua function value.
 
     Some events have associated data. This is put into a Lua table and passed
-    as argument to fn. The Lua table by default contains a ``name`` field,
+    as argument to fn. The Lua table by default contains a ``event`` field,
     which is a string containing the event name. If the event has an error
     associated, the ``error`` field is set to a string describing the error,
     on success it's not set.
