@@ -1355,7 +1355,9 @@ local function parse_menu_conf(_, vo_configured)
 
         if line == "" then
             -- Determine the depth of the separator from the next line.
-            table.insert(menus_by_depth[lines[i + 1]:match("%s*")], item)
+            if lines[i + 1] then -- ignore newlines at the end
+                table.insert(menus_by_depth[lines[i + 1]:match("%s*")], item)
+            end
         else
             table.insert(menus_by_depth[leading_whitespace], item)
             last_leading_whitespace = leading_whitespace
