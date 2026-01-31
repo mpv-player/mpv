@@ -940,6 +940,7 @@ static bool render_frame(struct vo *vo)
                (in->current_frame->display_synced && in->current_frame->num_vsyncs < 1) ||
                !in->current_frame->display_synced)
     {
+        in->wait_on_vo = false;
         goto done;
     }
 
