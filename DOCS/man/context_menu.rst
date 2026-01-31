@@ -121,7 +121,7 @@ Configurable Options
 ``disabled_color``
     Default: ``#555555``
 
-    The color of disabled items.
+    The color of disabled items and separators.
 
 ``seconds_to_open_submenus``
     Default: 0.2
