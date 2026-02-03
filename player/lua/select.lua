@@ -962,6 +962,11 @@ local function on_idle()
     mp.set_property_native("menu-data", menu_data)
 end
 
+-- quote string and escape it in JSON-style
+local function quote(str)
+    return utils.format_json(str or "")
+end
+
 local function clamp_submenu(submenu, max, cmd)
     if #submenu <= max then
        return submenu
@@ -1111,7 +1116,7 @@ local function audio_devices()
     for i, device in ipairs(get("audio-device-list")) do
         items[i] = {
             title = format_audio_device(device):gsub("&", "&&"),
-            cmd = "set audio-device " .. device.name,
+            cmd = "set audio-device " .. quote(device.name),
         }
 
         if device.name == selected_device then
@@ -1154,8 +1159,8 @@ local function profiles()
 
     for _, profile in ipairs(user_profiles) do
         items[#items + 1] = {
-            title = profile,
-            cmd = "apply-profile " .. profile:gsub("&", "&&"),
+            title = profile:gsub("&", "&&"),
+            cmd = "apply-profile " .. quote(profile),
         }
     end
 
