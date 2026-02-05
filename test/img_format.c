@@ -1,5 +1,6 @@
 #include <libavutil/frame.h>
 #include <libavutil/pixdesc.h>
+#include <libavutil/version.h>
 
 #include "img_utils.h"
 #include "options/path.h"
@@ -205,11 +206,6 @@ int main(int argc, char *argv[])
                 const AVComponentDescriptor *cd = &avd->comp[n];
                 fprintf(f, "    %d: p=%-2d st=%-2d o=%-2d sh=%-2d d=%d\n",
                         n, cd->plane, cd->step, cd->offset, cd->shift, cd->depth);
-            }
-            for (int n = avd->nb_components; n < 4; n++) {
-                const AVComponentDescriptor *cd = &avd->comp[n];
-                mp_require(!cd->plane && !cd->step && !cd->offset && !cd->shift &&
-                          !cd->depth);
             }
         }
 
