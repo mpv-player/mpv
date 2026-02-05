@@ -286,3 +286,11 @@ yuvj422p    = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gr
 yuvj440p    = no
 yuyv422     = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
 yvyu422     = align=2:1 ov=yuva422p, ov_f=yuva422pf, v_f=yuv422pf, a=gray, ca=gray, ca_f=grayf32
+
+1920x1080= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+78x63= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+63x11= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+78x64= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+64x11= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+78x65= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
+65x11= align=1:1 ov=unknown, ov_f=gbrap, v_f=gbrp, a=unknown, ca=unknown, ca_f=unknown
