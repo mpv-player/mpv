@@ -437,21 +437,21 @@ static void check_float_repack(int imgfmt, enum pl_color_system csp,
     talloc_free(from_f);
 }
 
-static bool try_draw_bmp(FILE *f, int imgfmt)
+static bool try_draw_bmp(FILE *f, int imgfmt, int w, int h)
 {
     bool ok = false;
 
-    struct mp_image *dst = mp_image_alloc(imgfmt, 64, 64);
+    struct mp_image *dst = mp_image_alloc(imgfmt, w, h);
     if (!dst)
         goto done;
 
     struct sub_bitmap sb = {
-        .bitmap = &(uint8_t[]){123},
-        .stride = 1,
-        .x = 1,
-        .y = 1,
-        .w = 1, .dw = 1,
-        .h = 1, .dh = 1,
+        .bitmap = &(uint8_t[]){0x55, 0xaa, 0x55, 0xaa},
+        .stride = 2,
+        .x = w - 2,
+        .y = h - 2,
+        .w = 2, .dw = 2,
+        .h = 2, .dh = 2,
 
         .libass = { .color = 0xDEDEDEDE },
     };
@@ -525,7 +525,21 @@ int main(int argc, char *argv[])
         int imgfmt = imgfmts[n];
 
         fprintf(f, "%-12s= ", mp_imgfmt_to_name(imgfmt));
-        try_draw_bmp(f, imgfmt);
+        try_draw_bmp(f, imgfmt, 64, 64);
+    }
+
+    fprintf(f, "\n");
+
+    { // try it at a few sizes
+        const int imgfmt = IMGFMT_RGB0;
+        fprintf(f, "1920x1080= ");
+        try_draw_bmp(f, imgfmt, 1920, 1080);
+        for(int off = -1; off <= 1; off++) {
+            fprintf(f, "78x%d= ", 64+off);
+            try_draw_bmp(f, imgfmt, 78, 64+off);
+            fprintf(f, "%dx11= ", 64+off);
+            try_draw_bmp(f, imgfmt, 64+off, 11);
+        }
     }
 
     fclose(f);
