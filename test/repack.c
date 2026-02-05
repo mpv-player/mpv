@@ -1,6 +1,7 @@
 #include <limits.h>
 
 #include <libavutil/pixfmt.h>
+#include <libswscale/swscale.h>
 
 #include "common/common.h"
 #include "img_utils.h"
@@ -216,7 +217,9 @@ static int try_repack(FILE *f, int imgfmt, int flags, int not_if_fmt)
     if (a == imgfmt && b == imgfmt) {
         mp_require(is_true_planar(imgfmt));
         // (note that we require alpha-enabled zimg)
-        mp_require(mp_zimg_supports_in_format(imgfmt));
+        if (sws_isSupportedInput(imgfmt)) {
+            mp_require(mp_zimg_supports_in_format(imgfmt));
+        }
         mp_require(un && pa);
         talloc_free(pa);
         talloc_free(un);

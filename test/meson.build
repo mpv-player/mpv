@@ -158,7 +158,9 @@ endif
 
 # Supported libavutil versions that work with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
-if libavutil.version().version_compare('>= 59.0.100') and libavutil.version().version_compare('<= 59.39.100')
+if libavutil.version().version_compare('>= 60.8.100') and libavutil.version().version_compare('< 61.0.100')
+    refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg8')
+elif libavutil.version().version_compare('>= 59.0.100') and libavutil.version().version_compare('< 60.0.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg7')
 elif libavutil.version().version_compare('>= 58.27.100') and libavutil.version().version_compare('< 59.0.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg6')
