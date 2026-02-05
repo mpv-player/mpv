@@ -413,12 +413,12 @@ static void w32_register(struct MPContext *mpctx)
     reg_add_str(log, root, KEY_MPV_UNINSTALL, L"URLInfoAbout", L"https://mpv.io");
     reg_add_str(log, root, KEY_MPV_UNINSTALL, L"URLUpdateInfo", L"https://mpv.io/installation");
 
-    if (SUCCEEDED(PathCchRemoveFileSpec(mpv_path, MP_PATH_MAX)))
-        reg_add_str(log, root, KEY_MPV_UNINSTALL, L"InstallLocation", mpv_path);
-
     uint64_t size = get_file_size(mpv_path);
     if (size)
-        reg_add_dwr(log, root, KEY_MPV_UNINSTALL, L"EstimatedSize", size);
+        reg_add_dwr(log, root, KEY_MPV_UNINSTALL, L"EstimatedSize", size / 1024);
+
+    if (SUCCEEDED(PathCchRemoveFileSpec(mpv_path, MP_PATH_MAX)))
+        reg_add_str(log, root, KEY_MPV_UNINSTALL, L"InstallLocation", mpv_path);
 
     mp_msg(log, MSGL_INFO, "mpv has been successfully registered.\n");
     mp_msg(log, MSGL_INFO, "Note: The mpv binary has not been copied or moved. Please keep it in the current directory.\n");
