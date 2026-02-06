@@ -660,28 +660,42 @@ var latest_log_id;
 function register_event_handler(t) {
     var handler_id = "input-event/" + input_handle_counter++;
     latest_handler_id = handler_id;
+    var completion_counter = -1;
 
     mp.register_script_message(handler_id, function (type, args) {
-        if (latest_handler_id !== handler_id && type !== "closed")
+        if (type == "closed")
+            mp.unregister_script_message(handler_id);
+
+        if (!t[type] || (latest_handler_id !== handler_id && type !== "closed"))
             return;
 
-        if (t[type]) {
-            args = args ? JSON.parse(args) : [];
-            var result = t[type].apply(null, args);
+        args = args ? JSON.parse(args) : [];
 
-            if (type == "complete" && result) {
+        if (type == "complete") {
+            var completed = false;
+            var completion_num = ++completion_counter;
+
+            var complete = function(completions, completion_pos, completion_append) {
+                if (completed || completions == undefined || completion_num != completion_counter)
+                    return false;
+
                 mp.commandv("script-message-to", "console", "complete", JSON.stringify({
                                 client_name: mp.script_name,
                                 handler_id: handler_id,
-                                list: result[0],
-                                start_pos: result[1],
-                                append: result[2] || "",
+                                list: completions,
+                                start_pos: completion_pos,
+                                append: completion_append || "",
                             }));
-            }
-        }
 
-        if (type == "closed")
-            mp.unregister_script_message(handler_id);
+                completed = true;
+                return true;
+            }
+
+            args[1] = complete;
+            complete.apply(null, t[type].apply(null, args));
+        } else {
+            t[type].apply(null, args)
+        }
     })
 
     return handler_id;
