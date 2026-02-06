@@ -328,8 +328,7 @@ static void rescale_geometry(struct vo_wayland_state *wl, double old_scale);
 static void set_geometry(struct vo_wayland_state *wl, bool resize);
 static void set_surface_scaling(struct vo_wayland_state *wl);
 static void update_output_scaling(struct vo_wayland_state *wl);
-static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect old_geometry,
-                                   struct mp_rect old_output_geometry);
+static void update_output_geometry(struct vo_wayland_state *wl);
 static void destroy_offer(struct vo_wayland_data_offer *o);
 
 /* Wayland listener boilerplate */
@@ -1670,13 +1669,13 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
-    if (!wl->current_output)
-        return;
 
-    struct mp_rect old_output_geometry = wl->current_output->geometry;
-    struct mp_rect old_geometry = wl->geometry;
+    if (wl->current_output) {
+        wl->old_output_geometry = wl->current_output->geometry;
+        wl->old_geometry = wl->geometry;
+    }
+
     wl->current_output = NULL;
-
     int outputs = 0;
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
@@ -1689,7 +1688,7 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     }
 
     if (outputs == 1)
-        update_output_geometry(wl, old_geometry, old_output_geometry);
+        update_output_geometry(wl);
 
     MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
                wl->current_output->make, wl->current_output->model, wl->current_output->name,
@@ -1702,11 +1701,11 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
-    if (!wl->current_output)
-        return;
 
-    struct mp_rect old_output_geometry = wl->current_output->geometry;
-    struct mp_rect old_geometry = wl->geometry;
+    if (wl->current_output) {
+        wl->old_output_geometry = wl->current_output->geometry;
+        wl->old_geometry = wl->geometry;
+    }
 
     int outputs = 0;
     struct vo_wayland_output *o;
@@ -1719,8 +1718,11 @@ static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
             wl->current_output = o;
     }
 
+    if (!outputs)
+        wl->current_output = NULL;
+
     if (outputs == 1)
-        update_output_geometry(wl, old_geometry, old_output_geometry);
+        update_output_geometry(wl);
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
@@ -2828,6 +2830,8 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
     wl_list_for_each_safe(output, output_tmp, &wl->output_list, link) {
         if (output->id == id) {
             remove_output(output);
+            if (wl_list_length(&wl->output_list) == 0)
+                wl->current_output = NULL;
             return;
         }
     }
@@ -3183,7 +3187,7 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
             return output;
     }
     if (!fallback_output) {
-        MP_ERR(wl, "No screens could be found!\n");
+        MP_VERBOSE(wl, "No screens could be found!\n");
         return NULL;
     } else if (screen_id >= 0) {
         MP_WARN(wl, "Screen index %i not found/unavailable! Falling back to screen 0!\n", screen_id);
@@ -3885,8 +3889,7 @@ static void update_output_scaling(struct vo_wayland_state *wl)
     wl->pending_vo_events |= VO_EVENT_DPI | VO_EVENT_RESIZE;
 }
 
-static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect old_geometry,
-                                   struct mp_rect old_output_geometry)
+static void update_output_geometry(struct vo_wayland_state *wl)
 {
     if (wl->need_rescale) {
         update_output_scaling(wl);
@@ -3895,7 +3898,7 @@ static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect o
 
     bool force_resize = false;
     bool use_output_scale = wl_surface_get_version(wl->surface) < 6 &&
-                            !wl->fractional_scale_manager &&
+                            !wl->fractional_scale_manager && wl->current_output &&
                             wl->scaling != wl->current_output->scale;
 
     if (use_output_scale) {
@@ -3903,12 +3906,12 @@ static void update_output_geometry(struct vo_wayland_state *wl, struct mp_rect o
         force_resize = true;
     }
 
-    if (!mp_rect_equals(&old_output_geometry, &wl->current_output->geometry)) {
+    if (!mp_rect_equals(&wl->old_output_geometry, &wl->current_output->geometry)) {
         set_geometry(wl, false);
         force_resize = true;
     }
 
-    if (!mp_rect_equals(&old_geometry, &wl->geometry) || force_resize)
+    if (!mp_rect_equals(&wl->old_geometry, &wl->geometry) || force_resize)
         wl->pending_vo_events |= VO_EVENT_RESIZE;
 }
 
@@ -4696,7 +4699,7 @@ void vo_wayland_wait_frame(struct vo_wayland_state *wl)
     if (vblank_time <= 0 && wl->refresh_interval > 0)
         vblank_time = wl->refresh_interval;
 
-    if (vblank_time <= 0 && wl->current_output->refresh_rate > 0)
+    if (vblank_time <= 0 && wl->current_output && wl->current_output->refresh_rate > 0)
         vblank_time = 1e9 / wl->current_output->refresh_rate;
 
     // Ideally you should never reach this point.

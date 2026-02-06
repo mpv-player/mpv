@@ -58,6 +58,8 @@ struct vo_wayland_state {
     struct mp_rect window_size;
     struct wl_list output_list;
     struct vo_wayland_output *current_output;
+    struct mp_rect old_geometry;
+    struct mp_rect old_output_geometry;
     int bounded_height;
     int bounded_width;
     int reduced_height;
