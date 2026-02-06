@@ -1798,6 +1798,7 @@ static int get_device_entry(int item, int action, void *arg, void *ctx)
     struct m_sub_property props[] = {
         {"name",        SUB_PROP_STR(entry->name)},
         {"description", SUB_PROP_STR(entry->desc)},
+        {"ao", SUB_PROP_STR(entry->ao)},
         {0}
     };
 
