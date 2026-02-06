@@ -10,9 +10,6 @@
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 
-static enum AVPixelFormat pixfmt_unsup[100];
-static int num_pixfmt_unsup;
-
 static const char *comp_type(enum mp_component_type type)
 {
     switch (type) {
@@ -216,11 +213,6 @@ int main(int argc, char *argv[])
             if (mpfmt2 == mpfmt && pixfmt2 != pixfmt)
                 fprintf(f, "  Ambiguous alias: %s\n", avd2->name);
         }
-    }
-
-    for (int z = 0; z < num_pixfmt_unsup; z++) {
-        const AVPixFmtDescriptor *avd = av_pix_fmt_desc_get(pixfmt_unsup[z]);
-        fprintf(f, "Unsupported: %s\n", avd->name);
     }
 
     fclose(f);
