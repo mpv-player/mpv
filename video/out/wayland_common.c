@@ -4238,14 +4238,18 @@ bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, u
 
 bool vo_wayland_init(struct vo *vo)
 {
-    if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
+    if (vo->probing && !getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET")) {
+        MP_VERBOSE(vo, "Skipping Wayland because neither WAYLAND_DISPLAY or "
+            "WAYLAND_SOCKET is set\n");
         goto err;
+    }
+
+    mp_assert(!vo->wl);
 
     vo->wl = talloc_zero(NULL, struct vo_wayland_state);
     struct vo_wayland_state *wl = vo->wl;
 
     *wl = (struct vo_wayland_state) {
-        .display = wl_display_connect(NULL),
         .vo = vo,
         .log = mp_log_new(wl, vo->log, "wayland"),
         .bounded_width = 0,
@@ -4265,8 +4269,12 @@ bool vo_wayland_init(struct vo *vo)
     wl_list_init(&wl->seat_list);
     wl_list_init(&wl->tranche_list);
 
-    if (!wl->display)
+    wl->display = wl_display_connect(NULL);
+    if (!wl->display) {
+        MP_MSG(wl, vo->probing ? MSGL_V : MSGL_FATAL,
+               "Couldn't connect to Wayland display: %s\n", strerror(errno));
         goto err;
+    }
 
     if (create_input(wl))
         goto err;
