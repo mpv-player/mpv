@@ -6199,7 +6199,7 @@ static void cmd_loadlist(void *p)
     talloc_free(path);
 
     if (pl) {
-        prepare_playlist(mpctx, pl);
+        prepare_playlist(mpctx, pl, true);
         struct playlist_entry *new = pl->current;
         if (action.type == LOAD_TYPE_REPLACE)
             playlist_clear(mpctx->playlist);
