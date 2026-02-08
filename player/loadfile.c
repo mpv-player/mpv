@@ -1034,11 +1034,13 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
 
 // Do stuff to a newly loaded playlist. This includes any processing that may
 // be required after loading a playlist.
-void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
+void prepare_playlist(struct MPContext *mpctx, struct playlist *pl, bool overwrite_current)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    pl->current = NULL;
+    if (overwrite_current)
+        pl->current = NULL;
+
     pl->playlist_completed = false;
     pl->playlist_started = false;
 
@@ -1054,8 +1056,9 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
     if (opts->merge_files)
         merge_playlist_files(pl);
 
-    if (!pl->current)
-        pl->current = mp_check_playlist_resume(mpctx, pl);
+    struct playlist_entry *resume_entry = mp_check_playlist_resume(mpctx, pl);
+    if (!pl->current || resume_entry)
+        pl->current = resume_entry;
 
     if (!pl->current)
         pl->current = playlist_get_first(pl);
@@ -1067,7 +1070,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
                               int64_t *start_id, int *num_new_entries)
 {
     if (pl->num_entries) {
-        prepare_playlist(mpctx, pl);
+        prepare_playlist(mpctx, pl, true);
         struct playlist_entry *new = pl->current;
         *num_new_entries = pl->num_entries;
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
@@ -2116,7 +2119,7 @@ void mp_play_files(struct MPContext *mpctx)
     // After above is finished; but even if it's skipped.
     mp_msg_set_early_logging(mpctx->global, false);
 
-    prepare_playlist(mpctx, mpctx->playlist);
+    prepare_playlist(mpctx, mpctx->playlist, false);
 
     for (;;) {
         idle_loop(mpctx);
