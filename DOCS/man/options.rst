@@ -7378,13 +7378,13 @@ them.
     ``sRGB``, ``gamma2.2`` or ``bt.1886`` will be rendered as-is. If set to
     ``yes``, it will be converted based on the available metadata.
 
-    ``auto`` (default) behaves like ``no``, except when ``--target-trc`` is
+    ``auto`` behaves like ``no``, except when ``--target-trc`` is
     explicitly set, in which case it behaves like ``yes``.
 
     Generally it's recommended to enable this option, if you can ensure that
     both source and target metadata is correct.
 
-    (Only for ``--vo=gpu-next``)
+    The default is ``yes``. (Only for ``--vo=gpu-next``)
 
 ``--treat-srgb-as-power22=<no|input|output|both|auto>``
     When enabled, sRGB is (de)linearized using a pure power 2.2 curve instead of
