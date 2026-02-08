@@ -89,6 +89,9 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
         pl_d3d11_swapchain_params(
             .swapchain = swapchain,
             .disable_10bit_sdr = ra_d3d11_ctx_prefer_8bit_output_format(ctx->ra_ctx),
+#if PL_API_VER >= 360
+            .alpha_bits = ctx_opts->want_alpha ? 8 : 0,
+#endif
         )
     );
     if (!ctx->swapchain) {
