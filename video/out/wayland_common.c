@@ -2027,6 +2027,9 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
         MP_VERBOSE(wl, "Compositor supports setting mastering display primaries.\n");
         wl->supports_display_primaries = true;
         break;
+    case WP_COLOR_MANAGER_V1_FEATURE_SET_LUMINANCES:
+        MP_VERBOSE(wl, "Compositor supports setting primary color luminances.\n");
+        wl->supports_set_luminances = true;
     }
 }
 
@@ -2144,6 +2147,24 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     if (!wd->icc_file) {
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, wd);
+        if (fabsf(wd->csp.hdr.max_luma / wd->ref_luma - 1.0f) > 1e-4f &&
+            !pl_color_transfer_is_hdr(wd->csp.transfer)) {
+            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
+            wd->csp.transfer = PL_COLOR_TRC_PQ;
+        }
+        float contrast = wd->csp.hdr.max_luma / wd->csp.hdr.min_luma;
+        float output_ref = wl->supports_set_luminances ? PL_COLOR_SDR_WHITE : 80.0f;
+        float output_min = wl->supports_set_luminances ? PL_COLOR_SDR_WHITE / contrast : 0.2f;
+        if (wd->csp.transfer == PL_COLOR_TRC_PQ) {
+            output_ref = wl->supports_set_luminances ? PL_COLOR_SDR_WHITE : 203.0f;
+            output_min = wl->supports_set_luminances ? 0 : 0.005f;
+        } else if (wd->csp.transfer == PL_COLOR_TRC_BT_1886) {
+            output_ref = wl->supports_set_luminances ? PL_COLOR_SDR_WHITE : 100.0f;
+            output_min = wl->supports_set_luminances ? PL_COLOR_SDR_WHITE / contrast : 0.01f;
+        } else if (wd->csp.transfer == PL_COLOR_TRC_HLG) {
+            output_ref = 1000.0f;
+            output_min = 0.005f;
+        }
         // Wayland luminances are always in reference to the reference luminance. That is,
         // if max_luma == 2*ref_luma, then there is 2x headroom above paper white. On the
         // other hand, libplacebo hardcodes PL_COLOR_SDR_WHITE as the reference luminance.
@@ -2151,13 +2172,14 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         // otherwise libplacebo will assume that there is too little or too much headroom
         // when ref_luma != PL_COLOR_SDR_WHITE.
         float a = wd->min_luma;
-        float b = (PL_COLOR_SDR_WHITE - PL_COLOR_HDR_BLACK) / (wd->ref_luma - a);
-        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + PL_COLOR_HDR_BLACK;
-        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + PL_COLOR_HDR_BLACK;
+        float c = PL_COLOR_SDR_WHITE / output_ref * output_min;
+        float b = (PL_COLOR_SDR_WHITE - c) / (wd->ref_luma - a);
+        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + c;
+        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + c;
         if (wd->csp.hdr.max_cll != 0)
-            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + c;
         if (wd->csp.hdr.max_fall != 0)
-            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + c;
         // Ensure that min_luma doesn't become negative.
         wd->csp.hdr.min_luma = MPMAX(wd->csp.hdr.min_luma, 0.0);
         // Since we want to do some exact comparisons of max_luma with PL_COLOR_SDR_WHITE,
@@ -2170,10 +2192,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
                 wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
         }
         wl->preferred_csp = wd->csp;
-        if (wd->csp.hdr.max_luma != PL_COLOR_SDR_WHITE && !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
-        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
@@ -3511,6 +3529,31 @@ static void set_color_management(struct vo_wayland_state *wl)
     wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
 
     struct pl_hdr_metadata hdr = wl->target_params.color.hdr;
+
+    if (wl->supports_set_luminances) {
+        switch (color.transfer) {
+        case PL_COLOR_TRC_PQ:
+            // Set min luminance to 0 for PQ as per SMPTE ST 2084
+            wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                0, 10000, PL_COLOR_SDR_WHITE);
+            MP_VERBOSE(wl, "Setting PQ luminance range: min=0, max=10000, ref=%.2f\n",
+                PL_COLOR_SDR_WHITE);
+            break;
+        case PL_COLOR_TRC_HLG:
+            // Leave default for HLG, we wouldn't output it directly, except for pass-through
+            break;
+        default:
+            // Set SDR luminance range for all relative transfers
+            if (hdr.min_luma && hdr.max_luma) {
+                wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                    hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                MP_VERBOSE(wl, "Setting relative luminance range: min=%.3f, max=%.2f, ref=%.2f\n",
+                    hdr.min_luma, hdr.max_luma, PL_COLOR_SDR_WHITE);
+            }
+            break;
+        }
+    }
+
     bool is_hdr = pl_color_transfer_is_hdr(color.transfer);
     bool use_metadata = hdr_metadata_valid(wl, &hdr);
     if (!use_metadata)
@@ -4191,6 +4234,24 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl_list_for_each(seat, &wl->seat_list, link) {
             if (seat->last_serial && !seat->data_source && wl->devman)
                 seat_create_data_source(seat);
+        }
+        return VO_TRUE;
+    }
+    case VOCTRL_COLOR_SPACE_HINT: {
+#if HAVE_WAYLAND_PROTOCOLS_1_41
+        if (wl->color_manager && !wl->color_surface)
+            wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+#endif
+        if (!wl->color_surface)
+            return VO_NOTAVAIL;
+        struct pl_color_space *csp = arg;
+        int primaries = wl->primaries_map[csp->primaries];
+        int transfer = wl->transfer_map[csp->transfer];
+        // We could do fancy negotiation here, but we can just fallback to good old sRGB.
+        if (!primaries || !transfer) {
+            *csp = pl_color_space_srgb;
+            // but gamma2.2...
+            csp->transfer = PL_COLOR_TRC_GAMMA22;
         }
         return VO_TRUE;
     }
