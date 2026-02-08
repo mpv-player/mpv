@@ -8,6 +8,8 @@
 // refcounted and must be released by the caller.
 IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra);
 
-// Returns true if an 8-bit output format is explicitly requested for
-// d3d11-output-format for an RA context.
-bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra);
+// Sets pl_d3d11_swapchain_params according to requested d3d11-output-format for
+// an RA context.
+struct pl_d3d11_swapchain_params;
+void ra_d3d11_ctx_set_swapchain_params(struct ra_ctx *ra,
+                                       struct pl_d3d11_swapchain_params *params);

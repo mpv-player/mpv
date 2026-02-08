@@ -85,15 +85,11 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
 
     mppl_log_set_probing(ctx->pllog, false);
 
-    ctx->swapchain = pl_d3d11_create_swapchain(d3d11,
-        pl_d3d11_swapchain_params(
-            .swapchain = swapchain,
-            .disable_10bit_sdr = ra_d3d11_ctx_prefer_8bit_output_format(ctx->ra_ctx),
-#if PL_API_VER >= 360
-            .alpha_bits = ctx_opts->want_alpha ? 8 : 0,
-#endif
-        )
+    struct pl_d3d11_swapchain_params *params = pl_d3d11_swapchain_params(
+         .swapchain = swapchain,
     );
+    ra_d3d11_ctx_set_swapchain_params(ctx->ra_ctx, params);
+    ctx->swapchain = pl_d3d11_create_swapchain(d3d11, params);
     if (!ctx->swapchain) {
         mp_err(ctx->log, "Failed to acquire a d3d11 libplacebo swap chain!\n");
         goto err_out;

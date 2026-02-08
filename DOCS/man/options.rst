@@ -6120,10 +6120,6 @@ them.
         according to the bit depth of your display.
         This option also affects the auto-detection of ``--dither-depth``.
 
-    .. note::
-
-        Unlike  ``--d3d11-output-format``, this option also takes effect with ``--vo=gpu-next``.
-
 ``--vulkan-device=<device name|UUID>``
     The name or UUID of the Vulkan device to use for rendering and presentation. Use
     ``--vulkan-device=help`` to see the list of available devices and their
@@ -6258,6 +6254,12 @@ them.
 
         For ``--vo=gpu-next``, this is used as a best-effort hint and
         libplacebo has the last say on which format is utilized.
+
+    .. note::
+
+        For ``--vo=gpu-next``, ``rgba16f`` enables scRGB output. However, it is
+        not currently fully supported. Colors may appear darker than expected,
+        and HDR output is not supported.
 
 ``--d3d11-output-csp=<auto|srgb|linear|pq|bt.2020>``
     Select a specific D3D11 output color space to utilize for D3D11 rendering.

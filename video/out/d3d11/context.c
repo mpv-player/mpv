@@ -27,6 +27,10 @@
 #include "context.h"
 #include "ra_d3d11.h"
 
+#ifdef PL_HAVE_D3D11
+#include <libplacebo/d3d11.h>
+#endif
+
 struct d3d11_opts {
     int feature_level;
     int warp;
@@ -584,15 +588,42 @@ IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra)
     return p->swapchain;
 }
 
-bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra)
+#ifdef PL_HAVE_D3D11
+void ra_d3d11_ctx_set_swapchain_params(struct ra_ctx *ra,
+                                       struct pl_d3d11_swapchain_params *params)
 {
-    if (ra->swapchain->fns != &d3d11_swapchain)
-        return false;
+    mp_assert(ra->swapchain->fns == &d3d11_swapchain);
 
     struct priv *p = ra->priv;
+    int fmt = p->opts->output_format;
 
-    return p->opts->output_format == DXGI_FORMAT_R8G8B8A8_UNORM;
+#if PL_API_VER >= 360
+    switch (fmt) {
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+        params->alpha_bits = 8;
+        params->color_bits = 8;
+        // This is redundant, as alpha bits would force 8-bit output format,
+        // but set it anyway to be explicit.
+        params->disable_10bit_sdr = true;
+        break;
+    case DXGI_FORMAT_R10G10B10A2_UNORM:
+        params->alpha_bits = 2;
+        params->color_bits = 10;
+        break;
+    case DXGI_FORMAT_R16G16B16A16_FLOAT:
+        params->alpha_bits = 16;
+        params->color_bits = 16;
+        break;
+    default:
+        params->alpha_bits = ra->opts.want_alpha ? 8 : 0;
+    };
+#else
+    if (fmt == DXGI_FORMAT_R8G8B8A8_UNORM || fmt == DXGI_FORMAT_B8G8R8A8_UNORM)
+        params->disable_10bit_sdr = true;
+#endif
 }
+#endif
 
 const struct ra_ctx_fns ra_ctx_d3d11 = {
     .type               = "d3d11",
