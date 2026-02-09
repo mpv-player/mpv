@@ -87,6 +87,21 @@ jobs:
         run: |
           ./ci/build-mingw64.sh meson pack
 
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure mingw_build -Dlibmpv=true -Ddefault_library=static
+          ninja -C mingw_build libmpv.a
+          meson configure mingw_build -Ddefault_library=shared
+          ninja -C mingw_build libmpv-2.dll
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-${{ matrix.arch }}-mingw
+          path: |
+            mingw_build/libmpv.a
+            mingw_build/libmpv-2.dll
+
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
@@ -197,6 +212,21 @@ jobs:
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           ./ci/build-win32.ps1
+
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure build -Dlibmpv=true -Ddefault_library=static
+          ninja -C build libmpv.lib
+          meson configure build -Ddefault_library=shared
+          ninja -C build libmpv-2.dll
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-${{ matrix.target }}
+          path: |
+            build/libmpv.lib
+            build/libmpv-2.dll
 
       - name: Print build log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -309,6 +339,21 @@ jobs:
           SWIFT_FLAGS: "${{ matrix.swift }}"
           MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
 
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure build -Dlibmpv=true -Ddefault_library=static
+          ninja -C build libmpv.a
+          meson configure build -Ddefault_library=shared
+          ninja -C build libmpv.2.dylib
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-${{ matrix.os }}${{ matrix.arch }}
+          path: |
+            build/libmpv.a
+            build/libmpv.2.dylib
+
       - name: Create App Bundle
         if: ${{ matrix.arch != 'test' }}
         run: |
@@ -372,6 +417,21 @@ jobs:
         run: |
           ./ci/build-tumbleweed.sh ${{ matrix.config.args }}
 
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure build -Dlibmpv=true -Ddefault_library=static
+          ninja -C build libmpv.a
+          meson configure build -Ddefault_library=shared
+          ninja -C build libmpv.so
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-linux-${{ matrix.config.cc }}
+          path: |
+            build/libmpv.a
+            build/libmpv.so
+
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
         run: |
@@ -404,6 +464,21 @@ jobs:
             --werror        \
             -Dfuzzers=true -Dlibmpv=true -Dcplayer=false
           meson compile -C build fuzzers
+
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure build -Dlibmpv=true -Ddefault_library=static
+          ninja -C build libmpv.a
+          meson configure build -Ddefault_library=shared
+          ninja -C build libmpv.so
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-linux-alpine
+          path: |
+            build/libmpv.a
+            build/libmpv.so
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -640,6 +715,21 @@ jobs:
           SYS: ${{ matrix.sys }}
           ASAN: ${{ matrix.asan }}
           AUTO_VAR_INIT: ${{ matrix.auto-var-init }}
+          
+      - name: Build libmpv (static + shared)
+        run: |
+          meson configure build -Dlibmpv=true -Ddefault_library=static
+          ninja -C build libmpv.a
+          meson configure build -Ddefault_library=shared
+          ninja -C build libmpv-2.dll
+
+      - name: Upload libmpv artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: libmpv-msys2-${{ matrix.sys }}
+          path: |
+            build/libmpv.a
+            build/libmpv-2.dll
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
