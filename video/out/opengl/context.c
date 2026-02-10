@@ -302,6 +302,13 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
+static void ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+{
+    struct priv *p = sw->priv;
+    if (p->params.set_color)
+        p->params.set_color(sw->ctx, params);
+}
+
 static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
@@ -312,6 +319,7 @@ static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
 
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
+    .set_color     = ra_gl_ctx_set_color,
     .target_csp    = ra_gl_ctx_target_csp,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
