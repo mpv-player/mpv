@@ -134,6 +134,13 @@ static void deint_process(struct mp_filter *f)
         if (has_filter)
             MP_ERR(f, "creating deinterlacer failed\n");
 
+        struct mp_stream_info *info = mp_filter_find_stream_info(f);
+        // VO has VO_CAP_DEINTERLACE, so skip adding a filter here.
+        if (info && info->deinterlace) {
+            mp_subfilter_continue(&p->sub);
+            return;
+        }
+
         struct mp_filter *subf = mp_bidir_dummy_filter_create(f);
         struct mp_filter *filters[2] = {0};
 
