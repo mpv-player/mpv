@@ -1365,8 +1365,7 @@ bool vo_drm_set_hdr_metadata(struct vo *vo, bool force_sdr)
 
     destroy_hdr_blob(drm);
     drm->target_params = target_params;
-    drm->supported_colorspace = target_params_supported_by_display(drm);
-    bool use_sdr = !drm->supported_colorspace || force_sdr;
+    bool use_sdr = !target_params_supported_by_display(drm) || force_sdr;
 
     // For any HDR, the BT2020 drm colorspace is the only one that works in practice.
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
