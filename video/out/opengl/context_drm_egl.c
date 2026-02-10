@@ -516,6 +516,36 @@ static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
     present_sync_get_info(drm->present, info);
 }
 
+static pl_color_space_t drm_egl_preferred_csp(struct ra_ctx *ctx)
+{
+    struct vo_drm_state *drm = ctx->vo->drm;
+    pl_color_space_t bt2020 = {0};
+
+    // If the display supports either one of these colorspaces, return it as
+    // preferred.
+    if (vo_drm_color_supported_by_display(drm, pl_color_space_hdr10)) {
+        bt2020 = pl_color_space_hdr10;
+    } else if (vo_drm_color_supported_by_display(drm, pl_color_space_bt2020_hlg)) {
+        bt2020 = pl_color_space_bt2020_hlg;
+    }
+
+    if (bt2020.primaries != PL_COLOR_PRIM_UNKNOWN) {
+        bt2020.hdr.prim.red.x = drm->chromaticity->red_x;
+        bt2020.hdr.prim.red.y = drm->chromaticity->red_y;
+        bt2020.hdr.prim.green.x = drm->chromaticity->green_x;
+        bt2020.hdr.prim.green.y = drm->chromaticity->green_y;
+        bt2020.hdr.prim.blue.x = drm->chromaticity->blue_x;
+        bt2020.hdr.prim.blue.y = drm->chromaticity->blue_y;
+        bt2020.hdr.prim.white.x = drm->chromaticity->white_x;
+        bt2020.hdr.prim.white.y = drm->chromaticity->white_y;
+        bt2020.hdr.min_luma = drm->hdr_static_metadata->desired_content_min_luminance;
+        bt2020.hdr.max_luma = drm->hdr_static_metadata->desired_content_max_luminance;
+        return bt2020;
+    }
+
+    return pl_color_space_srgb;
+}
+
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
     if (!vo_drm_init(ctx->vo))
@@ -630,6 +660,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .get_vsync          = drm_egl_get_vsync,
+        .preferred_csp      = drm_egl_preferred_csp,
         .swap_buffers       = drm_egl_swap_buffers,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))

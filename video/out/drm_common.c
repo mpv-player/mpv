@@ -672,29 +672,6 @@ done:
         drmModeFreePropertyBlob(blob);
 }
 
-static bool target_params_supported_by_display(struct vo_drm_state *drm)
-{
-    if (!drm->chromaticity || !drm->colorimetry || !drm->hdr_static_metadata)
-        return false;
-
-    const struct di_cta_hdr_static_metadata_block *hdr_static_metadata = drm->hdr_static_metadata;
-    enum pl_color_transfer trc = drm->target_params.color.transfer;
-
-    if (!pl_color_transfer_is_hdr(trc) && !hdr_static_metadata->eotfs->traditional_sdr)
-        return false;
-
-    if (pl_color_transfer_is_hdr(trc) && !drm->colorimetry->bt2020_rgb)
-        return false;
-
-    if (trc == PL_COLOR_TRC_PQ && !hdr_static_metadata->eotfs->pq)
-        return false;
-
-    if (trc == PL_COLOR_TRC_HLG && !hdr_static_metadata->eotfs->hlg)
-        return false;
-
-    return true;
-}
-
 static bool all_digits(const char *str)
 {
     if (str == NULL || str[0] == '\0') {
@@ -1350,6 +1327,28 @@ static int drm_validate_mode_opt(struct mp_log *log, const struct m_option *opt,
 }
 
 /* Helpers */
+bool vo_drm_color_supported_by_display(struct vo_drm_state *drm, struct pl_color_space color)
+{
+    const struct di_cta_hdr_static_metadata_block *hdr_static_metadata = drm->hdr_static_metadata;
+    enum pl_color_transfer trc = color.transfer;
+
+    if (!pl_color_transfer_is_hdr(trc) && hdr_static_metadata && !hdr_static_metadata->eotfs->traditional_sdr)
+        return false;
+
+    if (pl_color_transfer_is_hdr(trc)) {
+        if (!drm->chromaticity || !drm->colorimetry || !hdr_static_metadata || !drm->colorimetry->bt2020_rgb)
+            return false;
+
+        if (trc == PL_COLOR_TRC_PQ && !hdr_static_metadata->eotfs->pq)
+            return false;
+
+        if (trc == PL_COLOR_TRC_HLG && !hdr_static_metadata->eotfs->hlg)
+            return false;
+    }
+
+    return true;
+}
+
 double vo_drm_get_display_fps(struct vo_drm_state *drm)
 {
     return mode_get_Hz(&drm->mode.mode);
@@ -1365,7 +1364,7 @@ bool vo_drm_set_hdr_metadata(struct vo *vo, bool force_sdr)
 
     destroy_hdr_blob(drm);
     drm->target_params = target_params;
-    bool use_sdr = !target_params_supported_by_display(drm) || force_sdr;
+    bool use_sdr = !vo_drm_color_supported_by_display(drm, drm->target_params.color) || force_sdr;
 
     // For any HDR, the BT2020 drm colorspace is the only one that works in practice.
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;

@@ -156,6 +156,7 @@ struct vo_drm_state {
 bool vo_drm_init(struct vo *vo);
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg);
 
+bool vo_drm_color_supported_by_display(struct vo_drm_state *drm, struct pl_color_space color);
 double vo_drm_get_display_fps(struct vo_drm_state *drm);
 bool vo_drm_set_hdr_metadata(struct vo *vo, bool force_sdr);
 void vo_drm_set_monitor_par(struct vo *vo);
