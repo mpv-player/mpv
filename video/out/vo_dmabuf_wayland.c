@@ -630,13 +630,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
         buf = buffer_get(vo, frame);
+        vo_wayland_handle_color(wl, &frame->current->params);
 
         if (buf && buf->frame) {
-            if (wl->color_surface && (!wl->image_description_processed || p->vo_is_waiting)) {
-                vo_wait_on_vo(vo, !wl->image_description_processed);
-                p->vo_is_waiting = !wl->image_description_processed;
+            if (wl->image_description_pending || p->vo_is_waiting) {
+                vo_wait_on_vo(vo, wl->image_description_pending);
+                p->vo_is_waiting = wl->image_description_pending;
             }
-            vo_wayland_handle_color(wl, &frame->current->params);
             struct mp_image *image = buf->frame->current;
             wl_surface_attach(wl->video_surface, buf->buffer, 0, 0);
             wl_surface_damage_buffer(wl->video_surface, 0, 0, image->w,
