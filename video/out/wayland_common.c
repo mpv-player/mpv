@@ -2109,18 +2109,18 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
     MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
     wp_color_management_surface_v1_unset_image_description(wl->color_surface);
     wp_image_description_v1_destroy(image_description);
-    wl->image_description_processed = true;
+    wl->image_description_pending = false;
 }
 
 static void image_description_ready2(void *data, struct wp_image_description_v1 *image_description,
-                                    uint32_t identity_hi, uint32_t identity_lo)
+                                     uint32_t identity_hi, uint32_t identity_lo)
 {
     struct vo_wayland_state *wl = data;
     wp_color_management_surface_v1_set_image_description(wl->color_surface, image_description,
                                                          WP_COLOR_MANAGER_V1_RENDER_INTENT_PERCEPTUAL);
     MP_TRACE(wl, "Image description set on color surface.\n");
     wp_image_description_v1_destroy(image_description);
-    wl->image_description_processed = true;
+    wl->image_description_pending = false;
 }
 
 static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
@@ -3548,14 +3548,13 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
-    wl->image_description_processed = false;
+    wl->image_description_pending = true;
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
     return;
 
 nosupport:
     *color = pl_color_space_srgb;
     pl_color_space_infer(color);
-    wl->image_description_processed = true;
     return;
 #endif
 }
