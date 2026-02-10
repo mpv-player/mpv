@@ -1082,7 +1082,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
 
-    bool pass_colorspace = false;
     struct pl_color_space target_csp = {0};
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
@@ -1178,8 +1177,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.hdr.max_cll  = target->hdr.max_cll;
             hint.hdr.max_fall = target->hdr.max_fall;
         }
-        if (p->ra_ctx->fns->pass_colorspace && p->ra_ctx->fns->pass_colorspace(p->ra_ctx))
-            pass_colorspace = true;
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
         if (opts->target_gamut) {
@@ -1226,8 +1223,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update again after possible max_luma change
         if (p->icc_profile)
             hint = p->icc_profile->csp;
-        if (!pass_colorspace)
-            pl_swapchain_colorspace_hint(p->sw, &hint);
+        pl_swapchain_colorspace_hint(p->sw, &hint);
     } else if (!target_hint) {
         if (!hint.hdr.min_luma)
             hint.hdr.min_luma = target_csp.hdr.min_luma;
@@ -1258,7 +1254,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
+    bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
     if (target.color.transfer == PL_COLOR_TRC_SRGB && frame->current &&
         ((opts->sdr_adjust_gamma == 0 && opts->target_trc == PL_COLOR_TRC_UNKNOWN) ||
@@ -1414,7 +1410,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                         ? swframe.fbo->params.format->name : NULL,
         .w = mp_rect_w(p->dst),
         .h = mp_rect_h(p->dst),
-        .color = pass_colorspace ? hint : target.color,
+        .color = target.color,
         .repr = target.repr,
         .rotate = target.rotation,
     };
