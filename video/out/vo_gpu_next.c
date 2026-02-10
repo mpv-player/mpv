@@ -138,6 +138,7 @@ struct priv {
     pl_options pars;
     struct m_config_cache *opts_cache;
     struct m_config_cache *next_opts_cache;
+    struct m_config_cache *filter_opts_cache;
     struct gl_next_opts *next_opts;
     struct cache shader_cache, icc_cache;
     struct mp_csp_equalizer_state *video_eq;
@@ -813,6 +814,7 @@ static void update_options(struct vo *vo)
     pl_options pars = p->pars;
     bool changed = m_config_cache_update(p->opts_cache);
     changed = m_config_cache_update(p->next_opts_cache) || changed;
+    changed = m_config_cache_update(p->filter_opts_cache) || changed;
     if (changed)
         update_render_options(vo);
 
@@ -1068,6 +1070,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         mpi->priv = fp;
         fp->vo = vo;
 
+        bool use_fields = mpi->fields & MP_IMGFIELD_INTERLACED && !IMGFMT_IS_HWACCEL(mpi->imgfmt);
+        int first_field = !use_fields ? PL_FIELD_NONE :
+                          (mpi->fields & MP_IMGFIELD_TOP_FIRST) ? PL_FIELD_TOP : PL_FIELD_BOTTOM;
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
             .duration = can_interpolate ? frame->approx_duration : 0,
@@ -1075,6 +1080,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             .map = map_frame,
             .unmap = unmap_frame,
             .discard = discard_frame,
+            .first_field = first_field,
         });
 
         p->last_id = id;
@@ -2127,6 +2133,7 @@ static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
+    p->filter_opts_cache = m_config_cache_alloc(p, vo->global, &filter_conf);
     p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
     p->next_opts = p->next_opts_cache->opts;
     p->video_eq = mp_csp_equalizer_create(p, vo->global);
@@ -2479,6 +2486,7 @@ static void update_render_options(struct vo *vo)
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
+    const struct filter_opts *fopts = p->filter_opts_cache->opts;
     pars->params.background_color[0] = opts->background_color.r / 255.0;
     pars->params.background_color[1] = opts->background_color.g / 255.0;
     pars->params.background_color[2] = opts->background_color.b / 255.0;
@@ -2529,6 +2537,11 @@ static void update_render_options(struct vo *vo)
                       (pars->params.skip_anti_aliasing ? 1 : 2);
     }
     vo_set_queue_params(vo, 0, MPMIN(VO_MAX_REQ_FRAMES, req_frames));
+
+#if PL_API_VER >= 353
+    pars->params.deinterlace_params = fopts->deinterlace != 0 ? &pars->deinterlace_params : NULL;
+    pars->deinterlace_params.algo = PL_DEINTERLACE_BWDIF;
+#endif
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
@@ -2637,6 +2650,9 @@ const struct vo_driver video_out_gpu_next = {
     .caps = VO_CAP_ROTATE90 |
             VO_CAP_FILM_GRAIN |
             VO_CAP_VFLIP |
+#if PL_API_VER >= 353
+            VO_CAP_DEINTERLACE |
+#endif
             0x0,
     .preinit = preinit,
     .query_format = query_format,
