@@ -243,7 +243,7 @@ Alt++ and Alt+-
 Alt+KP_ADD and Alt+KP_SUBTRACT
     Change video zoom.
 
-Alt+BACKSPACE
+Alt+BACKSPACE and Ctrl+0
     Reset the pan/zoom settings.
 
 F8
