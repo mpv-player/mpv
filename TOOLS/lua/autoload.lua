@@ -413,8 +413,10 @@ local function find_and_add_entries()
 end
 
 local function enable()
+    local disabled = o.disabled
     o.disabled = false
     find_and_add_entries()
+    o.disabled = disabled
 end
 
 mp.register_event("start-file", find_and_add_entries)
