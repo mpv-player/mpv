@@ -22,6 +22,7 @@
 
 #include "common/common.h"
 #include "misc/ctype.h"
+#include <string.h>
 
 #define L(s) { #s, sizeof(#s) - 1 }
 
@@ -295,6 +296,27 @@ int mp_match_lang(char **langs, const char *lang)
 done:
     talloc_free(ta_ctx);
     return best_score;
+}
+
+bool mp_language_is_suffix_token(const char *token)
+{
+    if (!token || !token[0])
+        return false;
+
+    char *lang_list[] = {(char *)token, NULL};
+    if (mp_match_lang(lang_list, token) > 0)
+        return true;
+
+    static const char *const special[] = {
+        "jp", "chs", "cht", "sub", "subs", "sdh", "forced", "cc", NULL,
+    };
+
+    for (int i = 0; special[i]; i++) {
+        if (strcmp(token, special[i]) == 0)
+            return true;
+    }
+
+    return false;
 }
 
 bstr mp_guess_lang_from_filename(bstr name, int *lang_start, enum track_flags *flags)
