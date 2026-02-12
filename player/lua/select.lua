@@ -1045,9 +1045,19 @@ end
 
 local function tracks(property, track_type)
     local items = {}
+    local track_list = get("track-list")
     local last_type
 
-    for _, track in ipairs(get("track-list")) do
+    local positions = {video = 0, audio = 1, sub = 2}
+    table.sort(track_list, function (i, j)
+        if i.type ~= j.type then
+            return positions[i.type] < positions[j.type]
+        end
+
+        return i.id < j.id
+    end)
+
+    for _, track in ipairs(track_list) do
         if not track_type or track.type == track_type then
             if last_type and track.type ~= last_type then
                 items[#items + 1] = { type = "separator" }
