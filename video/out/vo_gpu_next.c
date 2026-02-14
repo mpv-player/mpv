@@ -1268,6 +1268,10 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         case PL_COLOR_TRC_BT_1886:
         case PL_COLOR_TRC_GAMMA22:
         case PL_COLOR_TRC_SRGB:
+#ifdef __APPLE__
+            if (opts->sdr_adjust_gamma == 0)
+                break;
+#endif
             target.color.transfer = frame->current->params.color.transfer;
         }
     }

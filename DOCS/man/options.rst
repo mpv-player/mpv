@@ -7381,10 +7381,19 @@ them.
     ``yes``, it will be converted based on the available metadata.
 
     ``auto`` (default) behaves like ``no``, except when ``--target-trc`` is
-    explicitly set, in which case it behaves like ``yes``.
+    explicitly set, in which case it behaves like ``yes``. On macOS it
+    should always behave like ``yes``.
 
     Generally it's recommended to enable this option, if you can ensure that
-    both source and target metadata is correct.
+    both source and target metadata is correct. Besides, on color managed
+    platforms, the output metadata will most likely to be correct. For example,
+    macOS, Windows with ACM enabled, or Wayland that compositor has color
+    management protocol support are all globally color managed.
+
+    However, your render API should also support passing output metadata to MPV,
+    or able to let MPV pick color space description for output surface. Setting
+    ``--gpu-api`` to ``d3d11`` or ``vulkan`` (``opengl`` won't work) would allow
+    this.
 
     (Only for ``--vo=gpu-next``)
 
