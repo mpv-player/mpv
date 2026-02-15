@@ -785,7 +785,6 @@ mp.add_key_binding(nil, "menu", function ()
     end
 
     input.select({
-        prompt = "",
         items = labels,
         keep_open = true,
         submit = function (i)
