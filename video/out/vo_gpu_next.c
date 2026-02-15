@@ -963,6 +963,9 @@ static void set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
 
     if (sw->fns->set_color) {
         sw->fns->set_color(sw, &params);
+        // Wayland on Vulkan requires this until we can do VK_COLOR_SPACE_PASS_THROUGH_EXT
+        if (strcmp(p->ra_ctx->fns->name, "waylandvk") == 0)
+            pl_swapchain_colorspace_hint(p->sw, hint);
         if (hint)
             *hint = params.color;
     } else {
@@ -1280,7 +1283,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Calculate target
     struct pl_frame target;
     pl_frame_from_swapchain(&target, &swframe);
-    if (target_hint && sw->fns->set_color)
+    if (target_hint && sw->fns->set_color && strcmp(p->ra_ctx->fns->name, "waylandvk") != 0)
         target.color = hint;
     bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);

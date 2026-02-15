@@ -62,12 +62,15 @@ static bool wayland_egl_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
+static void wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+{
+    vo_wayland_handle_color(ctx->vo->wl, params);
+}
+
 static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
-
-    vo_wayland_handle_color(wl);
 
     eglSwapBuffers(p->egl_display, p->egl_surface);
 
@@ -108,6 +111,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
+        .set_color          = wayland_egl_set_color,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,
     };
