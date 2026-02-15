@@ -486,6 +486,14 @@ end
 -- sent by "script-binding"
 mp.register_script_message("key-binding", dispatch_key_binding)
 
+function mp.log(level, ...)
+    local cmd = {"msg", level}
+    for i = 1, select("#", ...) do
+        cmd[#cmd + 1] = tostring(select(i, ...))
+    end
+    mp.command_native(cmd)
+end
+
 mp.msg = {
     log = mp.log,
     fatal = function(...) return mp.log("fatal", ...) end,
