@@ -114,13 +114,20 @@ struct priv {
     AVBufferRef *hw_pool;
 
     struct mp_refqueue *queue;
+
+    UINT past_frames;
+    UINT future_frames;
+
+    UINT output_seq;
 };
 
+#define D3D11VPP_MAX_FRAMES 4
 
 static void flush_frames(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
     mp_refqueue_flush(p->queue);
+    p->output_seq = 0;
 }
 
 static void destroy_video_proc(struct mp_filter *vf)
@@ -248,32 +255,40 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
-    int mode = p->opts->mode;
-    if (!mode && p->opts->deint_enabled)
-        mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+    int mode = 0;
+    if (mp_refqueue_should_deint(p->queue))
+        mode = p->opts->mode ? p->opts->mode : D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE;
 
-    int rindex = mode ? -1 : 0;
-    if (rindex == 0)
-        goto create;
-
+    D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rc_caps = {0};
     D3D11_VIDEO_PROCESSOR_CAPS caps;
     hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorCaps(p->vp_enum, &caps);
     if (FAILED(hr))
         goto fail;
 
-    MP_VERBOSE(vf, "Found %u rate conversion caps. Looking for caps=%#x.\n",
-               caps.RateConversionCapsCount, mode);
+    static const char *frame_type[] = {
+        [D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE] = "progressive",
+        [D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST] = "interlaced tff",
+        [D3D11_VIDEO_FRAME_FORMAT_INTERLACED_BOTTOM_FIELD_FIRST] = "interlaced bff",
+    };
+    mp_require((size_t)p->d3d_frame_format < MP_ARRAY_SIZE(frame_type));
+    MP_VERBOSE(vf, "Found %u rate conversion caps for %s frame. Looking for caps=%#x.\n",
+               caps.RateConversionCapsCount, frame_type[p->d3d_frame_format], mode);
 
-    for (int n = 0; n < caps.RateConversionCapsCount; n++) {
+    int rindex = -1;
+    for (UINT n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
         hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorRateConversionCaps
                 (p->vp_enum, n, &rcaps);
         if (FAILED(hr))
             goto fail;
+        // Init rc_caps for fallback if no matching mode is found.
+        if (n == 0)
+            rc_caps = rcaps;
         const char *marker = WHITE_CIRCLE;
-        if (rcaps.ProcessorCaps & mode) {
+        if ((rcaps.ProcessorCaps & mode) == mode) {
             if (rindex < 0) {
                 rindex = n;
+                rc_caps = rcaps;
                 marker = BLACK_CIRCLE;
             }
         }
@@ -289,15 +304,39 @@ static int recreate_video_proc(struct mp_filter *vf)
         rindex = 0;
     }
 
-    // TODO: so, how do we select which rate conversion mode the processor uses?
-
-create:
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
     if (FAILED(hr)) {
         MP_ERR(vf, "Failed to create D3D11 video processor.\n");
         goto fail;
     }
+
+    p->past_frames = MPMIN(rc_caps.PastFrames, D3D11VPP_MAX_FRAMES);
+    p->future_frames = MPMIN(rc_caps.FutureFrames, D3D11VPP_MAX_FRAMES);
+
+    if (p->past_frames < rc_caps.PastFrames || p->future_frames < rc_caps.FutureFrames) {
+        // No implementation should need more than D3D11VPP_MAX_FRAMES in practice.
+        MP_ERR(vf, "Processor requested %u past frames and %u future frames, "
+                   "but only %u/%u are supported. Please report an issue.\n",
+               rc_caps.PastFrames, rc_caps.FutureFrames, p->past_frames, p->future_frames);
+    }
+
+    // Force BOB if requested by user, this doesn't really make much sense, but
+    // since we have an option, just allow to not use any ref frames.
+    if (mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB ||
+        mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND) {
+        p->past_frames = 0;
+        p->future_frames = 0;
+        // Warn explicitly here, because forcing unsupported mode will cause
+        // obviously wrong result.
+        if ((rc_caps.ProcessorCaps & mode) != mode) {
+            MP_WARN(vf, "%s mode requested, but not supported. Consider using "
+                        "another mode for correct deinterlacing.\n",
+                    m_opt_choice_str(d3d11vpp_processor_caps, mode));
+        }
+    }
+
+    mp_refqueue_set_refs(p->queue, p->past_frames, p->future_frames);
 
     // Note: libavcodec does not support cropping left/top with hwaccel.
     RECT src_rc = {
@@ -313,10 +352,17 @@ create:
                                                                  p->video_proc,
                                                                  0, FALSE);
 
+    bool half_rate = !mp_refqueue_output_fields(p->queue) && mp_refqueue_should_deint(p->queue);
+    MP_DBG(vf, "Using %u past and %u future frames for processing at %s rate.\n",
+           p->past_frames, p->future_frames, half_rate ? "half" : "normal");
+    // None of the major GPU vendors seem to support custom rates for proper
+    // IVTC frame dropping. Only frame reconstruction is supported.
     ID3D11VideoContext_VideoProcessorSetStreamOutputRate(p->video_ctx,
                                                          p->video_proc,
                                                          0,
-                                                         D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
+                                                         half_rate ?
+                                                            D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_HALF :
+                                                            D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
                                                          FALSE, 0);
 
     D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
@@ -378,6 +424,26 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     return img;
 }
 
+static ID3D11VideoProcessorInputView *create_input_view(struct mp_filter *vf,
+                                                        struct mp_image *img)
+{
+    struct priv *p = vf->priv;
+    if (!img)
+        return NULL;
+
+    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC desc = {
+        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
+        .Texture2D.ArraySlice = (intptr_t)img->planes[1],
+    };
+    ID3D11VideoProcessorInputView *view = NULL;
+    HRESULT hr = ID3D11VideoDevice_CreateVideoProcessorInputView(
+        p->video_dev, (ID3D11Resource *)img->planes[0],
+        p->vp_enum, &desc, &view);
+    if (FAILED(hr))
+        MP_WARN(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    return view;
+}
+
 static struct mp_image *render(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -386,6 +452,12 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
+
+    UINT num_past = 0;
+    ID3D11VideoProcessorInputView *past_views[D3D11VPP_MAX_FRAMES] = {0};
+    UINT num_future = 0;
+    ID3D11VideoProcessorInputView *future_views[D3D11VPP_MAX_FRAMES] = {0};
+
     out = alloc_out(vf);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
@@ -398,7 +470,6 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!in)
         goto cleanup;
     ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
-    int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
     // mp_image_copy_attributes overwrites the height and width
@@ -425,35 +496,31 @@ static struct mp_image *render(struct mp_filter *vf)
         p->c_w = texdesc.Width;
         p->c_h = texdesc.Height;
         p->d3d_frame_format = d3d_frame_format;
+        p->output_seq = 0;
         if (recreate_video_proc(vf) < 0)
             goto cleanup;
-    }
-
-    if (!mp_refqueue_should_deint(p->queue)) {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
-    } else if (mp_refqueue_is_top_field(p->queue)) {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST;
-    } else {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_BOTTOM_FIELD_FIRST;
     }
 
     ID3D11VideoContext_VideoProcessorSetStreamFrameFormat(p->video_ctx,
                                                           p->video_proc,
                                                           0, d3d_frame_format);
 
-    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC indesc = {
-        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
-        .Texture2D = {
-            .ArraySlice = d3d_subindex,
-        },
-    };
-    hr = ID3D11VideoDevice_CreateVideoProcessorInputView(p->video_dev,
-                                                         (ID3D11Resource *)d3d_tex,
-                                                         p->vp_enum, &indesc,
-                                                         &in_view);
-    if (FAILED(hr)) {
-        MP_ERR(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    in_view = create_input_view(vf, in);
+    if (!in_view)
         goto cleanup;
+
+    for (int i = p->past_frames; i > 0; i--) {
+        ID3D11VideoProcessorInputView *v =
+            create_input_view(vf, mp_refqueue_get(p->queue, -i));
+        if (v)
+            past_views[num_past++] = v;
+    }
+
+    for (int i = 1; i <= p->future_frames; i++) {
+        ID3D11VideoProcessorInputView *v =
+            create_input_view(vf, mp_refqueue_get(p->queue, i));
+        if (v)
+            future_views[num_future++] = v;
     }
 
     D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC outdesc = {
@@ -468,24 +535,35 @@ static struct mp_image *render(struct mp_filter *vf)
         goto cleanup;
     }
 
+    bool half_rate = !mp_refqueue_output_fields(p->queue) && mp_refqueue_should_deint(p->queue);
     D3D11_VIDEO_PROCESSOR_STREAM stream = {
         .Enable = TRUE,
         .pInputSurface = in_view,
+        .OutputIndex = mp_refqueue_is_second_field(p->queue),
+        .InputFrameOrField = p->output_seq * (half_rate ? 2 : 1),
+        .PastFrames = num_past,
+        .FutureFrames = num_future,
+        .ppPastSurfaces = num_past ? past_views : NULL,
+        .ppFutureSurfaces = num_future ? future_views : NULL,
     };
-    int frame = mp_refqueue_is_second_field(p->queue);
     hr = ID3D11VideoContext_VideoProcessorBlt(p->video_ctx, p->video_proc,
-                                              out_view, frame, 1, &stream);
+                                              out_view, p->output_seq, 1, &stream);
     if (FAILED(hr)) {
         MP_ERR(vf, "VideoProcessorBlt failed.\n");
         goto cleanup;
     }
 
+    p->output_seq++;
     res = 0;
 cleanup:
     if (in_view)
         ID3D11VideoProcessorInputView_Release(in_view);
     if (out_view)
         ID3D11VideoProcessorOutputView_Release(out_view);
+    for (int i = 0; i < num_past; i++)
+        ID3D11VideoProcessorInputView_Release(past_views[i]);
+    for (int i = 0; i < num_future; i++)
+        ID3D11VideoProcessorInputView_Release(future_views[i]);
     if (res < 0)
         TA_FREEP(&out);
     return out;
@@ -632,10 +710,13 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
 
     mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
 
+    // Force BLEND mode by not sending ref frames and setting half rate.
+    bool out_fields = p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND;
+
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue,
         (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
-        MP_MODE_OUTPUT_FIELDS |
+        (out_fields ? MP_MODE_OUTPUT_FIELDS : 0) |
         (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
     mp_refqueue_set_parity(p->queue, p->opts->field_parity);
 
