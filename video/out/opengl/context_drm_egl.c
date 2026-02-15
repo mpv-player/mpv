@@ -76,6 +76,8 @@ struct priv {
 
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
+
+    bool allow_modeset;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -312,6 +314,7 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
 static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 {
     struct vo_drm_state *drm = ctx->vo->drm;
+    struct priv *p = ctx->priv;
 
     update_framebuffer_from_bo(ctx, frame->bo);
 
@@ -321,7 +324,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
-    if (vo_drm_set_hdr_metadata(ctx->vo, false))
+    if (p->allow_modeset)
         flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
 
     int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request, flags, drm);
@@ -546,6 +549,12 @@ static pl_color_space_t drm_egl_preferred_csp(struct ra_ctx *ctx)
     return pl_color_space_srgb;
 }
 
+static void drm_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+{
+    struct priv *p = ctx->priv;
+    p->allow_modeset = vo_drm_set_color(ctx->vo, &params->color);
+}
+
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
     if (!vo_drm_init(ctx->vo))
@@ -661,6 +670,7 @@ static bool drm_egl_init(struct ra_ctx *ctx)
     struct ra_ctx_params params = {
         .get_vsync          = drm_egl_get_vsync,
         .preferred_csp      = drm_egl_preferred_csp,
+        .set_color          = drm_egl_set_color,
         .swap_buffers       = drm_egl_swap_buffers,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))

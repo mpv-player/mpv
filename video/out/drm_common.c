@@ -520,7 +520,8 @@ static void restore_sdr(struct vo_drm_state *drm)
     if (!atomic_ctx)
         return;
 
-    vo_drm_set_hdr_metadata(drm->vo, true);
+    struct pl_color_space sdr = pl_color_space_srgb;
+    vo_drm_set_color(drm->vo, &sdr);
     int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request, DRM_MODE_ATOMIC_ALLOW_MODESET, drm);
     if (ret)
         MP_VERBOSE(drm, "Failed to commit atomic request: %s\n", mp_strerror(ret));
@@ -1354,30 +1355,33 @@ double vo_drm_get_display_fps(struct vo_drm_state *drm)
     return mode_get_Hz(&drm->mode.mode);
 }
 
-bool vo_drm_set_hdr_metadata(struct vo *vo, bool force_sdr)
+bool vo_drm_set_color(struct vo *vo, struct pl_color_space *color)
 {
     struct vo_drm_state *drm = vo->drm;
-    struct mp_image_params target_params = vo_get_target_params(vo);
-    if (!force_sdr && (pl_color_space_equal(&target_params.color, &drm->target_params.color) ||
-        !target_params.w || !target_params.h))
+    if (pl_color_space_equal(&drm->colorspace, color))
         return false;
 
+    // Set to sdr if the display doesn't support the colorspace.
+    if (!vo_drm_color_supported_by_display(drm, *color)) {
+        *color = pl_color_space_srgb;
+        pl_color_space_infer(color);
+    }
+
     destroy_hdr_blob(drm);
-    drm->target_params = target_params;
-    bool use_sdr = !vo_drm_color_supported_by_display(drm, drm->target_params.color) || force_sdr;
+    drm->colorspace = *color;
 
     // For any HDR, the BT2020 drm colorspace is the only one that works in practice.
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
-    int colorspace = !use_sdr && pl_color_space_is_hdr(&drm->target_params.color) ?
+    int colorspace = pl_color_space_is_hdr(color) || pl_color_primaries_is_wide_gamut(color->primaries) ?
                      DRM_MODE_COLORIMETRY_BT2020_RGB : DRM_MODE_COLORIMETRY_DEFAULT;
     drm_object_set_property(atomic_ctx->request, atomic_ctx->connector, "Colorspace", colorspace);
 
-    const struct pl_hdr_metadata *hdr = &target_params.color.hdr;
+    const struct pl_hdr_metadata *hdr = &color->hdr;
     struct hdr_output_metadata metadata = {
         .metadata_type = HDMI_STATIC_METADATA_TYPE1,
         .hdmi_metadata_type1.metadata_type = HDMI_STATIC_METADATA_TYPE1,
 
-        .hdmi_metadata_type1.eotf = use_sdr ? HDMI_EOTF_TRADITIONAL_GAMMA_SDR : eotf_map[target_params.color.transfer],
+        .hdmi_metadata_type1.eotf = eotf_map[color->transfer],
 
         .hdmi_metadata_type1.display_primaries[0].x = lrintf(hdr->prim.red.x * DRM_PRIM_FACTOR),
         .hdmi_metadata_type1.display_primaries[0].y = lrintf(hdr->prim.red.y * DRM_PRIM_FACTOR),
