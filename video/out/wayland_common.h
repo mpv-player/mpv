@@ -96,7 +96,7 @@ struct vo_wayland_state {
     struct wp_color_management_surface_v1 *color_surface;
     struct wp_color_management_surface_feedback_v1 *color_surface_feedback;
     struct wp_image_description_creator_icc_v1 *icc_creator;
-    struct mp_image_params target_params;
+    struct mp_image_params current_params;
     bool image_description_processed;
     bool supports_parametric;
     bool supports_display_primaries;
@@ -204,7 +204,7 @@ bool vo_wayland_reconfig(struct vo *vo);
 int vo_wayland_allocate_memfd(struct vo *vo, size_t size);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
-void vo_wayland_handle_color(struct vo_wayland_state *wl);
+void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params);
 void vo_wayland_handle_scale(struct vo_wayland_state *wl);
 void vo_wayland_set_opaque_region(struct vo_wayland_state *wl, bool alpha);
 void vo_wayland_sync_swap(struct vo_wayland_state *wl);
