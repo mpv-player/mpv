@@ -103,8 +103,13 @@ struct priv {
     AVBufferRef *hw_pool;
 
     struct mp_refqueue *queue;
+
+    UINT past_frames;
+    UINT future_frames;
 };
 
+#define D3D11VPP_MAX_PAST_FRAMES   8
+#define D3D11VPP_MAX_FUTURE_FRAMES 4
 
 static void flush_frames(struct mp_filter *vf)
 {
@@ -237,10 +242,13 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
-    if (!p->opts->mode && p->opts->deint_enabled)
-        p->opts->mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+    int mode = p->opts->mode;
+    if (!mode && p->opts->deint_enabled)
+        mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
 
-    int rindex = p->opts->mode ? -1 : 0;
+    int rindex = mode ? -1 : 0;
+    D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rc_caps = {0};
+
     if (rindex == 0)
         goto create;
 
@@ -250,7 +258,7 @@ static int recreate_video_proc(struct mp_filter *vf)
         goto fail;
 
     MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
-               (int)caps.RateConversionCapsCount, p->opts->mode);
+               (int)caps.RateConversionCapsCount, mode);
 
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
@@ -258,11 +266,14 @@ static int recreate_video_proc(struct mp_filter *vf)
                 (p->vp_enum, n, &rcaps);
         if (FAILED(hr))
             goto fail;
-        MP_VERBOSE(vf, "  - %d: 0x%08x\n", n, (unsigned)rcaps.ProcessorCaps);
-        if (rcaps.ProcessorCaps & p->opts->mode) {
+        MP_VERBOSE(vf, "  - %d: caps=%#x past=%u future=%u\n", n,
+                   rcaps.ProcessorCaps, rcaps.PastFrames, rcaps.FutureFrames);
+        if (rcaps.ProcessorCaps & mode) {
             MP_VERBOSE(vf, "       (matching)\n");
-            if (rindex < 0)
+            if (rindex < 0) {
                 rindex = n;
+                rc_caps = rcaps;
+            }
         }
     }
 
@@ -280,6 +291,10 @@ create:
         MP_ERR(vf, "Failed to create D3D11 video processor.\n");
         goto fail;
     }
+
+    p->past_frames   = MPMIN(rc_caps.PastFrames,   D3D11VPP_MAX_PAST_FRAMES);
+    p->future_frames = MPMIN(rc_caps.FutureFrames, D3D11VPP_MAX_FUTURE_FRAMES);
+    mp_refqueue_set_refs(p->queue, p->past_frames, p->future_frames);
 
     // Note: libavcodec does not support cropping left/top with hwaccel.
     RECT src_rc = {
@@ -360,6 +375,26 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     return img;
 }
 
+static ID3D11VideoProcessorInputView *create_input_view(struct mp_filter *vf,
+                                                        struct mp_image *img)
+{
+    struct priv *p = vf->priv;
+    if (!img)
+        return NULL;
+
+    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC desc = {
+        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
+        .Texture2D.ArraySlice = (intptr_t)img->planes[1],
+    };
+    ID3D11VideoProcessorInputView *view = NULL;
+    HRESULT hr = ID3D11VideoDevice_CreateVideoProcessorInputView(
+        p->video_dev, (ID3D11Resource *)img->planes[0],
+        p->vp_enum, &desc, &view);
+    if (FAILED(hr))
+        MP_WARN(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    return view;
+}
+
 static struct mp_image *render(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -368,6 +403,12 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
+
+    UINT num_past = 0;
+    ID3D11VideoProcessorInputView *past_views[D3D11VPP_MAX_PAST_FRAMES] = {0};
+    UINT num_future = 0;
+    ID3D11VideoProcessorInputView *future_views[D3D11VPP_MAX_FUTURE_FRAMES] = {0};
+
     out = alloc_out(vf);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
@@ -380,7 +421,6 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!in)
         goto cleanup;
     ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
-    int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
     // mp_image_copy_attributes overwrites the height and width
@@ -423,19 +463,26 @@ static struct mp_image *render(struct mp_filter *vf)
                                                           p->video_proc,
                                                           0, d3d_frame_format);
 
-    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC indesc = {
-        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
-        .Texture2D = {
-            .ArraySlice = d3d_subindex,
-        },
-    };
-    hr = ID3D11VideoDevice_CreateVideoProcessorInputView(p->video_dev,
-                                                         (ID3D11Resource *)d3d_tex,
-                                                         p->vp_enum, &indesc,
-                                                         &in_view);
-    if (FAILED(hr)) {
-        MP_ERR(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    in_view = create_input_view(vf, in);
+    if (!in_view)
         goto cleanup;
+
+    num_past = p->past_frames;
+    for (int i = 0; i < num_past; i++) {
+        past_views[i] = create_input_view(vf, mp_refqueue_get(p->queue, -(i + 1)));
+        if (!past_views[i]) {
+            num_past = i;
+            break;
+        }
+    }
+
+    num_future = p->future_frames;
+    for (UINT i = 0; i < num_future; i++) {
+        future_views[i] = create_input_view(vf, mp_refqueue_get(p->queue, i + 1));
+        if (!future_views[i]) {
+            num_future = i;
+            break;
+        }
     }
 
     D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC outdesc = {
@@ -453,6 +500,12 @@ static struct mp_image *render(struct mp_filter *vf)
     D3D11_VIDEO_PROCESSOR_STREAM stream = {
         .Enable = TRUE,
         .pInputSurface = in_view,
+        .OutputIndex       = mp_refqueue_is_second_field(p->queue) ? 1u : 0u,
+        .InputFrameOrField = mp_refqueue_is_second_field(p->queue) ? 1u : 0u,
+        .PastFrames        = num_past,
+        .FutureFrames      = num_future,
+        .ppPastSurfaces    = num_past ? past_views : NULL,
+        .ppFutureSurfaces  = num_future ? future_views : NULL,
     };
     int frame = mp_refqueue_is_second_field(p->queue);
     hr = ID3D11VideoContext_VideoProcessorBlt(p->video_ctx, p->video_proc,
@@ -468,6 +521,10 @@ cleanup:
         ID3D11VideoProcessorInputView_Release(in_view);
     if (out_view)
         ID3D11VideoProcessorOutputView_Release(out_view);
+    for (int i = 0; i < num_past; i++)
+        ID3D11VideoProcessorInputView_Release(past_views[i]);
+    for (int i = 0; i < num_future; i++)
+        ID3D11VideoProcessorInputView_Release(future_views[i]);
     if (res < 0)
         TA_FREEP(&out);
     return out;
