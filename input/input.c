@@ -676,24 +676,53 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale,
 
     memset(ictx->key_history, 0, sizeof(ictx->key_history));
 
-    if (mp_input_is_scalable_cmd(cmd)) {
-        cmd->scale = scale;
-        cmd->scale_units = scale_units;
-        queue_cmd(ictx, cmd);
-    } else {
-        // Non-scalable commands won't understand cmd->scale, so synthesize
-        // multiple commands with cmd->scale = 1
-        cmd->scale = 1;
-        cmd->scale_units = 1;
-        // Avoid spamming the player with too many commands
-        scale_units = MPMIN(scale_units, 20);
-        for (int i = 0; i < scale_units - 1; i++)
-            queue_cmd(ictx, mp_cmd_clone(cmd));
-        if (scale_units) {
+    // Non-scalable commands won't understand cmd->scale, so synthesize
+    // multiple commands with cmd->scale = 1
+    cmd->scale = 1;
+    cmd->scale_units = 1;
+    // Avoid spamming the player with too many commands
+    int cmd_multiplier = MPMIN(scale_units, 20);
+    if (cmd->def != &mp_cmd_list) {
+        if (mp_input_is_scalable_cmd(cmd)) {
+            cmd->scale = scale;
+            cmd->scale_units = scale_units;
             queue_cmd(ictx, cmd);
         } else {
-            talloc_free(cmd);
+            for (int i = 0; i < cmd_multiplier - 1; i++)
+                queue_cmd(ictx, mp_cmd_clone(cmd));
+            if (cmd_multiplier)
+                queue_cmd(ictx, cmd);
+            else
+                talloc_free(cmd);
         }
+    } else {
+        struct mp_cmd *sub_next = cmd->args[0].v.p;
+        struct mp_cmd *sub_prev = NULL;
+        while (sub_next) {
+            struct mp_cmd *sub = sub_next;
+            sub_next = sub->queue_next;
+            if (mp_input_is_scalable_cmd(sub)) {
+                sub->scale = scale;
+                sub->scale_units = scale_units;
+                sub_prev = sub;
+            } else {
+                sub->scale = 1;
+                sub->scale_units = 1;
+                if (cmd_multiplier > 1) {
+                    for (int i = 0; i < cmd_multiplier - 1; i++)
+                        sub->queue_next = mp_cmd_clone(sub);
+                } else if (cmd_multiplier < 1) {
+                    if (sub_prev)
+                        sub_prev->queue_next = sub->queue_next;
+                    else
+                        cmd->args[0].v.p = sub->queue_next;
+                }
+            }
+        }
+        if (cmd->args[0].v.p)
+            queue_cmd(ictx, cmd);
+        else
+            talloc_free(cmd);
     }
 }
 
