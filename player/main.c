@@ -42,6 +42,7 @@
 #include "common/codecs.h"
 #include "common/encode.h"
 #include "options/m_config.h"
+#include "options/m_config_frontend.h"
 #include "options/m_option.h"
 #include "options/m_property.h"
 #include "common/common.h"
@@ -366,6 +367,25 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             return r == M_OPT_EXIT ? 1 : -1;
     }
 
+#if HAVE_COCOA
+
+    if (mpctx->is_cli && opts->vo->WinID > 0)
+    {
+        MP_FATAL(mpctx, "On macOS, window embedding via 'wid' parameter is not supported from the CLI.\n");
+        return -1;
+    }
+
+    if (!mpctx->is_cli && opts->vo->WinID > 0)
+    {
+        MP_INFO(mpctx, "A 'wid' for window embedding is specified. Setting vo=libmpv, which is the only supported way on macOS.\n");
+
+        int r = m_config_set_option_cli(mpctx->mconfig, bstr0("vo"), bstr0("libmpv"), 0);
+        if (r < 0) {
+            MP_WARN(mpctx, "Failed to force vo=libmpv for wid embedding (err=%d)\n", r);
+        }
+    }
+#endif
+
     if (opts->operation_mode == 1) {
         m_config_set_profile(mpctx->mconfig, "builtin-pseudo-gui",
                              M_SETOPT_NO_OVERWRITE);
@@ -410,8 +430,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_STATS(mpctx, "start init");
 
 #if HAVE_COCOA
-    mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
-    cocoa_set_mpv_handle(ctx);
+    if (mpctx->is_cli || opts->vo->WinID > 0) {
+        mpv_handle *ctx = mp_new_client(mpctx->clients, "mac");
+        cocoa_set_mpv_handle(ctx);
+    }
 #endif
 
 #if HAVE_WIN32_SMTC
