@@ -310,6 +310,7 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
 static void get_compositor_preferred_description(struct vo_wayland_state *wl);
+static void get_fullscreen_dims(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -1921,6 +1922,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->geometry.x1 = handle_round(wl->scaling, width);
     wl->geometry.y1 = handle_round(wl->scaling, height);
 
+    get_fullscreen_dims(wl);
+
     if (mp_rect_equals(&old_geometry, &wl->geometry))
         return;
 
@@ -3128,6 +3131,26 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 #endif
 }
 
+static void get_fullscreen_dims(struct vo_wayland_state *wl)
+{
+    if (!wl->opts->fullscreen || !wl->fractional_scale_manager)
+        return;
+
+    // Fractional scaling can have pixel rounding errors (max of 2).
+    // For fullscreen, loop through output geometry and find a valid match.
+    int width = mp_rect_w(wl->geometry);
+    int height = mp_rect_h(wl->geometry);
+    struct vo_wayland_output *output;
+    wl_list_for_each(output, &wl->output_list, link) {
+        if (abs(mp_rect_w(output->geometry) - width <= 2) && abs(mp_rect_h(output->geometry) - height) <= 2) {
+            wl->geometry.x1 = mp_rect_w(output->geometry);
+            wl->geometry.y1 = mp_rect_h(output->geometry);
+            return;
+        }
+    }
+    return;
+}
+
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
     if (!s->cursor_shape_device && wl->cursor_shape_manager) {
@@ -3314,6 +3337,7 @@ static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
     wl->window_size.y1 /= factor;
     wl->geometry.x1 /= factor;
     wl->geometry.y1 /= factor;
+    get_fullscreen_dims(wl);
 }
 
 static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
