@@ -4340,6 +4340,7 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
+        wl_subsurface_place_above(wl->video_subsurface, wl->surface);
     }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
