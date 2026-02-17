@@ -56,6 +56,7 @@ struct vo_wayland_state {
     /* Geometry */
     struct mp_rect geometry;
     struct mp_rect window_size;
+    struct mp_rect surface_local;
     struct wl_list output_list;
     struct vo_wayland_output *current_output;
     struct mp_rect old_geometry;
@@ -64,6 +65,7 @@ struct vo_wayland_state {
     int bounded_width;
     int reduced_height;
     int reduced_width;
+    bool override_surface_local;
 
     /* State */
     bool activated;
