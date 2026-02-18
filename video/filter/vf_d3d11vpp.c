@@ -29,6 +29,7 @@
 #include "filters/filter.h"
 #include "filters/filter_internal.h"
 #include "filters/user_filters.h"
+#include "player/core.h"
 #include "refqueue.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
@@ -63,6 +64,16 @@ static const unsigned int intel_vpe_scaling_vsr = 0x2;
 
 static const unsigned int intel_vpe_fn_mode      = 0x20;
 static const unsigned int intel_vpe_mode_preproc = 0x1;
+
+static const struct m_opt_choice_alternatives d3d11vpp_processor_caps[] = {
+    {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
+    {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
+    {"adaptive", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE},
+    {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
+    {"ivtc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
+    {"none", 0},
+    {0}
+};
 
 enum scaling_mode {
     SCALING_BASIC,
@@ -237,10 +248,11 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
-    if (!p->opts->mode && p->opts->deint_enabled)
-        p->opts->mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+    int mode = p->opts->mode;
+    if (!mode && p->opts->deint_enabled)
+        mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
 
-    int rindex = p->opts->mode ? -1 : 0;
+    int rindex = mode ? -1 : 0;
     if (rindex == 0)
         goto create;
 
@@ -249,8 +261,8 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
-    MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
-               (int)caps.RateConversionCapsCount, p->opts->mode);
+    MP_VERBOSE(vf, "Found %u rate conversion caps. Looking for caps=%#x.\n",
+               caps.RateConversionCapsCount, mode);
 
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
@@ -258,16 +270,22 @@ static int recreate_video_proc(struct mp_filter *vf)
                 (p->vp_enum, n, &rcaps);
         if (FAILED(hr))
             goto fail;
-        MP_VERBOSE(vf, "  - %d: 0x%08x\n", n, (unsigned)rcaps.ProcessorCaps);
-        if (rcaps.ProcessorCaps & p->opts->mode) {
-            MP_VERBOSE(vf, "       (matching)\n");
-            if (rindex < 0)
+        const char *marker = WHITE_CIRCLE;
+        if (rcaps.ProcessorCaps & mode) {
+            if (rindex < 0) {
                 rindex = n;
+                marker = BLACK_CIRCLE;
+            }
         }
+        MP_VERBOSE(vf, "%s %d: processor_caps=%#x past_frames=%u future_frames=%u "
+                       "itelecine_caps=%#x custom_rate_count=%u\n", marker, n,
+                   rcaps.ProcessorCaps, rcaps.PastFrames, rcaps.FutureFrames,
+                   rcaps.ITelecineCaps, rcaps.CustomRateCount);
     }
 
     if (rindex < 0) {
-        MP_WARN(vf, "No fitting video processor found, picking #0.\n");
+        MP_WARN(vf, "No video processor found matching %s mode, using #0.\n",
+                m_opt_choice_str(d3d11vpp_processor_caps, mode));
         rindex = 0;
     }
 
@@ -638,13 +656,7 @@ static const m_option_t vf_opts_fields[] = {
         {"intel", SCALING_INTEL_VSR},
         {"nvidia", SCALING_NVIDIA_RTX})},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
-    {"mode", OPT_CHOICE(mode,
-        {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
-        {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
-        {"adaptive", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE},
-        {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
-        {"ivtc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
-        {"none", 0})},
+    {"mode", OPT_CHOICE_C(mode, d3d11vpp_processor_caps)},
     {"parity", OPT_CHOICE(field_parity,
         {"tff", MP_FIELD_PARITY_TFF},
         {"bff", MP_FIELD_PARITY_BFF},
