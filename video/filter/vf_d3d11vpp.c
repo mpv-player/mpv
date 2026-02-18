@@ -720,7 +720,10 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
 
     // Force BLEND mode by not sending ref frames and setting half rate.
-    bool out_fields = p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND;
+    // Use half rate for IVTC modes, custom rate would be perfect for that,
+    // but it's not supported by any driver in practice.
+    bool out_fields = p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND &&
+                      p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE;
 
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue,
