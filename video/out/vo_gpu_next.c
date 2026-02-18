@@ -2241,9 +2241,9 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     }
 
     for (int i = 0; i < 2; i++) {
-        if (!isnan(cfg->kernel.params[i]))
+        if (!mp_isnan(cfg->kernel.params[i]))
             par->config.params[i] = cfg->kernel.params[i];
-        if (!isnan(cfg->window.params[i]))
+        if (!mp_isnan(cfg->window.params[i]))
             par->config.wparams[i] = cfg->window.params[i];
     }
 
@@ -2578,7 +2578,7 @@ static void update_render_options(struct vo *vo)
     pars->color_map_params.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
 AV_NOWARN_DEPRECATED(
     pars->color_map_params.tone_mapping_param = opts->tone_map.curve_param;
-    if (isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
+    if (mp_isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
         pars->color_map_params.tone_mapping_param = 0.0;
 )
     pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
