@@ -741,7 +741,7 @@ Available mpv-only filters are:
             NVIDIA RTX Super Resolution.
     ``interlaced-only=<yes|no>``
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
-    ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
+    ``mode=<blend|bob|adaptive|mocomp|ivtc|none>``
         Tries to select a video processor with the given processing capability.
         If a video processor supports multiple capabilities, it is not clear
         which algorithm is actually selected. ``none`` always falls back. On
