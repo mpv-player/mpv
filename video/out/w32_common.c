@@ -118,7 +118,6 @@ struct vo_w32_state {
     bool window_bounds_initialized;
 
     bool current_fs;
-    bool toggle_fs; // whether the current fullscreen state needs to be switched
 
     // Note: maximized state doesn't involve nor modify windowrc
     RECT windowrc; // currently known normal/fullscreen window client rect
@@ -1064,17 +1063,8 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
         return;
-
-    bool new_fs = w32->opts->fullscreen;
-    if (w32->toggle_fs) {
-        new_fs = !w32->current_fs;
-        w32->toggle_fs = false;
-    }
-
-    bool toggle_fs = w32->current_fs != new_fs;
-    w32->opts->fullscreen = w32->current_fs = new_fs;
-    m_config_cache_write_opt(w32->opts_cache,
-                             &w32->opts->fullscreen);
+    bool toggle_fs = w32->current_fs != w32->opts->fullscreen;
+    w32->current_fs = w32->opts->fullscreen;
 
     if (toggle_fs && (!w32->opts->window_maximized || w32->unmaximize)) {
         if (w32->current_fs) {
@@ -1561,14 +1551,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         case SC_MONITORPOWER:
             if (w32->disable_screensaver) {
                 MP_VERBOSE(w32, "killing screensaver\n");
-                return 0;
-            }
-            break;
-        case SC_RESTORE:
-            if (IsMaximized(w32->window) && w32->current_fs) {
-                w32->toggle_fs = true;
-                reinit_window_state(w32);
-
                 return 0;
             }
             break;
