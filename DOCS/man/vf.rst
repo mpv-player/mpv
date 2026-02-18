@@ -743,10 +743,22 @@ Available mpv-only filters are:
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
     ``mode=<blend|bob|adaptive|mocomp|ivtc|none>``
         Tries to select a video processor with the given processing capability.
-        If a video processor supports multiple capabilities, it is not clear
-        which algorithm is actually selected. ``none`` always falls back. On
-        most if not all hardware, this option will probably do nothing, because
-        a video processor usually supports all modes or none.
+        If a video processor supports multiple capabilities, it is not guaranteed
+        which algorithm will actually be selected, this is left to the driver.
+        However, ``blend`` and ``bob`` modes are enforced by not passing reference
+        frames and adjusting the output frame rate. The other modes are used to
+        select an appropriate video processor, but the algorithm chosen depends
+        on the driver and the content. ``ivtc`` mode outputs at the half rate.
+
+    .. note::
+
+        ``ivtc`` mode only performs field matching and does not drop duplicate
+        frames. Duplicated frames can be removed manually using the ``decimate``
+        filter: ``--vf=d3d11vpp="deint:mode=ivtc,format=nv12,decimate=5"`` for
+        3:2 pulldown cadence. ``format=nv12`` is required to download frames back
+        to the CPU for decimation, the format should match the underlying format
+        of the d3d11 frame.
+
     ``nvidia-true-hdr``
         Enable NVIDIA RTX Video HDR processing.
 
