@@ -1736,6 +1736,10 @@ mp.register_script_message("get-input", function (args)
     end
 
     set_active(true)
+
+    -- We want to ensure the keybindings have been set before sending the "opened" event
+    -- in case scripts want to override our bindings.
+    mp.flush_keybindings()
     mp.commandv("script-message-to", input_caller, input_caller_handler, "opened")
 end)
 
