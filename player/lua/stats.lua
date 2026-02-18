@@ -1579,6 +1579,9 @@ local function unbind_scroll()
     end
 end
 
+local add_page_bindings
+local remove_page_bindings
+
 local function filter_bindings()
     input.get({
         prompt = "Filter bindings:",
@@ -1586,6 +1589,10 @@ local function filter_bindings()
             -- This is necessary to close the console if the oneshot
             -- display_timer expires without typing anything.
             searched_text = ""
+
+            -- Must be re-bound to override the console.lua bindings.
+            remove_page_bindings()
+            bind_scroll()
         end,
         edited = function (text)
             reset_scroll_offsets()
@@ -1599,6 +1606,7 @@ local function filter_bindings()
         closed = function ()
             searched_text = nil
             if display_timer:is_enabled() then
+                add_page_bindings()
                 print_page(curr_page)
                 if display_timer.oneshot then
                     display_timer:kill()
@@ -1606,7 +1614,6 @@ local function filter_bindings()
                 end
             end
         end,
-        dont_bind_up_down = true,
     })
 end
 
@@ -1648,7 +1655,7 @@ local function update_scroll_bindings(k)
 end
 
 -- Add keybindings for every page
-local function add_page_bindings()
+add_page_bindings = function()
     local function a(k)
         return function()
             reset_scroll_offsets()
@@ -1667,7 +1674,7 @@ end
 
 
 -- Remove keybindings for every page
-local function remove_page_bindings()
+remove_page_bindings = function()
     for k, _ in pairs(pages) do
         mp.remove_key_binding("__forced_"..k)
     end
