@@ -22,6 +22,7 @@ extern const struct mp_user_filter_entry af_lavfi;
 extern const struct mp_user_filter_entry af_lavfi_bridge;
 extern const struct mp_user_filter_entry af_scaletempo;
 extern const struct mp_user_filter_entry af_scaletempo2;
+extern const struct mp_user_filter_entry af_lavfi_tempo;
 extern const struct mp_user_filter_entry af_format;
 extern const struct mp_user_filter_entry af_rubberband;
 extern const struct mp_user_filter_entry af_lavcac3enc;
