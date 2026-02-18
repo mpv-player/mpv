@@ -36,6 +36,7 @@ enum {
 void mp_refqueue_set_mode(struct mp_refqueue *q, int flags);
 void mp_refqueue_set_parity(struct mp_refqueue *q, int parity);
 bool mp_refqueue_should_deint(struct mp_refqueue *q);
+bool mp_refqueue_output_fields(struct mp_refqueue *q);
 bool mp_refqueue_is_top_field(struct mp_refqueue *q);
 bool mp_refqueue_top_field_first(struct mp_refqueue *q);
 bool mp_refqueue_is_second_field(struct mp_refqueue *q);
