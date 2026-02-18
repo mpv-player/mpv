@@ -2729,12 +2729,14 @@ Subtitles
 
     This has no effect if ``sub-ass-use-video-data`` is set to ``none``.
 
-``--sub-vsfilter-bidi-compat=<yes|no>``
-    Set implicit bidi detection to ``ltr`` instead of ``auto`` to match ASS'
-    default. This also disables libass' incompatible extensions. This currently
-    includes bracket pair matching according to the revised Unicode
-    Bidirectional Algorithm introduced in Unicode 6.3, and also affects how BiDi
-    runs are split and processed, as well as soft linewrapping of Unicode text.
+``--sub-vsfilter-bidi-compat=<yes|no|force-rtl>``
+    Set implicit bidi detection to ``ltr`` instead of ``auto`` to match VSFilter
+    default. This also disables libass extensions incompatible with VSFilter
+    defaults. These extensions currently includes bracket pair matching
+    according to the revised Unicode Bidirectional Algorithm introduced in
+    Unicode 6.3, and also affects how BiDi runs are split and processed, as well
+    as soft linewrapping of Unicode text. ``force-rtl`` will force text to be
+    rendered as right-to-left.
 
     This affects plaintext (non-ASS) subtitles only. Default: no.
 
