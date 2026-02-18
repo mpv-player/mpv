@@ -93,7 +93,6 @@ local MAX_LOG_LINES = 10000
 local log_buffers = {}
 local log_offset = 0
 local key_bindings = {}
-local dont_bind_up_down = false
 local global_margins = { t = 0, b = 0 }
 local input_caller
 local input_caller_handler
@@ -1573,12 +1572,10 @@ local function define_key_bindings()
         return
     end
     for _, bind in ipairs(get_bindings()) do
-        if not (dont_bind_up_down and (bind[1] == "up" or bind[1] == "down")) then
-            -- Generate arbitrary name for removing the bindings later.
-            local name = "_console_" .. (#key_bindings + 1)
-            key_bindings[#key_bindings + 1] = name
-            mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
-        end
+        -- Generate arbitrary name for removing the bindings later.
+        local name = "_console_" .. (#key_bindings + 1)
+        key_bindings[#key_bindings + 1] = name
+        mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
     end
     mp.add_forced_key_binding("any_unicode", "_console_text", text_input,
         {repeatable = true, complex = true})
@@ -1683,7 +1680,6 @@ mp.register_script_message("get-input", function (args)
     keep_open = args.keep_open
     default_item = args.default_item
     has_completions = args.has_completions
-    dont_bind_up_down = args.dont_bind_up_down
     searching_history = false
 
     if args.items then
