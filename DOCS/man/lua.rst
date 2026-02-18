@@ -946,14 +946,21 @@ REPL.
 
     ``complete``
         A callback invoked when the user edits the text or moves the cursor. The
-        first argument is the text before the cursor. The callback should return
-        a table of the string candidate completion values and the 1-based cursor
+        first argument is the text before the cursor, and the second argument is
+        a response function which can be called to present completion values to
+        the user.
+
+        The first argument to the response function is a table of the string
+        candidate completion values, and the second argument is the 1-based cursor
         position from which the completion starts. console will show the
         completions that fuzzily match the text between this position and the
-        cursor and allow selecting them.
+        cursor, which the user can select with ``TAB``. The completions will only
+        be shown to the user if the text before the cursor has not since changed.
+        The response function should be called with an empty table if there are no
+        completion values to display.
 
-        The third and optional return value is a string that will be appended to
-        the input line without displaying it in the completions.
+        The third and optional argument to the response function is a string that
+        will be appended to the input line without displaying it in the completions.
 
     ``autoselect_completion``
         Whether to automatically select the first completion on submit if one
