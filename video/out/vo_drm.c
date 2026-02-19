@@ -124,8 +124,8 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
         p->imgfmt = IMGFMT_XRGB2101010;
         break;
     case DRM_OPTS_FORMAT_XBGR2101010:
-        p->drm_format = DRM_FORMAT_XRGB2101010;
-        p->imgfmt = IMGFMT_XRGB2101010;
+        p->drm_format = DRM_FORMAT_XBGR2101010;
+        p->imgfmt = IMGFMT_XBGR2101010;
         break;
     case DRM_OPTS_FORMAT_XBGR8888:
         p->drm_format = DRM_FORMAT_XBGR8888;
