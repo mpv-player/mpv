@@ -121,4 +121,9 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
 void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue);
 
+const char *d3d11_get_csp_name(DXGI_COLOR_SPACE_TYPE csp);
+
+DXGI_COLOR_SPACE_TYPE mp_params_to_dxgi_colorspace(struct mp_log *log,
+                                                   const struct mp_image_params *params);
+
 #endif

@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <d3d11.h>
+#include <d3d11_1.h>
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_d3d11va.h>
@@ -34,6 +35,7 @@
 #include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
+#include "video/out/gpu/d3d11_helpers.h"
 
 // For video processor extensions identifiers reference see:
 // https://chromium.googlesource.com/chromium/src/+/5f354f38/ui/gl/swap_chain_presenter.cc
@@ -374,16 +376,35 @@ static int recreate_video_proc(struct mp_filter *vf)
                                                             D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
                                                          FALSE, 0);
 
-    D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
-        .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
-        .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
-    };
-    ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
-                                                         p->video_proc,
-                                                         0, &csp);
-    ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
-                                                         p->video_proc,
-                                                         &csp);
+    mp_image_params_guess_csp(&p->params);
+    mp_image_params_guess_csp(&p->out_params);
+
+    ID3D11VideoContext1 *video_ctx1;
+    hr = ID3D11VideoContext_QueryInterface(p->video_ctx, &IID_ID3D11VideoContext1, (void **)&video_ctx1);
+    if (SUCCEEDED(hr)) {
+        DXGI_COLOR_SPACE_TYPE in = mp_params_to_dxgi_colorspace(vf->log, &p->params);
+        DXGI_COLOR_SPACE_TYPE out = mp_params_to_dxgi_colorspace(vf->log, &p->out_params);
+        if (in != out)
+            MP_VERBOSE(vf, "Converting %s to %s.\n", d3d11_get_csp_name(in), d3d11_get_csp_name(out));
+        ID3D11VideoContext1_VideoProcessorSetStreamColorSpace1(video_ctx1,
+                                                               p->video_proc,
+                                                               0, in);
+        ID3D11VideoContext1_VideoProcessorSetOutputColorSpace1(video_ctx1,
+                                                               p->video_proc,
+                                                               out);
+        SAFE_RELEASE(video_ctx1);
+    } else {
+        D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
+            .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
+            .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
+        };
+        ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
+                                                            p->video_proc,
+                                                            0, &csp);
+        ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
+                                                            p->video_proc,
+                                                            &csp);
+    }
 
     switch (p->opts->scaling_mode) {
     case SCALING_INTEL_VSR:
