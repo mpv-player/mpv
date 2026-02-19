@@ -3874,6 +3874,9 @@ Property list
     ``user-data/mpv/console/open``
         Whether the console is open.
 
+    ``user-data/mpv/context-menu/open``
+        Whether the context menu script is open.
+
 ``menu-data`` (RW)
     This property stores the raw menu definition. See `Context Menu`_ section for details.
 
