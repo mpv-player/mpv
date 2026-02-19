@@ -65,13 +65,6 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .flags = MP_IMGFLAG_NE | MP_IMGFLAG_RGB | MP_IMGFLAG_HWACCEL,
         },
     },
-    [IMGFMT_X2RGB10 - IMGFMT_CUST_BASE] = {
-        .name = "rgb30",
-        .desc = {
-            .flags = MP_IMGFLAG_RGB,
-            .comps = { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} },
-        },
-    },
     [IMGFMT_YAP8 - IMGFMT_CUST_BASE] = {
         .name = "yap8",
         .desc = {
@@ -155,6 +148,15 @@ int mp_imgfmt_from_name(bstr name)
 {
     if (bstr_equals0(name, "none"))
         return 0;
+    static const struct { bstr old, new; } deprecated_fmt_names[] = {
+        {bstr0_lit("rgb30"), bstr0_lit("x2rgb10")},
+    };
+    for (int n = 0; n < MP_ARRAY_SIZE(deprecated_fmt_names); n++) {
+        if (bstr_equals(name, deprecated_fmt_names[n].old)) {
+            name = deprecated_fmt_names[n].new;
+            break;
+        }
+    }
     for (int n = 0; n < MP_ARRAY_SIZE(mp_imgfmt_list); n++) {
         const struct mp_imgfmt_entry *p = &mp_imgfmt_list[n];
         if (p->name && bstr_equals0(name, p->name))
