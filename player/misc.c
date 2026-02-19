@@ -416,6 +416,10 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
         ADD_FLAG(ctx, dst, "visual-impaired", first);
     if (t->hearing_impaired_track)
         ADD_FLAG(ctx, dst, "hearing-impaired", first);
+    if (t->original_track)
+        ADD_FLAG(ctx, dst, "original", first);
+    if (t->commentary_track)
+        ADD_FLAG(ctx, dst, "commentary", first);
     if (t->is_external)
         ADD_FLAG(ctx, dst, "external", first);
     if (!first)
