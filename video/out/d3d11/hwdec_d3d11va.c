@@ -101,7 +101,14 @@ static int init(struct ra_hwdec *hw)
     ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
     ID3D10Multithread_Release(multithread);
 
-    static const int subfmts[] = {IMGFMT_NV12, IMGFMT_P010, 0};
+    static const int subfmts[] = {
+        IMGFMT_NV12,
+        IMGFMT_P010,
+        IMGFMT_BGRA,
+        IMGFMT_X2BGR10,
+        IMGFMT_RGBAF16,
+        0
+    };
     p->hwctx = (struct mp_hwdec_ctx){
         .driver_name = hw->driver->name,
         .av_device_ref = d3d11_wrap_device_ref(p->device),
@@ -160,6 +167,9 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         switch (mapper->dst_params.imgfmt) {
         case IMGFMT_NV12: copy_fmt = DXGI_FORMAT_NV12; break;
         case IMGFMT_P010: copy_fmt = DXGI_FORMAT_P010; break;
+        case IMGFMT_BGRA: copy_fmt = DXGI_FORMAT_B8G8R8A8_UNORM; break;
+        case IMGFMT_X2BGR10: copy_fmt = DXGI_FORMAT_R10G10B10A2_UNORM; break;
+        case IMGFMT_RGBAF16: copy_fmt = DXGI_FORMAT_R16G16B16A16_FLOAT; break;
         default: return -1;
         }
 
