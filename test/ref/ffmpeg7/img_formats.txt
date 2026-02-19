@@ -1378,7 +1378,7 @@ rgba64be: [GENERIC] fcsp=rgb ctype=uint
     1: p=0  st=8  o=2  sh=0  d=16
     2: p=0  st=8  o=4  sh=0  d=16
     3: p=0  st=8  o=6  sh=0  d=16
-rgbaf16: [GENERIC] fcsp=rgb ctype=float
+rgbaf16: fcsp=rgb ctype=float
   Basic desc: [ba][bb][a][rgb][le][float]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
@@ -1507,7 +1507,7 @@ vuyx: [GENERIC] ctype=uint
     0: p=0  st=4  o=2  sh=0  d=8
     1: p=0  st=4  o=1  sh=0  d=8
     2: p=0  st=4  o=0  sh=0  d=8
-x2bgr10: [GENERIC] fcsp=rgb ctype=uint
+x2bgr10: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][uint]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }

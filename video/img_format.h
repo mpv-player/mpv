@@ -248,6 +248,9 @@ enum mp_imgfmt {
     IMGFMT_RGB24,
 
     IMGFMT_X2RGB10,             // 2pad 10r 10g 10b (MSB to LSB)
+    IMGFMT_X2BGR10,             // 2pad 10b 10g 10r (MSB to LSB)
+
+    IMGFMT_RGBAF16,
 
     // Like e.g. IMGFMT_ARGB, but has a padding byte instead of alpha
     IMGFMT_0RGB,
