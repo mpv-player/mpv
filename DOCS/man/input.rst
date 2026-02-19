@@ -1449,6 +1449,11 @@ Scripting Commands
     return value of the ``mpv_client_id()`` API call of the newly created script
     handle.
 
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "client_id"    MPV_FORMAT_STRING
+
 Screenshot Commands
 ~~~~~~~~~~~~~~~~~~~
 
@@ -1493,6 +1498,11 @@ Screenshot Commands
 
     On success, returns a ``mpv_node`` with a ``filename`` field set to the
     saved screenshot location.
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "filename"    MPV_FORMAT_STRING
 
 ``screenshot-to-file <filename> [<flags>]``
     Take a screenshot and save it to a given file. The format of the file will
@@ -1543,6 +1553,15 @@ Screenshot Commands
 
     The ``flags`` argument is like the first argument to ``screenshot`` and
     supports ``subtitles``, ``video``, ``window``.
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "w"         MPV_FORMAT_INT64
+            "h"         MPV_FORMAT_INT64
+            "stride"    MPV_FORMAT_INT64
+            "format"    MPV_FORMAT_STRING
+            "data"      MPV_FORMAT_BYTE_ARRAY
 
 Filter Commands
 ~~~~~~~~~~~~~~~
@@ -2591,8 +2610,8 @@ Property list
         MPV_FORMAT_NODE_MAP
             "seekable-ranges"   MPV_FORMAT_NODE_ARRAY
                 MPV_FORMAT_NODE_MAP
-                    "start"             MPV_FORMAT_DOUBLE
-                    "end"               MPV_FORMAT_DOUBLE
+                    "start"           MPV_FORMAT_DOUBLE
+                    "end"             MPV_FORMAT_DOUBLE
             "bof-cached"        MPV_FORMAT_FLAG
             "eof-cached"        MPV_FORMAT_FLAG
             "fw-bytes"          MPV_FORMAT_INT64
@@ -2603,10 +2622,10 @@ Property list
             "raw-input-rate"    MPV_FORMAT_INT64
             "ts-per-stream"     MPV_FORMAT_NODE_ARRAY
                 MPV_FORMAT_NODE_MAP
-                      "type"            MPV_FORMAT_STRING
-                      "cache-duration"  MPV_FORMAT_DOUBLE
-                      "reader-pts"      MPV_FORMAT_DOUBLE
-                      "cache-end"       MPV_FORMAT_DOUBLE
+                    "type"            MPV_FORMAT_STRING
+                    "cache-duration"  MPV_FORMAT_DOUBLE
+                    "reader-pts"      MPV_FORMAT_DOUBLE
+                    "cache-end"       MPV_FORMAT_DOUBLE
 
     Other fields (might be changed or removed in the future):
 
@@ -2891,6 +2910,7 @@ Property list
             "dw"                MPV_FORMAT_INT64
             "dh"                MPV_FORMAT_INT64
             "aspect"            MPV_FORMAT_DOUBLE
+            "aspect-name"       MPV_FORMAT_STRING
             "par"               MPV_FORMAT_DOUBLE
             "colormatrix"       MPV_FORMAT_STRING
             "colorlevels"       MPV_FORMAT_STRING
@@ -3338,11 +3358,12 @@ Property list
 
         MPV_FORMAT_NODE_ARRAY
             MPV_FORMAT_NODE_MAP (for each playlist entry)
-                "filename"  MPV_FORMAT_STRING
-                "current"   MPV_FORMAT_FLAG (might be missing; since mpv 0.7.0)
-                "playing"   MPV_FORMAT_FLAG (same)
-                "title"     MPV_FORMAT_STRING (optional)
-                "id"        MPV_FORMAT_INT64
+                "filename"      MPV_FORMAT_STRING
+                "current"       MPV_FORMAT_FLAG (might be missing; since mpv 0.7.0)
+                "playing"       MPV_FORMAT_FLAG (same)
+                "title"         MPV_FORMAT_STRING (optional)
+                "id"            MPV_FORMAT_INT64
+                "playlist-path" MPV_FORMAT_STRING (optional)
 
 ``track-list``
     List of audio/video/sub tracks, current entry marked.
@@ -3631,8 +3652,7 @@ Property list
                 "label"     MPV_FORMAT_STRING [optional]
                 "enabled"   MPV_FORMAT_FLAG [optional]
                 "params"    MPV_FORMAT_NODE_MAP [optional]
-                    "key"   MPV_FORMAT_STRING
-                    "value" MPV_FORMAT_STRING
+                    (key and string value for each param entry)
 
     It's also possible to write the property using this format.
 
@@ -3738,15 +3758,16 @@ Property list
     ::
 
         MPV_FORMAT_NODE_MAP
-        "TYPE" MPV_FORMAT_NODE_ARRAY
-            MPV_FORMAT_NODE_MAP
-                "desc"    MPV_FORMAT_STRING
-                "last"    MPV_FORMAT_INT64
-                "avg"     MPV_FORMAT_INT64
-                "peak"    MPV_FORMAT_INT64
-                "count"   MPV_FORMAT_INT64
-                "samples" MPV_FORMAT_NODE_ARRAY
-                     MP_FORMAT_INT64
+            (key and array value for each TYPE entry)
+            MPV_FORMAT_NODE_ARRAY (for each pass entry)
+                MPV_FORMAT_NODE_MAP
+                    "desc"    MPV_FORMAT_STRING
+                    "last"    MPV_FORMAT_INT64
+                    "avg"     MPV_FORMAT_INT64
+                    "peak"    MPV_FORMAT_INT64
+                    "count"   MPV_FORMAT_INT64
+                    "samples" MPV_FORMAT_NODE_ARRAY
+                         MPV_FORMAT_INT64
 
     Note that directly accessing this structure via subkeys is not supported,
     the only access is through aforementioned ``MPV_FORMAT_NODE``.
@@ -4079,6 +4100,20 @@ Property list
         are not actual choice options internally, may not have this info
         available.
 
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "name"                    MPV_FORMAT_STRING
+            "type"                    MPV_FORMAT_STRING
+            "set-from-commandline"    MPV_FORMAT_FLAG
+            "set-locally"             MPV_FORMAT_FLAG
+            "expects-file"            MPV_FORMAT_FLAG
+            "default-value"           MPV_FORMAT_NODE (optional, value of "type")
+            "min"                     MPV_FORMAT_DOUBLE (optional)
+            "max"                     MPV_FORMAT_DOUBLE (optional)
+            "choices"                 MPV_FORMAT_NODE_ARRAY (optional)
+                MPV_FORMAT_STRING
+
 ``property-list``
     The list of top-level properties.
 
@@ -4093,6 +4128,16 @@ Property list
     The ``profile-restore`` field is currently missing if it holds the default
     value (either because it was not set, or set explicitly to ``default``),
     but in the future it might hold the value ``default``.
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each profile entry)
+                "name"       MPV_FORMAT_STRING
+                "options"    MPV_FORMAT_NODE_ARRAY (for each option entry)
+                    MPV_FORMAT_NODE_MAP
+                        "key"      MPV_FORMAT_STRING
+                        "value"    MPV_FORMAT_STRING
 
 ``command-list``
     The list of input commands. This returns an array of maps, where each map
@@ -4171,6 +4216,18 @@ Property list
         example, the input.conf entry ``f cycle bla # toggle bla`` would
         result in an entry with ``comment = "toggle bla", cmd = "cycle bla"``.)
 
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP
+                "key"         MPV_FORMAT_STRING
+                "cmd"         MPV_FORMAT_STRING
+                "is_weak"     MPV_FORMAT_FLAG
+                "owner"       MPV_FORMAT_STRING (optional)
+                "section"     MPV_FORMAT_STRING
+                "priority"    MPV_FORMAT_INT64
+                "comment"     MPV_FORMAT_STRING (optional)
+
     This property is read-only, and change notification is not supported.
 
 ``clipboard``
@@ -4195,6 +4252,12 @@ Property list
         (typically when VO window is focused). The ``wayland`` backend typically
         does not have this limitation.
         See ``current-clipboard-backend`` property for more details.
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "text"            MPV_FORMAT_STRING
+            "text-primary"    MPV_FORMAT_STRING
 
 ``current-clipboard-backend``
     A string containing the currently active clipboard backend.
