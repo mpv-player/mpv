@@ -191,7 +191,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             desc->chroma_w = desc->chroma_h = 1;
         }
         if (strcmp(fmt->name, "rgb10_a2") == 0) {
-            fmt->special_imgfmt = IMGFMT_RGB30;
+            fmt->special_imgfmt = IMGFMT_X2RGB10;
             struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
             fmt->special_imgfmt_desc = desc;
             desc->component_bits = 10;
