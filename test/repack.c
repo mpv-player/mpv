@@ -137,6 +137,8 @@ static const struct entry repack_tests[] = {
         .flags = REPACK_CREATE_EXPAND_8BIT},
     {1, 1, IMGFMT_X2RGB10,          {P32((3 << 20) | (2 << 10) | 1)},
            -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
+    {1, 1, IMGFMT_X2BGR10,          {P32((3 << 20) | (2 << 10) | 1)},
+           -AV_PIX_FMT_GBRP10,      {P16(2), P16(3), P16(1)}},
     {1, 1, -AV_PIX_FMT_X2RGB10BE,   {P32(SW32((3 << 20) | (2 << 10) | 1))},
            -AV_PIX_FMT_GBRP10,      {P16(2), P16(1), P16(3)}},
     {8, 1, -AV_PIX_FMT_MONOWHITE,   {P8(0xAA)},
@@ -172,6 +174,8 @@ static const struct entry repack_tests[] = {
     {8, 1, -AV_PIX_FMT_UYYVYY411,   {P8(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)},
            -AV_PIX_FMT_YUV411P,     {P8(2, 3, 5, 6, 8, 9, 11, 12),
                                      P8(1, 7), P8(4, 10)}},
+    {1, 1, IMGFMT_RGBAF16,          {P16(0x1a1b, 0x2a2b, 0x3a3b, 0x4a4b)},
+           -AV_PIX_FMT_GBRAP16,     {P16(0x2a2b), P16(0x3a3b), P16(0x1a1b), P16(0x4a4b)}},
 };
 
 static bool is_true_planar(int imgfmt)

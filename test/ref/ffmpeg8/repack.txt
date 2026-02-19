@@ -274,7 +274,7 @@ vuyx            => [pa] [un] yuv444p         | a=1:1
 vuyx            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
 vyu444          => [pa] [un] yuv444p         | a=1:1
 vyu444          => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
-x2bgr10         => [pa] [un] gbrp10          | a=1:1
+x2bgr10         => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 x2bgr10         => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 x2bgr10be       => [pa] [un] gbrp10          | a=1:1
 x2bgr10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
