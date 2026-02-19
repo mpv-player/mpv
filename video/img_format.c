@@ -65,7 +65,7 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
             .flags = MP_IMGFLAG_NE | MP_IMGFLAG_RGB | MP_IMGFLAG_HWACCEL,
         },
     },
-    [IMGFMT_RGB30 - IMGFMT_CUST_BASE] = {
+    [IMGFMT_X2RGB10 - IMGFMT_CUST_BASE] = {
         .name = "rgb30",
         .desc = {
             .flags = MP_IMGFLAG_RGB,
