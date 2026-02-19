@@ -165,7 +165,7 @@ static void enable_nvidia_rtx_extension(struct mp_filter *vf)
     if (FAILED(hr)) {
         MP_WARN(vf, "Failed to enable NVIDIA RTX Super Resolution: %s\n", mp_HRESULT_to_str(hr));
     } else {
-        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled\n");
+        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled.\n");
     }
 }
 
@@ -190,7 +190,7 @@ static void enable_nvidia_true_hdr(struct mp_filter *vf)
     if (FAILED(hr)) {
         MP_WARN(vf, "Failed to enable NVIDIA RTX Video HDR: %s\n", mp_HRESULT_to_str(hr));
     } else {
-        MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled\n");
+        MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled.\n");
     }
 }
 
@@ -231,7 +231,7 @@ static void enable_intel_vsr_extension(struct mp_filter *vf)
     if (FAILED(hr))
         goto failed;
 
-    MP_VERBOSE(vf, "Intel Video Super Resolution enabled\n");
+    MP_VERBOSE(vf, "Intel Video Super Resolution enabled.\n");
     return;
 
 failed:
