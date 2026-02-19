@@ -36,14 +36,6 @@
 #include "video/sws_utils.h"
 #include "vo.h"
 
-#define IMGFMT_XRGB8888 IMGFMT_BGR0
-#define IMGFMT_XBGR8888 IMGFMT_RGB0
-#define IMGFMT_XRGB2101010 \
-    pixfmt2imgfmt(AV_PIX_FMT_X2RGB10LE)
-#define IMGFMT_XBGR2101010 \
-    pixfmt2imgfmt(AV_PIX_FMT_X2BGR10LE)
-#define IMGFMT_YUYV pixfmt2imgfmt(AV_PIX_FMT_YUYV422)
-
 #define BYTES_PER_PIXEL 4
 #define BITS_PER_PIXEL 32
 
@@ -121,19 +113,19 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     switch (drm->opts->drm_format) {
     case DRM_OPTS_FORMAT_XRGB2101010:
         p->drm_format = DRM_FORMAT_XRGB2101010;
-        p->imgfmt = IMGFMT_XRGB2101010;
+        p->imgfmt = pixfmt2imgfmt(AV_PIX_FMT_X2RGB10LE);
         break;
     case DRM_OPTS_FORMAT_XBGR2101010:
         p->drm_format = DRM_FORMAT_XBGR2101010;
-        p->imgfmt = IMGFMT_XBGR2101010;
+        p->imgfmt = pixfmt2imgfmt(AV_PIX_FMT_X2BGR10LE);
         break;
     case DRM_OPTS_FORMAT_XBGR8888:
         p->drm_format = DRM_FORMAT_XBGR8888;
-        p->imgfmt = IMGFMT_XBGR8888;
+        p->imgfmt = IMGFMT_RGB0;
         break;
     case DRM_OPTS_FORMAT_YUYV:
         p->drm_format = DRM_FORMAT_YUYV;
-        p->imgfmt = IMGFMT_YUYV;
+        p->imgfmt = pixfmt2imgfmt(AV_PIX_FMT_YUYV422);
         break;
     default:
         if (drm->opts->drm_format != DRM_OPTS_FORMAT_XRGB8888) {
@@ -141,7 +133,7 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
                        "falling back to xrgb8888\n");
         }
         p->drm_format = DRM_FORMAT_XRGB8888;
-        p->imgfmt = IMGFMT_XRGB8888;
+        p->imgfmt = IMGFMT_BGR0;
         break;
     }
 
