@@ -319,6 +319,8 @@ Available video output drivers are:
     This is low quality, and has issues with OSD. We strongly recommend that
     you use ``--vo=gpu`` with ``--hwdec=vaapi`` instead.
 
+    .. warning:: This VO is deprecated will be removed next release.
+
     The following global options are supported by this video output:
 
     ``--vo-vaapi-scaling=<algorithm>``
