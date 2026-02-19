@@ -2054,6 +2054,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"dependent",   SUB_PROP_BOOL(track->dependent_track)},
         {"visual-impaired",  SUB_PROP_BOOL(track->visual_impaired_track)},
         {"hearing-impaired", SUB_PROP_BOOL(track->hearing_impaired_track)},
+        {"original",    SUB_PROP_BOOL(track->original_track)},
+        {"commentary",  SUB_PROP_BOOL(track->commentary_track)},
         {"external",    SUB_PROP_BOOL(track->is_external)},
         {"selected",    SUB_PROP_BOOL(track->selected)},
         {"main-selection", SUB_PROP_INT(order), .unavailable = order < 0},

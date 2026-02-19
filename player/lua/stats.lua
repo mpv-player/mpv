@@ -1248,7 +1248,8 @@ local function add_track(c, t, i)
     append(c, t["external-filename"], {prefix="File:"})
     append(c, "", {prefix="Flags:"})
     local flags = {"default", "forced", "dependent", "visual-impaired",
-                   "hearing-impaired", "image", "albumart", "external"}
+                   "hearing-impaired", "original", "commentary", "image",
+                   "albumart", "external"}
     local any = false
     for _, flag in ipairs(flags) do
         if t[flag] then

@@ -725,6 +725,14 @@ Track Manipulation
 
         Marks the track as default.
 
+    <original>
+
+        Marks the track as being in the original language.
+
+    <commentary>
+
+        Marks the track as containing commentary.
+
     <attached-picture> (only for ``video-add``)
 
         Marks the track as an attached picture, same as ``albumart`` argument

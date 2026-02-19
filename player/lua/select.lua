@@ -112,7 +112,7 @@ local function format_flags(track)
 
     for _, flag in ipairs({
         "default", "forced", "dependent", "visual-impaired", "hearing-impaired",
-        "image", "external"
+        "original", "commentary", "image", "external"
     }) do
         if track[flag] then
             flags = flags .. flag .. " "
