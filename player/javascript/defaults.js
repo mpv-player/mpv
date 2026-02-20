@@ -678,6 +678,7 @@ function register_event_handler(t) {
                 mp.commandv("script-message-to", "console", "complete", JSON.stringify({
                                 client_name: mp.script_name,
                                 handler_id: handler_id,
+                                original_line: args[0],
                                 list: completions,
                                 start_pos: completion_pos,
                                 append: completion_append || "",
