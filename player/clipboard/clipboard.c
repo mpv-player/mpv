@@ -99,6 +99,7 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
     struct clipboard_ctx *cl = talloc_ptrtype(NULL, cl);
     *cl = (struct clipboard_ctx) {
         .log = mp_log_new(cl, global->log, "clipboard"),
+        .global = global,
         .monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
     };
 
