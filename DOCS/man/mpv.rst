@@ -402,6 +402,29 @@ Ctrl+Wheel up/down
     Change video zoom keeping the part of the video hovered by the cursor under
     it.
 
+Image Bindings
+--------------
+
+When viewing images, the following key bindings optimized for image viewing are
+added. Key bindings not listed here, or those configured by the user in
+``input.conf``, keep behaving like with non-image files.
+
+LEFT, RIGHT, UP, DOWN
+    Pan the image when it is larger than the window.
+
+Shift+LEFT, Shift+RIGHT, Shift+UP, Shift+DOWN
+    Slowly pan the image when it is larger than the window.
+
+Ctrl+LEFT, Ctrl+RIGHT, Ctrl+UP, Ctrl+DOWN
+    Align the image to one of the boundaries of the window when it is larger
+    than the window.
+
+Middle click
+    Pan through the whole video while holding the button. See `POSITIONING`_ for
+    more information.
+
+See `Image profile`_ for image viewing tips.
+
 USAGE
 =====
 
@@ -1061,6 +1084,80 @@ example, ``math`` is defined and gives access to the Lua standard math library.
 
     This feature is subject to change indefinitely. You might be forced to
     adjust your profiles on mpv updates.
+
+Image profile
+-------------
+
+mpv has a builtin profile called ``builtin-image`` that is automatically applied
+to images and restored when switching to a video or audio file. It enables
+options optimal for image viewing, such as a smaller OSC layout optimized for
+images. Its full contents can be listed with ``mpv
+--show-profile=builtin-image``. It can be disabled with
+``--apply-image-profile=no``.
+
+It can be extended in mpv.conf without overwriting it completely:
+
+.. admonition:: Example to loop image playlists
+
+    ::
+
+        [builtin-image]
+        loop-playlist
+
+``--apply-image-profile`` also enables the image specific key bindings listed in
+`Keyboard Control`_. Additional image key bindings can be specified in the
+``image`` section in ``input.conf``, for example:
+
+    SPACE {image} repeatable playlist-next force
+    MBTN_LEFT {image} script-binding positioning/drag-to-pan
+
+Drag to pan on ``MBTN_LEFT`` requires adding ``window-dragging=no`` to
+``builtin-image``.
+
+See the `INPUT.CONF`_ section for more information on how to define key
+bindings.
+
+To reset zoom, alignment and rotation between images, it is recommended to place
+``reset-on-next-file=video-zoom,panscan,video-unscaled,video-align-x,video-align-y,video-rotate``
+in the top level of mpv.conf, as enabling it in the ``builtin-image`` profile
+makes it take effect only from the second image.
+
+To start viewing images and videos bigger than the window from the top left
+corner, these options can be set in the top level of mpv.conf along with
+``--reset-on-next-file``:
+
+.. admonition:: Start from the top left:
+
+    ::
+
+        video-align-x=-1
+        video-align-y=-1
+        video-recenter
+
+To enable the screensaver only when images are kept open forever, this profile
+can be added to mpv.conf:
+
+.. admonition:: Example to enable the screensaver:
+
+    ::
+
+        [screensaver]
+        profile-cond=p['current-tracks/video/image'] and not p['current-tracks/video/albumart'] and image_display_duration == math.huge
+        profile-restore=copy
+        stop-screensaver=no
+
+To display images larger than the max texture size of the GPU API, a VO with
+software rendering can be used as fallback:
+
+.. admonition:: Example to display huge images on Wayland:
+
+    ::
+
+        [huge]
+        profile-cond=width > 16384 or height > 16384
+        vo=wlshm
+
+maxImageExtent may be 8192 instead on old iGPUs.
 
 Legacy auto profiles
 --------------------
