@@ -1283,6 +1283,7 @@ local function add_track(c, t, i)
     if not t["image"] and t["demux-fps"] then
         append_fps(c, "track-list/" .. i .. "/demux-fps", "")
     end
+    append(c, t["format-name"], {prefix="Format:"})
     append(c, t["demux-rotation"], {prefix="Rotation:"})
     if t["demux-par"] then
         local num, den = float2rational(t["demux-par"])
