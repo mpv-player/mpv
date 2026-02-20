@@ -1260,7 +1260,7 @@ local function add_track(c, t, i)
     if not any then
         table.remove(c)
     end
-    if append(c, t["codec-desc"], {prefix="Format:"}) then
+    if append(c, t["codec-desc"], {prefix="Codec:"}) then
         append(c, t["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
                no_prefix_markup=true, suffix="]"})
         if t["codec"] ~= t["decoder"] then
