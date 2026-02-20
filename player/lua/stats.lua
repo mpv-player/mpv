@@ -680,6 +680,7 @@ local function add_file(s, print_cache, print_tags)
     end
 
     if print_tags then
+        append_property(s, "duration", {prefix="Duration:"})
         local tags = mp.get_property_native("display-tags")
         local tags_displayed = 0
         for _, tag in ipairs(tags) do
