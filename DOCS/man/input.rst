@@ -3508,7 +3508,7 @@ Property list
         Video FPS as indicated by the container. (Not always accurate.)
 
     ``track-list/N/demux-bitrate``
-        Audio average bitrate, in bits per second. (Not always accurate.)
+        Average bitrate, in bits per second. (Not always accurate.)
 
     ``track-list/N/demux-rotation``
         Video clockwise rotation metadata, in degrees.

@@ -743,6 +743,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
+        sh->codec->bitrate = codec->bit_rate;
         sh->codec->format_name = talloc_strdup(sh, av_get_pix_fmt_name(codec->format));
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
