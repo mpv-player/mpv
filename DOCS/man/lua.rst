@@ -938,7 +938,7 @@ REPL.
 
     ``opened``
         A callback invoked when the console is shown. This can be used to
-        present a list of options with ``input.set_log()``.
+        override keybinds set by the console with ``mp.add_forced_key_binding()``.
 
     ``edited``
         A callback invoked when the text changes. The first argument is the text
