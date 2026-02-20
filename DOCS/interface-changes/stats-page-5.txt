@@ -1,0 +1,1 @@
+add `track_info_selected_only` script option for stats

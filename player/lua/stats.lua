@@ -35,6 +35,7 @@ local o = {
     file_tag_max_count = 16,         -- only show the first x file tags
     show_frame_info = false,         -- whether to show the current frame info
     term_clip = true,
+    track_info_selected_only = true, -- only show selected track info
     debug = false,
 
     -- Graph options and style
@@ -1327,7 +1328,7 @@ local function track_info()
     table.insert(c, o.nl .. o.nl)
     add_file(c, false, true)
     for i, track in ipairs(mp.get_property_native("track-list")) do
-        if track['selected'] then
+        if track['selected'] or not o.track_info_selected_only then
             add_track(c, track, i - 1)
         end
     end
@@ -1471,7 +1472,7 @@ pages = {
     [o.key_page_2] = { idx = 2, f = vo_stats, desc = "Extended Frame Timings", scroll = true },
     [o.key_page_3] = { idx = 3, f = cache_stats, desc = "Cache Statistics" },
     [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "Active Key Bindings", scroll = true },
-    [o.key_page_5] = { idx = 5, f = track_info, desc = "Selected Tracks Info", scroll = true },
+    [o.key_page_5] = { idx = 5, f = track_info, desc = "Tracks Info", scroll = true },
     [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
