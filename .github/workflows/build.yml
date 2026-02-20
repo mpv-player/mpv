@@ -141,7 +141,6 @@ jobs:
             arch: "arm64"
             os: "windows-11-arm"
     env:
-      VS: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise"
       CC: "ccache clang"
       CXX: "ccache clang++"
       CC_LD: "lld-link"
@@ -186,6 +185,14 @@ jobs:
           meson wrap install harfbuzz
           meson wrap install libpng
           meson wrap install zlib
+
+      - name: Find Visual Studio
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsPath) { throw "Could not find a Visual Studio installation" }
+          "VS=$vsPath"
+          "VS=$vsPath" >> $env:GITHUB_ENV
 
       - name: Build
         id: build
