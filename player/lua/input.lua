@@ -60,6 +60,7 @@ local function register_event_handler(t)
                 mp.commandv("script-message-to", "console", "complete", utils.format_json({
                                 client_name = mp.get_script_name(),
                                 handler_id = handler_id,
+                                original_line = args[1],
                                 list = completions,
                                 start_pos = completion_pos,
                                 append = completion_append or "",

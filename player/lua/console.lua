@@ -103,8 +103,6 @@ local completion_buffer = {}
 local selected_completion_index
 local completion_pos
 local completion_append
-local completion_old_line
-local completion_old_cursor
 local autoselect_completion
 local has_completions
 
@@ -1480,8 +1478,6 @@ end
 
 -- Show autocompletions.
 complete = function ()
-    completion_old_line = line
-    completion_old_cursor = cursor
     mp.commandv("script-message-to", input_caller, input_caller_handler,
                 "complete", utils.format_json({line:sub(1, cursor - 1)}))
     render()
@@ -1807,7 +1803,7 @@ mp.register_script_message("complete", function (message)
     message = utils.parse_json(message)
 
     if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler
-       or line ~= completion_old_line or cursor ~= completion_old_cursor then
+       or line:sub(1, cursor - 1) ~= message.original_line then
         return
     end
 
