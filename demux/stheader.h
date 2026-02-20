@@ -137,6 +137,9 @@ struct mp_codec_params {
     // STREAM_SUB
     double frame_based;   // timestamps are frame-based (and this is the
                           // fallback framerate used for timestamps)
+
+    // STREAM_VIDEO + STREAM_AUDIO + STREAM_SUB
+    double duration;
 };
 
 #endif /* MPLAYER_STHEADER_H */

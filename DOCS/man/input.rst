@@ -3516,6 +3516,9 @@ Property list
     ``track-list/N/demux-par``
         Pixel aspect ratio.
 
+    ``track-list/N/demux-duration``
+        Track duration as indicated by the container.
+
     ``track-list/N/format-name``
         Short name for format from ffmpeg. If the track is audio, this will be
         the name of the sample format. If the track is video, this will be the

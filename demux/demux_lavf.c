@@ -827,6 +827,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
         sh->codec->native_tb_num = st->time_base.num;
         sh->codec->native_tb_den = st->time_base.den;
+        sh->codec->duration = st->duration * av_q2d(st->time_base);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
