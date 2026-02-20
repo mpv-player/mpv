@@ -1,0 +1,4 @@
+`mp.input.get()` `complete` callbacks are now passed a second argument,
+a function which can be passed the completion values, which allows generating
+completions asynchronously. The old method of returning completions from
+the callback is now deprecated.
