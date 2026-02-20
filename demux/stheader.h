@@ -107,7 +107,6 @@ struct mp_codec_params {
     int samplerate;
     struct mp_chmap channels;
     bool force_channels;
-    int bitrate; // compressed bits/sec
     int block_align;
     struct replaygain_data *replaygain_data;
 
@@ -131,6 +130,7 @@ struct mp_codec_params {
     // STREAM_VIDEO + STREAM_AUDIO
     int bits_per_coded_sample;
     char *format_name;    // pixel format (video) or sample format (audio)
+    int bitrate;          // compressed bits/sec
 
     // STREAM_SUB
     double frame_based;   // timestamps are frame-based (and this is the
