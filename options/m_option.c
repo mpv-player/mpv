@@ -1208,7 +1208,7 @@ static int float_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     double tmp;
     int r = double_set(opt, &tmp, src);
-    if (r >= 0 && clamp_double(opt, &tmp) < 0)
+    if (r >= 0 && clamp_float(opt, &tmp) < 0)
         return M_OPT_OUT_OF_RANGE;
     if (r >= 0)
         VAL(dst) = tmp;
