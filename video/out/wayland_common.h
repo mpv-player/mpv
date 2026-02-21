@@ -196,7 +196,7 @@ struct vo_wayland_state {
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
-struct pl_color_space vo_wayland_preferred_csp(struct vo *vo);
+struct pl_color_space vo_wayland_preferred_csp(struct vo *vo, float source_max_luma);
 bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier);
 bool vo_wayland_init(struct vo *vo);
 bool vo_wayland_reconfig(struct vo *vo);
