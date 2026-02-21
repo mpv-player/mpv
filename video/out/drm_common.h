@@ -127,7 +127,7 @@ struct vo_drm_state {
     struct drm_mode mode;
     struct drm_opts *opts;
     struct framebuffer *fb;
-    struct mp_image_params target_params;
+    struct pl_color_space colorspace;
     struct mp_log *log;
     struct mp_present *present;
     struct vo *vo;
@@ -138,7 +138,6 @@ struct vo_drm_state {
     const struct di_edid_chromaticity_coords *chromaticity;
     const struct di_cta_hdr_static_metadata_block *hdr_static_metadata;
     const struct di_cta_colorimetry_block *colorimetry;
-    bool supported_colorspace;
 
     bool active;
     bool redraw;
@@ -157,8 +156,9 @@ struct vo_drm_state {
 bool vo_drm_init(struct vo *vo);
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg);
 
+bool vo_drm_color_supported_by_display(struct vo_drm_state *drm, struct pl_color_space color);
 double vo_drm_get_display_fps(struct vo_drm_state *drm);
-bool vo_drm_set_hdr_metadata(struct vo *vo, bool force_sdr);
+bool vo_drm_set_color(struct vo *vo, struct pl_color_space *color);
 void vo_drm_set_monitor_par(struct vo *vo);
 void vo_drm_uninit(struct vo *vo);
 void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns);

@@ -76,6 +76,8 @@ struct priv {
 
     struct mpv_opengl_drm_params_v2 drm_params;
     struct mpv_opengl_drm_draw_surface_size draw_surface_size;
+
+    bool allow_modeset;
 };
 
 // Not general. Limited to only the formats being used in this module
@@ -312,6 +314,7 @@ static void update_framebuffer_from_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
 static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 {
     struct vo_drm_state *drm = ctx->vo->drm;
+    struct priv *p = ctx->priv;
 
     update_framebuffer_from_bo(ctx, frame->bo);
 
@@ -321,7 +324,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "CRTC_ID", atomic_ctx->crtc->id);
     drm_object_set_property(atomic_ctx->request, atomic_ctx->draw_plane, "ZPOS", 1);
 
-    if (vo_drm_set_hdr_metadata(ctx->vo, false))
+    if (p->allow_modeset)
         flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
 
     int ret = drmModeAtomicCommit(drm->fd, atomic_ctx->request, flags, drm);
@@ -516,6 +519,42 @@ static void drm_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
     present_sync_get_info(drm->present, info);
 }
 
+static pl_color_space_t drm_egl_preferred_csp(struct ra_ctx *ctx)
+{
+    struct vo_drm_state *drm = ctx->vo->drm;
+    pl_color_space_t bt2020 = {0};
+
+    // If the display supports either one of these colorspaces, return it as
+    // preferred.
+    if (vo_drm_color_supported_by_display(drm, pl_color_space_hdr10)) {
+        bt2020 = pl_color_space_hdr10;
+    } else if (vo_drm_color_supported_by_display(drm, pl_color_space_bt2020_hlg)) {
+        bt2020 = pl_color_space_bt2020_hlg;
+    }
+
+    if (bt2020.primaries != PL_COLOR_PRIM_UNKNOWN) {
+        bt2020.hdr.prim.red.x = drm->chromaticity->red_x;
+        bt2020.hdr.prim.red.y = drm->chromaticity->red_y;
+        bt2020.hdr.prim.green.x = drm->chromaticity->green_x;
+        bt2020.hdr.prim.green.y = drm->chromaticity->green_y;
+        bt2020.hdr.prim.blue.x = drm->chromaticity->blue_x;
+        bt2020.hdr.prim.blue.y = drm->chromaticity->blue_y;
+        bt2020.hdr.prim.white.x = drm->chromaticity->white_x;
+        bt2020.hdr.prim.white.y = drm->chromaticity->white_y;
+        bt2020.hdr.min_luma = drm->hdr_static_metadata->desired_content_min_luminance;
+        bt2020.hdr.max_luma = drm->hdr_static_metadata->desired_content_max_luminance;
+        return bt2020;
+    }
+
+    return pl_color_space_srgb;
+}
+
+static void drm_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+{
+    struct priv *p = ctx->priv;
+    p->allow_modeset = vo_drm_set_color(ctx->vo, &params->color);
+}
+
 static bool drm_egl_init(struct ra_ctx *ctx)
 {
     if (!vo_drm_init(ctx->vo))
@@ -630,6 +669,8 @@ static bool drm_egl_init(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .get_vsync          = drm_egl_get_vsync,
+        .preferred_csp      = drm_egl_preferred_csp,
+        .set_color          = drm_egl_set_color,
         .swap_buffers       = drm_egl_swap_buffers,
     };
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
@@ -654,11 +695,6 @@ static bool drm_egl_reconfig(struct ra_ctx *ctx)
     return true;
 }
 
-static bool drm_egl_pass_colorspace(struct ra_ctx *ctx)
-{
-    return ctx->vo->drm->supported_colorspace;
-}
-
 static int drm_egl_control(struct ra_ctx *ctx, int *events, int request,
                            void *arg)
 {
@@ -681,7 +717,6 @@ const struct ra_ctx_fns ra_ctx_drm_egl = {
     .name            = "drm",
     .description     = "DRM/EGL",
     .reconfig        = drm_egl_reconfig,
-    .pass_colorspace = drm_egl_pass_colorspace,
     .control         = drm_egl_control,
     .init            = drm_egl_init,
     .uninit          = drm_egl_uninit,
