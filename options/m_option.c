@@ -1165,7 +1165,7 @@ static int parse_float(struct mp_log *log, const m_option_t *opt,
     double tmp;
     int r = parse_double(log, opt, name, param, &tmp);
 
-    if (r == 1 && clamp_float(opt, &tmp) < 0) {
+    if (r == 1 && !isnan(tmp) && clamp_float(opt, &tmp) < 0) {
         mp_err(log, "The %.*s option is out of range: %.*s\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
@@ -1208,7 +1208,7 @@ static int float_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     double tmp;
     int r = double_set(opt, &tmp, src);
-    if (r >= 0 && clamp_double(opt, &tmp) < 0)
+    if (r >= 0 && clamp_float(opt, &tmp) < 0)
         return M_OPT_OUT_OF_RANGE;
     if (r >= 0)
         VAL(dst) = tmp;
