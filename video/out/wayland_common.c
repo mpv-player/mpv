@@ -310,6 +310,7 @@ static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
 static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *height);
 static void get_compositor_preferred_description(struct vo_wayland_state *wl);
+static void get_fullscreen_dims(struct vo_wayland_state *wl);
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s);
 static void guess_focus(struct vo_wayland_state *wl);
 static void handle_key_input(struct vo_wayland_seat *s, uint32_t key, uint32_t state, bool no_emit);
@@ -1807,6 +1808,8 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
             wl->initial_size_hint = true;
             wl->window_size = (struct mp_rect){0, 0, width, height};
             wl->geometry = wl->window_size;
+        } else {
+            wl->override_surface_local = true;
         }
         return;
     }
@@ -1921,6 +1924,13 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->geometry.x1 = handle_round(wl->scaling, width);
     wl->geometry.y1 = handle_round(wl->scaling, height);
 
+    get_fullscreen_dims(wl);
+
+    wl->surface_local.x0 = 0;
+    wl->surface_local.y0 = 0;
+    wl->surface_local.x1 = width;
+    wl->surface_local.y1 = height;
+
     if (mp_rect_equals(&old_geometry, &wl->geometry))
         return;
 
@@ -1930,6 +1940,7 @@ resize:
                mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
+    wl->override_surface_local = false;
     wl->toplevel_configured = true;
 }
 
@@ -3128,6 +3139,26 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 #endif
 }
 
+static void get_fullscreen_dims(struct vo_wayland_state *wl)
+{
+    if (!wl->opts->fullscreen || !wl->fractional_scale_manager)
+        return;
+
+    // Fractional scaling can have pixel rounding errors (max of 2).
+    // For fullscreen, loop through output geometry and find a valid match.
+    int width = mp_rect_w(wl->geometry);
+    int height = mp_rect_h(wl->geometry);
+    struct vo_wayland_output *output;
+    wl_list_for_each(output, &wl->output_list, link) {
+        if (abs(mp_rect_w(output->geometry) - width <= 2) && abs(mp_rect_h(output->geometry) - height) <= 2) {
+            wl->geometry.x1 = mp_rect_w(output->geometry);
+            wl->geometry.y1 = mp_rect_h(output->geometry);
+            return;
+        }
+    }
+    return;
+}
+
 static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat *s)
 {
     if (!s->cursor_shape_device && wl->cursor_shape_manager) {
@@ -3314,6 +3345,7 @@ static void rescale_geometry(struct vo_wayland_state *wl, double old_scale)
     wl->window_size.y1 /= factor;
     wl->geometry.x1 /= factor;
     wl->geometry.y1 /= factor;
+    get_fullscreen_dims(wl);
 }
 
 static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
@@ -3714,6 +3746,7 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     if (resize) {
         if (!wl->locked_size)
             wl->geometry = wl->window_size;
+        wl->override_surface_local = true;
         wl->pending_vo_events |= VO_EVENT_RESIZE;
     }
 }
@@ -4073,7 +4106,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
             if (opt == &opts->geometry || opt == &opts->autofit ||
                 opt == &opts->autofit_smaller || opt == &opts->autofit_larger)
             {
-                wl->state_change = true;
                 set_geometry(wl, true);
             }
         }
@@ -4117,7 +4149,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window_size.x1 = s[0];
         wl->window_size.y1 = s[1];
         if (!wl->opts->fullscreen && !wl->tiled) {
-            wl->state_change = true;
             if (wl->opts->window_maximized) {
                 xdg_toplevel_unset_maximized(wl->xdg_toplevel);
                 wl_display_dispatch_pending(wl->display);
@@ -4126,6 +4157,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                     return VO_TRUE;
             }
             wl->geometry = wl->window_size;
+            wl->override_surface_local = true;
             wl->pending_vo_events |= VO_EVENT_RESIZE;
         }
         return VO_TRUE;
@@ -4219,8 +4251,11 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl)
 
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 {
-    wp_viewport_set_destination(wl->viewport, lround(mp_rect_w(wl->geometry) / wl->scaling_factor),
-                                lround(mp_rect_h(wl->geometry) / wl->scaling_factor));
+    int width = wl->override_surface_local ? lround(mp_rect_w(wl->geometry) / wl->scaling_factor) :
+                                             mp_rect_w(wl->surface_local);
+    int height = wl->override_surface_local ? lround(mp_rect_h(wl->geometry) / wl->scaling_factor) :
+                                             mp_rect_h(wl->surface_local);
+    wp_viewport_set_destination(wl->viewport, width, height);
 }
 
 bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, uint64_t modifier)
@@ -4329,6 +4364,7 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->subcompositor) {
         wl->osd_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->osd_surface, wl->video_surface);
         wl->video_subsurface = wl_subcompositor_get_subsurface(wl->subcompositor, wl->video_surface, wl->surface);
+        wl_subsurface_place_above(wl->video_subsurface, wl->surface);
     }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
