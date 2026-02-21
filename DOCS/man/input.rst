@@ -3487,13 +3487,16 @@ Property list
         Video FPS as indicated by the container. (Not always accurate.)
 
     ``track-list/N/demux-bitrate``
-        Audio average bitrate, in bits per second. (Not always accurate.)
+        Average bitrate, in bits per second. (Not always accurate.)
 
     ``track-list/N/demux-rotation``
         Video clockwise rotation metadata, in degrees.
 
     ``track-list/N/demux-par``
         Pixel aspect ratio.
+
+    ``track-list/N/demux-duration``
+        Track duration as indicated by the container.
 
     ``track-list/N/format-name``
         Short name for format from ffmpeg. If the track is audio, this will be

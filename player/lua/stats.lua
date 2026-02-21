@@ -35,6 +35,7 @@ local o = {
     file_tag_max_count = 16,         -- only show the first x file tags
     show_frame_info = false,         -- whether to show the current frame info
     term_clip = true,
+    track_info_selected_only = true, -- only show selected track info
     debug = false,
 
     -- Graph options and style
@@ -680,6 +681,7 @@ local function add_file(s, print_cache, print_tags)
     end
 
     if print_tags then
+        append_property(s, "duration", {prefix="Duration:"})
         local tags = mp.get_property_native("display-tags")
         local tags_displayed = 0
         for _, tag in ipairs(tags) do
@@ -1260,7 +1262,7 @@ local function add_track(c, t, i)
     if not any then
         table.remove(c)
     end
-    if append(c, t["codec-desc"], {prefix="Format:"}) then
+    if append(c, t["codec-desc"], {prefix="Codec:"}) then
         append(c, t["codec-profile"], {prefix="[", nl="", indent=" ", prefix_sep="",
                no_prefix_markup=true, suffix="]"})
         if t["codec"] ~= t["decoder"] then
@@ -1283,6 +1285,7 @@ local function add_track(c, t, i)
     if not t["image"] and t["demux-fps"] then
         append_fps(c, "track-list/" .. i .. "/demux-fps", "")
     end
+    append(c, t["format-name"], {prefix="Format:"})
     append(c, t["demux-rotation"], {prefix="Rotation:"})
     if t["demux-par"] then
         local num, den = float2rational(t["demux-par"])
@@ -1326,7 +1329,7 @@ local function track_info()
     table.insert(c, o.nl .. o.nl)
     add_file(c, false, true)
     for i, track in ipairs(mp.get_property_native("track-list")) do
-        if track['selected'] then
+        if track['selected'] or not o.track_info_selected_only then
             add_track(c, track, i - 1)
         end
     end
@@ -1470,7 +1473,7 @@ pages = {
     [o.key_page_2] = { idx = 2, f = vo_stats, desc = "Extended Frame Timings", scroll = true },
     [o.key_page_3] = { idx = 3, f = cache_stats, desc = "Cache Statistics" },
     [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "Active Key Bindings", scroll = true },
-    [o.key_page_5] = { idx = 5, f = track_info, desc = "Selected Tracks Info", scroll = true },
+    [o.key_page_5] = { idx = 5, f = track_info, desc = "Tracks Info", scroll = true },
     [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 

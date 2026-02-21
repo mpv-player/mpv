@@ -421,3 +421,19 @@ void mp_codec_info_from_av(const AVCodecContext *avctx, struct mp_codec_params *
     c->decoder = avctx->codec->name;
     c->decoder_desc = avctx->codec->long_name;
 }
+
+void mp_codec_info_from_avcodecpar(const AVCodecParameters *avcodecpar, struct mp_codec_params *c)
+{
+    const AVCodec *codec = avcodec_find_decoder(avcodecpar->codec_id);
+    const AVCodecDescriptor *desc = avcodec_descriptor_get(avcodecpar->codec_id);
+    c->codec = mp_codec_from_av_codec_id(avcodecpar->codec_id);
+    if (desc)
+        c->codec_desc = desc->long_name;
+    if (codec) {
+        c->decoder = codec->name;
+        c->decoder_desc = codec->long_name;
+        c->codec_profile = av_get_profile_name(codec, avcodecpar->profile);
+    }
+    if (!c->codec_profile)
+        c->codec_profile = avcodec_profile_name(avcodecpar->codec_id, avcodecpar->profile);
+}

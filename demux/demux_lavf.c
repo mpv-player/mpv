@@ -743,6 +743,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
+        sh->codec->bitrate = codec->bit_rate;
         sh->codec->format_name = talloc_strdup(sh, av_get_pix_fmt_name(codec->format));
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
@@ -819,13 +820,14 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
     if (sh) {
         sh->ff_index = st->index;
-        sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
+        mp_codec_info_from_avcodecpar(codec, sh->codec);
         sh->codec->codec_tag = codec->codec_tag;
         sh->codec->lav_codecpar = avcodec_parameters_alloc();
         if (sh->codec->lav_codecpar)
             avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
         sh->codec->native_tb_num = st->time_base.num;
         sh->codec->native_tb_den = st->time_base.den;
+        sh->codec->duration = st->duration * av_q2d(st->time_base);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;

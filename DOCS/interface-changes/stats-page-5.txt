@@ -1,0 +1,2 @@
+add `track_info_selected_only` script option for stats
+add `track-list/N/demux-duration` property
