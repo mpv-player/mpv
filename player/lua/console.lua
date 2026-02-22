@@ -53,6 +53,7 @@ local opts = {
 local styles = {
     error = "{\\1c&H7a77f2&}",
     completion = "{\\1c&Hcc99cc&}",
+    inactive = "{\\alpha&H66&}",
 }
 for key, style in pairs(styles) do
     styles[key] = style .. "{\\3c&H111111&}"
@@ -100,6 +101,7 @@ local input_caller_handler
 local keep_open = false
 
 local completion_buffer = {}
+local dim_completions = false
 local selected_completion_index
 local completion_pos
 local completion_append
@@ -118,8 +120,14 @@ local horizontal_offset = 0
 local complete
 local cycle_through_completions
 local set_active
+local render
 
 local property_cache = {}
+
+local completion_timer = mp.add_timeout(0.1, function()
+    dim_completions = true
+    render()
+end, true)
 
 
 local function get_property_cached(name, def)
@@ -452,8 +460,9 @@ local function format_grid(list, width_max, rows_max)
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
             if should_highlight_completion(i) then
-                columns[column] = get_selected_ass() .. columns[column] ..
-                                  "{\\b\\1a&\\3a&}" .. styles.completion
+                local style_override = dim_completions and styles.inactive or ""
+                columns[column] = get_selected_ass() .. style_override .. columns[column] ..
+                                  "{\\b\\1a&\\3a&}" .. styles.completion .. style_override
             end
         end
         -- first row is at the bottom
@@ -661,14 +670,16 @@ local function print_to_terminal()
             log = log .. log_line.terminal_style .. log_line.text .. "\027[0m\n"
         end
 
-        for i, completion in ipairs(completion_buffer) do
-            if should_highlight_completion(i) then
-                log = log .. terminal_styles.selected_completion ..
-                      completion .. "\027[0m"
-            else
-                log = log .. completion
+        if not dim_completions then
+            for i, completion in ipairs(completion_buffer) do
+                if should_highlight_completion(i) then
+                    log = log .. terminal_styles.selected_completion ..
+                          completion .. "\027[0m"
+                else
+                    log = log .. completion
+                end
+                log = log .. (i < #completion_buffer and "\t" or "\n")
             end
-            log = log .. (i < #completion_buffer and "\t" or "\n")
         end
     end
 
@@ -684,7 +695,7 @@ local function print_to_terminal()
     osd_msg_active = true
 end
 
-local function render()
+render = function()
     pending_update = false
 
     if terminal_output() then
@@ -780,7 +791,9 @@ local function render()
 
         local completions, rows = format_grid(completion_buffer, width_max, max_lines)
         max_lines = max_lines - rows
-        completion_ass = style .. styles.completion .. completions .. "\\N"
+        completion_ass = style .. styles.completion ..
+                         (dim_completions and styles.inactive or "") ..
+                         completions .. "\\N"
     end
 
     -- Background
@@ -1451,6 +1464,11 @@ local function strip_common_characters(str, prefix)
 end
 
 cycle_through_completions = function (backwards)
+    -- Disable tab completions while waiting for completion responses
+    if completion_timer:is_enabled() or dim_completions then
+        return
+    end
+
     if #completion_buffer == 0 then
         -- Allow Tab completion of commands before typing anything.
         if line == "" then
@@ -1476,8 +1494,14 @@ cycle_through_completions = function (backwards)
     render()
 end
 
+local function enable_completions()
+    dim_completions = false
+    completion_timer:kill()
+end
+
 -- Show autocompletions.
 complete = function ()
+    completion_timer:resume()
     mp.commandv("script-message-to", input_caller, input_caller_handler,
                 "complete", utils.format_json({line:sub(1, cursor - 1)}))
     render()
@@ -1646,6 +1670,7 @@ set_active = function (active)
         open = false
         undefine_key_bindings()
         unbind_mouse()
+        completion_timer:kill()
         mp.set_property_bool("user-data/mpv/console/open", false)
         mp.set_property_bool("input-ime", ime_active)
         mp.commandv("script-message-to", input_caller, input_caller_handler,
@@ -1680,6 +1705,7 @@ mp.register_script_message("get-input", function (args)
     has_completions = args.has_completions
     dont_bind_up_down = args.dont_bind_up_down
     searching_history = false
+    enable_completions()
 
     if args.items then
         selectable_items = {}
@@ -1802,8 +1828,7 @@ end)
 mp.register_script_message("complete", function (message)
     message = utils.parse_json(message)
 
-    if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler
-       or line:sub(1, cursor - 1) ~= message.original_line then
+    if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler then
         return
     end
 
@@ -1818,6 +1843,11 @@ mp.register_script_message("complete", function (message)
         completion_buffer[i] = completions[match[1]]
     end
 
+    -- Rendering outdated completions makes the completions appear more
+    -- responsive, but we only want allow selecting up-to-date completions.
+    if line:sub(1, cursor - 1) == message.original_line then
+        enable_completions()
+    end
     render()
 end)
 
