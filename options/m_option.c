@@ -2269,11 +2269,15 @@ static char *print_geometry(const m_option_t *opt, const void *val)
             APPEND_PER(w, w_per);
             res = talloc_asprintf_append(res, "x");
             APPEND_PER(h, h_per);
-        }
-        if (gm->xy_valid) {
-            res = talloc_asprintf_append(res, gm->x_sign ? "-" : "+");
+            if (gm->xy_valid) {
+                res = talloc_asprintf_append(res, gm->x_sign ? "-" : "+");
+                APPEND_PER(x, x_per);
+                res = talloc_asprintf_append(res, gm->y_sign ? "-" : "+");
+                APPEND_PER(y, y_per);
+            }
+        } else {
             APPEND_PER(x, x_per);
-            res = talloc_asprintf_append(res, gm->y_sign ? "-" : "+");
+            res = talloc_asprintf_append(res, ":");
             APPEND_PER(y, y_per);
         }
         if (gm->ws > 0)
