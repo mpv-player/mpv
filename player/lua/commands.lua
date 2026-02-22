@@ -407,7 +407,7 @@ local function filter_label_list(type)
     return values
 end
 
-local function complete(before_cur)
+local function complete(before_cur, response)
     local tokens = {}
     local first_useful_token_index = 1
     local completions
@@ -548,7 +548,7 @@ local function complete(before_cur)
         end
     end
 
-    return completions or {}, completion_pos, completion_append
+    response(completions or {}, completion_pos, completion_append)
 end
 
 local function open(text, cursor_position, keep_open)

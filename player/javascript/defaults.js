@@ -662,26 +662,34 @@ function register_event_handler(t) {
     latest_handler_id = handler_id;
 
     mp.register_script_message(handler_id, function (type, args) {
-        if (latest_handler_id !== handler_id && type !== "closed")
+        if (type == "closed")
+            mp.unregister_script_message(handler_id);
+
+        if (!t[type] || (latest_handler_id !== handler_id && type !== "closed"))
             return;
 
-        if (t[type]) {
-            args = args ? JSON.parse(args) : [];
-            var result = t[type].apply(null, args);
+        args = args ? JSON.parse(args) : [];
 
-            if (type == "complete" && result) {
+        if (type == "complete") {
+            var complete = function(completions, completion_pos, completion_append) {
+                if (completions == undefined)
+                    return;
+
                 mp.commandv("script-message-to", "console", "complete", JSON.stringify({
                                 client_name: mp.script_name,
                                 handler_id: handler_id,
-                                list: result[0],
-                                start_pos: result[1],
-                                append: result[2] || "",
+                                original_line: args[0],
+                                list: completions,
+                                start_pos: completion_pos,
+                                append: completion_append || "",
                             }));
             }
-        }
 
-        if (type == "closed")
-            mp.unregister_script_message(handler_id);
+            args[1] = complete;
+            complete.apply(null, t[type].apply(null, args));
+        } else {
+            t[type].apply(null, args)
+        }
     })
 
     return handler_id;

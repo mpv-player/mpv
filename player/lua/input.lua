@@ -40,28 +40,37 @@ local function register_event_handler(t)
     latest_handler_id = handler_id
 
     mp.register_script_message(handler_id, function (type, args)
+        if type == "closed" then
+            mp.unregister_script_message(handler_id)
+        end
+
         -- do not process events (other than closed) for an input that has been overwritten
-        if latest_handler_id ~= handler_id and type ~= "closed" then
+        if not t[type] or (latest_handler_id ~= handler_id and type ~= "closed") then
             return
         end
 
-        if t[type] then
-            local completions, completion_pos, completion_append =
-                t[type](unpack(utils.parse_json(args or "") or {}))
+        args = utils.parse_json(args or "") or {}
 
-            if type == "complete" and completions then
+        if type == "complete" then
+            local function complete(completions, completion_pos, completion_append)
+                if not completions then
+                    return
+                end
+
                 mp.commandv("script-message-to", "console", "complete", utils.format_json({
                                 client_name = mp.get_script_name(),
                                 handler_id = handler_id,
+                                original_line = args[1],
                                 list = completions,
                                 start_pos = completion_pos,
                                 append = completion_append or "",
                             }))
             end
-        end
 
-        if type == "closed" then
-            mp.unregister_script_message(handler_id)
+            args[2] = complete
+            complete(t[type](unpack(args)))
+        else
+            t[type](unpack(args))
         end
     end)
 
