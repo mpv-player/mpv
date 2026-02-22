@@ -1726,13 +1726,7 @@ mp.register_script_message("get-input", function (args)
         read_history()
         history_pos = #history + 1
 
-        if line ~= "" then
-            complete()
-        elseif open then
-            -- This is needed to update the prompt if a new request is
-            -- received while another is still active.
-            render()
-        end
+        handle_cursor_move()
     end
 
     set_active(true)
