@@ -135,7 +135,7 @@ body:
   attributes:
       label: "I carefully read all instruction and confirm that I did the following:"
       options:
-          - label: "I tested with the latest mpv version to validate that the issue is not already fixed."
+          - label: "I tested and confirmed that the issue exists with the [latest release version](https://github.com/mpv-player/mpv/releases/latest) or newer."
             required: true
           - label: "I provided all required information including system and mpv version."
             required: true
