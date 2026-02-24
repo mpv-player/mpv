@@ -54,6 +54,12 @@
 #define MP_ASSERT_UNREACHABLE() ((void)0)
 #endif
 
+#if __has_builtin(__builtin_isnan)
+#define mp_isnan __builtin_isnan
+#else
+#define mp_isnan isnan
+#endif
+
 #ifdef __MINGW_PRINTF_FORMAT
 #define MP_PRINTF_FORMAT __MINGW_PRINTF_FORMAT
 #elif __has_attribute(format)
