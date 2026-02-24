@@ -7428,6 +7428,16 @@ const struct mp_cmd_def mp_cmds[] = {
         },
         .spawn_thread = true,
     },
+    { "screenshot-to-clipboard", cmd_screenshot_to_clipboard,
+        {
+            {"flags", OPT_CHOICE(v.i,
+                {"video", 0},
+                {"window", 1},
+                {"subtitles", 2}),
+                OPTDEF_INT(2)},
+        },
+        .spawn_thread = true,
+    },
     { "screenshot-raw", cmd_screenshot_raw,
         {
             {"flags", OPT_CHOICE(v.i,

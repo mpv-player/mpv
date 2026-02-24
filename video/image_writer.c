@@ -656,12 +656,7 @@ static struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     dst->params = p;
 
-    struct mp_sws_context *sws = mp_sws_alloc(NULL);
-    sws->log = log;
-    if (global)
-        mp_sws_enable_cmdline_opts(sws, global);
-    bool ok = mp_sws_scale(sws, dst, src) >= 0;
-    talloc_free(sws);
+    bool ok = mp_image_swscale(dst, src, global, log) >= 0;
 
     if (src != image)
         talloc_free(src);
