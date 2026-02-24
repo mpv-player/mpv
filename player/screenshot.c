@@ -40,6 +40,7 @@
 #include "video/image_writer.h"
 #include "video/sws_utils.h"
 #include "sub/osd.h"
+#include "stream/stream.h"
 
 #include "video/csputils.h"
 
@@ -176,8 +177,12 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         case 'f':
         case 'F': {
             char *video_file = NULL;
-            if (mpctx->filename)
-                video_file = mp_basename(mpctx->filename);
+            if (mpctx->filename) {
+                if (mp_is_url(bstr0(mpctx->filename)))
+                    video_file = mp_basename(mp_url_unescape(res, mpctx->filename));
+                else
+                    video_file = mp_basename(mpctx->filename);
+            }
 
             if (!video_file)
                 video_file = "NO_FILE";
