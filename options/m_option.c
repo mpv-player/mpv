@@ -959,9 +959,9 @@ const struct m_option_type m_option_type_flags = {
 #undef VAL
 #define VAL(x) (*(double *)(x))
 
-static int clamp_double(const m_option_t *opt, void *val)
+static int clamp_double(const m_option_t *opt, double *val)
 {
-    double v = VAL(val);
+    double v = *val;
     int r = 0;
     if (opt->min < opt->max) {
         if (v > opt->max) {
@@ -978,25 +978,26 @@ static int clamp_double(const m_option_t *opt, void *val)
         v = opt->min;
         r = M_OPT_OUT_OF_RANGE;
     }
-    VAL(val) = v;
+    *val = v;
     return r;
 }
 
-static int parse_double(struct mp_log *log, const m_option_t *opt,
-                        struct bstr name, struct bstr param, void *dst)
+static int parse_numeric(struct mp_log *log, const m_option_t *opt,
+                         struct bstr name, struct bstr param, double *out,
+                         int (*clamp)(const m_option_t *, double *))
 {
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
     struct bstr rest;
-    double tmp_float = bstrtod(param, &rest);
+    *out = bstrtod(param, &rest);
 
     if (bstr_eatstart0(&rest, ":") || bstr_eatstart0(&rest, "/"))
-        tmp_float /= bstrtod(rest, &rest);
+        *out /= bstrtod(rest, &rest);
 
     if ((opt->flags & M_OPT_DEFAULT_NAN) && bstr_equals0(param, "default")) {
-        tmp_float = NAN;
-        goto done;
+        *out = NAN;
+        return 1;
     }
 
     if (rest.len) {
@@ -1006,16 +1007,23 @@ static int parse_double(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if (clamp_double(opt, &tmp_float) < 0) {
+    if (clamp(opt, out) < 0) {
         mp_err(log, "The %.*s option is out of range: %.*s\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
 
-done:
-    if (dst)
-        VAL(dst) = tmp_float;
     return 1;
+}
+
+static int parse_double(struct mp_log *log, const m_option_t *opt,
+                        struct bstr name, struct bstr param, void *dst)
+{
+    double tmp;
+    int r = parse_numeric(log, opt, name, param, &tmp, clamp_double);
+    if (r == 1 && dst)
+        VAL(dst) = tmp;
+    return r;
 }
 
 static char *print_double(const m_option_t *opt, const void *val)
@@ -1054,7 +1062,7 @@ static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
 static void multiply_double(const m_option_t *opt, void *val, double f)
 {
     VAL(val) *= f;
-    clamp_double(opt, val);
+    clamp_double(opt, &VAL(val));
 }
 
 static int double_set(const m_option_t *opt, void *dst, struct mpv_node *src)
@@ -1163,14 +1171,7 @@ static int parse_float(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
     double tmp;
-    int r = parse_double(log, opt, name, param, &tmp);
-
-    if (r == 1 && clamp_float(opt, &tmp) < 0) {
-        mp_err(log, "The %.*s option is out of range: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_OUT_OF_RANGE;
-    }
-
+    int r = parse_numeric(log, opt, name, param, &tmp, clamp_float);
     if (r == 1 && dst)
         VAL(dst) = tmp;
     return r;
