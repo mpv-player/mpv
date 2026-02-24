@@ -22,6 +22,10 @@
 #include <stdbool.h>
 #include "misc/bstr.h"
 
+/* Return pointer to last path segment or the original argument if it is a URL
+ */
+#define mp_basename_or_url(p) (mp_is_url(bstr0(p)) ? (char *)p : mp_basename(p))
+
 // Return pointer to filename part of path
 
 char *mp_basename(const char *path);
@@ -32,6 +36,9 @@ char *mp_basename(const char *path);
  * Return NULL if no extension and don't set *root in this case.
  */
 char *mp_splitext(const char *path, bstr *root);
+
+// This is a shorthand to remove the extension
+char *mp_stripext(void *talloc_ctx, const char *s);
 
 /* Return struct bstr referencing directory part of path, or if that
  * would be empty, ".".

@@ -2187,10 +2187,10 @@ Property list
     Whether ``--video-sync=display`` is actually active.
 
 ``filename``
-    Currently played file, with path stripped. If this is an URL, try to undo
-    percent encoding as well. (The result is not necessarily correct, but
-    looks better for display purposes. Use the ``path`` property to get an
-    unmodified filename.)
+    Currently played file, with path stripped, except URLs. The latter will be
+    returned in full with percent encoding undone. (The result is not
+    necessarily correct, but looks better for display purposes. Use the
+    ``path`` property to get an unmodified filename.)
 
     This has a sub-property:
 
