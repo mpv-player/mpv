@@ -41,6 +41,7 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "player/screenshot.h"
 #include "stream/stream.h"
 
 #include "command.h"
@@ -1332,6 +1333,11 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
     };
     run_locked(ctx, setproperty_fn, &req);
     return req.status;
+}
+
+struct mp_image *mp_take_screenshot(mpv_handle *ctx, int mode)
+{
+    return capture_screenshot(ctx->mpctx, mode);
 }
 
 int mpv_del_property(mpv_handle *ctx, const char *name)
