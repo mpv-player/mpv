@@ -721,6 +721,26 @@ static void init_avctx(struct mp_filter *vd)
     if (!lavc_codec)
         return;
 
+    /*
+     * DEAR DISTRIBUTION PACKAGER,
+     * Before removing the check below to silence the users filing bugs against
+     * your package prompted by it that you can't do anything about, please
+     * consider the hypocrisy of your actions. libopenh264 users frequently
+     * report problems on mpv's issue tracker and IRC channel that we can't do
+     * anything about either.
+     */
+    if (strcmp(ctx->decoder, "libopenh264") == 0) {
+        MP_WARN(vd, "You are using the libopenh264 decoder, which is known to "
+                "be very buggy. If you run into issues with mpv while using "
+                "it, even seemingly unrelated ones like desync or crashes, "
+                "then please do not report it to mpv's issue tracker.\n"
+                "There is no reason to use the libopenh264 decoder as a "
+                "private person, the internal H.264 decoder is also open-"
+                "source, and libopenh264 only exists to work around alleged "
+                "patent licensing issues.\n"
+        );
+    }
+
     const AVCodecDescriptor *desc = avcodec_descriptor_get(lavc_codec->id);
     ctx->intra_only = desc && (desc->props & AV_CODEC_PROP_INTRA_ONLY);
 
