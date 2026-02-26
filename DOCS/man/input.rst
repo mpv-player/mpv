@@ -545,15 +545,14 @@ Playlist Manipulation
 
 ``loadfile <url> [<flags> [<index> [<options>]]]``
     Load the given file or URL and play it. Technically, this is just a playlist
-    manipulation command (which either replaces the playlist or adds an entry
-    to it). Actual file loading happens independently. For example, a
-    ``loadfile`` command that replaces the current file with a new one returns
+    manipulation command. Actual file loading happens independently. For example,
+    a ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
 
     Second argument:
 
     <replace> (default)
-        Stop playback of the current file, and play the new file immediately.
+        Clear the playlist, and play the new file immediately.
     <append>
         Append the file to the playlist.
     <insert-next>
