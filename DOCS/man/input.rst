@@ -540,6 +540,11 @@ Playlist Manipulation
     restarted if for example the new playlist entry is the same as the previous
     one.
 
+``reload``
+    Reload the current file, as if the mpv were started with the same file again.
+    This is essentially a shortcut for ``playlist-play-index current``, but does
+    preserve ``watch-later-options`` as it normally would on quit.
+
 ``loadfile <url> [<flags> [<index> [<options>]]]``
     Load the given file or URL and play it. Technically, this is just a playlist
     manipulation command (which either replaces the playlist or adds an entry

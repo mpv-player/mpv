@@ -6115,6 +6115,46 @@ static void cmd_escape_ass(void *p)
     };
 }
 
+static void cmd_reload(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct MPOpts *opts = mpctx->opts;
+    struct demuxer *demuxer = mpctx->demuxer;
+    struct playlist_entry *current = mpctx->playlist->current;
+
+    if (!current) {
+        MP_WARN(mpctx, "No file is currently playing.\n");
+        cmd->success = false;
+        return;
+    }
+
+    char **wl = opts->position_save_on_quit ? opts->watch_later_options : NULL;
+    for (; wl && *wl; wl++) {
+        char *prop = *wl;
+        const bstr bprop = bstr0(prop);
+        if (bstrcmp0(bprop, "start") == 0) {
+            bool seekable = demuxer && demuxer->seekable &&
+                            !demuxer->partially_seekable;
+            double pos = get_playback_time(mpctx);
+            if (!seekable || pos == MP_NOPTS_VALUE)
+                continue;
+            playlist_entry_add_param(current, bprop, bstr0(mp_tprintf(42, "%f", pos)));
+        } else if (m_config_watch_later_backup_opt_changed(mpctx->mconfig, prop)) {
+            char *val = NULL;
+            int r = mp_property_do(prop, M_PROPERTY_GET_STRING, &val, mpctx);
+            if (r == M_PROPERTY_OK && val) {
+                playlist_entry_add_param(current, bprop, bstr0(val));
+                talloc_free(val);
+            }
+        }
+    }
+
+    if (!mpctx->stop_play)
+        mpctx->stop_play = PT_CURRENT_ENTRY;
+    mp_wakeup_core(mpctx);
+}
+
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
     int type = action_flag & 3;
@@ -7445,6 +7485,7 @@ const struct mp_cmd_def mp_cmds[] = {
                 OPTDEF_INT(0)},
         },
     },
+    { "reload", cmd_reload },
     { "loadfile", cmd_loadfile,
         {
             {"url", OPT_STRING(v.s)},
