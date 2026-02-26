@@ -257,6 +257,10 @@ Ctrl+v
     currently playing, it is played immediately. Only works on platforms that
     support the ``clipboard`` property.
 
+Ctrl+r
+    Reload the current file, preserving the time position and any changed
+    option. Empties any network cache.
+
 i and I
     Show/toggle an overlay displaying statistics about the currently playing
     file such as codec, framerate, number of dropped frames and so on. See
