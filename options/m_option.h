@@ -235,6 +235,7 @@ struct m_sub_options {
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
+#define CONF_TYPE_KV_LIST       (&m_option_type_keyvalue_list)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_FOURCC        (&m_option_type_fourcc)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
