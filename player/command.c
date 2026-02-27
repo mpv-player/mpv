@@ -157,16 +157,35 @@ struct hook_handler {
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
-enum load_action_type {
-    LOAD_TYPE_REPLACE,
-    LOAD_TYPE_INSERT_AT,
-    LOAD_TYPE_INSERT_NEXT,
-    LOAD_TYPE_APPEND,
+enum load_flag {
+    // Action modifiers
+    LOAD_FLAG_REPLACE = 1 << 0,
+    LOAD_FLAG_INSERT = 1 << 1,
+
+    LOAD_FLAG_ACTION_MASK = LOAD_FLAG_REPLACE | LOAD_FLAG_INSERT,
+
+    // Position modifiers, for backward compatibility glue.
+    LOAD_FLAG_NEXT = 1 << 2,
+    LOAD_FLAG_PREV = 1 << 3,
+    LOAD_FLAG_CURRENT = 1 << 4,
+    LOAD_FLAG_FIRST = 1 << 5,
+    LOAD_FLAG_LAST = 1 << 6,
+    LOAD_FLAG_APPEND = 1 << 7,
+
+    LOAD_FLAG_POS_MASK = LOAD_FLAG_NEXT | LOAD_FLAG_PREV | LOAD_FLAG_CURRENT |
+                         LOAD_FLAG_FIRST | LOAD_FLAG_LAST | LOAD_FLAG_APPEND,
+
+    // Load modifiers
+    LOAD_FLAG_PLAY = 1 << 8,
 };
 
-struct load_action {
-    enum load_action_type type;
-    bool play;
+enum load_flag_pos {
+    LOAD_POS_NONE = -1,
+    LOAD_POS_NEXT = -2,
+    LOAD_POS_PREV = -3,
+    LOAD_POS_CURRENT = -4,
+    LOAD_POS_FIRST = -5,
+    LOAD_POS_LAST = -6,
 };
 
 // U+00A0 NO-BREAK SPACE
@@ -6127,37 +6146,53 @@ static void cmd_escape_ass(void *p)
     };
 }
 
-static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
+static int load_flags_apply_defaults(int flags)
 {
-    int type = action_flag & 3;
-    bool play = (action_flag >> 3) & 1;
-    switch (type) {
-    case 0:
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = play};
-    case 1:
-        return (struct load_action){LOAD_TYPE_APPEND, .play = play};
-    case 2:
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = play};
-    case 3:
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = play};
-    default: // default: replace
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
-    }
+    if (!(flags & LOAD_FLAG_ACTION_MASK))
+        flags |= LOAD_FLAG_REPLACE;
+    return flags;
 }
 
-static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct load_action *action,
-                                               int insert_at_idx)
+static int load_pos_apply_defaults(int flags, int position)
 {
-    switch (action->type) {
-    case LOAD_TYPE_INSERT_NEXT:
-        return playlist_get_next(mpctx->playlist, +1);
-    case LOAD_TYPE_INSERT_AT:
-        return playlist_entry_from_index(mpctx->playlist, insert_at_idx);
-    case LOAD_TYPE_REPLACE:
-    case LOAD_TYPE_APPEND:
-    default:
+    // flags override the position
+    if (flags & LOAD_FLAG_APPEND)
+        position = LOAD_POS_NONE;
+    if (flags & LOAD_FLAG_NEXT)
+        position = LOAD_POS_NEXT;
+    if (flags & LOAD_FLAG_PREV)
+        position = LOAD_POS_PREV;
+    if (flags & LOAD_FLAG_CURRENT)
+        position = LOAD_POS_CURRENT;
+    if (flags & LOAD_FLAG_FIRST)
+        position = LOAD_POS_FIRST;
+    if (flags & LOAD_FLAG_LAST)
+        position = LOAD_POS_LAST;
+    return position;
+}
+
+static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, int position)
+{
+    struct playlist_entry *entry;
+    switch (position) {
+    case LOAD_POS_NONE:
         return NULL;
+    case LOAD_POS_PREV:
+        if ((entry = playlist_get_next(mpctx->playlist, -1)))
+            return entry;
+        MP_FALLTHROUGH;
+    case LOAD_POS_FIRST:
+        return playlist_get_first(mpctx->playlist);
+    case LOAD_POS_NEXT:
+        return playlist_get_next(mpctx->playlist, +1);
+    case LOAD_POS_LAST:
+        return playlist_get_last(mpctx->playlist);
+    case LOAD_POS_CURRENT:
+        return mpctx->playlist->current;
+    default:
+        return playlist_entry_from_index(mpctx->playlist, position);
     }
+    MP_ASSERT_UNREACHABLE();
 }
 
 static void cmd_loadfile(void *p)
@@ -6165,12 +6200,12 @@ static void cmd_loadfile(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int flags = load_flags_apply_defaults(cmd->args[1].v.i);
+    int position = load_pos_apply_defaults(flags, cmd->args[2].v.i);
 
-    struct load_action action = get_load_action(mpctx, action_flag);
-
-    if (action.type == LOAD_TYPE_REPLACE)
+    // For historical reasons, the default replace behavior is to replace the whole playlist
+    bool clear_playlist = (flags & LOAD_FLAG_REPLACE) && position == LOAD_POS_NONE;
+    if (clear_playlist)
         playlist_clear(mpctx->playlist);
 
     char *path = mp_get_user_path(NULL, mpctx->global, filename);
@@ -6182,14 +6217,24 @@ static void cmd_loadfile(void *p)
             playlist_entry_add_param(entry, bstr0(pairs[i]), bstr0(pairs[i + 1]));
     }
 
-    struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
+    struct playlist_entry *at = get_insert_entry(mpctx, position);
     playlist_insert_at(mpctx->playlist, entry, at);
+
+    if ((flags & LOAD_FLAG_REPLACE) && at) {
+        bool replacing_current = at == mpctx->playlist->current;
+        playlist_remove(mpctx->playlist, at);
+        if (replacing_current)
+            mp_set_playlist_entry(mpctx, entry);
+    }
+
+    if (!at && position != LOAD_POS_NONE && (flags & LOAD_FLAG_REPLACE))
+        MP_WARN(mpctx, "Playlist position not found, file will be appended to the end.\n");
 
     struct mpv_node *res = &cmd->result;
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
     node_map_add_int64(res, "playlist_entry_id", entry->id);
 
-    if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
+    if (clear_playlist || ((flags & LOAD_FLAG_PLAY) && !mpctx->playlist->current)) {
         if (mpctx->opts->position_save_on_quit) // requested in issue #1148
             mp_write_watch_later_conf(mpctx);
         mp_set_playlist_entry(mpctx, entry);
@@ -6203,10 +6248,8 @@ static void cmd_loadlist(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
-    int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
-
-    struct load_action action = get_load_action(mpctx, action_flag);
+    int flags = load_flags_apply_defaults(cmd->args[1].v.i);
+    int position = load_pos_apply_defaults(flags, cmd->args[2].v.i);
 
     char *path = mp_get_user_path(NULL, mpctx->global, filename);
     struct playlist *pl = playlist_parse_file(path, cmd->abort->cancel,
@@ -6216,12 +6259,13 @@ static void cmd_loadlist(void *p)
     if (pl) {
         prepare_playlist(mpctx, pl, true);
         struct playlist_entry *new = pl->current;
-        if (action.type == LOAD_TYPE_REPLACE)
+        bool clear_playlist = flags & LOAD_FLAG_REPLACE;
+        if (clear_playlist)
             playlist_clear(mpctx->playlist);
         struct playlist_entry *first = playlist_entry_from_index(pl, 0);
         int num_entries = pl->num_entries;
 
-        struct playlist_entry *at = get_insert_entry(mpctx, &action, insert_at_idx);
+        struct playlist_entry *at = get_insert_entry(mpctx, position);
         if (at == NULL) {
             playlist_append_entries(mpctx->playlist, pl);
         } else {
@@ -6233,8 +6277,8 @@ static void cmd_loadlist(void *p)
         if (!new)
             new = playlist_get_first(mpctx->playlist);
 
-        if ((action.type == LOAD_TYPE_REPLACE ||
-            (action.play && !mpctx->playlist->current)) && new) {
+        if ((clear_playlist ||
+            ((flags & LOAD_FLAG_PLAY) && !mpctx->playlist->current)) && new) {
             mp_set_playlist_entry(mpctx, new);
         }
 
@@ -7462,17 +7506,31 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", LOAD_FLAG_REPLACE},
+                {"insert", LOAD_FLAG_INSERT},
+
+                // convenience aliases
+                {"prepend", LOAD_FLAG_INSERT | LOAD_FLAG_FIRST},
+                {"append", LOAD_FLAG_INSERT | LOAD_FLAG_APPEND},
+
+                {"play", LOAD_FLAG_PLAY},
+
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
-                .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+                {"insert-next", LOAD_FLAG_INSERT | LOAD_FLAG_NEXT},
+                {"insert-at", LOAD_FLAG_INSERT},
+                {"append-play", LOAD_FLAG_INSERT | LOAD_FLAG_APPEND | LOAD_FLAG_PLAY},
+                {"insert-next-play", LOAD_FLAG_INSERT | LOAD_FLAG_NEXT | LOAD_FLAG_PLAY},
+                {"insert-at-play", LOAD_FLAG_INSERT | LOAD_FLAG_PLAY}),
+                 .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_CHOICE(v.i,
+                {"none", LOAD_POS_NONE},
+                {"next", LOAD_POS_NEXT},
+                {"prev", LOAD_POS_PREV},
+                {"current", LOAD_POS_CURRENT},
+                {"first", LOAD_POS_FIRST},
+                {"last", LOAD_POS_LAST}),
+                // Allow -1 for backwards compatibility, same as none/default.
+                M_RANGE(LOAD_POS_NONE, INT_MAX), OPTDEF_INT(LOAD_POS_NONE)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
     },
@@ -7480,17 +7538,30 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", LOAD_FLAG_REPLACE},
+                {"insert", LOAD_FLAG_INSERT},
+
+                // convenience aliases
+                {"prepend", LOAD_FLAG_INSERT | LOAD_FLAG_FIRST},
+                {"append", LOAD_FLAG_INSERT | LOAD_FLAG_APPEND},
+
+                {"play", LOAD_FLAG_PLAY},
+
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
-                .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+                {"insert-next", LOAD_FLAG_INSERT | LOAD_FLAG_NEXT},
+                {"insert-at", LOAD_FLAG_INSERT},
+                {"append-play", LOAD_FLAG_INSERT | LOAD_FLAG_APPEND | LOAD_FLAG_PLAY},
+                {"insert-next-play", LOAD_FLAG_INSERT | LOAD_FLAG_NEXT | LOAD_FLAG_PLAY},
+                {"insert-at-play", LOAD_FLAG_INSERT | LOAD_FLAG_PLAY}),
+                 .flags = MP_CMD_OPT_ARG},
+            {"index", OPT_CHOICE(v.i,
+                {"none", LOAD_POS_NONE},
+                {"next", LOAD_POS_NEXT},
+                {"prev", LOAD_POS_PREV},
+                {"first", LOAD_POS_FIRST},
+                {"last", LOAD_POS_LAST}),
+                // Allow -1 for backwards compatibility, same as none/default.
+                M_RANGE(LOAD_POS_NONE, INT_MAX), OPTDEF_INT(LOAD_POS_NONE)},
         },
         .spawn_thread = true,
         .can_abort = true,
