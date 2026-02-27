@@ -862,6 +862,18 @@ local function add_single_video(json)
         stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
     end
 
+    local chunk_size = math.huge
+    if has_requested_formats then
+        for _, f in pairs(requested_formats) do
+            if f.downloader_options and f.downloader_options.http_chunk_size then
+                chunk_size = math.min(chunk_size, tonumber(f.downloader_options.http_chunk_size))
+            end
+        end
+    end
+    if chunk_size < math.huge then
+        stream_opts = append_libav_opt(stream_opts, "request_size", tostring(chunk_size))
+    end
+
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
 end
 
