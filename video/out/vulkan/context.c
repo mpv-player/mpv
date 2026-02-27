@@ -526,11 +526,11 @@ static void get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static pl_color_space_t target_csp(struct ra_swapchain *sw)
+static pl_color_space_t target_csp(struct ra_swapchain *sw, float soucre_max_luma)
 {
     struct priv *p = sw->priv;
     if (p->params.preferred_csp)
-        return p->params.preferred_csp(sw->ctx);
+        return p->params.preferred_csp(sw->ctx, soucre_max_luma);
     return (pl_color_space_t){0};
 }
 
