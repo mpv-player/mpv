@@ -464,7 +464,7 @@ local function complete(before_cur, response)
     while tokens[first_useful_token_index] and
           command_prefixes[tokens[first_useful_token_index].text] do
         if first_useful_token_index == #tokens then
-            return
+            return response({}, 1)
         end
 
         first_useful_token_index = first_useful_token_index + 1
