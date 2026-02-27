@@ -87,13 +87,19 @@ local function input_request(t)
 end
 
 function input.get(t)
+    t.prompt = tostring(t.prompt or "")
+
     -- input.select does not support log buffers, so cannot override the latest id.
-    t.id = t.id or mp.get_script_name()..(t.prompt or "")
+    t.id = t.id or mp.get_script_name() .. t.prompt
     latest_log_id = t.id
     return input_request(t)
 end
 
-input.select = input_request
+function input.select(t)
+    -- Ensures that console.lua treats this request as a select request.
+    t.items = t.items or {}
+    return input_request(t)
+end
 
 function input.terminate()
     mp.commandv("script-message-to", "console", "disable", utils.format_json({

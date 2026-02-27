@@ -705,8 +705,13 @@ function input_request(t) {
 
 mp.input = {
     get: function(t) {
-        t.id = t.id || mp.script_name + (t.prompt || "");
+        t.prompt = String(t.prompt || "")
+        t.id = t.id || mp.script_name + t.prompt;
         latest_log_id = t.id;
+        return input_request(t);
+    },
+    select: function(t) {
+        t.args = t.args || [];
         return input_request(t);
     },
     terminate: function () {
@@ -738,7 +743,6 @@ mp.input = {
         }
     }
 }
-mp.input.select = input_request;
 
 /**********************************************************************
  *  various
