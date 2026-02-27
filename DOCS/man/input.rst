@@ -517,7 +517,7 @@ Playlist Manipulation
     Go to the first of the previous entries on the playlist with a different
     ``playlist-path``.
 
-``playlist-play-index <integer|current|none>``
+``playlist-play-index <integer|current|none> [preserve-options]``]
     Start (or restart) playback of the given playlist index. In addition to the
     0-based playlist entry index, it supports the following values:
 
@@ -530,6 +530,9 @@ Playlist Manipulation
     <none>
         Playback is stopped. If idle mode (``--idle``) is enabled, the player
         will enter idle mode, otherwise it will exit.
+
+    Setting ``preserve-options`` (``MPV_FORMAT_FLAG``) will not reset file-local
+    options when the playback of the current playlist index is restarted.
 
     This command is similar to ``loadfile`` in that it only manipulates the
     state of what to play next, without waiting until the current file is

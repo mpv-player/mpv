@@ -1985,7 +1985,13 @@ terminate_playback:
     // Possibly stop ongoing async commands.
     mp_abort_playback_async(mpctx);
 
-    m_config_restore_backups(mpctx->mconfig);
+    struct playlist_entry *current = mpctx->playlist->current;
+    bool reloading = mpctx->stop_play == PT_CURRENT_ENTRY &&
+                     current && current->reloading;
+    if (current)
+        current->reloading = false;
+    if (!reloading)
+        m_config_restore_backups(mpctx->mconfig);
 
     TA_FREEP(&mpctx->filter_root);
     talloc_free(mpctx->filtered_tags);

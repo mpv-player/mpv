@@ -5987,9 +5987,13 @@ static void cmd_playlist_play_index(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     struct playlist *pl = mpctx->playlist;
     int pos = cmd->args[0].v.i;
+    bool preserve_options = cmd->num_args >= 2 && cmd->args[1].v.b;
 
     if (pos == -2)
         pos = playlist_entry_to_index(pl, pl->current);
+
+    if (preserve_options && pl->current && pos == pl->current->pl_index)
+        pl->current->reloading = true;
 
     mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
     if (cmd->on_osd & MP_ON_OSD_MSG)
@@ -7256,6 +7260,7 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
                 M_RANGE(-1, INT_MAX)},
+            {"preserve-options", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
         }
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
