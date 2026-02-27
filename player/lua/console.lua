@@ -12,6 +12,7 @@
 -- OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 -- CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+local msg = require "mp.msg"
 local utils = require "mp.utils"
 local assdraw = require "mp.assdraw"
 
@@ -1687,12 +1688,22 @@ mp.register_script_message("disable", function(message)
 end)
 
 mp.register_script_message("get-input", function (args)
+    args = utils.parse_json(args)
+    if type(args) ~= "table" then
+        return msg.error("Input request aborted - " ..
+                         "get-input must be passed a JSON formatted table.")
+    end
+
+    if not args.client_name or not args.handler_id then
+        return msg.error("Input request aborted - " ..
+                         "get-input must be passed a 'client_name' and 'handler_id'")
+    end
+
     if open then
         mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
     end
 
-    args = utils.parse_json(args)
     input_caller = args.client_name
     input_caller_handler = args.handler_id
     prompt = args.prompt or ""
@@ -1758,8 +1769,9 @@ end)
 -- Add a line to the log buffer
 mp.register_script_message("log", function (message)
     message = utils.parse_json(message or "")
-    if not message or not message.log_id then
-        return
+    if type(message) ~= "table" or not message.log_id then
+        return msg.error("Line not appended to log buffer - " ..
+                         "log must be passed a JSON formatted table which contains a 'log_id'.")
     end
 
     local log_buffer = log_buffers[message.log_id]
@@ -1793,11 +1805,20 @@ mp.register_script_message("log", function (message)
 end)
 
 mp.register_script_message("set-log", function (log_id, log)
-    if not log_id or not log then
-        return
+    log = utils.parse_json(log)
+    if not log_id then
+        return msg.error("Log buffer not overwritten - " ..
+                         "set-log must be passed a 'log_id' as the first argument.")
     end
 
-    log = utils.parse_json(log)
+    -- This error message provides extra details as mp.input passes the `log` table to
+    -- console.lua unchanged, meaning that this guard may be triggered by Lua and Js clients.
+    if type(log) ~= "table" then
+        return msg.error("Log buffer not overwritten - " ..
+                         "set-log must be passed a table as second argument, " ..
+                         ("instead received a %s."):format(type(log)))
+    end
+
     log_buffers[log_id] = {}
 
     for i = 1, #log do
@@ -1822,6 +1843,10 @@ end)
 
 mp.register_script_message("complete", function (message)
     message = utils.parse_json(message)
+    if type(message) ~= "table" then
+        return msg.error("Completions not received - " ..
+                         "complete must be passed a JSON formatted table.")
+    end
 
     if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler then
         return
