@@ -855,6 +855,20 @@ Text Manipulation
 
         This line of Lua prints "foo \\{bar}" on the OSD.
 
+``msg <level> <message> [...]``
+    Write a log message. ``level`` must be one of the log levels accepted by the
+    ``mp.msg.log`` Lua function. The ``message`` arguments are separated from
+    each other with a space. A newline is added to the end of the message.
+
+    This command has a variable number of arguments, and cannot be used with
+    named arguments.
+
+    .. note:: Lua and JS code should use the provided ``mp.msg`` modules.
+
+``msg-prefix <level> <prefix> <message> [...]``
+    Same as ``msg``, but allows writing messages using ``prefix`` as the prefix
+    instead of the name of the client that sent the command.
+
 Configuration Commands
 ~~~~~~~~~~~~~~~~~~~~~~
 
