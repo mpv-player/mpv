@@ -1042,6 +1042,22 @@ REPL.
         ``submit`` callback, setting this option to ``true`` allows a seamless
         transition without the console closing and reopening.
 
+    ``opened``
+        A callback invoked when the console is shown. This can be used to
+        override keybinds set by the console with ``mp.add_forced_key_binding()``.
+
+    ``closed``
+        A callback invoked when the console is hidden, either because
+        ``input.terminate()`` was invoked from the other callbacks, or because
+        the user closed it with a key binding. The first argument is the text in
+        the console, and the second argument is the cursor position.
+
+    ``default_text``
+        A string to pre-fill the input field with.
+
+    ``cursor_position``
+        The initial cursor position, starting from 1.
+
     Example:
 
         ::
