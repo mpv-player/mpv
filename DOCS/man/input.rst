@@ -549,32 +549,37 @@ Playlist Manipulation
     a ``loadfile`` command that replaces the current file with a new one returns
     before the current file is stopped, and the new file even begins loading.
 
-    Second argument:
+    Second argument is combination of flags controlling how the file is added
+    to the playlist:
 
     <replace> (default)
-        Clear the playlist, and play the new file immediately.
-    <append>
-        Append the file to the playlist.
-    <insert-next>
-        Insert the file into the playlist, directly after the current entry.
-    <insert-at>
-        Insert the file into the playlist, at the index given in the third
-        argument.
+        Replace the playlist entry at the given index with the new file. If no
+        index is given (default ``-1``), the whole playlist is cleared and the
+        file is added as the only entry.
+    <insert>
+        Insert the file into the playlist at the given index, or append it if
+        no index is given.
+
     <play>
         If nothing is currently playing, start playback. (Always starts with the
         added file, even if the playlist was not empty before running this
         command).
 
-    Multiple flags can be combined, e.g.: ``append+play``.
+    Multiple flags can be combined, e.g.: ``insert+play``.
 
-    By default, ``append``, ``insert-next``, and ``insert-at`` will not
-    immediately start playback even if the playlist was previously empty. Adding
-    the ``play`` flag to them forces playback to start.
+    By default, playback will not immediately start even if the playlist was
+    previously empty. Adding the ``play`` flag forces playback to start.
 
     The following values are considered deprecated and were the old way
-    (before mpv 0.42) of forcing playback to start before the ``play`` flag was
-    added.
+    (before mpv 0.42) of providing flags.
 
+    <append>
+        Append the file to the playlist. Equivalent to ``insert`` with no index.
+    <insert-next>
+        Insert the file into the playlist, directly after the current entry.
+    <insert-at>
+        Insert the file into the playlist, at the index given in the third
+        argument.
     <append-play>
         Append the file, and if nothing is currently playing, start playback.
         (Always starts with the added file, even if the playlist was not empty
@@ -588,11 +593,25 @@ Playlist Manipulation
         is currently playing, start playback. (Always starts with the added
         file, even if the playlist was not empty before running this command.)
 
-    The third argument is an insertion index, used only by the ``insert-at``
-    action. When used with those actions, the new item will be inserted at the
-    index position in the playlist, or appended to the end if index is less than
-    0 or greater than the size of the playlist. This argument will be ignored for
-    all other actions. This argument was added in mpv 0.38.0.
+    The third argument is a numeric insertion index (0-based). For ``insert``,
+    the new item is placed at the given position, shifting later entries right,
+    or appended if the index is out of range. For ``replace``, the entry at
+    the given position is replaced. If out of range the new item is appended.
+    The default value ``-1`` means no specific position.
+
+    .. admonition:: Examples
+
+        # insert at the start of the playlist
+        loadfile url insert 0
+
+        # append to the end of the playlist
+        loadfile url insert
+
+        # replace the currently playing entry
+        loadfile url replace ${playlist-pos}
+
+        # replace the next entry
+        loadfile url replace ${playlist-pos-1}
 
     The fourth argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
@@ -615,29 +634,35 @@ Playlist Manipulation
     Second argument:
 
     <replace> (default)
-        Stop playback and replace the internal playlist with the new one.
-    <append>
-        Append the new playlist at the end of the current internal playlist.
-    <insert-next>
-        Insert the new playlist into the current internal playlist, directly
-        after the current entry.
-    <insert-at>
-        Insert the new playlist at the index given in the third argument.
+        Replace entries in the internal playlist with the loaded playlist. If no
+        index is given (default ``-1``), the whole internal playlist is cleared
+        and replaced. If an index is given, entries starting at that position are
+        replaced with the new playlist, any excess loaded entries are appended.
+    <insert>
+        Insert the new playlist into the internal playlist at the given index,
+        or append it if no index is given.
+
     <play>
         If nothing is currently playing, start playback. (Always starts with the
         added playlist, even if the internal playlist was not empty before running
         this command).
 
-    Multiple flags can be combined, e.g.: ``append+play``.
+    Multiple flags can be combined, e.g.: ``insert+play``.
 
-    By default, ``append``, ``insert-next``, and ``insert-at`` will not
-    immediately start playback even if the playlist was previously empty. Adding
-    the ``play`` flag to them forces playback to start.
+    By default, playback will not immediately start even if the playlist was
+    previously empty. Adding the ``play`` flag forces playback to start.
 
     The following values are considered deprecated and were the old way
-    (before mpv 0.42) of forcing playback to start before the ``play`` flag was
-    added.
+    (before mpv 0.42) of providing flags.
 
+    <append>
+        Append the new playlist to the end of the internal playlist. Equivalent
+        to ``insert`` with no index.
+    <insert-next>
+        Insert the new playlist into the current internal playlist, directly
+        after the current entry.
+    <insert-at>
+        Insert the new playlist at the index given in the third argument.
     <append-play>
         Append the new playlist, and if nothing is currently playing, start
         playback. (Always starts with the new playlist, even if the internal
@@ -652,11 +677,11 @@ Playlist Manipulation
         new playlist, even if the internal playlist was not empty before running
         this command.)
 
-    The third argument is an insertion index, used only by the ``insert-at`` action.
-    When used with those actions, the new playlist will be inserted at the index
-    position in the internal playlist, or appended to the end if index is less
-    than 0 or greater than the size of the internal playlist. This argument will be
-    ignored for all other actions. This argument was added in mpv 0.38.0.
+    The third argument is a numeric index (0-based). For ``insert``, the loaded
+    playlist is inserted starting at the given position, or appended if out of
+    range. For ``replace``, entries starting at that position are replaced; any
+    excess loaded entries are appended. The default value ``-1`` means no
+    specific position.
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.

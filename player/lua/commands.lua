@@ -335,7 +335,7 @@ local function command_flags_at_2nd_argument_list(command)
     local flags = {
         ["apply-profile"] = {"apply", "restore"},
         ["frame-step"] = {"play", "seek", "mute"},
-        ["loadfile"] = {"replace", "append", "insert-next", "insert-at", "play"},
+        ["loadfile"] = {"replace", "insert", "play", "prepend", "append"},
         ["screenshot-to-file"] = {"subtitles", "video", "window", "osd", "scaled", "each-frame"},
         ["screenshot-raw"] = {"bgr0", "bgra", "rgba", "rgba64"},
         ["seek"] = {"relative", "absolute", "absolute-percent",
