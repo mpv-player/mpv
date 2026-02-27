@@ -53,6 +53,9 @@ struct playlist_entry {
     bool init_failed : 1;
     // Entry was removed with playlist_remove (etc.), but not deallocated.
     bool removed : 1;
+    // Playback of the entry is restarting without resetting
+    // file-local options.
+    bool reloading : 1;
     // Additional refcount. Normally (reserved==0), the entry is owned by the
     // playlist, and this can be used to keep the entry alive.
     int reserved;
