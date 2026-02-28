@@ -392,6 +392,10 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                         ol->color.hdr = (struct pl_hdr_metadata) {
                             .max_luma = p->next_opts->image_subs_hdr_peak,
                         };
+                    } else {
+                        ol->color.hdr = (struct pl_hdr_metadata) {
+                            .max_luma = src->params.color.hdr.max_luma,
+                        };
                     }
                 }
             }
