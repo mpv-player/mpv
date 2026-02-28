@@ -4204,6 +4204,19 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
 void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params)
 {
+#if HAVE_WAYLAND_PROTOCOLS_1_41
+    if (!params) {
+        if (wl->color_surface) {
+            wp_color_management_surface_v1_destroy(wl->color_surface);
+            wl->color_surface = NULL;
+        }
+        wl->current_params = (struct mp_image_params){0};
+        return;
+    }
+    if (!wl->color_surface)
+        wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+#endif
+
     bool color_space_changed = !pl_color_space_equal(&wl->current_params.color, &params->color);
     bool color_repr_changed = !pl_color_repr_equal(&wl->current_params.repr, &params->repr) ||
                               wl->current_params.chroma_location != params->chroma_location;
@@ -4336,9 +4349,6 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->color_manager) {
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
-        // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
-        if (!strcmp(wl->vo->driver->name, "dmabuf-wayland"))
-            wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_manager_v1_interface.name);
