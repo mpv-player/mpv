@@ -1023,8 +1023,31 @@ if features['posix']
     features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
 endif
 
-spirv_cross = dependency('spirv-cross-c-shared', required:
-    get_option('spirv-cross').require(features['win32-desktop']))
+prefer_static = get_option('prefer_static')
+
+spirv_cross_deps = ['spirv-cross-c-shared']
+spirv_cross_required = get_option('spirv-cross').require(features['win32-desktop']).enabled()
+spirv_cross_preferred_check_failed = false
+
+if prefer_static
+    spirv_cross_deps = ['spirv-cross-c'] + spirv_cross_deps
+else
+    spirv_cross_deps += ['spirv-cross-c']
+endif
+
+foreach spirv_dep : spirv_cross_deps
+    spirv_cross = dependency(
+        spirv_dep,
+        required: spirv_cross_required and spirv_cross_preferred_check_failed
+    )
+    if not spirv_cross.found()
+        spirv_cross_preferred_check_failed = true
+        continue
+    endif
+
+    break
+endforeach
+
 features += {'spirv-cross': spirv_cross.found()}
 if features['spirv-cross']
     dependencies += spirv_cross
