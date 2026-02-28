@@ -29,7 +29,7 @@ end
 local platform = detect_platform()
 
 -- Default options
-local opts = {
+local script_opts = {
     monospace_font = "",
     font_size = 24,
     border_size = 1.65,
@@ -50,6 +50,7 @@ local opts = {
     history_dedup = true,
     font_hw_ratio = "auto",
 }
+local opts = script_opts
 
 local styles = {
     error = "{\\1c&H7a77f2&}",
@@ -1730,6 +1731,20 @@ mp.register_script_message("get-input", function (args)
         cursor = line:len() + 1
     end
 
+    -- Allows clients to override script-opts, but first ensures the overrides are the same type.
+    if type(args.console_opts) == "table" then
+        for k, v in pairs(args.console_opts) do
+            if type(v) ~= type(script_opts[k]) then
+                args.console_opts[k] = nil
+                msg.warn(("mp.input (%s): ignoring console_opts.%s - must be of type %s"
+                         ):format(input_caller, k, type(script_opts[k])))
+            end
+        end
+        opts = setmetatable(args.console_opts, {__index = script_opts})
+    else
+        opts = script_opts
+    end
+
     enable_completions()
 
     if args.items then
@@ -1971,6 +1986,6 @@ mp.register_script_message("type", function (...)
     mp.commandv("script-message-to", "commands", "type", ...)
 end)
 
-require "mp.options".read_options(opts, nil, render)
+require "mp.options".read_options(script_opts, nil, render)
 
 collectgarbage()

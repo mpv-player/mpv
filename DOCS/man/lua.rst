@@ -987,6 +987,11 @@ REPL.
         among the ones stored for ``input.get()`` calls. Defaults to the calling
         script name with ``prompt`` appended.
 
+    ``console_opts``
+        A table containing configuration overrides for the console REPL.
+        Can be used to change the visual style of the text input, among other things.
+        See `CONSOLE`_ for the full list of options.
+
 ``input.terminate()``
     Closes any currently active input request. This will not close
     requests made by other scripts.
@@ -1041,6 +1046,11 @@ REPL.
         If calling ``input.get()`` or ``input.select()`` again from inside the
         ``submit`` callback, setting this option to ``true`` allows a seamless
         transition without the console closing and reopening.
+
+    ``console_opts``
+        A table containing configuration overrides for the console REPL.
+        Can be used to change the visual style of the select window, among other things.
+        See `CONSOLE`_ for the full list of options.
 
     Example:
 
