@@ -528,13 +528,30 @@ static void get_vsync(struct ra_swapchain *sw,
 
 static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
 {
-    // Needs VK_COLOR_SPACE_PASS_THROUGH_EXT for Wayland. This is currently the
-    // only backend that supports set_color, and likely will stay that way.
-    // Everything else can use Vulkan API colorspace without issues.
-    bool supported = strcmp(sw->ctx->fns->name, "waylandvk") != 0;
     struct priv *p = sw->priv;
-    if (supported && p->params.set_color)
-        return p->params.set_color(sw->ctx, params);
+
+    // Vulkan Wayland needs special handling to avoid duplicated color surface.
+    bool waylandvk = strcmp(sw->ctx->fns->name, "waylandvk") == 0;
+    // Assume anything else is supported when set_color is defined. However,
+    // everything else can use Vulkan API colorspace without issues, so unlikely
+    // that set_color is used outside of Wayland.
+    bool supported = PL_API_VER >= 361 || !waylandvk;
+    if (supported && p->params.set_color) {
+        if (waylandvk && params) {
+            // Request VK_COLOR_SPACE_PASS_THROUGH_EXT
+            pl_swapchain_colorspace_hint(p->vk->swapchain, &(struct pl_color_space){0});
+            // Do the resize in case surface format needs to change
+            // Vulkan doesn't guarantee that Wayland's color surface will be
+            // immediately released, but it works for now...
+            pl_swapchain_resize(p->vk->swapchain, &(int){0}, &(int){0});
+        }
+        bool ret = p->params.set_color(sw->ctx, params);
+        // To avoid ping-pong between VK_COLOR_SPACE_PASS_THROUGH_EXT and others,
+        // we assume that internal Wayland set_color always work, and update
+        // params to fallback values if needed.
+        mp_assert(ret || !waylandvk);
+        return ret;
+    }
     // Technically we could call pl_swapchain_colorspace_hint() here directly,
     // but we want to know when parameters are set "externally".
     return false;

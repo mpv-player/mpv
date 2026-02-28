@@ -1104,6 +1104,15 @@ struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc)
             break;
     }
 
+    if (!pl_color_transfer_is_hdr(ret.transfer)) {
+        // Don't use reported display peak in SDR mode, setting target peak in
+        // SDR mode is very specific usecase, needs proper calibration, users
+        // can set it manually.
+        ret.hdr.max_luma = 0;
+        ret.hdr.max_cll = 0;
+        ret.hdr.max_fall = 0;
+    }
+
     return ret;
 }
 
