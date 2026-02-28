@@ -2795,10 +2795,12 @@ Subtitles
     canvas size. Can be useful to test broken subtitles, which often happen
     when the video was transcoded, while attempting to keep the old subtitles.
 
-``--image-subs-hdr-peak=<sdr|video|10-10000>``
+``--image-subs-hdr-peak=<sdr|video|video-static|video-dynamic|10-10000>``
     Controls the image subtitle diffuse white level in cd/m² (nits) for HDR
-    videos (default: 1000). ``sdr`` is 203 cd/m² for standard SDR white, while
-    ``video`` uses video metadata. (``--vo=gpu-next`` only)
+    videos (default: 1000). ``sdr`` is 203 cd/m² for standard SDR white,
+    ``video`` uses all video metadata including peak detection,
+    ``video-dynamic`` uses only per-scene video metadata,
+    ``video-static`` uses only static video metadata, (``--vo=gpu-next`` only)
 
     This also affects image subtitle brightness in HDR tone mapping with
     ``--blend-subtitles=<yes|video>``.
