@@ -956,7 +956,7 @@ static void set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         .color = hint ? *hint : pl_color_space_srgb,
         .repr = {
             .sys = PL_COLOR_SYSTEM_RGB,
-            .levels = p->output_levels,
+            .levels = p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL,
             .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : alpha,
         },
     };
