@@ -1575,6 +1575,29 @@ static void load_external_opts(struct MPContext *mpctx)
     mp_waiter_wait(&wait);
 }
 
+static void toggle_image_profile(struct MPContext *mpctx)
+{
+    if (!mpctx->opts->apply_image_profile)
+        return;
+
+    if (!mpctx->image_profile_applied &&
+        mpctx->current_track[0][STREAM_VIDEO] &&
+        mpctx->current_track[0][STREAM_VIDEO]->image &&
+        !mpctx->current_track[0][STREAM_AUDIO]) {
+        m_config_set_profile(mpctx->mconfig, "builtin-image", 0);
+        mp_input_enable_section(mpctx->input, "image",
+                                MP_INPUT_ALLOW_HIDE_CURSOR|MP_INPUT_ALLOW_VO_DRAGGING);
+        mpctx->image_profile_applied = true;
+    } else if (mpctx->image_profile_applied &&
+        (!mpctx->current_track[0][STREAM_VIDEO] ||
+         !mpctx->current_track[0][STREAM_VIDEO]->image ||
+         mpctx->current_track[0][STREAM_AUDIO])) {
+        m_config_restore_profile(mpctx->mconfig, "builtin-image");
+        mp_input_disable_section(mpctx->input, "image");
+        mpctx->image_profile_applied = false;
+    }
+}
+
 static void append_to_watch_history(struct MPContext *mpctx)
 {
     if (!mpctx->opts->save_watch_history)
@@ -1892,6 +1915,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (!mpctx->vo_chain)
         handle_force_window(mpctx, true);
+
+    toggle_image_profile(mpctx);
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
