@@ -78,7 +78,7 @@ struct ra_ctx_params {
     pl_color_space_t (*preferred_csp)(struct ra_ctx *ctx);
 
     // See ra_swapchain_fns.set_color. Optional.
-    void (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
+    bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
 
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
@@ -116,8 +116,8 @@ struct ra_swapchain_fns {
     pl_color_space_t (*target_csp)(struct ra_swapchain *sw);
 
     // Call into backends so they can use the appropriate platform-specific
-    // functions to configure color spaces.
-    void (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
+    // functions to configure color spaces. Returns true if request was handled.
+    bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
 
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function
