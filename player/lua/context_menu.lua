@@ -648,6 +648,8 @@ close = function ()
     for key, _ in pairs(bindings) do
         mp.remove_key_binding("_context_menu_" .. key)
     end
+
+    mp.set_property_native("user-data/mpv/context-menu/open", false)
 end
 
 mp.register_script_message("open", function ()
@@ -675,6 +677,8 @@ mp.register_script_message("open", function ()
             complex = key == "ANY_UNICODE",
         })
     end
+
+    mp.set_property_native("user-data/mpv/context-menu/open", true)
 end)
 
 mp.register_script_message("select", function ()
