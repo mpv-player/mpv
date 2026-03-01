@@ -6189,11 +6189,8 @@ static void cmd_loadfile(void *p)
     node_init(res, MPV_FORMAT_NODE_MAP, NULL);
     node_map_add_int64(res, "playlist_entry_id", entry->id);
 
-    if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current)) {
-        if (mpctx->opts->position_save_on_quit) // requested in issue #1148
-            mp_write_watch_later_conf(mpctx);
+    if (action.type == LOAD_TYPE_REPLACE || (action.play && !mpctx->playlist->current))
         mp_set_playlist_entry(mpctx, entry);
-    }
     mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
     mp_wakeup_core(mpctx);
 }
