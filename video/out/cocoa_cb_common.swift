@@ -23,6 +23,10 @@ class CocoaCB: Common, EventSubscriber {
 
     var isShuttingDown: Bool = false
 
+    // NSView ref for embedded mode (wid property)
+    var externalView: NSView?
+    var isEmbedded: Bool { return externalView != nil }
+
     enum State {
         case uninitialized
         case needsInit
@@ -39,6 +43,13 @@ class CocoaCB: Common, EventSubscriber {
         AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
     }
 
+    // Init for embedded mode (wid property)
+    convenience init(_ mpv: OpaquePointer, _ view: NSView) {
+        self.init(mpv)
+        self.externalView = view
+        log.verbose("Initialized in embedded mode, NSView: \(view)")
+    }
+
     func preinit(_ vo: UnsafeMutablePointer<vo>) {
         eventsLock.withLock { self.vo = vo }
         input = InputHelper(vo.pointee.input_ctx, option)
@@ -51,15 +62,67 @@ class CocoaCB: Common, EventSubscriber {
                 exit(1)
             }
 
-            initView(vo, layer)
+            if isEmbedded {
+                initEmbeddedView(vo, layer)
+            } else {
+                initView(vo, layer)
+            }
             initMisc(vo)
         }
     }
 
+    // Init embedded mode, attach layer to external NSView
+    func initEmbeddedView(_ vo: UnsafeMutablePointer<vo>, _ layer: CALayer) {
+        guard let extView = externalView else {
+            log.error("No NSView provided for embedded mode")
+            return
+        }
+
+        log.verbose("Attaching GLLayer to external view")
+
+        // Create internal sub-view, hosting the GL layer
+        view = View(frame: extView.bounds, common: self)
+        guard let sub = view else {
+            log.error("Unable to allocate sub-view for embedded mode")
+            return
+        }
+
+        sub.autoresizingMask = [.width, .height]
+        sub.wantsLayer = true
+        sub.layer = layer
+        sub.layerContentsPlacement = .scaleProportionallyToFit
+        layer.delegate = sub
+        extView.addSubview(sub)
+
+        // Track external-view size changes
+        extView.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(hostViewFrameDidChange(_:)),
+            name: NSView.frameDidChangeNotification,
+            object: extView)
+
+        let scale = extView.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1.0
+        layer.contentsScale = scale
+
+        log.verbose("Embedded view initialized with scale factor: \(scale)")
+    }
+
     func uninit() {
-        eventsLock.withLock { self.vo = nil }
-        window?.orderOut(nil)
-        window?.close()
+
+        log.verbose("Uninit")
+
+        if isEmbedded {
+            NotificationCenter.default.removeObserver(self,
+                                                      name: NSView.frameDidChangeNotification,
+                                                      object: externalView)
+            view?.removeFromSuperview()
+            externalView?.layer = nil
+        } else {
+            eventsLock.withLock { self.vo = nil }
+            window?.orderOut(nil)
+            window?.close()
+        }
     }
 
     func reconfig(_ vo: UnsafeMutablePointer<vo>) {
@@ -68,21 +131,31 @@ class CocoaCB: Common, EventSubscriber {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else if option.vo.auto_window_resize {
             DispatchQueue.main.async {
-                self.updateWindowSize(vo)
-                self.layer?.update(force: true)
-                if self.option.vo.focus_on == 2 {
-                    NSApp.activate(ignoringOtherApps: true)
+                if self.isEmbedded {
+                    self.layer?.update(force: true)
+                } else {
+                    self.updateWindowSize(vo)
+                    self.layer?.update(force: true)
+                    if self.option.vo.focus_on == 2 {
+                        NSApp.activate(ignoringOtherApps: true)
+                    }
                 }
             }
         }
     }
 
     func initBackend(_ vo: UnsafeMutablePointer<vo>) {
-        let previousActiveApp = getActiveApp()
-        initApp()
-        initWindow(vo, previousActiveApp)
-        updateICCProfile()
-        initWindowState()
+        log.verbose("InitBackend")
+
+        if isEmbedded {
+            updateICCProfile()
+        } else {
+            let previousActiveApp = getActiveApp()
+            initApp()
+            initWindow(vo, previousActiveApp)
+            updateICCProfile()
+            initWindowState()
+        }
 
         backendState = .initialized
     }
@@ -110,8 +183,26 @@ class CocoaCB: Common, EventSubscriber {
         return kCVReturnSuccess
     }
 
+    func getEmbeddedScreen() -> NSScreen? {
+        if isEmbedded {
+            return externalView?.window?.screen ?? NSScreen.main
+        }
+        return window?.screen
+    }
+
+    override func getCurrentScreen() -> NSScreen? {
+        if isEmbedded {
+            return externalView?.window?.screen ??
+                   getTargetScreen(forFullscreen: false) ??
+                   NSScreen.main
+        }
+        return window != nil ? window?.screen :
+                               getTargetScreen(forFullscreen: false) ??
+                               NSScreen.main
+    }
+
     override func updateICCProfile() {
-        guard let colorSpace = window?.screen?.colorSpace else {
+        guard let colorSpace = getEmbeddedScreen()?.colorSpace else {
             log.warning("Couldn't update ICC Profile, no color space available")
             return
         }
@@ -123,7 +214,7 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     func getColorSpace() -> (Bool, CGColorSpace?) {
-        guard let colorSpace = window?.screen?.colorSpace?.cgColorSpace else {
+        guard let colorSpace = getEmbeddedScreen()?.colorSpace?.cgColorSpace else {
             log.warning("Couldn't retrieve ICC Profile, no color space available")
             return (false, nil)
         }
@@ -204,7 +295,11 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func windowDidChangeBackingProperties() {
-        layer?.contentsScale = window?.backingScaleFactor ?? 1
+        if isEmbedded {
+            layer?.contentsScale = externalView?.window?.backingScaleFactor ?? 1
+        } else {
+            layer?.contentsScale = window?.backingScaleFactor ?? 1
+        }
     }
 
     override func windowWillStartLiveResize() {
@@ -216,6 +311,10 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func windowDidChangeOcclusionState() {
+        layer?.update(force: true)
+    }
+
+    @objc func hostViewFrameDidChange(_ note: Notification) {
         layer?.update(force: true)
     }
 
@@ -244,6 +343,51 @@ class CocoaCB: Common, EventSubscriber {
         case VOCTRL_RECONFIG:
             reconfig(vo)
             return VO_TRUE
+        case VOCTRL_GET_WINDOW_ID:
+            if isEmbedded {
+                guard let extView = externalView else {
+                    return VO_NOTAVAIL
+                }
+                let wid = data!.assumingMemoryBound(to: Int64.self)
+                wid.pointee = unsafeBitCast(extView, to: Int64.self)
+                return VO_TRUE
+            }
+        case VOCTRL_GET_HIDPI_SCALE:
+            if isEmbedded {
+                let scaleFactor = data!.assumingMemoryBound(to: CDouble.self)
+                let factor = externalView?.window?.backingScaleFactor ??
+                             getCurrentScreen()?.backingScaleFactor ?? 1.0
+                scaleFactor.pointee = Double(factor)
+                return VO_TRUE
+            }
+        case VOCTRL_GET_UNFS_WINDOW_SIZE:
+            if isEmbedded {
+                let sizeData = data!.assumingMemoryBound(to: Int32.self)
+                let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
+                let rect = externalView?.bounds ?? NSRect(x: 0, y: 0, width: 1280, height: 720)
+
+                if Bool(option.vo.hidpi_window_scale) {
+                    size[0] = Int32(rect.size.width)
+                    size[1] = Int32(rect.size.height)
+                } else {
+                    let scale = externalView?.window?.backingScaleFactor ?? 1.0
+                    size[0] = Int32(rect.size.width * scale)
+                    size[1] = Int32(rect.size.height * scale)
+                }
+                return VO_TRUE
+            }
+        case VOCTRL_SET_UNFS_WINDOW_SIZE:
+            if isEmbedded {
+                return VO_NOTIMPL
+            }
+        case VOCTRL_VO_OPTS_CHANGED:
+            if isEmbedded {
+                var opt: UnsafeMutableRawPointer?
+                while option.nextChangedOption(property: &opt) {
+                    // Skip window-specific options in embedded mode
+                }
+                return VO_TRUE
+            }
         default:
             break
         }
@@ -252,20 +396,31 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     func shutdown() {
-        isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && option.vo.native_fs
-        if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
-            window?.close()
+        log.verbose("Shutdown")
+
+        if isEmbedded {
+            uninit()
+            uninitCommon()
+
+            layer?.lockCglContext()
+            libmpv.uninit()
+            layer?.unlockCglContext()
+        } else {
+            isShuttingDown = window?.isAnimating ?? false ||
+                             window?.isInFullscreen ?? false && option.vo.native_fs
+            if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
+                window?.close()
+            }
+            if isShuttingDown { return }
+
+            uninit()
+            uninitCommon()
+            window = nil
+
+            layer?.lockCglContext()
+            libmpv.uninit()
+            layer?.unlockCglContext()
         }
-        if isShuttingDown { return }
-
-        uninit()
-        uninitCommon()
-        window = nil
-
-        layer?.lockCglContext()
-        libmpv.uninit()
-        layer?.unlockCglContext()
     }
 
     func checkShutdown() {
