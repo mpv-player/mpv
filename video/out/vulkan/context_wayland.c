@@ -41,9 +41,10 @@ static bool wayland_vk_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
-static void wayland_vk_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+static bool wayland_vk_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
 {
     vo_wayland_handle_color(ctx->vo->wl, params);
+    return true;
 }
 
 static pl_color_space_t wayland_vk_preferred_csp(struct ra_ctx *ctx)

@@ -302,11 +302,12 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static void ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+static bool ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params)
 {
     struct priv *p = sw->priv;
     if (p->params.set_color)
-        p->params.set_color(sw->ctx, params);
+        return p->params.set_color(sw->ctx, params);
+    return false;
 }
 
 static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)

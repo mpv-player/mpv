@@ -62,9 +62,10 @@ static bool wayland_egl_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
-static void wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+static bool wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
 {
     vo_wayland_handle_color(ctx->vo->wl, params);
+    return true;
 }
 
 static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
