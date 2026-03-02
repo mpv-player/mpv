@@ -213,6 +213,7 @@ typedef struct lavc_ctx {
     bool hwdec_failed;
     bool hwdec_notified;
     bool force_eof;
+    bool wait_for_keyframe;
 
     bool intra_only;
     int framedrop_flags;
@@ -699,6 +700,11 @@ static void reinit(struct mp_filter *vd)
             force_fallback(vd);
         } while (!ctx->avctx);
     }
+
+    // Wait for the first keyframe after reinit to ensure the decoder state is
+    // valid and to avoid decoding errors that could cause hwdec to fail and
+    // fall back immediately after a reinit.
+    ctx->wait_for_keyframe = true;
 }
 
 static void init_avctx(struct mp_filter *vd)
@@ -882,6 +888,9 @@ static void reset_avctx(struct mp_filter *vd)
         avcodec_flush_buffers(ctx->avctx);
     ctx->flushing = false;
     ctx->hwdec_request_reinit = false;
+    // Wait for the first keyframe after reset to ensure the decoder state is
+    // valid. Seeking should already jump to a keyframe, so this is safe.
+    ctx->wait_for_keyframe = true;
 }
 
 static void flush_all(struct mp_filter *vd)
@@ -1177,6 +1186,14 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
 
     if (!ctx->avctx)
         return AVERROR_EOF;
+
+    if (ctx->wait_for_keyframe && pkt) {
+        if (!pkt->keyframe) {
+            MP_DBG(vd, "Waiting for keyframe after reinit (dropping frame).\n");
+            return 0;
+        }
+        ctx->wait_for_keyframe = false;
+    }
 
     prepare_decoding(vd);
 
