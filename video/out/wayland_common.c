@@ -2029,6 +2029,9 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
         MP_VERBOSE(wl, "Compositor supports setting mastering display primaries.\n");
         wl->supports_display_primaries = true;
         break;
+    case WP_COLOR_MANAGER_V1_FEATURE_SET_LUMINANCES:
+        MP_VERBOSE(wl, "Compositor supports setting primary color luminances.\n");
+        wl->supports_set_luminances = true;
     }
 }
 
@@ -2146,6 +2149,13 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     if (!wd->icc_file) {
         MP_VERBOSE(wl, "Preferred surface feedback received:\n");
         log_color_space(wl->log, wd);
+        // We don't support extended ranges output where luminance exceeds
+        // maximum nominal luminance range (1.0), so switch to PQ.
+        if (fabsf(wd->csp.hdr.max_luma / wd->ref_luma - 1.0f) > 1e-4f &&
+            !pl_color_transfer_is_hdr(wd->csp.transfer)) {
+            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
+            wd->csp.transfer = PL_COLOR_TRC_PQ;
+        }
         // Wayland luminances are always in reference to the reference luminance. That is,
         // if max_luma == 2*ref_luma, then there is 2x headroom above paper white. On the
         // other hand, libplacebo hardcodes PL_COLOR_SDR_WHITE as the reference luminance.
@@ -2153,13 +2163,17 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         // otherwise libplacebo will assume that there is too little or too much headroom
         // when ref_luma != PL_COLOR_SDR_WHITE.
         float a = wd->min_luma;
-        float b = (PL_COLOR_SDR_WHITE - PL_COLOR_HDR_BLACK) / (wd->ref_luma - a);
-        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + PL_COLOR_HDR_BLACK;
-        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + PL_COLOR_HDR_BLACK;
+        // Wayland treats all transfers as display referred, don't scale min
+        // luminance, and hope compositors will do the right thing mapping it,
+        // or to be specific, not mapping it, because we set the same value.
+        float c = wd->min_luma;
+        float b = (PL_COLOR_SDR_WHITE - c) / (wd->ref_luma - a);
+        wd->csp.hdr.min_luma = (wd->csp.hdr.min_luma - a) * b + c;
+        wd->csp.hdr.max_luma = (wd->csp.hdr.max_luma - a) * b + c;
         if (wd->csp.hdr.max_cll != 0)
-            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_cll  = (wd->csp.hdr.max_cll  - a) * b + c;
         if (wd->csp.hdr.max_fall != 0)
-            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + PL_COLOR_HDR_BLACK;
+            wd->csp.hdr.max_fall = (wd->csp.hdr.max_fall - a) * b + c;
         // Ensure that min_luma doesn't become negative.
         wd->csp.hdr.min_luma = MPMAX(wd->csp.hdr.min_luma, 0.0);
         // Since we want to do some exact comparisons of max_luma with PL_COLOR_SDR_WHITE,
@@ -2172,10 +2186,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
                 wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
         }
         wl->preferred_csp = wd->csp;
-        if (wd->csp.hdr.max_luma != PL_COLOR_SDR_WHITE && !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-            MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-            wl->preferred_csp.transfer = PL_COLOR_TRC_PQ;
-        }
     } else {
         if (wl->icc_size) {
             munmap(wl->icc_file, wl->icc_size);
@@ -3515,6 +3525,48 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     wp_image_description_creator_params_v1_set_tf_named(image_creator_params, transfer);
 
     struct pl_hdr_metadata hdr = color->hdr;
+
+    if (wl->supports_set_luminances) {
+        switch (color->transfer) {
+        case PL_COLOR_TRC_PQ:
+            // Set min luminance to 0 for PQ as per SMPTE ST 2084
+            wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                0 * WAYLAND_MIN_LUM_FACTOR, 10000, PL_COLOR_SDR_WHITE);
+            MP_VERBOSE(wl, "Setting PQ luminance range: min=0, max=10000, ref=%.2f\n",
+                PL_COLOR_SDR_WHITE);
+            // Mastering luminances will be set below
+            break;
+        case PL_COLOR_TRC_LINEAR:
+            // Our linear output is absolute scaled, meaning the 0 is absolute
+            // black, similar to PQ transfer. Configure it in the same way as PQ.
+            if (hdr.max_luma) {
+                wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                    0 * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
+                    hdr.max_luma, PL_COLOR_SDR_WHITE);
+                if (hdr.min_luma && hdr.max_luma) {
+                    wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
+                        lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
+                    MP_VERBOSE(wl, "Setting linear luminace mastering range: min=%.5f, max=%.2f\n",
+                        hdr.min_luma, hdr.max_luma);
+                }
+            }
+            break;
+        case PL_COLOR_TRC_HLG:
+            // Leave default for HLG, we wouldn't output it directly, except for pass-through
+            break;
+        default:
+            // Set SDR luminance range for all relative transfers
+            if (hdr.min_luma && hdr.max_luma) {
+                wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                    hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                MP_VERBOSE(wl, "Setting relative luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
+                    hdr.min_luma, hdr.max_luma, PL_COLOR_SDR_WHITE);
+            }
+            break;
+        }
+    }
+
     bool is_hdr = pl_color_transfer_is_hdr(color->transfer);
     bool use_metadata = hdr_metadata_valid(wl, &hdr);
     if (!use_metadata)
@@ -4204,6 +4256,19 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
 void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params)
 {
+#if HAVE_WAYLAND_PROTOCOLS_1_41
+    if (!params) {
+        if (wl->color_surface) {
+            wp_color_management_surface_v1_destroy(wl->color_surface);
+            wl->color_surface = NULL;
+        }
+        wl->current_params = (struct mp_image_params){0};
+        return;
+    }
+    if (!wl->color_surface)
+        wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
+#endif
+
     bool color_space_changed = !pl_color_space_equal(&wl->current_params.color, &params->color);
     bool color_repr_changed = !pl_color_repr_equal(&wl->current_params.repr, &params->repr) ||
                               wl->current_params.chroma_location != params->chroma_location;
@@ -4336,9 +4401,6 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->color_manager) {
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
-        // Only bind color surface to vo_dmabuf_wayland for now to avoid conflicting with graphics drivers
-        if (!strcmp(wl->vo->driver->name, "dmabuf-wayland"))
-            wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
     } else {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_manager_v1_interface.name);

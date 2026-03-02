@@ -961,10 +961,11 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         },
     };
 
-    if (sw->fns->set_color && sw->fns->set_color(sw, &params)) {
-        if (hint)
+    if (sw->fns->set_color && sw->fns->set_color(sw, hint ? &params : NULL)) {
+        if (hint) {
             *hint = params.color;
-        return true;
+            return true;
+        }
     }
     pl_swapchain_colorspace_hint(p->sw, hint);
     return false;
@@ -1118,13 +1119,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // limit min_luma to 1000:1 contrast ratio in SDR mode
         if (target_csp.hdr.min_luma > PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST)
             target_csp.hdr.min_luma = 0;
-        // Don't use reported display peak in SDR mode. Mostly because libplacebo
-        // forcefully switches to PQ if hinting hdr metadata, ignoring the transfer
-        // set in the hint. But also because setting target peak in SDR mode is
-        // very specific usecase, needs proper calibration, users can set it manually.
-        target_csp.hdr.max_luma = 0;
-        target_csp.hdr.max_cll = 0;
-        target_csp.hdr.max_fall = 0;
     }
     // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
     // reports it as maxFALL directly, but this doesn't mean the same thing.
@@ -1156,14 +1150,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 pl_color_space_merge(&hint, source);
             if (target_unknown && !opts->target_trc && !pl_color_transfer_is_hdr(source->transfer))
                 hint = *source;
-            // Vulkan doesn't have support for gamma 2.2 transfer function,
-            // so even though requested preferred color space is gamma 2.2, we
-            // fallback to sRGB. sRGB itself is ambiguous, but at least we have
-            // options to control the behavior.
-            // TODO: Revise this after fix for linear transfers lands in libplacebo.
-            // <https://code.videolan.org/videolan/libplacebo/-/merge_requests/759>
-            if (hint.transfer == PL_COLOR_TRC_GAMMA22)
-                hint.transfer = PL_COLOR_TRC_SRGB;
             // Restore target luminance if it was present, note that we check
             // max_luma only, this make sure that max_cll/max_fall is not take
             // from source.
