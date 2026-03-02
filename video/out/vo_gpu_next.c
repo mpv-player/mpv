@@ -225,7 +225,7 @@ const struct m_sub_options gl_next_conf = {
         .background_blur_radius = 16.0f,
         .inter_preserve = true,
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
-        .image_subs_hdr_peak = PL_COLOR_SDR_WHITE,
+        .image_subs_hdr_peak = 1000,
         .target_hint = -1,
         .target_hint_strict = true,
     },
@@ -388,14 +388,13 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             if (src) {
                 ol->color = src->params.color;
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
-                    if (!pl_color_transfer_is_hdr(frame->color.transfer)) {
-                        // Tone mapping targets SDR white
-                        ol->color.hdr = (struct pl_hdr_metadata) {
-                            .max_luma = PL_COLOR_SDR_WHITE,
-                        };
-                    } else if (p->next_opts->image_subs_hdr_peak != -1) {
+                    if (p->next_opts->image_subs_hdr_peak != -1) {
                         ol->color.hdr = (struct pl_hdr_metadata) {
                             .max_luma = p->next_opts->image_subs_hdr_peak,
+                        };
+                    } else {
+                        ol->color.hdr = (struct pl_hdr_metadata) {
+                            .max_luma = src->params.color.hdr.max_luma,
                         };
                     }
                 }
