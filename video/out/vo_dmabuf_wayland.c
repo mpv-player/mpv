@@ -869,6 +869,7 @@ static int preinit(struct vo *vo)
     // Initialize all possible hwdec drivers.
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "vaapi", false);
     ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "drmprime", false);
+    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, "v4l2request", false);
 
     p->src = (struct mp_rect){0, 0, 0, 0};
     return 0;

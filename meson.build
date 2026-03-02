@@ -1445,6 +1445,16 @@ if features['ios-gl']
     sources += files('video/out/hwdec/hwdec_ios_gl.m')
 endif
 
+v4l2request = get_option('v4l2request').require(
+    cc.has_header_symbol('libavutil/hwcontext.h',
+                         'AV_HWDEVICE_TYPE_V4L2REQUEST',
+                         dependencies: libavutil)
+)
+features += {'v4l2request': v4l2request.allowed()}
+if features['v4l2request']
+    sources += files('video/v4l2request.c')
+endif
+
 libva = dependency('libva', version: '>= 1.1.0', required: get_option('vaapi'))
 
 vaapi_drm = dependency('libva-drm', version: '>= 1.1.0', required:
@@ -1912,6 +1922,7 @@ summary({'cocoa': features['cocoa'] and features['swift'],
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
          'opengl': features['gl'],
+         'v4l2request': features['v4l2request'],
          'vulkan': features['vulkan'],
          'wayland': features['wayland'],
          'x11': features['x11']},
