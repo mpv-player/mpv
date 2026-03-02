@@ -293,6 +293,13 @@ typedef struct MPContext {
     int quit_custom_rc;
     bool has_quit_custom_rc;
 
+    // If set to true, specific deinitialization steps can be omitted during
+    // the destruction of MPContext (e.g., when exiting the process). This is
+    // beneficial to prevent delays caused by unnecessary cleanup operations.
+    // However, be aware that leak checkers might flag this, so they must be
+    // configured accordingly.
+    bool quit_fast;
+
     // Global file statistics
     int files_played;       // played without issues (even if stopped by user)
     int files_errored;      // played, but errors happened at one point
