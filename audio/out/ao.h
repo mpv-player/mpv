@@ -62,6 +62,7 @@ enum {
 struct ao_device_desc {
     const char *name;   // symbolic name; will be set on ao->device
     const char *desc;   // verbose human readable name
+    const char *ao;   // ao name; will be set on ao
 };
 
 struct ao_device_list {
