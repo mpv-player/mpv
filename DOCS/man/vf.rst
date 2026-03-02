@@ -35,7 +35,7 @@ The exact syntax is:
 
     and the ``filter-parameter-list``:
 
-        ``<filter-parameter> | <filter-parameter> "," <filter-parameter-list>``
+        ``<filter-parameter> | <filter-parameter> ":" <filter-parameter-list>``
 
     and ``filter-parameter``:
 
