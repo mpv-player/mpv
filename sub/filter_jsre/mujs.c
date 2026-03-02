@@ -3,11 +3,11 @@
 
 #include <mujs.h>
 
-#include "common/common.h"
-#include "common/msg.h"
-#include "misc/bstr.h"
-#include "options/options.h"
-#include "sd.h"
+#include "../common/common.h"
+#include "../common/msg.h"
+#include "../misc/bstr.h"
+#include "../options/options.h"
+#include "../sd.h"
 
 
 // p_NAME are protected functions (never throw) which interact with the JS VM.

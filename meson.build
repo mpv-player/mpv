@@ -658,12 +658,50 @@ if features['iconv']
     add_project_arguments('-DWINICONV_CONST=', language: ['c', 'objc'])
 endif
 
-javascript = dependency('mujs', version: '>= 1.0.0', required: get_option('javascript'))
-features += {'javascript': javascript.found()}
+javascript_opt = get_option('javascript')
+javascript_dep = disabler()
+javascript_sources = []
+javascript_runtime = ''
+
+if javascript_opt != 'disabled'
+    if javascript_opt in ['auto', 'enabled', 'quickjs']
+        quickjs_dep = dependency('quickjs-ng', version: '>= 0.10.0',
+                     default_options: ['libc=true'],
+                     required: javascript_opt in ['quickjs', 'enabled'])
+        if quickjs_dep.found()
+            javascript_dep = quickjs_dep
+            javascript_runtime = 'quickjs'
+            add_project_arguments('-DJAVASCRIPT_RUNTIME=2', language : 'c')
+        endif
+    endif
+
+    if not javascript_dep.found() and javascript_opt in ['auto', 'enabled', 'mujs']
+        mujs_dep = dependency('mujs', version: '>= 1.0.0',
+                              required: javascript_opt == 'mujs')
+        if mujs_dep.found()
+            javascript_dep = mujs_dep
+            javascript_runtime = 'mujs'
+            add_project_arguments('-DJAVASCRIPT_RUNTIME=1', language : 'c')
+        endif
+    endif
+
+    if javascript_opt == 'enabled' and not javascript_dep.found()
+        error('Javascript enabled but no supported runtime (mujs or quickjs-ng) was found!')
+    endif
+
+    if javascript_runtime == 'mujs'
+        javascript_sources += files('player/javascript/mujs.c',
+                                     'sub/filter_jsre/mujs.c')
+    elif javascript_runtime == 'quickjs'
+        javascript_sources += files('player/javascript/quickjs.c',
+                                     'sub/filter_jsre/quickjs.c')
+    endif
+endif
+
+features += {'javascript': javascript_dep.found()}
 if features['javascript']
-    dependencies += javascript
-    sources += files('player/javascript.c',
-                     'sub/filter_jsre.c')
+    dependencies += javascript_dep
+    sources += javascript_sources
 endif
 
 lcms2 = dependency('lcms2', version: '>= 2.6', required: get_option('lcms2'))
@@ -1905,10 +1943,15 @@ if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
     warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
 endif
 
+javascript_summary = javascript_opt
+if features['javascript']
+    javascript_summary = javascript_runtime
+endif
+
 summary({'cocoa': features['cocoa'] and features['swift'],
          'd3d11': features['d3d11'],
          'drm': features['drm'],
-         'javascript': features['javascript'],
+         'javascript': javascript_summary,
          'libmpv': get_option('libmpv'),
          'lua': features['lua'],
          'opengl': features['gl'],
