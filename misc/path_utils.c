@@ -85,13 +85,24 @@ void mp_path_strip_trailing_separator(char *path)
 char *mp_splitext(const char *path, bstr *root)
 {
     mp_assert(path);
-    int skip = (*path == '.'); // skip leading dot for "hidden" unix files
-    const char *split = strrchr(path + skip, '.');
-    if (!split || !split[1] || strchr(split, '/'))
+    char *bn = mp_basename(path);
+
+    // Skip all leading dots, not just for "hidden" unix files, otherwise we
+    // end up splitting a part of the filename sans leading dot.
+    bn += strspn(bn, ".");
+
+    const char *split = strrchr(bn, '.');
+    if (!split || !split[1])
         return NULL;
     if (root)
         *root = (bstr){(char *)path, split - path};
     return (char *)split + 1;
+}
+
+char *mp_strip_ext(void *talloc_ctx, const char *s)
+{
+    bstr root;
+    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
 }
 
 bool mp_path_is_absolute(struct bstr path)
