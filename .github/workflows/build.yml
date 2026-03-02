@@ -310,11 +310,13 @@ jobs:
       - name: Build with meson
         id: build
         run: |
+          if [ -n "${{ matrix.target }}" ]; then
+            export MACOSX_DEPLOYMENT_TARGET="${{ matrix.target }}"
+          fi
           ./ci/build-macos.sh
         env:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
-          MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
 
       - name: Create App Bundle
         if: ${{ matrix.arch != 'test' }}
