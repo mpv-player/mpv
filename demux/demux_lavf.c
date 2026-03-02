@@ -1278,6 +1278,11 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     dp->is_wrapped_avframe = st->codecpar->codec_id == AV_CODEC_ID_WRAPPED_AVFRAME;
+    if (dp->is_wrapped_avframe) {
+        mp_require(dp->buffer);
+        const AVFrame *frame = (AVFrame *)dp->buffer;
+        dp->keyframe |= frame->flags & AV_FRAME_FLAG_KEY;
+    }
     av_packet_free(&pkt);
 
     if (priv->format_hack.clear_filepos)
