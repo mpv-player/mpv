@@ -3648,6 +3648,10 @@ static void set_color_representation(struct vo_wayland_state *wl, struct mp_imag
                    m_opt_choice_str(pl_csp_names, params->repr.sys),
                    m_opt_choice_str(pl_csp_levels_names, params->repr.levels));
         wp_color_representation_surface_v1_set_coefficients_and_range(wl->color_representation_surface, coefficients, range);
+    } else {
+        MP_WARN(wl, "Color representation '%s / %s' not supported! Output may be incorrect.\n",
+                m_opt_choice_str(pl_csp_names, params->repr.sys),
+                m_opt_choice_str(pl_csp_levels_names, params->repr.levels));
     }
 
     if (alpha) {
