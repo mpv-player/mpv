@@ -986,6 +986,11 @@ This module lets scripts get textual input from the user using the console.
         among the ones stored for ``input.get()`` calls. Defaults to the calling
         script name with ``prompt`` appended.
 
+    ``console_opt_overrides``
+        A table containing configuration overrides for the console script.
+        Can be used to change the visual style of the text input, among other things.
+        See `CONSOLE`_ for the full list of options.
+
 ``input.terminate()``
     Closes any currently active input request. This will not close
     requests made by other scripts.
@@ -1056,6 +1061,11 @@ This module lets scripts get textual input from the user using the console.
 
     ``cursor_position``
         The initial cursor position, starting from 1.
+
+    ``console_opt_overrides``
+        A table containing configuration overrides for the console script.
+        Can be used to change the visual style of the select window, among other things.
+        See `CONSOLE`_ for the full list of options.
 
     Example:
 

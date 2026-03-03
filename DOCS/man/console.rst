@@ -130,6 +130,8 @@ This script can be customized through a config file ``script-opts/console.conf``
 placed in mpv's user directory and through the ``--script-opts`` command-line
 option. The configuration syntax is described in `mp.options functions`_.
 
+Note that ``mp.input`` clients can selectively override these options.
+
 Configurable Options
 ~~~~~~~~~~~~~~~~~~~~
 
