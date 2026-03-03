@@ -2364,6 +2364,10 @@ static void supported_coefficients_and_ranges(void *data, struct wp_color_repres
         wl->coefficients_map[PL_COLOR_SYSTEM_BT_2020_C] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_BT2020_CL;
         wl->range_map[PL_COLOR_SYSTEM_BT_2020_C + offset] = range;
         break;
+    case WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_ICTCP:
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_2100_PQ] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_ICTCP;
+        wl->range_map[PL_COLOR_SYSTEM_BT_2100_PQ + offset] = range;
+        break;
     }
 }
 
