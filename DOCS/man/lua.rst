@@ -913,8 +913,7 @@ strictly part of the guaranteed API.
 mp.input functions
 --------------------
 
-This module lets scripts get textual input from the user using the console
-REPL.
+This module lets scripts get textual input from the user using the console.
 
 ``input.get(table)``
     Show the console to let the user enter text.
