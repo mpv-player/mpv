@@ -4732,8 +4732,9 @@ int mp_property_do(const char *name, int action, void *val,
 {
     struct command_ctx *cmd = ctx->command_ctx;
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    int level = strcmp(name, "menu-data") ? MSGL_V : MSGL_TRACE;
 
-    if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
+    if (mp_msg_test(ctx->log, level) && is_property_set(action, val)) {
         struct m_option option_type = {0};
         void *data = val;
         switch (action) {
