@@ -52,6 +52,7 @@ struct vo_wayland_state {
     struct wl_surface       *video_surface;
     struct wl_surface       *callback_surface;
     struct wl_subsurface    *video_subsurface;
+    struct wl_event_queue   *color_queue;
 
     /* Geometry */
     struct mp_rect geometry;
