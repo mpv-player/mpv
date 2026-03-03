@@ -629,7 +629,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     pts = frame->current ? frame->current->pts : 0;
     if (frame->current) {
         buf = buffer_get(vo, frame);
-        vo_wayland_handle_color(wl, &frame->current->params);
+        vo_wayland_handle_color(wl, &p->target_params);
 
         if (buf && buf->frame) {
             struct mp_image *image = buf->frame->current;
