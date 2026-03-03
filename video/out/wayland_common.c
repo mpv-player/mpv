@@ -2109,7 +2109,6 @@ static void image_description_failed(void *data, struct wp_image_description_v1 
     MP_VERBOSE(wl, "Image description failed: %d, %s\n", cause, msg);
     wp_color_management_surface_v1_unset_image_description(wl->color_surface);
     wp_image_description_v1_destroy(image_description);
-    wl->image_description_pending = false;
 }
 
 static void image_description_ready2(void *data, struct wp_image_description_v1 *image_description,
@@ -2120,7 +2119,6 @@ static void image_description_ready2(void *data, struct wp_image_description_v1 
                                                          WP_COLOR_MANAGER_V1_RENDER_INTENT_PERCEPTUAL);
     MP_TRACE(wl, "Image description set on color surface.\n");
     wp_image_description_v1_destroy(image_description);
-    wl->image_description_pending = false;
 }
 
 static void image_description_ready(void *data, struct wp_image_description_v1 *image_description,
@@ -3549,7 +3547,6 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     }
     struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     wl_proxy_set_queue((struct wl_proxy *)image_description, wl->color_queue);
-    wl->image_description_pending = true;
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
     wl_display_roundtrip_queue(wl->display, wl->color_queue);
     return;
