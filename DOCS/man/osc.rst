@@ -411,6 +411,12 @@ Configurable Options
     and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
     but ``quit`` will always work.
 
+``windowcontrols_independent``
+    Default: yes
+
+    Whether to show window controls independently of the OSC, or show them
+    together.
+
 ``windowcontrols_alignment``
     Default: right
 
