@@ -50,6 +50,7 @@ local user_opts = {
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
+    windowcontrols_independent = true, -- show window controls and bottom bar independently
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
@@ -227,9 +228,14 @@ end
 -- internal states, do not touch
 local state = {
     showtime = nil,                         -- time of last invocation (last mouse move)
+    wc_showtime = nil,                      -- time of last invocation for window controls
+    wc_anistart = nil,                      -- time when the wc animation started
+    wc_anitype = nil,                       -- current type of wc animation
+    wc_animation = nil,                     -- current wc animation alpha
     touchtime = nil,                        -- time of last invocation (last touch event)
     touchpoints = {},                       -- current touch points
     osc_visible = false,
+    wc_visible = false,                     -- window controls visibility
     anistart = nil,                         -- time when the animation started
     anitype = nil,                          -- current type of animation
     animation = nil,                        -- current animation alpha
@@ -299,10 +305,10 @@ local santa_hat_lines = {
 -- Helper functions
 --
 
-local function kill_animation()
-    state.anistart = nil
-    state.animation = nil
-    state.anitype =  nil
+local function kill_animation(anitype_key, anistart_key, animation_key)
+    state[anitype_key]   = nil
+    state[anistart_key]  = nil
+    state[animation_key] = nil
 end
 
 local function set_osd(res_x, res_y, text, z)
@@ -834,6 +840,18 @@ local function render_elements(master_ass)
     for n=1, #elements do
         local element = elements[n]
 
+        if element.is_wc then
+            if not state.wc_visible then goto continue end
+        else
+            if not state.osc_visible then goto continue end
+        end
+
+        local saved_animation
+        if element.is_wc then
+            saved_animation = state.animation
+            state.animation = state.wc_animation
+        end
+
         local style_ass = assdraw.ass_new()
         style_ass:merge(element.style_ass)
         ass_append_alpha(style_ass, element.layout.alpha, 0)
@@ -1063,6 +1081,12 @@ local function render_elements(master_ass)
         end
 
         master_ass:merge(elem_ass)
+
+        if element.is_wc then
+            state.animation = saved_animation
+        end
+
+        ::continue::
     end
 end
 
@@ -1082,6 +1106,7 @@ local function new_element(name, type)
     elements[name].softrepeat = false
     elements[name].styledown = (type == "button")
     elements[name].state = {}
+    elements[name].is_wc = false
 
     if type == "slider" then
         elements[name].slider = {min = {value = 0}, max = {value = 100}}
@@ -1159,7 +1184,8 @@ local function window_controls(topbar)
     local lo
 
     -- Background Bar
-    new_element("wcbar", "box")
+    local ne = new_element("wcbar", "box")
+    ne.is_wc = true
     lo = add_layout("wcbar")
     lo.geometry = wc_geo
     lo.layer = 10
@@ -1181,7 +1207,8 @@ local function window_controls(topbar)
     -- default font, even if another font with them is available.
 
     -- Close: 🗙
-    local ne = new_element("close", "button")
+    ne = new_element("close", "button")
+    ne.is_wc = true
     ne.content = icons.close
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("quit") end
@@ -1191,6 +1218,7 @@ local function window_controls(topbar)
 
     -- Minimize: 🗕
     ne = new_element("minimize", "button")
+    ne.is_wc = true
     ne.content = icons.minimize
     ne.eventresponder["mbtn_left_up"] =
         function () mp.commandv("cycle", "window-minimized") end
@@ -1200,6 +1228,7 @@ local function window_controls(topbar)
 
     -- Maximize: 🗖 /🗗
     ne = new_element("maximize", "button")
+    ne.is_wc = true
     if state.maximized or state.fullscreen then
         ne.content = icons.unmaximize
     else
@@ -1223,7 +1252,6 @@ local function window_controls(topbar)
     sh_area_y1 = wc_geo.y + get_align(1 - (2 * user_opts.deadzonesize),
                                       osc_param.playresy - wc_geo.y, 0, 0)
     add_area("showhide_wc", wc_geo.x, sh_area_y0, wc_geo.w, sh_area_y1)
-
     if topbar then
         -- The title is already there as part of the top bar
         return
@@ -1234,6 +1262,7 @@ local function window_controls(topbar)
 
     -- Window Title
     ne = new_element("wctitle", "button")
+    ne.is_wc = true
     ne.content = function ()
         local title = mp.command_native({"expand-text", user_opts.windowcontrols_title})
         title = title:gsub("\n", " ")
@@ -2194,50 +2223,74 @@ local function osc_init()
     update_margins()
 end
 
-local function osc_visible(visible)
-    if state.osc_visible ~= visible then
-        state.osc_visible = visible
-        update_margins()
+local function set_bar_visible(visible_key, visible, with_margins)
+    if state[visible_key] ~= visible then
+        state[visible_key] = visible
+        if with_margins then update_margins() end
     end
     request_tick()
 end
 
-local function show_osc()
+local function osc_visible(visible)
+    set_bar_visible("osc_visible", visible, true)
+end
+
+local function set_wc_visible(visible)
+    set_bar_visible("wc_visible", visible, false)
+end
+
+local function show_bar(label, showtime_key, visible_key, anitype_key, set_visible)
     -- show when disabled can happen (e.g. mouse_move) due to async/delayed unbinding
     if not state.enabled then return end
 
-    msg.trace("show_osc")
+    msg.trace("show_" .. label)
     --remember last time of invocation (mouse move)
-    state.showtime = mp.get_time()
+    state[showtime_key] = mp.get_time()
 
     if user_opts.fadeduration <= 0 then
-        osc_visible(true)
+        set_visible(true)
     elseif user_opts.fadein then
-        if not state.osc_visible then
-            state.anitype = "in"
+        if not state[visible_key] then
+            state[anitype_key] = "in"
             request_tick()
         end
     else
-        osc_visible(true)
-        state.anitype = nil
+        set_visible(true)
+        state[anitype_key] = nil
+    end
+end
+
+local function show_osc()
+    show_bar("osc", "showtime", "osc_visible", "anitype", osc_visible)
+end
+
+local function show_wc()
+    show_bar("wc",  "wc_showtime", "wc_visible",  "wc_anitype", set_wc_visible)
+end
+
+local function hide_bar(label, visible_key, anitype_key, set_visible)
+    msg.trace("hide_" .. label)
+    if not state.enabled then
+        -- typically hide happens at render() from tick(), but now tick() is
+        -- no-op and won't render again to remove the osc, so do that manually.
+        state[visible_key] = false
+        render_wipe()
+    elseif user_opts.fadeduration > 0 then
+        if state[visible_key] then
+            state[anitype_key] = "out"
+            request_tick()
+        end
+    else
+        set_visible(false)
     end
 end
 
 local function hide_osc()
-    msg.trace("hide_osc")
-    if not state.enabled then
-        -- typically hide happens at render() from tick(), but now tick() is
-        -- no-op and won't render again to remove the osc, so do that manually.
-        state.osc_visible = false
-        render_wipe()
-    elseif user_opts.fadeduration > 0 then
-        if state.osc_visible then
-            state.anitype = "out"
-            request_tick()
-        end
-    else
-        osc_visible(false)
-    end
+    hide_bar("osc", "osc_visible", "anitype", osc_visible)
+end
+
+local function hide_wc()
+    hide_bar("wc", "wc_visible", "wc_anitype", set_wc_visible)
 end
 
 local function pause_state(_, enabled)
@@ -2253,6 +2306,7 @@ end
 local function mouse_leave()
     if get_hidetimeout() >= 0 and get_touchtimeout() <= 0 then
         hide_osc()
+        hide_wc()
     end
     -- reset mouse position
     state.last_mouseX, state.last_mouseY = nil, nil
@@ -2340,7 +2394,22 @@ local function process_event(source, what)
                     or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
                 )
             ) then
-            show_osc()
+            if window_controls_enabled() then
+                if user_opts.windowcontrols_independent then
+                    if mouseY < osc_param.playresy / 2 then
+                        show_wc()
+                        hide_osc()
+                    else
+                        show_osc()
+                        hide_wc()
+                    end
+                else
+                    show_osc()
+                    show_wc()
+                end
+            else
+                show_osc()
+            end
         end
         state.last_mouseX, state.last_mouseY = mouseX, mouseY
 
@@ -2370,6 +2439,7 @@ local function enable_osc(enable)
         do_enable_keybindings()
     else
         hide_osc() -- acts immediately when state.enabled == false
+        hide_wc()
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
             mp.disable_key_bindings("showhide_wc")
@@ -2416,34 +2486,31 @@ local function render()
 
 
     -- fade animation
-    if state.anitype ~= nil then
-
-        if state.anistart == nil then
-            state.anistart = now
+    local function run_fade(anitype_key, anistart_key, animation_key, set_visible)
+        local anitype = state[anitype_key]
+        if anitype == nil then
+            kill_animation(anitype_key, anistart_key, animation_key)
+            return
         end
-
-        if now < state.anistart + (user_opts.fadeduration / 1000) then
-
-            if state.anitype == "in" then --fade in
-                osc_visible(true)
-                state.animation = scale_value(state.anistart,
-                    (state.anistart + (user_opts.fadeduration / 1000)),
-                    255, 0, now)
-            elseif state.anitype == "out" then --fade out
-                state.animation = scale_value(state.anistart,
-                    (state.anistart + (user_opts.fadeduration / 1000)),
-                    0, 255, now)
+        if state[anistart_key] == nil then state[anistart_key] = now end
+        local fadelen = user_opts.fadeduration / 1000
+        if now < state[anistart_key] + fadelen then
+            if anitype == "in" then --fade in
+                set_visible(true)
+                state[animation_key] = scale_value(state[anistart_key],
+                    state[anistart_key] + fadelen, 255, 0, now)
+            elseif anitype == "out" then --fade out
+                state[animation_key] = scale_value(state[anistart_key],
+                    state[anistart_key] + fadelen, 0, 255, now)
             end
-
         else
-            if state.anitype == "out" then
-                osc_visible(false)
-            end
-            kill_animation()
+            if anitype == "out" then set_visible(false) end
+            kill_animation(anitype_key, anistart_key, animation_key)
         end
-    else
-        kill_animation()
     end
+
+    run_fade("anitype", "anistart", "animation", osc_visible)
+    run_fade("wc_anitype", "wc_anistart", "wc_animation", set_wc_visible)
 
     --mouse show/hide area
     for _, cords in pairs(osc_param.areas["showhide"]) do
@@ -2461,70 +2528,41 @@ local function render()
     --mouse input area
     local mouse_over_osc = false
 
-    for _,cords in ipairs(osc_param.areas["input"]) do
-        if state.osc_visible then -- activate only when OSC is actually visible
-            set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "input")
-        end
-        if state.osc_visible ~= state.input_enabled then
-            if state.osc_visible then
-                mp.enable_key_bindings("input")
-            else
-                mp.disable_key_bindings("input")
+    local function update_input_area(area_name, visible, enabled_key, enable_fn)
+        local areas = osc_param.areas[area_name]
+        if not areas then return end
+        for _,cords in ipairs(areas) do
+            if visible then
+                set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, area_name)
             end
-            state.input_enabled = state.osc_visible
-        end
-
-        if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
-            mouse_over_osc = true
-        end
-    end
-
-    if osc_param.areas["window-controls"] then
-        for _,cords in ipairs(osc_param.areas["window-controls"]) do
-            if state.osc_visible then -- activate only when OSC is actually visible
-                set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls")
+            if visible ~= state[enabled_key] then
+                if visible then enable_fn() else mp.disable_key_bindings(area_name) end
+                state[enabled_key] = visible
             end
-            if state.osc_visible ~= state.windowcontrols_buttons then
-                if state.osc_visible then
-                    mp.enable_key_bindings("window-controls")
-                else
-                    mp.disable_key_bindings("window-controls")
-                end
-                state.windowcontrols_buttons = state.osc_visible
-            end
-
             if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
                 mouse_over_osc = true
             end
         end
     end
 
-    if osc_param.areas["window-controls-title"] then
-        for _,cords in ipairs(osc_param.areas["window-controls-title"]) do
-            if state.osc_visible then -- activate only when OSC is actually visible
-                set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "window-controls-title")
-            end
-            if state.osc_visible ~= state.windowcontrols_title then
-                if state.osc_visible then
-                    mp.enable_key_bindings("window-controls-title", "allow-vo-dragging")
-                else
-                    mp.disable_key_bindings("window-controls-title")
-                end
-                state.windowcontrols_title = state.osc_visible
-            end
+    update_input_area("input", state.osc_visible, "input_enabled",
+                      function() mp.enable_key_bindings("input") end)
+    update_input_area("window-controls", state.wc_visible, "windowcontrols_buttons",
+                      function() mp.enable_key_bindings("window-controls") end)
+    update_input_area("window-controls-title", state.wc_visible, "windowcontrols_title",
+                      function()
+                          mp.enable_key_bindings("window-controls-title", "allow-vo-dragging")
+                      end)
 
-            if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
-                mouse_over_osc = true
-            end
-        end
-    end
+    if state.hide_timer then state.hide_timer.timeout = math.huge end
 
     -- autohide
-    if state.showtime ~= nil and get_hidetimeout() >= 0 then
-        local timeout = state.showtime + (get_hidetimeout() / 1000) - now
+    local function run_autohide(showtime_key, hide_fn)
+        if state[showtime_key] == nil or get_hidetimeout() < 0 then return end
+        local timeout = state[showtime_key] + (get_hidetimeout() / 1000) - now
         if timeout <= 0 and get_touchtimeout() <= 0 then
             if state.active_element == nil and not mouse_over_osc then
-                hide_osc()
+                hide_fn()
             end
         else
             -- the timer is only used to recheck the state and to possibly run
@@ -2532,19 +2570,23 @@ local function render()
             if not state.hide_timer then
                 state.hide_timer = mp.add_timeout(0, tick)
             end
-            state.hide_timer.timeout = timeout
-            -- re-arm
-            state.hide_timer:kill()
-            state.hide_timer:resume()
+            if timeout < state.hide_timer.timeout then
+                state.hide_timer.timeout = timeout
+                -- re-arm
+                state.hide_timer:kill()
+                state.hide_timer:resume()
+            end
         end
     end
+    run_autohide("showtime", hide_osc)
+    run_autohide("wc_showtime", hide_wc)
 
 
     -- actual rendering
     local ass = assdraw.ass_new()
 
     -- actual OSC
-    if state.osc_visible then
+    if state.osc_visible or state.wc_visible then
         render_elements(ass)
     end
 
@@ -2621,19 +2663,23 @@ tick = function()
 
     state.tick_last_time = mp.get_time()
 
-    if state.anitype ~= nil then
+    local function tick_animation(anitype_key, anistart_key, animation_key)
         -- state.anistart can be nil - animation should now start, or it can
         -- be a timestamp when it started. state.idle has no animation.
-        if not state.idle and
-           (not state.anistart or
-            mp.get_time() < 1 + state.anistart + user_opts.fadeduration/1000)
-        then
-            -- animating or starting, or still within 1s past the deadline
-            request_tick()
-        else
-            kill_animation()
+        if state[anitype_key] ~= nil then
+            if not state.idle and
+               (not state[anistart_key] or
+                mp.get_time() < 1 + state[anistart_key] + user_opts.fadeduration/1000)
+            then
+                -- animating or starting, or still within 1s past the deadline
+                request_tick()
+            else
+                kill_animation(anitype_key, anistart_key, animation_key)
+            end
         end
     end
+    tick_animation("anitype", "anistart", "animation")
+    tick_animation("wc_anitype", "wc_anistart", "wc_animation")
 end
 
 local function shutdown()
@@ -2796,8 +2842,10 @@ local function always_on(val)
     if state.enabled then
         if val then
             show_osc()
+            show_wc()
         else
             hide_osc()
+            hide_wc()
         end
     end
 end
@@ -2877,6 +2925,7 @@ mp.register_script_message("osc-show", show_osc)
 mp.register_script_message("osc-hide", function ()
     if user_opts.visibility == "auto" then
         osc_visible(false)
+        set_wc_visible(false)
     end
 end)
 mp.add_key_binding(nil, "visibility", function() visibility_mode("cycle") end)
