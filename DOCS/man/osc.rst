@@ -261,6 +261,11 @@ Configurable Options
 
     Show the mpv logo and message when idle
 
+``audioonlyscreen``
+    Default: no
+
+    Show the mpv logo when no video track is present or selected.
+
 ``scalewindowed``
     Default: 1.0
 
