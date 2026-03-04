@@ -11,6 +11,7 @@ local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
     idlescreen = true,          -- show mpv logo on idle
+    audioonlyscreen = false,    -- show mpv logo when no video
     scalewindowed = 1,          -- scaling of the controller when windowed
     scalefullscreen = 1,        -- scaling of the controller when fullscreen
     vidscale = "auto",          -- scale the controller with the video?
@@ -256,6 +257,8 @@ local state = {
     hide_timer = nil,
     cache_state = nil,
     idle = false,
+    no_video = false,
+    file_loaded = false,
     enabled = true,
     input_enabled = true,
     showhide_enabled = false,
@@ -2616,22 +2619,20 @@ local function render_logo()
 
     local ass = assdraw.ass_new()
     -- mpv logo
-    if user_opts.idlescreen then
-        for _, line in ipairs(logo_lines) do
-            ass:new_event()
-            ass:append(line_prefix .. line)
-        end
+    for _, line in ipairs(logo_lines) do
+        ass:new_event()
+        ass:append(line_prefix .. line)
     end
 
     -- Santa hat
-    if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
+    if is_december and not user_opts.greenandgrumpy then
         for _, line in ipairs(santa_hat_lines) do
             ass:new_event()
             ass:append(line_prefix .. line)
         end
     end
 
-    if user_opts.idlescreen then
+    if state.idle then
         ass:new_event()
         ass:pos(display_w / 2, icon_y + 65)
         ass:an(8)
@@ -2648,14 +2649,15 @@ tick = function()
     end
 
     if not state.enabled then return end
-    if not state.idle then
-        render_wipe(state.logo_osd)
-    end
 
     if state.idle then
         -- render idle message
         msg.trace("idle message")
-        render_logo()
+        if user_opts.idlescreen then
+            render_logo()
+        else
+            render_wipe(state.osd)
+        end
 
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
@@ -2665,6 +2667,11 @@ tick = function()
     elseif state.fullscreen and user_opts.showfullscreen
         or (not state.fullscreen and user_opts.showwindowed) then
 
+        if state.no_video and state.file_loaded and user_opts.audioonlyscreen then
+            render_logo()
+        else
+            render_wipe(state.logo_osd)
+        end
         -- render the OSC
         render()
     else
@@ -2796,6 +2803,20 @@ mp.observe_property("window-maximized", "bool", function(_, val)
 end)
 mp.observe_property("idle-active", "bool", function(_, val)
     state.idle = val
+    request_tick()
+end)
+mp.observe_property("current-tracks/video", "native", function(_, val)
+    state.no_video = val == nil
+    request_tick()
+end)
+
+mp.register_event("file-loaded", function()
+    state.file_loaded = true
+    state.no_video = mp.get_property_native("current-tracks/video") == nil
+    request_tick()
+end)
+mp.add_hook("on_unload", 50, function()
+    state.file_loaded = false
     request_tick()
 end)
 
