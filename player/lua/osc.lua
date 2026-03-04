@@ -266,6 +266,7 @@ local state = {
     border = true,
     maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
+    logo_osd = mp.create_osd_overlay("ass-events"),
     chapter_list = {},                      -- sorted by time
     visibility_modes = {},                  -- visibility_modes to cycle through
     osc_message_warned = false,             -- deprecation warnings
@@ -311,17 +312,17 @@ local function kill_animation(anitype_key, anistart_key, animation_key)
     state[animation_key] = nil
 end
 
-local function set_osd(res_x, res_y, text, z)
-    if state.osd.res_x == res_x and
-       state.osd.res_y == res_y and
-       state.osd.data == text then
+local function set_osd(osd, res_x, res_y, text, z)
+    if osd.res_x == res_x and
+       osd.res_y == res_y and
+       osd.data == text then
         return
     end
-    state.osd.res_x = res_x
-    state.osd.res_y = res_y
-    state.osd.data = text
-    state.osd.z = z
-    state.osd:update()
+    osd.res_x = res_x
+    osd.res_y = res_y
+    osd.data = text
+    osd.z = z
+    osd:update()
 end
 
 local function set_time_styles(timetotal_changed, timems_changed)
@@ -618,10 +619,10 @@ local function request_init_resize()
     state.tick_timer:resume()
 end
 
-local function render_wipe()
+local function render_wipe(osd)
     msg.trace("render_wipe()")
-    state.osd.data = "" -- allows set_osd to immediately update on enable
-    state.osd:remove()
+    osd.data = "" -- allows set_osd to immediately update on enable
+    osd:remove()
 end
 
 
@@ -2286,7 +2287,7 @@ local function hide_bar(label, visible_key, anitype_key, set_visible)
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
         state[visible_key] = false
-        render_wipe()
+        render_wipe(state.osd)
     elseif user_opts.fadeduration > 0 then
         if state[visible_key] then
             state[anitype_key] = "out"
@@ -2595,8 +2596,46 @@ local function render()
     end
 
     -- submit
-    set_osd(osc_param.playresy * osc_param.display_aspect,
+    set_osd(state.osd, osc_param.playresy * osc_param.display_aspect,
             osc_param.playresy, ass.text, 1000)
+end
+
+local function render_logo()
+    local _, _, display_aspect = mp.get_osd_size()
+    if display_aspect == 0 then
+        return
+    end
+    local display_h = 360
+    local display_w = display_h * display_aspect
+    -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
+    local icon_x, icon_y = (display_w - 1800 / 32) / 2, 140
+    local line_prefix = ("{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}"):format(icon_x,
+                                                                                        icon_y)
+
+    local ass = assdraw.ass_new()
+    -- mpv logo
+    if user_opts.idlescreen then
+        for _, line in ipairs(logo_lines) do
+            ass:new_event()
+            ass:append(line_prefix .. line)
+        end
+    end
+
+    -- Santa hat
+    if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
+        for _, line in ipairs(santa_hat_lines) do
+            ass:new_event()
+            ass:append(line_prefix .. line)
+        end
+    end
+
+    if user_opts.idlescreen then
+        ass:new_event()
+        ass:pos(display_w / 2, icon_y + 65)
+        ass:an(8)
+        ass:append("Drop files or URLs to play here.")
+    end
+    set_osd(state.logo_osd, display_w, display_h, ass.text, -1000)
 end
 
 -- called by mpv on every frame
@@ -2607,54 +2646,20 @@ tick = function()
     end
 
     if not state.enabled then return end
+    if not state.idle then
+        render_wipe(state.logo_osd)
+    end
 
     if state.idle then
-
         -- render idle message
         msg.trace("idle message")
-        local _, _, display_aspect = mp.get_osd_size()
-        if display_aspect == 0 then
-            return
-        end
-        local display_h = 360
-        local display_w = display_h * display_aspect
-        -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
-        local icon_x, icon_y = (display_w - 1800 / 32) / 2, 140
-        local line_prefix = ("{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}"):format(icon_x,
-                                                                                            icon_y)
-
-        local ass = assdraw.ass_new()
-        -- mpv logo
-        if user_opts.idlescreen then
-            for _, line in ipairs(logo_lines) do
-                ass:new_event()
-                ass:append(line_prefix .. line)
-            end
-        end
-
-        -- Santa hat
-        if is_december and user_opts.idlescreen and not user_opts.greenandgrumpy then
-            for _, line in ipairs(santa_hat_lines) do
-                ass:new_event()
-                ass:append(line_prefix .. line)
-            end
-        end
-
-        if user_opts.idlescreen then
-            ass:new_event()
-            ass:pos(display_w / 2, icon_y + 65)
-            ass:an(8)
-            ass:append("Drop files or URLs to play here.")
-        end
-        set_osd(display_w, display_h, ass.text, -1000)
+        render_logo()
 
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
             mp.disable_key_bindings("showhide_wc")
             state.showhide_enabled = false
         end
-
-
     elseif state.fullscreen and user_opts.showfullscreen
         or (not state.fullscreen and user_opts.showwindowed) then
 
@@ -2662,7 +2667,8 @@ tick = function()
         render()
     else
         -- Flush OSD
-        render_wipe()
+        render_wipe(state.osd)
+        render_wipe(state.logo_osd)
     end
 
     state.tick_last_time = mp.get_time()
