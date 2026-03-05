@@ -410,6 +410,18 @@ local function mouse_hit_coords(bX1, bY1, bX2, bY2)
     return (mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2)
 end
 
+local function mouse_in_area(names)
+    if type(names) == "string" then names = {names} end
+    for _, name in pairs(names) do
+        for _, cords in pairs(osc_param.areas[name] or {}) do
+            if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function mouse_hit(element)
     return mouse_hit_coords(get_element_hitbox(element))
 end
@@ -2394,21 +2406,12 @@ local function process_event(source, what)
                     or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
                 )
             ) then
-            if window_controls_enabled() then
-                if user_opts.windowcontrols_independent then
-                    if mouseY < osc_param.playresy / 2 then
-                        show_wc()
-                        hide_osc()
-                    else
-                        show_osc()
-                        hide_wc()
-                    end
-                else
-                    show_osc()
-                    show_wc()
-                end
+            if window_controls_enabled() and user_opts.windowcontrols_independent then
+                if mouse_in_area("showhide_wc") then show_wc() end
+                if mouse_in_area("showhide") then show_osc() end
             else
                 show_osc()
+                if window_controls_enabled() then show_wc() end
             end
         end
         state.last_mouseX, state.last_mouseY = mouseX, mouseY
@@ -2526,8 +2529,6 @@ local function render()
     do_enable_keybindings()
 
     --mouse input area
-    local mouse_over_osc = false
-
     local function update_input_area(area_name, visible, enabled_key, enable_fn)
         local areas = osc_param.areas[area_name]
         if not areas then return end
@@ -2538,9 +2539,6 @@ local function render()
             if visible ~= state[enabled_key] then
                 if visible then enable_fn() else mp.disable_key_bindings(area_name) end
                 state[enabled_key] = visible
-            end
-            if mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2) then
-                mouse_over_osc = true
             end
         end
     end
@@ -2557,11 +2555,11 @@ local function render()
     if state.hide_timer then state.hide_timer.timeout = math.huge end
 
     -- autohide
-    local function run_autohide(showtime_key, hide_fn)
+    local function run_autohide(showtime_key, hide_fn, input_areas)
         if state[showtime_key] == nil or get_hidetimeout() < 0 then return end
         local timeout = state[showtime_key] + (get_hidetimeout() / 1000) - now
         if timeout <= 0 and get_touchtimeout() <= 0 then
-            if state.active_element == nil and not mouse_over_osc then
+            if state.active_element == nil and not mouse_in_area(input_areas) then
                 hide_fn()
             end
         else
@@ -2578,8 +2576,14 @@ local function render()
             end
         end
     end
-    run_autohide("showtime", hide_osc)
-    run_autohide("wc_showtime", hide_wc)
+    local osc_areas = {"input"}
+    local wc_areas = {"window-controls", "window-controls-title"}
+    if not user_opts.windowcontrols_independent then
+        osc_areas = {"input", "window-controls", "window-controls-title"}
+        wc_areas = osc_areas
+    end
+    run_autohide("showtime", hide_osc, osc_areas)
+    run_autohide("wc_showtime", hide_wc, wc_areas)
 
 
     -- actual rendering
