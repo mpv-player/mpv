@@ -838,6 +838,9 @@ endif
 if features['audiounit'] or features['coreaudio'] or features['avfoundation']
     sources += files('audio/out/ao_coreaudio_chmap.c',
                      'audio/out/ao_coreaudio_utils.c')
+    if not features['cocoa']
+        sources += files('osdep/utils-mac.c')
+    endif
 endif
 
 if features['avfoundation']
