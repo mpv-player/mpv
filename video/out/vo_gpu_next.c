@@ -1276,6 +1276,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
+#if PL_API_VER >= 362
+    clip_gamut = clip_gamut && target.color.transfer != PL_COLOR_TRC_SCRGB;
+#endif
     if (clip_gamut) {
         // Ensure resulting gamut still fits inside container
         target.color.hdr.prim = pl_primaries_clip(&target.color.hdr.prim,
