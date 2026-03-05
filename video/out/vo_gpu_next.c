@@ -888,13 +888,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     }
     if ((!target->color.hdr.min_luma || !hint))
         apply_target_contrast(p, &target->color, min_luma);
-    if (opts->target_gamut) {
-        // Ensure resulting gamut still fits inside container
-        const struct pl_raw_primaries *gamut, *container;
-        gamut = pl_raw_primaries_get(opts->target_gamut);
-        container = pl_raw_primaries_get(target->color.primaries);
-        target->color.hdr.prim = pl_primaries_clip(gamut, container);
-    }
+    if (opts->target_gamut)
+        target->color.hdr.prim = *pl_raw_primaries_get(opts->target_gamut);
     int dither_depth = opts->dither_depth;
     if (dither_depth == 0) {
         struct ra_swapchain *sw = p->ra_ctx->swapchain;
@@ -1206,13 +1201,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         }
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
-        if (opts->target_gamut) {
-            // Ensure resulting gamut still fits inside container
-            const struct pl_raw_primaries *gamut, *container;
-            gamut = pl_raw_primaries_get(opts->target_gamut);
-            container = pl_raw_primaries_get(hint.primaries);
-            hint.hdr.prim = pl_primaries_clip(gamut, container);
-        }
+        if (opts->target_gamut)
+            hint.hdr.prim = *pl_raw_primaries_get(opts->target_gamut);
         if (opts->target_trc)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
@@ -1285,6 +1275,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         target.color = hint;
     bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
+    bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
+    if (clip_gamut) {
+        // Ensure resulting gamut still fits inside container
+        target.color.hdr.prim = pl_primaries_clip(&target.color.hdr.prim,
+                                    pl_raw_primaries_get(target.color.primaries));
+    }
     if (target.color.transfer == PL_COLOR_TRC_SRGB && frame->current &&
         ((opts->sdr_adjust_gamma == 0 && opts->target_trc == PL_COLOR_TRC_UNKNOWN) ||
          opts->sdr_adjust_gamma == -1))
