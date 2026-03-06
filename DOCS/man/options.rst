@@ -6255,9 +6255,8 @@ them.
 
     .. note::
 
-        For ``--vo=gpu-next``, ``rgba16f`` enables scRGB output. However, it is
-        not currently fully supported. Colors may appear darker than expected,
-        and HDR output is not supported.
+        For ``--vo=gpu-next``, ``rgba16f`` enables scRGB output. Alternatively,
+        ``--target-trc=scrgb`` can be used to request scRGB output.
 
 ``--d3d11-output-csp=<auto|srgb|linear|pq|bt.2020>``
     Select a specific D3D11 output color space to utilize for D3D11 rendering.
@@ -7271,6 +7270,12 @@ them.
         Sony S-Log1 curve
     s-log2
         Sony S-Log2 curve
+    scrgb
+        scRGB, extended linear light transfer. Supports both HDR
+        and wide color gamut content. The output gamut defaults to BT.709
+        unless display primaries are reported by the system. You can also use
+        ``--target-gamut`` to manually specify a wider gamut.
+        (``--vo=gpu-next`` only)
 
     .. note::
 

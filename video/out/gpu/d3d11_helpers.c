@@ -62,6 +62,10 @@ DECLARE_DLL_FUNCTION(D3D11CreateDevice, L"d3d11.dll", PFN_D3D11_CREATE_DEVICE)
 DECLARE_DLL_FUNCTION(CreateDXGIFactory1, L"dxgi.dll", PFN_CREATE_DXGI_FACTORY)
 DECLARE_DLL_FUNCTION(DXGIGetDebugInterface, L"dxgidebug.dll", PFN_DXGI_GET_DEBUG_INTERFACE)
 
+#if PL_API_VER < 362
+#define PL_COLOR_TRC_SCRGB PL_COLOR_TRC_LINEAR
+#endif
+
 #define D3D11_DXGI_ENUM(prefix, define) { case prefix ## define: return #define; }
 
 static const char *d3d11_get_format_name(DXGI_FORMAT fmt)
@@ -1088,7 +1092,7 @@ struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc)
             break;
         case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
             ret.primaries = PL_COLOR_PRIM_BT_709;
-            ret.transfer = PL_COLOR_TRC_LINEAR;
+            ret.transfer = PL_COLOR_TRC_SCRGB;
             break;
         case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
             ret.primaries = PL_COLOR_PRIM_BT_2020;
@@ -1153,7 +1157,7 @@ DXGI_COLOR_SPACE_TYPE mp_params_to_dxgi_colorspace(struct mp_log *log,
 
     if (is_rgb) {
         switch (params->color.transfer) {
-        case PL_COLOR_TRC_LINEAR:
+        case PL_COLOR_TRC_SCRGB:
             return DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709;
         case PL_COLOR_TRC_PQ:
             if (!p2020) {

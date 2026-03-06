@@ -97,6 +97,9 @@ const struct m_opt_choice_alternatives pl_csp_trc_names[] = {
     {"s-log1",      PL_COLOR_TRC_S_LOG1},
     {"s-log2",      PL_COLOR_TRC_S_LOG2},
     {"st428",       PL_COLOR_TRC_ST428},
+#if PL_API_VER >= 362
+    {"scrgb",       PL_COLOR_TRC_SCRGB},
+#endif
     {0}
 };
 
