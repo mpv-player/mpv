@@ -840,7 +840,7 @@ local function render_elements(master_ass)
     local se, ae = state.slider_element, elements[state.active_element]
 
     -- show time when mouse is hoverd on seekbar helpful for
-    -- creating thumbnail script, it's a property, can used by other scripts.
+    -- creating thumbnail script, it's a property and can used by other scripts.
     if se and (ae == se or (not ae and mouse_hit(se))) then
         local dur = mp.get_property_number("duration", 0)
         if dur > 0 then
