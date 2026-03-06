@@ -1992,7 +1992,7 @@ The following hooks are currently defined:
 
 ``on_preloaded``
     Called after a file has been opened, and before tracks are selected and
-    decoders are created. This has some usefulness if an API users wants
+    decoders are created. This has some usefulness if an API user wants
     to select tracks manually, based on the set of available tracks. It's
     also useful to initialize ``--lavfi-complex`` in a specific way by API,
     without having to "probe" the available streams at first.
