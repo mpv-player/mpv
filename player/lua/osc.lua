@@ -2608,7 +2608,7 @@ local function render_logo()
     local display_h = 360
     local display_w = display_h * display_aspect
     -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
-    local icon_x, icon_y = (display_w - 1800 / 32) / 2, 140
+    local icon_x, icon_y = (display_w - 1800 / 32) / 2, (display_h - 1800 / 32) / 2
     local line_prefix = ("{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}"):format(icon_x,
                                                                                         icon_y)
 
