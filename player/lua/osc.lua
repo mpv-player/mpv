@@ -838,6 +838,20 @@ local function render_elements(master_ass)
     -- render iterations because the title may be rendered before the slider.
     state.forced_title = nil
     local se, ae = state.slider_element, elements[state.active_element]
+
+    -- show posssec time when mouse is hoverd on seekbar helpful for
+	-- creating thumbnail script, it's a property, can used by other scripts
+	if se and (ae == se or (not ae and mouse_hit(se))) then
+        local dur = mp.get_property_number("duration", 0)
+        if dur > 0 then
+            local possec = get_slider_value(se) * dur / 100
+            mp.set_property_number("user-data/osc/hover_mouse_time", possec)
+        end
+    else
+        mp.set_property("user-data/osc/hover_mouse_time", "none")
+    end
+
+    
     if user_opts.chapter_fmt ~= "no" and se and (ae == se or (not ae and mouse_hit(se))) then
         local dur = mp.get_property_number("duration", 0)
         if dur > 0 then
