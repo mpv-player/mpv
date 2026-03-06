@@ -2003,6 +2003,13 @@ The following hooks are currently defined:
 
     Ordered after ``on_load_fail`` etc. and before ``playback-restart``.
 
+``on_loaded``
+    Called after a file has been loaded, after tracks are selected but before
+    starting playback. This has some usefulness if an API user wants
+    to act on selected track metadata before the media is shown.
+
+    Ordered after ``on_preloaded``. and before ``playback-restart``.
+
 ``on_unload``
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.

@@ -1857,6 +1857,7 @@ static void play_current_file(struct MPContext *mpctx)
         }
     }
 
+    process_hooks(mpctx, "on_loaded");
     for (int t = 0; t < STREAM_TYPE_COUNT; t++)
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
