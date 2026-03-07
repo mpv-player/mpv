@@ -43,10 +43,8 @@ const struct m_opt_choice_alternatives pl_csp_names[] = {
     {"rgb",         PL_COLOR_SYSTEM_RGB},
     {"xyz",         PL_COLOR_SYSTEM_XYZ},
     {"ycgco",       PL_COLOR_SYSTEM_YCGCO},
-#if PL_API_VER >= 358
     {"ycgco-re",    PL_COLOR_SYSTEM_YCGCO_RE},
     {"ycgco-ro",    PL_COLOR_SYSTEM_YCGCO_RO},
-#endif
     {0}
 };
 
@@ -127,9 +125,7 @@ const struct m_opt_choice_alternatives pl_alpha_names[] = {
     {"auto",        PL_ALPHA_UNKNOWN},
     {"straight",    PL_ALPHA_INDEPENDENT},
     {"premul",      PL_ALPHA_PREMULTIPLIED},
-#if PL_API_VER >= 344
     {"none",        PL_ALPHA_NONE},
-#endif
     {0}
 };
 
