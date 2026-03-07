@@ -53,6 +53,16 @@ project('shaderc', 'cpp', version: '2024.1')
 python = find_program('python3')
 run_command(python, '../shaderc_cmake/utils/git-sync-deps', check: true)
 
+# Pre-generate build-version.inc for SPIRV-Tools. Meson's cmake module doesn't
+# support CMake's OBJECT_DEPENDS source file property, so the custom command
+# that generates this file is never triggered.
+# https://github.com/mesonbuild/meson/issues/9062
+run_command(python,
+    '../shaderc_cmake/third_party/spirv-tools/utils/update_build_version.py',
+    '../shaderc_cmake/third_party/spirv-tools/CHANGES',
+    '../shaderc_cmake/third_party/spirv-tools/build-version.inc',
+    check: true)
+
 cmake = import('cmake')
 opts = cmake.subproject_options()
 opts.add_cmake_defines({
