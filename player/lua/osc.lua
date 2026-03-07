@@ -849,13 +849,13 @@ local function render_elements(master_ass)
         end
     end
 
-    for n=1, #elements do
+    local function render_element(n)
         local element = elements[n]
 
         if element.is_wc then
-            if not state.wc_visible then goto continue end
+            if not state.wc_visible then return end
         else
-            if not state.osc_visible then goto continue end
+            if not state.osc_visible then return end
         end
 
         local saved_animation
@@ -1097,8 +1097,10 @@ local function render_elements(master_ass)
         if element.is_wc then
             state.animation = saved_animation
         end
+    end
 
-        ::continue::
+    for n = 1, #elements do
+        render_element(n)
     end
 end
 
