@@ -172,7 +172,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install meson==1.9.2
+          python -m pip install meson
           choco install ccache nasm
           # For cargo -C
           rustup default nightly
