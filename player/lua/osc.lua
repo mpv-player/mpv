@@ -79,6 +79,8 @@ local user_opts = {
     tick_delay = 1 / 60,                   -- minimum interval between OSC redraws in seconds
     tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
+    max_thumb_size = 200, -- maximum display size of preview thumbnails
+
     -- luacheck: push ignore
     -- luacheck: max line length
     menu_mbtn_left_command = "script-binding select/menu; script-message-to osc osc-hide",
@@ -1177,6 +1179,56 @@ local function render_elements(master_ass)
                     ass_append_alpha(elem_ass, slider_lo.alpha, 0)
                     elem_ass:append(tooltiplabel)
 
+                    local hover_sec = mp.get_property_number("duration", 0) * (sliderpos / 100)
+                    mp.set_property_number("user-data/osc/hover-sec", hover_sec)
+
+                    -- thumbnail
+                    local osd_w, osd_h = mp.get_osd_size()
+                    local vop = mp.get_property_native("video-out-params")
+                    local draw_thumbnail = osd_w > 0 and vop
+                    if draw_thumbnail then
+                        local r_w, r_h = get_virt_scale_factor()
+                        local thumb_max = math.min(user_opts.max_thumb_size,
+                            math.min(osd_w, osd_h) * 0.25)
+                        local scale = thumb_max / math.max(vop.dw, vop.dh)
+                        local thumb_w = math.floor(vop.dw * scale + 0.5)
+                        local thumb_h = math.floor(vop.dh * scale + 0.5)
+                        local tooltip_font_size = (user_opts.layout == "box" or
+                            user_opts.layout == "slimbox") and 2 or 12
+                        local thumb_tx = tx
+                        local thumb_ty = user_opts.layout ~= "topbar" and element.hitbox.y1 - 8 or
+                            element.hitbox.y2 + tooltip_font_size + 8
+                        local thumb_pad = 4
+                        local thumb_margin_x = 20 / r_w
+                        local thumb_margin_y = (4 + user_opts.tooltipborder) / r_h + thumb_pad
+                        local thumb_x = math.min(osd_w - thumb_w - thumb_margin_x,
+                            math.max(thumb_margin_x, thumb_tx / r_w - thumb_w / 2))
+                        local thumb_y = thumb_ty / r_h + (user_opts.layout ~= "topbar" and
+                            -(thumb_h + tooltip_font_size / r_h + thumb_margin_y) or
+                            thumb_margin_y)
+
+                        local thumb_req = {
+                            x = math.floor(thumb_x + 0.5), y = math.floor(thumb_y + 0.5),
+                            w = math.floor(thumb_w + 0.5), h = math.floor(thumb_h + 0.5),
+                        }
+
+                        local thumb_ass = assdraw.ass_new()
+                        thumb_ass:new_event()
+                        thumb_ass:pos(thumb_req.x, thumb_req.y)
+                        thumb_ass:an(7)
+                        thumb_ass:append(osc_styles.timePosBar)
+                        thumb_ass:append("{\\1a&H20&}")
+                        thumb_ass:draw_start()
+                        thumb_ass:rect_cw(-thumb_pad, -thumb_pad,
+                            thumb_req.w + thumb_pad, thumb_req.h + thumb_pad)
+                        thumb_ass:draw_stop()
+                        thumb_req.ass = thumb_ass.text
+
+                        mp.set_property_native("user-data/osc/draw-preview", thumb_req)
+                    end
+                else
+                    mp.set_property_native("user-data/osc/hover-sec", nil)
+                    mp.set_property_native("user-data/osc/draw-preview", nil)
                 end
             end
 
@@ -3187,6 +3239,8 @@ mp.register_event("file-loaded", function()
 end)
 mp.add_hook("on_unload", 50, function()
     state.file_loaded = false
+    mp.set_property_native("user-data/osc/hover-sec", nil)
+    mp.set_property_native("user-data/osc/draw-preview", nil)
     request_tick()
 end)
 
