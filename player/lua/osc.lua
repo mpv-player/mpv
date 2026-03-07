@@ -839,33 +839,14 @@ local function render_elements(master_ass)
     -- render iterations because the title may be rendered before the slider.
     state.forced_title = nil
     local se, ae = state.slider_element, elements[state.active_element]
-
-    -- show time when mouse is hoverd on seekbar helpful for
-    -- creating thumbnail script, it's a property and can used by other scripts.
-    if se and (ae == se or (not ae and mouse_hit(se))) then
+    if user_opts.chapter_fmt ~= "no" and se and (ae == se or (not ae and mouse_hit(se))) then
         local dur = mp.get_property_number("duration", 0)
         if dur > 0 then
-            local possec = get_slider_value(se) * dur / 100
-
-            -- update hover time only if changed by >0.1s to prevent render lag
-            if not state.last_hover_possec or math.abs(state.last_hover_possec - possec) > 0.1 then
-                mp.set_property_number("user-data/osc/hover_mouse_time", possec)
-                state.last_hover_possec = possec
+            local possec = get_slider_value(se) * dur / 100 -- of mouse pos
+            local ch = get_chapter(possec)
+            if ch and ch.title and ch.title ~= "" then
+                state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
             end
-
-            -- original chapter title logic is now implemented/combined here
-            if user_opts.chapter_fmt ~= "no" then
-                local ch = get_chapter(possec)
-                if ch and ch.title and ch.title ~= "" then
-                    state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
-                end
-            end
-        end
-    else
-        -- clear the property when the mouse leaves sets to none
-        if state.last_hover_possec ~= nil then
-            mp.set_property("user-data/osc/hover_mouse_time", "none")
-            state.last_hover_possec = nil
         end
     end
 
@@ -1048,6 +1029,18 @@ local function render_elements(master_ass)
                     local sliderpos = get_slider_value(element)
                     local tooltiplabel = element.slider.tooltipF(sliderpos)
 
+                    if element == state.slider_element then
+                        local dur = mp.get_property_number("duration", 0)
+                        if dur > 0 then
+                            local possec = sliderpos * dur / 100
+                            -- Only update if it changed by more than 0.1s to prevent lag
+                            if not state.last_hover_possec or math.abs(state.last_hover_possec - possec) > 0.1 then
+                                mp.set_property_native("user-data/osc/hovered-time", possec)
+                                state.last_hover_possec = possec
+                            end
+                        end
+                    end
+
                     local an = slider_lo.tooltip_an
 
                     local ty
@@ -1083,6 +1076,12 @@ local function render_elements(master_ass)
                     ass_append_alpha(elem_ass, slider_lo.alpha, 0)
                     elem_ass:append(tooltiplabel)
 
+                else
+                    -- clear hover time when mouse leaves the slider
+                    if element == state.slider_element and state.last_hover_possec ~= nil then
+                        mp.set_property_native("user-data/osc/hovered-time", nil)
+                        state.last_hover_possec = nil
+                    end
                 end
             end
 
@@ -3044,7 +3043,7 @@ set_time_styles(true, true)
 set_tick_delay("display_fps", mp.get_property_number("display_fps"))
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
-mp.set_property("user-data/osc/hover_mouse_time", "none")
+mp.set_property_native("user-data/osc/hovered-time", nil)
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")
