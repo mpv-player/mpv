@@ -128,6 +128,67 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
 
+  mingw64-fat:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [gpl, lgpl]
+        arch: [win64, winarm64]
+    container:
+      image: ghcr.io/btbn/ffmpeg-builds/${{ matrix.arch }}-${{ matrix.variant }}:latest
+      env:
+        WINEPREFIX: /tmp/wine
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build
+        id: build
+        run: |
+          ./ci/build-mingw64-fat.sh
+        env:
+          GPL: ${{ matrix.variant == 'gpl' }}
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Functional test
+        if: ${{ matrix.variant == 'gpl' && matrix.arch == 'win64' }}
+        run: |
+          cd artifact && wine ./mpv.com -v --no-config
+
+      - name: Run meson tests
+        if: ${{ matrix.arch == 'win64' }}
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
+      - name: Artifact name
+        id: artifact
+        run: |
+          VERSION_FILE=$(find . -path "*/common/version.h" -type f | head -n 1)
+          VER=$(grep VERSION "$VERSION_FILE" | cut -d'"' -f2)
+          PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
+          echo "name=mpv-$VER$PR-${{ github.run_id }}-${{ matrix.arch }}-${{ matrix.variant }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v5
+        if: ${{ matrix.variant == 'gpl' }}
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: artifact/*
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.artifact.outputs.name }}-dev
+          path: artifact-dev/*
+
   win32:
     runs-on: ${{ matrix.os }}
     strategy:
