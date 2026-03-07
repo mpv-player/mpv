@@ -173,7 +173,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install meson
-          choco install ccache nasm
+          winget install --accept-source-agreements --accept-package-agreements Ccache.Ccache NASM.NASM
+          echo "$env:LOCALAPPDATA\Microsoft\WinGet\Links" >> $env:GITHUB_PATH
           # For cargo -C
           rustup default nightly
 
