@@ -4279,7 +4279,7 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
             wp_color_representation_surface_v1_destroy(wl->color_representation_surface);
             wl->color_representation_surface = NULL;
         }
-        wl->current_params = (struct mp_image_params){0};
+        wl->last_hint_params = wl->current_params = (struct mp_image_params){0};
         return;
     }
     if (wl->color_manager) {
@@ -4288,12 +4288,15 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
     }
 #endif
 
-    bool color_space_changed = !pl_color_space_equal(&wl->current_params.color, &params->color);
-    bool color_repr_changed = !pl_color_repr_equal(&wl->current_params.repr, &params->repr) ||
-                              wl->current_params.chroma_location != params->chroma_location;
+    bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color);
+    bool color_repr_changed = !pl_color_repr_equal(&wl->last_hint_params.repr, &params->repr) ||
+                              wl->last_hint_params.chroma_location != params->chroma_location;
 
-    if (!color_space_changed && !color_repr_changed)
+    if (!color_space_changed && !color_repr_changed) {
+        *params = wl->current_params;
         return;
+    }
+    wl->last_hint_params = *params;
     if (color_space_changed)
         set_color_management(wl, &params->color);
     if (color_repr_changed)
