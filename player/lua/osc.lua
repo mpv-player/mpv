@@ -272,6 +272,7 @@ local state = {
     osc_chapterlist_warned = false,
     osc_playlist_warned = false,
     osc_tracklist_warned = false,
+	last_hover_possec = nil,
 }
 
 local logo_lines = {
@@ -845,20 +846,26 @@ local function render_elements(master_ass)
         local dur = mp.get_property_number("duration", 0)
         if dur > 0 then
             local possec = get_slider_value(se) * dur / 100
-            mp.set_property_number("user-data/osc/hover_mouse_time", possec)
+
+            -- update hover time only if changed by >0.1s to prevent render lag
+            if not state.last_hover_possec or math.abs(state.last_hover_possec - possec) > 0.1 then
+                mp.set_property_number("user-data/osc/hover_mouse_time", possec)
+                state.last_hover_possec = possec
+            end
+
+            -- original chapter title logic is now implemented/combined here
+            if user_opts.chapter_fmt ~= "no" then
+                local ch = get_chapter(possec)
+                if ch and ch.title and ch.title ~= "" then
+                    state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
+                end
+            end
         end
     else
-        mp.set_property("user-data/osc/hover_mouse_time", "none")
-    end
-
-    if user_opts.chapter_fmt ~= "no" and se and (ae == se or (not ae and mouse_hit(se))) then
-        local dur = mp.get_property_number("duration", 0)
-        if dur > 0 then
-            local possec = get_slider_value(se) * dur / 100 -- of mouse pos
-            local ch = get_chapter(possec)
-            if ch and ch.title and ch.title ~= "" then
-                state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
-            end
+        -- clear the property when the mouse leaves sets to none
+        if state.last_hover_possec ~= nil then
+            mp.set_property("user-data/osc/hover_mouse_time", "none")
+            state.last_hover_possec = nil
         end
     end
 
@@ -3037,6 +3044,7 @@ set_time_styles(true, true)
 set_tick_delay("display_fps", mp.get_property_number("display_fps"))
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
+mp.set_property("user-data/osc/hover_mouse_time", "none")
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")
