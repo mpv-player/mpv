@@ -4180,9 +4180,12 @@ Property list
                 "vararg"  MPV_FORMAT_FLAG
                 "args"    MPV_FORMAT_NODE_ARRAY
                     MPV_FORMAT_NODE_MAP
-                        "name"     MPV_FORMAT_STRING
-                        "type"     MPV_FORMAT_STRING
-                        "optional" MPV_FORMAT_FLAG
+                        "name"           MPV_FORMAT_STRING
+                        "type"           MPV_FORMAT_STRING
+                        "optional"       MPV_FORMAT_FLAG
+                        "default-value"  MPV_FORMAT_NODE (optional, value of "type")
+                        "choices"        MPV_FORMAT_NODE_ARRAY (optional)
+                            MPV_FORMAT_STRING
 
 ``input-bindings``
     The list of current input key bindings. This returns an array of maps,

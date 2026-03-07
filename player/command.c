@@ -4010,6 +4010,31 @@ static int mp_property_commands(void *ctx, struct m_property *prop,
                 node_map_add_string(ae, "name", a->name);
                 node_map_add_string(ae, "type", a->type->name);
                 node_map_add_flag(ae, "optional", a->flags & MP_CMD_OPT_ARG);
+                if (a->type == &m_option_type_choice ||
+                    a->type == &m_option_type_flags) {
+                    const struct m_opt_choice_alternatives *alt = a->priv;
+                    if (alt) {
+                        if (a->defval) {
+                            const int ival = *(const int *)a->defval;
+                            const char *val = m_opt_choice_str_def(alt, ival, NULL);
+                            if (val)
+                                node_map_add_string(ae, "default-value", val);
+                        }
+                        struct mpv_node *choices =
+                            node_map_add(ae, "choices", MPV_FORMAT_NODE_ARRAY);
+                        for (int j = 0; alt[j].name; j++) {
+                           struct mpv_node *ce = node_array_add(choices, MPV_FORMAT_NONE);
+                           ce->format = MPV_FORMAT_STRING;
+                           ce->u.string = talloc_strdup(choices->u.list, alt[j].name);
+                        }
+                    }
+                } else {
+                    if (a->defval) {
+                        struct mpv_node *def =
+                            node_map_add(ae, "default-value", MPV_FORMAT_NONE);
+                        m_option_get_node(a, NULL, def, (void *)a->defval);
+                    }
+                }
             }
 
             node_map_add_flag(entry, "vararg", cmd->vararg);
