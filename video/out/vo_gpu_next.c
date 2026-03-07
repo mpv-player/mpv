@@ -200,12 +200,8 @@ const struct m_sub_options gl_next_conf = {
             {"none",  BACKGROUND_NONE},
             {"color", BACKGROUND_COLOR},
             {"tiles", BACKGROUND_TILES}
-#if PL_API_VER < 355
-            )},
-#else
             ,{"blur", BACKGROUND_BLUR})},
         {"background-blur-radius", OPT_FLOAT(background_blur_radius)},
-#endif
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
@@ -942,17 +938,13 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
 static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
 {
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    enum pl_alpha_mode alpha = PL_ALPHA_UNKNOWN;
-#if PL_API_VER >= 344
-    alpha = PL_ALPHA_NONE;
-#endif
 
     struct mp_image_params params = {
         .color = hint ? *hint : pl_color_space_srgb,
         .repr = {
             .sys = PL_COLOR_SYSTEM_RGB,
             .levels = p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL,
-            .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : alpha,
+            .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : PL_ALPHA_NONE,
         },
     };
 
@@ -1242,10 +1234,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                 .pts = frame->current->pts + pts_offset,
                 .radius = pl_frame_mix_radius(&params),
                 .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
+                .drift_compensation = 0,
             );
-#if PL_API_VER >= 340
-            qparams.drift_compensation = 0;
-#endif
             pl_queue_update(p->queue, NULL, &qparams);
         }
         return VO_FALSE;
@@ -1323,10 +1313,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             .radius = pl_frame_mix_radius(&params),
             .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
             .interpolation_threshold = opts->interpolation_threshold,
+            .drift_compensation = 0,
         );
-#if PL_API_VER >= 340
-        qparams.drift_compensation = 0;
-#endif
 
         // Depending on the vsync ratio, we may be up to half of the vsync
         // duration before the current frame time. This works fine because
@@ -1586,10 +1574,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     enum pl_queue_status status;
     struct pl_queue_params qparams = *pl_queue_params(
         .pts = p->last_pts,
+        .drift_compensation = 0,
     );
-#if PL_API_VER >= 340
-        qparams.drift_compensation = 0;
-#endif
     status = pl_queue_update(p->queue, &mix, &qparams);
     mp_assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
@@ -2497,23 +2483,15 @@ static void update_render_options(struct vo *vo)
     pars->params.disable_linear_scaling = !opts->linear_downscaling && !opts->linear_upscaling;
     pars->params.disable_fbos = opts->dumb_mode == 1;
 
-#if PL_API_VER >= 346
     static const int map_background_types[] = {
         [BACKGROUND_NONE]  = PL_CLEAR_SKIP,
         [BACKGROUND_COLOR] = PL_CLEAR_COLOR,
         [BACKGROUND_TILES] = PL_CLEAR_TILES,
-#if PL_API_VER >= 355
         [BACKGROUND_BLUR]  = PL_CLEAR_BLUR,
-#endif
     };
     pars->params.background = map_background_types[opts->background];
     pars->params.border = map_background_types[p->next_opts->border_background];
-#if PL_API_VER >= 355
     pars->params.blur_radius = p->next_opts->background_blur_radius;
-#endif
-#else
-    pars->params.blend_against_tiles = opts->background == BACKGROUND_TILES;
-#endif
     pars->params.tile_size = opts->background_tile_size * 2;
     for (int i = 0; i < 2; ++i) {
         pars->params.tile_colors[i][0] = opts->background_tile_color[i].r / 255.0f;

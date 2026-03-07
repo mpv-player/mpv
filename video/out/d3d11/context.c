@@ -597,7 +597,6 @@ void ra_d3d11_ctx_set_swapchain_params(struct ra_ctx *ra,
     struct priv *p = ra->priv;
     int fmt = p->opts->output_format;
 
-#if PL_API_VER >= 360
     switch (fmt) {
     case DXGI_FORMAT_R8G8B8A8_UNORM:
     case DXGI_FORMAT_B8G8R8A8_UNORM:
@@ -618,10 +617,6 @@ void ra_d3d11_ctx_set_swapchain_params(struct ra_ctx *ra,
     default:
         params->alpha_bits = ra->opts.want_alpha ? 8 : 0;
     };
-#else
-    if (fmt == DXGI_FORMAT_R8G8B8A8_UNORM || fmt == DXGI_FORMAT_B8G8R8A8_UNORM)
-        params->disable_10bit_sdr = true;
-#endif
 }
 #endif
 
