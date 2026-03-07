@@ -560,6 +560,12 @@ Configurable Options
 
     Use display fps to calculate the interval between OSC redraws.
 
+``max_thumb_size``
+    Default: 200
+
+    Maximum display size of the preview thumbnail. Only meaningful when a
+    Thumbnailer is active. See the `Thumbnailer API`_ section.
+
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 
@@ -693,3 +699,32 @@ to set auto mode (the default) with ``b``::
     Controls the visibility of the mpv logo on idle. Valid arguments are ``yes``,
     ``no``, and ``cycle`` to toggle between yes and no. If a second argument is
     passed (any value), then the output on the OSD will be silenced.
+
+Thumbnailer API
+~~~~~~~~~~~~~~~
+
+The OSC supports displaying thumbnails when hovering over the seekbar if a
+compatible thumbnailer script is installed. It communicates with a thumbnailer
+script via the following ``user-data`` properties:
+
+``user-data/mpv/thumbnailer/enabled``
+    The thumbnailer script shall set this to ``true`` to signal that it is active.
+    The OSC will start issuing thumbnail draw requests when this is set.
+
+``user-data/mpv/thumbnailer/draw``
+    Set by the OSC to request a thumbnail within the currently playing file.
+    It is a table with the following fields:
+
+    ``hover_sec``
+        The playback position in seconds at the mouse hover position.
+
+    ``x``, ``y``
+        Top-left coordinates (positive integers) to draw the thumbnail at.
+
+    ``w``, ``h``
+        Width and height (positive non-zero integers) of the area to draw the
+        thumbnail in. Note that this only specifies the drawing width and
+        height, the actual backing thumbnail size may differ.
+
+    The OSC sets this property to ``nil`` to signal the thumbnailer to clear
+    the displayed thumbnail.
