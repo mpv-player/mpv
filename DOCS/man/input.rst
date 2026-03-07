@@ -3924,6 +3924,10 @@ Property list
         the left, right, top, and bottom margins respectively.
         Values are between 0.0 and 1.0, normalized to window width/height.
 
+    ``user-data/osc/draw-preview``
+        Used to communicate between osc and compatible thumbnailer (if
+        installed). See `OSC Preview API`_ section for more details.
+
     ``user-data/mpv/ytdl``
         Data shared by the builtin ytdl hook script.
 
