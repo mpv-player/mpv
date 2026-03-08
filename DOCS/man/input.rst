@@ -932,8 +932,9 @@ OSD Commands
 
     ``file`` specifies the file the raw image data is read from. It can be
     either a numeric UNIX file descriptor prefixed with ``@`` (e.g. ``@4``),
-    or a filename. The file will be mapped into memory with ``mmap()``,
-    copied, and unmapped before the command returns (changed in mpv 0.18.1).
+    or a filename. The file will be read into memory before the command returns.
+    Note that since mpv 0.42.0, if a file descriptor is specified, the file
+    offset of the descriptor will be modified.
 
     It is also possible to pass a raw memory address for use as bitmap memory
     by passing a memory address as integer prefixed with an ``&`` character.
@@ -942,10 +943,6 @@ OSD Commands
     memory address (since mpv 0.8.0, ignored before).
 
     ``offset`` is the byte offset of the first pixel in the source file.
-    (The current implementation always mmap's the whole file from position 0 to
-    the end of the image, so large offsets should be avoided. Before mpv 0.8.0,
-    the offset was actually passed directly to ``mmap``, but it was changed to
-    make using it easier.)
 
     ``fmt`` is a string identifying the image format. Currently, only ``bgra``
     is defined. This format has 4 bytes per pixels, with 8 bits per component.
@@ -973,12 +970,20 @@ OSD Commands
 
     .. note::
 
+        Before mpv 0.42.0, the file was mapped into memory with ``mmap()``,
+        copied, and unmapped before the command returns. Changing the file
+        before the command returns is highly discouraged as this could lead to
+        crashes on versions before 0.42.0.
+
         Before mpv 0.18.1, you had to do manual "double buffering" when updating
-        an overlay by replacing it with a different memory buffer. Since mpv
-        0.18.1, the memory is simply copied and doesn't reference any of the
-        memory indicated by the command's arguments after the command returns.
-        If you want to use this command before mpv 0.18.1, reads the old docs
-        to see how to handle this correctly.
+        an overlay by replacing it with a different memory buffer. If you want
+        to use this command before mpv 0.18.1, read the old docs to see how to
+        handle this correctly.
+
+        Larger offsets should be avoided as mpv versions before 0.42.0 used to
+        mmap the whole file from position 0 to the end of the image. Before mpv
+        0.8.0, the offset was actually passed directly to ``mmap``. Since mpv
+        0.42.0, no mmap happens, so offset is handled by seeking on the file.
 
 ``overlay-remove <id>``
     Remove an overlay added with ``overlay-add`` and the same ID. Does nothing
