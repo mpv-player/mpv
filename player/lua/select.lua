@@ -1144,9 +1144,9 @@ local function profiles()
     })
 
     local user_profiles = {}
-    for i, profile in pairs(get("profile-list")) do
+    for _, profile in ipairs(get("profile-list")) do
         if not builtin_profiles[profile.name] then
-            user_profiles[i] = profile.name
+            user_profiles[#user_profiles + 1] = profile.name
         end
     end
     table.sort(user_profiles)
