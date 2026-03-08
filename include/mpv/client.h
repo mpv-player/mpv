@@ -1776,9 +1776,6 @@ MPV_EXPORT void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), vo
  * This is a helper, and somewhat equivalent to calling mpv_wait_event() in a
  * loop until all known asynchronous requests have sent their reply as event,
  * except that the event queue is not emptied.
- *
- * In case you called mpv_suspend() before, this will also forcibly reset the
- * suspend counter of the given handle.
  */
 MPV_EXPORT void mpv_wait_async_requests(mpv_handle *ctx);
 
