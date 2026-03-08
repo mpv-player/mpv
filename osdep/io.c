@@ -284,10 +284,8 @@ int mp_stat(const char *path, struct mp_stat *buf)
 int mp_fstat(int fd, struct mp_stat *buf)
 {
     HANDLE h = (HANDLE)_get_osfhandle(fd);
-    if (h == INVALID_HANDLE_VALUE) {
-        errno = EBADF;
+    if (h == INVALID_HANDLE_VALUE)
         return -1;
-    }
     // Use mpv's hstat() function rather than MSVCRT's fstat() because mpv's
     // supports directories and device/inode numbers.
     return hstat(h, buf);
@@ -815,10 +813,8 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
     mp_assert(flags == MAP_SHARED); // not implemented
 
     HANDLE osf = (HANDLE)_get_osfhandle(fd);
-    if (osf == INVALID_HANDLE_VALUE) {
-        errno = EBADF;
+    if (osf == INVALID_HANDLE_VALUE)
         return MAP_FAILED;
-    }
 
     DWORD protect = 0;
     DWORD access = 0;
