@@ -63,6 +63,11 @@ bool mp_set_cloexec(int fd)
 }
 
 #ifndef _WIN32
+int mp_dup_cloexec(int fd)
+{
+    return fcntl(fd, F_DUPFD_CLOEXEC);
+}
+
 int mp_make_cloexec_pipe(int pipes[2])
 {
     if (pipe(pipes) != 0) {
@@ -261,6 +266,24 @@ static int hstat(HANDLE h, struct mp_stat *buf)
 
     *buf = st;
     return 0;
+}
+
+int mp_dup_cloexec(int fd)
+{
+    HANDLE proc = GetCurrentProcess();
+    HANDLE src = (HANDLE)_get_osfhandle(fd), dup = INVALID_HANDLE_VALUE;
+    if (src == INVALID_HANDLE_VALUE)
+        return -1;
+    BOOL ok = DuplicateHandle(proc, src, proc, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS);
+    if (!ok) {
+        set_errno_from_lasterror();
+        return -1;
+    }
+    int oflag = _O_RDWR | _O_NOINHERIT; // FIXME: find out the proper flags from the HANDLE
+    int dupfd = _open_osfhandle((intptr_t)dup, oflag);
+    if (dupfd < 0)
+        CloseHandle(dup);
+    return dupfd;
 }
 
 int mp_stat(const char *path, struct mp_stat *buf)
