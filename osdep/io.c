@@ -815,7 +815,7 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
     mp_assert(flags == MAP_SHARED); // not implemented
 
     HANDLE osf = (HANDLE)_get_osfhandle(fd);
-    if (!osf) {
+    if (osf == INVALID_HANDLE_VALUE) {
         errno = EBADF;
         return MAP_FAILED;
     }
