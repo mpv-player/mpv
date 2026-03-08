@@ -34,6 +34,7 @@
 #include "common/playlist.h"
 #include "common/stats.h"
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "filters/f_decoder_wrapper.h"
 #include "filters/filter_internal.h"
 #include "input/input.h"
@@ -1348,6 +1349,7 @@ void idle_loop(struct MPContext *mpctx)
             handle_force_window(mpctx, true);
             mp_wakeup_core(mpctx);
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
+            demux_packet_pool_clear(demux_packet_pool_get(mpctx->global));
             need_reinit = false;
         }
         mp_idle(mpctx);
