@@ -3201,6 +3201,20 @@ Property list
     ``tablet-pos/pad-btns/N``
         The state of the Nth tablet pad button, ``pressed`` or ``released``.
 
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "x"                  MPV_FORMAT_INT64
+            "y"                  MPV_FORMAT_INT64
+            "tool-in-proximity"  MPV_FORMAT_FLAG
+            "tool-tip"           MPV_FORMAT_STRING
+            "tool-stylus-btn1"   MPV_FORMAT_STRING
+            "tool-stylus-btn2"   MPV_FORMAT_STRING
+            "tool-stylus-btn3"   MPV_FORMAT_STRING
+            "pad-focus"          MPV_FORMAT_FLAG
+            "pad-btns"           MPV_FORMAT_NODE_MAP
+               (key and string value for each pad-btn entry)
+
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.
     The extradata is returned as a string as-is. This property is not
