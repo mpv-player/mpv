@@ -5152,6 +5152,28 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     recreate_overlays(mpctx);
 }
 
+static bool
+fread_pic(FILE *fp, mp_image_t *dst, size_t bytesPerLine, size_t h, size_t stride, size_t offset)
+{
+    size_t bytesRead = 0, expectedBytes = h * bytesPerLine;
+    size_t src_off = offset, dst_off = 0;
+    if (stride == dst->stride[0]) {
+        fseek(fp, src_off, SEEK_SET);
+        bytesRead = fread(dst->planes[0], 1, expectedBytes, fp);
+    } else {
+        for (int i = 0; i < h; i++) {
+            fseek(fp, src_off, SEEK_SET);
+            size_t r = fread(dst->planes[0] + dst_off, 1, bytesPerLine, fp);
+            if (r != bytesPerLine)
+                break;
+            bytesRead += bytesPerLine;
+            src_off += stride;
+            dst_off += dst->stride[0];
+        }
+    }
+    return bytesRead == expectedBytes;
+}
+
 static void cmd_overlay_add(void *pcmd)
 {
     struct mp_cmd_ctx *cmd = pcmd;
@@ -5189,14 +5211,12 @@ static void cmd_overlay_add(void *pcmd)
     if (!overlay.source)
         goto error;
     int fd = -1;
-    bool close_fd = true;
     void *p = NULL;
     if (file[0] == '@') {
         char *end;
-        fd = strtol(&file[1], &end, 10);
-        if (!file[1] || end[0])
-            fd = -1;
-        close_fd = false;
+        int srcfd = strtol(&file[1], &end, 10);
+        if (file[1] && end[0] == '\0' && srcfd >= 0)
+            fd = mp_dup_cloexec(srcfd); // fdopen will "own" the fd
     } else if (file[0] == '&') {
         char *end;
         unsigned long long addr = strtoull(&file[1], &end, 0);
@@ -5206,24 +5226,22 @@ static void cmd_overlay_add(void *pcmd)
     } else {
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
-    size_t map_size = 0;
-    if (fd >= 0) {
-        map_size = offset + h * stride;
-        void *m = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
-        if (close_fd)
-            close(fd);
-        if (m && m != MAP_FAILED)
-            p = m;
+
+    FILE *fp = (fd >= 0) ? fdopen(fd, "rb") : NULL;
+    int open_or_read_err = 1, bytesPerLine = w * 4;
+    if (p) {
+        memcpy_pic(overlay.source->planes[0], (char *)p + offset, bytesPerLine,
+                   h, overlay.source->stride[0], stride);
+        open_or_read_err = 0;
+    } else if (fp) {
+        open_or_read_err = !fread_pic(fp, overlay.source, bytesPerLine, h, stride, offset);
+        fclose(fp);
     }
-    if (!p) {
-        MP_ERR(mpctx, "overlay-add: could not open or map '%s'\n", file);
+    if (open_or_read_err) {
+        MP_ERR(mpctx, "overlay-add: could not open or read '%s'\n", file);
         talloc_free(overlay.source);
         goto error;
     }
-    memcpy_pic(overlay.source->planes[0], (char *)p + offset, w * 4, h,
-               overlay.source->stride[0], stride);
-    if (map_size)
-        munmap(p, map_size);
 
     replace_overlay(mpctx, id, &overlay);
     return;
