@@ -98,7 +98,7 @@ static int init(struct ao *ao)
 {
     struct priv *ac = ao->priv;
 
-    ac->enc = encoder_context_alloc(ao->encode_lavc_ctx, STREAM_AUDIO, ao->log);
+    ac->enc = mp_encoder_context_alloc(ao->encode_lavc_ctx, STREAM_AUDIO, ao->log);
     if (!ac->enc)
         return -1;
     talloc_steal(ac, ac->enc);
@@ -137,10 +137,10 @@ static int init(struct ao *ao)
     encoder->sample_fmt = af_to_avformat(ao->format);
     encoder->bits_per_raw_sample = ac->sample_size * 8;
 
-    if (!encoder_init_codec_and_muxer(ac->enc))
+    if (!mp_encoder_init_codec_and_muxer(ac->enc))
         goto fail;
 
-    ac->worst_time_base = encoder_get_mux_timebase_unlocked(ac->enc);
+    ac->worst_time_base = mp_encoder_get_mux_timebase_unlocked(ac->enc);
     ac->pcmhack = 0;
     if (encoder->frame_size <= 1)
         ac->pcmhack = av_get_bits_per_sample(encoder->codec_id) / 8;
@@ -183,7 +183,7 @@ static void uninit(struct ao *ao)
     if (!ac->shutdown) {
         if (!write_frame(ao, MP_EOF_FRAME))
             MP_WARN(ao, "could not flush last frame\n");
-        encoder_encode(ac->enc, NULL);
+        mp_encoder_encode(ac->enc, NULL);
     }
 
     talloc_free(ac->filter_root);
@@ -217,7 +217,7 @@ static void encode(struct ao *ao, struct mp_aframe *af)
     ac->lastpts = frame_pts;
 
     frame->quality = encoder->global_quality;
-    encoder_encode(ac->enc, frame);
+    mp_encoder_encode(ac->enc, frame);
     av_frame_free(&frame);
 }
 
