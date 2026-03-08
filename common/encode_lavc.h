@@ -59,7 +59,7 @@ struct encode_lavc_context {
 // Static information after encoder init. This never changes (even if there are
 // dynamic runtime changes, they have to work over AVPacket side data).
 // For use in encoder_context, most fields are copied from encoder_context.encoder
-// by encoder_init_codec_and_muxer().
+// by mp_encoder_init_codec_and_muxer().
 struct encoder_stream_info {
     AVRational timebase; // timebase used by the encoder (in frames/out packets)
     AVCodecParameters *codecpar;
@@ -91,20 +91,20 @@ struct encoder_context {
 // Free with talloc_free(). (Keep in mind actual deinitialization requires
 // sending a flush packet.)
 // This can fail and return NULL.
-struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
+struct encoder_context *mp_encoder_context_alloc(struct encode_lavc_context *ctx,
                                               enum stream_type type,
                                               struct mp_log *log);
 
 // After setting your codec parameters on p->encoder, you call this to "open"
 // the encoder. This also initializes p->mux_stream. Returns false on failure.
-bool encoder_init_codec_and_muxer(struct encoder_context *p);
+bool mp_encoder_init_codec_and_muxer(struct encoder_context *p);
 
 // Encode the frame and write the packet. frame is ref'ed as need.
-bool encoder_encode(struct encoder_context *p, AVFrame *frame);
+bool mp_encoder_encode(struct encoder_context *p, AVFrame *frame);
 
 // Return muxer timebase (only available if p->mux_stream is initialized).
-AVRational encoder_get_mux_timebase_unlocked(struct encoder_context *p);
+AVRational mp_encoder_get_mux_timebase_unlocked(struct encoder_context *p);
 
-void encoder_update_log(struct mpv_global *global);
+void mp_encoder_update_log(struct mpv_global *global);
 
 #endif
