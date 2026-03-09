@@ -26,14 +26,6 @@
 
 char *mp_basename(const char *path);
 
-/* Return file extension, excluding the '.'. If root is not NULL, set it to the
- * part of the path without extension. So: path == root + "." + extension
- * Don't consider it a file extension if the only '.' is the first character.
- * Return NULL if no extension and don't set *root in this case.
- */
-char *mp_splitext(const char *path, bstr *root);
-
-// This is a shorthand to remove the extension
 char *mp_strip_ext(void *talloc_ctx, const char *s);
 const char *mp_get_ext(const char *s);
 
