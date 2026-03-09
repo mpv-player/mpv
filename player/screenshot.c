@@ -482,7 +482,7 @@ void cmd_screenshot_to_file(void *p)
     int mode = cmd->args[1].v.i;
     struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
 
-    char *ext = mp_splitext(filename, NULL);
+    const char *ext = mp_get_ext(filename);
     int format = image_writer_format_from_ext(ext);
     if (format)
         opts.format = format;
