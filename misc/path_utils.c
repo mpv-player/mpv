@@ -105,6 +105,11 @@ char *mp_strip_ext(void *talloc_ctx, const char *s)
     return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
 }
 
+const char *mp_get_ext(const char *s)
+{
+    return mp_splitext(s, NULL);
+}
+
 bool mp_path_is_absolute(struct bstr path)
 {
     if (path.len && strchr(mp_path_separators, path.start[0]))
