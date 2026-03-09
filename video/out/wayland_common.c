@@ -2033,6 +2033,10 @@ static void supported_feature(void *data, struct wp_color_manager_v1 *color_mana
         MP_VERBOSE(wl, "Compositor supports setting primary color luminances.\n");
         wl->supports_set_luminances = true;
         break;
+    case WP_COLOR_MANAGER_V1_FEATURE_WINDOWS_SCRGB:
+        MP_VERBOSE(wl, "Compositor supports scRGB.\n");
+        wl->supports_scrgb = true;
+        break;
     }
 }
 
@@ -3507,6 +3511,15 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
 
+    // scRGB has dedicated creator, and not using the generic one.
+    struct wp_image_description_v1 *image_description;
+#if PL_API_VER >= 362
+    if (color->transfer == PL_COLOR_TRC_SCRGB && wl->supports_scrgb) {
+        image_description = wp_color_manager_v1_create_windows_scrgb(wl->color_manager);
+        goto set_img_desc;
+    }
+#endif
+
     int primaries = wl->primaries_map[color->primaries];
     int transfer = wl->transfer_map[color->transfer];
     if (!primaries)
@@ -3604,8 +3617,11 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
         wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
+    image_description = wp_image_description_creator_params_v1_create(image_creator_params);
+#if PL_API_VER >= 362
+set_img_desc:
+#endif
     wl->image_description_pending = true;
-    struct wp_image_description_v1 *image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     wl_proxy_set_queue((struct wl_proxy *)image_description, wl->color_queue);
     wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
     while (wl->image_description_pending)

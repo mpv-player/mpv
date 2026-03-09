@@ -102,6 +102,7 @@ struct vo_wayland_state {
     bool supports_parametric;
     bool supports_display_primaries;
     bool supports_set_luminances;
+    bool supports_scrgb;
     int primaries_map[PL_COLOR_PRIM_COUNT];
     int transfer_map[PL_COLOR_TRC_COUNT];
     void *icc_file;
