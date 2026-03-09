@@ -185,8 +185,6 @@ local margins_opts = {
 }
 
 local tick_delay = 1 / 60
-local audio_track_count = 0
-local sub_track_count = 0
 local window_control_box_width = 80
 local layouts = {}
 local is_december = os.date("*t").month == 12
@@ -257,6 +255,8 @@ local state = {
     hide_timer = nil,
     cache_state = nil,
     idle = false,
+    audio_track_count = 0,
+    sub_track_count = 0,
     no_video = false,
     file_loaded = false,
     enabled = true,
@@ -629,13 +629,14 @@ local function render_wipe(osd)
 end
 
 local function update_tracklist(_, track_list)
-    audio_track_count, sub_track_count = 0, 0
+    state.audio_track_count = 0
+    state.sub_track_count = 0
 
     for _, track in pairs(track_list) do
         if track.type == "audio" then
-            audio_track_count = audio_track_count + 1
+            state.audio_track_count = state.audio_track_count + 1
         elseif track.type == "sub" then
-            sub_track_count = sub_track_count + 1
+            state.sub_track_count = state.sub_track_count + 1
         end
     end
 
@@ -2005,20 +2006,20 @@ local function osc_init()
     --audio_track
     ne = new_element("audio_track", "button")
 
-    ne.enabled = audio_track_count > 0
+    ne.enabled = state.audio_track_count > 0
     ne.content = function ()
         return icons.audio .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("aid", "-") .. "/" .. audio_track_count
+               mp.get_property_number("aid", "-") .. "/" .. state.audio_track_count
     end
     bind_mouse_buttons("audio_track")
 
     --sub_track
     ne = new_element("sub_track", "button")
 
-    ne.enabled = sub_track_count > 0
+    ne.enabled = state.sub_track_count > 0
     ne.content = function ()
         return icons.subtitle .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("sid", "-") .. "/" .. sub_track_count
+               mp.get_property_number("sid", "-") .. "/" .. state.sub_track_count
     end
     bind_mouse_buttons("sub_track")
 
