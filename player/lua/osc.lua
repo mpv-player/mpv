@@ -2651,12 +2651,11 @@ tick = function()
     if not state.enabled then return end
 
     if state.idle then
+        render_wipe(state.osd)
         -- render idle message
         msg.trace("idle message")
         if user_opts.idlescreen then
             render_logo()
-        else
-            render_wipe(state.osd)
         end
 
         if state.showhide_enabled then
