@@ -628,22 +628,18 @@ local function render_wipe(osd)
     osd:remove()
 end
 
-
---
--- Tracklist Management
---
-
--- updates the OSC internal playlists, should be run each time the track-layout changes
-local function update_tracklist()
+local function update_tracklist(_, track_list)
     audio_track_count, sub_track_count = 0, 0
 
-    for _, track in pairs(mp.get_property_native("track-list")) do
+    for _, track in pairs(track_list) do
         if track.type == "audio" then
             audio_track_count = audio_track_count + 1
         elseif track.type == "sub" then
             sub_track_count = sub_track_count + 1
         end
     end
+
+    request_init()
 end
 
 -- WindowControl helpers
@@ -2006,9 +2002,6 @@ local function osc_init()
     ne.content = icons.chapter_next
     bind_mouse_buttons("chapter_next")
 
-    --
-    update_tracklist()
-
     --audio_track
     ne = new_element("audio_track", "button")
 
@@ -2739,7 +2732,7 @@ end
 
 mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
-mp.observe_property("track-list", "native", request_init)
+mp.observe_property("track-list", "native", update_tracklist)
 mp.observe_property("playlist-count", "native", request_init)
 mp.observe_property("playlist-pos", "native", request_init)
 mp.observe_property("chapter-list", "native", function(_, list)
