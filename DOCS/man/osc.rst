@@ -408,6 +408,18 @@ Configurable Options
     applied when the OSC appears and removed when it hides. Without this
     option, margins are only applied when ``visibility`` is set to ``always``.
 
+``sub_margins``
+    Default: yes
+
+    Whether to adjust ``--sub-margin-y`` so that subtitles do not overlap
+    with the OSC. The offset is derived from the bottom OSC margin and added
+    on top of the current ``--sub-margin-y`` value. Requires
+    ``dynamic_margins`` or ``visibility=always`` to take effect.
+
+    With ``boxvideo`` enabled and ``--sub-use-margins=no``, subtitles are
+    already confined to the video area and this option has no additional
+    effect.
+
 ``windowcontrols``
     Default: auto (Show window controls if there is no window border)
 

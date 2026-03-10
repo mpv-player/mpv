@@ -49,6 +49,7 @@ local user_opts = {
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
     dynamic_margins = false,    -- update margins dynamically with OSC visibility
+    sub_margins = true,         -- adjust sub-margin-y to not overlap with OSC
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
@@ -541,6 +542,18 @@ local function cache_enabled()
     return state.cache_state and #state.cache_state["seekable-ranges"] > 0
 end
 
+local function set_margin_offset(prop, offset)
+    if offset > 0 then
+        if not state[prop] then
+            state[prop] = mp.get_property_number(prop)
+        end
+        mp.set_property_number(prop, state[prop] + offset)
+    elseif state[prop] then
+        mp.set_property_number(prop, state[prop])
+        state[prop] = nil
+    end
+end
+
 local function reset_margins()
     if state.using_video_margins then
         for _, mopt in ipairs(margins_opts) do
@@ -548,6 +561,7 @@ local function reset_margins()
         end
         state.using_video_margins = false
     end
+    set_margin_offset("sub-margin-y", 0)
 end
 
 local function update_margins()
@@ -585,6 +599,23 @@ local function update_margins()
     else
         reset_margins()
     end
+
+    local function get_margin(ent)
+        local margin = 0
+        if user_opts[ent .. "_margins"] then
+            local align = mp.get_property(ent .. "-align-y")
+            if align == "top" and top_vis then
+                margin = margins.t
+            elseif align == "bottom" and bottom_vis then
+                margin = margins.b
+            end
+        end
+        if ent == "sub" and user_opts.boxvideo and mp.get_property_bool("sub-use-margins") then
+            margin = 0
+        end
+        return margin * osc_param.playresy
+    end
+    set_margin_offset("sub-margin-y", get_margin("sub"))
 
     mp.set_property_native("user-data/osc/margins", margins)
 end
