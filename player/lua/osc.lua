@@ -3092,7 +3092,7 @@ end)
 validate_user_opts()
 set_osc_styles()
 set_time_styles(true, true)
-set_tick_delay("display_fps", mp.get_property_number("display_fps"))
+set_tick_delay()
 visibility_mode(user_opts.visibility, true)
 update_duration_watch()
 
