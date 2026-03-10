@@ -56,6 +56,10 @@ local user_opts = {
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     windowcontrols_independent = true, -- show window controls and bottom bar independently
+    floatingtitle = true,         -- show title in the floating layout?
+    floatingwidth = 700,          -- width of the floating layout
+    floatingalpha = 130,          -- alpha of the floating layout background
+    tracknumberswidth = 35,       -- width for track number labels (0 = icon only)
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
@@ -260,6 +264,12 @@ local function set_osc_styles()
         wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fn" .. icon_font .. "}",
         wcTitle = "{\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\fs24\\q2}",
         wcBar = "{\\1c&H" .. osc_color_convert(user_opts.background_color) .. "}",
+        floatingButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs26\\fn" .. icon_font .. "}",
+        floatingButtonslabel = "{\\fs26\\fn" .. mp.get_property("options/osd-font") .. "}",
+        floatingButtonsBig = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs30\\fn" .. icon_font .. "}",
+        floatingBox = "{\\rDefault\\blur0\\bord0\\1c&H" ..
+            osc_color_convert(user_opts.background_color) .. "\\3c&H" ..
+            osc_color_convert(user_opts.background_color) .. "}",
     }
 end
 
@@ -1071,19 +1081,39 @@ local function render_elements(master_ass)
                                              elem_geo.h - foV)
                         end
                     elseif slider_lo.rtype == "inverted" then
+                        local rlh = slider_lo.inverted_size or 1
                         if slider_lo.stype ~= "bar" then
-                            ass_draw_rr_h_ccw(elem_ass, pstart, (elem_geo.h / 2) - 1, pend,
-                                              (elem_geo.h / 2) + 1,
-                                              1, slider_lo.stype == "diamond")
+                            ass_draw_rr_h_ccw(elem_ass, pstart, (elem_geo.h / 2) - rlh, pend,
+                                              (elem_geo.h / 2) + rlh,
+                                              rlh, slider_lo.stype == "diamond")
                         else
-                            elem_ass:rect_ccw(pstart, (elem_geo.h / 2) - 1, pend,
-                                              (elem_geo.h / 2) + 1)
+                            elem_ass:rect_ccw(pstart, (elem_geo.h / 2) - rlh, pend,
+                                              (elem_geo.h / 2) + rlh)
                         end
                     end
                 end
             end
 
             elem_ass:draw_stop()
+
+            -- hover position indicator
+            if slider_lo.hover_bar and element.slider.tooltipF ~= nil
+                and mouse_hit(element) then
+
+                local hover_val = get_slider_value(element)
+                local hover_x = get_slider_ele_pos_for(element, hover_val)
+
+                elem_ass:new_event()
+                elem_ass:pos(element.hitbox.x1 + hover_x - 0.75,
+                             element.hitbox.y1 + foV)
+                elem_ass:an(7)
+                elem_ass:append(element.layout.style)
+                ass_append_alpha(elem_ass,
+                    {[1] = 80, [2] = 255, [3] = 255, [4] = 255}, 0)
+                elem_ass:draw_start()
+                elem_ass:rect_cw(0, 0, 1.5, elem_geo.h - 2 * foV)
+                elem_ass:draw_stop()
+            end
 
             -- add tooltip
             if element.slider.tooltipF ~= nil then
@@ -1258,16 +1288,44 @@ local function window_controls(topbar)
              get_hitbox_coords(controlbox_left, wc_geo.y, wc_geo.an,
                                controlbox_w, wc_geo.h))
 
+    local floating_buttons_only = user_opts.layout == "floating"
+                                  and user_opts.floatingtitle
+
     local lo
 
     -- Background Bar
     local ne = new_element("wcbar", "box")
     ne.is_wc = true
     lo = add_layout("wcbar")
-    lo.geometry = wc_geo
     lo.layer = 10
-    lo.style = osc_styles.wcBar
-    lo.alpha[1] = user_opts.boxalpha
+    if floating_buttons_only then
+        -- Compact background behind buttons only
+        lo.alpha[1] = user_opts.floatingalpha
+        local blur_extend = 4
+        local r = 10
+        lo.geometry = {
+            x = controlbox_left - blur_extend,
+            y = wc_geo.y,
+            an = wc_geo.an,
+            w = controlbox_w + blur_extend + r,
+            h = wc_geo.h + blur_extend + r,
+        }
+        lo.style = osc_styles.floatingBox
+        lo.box.radius = r
+    elseif user_opts.layout == "floating" then
+        -- Full-width bar
+        lo.alpha[1] = user_opts.floatingalpha
+        local blur_extend = 4
+        lo.geometry = {
+            x = wc_geo.x - blur_extend, y = wc_geo.y, an = wc_geo.an,
+            w = wc_geo.w + 2 * blur_extend, h = wc_geo.h + blur_extend,
+        }
+        lo.style = osc_styles.floatingBox
+    else
+        lo.alpha[1] = user_opts.boxalpha
+        lo.geometry = wc_geo
+        lo.style = osc_styles.wcBar
+    end
 
     local button_y = wc_geo.y - (wc_geo.h / 2)
     local first_geo =
@@ -1331,6 +1389,9 @@ local function window_controls(topbar)
     add_area("showhide_wc", wc_geo.x, sh_area_y0, wc_geo.w, sh_area_y1)
     if topbar then
         -- The title is already there as part of the top bar
+        return
+    elseif floating_buttons_only then
+        -- No title bar or video margins, just the buttons
         return
     else
         -- Apply boxvideo margins to the control bar
@@ -1901,6 +1962,214 @@ layouts["slimtopbar"] = function()
     bar_layout(1, true)
 end
 
+layouts["floating"] = function ()
+    local show_title = user_opts.floatingtitle
+    local osc_geo = {
+        w = user_opts.floatingwidth,
+        h = show_title and 90 or 72,
+        r = 14,
+        p = 18,
+    }
+
+    local min_width = 620
+    local margin = 80
+    if osc_param.display_aspect > 0 and osc_param.playresx < min_width + margin then
+        osc_param.playresy = (min_width + margin) / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+    end
+
+    osc_geo.w = math.max(min_width, math.min(osc_geo.w, osc_param.playresx - margin))
+
+    -- halign/valign
+    local x = math.floor(get_align(user_opts.halign, osc_param.playresx,
+        osc_geo.w, 0))
+    local y = math.floor(get_align(user_opts.valign, osc_param.playresy,
+        osc_geo.h, 0))
+
+    local half_w = (osc_geo.w - 2 * osc_geo.p) / 2
+
+    osc_param.areas = {}
+
+    add_area("input", get_hitbox_coords(x, y, 5, osc_geo.w, osc_geo.h))
+
+    -- Show/hide deadzone
+    local sh_area_y0, sh_area_y1
+    if user_opts.valign > 0 then
+        sh_area_y0 = get_align(-1 + (2 * user_opts.deadzonesize),
+            y - (osc_geo.h / 2), 0, 0)
+        sh_area_y1 = osc_param.playresy
+    else
+        sh_area_y0 = 0
+        sh_area_y1 = (y + (osc_geo.h / 2)) +
+            get_align(1 - (2 * user_opts.deadzonesize),
+            osc_param.playresy - (y + (osc_geo.h / 2)), 0, 0)
+    end
+    add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
+
+    local lo
+
+    -- Background
+    new_element("bgbox", "box")
+    lo = add_layout("bgbox")
+    lo.geometry = {x = x, y = y, an = 5, w = osc_geo.w, h = osc_geo.h}
+    lo.layer = 10
+    lo.style = osc_styles.floatingBox
+    lo.alpha[1] = user_opts.floatingalpha
+    lo.alpha[3] = 255
+    lo.box.radius = osc_geo.r
+
+    -- Row positions
+    local title_h = 14
+    local tile_pos, seekbar_pos, ctrl_pos
+    if show_title then
+        tile_pos = y + (-osc_geo.h + title_h + osc_geo.p) / 2 -- title row
+        seekbar_pos = y - 2                                   -- seekbar row
+        ctrl_pos = y + (osc_geo.h - 18 - osc_geo.p) / 2 - 2   -- controls row
+    else
+        seekbar_pos = y - 15  -- seekbar row
+        ctrl_pos = y + 15     -- controls row
+    end
+
+    local tc_w = (state.tc_ms) and 122 or 87
+    if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
+        tc_w = tc_w * user_opts.tcspace / 100
+    end
+
+    -- Title row (optional)
+    if show_title then
+        lo = add_layout("title")
+        local title_reserved = 160
+        lo.geometry = {x = x - half_w, y = tile_pos, an = 4,
+            w = half_w * 2 - title_reserved, h = title_h}
+        lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
+            osc_styles.vidtitle,
+            x - half_w, tile_pos - title_h, x + half_w - title_reserved, tile_pos + title_h)
+        lo.button.maxchars = user_opts.boxmaxchars
+    end
+
+    -- Seekbar row
+    local tc_h = 20
+    local seekbar_pad = 2
+    local seekbar_pos_bar = seekbar_pos - 1
+
+    lo = add_layout("tc_left")
+    lo.geometry = {x = x - half_w, y = seekbar_pos_bar, an = 4, w = tc_w, h = tc_h}
+    lo.style = osc_styles.timecodes
+
+    lo = add_layout("tc_right")
+    lo.geometry = {x = x + half_w, y = seekbar_pos_bar, an = 6, w = tc_w, h = tc_h}
+    lo.style = osc_styles.timecodes
+
+    local sb_l = x - half_w + tc_w + seekbar_pad
+    local sb_r = x + half_w - tc_w - seekbar_pad
+    local seekbar_w = math.max(0, sb_r - sb_l)
+    local seekbar_cx = (sb_l + sb_r) / 2
+
+    -- Seekbar track background
+    local seekH = 16
+    new_element("bgbar1", "box")
+    lo = add_layout("bgbar1")
+    lo.geometry = {x = seekbar_cx, y = seekbar_pos_bar, an = 5, w = seekbar_w, h = seekH}
+    lo.layer = 15
+    lo.style = osc_styles.timecodes
+    lo.alpha[1] = math.min(255, user_opts.floatingalpha + (255 - user_opts.floatingalpha) * 0.75)
+    if user_opts["seekbarstyle"] ~= "bar" then
+        lo.box.radius = seekH / 2
+        lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
+    end
+
+    lo = add_layout("seekbar")
+    lo.geometry = {x = seekbar_cx, y = seekbar_pos_bar, an = 5, w = seekbar_w, h = seekH}
+    lo.style = osc_styles.timecodes
+    lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.tooltip_an = 2
+    lo.slider.adjust_tooltip = false
+    lo.slider.hover_bar = true
+    lo.slider.stype = user_opts["seekbarstyle"]
+    lo.slider.rtype = user_opts["seekrangestyle"]
+    lo.slider.gap = 2
+    lo.slider.border = 0
+    lo.slider.inverted_size = 0.4
+
+    -- Control row
+    local btn_dist = 38
+    local btn_bsize = 32
+
+    lo = add_layout("play_pause")
+    lo.geometry = {x = x, y = ctrl_pos, an = 5, w = btn_bsize, h = btn_bsize}
+    lo.style = osc_styles.floatingButtonsBig
+
+    lo = add_layout("skip_backward")
+    lo.geometry = {x = x - btn_dist, y = ctrl_pos, an = 5, w = btn_bsize, h = btn_bsize}
+    lo.style = osc_styles.floatingButtonsBig
+
+    lo = add_layout("skip_forward")
+    lo.geometry = {x = x + btn_dist, y = ctrl_pos, an = 5, w = btn_bsize, h = btn_bsize}
+    lo.style = osc_styles.floatingButtonsBig
+
+    lo = add_layout("chapter_prev")
+    lo.geometry = {x = x - btn_dist * 2, y = ctrl_pos, an = 5, w = btn_bsize, h = btn_bsize}
+    lo.style = osc_styles.floatingButtonsBig
+
+    lo = add_layout("chapter_next")
+    lo.geometry = {x = x + btn_dist * 2, y = ctrl_pos, an = 5, w = btn_bsize, h = btn_bsize}
+    lo.style = osc_styles.floatingButtonsBig
+
+    local btn_pad = 8
+
+    -- Control row - left
+    local ll = x - half_w
+    local btn_size = 18
+
+    lo = add_layout("menu")
+    lo.geometry = {x = ll, y = ctrl_pos, an = 4, w = btn_size, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    ll = ll + btn_size + btn_pad
+
+    lo = add_layout("playlist_prev")
+    lo.geometry = {x = ll, y = ctrl_pos, an = 4, w = btn_size, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    ll = ll + btn_size + btn_pad
+
+    lo = add_layout("playlist_next")
+    lo.geometry = {x = ll, y = ctrl_pos, an = 4, w = btn_size, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    ll = ll + btn_size + btn_pad
+
+    -- Custom buttons
+    for i = 1, last_custom_button do
+        lo = add_layout("custom_button_" .. i)
+        lo.geometry = {x = ll, y = ctrl_pos, an = 4, w = btn_size, h = btn_size  }
+        lo.style = osc_styles.vidtitleBar
+        ll = ll + btn_size + btn_pad
+    end
+
+    -- Control row - right
+    local rr = x + half_w - btn_size / 2
+    btn_pad = 12
+    local tnW = user_opts.tracknumberswidth
+    local tsW = btn_size + (tnW > 0 and tnW or 0)
+
+    lo = add_layout("fullscreen")
+    lo.geometry = {x = rr, y = ctrl_pos, an = 5, w = btn_size, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    rr = rr - btn_size - btn_pad
+
+    lo = add_layout("volume")
+    lo.geometry = {x = rr, y = ctrl_pos, an = 5, w = btn_size, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    rr = rr - tsW - btn_pad
+
+    lo = add_layout("sub_track")
+    lo.geometry = {x = rr, y = ctrl_pos, an = 5, w = tsW, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+    rr = rr - tsW - btn_pad
+
+    lo = add_layout("audio_track")
+    lo.geometry = {x = rr, y = ctrl_pos, an = 5, w = tsW, h = btn_size}
+    lo.style = osc_styles.floatingButtons
+end
+
 
 local function bind_mouse_buttons(element_name)
     for _, button in pairs({"mbtn_left", "mbtn_mid", "mbtn_right"}) do
@@ -1924,6 +2193,18 @@ local function bind_mouse_buttons(element_name)
             end
         end
     end
+end
+
+local function to_fraction(num, den)
+    local sup = {['0']='\226\129\176',['1']='\194\185',    ['2']='\194\178',
+                 ['3']='\194\179',    ['4']='\226\129\180',['5']='\226\129\181',
+                 ['6']='\226\129\182',['7']='\226\129\183',['8']='\226\129\184',
+                 ['9']='\226\129\185',['-']='\226\129\187'}
+    local sub = {['0']='\226\130\128',['1']='\226\130\129',['2']='\226\130\130',
+                 ['3']='\226\130\131',['4']='\226\130\132',['5']='\226\130\133',
+                 ['6']='\226\130\134',['7']='\226\130\135',['8']='\226\130\136',
+                 ['9']='\226\130\137'}
+    return tostring(num):gsub('.', sup) .. "\226\129\132" .. tostring(den):gsub('.', sub)
 end
 
 local function osc_init()
@@ -2065,13 +2346,22 @@ local function osc_init()
     ne.content = icons.chapter_next
     bind_mouse_buttons("chapter_next")
 
+    local label_style = user_opts.layout == "floating" and osc_styles.floatingButtonslabel
+                                                        or osc_styles.smallButtonsLlabel
+
     --audio_track
     ne = new_element("audio_track", "button")
 
     ne.enabled = state.audio_track_count > 0
     ne.content = function ()
-        return icons.audio .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("aid", "-") .. "/" .. state.audio_track_count
+        if user_opts.tracknumberswidth == 0 then
+            return icons.audio
+        end
+        local track = mp.get_property_number("aid", "-")
+        local count = state.audio_track_count
+        return icons.audio .. label_style .. " " ..
+               (user_opts.layout == "floating" and to_fraction(track, count)
+                                                or track .. "/" .. count)
     end
     bind_mouse_buttons("audio_track")
 
@@ -2080,8 +2370,14 @@ local function osc_init()
 
     ne.enabled = state.sub_track_count > 0
     ne.content = function ()
-        return icons.subtitle .. osc_styles.smallButtonsLlabel .. " " ..
-               mp.get_property_number("sid", "-") .. "/" .. state.sub_track_count
+        if user_opts.tracknumberswidth == 0 then
+            return icons.subtitle
+        end
+        local track = mp.get_property_number("sid", "-")
+        local count = state.audio_track_count
+        return icons.subtitle .. label_style .. " " ..
+               (user_opts.layout == "floating" and to_fraction(track, count)
+                                                or track .. "/" .. count)
     end
     bind_mouse_buttons("sub_track")
 
