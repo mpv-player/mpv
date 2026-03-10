@@ -39,8 +39,8 @@ local script_opts = {
     menu_outline_size = 0,
     menu_outline_color = "#FFFFFF",
     corner_radius = 8,
-    margin_x = -1,
-    margin_y = -1,
+    margin_x = mp.get_property_native("osd-margin-x"),
+    margin_y = mp.get_property_native("osd-margin-y"),
     scale_with_window = "auto",
     focused_color = "#222222",
     focused_back_color = "#FFFFFF",
@@ -158,15 +158,6 @@ local function get_font()
 
     return "monospace"
 end
-
-local function get_margin_x()
-    return opts.margin_x > -1 and opts.margin_x or mp.get_property_native("osd-margin-x")
-end
-
-local function get_margin_y()
-    return opts.margin_y > -1 and opts.margin_y or mp.get_property_native("osd-margin-y")
-end
-
 
 -- Naive helper function to find the next UTF-8 character in "str" after "pos"
 -- by skipping continuation bytes. Assumes "str" contains valid UTF-8.
@@ -335,7 +326,7 @@ local function calculate_max_lines()
 
     return math.floor((select(2, get_scaled_osd_dimensions())
                        * (1 - global_margins.t - global_margins.b)
-                       - get_margin_y() - (selectable_items and opts.padding * 2 or 0))
+                       - opts.margin_y - (selectable_items and opts.padding * 2 or 0))
                       / get_line_height()
                       -- Subtract 1 for the input line and 0.5 for the empty
                       -- line between the log and the input line.
@@ -364,7 +355,7 @@ local function calculate_max_item_width()
     local result = width_overlay:update()
     if result.x0 then
         max_item_width = math.min(result.x1 - result.x0,
-                                  osd_w - get_margin_x() * 2 - opts.padding * 2)
+        osd_w - opts.margin_x * 2 - opts.padding * 2)
     end
 end
 
@@ -741,8 +732,8 @@ render = function()
         alignment = 7
         clipping_coordinates = x .. ",0," .. x + max_item_width .. "," .. osd_h
     else
-        x = get_margin_x()
-        y = osd_h * (1 - global_margins.b) - get_margin_y()
+        x = opts.margin_x
+        y = osd_h * (1 - global_margins.b) - opts.margin_y
         alignment = 1
         -- Avoid drawing below topbar OSC when there are wrapped lines.
         local coordinate_top = math.floor(global_margins.t * osd_h + 0.5)
@@ -1123,7 +1114,7 @@ local function determine_hovered_item()
     local mouse_pos = mp.get_property_native("mouse-pos")
     local mouse_x = mouse_pos.x / scale
     local mouse_y = mouse_pos.y / scale
-    local item_x0 = (searching_history and get_margin_x() or (osd_w - max_item_width) / 2)
+    local item_x0 = (searching_history and opts.margin_x or (osd_w - max_item_width) / 2)
                     - opts.padding
 
     if mouse_x < item_x0 or mouse_x > item_x0 + max_item_width + opts.padding * 2 then
