@@ -160,11 +160,27 @@ local function get_font()
 end
 
 local function get_margin_x()
-    return opts.margin_x > -1 and opts.margin_x or mp.get_property_native("osd-margin-x")
+    if opts.margin_x > -1 then
+        return opts.margin_x
+    end
+
+    if global_margins.t > 0 or global_margins.b > 0 then
+        return mp.get_property_native("option-info/osd-margin-x/default-value")
+    end
+
+    return mp.get_property_native("osd-margin-x")
 end
 
 local function get_margin_y()
-    return opts.margin_y > -1 and opts.margin_y or mp.get_property_native("osd-margin-y")
+    if opts.margin_y > -1 then
+        return opts.margin_y
+    end
+
+    if global_margins.t > 0 or global_margins.b > 0 then
+        return mp.get_property_native("option-info/osd-margin-y/default-value")
+    end
+
+    return mp.get_property_native("osd-margin-y")
 end
 
 
