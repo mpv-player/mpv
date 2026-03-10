@@ -392,13 +392,10 @@ Configurable Options
     if this option is set. Separately, if window controls are present (see
     below), they will be affected regardless of which osc layout is in use.
 
-    The border is static and appears even if the OSC is configured to appear
-    only on mouse interaction. If the OSC is invisible, the border is simply
-    filled with the background color (black by default).
-
-    This currently still makes the OSC overlap with subtitles (if the
-    ``--sub-use-margins`` option is set to ``yes``, the default). This may be
-    fixed later.
+    Subtitles may still overlap with the OSC when ``--sub-use-margins`` is set
+    to ``yes`` (the default), as they are allowed to extend into the margin
+    area. Setting ``--sub-use-margins=no`` confines subtitles to the video
+    area.
 
     This does not work correctly with video outputs like ``--vo=xv``, which
     render OSD into the unscaled video.
