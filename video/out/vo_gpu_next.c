@@ -2488,9 +2488,7 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
         return;
 
     const char *basename = mp_basename(shaderpath);
-    struct bstr shadername;
-    if (!mp_splitext(basename, &shadername))
-        shadername = bstr0(basename);
+    struct bstr shadername = bstr_strip_ext(bstr0(basename));
 
     for (int n = 0; opts[n * 2]; n++) {
         struct bstr k = bstr0(opts[n * 2 + 0]);
