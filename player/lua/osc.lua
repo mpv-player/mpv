@@ -2413,8 +2413,16 @@ local function process_event(source, what)
                 )
             ) then
             if window_controls_enabled() and user_opts.windowcontrols_independent then
-                if mouse_in_area("showhide_wc") then show_wc() else hide_wc() end
-                if mouse_in_area("showhide") then show_osc() else hide_osc() end
+                if mouse_in_area("showhide_wc") then
+                    show_wc()
+                elseif user_opts.visibility ~= "always" then
+                    hide_wc()
+                end
+                if mouse_in_area("showhide") then
+                    show_osc()
+                elseif user_opts.visibility ~= "always" then
+                    hide_osc()
+                end
             else
                 show_osc()
                 if window_controls_enabled() then show_wc() end
