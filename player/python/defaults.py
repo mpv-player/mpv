@@ -52,8 +52,8 @@ class Options:
                 val = None
         return val
 
-    def read_options(self, options: dict, identifier: typing.Optional[str] = None,
-        on_update: typing.Optional[typing.Callable[[typing.Any], typing.Any]] = None,
+    def read_options(self, options: dict, identifier: str | None = None,
+        on_update: typing.Callable[[typing.Any], typing.Any] | None = None,
     ):
         option_types = options.copy()
 

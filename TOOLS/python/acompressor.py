@@ -5,7 +5,6 @@
 # of the parameters.
 
 import re
-import typing
 from mpvclient import mpv  # type: ignore
 
 o = dict(
@@ -73,7 +72,7 @@ def show_osd(filter):  # noqa: A002
         mpv.commandv("show-text", "Dynamic range compressor: disabled", o["osd_timeout"])
         return
 
-    pretty: typing.Union[str, list] = []
+    pretty: str | list = []
     for param in params:
         value = parse_value(filter["params"][param["name"]])
         if not (param["hide_default"] and value == o["default_" + param["name"]]):  # type: ignore

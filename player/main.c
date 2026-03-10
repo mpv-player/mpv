@@ -213,9 +213,24 @@ void mp_destroy(struct MPContext *mpctx)
     uninit_libav(mpctx->global);
 
 #if HAVE_PYTHON
-    if (mpctx->opts->enable_python) {
-        if (Py_IsInitialized()) Py_FinalizeEx();
-    }
+    // Do NOT call Py_FinalizeEx() here.
+    //
+    // Subinterpreters use OWN_GIL + use_main_obmalloc=0, giving each script
+    // its own isolated pymalloc arena.  Py_EndInterpreter() (called per
+    // script in end_interpreter()) frees that arena.  However, Py_AtExit()
+    // handlers registered by C extension modules (e.g. _ssl via
+    // requests/urllib3) are invoked by Py_FinalizeEx() in the main
+    // interpreter's context.  If such a handler holds a reference to a
+    // Python object that lived in the now-freed subinterpreter arena and
+    // tries to Py_XDECREF / PyObject_Free it through the main allocator,
+    // glibc reports "free(): invalid pointer" and aborts.
+    //
+    // Skipping Py_FinalizeEx() is safe here: all script subinterpreters are
+    // already finalized by the time we reach this point, and the OS reclaims
+    // all remaining memory on process exit.
+    // if (mpctx->opts->enable_python) {
+    //     if (Py_IsInitialized()) Py_FinalizeEx();
+    // }
 #endif
 
     mp_msg_uninit(mpctx->global);
