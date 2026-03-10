@@ -420,6 +420,15 @@ Configurable Options
     already confined to the video area and this option has no additional
     effect.
 
+``osd_margins``
+    Default: yes
+
+    Whether to adjust ``--osd-margin-y`` so that OSD text does not overlap
+    with the OSC. The offset is derived from the top OSC margin (including
+    window controls when present) and added on top of the current
+    ``--osd-margin-y`` value. Requires ``dynamic_margins`` or
+    ``visibility=always`` to take effect.
+
 ``windowcontrols``
     Default: auto (Show window controls if there is no window border)
 

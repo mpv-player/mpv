@@ -50,6 +50,7 @@ local user_opts = {
     boxvideo = false,           -- apply osc_param.video_margins to video
     dynamic_margins = false,    -- update margins dynamically with OSC visibility
     sub_margins = true,         -- adjust sub-margin-y to not overlap with OSC
+    osd_margins = true,         -- adjust osd-margin-y to not overlap with OSC
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
@@ -562,6 +563,7 @@ local function reset_margins()
         state.using_video_margins = false
     end
     set_margin_offset("sub-margin-y", 0)
+    set_margin_offset("osd-margin-y", 0)
 end
 
 local function update_margins()
@@ -616,6 +618,7 @@ local function update_margins()
         return margin * osc_param.playresy
     end
     set_margin_offset("sub-margin-y", get_margin("sub"))
+    set_margin_offset("osd-margin-y", get_margin("osd"))
 
     mp.set_property_native("user-data/osc/margins", margins)
 end
