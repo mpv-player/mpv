@@ -227,6 +227,8 @@ struct priv {
 
     // --- Protected by cache_lock.
     char *cur_hwdec;
+    char *decoder_name;
+    char *decoder_desc;
     bool try_spdif;
     bool attached_picture;
     bool pts_reset;
@@ -373,8 +375,6 @@ static void decf_destroy(struct mp_filter *f)
         MP_DBG(f, "Uninit decoder.\n");
         talloc_free(p->decoder->f);
         p->decoder = NULL;
-        p->codec->decoder = NULL;
-        p->codec->decoder_desc = NULL;
     }
 
     decf_reset(f);
@@ -403,6 +403,13 @@ static bool reinit_decoder(struct priv *p)
 
     reset_decoder(p);
     p->has_broken_packet_pts = -10; // needs 10 packets to reach decision
+
+    mp_mutex_lock(&p->cache_lock);
+    talloc_free(p->decoder_name);
+    p->decoder_name = NULL;
+    talloc_free(p->decoder_desc);
+    p->decoder_desc = NULL;
+    mp_mutex_unlock(&p->cache_lock);
 
     const struct mp_decoder_fns *driver = NULL;
     struct mp_decoder_list *list = NULL;
@@ -455,11 +462,16 @@ static bool reinit_decoder(struct priv *p)
 
         p->decoder = driver->create(p->decf, p->codec, sel->decoder);
         if (p->decoder) {
-            p->codec->decoder = talloc_strdup(p, sel->decoder);
-            p->codec->decoder_desc = talloc_strdup(p, sel->desc && sel->desc[0] ? sel->desc : NULL);
+            const char *d = sel->desc && sel->desc[0] ? sel->desc : sel->decoder;
+
+            mp_mutex_lock(&p->cache_lock);
+            p->decoder_name = talloc_strdup(p, sel->decoder);
+            p->decoder_desc = talloc_strdup(p, d);
+            mp_mutex_unlock(&p->cache_lock);
+
             MP_VERBOSE(p, "Selected decoder: %s", sel->decoder);
-            if (p->codec->decoder_desc)
-                MP_VERBOSE(p, " - %s", p->codec->decoder_desc);
+            if (d)
+                MP_VERBOSE(p, " - %s", d);
             MP_VERBOSE(p, "\n");
             break;
         }
@@ -491,6 +503,24 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
     bool res = reinit_decoder(p);
     thread_unlock(p);
     return res;
+}
+
+void mp_decoder_wrapper_get_desc(struct mp_decoder_wrapper *d,
+                                 char *buf, size_t buf_size)
+{
+    struct priv *p = d->f->priv;
+    mp_mutex_lock(&p->cache_lock);
+    snprintf(buf, buf_size, "%s", p->decoder_desc ? p->decoder_desc : "");
+    mp_mutex_unlock(&p->cache_lock);
+}
+
+void mp_decoder_wrapper_get_name(struct mp_decoder_wrapper *d,
+                                 char *buf, size_t buf_size)
+{
+    struct priv *p = d->f->priv;
+    mp_mutex_lock(&p->cache_lock);
+    snprintf(buf, buf_size, "%s", p->decoder_name ? p->decoder_name : "");
+    mp_mutex_unlock(&p->cache_lock);
 }
 
 void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num)
