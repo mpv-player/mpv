@@ -175,8 +175,8 @@ Configurable Options
     Default: bottombar
 
     The layout for the OSC. Currently available are: box, slimbox,
-    bottombar, topbar, slimbottombar and slimtopbar. Default pre-0.21.0 was
-    'box'.
+    bottombar, topbar, slimbottombar, slimtopbar and floating. Default
+    pre-0.21.0 was 'box'.
 
 ``seekbarstyle``
     Default: bar
@@ -467,6 +467,30 @@ Configurable Options
     String that supports property expansion that will be displayed as the
     windowcontrols title.
     ASS tags are escaped, and newlines and trailing slashes are stripped.
+
+``floatingtitle``
+    Default: yes
+
+    Whether to show the title row in the ``floating`` layout. When enabled,
+    window controls are rendered as compact buttons without a full-width
+    background bar.
+
+``floatingwidth``
+    Default: 700
+
+    Width of the ``floating`` layout.
+
+``floatingalpha``
+    Default: 130
+
+    Alpha of the ``floating`` layout background, 0 (opaque) to 255 (fully
+    transparent).
+
+``tracknumberswidth``
+    Default: 35
+
+    Width of the track number labels next to the audio/subtitle track selector
+    icons. Set to ``0`` to hide track numbers and show only the icons.
 
 ``greenandgrumpy``
     Default: no
