@@ -3493,9 +3493,8 @@ Window
 
 ``--title-bar=<yes|no>``
     (Windows and X11 only)
-    Play video with the window title bar. Since this is on by default,
-    use ``--title-bar=no`` to hide the title bar. The ``--border`` option takes
-    precedence.
+    Play video with the window title bar. The ``--border`` option takes
+    precedence. (Default: no)
 
 ``--on-all-workspaces``
     (X11 and macOS only)

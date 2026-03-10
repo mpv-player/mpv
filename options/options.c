@@ -275,7 +275,6 @@ const struct m_sub_options vo_sub_opts = {
         .taskbar_progress = true,
         .show_in_taskbar = true,
         .border = true,
-        .title_bar = true,
         .appid = "mpv",
         .WinID = -1,
         .window_scale = 1.0,
