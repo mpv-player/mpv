@@ -48,6 +48,7 @@ local user_opts = {
     visibility_modes = "never_auto_always", -- visibility modes to cycle through
     boxmaxchars = 80,           -- title crop threshold for box layout
     boxvideo = false,           -- apply osc_param.video_margins to video
+    dynamic_margins = false,    -- update margins dynamically with OSC visibility
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
@@ -550,15 +551,15 @@ local function reset_margins()
 end
 
 local function update_margins()
-    local margins = osc_param.video_margins
-
-    -- Don't use margins if it's visible only temporarily.
-    if not state.osc_visible or get_hidetimeout() >= 0 or
-       (state.fullscreen and not user_opts.showfullscreen) or
-       (not state.fullscreen and not user_opts.showwindowed)
-    then
-        margins = {l = 0, r = 0, t = 0, b = 0}
-    end
+    local use_margins = get_hidetimeout() < 0 or user_opts.dynamic_margins
+    local top_vis = (user_opts.layout:find("top") and state.osc_visible) or state.wc_visible
+    local bottom_vis = user_opts.layout:find("bottom") and state.osc_visible
+    local margins = {
+        l = use_margins and osc_param.video_margins.l or 0,
+        r = use_margins and osc_param.video_margins.r or 0,
+        t = (use_margins and top_vis) and osc_param.video_margins.t or 0,
+        b = (use_margins and bottom_vis) and osc_param.video_margins.b or 0,
+    }
 
     if user_opts.boxvideo then
         -- check whether any margin option has a non-default value
@@ -2241,20 +2242,20 @@ local function osc_init()
     update_margins()
 end
 
-local function set_bar_visible(visible_key, visible, with_margins)
+local function set_bar_visible(visible_key, visible)
     if state[visible_key] ~= visible then
         state[visible_key] = visible
-        if with_margins then update_margins() end
+        update_margins()
     end
     request_tick()
 end
 
 local function osc_visible(visible)
-    set_bar_visible("osc_visible", visible, true)
+    set_bar_visible("osc_visible", visible)
 end
 
 local function set_wc_visible(visible)
-    set_bar_visible("wc_visible", visible, false)
+    set_bar_visible("wc_visible", visible)
 end
 
 local function show_bar(label, showtime_key, visible_key, anitype_key, set_visible)

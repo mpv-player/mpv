@@ -384,8 +384,9 @@ Configurable Options
     within the areas not covered by the osc (``yes``). If this option is set,
     the osc may overwrite the ``--video-margin-ratio-*`` options, even if the
     user has set them. (It will not overwrite them if all of them are set to
-    default values.) Additionally, ``visibility`` must be set to ``always``.
-    Otherwise, this option does nothing.
+    default values.) By default, ``visibility`` must be set to ``always``.
+    Use ``dynamic_margins`` to allow margins to update with OSC visibility
+    instead.
 
     Currently, this is supported for the ``bottombar``, ``slimbottombar``,
     ``topbar`` and ``slimtopbar`` layouts only. The other layouts do not change
@@ -399,6 +400,13 @@ Configurable Options
 
     This does not work correctly with video outputs like ``--vo=xv``, which
     render OSD into the unscaled video.
+
+``dynamic_margins``
+    Default: no
+
+    When set to ``yes``, margins follow the actual OSC visibility: they are
+    applied when the OSC appears and removed when it hides. Without this
+    option, margins are only applied when ``visibility`` is set to ``always``.
 
 ``windowcontrols``
     Default: auto (Show window controls if there is no window border)
