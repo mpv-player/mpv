@@ -52,6 +52,7 @@ local user_opts = {
     sub_margins = true,         -- adjust sub-margin-y to not overlap with OSC
     osd_margins = true,         -- adjust osd-margin-y to not overlap with OSC
     windowcontrols = "auto",    -- whether to show window controls
+    windowcontrols_fullscreen = false, -- show window controls in fullscreen
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     windowcontrols_independent = true, -- show window controls and bottom bar independently
@@ -685,7 +686,10 @@ end
 local function window_controls_enabled()
     local val = user_opts.windowcontrols
     if val == "auto" then
-        return not (state.border and state.title_bar)
+        if state.fullscreen then
+            return user_opts.windowcontrols_fullscreen
+        end
+        return not state.border or not state.title_bar
     else
         return val ~= "no"
     end

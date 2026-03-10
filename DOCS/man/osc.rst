@@ -430,7 +430,7 @@ Configurable Options
     ``visibility=always`` to take effect.
 
 ``windowcontrols``
-    Default: auto (Show window controls if there is no window border)
+    Default: auto (Show window controls if there is no window border/title-bar)
 
     Whether to show window management controls over the video, and if so,
     which side of the window to place them. This may be desirable when the
@@ -441,6 +441,12 @@ Configurable Options
     The set of window controls is fixed, offering ``minimize``, ``maximize``,
     and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
     but ``quit`` will always work.
+
+``windowcontrols_fullscreen``
+    Default: no
+
+    Whether to show window controls in fullscreen mode. Only applies when
+    ``windowcontrols`` is set to ``auto``.
 
 ``windowcontrols_independent``
     Default: yes
