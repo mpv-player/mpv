@@ -117,13 +117,13 @@ struct priv {
 
     struct mp_refqueue *queue;
 
-    UINT past_frames;
-    UINT future_frames;
+    UINT num_past_views;
+    ID3D11VideoProcessorInputView **past_views;
+    UINT num_future_views;
+    ID3D11VideoProcessorInputView **future_views;
 
     UINT output_seq;
 };
-
-#define D3D11VPP_MAX_FRAMES 4
 
 static void flush_frames(struct mp_filter *vf)
 {
@@ -347,22 +347,20 @@ static int recreate_video_proc(struct mp_filter *vf)
         goto fail;
     }
 
-    p->past_frames = MPMIN(rc_caps.PastFrames, D3D11VPP_MAX_FRAMES);
-    p->future_frames = MPMIN(rc_caps.FutureFrames, D3D11VPP_MAX_FRAMES);
+    p->num_past_views = rc_caps.PastFrames;
+    if (p->num_past_views)
+        MP_TARRAY_GROW(p, p->past_views, p->num_past_views - 1);
 
-    if (p->past_frames < rc_caps.PastFrames || p->future_frames < rc_caps.FutureFrames) {
-        // No implementation should need more than D3D11VPP_MAX_FRAMES in practice.
-        MP_ERR(vf, "Processor requested %u past frames and %u future frames, "
-                   "but only %u/%u are supported. Please report an issue.\n",
-               rc_caps.PastFrames, rc_caps.FutureFrames, p->past_frames, p->future_frames);
-    }
+    p->num_future_views = rc_caps.FutureFrames;
+    if (p->num_future_views)
+        MP_TARRAY_GROW(p, p->future_views, p->num_future_views - 1);
 
     // Force BOB if requested by user, this doesn't really make much sense, but
     // since we have an option, just allow to not use any ref frames.
     if (mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB ||
         mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND) {
-        p->past_frames = 0;
-        p->future_frames = 0;
+        p->num_past_views = 0;
+        p->num_future_views = 0;
         // Warn explicitly here, because forcing unsupported mode will cause
         // obviously wrong result.
         if ((rc_caps.ProcessorCaps & mode) != mode) {
@@ -372,7 +370,7 @@ static int recreate_video_proc(struct mp_filter *vf)
         }
     }
 
-    mp_refqueue_set_refs(p->queue, p->past_frames, p->future_frames);
+    mp_refqueue_set_refs(p->queue, p->num_past_views, p->num_future_views);
 
     // Note: libavcodec does not support cropping left/top with hwaccel.
     RECT src_rc = {
@@ -390,7 +388,7 @@ static int recreate_video_proc(struct mp_filter *vf)
 
     bool half_rate = !mp_refqueue_output_fields(p->queue) && mp_refqueue_should_deint(p->queue);
     MP_DBG(vf, "Using %u past and %u future frames for processing at %s rate.\n",
-           p->past_frames, p->future_frames, half_rate ? "half" : "normal");
+           p->num_past_views, p->num_future_views, half_rate ? "half" : "normal");
     // None of the major GPU vendors seem to support custom rates for proper
     // IVTC frame dropping. Only frame reconstruction is supported.
     ID3D11VideoContext_VideoProcessorSetStreamOutputRate(p->video_ctx,
@@ -528,9 +526,7 @@ static struct mp_image *render(struct mp_filter *vf)
     struct mp_image *in = NULL, *out = NULL;
 
     UINT num_past = 0;
-    ID3D11VideoProcessorInputView *past_views[D3D11VPP_MAX_FRAMES] = {0};
     UINT num_future = 0;
-    ID3D11VideoProcessorInputView *future_views[D3D11VPP_MAX_FRAMES] = {0};
 
     out = alloc_out(vf);
     if (!out) {
@@ -579,18 +575,18 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!in_view)
         goto cleanup;
 
-    for (int i = p->past_frames; i > 0; i--) {
+    for (int i = p->num_past_views; i > 0; i--) {
         ID3D11VideoProcessorInputView *v =
             create_input_view(vf, mp_refqueue_get(p->queue, -i));
         if (v)
-            past_views[num_past++] = v;
+            p->past_views[num_past++] = v;
     }
 
-    for (int i = 1; i <= p->future_frames; i++) {
+    for (int i = 1; i <= p->num_future_views; i++) {
         ID3D11VideoProcessorInputView *v =
             create_input_view(vf, mp_refqueue_get(p->queue, i));
         if (v)
-            future_views[num_future++] = v;
+            p->future_views[num_future++] = v;
     }
 
     D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC outdesc = {
@@ -613,8 +609,8 @@ static struct mp_image *render(struct mp_filter *vf)
         .InputFrameOrField = p->output_seq * (half_rate ? 2 : 1),
         .PastFrames = num_past,
         .FutureFrames = num_future,
-        .ppPastSurfaces = num_past ? past_views : NULL,
-        .ppFutureSurfaces = num_future ? future_views : NULL,
+        .ppPastSurfaces = num_past ? p->past_views : NULL,
+        .ppFutureSurfaces = num_future ? p->future_views : NULL,
     };
     hr = ID3D11VideoContext_VideoProcessorBlt(p->video_ctx, p->video_proc,
                                               out_view, p->output_seq, 1, &stream);
@@ -626,14 +622,12 @@ static struct mp_image *render(struct mp_filter *vf)
     p->output_seq++;
     res = 0;
 cleanup:
-    if (in_view)
-        ID3D11VideoProcessorInputView_Release(in_view);
-    if (out_view)
-        ID3D11VideoProcessorOutputView_Release(out_view);
+    SAFE_RELEASE(in_view);
+    SAFE_RELEASE(out_view);
     for (int i = 0; i < num_past; i++)
-        ID3D11VideoProcessorInputView_Release(past_views[i]);
+        SAFE_RELEASE(p->past_views[i]);
     for (int i = 0; i < num_future; i++)
-        ID3D11VideoProcessorInputView_Release(future_views[i]);
+        SAFE_RELEASE(p->future_views[i]);
     if (res < 0)
         TA_FREEP(&out);
     return out;
