@@ -60,6 +60,7 @@ static const m_option_t style_opts[] = {
     {"spacing", OPT_FLOAT(spacing), M_RANGE(-10, 10)},
     {"margin-x", OPT_INT(margin_x), M_RANGE(0, INT_MAX)},
     {"margin-y", OPT_INT(margin_y), M_RANGE(0, INT_MAX)},
+    {"margin-y-offset", OPT_INT(margin_y_offset)},
     {"align-x", OPT_CHOICE(align_x,
         {"left", -1}, {"center", 0}, {"right", +1})},
     {"align-y", OPT_CHOICE(align_y,

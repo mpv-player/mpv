@@ -3134,6 +3134,16 @@ Subtitles
 
     Default: 34
 
+``--sub-margin-y-offset=<size>``
+    Additional vertical offset added to the subtitle margin, in scaled pixels.
+    This is added on top of ``--sub-margin-y``.
+
+    This is intended for dynamic margin adjustments at runtime (e.g. by
+    scripts like the OSC to avoid subtitle/UI overlap). For persistent
+    settings, use ``--sub-margin-y`` instead.
+
+    Default: 0
+
 ``--sub-align-x=<left|center|right>``
     Control to which corner of the screen text subtitles should be
     aligned to (default: ``center``).
@@ -4815,6 +4825,16 @@ OSD
     This option specifies the vertical margins of the OSD.
 
     Default: 16
+
+``--osd-margin-y-offset=<size>``
+    Additional vertical offset added to the OSD margin, in scaled pixels.
+    This is added on top of ``--osd-margin-y``.
+
+    This is intended for dynamic margin adjustments at runtime (e.g. by
+    scripts like the OSC to avoid OSD/UI overlap). For persistent settings,
+    use ``--osd-margin-y`` instead.
+
+    Default: 0
 
 ``--osd-align-x=<left|center|right>``
     Control to which corner of the screen OSD should be
