@@ -2350,11 +2350,6 @@ local function hide_wc()
     hide_bar("wc", "wc_visible", "wc_anitype", set_wc_visible)
 end
 
-local function pause_state(_, enabled)
-    state.paused = enabled
-    request_tick()
-end
-
 local function cache_state(_, st)
     state.cache_state = st
     request_tick()
@@ -2867,7 +2862,7 @@ mp.add_hook("on_unload", 50, function()
 end)
 
 mp.observe_property("display-fps", "number", set_tick_delay)
-mp.observe_property("pause", "bool", pause_state)
+mp.observe_property("pause", "bool", request_tick)
 mp.observe_property("volume", "number", request_tick)
 mp.observe_property("mute", "bool", request_tick)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
