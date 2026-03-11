@@ -230,7 +230,7 @@ Configurable Options
     Set to ``no`` to disable any special mouse wheel behavior.
 
 ``deadzonesize``
-    Default: 0.5
+    Default: 0.75
 
     Size of the deadzone. The deadzone is an area that makes the mouse act
     like leaving the window. Movement there won't make the OSC show up and
@@ -239,6 +239,7 @@ Configurable Options
     of the window it will span. Values between 0.0 and 1.0, where 0 means the
     OSC will always popup with mouse movement in the window, and 1 means the
     OSC will only show up when the mouse hovers it. Default pre-0.21.0 was 0.
+    Default pre-0.42.0 was 0.5.
 
 ``minmousemove``
     Default: 0

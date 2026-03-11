@@ -25,7 +25,7 @@ local user_opts = {
                                 -- user, but internally negative is "always-on".
     fadeduration = 200,         -- duration of fade out (and fade in, if enabled) in ms, 0 = no fade
     fadein = false,             -- whether to enable fade-in effect
-    deadzonesize = 0.5,         -- size of deadzone
+    deadzonesize = 0.75,        -- size of deadzone
     minmousemove = 0,           -- minimum amount of pixels the mouse has to
                                 -- move between ticks to make the OSC show up
     layout = "bottombar",
