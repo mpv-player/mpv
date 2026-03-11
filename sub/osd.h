@@ -155,6 +155,7 @@ struct osd_style_opts {
     float spacing;
     int margin_x;
     int margin_y;
+    int margin_y_offset;
     int align_x;
     int align_y;
     float blur;

@@ -411,10 +411,9 @@ Configurable Options
 ``sub_margins``
     Default: yes
 
-    Whether to adjust ``--sub-margin-y`` so that subtitles do not overlap
-    with the OSC. The offset is derived from the bottom OSC margin and added
-    on top of the current ``--sub-margin-y`` value. Requires
-    ``dynamic_margins`` or ``visibility=always`` to take effect.
+    Whether to adjust the subtitle margin so that subtitles do not overlap
+    with the OSC. Requires ``dynamic_margins`` or ``visibility=always`` to
+    take effect. Uses ``--sub-margin-y-offset`` to apply the adjustment.
 
     With ``boxvideo`` enabled and ``--sub-use-margins=no``, subtitles are
     already confined to the video area and this option has no additional
@@ -423,11 +422,9 @@ Configurable Options
 ``osd_margins``
     Default: yes
 
-    Whether to adjust ``--osd-margin-y`` so that OSD text does not overlap
-    with the OSC. The offset is derived from the top OSC margin (including
-    window controls when present) and added on top of the current
-    ``--osd-margin-y`` value. Requires ``dynamic_margins`` or
-    ``visibility=always`` to take effect.
+    Whether to adjust the OSD margin so that OSD text does not overlap
+    with the OSC. Requires ``dynamic_margins`` or ``visibility=always`` to
+    take effect. Uses ``--osd-margin-y-offset`` to apply the adjustment.
 
 ``windowcontrols``
     Default: auto (Show window controls if there is no window border)
