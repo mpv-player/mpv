@@ -517,11 +517,13 @@ Configurable Options
     the remaining playback time.
 
 ``icon_style``
-    Default: classic
+    Default: layout
 
     Selects the icon set used for OSC buttons. Both sets are bundled in the
     mpv-osd-symbols font.
 
+    ``layout``
+        Select the icon set based on the current layout.
     ``classic``
         The original mpv icon set.
     ``fluent``

@@ -64,7 +64,7 @@ local user_opts = {
     livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
-    icon_style = "classic",     -- icon style: "classic" or "fluent"
+    icon_style = "layout",      -- icon style: layout/classic/fluent
 
     background_color = "#000000",     -- background color of the osc
     timecode_color = "#FFFFFF",       -- color of the progress bar and time color
@@ -206,7 +206,11 @@ local icon_styles = {
 local icons = icon_styles.classic
 
 local function set_icon_style()
-    icons = icon_styles[user_opts.icon_style] or icon_styles.classic
+    local icon_style = user_opts.icon_style
+    if user_opts.icon_style == "layout" then
+        icon_style = user_opts.layout == "floating" and "fluent" or "classic"
+    end
+    icons = icon_styles[icon_style] or icon_styles.classic
 end
 
 local osc_param = { -- calculated by osc_init()
