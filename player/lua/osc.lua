@@ -60,6 +60,7 @@ local user_opts = {
     livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
+    icon_style = "classic",     -- icon style: "classic" or "fluent"
 
     background_color = "#000000",     -- background color of the osc
     timecode_color = "#FFFFFF",       -- color of the progress bar and time color
@@ -146,29 +147,63 @@ local icon_font = "mpv-osd-symbols"
 -- glyph='\u{e000}' output=''
 -- for i = 1, #glyph do output = output .. '\\' .. string.byte(glyph, i) end
 -- print(output)
-local icons = {
-    menu = "\238\132\130",           -- E102
-    prev = "\238\132\144",           -- E110
-    next = "\238\132\129",           -- E101
-    pause = "\238\128\130",          -- E002
-    play = "\238\132\129",           -- E101
-    clock = "\238\128\134",          -- E006
-    play_backward = "\238\132\144",  -- E110
-    skip_backward = "\238\128\132",  -- E004
-    skip_forward = "\238\128\133",   -- E005
-    chapter_prev = "\238\132\132",   -- E104
-    chapter_next = "\238\132\133",   -- E105
-    audio = "\238\132\134",          -- E106
-    subtitle = "\238\132\135",       -- E107
-    mute = "\238\132\138",           -- E10A
-    volume = {"\238\132\139", "\238\132\140", "\238\132\141", "\238\132\142"},-- E10B E10C E10D E10E
-    fullscreen = "\238\132\136",     -- E108
-    exit_fullscreen = "\238\132\137",-- E109
-    close = "\238\132\149",          -- E115
-    minimize = "\238\132\146",       -- E112
-    maximize = "\238\132\147",       -- E113
-    unmaximize = "\238\132\148",     -- E114
+local icon_styles = {
+    classic = {
+        menu = "\238\132\130",           -- E102
+        prev = "\238\132\144",           -- E110
+        next = "\238\132\129",           -- E101
+        pause = "\238\128\130",          -- E002
+        play = "\238\132\129",           -- E101
+        clock = "\238\128\134",          -- E006
+        play_backward = "\238\132\144",  -- E110
+        skip_backward = "\238\128\132",  -- E004
+        skip_forward = "\238\128\133",   -- E005
+        chapter_prev = "\238\132\132",   -- E104
+        chapter_next = "\238\132\133",   -- E105
+        audio = "\238\132\134",          -- E106
+        subtitle = "\238\132\135",       -- E107
+        mute = "\238\132\138",           -- E10A
+        volume = {                               -- E10B-E10E
+            "\238\132\139", "\238\132\140", "\238\132\141", "\238\132\142",
+        },
+        fullscreen = "\238\132\136",     -- E108
+        exit_fullscreen = "\238\132\137",-- E109
+        close = "\238\132\149",          -- E115
+        minimize = "\238\132\146",       -- E112
+        maximize = "\238\132\147",       -- E113
+        unmaximize = "\238\132\148",     -- E114
+    },
+    fluent = {
+        menu = "\238\136\128",           -- E200
+        prev = "\238\136\129",           -- E201
+        next = "\238\136\130",           -- E202
+        pause = "\238\136\131",          -- E203
+        play = "\238\136\130",           -- E202
+        clock = "\238\136\132",          -- E204
+        play_backward = "\238\136\129",  -- E201
+        skip_backward = "\238\136\133",  -- E205
+        skip_forward = "\238\136\134",   -- E206
+        chapter_prev = "\238\136\135",   -- E207
+        chapter_next = "\238\136\136",   -- E208
+        audio = "\238\136\137",          -- E209
+        subtitle = "\238\136\138",       -- E20A
+        mute = "\238\136\139",           -- E20B
+        volume = {                               -- E20C-E20F
+            "\238\136\140", "\238\136\141", "\238\136\142", "\238\136\143",
+        },
+        fullscreen = "\238\136\144",     -- E210
+        exit_fullscreen = "\238\136\145",-- E211
+        close = "\238\136\146",          -- E212
+        minimize = "\238\136\147",       -- E213
+        maximize = "\238\136\148",       -- E214
+        unmaximize = "\238\136\149",     -- E215
+    },
 }
+local icons = icon_styles.classic
+
+local function set_icon_style()
+    icons = icon_styles[user_opts.icon_style] or icon_styles.classic
+end
 
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
@@ -3059,6 +3094,7 @@ end
 -- read options from config and command-line
 opt.read_options(user_opts, "osc", function(changed)
     validate_user_opts()
+    set_icon_style()
     set_osc_styles()
     set_time_styles(changed.timetotal, changed.timems)
     if changed.tick_delay or changed.tick_delay_follow_display_fps then
@@ -3071,6 +3107,7 @@ opt.read_options(user_opts, "osc", function(changed)
 end)
 
 validate_user_opts()
+set_icon_style()
 set_osc_styles()
 set_time_styles(true, true)
 set_tick_delay()
