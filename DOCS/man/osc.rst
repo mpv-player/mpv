@@ -492,6 +492,17 @@ Configurable Options
     Use a Unicode minus sign instead of an ASCII hyphen when displaying
     the remaining playback time.
 
+``icon_style``
+    Default: classic
+
+    Selects the icon set used for OSC buttons. Both sets are bundled in the
+    mpv-osd-symbols font.
+
+    ``classic``
+        The original mpv icon set.
+    ``fluent``
+        Icons based on Microsoft's Fluent UI System Icons.
+
 ``background_color``
     Default: #000000
 
