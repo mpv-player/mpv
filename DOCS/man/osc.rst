@@ -409,7 +409,7 @@ Configurable Options
     option, margins are only applied when ``visibility`` is set to ``always``.
 
 ``sub_margins``
-    Default: yes
+    Default: no
 
     Whether to adjust the subtitle margin so that subtitles do not overlap
     with the OSC. Requires ``dynamic_margins`` or ``visibility=always`` to
