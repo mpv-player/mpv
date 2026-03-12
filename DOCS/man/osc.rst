@@ -175,8 +175,7 @@ Configurable Options
     Default: bottombar
 
     The layout for the OSC. Currently available are: box, slimbox,
-    bottombar, topbar, slimbottombar, slimtopbar and floating. Default
-    pre-0.21.0 was 'box'.
+    bottombar, topbar, slimbottombar, slimtopbar and floating.
 
 ``seekbarstyle``
     Default: bar
@@ -238,14 +237,13 @@ Configurable Options
     at the window border opposite to the OSC and the size controls how much
     of the window it will span. Values between 0.0 and 1.0, where 0 means the
     OSC will always popup with mouse movement in the window, and 1 means the
-    OSC will only show up when the mouse hovers it. Default pre-0.21.0 was 0.
-    Default pre-0.42.0 was 0.5.
+    OSC will only show up when the mouse hovers it. Default pre-0.42.0 was 0.5.
 
 ``minmousemove``
     Default: 0
 
     Minimum amount of pixels the mouse has to move between ticks to make
-    the OSC show up. Default pre-0.21.0 was 3.
+    the OSC show up.
 
 ``showwindowed``
     Default: yes

@@ -350,8 +350,6 @@ paths - like ``<script-dir>/modules`` for scripts which load from a directory).
 
 The custom-init file is ignored if mpv is invoked with ``--no-config``.
 
-Before mpv 0.34, the file name was ``.init.js`` (with dot) at the same dir.
-
 The event loop
 --------------
 

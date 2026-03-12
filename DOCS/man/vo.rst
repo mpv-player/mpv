@@ -118,8 +118,7 @@ Available video output drivers are:
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     .. note:: This is a fallback only, and should not be normally used.
 
@@ -375,8 +374,7 @@ Available video output drivers are:
     the images at full color range, but 256-colors output is also supported (see
     below). On Windows it requires an ansi terminal such as mintty.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     Note: the TCT image output is not synchronized with other terminal output
     from mpv, which can lead to broken images. The options ``--terminal=no`` or
@@ -631,8 +629,7 @@ Available video output drivers are:
     environment (e.g. no X). Does not support hardware acceleration (if you
     need this, check the ``drm`` backend for ``gpu`` VO).
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     The following global options are supported by this video output:
 
@@ -741,7 +738,6 @@ Available video output drivers are:
     Shared memory video output driver without hardware acceleration that works
     whenever Wayland is present.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     .. note:: This is a fallback only, and should not be normally used.

@@ -366,8 +366,7 @@ tracks. In this case, it's not obvious, which virtual tracks the EDL show should
 expose when being played.
 
 Currently, mpv will apply an arbitrary heuristic which tracks the EDL file
-should expose. (Before mpv 0.30.0, it always used the first source file in the
-segment list.)
+should expose.
 
 You can set the ``layout`` option to ``this`` to make a specific entry define
 the track layout.
