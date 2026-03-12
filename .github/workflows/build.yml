@@ -116,7 +116,7 @@ jobs:
           PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
           echo "name=mpv-$VER$PR-${{ github.run_id }}-$TARGET" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: artifact/*
@@ -236,7 +236,7 @@ jobs:
           $name = "mpv-$VER$PR-${{ github.run_id }}-${{ matrix.target }}"
           "name=$name" >> $env:GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: |
@@ -246,7 +246,7 @@ jobs:
             !build/mpv.lib
             !build/mpv.pdb
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}-pdb
           path: |
@@ -347,7 +347,7 @@ jobs:
           PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
           echo "name=mpv-$VER$PR-${{ github.run_id }}-$TARGET" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: ${{ matrix.arch != 'test' }}
         with:
           name: ${{ steps.artifact.outputs.name }}
