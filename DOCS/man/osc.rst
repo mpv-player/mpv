@@ -728,3 +728,7 @@ script via the following ``user-data`` properties:
 
     The OSC sets this property to ``nil`` to signal the thumbnailer to clear
     the displayed thumbnail.
+
+The script ``TOOLS/lua/yt-thumbnailer.lua`` implements this API to fetch and
+show pre-generated storyboard images available through the youtube-dl hook
+script on certain sites (e.g youtube).
