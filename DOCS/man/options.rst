@@ -1142,8 +1142,9 @@ Watch Later
           position.
 
 ``--write-filename-in-watch-later-config``
-    Prepend the watch later config files with the name of the file they refer
-    to. This is simply written as comment on the top of the file.
+    Prepend the watch later config files with the name and title of the
+    file they refer to. These are simply written as comments on the top of
+    the file.
 
     .. warning::
 
