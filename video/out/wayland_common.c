@@ -1343,9 +1343,6 @@ static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
 static void data_device_handle_motion(void *data, struct wl_data_device *wl_ddev,
                                       uint32_t time, wl_fixed_t x, wl_fixed_t y)
 {
-    struct vo_wayland_seat *s = data;
-    struct vo_wayland_data_offer *o = s->dnd_offer;
-    wl_data_offer_accept(o->offer, time, o->mime_type);
 }
 
 static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
