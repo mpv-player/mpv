@@ -326,6 +326,10 @@ typedef struct MPContext {
     struct mp_aframe *ao_filter_fmt; // for weak gapless audio check
     struct ao_chain *ao_chain;
 
+    // Callback that will be set for ao_libmpv
+    void (*ao_libmpv_cb)(void *userdata, const void *data, int bytes);
+    void *ao_libmpv_userdata;
+
     struct vo_chain *vo_chain;
 
     struct vo *video_out;
