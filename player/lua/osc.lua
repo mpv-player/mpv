@@ -667,12 +667,15 @@ end
 local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
+    state.no_video = true
 
     for _, track in pairs(track_list) do
         if track.type == "audio" then
             state.audio_track_count = state.audio_track_count + 1
         elseif track.type == "sub" then
             state.sub_track_count = state.sub_track_count + 1
+        elseif track.type == "video" and track.selected then
+            state.no_video = false
         end
     end
 
@@ -2838,10 +2841,6 @@ mp.observe_property("window-maximized", "bool", function(_, val)
 end)
 mp.observe_property("idle-active", "bool", function(_, val)
     state.idle = val
-    request_tick()
-end)
-mp.observe_property("current-tracks/video", "native", function(_, val)
-    state.no_video = val == nil
     request_tick()
 end)
 
