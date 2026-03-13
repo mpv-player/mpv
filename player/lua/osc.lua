@@ -2378,7 +2378,7 @@ local function osc_init()
             return icons.subtitle
         end
         local track = mp.get_property_number("sid", "-")
-        local count = state.audio_track_count
+        local count = state.sub_track_count
         return icons.subtitle .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
                                                 or track .. "/" .. count)
