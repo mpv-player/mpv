@@ -73,3 +73,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: pre-commit/action@v3.0.1
+
+  clang-format-lint:
+    runs-on: ubuntu-latest
+    container:
+      image: "registry.opensuse.org/home/mia/images/images/mpv-ci:stable-deps"
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+      - name: Check Formatting
+        run: git clang-format ${{ github.event.pull_request.base.sha }} --diff
