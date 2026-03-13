@@ -556,8 +556,12 @@ Playlist Manipulation
         Stop playback of the current file, and play the new file immediately.
     <append>
         Append the file to the playlist.
+    <prepend>
+        Prepend the file to the playlist.
     <insert-next>
         Insert the file into the playlist, directly after the current entry.
+    <insert-prev>
+        Insert the file into the playlist, directly before the current entry.
     <insert-at>
         Insert the file into the playlist, at the index given in the third
         argument.
@@ -619,9 +623,14 @@ Playlist Manipulation
         Stop playback and replace the internal playlist with the new one.
     <append>
         Append the new playlist at the end of the current internal playlist.
+    <prepend>
+        Prepend the new playlist at the beginning of the current internal playlist.
     <insert-next>
         Insert the new playlist into the current internal playlist, directly
         after the current entry.
+    <insert-prev>
+        Insert the new playlist into the current internal playlist, directly
+        before the current entry.
     <insert-at>
         Insert the new playlist at the index given in the third argument.
     <play>
