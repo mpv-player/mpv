@@ -6335,8 +6335,8 @@ them.
 
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 16) to initiate client side
-    resize events in the wayland contexts with the mouse. This is only active if
-    there are no server side decorations from the compositor.
+    resize events in the wayland contexts with the mouse or tablet. This is only
+    active if there are no server side decorations from the compositor.
 
 ``--wayland-edge-pixels-touch=<value>``
     Defines the size of an edge border (default: 32) to initiate client side

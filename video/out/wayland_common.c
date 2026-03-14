@@ -709,7 +709,7 @@ static void tablet_tool_handle_down(void *data,
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
         !wl->locked_size && !wl->opts->border &&
-        check_for_resize(wl, wl->opts->wl_edge_pixels_touch, &edge))
+        check_for_resize(wl, wl->opts->wl_edge_pixels_pointer, &edge))
     {
         xdg_toplevel_resize(wl->xdg_toplevel, tablet_tool->seat->seat, serial, edge);
         return;
