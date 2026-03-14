@@ -178,6 +178,8 @@ Configurable Options
     bottombar, topbar, slimbottombar, slimtopbar and floating. Default
     pre-0.21.0 was 'box'.
 
+    slimbottombar is the default for images.
+
 ``seekbarstyle``
     Default: bar
 
@@ -240,6 +242,8 @@ Configurable Options
     OSC will always popup with mouse movement in the window, and 1 means the
     OSC will only show up when the mouse hovers it. Default pre-0.21.0 was 0.
     Default pre-0.42.0 was 0.5.
+
+    0.9 is the default for images.
 
 ``minmousemove``
     Default: 0

@@ -498,6 +498,7 @@ static const m_option_t mp_opts[] = {
     {"profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
     {"show-profile", CONF_TYPE_STRING, M_OPT_NOCFG | M_OPT_NOPROP |
         M_OPT_OPTIONAL_PARAM,  .offset = -1},
+    {"apply-image-profile", OPT_BOOL(apply_image_profile)},
     {"list-options", &m_option_type_dummy_flag, M_OPT_NOCFG | M_OPT_NOPROP,
         .offset = -1},
     {"list-properties", OPT_BOOL(property_print_help),
@@ -1052,6 +1053,7 @@ static const struct MPOpts mp_default_opts = {
     .rebase_start_time = true,
     .keep_open_pause = true,
     .image_display_duration = 5.0,
+    .apply_image_profile = true,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,
                      [STREAM_SUB] = -1, },
