@@ -303,6 +303,7 @@ def process(binary):
 
     print(">> copying and processing vulkan loader")
     process_vulkan_loader(binary, "MoltenVK_icd.json", "vulkan/icd.d", "ICD")
+    process_vulkan_loader(binary, "kosmickrisp_mesa_icd.aarch64.json", "vulkan/icd.d", "ICD")
     if check_vulkan_max_version("1.3.261.1"):
         process_vulkan_loader(
             binary,
