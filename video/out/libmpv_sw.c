@@ -170,6 +170,13 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
         struct mp_rect src_rc = p->src_rc;
         src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
+        // Clamp crop rect to actual decoded frame dimensions to prevent
+        // assertion failure when hwdec or codec alignment causes the frame
+        // size to differ from the display parameters used by aspect.c
+        if (src_rc.x1 > src.w) src_rc.x1 = src.w;
+        if (src_rc.y1 > src.h) src_rc.y1 = src.h;
+        if (src_rc.x0 >= src_rc.x1) src_rc.x0 = 0;
+        if (src_rc.y0 >= src_rc.y1) src_rc.y0 = 0;
         mp_image_crop_rc(&src, src_rc);
 
         struct mp_image dst = wrap_img;

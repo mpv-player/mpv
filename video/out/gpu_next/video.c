@@ -1,8 +1,10 @@
 #include "video.h"
 #include <libplacebo/utils/frame_queue.h>
 #include <libplacebo/utils/upload.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "assert.h"
 #include "common/common.h"
 #include "common/msg.h"
@@ -35,6 +37,10 @@ struct pl_video_osd_state {
     struct pl_overlay overlays[MAX_OSD_PARTS];
 };
 
+struct scaler_params {
+    struct pl_filter_config config;
+};
+
 struct pl_video {
     struct mp_log *log;
     struct mpv_global *global;
@@ -42,7 +48,7 @@ struct pl_video {
     pl_gpu gpu;
     pl_renderer renderer;
     pl_log pl_log;
-    
+
     pl_queue queue;
     uint64_t last_frame_id;
     double last_pts;
@@ -59,6 +65,7 @@ struct pl_video {
 
     struct mp_csp_equalizer_state *video_eq;
     struct m_config_cache *opts_cache;
+    struct scaler_params scalers[SCALER_COUNT];
 };
 
 struct frame_priv {
@@ -434,9 +441,83 @@ static void update_overlays(struct pl_video *p, struct mp_osd_res res,
     talloc_free(subs);
 }
 
-// Equivalent to vo_gpu_next.c's apply_crop(), but tailored for libmpv render API.
-// The dst rectangle returned by mp_get_src_dst_rects() can be rotated/flipped;
-// libplacebo expects an unrotated crop rectangle. This helper normalizes it.
+// Map mpv scaler options to libplacebo filter configs
+// Adapted from vo_gpu_next.c map_scaler()
+static const struct pl_filter_config *map_scaler(struct pl_video *p,
+                                                  const struct gl_video_opts *opts,
+                                                  enum scaler_unit unit)
+{
+    static const struct pl_filter_preset fixed_scalers[] = {
+        { "bilinear",       &pl_filter_bilinear },
+        { "bicubic_fast",   &pl_filter_bicubic },
+        { "nearest",        &pl_filter_nearest },
+        { "oversample",     &pl_filter_oversample },
+        {0},
+    };
+
+    const struct scaler_config *cfg = &opts->scaler[unit];
+    if (cfg->kernel.function == SCALER_INHERIT)
+        cfg = &opts->scaler[SCALER_SCALE];
+    const char *kernel_name = m_opt_choice_str(cfg->kernel.functions,
+                                               cfg->kernel.function);
+
+    for (int i = 0; fixed_scalers[i].name; i++) {
+        if (strcmp(kernel_name, fixed_scalers[i].name) == 0)
+            return fixed_scalers[i].filter;
+    }
+
+    // Attempt loading filter preset first, fall back to raw filter function
+    struct scaler_params *par = &p->scalers[unit];
+    const struct pl_filter_preset *preset;
+    const struct pl_filter_function_preset *fpreset;
+    if ((preset = pl_find_filter_preset(kernel_name))) {
+        par->config = *preset->filter;
+    } else if ((fpreset = pl_find_filter_function_preset(kernel_name))) {
+        par->config = (struct pl_filter_config) {
+            .kernel = fpreset->function,
+            .params[0] = fpreset->function->params[0],
+            .params[1] = fpreset->function->params[1],
+        };
+    } else {
+        mp_msg(p->log, MSGL_ERR, "Failed mapping filter '%s', no libplacebo analog\n",
+               kernel_name);
+        return &pl_filter_bilinear;
+    }
+
+    const struct pl_filter_function_preset *wpreset;
+    if ((wpreset = pl_find_filter_function_preset(
+             m_opt_choice_str(cfg->window.functions, cfg->window.function)))) {
+        par->config.window = wpreset->function;
+        par->config.wparams[0] = wpreset->function->params[0];
+        par->config.wparams[1] = wpreset->function->params[1];
+    }
+
+    for (int i = 0; i < 2; i++) {
+        if (!isnan(cfg->kernel.params[i]))
+            par->config.params[i] = cfg->kernel.params[i];
+        if (!isnan(cfg->window.params[i]))
+            par->config.wparams[i] = cfg->window.params[i];
+    }
+
+    par->config.clamp = cfg->clamp;
+    if (cfg->antiring > 0.0)
+        par->config.antiring = cfg->antiring;
+    if (cfg->kernel.blur > 0.0)
+        par->config.blur = cfg->kernel.blur;
+    if (cfg->kernel.taper > 0.0)
+        par->config.taper = cfg->kernel.taper;
+    if (cfg->radius > 0.0) {
+        if (par->config.kernel->resizable) {
+            par->config.radius = cfg->radius;
+        } else {
+            mp_msg(p->log, MSGL_WARN, "Filter radius specified but filter '%s' "
+                    "is not resizable, ignoring\n", kernel_name);
+        }
+    }
+
+    return &par->config;
+}
+
 void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_tex)
 {
     // Build target color space from mpv options instead of hardcoding sRGB
@@ -576,10 +657,35 @@ void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_t
 
     mix.vsync_duration = 1.0f;
 
-    struct pl_render_params params = {
-        .upscaler = &pl_filter_nearest,
-        .downscaler = &pl_filter_nearest,
-    };
+    // Build render params dynamically from mpv options
+    // Reference: vo_gpu_next.c update_render_options() lines 2517-2540
+    struct pl_render_params params = pl_render_default_params;
+    struct pl_sigmoid_params sigmoid_params = pl_sigmoid_default_params;
+
+    if (p->opts_cache) {
+        const struct gl_video_opts *gopts = p->opts_cache->opts;
+        if (gopts) {
+            // Map scaler options from mpv config to libplacebo filters
+            params.upscaler = map_scaler(p, gopts, SCALER_SCALE);
+            params.downscaler = map_scaler(p, gopts, SCALER_DSCALE);
+            params.plane_upscaler = map_scaler(p, gopts, SCALER_CSCALE);
+
+            // Sigmoid upscaling
+            if (gopts->sigmoid_upscaling) {
+                sigmoid_params.center = gopts->sigmoid_center;
+                sigmoid_params.slope = gopts->sigmoid_slope;
+                params.sigmoid_params = &sigmoid_params;
+            } else {
+                params.sigmoid_params = NULL;
+            }
+
+            // Correct subpixel offsets (inverse of scaler_resizes_only)
+            params.correct_subpixel_offsets = !gopts->scaler_resizes_only;
+
+            // Skip anti-aliasing only if linear downscaling is disabled
+            params.skip_anti_aliasing = !gopts->linear_downscaling;
+        }
+    }
 
     struct pl_color_adjustment color_adj;
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
@@ -666,10 +772,7 @@ struct mp_image *pl_video_screenshot(struct pl_video *p, struct vo_frame *frame)
     update_overlays(p, osd_res, 0, PL_OVERLAY_COORDS_DST_FRAME,
                     &p->osd_state_storage, &target_frame, frame->current);
 
-    const struct pl_render_params params = {
-        .upscaler = &pl_filter_nearest,
-        .downscaler = &pl_filter_nearest,
-    };
+    const struct pl_render_params params = pl_render_default_params;
 
     if (!pl_render_image(p->renderer, &source_frame, &target_frame, &params)) {
         mp_msg(p->log, MSGL_ERR, "pl_video_screenshot: rendering failed\n");
