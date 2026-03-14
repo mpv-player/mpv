@@ -2994,6 +2994,7 @@ static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
     int pos[2] = { wl->mouse_x, wl->mouse_y };
     *edges = 0;
 
+    edge_pixels = handle_round(wl->scaling, edge_pixels);
     if (pos[0] < edge_pixels)
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
     if (pos[0] > (mp_rect_w(wl->geometry) - edge_pixels))
