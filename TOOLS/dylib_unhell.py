@@ -233,23 +233,25 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
     ]
 
     loader_system_folder = ""
+    loader_system_path = ""
     for loader_system_search_folder in loader_system_search_folders:
         if os.path.exists(loader_system_search_folder):
             loader_system_folder = loader_system_search_folder
-            break
+            if os.path.exists(os.path.join(loader_system_folder, loader_name)):
+                loader_system_path = os.path.join(loader_system_folder, loader_name)
+                break
 
     if not loader_system_folder:
         print(">>> could not find loader folder " + loader_relative_folder)
         return
 
-    loader_bundle_folder = os.path.join(resources_path(binary), loader_relative_folder)
-    loader_system_path = os.path.join(loader_system_folder, loader_name)
-    loader_bundle_path = os.path.join(loader_bundle_folder, loader_name)
-    library_relative_folder = "../../../Frameworks/"
-
-    if not os.path.exists(loader_system_path):
+    if not loader_system_path:
         print(">>> could not find loader " + loader_name)
         return
+
+    loader_bundle_folder = os.path.join(resources_path(binary), loader_relative_folder)
+    loader_bundle_path = os.path.join(loader_bundle_folder, loader_name)
+    library_relative_folder = "../../../Frameworks/"
 
     if not os.path.exists(loader_bundle_folder):
         os.makedirs(loader_bundle_folder)
