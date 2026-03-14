@@ -1474,6 +1474,20 @@ PROTOCOLS
 
     Like ``memory://``, but the string is interpreted as hexdump.
 
+``archive://[ARCHIVE PATH]|[FILE PATH IN ARCHIVE]``
+
+    Open a file at the specified path inside an archive. Requires libarchive
+    feature enabled. The archive path must have all ``%`` and ``|`` characters
+    URL escaped. The file path should not be URL escaped.
+
+    .. admonition:: Example
+
+        ::
+
+            mpv "archive://file.zip|video.mkv"
+
+        This will play ``video.mkv`` in the archive file ``file.zip``.
+
 PSEUDO GUI MODE
 ===============
 
