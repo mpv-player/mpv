@@ -227,29 +227,31 @@ def process_vulkan_loader(binary, loader_name, loader_relative_folder, library_n
         os.path.join("/etc", loader_relative_folder),
         os.path.join(os.path.expanduser("~"), ".local/share", loader_relative_folder),
         os.path.join("/usr/local/share", loader_relative_folder),
-        os.path.join("/usr/share/vulkan", loader_relative_folder),
+        os.path.join("/usr/share", loader_relative_folder),
         os.path.join(get_homebrew_prefix(), "etc", loader_relative_folder),
         os.path.join(get_homebrew_prefix(), "share", loader_relative_folder), # old location
     ]
 
     loader_system_folder = ""
+    loader_system_path = ""
     for loader_system_search_folder in loader_system_search_folders:
         if os.path.exists(loader_system_search_folder):
             loader_system_folder = loader_system_search_folder
-            break
+            if os.path.exists(os.path.join(loader_system_folder, loader_name)):
+                loader_system_path = os.path.join(loader_system_folder, loader_name)
+                break
 
     if not loader_system_folder:
         print(">>> could not find loader folder " + loader_relative_folder)
         return
 
-    loader_bundle_folder = os.path.join(resources_path(binary), loader_relative_folder)
-    loader_system_path = os.path.join(loader_system_folder, loader_name)
-    loader_bundle_path = os.path.join(loader_bundle_folder, loader_name)
-    library_relative_folder = "../../../Frameworks/"
-
-    if not os.path.exists(loader_system_path):
+    if not loader_system_path:
         print(">>> could not find loader " + loader_name)
         return
+
+    loader_bundle_folder = os.path.join(resources_path(binary), loader_relative_folder)
+    loader_bundle_path = os.path.join(loader_bundle_folder, loader_name)
+    library_relative_folder = "../../../Frameworks/"
 
     if not os.path.exists(loader_bundle_folder):
         os.makedirs(loader_bundle_folder)
@@ -301,6 +303,7 @@ def process(binary):
 
     print(">> copying and processing vulkan loader")
     process_vulkan_loader(binary, "MoltenVK_icd.json", "vulkan/icd.d", "ICD")
+    process_vulkan_loader(binary, "kosmickrisp_mesa_icd.aarch64.json", "vulkan/icd.d", "ICD")
     if check_vulkan_max_version("1.3.261.1"):
         process_vulkan_loader(
             binary,
