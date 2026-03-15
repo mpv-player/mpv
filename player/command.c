@@ -7140,6 +7140,20 @@ static void cmd_begin_vo_dragging(void *p)
         vo_control(vo, VOCTRL_BEGIN_DRAGGING, NULL);
 }
 
+static void cmd_update_clipboard(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    struct clipboard_access_params params = {.type = cmd->args[0].v.i};
+    double timeout = cmd->args[1].v.i / 1000.0;
+    bool success = false;
+
+    mp_core_unlock(mpctx);
+    success = mp_clipboard_update_data(mpctx->clipboard, &params, cmd->abort->cancel, timeout);
+    mp_core_lock(mpctx);
+    cmd->success = success;
+}
+
 static void cmd_context_menu(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -7693,6 +7707,16 @@ const struct mp_cmd_def mp_cmds[] = {
     { "ab-loop-align-cache", cmd_align_cache_ab },
 
     { "begin-vo-dragging", cmd_begin_vo_dragging },
+
+    { "update-clipboard", cmd_update_clipboard,
+        { {"type", OPT_CHOICE(v.i,
+              {"text", CLIPBOARD_TARGET_CLIPBOARD},
+              {"text-primary", CLIPBOARD_TARGET_PRIMARY_SELECTION})},
+          {"timeout", OPT_INT(v.i), OPTDEF_INT(10)},
+          },
+        .spawn_thread = true,
+        .can_abort = true,
+    },
 
     { "context-menu", cmd_context_menu },
 

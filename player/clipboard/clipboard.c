@@ -19,6 +19,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "misc/thread_tools.h"
 #include "options/m_config.h"
 #include "player/core.h"
 
@@ -107,7 +108,9 @@ static void mp_clipboard_create(struct clipboard_ctx *cl,
                 continue;
             if (backend->init(cl, params) != CLIPBOARD_SUCCESS)
                 break;
+            mp_mutex_lock(&cl->lock);
             cl->backend = backend;
+            mp_mutex_unlock(&cl->lock);
             MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
             return;
         }
@@ -116,16 +119,26 @@ static void mp_clipboard_create(struct clipboard_ctx *cl,
     MP_WARN(cl, "Failed to initialize any clipboard backend.\n");
 }
 
+void mp_clipboard_notify_update_data(struct clipboard_ctx *cl)
+{
+    mp_mutex_lock(&cl->lock);
+    for (int i = 0; i < cl->num_cancels; ++i)
+        mp_cancel_trigger(cl->cancels[i]);
+    mp_mutex_unlock(&cl->lock);
+}
+
 void mp_clipboard_destroy(struct clipboard_ctx *cl)
 {
+    mp_mutex_lock(&cl->lock);
     if (cl->backend && cl->backend->uninit)
         cl->backend->uninit(cl);
-    *cl = (struct clipboard_ctx){.log = cl->log};
+    cl->backend = cl->priv = NULL;
+    mp_mutex_unlock(&cl->lock);
 }
 
 bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
 {
-    if (cl && cl->backend->data_changed && cl->monitor)
+    if (cl->backend && cl->backend->data_changed && cl->monitor)
         return cl->backend->data_changed(cl);
     return false;
 }
@@ -144,6 +157,32 @@ int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_para
     if (cl->backend && cl->backend->set_data)
         return cl->backend->set_data(cl, params, data);
     return CLIPBOARD_UNAVAILABLE;
+}
+
+bool mp_clipboard_update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
+                              struct mp_cancel *cancel, double timeout)
+{
+    mp_mutex_lock(&cl->lock);
+    if (cl->backend && cl->backend->update_data) {
+        cl->backend->update_data(cl, params);
+    } else {
+        mp_mutex_unlock(&cl->lock);
+        return true;
+    }
+    MP_TARRAY_APPEND(cl, cl->cancels, cl->num_cancels, cancel);
+    mp_mutex_unlock(&cl->lock);
+
+    bool success = mp_cancel_wait(cancel, timeout);
+
+    mp_mutex_lock(&cl->lock);
+    for (int i = 0; i < cl->num_cancels; ++i) {
+        if (cl->cancels[i] == cancel) {
+            MP_TARRAY_REMOVE_AT(cl->cancels, cl->num_cancels, i);
+            break;
+        }
+    }
+    mp_mutex_unlock(&cl->lock);
+    return success;
 }
 
 const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl)
@@ -168,8 +207,17 @@ void reinit_clipboard(struct MPContext *mpctx)
     talloc_free(opts);
 }
 
+static void clipboard_destructor(void *ctx)
+{
+    struct clipboard_ctx *cl = ctx;
+    mp_mutex_destroy(&cl->lock);
+}
+
 void clipboard_init(struct MPContext *mpctx)
 {
-    mpctx->clipboard = talloc_zero_ptrtype(mpctx, mpctx->clipboard);
-    mpctx->clipboard->log = mp_log_new(mpctx->clipboard, mpctx->global->log, "clipboard");
+    struct clipboard_ctx *cl = talloc_zero_ptrtype(mpctx, cl);
+    talloc_set_destructor(cl, clipboard_destructor);
+    cl->log = mp_log_new(cl, mpctx->global->log, "clipboard");
+    mp_mutex_init(&cl->lock);
+    mpctx->clipboard = cl;
 }

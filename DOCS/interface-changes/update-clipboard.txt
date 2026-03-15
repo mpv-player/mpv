@@ -1,0 +1,2 @@
+add `update-clipboard` command
+change `clipboard` property to require `update-clipboard` command when clipboard monitoring is disabled
