@@ -254,7 +254,7 @@ static int parse_m3u(struct pl_parser *p)
     if (p->probing && !bstr_equals0(line, "#EXTM3U")) {
         // Last resort: if the file extension is m3u, it might be headerless.
         if (p->check_level == DEMUX_CHECK_UNSAFE) {
-            char *ext = mp_splitext(p->real_stream->url, NULL);
+            const char *ext = mp_get_ext(p->real_stream->url);
             char probe[PROBE_SIZE];
             int len = stream_read_peek(p->real_stream, probe, sizeof(probe));
             bstr data = {probe, len};

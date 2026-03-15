@@ -82,7 +82,12 @@ void mp_path_strip_trailing_separator(char *path)
         path[len - 1] = '\0';
 }
 
-char *mp_splitext(const char *path, bstr *root)
+/* Return file extension, excluding the '.'. If root is not NULL, set it to the
+ * part of the path without extension. So: path == root + "." + extension
+ * Don't consider it a file extension if the only '.' is the first character.
+ * Return NULL if no extension and don't set *root in this case.
+ */
+static char *mp_split_ext(const char *path, bstr *root)
 {
     mp_assert(path);
     const char *bn = mp_basename(path);
@@ -102,7 +107,12 @@ char *mp_splitext(const char *path, bstr *root)
 char *mp_strip_ext(void *talloc_ctx, const char *s)
 {
     bstr root;
-    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
+    return mp_split_ext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
+}
+
+const char *mp_get_ext(const char *s)
+{
+    return mp_split_ext(s, NULL);
 }
 
 bool mp_path_is_absolute(struct bstr path)
