@@ -168,7 +168,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 'f':
         case 'F': {
-            char *name;
+            const char *name;
             if (!mpctx->filename) {
                 name = "NO_FILE";
             } else if (bstr_endswith0(bstr0(mpctx->filename), "/")) {

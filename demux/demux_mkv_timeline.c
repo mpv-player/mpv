@@ -98,7 +98,7 @@ static bool test_matroska_ext(const char *filename)
 static char **find_files(const char *original_file)
 {
     void *tmpmem = talloc_new(NULL);
-    char *basename = mp_basename(original_file);
+    const char *basename = mp_basename(original_file);
     struct bstr directory = mp_dirname(original_file);
     char **results = talloc_size(NULL, 0);
     char *dir_zero = bstrdup0(tmpmem, directory);
@@ -119,7 +119,7 @@ static char **find_files(const char *original_file)
 
         char *name = mp_path_join_bstr(results, directory, bstr0(ep->d_name));
         char *s1 = ep->d_name;
-        char *s2 = basename;
+        const char *s2 = basename;
         int matchlen = 0;
         while (*s1 && *s1++ == *s2++)
             matchlen++;

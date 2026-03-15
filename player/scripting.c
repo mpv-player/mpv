@@ -111,7 +111,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     void *tmp = talloc_new(NULL);
 
     const char *path = NULL;
-    char *script_name = NULL;
+    const char *script_name = NULL;
     const struct mp_scripting *backend = NULL;
 
     struct stat s;
@@ -138,9 +138,9 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
             return -1;
         }
 
-        script_name = talloc_strdup(tmp, path);
-        mp_path_strip_trailing_separator(script_name);
-        script_name = mp_basename(script_name);
+        char *path_dup = talloc_strdup(tmp, path);
+        mp_path_strip_trailing_separator(path_dup);
+        script_name = mp_basename(path_dup);
     } else {
         for (int n = 0; scripting_backends[n]; n++) {
             const struct mp_scripting *b = scripting_backends[n];

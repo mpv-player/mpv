@@ -1282,7 +1282,7 @@ static int tag_property(int action, void *arg, struct mp_tags *tags)
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
         bstr key;
-        char *rem;
+        const char *rem;
         m_property_split_path(ka->key, &key, &rem);
         if (bstr_equals0(key, "list")) {
             struct m_property_action_arg nka = *ka;
@@ -1352,7 +1352,7 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
     if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
         bstr key;
-        char *rem;
+        const char *rem;
         m_property_split_path(ka->key, &key, &rem);
         struct mp_tags *metadata = NULL;
         struct mp_output_chain *chain = NULL;
@@ -2115,7 +2115,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         struct m_property_action_arg *ka = arg;
         if (!strncmp(ka->key, "metadata/", 9)) {
             bstr key = {0};
-            char *rem = "";
+            const char *rem = "";
             m_property_split_path(ka->key, &key, &rem);
             ka->key = rem;
             if (!rem[0]) {
@@ -2253,7 +2253,7 @@ static int mp_property_current_tracks(void *ctx, struct m_property *prop,
 
     struct m_property_action_arg *ka = arg;
     bstr key;
-    char *rem;
+    const char *rem;
     m_property_split_path(ka->key, &key, &rem);
 
     if (bstr_equals0(key, "video")) {
@@ -3505,11 +3505,11 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
             if (pl->current == e)
                 res = append_selected_style(mpctx, res);
             const char *reset = pl->current == e ? get_style_reset(mpctx) : "";
-            char *p = e->title;
+            const char *p = e->title;
             if (!p || mpctx->opts->playlist_entry_name > 0) {
                 p = e->filename;
                 if (!mp_is_url(bstr0(p))) {
-                    char *s = mp_basename(e->filename);
+                    const char *s = mp_basename(e->filename);
                     if (s[0])
                         p = s;
                 }
@@ -3874,7 +3874,7 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
         bstr key;
-        char *rem;
+        const char *rem;
         m_property_split_path(ka->key, &key, &rem);
         struct m_config_option *co = m_config_get_co(mpctx->mconfig, key);
         if (!co)
@@ -4134,7 +4134,7 @@ static int do_op_udata(struct udata_ctx* ctx, int action, void *arg)
 
         // See if the next layer down will also be a sub-object access
         bstr key;
-        char *rem;
+        const char *rem;
         bool has_split = m_property_split_path(act->key, &key, &rem);
 
         if (!has_split && act->action == M_PROPERTY_DELETE) {

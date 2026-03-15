@@ -39,9 +39,9 @@
 #include <pathcch.h>
 #endif
 
-char *mp_basename(const char *path)
+const char *mp_basename(const char *path)
 {
-    char *s;
+    const char *s;
 
 #if HAVE_DOS_PATHS
     if (!mp_is_url(bstr0(path))) {
@@ -54,7 +54,7 @@ char *mp_basename(const char *path)
     }
 #endif
     s = strrchr(path, '/');
-    return s ? s + 1 : (char *)path;
+    return s ? s + 1 : path;
 }
 
 struct bstr mp_dirname(const char *path)
@@ -85,7 +85,7 @@ void mp_path_strip_trailing_separator(char *path)
 char *mp_splitext(const char *path, bstr *root)
 {
     mp_assert(path);
-    char *bn = mp_basename(path);
+    const char *bn = mp_basename(path);
 
     // Skip all leading dots, not just for "hidden" unix files, otherwise we
     // end up splitting a part of the filename sans leading dot.
