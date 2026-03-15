@@ -54,6 +54,7 @@ struct clipboard_wayland_priv {
     struct ext_data_control_manager_v1 *dcman;
     struct clipboard_wayland_data_offer *selection_offer;
     struct clipboard_wayland_data_offer *primary_selection_offer;
+    bool monitor;
 };
 
 struct clipboard_wayland_seat {
@@ -94,22 +95,11 @@ static void destroy_offer(struct clipboard_wayland_data_offer *o)
     *o = (struct clipboard_wayland_data_offer){.fd = -1};
 }
 
-
-static void handle_selection(void *data,
-                             struct ext_data_control_device_v1 *dcdev,
-                             struct ext_data_control_offer_v1 *id,
-                             struct clipboard_wayland_data_offer *o)
+static void receive_offer(struct clipboard_wayland_seat *s, struct clipboard_wayland_data_offer *o)
 {
-    struct clipboard_wayland_seat *s = data;
     struct clipboard_wayland_priv *wl = s->wl;
-    if (o->offer) {
-        destroy_offer(o);
-        MP_VERBOSE(wl, "Received a new selection offer. Releasing the previous offer.\n");
-    }
-    o->offer = id;
-    if (!id)
+    if (!o->offer || o->fd != -1)
         return;
-
     int pipefd[2];
 
     if (pipe2(pipefd, O_CLOEXEC) == -1) {
@@ -124,6 +114,23 @@ static void handle_selection(void *data,
     }
     close(pipefd[1]);
     o->fd = pipefd[0];
+}
+
+
+static void handle_selection(void *data,
+                             struct ext_data_control_device_v1 *dcdev,
+                             struct ext_data_control_offer_v1 *id,
+                             struct clipboard_wayland_data_offer *o)
+{
+    struct clipboard_wayland_seat *s = data;
+    struct clipboard_wayland_priv *wl = s->wl;
+    if (o->offer) {
+        destroy_offer(o);
+        MP_VERBOSE(wl, "Received a new selection offer. Releasing the previous offer.\n");
+    }
+    o->offer = id;
+    if (wl->monitor)
+        receive_offer(s, o);
 }
 
 static void data_offer_handle_offer(void *data,
@@ -323,7 +330,7 @@ static void clipboard_wayland_uninit(struct clipboard_wayland_priv *wl)
         wl_display_disconnect(wl->display);
 }
 
-static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl)
+static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl, bool monitor)
 {
     if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
         goto err;
@@ -332,6 +339,7 @@ static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl)
     if (!wl->display)
         goto err;
 
+    wl->monitor = monitor;
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
 
@@ -489,7 +497,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 
     if (mp_make_wakeup_pipe(priv->message_pipe) < 0)
         goto pipe_err;
-    if (!clipboard_wayland_init(priv))
+    if (!clipboard_wayland_init(priv, params->flags & CLIPBOARD_INIT_ENABLE_MONITORING))
         goto init_err;
     if (mp_thread_create(&priv->thread, clipboard_thread, cl->priv))
         goto thread_err;
