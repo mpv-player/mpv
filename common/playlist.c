@@ -312,12 +312,19 @@ void playlist_set_stream_flags(struct playlist *pl, int flags)
 }
 
 int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
-                                     struct playlist *source_pl)
+                                     struct playlist *source_pl, bool replace)
 {
     mp_assert(pl != source_pl);
     struct playlist_entry *first = playlist_get_first(source_pl);
 
     int count = source_pl->num_entries;
+
+    if (replace) {
+        int replace_count = MPMIN(count, pl->num_entries - dst_index);
+        for (int n = dst_index + replace_count - 1; n >= dst_index; n--)
+            playlist_remove(pl, pl->entries[n]);
+    }
+
     MP_TARRAY_INSERT_N_AT(pl, pl->entries, pl->num_entries, dst_index, count);
 
     for (int n = 0; n < count; n++) {
@@ -356,12 +363,12 @@ int64_t playlist_transfer_entries(struct playlist *pl, struct playlist *source_p
     mp_assert(add_at >= 0);
     mp_assert(add_at <= pl->num_entries);
 
-    return playlist_transfer_entries_to(pl, add_at, source_pl);
+    return playlist_transfer_entries_to(pl, add_at, source_pl, false);
 }
 
 int64_t playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
 {
-    return playlist_transfer_entries_to(pl, pl->num_entries, source_pl);
+    return playlist_transfer_entries_to(pl, pl->num_entries, source_pl, false);
 }
 
 // Return number of entries between list start and e.
