@@ -308,9 +308,9 @@ local state = {
     hide_timer = nil,
     cache_state = nil,
     idle = false,
+    current_tracks = {},
     audio_track_count = 0,
     sub_track_count = 0,
-    no_video = false,
     file_loaded = false,
     enabled = true,
     input_enabled = true,
@@ -704,15 +704,21 @@ end
 local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
-    state.no_video = true
+    state.current_tracks = {}
 
     for _, track in pairs(track_list) do
+        if track.selected and not state.current_tracks[track.type] then
+            state.current_tracks[track.type] = track.id
+        end
+
         if track.type == "audio" then
             state.audio_track_count = state.audio_track_count + 1
         elseif track.type == "sub" then
             state.sub_track_count = state.sub_track_count + 1
-        elseif track.type == "video" and track.selected then
-            state.no_video = false
+
+            if track.selected and track["main-selection"] == 0 then
+                state.current_tracks.sub = track.id
+            end
         end
     end
 
@@ -2364,7 +2370,7 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.audio
         end
-        local track = mp.get_property_number("aid", "-")
+        local track = state.current_tracks.audio or "-"
         local count = state.audio_track_count
         return icons.audio .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
@@ -2380,7 +2386,7 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.subtitle
         end
-        local track = mp.get_property_number("sid", "-")
+        local track = state.current_tracks.sub or "-"
         local count = state.sub_track_count
         return icons.subtitle .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
@@ -3028,7 +3034,7 @@ tick = function()
     elseif state.fullscreen and user_opts.showfullscreen
         or (not state.fullscreen and user_opts.showwindowed) then
 
-        if state.no_video and state.file_loaded and user_opts.audioonlyscreen then
+        if not state.current_tracks.video and state.file_loaded and user_opts.audioonlyscreen then
             render_logo()
         else
             render_wipe(state.logo_osd)
@@ -3169,7 +3175,8 @@ end)
 
 mp.register_event("file-loaded", function()
     state.file_loaded = true
-    state.no_video = mp.get_property_native("current-tracks/video") == nil
+    local video_track = mp.get_property_native("current-tracks/video")
+    state.current_tracks.video = video_track and video_track.id or nil
     request_tick()
 end)
 mp.add_hook("on_unload", 50, function()
