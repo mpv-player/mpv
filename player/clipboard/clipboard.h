@@ -18,6 +18,7 @@
 #pragma once
 
 #include "common/common.h"
+#include "osdep/threads.h"
 
 struct clipboard_ctx;
 struct mp_image;
@@ -75,6 +76,7 @@ struct clipboard_backend {
                     struct clipboard_data *out, void *talloc_ctx);
     int (*set_data)(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                     struct clipboard_data *data);
+    void (*update_data)(struct clipboard_ctx *cl, struct clipboard_access_params *params);
 };
 
 struct clipboard_ctx {
@@ -82,6 +84,12 @@ struct clipboard_ctx {
     struct mp_log *log;
     void *priv;   // backend-specific internal data
     bool monitor;
+    // For notifying mp_clipboard_update_data waiters.
+    // Lock protects backend and cancel access.
+    // Must outlive the pending commands that use worker threads.
+    mp_mutex lock;
+    struct mp_cancel **cancels;
+    int num_cancels;
 };
 
 void mp_clipboard_destroy(struct clipboard_ctx *cl);
@@ -90,7 +98,10 @@ int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_para
                           struct clipboard_data *out, void *talloc_ctx);
 int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *data);
+bool mp_clipboard_update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
+                              struct mp_cancel *cancel, double timeout);
 const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl);
+void mp_clipboard_notify_update_data(struct clipboard_ctx *cl);
 
 void reinit_clipboard(struct MPContext *mpctx);
 void clipboard_init(struct MPContext *mpctx);

@@ -1758,6 +1758,22 @@ Miscellaneous Commands
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
 
+``update-clipboard <type> [timeout]``
+    Update the clipboard content so that the ``clipboard`` property reflects
+    up-to-date value. This command is required to update the ``clipboard``
+    property value if ``--clipboard-monitor=no``. ``<type>`` must be ``text``
+    or ``text-primary`` to indicate whether to update clipboard or primary
+    selection. ``[timeout]`` specifies the maximum timeout in ms to wait for
+    the clipboard content to be updated. A negative timeout means infinite.
+    The default timeout is 10 ms.
+
+    This command returns as soon as the clipboard content is updated or the
+    timeout has reached. On some platforms, this command does nothing and
+    returns immediately.
+
+    This command can be asynchronously aborted via API. See `Asynchronous
+    command details`_.
+
 Undocumented commands: ``ao-reload`` (experimental/internal).
 
 List of events
@@ -4284,6 +4300,13 @@ Property list
         (typically when VO window is focused). The ``wayland`` backend typically
         does not have this limitation.
         See ``current-clipboard-backend`` property for more details.
+
+    .. warning::
+
+        Since mpv 0.42.0, this property does not return the current clipboard
+        content on certain platforms if ``--clipboard-monitor=no``.
+        When reading clipboard content, you must run ``update-clipboard``
+        command to update the clipboard content manually in this case.
 
     ::
 
