@@ -2325,9 +2325,7 @@ static void supported_alpha_mode(void *data, struct wp_color_representation_mana
     struct vo_wayland_state *wl = data;
     switch (alpha_mode) {
     case WP_COLOR_REPRESENTATION_SURFACE_V1_ALPHA_MODE_PREMULTIPLIED_ELECTRICAL:
-#if PL_API_VER >= 344
-        wl->alpha_map[PL_ALPHA_NONE] = alpha_mode;
-#endif
+        wl->alpha_map[PL_ALPHA_PREMULTIPLIED] = alpha_mode;
         break;
     case WP_COLOR_REPRESENTATION_SURFACE_V1_ALPHA_MODE_STRAIGHT:
         wl->alpha_map[PL_ALPHA_INDEPENDENT] = alpha_mode;
