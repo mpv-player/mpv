@@ -81,6 +81,12 @@ static const char def_config[] =
 #include "osdep/w32_register.h"
 #endif
 
+#if HAVE_PYTHON
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include "py_extend.h"
+#endif
+
 #if HAVE_COCOA
 #include "osdep/mac/app_bridge.h"
 #endif
@@ -205,6 +211,27 @@ void mp_destroy(struct MPContext *mpctx)
     mp_clipboard_destroy(mpctx->clipboard);
 
     uninit_libav(mpctx->global);
+
+#if HAVE_PYTHON
+    // Do NOT call Py_FinalizeEx() here.
+    //
+    // Subinterpreters use OWN_GIL + use_main_obmalloc=0, giving each script
+    // its own isolated pymalloc arena.  Py_EndInterpreter() (called per
+    // script in end_interpreter()) frees that arena.  However, Py_AtExit()
+    // handlers registered by C extension modules (e.g. _ssl via
+    // requests/urllib3) are invoked by Py_FinalizeEx() in the main
+    // interpreter's context.  If such a handler holds a reference to a
+    // Python object that lived in the now-freed subinterpreter arena and
+    // tries to Py_XDECREF / PyObject_Free it through the main allocator,
+    // glibc reports "free(): invalid pointer" and aborts.
+    //
+    // Skipping Py_FinalizeEx() is safe here: all script subinterpreters are
+    // already finalized by the time we reach this point, and the OS reclaims
+    // all remaining memory on process exit.
+    // if (mpctx->opts->enable_python) {
+    //     if (Py_IsInitialized()) Py_FinalizeEx();
+    // }
+#endif
 
     mp_msg_uninit(mpctx->global);
     mp_assert(!mpctx->num_abort_list);
@@ -378,6 +405,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     m_config_backup_watch_later_opts(mpctx->mconfig);
 
     mp_input_load_config(mpctx->input);
+
+#if HAVE_PYTHON
+    if (mpctx->opts->enable_python) {
+        if (PyImport_AppendInittab("mpv", PyInit_mpv) != -1) Py_Initialize();
+    }
+#endif
 
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
