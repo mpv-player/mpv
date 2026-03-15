@@ -29,6 +29,8 @@
 
 static const uint8_t MESSAGE_DEATH = 0;
 static const uint8_t MESSAGE_CREATE_SOURCES = 1;
+static const uint8_t MESSAGE_UPDATE_CLIPBOARD = 2;
+static const uint8_t MESSAGE_UPDATE_PRIMARY_SELECTION = 3;
 
 struct clipboard_wayland_data_offer {
     struct ext_data_control_offer_v1 *offer;
@@ -443,11 +445,26 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
         return false;
     }
 
+    struct clipboard_wayland_seat *seat;
     if (fds[1].revents & POLLIN) {
         uint8_t msg = 0;
-        if (read(wl->message_pipe[0], &msg, sizeof(msg)) == sizeof(msg) && msg == MESSAGE_CREATE_SOURCES) {
+        if (read(wl->message_pipe[0], &msg, sizeof(msg)) != sizeof(msg))
+            return false;
+        switch (msg) {
+        case MESSAGE_CREATE_SOURCES:
             create_data_sources(wl);
-        } else {
+            break;
+        case MESSAGE_UPDATE_CLIPBOARD:
+            wl_list_for_each(seat, &wl->seat_list, link) {
+                receive_offer(seat, wl->selection_offer);
+            }
+            break;
+        case MESSAGE_UPDATE_PRIMARY_SELECTION:
+            wl_list_for_each(seat, &wl->seat_list, link) {
+                receive_offer(seat, wl->primary_selection_offer);
+            }
+            break;
+        default:
             return false;
         }
     }
@@ -588,6 +605,22 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
     return CLIPBOARD_SUCCESS;
 }
 
+static void update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params)
+{
+    struct clipboard_wayland_priv *priv = cl->priv;
+    uint8_t type = MESSAGE_UPDATE_CLIPBOARD;
+    switch (params->target) {
+    case CLIPBOARD_TARGET_CLIPBOARD:
+        break;
+    case CLIPBOARD_TARGET_PRIMARY_SELECTION:
+        type = MESSAGE_UPDATE_PRIMARY_SELECTION;
+        break;
+    default:
+        return;
+    }
+    (void)write(priv->message_pipe[1], &type, sizeof(type));
+}
+
 const struct clipboard_backend clipboard_backend_wayland = {
     .name = "wayland",
     .desc = "Wayland clipboard (Data control protocol)",
@@ -596,4 +629,5 @@ const struct clipboard_backend clipboard_backend_wayland = {
     .data_changed = data_changed,
     .get_data = get_data,
     .set_data = set_data,
+    .update_data = update_data,
 };
