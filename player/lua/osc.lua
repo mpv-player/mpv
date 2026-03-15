@@ -81,6 +81,8 @@ local user_opts = {
     tick_delay = 1 / 60,                   -- minimum interval between OSC redraws in seconds
     tick_delay_follow_display_fps = false, -- use display fps as the minimum interval
 
+    max_thumb_size = 200, -- maximum display size of preview thumbnails
+
     -- luacheck: push ignore
     -- luacheck: max line length
     menu_mbtn_left_command = "script-binding select/menu; script-message-to osc osc-hide",
@@ -237,6 +239,8 @@ local layouts = {}
 local is_december = os.date("*t").month == 12
 local UNICODE_MINUS = string.char(0xe2, 0x88, 0x92)  -- UTF-8 for U+2212 MINUS SIGN
 local last_custom_button = 0
+local thumbnailer = { enabled = false }
+local video_out_params = {}
 
 local function osc_color_convert(color)
     return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
@@ -1160,6 +1164,43 @@ local function render_elements(master_ass)
                     ass_append_alpha(elem_ass, slider_lo.alpha, 0)
                     elem_ass:append(tooltiplabel)
 
+                    -- thumbnail
+                    local isPositive = function(arg) return arg and arg > 0 end
+                    local osd_w, osd_h = mp.get_osd_size()
+                    local vop = video_out_params
+                    local draw_thumbnail = thumbnailer.enabled and isPositive(osd_w) and
+                                           isPositive(vop.dw) and isPositive(vop.dh)
+                    if draw_thumbnail then
+                        local r_w, r_h = get_virt_scale_factor()
+                        local thumb_max = math.min(user_opts.max_thumb_size,
+                            math.min(osd_w, osd_h) * 0.25)
+                        local thumb_w = math.min(vop.dw > vop.dh and thumb_max or math.huge,
+                            math.floor(vop.dw / vop.dh * thumb_max + 0.5))
+                        local thumb_h = math.min(vop.dw > vop.dh and math.huge or thumb_max,
+                            math.floor(vop.dh / vop.dw * thumb_max + 0.5))
+                        local tooltip_font_size = (user_opts.layout == "box" or
+                            user_opts.layout == "slimbox") and 2 or 12
+                        local thumb_ty = user_opts.layout ~= "topbar" and element.hitbox.y1 - 8 or
+                            element.hitbox.y2 + tooltip_font_size + 8
+                        local thumb_tx = tx
+                        local thumb_pad = 4
+                        local thumb_margin_x = 20 / r_w
+                        local thumb_margin_y = (4 + user_opts.tooltipborder) / r_h + thumb_pad
+                        local thumb_x = math.min(osd_w - thumb_w - thumb_margin_x,
+                            math.max(thumb_margin_x, thumb_tx / r_w - thumb_w / 2))
+                        local thumb_y = thumb_ty / r_h + (user_opts.layout ~= "topbar" and
+                            -(thumb_h + tooltip_font_size / r_h + thumb_margin_y) or
+                            thumb_margin_y)
+
+                        mp.set_property_native("user-data/mpv/thumbnailer/draw", {
+                            hover_sec = mp.get_property_number("duration", 0) * (sliderpos / 100),
+                            x = math.floor(thumb_x + 0.5), y = math.floor(thumb_y + 0.5),
+                            w = math.floor(thumb_w + 0.5), h = math.floor(thumb_h + 0.5),
+                        })
+                    end
+
+                else
+                    mp.set_property_native("user-data/mpv/thumbnailer/draw", nil)
                 end
             end
 
@@ -3107,6 +3148,12 @@ mp.observe_property("chapter-list", "native", function(_, list)
     update_duration_watch()
     request_init()
 end)
+mp.observe_property('video-out-params', 'native', function(_, data)
+    video_out_params = data or {}
+end)
+mp.observe_property('user-data/mpv/thumbnailer/enabled', 'native', function(_, data)
+    thumbnailer.enabled = data or false
+end)
 
 -- These are for backwards compatibility only.
 mp.register_script_message("osc-message", function(message, dur)
@@ -3175,6 +3222,7 @@ mp.register_event("file-loaded", function()
 end)
 mp.add_hook("on_unload", 50, function()
     state.file_loaded = false
+    mp.set_property_native("user-data/mpv/thumbnailer/draw", nil)
     request_tick()
 end)
 
