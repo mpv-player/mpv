@@ -3643,6 +3643,8 @@ Property list
     If tracks of the requested type are selected via ``--lavfi-complex``, the
     first one is returned.
 
+    Note that this property cannot be used directly, a sub-property is required.
+
 ``chapter-list`` (RW)
     List of chapters, current entry marked.
 
