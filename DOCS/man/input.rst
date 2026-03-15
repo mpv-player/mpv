@@ -2235,6 +2235,8 @@ Property list
     The variable to retrieve should be set as the sub-property. E.g
     ``${env/HOME}`` will return ``$HOME`` if set.
 
+    Note that this property cannot be used directly, a sub-property is required.
+
 ``pid``
     Process-id of mpv.
 
@@ -3647,6 +3649,8 @@ Property list
 
     If tracks of the requested type are selected via ``--lavfi-complex``, the
     first one is returned.
+
+    Note that this property cannot be used directly, a sub-property is required.
 
 ``chapter-list`` (RW)
     List of chapters, current entry marked.
