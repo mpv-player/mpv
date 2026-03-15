@@ -24,7 +24,7 @@
 
 // Return pointer to filename part of path
 
-char *mp_basename(const char *path);
+const char *mp_basename(const char *path);
 
 /* Return file extension, excluding the '.'. If root is not NULL, set it to the
  * part of the path without extension. So: path == root + "." + extension

@@ -208,9 +208,9 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     }
 }
 
-bool m_property_split_path(const char *path, bstr *prefix, char **rem)
+bool m_property_split_path(const char *path, bstr *prefix, const char **rem)
 {
-    char *next = strchr(path, '/');
+    const char *next = strchr(path, '/');
     if (next) {
         *prefix = bstr_splice(bstr0(path), 0, next - path);
         *rem = next + 1;

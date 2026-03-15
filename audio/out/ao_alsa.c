@@ -547,7 +547,7 @@ static char *append_params(void *ta_parent, const char *device, const char *p)
         return talloc_strdup(ta_parent, device);
 
     int len = strlen(device);
-    char *end = strchr(device, ':');
+    const char *end = strchr(device, ':');
     if (!end) {
         /* no existing parameters: add it behind device name */
         return talloc_asprintf(ta_parent, "%s:%s", device, p);
