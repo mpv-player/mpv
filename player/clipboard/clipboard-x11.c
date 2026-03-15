@@ -29,6 +29,8 @@
 
 static const uint8_t MESSAGE_DEATH = 0;
 static const uint8_t MESSAGE_SET_OWNER = 1;
+static const uint8_t MESSAGE_UPDATE_CLIPBOARD = 2;
+static const uint8_t MESSAGE_UPDATE_PRIMARY_SELECTION = 3;
 
 struct clipboard_x11_priv {
     mp_mutex lock;
@@ -176,6 +178,19 @@ static void clipboard_x11_set_owner(struct clipboard_x11_priv *x11)
 {
     XSetSelectionOwner(x11->display, XA_PRIMARY, x11->window, CurrentTime);
     XSetSelectionOwner(x11->display, XA(x11, CLIPBOARD), x11->window, CurrentTime);
+    XFlush(x11->display);
+}
+
+static void clipboard_x11_update_data(struct clipboard_x11_priv *x11, uint8_t type)
+{
+    if (type == MESSAGE_UPDATE_CLIPBOARD) {
+        XConvertSelection(x11->display, XA(x11, CLIPBOARD), XA(x11, UTF8_STRING),
+                          XA(x11, MPV_CLIPBOARD), x11->window, CurrentTime);
+    } else if (type == MESSAGE_UPDATE_PRIMARY_SELECTION) {
+        XConvertSelection(x11->display, XA_PRIMARY, XA(x11, UTF8_STRING),
+                          XA(x11, MPV_PRIMARY), x11->window, CurrentTime);
+    }
+    XFlush(x11->display);
 }
 
 static bool clipboard_x11_dispatch_events(struct clipboard_x11_priv *x11, int64_t timeout_ns)
@@ -200,11 +215,9 @@ static bool clipboard_x11_dispatch_events(struct clipboard_x11_priv *x11, int64_
             if (event.type == x11->XFixesSelectionNotifyEvent && x11->monitor) {
                 XFixesSelectionNotifyEvent *ev = (XFixesSelectionNotifyEvent *)&event;
                 if (ev->owner != x11->window && ev->selection == XA(x11, CLIPBOARD)) {
-                    XConvertSelection(x11->display, ev->selection, XA(x11, UTF8_STRING),
-                                      XA(x11, MPV_CLIPBOARD), x11->window, CurrentTime);
+                    clipboard_x11_update_data(x11, MESSAGE_UPDATE_CLIPBOARD);
                 } else if (ev->owner != x11->window && ev->selection == XA_PRIMARY) {
-                    XConvertSelection(x11->display, ev->selection, XA(x11, UTF8_STRING),
-                                      XA(x11, MPV_PRIMARY), x11->window, CurrentTime);
+                    clipboard_x11_update_data(x11, MESSAGE_UPDATE_PRIMARY_SELECTION);
                 }
             } else if (event.type == SelectionRequest) {
                 clipboard_x11_handle_selection_request(x11, &event);
@@ -216,10 +229,17 @@ static bool clipboard_x11_dispatch_events(struct clipboard_x11_priv *x11, int64_
 
     if (fds[1].revents & POLLIN) {
         uint8_t msg = 0;
-        if (read(x11->message_pipe[0], &msg, sizeof(msg)) == sizeof(msg) && msg == MESSAGE_SET_OWNER) {
+        if (read(x11->message_pipe[0], &msg, sizeof(msg)) != sizeof(msg))
+            return false;
+        switch (msg) {
+        case MESSAGE_SET_OWNER:
             clipboard_x11_set_owner(x11);
-            XFlush(x11->display);
-        } else {
+            break;
+        case MESSAGE_UPDATE_CLIPBOARD:
+        case MESSAGE_UPDATE_PRIMARY_SELECTION:
+            clipboard_x11_update_data(x11, msg);
+            break;
+        default:
             return false;
         }
     }
@@ -344,6 +364,22 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
     return CLIPBOARD_SUCCESS;
 }
 
+static void update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params)
+{
+    struct clipboard_x11_priv *priv = cl->priv;
+    uint8_t type = MESSAGE_UPDATE_CLIPBOARD;
+    switch (params->target) {
+    case CLIPBOARD_TARGET_CLIPBOARD:
+        break;
+    case CLIPBOARD_TARGET_PRIMARY_SELECTION:
+        type = MESSAGE_UPDATE_PRIMARY_SELECTION;
+        break;
+    default:
+        return;
+    }
+    (void)write(priv->message_pipe[1], &type, sizeof(type));
+}
+
 const struct clipboard_backend clipboard_backend_x11 = {
     .name = "x11",
     .desc = "x11 clipboard",
@@ -352,4 +388,5 @@ const struct clipboard_backend clipboard_backend_x11 = {
     .data_changed = data_changed,
     .get_data = get_data,
     .set_data = set_data,
+    .update_data = update_data,
 };
