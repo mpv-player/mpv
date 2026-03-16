@@ -238,6 +238,7 @@ class Window: NSWindow, NSWindowDelegate {
 
         if #available(macOS 11.0, *) {
             styleMask = .borderless
+            hasShadow = false
             common.titleBar?.hide(0.0)
         } else {
             styleMask.insert(.fullScreen)
@@ -256,6 +257,7 @@ class Window: NSWindow, NSWindowDelegate {
 
         if #available(macOS 11.0, *) {
             styleMask = previousStyleMask
+            hasShadow = true
             common.titleBar?.hide(0.0)
         } else {
             styleMask.remove(.fullScreen)
