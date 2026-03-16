@@ -231,7 +231,11 @@ static int get_title_bar_height(struct vo_w32_state *w32)
         DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
                               &visible_border, sizeof(visible_border));
     }
-    return visible_border;
+    int top_bar = IsMaximized(w32->window)
+                      ? get_system_metrics(w32, SM_CYFRAME) +
+                        get_system_metrics(w32, SM_CXPADDEDBORDER)
+                      : visible_border;
+    return top_bar;
 }
 
 static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
