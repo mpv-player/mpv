@@ -1935,6 +1935,16 @@ set_pos_done:
         } else {
             ShowWindow(w32->window, SW_SHOW);
         }
+
+        // DWMWA_EXTENDED_FRAME_BOUNDS doesn't work when the window was not yet
+        // shown. We need it to correctly account for invisible window borders.
+        // Do one more forced resize after showing the window. This is only
+        // needed for Windows 10, but let's do the same for Windows 11 to get
+        // the same init behavior. In practice, this will only cause small
+        // adjustment to window position based on invisible borders, on
+        // Windows 11 it should be a no-op.
+        w32->pending_reset_size = true;
+        window_resize(w32);
     }
 
 finish:
