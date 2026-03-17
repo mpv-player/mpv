@@ -122,4 +122,6 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *out
 void mp_map_fixp_color(struct pl_transform3x3 *matrix, int ibits, int in[3],
                                                int obits, int out[3]);
 
+enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries *gamut);
+
 #endif /* MPLAYER_CSPUTILS_H */
