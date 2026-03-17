@@ -979,36 +979,6 @@ static void update_tm_viz(struct pl_color_map_params *params,
     params->visualize_hue = M_PI / 4.0;
 }
 
-static enum pl_color_primaries get_best_prim_container(const struct pl_raw_primaries *gamut)
-{
-    enum pl_color_primaries container = PL_COLOR_PRIM_UNKNOWN;
-
-    if (!pl_primaries_valid(gamut))
-        return container;
-
-    const struct pl_raw_primaries *best = NULL;
-    for (enum pl_color_primaries prim = 1; prim < PL_COLOR_PRIM_COUNT; prim++) {
-        const struct pl_raw_primaries *raw = pl_raw_primaries_get(prim);
-        if (pl_raw_primaries_similar(raw, gamut)) {
-            container = prim;
-            best = raw;
-            break;
-        }
-
-        if (pl_primaries_superset(raw, gamut) &&
-            (!best || pl_primaries_superset(best, raw)))
-        {
-            container = prim;
-            best = raw;
-        }
-    }
-
-    if (!best)
-        container = PL_COLOR_PRIM_BT_2020;
-
-    return container;
-}
-
 static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
@@ -1101,7 +1071,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (sw->fns->target_csp)
         target_csp = sw->fns->target_csp(sw);
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
-        target_csp.primaries = get_best_prim_container(&target_csp.hdr.prim);
+        target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         // limit min_luma to 1000:1 contrast ratio in SDR mode
         if (target_csp.hdr.min_luma > PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST)
