@@ -2348,6 +2348,10 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 if (!w32->window_bounds_initialized)
                     return VO_TRUE;
 
+                // Force window repositioning if geometry xy is valid.
+                if (changed_option == &vo_opts->geometry)
+                    w32->window_bounds_initialized = !w32->opts->geometry.xy_valid;
+
                 if (w32->current_fs) {
                     w32->pending_resize = true;
                     w32->pending_maximize = false;
