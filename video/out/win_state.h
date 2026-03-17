@@ -29,7 +29,7 @@ struct m_geometry;
 void vo_calc_window_geometry(struct vo *vo, struct mp_vo_opts *opts,
                              const struct mp_rect *screen,
                              const struct mp_rect *monitor, double dpi_scale,
-                             bool force_center, struct vo_win_geometry *out_geo,
+                             bool force_pos, struct vo_win_geometry *out_geo,
                              struct m_geometry *size_constraint);
 void vo_apply_window_geometry(struct vo *vo, const struct vo_win_geometry *geo);
 

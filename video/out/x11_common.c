@@ -1810,7 +1810,7 @@ void vo_x11_config_vo_window(struct vo *vo)
     vo_apply_window_geometry(vo, &geo);
 
     struct mp_rect rc = !x11->pseudo_mapped || opts->auto_window_resize || opts->geometry.wh_valid ||
-                        opts->geometry.xy_valid ? geo.win : x11->nofsrc;
+                        (geo.flags & VO_WIN_FORCE_POS) ? geo.win : x11->nofsrc;
 
     if (x11->parent) {
         vo_x11_update_geometry(vo);
@@ -2132,6 +2132,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
                             &x11->opts->window_maximized);
                     vo_x11_maximize(vo);
                 }
+                // Force window repositioning if geometry xy is valid.
+                if (opt == &opts->geometry)
+                    x11->pseudo_mapped = !x11->opts->geometry.xy_valid;
                 vo_x11_set_geometry(vo);
             }
         }
