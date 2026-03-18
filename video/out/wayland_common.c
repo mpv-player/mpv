@@ -156,6 +156,7 @@ struct compositor_format {
 struct vo_wayland_feedback_pool {
     struct wp_presentation_feedback **fback;
     struct vo_wayland_state *wl;
+    int last_zero_copy;
     int len;
 };
 
@@ -2497,10 +2498,10 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     struct vo_wayland_state *wl = fback_pool->wl;
 
     bool current_zero_copy = flags & WP_PRESENTATION_FEEDBACK_KIND_ZERO_COPY;
-    if (wl->last_zero_copy == -1 || wl->last_zero_copy != current_zero_copy) {
+    if (fback_pool->last_zero_copy == -1 || fback_pool->last_zero_copy != current_zero_copy) {
         MP_DBG(wl, "Presentation was done with %s.\n",
                  current_zero_copy ? "direct scanout" : "a copy");
-        wl->last_zero_copy = current_zero_copy;
+        fback_pool->last_zero_copy = current_zero_copy;
     }
 
     if (fback)
@@ -2526,8 +2527,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
     struct vo_wayland_feedback_pool *fback_pool = data;
-    struct vo_wayland_state *wl = fback_pool->wl;
-    wl->last_zero_copy = -1;
+    fback_pool->last_zero_copy = -1;
     if (fback)
         remove_feedback(fback_pool, fback);
 }
@@ -4387,7 +4387,6 @@ bool vo_wayland_init(struct vo *vo)
         .wakeup_pipe = {-1, -1},
         .display_fd = -1,
         .cursor_visible = true,
-        .last_zero_copy = -1,
         .opts_cache = m_config_cache_alloc(wl, vo->global, &vo_sub_opts),
         .preferred_csp = (struct pl_color_space) { .transfer = PL_COLOR_TRC_SRGB, .primaries = PL_COLOR_PRIM_BT_709 },
     };
@@ -4516,6 +4515,7 @@ bool vo_wayland_init(struct vo *vo)
         wl->fback_pool = talloc_zero(wl, struct vo_wayland_feedback_pool);
         wl->fback_pool->wl = wl;
         wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
+        wl->fback_pool->last_zero_copy = -1,
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
                                                   wl->fback_pool->len);
         wl->present = mp_present_initialize(wl, wl->opts, VO_MAX_SWAPCHAIN_DEPTH);
