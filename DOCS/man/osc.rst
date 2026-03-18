@@ -440,12 +440,6 @@ Configurable Options
     and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
     but ``quit`` will always work.
 
-``windowcontrols_fullscreen``
-    Default: no
-
-    Whether to show window controls in fullscreen mode. Only applies when
-    ``windowcontrols`` is set to ``auto``.
-
 ``windowcontrols_independent``
     Default: yes
 
