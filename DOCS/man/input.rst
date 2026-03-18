@@ -2477,7 +2477,7 @@ Property list
 
     This has a number of sub-properties:
 
-    ``metadata/by-key/<key>``
+    ``metadata/by-key/<key>`` (RW)
         Value of metadata entry ``<key>``.
 
     ``metadata/list/count``

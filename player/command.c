@@ -1329,17 +1329,21 @@ static int tag_property(int action, void *arg, struct mp_tags *tags)
         // Direct access without this prefix is allowed for compatibility.
         bstr k = bstr0(ka->key);
         bstr_eatstart0(&k, "by-key/");
-        char *meta = mp_tags_get_bstr(tags, k);
-        if (!meta)
-            return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
-        case M_PROPERTY_GET:
+        case M_PROPERTY_GET: {
+            char *meta = mp_tags_get_bstr(tags, k);
+            if (!meta)
+                return M_PROPERTY_UNKNOWN;
             *(char **)ka->arg = talloc_strdup(NULL, meta);
             return M_PROPERTY_OK;
+        }
         case M_PROPERTY_GET_TYPE:
             *(struct m_option *)ka->arg = (struct m_option){
                 .type = CONF_TYPE_STRING,
             };
+            return M_PROPERTY_OK;
+        case M_PROPERTY_SET:
+            mp_tags_set_bstr(tags, k, bstr0(*(char **)ka->arg));
             return M_PROPERTY_OK;
         }
     }
