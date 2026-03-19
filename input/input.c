@@ -1134,12 +1134,14 @@ void mp_input_tablet_tool_up(struct input_ctx *ictx)
 
 void mp_input_tablet_tool_button(struct input_ctx *ictx, int button, int state)
 {
-    char *key = mp_input_get_key_name(button);
-    MP_TRACE(ictx, "tablet tool button %s %s%s \n",
-             key,
-             (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
-             (state & MP_KEY_STATE_UP) ? "released" : "");
-    talloc_free(key);
+    if (mp_msg_test(ictx->log, MSGL_TRACE)) {
+        char *key = mp_input_get_key_name(button);
+        MP_TRACE(ictx, "tablet tool button %s %s%s \n",
+                 key,
+                 (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
+                 (state & MP_KEY_STATE_UP) ? "released" : "");
+        talloc_free(key);
+    }
 
     input_lock(ictx);
 
