@@ -62,7 +62,6 @@ local tag_list = {
     ["release_year"]    = "ytdl_release_year",
     ["description"]     = "ytdl_description",
     -- "title" is handled by force-media-title
-    -- tags don't work with all_formats=yes
 }
 
 local safe_protos = Set {

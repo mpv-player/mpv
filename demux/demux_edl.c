@@ -561,12 +561,11 @@ static struct timeline_par *build_timeline(struct timeline *root,
     if (!tl->track_layout && !tl->delay_open)
         goto error;
     if (!root->meta)
-        root->meta = tl->track_layout;
+        root->meta = tl->track_layout ? tl->track_layout : root->demuxer;
 
     // Not very sane, since demuxer fields are supposed to be treated read-only
     // from outside, but happens to work in this case, so who cares.
-    if (root->meta)
-        mp_tags_merge(root->meta->metadata, edl_root->tags);
+    mp_tags_merge(root->meta->metadata, edl_root->tags);
 
     mp_assert(tl->num_parts == parts->num_parts);
     return tl;
