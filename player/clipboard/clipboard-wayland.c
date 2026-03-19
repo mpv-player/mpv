@@ -57,6 +57,8 @@ struct clipboard_wayland_priv {
     struct clipboard_wayland_data_offer *selection_offer;
     struct clipboard_wayland_data_offer *primary_selection_offer;
     bool monitor;
+    // accessed by both threads (protected by cl->lock)
+    struct clipboard_ctx *cl;
 };
 
 struct clipboard_wayland_seat {
@@ -409,6 +411,7 @@ static void get_selection_data(struct clipboard_wayland_priv *wl, struct clipboa
         wl->data_changed = true;
         mp_mutex_unlock(&wl->lock);
         content = (bstr){0};
+        mp_clipboard_notify_update_data(wl->cl);
     }
 
     talloc_free(content.start);
@@ -504,6 +507,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     cl->priv = talloc_zero(cl, struct clipboard_wayland_priv);
     struct clipboard_wayland_priv *priv = cl->priv;
+    priv->cl = cl;
     priv->message_pipe[0] = priv->message_pipe[1] = priv->display_fd = -1;
     priv->log = mp_log_new(priv, cl->log, "wayland");
     priv->selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
