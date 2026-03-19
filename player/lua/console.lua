@@ -1382,6 +1382,7 @@ end
 
 -- Returns a string of UTF-8 text from the clipboard (or the primary selection)
 local function get_clipboard(clip)
+    mp.commandv("update-clipboard", clip and "text" or "text-primary")
     if platform == "x11" then
         local property = clip and "clipboard/text" or "clipboard/text-primary"
         return mp.get_property(property, "")
