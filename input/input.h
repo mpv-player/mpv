@@ -23,6 +23,8 @@
 
 #include "cmd.h"
 
+#define MAX_TOUCH_POINTS 10
+
 struct input_ctx;
 struct mp_log;
 

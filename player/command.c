@@ -3117,7 +3117,6 @@ static int get_touch_pos(int item, int action, void *arg, void *ctx)
     return r;
 }
 
-#define MAX_TOUCH_POINTS 10
 static int mp_property_touch_pos(void *ctx, struct m_property *prop,
                                  int action, void *arg)
 {
