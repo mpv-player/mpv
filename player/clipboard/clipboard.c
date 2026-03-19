@@ -93,14 +93,10 @@ const struct m_sub_options clipboard_conf = {
     .size = sizeof(struct clipboard_opts)
 };
 
-struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
-                                          struct mpv_global *global)
+static void mp_clipboard_create(struct clipboard_ctx *cl,
+                                struct clipboard_init_params *params)
 {
-    struct clipboard_ctx *cl = talloc_ptrtype(NULL, cl);
-    *cl = (struct clipboard_ctx) {
-        .log = mp_log_new(cl, global->log, "clipboard"),
-        .monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
-    };
+    cl->monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING;
 
     for (int n = 0; params->backends && params->backends[n].name; n++) {
         if (!params->backends[n].enabled)
@@ -112,23 +108,19 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
             if (backend->init(cl, params) != CLIPBOARD_SUCCESS)
                 break;
             cl->backend = backend;
-            goto success;
+            MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
+            return;
         }
     }
 
     MP_WARN(cl, "Failed to initialize any clipboard backend.\n");
-    talloc_free(cl);
-    return NULL;
-success:
-    MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
-    return cl;
 }
 
 void mp_clipboard_destroy(struct clipboard_ctx *cl)
 {
-    if (cl && cl->backend->uninit)
+    if (cl->backend && cl->backend->uninit)
         cl->backend->uninit(cl);
-    talloc_free(cl);
+    *cl = (struct clipboard_ctx){.log = cl->log};
 }
 
 bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
@@ -141,7 +133,7 @@ bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
 int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *out, void *talloc_ctx)
 {
-    if (cl && cl->backend->get_data)
+    if (cl->backend && cl->backend->get_data)
         return cl->backend->get_data(cl, params, out, talloc_ctx);
     return CLIPBOARD_UNAVAILABLE;
 }
@@ -149,20 +141,19 @@ int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_para
 int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *data)
 {
-    if (cl && cl->backend->set_data)
+    if (cl->backend && cl->backend->set_data)
         return cl->backend->set_data(cl, params, data);
     return CLIPBOARD_UNAVAILABLE;
 }
 
 const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl)
 {
-    return cl ? cl->backend->name : NULL;
+    return cl->backend ? cl->backend->name : NULL;
 }
 
 void reinit_clipboard(struct MPContext *mpctx)
 {
     mp_clipboard_destroy(mpctx->clipboard);
-    mpctx->clipboard = NULL;
 
     struct clipboard_opts *opts = mp_get_config_group(NULL, mpctx->global, &clipboard_conf);
     if (opts->backends && opts->backends[0].name) {
@@ -172,7 +163,13 @@ void reinit_clipboard(struct MPContext *mpctx)
         };
         params.flags |= opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0;
         params.flags |= opts->xwayland ? CLIPBOARD_INIT_ENABLE_XWAYLAND : 0;
-        mpctx->clipboard = mp_clipboard_create(&params, mpctx->global);
+        mp_clipboard_create(mpctx->clipboard, &params);
     }
     talloc_free(opts);
+}
+
+void clipboard_init(struct MPContext *mpctx)
+{
+    mpctx->clipboard = talloc_zero_ptrtype(mpctx, mpctx->clipboard);
+    mpctx->clipboard->log = mp_log_new(mpctx->clipboard, mpctx->global->log, "clipboard");
 }

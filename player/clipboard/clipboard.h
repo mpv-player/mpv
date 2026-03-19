@@ -84,8 +84,6 @@ struct clipboard_ctx {
     bool monitor;
 };
 
-struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
-                                          struct mpv_global *global);
 void mp_clipboard_destroy(struct clipboard_ctx *cl);
 bool mp_clipboard_data_changed(struct clipboard_ctx *cl);
 int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
@@ -95,3 +93,4 @@ int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_para
 const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl);
 
 void reinit_clipboard(struct MPContext *mpctx);
+void clipboard_init(struct MPContext *mpctx);
