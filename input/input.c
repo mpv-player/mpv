@@ -1139,6 +1139,7 @@ void mp_input_tablet_tool_button(struct input_ctx *ictx, int button, int state)
              key,
              (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
              (state & MP_KEY_STATE_UP) ? "released" : "");
+    talloc_free(key);
 
     input_lock(ictx);
 
