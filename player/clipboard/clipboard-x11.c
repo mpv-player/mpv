@@ -47,6 +47,8 @@ struct clipboard_x11_priv {
     Display *display;
     int XFixesSelectionNotifyEvent;
     bool monitor;
+    // accessed by both threads (protected by cl->lock)
+    struct clipboard_ctx *cl;
 };
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
@@ -172,6 +174,7 @@ static void clipboard_x11_handle_selection_notify(struct clipboard_x11_priv *x11
         mp_mutex_unlock(&x11->lock);
     }
     XFree(data);
+    mp_clipboard_notify_update_data(x11->cl);
 }
 
 static void clipboard_x11_set_owner(struct clipboard_x11_priv *x11)
@@ -266,6 +269,7 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     cl->priv = talloc_zero(cl, struct clipboard_x11_priv);
     struct clipboard_x11_priv *priv = cl->priv;
+    priv->cl = cl;
     priv->message_pipe[0] = priv->message_pipe[1] = -1;
     priv->log = mp_log_new(priv, cl->log, "x11");
     mp_mutex_init(&priv->lock);
