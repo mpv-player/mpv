@@ -30,6 +30,19 @@ struct vo_wayland_seat;
 struct vo_wayland_tranche;
 struct vo_wayland_data_offer;
 
+enum touch_event_type {
+    TOUCH_DOWN,
+    TOUCH_UP,
+    TOUCH_MOTION,
+};
+
+struct pending_touch_event {
+    enum touch_event_type type;
+    int32_t id;
+    int mouse_x;
+    int mouse_y;
+};
+
 struct drm_format {
     uint32_t format;
     uint64_t modifier;
@@ -197,6 +210,10 @@ struct vo_wayland_state {
     bool                    cursor_visible;
     int                     allocated_cursor_scale;
     struct vo_wayland_seat *last_button_seat;
+
+    /* Touch */
+    struct pending_touch_event *touch_events;
+    int num_touch_events;
 };
 
 bool vo_wayland_check_visible(struct vo *vo);
