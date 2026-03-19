@@ -530,8 +530,10 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_state *wl = s->wl;
     s->last_serial = serial;
     // Note: the position should still be saved here for VO dragging handling.
-    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
-    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
+    int x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
+    int y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
+    wl->mouse_x = x;
+    wl->mouse_y = y;
 
     enum xdg_toplevel_resize_edge edge;
     if (!mp_input_test_dragging(wl->vo->input_ctx, wl->mouse_x, wl->mouse_y) &&
@@ -544,8 +546,13 @@ static void touch_handle_down(void *data, struct wl_touch *wl_touch,
         s->pointer_button_serial = serial;
         wl->last_button_seat = s;
     }
-
-    mp_input_add_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
+    MP_TARRAY_APPEND(wl, wl->touch_events, wl->num_touch_events,
+                     (struct pending_touch_event){
+                         .type = TOUCH_DOWN,
+                         .id = id,
+                         .mouse_x = x,
+                         .mouse_y = y,
+                     });
 }
 
 static void touch_handle_up(void *data, struct wl_touch *wl_touch,
@@ -554,8 +561,12 @@ static void touch_handle_up(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     s->last_serial = serial;
-    mp_input_remove_touch_point(wl->vo->input_ctx, id);
     wl->last_button_seat = NULL;
+    MP_TARRAY_APPEND(wl, wl->touch_events, wl->num_touch_events,
+                     (struct pending_touch_event){
+                         .type = TOUCH_UP,
+                         .id = id,
+                     });
 }
 
 static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
@@ -564,20 +575,44 @@ static void touch_handle_motion(void *data, struct wl_touch *wl_touch,
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
 
-    wl->mouse_x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
-    wl->mouse_y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
-
-    mp_input_update_touch_point(wl->vo->input_ctx, id, wl->mouse_x, wl->mouse_y);
+    int x = handle_round(wl->scaling, wl_fixed_to_int(x_w));
+    int y = handle_round(wl->scaling, wl_fixed_to_int(y_w));
+    MP_TARRAY_APPEND(wl, wl->touch_events, wl->num_touch_events,
+                     (struct pending_touch_event){
+                         .type = TOUCH_MOTION,
+                         .id = id,
+                         .mouse_x = x,
+                         .mouse_y = y,
+                     });
 }
 
 static void touch_handle_frame(void *data, struct wl_touch *wl_touch)
 {
+    struct vo_wayland_seat *s = data;
+    struct vo_wayland_state *wl = s->wl;
+
+    for (int i = 0; i < wl->num_touch_events; i++) {
+        struct pending_touch_event *e = &wl->touch_events[i];
+        switch (e->type) {
+            case TOUCH_DOWN:
+                mp_input_add_touch_point(wl->vo->input_ctx, e->id, e->mouse_x, e->mouse_y);
+                break;
+            case TOUCH_UP:
+                mp_input_remove_touch_point(wl->vo->input_ctx, e->id);
+                break;
+            case TOUCH_MOTION:
+                mp_input_update_touch_point(wl->vo->input_ctx, e->id, e->mouse_x, e->mouse_y);
+                break;
+        }
+    }
+    wl->num_touch_events = 0;
 }
 
 static void touch_handle_cancel(void *data, struct wl_touch *wl_touch)
 {
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
+    wl->num_touch_events = 0;
     mp_input_put_key(wl->vo->input_ctx, MP_TOUCH_RELEASE_ALL);
 }
 
