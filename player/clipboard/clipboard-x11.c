@@ -27,10 +27,12 @@
 #include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
-static const uint8_t MESSAGE_DEATH = 0;
-static const uint8_t MESSAGE_SET_OWNER = 1;
-static const uint8_t MESSAGE_UPDATE_CLIPBOARD = 2;
-static const uint8_t MESSAGE_UPDATE_PRIMARY_SELECTION = 3;
+enum message_type {
+    MESSAGE_DEATH = 0,
+    MESSAGE_SET_OWNER = 1,
+    MESSAGE_UPDATE_CLIPBOARD = 2,
+    MESSAGE_UPDATE_PRIMARY_SELECTION = 3,
+};
 
 struct clipboard_x11_priv {
     mp_mutex lock;
@@ -299,7 +301,8 @@ static void uninit(struct clipboard_ctx *cl)
     struct clipboard_x11_priv *priv = cl->priv;
     if (!priv)
         return;
-    (void)write(priv->message_pipe[1], &MESSAGE_DEATH, sizeof(MESSAGE_DEATH));
+    uint8_t msg = MESSAGE_DEATH;
+    (void)write(priv->message_pipe[1], &msg, sizeof(msg));
     mp_thread_join(priv->thread);
     close(priv->message_pipe[0]);
     close(priv->message_pipe[1]);
@@ -364,7 +367,8 @@ static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
         break;
     }
     mp_mutex_unlock(&priv->lock);
-    (void)write(priv->message_pipe[1], &MESSAGE_SET_OWNER, sizeof(MESSAGE_SET_OWNER));
+    uint8_t msg = MESSAGE_SET_OWNER;
+    (void)write(priv->message_pipe[1], &msg, sizeof(msg));
     return CLIPBOARD_SUCCESS;
 }
 
