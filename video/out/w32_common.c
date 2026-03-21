@@ -1407,6 +1407,22 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_display_info(w32);
         break;
     }
+    case WM_GETMINMAXINFO: {
+        if (w32->parent)
+            break;
+        // Set the maximum window track size. Default values aka. C{X,Y}MAXTRACK
+        // seems to be too big, making the window go few pixels outside of the
+        // virtual screen edges. Windows calculates them based on virtual screen
+        // size, but doesn't handle borders correctly.
+        MINMAXINFO* mmi = (MINMAXINFO *)lParam;
+        RECT r = {0, 0, get_system_metrics(w32, SM_CXVIRTUALSCREEN),
+                        get_system_metrics(w32, SM_CYVIRTUALSCREEN)};
+        RECT window_rect;
+        if (GetWindowRect(w32->window, &window_rect))
+            adjust_working_area_for_extended_frame(&r, &window_rect, w32->window);
+        mmi->ptMaxTrackSize = (POINT){rect_w(r), rect_h(r)};
+        break;
+    }
     case WM_SIZING:
         if (w32->opts->keepaspect && w32->opts->keepaspect_window &&
             !w32->current_fs && !w32->parent && w32->o_dwidth && w32->o_dheight)
