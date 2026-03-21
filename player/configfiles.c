@@ -37,6 +37,7 @@
 #include "common/encode.h"
 #include "common/msg.h"
 #include "misc/ctype.h"
+#include "misc/io_utils.h"
 #include "options/path.h"
 #include "options/m_config.h"
 #include "options/m_config_frontend.h"
@@ -243,7 +244,7 @@ static bool needs_config_quoting(const char *s)
     return false;
 }
 
-static void write_filename(struct MPContext *mpctx, FILE *file, const char *filename)
+static void write_filename(struct MPContext *mpctx, void *talloc_ctx, bstr *s, const char *filename)
 {
     if (mpctx->opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(filename)))
         filename = mp_basename(filename);
@@ -252,7 +253,7 @@ static void write_filename(struct MPContext *mpctx, FILE *file, const char *file
         char write_name[1024] = {0};
         for (int n = 0; filename[n] && n < sizeof(write_name) - 1; n++)
             write_name[n] = (unsigned char)filename[n] < 32 ? '_' : filename[n];
-        fprintf(file, "# %s\n", write_name);
+        bstr_xappend_asprintf(talloc_ctx, s, "# %s\n", write_name);
     }
 }
 
@@ -260,12 +261,10 @@ static void write_redirect(struct MPContext *mpctx, char *path)
 {
     char *conffile = mp_get_playback_resume_config_filename(mpctx, path);
     if (conffile) {
-        FILE *file = fopen(conffile, "wb");
-        if (file) {
-            fprintf(file, "# redirect entry\n");
-            write_filename(mpctx, file, path);
-            fclose(file);
-        }
+        bstr data = {0};
+        bstr_xappend0(conffile, &data, "# redirect entry\n");
+        write_filename(mpctx, conffile, &data, path);
+        mp_save_to_file(conffile, data.start, data.len);
 
         if (mpctx->opts->position_check_mtime &&
             !mp_is_url(bstr0(path)) && !copy_mtime(path, conffile))
@@ -318,13 +317,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     MP_INFO(mpctx, "Saving state.\n");
 
-    FILE *file = fopen(conffile, "wb");
-    if (!file) {
-        MP_WARN(mpctx, "Can't open %s for writing\n", conffile);
-        goto exit;
-    }
-
-    write_filename(mpctx, file, cur->filename);
+    bstr data = {0};
+    write_filename(mpctx, conffile, &data, cur->filename);
 
     bool write_start = true;
     double pos = get_playback_time(mpctx);
@@ -340,7 +334,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         char *pname = watch_later_options[i];
         // Always save start if we have it in the array.
         if (write_start && strcmp(pname, "start") == 0) {
-            fprintf(file, "%s=%f\n", pname, pos);
+            bstr_xappend_asprintf(conffile, &data, "%s=%f\n", pname, pos);
             continue;
         }
         // Only store it if it's different from the initial value.
@@ -352,14 +346,18 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
                     "writing watch-later file\n", pname);
             } else if (needs_config_quoting(val)) {
                 // e.g. '%6%STRING'
-                fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);
+                bstr_xappend_asprintf(conffile, &data, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);
             } else {
-                fprintf(file, "%s=%s\n", pname, val);
+                bstr_xappend_asprintf(conffile, &data, "%s=%s\n", pname, val);
             }
             talloc_free(val);
         }
     }
-    fclose(file);
+    bool ok = mp_save_to_file(conffile, data.start, data.len);
+    if (!ok) {
+        MP_WARN(mpctx, "Can't save state to %s\n", conffile);
+        goto exit;
+    }
 
     if (mpctx->opts->position_check_mtime && !mp_is_url(bstr0(cur->filename)) &&
         !copy_mtime(cur->filename, conffile))
