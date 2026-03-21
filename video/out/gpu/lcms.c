@@ -25,6 +25,7 @@
 #include "stream/stream.h"
 #include "common/common.h"
 #include "misc/bstr.h"
+#include "misc/io_utils.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
@@ -436,13 +437,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
     cmsDeleteTransform(trafo);
 
-    if (cache_file) {
-        FILE *out = fopen(cache_file, "wb");
-        if (out) {
-            fwrite(output, talloc_get_size(output), 1, out);
-            fclose(out);
-        }
-    }
+    if (cache_file)
+        mp_save_to_file(cache_file, output, talloc_get_size(output));
 
 done: ;
 
