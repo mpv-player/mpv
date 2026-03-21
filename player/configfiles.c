@@ -264,9 +264,11 @@ static void write_redirect(struct MPContext *mpctx, char *path)
         bstr data = {0};
         bstr_xappend0(conffile, &data, "# redirect entry\n");
         write_filename(mpctx, conffile, &data, path);
-        mp_save_to_file(conffile, data.start, data.len);
+        bool ok = mp_save_to_file(conffile, data.start, data.len);
+        if (!ok)
+            MP_WARN(mpctx, "Can't save redirect to %s\n", conffile);
 
-        if (mpctx->opts->position_check_mtime &&
+        if (ok && mpctx->opts->position_check_mtime &&
             !mp_is_url(bstr0(path)) && !copy_mtime(path, conffile))
             MP_WARN(mpctx, "Can't copy mtime from %s to %s\n", path, conffile);
 
