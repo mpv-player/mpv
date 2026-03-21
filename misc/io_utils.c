@@ -67,14 +67,14 @@ bool mp_save_to_file(const char *filepath, const void *data, size_t size)
     int fd = mp_mkostemps(tmp, 0, O_CLOEXEC);
     if (fd < 0)
         goto done;
-    FILE *cache = fdopen(fd, "wb");
-    if (!cache) {
+    FILE *fs = fdopen(fd, "wb");
+    if (!fs) {
         close(fd);
         unlink(tmp);
         goto done;
     }
-    size_t written = fwrite(data, size, 1, cache);
-    int ret = fclose(cache);
+    size_t written = fwrite(data, size, 1, fs);
+    int ret = fclose(fs);
     if (written > 0 && !ret) {
         ret = rename(tmp, filepath);
         result = !ret;
