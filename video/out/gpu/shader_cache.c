@@ -11,6 +11,7 @@
 #include "osdep/io.h"
 
 #include "common/common.h"
+#include "misc/io_utils.h"
 #include "options/path.h"
 #include "stream/stream.h"
 #include "shader_cache.h"
@@ -648,12 +649,10 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
             mp_mkdirp(cache_dir);
 
             MP_DBG(sc, "Writing shader cache file: %s\n", cache_filename);
-            FILE *out = fopen(cache_filename, "wb");
-            if (out) {
-                fwrite(cache_header, strlen(cache_header), 1, out);
-                fwrite(nc.start, nc.len, 1, out);
-                fclose(out);
-            }
+            bstr out = {0};
+            bstr_xappend0(tmp, &out, cache_header);
+            bstr_xappend(tmp, &out, nc);
+            mp_save_to_file(cache_filename, out.start, out.len);
         }
     }
 
