@@ -1915,6 +1915,13 @@ static void window_resize(struct vo_w32_state *w32)
 
     vo_calc_window_geometry(vo, w32->opts, &screen, &mon, w32->dpi_scale,
                             !w32->window_bounds_initialized, &geo, &size_constraint);
+    // Limit the minimum window size to prevent the window floating to different
+    // position when our requested size is smaller than the system minimum.
+    // C{X,Y}MIN values doesn't seem to be absolute minimum of window, but it's
+    // the reasonable size.
+    POINT min = {get_system_metrics(w32, SM_CXMIN), get_system_metrics(w32, SM_CYMIN)};
+    geo.win.x1 = MPMAX(geo.win.x0 + min.x, geo.win.x1);
+    geo.win.y1 = MPMAX(geo.win.y0 + min.y, geo.win.y1);
     vo_apply_window_geometry(vo, &geo);
 
     w32->pending_reset_size |= w32->opts->auto_window_resize &&
