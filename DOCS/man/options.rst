@@ -926,7 +926,7 @@ Program Behavior
 
     ``all_formats=<yes|no>``
         If 'yes' will attempt to add all formats found reported by youtube-dl
-        (default: no). Each format is added as a separate track. In addition,
+        (default: yes). Each format is added as a separate track. In addition,
         they are delay-loaded, and actually opened only when a track is selected
         (this should keep load times as low as without this option).
 
