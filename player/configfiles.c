@@ -37,6 +37,7 @@
 #include "common/encode.h"
 #include "common/msg.h"
 #include "misc/ctype.h"
+#include "misc/hash.h"
 #include "misc/io_utils.h"
 #include "options/path.h"
 #include "options/m_config.h"
@@ -217,15 +218,11 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     void *tmp = talloc_new(NULL);
     if (opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(path)))
         path = mp_basename(path);
-    uint8_t md5[16];
-    av_md5_sum(md5, path, strlen(path));
-    char *conf = talloc_strdup(tmp, "");
-    for (int i = 0; i < 16; i++)
-        conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
+    bstr hashstr = mp_hash_to_bstr(tmp, path, strlen(path), "MD5");
     char *wl_dir = mp_get_playback_resume_dir(mpctx);
     if (wl_dir && wl_dir[0])
-        res = mp_path_join(NULL, wl_dir, conf);
+        res = mp_path_join_bstr(NULL, bstr0(wl_dir), hashstr);
     talloc_free(wl_dir);
     talloc_free(tmp);
     return res;
