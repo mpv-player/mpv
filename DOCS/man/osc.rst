@@ -470,6 +470,17 @@ Configurable Options
     windowcontrols title.
     ASS tags are escaped, and newlines and trailing slashes are stripped.
 
+``windowcontrols_deadzonesize``
+    Default: 1
+
+    Size of the deadzone. The deadzone is an area that makes the mouse act like
+    leaving the window. Movement there won't make the window controls show up
+    and it will hide immediately if the mouse enters it. The deadzone starts at
+    the window border opposite to the window controls and the size controls how
+    much of the window it will span. Values between 0.0 and 1.0, where 0 means
+    the window controls will always popup with mouse movement in the window, and
+    1 means the window controls will only show up when the mouse hovers it.
+
 ``floatingtitle``
     Default: yes
 

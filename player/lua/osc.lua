@@ -55,6 +55,7 @@ local user_opts = {
     windowcontrols_alignment = "right", -- which side to show window controls on
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     windowcontrols_independent = true, -- show window controls and bottom bar independently
+    windowcontrols_deadzonesize = 1,   -- size of the window controls deadzone
     floatingtitle = true,         -- show title in the floating layout?
     floatingwidth = 700,          -- width of the floating layout
     floatingalpha = 130,          -- alpha of the floating layout background
@@ -1389,7 +1390,7 @@ local function window_controls(topbar)
     -- deadzone below window controls
     local sh_area_y0, sh_area_y1
     sh_area_y0 = user_opts.barmargin
-    sh_area_y1 = wc_geo.y + get_align(1 - (2 * user_opts.deadzonesize),
+    sh_area_y1 = wc_geo.y + get_align(1 - (2 * user_opts.windowcontrols_deadzonesize),
                                       osc_param.playresy - wc_geo.y, 0, 0)
     add_area("showhide_wc", wc_geo.x, sh_area_y0, wc_geo.w, sh_area_y1)
     if topbar then

@@ -1,3 +1,4 @@
 add `osc-windowcontrols_independent` script-opt
 change ``osc-windowcontrols=auto`` to enable window controls in fullscreen
 add ``osc-windowcontrols=auto-windowed`` to restore the previous behavior
+add ``osc-windowcontrols_deadzonesize`` script-opt
