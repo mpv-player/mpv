@@ -23,10 +23,6 @@
 #include <stdarg.h>
 #include <assert.h>
 
-#include <libavutil/sha.h>
-#include <libavutil/intreadwrite.h>
-#include <libavutil/mem.h>
-
 #include "osdep/io.h"
 
 #include "common/common.h"
