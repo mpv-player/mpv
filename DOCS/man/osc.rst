@@ -481,6 +481,13 @@ Configurable Options
     the window controls will always popup with mouse movement in the window, and
     1 means the window controls will only show up when the mouse hovers it.
 
+``windowcontrols_bar``
+    Default: auto
+
+    Whether to draw a bar and ``windowcontrols_title`` next to the buttons. Can
+    be ``yes``, ``no``, or ``auto``. ``auto`` draws them only when the title is
+    not already printed in the rest of the OSC.
+
 ``floatingtitle``
     Default: yes
 

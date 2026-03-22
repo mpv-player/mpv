@@ -56,6 +56,7 @@ local user_opts = {
     windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     windowcontrols_independent = true, -- show window controls and bottom bar independently
     windowcontrols_deadzonesize = 1,   -- size of the window controls deadzone
+    windowcontrols_bar = "auto", -- whether to draw the window controls bar
     floatingtitle = true,         -- show title in the floating layout?
     floatingwidth = 700,          -- width of the floating layout
     floatingalpha = 130,          -- alpha of the floating layout background
@@ -1294,8 +1295,10 @@ local function window_controls(topbar)
              get_hitbox_coords(controlbox_left, wc_geo.y, wc_geo.an,
                                controlbox_w, wc_geo.h))
 
-    local floating_buttons_only = user_opts.layout == "floating"
-                                  and user_opts.floatingtitle
+    local floating_buttons_only = user_opts.windowcontrols_bar == "no" or
+        (user_opts.windowcontrols_bar == "auto" and
+         (user_opts.layout ~= "slimbox" and
+          (user_opts.layout ~= "floating" or user_opts.floatingtitle)))
 
     local lo
 
@@ -1306,9 +1309,12 @@ local function window_controls(topbar)
     lo.layer = 10
     if floating_buttons_only then
         -- Compact background behind buttons only
-        lo.alpha[1] = user_opts.floatingalpha
+        lo.alpha[1] = user_opts[user_opts.layout == "floating" and "floatingalpha" or "boxalpha"]
         local blur_extend = 4
-        local r = 10
+        local r = 0
+        if user_opts.layout == "floating" or user_opts.layout == "box" then
+            r = 10
+        end
         lo.geometry = {
             x = controlbox_left - blur_extend,
             y = wc_geo.y,
