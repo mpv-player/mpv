@@ -304,8 +304,8 @@ local state = {
     tick_timer = nil,
     tick_last_time = 0,                     -- when the last tick() was run
     hide_timer = nil,
-    cache_state = nil,
-    idle = false,
+    demuxer_cache_state = nil,
+    idle_active = false,
     audio_track_count = 0,
     sub_track_count = 0,
     track_position = {},
@@ -318,7 +318,7 @@ local state = {
     dmx_cache = 0,
     using_video_margins = false,
     border = true,
-    maximized = false,
+    window_maximized = false,
     osd = mp.create_osd_overlay("ass-events"),
     logo_osd = mp.create_osd_overlay("ass-events"),
     chapter_list = {},                      -- sorted by time
@@ -359,6 +359,14 @@ local santa_hat_lines = {
 --
 -- Helper functions
 --
+
+local function observe_cached(property, callback)
+    local key = property:gsub("-", "_")
+    mp.observe_property(property, "native", function (_, value)
+        state[key] = value
+        callback()
+    end)
+end
 
 local function kill_animation(anitype_key, anistart_key, animation_key)
     state[anitype_key]   = nil
@@ -588,7 +596,7 @@ local function get_touchtimeout()
 end
 
 local function cache_enabled()
-    return state.cache_state and #state.cache_state["seekable-ranges"] > 0
+    return state.demuxer_cache_state and #state.demuxer_cache_state["seekable-ranges"] > 0
 end
 
 local function reset_margins()
@@ -1377,7 +1385,7 @@ local function window_controls(topbar)
     -- Maximize: 🗖 /🗗
     ne = new_element("maximize", "button")
     ne.is_wc = true
-    if state.maximized or state.fullscreen then
+    if state.window_maximized or state.fullscreen then
         ne.content = icons.unmaximize
     else
         ne.content = icons.maximize
@@ -2448,7 +2456,7 @@ local function osc_init()
             return nil
         end
         local nranges = {}
-        for _, range in pairs(state.cache_state["seekable-ranges"]) do
+        for _, range in pairs(state.demuxer_cache_state["seekable-ranges"]) do
             nranges[#nranges + 1] = {
                 ["start"] = 100 * range["start"] / duration,
                 ["end"] = 100 * range["end"] / duration,
@@ -2558,7 +2566,7 @@ local function osc_init()
         if not cache_enabled() then
             return ""
         end
-        local dmx_cache = state.cache_state["cache-duration"]
+        local dmx_cache = state.demuxer_cache_state["cache-duration"]
         local thresh = math.min(state.dmx_cache * 0.05, 5)  -- 5% or 5s
         if dmx_cache and math.abs(dmx_cache - state.dmx_cache) >= thresh then
             state.dmx_cache = dmx_cache
@@ -2682,11 +2690,6 @@ end
 
 local function hide_wc()
     hide_bar("wc", "wc_visible", "wc_anitype", set_wc_visible)
-end
-
-local function cache_state(_, st)
-    state.cache_state = st
-    request_tick()
 end
 
 local function mouse_leave()
@@ -3008,7 +3011,7 @@ local function render_logo()
         end
     end
 
-    if state.idle then
+    if state.idle_active then
         ass:new_event()
         ass:pos(display_w / 2, icon_y + 65)
         ass:an(8)
@@ -3026,7 +3029,7 @@ tick = function()
 
     if not state.enabled then return end
 
-    if state.idle then
+    if state.idle_active then
         -- render idle message
         msg.trace("idle message")
         if user_opts.idlescreen then
@@ -3067,9 +3070,9 @@ tick = function()
 
     local function tick_animation(anitype_key, anistart_key, animation_key, allow_idle)
         -- state.anistart can be nil - animation should now start, or it can
-        -- be a timestamp when it started. state.idle has no animation.
+        -- be a timestamp when it started. state.idle_active has no animation.
         if state[anitype_key] ~= nil then
-            if (allow_idle or not state.idle) and
+            if (allow_idle or not state.idle_active) and
                (not state[anistart_key] or
                 mp.get_time() < 1 + state[anistart_key] + user_opts.fadeduration/1000)
             then
@@ -3125,10 +3128,8 @@ mp.register_event("start-file", request_init)
 mp.observe_property("track-list", "native", update_tracklist)
 mp.observe_property("playlist-count", "native", request_init)
 mp.observe_property("playlist-pos", "native", request_init)
-mp.observe_property("chapter-list", "native", function(_, list)
-    list = list or {}  -- safety, shouldn't return nil
-    table.sort(list, function(a, b) return a.time < b.time end)
-    state.chapter_list = list
+observe_cached("chapter-list", function ()
+    table.sort(state.chapter_list, function(a, b) return a.time < b.time end)
     update_duration_watch()
     request_init()
 end)
@@ -3167,27 +3168,14 @@ mp.register_script_message("osc-tracklist", function(dur)
     mp.command("show-text ${track-list} " .. (dur and dur * 1000 or ""))
 end)
 
-mp.observe_property("fullscreen", "bool", function(_, val)
-    state.fullscreen = val
+observe_cached("fullscreen", function ()
     state.marginsREQ = true
     request_init_resize()
 end)
-mp.observe_property("border", "bool", function(_, val)
-    state.border = val
-    request_init_resize()
-end)
-mp.observe_property("title-bar", "bool", function(_, val)
-    state.title_bar = val
-    request_init_resize()
-end)
-mp.observe_property("window-maximized", "bool", function(_, val)
-    state.maximized = val
-    request_init_resize()
-end)
-mp.observe_property("idle-active", "bool", function(_, val)
-    state.idle = val
-    request_tick()
-end)
+observe_cached("border", request_init_resize)
+observe_cached("title-bar", request_init_resize)
+observe_cached("window-maximized", request_init_resize)
+observe_cached("idle-active", request_tick)
 mp.observe_property("current-tracks/video", "native", function(_, val)
     state.no_video = val == nil
     request_tick()
@@ -3207,7 +3195,7 @@ mp.observe_property("display-fps", "number", set_tick_delay)
 mp.observe_property("pause", "bool", request_tick)
 mp.observe_property("volume", "number", request_tick)
 mp.observe_property("mute", "bool", request_tick)
-mp.observe_property("demuxer-cache-state", "native", cache_state)
+observe_cached("demuxer-cache-state", request_tick)
 mp.observe_property("vo-configured", "bool", request_tick)
 mp.observe_property("playback-time", "number", request_tick)
 mp.observe_property("osd-dimensions", "native", function()
