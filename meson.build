@@ -138,6 +138,7 @@ sources = files(
     'misc/charset_conv.c',
     'misc/codepoint_width.c',
     'misc/dispatch.c',
+    'misc/hash.c',
     'misc/io_utils.c',
     'misc/json.c',
     'misc/language.c',
