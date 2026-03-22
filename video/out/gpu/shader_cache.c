@@ -11,6 +11,7 @@
 #include "osdep/io.h"
 
 #include "common/common.h"
+#include "misc/hash.h"
 #include "misc/io_utils.h"
 #include "options/path.h"
 #include "stream/stream.h"
@@ -583,20 +584,8 @@ static bool create_pass(struct gl_shader_cache *sc, struct sc_entry *entry)
         // Try to load it from a disk cache.
         cache_dir = mp_get_user_path(tmp, sc->global, sc->cache_dir);
 
-        struct AVSHA *sha = av_sha_alloc();
-        MP_HANDLE_OOM(sha);
-        av_sha_init(sha, 256);
-        av_sha_update(sha, entry->total.start, entry->total.len);
-
-        uint8_t hash[256 / 8];
-        av_sha_final(sha, hash);
-        av_free(sha);
-
-        char hashstr[256 / 8 * 2 + 1];
-        for (int n = 0; n < 256 / 8; n++)
-            snprintf(hashstr + n * 2, sizeof(hashstr) - n * 2, "%02X", hash[n]);
-
-        cache_filename = mp_path_join(tmp, cache_dir, hashstr);
+        bstr hashstr = mp_hash_to_bstr(tmp, entry->total.start, entry->total.len, "SHA256");
+        cache_filename = mp_path_join_bstr(tmp, bstr0(cache_dir), hashstr);
         if (stat(cache_filename, &(struct stat){0}) == 0) {
             MP_DBG(sc, "Trying to load shader from disk...\n");
             struct bstr cachedata =
