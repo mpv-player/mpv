@@ -428,7 +428,7 @@ Configurable Options
     take effect. Uses ``--osd-margin-y-offset`` to apply the adjustment.
 
 ``windowcontrols``
-    Default: auto (Show window controls if there is no window border/title-bar)
+    Default: auto
 
     Whether to show window management controls over the video, and if so,
     which side of the window to place them. This may be desirable when the
@@ -439,6 +439,14 @@ Configurable Options
     The set of window controls is fixed, offering ``minimize``, ``maximize``,
     and ``quit``. Not all platforms implement ``minimize`` and ``maximize``,
     but ``quit`` will always work.
+
+    Possible values are:
+    ``no``: never show window controls
+    ``yes``: always show window controls
+    ``auto-windowed``: show window controls when ``--title-bar`` or ``--border``
+    is ``no``
+    ``auto``: show window controls when ``--title-bar`` or ``--border`` is
+    ``no``, or when in fullscreen on platforms other than macOS
 
 ``windowcontrols_independent``
     Default: yes

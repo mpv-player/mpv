@@ -230,6 +230,7 @@ local margins_opts = {
     {"b", "video-margin-ratio-bottom"},
 }
 
+local platform = mp.get_property("platform")
 local tick_delay = 1 / 60
 local window_control_box_width = 80
 local layouts = {}
@@ -717,12 +718,16 @@ end
 
 -- WindowControl helpers
 local function window_controls_enabled()
-    local val = user_opts.windowcontrols
-    if val == "auto" then
-        return not (state.border and state.title_bar)
-    else
-        return val ~= "no"
+    if user_opts.windowcontrols == "auto" then
+        return not state.border or not state.title_bar or
+               (state.fullscreen and platform ~= "darwin")
     end
+
+    if user_opts.windowcontrols == "auto-windowed" then
+        return not state.border or not state.title_bar
+    end
+
+    return user_opts.windowcontrols == "yes"
 end
 
 local function window_controls_alignment()
