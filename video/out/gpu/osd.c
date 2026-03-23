@@ -273,17 +273,6 @@ static void generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
     }
 }
 
-// number of screen divisions per axis (x=0, y=1) for the current 3D mode
-static void get_3d_side_by_side(int stereo_mode, int div[2])
-{
-    div[0] = div[1] = 1;
-    switch (stereo_mode) {
-    case MP_STEREO3D_SBS2L:
-    case MP_STEREO3D_SBS2R: div[0] = 2; break;
-    case MP_STEREO3D_AB2R:
-    case MP_STEREO3D_AB2L:  div[1] = 2; break;
-    }
-}
 
 void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
                           struct gl_shader_cache *sc, const struct ra_fbo *fbo)
@@ -291,7 +280,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
     struct mpgl_osd_part *part = ctx->parts[index];
 
     int div[2];
-    get_3d_side_by_side(ctx->stereo_mode, div);
+    mp_get_3d_side_by_side(ctx->stereo_mode, div);
 
     part->num_vertices = 0;
 
@@ -319,7 +308,7 @@ void mpgl_osd_draw_finish(struct mpgl_osd *ctx, int index,
 static void set_res(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode)
 {
     int div[2];
-    get_3d_side_by_side(stereo_mode, div);
+    mp_get_3d_side_by_side(stereo_mode, div);
 
     res.w /= div[0];
     res.h /= div[1];

@@ -63,6 +63,9 @@ extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
 #define MP_STEREO3D_NAME_DEF(x, def) m_opt_choice_str_def(mp_stereo3d_names, x, def)
 
+// Number of screen divisions per axis (div[0]=x, div[1]=y) for the given 3D mode
+void mp_get_3d_side_by_side(int stereo_mode, int div[2]);
+
 // For many colorspace conversions, in particular those involving HDR, an
 // implicit reference white level is needed. Since this magic constant shows up
 // a lot, give it an explicit name. The value of 203 cd/m² comes from ITU-R

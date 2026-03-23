@@ -153,6 +153,17 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {0}
 };
 
+void mp_get_3d_side_by_side(int stereo_mode, int div[2])
+{
+    div[0] = div[1] = 1;
+    switch (stereo_mode) {
+    case MP_STEREO3D_SBS2L:
+    case MP_STEREO3D_SBS2R: div[0] = 2; break;
+    case MP_STEREO3D_AB2R:
+    case MP_STEREO3D_AB2L:  div[1] = 2; break;
+    }
+}
+
 enum pl_color_system mp_csp_guess_colorspace(int width, int height)
 {
     return width >= 1280 || height > 576 ? PL_COLOR_SYSTEM_BT_709 : PL_COLOR_SYSTEM_BT_601;
