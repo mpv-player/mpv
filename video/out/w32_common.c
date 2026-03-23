@@ -1982,6 +1982,7 @@ set_pos_done:
         // adjustment to window position based on invisible borders, on
         // Windows 11 it should be a no-op.
         w32->pending_reset_size = true;
+        w32->window_bounds_initialized = false;
         window_resize(w32);
     }
 
