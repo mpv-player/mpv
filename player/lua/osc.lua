@@ -2038,13 +2038,12 @@ layouts["floating"] = function ()
     -- Title row (optional)
     if show_title then
         lo = add_layout("title")
-        local title_reserved = 160
         lo.geometry = {x = x - half_w, y = tile_pos, an = 4,
-            w = half_w * 2 - title_reserved, h = title_h}
+            w = half_w * 2, h = title_h}
         lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
             osc_styles.vidtitle,
-            x - half_w, tile_pos - title_h, x + half_w - title_reserved, tile_pos + title_h)
-        lo.button.maxchars = user_opts.boxmaxchars
+            x - half_w, tile_pos - title_h, x + half_w, tile_pos + title_h)
+        lo.button.maxchars = 105
     end
 
     -- Seekbar row
