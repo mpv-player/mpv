@@ -27,6 +27,7 @@
 
 #include "mp_image.h"
 #include "csputils.h"
+#include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 
@@ -585,4 +586,41 @@ enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries
         container = PL_COLOR_PRIM_BT_2020;
 
     return container;
+}
+
+int mp_parse_raw_primaries(struct mp_log *log, const char *str,
+                           struct pl_raw_primaries *out)
+{
+    if (!str)
+        return M_OPT_INVALID;
+
+    if (!*str)
+        return M_OPT_MISSING_PARAM;
+
+    // Comma-separated CIE xy values: Rx,Ry,Gx,Gy,Bx,By,Wx,Wy
+    struct pl_raw_primaries prim;
+    if (sscanf(str, "%f,%f,%f,%f,%f,%f,%f,%f",
+            &prim.red.x, &prim.red.y, &prim.green.x, &prim.green.y,
+            &prim.blue.x, &prim.blue.y, &prim.white.x, &prim.white.y) == 8)
+    {
+        if (!pl_primaries_valid(&prim))
+            return M_OPT_OUT_OF_RANGE;
+        *out = prim;
+        return 1;
+    }
+
+    const m_option_t choice_opt = {
+        .priv = (void *)pl_csp_prim_names,
+    };
+
+    int prim_choice;
+    int ret = m_option_type_choice.parse(log, &choice_opt, bstr0("target-gamut"),
+                                         bstr0(str), &prim_choice);
+    if (ret >= 0) {
+        *out = *pl_raw_primaries_get(prim_choice);
+    } else if (ret != M_OPT_MISSING_PARAM) {
+        mp_info(log, "    Rx,Ry,Gx,Gy,Bx,By,Wx,Wy (custom CIE xy primaries)\n");
+    }
+
+    return ret;
 }

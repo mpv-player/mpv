@@ -7366,8 +7366,13 @@ them.
     Constrains the gamut of the display. You can use this option to output e.g.
     DCIP3-in-BT.2020. Set ``--target-prim`` to the primaries of the containing
     colorspace (into which values will be encoded), and ``--target-gamut`` to
-    the gamut you want to limit colors to. Takes the same values as
-    ``--target-prim``. (Only for ``--vo=gpu-next``)
+    the gamut you want to limit colors to.
+
+    Accepts either a named primary set (same values as ``--target-prim``) or
+    8 comma-separated CIE xy chromaticity values specifying custom primaries
+    in the format ``Rx,Ry,Gx,Gy,Bx,By,Wx,Wy`` (red, green, blue, white point).
+    All values must be in the range 0.0-1.0. Use ``--target-gamut=help`` to
+    list all named primaries. (Only for ``--vo=gpu-next``)
 
     .. note::
 

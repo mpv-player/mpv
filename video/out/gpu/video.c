@@ -413,6 +413,7 @@ static const struct gl_video_opts gl_video_opts_def = {
 };
 
 static OPT_STRING_VALIDATE_FUNC(validate_error_diffusion_opt);
+static OPT_STRING_VALIDATE_FUNC(validate_target_gamut);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
 
@@ -452,7 +453,7 @@ const struct m_sub_options gl_video_conf = {
             {"no", 0}, {"input", 1}, {"output", 2}, {"both", 1|2}, {"auto", 1|2|4})},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
             M_RANGE(10, 10 / PL_COLOR_HDR_BLACK)},
-        {"target-gamut", OPT_CHOICE_C(target_gamut, pl_csp_prim_names)},
+        {"target-gamut", OPT_STRING_VALIDATE(target_gamut, validate_target_gamut)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
             {"auto",     TONE_MAPPING_AUTO},
             {"clip",     TONE_MAPPING_CLIP},
@@ -4329,6 +4330,13 @@ static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *op
             mp_fatal(log, "No error diffusion kernel named '%s' found!\n", s);
     }
     return r;
+}
+
+static int validate_target_gamut(struct mp_log *log, const m_option_t *opt,
+                                 struct bstr name, const char **value)
+{
+    struct pl_raw_primaries tmp;
+    return mp_parse_raw_primaries(log, *value, &tmp);
 }
 
 void gl_video_set_ambient_lux(struct gl_video *p, double lux)

@@ -127,4 +127,7 @@ void mp_map_fixp_color(struct pl_transform3x3 *matrix, int ibits, int in[3],
 
 enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries *gamut);
 
+int mp_parse_raw_primaries(struct mp_log *log, const char *str,
+                           struct pl_raw_primaries *out);
+
 #endif /* MPLAYER_CSPUTILS_H */
