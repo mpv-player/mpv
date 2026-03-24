@@ -115,6 +115,7 @@ struct vo_w32_state {
 
     // whether the window position and size were initialized
     bool window_bounds_initialized;
+    bool force_pos;
 
     bool current_fs;
     bool pending_resize;
@@ -1914,7 +1915,8 @@ static void window_resize(struct vo_w32_state *w32)
     };
 
     vo_calc_window_geometry(vo, w32->opts, &screen, &mon, w32->dpi_scale,
-                            !w32->window_bounds_initialized, &geo, &size_constraint);
+                            !w32->window_bounds_initialized || w32->force_pos,
+                            &geo, &size_constraint);
     // Limit the minimum window size to prevent the window floating to different
     // position when our requested size is smaller than the system minimum.
     // C{X,Y}MIN values doesn't seem to be absolute minimum of window, but it's
@@ -1959,6 +1961,7 @@ static void window_resize(struct vo_w32_state *w32)
 
     window_set_pos(w32, client_rect);
     w32->pending_reset_size = false;
+    w32->force_pos = false;
 
 set_pos_done:
     w32->window_bounds_initialized = true;
@@ -1982,7 +1985,7 @@ set_pos_done:
         // adjustment to window position based on invisible borders, on
         // Windows 11 it should be a no-op.
         w32->pending_reset_size = true;
-        w32->window_bounds_initialized = false;
+        w32->force_pos = true;
         window_resize(w32);
     }
 
@@ -2349,23 +2352,27 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 if (!w32->window_bounds_initialized)
                     return VO_TRUE;
 
-                // Force window repositioning if geometry xy is valid.
-                if (changed_option == &vo_opts->geometry)
-                    w32->window_bounds_initialized = !w32->opts->geometry.xy_valid;
-
-                if (w32->current_fs) {
-                    w32->pending_resize = true;
-                    w32->pending_maximize = false;
+                if (w32->opts->window_maximized) {
                     // Immediately notify that we will not restore maximized state.
                     w32->opts->window_maximized = false;
                     m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized);
                     signal_events(w32, VO_EVENT_WIN_STATE);
-                } else if (IsMaximized(w32->window)) {
-                    ShowWindow(w32->window, SW_RESTORE);
-                } else {
-                    w32->pending_reset_size = true;
-                    window_resize(w32);
                 }
+
+                w32->pending_resize = true;
+                w32->pending_maximize = false;
+
+                if (IsMaximized(w32->window)) {
+                    ShowWindow(w32->window, SW_RESTORE);
+                    if (changed_option != &vo_opts->geometry)
+                        return VO_TRUE;
+                }
+
+                // Force window repositioning if geometry xy is valid.
+                if (changed_option == &vo_opts->geometry)
+                    w32->force_pos = w32->opts->geometry.xy_valid;
+                w32->pending_reset_size = true;
+                window_resize(w32);
             }
         }
 
