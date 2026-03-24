@@ -3315,7 +3315,7 @@ static int handle_round(int scale, int n)
 }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-static bool hdr_metadata_valid(struct vo_wayland_state *wl, struct pl_hdr_metadata *hdr)
+static bool cm_metadata_sanitize(struct vo_wayland_state *wl, struct pl_hdr_metadata *hdr)
 {
     // Always return a hard failure if this condition fails.
     if (hdr->min_luma >= hdr->max_luma)
@@ -3569,6 +3569,10 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
 
     struct pl_hdr_metadata hdr = color->hdr;
 
+    bool use_metadata = cm_metadata_sanitize(wl, &hdr);
+    if (!use_metadata)
+        MP_VERBOSE(wl, "supplied color metadata is invalid. Not using it.\n");
+
     if (wl->supports_set_luminances) {
         switch (color->transfer) {
         case PL_COLOR_TRC_PQ:
@@ -3582,17 +3586,15 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         case PL_COLOR_TRC_LINEAR:
             // Our linear output is absolute scaled, meaning the 0 is absolute
             // black, similar to PQ transfer. Configure it in the same way as PQ.
-            if (hdr.max_luma) {
+            if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
                     0 * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
                 MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
                     hdr.max_luma, PL_COLOR_SDR_WHITE);
-                if (hdr.min_luma && hdr.max_luma) {
-                    wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
-                        lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
-                    MP_VERBOSE(wl, "Setting linear luminace mastering range: min=%.5f, max=%.2f\n",
-                        hdr.min_luma, hdr.max_luma);
-                }
+                wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
+                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
+                MP_VERBOSE(wl, "Setting linear luminace mastering range: min=%.5f, max=%.2f\n",
+                    hdr.min_luma, hdr.max_luma);
             }
             break;
         case PL_COLOR_TRC_HLG:
@@ -3600,7 +3602,7 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             break;
         default:
             // Set SDR luminance range for all relative transfers
-            if (hdr.min_luma && hdr.max_luma) {
+            if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
                     hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
                 MP_VERBOSE(wl, "Setting relative luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
@@ -3610,11 +3612,7 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         }
     }
 
-    bool is_hdr = pl_color_transfer_is_hdr(color->transfer);
-    bool use_metadata = hdr_metadata_valid(wl, &hdr);
-    if (!use_metadata)
-        MP_VERBOSE(wl, "supplied HDR metadata does not conform to the wayland color management protocol. It will not be used.\n");
-    if (is_hdr && use_metadata) {
+    if (pl_color_transfer_is_hdr(color->transfer) && use_metadata) {
         if (wl->supports_display_primaries) {
             MP_VERBOSE(wl,"raw prims: red.x=%f, red.y=%f,\n"
                           "           green.x=%f, green.y=%f,\n"
