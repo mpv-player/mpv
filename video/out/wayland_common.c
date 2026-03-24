@@ -3339,6 +3339,17 @@ static bool cm_metadata_sanitize(struct vo_wayland_state *wl, struct pl_hdr_meta
 
     return true;
 }
+
+static void cm_dispatch_color_queue(struct vo_wayland_state *wl,
+                                    struct wp_image_description_v1 *image_description)
+{
+    wl->image_description_pending = true;
+    wl_proxy_set_queue((struct wl_proxy *)image_description, wl->color_queue);
+    wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
+    while (wl->image_description_pending)
+        if (wl_display_dispatch_queue(wl->display, wl->color_queue) < 0)
+            break;
+}
 #endif
 
 static void request_decoration_mode(struct vo_wayland_state *wl, uint32_t mode)
@@ -3540,7 +3551,8 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     // scRGB has dedicated creator, and not using the generic one.
     if (color->transfer == PL_COLOR_TRC_SCRGB && wl->supports_scrgb) {
         image_description = wp_color_manager_v1_create_windows_scrgb(wl->color_manager);
-        goto set_img_desc;
+        cm_dispatch_color_queue(wl, image_description);
+        return;
     }
 #endif
 
@@ -3641,15 +3653,7 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     image_description = wp_image_description_creator_params_v1_create(image_creator_params);
-#if PL_API_VER >= 362
-set_img_desc:
-#endif
-    wl->image_description_pending = true;
-    wl_proxy_set_queue((struct wl_proxy *)image_description, wl->color_queue);
-    wp_image_description_v1_add_listener(image_description, &image_description_listener, wl);
-    while (wl->image_description_pending)
-        if (wl_display_dispatch_queue(wl->display, wl->color_queue) < 0)
-            break;
+    cm_dispatch_color_queue(wl, image_description);
     return;
 
 nosupport:
