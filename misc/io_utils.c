@@ -60,7 +60,7 @@ int mp_mkostemps(char *template, int suffixlen, int flags)
 
 bool mp_save_to_file(const char *filepath, const void *data, size_t size)
 {
-    mp_assert(filepath && data && size);
+    mp_assert(filepath);
 
     bool result = false;
     char *tmp = talloc_asprintf(NULL, "%sXXXXXX", filepath);
@@ -73,7 +73,7 @@ bool mp_save_to_file(const char *filepath, const void *data, size_t size)
         unlink(tmp);
         goto done;
     }
-    size_t written = fwrite(data, size, 1, fs);
+    size_t written = (data && size) ? fwrite(data, size, 1, fs) : 1;
     int ret = fclose(fs);
     if (written > 0 && !ret) {
         ret = rename(tmp, filepath);
