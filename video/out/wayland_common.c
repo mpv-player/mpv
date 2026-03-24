@@ -3535,9 +3535,9 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
 
-    // scRGB has dedicated creator, and not using the generic one.
     struct wp_image_description_v1 *image_description;
 #if PL_API_VER >= 362
+    // scRGB has dedicated creator, and not using the generic one.
     if (color->transfer == PL_COLOR_TRC_SCRGB && wl->supports_scrgb) {
         image_description = wp_color_manager_v1_create_windows_scrgb(wl->color_manager);
         goto set_img_desc;
@@ -3546,12 +3546,13 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
 
     int primaries = wl->primaries_map[color->primaries];
     int transfer = wl->transfer_map[color->transfer];
-    if (!primaries)
-        MP_VERBOSE(wl, "Compositor does not support color primary: %s\n", m_opt_choice_str(pl_csp_prim_names, color->primaries));
-    if (!transfer)
-        MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n", m_opt_choice_str(pl_csp_trc_names, color->transfer));
     if (!primaries || !transfer) {
-        // Set to srgb if the compositor doesn't support it.
+        if (!primaries)
+            MP_VERBOSE(wl, "Compositor does not support color primary: %s\n",
+                       m_opt_choice_str(pl_csp_prim_names, color->primaries));
+        if (!transfer)
+            MP_VERBOSE(wl, "Compositor does not support transfer function: %s\n",
+                       m_opt_choice_str(pl_csp_trc_names, color->transfer));
         wp_color_management_surface_v1_unset_image_description(wl->color_surface);
         goto nosupport;
     }
