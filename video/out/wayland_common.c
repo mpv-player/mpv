@@ -3540,9 +3540,9 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
     zwp_text_input_v3_add_listener(seat->text_input->text_input, &text_input_listener, seat);
 }
 
+#if HAVE_WAYLAND_PROTOCOLS_1_41
 static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
 
@@ -3660,12 +3660,12 @@ nosupport:
     *color = pl_color_space_srgb;
     pl_color_space_infer(color);
     return;
-#endif
 }
+#endif
 
+#if HAVE_WAYLAND_PROTOCOLS_1_44
 static void set_color_representation(struct vo_wayland_state *wl, struct mp_image_params *params)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (!wl->color_representation_manager)
         return;
 
@@ -3706,8 +3706,8 @@ static void set_color_representation(struct vo_wayland_state *wl, struct mp_imag
         MP_VERBOSE(wl, "  Chroma location: %s\n", m_opt_choice_str(pl_chroma_names, params->chroma_location));
         wp_color_representation_surface_v1_set_chroma_location(wl->color_representation_surface, chroma_location);
     }
-#endif
 }
+#endif
 
 static void set_content_type(struct vo_wayland_state *wl)
 {
@@ -4329,7 +4329,6 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
         if (!wl->color_surface)
             wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
     }
-#endif
 
     bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color);
     bool color_repr_changed = !pl_color_repr_equal(&wl->last_hint_params.repr, &params->repr) ||
@@ -4342,9 +4341,12 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
     wl->last_hint_params = *params;
     if (color_space_changed)
         set_color_management(wl, &params->color);
+#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (color_repr_changed)
         set_color_representation(wl, params);
+#endif
     wl->current_params = *params;
+#endif
 }
 
 
