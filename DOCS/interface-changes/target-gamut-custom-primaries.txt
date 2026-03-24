@@ -1,0 +1,1 @@
+`--target-gamut` now accepts custom CIE xy primaries as comma-separated values (Rx,Ry,Gx,Gy,Bx,By,Wx,Wy) in addition to named primary sets

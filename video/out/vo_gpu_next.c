@@ -925,7 +925,7 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     if ((!target->color.hdr.min_luma || !hint))
         apply_target_contrast(p, &target->color, min_luma);
     if (opts->target_gamut)
-        target->color.hdr.prim = *pl_raw_primaries_get(opts->target_gamut);
+        mp_parse_raw_primaries(mp_null_log, opts->target_gamut, &target->color.hdr.prim);
     int dither_depth = opts->dither_depth;
     if (dither_depth == 0) {
         struct ra_swapchain *sw = p->ra_ctx->swapchain;
@@ -1190,7 +1190,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         if (opts->target_prim)
             hint.primaries = opts->target_prim;
         if (opts->target_gamut)
-            hint.hdr.prim = *pl_raw_primaries_get(opts->target_gamut);
+            mp_parse_raw_primaries(mp_null_log, opts->target_gamut, &hint.hdr.prim);
         if (opts->target_trc)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
