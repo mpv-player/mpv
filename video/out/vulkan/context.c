@@ -536,10 +536,12 @@ static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
     bool supported = PL_API_VER >= 361 || !waylandvk;
     if (supported && p->params.set_color) {
         if (waylandvk && params) {
-            // Request VK_COLOR_SPACE_PASS_THROUGH_EXT
-            pl_swapchain_colorspace_hint(p->vk->swapchain, &(struct pl_color_space){0});
-            // Do the resize in case surface format needs to change.
-            pl_swapchain_resize(p->vk->swapchain, &(int){0}, &(int){0});
+          // Request VK_COLOR_SPACE_PASS_THROUGH_EXT, and also force immediate
+          // cleanup of swapchain retired by pl_swapchain_colorspace_hint,
+          // otherwise there's a possibility the Wayland color surface will be
+          // held while we try to create a new one.
+          pl_swapchain_colorspace_hint(p->vk->swapchain,
+                                       &(struct pl_color_space){0});
         }
         bool ret = p->params.set_color(sw->ctx, params);
         // To avoid ping-pong between VK_COLOR_SPACE_PASS_THROUGH_EXT and others,
