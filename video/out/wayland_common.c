@@ -3605,7 +3605,7 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
                     hdr.max_luma, PL_COLOR_SDR_WHITE);
                 wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
                     lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
-                MP_VERBOSE(wl, "Setting linear luminace mastering range: min=%.5f, max=%.2f\n",
+                MP_VERBOSE(wl, "Setting linear luminance mastering range: min=%.5f, max=%.2f\n",
                     hdr.min_luma, hdr.max_luma);
             }
             break;
