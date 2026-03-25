@@ -330,6 +330,10 @@ struct demux_cached_range {
 // this amount of time (it's better to seek them manually).
 #define INDEX_STEP_SIZE 1.0
 
+// Diff between the demuxer's reported start_time and a range's earliest cached
+// timestamp, below which the range is still considered beginning-of-file.
+#define BOF_START_TOLERANCE 1.0
+
 struct index_entry {
     double pts;
     struct demux_packet *pkt;
@@ -1969,6 +1973,19 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
                 if (queue->seek_start == MP_NOPTS_VALUE) {
                     update_ranges = true;
                     queue->seek_start = kf_min + ds->sh->seek_preroll;
+
+                    // queue->is_bof is set optimistically after a seek to start,
+                    // assuming demuxing began at the start of the file. That is
+                    // wrong for streams opened mid-content, which can happen in
+                    // unfinished event HLS playlists, which starts at live-edge,
+                    // but the seekable range in the past is still valid.
+                    double start_time = ds->in->d_thread->start_time;
+                    if (queue->is_bof && ds->in->d_thread->seekable &&
+                        start_time != MP_NOPTS_VALUE &&
+                        queue->seek_start > start_time + BOF_START_TOLERANCE)
+                    {
+                        queue->is_bof = false;
+                    }
                 }
             }
 
