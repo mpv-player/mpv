@@ -105,7 +105,11 @@ FILE *mp_fopen(const char *filename, const char *mode)
         return NULL;
 
     // Add 'b' to the mode so the CRT knows the file is opened in binary mode
-    char bmode[] = { mode[0], 'b', rwmode == O_RDWR ? '+' : '\0', '\0' };
+    char bmode[] = { mode[0], '\0', '\0', '\0' };
+    int idx = 1;
+    if (rwmode == O_RDWR)
+        bmode[idx++] = '+';
+    bmode[idx++] = 'b';
     FILE *fp = fdopen(fd, bmode);
     if (!fp) {
         close(fd);
