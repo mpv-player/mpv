@@ -4377,9 +4377,9 @@ Demuxer
     ``--shuffle``, and like ``lazy`` otherwise.
 
 ``--directory-filter-types=<video,audio,image,archive,playlist>``
-    Media file types to filter when opening directory. If the list is empty,
-    all files are added to the playlist. (Default:
-    ``video,audio,image,archive,playlist``)
+    Media file types to filter when opening directory. To have all files added
+    to the playlist, clear the list using ``--directory-filter-types-clr``.
+    (Default: ``video,audio,image,archive,playlist``)
 
     This is a string list option. See `List Options`_ for details.
 
