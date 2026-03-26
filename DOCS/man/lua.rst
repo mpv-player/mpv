@@ -155,11 +155,14 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     ``mp.commandv()`` (but can be a native type instead of a string).
 
     If the table contains string keys, it's interpreted as command with named
-    arguments. This requires at least an entry with the key ``name`` to be
-    present, which must be a string, and contains the command name. The special
-    entry ``_flags`` is optional, and if present, must be an array of
-    `Input Command Prefixes`_ to apply. All other entries are interpreted as
-    arguments.
+    arguments. This requires at least an entry with the key ``_name`` to be
+    present, which must be a string, and contains the command name.
+    For compatibility, if the key ``_name`` does not exist, then the entry with
+    the key ``name`` will be used instead. The special entry ``_flags`` is
+    optional, and if present, must be an array of `Input Command Prefixes`_ to
+    apply. All other entries are interpreted as arguments. Note that some
+    commands have arguments named ``name``, and can only be used if the command
+    name is specified with key ``_name`` instead of ``name``.
 
     Returns a result table on success (usually empty), or ``def, error`` on
     error. ``def`` is the second parameter provided to the function, and is

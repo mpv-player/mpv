@@ -230,7 +230,12 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
     mp_assert(node->format == MPV_FORMAT_NODE_MAP);
     mpv_node_list *args = node->u.list;
 
-    mpv_node *name = node_map_get(node, "name");
+    bool old_name = false;
+    mpv_node *name = node_map_get(node, "_name");
+    if (!name || name->format != MPV_FORMAT_STRING) {
+        old_name = true;
+        name = node_map_get(node, "name");
+    }
     if (!name || name->format != MPV_FORMAT_STRING)
         return false;
 
@@ -248,7 +253,7 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
         const char *key = args->keys[n];
         mpv_node *val = &args->values[n];
 
-        if (strcmp(key, "name") == 0) {
+        if (strcmp(key, "_name") == 0 || (old_name && strcmp(key, "name") == 0)) {
             // already handled above
         } else if (strcmp(key, "_flags") == 0) {
             if (val->format != MPV_FORMAT_NODE_ARRAY)
