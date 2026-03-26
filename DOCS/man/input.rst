@@ -271,7 +271,7 @@ This applies to certain APIs, such as ``mp.command_native()`` (with tables that
 have string keys) in Lua scripting, or ``mpv_command_node()`` (with
 MPV_FORMAT_NODE_MAP) in the C libmpv client API.
 
-The name of the command is provided with a ``name`` string field. The name of
+The name of the command is provided with a ``_name`` string field. The name of
 each command is defined in each command description in the
 `List of Input Commands`_. ``--input-cmdlist`` also lists them. See the
 ``subprocess`` command for an example.
