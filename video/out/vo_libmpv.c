@@ -199,7 +199,8 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
         ctx->renderer->fns->destroy(ctx->renderer);
         talloc_free(ctx->renderer->priv);
         TA_FREEP(&ctx->renderer);
-        if (err != MPV_ERROR_NOT_IMPLEMENTED)
+        if (err != MPV_ERROR_NOT_IMPLEMENTED &&
+            err != MPV_ERROR_UNSUPPORTED)
             break;
     }
 
