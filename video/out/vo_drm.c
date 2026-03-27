@@ -91,23 +91,12 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     fb->width = drm->mode.mode.hdisplay;
     fb->height = drm->mode.mode.vdisplay;
     fb->fd = drm->fd;
-    fb->handle = 0;
 
-    // create dumb buffer
-    struct drm_mode_create_dumb creq = {
-        .width = fb->width,
-        .height = fb->height,
-        .bpp = BITS_PER_PIXEL,
-    };
-
-    if (drmIoctl(drm->fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq) < 0) {
+    if (drmModeCreateDumbBuffer(drm->fd, fb->width, fb->height, BITS_PER_PIXEL, 0,
+                                &fb->handle, &fb->stride, &fb->size) < 0) {
         MP_ERR(vo, "Cannot create dumb buffer: %s\n", mp_strerror(errno));
         goto err;
     }
-
-    fb->stride = creq.pitch;
-    fb->size = creq.size;
-    fb->handle = creq.handle;
 
     // select format
     switch (drm->opts->drm_format) {
