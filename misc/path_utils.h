@@ -33,6 +33,8 @@ bstr mp_basename_bstr(bstr path);
  * Return NULL if no extension and don't set *root in this case.
  */
 char *mp_splitext(const char *path, bstr *root);
+bstr bstr_strip_ext(bstr path);
+bstr bstr_get_ext(bstr path);
 
 // This is a shorthand to remove the extension
 char *mp_strip_ext(void *talloc_ctx, const char *s);

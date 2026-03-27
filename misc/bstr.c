@@ -424,22 +424,6 @@ bool bstr_case_endswith(struct bstr s, struct bstr suffix)
     return end.len == suffix.len && bstrcasecmp(end, suffix) == 0;
 }
 
-struct bstr bstr_strip_ext(struct bstr str)
-{
-    int dotpos = bstrrchr(str, '.');
-    if (dotpos < 0)
-        return str;
-    return (struct bstr){str.start, dotpos};
-}
-
-struct bstr bstr_get_ext(struct bstr s)
-{
-    int dotpos = bstrrchr(s, '.');
-    if (dotpos < 0)
-        return (struct bstr){NULL, 0};
-    return bstr_splice(s, dotpos + 1, s.len);
-}
-
 static int h_to_i(unsigned char c)
 {
     if (c >= '0' && c <= '9')
