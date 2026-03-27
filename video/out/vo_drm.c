@@ -75,10 +75,7 @@ static void destroy_framebuffer(int fd, struct framebuffer *fb)
         drmModeRmFB(fd, fb->id);
     }
     if (fb->handle) {
-        struct drm_mode_destroy_dumb dreq = {
-            .handle = fb->handle,
-        };
-        drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+        drmModeDestroyDumbBuffer(fd, fb->handle);
     }
 }
 
