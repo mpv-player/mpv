@@ -57,9 +57,9 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
     double n_asp = (double)n_w / n_h;
     if ((n_asp <= asp) == allow_down) {
         *w = n_w;
-        *h = n_w / asp;
+        *h = MPMAX(n_w / asp, 1);
     } else {
-        *w = n_h * asp;
+        *w = MPMAX(n_h * asp, 1);
         *h = n_h;
     }
 }
