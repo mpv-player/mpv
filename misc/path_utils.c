@@ -89,23 +89,6 @@ void mp_path_strip_trailing_separator(char *path)
         path[len - 1] = '\0';
 }
 
-char *mp_splitext(const char *path, bstr *root)
-{
-    mp_assert(path);
-    const char *bn = mp_basename(path);
-
-    // Skip all leading dots, not just for "hidden" unix files, otherwise we
-    // end up splitting a part of the filename sans leading dot.
-    bn += strspn(bn, ".");
-
-    const char *split = strrchr(bn, '.');
-    if (!split || !split[1])
-        return NULL;
-    if (root)
-        *root = (bstr){(char *)path, split - path};
-    return (char *)split + 1;
-}
-
 /* Return the file extension, excluding the '.'. If root is not NULL, set it to
  * the part of the path without extension. So: path == root + "." + extension
  * Return NULL if there is no file extension and don't set *root in this case.
