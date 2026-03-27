@@ -112,6 +112,27 @@ char *mp_strip_ext(void *talloc_ctx, const char *s)
     return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
 }
 
+/* Return the file extension, excluding the '.'. If root is not NULL, set it to
+ * the part of the path without extension. So: path == root + "." + extension
+ * Return NULL if there is no file extension and don't set *root in this case.
+ */
+static bstr split_ext(bstr path, bstr *root)
+{
+    bstr basename = mp_basename_bstr(path);
+
+    // Skip all leading dots, not just for "hidden" unix files, otherwise we
+    // end up splitting a part of the filename sans leading dot.
+    basename = bstr_splice(basename, bstrspn(basename, "."), basename.len);
+
+    int dot_pos = bstrrchr(basename, '.');
+    if (dot_pos < 0 || dot_pos == basename.len - 1)
+        return bstr0(NULL);
+    bstr ext = bstr_splice(basename, dot_pos + 1, basename.len);
+    if (root)
+        *root = (bstr){path.start, ext.start - 1 - path.start };
+    return ext;
+}
+
 bool mp_path_is_absolute(struct bstr path)
 {
     if (path.len && strchr(mp_path_separators, path.start[0]))
