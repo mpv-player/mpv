@@ -536,7 +536,7 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
         if (strcmp(ka->key, "no-ext") == 0) {
             action = ka->action;
             arg = ka->arg;
-            f = mp_strip_ext(filename, f);
+            f = bstrto0(filename, bstr_strip_ext(bstr0(f)));
         }
     }
     int r = m_property_strdup_ro(action, arg, f);

@@ -181,7 +181,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
                 name = mp_url_unescape(res, name);
 
             if (fmt == 'F')
-                name = mp_strip_ext(res, name);
+                name = bstrto0(res, bstr_strip_ext(bstr0(name)));
             append_filename(&res, name);
             break;
         }
