@@ -166,7 +166,7 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
     mp_auto_load_profile(mpctx, "protocol",
                          mp_split_proto(bstr0(mpctx->filename), NULL));
     mp_auto_load_profile(mpctx, "extension",
-                         bstr0(mp_splitext(mpctx->filename, NULL)));
+                         bstr_get_ext(bstr0(mpctx->filename)));
 
     mp_load_per_file_config(mpctx);
 }

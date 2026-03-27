@@ -584,10 +584,10 @@ bool image_writer_flexible_csp(const struct image_writer_opts *opts)
         || opts->format == AV_CODEC_ID_PNG;
 }
 
-int image_writer_format_from_ext(const char *ext)
+int image_writer_format_from_ext(bstr ext)
 {
     for (int n = 0; mp_image_writer_formats[n].name; n++) {
-        if (ext && strcmp(mp_image_writer_formats[n].name, ext) == 0)
+        if (ext.len && bstrcmp(bstr0(mp_image_writer_formats[n].name), ext) == 0)
             return mp_image_writer_formats[n].value;
     }
     return 0;
