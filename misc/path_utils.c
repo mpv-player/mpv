@@ -39,22 +39,29 @@
 #include <pathcch.h>
 #endif
 
-const char *mp_basename(const char *path)
+bstr mp_basename_bstr(bstr path)
 {
-    const char *s;
+    int separator_pos;
 
 #if HAVE_DOS_PATHS
-    if (!mp_is_url(bstr0(path))) {
-        s = strrchr(path, '\\');
-        if (s)
-            path = s + 1;
-        s = strrchr(path, ':');
-        if (s)
-            path = s + 1;
+    if (!mp_is_url(path)) {
+        separator_pos = bstrrchr(path, '\\');
+        if (separator_pos >= 0)
+            path = bstr_splice(path, separator_pos + 1, path.len);
+        separator_pos = bstrrchr(path, ':');
+        if (separator_pos >= 0)
+            path = bstr_splice(path, separator_pos + 1, path.len);
     }
 #endif
-    s = strrchr(path, '/');
-    return s ? s + 1 : path;
+    separator_pos = bstrrchr(path, '/');
+    if (separator_pos < 0)
+        return path;
+    return bstr_splice(path, separator_pos + 1, path.len);
+}
+
+const char *mp_basename(const char *path)
+{
+    return mp_basename_bstr(bstr0(path)).start;
 }
 
 struct bstr mp_dirname(const char *path)
