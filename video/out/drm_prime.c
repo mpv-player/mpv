@@ -113,7 +113,7 @@ void drm_prime_destroy_framebuffer(struct mp_log *log, int fd,
                                         framebuffer->gem_handles[i]);
             if (!drm_prime_get_handle_ref_count(handle_refs,
                                                 framebuffer->gem_handles[i])) {
-                drmIoctl(fd, DRM_IOCTL_GEM_CLOSE, &framebuffer->gem_handles[i]);
+                drmCloseBufferHandle(fd, framebuffer->gem_handles[i]);
             }
         }
     }
