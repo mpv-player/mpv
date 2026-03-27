@@ -139,17 +139,15 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
     }
 
     // prepare buffer for memory mapping
-    struct drm_mode_map_dumb mreq = {
-        .handle = fb->handle,
-    };
-    if (drmIoctl(drm->fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq)) {
+    uint64_t offset = 0;
+    if (drmModeMapDumbBuffer(drm->fd, fb->handle, &offset)) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         goto err;
     }
 
     // perform actual memory mapping
     fb->map = mmap(0, fb->size, PROT_READ | PROT_WRITE, MAP_SHARED,
-                    drm->fd, mreq.offset);
+                    drm->fd, offset);
     if (fb->map == MAP_FAILED) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         goto err;
