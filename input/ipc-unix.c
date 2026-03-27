@@ -323,11 +323,11 @@ static MP_THREAD_VOID ipc_thread(void *p)
     ipc_un.sun_family = AF_UNIX,
     strncpy(ipc_un.sun_path, arg->path, sizeof(ipc_un.sun_path) - 1);
 
-    unlink(ipc_un.sun_path);
-
     if (ipc_un.sun_path[0] == '@') {
         ipc_un.sun_path[0] = '\0';
         path_len--;
+    } else {
+        unlink(ipc_un.sun_path);
     }
 
     size_t addr_len = offsetof(struct sockaddr_un, sun_path) + 1 + path_len;
