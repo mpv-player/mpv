@@ -133,6 +133,18 @@ static bstr split_ext(bstr path, bstr *root)
     return ext;
 }
 
+bstr bstr_strip_ext(bstr path)
+{
+    bstr root = {0};
+    split_ext(path, &root);
+    return root.len ? root : path;
+}
+
+bstr bstr_get_ext(bstr path)
+{
+    return split_ext(path, NULL);
+}
+
 bool mp_path_is_absolute(struct bstr path)
 {
     if (path.len && strchr(mp_path_separators, path.start[0]))

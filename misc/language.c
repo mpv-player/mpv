@@ -22,6 +22,7 @@
 
 #include "common/common.h"
 #include "misc/ctype.h"
+#include "misc/path_utils.h"
 
 #define L(s) { #s, sizeof(#s) - 1 }
 
