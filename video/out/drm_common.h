@@ -82,7 +82,7 @@ struct framebuffer {
     uint32_t width;
     uint32_t height;
     uint32_t stride;
-    uint32_t size;
+    uint64_t size;
     uint32_t handle;
     uint8_t *map;
     uint32_t id;
