@@ -106,12 +106,6 @@ char *mp_splitext(const char *path, bstr *root)
     return (char *)split + 1;
 }
 
-char *mp_strip_ext(void *talloc_ctx, const char *s)
-{
-    bstr root;
-    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
-}
-
 /* Return the file extension, excluding the '.'. If root is not NULL, set it to
  * the part of the path without extension. So: path == root + "." + extension
  * Return NULL if there is no file extension and don't set *root in this case.
