@@ -195,7 +195,7 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
                     cmd[k] = this[k];
             }
 
-            cmd.name = "osd-overlay";
+            cmd._name = "osd-overlay";
             cmd.res_x = Math.round(this.res_x);
             cmd.res_y = Math.round(this.res_y);
 
@@ -204,7 +204,7 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
 
         remove: function ass_remove() {
             mp.command_native({
-                name: "osd-overlay",
+                _name: "osd-overlay",
                 id: this.id,
                 format: "none",
                 data: "",
@@ -774,7 +774,7 @@ mp.osd_message = function osd_message(text, duration) {
 }
 
 mp.utils.subprocess = function subprocess(t) {
-    var cmd = { name: "subprocess", capture_stdout: true };
+    var cmd = { _name: "subprocess", capture_stdout: true };
     var new_names = { cancellable: "playback_only", max_size: "capture_size" };
     for (var k in t)
         cmd[new_names[k] || k] = t[k];
