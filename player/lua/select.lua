@@ -298,7 +298,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
     end
 
     local r = mp.command_native({
-        name = "subprocess",
+        _name = "subprocess",
         capture_stdout = true,
         args = sub.external
             and {"ffmpeg", "-loglevel", "error", "-i", sub["external-filename"],
