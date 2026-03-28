@@ -849,7 +849,7 @@ strictly part of the guaranteed API.
     - rename ``cancellable`` field to ``playback_only``
     - rename ``max_size`` to ``capture_size``
     - set ``capture_stdout`` field to ``true`` if unset
-    - set ``name`` field to ``subprocess``
+    - set ``_name`` field to ``subprocess``
     - call ``mp.command_native(copied_t)``
     - if the command failed, create a dummy result table
     - copy ``error_string`` to ``error`` field if the string is non-empty
