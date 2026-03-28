@@ -117,7 +117,7 @@ end
 
 local function exec(args)
     return mp.command_native({
-        name = "subprocess",
+        _name = "subprocess",
         args = args,
         capture_stdout = true,
         capture_stderr = true,
