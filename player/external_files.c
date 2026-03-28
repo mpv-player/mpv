@@ -37,11 +37,11 @@ char **sub_exts;
 
 static int test_ext(MPOpts *opts, bstr ext)
 {
-    if (str_in_list(ext, opts->sub_auto_exts))
+    if (bstr_in_list0(ext, opts->sub_auto_exts))
         return STREAM_SUB;
-    if (str_in_list(ext, opts->audio_exts))
+    if (bstr_in_list0(ext, opts->audio_exts))
         return STREAM_AUDIO;
-    if (str_in_list(ext, opts->image_exts))
+    if (bstr_in_list0(ext, opts->image_exts))
         return STREAM_VIDEO;
     return -1;
 }
@@ -60,7 +60,7 @@ static int test_cover_filename(bstr fname, char **cover_files)
 
 bool mp_might_be_subtitle_file(const char *filename)
 {
-    return str_in_list(bstr_get_ext(bstr0(filename)), sub_exts);
+    return bstr_in_list0(bstr_get_ext(bstr0(filename)), sub_exts);
 }
 
 void mp_update_subtitle_exts(struct MPOpts *opts)
