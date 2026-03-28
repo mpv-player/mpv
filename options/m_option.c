@@ -786,7 +786,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
     if (alt) {
         char *end = NULL;
         ival = strtol(alt->name, &end, 10);
-        if (end && !end[0])
+        if (!end[0])
             alt = NULL;
     }
     if (alt) {

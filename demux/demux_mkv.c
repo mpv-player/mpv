@@ -1839,7 +1839,7 @@ static void parse_vorbis_chmap(struct mp_chmap *channels, unsigned char *data,
             snprintf(smask, sizeof(smask), "%.*s", (int)(len - 34), data + 34);
             char *end = NULL;
             uint32_t mask = strtol(smask, &end, 0);
-            if (!end || end[0])
+            if (end[0])
                 mask = 0;
             struct mp_chmap chmask = {0};
             mp_chmap_from_waveext(&chmask, mask);
