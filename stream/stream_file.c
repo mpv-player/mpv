@@ -300,7 +300,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
         stream->is_local_fs = false;
         char *begin = strstr(stream->url, "://") + 3, *end = NULL;
         p->fd = strtol(begin, &end, 0);
-        if (!end || end == begin || end[0] || p->fd < 0) {
+        if (end == begin || end[0] || p->fd < 0) {
             MP_ERR(stream, "Invalid FD number: %s\n", stream->url);
             return STREAM_ERROR;
         }
