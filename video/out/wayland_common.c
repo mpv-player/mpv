@@ -2787,6 +2787,13 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->shm = wl_registry_bind(reg, id, &wl_shm_interface, ver);
     }
 
+#ifdef WL_FIXES_ACK_GLOBAL_REMOVE
+    if (!strcmp(interface, wl_fixes_interface.name) && found++) {
+        ver = MPMIN(ver, 2);
+        wl->fixes = wl_registry_bind(reg, id, &wl_fixes_interface, ver);
+    }
+#endif
+
 #if HAVE_WAYLAND_PROTOCOLS_1_44
     if (!strcmp(interface, wp_color_representation_manager_v1_interface.name) && found++) {
         ver = 1;
@@ -2894,6 +2901,11 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
             return;
         }
     }
+
+#ifdef WL_FIXES_ACK_GLOBAL_REMOVE
+    if (wl->fixes)
+        wl_fixes_ack_global_remove(wl->fixes, registry, name);
+#endif
 }
 
 static const struct wl_registry_listener registry_listener = {

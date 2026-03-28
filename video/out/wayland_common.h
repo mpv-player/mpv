@@ -46,6 +46,7 @@ struct vo_wayland_state {
     struct wl_display       *display;
     struct wl_registry      *registry;
     struct wl_shm           *shm;
+    struct wl_fixes         *fixes;
     struct wl_surface       *surface;
     struct wl_surface       *osd_surface;
     struct wl_subsurface    *osd_subsurface;
