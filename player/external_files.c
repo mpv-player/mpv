@@ -26,6 +26,7 @@
 #include "common/msg.h"
 #include "misc/charset_conv.h"
 #include "misc/language.h"
+#include "misc/natural_sort.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "player/core.h"
@@ -71,7 +72,7 @@ static int compare_filename(const void *a, const void *b)
 {
     const struct subfn *s1 = a;
     const struct subfn *s2 = b;
-    return strcoll(s1->fname, s2->fname);
+    return mp_natural_sort_cmp(s1->fname, s2->fname);
 }
 
 static int compare_priority(const void *a, const void *b)
@@ -82,7 +83,7 @@ static int compare_priority(const void *a, const void *b)
         return -1;
     if (s1->priority < s2->priority)
         return 1;
-    return strcoll(s1->fname, s2->fname);
+    return mp_natural_sort_cmp(s1->fname, s2->fname);
 }
 
 static void append_dir_external_files(struct mpv_global *global, struct MPOpts *opts,
