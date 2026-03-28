@@ -2305,9 +2305,9 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
         // keep aspect if the other value is not set
         double asp = (double)prew / preh;
         if (gm->w > 0 && !(gm->h > 0)) {
-            *widh = *widw / asp;
+            *widh = MPMAX(*widw / asp, 1);
         } else if (!(gm->w > 0) && gm->h > 0) {
-            *widw = *widh * asp;
+            *widw = MPMAX(*widh * asp, 1);
         }
         if (center) {
             *xpos += prew / 2 - *widw / 2;
