@@ -1650,6 +1650,7 @@ features += {'macos-cocoa-cb': macos_cocoa_cb.allowed()}
 if features['macos-cocoa-cb']
     swift_sources += files('osdep/mac/libmpv_helper.swift',
                            'video/out/cocoa_cb_common.swift',
+                           'video/out/cocoa_cb_embedded.swift',
                            'video/out/mac/gl_layer.swift')
 endif
 if features['cocoa'] and features['vulkan'] and features['swift']
