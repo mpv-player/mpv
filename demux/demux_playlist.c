@@ -585,11 +585,8 @@ static int parse_dir(struct pl_parser *p)
 
     struct stat dir_stack[MAX_DIR_STACK];
 
-    if (p->opts->dir_mode == DIR_AUTO) {
-        struct MPOpts *opts = mp_get_config_group(NULL, p->global, &mp_opt_root);
-        p->opts->dir_mode = opts->shuffle ? DIR_RECURSIVE : DIR_LAZY;
-        talloc_free(opts);
-    }
+    if (p->opts->dir_mode == DIR_AUTO)
+        p->opts->dir_mode = p->mp_opts->shuffle ? DIR_RECURSIVE : DIR_LAZY;
 
     scan_dir(p, path, dir_stack, 0, autocreate);
 
