@@ -321,7 +321,7 @@ struct MPContext *mp_create(void)
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
-        mpctx->opts->verbose = atoi(verbose_env);
+        mpctx->opts->verbose = strtol(verbose_env, NULL, 10);
 
     mp_cancel_trigger(mpctx->playback_abort);
 
