@@ -476,6 +476,11 @@ int bstr_find_in_list0(struct bstr str, char **list, bool case_sensitive)
     return -1;
 }
 
+bool bstr_in_list0(struct bstr str, char **list)
+{
+    return bstr_find_in_list0(str, list, false) != -1;
+}
+
 #ifdef _WIN32
 
 #include <windows.h>

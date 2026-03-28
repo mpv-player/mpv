@@ -82,6 +82,7 @@ void bstr_lower(struct bstr str);
 int bstr_sscanf(struct bstr str, const char *format, ...) MP_SCANF_ATTRIBUTE(2, 3);
 
 int bstr_find_in_list0(bstr str, char **list, bool case_sensitive);
+bool bstr_in_list0(struct bstr str, char **list);
 
 // Decode a string containing hexadecimal data. All whitespace will be silently
 // ignored. When successful, this allocates a new array to store the output.
