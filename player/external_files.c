@@ -180,10 +180,9 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
         if (!limit_fuzziness && fuzz >= 2 && prio == 0)
             prio = INT_MIN;
 
-        mp_trace(log, "Potential external file: \"%s\"  Priority: %d\n",
-               de->d_name, prio);
-
         if (prio) {
+            mp_trace(log, "Potential external file: \"%s\"  Priority: %d\n",
+                   de->d_name, prio);
             char *extpath = mp_path_join_bstr(*slist, path, dename);
             if (mp_path_exists(extpath)) {
                 MP_TARRAY_GROW(NULL, *slist, *nsub);
