@@ -228,7 +228,7 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         }
         case 't': {
             char tfmt = *template;
-            if (!tfmt)
+            if (!tfmt || !local_time)
                 goto error_exit;
             template++;
             char fmtstr[] = {'%', tfmt, '\0'};
