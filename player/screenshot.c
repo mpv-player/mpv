@@ -229,15 +229,19 @@ static char *create_fname(struct MPContext *mpctx, char *template,
         case 't': {
             char tfmt = *template;
             // Translate common extensions to the closest alternative.
-            size_t i = strcspn("klPaAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%", (char[]){tfmt, '\0'});
-            tfmt =             "HIpaAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%"[i];
+            size_t i = strcspn("sklPaAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%", (char[]){tfmt, '\0'});
+            tfmt =             "sHIpaAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%"[i];
             if (!tfmt || !local_time)
                 goto error_exit;
             template++;
-            char fmtstr[] = {'%', tfmt, '\0'};
             char buffer[80];
-            if (strftime(buffer, sizeof(buffer), fmtstr, local_time) == 0)
-                buffer[0] = '\0';
+            if (tfmt == 's') {
+                snprintf(buffer, sizeof(buffer), "%"PRId64, (int64_t)raw_time);
+            } else {
+                char fmtstr[] = {'%', tfmt, '\0'};
+                if (strftime(buffer, sizeof(buffer), fmtstr, local_time) == 0)
+                    buffer[0] = '\0';
+            }
             append_filename(&res, buffer);
             break;
         }
