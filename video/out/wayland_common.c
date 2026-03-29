@@ -1936,7 +1936,7 @@ resize:
                mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
 
     wl->pending_vo_events |= VO_EVENT_RESIZE;
-    wl->override_surface_local = false;
+    wl->override_surface_local = width == 0 || height == 0;
     wl->toplevel_configured = true;
 }
 
