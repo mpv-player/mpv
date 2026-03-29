@@ -4361,10 +4361,15 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
 
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
 {
-    int width = wl->override_surface_local ? lround(mp_rect_w(wl->geometry) / wl->scaling_factor) :
-                                             mp_rect_w(wl->surface_local);
-    int height = wl->override_surface_local ? lround(mp_rect_h(wl->geometry) / wl->scaling_factor) :
-                                             mp_rect_h(wl->surface_local);
+    int width, height;
+    if (!wl->override_surface_local && mp_rect_w(wl->surface_local) != 0 &&
+                                       mp_rect_h(wl->surface_local) != 0) {
+        width = mp_rect_w(wl->surface_local);
+        height = mp_rect_h(wl->surface_local);
+    } else {
+        width = lround(mp_rect_w(wl->geometry) / wl->scaling_factor);
+        height = lround(mp_rect_h(wl->geometry) / wl->scaling_factor);
+    }
     wp_viewport_set_destination(wl->viewport, width, height);
 }
 
