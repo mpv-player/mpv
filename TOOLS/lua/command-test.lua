@@ -107,6 +107,21 @@ mp.observe_property("vo-configured", "bool", function(_, v)
     -- Runs detached; should be killed on player exit (forces timeout)
     mp.command_native({_flags={"async"}, name = "subprocess",
                        playback_only = false, args = {"sleep", "inf"}})
+
+    -- Rapidly dispatching many subprocesses asynchronously must not block the
+    -- main thread. If it takes multiple seconds we're blocking the main thread.
+    local rapid_done = 0
+    local rapid_start = mp.get_time()
+    for _ = 1, 1000 do
+        mp.command_native_async({name = "subprocess", args = {"true"}},
+            function(_, _, _)
+                rapid_done = rapid_done + 1
+                if rapid_done == 1000 then
+                    print(string.format("done rapid subprocess dispatch in %.3fms",
+                        (mp.get_time() - rapid_start) * 1000))
+                end
+            end)
+    end
 end)
 
 local counter
