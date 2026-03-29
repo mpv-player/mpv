@@ -48,14 +48,9 @@ static int test_ext(MPOpts *opts, bstr ext)
 
 static int test_cover_filename(bstr fname, char **cover_files)
 {
-    for (int n = 0; cover_files && cover_files[n]; n++) {
-        if (bstrcasecmp(bstr0(cover_files[n]), fname) == 0) {
-            size_t size = n;
-            while (cover_files[++size]);
-            return size - n;
-        }
-    }
-    return 0;
+    int idx = bstr_find_in_list0(fname, cover_files, false);
+    // This equals to 0 if not in list (idx == -1)
+    return -idx - 1;
 }
 
 bool mp_might_be_subtitle_file(const char *filename)
@@ -182,8 +177,8 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
 
         // doesn't contain the movie name
         // don't try in the mplayer subtitle directory
-        if (!limit_fuzziness && fuzz >= 2)
-            prio |= 1;
+        if (!limit_fuzziness && fuzz >= 2 && prio == 0)
+            prio = INT_MIN;
 
         mp_trace(log, "Potential external file: \"%s\"  Priority: %d\n",
                de->d_name, prio);
@@ -234,11 +229,11 @@ static void filter_subidx(struct subfn **slist, int *nsub)
             prev = fname;
         } else if (case_endswith(fname, ".sub")) {
             if (prev && strncmp(prev, fname, strlen(fname) - 4) == 0)
-                (*slist)[n].priority = -1;
+                (*slist)[n].priority = 0;
         }
     }
     for (int n = *nsub - 1; n >= 0; n--) {
-        if ((*slist)[n].priority < 0)
+        if ((*slist)[n].priority == 0)
             MP_TARRAY_REMOVE_AT(*slist, *nsub, n);
     }
 }
