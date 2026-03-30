@@ -1,0 +1,1 @@
+change `%tX` format specifier of `--screenshot-template` option to only accept C11 strftime specifiers or `%s` specifier

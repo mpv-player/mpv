@@ -5031,6 +5031,12 @@ Screenshot
         the result of passing "%X" to ``strftime``. For example, ``%tm`` will
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
+
+        .. note::
+
+            Since mpv 0.42.0, this only supports the ``strftime`` format
+            specifiers specified in C11 standard, or the ``%s`` extension for
+            UNIX timestamp. Other format specifiers are unsupported.
     ``%{prop[:fallback text]}``
         Insert the value of the input property 'prop'. E.g. ``%{filename}`` is
         the same as ``%f``. If the property does not exist or is not available,
