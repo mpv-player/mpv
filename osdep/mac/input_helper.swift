@@ -264,7 +264,7 @@ class InputHelper: NSObject {
 
             let filesClean = files.map { $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
             var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
-            mp_event_drop_files(input, Int32(files.count), &filesPtr, action)
+            mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
             for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
         }
     }

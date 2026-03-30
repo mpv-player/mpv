@@ -33,6 +33,7 @@
 #include "osdep/io.h"
 #include "misc/rendezvous.h"
 
+#include "event.h"
 #include "input.h"
 #include "keycodes.h"
 #include "osdep/threads.h"
@@ -44,6 +45,7 @@
 #include "options/path.h"
 #include "mpv_talloc.h"
 #include "options/options.h"
+#include "player/external_files.h"
 #include "misc/bstr.h"
 #include "misc/node.h"
 #include "stream/stream.h"
@@ -1274,6 +1276,54 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
                         test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
     input_unlock(ictx);
     return r;
+}
+
+void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         enum mp_dnd_action action)
+{
+    bool all_sub = true;
+    for (int i = 0; i < num_files; i++)
+        all_sub &= mp_might_be_subtitle_file(files[i]);
+
+    if (all_sub) {
+        for (int i = 0; i < num_files; i++) {
+            const char *cmd[] = {
+                "osd-auto",
+                "sub-add",
+                files[i],
+                NULL
+            };
+            mp_input_run_cmd(ictx, cmd);
+        }
+    } else if (action == DND_INSERT_NEXT) {
+        /* To insert the entries in the correct order, we iterate over them
+           backwards */
+        for (int i = num_files - 1; i >= 0; i--) {
+            const char *cmd[] = {
+                "osd-auto",
+                "loadfile",
+                files[i],
+                /* Since we're inserting in reverse, wait til the final item
+                   is added to start playing */
+                (i > 0) ? "insert-next" : "insert-next-play",
+                NULL
+            };
+            mp_input_run_cmd(ictx, cmd);
+        }
+    } else {
+        for (int i = 0; i < num_files; i++) {
+            const char *cmd[] = {
+                "osd-auto",
+                "loadfile",
+                files[i],
+                /* Either start playing the dropped files right away
+                   or add them to the end of the current playlist */
+                (i == 0 && action == DND_REPLACE) ? "replace" : "append-play",
+                NULL
+            };
+            mp_input_run_cmd(ictx, cmd);
+        }
+    }
 }
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)

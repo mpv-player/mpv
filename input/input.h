@@ -22,6 +22,7 @@
 #include "misc/bstr.h"
 
 #include "cmd.h"
+#include "event.h"
 
 #define MP_MAX_TABLET_PAD_BUTTONS 10
 
@@ -204,6 +205,10 @@ bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y);
 // Whether input.c wants mouse drag events at this mouse position. If this
 // returns false, some VOs will initiate window dragging.
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
+
+// Enqueue files for playback after drag and drop
+void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         enum mp_dnd_action action);
 
 // Initialize the input system
 struct mpv_global;

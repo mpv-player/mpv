@@ -171,7 +171,7 @@ static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
             }
 
             GlobalUnlock(medium.hGlobal);
-            mp_event_drop_files(t->input_ctx, recvd_files, files, action);
+            mp_input_drop_files(t->input_ctx, recvd_files, files, action);
             talloc_free(files);
         }
 
