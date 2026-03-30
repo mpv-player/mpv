@@ -160,6 +160,12 @@ struct input_ctx {
     struct touch_point *touch_points;
     int num_touch_points;
 
+    // List of last dropped files
+    int64_t dnd_ts;
+    enum mp_dnd_action dnd_action;
+    bstr *dropped_files;
+    int num_dropped_files;
+
     int tablet_x, tablet_y;
     // Indicates tablet tools in proximity / close to tablet surface
     bool tablet_tool_in_proximity;
@@ -1286,6 +1292,15 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
 {
     input_lock(ictx);
     if (!ictx->opts->builtin_dnd) {
+        TA_FREEP(&ictx->dropped_files);
+        ictx->dropped_files = talloc_zero_array(ictx, bstr, num_files);
+        ictx->num_dropped_files = num_files;
+        ictx->dnd_ts = mp_time_ns();
+        ictx->dnd_action = action;
+        for (int i = 0; i < num_files; i++)
+            ictx->dropped_files[i] = bstrdup(ictx->dropped_files, bstr0(files[i]));
+
+        notify_event_update(ictx);
         input_unlock(ictx);
         return;
     }
@@ -1333,6 +1348,23 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
             queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
         }
     }
+    input_unlock(ictx);
+}
+
+void mp_input_get_dropped_files(struct input_ctx *ictx, void *talloc_ctx,
+                                int64_t *dnd_ts,
+                                enum mp_dnd_action *dnd_action,
+                                char ***dropped_files)
+{
+    input_lock(ictx);
+    *dnd_ts = ictx->dnd_ts;
+    *dnd_action = ictx->dnd_action;
+    *dropped_files = NULL;
+    int num = 0;
+    for (int i = 0; i < ictx->num_dropped_files; i++)
+        MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num,
+                         bstrto0(talloc_ctx, ictx->dropped_files[i]));
+    MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num, NULL);
     input_unlock(ictx);
 }
 
@@ -1746,6 +1778,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
         .wakeup_ctx = wakeup_ctx,
         .active_sections = talloc_array(ictx, struct active_section, 0),
         .touch_points = talloc_array(ictx, struct touch_point, 0),
+        .dnd_action = DND_NONE,
     };
 
     ictx->opts = ictx->opts_cache->opts;

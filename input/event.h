@@ -25,6 +25,7 @@ enum mp_dnd_action {
     DND_REPLACE,
     DND_APPEND,
     DND_INSERT_NEXT,
+    DND_NONE,
 };
 
 // Drop data in a specific format (identified by the mimetype).
