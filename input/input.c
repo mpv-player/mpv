@@ -204,6 +204,7 @@ struct input_opts {
     bool default_bindings;
     bool builtin_bindings;
     bool builtin_dragging;
+    bool builtin_dnd;
     bool enable_mouse_movements;
     bool vo_key_input;
     bool test;
@@ -223,6 +224,7 @@ const struct m_sub_options input_config = {
         {"input-default-bindings", OPT_BOOL(default_bindings)},
         {"input-builtin-bindings", OPT_BOOL(builtin_bindings)},
         {"input-builtin-dragging", OPT_BOOL(builtin_dragging)},
+        {"input-builtin-drag-and-drop", OPT_BOOL(builtin_dnd)},
         {"input-test", OPT_BOOL(test)},
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
@@ -254,6 +256,7 @@ const struct m_sub_options input_config = {
         .default_bindings = true,
         .builtin_bindings = true,
         .builtin_dragging = true,
+        .builtin_dnd = true,
         .vo_key_input = true,
         .allow_win_drag = true,
         .preprocess_wheel = true,
@@ -1281,6 +1284,12 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
 void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                          enum mp_dnd_action action)
 {
+    input_lock(ictx);
+    if (!ictx->opts->builtin_dnd) {
+        input_unlock(ictx);
+        return;
+    }
+
     bool all_sub = true;
     for (int i = 0; i < num_files; i++)
         all_sub &= mp_might_be_subtitle_file(files[i]);
@@ -1293,7 +1302,7 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                 files[i],
                 NULL
             };
-            mp_input_run_cmd(ictx, cmd);
+            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
         }
     } else if (action == DND_INSERT_NEXT) {
         /* To insert the entries in the correct order, we iterate over them
@@ -1308,7 +1317,7 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                 (i > 0) ? "insert-next" : "insert-next-play",
                 NULL
             };
-            mp_input_run_cmd(ictx, cmd);
+            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
         }
     } else {
         for (int i = 0; i < num_files; i++) {
@@ -1321,9 +1330,10 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                 (i == 0 && action == DND_REPLACE) ? "replace" : "append-play",
                 NULL
             };
-            mp_input_run_cmd(ictx, cmd);
+            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
         }
     }
+    input_unlock(ictx);
 }
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)

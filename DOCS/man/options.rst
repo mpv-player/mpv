@@ -4452,6 +4452,10 @@ Input
     option, this option only affects VOs which support the ``begin-vo-dragging``
     command, and does not disable window dragging initialized with the command.
 
+``--input-builtin-drag-and-drop=<yes|no>``
+    Enable the built-in drag-and-drop behavior (default: yes). Setting it to no
+    disables the built-in drag-and-drop handling.
+
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
