@@ -209,6 +209,11 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 // Enqueue files for playback after drag and drop
 void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                          enum mp_dnd_action action);
+// Last dropped files
+void mp_input_get_dropped_files(struct input_ctx *ictx, void *talloc_ctx,
+                                int64_t *dnd_ts,
+                                enum mp_dnd_action *dnd_action,
+                                char ***dropped_files);
 
 // Initialize the input system
 struct mpv_global;

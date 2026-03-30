@@ -3231,6 +3231,39 @@ Property list
             "pad-btns"           MPV_FORMAT_NODE_MAP
                (key and string value for each pad-btn entry)
 
+``dropped-files``
+    Information of the most recent drag-and-drop event mpv received. This
+    property is only updated when ``--input-builtin-drag-and-drop=no``.
+    A client can observe this property to detect when a drag-and-drop event
+    happens. This property is unavailable if no drag-and-drop event has
+    happened.
+
+    Has the following sub-properties:
+
+    ``dropped-files/time``
+        The timestamp of the last drag-and-drop event mpv received, in
+        nanoseconds. This uses the same clock as ``mpv_get_time_ns()``.
+
+    ``dropped-files/action``
+        The action of the drag-and-drop event, can be one of ``replace``,
+        ``append``, or ``insert-next``. This is affected by the
+        ``--drag-and-drop`` option.
+
+    ``dropped-files/files``
+        The dropped file names of the drag-and-drop event.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "time"    MPV_FORMAT_INT64
+            "action"  MPV_FORMAT_STRING
+            "files"   MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_STRING
+
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.
     The extradata is returned as a string as-is. This property is not

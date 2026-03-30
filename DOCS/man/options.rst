@@ -4454,7 +4454,8 @@ Input
 
 ``--input-builtin-drag-and-drop=<yes|no>``
     Enable the built-in drag-and-drop behavior (default: yes). Setting it to no
-    disables the built-in drag-and-drop handling.
+    disables the built-in drag-and-drop handling and enables the ``dropped-files``
+    property, which can be used to retrieve information about dropped files.
 
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
