@@ -266,6 +266,10 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
                 mp_err(log, "Error while parsing COMPONENTS!\n");
                 return false;
             }
+            if (out->components < 0 || out->components > 4) {
+                mp_err(log, "Invalid COMPONENTS: %d\n", out->components);
+                return false;
+            }
             continue;
         }
 
