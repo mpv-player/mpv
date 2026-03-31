@@ -1590,7 +1590,8 @@ static struct ra_tex **next_hook_tex(struct gl_video *p)
 // Process hooks for a plane, saving the result and returning a new image
 // If 'trans' is NULL, the shader is forbidden from transforming img
 static struct image pass_hook(struct gl_video *p, const char *name,
-                              struct image img, struct gl_transform *trans)
+                              struct image img, struct gl_transform *trans,
+                              int max_output_components)
 {
     if (!name)
         return img;
@@ -1618,6 +1619,14 @@ found:
 
         const char *store_name = hook->save_tex ? hook->save_tex : name;
         bool is_overwrite = strcmp(store_name, name) == 0;
+        int comps = hook->components ? hook->components : img.components;
+
+        if (is_overwrite && comps > max_output_components) {
+            MP_ERR(p, "Hook tried to overwrite %s COMPONENTS to "
+                   "unsupported value: %d (max supported: %d)\n",
+                   name, comps, max_output_components);
+            continue;
+        }
 
         // If user shader is set to align HOOKED with reference and fix its
         // offset, it requires HOOKED to be resizable and overwritten.
@@ -1643,7 +1652,6 @@ found:
         struct gl_transform hook_off = identity_trans;
         hook->hook(p, img, &hook_off, hook->priv);
 
-        int comps = hook->components ? hook->components : img.components;
         skip_unused(p, comps);
 
         // Compute the updated FBO dimensions and store the result
@@ -1718,7 +1726,7 @@ found: ;
     struct ra_tex **tex = next_hook_tex(p);
     finish_pass_tex(p, tex, p->texture_w, p->texture_h);
     struct image img = image_wrap(*tex, PLANE_RGB, p->components);
-    img = pass_hook(p, name, img, tex_trans);
+    img = pass_hook(p, name, img, tex_trans, 4);
     copy_image(p, &(int){0}, img);
     p->texture_w = img.w;
     p->texture_h = img.h;
@@ -2297,7 +2305,7 @@ static void pass_read_video(struct gl_video *p)
         default: continue;
         }
 
-        img[n] = pass_hook(p, name, img[n], &offsets[n]);
+        img[n] = pass_hook(p, name, img[n], &offsets[n], img[n].components);
 
         if (reference_tex_num == n) {
             // The reference texture is finalized now.
@@ -2417,7 +2425,7 @@ static void pass_read_video(struct gl_video *p)
         }
 
         // Run any post-scaling hooks
-        img[n] = pass_hook(p, name, img[n], NULL);
+        img[n] = pass_hook(p, name, img[n], NULL, img[n].components);
     }
 
     // All planes are of the same size and properly aligned at this point
