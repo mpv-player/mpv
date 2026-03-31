@@ -53,7 +53,6 @@ local user_opts = {
     osd_margins = true,         -- adjust osd-margin-y to not overlap with OSC
     windowcontrols = "auto",    -- whether to show window controls
     windowcontrols_alignment = "right", -- which side to show window controls on
-    windowcontrols_title = "${media-title}", -- same as title but for windowcontrols
     windowcontrols_independent = true, -- show window controls and bottom bar independently
     floatingtitle = true,         -- show title in the floating layout?
     floatingwidth = 700,          -- width of the floating layout
@@ -315,7 +314,6 @@ local state = {
     input_enabled = true,
     showhide_enabled = false,
     windowcontrols_buttons = false,
-    windowcontrols_title = false,
     dmx_cache = 0,
     using_video_margins = false,
     border = true,
@@ -1402,7 +1400,7 @@ local function window_controls(topbar)
     ne = new_element("wctitle", "button")
     ne.is_wc = true
     ne.content = function ()
-        local title = mp.command_native({"expand-text", user_opts.windowcontrols_title})
+        local title = mp.command_native({"expand-text", mp.get_property("title")})
         title = title:gsub("\n", " ")
         return title ~= "" and mp.command_native({"escape-ass", title}) or "mpv"
     end
