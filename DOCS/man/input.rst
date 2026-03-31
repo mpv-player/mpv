@@ -1829,8 +1829,7 @@ This list uses the event name field value, and the C API symbol in brackets:
             Playback was ended by sending the quit command.
 
         ``error``
-            An error happened. In this case, an ``error`` field is present with
-            the error string.
+            An error happened.
 
         ``redirect``
             Happens with playlists and similar. Details see
@@ -1849,10 +1848,7 @@ This list uses the event name field value, and the C API symbol in brackets:
 
     ``file_error``
         Set to mpv error string describing the approximate reason why playback
-        failed. Unset if no error known. (In Lua scripting, this value was set
-        on the ``error`` field directly. This is deprecated since mpv 0.33.0.
-        In the future, this ``error`` field will be unset for this specific
-        event.)
+        failed. Unset if no error known.
 
     ``playlist_insert_id``
         If loading ended, because the playlist entry to be played was for example
