@@ -2628,6 +2628,7 @@ local function show_bar(label, showtime_key, visible_key, anitype_key, set_visib
 end
 
 local function show_osc()
+    if state.idle then return end
     show_bar("osc", "showtime", "osc_visible", "anitype", osc_visible)
 end
 
@@ -3003,17 +3004,25 @@ tick = function()
     if not state.enabled then return end
 
     if state.idle then
-        render_wipe(state.osd)
         -- render idle message
         msg.trace("idle message")
         if user_opts.idlescreen then
             render_logo()
         end
 
-        if state.showhide_enabled then
-            mp.disable_key_bindings("showhide")
-            mp.disable_key_bindings("showhide_wc")
-            state.showhide_enabled = false
+        -- Hide main OSC but keep window controls functional
+        if state.osc_visible then
+            osc_visible(false)
+        end
+        if window_controls_enabled() then
+            render()
+        else
+            render_wipe(state.osd)
+            if state.showhide_enabled then
+                mp.disable_key_bindings("showhide")
+                mp.disable_key_bindings("showhide_wc")
+                state.showhide_enabled = false
+            end
         end
     elseif state.fullscreen and user_opts.showfullscreen
         or (not state.fullscreen and user_opts.showwindowed) then
@@ -3033,11 +3042,11 @@ tick = function()
 
     state.tick_last_time = mp.get_time()
 
-    local function tick_animation(anitype_key, anistart_key, animation_key)
+    local function tick_animation(anitype_key, anistart_key, animation_key, allow_idle)
         -- state.anistart can be nil - animation should now start, or it can
         -- be a timestamp when it started. state.idle has no animation.
         if state[anitype_key] ~= nil then
-            if not state.idle and
+            if (allow_idle or not state.idle) and
                (not state[anistart_key] or
                 mp.get_time() < 1 + state[anistart_key] + user_opts.fadeduration/1000)
             then
@@ -3049,7 +3058,7 @@ tick = function()
         end
     end
     tick_animation("anitype", "anistart", "animation")
-    tick_animation("wc_anitype", "wc_anistart", "wc_animation")
+    tick_animation("wc_anitype", "wc_anistart", "wc_animation", window_controls_enabled())
 end
 
 local function shutdown()
