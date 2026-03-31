@@ -78,7 +78,6 @@ struct cmd_bind_section {
 };
 
 #define MP_MAX_SOURCES 10
-#define MP_MAX_TABLET_PAD_BUTTONS 10
 
 struct active_section {
     bstr name;
@@ -1221,7 +1220,7 @@ void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
                              bool *tool_stylus_btn2_pressed,
                              bool *tool_stylus_btn3_pressed,
                              bool *pad_focus,
-                             bool **pad_buttons_pressed,
+                             bool *pad_buttons_pressed,
                              int *pad_buttons)
 {
     input_lock(ictx);
@@ -1233,7 +1232,8 @@ void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
     *tool_stylus_btn2_pressed = ictx->tablet_tool_stylus_btn2_pressed;
     *tool_stylus_btn3_pressed = ictx->tablet_tool_stylus_btn3_pressed;
     *pad_focus = ictx->tablet_pad_focus;
-    *pad_buttons_pressed = ictx->tablet_pad_buttons_pressed;
+    for (int i = 0; i < ictx->tablet_pad_buttons; i++)
+        pad_buttons_pressed[i] = ictx->tablet_pad_buttons_pressed[i];
     *pad_buttons = ictx->tablet_pad_buttons;
     input_unlock(ictx);
 }
