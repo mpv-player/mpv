@@ -240,12 +240,10 @@ static void update_opts(void *p)
 
     if (m_config_cache_update(vo->opts_cache)) {
         read_opts(vo);
-        if (vo->driver->control) {
-            vo->driver->control(vo, VOCTRL_VO_OPTS_CHANGED, NULL);
-            // "Legacy" update of video position related options.
-            // Unlike VOCTRL_VO_OPTS_CHANGED, often not propagated to backends.
-            vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
-        }
+        vo->driver->control(vo, VOCTRL_VO_OPTS_CHANGED, NULL);
+        // "Legacy" update of video position related options.
+        // Unlike VOCTRL_VO_OPTS_CHANGED, often not propagated to backends.
+        vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
     }
 }
 
