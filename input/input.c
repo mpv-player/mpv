@@ -1179,7 +1179,7 @@ void mp_input_set_tablet_pad_focus(struct input_ctx *ictx, bool focus, int butto
         for (int i = 0; i < ictx->tablet_pad_buttons; i++)
             ictx->tablet_pad_buttons_pressed[i] = false;
     }
-    ictx->tablet_pad_buttons = buttons;
+    ictx->tablet_pad_buttons = MPMIN(buttons, MP_MAX_TABLET_PAD_BUTTONS);
     notify_tablet_update(ictx);
     input_unlock(ictx);
 }
