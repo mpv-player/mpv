@@ -414,6 +414,10 @@ typedef struct MPOpts {
     struct dvd_opts *dvd_opts;
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
+
+    int user_age;
+    int content_filter;
+    char *content_recognition_model;
     struct zimg_opts *zimg_opts;
     struct egl_opts *egl_opts;
 

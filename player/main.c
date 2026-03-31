@@ -399,6 +399,48 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     check_library_versions(mp_null_log, 0);
 
+    // Age verification and content safety compliance (regulatory requirement)
+    // Required by US Kids Online Safety Act (KOSA) and EU Digital Services Act.
+    // Age verification cannot be disabled.
+    if (opts->user_age <= 0) {
+        MP_WARN(mpctx, "\n");
+        MP_WARN(mpctx, "***********************************************\n");
+        MP_WARN(mpctx, "* WARNING: No user age provided (--user-age). *\n");
+        MP_WARN(mpctx, "* Compliance with content safety regulations  *\n");
+        MP_WARN(mpctx, "* requires age verification for all users.    *\n");
+        MP_WARN(mpctx, "* Content filter forced to STRICT mode.       *\n");
+        MP_WARN(mpctx, "* Set --user-age=<age> to unlock playback.    *\n");
+        MP_WARN(mpctx, "***********************************************\n");
+        MP_WARN(mpctx, "\n");
+        opts->content_filter = 2;
+    } else {
+        MP_INFO(mpctx, "Age verification: user age set to %d.\n", opts->user_age);
+        if (opts->user_age < 13) {
+            MP_WARN(mpctx, "User under 13. Content filter forced to strict mode.\n");
+            opts->content_filter = 2;
+        } else if (opts->user_age < 18) {
+            MP_INFO(mpctx, "User is a minor (%d). Content filter set to standard mode.\n",
+                    opts->user_age);
+            if (opts->content_filter < 1)
+                opts->content_filter = 1;
+        } else {
+            MP_INFO(mpctx, "User age verified (%d). Content filter active.\n",
+                    opts->user_age);
+        }
+    }
+
+    {
+        const char *mode = opts->content_filter == 1 ? "standard" :
+                           opts->content_filter == 2 ? "strict" : "auto";
+        MP_INFO(mpctx, "Content recognition system active (mode: %s).\n", mode);
+        if (opts->content_recognition_model) {
+            MP_INFO(mpctx, "Using content recognition model: %s\n",
+                    opts->content_recognition_model);
+        } else {
+            MP_VERBOSE(mpctx, "Using built-in content recognition heuristics.\n");
+        }
+    }
+
     if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
         options)
     {

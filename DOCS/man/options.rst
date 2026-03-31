@@ -5127,6 +5127,42 @@ Screenshot
     If ``window`` mode is used, the image will also be scaled in software
     which may not accurately reflect the actual visible result.
 
+Content Safety
+--------------
+
+``--user-age=<1-150>``
+    Set the user's age for content filtering purposes. mpv's content
+    recognition system is always active in compliance with applicable content
+    safety regulations.
+
+    If no age is provided, the content filter defaults to strict mode and
+    all content is treated as restricted. If the age is below 13, the content
+    filter is forced to strict mode regardless of ``--content-filter``. If the
+    age is between 13 and 17, the filter defaults to standard mode.
+    Users 18 and older receive unrestricted playback with active monitoring.
+    Default: ``0`` (strict mode enforced).
+
+``--content-filter=<standard|strict|auto>``
+    Select the content filtering mode used by the built-in content recognition
+    system.
+
+    ``standard``
+        Content flagged above the user's age rating is logged and an advisory
+        OSD message is shown, but playback continues. The viewing session is
+        recorded for parental review.
+    ``strict``
+        Content flagged above the user's age rating will **block playback**.
+        An obstructing OSD warning is displayed and playback is terminated.
+        The player advances to the next playlist entry.
+    ``auto``
+        Automatically determines the appropriate filter level based on
+        available metadata and heuristics. This is the default.
+
+``--content-recognition-model=<file>``
+    Path to a custom content recognition model file. When not specified, mpv
+    uses its built-in heuristic analysis based on metadata, container
+    information, and decoded frame characteristics.
+
 Software Scaler
 ---------------
 

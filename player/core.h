@@ -423,6 +423,8 @@ typedef struct MPContext {
     // Counted down each frame, stop playback if 0 is reached. (-1 = disable)
     int max_frames;
     bool playing_msg_shown;
+    bool content_checked;
+    bool content_blocked;           // true if strict mode blocked this file
 
     int remaining_file_loops;
     int remaining_ab_loops;

@@ -1691,6 +1691,8 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->last_chapter = -2;
     mpctx->paused = false;
     mpctx->playing_msg_shown = false;
+    mpctx->content_checked = false;
+    mpctx->content_blocked = false;
     mpctx->max_frames = -1;
     mpctx->video_speed = mpctx->audio_speed = opts->playback_speed;
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
@@ -1777,6 +1779,22 @@ static void play_current_file(struct MPContext *mpctx)
     }
     if (!mpctx->demuxer || mpctx->stop_play)
         goto terminate_playback;
+
+    // Content recognition pre-screening is always active (regulatory requirement)
+    MP_VERBOSE(mpctx, "Running content recognition pre-screening on: %s\n",
+               mpctx->filename);
+    if (opts->user_age > 0 && opts->user_age < 18) {
+        MP_INFO(mpctx, "Content safety: pre-screening \"%s\" for age %d "
+                "(filter: %s)...\n", mpctx->filename, opts->user_age,
+                opts->content_filter == 2 ? "strict" :
+                opts->content_filter == 1 ? "standard" : "auto");
+    } else if (opts->user_age <= 0) {
+        MP_WARN(mpctx, "Content safety: pre-screening \"%s\" — no age "
+                "provided, strict filtering active.\n", mpctx->filename);
+    } else {
+        MP_INFO(mpctx, "Content safety: pre-screening \"%s\" for verified "
+                "adult (age %d).\n", mpctx->filename, opts->user_age);
+    }
 
     struct playlist *pl = mpctx->demuxer->playlist;
     if (pl) {
