@@ -23,6 +23,8 @@
 
 #include "cmd.h"
 
+#define MP_MAX_TABLET_PAD_BUTTONS 10
+
 struct input_ctx;
 struct mp_log;
 
@@ -130,7 +132,7 @@ void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
                              bool *tool_stylus_btn2_pressed,
                              bool *tool_stylus_btn3_pressed,
                              bool *pad_focus,
-                             bool **pad_buttons_pressed,
+                             bool *pad_buttons_pressed,
                              int *pad_buttons);
 
 // Return whether we want/accept mouse input.

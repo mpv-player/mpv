@@ -3147,11 +3147,11 @@ static int mp_property_tablet_pos(void *ctx, struct m_property *prop,
         bool tool_stylus_btn2_pressed;
         bool tool_stylus_btn3_pressed;
         bool pad_focus;
-        bool *pad_buttons_pressed;
+        bool pad_buttons_pressed[MP_MAX_TABLET_PAD_BUTTONS];
         int pad_buttons;
         mp_input_get_tablet_pos(mpctx->input, &xs, &ys, &tool_in_proximity, &tool_down,
             &tool_stylus_btn1_pressed, &tool_stylus_btn2_pressed, &tool_stylus_btn3_pressed,
-            &pad_focus, &pad_buttons_pressed, &pad_buttons);
+            &pad_focus, pad_buttons_pressed, &pad_buttons);
 
         struct mpv_node node;
         node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
