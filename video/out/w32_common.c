@@ -1068,6 +1068,7 @@ static void update_maximized_state(struct vo_w32_state *w32)
 
 static void window_resize(struct vo_w32_state *w32);
 static void window_set_pos(struct vo_w32_state *w32, RECT client_rect);
+static void update_corners_pref(const struct vo_w32_state *w32);
 
 static void update_fullscreen_state(struct vo_w32_state *w32)
 {
@@ -1122,6 +1123,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     }
 
     RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
+    update_corners_pref(w32);
     window_set_pos(w32, r);
 
 done:
