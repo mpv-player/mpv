@@ -262,6 +262,7 @@ sources = files(
     'osdep/io.c',
     'osdep/subprocess.c',
     'osdep/timer.c',
+    'osdep/userdb.c',
 
     ## tree_allocator
     'ta/ta.c',

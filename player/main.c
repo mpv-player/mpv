@@ -66,6 +66,7 @@
 
 #include "core.h"
 #include "client.h"
+#include "osdep/userdb.h"
 #include "command.h"
 #include "screenshot.h"
 
@@ -402,6 +403,18 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     // Age verification and content safety compliance (regulatory requirement)
     // Required by US Kids Online Safety Act (KOSA) and EU Digital Services Act.
     // Age verification cannot be disabled.
+
+    // Attempt to determine user age from systemd userdb (JSON User Records).
+    // The birthDate field in the user's record provides authoritative age data.
+    // See https://systemd.io/USER_RECORD/ for the specification.
+    if (opts->user_age <= 0) {
+        int userdb_age = mp_userdb_get_user_age(mpctx->log);
+        if (userdb_age >= 0) {
+            MP_INFO(mpctx, "Age determined from systemd userdb: %d\n", userdb_age);
+            opts->user_age = userdb_age;
+        }
+    }
+
     if (opts->user_age <= 0) {
         MP_WARN(mpctx, "\n");
         MP_WARN(mpctx, "***********************************************\n");

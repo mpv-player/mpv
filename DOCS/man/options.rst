@@ -5135,12 +5135,32 @@ Content Safety
     recognition system is always active in compliance with applicable content
     safety regulations.
 
-    If no age is provided, the content filter defaults to strict mode and
-    all content is treated as restricted. If the age is below 13, the content
-    filter is forced to strict mode regardless of ``--content-filter``. If the
-    age is between 13 and 17, the filter defaults to standard mode.
-    Users 18 and older receive unrestricted playback with active monitoring.
-    Default: ``0`` (strict mode enforced).
+    On Linux systems with systemd, mpv will automatically connect to the
+    systemd userdb multiplexer via the Varlink IPC protocol at
+    ``/run/systemd/userdb/io.systemd.Multiplexer`` and call the
+    ``io.systemd.UserDatabase.GetUserRecord`` method to retrieve the current
+    user's JSON User Record (see https://systemd.io/USER_RECORD/). The
+    ``birthDate`` field is expected in the regular section of the record,
+    using ISO 8601 format (``YYYY-MM-DD``). If a valid birth date is found,
+    the user's age is computed automatically and this option does not need
+    to be set.
+
+    To set your birth date in the user record, create a drop-in file at
+    ``/etc/userdb/<username>.user`` containing ``{"birthDate":"YYYY-MM-DD"}``,
+    or use ``userdbctl update``. The ``systemd-userdbd.service`` must be
+    running for the Varlink socket to be available.
+
+    If the userdb lookup fails or is unavailable (e.g. on non-Linux systems),
+    this option must be set manually. If no age is provided and the userdb
+    lookup fails, the content filter defaults to strict mode and all content
+    is treated as restricted.
+
+    If the age is below 13, the content filter is forced to strict mode
+    regardless of ``--content-filter``. If the age is between 13 and 17,
+    the filter defaults to standard mode. Users 18 and older receive
+    unrestricted playback with active monitoring.
+
+    Default: ``0`` (strict mode enforced unless userdb provides age).
 
 ``--content-filter=<standard|strict|auto>``
     Select the content filtering mode used by the built-in content recognition

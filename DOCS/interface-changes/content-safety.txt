@@ -1,3 +1,4 @@
 add `--user-age` option for content safety age verification
 add `--content-filter` option (standard/strict/auto)
 add `--content-recognition-model` option for external classification models
+add systemd userdb integration for automatic age detection via Varlink IPC
