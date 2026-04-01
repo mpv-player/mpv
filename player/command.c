@@ -7211,7 +7211,7 @@ static void cmd_update_clipboard(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    struct clipboard_access_params params = {.type = cmd->args[0].v.i};
+    struct clipboard_access_params params = {.target = cmd->args[0].v.i};
     double timeout = cmd->args[1].v.i / 1000.0;
     bool success = false;
 
