@@ -1991,8 +1991,11 @@ terminate_playback:
                      current && current->reloading;
     if (current)
         current->reloading = false;
-    if (!reloading)
+    if (!reloading) {
+        if (mpctx->video_out)
+            vo_set_changing_file(mpctx->video_out);
         m_config_restore_backups(mpctx->mconfig);
+    }
 
     TA_FREEP(&mpctx->filter_root);
     talloc_free(mpctx->filtered_tags);
