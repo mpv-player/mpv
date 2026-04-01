@@ -315,57 +315,23 @@ local function handle_choice_completion(option, before_cur)
     return info.choices
 end
 
-local function command_flags_at_1st_argument_list(command)
-    local flags = {
-        ["playlist-next"] = {"weak", "force"},
-        ["playlist-play-index"] = {"current", "none"},
-        ["playlist-remove"] = {"current"},
-        ["rescan-external-files"] = {"reselect", "keep-selection"},
-        ["revert-seek"] = {"mark", "mark-permanent"},
-        ["screenshot"] = {"subtitles", "video", "window", "osd", "scaled", "each-frame"},
-        ["stop"] = {"keep-playlist"},
-    }
-    flags["playlist-prev"] = flags["playlist-next"]
-    flags["screenshot-raw"] = flags.screenshot
-
-    return flags[command]
-end
-
-local function command_flags_at_2nd_argument_list(command)
-    local flags = {
-        ["apply-profile"] = {"apply", "restore"},
-        ["frame-step"] = {"play", "seek", "mute"},
-        ["loadfile"] = {"replace", "append", "insert-next", "insert-at", "play"},
-        ["screenshot-to-file"] = {"subtitles", "video", "window", "osd", "scaled", "each-frame"},
-        ["screenshot-raw"] = {"bgr0", "bgra", "rgba", "rgba64"},
-        ["seek"] = {"relative", "absolute", "absolute-percent",
-                    "relative-percent", "keyframes", "exact"},
-        ["sub-add"] = {"select", "auto", "cached"},
-        ["sub-seek"] = {"primary", "secondary"},
-    }
-    flags.loadlist = flags.loadfile
-    flags["audio-add"] = flags["sub-add"]
-    flags["video-add"] = flags["sub-add"]
-    flags["sub-step"] = flags["sub-seek"]
-
-    return flags[command]
-end
-
-local function handle_flags(command, arg_index, flags)
+local function command_arg_choice_list(command, arg_index, flags)
     for _, cmd in pairs(get_commands()) do
         if cmd.name == command then
-            if cmd.args[arg_index] and cmd.args[arg_index].type == "Flags" then
-                break
-            else
-                return
+            if cmd.args[arg_index] then
+                if cmd.args[arg_index].type == "Flags" then
+                    local plus_pos = flags:find("%+[^%+]*$")
+
+                    if plus_pos then
+                        completion_pos = completion_pos + plus_pos
+                    end
+                end
+
+                return cmd.args[arg_index].choices
             end
+
+            return
         end
-    end
-
-    local plus_pos = flags:find("%+[^%+]*$")
-
-    if plus_pos then
-        completion_pos = completion_pos + plus_pos
     end
 end
 
@@ -510,8 +476,7 @@ local function complete(before_cur, response)
         elseif has_file_argument(first_useful_token.text) then
             completions = handle_file_completion(before_cur)
         else
-            completions = command_flags_at_1st_argument_list(first_useful_token.text)
-            handle_flags(first_useful_token.text, 1, tokens[#tokens].text)
+            completions = command_arg_choice_list(first_useful_token.text, 1, tokens[#tokens].text)
         end
     elseif first_useful_token.text == "cycle-values" then
         completions = handle_choice_completion(tokens[first_useful_token_index + 1].text,
@@ -532,8 +497,7 @@ local function complete(before_cur, response)
                 completions = list_option_value_list(first_useful_token.text)
             end
         else
-            completions = command_flags_at_2nd_argument_list(first_useful_token.text)
-            handle_flags(first_useful_token.text, 2, tokens[#tokens].text)
+            completions = command_arg_choice_list(first_useful_token.text, 2, tokens[#tokens].text)
         end
     elseif #tokens == first_useful_token_index + 3 then
         if first_useful_token.text == "change-list" then
