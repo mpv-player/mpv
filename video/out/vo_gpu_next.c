@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "common/common.h"
+#include "common/stats.h"
 #include "misc/io_utils.h"
 #include "options/m_config.h"
 #include "options/options.h"
@@ -106,6 +107,7 @@ struct cache {
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
+    struct stats_ctx *stats;
     struct ra_ctx *ra_ctx;
     struct gpu_ctx *context;
     struct ra_hwdec_ctx hwdec_ctx;
@@ -623,22 +625,26 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
     if (!hwdec_reconfig(p, fp->hwdec, &mpi->params))
         return false;
 
+    stats_time_start(p->stats, "hwdec-map");
     timer_pool_start(p->hwdec_timer);
     if (ra_hwdec_mapper_map(p->hwdec_mapper, mpi) < 0) {
         MP_ERR(p, "Mapping hardware decoded surface failed.\n");
         timer_pool_stop(p->hwdec_timer);
+        stats_time_end(p->stats, "hwdec-map");
         return false;
     }
 
     for (int n = 0; n < frame->num_planes; n++) {
         if (!(frame->planes[n].texture = hwdec_get_tex(p, n))) {
             timer_pool_stop(p->hwdec_timer);
+            stats_time_end(p->stats, "hwdec-map");
             return false;
         }
     }
 
     timer_pool_stop(p->hwdec_timer);
     p->hwdec_perf = timer_pool_measure(p->hwdec_timer);
+    stats_time_end(p->stats, "hwdec-map");
 
     return true;
 }
@@ -760,6 +766,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             use_uint = true;
 
         frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt, use_uint);
+        stats_time_start(p->stats, "swdec-upload");
         timer_pool_start(p->sw_upload_timer);
         for (int n = 0; n < frame->num_planes; n++) {
             struct pl_plane *plane = &frame->planes[n];
@@ -787,6 +794,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
                 MP_ERR(vo, "Failed uploading frame!\n");
                 timer_pool_stop(p->sw_upload_timer);
+                stats_time_end(p->stats, "swdec-upload");
                 talloc_free(data[n].priv);
                 talloc_free(mpi);
                 return false;
@@ -794,6 +802,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         }
         timer_pool_stop(p->sw_upload_timer);
         p->sw_upload_perf = timer_pool_measure(p->sw_upload_timer);
+        stats_time_end(p->stats, "swdec-upload");
 
     }
 
@@ -1320,10 +1329,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             target.color.transfer = PL_COLOR_TRC_SRGB;
 #endif
     }
+    stats_time_start(p->stats, "osd-update");
     update_overlays(vo, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
                     frame->current ? frame->current->params.stereo3d : 0);
+    stats_time_end(p->stats, "osd-update");
     apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
@@ -1394,9 +1405,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                     };
                     enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
                         ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
+                    stats_time_start(p->stats, "osd-blend-update");
                     update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
                                     rel, &fp->subs, image, mpi,
                                     mpi->params.stereo3d);
+                    stats_time_end(p->stats, "osd-blend-update");
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
@@ -1421,7 +1434,10 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     }
 
     // Render frame
-    if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
+    stats_time_start(p->stats, "render");
+    bool render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
+    stats_time_end(p->stats, "render");
+    if (!render_ok) {
         MP_ERR(vo, "Failed rendering frame!\n");
         goto done;
     }
@@ -2177,6 +2193,7 @@ static int preinit(struct vo *vo)
     p->video_eq = mp_csp_equalizer_create(p, vo->global);
     p->global = vo->global;
     p->log = vo->log;
+    p->stats = stats_ctx_create(p, vo->global, "vo/gpu-next");
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
