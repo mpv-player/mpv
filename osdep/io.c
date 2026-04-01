@@ -713,7 +713,7 @@ char *mp_getenv(const char *name)
     int i;
     size_t l = strlen(name);
     if (!utf8_environ || !*name || strchr(name, '=')) return NULL;
-    for (i=0; utf8_environ[i] && (strncmp(name, utf8_environ[i], l)
+    for (i=0; utf8_environ[i] && (strncasecmp(name, utf8_environ[i], l)
             || utf8_environ[i][l] != '='); i++) {}
     if (utf8_environ[i]) return utf8_environ[i] + l+1;
     return NULL;
