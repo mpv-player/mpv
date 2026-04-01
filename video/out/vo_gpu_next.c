@@ -1810,7 +1810,7 @@ static inline void copy_frame_info_to_mp(struct frame_info *pl,
 
     if (sw_upload_perf && sw_upload_perf->count > 0) {
         *perf++ = *sw_upload_perf;
-        snprintf(*desc, sizeof(*desc), "upload frame (swdec)");
+        snprintf(*desc, sizeof(*desc), "upload frame");
         desc++;
     }
 
