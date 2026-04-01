@@ -2342,11 +2342,6 @@ Property list
     ``time-pos/full``
         ``time-pos`` with milliseconds.
 
-``time-start``
-    Deprecated. Always returns 0. Before mpv 0.14, this used to return the start
-    time of the file (could affect e.g. transport streams). See
-    ``--rebase-start-time`` option.
-
 ``time-remaining``
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
