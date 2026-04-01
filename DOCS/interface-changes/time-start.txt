@@ -1,0 +1,1 @@
+remove the deprecated `time-start` property
