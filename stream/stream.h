@@ -163,6 +163,7 @@ typedef struct stream {
     bool is_network : 1; // I really don't know what this is for
     bool is_local_fs : 1; // from the filesystem
     bool is_directory : 1; // directory on the filesystem
+    bool is_regular : 1; // regular file
     bool access_references : 1; // open other streams
     bool allow_partial_read : 1; // allows partial read with stream_read_file()
     struct mp_log *log;

@@ -354,6 +354,7 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
             stream->is_directory = true;
         } else if (S_ISREG(st.st_mode)) {
             p->regular_file = true;
+            stream->is_regular = true;
 #ifndef _WIN32
             // O_NONBLOCK has weird semantics on file locks; remove it.
             int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
