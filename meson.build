@@ -1,6 +1,7 @@
 project('mpv',
         'c',
         license: ['GPL2+', 'LGPL2.1+'],
+        license_files: ['LICENSE.GPL', 'LICENSE.LGPL', 'Copyright'],
         version: files('./MPV_VERSION'),
         meson_version: '>=1.3.0',
         default_options: [
