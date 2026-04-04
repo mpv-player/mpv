@@ -1165,8 +1165,8 @@ static int get_edition_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static int property_list_editions(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
+static int mp_property_list_editions(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
@@ -4431,7 +4431,7 @@ static const struct m_property mp_properties_base[] = {
     {"chapter-list", mp_property_list_chapters},
     {"track-list", mp_property_list_tracks},
     {"current-tracks", mp_property_current_tracks},
-    {"edition-list", property_list_editions},
+    {"edition-list", mp_property_list_editions},
 
     {"playlist", mp_property_playlist},
     {"playlist-path", mp_property_playlist_path},
