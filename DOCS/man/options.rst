@@ -6402,8 +6402,8 @@ them.
         ...
 
     Each section of metadata, along with the non-metadata lines after it,
-    defines a single block. There are currently two types of blocks, HOOKs and
-    TEXTUREs.
+    defines a single block. There are currently three types of blocks, HOOKs,
+    TEXTUREs, and PARAMs.
 
     A ``TEXTURE`` block can set the following options:
 
@@ -6437,6 +6437,36 @@ them.
     Following the metadata is a string of bytes in hexadecimal notation that
     define the raw texture data, corresponding to the format specified by
     `FORMAT`, on a single line with no extra whitespace.
+
+    A ``PARAM`` block can set the following options:
+
+    PARAM <name> (required)
+        Starts a parameter block that defines a tunable shader parameter.
+        Parameters are global across the entire shader file, all hooks in the
+        file can reference them, regardless of declaration order.
+
+    TYPE <type> (required)
+        The parameter type. Supported types are ``float`` and ``int``.
+
+    MINIMUM <value>
+        Minimum allowed value for this parameter.
+
+    MAXIMUM <value>
+        Maximum allowed value for this parameter.
+
+    DESC <text>
+        Human-readable description of the parameter.
+
+    The initial/default value of the parameter is the first non-metadata line
+    after the parameter headers.
+
+    .. note::
+        ``vo=gpu`` supports only a subset of the parameter features available in
+        ``vo=gpu-next``. See libplacebo documentation for more detailed
+        information about PARAM features supported in ``vo=gpu-next``. Notably
+        ``uint``, ``ENUM``, ``DEFINE``, ``DYNAMIC``, and ``CONSTANT`` types are
+        not available, and parameters cannot be referenced in ``WHEN``
+        expression.
 
     A ``HOOK`` block can set the following options:
 
@@ -6631,7 +6661,7 @@ them.
     specific named shaders by prefixing the shader name with a ``/``, e.g.
     ``shader/param=value``. Without a prefix, parameters affect all shaders.
     The shader name is the base part of the shader filename, without the
-    extension. (``--vo=gpu-next`` only)
+    extension.
 
     Some parameters are filled automatically if the shader requests them.
     Currently following parameters are available:

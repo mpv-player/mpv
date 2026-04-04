@@ -23,6 +23,7 @@
 
 #define SHADER_MAX_HOOKS 16
 #define SHADER_MAX_BINDS 16
+#define SHADER_MAX_PARAMS 16
 #define MAX_SZEXP_SIZE 32
 
 enum szexp_op {
@@ -62,10 +63,30 @@ struct compute_info {
     bool directly_writes;     // If true, shader is assumed to imageStore(out_image)
 };
 
+enum gl_user_shader_param_type {
+    GL_USER_SHADER_PARAM_UNKNOWN,
+    GL_USER_SHADER_PARAM_FLOAT,
+    GL_USER_SHADER_PARAM_INT,
+};
+
+struct gl_user_shader_param {
+    struct bstr name;
+    struct bstr desc;
+    enum gl_user_shader_param_type type;
+    double value;
+    double initial;
+    double min;
+    double max;
+    bool has_min;
+    bool has_max;
+};
+
 struct gl_user_shader_hook {
     struct bstr pass_desc;
     struct bstr hook_tex[SHADER_MAX_HOOKS];
     struct bstr bind_tex[SHADER_MAX_BINDS];
+    struct gl_user_shader_param params[SHADER_MAX_PARAMS];
+    int num_params;
     struct bstr save_tex;
     struct bstr pass_body;
     struct gl_transform offset;
@@ -87,9 +108,16 @@ struct gl_user_shader_tex {
 // Parse the next shader block from `body`. The callbacks are invoked on every
 // valid shader block parsed.
 void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
+                       const char *path,
                        void *priv,
-                       bool (*dohook)(void *p, const struct gl_user_shader_hook *hook),
+                       bool (*dohook)(void *p, const char *path,
+                                      const struct gl_user_shader_hook *hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex));
+
+// Parse and validate a bstr value according to the param type and bounds.
+// Prints errors via the provided log. Returns true on success, false on error.
+bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *param,
+                              struct bstr val, double *out);
 
 // Evaluate a szexp, given a lookup function for named textures
 bool eval_szexpr(struct mp_log *log, void *priv,
