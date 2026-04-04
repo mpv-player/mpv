@@ -227,7 +227,7 @@ void gl_sc_paddf(struct gl_shader_cache *sc, const char *textf, ...)
 }
 
 static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
-                                       const char *name)
+                                       struct bstr name)
 {
     struct sc_uniform new = {
         .input = {
@@ -238,7 +238,7 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
 
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
-        if (strcmp(u->input.name, name) == 0) {
+        if (bstrcmp(bstr0(u->input.name), name) == 0) {
             const char *allocname = u->input.name;
             *u = new;
             u->input.name = allocname;
@@ -247,7 +247,7 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
     }
 
     // not found -> add it
-    new.input.name = talloc_strdup(NULL, name);
+    new.input.name = bstrdup0(NULL, name);
     MP_TARRAY_APPEND(sc, sc->uniforms, sc->num_uniforms, new);
     return &sc->uniforms[sc->num_uniforms - 1];
 }
@@ -325,7 +325,7 @@ void gl_sc_uniform_texture(struct gl_shader_cache *sc, char *name,
         glsl_type = sc->ra->glsl_es ? "highp usampler2D" : "usampler2D";
     }
 
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_TEX;
     u->glsl_type = glsl_type;
     u->input.binding = gl_sc_next_binding(sc, u->input.type);
@@ -337,7 +337,7 @@ void gl_sc_uniform_image2D_wo(struct gl_shader_cache *sc, const char *name,
 {
     gl_sc_enable_extension(sc, "GL_ARB_shader_image_load_store");
 
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_IMG_W;
     u->glsl_type = sc->ra->glsl_es ? "writeonly highp image2D" : "writeonly image2D";
     u->input.binding = gl_sc_next_binding(sc, u->input.type);
@@ -350,7 +350,7 @@ void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
     mp_assert(sc->ra->caps & RA_CAP_BUF_RW);
     gl_sc_enable_extension(sc, "GL_ARB_shader_storage_buffer_object");
 
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_BUF_RW;
     u->glsl_type = "";
     u->input.binding = gl_sc_next_binding(sc, u->input.type);
@@ -362,7 +362,7 @@ void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
     va_end(ap);
 }
 
-void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f)
+void gl_sc_uniform_f_bstr(struct gl_shader_cache *sc, struct bstr name, float f)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_FLOAT;
@@ -371,7 +371,7 @@ void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f)
     u->v.f[0] = f;
 }
 
-void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int i)
+void gl_sc_uniform_i_bstr(struct gl_shader_cache *sc, struct bstr name, int i)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->input.type = RA_VARTYPE_INT;
@@ -380,9 +380,19 @@ void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int i)
     u->v.i[0] = i;
 }
 
+void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f)
+{
+    gl_sc_uniform_f_bstr(sc, bstr0(name), f);
+}
+
+void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int i)
+{
+    gl_sc_uniform_i_bstr(sc, bstr0(name), i);
+}
+
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, float f[2])
 {
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_FLOAT;
     u->input.dim_v = 2;
     u->glsl_type = "vec2";
@@ -393,7 +403,7 @@ void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, float f[2])
 
 void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, float f[3])
 {
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_FLOAT;
     u->input.dim_v = 3;
     u->glsl_type = "vec3";
@@ -411,7 +421,7 @@ static void transpose2x2(float r[2 * 2])
 void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v)
 {
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_FLOAT;
     u->input.dim_v = 2;
     u->input.dim_m = 2;
@@ -433,7 +443,7 @@ static void transpose3x3(float r[3 * 3])
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, float *v)
 {
-    struct sc_uniform *u = find_uniform(sc, name);
+    struct sc_uniform *u = find_uniform(sc, bstr0(name));
     u->input.type = RA_VARTYPE_FLOAT;
     u->input.dim_v = 3;
     u->input.dim_m = 3;
