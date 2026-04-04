@@ -37,6 +37,8 @@ void gl_sc_ssbo(struct gl_shader_cache *sc, char *name, struct ra_buf *buf,
                 char *format, ...) MP_PRINTF_ATTRIBUTE(4, 5);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, float f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, int f);
+void gl_sc_uniform_f_bstr(struct gl_shader_cache *sc, struct bstr name, float f);
+void gl_sc_uniform_i_bstr(struct gl_shader_cache *sc, struct bstr name, int f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, float f[2]);
 void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, float f[3]);
 void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
