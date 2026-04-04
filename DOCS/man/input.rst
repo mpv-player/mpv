@@ -2236,6 +2236,11 @@ Property list
     Read-only table of all the environment variables. A specific variable can be
     accessed as a sub-property, e.g. ``${env/HOME}`` returns ``$HOME`` if set.
 
+    .. note:: On certain platforms (e.g Windows) environment variables are case
+              insensitive and so ``${env/PATH}`` and ``${env/Path}`` will
+              resolve to the same thing. However, the returned table will
+              contain the variable name as is without any case-normalization.
+
 ``pid``
     Process-id of mpv.
 
