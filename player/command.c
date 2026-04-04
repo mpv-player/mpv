@@ -3105,27 +3105,16 @@ static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
 
-    switch (action) {
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
-        return M_PROPERTY_OK;
+    int x, y, hover;
+    mp_input_get_mouse_pos(mpctx->input, &x, &y, &hover);
+    struct m_sub_property props[] = {
+        {"x",      SUB_PROP_INT64(x)},
+        {"y",      SUB_PROP_INT64(y)},
+        {"hover",  SUB_PROP_BOOL(!!hover)},
+        {0}
+    };
 
-    case M_PROPERTY_GET: {
-        struct mpv_node node;
-        int x, y, hover;
-        mp_input_get_mouse_pos(mpctx->input, &x, &y, &hover);
-
-        node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
-        node_map_add_int64(&node, "x", x);
-        node_map_add_int64(&node, "y", y);
-        node_map_add_flag(&node, "hover", hover);
-        *(struct mpv_node *)arg = node;
-
-        return M_PROPERTY_OK;
-    }
-    }
-
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return m_property_read_sub(props, action, arg);
 }
 
 static int get_touch_pos(int item, int action, void *arg, void *ctx)
