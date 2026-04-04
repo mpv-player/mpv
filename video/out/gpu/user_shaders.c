@@ -16,11 +16,149 @@
  */
 
 #include <assert.h>
+#include <float.h>
+#include <limits.h>
 #include <math.h>
+#include <string.h>
 
 #include "common/msg.h"
 #include "misc/ctype.h"
 #include "user_shaders.h"
+
+bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *param,
+                              struct bstr val, double *out)
+{
+    double v, range[2];
+    struct bstr rest;
+
+    switch (param->type) {
+    case GL_USER_SHADER_PARAM_UNKNOWN:
+        mp_err(log, "Missing type for param '%.*s'\n", BSTR_P(param->name));
+        return false;
+    case GL_USER_SHADER_PARAM_INT:
+        v = bstrtoll(val, &rest, 10);
+        range[0] = INT_MIN;
+        range[1] = INT_MAX;
+        break;
+    case GL_USER_SHADER_PARAM_FLOAT:
+        v = bstrtod(val, &rest);
+        range[0] = -FLT_MAX;
+        range[1] = FLT_MAX;
+        break;
+    default:
+        MP_ASSERT_UNREACHABLE();
+    }
+
+    if (val.len == 0 || rest.len > 0) {
+        mp_err(log, "Invalid value for option '%.*s': '%.*s'\n",
+               BSTR_P(param->name), BSTR_P(val));
+        return false;
+    }
+
+    if (param->has_min)
+        range[0] = MPMAX(param->min, range[0]);
+    if (param->has_max)
+        range[1] = MPMIN(param->max, range[1]);
+    if (v < range[0] || v > range[1] || !isfinite(v)) {
+        mp_err(log, "Value of %f for option '%.*s' out of range [%f, %f]\n",
+               v, BSTR_P(param->name), range[0], range[1]);
+        return false;
+    }
+
+    *out = v;
+    return true;
+}
+
+static bool parse_bound(struct mp_log *log, struct bstr line,
+                        const char *name, double *val, bool *has)
+{
+    struct bstr rest, strip = bstr_strip(line);
+    *val = bstrtod(strip, &rest);
+    *has = rest.len == 0 && strip.len > 0;
+    if (!*has)
+        mp_err(log, "Error while parsing PARAM %s!\n", name);
+    return *has;
+}
+
+static bool parse_param(struct mp_log *log, struct bstr *body,
+                        struct gl_user_shader_param *params, int *num_params)
+{
+    struct bstr rest;
+    struct bstr line = bstr_strip(bstr_getline(*body, &rest));
+
+    if (!bstr_eatstart0(&line, "//!PARAM")) {
+        mp_err(log, "Expected PARAM header!\n");
+        return false;
+    }
+
+    if (*num_params == SHADER_MAX_PARAMS) {
+        mp_err(log, "Shader defines too many parameters!\n");
+        return false;
+    }
+
+    struct gl_user_shader_param *param = &params[(*num_params)++];
+    *param = (struct gl_user_shader_param){ .name = bstr_strip(line) };
+
+    while (true) {
+        *body = rest;
+        line = bstr_strip(bstr_getline(*body, &rest));
+
+        if (line.len == 0) {
+            if (rest.len == 0) {
+                mp_err(log, "Missing initial parameter value!\n");
+                return false;
+            }
+            continue;
+        }
+
+        if (!bstr_eatstart0(&line, "//!")) {
+            if (!parse_shader_param_value(log, param, line, &param->initial))
+                return false;
+            param->value = param->initial;
+
+            *body = rest;
+            struct bstr discard;
+            if (bstr_split_tok(*body, "//!", &discard, body)) {
+                body->start -= 3;
+                body->len += 3;
+            }
+            return true;
+        }
+
+        if (bstr_eatstart0(&line, "DESC")) {
+            param->desc = bstr_strip(line);
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "TYPE")) {
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "float")) {
+                param->type = GL_USER_SHADER_PARAM_FLOAT;
+            } else if (bstr_equals0(line, "int")) {
+                param->type = GL_USER_SHADER_PARAM_INT;
+            } else {
+                mp_err(log, "Unrecognized PARAM TYPE: '%.*s'!\n", BSTR_P(line));
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "MINIMUM")) {
+            if (!parse_bound(log, line, "MINIMUM", &param->min, &param->has_min))
+                return false;
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "MAXIMUM")) {
+            if (!parse_bound(log, line, "MAXIMUM", &param->max, &param->has_max))
+                return false;
+            continue;
+        }
+
+        mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
+        return false;
+    }
+}
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 {
@@ -430,8 +568,10 @@ static bool parse_tex(struct mp_log *log, struct ra *ra, struct bstr *body,
 }
 
 void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
+                       const char *path,
                        void *priv,
-                       bool (*dohook)(void *p, const struct gl_user_shader_hook *hook),
+                       bool (*dohook)(void *p, const char *path,
+                                      const struct gl_user_shader_hook *hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex))
 {
     if (!dohook || !dotex || !shader.len)
@@ -445,19 +585,42 @@ void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
     }
     shader = bstr_cut(shader, pos);
 
-    // Loop over the file
-    while (shader.len > 0)
-    {
-        // Peek at the first header to dispatch the right type
+    // params need to be collected in a first pass before dohook()
+    struct gl_user_shader_param global_params[SHADER_MAX_PARAMS] = {0};
+    int num_global_params = 0;
+    struct gl_user_shader_hook *hooks = NULL;
+    int num_hooks = 0;
+
+    while (shader.len > 0) {
         if (bstr_startswith0(shader, "//!TEXTURE")) {
             struct gl_user_shader_tex t;
             if (!parse_tex(log, ra, &shader, &t) || !dotex(priv, t))
-                return;
+                goto out;
+            continue;
+        }
+
+        if (bstr_startswith0(shader, "//!PARAM")) {
+            if (!parse_param(log, &shader, global_params, &num_global_params))
+                goto out;
             continue;
         }
 
         struct gl_user_shader_hook h;
-        if (!parse_hook(log, &shader, &h) || !dohook(priv, &h))
-            return;
+        if (!parse_hook(log, &shader, &h))
+            goto out;
+
+        MP_TARRAY_APPEND(NULL, hooks, num_hooks, h);
     }
+
+    for (int i = 0; i < num_hooks; i++) {
+        struct gl_user_shader_hook *h = &hooks[i];
+
+        h->num_params = num_global_params;
+        memcpy(h->params, global_params, num_global_params * sizeof(h->params[0]));
+
+        if (!dohook(priv, path, h))
+            goto out;
+    }
+out:
+    talloc_free(hooks);
 }

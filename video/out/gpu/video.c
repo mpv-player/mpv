@@ -2114,11 +2114,98 @@ static bool user_hook_cond(struct gl_video *p, struct image img, void *priv)
     return res;
 }
 
+static void update_user_shader_opts(struct gl_video *p, const char *path,
+                                    struct gl_user_shader_hook *shader)
+{
+    for (int i = 0; i < shader->num_params; i++)
+        shader->params[i].value = shader->params[i].initial;
+
+    if (!p->opts.user_shader_opts)
+        return;
+
+    const char *basename = mp_basename(path);
+    struct bstr shadername;
+    if (!mp_splitext(basename, &shadername))
+        shadername = bstr0(basename);
+
+    for (int n = 0; p->opts.user_shader_opts[n * 2]; n++) {
+        struct bstr key = bstr0(p->opts.user_shader_opts[n * 2 + 0]);
+        struct bstr val = bstr0(p->opts.user_shader_opts[n * 2 + 1]);
+
+        int pos = bstrchr(key, '/');
+        if (pos >= 0) {
+            if (!bstr_equals(bstr_splice(key, 0, pos), shadername))
+                continue;
+            key = bstr_cut(key, pos + 1);
+        }
+
+        for (int i = 0; i < shader->num_params; i++) {
+            struct gl_user_shader_param *param = &shader->params[i];
+            if (!bstr_equals(key, param->name))
+                continue;
+            parse_shader_param_value(p->log, param, val, &param->value);
+        }
+    }
+}
+
+static bool get_param_dynamic(struct gl_video *p, struct bstr name, double *out)
+{
+    const struct mp_image_params *params = &p->image.mpi->params;
+    float chroma_offset_x, chroma_offset_y;
+    pl_chroma_location_offset(params->chroma_location,
+                              &chroma_offset_x, &chroma_offset_y);
+
+    const struct {
+        const char *name;
+        double value;
+    } opts[] = {
+        {             "PTS", p->image.mpi->pts              },
+        { "chroma_offset_x", chroma_offset_x                },
+        { "chroma_offset_y", chroma_offset_y                },
+        {        "min_luma", params->color.hdr.min_luma     },
+        {        "max_luma", params->color.hdr.max_luma     },
+        {         "max_cll", params->color.hdr.max_cll      },
+        {        "max_fall", params->color.hdr.max_fall     },
+        {     "scene_max_r", params->color.hdr.scene_max[0] },
+        {     "scene_max_g", params->color.hdr.scene_max[1] },
+        {     "scene_max_b", params->color.hdr.scene_max[2] },
+        {       "scene_avg", params->color.hdr.scene_avg    },
+        {        "max_pq_y", params->color.hdr.max_pq_y     },
+        {        "avg_pq_y", params->color.hdr.avg_pq_y     },
+    };
+
+    for (int n = 0; n < MP_ARRAY_SIZE(opts); n++) {
+        if (bstrcmp(name, bstr0(opts[n].name)) != 0)
+            continue;
+
+        *out = opts[n].value;
+        return true;
+    }
+
+    return false;
+}
+
 static void user_hook(struct gl_video *p, struct image img,
                       struct gl_transform *trans, void *priv)
 {
     struct gl_user_shader_hook *shader = priv;
     mp_assert(shader);
+
+    for (int i = 0; i < shader->num_params; i++) {
+        const struct gl_user_shader_param *param = &shader->params[i];
+        double value = param->value;
+        get_param_dynamic(p, param->name, &value);
+
+        switch (param->type) {
+        case GL_USER_SHADER_PARAM_FLOAT:
+            gl_sc_uniform_f_bstr(p->sc, param->name, value);
+            break;
+        case GL_USER_SHADER_PARAM_INT:
+            gl_sc_uniform_i_bstr(p->sc, param->name, lrint(value));
+            break;
+        }
+    }
+
     load_shader(p, shader->pass_body);
 
     pass_describe(p, "user shader: %.*s (%s)", BSTR_P(shader->pass_desc),
@@ -2142,10 +2229,12 @@ static void user_hook(struct gl_video *p, struct image img,
     gl_transform_trans(shader->offset, trans);
 }
 
-static bool add_user_hook(void *priv, const struct gl_user_shader_hook *hook)
+static bool add_user_hook(void *priv, const char *path,
+                          const struct gl_user_shader_hook *hook)
 {
     struct gl_video *p = priv;
     struct gl_user_shader_hook *copy = talloc_dup(p, (struct gl_user_shader_hook *)hook);
+    update_user_shader_opts(p, path, copy);
     struct tex_hook texhook = {
         .save_tex = bstrdup0(copy, copy->save_tex),
         .components = copy->components,
@@ -2185,7 +2274,7 @@ static void load_user_shaders(struct gl_video *p, char **shaders)
 
     for (int n = 0; shaders[n] != NULL; n++) {
         struct bstr file = load_cached_file(p, shaders[n]);
-        parse_user_shader(p->log, p->ra, file, p, add_user_hook, add_user_tex);
+        parse_user_shader(p->log, p->ra, file, shaders[n], p, add_user_hook, add_user_tex);
     }
 }
 
