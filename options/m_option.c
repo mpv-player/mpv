@@ -2357,7 +2357,7 @@ exit:
                BSTR_P(name), BSTR_P(param));
     }
     mp_info(log,
-         "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]] | [X[%%]:Y[%%]]\n");
+         "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]][/WS] | [X[%%]:Y[%%]]\n");
     return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
