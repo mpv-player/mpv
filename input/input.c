@@ -996,7 +996,7 @@ static int find_touch_point_index(struct input_ctx *ictx, int id)
     return -1;
 }
 
-static void notify_touch_update(struct input_ctx *ictx)
+static void notify_event_update(struct input_ctx *ictx)
 {
     // queue dummy cmd so that touch-pos can notify observers
     mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
@@ -1016,7 +1016,7 @@ static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, i
     // Emulate mouse input from the primary touch point (the first one added)
     if (ictx->opts->touch_emulate_mouse && idx == 0)
         set_mouse_pos(ictx, x, y, false);
-    notify_touch_update(ictx);
+    notify_event_update(ictx);
 }
 
 void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
@@ -1037,7 +1037,7 @@ void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
             set_mouse_pos(ictx, x, y, false);
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
         }
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
@@ -1064,7 +1064,7 @@ void mp_input_remove_touch_point(struct input_ctx *ictx, int id)
         // Emulate MBTN_LEFT up if there are no touch points left
         if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 0)
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
