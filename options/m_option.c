@@ -2220,13 +2220,15 @@ static bool parse_geometry_str(struct m_geometry *gm, bstr s)
 
     if (bstrchr(s, ':') < 0) {
         gm->wh_valid = true;
-        if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-")) {
+        if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-") &&
+            !bstr_startswith0(s, "/"))
+        {
             if (!bstr_startswith0(s, "x"))
                 READ_NUM(w, w_per);
             if (bstr_eatstart0(&s, "x"))
                 READ_NUM(h, h_per);
         }
-        if (s.len > 0) {
+        if (s.len > 0 && !bstr_startswith0(s, "/")) {
             gm->xy_valid = true;
             READ_SIGN(x_sign);
             READ_NUM(x, x_per);
