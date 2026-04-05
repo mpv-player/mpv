@@ -4054,8 +4054,8 @@ static int mp_property_option_info(void *ctx, struct m_property *prop,
              .unavailable = !(has_minmax && opt->min != DBL_MIN)},
             {"max",                     SUB_PROP_DOUBLE(opt->max),
              .unavailable = !(has_minmax && opt->max != DBL_MAX)},
-            {"choices", .type = {.type = CONF_TYPE_STRING_LIST},
-             .value = {.string_list = choices}, .unavailable = !choices},
+            {"choices",                 SUB_PROP_STRING_LIST(choices),
+             .unavailable = !choices},
             {0}
         };
 
