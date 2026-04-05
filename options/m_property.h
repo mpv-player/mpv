@@ -226,6 +226,8 @@ struct m_sub_property {
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 #define SUB_PROP_KEYVALUE_LIST(l) \
     .type = {.type = &m_option_type_keyvalue_list}, .value = {.keyvalue_list = (l)}
+#define SUB_PROP_STRING_LIST(l) \
+    .type = {.type = CONF_TYPE_STRING_LIST}, .value = {.string_list = (l)}
 // Expose a C array as a read-only array sub-property. The caller retains
 // ownership of the data pointer. It will be copied if needed. Used for
 // to expose arrays as sub-properties.
