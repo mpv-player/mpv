@@ -25,11 +25,26 @@
 #include "misc/ctype.h"
 #include "user_shaders.h"
 
+static int resolve_enum_name(struct gl_user_shader_param *param, struct bstr val)
+{
+    struct bstr enum_rest = param->enum_body;
+    int idx = 0;
+    while (enum_rest.len > 0) {
+        struct bstr enum_line = bstr_strip(bstr_getline(enum_rest, &enum_rest));
+        if (enum_line.len == 0)
+            continue;
+        if (bstr_equals(enum_line, val))
+            return idx;
+        idx++;
+    }
+    return -1;
+}
+
 bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *param,
                               struct bstr val, double *out)
 {
     double v, range[2];
-    struct bstr rest;
+    struct bstr rest = {0};
 
     switch (param->type) {
     case GL_USER_SHADER_PARAM_UNKNOWN:
@@ -37,7 +52,8 @@ bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *p
         return false;
     case GL_USER_SHADER_PARAM_INT:
     case GL_USER_SHADER_PARAM_DEFINE:
-        v = bstrtoll(val, &rest, 10);
+        v = resolve_enum_name(param, val);
+        v = v >= 0 ? v : bstrtoll(val, &rest, 10);
         range[0] = INT_MIN;
         range[1] = INT_MAX;
         break;
@@ -99,6 +115,7 @@ static bool parse_param(struct mp_log *log, struct bstr *body,
 
     struct gl_user_shader_param *param = &params[(*num_params)++];
     *param = (struct gl_user_shader_param){ .name = bstr_strip(line) };
+    bool is_enum = false;
 
     while (true) {
         *body = rest;
@@ -113,6 +130,47 @@ static bool parse_param(struct mp_log *log, struct bstr *body,
         }
 
         if (!bstr_eatstart0(&line, "//!")) {
+            if (is_enum) {
+                int count = 0;
+                struct bstr enum_rest = {
+                    .start = line.start,
+                    .len = rest.start + rest.len - line.start,
+                };
+                param->enum_body = enum_rest;
+
+                while (enum_rest.len > 0) {
+                    struct bstr next_line;
+                    struct bstr enum_line = bstr_strip(bstr_getline(enum_rest, &next_line));
+                    if (bstr_startswith0(enum_line, "//!"))
+                        break;
+                    if (next_line.len == 0)
+                        continue;
+                    enum_rest = next_line;
+                    count++;
+                }
+
+                if (param->type != GL_USER_SHADER_PARAM_INT &&
+                    param->type != GL_USER_SHADER_PARAM_DEFINE)
+                {
+                    mp_err(log, "ENUM parameter '%.*s' must be type int or DEFINE!\n",
+                           BSTR_P(param->name));
+                    return false;
+                }
+                if (count == 0) {
+                    mp_err(log, "ENUM parameter '%.*s' has no values!\n",
+                           BSTR_P(param->name));
+                    return false;
+                }
+
+                param->enum_body.len -= enum_rest.len;
+                param->has_min = true;
+                param->has_max = true;
+                param->max = count - 1;
+
+                *body = enum_rest;
+                return true;
+            }
+
             if (!parse_shader_param_value(log, param, line, &param->initial))
                 return false;
             param->value = param->initial;
@@ -132,6 +190,8 @@ static bool parse_param(struct mp_log *log, struct bstr *body,
         }
 
         if (bstr_eatstart0(&line, "TYPE")) {
+            line = bstr_strip(line);
+            is_enum = bstr_eatstart0(&line, "ENUM");
             line = bstr_strip(line);
             if (bstr_equals0(line, "float")) {
                 param->type = GL_USER_SHADER_PARAM_FLOAT;

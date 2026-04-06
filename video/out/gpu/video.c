@@ -2201,6 +2201,17 @@ static void user_hook(struct gl_video *p, struct image img,
 
     for (int i = 0; i < shader->num_params; i++) {
         const struct gl_user_shader_param *param = &shader->params[i];
+
+        struct bstr enum_rest = param->enum_body;
+        int idx = 0;
+        while (enum_rest.len > 0) {
+            struct bstr enum_line = bstr_strip(bstr_getline(enum_rest, &enum_rest));
+            if (enum_line.len == 0)
+                continue;
+            GLSLHF("#define %.*s %d\n", BSTR_P(enum_line), idx);
+            idx++;
+        }
+
         double value = param->value;
         get_param_dynamic(p, param->name, &value);
 

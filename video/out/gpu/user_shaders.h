@@ -80,6 +80,7 @@ struct gl_user_shader_param {
     double max;
     bool has_min;
     bool has_max;
+    struct bstr enum_body;
 };
 
 struct gl_user_shader_hook {
