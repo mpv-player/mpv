@@ -67,6 +67,7 @@ enum gl_user_shader_param_type {
     GL_USER_SHADER_PARAM_UNKNOWN,
     GL_USER_SHADER_PARAM_FLOAT,
     GL_USER_SHADER_PARAM_INT,
+    GL_USER_SHADER_PARAM_DEFINE,
 };
 
 struct gl_user_shader_param {

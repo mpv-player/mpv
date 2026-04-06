@@ -36,6 +36,7 @@ bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *p
         mp_err(log, "Missing type for param '%.*s'\n", BSTR_P(param->name));
         return false;
     case GL_USER_SHADER_PARAM_INT:
+    case GL_USER_SHADER_PARAM_DEFINE:
         v = bstrtoll(val, &rest, 10);
         range[0] = INT_MIN;
         range[1] = INT_MAX;
@@ -136,6 +137,8 @@ static bool parse_param(struct mp_log *log, struct bstr *body,
                 param->type = GL_USER_SHADER_PARAM_FLOAT;
             } else if (bstr_equals0(line, "int")) {
                 param->type = GL_USER_SHADER_PARAM_INT;
+            } else if (bstr_equals0(line, "DEFINE")) {
+                param->type = GL_USER_SHADER_PARAM_DEFINE;
             } else {
                 mp_err(log, "Unrecognized PARAM TYPE: '%.*s'!\n", BSTR_P(line));
                 return false;
