@@ -6434,10 +6434,18 @@ them.
         Parameters are global across the entire shader file, all hooks in the
         file can reference them, regardless of declaration order.
 
-    TYPE <DEFINE | <type>> (required)
+    TYPE [ENUM] <DEFINE | <type>> (required)
         The parameter type. Supported types are ``float`` and ``int``.
+
         The special type ``DEFINE`` emits a preprocessor define which can be
         used inside ``#if`` directives.
+
+        If the ``ENUM`` qualifier is used then the type must be either
+        ``DEFINE`` or ``int``. Instead of accepting a default value, ``ENUM``
+        qualified parameter body lists all the possible enumeration values
+        separated by newlines. These values are assigned integer values starting
+        from 0 incremented by 1. Each enumeration will also be emitted as a
+        preprocessor define. ``MINIMUM`` and ``MAXIMUM`` are ignored.
 
     MINIMUM <value>
         Minimum allowed value for this parameter.
@@ -6455,9 +6463,8 @@ them.
         ``vo=gpu`` supports only a subset of the parameter features available in
         ``vo=gpu-next``. See libplacebo documentation for more detailed
         information about PARAM features supported in ``vo=gpu-next``. Notably
-        ``uint``, ``ENUM``, ``DYNAMIC``, and ``CONSTANT`` types are
-        not available, and parameters cannot be referenced in ``WHEN``
-        expression.
+        ``uint``, ``DYNAMIC``, and ``CONSTANT`` types are not available, and
+        parameters cannot be referenced in ``WHEN`` expression.
 
     A ``HOOK`` block can set the following options:
 
