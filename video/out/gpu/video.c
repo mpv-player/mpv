@@ -3780,15 +3780,13 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
 
         vimg->hwdec_mapped = true;
         if (ok) {
-            struct mp_image layout = {0};
-            mp_image_set_params(&layout, &p->image_params);
             struct ra_tex **tex = p->hwdec_mapper->tex;
             for (int n = 0; n < p->plane_count; n++) {
                 vimg->planes[n] = (struct texplane){
-                    .w = mp_image_plane_w(&layout, n),
-                    .h = mp_image_plane_h(&layout, n),
+                    .w = tex[n]->params.w,
+                    .h = tex[n]->params.h,
                     .tex = tex[n],
-                    .flipped = layout.params.vflip,
+                    .flipped = p->image_params.vflip,
                 };
             }
         } else {
