@@ -2203,6 +2203,9 @@ static void user_hook(struct gl_video *p, struct image img,
         case GL_USER_SHADER_PARAM_INT:
             gl_sc_uniform_i_bstr(p->sc, param->name, lrint(value));
             break;
+        case GL_USER_SHADER_PARAM_DEFINE:
+            GLSLHF("#define %.*s %d\n", BSTR_P(param->name), (int)lrint(value));
+            break;
         }
     }
 
