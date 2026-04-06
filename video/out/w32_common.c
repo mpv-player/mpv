@@ -1916,9 +1916,14 @@ static void window_resize(struct vo_w32_state *w32)
         .wh_valid = true,
     };
 
+    // Only apply size_constraint during initial setup or when forcing position.
+    // This prevents resetting video zoom when restoring from maximized state.
+    struct m_geometry *constraint = (!w32->window_bounds_initialized || w32->force_pos) 
+                                     ? &size_constraint : NULL;
+
     vo_calc_window_geometry(vo, w32->opts, &screen, &mon, w32->dpi_scale,
                             !w32->window_bounds_initialized || w32->force_pos,
-                            &geo, &size_constraint);
+                            &geo, constraint);
     // Limit the minimum window size to prevent the window floating to different
     // position when our requested size is smaller than the system minimum.
     // C{X,Y}MIN values doesn't seem to be absolute minimum of window, but it's
