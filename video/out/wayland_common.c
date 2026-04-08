@@ -2185,8 +2185,15 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     log_color_space(wl->log, wd);
     if (!wd->csp.primaries) {
         wd->csp.primaries = mp_get_best_prim_container(&wd->raw_prim);
-        MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
-                   m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
+        if (wl->primaries_map[wd->csp.primaries]) {
+            MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
+                       m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
+        } else {
+            MP_VERBOSE(wl, "Best primary container %s not supported by compositor, "
+                       "falling back to sRGB.\n",
+                       m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
+            wd->csp.primaries = PL_COLOR_PRIM_BT_709;
+        }
     }
     // We don't support extended ranges output where luminance exceeds
     // maximum nominal luminance range (1.0), so switch to PQ.
