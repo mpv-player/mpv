@@ -1515,7 +1515,7 @@ static void find_backward_restart_pos(struct demux_stream *ds)
             kf_pos++;
         }
     }
-    mp_assert(restart_pkt);
+    mp_require(restart_pkt);
     ds->back_restart_dts = restart_pkt->dts;
     ds->back_restart_pos = restart_pkt->pos;
 
