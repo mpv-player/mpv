@@ -41,6 +41,7 @@
 #include "mpv_talloc.h"
 #include "common/common.h"
 #include "common/msg.h"
+#include "misc/linked_list.h"
 #include "options/m_config.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -52,6 +53,8 @@
 
 #define BLURAY_SECTOR_SIZE     6144
 #define UDF_BLOCK_SIZE         2048
+#define BD_CACHE_CAPACITY      2048    // 2048 blocks = 4MB memory
+#define BD_READAHEAD_BLOCKS    256     // read-ahead 256 blocks (512KB) per HTTP request
 
 #define BLURAY_DEFAULT_ANGLE      0
 #define BLURAY_DEFAULT_CHAPTER    0
@@ -88,6 +91,21 @@ const struct m_sub_options stream_bluray_conf = {
     },
 };
 
+// Block cache for HTTP Blu-ray ISO streaming (reduces HTTP Range requests)
+struct bd_cache_entry {
+    int lba;
+    uint8_t data[UDF_BLOCK_SIZE];
+    struct { struct bd_cache_entry *prev, *next; } lru;
+};
+
+struct bd_block_cache {
+    struct bd_cache_entry *entries;  // pre-allocated pool (talloc_array)
+    uint8_t *ra_buf;                 // heap-allocated read-ahead buffer (512KB)
+    int capacity;
+    int count;                       // number of used entries
+    struct { struct bd_cache_entry *head, *tail; } lru_list;
+};
+
 struct bluray_priv_s {
     BLURAY *bd;
     BLURAY_TITLE_INFO *title_info;
@@ -103,7 +121,8 @@ struct bluray_priv_s {
     struct mp_bluray_opts *opts;
     struct m_config_cache *opts_cache;
 
-    struct stream *iso_stream;  // non-NULL when streaming from HTTP/network
+    struct stream *iso_stream;       // non-NULL when streaming from HTTP/network
+    struct bd_block_cache *block_cache; // non-NULL when iso_stream is set
 };
 
 inline static int play_playlist(struct bluray_priv_s *priv, int playlist)
@@ -415,21 +434,98 @@ static void select_initial_title(stream_t *s, int title_guess) {
     }
 }
 
+// ---- Block cache helpers (LRU, linear scan lookup) ----
+
+static struct bd_cache_entry *cache_lookup(struct bd_block_cache *c, int lba)
+{
+    for (int i = 0; i < c->count; i++) {
+        if (c->entries[i].lba == lba)
+            return &c->entries[i];
+    }
+    return NULL;
+}
+
+static void cache_touch(struct bd_block_cache *c, struct bd_cache_entry *e)
+{
+    if (c->lru_list.head == e)
+        return;
+    LL_REMOVE(lru, &c->lru_list, e);
+    LL_PREPEND(lru, &c->lru_list, e);
+}
+
+static struct bd_cache_entry *cache_insert(struct bd_block_cache *c, int lba)
+{
+    struct bd_cache_entry *e;
+    if (c->count < c->capacity) {
+        e = &c->entries[c->count++];
+    } else {
+        e = c->lru_list.tail;
+        LL_REMOVE(lru, &c->lru_list, e);
+    }
+    e->lba = lba;
+    LL_PREPEND(lru, &c->lru_list, e);
+    return e;
+}
+
+// Read-ahead: fetch BD_READAHEAD_BLOCKS from HTTP and cache them all.
+static void cache_readahead(struct bd_block_cache *cache, struct stream *s,
+                            int start_lba)
+{
+    int64_t offset = (int64_t)start_lba * UDF_BLOCK_SIZE;
+    int ra_size = BD_READAHEAD_BLOCKS * UDF_BLOCK_SIZE;
+
+    if (!stream_seek(s, offset))
+        return;
+
+    int got = stream_read(s, cache->ra_buf, ra_size);
+    int ra_blocks = got > 0 ? got / UDF_BLOCK_SIZE : 0;
+
+    for (int i = 0; i < ra_blocks; i++) {
+        int blk_lba = start_lba + i;
+        if (cache_lookup(cache, blk_lba))
+            continue;
+        struct bd_cache_entry *e = cache_insert(cache, blk_lba);
+        memcpy(e->data, cache->ra_buf + i * UDF_BLOCK_SIZE, UDF_BLOCK_SIZE);
+    }
+}
+
 // read_blocks callback for bd_open_stream(): bridge HTTP stream to libbluray
 static int bluray_stream_read_blocks(void *handle, void *buf, int lba, int num_blocks)
 {
     struct bluray_priv_s *priv = handle;
-    int64_t offset = (int64_t)lba * UDF_BLOCK_SIZE;
-    int total = num_blocks * UDF_BLOCK_SIZE;
+    struct bd_block_cache *cache = priv->block_cache;
+    uint8_t *dst = buf;
+    int blocks_read = 0;
 
-    if (!stream_seek(priv->iso_stream, offset))
-        return -1;
+    for (int i = 0; i < num_blocks; i++) {
+        int cur_lba = lba + i;
+        struct bd_cache_entry *e = cache ? cache_lookup(cache, cur_lba) : NULL;
 
-    int got = stream_read(priv->iso_stream, buf, total);
-    if (got <= 0)
-        return -1;
-
-    return got / UDF_BLOCK_SIZE;
+        if (e) {
+            memcpy(dst, e->data, UDF_BLOCK_SIZE);
+            cache_touch(cache, e);
+        } else if (cache) {
+            cache_readahead(cache, priv->iso_stream, cur_lba);
+            e = cache_lookup(cache, cur_lba);
+            if (e) {
+                memcpy(dst, e->data, UDF_BLOCK_SIZE);
+                cache_touch(cache, e);
+            } else {
+                break;  // read-ahead failed to get this block
+            }
+        } else {
+            // No cache: direct read
+            int64_t offset = (int64_t)cur_lba * UDF_BLOCK_SIZE;
+            if (!stream_seek(priv->iso_stream, offset))
+                break;
+            int got = stream_read(priv->iso_stream, dst, UDF_BLOCK_SIZE);
+            if (got < UDF_BLOCK_SIZE)
+                break;
+        }
+        dst += UDF_BLOCK_SIZE;
+        blocks_read++;
+    }
+    return blocks_read > 0 ? blocks_read : -1;
 }
 
 static int bluray_stream_open_internal(stream_t *s)
@@ -486,6 +582,14 @@ static int bluray_stream_open_internal(stream_t *s)
             goto err;
         }
         b->bd = bd;
+
+        // Create block cache before bd_open_stream (it triggers UDF scan)
+        b->block_cache = talloc_zero(b, struct bd_block_cache);
+        b->block_cache->capacity = BD_CACHE_CAPACITY;
+        b->block_cache->entries = talloc_zero_array(b->block_cache,
+            struct bd_cache_entry, BD_CACHE_CAPACITY);
+        b->block_cache->ra_buf = talloc_size(b->block_cache,
+            BD_READAHEAD_BLOCKS * UDF_BLOCK_SIZE);
 
         if (!bd_open_stream(bd, b, bluray_stream_read_blocks)) {
             MP_ERR(s, "Failed to open Blu-ray from stream: %s\n", device);
