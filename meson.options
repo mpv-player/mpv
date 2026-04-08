@@ -60,6 +60,7 @@ option('wasapi', type: 'feature', value: 'auto', description: 'WASAPI audio outp
 option('amf', type: 'feature', value: 'auto', description: 'AMD AMF')
 option('caca', type: 'feature', value: 'auto', description: 'CACA')
 option('cocoa', type: 'feature', value: 'auto', description: 'Cocoa')
+option('chafa', type: 'feature', value: 'auto', description: 'Chafa')
 option('d3d11', type: 'feature', value: 'auto', description: 'Direct3D 11 video output')
 option('direct3d', type: 'feature', value: 'auto', description: 'Direct3D support')
 option('dmabuf-wayland', type: 'feature', value: 'auto', description: 'dmabuf-wayland video output')

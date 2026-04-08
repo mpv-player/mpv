@@ -1020,6 +1020,13 @@ if features['sixel']
     sources += files('video/out/vo_sixel.c')
 endif
 
+chafa = dependency('chafa', version: '>= 1.18', required: get_option('chafa'))
+features += {'chafa': chafa.found()}
+if features['chafa']
+    dependencies += chafa
+    sources += files('video/out/vo_chafa.c')
+endif
+
 features += {'posix-shm': false}
 if features['posix']
     features += {'posix-shm': cc.has_function('shm_open', prefix: '#include <sys/mman.h>')}
