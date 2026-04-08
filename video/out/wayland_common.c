@@ -2116,6 +2116,33 @@ static void supported_primaries_named(void *data, struct wp_color_manager_v1 *co
     wl->primaries_map[pl_primaries] = primaries;
 }
 
+static enum pl_color_primaries get_best_supported_prim_container(const int primaries_map[PL_COLOR_PRIM_COUNT],
+                                                                  const struct pl_raw_primaries *gamut)
+{
+    enum pl_color_primaries container = PL_COLOR_PRIM_UNKNOWN;
+    enum pl_color_primaries widest = PL_COLOR_PRIM_UNKNOWN;
+    const struct pl_raw_primaries *best = NULL;
+    const struct pl_raw_primaries *widest_raw = NULL;
+    for (enum pl_color_primaries prim = 1; prim < PL_COLOR_PRIM_COUNT; prim++) {
+        if (!primaries_map[prim])
+            continue;
+        const struct pl_raw_primaries *raw = pl_raw_primaries_get(prim);
+        if (pl_raw_primaries_similar(raw, gamut))
+            return prim;
+        if (pl_primaries_superset(raw, gamut) &&
+            (!best || pl_primaries_superset(best, raw)))
+        {
+            container = prim;
+            best = raw;
+        }
+        if (!widest_raw || pl_primaries_superset(raw, widest_raw)) {
+            widest = prim;
+            widest_raw = raw;
+        }
+    }
+    return container != PL_COLOR_PRIM_UNKNOWN ? container : widest;
+}
+
 static void color_manager_done(void *data, struct wp_color_manager_v1 *color_manager)
 {
 }
@@ -2184,7 +2211,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
     MP_VERBOSE(wl, "Preferred surface feedback received:\n");
     log_color_space(wl->log, wd);
     if (!wd->csp.primaries) {
-        wd->csp.primaries = mp_get_best_prim_container(&wd->raw_prim);
+        wd->csp.primaries = get_best_supported_prim_container(wl->primaries_map, &wd->raw_prim);
         MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
                    m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
     }
