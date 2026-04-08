@@ -51,6 +51,7 @@
 #include "video/mp_image.h"
 
 #define BLURAY_SECTOR_SIZE     6144
+#define UDF_BLOCK_SIZE         2048
 
 #define BLURAY_DEFAULT_ANGLE      0
 #define BLURAY_DEFAULT_CHAPTER    0
@@ -101,6 +102,8 @@ struct bluray_priv_s {
 
     struct mp_bluray_opts *opts;
     struct m_config_cache *opts_cache;
+
+    struct stream *iso_stream;  // non-NULL when streaming from HTTP/network
 };
 
 inline static int play_playlist(struct bluray_priv_s *priv, int playlist)
@@ -121,8 +124,15 @@ static void bluray_stream_close(stream_t *s)
 
     if (priv->title_info)
         bd_free_title_info(priv->title_info);
-    if (priv->bd)
+    // bd_close before free_stream: libbluray may call read_blocks during close
+    if (priv->bd) {
         bd_close(priv->bd);
+        priv->bd = NULL;
+    }
+    if (priv->iso_stream) {
+        free_stream(priv->iso_stream);
+        priv->iso_stream = NULL;
+    }
 }
 
 static void handle_event(stream_t *s, const BD_EVENT *ev)
@@ -405,6 +415,23 @@ static void select_initial_title(stream_t *s, int title_guess) {
     }
 }
 
+// read_blocks callback for bd_open_stream(): bridge HTTP stream to libbluray
+static int bluray_stream_read_blocks(void *handle, void *buf, int lba, int num_blocks)
+{
+    struct bluray_priv_s *priv = handle;
+    int64_t offset = (int64_t)lba * UDF_BLOCK_SIZE;
+    int total = num_blocks * UDF_BLOCK_SIZE;
+
+    if (!stream_seek(priv->iso_stream, offset))
+        return -1;
+
+    int got = stream_read(priv->iso_stream, buf, total);
+    if (got <= 0)
+        return -1;
+
+    return got / UDF_BLOCK_SIZE;
+}
+
 static int bluray_stream_open_internal(stream_t *s)
 {
     struct bluray_priv_s *b = s->priv;
@@ -435,16 +462,48 @@ static int bluray_stream_open_internal(stream_t *s)
     if (!mp_msg_test(s->log, MSGL_DEBUG))
         bd_set_debug_mask(0);
 
-    /* open device */
-    char *device_tmp = mp_get_user_path(NULL, s->global, device);
-    BLURAY *bd = bd_open(device_tmp, NULL);
-    talloc_free(device_tmp);
-    if (!bd) {
-        MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
-        ret = STREAM_UNSUPPORTED;
-        goto err;
+    BLURAY *bd;
+
+    if (strstr(device, "://")) {
+        // Network URL: open HTTP sub-stream, then use bd_open_stream()
+        b->iso_stream = stream_create(device,
+            STREAM_READ | STREAM_ORIGIN_DIRECT, s->cancel, s->global);
+        if (!b->iso_stream) {
+            MP_ERR(s, "Failed to open stream: %s\n", device);
+            ret = STREAM_UNSUPPORTED;
+            goto err;
+        }
+        if (!b->iso_stream->seekable) {
+            MP_ERR(s, "Stream is not seekable: %s\n", device);
+            ret = STREAM_UNSUPPORTED;
+            goto err;
+        }
+
+        bd = bd_init();
+        if (!bd) {
+            MP_ERR(s, "Failed to initialize libbluray\n");
+            ret = STREAM_ERROR;
+            goto err;
+        }
+        b->bd = bd;
+
+        if (!bd_open_stream(bd, b, bluray_stream_read_blocks)) {
+            MP_ERR(s, "Failed to open Blu-ray from stream: %s\n", device);
+            ret = STREAM_UNSUPPORTED;
+            goto err;
+        }
+    } else {
+        // Local path: use bd_open() as before
+        char *device_tmp = mp_get_user_path(NULL, s->global, device);
+        bd = bd_open(device_tmp, NULL);
+        talloc_free(device_tmp);
+        if (!bd) {
+            MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
+            ret = STREAM_UNSUPPORTED;
+            goto err;
+        }
+        b->bd = bd;
     }
-    b->bd = bd;
 
     if (!check_disc_info(s)) {
         ret = STREAM_UNSUPPORTED;
