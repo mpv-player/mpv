@@ -1926,7 +1926,8 @@ static void window_resize(struct vo_w32_state *w32)
                             force_geometry, &geo, NULL);
 
     if (should_reset_size &&
-        (rect_w(geo.win) > rect_w(screen) || rect_h(geo.win) > rect_h(screen))) {
+        (geo.win.x1 - geo.win.x0 > screen.x1 - screen.x0 ||
+         geo.win.y1 - geo.win.y0 > screen.y1 - screen.y0)) {
         vo_calc_window_geometry(vo, w32->opts, &screen, &mon, w32->dpi_scale,
                                 force_geometry, &geo, &size_constraint);
     }
