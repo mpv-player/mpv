@@ -592,7 +592,9 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
     }
     // not found -> load it
     char *fname = mp_get_user_path(NULL, p->global, path);
-    struct bstr s = stream_read_file(fname, p, p->global, 1000000000); // 1GB
+    struct bstr s = stream_read_file2(fname, p,
+                                      STREAM_READ_FILE_FLAGS_DEFAULT & ~STREAM_LOCAL_FS_ONLY,
+                                      p->global, 1000000000); // 1GB
     talloc_free(fname);
     if (s.len) {
         struct cached_file new = {
