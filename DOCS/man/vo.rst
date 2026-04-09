@@ -630,7 +630,10 @@ Available video output drivers are:
         Selects the graphics protocol that chafa will render graphics with.
         Can be one of the below list
 
-        symbols (Default)
+        auto (Default)
+            Infers the best pixel mode to use based on
+            what your terminal supports.
+        symbols
             Writes unicode characters to the terminal
         sixels
             Uses the sixel protocol to render graphics.
@@ -643,6 +646,9 @@ Available video output drivers are:
         Selects the colorspace that chafa will render graphics with.
         Can be one of the below list as per chafa's documentation.
 
+        auto (Default)
+            Infers the best canvas mode to use based on
+            what your terminal supports.
         truecolor (Default)
             Truecolor (sRGB)
         256
