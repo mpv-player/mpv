@@ -3455,6 +3455,43 @@ static int mp_property_sub_end(void *ctx, struct m_property *prop,
     return property_time(action, arg, end);
 }
 
+static int mp_property_sub_lines(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int sub_index = *(int *)prop->priv;
+    struct track *track = mpctx->current_track[sub_index][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    if (!sub)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
+        struct sub_lines *lines = sub_get_lines(sub);
+        if (!lines)
+            return M_PROPERTY_UNAVAILABLE;
+
+        struct mpv_node *node = arg;
+        node_init(node, MPV_FORMAT_NODE_ARRAY, NULL);
+        for (int i = 0; i < lines->num_entries; i++) {
+            struct sub_line *line = &lines->entries[i];
+            struct mpv_node *entry = node_array_add(node, MPV_FORMAT_NODE_MAP);
+            node_map_add_string(entry, "text", line->text);
+            node_map_add_double(entry, "start", line->start);
+            if (line->end != MP_NOPTS_VALUE)
+                node_map_add_double(entry, "end", line->end);
+        }
+        talloc_free(lines);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_playlist_current_pos(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
@@ -4650,6 +4687,10 @@ static const struct m_property mp_properties_base[] = {
         .priv = (void *)&(const int){0}},
     {"secondary-sub-end", mp_property_sub_end,
         .priv = (void *)&(const int){1}},
+    {"sub-lines", mp_property_sub_lines,
+        .priv = (void *)&(const int){0}},
+    {"secondary-sub-lines", mp_property_sub_lines,
+        .priv = (void *)&(const int){1}},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -4734,8 +4775,8 @@ static const char *const *const mp_event_property_change[] = {
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
-      "secondary-sub-end", "video-out-params", "video-dec-params", "video-params",
-      "deinterlace-active", "video-target-params"),
+      "secondary-sub-end", "sub-lines", "secondary-sub-lines", "video-out-params",
+      "video-dec-params", "video-params", "deinterlace-active", "video-target-params"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",

@@ -3290,6 +3290,29 @@ Property list
 ``secondary-sub-end``
     Same as ``sub-end``, but for the secondary subtitles.
 
+``sub-lines``
+    The list of subtitle lines in memory. Not available if the subtitle is not
+    text-based (i.e. DVD/BD subtitles).
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each subtitle line)
+                "text"  MPV_FORMAT_STRING
+                "start" MPV_FORMAT_DOUBLE
+                "end"   MPV_FORMAT_DOUBLE
+
+    ASS tags are stripped from ``text``.
+
+    ``end`` is absent if unknown.
+
+``secondary-sub-lines``
+    Same as ``sub-lines``, but for the secondary subtitles.
+
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing to
     this property may start playback at the new position.

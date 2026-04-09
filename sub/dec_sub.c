@@ -580,3 +580,24 @@ bool sub_is_secondary_visible(struct dec_sub *sub)
     mp_mutex_unlock(&sub->lock);
     return ret;
 }
+
+static int sub_line_cmp(const void *a, const void *b)
+{
+    const struct sub_line *la = a, *lb = b;
+    if (la->start < lb->start) return -1;
+    if (la->start > lb->start) return  1;
+    return 0;
+}
+
+struct sub_lines *sub_get_lines(struct dec_sub *sub)
+{
+    mp_mutex_lock(&sub->lock);
+    struct sub_lines *res = NULL;
+    if (sub->sd->driver->get_lines) {
+        res = sub->sd->driver->get_lines(sub->sd);
+        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+              sub_line_cmp);
+    }
+    mp_mutex_unlock(&sub->lock);
+    return res;
+}
