@@ -97,8 +97,7 @@ static void dealloc_canvas_and_buffers(struct vo *vo)
     }
 
     if (priv->frame) {
-        talloc_free(priv->frame);
-        priv->frame = NULL;
+        TA_FREEP(&priv->frame);
     }
 }
 
@@ -253,6 +252,10 @@ static int update_chafa_canvas(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(priv->sws) < 0)
         return -1;
 
+    gchar **envp = g_get_environ();
+    priv->term_info = chafa_term_db_detect(chafa_term_db_get_default (), envp);
+    g_strfreev (envp);
+
     priv->config = chafa_canvas_config_new();
 
     // Set geometry based on terminal character cells
@@ -267,10 +270,16 @@ static int update_chafa_canvas(struct vo *vo, struct mp_image_params *params)
 
     if (priv->opts.canvas_mode >= 0 && priv->opts.canvas_mode < CHAFA_CANVAS_MODE_MAX) {
         chafa_canvas_config_set_canvas_mode(priv->config, priv->opts.canvas_mode);
+    } else {
+        ChafaCanvasMode mode = chafa_term_info_get_best_canvas_mode(priv->term_info);
+        chafa_canvas_config_set_canvas_mode(priv->config, mode);
     }
 
     if (priv->opts.dither_mode >= 0 && priv->opts.dither_mode < CHAFA_DITHER_MODE_MAX) {
         chafa_canvas_config_set_dither_mode(priv->config, priv->opts.dither_mode);
+    } else {
+        ChafaPixelMode mode = chafa_term_info_get_best_pixel_mode(priv->term_info);
+        chafa_canvas_config_set_pixel_mode(priv->config, mode);
     }
 
     if (priv->opts.work_factor > 0) {
@@ -398,7 +407,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                                    priv->frame->stride[0]);
 
     if (mpi)
-        talloc_free(mpi);
+        TA_FREEP(&mpi);
 
 done:
     return VO_TRUE;
@@ -423,6 +432,7 @@ static void flip_page(struct vo *vo)
 
     chafa_canvas_print_rows(priv->canvas, priv->term_info, &output, &rows);
 
+    chafa_strwrite(TERM_ESC_SYNC_UPDATE_BEGIN);
 
     for (int i = 0; output [i]; i++)
     {
@@ -432,6 +442,8 @@ static void flip_page(struct vo *vo)
 
         chafa_write(output[i]->str, output[i]->len, stdout);
     }
+
+    chafa_strwrite(TERM_ESC_SYNC_UPDATE_END);
 
     chafa_free_gstring_array (output);
 }
@@ -454,10 +466,6 @@ static int preinit(struct vo *vo)
     priv->canvas = NULL;
     priv->config = NULL;
     priv->symbol_map = NULL;
-
-    gchar **envp = g_get_environ();
-    priv->term_info = chafa_term_db_detect(chafa_term_db_get_default (), envp);
-    g_strfreev (envp);
 
     // Comment from Chafa repo
     /* Chafa may create and destroy GThreadPools multiple times while rendering
@@ -512,8 +520,8 @@ const struct vo_driver video_out_chafa = {
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .opts.pixel_mode = CHAFA_PIXEL_MODE_SYMBOLS,
-        .opts.canvas_mode = CHAFA_CANVAS_MODE_TRUECOLOR,
+        .opts.pixel_mode = CHAFA_PIXEL_MODE_MAX,
+        .opts.canvas_mode = CHAFA_CANVAS_MODE_MAX,
         .opts.dither_mode = CHAFA_DITHER_MODE_NONE,
         .opts.work_factor = 50,
         .opts.pad_y = -1,
@@ -525,11 +533,13 @@ const struct vo_driver video_out_chafa = {
         {"width", OPT_INT(opts.width)},
         {"height", OPT_INT(opts.height)},
         {"pixel-mode", OPT_CHOICE(opts.pixel_mode,
+            {"auto", CHAFA_PIXEL_MODE_MAX},
             {"symbols", CHAFA_PIXEL_MODE_SYMBOLS},
             {"sixels", CHAFA_PIXEL_MODE_SIXELS},
             {"kitty", CHAFA_PIXEL_MODE_KITTY},
             {"iterm2", CHAFA_PIXEL_MODE_ITERM2})},
         {"canvas-mode", OPT_CHOICE(opts.canvas_mode,
+            {"auto", CHAFA_CANVAS_MODE_MAX},
             {"truecolor", CHAFA_CANVAS_MODE_TRUECOLOR},
             {"256", CHAFA_CANVAS_MODE_INDEXED_256},
             {"240", CHAFA_CANVAS_MODE_INDEXED_240},
