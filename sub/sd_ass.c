@@ -1017,6 +1017,44 @@ static void uninit(struct sd *sd)
     talloc_free(ctx->copy_cache);
 }
 
+static struct sub_lines *get_lines(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->ass_track;
+    struct sub_lines *res = talloc_zero(NULL, struct sub_lines);
+
+    for (int i = 0; i < track->n_events; i++) {
+        ASS_Event *event = &track->events[i];
+        if (!event->Text)
+            continue;
+
+        char *plain = NULL;
+        bstr result = sd_ass_to_plaintext(&plain, event->Text);
+
+        // ASS subtitle lines can have many empty lines after stripping tags,
+        // but empty lines are useful in LRC.
+        if (is_whitespace_only(result)) {
+            talloc_free(plain);
+            if (!strcmp(sd->codec->codec, "ass"))
+                continue;
+            plain = talloc_strdup(res, "");
+        } else {
+            talloc_steal(res, plain);
+        }
+
+        struct sub_line line = {
+            .text  = plain,
+            .start = event->Start / 1000.0,
+            .end   = event->Duration == UNKNOWN_DURATION * 1000
+                         ? MP_NOPTS_VALUE
+                         : (event->Start + event->Duration) / 1000.0,
+        };
+        MP_TARRAY_APPEND(res, res->entries, res->num_entries, line);
+    }
+
+    return res;
+}
+
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -1072,6 +1110,7 @@ const struct sd_functions sd_ass = {
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .get_times = get_times,
+    .get_lines = get_lines,
     .control = control,
     .reset = reset,
     .select = enable_output,

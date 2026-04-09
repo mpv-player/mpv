@@ -52,6 +52,7 @@ struct sd_functions {
                                        int format, double pts);
     char *(*get_text)(struct sd *sd, double pts, enum sd_text_type type);
     struct sd_times (*get_times)(struct sd *sd, double pts);
+    struct sub_lines *(*get_lines)(struct sd *sd);
 };
 
 // lavc_conv.c

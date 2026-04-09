@@ -39,6 +39,17 @@ struct attachment_list {
     int num_entries;
 };
 
+struct sub_line {
+    char *text;
+    double start;
+    double end;
+};
+
+struct sub_lines {
+    struct sub_line *entries;
+    int num_entries;
+};
+
 struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
                            struct attachment_list *attachments, int order);
 void sub_destroy(struct dec_sub *sub);
@@ -53,6 +64,9 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type);
 char *sub_ass_get_extradata(struct dec_sub *sub);
 struct sd_times sub_get_times(struct dec_sub *sub, double pts);
+// Return subtitle lines in memory. Call talloc_free() on the return value.
+struct sub_lines *sub_get_lines(struct dec_sub *sub);
+
 void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);
 void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink);
