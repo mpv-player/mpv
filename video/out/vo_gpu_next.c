@@ -2684,7 +2684,7 @@ AV_NOWARN_DEPRECATED(
     pars->params.hooks = p->hooks;
 
     MP_DBG(p, "Render options updated, resetting render state.\n");
-    p->want_reset = true;
+    // p->want_reset = true;
 }
 
 const struct vo_driver video_out_gpu_next = {
