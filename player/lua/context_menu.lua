@@ -683,4 +683,4 @@ mp.register_script_message("select", function ()
     end
 end)
 
-require "mp.options".read_options(options)
+require "mp.options".read_options(options, nil, function () end)
