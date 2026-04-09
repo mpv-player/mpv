@@ -2148,43 +2148,6 @@ static void update_user_shader_opts(struct gl_video *p, const char *path,
     }
 }
 
-static bool get_param_dynamic(struct gl_video *p, struct bstr name, double *out)
-{
-    const struct mp_image_params *params = &p->image.mpi->params;
-    float chroma_offset_x, chroma_offset_y;
-    pl_chroma_location_offset(params->chroma_location,
-                              &chroma_offset_x, &chroma_offset_y);
-
-    const struct {
-        const char *name;
-        double value;
-    } opts[] = {
-        {             "PTS", p->image.mpi->pts              },
-        { "chroma_offset_x", chroma_offset_x                },
-        { "chroma_offset_y", chroma_offset_y                },
-        {        "min_luma", params->color.hdr.min_luma     },
-        {        "max_luma", params->color.hdr.max_luma     },
-        {         "max_cll", params->color.hdr.max_cll      },
-        {        "max_fall", params->color.hdr.max_fall     },
-        {     "scene_max_r", params->color.hdr.scene_max[0] },
-        {     "scene_max_g", params->color.hdr.scene_max[1] },
-        {     "scene_max_b", params->color.hdr.scene_max[2] },
-        {       "scene_avg", params->color.hdr.scene_avg    },
-        {        "max_pq_y", params->color.hdr.max_pq_y     },
-        {        "avg_pq_y", params->color.hdr.avg_pq_y     },
-    };
-
-    for (int n = 0; n < MP_ARRAY_SIZE(opts); n++) {
-        if (bstrcmp(name, bstr0(opts[n].name)) != 0)
-            continue;
-
-        *out = opts[n].value;
-        return true;
-    }
-
-    return false;
-}
-
 static void user_hook(struct gl_video *p, struct image img,
                       struct gl_transform *trans, void *priv)
 {
@@ -2205,7 +2168,7 @@ static void user_hook(struct gl_video *p, struct image img,
         }
 
         double value = param->value;
-        get_param_dynamic(p, param->name, &value);
+        gpu_get_auto_param(p->image.mpi, param->name, &value);
 
         switch (param->type) {
         case GL_USER_SHADER_PARAM_FLOAT:

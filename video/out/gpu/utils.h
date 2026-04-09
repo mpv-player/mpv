@@ -68,6 +68,9 @@ void gl_transform_ortho_fbo(struct gl_transform *t, const struct ra_fbo *fbo);
 double gl_video_scale_ambient_lux(float lmin, float lmax,
                                   float rmin, float rmax, double lux);
 
+// Get automatic parameter value for user shaders
+bool gpu_get_auto_param(const struct mp_image *mpi, struct bstr name, double *out);
+
 // A pool of buffers, which can grow as needed
 struct ra_buf_pool {
     struct ra_buf_params current_params;
