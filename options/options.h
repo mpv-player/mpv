@@ -28,6 +28,7 @@ typedef struct mp_vo_opts {
     char *fsscreen_name;
     char *winname;
     char *appid;
+    char *wayland_session;
     int x11_netwm;
     int x11_bypass_compositor;
     int x11_present;

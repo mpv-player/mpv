@@ -1,0 +1,2 @@
+add `--wayland-session=<string>`
+restore the mpv window on wayland using xdg-session-management-v1
