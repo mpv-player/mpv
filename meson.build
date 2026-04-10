@@ -772,11 +772,9 @@ if features['uchardet']
 endif
 
 vapoursynth = dependency('vapoursynth', version: '>= 56', required: get_option('vapoursynth'))
-vapoursynth_script = dependency('vapoursynth-script', version: '>= 56',
-                                required: get_option('vapoursynth'))
-features += {'vapoursynth': vapoursynth.found() and vapoursynth_script.found()}
+features += {'vapoursynth': vapoursynth.found()}
 if features['vapoursynth']
-    dependencies += [vapoursynth, vapoursynth_script]
+    dependencies += vapoursynth.partial_dependency(compile_args: true, includes: true)
     sources += files('video/filter/vf_vapoursynth.c')
 endif
 

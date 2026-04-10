@@ -247,12 +247,13 @@ locale_t newlocale(int, const char *, locale_t);
 locale_t uselocale(locale_t);
 void freelocale(locale_t);
 
-#else /* __MINGW32__ */
+#else /* _WIN32 */
 
+#include <dlfcn.h>
 #include <sys/mman.h>
 
 extern char **environ;
 
-#endif /* __MINGW32__ */
+#endif /* _WIN32 */
 
 #endif
