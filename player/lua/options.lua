@@ -52,14 +52,6 @@ local function read_options(options, identifier, on_update)
     -- read config file
     local conffilename = "script-opts/" .. identifier .. ".conf"
     local conffile = mp.find_config_file(conffilename)
-    if conffile == nil then
-        msg.debug(conffilename .. " not found.")
-        conffilename = "lua-settings/" .. identifier .. ".conf"
-        conffile = mp.find_config_file(conffilename)
-        if conffile then
-            msg.warn("lua-settings/ is deprecated, use directory script-opts/")
-        end
-    end
     local f = conffile and io.open(conffile,"r")
     if f == nil then
         -- config not found
