@@ -27,11 +27,16 @@
 #include "common/msg.h"
 #include "input/input.h"
 #include "input/keycodes.h"
+#include "misc/hash.h"
+#include "misc/io_utils.h"
+#include "misc/path_utils.h"
 #include "options/m_config.h"
+#include "options/path.h"
 #include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
+#include "stream/stream.h"
 #include "video/out/gpu/video.h"
 #include "wayland_common.h"
 #include "win_state.h"
@@ -58,6 +63,10 @@
 
 #if HAVE_WAYLAND_PROTOCOLS_1_44
 #include "color-representation-v1.h"
+#endif
+
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+#include "xdg-session-management-v1.h"
 #endif
 
 #ifndef CLOCK_MONOTONIC_RAW
@@ -331,6 +340,10 @@ static void set_surface_scaling(struct vo_wayland_state *wl);
 static void update_output_scaling(struct vo_wayland_state *wl);
 static void update_output_geometry(struct vo_wayland_state *wl);
 static void destroy_offer(struct vo_wayland_data_offer *o);
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+static char *session_file(void *talloc_ctx, const char *session, struct vo *vo);
+static char *read_session_id(void *talloc_ctx, struct vo_wayland_state *wl, const char *path);
+#endif
 
 /* Wayland listener boilerplate */
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
@@ -2717,6 +2730,31 @@ static const struct zwp_linux_dmabuf_feedback_v1_listener dmabuf_feedback_listen
     .tranche_flags = tranche_flags,
 };
 
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+static void xdg_session_created(void *data, struct xdg_session_v1 *xdg_session_v1, const char *session_id)
+{
+    struct vo_wayland_state *wl = data;
+    mp_save_to_file(wl->session_file, session_id, strlen(session_id));
+}
+
+static void xdg_session_restored(void *data, struct xdg_session_v1 *xdg_session_v1)
+{
+    // nothing
+}
+
+static void xdg_session_replaced(void *data, struct xdg_session_v1 *xdg_session_v1)
+{
+    struct vo_wayland_state *wl = data;
+    MP_WARN(wl, "Session has been replaced!\n");
+}
+
+static const struct xdg_session_v1_listener xdg_session_listener = {
+    .created = xdg_session_created,
+    .restored = xdg_session_restored,
+    .replaced = xdg_session_replaced,
+};
+#endif
+
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -2894,6 +2932,25 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         ver = 1;
         wl->wp_tablet_manager = wl_registry_bind(reg, id, &zwp_tablet_manager_v2_interface, ver);
     }
+
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+    if (wl->session_file &&
+        !strcmp(interface, xdg_session_manager_v1_interface.name) &&
+        found++)
+    {
+        ver = 1;
+        struct xdg_session_manager_v1 *xdg_session_manager =
+            wl_registry_bind(reg, id, &xdg_session_manager_v1_interface, ver);
+        void *tmp = talloc_new(NULL);
+        char *session_id = read_session_id(tmp, wl, wl->session_file);
+        wl->xdg_session = xdg_session_manager_v1_get_session(xdg_session_manager,
+                                                             XDG_SESSION_MANAGER_V1_REASON_LAUNCH,
+                                                             session_id);
+        xdg_session_v1_add_listener(wl->xdg_session, &xdg_session_listener, wl);
+        talloc_free(tmp);
+        xdg_session_manager_v1_destroy(xdg_session_manager);
+    }
+#endif
 
     if (found > 1)
         MP_VERBOSE(wl, "Registered interface %s at version %d\n", interface, ver);
@@ -3167,6 +3224,14 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
         MP_ERR(wl, "failed to create xdg_surface and xdg_toplevel!\n");
         return 1;
     }
+
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+    if (wl->xdg_session) {
+        wl->xdg_toplevel_session =
+            xdg_session_v1_restore_toplevel(wl->xdg_session, wl->xdg_toplevel, "mpv");
+    }
+#endif
+
     return 0;
 }
 
@@ -4450,6 +4515,11 @@ bool vo_wayland_init(struct vo *vo)
     if (create_input(wl))
         goto err;
 
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+    if (wl->opts->wayland_session && *wl->opts->wayland_session)
+        wl->session_file = session_file(wl, wl->opts->wayland_session, vo);
+#endif
+
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
 
@@ -4852,6 +4922,14 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->wp_tablet_manager)
         zwp_tablet_manager_v2_destroy(wl->wp_tablet_manager);
 
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+    if (wl->xdg_toplevel_session)
+        xdg_toplevel_session_v1_destroy(wl->xdg_toplevel_session);
+
+    if (wl->xdg_session)
+        xdg_session_v1_destroy(wl->xdg_session);
+#endif
+
     if (wl->display)
         wl_display_disconnect(wl->display);
 
@@ -4933,3 +5011,37 @@ void vo_wayland_wakeup(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
 }
+
+#if HAVE_WAYLAND_PROTOCOLS_1_48
+static char *session_file(void *talloc_ctx, const char *session, struct vo *vo)
+{
+    void *tmp = talloc_new(NULL);
+    char *xdg_current_desktop = getenv("XDG_CURRENT_DESKTOP");
+    if (!xdg_current_desktop)
+        xdg_current_desktop = "";
+    bstr full_name = {0};
+    bstr_xappend_asprintf(tmp, &full_name, "%16" PRIx64 "%s%16" PRIx64 "%s",
+                          (uint64_t)strlen(xdg_current_desktop),
+                          xdg_current_desktop, (uint64_t)strlen(session),
+                          session);
+    bstr file_name = mp_hash_to_bstr(tmp, full_name.start, full_name.len,
+                                     "SHA256");
+    char *file_path = mp_find_user_file(tmp, vo->global, "state", "sessions");
+    mp_mkdirp(file_path);
+    file_path = mp_path_join_bstr(talloc_ctx, bstr0(file_path), file_name);
+    talloc_free(tmp);
+    return file_path;
+}
+
+static char *read_session_id(void *talloc_ctx, struct vo_wayland_state *wl, const char *path)
+{
+    if (!mp_path_exists(path))
+        return NULL;
+    bstr id = stream_read_file(path, talloc_ctx, wl->vo->global, 4096);
+    if (!id.len)
+        return NULL;
+    if (bstr_validate_utf8(id) < 0)
+        return NULL;
+    return bstrto0(talloc_ctx, id);
+}
+#endif

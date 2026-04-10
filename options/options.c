@@ -220,6 +220,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"wayland-edge-pixels-touch", OPT_INT(wl_edge_pixels_touch),
         M_RANGE(0, INT_MAX)},
     {"wayland-present", OPT_BOOL(wl_present)},
+    {"wayland-session", OPT_STRING(wayland_session)},
 #endif
 #if HAVE_WIN32_DESKTOP
 // For old MinGW-w64 compatibility
