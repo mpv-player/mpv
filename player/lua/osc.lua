@@ -763,6 +763,14 @@ local function prepare_elements()
         -- Calculate the hitbox
         local bX1, bY1, bX2, bY2 = get_hitbox_coords_geo(elem_geo)
         element.hitbox = {x1 = bX1, y1 = bY1, x2 = bX2, y2 = bY2}
+        if element.layout.hitbox then
+            if element.layout.hitbox.x1 then
+                element.hitbox.x1 = element.layout.hitbox.x1
+            end
+            if element.layout.hitbox.x2 then
+                element.hitbox.x2 = element.layout.hitbox.x2
+            end
+        end
 
         local style_ass = assdraw.ass_new()
 
@@ -1352,6 +1360,9 @@ local function window_controls(topbar)
     lo = add_layout("close")
     lo.geometry = alignment == "left" and first_geo or third_geo
     lo.style = osc_styles.wcButtons
+    if alignment == "left" then
+        lo.hitbox = { x1 = 0 }
+    end
 
     -- Minimize: 🗕
     ne = new_element("minimize", "button")
@@ -1802,6 +1813,7 @@ local function bar_layout(direction, slim)
     lo = add_layout("menu")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
+    lo.hitbox = { x1 = 0 }
 
     -- Playlist prev/next
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
@@ -1826,6 +1838,9 @@ local function bar_layout(direction, slim)
         lo = add_layout("custom_button_" .. i)
         lo.geometry = geo
         lo.style = osc_styles.vidtitleBar
+        if i == last_custom_button then
+            lo.hitbox = { x2 = math.huge }
+        end
     end
 
     t_r = t_r - padX
@@ -1836,6 +1851,7 @@ local function bar_layout(direction, slim)
         lo = add_layout("fullscreen")
         lo.geometry = geo
         lo.style = osc_styles.topButtonsBar
+        lo.hitbox = { x2 = math.huge }
     else
         -- Cache
         geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
@@ -1865,6 +1881,7 @@ local function bar_layout(direction, slim)
     lo = add_layout("play_pause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
+    lo.hitbox = { x1 = 0 }
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("chapter_prev")
@@ -1891,6 +1908,7 @@ local function bar_layout(direction, slim)
     lo = add_layout("fullscreen")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
+    lo.hitbox = { x2 = math.huge }
 
     -- Volume
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
