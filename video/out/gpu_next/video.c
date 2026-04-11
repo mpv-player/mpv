@@ -1,6 +1,7 @@
 #include "video.h"
 #include <libplacebo/utils/frame_queue.h>
 #include <libplacebo/utils/upload.h>
+#include <libplacebo/shaders/custom.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -24,6 +25,8 @@
 #include "video/out/placebo/utils.h"
 #include "options/m_config.h"
 #include "options/options.h"
+#include "options/path.h"
+#include "stream/stream.h"
 #include "video/out/gpu/video.h"  // For struct gl_video_opts
 
 struct pl_video_osd_entry {
@@ -66,6 +69,15 @@ struct pl_video {
     struct mp_csp_equalizer_state *video_eq;
     struct m_config_cache *opts_cache;
     struct scaler_params scalers[SCALER_COUNT];
+
+    // User shader hooks (glsl-shaders)
+    struct user_hook {
+        char *path;
+        const struct pl_hook *hook;
+    } *user_hooks;
+    int num_user_hooks;
+    const struct pl_hook **hooks;  // array for pl_render_params
+    int num_hooks;
 };
 
 struct frame_priv {
@@ -297,6 +309,10 @@ void pl_video_uninit(struct pl_video **p_ptr)
     }
     talloc_free(p->sub_tex);
 
+    // Free user shader hooks
+    for (int i = 0; i < p->num_user_hooks; i++)
+        pl_mpv_user_shader_destroy(&p->user_hooks[i].hook);
+
     pl_renderer_destroy(&p->renderer);
     pl_log_destroy(&p->pl_log);
 
@@ -518,15 +534,59 @@ static const struct pl_filter_config *map_scaler(struct pl_video *p,
     return &par->config;
 }
 
+// ── User shader hook loading (mirrors vo_gpu_next.c load_hook / update_render_options) ──
+
+static const struct pl_hook *load_user_hook(struct pl_video *p, const char *path)
+{
+    // Check cache first
+    for (int i = 0; i < p->num_user_hooks; i++) {
+        if (strcmp(p->user_hooks[i].path, path) == 0)
+            return p->user_hooks[i].hook;
+    }
+
+    char *fname = mp_get_user_path(NULL, p->global, path);
+    bstr shader = stream_read_file(fname, p, p->global, 1000000000);
+    talloc_free(fname);
+
+    const struct pl_hook *hook = NULL;
+    if (shader.len)
+        hook = pl_mpv_user_shader_parse(p->gpu, shader.start, shader.len);
+
+    if (!hook)
+        mp_msg(p->log, MSGL_WARN, "Failed to parse user shader: %s\n", path);
+
+    MP_TARRAY_APPEND(p, p->user_hooks, p->num_user_hooks, (struct user_hook) {
+        .path = talloc_strdup(p, path),
+        .hook = hook,
+    });
+
+    return hook;
+}
+
+static void update_user_shaders(struct pl_video *p, const struct gl_video_opts *opts)
+{
+    // Destroy old hooks before reloading
+    for (int i = 0; i < p->num_user_hooks; i++)
+        pl_mpv_user_shader_destroy(&p->user_hooks[i].hook);
+    p->num_user_hooks = 0;
+
+    p->num_hooks = 0;
+    const struct pl_hook *hook;
+    for (int i = 0; opts->user_shaders && opts->user_shaders[i]; i++) {
+        if ((hook = load_user_hook(p, opts->user_shaders[i])))
+            MP_TARRAY_APPEND(p, p->hooks, p->num_hooks, hook);
+    }
+}
+
 void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_tex)
 {
     // Build target color space from mpv options instead of hardcoding sRGB
     // This fixes HDR overexposure - libplacebo needs to know the correct target colorspace
     // Reference: vo_gpu_next.c apply_target_options() and draw_frame()
     struct pl_color_space target_color = {0};  // Start with empty, let libplacebo infer
-    
+    bool opts_changed = p->opts_cache && m_config_cache_update(p->opts_cache);
+
     if (p->opts_cache) {
-        m_config_cache_update(p->opts_cache);
         // opts_cache now points directly to gl_video_opts (via gl_video_conf)
         const struct gl_video_opts *gopts = p->opts_cache->opts;
         
@@ -684,6 +744,12 @@ void pl_video_render(struct pl_video *p, struct vo_frame *frame, pl_tex target_t
 
             // Skip anti-aliasing only if linear downscaling is disabled
             params.skip_anti_aliasing = !gopts->linear_downscaling;
+
+            // Load user shaders (glsl-shaders option) — only re-parse on options change
+            if (opts_changed)
+                update_user_shaders(p, gopts);
+            params.hooks = p->hooks;
+            params.num_hooks = p->num_hooks;
         }
     }
 
