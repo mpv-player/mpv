@@ -818,10 +818,12 @@ int mp_client_send_event(struct MPContext *mpctx, const char *client_name,
         r = send_event(ctx, &event_data, false);
     } else {
         r = -1;
-        talloc_free(data);
     }
 
     mp_mutex_unlock(&clients->lock);
+
+    if (r < 0)
+        talloc_free(data);
 
     return r;
 }
