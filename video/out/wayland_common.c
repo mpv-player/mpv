@@ -1798,20 +1798,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         width = height = 0;
     }
 
-    if (!wl->geometry_configured) {
-        /* Save initial window size if the compositor gives us a hint here. */
-        bool autofit_or_geometry = opts->geometry.wh_valid || opts->autofit.wh_valid ||
-                                   opts->autofit_larger.wh_valid || opts->autofit_smaller.wh_valid;
-        if (width && height && !autofit_or_geometry) {
-            wl->initial_size_hint = true;
-            wl->window_size = (struct mp_rect){0, 0, width, height};
-            wl->geometry = wl->window_size;
-        } else {
-            wl->override_surface_local = true;
-        }
-        return;
-    }
-
     bool is_maximized = false;
     bool is_fullscreen = false;
     bool is_activated = false;
@@ -1879,6 +1865,20 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     wl->tiled = is_tiled;
 
     wl->locked_size = is_fullscreen || is_maximized || is_tiled;
+
+    if (!wl->geometry_configured) {
+        /* Save initial window size if the compositor gives us a hint here. */
+        bool autofit_or_geometry = opts->geometry.wh_valid || opts->autofit.wh_valid ||
+                                   opts->autofit_larger.wh_valid || opts->autofit_smaller.wh_valid;
+        if (width && height && !autofit_or_geometry) {
+            wl->initial_size_hint = true;
+            wl->window_size = (struct mp_rect){0, 0, width, height};
+            wl->geometry = wl->window_size;
+        } else {
+            wl->override_surface_local = true;
+        }
+        return;
+    }
 
     if (wl->requested_decoration)
         request_decoration_mode(wl, wl->requested_decoration);
