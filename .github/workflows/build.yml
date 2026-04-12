@@ -479,7 +479,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Test in OpenBSD VM
-      uses: cross-platform-actions/action@v0.32.0
+      uses: cross-platform-actions/action@v1.0.0
       with:
         operating_system: openbsd
         version: '7.8'
@@ -525,7 +525,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v0.32.0
+      uses: cross-platform-actions/action@v1.0.0
       with:
         operating_system: freebsd
         version: '15.0'
