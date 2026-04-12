@@ -5,7 +5,7 @@ folders without modifying mpv core.
 
 ## What it does
 
-- Registers a configurable hotkey (`Ctrl+Shift+s` by default).
+- Registers configurable hotkeys (`Win+y` primary, `Win+Print` fallback by default).
 - Reads current media path, filename, media title, and playback timestamp.
 - Classifies media as `movie`, `show`, or `unknown` via layered rules.
 - Parses show title/season/episode/episode title/date from filename + folders.
@@ -33,14 +33,15 @@ Put values in `script-opts/screenshot-folder.conf` (or use
 Default options:
 
 ```ini
-base_output_dir=D:/MediaShots
+base_output_dir=C:/Mediashots
 movies_subdir=Movies
 shows_subdir=Shows
 fallback_subdir=Unsorted
 image_format=png
 include_year_in_movie_folder=no
 zero_pad_season_episode=yes
-screenshot_key=Ctrl+Shift+s
+screenshot_key=Win+y
+fallback_screenshot_key=Win+Print
 show_osd_confirmation=yes
 save_debug_log=no
 support_daily_show_folders=no

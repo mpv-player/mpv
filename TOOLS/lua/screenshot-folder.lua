@@ -3,16 +3,20 @@ local utils = require("mp.utils")
 local options = require("mp.options")
 
 local o = {
-    base_output_dir = "D:/MediaShots",
+    base_output_dir = "C:/Mediashots",
     movies_subdir = "Movies",
     shows_subdir = "Shows",
     fallback_subdir = "Unsorted",
     image_format = "png",
     include_year_in_movie_folder = false,
     zero_pad_season_episode = true,
-    screenshot_key = "Ctrl+Shift+s",
+    screenshot_key = "Win+y",
+    fallback_screenshot_key = "Win+Print",
+    debug_trigger_key = "Ctrl+Alt+y",
     show_osd_confirmation = true,
     save_debug_log = false,
+    debug_trigger_feedback = true,
+    debug_trigger_captures_screenshot = true,
     support_daily_show_folders = false,
 }
 
@@ -42,6 +46,12 @@ local release_junk_tokens = {
 }
 
 local show_binding_name = "screenshot-folder-capture"
+local fallback_binding_name = "screenshot-folder-capture-fallback"
+
+local strip_release_junk
+local extract_year_metadata
+local parse_date
+local parse_episode_title
 
 local function debug_log(message)
     if o.save_debug_log then
@@ -53,6 +63,13 @@ local function notify_user(message)
     if o.show_osd_confirmation then
         mp.osd_message(message, 2)
     end
+end
+
+local function debug_trigger_message(source)
+    if o.debug_trigger_feedback then
+        notify_user("screenshot-folder trigger: " .. source)
+    end
+    debug_log("trigger source=" .. source)
 end
 
 local function is_url(path)
@@ -101,6 +118,83 @@ local function sanitize_name(name)
     return s
 end
 
+local function cleanup_series_title(name)
+    local s = normalize_spaces(name)
+    s = s:gsub("%(%s*%)", "")
+    s = s:gsub("%s+%-%s*$", "")
+    s = s:gsub("%s+", " ")
+    s = trim(s)
+    return sanitize_name(s)
+end
+
+local function is_plausible_season_episode(season, episode, pattern)
+    local s = tonumber(season)
+    local e = tonumber(episode)
+
+    if s and (s < 0 or s > 60) then
+        return false
+    end
+    if e and (e < 0 or e > 500) then
+        return false
+    end
+
+    if pattern == "x-style" then
+        if (s and s > 30) or (e and e > 40) then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function has_x_style_episode_marker(text)
+    local _, _, season, episode = (text or ""):find("%f[%d](%d%d?)x(%d%d?)%f[%D]")
+    if not season then
+        return false
+    end
+    return is_plausible_season_episode(season, episode, "x-style")
+end
+
+local function parse_explicit_sxe_from_text(text)
+    local normalized = normalize_separators(text or "")
+    local lowered = normalized:lower()
+    local start_idx, end_idx, empty_idx, season, episode = lowered:find("()s(%d%d?)%s*e(%d%d?)")
+    if not start_idx then
+        return nil
+    end
+
+    if not is_plausible_season_episode(season, episode, "sxe") then
+        return nil
+    end
+
+    local show_title = normalize_spaces(normalized:sub(1, start_idx - 1))
+    show_title = strip_release_junk(show_title)
+    local clean_title, year = extract_year_metadata(show_title)
+    show_title = cleanup_series_title(clean_title)
+
+    local episode_title
+    if end_idx < #normalized then
+        episode_title = parse_episode_title(normalized:sub(end_idx + 1))
+    end
+
+    if show_title == "Unknown" then
+        return nil
+    end
+
+    return {
+        show_title = show_title,
+        season = pad2(season),
+        episode = pad2(episode),
+        episode_title = episode_title,
+        date = parse_date(text),
+        year = year,
+        confidence = "high",
+        score = 130,
+        matched_pattern = "filename-explicit-sxe",
+        evidence = "filename",
+    }
+end
+
 local function split_path_components(path)
     local parts = {}
     for part in (path or ""):gmatch("[^/\\]+") do
@@ -109,7 +203,7 @@ local function split_path_components(path)
     return parts
 end
 
-local function strip_release_junk(text)
+strip_release_junk = function(text)
     local normalized = normalize_separators(text)
     local kept = {}
     for token in normalized:gmatch("[^%s]+") do
@@ -129,7 +223,7 @@ local function strip_release_junk(text)
     return normalize_spaces(table.concat(kept, " "))
 end
 
-local function extract_year_metadata(text)
+extract_year_metadata = function(text)
     local clean = normalize_spaces(text)
     local year = clean:match("%f[%d](19%d%d)%f[%D]") or clean:match("%f[%d](20%d%d)%f[%D]")
     if year then
@@ -139,7 +233,7 @@ local function extract_year_metadata(text)
     return clean, year
 end
 
-local function parse_date(text)
+parse_date = function(text)
     if not text then
         return nil
     end
@@ -150,7 +244,7 @@ local function parse_date(text)
     return string.format("%s-%s-%s", y, m, d)
 end
 
-local function parse_episode_title(fragment)
+parse_episode_title = function(fragment)
     local t = normalize_separators(fragment)
     t = t:gsub("^%-+", "")
     t = strip_release_junk(t)
@@ -225,6 +319,13 @@ local function parse_from_folders(info)
 end
 
 local function parse_show_info(info)
+    if info.filename_no_ext and info.filename_no_ext ~= "" then
+        local explicit = parse_explicit_sxe_from_text(info.filename_no_ext)
+        if explicit then
+            return explicit
+        end
+    end
+
     local base = info.filename_no_ext ~= "" and info.filename_no_ext or info.media_title
     local normalized = normalize_separators(base)
     local lowered = normalized:lower()
@@ -235,8 +336,14 @@ local function parse_show_info(info)
         confidence = "low",
         evidence = "filename",
     }
+    local explicit_sxe_found = false
 
     local function candidate(score, confidence, pattern, season, episode, title_start, title_end, date)
+        if not is_plausible_season_episode(season, episode, pattern) then
+            debug_log("reject implausible " .. pattern .. " season=" .. tostring(season) .. " episode=" .. tostring(episode))
+            return
+        end
+
         local show_title
         local episode_title
 
@@ -273,7 +380,7 @@ local function parse_show_info(info)
 
         local clean_title, year = extract_year_metadata(show_title or "")
         if clean_title ~= "" then
-            show_title = sanitize_name(clean_title)
+            show_title = cleanup_series_title(clean_title)
         end
 
         local result = {
@@ -301,38 +408,55 @@ local function parse_show_info(info)
         end
     end
 
-    local s, e, season, episode = lowered:find("()s(%d%d?)%s*e(%d%d?)")
+    local s, e, empty_idx, season, episode
+    s, e, empty_idx, season, episode = lowered:find("()s(%d%d?)%s*e(%d%d?)%s*[%-%+]%s*e?%d%d?")
+    if s then
+        candidate(100, "high", "sxe-range", season, episode, s, e, parse_date(base))
+        explicit_sxe_found = true
+    end
+
+    s, e, empty_idx, season, episode = lowered:find("()s(%d%d?)%s*e(%d%d?)%s*e%d%d?")
+    if s then
+        candidate(100, "high", "sxe-multi", season, episode, s, e, parse_date(base))
+        explicit_sxe_found = true
+    end
+
+    s, e, empty_idx, season, episode = lowered:find("()s(%d%d?)%s*e(%d%d?)")
     if s then
         candidate(100, "high", "sxe", season, episode, s, e, parse_date(base))
+        explicit_sxe_found = true
     end
 
-    s, e, season, episode = lowered:find("()(%d%d?)x(%d%d?)")
-    if s then
-        candidate(90, "high", "x-style", season, episode, s, e, parse_date(base))
-    end
+    if not explicit_sxe_found then
+        s, e, empty_idx, season, episode = lowered:find("()%f[%d](%d%d?)x(%d%d?)%f[%D]")
+        if s then
+            candidate(90, "high", "x-style", season, episode, s, e, parse_date(base))
+        end
 
-    s, e, season, episode = lowered:find("()season%s*(%d%d?).-episode%s*(%d%d?)")
-    if s then
-        candidate(95, "high", "season-episode-text", season, episode, s, e, parse_date(base))
-    end
+        s, e, empty_idx, season, episode = lowered:find("()season%s*(%d%d?).-episode%s*(%d%d?)")
+        if s then
+            candidate(95, "high", "season-episode-text", season, episode, s, e, parse_date(base))
+        end
 
-    s, e, season, episode = lowered:find("()season%s*(%d%d?).-ep%s*(%d%d?)")
-    if s then
-        candidate(92, "high", "season-ep-text", season, episode, s, e, parse_date(base))
-    end
+        s, e, empty_idx, season, episode = lowered:find("()season%s*(%d%d?).-ep%s*(%d%d?)")
+        if s then
+            candidate(92, "high", "season-ep-text", season, episode, s, e, parse_date(base))
+        end
 
-    local ep_start, ep_end, episode_only = lowered:find("()episode%s*(%d%d?)")
-    if ep_start then
-        local score = folder_parse.season and 78 or 55
-        local confidence = folder_parse.season and "medium" or "low"
-        candidate(score, confidence, "episode-only", nil, episode_only, ep_start, ep_end, parse_date(base))
-    end
+        local ep_start, ep_end, empty_idx, episode_only
+        ep_start, ep_end, empty_idx, episode_only = lowered:find("()episode%s*(%d%d?)")
+        if ep_start then
+            local score = folder_parse.season and 78 or 55
+            local confidence = folder_parse.season and "medium" or "low"
+            candidate(score, confidence, "episode-only", nil, episode_only, ep_start, ep_end, parse_date(base))
+        end
 
-    ep_start, ep_end, episode_only = lowered:find("()ep%s*(%d%d?)")
-    if ep_start then
-        local score = folder_parse.season and 76 or 52
-        local confidence = folder_parse.season and "medium" or "low"
-        candidate(score, confidence, "ep-only", nil, episode_only, ep_start, ep_end, parse_date(base))
+        ep_start, ep_end, empty_idx, episode_only = lowered:find("()ep%s*(%d%d?)")
+        if ep_start then
+            local score = folder_parse.season and 76 or 52
+            local confidence = folder_parse.season and "medium" or "low"
+            candidate(score, confidence, "ep-only", nil, episode_only, ep_start, ep_end, parse_date(base))
+        end
     end
 
     if folder_parse.score > best.score then
@@ -357,7 +481,7 @@ local function parse_show_info(info)
     end
 
     if best.show_title then
-        best.show_title = sanitize_name(best.show_title)
+        best.show_title = cleanup_series_title(best.show_title)
     end
 
     return best
@@ -368,7 +492,7 @@ local function parse_movie_info(info)
     local normalized = normalize_separators(base)
     local lowered = normalized:lower()
 
-    if lowered:find("s%d%d?%s*e%d%d?") or lowered:find("%d%d?x%d%d?")
+    if lowered:find("s%d%d?%s*e%d%d?") or has_x_style_episode_marker(lowered)
         or lowered:find("season%s*%d") then
         return {
             score = 0,
@@ -471,6 +595,7 @@ end
 local function ensure_dir(path)
     local info = utils.file_info(path)
     if info and info.is_dir then
+        debug_log("ensure_dir exists: " .. path)
         return true
     end
 
@@ -480,12 +605,13 @@ local function ensure_dir(path)
         cmd = {
             _name = "subprocess",
             playback_only = false,
+            capture_stdout = true,
+            capture_stderr = true,
             args = {
-                "powershell",
-                "-NoProfile",
-                "-NonInteractive",
-                "-Command",
-                "New-Item -ItemType Directory -Force -LiteralPath $args[0] | Out-Null",
+                "cmd",
+                "/d",
+                "/c",
+                "mkdir",
                 path,
             },
         }
@@ -498,6 +624,11 @@ local function ensure_dir(path)
     end
 
     local result = mp.command_native(cmd)
+    if result then
+        debug_log("ensure_dir status=" .. tostring(result.status) .. " path=" .. path)
+    else
+        debug_log("ensure_dir subprocess returned nil for path=" .. path)
+    end
     if result and result.status == 0 then
         return true
     end
@@ -625,25 +756,52 @@ local function save_screenshot(target_path)
     if not ok then
         return false, ret
     end
-    return ret ~= nil, ret
+
+    local saved = utils.file_info(target_path)
+    if saved and saved.is_file then
+        return true, ret
+    end
+
+    return false, ret
 end
 
-local function take_screenshot()
+local function take_screenshot(source)
+    local trigger_source = source or "hotkey"
+    debug_trigger_message(trigger_source)
+
     local info = get_current_media_info()
     local parsed = classify_media(info)
     debug_log_parse_result(parsed)
 
     local target_dir, base_output = build_output_path(parsed)
+    debug_log("base_output=" .. tostring(base_output))
+    debug_log("target_dir(initial)=" .. tostring(target_dir))
+
+    if o.debug_trigger_feedback then
+        local title = parsed.show_title or parsed.title or parsed.raw_name or "Unknown"
+        local se = ""
+        if parsed.season and parsed.episode then
+            se = " S" .. parsed.season .. "E" .. parsed.episode
+        end
+        notify_user("debug: " .. (parsed.classification or "unknown") .. " | " .. title .. se .. " [" .. (parsed.matched_pattern or "n/a") .. "]")
+    end
+
     if not ensure_dir(target_dir) then
+        debug_log("target_dir create failed, trying fallback root")
         local fallback_root = mp.command_native({"expand-path", o.base_output_dir})
         fallback_root = mp.command_native({"normalize-path", fallback_root})
         target_dir = utils.join_path(fallback_root, sanitize_name(o.fallback_subdir))
-        ensure_dir(target_dir)
+        if not ensure_dir(target_dir) then
+            notify_user("Failed to create output directory")
+            mp.msg.error("Failed to create output directory: " .. tostring(target_dir))
+            return
+        end
     end
 
     local file_name = build_screenshot_filename(parsed, info.playback_time)
     local final_path = with_collision_suffix(target_dir, file_name)
-    local ok = save_screenshot(final_path)
+    debug_log("final_path=" .. tostring(final_path))
+    local ok, cmd_result = save_screenshot(final_path)
 
     if ok then
         local rel = make_relative_path(final_path, base_output)
@@ -652,19 +810,55 @@ local function take_screenshot()
     else
         notify_user("Failed to save screenshot")
         mp.msg.error("Failed to save screenshot to: " .. final_path)
+        debug_log("screenshot command result=" .. utils.to_string(cmd_result))
     end
 end
 
 local function register_hotkey()
     mp.remove_key_binding(show_binding_name)
-    if trim(o.screenshot_key) == "" then
-        return
+    mp.remove_key_binding(fallback_binding_name)
+    mp.remove_key_binding("screenshot-folder-debug-trigger")
+
+    local primary_key = trim(o.screenshot_key)
+    if primary_key ~= "" then
+        mp.add_forced_key_binding(primary_key, show_binding_name, function()
+            take_screenshot("primary-key")
+        end)
+        debug_log("registered primary key: " .. primary_key)
     end
-    mp.add_key_binding(o.screenshot_key, show_binding_name, take_screenshot)
+
+    local fallback_key = trim(o.fallback_screenshot_key)
+    if fallback_key ~= "" and fallback_key:lower() ~= primary_key:lower() then
+        mp.add_forced_key_binding(fallback_key, fallback_binding_name, function()
+            take_screenshot("fallback-key")
+        end)
+        debug_log("registered fallback key: " .. fallback_key)
+    end
+
+    local debug_key = trim(o.debug_trigger_key)
+    if debug_key ~= "" and debug_key:lower() ~= primary_key:lower() and debug_key:lower() ~= fallback_key:lower() then
+        mp.add_forced_key_binding(debug_key, "screenshot-folder-debug-trigger", function()
+            debug_trigger_message("debug-key")
+            if o.debug_trigger_captures_screenshot then
+                take_screenshot("debug-key")
+            end
+        end)
+        debug_log("registered debug key: " .. debug_key)
+    end
 end
 
 options.read_options(o, "screenshot-folder", function()
     register_hotkey()
 end)
 
+mp.register_script_message("screenshot-folder-trigger", function()
+    debug_trigger_message("script-message")
+    take_screenshot("script-message")
+end)
+
+mp.register_script_message("screenshot-folder-debug", function()
+    debug_trigger_message("script-message-debug")
+end)
+
 register_hotkey()
+debug_log("script loaded")
