@@ -18,3 +18,7 @@ user-edited list of 3rd party scripts is available here:
     https://github.com/mpv-player/mpv/wiki/User-Scripts
 
 (Anyone can add their own scripts to that list.)
+
+This folder also includes `screenshot-folder.lua`, a Windows-first screenshot
+organizer script that routes screenshots into movie/show/fallback folders based
+on filename and path parsing. See `TOOLS/lua/screenshot-folder.md`.
