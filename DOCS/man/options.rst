@@ -821,7 +821,7 @@ Program Behavior
     load multiple scripts by separating them with the path separator (``:`` on
     Unix, ``;`` on Windows).
 
-    ``--scripts`` is a path list option. See `List Options`_ for details.
+    ``--scripts`` is a string list option. See `List Options`_ for details.
 
 ``--script-opt=<key=value>``, ``--script-opts=key1=value1,key2=value2,...``
     Set options for scripts. A script can query an option by key. If an
@@ -2291,7 +2291,7 @@ Audio
 ``--audio-files=<files>``
     Play audio from an external file while viewing a video.
 
-    This is a path list option. See `List Options`_ for details.
+    This is a string list option. See `List Options`_ for details.
 
 ``--audio-file=<file>``
     CLI/config file only alias for ``--audio-files-append``. Each use of this
@@ -2373,7 +2373,7 @@ Audio
 ``--audio-file-paths=<path1:path2:...>``
     Analogous to ``--sub-file-paths`` option, but for auto-loaded audio files.
 
-    This is a path list option. See `List Options`_ for details.
+    This is a string list option. See `List Options`_ for details.
 
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
@@ -2466,7 +2466,7 @@ Subtitles
     and ``--secondary-sid`` to select the second index. (The index is printed
     on the terminal output after the ``--sid=`` in the list of streams.)
 
-    ``--sub-files`` is a path list option (see `List Options`_  for details), and
+    ``--sub-files`` is a string list option (see `List Options`_  for details), and
     can take multiple file names separated by ``:`` (Unix) or ``;`` (Windows),
     while  ``--sub-file`` takes a single filename, but can be used multiple
     times to add multiple files. Technically, ``--sub-file`` is a CLI/config
@@ -2953,7 +2953,7 @@ Subtitles
         - ``/path/to/video/subtitles/``
         -  the ``sub`` configuration subdirectory (usually ``~/.config/mpv/sub/``)
 
-    This is a path list option. See `List Options`_ for details.
+    This is a string list option. See `List Options`_ for details.
 
 ``--sub-visibility=<yes|no>``
     Can be used to disable display of subtitles, but still select and decode
@@ -6377,7 +6377,7 @@ them.
 
     Each use of the ``--glsl-shader`` option will add another file to the
     internal list of shaders, while ``--glsl-shaders`` takes a list of files,
-    and overwrites the internal list with it. The latter is a path list option
+    and overwrites the internal list with it. The latter is a string list option
     (see `List Options`_ for details).
 
     .. warning::
@@ -8129,7 +8129,7 @@ Miscellaneous
     does not cause default stream selection over the "proper" file. This makes
     it slightly less intrusive.
 
-    This is a path list option. See `List Options`_ for details.
+    This is a string list option. See `List Options`_ for details.
 
 ``--external-file=<file>``
     CLI/config file only alias for ``--external-files-append``. Each use of this
@@ -8148,7 +8148,7 @@ Miscellaneous
     pass videos to this option, so this paragraph describes the behavior
     coincidentally resulting from implementation details.)
 
-    This is a path list option. See `List Options`_ for details.
+    This is a string list option. See `List Options`_ for details.
 
 ``--cover-art-file=<file>``
     CLI/config file only alias for ``--cover-art-files-append``. Each use of this
