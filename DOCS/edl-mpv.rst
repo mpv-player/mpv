@@ -214,6 +214,9 @@ It provides following parameters change track metadata:
 ``byterate``
     Number of bytes per second this stream uses. (Purely informational.)
 
+``program_id``
+    Assign this track to a program (integer, default: -1 meaning unset).
+
 ``index``
     The numeric index of the track this should map to (default: -1). This is
     the 0-based index of the virtual stream as seen by the player, enumerating

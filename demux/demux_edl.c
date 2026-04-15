@@ -244,6 +244,7 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                 sh->lang = get_param0(&ctx, sh, "lang");
                 sh->title = get_param0(&ctx, sh, "title");
                 sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
+                sh->program_id = get_param_int(&ctx, "program_id", -1);
                 bstr flags = get_param(&ctx, "flags");
                 bstr flag;
                 while (bstr_split_tok(flags, "+", &flag, &flags) || flag.len) {
