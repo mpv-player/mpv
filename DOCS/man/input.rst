@@ -2411,7 +2411,7 @@ Property list
     restart playback. The number of the first edition is 0.
 
     For Matroska files, this is the edition. For DVD/Blu-ray, this is the title.
-    For MPEG-TS and HLS, this maps to the underlying program/variant.
+    For MPEG-TS, HLS, and EDL streams, this maps to the underlying program/variant.
 
     This strictly returns the user-set option or property value, and the
     ``current-edition`` property returns the runtime selected edition (this
