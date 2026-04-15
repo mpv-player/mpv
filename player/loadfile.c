@@ -279,18 +279,31 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
     MP_INFO(mpctx, "%s\n", b);
 }
 
+bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer || !demuxer->edition_is_track_mapping || demuxer->num_editions <= 1)
+        return true;
+    if (track->is_external || track->program_id < 0)
+        return true;
+    return track->program_id == demuxer->editions[demuxer->edition].demuxer_id;
+}
+
 void print_track_list(struct MPContext *mpctx, const char *msg)
 {
     if (msg)
         MP_INFO(mpctx, "%s\n", msg);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            if (mpctx->tracks[n]->type == t)
-                // Indent tracks after messages like "Tracks switched" and
-                // "Playing:".
-                print_stream(mpctx, mpctx->tracks[n], msg ||
-                             mpctx->playlist->num_entries > 1 ||
-                             mpctx->playing->playlist_path);
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != t || !track_in_current_edition(mpctx, track))
+                continue;
+            // Indent tracks after messages like "Tracks switched" and
+            // "Playing:".
+            print_stream(mpctx, track, msg ||
+                         mpctx->playlist->num_entries > 1 ||
+                         mpctx->playing->playlist_path);
+        }
     }
 }
 
@@ -571,8 +584,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
-    int preferred_program = (type != STREAM_VIDEO && mpctx->current_track[0][STREAM_VIDEO]) ?
-                            mpctx->current_track[0][STREAM_VIDEO]->program_id : -1;
+    const struct demuxer *demuxer = mpctx->demuxer;
+    int preferred_program = -1;
+    if (demuxer && demuxer->edition_is_track_mapping && demuxer->num_editions > 1) {
+        preferred_program = demuxer->editions[demuxer->edition].demuxer_id;
+    } else if (type != STREAM_VIDEO && mpctx->current_track[0][STREAM_VIDEO]) {
+        preferred_program = mpctx->current_track[0][STREAM_VIDEO]->program_id;
+    }
     if (tid == -2)
         return NULL;
     char **langs = process_langs(opts->stream_lang[type]);

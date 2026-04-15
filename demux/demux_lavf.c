@@ -53,6 +53,7 @@
 #include "stheader.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
+#include "options/options.h"
 #include "options/path.h"
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
@@ -977,6 +978,121 @@ static int nested_io_close2(struct AVFormatContext *s, AVIOContext *pb)
     return priv->default_io_close2(s, pb);
 }
 
+static void build_editions(demuxer_t *demuxer)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    AVFormatContext *avfc = priv->avfc;
+
+    if (avfc->nb_programs <= 1)
+        return;
+
+    for (unsigned i = 0; i < avfc->nb_programs; i++) {
+        AVProgram *prog = avfc->programs[i];
+
+        struct demux_edition ed = {
+            .demuxer_id = prog->id,
+            .metadata = talloc_zero(demuxer, struct mp_tags),
+        };
+        mp_tags_copy_from_av_dictionary(ed.metadata, prog->metadata);
+
+        // AVProgram is unlikely to have a "title" tag, but just in case,
+        // don't override it.
+        char *title = mp_tags_get_str(ed.metadata, "title");
+        if (title)
+            goto done;
+
+        char *service_name = mp_tags_get_str(ed.metadata, "service_name");
+        if (service_name) {
+            mp_tags_set_str(ed.metadata, "title", service_name);
+            goto done;
+        }
+
+        // If program/variant has a single video (or audio) stream, use the
+        // "comment" metadata as the name.
+        char *rendition_name = NULL;
+        int video_count = 0, audio_count = 0;
+        int video_idx = -1, audio_idx = -1;
+        for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
+            unsigned idx = prog->stream_index[j];
+            if (idx >= priv->num_streams || !priv->streams[idx]->sh)
+                continue;
+            if (priv->streams[idx]->sh->type == STREAM_VIDEO) {
+                video_count++;
+                video_idx = idx;
+            } else if (priv->streams[idx]->sh->type == STREAM_AUDIO) {
+                audio_count++;
+                audio_idx = idx;
+            }
+        }
+        int name_idx = video_count == 1 ? video_idx : audio_count == 1 ? audio_idx : -1;
+        if (name_idx >= 0)
+            rendition_name = mp_tags_get_str(priv->streams[name_idx]->sh->tags, "comment");
+
+        if (rendition_name) {
+            mp_tags_set_str(ed.metadata, "title", rendition_name);
+            goto done;
+        }
+
+        char *vb = mp_tags_get_str(ed.metadata, "variant_bitrate");
+        char *end;
+        double rate = vb ? strtoll(vb, &end, 10) : 0;
+        if (rate > 0 && *end == '\0') {
+            rate /= 1000.0;
+            if (rate < 1000) {
+                mp_tags_set_str(ed.metadata, "title", mp_tprintf(42, "Bitrate: %.f kbps", rate));
+            } else {
+                mp_tags_set_str(ed.metadata, "title", mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0));
+            }
+        }
+
+done:
+        MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
+    }
+
+    demuxer->edition_is_track_mapping = true;
+
+    struct MPOpts *mp_opts = mp_get_config_group(priv, demuxer->global, &mp_opt_root);
+    int hls_bitrate = mp_opts->hls_bitrate;
+    int edition_id = mp_opts->edition_id;
+    TA_FREEP(&mp_opts);
+
+    int selected = -1;
+    if (edition_id >= 0 && edition_id < demuxer->num_editions)
+        selected = edition_id;
+
+    // Select initial edition by best variant bitrate
+    if (selected < 0 && hls_bitrate >= 0) {
+        int best = -1;
+        int best_bitrate = 0;
+        bool best_ok = false;
+        for (int n = 0; n < demuxer->num_editions; n++) {
+            AVProgram *prog = avfc->programs[n];
+            for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
+                unsigned idx = prog->stream_index[j];
+                if (idx >= priv->num_streams || !priv->streams[idx]->sh)
+                    continue;
+                struct sh_stream *sh = priv->streams[idx]->sh;
+                if (sh->type != STREAM_VIDEO || sh->hls_bitrate <= 0)
+                    continue;
+                bool ok = sh->hls_bitrate <= hls_bitrate;
+                if (best < 0 || (ok && !best_ok) ||
+                    (ok && best_ok && sh->hls_bitrate > best_bitrate) ||
+                    (!ok && !best_ok && sh->hls_bitrate < best_bitrate))
+                {
+                    best = n;
+                    best_bitrate = sh->hls_bitrate;
+                    best_ok = ok;
+                }
+                break;
+            }
+        }
+        if (best >= 0)
+            selected = best;
+    }
+
+    demuxer->edition = selected >= 0 ? selected : 0;
+}
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     AVFormatContext *avfc = NULL;
@@ -1139,6 +1255,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     add_new_streams(demuxer);
+    build_editions(demuxer);
 
     mp_tags_move_from_av_dictionary(demuxer->metadata, &avfc->metadata);
 

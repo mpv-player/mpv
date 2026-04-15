@@ -1179,15 +1179,26 @@ static int get_edition_entry(int item, int action, void *arg, void *ctx)
 
     char *title = mp_tags_get_str(ed->metadata, "title");
 
+    struct mp_tags *tags = ed->metadata;
+    char **tag_list = talloc_zero_array(NULL, char *, tags->num_keys * 2 + 1);
+    for (int i = 0; i < tags->num_keys; i++) {
+        tag_list[2 * i] = talloc_strdup(tag_list, tags->keys[i]);
+        tag_list[2 * i + 1] = talloc_strdup(tag_list, tags->values[i]);
+    }
+
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(item)},
         {"title",       SUB_PROP_STR(title),
                         .unavailable = !title},
         {"default",     SUB_PROP_BOOL(ed->default_edition)},
+        {"metadata",    SUB_PROP_KEYVALUE_LIST(tag_list),
+                        .unavailable = !tags->num_keys},
         {0}
     };
 
-    return m_property_read_sub(props, action, arg);
+    int ret = m_property_read_sub(props, action, arg);
+    talloc_free(tag_list);
+    return ret;
 }
 
 static int mp_property_list_editions(void *ctx, struct m_property *prop,
@@ -1964,7 +1975,7 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
     bool seen = track == NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *cur = mpctx->tracks[n];
-        if (cur->type == type) {
+        if (cur->type == type && track_in_current_edition(mpctx, cur)) {
             if (cur == track) {
                 seen = true;
             } else if (!cur->selected) {
@@ -2198,6 +2209,17 @@ static char *append_track_info(char *res, struct track *track)
     return res;
 }
 
+struct filtered_track_ctx {
+    struct MPContext *mpctx;
+    int *map;
+};
+
+static int get_filtered_track_entry(int item, int action, void *arg, void *ctx)
+{
+    struct filtered_track_ctx *ft = ctx;
+    return get_track_entry(ft->map[item], action, arg, ft->mpctx);
+}
+
 static int mp_property_list_tracks(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -2210,6 +2232,8 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *track = mpctx->tracks[n];
                 if (track->type != type)
+                    continue;
+                if (!track_in_current_edition(mpctx, track))
                     continue;
                 res = talloc_asprintf_append(res, "%s%s: ",
                     spacing == 2 ? "\n\n" : spacing == 1 ? "\n" : "",
@@ -2256,9 +2280,10 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
                               type == STREAM_SUB ? "subtitle" : stream_type_name(type));
 
                     for (int n = 0; n < mpctx->num_tracks; n++) {
-                        if (mpctx->tracks[n]->type == type) {
+                        struct track *track = mpctx->tracks[n];
+                        if (track->type == type && track_in_current_edition(mpctx, track)) {
                             res = talloc_strdup_append(res, "\n");
-                            res = append_track_info(res, mpctx->tracks[n]);
+                            res = append_track_info(res, track);
                         }
                     }
 
@@ -2270,8 +2295,16 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
         }
     }
 
-    return m_property_read_list(action, arg, mpctx->num_tracks,
-                                get_track_entry, mpctx);
+    int *map = talloc_array(NULL, int, mpctx->num_tracks);
+    int count = 0;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        if (track_in_current_edition(mpctx, mpctx->tracks[n]))
+            map[count++] = n;
+    }
+    struct filtered_track_ctx ft = { .mpctx = mpctx, .map = map };
+    int r = m_property_read_list(action, arg, count, get_filtered_track_entry, &ft);
+    talloc_free(map);
+    return r;
 }
 
 static int mp_property_current_tracks(void *ctx, struct m_property *prop,
@@ -2319,13 +2352,18 @@ static int mp_property_current_tracks(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     int index = -1;
+    int filtered_index = 0;
     for (int n = 0; n < mpctx->num_tracks; n++) {
+        if (!track_in_current_edition(mpctx, mpctx->tracks[n]))
+            continue;
         if (mpctx->tracks[n] == t) {
-            index = n;
+            index = filtered_index;
             break;
         }
+        filtered_index++;
     }
-    mp_assert(index >= 0);
+    if (index < 0)
+        return M_PROPERTY_UNAVAILABLE;
 
     char *name = mp_tprintf(80, "track-list/%d%s%s", index, *rem ? "/" : "", rem);
     return mp_property_do(name, ka->action, ka->arg, ctx);
@@ -8216,8 +8254,25 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         struct demuxer *demuxer = mpctx->demuxer;
         if (mpctx->playback_initialized && demuxer && demuxer->num_editions > 0) {
             if (opts->edition_id != demuxer->edition) {
-                if (!mpctx->stop_play)
-                    mpctx->stop_play = PT_CURRENT_ENTRY;
+                if (demuxer->edition_is_track_mapping) {
+                    int new_ed = opts->edition_id;
+                    if (new_ed < 0 || new_ed >= demuxer->num_editions)
+                        new_ed = 0;
+                    demuxer->edition = new_ed;
+                    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+                        for (int i = 0; i < num_ptracks[t]; i++) {
+                            struct track *sel = select_default_track(mpctx, i, t);
+                            if (sel != mpctx->current_track[i][t])
+                                mp_switch_track_n(mpctx, i, t, sel, 0);
+                        }
+                    }
+                    mp_notify_property(mpctx, "current-edition");
+                    print_track_list(mpctx,
+                        mp_tprintf(42, "Selected edition %d:", demuxer->edition));
+                } else {
+                    if (!mpctx->stop_play)
+                        mpctx->stop_play = PT_CURRENT_ENTRY;
+                }
                 mp_wakeup_core(mpctx);
             }
         }

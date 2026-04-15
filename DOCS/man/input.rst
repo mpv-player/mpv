@@ -2411,6 +2411,7 @@ Property list
     restart playback. The number of the first edition is 0.
 
     For Matroska files, this is the edition. For DVD/Blu-ray, this is the title.
+    For MPEG-TS and HLS, this maps to the underlying program/variant.
 
     This strictly returns the user-set option or property value, and the
     ``current-edition`` property returns the runtime selected edition (this
@@ -2447,6 +2448,9 @@ Property list
     ``edition-list/N/title``
         Edition title as stored in the file. Not always available.
 
+    ``edition-list/N/metadata``
+        Per-edition metadata key/value pairs.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -2458,6 +2462,7 @@ Property list
                 "id"                MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "default"           MPV_FORMAT_FLAG
+                "metadata"          MPV_FORMAT_NODE_MAP
 
 ``metadata``
     Metadata key/value pairs.
@@ -3392,7 +3397,8 @@ Property list
                 "playlist-path" MPV_FORMAT_STRING (optional)
 
 ``track-list``
-    List of audio/video/sub tracks, current entry marked.
+    List of audio/video/sub tracks, current entry marked. When the file has
+    editions, only tracks belonging to the currently selected edition are listed.
 
     This has a number of sub-properties. Replace ``N`` with the 0-based track
     index.
@@ -3466,7 +3472,7 @@ Property list
         The bitrate of the HLS stream, if available.
 
     ``track-list/N/program-id``
-        The program ID of the HLS stream, if available.
+        The program ID of the stream, if available.
 
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
