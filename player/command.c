@@ -2205,32 +2205,27 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
     if (action == M_PROPERTY_PRINT) {
         char *res = talloc_strdup(NULL, "");
 
+        int spacing = 0;
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-            bool found = false;
-
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *track = mpctx->tracks[n];
-                if (track->type == type) {
-                    res = talloc_asprintf_append(res, "%s: ", track_type_name(track));
-                    res = append_track_info(res, track);
-                    res = talloc_asprintf_append(res, "\n");
-                    found = true;
-                }
+                if (track->type != type)
+                    continue;
+                res = talloc_asprintf_append(res, "%s%s: ",
+                    spacing == 2 ? "\n\n" : spacing == 1 ? "\n" : "",
+                    track_type_name(track));
+                res = append_track_info(res, track);
+                spacing = 1;
             }
-
-            if (found && type < STREAM_TYPE_COUNT - 1) {
-                res = talloc_asprintf_append(res, "\n");
-                found = false;
-            }
+            spacing = 2;
         }
 
         struct demuxer *demuxer = mpctx->demuxer;
         if (demuxer && demuxer->num_editions > 1) {
-            res = talloc_asprintf_append(res, "\nEdition: %d of %d",
+            res = talloc_asprintf_append(res, "%sEdition: %d of %d",
+                                         spacing == 2 ? "\n\n" : "",
                                          demuxer->edition + 1,
                                          demuxer->num_editions);
-        } else {
-            res[strlen(res) - 1] = '\0';
         }
 
         *(char **)arg = res;
