@@ -308,6 +308,7 @@ local state = {
     idle = false,
     audio_track_count = 0,
     sub_track_count = 0,
+    track_position = {},
     no_video = false,
     file_loaded = false,
     enabled = true,
@@ -701,12 +702,15 @@ end
 local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
+    state.track_position = {}
 
-    for _, track in pairs(track_list) do
+    for _, track in ipairs(track_list) do
         if track.type == "audio" then
             state.audio_track_count = state.audio_track_count + 1
+            state.track_position[track.id .. "audio"] = state.audio_track_count
         elseif track.type == "sub" then
             state.sub_track_count = state.sub_track_count + 1
+            state.track_position[track.id .. "sub"] = state.sub_track_count
         end
     end
 
@@ -2353,7 +2357,8 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.audio
         end
-        local track = mp.get_property_number("aid", "-")
+        local tid = mp.get_property_number("aid", 0)
+        local track = state.track_position[tid .. "audio"] or "-"
         local count = state.audio_track_count
         return icons.audio .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
@@ -2369,7 +2374,8 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.subtitle
         end
-        local track = mp.get_property_number("sid", "-")
+        local tid = mp.get_property_number("sid", 0)
+        local track = state.track_position[tid .. "sub"] or "-"
         local count = state.sub_track_count
         return icons.subtitle .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
