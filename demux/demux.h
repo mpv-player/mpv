@@ -251,6 +251,7 @@ typedef struct demuxer {
     struct demux_edition *editions;
     int num_editions;
     int edition;
+    bool edition_is_track_mapping;
 
     struct demux_chapter *chapters;
     int num_chapters;

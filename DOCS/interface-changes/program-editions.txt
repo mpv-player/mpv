@@ -1,0 +1,2 @@
+``track-list`` is now filtered by the currently selected edition
+add ``edition-list/N/metadata`` sub-property

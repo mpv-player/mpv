@@ -302,27 +302,78 @@ static void test_track_selection(char *file, char *path)
         check_string("track-list/5/selected", "yes");
     } else if (strcmp(file, "multiprogram.ts") == 0) {
         set_property_string("subs-match-os-language", "no");
-        set_property_string("vid", "2");
+        set_property_string("edition", "1");
+
+        reload_file(path);
+        check_string("current-edition", "1");
 
         // no subs are selected by default
-        reload_file(path);
+        check_string("track-list/count", "2");
+        check_string("track-list/0/program-id", "2");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/program-id", "2");
         check_string("track-list/1/selected", "no");
-        check_string("track-list/3/selected", "no");
 
-        // the eng track cannot be selected due to having the wrong program ID
-        // because subs-fallback=default, the jpn track cannot be chosen either
-        // so we get no subs
         set_property_string("slang", "eng");
-        reload_file(path);
-        check_string("track-list/1/selected", "no");
-        check_string("track-list/3/selected", "no");
 
-        // the jpn track is selected to match video program ID
-        // even though the user requested eng subtitles
-        set_property_string("subs-fallback", "yes");
+        // no eng subs in edition 1
         reload_file(path);
+        check_string("track-list/count", "2");
+        check_string("track-list/0/program-id", "2");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/program-id", "2");
+        check_string("track-list/1/selected", "no");
+
+        check_string("current-tracks/video/program-id", "2");
+
+        // eng subs in edition 0
+        set_property_string("edition", "0");
+        check_string("current-edition", "0");
+        check_string("track-list/count", "2");
+        check_string("track-list/0/program-id", "1");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/program-id", "1");
+        check_string("track-list/1/lang", "eng");
+        check_string("track-list/1/selected", "yes");
+
+        check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/program-id", "1");
+        check_string("current-tracks/video/program-id", "1");
+
+        // reload should give the same result
+        reload_file(path);
+        check_string("current-edition", "0");
+        check_string("track-list/count", "2");
+        check_string("track-list/0/program-id", "1");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/program-id", "1");
+        check_string("track-list/1/lang", "eng");
+        check_string("track-list/1/selected", "yes");
+
+        check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/program-id", "1");
+        check_string("current-tracks/video/program-id", "1");
+
+        set_property_string("subs-fallback", "yes");
+        set_property_string("edition", "1");
+        // the jpn track is selected even though the user requested eng subtitles
+        check_string("current-edition", "1");
+        check_string("track-list/count", "2");
+        check_string("track-list/0/selected", "yes");
         check_string("current-tracks/sub/lang", "jpn");
-        check_string("track-list/3/selected", "yes");
+        check_string("track-list/1/selected", "yes");
+
+        check_string("current-edition", "1");
+        check_string("track-list/count", "2");
+        check_string("track-list/0/program-id", "2");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/program-id", "2");
+        check_string("track-list/1/lang", "jpn");
+        check_string("track-list/1/selected", "yes");
+
+        check_string("current-tracks/sub/lang", "jpn");
+        check_string("current-tracks/sub/program-id", "2");
+        check_string("current-tracks/video/program-id", "2");
     }
 }
 
