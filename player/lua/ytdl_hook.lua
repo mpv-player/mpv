@@ -486,13 +486,18 @@ local function formats_to_edl(json, formats, use_all_formats)
     local streams = {}
 
     local tbr_only = true
+    local has_video_only = false
     for _, track in ipairs(formats) do
         tbr_only = tbr_only and track["tbr"] and
                    (not track["abr"]) and (not track["vbr"])
+        local video_only = track.vcodec and track.vcodec ~= "none"
+                      and (not track.acodec or track.acodec == "none")
+        has_video_only = has_video_only or video_only
     end
 
     local has_requested_video = false
     local has_requested_audio = false
+    local next_program_id = 0
     -- Web players with quality selection always show the highest quality
     -- option at the top. Since tracks are usually listed with the first
     -- track at the top, that should also be the highest quality track.
@@ -537,6 +542,13 @@ local function formats_to_edl(json, formats, use_all_formats)
         local skip = #tracks == 0
         local params = ""
 
+        -- For DASH-style sources (video-only + audio-only streams), only video
+        -- formats get a program_id. Audio-only formats are shared across all
+        -- editions. For muxed sources, every format including audio_only becomes
+        -- a separate edition.
+        local has_video = track.vcodec and track.vcodec ~= "none"
+        local dominated = has_video or not has_video_only
+
         if use_all_formats then
             for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
@@ -580,7 +592,11 @@ local function formats_to_edl(json, formats, use_all_formats)
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
                     edl_escape(title) .. ",byterate=" .. byterate ..
+                    (dominated and ",program_id=" .. next_program_id or "") ..
                     (#flags > 0 and ",flags=" .. table.concat(flags, "+") or "")
+            end
+            if dominated then
+                next_program_id = next_program_id + 1
             end
 
             if duration > 0 then
