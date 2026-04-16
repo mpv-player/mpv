@@ -322,6 +322,34 @@ static char *get_text(struct sd *sd, double pts, enum sd_text_type type)
 
     return result;
 }
+
+static struct sub_lines *get_lines(struct sd *sd)
+{
+    struct sd_sbr_priv *ctx = sd->priv;
+
+    struct sub_lines *res = talloc_zero(NULL, struct sub_lines);
+    if (!ctx->sbr_subtitles)
+        return res;
+
+    if (!ctx->subtitle_iterator)
+        ctx->subtitle_iterator = sbr_subtitle_iterator_new();
+    sbr_subtitle_iterator *iter = ctx->subtitle_iterator;
+
+    sbr_subtitles_iter(ctx->sbr_subtitles, iter);
+    for (; !iter->exhausted; sbr_subtitle_iterator_next(iter)) {
+        const char *text = sbr_subtitle_iterator_get_text(iter, 0);
+
+        struct sub_line line = {
+            .text  = bstrdup0(res, bstr_strip(bstr0(text))),
+            .start = iter->start / 1000.,
+            .end   = iter->end / 1000.
+        };
+        MP_TARRAY_APPEND(res, res->entries, res->num_entries, line);
+    }
+    sbr_subtitle_iterator_reset(iter);
+
+    return res;
+}
 #endif
 
 static void uninit(struct sd *sd)
@@ -354,6 +382,7 @@ const struct sd_functions sd_sbr = {
     .get_bitmaps = get_bitmaps,
 #if SUBRANDR_MAJOR > 1 || SUBRANDR_MINOR >= 3
     .get_text = get_text,
+    .get_lines = get_lines,
 #endif
     .control = control,
     .select = enable_output,
