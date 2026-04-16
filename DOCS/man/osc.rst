@@ -473,7 +473,7 @@ Configurable Options
     Width of the ``floating`` layout.
 
 ``floatingalpha``
-    Default: 130
+    Default: 105
 
     Alpha of the ``floating`` layout background, 0 (opaque) to 255 (fully
     transparent).
