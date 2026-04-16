@@ -589,12 +589,46 @@ static int sub_line_cmp(const void *a, const void *b)
     return 0;
 }
 
+static void dedup_sub_lines(struct sub_lines *lines)
+{
+    int window_start = 0;
+    int window_end = 1;
+    int current_shift = 0;
+
+    while (window_end < lines->num_entries) {
+        struct sub_line next = lines->entries[window_end + current_shift];
+        for (int i = window_start; i < window_end; ++i) {
+            if (lines->entries[i].end < next.start) {
+                struct sub_line tmp = lines->entries[window_start];
+                lines->entries[window_start++] = lines->entries[i];
+                lines->entries[i] = tmp;
+                continue;
+            }
+
+            if (!strcmp(lines->entries[i].text, next.text)) {
+                lines->entries[i].end = MPMAX(next.end, lines->entries[i].end);
+                TA_FREEP(&next.text);
+                ++current_shift, --lines->num_entries;
+                goto skip;
+            }
+        }
+
+        lines->entries[window_end++] = next;
+
+    skip:;
+    }
+}
+
 struct sub_lines *sub_get_lines(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
     struct sub_lines *res = NULL;
     if (sub->sd->driver->get_lines) {
         res = sub->sd->driver->get_lines(sub->sd);
+        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+              sub_line_cmp);
+        dedup_sub_lines(res);
+        // dedup may sometimes reorder lines to keep its window smaller
         qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
               sub_line_cmp);
     }
