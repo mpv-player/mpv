@@ -266,9 +266,9 @@ local function set_osc_styles()
         wcButtons = "{\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\fs24\\fn" .. icon_font .. "}",
         wcTitle = "{\\1c&H" .. osc_color_convert(user_opts.title_color) .. "\\fs24\\q2}",
         wcBar = "{\\1c&H" .. osc_color_convert(user_opts.background_color) .. "}",
-        floatingButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs26\\fn" .. icon_font .. "}",
-        floatingButtonslabel = "{\\fs26\\fn" .. mp.get_property("options/osd-font") .. "}",
-        floatingButtonsBig = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs30\\fn" .. icon_font .. "}",
+        floatingButtons = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs22\\fn" .. icon_font .. "}",
+        floatingButtonslabel = "{\\fs22\\fn" .. mp.get_property("options/osd-font") .. "}",
+        floatingButtonsBig = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.buttons_color) .. "\\3c&HFFFFFF\\fs26\\fn" .. icon_font .. "}",
         floatingBox = "{\\rDefault\\blur0\\bord0\\1c&H" ..
             osc_color_convert(user_opts.background_color) .. "\\3c&H" ..
             osc_color_convert(user_opts.background_color) .. "}",
