@@ -23,15 +23,13 @@ SFDIR = os.path.join(SCRIPT_DIR, "mpv-osd-symbols.sfdir")
 REPO_SHA = "9a4a2db2df7f0067b4ef43c5ae5bfcae3759a5a0"  # v1.1.320
 REPO_BASE = ("https://raw.githubusercontent.com/"
              f"microsoft/fluentui-system-icons/{REPO_SHA}/assets")
-GLYPH_WIDTH = 880
-
 # Mapping: codepoint -> (fluent_icon_name, size, style, transform)
 #
 # See https://github.com/microsoft/fluentui-system-icons/tree/main/assets
 # for available icons.
 
 ICONS = {
-    0xE200: ("Line Horizontal 3",    20, "filled", None),     # menu
+    0xE200: ("Line Horizontal 3",    24, "filled", None),     # menu
     0xE201: ("Play",                 24, "filled", "flip_x"), # prev / play_backward
     0xE202: ("Play",                 24, "filled", None),     # play / next
     0xE203: ("Pause",                24, "filled", None),     # pause
@@ -102,7 +100,6 @@ import psMat
 import os
 
 font = fontforge.open({SFDIR!r})
-WIDTH = {GLYPH_WIDTH}
 
 svg_paths = {svg_paths!r}
 transforms = {transforms!r}
@@ -115,53 +112,63 @@ for cp, svg_path in sorted(svg_paths.items()):
     glyph.clear()
     glyph.importOutlines(svg_path)
 
-    # Scale to fit ascent (800 units) with padding
     bb = glyph.boundingBox()  # (xmin, ymin, xmax, ymax)
-    bw = bb[2] - bb[0]
-    bh = bb[3] - bb[1]
-    if bw == 0 or bh == 0:
+    if bb[0] == bb[2] or bb[1] == bb[3]:
         print(f"  SKIP U+{{cp:04X}} (empty)")
         continue
 
-    target = 700  # leave some padding within 800-unit ascent
-    scale = min(target / bh, target / bw)
-    glyph.transform(psMat.scale(scale))
-
-    # Apply transform (e.g. horizontal flip for prev)
-    if cp in transforms and transforms[cp] == "flip_x":
-        glyph.transform(psMat.scale(-1, 1))
-
-    # Center in glyph
-    bb = glyph.boundingBox()
-    x_off = (WIDTH - (bb[2] + bb[0])) / 2
+    # Center vertically within ascent (0..800)
     y_off = (800 - (bb[3] + bb[1])) / 2
-    glyph.transform(psMat.translate(x_off, y_off))
-
-    # Add alert indicator
-    if cp in transforms and transforms[cp] == "add_alert":
+    if y_off:
+        glyph.transform(psMat.translate(0, y_off))
         bb = glyph.boundingBox()
+
+    transform = transforms.get(cp)
+    if transform == "flip_x":
         cx = (bb[0] + bb[2]) / 2
+        glyph.transform(psMat.compose(psMat.translate(-cx, 0),
+                        psMat.compose(psMat.scale(-1, 1),
+                        psMat.translate(cx, 0))))
+    elif transform == "add_alert":
         cy = (bb[1] + bb[3]) / 2
-        # Shrink icon to make room
-        glyph.transform(psMat.compose(
-            psMat.translate(-cx, -cy),
-            psMat.compose(psMat.scale(0.75),
-                          psMat.translate(cx - 80, cy))))
-        # Draw exclamation mark (centered vertically at y=400)
+        h = (bb[3] - bb[1]) * 0.75
+        top = cy + h / 2
+        bot = cy - h / 2
+        w = h * 0.14  # stroke width relative to height
+        r = w * 0.55  # dot radius
+        cx = bb[2] + 100 + w / 2
+        k = 0.5523
+
         pen = glyph.glyphPen(replace=False)
-        pen.moveTo((720, 630))
-        pen.lineTo((760, 630))
-        pen.lineTo((760, 300))
-        pen.lineTo((720, 300))
+        # Stem (tapers from w at top to ~0.46*w at bottom tip)
+        stem_bot = bot + r * 2 + h * 0.1  # gap above dot
+        hw = w / 2
+        nhw = hw * 0.46
+        pen.moveTo((cx + hw, top))
+        pen.curveTo((cx + hw, top + hw * 0.3), (cx + hw * 0.3, top + hw),
+                     (cx, top + hw))
+        pen.curveTo((cx - hw * 0.3, top + hw), (cx - hw, top + hw * 0.3),
+                     (cx - hw, top))
+        pen.lineTo((cx - nhw, stem_bot))
+        pen.curveTo((cx - nhw, stem_bot - nhw * 0.5), (cx - nhw * 0.5, stem_bot - nhw),
+                     (cx, stem_bot - nhw))
+        pen.curveTo((cx + nhw * 0.5, stem_bot - nhw), (cx + nhw, stem_bot - nhw * 0.5),
+                     (cx + nhw, stem_bot))
         pen.closePath()
-        pen.moveTo((720, 240))
-        pen.lineTo((760, 240))
-        pen.lineTo((760, 170))
-        pen.lineTo((720, 170))
+        # Dot (circle)
+        dot_cy = bot + r
+        pen.moveTo((cx + r, dot_cy))
+        pen.curveTo((cx + r, dot_cy + r * k), (cx + r * k, dot_cy + r),
+                     (cx, dot_cy + r))
+        pen.curveTo((cx - r * k, dot_cy + r), (cx - r, dot_cy + r * k),
+                     (cx - r, dot_cy))
+        pen.curveTo((cx - r, dot_cy - r * k), (cx - r * k, dot_cy - r),
+                     (cx, dot_cy - r))
+        pen.curveTo((cx + r * k, dot_cy - r), (cx + r, dot_cy - r * k),
+                     (cx + r, dot_cy))
         pen.closePath()
         pen = None
 
-    glyph.width = WIDTH
     print(f"  U+{{cp:04X}} imported")
 
 font.save({SFDIR!r})
