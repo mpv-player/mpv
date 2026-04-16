@@ -7011,8 +7011,7 @@ static void cmd_mouse(void *p)
     if (button == -1) {// no button
         if (pre_key)
             mp_input_put_key_artificial(mpctx->input, pre_key, 1);
-        if (pre_key != MP_KEY_MOUSE_LEAVE)
-            mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
+        mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
         return;
     }
     if (button < 0 || button >= MP_KEY_MOUSE_BTN_COUNT) {// invalid button
@@ -7030,10 +7029,8 @@ static void cmd_mouse(void *p)
     button += dbc ? MP_MBTN_DBL_BASE : MP_MBTN_BASE;
     if (pre_key)
         mp_input_put_key_artificial(mpctx->input, pre_key, 1);
-    if (pre_key != MP_KEY_MOUSE_LEAVE) {
-        mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
-        mp_input_put_key_artificial(mpctx->input, button, 1);
-    }
+    mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
+    mp_input_put_key_artificial(mpctx->input, button, 1);
 }
 
 static void cmd_key(void *p)
