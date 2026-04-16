@@ -1334,8 +1334,8 @@ Video
         - If you're not sure, but want hardware decoding always enabled by
           default, put ``hwdec=yes`` into your ``mpv.conf``, and acknowledge that
           this may cause problems.
-        - If you want to test available hardware decoding methods, pass
-          ``--hwdec=auto --hwdec-codecs=all`` and look at the terminal output.
+        - If you want to test all available hardware decoding methods, pass
+          ``--hwdec=auto-unsafe --hwdec-codecs=all`` and look at the terminal output.
         - If you're a developer, or want to perform elaborate tests, you may
           need any of the other possible option values.
 
