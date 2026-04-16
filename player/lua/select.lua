@@ -518,12 +518,21 @@ mp.add_key_binding(nil, "select-watch-history", function ()
                 return
             end
 
-            error_message = select(2, os.remove(history_file_path))
-            if error_message then
-                show_error(error_message)
-            else
-                mp.osd_message("History cleared.")
-            end
+            input.select({
+                prompt = "Are you sure you want to clear the history?",
+                items = {"No", "Yes"},
+                submit = function (j)
+                    if j == 2 then
+                        error_message = select(2, os.remove(history_file_path))
+                        if error_message then
+                            show_error(error_message)
+                        else
+                            mp.osd_message("History cleared.")
+                        end
+                    end
+                end
+            })
+
         end,
     })
 end)
