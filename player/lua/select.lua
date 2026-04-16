@@ -285,128 +285,39 @@ mp.add_key_binding(nil, "select-edition", function ()
 end)
 
 mp.add_key_binding(nil, "select-subtitle-line", function ()
-    local sub = mp.get_property_native("current-tracks/sub")
+    local lines = mp.get_property_native("sub-lines")
 
-    if sub == nil then
-        show_warning("No subtitle is loaded.")
+    if not lines then
+        show_warning("Subtitle lines could not be retrieved.")
         return
     end
 
-    if sub.external and sub["external-filename"]:find("^edl://") then
-        sub["external-filename"] = sub["external-filename"]:match('https?://.*')
-                                   or sub["external-filename"]
-    end
-
-    local r = mp.command_native({
-        _name = "subprocess",
-        capture_stdout = true,
-        args = sub.external
-            and {"ffmpeg", "-loglevel", "error", "-i", sub["external-filename"],
-                 "-f", "lrc", "-map_metadata", "-1", "-fflags", "+bitexact", "-"}
-            or {"ffmpeg", "-loglevel", "error", "-i", mp.get_property("path"),
-                "-map", "s:" .. sub["id"] - 1, "-f", "lrc", "-map_metadata",
-                "-1", "-fflags", "+bitexact", "-"}
-    })
-
-    if r.error_string == "init" then
-        show_error("Failed to extract subtitles: ffmpeg not found.")
-        return
-    elseif r.status ~= 0 then
-        show_error("Failed to extract subtitles.")
-        return
-    end
-
-    local sub_lines = {}
-    local sub_times = {}
+    local items = {}
     local default_item
     local delay = mp.get_property_native("sub-delay")
     local time_pos = mp.get_property_native("time-pos") - delay
     local duration = mp.get_property_native("duration", math.huge)
-    local sub_content = {}
 
-    -- Strip HTML and ASS tags and process subtitles
-    for line in r.stdout:gmatch("[^\n]+") do
-        -- Clean up tags
-        local sub_line = line:gsub("<.->", "")                -- Strip HTML tags
-                             :gsub("\\h+", " ")               -- Replace '\h' tag
-                             :gsub("{[\\=].-}", "")           -- Remove ASS formatting
-                             :gsub(".-]", "", 1)              -- Remove time info prefix
-                             :gsub("^%s*(.-)%s*$", "%1")      -- Strip whitespace
-                             :gsub("^m%s[mbl%s%-%d%.]+$", "") -- Remove graphics code
+    for i, line in ipairs(lines) do
+        items[i] = format_time(line.start, duration) .. " " .. line.text
 
-        if sub.codec == "text" or (sub_line ~= "" and sub_line:match("^%s+$") == nil) then
-            local sub_time = line:match("%d+") * 60 + line:match(":([%d%.]*)")
-            local time_seconds = math.floor(sub_time)
-            sub_content[time_seconds] = sub_content[time_seconds] or {}
-            sub_content[time_seconds][sub_line] = true
-        end
-    end
-
-    -- Process all timestamps and content into selectable subtitle list
-    for time_seconds, contents in pairs(sub_content) do
-        for sub_line in pairs(contents) do
-            sub_times[#sub_times + 1] = time_seconds
-            sub_lines[#sub_lines + 1] = format_time(time_seconds, duration) .. " " .. sub_line
-        end
-    end
-
-    -- Generate time -> subtitle mapping
-    local time_to_lines = {}
-    for i = 1, #sub_times do
-        local time = sub_times[i]
-        local line = sub_lines[i]
-
-        if not time_to_lines[time] then
-            time_to_lines[time] = {}
-        end
-        table.insert(time_to_lines[time], line)
-    end
-
-    -- Sort by timestamp
-    local sorted_sub_times = {}
-    for i = 1, #sub_times do
-        sorted_sub_times[i] = sub_times[i]
-    end
-    table.sort(sorted_sub_times)
-
-    -- Use a helper table to avoid duplicates
-    local added_times = {}
-
-    -- Rebuild sub_lines and sub_times based on the sorted timestamps
-    local sorted_sub_lines = {}
-    for _, sub_time in ipairs(sorted_sub_times) do
-        -- Iterate over all subtitle content for this timestamp
-        if not added_times[sub_time] then
-            added_times[sub_time] = true
-            for _, line in ipairs(time_to_lines[sub_time]) do
-                table.insert(sorted_sub_lines, line)
-            end
-        end
-    end
-
-    -- Use the sorted subtitle list
-    sub_lines = sorted_sub_lines
-    sub_times = sorted_sub_times
-
-    -- Get the default item (last subtitle before current time position)
-    for i, sub_time in ipairs(sub_times) do
-        if sub_time <= time_pos then
-            default_item = i
+        if line.start <= time_pos then
+            default_item = #items
         end
     end
 
     input.select({
         prompt = "Select a line to seek to:",
-        items = sub_lines,
+        items = items,
         default_item = default_item,
-        submit = function (index)
+        submit = function (i)
             -- Add an offset to seek to the correct line while paused without a
             -- video track.
             if mp.get_property_native("current-tracks/video/image") ~= false then
                 delay = delay + 0.1
             end
 
-            mp.commandv("seek", sub_times[index] + delay, "absolute")
+            mp.commandv("seek", lines[i].start + delay, "absolute")
         end,
     })
 end)

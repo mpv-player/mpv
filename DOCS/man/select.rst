@@ -102,9 +102,6 @@ Available script bindings are:
 ``select-subtitle-line``
     Select a subtitle line to seek to. This doesn't work with image subtitles.
 
-    This currently requires ``ffmpeg`` in ``PATH``, or in the same folder as mpv
-    on Windows.
-
 ``select-audio-device``
     Select an audio device.
 

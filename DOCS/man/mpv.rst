@@ -336,8 +336,7 @@ g-e
     Select an MKV edition or DVD/Blu-ray title.
 
 g-l
-    Select a subtitle line to seek to. This currently requires ``ffmpeg`` in
-    ``PATH``, or in the same folder as mpv on Windows.
+    Select a subtitle line to seek to.
 
 g-d
     Select an audio device.
