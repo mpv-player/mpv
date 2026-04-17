@@ -711,6 +711,7 @@ local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
     state.track_position = {}
+    state.no_video = true
 
     for _, track in ipairs(track_list) do
         if track.type == "audio" then
