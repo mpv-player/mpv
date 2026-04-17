@@ -939,11 +939,6 @@ Program Behavior
         default will have the default flag set. This means mpv should generally
         still select formats chosen with ``--ytdl-format`` by default.
 
-        Although this mechanism makes it possible to switch streams at runtime,
-        it's not suitable for this purpose for various technical reasons. (It's
-        slow, which can't be really fixed.) In general, this option is not
-        useful, and was only added to show that it's possible.
-
         There are two cases that must be considered when doing quality/bandwidth
         selection:
 
