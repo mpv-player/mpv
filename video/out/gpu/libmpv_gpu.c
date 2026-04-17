@@ -6,6 +6,9 @@
 #include "video/out/libmpv.h"
 
 static const struct libmpv_gpu_context_fns *context_backends[] = {
+#if HAVE_D3D11
+    &libmpv_gpu_context_d3d11,
+#endif
 #if HAVE_GL
     &libmpv_gpu_context_gl,
 #endif
@@ -181,6 +184,8 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
 
     int depth = *(int *)get_mpv_render_param(params, MPV_RENDER_PARAM_DEPTH,
                                              &(int){0});
+    if (!depth)
+        depth = tex->params.format->component_depth[0];
     gl_video_set_fb_depth(p->renderer, depth);
 
     bool flip = *(int *)get_mpv_render_param(params, MPV_RENDER_PARAM_FLIP_Y,
