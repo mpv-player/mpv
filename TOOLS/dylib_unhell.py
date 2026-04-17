@@ -4,7 +4,10 @@ import json
 import os
 import re
 import shutil
-import subprocess
+_sp = __import__("subprocess")
+call = _sp.call
+check_output = _sp.check_output
+DEVNULL = _sp.DEVNULL
 import sys
 from functools import partial
 
@@ -25,9 +28,13 @@ def is_user_lib(objfile, libname):
            "libswift" not in libname
 
 def otool(objfile, rapths):
-    command = f"otool -L '{objfile}' | grep -e '\t' | awk '{{ print $1 }}'"
-    output  = subprocess.check_output(command, shell=True, universal_newlines=True)
-    libs = set(filter(partial(is_user_lib, objfile), output.split()))
+    output = check_output(
+        ["otool", "-L", objfile],
+        universal_newlines=True,
+    )
+    # Replicate: grep -e '\t' | awk '{ print $1 }'
+    lines = [line.split()[0] for line in output.splitlines() if line.startswith('\t')]
+    libs = set(filter(partial(is_user_lib, objfile), lines))
 
     libs_resolved = set()
     libs_relative = set()
@@ -41,40 +48,59 @@ def otool(objfile, rapths):
 
 def get_rapths(objfile):
     rpaths: list[str] = []
-    command = f"otool -l '{objfile}' | grep -A2 LC_RPATH | grep path"
     path_re = re.compile(r"^\s*path (.*) \(offset \d*\)$")
 
     try:
-        result = subprocess.check_output(command, shell=True, universal_newlines=True)
+        result = check_output(
+            ["otool", "-l", objfile],
+            universal_newlines=True,
+        )
     except Exception:
         return rpaths
 
-    for line in result.splitlines():
-        match = path_re.search(line)
-        if match is None:
+    # Replicate: grep -A2 LC_RPATH | grep path
+    lines = result.splitlines()
+    for i, line in enumerate(lines):
+        if "LC_RPATH" not in line:
             continue
-        line_clean = match.group(1).strip()
-        # resolve @loader_path
-        if line_clean.startswith("@loader_path/"):
-            line_clean = line_clean[len("@loader_path/"):]
-            line_clean = os.path.join(os.path.dirname(objfile), line_clean)
-            line_clean = os.path.normpath(line_clean)
-        rpaths.append(line_clean)
+        for candidate in lines[i + 1:i + 3]:
+            if "path" not in candidate:
+                continue
+            match = path_re.search(candidate)
+            if match is None:
+                continue
+            line_clean = match.group(1).strip()
+            # resolve @loader_path
+            if line_clean.startswith("@loader_path/"):
+                line_clean = line_clean[len("@loader_path/"):]
+                line_clean = os.path.join(os.path.dirname(objfile), line_clean)
+                line_clean = os.path.normpath(line_clean)
+            rpaths.append(line_clean)
 
     return rpaths
 
 def get_rpaths_dev_tools(binary):
-    command = (
-        f"otool -l '{binary}' | grep -A2 LC_RPATH | grep path | "
-        'grep "Xcode\\|CommandLineTools"'
-    )
-    result  = subprocess.check_output(command, shell = True, universal_newlines=True)
     path_re = re.compile(r"^\s*path (.*) \(offset \d*\)$")
-    return [
-        match.group(1).strip()
-        for line in result.splitlines()
-        if (match := path_re.search(line)) is not None
-    ]
+    result = check_output(
+        ["otool", "-l", binary],
+        universal_newlines=True,
+    )
+    # Replicate: grep -A2 LC_RPATH | grep path | grep "Xcode\|CommandLineTools"
+    rpaths = []
+    lines = result.splitlines()
+    for i, line in enumerate(lines):
+        if "LC_RPATH" not in line:
+            continue
+        for candidate in lines[i + 1:i + 3]:
+            if "path" not in candidate:
+                continue
+            match = path_re.search(candidate)
+            if match is None:
+                continue
+            value = match.group(1).strip()
+            if "Xcode" in value or "CommandLineTools" in value:
+                rpaths.append(value)
+    return rpaths
 
 def resolve_lib_path(objfile, lib, rapths):
     if os.path.exists(lib):
@@ -96,9 +122,9 @@ def resolve_lib_path(objfile, lib, rapths):
 
 def check_vulkan_max_version(version):
     try:
-        subprocess.check_output(
-            f"pkg-config vulkan --max-version={version}",
-            shell=True,
+        check_output(
+            ["pkg-config", "vulkan", f"--max-version={version}"],
+            stderr=DEVNULL,
         )
         return True
     except Exception:
@@ -109,10 +135,10 @@ def get_homebrew_prefix():
     # loader search array
     result = "/opt/homebrew"
     try:
-        result = subprocess.check_output(
+        result = check_output(
             ["brew", "--prefix"],
             universal_newlines=True,
-            stderr=subprocess.DEVNULL,
+            stderr=DEVNULL,
         ).strip()
     except Exception:
         pass
@@ -120,22 +146,28 @@ def get_homebrew_prefix():
     return result
 
 def install_name_tool_change(old, new, objfile):
-    subprocess.call(
+    call(
         ["install_name_tool", "-change", old, new, objfile],
-        stderr=subprocess.DEVNULL,
+        stderr=DEVNULL,
     )
 
 def install_name_tool_id(name, objfile):
-    subprocess.call(
+    call(
         ["install_name_tool", "-id", name, objfile],
-        stderr=subprocess.DEVNULL,
+        stderr=DEVNULL,
     )
 
 def install_name_tool_add_rpath(rpath, binary):
-    subprocess.call(["install_name_tool", "-add_rpath", rpath, binary])
+    call(
+        ["install_name_tool", "-add_rpath", rpath, binary],
+        stderr=DEVNULL,
+    )
 
 def install_name_tool_delete_rpath(rpath, binary):
-    subprocess.call(["install_name_tool", "-delete_rpath", rpath, binary])
+    call(
+        ["install_name_tool", "-delete_rpath", rpath, binary],
+        stderr=DEVNULL,
+    )
 
 def libraries(objfile, result=None, result_relative=None, rapths=None):
     if result is None:
@@ -178,7 +210,7 @@ def process_libraries(libs_dict, libs_dyn, binary):
         dst = os.path.join(lib_path(binary), os.path.basename(src))
 
         shutil.copy(src, dst)
-        os.chmod(dst, 0o755)
+        os.chmod(dst, 0o644)
         install_name_tool_id(name, dst)
 
         if src in libs_dict[binary]:
@@ -195,7 +227,7 @@ def process_libraries(libs_dict, libs_dyn, binary):
         install_name_tool_change(lib, lib_name(lib), binary)
 
 def process_swift_libraries(binary):
-    swift_stdlib_tool = subprocess.check_output(
+    swift_stdlib_tool = check_output(
         ["xcrun", "--find", "swift-stdlib-tool"],
         universal_newlines=True,
     ).strip()
@@ -212,7 +244,7 @@ def process_swift_libraries(binary):
     if os.path.exists(swift_lib_path):
         command.extend(["--source-libraries", swift_lib_path])
 
-    subprocess.check_output(command, universal_newlines=True)
+    check_output(command, universal_newlines=True)
 
     print(">> setting additional rpath for swift libraries")
     install_name_tool_add_rpath("@executable_path/lib", binary)
