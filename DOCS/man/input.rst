@@ -3158,8 +3158,15 @@ Property list
 
     ``mouse-pos/hover``
         Boolean - whether the mouse pointer hovers the video window. The
-        coordinates should be ignored when this value is false, because the
-        video backends update them only when the pointer hovers the window.
+        coordinates should be ignored when this value is false if no mouse
+        button is being pressed, because the video backends update them only
+        when the pointer hovers the window in this case.
+
+        If a mouse button is pressed while the pointer hovers the video window
+        and then the mouse pointer moves out of window region without releasing
+        the button, some video backends "capture" the pointer and still report
+        the coordinates. In this case, the value of this property may be true or
+        false depending on the video backend.
 
 ``touch-pos``
     Read-only - last known touch point positions, normalized to OSD dimensions.
