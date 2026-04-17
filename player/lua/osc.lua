@@ -719,6 +719,8 @@ local function update_tracklist(_, track_list)
         elseif track.type == "sub" then
             state.sub_track_count = state.sub_track_count + 1
             state.track_position[track.id .. "sub"] = state.sub_track_count
+        elseif track.type == "video" and track.selected then
+            state.no_video = false
         end
     end
 
@@ -3176,10 +3178,6 @@ observe_cached("border", request_init_resize)
 observe_cached("title-bar", request_init_resize)
 observe_cached("window-maximized", request_init_resize)
 observe_cached("idle-active", request_tick)
-mp.observe_property("current-tracks/video", "native", function(_, val)
-    state.no_video = val == nil
-    request_tick()
-end)
 
 mp.register_event("file-loaded", function()
     state.file_loaded = true
