@@ -745,21 +745,8 @@ int mp_ftruncate64(int fd, off_t length)
 thread_local
 static struct {
     DWORD errcode;
-    char *errstring;
-} mp_dl_result = {
-    .errcode = 0,
-    .errstring = NULL
-};
-
-static void mp_dl_free(void)
-{
-    talloc_free(mp_dl_result.errstring);
-}
-
-static void mp_dl_init(void)
-{
-    atexit(mp_dl_free);
-}
+    char errstring[1024];
+} mp_dl_result;
 
 void *mp_dlopen(const char *filename, int flag)
 {
@@ -793,17 +780,14 @@ void *mp_dlsym(void *handle, const char *symbol)
 
 char *mp_dlerror(void)
 {
-    static mp_once once_init_dlerror = MP_STATIC_ONCE_INITIALIZER;
-    mp_exec_once(&once_init_dlerror, mp_dl_init);
-    mp_dl_free();
-
     if (mp_dl_result.errcode == 0)
         return NULL;
 
-    mp_dl_result.errstring = talloc_strdup(NULL, mp_HRESULT_to_str(mp_dl_result.errcode));
+    mp_HRESULT_to_str_buf(mp_dl_result.errstring, sizeof(mp_dl_result.errstring),
+                          mp_dl_result.errcode);
     mp_dl_result.errcode = 0;
 
-    return mp_dl_result.errstring == NULL
+    return !mp_dl_result.errstring[0]
         ? "unknown error"
         : mp_dl_result.errstring;
 }
