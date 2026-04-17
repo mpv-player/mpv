@@ -312,6 +312,13 @@ local state = {
     sub_track_count = 0,
     current_tracks = {},
     no_video = false,
+    playlist_count = 0,
+    playlist_pos_1 = 0,
+    pause = false,
+    volume = 0,
+    mute = false,
+    osd_dimensions = {w = 0, h = 0, aspect = 0},
+    osd_scale_by_window = false,
     file_loaded = false,
     enabled = true,
     input_enabled = true,
@@ -400,11 +407,11 @@ end
 
 -- scale factor for translating between real and virtual ASS coordinates
 local function get_virt_scale_factor()
-    local w, h = mp.get_osd_size()
-    if w <= 0 or h <= 0 then
+    if state.osd_dimensions.w == 0 or state.osd_dimensions.h == 0 then
         return 0, 0
     end
-    return osc_param.playresx / w, osc_param.playresy / h
+    return osc_param.playresx / state.osd_dimensions.w,
+           osc_param.playresy / state.osd_dimensions.h
 end
 
 local function recently_touched()
@@ -1189,13 +1196,12 @@ local function render_elements(master_ass)
                     mp.set_property_number("user-data/osc/hover-sec", hover_sec)
 
                     -- thumbnail
-                    local osd_w, osd_h = mp.get_osd_size()
                     local vop = mp.get_property_native("video-out-params")
-                    local draw_thumbnail = osd_w > 0 and vop
+                    local draw_thumbnail = state.osd_dimensions.w > 0 and vop
                     if draw_thumbnail then
                         local r_w, r_h = get_virt_scale_factor()
                         local thumb_max = math.min(user_opts.max_thumb_size,
-                            math.min(osd_w, osd_h) * 0.25)
+                            math.min(state.osd_dimensions.w, state.osd_dimensions.h) * 0.25)
                         local scale = thumb_max / math.max(vop.dw, vop.dh)
                         local thumb_w = math.floor(vop.dw * scale + 0.5)
                         local thumb_h = math.floor(vop.dh * scale + 0.5)
@@ -1207,7 +1213,7 @@ local function render_elements(master_ass)
                         local thumb_pad = 4
                         local thumb_margin_x = 20 / r_w
                         local thumb_margin_y = (4 + user_opts.tooltipborder) / r_h + thumb_pad
-                        local thumb_x = math.min(osd_w - thumb_w - thumb_margin_x,
+                        local thumb_x = math.min(state.osd_dimensions.w - thumb_w - thumb_margin_x,
                             math.max(thumb_margin_x, thumb_tx / r_w - thumb_w / 2))
                         local thumb_y = thumb_ty / r_h + (user_opts.layout ~= "topbar" and
                             -(thumb_h + tooltip_font_size / r_h + thumb_margin_y) or
@@ -2299,7 +2305,6 @@ local function osc_init()
 
     -- set canvas resolution according to display aspect and scaling setting
     local baseResY = 720
-    local _, display_h, display_aspect = mp.get_osd_size()
     local scale
 
     if state.fullscreen then
@@ -2310,7 +2315,7 @@ local function osc_init()
 
     local scale_with_video
     if user_opts.vidscale == "auto" then
-        scale_with_video = mp.get_property_native("osd-scale-by-window")
+        scale_with_video = state.osd_scale_by_window
     else
         scale_with_video = user_opts.vidscale == "yes"
     end
@@ -2318,11 +2323,11 @@ local function osc_init()
     if scale_with_video then
         osc_param.unscaled_y = baseResY
     else
-        osc_param.unscaled_y = display_h
+        osc_param.unscaled_y = state.osd_dimensions.h
     end
     osc_param.playresy = osc_param.unscaled_y / scale
-    if display_aspect > 0 then
-        osc_param.display_aspect = display_aspect
+    if state.osd_dimensions.aspect > 0 then
+        osc_param.display_aspect = state.osd_dimensions.aspect
     end
     osc_param.playresx = osc_param.playresy * osc_param.display_aspect
 
@@ -2334,9 +2339,6 @@ local function osc_init()
     elements = {}
 
     -- some often needed stuff
-    local pl_count = mp.get_property_number("playlist-count", 0)
-    local have_pl = (pl_count > 1)
-    local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
     local loop = mp.get_property("loop-playlist", "no")
 
@@ -2364,14 +2366,15 @@ local function osc_init()
     ne = new_element("playlist_prev", "button")
 
     ne.content = icons.prev
-    ne.enabled = (pl_pos > 1) or (loop ~= "no")
+    ne.enabled = state.playlist_pos_1 > 1 or loop ~= "no"
     bind_mouse_buttons("playlist_prev")
 
     --next
     ne = new_element("playlist_next", "button")
 
     ne.content = icons.next
-    ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
+    ne.enabled = (state.playlist_count > 1 and state.playlist_pos_1 < state.playlist_count)
+                 or loop ~= "no"
     bind_mouse_buttons("playlist_next")
 
 
@@ -2385,7 +2388,7 @@ local function osc_init()
             return icons.clock
         end
 
-        if not mp.get_property_native("pause") then
+        if not state.pause then
             return icons.pause
         end
 
@@ -2643,12 +2646,11 @@ local function osc_init()
     ne = new_element("volume", "button")
 
     ne.content = function()
-        local volume = mp.get_property_number("volume")
-        if volume == 0 or mp.get_property_native("mute") then
+        if state.volume == 0 or state.mute then
             return icons.mute
         end
 
-        return icons.volume[math.min(4, math.ceil(volume / (100/3)))]
+        return icons.volume[math.min(4, math.ceil(state.volume / (100/3)))]
     end
     bind_mouse_buttons("volume")
 
@@ -2897,18 +2899,17 @@ end
 
 local function render()
     msg.trace("rendering")
-    local current_screen_sizeX, current_screen_sizeY = mp.get_osd_size()
     local mouseX, mouseY = get_virt_mouse_pos()
     local now = mp.get_time()
 
     -- check if display changed, if so request reinit
-    if state.screen_sizeX ~= current_screen_sizeX
-        or state.screen_sizeY ~= current_screen_sizeY then
+    if state.screen_sizeX ~= state.osd_dimensions.w
+        or state.screen_sizeY ~= state.osd_dimensions.h then
 
         request_init_resize()
 
-        state.screen_sizeX = current_screen_sizeX
-        state.screen_sizeY = current_screen_sizeY
+        state.screen_sizeX = state.osd_dimensions.w
+        state.screen_sizeY = state.osd_dimensions.h
     end
 
     -- init management
@@ -3044,12 +3045,11 @@ local function render()
 end
 
 local function render_logo()
-    local _, _, display_aspect = mp.get_osd_size()
-    if display_aspect == 0 then
+    if state.osd_dimensions.aspect == 0 then
         return
     end
     local display_h = 360
-    local display_w = display_h * display_aspect
+    local display_w = display_h * state.osd_dimensions.aspect
     -- logo is rendered at 2^(6-1) = 32 times resolution with size 1800x1800
     local icon_x, icon_y = (display_w - 1800 / 32) / 2, (display_h - 1800 / 32) / 2
     local line_prefix = ("{\\rDefault\\an7\\1a&H00&\\bord0\\shad0\\pos(%f,%f)}"):format(icon_x,
@@ -3185,8 +3185,8 @@ end
 mp.register_event("shutdown", shutdown)
 mp.register_event("start-file", request_init)
 mp.observe_property("track-list", "native", update_tracklist)
-mp.observe_property("playlist-count", "native", request_init)
-mp.observe_property("playlist-pos", "native", request_init)
+observe_cached("playlist-count", request_init)
+observe_cached("playlist-pos-1", request_init)
 observe_cached("chapter-list", function ()
     table.sort(state.chapter_list, function(a, b) return a.time < b.time end)
     update_duration_watch()
@@ -3249,18 +3249,14 @@ mp.add_hook("on_unload", 50, function()
 end)
 
 mp.observe_property("display-fps", "number", set_tick_delay)
-mp.observe_property("pause", "bool", request_tick)
-mp.observe_property("volume", "number", request_tick)
-mp.observe_property("mute", "bool", request_tick)
+observe_cached("pause", request_tick)
+observe_cached("volume", request_tick)
+observe_cached("mute", request_tick)
 observe_cached("demuxer-cache-state", request_tick)
 mp.observe_property("vo-configured", "bool", request_tick)
 mp.observe_property("playback-time", "number", request_tick)
-mp.observe_property("osd-dimensions", "native", function()
-    -- (we could use the value instead of re-querying it all the time, but then
-    --  we might have to worry about property update ordering)
-    request_init_resize()
-end)
-mp.observe_property('osd-scale-by-window', 'native', request_init_resize)
+observe_cached("osd-dimensions", request_init_resize)
+observe_cached("osd-scale-by-window", request_init_resize)
 mp.observe_property('touch-pos', 'native', handle_touch)
 
 -- mouse show/hide bindings
