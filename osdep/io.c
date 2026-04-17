@@ -753,15 +753,18 @@ void *mp_dlopen(const char *filename, int flag)
     HMODULE lib = NULL;
     void *ta_ctx = talloc_new(NULL);
     wchar_t *wfilename = mp_from_utf8(ta_ctx, filename);
+    wchar_t *path = wfilename;
 
-    DWORD len = GetFullPathNameW(wfilename, 0, NULL, NULL);
-    if (!len)
-        goto err;
+    if (strchr(filename, '/') || strchr(filename, '\\')) {
+        DWORD len = GetFullPathNameW(wfilename, 0, NULL, NULL);
+        if (!len)
+            goto err;
 
-    wchar_t *path = talloc_array(ta_ctx, wchar_t, len);
-    len = GetFullPathNameW(wfilename, len, path, NULL);
-    if (!len)
-        goto err;
+        path = talloc_array(ta_ctx, wchar_t, len);
+        len = GetFullPathNameW(wfilename, len, path, NULL);
+        if (!len)
+            goto err;
+    }
 
     lib = LoadLibraryW(path);
 
