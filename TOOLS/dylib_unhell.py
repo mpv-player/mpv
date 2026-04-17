@@ -4,10 +4,7 @@ import json
 import os
 import re
 import shutil
-_sp = __import__("subprocess")
-call = _sp.call
-check_output = _sp.check_output
-DEVNULL = _sp.DEVNULL
+import subprocess
 import sys
 from functools import partial
 
@@ -28,7 +25,7 @@ def is_user_lib(objfile, libname):
            "libswift" not in libname
 
 def otool(objfile, rapths):
-    output = check_output(
+    output = subprocess.check_output(
         ["otool", "-L", objfile],
         universal_newlines=True,
     )
@@ -51,7 +48,7 @@ def get_rapths(objfile):
     path_re = re.compile(r"^\s*path (.*) \(offset \d*\)$")
 
     try:
-        result = check_output(
+        result = subprocess.check_output(
             ["otool", "-l", objfile],
             universal_newlines=True,
         )
@@ -81,7 +78,7 @@ def get_rapths(objfile):
 
 def get_rpaths_dev_tools(binary):
     path_re = re.compile(r"^\s*path (.*) \(offset \d*\)$")
-    result = check_output(
+    result = subprocess.check_output(
         ["otool", "-l", binary],
         universal_newlines=True,
     )
@@ -122,9 +119,9 @@ def resolve_lib_path(objfile, lib, rapths):
 
 def check_vulkan_max_version(version):
     try:
-        check_output(
+        subprocess.check_output(
             ["pkg-config", "vulkan", f"--max-version={version}"],
-            stderr=DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         return True
     except Exception:
@@ -135,10 +132,10 @@ def get_homebrew_prefix():
     # loader search array
     result = "/opt/homebrew"
     try:
-        result = check_output(
+        result = subprocess.check_output(
             ["brew", "--prefix"],
             universal_newlines=True,
-            stderr=DEVNULL,
+            stderr=subprocess.DEVNULL,
         ).strip()
     except Exception:
         pass
@@ -146,27 +143,27 @@ def get_homebrew_prefix():
     return result
 
 def install_name_tool_change(old, new, objfile):
-    call(
+    subprocess.call(
         ["install_name_tool", "-change", old, new, objfile],
-        stderr=DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 def install_name_tool_id(name, objfile):
-    call(
+    subprocess.call(
         ["install_name_tool", "-id", name, objfile],
-        stderr=DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 def install_name_tool_add_rpath(rpath, binary):
-    call(
+    subprocess.call(
         ["install_name_tool", "-add_rpath", rpath, binary],
-        stderr=DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 def install_name_tool_delete_rpath(rpath, binary):
-    call(
+    subprocess.call(
         ["install_name_tool", "-delete_rpath", rpath, binary],
-        stderr=DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 def libraries(objfile, result=None, result_relative=None, rapths=None):
@@ -227,7 +224,7 @@ def process_libraries(libs_dict, libs_dyn, binary):
         install_name_tool_change(lib, lib_name(lib), binary)
 
 def process_swift_libraries(binary):
-    swift_stdlib_tool = check_output(
+    swift_stdlib_tool = subprocess.check_output(
         ["xcrun", "--find", "swift-stdlib-tool"],
         universal_newlines=True,
     ).strip()
@@ -244,7 +241,7 @@ def process_swift_libraries(binary):
     if os.path.exists(swift_lib_path):
         command.extend(["--source-libraries", swift_lib_path])
 
-    check_output(command, universal_newlines=True)
+    subprocess.check_output(command, universal_newlines=True)
 
     print(">> setting additional rpath for swift libraries")
     install_name_tool_add_rpath("@executable_path/lib", binary)
