@@ -37,6 +37,7 @@ end
 
 -- youtube-dl JSON name to mpv tag name
 local tag_list = {
+    ["title"]           = "title",
     ["artist"]          = "artist",
     ["album"]           = "album",
     ["album_artist"]    = "album_artist",
@@ -729,10 +730,6 @@ local function add_single_video(json)
     msg.debug("streamurl: " .. streamurl)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
-
-    if mp.get_property("force-media-title", "") == "" then
-        mp.set_property("file-local-options/force-media-title", json.title)
-    end
 
     -- set hls-bitrate for dash track selection
     if max_bitrate > 0 and
