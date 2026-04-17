@@ -353,17 +353,6 @@ const char *mp_status_str(enum playback_status st)
     }
 }
 
-bool str_in_list(bstr str, char **list)
-{
-    if (!list)
-        return false;
-    while (*list) {
-        if (!bstrcasecmp0(str, *list++))
-            return true;
-    }
-    return false;
-}
-
 #define ADD_FLAG(ctx, dst, flag, first) do {                           \
     bstr_xappend_asprintf(ctx, &dst, " %s%s", first ? "[" : "", flag); \
     first = false;                                                     \

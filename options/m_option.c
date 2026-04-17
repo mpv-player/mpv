@@ -786,7 +786,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
     if (alt) {
         char *end = NULL;
         ival = strtol(alt->name, &end, 10);
-        if (end && !end[0])
+        if (!end[0])
             alt = NULL;
     }
     if (alt) {
@@ -1400,15 +1400,6 @@ static struct bstr get_nextsep(struct bstr *ptr, char sep, bool modify)
     return bstr_splice(orig, 0, str.start - orig.start);
 }
 
-static int find_list_bstr(char **list, bstr item)
-{
-    for (int n = 0; list && list[n]; n++) {
-        if (bstr_equals0(item, list[n]))
-            return n;
-    }
-    return -1;
-}
-
 static char **separate_input_param(const m_option_t *opt, bstr param,
                                    int *len, int op)
 {
@@ -1455,7 +1446,7 @@ static int str_list_remove(char **remove, int n, void *dst)
     for (int i = 0; i < n; i++) {
         int index = 0;
         do {
-            index = find_list_bstr(list, bstr0(remove[i]));
+            index = bstr_find_in_list0(bstr0(remove[i]), list, true);
             if (index >= 0) {
                 found = true;
                 char *old = list[index];

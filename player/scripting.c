@@ -212,7 +212,7 @@ static int compare_filename(const void *pa, const void *pb)
 {
     char *a = (char *)pa;
     char *b = (char *)pb;
-    return strcmp(a, b);
+    return strcasecmp(a, b);
 }
 
 static char **list_script_files(void *talloc_ctx, char *path)

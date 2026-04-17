@@ -2869,7 +2869,7 @@ static int decode_float(char *str, float *out)
     float dec_val;
 
     dec_val = strtod(str, &rest);
-    if (!rest || (rest == str) || !isfinite(dec_val))
+    if (rest == str || !isfinite(dec_val))
         return -1;
 
     *out = dec_val;

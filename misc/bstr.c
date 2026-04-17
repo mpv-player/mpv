@@ -467,6 +467,20 @@ bool bstr_decode_hex(void *talloc_ctx, struct bstr hex, struct bstr *out)
     return true;
 }
 
+int bstr_find_in_list0(struct bstr str, char **list, bool case_sensitive)
+{
+    for (int n = 0; list && list[n]; n++)
+        if (case_sensitive ? !bstrcmp0(str, list[n]) : !bstrcasecmp0(str, list[n]))
+            return n;
+
+    return -1;
+}
+
+bool bstr_in_list0(struct bstr str, char **list)
+{
+    return bstr_find_in_list0(str, list, false) != -1;
+}
+
 #ifdef _WIN32
 
 #include <windows.h>

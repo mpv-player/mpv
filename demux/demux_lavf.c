@@ -660,7 +660,7 @@ static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
     if (e && e->value) {
         char *end = NULL;
         long int r = strtol(e->value, &end, 10);
-        if (end && !end[0] && r >= INT_MIN && r <= INT_MAX)
+        if (!end[0] && r >= INT_MIN && r <= INT_MAX)
             return r;
     }
     return def;

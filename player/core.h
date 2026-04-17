@@ -581,7 +581,6 @@ void update_window_title(struct MPContext *mpctx, bool force);
 void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track);
-bool str_in_list(bstr str, char **list);
 char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang);
 const char *mp_find_non_filename_media_title(MPContext *mpctx);
 
