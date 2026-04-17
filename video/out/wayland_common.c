@@ -4682,6 +4682,7 @@ bool vo_wayland_reconfig(struct vo *vo)
         wl->geometry_configured = true;
     }
 
+    wl->override_surface_local = true;
     wl->pending_vo_events |= VO_EVENT_RESIZE;
 
     return true;
