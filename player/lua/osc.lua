@@ -310,7 +310,7 @@ local state = {
     idle_active = false,
     audio_track_count = 0,
     sub_track_count = 0,
-    track_position = {},
+    current_tracks = {},
     no_video = false,
     file_loaded = false,
     enabled = true,
@@ -712,16 +712,22 @@ end
 local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
-    state.track_position = {}
+    state.current_tracks = {}
     state.no_video = true
 
     for _, track in ipairs(track_list) do
         if track.type == "audio" then
             state.audio_track_count = state.audio_track_count + 1
-            state.track_position[track.id .. "audio"] = state.audio_track_count
+
+            if track.selected and not state.current_tracks["audio"] then
+                state.current_tracks["audio"] = state.audio_track_count
+            end
         elseif track.type == "sub" then
             state.sub_track_count = state.sub_track_count + 1
-            state.track_position[track.id .. "sub"] = state.sub_track_count
+
+            if track["main-selection"] == 0 then
+                state.current_tracks["sub"] = state.sub_track_count
+            end
         elseif track.type == "video" and track.selected then
             state.no_video = false
         end
@@ -2438,8 +2444,7 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.audio
         end
-        local tid = mp.get_property_number("aid", 0)
-        local track = state.track_position[tid .. "audio"] or "-"
+        local track = state.current_tracks.audio or "-"
         local count = state.audio_track_count
         return icons.audio .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
@@ -2455,8 +2460,7 @@ local function osc_init()
         if user_opts.tracknumberswidth == 0 then
             return icons.subtitle
         end
-        local tid = mp.get_property_number("sid", 0)
-        local track = state.track_position[tid .. "sub"] or "-"
+        local track = state.current_tracks.sub or "-"
         local count = state.sub_track_count
         return icons.subtitle .. label_style .. " " ..
                (user_opts.layout == "floating" and to_fraction(track, count)
