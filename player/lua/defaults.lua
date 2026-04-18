@@ -515,18 +515,8 @@ local function call_event_handlers(e)
     end
 end
 
-mp.use_suspend = false
-
-local suspend_warned = false
-
 function mp.dispatch_events(allow_wait)
     local more_events = true
-    if mp.use_suspend then
-        if not suspend_warned then
-            mp.msg.error("mp.use_suspend is now ignored.")
-            suspend_warned = true
-        end
-    end
     while mp.keep_running do
         local wait = 0
         if not more_events then
