@@ -65,6 +65,11 @@ struct sh_stream {
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
 
+    // Metadata for tiled grid images.
+    // All streams belonging to the same group share the same mp_tile_grid
+    // object.
+    struct mp_tile_grid *tile_grid;
+
     // Internal to demux.c
     struct demux_stream *ds;
 };
@@ -140,6 +145,39 @@ struct mp_codec_params {
 
     // STREAM_VIDEO + STREAM_AUDIO + STREAM_SUB
     double duration;
+};
+
+struct mp_tile_grid {
+    int nb_tiles;
+
+    // Dimensions after cropping.
+    int width, height;
+
+    // Dimensions before cropping (union of all tile areas plus
+    // any alignment padding on the right/bottom edges).
+    int coded_width, coded_height;
+
+    // Top-left offset of the display rectangle within the coded canvas.
+    //   crop_right  = coded_width  - width  - horizontal_offset
+    //   crop_bottom = coded_height - height - vertical_offset
+    int horizontal_offset;
+    int vertical_offset;
+
+    // Per-tile placement info, array of length nb_tiles.
+    struct mp_tile_grid_entry *tiles;
+
+    // Background fill color used outside tile boundaries (R,G,B,A bytes).
+    uint8_t background[4];
+};
+
+// Describes one tile's position within a tiled grid image.
+struct mp_tile_grid_entry {
+    // Global AVFormatContext stream index (AVStream.index).
+    // Used to find the matching track.
+    int ff_index;
+    // Top-left pixel position of this tile in the assembled image.
+    int horizontal;
+    int vertical;
 };
 
 #endif /* MPLAYER_STHEADER_H */

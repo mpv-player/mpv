@@ -900,6 +900,89 @@ static void add_new_streams(demuxer_t *demuxer)
         handle_new_stream(demuxer, priv->num_streams);
 }
 
+static void handle_tile_grid_groups(demuxer_t *demuxer)
+{
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 1, 100)
+    lavf_priv_t *priv = demuxer->priv;
+    AVFormatContext *avfc = priv->avfc;
+
+    for (int g = 0; g < avfc->nb_stream_groups; g++) {
+        AVStreamGroup *stream_group = avfc->stream_groups[g];
+        if (stream_group->type != AV_STREAM_GROUP_PARAMS_TILE_GRID)
+            continue;
+
+        const AVStreamGroupTileGrid *av_grid = stream_group->params.tile_grid;
+        if (!av_grid || av_grid->nb_tiles == 0)
+            continue;
+
+        bool valid = true;
+        for (int i = 0; i < av_grid->nb_tiles; i++) {
+            if (av_grid->offsets[i].horizontal >= av_grid->coded_width ||
+                av_grid->offsets[i].vertical   >= av_grid->coded_height)
+            {
+                MP_WARN(demuxer, "Tile grid offsets exceed coded canvas (%dx%d) -"
+                        "ignoring tile grid.\n",
+                        av_grid->coded_width, av_grid->coded_height);
+                valid = false;
+                break;
+            }
+        }
+        if (!valid)
+            continue;
+
+        struct mp_tile_grid *mp_grid = talloc_zero(demuxer, struct mp_tile_grid);
+        mp_grid->nb_tiles          = av_grid->nb_tiles;
+        mp_grid->width             = av_grid->width;
+        mp_grid->height            = av_grid->height;
+        mp_grid->coded_width       = av_grid->coded_width;
+        mp_grid->coded_height      = av_grid->coded_height;
+        mp_grid->horizontal_offset = av_grid->horizontal_offset;
+        mp_grid->vertical_offset   = av_grid->vertical_offset;
+        memcpy(mp_grid->background, av_grid->background, 4);
+
+        mp_grid->tiles = talloc_array(mp_grid, struct mp_tile_grid_entry,
+                                      av_grid->nb_tiles);
+
+        for (int i = 0; i < av_grid->nb_tiles; i++) {
+            unsigned int group_idx = av_grid->offsets[i].idx;
+            if (group_idx >= stream_group->nb_streams) {
+                MP_WARN(demuxer, "Tile %d references out-of-range group "
+                        "stream index %u (group has %u streams) – skipping.\n",
+                        i, group_idx, stream_group->nb_streams);
+                continue;
+            }
+
+            int ff_idx = stream_group->streams[group_idx]->index;
+
+            mp_grid->tiles[i].ff_index   = ff_idx;
+            mp_grid->tiles[i].horizontal = av_grid->offsets[i].horizontal;
+            mp_grid->tiles[i].vertical   = av_grid->offsets[i].vertical;
+
+            if (ff_idx >= 0 && ff_idx < priv->num_streams &&
+                priv->streams[ff_idx])
+            {
+                struct sh_stream *sh = priv->streams[ff_idx]->sh;
+                if (sh && sh->type == STREAM_VIDEO) {
+                    sh->tile_grid = mp_grid;
+                } else {
+                    MP_WARN(demuxer, "Tile %u stream %d is not a video "
+                            "stream – ignoring tile grid for it.\n",
+                            i, ff_idx);
+                }
+            }
+        }
+
+        MP_VERBOSE(demuxer,
+                   "Stream group %u: tile grid %d tile(s), "
+                   "display %dx%d, coded %dx%d, offset (%d,%d).\n",
+                   g, mp_grid->nb_tiles,
+                   mp_grid->width, mp_grid->height,
+                   mp_grid->coded_width, mp_grid->coded_height,
+                   mp_grid->horizontal_offset, mp_grid->vertical_offset);
+    }
+#endif
+}
+
 static void update_metadata(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -1139,6 +1222,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     add_new_streams(demuxer);
+
+    handle_tile_grid_groups(demuxer);
 
     mp_tags_move_from_av_dictionary(demuxer->metadata, &avfc->metadata);
 
