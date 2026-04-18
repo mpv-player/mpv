@@ -67,6 +67,10 @@ static inline bool mp_msg_test(struct mp_log *log, int lev)
 
 void mp_msg_set_max_level(struct mp_log *log, int lev);
 
+// Sanitize text for terminal output.
+struct bstr;
+void mp_msg_sanitize(struct bstr *text);
+
 // Convenience macros.
 #define mp_fatal(log, ...)      mp_msg(log, MSGL_FATAL, __VA_ARGS__)
 #define mp_err(log, ...)        mp_msg(log, MSGL_ERR, __VA_ARGS__)
