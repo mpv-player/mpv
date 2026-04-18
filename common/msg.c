@@ -559,7 +559,7 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
     }
 }
 
-static void sanitize(bstr *text)
+void mp_msg_sanitize(bstr *text)
 {
     for (size_t i = 0; i < text->len; i++) {
         unsigned char ch = text->start[i];
@@ -587,8 +587,19 @@ static void sanitize(bstr *text)
                 text->start[i] = '?';
         }
         // Allow only printable > 0x20 and 0x08-0x0D (backspace, tab, newline, ...)
-        else if (ch < 0x08 || (ch > 0x0D && ch < 0x20)) {
+        else if (ch < 0x08 || (ch > 0x0D && ch < 0x20) || ch == 0x7F) {
             text->start[i] = '?';
+        }
+        // Block UTF-8 encoded C1 controls (U+0080-U+009F = bytes C2 80..C2 9F).
+        // xterm interprets these as C1 control functions (CSI, OSC, DCS, ST, ...),
+        // which allows bypassing the ESC/BEL filter above.
+        else if (ch == 0xC2 && i + 1 < text->len &&
+                 (unsigned char)text->start[i + 1] >= 0x80 &&
+                 (unsigned char)text->start[i + 1] <= 0x9F)
+        {
+            text->start[i] = '?';
+            text->start[i + 1] = '?';
+            i++;
         }
     }
 }
@@ -613,7 +624,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         bstr_xappend(root, &root->buffer, bstr0(format));
     }
 
-    sanitize(&root->buffer);
+    mp_msg_sanitize(&root->buffer);
 
     // Remember last status message and restore it to ensure that it is
     // always displayed
