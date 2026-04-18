@@ -4694,7 +4694,7 @@ static const struct m_property mp_properties_base[] = {
     {"command-list", mp_property_commands},
     {"input-bindings", mp_property_bindings},
 
-    {"menu-data", mp_property_mdata},
+    {"menu-data", mp_property_mdata, .is_noisy = true},
     {"default-menu", mp_property_default_menu},
 
     {"user-data", mp_property_udata},
@@ -4842,6 +4842,10 @@ int mp_property_do(const char *name, int action, void *val,
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
+        struct m_property *property = m_property_list_find(cmd->properties, name);
+        if (property && property->is_noisy && !mp_msg_test(ctx->log, MSGL_TRACE))
+            return r;
+
         struct m_option option_type = {0};
         void *data = val;
         switch (action) {
