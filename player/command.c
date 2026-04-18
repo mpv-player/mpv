@@ -7001,7 +7001,6 @@ static void cmd_mouse(void *p)
         mp_input_get_mouse_pos(mpctx->input, &oldx, &oldy, &oldhover);
         struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
 
-        // TODO: VOs don't send outside positions. should we abort if outside?
         int hover = x >= 0 && y >= 0 && x < vo_res.w && y < vo_res.h;
 
         if (vo_res.w && vo_res.h && hover != oldhover)
