@@ -293,9 +293,10 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
     switch (id) {
     case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
         static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
-        static const uint16_t ITU_T_T35_PROVIDER_CODE_SMTPE = 0x3C;
+        static const uint16_t ITU_T_T35_PROVIDER_CODE_SAMSUNG = 0x003C;
+        static const MP_UNUSED uint16_t ITU_T_T35_PROVIDER_CODE_SMPTE = 0x0090;
 
-        if (size < 6)
+        if (size < 5)
             break;
 
         uint8_t *p = data;
@@ -305,31 +306,59 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
         uint16_t provider_code = AV_RB16(p);
         p += sizeof(provider_code);
 
-        if (country_code != ITU_T_T35_COUNTRY_CODE_US ||
-            provider_code != ITU_T_T35_PROVIDER_CODE_SMTPE)
+        if (country_code != ITU_T_T35_COUNTRY_CODE_US)
             break;
 
-        uint16_t provider_oriented_code = AV_RB16(p);
-        p += sizeof(provider_oriented_code);
-        uint8_t application_identifier = AV_RB8(p);
-        p += sizeof(application_identifier);
+        if (provider_code == ITU_T_T35_PROVIDER_CODE_SAMSUNG) {
+            if (size < 6)
+                break;
 
-        if (provider_oriented_code != 1 || application_identifier != 4)
-            break;
+            uint16_t provider_oriented_code = AV_RB16(p);
+            p += sizeof(provider_oriented_code);
+            uint8_t application_identifier = AV_RB8(p);
+            p += sizeof(application_identifier);
 
-        size_t hdrplus_size;
-        AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
-        MP_HANDLE_OOM(hdrplus);
+            if (provider_oriented_code != 1 || application_identifier != 4)
+                break;
 
-        if (av_dynamic_hdr_plus_from_t35(hdrplus, p, size - (p - (uint8_t *)data)) < 0 ||
-            av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
-                                    (uint8_t *)hdrplus, hdrplus_size) < 0)
-        {
-            av_free(hdrplus);
-            return -1;
+            size_t hdrplus_size;
+            AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
+            MP_HANDLE_OOM(hdrplus);
+
+            if (av_dynamic_hdr_plus_from_t35(hdrplus, p, size - (p - (uint8_t *)data)) < 0 ||
+                av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
+                                        (uint8_t *)hdrplus, hdrplus_size) < 0)
+            {
+                av_free(hdrplus);
+                return -1;
+            }
+
+            return 0;
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(60, 30, 100)
+        } else if (provider_code == ITU_T_T35_PROVIDER_CODE_SMPTE) {
+            uint16_t provider_oriented_code = AV_RB16(p);
+            p += sizeof(provider_oriented_code);
+
+            if (provider_oriented_code != 1)
+                break;
+
+            size_t app5_size;
+            AVDynamicHDRSmpte2094App5 *app5 = av_dynamic_hdr_smpte2094_app5_alloc(&app5_size);
+            MP_HANDLE_OOM(app5);
+
+            if (av_dynamic_hdr_smpte2094_app5_from_t35(app5, p, size - (p - (uint8_t *)data)) < 0 ||
+                av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR_SMPTE_2094_APP5,
+                    (uint8_t *)app5, app5_size) < 0)
+            {
+                av_free(app5);
+                return -1;
+            }
+
+            return 0;
+#endif
         }
 
-        return 0;
+        break;
     }
     default:
         break;
