@@ -149,6 +149,8 @@ struct m_property {
     bool is_option;
     // Special-case: option-bridge properties should be coalesced
     bool coalesce;
+    // Whether to log changes only on the trace level.
+    bool is_noisy;
 };
 
 struct m_property *m_property_list_find(const struct m_property *list,
