@@ -303,7 +303,6 @@ static bool single_output_spanned(struct vo_wayland_state *wl);
 static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edges);
 static int get_mods(struct vo_wayland_seat *seat);
-static int greatest_common_divisor(int a, int b);
 static int handle_round(int scale, int n);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
 static int spawn_cursor(struct vo_wayland_state *wl);
@@ -3295,14 +3294,6 @@ static void get_shape_device(struct vo_wayland_state *wl, struct vo_wayland_seat
     }
 }
 
-static int greatest_common_divisor(int a, int b)
-{
-    int rem = a % b;
-    if (rem == 0)
-        return b;
-    return greatest_common_divisor(b, rem);
-}
-
 static void guess_focus(struct vo_wayland_state *wl)
 {
     // We can't actually know if the window is focused or not in wayland,
@@ -3848,7 +3839,7 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     vo_calc_window_geometry(vo, wl->opts, &screenrc, &screenrc, wl->scaling_factor, false, &geo, NULL);
     vo_apply_window_geometry(vo, &geo);
 
-    int gcd = greatest_common_divisor(vo->dwidth, vo->dheight);
+    int gcd = mp_gcd(vo->dwidth, vo->dheight);
     wl->reduced_width = vo->dwidth / gcd;
     wl->reduced_height = vo->dheight / gcd;
 

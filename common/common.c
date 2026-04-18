@@ -430,3 +430,8 @@ int mp_lcm(int x, int y)
     mp_assert(x && y);
     return x * (y / av_gcd(x, y));
 }
+
+int64_t mp_gcd(int64_t x, int64_t y)
+{
+    return av_gcd(x, y);
+}
