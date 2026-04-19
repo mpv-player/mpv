@@ -118,7 +118,8 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->last_av_difference = 0;
     mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
-    mpctx->display_sync_drift_dir = 0;
+    mpctx->audio_drift_compensation = 0;
+    mpctx->avd_filtered = 0;
     mpctx->display_sync_error = 0;
     mpctx->display_sync_active = 0;
 
@@ -721,32 +722,19 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
     return false;
 }
 
-// Compute the relative audio speed difference by taking A/V dsync into account.
-static double compute_audio_drift(struct MPContext *mpctx, double vsync)
-{
-    // Least-squares linear regression, using relative real time for x, and
-    // audio desync for y. Assume speed didn't change for the frames we're
-    // looking at for simplicity. This also should actually use the realtime
-    // (minus paused time) for x, but use vsync scheduling points instead.
-    if (mpctx->num_past_frames <= 10)
-        return NAN;
-    int num = mpctx->num_past_frames - 1;
-    double sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
-    double x = 0;
-    for (int n = 0; n < num; n++) {
-        struct frame_info *frame = &mpctx->past_frames[n + 1];
-        if (frame->num_vsyncs < 0)
-            return NAN;
-        double y = frame->av_diff;
-        sum_x += x;
-        sum_y += y;
-        sum_xy += x * y;
-        sum_xx += x * x;
-        x -= frame->num_vsyncs * vsync;
-    }
-    return (sum_x * sum_y - num * sum_xy) / (sum_x * sum_x - num * sum_xx);
-}
-
+// Audio drift compensation for display-sync. Tunes the audio-speed scale
+// factor (speed_factor_a) relative to video so that A/V difference decays
+// exponentially toward zero.
+//
+// The raw per-frame av_diff is dominated by vsync-rounding jitter
+// (±1 vsync). Acting on it directly would modulate audio pitch at the
+// jitter frequency. A low-pass filter on av_diff removes the jitter, so
+// comp converges to the value that cancels the true underlying drift and
+// then stops moving.
+//
+// From d(av_diff)/dt = other * (comp - 1) with other = playback_speed *
+// speed_factor_v, the comp that makes av_diff_lp decay with time
+// constant AVD_RECOVERY_TIME is (1 - av_diff_lp / (τ · other)).
 static void adjust_audio_drift_compensation(struct MPContext *mpctx, double vsync)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -756,54 +744,47 @@ static void adjust_audio_drift_compensation(struct MPContext *mpctx, double vsyn
         mpctx->audio_status != STATUS_PLAYING)
     {
         mpctx->speed_factor_a = mpctx->speed_factor_v;
+        mpctx->audio_drift_compensation = 0;
+        mpctx->avd_filtered = 0;
         return;
     }
 
-    // Try to smooth out audio timing drifts. This can happen if either
-    // video isn't playing at expected speed, or audio is not playing at
-    // the requested speed. Both are unavoidable.
-    // The audio desync is made up of 2 parts: 1. drift due to rounding
-    // errors and imperfect information, and 2. an offset, due to
-    // unaligned audio/video start, or disruptive events halting audio
-    // or video for a small time.
-    // Instead of trying to be clever, just apply an awfully dumb drift
-    // compensation with a constant factor, which does what we want. In
-    // theory we could calculate the exact drift compensation needed,
-    // but it likely would be wrong anyway, and we'd run into the same
-    // issues again, except with more complex code.
-    // 1 means drifts to positive, -1 means drifts to negative
-    double max_drift = vsync / 2;
-    double av_diff = mpctx->last_av_difference;
-    int new = mpctx->display_sync_drift_dir;
-    if (av_diff * -mpctx->display_sync_drift_dir >= 0)
-        new = 0;
-    if (fabs(av_diff) > max_drift)
-        new = av_diff >= 0 ? 1 : -1;
+    // Low-pass time constant on av_diff. Long enough to suppress
+    // per-frame vsync-rounding jitter, short enough not to lag the
+    // recovery loop noticeably.
+    const double AVD_FILTER_TIME = 1.0;
+    // Target exponential decay time of av_diff_lp toward zero.
+    const double AVD_RECOVERY_TIME = 10.0;
+    // Per-frame ceiling on comp motion, expressed as a fraction of the
+    // full compensation budget. Adaptive slew (|p_delta|) normally
+    // governs; this cap only bites for large post-seek kicks, spreading
+    // the ramp to full correction over ~SLEW_RAMP_FRAMES frames so the
+    // audio pipeline can absorb it without artifacts.
+    const double SLEW_RAMP_FRAMES = 10.0;
 
-    bool change = mpctx->display_sync_drift_dir != new;
-    if (new || change) {
-        if (change)
-            MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
-        mpctx->display_sync_drift_dir = new;
+    double max_correct = opts->sync_max_audio_change / 100;
+    double other = opts->playback_speed * mpctx->speed_factor_v;
+    double comp = 1.0 + mpctx->audio_drift_compensation;
 
-        double max_correct = opts->sync_max_audio_change / 100;
-        double audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
+    double alpha = vsync / (AVD_FILTER_TIME + vsync);
+    mpctx->avd_filtered += alpha * (mpctx->last_av_difference -
+                                    mpctx->avd_filtered);
+    double avd_lp = mpctx->avd_filtered;
 
-        if (new == 0) {
-            // If we're resetting, actually try to be clever and pick a speed
-            // which compensates the general drift we're getting.
-            double drift = compute_audio_drift(mpctx, vsync);
-            if (isnormal(drift)) {
-                // other = will be multiplied with audio_factor for final speed
-                double other = mpctx->opts->playback_speed * mpctx->speed_factor_v;
-                audio_factor = (mpctx->audio_speed - drift) / other;
-                MP_VERBOSE(mpctx, "Compensation factor: %f\n", audio_factor);
-            }
-        }
+    double p_delta = MPCLAMP(-avd_lp / (AVD_RECOVERY_TIME * other),
+                             -max_correct, max_correct);
+    // Adaptive slew: fast response for large excursions, gentle motion
+    // near equilibrium.
+    double slew = MPMIN(fabs(p_delta), max_correct / SLEW_RAMP_FRAMES);
 
-        audio_factor = MPCLAMP(audio_factor, 1 - max_correct, 1 + max_correct);
-        mpctx->speed_factor_a = audio_factor * mpctx->speed_factor_v;
-    }
+    double target_comp = MPCLAMP(1.0 + p_delta,
+                                 1 - max_correct, 1 + max_correct);
+    double new_comp = comp + MPCLAMP(target_comp - comp, -slew, +slew);
+
+    mpctx->audio_drift_compensation = new_comp - 1.0;
+    mpctx->speed_factor_a = new_comp * mpctx->speed_factor_v;
+
+    MP_STATS(mpctx, "value %f adrift", avd_lp);
 }
 
 // Manipulate frame timing for display sync, or do nothing for normal timing.
@@ -816,7 +797,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     if (!mpctx->display_sync_active) {
         mpctx->display_sync_error = 0.0;
-        mpctx->display_sync_drift_dir = 0;
+        mpctx->audio_drift_compensation = 0.0;
+        mpctx->avd_filtered = 0;
     }
 
     mpctx->display_sync_active = false;
@@ -909,7 +891,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     update_av_diff(mpctx, time_left * opts->playback_speed);
 
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
-    mpctx->past_frames[0].av_diff = mpctx->last_av_difference;
 
     if (resample || mode == VS_DISP_ADROP || mode == VS_DISP_TEMPO) {
         adjust_audio_drift_compensation(mpctx, vsync);
