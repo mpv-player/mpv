@@ -35,6 +35,7 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/codepoint_width.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
@@ -1000,6 +1001,15 @@ static void script_get_env_list(js_State *J)
     }
 }
 
+// args: text
+static void script_terminal_display_width(js_State *J)
+{
+    bstr text = bstr0(js_tostring(J, 1));
+    const unsigned char *cut_pos;
+    int width = term_disp_width(text, INT_MAX, &cut_pos);
+    js_pushnumber(J, width);
+}
+
 // args: as-filename, content-string, returns the compiled result as a function
 static void script_compile_js(js_State *J)
 {
@@ -1202,6 +1212,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     FN_ENTRY(get_env_list, 0),
+    FN_ENTRY(terminal_display_width, 1),
 
     FN_ENTRY(read_file, 2),
     AF_ENTRY(_write_file, 3),
