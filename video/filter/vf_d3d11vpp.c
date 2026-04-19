@@ -329,7 +329,7 @@ static int recreate_video_proc(struct mp_filter *vf)
             if (FAILED(ID3D11VideoProcessorEnumerator_GetVideoProcessorCustomRate(p->vp_enum, n, c, &cr)))
                 continue;
             MP_DBG(vf, "\t%u: custom_rate=%u/%u out_frames=%u in_interlaced=%d in_frames_or_fields=%u\n",
-                   0, cr.CustomRate.Numerator, cr.CustomRate.Denominator, cr.OutputFrames,
+                   c, cr.CustomRate.Numerator, cr.CustomRate.Denominator, cr.OutputFrames,
                    cr.InputInterlaced, cr.InputFramesOrFields);
         }
     }
