@@ -348,9 +348,12 @@ local function calculate_max_item_width()
     end
 
     local longest_item = prompt .. ("a"):rep(9)
+    local longest_item_width = utils.terminal_display_width(longest_item)
     for _, item in pairs(selectable_items) do
-        if #item > #longest_item then
+        local item_width = utils.terminal_display_width(item)
+        if item_width > longest_item_width then
             longest_item = item
+            longest_item_width = item_width
         end
     end
 

@@ -15,6 +15,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 ]]
 
+local utils = require "mp.utils"
 local assdraw = require "mp.assdraw"
 
 local options = {
@@ -157,9 +158,12 @@ local function calculate_width(menu_items, osd_w, osd_h, checkbox)
     end
 
     local longest = ""
+    local longest_width = 0
     for _, title in pairs(titles) do
-        if #title > #longest then
+        local title_width = utils.terminal_display_width(title)
+        if title_width > longest_width then
             longest = title
+            longest_width = title_width
         end
     end
 
