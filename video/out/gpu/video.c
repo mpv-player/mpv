@@ -2072,9 +2072,10 @@ static void unsharp_hook(struct gl_video *p, struct image img,
 struct szexp_ctx {
     struct gl_video *p;
     struct image img;
+    struct gl_user_shader_hook *shader;
 };
 
-static bool szexp_lookup(void *priv, struct bstr var, float size[2])
+static bool szexp_tex_lookup(void *priv, struct bstr var, float size[2])
 {
     struct szexp_ctx *ctx = priv;
     struct gl_video *p = ctx->p;
@@ -2111,14 +2112,37 @@ static bool szexp_lookup(void *priv, struct bstr var, float size[2])
     return false;
 }
 
+static bool szexp_param_lookup(void *priv, struct bstr var, float *out)
+{
+    struct szexp_ctx *ctx = priv;
+
+    for (int i = 0; i < ctx->shader->num_params; i++) {
+        const struct gl_user_shader_param *param = &ctx->shader->params[i];
+        if (bstr_equals(var, param->name)) {
+            double value = param->value;
+            gpu_get_auto_param(ctx->p->image.mpi, param->name, &value);
+            *out = value;
+            return true;
+        }
+        int idx = resolve_shader_enum_name(param, var);
+        if (idx >= 0) {
+            *out = idx;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static bool user_hook_cond(struct gl_video *p, struct image img, void *priv)
 {
     struct gl_user_shader_hook *shader = priv;
     mp_assert(shader);
 
     float res = false;
-    struct szexp_ctx ctx = {p, img};
-    eval_szexpr(p->log, &ctx, szexp_lookup, shader->cond, &res);
+    struct szexp_ctx ctx = {p, img, shader};
+    eval_szexpr(p->log, &ctx, szexp_tex_lookup, szexp_param_lookup,
+                shader->cond, &res);
     return res;
 }
 
@@ -2207,8 +2231,10 @@ static void user_hook(struct gl_video *p, struct image img,
     // to do this and display an error message than just crash OpenGL
     float w = 1.0, h = 1.0;
 
-    eval_szexpr(p->log, &(struct szexp_ctx){p, img}, szexp_lookup, shader->width, &w);
-    eval_szexpr(p->log, &(struct szexp_ctx){p, img}, szexp_lookup, shader->height, &h);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, img, shader}, szexp_tex_lookup,
+                szexp_param_lookup, shader->width, &w);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, img, shader}, szexp_tex_lookup,
+                szexp_param_lookup, shader->height, &h);
 
     *trans = (struct gl_transform){{{w / img.w, 0}, {0, h / img.h}}};
     gl_transform_trans(shader->offset, trans);
