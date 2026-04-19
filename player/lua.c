@@ -38,6 +38,7 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/codepoint_width.h"
 #include "misc/json.h"
 #include "osdep/subprocess.h"
 #include "osdep/timer.h"
@@ -1216,6 +1217,15 @@ static int script_get_env_list(lua_State *L)
     return 1;
 }
 
+static int script_terminal_display_width(lua_State *L)
+{
+    bstr text = bstr0(luaL_checkstring(L, 1));
+    const unsigned char *cut_pos;
+    int width = term_disp_width(text, INT_MAX, &cut_pos);
+    lua_pushnumber(L, width);
+    return 1;
+}
+
 #define FN_ENTRY(name) {#name, script_ ## name, 0}
 #define AF_ENTRY(name) {#name, 0, script_ ## name}
 struct fn_entry {
@@ -1265,6 +1275,7 @@ static const struct fn_entry utils_fns[] = {
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
     FN_ENTRY(get_env_list),
+    FN_ENTRY(terminal_display_width),
     {0}
 };
 
