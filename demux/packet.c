@@ -334,7 +334,7 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
             }
 
             return 0;
-#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(60, 30, 100)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 30, 100)
         } else if (provider_code == ITU_T_T35_PROVIDER_CODE_SMPTE) {
             uint16_t provider_oriented_code = AV_RB16(p);
             p += sizeof(provider_oriented_code);
