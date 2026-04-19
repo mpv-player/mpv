@@ -97,7 +97,6 @@ struct frame_info {
     double pts;
     double duration;        // PTS difference to next frame
     double approx_duration; // possibly fixed/smoothed out duration
-    double av_diff;         // A/V diff at time of scheduling
     int num_vsyncs;         // scheduled vsyncs, if using display-sync
 };
 
@@ -345,7 +344,8 @@ typedef struct MPContext {
     // update_playback_speed() updates them from the other fields.
     double audio_speed, video_speed;
     bool display_sync_active;
-    int display_sync_drift_dir;
+    double audio_drift_compensation;
+    double avd_filtered;
     // Timing error (in seconds) due to rounding on vsync boundaries
     double display_sync_error;
     // Number of mistimed frames.
