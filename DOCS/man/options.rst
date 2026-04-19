@@ -6504,7 +6504,7 @@ them.
     WIDTH <szexpr>, HEIGHT <szexpr>
         Specifies the size of the resulting texture for this pass. ``szexpr``
         refers to an expression in RPN (reverse polish notation), using the
-        operators + - * / > < !, floating point literals, and references to
+        operators + - * / > < ! = %, floating point literals, and references to
         sizes of existing texture (such as MAIN.width or CHROMA.height),
         OUTPUT, or NATIVE_CROPPED (size of an input texture cropped after
         pan-and-scan, video-align-x/y, video-pan-x/y, etc. and possibly
