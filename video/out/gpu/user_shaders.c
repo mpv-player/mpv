@@ -25,7 +25,7 @@
 #include "misc/ctype.h"
 #include "user_shaders.h"
 
-static int resolve_enum_name(struct gl_user_shader_param *param, struct bstr val)
+int resolve_shader_enum_name(const struct gl_user_shader_param *param, struct bstr val)
 {
     struct bstr enum_rest = param->enum_body;
     int idx = 0;
@@ -52,7 +52,7 @@ bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *p
         return false;
     case GL_USER_SHADER_PARAM_INT:
     case GL_USER_SHADER_PARAM_DEFINE:
-        v = resolve_enum_name(param, val);
+        v = resolve_shader_enum_name(param, val);
         v = v >= 0 ? v : bstrtoll(val, &rest, 10);
         range[0] = INT_MIN;
         range[1] = INT_MAX;
@@ -268,8 +268,10 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
             continue;
         }
 
-        // Some sort of illegal expression
-        return false;
+        // probably a parameter
+        exp->tag = SZEXP_VAR;
+        exp->val.varname = word;
+        continue;
     }
 
     return true;
@@ -277,7 +279,8 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 
 // Returns whether successful. 'result' is left untouched on failure
 bool eval_szexpr(struct mp_log *log, void *priv,
-                 bool (*lookup)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_tex)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_param)(void *priv, struct bstr var, float *out),
                  struct szexp expr[MAX_SZEXP_SIZE], float *result)
 {
     float stack[MAX_SZEXP_SIZE] = {0};
@@ -342,7 +345,7 @@ bool eval_szexpr(struct mp_log *log, void *priv,
             struct bstr name = expr[i].val.varname;
             float size[2];
 
-            if (!lookup(priv, name, size)) {
+            if (!lookup_tex(priv, name, size)) {
                 mp_warn(log, "Variable %.*s not found in RPN expression!\n",
                         BSTR_P(name));
                 return false;
@@ -351,6 +354,17 @@ bool eval_szexpr(struct mp_log *log, void *priv,
             stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? size[0] : size[1];
             continue;
             }
+        case SZEXP_VAR: {
+            struct bstr name = expr[i].val.varname;
+            float value;
+            if (!lookup_param(priv, name, &value)) {
+                mp_warn(log, "Variable %.*s not found in RPN expression!\n",
+                    BSTR_P(name));
+                return false;
+            }
+            stack[idx++] = value;
+            continue;
+        }
         }
     }
 

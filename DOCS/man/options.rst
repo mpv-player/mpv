@@ -6456,7 +6456,8 @@ them.
         qualified parameter body lists all the possible enumeration values
         separated by newlines. These values are assigned integer values starting
         from 0 incremented by 1. Each enumeration will also be emitted as a
-        preprocessor define. ``MINIMUM`` and ``MAXIMUM`` are ignored.
+        preprocessor define and will be accessible within RPN expressions.
+        ``MINIMUM`` and ``MAXIMUM`` are ignored.
 
     MINIMUM <value>
         Minimum allowed value for this parameter.
@@ -6474,8 +6475,7 @@ them.
         ``vo=gpu`` supports only a subset of the parameter features available in
         ``vo=gpu-next``. See libplacebo documentation for more detailed
         information about PARAM features supported in ``vo=gpu-next``. Notably
-        ``uint``, ``DYNAMIC``, and ``CONSTANT`` types are not available, and
-        parameters cannot be referenced in ``WHEN`` expression.
+        ``uint``, ``DYNAMIC``, and ``CONSTANT`` types are not available.
 
     A ``HOOK`` block can set the following options:
 
@@ -6506,9 +6506,9 @@ them.
         refers to an expression in RPN (reverse polish notation), using the
         operators + - * / > < ! = %, floating point literals, and references to
         sizes of existing texture (such as MAIN.width or CHROMA.height),
-        OUTPUT, or NATIVE_CROPPED (size of an input texture cropped after
-        pan-and-scan, video-align-x/y, video-pan-x/y, etc. and possibly
-        prescaled). By default, these are set to HOOKED.w and HOOKED.h,
+        OUTPUT, tunable parameters, or NATIVE_CROPPED (size of an input texture
+        cropped after pan-and-scan, video-align-x/y, video-pan-x/y, etc. and
+        possibly prescaled). By default, these are set to HOOKED.w and HOOKED.h,
         espectively.
 
     WHEN <szexpr>

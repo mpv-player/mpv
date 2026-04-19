@@ -43,6 +43,7 @@ enum szexp_tag {
     SZEXP_CONST, // Push a constant value onto the stack
     SZEXP_VAR_W, // Get the width/height of a named texture (variable)
     SZEXP_VAR_H,
+    SZEXP_VAR,   // Get the scalar value of a named parameter/enum member
     SZEXP_OP2, // Pop two elements and push the result of a dyadic operation
     SZEXP_OP1, // Pop one element and push the result of a monadic operation
 };
@@ -121,9 +122,12 @@ void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
 bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *param,
                               struct bstr val, double *out);
 
-// Evaluate a szexp, given a lookup function for named textures
+int resolve_shader_enum_name(const struct gl_user_shader_param *param, struct bstr val);
+
+// Evaluate a szexp, given lookup functions for named textures and parameters.
 bool eval_szexpr(struct mp_log *log, void *priv,
-                 bool (*lookup)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_tex)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_param)(void *priv, struct bstr var, float *out),
                  struct szexp expr[MAX_SZEXP_SIZE], float *result);
 
 #endif
