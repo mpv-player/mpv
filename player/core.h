@@ -60,7 +60,7 @@ enum {
     OSD_LEVEL_INVISIBLE = 4,
     OSD_BAR_SEEK = 256,
 
-    MAX_NUM_VO_PTS = 100,
+    MAX_NUM_VO_PTS = 1000,
 };
 
 enum seek_type {
