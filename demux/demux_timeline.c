@@ -638,6 +638,15 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
     return true;
 }
 
+static int find_edition(struct demuxer *demuxer, uint64_t demuxer_id)
+{
+    for (int e = 0; e < demuxer->num_editions; e++) {
+        if (demuxer->editions[e].demuxer_id == demuxer_id)
+            return e;
+    }
+    return -1;
+}
+
 static void build_editions(struct demuxer *demuxer)
 {
     // Don't override editions from the underlying demuxer.
@@ -650,14 +659,7 @@ static void build_editions(struct demuxer *demuxer)
         if (sh->program_id < 0)
             continue;
 
-        bool found = false;
-        for (int e = 0; e < demuxer->num_editions; e++) {
-            if (demuxer->editions[e].demuxer_id == sh->program_id) {
-                found = true;
-                break;
-            }
-        }
-        if (found)
+        if (find_edition(demuxer, sh->program_id) >= 0)
             continue;
 
         struct demux_edition ed = {
@@ -701,28 +703,39 @@ static void build_editions(struct demuxer *demuxer)
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
         selected = edition_id;
 
-    // Select initial edition by best variant bitrate.
-    if (selected < 0 && hls_bitrate >= 0) {
+    // Select initial edition by best variant bitrate, preferring editions
+    // whose video stream is marked as default.
+    if (selected < 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
-        for (int e = 0; e < demuxer->num_editions; e++) {
-            int pid = (int)demuxer->editions[e].demuxer_id;
-            for (int n = 0; n < num_streams; n++) {
-                struct sh_stream *sh = demux_get_stream(demuxer, n);
-                if (sh->program_id != pid || sh->type != STREAM_VIDEO ||
-                    sh->hls_bitrate <= 0)
-                    continue;
-                bool ok = sh->hls_bitrate <= hls_bitrate;
-                if (best < 0 || (ok && !best_ok) ||
-                    (ok && best_ok && sh->hls_bitrate > best_bitrate) ||
-                    (!ok && !best_ok && sh->hls_bitrate < best_bitrate))
-                {
-                    best = e;
-                    best_bitrate = sh->hls_bitrate;
-                    best_ok = ok;
-                }
-                break;
+        bool best_default = false;
+        for (int n = 0; n < num_streams; n++) {
+            struct sh_stream *sh = demux_get_stream(demuxer, n);
+            if (sh->type != STREAM_VIDEO || sh->program_id < 0)
+                continue;
+            if (!sh->default_track && (hls_bitrate < 0 || sh->hls_bitrate <= 0))
+                continue;
+            int e = find_edition(demuxer, sh->program_id);
+            if (e < 0)
+                continue;
+            bool ok = hls_bitrate < 0 || sh->hls_bitrate <= hls_bitrate;
+            bool better;
+            if (best < 0) {
+                better = true;
+            } else if (sh->default_track != best_default) {
+                better = sh->default_track;
+            } else if (ok != best_ok) {
+                better = ok;
+            } else {
+                better = ok ? sh->hls_bitrate > best_bitrate
+                            : sh->hls_bitrate < best_bitrate;
+            }
+            if (better) {
+                best = e;
+                best_bitrate = sh->hls_bitrate;
+                best_ok = ok;
+                best_default = sh->default_track;
             }
         }
         if (best >= 0)
