@@ -658,6 +658,25 @@ static int ucdToCharacterWidth(const int val)
 
 #include "common/common.h"
 
+// Check whether a truncated UTF-8 sequence is well-formed.
+//
+// See https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-3/#G27506
+static bool is_valid_partial_sequence(struct bstr seq)
+{
+    if (seq.len < 2)
+        return true;
+
+    if (seq.start[0] == 0xE0)
+        return seq.start[1] >= 0xA0;
+    else if (seq.start[0] == 0xED)
+        return seq.start[1] <= 0x9F;
+    else if (seq.start[0] == 0xF0)
+        return seq.start[1] >= 0x90;
+    else if (seq.start[0] == 0xF4)
+        return seq.start[1] <= 0x8F;
+    return true;
+}
+
 int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
 {
     static const int ambiguous_width = 1;
@@ -676,11 +695,25 @@ int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
         }
 
         prev_pos = str.start;
-        int cp = bstr_decode_utf8(str, &str);
+        int cp = bstr_decode_partial_utf8(&str);
 
-        // Stop processing on any invalid input
-        if (cp < 0)
-            return 0;
+        // Assume the terminal replaces maximal ill-formed subparts with
+        // a single U+FFFD replacement character as described in
+        // https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-3/#G66453
+        if (cp < 0) {
+            struct bstr partial = {(unsigned char *)prev_pos, str.start - prev_pos};
+            if (cp == BSTR_DECODE_TRUNCATED_SEQUENCE &&
+                is_valid_partial_sequence(partial))
+            {
+                // This is a truncated but initially well-formed sequence,
+                // should be replaced with a single U+FFFD.
+                current_width = 1;
+            } else {
+                // Otherwise each byte should be replaced individually.
+                current_width = partial.len;
+            }
+            goto next;
+        }
 
         if (cp == '\r') {
             width = 0;
@@ -724,9 +757,9 @@ int term_disp_width(bstr str, int max_width, const unsigned char **cut_pos)
             // Fetch next codepoint in grapheme cluster
             bstr cluster_end;
             cp = bstr_decode_utf8(str, &cluster_end);
-            // Stop processing on any invalid input
+            // Invalid sequences end the current grapheme.
             if (cp < 0)
-                return 0;
+                break;
             int trail = ucdLookup(cp);
 
             state = ucdGraphemeJoins(state, lead, trail);
