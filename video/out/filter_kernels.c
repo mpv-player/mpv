@@ -349,9 +349,9 @@ static double sphinx(params *p, double x)
 }
 
 const struct filter_window mp_filter_windows[] = {
-    {WINDOW_BOX,      1,   box},
-    {WINDOW_TRIANGLE, 1,   triangle},
-    {WINDOW_BARTLETT, 1,   triangle},
+    {WINDOW_BOX,      1,   box, .resizable = true},
+    {WINDOW_TRIANGLE, 1,   triangle, .resizable = true},
+    {WINDOW_BARTLETT, 1,   triangle, .resizable = true},
     {WINDOW_COSINE,   M_PI_2, cosine},
     {WINDOW_HANNING,  1,   hanning},
     {WINDOW_TUKEY,    1,   hanning, .taper = 0.5},
@@ -360,10 +360,10 @@ const struct filter_window mp_filter_windows[] = {
     {WINDOW_WELCH,    1,   welch},
     {WINDOW_KAISER,   1,   kaiser,   .params = {6.33, NAN} },
     {WINDOW_BLACKMAN, 1,   blackman, .params = {0.16, NAN} },
-    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN} },
-    {WINDOW_SINC,     1,   sinc},
-    {WINDOW_JINC,     1.2196698912665045, jinc},
-    {WINDOW_SPHINX,   1.4302966531242027, sphinx},
+    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN}, .resizable = true},
+    {WINDOW_SINC,     1,   sinc, .resizable = true},
+    {WINDOW_JINC,     1.2196698912665045, jinc, .resizable = true},
+    {WINDOW_SPHINX,   1.4302966531242027, sphinx, .resizable = true},
     {0}
 };
 
