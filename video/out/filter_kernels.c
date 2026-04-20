@@ -135,6 +135,24 @@ static void mp_compute_weights(struct filter_kernel *filter, double f,
         out_w[n] = w;
         sum += w;
     }
+    // If the filter radius is smaller than the smallest tap distance (e.g. a
+    // user-resized filter with radius < 0.5 sampled at f=0.5), all taps fall
+    // outside the kernel support and sum == 0. Fall back to nearest-neighbor
+    // on the closest tap to avoid a division-by-zero.
+    if (sum == 0.0) {
+        int nearest = 0;
+        double min_dist = INFINITY;
+        for (int n = 0; n < filter->size; n++) {
+            double x = fabs(f - (n - filter->size / 2 + 1));
+            if (x < min_dist) {
+                min_dist = x;
+                nearest = n;
+            }
+        }
+        for (int n = 0; n < filter->size; n++)
+            out_w[n] = (n == nearest) ? 1.0f : 0.0f;
+        return;
+    }
     // Normalize to preserve energy
     for (int n = 0; n < filter->size; n++)
         out_w[n] /= sum;
