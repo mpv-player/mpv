@@ -180,6 +180,7 @@ typedef struct MPOpts {
     char **reset_options;
     char **script_files;
     char **script_opts;
+    char **profile_scripts;
     bool js_memory_report;
     bool lua_load_osc;
     bool lua_load_ytdl;

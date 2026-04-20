@@ -833,6 +833,21 @@ Program Behavior
     and overwrites the internal list with it. The latter is a key/value list
     option. See `List Options`_ for details.
 
+``--profile-script=<name[=path]>``, ``--profile-scripts=name1[=path1],name2[=path2],...``
+    Profile the given script(s) and dump a report to ``path`` when the script
+    exits. If no ``path`` is given, logs to the console with ``info`` message
+    level.
+
+    Currently only supports profiling lua scripts with LuaJIT.
+
+    The exact format of the report depends on the profiler used. For LuaJIT the
+    format is::
+
+        <Number of samples>  <Percentage of total samples>  <Stack trace>
+
+    Stack is only printed up to a depth of 100. The requested sampling interval
+    is set to 4ms (but the actual sampling interval may vary due to OS).
+
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
     file. This uses timeline/EDL support internally.
