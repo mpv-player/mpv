@@ -733,6 +733,10 @@ The OSC supports displaying preview thumbnails when hovering over the seekbar if
 a compatible thumbnailer script is installed. It communicates with a thumbnailer
 script via the following ``user-data`` properties:
 
+``user-data/osc/thumbnailer-enabled``
+    Boolean property set by the thumbnailer to signal that it is capable of
+    providing thumbnail for the currently playing file.
+
 ``user-data/osc/draw-preview``
     Set by the OSC to request a thumbnail within the currently playing file.
     The requested thumbnail timestamp in seconds is set in

@@ -365,6 +365,10 @@ local santa_hat_lines = {
 -- luacheck: pop
 
 
+local thumbnailer_enabled = false
+mp.observe_property("user-data/osc/thumbnailer-enabled", "bool",
+    function(_, val) thumbnailer_enabled = val or false end)
+
 --
 -- Helper functions
 --
@@ -1198,7 +1202,7 @@ local function render_elements(master_ass)
                     -- thumbnail
                     local vop = mp.get_property_native("video-out-params")
                     local draw_thumbnail = state.osd_dimensions.w > 0 and vop
-                    if draw_thumbnail then
+                    if draw_thumbnail and thumbnailer_enabled then
                         local r_w, r_h = get_virt_scale_factor()
                         local thumb_max = math.min(user_opts.max_thumb_size,
                             math.min(state.osd_dimensions.w, state.osd_dimensions.h) * 0.25)
