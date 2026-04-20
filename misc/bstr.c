@@ -258,36 +258,43 @@ int bstr_parse_utf8_code_length(unsigned char b)
     return (bytes >= 2 && bytes <= 4) ? bytes : -1;
 }
 
-int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
+int bstr_decode_partial_utf8(struct bstr *s)
 {
-    if (s.len == 0)
+    if (s->len == 0)
         return -1;
-    unsigned int codepoint = s.start[0];
-    s.start++; s.len--;
+    unsigned int codepoint = s->start[0];
+    s->start++; s->len--;
     if (codepoint >= 128) {
         int bytes = bstr_parse_utf8_code_length(codepoint);
-        if (bytes < 1 || s.len < bytes - 1)
-            return -1;
+        if (bytes < 1)
+            return BSTR_DECODE_OUT_OF_RANGE;
         codepoint &= 127 >> bytes;
         for (int n = 1; n < bytes; n++) {
-            int tmp = (unsigned char)s.start[0];
+            if (!s->len)
+                return BSTR_DECODE_TRUNCATED_SEQUENCE;
+            int tmp = (unsigned char)s->start[0];
             if ((tmp & 0xC0) != 0x80)
-                return -1;
+                return BSTR_DECODE_TRUNCATED_SEQUENCE;
             codepoint = (codepoint << 6) | (tmp & ~0xC0);
-            s.start++; s.len--;
+            s->start++; s->len--;
         }
         if (codepoint > 0x10FFFF || (codepoint >= 0xD800 && codepoint <= 0xDFFF))
-            return -1;
+            return BSTR_DECODE_OUT_OF_RANGE;
+
         // Overlong sequences - check taken from libavcodec.
-        // (The only reason we even bother with this is to make libavcodec's
-        //  retarded subtitle utf-8 check happy.)
         unsigned int min = bytes == 2 ? 0x80 : 1 << (5 * bytes - 4);
         if (codepoint < min)
-            return -1;
+            return BSTR_DECODE_OVERLONG_ENCODING;
     }
-    if (out_next)
-        *out_next = s;
     return codepoint;
+}
+
+int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
+{
+    int res = bstr_decode_partial_utf8(&s);
+    if (res >= 0 && out_next)
+        *out_next = s;
+    return res;
 }
 
 struct bstr bstr_split_utf8(struct bstr str, struct bstr *out_next)

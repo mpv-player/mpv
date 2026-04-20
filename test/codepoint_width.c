@@ -58,6 +58,21 @@ int main(void) {
     assert_int_equal(W("A\nB"), 2);            // ASCII characters with newline (newline should not affect width)
     assert_int_equal(W("ABC\tDEF"), 11);       // Tab inside a string
 
+    // Single illegal character
+    assert_int_equal(W("abc" "\xFF" "def"), 7);
+    // Codepoint sequence cut off by one byte
+    assert_int_equal(W("abc"  "\xF0\x9F\x98" "def"), 7);
+
+    // Examples from https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-3/#G66453
+    // Table 3-8. U+FFFD for Non-Shortest Form Sequences
+    assert_int_equal(W("\xC0\xAF\xE0\x80\xBF\xF0\x81\x82\x41"), 9);
+    // Table 3-9. U+FFFD for Ill-Formed Sequences for Surrogates
+    assert_int_equal(W("\xED\xA0\x80\xED\xBF\xBF\xED\xAF\x41"), 9);
+    // Table 3-10. U+FFFD for Other Ill-Formed Sequences
+    assert_int_equal(W("\xF4\x91\x92\x93\xFF\x41\x80\xBF\x42"), 9);
+    // Table 3-11. U+FFFD for Truncated Sequences
+    assert_int_equal(W("\xE1\x80\xE2\xF0\x91\x92\xF1\xBF\x41"), 5);
+
     // ASCII characters with color
     assert_int_equal(W("\033[31mABC\033[0m\033[32mDEF\033[0m"), 6);
 

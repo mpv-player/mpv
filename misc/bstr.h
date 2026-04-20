@@ -88,11 +88,34 @@ bool bstr_in_list0(struct bstr str, char **list);
 // ignored. When successful, this allocates a new array to store the output.
 bool bstr_decode_hex(void *talloc_ctx, struct bstr hex, struct bstr *out);
 
+#define BSTR_DECODE_OUT_OF_RANGE -1
+#define BSTR_DECODE_TRUNCATED_SEQUENCE -2
+#define BSTR_DECODE_OVERLONG_ENCODING -3
+
+// Decode the UTF-8 code point at the start of the string, and return the
+// character.
+//
+// Unlike `bstr_decode_utf8`, this function will modify `str` directly
+// and will advance it even if the sequence at the start of the string
+// is ill-formed.
+//
+// On error, returns an error code depending on what type of ill-formed
+// sequence was encountered.
+// - `BSTR_DECODE_OUT_OF_RANGE` is returned if the first byte starts a
+//   five or six byte sequence or if the consumed sequence resulted in
+//   a value that is not a valid code point.
+// - `BSTR_DECODE_TRUNCATED_SEQUENCE` if an initially valid sequence
+//   was interrupted by an invalid continuation or the end of the string.
+//   Note that the consumed prefix may additionally be overlong.
+// - `BSTR_DECODE_OVERLONG_ENCODING` if a non-shortest-form sequence
+//   was fully decoded and rejected.
+int bstr_decode_partial_utf8(struct bstr *str);
+
 // Decode the UTF-8 code point at the start of the string, and return the
 // character.
 // After calling this function, *out_next will point to the next character.
 // out_next can be NULL.
-// On error, -1 is returned, and *out_next is not modified.
+// On error, a negative value is returned, and *out_next is not modified.
 int bstr_decode_utf8(struct bstr str, struct bstr *out_next);
 
 // Return the UTF-8 code point at the start of the string.
