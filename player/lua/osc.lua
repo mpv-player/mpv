@@ -2485,10 +2485,9 @@ local function osc_init()
     ne.slider.markerF = function ()
         local duration = mp.get_property_number("duration")
         if duration ~= nil then
-            local chapters = mp.get_property_native("chapter-list", {})
             local markers = {}
-            for n = 1, #chapters do
-                markers[n] = (chapters[n].time / duration * 100)
+            for n = 1, #state.chapter_list do
+                markers[n] = (state.chapter_list[n].time / duration * 100)
             end
             return markers
         else
