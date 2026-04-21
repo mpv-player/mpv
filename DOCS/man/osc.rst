@@ -687,6 +687,24 @@ continuously called while the mouse button is held down.
 
 ``skip_forward_mbtn_right_down_command=seek 60``
 
+``close_mbtn_left_command=quit``
+
+``close_mbtn_mid_command=``
+
+``close_mbtn_right_command=``
+
+``minimize_mbtn_left_command=cycle window-minimized``
+
+``minimize_mbtn_mid_command=``
+
+``minimize_mbtn_right_command=``
+
+``maximize_mbtn_left_command=cycle ${?fullscreen==yes:fullscreen}${!fullscreen==yes:window-maximized}``
+
+``maximize_mbtn_mid_command=``
+
+``maximize_mbtn_right_command=``
+
 Custom Buttons
 ~~~~~~~~~~~~~~
 
