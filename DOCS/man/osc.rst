@@ -588,6 +588,8 @@ Configurable Options
 
 The following options configure what commands are run when the buttons are
 clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
+An option that ends with ``_down_command`` means that the command is
+continuously called while the mouse button is held down.
 
 ``menu_mbtn_left_command=script-binding select/menu; script-message-to osc osc-hide``
 
@@ -666,6 +668,18 @@ clicked. ``mbtn_mid`` commands are also triggered with ``shift+mbtn_left``.
 ``fullscreen_mbtn_mid_command=``
 
 ``fullscreen_mbtn_right_command="cycle window-maximized"``
+
+``skip_backward_mbtn_left_down_command=seek -5``
+
+``skip_backward_mbtn_mid_down_command=frame-back-step``
+
+``skip_backward_mbtn_right_down_command=seek -30``
+
+``skip_forward_mbtn_left_down_command=seek 10``
+
+``skip_forward_mbtn_mid_down_command=frame-step``
+
+``skip_forward_mbtn_right_down_command=seek 60``
 
 Custom Buttons
 ~~~~~~~~~~~~~~
