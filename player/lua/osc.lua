@@ -132,6 +132,14 @@ local user_opts = {
     fullscreen_mbtn_left_command = "cycle fullscreen",
     fullscreen_mbtn_mid_command = "",
     fullscreen_mbtn_right_command = "cycle window-maximized",
+
+    skip_backward_mbtn_left_down_command = "seek -5",
+    skip_backward_mbtn_mid_down_command = "frame-back-step",
+    skip_backward_mbtn_right_down_command = "seek -30",
+
+    skip_forward_mbtn_left_down_command = "seek 10",
+    skip_forward_mbtn_mid_down_command = "frame-step",
+    skip_forward_mbtn_right_down_command = "seek 60",
     -- luacheck: pop
 }
 
@@ -2266,11 +2274,19 @@ end
 
 local function bind_mouse_buttons(element_name)
     for _, button in pairs({"mbtn_left", "mbtn_mid", "mbtn_right"}) do
-        local command = user_opts[element_name .. "_" .. button .. "_command"]
+        local up_command = user_opts[element_name .. "_" .. button .. "_command"]
 
-        if command ~= "" then
+        if up_command and up_command ~= "" then
             elements[element_name].eventresponder[button .. "_up"] = function ()
-                mp.command(command)
+                mp.command(up_command)
+            end
+        end
+
+        local down_command = user_opts[element_name .. "_" .. button .. "_down_command"]
+
+        if down_command and down_command ~= "" then
+            elements[element_name].eventresponder[button .. "_down"] = function ()
+                mp.command(down_command)
             end
         end
     end
@@ -2403,24 +2419,14 @@ local function osc_init()
 
     ne.softrepeat = true
     ne.content = icons.skip_backward
-    ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", -5) end
-    ne.eventresponder["mbtn_mid_down"] =
-        function () mp.commandv("frame-back-step") end
-    ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", -30) end
+    bind_mouse_buttons("skip_backward")
 
     --skip_forward
     ne = new_element("skip_forward", "button")
 
     ne.softrepeat = true
     ne.content = icons.skip_forward
-    ne.eventresponder["mbtn_left_down"] =
-        function () mp.commandv("seek", 10) end
-    ne.eventresponder["mbtn_mid_down"] =
-        function () mp.commandv("frame-step") end
-    ne.eventresponder["mbtn_right_down"] =
-        function () mp.commandv("seek", 60) end
+    bind_mouse_buttons("skip_forward")
 
     --chapter_prev
     ne = new_element("chapter_prev", "button")
