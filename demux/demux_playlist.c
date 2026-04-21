@@ -259,7 +259,7 @@ static int parse_m3u(struct pl_parser *p)
             int len = stream_read_peek(p->real_stream, probe, sizeof(probe));
             bstr data = {probe, len};
             if (ext && data.len >= 2 && maybe_text(data)) {
-                const char *exts[] = {"m3u", "m3u8", NULL};
+                const char *exts[] = {"m3u", "m3u8", "strm", NULL};
                 for (int n = 0; exts[n]; n++) {
                     if (strcasecmp(ext, exts[n]) == 0)
                         goto ok;
@@ -616,6 +616,7 @@ static const struct pl_format dir_formats[] = {
 static const struct pl_format playlist_formats[] = {
     {"m3u", parse_m3u,
      MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
+    {"strm", parse_m3u},
     {"ini", parse_ref_init},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
