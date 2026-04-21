@@ -1121,6 +1121,10 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
         wp.showCmd = SW_SHOWNORMAL;
         SetWindowPlacement(w32->window, &wp);
         w32->pending_maximize = true;
+    } else if (w32->opts->window_maximized) {
+        // If the window was initialized directly in fullscreen mode, restore
+        // it to maximized state later.
+        w32->pending_maximize = true;
     }
 
     RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
@@ -1981,7 +1985,7 @@ set_pos_done:
     if (!is_visible(w32->window)) {
         if (w32->opts->window_minimized) {
             ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
-        } else if (w32->opts->window_maximized) {
+        } else if (w32->opts->window_maximized && !w32->current_fs) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
         } else {
             ShowWindow(w32->window, SW_SHOW);
