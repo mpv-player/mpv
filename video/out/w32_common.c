@@ -120,6 +120,7 @@ struct vo_w32_state {
     bool current_fs;
     bool pending_resize;
     bool pending_reset_size;
+    bool window_state_changed;
     bool pending_maximize;
 
     RECT current_rect; // client rect of the window
@@ -1435,6 +1436,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         bool updated = (m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized) ||
                         m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_minimized));
         if (updated || w32->pending_resize) {
+            // We call window resize here, only to recalculate possible window
+            // size after changing the style, but we want to preserve the client
+            // size.
+            w32->window_state_changed = true;
             window_resize(w32);
             events |= VO_EVENT_WIN_STATE;
         }
@@ -1931,7 +1936,9 @@ static void window_resize(struct vo_w32_state *w32)
 
     w32->pending_reset_size |= w32->opts->auto_window_resize &&
                                (w32->o_dwidth != vo->dwidth ||
-                                w32->o_dheight != vo->dheight);
+                                w32->o_dheight != vo->dheight) &&
+                                !w32->window_state_changed;
+    w32->window_state_changed = false;
 
     if (w32->parent) {
         GetClientRect(w32->window, &r);
@@ -2328,6 +2335,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                        changed_option == &vo_opts->title_bar)
             {
                 update_window_style(w32);
+                w32->window_state_changed = true;
                 window_resize(w32);
             } else if (changed_option == &vo_opts->show_in_taskbar) {
                 // This hide and show is apparently required according to the documentation:
