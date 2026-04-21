@@ -335,6 +335,7 @@ local state = {
     no_video = false,
     playlist_count = 0,
     playlist_pos_1 = 0,
+    duration = nil,
     pause = false,
     volume = 0,
     mute = false,
@@ -979,9 +980,8 @@ local function render_elements(master_ass)
     state.forced_title = nil
     local se, ae = state.slider_element, elements[state.active_element]
     if user_opts.chapter_fmt ~= "no" and se and (ae == se or (not ae and mouse_hit(se))) then
-        local dur = mp.get_property_number("duration", 0)
-        if dur > 0 then
-            local possec = get_slider_value(se) * dur / 100 -- of mouse pos
+        if state.duration then
+            local possec = get_slider_value(se) * state.duration / 100 -- of mouse pos
             local ch = get_chapter(possec)
             if ch and ch.title and ch.title ~= "" then
                 state.forced_title = string.format(user_opts.chapter_fmt, ch.title)
@@ -1223,7 +1223,7 @@ local function render_elements(master_ass)
                     ass_append_alpha(elem_ass, slider_lo.alpha, 0)
                     elem_ass:append(tooltiplabel)
 
-                    local hover_sec = mp.get_property_number("duration", 0) * (sliderpos / 100)
+                    local hover_sec = (state.duration or 0) * (sliderpos / 100)
                     local changed = math.abs(hover_sec - state.hover_sec) > 0.5
                     if changed then
                        mp.set_property_number("user-data/osc/hover-sec", hover_sec)
@@ -2508,11 +2508,10 @@ local function osc_init()
                  and user_opts.layout ~= "slimtopbar"
     state.slider_element = ne.enabled and ne or nil  -- used for forced_title
     ne.slider.markerF = function ()
-        local duration = mp.get_property_number("duration")
-        if duration ~= nil then
+        if state.duration then
             local markers = {}
             for n = 1, #state.chapter_list do
-                markers[n] = (state.chapter_list[n].time / duration * 100)
+                markers[n] = (state.chapter_list[n].time / state.duration * 100)
             end
             return markers
         else
@@ -2522,9 +2521,8 @@ local function osc_init()
     ne.slider.posF =
         function () return mp.get_property_number("percent-pos") end
     ne.slider.tooltipF = function (pos)
-        local duration = mp.get_property_number("duration")
-        if duration ~= nil and pos ~= nil then
-            local possec = duration * (pos / 100)
+        if state.duration and pos then
+            local possec = state.duration * (pos / 100)
             return mp.format_time(possec)
         else
             return ""
@@ -2534,15 +2532,14 @@ local function osc_init()
         if user_opts.seekrangestyle == "none" or not cache_enabled() then
             return nil
         end
-        local duration = mp.get_property_number("duration")
-        if duration == nil or duration <= 0 then
+        if state.duration == nil then
             return nil
         end
         local nranges = {}
         for _, range in pairs(state.demuxer_cache_state["seekable-ranges"]) do
             nranges[#nranges + 1] = {
-                ["start"] = 100 * range["start"] / duration,
-                ["end"] = 100 * range["end"] / duration,
+                ["start"] = 100 * range["start"] / state.duration,
+                ["end"] = 100 * range["end"] / state.duration,
             }
         end
         return nranges
@@ -2620,7 +2617,7 @@ local function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = (mp.get_property_number("duration", 0) > 0)
+    ne.visible = state.duration ~= nil
     ne.content = function ()
         if state.rightTC_trem then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
@@ -2631,13 +2628,9 @@ local function osc_init()
             else
                 return (minus..mp.get_property_osd(property))
             end
-        else
-            if state.tc_ms then
-                return (mp.get_property_osd("duration/full"))
-            else
-                return (mp.get_property_osd("duration"))
-            end
         end
+
+        return mp.format_time(state.duration or 0, state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
     end
     ne.eventresponder["mbtn_left_up"] =
         function () state.rightTC_trem = not state.rightTC_trem end
@@ -3173,28 +3166,6 @@ local function shutdown()
     mp.del_property("user-data/osc")
 end
 
--- duration is observed for the sole purpose of updating chapter markers
--- positions. live streams with chapters are very rare, and the update is also
--- expensive (with request_init), so it's only observed when we have chapters
--- and the user didn't disable the livemarkers option (update_duration_watch).
-local function on_duration() request_init() end
-
-local duration_watched = false
-local function update_duration_watch()
-    local want_watch = user_opts.livemarkers and
-                       (mp.get_property_number("chapters", 0) or 0) > 0 and
-                       true or false  -- ensure it's a boolean
-
-    if want_watch ~= duration_watched then
-        if want_watch then
-            mp.observe_property("duration", "native", on_duration)
-        else
-            mp.unobserve_property(on_duration)
-        end
-        duration_watched = want_watch
-    end
-end
-
 local function set_tick_delay(_, display_fps)
     -- may be nil if unavailable or 0 fps is reported
     if not display_fps or not user_opts.tick_delay_follow_display_fps then
@@ -3211,8 +3182,12 @@ observe_cached("playlist-count", request_init)
 observe_cached("playlist-pos-1", request_init)
 observe_cached("chapter-list", function ()
     table.sort(state.chapter_list, function(a, b) return a.time < b.time end)
-    update_duration_watch()
     request_init()
+end)
+observe_cached("duration", function ()
+    if user_opts.livemarkers and state.chapter_list[1] then
+        request_init()
+    end
 end)
 
 -- These are for backwards compatibility only.
@@ -3489,7 +3464,6 @@ opt.read_options(user_opts, "osc", function(changed)
     end
     request_tick()
     visibility_mode(user_opts.visibility, true)
-    update_duration_watch()
     request_init()
 end)
 
@@ -3499,7 +3473,6 @@ set_osc_styles()
 set_time_styles(true, true)
 set_tick_delay()
 visibility_mode(user_opts.visibility, true)
-update_duration_watch()
 
 set_virt_mouse_area(0, 0, 0, 0, "input")
 set_virt_mouse_area(0, 0, 0, 0, "window-controls")
