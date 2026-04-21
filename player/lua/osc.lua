@@ -2405,7 +2405,7 @@ local function osc_init()
     ne.content = icons.skip_backward
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", -5) end
-    ne.eventresponder["mbtn_mid"] =
+    ne.eventresponder["mbtn_mid_down"] =
         function () mp.commandv("frame-back-step") end
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", -30) end
@@ -2417,7 +2417,7 @@ local function osc_init()
     ne.content = icons.skip_forward
     ne.eventresponder["mbtn_left_down"] =
         function () mp.commandv("seek", 10) end
-    ne.eventresponder["mbtn_mid"] =
+    ne.eventresponder["mbtn_mid_down"] =
         function () mp.commandv("frame-step") end
     ne.eventresponder["mbtn_right_down"] =
         function () mp.commandv("seek", 60) end
