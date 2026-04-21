@@ -1407,6 +1407,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             switch (wParam) {
             case SIZE_MAXIMIZED:
                 w32->opts->window_maximized = true;
+                w32->opts->window_minimized = false;
                 break;
             case SIZE_MINIMIZED:
                 w32->opts->window_minimized = true;
