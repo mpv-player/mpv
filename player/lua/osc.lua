@@ -2371,7 +2371,6 @@ local function osc_init()
     elements = {}
 
     -- some often needed stuff
-    local have_ch = (mp.get_property_number("chapters", 0) > 0)
     local loop = mp.get_property("loop-playlist", "no")
 
     local ne
@@ -2447,14 +2446,14 @@ local function osc_init()
     --chapter_prev
     ne = new_element("chapter_prev", "button")
 
-    ne.enabled = have_ch
+    ne.enabled = #state.chapter_list > 0
     ne.content = icons.chapter_prev
     bind_mouse_buttons("chapter_prev")
 
     --chapter_next
     ne = new_element("chapter_next", "button")
 
-    ne.enabled = have_ch
+    ne.enabled = #state.chapter_list > 0
     ne.content = icons.chapter_next
     bind_mouse_buttons("chapter_next")
 
