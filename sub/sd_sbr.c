@@ -38,6 +38,11 @@ struct sd_sbr_priv {
     struct sbr_subtitles *sbr_subtitles;
     struct mp_osd_res prev_osd;
     struct mp_sub_packer *packer;
+#if SUBRANDR_MAJOR > 1 || SUBRANDR_MINOR >= 3
+    struct sbr_subtitle_iterator *subtitle_iterator;
+    struct active_text_line *text_lines;
+    int n_text_lines;
+#endif
 };
 
 static void enable_output(struct sd *sd, bool enable)
@@ -230,11 +235,104 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     return sub_bitmaps_copy(NULL, &res);
 }
 
+#if SUBRANDR_MAJOR > 1 || SUBRANDR_MINOR >= 3
+// Needed to make sure line order in `get_text` is stable and to deduplicate
+// identical lines.
+// Without this some styles of karaoke subtitles cause lines to jump around.
+// This isn't perfect and messes up some unusual subtitles like braille
+// Bad Apple but it's the best we can do without coordinates.
+struct active_text_line {
+    bstr text;
+    bool alive;
+};
+
+static void collect_dead_text_lines(struct sd_sbr_priv *ctx)
+{
+    int shift = 0;
+    for (int i = 0; i < ctx->n_text_lines;) {
+        struct active_text_line *line = &ctx->text_lines[i + shift];
+        if (!line->alive) {
+            talloc_free(line->text.start);
+            ++shift, --ctx->n_text_lines;
+            continue;
+        }
+
+        line->alive = false;
+        ctx->text_lines[i++] = *line;
+    }
+}
+
+static char *get_text(struct sd *sd, double pts, enum sd_text_type type)
+{
+    struct sd_sbr_priv *ctx = sd->priv;
+
+    if (pts == MP_NOPTS_VALUE || !ctx->sbr_subtitles)
+        return NULL;
+    uint32_t ms = lrint(pts * 1000);
+
+    if (!ctx->subtitle_iterator)
+        ctx->subtitle_iterator = sbr_subtitle_iterator_new();
+    sbr_subtitle_iterator *iter = ctx->subtitle_iterator;
+
+    size_t total_len = 0;
+    sbr_subtitles_iter(ctx->sbr_subtitles, iter);
+    for (; !iter->exhausted; sbr_subtitle_iterator_next(iter)) {
+        if (iter->start > ms || iter->end <= ms)
+            continue;
+
+        const char *text = sbr_subtitle_iterator_get_text(iter, 0);
+
+        for (int i = 0; i < ctx->n_text_lines; ++i) {
+            if (!bstrcmp0(ctx->text_lines[i].text, text)) {
+                if (!ctx->text_lines[i].alive) {
+                    total_len += ctx->text_lines[i].text.len;
+                    ctx->text_lines[i].alive = true;
+                }
+                goto skip;
+            }
+        }
+
+        struct active_text_line line = {
+            .text = bstrdup(ctx, bstr0(text)),
+            .alive = true,
+        };
+        MP_TARRAY_APPEND(ctx, ctx->text_lines, ctx->n_text_lines, line);
+        total_len += line.text.len;
+
+    skip:;
+    }
+    sbr_subtitle_iterator_reset(iter);
+
+    collect_dead_text_lines(ctx);
+
+    if (!ctx->n_text_lines)
+        return NULL;
+
+    // For newlines between each surviving line and the null terminator
+    total_len += ctx->n_text_lines;
+    char *result = talloc_size(NULL, total_len);
+    char *current = result;
+    for (int i = 0; i < ctx->n_text_lines; ++i) {
+        struct active_text_line *line = &ctx->text_lines[i];
+        memcpy(current, line->text.start, line->text.len);
+        current += line->text.len;
+        *current++ = '\n';
+    }
+    *--current = '\0';
+
+    return result;
+}
+#endif
+
 static void uninit(struct sd *sd)
 {
     struct sd_sbr_priv *ctx = sd->priv;
 
     enable_output(sd, false);
+#if SUBRANDR_MAJOR > 1 || SUBRANDR_MINOR >= 3
+    if (ctx->subtitle_iterator)
+        sbr_subtitle_iterator_destroy(ctx->subtitle_iterator);
+#endif
     if (ctx->sbr_subtitles)
         sbr_subtitles_destroy(ctx->sbr_subtitles);
     sbr_library_fini(ctx->sbr_library);
@@ -254,6 +352,9 @@ const struct sd_functions sd_sbr = {
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+#if SUBRANDR_MAJOR > 1 || SUBRANDR_MINOR >= 3
+    .get_text = get_text,
+#endif
     .control = control,
     .select = enable_output,
     .uninit = uninit,
