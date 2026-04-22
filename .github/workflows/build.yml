@@ -170,6 +170,13 @@ jobs:
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
           restore-keys: ${{ matrix.target }}-
 
+      - name: Install Winget on windows-11-arm
+        if: matrix.os == 'windows-11-arm'
+        shell: pwsh
+        run: |
+          Install-Module -Name Microsoft.WinGet.Client -Repository PSGallery -Force
+          Repair-WinGetPackageManager -Latest -Force
+
       - name: Install dependencies
         run: |
           python -m pip install meson
