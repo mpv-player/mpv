@@ -590,12 +590,13 @@ void mp_msg_sanitize(bstr *text)
         else if (ch < 0x08 || (ch > 0x0D && ch < 0x20) || ch == 0x7F) {
             text->start[i] = '?';
         }
-        // Block UTF-8 encoded C1 controls (U+0080-U+009F = bytes C2 80..C2 9F).
-        // xterm interprets these as C1 control functions (CSI, OSC, DCS, ST, ...),
-        // which allows bypassing the ESC/BEL filter above.
+        // Block UTF-8 encoded C1 controls (U+0080-U+009F = bytes C2 80..C2 9F),
+        // except PU1 (0x91) and PU2 (0x92) used as internal escape prefixes.
         else if (ch == 0xC2 && i + 1 < text->len &&
                  (unsigned char)text->start[i + 1] >= 0x80 &&
-                 (unsigned char)text->start[i + 1] <= 0x9F)
+                 (unsigned char)text->start[i + 1] <= 0x9F &&
+                 (unsigned char)text->start[i + 1] != 0x91 &&
+                 (unsigned char)text->start[i + 1] != 0x92)
         {
             text->start[i] = '?';
             text->start[i + 1] = '?';
