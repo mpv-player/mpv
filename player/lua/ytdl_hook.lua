@@ -63,7 +63,6 @@ local tag_list = {
     ["is_live"]         = "ytdl_is_live",
     ["release_year"]    = "ytdl_release_year",
     ["description"]     = "ytdl_description",
-    -- "title" is handled by force-media-title
 }
 
 local safe_protos = Set {
