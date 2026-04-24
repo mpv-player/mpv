@@ -322,6 +322,7 @@ local state = {
     last_mouseX = nil, last_mouseY = nil,   -- last mouse position, to detect significant mouse movement
     last_touchX = -1, last_touchY = -1,     -- last touch position
     mouse_in_window = false,
+    hover_sec = -1,
     fullscreen = false,
     tick_timer = nil,
     tick_last_time = 0,                     -- when the last tick() was run
@@ -1213,11 +1214,15 @@ local function render_elements(master_ass)
                     elem_ass:append(tooltiplabel)
 
                     local hover_sec = mp.get_property_number("duration", 0) * (sliderpos / 100)
-                    mp.set_property_number("user-data/osc/hover-sec", hover_sec)
+                    local changed = math.abs(hover_sec - state.hover_sec) > 0.5
+                    if changed then
+                       mp.set_property_number("user-data/osc/hover-sec", hover_sec)
+                       state.hover_sec = hover_sec
+                    end
 
                     -- thumbnail
                     local vop = mp.get_property_native("video-out-params")
-                    local draw_thumbnail = state.osd_dimensions.w > 0 and vop
+                    local draw_thumbnail = state.osd_dimensions.w > 0 and vop and changed
                     if draw_thumbnail then
                         local r_w, r_h = get_virt_scale_factor()
                         local thumb_max = math.min(user_opts.max_thumb_size,
@@ -1258,7 +1263,8 @@ local function render_elements(master_ass)
 
                         mp.set_property_native("user-data/osc/draw-preview", thumb_req)
                     end
-                else
+                elseif state.hover_sec >= 0 then
+                    state.hover_sec = -1
                     mp.set_property_native("user-data/osc/hover-sec", nil)
                     mp.set_property_native("user-data/osc/draw-preview", nil)
                 end
