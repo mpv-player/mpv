@@ -138,6 +138,7 @@ off_t mp_lseek64(int fd, off_t offset, int whence);
 int mp_ftruncate64(int fd, off_t length);
 void *mp_dlopen(const char *filename, int flag);
 void *mp_dlsym(void *handle, const char *symbol);
+int mp_dlclose(void *handle);
 char *mp_dlerror(void);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
@@ -207,8 +208,10 @@ void mp_globfree(mp_glob_t *pglob);
 
 #define RTLD_NOW 0
 #define RTLD_LOCAL 0
+#define RTLD_GLOBAL 0
 #define dlopen(fn,fg) mp_dlopen((fn), (fg))
 #define dlsym(h,s) mp_dlsym((h), (s))
+#define dlclose(h) mp_dlclose((h))
 #define dlerror mp_dlerror
 
 // Affects both "stat()" and "struct stat".

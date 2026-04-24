@@ -75,6 +75,7 @@ struct priv {
 
     const struct script_driver *drv;
     // drv_vss
+    void *vs_script_lib;
     const VSSCRIPTAPI *vs_script_api;
     VSScript *vs_script;
 
@@ -817,24 +818,24 @@ static const m_option_t vf_opts_fields[] = {
 static int drv_vss_init(struct priv *p)
 {
     const char *vsscript_path = getenv("VSSCRIPT_PATH");
-    const int dl_mode = RTLD_NOW | RTLD_LOCAL;
-    void *vsscript_lib = NULL;
+    const int dl_mode = RTLD_NOW | RTLD_GLOBAL;
+    p->vs_script_lib = NULL;
 
     if (vsscript_path) {
-        vsscript_lib = dlopen(vsscript_path, dl_mode);
+        p->vs_script_lib = dlopen(vsscript_path, dl_mode);
     } else {
-        for (size_t i = 0; i < MP_ARRAY_SIZE(vsscript_lib_names) && !vsscript_lib; ++i) {
-            vsscript_lib = dlopen(vsscript_lib_names[i], dl_mode);
+        for (size_t i = 0; i < MP_ARRAY_SIZE(vsscript_lib_names) && !p->vs_script_lib; ++i) {
+            p->vs_script_lib = dlopen(vsscript_lib_names[i], dl_mode);
         }
     }
 
     VS_CC const VSSCRIPTAPI *(*getVSScriptAPI_func)(int) = NULL;
     VS_CC const char *(*getVSScriptAPILastError_func)(void) = NULL;
-    const char *unknown_error_msg = "Last error unknown";
+    const char *unknown_error_msg = "last error unknown";
 
-    if (vsscript_lib) {
-        getVSScriptAPI_func = (void *) dlsym(vsscript_lib, "getVSScriptAPI");
-        getVSScriptAPILastError_func = (void *) dlsym(vsscript_lib, "getVSScriptAPILastError");
+    if (p->vs_script_lib) {
+        getVSScriptAPI_func = (void *) dlsym(p->vs_script_lib, "getVSScriptAPI");
+        getVSScriptAPILastError_func = (void *) dlsym(p->vs_script_lib, "getVSScriptAPILastError");
     }
 
     if (!getVSScriptAPI_func) {
@@ -858,6 +859,11 @@ static int drv_vss_init(struct priv *p)
 static void drv_vss_uninit(struct priv *p)
 {
     p->vs_script_api = NULL;
+
+    if (p->vs_script_lib) {
+        dlclose(p->vs_script_lib);
+        p->vs_script_lib = NULL;
+    }
 }
 
 static int drv_vss_load_core(struct priv *p)
