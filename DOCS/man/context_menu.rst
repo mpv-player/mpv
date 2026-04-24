@@ -94,6 +94,12 @@ Configurable Options
 
     The color of the menu's border.
 
+``background_alpha``
+    Default: ``0``
+
+    The transparency of the menu's background. Ranges from 0 (opaque) to 255
+    (fully transparent).
+
 ``corner_radius``
     Default: 5
 
