@@ -962,6 +962,16 @@ local function get_chapter(possec)
     end
 end
 
+local function disable_thumbnail()
+    if state.hover_sec == -1 then
+        return
+    end
+
+    state.hover_sec = -1
+    mp.set_property_native("user-data/osc/hover-sec", nil)
+    mp.set_property_native("user-data/osc/draw-preview", nil)
+end
+
 local function render_elements(master_ass)
     -- when the slider is dragged or hovered and we have a target chapter name
     -- then we use it instead of the normal title. we calculate it before the
@@ -1263,10 +1273,8 @@ local function render_elements(master_ass)
 
                         mp.set_property_native("user-data/osc/draw-preview", thumb_req)
                     end
-                elseif state.hover_sec >= 0 then
-                    state.hover_sec = -1
-                    mp.set_property_native("user-data/osc/hover-sec", nil)
-                    mp.set_property_native("user-data/osc/draw-preview", nil)
+                else
+                    disable_thumbnail()
                 end
             end
 
@@ -2705,6 +2713,7 @@ end
 
 local function osc_visible(visible)
     set_bar_visible("osc_visible", visible)
+    disable_thumbnail()
 end
 
 local function set_wc_visible(visible)
@@ -3256,8 +3265,7 @@ mp.register_event("file-loaded", function()
 end)
 mp.add_hook("on_unload", 50, function()
     state.file_loaded = false
-    mp.set_property_native("user-data/osc/hover-sec", nil)
-    mp.set_property_native("user-data/osc/draw-preview", nil)
+    disable_thumbnail()
     request_tick()
 end)
 
