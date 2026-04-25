@@ -447,7 +447,7 @@ static const struct pl_filter_config *map_scaler(struct pl_video *p,
                                                   const struct gl_video_opts *opts,
                                                   enum scaler_unit unit)
 {
-    static const struct pl_filter_preset fixed_scalers[] = {
+    const struct pl_filter_preset fixed_scalers[] = {
         { "bilinear",       &pl_filter_bilinear },
         { "bicubic_fast",   &pl_filter_bicubic },
         { "nearest",        &pl_filter_nearest },
