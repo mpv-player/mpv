@@ -326,6 +326,11 @@ class Window: NSWindow, NSWindowDelegate {
         }
     }
 
+    func windowWillUseStandardFrame(_ window: NSWindow, defaultFrame: NSRect) -> NSRect {
+        guard keepAspect, !isInFullscreen else { return defaultFrame }
+        return aspectFit(rect: unfsContentFrame, in: defaultFrame)
+    }
+
     func setMaximized(_ stateWanted: Bool) {
         if isZoomed == stateWanted { return }
 
