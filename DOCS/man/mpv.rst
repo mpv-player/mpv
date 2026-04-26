@@ -338,6 +338,9 @@ g-e
 g-l
     Select a subtitle line to seek to.
 
+g-L
+    Select a secondary subtitle line to seek to.
+
 g-d
     Select an audio device.
 
