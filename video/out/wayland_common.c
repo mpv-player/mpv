@@ -1851,27 +1851,31 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
         }
     }
 
-    if (wl->hidden != is_suspended)
+    /* Only update the toplevel state values if either mpv already has
+     * configured its initial geometry or if the compositor gives us some
+     * initial state to use. */
+
+    if ((wl->geometry_configured || is_suspended) && wl->hidden != is_suspended)
         wl->hidden = is_suspended;
 
-    if (wl->resizing != is_resizing) {
+    if ((wl->geometry_configured || is_resizing) && wl->resizing != is_resizing) {
         wl->resizing = is_resizing;
         wl->resizing_constraint = 0;
     }
 
-    if (opts->fullscreen != is_fullscreen) {
+    if ((wl->geometry_configured || is_fullscreen) && opts->fullscreen != is_fullscreen) {
         wl->state_change = wl->reconfigured;
         opts->fullscreen = is_fullscreen;
         m_config_cache_write_opt(wl->opts_cache, &opts->fullscreen);
     }
 
-    if (opts->window_maximized != is_maximized) {
+    if ((wl->geometry_configured || is_maximized) && opts->window_maximized != is_maximized) {
         wl->state_change = wl->reconfigured;
         opts->window_maximized = is_maximized;
         m_config_cache_write_opt(wl->opts_cache, &opts->window_maximized);
     }
 
-    if (!is_tiled && wl->tiled)
+    if (wl->geometry_configured && !is_tiled && wl->tiled)
         wl->state_change = wl->reconfigured;
 
     wl->tiled = is_tiled;
