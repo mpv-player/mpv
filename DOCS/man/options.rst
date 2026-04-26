@@ -395,6 +395,11 @@ Playback Control
     location. (Instead, the behavior is as if the playlist entries were provided
     directly to mpv command line or ``loadfile`` command.)
 
+    This also enables non-network protocols inside the ``mpv://`` URL handler.
+    For example, the youtube-dl hook builds ``edl://`` playlists. This
+    effectively allows crossing between network and local boundaries, bypassing
+    safety restrictions, so it should be used with caution.
+
 ``--access-references=<yes|no>``
     Follow any references in the file being opened (default: yes). Disabling
     this is helpful if the file is automatically scanned (e.g. thumbnail
