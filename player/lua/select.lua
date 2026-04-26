@@ -284,8 +284,8 @@ mp.add_key_binding(nil, "select-edition", function ()
     })
 end)
 
-mp.add_key_binding(nil, "select-subtitle-line", function ()
-    local lines = mp.get_property_native("sub-lines")
+local function select_subtitle_line(secondary)
+    local lines = mp.get_property_native(secondary .. "sub-lines")
 
     if not lines then
         show_warning("Subtitle lines could not be retrieved.")
@@ -294,7 +294,7 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
 
     local items = {}
     local default_item
-    local delay = mp.get_property_native("sub-delay")
+    local delay = mp.get_property_native(secondary .. "sub-delay")
     local time_pos = mp.get_property_native("time-pos") - delay
     local duration = mp.get_property_native("duration", math.huge)
 
@@ -320,6 +320,13 @@ mp.add_key_binding(nil, "select-subtitle-line", function ()
             mp.commandv("seek", lines[i].start + delay, "absolute")
         end,
     })
+end
+
+mp.add_key_binding(nil, "select-subtitle-line", function ()
+    select_subtitle_line("")
+end)
+mp.add_key_binding(nil, "select-secondary-subtitle-line", function ()
+    select_subtitle_line("secondary-")
 end)
 
 local function format_audio_device(device)
