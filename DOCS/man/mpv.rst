@@ -1285,6 +1285,10 @@ PROTOCOLS
     trusted source, since it disables the safety limits, basically allowing any
     protocol to be opened from the URL handler.
 
+    Example browser bookmarklet that opens the current page in mpv::
+
+        javascript:void(location='mpv://'+encodeURIComponent(location.href))
+
 ``http://...``, ``https://``, ...
 
     Many network protocols are supported, but the protocol prefix must always
