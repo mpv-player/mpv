@@ -806,7 +806,9 @@ Program Behavior
     commands. (Default: ``no``)
 
     ``once`` will only idle at start and let the player close once the
-    first playlist has finished playing back.
+    first playlist has finished playing back. In ``pseudo-gui`` mode, a
+    failed load is reported on the OSD before exiting; see
+    ``--error-message-duration``.
 
 ``--include=<configuration-file>``
     Specify configuration file to be parsed after the default ones.
@@ -3418,6 +3420,13 @@ Window
     image when encoding, you need to use ``--demuxer=lavf
     --demuxer-lavf-o=loop=1``, and use ``--length`` or ``--frames`` to stop
     after a particular time.
+
+``--error-message-duration=<seconds>``
+    When a file fails to load in ``pseudo-gui`` mode, mpv shows the error on
+    the OSD and keeps the window open for this many seconds before exiting,
+    instead of closing silently. Triggering ``quit`` (or closing the window)
+    aborts the wait and exits immediately. Set to ``0`` to disable.
+    (Default: 4)
 
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful

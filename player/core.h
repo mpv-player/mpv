@@ -297,6 +297,10 @@ typedef struct MPContext {
     int files_errored;      // played, but errors happened at one point
     int files_broken;       // couldn't be played at all
 
+    // Deadline (mp_time_ns) until which the playloop holds idle to keep the
+    // post-error OSD message visible in pseudo-gui mode. 0 if not armed.
+    int64_t error_display_deadline;
+
     // Current file statistics
     int64_t shown_vframes, shown_aframes;
 

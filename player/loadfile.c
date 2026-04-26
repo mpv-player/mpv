@@ -47,6 +47,7 @@
 #include "input/input.h"
 #include "misc/json.h"
 #include "misc/language.h"
+#include "misc/path_utils.h"
 
 #include "audio/out/ao.h"
 #include "filters/f_decoder_wrapper.h"
@@ -2062,6 +2063,17 @@ terminate_playback:
     if (end_event.error == MPV_ERROR_UNKNOWN_FORMAT)
         MP_ERR(mpctx, "Failed to recognize file format.\n");
 
+    if (end_event.error < 0 && mpctx->opts->operation_mode == 1 &&
+        mpctx->opts->error_message_duration > 0)
+    {
+        double duration = mpctx->opts->error_message_duration;
+        const char *name = mpctx->filename ? mp_basename(mpctx->filename) : "?";
+        set_osd_msg(mpctx, 1, (int)MP_TIME_NS_TO_MS(MP_TIME_S_TO_NS(duration)),
+                    "Failed to open: %s\n%s", name,
+                    mpv_error_string(end_event.error));
+        mpctx->error_display_deadline = mp_time_ns_add(mp_time_ns(), duration);
+    }
+
     if (mpctx->playing)
         playlist_entry_unref(mpctx->playing);
     mpctx->playing = NULL;
@@ -2180,8 +2192,21 @@ void mp_play_files(struct MPContext *mpctx)
         mpctx->playlist->current_was_replaced = false;
         mpctx->stop_play = new_entry ? PT_NEXT_ENTRY : PT_STOP;
 
-        if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
+        if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2) {
+            if (mpctx->error_display_deadline) {
+                handle_force_window(mpctx, true);
+                mp_wakeup_core(mpctx);
+                while (mpctx->stop_play == PT_STOP) {
+                    int64_t left = mpctx->error_display_deadline - mp_time_ns();
+                    if (left <= 0)
+                        break;
+                    mp_set_timeout(mpctx, MP_TIME_NS_TO_S(left));
+                    mp_idle(mpctx);
+                }
+                mpctx->error_display_deadline = 0;
+            }
             break;
+        }
     }
 
     cancel_open(mpctx);

@@ -620,6 +620,8 @@ static const m_option_t mp_opts[] = {
     {"keep-open-pause", OPT_BOOL(keep_open_pause)},
     {"image-display-duration", OPT_DOUBLE(image_display_duration),
         M_RANGE(0, INFINITY)},
+    {"error-message-duration", OPT_DOUBLE(error_message_duration),
+        M_RANGE(0, INFINITY)},
 
     // select audio/video/subtitle stream
     // keep in sync with num_ptracks[] and MAX_PTRACKS
@@ -1053,6 +1055,7 @@ static const struct MPOpts mp_default_opts = {
     .rebase_start_time = true,
     .keep_open_pause = true,
     .image_display_duration = 5.0,
+    .error_message_duration = 4.0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,
                      [STREAM_SUB] = -1, },
