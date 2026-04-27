@@ -667,22 +667,21 @@ static void build_editions(struct demuxer *demuxer)
             .metadata = talloc_zero(demuxer, struct mp_tags),
         };
 
-        // Use title from the first video stream in this program as edition
-        // title, falling back to any stream with a title.
-        const char *fallback_title = NULL;
+        const char *prefix = NULL;
+        bool prefix_is_video = false;
         for (int i = n; i < num_streams; i++) {
             struct sh_stream *s = demux_get_stream(demuxer, i);
             if (s->program_id != sh->program_id || !s->title)
                 continue;
-            if (s->type == STREAM_VIDEO) {
-                fallback_title = s->title;
-                break;
+            if (!prefix || (!prefix_is_video && s->type == STREAM_VIDEO)) {
+                prefix = s->title;
+                prefix_is_video = s->type == STREAM_VIDEO;
             }
-            if (!fallback_title)
-                fallback_title = s->title;
         }
-        if (fallback_title)
-            mp_tags_set_str(ed.metadata, "title", fallback_title);
+        char *title = demux_compose_edition_title(demuxer, demuxer,
+                                                  sh->program_id, prefix);
+        if (title)
+            mp_tags_set_str(ed.metadata, "title", title);
 
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
     }
