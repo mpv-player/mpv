@@ -995,57 +995,48 @@ static void build_editions(demuxer_t *demuxer)
         };
         mp_tags_copy_from_av_dictionary(ed.metadata, prog->metadata);
 
-        // AVProgram is unlikely to have a "title" tag, but just in case,
-        // don't override it.
-        char *title = mp_tags_get_str(ed.metadata, "title");
-        if (title)
-            goto done;
-
-        char *service_name = mp_tags_get_str(ed.metadata, "service_name");
-        if (service_name) {
-            mp_tags_set_str(ed.metadata, "title", service_name);
-            goto done;
-        }
-
-        // If program/variant has a single video (or audio) stream, use the
-        // "comment" metadata as the name.
-        char *rendition_name = NULL;
         int video_count = 0, audio_count = 0;
         int video_idx = -1, audio_idx = -1;
         for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
             unsigned idx = prog->stream_index[j];
             if (idx >= priv->num_streams || !priv->streams[idx]->sh)
                 continue;
-            if (priv->streams[idx]->sh->type == STREAM_VIDEO) {
+            struct sh_stream *sh = priv->streams[idx]->sh;
+            if (sh->type == STREAM_VIDEO) {
                 video_count++;
                 video_idx = idx;
-            } else if (priv->streams[idx]->sh->type == STREAM_AUDIO) {
+            } else if (sh->type == STREAM_AUDIO) {
                 audio_count++;
                 audio_idx = idx;
             }
         }
-        int name_idx = video_count == 1 ? video_idx : audio_count == 1 ? audio_idx : -1;
-        if (name_idx >= 0)
-            rendition_name = mp_tags_get_str(priv->streams[name_idx]->sh->tags, "comment");
 
-        if (rendition_name) {
-            mp_tags_set_str(ed.metadata, "title", rendition_name);
-            goto done;
+        const char *prefix = mp_tags_get_str(ed.metadata, "title");
+        if (!prefix)
+            prefix = mp_tags_get_str(ed.metadata, "service_name");
+        if (!prefix) {
+            int name_idx = video_count == 1 ? video_idx
+                         : audio_count == 1 ? audio_idx : -1;
+            if (name_idx >= 0)
+                prefix = mp_tags_get_str(priv->streams[name_idx]->sh->tags, "comment");
         }
-
-        char *vb = mp_tags_get_str(ed.metadata, "variant_bitrate");
-        char *end;
-        double rate = vb ? strtoll(vb, &end, 10) : 0;
-        if (rate > 0 && *end == '\0') {
-            rate /= 1000.0;
-            if (rate < 1000) {
-                mp_tags_set_str(ed.metadata, "title", mp_tprintf(42, "Bitrate: %.f kbps", rate));
-            } else {
-                mp_tags_set_str(ed.metadata, "title", mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0));
+        if (!prefix) {
+            char *vb = mp_tags_get_str(ed.metadata, "variant_bitrate");
+            char *end;
+            double rate = vb ? strtoll(vb, &end, 10) : 0;
+            if (rate > 0 && *end == '\0') {
+                rate /= 1000.0;
+                prefix = rate < 1000
+                    ? mp_tprintf(42, "Bitrate: %.f kbps", rate)
+                    : mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0);
             }
         }
 
-done:
+        char *title = demux_compose_edition_title(demuxer, demuxer,
+                                                  prog->id, prefix);
+        if (title)
+            mp_tags_set_str(ed.metadata, "title", title);
+
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
     }
 

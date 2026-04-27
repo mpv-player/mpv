@@ -370,4 +370,18 @@ bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
 
 const char *stream_type_name(enum stream_type type);
 
+// Append a codec descriptor for stream `sh` to output string `dst`
+// Fields that are unset are skipped. If `skip_dup` is non-NULL, fields whose
+// formatted value already appears in it are skipped too.
+void demux_append_codec_desc(void *ta_ctx, bstr *dst, struct sh_stream *sh,
+                             const char *skip_dup);
+
+// Compose a descriptive edition title. Walks the demuxer's streams matching
+// `program_id`, and when exactly one video / one audio stream is present,
+// appends a parenthesized codec descriptor for it. When multiple tracks of a
+// a type are present, no descriptor is appended. Returns NULL if
+// nothing useful would be produced; otherwise a talloc'd string.
+char *demux_compose_edition_title(void *ta_ctx, struct demuxer *demuxer,
+                                  int program_id, const char *prefix);
+
 #endif /* MPLAYER_DEMUXER_H */

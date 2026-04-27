@@ -366,31 +366,15 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
     if (t->title)
         bstr_xappend_asprintf(ctx, &dst, "'%s' ", t->title);
 
-    const char *codec = s ? s->codec->codec : NULL;
-
     bstr_xappend0(ctx, &dst, "(");
 
     if (add_lang && t->lang)
         bstr_xappend_asprintf(ctx, &dst, "%s ", t->lang);
 
-    bstr_xappend0(ctx, &dst, codec ? codec : "<unknown>");
-
-    if (s && s->codec->codec_profile)
-        bstr_xappend_asprintf(ctx, &dst, " [%s]", s->codec->codec_profile);
-    if (s && s->codec->disp_w)
-        bstr_xappend_asprintf(ctx, &dst, " %dx%d", s->codec->disp_w, s->codec->disp_h);
-    if (s && s->codec->fps && !t->image) {
-        char *fps = mp_format_double(ctx, s->codec->fps, 4, false, false, true);
-        bstr_xappend_asprintf(ctx, &dst, " %s fps", fps);
-    }
-    if (s && s->codec->channels.num)
-        bstr_xappend_asprintf(ctx, &dst, " %dch", s->codec->channels.num);
-    if (s && s->codec->samplerate)
-        bstr_xappend_asprintf(ctx, &dst, " %d Hz", s->codec->samplerate);
-    if (s && s->codec->bitrate > 0 && s->codec->bitrate < INT_MAX - 500) {
-        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->codec->bitrate + 500) / 1000);
-    } else if (s && s->hls_bitrate > 0 && s->hls_bitrate < INT_MAX - 500) {
-        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->hls_bitrate + 500) / 1000);
+    if (s) {
+        demux_append_codec_desc(ctx, &dst, s, NULL);
+    } else {
+        bstr_xappend0(ctx, &dst, "<unknown>");
     }
     bstr_xappend0(ctx, &dst, ")");
 
