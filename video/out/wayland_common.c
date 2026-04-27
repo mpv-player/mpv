@@ -3802,6 +3802,16 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
 
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
+
+    if (wl->opts->border && wl->opts->autofit_larger.h > 0) {
+        int reference_height = wl->current_output->geometry.y1;
+        int base_px = 43;
+
+        int border_percent = (base_px * 100 / reference_height);
+
+        wl->opts->autofit_larger.h -= border_percent;
+    }
+
     vo_calc_window_geometry(vo, wl->opts, &screenrc, &screenrc, wl->scaling_factor, false, &geo, NULL);
     vo_apply_window_geometry(vo, &geo);
 
