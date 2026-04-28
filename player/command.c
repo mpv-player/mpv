@@ -8237,9 +8237,6 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
     if (flags & UPDATE_CLIPBOARD)
         reinit_clipboard(mpctx);
 
-    if (flags & UPDATE_SUB_EXTS)
-        mp_update_subtitle_exts(mpctx->opts);
-
     if (opt_ptr == &opts->ipc_path || opt_ptr == &opts->ipc_client) {
         mp_uninit_ipc(mpctx->ipc_ctx);
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);

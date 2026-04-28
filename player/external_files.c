@@ -32,9 +32,6 @@
 #include "player/core.h"
 #include "external_files.h"
 
-// Needed for mp_might_be_subtitle_file
-char **sub_exts;
-
 static int test_ext(MPOpts *opts, bstr ext)
 {
     if (bstr_in_list0(ext, opts->sub_auto_exts))
@@ -51,16 +48,6 @@ static int test_cover_filename(bstr fname, char **cover_files)
     int idx = bstr_find_in_list0(fname, cover_files, false);
     // This equals to 0 if not in list (idx == -1)
     return -idx - 1;
-}
-
-bool mp_might_be_subtitle_file(const char *filename)
-{
-    return bstr_in_list0(bstr_get_ext(bstr0(filename)), sub_exts);
-}
-
-void mp_update_subtitle_exts(struct MPOpts *opts)
-{
-    sub_exts = opts->sub_auto_exts;
 }
 
 static int compare_filename(const void *a, const void *b)
