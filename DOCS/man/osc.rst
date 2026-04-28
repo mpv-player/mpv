@@ -368,6 +368,16 @@ Configurable Options
     The list of visibility modes to cycle through when calling the
     osc-visibility cycle script message. Modes are separated by ``_``.
 
+``boxwidth``
+    Default: 550
+
+    Width of the ``box`` layout.
+
+``slimboxwidth``
+    Default: 660
+
+    Width of the ``slimbox`` layout.
+
 ``boxmaxchars``
     Default: 80
 
