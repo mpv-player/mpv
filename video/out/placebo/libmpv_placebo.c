@@ -639,8 +639,9 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     struct pl_swapchain_frame internal_swframe;
     bool use_application_swframe = false;
     {
-        struct pl_swapchain_frame *application_swframe = get_mpv_render_param(params, 
-            (mpv_render_param_type) MPV_RENDER_PARAM_LIBPLACEBO_FRAME, NULL);
+        struct pl_swapchain_frame *application_swframe = get_mpv_render_param(
+            params, (mpv_render_param_type)MPV_RENDER_PARAM_LIBPLACEBO_FRAME,
+            NULL);
         if (!application_swframe) {
             if (!pl_swapchain_start_frame(p->swapchain, &internal_swframe)) {
                 if (frame->current) {
@@ -651,7 +652,7 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
                     pl_queue_update(p->queue, NULL, &qparams);
                 }
                 return MPV_ERROR_GENERIC;
-            }    
+            }
             swframe = &internal_swframe;
         } else {
             swframe = application_swframe;
@@ -671,15 +672,15 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
             video_w = swframe->fbo->params.w;
             video_h = swframe->fbo->params.h;
         }
-        
+
         // Get viewport dimensions
         double vp_w = viewport->x1 - viewport->x0;
         double vp_h = viewport->y1 - viewport->y0;
-        
+
         // Calculate aspect ratios
         double video_aspect = (double)video_w / video_h;
         double viewport_aspect = vp_w / vp_h;
-        
+
         // Calculate destination rect that fits video in viewport with aspect ratio
         double dst_w, dst_h;
         if (video_aspect > viewport_aspect) {
@@ -691,11 +692,11 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
             dst_h = vp_h;
             dst_w = vp_h * video_aspect;
         }
-        
+
         // Center in viewport
         double offset_x = (vp_w - dst_w) / 2.0;
         double offset_y = (vp_h - dst_h) / 2.0;
-        
+
         // Set destination crop
         p->dst.x0 = viewport->x0 + offset_x;
         p->dst.y0 = viewport->y0 + offset_y;
@@ -796,7 +797,6 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     } else {
         pl_tex_clear(p->gpu, swframe->fbo, (float[4]){ 0.0, 0.0, 0.0, 1.0 });
     }
-    
 
     // Flush GPU commands
     pl_gpu_flush(p->gpu);
