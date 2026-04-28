@@ -584,13 +584,6 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
-    const struct demuxer *demuxer = mpctx->demuxer;
-    int preferred_program = -1;
-    if (demuxer && demuxer->edition_is_track_mapping && demuxer->num_editions > 1) {
-        preferred_program = demuxer->editions[demuxer->edition].demuxer_id;
-    } else if (type != STREAM_VIDEO && mpctx->current_track[0][STREAM_VIDEO]) {
-        preferred_program = mpctx->current_track[0][STREAM_VIDEO]->program_id;
-    }
     if (tid == -2)
         return NULL;
     char **langs = process_langs(opts->stream_lang[type]);
@@ -610,18 +603,15 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         struct track *track = mpctx->tracks[n];
         if (track->type != type)
             continue;
+        if (!track_in_current_edition(mpctx, track))
+            continue;
         if (track->user_tid == tid) {
             pick = track;
             goto cleanup;
         }
-        if (tid >= 0)
-            continue;
         if (track->no_auto_select)
             continue;
         if (!opts->autoload_files && track->is_external)
-            continue;
-        if (preferred_program != -1 && !track->is_external &&
-            track->program_id != -1 && track->program_id != preferred_program)
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
