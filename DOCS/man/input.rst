@@ -3232,8 +3232,7 @@ Property list
                (key and string value for each pad-btn entry)
 
 ``dropped-files``
-    Information of the most recent drag-and-drop event mpv received. This
-    property is only updated when ``--input-builtin-drag-and-drop=no``.
+    Information of the most recent drag-and-drop event mpv received.
     A client can observe this property to detect when a drag-and-drop event
     happens. This property is unavailable if no drag-and-drop event has
     happened.

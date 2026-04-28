@@ -390,6 +390,7 @@ typedef struct MPOpts {
     struct hwdec_opts *hwdec_opts;
 
     struct input_opts *input_opts;
+    bool builtin_dnd;
 
     struct clipboard_opts *clipboard_opts;
 

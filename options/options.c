@@ -920,6 +920,7 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(resample_opts, resample_conf)},
 
     {"", OPT_SUBSTRUCT(input_opts, input_config)},
+    {"input-builtin-drag-and-drop", OPT_BOOL(builtin_dnd)},
 
     {"clipboard", OPT_SUBSTRUCT(clipboard_opts, clipboard_conf)},
 
@@ -1076,6 +1077,7 @@ static const struct MPOpts mp_default_opts = {
     .screenshot_template = "mpv-shot%n",
     .play_dir = 1,
     .media_controls = true,
+    .builtin_dnd = true,
     .video_exts = (char *[]){
         "3g2", "3gp", "avi", "flv", "ivf", "m2ts", "m4v", "mj2", "mkv", "mov",
         "mp4", "mpeg", "mpg", "mxf", "ogv", "rmvb", "ts", "webm", "wmv", "y4m",
