@@ -210,7 +210,6 @@ struct input_opts {
     bool default_bindings;
     bool builtin_bindings;
     bool builtin_dragging;
-    bool builtin_dnd;
     bool enable_mouse_movements;
     bool vo_key_input;
     bool test;
@@ -230,7 +229,6 @@ const struct m_sub_options input_config = {
         {"input-default-bindings", OPT_BOOL(default_bindings)},
         {"input-builtin-bindings", OPT_BOOL(builtin_bindings)},
         {"input-builtin-dragging", OPT_BOOL(builtin_dragging)},
-        {"input-builtin-drag-and-drop", OPT_BOOL(builtin_dnd)},
         {"input-test", OPT_BOOL(test)},
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
@@ -262,7 +260,6 @@ const struct m_sub_options input_config = {
         .default_bindings = true,
         .builtin_bindings = true,
         .builtin_dragging = true,
-        .builtin_dnd = true,
         .vo_key_input = true,
         .allow_win_drag = true,
         .preprocess_wheel = true,
@@ -1291,63 +1288,15 @@ void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
                          enum mp_dnd_action action)
 {
     input_lock(ictx);
-    if (!ictx->opts->builtin_dnd) {
-        TA_FREEP(&ictx->dropped_files);
-        ictx->dropped_files = talloc_zero_array(ictx, bstr, num_files);
-        ictx->num_dropped_files = num_files;
-        ictx->dnd_ts = mp_time_ns();
-        ictx->dnd_action = action;
-        for (int i = 0; i < num_files; i++)
-            ictx->dropped_files[i] = bstrdup(ictx->dropped_files, bstr0(files[i]));
-
-        notify_event_update(ictx);
-        input_unlock(ictx);
-        return;
-    }
-
-    bool all_sub = true;
+    TA_FREEP(&ictx->dropped_files);
+    ictx->dropped_files = talloc_zero_array(ictx, bstr, num_files);
+    ictx->num_dropped_files = num_files;
+    ictx->dnd_ts = mp_time_ns();
+    ictx->dnd_action = action;
     for (int i = 0; i < num_files; i++)
-        all_sub &= mp_might_be_subtitle_file(files[i]);
+        ictx->dropped_files[i] = bstrdup(ictx->dropped_files, bstr0(files[i]));
 
-    if (all_sub) {
-        for (int i = 0; i < num_files; i++) {
-            const char *cmd[] = {
-                "osd-auto",
-                "sub-add",
-                files[i],
-                NULL
-            };
-            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
-        }
-    } else if (action == DND_INSERT_NEXT) {
-        /* To insert the entries in the correct order, we iterate over them
-           backwards */
-        for (int i = num_files - 1; i >= 0; i--) {
-            const char *cmd[] = {
-                "osd-auto",
-                "loadfile",
-                files[i],
-                /* Since we're inserting in reverse, wait til the final item
-                   is added to start playing */
-                (i > 0) ? "insert-next" : "insert-next-play",
-                NULL
-            };
-            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
-        }
-    } else {
-        for (int i = 0; i < num_files; i++) {
-            const char *cmd[] = {
-                "osd-auto",
-                "loadfile",
-                files[i],
-                /* Either start playing the dropped files right away
-                   or add them to the end of the current playlist */
-                (i == 0 && action == DND_REPLACE) ? "replace" : "append-play",
-                NULL
-            };
-            queue_cmd(ictx, mp_input_parse_cmd_strv(ictx->log, cmd));
-        }
-    }
+    notify_event_update(ictx);
     input_unlock(ictx);
 }
 

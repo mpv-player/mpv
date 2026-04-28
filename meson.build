@@ -129,6 +129,7 @@ sources = files(
 
     ## Input
     'input/cmd.c',
+    'input/dnd.c',
     'input/event.c',
     'input/input.c',
     'input/ipc.c',
