@@ -421,7 +421,7 @@ typedef enum mpv_render_param_type {
      *
      * See MPV_RENDER_PARAM_SW_STRIDE for alignment requirements.
      */
-    MPV_RENDER_PARAM_SW_POINTER = 20
+    MPV_RENDER_PARAM_SW_POINTER = 20,
 } mpv_render_param_type;
 
 /**
