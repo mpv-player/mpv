@@ -168,8 +168,7 @@ typedef struct mpv_render_context mpv_render_context;
  *
  * Also see mpv_render_param for conventions and how to use it.
  */
-typedef enum mpv_render_param_type
-{
+typedef enum mpv_render_param_type {
     /**
      * Not a valid value, but also used to terminate a params array. Its value
      * is always guaranteed to be 0 (even if the ABI changes in the future).
@@ -347,7 +346,7 @@ typedef enum mpv_render_param_type
      * DRM display, contains drm display handles.
      * Valid for mpv_render_context_create().
      * Type : struct mpv_opengl_drm_params_v2*
-     */
+    */
     MPV_RENDER_PARAM_DRM_DISPLAY_V2 = 16,
     /**
      * MPV_RENDER_API_TYPE_SW only: rendering target surface size, mandatory.
@@ -422,7 +421,7 @@ typedef enum mpv_render_param_type
      *
      * See MPV_RENDER_PARAM_SW_STRIDE for alignment requirements.
      */
-    MPV_RENDER_PARAM_SW_POINTER = 20,
+    MPV_RENDER_PARAM_SW_POINTER = 20
 } mpv_render_param_type;
 
 /**
