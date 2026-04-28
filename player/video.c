@@ -224,14 +224,15 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 {
     mp_assert(!mpctx->vo_chain);
 
+    struct vo_extra ex = {
+        .input_ctx = mpctx->input,
+        .osd = mpctx->osd,
+        .encode_lavc_ctx = mpctx->encode_lavc_ctx,
+        .wakeup_cb = mp_wakeup_core_cb,
+        .wakeup_ctx = mpctx,
+    };
+
     if (!mpctx->video_out) {
-        struct vo_extra ex = {
-            .input_ctx = mpctx->input,
-            .osd = mpctx->osd,
-            .encode_lavc_ctx = mpctx->encode_lavc_ctx,
-            .wakeup_cb = mp_wakeup_core_cb,
-            .wakeup_ctx = mpctx,
-        };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {
             MP_FATAL(mpctx, "Error opening/initializing "
@@ -240,6 +241,15 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
             goto err_out;
         }
         mpctx->mouse_cursor_visible = true;
+    }
+
+    if (track) {
+        struct vo *vo = vo_handle_max_texture_size(mpctx->video_out, mpctx->global, &ex,
+            MPMAX(track->stream->codec->disp_w, track->stream->codec->disp_h));
+        if (vo) {
+            uninit_video_out(mpctx);
+            mpctx->video_out = vo;
+        }
     }
 
     update_window_title(mpctx, true);

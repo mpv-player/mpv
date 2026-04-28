@@ -1520,6 +1520,12 @@ static int query_format(struct vo *vo, int format)
     return supported;
 }
 
+static int get_max_texture_size(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    return p->gpu->limits.max_tex_2d_dim;
+}
+
 static void resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -2680,6 +2686,7 @@ const struct vo_driver video_out_gpu_next = {
             0x0,
     .preinit = preinit,
     .query_format = query_format,
+    .get_max_texture_size = get_max_texture_size,
     .reconfig = reconfig,
     .control = control,
     .get_image_ts = get_image,
