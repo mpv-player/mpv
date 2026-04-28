@@ -1,0 +1,2 @@
+add `boxwidth` script option to osc
+add `slimboxwidth` script option to osc
