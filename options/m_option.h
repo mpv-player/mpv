@@ -453,7 +453,6 @@ char *format_file_size(int64_t size);
 #define UPDATE_HWDEC            (UINT64_C(1) << 11)  // --hwdec
 #define UPDATE_DVB_PROG         (UINT64_C(1) << 12)  // some --dvbin-...
 #define UPDATE_SUB_HARD         (UINT64_C(1) << 13)  // subtitle opts. that need full reinit
-#define UPDATE_SUB_EXTS         (UINT64_C(1) << 14)  // update internal list of sub exts
 #define UPDATE_VIDEO            (UINT64_C(1) << 15)  // force redraw if needed
 #define UPDATE_VO               (UINT64_C(1) << 16)  // reinit the VO
 #define UPDATE_CLIPBOARD        (UINT64_C(1) << 17)  // reinit the clipboard
