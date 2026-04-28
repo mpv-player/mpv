@@ -56,6 +56,7 @@ local user_opts = {
     windowcontrols_independent = true, -- show window controls and bottom bar independently
     floatingtitle = true,         -- show title in the floating layout?
     floatingwidth = 700,          -- width of the floating layout
+    boxwidth = 660,               -- width of the slimbox layout
     floatingalpha = 105,          -- alpha of the floating layout background
     tracknumberswidth = 35,       -- width for track number labels (0 = icon only)
     greenandgrumpy = false,     -- disable santa hat
@@ -1750,7 +1751,7 @@ end
 layouts["slimbox"] = function ()
 
     local osc_geo = {
-        w = 660,    -- width
+        w = user_opts.boxwidth,    -- width
         h = 70,     -- height
         r = 10,     -- corner-radius
     }

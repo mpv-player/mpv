@@ -304,6 +304,11 @@ Configurable Options
 
     Alpha of the background box, 0 (opaque) to 255 (fully transparent)
 
+``boxwidth``
+    Default: 660
+
+    Width of the slimbox layout, in pixels.
+
 ``hidetimeout``
     Default: 500
 
