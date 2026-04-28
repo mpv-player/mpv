@@ -279,14 +279,37 @@ static void print_stream(struct MPContext *mpctx, struct track *t, bool indent)
     MP_INFO(mpctx, "%s\n", b);
 }
 
+// Return true if any track of `type` has program_id matching the edition id.
+static bool edition_has_track_of_type(struct MPContext *mpctx,
+                                      enum stream_type type)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer || !demuxer->edition_is_track_mapping || demuxer->num_editions <= 1)
+        return false;
+    int program = demuxer->editions[demuxer->edition].demuxer_id;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (t->type == type && t->program_id == program)
+            return true;
+    }
+    return false;
+}
+
 bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer || !demuxer->edition_is_track_mapping || demuxer->num_editions <= 1)
         return true;
-    if (track->is_external || track->program_id < 0)
+    if (track->is_external)
         return true;
-    return track->program_id == demuxer->editions[demuxer->edition].demuxer_id;
+    int program = demuxer->editions[demuxer->edition].demuxer_id;
+    if (track->program_id == program)
+        return true;
+    // Program-agnostic tracks only show in editions that don't supply their own
+    // track of this type.
+    if (track->program_id < 0)
+        return !edition_has_track_of_type(mpctx, track->type);
+    return false;
 }
 
 void print_track_list(struct MPContext *mpctx, const char *msg)
