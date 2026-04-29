@@ -1051,30 +1051,40 @@ static void build_editions(demuxer_t *demuxer)
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
         selected = edition_id;
 
-    // Select initial edition by best variant bitrate
+    // Select initial edition by best variant bitrate. Prefer the program's
+    // video stream as the representative, falling back to audio for
+    // audio-only variants (e.g. HLS audio-only renditions).
     if (selected < 0 && hls_bitrate >= 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
         for (int n = 0; n < demuxer->num_editions; n++) {
             AVProgram *prog = avfc->programs[n];
+            struct sh_stream *rep = NULL;
             for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
                 unsigned idx = prog->stream_index[j];
                 if (idx >= priv->num_streams || !priv->streams[idx]->sh)
                     continue;
                 struct sh_stream *sh = priv->streams[idx]->sh;
-                if (sh->type != STREAM_VIDEO || sh->hls_bitrate <= 0)
+                if (sh->hls_bitrate <= 0)
                     continue;
-                bool ok = sh->hls_bitrate <= hls_bitrate;
-                if (best < 0 || (ok && !best_ok) ||
-                    (ok && best_ok && sh->hls_bitrate > best_bitrate) ||
-                    (!ok && !best_ok && sh->hls_bitrate < best_bitrate))
-                {
-                    best = n;
-                    best_bitrate = sh->hls_bitrate;
-                    best_ok = ok;
+                if (sh->type == STREAM_VIDEO) {
+                    rep = sh;
+                    break;
                 }
-                break;
+                if (sh->type == STREAM_AUDIO && !rep)
+                    rep = sh;
+            }
+            if (!rep)
+                continue;
+            bool ok = rep->hls_bitrate <= hls_bitrate;
+            if (best < 0 || (ok && !best_ok) ||
+                (ok && best_ok && rep->hls_bitrate > best_bitrate) ||
+                (!ok && !best_ok && rep->hls_bitrate < best_bitrate))
+            {
+                best = n;
+                best_bitrate = rep->hls_bitrate;
+                best_ok = ok;
             }
         }
         if (best >= 0)

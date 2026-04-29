@@ -703,15 +703,19 @@ static void build_editions(struct demuxer *demuxer)
         selected = edition_id;
 
     // Select initial edition by best variant bitrate, preferring editions
-    // whose video stream is marked as default.
+    // whose video stream is marked as default. Audio streams are considered
+    // too so that audio-only variants (e.g. HLS/DASH audio-only renditions)
+    // still get picked, but video always wins over audio.
     if (selected < 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
         bool best_default = false;
+        bool best_video = false;
         for (int n = 0; n < num_streams; n++) {
             struct sh_stream *sh = demux_get_stream(demuxer, n);
-            if (sh->type != STREAM_VIDEO || sh->program_id < 0)
+            if ((sh->type != STREAM_VIDEO && sh->type != STREAM_AUDIO) ||
+                sh->program_id < 0)
                 continue;
             if (!sh->default_track && (hls_bitrate < 0 || sh->hls_bitrate <= 0))
                 continue;
@@ -719,9 +723,12 @@ static void build_editions(struct demuxer *demuxer)
             if (e < 0)
                 continue;
             bool ok = hls_bitrate < 0 || sh->hls_bitrate <= hls_bitrate;
+            bool is_video = sh->type == STREAM_VIDEO;
             bool better;
             if (best < 0) {
                 better = true;
+            } else if (is_video != best_video) {
+                better = is_video;
             } else if (sh->default_track != best_default) {
                 better = sh->default_track;
             } else if (ok != best_ok) {
@@ -735,6 +742,7 @@ static void build_editions(struct demuxer *demuxer)
                 best_bitrate = sh->hls_bitrate;
                 best_ok = ok;
                 best_default = sh->default_track;
+                best_video = is_video;
             }
         }
         if (best >= 0)
