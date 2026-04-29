@@ -35,7 +35,7 @@ struct vulkan_opts {
 
 static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 {
-    int ret = M_OPT_INVALID;
+    int ret = M_OPT_EXIT;
     void *ta_ctx = talloc_new(NULL);
     pl_log pllog = mppl_log_create(ta_ctx, log);
     if (!pllog)
@@ -45,13 +45,17 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
     mppl_log_set_probing(pllog, true);
     pl_vk_inst inst = pl_vk_inst_create(pllog, pl_vk_inst_params());
     mppl_log_set_probing(pllog, false);
-    if (!inst)
+    if (!inst) {
+        mp_info(log, "Failed to create Vulkan instance\n");
         goto done;
+    }
 
     uint32_t num = 0;
     VkResult res = vkEnumeratePhysicalDevices(inst->instance, &num, NULL);
-    if (res != VK_SUCCESS)
+    if (res != VK_SUCCESS) {
+        mp_info(log, "Failed to enumerate Vulkan devices\n");
         goto done;
+    }
 
     VkPhysicalDevice *devices = talloc_array(ta_ctx, VkPhysicalDevice, num);
     res = vkEnumeratePhysicalDevices(inst->instance, &num, devices);
@@ -60,10 +64,8 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 
     struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
-    if (help) {
+    if (help)
         mp_info(log, "Available vulkan devices:\n");
-        ret = M_OPT_EXIT;
-    }
 
     AVUUID param_uuid;
     bool is_uuid = av_uuid_parse(*value, param_uuid) == 0;
