@@ -680,7 +680,7 @@ local function add_single_video(json)
 
         for json_name, mp_name in pairs(tag_list) do
             if json[json_name] then
-                metadata[mp_name] = json[json_name]
+                metadata[mp_name] = tostring(json[json_name])
             end
         end
     end
