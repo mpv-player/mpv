@@ -1380,7 +1380,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         case PL_QUEUE_MORE:
             // This is expected to happen semi-frequently near the start and
             // end of a file, so only log it at high verbosity and move on.
-            MP_DBG(vo, "Render queue underrun.\n");
+            if (!frame->still)
+                MP_DBG(vo, "Render queue underrun.\n");
             break;
         case PL_QUEUE_OK:
             break;
