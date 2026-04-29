@@ -189,6 +189,11 @@ Configurable Options
     Size ratio of the seek handle if ``seekbarstyle`` is set to ``diamond``
     or ``knob``. This is relative to the full height of the seekbar.
 
+``seekbarmaxalpha``
+    Default: 255
+
+    Maximum alpha of the seekbar box, 0 (opaque) to 255 (fully transparent)
+
 ``seekbarkeyframes``
     Default: yes
 

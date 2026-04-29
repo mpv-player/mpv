@@ -31,6 +31,7 @@ local user_opts = {
     layout = "bottombar",
     seekbarstyle = "bar",       -- bar, diamond or knob
     seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
+    seekbarmaxalpha = 255,      -- maximum alpha value for seekbar
     seekrangestyle = "inverted",-- bar, line, slider, inverted or none
     seekrangeseparate = true,   -- whether the seekranges overlay on the bar-style seekbar
     seekrangealpha = 200,       -- transparency of seekranges
@@ -1811,7 +1812,7 @@ layouts["slimbox"] = function ()
     lo.geometry = {x = posX, y = posY - 1, an = 2, w = inner_w, h = ele_h}
     lo.layer = 10
     lo.style = osc_styles.box
-    lo.alpha[1] = user_opts.boxalpha
+    lo.alpha[1] = math.min(user_opts.seekbarmaxalpha, user_opts.boxalpha)
     lo.alpha[3] = 0
     if user_opts["seekbarstyle"] ~= "bar" then
         lo.box.radius = osc_geo.r
@@ -2082,7 +2083,7 @@ local function bar_layout(direction, slim)
     lo.layer = 15
     lo.style = osc_styles.timecodesBar
     lo.alpha[1] =
-        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+        math.min(user_opts.seekbarmaxalpha, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
     if user_opts["seekbarstyle"] ~= "bar" then
         lo.box.radius = geo.h / 2
         lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
@@ -2224,7 +2225,8 @@ layouts["floating"] = function ()
     lo.geometry = {x = seekbar_cx, y = seekbar_pos_bar, an = 5, w = seekbar_w, h = seekH}
     lo.layer = 15
     lo.style = osc_styles.timecodes
-    lo.alpha[1] = math.min(255, user_opts.floatingalpha + (255 - user_opts.floatingalpha) * 0.75)
+    lo.alpha[1] = math.min(user_opts.seekbarmaxalpha,
+        user_opts.floatingalpha + (255 - user_opts.floatingalpha) * 0.75)
     if user_opts["seekbarstyle"] ~= "bar" then
         lo.box.radius = seekH / 2
         lo.box.hexagon = user_opts["seekbarstyle"] == "diamond"
