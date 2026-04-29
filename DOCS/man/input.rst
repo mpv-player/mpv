@@ -3244,9 +3244,9 @@ Property list
         nanoseconds. This uses the same clock as ``mpv_get_time_ns()``.
 
     ``dropped-files/action``
-        The action of the drag-and-drop event, can be one of ``replace``,
-        ``append``, or ``insert-next``. This is affected by the
-        ``--drag-and-drop`` option.
+        The action of the drag-and-drop event. This is normally ``replace``.
+        Depending on the platform, this can also be ``append`` in some cases,
+        such as shift key being held while files are dropped.
 
     ``dropped-files/files``
         The dropped file names of the drag-and-drop event.
