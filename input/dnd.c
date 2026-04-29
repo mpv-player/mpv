@@ -38,9 +38,17 @@ static bool might_be_subtitle_file(mpv_node *sub_exts, char *file)
 static void handle_dnd(mpv_handle *mpv, mpv_node *files, char *action)
 {
     mpv_node sub_exts = {0};
+    mpv_node drop_type = {0};
     if (mpv_get_property(mpv, "sub-auto-exts", MPV_FORMAT_NODE, &sub_exts) != MPV_ERROR_SUCCESS ||
         sub_exts.format != MPV_FORMAT_NODE_ARRAY)
         goto end;
+    if (mpv_get_property(mpv, "drag-and-drop", MPV_FORMAT_NODE, &drop_type) != MPV_ERROR_SUCCESS ||
+        drop_type.format != MPV_FORMAT_STRING)
+        goto end;
+    if (!strcmp(drop_type.u.string, "no"))
+        goto end;
+    if (strcmp(drop_type.u.string, "auto"))
+        action = drop_type.u.string;
 
     struct mpv_node_list *list = files->u.list;
     for (int i = 0; i < list->num; i++) {
@@ -95,6 +103,7 @@ static void handle_dnd(mpv_handle *mpv, mpv_node *files, char *action)
 
 end:
     mpv_free_node_contents(&sub_exts);
+    mpv_free_node_contents(&drop_type);
 }
 
 static MP_THREAD_VOID mpv_event_loop_fn(void *arg)

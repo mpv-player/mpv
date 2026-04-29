@@ -3464,13 +3464,12 @@ Window
     (Windows only) Snap the player window to screen edges.
 
 ``--drag-and-drop=<no|auto|replace|append|insert-next>``
-    Controls the default behavior of drag and drop on platforms that support
-    this. ``auto`` will obey what the underlying os/platform gives mpv.
-    Typically, holding shift during the drag and drop will append the item to
-    the playlist. Otherwise, it will completely replace it. ``replace``,
-    ``append``, and ``insert-next`` always force replacing, appending to, and
-    inserting next into the playlist respectively. ``no`` disables all drag and
-    drop behavior.
+    Controls the default built-in drag-and-drop behavior
+    (``--input-builtin-drag-and-drop``).
+    ``auto`` will obey the ``action`` value in ``dropped-files`` property.
+    ``replace``, ``append``, and ``insert-next`` always force replacing,
+    appending to, and inserting next into the playlist respectively.
+    ``no`` disables all drag and drop behavior.
 
 ``--ontop``
     Makes the player window stay on top of other windows.

@@ -1251,7 +1251,7 @@ static void data_offer_handle_offer(void *data, struct wl_data_offer *offer,
     struct vo_wayland_state *wl = s->wl;
     struct vo_wayland_data_offer *o = s->pending_offer;
     int score = mp_event_get_mime_type_score(wl->vo->input_ctx, mime_type);
-    if (o->offer && score > o->mime_score && wl->opts->drag_and_drop != -2) {
+    if (o->offer && score > o->mime_score) {
         o->mime_score = score;
         talloc_replace(wl, o->mime_type, mime_type);
         MP_VERBOSE(wl, "Given data offer with mime type %s\n", o->mime_type);
@@ -1269,22 +1269,14 @@ static void data_offer_action(void *data, struct wl_data_offer *wl_data_offer, u
     struct vo_wayland_seat *s = data;
     struct vo_wayland_state *wl = s->wl;
     struct vo_wayland_data_offer *o = s->dnd_offer;
-    if (dnd_action && wl->opts->drag_and_drop != -2) {
-        if (wl->opts->drag_and_drop >= 0) {
-            o->action = wl->opts->drag_and_drop;
-        } else {
-            o->action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
-                            DND_REPLACE : DND_APPEND;
-        }
+    o->action = dnd_action & WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY ?
+                    DND_REPLACE : DND_APPEND;
+    static const char * const dnd_action_names[] = {
+        [DND_REPLACE] = "DND_REPLACE",
+        [DND_APPEND] = "DND_APPEND",
+    };
 
-        static const char * const dnd_action_names[] = {
-            [DND_REPLACE] = "DND_REPLACE",
-            [DND_APPEND] = "DND_APPEND",
-            [DND_INSERT_NEXT] = "DND_INSERT_NEXT",
-        };
-
-        MP_VERBOSE(wl, "DND action is %s\n", dnd_action_names[o->action]);
-    }
+    MP_VERBOSE(wl, "DND action is %s\n", dnd_action_names[o->action]);
 }
 
 static const struct wl_data_offer_listener data_offer_listener = {
@@ -1323,13 +1315,11 @@ static void data_device_handle_enter(void *data, struct wl_data_device *wl_ddev,
     *s->pending_offer = (struct vo_wayland_data_offer){.fd = -1};
     o = s->dnd_offer;
     o->action = action;
-    if (wl->opts->drag_and_drop != -2) {
-        wl_data_offer_set_actions(id, WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY |
-                                      WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
-                                      WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY);
-        wl_data_offer_accept(id, serial, o->mime_type);
-        MP_VERBOSE(wl, "Accepting DND offer with mime type %s\n", o->mime_type);
-    }
+    wl_data_offer_set_actions(id, WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY |
+                                  WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE,
+                                  WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY);
+    wl_data_offer_accept(id, serial, o->mime_type);
+    MP_VERBOSE(wl, "Accepting DND offer with mime type %s\n", o->mime_type);
 
 }
 
@@ -1346,12 +1336,10 @@ static void data_device_handle_leave(void *data, struct wl_data_device *wl_ddev)
         o->offer = NULL;
     }
 
-    if (wl->opts->drag_and_drop != -2) {
-        MP_VERBOSE(wl, "Releasing DND offer with mime type %s\n", o->mime_type);
-        if (o->mime_type)
-            TA_FREEP(&o->mime_type);
-        o->mime_score = 0;
-    }
+    MP_VERBOSE(wl, "Releasing DND offer with mime type %s\n", o->mime_type);
+    if (o->mime_type)
+        TA_FREEP(&o->mime_type);
+    o->mime_score = 0;
 }
 
 static void data_device_handle_motion(void *data, struct wl_data_device *wl_ddev,
@@ -1372,10 +1360,8 @@ static void data_device_handle_drop(void *data, struct wl_data_device *wl_ddev)
         return;
     }
 
-    if (wl->opts->drag_and_drop != -2) {
-        MP_VERBOSE(wl, "Receiving DND offer with mime %s\n", o->mime_type);
-        wl_data_offer_receive(o->offer, o->mime_type, pipefd[1]);
-    }
+    MP_VERBOSE(wl, "Receiving DND offer with mime %s\n", o->mime_type);
+    wl_data_offer_receive(o->offer, o->mime_type, pipefd[1]);
 
     close(pipefd[1]);
     o->fd = pipefd[0];
