@@ -517,6 +517,7 @@ static bool d3d11_init(struct ra_ctx *ctx)
         .max_feature_level = p->opts->feature_level,
         .max_frame_latency = ctx->vo->opts->swapchain_depth,
         .adapter_name = p->opts->adapter_name,
+        .gpu_type = (const char * const *) ctx->opts.gpu_type,
     };
     if (!mp_d3d11_create_present_device(ctx->log, &dopts, &p->device))
         goto error;

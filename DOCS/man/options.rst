@@ -7097,6 +7097,29 @@ them.
 
     This is an object settings list option. See `List Options`_ for details.
 
+``--gpu-type=<type1,type2,...>``
+    Specify an ordered preference list of GPU types for automatic device
+    selection. The first entry has the highest priority. If not set, hardware
+    adapters are preferred over software ones.
+
+    discrete
+        A dedicated GPU.
+    integrated
+        An integrated/on-die GPU. On D3D11, requires Windows 10 1803 or later
+        to distinguish from ``other``; falls back to ``other`` on older systems.
+    virtual
+        A virtual GPU (Vulkan only).
+    software
+        A software renderer. Requires ``--gpu-sw`` (Vulkan). On D3D11,
+        does not work if ``--d3d11-warp=no`` is set.
+    other
+        Any GPU not matched by the above types.
+
+    Types not listed still participate in selection as fallbacks using their
+    default relative priority (discrete > integrated > virtual > software > other).
+    Ignored when a specific device is selected via ``--vulkan-device``,
+    ``--d3d11-adapter``, or similar. Has no effect with ``--gpu-api=opengl``.
+
 ``--opengl-es=<mode>``
     Controls which type of OpenGL context will be accepted:
 
