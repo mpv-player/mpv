@@ -1094,6 +1094,157 @@ static void build_editions(demuxer_t *demuxer)
     demuxer->edition = selected >= 0 ? selected : 0;
 }
 
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 22, 100)
+// Correct the display dimensions of the primary tile stream to the composed
+// image size, and mark the remaining tile streams as dependent.
+static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stg)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    AVStreamGroupTileGrid *tile_grid = stg->params.tile_grid;
+
+    // AV_DISPOSITION_DEFAULT identifies the intended presentation stream.
+    AVStream *primary_st = NULL;
+    struct sh_stream *primary_sh = NULL;
+    for (unsigned i = 0; i < stg->nb_streams; i++) {
+        AVStream *st = stg->streams[i];
+        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+            continue;
+        struct sh_stream *sh = priv->streams[st->index]->sh;
+        if (!sh)
+            continue;
+        if (st->disposition & AV_DISPOSITION_DEFAULT) {
+            primary_st = st;
+            primary_sh = sh;
+            break;
+        }
+        if (!primary_st) {
+            primary_st = st;
+            primary_sh = sh;
+        }
+    }
+
+    if (!primary_sh) {
+        MP_WARN(demuxer, "Tile grid stream group %u has no usable streams.\n",
+                stg->index);
+        return;
+    }
+
+    MP_VERBOSE(demuxer, "Tile grid group: %u tiles, canvas %dx%d, "
+               "visible %dx%d at offset (%d,%d)\n",
+               tile_grid->nb_tiles,
+               tile_grid->coded_width, tile_grid->coded_height,
+               tile_grid->width, tile_grid->height,
+               tile_grid->horizontal_offset, tile_grid->vertical_offset);
+
+    // width/height is the final visible region; coded_width/coded_height is
+    // the full canvas including padding — use the former for presentation.
+    primary_sh->codec->disp_w = tile_grid->width;
+    primary_sh->codec->disp_h = tile_grid->height;
+
+    if (stg->metadata)
+        mp_tags_copy_from_av_dictionary(primary_sh->tags, stg->metadata);
+
+    for (unsigned i = 0; i < stg->nb_streams; i++) {
+        AVStream *st = stg->streams[i];
+        if (st == primary_st)
+            continue;
+        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+            continue;
+        struct sh_stream *sh = priv->streams[st->index]->sh;
+        if (sh)
+            sh->dependent_track = true;
+    }
+}
+#endif
+
+// IAMF audio element sub-streams carry raw coded data for individual spatial
+// audio layers. They are not independently decodable; the mix presentations
+// represent the actual user-selectable tracks.
+static void handle_iamf_audio_element_group(demuxer_t *demuxer,
+                                            AVStreamGroup *stg)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    MP_VERBOSE(demuxer, "IAMF audio element group %u: %u sub-streams\n",
+               stg->index, stg->nb_streams);
+    for (unsigned i = 0; i < stg->nb_streams; i++) {
+        AVStream *st = stg->streams[i];
+        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+            continue;
+        struct sh_stream *sh = priv->streams[st->index]->sh;
+        if (sh)
+            sh->dependent_track = true;
+    }
+}
+
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 6, 100)
+// The LCEVC group contains a base video stream plus a data stream with
+// enhancement NALUs. Only the base is decodable on its own.
+static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    AVStreamGroupLCEVC *lcevc = stg->params.lcevc;
+
+    if (lcevc->lcevc_index >= stg->nb_streams) {
+        MP_WARN(demuxer, "LCEVC group %u: lcevc_index %u out of range (%u streams)\n",
+                stg->index, lcevc->lcevc_index, stg->nb_streams);
+        return;
+    }
+
+    MP_VERBOSE(demuxer, "LCEVC group %u: enhancement stream index %u, "
+               "final size %dx%d\n",
+               stg->index, lcevc->lcevc_index, lcevc->width, lcevc->height);
+
+    AVStream *lcevc_st = stg->streams[lcevc->lcevc_index];
+    if ((unsigned)lcevc_st->index < (unsigned)priv->num_streams) {
+        struct sh_stream *sh = priv->streams[lcevc_st->index]->sh;
+        if (sh)
+            sh->dependent_track = true;
+    }
+}
+#endif
+
+static void handle_stream_groups(demuxer_t *demuxer)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    AVFormatContext *avfc = priv->avfc;
+
+    for (unsigned i = 0; i < avfc->nb_stream_groups; i++) {
+        AVStreamGroup *stg = avfc->stream_groups[i];
+        switch (stg->type) {
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 22, 100)
+        case AV_STREAM_GROUP_PARAMS_TILE_GRID:
+            handle_tile_grid_group(demuxer, stg);
+            break;
+#endif
+        case AV_STREAM_GROUP_PARAMS_IAMF_AUDIO_ELEMENT:
+            handle_iamf_audio_element_group(demuxer, stg);
+            break;
+        case AV_STREAM_GROUP_PARAMS_IAMF_MIX_PRESENTATION: {
+            // Full playback requires routing sub-streams through an IAMF
+            // decoder context; log for now and let element streams handle
+            // suppression.
+            AVDictionaryEntry *t =
+                stg->metadata
+                ? av_dict_get(stg->metadata, "title", NULL, 0) : NULL;
+            MP_VERBOSE(demuxer, "IAMF mix presentation group %u: \"%s\"\n",
+                       stg->index, t ? t->value : "(untitled)");
+            break;
+        }
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 6, 100)
+        case AV_STREAM_GROUP_PARAMS_LCEVC:
+            handle_lcevc_group(demuxer, stg);
+            break;
+#endif
+        default:
+            MP_VERBOSE(demuxer, "Unhandled stream group type %d (index %u)\n",
+                       (int)stg->type, stg->index);
+            break;
+        }
+    }
+}
+#endif
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     AVFormatContext *avfc = NULL;
@@ -1257,6 +1408,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     add_new_streams(demuxer);
     build_editions(demuxer);
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
+    handle_stream_groups(demuxer);
+#endif
 
     mp_tags_move_from_av_dictionary(demuxer->metadata, &avfc->metadata);
 
