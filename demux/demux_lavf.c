@@ -858,9 +858,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (lang && lang->value && strcmp(lang->value, "und") != 0)
             sh->lang = talloc_strdup(sh, lang->value);
         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
-        AVProgram *prog = av_find_program_from_stream(avfc, NULL, i);
-        if (prog)
-            sh->program_id = prog->id;
+        AVProgram *prog = NULL;
+        while ((prog = av_find_program_from_stream(avfc, prog, i)))
+            MP_TARRAY_APPEND(sh, sh->program_ids, sh->num_program_ids, prog->id);
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
         mp_tags_move_from_av_dictionary(sh->tags, &st->metadata);
         demux_add_sh_stream(demuxer, sh);

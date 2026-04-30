@@ -960,7 +960,6 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
         .index = -1,
         .ff_index = -1,     // may be overwritten by demuxer
         .demuxer_id = -1,   // ... same
-        .program_id = -1,   // ... same
         .codec = talloc_zero(sh, struct mp_codec_params),
         .tags = talloc_zero(sh, struct mp_tags),
     };
@@ -1295,7 +1294,7 @@ char *demux_compose_edition_title(void *ta_ctx, struct demuxer *demuxer,
     int num = demux_get_num_stream(demuxer);
     for (int i = 0; i < num; i++) {
         struct sh_stream *s = demux_get_stream(demuxer, i);
-        if (s->program_id != program_id)
+        if (!sh_stream_has_program(s, program_id))
             continue;
         if (s->type == STREAM_VIDEO) { video_count++; vsh = s; }
         else if (s->type == STREAM_AUDIO) { audio_count++; ash = s; }
@@ -1330,7 +1329,8 @@ static struct sh_stream *demuxer_get_cc_track_locked(struct sh_stream *stream)
         sh->codec->codec = "eia_608";
         sh->default_track = true;
         sh->hls_bitrate = stream->hls_bitrate;
-        sh->program_id = stream->program_id;
+        for (int i = 0; i < stream->num_program_ids; i++)
+            MP_TARRAY_APPEND(sh, sh->program_ids, sh->num_program_ids, stream->program_ids[i]);
         stream->ds->cc = sh;
         demux_add_sh_stream_locked(stream->ds->in, sh);
         sh->ds->ignore_eof = true;

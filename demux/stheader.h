@@ -54,7 +54,8 @@ struct sh_stream {
     bool image;                 // video stream is an image
     bool still_image;           // video consists of multiple sparse still images
     int hls_bitrate;
-    int program_id;
+    int *program_ids;
+    int num_program_ids;
 
     struct mp_tags *tags;
 
@@ -68,6 +69,16 @@ struct sh_stream {
     // Internal to demux.c
     struct demux_stream *ds;
 };
+
+// Returns true if the stream belongs to the given program.
+static inline bool sh_stream_has_program(const struct sh_stream *sh, int program_id)
+{
+    for (int i = 0; i < sh->num_program_ids; i++) {
+        if (sh->program_ids[i] == program_id)
+            return true;
+    }
+    return false;
+}
 
 struct mp_codec_params {
     enum stream_type type;
