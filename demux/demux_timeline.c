@@ -653,6 +653,16 @@ static void build_editions(struct demuxer *demuxer)
     if (demuxer->num_editions > 0)
         return;
 
+    struct MPOpts *mp_opts = mp_get_config_group(NULL, demuxer->global, &mp_opt_root);
+    int hls_bitrate = mp_opts->hls_bitrate;
+    int edition_id = mp_opts->edition_id;
+    bool flatten_editions = mp_opts->flatten_editions;
+    TA_FREEP(&mp_opts);
+    if (flatten_editions) {
+        MP_VERBOSE(demuxer, "Flattening track-based editions.\n");
+        return;
+    }
+
     int num_streams = demux_get_num_stream(demuxer);
     for (int n = 0; n < num_streams; n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
@@ -692,11 +702,6 @@ static void build_editions(struct demuxer *demuxer)
     }
 
     demuxer->edition_is_track_mapping = true;
-
-    struct MPOpts *mp_opts = mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
-    int hls_bitrate = mp_opts->hls_bitrate;
-    int edition_id = mp_opts->edition_id;
-    TA_FREEP(&mp_opts);
 
     int selected = -1;
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
