@@ -2072,6 +2072,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         tag_list[2 * i + 1] = talloc_strdup(tag_list, tags->values[i]);
     }
 
+    struct sh_stream *sh = track->stream;
+
     double par = 0.0;
     if (p.par_h)
         par = p.par_w / (double) p.par_h;
@@ -2116,8 +2118,11 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"ff-index",    SUB_PROP_INT(track->ff_index)},
         {"hls-bitrate", SUB_PROP_INT(track->hls_bitrate),
                         .unavailable = !track->hls_bitrate},
-        {"program-id",  SUB_PROP_INT(track->program_id),
-                        .unavailable = track->program_id < 0},
+        {"program-id",  SUB_PROP_INT(sh && sh->num_program_ids ? sh->program_ids[0] : -1),
+                        .unavailable = !sh || !sh->num_program_ids},
+        {"program-ids", SUB_PROP_INT_ARRAY(sh ? sh->program_ids : NULL,
+                                           sh ? sh->num_program_ids : 0),
+                        .unavailable = !sh || !sh->num_program_ids},
         {"decoder",     SUB_PROP_STR(p.decoder),
                         .unavailable = !p.decoder},
         {"decoder-desc", SUB_PROP_STR(p.decoder_desc),

@@ -3502,7 +3502,13 @@ Property list
         The bitrate of the HLS stream, if available.
 
     ``track-list/N/program-id``
-        The program ID of the stream, if available.
+        The first program ID this stream belongs to, if any. Deprecated,
+        use ``track-list/N/program-ids``.
+
+    ``track-list/N/program-ids``
+        A list of all program IDs this stream belongs to. A stream can belong
+        to more than one program (e.g. in MPEG-TS or HLS). Unavailable if the
+        stream does not belong to any program.
 
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
@@ -3629,6 +3635,7 @@ Property list
                 "hearing-impaired"  MPV_FORMAT_FLAG
                 "hls-bitrate"       MPV_FORMAT_INT64
                 "program-id"        MPV_FORMAT_INT64
+                "program-ids"       MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_INT64]
                 "selected"          MPV_FORMAT_FLAG
                 "main-selection"    MPV_FORMAT_INT64
                 "external"          MPV_FORMAT_FLAG
