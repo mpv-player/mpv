@@ -1,3 +1,4 @@
 ``track-list`` is now filtered by the currently selected edition
 add ``edition-list/N/metadata`` sub-property
 add ``program_id`` support to EDL ``!track_meta`` header
+add ``--flatten-editions`` option to disable program-based edition grouping
