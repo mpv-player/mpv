@@ -272,13 +272,14 @@ static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
 
+    double playresx = obj->ass.track->PlayResX;
     double playresy = obj->ass.track->PlayResY;
     // Compensate for libass and mp_ass_set_style scaling the font etc.
     if (!opts->osd_scale_by_window && obj->vo_res.h)
         playresy *= 720.0 / obj->vo_res.h;
 
     ASS_Style *style = get_style(&obj->ass, "OSD");
-    mp_ass_set_style(style, playresy, &font);
+    mp_ass_set_style(style, playresx, playresy, &font);
     return style;
 }
 
@@ -392,7 +393,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
         return;
     }
 
-    mp_ass_set_style(style, track->PlayResY, opts->osd_style);
+    mp_ass_set_style(style, track->PlayResX, track->PlayResY, opts->osd_style);
 
     // override the default osd opaque-box into plain outline. Otherwise
     // the opaque box is not aligned with the bar (even without shadow),
@@ -535,12 +536,13 @@ static void update_external(struct osd_state *osd, struct osd_object *obj,
 
     clear_ass(&ext->ass);
 
+    int resx = ext->ass.track->PlayResX;
     int resy = ext->ass.track->PlayResY;
-    mp_ass_set_style(get_style(&ext->ass, "OSD"), resy, osd->opts->osd_style);
+    mp_ass_set_style(get_style(&ext->ass, "OSD"), resx, resy, osd->opts->osd_style);
 
     // Some scripts will reference this style name with \r tags.
     const struct osd_style_opts *def = osd_style_conf.defaults;
-    mp_ass_set_style(get_style(&ext->ass, "Default"), resy, def);
+    mp_ass_set_style(get_style(&ext->ass, "Default"), resx, resy, def);
 
     while (t.len) {
         bstr line;
