@@ -1666,6 +1666,109 @@ const m_option_type_t m_option_type_string_list = {
     },
 };
 
+//////////// Property array
+// Adaptor that converts a typed C array into a MPV_FORMAT_NODE_ARRAY
+// sub-property. This is for read-only access, parse/set are not intentionally
+// omitted.
+
+static int prop_array_get(const m_option_t *opt, void *ta_parent,
+                          struct mpv_node *dst, void *src)
+{
+    struct m_prop_arr *arr = src;
+    mp_assert(arr->elem_type);
+    mp_assert(arr->elem_type->size > 0);
+    size_t elem_size = arr->elem_type->size;
+    const char *base = arr->data;
+    dst->format = MPV_FORMAT_NODE_ARRAY;
+    dst->u.list = talloc_zero(ta_parent, mpv_node_list);
+    struct mpv_node_list *list = dst->u.list;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    for (int i = 0; i < arr->count; i++) {
+        MP_TARRAY_GROW(list, list->values, list->num);
+        if (m_option_get_node(&elem_opt, list, &list->values[list->num],
+                              (void *)&base[i * elem_size]) >= 0)
+            list->num++;
+    }
+    return 1;
+}
+
+static char *print_prop_array(const m_option_t *opt, const void *val)
+{
+    const struct m_prop_arr *arr = val;
+    mp_assert(arr->elem_type);
+    mp_assert(arr->elem_type->size > 0);
+    size_t elem_size = arr->elem_type->size;
+    const char *base = arr->data;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    char *ret = talloc_strdup(NULL, "");
+    for (int i = 0; i < arr->count; i++) {
+        char *s = m_option_print(&elem_opt, &base[i * elem_size]);
+        if (i > 0)
+            ret = talloc_strdup_append(ret, ",");
+        ret = talloc_strdup_append(ret, s ? s : "?");
+        talloc_free(s);
+    }
+    return ret;
+}
+
+static void free_prop_array(void *val)
+{
+    struct m_prop_arr *arr = val;
+    if (!arr->data)
+        return;
+    size_t elem_size = arr->elem_type->size;
+    char *base = (char *)arr->data;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    for (int i = 0; i < arr->count; i++)
+        m_option_free(&elem_opt, &base[i * elem_size]);
+    talloc_free(base);
+    arr->data = NULL;
+    arr->count = 0;
+}
+
+static void copy_prop_array(const m_option_t *opt, void *dst, const void *src)
+{
+    const struct m_prop_arr *s = src;
+    struct m_prop_arr *d = dst;
+    free_prop_array(d);
+    *d = (struct m_prop_arr){.elem_type = s->elem_type, .count = s->count};
+    if (!s->data || !s->count)
+        return;
+    size_t elem_size = s->elem_type->size;
+    const char *sbase = s->data;
+    char *dbase = talloc_zero_size(NULL, (size_t)s->count * elem_size);
+    struct m_option elem_opt = {.type = s->elem_type};
+    for (int i = 0; i < s->count; i++)
+        m_option_copy(&elem_opt, &dbase[i * elem_size], &sbase[i * elem_size]);
+    d->data = dbase;
+}
+
+static bool equal_prop_array(const m_option_t *opt, void *a, void *b)
+{
+    struct m_prop_arr *pa = a, *pb = b;
+    if (pa->count != pb->count || pa->elem_type != pb->elem_type)
+        return false;
+    size_t elem_size = pa->elem_type->size;
+    char *abase = pa->data;
+    char *bbase = pb->data;
+    struct m_option elem_opt = {.type = pa->elem_type};
+    for (int i = 0; i < pa->count; i++) {
+        if (!m_option_equal(&elem_opt, &abase[i * elem_size], &bbase[i * elem_size]))
+            return false;
+    }
+    return true;
+}
+
+const m_option_type_t m_option_type_prop_array = {
+    .name  = "Property array",
+    .size  = sizeof(struct m_prop_arr),
+    .print = print_prop_array,
+    .copy  = copy_prop_array,
+    .free  = free_prop_array,
+    .get   = prop_array_get,
+    .equal = equal_prop_array,
+};
+
 static int read_subparam(struct mp_log *log, bstr optname, char *termset,
                          bstr *str, bstr *out_subparam);
 

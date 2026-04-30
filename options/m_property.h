@@ -226,6 +226,16 @@ struct m_sub_property {
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 #define SUB_PROP_KEYVALUE_LIST(l) \
     .type = {.type = &m_option_type_keyvalue_list}, .value = {.keyvalue_list = (l)}
+// Expose a C array as a read-only array sub-property. The caller retains
+// ownership of the data pointer. It will be copied if needed. Used for
+// to expose arrays as sub-properties.
+#define SUB_PROP_TYPE_ARRAY(etype, ptr, n) \
+    .type = {.type = &m_option_type_prop_array}, \
+    .value = {.prop_arr = {.data = (ptr), .count = (n), .elem_type = (etype)}}
+#define SUB_PROP_INT_ARRAY(ptr, n)    SUB_PROP_TYPE_ARRAY(CONF_TYPE_INT, ptr, n)
+#define SUB_PROP_INT64_ARRAY(ptr, n)  SUB_PROP_TYPE_ARRAY(CONF_TYPE_INT64, ptr, n)
+#define SUB_PROP_FLOAT_ARRAY(ptr, n)  SUB_PROP_TYPE_ARRAY(CONF_TYPE_FLOAT, ptr, n)
+#define SUB_PROP_DOUBLE_ARRAY(ptr, n) SUB_PROP_TYPE_ARRAY(CONF_TYPE_DOUBLE, ptr, n)
 
 int m_property_read_sub_validate(void *ctx, struct m_property *prop,
                                  int action, void *arg);
