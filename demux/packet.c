@@ -33,6 +33,13 @@
 
 #include "packet.h"
 
+#define ITU_T_T35_COUNTRY_CODE_US        0xB5
+#define ITU_T_T35_PROVIDER_CODE_SAMSUNG  0x003C
+#define ITU_T_T35_PROVIDER_CODE_SMPTE    0x0090
+
+#define ITU_T_T35_COUNTRY_CODE_UK        0xB4
+#define ITU_T_T35_PROVIDER_CODE_VNOVA    0x5000
+
 // Free any refcounted data dp holds (but don't free dp itself). This does not
 // care about pointers that are _not_ refcounted (like demux_packet.codec).
 // Normally, a user should use talloc_free(dp). This function is only for
@@ -287,105 +294,109 @@ int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
                                      void *data, size_t size)
 {
+#define SKIP(n) do { p += (n); remaining -= (n); } while (0)
+
     if (!dp->avpacket)
         return -1;
 
     switch (id) {
     case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
-        static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
-        static const MP_UNUSED uint8_t ITU_T_T35_COUNTRY_CODE_UK = 0xB4;
-        static const uint16_t ITU_T_T35_PROVIDER_CODE_SAMSUNG = 0x003C;
-        static const MP_UNUSED uint16_t ITU_T_T35_PROVIDER_CODE_SMPTE = 0x0090;
-
-        if (size < 5)
+        if (size < 1)
             break;
 
         uint8_t *p = data;
+        size_t remaining = size;
 
         uint8_t country_code = AV_RB8(p);
-        p += sizeof(country_code);
+        SKIP(1);
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 17, 100)
-        if (country_code == ITU_T_T35_COUNTRY_CODE_UK) {
-            static const uint16_t ITU_T_T35_PROVIDER_CODE_VNOVA = 0x5000;
-
-            p += 1; // skip t35_uk_country_code_second_octet
-            if ((size_t)(p - (uint8_t *)data) + 2 > size)
+        switch (country_code) {
+        case ITU_T_T35_COUNTRY_CODE_US: {
+            if (remaining < 2)
                 break;
 
-            uint16_t uk_provider_code = AV_RB16(p);
-            p += sizeof(uk_provider_code);
+            uint16_t provider_code = AV_RB16(p);
+            SKIP(2);
 
-            if (uk_provider_code == ITU_T_T35_PROVIDER_CODE_VNOVA) {
-                size_t remaining = size - (size_t)(p - (uint8_t *)data);
+            switch (provider_code) {
+            case ITU_T_T35_PROVIDER_CODE_SAMSUNG: {
+                if (remaining < 3)
+                    break;
+
+                uint16_t provider_oriented_code = AV_RB16(p);
+                SKIP(2);
+                uint8_t application_identifier = AV_RB8(p);
+                SKIP(1);
+
+                if (provider_oriented_code != 1 || application_identifier != 4)
+                    break;
+
+                size_t hdrplus_size;
+                AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
+                MP_HANDLE_OOM(hdrplus);
+
+                if (av_dynamic_hdr_plus_from_t35(hdrplus, p, remaining) < 0 ||
+                    av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
+                                            (uint8_t *)hdrplus, hdrplus_size) < 0)
+                {
+                    av_free(hdrplus);
+                    return -1;
+                }
+
+                return 0;
+            }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 30, 100)
+            case ITU_T_T35_PROVIDER_CODE_SMPTE: {
                 if (remaining < 2)
                     break;
 
-                uint8_t *lcevc_data = av_packet_new_side_data(dp->avpacket,
-                                                              AV_PKT_DATA_LCEVC,
-                                                              remaining);
-                if (!lcevc_data)
+                uint16_t provider_oriented_code = AV_RB16(p);
+                SKIP(2);
+
+                if (provider_oriented_code != 1)
+                    break;
+
+                size_t app5_size;
+                AVDynamicHDRSmpte2094App5 *app5 = av_dynamic_hdr_smpte2094_app5_alloc(&app5_size);
+                MP_HANDLE_OOM(app5);
+
+                if (av_dynamic_hdr_smpte2094_app5_from_t35(app5, p, remaining) < 0 ||
+                    av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR_SMPTE_2094_APP5,
+                        (uint8_t *)app5, app5_size) < 0)
+                {
+                    av_free(app5);
                     return -1;
-                memcpy(lcevc_data, p, remaining);
+                }
+
                 return 0;
             }
-
+#endif
+            }
             break;
         }
-#endif
-
-        uint16_t provider_code = AV_RB16(p);
-        p += sizeof(provider_code);
-
-        if (country_code != ITU_T_T35_COUNTRY_CODE_US)
-            break;
-
-        if (provider_code == ITU_T_T35_PROVIDER_CODE_SAMSUNG) {
-            if (size < 6)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 17, 100)
+        case ITU_T_T35_COUNTRY_CODE_UK: {
+            SKIP(1); // skip t35_uk_country_code_second_octet
+            if (remaining < 2)
                 break;
 
-            uint16_t provider_oriented_code = AV_RB16(p);
-            p += sizeof(provider_oriented_code);
-            uint8_t application_identifier = AV_RB8(p);
-            p += sizeof(application_identifier);
+            uint16_t provider_code = AV_RB16(p);
+            SKIP(2);
 
-            if (provider_oriented_code != 1 || application_identifier != 4)
+            if (provider_code != ITU_T_T35_PROVIDER_CODE_VNOVA)
                 break;
 
-            size_t hdrplus_size;
-            AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
-            MP_HANDLE_OOM(hdrplus);
+            if (remaining < 2)
+                break;
 
-            if (av_dynamic_hdr_plus_from_t35(hdrplus, p, size - (p - (uint8_t *)data)) < 0 ||
-                av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
-                                        (uint8_t *)hdrplus, hdrplus_size) < 0)
-            {
-                av_free(hdrplus);
+            uint8_t *lcevc_data = av_packet_new_side_data(dp->avpacket,
+                                                          AV_PKT_DATA_LCEVC,
+                                                          remaining);
+            if (!lcevc_data)
                 return -1;
-            }
-
+            memcpy(lcevc_data, p, remaining);
             return 0;
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 30, 100)
-        } else if (provider_code == ITU_T_T35_PROVIDER_CODE_SMPTE) {
-            uint16_t provider_oriented_code = AV_RB16(p);
-            p += sizeof(provider_oriented_code);
-
-            if (provider_oriented_code != 1)
-                break;
-
-            size_t app5_size;
-            AVDynamicHDRSmpte2094App5 *app5 = av_dynamic_hdr_smpte2094_app5_alloc(&app5_size);
-            MP_HANDLE_OOM(app5);
-
-            if (av_dynamic_hdr_smpte2094_app5_from_t35(app5, p, size - (p - (uint8_t *)data)) < 0 ||
-                av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR_SMPTE_2094_APP5,
-                    (uint8_t *)app5, app5_size) < 0)
-            {
-                av_free(app5);
-                return -1;
-            }
-
-            return 0;
+        }
 #endif
         }
 
@@ -404,4 +415,6 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
     if (size > 0)
         memcpy(sd + 8, data, size);
     return 0;
+
+#undef SKIP
 }
