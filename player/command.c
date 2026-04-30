@@ -1979,7 +1979,7 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
     bool seen = track == NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *cur = mpctx->tracks[n];
-        if (cur->type == type && track_in_current_edition(mpctx, cur)) {
+        if (cur->type == type && track_is_visible(mpctx, cur)) {
             if (cur == track) {
                 seen = true;
             } else if (!cur->selected) {
@@ -2237,7 +2237,7 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
                 struct track *track = mpctx->tracks[n];
                 if (track->type != type)
                     continue;
-                if (!track_in_current_edition(mpctx, track))
+                if (!track_is_visible(mpctx, track))
                     continue;
                 res = talloc_asprintf_append(res, "%s%s: ",
                     spacing == 2 ? "\n\n" : spacing == 1 ? "\n" : "",
@@ -2285,7 +2285,7 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
 
                     for (int n = 0; n < mpctx->num_tracks; n++) {
                         struct track *track = mpctx->tracks[n];
-                        if (track->type == type && track_in_current_edition(mpctx, track)) {
+                        if (track->type == type && track_is_visible(mpctx, track)) {
                             res = talloc_strdup_append(res, "\n");
                             res = append_track_info(res, track);
                         }
@@ -2302,7 +2302,7 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
     int *map = talloc_array(NULL, int, mpctx->num_tracks);
     int count = 0;
     for (int n = 0; n < mpctx->num_tracks; n++) {
-        if (track_in_current_edition(mpctx, mpctx->tracks[n]))
+        if (track_is_visible(mpctx, mpctx->tracks[n]))
             map[count++] = n;
     }
     struct filtered_track_ctx ft = { .mpctx = mpctx, .map = map };
@@ -2358,7 +2358,7 @@ static int mp_property_current_tracks(void *ctx, struct m_property *prop,
     int index = -1;
     int filtered_index = 0;
     for (int n = 0; n < mpctx->num_tracks; n++) {
-        if (!track_in_current_edition(mpctx, mpctx->tracks[n]))
+        if (!track_is_visible(mpctx, mpctx->tracks[n]))
             continue;
         if (mpctx->tracks[n] == t) {
             index = filtered_index;

@@ -295,7 +295,7 @@ static bool edition_has_track_of_type(struct MPContext *mpctx,
     return false;
 }
 
-bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
+static bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer || !demuxer->edition_is_track_mapping || demuxer->num_editions <= 1)
@@ -312,6 +312,15 @@ bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
     return false;
 }
 
+bool track_is_visible(struct MPContext *mpctx, struct track *track)
+{
+    if (!track_in_current_edition(mpctx, track))
+        return false;
+    if (track->dependent_track && !mpctx->opts->show_dependent_tracks)
+        return false;
+    return true;
+}
+
 void print_track_list(struct MPContext *mpctx, const char *msg)
 {
     if (msg)
@@ -319,7 +328,7 @@ void print_track_list(struct MPContext *mpctx, const char *msg)
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *track = mpctx->tracks[n];
-            if (track->type != t || !track_in_current_edition(mpctx, track))
+            if (track->type != t || !track_is_visible(mpctx, track))
                 continue;
             // Indent tracks after messages like "Tracks switched" and
             // "Playing:".
@@ -634,7 +643,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         struct track *track = mpctx->tracks[n];
         if (track->type != type)
             continue;
-        if (!track_in_current_edition(mpctx, track))
+        if (!track_is_visible(mpctx, track))
             continue;
         if (track->user_tid == tid) {
             pick = track;
