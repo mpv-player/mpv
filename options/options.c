@@ -588,6 +588,7 @@ static const m_option_t mp_opts[] = {
 #endif
     {"edition", OPT_CHOICE(edition_id, {"auto", -1}), M_RANGE(0, 8190)},
     {"flatten-editions", OPT_BOOL(flatten_editions)},
+    {"show-dependent-tracks", OPT_BOOL(show_dependent_tracks)},
 #if HAVE_LIBBLURAY
     {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
 #endif /* HAVE_LIBBLURAY */
