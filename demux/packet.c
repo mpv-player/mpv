@@ -293,6 +293,7 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
     switch (id) {
     case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
         static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
+        static const MP_UNUSED uint8_t ITU_T_T35_COUNTRY_CODE_UK = 0xB4;
         static const uint16_t ITU_T_T35_PROVIDER_CODE_SAMSUNG = 0x003C;
         static const MP_UNUSED uint16_t ITU_T_T35_PROVIDER_CODE_SMPTE = 0x0090;
 
@@ -303,6 +304,36 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
 
         uint8_t country_code = AV_RB8(p);
         p += sizeof(country_code);
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 17, 100)
+        if (country_code == ITU_T_T35_COUNTRY_CODE_UK) {
+            static const uint16_t ITU_T_T35_PROVIDER_CODE_VNOVA = 0x5000;
+
+            p += 1; // skip t35_uk_country_code_second_octet
+            if ((size_t)(p - (uint8_t *)data) + 2 > size)
+                break;
+
+            uint16_t uk_provider_code = AV_RB16(p);
+            p += sizeof(uk_provider_code);
+
+            if (uk_provider_code == ITU_T_T35_PROVIDER_CODE_VNOVA) {
+                size_t remaining = size - (size_t)(p - (uint8_t *)data);
+                if (remaining < 2)
+                    break;
+
+                uint8_t *lcevc_data = av_packet_new_side_data(dp->avpacket,
+                                                              AV_PKT_DATA_LCEVC,
+                                                              remaining);
+                if (!lcevc_data)
+                    return -1;
+                memcpy(lcevc_data, p, remaining);
+                return 0;
+            }
+
+            break;
+        }
+#endif
+
         uint16_t provider_code = AV_RB16(p);
         p += sizeof(provider_code);
 
