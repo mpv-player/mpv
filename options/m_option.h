@@ -50,6 +50,7 @@ extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
+extern const m_option_type_t m_option_type_prop_array;
 extern const m_option_type_t m_option_type_string_append_list;
 extern const m_option_type_t m_option_type_keyvalue_list;
 extern const m_option_type_t m_option_type_time;
@@ -227,6 +228,13 @@ struct m_sub_options {
     bool (*get_sub_options)(int index, const struct m_sub_options **sub);
 };
 
+// A typed C array value for use with m_option_type_prop_array.
+struct m_prop_arr {
+    void *data;                       // first element; owned iff produced by copy
+    int count;                        // number of elements
+    const m_option_type_t *elem_type; // element type (must have a .get callback)
+};
+
 #define CONF_TYPE_BOOL          (&m_option_type_bool)
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
 #define CONF_TYPE_INT           (&m_option_type_int)
@@ -257,6 +265,7 @@ union m_option_value {
     char *string;
     char **string_list;
     char **keyvalue_list;
+    struct m_prop_arr prop_arr;
     int imgfmt;
     unsigned int fourcc;
     int afmt;
