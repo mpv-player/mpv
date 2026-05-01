@@ -140,6 +140,7 @@ struct priv {
     double last_pts;
     bool is_interpolated;
     bool want_reset;
+    bool flush_cache;
     bool frame_pending;
 
     pl_options pars;
@@ -1106,11 +1107,16 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         int id = frame->frame_id + n;
 
         if (p->want_reset) {
-            pl_renderer_flush_cache(p->rr);
             pl_queue_reset(p->queue);
             p->last_pts = 0.0;
             p->last_id = 0;
             p->want_reset = false;
+            p->flush_cache = true;
+        }
+
+        if (p->flush_cache) {
+            pl_renderer_flush_cache(p->rr);
+            p->flush_cache = false;
         }
 
         if (id <= p->last_id)
@@ -2668,8 +2674,8 @@ AV_NOWARN_DEPRECATED(
 
     pars->params.hooks = p->hooks;
 
-    MP_DBG(p, "Render options updated, resetting render state.\n");
-    p->want_reset = true;
+    MP_DBG(p, "Render options updated, flushing renderer cache.\n");
+    p->flush_cache = true;
 }
 
 const struct vo_driver video_out_gpu_next = {
