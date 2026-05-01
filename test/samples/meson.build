@@ -75,9 +75,9 @@ samples = {
          '@OUTPUT@'],
     'multiprogram.ts':
         [ffmpeg, '-v', 'error', '-y', '-i', video, '-f', 'vobsub', '-i', img_sub,
-         '-c:v', 'copy', '-c:s', 'dvbsub', '-map', '0:0', '-map', '1:0', '-map', '0:0', '-map', '1:0',
-         '-metadata:s:s:0', 'language=eng', '-metadata:s:s:1', 'language=jpn',
-         '-program', 'program_num=1:st=0:st=1', '-program', 'program_num=2:st=2:st=3', '@OUTPUT@'],
+         '-c:v', 'copy', '-c:s', 'dvbsub', '-map', '0:0', '-map', '1:0', '-map', '0:0', '-map', '1:0', '-map', '1:0',
+         '-metadata:s:s:0', 'language=eng', '-metadata:s:s:1', 'language=jpn', '-metadata:s:s:2', 'language=fra',
+         '-program', 'program_num=1:st=0:st=1:st=4', '-program', 'program_num=2:st=2:st=3:st=4', '@OUTPUT@'],
 }
 
 foreach name, cmd: samples
