@@ -851,6 +851,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
         if (title && title->value)
             sh->title = talloc_strdup(sh, title->value);
+        AVDictionaryEntry *comment = av_dict_get(st->metadata, "comment", NULL, 0);
+        if (!sh->title && comment && comment->value)
+            sh->title = talloc_strdup(sh, comment->value);
         AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
         if (lang && lang->value && strcmp(lang->value, "und") != 0)
             sh->lang = talloc_strdup(sh, lang->value);
