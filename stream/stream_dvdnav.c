@@ -493,8 +493,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         if (new_angle > angles || new_angle < 1)
             break;
         if (dvdnav_angle_change(dvdnav, new_angle) != DVDNAV_STATUS_OK)
-            return 1;
-        break;
+            break;
+        return STREAM_OK;
     }
     case STREAM_CTRL_GET_LANG: {
         struct stream_lang_req *req = arg;
