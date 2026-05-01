@@ -384,8 +384,10 @@ static int control(stream_t *stream, int cmd, void *arg)
         int n = dvdnav_describe_title_chapters(dvdnav, tit, &parts, &duration);
         if (!parts)
             break;
-        if (chapter < 0 || chapter + 1 > n)
+        if (chapter < 0 || chapter + 1 > n) {
+            free(parts);
             break;
+        }
         *ch = chapter > 0 ? parts[chapter - 1] / 90000.0 : 0;
         free(parts);
         return 1;
