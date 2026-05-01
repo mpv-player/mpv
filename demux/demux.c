@@ -2158,6 +2158,13 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
     } else {
         // first packet in stream
         queue->head = queue->tail = dp;
+
+        // If rebased time is >1s, it's likely that we are not at BOF.
+        if (queue->is_bof && ts != MP_NOPTS_VALUE) {
+            double rebased = ts + in->ts_offset;
+            if (rebased != MP_NOPTS_VALUE && rebased > 1.0)
+                queue->is_bof = false;
+        }
     }
 
     if (!ds->ignore_eof) {
