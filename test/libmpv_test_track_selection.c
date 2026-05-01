@@ -374,6 +374,39 @@ static void test_track_selection(char *file, char *path)
         check_string("current-tracks/sub/lang", "jpn");
         check_string("current-tracks/sub/program-id", "2");
         check_string("current-tracks/video/program-id", "2");
+
+        // flatten-editions: all 4 tracks exposed, no edition filtering
+        set_property_string("flatten-editions", "yes");
+        set_property_string("edition", "auto");
+        set_property_string("slang", "");
+        set_property_string("subs-fallback", "no");
+        reload_file(path);
+        check_string("track-list/count", "4");
+        // no editions created
+        check_string("edition-list/count", "0");
+
+        // video from program 1 selected (first video), no sub selected
+        check_string("track-list/0/type", "video");
+        check_string("track-list/0/program-id", "1");
+        check_string("track-list/0/selected", "yes");
+        check_string("current-tracks/video/program-id", "1");
+        check_string("sid", "no");
+
+        // preferred_program: eng sub in program 1 is picked when slang=eng
+        set_property_string("slang", "eng");
+        reload_file(path);
+        check_string("track-list/0/selected", "yes");
+        check_string("current-tracks/video/program-id", "1");
+        check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/program-id", "1");
+
+        // preferred_program: jpn sub in program 2 follows video from program 2
+        set_property_string("vid", "2");
+        set_property_string("slang", "jpn");
+        reload_file(path);
+        check_string("current-tracks/video/program-id", "2");
+        check_string("current-tracks/sub/lang", "jpn");
+        check_string("current-tracks/sub/program-id", "2");
     }
 }
 
