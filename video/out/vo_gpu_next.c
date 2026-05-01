@@ -2349,7 +2349,9 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     }
 
     char *fname = mp_get_user_path(NULL, p->global, path);
-    bstr shader = stream_read_file(fname, p, p->global, 1000000000); // 1GB
+    bstr shader = stream_read_file2(fname, p,
+                                    STREAM_READ_FILE_FLAGS_DEFAULT & ~STREAM_LOCAL_FS_ONLY,
+                                    p->global, 1000000000); // 1GB
     talloc_free(fname);
 
     const struct pl_hook *hook = NULL;
@@ -2669,7 +2671,7 @@ AV_NOWARN_DEPRECATED(
     pars->params.hooks = p->hooks;
 
     MP_DBG(p, "Render options updated, resetting render state.\n");
-    p->want_reset = true;
+    // p->want_reset = true;
 }
 
 const struct vo_driver video_out_gpu_next = {
