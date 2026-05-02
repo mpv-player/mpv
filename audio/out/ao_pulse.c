@@ -80,7 +80,7 @@ static void subscribe_cb(pa_context *c, pa_subscription_event_type_t t,
                          uint32_t idx, void *userdata)
 {
     struct ao *ao = userdata;
-    int type = t & PA_SUBSCRIPTION_MASK_SINK;
+    int type = t & PA_SUBSCRIPTION_EVENT_TYPE_MASK;
     int fac = t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
     if ((type == PA_SUBSCRIPTION_EVENT_NEW || type == PA_SUBSCRIPTION_EVENT_REMOVE)
         && fac == PA_SUBSCRIPTION_EVENT_SINK)
