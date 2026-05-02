@@ -1536,10 +1536,15 @@ works like in older mpv releases:
 .. warning::
 
     Currently, you can extend the ``pseudo-gui`` profile in the config file the
-    normal way. This is deprecated. In future mpv releases, the behavior might
-    change, and not apply your additional settings, and/or use a different
-    profile name.
+    normal way. This is deprecated and will be removed in future mpv releases.
 
+    As an alternative, a conditional autoprofile can be used instead:
+
+        ::
+
+            [gui]
+            profile-cond=p["player-operation-mode"]=="pseudo-gui"
+            idle=once
 
 .. include:: options.rst
 
