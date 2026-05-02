@@ -3166,6 +3166,14 @@ static int mp_property_term_size(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
+static int mp_property_player_operation_mode(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    const struct m_opt_choice_alternatives mode_names[] = {{"cplayer", 0}, {"pseudo-gui", 1}};
+    return m_property_strdup_ro(action, arg, m_opt_choice_str(mode_names, mpctx->opts->operation_mode));
+}
+
 static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -4633,6 +4641,7 @@ static const struct m_property mp_properties_base[] = {
     {"idle-active", mp_property_idle},
     {"window-id", mp_property_window_id},
     {"display-swapchain", mp_property_vo_display_swapchain},
+    {"player-operation-mode", mp_property_player_operation_mode},
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", mp_property_list_tracks},

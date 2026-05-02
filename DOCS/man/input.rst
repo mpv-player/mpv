@@ -4386,6 +4386,11 @@ Property list
     A string containing the currently active clipboard backend.
     See ``--clipboard-backends`` option for the list of available backends.
 
+``player-operation-mode``
+    A read-only string of the current player operation mode, mirroring the
+    ``--player-operation-mode`` option. To set operation mode, set the option
+    at startup instead.
+
 ``clock``
     The current local time in hour:minutes format.
 
