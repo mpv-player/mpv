@@ -1090,6 +1090,9 @@ Program Behavior
     only by mpv internally, or mpv-provided scripts, config files, or .desktop
     files. See `PSEUDO GUI MODE`_ for details.
 
+    This option should be set at startup. Changing this option at runtime has no
+    effect.
+
 Watch Later
 -----------
 

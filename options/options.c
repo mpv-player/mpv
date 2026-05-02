@@ -514,7 +514,7 @@ static const m_option_t mp_opts[] = {
 
     {"player-operation-mode", OPT_CHOICE(operation_mode,
         {"cplayer", 0}, {"pseudo-gui", 1}),
-        .flags = M_OPT_PRE_PARSE | M_OPT_NOPROP},
+        .flags = M_OPT_PRE_PARSE},
 
     {"shuffle", OPT_BOOL(shuffle), .flags = M_OPT_PRE_PARSE},
 
