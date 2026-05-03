@@ -90,7 +90,7 @@ static bool open_source(struct timeline *tl, char *filename)
     void *ctx = talloc_new(NULL);
     bool res = false;
 
-    struct bstr dirname = mp_dirname(tl->demuxer->filename);
+    struct bstr dirname = mp_dirname(filename);
 
     struct bstr base_filename = bstr0(mp_basename(filename));
     if (!base_filename.len) {
