@@ -54,7 +54,7 @@ static inline void fail(const char *fmt, ...)
 
 static inline void exit_cleanup(void)
 {
-    mpv_destroy(ctx);
+    mpv_terminate_destroy(ctx);
     ctx = NULL;
 }
 
