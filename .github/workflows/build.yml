@@ -395,6 +395,7 @@ jobs:
       - name: Run meson tests
         id: tests
         run: |
+          export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
           meson test -C build
 
       - name: Print meson test log
@@ -575,6 +576,7 @@ jobs:
                 vulkan-headers \
                 wayland-protocols
             ./ci/build-freebsd.sh
+            export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
             if ! meson test -C build; then
                 cat ./build/meson-logs/testlog.txt
                 exit 1
@@ -664,6 +666,7 @@ jobs:
       - name: Run meson tests
         id: tests
         run: |
+          export LSAN_OPTIONS="suppressions=${GITHUB_WORKSPACE}/.lsan_suppressions"
           meson test -C build
 
       - name: Print meson test log
