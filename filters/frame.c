@@ -14,7 +14,7 @@ struct frame_handler {
     void *(*new_ref)(void *data);
     double (*get_pts)(void *data);
     void (*set_pts)(void *data, double pts);
-    int (*approx_size)(void *data);
+    size_t (*approx_size)(void *data);
     AVFrame *(*new_av_ref)(void *data);
     void *(*from_av_ref)(AVFrame *data);
     void (*free)(void *data);
@@ -35,7 +35,7 @@ static void video_set_pts(void *data, double pts)
     ((struct mp_image *)data)->pts = pts;
 }
 
-static int video_approx_size(void *data)
+static size_t video_approx_size(void *data)
 {
     return mp_image_approx_byte_size(data);
 }
@@ -65,7 +65,7 @@ static void audio_set_pts(void *data, double pts)
     mp_aframe_set_pts(data, pts);
 }
 
-static int audio_approx_size(void *data)
+static size_t audio_approx_size(void *data)
 {
     return mp_aframe_approx_byte_size(data);
 }
@@ -169,11 +169,11 @@ double mp_frame_get_pts(struct mp_frame frame)
 
 void mp_frame_set_pts(struct mp_frame frame, double pts)
 {
-    if (frame_handlers[frame.type].get_pts)
+    if (frame_handlers[frame.type].set_pts)
         frame_handlers[frame.type].set_pts(frame.data, pts);
 }
 
-int mp_frame_approx_size(struct mp_frame frame)
+size_t mp_frame_approx_size(struct mp_frame frame)
 {
     if (frame_handlers[frame.type].approx_size)
         return frame_handlers[frame.type].approx_size(frame.data);
