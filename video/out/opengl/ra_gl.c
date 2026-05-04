@@ -777,6 +777,7 @@ static void compile_attach_shader(struct ra *ra, GLuint program,
             gl->GetTranslatedShaderSourceANGLE(shader, len, NULL, sstr);
             MP_DBG(ra, "Translated shader:\n");
             mp_log_source(ra->log, MSGL_DEBUG, sstr);
+            talloc_free(sstr);
         }
     }
 
