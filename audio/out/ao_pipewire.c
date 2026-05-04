@@ -195,7 +195,7 @@ static void on_process(void *userdata)
     int64_t end_time = mp_time_ns();
     end_time += MP_TIME_S_TO_NS(nframes) / ao->samplerate;
     end_time += MP_TIME_S_TO_NS(time.delay) * time.rate.num / time.rate.denom;
-    end_time += MP_TIME_S_TO_NS(time.queued) / ao->samplerate;
+    end_time += MP_TIME_S_TO_NS(time.queued / ao->sstride) / ao->samplerate;
     end_time += MP_TIME_S_TO_NS(time.buffered) / ao->samplerate;
     end_time -= pw_stream_get_nsec(p->stream) - time.now;
 
