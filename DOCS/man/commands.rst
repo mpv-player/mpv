@@ -27,7 +27,7 @@ Commands
         ``% script-message-to commands type "seek  absolute-percent" 6``
             Enter a percent position to seek to.
 
-        ``Ctrl+o script-message-to console type "loadfile ''" 11``
+        ``Ctrl+o script-message-to commands type "loadfile ''" 11``
             Enter a file or URL to play, with autocompletion of paths in the
             filesystem.
 
@@ -49,7 +49,7 @@ Configurable Options
 ``history_path``
     Default: ``~~state/command_history.txt``
 
-    The file path for ``persist_history`` (see `PATHS`_).
+    The file path for ``persist_history`` (see `FILES`_).
 
 ``remember_input``
     Default: yes

@@ -202,6 +202,6 @@ mp.observe_property("profile-list", "native", function (_, profiles_property)
 end)
 
 mp.register_idle(on_idle)
-for _, name in ipairs({"on_load", "on_preloaded", "on_before_start_file"}) do
+for _, name in ipairs({"on_load", "on_preloaded", "on_loaded", "on_before_start_file"}) do
     mp.add_hook(name, 5, on_hook)
 end

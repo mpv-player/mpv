@@ -33,6 +33,7 @@ static const char osd_font_pfb[] =
 ;
 
 #include "sub/ass_mp.h"
+#include "sub/packer.h"
 #include "options/options.h"
 
 
@@ -119,6 +120,7 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     create_ass_renderer(osd, ass);
 
     ASS_Track *track = ass->track;
+    struct mp_osd_render_opts *opts = osd->opts;
     if (!track)
         track = ass->track = ass_new_track(ass->library);
 
@@ -127,9 +129,14 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
     track->Kerning = true;
     track->ScaledBorderAndShadow = true;
+    ass_set_shaper(ass->render, opts->osd_shaper);
 #if LIBASS_VERSION >= 0x01600010
     ass_track_set_feature(track, ASS_FEATURE_WRAP_UNICODE, 1);
 #endif
+#if LIBASS_VERSION >= 0x01703010
+    ass_configure_prune(track, opts->osd_ass_prune_delay * 1000.0);
+#endif
+    ass_set_cache_limits(ass->render, opts->osd_glyph_limit, opts->osd_bitmap_max_size);
     update_playres(ass, &obj->vo_res);
 }
 
@@ -162,7 +169,7 @@ static ASS_Style *get_style(struct ass_state *ass, char *name)
 }
 
 static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *style,
-                                    const char *text)
+                                    bstr text)
 {
     int n = ass_alloc_event(track);
     ASS_Event *event = track->events + n;
@@ -171,8 +178,12 @@ static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *style,
     event->Style = find_style(track, style, 0);
     event->ReadOrder = n;
     mp_assert(event->Text == NULL);
-    if (text)
-        event->Text = strdup(text);
+    if (text.start) {
+        event->Text = malloc(text.len + 1);
+        MP_HANDLE_OOM(event->Text);
+        memcpy(event->Text, text.start, text.len);
+        event->Text[text.len] = '\0';
+    }
     return event;
 }
 
@@ -184,9 +195,7 @@ static void clear_ass(struct ass_state *ass)
 
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 {
-    // 0xFF is never valid UTF-8, so we can use it to escape OSD symbols.
-    // (Same trick as OSD_ASS_0/OSD_ASS_1.)
-    snprintf(buffer, buffer_size, "\xFF%c", osd_function);
+    snprintf(buffer, buffer_size, OSD_CODEPOINTS_ESCAPE "%c", osd_function);
 }
 
 void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
@@ -195,20 +204,29 @@ void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
     bool escape_ass = true;
     while (*in) {
         // As used by osd_get_function_sym().
-        if (in[0] == '\xFF' && in[1]) {
+        size_t len = strlen(OSD_CODEPOINTS_ESCAPE);
+        if (!strncmp(in, OSD_CODEPOINTS_ESCAPE, len) && in[len]) {
             bstr_xappend(NULL, dst, bstr0(ASS_USE_OSD_FONT));
-            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[1]);
+            mp_append_utf8_bstr(NULL, dst, OSD_CODEPOINTS + in[len]);
             bstr_xappend(NULL, dst, bstr0("{\\r}"));
-            in += 2;
+            in += len + 1;
             continue;
         }
-        if (*in == OSD_ASS_0[0] || *in == OSD_ASS_1[0]) {
-            escape_ass = *in == OSD_ASS_1[0];
-            in += 1;
+        len = strlen(OSD_ASS_0);
+        if (!strncmp(in, OSD_ASS_0, len)) {
+            escape_ass = false;
+            in += len;
             continue;
         }
-        if (*in == TERM_MSG_0[0]) {
-            in += 1;
+        len = strlen(OSD_ASS_1);
+        if (!strncmp(in, OSD_ASS_1, len)) {
+            escape_ass = true;
+            in += len;
+            continue;
+        }
+        len = strlen(TERM_MSG_0);
+        if (!strncmp(in, TERM_MSG_0, len)) {
+            in += len;
             continue;
         }
         if (escape_ass && *in == '{')
@@ -240,7 +258,7 @@ static ASS_Event *add_osd_ass_event_escaped(ASS_Track *track, const char *style,
 {
     bstr buf = {0};
     osd_mangle_ass(&buf, text, false);
-    ASS_Event *e = add_osd_ass_event(track, style, buf.start);
+    ASS_Event *e = add_osd_ass_event(track, style, buf);
     talloc_free(buf.start);
     return e;
 }
@@ -422,7 +440,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
         bstr_xappend(NULL, &buf, bstr0("{\\r}"));
     }
 
-    add_osd_ass_event(track, "progbar", buf.start);
+    add_osd_ass_event(track, "progbar", buf);
     talloc_free(buf.start);
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
@@ -438,7 +456,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
         ass_draw_start(d);
         ass_draw_rect_cw(d, -border, -border, width + border, height + border);
         ass_draw_stop(d);
-        add_osd_ass_event(track, "progbar", d->text);
+        add_osd_ass_event(track, "progbar", bstr0(d->text));
         ass_draw_reset(d);
     }
 
@@ -448,7 +466,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     float pos = obj->progbar_state.value * width - border / 2;
     ass_draw_rect_cw(d, 0, 0, pos, height);
     ass_draw_stop(d);
-    add_osd_ass_event(track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", bstr0(d->text));
     ass_draw_reset(d);
 
     // position marker
@@ -458,7 +476,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_move_to(d, pos + border / 2, 0);
     ass_draw_line_to(d, pos + border / 2, height);
     ass_draw_stop(d);
-    add_osd_ass_event(track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", bstr0(d->text));
     ass_draw_reset(d);
 
     d->text = talloc_asprintf_append(d->text, "{\\pos(%f,%f)}", px, py);
@@ -495,7 +513,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     }
 
     ass_draw_stop(d);
-    add_osd_ass_event(track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", bstr0(d->text));
     ass_draw_reset(d);
 }
 
@@ -527,11 +545,8 @@ static void update_external(struct osd_state *osd, struct osd_object *obj,
     while (t.len) {
         bstr line;
         bstr_split_tok(t, "\n", &line, &t);
-        if (line.len) {
-            char *tmp = bstrdup0(NULL, line);
-            add_osd_ass_event(ext->ass.track, "OSD", tmp);
-            talloc_free(tmp);
-        }
+        if (line.len)
+            add_osd_ass_event(ext->ass.track, "OSD", line);
     }
 }
 
@@ -672,11 +687,17 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
                                            struct osd_object *obj, int format)
 {
-    if (obj->type == OSDTYPE_OSD && obj->osd_changed)
-        update_osd(osd, obj);
+    if (obj->type == OSDTYPE_OSD) {
+        if (obj->osd_changed) {
+            update_osd(osd, obj);
+        } else {
+            mp_require(obj->sub_packer);
+            goto done;
+        }
+    }
 
-    if (!obj->ass_packer)
-        obj->ass_packer = mp_ass_packer_alloc(obj);
+    if (!obj->sub_packer)
+        obj->sub_packer = mp_sub_packer_alloc(obj);
 
     MP_TARRAY_GROW(obj, obj->ass_imgs, obj->num_externals + 1);
 
@@ -691,8 +712,9 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
         }
     }
 
+done:;
     struct sub_bitmaps out_imgs = {0};
-    mp_ass_packer_pack(obj->ass_packer, obj->ass_imgs, obj->num_externals + 1,
+    mp_sub_packer_pack_ass(obj->sub_packer, obj->ass_imgs, obj->num_externals + 1,
                        obj->changed, false, format, &out_imgs);
 
     obj->changed = false;

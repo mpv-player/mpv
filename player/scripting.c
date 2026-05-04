@@ -89,8 +89,9 @@ static void run_script(struct mp_script_args *arg)
     if (arg->backend->load(arg) < 0)
         MP_ERR(arg, "Could not load %s script %s\n", arg->backend->name, arg->filename);
 
-    mpv_destroy(arg->client);
+    mpv_handle *client = arg->client;
     talloc_free(arg);
+    mpv_destroy(client);
 }
 
 static MP_THREAD_VOID script_thread(void *p)
@@ -110,7 +111,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
     void *tmp = talloc_new(NULL);
 
     const char *path = NULL;
-    char *script_name = NULL;
+    const char *script_name = NULL;
     const struct mp_scripting *backend = NULL;
 
     struct stat s;
@@ -137,9 +138,9 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
             return -1;
         }
 
-        script_name = talloc_strdup(tmp, path);
-        mp_path_strip_trailing_separator(script_name);
-        script_name = mp_basename(script_name);
+        char *path_dup = talloc_strdup(tmp, path);
+        mp_path_strip_trailing_separator(path_dup);
+        script_name = mp_basename(path_dup);
     } else {
         for (int n = 0; scripting_backends[n]; n++) {
             const struct mp_scripting *b = scripting_backends[n];
@@ -211,7 +212,7 @@ static int compare_filename(const void *pa, const void *pb)
 {
     char *a = (char *)pa;
     char *b = (char *)pb;
-    return strcmp(a, b);
+    return strcasecmp(a, b);
 }
 
 static char **list_script_files(void *talloc_ctx, char *path)
@@ -269,6 +270,7 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
     load_builtin_script(mpctx, 5, mpctx->opts->lua_load_select, "@select.lua");
     load_builtin_script(mpctx, 6, mpctx->opts->lua_load_positioning, "@positioning.lua");
     load_builtin_script(mpctx, 7, mpctx->opts->lua_load_commands, "@commands.lua");
+    load_builtin_script(mpctx, 8, mpctx->opts->lua_load_context_menu, "@context_menu.lua");
 }
 
 bool mp_load_scripts(struct MPContext *mpctx)
@@ -329,6 +331,7 @@ static void init_sym_table(struct mp_script_args *args, void *lib) {
     INIT_SYM(mpv_create_client);
     INIT_SYM(mpv_create_weak_client);
     INIT_SYM(mpv_load_config_file);
+    INIT_SYM(mpv_get_time_ns);
     INIT_SYM(mpv_get_time_us);
     INIT_SYM(mpv_free_node_contents);
     INIT_SYM(mpv_set_option);

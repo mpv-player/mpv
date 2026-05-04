@@ -63,6 +63,9 @@ extern const demuxer_desc_t demuxer_desc_directory;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+#if HAVE_SUBRANDR
+extern const demuxer_desc_t demuxer_desc_sbr;
+#endif
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
@@ -76,6 +79,9 @@ static const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_matroska,
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,
+#endif
+#if HAVE_SUBRANDR
+    &demuxer_desc_sbr,
 #endif
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
@@ -954,7 +960,6 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
         .index = -1,
         .ff_index = -1,     // may be overwritten by demuxer
         .demuxer_id = -1,   // ... same
-        .program_id = -1,   // ... same
         .codec = talloc_zero(sh, struct mp_codec_params),
         .tags = talloc_zero(sh, struct mp_tags),
     };
@@ -1243,6 +1248,76 @@ const char *stream_type_name(enum stream_type type)
     }
 }
 
+static void append_field(void *ta_ctx, bstr *dst, const char *skip_dup,
+                         const char *value)
+{
+    if (skip_dup && skip_dup[0] && strstr(skip_dup, value))
+        return;
+    bstr_xappend_asprintf(ta_ctx, dst, " %s", value);
+}
+
+void demux_append_codec_desc(void *ta_ctx, bstr *dst, struct sh_stream *sh,
+                             const char *skip_dup)
+{
+    struct mp_codec_params *c = sh->codec;
+
+    bstr_xappend0(ta_ctx, dst, c->codec ? c->codec : "<unknown>");
+
+    if (c->codec_profile)
+        bstr_xappend_asprintf(ta_ctx, dst, " [%s]", c->codec_profile);
+    if (c->disp_w)
+        append_field(ta_ctx, dst, skip_dup,
+                     mp_tprintf(32, "%dx%d", c->disp_w, c->disp_h));
+    if (c->fps && !sh->image) {
+        char *fps = mp_format_double(ta_ctx, c->fps, 4, false, false, true);
+        append_field(ta_ctx, dst, skip_dup, mp_tprintf(32, "%s fps", fps));
+    }
+    if (c->channels.num)
+        bstr_xappend_asprintf(ta_ctx, dst, " %dch", c->channels.num);
+    if (c->samplerate)
+        bstr_xappend_asprintf(ta_ctx, dst, " %d Hz", c->samplerate);
+    int bitrate = 0;
+    if (c->bitrate > 0 && c->bitrate < INT_MAX - 500) {
+        bitrate = (c->bitrate + 500) / 1000;
+    } else if (sh->hls_bitrate > 0 && sh->hls_bitrate < INT_MAX - 500) {
+        bitrate = (sh->hls_bitrate + 500) / 1000;
+    }
+    if (bitrate)
+        append_field(ta_ctx, dst, skip_dup, mp_tprintf(32, "%d kbps", bitrate));
+}
+
+char *demux_compose_edition_title(void *ta_ctx, struct demuxer *demuxer,
+                                  int program_id, const char *prefix)
+{
+    struct sh_stream *vsh = NULL, *ash = NULL;
+    int video_count = 0, audio_count = 0;
+    int num = demux_get_num_stream(demuxer);
+    for (int i = 0; i < num; i++) {
+        struct sh_stream *s = demux_get_stream(demuxer, i);
+        if (!sh_stream_has_program(s, program_id))
+            continue;
+        if (s->type == STREAM_VIDEO) { video_count++; vsh = s; }
+        else if (s->type == STREAM_AUDIO) { audio_count++; ash = s; }
+    }
+
+    bstr dst = {0};
+    if (prefix && prefix[0])
+        bstr_xappend0(ta_ctx, &dst, prefix);
+    if (video_count == 1) {
+        bstr_xappend0(ta_ctx, &dst, dst.len ? " (" : "(");
+        demux_append_codec_desc(ta_ctx, &dst, vsh, prefix);
+        bstr_xappend0(ta_ctx, &dst, ")");
+    }
+    if (audio_count == 1) {
+        bstr_xappend0(ta_ctx, &dst, dst.len ? " (" : "(");
+        demux_append_codec_desc(ta_ctx, &dst, ash, prefix);
+        bstr_xappend0(ta_ctx, &dst, ")");
+    }
+    if (!dst.len)
+        return NULL;
+    return bstrto0(ta_ctx, dst);
+}
+
 static struct sh_stream *demuxer_get_cc_track_locked(struct sh_stream *stream)
 {
     struct sh_stream *sh = stream->ds->cc;
@@ -1254,7 +1329,8 @@ static struct sh_stream *demuxer_get_cc_track_locked(struct sh_stream *stream)
         sh->codec->codec = "eia_608";
         sh->default_track = true;
         sh->hls_bitrate = stream->hls_bitrate;
-        sh->program_id = stream->program_id;
+        for (int i = 0; i < stream->num_program_ids; i++)
+            MP_TARRAY_APPEND(sh, sh->program_ids, sh->num_program_ids, stream->program_ids[i]);
         stream->ds->cc = sh;
         demux_add_sh_stream_locked(stream->ds->in, sh);
         sh->ds->ignore_eof = true;
@@ -2047,7 +2123,7 @@ static void add_packet_locked(struct sh_stream *stream, demux_packet_t *dp)
 
     record_packet(in, dp);
 
-    if (in->cache && in->d_user->opts->disk_cache) {
+    if (in->cache && in->d_user->opts->disk_cache && !dp->is_wrapped_avframe) {
         int64_t pos = demux_cache_write(in->cache, dp);
         if (pos >= 0) {
             demux_packet_unref_contents(dp);
@@ -2519,8 +2595,14 @@ static void update_opts(struct demuxer *demuxer)
 // Make demuxing progress. Return whether progress was made.
 static bool thread_work(struct demux_internal *in)
 {
-    if (m_config_cache_update(in->d_user->opts_cache))
+    struct demux_opts *opts = in->d_user->opts;
+    size_t old_max_bytes = opts->max_bytes;
+    size_t old_max_bytes_bw = opts->max_bytes_bw;
+    if (m_config_cache_update(in->d_user->opts_cache)) {
         update_opts(in->d_user);
+        if (opts->max_bytes + opts->max_bytes_bw < old_max_bytes + old_max_bytes_bw)
+            demux_packet_pool_clear(in->packet_pool);
+    }
     if (in->tracks_switched) {
         execute_trackswitch(in);
         return true;
@@ -2857,7 +2939,7 @@ static int decode_float(char *str, float *out)
     float dec_val;
 
     dec_val = strtod(str, &rest);
-    if (!rest || (rest == str) || !isfinite(dec_val))
+    if (rest == str || !isfinite(dec_val))
         return -1;
 
     *out = dec_val;
@@ -2979,6 +3061,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
     dst->editions = src->editions;
     dst->num_editions = src->num_editions;
     dst->edition = src->edition;
+    dst->edition_is_track_mapping = src->edition_is_track_mapping;
     dst->attachments = src->attachments;
     dst->num_attachments = src->num_attachments;
     dst->matroska_data = src->matroska_data;
@@ -3188,7 +3271,7 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     struct cue_file *f = mp_parse_cue(bstr0(cue));
     if (f) {
         if (mp_check_embedded_cue(f) < 0) {
-            MP_WARN(demuxer, "Embedded cue sheet references more than one file. "
+            MP_WARN(demuxer, "Embedded cue sheet references zero or multiple files. "
                     "Ignoring it.\n");
         } else {
             for (int n = 0; n < f->num_tracks; n++) {
@@ -3268,6 +3351,11 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     if (mp_cancel_test(sinfo->cancel))
         return NULL;
 
+    if (params && params->depth > 10) {
+        mp_err(log, "Demuxer recursion depth exceeded.\n");
+        return NULL;
+    }
+
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     struct m_config_cache *opts_cache =
         m_config_cache_alloc(demuxer, global, &demux_conf);
@@ -3291,6 +3379,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .opts_cache = opts_cache,
         .events = DEMUX_EVENT_ALL,
         .duration = -1,
+        .depth = params ? params->depth : 0,
     };
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
@@ -3355,6 +3444,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 params2.timeline = tl;
                 params2.is_top_level = params && params->is_top_level;
                 params2.stream_record = params && params->stream_record;
+                params2.depth = params ? params->depth + 1 : 0;
                 sub =
                     open_given_type(global, log, &demuxer_desc_timeline,
                                     NULL, sinfo, &params2, DEMUX_CHECK_FORCE);

@@ -270,6 +270,18 @@ static void setup_formats(struct ra *ra)
         for (int j = 0; j < d3dfmt->components; j++)
             fmt->component_size[j] = fmt->component_depth[j] = d3dfmt->bits[j];
 
+        if (strcmp(fmt->name, "rgb10_a2") == 0) {
+            fmt->special_imgfmt = IMGFMT_X2BGR10;
+            struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
+            fmt->special_imgfmt_desc = desc;
+            desc->component_bits = 10;
+            desc->num_planes = 1;
+            desc->planes[0] = fmt;
+            for (int c = 0; c < 3; c++)
+                desc->components[0][c] = c + 1;
+            desc->chroma_w = desc->chroma_h = 1;
+        }
+
         fmt->glsl_format = ra_fmt_glsl_format(fmt);
 
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, fmt);
@@ -1500,7 +1512,7 @@ static size_t vbuf_upload(struct ra *ra, void *data, size_t size)
     return offset;
 }
 
-static const char cache_magic[4] = "RD11";
+static const char cache_magic[4] MP_NONSTRING = "RD11";
 static const uint32_t cache_version = 4;
 
 struct cache_header {
@@ -2256,7 +2268,7 @@ static void destroy(struct ra *ra)
     talloc_free(ra);
 }
 
-static struct ra_fns ra_fns_d3d11 = {
+static const struct ra_fns ra_fns_d3d11 = {
     .destroy            = destroy,
     .tex_create         = tex_create,
     .tex_destroy        = tex_destroy,

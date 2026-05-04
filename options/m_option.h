@@ -50,6 +50,7 @@ extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
+extern const m_option_type_t m_option_type_prop_array;
 extern const m_option_type_t m_option_type_string_append_list;
 extern const m_option_type_t m_option_type_keyvalue_list;
 extern const m_option_type_t m_option_type_time;
@@ -193,6 +194,9 @@ struct m_opt_choice_alternatives {
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value);
 
+const char *m_opt_choice_str_def(const struct m_opt_choice_alternatives *choices,
+                                 int value, const char *def);
+
 typedef int (*m_opt_generic_validate_fn)(struct mp_log *log, const m_option_t *opt,
                                          struct bstr name, void *value);
 
@@ -224,6 +228,13 @@ struct m_sub_options {
     bool (*get_sub_options)(int index, const struct m_sub_options **sub);
 };
 
+// A typed C array value for use with m_option_type_prop_array.
+struct m_prop_arr {
+    void *data;                       // first element; owned iff produced by copy
+    int count;                        // number of elements
+    const m_option_type_t *elem_type; // element type (must have a .get callback)
+};
+
 #define CONF_TYPE_BOOL          (&m_option_type_bool)
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
 #define CONF_TYPE_INT           (&m_option_type_int)
@@ -232,6 +243,7 @@ struct m_sub_options {
 #define CONF_TYPE_DOUBLE        (&m_option_type_double)
 #define CONF_TYPE_STRING        (&m_option_type_string)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
+#define CONF_TYPE_KV_LIST       (&m_option_type_keyvalue_list)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_FOURCC        (&m_option_type_fourcc)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
@@ -253,6 +265,7 @@ union m_option_value {
     char *string;
     char **string_list;
     char **keyvalue_list;
+    struct m_prop_arr prop_arr;
     int imgfmt;
     unsigned int fourcc;
     int afmt;
@@ -440,7 +453,6 @@ char *format_file_size(int64_t size);
 #define UPDATE_HWDEC            (UINT64_C(1) << 11)  // --hwdec
 #define UPDATE_DVB_PROG         (UINT64_C(1) << 12)  // some --dvbin-...
 #define UPDATE_SUB_HARD         (UINT64_C(1) << 13)  // subtitle opts. that need full reinit
-#define UPDATE_SUB_EXTS         (UINT64_C(1) << 14)  // update internal list of sub exts
 #define UPDATE_VIDEO            (UINT64_C(1) << 15)  // force redraw if needed
 #define UPDATE_VO               (UINT64_C(1) << 16)  // reinit the VO
 #define UPDATE_CLIPBOARD        (UINT64_C(1) << 17)  // reinit the clipboard
@@ -590,7 +602,7 @@ static inline int m_option_set_node(const m_option_t *opt, void *dst,
 
 // Call m_option_parse for strings, m_option_set_node otherwise.
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
-                                const char *name, void *dst, struct mpv_node *src);
+                                struct bstr name, void *dst, struct mpv_node *src);
 
 // see m_option_type.get
 static inline int m_option_get_node(const m_option_t *opt, void *ta_parent,

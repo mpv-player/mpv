@@ -244,6 +244,9 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                 sh->lang = get_param0(&ctx, sh, "lang");
                 sh->title = get_param0(&ctx, sh, "title");
                 sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
+                int pid = get_param_int(&ctx, "program_id", -1);
+                if (pid >= 0)
+                    MP_TARRAY_APPEND(sh, sh->program_ids, sh->num_program_ids, pid);
                 bstr flags = get_param(&ctx, "flags");
                 bstr flag;
                 while (bstr_split_tok(flags, "+", &flag, &flags) || flag.len) {
@@ -320,11 +323,19 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
         }
     }
     mp_assert(root->num_pars);
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (root->num_pars > 3)
+        goto error;
+#endif
     for (int n = 0; n < root->num_pars; n++) {
         if (root->pars[n]->num_parts < 1) {
             mp_err(log, "EDL specifies no segments.'\n");
             goto error;
         }
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        if (root->pars[n]->num_parts > 3)
+            goto error;
+#endif
     }
     return root;
 error:
@@ -344,6 +355,7 @@ static struct demuxer *open_source(struct timeline *root,
     struct demuxer_params params = {
         .init_fragment = tl->init_fragment,
         .stream_flags = root->stream_origin,
+        .depth = root->demuxer->depth + 1,
     };
     struct demuxer *d = demux_open_url(filename, &params, root->cancel,
                                        root->global);
@@ -435,6 +447,7 @@ static struct timeline_par *build_timeline(struct timeline *root,
         struct demuxer_params params = {
             .init_fragment = tl->init_fragment,
             .stream_flags = root->stream_origin,
+            .depth = root->demuxer->depth + 1,
         };
         tl->track_layout = demux_open_url("memory://", &params, root->cancel,
                                           root->global);
@@ -550,12 +563,11 @@ static struct timeline_par *build_timeline(struct timeline *root,
     if (!tl->track_layout && !tl->delay_open)
         goto error;
     if (!root->meta)
-        root->meta = tl->track_layout;
+        root->meta = tl->track_layout ? tl->track_layout : root->demuxer;
 
     // Not very sane, since demuxer fields are supposed to be treated read-only
     // from outside, but happens to work in this case, so who cares.
-    if (root->meta)
-        mp_tags_merge(root->meta->metadata, edl_root->tags);
+    mp_tags_merge(root->meta->metadata, edl_root->tags);
 
     mp_assert(tl->num_parts == parts->num_parts);
     return tl;

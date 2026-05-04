@@ -35,7 +35,7 @@ struct vulkan_opts {
 
 static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 {
-    int ret = M_OPT_INVALID;
+    int ret = M_OPT_EXIT;
     void *ta_ctx = talloc_new(NULL);
     pl_log pllog = mppl_log_create(ta_ctx, log);
     if (!pllog)
@@ -45,13 +45,17 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
     mppl_log_set_probing(pllog, true);
     pl_vk_inst inst = pl_vk_inst_create(pllog, pl_vk_inst_params());
     mppl_log_set_probing(pllog, false);
-    if (!inst)
+    if (!inst) {
+        mp_info(log, "Failed to create Vulkan instance\n");
         goto done;
+    }
 
     uint32_t num = 0;
     VkResult res = vkEnumeratePhysicalDevices(inst->instance, &num, NULL);
-    if (res != VK_SUCCESS)
+    if (res != VK_SUCCESS) {
+        mp_info(log, "Failed to enumerate Vulkan devices\n");
         goto done;
+    }
 
     VkPhysicalDevice *devices = talloc_array(ta_ctx, VkPhysicalDevice, num);
     res = vkEnumeratePhysicalDevices(inst->instance, &num, devices);
@@ -60,17 +64,19 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
 
     struct bstr param = bstr0(*value);
     bool help = bstr_equals0(param, "help");
-    if (help) {
+    if (help)
         mp_info(log, "Available vulkan devices:\n");
-        ret = M_OPT_EXIT;
-    }
 
     AVUUID param_uuid;
     bool is_uuid = av_uuid_parse(*value, param_uuid) == 0;
 
     for (int i = 0; i < num; i++) {
+        VkPhysicalDeviceDriverProperties driver_prop = { 0 };
+        driver_prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES;
+
         VkPhysicalDeviceIDPropertiesKHR id_prop = { 0 };
         id_prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES_KHR;
+        id_prop.pNext = &driver_prop;
 
         VkPhysicalDeviceProperties2KHR prop2 = { 0 };
         prop2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR;
@@ -83,9 +89,10 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
         if (help) {
             char device_uuid[37];
             av_uuid_unparse(id_prop.deviceUUID, device_uuid);
-            mp_info(log, "  '%s' (GPU %d, PCI ID %x:%x, UUID %s)\n",
+            mp_info(log, "  '%s' (GPU %d, PCI ID %x:%x, UUID %s, Driver %s)\n",
                     prop->deviceName, i, (unsigned)prop->vendorID,
-                    (unsigned)prop->deviceID, device_uuid);
+                    (unsigned)prop->deviceID, device_uuid,
+                    driver_prop.driverName);
         } else if (bstr_equals0(param, prop->deviceName)) {
             ret = 0;
             goto done;
@@ -186,29 +193,148 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     const char *opt_extensions[] = {
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
-        VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
-#endif
+        VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_H265_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
-        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME */
-        "VK_KHR_video_maintenance2", /* VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME */
+        VK_KHR_ZERO_INITIALIZE_WORKGROUP_MEMORY_EXTENSION_NAME,
+        /*
+         * Extensions below this point are newer than our minimum required Vulkan
+         * headers and so we only activate them if the build time headers contain
+         * them.
+         */
+#ifdef VK_EXT_shader_object
+        VK_EXT_SHADER_OBJECT_EXTENSION_NAME, /* 1.3.246 */
+#endif
+#ifdef VK_KHR_cooperative_matrix
+        VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME, /* 1.3.255 */
+#endif
+#ifdef VK_KHR_video_maintenance1
+        VK_KHR_VIDEO_MAINTENANCE_1_EXTENSION_NAME, /* 1.3.274 */
+#endif
+#ifdef VK_KHR_shader_expect_assume
+        VK_KHR_SHADER_EXPECT_ASSUME_EXTENSION_NAME, /* 1.3.276 */
+#endif
+#ifdef VK_KHR_shader_subgroup_rotate
+        VK_KHR_SHADER_SUBGROUP_ROTATE_EXTENSION_NAME, /* 1.3.276 */
+#endif
+        /*
+         * Because the AV1 extension does not require a feature flag to be enabled,
+         * we can include it as a string literal and have it work.
+         */
+        "VK_KHR_video_decode_av1", /* VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME 1.3.277 */
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+        VK_KHR_SHADER_RELAXED_EXTENDED_INSTRUCTION_EXTENSION_NAME, /* 1.3.288 */
+#endif
+#ifdef VK_KHR_video_maintenance2
+        VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME, /* 1.4.306 */
+#endif
+#ifdef VK_KHR_video_decode_vp9
+        VK_KHR_VIDEO_DECODE_VP9_EXTENSION_NAME, /* 1.4.317 */
+#endif
     };
 
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+    /*
+     * The following chain of conditional extension features must be constructed
+     * in descending vulkan version order. This ensures that if one is present,
+     * the next extension that chains on to it will also be present.
+     */
+
+#ifdef VK_KHR_video_decode_vp9
+     VkPhysicalDeviceVideoDecodeVP9FeaturesKHR video_decode_vp9_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_DECODE_VP9_FEATURES_KHR,
+        .videoDecodeVP9 = true,
+    };
+#endif
+
+#ifdef VK_KHR_video_maintenance2
+    VkPhysicalDeviceVideoMaintenance2FeaturesKHR video_maintenance_2_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_2_FEATURES_KHR,
+#ifdef VK_KHR_video_decode_vp9
+        .pNext = &video_decode_vp9_feature,
+#endif
+        .videoMaintenance2 = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+    VkPhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR shader_relaxed_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_RELAXED_EXTENDED_INSTRUCTION_FEATURES_KHR,
+#ifdef VK_KHR_video_maintenance2
+        .pNext = &video_maintenance_2_feature,
+#endif
+        .shaderRelaxedExtendedInstruction = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_subgroup_rotate
+    VkPhysicalDeviceShaderSubgroupRotateFeaturesKHR shader_subgroup_rotate_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_ROTATE_FEATURES_KHR,
+#ifdef VK_KHR_shader_relaxed_extended_instruction
+        .pNext = &shader_relaxed_feature,
+#endif
+       .shaderSubgroupRotate = true,
+    };
+#endif
+
+#ifdef VK_KHR_shader_expect_assume
+    VkPhysicalDeviceShaderExpectAssumeFeaturesKHR shader_expect_assume_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_EXPECT_ASSUME_FEATURES_KHR,
+#ifdef VK_KHR_shader_subgroup_rotate
+        .pNext = &shader_subgroup_rotate_feature,
+#endif
+       .shaderExpectAssume = true,
+    };
+#endif
+
+#ifdef VK_KHR_video_maintenance1
+    VkPhysicalDeviceVideoMaintenance1FeaturesKHR video_maintenance_1_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_1_FEATURES_KHR,
+#ifdef VK_KHR_shader_expect_assume
+        .pNext = &shader_expect_assume_feature,
+#endif
+        .videoMaintenance1 = true,
+    };
+#endif
+
+#ifdef VK_KHR_cooperative_matrix
+     VkPhysicalDeviceCooperativeMatrixFeaturesKHR cooperative_matrix_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_KHR,
+#ifdef VK_KHR_video_maintenance1
+        .pNext = &video_maintenance_1_feature,
+#endif
+        .cooperativeMatrix = true,
+    };
+#endif
+
+#ifdef VK_EXT_shader_object
     VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
+#ifdef VK_KHR_cooperative_matrix
+        .pNext = &cooperative_matrix_feature,
+#endif
         .shaderObject = true,
     };
 #endif
 
-    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
-#ifdef VK_EXT_SHADER_OBJECT_EXTENSION_NAME
+    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zero_init_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR,
+#ifdef VK_EXT_shader_object
         .pNext = &shader_object_feature,
 #endif
+       .shaderZeroInitializeWorkgroupMemory = true,
+    };
+
+    VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+        .pNext = &zero_init_feature,
+       .dynamicRendering = true,
+    };
+
+    VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
+        .pNext = &dynamic_rendering_feature,
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
@@ -220,7 +346,31 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .shaderBufferFloat32AtomicAdd = true,
     };
 
-    features.pNext = &atomic_float_feature;
+    VkPhysicalDeviceVulkan12Features recommended_vk12 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+        .pNext = &atomic_float_feature,
+        .scalarBlockLayout = true,
+        .shaderBufferInt64Atomics = true,
+        .uniformBufferStandardLayout = true,
+    };
+
+    VkPhysicalDeviceVulkan11Features recommended_vk11 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
+        .pNext = &recommended_vk12,
+        .storageBuffer16BitAccess = true,
+        .uniformAndStorageBuffer16BitAccess = true,
+    };
+
+    VkPhysicalDeviceFeatures2 recommended_features = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = &recommended_vk11,
+        .features = {
+            .shaderInt16 = true,
+            .shaderFloat64 = true,
+        },
+    };
+
+    features.pNext = &recommended_features;
 
     AVUUID param_uuid = { 0 };
     bool is_uuid = opts->device &&
@@ -277,6 +427,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
         .surface = vk->surface,
         .present_mode = preferred_mode,
         .swapchain_depth = ctx->vo->opts->swapchain_depth,
+        .alpha_bits = ctx->opts.want_alpha ? 8 : 0,
     };
 
     if (p->opts->swap_mode >= 0) // user override
@@ -375,8 +526,49 @@ static void get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
+static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+{
+    struct priv *p = sw->priv;
+
+    // Vulkan Wayland needs special handling to avoid duplicated color surface.
+    bool waylandvk = strcmp(sw->ctx->fns->name, "waylandvk") == 0;
+    // Assume anything else is supported when set_color is defined. However,
+    // everything else can use Vulkan API colorspace without issues, so unlikely
+    // that set_color is used outside of Wayland.
+    bool supported = PL_API_VER >= 361 || !waylandvk;
+    if (supported && p->params.set_color) {
+        if (waylandvk && params) {
+          // Request VK_COLOR_SPACE_PASS_THROUGH_EXT, and also force immediate
+          // cleanup of swapchain retired by pl_swapchain_colorspace_hint,
+          // otherwise there's a possibility the Wayland color surface will be
+          // held while we try to create a new one.
+          pl_swapchain_colorspace_hint(p->vk->swapchain,
+                                       &(struct pl_color_space){0});
+        }
+        bool ret = p->params.set_color(sw->ctx, params);
+        // To avoid ping-pong between VK_COLOR_SPACE_PASS_THROUGH_EXT and others,
+        // we assume that internal Wayland set_color always work, and update
+        // params to fallback values if needed.
+        mp_assert(ret || !waylandvk);
+        return ret;
+    }
+    // Technically we could call pl_swapchain_colorspace_hint() here directly,
+    // but we want to know when parameters are set "externally".
+    return false;
+}
+
+static pl_color_space_t target_csp(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    if (p->params.preferred_csp)
+        return p->params.preferred_csp(sw->ctx);
+    return (pl_color_space_t){0};
+}
+
 static const struct ra_swapchain_fns vulkan_swapchain = {
     .color_depth   = color_depth,
+    .set_color     = set_color,
+    .target_csp    = target_csp,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
     .swap_buffers  = swap_buffers,

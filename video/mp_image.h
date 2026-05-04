@@ -57,6 +57,8 @@ struct mp_image_params {
 
     enum mp_csp_light light;
     enum pl_chroma_location chroma_location;
+    // The image should be flipped vertically before rotating
+    bool vflip;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
@@ -160,7 +162,8 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h);
 int mp_image_plane_w(struct mp_image *mpi, int plane);
 int mp_image_plane_h(struct mp_image *mpi, int plane);
 
-void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
+void mp_image_sethwfmt(mp_image_t *mpi, enum mp_imgfmt hw_fmt, enum mp_imgfmt sw_fmt);
+void mp_image_setfmt(mp_image_t* mpi, enum mp_imgfmt out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
 void mp_image_unref_data(struct mp_image *img);
 

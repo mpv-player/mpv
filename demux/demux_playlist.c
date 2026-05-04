@@ -101,12 +101,11 @@ struct pl_parser {
     bool error;
     bool probing;
     bool force;
-    bool add_base;
     bool line_allocated;
     int autocreate_playlist;
     enum demux_check check_level;
     struct stream *real_stream;
-    char *format;
+    const char *format;
     char *codepage;
     struct demux_playlist_opts *opts;
     struct MPOpts *mp_opts;
@@ -219,9 +218,19 @@ static void pl_free_line(struct pl_parser *p, bstr line)
 
 static void pl_add(struct pl_parser *p, bstr entry)
 {
-    char *s = bstrto0(NULL, entry);
-    playlist_append_file(p->pl, s);
-    talloc_free(s);
+    void *ctx = talloc_new(NULL);
+    char *path = mp_get_user_path(ctx, p->global, bstrto0(ctx, entry));
+
+    bstr proto = mp_split_proto(bstr0(p->s->url), NULL);
+    // Don't add base path to self-expanding protocols
+    if (!mp_is_url(entry) && bstrcasecmp0(proto, "memory") &&
+        bstrcasecmp0(proto, "lavf") && bstrcasecmp0(proto, "hex") &&
+        bstrcasecmp0(proto, "data") && bstrcasecmp0(proto, "fd")) {
+        path = mp_path_join_bstr(ctx, mp_dirname(p->s->url), bstr0(path));
+    }
+
+    playlist_append_file(p->pl, path);
+    talloc_free(ctx);
 }
 
 static bool pl_eof(struct pl_parser *p)
@@ -250,7 +259,7 @@ static int parse_m3u(struct pl_parser *p)
             int len = stream_read_peek(p->real_stream, probe, sizeof(probe));
             bstr data = {probe, len};
             if (ext && data.len >= 2 && maybe_text(data)) {
-                const char *exts[] = {"m3u", "m3u8", NULL};
+                const char *exts[] = {"m3u", "m3u8", "strm", NULL};
                 for (int n = 0; exts[n]; n++) {
                     if (strcasecmp(ext, exts[n]) == 0)
                         goto ok;
@@ -277,14 +286,14 @@ ok:
                 title = bstrto0(NULL, btitle);
             }
         } else if (bstr_startswith0(line_dup, "#EXT-X-")) {
+            // Note that this is only used for user advice. Actual HLS demuxing
+            // must happen through demux_lavf.
             p->format = "hls";
         } else if (line_dup.len > 0 && !bstr_startswith0(line_dup, "#")) {
-            char *fn = bstrto0(NULL, line_dup);
-            struct playlist_entry *e = playlist_entry_new(fn);
-            talloc_free(fn);
+            pl_add(p, line);
+            struct playlist_entry *e = playlist_get_last(p->pl);
             e->title = talloc_steal(e, title);
             title = NULL;
-            playlist_insert_at(p->pl, e, NULL);
         }
         pl_free_line(p, line);
         line = pl_get_line(p);
@@ -419,30 +428,19 @@ static bool test_path(struct pl_parser *p, char *path, int autocreate)
     if (autocreate & AUTO_ANY)
         return true;
 
-    bstr bpath = bstr0(path);
-    bstr bstream_path = bstr0(p->real_stream->path);
-
-    // When opening a file from cwd, 'path' starts with "./" while stream->path
-    // matches what the user passed as arg. So it may or not not contain ./.
-    // Strip it from both to make the comparison work.
-    if (!mp_path_is_absolute(bstream_path)) {
-        bstr_eatstart0(&bpath, "./");
-        bstr_eatstart0(&bstream_path, "./");
-    }
-
-    if (!bstrcmp(bpath, bstream_path))
+    if (!strcmp(path, p->real_stream->path))
         return true;
 
-    bstr ext = bstr_get_ext(bpath);
-    if (autocreate & AUTO_VIDEO && str_in_list(ext, p->mp_opts->video_exts))
+    bstr ext = bstr_get_ext(bstr0(path));
+    if (autocreate & AUTO_VIDEO && bstr_in_list0(ext, p->mp_opts->video_exts))
         return true;
-    if (autocreate & AUTO_AUDIO && str_in_list(ext, p->mp_opts->audio_exts))
+    if (autocreate & AUTO_AUDIO && bstr_in_list0(ext, p->mp_opts->audio_exts))
         return true;
-    if (autocreate & AUTO_IMAGE && str_in_list(ext, p->mp_opts->image_exts))
+    if (autocreate & AUTO_IMAGE && bstr_in_list0(ext, p->mp_opts->image_exts))
         return true;
-    if (autocreate & AUTO_ARCHIVE && str_in_list(ext, p->mp_opts->archive_exts))
+    if (autocreate & AUTO_ARCHIVE && bstr_in_list0(ext, p->mp_opts->archive_exts))
         return true;
-    if (autocreate & AUTO_PLAYLIST && str_in_list(ext, p->mp_opts->playlist_exts))
+    if (autocreate & AUTO_PLAYLIST && bstr_in_list0(ext, p->mp_opts->playlist_exts))
         return true;
 
     return false;
@@ -521,15 +519,15 @@ static enum autocreate_mode get_directory_filter(struct pl_parser *p)
     enum autocreate_mode autocreate = AUTO_NONE;
     if (!p->opts->directory_filter || !p->opts->directory_filter[0])
         autocreate = AUTO_ANY;
-    if (str_in_list(bstr0("video"), p->opts->directory_filter))
+    if (bstr_in_list0(bstr0("video"), p->opts->directory_filter))
         autocreate |= AUTO_VIDEO;
-    if (str_in_list(bstr0("audio"), p->opts->directory_filter))
+    if (bstr_in_list0(bstr0("audio"), p->opts->directory_filter))
         autocreate |= AUTO_AUDIO;
-    if (str_in_list(bstr0("image"), p->opts->directory_filter))
+    if (bstr_in_list0(bstr0("image"), p->opts->directory_filter))
         autocreate |= AUTO_IMAGE;
-    if (str_in_list(bstr0("archive"), p->opts->directory_filter))
+    if (bstr_in_list0(bstr0("archive"), p->opts->directory_filter))
         autocreate |= AUTO_ARCHIVE;
-    if (str_in_list(bstr0("playlist"), p->opts->directory_filter))
+    if (bstr_in_list0(bstr0("playlist"), p->opts->directory_filter))
         autocreate |= AUTO_PLAYLIST;
     return autocreate;
 }
@@ -540,22 +538,23 @@ static int parse_dir(struct pl_parser *p)
     struct stream *stream = p->real_stream;
     enum autocreate_mode autocreate = AUTO_NONE;
     p->pl->playlist_dir = NULL;
-    if (p->autocreate_playlist && p->real_stream->is_local_fs && !p->real_stream->is_directory) {
+    if (p->autocreate_playlist && p->real_stream->is_local_fs && p->real_stream->is_regular &&
+        !p->real_stream->is_directory) {
         bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
         switch (p->autocreate_playlist) {
         case 1: // filter
             autocreate = get_directory_filter(p);
             break;
         case 2: // same
-            if (str_in_list(ext, p->mp_opts->video_exts)) {
+            if (bstr_in_list0(ext, p->mp_opts->video_exts)) {
                 autocreate = AUTO_VIDEO;
-            } else if (str_in_list(ext, p->mp_opts->audio_exts)) {
+            } else if (bstr_in_list0(ext, p->mp_opts->audio_exts)) {
                 autocreate = AUTO_AUDIO;
-            } else if (str_in_list(ext, p->mp_opts->image_exts)) {
+            } else if (bstr_in_list0(ext, p->mp_opts->image_exts)) {
                 autocreate = AUTO_IMAGE;
-            } else if (str_in_list(ext, p->mp_opts->archive_exts)) {
+            } else if (bstr_in_list0(ext, p->mp_opts->archive_exts)) {
                 autocreate = AUTO_ARCHIVE;
-            } else if (str_in_list(ext, p->mp_opts->playlist_exts)) {
+            } else if (bstr_in_list0(ext, p->mp_opts->playlist_exts)) {
                 autocreate = AUTO_PLAYLIST;
             }
             break;
@@ -587,15 +586,11 @@ static int parse_dir(struct pl_parser *p)
 
     struct stat dir_stack[MAX_DIR_STACK];
 
-    if (p->opts->dir_mode == DIR_AUTO) {
-        struct MPOpts *opts = mp_get_config_group(NULL, p->global, &mp_opt_root);
-        p->opts->dir_mode = opts->shuffle ? DIR_RECURSIVE : DIR_LAZY;
-        talloc_free(opts);
-    }
+    if (p->opts->dir_mode == DIR_AUTO)
+        p->opts->dir_mode = p->mp_opts->shuffle ? DIR_RECURSIVE : DIR_LAZY;
 
     scan_dir(p, path, dir_stack, 0, autocreate);
 
-    p->add_base = false;
     ret = p->pl->num_entries > 0 ? 0 : -1;
 
 done:
@@ -621,6 +616,7 @@ static const struct pl_format dir_formats[] = {
 static const struct pl_format playlist_formats[] = {
     {"m3u", parse_m3u,
      MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
+    {"strm", parse_m3u},
     {"ini", parse_ref_init},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
@@ -662,7 +658,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->log = demuxer->log;
     p->pl = talloc_zero(p, struct playlist);
     p->real_stream = demuxer->stream;
-    p->add_base = true;
 
     struct demux_opts *opts = mp_get_config_group(p, p->global, &demux_conf);
     p->codepage = opts->meta_cp;
@@ -696,15 +691,6 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     p->s = demuxer->stream;
     p->utf16 = stream_skip_bom(p->s);
     bool ok = fmt->parse(p) >= 0 && !p->error;
-    if (p->add_base) {
-        bstr proto = mp_split_proto(bstr0(demuxer->filename), NULL);
-        // Don't add base path to self-expanding protocols
-        if (bstrcasecmp0(proto, "memory") && bstrcasecmp0(proto, "lavf") &&
-            bstrcasecmp0(proto, "hex") && bstrcasecmp0(proto, "data"))
-        {
-            playlist_add_base_path(p->pl, mp_dirname(demuxer->filename));
-        }
-    }
     playlist_set_stream_flags(p->pl, demuxer->stream_origin);
     demuxer->playlist = talloc_steal(demuxer, p->pl);
     demuxer->filetype = p->format ? p->format : fmt->name;

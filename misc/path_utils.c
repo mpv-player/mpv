@@ -39,9 +39,9 @@
 #include <pathcch.h>
 #endif
 
-char *mp_basename(const char *path)
+const char *mp_basename(const char *path)
 {
-    char *s;
+    const char *s;
 
 #if HAVE_DOS_PATHS
     if (!mp_is_url(bstr0(path))) {
@@ -54,7 +54,7 @@ char *mp_basename(const char *path)
     }
 #endif
     s = strrchr(path, '/');
-    return s ? s + 1 : (char *)path;
+    return s ? s + 1 : path;
 }
 
 struct bstr mp_dirname(const char *path)
@@ -85,13 +85,24 @@ void mp_path_strip_trailing_separator(char *path)
 char *mp_splitext(const char *path, bstr *root)
 {
     mp_assert(path);
-    int skip = (*path == '.'); // skip leading dot for "hidden" unix files
-    const char *split = strrchr(path + skip, '.');
-    if (!split || !split[1] || strchr(split, '/'))
+    const char *bn = mp_basename(path);
+
+    // Skip all leading dots, not just for "hidden" unix files, otherwise we
+    // end up splitting a part of the filename sans leading dot.
+    bn += strspn(bn, ".");
+
+    const char *split = strrchr(bn, '.');
+    if (!split || !split[1])
         return NULL;
     if (root)
         *root = (bstr){(char *)path, split - path};
     return (char *)split + 1;
+}
+
+char *mp_strip_ext(void *talloc_ctx, const char *s)
+{
+    bstr root;
+    return mp_splitext(s, &root) ? bstrto0(talloc_ctx, root) : talloc_strdup(talloc_ctx, s);
 }
 
 bool mp_path_is_absolute(struct bstr path)
@@ -159,15 +170,17 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     if (!path)
         return NULL;
 
-    if (mp_is_url(bstr0(path)))
+    if (mp_is_url(bstr0(path)) || !strcmp(path, "-"))
         return talloc_strdup(talloc_ctx, path);
 
     void *tmp = talloc_new(NULL);
+    char *result;
+
     if (!mp_path_is_absolute(bstr0(path))) {
         char *cwd = mp_getcwd(tmp);
         if (!cwd) {
-            talloc_free(tmp);
-            return NULL;
+            result = talloc_strdup(talloc_ctx, path);
+            goto exit;
         }
         path = mp_path_join(tmp, cwd, path);
     }
@@ -195,11 +208,9 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     size_t max_size = wcslen(pathw) + 1;
     wchar_t *pathc = talloc_array(tmp, wchar_t, max_size);
     HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
-    char *ret = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
-    talloc_free(tmp);
-    return ret;
+    result = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
 #else
-    char *result = talloc_strdup(tmp, "");
+    result = talloc_strdup(tmp, "");
     const char *next;
     const char *end = path + strlen(path);
 
@@ -226,10 +237,10 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
                 // long as the symlinked path doesn't change.
                 if (ptr[0] == '.' && ptr[1] == '.') {
                     char *tmp_result = realpath(path, NULL);
-                    result = talloc_strdup(talloc_ctx, tmp_result);
+                    result = talloc_strdup(talloc_ctx,
+                                           tmp_result ? tmp_result : path);
                     free(tmp_result);
-                    talloc_free(tmp);
-                    return result;
+                    goto exit;
                 }
         }
 
@@ -238,9 +249,11 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     }
 
     result = talloc_steal(talloc_ctx, result);
+#endif
+
+exit:
     talloc_free(tmp);
     return result;
-#endif
 }
 
 bool mp_path_exists(const char *path)
@@ -287,6 +300,9 @@ bstr mp_split_proto(bstr path, bstr *out_url)
 
 void mp_mkdirp(const char *dir)
 {
+    if (mp_path_exists(dir))
+        return;
+
     char *path = talloc_strdup(NULL, dir);
     char *cdir = path + 1;
 
@@ -295,7 +311,7 @@ void mp_mkdirp(const char *dir)
         if (cdir)
             *cdir = 0;
 
-        mkdir(path, 0700);
+        mkdir(path, 0777);
 
         if (cdir)
             *cdir++ = '/';

@@ -34,6 +34,7 @@
 #include "common/playlist.h"
 #include "common/stats.h"
 #include "demux/demux.h"
+#include "demux/packet_pool.h"
 #include "filters/f_decoder_wrapper.h"
 #include "filters/filter_internal.h"
 #include "input/input.h"
@@ -296,8 +297,6 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (seek.type == MPSEEK_CHAPTER) {
         mpctx->last_chapter_flag = false;
         seek.type = MPSEEK_ABSOLUTE;
-    } else {
-        mpctx->last_chapter_seek = -2;
     }
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
@@ -458,6 +457,11 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
     struct seek_params *seek = &mpctx->seek;
 
     mp_wakeup_core(mpctx);
+
+    if (type != MPSEEK_CHAPTER) {
+        mpctx->last_chapter_flag = false;
+        mpctx->last_chapter_seek = -2;
+    }
 
     switch (type) {
     case MPSEEK_RELATIVE:
@@ -1063,7 +1067,9 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         int config_format = 0;
         uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
         vo_query_formats(vo, fmts);
-        for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
+        if (fmts[IMGFMT_RGBA - IMGFMT_START])
+            config_format = IMGFMT_RGBA;
+        for (int fmt = IMGFMT_START; fmt < IMGFMT_END && !config_format; fmt++) {
             if (fmts[fmt - IMGFMT_START]) {
                 config_format = fmt;
                 break;
@@ -1080,10 +1086,13 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .w = w,   .h = h,
             .p_w = 1, .p_h = 1,
             .force_window = true,
+            .color = pl_color_space_srgb,
         };
+        mp_image_params_guess_csp(&p);
         if (vo_reconfig(vo, &p) < 0)
             goto err;
         struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        update_window_title(mpctx, true);
         update_content_type(mpctx, track);
         update_screensaver_state(mpctx);
         vo_set_paused(vo, true);
@@ -1340,6 +1349,7 @@ void idle_loop(struct MPContext *mpctx)
             handle_force_window(mpctx, true);
             mp_wakeup_core(mpctx);
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
+            demux_packet_pool_clear(demux_packet_pool_get(mpctx->global));
             need_reinit = false;
         }
         mp_idle(mpctx);

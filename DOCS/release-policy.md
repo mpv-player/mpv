@@ -1,7 +1,7 @@
 Release Policy
 ==============
 
-Once or twice a year, a new release is cut off of the master branch and
+A few times a year, a new release is cut off of the master branch and
 assigned a 0.X.Y version number, where X is incremented each time a release
 contains breaking changes, such as changed options or added/removed features,
 and Y is incremented if a release contains only bugfixes and other minor
@@ -30,9 +30,9 @@ While on master:
   number if necessary)
 
 - Run `TOOLS/gen-interface-changes.py` to refresh `DOCS/interface-changes.rst`,
-  edit manually as necessary.
+  and edit manually as necessary.
 
-- Delete all `.txt` files in the `DOCS/interface-changes` directory except for `example.txt`.
+- Delete all `.txt` files in `DOCS/interface-changes/` except for `example.txt`.
 
 - Create signed commit with changes.
 
@@ -41,11 +41,11 @@ While on master:
 - Push release branch (`release/0.X`) and tag to GitHub.
 
 - Create a new GitHub release using the content of `RELEASE_NOTES` related to
-  the new version.
+  the new version. Check the "Create a discussion for this release" box.
 
-- Re-add -UNKNOWN suffix to version in `MPV_VERSION` file.
+- Re-add -UNKNOWN suffix to version in `MPV_VERSION` file and commit.
 
-If necessary (to e.g. exclude commits already on master), the release can
+If necessary (e.g. to exclude commits already on master), the release can
 be done on a branch with different commit history. The release branch **must**
 then be merged to master so `git describe` will pick up the tag.
 
@@ -55,7 +55,7 @@ This does not apply to patch releases, which are tagged directly on the
 Release notes template
 ----------------------
 
-Here is a template that can be used for writing the `RELEASE_NOTES` file:
+Here is a template that should be used for writing the `RELEASE_NOTES` file:
 
 ```markdown
 Release 0.X.Y
@@ -127,7 +127,7 @@ When creating a new point release its changes should be added on top of the
 the current 0.X branch will be included. This way the `RELEASE_NOTES` file
 can be used by distributors as changelog for point releases too.
 
-The changelog of lists all changes since the last release, including those
+The changelog lists all changes since the last release, including those
 that have been backported to patch releases already. Except for the
 "Key highlights" section they are ordered chronologically with older commits
 at the top.

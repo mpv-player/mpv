@@ -22,6 +22,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/hdr_dynamic_metadata.h>
+#include <libavutil/imgutils.h>
 #include <libavutil/intreadwrite.h>
 
 #include "common/av_common.h"
@@ -31,6 +32,13 @@
 #include "packet_pool.h"
 
 #include "packet.h"
+
+#define ITU_T_T35_COUNTRY_CODE_US        0xB5
+#define ITU_T_T35_PROVIDER_CODE_SAMSUNG  0x003C
+#define ITU_T_T35_PROVIDER_CODE_SMPTE    0x0090
+
+#define ITU_T_T35_COUNTRY_CODE_UK        0xB4
+#define ITU_T_T35_PROVIDER_CODE_VNOVA    0x5000
 
 // Free any refcounted data dp holds (but don't free dp itself). This does not
 // care about pointers that are _not_ refcounted (like demux_packet.codec).
@@ -43,6 +51,7 @@ void demux_packet_unref_contents(struct demux_packet *dp)
         av_packet_free(&dp->avpacket);
         dp->buffer = NULL;
         dp->len = 0;
+        dp->is_wrapped_avframe = false;
     }
 }
 
@@ -52,13 +61,8 @@ static void packet_destroy(void *ptr)
     demux_packet_unref_contents(dp);
 }
 
-static struct demux_packet *packet_create(struct demux_packet_pool *pool)
+static void set_packet_defaults(struct demux_packet *dp)
 {
-    struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
-    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
-    if (!dp)
-        dp = talloc(NULL, struct demux_packet);
-    talloc_set_destructor(dp, packet_destroy);
     *dp = (struct demux_packet) {
         .pts = MP_NOPTS_VALUE,
         .dts = MP_NOPTS_VALUE,
@@ -69,7 +73,32 @@ static struct demux_packet *packet_create(struct demux_packet_pool *pool)
         .stream = -1,
         .animated = -1,
     };
-    dp->avpacket = avpkt ? avpkt : av_packet_alloc();
+}
+
+// This frees a packet backing allocations, but does not free dp itself, or
+// AVPacket inside dp, which is restored to default state.
+void demux_packet_unref(struct demux_packet *dp)
+{
+    if (!dp)
+        return;
+    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
+    if (avpkt)
+        av_packet_unref(avpkt);
+    ta_free_children(dp);
+    set_packet_defaults(dp);
+    dp->avpacket = avpkt;
+}
+
+static struct demux_packet *packet_create(struct demux_packet_pool *pool)
+{
+    struct demux_packet *dp = pool ? demux_packet_pool_pop(pool) : NULL;
+    if (!dp) {
+        dp = talloc(NULL, struct demux_packet);
+        talloc_set_destructor(dp, packet_destroy);
+        set_packet_defaults(dp);
+    }
+    if (!dp->avpacket)
+        dp->avpacket = av_packet_alloc();
     MP_HANDLE_OOM(dp->avpacket);
     return dp;
 }
@@ -166,6 +195,7 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->dts = src->dts;
     dst->duration = src->duration;
     dst->pos = src->pos;
+    dst->is_wrapped_avframe = src->is_wrapped_avframe;
     dst->segmented = src->segmented;
     dst->start = src->start;
     dst->end = src->end;
@@ -209,6 +239,31 @@ size_t demux_packet_estimate_total_size(struct demux_packet *dp)
     if (dp->avpacket) {
         mp_assert(!dp->is_cached);
         size += ROUND_ALLOC(dp->len);
+        if (dp->is_wrapped_avframe) {
+            mp_require(dp->buffer);
+
+            const AVFrame *frame = (AVFrame *)dp->buffer;
+            if (frame->hw_frames_ctx) {
+                const AVHWFramesContext *hwctx = (AVHWFramesContext *)frame->hw_frames_ctx->data;
+                int r = av_image_get_buffer_size(hwctx->sw_format, hwctx->width, hwctx->height, 16);
+                mp_require(r >= 0);
+                size += ROUND_ALLOC(r);
+            }
+            for (int i = 0; i < MP_ARRAY_SIZE(frame->buf) && frame->buf[i]; ++i)
+                size += ROUND_ALLOC(frame->buf[i]->size);
+
+            size += ROUND_ALLOC(frame->nb_extended_buf * sizeof(frame->extended_buf[0]));
+            for (int i = 0; i < frame->nb_extended_buf; ++i) {
+                size += ROUND_ALLOC(sizeof(*frame->extended_buf[i]));
+                size += ROUND_ALLOC(frame->extended_buf[i]->size);
+            }
+
+            size += ROUND_ALLOC(frame->nb_side_data * sizeof(frame->side_data[0]));
+            for (int i = 0; i < frame->nb_side_data; ++i) {
+                size += ROUND_ALLOC(sizeof(*frame->side_data[i]));
+                size += ROUND_ALLOC(frame->side_data[i]->size);
+            }
+        }
         size += ROUND_ALLOC(sizeof(AVPacket));
         size += 8 * sizeof(void *); // ta  overhead
         size += ROUND_ALLOC(sizeof(AVBufferRef));
@@ -239,49 +294,113 @@ int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
                                      void *data, size_t size)
 {
+#define SKIP(n) do { p += (n); remaining -= (n); } while (0)
+
     if (!dp->avpacket)
         return -1;
 
     switch (id) {
     case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35: {
-        static const uint8_t ITU_T_T35_COUNTRY_CODE_US = 0xB5;
-        static const uint16_t ITU_T_T35_PROVIDER_CODE_SMTPE = 0x3C;
-
-        if (size < 6)
+        if (size < 1)
             break;
 
         uint8_t *p = data;
+        size_t remaining = size;
 
         uint8_t country_code = AV_RB8(p);
-        p += sizeof(country_code);
-        uint16_t provider_code = AV_RB16(p);
-        p += sizeof(provider_code);
+        SKIP(1);
 
-        if (country_code != ITU_T_T35_COUNTRY_CODE_US ||
-            provider_code != ITU_T_T35_PROVIDER_CODE_SMTPE)
+        switch (country_code) {
+        case ITU_T_T35_COUNTRY_CODE_US: {
+            if (remaining < 2)
+                break;
+
+            uint16_t provider_code = AV_RB16(p);
+            SKIP(2);
+
+            switch (provider_code) {
+            case ITU_T_T35_PROVIDER_CODE_SAMSUNG: {
+                if (remaining < 3)
+                    break;
+
+                uint16_t provider_oriented_code = AV_RB16(p);
+                SKIP(2);
+                uint8_t application_identifier = AV_RB8(p);
+                SKIP(1);
+
+                if (provider_oriented_code != 1 || application_identifier != 4)
+                    break;
+
+                size_t hdrplus_size;
+                AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
+                MP_HANDLE_OOM(hdrplus);
+
+                if (av_dynamic_hdr_plus_from_t35(hdrplus, p, remaining) < 0 ||
+                    av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
+                                            (uint8_t *)hdrplus, hdrplus_size) < 0)
+                {
+                    av_free(hdrplus);
+                    return -1;
+                }
+
+                return 0;
+            }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 30, 100)
+            case ITU_T_T35_PROVIDER_CODE_SMPTE: {
+                if (remaining < 2)
+                    break;
+
+                uint16_t provider_oriented_code = AV_RB16(p);
+                SKIP(2);
+
+                if (provider_oriented_code != 1)
+                    break;
+
+                size_t app5_size;
+                AVDynamicHDRSmpte2094App5 *app5 = av_dynamic_hdr_smpte2094_app5_alloc(&app5_size);
+                MP_HANDLE_OOM(app5);
+
+                if (av_dynamic_hdr_smpte2094_app5_from_t35(app5, p, remaining) < 0 ||
+                    av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR_SMPTE_2094_APP5,
+                        (uint8_t *)app5, app5_size) < 0)
+                {
+                    av_free(app5);
+                    return -1;
+                }
+
+                return 0;
+            }
+#endif
+            }
             break;
+        }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 17, 100)
+        case ITU_T_T35_COUNTRY_CODE_UK: {
+            SKIP(1); // skip t35_uk_country_code_second_octet
+            if (remaining < 2)
+                break;
 
-        uint16_t provider_oriented_code = AV_RB16(p);
-        p += sizeof(provider_oriented_code);
-        uint8_t application_identifier = AV_RB8(p);
-        p += sizeof(application_identifier);
+            uint16_t provider_code = AV_RB16(p);
+            SKIP(2);
 
-        if (provider_oriented_code != 1 || application_identifier != 4)
-            break;
+            if (provider_code != ITU_T_T35_PROVIDER_CODE_VNOVA)
+                break;
 
-        size_t hdrplus_size;
-        AVDynamicHDRPlus *hdrplus = av_dynamic_hdr_plus_alloc(&hdrplus_size);
-        MP_HANDLE_OOM(hdrplus);
+            if (remaining < 2)
+                break;
 
-        if (av_dynamic_hdr_plus_from_t35(hdrplus, p, size - (p - (uint8_t *)data)) < 0 ||
-            av_packet_add_side_data(dp->avpacket, AV_PKT_DATA_DYNAMIC_HDR10_PLUS,
-                                    (uint8_t *)hdrplus, hdrplus_size) < 0)
-        {
-            av_free(hdrplus);
-            return -1;
+            uint8_t *lcevc_data = av_packet_new_side_data(dp->avpacket,
+                                                          AV_PKT_DATA_LCEVC,
+                                                          remaining);
+            if (!lcevc_data)
+                return -1;
+            memcpy(lcevc_data, p, remaining);
+            return 0;
+        }
+#endif
         }
 
-        return 0;
+        break;
     }
     default:
         break;
@@ -296,4 +415,6 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
     if (size > 0)
         memcpy(sd + 8, data, size);
     return 0;
+
+#undef SKIP
 }

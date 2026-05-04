@@ -1,11 +1,11 @@
 local utils = require("mp.utils")
 
 local function hardsleep()
-    os.execute("sleep 1s")
+    os.execute("sleep 1")
 end
 
 local hooks = {"on_before_start_file", "on_load", "on_load_fail",
-               "on_preloaded", "on_unload", "on_after_end_file"}
+               "on_preloaded", "on_loaded", "on_unload", "on_after_end_file"}
 
 for _, name in ipairs(hooks) do
     mp.add_hook(name, 0, function()

@@ -12,6 +12,7 @@
 -- OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 -- CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+local msg = require "mp.msg"
 local utils = require "mp.utils"
 local assdraw = require "mp.assdraw"
 
@@ -28,11 +29,12 @@ end
 local platform = detect_platform()
 
 -- Default options
-local opts = {
-    font = "",
+local script_opts = {
+    monospace_font = "",
     font_size = 24,
     border_size = 1.65,
     background_alpha = 80,
+    gap = 0.2,
     padding = 10,
     menu_outline_size = 0,
     menu_outline_color = "#FFFFFF",
@@ -40,17 +42,20 @@ local opts = {
     margin_x = -1,
     margin_y = -1,
     scale_with_window = "auto",
-    selected_color = "#222222",
-    selected_back_color = "#FFFFFF",
+    focused_color = "#222222",
+    focused_back_color = "#FFFFFF",
     match_color = "#0088FF",
-    case_sensitive = platform ~= "windows" and true or false,
+    exact_match = false,
+    case_sensitive = false,
     history_dedup = true,
     font_hw_ratio = "auto",
 }
+local opts = script_opts
 
 local styles = {
     error = "{\\1c&H7a77f2&}",
     completion = "{\\1c&Hcc99cc&}",
+    inactive = "{\\alpha&H66&}",
 }
 for key, style in pairs(styles) do
     styles[key] = style .. "{\\3c&H111111&}"
@@ -75,6 +80,11 @@ local cursor = 1
 local prompt
 local id
 
+local overlay = mp.create_osd_overlay("ass-events")
+local width_overlay = mp.create_osd_overlay("ass-events")
+width_overlay.compute_bounds = true
+width_overlay.hidden = true
+
 local histories = {}
 local history = {}
 local history_pos = 1
@@ -82,37 +92,43 @@ local searching_history = false
 local history_paths = {}
 local histories_to_save = {}
 
+local MAX_LOG_LINES = 10000
 local log_buffers = {}
+local log_offset = 0
 local key_bindings = {}
-local dont_bind_up_down = false
-local overlay = mp.create_osd_overlay("ass-events")
-local width_overlay = mp.create_osd_overlay("ass-events")
 local global_margins = { t = 0, b = 0 }
 local input_caller
+local input_caller_handler
 local keep_open = false
 
 local completion_buffer = {}
+local dim_completions = false
 local selected_completion_index
 local completion_pos
 local completion_append
-local completion_old_line
-local completion_old_cursor
 local autoselect_completion
 local has_completions
 
 local selectable_items
 local matches = {}
-local selected_match = 1
+local focused_match = 1
 local first_match_to_print = 1
 local default_item
 local item_positions = {}
 local max_item_width = 0
+local horizontal_offset = 0
 
 local complete
 local cycle_through_completions
 local set_active
+local render
 
 local property_cache = {}
+
+local completion_timer = mp.add_timeout(0.1, function()
+    dim_completions = true
+    render()
+end, true)
 
 
 local function get_property_cached(name, def)
@@ -123,12 +139,12 @@ local function get_property_cached(name, def)
 end
 
 local function get_font()
-    if opts.font ~= "" then
-        return opts.font
-    end
-
     if not has_completions then
         return
+    end
+
+    if opts.monospace_font ~= "" then
+        return opts.monospace_font
     end
 
     -- Pick a better default font for Windows and macOS
@@ -193,10 +209,21 @@ local function utf8_positions(str)
     return positions
 end
 
+-- Converts values to strings, using JSON formatting for tables.
+-- JSON is used instead of utils.to_string as that is the format the
+-- values are received in from script-messages.
+local function to_string(v)
+    if type(v) == "table" then
+        return utils.format_json(v)
+    else
+        return tostring(v)
+    end
+end
+
 
 -- Functions to calculate the font width.
 local width_length_ratio = 0.5
-local osd_width, osd_height = 100, 100
+local osd_width, osd_height = 0, 0
 local text_osd = mp.create_osd_overlay("ass-events")
 text_osd.compute_bounds, text_osd.hidden = true, true
 
@@ -291,7 +318,11 @@ local function get_scaled_osd_dimensions()
 end
 
 local function get_line_height()
-    return selectable_items and opts.font_size * 1.1 or opts.font_size
+    if selectable_items then
+        return opts.font_size * (1 + opts.gap)
+    end
+
+    return opts.font_size
 end
 
 local function calculate_max_lines()
@@ -317,24 +348,27 @@ local function calculate_max_item_width()
     end
 
     local longest_item = prompt .. ("a"):rep(9)
+    local longest_item_width = utils.terminal_display_width(longest_item)
     for _, item in pairs(selectable_items) do
-        if #item > #longest_item then
+        local item_width = utils.terminal_display_width(item)
+        if item_width > longest_item_width then
             longest_item = item
+            longest_item_width = item_width
         end
     end
 
     local osd_w, osd_h = get_scaled_osd_dimensions()
     local font = get_font()
-    width_overlay.compute_bounds = true
-    width_overlay.hidden = true
     width_overlay.res_x = osd_w
     width_overlay.res_y = osd_h
     width_overlay.data = "{\\fs" .. opts.font_size ..
                          (font and "\\fn" .. font or "") .. "\\q2}" ..
                          ass_escape(longest_item)
     local result = width_overlay:update()
-    max_item_width = math.min(result.x1 - result.x0,
-                              osd_w - get_margin_x() * 2 - opts.padding * 2)
+    if result.x0 then
+        max_item_width = math.min(result.x1 - result.x0,
+                                  osd_w - get_margin_x() * 2 - opts.padding * 2)
+    end
 end
 
 local function should_highlight_completion(i)
@@ -347,7 +381,7 @@ local function mpv_color_to_ass(color)
            string.format("%x", 255 - tonumber("0x" .. color:sub(2,3)))
 end
 
-local function option_color_to_ass(color)
+local function color_option_to_ass(color)
     return color:sub(6,7) .. color:sub(4,5) ..  color:sub(2,3)
 end
 
@@ -441,8 +475,9 @@ local function format_grid(list, width_max, rows_max)
             columns[column] = ass_escape(string.format(format_string, list[i]))
 
             if should_highlight_completion(i) then
-                columns[column] = get_selected_ass() .. columns[column] ..
-                                  "{\\b\\1a&\\3a&}" .. styles.completion
+                local style_override = dim_completions and styles.inactive or ""
+                columns[column] = get_selected_ass() .. style_override .. columns[column] ..
+                                  "{\\b\\1a&\\3a&}" .. styles.completion .. style_override
             end
         end
         -- first row is at the bottom
@@ -451,8 +486,8 @@ local function format_grid(list, width_max, rows_max)
     return table.concat(rows, ass_escape("\n")), row_count
 end
 
-local function fuzzy_find(needle, haystacks, case_sensitive)
-    local result = require "mp.fzy".filter(needle, haystacks, case_sensitive)
+local function fuzzy_find(needle, haystacks)
+    local result = require "mp.fzy".filter(needle, haystacks)
     table.sort(result, function (i, j)
         if i[3] ~= j[3] then
             return i[3] > j[3]
@@ -464,8 +499,56 @@ local function fuzzy_find(needle, haystacks, case_sensitive)
     return result
 end
 
+local function find_matches(needle, haystacks)
+    if not opts.exact_match and needle:sub(1, 1) ~= "'" then
+        return fuzzy_find(needle, haystacks)
+    end
+
+    if not opts.exact_match then
+        needle = needle:sub(2)
+    end
+
+    if not opts.case_sensitive then
+        needle = needle:lower()
+    end
+
+    local result = {}
+    local needle_words = {}
+
+    for word in needle:gmatch("%S+") do
+        needle_words[#needle_words + 1] = word
+    end
+
+    for i, haystack in ipairs(haystacks) do
+        if not opts.case_sensitive then
+            haystack = haystack:lower()
+        end
+
+        local matching_positions = {}
+        for _, word in pairs(needle_words) do
+            local start, e = haystack:find(word, 1, true)
+
+            if start then
+                for j = start, e do
+                    matching_positions[#matching_positions + 1] = j
+                end
+            else
+                matching_positions = nil
+                break
+            end
+        end
+
+        if matching_positions then
+            table.sort(matching_positions)
+            result[#result + 1] = { i, matching_positions }
+        end
+    end
+
+    return result
+end
+
 local function get_matches_to_print(terminal)
-    if not selectable_items or selected_match == 0 then
+    if not selectable_items or focused_match == 0 then
         return {}
     end
 
@@ -473,16 +556,21 @@ local function get_matches_to_print(terminal)
     local max_lines = calculate_max_lines()
     local escape = terminal and function (str) return str end or ass_escape
     local highlight = terminal and terminal_styles.matched_position or
-                     "{\\1c&H" .. option_color_to_ass(opts.match_color) .. "}"
+                     "{\\1c&H" .. color_option_to_ass(opts.match_color) .. "}"
 
-    if selected_match < first_match_to_print then
-        first_match_to_print = selected_match
-    elseif selected_match > first_match_to_print + max_lines - 1 then
-        first_match_to_print = selected_match - max_lines + 1
+    if focused_match < first_match_to_print then
+        first_match_to_print = focused_match
+    elseif focused_match > first_match_to_print + max_lines - 1 then
+        first_match_to_print = focused_match - max_lines + 1
     end
 
     local last_match_to_print  = math.min(first_match_to_print + max_lines - 1,
                                           #matches)
+
+    if last_match_to_print - first_match_to_print + 1 < math.min(max_lines, #matches) and
+       last_match_to_print >= math.min(max_lines, #matches) then
+        first_match_to_print = last_match_to_print - math.min(max_lines, #matches) + 1
+    end
 
     for i = first_match_to_print, last_match_to_print do
         local item = ""
@@ -492,16 +580,16 @@ local function get_matches_to_print(terminal)
             if matches[i].index == default_item then
                 item = terminal_styles.default_item
             end
-            if i == selected_match then
+            if i == focused_match then
                 item = item .. terminal_styles.selected_completion
             end
         else
-            if i == selected_match then
+            if i == focused_match then
                 if searching_history and
                    mp.get_property("osd-border-style") == "outline-and-shadow" then
                     item = get_selected_ass()
                 else
-                    item = "{\\1c&H" .. option_color_to_ass(opts.selected_color) .. "&}"
+                    item = "{\\1c&H" .. color_option_to_ass(opts.focused_color) .. "&}"
                 end
                 end_highlight = item
             end
@@ -583,7 +671,7 @@ local function print_to_terminal()
         if #selectable_items > calculate_max_lines() then
             local digits = math.ceil(math.log(#selectable_items, 10))
             counter = terminal_styles.disabled ..
-                      "[" .. string.format("%0" .. digits .. "d", selected_match) ..
+                      "[" .. string.format("%0" .. digits .. "d", focused_match) ..
                       "/" .. string.format("%0" .. digits .. "d", #matches) ..
                       "]\027[0m "
         end
@@ -597,14 +685,16 @@ local function print_to_terminal()
             log = log .. log_line.terminal_style .. log_line.text .. "\027[0m\n"
         end
 
-        for i, completion in ipairs(completion_buffer) do
-            if should_highlight_completion(i) then
-                log = log .. terminal_styles.selected_completion ..
-                      completion .. "\027[0m"
-            else
-                log = log .. completion
+        if not dim_completions then
+            for i, completion in ipairs(completion_buffer) do
+                if should_highlight_completion(i) then
+                    log = log .. terminal_styles.selected_completion ..
+                          completion .. "\027[0m"
+                else
+                    log = log .. completion
+                end
+                log = log .. (i < #completion_buffer and "\t" or "\n")
             end
-            log = log .. (i < #completion_buffer and "\t" or "\n")
         end
     end
 
@@ -620,7 +710,7 @@ local function print_to_terminal()
     osd_msg_active = true
 end
 
-local function render()
+render = function()
     pending_update = false
 
     if terminal_output() then
@@ -648,9 +738,11 @@ local function render()
     local x, y, alignment, clipping_coordinates
     if selectable_items and not searching_history then
         x = (osd_w - max_item_width) / 2
-        y = osd_h / 2 - (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
+        y = osd_h *
+            (global_margins.t + (1 - global_margins.t - global_margins.b) / 2) -
+            (math.min(#selectable_items, max_lines) + 1.5) * line_height / 2
         alignment = 7
-        clipping_coordinates = "0,0," .. x + max_item_width .. "," .. osd_h
+        clipping_coordinates = x .. ",0," .. x + max_item_width .. "," .. osd_h
     else
         x = get_margin_x()
         y = osd_h * (1 - global_margins.b) - get_margin_y()
@@ -693,7 +785,10 @@ local function render()
 
     local log_ass = ""
     local log_buffer = log_buffers[id] or {}
-    for i = #log_buffer - math.min(max_lines, #log_buffer) + 1, #log_buffer do
+    log_offset = math.max(math.min(log_offset, #log_buffer - 1), 0)
+    local last = #log_buffer - log_offset
+    local first = math.max(last - math.min(max_lines, #log_buffer) + 1, 1)
+    for i = first, last do
         log_ass = log_ass .. style .. log_buffer[i].style ..
                   ass_escape(log_buffer[i].text) .. "\\N"
     end
@@ -712,7 +807,9 @@ local function render()
 
         local completions, rows = format_grid(completion_buffer, width_max, max_lines)
         max_lines = max_lines - rows
-        completion_ass = style .. styles.completion .. completions .. "\\N"
+        completion_ass = style .. styles.completion ..
+                         (dim_completions and styles.inactive or "") ..
+                         completions .. "\\N"
     end
 
     -- Background
@@ -730,7 +827,7 @@ local function render()
         ass:pos(x, y)
         ass:append("{\\1c&H" .. back_color .. "&\\1a&H" .. back_alpha ..
                    "&\\bord" .. opts.menu_outline_size .. "\\3c&H" ..
-                   option_color_to_ass(opts.menu_outline_color) .. "&}")
+                   color_option_to_ass(opts.menu_outline_color) .. "\\blur0&}")
         if border_style == "background-box" then
             ass:append("{\\4a&Hff&}")
         end
@@ -751,15 +848,15 @@ local function render()
             and y + (1 + i) * line_height
             or y - (1.5 + #items - i) * line_height
 
-        if (first_match_to_print - 1 + i == selected_match or
+        if (first_match_to_print - 1 + i == focused_match or
             matches[first_match_to_print - 1 + i].index == default_item)
            and (not searching_history or border_style == "background-box") then
             ass:new_event()
             ass:an(4)
             ass:pos(x, item_y)
             ass:append("{\\blur0\\bord0\\4aH&ff&\\1c&H" ..
-                       option_color_to_ass(opts.selected_back_color) .. "&}")
-            if first_match_to_print - 1 + i ~= selected_match then
+                       color_option_to_ass(opts.focused_back_color) .. "&}")
+            if first_match_to_print - 1 + i ~= focused_match then
                 ass:append("{\\1aH&cc&}")
             end
             ass:draw_start()
@@ -769,7 +866,7 @@ local function render()
 
         ass:new_event()
         ass:an(4)
-        ass:pos(x, item_y)
+        ass:pos(x - horizontal_offset, item_y)
         ass:append(style .. item)
 
         item_positions[#item_positions + 1] =
@@ -785,7 +882,7 @@ local function render()
         if not searching_history or border_style == "background-box" then
             ass:append("{\\bord0\\4a&Hff&\\blur0}")
         end
-        ass:append(selected_match .. "/" .. #matches)
+        ass:append(focused_match .. "/" .. #matches)
 
         local start_percentage = (first_match_to_print - 1) / #matches
         local end_percentage = (first_match_to_print - 1 + max_lines) / #matches
@@ -880,13 +977,13 @@ end
 local function handle_edit()
     if not selectable_items then
         handle_cursor_move()
-        mp.commandv("script-message-to", input_caller, "input-event", "edited",
+        mp.commandv("script-message-to", input_caller, input_caller_handler, "edited",
                     utils.format_json({line}))
         return
     end
 
     matches = {}
-    for i, match in ipairs(fuzzy_find(line, selectable_items)) do
+    for i, match in ipairs(find_matches(line, selectable_items)) do
         matches[i] = {
             index = match[1],
             text = selectable_items[match[1]],
@@ -895,15 +992,15 @@ local function handle_edit()
     end
 
     if line == "" and default_item then
-        selected_match = default_item
+        focused_match = default_item
 
         local max_lines = calculate_max_lines()
-        first_match_to_print = math.max(1, selected_match + 1 - math.ceil(max_lines / 2))
+        first_match_to_print = math.max(1, focused_match + 1 - math.ceil(max_lines / 2))
         if first_match_to_print > #selectable_items - max_lines + 1 then
             first_match_to_print = math.max(1, #selectable_items - max_lines + 1)
         end
     else
-        selected_match = 1
+        focused_match = 1
     end
 
     render()
@@ -977,12 +1074,22 @@ local function unbind_mouse()
     mp.remove_key_binding("_console_mbtn_left")
 end
 
+local function after_cur_matches_completion()
+    local token = line:sub(completion_pos)
+
+    for _, completion in pairs(completion_buffer) do
+        if completion == token:sub(1, #completion) then
+            return true
+        end
+    end
+end
+
 -- Run the current command or select the current item
 local function submit()
     if searching_history then
         searching_history = false
         selectable_items = nil
-        line = #matches > 0 and matches[selected_match].text or ""
+        line = #matches > 0 and matches[focused_match].text or ""
         cursor = #line + 1
         handle_edit()
         unbind_mouse()
@@ -991,15 +1098,16 @@ local function submit()
 
     if selectable_items then
         if #matches > 0 then
-            mp.commandv("script-message-to", input_caller, "input-event", "submit",
-                        utils.format_json({matches[selected_match].index}))
+            mp.commandv("script-message-to", input_caller, input_caller_handler, "submit",
+                        utils.format_json({matches[focused_match].index}))
         end
     else
-        if selected_completion_index == 0 and autoselect_completion then
+        if selected_completion_index == 0 and autoselect_completion
+           and not after_cur_matches_completion() then
             cycle_through_completions()
         end
 
-        mp.commandv("script-message-to", input_caller, "input-event", "submit",
+        mp.commandv("script-message-to", input_caller, input_caller_handler, "submit",
                     utils.format_json({line}))
 
         history_add(line)
@@ -1035,8 +1143,8 @@ end
 local function bind_mouse()
     mp.add_forced_key_binding("MOUSE_MOVE", "_console_mouse_move", function()
         local item = determine_hovered_item()
-        if item and item ~= selected_match then
-            selected_match = item
+        if item and item ~= focused_match then
+            focused_match = item
             render()
         end
     end)
@@ -1044,7 +1152,7 @@ local function bind_mouse()
     mp.add_forced_key_binding("MBTN_LEFT", "_console_mbtn_left", function()
         local item = determine_hovered_item()
         if item then
-            selected_match = item
+            focused_match = item
             submit()
         else
             set_active(false)
@@ -1097,13 +1205,13 @@ local function move_history(amount, is_wheel)
     if is_wheel then
         local max_lines = calculate_max_lines()
 
-        -- Update selected_match only if it's the first or last printed item and
+        -- Update focused_match only if it's the first or last printed item and
         -- there are hidden items.
-        if (amount > 0 and selected_match == first_match_to_print
+        if (amount > 0 and focused_match == first_match_to_print
             and first_match_to_print - 1 + max_lines < #matches)
-           or (amount < 0 and selected_match == first_match_to_print - 1 + max_lines
+           or (amount < 0 and focused_match == first_match_to_print - 1 + max_lines
                and first_match_to_print > 1) then
-            selected_match = selected_match + amount
+            focused_match = focused_match + amount
         end
 
         if amount > 0 and first_match_to_print < #matches - max_lines + 1
@@ -1116,26 +1224,31 @@ local function move_history(amount, is_wheel)
 
         local item = determine_hovered_item()
         if item then
-            selected_match = item
+            focused_match = item
         end
 
         render()
         return
     end
 
-    selected_match = selected_match + amount
-    if selected_match > #matches then
-        selected_match = 1
-    elseif selected_match < 1 then
-        selected_match = #matches
+    focused_match = focused_match + amount
+    if focused_match > #matches then
+        focused_match = 1
+    elseif focused_match < 1 then
+        focused_match = #matches
     end
+    render()
+end
+
+local function horizontal_scroll(amount)
+    horizontal_offset = math.max(horizontal_offset + amount, 0)
     render()
 end
 
 -- Go to the first command in the command history (PgUp)
 local function handle_pgup()
     if selectable_items then
-        selected_match = math.max(selected_match - calculate_max_lines() + 1, 1)
+        focused_match = math.max(focused_match - calculate_max_lines() + 1, 1)
         render()
         return
     end
@@ -1146,7 +1259,7 @@ end
 -- Stop browsing history and start editing a blank line (PgDown)
 local function handle_pgdown()
     if selectable_items then
-        selected_match = math.min(selected_match + calculate_max_lines() - 1, #matches)
+        focused_match = math.min(focused_match + calculate_max_lines() - 1, #matches)
         render()
         return
     end
@@ -1161,6 +1274,7 @@ local function search_history()
 
     searching_history = true
     selectable_items = {}
+    horizontal_offset = 0
 
     for i = 1, #history do
         selectable_items[i] = history[#history + 1 - i]
@@ -1254,20 +1368,27 @@ end
 
 -- Empty the log buffer of all messages (Ctrl+L)
 local function clear_log_buffer()
-    log_buffers[id] = {}
+    if not selectable_items then
+        log_buffers[id] = {}
+    end
+    render()
+end
+
+local function scroll_log(amount)
+    if selectable_items then
+        return
+    end
+
+    log_offset = log_offset + amount
     render()
 end
 
 -- Returns a string of UTF-8 text from the clipboard (or the primary selection)
 local function get_clipboard(clip)
+    mp.commandv("update-clipboard", clip and "text" or "text-primary")
     if platform == "x11" then
-        local res = utils.subprocess({
-            args = { "xclip", "-selection", clip and "clipboard" or "primary", "-out" },
-            playback_only = false,
-        })
-        if not res.error then
-            return res.stdout
-        end
+        local property = clip and "clipboard/text" or "clipboard/text-primary"
+        return mp.get_property(property, "")
     elseif platform == "wayland" then
         if mp.get_property("current-clipboard-backend") == "wayland" then
             local property = clip and "clipboard/text" or "clipboard/text-primary"
@@ -1299,6 +1420,21 @@ local function paste(clip)
     line = before_cur .. text .. after_cur
     cursor = cursor + text:len()
     handle_edit()
+end
+
+local function copy()
+    if not selectable_items then
+        mp.set_property("clipboard/text", line)
+        mp.msg.info("Input line copied")
+    elseif matches[1] then
+        mp.set_property("clipboard/text", matches[focused_match].text)
+
+        if terminal_output() then
+            mp.msg.info("Item copied")
+        else
+            mp.osd_message("Item copied")
+        end
+    end
 end
 
 local function text_input(info)
@@ -1345,6 +1481,11 @@ local function strip_common_characters(str, prefix)
 end
 
 cycle_through_completions = function (backwards)
+    -- Disable tab completions while waiting for completion responses
+    if completion_timer:is_enabled() or dim_completions then
+        return
+    end
+
     if #completion_buffer == 0 then
         -- Allow Tab completion of commands before typing anything.
         if line == "" then
@@ -1370,11 +1511,15 @@ cycle_through_completions = function (backwards)
     render()
 end
 
+local function enable_completions()
+    dim_completions = false
+    completion_timer:kill()
+end
+
 -- Show autocompletions.
 complete = function ()
-    completion_old_line = line
-    completion_old_cursor = cursor
-    mp.commandv("script-message-to", input_caller, "input-event",
+    completion_timer:resume()
+    mp.commandv("script-message-to", input_caller, input_caller_handler,
                 "complete", utils.format_json({line:sub(1, cursor - 1)}))
     render()
 end
@@ -1408,8 +1553,16 @@ local function get_bindings()
         { "down",        function() move_history(1) end         },
         { "ctrl+n",      function() move_history(1) end         },
         { "wheel_down",  function() move_history(1, true) end   },
+        { "shift+up",    function() scroll_log(1)  end          },
+        { "shift+down",  function() scroll_log(-1) end          },
         { "wheel_left",  function() end                         },
         { "wheel_right", function() end                         },
+        { "shift+left",  function() horizontal_scroll(-25) end  },
+        { "shift+right", function() horizontal_scroll( 25) end  },
+        { "wheel_left",  function() horizontal_scroll(-25) end  },
+        { "wheel_right", function() horizontal_scroll( 25) end  },
+        { "shift+wheel_up",   function() horizontal_scroll(-25) end },
+        { "shift+wheel_down", function() horizontal_scroll( 25) end },
         { "ctrl+left",   prev_word                              },
         { "alt+b",       prev_word                              },
         { "ctrl+right",  next_word                              },
@@ -1429,6 +1582,7 @@ local function get_bindings()
         { "ctrl+k",      del_to_eol                             },
         { "ctrl+l",      clear_log_buffer                       },
         { "ctrl+u",      del_to_start                           },
+        { "ctrl+y",      copy,                                  },
         { "ctrl+v",      function() paste(true) end             },
         { "meta+v",      function() paste(true) end             },
         { "ctrl+bs",     del_word                               },
@@ -1455,12 +1609,10 @@ local function define_key_bindings()
         return
     end
     for _, bind in ipairs(get_bindings()) do
-        if not (dont_bind_up_down and (bind[1] == "up" or bind[1] == "down")) then
-            -- Generate arbitrary name for removing the bindings later.
-            local name = "_console_" .. (#key_bindings + 1)
-            key_bindings[#key_bindings + 1] = name
-            mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
-        end
+        -- Generate arbitrary name for removing the bindings later.
+        local name = "_console_" .. (#key_bindings + 1)
+        key_bindings[#key_bindings + 1] = name
+        mp.add_forced_key_binding(bind[1], name, bind[2], {repeatable = true})
     end
     mp.add_forced_key_binding("any_unicode", "_console_text", text_input,
         {repeatable = true, complex = true})
@@ -1533,45 +1685,97 @@ set_active = function (active)
         open = false
         undefine_key_bindings()
         unbind_mouse()
+        completion_timer:kill()
         mp.set_property_bool("user-data/mpv/console/open", false)
         mp.set_property_bool("input-ime", ime_active)
-        mp.commandv("script-message-to", input_caller, "input-event",
+        mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
         collectgarbage()
     end
     render()
 end
 
-mp.register_script_message("disable", function()
-    set_active(false)
+mp.register_script_message("disable", function(message)
+    message = utils.parse_json(message or "")
+
+    if not message or message.client_name == input_caller then
+        set_active(false)
+    end
 end)
 
-mp.register_script_message("get-input", function (script_name, args)
-    if open and script_name ~= input_caller then
-        mp.commandv("script-message-to", input_caller, "input-event",
+mp.register_script_message("get-input", function (args)
+    args = utils.parse_json(args)
+    if type(args) ~= "table" then
+        return msg.error("Input request aborted - " ..
+                         "get-input must be passed a JSON formatted table.")
+    end
+
+    if not args.client_name or not args.handler_id then
+        return msg.error("Input request aborted - " ..
+                         "get-input must be passed a 'client_name' and 'handler_id'")
+    end
+
+    if open then
+        mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
     end
 
-    input_caller = script_name
-    args = utils.parse_json(args)
-    prompt = args.prompt
-    line = args.default_text or ""
-    cursor = tonumber(args.cursor_position) or line:len() + 1
+    input_caller = args.client_name
+    input_caller_handler = args.handler_id
+    prompt = to_string(args.prompt or "")
+    line = to_string(args.default_text or "")
+    cursor = math.floor(tonumber(args.cursor_position) or line:len() + 1)
     keep_open = args.keep_open
     default_item = args.default_item
     has_completions = args.has_completions
-    dont_bind_up_down = args.dont_bind_up_down
     searching_history = false
+    if cursor < 1 then
+        cursor = 1
+    elseif cursor > line:len() + 1 then
+        cursor = line:len() + 1
+    end
+
+    -- Allows clients to override script-opts, but first ensures the overrides are the same type.
+    if type(args.console_opt_overrides) == "table" then
+        for k, v in pairs(args.console_opt_overrides) do
+            if type(v) ~= type(script_opts[k]) then
+                args.console_opt_overrides[k] = nil
+                msg.warn(("mp.input (%s): ignoring console_opt_overrides.%s - must be of type %s"
+                         ):format(input_caller, k, type(script_opts[k])))
+            end
+        end
+        opts = setmetatable(args.console_opt_overrides, {__index = script_opts})
+    else
+        opts = script_opts
+    end
+
+    enable_completions()
 
     if args.items then
+        if type(args.items) ~= "table" then
+            msg.warn(("input.select (%s): 'items' must be a table, instead received a %s"
+                     ):format(input_caller, type(args.items)))
+            -- set as empty to avoid errors
+            args.items = {}
+        end
+
         selectable_items = {}
+        horizontal_offset = 0
 
         -- Limit the number of characters to prevent libass from freezing mpv.
         -- Not important for terminal output.
-        local limit = terminal_output() and 5000 or (5 * osd_width / opts.font_size)
+        local limit
+        if osd_width == 0 or terminal_output() then
+            limit = 5000
+        else
+            limit = 5 * osd_width / opts.font_size
+        end
 
         for i, item in ipairs(args.items) do
-            selectable_items[i] = item:gsub("[\r\n].*", "⋯"):sub(1, limit)
+            item = to_string(item)
+            local last = next_utf8(item, limit) - 1
+            selectable_items[i] = item:gsub("[\r\n].*", "…"):sub(1, last) ..
+                                  (last < #item and "…" or "")
         end
 
         calculate_max_item_width()
@@ -1580,7 +1784,8 @@ mp.register_script_message("get-input", function (script_name, args)
     else
         selectable_items = nil
         unbind_mouse()
-        id = args.id or script_name .. prompt
+        id = args.id or input_caller .. args.prompt
+        log_offset = 0
         completion_buffer = {}
         autoselect_completion = args.autoselect_completion
 
@@ -1590,37 +1795,51 @@ mp.register_script_message("get-input", function (script_name, args)
             histories_to_save[id] = ""
         end
         history = histories[id]
-        history_paths[id] = args.history_path
+
+        -- We probably do not want to be converting accidental non-string values to filepaths.
+        history_paths[id] = type(args.history_path) == "string" and args.history_path or nil
         read_history()
         history_pos = #history + 1
 
-        if line ~= "" then
-            complete()
-        end
+        handle_cursor_move()
     end
 
     set_active(true)
-    mp.commandv("script-message-to", input_caller, "input-event", "opened")
+
+    -- We want to ensure the keybindings have been set before sending the "opened" event
+    -- in case scripts want to override our bindings.
+    mp.flush_keybindings()
+    mp.commandv("script-message-to", input_caller, input_caller_handler, "opened")
 end)
 
--- Add a line to the log buffer (which is limited to 100 lines)
+-- Add a line to the log buffer
 mp.register_script_message("log", function (message)
-    local log_buffer = log_buffers[id]
-    message = utils.parse_json(message)
+    message = utils.parse_json(message or "")
+    if type(message) ~= "table" or not message.log_id then
+        return msg.error("Line not appended to log buffer - " ..
+                         "log must be passed a JSON formatted table which contains a 'log_id'.")
+    end
+
+    local log_buffer = log_buffers[message.log_id]
+    if not log_buffer then return end
 
     log_buffer[#log_buffer + 1] = {
-        text = message.text,
-        style = message.error and styles.error or message.style or "",
+        text = to_string(message.text or ""),
+        style = message.error and styles.error or to_string(message.style or ""),
         terminal_style = message.error and terminal_styles.error or
-                         message.terminal_style or "",
+                         to_string(message.terminal_style or ""),
     }
 
-    if #log_buffer > 100 then
+    if #log_buffer > MAX_LOG_LINES then
         table.remove(log_buffer, 1)
     end
 
-    if not open then
+    if not open or message.log_id ~= id then
         return
+    end
+
+    if log_offset > 0 then
+        log_offset = log_offset + 1
     end
 
     if not update_timer:is_enabled() then
@@ -1631,44 +1850,86 @@ mp.register_script_message("log", function (message)
     end
 end)
 
-mp.register_script_message("set-log", function (log)
+mp.register_script_message("set-log", function (log_id, log)
     log = utils.parse_json(log)
-    log_buffers[id] = {}
+    if not log_id then
+        return msg.error("Log buffer not overwritten - " ..
+                         "set-log must be passed a 'log_id' as the first argument.")
+    end
+
+    -- This error message provides extra details as mp.input passes the `log` table to
+    -- console.lua unchanged, meaning that this guard may be triggered by Lua and Js clients.
+    if type(log) ~= "table" then
+        return msg.error("Log buffer not overwritten - " ..
+                         "set-log must be passed a table as second argument, " ..
+                         ("instead received a %s."):format(type(log)))
+    end
+
+    log_buffers[log_id] = {}
 
     for i = 1, #log do
         if type(log[i]) == "table" then
-            log[i].text = log[i].text
-            log[i].style = log[i].style or ""
-            log[i].terminal_style = log[i].terminal_style or ""
+            log[i].text = to_string(log[i].text or "")
+            log[i].style = to_string(log[i].style or "")
+            log[i].terminal_style = to_string(log[i].terminal_style or "")
             log_buffers[id][i] = log[i]
         else
             log_buffers[id][i] = {
-                text = log[i],
+                text = to_string(log[i] or ""),
                 style = "",
                 terminal_style = "",
             }
         end
     end
 
-    render()
+    if log_id == id then
+        render()
+    end
 end)
 
-mp.register_script_message("complete", function (list, start_pos, append)
-    if line ~= completion_old_line or cursor ~= completion_old_cursor then
+mp.register_script_message("complete", function (message)
+    message = utils.parse_json(message)
+    if type(message) ~= "table" then
+        return msg.error("Completions not received - " ..
+                         "complete must be passed a JSON formatted table.")
+    end
+
+    if message.client_name ~= input_caller or message.handler_id ~= input_caller_handler then
         return
     end
 
     completion_buffer = {}
     selected_completion_index = 0
-    local completions = utils.parse_json(list)
+    local completions = message.list
+
+    if type(completions) ~= "table" then
+        msg.warn(("Completions invalid (%s) - " ..
+                  "completions must be a table, instead received a %s"
+                 ):format(input_caller, type(completions)))
+        completions = {}
+    else
+        for i = 1, #completions do
+            completions[i] = to_string(completions[i])
+        end
+    end
+
     table.sort(completions)
-    completion_pos = start_pos
-    completion_append = append
+    completion_pos = math.floor(tonumber(message.start_pos) or 1)
+    completion_append = to_string(message.append or "")
+    if completion_pos < 1 then
+        completion_pos = 1
+    end
+
     for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor - 1),
                                       completions)) do
         completion_buffer[i] = completions[match[1]]
     end
 
+    -- Rendering outdated completions makes the completions appear more
+    -- responsive, but we only want allow selecting up-to-date completions.
+    if line:sub(1, cursor - 1) == message.original_line then
+        enable_completions()
+    end
     render()
 end)
 
@@ -1729,6 +1990,6 @@ mp.register_script_message("type", function (...)
     mp.commandv("script-message-to", "commands", "type", ...)
 end)
 
-require "mp.options".read_options(opts, nil, render)
+require "mp.options".read_options(script_opts, nil, render)
 
 collectgarbage()

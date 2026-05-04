@@ -3,4 +3,11 @@ common_args="--werror \
 -Dtests=true \
 "
 
-export CFLAGS="$CFLAGS -Wno-error=deprecated -Wno-error=deprecated-declarations -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
+export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
+
+build_subrandr() {
+    git clone --depth=1 https://github.com/afishhh/subrandr.git
+    pushd subrandr
+    cargo xtask install --prefix "$@"
+    popd
+}

@@ -38,10 +38,11 @@ fam=x86_64
 cat >"$prefix_dir/crossfile" <<EOF
 [built-in options]
 buildtype = 'release'
-wrap_mode = 'nofallback'
+wrap_mode = 'nodownload'
 [binaries]
 c = ['ccache', '${CC}']
 cpp = ['ccache', '${CXX}']
+rust = ['rustc', '--target', '${RUST_TARGET}']
 ar = '${AR}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
@@ -114,7 +115,7 @@ function build_if_missing {
 
 _iconv () {
     local ver=1.18
-    gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
+    gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $commonflags
     makeplusinstall
@@ -143,6 +144,27 @@ _dav1d () {
     popd
 }
 _dav1d_mark=lib/libdav1d.dll.a
+
+_lcms2 () {
+    [ -d lcms2 ] || $gitclone https://github.com/mm2/Little-CMS.git lcms2
+    builddir lcms2
+    meson setup .. --cross-file "$prefix_dir/crossfile" \
+        -Dtests=disabled -D{utils,versionedlibs}=false
+    makeplusinstall
+    popd
+}
+_lcms2_mark=lib/liblcms2.dll.a
+
+_amf_headers () {
+    local ver=1.5.0
+    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz"
+    pushd amf-headers-v${ver}
+    mkdir -p "$prefix_dir/include"
+    cp -r AMF "$prefix_dir/include/"
+    touch "$prefix_dir/include/AMF/core/Version.h"
+    popd
+}
+_amf_headers_mark=include/AMF/core/Version.h
 
 _ffmpeg () {
     [ -d ffmpeg ] || $gitclone https://github.com/FFmpeg/FFmpeg.git ffmpeg
@@ -214,14 +236,14 @@ _libplacebo () {
     [ -d libplacebo ] || $gitclone https://code.videolan.org/videolan/libplacebo.git
     builddir libplacebo
     meson setup .. --cross-file "$prefix_dir/crossfile" \
-        -Ddemos=false -D{opengl,d3d11}=enabled
+        -Ddemos=false -D{opengl,d3d11,lcms}=enabled
     makeplusinstall
     popd
 }
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.13.3
+    local ver=2.14.1
     gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
@@ -242,7 +264,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=10.2.0
+    local ver=12.2.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
@@ -275,7 +297,12 @@ _luajit () {
 }
 _luajit_mark=lib/libluajit-5.1.a
 
-for x in iconv zlib shaderc spirv-cross nv-headers dav1d; do
+_subrandr () {
+    build_subrandr "$prefix_dir" --target "$RUST_TARGET" -- -- -L"$prefix_dir"/lib
+}
+_subrandr_mark=lib/libsubrandr.dll.a
+
+for x in iconv zlib shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
@@ -285,6 +312,9 @@ fi
 for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
     build_if_missing $x
 done
+if [[ "$TARGET" != "i686-"* ]]; then
+    build_if_missing subrandr
+fi
 
 ## mpv
 
@@ -302,13 +332,13 @@ meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
   -Dmujs:werror=false \
   -Dmujs:default_library=static \
   -Dlua=luajit \
-  -D{shaderc,spirv-cross,d3d11,javascript}=enabled
+  -D{amf,shaderc,spirv-cross,d3d11,javascript}=enabled
 meson compile -C $build
 
 if [ "$2" = pack ]; then
     mkdir -p artifact/tmp
     echo "Copying:"
-    cp -pv $build/mpv.com $build/mpv.exe artifact/
+    cp -pv $build/mpv.com $build/mpv.exe etc/mpv-*.bat artifact/
     # copy everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
@@ -319,8 +349,8 @@ if [ "$2" = pack ]; then
     pushd artifact/tmp
     dlls=(
         libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
-        av*.dll sw*.dll postproc-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
-        lib{shaderc_shared,spirv-cross-c-shared,dav1d}.dll zlib1.dll
+        av*.dll sw*.dll {postproc,subrandr}-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
+        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2}.dll zlib1.dll
     )
     if [[ -f vulkan-1.dll ]]; then
         dlls+=(vulkan-1.dll)
@@ -328,9 +358,7 @@ if [ "$2" = pack ]; then
     mv -v "${dlls[@]}" ..
     popd
 
-    echo "Archiving:"
     pushd artifact
     rm -rf tmp
-    zip -9r "../mpv-git-$(date +%F)-$(git rev-parse --short HEAD)-${TARGET%%-*}.zip" -- *
     popd
 fi

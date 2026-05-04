@@ -200,6 +200,8 @@ typedef struct demux_attachment
 
 struct demuxer_params {
     bool is_top_level; // if true, it's not a sub-demuxer (enables cache etc.)
+    int depth;         // depth of the demuxer tree, 0 for top-level, each
+                       // nested demuxer increases depth by 1
     char *force_format;
     int matroska_num_wanted_uids;
     struct matroska_segment_uid *matroska_wanted_uids;
@@ -238,6 +240,7 @@ typedef struct demuxer {
     bool is_streaming; // implies a "slow" input, such as network or FUSE
     int stream_origin; // any STREAM_ORIGIN_* (set from source stream)
     bool access_references; // allow opening other files/URLs
+    int depth; // demuxer depth, 0 for top-level
 
     struct demux_opts *opts;
     struct m_config_cache *opts_cache;
@@ -248,6 +251,7 @@ typedef struct demuxer {
     struct demux_edition *editions;
     int num_editions;
     int edition;
+    bool edition_is_track_mapping;
 
     struct demux_chapter *chapters;
     int num_chapters;
@@ -365,5 +369,19 @@ bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
                             struct matroska_segment_uid *b);
 
 const char *stream_type_name(enum stream_type type);
+
+// Append a codec descriptor for stream `sh` to output string `dst`
+// Fields that are unset are skipped. If `skip_dup` is non-NULL, fields whose
+// formatted value already appears in it are skipped too.
+void demux_append_codec_desc(void *ta_ctx, bstr *dst, struct sh_stream *sh,
+                             const char *skip_dup);
+
+// Compose a descriptive edition title. Walks the demuxer's streams matching
+// `program_id`, and when exactly one video / one audio stream is present,
+// appends a parenthesized codec descriptor for it. When multiple tracks of a
+// a type are present, no descriptor is appended. Returns NULL if
+// nothing useful would be produced; otherwise a talloc'd string.
+char *demux_compose_edition_title(void *ta_ctx, struct demuxer *demuxer,
+                                  int program_id, const char *prefix);
 
 #endif /* MPLAYER_DEMUXER_H */

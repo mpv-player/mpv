@@ -204,8 +204,6 @@ string/boolean/number)
 
 ``mp.input.log(message, style)``
 
-``mp.input.log_error(message)``
-
 ``mp.input.set_log(log)``
 
 ``exit()`` (global)
@@ -351,8 +349,6 @@ for all scripts. E.g. if it contains ``mp.module_paths.push("/foo")`` then
 paths - like ``<script-dir>/modules`` for scripts which load from a directory).
 
 The custom-init file is ignored if mpv is invoked with ``--no-config``.
-
-Before mpv 0.34, the file name was ``.init.js`` (with dot) at the same dir.
 
 The event loop
 --------------

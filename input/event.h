@@ -25,11 +25,8 @@ enum mp_dnd_action {
     DND_REPLACE,
     DND_APPEND,
     DND_INSERT_NEXT,
+    DND_NONE,
 };
-
-// Enqueue files for playback after drag and drop
-void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
-                         enum mp_dnd_action action);
 
 // Drop data in a specific format (identified by the mimetype).
 // Returns <0 on error, ==0 if data was ok but empty, >0 on success.

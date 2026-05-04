@@ -120,15 +120,10 @@ int m_option_required_params(const m_option_t *opt)
 }
 
 int m_option_set_node_or_string(struct mp_log *log, const m_option_t *opt,
-                                const char *name, void *dst, struct mpv_node *src)
+                                struct bstr name, void *dst, struct mpv_node *src)
 {
     if (src->format == MPV_FORMAT_STRING) {
-        // The af and vf option unfortunately require this, because the
-        // option name includes the "action".
-        bstr optname = bstr0(name), a, b;
-        if (bstr_split_tok(optname, "/", &a, &b))
-            optname = b;
-        return m_option_parse(log, opt, optname, bstr0(src->u.string), dst);
+        return m_option_parse(log, opt, name, bstr0(src->u.string), dst);
     } else {
         return m_option_set_node(opt, dst, src);
     }
@@ -611,11 +606,20 @@ const m_option_type_t m_option_type_byte_size = {
 const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
                              int value)
 {
+    const char *val = m_opt_choice_str_def(choices, value, NULL);
+    if (val)
+        return val;
+    return "<unknown>";
+}
+
+const char *m_opt_choice_str_def(const struct m_opt_choice_alternatives *choices,
+                                 int value, const char *def)
+{
     for (const struct m_opt_choice_alternatives *c = choices; c->name; c++) {
         if (c->value == value)
             return c->name;
     }
-    return NULL;
+    return def;
 }
 
 static void print_choice_values(struct mp_log *log, const struct m_option *opt)
@@ -782,7 +786,7 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
     if (alt) {
         char *end = NULL;
         ival = strtol(alt->name, &end, 10);
-        if (end && !end[0])
+        if (!end[0])
             alt = NULL;
     }
     if (alt) {
@@ -955,9 +959,9 @@ const struct m_option_type m_option_type_flags = {
 #undef VAL
 #define VAL(x) (*(double *)(x))
 
-static int clamp_double(const m_option_t *opt, void *val)
+static int clamp_double(const m_option_t *opt, double *val)
 {
-    double v = VAL(val);
+    double v = *val;
     int r = 0;
     if (opt->min < opt->max) {
         if (v > opt->max) {
@@ -974,25 +978,26 @@ static int clamp_double(const m_option_t *opt, void *val)
         v = opt->min;
         r = M_OPT_OUT_OF_RANGE;
     }
-    VAL(val) = v;
+    *val = v;
     return r;
 }
 
-static int parse_double(struct mp_log *log, const m_option_t *opt,
-                        struct bstr name, struct bstr param, void *dst)
+static int parse_numeric(struct mp_log *log, const m_option_t *opt,
+                         struct bstr name, struct bstr param, double *out,
+                         int (*clamp)(const m_option_t *, double *))
 {
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
     struct bstr rest;
-    double tmp_float = bstrtod(param, &rest);
+    *out = bstrtod(param, &rest);
 
     if (bstr_eatstart0(&rest, ":") || bstr_eatstart0(&rest, "/"))
-        tmp_float /= bstrtod(rest, &rest);
+        *out /= bstrtod(rest, &rest);
 
     if ((opt->flags & M_OPT_DEFAULT_NAN) && bstr_equals0(param, "default")) {
-        tmp_float = NAN;
-        goto done;
+        *out = NAN;
+        return 1;
     }
 
     if (rest.len) {
@@ -1002,16 +1007,23 @@ static int parse_double(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if (clamp_double(opt, &tmp_float) < 0) {
+    if (clamp(opt, out) < 0) {
         mp_err(log, "The %.*s option is out of range: %.*s\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
 
-done:
-    if (dst)
-        VAL(dst) = tmp_float;
     return 1;
+}
+
+static int parse_double(struct mp_log *log, const m_option_t *opt,
+                        struct bstr name, struct bstr param, void *dst)
+{
+    double tmp;
+    int r = parse_numeric(log, opt, name, param, &tmp, clamp_double);
+    if (r == 1 && dst)
+        VAL(dst) = tmp;
+    return r;
 }
 
 static char *print_double(const m_option_t *opt, const void *val)
@@ -1050,7 +1062,7 @@ static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
 static void multiply_double(const m_option_t *opt, void *val, double f)
 {
     VAL(val) *= f;
-    clamp_double(opt, val);
+    clamp_double(opt, &VAL(val));
 }
 
 static int double_set(const m_option_t *opt, void *dst, struct mpv_node *src)
@@ -1159,14 +1171,7 @@ static int parse_float(struct mp_log *log, const m_option_t *opt,
                        struct bstr name, struct bstr param, void *dst)
 {
     double tmp;
-    int r = parse_double(log, opt, name, param, &tmp);
-
-    if (r == 1 && clamp_float(opt, &tmp) < 0) {
-        mp_err(log, "The %.*s option is out of range: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_OUT_OF_RANGE;
-    }
-
+    int r = parse_numeric(log, opt, name, param, &tmp, clamp_float);
     if (r == 1 && dst)
         VAL(dst) = tmp;
     return r;
@@ -1204,7 +1209,7 @@ static int float_set(const m_option_t *opt, void *dst, struct mpv_node *src)
 {
     double tmp;
     int r = double_set(opt, &tmp, src);
-    if (r >= 0 && clamp_double(opt, &tmp) < 0)
+    if (r >= 0 && clamp_float(opt, &tmp) < 0)
         return M_OPT_OUT_OF_RANGE;
     if (r >= 0)
         VAL(dst) = tmp;
@@ -1395,15 +1400,6 @@ static struct bstr get_nextsep(struct bstr *ptr, char sep, bool modify)
     return bstr_splice(orig, 0, str.start - orig.start);
 }
 
-static int find_list_bstr(char **list, bstr item)
-{
-    for (int n = 0; list && list[n]; n++) {
-        if (bstr_equals0(item, list[n]))
-            return n;
-    }
-    return -1;
-}
-
 static char **separate_input_param(const m_option_t *opt, bstr param,
                                    int *len, int op)
 {
@@ -1450,7 +1446,7 @@ static int str_list_remove(char **remove, int n, void *dst)
     for (int i = 0; i < n; i++) {
         int index = 0;
         do {
-            index = find_list_bstr(list, bstr0(remove[i]));
+            index = bstr_find_in_list0(bstr0(remove[i]), list, true);
             if (index >= 0) {
                 found = true;
                 char *old = list[index];
@@ -1668,6 +1664,109 @@ const m_option_type_t m_option_type_string_list = {
         {"remove"},
         {0}
     },
+};
+
+//////////// Property array
+// Adaptor that converts a typed C array into a MPV_FORMAT_NODE_ARRAY
+// sub-property. This is for read-only access, parse/set are not intentionally
+// omitted.
+
+static int prop_array_get(const m_option_t *opt, void *ta_parent,
+                          struct mpv_node *dst, void *src)
+{
+    struct m_prop_arr *arr = src;
+    mp_assert(arr->elem_type);
+    mp_assert(arr->elem_type->size > 0);
+    size_t elem_size = arr->elem_type->size;
+    const char *base = arr->data;
+    dst->format = MPV_FORMAT_NODE_ARRAY;
+    dst->u.list = talloc_zero(ta_parent, mpv_node_list);
+    struct mpv_node_list *list = dst->u.list;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    for (int i = 0; i < arr->count; i++) {
+        MP_TARRAY_GROW(list, list->values, list->num);
+        if (m_option_get_node(&elem_opt, list, &list->values[list->num],
+                              (void *)&base[i * elem_size]) >= 0)
+            list->num++;
+    }
+    return 1;
+}
+
+static char *print_prop_array(const m_option_t *opt, const void *val)
+{
+    const struct m_prop_arr *arr = val;
+    mp_assert(arr->elem_type);
+    mp_assert(arr->elem_type->size > 0);
+    size_t elem_size = arr->elem_type->size;
+    const char *base = arr->data;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    char *ret = talloc_strdup(NULL, "");
+    for (int i = 0; i < arr->count; i++) {
+        char *s = m_option_print(&elem_opt, &base[i * elem_size]);
+        if (i > 0)
+            ret = talloc_strdup_append(ret, ",");
+        ret = talloc_strdup_append(ret, s ? s : "?");
+        talloc_free(s);
+    }
+    return ret;
+}
+
+static void free_prop_array(void *val)
+{
+    struct m_prop_arr *arr = val;
+    if (!arr->data)
+        return;
+    size_t elem_size = arr->elem_type->size;
+    char *base = (char *)arr->data;
+    struct m_option elem_opt = {.type = arr->elem_type};
+    for (int i = 0; i < arr->count; i++)
+        m_option_free(&elem_opt, &base[i * elem_size]);
+    talloc_free(base);
+    arr->data = NULL;
+    arr->count = 0;
+}
+
+static void copy_prop_array(const m_option_t *opt, void *dst, const void *src)
+{
+    const struct m_prop_arr *s = src;
+    struct m_prop_arr *d = dst;
+    free_prop_array(d);
+    *d = (struct m_prop_arr){.elem_type = s->elem_type, .count = s->count};
+    if (!s->data || !s->count)
+        return;
+    size_t elem_size = s->elem_type->size;
+    const char *sbase = s->data;
+    char *dbase = talloc_zero_size(NULL, (size_t)s->count * elem_size);
+    struct m_option elem_opt = {.type = s->elem_type};
+    for (int i = 0; i < s->count; i++)
+        m_option_copy(&elem_opt, &dbase[i * elem_size], &sbase[i * elem_size]);
+    d->data = dbase;
+}
+
+static bool equal_prop_array(const m_option_t *opt, void *a, void *b)
+{
+    struct m_prop_arr *pa = a, *pb = b;
+    if (pa->count != pb->count || pa->elem_type != pb->elem_type)
+        return false;
+    size_t elem_size = pa->elem_type->size;
+    char *abase = pa->data;
+    char *bbase = pb->data;
+    struct m_option elem_opt = {.type = pa->elem_type};
+    for (int i = 0; i < pa->count; i++) {
+        if (!m_option_equal(&elem_opt, &abase[i * elem_size], &bbase[i * elem_size]))
+            return false;
+    }
+    return true;
+}
+
+const m_option_type_t m_option_type_prop_array = {
+    .name  = "Property array",
+    .size  = sizeof(struct m_prop_arr),
+    .print = print_prop_array,
+    .copy  = copy_prop_array,
+    .free  = free_prop_array,
+    .get   = prop_array_get,
+    .equal = equal_prop_array,
 };
 
 static int read_subparam(struct mp_log *log, bstr optname, char *termset,
@@ -2215,13 +2314,15 @@ static bool parse_geometry_str(struct m_geometry *gm, bstr s)
 
     if (bstrchr(s, ':') < 0) {
         gm->wh_valid = true;
-        if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-")) {
+        if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-") &&
+            !bstr_startswith0(s, "/"))
+        {
             if (!bstr_startswith0(s, "x"))
                 READ_NUM(w, w_per);
             if (bstr_eatstart0(&s, "x"))
                 READ_NUM(h, h_per);
         }
-        if (s.len > 0) {
+        if (s.len > 0 && !bstr_startswith0(s, "/")) {
             gm->xy_valid = true;
             READ_SIGN(x_sign);
             READ_NUM(x, x_per);
@@ -2265,11 +2366,15 @@ static char *print_geometry(const m_option_t *opt, const void *val)
             APPEND_PER(w, w_per);
             res = talloc_asprintf_append(res, "x");
             APPEND_PER(h, h_per);
-        }
-        if (gm->xy_valid) {
-            res = talloc_asprintf_append(res, gm->x_sign ? "-" : "+");
+            if (gm->xy_valid) {
+                res = talloc_asprintf_append(res, gm->x_sign ? "-" : "+");
+                APPEND_PER(x, x_per);
+                res = talloc_asprintf_append(res, gm->y_sign ? "-" : "+");
+                APPEND_PER(y, y_per);
+            }
+        } else {
             APPEND_PER(x, x_per);
-            res = talloc_asprintf_append(res, gm->y_sign ? "-" : "+");
+            res = talloc_asprintf_append(res, ":");
             APPEND_PER(y, y_per);
         }
         if (gm->ws > 0)
@@ -2296,9 +2401,9 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
         // keep aspect if the other value is not set
         double asp = (double)prew / preh;
         if (gm->w > 0 && !(gm->h > 0)) {
-            *widh = *widw / asp;
+            *widh = MPMAX(*widw / asp, 1);
         } else if (!(gm->w > 0) && gm->h > 0) {
-            *widw = *widh * asp;
+            *widw = MPMAX(*widh * asp, 1);
         }
         if (center) {
             *xpos += prew / 2 - *widw / 2;
@@ -2346,7 +2451,7 @@ exit:
                BSTR_P(name), BSTR_P(param));
     }
     mp_info(log,
-         "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]] | [X[%%]:Y[%%]]\n");
+         "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]][/WS] | [X[%%]:Y[%%]]\n");
     return is_help ? M_OPT_EXIT : M_OPT_INVALID;
 }
 
@@ -3009,7 +3114,7 @@ static bool obj_settings_list_insert_at(struct mp_log *log,
     // items, and it quickly starts taking ages to add all items.
     if (num > 100) {
         mp_warn(log, "Object settings list capacity exceeded: "
-                     "a maximum of 100 elements is allowed.");
+                     "a maximum of 100 elements is allowed.\n");
         return false;
     }
     if (idx < 0)

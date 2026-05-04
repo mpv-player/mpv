@@ -339,9 +339,8 @@ static void fill_presentparams(struct ra_ctx *ctx,
         .Windowed = TRUE,
         .BackBufferWidth = ctx->vo->dwidth ? ctx->vo->dwidth : 1,
         .BackBufferHeight = ctx->vo->dheight ? ctx->vo->dheight : 1,
-        // Add one frame for the backbuffer and one frame of "slack" to reduce
-        // contention with the window manager when acquiring the backbuffer
-        .BackBufferCount = ctx->vo->opts->swapchain_depth + 2,
+        // Add one frame for the backbuffer
+        .BackBufferCount = ctx->vo->opts->swapchain_depth + 1,
         .SwapEffect = IsWindows7OrGreater() ? D3DSWAPEFFECT_FLIPEX : D3DSWAPEFFECT_FLIP,
         // Automatically get the backbuffer format from the display format
         .BackBufferFormat = D3DFMT_UNKNOWN,

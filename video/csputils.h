@@ -61,10 +61,10 @@ enum mp_stereo3d_mode {
 
 extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
-#define MP_STEREO3D_NAME(x) m_opt_choice_str(mp_stereo3d_names, x)
+#define MP_STEREO3D_NAME_DEF(x, def) m_opt_choice_str_def(mp_stereo3d_names, x, def)
 
-#define MP_STEREO3D_NAME_DEF(x, def) \
-    (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
+// Number of screen divisions per axis (div[0]=x, div[1]=y) for the given 3D mode
+void mp_get_3d_side_by_side(int stereo_mode, int div[2]);
 
 // For many colorspace conversions, in particular those involving HDR, an
 // implicit reference white level is needed. Since this magic constant shows up
@@ -124,5 +124,10 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *out
 
 void mp_map_fixp_color(struct pl_transform3x3 *matrix, int ibits, int in[3],
                                                int obits, int out[3]);
+
+enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries *gamut);
+
+int mp_parse_raw_primaries(struct mp_log *log, const char *str,
+                           struct pl_raw_primaries *out);
 
 #endif /* MPLAYER_CSPUTILS_H */

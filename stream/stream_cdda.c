@@ -107,7 +107,7 @@ static void print_cdtext(stream_t *s, int track)
     cdtext_t *text = cdio_get_cdtext(p->cd->p_cdio);
     int header = 0;
     if (text) {
-        for (int i = 0; i < sizeof(cdtext_name) / sizeof(cdtext_name[0]); i++) {
+        for (int i = 0; i < MP_ARRAY_SIZE(cdtext_name); i++) {
             const char *name = cdtext_name[i];
             const char *value = cdtext_get_const(text, i, track);
             if (name && value) {

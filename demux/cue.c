@@ -59,6 +59,7 @@ static const struct {
     { CUE_UNUSED, "REM" },
     { CUE_UNUSED, "SONGWRITER" },
     { CUE_UNUSED, "MESSAGE" },
+    { CUE_UNUSED, "MCN" },
     { -1 },
 };
 
@@ -258,6 +259,8 @@ struct cue_file *mp_parse_cue(struct bstr data)
 
 int mp_check_embedded_cue(struct cue_file *f)
 {
+    if (f->num_tracks == 0)
+        return -1;
     char *fn0 = f->tracks[0].filename;
     for (int n = 1; n < f->num_tracks; n++) {
         char *fn = f->tracks[n].filename;

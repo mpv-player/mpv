@@ -303,8 +303,9 @@ done:
         CloseHandle(arg->write_ol.hEvent);
 
     CloseHandle(arg->client_h);
-    mpv_destroy(arg->client);
+    mpv_handle *client = arg->client;
     talloc_free(arg);
+    mpv_destroy(client);
     MP_THREAD_RETURN();
 }
 

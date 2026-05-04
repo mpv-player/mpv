@@ -214,6 +214,9 @@ It provides following parameters change track metadata:
 ``byterate``
     Number of bytes per second this stream uses. (Purely informational.)
 
+``program_id``
+    Assign this track to a program (integer, default: -1 meaning unset).
+
 ``index``
     The numeric index of the track this should map to (default: -1). This is
     the 0-based index of the virtual stream as seen by the player, enumerating
@@ -366,8 +369,7 @@ tracks. In this case, it's not obvious, which virtual tracks the EDL show should
 expose when being played.
 
 Currently, mpv will apply an arbitrary heuristic which tracks the EDL file
-should expose. (Before mpv 0.30.0, it always used the first source file in the
-segment list.)
+should expose.
 
 You can set the ``layout`` option to ``this`` to make a specific entry define
 the track layout.

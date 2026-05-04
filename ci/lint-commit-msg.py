@@ -5,7 +5,6 @@ import re
 import subprocess
 import sys
 from collections.abc import Callable
-from typing import Optional
 
 
 def call(cmd) -> str:
@@ -22,7 +21,7 @@ def lint_rule(description: str):
         lint_rules[func.__name__] = (func, description)
     return f
 
-def get_commit_range() -> Optional[str]:
+def get_commit_range() -> str | None:
     if len(sys.argv) > 1:
         return sys.argv[1]
     # https://github.com/actions/runner/issues/342#issuecomment-590670059

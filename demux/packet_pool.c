@@ -79,6 +79,10 @@ void demux_packet_pool_push(struct demux_packet_pool *pool,
     if (!dp)
         return;
     dp->next = NULL;
+    // On single packet push, clear instantly. Unlike prepend, where multiple
+    // packets may be prepended at once, there is no performance issue with
+    // clearing a single packet here.
+    demux_packet_unref(dp);
     demux_packet_pool_prepend(pool, dp, dp);
 }
 
@@ -120,11 +124,7 @@ struct demux_packet *demux_packet_pool_pop(struct demux_packet_pool *pool)
     // a single packet at a time. This avoids the need to clear potentially
     // hundreds of thousands of packets at once when file playback is stopped,
     // which would require a significant amount of time to iterate over all packets.
-    if (dp) {
-        if (dp->avpacket)
-            av_packet_unref(dp->avpacket);
-        ta_free_children(dp);
-    }
+    demux_packet_unref(dp);
 
     return dp;
 }

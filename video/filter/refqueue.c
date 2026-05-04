@@ -176,7 +176,7 @@ static bool output_next_field(struct mp_refqueue *q)
 {
     if (q->second_field)
         return false;
-    if (!(q->flags & MP_MODE_OUTPUT_FIELDS))
+    if (!mp_refqueue_output_fields(q))
         return false;
     if (!mp_refqueue_should_deint(q))
         return false;
@@ -367,4 +367,9 @@ void mp_refqueue_write_out_pin(struct mp_refqueue *q, struct mp_image *mpi)
 struct mp_image *mp_refqueue_get_format(struct mp_refqueue *q)
 {
     return q->in_format;
+}
+
+bool mp_refqueue_output_fields(struct mp_refqueue *q)
+{
+    return q->flags & MP_MODE_OUTPUT_FIELDS;
 }

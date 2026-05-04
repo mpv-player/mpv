@@ -119,15 +119,15 @@ if get_option('libmpv')
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
 
     exe = executable('libmpv-test-file-loading', 'libmpv_test_file_loading.c',
-                     dependencies: libmpv_dep)
+                     include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-file-loading', exe, args: file, suite: 'libmpv')
 
     exe = executable('libmpv-test-lavfi-complex', 'libmpv_test_lavfi_complex.c',
-                     dependencies: libmpv_dep)
+                     include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-lavfi-complex', exe, args: file, suite: 'libmpv')
 
     exe = executable('libmpv-test-options', 'libmpv_test_options.c',
-                     dependencies: libmpv_dep)
+                     include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-options', exe, suite: 'libmpv')
 
     # Old versions of ffmpeg are bugged when setting forced tracks and older
@@ -139,7 +139,8 @@ if get_option('libmpv')
         endif
     endif
 
-    exe = executable('libmpv-encode', 'libmpv_encode.c', dependencies: libmpv_dep)
+    exe = executable('libmpv-encode', 'libmpv_encode.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-encode', exe, suite: 'libmpv')
 
     mpvlib = libmpv
@@ -157,7 +158,9 @@ endif
 
 # Supported libavutil versions that work with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
-if libavutil.version().version_compare('>= 59.0.100') and libavutil.version().version_compare('<= 59.39.100')
+if libavutil.version().version_compare('>= 60.8.100') and libavutil.version().version_compare('< 61.0.100')
+    refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg8')
+elif libavutil.version().version_compare('>= 59.0.100') and libavutil.version().version_compare('< 60.0.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg7')
 elif libavutil.version().version_compare('>= 58.27.100') and libavutil.version().version_compare('< 59.0.100')
     refdir = join_paths(source_root, 'test', 'ref', 'ffmpeg6')

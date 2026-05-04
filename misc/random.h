@@ -23,19 +23,32 @@
 #include <stdint.h>
 
 /*
+ * Internal state for the PRNG, should be initialized via mp_rand_seed().
+ */
+typedef struct mp_rand_state {
+    uint64_t v[4];
+} mp_rand_state;
+
+/*
  * Initialize the pseudo-random number generator's state with
  * the given 64-bit seed. If the seed is 0, it is randomized.
  */
-void mp_rand_seed(uint64_t seed);
+mp_rand_state mp_rand_seed(uint64_t seed);
 
 /*
  * Return the next 64-bit pseudo-random integer, and update the state
  * accordingly.
  */
-uint64_t mp_rand_next(void);
+uint64_t mp_rand_next(mp_rand_state *s);
 
 /*
  * Return a double value in the range of [0.0, 1.0) with uniform
  * distribution, and update the state accordingly.
  */
-double mp_rand_next_double(void);
+double mp_rand_next_double(mp_rand_state *s);
+
+/*
+ * Return a 32 bit integer in the range [min, max) with uniform distribution.
+ * Caller should ensure `min < max`.
+ */
+uint32_t mp_rand_in_range32(mp_rand_state *s, uint32_t min, uint32_t max);

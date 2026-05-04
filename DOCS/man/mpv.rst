@@ -161,6 +161,9 @@ O
 v
     Toggle subtitle visibility.
 
+Alt+v
+    Toggle secondary subtitle visibility.
+
 j and J
     Cycle through the available subtitles.
 
@@ -254,6 +257,10 @@ Ctrl+v
     currently playing, it is played immediately. Only works on platforms that
     support the ``clipboard`` property.
 
+Ctrl+r
+    Reload the current file, preserving the time position and any changed
+    option. Empties any network cache.
+
 i and I
     Show/toggle an overlay displaying statistics about the currently playing
     file such as codec, framerate, number of dropped frames and so on. See
@@ -329,8 +336,10 @@ g-e
     Select an MKV edition or DVD/Blu-ray title.
 
 g-l
-    Select a subtitle line to seek to. This currently requires ``ffmpeg`` in
-    ``PATH``, or in the same folder as mpv on Windows.
+    Select a subtitle line to seek to.
+
+g-L
+    Select a secondary subtitle line to seek to.
 
 g-d
     Select an audio device.
@@ -348,10 +357,13 @@ g-b
 g-r
     Show the values of all properties.
 
-g-m, MENU, Ctrl+p
+g-m, Ctrl+p
     Show a menu with miscellaneous entries.
 
 See `SELECT`_ for more information.
+
+MENU, Shift+F10
+    Show the context menu (see `CONTEXT MENU`_).
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
@@ -396,21 +408,6 @@ Ctrl+Wheel up/down
     Change video zoom keeping the part of the video hovered by the cursor under
     it.
 
-Context Menu
--------------
-
-.. warning::
-
-    This feature is experimental. It may not work with all VOs. A libass based
-    fallback may be implemented in the future.
-
-Context Menu is a menu that pops up on the video window on user interaction
-(mouse right click, etc.).
-
-To use this feature, you need to fill the ``menu-data`` property with menu
-definition data, and add a keybinding to run the ``context-menu`` command,
-which can be done with a user script.
-
 USAGE
 =====
 
@@ -445,12 +442,10 @@ because ``--fs`` is a flag option that requires no parameter. If an option
 changes and its parameter becomes optional, then a command line using the
 alternative syntax will break.
 
-Until mpv 0.31.0, there was no difference whether an option started with ``--``
-or a single ``-``. Newer mpv releases strictly expect that you pass the option
-value after a ``=``. For example, before ``mpv --log-file f.txt`` would write
-a log to ``f.txt``, but now this command line fails, as ``--log-file`` expects
-an option value, and ``f.txt`` is simply considered a normal file to be played
-(as in ``mpv f.txt``).
+For options starting with ``--``, mpv expects that you pass the option value
+after a ``=``. For example, ``mpv --log-file f.txt`` will fail, as
+``--log-file`` expects an option value, and ``f.txt`` is simply considered a
+normal file to be played (as in ``mpv f.txt``).
 
 The future plan is that ``-option value`` will not work anymore, and options
 with a single ``-`` behave the same as ``--`` options.
@@ -489,9 +484,9 @@ quotes.
 
 The ``[...]`` form of quotes wraps everything between ``[`` and ``]``. It's
 useful with shells that don't interpret these characters in the middle of
-an argument (like bash). These quotes are balanced (since mpv 0.9.0): the ``[``
-and ``]`` nest, and the quote terminates on the last ``]`` that has no matching
-``[`` within the string. (For example, ``[a[b]c]`` results in ``a[b]c``.)
+an argument (like bash). These quotes are balanced: the ``[`` and ``]`` nest,
+and the quote terminates on the last ``]`` that has no matching ``[`` within the
+string. (For example, ``[a[b]c]`` results in ``a[b]c``.)
 
 The fixed-length quoting syntax is intended for use with external
 scripts and programs.
@@ -529,6 +524,13 @@ interpreted as protocol prefix, even though ``://`` can be part of a legal
 UNIX path. To avoid problems with arbitrary paths, you should be sure that
 absolute paths passed to mpv start with ``/``, and prefix relative paths with
 ``./``.
+
+URLs that are passed to mpv should be percent-encoded for it to work reliably.
+There are some heuristics in place that tries to automatically do it, but these
+heuristics are not foolproof. For example, in order to play a file literally
+named ``foo%20.mp4``, using ``http://localhost/foo%20.mp4`` without any
+percent-encoding will not work. Percent-encoding it as
+``http://localhost/foo%2520.mp4`` will work as expected.
 
 Using the ``file://`` pseudo-protocol is discouraged, because it involves
 strange URL unescaping rules.
@@ -587,7 +589,7 @@ Name             Meaning
 ``~~global/``    The global config path (such as ``/etc/mpv``), if available
                  (not on win32).
 ``~~osxbundle/`` The macOS bundle resource path (macOS only).
-``~~desktop/``   The path to the desktop (win32, macOS).
+``~~desktop/``   The path to the desktop.
 ``~~exe_dir/``   The path to the directory containing ``mpv.exe`` (for config
                  file purposes, ``$MPV_HOME`` will override this) (win32 only).
 ``~~cache/``     The path to application cache data (``~/.cache/mpv/``).
@@ -700,8 +702,6 @@ If you want to pass a value without interpreting it for escapes or ``,``, it is
 recommended to use the ``-append`` variant. When using libmpv, prefer using
 ``MPV_FORMAT_NODE_MAP``; when using a scripting backend or the JSON IPC, use an
 appropriate structured data type.
-
-Prior to mpv 0.33, ``:`` was also recognized as separator by ``-set``.
 
 Object settings list options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -860,7 +860,7 @@ or at runtime with the ``apply-profile <name>`` command.
         [network]
         demuxer-max-back-bytes=512MiB
         # reference a builtin profile
-        profile=fast
+        profile=low-latency
 
 Runtime profiles
 ----------------
@@ -1441,22 +1441,28 @@ PROTOCOLS
 
     Only works with seekable streams.
 
-    Examples::
+    .. admonition:: Example
 
-      mpv slice://1g-2g@cap.ts
+        ::
 
-      This starts reading from cap.ts after seeking 1 GiB, then
-      reads until reaching 2 GiB or end of file.
+            mpv slice://1g-2g@cap.ts
 
-      mpv slice://1g-+2g@cap.ts
+        This starts reading from cap.ts after seeking 1 GiB, then
+        reads until reaching 2 GiB or end of file.
 
-      This starts reading from cap.ts after seeking 1 GiB, then
-      reads until reaching 3 GiB or end of file.
+        ::
 
-      mpv slice://100m@appending://cap.ts
+            mpv slice://1g-+2g@cap.ts
 
-      This starts reading from cap.ts after seeking 100MiB, then
-      reads until end of file.
+        This starts reading from cap.ts after seeking 1 GiB, then
+        reads until reaching 3 GiB or end of file.
+
+        ::
+
+            mpv slice://100m@appending://cap.ts
+
+        This starts reading from cap.ts after seeking 100MiB, then
+        reads until end of file.
 
 ``null://``
 
@@ -1471,6 +1477,20 @@ PROTOCOLS
 ``hex://data``
 
     Like ``memory://``, but the string is interpreted as hexdump.
+
+``archive://[ARCHIVE PATH]|[FILE PATH IN ARCHIVE]``
+
+    Open a file at the specified path inside an archive. Requires libarchive
+    feature enabled. The archive path must have all ``%`` and ``|`` characters
+    URL escaped. The file path should not be URL escaped.
+
+    .. admonition:: Example
+
+        ::
+
+            mpv "archive://file.zip|video.mkv"
+
+        This will play ``video.mkv`` in the archive file ``file.zip``.
 
 PSEUDO GUI MODE
 ===============
@@ -1500,7 +1520,7 @@ The profile is currently defined as follows:
     [builtin-pseudo-gui]
     terminal=no
     force-window=yes
-    idle=once
+    idle=yes
     screenshot-directory=~~desktop/
 
 The ``pseudo-gui`` profile exists for compatibility. The options in the
@@ -1544,6 +1564,8 @@ works like in older mpv releases:
 .. include:: commands.rst
 
 .. include:: select.rst
+
+.. include:: context_menu.rst
 
 .. include:: positioning.rst
 

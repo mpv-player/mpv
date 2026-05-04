@@ -18,6 +18,10 @@ License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
 local utils = require "mp.utils"
 local input = {}
 
+local handle_counter = 0
+local latest_handler_id
+local latest_log_id
+
 local function get_non_callbacks(t)
     local non_callbacks = {}
 
@@ -31,54 +35,102 @@ local function get_non_callbacks(t)
 end
 
 local function register_event_handler(t)
-    mp.register_script_message("input-event", function (type, args)
-        if t[type] then
-            local completions, completion_pos, completion_append =
-                t[type](unpack(utils.parse_json(args or "") or {}))
+    local handler_id = "input-event/"..handle_counter
+    handle_counter = handle_counter + 1
+    latest_handler_id = handler_id
 
-            if type == "complete" and completions then
-                mp.commandv("script-message-to", "console", "complete",
-                            utils.format_json(completions), completion_pos,
-                            completion_append or "")
-            end
+    mp.register_script_message(handler_id, function (event, args)
+        if event == "closed" then
+            mp.unregister_script_message(handler_id)
         end
 
-        if type == "closed" then
-            mp.unregister_script_message("input-event")
+        -- do not process events (other than closed) for an input that has been overwritten
+        if not t[event] or (latest_handler_id ~= handler_id and event ~= "closed") then
+            return
+        end
+
+        args = utils.parse_json(args or "") or {}
+
+        if event == "complete" then
+            local function complete(completions, completion_pos, completion_append)
+                if not completions then
+                    return
+                end
+
+                mp.commandv("script-message-to", "console", "complete", utils.format_json({
+                                client_name = mp.get_script_name(),
+                                handler_id = handler_id,
+                                original_line = args[1],
+                                list = completions,
+                                start_pos = completion_pos,
+                                append = completion_append or "",
+                            }))
+            end
+
+            args[2] = complete
+            complete(t[event](unpack(args)))
+        else
+            t[event](unpack(args))
         end
     end)
+
+    return handler_id
+end
+
+local function input_request(t)
+    t.has_completions = t.complete ~= nil
+    t.client_name = mp.get_script_name()
+    t.handler_id = register_event_handler(t)
+
+    mp.commandv("script-message-to", "console", "get-input",
+                utils.format_json(get_non_callbacks(t)))
 end
 
 function input.get(t)
-    t.has_completions = t.complete ~= nil
+    t.prompt = tostring(t.prompt or "")
 
-    mp.commandv("script-message-to", "console", "get-input",
-                mp.get_script_name(), utils.format_json(get_non_callbacks(t)))
-
-    register_event_handler(t)
+    -- input.select does not support log buffers, so cannot override the latest id.
+    t.id = t.id or mp.get_script_name() .. t.prompt
+    latest_log_id = t.id
+    return input_request(t)
 end
 
-input.select = input.get
+function input.select(t)
+    -- Ensures that console.lua treats this request as a select request.
+    t.items = t.items or {}
+    return input_request(t)
+end
 
 function input.terminate()
-    mp.commandv("script-message-to", "console", "disable")
+    mp.commandv("script-message-to", "console", "disable", utils.format_json({
+                    client_name = mp.get_script_name(),
+                }))
 end
 
 function input.log(message, style, terminal_style)
     mp.commandv("script-message-to", "console", "log", utils.format_json({
-                   text = message,
-                   style = style,
-                   terminal_style = terminal_style,
-               }))
+                    log_id = latest_log_id,
+                    text = message,
+                    style = style,
+                    terminal_style = terminal_style,
+                }))
 end
 
 function input.log_error(message)
-    mp.commandv("script-message-to", "console", "log",
-                 utils.format_json({ text = message, error = true }))
+    mp.msg.warn("log_error is deprecated and will be removed.")
+
+    mp.commandv("script-message-to", "console", "log", utils.format_json({
+                    log_id = latest_log_id,
+                    text = message,
+                    error = true,
+                }))
 end
 
 function input.set_log(log)
-    mp.commandv("script-message-to", "console", "set-log", utils.format_json(log))
+    if latest_log_id then
+        mp.commandv("script-message-to", "console", "set-log",
+            latest_log_id, utils.format_json(log))
+    end
 end
 
 return input

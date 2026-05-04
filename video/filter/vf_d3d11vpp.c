@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <d3d11.h>
+#include <d3d11_1.h>
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_d3d11va.h>
@@ -29,10 +30,12 @@
 #include "filters/filter.h"
 #include "filters/filter_internal.h"
 #include "filters/user_filters.h"
+#include "player/core.h"
 #include "refqueue.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
+#include "video/out/gpu/d3d11_helpers.h"
 
 // For video processor extensions identifiers reference see:
 // https://chromium.googlesource.com/chromium/src/+/5f354f38/ui/gl/swap_chain_presenter.cc
@@ -63,6 +66,16 @@ static const unsigned int intel_vpe_scaling_vsr = 0x2;
 
 static const unsigned int intel_vpe_fn_mode      = 0x20;
 static const unsigned int intel_vpe_mode_preproc = 0x1;
+
+static const struct m_opt_choice_alternatives d3d11vpp_processor_caps[] = {
+    {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
+    {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
+    {"adaptive", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE},
+    {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
+    {"ivtc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
+    {"none", 0},
+    {0}
+};
 
 enum scaling_mode {
     SCALING_BASIC,
@@ -103,13 +116,20 @@ struct priv {
     AVBufferRef *hw_pool;
 
     struct mp_refqueue *queue;
-};
 
+    UINT num_past_views;
+    ID3D11VideoProcessorInputView **past_views;
+    UINT num_future_views;
+    ID3D11VideoProcessorInputView **future_views;
+
+    UINT output_seq;
+};
 
 static void flush_frames(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
     mp_refqueue_flush(p->queue);
+    p->output_seq = 0;
 }
 
 static void destroy_video_proc(struct mp_filter *vf)
@@ -145,13 +165,36 @@ static void enable_nvidia_rtx_extension(struct mp_filter *vf)
     if (FAILED(hr)) {
         MP_WARN(vf, "Failed to enable NVIDIA RTX Super Resolution: %s\n", mp_HRESULT_to_str(hr));
     } else {
-        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled\n");
+        MP_VERBOSE(vf, "NVIDIA RTX Super Resolution enabled.\n");
     }
 }
 
-static void enable_nvidia_true_hdr(struct mp_filter *vf)
+static bool supports_nvidia_true_hdr(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
+
+    UINT supported = 0;
+    HRESULT hr = ID3D11VideoContext_VideoProcessorGetStreamExtension(p->video_ctx,
+                                                                     p->video_proc,
+                                                                     0,
+                                                                     &NVIDIA_TRUE_HDR_INTERFACE_GUID,
+                                                                     sizeof(supported),
+                                                                     &supported);
+
+    if (FAILED(hr) || !supported) {
+        MP_WARN(vf, "NVIDIA RTX Video HDR not supported.\n");
+        return false;
+    }
+
+    return true;
+}
+
+static bool enable_nvidia_true_hdr(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (!supports_nvidia_true_hdr(vf))
+        return false;
 
     struct nvidia_ext {
         unsigned int version;
@@ -169,9 +212,11 @@ static void enable_nvidia_true_hdr(struct mp_filter *vf)
 
     if (FAILED(hr)) {
         MP_WARN(vf, "Failed to enable NVIDIA RTX Video HDR: %s\n", mp_HRESULT_to_str(hr));
-    } else {
-        MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled\n");
+        return false;
     }
+
+    MP_VERBOSE(vf, "NVIDIA RTX Video HDR enabled.\n");
+    return true;
 }
 
 static void enable_intel_vsr_extension(struct mp_filter *vf)
@@ -211,7 +256,7 @@ static void enable_intel_vsr_extension(struct mp_filter *vf)
     if (FAILED(hr))
         goto failed;
 
-    MP_VERBOSE(vf, "Intel Video Super Resolution enabled\n");
+    MP_VERBOSE(vf, "Intel Video Super Resolution enabled.\n");
     return;
 
 failed:
@@ -237,49 +282,95 @@ static int recreate_video_proc(struct mp_filter *vf)
     if (FAILED(hr))
         goto fail;
 
-    if (!p->opts->mode && p->opts->deint_enabled)
-        p->opts->mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB;
+    int mode = 0;
+    if (mp_refqueue_should_deint(p->queue))
+        mode = p->opts->mode ? p->opts->mode : D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE;
 
-    int rindex = p->opts->mode ? -1 : 0;
-    if (rindex == 0)
-        goto create;
-
+    D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rc_caps = {0};
     D3D11_VIDEO_PROCESSOR_CAPS caps;
     hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorCaps(p->vp_enum, &caps);
     if (FAILED(hr))
         goto fail;
 
-    MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
-               (int)caps.RateConversionCapsCount, p->opts->mode);
+    static const char *frame_type[] = {
+        [D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE] = "progressive",
+        [D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST] = "interlaced tff",
+        [D3D11_VIDEO_FRAME_FORMAT_INTERLACED_BOTTOM_FIELD_FIRST] = "interlaced bff",
+    };
+    mp_require((size_t)p->d3d_frame_format < MP_ARRAY_SIZE(frame_type));
+    MP_VERBOSE(vf, "Found %u rate conversion caps for %s frame. Looking for caps=%#x.\n",
+               caps.RateConversionCapsCount, frame_type[p->d3d_frame_format], mode);
 
-    for (int n = 0; n < caps.RateConversionCapsCount; n++) {
+    int rindex = -1;
+    for (UINT n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
         hr = ID3D11VideoProcessorEnumerator_GetVideoProcessorRateConversionCaps
                 (p->vp_enum, n, &rcaps);
         if (FAILED(hr))
             goto fail;
-        MP_VERBOSE(vf, "  - %d: 0x%08x\n", n, (unsigned)rcaps.ProcessorCaps);
-        if (rcaps.ProcessorCaps & p->opts->mode) {
-            MP_VERBOSE(vf, "       (matching)\n");
-            if (rindex < 0)
+        // Init rc_caps for fallback if no matching mode is found.
+        if (n == 0)
+            rc_caps = rcaps;
+        const char *marker = WHITE_CIRCLE;
+        if ((rcaps.ProcessorCaps & mode) == mode) {
+            if (rindex < 0) {
                 rindex = n;
+                rc_caps = rcaps;
+                marker = BLACK_CIRCLE;
+            }
+        }
+        MP_VERBOSE(vf, "%s %d: processor_caps=%#x past_frames=%u future_frames=%u "
+                       "itelecine_caps=%#x custom_rate_count=%u\n", marker, n,
+                   rcaps.ProcessorCaps, rcaps.PastFrames, rcaps.FutureFrames,
+                   rcaps.ITelecineCaps, rcaps.CustomRateCount);
+
+        for (UINT c = 0; c < rcaps.CustomRateCount; c++) {
+            D3D11_VIDEO_PROCESSOR_CUSTOM_RATE cr;
+            if (FAILED(ID3D11VideoProcessorEnumerator_GetVideoProcessorCustomRate(p->vp_enum, n, c, &cr)))
+                continue;
+            MP_DBG(vf, "\t%u: custom_rate=%u/%u out_frames=%u in_interlaced=%d in_frames_or_fields=%u\n",
+                   c, cr.CustomRate.Numerator, cr.CustomRate.Denominator, cr.OutputFrames,
+                   cr.InputInterlaced, cr.InputFramesOrFields);
         }
     }
 
     if (rindex < 0) {
-        MP_WARN(vf, "No fitting video processor found, picking #0.\n");
+        MP_WARN(vf, "No video processor found matching %s mode, using #0.\n",
+                m_opt_choice_str(d3d11vpp_processor_caps, mode));
         rindex = 0;
     }
 
-    // TODO: so, how do we select which rate conversion mode the processor uses?
-
-create:
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
     if (FAILED(hr)) {
         MP_ERR(vf, "Failed to create D3D11 video processor.\n");
         goto fail;
     }
+
+    p->num_past_views = rc_caps.PastFrames;
+    if (p->num_past_views)
+        MP_TARRAY_GROW(p, p->past_views, p->num_past_views - 1);
+
+    p->num_future_views = rc_caps.FutureFrames;
+    if (p->num_future_views)
+        MP_TARRAY_GROW(p, p->future_views, p->num_future_views - 1);
+
+    // Force BOB if requested by user, this doesn't really make much sense, but
+    // since we have an option, just allow to not use any ref frames.
+    if (mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB ||
+        mode == D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND) {
+        p->num_past_views = 0;
+        p->num_future_views = 0;
+        // Warn explicitly here, because forcing unsupported mode will cause
+        // obviously wrong result.
+        if ((rc_caps.ProcessorCaps & mode) != mode) {
+            MP_WARN(vf, "%s mode requested, but not supported. Consider using "
+                        "another mode for correct deinterlacing.\n",
+                    m_opt_choice_str(d3d11vpp_processor_caps, mode));
+        }
+    }
+
+    mp_refqueue_set_refs(p->queue, p->num_past_views, p->num_future_views);
 
     // Note: libavcodec does not support cropping left/top with hwaccel.
     RECT src_rc = {
@@ -295,22 +386,70 @@ create:
                                                                  p->video_proc,
                                                                  0, FALSE);
 
+    bool half_rate = !mp_refqueue_output_fields(p->queue) && mp_refqueue_should_deint(p->queue);
+    MP_DBG(vf, "Using %u past and %u future frames for processing at %s rate.\n",
+           p->num_past_views, p->num_future_views, half_rate ? "half" : "normal");
+    // None of the major GPU vendors seem to support custom rates for proper
+    // IVTC frame dropping. Only frame reconstruction is supported.
     ID3D11VideoContext_VideoProcessorSetStreamOutputRate(p->video_ctx,
                                                          p->video_proc,
                                                          0,
-                                                         D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
+                                                         half_rate ?
+                                                            D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_HALF :
+                                                            D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
                                                          FALSE, 0);
 
-    D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
-        .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
-        .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
-    };
-    ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
-                                                         p->video_proc,
-                                                         0, &csp);
-    ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
-                                                         p->video_proc,
-                                                         &csp);
+    if (p->opts->nvidia_true_hdr && enable_nvidia_true_hdr(vf)) {
+        // NVIDIA RTX Video HDR seems to require BT.2020+PQ RGB output.
+        p->out_params.color = pl_color_space_hdr10;
+        p->out_params.color.hdr.max_luma = 1000;
+        MP_WARN(vf, "Tagging image output as HDR with max-luma=1000 nits for "
+                    "NVIDIA RTX Video HDR. This is only a guess. "
+                    "Adjust the value to match NVIDIA settings with "
+                    "`--vf-add=format=max-luma=<value>`.\n");
+        const enum mp_imgfmt output_format = IMGFMT_X2BGR10;
+        if (p->opts->format) {
+            // Don't override user choice, even if it might break output.
+            if (p->out_params.hw_subfmt != output_format) {
+                MP_WARN(vf, "Requested %s format is not supported for NVIDIA RTX Video HDR. "
+                            "Consider using %s instead or leave it unspecified.\n",
+                        mp_imgfmt_to_name(p->opts->format),
+                        mp_imgfmt_to_name(output_format));
+            }
+        } else {
+            p->out_params.hw_subfmt = output_format;
+        }
+    }
+
+    mp_image_params_guess_csp(&p->params);
+    mp_image_params_guess_csp(&p->out_params);
+
+    ID3D11VideoContext1 *video_ctx1;
+    hr = ID3D11VideoContext_QueryInterface(p->video_ctx, &IID_ID3D11VideoContext1, (void **)&video_ctx1);
+    if (SUCCEEDED(hr)) {
+        DXGI_COLOR_SPACE_TYPE in = mp_params_to_dxgi_colorspace(vf->log, &p->params);
+        DXGI_COLOR_SPACE_TYPE out = mp_params_to_dxgi_colorspace(vf->log, &p->out_params);
+        if (in != out)
+            MP_VERBOSE(vf, "Converting %s to %s.\n", d3d11_get_csp_name(in), d3d11_get_csp_name(out));
+        ID3D11VideoContext1_VideoProcessorSetStreamColorSpace1(video_ctx1,
+                                                               p->video_proc,
+                                                               0, in);
+        ID3D11VideoContext1_VideoProcessorSetOutputColorSpace1(video_ctx1,
+                                                               p->video_proc,
+                                                               out);
+        SAFE_RELEASE(video_ctx1);
+    } else {
+        D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
+            .YCbCr_Matrix = p->params.repr.sys != PL_COLOR_SYSTEM_BT_601,
+            .Nominal_Range = p->params.repr.levels == PL_COLOR_LEVELS_LIMITED ? 1 : 2,
+        };
+        ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
+                                                            p->video_proc,
+                                                            0, &csp);
+        ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
+                                                            p->video_proc,
+                                                            &csp);
+    }
 
     switch (p->opts->scaling_mode) {
     case SCALING_INTEL_VSR:
@@ -320,9 +459,6 @@ create:
         enable_nvidia_rtx_extension(vf);
         break;
     }
-
-    if (p->opts->nvidia_true_hdr)
-        enable_nvidia_true_hdr(vf);
 
     return 0;
 fail:
@@ -342,10 +478,6 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
         return NULL;
     }
 
-    AVHWFramesContext *hw_frame_ctx = (void *)p->hw_pool->data;
-    AVD3D11VAFramesContext *d3d11va_frames_ctx = hw_frame_ctx->hwctx;
-    d3d11va_frames_ctx->BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
     AVFrame *av_frame = av_frame_alloc();
     MP_HANDLE_OOM(av_frame);
     if (av_hwframe_get_buffer(p->hw_pool, av_frame, 0) < 0) {
@@ -364,6 +496,26 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     return img;
 }
 
+static ID3D11VideoProcessorInputView *create_input_view(struct mp_filter *vf,
+                                                        struct mp_image *img)
+{
+    struct priv *p = vf->priv;
+    if (!img)
+        return NULL;
+
+    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC desc = {
+        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
+        .Texture2D.ArraySlice = (intptr_t)img->planes[1],
+    };
+    ID3D11VideoProcessorInputView *view = NULL;
+    HRESULT hr = ID3D11VideoDevice_CreateVideoProcessorInputView(
+        p->video_dev, (ID3D11Resource *)img->planes[0],
+        p->vp_enum, &desc, &view);
+    if (FAILED(hr))
+        MP_WARN(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    return view;
+}
+
 static struct mp_image *render(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -372,6 +524,10 @@ static struct mp_image *render(struct mp_filter *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
+
+    UINT num_past = 0;
+    UINT num_future = 0;
+
     out = alloc_out(vf);
     if (!out) {
         MP_WARN(vf, "failed to allocate frame\n");
@@ -384,15 +540,10 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!in)
         goto cleanup;
     ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
-    int d3d_subindex = (intptr_t)in->planes[1];
 
     mp_image_copy_attributes(out, in);
-    // mp_image_copy_attributes overwrites the height and width
-    // set it the size back if we are using scale
-    mp_image_set_size(out, p->out_params.w, p->out_params.h);
-    // mp_image_copy_attributes will set the crop value to the origin
-    // width and height, set the crop back to the default state
-    out->params.crop = p->out_params.crop;
+    // TODO: sanitize out_params based the processing enabled.
+    out->params = p->out_params;
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
     if (!mp_refqueue_should_deint(p->queue)) {
@@ -411,35 +562,31 @@ static struct mp_image *render(struct mp_filter *vf)
         p->c_w = texdesc.Width;
         p->c_h = texdesc.Height;
         p->d3d_frame_format = d3d_frame_format;
+        p->output_seq = 0;
         if (recreate_video_proc(vf) < 0)
             goto cleanup;
-    }
-
-    if (!mp_refqueue_should_deint(p->queue)) {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
-    } else if (mp_refqueue_is_top_field(p->queue)) {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST;
-    } else {
-        d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_BOTTOM_FIELD_FIRST;
     }
 
     ID3D11VideoContext_VideoProcessorSetStreamFrameFormat(p->video_ctx,
                                                           p->video_proc,
                                                           0, d3d_frame_format);
 
-    D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC indesc = {
-        .ViewDimension = D3D11_VPIV_DIMENSION_TEXTURE2D,
-        .Texture2D = {
-            .ArraySlice = d3d_subindex,
-        },
-    };
-    hr = ID3D11VideoDevice_CreateVideoProcessorInputView(p->video_dev,
-                                                         (ID3D11Resource *)d3d_tex,
-                                                         p->vp_enum, &indesc,
-                                                         &in_view);
-    if (FAILED(hr)) {
-        MP_ERR(vf, "Could not create ID3D11VideoProcessorInputView\n");
+    in_view = create_input_view(vf, in);
+    if (!in_view)
         goto cleanup;
+
+    for (int i = p->num_past_views; i > 0; i--) {
+        ID3D11VideoProcessorInputView *v =
+            create_input_view(vf, mp_refqueue_get(p->queue, -i));
+        if (v)
+            p->past_views[num_past++] = v;
+    }
+
+    for (int i = 1; i <= p->num_future_views; i++) {
+        ID3D11VideoProcessorInputView *v =
+            create_input_view(vf, mp_refqueue_get(p->queue, i));
+        if (v)
+            p->future_views[num_future++] = v;
     }
 
     D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC outdesc = {
@@ -454,24 +601,33 @@ static struct mp_image *render(struct mp_filter *vf)
         goto cleanup;
     }
 
+    bool half_rate = !mp_refqueue_output_fields(p->queue) && mp_refqueue_should_deint(p->queue);
     D3D11_VIDEO_PROCESSOR_STREAM stream = {
         .Enable = TRUE,
         .pInputSurface = in_view,
+        .OutputIndex = mp_refqueue_is_second_field(p->queue),
+        .InputFrameOrField = p->output_seq * (half_rate ? 2 : 1),
+        .PastFrames = num_past,
+        .FutureFrames = num_future,
+        .ppPastSurfaces = num_past ? p->past_views : NULL,
+        .ppFutureSurfaces = num_future ? p->future_views : NULL,
     };
-    int frame = mp_refqueue_is_second_field(p->queue);
     hr = ID3D11VideoContext_VideoProcessorBlt(p->video_ctx, p->video_proc,
-                                              out_view, frame, 1, &stream);
+                                              out_view, p->output_seq, 1, &stream);
     if (FAILED(hr)) {
         MP_ERR(vf, "VideoProcessorBlt failed.\n");
         goto cleanup;
     }
 
+    p->output_seq++;
     res = 0;
 cleanup:
-    if (in_view)
-        ID3D11VideoProcessorInputView_Release(in_view);
-    if (out_view)
-        ID3D11VideoProcessorOutputView_Release(out_view);
+    SAFE_RELEASE(in_view);
+    SAFE_RELEASE(out_view);
+    for (int i = 0; i < num_past; i++)
+        SAFE_RELEASE(p->past_views[i]);
+    for (int i = 0; i < num_future; i++)
+        SAFE_RELEASE(p->future_views[i]);
     if (res < 0)
         TA_FREEP(&out);
     return out;
@@ -501,9 +657,7 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         if (p->opts->format)
             p->out_params.hw_subfmt = p->opts->format;
 
-        p->require_filtering = p->params.hw_subfmt != p->out_params.hw_subfmt ||
-                               p->params.w != p->out_params.w ||
-                               p->params.h != p->out_params.h ||
+        p->require_filtering = !mp_image_params_static_equal(&p->params, &p->out_params) ||
                                p->opts->nvidia_true_hdr;
     }
 
@@ -618,10 +772,16 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
 
     mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
 
+    // Force BLEND mode by not sending ref frames and setting half rate.
+    // Use half rate for IVTC modes, custom rate would be perfect for that,
+    // but it's not supported by any driver in practice.
+    bool out_fields = p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND &&
+                      p->opts->mode != D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE;
+
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue,
         (p->opts->deint_enabled ? MP_MODE_DEINT : 0) |
-        MP_MODE_OUTPUT_FIELDS |
+        (out_fields ? MP_MODE_OUTPUT_FIELDS : 0) |
         (p->opts->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
     mp_refqueue_set_parity(p->queue, p->opts->field_parity);
 
@@ -642,13 +802,7 @@ static const m_option_t vf_opts_fields[] = {
         {"intel", SCALING_INTEL_VSR},
         {"nvidia", SCALING_NVIDIA_RTX})},
     {"interlaced-only", OPT_BOOL(interlaced_only)},
-    {"mode", OPT_CHOICE(mode,
-        {"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
-        {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
-        {"adaptive", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE},
-        {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
-        {"ivctc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
-        {"none", 0})},
+    {"mode", OPT_CHOICE_C(mode, d3d11vpp_processor_caps)},
     {"parity", OPT_CHOICE(field_parity,
         {"tff", MP_FIELD_PARITY_TFF},
         {"bff", MP_FIELD_PARITY_BFF},

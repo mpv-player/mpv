@@ -4,6 +4,7 @@ labels: ["os:linux"]
 type: Bug
 body:
 - type: textarea
+  id: mpv_information
   attributes:
       label: "mpv Information"
       placeholder: |
@@ -24,6 +25,7 @@ body:
   validations:
       required: false
 - type: textarea
+  id: other_information
   attributes:
       label: "Other Information"
       description: >
@@ -38,7 +40,9 @@ body:
            - The time when the problem started to happen (after updating mpv, system, driver, etc.)
            - Possible screenshot or video of visual glitches
 
-          If you're not using git master or the latest release, update.
+          If you're not using the git master branch or the [latest release](https://github.com/mpv-player/mpv/releases/latest), please update.
+          Older versions are not supported. If your distribution does not provide the latest version, please report the issue to them.
+
           Packages and builds can be found [here](https://mpv.io/installation/).
       value: |-
           - Linux version:
@@ -53,6 +57,7 @@ body:
   validations:
       required: true
 - type: textarea
+  id: reproduction_steps
   attributes:
       label: "Reproduction Steps"
       description: >
@@ -74,18 +79,21 @@ body:
   validations:
       required: true
 - type: textarea
+  id: expected_behavior
   attributes:
       label: "Expected Behavior"
       placeholder: "What were you expecting?"
   validations:
       required: true
 - type: textarea
+  id: actual_behavior
   attributes:
       label: "Actual Behavior"
       placeholder: "What happened instead?"
   validations:
       required: true
 - type: textarea
+  id: log_file
   attributes:
       label: "Log File"
       placeholder: "Drag and drop log file here (Don't paste content directly)"
@@ -94,7 +102,7 @@ body:
           attach it to the issue.
 
 
-          If you have trouble producing a log file, you can alternatively use `--gpu-debug -v -v`,
+          If you have trouble producing a log file, you can alternatively use `--gpu-debug --msg-time -v -v`,
           save the terminal output to a file, and attach it to the issue.
 
 
@@ -109,6 +117,7 @@ body:
   validations:
       required: true
 - type: textarea
+  id: sample_files
   attributes:
       label: "Sample Files"
       placeholder: "Drag and drop sample files here"
@@ -133,7 +142,7 @@ body:
   attributes:
       label: "I carefully read all instruction and confirm that I did the following:"
       options:
-          - label: "I tested with the latest mpv version to validate that the issue is not already fixed."
+          - label: "I tested and confirmed that the issue exists with the [latest release version](https://github.com/mpv-player/mpv/releases/latest) or newer."
             required: true
           - label: "I provided all required information including system and mpv version."
             required: true

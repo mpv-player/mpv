@@ -1,5 +1,6 @@
 #include "common/msg.h"
 #include "video/out/vo.h"
+#include "video/mp_image.h"
 #include "utils.h"
 
 // Standard parallel 2D projection, except y1 < y0 means that the coordinate
@@ -52,6 +53,41 @@ double gl_video_scale_ambient_lux(float lmin, float lmax,
     float max = MPMAX(rmax, rmin);
     float min = MPMIN(rmax, rmin);
     return MPMAX(MPMIN(result, max), min);
+}
+
+bool gpu_get_auto_param(const struct mp_image *mpi, struct bstr name, double *out)
+{
+    const struct mp_image_params *params = &mpi->params;
+    float chroma_offset_x, chroma_offset_y;
+    pl_chroma_location_offset(params->chroma_location,
+                              &chroma_offset_x, &chroma_offset_y);
+
+    const struct {
+        const char *name;
+        double value;
+    } opts[] = {
+        {             "PTS", mpi->pts                       },
+        { "chroma_offset_x", chroma_offset_x                },
+        { "chroma_offset_y", chroma_offset_y                },
+        {        "min_luma", params->color.hdr.min_luma     },
+        {        "max_luma", params->color.hdr.max_luma     },
+        {         "max_cll", params->color.hdr.max_cll      },
+        {        "max_fall", params->color.hdr.max_fall     },
+        {     "scene_max_r", params->color.hdr.scene_max[0] },
+        {     "scene_max_g", params->color.hdr.scene_max[1] },
+        {     "scene_max_b", params->color.hdr.scene_max[2] },
+        {       "scene_avg", params->color.hdr.scene_avg    },
+        {        "max_pq_y", params->color.hdr.max_pq_y     },
+        {        "avg_pq_y", params->color.hdr.avg_pq_y     },
+    };
+
+    for (int n = 0; n < MP_ARRAY_SIZE(opts); n++) {
+        if (bstrcmp0(name, opts[n].name) != 0)
+            continue;
+        *out = opts[n].value;
+        return true;
+    }
+    return false;
 }
 
 void ra_buf_pool_uninit(struct ra *ra, struct ra_buf_pool *pool)
@@ -339,9 +375,12 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
         return;
     while (*src) {
         const char *end = strchr(src, '\n');
-        const char *next = end + 1;
-        if (!end)
+        const char *next;
+        if (!end) {
             next = end = src + strlen(src);
+        } else {
+            next = end + 1;
+        }
         mp_msg(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
         line++;
         src = next;

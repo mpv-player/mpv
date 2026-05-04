@@ -826,9 +826,10 @@ static int preinit(struct vo *vo)
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_add(vo->hwdec_devs, &p->mpvaapi->hwctx);
 
-    MP_WARN(vo, "Warning: this compatibility VO is low quality and may "
+    MP_WARN(vo, "Warning: this VO is deprecated and will be removed next release.\n"
+                "This compatibility VO is low quality and may\n"
                 "have issues with OSD, scaling, screenshots and more.\n"
-                "vo=gpu is the preferred choice in any case and "
+                "vo=gpu-next is the preferred choice in any case and "
                 "includes VA-API support via hwdec=vaapi or vaapi-copy.\n");
 
     return 0;

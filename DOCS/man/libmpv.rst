@@ -22,7 +22,7 @@ You can write C plugins for mpv. These use the libmpv API, although they do not
 use the libmpv library itself.
 
 They are enabled by default if compiler supports linking with the ``-rdynamic``
-flag on Linux/BSD platforms. On Windows the are always enabled.
+flag on Linux/BSD platforms. On Windows they are always enabled.
 
 C plugins location
 ------------------
@@ -38,7 +38,7 @@ A C plugin must export the following function::
 
     int mpv_open_cplugin(mpv_handle *handle)
 
-The plugin function will be called on loading time. This function does not
+The plugin function will be called on loading time. This function must not
 return as long as your plugin is loaded (it runs in its own thread). The
 ``handle`` will be deallocated as soon as the plugin function returns.
 
@@ -52,7 +52,8 @@ behavior.
 Within the plugin function, you can call libmpv API functions. The ``handle``
 is created by ``mpv_create_client()`` (or actually an internal equivalent),
 and belongs to you. You can call ``mpv_wait_event()`` to wait for things
-happening, and so on.
+happening, and so on. However do not call ``mpv_destroy()`` or
+``mpv_terminate_destroy()`` on this handle.
 
 Note that the player might block until your plugin calls ``mpv_wait_event()``
 for the first time. This gives you a chance to install initial hooks etc.

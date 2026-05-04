@@ -36,9 +36,15 @@
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
+#if HAVE_SUBRANDR
+extern const struct sd_functions sd_sbr;
+#endif
 
 static const struct sd_functions *const sd_list[] = {
     &sd_lavc,
+#if HAVE_SUBRANDR
+    &sd_sbr,
+#endif
     &sd_ass,
     NULL
 };
@@ -69,6 +75,7 @@ struct dec_sub {
 
     struct mp_codec_params *codec;
     double start, end;
+    char *lang;
 
     double last_vo_pts;
     struct sd *sd;
@@ -165,6 +172,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .order = sub->order,
             .attachments = sub->attachments,
             .codec = sub->codec,
+            .lang = sub->lang,
             .preload_ok = true,
         };
 
@@ -198,6 +206,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
         .shared_opts_cache = m_config_cache_alloc(sub, global, &mp_subtitle_shared_sub_opts),
         .sh = track->stream,
         .codec = track->stream->codec,
+        .lang = track->lang,
         .attachments = talloc_steal(sub, attachments),
         .play_dir = 1,
         .order = order,
@@ -570,4 +579,59 @@ bool sub_is_secondary_visible(struct dec_sub *sub)
     bool ret = sub->shared_opts->sub_visibility[1];
     mp_mutex_unlock(&sub->lock);
     return ret;
+}
+
+static int sub_line_cmp(const void *a, const void *b)
+{
+    const struct sub_line *la = a, *lb = b;
+    if (la->start < lb->start) return -1;
+    if (la->start > lb->start) return  1;
+    return 0;
+}
+
+static void dedup_sub_lines(struct sub_lines *lines)
+{
+    int window_start = 0;
+    int window_end = 1;
+    int current_shift = 0;
+
+    while (window_end < lines->num_entries) {
+        struct sub_line next = lines->entries[window_end + current_shift];
+        for (int i = window_start; i < window_end; ++i) {
+            if (lines->entries[i].end < next.start) {
+                struct sub_line tmp = lines->entries[window_start];
+                lines->entries[window_start++] = lines->entries[i];
+                lines->entries[i] = tmp;
+                continue;
+            }
+
+            if (!strcmp(lines->entries[i].text, next.text)) {
+                lines->entries[i].end = MPMAX(next.end, lines->entries[i].end);
+                TA_FREEP(&next.text);
+                ++current_shift, --lines->num_entries;
+                goto skip;
+            }
+        }
+
+        lines->entries[window_end++] = next;
+
+    skip:;
+    }
+}
+
+struct sub_lines *sub_get_lines(struct dec_sub *sub)
+{
+    mp_mutex_lock(&sub->lock);
+    struct sub_lines *res = NULL;
+    if (sub->sd->driver->get_lines) {
+        res = sub->sd->driver->get_lines(sub->sd);
+        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+              sub_line_cmp);
+        dedup_sub_lines(res);
+        // dedup may sometimes reorder lines to keep its window smaller
+        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+              sub_line_cmp);
+    }
+    mp_mutex_unlock(&sub->lock);
+    return res;
 }

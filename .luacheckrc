@@ -57,6 +57,7 @@ local mp_globals = {
             disable_key_bindings = {},
             enable_key_bindings = {},
             find_config_file = {},
+            flush_keybindings = {},
             format_time = {},
             get_mouse_pos = {},
             set_key_bindings = {},
@@ -78,7 +79,6 @@ local mp_internal = {
             UNKNOWN_TYPE = { fields = { info = {}, type = {} }},
             _legacy_overlay = { fields = { res_x = {}, res_y = {}, data = {}, update = {} }},
             cancel_timer = {},
-            flush_keybindings = {},
             get_osd_margins = {},
             input_define_section = {},
             input_disable_section = {},
@@ -106,4 +106,5 @@ stds = { mp = { read_globals = mp_globals } }
 -- mp_internal seems to be merged with mp for other files too...
 files["player/lua/defaults.lua"] = { globals = mp_internal }
 files["player/lua/auto_profiles.lua"] = { globals = { "p", "get" } }
+files["player/lua/select.lua"] = { globals = { "p", "get" } }
 max_line_length = 100

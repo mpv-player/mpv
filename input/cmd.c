@@ -174,21 +174,16 @@ static bool set_node_arg(struct mp_log *log, struct mp_cmd *cmd, int i,
 
     struct mp_cmd_arg arg = {.type = opt};
     void *dst = &arg.v;
-    if (val->format == MPV_FORMAT_STRING) {
-        int r = m_option_parse(log, opt, bstr0(cmd->name),
-                                bstr0(val->u.string), dst);
-        if (r < 0) {
+    int r = m_option_set_node_or_string(log, opt, bstr0(cmd->name), dst, val);
+    if (r < 0) {
+        if (val->format == MPV_FORMAT_STRING) {
             mp_err(log, "Command %s: argument %s can't be parsed: %s.\n",
                    cmd->name, name, m_option_strerror(r));
-            return false;
-        }
-    } else {
-        int r = m_option_set_node(opt, dst, val);
-        if (r < 0) {
+        } else {
             mp_err(log, "Command %s: argument %s has incompatible type.\n",
                    cmd->name, name);
-            return false;
         }
+        return false;
     }
 
     // (leave unset arguments blank, to be set later or checked by finish_cmd())
@@ -235,7 +230,12 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
     mp_assert(node->format == MPV_FORMAT_NODE_MAP);
     mpv_node_list *args = node->u.list;
 
-    mpv_node *name = node_map_get(node, "name");
+    bool old_name = false;
+    mpv_node *name = node_map_get(node, "_name");
+    if (!name || name->format != MPV_FORMAT_STRING) {
+        old_name = true;
+        name = node_map_get(node, "name");
+    }
     if (!name || name->format != MPV_FORMAT_STRING)
         return false;
 
@@ -253,7 +253,7 @@ static bool cmd_node_map(struct mp_log *log, struct mp_cmd *cmd, mpv_node *node)
         const char *key = args->keys[n];
         mpv_node *val = &args->values[n];
 
-        if (strcmp(key, "name") == 0) {
+        if (strcmp(key, "_name") == 0 || (old_name && strcmp(key, "name") == 0)) {
             // already handled above
         } else if (strcmp(key, "_flags") == 0) {
             if (val->format != MPV_FORMAT_NODE_ARRAY)

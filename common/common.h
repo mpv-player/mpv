@@ -91,6 +91,15 @@ enum video_sync {
     VS_NONE,
 };
 
+enum track_flags {
+    // starts at 4, for cmd_track_add backwards compatibility
+    TRACK_HEARING_IMPAIRED = 1 << 2,
+    TRACK_VISUAL_IMPAIRED = 1 << 3,
+    TRACK_ATTACHED_PICTURE = 1 << 4,
+    TRACK_FORCED = 1 << 5,
+    TRACK_DEFAULT = 1 << 6,
+};
+
 #define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
                        (x) == VS_DISP_RESAMPLE_VDROP || \
                        (x) == VS_DISP_RESAMPLE_NONE ||  \
@@ -131,9 +140,10 @@ void mp_rect_rotate(struct mp_rect *rc, int w, int h, int rotation);
 unsigned int mp_log2(uint32_t v);
 uint32_t mp_round_next_power_of_2(uint32_t v);
 int mp_lcm(int x, int y);
+int64_t mp_gcd(int64_t x, int64_t y);
 
 int mp_snprintf_cat(char *str, size_t size, const char *format, ...)
-    PRINTF_ATTRIBUTE(3, 4);
+    MP_PRINTF_ATTRIBUTE(3, 4);
 
 struct bstr;
 
@@ -156,7 +166,7 @@ char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag);
 #define mp_tprintf(SIZE, format, ...) \
     mp_tprintf_buf((char[SIZE]){0}, (SIZE), (format), __VA_ARGS__)
 char *mp_tprintf_buf(char *buf, size_t buf_size, const char *format, ...)
-    PRINTF_ATTRIBUTE(3, 4);
+    MP_PRINTF_ATTRIBUTE(3, 4);
 
 char **mp_dup_str_array(void *tctx, char **s);
 

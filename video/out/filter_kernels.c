@@ -135,6 +135,24 @@ static void mp_compute_weights(struct filter_kernel *filter, double f,
         out_w[n] = w;
         sum += w;
     }
+    // If the filter radius is smaller than the smallest tap distance (e.g. a
+    // user-resized filter with radius < 0.5 sampled at f=0.5), all taps fall
+    // outside the kernel support and sum == 0. Fall back to nearest-neighbor
+    // on the closest tap to avoid a division-by-zero.
+    if (sum == 0.0) {
+        int nearest = 0;
+        double min_dist = INFINITY;
+        for (int n = 0; n < filter->size; n++) {
+            double x = fabs(f - (n - filter->size / 2 + 1));
+            if (x < min_dist) {
+                min_dist = x;
+                nearest = n;
+            }
+        }
+        for (int n = 0; n < filter->size; n++)
+            out_w[n] = (n == nearest) ? 1.0f : 0.0f;
+        return;
+    }
     // Normalize to preserve energy
     for (int n = 0; n < filter->size; n++)
         out_w[n] /= sum;
@@ -331,9 +349,9 @@ static double sphinx(params *p, double x)
 }
 
 const struct filter_window mp_filter_windows[] = {
-    {WINDOW_BOX,      1,   box},
-    {WINDOW_TRIANGLE, 1,   triangle},
-    {WINDOW_BARTLETT, 1,   triangle},
+    {WINDOW_BOX,      1,   box, .resizable = true},
+    {WINDOW_TRIANGLE, 1,   triangle, .resizable = true},
+    {WINDOW_BARTLETT, 1,   triangle, .resizable = true},
     {WINDOW_COSINE,   M_PI_2, cosine},
     {WINDOW_HANNING,  1,   hanning},
     {WINDOW_TUKEY,    1,   hanning, .taper = 0.5},
@@ -342,10 +360,10 @@ const struct filter_window mp_filter_windows[] = {
     {WINDOW_WELCH,    1,   welch},
     {WINDOW_KAISER,   1,   kaiser,   .params = {6.33, NAN} },
     {WINDOW_BLACKMAN, 1,   blackman, .params = {0.16, NAN} },
-    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN} },
-    {WINDOW_SINC,     1,   sinc},
-    {WINDOW_JINC,     1.2196698912665045, jinc},
-    {WINDOW_SPHINX,   1.4302966531242027, sphinx},
+    {WINDOW_GAUSSIAN, 2,   gaussian, .params = {1.00, NAN}, .resizable = true},
+    {WINDOW_SINC,     1,   sinc, .resizable = true},
+    {WINDOW_JINC,     1.2196698912665045, jinc, .resizable = true},
+    {WINDOW_SPHINX,   1.4302966531242027, sphinx, .resizable = true},
     {0}
 };
 

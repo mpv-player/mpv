@@ -149,6 +149,8 @@ struct m_property {
     bool is_option;
     // Special-case: option-bridge properties should be coalesced
     bool coalesce;
+    // Whether to log changes only on the trace level.
+    bool is_noisy;
 };
 
 struct m_property *m_property_list_find(const struct m_property *list,
@@ -165,7 +167,7 @@ int m_property_do(struct mp_log *log, const struct m_property* prop_list,
 // and rem to "b/c", and return true.
 // If there is no '/' in the path, set prefix to path, and rem to "", and
 // return false.
-bool m_property_split_path(const char *path, bstr *prefix, char **rem);
+bool m_property_split_path(const char *path, bstr *prefix, const char **rem);
 
 // Print a list of properties.
 void m_properties_print_help_list(struct mp_log *log,
@@ -224,6 +226,18 @@ struct m_sub_property {
     .type = {.type = &m_option_type_time}, .value = {.double_ = (f)}
 #define SUB_PROP_KEYVALUE_LIST(l) \
     .type = {.type = &m_option_type_keyvalue_list}, .value = {.keyvalue_list = (l)}
+#define SUB_PROP_STRING_LIST(l) \
+    .type = {.type = CONF_TYPE_STRING_LIST}, .value = {.string_list = (l)}
+// Expose a C array as a read-only array sub-property. The caller retains
+// ownership of the data pointer. It will be copied if needed. Used for
+// to expose arrays as sub-properties.
+#define SUB_PROP_TYPE_ARRAY(etype, ptr, n) \
+    .type = {.type = &m_option_type_prop_array}, \
+    .value = {.prop_arr = {.data = (ptr), .count = (n), .elem_type = (etype)}}
+#define SUB_PROP_INT_ARRAY(ptr, n)    SUB_PROP_TYPE_ARRAY(CONF_TYPE_INT, ptr, n)
+#define SUB_PROP_INT64_ARRAY(ptr, n)  SUB_PROP_TYPE_ARRAY(CONF_TYPE_INT64, ptr, n)
+#define SUB_PROP_FLOAT_ARRAY(ptr, n)  SUB_PROP_TYPE_ARRAY(CONF_TYPE_FLOAT, ptr, n)
+#define SUB_PROP_DOUBLE_ARRAY(ptr, n) SUB_PROP_TYPE_ARRAY(CONF_TYPE_DOUBLE, ptr, n)
 
 int m_property_read_sub_validate(void *ctx, struct m_property *prop,
                                  int action, void *arg);

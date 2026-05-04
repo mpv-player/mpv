@@ -22,7 +22,6 @@
 #include <limits.h>
 #include <assert.h>
 
-#include <VapourSynth4.h>
 #include <VSScript4.h>
 
 #include <libavutil/rational.h>
@@ -37,10 +36,23 @@
 #include "filters/user_filters.h"
 #include "options/m_option.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/threads.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
+
+static const char *const vsscript_lib_names[] = {
+#ifdef _WIN32
+    "VSScript.dll",
+#elif defined(__APPLE__)
+    "libvsscript.dylib",
+    "libvapoursynth-script.dylib",
+#else
+    "libvsscript.so",
+    "libvapoursynth-script.so",
+#endif
+};
 
 struct vapoursynth_opts {
     char *file;
@@ -63,6 +75,7 @@ struct priv {
 
     const struct script_driver *drv;
     // drv_vss
+    void *vs_script_lib;
     const VSSCRIPTAPI *vs_script_api;
     VSScript *vs_script;
 
@@ -804,17 +817,53 @@ static const m_option_t vf_opts_fields[] = {
 
 static int drv_vss_init(struct priv *p)
 {
-    p->vs_script_api = getVSScriptAPI(VSSCRIPT_API_VERSION);
-    if (!p->vs_script_api) {
-        MP_FATAL(p, "Could not initialize VapourSynth scripting.\n");
+    const char *vsscript_path = getenv("VSSCRIPT_PATH");
+    const int dl_mode = RTLD_NOW | RTLD_GLOBAL;
+    p->vs_script_lib = NULL;
+
+    if (vsscript_path) {
+        p->vs_script_lib = dlopen(vsscript_path, dl_mode);
+    } else {
+        for (size_t i = 0; i < MP_ARRAY_SIZE(vsscript_lib_names) && !p->vs_script_lib; ++i) {
+            p->vs_script_lib = dlopen(vsscript_lib_names[i], dl_mode);
+        }
+    }
+
+    VS_CC const VSSCRIPTAPI *(*getVSScriptAPI_func)(int) = NULL;
+    VS_CC const char *(*getVSScriptAPILastError_func)(void) = NULL;
+    const char *unknown_error_msg = "last error unknown";
+
+    if (p->vs_script_lib) {
+        getVSScriptAPI_func = (void *) dlsym(p->vs_script_lib, "getVSScriptAPI");
+        getVSScriptAPILastError_func = (void *) dlsym(p->vs_script_lib, "getVSScriptAPILastError");
+    }
+
+    if (!getVSScriptAPI_func) {
+        const char *dl_error_msg = dlerror();
+        const char *last_error_msg = dl_error_msg ? dl_error_msg : unknown_error_msg;
+        MP_FATAL(p, "Failed to load VapourSynth VSScript library: %s\n", last_error_msg);
         return -1;
     }
+
+    p->vs_script_api = getVSScriptAPI_func(VSSCRIPT_API_VERSION);
+    if (!p->vs_script_api) {
+        const char *vs_error_msg = getVSScriptAPILastError_func ? getVSScriptAPILastError_func() : NULL;
+        const char *last_error_msg = vs_error_msg ? vs_error_msg : unknown_error_msg;
+        MP_FATAL(p, "Failed to initialize VapourSynth VSScript library: %s\n", last_error_msg);
+        return -1;
+    }
+
     return 0;
 }
 
 static void drv_vss_uninit(struct priv *p)
 {
     p->vs_script_api = NULL;
+
+    if (p->vs_script_lib) {
+        dlclose(p->vs_script_lib);
+        p->vs_script_lib = NULL;
+    }
 }
 
 static int drv_vss_load_core(struct priv *p)

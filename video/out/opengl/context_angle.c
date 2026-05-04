@@ -291,9 +291,8 @@ static bool d3d11_swapchain_surface_create(struct ra_ctx *ctx)
         .width = p->sc_width,
         .height = p->sc_height,
         .flip = o->flip,
-        // Add one frame for the backbuffer and one frame of "slack" to reduce
-        // contention with the window manager when acquiring the backbuffer
-        .length = ctx->vo->opts->swapchain_depth + 2,
+        // Add one frame for the backbuffer
+        .length = ctx->vo->opts->swapchain_depth + 1,
         .usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT,
     };
     if (!mp_d3d11_create_swapchain(p->d3d11_device, vo->log, &swapchain_opts,

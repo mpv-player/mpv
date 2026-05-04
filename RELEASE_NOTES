@@ -1,22 +1,20 @@
-Release 0.40.0
+Release 0.41.0
 ==============
 
-We are excited to announce the release of mpv 0.40.0.
+We are excited to announce the release of mpv 0.41.0.
 
 Key highlights:
 
-* Console: Enhanced autocompletion and visual styling
-* OSC: New selection menu accessible by right-clicking common buttons
-* HDR is now natively supported when using direct rendering (DRM),
-  as well as dmabuf-wayland on Linux
-* Native clipboard access for scripts via new `clipboard` property
-* New command menu, with common actions easily accessible
-* Enhanced select.lua with new selection options for watch history, editions, DVD/Blu-Ray titles
-* New positioning.lua script script for cursor-centric zooming and drag to pan
-* Better stream support for Blu-ray, DVD and CDDA
-* Track selection improvements and better metadata display
-* Added osd-box / sub-box / box profiles to easily enable box styled OSD/OSC
-* Windows support in umpv helper script
+* The libplacebo based `gpu-next` is now the default, over `gpu`
+* Vulkan hardware decoding is preferred over other APIs
+* New context_menu.lua script for right-click context menus
+* AAudio backend for modern, HNI-free audio output on Android
+* Improved default color management for gpu-next, and handling on Wayland
+* Color representation protocol support for Wayland
+* Tablet input support for Wayland
+* Clipboard writing support for Wayland and a clipboard backend for X11
+* Ambient light support on Linux (using sysfs ALS)
+* Built-in helpers to register mpv as a media app on Windows
 
 This release requires FFmpeg 6.1 or newer and libplacebo 6.338.2 or newer.
 
@@ -24,110 +22,118 @@ This release requires FFmpeg 6.1 or newer and libplacebo 6.338.2 or newer.
 
 ## New
 
-- vf_d3d11vpp: add NVIDIA RTX Video HDR support
-- context_drm_gl: add support for HDR metadata
-- positioning.lua: add new script for video alignment and zooming
-- umpv: add Windows support
-- command: add clipboard property with native backends for Windows, macOS, and Wayland
-- select.lua: add watch history, edition, DVD/Blu-Ray titles and more selection options
-- input.conf: add cursor-centric zoom and drag-to-pan bindings
-- wayland: add support for wp-color-management-v1 protocol
-- console.lua: add persistent command history
-- stats.lua: add timecode display
-- options: add --playlist-exts and --archive-exts
-- wayland_common: support IME usage via text-input-v3
-- command: add multiple track metadata and properties
-- vo_gpu_next: add chroma location and HDR metadata to shader parameters
-- player/screenshot: support more formats for screenshot-raw command
-- demux_mkv: add `--demuxer-mkv-crop-compat` option
-- misc/language: parse hi/sdh/cc tags from external subtitle tracks
-- wayland: support xdg-activation
-- player: add mpv:// protocol
-
+- clipboard-wayland: support clipboard writing
+- wayland: add support for wp-color-representation-v1
+- wayland: tablet input support
+- vo_gpu_next: add support for blend-subtitles=video
+- meson: add mpv-register and mpv-unregister helpers on Windows
+- context_menu.lua: add this script
+- select.lua: add edit-config-file and edit-input-conf
+- osc.lua: add indicator for buffering/loading
+- osdep/linux-als: support 'ambient-light' property on Linux
+- clipboard-x11: add x11 clipboard backend
+- ao/aaudio: implement native AAudio backend for Android
 
 ## Changed
 
-- meson: build libmpv by default
-- command: enhance track and playlist display information
-- input.conf: improve numpad key bindings
-- osc.lua: add custom buttons support and improved mouse bindings
-- console.lua: inherit OSD styles and colors
-- options: default to --prefetch-playlist=yes
-- osc.lua: add slimbottombar and slimtopbar layouts
-- command: improve frame-step to go through multiple frames
-- wayland: use wp-presentation v2 if available
-- various: reorganize options into more logical groups
-- vo_gpu_next: improve target colorspace handling
-- options: disable `--input-ime` by default (enabled on demand)
+- vd_lavc: prefer Vulkan hwdec when available
+- vd_lavc: prefer non-copy hwdec before falling back to -copy variant
+- vo: move vo_mediacodec_embed to not be the default on Android
+- sub/osd_libass: don't rerender OSD if not changed
+- vo: prefer vo_gpu_next over vo_gpu by default
+- vo_gpu_next: respect ICC profile color space over any metadata
+- vo_gpu_next: linearize sRGB as a pure 2.2 power function
+- meson: warn if building with SDL2 due to known problems
+- osxbundle: make bundle category configurable and default to video
+- ao_pipewire: avoid setting any media.role by default
 
 
 # Options and Commands
 
 ## Added
 
-- sd_ass: introduce sub-ass-prune-delay
-- player: add an optional mute flag when framestepping
-- command: add clipboard/text-primary property
-- command: add current-clipboard-backend property
-- command: add notify-property command
-- options: add --script-opt alias for --script-opts-append
-- options: add --osd-bar-marker-{size,style} options
-- options: add --input-ime for improved text input
-- options: add --video-recenter
-- options: add --clipboard-backends
-- options: add --wayland-internal-vsync
-- options: add --sub-scale-signs
-
+- sub: add control for libass caching options (glyph-limit, bitmap-max-size)
+- vo: add options to control background tile appearance (transparency)
+- command: add default and forced flags to the track add commands
+- vo_gpu_next: add options to control subtitle peak for HDR output
+- video/out/d3d11: add d3d11 composition mode support
+- vd_lavc: add --hwdec-threads
+- stream_bluray: add --bluray-angle
+- vo_gpu_next: add options to control output colorspace metadata more precisely
+- sub: make --sub-fix-timing configurable
+- vo_gpu_next: add --hdr-reference-white
+- audio/out: add --audio-set-media-role
 
 ## Changed
 
-- options: rename --load-osd-console to --load-console
-- player: improve track selection for multi-component languages
-- options: improve frame-step command to handle multiple frames
-- input.conf: make Alt+BS reset --video-align-{x,y}
-- command: print track metadata when changing track
-- command: print track-list with enhanced metadata
-
-
-## Deprecated
-
-- options: deprecate `--gamma-auto` (use gamma-auto.lua script instead)
-- options: deprecate undocumented --cdda-span-{a,b} options
+- options: revert --prefetch-playlist default back to 'no'
+- vo_gpu_next: change --target-colorspace-hint to 'auto' by default
+- options: handle runtime --wid change
+- options: reduce swapchain-depth to 2 by default
+- screenshot: add osd and scaled flags to screenshot commands
 
 
 # Fixes and Minor Enhancements
 
-- f_hwtransfer: ensure that we convert to full range rgb with scale_vaapi
-- win32: fix window size restore after maximize state
-- build: fix dynamic generation of mpv.desktop file protocols
-- player/sub: avoid pointlessly redecoding subs
-- x11: remove nvidia blacklist logic from --x11-present=auto
-- osc.lua: seek to the nearest chapter when right clicking the seekbar
-- command: fix keybind command with sequence keys
-- video/out/wayland_common: fix crash with multi-seat drag and drop
-- demux: reclaim demux_packets to reduce memory allocator pressure
-- demux_cue: only accept TRACK with AUDIO type
-- player/loadfile: strip common filename part from external track title
-- build: remove unused dvdread dependency
-- wayland: fix vertical resizing and scaling issues
-- console.lua: improve completion and visual appearance
-- sub/osd: default to a semitransparent black back color
-- player: improve playlist handling with prefetch
-- drm: parse EDID using libdisplay-info (which is now a required dependency)
-- win32: fix window size restore after maximize state
-- hwdec_d3d11va: align image mapper dimensions to a multiple of 2
-- wayland: fix DnD with focus follow mouse
-- player: store external filenames as normalized
-- player: properly handle secondary subtitles on the terminal
-- demux_mkv: add support for chroma location
-- vo_dmabuf_wayland: improve and fix format selection
-- player: fix combination of --loop-playlist + --shuffle + --prefetch-playlist
+- vo_kitty: add auto-multiplexer-passthrough option
+- vd_lavc: enable FFv1 hwaccel by default
+- clipboard-wayland: prevent reading from hung up fd
+- demux_mkv: fix compilation after deprecated definitions removal
+- filters: handle flipping video if displaymatrix indicates so
+- player/scripting: fix race condition when destroying clients
+- {osd,msg}: use PU codepoints for escape codes instead of invalid UTF-8
+- vo_dmabuf_wayland: only load needed hardware decoding drivers
+- video/image_writer: tag accurate bit depth
+- demux_lavf: fix unconstrained cache size with wrapped AVFrame packets
+- libarchive: fix reading name of certain UTF-8 files
+- sub/sd_lavc: fix decoding with libaribb24
+- ao_avfoundation: fix memory leak
+- osc.lua: fix volume icon not updating while paused
+- context_wayland: implement target_csp for wayland
+- vo_gpu: fix target colorspace for redrawn frames
+- vo_dmabuf_wayland: don't set HDR metadata on SDR transfers
+- vo_gpu_next: don't do partial updates on hint luminance
+- sub/ass_mp: add missing padding for ass packer
+- stream_dvb: allow to enforce DVB-S/T for old zap format channels.conf
+- demux_libarchive: fix reading archives with '%' in stream URL path
+- vo_gpu_next: allow UINT upload if no other format is supported
+- ytdl_hook.lua: fix incorrect default format used with yt-dlp
+- vo_gpu_next: allow unsetting LUTs
+- stream_bluray: use bd_get_main_title() to get main title
+- vo_gpu_next: when tone-mapping, set better maxCLL value
+- stream_libarchive: seek source stream to 0 before probing
+- path-unix: support ~~desktop path expansion
+- ytdl_hook.lua: don't crash if playlist entries don't have an usable URL
+- mac/vulkan: fix frame not displayed when paused
+- mac/common: render first frame on init if possible
+- video/out/w32_common: support --wid=0
+- demux_mkv: map and expose hearing/visual impaired flags
+- player/misc: show percentage progress for --stream-dump
+- command: fix null dereference for invalid command in input-commands
+- cplugin: fix missing init of pfn_mpv_get_time_ns
+- vo_dmabuf_wayland: actually reuse OSD buffers
+- mp_image: add support for AVAlphaMode
+- vo_gpu_next: add --border-background=blur and --background-blur-radius
+- demux/cue: fix crash when there are no tracks
+- vf_format: add some basic HDR10 metadata
+- vo/context_android: fix surface tearing on resize
+- meson: remove redundant 'sdl2' option
+- mac/common: fix window position on multi monitor setups
+- vo_gpu_next: limit min_luma to 1000:1 contrast ratio in SDR mode
+- ao_pipewire: fix some incorrect channel mappings
+- wayland: correct geometry handling for rotated outputs
+- demux: clear packet pool when upper memory limit is lowered
+- mp_image: add ycgco-{re,ro} support
+- wayland: convert luminance values to libplacebo space
+- vo: trigger manual redraws at most at slightly over display fps
+- osxbundle: add new macOS 26 compatible App icon
+- wayland: support color-management-v1 version 2
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.39.0..v0.40.0`
+A complete changelog can be seen by running `git log v0.40.0..v0.41.0`
 in the git repository or by visiting
-<https://github.com/mpv-player/mpv/compare/v0.39.0...v0.40.0>.
+<https://github.com/mpv-player/mpv/compare/v0.40.0...v0.41.0>.

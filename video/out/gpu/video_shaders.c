@@ -22,6 +22,10 @@
 #include "video_shaders.h"
 #include "video.h"
 
+#if PL_API_VER < 362
+#define PL_COLOR_TRC_SCRGB PL_COLOR_TRC_LINEAR
+#endif
+
 #define GLSL(x) gl_sc_add(sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(sc, __VA_ARGS__)
 #define GLSLH(x) gl_sc_hadd(sc, #x "\n");
@@ -342,7 +346,7 @@ static const float SLOG_A = 0.432699,
 // absolute scale, multiply the result by `pl_color_transfer_nominal_peak(trc)`
 void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
 {
-    if (trc == PL_COLOR_TRC_LINEAR)
+    if (trc == PL_COLOR_TRC_LINEAR || trc == PL_COLOR_TRC_SCRGB)
         return;
 
     GLSLF("// linearize\n");
@@ -442,7 +446,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
 // Like pass_linearize, this functions ingests values on an normalized scale
 void pass_delinearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
 {
-    if (trc == PL_COLOR_TRC_LINEAR)
+    if (trc == PL_COLOR_TRC_LINEAR || trc == PL_COLOR_TRC_SCRGB)
         return;
 
     GLSLF("// delinearize\n");

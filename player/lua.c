@@ -38,6 +38,7 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/codepoint_width.h"
 #include "misc/json.h"
 #include "osdep/subprocess.h"
 #include "osdep/timer.h"
@@ -90,6 +91,9 @@ static const char * const builtin_lua_scripts[][2] = {
     },
     {"@commands.lua",
 #   include "player/lua/commands.lua.inc"
+    },
+    {"@context_menu.lua",
+#   include "player/lua/context_menu.lua.inc"
     },
     {0}
 };
@@ -555,7 +559,7 @@ static int script_get_script_directory(lua_State *L)
 
 static void pushnode(lua_State *L, mpv_node *node);
 
-static int script_raw_wait_event(lua_State *L, void *tmp)
+static int script_wait_event(lua_State *L, void *tmp)
 {
     struct script_ctx *ctx = get_ctx(L);
 
@@ -652,8 +656,7 @@ static int script_set_property_bool(lua_State *L)
 
 static bool is_int(double d)
 {
-    int64_t v = d;
-    return d == (double)v;
+    return d >= (double)INT64_MIN && d <= (double)INT64_MAX && d == (int64_t)d;
 }
 
 static int script_set_property_number(lua_State *L)
@@ -1214,6 +1217,15 @@ static int script_get_env_list(lua_State *L)
     return 1;
 }
 
+static int script_terminal_display_width(lua_State *L)
+{
+    bstr text = bstr0(luaL_checkstring(L, 1));
+    const unsigned char *cut_pos;
+    int width = term_disp_width(text, INT_MAX, &cut_pos);
+    lua_pushnumber(L, width);
+    return 1;
+}
+
 #define FN_ENTRY(name) {#name, script_ ## name, 0}
 #define AF_ENTRY(name) {#name, 0, script_ ## name}
 struct fn_entry {
@@ -1224,7 +1236,7 @@ struct fn_entry {
 
 static const struct fn_entry main_fns[] = {
     FN_ENTRY(log),
-    AF_ENTRY(raw_wait_event),
+    AF_ENTRY(wait_event),
     FN_ENTRY(request_event),
     FN_ENTRY(find_config_file),
     FN_ENTRY(get_script_directory),
@@ -1263,6 +1275,7 @@ static const struct fn_entry utils_fns[] = {
     AF_ENTRY(parse_json),
     AF_ENTRY(format_json),
     FN_ENTRY(get_env_list),
+    FN_ENTRY(terminal_display_width),
     {0}
 };
 
@@ -1283,6 +1296,7 @@ static int script_autofree_call(lua_State *L)
 
 static int script_autofree_trampoline(lua_State *L)
 {
+    struct script_ctx *ctx = get_ctx(L);
     // n*args
     autofree_data data = {
         .target = lua_touserdata(L, lua_upvalueindex(2)),  // fn
@@ -1294,7 +1308,7 @@ static int script_autofree_trampoline(lua_State *L)
     lua_insert(L, 1);  // autofree_call n*args
     lua_pushlightuserdata(L, &data);  // autofree_call n*args &data
 
-    data.ctx = talloc_new(NULL);
+    data.ctx = talloc_new(ctx);
     int r = lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0);  // m*retvals
     talloc_free(data.ctx);
 

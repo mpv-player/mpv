@@ -62,6 +62,7 @@ static bool try_open(struct timeline *tl, char *filename)
 
     struct demuxer_params p = {
         .stream_flags = tl->stream_origin,
+        .depth = tl->demuxer ? tl->demuxer->depth + 1 : 0,
     };
 
     struct demuxer *d = demux_open_url(filename, &p, tl->cancel, tl->global);

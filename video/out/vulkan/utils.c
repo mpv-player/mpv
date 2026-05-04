@@ -15,6 +15,7 @@ bool mpvk_init(struct mpvk_ctx *vk, struct ra_ctx *ctx, const char *surface_ext)
     mppl_log_set_probing(vk->pllog, true);
     vk->vkinst = pl_vk_inst_create(vk->pllog, &(struct pl_vk_inst_params) {
         .debug = ctx->opts.debug,
+        .debug_extra = ctx->opts.debug,
         .extensions = exts,
         .num_extensions = MP_ARRAY_SIZE(exts),
     });

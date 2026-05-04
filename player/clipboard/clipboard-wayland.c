@@ -27,6 +27,13 @@
 #include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
+enum message_type {
+    MESSAGE_DEATH = 0,
+    MESSAGE_CREATE_SOURCES = 1,
+    MESSAGE_UPDATE_CLIPBOARD = 2,
+    MESSAGE_UPDATE_PRIMARY_SELECTION = 3,
+};
+
 struct clipboard_wayland_data_offer {
     struct ext_data_control_offer_v1 *offer;
     char *mime_type;
@@ -36,7 +43,7 @@ struct clipboard_wayland_data_offer {
 struct clipboard_wayland_priv {
     mp_mutex lock;
     // accessed by both threads
-    int death_pipe[2];
+    int message_pipe[2];
     bstr selection_text;
     bstr primary_selection_text;
     bool data_changed;
@@ -51,6 +58,9 @@ struct clipboard_wayland_priv {
     struct ext_data_control_manager_v1 *dcman;
     struct clipboard_wayland_data_offer *selection_offer;
     struct clipboard_wayland_data_offer *primary_selection_offer;
+    bool monitor;
+    // accessed by both threads (protected by cl->lock)
+    struct clipboard_ctx *cl;
 };
 
 struct clipboard_wayland_seat {
@@ -59,6 +69,8 @@ struct clipboard_wayland_seat {
     struct wl_list link;
     uint32_t id;
     struct ext_data_control_device_v1 *dcdev;
+    struct ext_data_control_source_v1 *selection_source;
+    struct ext_data_control_source_v1 *primary_selection_source;
     bool offered_plain_text;
 };
 
@@ -71,9 +83,12 @@ static void remove_seat(struct clipboard_wayland_seat *seat)
     wl_list_remove(&seat->link);
     if (seat->dcdev)
         ext_data_control_device_v1_destroy(seat->dcdev);
+    if (seat->selection_source)
+        ext_data_control_source_v1_destroy(seat->selection_source);
+    if (seat->primary_selection_source)
+        ext_data_control_source_v1_destroy(seat->primary_selection_source);
     wl_seat_destroy(seat->seat);
     talloc_free(seat);
-    return;
 }
 
 static void destroy_offer(struct clipboard_wayland_data_offer *o)
@@ -84,6 +99,27 @@ static void destroy_offer(struct clipboard_wayland_data_offer *o)
     if (o->offer)
         ext_data_control_offer_v1_destroy(o->offer);
     *o = (struct clipboard_wayland_data_offer){.fd = -1};
+}
+
+static void receive_offer(struct clipboard_wayland_seat *s, struct clipboard_wayland_data_offer *o)
+{
+    struct clipboard_wayland_priv *wl = s->wl;
+    if (!o->offer || o->fd != -1)
+        return;
+    int pipefd[2];
+
+    if (pipe2(pipefd, O_CLOEXEC) == -1) {
+        MP_ERR(wl, "Failed to create selection pipe!\n");
+        return;
+    }
+
+    // Only receive plain text for now, may expand later.
+    if (s->offered_plain_text) {
+        ext_data_control_offer_v1_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
+        s->offered_plain_text = false;
+    }
+    close(pipefd[1]);
+    o->fd = pipefd[0];
 }
 
 
@@ -99,23 +135,8 @@ static void handle_selection(void *data,
         MP_VERBOSE(wl, "Received a new selection offer. Releasing the previous offer.\n");
     }
     o->offer = id;
-    if (!id)
-        return;
-
-    int pipefd[2];
-
-    if (pipe2(pipefd, O_CLOEXEC) == -1) {
-        MP_ERR(wl, "Failed to create selection pipe!\n");
-        return;
-    }
-
-    // Only receive plain text for now, may expand later.
-    if (s->offered_plain_text) {
-        ext_data_control_offer_v1_receive(o->offer, "text/plain;charset=utf-8", pipefd[1]);
-        s->offered_plain_text = false;
-    }
-    close(pipefd[1]);
-    o->fd = pipefd[0];
+    if (wl->monitor)
+        receive_offer(s, o);
 }
 
 static void data_offer_handle_offer(void *data,
@@ -172,6 +193,59 @@ static const struct ext_data_control_device_v1_listener data_device_listener = {
     data_device_handle_primary_selection,
 };
 
+static void data_source_handle_send(void *data,
+                                    struct ext_data_control_source_v1 *data_source,
+                                    const char *mime_type,
+                                    int32_t fd)
+{
+    struct clipboard_wayland_seat *s = data;
+    struct clipboard_wayland_priv *wl = s->wl;
+    if (strcmp(mime_type, "text/plain;charset=utf-8") == 0 ||
+        strcmp(mime_type, "text/plain") == 0 ||
+        strcmp(mime_type, "text") == 0)
+    {
+        struct pollfd fdp = { .fd = fd, .events = POLLOUT };
+        if (poll(&fdp, 1, 0) <= 0)
+            goto cleanup;
+        if (fdp.revents & (POLLERR | POLLHUP)) {
+            MP_VERBOSE(wl, "data source send aborted (write error)\n");
+            goto cleanup;
+        }
+
+        if (fdp.revents & POLLOUT) {
+            mp_mutex_lock(&wl->lock);
+            bstr text = data_source == s->selection_source ? wl->selection_text : wl->primary_selection_text;
+            ssize_t data_written = write(fd, text.start, text.len);
+            mp_mutex_unlock(&wl->lock);
+            if (data_written == -1) {
+                MP_VERBOSE(wl, "data source send aborted (write error: %s)\n", mp_strerror(errno));
+            } else {
+                MP_VERBOSE(wl, "%zu bytes written to the data source fd\n", data_written);
+            }
+        }
+    }
+
+cleanup:
+    close(fd);
+}
+
+static void data_source_handle_cancelled(void *data,
+                                         struct ext_data_control_source_v1 *data_source)
+{
+    // This can happen when another client sets selection, which invalidates the current source.
+    struct clipboard_wayland_seat *s = data;
+    ext_data_control_source_v1_destroy(data_source);
+    if (s->selection_source == data_source)
+        s->selection_source = NULL;
+    if (s->primary_selection_source == data_source)
+        s->primary_selection_source = NULL;
+}
+
+static const struct ext_data_control_source_v1_listener data_source_listener = {
+    data_source_handle_send,
+    data_source_handle_cancelled,
+};
+
 static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id,
                                 const char *interface, uint32_t ver)
 {
@@ -213,6 +287,35 @@ static const struct wl_registry_listener registry_listener = {
     registry_handle_remove,
 };
 
+static void seat_create_data_source(struct clipboard_wayland_seat *seat, bool is_primary)
+{
+    struct ext_data_control_source_v1 *source = ext_data_control_manager_v1_create_data_source(seat->wl->dcman);
+    ext_data_control_source_v1_offer(source, "text/plain;charset=utf-8");
+    ext_data_control_source_v1_offer(source, "text/plain");
+    ext_data_control_source_v1_offer(source, "text");
+    ext_data_control_source_v1_add_listener(source, &data_source_listener, seat);
+    if (is_primary) {
+        seat->primary_selection_source = source;
+        ext_data_control_device_v1_set_primary_selection(seat->dcdev, seat->primary_selection_source);
+    } else {
+        seat->selection_source = source;
+        ext_data_control_device_v1_set_selection(seat->dcdev, seat->selection_source);
+    }
+}
+
+static void create_data_sources(struct clipboard_wayland_priv *wl)
+{
+    struct clipboard_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
+        if (!seat->selection_source && wl->dcman) {
+            seat_create_data_source(seat, false);
+        }
+        if (!seat->primary_selection_source && wl->dcman) {
+            seat_create_data_source(seat, true);
+        }
+    }
+}
+
 static void clipboard_wayland_uninit(struct clipboard_wayland_priv *wl)
 {
     if (!wl)
@@ -233,7 +336,7 @@ static void clipboard_wayland_uninit(struct clipboard_wayland_priv *wl)
         wl_display_disconnect(wl->display);
 }
 
-static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl)
+static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl, bool monitor)
 {
     if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
         goto err;
@@ -242,6 +345,7 @@ static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl)
     if (!wl->display)
         goto err;
 
+    wl->monitor = monitor;
     wl->registry = wl_display_get_registry(wl->display);
     wl_registry_add_listener(wl->registry, &registry_listener, wl);
 
@@ -294,7 +398,7 @@ static void get_selection_data(struct clipboard_wayland_priv *wl, struct clipboa
     }
 
     if (data_read == -1) {
-        MP_VERBOSE(wl, "data offer aborted (read error)\n");
+        MP_VERBOSE(wl, "data offer aborted (read error: %s)\n", mp_strerror(errno));
     } else {
         MP_VERBOSE(wl, "Read %zu bytes from the data offer fd\n", content.len);
         // Update clipboard text content
@@ -309,6 +413,7 @@ static void get_selection_data(struct clipboard_wayland_priv *wl, struct clipboa
         wl->data_changed = true;
         mp_mutex_unlock(&wl->lock);
         content = (bstr){0};
+        mp_clipboard_notify_update_data(wl->cl);
     }
 
     talloc_free(content.start);
@@ -322,7 +427,7 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
 
     struct pollfd fds[] = {
         {.fd = wl->display_fd,    .events = POLLIN },
-        {.fd = wl->death_pipe[0], .events = POLLIN },
+        {.fd = wl->message_pipe[0], .events = POLLIN },
         {.fd = wl->selection_offer->fd, .events = POLLIN },
         {.fd = wl->primary_selection_offer->fd, .events = POLLIN },
     };
@@ -345,14 +450,41 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
         return false;
     }
 
-    if (fds[1].revents & POLLIN)
-        return false;
+    struct clipboard_wayland_seat *seat;
+    if (fds[1].revents & POLLIN) {
+        uint8_t msg = 0;
+        if (read(wl->message_pipe[0], &msg, sizeof(msg)) != sizeof(msg))
+            return false;
+        switch (msg) {
+        case MESSAGE_CREATE_SOURCES:
+            create_data_sources(wl);
+            break;
+        case MESSAGE_UPDATE_CLIPBOARD:
+            wl_list_for_each(seat, &wl->seat_list, link) {
+                receive_offer(seat, wl->selection_offer);
+            }
+            break;
+        case MESSAGE_UPDATE_PRIMARY_SELECTION:
+            wl_list_for_each(seat, &wl->seat_list, link) {
+                receive_offer(seat, wl->primary_selection_offer);
+            }
+            break;
+        default:
+            return false;
+        }
+    }
 
     if (fds[2].revents & POLLIN)
         get_selection_data(wl, wl->selection_offer, false);
 
     if (fds[3].revents & POLLIN)
         get_selection_data(wl, wl->primary_selection_offer, true);
+
+    if (fds[2].revents & (POLLERR | POLLHUP | POLLNVAL))
+        destroy_offer(wl->selection_offer);
+
+    if (fds[3].revents & (POLLERR | POLLHUP | POLLNVAL))
+        destroy_offer(wl->primary_selection_offer);
 
     wl_display_dispatch_pending(wl->display);
     return true;
@@ -377,7 +509,8 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 {
     cl->priv = talloc_zero(cl, struct clipboard_wayland_priv);
     struct clipboard_wayland_priv *priv = cl->priv;
-    priv->death_pipe[0] = priv->death_pipe[1] = priv->display_fd = -1;
+    priv->cl = cl;
+    priv->message_pipe[0] = priv->message_pipe[1] = priv->display_fd = -1;
     priv->log = mp_log_new(priv, cl->log, "wayland");
     priv->selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
     priv->primary_selection_offer = talloc_zero(priv, struct clipboard_wayland_data_offer),
@@ -385,9 +518,9 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
     wl_list_init(&priv->seat_list);
     mp_mutex_init(&priv->lock);
 
-    if (mp_make_wakeup_pipe(priv->death_pipe) < 0)
+    if (mp_make_wakeup_pipe(priv->message_pipe) < 0)
         goto pipe_err;
-    if (!clipboard_wayland_init(priv))
+    if (!clipboard_wayland_init(priv, params->flags & CLIPBOARD_INIT_ENABLE_MONITORING))
         goto init_err;
     if (mp_thread_create(&priv->thread, clipboard_thread, cl->priv))
         goto thread_err;
@@ -396,8 +529,8 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 thread_err:
     clipboard_wayland_uninit(priv);
 init_err:
-    close(priv->death_pipe[0]);
-    close(priv->death_pipe[1]);
+    close(priv->message_pipe[0]);
+    close(priv->message_pipe[1]);
 pipe_err:
     mp_mutex_destroy(&priv->lock);
     TA_FREEP(&cl->priv);
@@ -409,10 +542,11 @@ static void uninit(struct clipboard_ctx *cl)
     struct clipboard_wayland_priv *priv = cl->priv;
     if (!priv)
         return;
-    (void)write(priv->death_pipe[1], &(char){0}, 1);
+    uint8_t msg = MESSAGE_DEATH;
+    (void)write(priv->message_pipe[1], &msg, sizeof(msg));
     mp_thread_join(priv->thread);
-    close(priv->death_pipe[0]);
-    close(priv->death_pipe[1]);
+    close(priv->message_pipe[0]);
+    close(priv->message_pipe[1]);
     mp_mutex_destroy(&priv->lock);
     TA_FREEP(&cl->priv);
 }
@@ -454,6 +588,47 @@ static int get_data(struct clipboard_ctx *cl, struct clipboard_access_params *pa
     return ret;
 }
 
+static int set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
+                    struct clipboard_data *data)
+{
+    if (params->type != CLIPBOARD_DATA_TEXT || data->type != CLIPBOARD_DATA_TEXT)
+        return CLIPBOARD_FAILED;
+
+    struct clipboard_wayland_priv *priv = cl->priv;
+    bstr text = bstrdup(priv, bstr0(data->u.text));
+    mp_mutex_lock(&priv->lock);
+    switch (params->target) {
+    case CLIPBOARD_TARGET_CLIPBOARD:
+        talloc_free(priv->selection_text.start);
+        priv->selection_text = text;
+        break;
+    case CLIPBOARD_TARGET_PRIMARY_SELECTION:
+        talloc_free(priv->primary_selection_text.start);
+        priv->primary_selection_text = text;
+        break;
+    }
+    mp_mutex_unlock(&priv->lock);
+    uint8_t msg = MESSAGE_CREATE_SOURCES;
+    (void)write(priv->message_pipe[1], &msg, sizeof(msg));
+    return CLIPBOARD_SUCCESS;
+}
+
+static void update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params)
+{
+    struct clipboard_wayland_priv *priv = cl->priv;
+    uint8_t type = MESSAGE_UPDATE_CLIPBOARD;
+    switch (params->target) {
+    case CLIPBOARD_TARGET_CLIPBOARD:
+        break;
+    case CLIPBOARD_TARGET_PRIMARY_SELECTION:
+        type = MESSAGE_UPDATE_PRIMARY_SELECTION;
+        break;
+    default:
+        return;
+    }
+    (void)write(priv->message_pipe[1], &type, sizeof(type));
+}
+
 const struct clipboard_backend clipboard_backend_wayland = {
     .name = "wayland",
     .desc = "Wayland clipboard (Data control protocol)",
@@ -461,4 +636,6 @@ const struct clipboard_backend clipboard_backend_wayland = {
     .uninit = uninit,
     .data_changed = data_changed,
     .get_data = get_data,
+    .set_data = set_data,
+    .update_data = update_data,
 };

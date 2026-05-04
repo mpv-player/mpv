@@ -33,6 +33,7 @@
 #include "osdep/io.h"
 #include "misc/rendezvous.h"
 
+#include "event.h"
 #include "input.h"
 #include "keycodes.h"
 #include "osdep/threads.h"
@@ -44,6 +45,7 @@
 #include "options/path.h"
 #include "mpv_talloc.h"
 #include "options/options.h"
+#include "player/external_files.h"
 #include "misc/bstr.h"
 #include "misc/node.h"
 #include "stream/stream.h"
@@ -158,6 +160,23 @@ struct input_ctx {
     struct touch_point *touch_points;
     int num_touch_points;
 
+    // List of last dropped files
+    int64_t dnd_ts;
+    enum mp_dnd_action dnd_action;
+    bstr *dropped_files;
+    int num_dropped_files;
+
+    int tablet_x, tablet_y;
+    // Indicates tablet tools in proximity / close to tablet surface
+    bool tablet_tool_in_proximity;
+    bool tablet_tool_down;
+    bool tablet_tool_stylus_btn1_pressed;
+    bool tablet_tool_stylus_btn2_pressed;
+    bool tablet_tool_stylus_btn3_pressed;
+    bool tablet_pad_focus;
+    bool tablet_pad_buttons_pressed[MP_MAX_TABLET_PAD_BUTTONS];
+    int tablet_pad_buttons;
+
     unsigned int mouse_event_counter;
 
     struct mp_input_src *sources[MP_MAX_SOURCES];
@@ -197,6 +216,7 @@ struct input_opts {
     bool allow_win_drag;
     bool preprocess_wheel;
     bool touch_emulate_mouse;
+    bool tablet_emulate_mouse;
 };
 
 const struct m_sub_options input_config = {
@@ -219,6 +239,7 @@ const struct m_sub_options input_config = {
         {"input-media-keys", OPT_BOOL(use_media_keys)},
         {"input-preprocess-wheel", OPT_BOOL(preprocess_wheel)},
         {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
+        {"input-tablet-emulate-mouse", OPT_BOOL(tablet_emulate_mouse)},
         {"input-dragging-deadzone", OPT_INT(dragging_deadzone)},
 #if HAVE_SDL2_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
@@ -243,6 +264,7 @@ const struct m_sub_options input_config = {
         .allow_win_drag = true,
         .preprocess_wheel = true,
         .touch_emulate_mouse = true,
+        .tablet_emulate_mouse = true,
     },
     .change_flags = UPDATE_INPUT,
 };
@@ -980,7 +1002,7 @@ static int find_touch_point_index(struct input_ctx *ictx, int id)
     return -1;
 }
 
-static void notify_touch_update(struct input_ctx *ictx)
+static void notify_event_update(struct input_ctx *ictx)
 {
     // queue dummy cmd so that touch-pos can notify observers
     mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
@@ -1000,7 +1022,7 @@ static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, i
     // Emulate mouse input from the primary touch point (the first one added)
     if (ictx->opts->touch_emulate_mouse && idx == 0)
         set_mouse_pos(ictx, x, y, false);
-    notify_touch_update(ictx);
+    notify_event_update(ictx);
 }
 
 void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
@@ -1021,7 +1043,7 @@ void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
             set_mouse_pos(ictx, x, y, false);
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
         }
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
@@ -1048,7 +1070,7 @@ void mp_input_remove_touch_point(struct input_ctx *ictx, int id)
         // Emulate MBTN_LEFT up if there are no touch points left
         if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 0)
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
@@ -1064,6 +1086,164 @@ int mp_input_get_touch_pos(struct input_ctx *ictx, int count, int *x, int *y, in
     }
     input_unlock(ictx);
     return num_touch_points;
+}
+
+static void notify_tablet_update(struct input_ctx *ictx)
+{
+    // queue dummy cmd so that tablet-pos can notify observers
+    mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
+    if (cmd)
+        cmd->notify_event = true;
+    queue_cmd(ictx, cmd);
+}
+
+void mp_input_set_tablet_tool_in_proximity(struct input_ctx *ictx, bool in_proximity)
+{
+    MP_TRACE(ictx, "tablet tool proximity %s\n", in_proximity ? "in" : "out");
+
+    input_lock(ictx);
+    ictx->tablet_tool_in_proximity = in_proximity;
+    if (!in_proximity) {
+        ictx->tablet_tool_down = false;
+        ictx->tablet_tool_stylus_btn1_pressed = false;
+        ictx->tablet_tool_stylus_btn2_pressed = false;
+        ictx->tablet_tool_stylus_btn3_pressed = false;
+    }
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_tablet_tool_down(struct input_ctx *ictx)
+{
+    MP_TRACE(ictx, "tablet tool down\n");
+
+    input_lock(ictx);
+    ictx->tablet_tool_down = true;
+    if (ictx->opts->tablet_emulate_mouse && ictx->tablet_tool_in_proximity)
+        feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_tablet_tool_up(struct input_ctx *ictx)
+{
+    MP_TRACE(ictx, "tablet tool up\n");
+
+    input_lock(ictx);
+    ictx->tablet_tool_down = false;
+    if (ictx->opts->tablet_emulate_mouse && ictx->tablet_tool_in_proximity)
+        feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_tablet_tool_button(struct input_ctx *ictx, int button, int state)
+{
+    if (mp_msg_test(ictx->log, MSGL_TRACE)) {
+        char *key = mp_input_get_key_name(button);
+        MP_TRACE(ictx, "tablet tool button %s %s%s \n",
+                 key,
+                 (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
+                 (state & MP_KEY_STATE_UP) ? "released" : "");
+        talloc_free(key);
+    }
+
+    input_lock(ictx);
+
+    switch (button) {
+    case MP_KEY_TABLET_TOOL_STYLUS_BTN1:
+        ictx->tablet_tool_stylus_btn1_pressed = state == MP_KEY_STATE_DOWN;
+        button = MP_MBTN_MID;
+        break;
+    case MP_KEY_TABLET_TOOL_STYLUS_BTN2:
+        ictx->tablet_tool_stylus_btn2_pressed = state == MP_KEY_STATE_DOWN;
+        button = MP_MBTN_RIGHT;
+        break;
+    case MP_KEY_TABLET_TOOL_STYLUS_BTN3:
+        ictx->tablet_tool_stylus_btn3_pressed = state == MP_KEY_STATE_DOWN;
+        button = MP_MBTN_BACK;
+        break;
+    default:
+        break;
+    }
+
+    if (ictx->opts->tablet_emulate_mouse && ictx->tablet_tool_in_proximity && button)
+        feed_key(ictx, button | state, 1, false);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_set_tablet_pad_focus(struct input_ctx *ictx, bool focus, int buttons)
+{
+    MP_TRACE(ictx, "tablet pad focus %s\n", focus ? "enter" : "leave");
+
+    input_lock(ictx);
+    ictx->tablet_pad_focus = focus;
+    if (!focus) {
+        for (int i = 0; i < ictx->tablet_pad_buttons; i++)
+            ictx->tablet_pad_buttons_pressed[i] = false;
+    }
+    ictx->tablet_pad_buttons = MPMIN(buttons, MP_MAX_TABLET_PAD_BUTTONS);
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_tablet_pad_button(struct input_ctx *ictx, int button, int state)
+{
+    MP_TRACE(ictx, "tablet pad button %d %s%s \n",
+             button,
+             (state & MP_KEY_STATE_DOWN) ? "pressed" : "",
+             (state & MP_KEY_STATE_UP) ? "released" : "");
+
+    input_lock(ictx);
+    if (button < MP_MAX_TABLET_PAD_BUTTONS)
+        ictx->tablet_pad_buttons_pressed[button] = state == MP_KEY_STATE_DOWN;
+    else
+        MP_WARN(ictx, "Tablet pad button %d outside of range!\n", button);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_set_tablet_pos(struct input_ctx *ictx, int x, int y, bool quiet)
+{
+    MP_TRACE(ictx, "tablet tool position %d/%d \n", x, y);
+
+    input_lock(ictx);
+    ictx->tablet_x = x;
+    ictx->tablet_y = y;
+    if (ictx->opts->tablet_emulate_mouse && ictx->tablet_tool_in_proximity)
+        set_mouse_pos(ictx, x, y, quiet);
+
+    notify_tablet_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_get_tablet_pos(struct input_ctx *ictx, int *x, int *y,
+                             bool *tool_in_proximity, bool *tool_down,
+                             bool *tool_stylus_btn1_pressed,
+                             bool *tool_stylus_btn2_pressed,
+                             bool *tool_stylus_btn3_pressed,
+                             bool *pad_focus,
+                             bool *pad_buttons_pressed,
+                             int *pad_buttons)
+{
+    input_lock(ictx);
+    *x = ictx->tablet_x;
+    *y = ictx->tablet_y;
+    *tool_in_proximity = ictx->tablet_tool_in_proximity;
+    *tool_down = ictx->tablet_tool_down;
+    *tool_stylus_btn1_pressed = ictx->tablet_tool_stylus_btn1_pressed;
+    *tool_stylus_btn2_pressed = ictx->tablet_tool_stylus_btn2_pressed;
+    *tool_stylus_btn3_pressed = ictx->tablet_tool_stylus_btn3_pressed;
+    *pad_focus = ictx->tablet_pad_focus;
+    for (int i = 0; i < ictx->tablet_pad_buttons; i++)
+        pad_buttons_pressed[i] = ictx->tablet_pad_buttons_pressed[i];
+    *pad_buttons = ictx->tablet_pad_buttons;
+    input_unlock(ictx);
 }
 
 static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags)
@@ -1102,6 +1282,39 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
                         test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
     input_unlock(ictx);
     return r;
+}
+
+void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         enum mp_dnd_action action)
+{
+    input_lock(ictx);
+    TA_FREEP(&ictx->dropped_files);
+    ictx->dropped_files = talloc_zero_array(ictx, bstr, num_files);
+    ictx->num_dropped_files = num_files;
+    ictx->dnd_ts = mp_time_ns();
+    ictx->dnd_action = action;
+    for (int i = 0; i < num_files; i++)
+        ictx->dropped_files[i] = bstrdup(ictx->dropped_files, bstr0(files[i]));
+
+    notify_event_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_get_dropped_files(struct input_ctx *ictx, void *talloc_ctx,
+                                int64_t *dnd_ts,
+                                enum mp_dnd_action *dnd_action,
+                                char ***dropped_files)
+{
+    input_lock(ictx);
+    *dnd_ts = ictx->dnd_ts;
+    *dnd_action = ictx->dnd_action;
+    *dropped_files = NULL;
+    int num = 0;
+    for (int i = 0; i < ictx->num_dropped_files; i++)
+        MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num,
+                         bstrto0(talloc_ctx, ictx->dropped_files[i]));
+    MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num, NULL);
+    input_unlock(ictx);
 }
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
@@ -1514,6 +1727,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
         .wakeup_ctx = wakeup_ctx,
         .active_sections = talloc_array(ictx, struct active_section, 0),
         .touch_points = talloc_array(ictx, struct touch_point, 0),
+        .dnd_action = DND_NONE,
     };
 
     ictx->opts = ictx->opts_cache->opts;

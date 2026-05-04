@@ -252,19 +252,15 @@ class InputHelper: NSObject {
     @objc func open(files: [String], append: Bool = false) {
         lock.withLock {
             guard let input = input else { return }
-            if (option?.vo.drag_and_drop ?? -1) == -2 { return }
 
             var action = DND_APPEND
             if !append {
                 action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
-                if (option?.vo.drag_and_drop ?? -1) >= 0 {
-                    action = mp_dnd_action(UInt32(option?.vo.drag_and_drop ?? Int32(DND_REPLACE.rawValue)))
-                }
             }
 
             let filesClean = files.map { $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
             var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
-            mp_event_drop_files(input, Int32(files.count), &filesPtr, action)
+            mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
             for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
         }
     }

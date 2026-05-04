@@ -1,0 +1,1 @@
+effective `--image-display-duration` takes `--speed` into consideration now

@@ -24,6 +24,9 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    if (size > MAX_FUZZ_SIZE)
+        return 0;
+
     if (size <= 1 || data[size - 1] != '\0')
         return 0;
 
@@ -35,6 +38,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!str_startswith(data, size - 1, MPV_STRINGIFY(MPV_PROTO) "://", sizeof(MPV_STRINGIFY(MPV_PROTO) "://") - 1))
         return 0;
 #endif
+
+    set_fontconfig_sysroot();
 
     mpv_handle *ctx = mpv_create();
     if (!ctx)

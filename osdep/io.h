@@ -75,6 +75,7 @@ static inline int mp_fseeko(FILE* fp, off64_t offset, int whence) {
 #endif
 
 bool mp_set_cloexec(int fd);
+int mp_dup_cloexec(int fd);
 int mp_make_cloexec_pipe(int pipes[2]);
 int mp_make_wakeup_pipe(int pipes[2]);
 void mp_flush_wakeup_pipe(int pipe_end);
@@ -111,8 +112,8 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 
 size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
                  FILE *restrict stream);
-int mp_printf(const char *format, ...) PRINTF_ATTRIBUTE(1, 2);
-int mp_fprintf(FILE *stream, const char *format, ...) PRINTF_ATTRIBUTE(2, 3);
+int mp_printf(const char *format, ...) MP_PRINTF_ATTRIBUTE(1, 2);
+int mp_fprintf(FILE *stream, const char *format, ...) MP_PRINTF_ATTRIBUTE(2, 3);
 int mp_open(const char *filename, int oflag, ...);
 int mp_creat(const char *filename, int mode);
 int mp_rename(const char *oldpath, const char *newpath);
@@ -137,6 +138,7 @@ off_t mp_lseek64(int fd, off_t offset, int whence);
 int mp_ftruncate64(int fd, off_t length);
 void *mp_dlopen(const char *filename, int flag);
 void *mp_dlsym(void *handle, const char *symbol);
+int mp_dlclose(void *handle);
 char *mp_dlerror(void);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
@@ -206,8 +208,10 @@ void mp_globfree(mp_glob_t *pglob);
 
 #define RTLD_NOW 0
 #define RTLD_LOCAL 0
+#define RTLD_GLOBAL 0
 #define dlopen(fn,fg) mp_dlopen((fn), (fg))
 #define dlsym(h,s) mp_dlsym((h), (s))
+#define dlclose(h) mp_dlclose((h))
 #define dlerror mp_dlerror
 
 // Affects both "stat()" and "struct stat".
@@ -246,12 +250,13 @@ locale_t newlocale(int, const char *, locale_t);
 locale_t uselocale(locale_t);
 void freelocale(locale_t);
 
-#else /* __MINGW32__ */
+#else /* _WIN32 */
 
+#include <dlfcn.h>
 #include <sys/mman.h>
 
 extern char **environ;
 
-#endif /* __MINGW32__ */
+#endif /* _WIN32 */
 
 #endif

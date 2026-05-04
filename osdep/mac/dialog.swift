@@ -16,7 +16,9 @@
  */
 
 import Cocoa
+#if HAVE_MACOS_11_FEATURES
 import UniformTypeIdentifiers
+#endif
 
 class Dialog: NSObject, NSWindowDelegate, NSOpenSavePanelDelegate {
     var option: OptionHelper?
@@ -26,29 +28,32 @@ class Dialog: NSObject, NSWindowDelegate, NSOpenSavePanelDelegate {
     }
 
     func openFiles(title: String? = nil, path: URL? = nil) -> [String]? {
-         let types: [UTType] = (TypeHelper.toStringArray(option?.root.video_exts) +
+         let types: [String] = TypeHelper.toStringArray(option?.root.video_exts) +
             TypeHelper.toStringArray(option?.root.audio_exts) +
             TypeHelper.toStringArray(option?.root.image_exts) +
             TypeHelper.toStringArray(option?.root.archive_exts) +
-            TypeHelper.toStringArray(option?.root.playlist_exts)).compactMap { UTType(filenameExtension: $0) }
+            TypeHelper.toStringArray(option?.root.playlist_exts)
         return open(title: title, path: path, types: types)
     }
 
     func openPlaylist(title: String? = nil, path: URL? = nil) -> String? {
-        let types: [UTType] = TypeHelper.toStringArray(option?.root.playlist_exts).compactMap { UTType(filenameExtension: $0) }
+        let types: [String] = TypeHelper.toStringArray(option?.root.playlist_exts)
         return open(title: title, path: path, directories: false, multiple: false, types: types)?.first
     }
 
     func open(title: String? = nil, path: URL? = nil, files: Bool = true,
-              directories: Bool = true, multiple: Bool = true, types: [UTType] = []) -> [String]? {
+              directories: Bool = true, multiple: Bool = true, types: [String] = []) -> [String]? {
         let panel = NSOpenPanel()
         panel.title = title ?? panel.title
         panel.directoryURL = path
         panel.canChooseFiles = files
         panel.canChooseDirectories = directories
         panel.allowsMultipleSelection = multiple
-        panel.allowedContentTypes = types
         panel.delegate = self
+
+        if #available(macOS 11.0, *) {
+            panel.allowedContentTypes = types.compactMap { UTType(filenameExtension: $0) }
+        }
 
         if panel.runModal() == .OK {
             return panel.urls.map { $0.path }

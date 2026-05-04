@@ -19,11 +19,13 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "misc/thread_tools.h"
 #include "options/m_config.h"
 #include "player/core.h"
 
 struct clipboard_opts {
     bool monitor;
+    bool xwayland;
     struct m_obj_settings *backends;
 };
 
@@ -31,6 +33,7 @@ struct clipboard_opts {
 extern const struct clipboard_backend clipboard_backend_win32;
 extern const struct clipboard_backend clipboard_backend_mac;
 extern const struct clipboard_backend clipboard_backend_wayland;
+extern const struct clipboard_backend clipboard_backend_x11;
 extern const struct clipboard_backend clipboard_backend_vo;
 
 static const struct clipboard_backend *const clipboard_backend_list[] = {
@@ -40,8 +43,11 @@ static const struct clipboard_backend *const clipboard_backend_list[] = {
 #if HAVE_COCOA
     &clipboard_backend_mac,
 #endif
-#if HAVE_WAYLAND_PROTOCOLS_1_39
+#if HAVE_WAYLAND && HAVE_WAYLAND_PROTOCOLS_1_39
     &clipboard_backend_wayland,
+#endif
+#if HAVE_X11_CLIPBOARD
+    &clipboard_backend_x11,
 #endif
     &clipboard_backend_vo,
 };
@@ -70,6 +76,7 @@ static const struct m_obj_list backend_obj_list = {
 const struct m_sub_options clipboard_conf = {
     .opts = (const struct m_option[]) {
         {"monitor", OPT_BOOL(monitor), .flags = UPDATE_CLIPBOARD},
+        {"xwayland", OPT_BOOL(xwayland), .flags = UPDATE_CLIPBOARD},
         {"backends", OPT_SETTINGSLIST(backends, &backend_obj_list),
          .flags = UPDATE_CLIPBOARD},
         {0}
@@ -79,6 +86,7 @@ const struct m_sub_options clipboard_conf = {
             {.name = "win32", .enabled = true},
             {.name = "mac", .enabled = true},
             {.name = "wayland", .enabled = true},
+            {.name = "x11", .enabled = true},
             {.name = "vo", .enabled = true},
             {0}
         }
@@ -86,14 +94,10 @@ const struct m_sub_options clipboard_conf = {
     .size = sizeof(struct clipboard_opts)
 };
 
-struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
-                                          struct mpv_global *global)
+static void mp_clipboard_create(struct clipboard_ctx *cl,
+                                struct clipboard_init_params *params)
 {
-    struct clipboard_ctx *cl = talloc_ptrtype(NULL, cl);
-    *cl = (struct clipboard_ctx) {
-        .log = mp_log_new(cl, global->log, "clipboard"),
-        .monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
-    };
+    cl->monitor = params->flags & CLIPBOARD_INIT_ENABLE_MONITORING;
 
     for (int n = 0; params->backends && params->backends[n].name; n++) {
         if (!params->backends[n].enabled)
@@ -104,29 +108,37 @@ struct clipboard_ctx *mp_clipboard_create(struct clipboard_init_params *params,
                 continue;
             if (backend->init(cl, params) != CLIPBOARD_SUCCESS)
                 break;
+            mp_mutex_lock(&cl->lock);
             cl->backend = backend;
-            goto success;
+            mp_mutex_unlock(&cl->lock);
+            MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
+            return;
         }
     }
 
     MP_WARN(cl, "Failed to initialize any clipboard backend.\n");
-    talloc_free(cl);
-    return NULL;
-success:
-    MP_VERBOSE(cl, "Initialized %s clipboard backend.\n", cl->backend->name);
-    return cl;
+}
+
+void mp_clipboard_notify_update_data(struct clipboard_ctx *cl)
+{
+    mp_mutex_lock(&cl->lock);
+    for (int i = 0; i < cl->num_cancels; ++i)
+        mp_cancel_trigger(cl->cancels[i]);
+    mp_mutex_unlock(&cl->lock);
 }
 
 void mp_clipboard_destroy(struct clipboard_ctx *cl)
 {
-    if (cl && cl->backend->uninit)
+    mp_mutex_lock(&cl->lock);
+    if (cl->backend && cl->backend->uninit)
         cl->backend->uninit(cl);
-    talloc_free(cl);
+    cl->backend = cl->priv = NULL;
+    mp_mutex_unlock(&cl->lock);
 }
 
 bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
 {
-    if (cl && cl->backend->data_changed && cl->monitor)
+    if (cl->backend && cl->backend->data_changed && cl->monitor)
         return cl->backend->data_changed(cl);
     return false;
 }
@@ -134,7 +146,7 @@ bool mp_clipboard_data_changed(struct clipboard_ctx *cl)
 int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *out, void *talloc_ctx)
 {
-    if (cl && cl->backend->get_data)
+    if (cl->backend && cl->backend->get_data)
         return cl->backend->get_data(cl, params, out, talloc_ctx);
     return CLIPBOARD_UNAVAILABLE;
 }
@@ -142,29 +154,70 @@ int mp_clipboard_get_data(struct clipboard_ctx *cl, struct clipboard_access_para
 int mp_clipboard_set_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
                           struct clipboard_data *data)
 {
-    if (cl && cl->backend->set_data)
+    if (cl->backend && cl->backend->set_data)
         return cl->backend->set_data(cl, params, data);
     return CLIPBOARD_UNAVAILABLE;
 }
 
+bool mp_clipboard_update_data(struct clipboard_ctx *cl, struct clipboard_access_params *params,
+                              struct mp_cancel *cancel, double timeout)
+{
+    mp_mutex_lock(&cl->lock);
+    if (cl->backend && cl->backend->update_data) {
+        cl->backend->update_data(cl, params);
+    } else {
+        mp_mutex_unlock(&cl->lock);
+        return true;
+    }
+    MP_TARRAY_APPEND(cl, cl->cancels, cl->num_cancels, cancel);
+    mp_mutex_unlock(&cl->lock);
+
+    bool success = mp_cancel_wait(cancel, timeout);
+
+    mp_mutex_lock(&cl->lock);
+    for (int i = 0; i < cl->num_cancels; ++i) {
+        if (cl->cancels[i] == cancel) {
+            MP_TARRAY_REMOVE_AT(cl->cancels, cl->num_cancels, i);
+            break;
+        }
+    }
+    mp_mutex_unlock(&cl->lock);
+    return success;
+}
+
 const char *mp_clipboard_get_backend_name(struct clipboard_ctx *cl)
 {
-    return cl ? cl->backend->name : NULL;
+    return cl->backend ? cl->backend->name : NULL;
 }
 
 void reinit_clipboard(struct MPContext *mpctx)
 {
     mp_clipboard_destroy(mpctx->clipboard);
-    mpctx->clipboard = NULL;
 
     struct clipboard_opts *opts = mp_get_config_group(NULL, mpctx->global, &clipboard_conf);
     if (opts->backends && opts->backends[0].name) {
         struct clipboard_init_params params = {
             .mpctx = mpctx,
-            .flags = opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0,
             .backends = opts->backends,
         };
-        mpctx->clipboard = mp_clipboard_create(&params, mpctx->global);
+        params.flags |= opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0;
+        params.flags |= opts->xwayland ? CLIPBOARD_INIT_ENABLE_XWAYLAND : 0;
+        mp_clipboard_create(mpctx->clipboard, &params);
     }
     talloc_free(opts);
+}
+
+static void clipboard_destructor(void *ctx)
+{
+    struct clipboard_ctx *cl = ctx;
+    mp_mutex_destroy(&cl->lock);
+}
+
+void clipboard_init(struct MPContext *mpctx)
+{
+    struct clipboard_ctx *cl = talloc_zero_ptrtype(mpctx, cl);
+    talloc_set_destructor(cl, clipboard_destructor);
+    cl->log = mp_log_new(cl, mpctx->global->log, "clipboard");
+    mp_mutex_init(&cl->lock);
+    mpctx->clipboard = cl;
 }

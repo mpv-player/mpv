@@ -24,24 +24,20 @@
 
 #include <mpv/client.h>
 
-// Stolen from osdep/compiler.h
-#ifdef __GNUC__
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
-#define MP_NORETURN __attribute__((noreturn))
-#else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#define MP_NORETURN
-#endif
+#include "osdep/compiler.h"
 
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef PRINTF_ATTRIBUTE
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
-#endif
+#define command(cmd) command_impl(__FILE__, __LINE__, (cmd))
+#define command_string(cmd) command_string_impl(__FILE__, __LINE__, (cmd))
+#define get_property(property, format, result) \
+    get_property_impl(__FILE__, __LINE__, (property), (format), (result))
+#define set_option_or_property(property, format, value, option) \
+    set_option_or_property_impl(__FILE__, __LINE__, (property), (format), (value), (option))
+#define set_property_string(property, value) \
+    set_property_string_impl(__FILE__, __LINE__, (property), (value))
 
 // Global handle.
 static mpv_handle *ctx;
-MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
+MP_NORETURN MP_PRINTF_ATTRIBUTE(1, 2)
 
 static inline void fail(const char *fmt, ...)
 {
@@ -51,12 +47,14 @@ static inline void fail(const char *fmt, ...)
         vfprintf(stderr, fmt, va);
         va_end(va);
     }
+    fflush(stdout);
+    fflush(stderr);
     exit(1);
 }
 
 static inline void exit_cleanup(void)
 {
-    mpv_destroy(ctx);
+    mpv_terminate_destroy(ctx);
     ctx = NULL;
 }
 
@@ -78,16 +76,107 @@ static inline mpv_event *wrap_wait_event(void)
     }
 }
 
-static inline void check_api_error(int status)
+static inline void command_impl(const char *file, int line, const char *cmd[])
 {
-    if (status < 0)
-        fail("mpv API error: %s\n", mpv_error_string(status));
+    int ret = mpv_command(ctx, cmd);
+    if (ret < 0)
+        fail("mpv API error while running command '%s' at %s:%d (%s)\n",
+             cmd[0], file, line, mpv_error_string(ret));
+}
+
+static inline void command_string_impl(const char *file, int line, const char *cmd)
+{
+    int ret = mpv_command_string(ctx, cmd);
+    if (ret < 0)
+        fail("mpv API error while running command '%s' at %s:%d (%s)\n",
+             cmd, file, line, mpv_error_string(ret));
+}
+
+static inline void get_property_impl(const char *file, int line, const char *property,
+                                     int format, void *result)
+{
+    int ret = mpv_get_property(ctx, property, format, result);
+    if (ret < 0)
+        fail("mpv API error while getting property '%s' at %s:%d (%s)\n",
+             property, file, line, mpv_error_string(ret));
+}
+
+static inline void set_option_or_property_impl(const char *file, int line, const char *property,
+                                               int format, void *value, bool option)
+{
+    int ret = option ? mpv_set_option(ctx, property, format, value) :
+                       mpv_set_property(ctx, property, format, value);
+    if (ret < 0)
+        fail("mpv API while setting %s '%s' at %s:%d (%s)\n", option ? "option" : "property",
+             property, file, line, mpv_error_string(ret));
+
+}
+
+static inline void set_property_string_impl(const char *file, int line, const char *property,
+                                            const char *value)
+{
+    int ret = mpv_set_property_string(ctx, property, value);
+    if (ret < 0)
+        fail("mpv API error while setting property '%s' to '%s' at %s:%d (%s)\n",
+             property, value, file, line, mpv_error_string(ret));
+}
+
+MP_UNUSED static void check_double(const char *property, double expect)
+{
+    double result_double;
+    get_property(property, MPV_FORMAT_DOUBLE, &result_double);
+    if (expect != result_double)
+        fail("%s (double): expected '%f' but got '%f'!\n", property, expect, result_double);
+}
+
+MP_UNUSED static void check_flag(const char *property, int expect)
+{
+    int result_flag;
+    get_property(property, MPV_FORMAT_FLAG, &result_flag);
+    if (expect != result_flag)
+        fail("%s (flag): expected '%d' but got '%d'!\n", property, expect, result_flag);
+}
+
+MP_UNUSED static void check_int(const char *property, int64_t expect)
+{
+    int64_t result_int;
+    get_property(property, MPV_FORMAT_INT64, &result_int);
+    if (expect != result_int)
+        fail("%s (int): expected '%" PRId64 "' but got '%" PRId64 "'!\n", property, expect, result_int);
+}
+
+MP_UNUSED static inline void check_string(const char *property, const char *expect)
+{
+    char *result_string;
+    get_property(property, MPV_FORMAT_STRING, &result_string);
+    if (strcmp(expect, result_string) != 0)
+        fail("%s (string): expected '%s' but got '%s'!\n", property, expect, result_string);
+    mpv_free(result_string);
 }
 
 static inline void initialize(void)
 {
-    check_api_error(mpv_set_option_string(ctx, "vo", "null"));
-    check_api_error(mpv_set_option_string(ctx, "ao", "null"));
-    check_api_error(mpv_request_log_messages(ctx, "debug"));
-    check_api_error(mpv_initialize(ctx));
+    set_property_string("vo", "null");
+    set_property_string("ao", "null");
+    int ret = mpv_request_log_messages(ctx, "debug");
+    if (ret < 0)
+        fail("mpv API error while setting log level to debug: %s\n", mpv_error_string(ret));
+    ret = mpv_initialize(ctx);
+    if (ret < 0)
+        fail("mpv API error while initializing mpv: %s\n", mpv_error_string(ret));
+}
+
+static inline void reload_file(const char *path)
+{
+    const char *cmd[] = {"loadfile", path, NULL};
+    command(cmd);
+    bool loaded = false;
+    while (!loaded) {
+        mpv_event *event = wrap_wait_event();
+        switch (event->event_id) {
+        case MPV_EVENT_FILE_LOADED:
+            loaded = true;
+            break;
+        }
+    }
 }

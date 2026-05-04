@@ -188,8 +188,6 @@ rgb0            => [pa] [un] gbrp            | a=1:1 [tu] [tp]
 rgb0            => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 rgb24           => [pa] [un] gbrp            | a=1:1 [tu] [tp]
 rgb24           => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
-rgb30           => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
-rgb30           => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 rgb4            => no
 rgb444          => [pa] [un] gbrp4           | a=1:1
 rgb444          => [pa] [un] gbrp            | a=1:1 [expand-8bit] [tu] [tp]
@@ -248,10 +246,12 @@ vuya            => [pa] [un] yuva444p        | a=1:1
 vuya            => [pa] [un] yuva444pf       | a=1:1 [planar-f32]
 vuyx            => [pa] [un] yuv444p         | a=1:1
 vuyx            => [pa] [un] yuv444pf        | a=1:1 [planar-f32]
-x2bgr10         => [pa] [un] gbrp10          | a=1:1
+x2bgr10         => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 x2bgr10         => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 x2bgr10be       => [pa] [un] gbrp10          | a=1:1
 x2bgr10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
+x2rgb10         => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
+x2rgb10         => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 x2rgb10be       => [pa] [un] gbrp10          | a=1:1 [tu] [tp]
 x2rgb10be       => [pa] [un] gbrpf32         | a=1:1 [planar-f32]
 xv30            => [pa] [un] yuv444p10       | a=1:1

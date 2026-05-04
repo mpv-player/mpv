@@ -568,7 +568,7 @@ static bool find_formats(struct ao *ao)
     struct wasapi_sample_fmt alt_formats[MP_ARRAY_SIZE(wasapi_formats)];
     wasapi_get_best_sample_formats(ao->format, alt_formats);
     struct wasapi_sample_fmt wasapi_format =
-        {AF_FORMAT_S16, 16, 16, &KSDATAFORMAT_SUBTYPE_PCM};;
+        {AF_FORMAT_S16, 16, 16, &KSDATAFORMAT_SUBTYPE_PCM};
     if (alt_formats[0].mp_format)
         wasapi_format = alt_formats[0];
 
@@ -643,7 +643,6 @@ exit_label:
     SAFE_RELEASE(state->pSessionControl);
     MP_WARN(state, "Error setting audio session name: %s\n",
             mp_HRESULT_to_str(hr));
-    return;
 }
 
 static void init_volume_control(struct wasapi_state *state)
@@ -1014,7 +1013,7 @@ bool wasapi_thread_init(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
-    int64_t retry_wait = MP_TIME_US_TO_NS(1);
+    int64_t retry_wait = MP_TIME_MS_TO_NS(1);
     bool align_hack = false;
     HRESULT hr;
 
@@ -1097,14 +1096,14 @@ retry:
         goto retry;
     case AUDCLNT_E_DEVICE_IN_USE:
     case AUDCLNT_E_DEVICE_INVALIDATED:
-        if (retry_wait > MP_TIME_US_TO_NS(8)) {
+        if (retry_wait > MP_TIME_MS_TO_NS(1000)) {
             MP_FATAL(ao, "Bad device retry failed\n");
             return false;
         }
         wasapi_thread_uninit(ao);
-        MP_WARN(ao, "Retrying in %"PRId64" ns\n", retry_wait);
+        MP_WARN(ao, "Retrying in %.0f ms\n", MP_TIME_NS_TO_MS(retry_wait));
         mp_sleep_ns(retry_wait);
-        retry_wait *= 2;
+        retry_wait *= 10;
         goto retry;
     }
     return SUCCEEDED(hr);

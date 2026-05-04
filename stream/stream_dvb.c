@@ -1090,9 +1090,12 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     conf_file_name = "channels.conf.atsc";
                     break;
                 case SYS_DVBT:
-                    if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBT2))
-                        continue; /* Add all channels later with T2. */
-                    conf_file_name = "channels.conf.ter";
+                    if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBT2)) {
+                        // only if ter1 is present, interpret as DVB-T, else will be loaded as DVB-T2
+                        conf_file_name = "channels.conf.ter1";
+                    } else {
+                        conf_file_name = "channels.conf.ter";
+                    }
                     break;
                 case SYS_DVBT2:
                     conf_file_name = "channels.conf.ter";
@@ -1101,9 +1104,12 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                     conf_file_name = "channels.conf.isdbt";
                     break;
                 case SYS_DVBS:
-                    if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBS2))
-                        continue; /* Add all channels later with S2. */
-                    conf_file_name = "channels.conf.sat";
+                    if (DELSYS_IS_SET(delsys_mask[f], SYS_DVBS2)) {
+                        // only if sat1 is present, interpret as DVB-S, else will be loaded as DVB-S2
+                        conf_file_name = "channels.conf.sat1";
+                    } else {
+                        conf_file_name = "channels.conf.sat";
+                    }
                     break;
                 case SYS_DVBS2:
                     conf_file_name = "channels.conf.sat";

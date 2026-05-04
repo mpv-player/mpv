@@ -27,6 +27,7 @@
 
 #include "mp_image.h"
 #include "csputils.h"
+#include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 
@@ -43,6 +44,8 @@ const struct m_opt_choice_alternatives pl_csp_names[] = {
     {"rgb",         PL_COLOR_SYSTEM_RGB},
     {"xyz",         PL_COLOR_SYSTEM_XYZ},
     {"ycgco",       PL_COLOR_SYSTEM_YCGCO},
+    {"ycgco-re",    PL_COLOR_SYSTEM_YCGCO_RE},
+    {"ycgco-ro",    PL_COLOR_SYSTEM_YCGCO_RO},
     {0}
 };
 
@@ -93,6 +96,9 @@ const struct m_opt_choice_alternatives pl_csp_trc_names[] = {
     {"s-log1",      PL_COLOR_TRC_S_LOG1},
     {"s-log2",      PL_COLOR_TRC_S_LOG2},
     {"st428",       PL_COLOR_TRC_ST428},
+#if PL_API_VER >= 362
+    {"scrgb",       PL_COLOR_TRC_SCRGB},
+#endif
     {0}
 };
 
@@ -120,6 +126,7 @@ const struct m_opt_choice_alternatives pl_alpha_names[] = {
     {"auto",        PL_ALPHA_UNKNOWN},
     {"straight",    PL_ALPHA_INDEPENDENT},
     {"premul",      PL_ALPHA_PREMULTIPLIED},
+    {"none",        PL_ALPHA_NONE},
     {0}
 };
 
@@ -146,6 +153,17 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {"ar",     14}, // "alternating frames right first"
     {0}
 };
+
+void mp_get_3d_side_by_side(int stereo_mode, int div[2])
+{
+    div[0] = div[1] = 1;
+    switch (stereo_mode) {
+    case MP_STEREO3D_SBS2L:
+    case MP_STEREO3D_SBS2R: div[0] = 2; break;
+    case MP_STEREO3D_AB2R:
+    case MP_STEREO3D_AB2L:  div[1] = 2; break;
+    }
+}
 
 enum pl_color_system mp_csp_guess_colorspace(int width, int height)
 {
@@ -538,4 +556,71 @@ void mp_map_fixp_color(struct pl_transform3x3 *matrix, int ibits, int in[3],
         int ival = lrint(val * ((1 << obits) - 1));
         out[i] = av_clip(ival, 0, (1 << obits) - 1);
     }
+}
+
+enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries *gamut)
+{
+    enum pl_color_primaries container = PL_COLOR_PRIM_UNKNOWN;
+
+    if (!pl_primaries_valid(gamut))
+        return container;
+
+    const struct pl_raw_primaries *best = NULL;
+    for (enum pl_color_primaries prim = 1; prim < PL_COLOR_PRIM_COUNT; prim++) {
+        const struct pl_raw_primaries *raw = pl_raw_primaries_get(prim);
+        if (pl_raw_primaries_similar(raw, gamut)) {
+            container = prim;
+            best = raw;
+            break;
+        }
+
+        if (pl_primaries_superset(raw, gamut) &&
+            (!best || pl_primaries_superset(best, raw)))
+        {
+            container = prim;
+            best = raw;
+        }
+    }
+
+    if (!best)
+        container = PL_COLOR_PRIM_BT_2020;
+
+    return container;
+}
+
+int mp_parse_raw_primaries(struct mp_log *log, const char *str,
+                           struct pl_raw_primaries *out)
+{
+    if (!str)
+        return M_OPT_INVALID;
+
+    if (!*str)
+        return M_OPT_MISSING_PARAM;
+
+    // Comma-separated CIE xy values: Rx,Ry,Gx,Gy,Bx,By,Wx,Wy
+    struct pl_raw_primaries prim;
+    if (sscanf(str, "%f,%f,%f,%f,%f,%f,%f,%f",
+            &prim.red.x, &prim.red.y, &prim.green.x, &prim.green.y,
+            &prim.blue.x, &prim.blue.y, &prim.white.x, &prim.white.y) == 8)
+    {
+        if (!pl_primaries_valid(&prim))
+            return M_OPT_OUT_OF_RANGE;
+        *out = prim;
+        return 1;
+    }
+
+    const m_option_t choice_opt = {
+        .priv = (void *)pl_csp_prim_names,
+    };
+
+    int prim_choice;
+    int ret = m_option_type_choice.parse(log, &choice_opt, bstr0("target-gamut"),
+                                         bstr0(str), &prim_choice);
+    if (ret >= 0) {
+        *out = *pl_raw_primaries_get(prim_choice);
+    } else if (ret != M_OPT_MISSING_PARAM) {
+        mp_info(log, "    Rx,Ry,Gx,Gy,Bx,By,Wx,Wy (custom CIE xy primaries)\n");
+    }
+
+    return ret;
 }

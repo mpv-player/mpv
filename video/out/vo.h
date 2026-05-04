@@ -47,14 +47,11 @@ enum {
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
     // For VOCTRL_GET_HIDPI_SCALE changes.
     VO_EVENT_DPI                        = 1 << 6,
-    // Special thing for encode mode (vo_driver.initially_blocked).
-    // Part of VO_EVENTS_USER to make vo_is_ready_for_frame() work properly.
-    VO_EVENT_INITIAL_UNBLOCK            = 1 << 7,
-    VO_EVENT_FOCUS                      = 1 << 8,
+    VO_EVENT_FOCUS                      = 1 << 7,
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
-                     VO_EVENT_INITIAL_UNBLOCK | VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED,
+                     VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED,
 };
 
 enum mp_voctrl {
@@ -206,6 +203,8 @@ enum {
     VO_CAP_UNTIMED      = 1 << 4,
     // VO is responsible for freeing frames.
     VO_CAP_FRAMEOWNER   = 1 << 5,
+    // VO does handle mp_image_params.vflip
+    VO_CAP_VFLIP        = 1 << 6,
 };
 
 enum {
@@ -318,12 +317,6 @@ struct vo_vsync_info {
 struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
-
-    // This requires waiting for a VO_EVENT_INITIAL_UNBLOCK event before the
-    // first frame can be sent. Doing vo_reconfig*() calls is allowed though.
-    // Encode mode uses this, the core uses vo_is_ready_for_frame() to
-    // implicitly check for this.
-    bool initially_blocked;
 
     // VO_CAP_* bits
     int caps;
@@ -472,11 +465,13 @@ struct vo {
     struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
     void *priv;
     struct mpv_global *global;
-    struct vo_x11_state *x11;
-    struct vo_w32_state *w32;
-    struct vo_wayland_state *wl;
-    struct vo_android_state *android;
-    struct vo_drm_state *drm;
+    union {
+        struct vo_x11_state *x11;
+        struct vo_w32_state *w32;
+        struct vo_wayland_state *wl;
+        struct vo_android_state *android;
+        struct vo_drm_state *drm;
+    };
     struct mp_hwdec_devices *hwdec_devs;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
@@ -511,10 +506,9 @@ struct vo {
 
     struct m_config_cache *opts_cache; // cache for ->opts
     struct mp_vo_opts *opts;
-    struct m_config_cache *gl_opts_cache;
-    struct m_config_cache *eq_opts_cache;
 
     bool want_redraw;   // redraw as soon as possible
+    int64_t previous_redraw_time;
 
     // current window state
     int dwidth;
@@ -523,6 +517,9 @@ struct vo {
 
     // current GPU context (--vo=gpu and --vo=gpu-next only)
     const char *context_name;
+
+    // composition swapchain (--d3d11-output-mode=composition only)
+    void *display_swapchain;
 };
 
 struct mpv_global;
@@ -536,6 +533,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
 bool vo_is_visible(struct vo *vo);
 void vo_queue_frame(struct vo *vo, struct vo_frame *frame);
 void vo_wait_frame(struct vo *vo);
+void vo_wait_on_vo(struct vo *vo, bool wait);
 bool vo_still_displaying(struct vo *vo);
 void vo_request_wakeup_on_done(struct vo *vo);
 bool vo_has_frame(struct vo *vo);
@@ -557,6 +555,7 @@ double vo_get_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
+void * vo_get_display_swapchain(struct vo *vo);
 double vo_get_delay(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
 struct vo_frame *vo_get_current_vo_frame(struct vo *vo);

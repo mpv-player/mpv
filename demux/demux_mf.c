@@ -100,8 +100,8 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
     }
 
     if (strchr(filename, ',')) {
-        mp_info(log, "filelist: %s\n", filename);
         bstr bfilename = bstr0(filename);
+        mp_info(log, "filelist: %.*s\n", BSTR_P(bfilename));
 
         while (bfilename.len) {
             bstr bfname;

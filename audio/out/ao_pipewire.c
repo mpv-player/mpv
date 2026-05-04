@@ -147,10 +147,10 @@ static enum spa_audio_channel mp_speaker_id_to_spa(struct ao *ao, enum mp_speake
     case MP_SPEAKER_ID_TBR:  return SPA_AUDIO_CHANNEL_TRR;
     case MP_SPEAKER_ID_DL:   return SPA_AUDIO_CHANNEL_FL;
     case MP_SPEAKER_ID_DR:   return SPA_AUDIO_CHANNEL_FR;
-    case MP_SPEAKER_ID_WL:   return SPA_AUDIO_CHANNEL_FL;
-    case MP_SPEAKER_ID_WR:   return SPA_AUDIO_CHANNEL_FR;
+    case MP_SPEAKER_ID_WL:   return SPA_AUDIO_CHANNEL_FLW;
+    case MP_SPEAKER_ID_WR:   return SPA_AUDIO_CHANNEL_FRW;
     case MP_SPEAKER_ID_SDL:  return SPA_AUDIO_CHANNEL_SL;
-    case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SL;
+    case MP_SPEAKER_ID_SDR:  return SPA_AUDIO_CHANNEL_SR;
     case MP_SPEAKER_ID_LFE2: return SPA_AUDIO_CHANNEL_LFE2;
     case MP_SPEAKER_ID_TSL:  return SPA_AUDIO_CHANNEL_TSL;
     case MP_SPEAKER_ID_TSR:  return SPA_AUDIO_CHANNEL_TSR;
@@ -577,16 +577,18 @@ static int init(struct ao *ao)
     struct pw_properties *props = pw_properties_new(
         PW_KEY_MEDIA_TYPE, "Audio",
         PW_KEY_MEDIA_CATEGORY, "Playback",
-        PW_KEY_MEDIA_ROLE, ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC ?  "Music" : "Movie",
         PW_KEY_NODE_NAME, ao->client_name,
         PW_KEY_NODE_DESCRIPTION, ao->client_name,
         PW_KEY_APP_NAME, ao->client_name,
         PW_KEY_APP_ID, ao->client_name,
         PW_KEY_APP_ICON_NAME, ao->client_name,
-        PW_KEY_NODE_ALWAYS_PROCESS, "true",
         PW_KEY_TARGET_OBJECT, ao->device,
         NULL
     );
+
+    if (ao->set_media_role)
+        pw_properties_set(props, PW_KEY_MEDIA_ROLE,
+                          ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC ? "Music" : "Movie");
 
     if (pipewire_init_boilerplate(ao) < 0)
         goto error_props;
@@ -884,7 +886,7 @@ static void hotplug_uninit(struct ao *ao)
 
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
-    ao_device_list_add(list, ao, &(struct ao_device_desc){});
+    ao_device_list_add(list, ao, &(struct ao_device_desc){0});
 
     if (for_each_sink(ao, add_device_to_list, list) < 0)
         MP_WARN(ao, "Could not list devices, list may be incomplete\n");

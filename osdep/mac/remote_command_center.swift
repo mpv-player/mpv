@@ -48,8 +48,8 @@ class RemoteCommandCenter: EventSubscriber {
     var configs: [MPRemoteCommand: Config] = [:]
     var disabledCommands: [MPRemoteCommand] = []
     var isPaused: Bool = false { didSet { updateInfoCenter() } }
-    var duration: Double = 0 { didSet { updateInfoCenter() } }
-    var position: Double = 0 { didSet { updateInfoCenter() } }
+    var duration: Int64 = 0 { didSet { updateInfoCenter() } }
+    var position: Int64 = 0 { didSet { updateInfoCenter() } }
     var rate: Double = 1 { didSet { updateInfoCenter() } }
     var title: String = "" { didSet { updateInfoCenter() } }
     var chapter: String? { didSet { updateInfoCenter() } }
@@ -104,8 +104,8 @@ class RemoteCommandCenter: EventSubscriber {
     }
 
     func registerEvents() {
-        event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_DOUBLE))
-        event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_DOUBLE))
+        event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_INT64))
+        event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_INT64))
         event?.subscribe(self, event: .init(name: "speed", format: MPV_FORMAT_DOUBLE))
         event?.subscribe(self, event: .init(name: "pause", format: MPV_FORMAT_FLAG))
         event?.subscribe(self, event: .init(name: "media-title", format: MPV_FORMAT_STRING))
@@ -257,13 +257,9 @@ class RemoteCommandCenter: EventSubscriber {
 
     func handle(event: EventHelper.Event) {
         switch event.name {
-        case "time-pos":
-            let newPosition = max(event.double ?? 0, 0)
-            if Int((floor(newPosition) - floor(position)) / rate) != 0 {
-                position = newPosition
-            }
+        case "time-pos": position = max(event.int ?? 0, 0)
         case "pause": isPaused = event.bool ?? false
-        case "duration": duration = event.double ?? 0
+        case "duration": duration = event.int ?? 0
         case "speed": rate = event.double ?? 1
         case "media-title": title = event.string ?? ""
         case "chapter-metadata/title": chapter = event.string

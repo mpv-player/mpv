@@ -62,6 +62,17 @@ static bool wayland_egl_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
+static pl_color_space_t wayland_egl_preferred_csp(struct ra_ctx *ctx)
+{
+    return vo_wayland_preferred_csp(ctx->vo);
+}
+
+static bool wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+{
+    vo_wayland_handle_color(ctx->vo->wl, params);
+    return true;
+}
+
 static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -106,6 +117,8 @@ static bool egl_create_context(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
+        .preferred_csp      = wayland_egl_preferred_csp,
+        .set_color          = wayland_egl_set_color,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,
     };
@@ -212,9 +225,10 @@ static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
 
 static bool wayland_egl_init(struct ra_ctx *ctx)
 {
-    if (!vo_wayland_init(ctx->vo))
-        return false;
-    return egl_create_context(ctx);
+    if (vo_wayland_init(ctx->vo) && egl_create_context(ctx))
+        return true;
+    vo_wayland_uninit(ctx->vo);
+    return false;
 }
 
 const struct ra_ctx_fns ra_ctx_wayland_egl = {

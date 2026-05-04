@@ -63,6 +63,11 @@ bool mp_set_cloexec(int fd)
 }
 
 #ifndef _WIN32
+int mp_dup_cloexec(int fd)
+{
+    return fcntl(fd, F_DUPFD_CLOEXEC);
+}
+
 int mp_make_cloexec_pipe(int pipes[2])
 {
     if (pipe(pipes) != 0) {
@@ -263,6 +268,24 @@ static int hstat(HANDLE h, struct mp_stat *buf)
     return 0;
 }
 
+int mp_dup_cloexec(int fd)
+{
+    HANDLE proc = GetCurrentProcess();
+    HANDLE src = (HANDLE)_get_osfhandle(fd), dup = INVALID_HANDLE_VALUE;
+    if (src == INVALID_HANDLE_VALUE)
+        return -1;
+    BOOL ok = DuplicateHandle(proc, src, proc, &dup, 0, FALSE, DUPLICATE_SAME_ACCESS);
+    if (!ok) {
+        set_errno_from_lasterror();
+        return -1;
+    }
+    int oflag = _O_RDWR | _O_NOINHERIT; // FIXME: find out the proper flags from the HANDLE
+    int dupfd = _open_osfhandle((intptr_t)dup, oflag);
+    if (dupfd < 0)
+        CloseHandle(dup);
+    return dupfd;
+}
+
 int mp_stat(const char *path, struct mp_stat *buf)
 {
     wchar_t *wpath = mp_from_utf8(NULL, path);
@@ -284,10 +307,8 @@ int mp_stat(const char *path, struct mp_stat *buf)
 int mp_fstat(int fd, struct mp_stat *buf)
 {
     HANDLE h = (HANDLE)_get_osfhandle(fd);
-    if (h == INVALID_HANDLE_VALUE) {
-        errno = EBADF;
+    if (h == INVALID_HANDLE_VALUE)
         return -1;
-    }
     // Use mpv's hstat() function rather than MSVCRT's fstat() because mpv's
     // supports directories and device/inode numbers.
     return hstat(h, buf);
@@ -327,14 +348,14 @@ size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
 }
 
 #if HAVE_UWP
-PRINTF_ATTRIBUTE(2, 0)
+MP_PRINTF_ATTRIBUTE(2, 0)
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     return vfprintf(stream, format, args);
 }
 #else
 
-PRINTF_ATTRIBUTE(2, 0)
+MP_PRINTF_ATTRIBUTE(2, 0)
 static int mp_vfprintf(FILE *stream, const char *format, va_list args)
 {
     HANDLE wstream = get_handle(stream);
@@ -692,7 +713,7 @@ char *mp_getenv(const char *name)
     int i;
     size_t l = strlen(name);
     if (!utf8_environ || !*name || strchr(name, '=')) return NULL;
-    for (i=0; utf8_environ[i] && (strncmp(name, utf8_environ[i], l)
+    for (i=0; utf8_environ[i] && (strncasecmp(name, utf8_environ[i], l)
             || utf8_environ[i][l] != '='); i++) {}
     if (utf8_environ[i]) return utf8_environ[i] + l+1;
     return NULL;
@@ -721,39 +742,29 @@ int mp_ftruncate64(int fd, off_t length)
     return -1;
 }
 
-_Thread_local
+thread_local
 static struct {
     DWORD errcode;
-    char *errstring;
-} mp_dl_result = {
-    .errcode = 0,
-    .errstring = NULL
-};
-
-static void mp_dl_free(void)
-{
-    talloc_free(mp_dl_result.errstring);
-}
-
-static void mp_dl_init(void)
-{
-    atexit(mp_dl_free);
-}
+    char errstring[1024];
+} mp_dl_result;
 
 void *mp_dlopen(const char *filename, int flag)
 {
     HMODULE lib = NULL;
     void *ta_ctx = talloc_new(NULL);
     wchar_t *wfilename = mp_from_utf8(ta_ctx, filename);
+    wchar_t *path = wfilename;
 
-    DWORD len = GetFullPathNameW(wfilename, 0, NULL, NULL);
-    if (!len)
-        goto err;
+    if (strchr(filename, '/') || strchr(filename, '\\')) {
+        DWORD len = GetFullPathNameW(wfilename, 0, NULL, NULL);
+        if (!len)
+            goto err;
 
-    wchar_t *path = talloc_array(ta_ctx, wchar_t, len);
-    len = GetFullPathNameW(wfilename, len, path, NULL);
-    if (!len)
-        goto err;
+        path = talloc_array(ta_ctx, wchar_t, len);
+        len = GetFullPathNameW(wfilename, len, path, NULL);
+        if (!len)
+            goto err;
+    }
 
     lib = LoadLibraryW(path);
 
@@ -770,19 +781,21 @@ void *mp_dlsym(void *handle, const char *symbol)
     return (void *)addr;
 }
 
+int mp_dlclose(void *handle)
+{
+    return CloseHandle(handle);
+}
+
 char *mp_dlerror(void)
 {
-    static mp_once once_init_dlerror = MP_STATIC_ONCE_INITIALIZER;
-    mp_exec_once(&once_init_dlerror, mp_dl_init);
-    mp_dl_free();
-
     if (mp_dl_result.errcode == 0)
         return NULL;
 
-    mp_dl_result.errstring = talloc_strdup(NULL, mp_HRESULT_to_str(mp_dl_result.errcode));
+    mp_HRESULT_to_str_buf(mp_dl_result.errstring, sizeof(mp_dl_result.errstring),
+                          mp_dl_result.errcode);
     mp_dl_result.errcode = 0;
 
-    return mp_dl_result.errstring == NULL
+    return !mp_dl_result.errstring[0]
         ? "unknown error"
         : mp_dl_result.errstring;
 }
@@ -815,10 +828,8 @@ void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
     mp_assert(flags == MAP_SHARED); // not implemented
 
     HANDLE osf = (HANDLE)_get_osfhandle(fd);
-    if (!osf) {
-        errno = EBADF;
+    if (osf == INVALID_HANDLE_VALUE)
         return MAP_FAILED;
-    }
 
     DWORD protect = 0;
     DWORD access = 0;

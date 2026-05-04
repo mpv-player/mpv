@@ -35,7 +35,7 @@ The exact syntax is:
 
     and the ``filter-parameter-list``:
 
-        ``<filter-parameter> | <filter-parameter> "," <filter-parameter-list>``
+        ``<filter-parameter> | <filter-parameter> ":" <filter-parameter-list>``
 
     and ``filter-parameter``:
 
@@ -261,15 +261,15 @@ Available mpv-only filters are:
         :dci-p3:       DCI-P3 (Digital Cinema)
         :v-gamut:      Panasonic V-Gamut primaries
 
-    ``<gamma>``
-       Gamma function the source file was encoded with. Normally this should be set
+    ``<transfer>`` or ``<gamma>``
+       Transfer function the source file was encoded with. Normally this should be set
        in the file header, but when playing broken or mistagged files this can be
        used to override the setting.
 
        This option only affects video output drivers that perform color management.
 
        If this option is set to ``auto`` (which is the default), the gamma will
-       be set to BT.1886 for YCbCr content, sRGB for RGB content and Linear for
+       be set to BT.1886 for YCbCr content, sRGB for RGB content and st428 for
        XYZ content.
 
        Available gamma functions are:
@@ -290,6 +290,7 @@ Available mpv-only filters are:
        :v-log:        Panasonic V-Log transfer curve
        :s-log1:       Sony S-Log1 transfer curve
        :s-log2:       Sony S-Log2 transfer curve
+       :st428:        Digital Cinema Distribution Master (XYZ)
 
     ``<sig-peak>``
         Reference peak illumination for the video file, relative to the
@@ -321,6 +322,27 @@ Available mpv-only filters are:
     ``<hdr10plus=yes|no>``
         Whether or not to include HDR10+ metadata (default: yes). If
         disabled, any HDR10+ metadata will be stripped from frames.
+
+    ``<min-luma>``
+        Set the minimum luminance value for the mastering display metadata.
+        This is a float value in nits (cd/m²).
+
+        .. note::
+
+            0.0 means undefined, which is the default. To set 0.0 as actual value,
+            use a very small value like 1e-6.
+
+    ``<max-luma>``
+        Set the maximum luminance value for the mastering display metadata.
+        This is a float value in nits (cd/m²).
+
+    ``<max_cll>``
+        Set the maximum content light level for the mastering display
+        metadata. This is a float value in nits (cd/m²).
+
+    ``<max_fall>``
+        Set the maximum frame-average light level for the mastering
+        display metadata. This is a float value in nits (cd/m²).
 
     ``<film-grain=yes|no>``
         Whether or not to include film grain metadata (default: yes). If
@@ -357,13 +379,14 @@ Available mpv-only filters are:
         Force a specific scaler backend, if applicable. This is a debug option
         and could go away any time.
 
-    ``<alpha=auto|straight|premul>``
+    ``<alpha=auto|straight|premul|none>``
         Set the kind of alpha the video uses. Undefined effect if the image
         format has no alpha channel (could be ignored or cause an error,
         depending on how mpv internals evolve). Setting this may or may not
         cause downstream image processing to treat alpha differently, depending
         on support. With ``convert`` and zimg used, this will convert the alpha.
         libswscale and other FFmpeg components completely ignore this.
+        ``none`` is available only starting from libplacebo vN.344.0.
 
 ``lavfi=graph[:sws-flags[:o=opts]]``
     Filter video using FFmpeg's libavfilter.
@@ -718,14 +741,77 @@ Available mpv-only filters are:
             NVIDIA RTX Super Resolution.
     ``interlaced-only=<yes|no>``
         If ``yes``, only deinterlace frames marked as interlaced (default: no).
-    ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
+    ``mode=<blend|bob|adaptive|mocomp|ivtc|none>``
         Tries to select a video processor with the given processing capability.
-        If a video processor supports multiple capabilities, it is not clear
-        which algorithm is actually selected. ``none`` always falls back. On
-        most if not all hardware, this option will probably do nothing, because
-        a video processor usually supports all modes or none.
+        If a video processor supports multiple capabilities, it is not guaranteed
+        which algorithm will actually be selected, this is left to the driver.
+        However, ``blend`` and ``bob`` modes are enforced by not passing reference
+        frames and adjusting the output frame rate. The other modes are used to
+        select an appropriate video processor, but the algorithm chosen depends
+        on the driver and the content. ``ivtc`` mode outputs at the half rate.
+
+    .. note::
+
+        ``ivtc`` mode only performs field matching and does not drop duplicate
+        frames. Duplicated frames can be removed manually using the ``decimate``
+        filter: ``--vf=d3d11vpp="deint:mode=ivtc,format=nv12,decimate=5"`` for
+        3:2 pulldown cadence. ``format=nv12`` is required to download frames back
+        to the CPU for decimation, the format should match the underlying format
+        of the d3d11 frame.
+
     ``nvidia-true-hdr``
         Enable NVIDIA RTX Video HDR processing.
+
+``amf_frc``
+    AMD Frame Rate Conversion filter. Requires AMD hardware and drivers
+    supporting AMF FRC.
+
+    AMF FRC is a technique for achieving high-end video frame rate conversion
+    results from lower frame rate video inputs. The filter doubles the input
+    frame rate by generating intermediate frames.
+
+    AMF FRC only supports D3D11 input currently. Use `--hwdec=d3d11va` or
+    `--vf-pre=format=d3d11` to upload the data. `--d3d11va-zero-copy` is also
+    recommended for better performance.
+
+    ``profile=<auto|low|high|super>``
+        Selects the quality profile for frame rate conversion.
+
+        ``auto`` (default)
+            Select profile based on input resolution. Uses ``high`` for
+            resolutions up to 1440p, and ``super`` for 1440p and higher.
+        ``low``
+            Less levels of hierarchical motion search. Only recommended for
+            extremely low resolutions.
+        ``high``
+            Recommended for any resolution up to 1440p.
+        ``super``
+            More levels of hierarchical motion search. Recommended for
+            resolutions 1440p or higher.
+
+    ``mv-search=<native|performance>``
+        Selects the motion vector search mode.
+
+        ``native`` (default)
+            Conduct motion search on the full resolution of source images.
+        ``performance``
+            Conduct motion search on the down scaled source images.
+            Recommended for APU or low end GPU for better performance.
+
+    ``fallback``
+        In case confidence is too low to do interpolation, fall back to simple
+        frame blending. If not set, the filter will repeat the last frame instead.
+        (default: no)
+
+    ``indicator``
+        Specifies whether or not the FRC indicator square is shown in the top
+        left corner of the video. (default: no)
+
+    ``future-frame``
+        When enabled, the information contained in the next frame in the
+        sequence will be used in FRC interpolation calculations, in addition to
+        the current pair of frames. This will introduce one extra frame time of
+        latency. (default: yes)
 
 ``fingerprint=...``
     Compute video frame fingerprints and provide them as metadata. Actually, it

@@ -25,6 +25,8 @@
 #include "stream/stream.h"
 #include "common/common.h"
 #include "misc/bstr.h"
+#include "misc/hash.h"
+#include "misc/io_utils.h"
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
@@ -347,21 +349,15 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
-        char *cache_info = talloc_asprintf(tmp,
-                "ver=1.4, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
-                "contrast=%d\n",
-                p->opts->intent, s_r, s_g, s_b, prim, trc, p->opts->contrast);
-
-        uint8_t hash[32];
-        struct AVSHA *sha = av_sha_alloc();
-        MP_HANDLE_OOM(sha);
-        av_sha_init(sha, 256);
-        av_sha_update(sha, cache_info, strlen(cache_info));
+        bstr cache_info = {0};
+        bstr_xappend_asprintf(tmp, &cache_info,
+            "ver=1.4, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
+            "contrast=%d\n",
+            p->opts->intent, s_r, s_g, s_b, prim, trc, p->opts->contrast);
         if (vid_profile)
-            av_sha_update(sha, vid_profile->data, vid_profile->size);
-        av_sha_update(sha, p->icc_data, p->icc_size);
-        av_sha_final(sha, hash);
-        av_free(sha);
+            bstr_xappend(tmp, &cache_info, (bstr){vid_profile->data, vid_profile->size});
+        bstr_xappend(tmp, &cache_info, (bstr){p->icc_data, p->icc_size});
+        bstr hashstr = mp_hash_to_bstr(tmp, cache_info.start, cache_info.len, "SHA256");
 
         char *cache_dir = p->opts->cache_dir;
         if (cache_dir && cache_dir[0]) {
@@ -371,10 +367,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         }
 
         if (cache_dir && cache_dir[0]) {
-            cache_file = talloc_strdup(tmp, "");
-            for (int i = 0; i < sizeof(hash); i++)
-                cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
-            cache_file = mp_path_join(tmp, cache_dir, cache_file);
+            cache_file = mp_path_join_bstr(tmp, bstr0(cache_dir), hashstr);
             mp_mkdirp(cache_dir);
         }
     }
@@ -436,13 +429,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
     cmsDeleteTransform(trafo);
 
-    if (cache_file) {
-        FILE *out = fopen(cache_file, "wb");
-        if (out) {
-            fwrite(output, talloc_get_size(output), 1, out);
-            fclose(out);
-        }
-    }
+    if (cache_file)
+        mp_save_to_file(cache_file, output, talloc_get_size(output));
 
 done: ;
 

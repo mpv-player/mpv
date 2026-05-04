@@ -1,0 +1,1 @@
+make `--autocreate-playlist` only activate for regular files

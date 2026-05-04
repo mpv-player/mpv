@@ -1,0 +1,2 @@
+add `--input-builtin-drag-and-drop` option
+add `dropped-file` property

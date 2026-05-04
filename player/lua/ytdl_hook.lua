@@ -7,7 +7,7 @@ local o = {
     include = "^%w+%.youtube%.com/|^youtube%.com/|^youtu%.be/|^%w+%.twitch%.tv/|^twitch%.tv/",
     try_ytdl_first = false,
     use_manifests = false,
-    all_formats = false,
+    all_formats = true,
     force_all_formats = true,
     thumbnails = "none",
     ytdl_path = "",
@@ -26,6 +26,7 @@ options.read_options(o, nil, function()
 end)
 
 local chapter_list = {}
+local metadata = {}
 local playlist_cookies = {}
 local playlist_metadata = {}
 
@@ -37,6 +38,7 @@ end
 
 -- youtube-dl JSON name to mpv tag name
 local tag_list = {
+    ["title"]           = "title",
     ["artist"]          = "artist",
     ["album"]           = "album",
     ["album_artist"]    = "album_artist",
@@ -61,8 +63,6 @@ local tag_list = {
     ["is_live"]         = "ytdl_is_live",
     ["release_year"]    = "ytdl_release_year",
     ["description"]     = "ytdl_description",
-    -- "title" is handled by force-media-title
-    -- tags don't work with all_formats=yes
 }
 
 local safe_protos = Set {
@@ -82,10 +82,16 @@ local codec_map = {
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
+    ["vp9%..*"]     = "vp9",
     ["avc1%..*"]    = "h264",
     ["av01%..*"]    = "av1",
     ["mp4a%..*"]    = "aac",
+    ["hev1%..*"]    = "hevc",
 }
+
+if mp.get_property_native("subrandr-version") ~= nil then
+    codec_map["srv3"] = "subrandr/srv3"
+end
 
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
 -- Fun fact: mpv will not really use the codec, but will still try to initialize
@@ -111,7 +117,7 @@ end
 
 local function exec(args)
     return mp.command_native({
-        name = "subprocess",
+        _name = "subprocess",
         args = args,
         capture_stdout = true,
         capture_stderr = true,
@@ -246,35 +252,6 @@ local function url_is_safe(url)
         msg.error(("Ignoring potentially unsafe url: '%s'"):format(url))
     end
     return safe
-end
-
-local function time_to_secs(time_string)
-    local ret
-
-    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)")
-    if a ~= nil then
-        ret = (a*3600 + b*60 + c)
-    else
-        a, b = time_string:match("(%d%d?):(%d%d)")
-        if a ~= nil then
-            ret = (a*60 + b)
-        end
-    end
-
-    return ret
-end
-
-local function extract_chapters(data, video_length)
-    local ret = {}
-
-    for line in data:gmatch("[^\r\n]+") do
-        local time = time_to_secs(line)
-        if time and (time < video_length) then
-            table.insert(ret, {time = time, title = line})
-        end
-    end
-    table.sort(ret, function(a, b) return a.time < b.time end)
-    return ret
 end
 
 local function is_whitelisted(url)
@@ -509,13 +486,18 @@ local function formats_to_edl(json, formats, use_all_formats)
     local streams = {}
 
     local tbr_only = true
+    local has_video_only = false
     for _, track in ipairs(formats) do
         tbr_only = tbr_only and track["tbr"] and
                    (not track["abr"]) and (not track["vbr"])
+        local video_only = track.vcodec and track.vcodec ~= "none"
+                      and (not track.acodec or track.acodec == "none")
+        has_video_only = has_video_only or video_only
     end
 
     local has_requested_video = false
     local has_requested_audio = false
+    local next_program_id = 0
     -- Web players with quality selection always show the highest quality
     -- option at the top. Since tracks are usually listed with the first
     -- track at the top, that should also be the highest quality track.
@@ -560,6 +542,13 @@ local function formats_to_edl(json, formats, use_all_formats)
         local skip = #tracks == 0
         local params = ""
 
+        -- For DASH-style sources (video-only + audio-only streams), only video
+        -- formats get a program_id. Audio-only formats are shared across all
+        -- editions. For muxed sources, every format including audio_only becomes
+        -- a separate edition.
+        local has_video = track.vcodec and track.vcodec ~= "none"
+        local dominated = has_video or not has_video_only
+
         if use_all_formats then
             for _, sub in ipairs(tracks) do
                 -- A single track that is either audio or video. Delay load it.
@@ -603,7 +592,11 @@ local function formats_to_edl(json, formats, use_all_formats)
                 end
                 hdr[#hdr + 1] = "!track_meta,title=" ..
                     edl_escape(title) .. ",byterate=" .. byterate ..
+                    (dominated and ",program_id=" .. next_program_id or "") ..
                     (#flags > 0 and ",flags=" .. table.concat(flags, "+") or "")
+            end
+            if dominated then
+                next_program_id = next_program_id + 1
             end
 
             if duration > 0 then
@@ -684,6 +677,12 @@ local function add_single_video(json)
         elseif json.tbr then
             max_bitrate = json.tbr > max_bitrate and json.tbr or max_bitrate
         end
+
+        for json_name, mp_name in pairs(tag_list) do
+            if json[json_name] then
+                metadata[mp_name] = tostring(json[json_name])
+            end
+        end
     end
 
     if streamurl == ""  then
@@ -737,10 +736,6 @@ local function add_single_video(json)
     msg.debug("streamurl: " .. streamurl)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
-
-    if mp.get_property("force-media-title", "") == "" then
-        mp.set_property("file-local-options/force-media-title", json.title)
-    end
 
     -- set hls-bitrate for dash track selection
     if max_bitrate > 0 and
@@ -827,8 +822,6 @@ local function add_single_video(json)
             end
             table.insert(chapter_list, {time=chapter.start_time, title=title})
         end
-    elseif json.description ~= nil and json.duration ~= nil then
-        chapter_list = extract_chapters(json.description, json.duration)
     end
 
     -- set start time
@@ -887,27 +880,19 @@ local function add_single_video(json)
         stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
     end
 
+    local chunk_size = math.huge
+    if has_requested_formats then
+        for _, f in pairs(requested_formats) do
+            if f.downloader_options and f.downloader_options.http_chunk_size then
+                chunk_size = math.min(chunk_size, tonumber(f.downloader_options.http_chunk_size))
+            end
+        end
+    end
+    if chunk_size < math.huge then
+        stream_opts = append_libav_opt(stream_opts, "request_size", tostring(chunk_size))
+    end
+
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
-end
-
-local function check_version(ytdl_path)
-    local command = {
-        name = "subprocess",
-        capture_stdout = true,
-        args = {ytdl_path, "--version"}
-    }
-    local version_string = mp.command_native(command).stdout
-    local year, month, day = string.match(version_string, "(%d+).(%d+).(%d+)")
-
-    -- sanity check
-    if tonumber(year) < 2000 or tonumber(month) > 12 or
-        tonumber(day) > 31 then
-        return
-    end
-    local version_ts = os.time{year=year, month=month, day=day}
-    if os.difftime(os.time(), version_ts) > 60*60*24*90 then
-        msg.warn("It appears that your youtube-dl version is severely out of date.")
-    end
 end
 
 local function run_ytdl_hook(url)
@@ -936,11 +921,7 @@ local function run_ytdl_hook(url)
         msg.verbose("Video disabled. Only using audio")
     end
 
-    if format == "" then
-        format = "bestvideo+bestaudio/best"
-    end
-
-    if format ~= "ytdl" then
+    if format ~= "" and format ~= "ytdl" then
         table.insert(command, "--format")
         table.insert(command, format)
     end
@@ -1048,9 +1029,6 @@ local function run_ytdl_hook(url)
             err = err .. "unexpected error occurred"
         end
         msg.error(err)
-        if parse_err or string.find(ytdl_err, "yt%-dl%.org/bug") then
-            check_version(ytdl.path)
-        end
         return
     end
 
@@ -1165,7 +1143,9 @@ local function run_ytdl_hook(url)
                 local playlist_url = nil
 
                 -- links without protocol as returned by --flat-playlist
-                if not site:find("://") then
+                if not site then
+                    msg.error("Playlist entry does not have unique URL, can't add it.")
+                elseif not site:find("://") then
                     -- youtube extractor provides only IDs,
                     -- others come prefixed with the extractor name and ":"
                     local prefix = site:find(":") and "ytdl://" or
@@ -1193,8 +1173,7 @@ local function run_ytdl_hook(url)
 
     else -- probably a video
         -- add playlist metadata if any belongs to the current video
-        local metadata = playlist_metadata[mp.get_property("playlist-path")] or {}
-        for key, value in pairs(metadata) do
+        for key, value in pairs(playlist_metadata[mp.get_property("playlist-path")] or {}) do
             json[key] = value
         end
 
@@ -1234,6 +1213,11 @@ mp.add_hook("on_preloaded", 10, function ()
         mp.set_property_native("chapter-list", chapter_list)
         chapter_list = {}
     end
+
+    for key, value in pairs(metadata) do
+        mp.set_property("metadata/by-key/" .. key, value)
+    end
+    metadata = {}
 end)
 
 mp.add_hook("on_after_end_file", 50, function ()

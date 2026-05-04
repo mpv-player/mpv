@@ -108,7 +108,9 @@ static void term_osd_update_title(struct MPContext *mpctx)
         return;
 
     char *s = mp_property_expand_escaped_string(mpctx, mpctx->opts->term_title);
-    if (bstr_equals(bstr0(s), bstr0(mpctx->term_osd_title))) {
+    bstr title = bstr0(s);
+    mp_msg_sanitize(&title);
+    if (bstr_equals(title, bstr0(mpctx->term_osd_title))) {
         talloc_free(s);
         return;
     }
@@ -306,7 +308,7 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
     talloc_free(line);
 }
 
-PRINTF_ATTRIBUTE(4, 0)
+MP_PRINTF_ATTRIBUTE(4, 0)
 static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
                            const char *fmt, va_list ap)
 {

@@ -70,8 +70,6 @@ struct mux_stream {
     enum AVMediaType codec_type;
     AVRational encoder_timebase;    // packet timestamps from encoder
     AVStream *st;
-    void (*on_ready)(void *ctx);    // when finishing muxer init
-    void *on_ready_ctx;
 };
 
 #define OPT_BASE_STRUCT struct encode_opts
@@ -277,13 +275,6 @@ static void maybe_init_muxer(struct encode_lavc_context *ctx)
 
     p->header_written = true;
 
-    for (int n = 0; n < p->num_streams; n++) {
-        struct mux_stream *s = p->streams[n];
-
-        if (s->on_ready)
-            s->on_ready(s->on_ready_ctx);
-    }
-
     return;
 
 failed:
@@ -342,9 +333,7 @@ done:
 // Can be called only once per stream. info is copied by callee as needed.
 static void encode_lavc_add_stream(struct encoder_context *enc,
                                    struct encode_lavc_context *ctx,
-                                   struct encoder_stream_info *info,
-                                   void (*on_ready)(void *ctx),
-                                   void *on_ready_ctx)
+                                   struct encoder_stream_info *info)
 {
     struct encode_priv *p = ctx->priv;
 
@@ -377,8 +366,6 @@ static void encode_lavc_add_stream(struct encoder_context *enc,
     if (avcodec_parameters_copy(dst->st->codecpar, info->codecpar) < 0)
         MP_HANDLE_OOM(NULL);
 
-    dst->on_ready = on_ready;
-    dst->on_ready_ctx = on_ready_ctx;
     enc->mux_stream = dst;
 
     maybe_init_muxer(ctx);
@@ -839,8 +826,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
     talloc_free(filename);
 }
 
-bool encoder_init_codec_and_muxer(struct encoder_context *p,
-                                  void (*on_ready)(void *ctx), void *ctx)
+bool encoder_init_codec_and_muxer(struct encoder_context *p)
 {
     mp_assert(!avcodec_is_open(p->encoder));
 
@@ -896,7 +882,7 @@ bool encoder_init_codec_and_muxer(struct encoder_context *p,
     p->pkt = av_packet_alloc();
     MP_HANDLE_OOM(p->pkt);
 
-    encode_lavc_add_stream(p, p->encode_lavc_ctx, &p->info, on_ready, ctx);
+    encode_lavc_add_stream(p, p->encode_lavc_ctx, &p->info);
     if (!p->mux_stream)
         goto fail;
 

@@ -20,7 +20,7 @@
 static void test_lavfi_complex(char *file)
 {
     const char *cmd[] = {"loadfile", file, NULL};
-    check_api_error(mpv_command(ctx, cmd));
+    command(cmd);
     bool finished = false;
     bool loaded = false;
     while (!finished) {
@@ -29,10 +29,10 @@ static void test_lavfi_complex(char *file)
         case MPV_EVENT_FILE_LOADED:
             // Add file as external and toggle lavfi-complex on.
             if (!loaded) {
-                check_api_error(mpv_set_property_string(ctx, "external-files", file));
+                set_property_string("external-files", file);
                 const char *add_cmd[] = {"video-add", file, "auto", NULL};
-                check_api_error(mpv_command(ctx, add_cmd));
-                check_api_error(mpv_set_property_string(ctx, "lavfi-complex", "[vid1] [vid2] vstack [vo]"));
+                command(add_cmd);
+                set_property_string("lavfi-complex", "[vid1] [vid2] vstack [vo]");
             }
             loaded = true;
             break;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     test_lavfi_complex(argv[1]);
     printf("================ SHUTDOWN ================\n");
 
-    mpv_command_string(ctx, "quit");
+    command_string("quit");
     while (wrap_wait_event()->event_id != MPV_EVENT_SHUTDOWN) {}
 
     return 0;

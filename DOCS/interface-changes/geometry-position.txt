@@ -1,0 +1,1 @@
+`--geometry` x/y position is now applied only on initial window creation, unless `--force-window-position=yes` is set.

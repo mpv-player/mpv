@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "ra_gl.h"
 
-static struct ra_fns ra_fns_gl;
+static const struct ra_fns ra_fns_gl;
 
 // For ra.priv
 struct ra_gl {
@@ -191,7 +191,7 @@ static int ra_init_gl(struct ra *ra, GL *gl)
             desc->chroma_w = desc->chroma_h = 1;
         }
         if (strcmp(fmt->name, "rgb10_a2") == 0) {
-            fmt->special_imgfmt = IMGFMT_RGB30;
+            fmt->special_imgfmt = IMGFMT_X2RGB10;
             struct ra_imgfmt_desc *desc = talloc_zero(fmt, struct ra_imgfmt_desc);
             fmt->special_imgfmt_desc = desc;
             desc->component_bits = 10;
@@ -1183,7 +1183,7 @@ static void gl_debug_marker(struct ra *ra, const char *msg)
         gl_check_error(p->gl, ra->log, msg);
 }
 
-static struct ra_fns ra_fns_gl = {
+static const struct ra_fns ra_fns_gl = {
     .destroy                = gl_destroy,
     .tex_create             = gl_tex_create,
     .tex_destroy            = gl_tex_destroy,

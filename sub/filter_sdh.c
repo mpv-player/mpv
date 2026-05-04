@@ -33,13 +33,6 @@
 // all SDH parts.
 // It is for filtering ASS encoded subtitles
 
-static const char *const enclosure_pair[][2] = {
-    {"(",      ")"},
-    {"[",      "]"},
-    {"\uFF08", "\uFF09"},
-    {0},
-};
-
 struct buffer {
     char *string;
     int length;
@@ -84,26 +77,26 @@ static int get_char_bytes(char *str)
     return 0;
 }
 
-static const char *get_right_enclosure(char *left)
+static bool is_parenthesis_pair(const char *left, const char *right)
 {
-    // See if the right hand character is mapped. If not, just return the same thing.
-    for (int i = 0; enclosure_pair[i][0]; i++) {
-        if (strcmp(left, enclosure_pair[i][0]) == 0)
-            return enclosure_pair[i][1];
-    }
-    return left;
+    if (!strcmp(left, "(") && !strcmp(right, ")"))
+        return true;
+    if (!strcmp(left, "\uFF08") && !strcmp(right, "\uFF09"))
+        return true;
+    return false;
 }
 
-static bool valid_left_enclosure(struct sd_filter *sd, char *str)
+static int matching_enclosure(char **enclosures, char *str)
 {
-    // All characters in this string are valid left hand enclosure characters.
-    char *enclosures = sd->opts->sub_filter_SDH_enclosures;
-    int len = strlen(enclosures);
-    for (int i = 0; i < len; i++) {
-        if (str && str[0] && str[0] == enclosures[i])
-            return true;
+    int len = get_char_bytes(str);
+    for (int i = 0; len && enclosures && enclosures[i]; ++i) {
+        if (!strncmp(str, enclosures[i], len) &&
+            len == get_char_bytes(enclosures[i]))  // str doesn't end early
+        {
+            return i;
+        }
     }
-    return false;
+    return -1;
 }
 
 
@@ -130,8 +123,6 @@ static void copy_ass(struct sd_filter *sd, char **rpp, struct buffer *buf)
         }
     }
     *rpp = rp;
-
-    return;
 }
 
 static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
@@ -219,8 +210,6 @@ static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *
         return;
     }
     *rpp = rp;
-
-    return;
 }
 
 // Check for text enclosed in symbols, like (SOUND)
@@ -250,7 +239,7 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
     bool filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
     int old_pos = buf->pos;
-    bool parenthesis = strcmp(left, "(") == 0 || strcmp(left, "\uFF08") == 0;
+    bool parenthesis = is_parenthesis_pair(left, right);
 
     // skip past the left character
     rp += get_char_bytes(rp);
@@ -384,15 +373,16 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
         while (*rp && !(rp[0] == '\\' && rp[1] == 'N')) {
             copy_ass(sd, &rp, buf);
             char left[5] = {0};
-            const char *right = NULL;
-            if (valid_left_enclosure(sd, rp)) {
+            char **enclosures = sd->opts->sub_filter_SDH_enclosures;
+            int index = matching_enclosure(enclosures, rp);
+            if (index > -1) {
                 int bytes = get_char_bytes(rp);
                 for (int i = 0; i < bytes; i++)
                     left[i] = rp[i];
-                left[bytes] = '\0';
-                right = get_right_enclosure(left);
             }
-            if (left[0] && right && right[0]) {
+            if (left[0]) {
+                // Skip left character
+                char *right = enclosures[index] + get_char_bytes(enclosures[index]);
                 if (!skip_enclosed(sd, &rp, buf, left, right)) {
                     append(sd, buf, rp[0]);
                     rp++;

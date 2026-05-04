@@ -121,6 +121,7 @@ const struct m_sub_options dec_wrapper_conf = {
             .flags = UPDATE_VD,
             .help = decoder_list_help},
         {"audio-spdif", OPT_STRING(audio_spdif),
+            .flags = UPDATE_AD,
             .help = decoder_list_help},
         {"video-rotate", OPT_CHOICE(video_rotate, {"no", -1}),
             .flags = UPDATE_IMGPAR, M_RANGE(0, 359)},
@@ -454,8 +455,8 @@ static bool reinit_decoder(struct priv *p)
 
         p->decoder = driver->create(p->decf, p->codec, sel->decoder);
         if (p->decoder) {
-            p->codec->decoder = talloc_strdup(p, sel->decoder);
-            p->codec->decoder_desc = talloc_strdup(p, sel->desc && sel->desc[0] ? sel->desc : NULL);
+            p->codec->decoder = talloc_strdup(p->codec, sel->decoder);
+            p->codec->decoder_desc = talloc_strdup(p->codec, sel->desc && sel->desc[0] ? sel->desc : NULL);
             MP_VERBOSE(p, "Selected decoder: %s", sel->decoder);
             if (p->codec->decoder_desc)
                 MP_VERBOSE(p, " - %s", p->codec->decoder_desc);

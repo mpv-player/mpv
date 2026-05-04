@@ -79,7 +79,6 @@ struct priv {
     struct mp_log *log;
     struct ra_ctx_params params;
     struct opengl_opts *opts;
-    struct ra_swapchain_fns fns;
     GLuint main_fb;
     struct ra_tex *wrapped_fb; // corresponds to main_fb
     // for debugging:
@@ -130,6 +129,7 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_ctx_params params)
     struct ra_swapchain *sw = ctx->swapchain = talloc_ptrtype(NULL, sw);
     *sw = (struct ra_swapchain) {
         .ctx = ctx,
+        .fns = &ra_gl_swapchain_fns,
     };
 
     struct priv *p = sw->priv = talloc_ptrtype(sw, p);
@@ -138,10 +138,7 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_ctx_params params)
         .log    = ctx->log,
         .params = params,
         .opts   = mp_get_config_group(p, ctx->global, &opengl_conf),
-        .fns    = ra_gl_swapchain_fns,
     };
-
-    sw->fns = &p->fns;
 
     if (!gl->version && !gl->es)
         return false;
@@ -232,7 +229,7 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
     if (p->opts->use_glfinish)
         gl->Finish();
 
-    if (gl->FenceSync) {
+    if (gl->FenceSync && p->params.swap_buffers) {
         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
         if (fence)
             MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
@@ -305,8 +302,26 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
+static bool ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+{
+    struct priv *p = sw->priv;
+    if (p->params.set_color)
+        return p->params.set_color(sw->ctx, params);
+    return false;
+}
+
+static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    if (p->params.preferred_csp)
+        return p->params.preferred_csp(sw->ctx);
+    return (pl_color_space_t){0};
+}
+
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
+    .set_color     = ra_gl_ctx_set_color,
+    .target_csp    = ra_gl_ctx_target_csp,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
     .swap_buffers  = ra_gl_ctx_swap_buffers,

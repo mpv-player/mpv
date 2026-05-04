@@ -1,0 +1,2 @@
+add `skip_{backward,forward}_mbtn_*_down_command` script-opt for osc
+add `{close,minimize,maximize}_mbtn_*_command` script-opt for osc

@@ -354,10 +354,10 @@ static void draw_rgba(uint8_t *dst, ptrdiff_t dst_stride,
             unsigned int dstg = (dstpix >>  8) & 0xFF;
             unsigned int dstr = (dstpix >> 16) & 0xFF;
             unsigned int dsta = (dstpix >> 24) & 0xFF;
-            dstb = srcb + dstb * (255 * 255 - srca) / (255 * 255);
-            dstg = srcg + dstg * (255 * 255 - srca) / (255 * 255);
-            dstr = srcr + dstr * (255 * 255 - srca) / (255 * 255);
-            dsta = srca + dsta * (255 * 255 - srca) / (255 * 255);
+            dstb = srcb + dstb * (255 - srca) / 255;
+            dstg = srcg + dstg * (255 - srca) / 255;
+            dstr = srcr + dstr * (255 - srca) / 255;
+            dsta = srca + dsta * (255 - srca) / 255;
             dstrow[x] = dstb | (dstg << 8) | (dstr << 16) | (dsta << 24);
         }
         dst += dst_stride;
@@ -485,9 +485,9 @@ static void clear_rgba_overlay(struct mp_draw_sub_cache *p)
         for (int sx = 0; sx < p->s_w; sx++) {
             struct slice *s = &line[sx];
 
-            // Ensure this final slice doesn't extend beyond the width of p->s_w
-            if (s->x1 == SLICE_W && sx == p->s_w - 1 && y == p->rgba_overlay->h - 1)
-                s->x1 = MPMIN(p->w - ((p->s_w - 1) * SLICE_W), s->x1);
+            // Ensure the last slice doesn't extend beyond the total width.
+            if (sx == p->s_w - 1)
+                s->x1 = MPMIN(p->w - (sx * SLICE_W), s->x1);
 
             if (s->x0 <= s->x1) {
                 memset(px + s->x0, 0, (s->x1 - s->x0) * 4);

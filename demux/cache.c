@@ -116,6 +116,7 @@ struct demux_cache *demux_cache_create(struct mpv_global *global,
     mp_mkdirp(cache_dir);
     cache->filename = mp_path_join(cache, cache_dir, "mpv-cache-XXXXXX.dat");
     cache->fd = mp_mkostemps(cache->filename, 4, O_CLOEXEC);
+    talloc_free(cache_dir);
     if (cache->fd < 0) {
         MP_ERR(cache, "Failed to create cache temporary file.\n");
         goto fail;
@@ -216,6 +217,7 @@ int64_t demux_cache_write(struct demux_cache *cache, struct demux_packet *dp)
     }
 
     mp_assert(!dp->is_cached);
+    mp_assert(!dp->is_wrapped_avframe);
     mp_assert(dp->len <= INT32_MAX);
     mp_assert(dp->avpacket->flags >= 0 && dp->avpacket->flags <= INT32_MAX);
     mp_assert(dp->avpacket->side_data_elems >= 0 &&

@@ -16,8 +16,8 @@ This is an object settings list option. See `List Options`_ for details.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output driver is ``--vo=gpu``, which is the default. All
-    other drivers are for compatibility or special purposes. If the default
+    The recommended output driver is ``--vo=gpu-next``, which is the default.
+    All other drivers are for compatibility or special purposes. If the default
     does not work, it will fallback to other drivers (in the same order as
     listed by ``--vo=help``).
 
@@ -26,6 +26,17 @@ This is an object settings list option. See `List Options`_ for details.
     rendering API), it must be explicitly specified.
 
 Available video output drivers are:
+
+``gpu-next``
+    Video renderer based on ``libplacebo``. This supports almost the same set
+    of features as ``--vo=gpu``. See `GPU renderer options`_ for a list.
+
+    Should generally be faster and higher quality, while also implementing some
+    features specific to ``gpu-next``, but some features may be intentionally
+    omitted or there may be functional differences to ``--vo=gpu``.
+    See here for a list of known differences:
+
+    https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
 ``gpu``
     General purpose, customizable, GPU-accelerated video output driver. It
@@ -56,17 +67,6 @@ Available video output drivers are:
     support, and some macOS setups being very slow with ``rgb16`` but fast
     with ``rgb32f``. If you have problems, you can also try enabling the
     ``--gpu-dumb-mode=yes`` option.
-
-``gpu-next``
-    Experimental video renderer based on ``libplacebo``. This supports almost
-    the same set of features as ``--vo=gpu``. See `GPU renderer options`_ for a
-    list.
-
-    Should generally be faster and higher quality, but some features may still
-    be missing or misbehave. Expect (and report!) bugs. See here for a list of
-    known differences and bugs:
-
-    https://github.com/mpv-player/mpv/wiki/GPU-Next-vs-GPU
 
 ``xv`` (X11 only)
     Uses the XVideo extension to enable hardware-accelerated display. This is
@@ -118,8 +118,7 @@ Available video output drivers are:
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     .. note:: This is a fallback only, and should not be normally used.
 
@@ -319,6 +318,8 @@ Available video output drivers are:
     This is low quality, and has issues with OSD. We strongly recommend that
     you use ``--vo=gpu`` with ``--hwdec=vaapi`` instead.
 
+    .. warning:: This VO is deprecated will be removed next release.
+
     The following global options are supported by this video output:
 
     ``--vo-vaapi-scaling=<algorithm>``
@@ -373,8 +374,7 @@ Available video output drivers are:
     the images at full color range, but 256-colors output is also supported (see
     below). On Windows it requires an ansi terminal such as mintty.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     Note: the TCT image output is not synchronized with other terminal output
     from mpv, which can lead to broken images. The options ``--terminal=no`` or
@@ -454,6 +454,14 @@ Available video output drivers are:
         and not via e.g. SSH connections.
 
         This option is not implemented on Windows.
+
+    ``--vo-kitty-auto-multiplexer-passthrough=<yes|no>`` (default: no)
+        Automatically detect terminal multiplexer to passthrough escape
+        sequences. This allows the image protocol to work in multiplexers that
+        might not support the kitty image protocol by passing through the
+        escape sequences directly to the terminal.
+
+        Currently only supports tmux and GNU screen.
 
 ``sixel``
     Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
@@ -621,8 +629,7 @@ Available video output drivers are:
     environment (e.g. no X). Does not support hardware acceleration (if you
     need this, check the ``drm`` backend for ``gpu`` VO).
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     The following global options are supported by this video output:
 
@@ -731,7 +738,6 @@ Available video output drivers are:
     Shared memory video output driver without hardware acceleration that works
     whenever Wayland is present.
 
-    Since mpv 0.30.0, you may need to use ``--profile=sw-fast`` to get decent
-    performance.
+    You may need to use ``--profile=sw-fast`` to get decent performance.
 
     .. note:: This is a fallback only, and should not be normally used.

@@ -30,50 +30,17 @@
 
 #include <mpv/client.h>
 
-// Stolen from osdep/compiler.h
-#ifdef __GNUC__
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format(printf, a1, a2)))
-#define MP_NORETURN __attribute__((noreturn))
-#else
-#define PRINTF_ATTRIBUTE(a1, a2)
-#define MP_NORETURN
-#endif
+#include "libmpv_common.h"
 
-// Broken crap with __USE_MINGW_ANSI_STDIO
-#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
-#undef PRINTF_ATTRIBUTE
-#define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
-#endif
-
-// Global handle
-static mpv_handle *ctx;
 // Temporary output file
 static const char *out_path;
 
-static void exit_cleanup(void)
+static void cleanup(void)
 {
     if (ctx)
         mpv_destroy(ctx);
     if (out_path && *out_path)
         unlink(out_path);
-}
-
-MP_NORETURN PRINTF_ATTRIBUTE(1, 2)
-static void fail(const char *fmt, ...)
-{
-    if (fmt) {
-        va_list va;
-        va_start(va, fmt);
-        vfprintf(stderr, fmt, va);
-        va_end(va);
-    }
-    exit(1);
-}
-
-static void check_api_error(int status)
-{
-    if (status < 0)
-        fail("libmpv error: %s\n", mpv_error_string(status));
 }
 
 static void wait_done(void)
@@ -98,7 +65,7 @@ static void check_output(FILE *fp)
     char magic[4];
     fseek(fp, 0, SEEK_SET);
     size_t ret = fread(magic, sizeof(magic), 1, fp);
-    static const char ebml_magic[] = {26, 69, 223, 163};
+    static const uint8_t ebml_magic[] = {26, 69, 223, 163};
     if (ret != 1 || memcmp(magic, ebml_magic, sizeof(magic)) != 0)
         fail("output was not Matroska\n");
 
@@ -111,7 +78,7 @@ int main(int argc, char *argv[])
     if (!ctx)
         return 1;
 
-    atexit(exit_cleanup);
+    atexit(cleanup);
 
     static char path[] = "./testout.XXXXXX";
 
@@ -126,19 +93,19 @@ int main(int argc, char *argv[])
     out_path = path;
 #endif
 
-    check_api_error(mpv_set_option_string(ctx, "o", out_path));
-    check_api_error(mpv_set_option_string(ctx, "of", "matroska"));
-    check_api_error(mpv_set_option_string(ctx, "end", "1.5"));
-    check_api_error(mpv_set_option_string(ctx, "terminal", "yes"));
-    check_api_error(mpv_set_option_string(ctx, "msg-level", "all=v"));
+    set_property_string("o", out_path);
+    set_property_string("of", "matroska");
+    set_property_string("end", "1.5");
+    set_property_string("terminal", "yes");
+    set_property_string("msg-level", "all=v");
 
     if (mpv_initialize(ctx) != 0)
         return 1;
 
-    check_api_error(mpv_set_option_string(ctx, "idle", "once"));
+    set_property_string("idle", "once");
 
     const char *cmd[] = {"loadfile", "av://lavfi:testsrc", NULL};
-    check_api_error(mpv_command(ctx, cmd));
+    command(cmd);
 
     wait_done();
     mpv_destroy(ctx);

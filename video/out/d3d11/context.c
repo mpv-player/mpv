@@ -27,6 +27,10 @@
 #include "context.h"
 #include "ra_d3d11.h"
 
+#ifdef PL_HAVE_D3D11
+#include <libplacebo/d3d11.h>
+#endif
+
 struct d3d11_opts {
     int feature_level;
     int warp;
@@ -36,6 +40,7 @@ struct d3d11_opts {
     int output_format;
     int color_space;
     bool exclusive_fs;
+    int output_mode;
 };
 
 #define OPT_BASE_STRUCT struct d3d11_opts
@@ -82,6 +87,12 @@ const struct m_sub_options d3d11_conf = {
             .flags = UPDATE_VO,
         },
         {"d3d11-exclusive-fs", OPT_BOOL(exclusive_fs)},
+        {"d3d11-output-mode", OPT_CHOICE(output_mode,
+            {"auto", -1},
+            {"window", 0},
+            {"composition", 1}),
+            .flags = UPDATE_VO,
+        },
         {0}
     },
     .defaults = &(const struct d3d11_opts) {
@@ -92,6 +103,7 @@ const struct m_sub_options d3d11_conf = {
         .adapter_name = NULL,
         .output_format = DXGI_FORMAT_UNKNOWN,
         .color_space = -1,
+        .output_mode = -1,
     },
     .size = sizeof(struct d3d11_opts)
 };
@@ -113,6 +125,8 @@ struct priv {
     int64_t last_sync_qpc_time;
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
+
+    struct mp_dxgi_factory_ctx dxgi_ctx;
 };
 
 static struct ra_tex *get_backbuffer(struct ra_ctx *ctx)
@@ -157,7 +171,11 @@ static bool resize(struct ra_ctx *ctx)
 
 static bool d3d11_reconfig(struct ra_ctx *ctx)
 {
-    vo_w32_config(ctx->vo);
+    if (ctx->opts.composition) {
+        vo_w32_composition_size(ctx->vo);
+    } else {
+        vo_w32_config(ctx->vo);
+    }
     return resize(ctx);
 }
 
@@ -166,7 +184,7 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
     struct priv *p = sw->priv;
 
     DXGI_OUTPUT_DESC1 desc1;
-    if (!mp_get_dxgi_output_desc(p->swapchain, &desc1))
+    if (!mp_dxgi_output_desc_from_swapchain(&p->dxgi_ctx, p->swapchain, &desc1))
         desc1.BitsPerColor = 0;
 
     DXGI_SWAP_CHAIN_DESC desc;
@@ -191,46 +209,16 @@ static int d3d11_color_depth(struct ra_swapchain *sw)
 
 static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
 {
+    if (sw->ctx->opts.composition)
+        return (struct pl_color_space){0};
+
     struct priv *p = sw->priv;
 
-    struct pl_color_space ret = {0};
-    DXGI_OUTPUT_DESC1 desc1;
-    if (!mp_get_dxgi_output_desc(p->swapchain, &desc1))
-        return ret;
+    DXGI_OUTPUT_DESC1 desc;
+    if (mp_dxgi_output_desc_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(sw->ctx->vo), &desc))
+        return mp_dxgi_desc_to_color_space(&desc);
 
-    ret.hdr.max_luma = desc1.MaxLuminance;
-    ret.hdr.min_luma = desc1.MinLuminance;
-    ret.hdr.prim.blue.x = desc1.BluePrimary[0];
-    ret.hdr.prim.blue.y = desc1.BluePrimary[1];
-    ret.hdr.prim.green.x = desc1.GreenPrimary[0];
-    ret.hdr.prim.green.y = desc1.GreenPrimary[1];
-    ret.hdr.prim.red.x = desc1.RedPrimary[0];
-    ret.hdr.prim.red.y = desc1.RedPrimary[1];
-
-    switch (desc1.ColorSpace) {
-        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:
-            ret.primaries = PL_COLOR_PRIM_BT_709;
-            ret.transfer = PL_COLOR_TRC_SRGB;
-            break;
-        case DXGI_COLOR_SPACE_RGB_FULL_G10_NONE_P709:
-            ret.primaries = PL_COLOR_PRIM_BT_709;
-            ret.transfer = PL_COLOR_TRC_LINEAR;
-            break;
-        case DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020:
-            ret.primaries = PL_COLOR_PRIM_BT_2020;
-            ret.transfer = PL_COLOR_TRC_PQ;
-            break;
-        case DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020:
-            ret.primaries = PL_COLOR_PRIM_BT_2020;
-            ret.transfer = PL_COLOR_TRC_SRGB;
-            break;
-        default:
-            ret.primaries = PL_COLOR_PRIM_UNKNOWN;
-            ret.transfer = PL_COLOR_TRC_UNKNOWN;
-            break;
-    }
-
-    return ret;
+    return (struct pl_color_space){0};
 }
 
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
@@ -454,7 +442,7 @@ static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg
         fullscreen_switch_needed = false;
     }
 
-    ret = vo_w32_control(ctx->vo, events, request, arg);
+    ret = ctx->opts.composition ? VO_TRUE : vo_w32_control(ctx->vo, events, request, arg);
 
     // if entering full screen, handle d3d11 after general windowing stuff
     if (fullscreen_switch_needed && p->vo_opts->fullscreen) {
@@ -481,8 +469,13 @@ static void d3d11_uninit(struct ra_ctx *ctx)
     if (ctx->ra)
         ra_tex_free(ctx->ra, &p->backbuffer);
     SAFE_RELEASE(p->swapchain);
-    vo_w32_uninit(ctx->vo);
+    if (!ctx->opts.composition) {
+        vo_w32_uninit(ctx->vo);
+    } else {
+        vo_w32_swapchain(ctx->vo, NULL);
+    }
     SAFE_RELEASE(p->device);
+    mp_dxgi_factory_uninit(&p->dxgi_ctx);
 
     // Destroy the RA last to prevent objects we hold from showing up in D3D's
     // leak checker
@@ -534,10 +527,14 @@ static bool d3d11_init(struct ra_ctx *ctx)
     if (!ctx->ra)
         goto error;
 
-    if (!vo_w32_init(ctx->vo))
+    ctx->opts.composition = p->opts->output_mode == 1;
+    if (!ctx->opts.composition && !vo_w32_init(ctx->vo))
         goto error;
 
-    if (ctx->opts.want_alpha)
+    if (ctx->opts.composition && !vo_w32_composition_size(ctx->vo))
+        goto error;
+
+    if (!ctx->opts.composition && ctx->opts.want_alpha)
         vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 
     UINT usage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_SHADER_INPUT;
@@ -548,20 +545,22 @@ static bool d3d11_init(struct ra_ctx *ctx)
     }
 
     struct d3d11_swapchain_opts scopts = {
-        .window = vo_w32_hwnd(ctx->vo),
+        .window = ctx->opts.composition ? NULL : vo_w32_hwnd(ctx->vo),
         .width = ctx->vo->dwidth,
         .height = ctx->vo->dheight,
         .format = p->opts->output_format,
         .color_space = p->opts->color_space,
         .configured_csp = &p->swapchain_csp,
         .flip = p->opts->flip,
-        // Add one frame for the backbuffer and one frame of "slack" to reduce
-        // contention with the window manager when acquiring the backbuffer
-        .length = ctx->vo->opts->swapchain_depth + 2,
+        // Add one frame for the backbuffer
+        .length = ctx->vo->opts->swapchain_depth + 1,
         .usage = usage,
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
         goto error;
+
+    if (ctx->opts.composition)
+        vo_w32_swapchain(ctx->vo, p->swapchain);
 
     return true;
 
@@ -572,6 +571,8 @@ error:
 
 static void d3d11_update_render_opts(struct ra_ctx *ctx)
 {
+    if (ctx->opts.composition)
+        return;
     vo_w32_set_transparency(ctx->vo, ctx->opts.want_alpha);
 }
 
@@ -587,15 +588,37 @@ IDXGISwapChain *ra_d3d11_ctx_get_swapchain(struct ra_ctx *ra)
     return p->swapchain;
 }
 
-bool ra_d3d11_ctx_prefer_8bit_output_format(struct ra_ctx *ra)
+#ifdef PL_HAVE_D3D11
+void ra_d3d11_ctx_set_swapchain_params(struct ra_ctx *ra,
+                                       struct pl_d3d11_swapchain_params *params)
 {
-    if (ra->swapchain->fns != &d3d11_swapchain)
-        return false;
+    mp_assert(ra->swapchain->fns == &d3d11_swapchain);
 
     struct priv *p = ra->priv;
+    int fmt = p->opts->output_format;
 
-    return p->opts->output_format == DXGI_FORMAT_R8G8B8A8_UNORM;
+    switch (fmt) {
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
+    case DXGI_FORMAT_B8G8R8A8_UNORM:
+        params->alpha_bits = 8;
+        params->color_bits = 8;
+        // This is redundant, as alpha bits would force 8-bit output format,
+        // but set it anyway to be explicit.
+        params->disable_10bit_sdr = true;
+        break;
+    case DXGI_FORMAT_R10G10B10A2_UNORM:
+        params->alpha_bits = 2;
+        params->color_bits = 10;
+        break;
+    case DXGI_FORMAT_R16G16B16A16_FLOAT:
+        params->alpha_bits = 16;
+        params->color_bits = 16;
+        break;
+    default:
+        params->alpha_bits = ra->opts.want_alpha ? 8 : 0;
+    };
 }
+#endif
 
 const struct ra_ctx_fns ra_ctx_d3d11 = {
     .type               = "d3d11",

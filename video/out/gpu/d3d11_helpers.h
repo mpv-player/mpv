@@ -62,11 +62,24 @@ struct d3d11_device_opts {
     char *adapter_name;
 };
 
+struct mp_dxgi_factory_ctx {
+    IDXGIFactory1 *factory;
+    IDXGIOutput6 *last_matched_output;
+};
+
+void mp_dxgi_factory_uninit(struct mp_dxgi_factory_ctx *ctx);
+
 IDXGIAdapter1 *mp_get_dxgi_adapter(struct mp_log *log,
                                    bstr requested_adapter_name,
                                    bstr *listing);
 
-bool mp_get_dxgi_output_desc(IDXGISwapChain *swapchain, DXGI_OUTPUT_DESC1 *desc);
+bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
+                                   HWND hwnd, DXGI_OUTPUT_DESC1 *desc);
+bool mp_dxgi_output_desc_from_swapchain(struct mp_dxgi_factory_ctx *ctx,
+                                        IDXGISwapChain *swapchain,
+                                        DXGI_OUTPUT_DESC1 *desc);
+
+struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc);
 
 OPT_STRING_VALIDATE_FUNC(mp_dxgi_validate_adapter);
 
@@ -107,5 +120,10 @@ bool mp_d3d11_create_swapchain(ID3D11Device *dev, struct mp_log *log,
 
 void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue);
+
+const char *d3d11_get_csp_name(DXGI_COLOR_SPACE_TYPE csp);
+
+DXGI_COLOR_SPACE_TYPE mp_params_to_dxgi_colorspace(struct mp_log *log,
+                                                   const struct mp_image_params *params);
 
 #endif

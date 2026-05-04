@@ -120,6 +120,8 @@
     <string>mpv</string>
     <key>CFBundleIconFile</key>
     <string>icon</string>
+    <key>CFBundleIconName</key>
+    <string>icon</string>
     <key>CFBundleIdentifier</key>
     <string>io.mpv</string>
     <key>CFBundleInfoDictionaryVersion</key>
@@ -133,7 +135,7 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>LSApplicationCategoryType</key>
-    <string>public.app-category.games</string>
+    <string>public.app-category.${CATEGORY}</string>
     <key>LSEnvironment</key>
     <dict>
       <key>MallocNanoZone</key>

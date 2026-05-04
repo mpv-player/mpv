@@ -1,0 +1,3 @@
+add `osc-dynamic_margins` option
+add `osc-sub-margin` option
+add `osc-osd-margin` option

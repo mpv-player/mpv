@@ -43,7 +43,6 @@ enum aocontrol {
 enum {
     AO_EVENT_RELOAD = 1,
     AO_EVENT_HOTPLUG = 2,
-    AO_EVENT_INITIAL_UNBLOCK = 4,
 };
 
 enum {
@@ -80,6 +79,7 @@ struct ao_opts {
     char *audio_device;
     char *audio_client_name;
     double audio_buffer;
+    bool audio_set_media_role;
 };
 
 struct ao *ao_init_best(struct mpv_global *global,
@@ -104,8 +104,6 @@ bool ao_is_playing(struct ao *ao);
 struct mp_async_queue;
 struct mp_async_queue *ao_get_queue(struct ao *ao);
 int ao_query_and_reset_events(struct ao *ao, int events);
-int ao_add_events(struct ao *ao, int events);
-void ao_unblock(struct ao *ao);
 void ao_request_reload(struct ao *ao);
 void ao_hotplug_event(struct ao *ao);
 

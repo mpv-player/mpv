@@ -120,17 +120,28 @@ Configurable Options
 
     Whether to clip lines to the terminal width.
 
-``plot_perfdata``
+``track_info_selected_only``
     Default: yes
+
+    Show track info for selected tracks only instead of all tracks.
+
+``plot_perfdata``
+    Default: no
 
     Show graphs for performance data (page 2).
 
 ``plot_vsync_ratio``
-    Default: yes
+    Default: no
+
 ``plot_vsync_jitter``
-    Default: yes
+    Default: no
 
     Show graphs for vsync and jitter values (page 1). Only when toggled.
+
+``plot_cache``
+    Default: yes
+
+    Show graphs for cache values (page 3). Only when toggled.
 
 ``plot_tonemapping_lut``
     Default: no

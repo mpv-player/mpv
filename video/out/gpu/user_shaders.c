@@ -16,11 +16,212 @@
  */
 
 #include <assert.h>
+#include <float.h>
+#include <limits.h>
 #include <math.h>
+#include <string.h>
 
 #include "common/msg.h"
 #include "misc/ctype.h"
 #include "user_shaders.h"
+
+int resolve_shader_enum_name(const struct gl_user_shader_param *param, struct bstr val)
+{
+    struct bstr enum_rest = param->enum_body;
+    int idx = 0;
+    while (enum_rest.len > 0) {
+        struct bstr enum_line = bstr_strip(bstr_getline(enum_rest, &enum_rest));
+        if (enum_line.len == 0)
+            continue;
+        if (bstr_equals(enum_line, val))
+            return idx;
+        idx++;
+    }
+    return -1;
+}
+
+bool parse_shader_param_value(struct mp_log *log, struct gl_user_shader_param *param,
+                              struct bstr val, double *out)
+{
+    double v, range[2];
+    struct bstr rest = {0};
+
+    switch (param->type) {
+    case GL_USER_SHADER_PARAM_UNKNOWN:
+        mp_err(log, "Missing type for param '%.*s'\n", BSTR_P(param->name));
+        return false;
+    case GL_USER_SHADER_PARAM_INT:
+    case GL_USER_SHADER_PARAM_DEFINE:
+        v = resolve_shader_enum_name(param, val);
+        v = v >= 0 ? v : bstrtoll(val, &rest, 10);
+        range[0] = INT_MIN;
+        range[1] = INT_MAX;
+        break;
+    case GL_USER_SHADER_PARAM_FLOAT:
+        v = bstrtod(val, &rest);
+        range[0] = -FLT_MAX;
+        range[1] = FLT_MAX;
+        break;
+    default:
+        MP_ASSERT_UNREACHABLE();
+    }
+
+    if (val.len == 0 || rest.len > 0) {
+        mp_err(log, "Invalid value for option '%.*s': '%.*s'\n",
+               BSTR_P(param->name), BSTR_P(val));
+        return false;
+    }
+
+    if (param->has_min)
+        range[0] = MPMAX(param->min, range[0]);
+    if (param->has_max)
+        range[1] = MPMIN(param->max, range[1]);
+    if (v < range[0] || v > range[1] || !isfinite(v)) {
+        mp_err(log, "Value of %f for option '%.*s' out of range [%f, %f]\n",
+               v, BSTR_P(param->name), range[0], range[1]);
+        return false;
+    }
+
+    *out = v;
+    return true;
+}
+
+static bool parse_bound(struct mp_log *log, struct bstr line,
+                        const char *name, double *val, bool *has)
+{
+    struct bstr rest, strip = bstr_strip(line);
+    *val = bstrtod(strip, &rest);
+    *has = rest.len == 0 && strip.len > 0;
+    if (!*has)
+        mp_err(log, "Error while parsing PARAM %s!\n", name);
+    return *has;
+}
+
+static bool parse_param(struct mp_log *log, struct bstr *body,
+                        struct gl_user_shader_param *params, int *num_params)
+{
+    struct bstr rest;
+    struct bstr line = bstr_strip(bstr_getline(*body, &rest));
+
+    if (!bstr_eatstart0(&line, "//!PARAM")) {
+        mp_err(log, "Expected PARAM header!\n");
+        return false;
+    }
+
+    if (*num_params == SHADER_MAX_PARAMS) {
+        mp_err(log, "Shader defines too many parameters!\n");
+        return false;
+    }
+
+    struct gl_user_shader_param *param = &params[(*num_params)++];
+    *param = (struct gl_user_shader_param){ .name = bstr_strip(line) };
+    bool is_enum = false;
+
+    while (true) {
+        *body = rest;
+        line = bstr_strip(bstr_getline(*body, &rest));
+
+        if (line.len == 0) {
+            if (rest.len == 0) {
+                mp_err(log, "Missing initial parameter value!\n");
+                return false;
+            }
+            continue;
+        }
+
+        if (!bstr_eatstart0(&line, "//!")) {
+            if (is_enum) {
+                int count = 0;
+                struct bstr enum_rest = {
+                    .start = line.start,
+                    .len = rest.start + rest.len - line.start,
+                };
+                param->enum_body = enum_rest;
+
+                while (enum_rest.len > 0) {
+                    struct bstr next_line;
+                    struct bstr enum_line = bstr_strip(bstr_getline(enum_rest, &next_line));
+                    if (bstr_startswith0(enum_line, "//!"))
+                        break;
+                    if (next_line.len == 0)
+                        continue;
+                    enum_rest = next_line;
+                    count++;
+                }
+
+                if (param->type != GL_USER_SHADER_PARAM_INT &&
+                    param->type != GL_USER_SHADER_PARAM_DEFINE)
+                {
+                    mp_err(log, "ENUM parameter '%.*s' must be type int or DEFINE!\n",
+                           BSTR_P(param->name));
+                    return false;
+                }
+                if (count == 0) {
+                    mp_err(log, "ENUM parameter '%.*s' has no values!\n",
+                           BSTR_P(param->name));
+                    return false;
+                }
+
+                param->enum_body.len -= enum_rest.len;
+                param->has_min = true;
+                param->has_max = true;
+                param->max = count - 1;
+
+                *body = enum_rest;
+                return true;
+            }
+
+            if (!parse_shader_param_value(log, param, line, &param->initial))
+                return false;
+            param->value = param->initial;
+
+            *body = rest;
+            struct bstr discard;
+            if (bstr_split_tok(*body, "//!", &discard, body)) {
+                body->start -= 3;
+                body->len += 3;
+            }
+            return true;
+        }
+
+        if (bstr_eatstart0(&line, "DESC")) {
+            param->desc = bstr_strip(line);
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "TYPE")) {
+            line = bstr_strip(line);
+            is_enum = bstr_eatstart0(&line, "ENUM");
+            line = bstr_strip(line);
+            if (bstr_equals0(line, "float")) {
+                param->type = GL_USER_SHADER_PARAM_FLOAT;
+            } else if (bstr_equals0(line, "int")) {
+                param->type = GL_USER_SHADER_PARAM_INT;
+            } else if (bstr_equals0(line, "DEFINE")) {
+                param->type = GL_USER_SHADER_PARAM_DEFINE;
+            } else {
+                mp_err(log, "Unrecognized PARAM TYPE: '%.*s'!\n", BSTR_P(line));
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "MINIMUM")) {
+            if (!parse_bound(log, line, "MINIMUM", &param->min, &param->has_min))
+                return false;
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "MAXIMUM")) {
+            if (!parse_bound(log, line, "MAXIMUM", &param->max, &param->has_max))
+                return false;
+            continue;
+        }
+
+        mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
+        return false;
+    }
+}
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 {
@@ -67,8 +268,10 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
             continue;
         }
 
-        // Some sort of illegal expression
-        return false;
+        // probably a parameter
+        exp->tag = SZEXP_VAR;
+        exp->val.varname = word;
+        continue;
     }
 
     return true;
@@ -76,7 +279,8 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 
 // Returns whether successful. 'result' is left untouched on failure
 bool eval_szexpr(struct mp_log *log, void *priv,
-                 bool (*lookup)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_tex)(void *priv, struct bstr var, float size[2]),
+                 bool (*lookup_param)(void *priv, struct bstr var, float *out),
                  struct szexp expr[MAX_SZEXP_SIZE], float *result)
 {
     float stack[MAX_SZEXP_SIZE] = {0};
@@ -141,7 +345,7 @@ bool eval_szexpr(struct mp_log *log, void *priv,
             struct bstr name = expr[i].val.varname;
             float size[2];
 
-            if (!lookup(priv, name, size)) {
+            if (!lookup_tex(priv, name, size)) {
                 mp_warn(log, "Variable %.*s not found in RPN expression!\n",
                         BSTR_P(name));
                 return false;
@@ -150,6 +354,17 @@ bool eval_szexpr(struct mp_log *log, void *priv,
             stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? size[0] : size[1];
             continue;
             }
+        case SZEXP_VAR: {
+            struct bstr name = expr[i].val.varname;
+            float value;
+            if (!lookup_param(priv, name, &value)) {
+                mp_warn(log, "Variable %.*s not found in RPN expression!\n",
+                    BSTR_P(name));
+                return false;
+            }
+            stack[idx++] = value;
+            continue;
+        }
         }
     }
 
@@ -264,6 +479,10 @@ static bool parse_hook(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "COMPONENTS")) {
             if (bstr_sscanf(line, "%d", &out->components) != 1) {
                 mp_err(log, "Error while parsing COMPONENTS!\n");
+                return false;
+            }
+            if (out->components < 0 || out->components > 4) {
+                mp_err(log, "Invalid COMPONENTS: %d\n", out->components);
                 return false;
             }
             continue;
@@ -430,8 +649,10 @@ static bool parse_tex(struct mp_log *log, struct ra *ra, struct bstr *body,
 }
 
 void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
+                       const char *path,
                        void *priv,
-                       bool (*dohook)(void *p, const struct gl_user_shader_hook *hook),
+                       bool (*dohook)(void *p, const char *path,
+                                      const struct gl_user_shader_hook *hook),
                        bool (*dotex)(void *p, struct gl_user_shader_tex tex))
 {
     if (!dohook || !dotex || !shader.len)
@@ -445,19 +666,42 @@ void parse_user_shader(struct mp_log *log, struct ra *ra, struct bstr shader,
     }
     shader = bstr_cut(shader, pos);
 
-    // Loop over the file
-    while (shader.len > 0)
-    {
-        // Peek at the first header to dispatch the right type
+    // params need to be collected in a first pass before dohook()
+    struct gl_user_shader_param global_params[SHADER_MAX_PARAMS] = {0};
+    int num_global_params = 0;
+    struct gl_user_shader_hook *hooks = NULL;
+    int num_hooks = 0;
+
+    while (shader.len > 0) {
         if (bstr_startswith0(shader, "//!TEXTURE")) {
             struct gl_user_shader_tex t;
             if (!parse_tex(log, ra, &shader, &t) || !dotex(priv, t))
-                return;
+                goto out;
+            continue;
+        }
+
+        if (bstr_startswith0(shader, "//!PARAM")) {
+            if (!parse_param(log, &shader, global_params, &num_global_params))
+                goto out;
             continue;
         }
 
         struct gl_user_shader_hook h;
-        if (!parse_hook(log, &shader, &h) || !dohook(priv, &h))
-            return;
+        if (!parse_hook(log, &shader, &h))
+            goto out;
+
+        MP_TARRAY_APPEND(NULL, hooks, num_hooks, h);
     }
+
+    for (int i = 0; i < num_hooks; i++) {
+        struct gl_user_shader_hook *h = &hooks[i];
+
+        h->num_params = num_global_params;
+        memcpy(h->params, global_params, num_global_params * sizeof(h->params[0]));
+
+        if (!dohook(priv, path, h))
+            goto out;
+    }
+out:
+    talloc_free(hooks);
 }

@@ -23,7 +23,14 @@
 
 #include <windows.h>
 #include <systemmediatransportcontrolsinterop.h>
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic warning "-Wtemplate-body"
+#endif
 #include <winrt/Windows.Foundation.h>
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic pop
+#endif
 #include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Media.h>
 #include <winrt/Windows.Storage.h>
@@ -540,4 +547,6 @@ void mp_smtc_init(mpv_handle *mpv)
     mp_thread mpv_event_loop;
     if (!mp_thread_create(&mpv_event_loop, mpv_event_loop_fn, mpv))
         mp_thread_detach(mpv_event_loop);
+    else
+        mpv_destroy(mpv);
 }

@@ -56,6 +56,7 @@
 #include "common/playlist.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "input/dnd.h"
 #include "input/input.h"
 #include "demux/packet_pool.h"
 
@@ -75,6 +76,10 @@ static const char def_config[] =
 
 #if HAVE_WIN32_SMTC
 #include "osdep/win32/smtc.h"
+#endif
+
+#if HAVE_WIN32_DESKTOP
+#include "osdep/w32_register.h"
 #endif
 
 #if HAVE_COCOA
@@ -264,7 +269,6 @@ struct MPContext *mp_create(void)
         talloc_enable_leak_report();
 
     mp_time_init();
-    mp_rand_seed(0);
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
@@ -305,6 +309,7 @@ struct MPContext *mp_create(void)
     m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
 
     mpctx->input = mp_input_init(mpctx->global, mp_wakeup_core_cb, mpctx);
+    clipboard_init(mpctx);
     screenshot_init(mpctx);
     command_init(mpctx);
     init_libav(mpctx->global);
@@ -317,7 +322,7 @@ struct MPContext *mp_create(void)
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
-        mpctx->opts->verbose = atoi(verbose_env);
+        mpctx->opts->verbose = strtol(verbose_env, NULL, 10);
 
     mp_cancel_trigger(mpctx->playback_abort);
 
@@ -388,6 +393,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (handle_help_options(mpctx))
         return 1; // help
 
+#if HAVE_WIN32_DESKTOP
+    if (mp_w32_handle_register(mpctx))
+        return 1; // register/unregister
+#endif
+
     check_library_versions(mp_null_log, 0);
 
     if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
@@ -410,6 +420,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (opts->media_controls)
         mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
+
+    mp_dnd_init(mp_new_client(mpctx->clients, "dnd"));
 
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 

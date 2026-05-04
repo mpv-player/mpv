@@ -1,0 +1,2 @@
+``track-list`` now hides dependent tracks (e.g. tile sub-streams, IAMF audio element layers, LCEVC enhancement streams) by default
+add ``--show-dependent-tracks`` option to expose them

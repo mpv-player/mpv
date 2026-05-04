@@ -7,21 +7,22 @@ providing script bindings that gather and format the data to be selected in the
 console and do operations on the selected item. It can be disabled using the
 ``--load-select=no`` option.
 
+This script is also used to populate the context menu.
+
 Key bindings
 ------------
 
-When using ``mp.input.select``, typing printable characters does a fuzzy search
-of the presented items, and key bindings listed in `CONSOLE`_ are extended with
-the following:
+When using ``mp.input.select``, the key bindings listed in `CONSOLE`_ are
+extended with the following:
 
 ENTER, Ctrl+j and Ctrl+m
-    Confirm the selection of the highlighted item.
+    Select the focused item.
 
 UP and Ctrl+p
-    Select the item above, or the last one when the first item is selected.
+    Focus the item above, or the last one when the first item is selected.
 
 DOWN and Ctrl+n
-    Select the item below, or the first one when the last item is selected.
+    Focus the item below, or the first one when the last item is selected.
 
 PGUP and Ctrl+b
     Scroll up one page.
@@ -29,15 +30,36 @@ PGUP and Ctrl+b
 PGDN and Ctrl+f
     Scroll down one page.
 
+Shift+LEFT
+    Scroll left.
+
+Shift+RIGHT
+    Scroll right.
+
+Ctrl+y
+    Copy the focused item to the clipboard.
+
 MBTN_LEFT
-    Confirm the selection of the highlighted item, or close the console if
-    clicking outside of the menu rectangle.
+    Select the item under the cursor, or close the console if clicking outside
+    of the menu rectangle.
 
 WHEEL_UP
     Scroll up.
 
 WHEEL_DOWN
     Scroll down.
+
+WHEEL_LEFT and Shift+WHEEL_DOWN
+    Scroll left.
+
+WHEEL_RIGHT and Shift+WHEEL_UP
+    Scroll right.
+
+Typing printable characters does a fuzzy search of the presented items.
+
+If the query starts with ``'``, only exact matches are filtered. You can also
+specify multiple search terms delimited by spaces, and only items matching all
+terms are filtered.
 
 Script bindings
 ---------------
@@ -80,9 +102,6 @@ Available script bindings are:
 ``select-subtitle-line``
     Select a subtitle line to seek to. This doesn't work with image subtitles.
 
-    This currently requires ``ffmpeg`` in ``PATH``, or in the same folder as mpv
-    on Windows.
-
 ``select-audio-device``
     Select an audio device.
 
@@ -119,8 +138,25 @@ Available script bindings are:
     print its value on the OSD, which is useful for long values that get
     clipped.
 
+``edit-config-file``
+    Open ``mpv.conf`` in the system text editor, creating it if it doesn't
+    already exist.
+
+``edit-input-conf``
+    Open ``input.conf`` in the system text editor, creating it if it doesn't
+    already exist.
+
+``open-docs``
+    Open mpv's online documentation in the browser.
+
+``open-chat``
+    Open mpv's chat in the browser.
+
 ``menu``
     Show a menu with miscellaneous entries.
+
+``context-menu``
+    Show the context menu.
 
 Configuration
 -------------
@@ -142,3 +178,20 @@ Configurable options
     Default: yes
 
     Whether to show only the last of history entries with the same path.
+
+``menu_conf_path``
+    Default: ~~/menu.conf (see `FILES`_).
+
+    The path from which to read the custom context menu definition (see `CONTEXT
+    MENU`_).
+
+``max_playlist_items``
+    Default: 25
+
+    The maximum number of playlist entries in the context menu.
+
+``populate_menu_data``
+    Default: yes, except for libmpv
+
+    Whether observe the properties referenced in ``menu.conf`` and update
+    ``menu-data`` with suitable menu items after mpv's window is created.

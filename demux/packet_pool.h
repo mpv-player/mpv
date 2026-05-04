@@ -82,6 +82,9 @@ void demux_packet_pool_prepend(struct demux_packet_pool *pool,
  * This function removes and returns the first packet from the pool's
  * linked list. This function is thread-safe.
  *
+ * The packet's contents are cleared of any external references before
+ * being returned.
+ *
  * @param pool Pointer to the demux packet pool.
  * @return Pointer to the demux packet, or NULL if the pool is empty.
  */

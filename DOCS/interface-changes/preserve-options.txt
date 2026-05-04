@@ -1,0 +1,1 @@
+add `preserve-options` flag to `playlist-play-index`

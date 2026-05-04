@@ -46,12 +46,10 @@ static void preemption_callback(VdpDevice device, void *context)
 {
     struct mp_vdpau_ctx *ctx = context;
 
-    mp_mutex_lock(&ctx->preempt_lock);
     ctx->is_preempted = true;
-    mp_mutex_unlock(&ctx->preempt_lock);
 }
 
-static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
+static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing, bool preempted)
 {
     Display *x11 = ctx->x11;
     VdpStatus vdp_st;
@@ -80,7 +78,7 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
     vdp_st = vdp_device_create_x11(x11, DefaultScreen(x11), &ctx->vdp_device,
                                    &get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
-        if (ctx->is_preempted) {
+        if (preempted || ctx->is_preempted) {
             MP_DBG(ctx, "Error calling vdp_device_create_x11 while preempted: %d\n",
                    vdp_st);
         } else {
@@ -127,7 +125,8 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx, bool probing)
 
 static int handle_preemption(struct mp_vdpau_ctx *ctx)
 {
-    if (!ctx->is_preempted)
+    // Note that this function is guarded by the preempt_lock mutex.
+    if (!atomic_exchange(&ctx->is_preempted, false))
         return 0;
     mark_vdpau_objects_uninitialized(ctx);
     if (!ctx->preemption_user_notified) {
@@ -138,17 +137,29 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
      * second to avoid using 100% CPU. */
     if (ctx->last_preemption_retry_fail &&
         mp_time_sec() - ctx->last_preemption_retry_fail < 1.0)
-        return -1;
-    if (win_x11_init_vdpau_procs(ctx, false) < 0) {
-        ctx->last_preemption_retry_fail = mp_time_sec();
-        return -1;
+    {
+        goto error;
     }
+    if (win_x11_init_vdpau_procs(ctx, false, true) < 0) {
+        ctx->last_preemption_retry_fail = mp_time_sec();
+        goto error;
+    }
+
+    // If preemption_callback has been called during our recovery attempt, we
+    // need to retry the recovery. This check is not strictly necessary, because
+    // we would act on the next check anyway, but it doesn't hurt.
+    if (ctx->is_preempted)
+        return -1;
+
     ctx->preemption_user_notified = false;
     ctx->last_preemption_retry_fail = 0;
-    ctx->is_preempted = false;
     ctx->preemption_counter++;
     MP_INFO(ctx, "Recovered from display preemption.\n");
-    return 1;
+    return 0;
+
+error:
+    ctx->is_preempted = true;
+    return -1;
 }
 
 // Check whether vdpau display preemption happened. The caller provides a
@@ -388,7 +399,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
             .av_device_ref = avref,
         },
     };
-    mp_mutex_init_type(&ctx->preempt_lock, MP_MUTEX_RECURSIVE);
+    mp_mutex_init(&ctx->preempt_lock);
     mp_mutex_init(&ctx->pool_lock);
 
     hwctx->free = free_device_ref;
@@ -396,7 +407,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
 
     mark_vdpau_objects_uninitialized(ctx);
 
-    if (win_x11_init_vdpau_procs(ctx, probing) < 0) {
+    if (win_x11_init_vdpau_procs(ctx, probing, false) < 0) {
         mp_vdpau_destroy(ctx);
         return NULL;
     }

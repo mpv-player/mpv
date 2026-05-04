@@ -320,6 +320,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
         .force_format = "+lavf",
         .external_stream = demuxer->stream,
         .stream_flags = demuxer->stream_origin,
+        .depth = demuxer->depth + 1,
     };
 
     struct stream *cur = demuxer->stream;

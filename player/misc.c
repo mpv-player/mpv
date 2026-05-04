@@ -278,6 +278,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
         goto done;
 
     int64_t size = stream_get_size(stream);
+    int64_t start_pos = stream->pos;
 
     FILE *dest = fopen(filename, "wb");
     if (!dest) {
@@ -289,9 +290,15 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
     while (mpctx->stop_play == KEEP_PLAYING && ok) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
-            uint64_t pos = stream->pos;
-            MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
-                   (long long int)pos, (long long int)size);
+            int64_t pos = stream->pos;
+            if (size > 0 && pos >= start_pos) {
+                double percent = 100.0 * (pos - start_pos) / (size - start_pos);
+                MP_MSG(mpctx, MSGL_STATUS, "Dumping %" PRId64 "/%" PRId64 " (%.2f%%)...",
+                       pos, size, percent);
+            } else {
+                MP_MSG(mpctx, MSGL_STATUS, "Dumping %" PRId64 "/%" PRId64 "...",
+                       pos, size);
+            }
         }
         uint8_t buf[4096];
         int len = stream_read(stream, buf, sizeof(buf));
@@ -346,17 +353,6 @@ const char *mp_status_str(enum playback_status st)
     }
 }
 
-bool str_in_list(bstr str, char **list)
-{
-    if (!list)
-        return false;
-    while (*list) {
-        if (!bstrcasecmp0(str, *list++))
-            return true;
-    }
-    return false;
-}
-
 #define ADD_FLAG(ctx, dst, flag, first) do {                           \
     bstr_xappend_asprintf(ctx, &dst, " %s%s", first ? "[" : "", flag); \
     first = false;                                                     \
@@ -370,31 +366,15 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
     if (t->title)
         bstr_xappend_asprintf(ctx, &dst, "'%s' ", t->title);
 
-    const char *codec = s ? s->codec->codec : NULL;
-
     bstr_xappend0(ctx, &dst, "(");
 
     if (add_lang && t->lang)
         bstr_xappend_asprintf(ctx, &dst, "%s ", t->lang);
 
-    bstr_xappend0(ctx, &dst, codec ? codec : "<unknown>");
-
-    if (s && s->codec->codec_profile)
-        bstr_xappend_asprintf(ctx, &dst, " [%s]", s->codec->codec_profile);
-    if (s && s->codec->disp_w)
-        bstr_xappend_asprintf(ctx, &dst, " %dx%d", s->codec->disp_w, s->codec->disp_h);
-    if (s && s->codec->fps && !t->image) {
-        char *fps = mp_format_double(ctx, s->codec->fps, 4, false, false, true);
-        bstr_xappend_asprintf(ctx, &dst, " %s fps", fps);
-    }
-    if (s && s->codec->channels.num)
-        bstr_xappend_asprintf(ctx, &dst, " %dch", s->codec->channels.num);
-    if (s && s->codec->samplerate)
-        bstr_xappend_asprintf(ctx, &dst, " %d Hz", s->codec->samplerate);
-    if (s && s->codec->bitrate > 0 && s->codec->bitrate < INT_MAX - 500) {
-        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->codec->bitrate + 500) / 1000);
-    } else if (s && s->hls_bitrate > 0 && s->hls_bitrate < INT_MAX - 500) {
-        bstr_xappend_asprintf(ctx, &dst, " %d kbps", (s->hls_bitrate + 500) / 1000);
+    if (s) {
+        demux_append_codec_desc(ctx, &dst, s, NULL);
+    } else {
+        bstr_xappend0(ctx, &dst, "<unknown>");
     }
     bstr_xappend0(ctx, &dst, ")");
 
@@ -409,6 +389,10 @@ char *mp_format_track_metadata(void *ctx, struct track *t, bool add_lang)
         ADD_FLAG(ctx, dst, "visual-impaired", first);
     if (t->hearing_impaired_track)
         ADD_FLAG(ctx, dst, "hearing-impaired", first);
+    if (t->original_track)
+        ADD_FLAG(ctx, dst, "original", first);
+    if (t->commentary_track)
+        ADD_FLAG(ctx, dst, "commentary", first);
     if (t->is_external)
         ADD_FLAG(ctx, dst, "external", first);
     if (!first)

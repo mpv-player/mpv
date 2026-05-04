@@ -77,8 +77,8 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
     var configs: [NSTouchBarItem.Identifier: Config] = [:]
     var observers: [NSKeyValueObservation] = []
     var isPaused: Bool = false { didSet { updatePlayButton() } }
-    var position: Double = 0 { didSet { updateTouchBarTimeItems() } }
-    var duration: Double = 0 { didSet { updateTouchBarTimeItems() } }
+    var position: Int64 = 0 { didSet { updateTouchBarTimeItems() } }
+    var duration: Int64 = 0 { didSet { updateTouchBarTimeItems() } }
     var rate: Double = 1
 
     init(_ appHub: AppHub) {
@@ -141,8 +141,8 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
             .previousChapter, .nextChapter, .cycleAudio, .cycleSubtitle, .currentPosition, .timeLeft]
         observers += [observe(\.isVisible, options: [.new]) { _, change in self.changed(visibility: change.newValue) }]
 
-        event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_DOUBLE))
-        event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_DOUBLE))
+        event?.subscribe(self, event: .init(name: "duration", format: MPV_FORMAT_INT64))
+        event?.subscribe(self, event: .init(name: "time-pos", format: MPV_FORMAT_INT64))
         event?.subscribe(self, event: .init(name: "speed", format: MPV_FORMAT_DOUBLE))
         event?.subscribe(self, event: .init(name: "pause", format: MPV_FORMAT_FLAG))
         event?.subscribe(self, event: .init(name: "MPV_EVENT_END_FILE"))
@@ -200,7 +200,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
 
         slider.isEnabled = duration > 0
         if !slider.isHighlighted {
-            slider.doubleValue = slider.isEnabled ? (position / duration) * 100 : 0
+            slider.doubleValue = slider.isEnabled ? (Double(position) / Double(duration)) * 100 : 0
         }
     }
 
@@ -209,9 +209,9 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         if !(config.item?.isVisible ?? false) { return }
 
         removeConstraintFor(identifier: .timeLeft)
-        text.stringValue = duration > 0 ? "-" + format(time: Int(floor(duration) - floor(position))) : ""
+        text.stringValue = duration > 0 ? "-" + format(time: duration - position) : ""
         if !text.stringValue.isEmpty {
-            applyConstraintFrom(string: "-" + format(time: Int(duration)), identifier: .timeLeft)
+            applyConstraintFrom(string: "-" + format(time: duration), identifier: .timeLeft)
         }
     }
 
@@ -219,9 +219,9 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         guard let config = configs[.currentPosition], let text = config.item?.view as? NSTextField else { return }
         if !(config.item?.isVisible ?? false) { return }
 
-        text.stringValue = format(time: Int(floor(position)))
+        text.stringValue = format(time: position)
         removeConstraintFor(identifier: .currentPosition)
-        applyConstraintFrom(string: format(time: Int(duration > 0 ? duration : position)), identifier: .currentPosition)
+        applyConstraintFrom(string: format(time: duration > 0 ? duration : position), identifier: .currentPosition)
     }
 
     func updatePlayButton() {
@@ -240,7 +240,7 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         input.command(String(format: command, slider.doubleValue))
     }
 
-    func format(time: Int) -> String {
+    func format(time: Int64) -> String {
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .positional
         formatter.zeroFormattingBehavior = time >= (60 * 60) ? [.dropLeading] : []
@@ -276,13 +276,9 @@ class TouchBar: NSTouchBar, NSTouchBarDelegate, EventSubscriber {
         case "MPV_EVENT_END_FILE":
             position = 0
             duration = 0
-        case "time-pos":
-            let newPosition = max(event.double ?? 0, 0)
-            if Int((floor(newPosition) - floor(position)) / rate) != 0 {
-                position = newPosition
-            }
+        case "time-pos": position = max(event.int ?? 0, 0)
         case "pause": isPaused = event.bool ?? false
-        case "duration": duration = event.double ?? 0
+        case "duration": duration = event.int ?? 0
         case "speed": rate = event.double ?? 1
         default: break
         }

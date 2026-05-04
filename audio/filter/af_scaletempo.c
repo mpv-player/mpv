@@ -183,7 +183,7 @@ static int best_overlap_offset_float(struct priv *s)
     float *target = (float *)s->buf_overlap + num_channels;
     int num_samples = s->samples_overlap - num_channels;
     int step_size = 3;
-    float history[3] = {};
+    float history[3] = {0};
 
     float best_distance = FLT_MAX;
     int best_offset_approx = 0;
@@ -232,7 +232,7 @@ static int best_overlap_offset_s16(struct priv *s)
     int16_t *target = (int16_t *)s->buf_overlap + num_channels;
     int num_samples = s->samples_overlap - num_channels;
     int step_size = 3;
-    int32_t history[3] = {};
+    int32_t history[3] = {0};
 
     int32_t best_distance = INT32_MAX;
     int best_offset_approx = 0;
@@ -456,7 +456,7 @@ static bool reinit(struct mp_filter *f)
 
     mp_aframe_reset(s->cur_format);
 
-    float srate  = mp_aframe_get_rate(s->in) / 1000.0;
+    float srate  = mp_aframe_get_rate(s->in) / 1000.0f;
     int nch = mp_aframe_get_channels(s->in);
     int format = mp_aframe_get_format(s->in);
 
@@ -652,10 +652,10 @@ const struct mp_user_filter_entry af_scaletempo = {
             .scale_nominal = 1.0,
         },
         .options = (const struct m_option[]) {
-            {"scale", OPT_FLOAT(scale_nominal), M_RANGE(0.01, FLT_MAX)},
-            {"stride", OPT_FLOAT(ms_stride), M_RANGE(0.01, FLT_MAX)},
+            {"scale", OPT_FLOAT(scale_nominal), M_RANGE(0.01, 1e5f)},
+            {"stride", OPT_FLOAT(ms_stride), M_RANGE(0.01, 1e5f)},
             {"overlap", OPT_FLOAT(factor_overlap), M_RANGE(0, 1)},
-            {"search", OPT_FLOAT(ms_search), M_RANGE(0, FLT_MAX)},
+            {"search", OPT_FLOAT(ms_search), M_RANGE(0, 1e5f)},
             {"speed", OPT_CHOICE(speed_opt,
                 {"pitch", SCALE_PITCH},
                 {"tempo", SCALE_TEMPO},

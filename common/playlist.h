@@ -53,6 +53,9 @@ struct playlist_entry {
     bool init_failed : 1;
     // Entry was removed with playlist_remove (etc.), but not deallocated.
     bool removed : 1;
+    // Playback of the entry is restarting without resetting
+    // file-local options.
+    bool reloading : 1;
     // Additional refcount. Normally (reserved==0), the entry is owned by the
     // playlist, and this can be used to keep the entry alive.
     int reserved;
@@ -107,7 +110,6 @@ struct playlist_entry *playlist_get_first_in_next_playlist(struct playlist *pl,
                                                            int direction);
 struct playlist_entry *playlist_get_first_in_same_playlist(struct playlist_entry *entry,
                                                            char *current_playlist_path);
-void playlist_add_base_path(struct playlist *pl, bstr base_path);
 void playlist_set_stream_flags(struct playlist *pl, int flags);
 int64_t playlist_transfer_entries_to(struct playlist *pl, int dst_index,
                                      struct playlist *source_pl);

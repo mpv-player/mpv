@@ -42,9 +42,7 @@ section::
   oacopts-add = b=96k
 
 It's also possible to define default encoding options by putting them into
-the section named ``[encoding]``. (This behavior changed after mpv 0.3.x. In
-mpv 0.3.x, config options in the default section / no section were applied
-to encoding. This is not the case anymore.)
+the section named ``[encoding]``.
 
 One can then encode using this profile using the command::
 
@@ -97,12 +95,9 @@ Device targets
 As the options for various devices can get complex, profiles can be used.
 
 An example profile file for encoding is provided in
-etc/encoding-profiles.conf in the source tree. This file is installed and loaded
-by default. If you want to modify it, you can replace and it with your own copy
-by doing::
-
-  mkdir -p ~/.mpv
-  cp /etc/mpv/encoding-profiles.conf ~/.mpv/encoding-profiles.conf
+etc/encoding-profiles.conf in the source tree. mpv will read any file
+named ``encoding-profiles.conf`` in either the local or system
+configuration directories.
 
 Keep in mind that the default profile is the playback one. If you want to add
 options that apply only in encoding mode, put them into a ``[encoding]``

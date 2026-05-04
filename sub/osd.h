@@ -29,6 +29,8 @@ enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
     SUBBITMAP_BGRA,     // IMGFMT_BGRA (MSB=A, LSB=B), scaled, premultiplied alpha
+    SUBBITMAP_SUBRANDR, // contains `sbr_output_image`s, must be converted to
+                        // SUBBITMAP_BGRA during packing
 
     SUBBITMAP_COUNT
 };
@@ -47,9 +49,14 @@ struct sub_bitmap {
     // with the bitmap pointer.)
     int src_x, src_y;
 
-    struct {
-        uint32_t color;
-    } libass;
+    union {
+        struct {
+            uint32_t color;
+        } libass;
+        struct {
+            const struct sbr_output_image *image;
+        } subrandr;
+    };
 };
 
 struct sub_bitmaps {
@@ -110,6 +117,8 @@ bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b);
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
+// Escape code for OSD symbols. PU1 (U+0091)
+#define OSD_CODEPOINTS_ESCAPE "\xC2\x91"
 
 // OSD symbols. osd_font.pfb has them starting from codepoint OSD_CODEPOINTS.
 // Symbols with a value >= 32 are normal unicode codepoints.
@@ -128,11 +137,11 @@ enum mp_osd_font_codepoints {
     OSD_PANSCAN = 0x50,
 };
 
-
-// Never valid UTF-8, so we expect it's free for use.
+// Escape code for OSD_ASS codes. PU2 (U+0092) followed by 'a'.
+#define OSD_ASS_ESCAPE "\xC2\x92" "a"
 // Specially interpreted by osd_libass.c, in order to allow/escape ASS tags.
-#define OSD_ASS_0 "\xFD"
-#define OSD_ASS_1 "\xFE"
+#define OSD_ASS_0 OSD_ASS_ESCAPE "0"
+#define OSD_ASS_1 OSD_ASS_ESCAPE "1"
 
 struct osd_style_opts {
     char *font;
@@ -146,6 +155,7 @@ struct osd_style_opts {
     float spacing;
     int margin_x;
     int margin_y;
+    int margin_y_offset;
     int align_x;
     int align_y;
     float blur;

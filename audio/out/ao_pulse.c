@@ -80,7 +80,7 @@ static void subscribe_cb(pa_context *c, pa_subscription_event_type_t t,
                          uint32_t idx, void *userdata)
 {
     struct ao *ao = userdata;
-    int type = t & PA_SUBSCRIPTION_MASK_SINK;
+    int type = t & PA_SUBSCRIPTION_EVENT_TYPE_MASK;
     int fac = t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK;
     if ((type == PA_SUBSCRIPTION_EVENT_NEW || type == PA_SUBSCRIPTION_EVENT_REMOVE)
         && fac == PA_SUBSCRIPTION_EVENT_SINK)
@@ -404,6 +404,11 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
     }
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME, ao->client_name);
+
+    if (ao->set_media_role)
+        (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE,
+                               ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC
+                               ? "music" : "video");
 
     if (!(format = pa_format_info_new()))
         goto unlock_and_fail;

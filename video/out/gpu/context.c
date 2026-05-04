@@ -75,7 +75,7 @@ static const struct ra_ctx_fns ra_ctx_dummy = {
     .uninit         = dummy_uninit,
 };
 
-static const struct ra_ctx_fns *contexts[] = {
+static const struct ra_ctx_fns *const contexts[] = {
     &ra_ctx_dummy,
 // Direct3D contexts:
 #if HAVE_D3D11
@@ -135,7 +135,7 @@ static const struct ra_ctx_fns *contexts[] = {
 #endif
 };
 
-static const struct ra_ctx_fns *no_api_contexts[] = {
+static const struct ra_ctx_fns *const no_api_contexts[] = {
     &ra_ctx_dummy,
 /* No API contexts: */
 #if HAVE_DMABUF_WAYLAND
@@ -224,7 +224,7 @@ const struct m_sub_options ra_ctx_conf = {
 
 static struct ra_ctx *create_in_contexts(struct vo *vo, const char *name,
                                          struct m_obj_settings *context_type_list,
-                                         const struct ra_ctx_fns *ctxs[], size_t size,
+                                         const struct ra_ctx_fns *const ctxs[], size_t size,
                                          struct ra_ctx_opts opts)
 {
     for (int i = 0; i < size; i++) {

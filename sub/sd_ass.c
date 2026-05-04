@@ -38,6 +38,7 @@
 #include "video/mp_image.h"
 #include "dec_sub.h"
 #include "ass_mp.h"
+#include "packer.h"
 #include "sd.h"
 
 struct sd_ass_priv {
@@ -51,7 +52,7 @@ struct sd_ass_priv {
     struct sd_filter **filters;
     int num_filters;
     bool clear_once;
-    struct mp_ass_packer *packer;
+    struct mp_sub_packer *packer;
     struct sub_bitmap_copy_cache *copy_cache;
     bstr last_text;
     struct mp_image_params video_params;
@@ -76,7 +77,7 @@ const struct m_sub_options mp_sub_filter_opts = {
     .opts = (const struct m_option[]){
         {"sdh", OPT_BOOL(sub_filter_SDH)},
         {"sdh-harder", OPT_BOOL(sub_filter_SDH_harder)},
-        {"sdh-enclosures", OPT_STRING(sub_filter_SDH_enclosures)},
+        {"sdh-enclosures", OPT_STRINGLIST(sub_filter_SDH_enclosures)},
         {"regex-enable", OPT_BOOL(rf_enable)},
         {"regex-plain", OPT_BOOL(rf_plain)},
         {"regex", OPT_STRINGLIST(rf_items)},
@@ -86,7 +87,12 @@ const struct m_sub_options mp_sub_filter_opts = {
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
-        .sub_filter_SDH_enclosures = "([\uFF08",
+        .sub_filter_SDH_enclosures = (char *[]) {
+            "()",
+            "[]",
+            "\uFF08\uFF09",
+            NULL
+        },
         .rf_enable = true,
     },
     .change_flags = UPDATE_SUB_FILT,
@@ -282,6 +288,7 @@ static void assobjects_init(struct sd *sd)
 #endif
 
     enable_output(sd, true);
+    ass_set_cache_limits(ctx->ass_renderer, sd->opts->sub_glyph_limit, sd->opts->sub_bitmap_max_size);
 }
 
 static void assobjects_destroy(struct sd *sd)
@@ -313,7 +320,7 @@ static int init(struct sd *sd)
     assobjects_init(sd);
     filters_init(sd);
 
-    ctx->packer = mp_ass_packer_alloc(ctx);
+    ctx->packer = mp_sub_packer_alloc(ctx);
 
     // Subtitles does not have any profile value, so put the converted type as a profile.
     const char *_Atomic *desc = ctx->converter ? &sd->codec->codec_profile : &sd->codec->codec_desc;
@@ -476,17 +483,19 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             };
             filter_and_add(sd, &pkt2);
         }
-        if (sub_duration == UNKNOWN_DURATION) {
-            for (int n = track->n_events - 2; n >= 0; n--) {
-                if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
-                    if (track->events[n].Start != track->events[n + 1].Start) {
-                        track->events[n].Duration = track->events[n + 1].Start -
-                                                    track->events[n].Start;
-                    } else {
-                        track->events[n].Duration = track->events[n + 1].Duration;
-                    }
+        for (int n = track->n_events - 1; n >= 0; n--) {
+            if (track->events[track->n_events - 1].Start == track->events[n].Start)
+                continue;
+            if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
+                if (track->events[n].Start < track->events[n + 1].Start) {
+                    track->events[n].Duration = track->events[n + 1].Start -
+                                                track->events[n].Start;
+                } else if (track->events[n].Start == track->events[n + 1].Start) {
+                    track->events[n].Duration = track->events[n + 1].Duration;
                 }
             }
+            if (n > 0 && track->events[n].Start != track->events[n - 1].Start)
+                break;
         }
     } else {
         // Note that for this packet format, libass has an internal mechanism
@@ -662,8 +671,8 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     // Try to fix small gaps and overlaps.
     ASS_Track *track = priv->ass_track;
-    int threshold = SUB_GAP_THRESHOLD * 1000;
-    int keep = SUB_GAP_KEEP * 1000;
+    int threshold = sd->opts->sub_fix_timing_threshold;
+    int keep = sd->opts->sub_fix_timing_keep;
 
     // Find the "current" event.
     ASS_Event *ev[2] = {0};
@@ -770,7 +779,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
 
     int changed;
     ASS_Image *imgs = ass_render_frame(renderer, track, ts, &changed);
-    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, !converted, format, res);
+    mp_sub_packer_pack_ass(ctx->packer, &imgs, 1, changed, !converted, format, res);
 
 done:
     // mangle_colors() modifies the color field, so copy the thing _before_.
@@ -989,6 +998,7 @@ static void reset(struct sd *sd)
     if (sd->opts->sub_clear_on_seek || ctx->clear_once) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
+        ctx->num_packets_animated = 0;
         sd->preload_ok = false;
         ctx->clear_once = false;
     }
@@ -1007,6 +1017,44 @@ static void uninit(struct sd *sd)
     talloc_free(ctx->copy_cache);
 }
 
+static struct sub_lines *get_lines(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->ass_track;
+    struct sub_lines *res = talloc_zero(NULL, struct sub_lines);
+
+    for (int i = 0; i < track->n_events; i++) {
+        ASS_Event *event = &track->events[i];
+        if (!event->Text)
+            continue;
+
+        char *plain = NULL;
+        bstr result = sd_ass_to_plaintext(&plain, event->Text);
+
+        // ASS subtitle lines can have many empty lines after stripping tags,
+        // but empty lines are useful in LRC.
+        if (is_whitespace_only(result)) {
+            talloc_free(plain);
+            if (!strcmp(sd->codec->codec, "ass"))
+                continue;
+            plain = talloc_strdup(res, "");
+        } else {
+            talloc_steal(res, plain);
+        }
+
+        struct sub_line line = {
+            .text  = plain,
+            .start = event->Start / 1000.0,
+            .end   = event->Duration == UNKNOWN_DURATION * 1000
+                         ? MP_NOPTS_VALUE
+                         : (event->Start + event->Duration) / 1000.0,
+        };
+        MP_TARRAY_APPEND(res, res->entries, res->num_entries, line);
+    }
+
+    return res;
+}
+
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -1023,6 +1071,10 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     }
     case SD_CTRL_SET_ANIMATED_CHECK:
         ctx->check_animated = *(bool *)arg;
+        return CONTROL_OK;
+    case SD_CTRL_RESET_SOFT:
+        ctx->clear_once = true;
+        reset(sd);
         return CONTROL_OK;
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
@@ -1058,6 +1110,7 @@ const struct sd_functions sd_ass = {
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .get_times = get_times,
+    .get_lines = get_lines,
     .control = control,
     .reset = reset,
     .select = enable_output,
@@ -1097,9 +1150,9 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     // NONE is a bit random, but the intention is: don't modify colors.
     if (trackcsp == YCBCR_NONE)
         return;
-    if (trackcsp < sizeof(ass_csp) / sizeof(ass_csp[0]))
+    if (trackcsp < MP_ARRAY_SIZE(ass_csp))
         csp = ass_csp[trackcsp];
-    if (trackcsp < sizeof(ass_levels) / sizeof(ass_levels[0]))
+    if (trackcsp <  MP_ARRAY_SIZE(ass_levels))
         levels = ass_levels[trackcsp];
     if (trackcsp == YCBCR_DEFAULT) {
         csp = PL_COLOR_SYSTEM_BT_601;

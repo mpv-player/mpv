@@ -103,21 +103,25 @@ static int init(struct sd *sd)
 
     switch (cid) {
     case AV_CODEC_ID_DVB_TELETEXT: {
-        int64_t format;
+        int64_t format = -1;
         int ret = av_opt_get_int(ctx, "txt_format", AV_OPT_SEARCH_CHILDREN, &format);
-        // format == 0 is bitmap
-        if (!ret && format)
+        // libzvbi_teletextdec: format == 0 is bitmap
+        if (ret || format)
             goto error_probe;
         break;
     }
     case AV_CODEC_ID_ARIB_CAPTION: {
-        int64_t format;
+        int64_t format = -1;
+        // FFmpeg has both libaribb24 and libaribcaption as decoders. Only the latter
+        // can produce bitmaps, so abort if we don't find the option.
         int ret = av_opt_get_int(ctx, "sub_type", AV_OPT_SEARCH_CHILDREN, &format);
-        if (!ret && format != SUBTITLE_BITMAP)
+        if (ret || format != SUBTITLE_BITMAP)
             goto error_probe;
         break;
     }
     }
+
+    MP_VERBOSE(sd, "Using subtitle decoder %s\n", sub_codec->name);
 
     priv->avpkt = av_packet_alloc();
     priv->codec = sd->codec;
@@ -217,7 +221,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         struct sub_bitmap *b = &sub->inbitmaps[sub->count];
 
         if (r->type != SUBTITLE_BITMAP) {
-            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
+            MP_ERR(sd, "unsupported subtitle type from decoder (%d)\n", r->type);
             continue;
         }
         if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->sub_forced_events_only)
@@ -370,7 +374,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             if (prev->endpts == MP_NOPTS_VALUE || prev->endpts > pts)
                 prev->endpts = pts;
 
-            if (opts->sub_fix_timing && pts - prev->endpts <= SUB_GAP_THRESHOLD)
+            if (opts->sub_fix_timing && pts - prev->endpts <= opts->sub_fix_timing_threshold / 1000.0)
                 prev->endpts = pts;
 
             for (int n = 0; n < priv->num_seekpoints; n++) {

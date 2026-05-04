@@ -1238,15 +1238,6 @@ rgb24: fcsp=rgb ctype=uint
     0: p=0  st=3  o=0  sh=0  d=8
     1: p=0  st=3  o=1  sh=0  d=8
     2: p=0  st=3  o=2  sh=0  d=8
-rgb30: fcsp=rgb ctype=uint
-  Basic desc: [ba][rgb][le][uint]
-    planes=1, chroma=0:0 align=1:1
-    {32/[0:0] }
-    0: 32bits {20:10} {10:10} {0:10} {}
-  AVD: name=x2rgb10le chroma=0:0 flags=0x20 [rgb]
-    0: p=0  st=4  o=2  sh=4  d=10
-    1: p=0  st=4  o=1  sh=2  d=10
-    2: p=0  st=4  o=0  sh=0  d=10
 rgb4: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [rgb][le][be][uint]
     planes=1, chroma=0:0 align=2:1
@@ -1382,7 +1373,7 @@ rgba64be: [GENERIC] fcsp=rgb ctype=uint
     1: p=0  st=8  o=2  sh=0  d=16
     2: p=0  st=8  o=4  sh=0  d=16
     3: p=0  st=8  o=6  sh=0  d=16
-rgbaf16: [GENERIC] fcsp=rgb ctype=float
+rgbaf16: fcsp=rgb ctype=float
   Basic desc: [ba][bb][a][rgb][le][float]
     planes=1, chroma=0:0 align=1:1
     {64/[0:0] }
@@ -1511,7 +1502,7 @@ vuyx: [GENERIC] ctype=uint
     0: p=0  st=4  o=2  sh=0  d=8
     1: p=0  st=4  o=1  sh=0  d=8
     2: p=0  st=4  o=0  sh=0  d=8
-x2bgr10: [GENERIC] fcsp=rgb ctype=uint
+x2bgr10: fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][le][uint]
     planes=1, chroma=0:0 align=1:1
     {32/[0:0] }
@@ -1529,6 +1520,15 @@ x2bgr10be: [GENERIC] fcsp=rgb ctype=uint
     0: p=0  st=4  o=2  sh=0  d=10
     1: p=0  st=4  o=1  sh=2  d=10
     2: p=0  st=4  o=0  sh=4  d=10
+x2rgb10: fcsp=rgb ctype=uint
+  Basic desc: [ba][rgb][le][uint]
+    planes=1, chroma=0:0 align=1:1
+    {32/[0:0] }
+    0: 32bits {20:10} {10:10} {0:10} {}
+  AVD: name=x2rgb10le chroma=0:0 flags=0x20 [rgb]
+    0: p=0  st=4  o=2  sh=4  d=10
+    1: p=0  st=4  o=1  sh=2  d=10
+    2: p=0  st=4  o=0  sh=0  d=10
 x2rgb10be: [GENERIC] fcsp=rgb ctype=uint
   Basic desc: [ba][rgb][be][uint]
     planes=1, chroma=0:0 align=1:1

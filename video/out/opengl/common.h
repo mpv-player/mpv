@@ -37,6 +37,9 @@
 #include <windows.h>
 #endif
 
+// Collision with <winnt.h>
+#undef MemoryBarrier
+
 struct GL;
 typedef struct GL GL;
 

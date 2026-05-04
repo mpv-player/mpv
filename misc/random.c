@@ -22,12 +22,11 @@
 
 #include <libavutil/random_seed.h>
 
-#include "osdep/threads.h"
+#include "common/common.h"
+#include "misc/mp_assert.h"
 #include "osdep/timer.h"
 #include "random.h"
 
-static uint64_t state[4];
-static mp_static_mutex state_mutex = MP_STATIC_MUTEX_INITIALIZER;
 
 static inline uint64_t rotl_u64(const uint64_t x, const int k)
 {
@@ -42,33 +41,33 @@ static inline uint64_t splitmix64(uint64_t *const x)
     return z ^ (z >> 31);
 }
 
-void mp_rand_seed(uint64_t seed)
+mp_rand_state mp_rand_seed(uint64_t seed)
 {
+    mp_rand_state ret;
+
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     seed = 42;
 #endif
 
     if (seed == 0) {
-        uint8_t buf[sizeof(seed)];
-        if (av_random_bytes(buf, sizeof(buf)) < 0) {
-            seed = mp_raw_time_ns();
-        } else {
-            memcpy(&seed, buf, sizeof(seed));
+        if (av_random_bytes((void *)ret.v, sizeof(ret.v)) == 0) {
+            return ret;
         }
+        seed = mp_raw_time_ns();
+        seed ^= (uintptr_t)&mp_rand_seed; // ASLR, hopefully
+        seed += (uintptr_t)&ret; // stack position
     }
 
-    mp_mutex_lock(&state_mutex);
-    state[0] = seed;
+    ret.v[0] = seed;
     for (int i = 1; i < 4; i++)
-        state[i] = splitmix64(&seed);
-    mp_mutex_unlock(&state_mutex);
+        ret.v[i] = splitmix64(&seed);
+    return ret;
 }
 
-uint64_t mp_rand_next(void)
+uint64_t mp_rand_next(mp_rand_state *s)
 {
     uint64_t result, t;
-
-    mp_mutex_lock(&state_mutex);
+    uint64_t *state = s->v;
 
     result = rotl_u64(state[1] * 5, 7) * 9;
     t = state[1] << 17;
@@ -80,12 +79,24 @@ uint64_t mp_rand_next(void)
     state[2] ^= t;
     state[3] = rotl_u64(state[3], 45);
 
-    mp_mutex_unlock(&state_mutex);
-
     return result;
 }
 
-double mp_rand_next_double(void)
+double mp_rand_next_double(mp_rand_state *s)
 {
-    return (mp_rand_next() >> 11) * 0x1.0p-53;
+    return (mp_rand_next(s) >> 11) * 0x1.0p-53;
+}
+
+// <https://web.archive.org/web/20250321082025/
+// https://www.pcg-random.org/posts/bounded-rands.html#bitmask-with-rejection-unbiased-apples-method>
+uint32_t mp_rand_in_range32(mp_rand_state *s, uint32_t min, uint32_t max)
+{
+    mp_assert(min < max);
+    uint32_t range = max - min;
+    uint32_t mask = mp_round_next_power_of_2(range) - 1;
+    uint32_t ret;
+    do {
+        ret = mp_rand_next(s) & mask;
+    } while (ret >= range);
+    return min + ret;
 }

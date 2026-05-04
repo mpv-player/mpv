@@ -133,18 +133,12 @@ static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
     struct droptarget *t = (struct droptarget *)self;
 
     enum mp_dnd_action action;
-    if (t->opts->drag_and_drop >= 0) {
-        action = t->opts->drag_and_drop;
-    } else {
-        action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
-    }
+    action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
 
     SAFE_RELEASE(t->data_obj);
 
     STGMEDIUM medium;
-    if (t->opts->drag_and_drop == -2) {
-        t->last_effect = DROPEFFECT_NONE;
-    } else if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_file, &medium))) {
+    if (SUCCEEDED(IDataObject_GetData(pDataObj, &fmtetc_file, &medium))) {
         if (GlobalLock(medium.hGlobal)) {
             HDROP drop = medium.hGlobal;
 
@@ -171,7 +165,7 @@ static STDMETHODIMP DropTarget_Drop(IDropTarget *self, IDataObject *pDataObj,
             }
 
             GlobalUnlock(medium.hGlobal);
-            mp_event_drop_files(t->input_ctx, recvd_files, files, action);
+            mp_input_drop_files(t->input_ctx, recvd_files, files, action);
             talloc_free(files);
         }
 

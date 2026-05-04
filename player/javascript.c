@@ -35,6 +35,7 @@
 #include "input/input.h"
 #include "options/path.h"
 #include "misc/bstr.h"
+#include "misc/codepoint_width.h"
 #include "osdep/timer.h"
 #include "osdep/threads.h"
 #include "stream/stream.h"
@@ -701,12 +702,27 @@ static void script_get_property_bool(js_State *J)
         js_pushboolean(J, result);
 }
 
+// true if we don't lose (too much) precision when casting to int64
+static bool same_as_int64(double d)
+{
+    // The range checks also validly filter inf and nan, so behavior is defined
+    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
+}
+
 // args: name, number
 static void script_set_property_number(js_State *J)
 {
     double v = js_tonumber(J, 2);
     mpv_handle *h = jclient(J);
-    int e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
+    // If the number might be an integer, then set it as integer. The mpv core
+    // will (probably) convert INT64 to DOUBLE when setting, but not the other
+    // way around.
+    int e;
+    if (same_as_int64(v)) {
+        e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_INT64, &(int64_t){v});
+    } else {
+        e = mpv_set_property(h, js_tostring(J, 1), MPV_FORMAT_DOUBLE, &v);
+    }
     push_status(J, e);
 }
 
@@ -985,6 +1001,15 @@ static void script_get_env_list(js_State *J)
     }
 }
 
+// args: text
+static void script_terminal_display_width(js_State *J)
+{
+    bstr text = bstr0(js_tostring(J, 1));
+    const unsigned char *cut_pos;
+    int width = term_disp_width(text, INT_MAX, &cut_pos);
+    js_pushnumber(J, width);
+}
+
 // args: as-filename, content-string, returns the compiled result as a function
 static void script_compile_js(js_State *J)
 {
@@ -1051,13 +1076,6 @@ static int get_obj_properties(void *ta_ctx, char ***keys, js_State *J, int idx)
 
     js_pop(J, 1);  // the iterator
     return length;
-}
-
-// true if we don't lose (too much) precision when casting to int64
-static bool same_as_int64(double d)
-{
-    // The range checks also validly filter inf and nan, so behavior is defined
-    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
 }
 
 static int jsL_checkint(js_State *J, int idx)
@@ -1194,6 +1212,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(split_path, 1),
     AF_ENTRY(join_path, 2),
     FN_ENTRY(get_env_list, 0),
+    FN_ENTRY(terminal_display_width, 1),
 
     FN_ENTRY(read_file, 2),
     AF_ENTRY(_write_file, 3),

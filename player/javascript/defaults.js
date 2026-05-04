@@ -195,7 +195,7 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
                     cmd[k] = this[k];
             }
 
-            cmd.name = "osd-overlay";
+            cmd._name = "osd-overlay";
             cmd.res_x = Math.round(this.res_x);
             cmd.res_y = Math.round(this.res_y);
 
@@ -204,7 +204,7 @@ mp.create_osd_overlay = function create_osd_overlay(format) {
 
         remove: function ass_remove() {
             mp.command_native({
-                name: "osd-overlay",
+                _name: "osd-overlay",
                 id: this.id,
                 format: "none",
                 data: "",
@@ -653,52 +653,96 @@ mp.options = { read_options: read_options };
 /**********************************************************************
 *  input
 *********************************************************************/
+var input_handle_counter = 0;
+var latest_handler_id;
+var latest_log_id;
+
 function register_event_handler(t) {
-    mp.register_script_message("input-event", function (type, args) {
-        if (t[type]) {
-            args = args ? JSON.parse(args) : [];
-            var result = t[type].apply(null, args);
+    var handler_id = "input-event/" + input_handle_counter++;
+    latest_handler_id = handler_id;
 
-            if (type == "complete" && result) {
-                mp.commandv("script-message-to", "console", "complete",
-                            JSON.stringify(result[0]), result[1], result[2] || "");
+    mp.register_script_message(handler_id, function (event, args) {
+        if (event == "closed")
+            mp.unregister_script_message(handler_id);
+
+        if (!t[event] || (latest_handler_id !== handler_id && event !== "closed"))
+            return;
+
+        args = args ? JSON.parse(args) : [];
+
+        if (event == "complete") {
+            var complete = function(completions, completion_pos, completion_append) {
+                if (completions == undefined)
+                    return;
+
+                mp.commandv("script-message-to", "console", "complete", JSON.stringify({
+                                client_name: mp.script_name,
+                                handler_id: handler_id,
+                                original_line: args[0],
+                                list: completions,
+                                start_pos: completion_pos,
+                                append: completion_append || "",
+                            }));
             }
-        }
 
-        if (type == "closed")
-            mp.unregister_script_message("input-event");
+            args[1] = complete;
+            complete.apply(null, t[event].apply(null, args));
+        } else {
+            t[event].apply(null, args)
+        }
     })
+
+    return handler_id;
+}
+
+function input_request(t) {
+    t.has_completions = t.complete !== undefined;
+    t.client_name = mp.script_name;
+    t.handler_id = register_event_handler(t);
+
+    mp.commandv("script-message-to", "console", "get-input", JSON.stringify(t));
 }
 
 mp.input = {
     get: function(t) {
-        t.has_completions = t.complete !== undefined
-
-        mp.commandv("script-message-to", "console", "get-input", mp.script_name,
-                    JSON.stringify(t));
-
-        register_event_handler(t)
+        t.prompt = String(t.prompt || "")
+        t.id = t.id || mp.script_name + t.prompt;
+        latest_log_id = t.id;
+        return input_request(t);
+    },
+    select: function(t) {
+        t.args = t.args || [];
+        return input_request(t);
     },
     terminate: function () {
-        mp.commandv("script-message-to", "console", "disable");
+        mp.commandv("script-message-to", "console", "disable", JSON.stringify({
+                        client_name: mp.script_name,
+                    }));
     },
     log: function (message, style, terminal_style) {
         mp.commandv("script-message-to", "console", "log", JSON.stringify({
+                        log_id: latest_log_id,
                         text: message,
                         style: style,
                         terminal_style: terminal_style,
                    }));
     },
     log_error: function (message) {
-        mp.commandv("script-message-to", "console", "log",
-                    JSON.stringify({ text: message, error: true }));
+        mp.msg.warn("log_error is deprecated and will be removed.")
+
+        mp.commandv("script-message-to", "console", "log", JSON.stringify({
+                        log_id: latest_log_id,
+                        text: message,
+                        error: true,
+                    }));
     },
     set_log: function (log) {
-        mp.commandv("script-message-to", "console", "set-log",
-                    JSON.stringify(log));
+        if (latest_log_id) {
+            mp.commandv("script-message-to", "console", "set-log",
+                        latest_log_id, JSON.stringify(log));
+        }
     }
 }
-mp.input.select = mp.input.get
 
 /**********************************************************************
  *  various
@@ -730,7 +774,7 @@ mp.osd_message = function osd_message(text, duration) {
 }
 
 mp.utils.subprocess = function subprocess(t) {
-    var cmd = { name: "subprocess", capture_stdout: true };
+    var cmd = { _name: "subprocess", capture_stdout: true };
     var new_names = { cancellable: "playback_only", max_size: "capture_size" };
     for (var k in t)
         cmd[new_names[k] || k] = t[k];

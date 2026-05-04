@@ -5,10 +5,6 @@
 #include "demux/packet.h"
 #include "misc/bstr.h"
 
-// up to 210 ms overlaps or gaps are removed
-#define SUB_GAP_THRESHOLD 0.210
-// don't change timings if durations are smaller
-#define SUB_GAP_KEEP 0.4
 // slight offset when sub seeking or sub stepping
 #define SUB_SEEK_OFFSET 0.01
 #define SUB_SEEK_WITHOUT_VIDEO_OFFSET 0.1
@@ -33,6 +29,7 @@ struct sd {
 
     struct attachment_list *attachments;
     struct mp_codec_params *codec;
+    const char *lang;
 
     // Set to false as soon as the decoder discards old subtitle events.
     // (only needed if sd_functions.accept_packets_in_advance == false)
@@ -55,6 +52,7 @@ struct sd_functions {
                                        int format, double pts);
     char *(*get_text)(struct sd *sd, double pts, enum sd_text_type type);
     struct sd_times (*get_times)(struct sd *sd, double pts);
+    struct sub_lines *(*get_lines)(struct sd *sd);
 };
 
 // lavc_conv.c
@@ -70,7 +68,7 @@ void lavc_conv_uninit(struct lavc_conv *priv);
 struct mp_sub_filter_opts {
     bool sub_filter_SDH;
     bool sub_filter_SDH_harder;
-    char *sub_filter_SDH_enclosures;
+    char **sub_filter_SDH_enclosures;
     bool rf_enable;
     bool rf_plain;
     char **rf_items;
