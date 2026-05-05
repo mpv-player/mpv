@@ -1281,7 +1281,15 @@ PROTOCOLS
 
     mpv protocol. This is used for starting mpv from URL handler. The protocol
     is stripped and the rest is passed to the player as a normal open argument.
-    Only safe network protocols are allowed to be opened this way.
+    Only safe network protocols are allowed to be opened this way. To open
+    other protocols (such as ``edl://`` URLs produced by the youtube-dl hook),
+    use ``--load-unsafe-playlists``. Only enable this when invoking mpv from a
+    trusted source, since it disables the safety limits, basically allowing any
+    protocol to be opened from the URL handler.
+
+    Example browser bookmarklet that opens the current page in mpv::
+
+        javascript:void(location='mpv://'+encodeURIComponent(location.href))
 
 ``http://...``, ``https://``, ...
 
