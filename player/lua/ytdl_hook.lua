@@ -811,11 +811,12 @@ local function add_single_video(json)
     end
 
     -- add chapters
-    if json.chapters then
+    local chapters = json.chapters or json.sponsorblock_chapters
+    if chapters then
         msg.debug("Adding pre-parsed chapters")
         chapter_list = {}
-        for i = 1, #json.chapters do
-            local chapter = json.chapters[i]
+        for i = 1, #chapters do
+            local chapter = chapters[i]
             local title = chapter.title or ""
             if title == "" then
                 title = string.format('Chapter %02d', i)
