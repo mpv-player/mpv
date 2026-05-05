@@ -15,6 +15,10 @@ struct ra_ctx_opts {
     bool composition;    // enable swapchain composition
     struct m_obj_settings *context_list; // list of `ra_ctx_fns.name` to probe
     struct m_obj_settings *context_type_list;  // list of `ra_ctx_fns.type` to probe
+    // Ordered list of preferred GPU types for auto-selection: "discrete",
+    // "integrated", "virtual", "software", or "other". First entry wins.
+    // If NULL, the backend's default priority applies.
+    char **gpu_type;
 };
 
 extern const struct m_sub_options ra_ctx_conf;
