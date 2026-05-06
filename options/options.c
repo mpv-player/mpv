@@ -563,6 +563,8 @@ static const m_option_t mp_opts[] = {
     {"js-memory-report", OPT_BOOL(js_memory_report)},
 #endif
 #if HAVE_LUA
+    {"profile-scripts", OPT_STRINGLIST(profile_scripts)},
+    {"profile-script", OPT_CLI_ALIAS("profile-scripts-append")},
     {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS},
     {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS},
     {"ytdl-format", OPT_STRING(lua_ytdl_format)},
