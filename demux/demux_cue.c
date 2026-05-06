@@ -92,7 +92,7 @@ static bool open_source(struct timeline *tl, char *filename)
 
     struct bstr dirname = mp_dirname(tl->demuxer->filename);
 
-    struct bstr base_filename = bstr0(mp_basename(filename));
+    struct bstr base_filename = bstr0(filename);
     if (!base_filename.len) {
         MP_WARN(tl, "CUE: Invalid audio filename in .cue file!\n");
     } else {
