@@ -178,6 +178,9 @@ struct vo_internal {
     struct stats_ctx *stats;
 };
 
+int max_texture_size;
+char *previous_vo;
+
 extern const struct m_sub_options gl_video_conf;
 
 static void forget_frames(struct vo *vo);
@@ -331,6 +334,7 @@ struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
     struct mp_vo_opts *opts = mp_get_config_group(NULL, global, &vo_sub_opts);
     struct m_obj_settings *vo_list = opts->video_driver_list;
     struct vo *vo = NULL;
+    previous_vo = NULL;
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0].name) {
         for (int n = 0; vo_list[n].name; n++) {
@@ -357,6 +361,43 @@ autoprobe:
 done:
     talloc_free(opts);
     return vo;
+}
+
+struct vo *vo_handle_max_texture_size(struct vo* vo, struct mpv_global *global,
+                                      struct vo_extra *ex, int size)
+{
+    struct vo *new_vo = NULL;
+
+    if (vo->driver->get_max_texture_size) {
+        max_texture_size = vo->driver->get_max_texture_size(vo);
+
+        if (size > max_texture_size) {
+            MP_WARN(vo,
+                    "Video dimension %d exceeds the GPU maximum texture size of %d.\n"
+                    "Attempting to use software rendering.\n",
+                    size, vo->driver->get_max_texture_size(vo));
+
+            for (int i = 0; i < MP_ARRAY_SIZE(video_out_drivers); i++) {
+                const struct vo_driver *driver = video_out_drivers[i];
+                if (!driver->is_software)
+                    continue;
+                new_vo = vo_create(true, global, ex, (char *)driver->name);
+                if (new_vo) {
+                    previous_vo = (char *)vo->driver->name;
+                    break;
+                }
+            }
+        }
+    } else if (previous_vo && size <= max_texture_size) {
+        MP_WARN(vo,
+                "Video dimension %d is within the GPU maximum texture size of %d.\n"
+                "Switching back to %s.\n",
+                size, max_texture_size, previous_vo);
+        new_vo = vo_create(false, global, ex, previous_vo);
+        previous_vo = NULL;
+    }
+
+    return new_vo;
 }
 
 static void terminate_vo(void *p)
