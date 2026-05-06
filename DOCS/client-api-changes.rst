@@ -33,6 +33,9 @@ API changes
 ::
 
  --- mpv 0.40.0 ---
+ 2.6    - add MPV_RENDER_API_TYPE_D3D11 render API backend, along with
+          MPV_RENDER_PARAM_D3D11_INIT_PARAMS and MPV_RENDER_PARAM_D3D11_FBO,
+          and a new render_d3d11.h header.
  2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.39.0 ---
  2.4    - mpv_render_param with the MPV_RENDER_PARAM_ICC_PROFILE argument no
