@@ -890,6 +890,7 @@ local function add_single_video(json)
     end
     if chunk_size < math.huge then
         stream_opts = append_libav_opt(stream_opts, "request_size", tostring(chunk_size))
+        mp.set_property_native("file-local-options/http-max-request-size", chunk_size)
     end
 
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
