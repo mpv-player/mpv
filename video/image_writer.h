@@ -52,7 +52,7 @@ bool image_writer_high_depth(const struct image_writer_opts *opts);
 bool image_writer_flexible_csp(const struct image_writer_opts *opts);
 
 // Map file extension to format ID - return 0 (which is invalid) if unknown.
-int image_writer_format_from_ext(const char *ext);
+int image_writer_format_from_ext(bstr ext);
 
 /*
  * Save the given image under the given filename. The parameters csp and opts

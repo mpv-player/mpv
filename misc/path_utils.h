@@ -25,16 +25,10 @@
 // Return pointer to filename part of path
 
 const char *mp_basename(const char *path);
+bstr mp_basename_bstr(bstr path);
 
-/* Return file extension, excluding the '.'. If root is not NULL, set it to the
- * part of the path without extension. So: path == root + "." + extension
- * Don't consider it a file extension if the only '.' is the first character.
- * Return NULL if no extension and don't set *root in this case.
- */
-char *mp_splitext(const char *path, bstr *root);
-
-// This is a shorthand to remove the extension
-char *mp_strip_ext(void *talloc_ctx, const char *s);
+bstr bstr_strip_ext(bstr path);
+bstr bstr_get_ext(bstr path);
 
 /* Return struct bstr referencing directory part of path, or if that
  * would be empty, ".".
