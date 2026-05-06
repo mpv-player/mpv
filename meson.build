@@ -184,6 +184,7 @@ sources = files(
 
     ## Streams
     'stream/cookies.c',
+    'stream/network.c',
     'stream/stream.c',
     'stream/stream_avdevice.c',
     'stream/stream_cb.c',

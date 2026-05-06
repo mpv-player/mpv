@@ -28,6 +28,7 @@
 #include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
+#include "network.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 
@@ -36,43 +37,18 @@
 #include "misc/bstr.h"
 #include "mpv_talloc.h"
 
-#define OPT_BASE_STRUCT struct stream_lavf_params
-struct stream_lavf_params {
+#define OPT_BASE_STRUCT struct stream_lavf_opts
+
+struct stream_lavf_opts {
     char **avopts;
-    bool cookies_enabled;
-    char *cookies_file;
-    char *useragent;
-    char *referrer;
-    char **http_header_fields;
-    bool tls_verify;
-    char *tls_ca_file;
-    char *tls_cert_file;
-    char *tls_key_file;
-    double timeout;
-    char *http_proxy;
 };
 
 const struct m_sub_options stream_lavf_conf = {
     .opts = (const m_option_t[]) {
         {"stream-lavf-o", OPT_KEYVALUELIST(avopts)},
-        {"http-header-fields", OPT_STRINGLIST(http_header_fields)},
-        {"user-agent", OPT_STRING(useragent)},
-        {"referrer", OPT_STRING(referrer)},
-        {"cookies", OPT_BOOL(cookies_enabled)},
-        {"cookies-file", OPT_STRING(cookies_file), .flags = M_OPT_FILE},
-        {"tls-verify", OPT_BOOL(tls_verify)},
-        {"tls-ca-file", OPT_STRING(tls_ca_file), .flags = M_OPT_FILE},
-        {"tls-cert-file", OPT_STRING(tls_cert_file), .flags = M_OPT_FILE},
-        {"tls-key-file", OPT_STRING(tls_key_file), .flags = M_OPT_FILE},
-        {"network-timeout", OPT_DOUBLE(timeout), M_RANGE(0, DBL_MAX)},
-        {"http-proxy", OPT_STRING(http_proxy)},
         {0}
     },
-    .size = sizeof(struct stream_lavf_params),
-    .defaults = &(const struct stream_lavf_params){
-        .useragent = "libmpv",
-        .timeout = 60,
-    },
+    .size = sizeof(struct stream_lavf_opts),
 };
 
 static const char *const http_like[] =
@@ -184,8 +160,8 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
                                  struct mpv_global *global, struct mp_log *log)
 {
     void *temp = talloc_new(NULL);
-    struct stream_lavf_params *opts =
-        mp_get_config_group(temp, global, &stream_lavf_conf);
+    struct mp_network_opts *opts =
+        mp_get_config_group(temp, global, &mp_network_conf);
 
     // HTTP specific options (other protocols ignore them)
     if (opts->useragent)
@@ -239,7 +215,9 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
     if (opts->http_proxy && opts->http_proxy[0])
         av_dict_set(dict, "http_proxy", opts->http_proxy, 0);
 
-    mp_set_avdict(dict, opts->avopts);
+    struct stream_lavf_opts *lavf_opts =
+        mp_get_config_group(temp, global, &stream_lavf_conf);
+    mp_set_avdict(dict, lavf_opts->avopts);
 
     talloc_free(temp);
 }
