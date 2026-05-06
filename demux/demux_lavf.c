@@ -49,6 +49,8 @@
 #include "misc/thread_tools.h"
 
 #include "stream/stream.h"
+#include "stream/stream_curl.h"
+
 #include "demux.h"
 #include "stheader.h"
 #include "options/m_config.h"
@@ -214,6 +216,7 @@ static const struct format_hack format_hacks[] = {
 struct nested_stream {
     AVIOContext *id;
     int64_t last_bytes;
+    void *curl_data;
 };
 
 struct stream_info {
@@ -945,12 +948,24 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
         }
     }
 
-    int r = priv->default_io_open(s, pb, url, flags, options);
+    // Try the libcurl-based backend first, so nested connections use the same
+    // stack. Only ENOSYS (the URL not supported) falls back to Lavf IO.
+    void *curl_data = NULL;
+    int r = AVERROR(ENOSYS);
+#if HAVE_LIBCURL
+    r = mp_curl_avio_open(demuxer, pb, &curl_data, url, flags, options,
+                          s->protocol_whitelist, s->protocol_blacklist);
+    mp_assert(r != 0 || curl_data != NULL);
+#endif
+    if (r == AVERROR(ENOSYS))
+        r = priv->default_io_open(s, pb, url, flags, options);
+
     if (r >= 0) {
         if (options)
             mp_avdict_print_unset(demuxer->log, MSGL_TRACE, *options);
         struct nested_stream nest = {
             .id = *pb,
+            .curl_data = curl_data,
         };
         MP_TARRAY_APPEND(priv, priv->nested, priv->num_nested, nest);
     }
@@ -963,12 +978,21 @@ static int nested_io_close2(struct AVFormatContext *s, AVIOContext *pb)
     mp_require(demuxer);
     lavf_priv_t *priv = demuxer->priv;
 
+    MP_UNUSED void *curl_data = NULL;
     for (int n = 0; n < priv->num_nested; n++) {
         if (priv->nested[n].id == pb) {
+            curl_data = priv->nested[n].curl_data;
             MP_TARRAY_REMOVE_AT(priv->nested, priv->num_nested, n);
             break;
         }
     }
+
+#if HAVE_LIBCURL
+    if (curl_data) {
+        mp_curl_avio_close(pb, curl_data);
+        return 0;
+    }
+#endif
 
     return priv->default_io_close2(s, pb);
 }
@@ -1350,6 +1374,22 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->io_open = block_io_open;
     }
 
+#if HAVE_LIBCURL
+    // When nested HTTP requests are routed through our libcurl backend,
+    // Lavf's HLS demuxer must not try to reuse the URLContext of the previous
+    // request via ff_http_do_new_request2(). Our AVIOContext is not backed by a
+    // URLContext, so ffio_geturlcontext() returns NULL and av_assert0() trips.
+    // Note that our implementation will reuse and multiplex connections.
+    // This will be fixed upstream, but keep compatibility with older versions.
+    if (demuxer->access_references) {
+        av_dict_set(&dopts, "http_persistent", "0", 0);
+        // Actually enable http_multiple, this is basic prefetching logic in
+        // HLS demuxer. We just need to avoid autodetection (-1) which would
+        // be incorrect as our backed is handling everything.
+        av_dict_set(&dopts, "http_multiple", "1", 0);
+    }
+#endif
+
     mp_set_avdict(&dopts, lavfdopts->avopts);
 
     if (av_dict_copy(&priv->av_opts, dopts, 0) < 0) {
@@ -1505,6 +1545,8 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     if (r < 0) {
         av_packet_free(&pkt);
         if (r == AVERROR_EOF)
+            return false;
+        if (mp_cancel_test(demux->cancel))
             return false;
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         if (priv->retry_counter >= 10) {

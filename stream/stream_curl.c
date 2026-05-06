@@ -22,6 +22,11 @@
 
 #include <curl/curl.h>
 
+#include <libavformat/avio.h>
+#include <libavutil/avstring.h>
+#include <libavutil/error.h>
+#include <libavutil/mem.h>
+
 #include "stream.h"
 #include "stream_curl.h"
 
@@ -29,8 +34,10 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "cookies.h"
+#include "demux/demux.h"
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
+#include "misc/path_utils.h"
 #include "misc/thread_tools.h"
 #include "mpv_talloc.h"
 #include "network.h"
@@ -822,3 +829,153 @@ const stream_info_t stream_info_curl = {
     .protocols = (const char *const[]){"http", "https", NULL},
     .stream_origin = STREAM_ORIGIN_NET,
 };
+
+// FFmpeg AVIOContext implementation
+// Allows demuxers to use our stream_curl in nested io and sub-demuxers. This
+// should route all traffic through our implementation.
+
+struct curl_avio_cookie {
+    struct stream *stream;
+    struct mp_cancel *cancel;
+};
+
+static bool is_protocol_allowed(struct mp_log *log, const char *scheme,
+                                const char *whitelist, const char *blacklist)
+{
+    if (whitelist && av_match_list(scheme, whitelist, ',') <= 0) {
+        mp_err(log, "Protocol '%s' not on whitelist '%s'!\n", scheme, whitelist);
+        return false;
+    }
+    if (blacklist && av_match_list(scheme, blacklist, ',') > 0) {
+        mp_err(log, "Protocol '%s' on blacklist '%s'!\n", scheme, blacklist);
+        return false;
+    }
+    return true;
+}
+
+static int curl_avio_read(void *opaque, uint8_t *buf, int size)
+{
+    struct curl_avio_cookie *c = opaque;
+    int ret = stream_read_partial(c->stream, buf, size);
+    return ret > 0 ? ret : AVERROR_EOF;
+}
+
+static int64_t curl_avio_seek(void *opaque, int64_t pos, int whence)
+{
+    struct curl_avio_cookie *c = opaque;
+    if (whence == AVSEEK_SIZE) {
+        int64_t end = stream_get_size(c->stream);
+        return end >= 0 ? end : AVERROR(ENOSYS);
+    }
+    if (whence == SEEK_END) {
+        int64_t end = stream_get_size(c->stream);
+        if (end < 0)
+            return AVERROR(EINVAL);
+        pos += end;
+    } else if (whence == SEEK_CUR) {
+        pos += stream_tell(c->stream);
+    } else if (whence != SEEK_SET) {
+        return AVERROR(EINVAL);
+    }
+    if (pos < 0)
+        return AVERROR(EINVAL);
+    if (!stream_seek(c->stream, pos))
+        return AVERROR(EIO);
+    return pos;
+}
+
+int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
+                      void **cookie_out, const char *url, int flags,
+                      AVDictionary **options,
+                      const char *whitelist, const char *blacklist)
+{
+    *pb_out = NULL;
+    *cookie_out = NULL;
+
+    if (flags & AVIO_FLAG_WRITE)
+        return AVERROR(ENOSYS);
+
+    // Check protocol early, to return ENOSYS and allow lavf to fallback.
+    bstr scheme = mp_split_proto(bstr0(url), NULL);
+    if (!bstr_in_list0(scheme, (char **)stream_info_curl.protocols))
+        return AVERROR(ENOSYS);
+
+    // The context is required to be initialized in global.
+    mp_require(demuxer->global && demuxer->global->curl);
+
+    // Nested IO plumbs whitelist/blacklist through the AVDictionary, use that
+    // if set, same as FFmpeg's implementation.
+    if (options && *options) {
+        AVDictionaryEntry *e;
+        if ((e = av_dict_get(*options, "protocol_whitelist", NULL, 0)))
+            whitelist = e->value;
+        if ((e = av_dict_get(*options, "protocol_blacklist", NULL, 0)))
+            blacklist = e->value;
+    }
+
+    if (!is_protocol_allowed(demuxer->log, bstrdup0(demuxer, scheme), whitelist, blacklist))
+        return AVERROR(EINVAL);
+
+    // Each nested stream gets its own mp_cancel slaved to the main demuxer,
+    // so the http backend can install its own wake-up callback without
+    // clobbering the top-level stream or any sibling nested stream.
+    struct mp_cancel *cancel = mp_cancel_new(NULL);
+    mp_cancel_set_parent(cancel, demuxer->cancel);
+
+    struct stream_open_args args = {
+        .global = demuxer->global,
+        .cancel = cancel,
+        .url = url,
+        .flags = STREAM_READ | (demuxer->stream_origin & STREAM_ORIGIN_MASK),
+        .sinfo = &stream_info_curl,
+    };
+
+    struct stream *s = NULL;
+    int r = stream_create_with_args(&args, &s);
+    if (r != STREAM_OK || !s) {
+        talloc_free(cancel);
+        return AVERROR(EIO);
+    }
+
+    struct curl_avio_cookie *c = talloc_zero(NULL, struct curl_avio_cookie);
+    c->stream = s;
+    c->cancel = cancel;
+
+    void *buffer = av_malloc(64 * 1024);
+    if (!buffer) {
+        free_stream(s);
+        talloc_free(cancel);
+        talloc_free(c);
+        return AVERROR(ENOMEM);
+    }
+
+    AVIOContext *pb = avio_alloc_context(buffer, 64 * 1024, 0, c,
+                                         curl_avio_read, NULL,
+                                         s->seekable ? curl_avio_seek : NULL);
+    if (!pb) {
+        av_free(buffer);
+        free_stream(s);
+        talloc_free(cancel);
+        talloc_free(c);
+        return AVERROR(ENOMEM);
+    }
+    pb->seekable = s->seekable ? AVIO_SEEKABLE_NORMAL : 0;
+
+    *pb_out = pb;
+    *cookie_out = c;
+    return 0;
+}
+
+void mp_curl_avio_close(AVIOContext *pb, void *cookie)
+{
+    struct curl_avio_cookie *c = cookie;
+    if (pb) {
+        av_freep(&pb->buffer);
+        avio_context_free(&pb);
+    }
+    if (c) {
+        free_stream(c->stream);
+        talloc_free(c->cancel);
+        talloc_free(c);
+    }
+}
