@@ -334,6 +334,7 @@ local state = {
     audio_track_count = 0,
     sub_track_count = 0,
     current_tracks = {},
+    is_image = false,
     no_video = false,
     playlist_count = 0,
     playlist_pos_1 = 0,
@@ -744,6 +745,7 @@ local function update_tracklist(_, track_list)
     state.audio_track_count = 0
     state.sub_track_count = 0
     state.current_tracks = {}
+    state.is_image = false
     state.no_video = true
 
     for _, track in ipairs(track_list) do
@@ -761,7 +763,12 @@ local function update_tracklist(_, track_list)
             end
         elseif track.type == "video" and track.selected then
             state.no_video = false
+            state.is_image = track.image
         end
+    end
+
+    if state.current_tracks["audio"] then
+        state.is_image = false
     end
 
     request_init()
@@ -2618,7 +2625,7 @@ local function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = state.duration ~= nil
+    ne.visible = state.duration and not state.is_image
     ne.content = function ()
         if state.rightTC_trem then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
