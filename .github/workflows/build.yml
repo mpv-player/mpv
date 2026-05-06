@@ -312,7 +312,7 @@ jobs:
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
           brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
-            libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg mesa
           brew link ffmpeg-full
 
       - name: Build with meson
