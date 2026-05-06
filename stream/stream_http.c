@@ -22,6 +22,10 @@
 
 #include <curl/curl.h>
 
+#include <libavformat/avio.h>
+#include <libavutil/error.h>
+#include <libavutil/mem.h>
+
 #include "stream.h"
 #include "stream_http.h"
 
@@ -29,6 +33,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "cookies.h"
+#include "demux/demux.h"
 #include "misc/bstr.h"
 #include "misc/dispatch.h"
 #include "misc/thread_tools.h"
@@ -292,6 +297,11 @@ void mp_curl_global_init(struct mpv_global *global)
     ctx->dispatch = mp_dispatch_create(ctx);
     global->curl = ctx;
     mp_require(!mp_thread_create(&ctx->thread, curl_thread, ctx));
+}
+
+bool mp_curl_is_available(struct mpv_global *global)
+{
+    return global && global->curl;
 }
 
 // Curl callbacks
@@ -803,3 +813,124 @@ const stream_info_t stream_info_http = {
     .protocols = (const char *const[]){"http", "https", NULL},
     .stream_origin = STREAM_ORIGIN_NET,
 };
+
+// FFmpeg AVIOContext implementation
+// Allows demuxers to use our stream_http in nested io and sub-demuxers. This
+// should route all traffic through our implementation.
+
+struct curl_avio_cookie {
+    struct stream *stream;
+    struct mp_cancel *cancel;
+};
+
+static int curl_avio_read(void *opaque, uint8_t *buf, int size)
+{
+    struct curl_avio_cookie *c = opaque;
+    int ret = stream_read_partial(c->stream, buf, size);
+    return ret > 0 ? ret : AVERROR_EOF;
+}
+
+static int64_t curl_avio_seek(void *opaque, int64_t pos, int whence)
+{
+    struct curl_avio_cookie *c = opaque;
+    if (whence == AVSEEK_SIZE) {
+        int64_t end = stream_get_size(c->stream);
+        return end >= 0 ? end : AVERROR(ENOSYS);
+    }
+    if (whence == SEEK_END) {
+        int64_t end = stream_get_size(c->stream);
+        if (end < 0)
+            return AVERROR(EINVAL);
+        pos += end;
+    } else if (whence == SEEK_CUR) {
+        pos += stream_tell(c->stream);
+    } else if (whence != SEEK_SET) {
+        return AVERROR(EINVAL);
+    }
+    if (pos < 0)
+        return AVERROR(EINVAL);
+    if (!stream_seek(c->stream, pos))
+        return AVERROR(EIO);
+    return pos;
+}
+
+int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
+                      void **cookie_out, const char *url, int flags)
+{
+    *pb_out = NULL;
+    *cookie_out = NULL;
+
+    if (flags & AVIO_FLAG_WRITE)
+        return AVERROR(ENOSYS);
+
+    bstr u = bstr0(url);
+    if (!bstr_case_startswith(u, bstr0("http://")) &&
+        !bstr_case_startswith(u, bstr0("https://")))
+        return AVERROR(ENOSYS);
+
+    if (!mp_curl_is_available(demuxer->global))
+        return AVERROR(ENOSYS);
+
+    // Each nested stream gets its own mp_cancel slaved to the main demuxer,
+    // so the http backend can install its own wake-up callback without
+    // clobbering the top-level stream or any sibling nested stream.
+    struct mp_cancel *cancel = mp_cancel_new(NULL);
+    mp_cancel_set_parent(cancel, demuxer->cancel);
+
+    struct stream_open_args args = {
+        .global = demuxer->global,
+        .cancel = cancel,
+        .url = url,
+        .flags = STREAM_READ | (demuxer->stream_origin & STREAM_ORIGIN_MASK),
+        .sinfo = &stream_info_http,
+    };
+
+    struct stream *s = NULL;
+    int r = stream_create_with_args(&args, &s);
+    if (r != STREAM_OK || !s) {
+        talloc_free(cancel);
+        return AVERROR(EIO);
+    }
+
+    struct curl_avio_cookie *c = talloc_zero(NULL, struct curl_avio_cookie);
+    c->stream = s;
+    c->cancel = cancel;
+
+    void *buffer = av_malloc(64 * 1024);
+    if (!buffer) {
+        free_stream(s);
+        talloc_free(cancel);
+        talloc_free(c);
+        return AVERROR(ENOMEM);
+    }
+
+    AVIOContext *pb = avio_alloc_context(buffer, 64 * 1024, 0, c,
+                                         curl_avio_read, NULL,
+                                         s->seekable ? curl_avio_seek : NULL);
+    if (!pb) {
+        av_free(buffer);
+        free_stream(s);
+        talloc_free(cancel);
+        talloc_free(c);
+        return AVERROR(ENOMEM);
+    }
+    pb->seekable = s->seekable ? AVIO_SEEKABLE_NORMAL : 0;
+
+    *pb_out = pb;
+    *cookie_out = c;
+    return 0;
+}
+
+void mp_curl_avio_close(AVIOContext *pb, void *cookie)
+{
+    struct curl_avio_cookie *c = cookie;
+    if (pb) {
+        av_freep(&pb->buffer);
+        avio_context_free(&pb);
+    }
+    if (c) {
+        free_stream(c->stream);
+        talloc_free(c->cancel);
+        talloc_free(c);
+    }
+}

@@ -4072,6 +4072,17 @@ Demuxer
     If this option is deemed unnecessary at some point in the future, it will
     be removed without notice.
 
+``--demuxer-lavf-prefer-curl=<yes|no>``
+    When mpv was built with libcurl support, route nested HTTP/HTTPS requests
+    issued by FFmpeg-internal demuxers (HLS, DASH, concat, side-loaded
+    playlists, ...) through mpv's libcurl-based HTTP backend instead of
+    FFmpeg's built-in HTTP protocol (default: yes).
+
+    Set this to ``no`` to keep using FFmpeg's HTTP protocol for nested URLs
+    (e.g. for debugging, or when the libcurl backend misbehaves on a
+    particular site). The option has no effect when libcurl support was not
+    compiled in.
+
 ``--demuxer-mkv-subtitle-preroll=<yes|index|no>``
     Try harder to show embedded soft subtitles when seeking somewhere. Normally,
     it can happen that the subtitle at the seek target is not shown due to how
