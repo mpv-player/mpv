@@ -310,7 +310,7 @@ jobs:
             brew update
           fi
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
-          brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
+          brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
           brew link ffmpeg-full
@@ -439,6 +439,7 @@ jobs:
           apk update
           apk add \
               binutils \
+              curl-dev \
               ffmpeg-dev \
               gcc \
               git \
@@ -493,6 +494,7 @@ jobs:
         run: |
             sudo pkg_add -U \
                 cmake \
+                curl \
                 ffmpeg \
                 git \
                 libarchive \
@@ -541,6 +543,7 @@ jobs:
             sudo pkg install -y \
                 alsa-lib \
                 cmake \
+                curl \
                 evdev-proto \
                 ffmpeg \
                 git \
@@ -625,6 +628,7 @@ jobs:
             ca-certificates:p
             cc:p
             cppwinrt:p
+            curl:p
             ffmpeg:p
             lcms2:p
             libarchive:p
