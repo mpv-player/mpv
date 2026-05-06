@@ -548,7 +548,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
     if (t1->image != t2->image)
         return !t1->image;
     if (t1->dependent_track != t2->dependent_track)
-        return !t1->dependent_track;
+        return t1->image ? t1->dependent_track : !t1->dependent_track;
     if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
         t1->stream->hls_bitrate != t2->stream->hls_bitrate)
     {
@@ -763,7 +763,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     if (track == current)
         return;
 
-    if (current && current->sink) {
+    if (current && current->sink && !current->stream->tile_grid) {
         MP_ERR(mpctx, "Can't disable input to complex filter.\n");
         goto error;
     }

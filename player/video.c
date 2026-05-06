@@ -39,6 +39,7 @@
 #include "sub/osd.h"
 #include "video/hwdec.h"
 #include "filters/f_decoder_wrapper.h"
+#include "filters/f_lavfi.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -156,10 +157,33 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
     // this does not free the VO
 }
 
+static void uninit_grid(struct MPContext *mpctx)
+{
+    struct track *primary = mpctx->vo_chain->track;
+    if (!primary || !primary->stream || !primary->stream->tile_grid)
+        return;
+
+    struct mp_tile_grid *grid = primary->stream->tile_grid;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (!track->stream || track->stream->tile_grid != grid)
+            continue;
+        if (track->sink) {
+            mp_pin_disconnect(track->sink);
+            track->sink = NULL;
+        }
+        if (track != primary)
+            track->dec = NULL;
+        track->selected = false;
+        reselect_demux_stream(mpctx, track, false);
+    }
+}
+
 void uninit_video_chain(struct MPContext *mpctx)
 {
     if (mpctx->vo_chain) {
         reset_video_state(mpctx);
+        uninit_grid(mpctx);
         vo_chain_uninit(mpctx->vo_chain);
         mpctx->vo_chain = NULL;
 
@@ -202,6 +226,138 @@ err_out:
     return 0;
 }
 
+static char *tile_grid_graph(void *ctx, const struct mp_tile_grid *grid)
+{
+    bstr buf = {0};
+
+    for (int i = 0; i < grid->nb_tiles; i++)
+        bstr_xappend_asprintf(ctx, &buf, "[in%d]", i);
+
+    bstr_xappend_asprintf(ctx, &buf, "xstack=inputs=%d:layout=", grid->nb_tiles);
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        if (i > 0)
+            bstr_xappend(ctx, &buf, bstr0("|"));
+        bstr_xappend_asprintf(ctx, &buf, "%d_%d", grid->tiles[i].horizontal,
+                              grid->tiles[i].vertical);
+    }
+    bstr_xappend_asprintf(ctx, &buf,
+                          ":fill=0x%02X%02X%02X@0x%02X",
+                          grid->background[0], grid->background[1],
+                          grid->background[2], grid->background[3]);
+
+    if (grid->coded_width != grid->width || grid->coded_height != grid->height) {
+        bstr_xappend_asprintf(ctx, &buf, ",crop=w=%d:h=%d:x=%d:y=%d", grid->width,
+                              grid->height, grid->horizontal_offset, grid->vertical_offset);
+    }
+
+    bstr_xappend(ctx, &buf, bstr0("[vo]"));
+    return buf.start;
+}
+
+static struct track *find_tile_track(struct MPContext *mpctx,
+                                     const struct mp_tile_grid *tg, int tile_idx)
+{
+
+    int wanted_ff = tg->tiles[tile_idx].ff_index;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (t->ff_index == wanted_ff && t->stream && t->stream->tile_grid == tg)
+            return t;
+    }
+    return NULL;
+}
+
+static void reinit_video_chain_tiled(struct MPContext *mpctx, struct track *track)
+{
+    struct mp_tile_grid *grid = track->stream->tile_grid;
+    mp_assert(grid);
+
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        struct track *t = find_tile_track(mpctx, grid, i);
+        if (t) {
+            t->selected = true;
+            reselect_demux_stream(mpctx, t, false);
+        }
+    }
+
+    reinit_video_chain_src(mpctx, NULL);
+    if (!mpctx->vo_chain)
+        return;
+
+    struct vo_chain *vo_c = mpctx->vo_chain;
+
+    void *tmp = talloc_new(NULL);
+    char *graph_str = tile_grid_graph(tmp, grid);
+    MP_VERBOSE(mpctx, "Tile grid xstack graph: %s\n", graph_str);
+
+    struct mp_lavfi *lavfi =
+        mp_lavfi_create_graph(vo_c->filter->f, 0, false, NULL, NULL, graph_str);
+    talloc_free(tmp);
+
+    if (!lavfi) {
+        MP_ERR(mpctx, "Failed to create tile grid filtergraph.\n");
+        goto err_out;
+    }
+
+    struct mp_filter *lavfi_f = lavfi->f;
+
+    struct mp_pin *out_pad = mp_filter_get_named_pin(lavfi_f, "vo");
+    if (!out_pad || mp_pin_get_dir(out_pad) != MP_PIN_OUT) {
+        MP_ERR(mpctx, "Tile grid filtergraph missing output pin 'vo'.\n");
+        goto err_out;
+    }
+    vo_c->filter_src = out_pad;
+    mp_pin_connect(vo_c->filter->f->pins[0], vo_c->filter_src);
+
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        struct track *tile_track = find_tile_track(mpctx, grid, i);
+        if (!tile_track) {
+            MP_ERR(mpctx, "No track found for tile %d (ff_index %d).\n",
+                   i, grid->tiles[i].ff_index);
+            goto err_out;
+        }
+
+        tile_track->vo_c = vo_c;
+        bool result = init_video_decoder(mpctx, tile_track);
+        // vo_chain_uninit() only unsets vo_c on the primary track
+        // (vo_c->track).
+        tile_track->vo_c = NULL;
+        if (!result)
+            goto err_out;
+
+        char label[16];
+        snprintf(label, sizeof(label), "in%d", i);
+        struct mp_pin *in_pad = mp_filter_get_named_pin(lavfi_f, label);
+        if (!in_pad || mp_pin_get_dir(in_pad) != MP_PIN_IN) {
+            MP_ERR(mpctx, "Tile grid filtergraph missing input pin '%s'.\n",
+                   label);
+            goto err_out;
+        }
+        tile_track->sink = in_pad;
+        mp_pin_connect(tile_track->sink, tile_track->dec->f->pins[0]);
+    }
+
+    struct track *primary = find_tile_track(mpctx, grid, 0);
+    vo_c->track = primary;
+    primary->vo_c = vo_c;
+    vo_c->filter->container_fps =
+        mp_decoder_wrapper_get_container_fps(primary->dec);
+    vo_c->is_coverart = !!primary->attached_picture;
+    vo_c->is_sparse = primary->stream->still_image || vo_c->is_coverart;
+
+    if (vo_c->is_coverart)
+        mp_decoder_wrapper_set_coverart_flag(track->dec, true);
+
+    MP_VERBOSE(mpctx, "Tile grid: assembling %d tile(s) into %dx%d image.\n",
+               grid->nb_tiles, grid->width, grid->height);
+    return;
+
+err_out:
+    uninit_video_chain(mpctx);
+    error_on_track(mpctx, track);
+    handle_force_window(mpctx, true);
+}
+
 void reinit_video_chain(struct MPContext *mpctx)
 {
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
@@ -209,7 +365,12 @@ void reinit_video_chain(struct MPContext *mpctx)
         error_on_track(mpctx, track);
         return;
     }
-    reinit_video_chain_src(mpctx, track);
+
+    if (track->stream->tile_grid) {
+        reinit_video_chain_tiled(mpctx, track);
+    } else {
+        reinit_video_chain_src(mpctx, track);
+    }
 }
 
 static void filter_update_subtitles(void *ctx, double pts)
