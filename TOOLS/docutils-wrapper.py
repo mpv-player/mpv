@@ -26,7 +26,7 @@ import subprocess
 import sys
 
 
-def convert_depfile(output, depfile):
+def convert_depfile(output: str, depfile: str) -> None:
     with open(depfile) as f:
         deps = f.readlines()
 
@@ -39,7 +39,7 @@ def convert_depfile(output, depfile):
             f.write(os.path.abspath(dep))
             f.write(" \\\n")
 
-def remove(path):
+def remove(path: str) -> None:
     try:
         os.remove(path)
     except FileNotFoundError:

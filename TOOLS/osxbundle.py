@@ -9,38 +9,38 @@ from optparse import OptionParser
 import dylib_unhell
 
 
-def bundle_path(binary_name):
+def bundle_path(binary_name: str) -> str:
     return f"{binary_name}.app"
 
-def bundle_name(binary_name):
+def bundle_name(binary_name: str) -> str:
     return os.path.basename(bundle_path(binary_name))
 
-def target_plist(binary_name):
+def target_plist(binary_name: str) -> str:
     return os.path.join(bundle_path(binary_name), "Contents", "Info.plist")
 
-def target_directory(binary_name):
+def target_directory(binary_name: str) -> str:
     return os.path.join(bundle_path(binary_name), "Contents", "MacOS")
 
-def target_binary(binary_name):
+def target_binary(binary_name: str) -> str:
     return os.path.join(target_directory(binary_name),
                         os.path.basename(binary_name))
 
-def copy_bundle(binary_name, src_path):
+def copy_bundle(binary_name: str, src_path: str) -> None:
     if os.path.isdir(bundle_path(binary_name)):
         shutil.rmtree(bundle_path(binary_name))
     shutil.copytree(
         os.path.join(src_path, "TOOLS", "osxbundle", bundle_name(binary_name)),
         bundle_path(binary_name))
 
-def copy_binary(binary_name):
+def copy_binary(binary_name: str) -> None:
     shutil.copy(binary_name, target_binary(binary_name))
 
-def apply_plist_template(plist_file, version, category):
+def apply_plist_template(plist_file: str, version: str, category: str) -> None:
     print(">> setting bundle category to " + category)
     for line in fileinput.input(plist_file, inplace=True):
         print(line.rstrip().replace("${VERSION}", version).replace("${CATEGORY}", category))
 
-def sign_bundle(binary_name):
+def sign_bundle(binary_name: str) -> None:
     sign_directories = ["Contents/Frameworks", "Contents/MacOS"]
     for sign_dir in sign_directories:
         resolved_dir = os.path.join(bundle_path(binary_name), sign_dir)
@@ -50,7 +50,7 @@ def sign_bundle(binary_name):
                 subprocess.run(["codesign", "--force", "-s", "-", path])
     subprocess.run(["codesign", "--force", "-s", "-", bundle_path(binary_name)])
 
-def bundle_version(build_path):
+def bundle_version(build_path: str) -> str:
     version = "UNKNOWN"
     version_h_path = os.path.join(build_path, "common", "version.h")
     if os.path.exists(version_h_path):
@@ -59,7 +59,7 @@ def bundle_version(build_path):
         x.close()
     return version
 
-def main():
+def main() -> None:
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-s", "--skip-deps", action="store_false", dest="deps",

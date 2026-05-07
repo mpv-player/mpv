@@ -58,7 +58,7 @@ jobs:
       - uses: python/mypy@master
         with:
           install_project_dependencies: no
-          options: '--check-untyped-defs'
+          options: '--strict'
           paths: ". TOOLS/umpv"
 
   editorconfig:
