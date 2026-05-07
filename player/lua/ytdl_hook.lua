@@ -643,7 +643,6 @@ end
 local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
-    local max_bitrate = 0
     local requested_formats = json["requested_formats"] or json["requested_downloads"]
     local all_formats = json["formats"]
     local has_requested_formats = requested_formats and #requested_formats > 0
@@ -668,15 +667,6 @@ local function add_single_video(json)
         end
 
         streamurl = mpd_url
-
-        if requested_formats then
-            for _, track in pairs(requested_formats) do
-                max_bitrate = (track.tbr and track.tbr > max_bitrate) and
-                    track.tbr or max_bitrate
-            end
-        elseif json.tbr then
-            max_bitrate = json.tbr > max_bitrate and json.tbr or max_bitrate
-        end
 
         for json_name, mp_name in pairs(tag_list) do
             if json[json_name] then
@@ -736,13 +726,6 @@ local function add_single_video(json)
     msg.debug("streamurl: " .. streamurl)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
-
-    -- set hls-bitrate for dash track selection
-    if max_bitrate > 0 and
-        not option_was_set("hls-bitrate") and
-        not option_was_set_locally("hls-bitrate") then
-        mp.set_property_native('file-local-options/hls-bitrate', max_bitrate*1000)
-    end
 
     -- add subtitles
     if json.requested_subtitles ~= nil then
