@@ -42,6 +42,7 @@
 extern const struct mp_scripting mp_scripting_lua;
 extern const struct mp_scripting mp_scripting_cplugin;
 extern const struct mp_scripting mp_scripting_js;
+extern const struct mp_scripting mp_scripting_py;
 extern const struct mp_scripting mp_scripting_run;
 
 static const struct mp_scripting *const scripting_backends[] = {
@@ -50,6 +51,9 @@ static const struct mp_scripting *const scripting_backends[] = {
 #endif
 #if HAVE_CPLUGINS
     &mp_scripting_cplugin,
+#endif
+#if HAVE_PYTHON
+    &mp_scripting_py,
 #endif
 #if HAVE_JAVASCRIPT
     &mp_scripting_js,
