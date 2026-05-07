@@ -184,6 +184,7 @@ sources = files(
 
     ## Streams
     'stream/cookies.c',
+    'stream/network.c',
     'stream/stream.c',
     'stream/stream_avdevice.c',
     'stream/stream_cb.c',
@@ -618,6 +619,13 @@ subdir('sub')
 
 if darwin
     subdir(join_paths('TOOLS', 'osxbundle'))
+endif
+
+libcurl = dependency('libcurl', version: '>= 7.83.0', required: get_option('libcurl'))
+features += {'libcurl': libcurl.found()}
+if features['libcurl']
+    dependencies += [libcurl]
+    sources += files('stream/stream_http.c')
 endif
 
 cdda_opt = get_option('cdda').require(

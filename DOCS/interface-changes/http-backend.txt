@@ -1,0 +1,1 @@
+add libcurl-based HTTP backend, with new options `--http-version`, `--http-max-redirects`, `--http-max-retries`, `--http-connect-timeout`, `--http-buffer-size` and `--http-max-request-size`

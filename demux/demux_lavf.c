@@ -49,6 +49,8 @@
 #include "misc/thread_tools.h"
 
 #include "stream/stream.h"
+#include "stream/stream_http.h"
+
 #include "demux.h"
 #include "stheader.h"
 #include "options/m_config.h"
@@ -79,6 +81,7 @@ struct demux_lavf_opts {
     int rtsp_transport;
     int linearize_ts;
     bool propagate_opts;
+    bool prefer_curl;
 };
 
 const struct m_sub_options demux_lavf_conf = {
@@ -108,6 +111,7 @@ const struct m_sub_options demux_lavf_conf = {
         {"demuxer-lavf-linearize-timestamps", OPT_CHOICE(linearize_ts,
             {"no", 0}, {"auto", -1}, {"yes", 1})},
         {"demuxer-lavf-propagate-opts", OPT_BOOL(propagate_opts)},
+        {"demuxer-lavf-prefer-curl", OPT_BOOL(prefer_curl)},
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -123,6 +127,7 @@ const struct m_sub_options demux_lavf_conf = {
         .rtsp_transport = 2,
         .linearize_ts = -1,
         .propagate_opts = true,
+        .prefer_curl = true,
     },
     .change_flags = UPDATE_DEMUXER,
 };
@@ -214,6 +219,7 @@ static const struct format_hack format_hacks[] = {
 struct nested_stream {
     AVIOContext *id;
     int64_t last_bytes;
+    void *curl_data;
 };
 
 struct stream_info {
@@ -945,14 +951,32 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
         }
     }
 
-    int r = priv->default_io_open(s, pb, url, flags, options);
+    // Try the libcurl-based HTTP backend first, so nested HLS/DASH segment
+    // fetches inherit the same connection reuse.
+    void *curl_data = NULL;
+    int r = AVERROR(ENOSYS);
+    if (priv->opts->prefer_curl)
+        r = mp_curl_avio_open(demuxer, pb, &curl_data, url, flags);
+    if (r < 0 && r != AVERROR(ENOSYS)) {
+        MP_WARN(demuxer, "libcurl backend failed for nested URL '%s' (%s), "
+                         "falling back to FFmpeg I/O.\n",
+                url, av_err2str(r));
+        r = AVERROR(ENOSYS);
+    }
+    if (r == AVERROR(ENOSYS))
+        r = priv->default_io_open(s, pb, url, flags, options);
+
     if (r >= 0) {
         if (options)
             mp_avdict_print_unset(demuxer->log, MSGL_TRACE, *options);
         struct nested_stream nest = {
             .id = *pb,
+            .curl_data = curl_data,
         };
         MP_TARRAY_APPEND(priv, priv->nested, priv->num_nested, nest);
+    } else if (curl_data) {
+        mp_curl_avio_close(*pb, curl_data);
+        *pb = NULL;
     }
     return r;
 }
@@ -963,11 +987,18 @@ static int nested_io_close2(struct AVFormatContext *s, AVIOContext *pb)
     mp_require(demuxer);
     lavf_priv_t *priv = demuxer->priv;
 
+    void *curl_data = NULL;
     for (int n = 0; n < priv->num_nested; n++) {
         if (priv->nested[n].id == pb) {
+            curl_data = priv->nested[n].curl_data;
             MP_TARRAY_REMOVE_AT(priv->nested, priv->num_nested, n);
             break;
         }
+    }
+
+    if (curl_data) {
+        mp_curl_avio_close(pb, curl_data);
+        return 0;
     }
 
     return priv->default_io_close2(s, pb);
@@ -1348,6 +1379,19 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->io_close2 = nested_io_close2;
     } else {
         avfc->io_open = block_io_open;
+    }
+
+    // When nested HTTP requests are routed through our libcurl backend,
+    // FFmpeg's HLS/DASH demuxers must not try to reuse the URLContext of
+    // the previous request via ff_http_do_new_request2(). Our AVIOContext
+    // is not backed by a URLContext, so ffio_geturlcontext() returns NULL
+    // and av_assert0() trips. Note that our implementation will reuse and
+    // multiplex connections.
+    if (demuxer->access_references && priv->opts->prefer_curl &&
+        mp_curl_is_available(demuxer->global))
+    {
+        av_dict_set(&dopts, "http_persistent", "0", 0);
+        av_dict_set(&dopts, "http_multiple", "0", 0);
     }
 
     mp_set_avdict(&dopts, lavfdopts->avopts);

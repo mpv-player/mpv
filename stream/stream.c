@@ -61,6 +61,9 @@ extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
 extern const stream_info_t stream_info_cb;
+#if HAVE_LIBCURL
+extern const stream_info_t stream_info_http;
+#endif
 
 static const stream_info_t *const stream_list[] = {
     &stream_info_mpv,
@@ -90,6 +93,9 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_slice,
     &stream_info_fd,
     &stream_info_cb,
+#if HAVE_LIBCURL
+    &stream_info_http,
+#endif
     &stream_info_ffmpeg,
     &stream_info_ffmpeg_unsafe,
 };
@@ -537,7 +543,12 @@ static bool stream_read_more(struct stream *s, int forward)
     // Keep guaranteed seek-back.
     int buf_old = MPMIN(s->buf_cur - s->buf_start, s->requested_buffer_size / 2);
 
-    if (!stream_resize_buffer(s, buf_old + forward_avail, buf_old + forward))
+    // Never shrink the buffer here. That's stream_drop_buffers()'s job. Otherwise
+    // data fetched by earlier larger reads (e.g. demuxer probing) would be
+    // discarded, forcing redundant re-reads on backward seeks.
+    int new_size = MPMAX(buf_old + forward, s->buffer_mask + 1);
+
+    if (!stream_resize_buffer(s, buf_old + forward_avail, new_size))
         return false;
 
     int buf_alloc = s->buffer_mask + 1;
