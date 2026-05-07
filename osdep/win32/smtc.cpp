@@ -329,6 +329,11 @@ static void handle_mp_event(smtc_ctx *ctx, mpv_event *event)
             auto &prop = *static_cast<mpv_event_property *>(event->data);
             if (!strcmp(prop.name, "time-pos") || !strcmp(prop.name, "duration"))
                 return;
+            if (!strcmp(prop.name, "media-controls")) {
+                mp_assert(prop.format == MPV_FORMAT_FLAG);
+                ctx->smtc.IsEnabled(*static_cast<int *>(prop.data));
+                return;
+            }
         }
         update_metadata(ctx->smtc, *ctx);
     } catch (const winrt::hresult_error& e) {
@@ -404,7 +409,7 @@ static MP_THREAD_VOID win_event_loop_fn(void *arg)
             winrt::throw_hresult(hr);
         SetWindowLongPtrW(ctx.hwnd, GWLP_USERDATA, LONG_PTR(&ctx));
 
-        smtc.IsEnabled(true);
+        smtc.IsEnabled(mp_get_property<MPV_FORMAT_FLAG>(mpv, "media-controls").value_or(0));
 
         smtc.ButtonPressed([&](const SystemMediaTransportControls &,
                                const SystemMediaTransportControlsButtonPressedEventArgs &args) {
@@ -500,12 +505,25 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
         .mpv = mpv
     };
 
+    // Nothing is created until the controls are enabled.
+    mpv_observe_property(mpv, 0, "media-controls", MPV_FORMAT_FLAG);
+    for (;;) {
+        mpv_event *event = mpv_wait_event(mpv, -1);
+        if (event->event_id == MPV_EVENT_SHUTDOWN)
+            goto done;
+        if (event->event_id == MPV_EVENT_PROPERTY_CHANGE) {
+            auto &prop = *static_cast<mpv_event_property *>(event->data);
+            if (prop.format == MPV_FORMAT_FLAG && *static_cast<int *>(prop.data))
+                break;
+        }
+    }
+
     // Create a dedicated window and event loop. We could use the mpv main window,
     // but it is not always available, especially in audio-only/console mode.
     mp_thread win_event_loop;
     if (mp_thread_create(&win_event_loop, win_event_loop_fn, &ctx)) {
         MP_ERR(&ctx, "Failed to create window event thread!\n");
-        goto error;
+        goto done;
     }
 
     // It is recommended that you keep the system controls in sync with your
@@ -551,7 +569,7 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
     }
     mp_thread_join(win_event_loop);
 
-error:
+done:
     mpv_destroy(mpv);
     MP_THREAD_RETURN();
 }
