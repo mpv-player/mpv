@@ -3021,9 +3021,9 @@ static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *heigh
     }
 
     double scale_factor = (double)*width / wl->reduced_width;
-    *width = ceil(wl->reduced_width * scale_factor);
+    *width = lrint(wl->reduced_width * scale_factor);
     if (wl->opts->keepaspect_window)
-        *height = ceil(wl->reduced_height * scale_factor);
+        *height = lrint(wl->reduced_height * scale_factor);
 
     if (wl->resizing_constraint == MP_HEIGHT_CONSTRAINT) {
         MPSWAP(int, *width, *height);
