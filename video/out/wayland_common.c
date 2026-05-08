@@ -1934,6 +1934,8 @@ resize:
                    mp_rect_w(old_geometry), mp_rect_h(old_geometry),
                    mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
         wl->pending_vo_events |= VO_EVENT_RESIZE;
+    } else if (wl->resizing) {
+        wl->pending_vo_events |= VO_EVENT_EXPOSE;
     }
 
     wl->override_surface_local = width == 0 || height == 0 || wl->reconfigured;
