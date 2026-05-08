@@ -823,10 +823,31 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     return STREAM_OK;
 }
 
+static const char *const enabled_protocols[] = {"http", "https", NULL};
+
+static bool curl_has_proto(bstr proto)
+{
+    curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
+    mp_require(info && info->protocols);
+    return bstr_in_list0(proto, (char **)info->protocols);
+}
+
+static char **curl_get_protocols(void)
+{
+    int num = 0;
+    char **protocols = NULL;
+    for (int i = 0; enabled_protocols[i]; i++) {
+        if (curl_has_proto(bstr0(enabled_protocols[i])))
+            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, enabled_protocols[i]));
+    }
+    MP_TARRAY_APPEND(NULL, protocols, num, NULL);
+    return protocols;
+}
+
 const stream_info_t stream_info_curl = {
     .name = "curl",
     .open2 = curl_open,
-    .protocols = (const char *const[]){"http", "https", NULL},
+    .get_protocols = curl_get_protocols,
     .stream_origin = STREAM_ORIGIN_NET,
 };
 
@@ -897,7 +918,7 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
 
     // Check protocol early, to return ENOSYS and allow lavf to fallback.
     bstr scheme = mp_split_proto(bstr0(url), NULL);
-    if (!bstr_in_list0(scheme, (char **)stream_info_curl.protocols))
+    if (!bstr_in_list0(scheme, (char **)enabled_protocols) || !curl_has_proto(scheme))
         return AVERROR(ENOSYS);
 
     // The context is required to be initialized in global.
