@@ -71,6 +71,7 @@ struct demux_opts {
     bool donate_fw;
     double min_secs;
     double hyst_secs;
+    int64_t hyst_bytes;
     bool force_seekable;
     double min_secs_cache;
     bool access_references;

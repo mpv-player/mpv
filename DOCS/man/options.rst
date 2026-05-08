@@ -4334,6 +4334,19 @@ Demuxer
     The default value is 0 seconds, which disables the caching hysteresis. A
     value of 10 seconds probably works well for most usecases.
 
+``--demuxer-hysteresis-bytes=<bytesize>``
+    Same as ``--demuxer-hysteresis-secs``, but specifies the hysteresis in
+    bytes of forward buffered data instead of seconds. Once the demuxer limit
+    is reached, the demuxer will not buffer ahead again until the amount of
+    forward buffered data drops to this value.
+
+    This option is useful for streams with variable or unknown bitrate, where
+    a byte-based threshold is more meaningful than a time-based one. It can
+    also be combined with ``--demuxer-hysteresis-secs``. In that case buffering
+    can resume when either threshold is reached.
+
+    The default value is 0, which disables the byte-based caching hysteresis.
+
 ``--prefetch-playlist=<yes|no>``
     Prefetch next playlist entry while playback of the current entry is ending
     (default: no). This merely opens the URL of the next playlist entry as soon
