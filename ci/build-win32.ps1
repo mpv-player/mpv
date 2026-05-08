@@ -25,10 +25,10 @@ if (-not (Test-Path "$subprojects/shaderc_cmake")) {
     git clone https://github.com/google/shaderc --depth 1 $subprojects/shaderc_cmake
     Set-Content -Path "$subprojects/shaderc_cmake/p.diff" -Value @'
 diff --git a/third_party/CMakeLists.txt b/third_party/CMakeLists.txt
-index d44f62a..54d4719 100644
+index 9e9d8b1..fecab91 100644
 --- a/third_party/CMakeLists.txt
 +++ b/third_party/CMakeLists.txt
-@@ -87,7 +87,11 @@ if (NOT TARGET glslang)
+@@ -92,7 +92,11 @@ if (NOT TARGET glslang)
        # Glslang tests are off by default. Turn them on if testing Shaderc.
        set(GLSLANG_TESTS ON)
      endif()
@@ -38,9 +38,9 @@ index d44f62a..54d4719 100644
 +    else()
 +      set(GLSLANG_ENABLE_INSTALL ON)
 +    endif()
+     set(ENABLE_HLSL "${SHADERC_ENABLE_HLSL}")
      add_subdirectory(${SHADERC_GLSLANG_DIR} glslang)
    endif()
-   if (NOT TARGET glslang)
 '@
     git -C $subprojects/shaderc_cmake apply --ignore-whitespace p.diff
 }
