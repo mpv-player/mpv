@@ -5718,13 +5718,13 @@ Network
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
 
-HTTP backend (libcurl)
-----------------------
+Network backend (libcurl)
+-------------------------
 
-When mpv is built with libcurl support, ``http://`` and ``https://`` URLs are
-served by an internal libcurl-based stream backend instead of FFmpeg. The
-backend fully supports all features of libcurl, making it more robust and
-compatible with a wide range of servers and CDNs, and faster too.
+When mpv is built with libcurl support, ``http://``, ``https://``, ``ftp://``
+and ``ftps://`` URLs are served by an internal libcurl-based stream backend
+instead of FFmpeg. The backend fully supports all features of libcurl, making it
+more robust and compatible with a wide range of servers and CDNs, and faster too.
 
 For HTTP transfers, the backend transparently negotiates HTTP/1.1, HTTP/2
 multiplexing or HTTP/3 (QUIC) when the server offers them, with HSTS enabled
@@ -5738,8 +5738,8 @@ The backend honors the network options listed above (``--user-agent``,
 ``--http-proxy``, ``--http-header-fields``, ``--referrer``, ``--cookies*``,
 ``--tls-*``).
 
-If libcurl is not available at build time, or if this backend fails to handle
-a particular request, mpv falls back to FFmpeg's HTTP implementation.
+If libcurl is not available at build time, mpv uses FFmpeg's networking
+implementation instead.
 
 To inspect libcurl's debug output (requests, response headers,
 TLS/connection diagnostics), set ``--msg-level=curl=trace``.

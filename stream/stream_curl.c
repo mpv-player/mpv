@@ -47,6 +47,23 @@
 #include "osdep/threads.h"
 #include "osdep/timer.h"
 
+enum curl_proto {
+    MP_CURL_PROTO_HTTP,
+    MP_CURL_PROTO_FTP,
+};
+
+struct curl_scheme {
+    bstr scheme;
+    enum curl_proto proto;
+};
+
+static const struct curl_scheme curl_schemes[] = {
+    {bstr0_lit("http"), MP_CURL_PROTO_HTTP},
+    {bstr0_lit("https"), MP_CURL_PROTO_HTTP},
+    {bstr0_lit("ftp"), MP_CURL_PROTO_FTP},
+    {bstr0_lit("ftps"), MP_CURL_PROTO_FTP},
+};
+
 struct curl_opts {
     int http_version;
     int max_redirects;
@@ -97,6 +114,16 @@ const struct m_sub_options curl_conf = {
     .size = sizeof(struct curl_opts),
 };
 
+static const struct curl_scheme *curl_scheme_lookup(bstr url)
+{
+    bstr scheme = mp_split_proto(url, NULL);
+    for (int i = 0; i < MP_ARRAY_SIZE(curl_schemes); i++) {
+        if (bstrcasecmp(scheme, curl_schemes[i].scheme) == 0)
+            return &curl_schemes[i];
+    }
+    return NULL;
+}
+
 struct curl_ctx {
     mp_thread thread;
     struct mp_dispatch_queue *dispatch;
@@ -117,6 +144,7 @@ struct priv {
     CURL *curl;
     struct curl_slist *headers;
     char *url;
+    const struct curl_scheme *scheme;
 
     // Stream parameters
     bool seekable;
@@ -312,6 +340,7 @@ static bool is_http_success(long resp)
     return resp >= 200 && resp < 300;
 }
 
+// Called per chunk of body data.
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     struct priv *p = userdata;
@@ -377,25 +406,35 @@ static const char *header_value(CURL *c, const char *name)
     return NULL;
 }
 
-// Decide stream parameters from the header response. The stream is considered
-// non-seakabke if compression is used, or server doesn't support byte ranges.
-static size_t header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
+static void finalize_probe(struct priv *p)
 {
-    struct priv *p = userdata;
-    size_t bytes = size * nitems;
+    if (mp_msg_test(p->log, MSGL_DEBUG)) {
+        long resp = 0;
+        char *ctype = NULL;
+        curl_easy_getinfo(p->curl, CURLINFO_RESPONSE_CODE, &resp);
+        curl_easy_getinfo(p->curl, CURLINFO_CONTENT_TYPE, &ctype);
+        MP_DBG(p, "proto=%.*s ok=%d code=%ld size=%" PRId64 " seekable=%d type=%s\n",
+               BSTR_P(p->scheme->scheme), p->stream_ok, resp,
+               p->content_size, p->seekable, ctype ? ctype : "-");
+    }
 
-    if (p->probed)
-        return bytes;
+    mp_mutex_lock(&p->mtx);
+    p->probed = true;
+    mp_cond_broadcast(&p->cond);
+    mp_mutex_unlock(&p->mtx);
+}
 
-    bstr line = bstr_strip_linebreaks((bstr){buffer, bytes});
+// Empty line is the end of the header. Skip intermediate 1xx and 3xx responses,
+// we care about the final one.
+static void probe_http(struct priv *p, struct bstr line)
+{
     if (line.len > 0)
-        return bytes;
+        return;
 
     long resp = 0;
     curl_easy_getinfo(p->curl, CURLINFO_RESPONSE_CODE, &resp);
-    // Skip 1xx and intermediate 3xx (curl follows redirects internally).
     if (resp < 200 || (resp >= 300 && resp < 400))
-        return bytes;
+        return;
 
     if (!is_http_success(resp)) {
         MP_ERR(p, "HTTP error %ld\n", resp);
@@ -426,15 +465,52 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
         p->content_size = total;
     }
     p->stream_ok = true;
-
-    MP_DBG(p, "status=%ld compressed=%d size=%" PRId64 " seekable=%d\n",
-           resp, compressed, p->content_size, p->seekable);
-
 done:
-    mp_mutex_lock(&p->mtx);
-    p->probed = true;
-    mp_cond_broadcast(&p->cond);
-    mp_mutex_unlock(&p->mtx);
+    finalize_probe(p);
+}
+
+static void probe_ftp(struct priv *p, struct bstr line)
+{
+    if (line.len < 4 || line.start[3] != ' ')
+        return;
+    // Parse the line directly: libcurl only stamps CURLINFO_RESPONSE_CODE after
+    // a reply is fully processed, so polling it from header_callback returns
+    // the previous code.
+    struct bstr code = {line.start, 3};
+    if (!bstr_equals0(code, "150") && !bstr_equals0(code, "125"))
+        return;
+
+    curl_off_t cl = -1;
+    if (curl_easy_getinfo(p->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                          &cl) == CURLE_OK && cl >= 0)
+        p->content_size = cl;
+
+    p->seekable = p->content_size > 0;
+    p->stream_ok = true;
+    finalize_probe(p);
+}
+
+// Called per header line.
+static size_t header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
+{
+    struct priv *p = userdata;
+    size_t bytes = size * nitems;
+
+    if (p->probed)
+        return bytes;
+
+    struct bstr line = bstr_strip_linebreaks((bstr){buffer, bytes});
+    switch (p->scheme->proto) {
+    case MP_CURL_PROTO_HTTP:
+        probe_http(p, line);
+        break;
+    case MP_CURL_PROTO_FTP:
+        probe_ftp(p, line);
+        break;
+    default:
+        break;
+    }
+
     return bytes;
 }
 
@@ -779,6 +855,9 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     p->opts = mp_get_config_group(p, s->global, &curl_conf);
     p->net_opts = mp_get_config_group(p, s->global, &mp_network_conf);
     p->url = talloc_strdup(p, s->url);
+    p->scheme = curl_scheme_lookup(bstr0(p->url));
+    // Only supported URLs are supposed to reach here.
+    mp_assert(p->scheme);
     p->content_size = -1;
     p->buffer_size = p->opts->buffer_size;
     p->buffer = talloc_size(p, p->buffer_size);
@@ -823,22 +902,21 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     return STREAM_OK;
 }
 
-static const char *const enabled_protocols[] = {"http", "https", NULL};
-
-static bool curl_has_proto(bstr proto)
+static bool curl_has_proto(bstr scheme)
 {
     curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
     mp_require(info && info->protocols);
-    return bstr_in_list0(proto, (char **)info->protocols);
+    return bstr_in_list0(scheme, (char **)info->protocols);
 }
 
 static char **curl_get_protocols(void)
 {
     int num = 0;
     char **protocols = NULL;
-    for (int i = 0; enabled_protocols[i]; i++) {
-        if (curl_has_proto(bstr0(enabled_protocols[i])))
-            MP_TARRAY_APPEND(NULL, protocols, num, talloc_strdup(protocols, enabled_protocols[i]));
+    for (int i = 0; i < MP_ARRAY_SIZE(curl_schemes); i++) {
+        bstr scheme = curl_schemes[i].scheme;
+        if (curl_has_proto(scheme))
+            MP_TARRAY_APPEND(NULL, protocols, num, bstrdup0(protocols, scheme));
     }
     MP_TARRAY_APPEND(NULL, protocols, num, NULL);
     return protocols;
@@ -860,15 +938,18 @@ struct curl_avio_cookie {
     struct mp_cancel *cancel;
 };
 
-static bool is_protocol_allowed(struct mp_log *log, const char *scheme,
+static bool is_protocol_allowed(struct mp_log *log, bstr scheme,
                                 const char *whitelist, const char *blacklist)
 {
-    if (whitelist && av_match_list(scheme, whitelist, ',') <= 0) {
-        mp_err(log, "Protocol '%s' not on whitelist '%s'!\n", scheme, whitelist);
+    // `scheme` is required to be wrapped null-terminated string literal.
+    // This is UB otherwise, see curl_schemes.
+    mp_assert(scheme.len && scheme.start[scheme.len] == '\0');
+    if (whitelist && av_match_list(scheme.start, whitelist, ',') <= 0) {
+        mp_err(log, "Protocol '%.*s' not on whitelist '%s'!\n", BSTR_P(scheme), whitelist);
         return false;
     }
-    if (blacklist && av_match_list(scheme, blacklist, ',') > 0) {
-        mp_err(log, "Protocol '%s' on blacklist '%s'!\n", scheme, blacklist);
+    if (blacklist && av_match_list(scheme.start, blacklist, ',') > 0) {
+        mp_err(log, "Protocol '%.*s' on blacklist '%s'!\n", BSTR_P(scheme), blacklist);
         return false;
     }
     return true;
@@ -917,8 +998,8 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
         return AVERROR(ENOSYS);
 
     // Check protocol early, to return ENOSYS and allow lavf to fallback.
-    bstr scheme = mp_split_proto(bstr0(url), NULL);
-    if (!bstr_in_list0(scheme, (char **)enabled_protocols) || !curl_has_proto(scheme))
+    const struct curl_scheme *cs = curl_scheme_lookup(bstr0(url));
+    if (!cs || !curl_has_proto(cs->scheme))
         return AVERROR(ENOSYS);
 
     // The context is required to be initialized in global.
@@ -934,7 +1015,7 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
             blacklist = e->value;
     }
 
-    if (!is_protocol_allowed(demuxer->log, bstrdup0(demuxer, scheme), whitelist, blacklist))
+    if (!is_protocol_allowed(demuxer->log, cs->scheme, whitelist, blacklist))
         return AVERROR(EINVAL);
 
     // Each nested stream gets its own mp_cancel slaved to the main demuxer,
