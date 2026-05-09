@@ -293,16 +293,20 @@ local function select_subtitle_line(secondary)
     end
 
     local items = {}
+    local times = {}
     local default_item
     local delay = mp.get_property_native(secondary .. "sub-delay")
     local time_pos = mp.get_property_native("time-pos") - delay
     local duration = mp.get_property_native("duration", math.huge)
 
-    for i, line in ipairs(lines) do
-        items[i] = format_time(line.start, duration) .. " " .. line.text
-
+    for _, line in ipairs(lines) do
         if line.start <= time_pos then
-            default_item = #items
+            default_item = #items + 1
+        end
+
+        for text in line.text:gmatch("[^\n]+") do
+            items[#items + 1] = format_time(line.start, duration) .. " " .. text
+            times[#times + 1] = line.start
         end
     end
 
@@ -317,7 +321,7 @@ local function select_subtitle_line(secondary)
                 delay = delay + 0.1
             end
 
-            mp.commandv("seek", lines[i].start + delay, "absolute")
+            mp.commandv("seek", times[i] + delay, "absolute")
         end,
     })
 end
