@@ -649,12 +649,23 @@ static void setup_curl(struct priv *p)
     }
 
     if (p->net_opts->cookies_enabled) {
+        curl_easy_setopt(c, CURLOPT_COOKIEFILE, "");
         char *file = p->net_opts->cookies_file;
         if (file && file[0]) {
-            char *path = mp_get_user_path(p, p->global, file);
-            curl_easy_setopt(c, CURLOPT_COOKIEFILE, path);
-        } else {
-            curl_easy_setopt(c, CURLOPT_COOKIEFILE, "");
+            void *tmp = talloc_new(NULL);
+            char *path = mp_get_user_path(tmp, p->global, file);
+            bstr data = stream_read_file2(path, tmp,
+                STREAM_READ_FILE_FLAGS_DEFAULT & ~STREAM_LOCAL_FS_ONLY,
+                p->global, 1000000);
+            bstr buf = data;
+            while (buf.len) {
+                bstr line = bstr_strip_linebreaks(bstr_getline(buf, &buf));
+                if (!line.len)
+                    continue;
+                char *line_str = bstrto0(tmp, line);
+                curl_easy_setopt(c, CURLOPT_COOKIELIST, line_str);
+            }
+            talloc_free(tmp);
         }
     }
 
