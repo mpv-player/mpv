@@ -100,11 +100,19 @@ function makeplusinstall {
     fi
 }
 
+# $1: URL to download
+# $2: directory name inside tar (optional)
 function gettar {
-    local name="${1##*/}"
-    [ -d "${name%%.*}" ] && return 0
-    $wget "$1"
-    tar -xaf "$name"
+    local fname="${1##*/}"
+    local dname="$2"
+    [ -z "$dname" ] && dname="${fname%.tar.*}"
+    [ -d "$dname" ] && return 0
+    $wget "$1" -O "$fname"
+    tar -xaf "$fname"
+    if [ ! -d "$dname" ]; then
+        echo "Error: expected $fname to extract to $dname but it was not created" >&2
+        return 2
+    fi
 }
 
 function build_if_missing {
@@ -168,7 +176,7 @@ _lcms2_mark=lib/liblcms2.dll.a
 
 _amf_headers () {
     local ver=1.5.2
-    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz"
+    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz" amf-headers-v${ver}
     pushd amf-headers-v${ver}
     mkdir -p "$prefix_dir/include"
     cp -r AMF "$prefix_dir/include/"
