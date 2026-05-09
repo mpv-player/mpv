@@ -79,6 +79,7 @@ cmake_args=(
     -DCMAKE_RC_COMPILER="${TARGET}-windres"
     -DCMAKE_ASM_COMPILER="$AS"
     -DCMAKE_BUILD_TYPE=Release
+    -DBUILD_SHARED_LIBS=ON
 )
 
 export CC="ccache $CC"
@@ -142,17 +143,17 @@ _iconv () {
 }
 _iconv_mark=lib/libiconv.dll.a
 
-_zlib () {
-    local ver=1.3.1
-    gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
-    pushd zlib-${ver}
-    make -fwin32/Makefile.gcc clean
-    make -fwin32/Makefile.gcc PREFIX=$TARGET- CC="$CC" SHARED_MODE=1 \
-        DESTDIR="$prefix_dir" install \
-        BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
+_zlib_ng () {
+    local ver=2.3.3
+    gettar "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ver}.tar.gz" zlib-ng-${ver}
+    builddir zlib-ng-${ver}
+    cmake .. "${cmake_args[@]}" \
+        -DZLIB_COMPAT=ON -DBUILD_TESTING=OFF
+    makeplusinstall
     popd
+    ln -snf libzlib.dll.a "$prefix_dir/lib/libz.dll.a" # see zlib-ng/zlib-ng#1864
 }
-_zlib_mark=lib/libz.dll.a
+_zlib_ng_mark=lib/libzlib.dll.a
 
 _dav1d () {
     [ -d dav1d ] || $gitclone https://code.videolan.org/videolan/dav1d.git
@@ -323,7 +324,7 @@ _subrandr () {
 }
 _subrandr_mark=lib/libsubrandr.dll.a
 
-for x in iconv zlib shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
+for x in iconv zlib-ng shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
@@ -383,7 +384,7 @@ if [ "$2" = pack ]; then
         av*.dll sw*.dll postproc-[0-9]*.dll
         # everything else
         subrandr-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
-        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2}.dll zlib1.dll
+        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2,zlib1}.dll
     )
     [[ -f vulkan-1.dll ]] && dlls+=(vulkan-1.dll)
     mv -v "${dlls[@]}" ..
