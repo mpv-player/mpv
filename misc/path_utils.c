@@ -110,7 +110,7 @@ static bstr split_ext(bstr path, bstr *root)
     return ext;
 }
 
-bstr bstr_strip_ext(bstr path)
+bstr mp_strip_ext(bstr path)
 {
     bstr root = {0};
     split_ext(path, &root);
