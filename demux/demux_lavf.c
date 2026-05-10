@@ -466,7 +466,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
     // HLS streams seems to be not well tagged, so matching mime type is not
     // enough. Strip URL parameters and match extension.
-    bstr ext = bstr_get_ext(bstr_split(bstr0(priv->filename), "?#", NULL));
+    bstr ext = mp_get_ext(bstr_split(bstr0(priv->filename), "?#", NULL));
     AVProbeData avpd = {
         // Disable file-extension matching with normal checks, except for HLS
         .filename = !bstrcasecmp0(ext, "m3u8") || !bstrcasecmp0(ext, "m3u") ||

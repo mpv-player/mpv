@@ -29,7 +29,7 @@ static bool might_be_subtitle_file(mpv_node *sub_exts, char *file)
          mpv_node sub_ext = sub_exts->u.list->values[i];
          if (sub_ext.format != MPV_FORMAT_STRING)
              continue;
-         if (!bstrcasecmp0(bstr_get_ext(bstr0(file)), sub_ext.u.string))
+         if (!bstrcasecmp0(mp_get_ext(bstr0(file)), sub_ext.u.string))
              return true;
     }
     return false;

@@ -89,7 +89,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
 
     while (mp_archive_next_entry(mpa)) {
         if (filter && filter[0]) {
-            bstr ext = bstr_get_ext(bstr0(mpa->entry_filename));
+            bstr ext = mp_get_ext(bstr0(mpa->entry_filename));
             bool pass = false;
 
             if (bstr_in_list0(bstr0("video"), filter))

@@ -102,7 +102,7 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
                                               "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
         // retrieve various parts of the filename
         struct bstr tmp_fname_noext = bstrdup(tmpmem2, bstr_strip_ext(dename));
-        struct bstr tmp_fname_ext = bstr_get_ext(dename);
+        struct bstr tmp_fname_ext = mp_get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
         if (den.start != dename.start)
