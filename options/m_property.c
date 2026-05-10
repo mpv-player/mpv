@@ -34,6 +34,30 @@
 #include "common/msg.h"
 #include "common/common.h"
 
+static int do_action(const struct m_property *prop_list, const char *name,
+                     int action, void *arg, void *ctx)
+{
+    struct m_property *prop;
+    struct m_property_action_arg ka;
+    const char *sep = strchr(name, '/');
+    if (sep && sep[1]) {
+        char base[128];
+        snprintf(base, sizeof(base), "%.*s", (int)(sep - name), name);
+        prop = m_property_list_find(prop_list, base);
+        ka = (struct m_property_action_arg) {
+            .key = sep + 1,
+            .action = action,
+            .arg = arg,
+        };
+        action = M_PROPERTY_KEY_ACTION;
+        arg = &ka;
+    } else
+        prop = m_property_list_find(prop_list, name);
+    if (!prop)
+        return M_PROPERTY_UNKNOWN;
+    return prop->call(ctx, prop, action, arg);
+}
+
 static int m_property_multiply(struct mp_log *log,
                                const struct m_property *prop_list,
                                const char *property, double f, void *ctx)
@@ -60,6 +84,36 @@ static int m_property_multiply(struct mp_log *log,
     return r;
 }
 
+static int m_property_switch(struct mp_log *log,
+                             const struct m_property *prop_list,
+                             const char *property, void *arg, void *ctx)
+{
+    union m_option_value val = m_option_value_default;
+    struct m_option opt = {0};
+    int r;
+
+    if (!log)
+        return M_PROPERTY_ERROR;
+    struct m_property_switch_arg *sarg = arg;
+    if ((r = do_action(prop_list, property, M_PROPERTY_SWITCH, arg, ctx)) !=
+        M_PROPERTY_NOT_IMPLEMENTED)
+        return r;
+    // Fallback to m_option
+    r = m_property_do(log, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
+                      &opt, ctx);
+    if (r <= 0)
+        return r;
+    mp_assert(opt.type);
+    if (!opt.type->add)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    if ((r = do_action(prop_list, property, M_PROPERTY_GET, &val, ctx)) <= 0)
+        return r;
+    opt.type->add(&opt, &val, sarg->inc, sarg->wrap);
+    r = do_action(prop_list, property, M_PROPERTY_SET, &val, ctx);
+    m_option_free(&opt, &val);
+    return r;
+}
+
 struct m_property *m_property_list_find(const struct m_property *list,
                                         const char *name)
 {
@@ -68,30 +122,6 @@ struct m_property *m_property_list_find(const struct m_property *list,
             return (struct m_property *)&list[n];
     }
     return NULL;
-}
-
-static int do_action(const struct m_property *prop_list, const char *name,
-                     int action, void *arg, void *ctx)
-{
-    struct m_property *prop;
-    struct m_property_action_arg ka;
-    const char *sep = strchr(name, '/');
-    if (sep && sep[1]) {
-        char base[128];
-        snprintf(base, sizeof(base), "%.*s", (int)(sep - name), name);
-        prop = m_property_list_find(prop_list, base);
-        ka = (struct m_property_action_arg) {
-            .key = sep + 1,
-            .action = action,
-            .arg = arg,
-        };
-        action = M_PROPERTY_KEY_ACTION;
-        arg = &ka;
-    } else
-        prop = m_property_list_find(prop_list, name);
-    if (!prop)
-        return M_PROPERTY_UNKNOWN;
-    return prop->call(ctx, prop, action, arg);
 }
 
 // (as a hack, log can be NULL on read-only paths)
@@ -136,26 +166,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return m_property_multiply(log, prop_list, name, *(double *)arg, ctx);
     }
     case M_PROPERTY_SWITCH: {
-        if (!log)
-            return M_PROPERTY_ERROR;
-        struct m_property_switch_arg *sarg = arg;
-        if ((r = do_action(prop_list, name, M_PROPERTY_SWITCH, arg, ctx)) !=
-            M_PROPERTY_NOT_IMPLEMENTED)
-            return r;
-        // Fallback to m_option
-        r = m_property_do(log, prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE,
-                          &opt, ctx);
-        if (r <= 0)
-            return r;
-        mp_assert(opt.type);
-        if (!opt.type->add)
-            return M_PROPERTY_NOT_IMPLEMENTED;
-        if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
-            return r;
-        opt.type->add(&opt, &val, sarg->inc, sarg->wrap);
-        r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
-        m_option_free(&opt, &val);
-        return r;
+        return m_property_switch(log, prop_list, name, arg, ctx);
     }
     case M_PROPERTY_GET_CONSTRICTED_TYPE: {
         r = do_action(prop_list, name, action, arg, ctx);
