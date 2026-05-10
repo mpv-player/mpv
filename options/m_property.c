@@ -66,6 +66,8 @@ static int m_property_multiply(struct mp_log *log,
     struct m_option opt = {0};
     int r;
 
+    if (!log)
+        return M_PROPERTY_ERROR;
     r = m_property_do(log, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
                       &opt, ctx);
     if (r != M_PROPERTY_OK)
