@@ -28,7 +28,7 @@ const char *mp_basename(const char *path);
 bstr mp_basename_bstr(bstr path);
 
 bstr bstr_strip_ext(bstr path);
-bstr bstr_get_ext(bstr path);
+bstr mp_get_ext(bstr path);
 
 /* Return struct bstr referencing directory part of path, or if that
  * would be empty, ".".

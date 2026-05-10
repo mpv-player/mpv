@@ -104,7 +104,7 @@ static MP_THREAD_VOID script_thread(void *p)
 
 static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
 {
-    bstr ext = bstr_get_ext(bstr0(fname));
+    bstr ext = mp_get_ext(bstr0(fname));
     if (bstrcasecmp0(ext, "disable") == 0)
         return 0;
 

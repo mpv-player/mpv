@@ -117,7 +117,7 @@ bstr bstr_strip_ext(bstr path)
     return root.len ? root : path;
 }
 
-bstr bstr_get_ext(bstr path)
+bstr mp_get_ext(bstr path)
 {
     return split_ext(path, NULL);
 }

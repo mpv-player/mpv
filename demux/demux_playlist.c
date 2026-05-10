@@ -254,7 +254,7 @@ static int parse_m3u(struct pl_parser *p)
     if (p->probing && !bstr_equals0(line, "#EXTM3U")) {
         // Last resort: if the file extension is m3u, it might be headerless.
         if (p->check_level == DEMUX_CHECK_UNSAFE) {
-            bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
+            bstr ext = mp_get_ext(bstr0(p->real_stream->url));
             char probe[PROBE_SIZE];
             int len = stream_read_peek(p->real_stream, probe, sizeof(probe));
             bstr data = {probe, len};
@@ -431,7 +431,7 @@ static bool test_path(struct pl_parser *p, char *path, int autocreate)
     if (!strcmp(path, p->real_stream->path))
         return true;
 
-    bstr ext = bstr_get_ext(bstr0(path));
+    bstr ext = mp_get_ext(bstr0(path));
     if (autocreate & AUTO_VIDEO && bstr_in_list0(ext, p->mp_opts->video_exts))
         return true;
     if (autocreate & AUTO_AUDIO && bstr_in_list0(ext, p->mp_opts->audio_exts))
@@ -540,7 +540,7 @@ static int parse_dir(struct pl_parser *p)
     p->pl->playlist_dir = NULL;
     if (p->autocreate_playlist && p->real_stream->is_local_fs && p->real_stream->is_regular &&
         !p->real_stream->is_directory) {
-        bstr ext = bstr_get_ext(bstr0(p->real_stream->url));
+        bstr ext = mp_get_ext(bstr0(p->real_stream->url));
         switch (p->autocreate_playlist) {
         case 1: // filter
             autocreate = get_directory_filter(p);
