@@ -4099,6 +4099,22 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
     }
 }
 
+static bool select_track(struct demux_internal *in,
+                         struct sh_stream *stream,
+                         double ref_pts, bool selected)
+{
+    struct demux_stream *ds = stream->ds;
+    if (ds->selected == selected)
+        return false;
+    MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
+    ds->selected = selected;
+    update_stream_selection_state(in, ds);
+    in->tracks_switched = true;
+    if (ds->selected)
+        refresh_track(in, stream, ref_pts);
+    return true;
+}
+
 // Set whether the given stream should return packets.
 // ref_pts is used only if the stream is enabled. Then it serves as approximate
 // start pts for this stream (in the worst case it is ignored).
@@ -4106,16 +4122,17 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           double ref_pts, bool selected)
 {
     struct demux_internal *in = demuxer->in;
-    struct demux_stream *ds = stream->ds;
     mp_mutex_lock(&in->lock);
-    // don't flush buffers if stream is already selected / unselected
-    if (ds->selected != selected) {
-        MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
-        ds->selected = selected;
-        update_stream_selection_state(in, ds);
-        in->tracks_switched = true;
-        if (ds->selected)
-            refresh_track(in, stream, ref_pts);
+    bool changed = select_track(in, stream, ref_pts, selected);
+    if (stream->group) {
+        for (int i = 0; i < stream->group->num_members; i++) {
+            struct sh_stream *m = stream->group->members[i];
+            mp_assert(m);
+            if (m != stream)
+                changed |= select_track(in, m, ref_pts, selected);
+        }
+    }
+    if (changed) {
         if (in->threading) {
             mp_cond_signal(&in->wakeup);
         } else {
