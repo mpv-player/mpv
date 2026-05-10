@@ -108,7 +108,7 @@ static bool open_source(struct timeline *tl, char *filename)
     // are renamed.
 
     struct bstr cuefile =
-        bstr_strip_ext(bstr0(mp_basename(tl->demuxer->filename)));
+        mp_strip_ext(bstr0(mp_basename(tl->demuxer->filename)));
 
     DIR *d = opendir(bstrdup0(ctx, dirname));
     if (!d)
