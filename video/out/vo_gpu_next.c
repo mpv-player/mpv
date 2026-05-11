@@ -142,6 +142,7 @@ struct priv {
     bool want_reset;
     bool flush_cache;
     bool frame_pending;
+    bool paused;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -1890,6 +1891,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         if (p->is_interpolated)
             vo->want_redraw = true;
+        p->paused = true;
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        p->paused = false;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
@@ -2695,7 +2700,7 @@ AV_NOWARN_DEPRECATED(
     pars->params.hooks = p->hooks;
 
     MP_DBG(p, "Render options updated, flushing renderer cache.\n");
-    p->flush_cache = true;
+    p->flush_cache = p->paused || !p->next_opts->inter_preserve;
 }
 
 const struct vo_driver video_out_gpu_next = {
