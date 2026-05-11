@@ -599,6 +599,20 @@ static void start_request(struct priv *p)
     curl_multi_add_handle(p->ctx->multi, p->curl);
 }
 
+static void log_curl_error(struct priv *p, const char *what, CURLcode code)
+{
+    MP_ERR(p, "%s: %s\n", what, curl_easy_strerror(code));
+    if (code == CURLE_PEER_FAILED_VERIFICATION ||
+        code == CURLE_SSL_CACERT_BADFILE)
+    {
+        MP_ERR(p,
+            "TLS certificate verification failed.\n"
+            "This usually means an outdated CA bundle, a self-signed "
+            "certificate,\nor a MITM proxy on your network. To bypass at "
+            "your own risk, pass\n--tls-verify=no.\n");
+    }
+}
+
 static void on_done(struct priv *p, CURLcode code)
 {
     bool aborted = atomic_load_explicit(&p->aborted, memory_order_relaxed);
@@ -606,7 +620,7 @@ static void on_done(struct priv *p, CURLcode code)
     if (!p->probed) {
         // Connection died before any headers arrived.
         if (code != CURLE_OK && !aborted)
-            MP_ERR(p, "error: %s\n", curl_easy_strerror(code));
+            log_curl_error(p, "error", code);
         mp_mutex_lock(&p->mtx);
         p->probed = true;
         mp_cond_broadcast(&p->cond);
@@ -650,7 +664,7 @@ static void on_done(struct priv *p, CURLcode code)
     }
 
     if (!aborted)
-        MP_ERR(p, "transfer failed: %s\n", curl_easy_strerror(code));
+        log_curl_error(p, "transfer failed", code);
 
     mp_mutex_lock(&p->mtx);
     p->stream_error = true;
