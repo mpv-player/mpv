@@ -22,10 +22,7 @@
 #include "options/path.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "common/tags.h"
 #include "common/av_common.h"
-#include "demux/demux.h"
-#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
 #include "network.h"
@@ -456,51 +453,14 @@ static struct mp_tags *read_icy(stream_t *s)
     // Send a metadata update only 1. on start, and 2. on a new metadata packet.
     // To detect new packages, set the icy_metadata_packet to "-" once we've
     // read it (a bit hacky, but works).
-
     struct mp_tags *res = NULL;
-    if ((!icy_header || !icy_header[0]) && (!icy_packet || !icy_packet[0]))
-        goto done;
-
     bstr packet = bstr0(icy_packet);
-    if (bstr_equals0(packet, "-"))
-        goto done;
+    if (!bstr_equals0(packet, "-"))
+        res = mp_parse_icy_metadata(s, bstr0(icy_header), packet);
 
-    res = talloc_zero(NULL, struct mp_tags);
+    if (res)
+        av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
 
-    bstr header = bstr0(icy_header);
-    while (header.len) {
-        bstr line = bstr_strip_linebreaks(bstr_getline(header, &header));
-        bstr name, val;
-        if (bstr_split_tok(line, ": ", &name, &val))
-            mp_tags_set_bstr(res, name, val);
-    }
-
-    bstr head = bstr0("StreamTitle='");
-    int i = bstr_find(packet, head);
-    if (i >= 0) {
-        packet = bstr_cut(packet, i + head.len);
-        int end = bstr_find(packet, bstr0("\';"));
-        packet = bstr_splice(packet, 0, end);
-
-        bool allocated = false;
-        struct demux_opts *opts = mp_get_config_group(NULL, s->global, &demux_conf);
-        const char *charset = mp_charset_guess(s, s->log, packet, opts->meta_cp, 0);
-        if (charset && !mp_charset_is_utf8(charset)) {
-            bstr conv = mp_iconv_to_utf8(s->log, packet, charset, 0);
-            if (conv.start && conv.start != packet.start) {
-                allocated = true;
-                packet = conv;
-            }
-        }
-        mp_tags_set_bstr(res, bstr0("icy-title"), packet);
-        talloc_free(opts);
-        if (allocated)
-            talloc_free(packet.start);
-    }
-
-    av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
-
-done:
     av_free(icy_header);
     av_free(icy_packet);
     return res;
