@@ -197,6 +197,7 @@ struct priv {
     bool stream_eof;     // producer has delivered all data
     bool stream_error;   // unrecoverable error
     atomic_bool aborted; // canceled by user (mp_cancel)
+    struct mp_icy *icy;  // ICY metadata state, dormant until Icy-MetaInt seen
 };
 
 // Curl thread
@@ -366,6 +367,18 @@ static bool is_http_success(long resp)
     return resp >= 200 && resp < 300;
 }
 
+// Append `len` bytes to the ring buffer. Caller must hold p->mtx and have
+// verified that there is enough free space.
+static void ring_write(void *ctx, const char *data, size_t len)
+{
+    struct priv *p = ctx;
+    size_t tail_chunk = MPMIN(p->buffer_size - p->tail, len);
+    memcpy(p->buffer + p->tail, data, tail_chunk);
+    memcpy(p->buffer, data + tail_chunk, len - tail_chunk);
+    p->tail = (p->tail + len) % p->buffer_size;
+    p->count += len;
+}
+
 // Called per chunk of body data.
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -390,13 +403,9 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
         return CURL_WRITEFUNC_PAUSE;
     }
 
-    size_t tail_chunk = MPMIN(p->buffer_size - p->tail, bytes);
-    memcpy(p->buffer + p->tail, ptr, tail_chunk);
-    memcpy(p->buffer, ptr + tail_chunk, bytes - tail_chunk);
-    p->tail = (p->tail + bytes) % p->buffer_size;
-    p->count += bytes;
-    p->paused = false;
+    mp_icy_process(p->icy, ptr, bytes, ring_write, p);
 
+    p->paused = false;
     p->request_received += bytes;
 
     mp_cond_broadcast(&p->cond);
@@ -454,8 +463,18 @@ static void finalize_probe(struct priv *p)
 // we care about the final one.
 static void probe_http(struct priv *p, struct bstr line)
 {
-    if (line.len > 0)
+    if (line.len > 0) {
+        // A new status line resets per-response state so that intermediate
+        // 1xx/3xx responses don't leak ICY metadata into the final one.
+        mp_mutex_lock(&p->mtx);
+        if (bstr_startswith0(line, "HTTP/")) {
+            mp_icy_reset(p->icy);
+        } else {
+            mp_icy_add_header(p->icy, line);
+        }
+        mp_mutex_unlock(&p->mtx);
         return;
+    }
 
     long resp = 0;
     curl_easy_getinfo(p->curl, CURLINFO_RESPONSE_CODE, &resp);
@@ -475,8 +494,10 @@ static void probe_http(struct priv *p, struct bstr line)
     bool accept_ranges = ar && strcasecmp(ar, "bytes") == 0;
 
     // Some servers reply 200 to an open-ended "Range: 0-" but 206 to explicit
-    // byte ranges, so trust either.
-    p->seekable = !compressed && (resp == 206 || accept_ranges);
+    // byte ranges, so trust either. ICY metadata is interleaved with the body,
+    // so byte ranges from the server don't line up with consumer offsets.
+    p->seekable = !compressed && !mp_icy_active(p->icy) &&
+                  (resp == 206 || accept_ranges);
 
     if (p->seekable) {
         // Content-Range carries the full size on a partial response. On any
@@ -726,6 +747,8 @@ static struct curl_slist *build_header_list(struct priv *p)
         for (int i = 0; p->net_opts->http_header_fields[i]; i++)
             list = curl_slist_append(list, p->net_opts->http_header_fields[i]);
     }
+    if (p->scheme->proto == MP_CURL_PROTO_HTTP)
+        list = curl_slist_append(list, "Icy-MetaData: 1");
     return list;
 }
 
@@ -858,6 +881,23 @@ static int64_t curl_get_size(struct stream *s)
     return p->content_size;
 }
 
+static int curl_control(struct stream *s, int cmd, void *arg)
+{
+    struct priv *p = s->priv;
+    switch (cmd) {
+    case STREAM_CTRL_GET_METADATA: {
+        mp_mutex_lock(&p->mtx);
+        struct mp_tags *tags = mp_icy_get_metadata(p->icy, s);
+        mp_mutex_unlock(&p->mtx);
+        if (!tags)
+            break;
+        *(struct mp_tags **)arg = tags;
+        return STREAM_OK;
+    }
+    }
+    return STREAM_UNSUPPORTED;
+}
+
 static void priv_destructor(void *ptr)
 {
     struct priv *p = ptr;
@@ -915,6 +955,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     p->content_size = -1;
     p->buffer_size = p->opts->buffer_size;
     p->buffer = talloc_size(p, p->buffer_size);
+    p->icy = mp_icy_new(p);
 
     if (args->special_arg) {
         const struct curl_open_args *oa = args->special_arg;
@@ -964,6 +1005,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     s->fill_buffer = curl_fill_buffer;
     s->seek = p->seekable ? curl_seek : NULL;
     s->get_size = curl_get_size;
+    s->control = curl_control;
     s->close = curl_close;
     s->pos = p->request_start;
 
