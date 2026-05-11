@@ -60,38 +60,33 @@ static int do_action(const struct m_property *prop_list, const char *name,
 
 static int m_property_multiply(struct mp_log *log,
                                const struct m_property *prop_list,
-                               const char *property, double f, void *ctx)
+                               const char *property, double f, void *ctx,
+                               struct m_option *opt)
 {
     union m_option_value val = m_option_value_default;
-    struct m_option opt = {0};
     int r;
 
     if (!log)
         return M_PROPERTY_ERROR;
-    r = m_property_do(log, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
-                      &opt, ctx);
-    if (r != M_PROPERTY_OK)
-        return r;
-    mp_assert(opt.type);
 
-    if (!opt.type->multiply)
+    if (!opt->type->multiply)
         return M_PROPERTY_NOT_IMPLEMENTED;
 
     r = m_property_do(log, prop_list, property, M_PROPERTY_GET, &val, ctx);
     if (r != M_PROPERTY_OK)
         return r;
-    opt.type->multiply(&opt, &val, f);
+    opt->type->multiply(opt, &val, f);
     r = m_property_do(log, prop_list, property, M_PROPERTY_SET, &val, ctx);
-    m_option_free(&opt, &val);
+    m_option_free(opt, &val);
     return r;
 }
 
 static int m_property_switch(struct mp_log *log,
                              const struct m_property *prop_list,
-                             const char *property, void *arg, void *ctx)
+                             const char *property, void *arg, void *ctx,
+                             struct m_option *opt)
 {
     union m_option_value val = m_option_value_default;
-    struct m_option opt = {0};
     int r;
 
     if (!log)
@@ -101,18 +96,13 @@ static int m_property_switch(struct mp_log *log,
         M_PROPERTY_NOT_IMPLEMENTED)
         return r;
     // Fallback to m_option
-    r = m_property_do(log, prop_list, property, M_PROPERTY_GET_CONSTRICTED_TYPE,
-                      &opt, ctx);
-    if (r <= 0)
-        return r;
-    mp_assert(opt.type);
-    if (!opt.type->add)
+    if (!opt->type->add)
         return M_PROPERTY_NOT_IMPLEMENTED;
     if ((r = do_action(prop_list, property, M_PROPERTY_GET, &val, ctx)) <= 0)
         return r;
-    opt.type->add(&opt, &val, sarg->inc, sarg->wrap);
+    opt->type->add(opt, &val, sarg->inc, sarg->wrap);
     r = do_action(prop_list, property, M_PROPERTY_SET, &val, ctx);
-    m_option_free(&opt, &val);
+    m_option_free(opt, &val);
     return r;
 }
 
@@ -172,10 +162,10 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return m_property_do(log, prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
     }
     case M_PROPERTY_MULTIPLY: {
-        return m_property_multiply(log, prop_list, name, *(double *)arg, ctx);
+        return m_property_multiply(log, prop_list, name, *(double *)arg, ctx, &opt);
     }
     case M_PROPERTY_SWITCH: {
-        return m_property_switch(log, prop_list, name, arg, ctx);
+        return m_property_switch(log, prop_list, name, arg, ctx, &opt);
     }
     case M_PROPERTY_GET_CONSTRICTED_TYPE: {
         r = do_action(prop_list, name, action, arg, ctx);
