@@ -1078,15 +1078,15 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_render_params params = pars->params;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
-    bool cache_frame = will_redraw || frame->still;
+    bool cache_frame = will_redraw || frame->still || p->paused;
     bool can_interpolate = opts->interpolation && frame->display_synced &&
-                           !frame->still && frame->num_frames > 1;
+                           !frame->still && frame->num_frames > 1 && !p->paused;
     double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
     params.preserve_mixing_cache = p->next_opts->inter_preserve && !frame->still;
-    if (frame->still)
+    if (frame->still || p->paused)
         params.frame_mixer = NULL;
 
     if (frame->current && frame->current->params.vflip) {
