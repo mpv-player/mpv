@@ -138,6 +138,13 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     if (r <= 0)
         return r;
     mp_assert(opt.type);
+    // Make sure dynamic range from properties with M_PROPERTY_GET_CONSTRICTED_TYPE is applied
+    struct m_option copt = {0};
+    r = do_action(prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE, &copt, ctx);
+    if (r == M_PROPERTY_OK) {
+        opt.min = copt.min;
+        opt.max = copt.max;
+    }
 
     switch (action) {
     case M_PROPERTY_FIXED_LEN_PRINT:
