@@ -3539,6 +3539,34 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT: {
+        struct sub_lines *lines = sub_get_lines(sub);
+        if (!lines)
+            return M_PROPERTY_UNAVAILABLE;
+
+        char *res = talloc_strdup(NULL, "");
+        double time_pos = get_playback_time(mpctx);
+        int pos = 0;
+
+        for (int i = 0; i < lines->num_entries; i++) {
+            struct sub_line *line = &lines->entries[i];
+            const char *reset = "";
+
+            if (line->start <= time_pos && line->end > time_pos) {
+                res = append_selected_style(mpctx, res);
+                reset = get_style_reset(mpctx);
+            }
+
+            res = talloc_asprintf_append(res, "%s%s\n", line->text, reset);
+
+            if (line->start <= time_pos && i)
+                pos += count_lines(lines->entries[i - 1].text);
+        }
+
+        *(char **)arg = cut_osd_list(mpctx, "Subtitle lines", res, pos);
+        talloc_free(lines);
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
