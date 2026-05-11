@@ -2618,7 +2618,7 @@ local function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = state.duration ~= nil
+    ne.visible = state.duration and state.duration > 0
     ne.content = function ()
         if state.rightTC_trem then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
