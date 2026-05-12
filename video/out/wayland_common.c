@@ -3190,7 +3190,7 @@ static bool create_input(struct vo_wayland_state *wl)
     return 0;
 }
 
-static int create_viewports(struct vo_wayland_state *wl)
+static bool create_viewports(struct vo_wayland_state *wl)
 {
     wl->viewport = wp_viewporter_get_viewport(wl->viewporter, wl->surface);
     wl->cursor_viewport = wp_viewporter_get_viewport(wl->viewporter, wl->cursor_surface);
@@ -3199,9 +3199,9 @@ static int create_viewports(struct vo_wayland_state *wl)
 
     if (!wl->viewport || !wl->osd_viewport || !wl->video_viewport) {
         MP_ERR(wl, "failed to create viewport interfaces!\n");
-        return 1;
+        return false;
     }
-    return 0;
+    return true;
 }
 
 static int create_xdg_surface(struct vo_wayland_state *wl)
@@ -4542,7 +4542,7 @@ bool vo_wayland_init(struct vo *vo)
     }
 
     /* Can't be initialized during registry due to multi-protocol dependence */
-    if (create_viewports(wl))
+    if (!create_viewports(wl))
         goto err;
 
     if (create_xdg_surface(wl))
