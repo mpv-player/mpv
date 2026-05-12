@@ -1738,7 +1738,7 @@ static void surface_handle_preferred_buffer_scale(void *data,
     wl->pending_scaling = scale * WAYLAND_SCALE_FACTOR;
     wl->scale_configured = true;
     MP_VERBOSE(wl, "Obtained preferred scale, %f, from the compositor.\n",
-               wl->scaling / WAYLAND_SCALE_FACTOR);
+               wl->pending_scaling / WAYLAND_SCALE_FACTOR);
     wl->pending_vo_events |= VO_EVENT_DPI;
     wl->need_rescale = true;
 
