@@ -314,7 +314,7 @@ static bool check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
 static int get_mods(struct vo_wayland_seat *seat);
 static int handle_round(int scale, int n);
 static int set_cursor_visibility(struct vo_wayland_seat *s, bool on);
-static int spawn_cursor(struct vo_wayland_state *wl);
+static bool spawn_cursor(struct vo_wayland_state *wl);
 
 static void add_feedback(struct vo_wayland_feedback_pool *fback_pool,
                          struct wp_presentation_feedback *fback);
@@ -3843,7 +3843,7 @@ static int set_cursor_visibility(struct vo_wayland_seat *s, bool on)
         if (s->wl->cursor_shape_manager) {
             set_cursor_shape(s);
         } else {
-            if (spawn_cursor(wl))
+            if (!spawn_cursor(wl))
                 return VO_FALSE;
             struct wl_cursor_image *img = wl->default_cursor->images[0];
             struct wl_buffer *buffer = wl_cursor_image_get_buffer(img);
@@ -3988,10 +3988,10 @@ static bool single_output_spanned(struct vo_wayland_state *wl)
     return wl->current_output && outputs == 1;
 }
 
-static int spawn_cursor(struct vo_wayland_state *wl)
+static bool spawn_cursor(struct vo_wayland_state *wl)
 {
     if (wl->allocated_cursor_scale == wl->scaling) {
-        return 0;
+        return true;
     } else if (wl->cursor_theme) {
         wl_cursor_theme_destroy(wl->cursor_theme);
     }
@@ -4011,7 +4011,7 @@ static int spawn_cursor(struct vo_wayland_state *wl)
                                             wl->shm);
     if (!wl->cursor_theme) {
         MP_ERR(wl, "Unable to load cursor theme!\n");
-        return 1;
+        return false;
     }
 
     wl->default_cursor = wl_cursor_theme_get_cursor(wl->cursor_theme, "default");
@@ -4020,12 +4020,12 @@ static int spawn_cursor(struct vo_wayland_state *wl)
 
     if (!wl->default_cursor) {
         MP_ERR(wl, "Unable to get default and left_ptr XCursor from theme!\n");
-        return 1;
+        return false;
     }
 
     wl->allocated_cursor_scale = wl->scaling;
 
-    return 0;
+    return true;
 }
 
 static void toggle_fullscreen(struct vo_wayland_state *wl)
