@@ -3184,10 +3184,10 @@ static bool create_input(struct vo_wayland_state *wl)
 
     if (!wl->xkb_context) {
         MP_ERR(wl, "failed to initialize input: check xkbcommon\n");
-        return 1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 static bool create_viewports(struct vo_wayland_state *wl)
@@ -4503,7 +4503,7 @@ bool vo_wayland_init(struct vo *vo)
         goto err;
     }
 
-    if (create_input(wl))
+    if (!create_input(wl))
         goto err;
 
 #if HAVE_WAYLAND_PROTOCOLS_1_48
