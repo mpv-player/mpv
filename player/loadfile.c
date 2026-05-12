@@ -1051,8 +1051,12 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
     struct subfn *list = find_external_files(mpctx->global, mpctx->filename, opts);
     talloc_steal(tmp, list);
 
-    int sc[STREAM_TYPE_COUNT] = {0};
+    // demux_edl allocates metadata track with type set to STREAM_TYPE_COUNT,
+    // count this too, even though it won't have any effect on the selection.
+    int sc[STREAM_TYPE_COUNT + 1] = {0};
     for (int n = 0; n < mpctx->num_tracks; n++) {
+        mp_assert(mpctx->tracks[n]->type >= 0);
+        mp_assert(mpctx->tracks[n]->type <= STREAM_TYPE_COUNT);
         if (!mpctx->tracks[n]->attached_picture)
             sc[mpctx->tracks[n]->type]++;
     }
