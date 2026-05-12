@@ -2777,16 +2777,16 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->subcompositor = wl_registry_bind(reg, id, &wl_subcompositor_interface, ver);
     }
 
-    if (!strcmp (interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
+    if (!strcmp(interface, zwp_linux_dmabuf_v1_interface.name) && (ver >= 4) && found++) {
         ver = MPMIN(ver, 5);
         wl->dmabuf = wl_registry_bind(reg, id, &zwp_linux_dmabuf_v1_interface, ver);
         wl->dmabuf_feedback = zwp_linux_dmabuf_v1_get_default_feedback(wl->dmabuf);
         zwp_linux_dmabuf_feedback_v1_add_listener(wl->dmabuf_feedback, &dmabuf_feedback_listener, wl);
     }
 
-    if (!strcmp (interface, wp_viewporter_interface.name) && found++) {
+    if (!strcmp(interface, wp_viewporter_interface.name) && found++) {
         ver = 1;
-        wl->viewporter = wl_registry_bind (reg, id, &wp_viewporter_interface, ver);
+        wl->viewporter = wl_registry_bind(reg, id, &wp_viewporter_interface, ver);
     }
 
     if (!strcmp(interface, wl_data_device_manager_interface.name) && (ver >= 3) && found++) {
