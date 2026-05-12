@@ -4924,7 +4924,8 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->display)
         wl_display_disconnect(wl->display);
 
-    munmap(wl->compositor_format_map, wl->compositor_format_size);
+    if (wl->compositor_format_size)
+        munmap(wl->compositor_format_map, wl->compositor_format_size);
 
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
