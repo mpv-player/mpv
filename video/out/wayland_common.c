@@ -3516,11 +3516,10 @@ static void remove_tablet_pad(struct vo_wayland_tablet_pad *tablet_pad)
 static void remove_tablet_tool(struct vo_wayland_tablet_tool *tablet_tool)
 {
     struct vo_wayland_state *wl = tablet_tool->wl;
-    struct vo_wayland_seat *seat = tablet_tool->seat;
     MP_VERBOSE(wl, "Removing tablet tool %p\n", tablet_tool->tablet_tool);
 
     wl_list_remove(&tablet_tool->link);
-    if (seat->cursor_shape_device)
+    if (tablet_tool->cursor_shape_device)
         wp_cursor_shape_device_v1_destroy(tablet_tool->cursor_shape_device);
     zwp_tablet_tool_v2_destroy(tablet_tool->tablet_tool);
     talloc_free(tablet_tool);
