@@ -144,8 +144,11 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
         track->vo_c = NULL;
         if (vo_c->dec_src)
             mp_assert(track->dec->f->pins[0] == vo_c->dec_src);
-        talloc_free(track->dec->f);
-        track->dec = NULL;
+        // This is NULL if a sh_stream_group's filter fails.
+        if (track->dec) {
+            talloc_free(track->dec->f);
+            track->dec = NULL;
+        }
     }
 
     if (vo_c->filter_src)

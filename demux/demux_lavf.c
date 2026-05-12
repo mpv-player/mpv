@@ -1096,65 +1096,92 @@ static void build_editions(demuxer_t *demuxer)
 
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 22, 100)
-// Correct the display dimensions of the primary tile stream to the composed
-// image size, and mark the remaining tile streams as dependent.
-static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stg)
+// Synthesize a virtual track that assembles an AVStreamGroupTileGrid.
+static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_group)
 {
     lavf_priv_t *priv = demuxer->priv;
-    AVStreamGroupTileGrid *tile_grid = stg->params.tile_grid;
+    AVStreamGroupTileGrid *grid = stream_group->params.tile_grid;
 
-    // AV_DISPOSITION_DEFAULT identifies the intended presentation stream.
-    AVStream *primary_st = NULL;
-    struct sh_stream *primary_sh = NULL;
-    for (unsigned i = 0; i < stg->nb_streams; i++) {
-        AVStream *st = stg->streams[i];
-        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+    MP_VERBOSE(demuxer, "Tile grid group: %u tiles -> %dx%d",
+               grid->nb_tiles, grid->width, grid->height);
+
+    struct sh_stream *vsh = demux_alloc_sh_stream(STREAM_VIDEO);
+    vsh->group = talloc_zero(vsh, struct sh_stream_group);
+    MP_TARRAY_GROW(vsh->group, vsh->group->members, grid->nb_tiles);
+    char *graph = talloc_strdup(vsh->group, "");
+
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        unsigned int group_idx = grid->offsets[i].idx;
+        if (group_idx >= stream_group->nb_streams) {
+            MP_ERR(demuxer, "Tile %d references out-of-range group "
+                   "stream index %u (group has %u streams) – skipping.\n",
+                   i, group_idx, stream_group->nb_streams);
             continue;
-        struct sh_stream *sh = priv->streams[st->index]->sh;
-        if (!sh)
-            continue;
-        if (st->disposition & AV_DISPOSITION_DEFAULT) {
-            primary_st = st;
-            primary_sh = sh;
-            break;
         }
-        if (!primary_st) {
-            primary_st = st;
-            primary_sh = sh;
+
+        if (grid->offsets[i].horizontal >= grid->coded_width ||
+            grid->offsets[i].vertical   >= grid->coded_height) {
+            MP_WARN(demuxer, "Tile grid offsets exceed coded canvas (%dx%d) -"
+                    "ignoring tile grid.\n",
+                    grid->coded_width, grid->coded_height);
+            goto error;
         }
+
+        int ff_idx = stream_group->streams[group_idx]->index;
+        if (ff_idx >= 0 && ff_idx < priv->num_streams && priv->streams[ff_idx] &&
+            priv->streams[ff_idx]->sh) {
+            vsh->group->members[vsh->group->num_members++] = priv->streams[ff_idx]->sh;
+        } else {
+            MP_WARN(demuxer, "Tile grid offset %d is not associated to any stream.\n", i);
+            goto error;
+        }
+
+        graph = talloc_asprintf_append(graph, "[%d]", i);
     }
 
-    if (!primary_sh) {
-        MP_WARN(demuxer, "Tile grid stream group %u has no usable streams.\n",
-                stg->index);
-        return;
+    graph = talloc_asprintf_append(graph, "xstack=inputs=%d:layout=", grid->nb_tiles);
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        if (i > 0)
+            graph = talloc_asprintf_append(graph, "|");
+        graph = talloc_asprintf_append(graph, "%d_%d",
+                                       grid->offsets[i].horizontal, grid->offsets[i].vertical);
+    }
+    graph = talloc_asprintf_append(graph,
+                                   ":fill=0x%02X%02X%02X@0x%02X",
+                                   grid->background[0], grid->background[1],
+                                   grid->background[2], grid->background[3]);
+
+    if (grid->coded_width != grid->width || grid->coded_height != grid->height) {
+        graph = talloc_asprintf_append(graph, ",crop=w=%d:h=%d:x=%d:y=%d",
+                                       grid->width, grid->height,
+                                       grid->horizontal_offset, grid->vertical_offset);
     }
 
-    MP_VERBOSE(demuxer, "Tile grid group: %u tiles, canvas %dx%d, "
-               "visible %dx%d at offset (%d,%d)\n",
-               tile_grid->nb_tiles,
-               tile_grid->coded_width, tile_grid->coded_height,
-               tile_grid->width, tile_grid->height,
-               tile_grid->horizontal_offset, tile_grid->vertical_offset);
+    graph = talloc_asprintf_append(graph, "[out]");
+    vsh->group->lavfi_graph = graph;
 
-    // width/height is the final visible region; coded_width/coded_height is
-    // the full canvas including padding — use the former for presentation.
-    primary_sh->codec->disp_w = tile_grid->width;
-    primary_sh->codec->disp_h = tile_grid->height;
+    struct sh_stream *primary_sh = vsh->group->members[0];
+    vsh->codec->fps    = primary_sh->codec->fps;
+    vsh->image         = primary_sh->image;
+    vsh->still_image   = primary_sh->still_image;
+    vsh->default_track = true;
+    vsh->codec->codec  = primary_sh->codec->codec;
+    vsh->codec->codec_desc = primary_sh->codec->codec_desc;
+    vsh->codec->disp_w = grid->width;
+    vsh->codec->disp_h = grid->height;
+    vsh->title = talloc_asprintf(vsh, "Tile grid (%dx%d, %d tiles)",
+                                 grid->width, grid->height,
+                                 grid->nb_tiles);
 
-    if (stg->metadata)
-        mp_tags_copy_from_av_dictionary(primary_sh->tags, stg->metadata);
+    if (stream_group->metadata)
+        mp_tags_copy_from_av_dictionary(vsh->tags, stream_group->metadata);
 
-    for (unsigned i = 0; i < stg->nb_streams; i++) {
-        AVStream *st = stg->streams[i];
-        if (st == primary_st)
-            continue;
-        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
-            continue;
-        struct sh_stream *sh = priv->streams[st->index]->sh;
-        if (sh)
-            sh->dependent_track = true;
-    }
+    demux_add_sh_stream(demuxer, vsh);
+
+    return;
+
+error:
+    talloc_free(vsh);
 }
 #endif
 
