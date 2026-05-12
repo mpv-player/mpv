@@ -66,9 +66,7 @@ static int m_property_multiply(struct mp_log *log,
     union m_option_value val = m_option_value_default;
     int r;
 
-    if (!log)
-        return M_PROPERTY_ERROR;
-
+    mp_require(log);
     if (!opt->type->multiply)
         return M_PROPERTY_NOT_IMPLEMENTED;
 
@@ -89,8 +87,7 @@ static int m_property_switch(struct mp_log *log,
     union m_option_value val = m_option_value_default;
     int r;
 
-    if (!log)
-        return M_PROPERTY_ERROR;
+    mp_require(log);
     struct m_property_switch_arg *sarg = arg;
     if ((r = do_action(prop_list, property, M_PROPERTY_SWITCH, arg, ctx)) !=
         M_PROPERTY_NOT_IMPLEMENTED)
