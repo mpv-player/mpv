@@ -3204,7 +3204,7 @@ static bool create_viewports(struct vo_wayland_state *wl)
     return true;
 }
 
-static int create_xdg_surface(struct vo_wayland_state *wl)
+static bool create_xdg_surface(struct vo_wayland_state *wl)
 {
     wl->xdg_surface = xdg_wm_base_get_xdg_surface(wl->wm_base, wl->surface);
     xdg_surface_add_listener(wl->xdg_surface, &xdg_surface_listener, wl);
@@ -3214,7 +3214,7 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
 
     if (!wl->xdg_surface || !wl->xdg_toplevel) {
         MP_ERR(wl, "failed to create xdg_surface and xdg_toplevel!\n");
-        return 1;
+        return false;
     }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_48
@@ -3224,7 +3224,7 @@ static int create_xdg_surface(struct vo_wayland_state *wl)
     }
 #endif
 
-    return 0;
+    return true;
 }
 
 static void destroy_offer(struct vo_wayland_data_offer *o)
@@ -4545,7 +4545,7 @@ bool vo_wayland_init(struct vo *vo)
     if (!create_viewports(wl))
         goto err;
 
-    if (create_xdg_surface(wl))
+    if (!create_xdg_surface(wl))
         goto err;
 
     if (wl->xdg_activation) {
