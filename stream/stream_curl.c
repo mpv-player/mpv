@@ -722,6 +722,7 @@ static void setup_curl(struct priv *p)
     if (p->net_opts->http_proxy && p->net_opts->http_proxy[0])
         curl_easy_setopt(c, CURLOPT_PROXY, p->net_opts->http_proxy);
 
+    curl_easy_setopt(c, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_NATIVE_CA);
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, p->net_opts->tls_verify ? 1L : 0L);
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, p->net_opts->tls_verify ? 2L : 0L);
     if (p->net_opts->tls_ca_file) {
