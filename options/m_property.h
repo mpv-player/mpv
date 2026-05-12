@@ -97,6 +97,9 @@ enum mp_property_action {
     // Most properties do not implement this.
     //  arg: (ignored)
     M_PROPERTY_DELETE,
+
+    // Total number of actions.
+    M_PROPERTY_MAX_ACTION,
 };
 
 // Argument for M_PROPERTY_SWITCH

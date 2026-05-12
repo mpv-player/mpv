@@ -121,16 +121,23 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     int r;
 
     struct m_option opt = {0};
-    r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
-    if (r <= 0)
-        return r;
-    mp_assert(opt.type);
-    // Make sure dynamic range from properties with M_PROPERTY_GET_CONSTRICTED_TYPE is applied
-    struct m_option copt = {0};
-    r = do_action(prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE, &copt, ctx);
-    if (r == M_PROPERTY_OK) {
-        opt.min = copt.min;
-        opt.max = copt.max;
+    bool get_opt_required[M_PROPERTY_MAX_ACTION] = {
+        [M_PROPERTY_FIXED_LEN_PRINT] = true, [M_PROPERTY_PRINT] = true, [M_PROPERTY_GET_STRING] = true,
+        [M_PROPERTY_MULTIPLY] = true, [M_PROPERTY_SWITCH] = true,
+        [M_PROPERTY_GET_NODE] = true, [M_PROPERTY_SET_NODE] = true,
+    };
+    if (get_opt_required[action]) {
+        r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
+        if (r <= 0)
+            return r;
+        mp_assert(opt.type);
+        // Make sure dynamic range from properties with M_PROPERTY_GET_CONSTRICTED_TYPE is applied
+        struct m_option copt = {0};
+        r = do_action(prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE, &copt, ctx);
+        if (r == M_PROPERTY_OK) {
+            opt.min = copt.min;
+            opt.max = copt.max;
+        }
     }
 
     switch (action) {
