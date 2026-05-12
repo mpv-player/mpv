@@ -309,7 +309,7 @@ struct vo_wayland_preferred_description_info {
 
 static bool single_output_spanned(struct vo_wayland_state *wl);
 
-static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
+static bool check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edges);
 static int get_mods(struct vo_wayland_seat *seat);
 static int handle_round(int scale, int n);
@@ -3108,11 +3108,11 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
     }
 }
 
-static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
+static bool check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
                             enum xdg_toplevel_resize_edge *edges)
 {
     if (wl->opts->fullscreen || wl->opts->window_maximized)
-        return 0;
+        return false;
 
     int pos[2] = { wl->mouse_x, wl->mouse_y };
     *edges = 0;
@@ -3127,7 +3127,7 @@ static int check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
     if (pos[1] >= (mp_rect_h(wl->geometry) - edge_pixels))
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
 
-    return *edges;
+    return *edges != 0;
 }
 
 static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
