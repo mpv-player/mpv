@@ -1922,6 +1922,7 @@ if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
 endif
 
 summary({'cocoa': features['cocoa'] and features['swift'],
+         'curl': features['libcurl'],
          'd3d11': features['d3d11'],
          'drm': features['drm'],
          'javascript': features['javascript'],
