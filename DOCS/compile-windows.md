@@ -76,7 +76,7 @@ which bootstraps a MinGW-w64 toolchain and builds mpv along with its dependencie
    cat <<EOF > subprojects/ffmpeg.wrap
    [wrap-git]
    url = https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git
-   revision = meson-8.0
+   revision = meson-8.1
    depth = 1
    [provide]
    libavcodec = libavcodec_dep
