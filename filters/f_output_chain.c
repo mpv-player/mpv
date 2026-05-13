@@ -71,6 +71,7 @@ struct mp_user_filter {
 
     bool failed;
     bool error_eof_sent;
+    bool in_eof;
 };
 
 static void update_output_caps(struct chain *p)
@@ -169,7 +170,11 @@ static void user_wrapper_process(struct mp_filter *f)
     }
 
     if (u->failed) {
-        if (u == p->convert_wrapper) {
+        // The convert_wrapper failure is fatal so we must signal EOF. Similarly,
+        // if this wrapper forwarded EOF into the inner filter, that EOF may
+        // be lost. Reset filter may have discarded this frame from failed filter.
+        // Synthesize EOF so downstream doesn't stall indefinitely.
+        if (u == p->convert_wrapper || u->in_eof) {
             if (mp_pin_in_needs_data(f->ppins[1])) {
                 if (!u->error_eof_sent)
                     mp_pin_in_write(f->ppins[1], MP_EOF_FRAME);
@@ -190,6 +195,9 @@ static void user_wrapper_process(struct mp_filter *f)
         double pts = mp_frame_get_pts(frame);
         if (pts != MP_NOPTS_VALUE)
             u->last_in_pts = pts;
+
+        if (frame.type == MP_FRAME_EOF)
+            u->in_eof = true;
 
         mp_pin_in_write(u->f->pins[0], frame);
     }
@@ -217,6 +225,7 @@ static void user_wrapper_reset(struct mp_filter *f)
     struct mp_user_filter *u = f->priv;
 
     u->error_eof_sent = false;
+    u->in_eof = false;
     u->last_in_pts = u->last_out_pts = MP_NOPTS_VALUE;
 }
 
