@@ -1264,8 +1264,12 @@ static bool init_group_decoder(struct priv *p, struct mp_filter *public_f)
     }
 
     mp_require(!public_f->stream_info);
-    struct mp_stream_info *no_hwdec = talloc_zero(public_f, struct mp_stream_info);
-    public_f->stream_info = no_hwdec;
+    struct mp_stream_info *parent_info = mp_filter_find_stream_info(public_f);
+    struct mp_stream_info *group_info = talloc_zero(p, struct mp_stream_info);
+    if (parent_info)
+        *group_info = *parent_info;
+    group_info->force_swdec = true;
+    public_f->stream_info = group_info;
 
     enum mp_frame_type ftype;
     switch (p->header->type) {
