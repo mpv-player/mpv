@@ -1263,6 +1263,10 @@ static bool init_group_decoder(struct priv *p, struct mp_filter *public_f)
         return false;
     }
 
+    mp_require(!public_f->stream_info);
+    struct mp_stream_info *no_hwdec = talloc_zero(public_f, struct mp_stream_info);
+    public_f->stream_info = no_hwdec;
+
     enum mp_frame_type ftype;
     switch (p->header->type) {
     case STREAM_VIDEO: ftype = MP_FRAME_VIDEO; break;
