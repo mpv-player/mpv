@@ -308,6 +308,11 @@ local function select_subtitle_line(secondary)
             items[#items + 1] = format_time(line.start, duration) .. " " .. text
             times[#times + 1] = line.start
         end
+
+        if line.text == "" then
+            items[#items + 1] = format_time(line.start, duration)
+            times[#times + 1] = line.start
+        end
     end
 
     input.select({
