@@ -108,11 +108,22 @@ function gettar {
     local dname="$2"
     [ -z "$dname" ] && dname="${fname%.tar.*}"
     [ -d "$dname" ] && return 0
-    $wget "$1" -O "$fname"
+    local cachename="$(md5sum <<<"$1" | cut -d " " -f 1)"
+    if [[ -n "$DOWNLOAD_CACHE" && -s "$DOWNLOAD_CACHE/$cachename" ]]; then
+        cp -v "$DOWNLOAD_CACHE/$cachename" "$fname"
+        cachename=
+    else
+        $wget "$1" -O "$fname"
+    fi
     tar -xaf "$fname"
     if [ ! -d "$dname" ]; then
         echo "Error: expected $fname to extract to $dname but it was not created" >&2
         return 2
+    fi
+    if [[ -n "$DOWNLOAD_CACHE" && -n "$cachename" ]]; then
+        # assume successful extraction means the file was fine
+        mkdir -p "$DOWNLOAD_CACHE"
+        cp -v "$fname" "$DOWNLOAD_CACHE/$cachename"
     fi
 }
 

@@ -40,6 +40,7 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 500M
+      DOWNLOAD_CACHE: ${{ github.workspace }}/.ccache/downloads
       TARGET: ${{ matrix.arch }}-w64-mingw32
       RUST_TARGET: ${{ matrix.arch }}-pc-windows-gnu
     strategy:
