@@ -139,6 +139,7 @@ struct hwdec_opts {
     int software_fallback;
     char **hwdec_api;
     char *hwdec_codecs;
+    bool hwdec_decode_images;
     int hwdec_image_format;
     int hwdec_extra_frames;
     int hwdec_threads;
@@ -150,6 +151,8 @@ const struct m_sub_options hwdec_conf = {
             .help = hwdec_opt_help,
             .flags = M_OPT_OPTIONAL_PARAM | M_OPT_ALLOW_NO | UPDATE_HWDEC},
         {"hwdec-codecs", OPT_STRING(hwdec_codecs),
+            .flags = UPDATE_HWDEC},
+        {"hwdec-decode-images", OPT_BOOL(hwdec_decode_images),
             .flags = UPDATE_HWDEC},
         {"hwdec-extra-frames", OPT_INT(hwdec_extra_frames), M_RANGE(0, 256),
             .flags = UPDATE_VD},
@@ -526,6 +529,10 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
         if (!hwdec_requested) {
             MP_VERBOSE(vd, "No hardware decoding requested.\n");
+            break;
+        } else if (ctx->codec->image && !ctx->hwdec_opts->hwdec_decode_images) {
+            MP_VERBOSE(vd, "Not trying to use hardware decoding: source is an "
+                       "image.\n");
             break;
         } else if (!hwdec_codec_allowed(vd, codec)) {
             MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
