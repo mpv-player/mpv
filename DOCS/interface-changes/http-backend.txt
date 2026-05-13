@@ -1,1 +1,1 @@
-add libcurl-based stream backend (http, https, ftp, ftps), with new options `--curl-http-version`, `--curl-max-redirects`, `--curl-max-retries`, `--curl-connect-timeout`, `--curl-buffer-size` and `--curl-max-request-size`
+add libcurl-based stream backend (http, https, ftp, ftps), with new options `--curl-enabled`, `--curl-http-version`, `--curl-max-redirects`, `--curl-max-retries`, `--curl-connect-timeout`, `--curl-buffer-size` and `--curl-max-request-size`

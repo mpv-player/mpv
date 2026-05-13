@@ -65,6 +65,7 @@ static const struct curl_scheme curl_schemes[] = {
 };
 
 struct curl_opts {
+    bool enabled;
     int http_version;
     int max_redirects;
     int max_retries;
@@ -84,6 +85,7 @@ struct curl_opts {
 #define OPT_BASE_STRUCT struct curl_opts
 const struct m_sub_options curl_conf = {
     .opts = (const struct m_option[]) {
+        {"enabled", OPT_BOOL(enabled)},
         {"http-version", OPT_CHOICE(http_version,
             {"auto", CURL_HTTP_VERSION_NONE},
             {"1.0", CURL_HTTP_VERSION_1_0},
@@ -104,6 +106,7 @@ const struct m_sub_options curl_conf = {
         {0}
     },
     .defaults = &(const struct curl_opts) {
+        .enabled = true,
         .http_version = CURL_HTTP_VERSION_NONE,
         .max_redirects = 16,
         .max_retries = 5,
@@ -844,6 +847,10 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
         return STREAM_ERROR;
     }
 
+    struct curl_opts *opts = mp_get_config_group(s, s->global, &curl_conf);
+    if (!opts->enabled)
+        return STREAM_NO_MATCH;
+
     struct priv *p = talloc_zero(s, struct priv);
     s->priv = p;
     talloc_set_destructor(p, priv_destructor);
@@ -852,7 +859,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     p->global = s->global;
     p->ctx = s->global->curl;
     p->s = s;
-    p->opts = mp_get_config_group(p, s->global, &curl_conf);
+    p->opts = talloc_steal(p, opts);
     p->net_opts = mp_get_config_group(p, s->global, &mp_network_conf);
     p->url = talloc_strdup(p, s->url);
     p->scheme = curl_scheme_lookup(bstr0(p->url));
@@ -1000,6 +1007,12 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
     // Check protocol early, to return ENOSYS and allow lavf to fallback.
     const struct curl_scheme *cs = curl_scheme_lookup(bstr0(url));
     if (!cs || !curl_has_proto(cs->scheme))
+        return AVERROR(ENOSYS);
+
+    struct curl_opts *opts = mp_get_config_group(NULL, demuxer->global, &curl_conf);
+    bool enabled = opts->enabled;
+    talloc_free(opts);
+    if (!enabled)
         return AVERROR(ENOSYS);
 
     // The context is required to be initialized in global.

@@ -5744,6 +5744,9 @@ implementation instead.
 To inspect libcurl's debug output (requests, response headers,
 TLS/connection diagnostics), set ``--msg-level=curl=trace``.
 
+``--curl-enabled=<yes|no>``
+    Enable the libcurl-based network backend (default: ``yes``).
+
 ``--curl-http-version=<auto|1.0|1.1|2|2tls|2-prior-knowledge|3|3only>``
     Select the maximum HTTP protocol version libcurl is allowed to negotiate.
     If libcurl was built without HTTP/3 support, it will fallback to ``auto``.
