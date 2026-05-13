@@ -5747,6 +5747,11 @@ TLS/connection diagnostics), set ``--msg-level=curl=trace``.
 ``--curl-enabled=<yes|no>``
     Enable the libcurl-based network backend (default: ``yes``).
 
+    Defaults to ``no`` with libavformat < 62.15.101, which has a nested IO
+    cleanup bug that can cause crashes or memory leaks. The issue happens only
+    on transfer failures or aborts, can be enabled if you don't mind possible
+    stability issues.
+
 ``--curl-http-version=<auto|1.0|1.1|2|2tls|2-prior-knowledge|3|3only>``
     Select the maximum HTTP protocol version libcurl is allowed to negotiate.
     If libcurl was built without HTTP/3 support, it will fallback to ``auto``.

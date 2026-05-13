@@ -23,6 +23,7 @@
 #include <curl/curl.h>
 
 #include <libavformat/avio.h>
+#include <libavformat/version.h>
 #include <libavutil/avstring.h>
 #include <libavutil/error.h>
 #include <libavutil/mem.h>
@@ -106,7 +107,9 @@ const struct m_sub_options curl_conf = {
         {0}
     },
     .defaults = &(const struct curl_opts) {
-        .enabled = true,
+        // Older lavf has a bug with nested IO cleanup, disable by default.
+        // <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/23082>
+        .enabled = LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 15, 101),
         .http_version = CURL_HTTP_VERSION_NONE,
         .max_redirects = 16,
         .max_retries = 5,
