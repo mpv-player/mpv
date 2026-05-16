@@ -561,38 +561,39 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-static bool hwdec_reconfig(struct priv *p, struct ra_hwdec *hwdec,
+static bool hwdec_reconfig(struct priv *p, struct ra_hwdec_mapper **mapper,
+                           struct timer_pool **timer, struct ra_hwdec *hwdec,
                            const struct mp_image_params *par)
 {
-    if (p->hwdec_mapper) {
-        if (mp_image_params_static_equal(par, &p->hwdec_mapper->src_params)) {
-            p->hwdec_mapper->src_params.repr.dovi = par->repr.dovi;
-            p->hwdec_mapper->dst_params.repr.dovi = par->repr.dovi;
-            p->hwdec_mapper->src_params.color.hdr = par->color.hdr;
-            p->hwdec_mapper->dst_params.color.hdr = par->color.hdr;
-            return p->hwdec_mapper;
+    if (*mapper) {
+        if (mp_image_params_static_equal(par, &(*mapper)->src_params)) {
+            (*mapper)->src_params.repr.dovi = par->repr.dovi;
+            (*mapper)->dst_params.repr.dovi = par->repr.dovi;
+            (*mapper)->src_params.color.hdr = par->color.hdr;
+            (*mapper)->dst_params.color.hdr = par->color.hdr;
+            return true;
         } else {
-            ra_hwdec_mapper_free(&p->hwdec_mapper);
-            timer_pool_destroy(p->hwdec_timer);
-            p->hwdec_timer = NULL;
+            ra_hwdec_mapper_free(mapper);
+            timer_pool_destroy(*timer);
+            *timer = NULL;
         }
     }
 
-    p->hwdec_mapper = ra_hwdec_mapper_create(hwdec, par);
-    if (!p->hwdec_mapper) {
+    *mapper = ra_hwdec_mapper_create(hwdec, par);
+    if (!*mapper) {
         MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
-        return NULL;
+        return false;
     }
-    p->hwdec_timer = timer_pool_create(p->ra_ctx->ra);
+    *timer = timer_pool_create(p->ra_ctx->ra);
 
-    return p->hwdec_mapper;
+    return true;
 }
 
-// For RAs not based on ra_pl, this creates a new pl_tex wrapper
-static pl_tex hwdec_get_tex(struct priv *p, int n)
+// For RAs not based on ra_pl, this creates a new pl_tex wrapper.
+static pl_tex hwdec_get_tex(struct priv *p, struct ra_hwdec_mapper *mapper, int n)
 {
-    struct ra_tex *ratex = p->hwdec_mapper->tex[n];
-    struct ra *ra = p->hwdec_mapper->ra;
+    struct ra_tex *ratex = mapper->tex[n];
+    struct ra *ra = mapper->ra;
     if (ra_pl_get(ra))
         return (pl_tex) ratex->priv;
 
@@ -630,12 +631,37 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
     return false;
 }
 
+// Fill `frame->num_planes` and per-plane component_mapping from an
+// hwdec-mapped imgfmt description.
+static void setup_hwdec_plane_mapping(struct pl_frame *frame,
+                                      const struct mp_imgfmt_desc *desc)
+{
+    frame->num_planes = desc->num_planes;
+    for (int n = 0; n < frame->num_planes; n++) {
+        struct pl_plane *plane = &frame->planes[n];
+        int *map = plane->component_mapping;
+        for (int c = 0; c < mp_imgfmt_desc_get_num_comps(desc); c++) {
+            if (desc->comps[c].plane != n)
+                continue;
+            // Sort by component offset
+            uint8_t offset = desc->comps[c].offset;
+            int index = plane->components++;
+            while (index > 0 && desc->comps[map[index - 1]].offset > offset) {
+                map[index] = map[index - 1];
+                index--;
+            }
+            map[index] = c;
+        }
+    }
+}
+
 static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (!hwdec_reconfig(p, fp->hwdec, &mpi->params))
+    if (!hwdec_reconfig(p, &p->hwdec_mapper, &p->hwdec_timer, fp->hwdec,
+                        &mpi->params))
         return false;
 
     stats_time_start(p->stats, "hwdec-map");
@@ -648,7 +674,7 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
     }
 
     for (int n = 0; n < frame->num_planes; n++) {
-        if (!(frame->planes[n].texture = hwdec_get_tex(p, n))) {
+        if (!(frame->planes[n].texture = hwdec_get_tex(p, p->hwdec_mapper, n))) {
             timer_pool_stop(p->hwdec_timer);
             stats_time_end(p->stats, "hwdec-map");
             return false;
@@ -692,6 +718,59 @@ static bool format_supported(struct vo *vo, int format, bool use_uint)
     return true;
 }
 
+static bool upload_planes_sw(struct vo *vo, pl_gpu gpu, struct mp_image *mpi,
+                             struct pl_frame *frame, pl_tex tex[4])
+{
+    struct priv *p = vo->priv;
+    struct pl_plane_data data[4] = {0};
+
+    // At this point, we know that the format is supported, query_format()
+    // makes sure of that. Just check if we should use UINT as a fallback.
+    bool use_uint = !format_supported(vo, mpi->imgfmt, false);
+    int planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt,
+                                        use_uint);
+    if (!planes)
+        return false;
+
+    frame->num_planes = planes;
+    for (int n = 0; n < planes; n++) {
+        struct pl_plane *plane = &frame->planes[n];
+        data[n].width = mp_image_plane_w(mpi, n);
+        data[n].height = mp_image_plane_h(mpi, n);
+        if (mpi->stride[n] < 0) {
+            data[n].pixels = mpi->planes[n] + (data[n].height - 1) * mpi->stride[n];
+            data[n].row_stride = -mpi->stride[n];
+            plane->flipped = true;
+        } else {
+            data[n].pixels = mpi->planes[n];
+            data[n].row_stride = mpi->stride[n];
+        }
+
+        pl_buf buf = get_dr_buf(p, data[n].pixels);
+        if (buf) {
+            data[n].buf = buf;
+            data[n].buf_offset = (uint8_t *) data[n].pixels - buf->data;
+            data[n].pixels = NULL;
+        }
+        // Keep the image alive until it's fully read.
+        if (gpu->limits.callbacks) {
+            data[n].callback = talloc_free;
+            data[n].priv = mp_image_new_ref(mpi);
+        }
+
+        if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
+            talloc_free(data[n].priv);
+            return false;
+        }
+
+        // Without async callback support, we have to poll...
+        if (!gpu->limits.callbacks && data[n].buf)
+            while (pl_buf_poll(gpu, data[n].buf, UINT64_MAX));
+    }
+
+    return true;
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -707,7 +786,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         // only reconfig the mapper here (potentially creating it) to access
         // `dst_params`. In practice, though, this should not matter unless the
         // image format changes mid-stream.
-        if (!hwdec_reconfig(p, fp->hwdec, &mpi->params)) {
+        if (!hwdec_reconfig(p, &p->hwdec_mapper, &p->hwdec_timer, fp->hwdec,
+                            &mpi->params)) {
             talloc_free(mpi);
             return false;
         }
@@ -745,86 +825,24 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(par.imgfmt);
         frame->acquire = hwdec_acquire;
         frame->release = hwdec_release;
-        frame->num_planes = desc.num_planes;
-        for (int n = 0; n < frame->num_planes; n++) {
-            struct pl_plane *plane = &frame->planes[n];
-            int *map = plane->component_mapping;
-            for (int c = 0; c < mp_imgfmt_desc_get_num_comps(&desc); c++) {
-                if (desc.comps[c].plane != n)
-                    continue;
-
-                // Sort by component offset
-                uint8_t offset = desc.comps[c].offset;
-                int index = plane->components++;
-                while (index > 0 && desc.comps[map[index - 1]].offset > offset) {
-                    map[index] = map[index - 1];
-                    index--;
-                }
-                map[index] = c;
-            }
-        }
-
+        setup_hwdec_plane_mapping(frame, &desc);
     } else { // swdec
         p->hwdec_perf.count = 0;
 
         if (!p->sw_upload_timer)
             p->sw_upload_timer = timer_pool_create(p->ra_ctx->ra);
 
-        struct pl_plane_data data[4] = {0};
-        bool use_uint = false;
-
-        // At this point, we know that the format is supported, query_format()
-        // makes sure of that. Just check if we should use UINT as a fallback.
-        if (!format_supported(vo, mpi->imgfmt, false))
-            use_uint = true;
-
-        frame->num_planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt, use_uint);
         stats_time_start(p->stats, "swdec-upload");
         timer_pool_start(p->sw_upload_timer);
-        for (int n = 0; n < frame->num_planes; n++) {
-            struct pl_plane *plane = &frame->planes[n];
-            data[n].width = mp_image_plane_w(mpi, n);
-            data[n].height = mp_image_plane_h(mpi, n);
-            if (mpi->stride[n] < 0) {
-                data[n].pixels = mpi->planes[n] + (data[n].height - 1) * mpi->stride[n];
-                data[n].row_stride = -mpi->stride[n];
-                plane->flipped = true;
-            } else {
-                data[n].pixels = mpi->planes[n];
-                data[n].row_stride = mpi->stride[n];
-            }
-
-            pl_buf buf = get_dr_buf(p, data[n].pixels);
-            if (buf) {
-                data[n].buf = buf;
-                data[n].buf_offset = (uint8_t *) data[n].pixels - buf->data;
-                data[n].pixels = NULL;
-            }
-            // Keep the image alive until it's fully read.
-            if (gpu->limits.callbacks) {
-                mp_assert(!data[n].callback);
-                data[n].callback = talloc_free;
-                mp_assert(!data[n].priv);
-                data[n].priv = mp_image_new_ref(mpi);
-            }
-
-            if (!pl_upload_plane(gpu, plane, &tex[n], &data[n])) {
-                MP_ERR(vo, "Failed uploading frame!\n");
-                timer_pool_stop(p->sw_upload_timer);
-                stats_time_end(p->stats, "swdec-upload");
-                talloc_free(data[n].priv);
-                talloc_free(mpi);
-                return false;
-            }
-
-            // Without async callback support, we have to poll...
-            if (!gpu->limits.callbacks && data[n].buf)
-                while (pl_buf_poll(gpu, data[n].buf, UINT64_MAX));
-        }
+        bool ok = upload_planes_sw(vo, gpu, mpi, frame, tex);
         timer_pool_stop(p->sw_upload_timer);
-        p->sw_upload_perf = timer_pool_measure(p->sw_upload_timer);
         stats_time_end(p->stats, "swdec-upload");
-
+        if (!ok) {
+            MP_ERR(vo, "Failed uploading frame!\n");
+            talloc_free(mpi);
+            return false;
+        }
+        p->sw_upload_perf = timer_pool_measure(p->sw_upload_timer);
     }
 
     // Update chroma location, must be done after initializing planes
