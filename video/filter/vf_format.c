@@ -61,6 +61,7 @@ struct vf_format_opts {
     int force_scaler;
     bool dovi;
     bool hdr10plus;
+    bool enhancement_layer;
     float min_luma;
     float max_luma;
     float max_cll;
@@ -187,6 +188,9 @@ static void vf_format_process(struct mp_filter *f)
             });
         }
 
+        if (!priv->opts->enhancement_layer)
+            mp_image_unrefp(&img->enhancement_layer);
+
         if (!priv->opts->hdr10plus) {
             memset(img->params.color.hdr.scene_max, 0,
                    sizeof(img->params.color.hdr.scene_max));
@@ -269,6 +273,7 @@ static const m_option_t vf_opts_fields[] = {
     {"dar", OPT_DOUBLE(dar)},
     {"convert", OPT_BOOL(convert)},
     {"dolbyvision", OPT_BOOL(dovi)},
+    {"enhancement-layer", OPT_BOOL(enhancement_layer)},
     {"hdr10plus", OPT_BOOL(hdr10plus)},
     {"min-luma", OPT_FLOAT(min_luma), M_RANGE(0, 10000)},
     {"max-luma", OPT_FLOAT(max_luma), M_RANGE(0, 10000)},
@@ -290,6 +295,7 @@ const struct mp_user_filter_entry vf_format = {
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .rotate = -1,
             .dovi = true,
+            .enhancement_layer = true,
             .hdr10plus = true,
             .film_grain = true,
         },
