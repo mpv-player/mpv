@@ -24,7 +24,7 @@
 
 /* General nonsense about this mechanism.
  *
- * This requires that that caller has access to two, related values:
+ * This requires that the caller has access to two, related values:
  * (ust, msc): clock time and incrementing counter of last vsync (this is
  *             increased continuously, even if we don't swap)
  *
