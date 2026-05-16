@@ -114,6 +114,8 @@ struct priv {
     struct ra_hwdec_mapper *hwdec_mapper;
     struct timer_pool *hwdec_timer;
     struct mp_pass_perf hwdec_perf;
+    struct ra_hwdec_mapper *el_hwdec_mapper;
+    struct timer_pool *el_hwdec_timer;
     struct timer_pool *sw_upload_timer;
     struct mp_pass_perf sw_upload_perf;
 
@@ -466,6 +468,10 @@ struct frame_priv {
     struct osd_state subs;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
+    // Optional Dolby Vision FEL.
+    struct ra_hwdec *el_hwdec;
+    pl_tex el_tex[4];
+    struct pl_frame el_frame;
 };
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
@@ -701,6 +707,45 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
     ra_hwdec_mapper_unmap(p->hwdec_mapper);
 }
 
+#if PL_API_VER >= 367
+static bool hwdec_acquire_el(pl_gpu gpu, struct pl_frame *frame)
+{
+    struct mp_image *bl_mpi = frame->user_data;
+    struct mp_image *el_mpi = bl_mpi->enhancement_layer;
+    struct frame_priv *fp = bl_mpi->priv;
+    struct priv *p = fp->vo->priv;
+    if (!hwdec_reconfig(p, &p->el_hwdec_mapper, &p->el_hwdec_timer,
+                        fp->el_hwdec, &el_mpi->params))
+        return false;
+
+    if (ra_hwdec_mapper_map(p->el_hwdec_mapper, el_mpi) < 0) {
+        MP_ERR(p, "Mapping enhancement-layer hwdec surface failed.\n");
+        return false;
+    }
+
+    for (int n = 0; n < frame->num_planes; n++) {
+        if (!(frame->planes[n].texture =
+                hwdec_get_tex(p, p->el_hwdec_mapper, n)))
+            return false;
+    }
+
+    return true;
+}
+
+static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
+{
+    struct mp_image *bl_mpi = frame->user_data;
+    struct frame_priv *fp = bl_mpi->priv;
+    struct priv *p = fp->vo->priv;
+    if (!ra_pl_get(p->el_hwdec_mapper->ra)) {
+        for (int n = 0; n < frame->num_planes; n++)
+            pl_tex_destroy(p->gpu, &frame->planes[n].texture);
+    }
+
+    ra_hwdec_mapper_unmap(p->el_hwdec_mapper);
+}
+#endif
+
 static bool format_supported(struct vo *vo, int format, bool use_uint)
 {
     struct priv *p = vo->priv;
@@ -874,6 +919,49 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // Update chroma location, must be done after initializing planes
     pl_frame_set_chroma_location(frame, par.chroma_location);
 
+#if PL_API_VER >= 367
+    if (mpi->enhancement_layer) {
+        struct mp_image *el = mpi->enhancement_layer;
+        fp->el_hwdec = ra_hwdec_get(&p->hwdec_ctx, el->imgfmt);
+
+        struct mp_image_params el_par = el->params;
+        bool el_ok = true;
+        if (fp->el_hwdec) {
+            if (hwdec_reconfig(p, &p->el_hwdec_mapper, &p->el_hwdec_timer,
+                               fp->el_hwdec, &el->params)) {
+                el_par = p->el_hwdec_mapper->dst_params;
+            } else {
+                fp->el_hwdec = NULL;
+                el_ok = false;
+            }
+        }
+        mp_image_params_guess_csp(&el_par);
+
+        fp->el_frame = (struct pl_frame) {
+            .color = el_par.color,
+            .repr  = el_par.repr,
+            .user_data = mpi, // BL mpi
+        };
+
+        if (el_ok && fp->el_hwdec) {
+            struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(el_par.imgfmt);
+            fp->el_frame.acquire = hwdec_acquire_el;
+            fp->el_frame.release = hwdec_release_el;
+            setup_hwdec_plane_mapping(&fp->el_frame, &desc);
+        } else if (el_ok) {
+            el_ok = upload_planes_sw(vo, gpu, el, &fp->el_frame, fp->el_tex);
+        }
+
+        if (el_ok) {
+            pl_frame_set_chroma_location(&fp->el_frame, el_par.chroma_location);
+            frame->enhancement_layer = &fp->el_frame;
+        } else {
+            MP_WARN(vo, "Failed setting up enhancement layer; "
+                    "rendering base layer only.\n");
+        }
+    }
+#endif
+
     if (mpi->film_grain)
         pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
 
@@ -900,6 +988,10 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
         pl_tex tex = fp->subs.entries[i].tex;
         if (tex)
             MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
+    }
+    for (int i = 0; i < MP_ARRAY_SIZE(fp->el_tex); i++) {
+        if (fp->el_tex[i])
+            pl_tex_destroy(gpu, &fp->el_tex[i]);
     }
     talloc_free(mpi);
 }
@@ -2237,6 +2329,8 @@ static void uninit(struct vo *vo)
     if (vo->hwdec_devs) {
         ra_hwdec_mapper_free(&p->hwdec_mapper);
         timer_pool_destroy(p->hwdec_timer);
+        ra_hwdec_mapper_free(&p->el_hwdec_mapper);
+        timer_pool_destroy(p->el_hwdec_timer);
         ra_hwdec_ctx_uninit(&p->hwdec_ctx);
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
