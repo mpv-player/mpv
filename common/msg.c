@@ -559,13 +559,13 @@ static void write_term_msg(struct mp_log *log, int lev, bstr text, bstr *out)
     }
 }
 
-void mp_msg_sanitize(bstr *text)
+void mp_msg_sanitize(bstr *text, bool allow_sgr)
 {
     for (size_t i = 0; i < text->len; i++) {
         unsigned char ch = text->start[i];
 
         // Allow SGR escape sequences only, filter anything else.
-        if (ch == 0x1B && i + 2 < text->len && text->start[i + 1] == '[') {
+        if (allow_sgr && ch == 0x1B && i + 2 < text->len && text->start[i + 1] == '[') {
             size_t j = i + 2;
             bool sgr = false;
 
@@ -625,7 +625,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         bstr_xappend(root, &root->buffer, bstr0(format));
     }
 
-    mp_msg_sanitize(&root->buffer);
+    mp_msg_sanitize(&root->buffer, true);
 
     // Remember last status message and restore it to ensure that it is
     // always displayed
