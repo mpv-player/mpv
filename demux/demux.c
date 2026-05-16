@@ -4145,11 +4145,11 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     struct demux_internal *in = demuxer->in;
     mp_mutex_lock(&in->lock);
     bool changed = select_track(in, stream, ref_pts, selected);
-    if (stream->group) {
+    if (stream->group && !stream->dependent_track) {
         for (int i = 0; i < stream->group->num_members; i++) {
             struct sh_stream *m = stream->group->members[i];
             mp_assert(m);
-            if (m != stream)
+            if (m != stream && m->dependent_track)
                 changed |= select_track(in, m, ref_pts, selected);
         }
     }
