@@ -237,6 +237,7 @@ static void mp_image_destructor(void *ptr)
     for (int n = 0; n < mpi->num_ff_side_data; n++)
         av_buffer_unref(&mpi->ff_side_data[n].buf);
     talloc_free(mpi->ff_side_data);
+    mp_image_unrefp(&mpi->enhancement_layer);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -374,6 +375,9 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     for (int n = 0; n < new->num_ff_side_data; n++)
         ref_buffer(&new->ff_side_data[n].buf);
 
+    new->enhancement_layer = img->enhancement_layer
+        ? mp_image_new_ref(img->enhancement_layer) : NULL;
+
     return new;
 }
 
@@ -407,6 +411,7 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
     new->film_grain = NULL;
     new->num_ff_side_data = 0;
     new->ff_side_data = NULL;
+    new->enhancement_layer = NULL;
     return new;
 }
 
@@ -587,6 +592,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->ff_side_data[n].buf = av_buffer_ref(src->ff_side_data[n].buf);
         MP_HANDLE_OOM(dst->ff_side_data[n].buf);
     }
+
+    mp_image_setrefp(&dst->enhancement_layer, src->enhancement_layer);
 }
 
 // Crop the given image to (x0, y0)-(x1, y1) (bottom/right border exclusive)

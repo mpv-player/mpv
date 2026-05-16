@@ -126,6 +126,8 @@ typedef struct mp_image {
     // Other side data we don't care about.
     struct mp_ff_side_data *ff_side_data;
     int num_ff_side_data;
+    // Optional decoded enhancement-layer frame
+    struct mp_image *enhancement_layer;
 } mp_image_t;
 
 struct mp_ff_side_data {
