@@ -55,6 +55,7 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "demux.h"
+#include "dovi_split.h"
 #include "packet_pool.h"
 #include "stheader.h"
 #include "ebml.h"
@@ -163,6 +164,7 @@ typedef struct mkv_track {
     size_t last_index_entry;
 
     AVDOVIDecoderConfigurationRecord *dovi_config;
+    struct mp_dovi_split *dovi_split;
 } mkv_track_t;
 
 typedef struct mkv_index {
@@ -867,6 +869,7 @@ static void demux_mkv_free_trackentry(mkv_track_t *track)
 {
     talloc_free(track->parser_tmp);
     av_freep(&track->dovi_config);
+    TA_FREEP(&track->dovi_split);
     talloc_free(track);
 }
 
@@ -1802,10 +1805,16 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->dovi = true;
         sh_v->dv_level = track->dovi_config->dv_level;
         sh_v->dv_profile = track->dovi_config->dv_profile;
+        sh_v->dv_el_present = track->dovi_config->bl_present_flag &&
+                              track->dovi_config->el_present_flag;
     }
 
 done:
     demux_add_sh_stream(demuxer, sh);
+
+    // Profile 7 NALU-interleaved
+    if (sh_v->dv_el_present)
+        track->dovi_split = mp_dovi_split_create(demuxer, sh);
 
     return 0;
 }
@@ -2749,6 +2758,7 @@ static void mkv_seek_reset(demuxer_t *demuxer)
             av_parser_close(track->av_parser);
         track->av_parser = NULL;
         avcodec_free_context(&track->av_parser_codec);
+        mp_dovi_split_reset(track->dovi_split);
     }
 
     for (int n = 0; n < mkv_d->num_blocks; n++)
@@ -2896,7 +2906,16 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     if (!track->parse || !track->av_parser || !track->av_parser_codec) {
+        struct demux_packet *el_dp = NULL;
+        struct sh_stream *el_sh = NULL;
+        if (track->dovi_split) {
+            el_sh = mp_dovi_split_el_stream(track->dovi_split);
+            if (el_sh && demux_stream_is_selected(el_sh))
+                el_dp = mp_dovi_split_dispatch(track->dovi_split, dp);
+        }
         add_packet(demuxer, stream, dp);
+        if (el_dp)
+            add_packet(demuxer, el_sh, el_dp);
         return;
     }
 
@@ -3034,7 +3053,13 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     struct sh_stream *stream = track->stream;
     bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
-    if (!demux_stream_is_selected(stream))
+    // Keep BL blocks flowing to feed the Dolby Vision splitter when its
+    // virtual EL is selected, even if the BL itself isn't selected.
+    struct sh_stream *split_el = track->dovi_split
+                                    ? mp_dovi_split_el_stream(track->dovi_split)
+                                    : NULL;
+    bool need_for_split = split_el && demux_stream_is_selected(split_el);
+    if (!demux_stream_is_selected(stream) && !need_for_split)
         return 0;
 
     current_pts = tc / 1e9 - track->codec_delay;
