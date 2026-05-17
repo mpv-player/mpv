@@ -1919,10 +1919,18 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     process_hooks(mpctx, "on_loaded");
-    for (int t = 0; t < STREAM_TYPE_COUNT; t++)
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            if (mpctx->tracks[n]->type == t)
-                reselect_demux_stream(mpctx, mpctx->tracks[n], false);
+    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != t)
+                continue;
+            // Only reselect dependent tracks when explicitly selected by user
+            if (track->stream && track->stream->dependent_track &&
+                !track->selected)
+                continue;
+            reselect_demux_stream(mpctx, track, false);
+        }
+    }
 
     update_demuxer_properties(mpctx);
 
