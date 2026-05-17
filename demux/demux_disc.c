@@ -57,10 +57,13 @@ static void reselect_streams(demuxer_t *demuxer)
     struct priv *p = demuxer->priv;
     int num_slave = demux_get_num_stream(p->slave);
     for (int n = 0; n < MPMIN(num_slave, p->num_streams); n++) {
-        if (p->streams[n]) {
-            demuxer_select_track(p->slave, demux_get_stream(p->slave, n),
-                MP_NOPTS_VALUE, demux_stream_is_selected(p->streams[n]));
-        }
+        if (!p->streams[n])
+            continue;
+        struct sh_stream *slave_sh = demux_get_stream(p->slave, n);
+        if (slave_sh->dependent_track && !demux_stream_is_selected(p->streams[n]))
+            continue;
+        demuxer_select_track(p->slave, slave_sh, MP_NOPTS_VALUE,
+                             demux_stream_is_selected(p->streams[n]));
     }
 }
 
