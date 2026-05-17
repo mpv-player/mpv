@@ -1277,6 +1277,42 @@ static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
 }
 #endif
 
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 19, 100)
+// Base layer + Enhancement layer separate track stream group
+static void handle_layered_video_group(demuxer_t *demuxer, AVStreamGroup *stg)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    AVStreamGroupLayeredVideo *layered = stg->params.layered_video;
+
+    if (stg->nb_streams != 2 || layered->el_index >= stg->nb_streams) {
+        MP_WARN(demuxer, "Dolby Vision group %u: expected 2 streams with valid "
+                "el_index, got %u streams and el_index %u\n",
+                stg->index, stg->nb_streams, layered->el_index);
+        return;
+    }
+
+    AVStream *el_st = stg->streams[layered->el_index];
+    AVStream *bl_st = stg->streams[layered->el_index ? 0 : 1];
+
+    if ((size_t)el_st->index >= priv->num_streams || (size_t)bl_st->index >= priv->num_streams)
+        return;
+
+    struct sh_stream *el_sh = priv->streams[el_st->index]->sh;
+    struct sh_stream *bl_sh = priv->streams[bl_st->index]->sh;
+    if (!el_sh || !bl_sh)
+        return;
+
+    // Group storage is attached to the BL so its lifetime tracks the demuxer.
+    struct sh_stream_group *group = talloc_zero(bl_sh, struct sh_stream_group);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, bl_sh);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, el_sh);
+
+    bl_sh->group = group;
+    el_sh->group = group;
+    el_sh->dependent_track = true;
+}
+#endif
+
 static void handle_stream_groups(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -1307,6 +1343,11 @@ static void handle_stream_groups(demuxer_t *demuxer)
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 6, 100)
         case AV_STREAM_GROUP_PARAMS_LCEVC:
             handle_lcevc_group(demuxer, stg);
+            break;
+#endif
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 19, 100)
+        case AV_STREAM_GROUP_PARAMS_DOLBY_VISION:
+            handle_layered_video_group(demuxer, stg);
             break;
 #endif
         default:
