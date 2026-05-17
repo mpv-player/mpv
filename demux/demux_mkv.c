@@ -2259,6 +2259,51 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
+static void pair_dovi_tracks(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    mkv_track_t *bl_track = NULL, *el_track = NULL;
+
+    for (int i = 0; i < mkv_d->num_tracks; i++) {
+        mkv_track_t *track = mkv_d->tracks[i];
+        if (!track->stream || track->stream->type != STREAM_VIDEO ||
+            !track->codec_id || strcmp(track->codec_id, "V_MPEGH/ISO/HEVC"))
+            continue;
+
+        AVDOVIDecoderConfigurationRecord *dovi = track->dovi_config;
+        if (dovi && dovi->dv_profile == 7 && dovi->el_present_flag) {
+            // bl_present_flag is not checked, because the files in the
+            // wild set it to 1 for EL stream, while the expectation, based
+            // on Dolby spec for MPEG-TS would be that it's set to 0.
+            // Ignore this, if we have EL track and single other video track
+            // it's safe to assume it's BL.
+            if (el_track)
+                return;
+            el_track = track;
+            continue;
+        }
+
+        if (bl_track)
+            return;
+        bl_track = track;
+    }
+
+    if (!el_track || !bl_track)
+        return;
+
+    struct sh_stream *bl_sh = bl_track->stream;
+    struct sh_stream *el_sh = el_track->stream;
+
+    // Group storage is attached to the BL so its lifetime tracks the demuxer.
+    struct sh_stream_group *group = talloc_zero(bl_sh, struct sh_stream_group);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, bl_sh);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, el_sh);
+
+    bl_sh->group = group;
+    el_sh->group = group;
+    el_sh->dependent_track = true;
+}
+
 // Workaround for broken files that don't set attached_picture
 static void probe_if_image(demuxer_t *demuxer)
 {
@@ -2540,6 +2585,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     MP_VERBOSE(demuxer, "All headers are parsed!\n");
 
     display_create_tracks(demuxer);
+    pair_dovi_tracks(demuxer);
     add_coverart(demuxer);
     process_tags(demuxer);
 
