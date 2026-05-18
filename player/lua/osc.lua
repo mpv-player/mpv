@@ -1259,6 +1259,7 @@ local function render_elements(master_ass)
                         local thumb_req = {
                             x = math.floor(thumb_x + 0.5), y = math.floor(thumb_y + 0.5),
                             w = math.floor(thumb_w + 0.5), h = math.floor(thumb_h + 0.5),
+                            ["hover-sec"] = hover_sec,
                         }
 
                         local thumb_ass = assdraw.ass_new()
