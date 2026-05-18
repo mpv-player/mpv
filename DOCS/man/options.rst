@@ -5307,7 +5307,7 @@ libavfilter, within the system audio API resampler, or any other places).
 
 ``--audio-resample-max-output-size=<length>``
     Limit maximum size of audio frames filtered at once, in ms (default: 40).
-    The output size size is limited in order to make resample speed changes
+    The output size is limited in order to make resample speed changes
     react faster. This is necessary especially if decoders or filters output
     very large frame sizes (like some lossless codecs or some DRC filters).
     This option does not affect the resampling algorithm in any way.
