@@ -130,6 +130,7 @@ const struct m_sub_options demux_conf = {
         {"demuxer-backward-playback-step", OPT_DOUBLE(back_seek_size),
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
+        {"directory-filter-types", OPT_STRINGLIST(directory_filter)},
         {"autocreate-playlist", OPT_CHOICE(autocreate_playlist,
             {"no", 0}, {"filter", 1}, {"same", 2})},
         {0}
@@ -154,6 +155,9 @@ const struct m_sub_options demux_conf = {
             [STREAM_AUDIO] = 10,
         },
         .meta_cp = "auto",
+        .directory_filter = (char *[]){
+            "video", "audio", "image", "archive", "playlist", NULL
+        },
     },
     .get_sub_options = get_demux_sub_opts,
 };
