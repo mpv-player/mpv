@@ -207,6 +207,7 @@ Most activity happens on the IRC channel and the GitHub issue tracker.
 - **Discussions**: [discussions][discussions]
 - **User IRC Channel**: `#mpv` on `irc.libera.chat`
 - **Developer IRC Channel**: `#mpv-devel` on `irc.libera.chat`
+- **Community Discord**: https://discord.gg/TV3k9C69v2
 
 [FAQ]: https://github.com/mpv-player/mpv/wiki/FAQ
 [releases]: https://github.com/mpv-player/mpv/releases
