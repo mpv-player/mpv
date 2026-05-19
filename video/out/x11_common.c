@@ -2061,7 +2061,9 @@ static void vo_x11_minimize(struct vo *vo)
     if (x11->opts->window_minimized) {
         XIconifyWindow(x11->display, x11->window, x11->screen);
     } else {
-        long params[5] = {0};
+        long params[5] = {
+            1, // source indication: normal
+        };
         x11_send_ewmh_msg(x11, "_NET_ACTIVE_WINDOW", params);
     }
 }
