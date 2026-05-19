@@ -11,7 +11,8 @@ concurrency:
 
 permissions:
   actions: read
-  contents: write
+  contents: read
+  issues: write
 
 jobs:
   pr_comment:
