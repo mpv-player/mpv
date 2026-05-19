@@ -352,13 +352,17 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
     struct priv *p = userdata;
     size_t bytes = size * nmemb;
 
+    // Returning a value other than size*nmemb signals failure to libcurl. If
+    // size*nmemb is already 0, we must return 1 to avoid looking like success.
+    const size_t failure = bytes ? 0 : 1;
+
     // header_callback validated the response and logged any error status,
     // we don't care about error body.
     if (!p->stream_ok)
-        return CURL_WRITEFUNC_ERROR;
+        return failure;
 
     if (atomic_load_explicit(&p->aborted, memory_order_relaxed))
-        return CURL_WRITEFUNC_ERROR;
+        return failure;
 
     mp_mutex_lock(&p->mtx);
 
