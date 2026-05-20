@@ -766,12 +766,16 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_h = codec->height;
         sh->codec->bitrate = codec->bit_rate;
         sh->codec->format_name = talloc_strdup(sh->codec, av_get_pix_fmt_name(codec->format));
-        if (st->avg_frame_rate.num)
+        if (st->avg_frame_rate.num) {
             sh->codec->fps = av_q2d(st->avg_frame_rate);
+            sh->codec->fps_num = st->avg_frame_rate.num;
+            sh->codec->fps_den = st->avg_frame_rate.den;
+        }
         if (is_image(st, sh->attached_picture, priv->avif)) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
             sh->image = true;
             sh->codec->fps = demuxer->opts->mf_fps;
+            sh->codec->fps_num = sh->codec->fps_den = 0;
         }
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
@@ -1218,6 +1222,8 @@ static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_gro
 
     struct sh_stream *primary_sh = vsh->group->members[0];
     vsh->codec->fps    = primary_sh->codec->fps;
+    vsh->codec->fps_num = primary_sh->codec->fps_num;
+    vsh->codec->fps_den = primary_sh->codec->fps_den;
     vsh->image         = primary_sh->image;
     vsh->still_image   = primary_sh->still_image;
     vsh->default_track = true;

@@ -1,3 +1,5 @@
+fs = import('fs')
+
 wl_protocol_dir = wayland['deps'][2].get_variable(pkgconfig: 'pkgdatadir', internal: 'pkgdatadir')
 protocols = [[wl_protocol_dir, 'stable/linux-dmabuf/linux-dmabuf-v1.xml'],
              [wl_protocol_dir, 'stable/presentation-time/presentation-time.xml'],
@@ -16,6 +18,13 @@ protocols = [[wl_protocol_dir, 'stable/linux-dmabuf/linux-dmabuf-v1.xml'],
 ]
 wl_protocols_source = []
 wl_protocols_headers = []
+
+features += {'wayland-protocols-content-frame-rate': fs.is_file(join_paths(
+    wl_protocol_dir, 'staging/content-frame-rate/content-frame-rate-v1.xml'))}
+
+if features['wayland-protocols-content-frame-rate']
+    protocols += [[wl_protocol_dir, 'staging/content-frame-rate/content-frame-rate-v1.xml']]
+endif
 
 foreach v: ['1.39', '1.41', '1.44', '1.47', '1.48']
     features += {'wayland-protocols-' + v.replace('.', '-'):
