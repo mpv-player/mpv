@@ -499,12 +499,6 @@ Configurable Options
 
     Set to ``yes`` to reduce festivity (i.e. disable santa hat in December.)
 
-``livemarkers``
-    Default: yes
-
-    Update chapter markers positions on duration changes, e.g. live streams.
-    The updates are unoptimized - consider disabling it on very low-end systems.
-
 ``chapter_fmt``
     Default: ``Chapter: %s``
 
