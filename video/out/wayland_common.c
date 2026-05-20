@@ -51,6 +51,9 @@
 #include "xdg-shell.h"
 #include "viewporter.h"
 #include "content-type-v1.h"
+#if HAVE_WAYLAND_PROTOCOLS_CONTENT_FRAME_RATE
+#include "content-frame-rate-v1.h"
+#endif
 #include "single-pixel-buffer-v1.h"
 #include "fractional-scale-v1.h"
 #include "tablet-unstable-v2.h"
@@ -2857,6 +2860,14 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         wl->content_type_manager = wl_registry_bind(reg, id, &wp_content_type_manager_v1_interface, ver);
     }
 
+#if HAVE_WAYLAND_PROTOCOLS_CONTENT_FRAME_RATE
+    if (!strcmp(interface, wp_content_frame_rate_manager_v1_interface.name) && found++) {
+        ver = 1;
+        wl->content_frame_rate_manager = wl_registry_bind(
+            reg, id, &wp_content_frame_rate_manager_v1_interface, ver);
+    }
+#endif
+
     if (!strcmp(interface, wp_single_pixel_buffer_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->single_pixel_manager = wl_registry_bind(reg, id, &wp_single_pixel_buffer_manager_v1_interface, ver);
@@ -3807,6 +3818,20 @@ static void set_content_type(struct vo_wayland_state *wl)
     }
 }
 
+static void set_content_frame_rate(struct vo_wayland_state *wl)
+{
+#if HAVE_WAYLAND_PROTOCOLS_CONTENT_FRAME_RATE
+    if (!wl->content_frame_rate_manager || !wl->content_frame_rate)
+        return;
+
+    uint32_t den = wl->current_content_frame_rate_den ?
+                   wl->current_content_frame_rate_den : 1;
+    wp_content_frame_rate_v1_set_frame_rate(
+        wl->content_frame_rate,
+        wl->current_content_frame_rate_num,
+        den);
+#endif
+}
 static void set_cursor(struct vo_wayland_seat *s, struct wl_surface *cursor_surface,
                        int32_t hotspot_x, int32_t hotspot_y)
 {
@@ -4277,6 +4302,13 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         set_content_type(wl);
         return VO_TRUE;
     }
+    case VOCTRL_CONTENT_FRAME_RATE: {
+        struct voctrl_content_frame_rate *content_frame_rate = arg;
+        wl->current_content_frame_rate_num = content_frame_rate->numerator;
+        wl->current_content_frame_rate_den = content_frame_rate->denominator;
+        set_content_frame_rate(wl);
+        return VO_TRUE;
+    }
     case VOCTRL_GET_FOCUSED: {
         *(bool *)arg = wl->focused;
         return VO_TRUE;
@@ -4590,6 +4622,17 @@ bool vo_wayland_init(struct vo *vo)
                    wp_content_type_manager_v1_interface.name);
     }
 
+#if HAVE_WAYLAND_PROTOCOLS_CONTENT_FRAME_RATE
+    if (wl->content_frame_rate_manager) {
+        wl->content_frame_rate =
+            wp_content_frame_rate_manager_v1_get_surface_content_frame_rate(
+                wl->content_frame_rate_manager, wl->surface);
+    } else {
+        MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
+                   wp_content_frame_rate_manager_v1_interface.name);
+    }
+#endif
+
     if (!wl->single_pixel_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_single_pixel_buffer_manager_v1_interface.name);
@@ -4810,6 +4853,14 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->content_type_manager)
         wp_content_type_manager_v1_destroy(wl->content_type_manager);
+
+#if HAVE_WAYLAND_PROTOCOLS_CONTENT_FRAME_RATE
+    if (wl->content_frame_rate)
+        wp_content_frame_rate_v1_destroy(wl->content_frame_rate);
+
+    if (wl->content_frame_rate_manager)
+        wp_content_frame_rate_manager_v1_destroy(wl->content_frame_rate_manager);
+#endif
 
     if (wl->devman)
         wl_data_device_manager_destroy(wl->devman);
