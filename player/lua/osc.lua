@@ -2708,7 +2708,9 @@ end
 
 local function osc_visible(visible)
     set_bar_visible("osc_visible", visible)
-    disable_thumbnail()
+    if not visible then
+        disable_thumbnail()
+    end
 end
 
 local function set_wc_visible(visible)
