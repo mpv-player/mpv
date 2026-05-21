@@ -79,6 +79,8 @@ local ext_map = {
 
 local codec_map = {
     -- src pattern  = mpv codec
+    ["ass"]         = "ass",
+    ["srt"]         = "subrip",
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
