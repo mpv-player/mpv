@@ -520,7 +520,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!p->core) {
         MP_MSG(ao, ao->probing ? MSGL_V : MSGL_ERR,
                "Could not connect to context '%s': %s\n",
-               p->options.remote, mp_strerror(errno));
+               p->options.remote ? p->options.remote : "(default)", mp_strerror(errno));
         pw_context_destroy(context);
         goto error;
     }
