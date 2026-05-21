@@ -179,7 +179,6 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
     if (restart_from_eof) {
         double start = get_start_time(mpctx, mpctx->play_dir);
 
-        mpctx->stop_play = KEEP_PLAYING;
         mark_seek(mpctx);
         queue_seek(mpctx, MPSEEK_ABSOLUTE, start, MPSEEK_DEFAULT, 0);
     }
