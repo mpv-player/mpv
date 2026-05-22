@@ -43,7 +43,7 @@ static void path_init(void)
     char *xdg_state = getenv("XDG_STATE_HOME");
 
     bool err = false;
-    if (xdg_config && xdg_config[0]) {
+    if (xdg_config && xdg_config[0] == '/') {
         err = err || MKPATH(mpv_home, "%s/mpv", xdg_config);
     } else if (home && home[0]) {
         err = err || MKPATH(mpv_home, "%s/.config/mpv", home);
@@ -55,20 +55,20 @@ static void path_init(void)
         err = err || MKPATH(old_cache, "%s/.mpv/cache", home);
     }
 
-    if (xdg_cache && xdg_cache[0]) {
+    if (xdg_cache && xdg_cache[0] == '/') {
         err = err || MKPATH(mpv_cache, "%s/mpv", xdg_cache);
     } else if (home && home[0]) {
         err = err || MKPATH(mpv_cache, "%s/.cache/mpv", home);
     }
 
-    if (xdg_state && xdg_state[0]) {
+    if (xdg_state && xdg_state[0] == '/') {
         err = err || MKPATH(mpv_state, "%s/mpv", xdg_state);
     } else if (home && home[0]) {
         err = err || MKPATH(mpv_state, "%s/.local/state/mpv", home);
     }
 
     char xdg_user_dirs[CONF_MAX];
-    if (xdg_config && xdg_config[0]) {
+    if (xdg_config && xdg_config[0] == '/') {
         err = err || MKPATH(xdg_user_dirs, "%s/user-dirs.dirs", xdg_config);
     } else if (home && home[0]) {
         err = err || MKPATH(xdg_user_dirs, "%s/.config/user-dirs.dirs", home);
