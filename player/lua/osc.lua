@@ -2750,9 +2750,9 @@ end
 local function hide_bar(label, visible_key, anitype_key, set_visible)
     msg.trace("hide_" .. label)
     if not state.enabled then
+        set_visible(false)
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
-        state[visible_key] = false
         render_wipe(state.osd)
     elseif user_opts.fadeduration > 0 then
         if state[visible_key] then
