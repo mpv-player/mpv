@@ -783,7 +783,7 @@ void *mp_dlsym(void *handle, const char *symbol)
 
 int mp_dlclose(void *handle)
 {
-    return CloseHandle(handle);
+    return FreeLibrary((HMODULE)handle) ? 0 : -1;
 }
 
 char *mp_dlerror(void)

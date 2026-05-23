@@ -66,7 +66,7 @@ static void write_arg(bstr *cmdline, char *arg)
         case '"':
             // Write the argument up to the point before the quote
             bstr_xappend(NULL, cmdline, (struct bstr){arg, pos});
-            arg += pos;
+            arg += pos + 1;
             pos = 0;
 
             // Double backslashes preceding the quote
