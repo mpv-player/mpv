@@ -140,6 +140,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     if (ret < 0)
         goto error;
 
+    evk->sem_handle.fd = -1;
     evk->vk_sem.sem = pl_vulkan_sem_create(gpu, pl_vulkan_sem_params(
         .type = VK_SEMAPHORE_TYPE_TIMELINE,
         .export_handle = HANDLE_TYPE,

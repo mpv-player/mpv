@@ -84,7 +84,6 @@ static bool cuda_ext_gl_init(struct ra_hwdec_mapper *mapper,
     return true;
 
 error:
-    CHECK_CU(cu->cuCtxPopCurrent(&dummy));
     return false;
 }
 

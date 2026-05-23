@@ -225,7 +225,7 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
     struct vulkan_hw_priv *p_owner = mapper->owner->priv;
     struct vulkan_mapper_priv *p = mapper->priv;
-    if (!mapper->src)
+    if (!mapper->src || !p->vkf)
         goto end;
 
     AVHWFramesContext *hwfc = (AVHWFramesContext *) mapper->src->hwctx->data;
