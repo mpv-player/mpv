@@ -231,7 +231,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
         b->bitmap = r; // save for later (dumb hack to avoid more complexity)
 
-        priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
+        priv->packer->in[sub->count] = (struct pos){r->w + 2 * padding, r->h};
         sub->count++;
     }
 

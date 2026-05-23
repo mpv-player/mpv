@@ -625,12 +625,13 @@ struct sub_lines *sub_get_lines(struct dec_sub *sub)
     struct sub_lines *res = NULL;
     if (sub->sd->driver->get_lines) {
         res = sub->sd->driver->get_lines(sub->sd);
-        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
-              sub_line_cmp);
-        dedup_sub_lines(res);
-        // dedup may sometimes reorder lines to keep its window smaller
-        qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
-              sub_line_cmp);
+        if (res) {
+            qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+                  sub_line_cmp);
+            dedup_sub_lines(res);
+            qsort(res->entries, res->num_entries, sizeof(res->entries[0]),
+                  sub_line_cmp);
+        }
     }
     mp_mutex_unlock(&sub->lock);
     return res;
