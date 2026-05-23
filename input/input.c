@@ -887,7 +887,8 @@ void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
     input_lock(ictx);
     ictx->mouse_mangle = dst || src;
     if (ictx->mouse_mangle) {
-        ictx->mouse_dst = *dst;
+        if (dst)
+            ictx->mouse_dst = *dst;
         ictx->mouse_src_mangle = !!src;
         if (ictx->mouse_src_mangle)
             ictx->mouse_src = *src;
@@ -927,8 +928,10 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
         x = MPCLAMP(x, dst->x0, dst->x1) - dst->x0;
         y = MPCLAMP(y, dst->y0, dst->y1) - dst->y0;
         if (ictx->mouse_src_mangle) {
-            x = x * 1.0 / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
-            y = y * 1.0 / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
+            if (dst->x1 != dst->x0 && dst->y1 != dst->y0) {
+                x = x * 1.0 / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
+                y = y * 1.0 / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
+            }
         }
         MP_TRACE(ictx, "-> %d/%d\n", x, y);
     }
@@ -2073,6 +2076,8 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
             in->cmd_buffer_size = 0;
             in->drop = overflow || !term;
             MP_WARN(src, "Dropping overlong line.\n");
+            buf = next;
+            len -= copy;
         } else {
             memcpy(in->cmd_buffer + in->cmd_buffer_size, buf, copy);
             in->cmd_buffer_size += copy;

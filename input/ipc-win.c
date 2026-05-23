@@ -55,7 +55,7 @@ static char *get_user_sid(void)
 {
     char *ssid = NULL;
     TOKEN_USER *info = NULL;
-    HANDLE t;
+    HANDLE t = NULL;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &t))
         goto done;
 
@@ -312,6 +312,11 @@ done:
 static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 {
     client->client = mp_new_client(ctx->client_api, client->client_name),
+    if (!client->client) {
+        CloseHandle(client->client_h);
+        talloc_free(client);
+        return;
+    }
     client->log    = mp_client_get_log(client->client);
 
     mp_thread client_thr;
