@@ -281,7 +281,6 @@ static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
         else
             profile = FRC_PROFILE_HIGH;
     }
-    profile = FRC_PROFILE_HIGH;
     AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_PROFILE, profile);
     if (res != AMF_OK) {
         MP_WARN(f, "Failed to set FRC profile: %d\n", res);
@@ -626,13 +625,14 @@ static void process(struct mp_filter *f)
         res = ICALL(SubmitInput, a->frc, (AMFData *)surface);
     }
 
-    ICALL(Release, surface);
-
     if (res == AMF_INPUT_FULL) {
         MP_WARN(f, "FRC input queue full...\n");
         mp_pin_out_unread(f->ppins[0], frame);
+        ICALL(Release, surface);
         return;
     }
+
+    ICALL(Release, surface);
 
     if (res != AMF_OK && res != AMF_EOF) {
         MP_WARN(f, "FRC SubmitInput failed: %d\n", res);
