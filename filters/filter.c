@@ -485,11 +485,11 @@ static void deinit_connection(struct mp_pin *p)
         p->within_conn = p->other->within_conn = false;
         mp_assert(!p->other->data_requested); // unused for in pins
         mp_assert(!p->other->data.type); // unused for in pins
-        p->data_requested = false;
         if (p->data.type)
             MP_VERBOSE(p->owner, "dropping frame due to pin disconnect\n");
         if (p->data_requested)
             MP_VERBOSE(p->owner, "dropping request due to pin disconnect\n");
+        p->data_requested = false;
         mp_frame_unref(&p->data);
         p = p->other->user_conn;
     }
