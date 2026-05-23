@@ -79,7 +79,6 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
         out->color.primaries = p->primaries;
     if (p->gamma) {
         enum pl_color_transfer in_gamma = p->gamma;
-        out->color.transfer = p->gamma;
         if (in_gamma != out->color.transfer) {
             // When changing the gamma function explicitly, also reset stuff
             // related to the gamma function since that information will almost
@@ -87,6 +86,7 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
             out->color.hdr = (struct pl_hdr_metadata){0};
             out->light = MP_CSP_LIGHT_AUTO;
         }
+        out->color.transfer = p->gamma;
     }
     if (out->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION) {
         out->primaries_orig = out->color.primaries;
