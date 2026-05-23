@@ -311,7 +311,8 @@ static struct mp_decoder *create(struct mp_filter *parent,
         return NULL;
     }
 
-    codec->codec_desc = priv->avctx->codec_descriptor->long_name;
+    codec->codec_desc = priv->avctx->codec_descriptor ?
+                        priv->avctx->codec_descriptor->long_name : NULL;
     mp_chmap_from_av_layout(&priv->codec->channels, &priv->avctx->ch_layout);
 
     return &priv->public;
