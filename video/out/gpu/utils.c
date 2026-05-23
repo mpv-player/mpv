@@ -10,7 +10,7 @@ void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
 {
     if (y1 < y0) {
         float tmp = y0;
-        y0 = tmp - y1;
+        y0 = y1;
         y1 = tmp;
     }
 
