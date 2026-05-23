@@ -46,8 +46,6 @@ static void vk_ctx_destroy(void *p)
     vk->gpu = NULL;
     pl_vulkan_destroy(&vk->vulkan);
     mpvk_uninit(vk);
-    talloc_free(vk);
-    talloc_free(ractx);
 }
 
 static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
@@ -104,8 +102,6 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
 error:
     pl_vulkan_destroy(&vk->vulkan);
     mpvk_uninit(vk);
-    talloc_free(vk);
-    talloc_free(ractx);
     talloc_free(ctx);
     return NULL;
 }
