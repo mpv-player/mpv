@@ -78,9 +78,9 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
     if (p->primaries)
         out->color.primaries = p->primaries;
     if (p->gamma) {
-        enum pl_color_transfer in_gamma = p->gamma;
+        enum pl_color_transfer old_gamma = out->color.transfer;
         out->color.transfer = p->gamma;
-        if (in_gamma != out->color.transfer) {
+        if (old_gamma != out->color.transfer) {
             // When changing the gamma function explicitly, also reset stuff
             // related to the gamma function since that information will almost
             // surely be false now and have to be re-inferred
