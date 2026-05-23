@@ -281,7 +281,6 @@ static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
         else
             profile = FRC_PROFILE_HIGH;
     }
-    profile = FRC_PROFILE_HIGH;
     AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_PROFILE, profile);
     if (res != AMF_OK) {
         MP_WARN(f, "Failed to set FRC profile: %d\n", res);
