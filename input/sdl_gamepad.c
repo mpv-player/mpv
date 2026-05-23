@@ -187,10 +187,12 @@ static void remove_gamepad(struct mp_input_src *src, int id)
 {
     struct gamepad_priv *p = src->priv;
     SDL_GameController *controller = p->controller;
+    if (!controller)
+        return;
     SDL_Joystick* j = SDL_GameControllerGetJoystick(controller);
     SDL_JoystickID jid = SDL_JoystickInstanceID(j);
 
-    if (controller && jid == id) {
+    if (jid == id) {
         const char *name = SDL_GameControllerName(controller);
         MP_INFO(src, "removed controller: %s\n", name);
         SDL_GameControllerClose(controller);
