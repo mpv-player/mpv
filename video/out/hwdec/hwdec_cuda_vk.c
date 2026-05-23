@@ -55,8 +55,13 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     int mem_fd = -1;
     int ret = 0;
 
-    struct ext_vk *evk = talloc_ptrtype(NULL, evk);
+    struct ext_vk *evk = talloc_zero_ptrtype(NULL, evk);
     p->ext[n] = evk;
+
+#if !HAVE_WIN32_DESKTOP
+    // need to initialise fd as invalid; zero alloc covers the Win32 .handle
+    evk->sem_handle.fd = -1;
+#endif
 
     pl_gpu gpu = ra_pl_get(mapper->ra);
 
@@ -163,8 +168,10 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     ret = CHECK_CU(cu->cuImportExternalSemaphore(&evk->cuda_sem, &w_desc));
     if (ret < 0)
         goto error;
+#if !HAVE_WIN32_DESKTOP
     // CUDA takes ownership of an imported FD *but not* an imported Handle.
     evk->sem_handle.fd = -1;
+#endif
 
     return true;
 
