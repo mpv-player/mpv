@@ -115,6 +115,16 @@ paths = executable('paths', 'paths.c', include_directories: incdir,
                    objects: paths_objects, link_with: test_utils)
 test('paths', paths)
 
+if features['libcurl']
+    avio_crypto_objects = libmpv.extract_objects('demux/avio_crypto.c')
+    avio_crypto = executable('avio-crypto', files('avio_crypto.c'),
+                             include_directories: incdir,
+                             dependencies: [libavformat, libavutil],
+                             objects: avio_crypto_objects,
+                             link_with: test_utils)
+    test('avio-crypto', avio_crypto)
+endif
+
 if get_option('libmpv')
     file = join_paths(source_root, 'etc', 'mpv-icon-8bit-16x16.png')
 

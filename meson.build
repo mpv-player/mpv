@@ -625,7 +625,8 @@ libcurl = dependency('libcurl', version: '>= 7.87.0', required: get_option('libc
 features += {'libcurl': libcurl.found()}
 if features['libcurl']
     dependencies += [libcurl]
-    sources += files('stream/stream_curl.c')
+    sources += files('demux/avio_crypto.c',
+                     'stream/stream_curl.c')
 endif
 
 cdda_opt = get_option('cdda').require(
