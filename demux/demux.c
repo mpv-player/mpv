@@ -3075,7 +3075,7 @@ static void demux_update_replaygain(demuxer_t *demuxer)
             if (!rg)
                 rg = decode_rgain(demuxer->log, demuxer->metadata);
             if (rg)
-                sh->codec->replaygain_data = talloc_steal(in, rg);
+                sh->codec->replaygain_data = talloc_steal(sh->codec, rg);
         }
     }
 }
