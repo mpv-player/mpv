@@ -255,6 +255,7 @@ typedef struct MPOpts {
     int hls_bitrate;
     int edition_id;
     bool flatten_editions;
+    bool disc_menu;
     bool show_dependent_tracks;
     bool initial_audio_sync;
     double sync_max_video_change;
