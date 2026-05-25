@@ -3917,6 +3917,12 @@ Window
 Disc Devices
 ------------
 
+``--disc-menu=<yes|no>``
+    When set, opening ``dvd://`` or ``bd://`` boots into the disc's interactive
+    menu instead of automatically playing the longest title (default: ``no``).
+    The menu can also be reached at any time via the synthetic "Disc Menu"
+    entry in the editions/titles list, or with ``discnav menu`` command.
+
 ``--cdda-device=<path>``
     Specify the CD device for CDDA playback. The default device path depends on
     the OS. See the `OPTICAL DRIVES`_ section.
