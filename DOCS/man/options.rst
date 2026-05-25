@@ -131,6 +131,12 @@ Track Selection
     flat list. Note that depending on the file, tracks from different programs
     may be completely unrelated to each other.
 
+``--disc-menu=<yes|no>``
+    When set, opening ``dvd://`` or ``bd://`` boots into the disc's interactive
+    menu instead of automatically playing the longest title (default: ``no``).
+    The menu can also be reached at any time via the synthetic "Disc Menu"
+    entry in the editions/titles list, or with ``discnav menu`` command.
+
 ``--show-dependent-tracks=<yes|no>``
     Show dependent tracks in the track list (default: no). Dependent tracks
     carry coded data that is not independently decodable. For example, the
