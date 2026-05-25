@@ -57,6 +57,10 @@ struct disc_nav_state {
     // sd_lavc path. menu_selected_track remembers what we selected so we
     // can deselect it again when the menu closes.
     struct track *menu_selected_track;
+
+    // Last menu_active pushed through property-change notification.
+    bool last_menu_active;
+    bool menu_active_seen;
 };
 
 static struct disc_nav_state *get_state(struct MPContext *mpctx)
@@ -344,7 +348,17 @@ void disc_nav_update(struct MPContext *mpctx)
         st->bd_last_change_id = 0;
         st->bd_last_vo_res = (struct mp_osd_res){0};
         st->menu_selected_track = NULL;
+        if (st->menu_active_seen && st->last_menu_active) {
+            st->last_menu_active = false;
+            mp_notify_property(mpctx, "disc-menu-active");
+        }
         return;
+    }
+
+    if (!st->menu_active_seen || nav.menu_active != st->last_menu_active) {
+        st->menu_active_seen = true;
+        st->last_menu_active = nav.menu_active;
+        mp_notify_property(mpctx, "disc-menu-active");
     }
 
     check_async_discontinuity(mpctx, s, &nav);

@@ -2441,6 +2441,12 @@ Property list
     between having no editions and a single edition, which will be reflected by
     the property, although in practice it does not matter.)
 
+``disc-menu-active``
+    ``yes`` when the current optical-disc stream (DVD or Blu-ray) is showing
+    an interactive menu (a DVD menu domain, or a visible Blu-ray menu
+    overlay), and ``no`` otherwise. Unavailable when the currently playing
+    source is not an optical disc.
+
 ``chapters``
     Number of chapters.
 
