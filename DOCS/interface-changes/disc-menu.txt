@@ -1,1 +1,2 @@
 and `--disc-menu` option
+add `disc-menu-active` property
