@@ -275,7 +275,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             p->last_dts = pkt->dts;
 
         if (fabs(p->last_dts - pkt->dts) >= DTS_RESET_THRESHOLD) {
-            MP_WARN(demuxer, "PTS discontinuity: %f->%f\n", p->last_dts, pkt->dts);
+            MP_VERBOSE(demuxer, "PTS discontinuity: %f->%f\n", p->last_dts, pkt->dts);
             p->base_time += p->last_dts - p->base_dts;
             p->base_dts = pkt->dts - pkt->duration;
         }
