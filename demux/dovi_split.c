@@ -99,7 +99,7 @@ struct mp_dovi_split *mp_dovi_split_create(struct demuxer *demuxer,
     el->codec->disp_w = par_out->width;
     el->codec->disp_h = par_out->height;
     if (par_out->extradata_size > 0) {
-        el->codec->extradata = talloc_memdup(el, par_out->extradata,
+        el->codec->extradata = talloc_memdup(el->codec, par_out->extradata,
                                              par_out->extradata_size);
         el->codec->extradata_size = par_out->extradata_size;
     }
