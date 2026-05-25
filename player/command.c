@@ -1130,6 +1130,19 @@ static int mp_property_current_edition(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, demuxer->edition);
 }
 
+static int mp_property_disc_menu_active(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct stream *s = disc_nav_get_stream(mpctx);
+    if (!s)
+        return M_PROPERTY_UNAVAILABLE;
+    struct stream_nav_state st = {0};
+    if (stream_control(s, STREAM_CTRL_GET_NAV_STATE, &st) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_bool_ro(action, arg, st.menu_active);
+}
+
 static int mp_property_edition(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -4643,6 +4656,7 @@ static const struct m_property mp_properties_base[] = {
     {"chapter", mp_property_chapter},
     {"edition", mp_property_edition},
     {"current-edition", mp_property_current_edition},
+    {"disc-menu-active", mp_property_disc_menu_active},
     {"chapters", mp_property_chapters},
     {"editions", mp_property_editions},
     {"metadata", mp_property_metadata},
