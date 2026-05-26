@@ -109,37 +109,6 @@ static int rate_from_speed(int rate, double speed)
     return lrint(rate * speed);
 }
 
-static const struct mp_chmap fudge_pairs[][2] = {
-    {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
-    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
-    {MP_CHMAP2(SDL, SDR), MP_CHMAP2(SL,  SR)},
-    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(SDL, SDR)},
-};
-
-// Modify out_layout and return the new value. The intention is reducing the
-// loss libswresample's rematrixing will cause by exchanging similar, but
-// strictly speaking incompatible channel pairs. For example, 7.1 should be
-// changed to 7.1(wide) without dropping the SL/SR channels. (We still leave
-// it to libswresample to create the remix matrix.)
-static uint64_t fudge_layout_conversion(struct priv *p,
-                                        uint64_t in, uint64_t out)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(fudge_pairs); n++) {
-        uint64_t a = mp_chmap_to_lavc(&fudge_pairs[n][0]);
-        uint64_t b = mp_chmap_to_lavc(&fudge_pairs[n][1]);
-        if ((in & a) == a && (in & b) == 0 &&
-            (out & a) == 0 && (out & b) == b)
-        {
-            out = (out & ~b) | a;
-
-            MP_VERBOSE(p, "Fudge: %s -> %s\n",
-                       mp_chmap_to_str(&fudge_pairs[n][0]),
-                       mp_chmap_to_str(&fudge_pairs[n][1]));
-        }
-    }
-    return out;
-}
-
 // mp_chmap_get_reorder() performs:
 //  to->speaker[n] = from->speaker[src[n]]
 // but libavresample does:
@@ -267,8 +236,6 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     mp_aframe_config_copy(p->pool_fmt, p->avrctx_fmt);
     if (map_out.num > out_lavc.num)
         mp_aframe_set_chmap(p->pool_fmt, &map_out);
-
-    out_ch_layout = fudge_layout_conversion(p, in_ch_layout, out_ch_layout);
 
     // Real conversion; output is input to avrctx_out.
     AVChannelLayout in_layout, out_layout;
