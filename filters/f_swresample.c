@@ -44,8 +44,6 @@ struct priv {
     struct mp_aframe *pre_out_fmt; // format before final conversion
     struct SwrContext *avrctx_out; // for output channel reordering
     struct mp_resample_opts *opts; // opts requested by the user
-    // At least libswresample keeps a pointer around for this:
-    int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
     struct mp_aframe_pool *reorder_buffer;
     struct mp_aframe_pool *out_pool;
@@ -107,22 +105,6 @@ static void close_lavrr(struct priv *p)
 static int rate_from_speed(int rate, double speed)
 {
     return lrint(rate * speed);
-}
-
-// mp_chmap_get_reorder() performs:
-//  to->speaker[n] = from->speaker[src[n]]
-// but libavresample does:
-//  to->speaker[dst[n]] = from->speaker[n]
-static void transpose_order(int *map, int num)
-{
-    int nmap[MP_NUM_CHANNELS] = {0};
-    for (int n = 0; n < num; n++) {
-        for (int i = 0; i < num; i++) {
-            if (map[n] == i)
-                nmap[i] = n;
-        }
-    }
-    memcpy(map, nmap, sizeof(nmap));
 }
 
 static bool configure_lavrr(struct priv *p, bool verbose)
@@ -203,9 +185,6 @@ static bool configure_lavrr(struct priv *p, bool verbose)
         goto error;
     }
 
-    mp_chmap_get_reorder(p->reorder_in, &map_in, &in_lavc);
-    transpose_order(p->reorder_in, map_in.num);
-
     if (mp_chmap_equals(&out_lavc, &map_out)) {
         // No intermediate step required - output new format directly.
         out_samplefmtp = out_samplefmt;
@@ -237,12 +216,13 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     if (map_out.num > out_lavc.num)
         mp_aframe_set_chmap(p->pool_fmt, &map_out);
 
-    // Real conversion; output is input to avrctx_out.
     AVChannelLayout in_layout, out_layout;
-    mp_chmap_to_av_layout(&in_layout, &in_lavc);
+    mp_chmap_to_av_layout_custom(&in_layout, &map_in);
     mp_chmap_to_av_layout(&out_layout, &out_lavc);
     av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
     av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
+    av_channel_layout_uninit(&in_layout);
+    av_channel_layout_uninit(&out_layout);
     av_opt_set_int(p->avrctx, "in_sample_rate",     p->in_rate, 0);
     av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
     av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
@@ -252,15 +232,11 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     av_channel_layout_default(&fake_layout, map_out.num);
     av_opt_set_chlayout(p->avrctx_out, "in_chlayout", &fake_layout, 0);
     av_opt_set_chlayout(p->avrctx_out, "out_chlayout", &fake_layout, 0);
+    av_channel_layout_uninit(&fake_layout);
     av_opt_set_int(p->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(p->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(p->avrctx_out, "in_sample_rate",     p->out_rate, 0);
     av_opt_set_int(p->avrctx_out, "out_sample_rate",    p->out_rate, 0);
-
-    // API has weird requirements, quoting avresample.h:
-    //  * This function can only be called when the allocated context is not open.
-    //  * Also, the input channel layout must have already been set.
-    swr_set_channel_mapping(p->avrctx, p->reorder_in);
 
     p->is_resampling = false;
 
