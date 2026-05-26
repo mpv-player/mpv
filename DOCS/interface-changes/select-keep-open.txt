@@ -1,0 +1,1 @@
+add `keep-open` argument support to select.lua script bindings
