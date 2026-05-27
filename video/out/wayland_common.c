@@ -2434,6 +2434,8 @@ static void supported_coefficients_and_ranges(void *data, struct wp_color_repres
     case WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_ICTCP:
         wl->coefficients_map[PL_COLOR_SYSTEM_BT_2100_PQ] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_ICTCP;
         wl->range_map[PL_COLOR_SYSTEM_BT_2100_PQ + offset] = range;
+        wl->coefficients_map[PL_COLOR_SYSTEM_BT_2100_HLG] = WP_COLOR_REPRESENTATION_SURFACE_V1_COEFFICIENTS_ICTCP;
+        wl->range_map[PL_COLOR_SYSTEM_BT_2100_HLG + offset] = range;
         break;
     }
 }
