@@ -386,8 +386,8 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
     }
 
     ass_process_chunk(ctx->ass_track, pkt->buffer, pkt->len,
-                      llrint(pkt->pts * 1000),
-                      llrint(pkt->duration * 1000));
+                      floor(pkt->pts * 1000 + 1e-6),
+                      floor(pkt->duration * 1000 + 1e-6));
 
     // This bookkeeping only has any practical use for ASS subs
     // over a VO with no video.
@@ -663,7 +663,7 @@ static long long find_timestamp(struct sd *sd, double pts)
     if (pts == MP_NOPTS_VALUE)
         return 0;
 
-    long long ts = llrint(pts * 1000);
+    long long ts = floor(pts * 1000 + 1e-6);
 
     if (!sd->opts->sub_fix_timing ||
         sd->shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_NONE)
@@ -1061,7 +1061,7 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
-        long long ts = llrint(a[0] * 1000.0);
+        long long ts = floor(a[0] * 1000.0 + 1e-6);
         long long res = ass_step_sub(ctx->ass_track, ts, a[1]);
         if (!res)
             return false;
