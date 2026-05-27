@@ -36,6 +36,7 @@
 #include "demux/demux.h"
 #include "demux/packet_pool.h"
 #include "filters/f_decoder_wrapper.h"
+#include "filters/f_output_chain.h"
 #include "filters/filter_internal.h"
 #include "input/input.h"
 #include "misc/dispatch.h"
@@ -262,6 +263,8 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->hrseek_active = false;
     mpctx->hrseek_lastframe = false;
     mpctx->hrseek_backstep = false;
+    if (mpctx->vo_chain)
+        mp_output_chain_set_hrseek(mpctx->vo_chain->filter, false, 0);
     mpctx->current_seek = (struct seek_params){0};
     mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->step_frames = 0;
@@ -433,6 +436,11 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             if (dec && hrseek_framedrop)
                 mp_decoder_wrapper_set_start_pts(dec, mpctx->hrseek_pts);
         }
+
+        // Let filters drop pre-target frames (e.g. expensive upscalers).
+        if (mpctx->vo_chain && hrseek_framedrop)
+            mp_output_chain_set_hrseek(mpctx->vo_chain->filter, true,
+                                       mpctx->hrseek_pts);
     }
 
     if (mpctx->stop_play == AT_END_OF_FILE)

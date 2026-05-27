@@ -79,6 +79,12 @@ bool mp_output_chain_update_filters(struct mp_output_chain *p,
 void mp_output_chain_set_audio_speed(struct mp_output_chain *p,
                                      double speed, double resample, double drop);
 
+// Tell the chain whether an hr-seek is in progress. Filters can read this via
+// mp_stream_info::get_hrseek to skip expensive work on pre-target frames.
+// For type==MP_OUTPUT_CHAIN_VIDEO only.
+void mp_output_chain_set_hrseek(struct mp_output_chain *p, bool active,
+                                double pts);
+
 // Total delay incurred by the filter chain, as measured by the recent filtered
 // frames. The intention is that this sums the measured delays for each filter,
 // so if a filter is removed, the caller can estimate how much audio is missing

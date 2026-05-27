@@ -402,6 +402,11 @@ struct mp_stream_info {
 
     double (*get_display_fps)(struct mp_stream_info *i);
     void   (*get_display_res)(struct mp_stream_info *i, int *res);
+    // Returns true if an hr-seek is in progress; if so, *pts is the seek target
+    // pts. Filters that do expensive per-frame work can drop input frames whose
+    // pts is before this target (they'd be discarded by the post-filter
+    // framedrop anyway).
+    bool   (*get_hrseek)(struct mp_stream_info *i, double *pts);
 
     struct mp_hwdec_devices *hwdec_devs;
     struct osd_state *osd;

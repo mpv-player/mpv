@@ -59,6 +59,7 @@ struct vapoursynth_opts {
     int maxbuffer;
     int maxrequests;
     char *user_data;
+    bool skip_seek_pre_target;
 
     const struct script_driver *drv;
 };
@@ -356,6 +357,23 @@ static void vf_vapoursynth_process(struct mp_filter *f)
             }
         } else if (frame.type == MP_FRAME_VIDEO) {
             struct mp_image *mpi = frame.data;
+            // During hr-seek, drop frames whose pts is before the seek target.
+            // These would be discarded by the post-filter framedrop anyway, so
+            // running them through VS (which may invoke expensive ML upscalers)
+            // is pure waste. The check is done before the reinit-on-format-change
+            // path so we don't reload e.g. a TensorRT engine for a dropped frame.
+            if (p->opts->skip_seek_pre_target && mpi->pts != MP_NOPTS_VALUE) {
+                struct mp_stream_info *info = mp_filter_find_stream_info(f);
+                double target;
+                if (info && info->get_hrseek && info->get_hrseek(info, &target) &&
+                    mpi->pts < target - 0.005)
+                {
+                    MP_DBG(p, "drop pre-seek-target frame pts=%f target=%f\n",
+                           mpi->pts, target);
+                    mp_frame_unref(&frame);
+                    continue;
+                }
+            }
             // Init VS script, or reinit it to change video format. (This
             // includes derived parameters we pass manually to the script.)
             if (!p->out_node || mpi->imgfmt != p->fmt_in.imgfmt ||
@@ -708,11 +726,57 @@ error:
     return res;
 }
 
+// Soft reset: drain in-flight VS requests and clear queued frames, but keep
+// VS nodes (and any TensorRT/etc. engine loaded by the script) alive. This is
+// what makes seeking fast for ML-upscaler scripts: the dominant per-seek cost
+// is the engine reload that would otherwise happen via destroy_vs+reinit_vs.
+//
+// Frame numbering is advanced past anything previously requested instead of
+// reset to 0, so VS's internal cache cannot return stale hits for reused
+// frame numbers.
+static void soft_reset_vs(struct priv *p)
+{
+    if (!p->out_node)
+        return; // not initialized yet — nothing to drain
+
+    MP_VERBOSE(p, "soft reset (keeping VS engine alive)\n");
+
+    mp_mutex_lock(&p->lock);
+    p->shutdown = true;
+    mp_cond_broadcast(&p->wakeup);
+    while (num_requested(p))
+        mp_cond_wait(&p->wakeup, &p->lock);
+    p->shutdown = false;
+    p->eof = false;
+    p->failed = false;
+
+    for (int n = 0; n < p->max_requests; n++) {
+        if (p->requested[n] != &dummy_img_eof)
+            mp_image_unrefp(&p->requested[n]);
+        p->requested[n] = NULL;
+    }
+    for (int n = 0; n < p->num_buffered; n++)
+        talloc_free(p->buffered[n]);
+    p->num_buffered = 0;
+
+    // frames_sent is the monotonic count of all-time frames sent to VS;
+    // never reset. Park in_/out_frameno at frames_sent so the next frame we
+    // accept gets a fresh, never-seen-by-VS frame number.
+    p->in_frameno = p->frames_sent;
+    p->out_frameno = p->frames_sent;
+    p->requested_frameno = p->frames_sent;
+    p->out_pts = MP_NOPTS_VALUE;
+    mp_mutex_unlock(&p->lock);
+}
+
 static void vf_vapoursynth_reset(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    destroy_vs(p);
+    if (p->opts->skip_seek_pre_target)
+        soft_reset_vs(p);
+    else
+        destroy_vs(p);
 }
 
 static void vf_vapoursynth_destroy(struct mp_filter *f)
@@ -812,6 +876,8 @@ static const m_option_t vf_opts_fields[] = {
     {"concurrent-frames", OPT_CHOICE(maxrequests, {"auto", -1}),
         M_RANGE(1, 99), OPTDEF_INT(-1)},
     {"user-data", OPT_STRING(user_data), OPTDEF_STR("")},
+    {"skip-seek-pre-target", OPT_BOOL(skip_seek_pre_target),
+        OPTDEF_INT(1)},
     {0}
 };
 

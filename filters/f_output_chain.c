@@ -45,6 +45,11 @@ struct chain {
     struct vo *vo;
     struct ao *ao;
 
+    // For type==MP_OUTPUT_CHAIN_VIDEO: hr-seek target pts. Exposed to filters
+    // via stream_info.get_hrseek so they can skip pre-target frames.
+    bool hrseek_active;
+    double hrseek_pts;
+
     struct mp_output_chain public;
 };
 
@@ -379,6 +384,15 @@ static void get_display_res(struct mp_stream_info *i, int *res)
         vo_control(p->vo, VOCTRL_GET_DISPLAY_RES, res);
 }
 
+static bool get_hrseek(struct mp_stream_info *i, double *pts)
+{
+    struct chain *p = i->priv;
+    if (!p->hrseek_active)
+        return false;
+    *pts = p->hrseek_pts;
+    return true;
+}
+
 void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
 {
     struct chain *p = c->f->priv;
@@ -488,6 +502,14 @@ static void set_speed_any(struct mp_user_filter **filters, int num_filters,
         if (mp_filter_command(filters[n]->f, &cmd))
             *speed = 1.0;
     }
+}
+
+void mp_output_chain_set_hrseek(struct mp_output_chain *c, bool active,
+                                double pts)
+{
+    struct chain *p = c->f->priv;
+    p->hrseek_active = active;
+    p->hrseek_pts = pts;
 }
 
 void mp_output_chain_set_audio_speed(struct mp_output_chain *c,
@@ -652,6 +674,7 @@ static void create_video_things(struct chain *p)
     p->stream_info.priv = p;
     p->stream_info.get_display_fps = get_display_fps;
     p->stream_info.get_display_res = get_display_res;
+    p->stream_info.get_hrseek = get_hrseek;
 
     p->f->stream_info = &p->stream_info;
 
