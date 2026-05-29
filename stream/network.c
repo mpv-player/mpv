@@ -17,6 +17,8 @@
 
 #include <float.h>
 
+#include <libavformat/version.h>
+
 #include "network.h"
 #include "options/m_option.h"
 
@@ -41,5 +43,8 @@ const struct m_sub_options mp_network_conf = {
     .defaults = &(const struct mp_network_opts){
         .useragent = "libmpv",
         .timeout = 60,
+#if HAVE_LIBCURL || LIBAVFORMAT_VERSION_MAJOR >= 63
+        .tls_verify = true,
+#endif
     },
 };
