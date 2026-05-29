@@ -1,0 +1,57 @@
+name: Sync upstream
+
+# Keeps this fork's master current with mpv-player/mpv while preserving local
+# commits (e.g. the vf_vapoursynth fast-seek patch). Reproduces what GitHub's
+# "Sync fork" button does for a diverged fork: a merge, not a fast-forward.
+# (The merge-upstream REST API only fast-forwards, so it can't be used here.)
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC nightly
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # full history required for a real merge
+
+      - name: Configure identity
+        run: |
+          git config user.name  "the-database"
+          git config user.email "25811902+the-database@users.noreply.github.com"
+
+      - name: Merge upstream
+        id: merge
+        run: |
+          git remote add upstream https://github.com/mpv-player/mpv.git
+          git fetch upstream master
+          if git merge -m "Merge branch 'mpv-player:master' into master" upstream/master; then
+            git push origin master
+          else
+            git diff --name-only --diff-filter=U > /tmp/conflicts.txt
+            echo "conflict=1" >> "$GITHUB_OUTPUT"
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Report conflict
+        if: failure() && steps.merge.outputs.conflict == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files="$(cat /tmp/conflicts.txt)"
+          title="Upstream sync conflict"
+          body=$'Nightly upstream merge hit conflicts in:\n\n```\n'"$files"$'\n```\n\nResolve manually:\n```\ngit fetch upstream && git merge upstream/master\n```'
+          n="$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number')"
+          if [ -n "$n" ]; then
+            gh issue comment "$n" --body "$body"$'\n\nRecurred in run '"${{ github.run_id }}"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
