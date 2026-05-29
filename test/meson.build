@@ -122,6 +122,10 @@ if get_option('libmpv')
                      include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-file-loading', exe, args: file, suite: 'libmpv')
 
+    exe = executable('libmpv-test-file-loading-lua-osd', 'libmpv_test_file_loading_lua_osd.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
+    test('libmpv-test-file-loading-lua-osd', exe, args: file, suite: 'libmpv')
+
     exe = executable('libmpv-test-lavfi-complex', 'libmpv_test_lavfi_complex.c',
                      include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-lavfi-complex', exe, args: file, suite: 'libmpv')
@@ -129,6 +133,10 @@ if get_option('libmpv')
     exe = executable('libmpv-test-options', 'libmpv_test_options.c',
                      include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-options', exe, suite: 'libmpv')
+
+    exe = executable('libmpv-test-lua-osd', 'libmpv_test_lua_osd.c',
+                     include_directories: incdir, dependencies: libmpv_dep)
+    test('libmpv-test-lua-osd', exe, suite: 'libmpv')
 
     # Old versions of ffmpeg are bugged when setting forced tracks and older
     # versions of meson don't support the custom version checking argument.
