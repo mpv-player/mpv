@@ -936,6 +936,13 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     if (!p->stream_ok || atomic_load(&p->aborted))
         return STREAM_ERROR;
 
+    char *effective_url = NULL;
+    curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+    if (effective_url && strcmp(s->url, effective_url)) {
+        MP_DBG(p, "Redirected:\n (original) %s\n (redirect) %s\n", s->url, effective_url);
+        s->url = effective_url;
+    }
+
     char *content_type = NULL;
     curl_easy_getinfo(p->curl, CURLINFO_CONTENT_TYPE, &content_type);
     if (content_type && content_type[0])
