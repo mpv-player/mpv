@@ -207,6 +207,7 @@ void mp_globfree(mp_glob_t *pglob);
 
 #define RTLD_NOW 0
 #define RTLD_LOCAL 0
+#define RTLD_GLOBAL 0
 #define dlopen(fn,fg) mp_dlopen((fn), (fg))
 #define dlsym(h,s) mp_dlsym((h), (s))
 #define dlerror mp_dlerror
