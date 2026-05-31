@@ -817,7 +817,7 @@ static const m_option_t vf_opts_fields[] = {
 static int drv_vss_init(struct priv *p)
 {
     const char *vsscript_path = getenv("VSSCRIPT_PATH");
-    const int dl_mode = RTLD_NOW | RTLD_LOCAL;
+    const int dl_mode = RTLD_NOW | RTLD_GLOBAL;
     void *vsscript_lib = NULL;
 
     if (vsscript_path) {
