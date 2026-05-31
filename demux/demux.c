@@ -3501,6 +3501,7 @@ static struct demuxer *demux_open(struct stream *stream,
     struct mp_log *log = mp_log_new(NULL, global->log, "!demux");
     struct demuxer *demuxer = NULL;
     char *force_format = params ? params->force_format : NULL;
+    char *s_url = stream->original_url ? stream->original_url : stream->url;
 
     struct parent_stream_info sinfo = {
         .seekable = stream->seekable,
@@ -3508,7 +3509,7 @@ static struct demuxer *demux_open(struct stream *stream,
         .is_streaming = stream->streaming,
         .stream_origin = stream->stream_origin,
         .cancel = cancel,
-        .filename = talloc_strdup(NULL, stream->url),
+        .filename = talloc_strdup(NULL, s_url),
     };
 
     if (!force_format)

@@ -153,6 +153,7 @@ typedef struct stream {
     int stream_origin; // any STREAM_ORIGIN_*
     void *priv; // used for DVD, TV, RTSP etc
     char *url;  // filename/url (possibly including protocol prefix)
+    char *original_url; // holds original url in case a redirect happened
     char *path; // filename (url without protocol prefix)
     char *mime_type; // when HTTP streaming is used
     char *demuxer; // request demuxer to be used

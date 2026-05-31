@@ -940,6 +940,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
     if (effective_url && strcmp(s->url, effective_url)) {
         MP_DBG(p, "Redirected:\n (original) %s\n (redirect) %s\n", s->url, effective_url);
+        s->original_url = s->url;
         s->url = effective_url;
     }
 
