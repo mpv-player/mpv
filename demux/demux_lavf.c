@@ -1233,20 +1233,26 @@ static void handle_iamf_audio_element_group(demuxer_t *demuxer,
 // enhancement NALUs. Only the base is decodable on its own.
 static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
 {
-    lavf_priv_t *priv = demuxer->priv;
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 19, 100)
+    AVStreamGroupLayeredVideo *lcevc = stg->params.layered_video;
+    unsigned el_index = lcevc->el_index;
+#else
     AVStreamGroupLCEVC *lcevc = stg->params.lcevc;
+    unsigned el_index = lcevc->lcevc_index;
+#endif
+    lavf_priv_t *priv = demuxer->priv;
 
-    if (lcevc->lcevc_index >= stg->nb_streams) {
-        MP_WARN(demuxer, "LCEVC group %u: lcevc_index %u out of range (%u streams)\n",
-                stg->index, lcevc->lcevc_index, stg->nb_streams);
+    if (el_index >= stg->nb_streams) {
+        MP_WARN(demuxer, "LCEVC group %u: el_index %u out of range (%u streams)\n",
+                stg->index, el_index, stg->nb_streams);
         return;
     }
 
     MP_VERBOSE(demuxer, "LCEVC group %u: enhancement stream index %u, "
                "final size %dx%d\n",
-               stg->index, lcevc->lcevc_index, lcevc->width, lcevc->height);
+               stg->index, el_index, lcevc->width, lcevc->height);
 
-    AVStream *lcevc_st = stg->streams[lcevc->lcevc_index];
+    AVStream *lcevc_st = stg->streams[el_index];
     if ((unsigned)lcevc_st->index < (unsigned)priv->num_streams) {
         struct sh_stream *sh = priv->streams[lcevc_st->index]->sh;
         if (sh)
