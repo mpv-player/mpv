@@ -670,6 +670,8 @@ jobs:
         id: tests
         run: |
           meson test -C build
+        env:
+          GGML_NO_BACKTRACE: 1
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
