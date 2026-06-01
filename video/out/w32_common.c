@@ -1987,6 +1987,9 @@ set_pos_done:
             ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
         } else if (w32->opts->window_maximized && !w32->current_fs) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
+        } else if (w32->opts->focus_on == 0) {
+            ShowWindow(w32->window, SW_SHOWNOACTIVATE);
+            SetWindowPos(w32->window, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
         } else {
             ShowWindow(w32->window, SW_SHOW);
         }
@@ -2017,6 +2020,9 @@ void vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
+
+    if (w32->opts->focus_on == 2)
+        SetForegroundWindow(w32->window);
 }
 
 static void w32_api_load(struct vo_w32_state *w32)
