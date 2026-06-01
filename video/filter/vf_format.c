@@ -186,10 +186,17 @@ static void vf_format_process(struct mp_filter *f)
                 .clm = get_side_data(img, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
                 .dhp = get_side_data(img, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
             });
+            // Tell the f_enhancement_pair filter to not inherit DV metadata
+            // from the EL.
+            img->params.no_dovi = true;
         }
 
-        if (!priv->opts->enhancement_layer)
+        if (!priv->opts->enhancement_layer) {
+            // This is no-op, but just in case. f_enhancement_pair runs at the
+            // end of chain.
             mp_image_unrefp(&img->enhancement_layer);
+            img->params.no_enhancement_layer = true;
+        }
 
         if (!priv->opts->hdr10plus) {
             memset(img->params.color.hdr.scene_max, 0,
