@@ -63,6 +63,9 @@ struct mp_image_params {
     int rotate;
     enum mp_stereo3d_mode stereo3d; // image is encoded with this mode
     struct mp_rect crop;        // crop applied on image
+    // Flags for f_enhancement_pair.c to not inherit flags from EL.
+    bool no_dovi;
+    bool no_enhancement_layer;
 };
 
 /* Memory management:
