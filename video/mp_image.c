@@ -561,6 +561,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.primaries_orig = src->params.primaries_orig;
     dst->params.transfer_orig = src->params.transfer_orig;
     dst->params.sys_orig = src->params.sys_orig;
+    dst->params.no_dovi = src->params.no_dovi;
+    dst->params.no_enhancement_layer = src->params.no_enhancement_layer;
 
     // ensure colorspace consistency
     enum pl_color_system dst_forced_csp = mp_image_params_get_forced_csp(&dst->params);
@@ -1132,6 +1134,8 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         dst->params.stereo3d = p->stereo3d;
         // Might be incorrect if colorspace changes.
         dst->params.light = p->light;
+        dst->params.no_dovi = p->no_dovi;
+        dst->params.no_enhancement_layer = p->no_enhancement_layer;
 #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 11, 100)
         dst->params.repr.alpha = p->repr.alpha;
 #endif
