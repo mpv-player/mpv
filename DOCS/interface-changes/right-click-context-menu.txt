@@ -1,0 +1,1 @@
+bind right click to context menu
