@@ -1185,12 +1185,13 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     if (sd) {
 #ifdef PL_HAVE_LAV_DOLBY_VISION
         const AVDOVIMetadata *metadata = (const AVDOVIMetadata *)sd->buf->data;
-#if PL_API_VER >= 364
-        if (pl_avdovi_metadata_supported(metadata)) {
-#else
+#if PL_API_VER < 364
         const AVDOVIRpuDataHeader *header = av_dovi_get_header(metadata);
-        if (header->disable_residual_flag) {
+        if (header->disable_residual_flag)
+#elif PL_API_VER < 370
+        if (pl_avdovi_metadata_supported(metadata))
 #endif
+        {
             dst->dovi = dovi = av_buffer_alloc(sizeof(struct pl_dovi_metadata));
             MP_HANDLE_OOM(dovi);
             pl_map_avdovi_metadata(&dst->params.color, &dst->params.repr,
