@@ -27,6 +27,7 @@
 #include <libavutil/avstring.h>
 #include <libavutil/error.h>
 #include <libavutil/mem.h>
+#include <libavutil/opt.h>
 
 #include "stream.h"
 #include "stream_curl.h"
@@ -158,6 +159,7 @@ struct priv {
     CURL *curl;
     struct curl_slist *headers;
     char *url;
+    const char *effective_url;
     const struct curl_scheme *scheme;
 
     // Stream parameters
@@ -941,6 +943,10 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     if (content_type && content_type[0])
         s->mime_type = talloc_strdup(s, content_type);
 
+    const char *effective_url = NULL;
+    curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
+    p->effective_url = effective_url ? effective_url : p->url;
+
     s->seekable = p->seekable;
     s->is_network = true;
     s->streaming = true;
@@ -985,8 +991,35 @@ const stream_info_t stream_info_curl = {
 // should route all traffic through our implementation.
 
 struct curl_avio_cookie {
+    const AVClass *av_class;
     struct stream *stream;
     struct mp_cancel *cancel;
+    const char *location; // final URL after redirects, exposed via the "location" opt
+};
+
+static const AVClass curl_avio_cookie_class = {
+    .class_name = "mpv_curl_avio",
+    .item_name  = av_default_item_name,
+    .option     = (const AVOption[]) {
+        {"location", "The actual location of the data received",
+         offsetof(struct curl_avio_cookie, location),
+         AV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, AV_OPT_FLAG_DECODING_PARAM},
+        {0}
+    },
+    .version = LIBAVUTIL_VERSION_INT,
+};
+
+static void *curl_avio_child_next(void *obj, void *prev)
+{
+    AVIOContext *pb = obj;
+    return prev ? NULL : pb->opaque; // the cookie
+}
+
+static const AVClass curl_avio_class = {
+    .class_name = "mpv_curl_avio",
+    .item_name  = av_default_item_name,
+    .child_next = curl_avio_child_next,
+    .version    = LIBAVUTIL_VERSION_INT,
 };
 
 static bool is_protocol_allowed(struct mp_log *log, bstr scheme,
@@ -1106,8 +1139,10 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
     }
 
     struct curl_avio_cookie *c = talloc_zero(NULL, struct curl_avio_cookie);
+    c->av_class = &curl_avio_cookie_class;
     c->stream = s;
     c->cancel = cancel;
+    c->location = ((struct priv *)s->priv)->effective_url;
 
     void *buffer = av_malloc(64 * 1024);
     if (!buffer) {
@@ -1128,6 +1163,7 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
         return AVERROR(ENOMEM);
     }
     pb->seekable = s->seekable ? AVIO_SEEKABLE_NORMAL : 0;
+    pb->av_class = &curl_avio_class;
 
     *pb_out = pb;
     *cookie_out = c;
