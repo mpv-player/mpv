@@ -189,6 +189,37 @@ Available filters are:
     ``window-size=<amount>``
         Length in milliseconds of the overlap-and-add window. (default: 12)
 
+``lavfi-tempo[=[filter=]<filter_name>]``
+    Scales audio tempo using ``atempo`` or ``ascale`` filters from FFmpeg's
+    libavfilter.
+
+    If ``ascale`` (Librempeg only) is not available in the loaded
+    libavfilter, ``atempo`` will be used as a fall-back.
+
+    This can be used in place of ``scaletempo`` and ``scaletempo2``.
+
+
+    .. admonition:: Examples
+
+        ``mpv --af=lavfi-tempo --speed=1.2 media.ogg``
+            Would play media at 1.2x normal speed at normal pitch with tempo
+            scaled by the ``atempo`` filter from lavfi.
+
+        ``mpv --af=lavfi-tempo=atempo --speed=1.2 media.ogg``
+            Same as above.
+
+        ``mpv --af=lavfi-tempo=filter=atempo --speed=1.2 media.ogg``
+            Same as above.
+
+        ``mpv --af=lavfi-tempo=ascale --speed=1.2 media.ogg``
+            Would play media at 1.2x normal speed at normal pitch with tempo
+            scaled by the ``ascale`` filter from lavfi, unless the filter is
+            not available, then ``atempo`` will be used as a fall-back.
+
+        ``mpv --af=lavfi-tempo=filter=ascale --speed=1.2 media.ogg``
+            Same as above.
+
+
 ``rubberband``
     High quality pitch correction with librubberband. This can be used in place
     of ``scaletempo`` and ``scaletempo2``, and will be used to adjust audio pitch
