@@ -133,6 +133,8 @@ enum mp_voctrl {
     // Clipboard
     VOCTRL_GET_CLIPBOARD,               // struct voctrl_clipboard*
     VOCTRL_SET_CLIPBOARD,
+
+    VOCTRL_FILE_CHANGE,
 };
 
 // Helper to expose what kind of content is currently playing to the VO.

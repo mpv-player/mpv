@@ -2020,9 +2020,6 @@ void vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
-
-    if (w32->opts->focus_on == 2)
-        SetForegroundWindow(w32->window);
 }
 
 static void w32_api_load(struct vo_w32_state *w32)
@@ -2311,6 +2308,7 @@ static bool gui_thread_control_supports(int request)
     case VOCTRL_BEGIN_DRAGGING:
     case VOCTRL_SHOW_MENU:
     case VOCTRL_UPDATE_MENU:
+    case VOCTRL_FILE_CHANGE:
         return true;
     }
 
@@ -2505,12 +2503,17 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_SHOW_MENU:
         PostMessageW(w32->window, WM_SHOWMENU, 0, 0);
         return VO_TRUE;
-    case VOCTRL_UPDATE_MENU:;
+    case VOCTRL_UPDATE_MENU:
         const m_option_t menu_data_type = {.type = CONF_TYPE_NODE};
         m_option_free(&menu_data_type, &w32->menu_data);
         m_option_copy(&menu_data_type, &w32->menu_data, arg);
         talloc_steal(w32, node_get_alloc(&w32->menu_data));
         return VO_TRUE;
+    case VOCTRL_FILE_CHANGE:
+        if (w32->opts->focus_on == 2 && SetForegroundWindow(w32->window) != FALSE)
+            return VO_TRUE;
+
+        return VO_FALSE;
     }
 
     // Keep gui_thread_control_supports() in sync
