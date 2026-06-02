@@ -146,11 +146,23 @@ they will be automatically downloaded and built by Meson.
       - Clang compiler for Windows
       - C++ CMake tools for Windows
       - Windows SDK
-   - Activate the developer shell:
+   - Activate the developer shell. The target and host architecture must match
+      (e.g. `amd64` for x86_64, `arm64` for ARM64):
       ```
       & "<Visual Studio Path>\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64 -SkipAutomaticLocation | Out-Null
       ```
-2. Install Meson, as outlined in [Getting Meson](https://mesonbuild.com/Getting-meson.html):
+2. Install the remaining build tools that are not part of the Visual Studio installer:
+   - [Meson](https://mesonbuild.com/Getting-meson.html), the build system.
+   - [NASM](https://www.nasm.us/), required to assemble the hand-written assembly
+     in FFmpeg, dav1d and aom. Make sure it is in `PATH`.
+   - [Rust](https://www.rust-lang.org/tools/install) (via `rustup`), required to
+     build mpv's Rust components and the `subrandr` subproject. A **nightly**
+     toolchain is needed, as the build relies on Cargo's unstable `-C` option:
+
+     ```powershell
+     rustup default nightly
+     ```
+
 3. The following build script utilizes the Meson subprojects system to build mpv and its dependencies.
    To make sure all dependency versions are up-to-date, update the subprojects database from Meson's WrapDB.
    Also explicitly download several wraps as some nested projects may pull older versions of them.
@@ -162,12 +174,14 @@ they will be automatically downloaded and built by Meson.
    meson wrap install libpng
    meson wrap install zlib
    ```
-4. Set environment variables or use the `--native-file` option in Meson.
+4. Set environment variables so Meson uses the Clang/LLVM toolchain, or pass an
+equivalent `--native-file` to Meson.
    ```powershell
    $env:CC = 'clang'
    $env:CXX = 'clang++'
-   $env:CC_LD = 'lld'
-   $env:CXX_LD = 'lld'
+   $env:CC_LD = 'lld-link'
+   $env:CXX_LD = 'lld-link'
+   $env:RUST_LD = 'lld-link'
    $env:WINDRES = 'llvm-rc'
    ```
    Note that some dependencies (e.g. LuaJIT) may require `sed` to configure. Fortunately, it is already bundled in
@@ -247,16 +261,24 @@ due to differences in compiler flags. Our build system is designed specifically
 for GNU-like compiler drivers. However, you can still build programs in
 Visual Studio and link them with libmpv.
 
-If the toolchain used generates a ``.lib`` file, it will be ready for use.
-Otherwise, you will need to create an import library for the mpv DLL with the
-following command:
+When ``libmpv`` is built with the recommended Clang/``lld-link`` toolchain,
+``lld-link`` emits an import library (``mpv.lib``) next to the DLL in the build
+directory. Add that ``mpv.lib`` to your MSVC project.
+
+To generate an import library from a DLL yourself, first create a ``.def`` file
+listing its exports. There are several ways to do this. One is ``gendef``, which
+writes a ``.def``, based on DLL.
 
 ```bash
-lib /name:mpv-2.dll /out:mpv.lib /MACHINE:X64
+gendef libmpv-2.dll
 ```
 
-Ensure that the string in the ``/name:`` parameter matches the filename of the
-DLL, as this is the filename that the MSVC linker will reference.
+Then build the import library from it. ``/name`` must match the DLL filename, and
+``/machine`` must match the DLL's architecture (e.g. ``x64`` or ``arm64``):
+
+```bash
+lib /def:libmpv-2.def /name:libmpv-2.dll /out:mpv.lib /machine:x64
+```
 
 **Note:** Static linking is only feasible with matching compilers. For instance,
 if you build with Clang in Visual Studio, static linking is possible.
