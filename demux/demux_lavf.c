@@ -1015,6 +1015,7 @@ static void build_editions(demuxer_t *demuxer)
         return;
     }
 
+    int first_nonempty = -1;
     for (unsigned i = 0; i < avfc->nb_programs; i++) {
         AVProgram *prog = avfc->programs[i];
 
@@ -1024,12 +1025,13 @@ static void build_editions(demuxer_t *demuxer)
         };
         mp_tags_copy_from_av_dictionary(ed.metadata, prog->metadata);
 
-        int video_count = 0, audio_count = 0;
+        int video_count = 0, audio_count = 0, track_count = 0;
         int video_idx = -1, audio_idx = -1;
         for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
             unsigned idx = prog->stream_index[j];
             if (idx >= priv->num_streams || !priv->streams[idx]->sh)
                 continue;
+            track_count++;
             struct sh_stream *sh = priv->streams[idx]->sh;
             if (sh->type == STREAM_VIDEO) {
                 video_count++;
@@ -1065,6 +1067,9 @@ static void build_editions(demuxer_t *demuxer)
                                                   prog->id, prefix);
         if (title)
             mp_tags_set_str(ed.metadata, "title", title);
+
+        if (track_count > 0 && first_nonempty < 0)
+            first_nonempty = demuxer->num_editions;
 
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
     }
@@ -1115,7 +1120,7 @@ static void build_editions(demuxer_t *demuxer)
             selected = best;
     }
 
-    demuxer->edition = selected >= 0 ? selected : 0;
+    demuxer->edition = selected >= 0 ? selected : first_nonempty >= 0 ? first_nonempty : 0;
 }
 
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
