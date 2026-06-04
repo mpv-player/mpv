@@ -53,6 +53,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
