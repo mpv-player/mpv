@@ -121,6 +121,7 @@ enum demux_event {
     DEMUX_EVENT_STREAMS = 1 << 1,   // a stream was added
     DEMUX_EVENT_METADATA = 1 << 2,  // metadata or stream_metadata changed
     DEMUX_EVENT_DURATION = 1 << 3,  // duration updated
+    DEMUX_EVENT_LISTS = 1 << 4,     // chapters / editions list changed
     DEMUX_EVENT_ALL = 0xFFFF,
 };
 
@@ -348,6 +349,8 @@ void demux_stream_tags_changed(struct demuxer *demuxer, struct sh_stream *sh,
 void demux_close_stream(struct demuxer *demuxer);
 
 void demux_metadata_changed(demuxer_t *demuxer);
+void demux_set_duration(demuxer_t *demuxer, double duration);
+void demux_lists_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer, double playback_pts);
 
 bool demux_cache_dump_set(struct demuxer *demuxer, double start, double end,
