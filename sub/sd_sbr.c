@@ -217,6 +217,8 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     const struct sub_bitmaps *cached = mp_sub_packer_get_cached(ctx->packer);
 
     bool redraw_required = ctx->prev_osd.w != dim.w || ctx->prev_osd.h != dim.h ||
+                           ctx->prev_osd.ml != dim.ml || ctx->prev_osd.mt != dim.mt ||
+                           ctx->prev_osd.mr != dim.mr || ctx->prev_osd.mb != dim.mb ||
                            !cached || sbr_renderer_did_change(ctx->sbr_renderer, &context, t);
     if (redraw_required) {
         sbr_renderer_set_subtitles(ctx->sbr_renderer, ctx->sbr_subtitles);
