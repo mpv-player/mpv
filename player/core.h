@@ -33,6 +33,8 @@
 #include "video/out/vo.h"
 #include "osdep/als.h"
 #include "demux/stheader.h"
+#include "player/waveform_scanner.h"
+#include "player/waveform_renderer.h"
 
 // definitions used internally by the core player code
 
@@ -480,6 +482,14 @@ typedef struct MPContext {
     int open_res_error;
 
     struct mp_als *als_state; // lazily initialized on first use
+
+    // Waveform scanner — created on first file open when --waveform is set,
+    // destroyed on MPV exit.  NULL when waveform is disabled.
+    struct waveform_scanner *waveform_scanner;
+
+    // Waveform renderer — created when waveform is enabled and video loads,
+    // destroyed on file unload. NULL when waveform is disabled.
+    struct waveform_renderer *waveform_renderer;
 } MPContext;
 
 // Contains information about an asynchronous work item, how it can be aborted,

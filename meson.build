@@ -177,6 +177,10 @@ sources = files(
     'player/scripting.c',
     'player/sub.c',
     'player/video.c',
+    'player/waveform_cache.c',
+    'player/waveform_opts.c',
+    'player/waveform_renderer.c',
+    'player/waveform_scanner.c',
 
     ## clipboard
     'player/clipboard/clipboard.c',

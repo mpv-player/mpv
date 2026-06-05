@@ -113,6 +113,7 @@ extern const struct m_sub_options egl_conf;
 extern const struct m_sub_options mp_sub_filter_opts;
 
 extern const struct m_sub_options w32_register_conf;
+extern const struct m_sub_options waveform_conf;
 
 static const struct m_sub_options screenshot_conf = {
     .opts = image_writer_opts,
@@ -994,6 +995,8 @@ static const m_option_t mp_opts[] = {
 #endif
 
     {"", OPT_SUBSTRUCT(encode_opts, encode_config)},
+
+    {"", OPT_SUBSTRUCT(waveform_opts, waveform_conf)},
 
     {"play-dir", OPT_REPLACED("play-direction")},
     {0}

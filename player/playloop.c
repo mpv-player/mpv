@@ -1284,6 +1284,28 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_clipboard_updates(mpctx);
 
+    // Update waveform renderer
+    if (mpctx->waveform_renderer && mpctx->playback_initialized) {
+        double time_pos = get_current_time(mpctx);
+        double duration = get_time_length(mpctx);
+        if (time_pos != MP_NOPTS_VALUE && duration > 0) {
+            waveform_renderer_set_position(mpctx->waveform_renderer,
+                                           time_pos, duration);
+
+            // Render waveform and set as external OSD
+            struct sub_bitmaps waveform_overlay = {0};
+            struct mp_osd_res osd_res = osd_get_vo_res(mpctx->osd);
+            waveform_renderer_draw(mpctx->waveform_renderer,
+                                  &waveform_overlay,
+                                  osd_res,
+                                  time_pos);
+
+            if (waveform_overlay.num_parts > 0) {
+                osd_set_external2(mpctx->osd, &waveform_overlay);
+            }
+        }
+    }
+
     update_osd_msg(mpctx);
 
     handle_update_subtitles(mpctx);

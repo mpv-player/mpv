@@ -53,6 +53,7 @@
 #include "filters/f_decoder_wrapper.h"
 #include "options/parse_configfile.h"
 #include "options/parse_commandline.h"
+#include "waveform_scanner.h"
 #include "common/playlist.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -190,6 +191,10 @@ void mp_destroy(struct MPContext *mpctx)
     mpctx->encode_lavc_ctx = NULL;
 
     command_uninit(mpctx);
+
+    // Destroy waveform scanner — joins worker threads before continuing
+    waveform_scanner_destroy(mpctx->waveform_scanner);
+    mpctx->waveform_scanner = NULL;
 
     mp_clients_destroy(mpctx);
 

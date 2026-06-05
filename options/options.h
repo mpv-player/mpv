@@ -6,6 +6,9 @@
 #include "m_option.h"
 #include "common/common.h"
 
+// Forward declaration — full definition in player/waveform_opts.h
+struct waveform_opts;
+
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list;
 
@@ -398,6 +401,8 @@ typedef struct MPOpts {
     struct curl_opts *curl_opts;
 
     struct encode_opts *encode_opts;
+
+    struct waveform_opts *waveform_opts;
 
     char *ipc_path;
     char *ipc_client;

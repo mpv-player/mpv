@@ -60,6 +60,45 @@
 
 #include "core.h"
 #include "command.h"
+#include "waveform_cache.h"
+#include "waveform_opts.h"
+#include "waveform_scanner.h"
+#include "waveform_renderer.h"
+
+// ── Waveform scanner callback ────────────────────────────────────────────────
+// Called on the main thread when waveform scan completes or fails.
+// result: talloc-owned waveform_data (NULL on error)
+// error: static error string (NULL on success)
+static void loadfile_waveform_scanned(void *ctx,
+                                     struct waveform_data *result,
+                                     const char *error)
+{
+    struct MPContext *mpctx = ctx;
+
+    if (error) {
+        MP_WARN(mpctx, "Waveform scan failed: %s\n", error);
+        return;
+    }
+
+    if (!result) {
+        MP_WARN(mpctx, "Waveform scan returned NULL result\n");
+        return;
+    }
+
+    MP_VERBOSE(mpctx, "Waveform scan complete: %d samples, %.2f seconds\n",
+               result->count, result->duration);
+
+    // Update renderer if it exists
+    if (mpctx->waveform_renderer) {
+        waveform_renderer_set_data(mpctx->waveform_renderer,
+                                   result->samples,
+                                   result->count,
+                                   result->duration);
+    }
+
+    // Free the result (scanner allocated it with talloc)
+    talloc_free(result);
+}
 
 // Called from the demuxer thread if a new packet is available, or other changes.
 static void wakeup_demux(void *pctx)
@@ -1919,6 +1958,56 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     process_hooks(mpctx, "on_loaded");
+
+    // ── Waveform scanning (Phase 2) ──────────────────────────────────────────
+    // Debug: Log waveform option status
+    if (mpctx->opts->waveform_opts) {
+        struct waveform_opts *wo = mpctx->opts->waveform_opts;
+        MP_VERBOSE(mpctx, "Waveform options: enable=%d cache=%d fps=%d file=%s\n",
+                   wo->enable, wo->cache_enabled, wo->sample_fps,
+                   mpctx->filename ? mpctx->filename : "(null)");
+    } else {
+        MP_VERBOSE(mpctx, "Waveform options: NULL\n");
+    }
+
+    if (mpctx->opts->waveform_opts &&
+        mpctx->opts->waveform_opts->enable &&
+        mpctx->opts->waveform_opts->cache_enabled &&
+        mpctx->filename)
+    {
+        struct waveform_opts *wo = mpctx->opts->waveform_opts;
+
+        MP_INFO(mpctx, "Waveform: Starting background scan for %s\n",
+                mpctx->filename);
+
+        // Lazily create scanner the first time it's needed.
+        if (!mpctx->waveform_scanner) {
+            struct mp_log *wf_log = mp_log_new(mpctx, mpctx->log, "waveform");
+            MP_INFO(mpctx, "Waveform: Creating scanner (max_scans=%d)\n",
+                    wo->max_concurrent_scans);
+            mpctx->waveform_scanner =
+                waveform_scanner_create(wf_log, mpctx->global,
+                                        mpctx->dispatch,
+                                        wo->max_concurrent_scans);
+        }
+
+        // Create renderer if not exists
+        if (!mpctx->waveform_renderer) {
+            struct mp_log *wf_log = mp_log_new(mpctx, mpctx->log, "waveform");
+            MP_INFO(mpctx, "Waveform: Creating renderer\n");
+            mpctx->waveform_renderer =
+                waveform_renderer_create(wf_log, wo);
+        }
+
+        MP_INFO(mpctx, "Waveform: Enqueuing scan (fps=%d)\n", wo->sample_fps);
+        waveform_scanner_enqueue(mpctx->waveform_scanner,
+                                 mpctx->filename,
+                                 wo->sample_fps,
+                                 WAVEFORM_PRIORITY_FILE_LOAD,
+                                 loadfile_waveform_scanned,  // callback
+                                 mpctx);                     // context
+    }
+    // ────────────────────────────────────────────────────────────────────────
     for (int t = 0; t < STREAM_TYPE_COUNT; t++)
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
@@ -2031,6 +2120,16 @@ terminate_playback:
     }
 
     process_hooks(mpctx, "on_unload");
+
+    // Cancel any pending waveform scans for this file
+    if (mpctx->waveform_scanner && mpctx->filename)
+        waveform_scanner_cancel_file(mpctx->waveform_scanner, mpctx->filename);
+
+    // Destroy waveform renderer (will be recreated on next file load)
+    if (mpctx->waveform_renderer) {
+        waveform_renderer_destroy(mpctx->waveform_renderer);
+        mpctx->waveform_renderer = NULL;
+    }
 
     // time to uninit all, except global stuff:
     reinit_complex_filters(mpctx, true);
