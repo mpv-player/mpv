@@ -280,6 +280,15 @@ struct demux_internal {
     // demux user state (user thread, somewhat similar to reader/decoder state)
     double last_playback_pts;   // last playback_pts from demux_update()
     bool force_metadata_update;
+
+    // Chapter/edition lists staged by the demux thread (demux_lists_changed),
+    // published into d_user by demux_update() on the user thread.
+    bool lists_changed;
+    struct demux_chapter *staged_chapters;
+    int num_staged_chapters;
+    struct demux_edition *staged_editions;
+    int num_staged_editions;
+    int staged_edition;
     int cached_metadata_index;  // speed up repeated lookups
 
     struct mp_recorder *dumper;
@@ -3179,6 +3188,39 @@ void demux_metadata_changed(demuxer_t *demuxer)
     mp_mutex_unlock(&in->lock);
 }
 
+// Updates the duration should it need to be changed. Used for demuxers that
+// changes titles/playlists at runtime.
+void demux_set_duration(demuxer_t *demuxer, double duration)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->duration = duration;
+    in->d_thread->duration = duration;
+    in->highest_av_pts = MP_NOPTS_VALUE;
+    in->events |= DEMUX_EVENT_DURATION;
+    mp_mutex_unlock(&in->lock);
+}
+
+// Updates the chapters/editions should it need to be changed. Used for demuxers
+// that changes titles/playlists at runtime.
+void demux_lists_changed(demuxer_t *demuxer)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->lists_changed = true;
+    in->staged_chapters = in->d_thread->chapters;
+    in->num_staged_chapters = in->d_thread->num_chapters;
+    in->staged_editions = in->d_thread->editions;
+    in->num_staged_editions = in->d_thread->num_editions;
+    in->staged_edition = in->d_thread->edition;
+    in->events |= DEMUX_EVENT_LISTS;
+    mp_mutex_unlock(&in->lock);
+}
+
 // Called locked, with user demuxer.
 static void update_final_metadata(demuxer_t *demuxer, struct timed_metadata *tm)
 {
@@ -3276,6 +3318,14 @@ void demux_update(demuxer_t *demuxer, double pts)
 
     demuxer->events |= in->events;
     in->events = 0;
+    if (in->lists_changed) {
+        in->lists_changed = false;
+        demuxer->chapters = in->staged_chapters;
+        demuxer->num_chapters = in->num_staged_chapters;
+        demuxer->editions = in->staged_editions;
+        demuxer->num_editions = in->num_staged_editions;
+        demuxer->edition = in->staged_edition;
+    }
     if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
         demux_update_replaygain(demuxer);
     if (demuxer->events & DEMUX_EVENT_DURATION)
