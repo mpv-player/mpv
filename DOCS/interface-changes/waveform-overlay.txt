@@ -1,0 +1,18 @@
+add `--waveform` option to enable audio waveform overlay
+add `--waveform-cache` option to control disk caching of waveform data
+add `--waveform-sample-fps` option to set waveform sampling rate (8-128 fps)
+add `--waveform-sample-fps-values` option to define switchable FPS presets
+add `--waveform-background-scan` option to control automatic scanning on file load
+add `--waveform-max-scans` option to set maximum concurrent scanning threads (1-8)
+add `--waveform-refresh-interval` option to throttle waveform redraw rate
+add `--waveform-window` option to set visible time window (0.1-60.0 seconds each side)
+add `--waveform-bar-x` option to set horizontal position (0-100% of screen width)
+add `--waveform-bar-y` option to set vertical position (0-100% of screen height)
+add `--waveform-bar-w` option to set bar width (1-100% of screen width)
+add `--waveform-bar-h` option to set bar height (1-100% of screen height)
+add `--waveform-color-bg` option to set waveform background color
+add `--waveform-color-bar` option to set color for unplayed audio bars
+add `--waveform-color-past` option to set color for played audio bars
+add `--waveform-color-head` option to set playback position indicator color
+add `--waveform-color-time` option to set time marker color (reserved)
+add `--waveform-color-chapter` option to set chapter marker color (reserved)

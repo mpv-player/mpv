@@ -4950,6 +4950,189 @@ OSD
     Set the text layout engine used by libass for the OSD. Default: complex.
     See also ``--sub-shaper``
 
+Waveform Overlay
+----------------
+
+The waveform overlay displays a real-time audio waveform visualization on top
+of the video. The waveform shows audio amplitude over time in a scrolling
+window centered on the current playback position. Audio data is scanned in
+the background, cached to disk for fast reloading, and rendered as an OSD
+overlay.
+
+``--waveform=<yes|no>``
+    Enable or disable the audio waveform overlay (default: no).
+
+    When enabled, mpv scans the audio track of the currently playing file to
+    generate waveform data, which is then displayed as an overlay bar showing
+    audio amplitude over time. The overlay scrolls to keep the current playback
+    position centered.
+
+    .. note::
+
+        The waveform requires an audio stream. Files without audio or with
+        unsupported audio formats will not display a waveform.
+
+``--waveform-cache=<yes|no>``
+    Enable disk caching of waveform data (default: yes).
+
+    When enabled, scanned waveform data is saved to mpv's cache directory
+    (typically ``~/.cache/mpv/waveform/`` on Linux or equivalent on other
+    platforms). Cached data is automatically reused when the same file is
+    played again, avoiding the need to rescan the audio.
+
+    Cache files are invalidated automatically if the source file changes
+    (based on file size and modification time). Each combination of file and
+    sample rate gets its own cache entry.
+
+    Disable this if you want to avoid writing waveform data to disk, though
+    this will require rescanning on every playback.
+
+``--waveform-sample-fps=<8-128>``
+    Set the sampling rate for waveform analysis in frames per second
+    (default: 32).
+
+    Higher values provide more detailed waveforms with finer time resolution,
+    but increase scanning time, memory usage, and cache file size. Lower
+    values scan faster and use less resources, but produce coarser waveforms.
+
+    Recommended values:
+
+    :8-16:   Fast scanning, minimal detail, good for very long files
+    :32-48:  Balanced detail and performance (recommended)
+    :64-128: High detail, slower scanning, larger cache files
+
+    .. admonition:: Example
+
+        ``mpv --waveform --waveform-sample-fps=64 video.mp4``
+            enables waveform with high detail sampling
+
+``--waveform-sample-fps-values=<string>``
+    Comma-separated list of FPS presets for runtime switching
+    (default: ``8,16,32,48,64``).
+
+    This option defines which sample rates are available for switching via
+    input commands or scripts. The values must be within the valid range
+    (8-128).
+
+    .. admonition:: Example
+
+        ``--waveform-sample-fps-values=16,32,64,128``
+
+``--waveform-background-scan=<yes|no>``
+    Automatically scan audio when a file is loaded (default: yes).
+
+    When enabled, waveform scanning starts automatically in the background
+    when a new file begins playback. When disabled, the waveform will only
+    be scanned when explicitly enabled with ``--waveform=yes`` or via a
+    runtime command.
+
+    Disabling this can reduce resource usage if you rarely use the waveform
+    feature.
+
+``--waveform-max-scans=<1-8>``
+    Maximum number of concurrent background scanning threads (default: 2).
+
+    This controls how many audio files can be scanned simultaneously. Higher
+    values can speed up scanning when switching between files quickly, but
+    use more CPU resources.
+
+    Setting this to 1 ensures only one file is scanned at a time, which may
+    be preferable on systems with limited CPU resources or when playing from
+    slow storage.
+
+``--waveform-refresh-interval=<0.001-1.0>``
+    Minimum time between waveform redraws in seconds (default: 0.016).
+
+    This throttles the waveform update rate to avoid excessive rendering.
+    The default value of 0.016 seconds corresponds to approximately 60 FPS.
+    Increase this value to reduce CPU usage from waveform rendering, or
+    decrease it for smoother animation (though values below 0.016 may not
+    be noticeable).
+
+``--waveform-window=<0.1-60.0>``
+    Time window displayed on each side of the playback position in seconds
+    (default: 10.0).
+
+    This sets how much audio timeline is visible before and after the current
+    position. The total visible window is twice this value. For example, the
+    default of 10.0 seconds shows 10 seconds before and 10 seconds after the
+    current position (20 seconds total).
+
+    Smaller values provide a "zoomed in" view focusing on the immediate audio
+    context. Larger values show more of the audio timeline at once.
+
+    .. admonition:: Examples
+
+        - ``--waveform-window=5.0``  shows 5s before + 5s after (10s total)
+        - ``--waveform-window=30.0`` shows 30s before + 30s after (60s total)
+
+``--waveform-bar-x=<0-100>``
+    Horizontal position of the waveform bar as a percentage of screen width
+    (default: 0).
+
+    :0:   Left edge of screen
+    :50:  Horizontally centered
+    :100: Right edge of screen
+
+``--waveform-bar-y=<0-100>``
+    Vertical position of the waveform bar as a percentage of screen height
+    (default: 72).
+
+    :0:   Top edge of screen
+    :50:  Vertically centered
+    :100: Bottom edge of screen
+
+    The default value of 72 places the waveform near the bottom of the screen,
+    above where OSD elements typically appear.
+
+``--waveform-bar-w=<1-100>``
+    Width of the waveform bar as a percentage of screen width (default: 90).
+
+    The bar width is clamped to reasonable minimum and maximum pixel values
+    to ensure visibility.
+
+``--waveform-bar-h=<1-100>``
+    Height of the waveform bar as a percentage of screen height (default: 14).
+
+    The bar height is clamped to ensure it's neither too small to be useful
+    nor so large that it obscures the video.
+
+``--waveform-color-bg=<color>``
+    Background color of the waveform bar (default: ``#CC000000``).
+
+    See ``--sub-color`` for details on color specification format. The color
+    format is AARRGGBB in hexadecimal.
+
+``--waveform-color-bar=<color>``
+    Color of waveform bars for audio that has not yet been played
+    (default: ``#8800AAFF``).
+
+    This represents the "future" audio that is ahead of the current playback
+    position.
+
+``--waveform-color-past=<color>``
+    Color of waveform bars for audio that has already been played
+    (default: ``#88FF7700``).
+
+    This represents the "past" audio that is behind the current playback
+    position.
+
+``--waveform-color-head=<color>``
+    Color of the playback position indicator line (default: ``#00FFFFFF``).
+
+    This vertical line shows exactly where playback is currently positioned
+    within the waveform.
+
+``--waveform-color-time=<color>``
+    Color for time markers (default: ``#00AAAAAA``).
+
+    Currently reserved for future use with time annotations.
+
+``--waveform-color-chapter=<color>``
+    Color for chapter markers (default: ``#44FFFFFF``).
+
+    Currently reserved for future use with chapter position indicators.
+
 Screenshot
 ----------
 
