@@ -7499,7 +7499,7 @@ them.
         In such a configuration, we highly recommend setting ``--tone-mapping``
         to ``mobius`` or even ``clip``.
 
-``--target-contrast=<auto|10-1000000|inf>``
+``--target-contrast=<auto|10-10000000|inf>``
     Specifies the measured contrast of the output display. ``--target-contrast``
     in conjunction with ``--target-peak`` value is used to calculate display
     black point. Used in black point compensation during HDR tone-mapping.
