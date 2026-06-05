@@ -12,7 +12,7 @@ if not sys.argv[1]:
     sys.exit(1)
 git_cmd = [sys.argv[1], "--git-dir=" + os.path.join(sys.argv[2], ".git"),
            "--work-tree=" + sys.argv[2]]
-describe_cmd = git_cmd + ["describe", "--abbrev=9", "--tags", "--dirty"]
+describe_cmd = git_cmd + ["describe", "--abbrev=9", "--tags", "--dirty", "--match", "v0.*"]
 try:
     ver = check_output(describe_cmd, stderr=DEVNULL, encoding="UTF-8")
 except CalledProcessError:

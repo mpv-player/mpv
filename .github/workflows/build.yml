@@ -738,7 +738,7 @@ jobs:
           }
 
           # Match the version string baked into the build (see common/meson.build).
-          version=$(git describe --abbrev=9 --tags --dirty)
+          version=$(git describe --abbrev=9 --tags --dirty --match "v0.*")
           notes=$(cat <<EOF
           Automated development build of the latest \`master\` branch.
 
