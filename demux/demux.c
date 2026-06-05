@@ -3181,6 +3181,41 @@ void demux_metadata_changed(demuxer_t *demuxer)
     mp_mutex_unlock(&in->lock);
 }
 
+// Updates the duration should it need to be changed. Used for demuxers that
+// changes titles/playlists at runtime.
+void demux_set_duration(demuxer_t *demuxer, double duration)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->duration = duration;
+    in->d_thread->duration = duration;
+    // Clear the high-water mark so subsequent packets can re-ratchet duration
+    // upward from the new playlist's PTS base without being shadowed by the
+    // previous title's value.
+    in->highest_av_pts = MP_NOPTS_VALUE;
+    in->events |= DEMUX_EVENT_DURATION;
+    mp_mutex_unlock(&in->lock);
+}
+
+// Updates the chapters/editions should it need to be changed. Used for demuxers
+// that changes titles/playlists at runtime.
+void demux_lists_changed(demuxer_t *demuxer)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->d_user->chapters = in->d_thread->chapters;
+    in->d_user->num_chapters = in->d_thread->num_chapters;
+    in->d_user->editions = in->d_thread->editions;
+    in->d_user->num_editions = in->d_thread->num_editions;
+    in->d_user->edition = in->d_thread->edition;
+    in->events |= DEMUX_EVENT_LISTS;
+    mp_mutex_unlock(&in->lock);
+}
+
 // Called locked, with user demuxer.
 static void update_final_metadata(demuxer_t *demuxer, struct timed_metadata *tm)
 {
