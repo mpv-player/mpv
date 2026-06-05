@@ -167,6 +167,7 @@ typedef struct mkv_track {
     size_t last_index_entry;
 
     AVDOVIDecoderConfigurationRecord *dovi_config;
+    bstr hvce;
     struct mp_dovi_split *dovi_split;
 } mkv_track_t;
 
@@ -836,9 +837,13 @@ static void parse_block_addition_mapping(struct demuxer *demuxer,
         switch (block_addition_mapping->block_add_id_type) {
         case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35:
         break;
-        case MKBETAG('a','v','c','E'):
         case MKBETAG('h','v','c','E'):
-            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback is not supported.\n");
+            if (block_addition_mapping->n_block_add_id_extra_data)
+                track->hvce = bstrdup(track, block_addition_mapping->block_add_id_extra_data);
+        break;
+        case MKBETAG('a','v','c','E'):
+            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback for AVC "
+                    "is not supported.\n");
         break;
         case MKBETAG('d','v','c','C'):
         case MKBETAG('d','v','v','C'):
@@ -1804,6 +1809,22 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->dv_el_present = track->dovi_config->bl_present_flag &&
                               track->dovi_config->el_present_flag;
     }
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 35, 100)
+    if (track->hvce.len > 0) {
+        void *data = av_memdup(track->hvce.start, track->hvce.len);
+        MP_HANDLE_OOM(data);
+        if (!av_packet_side_data_add(&sh_v->lav_codecpar->coded_side_data,
+                                     &sh_v->lav_codecpar->nb_coded_side_data,
+                                     AV_PKT_DATA_HEVC_CONF,
+                                     data, track->hvce.len, 0))
+        {
+            MP_ERR(demuxer, "Failed to attach hvcE configuration record to "
+                   "codec parameters for track %d!\n", track->tnum);
+            av_free(data);
+        }
+    }
+#endif
 
 done:
     demux_add_sh_stream(demuxer, sh);
