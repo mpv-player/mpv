@@ -1688,6 +1688,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
+    } else if (strcmp(track->codec_id, "V_VC1") == 0) {
+        if (track->private_size >= 7 && (track->private_data[0] & 0xf0) == 0xc0) {
+            extradata = track->private_data + 7;
+            extradata_size = track->private_size - 7;
+        }
+        sh_v->codec = "vc1";
     } else {
         for (int i = 0; mkv_video_tags[i][0]; i++) {
             if (!strcmp(mkv_video_tags[i][0], track->codec_id)) {
