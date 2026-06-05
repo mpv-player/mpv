@@ -216,6 +216,7 @@ const struct m_sub_options ra_ctx_conf = {
             OPT_SETTINGSLIST(context_type_list, &ra_ctx_type_obj_list)},
         {"gpu-debug", OPT_BOOL(debug)},
         {"gpu-sw", OPT_BOOL(allow_sw)},
+        {"gpu-type", OPT_STRINGLIST(gpu_type)},
         {0}
     },
     .size = sizeof(struct ra_ctx_opts),

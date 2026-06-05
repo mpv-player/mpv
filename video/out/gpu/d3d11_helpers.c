@@ -319,6 +319,16 @@ done:
     return success;
 }
 
+static bool luid_eq(LUID a, LUID b)
+{
+    return a.LowPart == b.LowPart && a.HighPart == b.HighPart;
+}
+
+static bool is_null_luid(LUID luid)
+{
+    return luid.LowPart == 0 && luid.HighPart == 0;
+}
+
 // Get a const array of D3D_FEATURE_LEVELs from max_fl to min_fl (inclusive)
 static int get_feature_levels(int max_fl, int min_fl,
                               const D3D_FEATURE_LEVEL **out)
@@ -491,9 +501,140 @@ bool mp_dxgi_list_or_verify_adapters(struct mp_log *log,
     return false;
 }
 
-// Create a Direct3D 11 device for rendering and presentation. This is meant to
-// reduce boilerplate in backends that D3D11, while also making sure they share
-// the same device creation logic and log the same information.
+static int gpu_type_score(const char *type_name, int fallback,
+                          const char * const *list, int list_len)
+{
+    for (int i = 0; i < list_len; i++) {
+        if (strcmp(list[i], type_name) == 0)
+            return (list_len - i) * 10;
+    }
+    return fallback;
+}
+
+// Choose a DXGI adapter based on --gpu-type. Sets *want_warp_out if software
+// wins; returns NULL if no match or type detection unavailable.
+static IDXGIAdapter1 *mp_choose_dxgi_adapter_by_type(
+    struct mp_log *log,
+    const struct d3d11_device_opts *opts,
+    bool *want_warp_out)
+{
+    const char * const *prio = opts->gpu_type;
+    PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = get_CreateDXGIFactory1();
+    if (!pCreateDXGIFactory1) {
+        mp_fatal(log, "Failed to load CreateDXGIFactory1 function.\n");
+        return NULL;
+    }
+
+    IDXGIFactory1 *factory = NULL;
+    IDXGIFactory6 *factory6 = NULL;
+    IDXGIAdapter1 *best_hw = NULL;
+    int best_hw_score = 0;
+    int best_sw_score = 0;
+    LUID hp_luid = {0}, mp_luid = {0};
+    HRESULT hr;
+
+    hr = pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&factory);
+    if (FAILED(hr)) {
+        mp_fatal(log, "Failed to create a DXGI factory: %s\n",
+                 mp_HRESULT_to_str(hr));
+        return NULL;
+    }
+
+    int prio_len = 0;
+    while (prio && prio[prio_len])
+        prio_len++;
+
+    // DXGI 1.6: classify adapters as discrete (HIGH_PERFORMANCE) or
+    // integrated (MINIMUM_POWER); falls back gracefully when unavailable.
+    hr = IDXGIFactory1_QueryInterface(factory, &IID_IDXGIFactory6,
+                                      (void **)&factory6);
+    if (SUCCEEDED(hr)) {
+        IDXGIAdapter1 *hp_adapter = NULL, *mp_adapter = NULL;
+        if (SUCCEEDED(IDXGIFactory6_EnumAdapterByGpuPreference(
+                factory6, 0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+                &IID_IDXGIAdapter1, (void **)&hp_adapter))) {
+            DXGI_ADAPTER_DESC1 desc;
+            if (SUCCEEDED(IDXGIAdapter1_GetDesc1(hp_adapter, &desc)))
+                hp_luid = desc.AdapterLuid;
+            SAFE_RELEASE(hp_adapter);
+        }
+        if (SUCCEEDED(IDXGIFactory6_EnumAdapterByGpuPreference(
+                factory6, 0, DXGI_GPU_PREFERENCE_MINIMUM_POWER,
+                &IID_IDXGIAdapter1, (void **)&mp_adapter))) {
+            DXGI_ADAPTER_DESC1 desc;
+            if (SUCCEEDED(IDXGIAdapter1_GetDesc1(mp_adapter, &desc)))
+                mp_luid = desc.AdapterLuid;
+            SAFE_RELEASE(mp_adapter);
+        }
+    } else {
+        mp_dbg(log, "DXGI 1.6 not available; \"discrete\" and \"integrated\" "
+               "GPU types cannot be distinguished\n");
+    }
+
+    for (unsigned int i = 0;; i++) {
+        IDXGIAdapter1 *adapter = NULL;
+        hr = IDXGIFactory1_EnumAdapters1(factory, i, &adapter);
+        if (FAILED(hr)) {
+            if (hr != DXGI_ERROR_NOT_FOUND)
+                mp_fatal(log, "Failed to enumerate at adapter %u\n", i);
+            break;
+        }
+
+        DXGI_ADAPTER_DESC1 desc = {0};
+        if (FAILED(IDXGIAdapter1_GetDesc1(adapter, &desc))) {
+            SAFE_RELEASE(adapter);
+            continue;
+        }
+
+        bool sw = (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) ||
+                  (desc.VendorId == 0x1414 && desc.DeviceId == 0x8c);
+
+        const char *type_name;
+        if (sw) {
+            type_name = "software";
+        } else if (!is_null_luid(hp_luid) && luid_eq(desc.AdapterLuid, hp_luid)) {
+            type_name = "discrete";
+        } else if (!is_null_luid(mp_luid) && luid_eq(desc.AdapterLuid, mp_luid)) {
+            type_name = "integrated";
+        } else {
+            type_name = "other";
+        }
+
+        int score = gpu_type_score(type_name, sw ? 0 : 1, prio, prio_len);
+
+        mp_dbg(log, "  Adapter %u (type: %s, score: %d): LUID %08lx%08lx\n",
+               i, type_name, score,
+               desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart);
+
+        if (sw) {
+            if (opts->allow_warp && score > best_sw_score)
+                best_sw_score = score;
+            SAFE_RELEASE(adapter);
+        } else {
+            if (score > best_hw_score) {
+                SAFE_RELEASE(best_hw);
+                best_hw = adapter;
+                best_hw_score = score;
+            } else {
+                SAFE_RELEASE(adapter);
+            }
+        }
+    }
+
+    SAFE_RELEASE(factory);
+    SAFE_RELEASE(factory6);
+
+    if (best_sw_score > best_hw_score) {
+        mp_dbg(log, "Selecting software adapter (WARP) based on --gpu-type\n");
+        SAFE_RELEASE(best_hw);
+        *want_warp_out = true;
+        return NULL;
+    }
+
+    return best_hw;
+}
+
+// Create a Direct3D 11 device for rendering and presentation.
 bool mp_d3d11_create_present_device(struct mp_log *log,
                                     struct d3d11_device_opts *opts,
                                     ID3D11Device **dev_out)
@@ -517,6 +658,11 @@ bool mp_d3d11_create_present_device(struct mp_log *log,
         mp_warn(log, "Adapter matching '%s' was not found in the system! "
                      "Will fall back to the default adapter.\n",
                  adapter_name);
+    }
+
+    // When no specific adapter was requested, apply --gpu-type selection.
+    if (!adapter && !warp && opts->gpu_type && opts->gpu_type[0]) {
+        adapter = mp_choose_dxgi_adapter_by_type(log, opts, &warp);
     }
 
     // Return here to retry creating the device

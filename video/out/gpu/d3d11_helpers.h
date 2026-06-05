@@ -60,6 +60,12 @@ struct d3d11_device_opts {
     // If unset, the default adapter will be utilized when creating
     // a device.
     char *adapter_name;
+
+    // Ordered list of preferred adapter types for auto-selection: "discrete",
+    // "integrated", "software", or "other". First entry has highest priority.
+    // If NULL, the default adapter selection is used. Ignored when adapter_name
+    // is set. Selecting "software" also requires allow_warp to be true.
+    const char * const *gpu_type;
 };
 
 struct mp_dxgi_factory_ctx {

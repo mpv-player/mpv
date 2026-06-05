@@ -71,17 +71,20 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
     struct pl_vk_inst_params pl_vk_params = {0};
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(NULL, global, &ra_ctx_conf);
     pl_vk_params.debug = ctx_opts->debug;
-    talloc_free(ctx_opts);
     mppl_log_set_probing(vk->pllog, true);
     vk->vkinst = pl_vk_inst_create(vk->pllog, &pl_vk_params);
     mppl_log_set_probing(vk->pllog, false);
-    if (!vk->vkinst)
+    if (!vk->vkinst) {
+        talloc_free(ctx_opts);
         goto error;
+    }
 
     struct vulkan_opts *vk_opts = mp_get_config_group(NULL, global, &vulkan_conf);
     vk->vulkan = mppl_create_vulkan(vk_opts, vk->vkinst, vk->pllog, VK_NULL_HANDLE,
-                                    ctx_opts->allow_sw);
+                                    ctx_opts->allow_sw,
+                                    (const char * const *) ctx_opts->gpu_type);
     talloc_free(vk_opts);
+    talloc_free(ctx_opts);
     if (!vk->vulkan)
         goto error;
 
