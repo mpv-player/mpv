@@ -83,6 +83,11 @@ struct priv {
     int src_w, src_h;                   // video resolution in pixels
     int auto_actioned_button;           // last auto-activated button; 0 if none
 
+    // Disc-driven audio/sub/angle state.
+    int audio_physical;                 // 0..7 from DVDNAV_AUDIO_STREAM_CHANGE
+    int sub_physical;                   // 0..31 from DVDNAV_SPU_STREAM_CHANGE
+    bool sub_visible;                   // SPU "on" flag from same event
+
     struct dvd_opts *opts;
 };
 
@@ -281,6 +286,28 @@ static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
         mp_map_fixp_color(&cmatrix, 8, y, 8, c);
         uint32_t alpha = (a << 4) | a;
         priv->hl_palette[i] = (alpha << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
+    }
+}
+
+// Map a libdvdnav physical audio stream number (0..7) to the corresponding
+// MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
+static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+{
+    if (physical < 0 || physical > 7)
+        return -1;
+    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, physical);
+    switch (fmt) {
+    case DVD_AUDIO_FORMAT_AC3:
+        return 0x80 + physical;
+    case DVD_AUDIO_FORMAT_DTS:
+        return 0x88 + physical;
+    case DVD_AUDIO_FORMAT_LPCM:
+        return 0xa0 + physical;
+    case DVD_AUDIO_FORMAT_MPEG:
+    case DVD_AUDIO_FORMAT_MPEG2_EXT:
+        return 0xc0 + physical;
+    default:
+        return -1;
     }
 }
 
@@ -587,6 +614,31 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             update_highlight(priv);
             break;
         }
+        case DVDNAV_AUDIO_STREAM_CHANGE: {
+            dvdnav_audio_stream_change_event_t *ev = buf;
+            // physical: 0..7 = active audio stream, -1 = SPU/audio off.
+            MP_VERBOSE(s, "DVDNAV, audio change phys=%d log=%d\n", ev->physical, ev->logical);
+            if (priv->audio_physical != ev->physical) {
+                priv->audio_physical = ev->physical;
+                priv->nav_change_id++;
+            }
+            break;
+        }
+        case DVDNAV_SPU_STREAM_CHANGE: {
+            dvdnav_spu_stream_change_event_t *ev = buf;
+            int raw = ev->physical_wide;
+            bool visible = raw >= 0 && !(raw & 0x80);
+            int phys = raw >= 0 ? (raw & 0x1F) : -1;
+            MP_VERBOSE(s, "DVDNAV, sub change phys_wide=0x%x lb=0x%x ps=0x%x log=%d\n",
+                       ev->physical_wide, ev->physical_letterbox,
+                       ev->physical_pan_scan, ev->logical);
+            if (priv->sub_physical != phys || priv->sub_visible != visible) {
+                priv->sub_physical = phys;
+                priv->sub_visible = visible;
+                priv->nav_change_id++;
+            }
+            break;
+        }
         }
     }
     return 0;
@@ -785,6 +837,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         struct stream_nav_state *st = arg;
         if (priv->src_w <= 0 || priv->src_h <= 0)
             refresh_video_resolution(priv);
+        uint32_t cur_angle = 0, num_angles = 0;
+        dvdnav_get_angle_info(dvdnav, &cur_angle, &num_angles);
         *st = (struct stream_nav_state){
             .menu_active = priv->in_menu,
             .has_popup = false,
@@ -796,6 +850,11 @@ static int control(stream_t *stream, int cmd, void *arg)
             .hl_h = priv->btn_rect[3],
             .change_id = priv->nav_change_id,
             .discontinuity_id = priv->discontinuity_id,
+            .active_audio_id = dvd_physical_audio_to_substream(priv, priv->audio_physical),
+            .active_sub_id = priv->sub_physical >= 0 ? 0x20 + priv->sub_physical : -1,
+            .sub_visible = priv->sub_visible,
+            .angle = cur_angle,
+            .num_angles = num_angles,
         };
         memcpy(st->hl_palette, priv->hl_palette, sizeof(st->hl_palette));
         return STREAM_OK;
@@ -850,6 +909,10 @@ static int open_s_internal(stream_t *stream)
     priv = p = stream->priv;
     char *filename;
     int ret = 0;
+
+    priv->audio_physical = -1;
+    priv->sub_physical = -1;
+    priv->sub_visible = false;
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 
