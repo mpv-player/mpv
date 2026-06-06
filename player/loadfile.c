@@ -427,6 +427,24 @@ void update_demuxer_properties(struct MPContext *mpctx)
     }
     if (events & DEMUX_EVENT_DURATION)
         mp_notify(mpctx, MP_EVENT_DURATION_UPDATE, NULL);
+    if (events & DEMUX_EVENT_LISTS) {
+        // Demuxer just published a new chapter / edition list at runtime.
+        TA_FREEP(&mpctx->chapters);
+        mpctx->num_chapters = demuxer->num_chapters;
+        if (demuxer->num_chapters > 0) {
+            mpctx->chapters = demux_copy_chapter_data(demuxer->chapters,
+                                                     demuxer->num_chapters);
+            if (mpctx->opts->rebase_start_time) {
+                for (int n = 0; n < mpctx->num_chapters; n++)
+                    mpctx->chapters[n].pts -= demuxer->start_time;
+            }
+        }
+        mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
+        mp_notify_property(mpctx, "chapter-list");
+        mp_notify_property(mpctx, "edition");
+        mp_notify_property(mpctx, "current-edition");
+        mp_notify_property(mpctx, "editions");
+    }
     demuxer->events = 0;
 }
 
