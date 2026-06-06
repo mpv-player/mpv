@@ -131,6 +131,14 @@ struct bluray_priv_s {
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
 
+    // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
+    // and BD_EVENT_PG_TEXTST{,_STREAM}. The numbers are 1-based libbluray
+    // stream indices; we resolve to MPEG-TS PIDs via title_info on demand.
+    // 0 = unknown (no event seen yet), 0xff/0xfff = "none" sentinel from BD.
+    int audio_stream_num;
+    int sub_stream_num;
+    bool sub_visible;
+
     int mouse_x, mouse_y;
 };
 
@@ -397,6 +405,35 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
             bd_free_title_info(b->title_info);
             b->title_info = bd_get_playlist_info(b->bd, b->current_playlist,
                                                  b->current_angle);
+        }
+        if (b->hdmv_mode) {
+            mp_mutex_lock(&b->overlay_lock);
+            b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+        }
+        break;
+    case BD_EVENT_AUDIO_STREAM:
+        b->audio_stream_num = ev->param;
+        if (b->hdmv_mode) {
+            mp_mutex_lock(&b->overlay_lock);
+            b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+        }
+        break;
+    case BD_EVENT_PG_TEXTST_STREAM:
+        b->sub_stream_num = ev->param;
+        if (b->hdmv_mode) {
+            mp_mutex_lock(&b->overlay_lock);
+            b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+        }
+        break;
+    case BD_EVENT_PG_TEXTST:
+        b->sub_visible = ev->param != 0;
+        if (b->hdmv_mode) {
+            mp_mutex_lock(&b->overlay_lock);
+            b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
         }
         break;
     case BD_EVENT_POPUP:
@@ -667,8 +704,33 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
     case STREAM_CTRL_GET_NAV_STATE: {
         struct stream_nav_state *st = arg;
+        int audio_pid = -1;
+        int sub_pid = -1;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
+        if (ti && ti->clip_count) {
+            const BLURAY_CLIP_INFO *ci = &ti->clips[0];
+            if (b->audio_stream_num >= 1 &&
+                b->audio_stream_num <= ci->audio_stream_count)
+            {
+                audio_pid = ci->audio_streams[b->audio_stream_num - 1].pid;
+            }
+            if (b->sub_stream_num >= 1 &&
+                b->sub_stream_num <= ci->pg_stream_count)
+            {
+                sub_pid = ci->pg_streams[b->sub_stream_num - 1].pid;
+            }
+        }
         if (!b->hdmv_mode) {
-            *st = (struct stream_nav_state){0};
+            // Even outside HDMV we can carry disc-driven audio/sub/angle so
+            // the player tracks the disc author's defaults on a plain-title
+            // playback.
+            *st = (struct stream_nav_state){
+                .active_audio_id = audio_pid,
+                .active_sub_id = sub_pid,
+                .sub_visible = b->sub_visible,
+                .angle = b->current_angle + 1,
+                .num_angles = ti ? ti->angle_count : 0,
+            };
             return STREAM_OK;
         }
         mp_mutex_lock(&b->overlay_lock);
@@ -680,6 +742,11 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             .src_h = b->plane_h,
             .change_id = b->nav_change_id,
             .discontinuity_id = b->discontinuity_id,
+            .active_audio_id = audio_pid,
+            .active_sub_id = sub_pid,
+            .sub_visible = b->sub_visible,
+            .angle = b->current_angle + 1,
+            .num_angles = ti ? ti->angle_count : 0,
         };
         mp_mutex_unlock(&b->overlay_lock);
         return STREAM_OK;
