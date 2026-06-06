@@ -233,8 +233,24 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     struct priv *p = demuxer->priv;
 
     struct demux_packet *pkt = demux_read_any_packet(p->slave);
-    if (!pkt)
-        return false;
+    if (!pkt) {
+        // The slave can hit EOF mid-playback when the stream layer breaks
+        // its read at a disc-driven discontinuity.
+        struct stream_nav_state nav2 = {0};
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav2) >= 1
+            && nav2.discontinuity_id != p->last_discontinuity_id)
+        {
+            MP_VERBOSE(demuxer, "discontinuity %u->%u at EOF, reopening slave\n",
+                       p->last_discontinuity_id, nav2.discontinuity_id);
+            if (!reopen_slave(demuxer))
+                return false;
+            p->last_discontinuity_id = nav2.discontinuity_id;
+            p->seek_reinit = true;
+            pkt = demux_read_any_packet(p->slave);
+        }
+        if (!pkt)
+            return false;
+    }
 
     demux_update(p->slave, MP_NOPTS_VALUE);
 
