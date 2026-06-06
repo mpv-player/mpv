@@ -230,7 +230,11 @@ local icons = icon_styles.classic
 local function set_icon_style()
     local icon_style = user_opts.icon_style
     if user_opts.icon_style == "layout" then
-        icon_style = user_opts.layout == "floating" and "fluent" or "classic"
+        if user_opts.layout == "floating" or user_opts.layout == "box" then
+            icon_style = "fluent"
+        else
+            icon_style = "classic"
+        end
     end
     icons = icon_styles[icon_style] or icon_styles.classic
 end
