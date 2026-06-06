@@ -446,6 +446,7 @@ typedef struct MPContext {
 
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
+    struct disc_nav_state *disc_nav;
     struct encode_lavc_context *encode_lavc_ctx;
 
     struct mp_option_callback *option_callbacks;
@@ -670,6 +671,15 @@ void uninit_sub(struct MPContext *mpctx, struct track *track);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
+
+// discnav.c
+struct stream;
+struct stream_nav_state;
+void disc_nav_update(struct MPContext *mpctx);
+void disc_nav_destroy(struct MPContext *mpctx);
+struct stream *disc_nav_get_stream(struct MPContext *mpctx);
+bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
+                               int *out_x, int *out_y);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);
