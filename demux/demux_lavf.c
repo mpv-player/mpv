@@ -238,6 +238,7 @@ typedef struct lavf_priv {
     struct stream *stream;
     bool own_stream;
     bool is_dvd_bd;
+    bool is_dvd;
     char *filename;
     struct format_hack format_hack;
     const AVInputFormat *avif;
@@ -887,6 +888,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
         mp_tags_move_from_av_dictionary(sh->tags, &st->metadata);
         demux_add_sh_stream(demuxer, sh);
+
+        // DVD routes the menu's button-graphics through an SPU
+        // substream lavf only discovers once the first SPU PES arrives
+        // mid-playback. Select it immediately to avoid missing menu highlights.
+        if (priv->is_dvd && sh->type == STREAM_SUB)
+            demuxer_select_track(demuxer, sh, MP_NOPTS_VALUE, true);
 
         // Unfortunately, there is no better way to detect PCM codecs, other
         // than listing them all manually. (Or other "frameless" codecs. Or
@@ -1646,8 +1653,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (priv->stream) {
         const char *sname = priv->stream->info->name;
-        priv->is_dvd_bd = strcmp(sname, "dvdnav") == 0 ||
-                          strcmp(sname, "ifo_dvdnav") == 0 ||
+        priv->is_dvd = strcmp(sname, "dvdnav") == 0 ||
+                       strcmp(sname, "ifo_dvdnav") == 0;
+        priv->is_dvd_bd = priv->is_dvd ||
                           strcmp(sname, "bd") == 0 ||
                           strcmp(sname, "bdnav") == 0 ||
                           strcmp(sname, "bdmv/bluray") == 0;
