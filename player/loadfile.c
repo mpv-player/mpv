@@ -367,6 +367,23 @@ void update_demuxer_properties(struct MPContext *mpctx)
         add_demuxer_tracks(mpctx, tracks);
         print_track_list(mpctx, NULL);
         tracks->events &= ~DEMUX_EVENT_STREAMS;
+
+        // Streams surfaced after play_current_file's selection phase (e.g.
+        // disc-nav playlist hop, or lavf identifying a PES stream only once
+        // its first packet arrives) wouldn't otherwise get auto-selected.
+        if (mpctx->playback_initialized && mpctx->opts->stream_auto_sel) {
+            for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+                for (int i = 0; i < num_ptracks[t]; i++) {
+                    if (mpctx->current_track[i][t])
+                        continue;
+                    if (mpctx->opts->stream_id[i][t] == -2)
+                        continue;
+                    struct track *sel = select_default_track(mpctx, i, t);
+                    if (sel)
+                        mp_switch_track_n(mpctx, i, t, sel, 0);
+                }
+            }
+        }
     }
     if (events & DEMUX_EVENT_METADATA) {
         struct mp_tags *info =
