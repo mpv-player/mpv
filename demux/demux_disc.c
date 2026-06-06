@@ -623,6 +623,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
+    demuxer->partially_seekable = !p->is_cdda;
 
     add_dvd_streams(demuxer);
     sync_streams(demuxer);
