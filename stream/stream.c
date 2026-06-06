@@ -701,6 +701,15 @@ void stream_drop_buffers(stream_t *s)
     stream_resize_buffer(s, 0, 0);
 }
 
+// Declare the current position the new logical start of the stream. Used for
+// streams whose content is replaced mid-stream (disc navigation jumps).
+// Discards buffered data and clears EOF.
+void stream_rebase_position(stream_t *s)
+{
+    stream_drop_buffers(s);
+    s->pos = 0;
+}
+
 // Seek function bypassing the local stream buffer.
 static bool stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {

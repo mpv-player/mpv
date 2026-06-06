@@ -273,6 +273,7 @@ int stream_read_partial(stream_t *s, void *buf, int buf_size);
 int stream_peek(stream_t *s, int forward_size);
 int stream_read_peek(stream_t *s, void *buf, int buf_size);
 void stream_drop_buffers(stream_t *s);
+void stream_rebase_position(stream_t *s);
 int64_t stream_get_size(stream_t *s);
 
 struct mpv_global;
