@@ -322,9 +322,9 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
         case DVDNAV_VTS_CHANGE: {
             int tit = 0, part = 0;
             dvdnav_vts_change_event_t *vts_event =
-                (dvdnav_vts_change_event_t *)s->buffer;
-            MP_INFO(s, "DVDNAV, switched to title: %d\n",
-                   vts_event->new_vtsN);
+                (dvdnav_vts_change_event_t *)buf;
+            MP_VERBOSE(s, "DVDNAV, switched to VTS: %d\n",
+                       vts_event->new_vtsN);
             if (!priv->had_initial_vts) {
                 // dvdnav sends an initial VTS change before any data; don't
                 // cause a blocking wait for the player, because the player in
