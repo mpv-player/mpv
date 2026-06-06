@@ -578,6 +578,8 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
+    // Partially seekable to refresh seek on track changes.
+    demuxer->partially_seekable = true;
 
     add_dvd_streams(demuxer);
     sync_streams(demuxer);
