@@ -128,9 +128,11 @@ end
 
 local function format_track(track)
     local bitrate = track["demux-bitrate"] or track["hls-bitrate"]
+    local bidi_fsi = "\226\129\168" -- U+2068 FIRST STRONG ISOLATE
+    local bidi_pdi = "\226\129\169" -- U+2069 POP DIRECTIONAL ISOLATE
 
     return (track.selected and "●" or "○") ..
-        (track.title and " " .. track.title or "") ..
+        (track.title and " " .. bidi_fsi .. track.title .. bidi_pdi or "") ..
         " (" .. (
             (track.lang and track.lang .. " " or "") ..
             (track.codec and track.codec .. " " or "") ..
