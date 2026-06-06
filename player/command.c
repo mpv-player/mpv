@@ -1178,6 +1178,22 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_SET: {
+        // For disc demuxers, jump the title directly, we sometimes need to
+        // react even if the actual edition "value" doesn't change.
+        if (disc_nav_get_stream(mpctx)) {
+            int new_ed = *(int *)arg;
+            if (new_ed < 0 || new_ed >= demuxer->num_editions)
+                return M_PROPERTY_ERROR;
+            unsigned new_title = new_ed;
+            stream_control(demuxer->stream, STREAM_CTRL_SET_CURRENT_TITLE, &new_title);
+            mpctx->opts->edition_id = new_ed;
+            mp_notify_property(mpctx, "edition");
+            mp_wakeup_core(mpctx);
+            return M_PROPERTY_OK;
+        }
+        return mp_property_generic_option(mpctx, prop, action, arg);
+    }
     default:
         return mp_property_generic_option(mpctx, prop, action, arg);
     }
@@ -7426,6 +7442,49 @@ static void cmd_context_menu(void *p)
         vo_control(vo, VOCTRL_SHOW_MENU, NULL);
 }
 
+static void cmd_discnav(void *p)
+{
+    struct mp_cmd_ctx *cmd = p;
+    struct MPContext *mpctx = cmd->mpctx;
+    int action = cmd->args[0].v.i;
+
+    struct stream *s = disc_nav_get_stream(mpctx);
+    if (!s) {
+        cmd->success = false;
+        return;
+    }
+
+    struct stream_nav_cmd nc = { .action = action };
+
+    struct stream_nav_state pre = {0};
+    stream_control(s, STREAM_CTRL_GET_NAV_STATE, &pre);
+
+    if (action == STREAM_NAV_MOUSE_MOVE || action == STREAM_NAV_MOUSE_CLICK) {
+        double nx = cmd->args[1].v.d;
+        double ny = cmd->args[2].v.d;
+        if (nx >= 0 && ny >= 0) {
+            if (pre.src_w <= 0 || pre.src_h <= 0 ||
+                nx < 0 || nx > 1 || ny < 0 || ny > 1)
+            {
+                cmd->success = false;
+                return;
+            }
+            nc.x = (int)(nx * pre.src_w);
+            nc.y = (int)(ny * pre.src_h);
+        } else if (!disc_nav_mouse_pos_to_src(mpctx, pre.src_w, pre.src_h,
+                                              &nc.x, &nc.y))
+        {
+            cmd->success = false;
+            return;
+        }
+    }
+
+    if (stream_control(s, STREAM_CTRL_NAV_CMD, &nc) < 1)
+        cmd->success = false;
+
+    mp_wakeup_core(mpctx);
+}
+
 static void cmd_flush_status_line(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
@@ -7982,6 +8041,23 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "context-menu", cmd_context_menu },
 
+    { "discnav", cmd_discnav,
+        { {"action", OPT_CHOICE(v.i,
+            {"up",          STREAM_NAV_UP},
+            {"down",        STREAM_NAV_DOWN},
+            {"left",        STREAM_NAV_LEFT},
+            {"right",       STREAM_NAV_RIGHT},
+            {"select",      STREAM_NAV_SELECT},
+            {"menu",        STREAM_NAV_MENU_ROOT},
+            {"title-menu",  STREAM_NAV_MENU_TITLE},
+            {"popup",       STREAM_NAV_MENU_POPUP},
+            {"prev",        STREAM_NAV_PREV_MENU},
+            {"mouse-move",  STREAM_NAV_MOUSE_MOVE},
+            {"mouse-click", STREAM_NAV_MOUSE_CLICK})},
+          {"x", OPT_DOUBLE(v.d), OPTDEF_DOUBLE(-1)},
+          {"y", OPT_DOUBLE(v.d), OPTDEF_DOUBLE(-1)} },
+    },
+
     { "flush-status-line", cmd_flush_status_line, { {"clear", OPT_BOOL(v.b)} } },
 
     { "notify-property", cmd_notify_property, { {"property", OPT_STRING(v.s)} } },
@@ -8406,6 +8482,10 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
                     mp_notify_property(mpctx, "current-edition");
                     print_track_list(mpctx,
                         mp_tprintf(42, "Selected edition %d:", demuxer->edition));
+                } else if (disc_nav_get_stream(mpctx)) {
+                    unsigned new_title = opts->edition_id;
+                    stream_control(demuxer->stream,
+                                   STREAM_CTRL_SET_CURRENT_TITLE, &new_title);
                 } else {
                     if (!mpctx->stop_play)
                         mpctx->stop_play = PT_CURRENT_ENTRY;
