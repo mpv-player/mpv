@@ -140,6 +140,13 @@ struct stream_nav_state {
     uint32_t hl_palette[4];
     uint32_t change_id; // Bumped whenever any of the above changes
     uint32_t discontinuity_id; // Bumped when the stream's source position jumps
+
+    // Disc-driven track selection.
+    int active_audio_id;
+    int active_sub_id;
+    bool sub_visible;   // disc says subs should be displayed
+    int angle;          // 1-based current angle (0 if unknown)
+    int num_angles;     // total angle count (0 if unknown or always 1)
 };
 
 struct stream_lang_req {

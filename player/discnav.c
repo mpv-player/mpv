@@ -56,6 +56,15 @@ struct disc_nav_state {
     // sd_lavc path. menu_selected_track remembers what we selected so we
     // can deselect it again when the menu closes.
     struct track *menu_selected_track;
+
+    // Last disc-driven audio/sub/angle we acted on.
+    int last_audio_id;
+    int last_sub_id;
+    bool last_sub_visible;
+    int last_angle;
+    bool track_sync_seen;
+    // Last disc-discontinuity id we acted on for track sync.
+    uint32_t last_track_disc_id;
 };
 
 static struct disc_nav_state *get_state(struct MPContext *mpctx)
@@ -254,6 +263,92 @@ static void check_async_discontinuity(struct MPContext *mpctx,
     demux_flush(mpctx->demuxer);
 }
 
+static struct track *find_track_by_demuxer_id(struct MPContext *mpctx,
+                                              enum stream_type type, int id)
+{
+    if (id < 0)
+        return NULL;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (t->type == type && t->stream && t->stream->demuxer_id == id)
+            return t;
+    }
+    return NULL;
+}
+
+static void sync_disc_track_selection(struct MPContext *mpctx, struct stream *s,
+                                      struct stream_nav_state *nav)
+{
+    struct disc_nav_state *st = get_state(mpctx);
+    bool first = !st->track_sync_seen;
+    bool hopped = nav->discontinuity_id != st->last_track_disc_id;
+    st->last_track_disc_id = nav->discontinuity_id;
+    st->track_sync_seen = true;
+
+    if (!first && (hopped || nav->active_audio_id != st->last_audio_id) &&
+        mpctx->opts->stream_id[0][STREAM_AUDIO] != -2)
+    {
+        struct track *t = find_track_by_demuxer_id(mpctx, STREAM_AUDIO,
+                                                  nav->active_audio_id);
+        if (t) {
+            if (mpctx->current_track[0][STREAM_AUDIO] != t) {
+                MP_VERBOSE(mpctx, "discnav: disc audio -> demuxer_id 0x%x\n",
+                           nav->active_audio_id);
+                mp_switch_track_n(mpctx, 0, STREAM_AUDIO, t, 0);
+            }
+            st->last_audio_id = nav->active_audio_id;
+        } else if (nav->active_audio_id >= 0) {
+            MP_TRACE(mpctx, "discnav: disc audio 0x%x not in tracks yet\n",
+                     nav->active_audio_id);
+        }
+    } else if (first) {
+        st->last_audio_id = nav->active_audio_id;
+    }
+
+    if (!first && (hopped ||
+                   nav->active_sub_id != st->last_sub_id ||
+                   nav->sub_visible != st->last_sub_visible) &&
+        !nav->menu_active && !st->menu_selected_track &&
+        mpctx->opts->stream_id[0][STREAM_SUB] != -2)
+    {
+        if (nav->sub_visible) {
+            struct track *t = find_track_by_demuxer_id(mpctx, STREAM_SUB,
+                                                      nav->active_sub_id);
+            if (t) {
+                if (mpctx->current_track[0][STREAM_SUB] != t) {
+                    MP_VERBOSE(mpctx, "discnav: disc sub -> demuxer_id 0x%x\n",
+                               nav->active_sub_id);
+                    mp_switch_track_n(mpctx, 0, STREAM_SUB, t, 0);
+                }
+                st->last_sub_id = nav->active_sub_id;
+                st->last_sub_visible = true;
+            } else if (nav->active_sub_id >= 0) {
+                MP_TRACE(mpctx, "discnav: disc sub 0x%x not in tracks yet\n",
+                         nav->active_sub_id);
+            }
+        } else {
+            if (mpctx->current_track[0][STREAM_SUB]) {
+                MP_VERBOSE(mpctx, "discnav: disc sub -> off\n");
+                mp_switch_track_n(mpctx, 0, STREAM_SUB, NULL, 0);
+            }
+            st->last_sub_id = nav->active_sub_id;
+            st->last_sub_visible = false;
+        }
+    } else if (first) {
+        st->last_sub_id = nav->active_sub_id;
+        st->last_sub_visible = nav->sub_visible;
+    }
+
+    if (first) {
+        st->last_angle = nav->angle;
+    } else if (nav->angle > 0 && nav->angle != st->last_angle) {
+        MP_VERBOSE(mpctx, "discnav: disc angle %d -> %d (of %d)\n",
+                   st->last_angle, nav->angle, nav->num_angles);
+        st->last_angle = nav->angle;
+        mp_notify_property(mpctx, "angle");
+    }
+}
+
 // Make sure a dvd_subtitle track is selected while a menu is visible,
 // so the SPU graphics decoded by sd_lavc reach the OSD.
 static void ensure_menu_sub_selection(struct MPContext *mpctx, bool menu_on)
@@ -330,6 +425,7 @@ void disc_nav_update(struct MPContext *mpctx)
 
     check_async_discontinuity(mpctx, &nav);
     sync_current_edition(mpctx, s, &nav);
+    sync_disc_track_selection(mpctx, s, &nav);
 
     bool is_bd = strcmp(s->info->name, "bd") == 0 || strcmp(s->info->name, "bdmv/bluray") == 0;
     bool visible = nav.menu_active && (is_bd || (nav.hl_w > 0 && nav.hl_h > 0));
