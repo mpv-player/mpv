@@ -642,11 +642,22 @@ local function add_property(property, value)
     value = value or mp.get_property_native(property)
 
     if type(value) == "table" and next(value) then
-        for key, val in pairs(value) do
-            add_property(property .. "/" .. key, val)
+        if type(next(value)) == "number" then
+            for i, val in ipairs(value) do
+                add_property(property .. "/" .. (i - 1), val)
+            end
+        else
+            for key, val in pairs(value) do
+                add_property(property .. "/" .. key, val)
+            end
         end
     else
-        properties[#properties + 1] = property .. ": " .. utils.to_string(value)
+        if type(value) == "boolean" then
+            value = value and "yes" or "no"
+        else
+            value = utils.to_string(value)
+        end
+        properties[#properties + 1] = property .. ": " .. value
     end
 end
 
