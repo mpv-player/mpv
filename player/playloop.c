@@ -1288,6 +1288,8 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_update_subtitles(mpctx);
 
+    disc_nav_update(mpctx);
+
     handle_each_frame_screenshot(mpctx);
 
     handle_eof(mpctx);

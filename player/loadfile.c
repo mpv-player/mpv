@@ -1784,6 +1784,7 @@ static void play_current_file(struct MPContext *mpctx)
     // let get_current_time() show 0 as start time (before playback_pts is set)
     mpctx->last_seek_pts = 0.0;
     mpctx->seek = (struct seek_params){ 0 };
+    disc_nav_reset(mpctx);
     mpctx->filter_root = mp_filter_create_root(mpctx->global);
     mp_filter_graph_set_wakeup_cb(mpctx->filter_root, mp_wakeup_core_cb, mpctx);
     mp_filter_graph_set_max_run_time(mpctx->filter_root, 0.1);
