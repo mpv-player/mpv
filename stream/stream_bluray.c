@@ -51,6 +51,7 @@
 #include "osdep/timer.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
+#include "video/csputils.h"
 #include "video/mp_image.h"
 
 #define BLURAY_SECTOR_SIZE     6144
@@ -90,6 +91,14 @@ const struct m_sub_options stream_bluray_conf = {
     },
 };
 
+// One overlay plane (BGRA, premultiplied alpha).
+struct bd_overlay_plane {
+    uint32_t *work;
+    uint32_t *publish;
+    int w, h;           // current allocation size (0 if unallocated)
+    bool visible;       // publish has any non-zero alpha pixel
+};
+
 struct bluray_priv_s {
     BLURAY *bd;
     BLURAY_TITLE_INFO *title_info;
@@ -108,23 +117,17 @@ struct bluray_priv_s {
     struct mp_bluray_opts *opts;
     struct m_config_cache *opts_cache;
 
-    // HDMV menu support (enabled when cfg_title == BLURAY_MENU_TITLE).
-    // libbluray delivers compressed YUV+RLE overlay primitives via
-    // bd_register_overlay_proc for the HDMV graphics controller. We decompress
-    // into ig_plane and snapshot to ig_publish on every FLUSH so the player
-    // thread can read a coherent image under overlay_lock.
-    //
-    // libbluray docs seems to suggest we should use bd_register_argb_overlay_proc
-    // if we can handle ARGB planes directly, but in practice that callback is
-    // only used for BD-J menus, and HDMV menus goes through the RLE callback.
-    // We support only the later, currently.
+    // Disc-menu support (enabled when cfg_title == BLURAY_MENU_TITLE).
+    // The HDMV graphics controller emits IG-plane primitives through
+    // bd_register_overlay_proc (YUV+RLE). BD-J titles bypass it entirely
+    // and emit fully-rendered ARGB on both PG and IG planes through
+    // bd_register_argb_overlay_proc. Discs that mix HDMV first-play with
+    // BD-J menus (or vice versa) need both callbacks registered.
     bool hdmv_mode;
-    uint32_t *ig_plane;              // working BGRA plane, written from callback
-    uint32_t *ig_publish;            // last FLUSHed snapshot, read by player
-    int plane_w, plane_h;            // current allocation size (0 if unallocated)
-    mp_mutex overlay_lock;           // guards ig_publish + visibility flags
+    struct bd_overlay_plane ig;
+    struct bd_overlay_plane pg;
+    mp_mutex overlay_lock;           // guards plane fields + visibility flags
 
-    bool overlay_ig_visible;         // IG plane was FLUSHED with non-empty content
     bool menu_event_active;          // BD_EVENT_MENU == 1
     bool popup_supported;            // BD_EVENT_POPUP == 1
     uint32_t nav_change_id;          // bumped on FLUSH/HIDE/MENU/POPUP events
@@ -142,47 +145,106 @@ struct bluray_priv_s {
     int mouse_x, mouse_y;
 };
 
-// Lazy (re-)allocation for the IG-plane working/publish buffers.
-static bool bd_ensure_plane(struct bluray_priv_s *priv, int w, int h)
+// Lazy (re-)allocation for an overlay plane's working+publish buffer pair.
+static bool bd_overlay_ensure(struct bluray_priv_s *priv,
+                              struct bd_overlay_plane *p, int w, int h)
 {
     if (w <= 0 || h <= 0)
         return false;
-    if (priv->ig_plane && w <= priv->plane_w && h <= priv->plane_h)
+    if (p->work && w <= p->w && h <= p->h)
         return true;
-    int nw = MPMAX(w, priv->plane_w);
-    int nh = MPMAX(h, priv->plane_h);
+    int nw = MPMAX(w, p->w);
+    int nh = MPMAX(h, p->h);
     size_t bytes = (size_t)nw * nh * 4;
-    uint32_t *plane   = talloc_realloc(priv, priv->ig_plane,   uint32_t, nw * nh);
-    uint32_t *publish = talloc_realloc(priv, priv->ig_publish, uint32_t, nw * nh);
-    if (!plane || !publish)
+    uint32_t *work = talloc_realloc(priv, p->work,    uint32_t, nw * nh);
+    uint32_t *pub  = talloc_realloc(priv, p->publish, uint32_t, nw * nh);
+    if (!work || !pub)
         return false;
-    memset(plane,   0, bytes);
-    memset(publish, 0, bytes);
-    priv->ig_plane   = plane;
-    priv->ig_publish = publish;
-    priv->plane_w = nw;
-    priv->plane_h = nh;
+    memset(work, 0, bytes);
+    memset(pub,  0, bytes);
+    p->work    = work;
+    p->publish = pub;
+    p->w = nw;
+    p->h = nh;
     return true;
 }
 
-static void bd_palette_to_bgra(const BD_PG_PALETTE_ENTRY *pg, uint32_t out[256])
+static void bd_overlay_clear(struct bd_overlay_plane *p)
 {
+    if (p->work)
+        memset(p->work, 0, (size_t)p->w * p->h * 4);
+}
+
+static void bd_overlay_hide(struct bluray_priv_s *priv, struct bd_overlay_plane *p)
+{
+    p->visible = false;
+    priv->nav_change_id++;
+}
+
+static void bd_overlay_flush(struct bluray_priv_s *priv, struct bd_overlay_plane *p)
+{
+    if (!p->work)
+        return;
+    size_t n = (size_t)p->w * p->h;
+    memcpy(p->publish, p->work, n * 4);
+    bool any = false;
+    for (size_t i = 0; i < n; i++) {
+        if (p->publish[i] & 0xFF000000) {
+            any = true;
+            break;
+        }
+    }
+    p->visible = any;
+    priv->nav_change_id++;
+}
+
+static enum pl_color_system bd_overlay_csp(struct bluray_priv_s *priv)
+{
+    const BLURAY_TITLE_INFO *ti = priv->title_info;
+    if (!ti || !ti->clip_count || !ti->clips[0].video_stream_count)
+        return PL_COLOR_SYSTEM_BT_709;
+    const BLURAY_STREAM_INFO *vs = &ti->clips[0].video_streams[0];
+
+#if BLURAY_VERSION > BLURAY_VERSION_CODE(1, 4, 1) // not yet released, but next libbluray will have this
+    // HEVC on UHD BD (2160p or 1080p) can be either 2020 or 709
+    if (vs->coding_type == BLURAY_STREAM_TYPE_VIDEO_HEVC || vs->format == BLURAY_VIDEO_FORMAT_2160P)
+        return vs->color_space == BLURAY_COLOR_SPACE_BT2020 ? PL_COLOR_SYSTEM_BT_2020_NC : PL_COLOR_SYSTEM_BT_709;
+#endif
+
+    switch (vs->format) {
+#if BLURAY_VERSION <= BLURAY_VERSION_CODE(1, 4, 1)
+    case BLURAY_VIDEO_FORMAT_2160P:
+        return PL_COLOR_SYSTEM_BT_2020_NC;
+#endif
+    case BLURAY_VIDEO_FORMAT_480I:  // ITU-R BT.601
+    case BLURAY_VIDEO_FORMAT_576I:
+    case BLURAY_VIDEO_FORMAT_480P:
+    case BLURAY_VIDEO_FORMAT_576P:
+        return PL_COLOR_SYSTEM_BT_601;
+    default:
+        return PL_COLOR_SYSTEM_BT_709;
+    }
+}
+
+static void bd_palette_to_bgra(const BD_PG_PALETTE_ENTRY *pg, uint32_t out[256],
+                               enum pl_color_system csp)
+{
+    struct mp_csp_params params = MP_CSP_PARAMS_DEFAULTS;
+    params.repr.sys = csp;
+    params.repr.levels = PL_COLOR_LEVELS_LIMITED;
+    params.levels_out = PL_COLOR_LEVELS_FULL;
+    struct pl_transform3x3 yuv2rgb;
+    mp_get_csp_matrix(&params, &yuv2rgb);
+
     for (int i = 0; i < 256; i++) {
-        int Y = pg[i].Y, Cb = pg[i].Cb, Cr = pg[i].Cr, T = pg[i].T;
-        // BT.709 limited->full.
-        int y_ = (Y - 16) * 1192;  // 1.164 << 10
-        int cr = Cr - 128;
-        int cb = Cb - 128;
-        int r = (y_ + 1836 * cr + 512) >> 10;             // 1.793
-        int g = (y_ -  547 * cr - 218 * cb + 512) >> 10;  // 0.534 / 0.213
-        int b = (y_ + 2166 * cb + 512) >> 10;             // 2.115
-        r = MPCLAMP(r, 0, 255);
-        g = MPCLAMP(g, 0, 255);
-        b = MPCLAMP(b, 0, 255);
+        int yuv[3] = { pg[i].Y, pg[i].Cb, pg[i].Cr };
+        int rgb[3];
+        mp_map_fixp_color(&yuv2rgb, 8, yuv, 8, rgb);
+        int T = pg[i].T;
         // Pre-multiply RGB by alpha so the OSD layer can composite directly.
-        r = r * T / 255;
-        g = g * T / 255;
-        b = b * T / 255;
+        int r = rgb[0] * T / 255;
+        int g = rgb[1] * T / 255;
+        int b = rgb[2] * T / 255;
         out[i] = ((uint32_t)T << 24) | ((uint32_t)r << 16) |
                  ((uint32_t)g << 8)  |  (uint32_t)b;
     }
@@ -191,19 +253,19 @@ static void bd_palette_to_bgra(const BD_PG_PALETTE_ENTRY *pg, uint32_t out[256])
 }
 
 // Composite one RLE-encoded sub-bitmap into the IG plane at (ov->x, ov->y).
-static void bd_overlay_draw_rle(struct bluray_priv_s *priv, const BD_OVERLAY *ov)
+static void bd_overlay_draw_rle(struct bd_overlay_plane *p, const BD_OVERLAY *ov,
+                                enum pl_color_system csp)
 {
     if (!ov->img || !ov->palette || ov->w <= 0 || ov->h <= 0)
         return;
     uint32_t pal[256];
-    bd_palette_to_bgra(ov->palette, pal);
+    bd_palette_to_bgra(ov->palette, pal, csp);
 
     const BD_PG_RLE_ELEM *rle = ov->img;
     for (int y = 0; y < ov->h; y++) {
         int dst_y = ov->y + y;
-        bool in_plane = dst_y >= 0 && dst_y < priv->plane_h;
-        uint32_t *dst_row = in_plane
-            ? priv->ig_plane + (size_t)dst_y * priv->plane_w : NULL;
+        bool in_plane = dst_y >= 0 && dst_y < p->h;
+        uint32_t *dst_row = in_plane ? p->work + (size_t)dst_y * p->w : NULL;
         int x = 0;
         while (x < ov->w) {
             int len = rle->len;
@@ -218,8 +280,8 @@ static void bd_overlay_draw_rle(struct bluray_priv_s *priv, const BD_OVERLAY *ov
                 run -= skip;
                 dst_x += skip;
             }
-            if (dst_x + run > priv->plane_w)
-                run = priv->plane_w - dst_x;
+            if (dst_x + run > p->w)
+                run = p->w - dst_x;
             if (dst_row && run > 0) {
                 uint32_t c = pal[color & 0xFF];
                 for (int i = 0; i < run; i++)
@@ -230,25 +292,6 @@ static void bd_overlay_draw_rle(struct bluray_priv_s *priv, const BD_OVERLAY *ov
         if (rle->len == 0)
             rle++;
     }
-}
-
-// Snapshot the working plane to ig_publish and recompute visibility.
-// Must be called with priv->overlay_lock held.
-static void bd_publish_overlay_flush(struct bluray_priv_s *priv)
-{
-    if (!priv->ig_plane)
-        return;
-    bool any = false;
-    size_t n = (size_t)priv->plane_w * priv->plane_h;
-    memcpy(priv->ig_publish, priv->ig_plane, n * 4);
-    for (size_t i = 0; i < n; i++) {
-        if (priv->ig_publish[i] & 0xFF000000) {
-            any = true;
-            break;
-        }
-    }
-    priv->overlay_ig_visible = any;
-    priv->nav_change_id++;
 }
 
 // Called by libbluray's HDMV graphics controller for every overlay primitive
@@ -262,52 +305,112 @@ static void bd_yuv_overlay_cb(void *handle, const struct bd_overlay_s *ov)
     if (ov->plane != BD_OVERLAY_IG)
         return;
 
+    struct bd_overlay_plane *p = &priv->ig;
     mp_mutex_lock(&priv->overlay_lock);
     switch (ov->cmd) {
     case BD_OVERLAY_INIT:
-        bd_ensure_plane(priv, ov->w, ov->h);
-        if (priv->ig_plane) {
-            memset(priv->ig_plane, 0,
-                   (size_t)priv->plane_w * priv->plane_h * 4);
-        }
-        priv->overlay_ig_visible = false;
-        priv->nav_change_id++;
+        bd_overlay_ensure(priv, p, ov->w, ov->h);
+        bd_overlay_clear(p);
+        bd_overlay_hide(priv, p);
         break;
     case BD_OVERLAY_CLOSE:
-        priv->overlay_ig_visible = false;
-        priv->nav_change_id++;
+    case BD_OVERLAY_HIDE:
+        bd_overlay_hide(priv, p);
         break;
     case BD_OVERLAY_CLEAR:
-        if (priv->ig_plane) {
-            memset(priv->ig_plane, 0,
-                   (size_t)priv->plane_w * priv->plane_h * 4);
-        }
+        bd_overlay_clear(p);
         break;
     case BD_OVERLAY_WIPE:
-        if (priv->ig_plane) {
+        if (p->work) {
             for (int y = 0; y < ov->h; y++) {
                 int dy = ov->y + y;
-                if (dy < 0 || dy >= priv->plane_h)
+                if (dy < 0 || dy >= p->h)
                     continue;
                 int dx = MPMAX(ov->x, 0);
-                int run = MPMIN(ov->w, priv->plane_w - dx);
-                if (run > 0) {
-                    memset(priv->ig_plane + (size_t)dy * priv->plane_w + dx,
-                           0, run * 4);
-                }
+                int run = MPMIN(ov->w, p->w - dx);
+                if (run > 0)
+                    memset(p->work + (size_t)dy * p->w + dx, 0, run * 4);
             }
         }
         break;
     case BD_OVERLAY_DRAW:
-        if (priv->ig_plane)
-            bd_overlay_draw_rle(priv, ov);
-        break;
-    case BD_OVERLAY_HIDE:
-        priv->overlay_ig_visible = false;
-        priv->nav_change_id++;
+        if (p->work)
+            bd_overlay_draw_rle(p, ov, bd_overlay_csp(priv));
         break;
     case BD_OVERLAY_FLUSH:
-        bd_publish_overlay_flush(priv);
+        bd_overlay_flush(priv, p);
+        break;
+    default:
+        break;
+    }
+    mp_mutex_unlock(&priv->overlay_lock);
+}
+
+static inline uint32_t bd_argb_premul(uint32_t src)
+{
+    uint32_t a = (src >> 24) & 0xFF;
+    if (a == 0)
+        return 0;
+    if (a == 255)
+        return src;
+    uint32_t r = (src >> 16) & 0xFF;
+    uint32_t g = (src >>  8) & 0xFF;
+    uint32_t b =  src        & 0xFF;
+    r = (r * a + 127) / 255;
+    g = (g * a + 127) / 255;
+    b = (b * a + 127) / 255;
+    return (a << 24) | (r << 16) | (g << 8) | b;
+}
+
+static void bd_overlay_draw_argb(struct bd_overlay_plane *p,
+                                 const BD_ARGB_OVERLAY *ov)
+{
+    if (!ov->argb || ov->w <= 0 || ov->h <= 0)
+        return;
+    int sx = 0, sy = 0;
+    int dx = ov->x, dy = ov->y;
+    int w = ov->w, h = ov->h;
+    if (dx < 0) { sx -= dx; w += dx; dx = 0; }
+    if (dy < 0) { sy -= dy; h += dy; dy = 0; }
+    if (dx + w > p->w) w = p->w - dx;
+    if (dy + h > p->h) h = p->h - dy;
+    if (w <= 0 || h <= 0)
+        return;
+    for (int y = 0; y < h; y++) {
+        const uint32_t *src = ov->argb + (size_t)(sy + y) * ov->stride + sx;
+        uint32_t *dst = p->work + (size_t)(dy + y) * p->w + dx;
+        for (int x = 0; x < w; x++)
+            dst[x] = bd_argb_premul(src[x]);
+    }
+}
+
+// Called by libbluray when a BD-J title paints into either the PG or IG plane.
+static void bd_argb_overlay_cb(void *handle, const BD_ARGB_OVERLAY *ov)
+{
+    struct bluray_priv_s *priv = handle;
+    if (!ov)
+        return;
+    if (ov->plane != BD_OVERLAY_PG && ov->plane != BD_OVERLAY_IG)
+        return;
+
+    struct bd_overlay_plane *p = ov->plane == BD_OVERLAY_IG ? &priv->ig
+                                                            : &priv->pg;
+    mp_mutex_lock(&priv->overlay_lock);
+    switch (ov->cmd) {
+    case BD_ARGB_OVERLAY_INIT:
+        bd_overlay_ensure(priv, p, ov->w, ov->h);
+        bd_overlay_clear(p);
+        bd_overlay_hide(priv, p);
+        break;
+    case BD_ARGB_OVERLAY_CLOSE:
+        bd_overlay_hide(priv, p);
+        break;
+    case BD_ARGB_OVERLAY_DRAW:
+        if (p->work)
+            bd_overlay_draw_argb(p, ov);
+        break;
+    case BD_ARGB_OVERLAY_FLUSH:
+        bd_overlay_flush(priv, p);
         break;
     default:
         break;
@@ -334,8 +437,10 @@ static void bluray_stream_close(stream_t *s)
     if (priv->title_info)
         bd_free_title_info(priv->title_info);
     if (priv->bd) {
-        if (priv->hdmv_mode)
+        if (priv->hdmv_mode) {
             bd_register_overlay_proc(priv->bd, NULL, NULL);
+            bd_register_argb_overlay_proc(priv->bd, NULL, NULL, NULL);
+        }
         bd_close(priv->bd);
     }
     if (priv->hdmv_mode)
@@ -734,12 +839,15 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             return STREAM_OK;
         }
         mp_mutex_lock(&b->overlay_lock);
-        bool visible = b->menu_event_active && b->overlay_ig_visible;
+        // BD_EVENT_MENU isn't fired by BD-J (it's HDMV-only), so treat any
+        // visible BD-J plane as an active menu too.
+        bool any_overlay = b->ig.visible || b->pg.visible;
+        bool visible = (b->menu_event_active && b->ig.visible) || any_overlay;
         *st = (struct stream_nav_state){
             .menu_active = visible,
             .has_popup = b->popup_supported,
-            .src_w = b->plane_w,
-            .src_h = b->plane_h,
+            .src_w = MPMAX(b->ig.w, b->pg.w),
+            .src_h = MPMAX(b->ig.h, b->pg.h),
             .change_id = b->nav_change_id,
             .discontinuity_id = b->discontinuity_id,
             .active_audio_id = audio_pid,
@@ -758,19 +866,37 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         if (!req->dst || req->w <= 0 || req->h <= 0)
             return STREAM_ERROR;
         mp_mutex_lock(&b->overlay_lock);
-        int copy_w = MPMIN(req->w, b->plane_w);
-        int copy_h = MPMIN(req->h, b->plane_h);
-        if (b->ig_publish && b->overlay_ig_visible) {
-            for (int y = 0; y < copy_h; y++) {
-                memcpy(req->dst + y * req->stride,
-                       b->ig_publish + y * b->plane_w,
-                       copy_w * 4);
+        int copy_w = MPMIN(req->w, MPMAX(b->ig.w, b->pg.w));
+        int copy_h = MPMIN(req->h, MPMAX(b->ig.h, b->pg.h));
+        const uint32_t *ig_src = b->ig.visible ? b->ig.publish : NULL;
+        const uint32_t *pg_src = b->pg.visible ? b->pg.publish : NULL;
+        for (int y = 0; y < copy_h; y++) {
+            uint32_t *dst = (uint32_t *)(req->dst + y * req->stride);
+            const uint32_t *ig_row = (ig_src && y < b->ig.h)
+                ? ig_src + (size_t)y * b->ig.w : NULL;
+            const uint32_t *pg_row = (pg_src && y < b->pg.h)
+                ? pg_src + (size_t)y * b->pg.w : NULL;
+            int ig_lim = ig_row ? b->ig.w : 0;
+            int pg_lim = pg_row ? b->pg.w : 0;
+            for (int x = 0; x < copy_w; x++) {
+                uint32_t ig = (x < ig_lim) ? ig_row[x] : 0;
+                uint32_t pg = (x < pg_lim) ? pg_row[x] : 0;
+                uint32_t ia = (ig >> 24) & 0xFF;
+                if (ia == 0) {
+                    dst[x] = pg;
+                } else if (ia == 0xFF || !pg) {
+                    dst[x] = ig;
+                } else {
+                    // out = ig + pg * (1 - ig.a)
+                    uint32_t inv = 255 - ia;
+                    uint32_t na = ia                  + ((pg >> 24) & 0xFF) * inv / 255;
+                    uint32_t nr = ((ig >> 16) & 0xFF) + ((pg >> 16) & 0xFF) * inv / 255;
+                    uint32_t ng = ((ig >>  8) & 0xFF) + ((pg >>  8) & 0xFF) * inv / 255;
+                    uint32_t nb = ( ig        & 0xFF) + ( pg        & 0xFF) * inv / 255;
+                    dst[x] = (MPMIN(na, 255u) << 24) | (MPMIN(nr, 255u) << 16) |
+                             (MPMIN(ng, 255u) <<  8) |  MPMIN(nb, 255u);
+                }
             }
-        } else {
-            // Plane is hidden / pre-init; clear the caller's buffer so a
-            // stale image doesn't linger after the menu closes.
-            for (int y = 0; y < copy_h; y++)
-                memset(req->dst + y * req->stride, 0, copy_w * 4);
         }
         req->change_id = b->nav_change_id;
         req->w = copy_w;
@@ -946,11 +1072,30 @@ static int bluray_stream_open_internal(stream_t *s)
     // initialize libbluray event queue
     bd_get_event(bd, NULL);
 
+    const BLURAY_DISC_INFO *info = bd_get_disc_info(bd);
+    MP_VERBOSE(s, "First play: %i, Top menu: %i, "
+                  "HDMV Titles: %i, BD-J Titles: %i, Other: %i\n",
+               info->first_play_supported, info->top_menu_supported,
+               info->num_hdmv_titles, info->num_bdj_titles,
+               info->num_unsupported_titles);
+
     b->hdmv_mode = b->cfg_title == BLURAY_MENU_TITLE;
+
+    // BD-J menus require a usable Java VM and libbluray.jar.
+    if (b->hdmv_mode && info->bdj_detected && !info->bdj_handled) {
+        MP_WARN(s, "BD-J menus not supported. Playing without menus. "
+                   "Java VM: %d, libbluray.jar: %d\n",
+                info->libjvm_detected, info->bdj_handled);
+        b->hdmv_mode = false;
+        b->cfg_title = BLURAY_DEFAULT_TITLE;
+    }
+
     MP_VERBOSE(s, "bdnav: cfg_title=%d hdmv_mode=%d\n", b->cfg_title, b->hdmv_mode);
     if (b->hdmv_mode) {
         mp_mutex_init(&b->overlay_lock);
         bd_register_overlay_proc(bd, b, bd_yuv_overlay_cb);
+        if (info->num_bdj_titles)
+            bd_register_argb_overlay_proc(bd, b, bd_argb_overlay_cb, NULL);
         if (!bd_play(bd)) {
             MP_ERR(s, "Couldn't start Blu-ray HDMV playback.\n");
             ret = STREAM_UNSUPPORTED;
