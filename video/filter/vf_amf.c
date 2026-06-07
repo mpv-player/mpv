@@ -629,6 +629,7 @@ static void process(struct mp_filter *f)
 
     if (res == AMF_INPUT_FULL) {
         MP_WARN(f, "FRC input queue full...\n");
+        frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
         return;
     }
