@@ -78,9 +78,6 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
 // Set src->cancel and src->uninit (if needed) before calling this.
 void mp_input_src_init_done(struct mp_input_src *src);
 
-// Feed text data, which will be split into lines of commands.
-void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
-
 // Process keyboard input. code is a key code from keycodes.h, possibly
 // with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
 void mp_input_put_key(struct input_ctx *ictx, int code);

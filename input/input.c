@@ -2056,43 +2056,6 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
     return 0;
 }
 
-#define CMD_BUFFER (4 * 4096)
-
-void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
-{
-    struct mp_input_src_internal *in = src->in;
-    if (!in->cmd_buffer)
-        in->cmd_buffer = talloc_size(in, CMD_BUFFER);
-    while (len) {
-        char *next = memchr(buf, '\n', len);
-        bool term = !!next;
-        next = next ? next + 1 : buf + len;
-        size_t copy = next - buf;
-        bool overflow = copy > CMD_BUFFER - in->cmd_buffer_size;
-        if (overflow || in->drop) {
-            in->cmd_buffer_size = 0;
-            in->drop = overflow || !term;
-            MP_WARN(src, "Dropping overlong line.\n");
-        } else {
-            memcpy(in->cmd_buffer + in->cmd_buffer_size, buf, copy);
-            in->cmd_buffer_size += copy;
-            buf += copy;
-            len -= copy;
-            if (term) {
-                bstr s = {in->cmd_buffer, in->cmd_buffer_size};
-                s = bstr_strip(s);
-                struct mp_cmd *cmd = mp_input_parse_cmd_str(src->log, s, "<>");
-                if (cmd) {
-                    input_lock(src->input_ctx);
-                    queue_cmd(src->input_ctx, cmd);
-                    input_unlock(src->input_ctx);
-                }
-                in->cmd_buffer_size = 0;
-            }
-        }
-    }
-}
-
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay)
 {
     input_lock(ictx);
