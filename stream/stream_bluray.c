@@ -835,6 +835,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         bool any_overlay = b->ig.visible || b->pg.visible;
         bool visible = (b->menu_event_active && b->ig.visible) || any_overlay;
         *st = (struct stream_nav_state){
+            .nav_active = true,
             .menu_active = visible,
             .has_popup = b->popup_supported,
             .src_w = MPMAX(b->ig.w, b->pg.w),
