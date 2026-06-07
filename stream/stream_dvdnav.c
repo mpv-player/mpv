@@ -840,6 +840,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         uint32_t cur_angle = 0, num_angles = 0;
         dvdnav_get_angle_info(dvdnav, &cur_angle, &num_angles);
         *st = (struct stream_nav_state){
+            .nav_active = true,
             .menu_active = priv->in_menu,
             .has_popup = false,
             .src_w = priv->src_w,
