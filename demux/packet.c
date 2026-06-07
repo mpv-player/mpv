@@ -376,6 +376,8 @@ int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
         }
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 17, 100)
         case ITU_T_T35_COUNTRY_CODE_UK: {
+            if (remaining < 1)
+                break;
             SKIP(1); // skip t35_uk_country_code_second_octet
             if (remaining < 2)
                 break;
