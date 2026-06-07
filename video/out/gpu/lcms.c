@@ -279,7 +279,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
         // Build the parametric BT.1886 transfer curve, one per channel
         for (int i = 0; i < 3; i++) {
             const double gamma = 2.40;
-            double binv = pow(src_black[i], 1.0/gamma);
+            double binv = pow(MPMAX(0, src_black[i]), 1.0/gamma);
             tonecurve[i] = cmsBuildParametricToneCurve(cms, 6,
                     (double[4]){gamma, 1.0 - binv, binv, 0.0});
         }
