@@ -45,6 +45,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "stream.h"
+#include "osdep/io.h"
 #include "osdep/timer.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"

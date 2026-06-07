@@ -34,6 +34,7 @@
 #include "internal.h"
 #include "common/msg.h"
 #include "osdep/endian.h"
+#include "osdep/io.h"
 
 #ifdef _WIN32
 // for GetFileType to detect pipes

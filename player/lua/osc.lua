@@ -321,6 +321,7 @@ local state = {
     screen_sizeX = nil, screen_sizeY = nil, -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
     marginsREQ = false,                     -- is a margins update pending?
+    mouse_stateREQ = false,                 -- is a mouse state update pending?
     last_mouseX = nil, last_mouseY = nil,   -- last mouse position, to detect significant mouse movement
     last_touchX = -1, last_touchY = -1,     -- last touch position
     mouse_in_window = false,
@@ -2708,7 +2709,9 @@ end
 
 local function osc_visible(visible)
     set_bar_visible("osc_visible", visible)
-    disable_thumbnail()
+    if not visible then
+        disable_thumbnail()
+    end
 end
 
 local function set_wc_visible(visible)
@@ -2748,9 +2751,9 @@ end
 local function hide_bar(label, visible_key, anitype_key, set_visible)
     msg.trace("hide_" .. label)
     if not state.enabled then
+        set_visible(false)
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
-        state[visible_key] = false
         render_wipe(state.osd)
     elseif user_opts.fadeduration > 0 then
         if state[visible_key] then
@@ -2803,6 +2806,41 @@ local function element_has_action(element, action)
         element.eventresponder[action]
 end
 
+local function process_mouse_move(refresh)
+    if refresh then
+        state.mouse_in_window = recently_touched() or mp.get_property_bool("mouse-pos/hover")
+        if not state.mouse_in_window then
+            state.last_mouseX, state.last_mouseY = nil, nil
+            return
+        end
+    end
+
+    local mouseX, mouseY = get_virt_mouse_pos()
+    if refresh or user_opts.minmousemove == 0 or
+        ((state.last_mouseX ~= nil and state.last_mouseY ~= nil) and
+            ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
+                or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
+            )
+        ) then
+        if window_controls_enabled() and user_opts.windowcontrols_independent then
+            if mouse_in_area("showhide_wc") then
+                show_wc()
+            elseif user_opts.visibility ~= "always" then
+                hide_wc()
+            end
+            if mouse_in_area("showhide") then
+                show_osc()
+            elseif user_opts.visibility ~= "always" then
+                hide_osc()
+            end
+        else
+            show_osc()
+            if window_controls_enabled() then show_wc() end
+        end
+    end
+    state.last_mouseX, state.last_mouseY = mouseX, mouseY
+end
+
 local function process_event(source, what)
     local action = string.format("%s%s", source,
         what and ("_" .. what) or "")
@@ -2853,31 +2891,7 @@ local function process_event(source, what)
     elseif source == "mouse_move" then
 
         state.mouse_in_window = true
-
-        local mouseX, mouseY = get_virt_mouse_pos()
-        if user_opts.minmousemove == 0 or
-            ((state.last_mouseX ~= nil and state.last_mouseY ~= nil) and
-                ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
-                    or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
-                )
-            ) then
-            if window_controls_enabled() and user_opts.windowcontrols_independent then
-                if mouse_in_area("showhide_wc") then
-                    show_wc()
-                elseif user_opts.visibility ~= "always" then
-                    hide_wc()
-                end
-                if mouse_in_area("showhide") then
-                    show_osc()
-                elseif user_opts.visibility ~= "always" then
-                    hide_osc()
-                end
-            else
-                show_osc()
-                if window_controls_enabled() then show_wc() end
-            end
-        end
-        state.last_mouseX, state.last_mouseY = mouseX, mouseY
+        process_mouse_move()
 
         local n = state.active_element
         if element_has_action(elements[n], action) then
@@ -2947,6 +2961,11 @@ local function render()
 
             state.last_mouseX, state.last_mouseY = mouseX, mouseY
         end
+    end
+
+    if state.mouse_stateREQ then
+        process_mouse_move(true)
+        state.mouse_stateREQ = false
     end
 
 
@@ -3308,6 +3327,7 @@ end
 -- mode can be auto/always/never/cycle
 -- the modes only affect internal variables and not stored on its own.
 local function visibility_mode(mode, no_osd)
+    local old_vis = mp.get_property_native("user-data/osc/visibility") or user_opts.visibility
     if mode == "cycle" then
         for i, allowed_mode in ipairs(state.visibility_modes) do
             if i == #state.visibility_modes then
@@ -3347,6 +3367,7 @@ local function visibility_mode(mode, no_osd)
     mp.disable_key_bindings("window-controls")
     state.input_enabled = false
 
+    state.mouse_stateREQ = old_vis == "never" and mode ~= "never"
     update_margins()
     request_tick()
 end
