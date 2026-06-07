@@ -321,6 +321,7 @@ void demux_start_thread(struct demuxer *demuxer);
 void demux_stop_thread(struct demuxer *demuxer);
 void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *ctx);
 void demux_start_prefetch(struct demuxer *demuxer);
+void demux_drive_nav(struct demuxer *demuxer);
 
 bool demux_cancel_test(struct demuxer *demuxer);
 

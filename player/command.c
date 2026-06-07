@@ -7481,6 +7481,8 @@ static void cmd_discnav(void *p)
 
     if (stream_control(s, STREAM_CTRL_NAV_CMD, &nc) < 1)
         cmd->success = false;
+    else if (mpctx->demuxer)
+        demux_drive_nav(mpctx->demuxer); // pump the menu VM past the cache
 
     mp_wakeup_core(mpctx);
 }

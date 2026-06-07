@@ -209,6 +209,8 @@ struct demux_internal {
     double hyst_secs;           // stop reading till there's hyst_secs remaining
     size_t hyst_bytes;          // stop reading till there's hyst_bytes remaining
     bool hyst_active;
+    int64_t nav_pump_deadline; // Deadline (mp_time_ns) until which reading is
+                               // forced past the readahead
     size_t max_bytes;
     size_t max_bytes_bw;
     bool seekable_cache;
@@ -1249,6 +1251,18 @@ void demux_start_prefetch(struct demuxer *demuxer)
     mp_mutex_unlock(&in->lock);
 }
 
+void demux_drive_nav(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_user);
+
+    mp_mutex_lock(&in->lock);
+    in->nav_pump_deadline = mp_time_ns() + MP_TIME_S_TO_NS(2);
+    in->reading = true;
+    mp_cond_signal(&in->wakeup);
+    mp_mutex_unlock(&in->lock);
+}
+
 const char *stream_type_name(enum stream_type type)
 {
     switch (type) {
@@ -2267,6 +2281,10 @@ static bool read_packet(struct demux_internal *in)
     if (!was_reading || in->blocked || demux_cancel_test(in->d_thread))
         return false;
 
+    bool nav_pump = in->nav_pump_deadline && mp_time_ns() < in->nav_pump_deadline;
+    if (in->nav_pump_deadline && !nav_pump)
+        in->nav_pump_deadline = 0;
+
     // Check if we need to read a new packet. We do this if all queues are below
     // the minimum, or if a stream explicitly needs new packets. Also includes
     // safe-guards against packet queue overflow.
@@ -2303,6 +2321,11 @@ static bool read_packet(struct demux_internal *in)
         in->hyst_active = false;
         prefetch_more |= true;
     }
+
+    // Keep reading regardless of cache fill level so the stream's DVD/BD VM
+    // gets driven. This is important in cases, where we would receive
+    // discontinuity reset after VM control, but we have to pump the events first.
+    prefetch_more |= nav_pump;
 
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
              (size_t)total_fw_bytes, read_more, prefetch_more, refresh_more);
