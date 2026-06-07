@@ -840,6 +840,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         for (int n = 0; n < 8 && no_audio; n++)
             no_audio = dvdnav_get_audio_logical_stream(dvdnav, n) == -1;
         *st = (struct stream_nav_state){
+            .nav_active = true,
             .no_audio = no_audio,
             .menu_active = priv->in_menu,
             .has_popup = false,

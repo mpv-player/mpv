@@ -58,6 +58,7 @@ struct priv {
     double last_dts;    // DTS of previously demuxed packet
     bool seek_reinit;   // needs reinit after seek
     uint32_t last_discontinuity_id; // Last source-position-jump id seen from the stream.
+    bool nav_active;    // last interactive-nav state pushed to the cache
 
     bool is_dvd, is_cdda, is_bd;
 };
@@ -410,16 +411,20 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     struct priv *p = demuxer->priv;
 
     struct stream_nav_state nav = {0};
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1 &&
-        nav.discontinuity_id != p->last_discontinuity_id)
-    {
-        MP_VERBOSE(demuxer, "discontinuity %u->%u, reopening slave\n",
-                   p->last_discontinuity_id, nav.discontinuity_id);
-        if (!reopen_slave(demuxer))
-            return false;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
-            p->last_discontinuity_id = nav.discontinuity_id;
-        p->seek_reinit = true;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1) {
+        if (nav.nav_active != p->nav_active) {
+            p->nav_active = nav.nav_active;
+            demux_set_nav_active(demuxer, nav.nav_active);
+        }
+        if (nav.discontinuity_id != p->last_discontinuity_id) {
+            MP_VERBOSE(demuxer, "discontinuity %u->%u, reopening slave\n",
+                       p->last_discontinuity_id, nav.discontinuity_id);
+            if (!reopen_slave(demuxer))
+                return false;
+            if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+                p->last_discontinuity_id = nav.discontinuity_id;
+            p->seek_reinit = true;
+        }
     }
 
     // A discontinuity reopen failed and the retry above hasn't succeeded
@@ -624,6 +629,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;
     demuxer->partially_seekable = !p->is_cdda;
+    demuxer->no_cache_seeking = !p->is_cdda;
 
     add_dvd_streams(demuxer);
     sync_streams(demuxer);
