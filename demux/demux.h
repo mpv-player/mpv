@@ -234,6 +234,10 @@ typedef struct demuxer {
     double duration;  // -1 if unknown
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
+    // The underlying source can switch to different content at any time, and
+    // timestamps restart per title, so cached packet ranges become stale
+    // without notice and must never be used to satisfy seeks.
+    bool no_cache_seeking;
     // The file data was fully read, and there is no need to keep the stream
     // open, keep the cache active, or to run the demuxer thread. Generating
     // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).
@@ -321,6 +325,7 @@ void demux_start_thread(struct demuxer *demuxer);
 void demux_stop_thread(struct demuxer *demuxer);
 void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *ctx);
 void demux_start_prefetch(struct demuxer *demuxer);
+void demux_drive_nav(struct demuxer *demuxer);
 
 bool demux_cancel_test(struct demuxer *demuxer);
 bool demux_read_interrupted(struct demuxer *demuxer);
@@ -351,6 +356,7 @@ void demux_close_stream(struct demuxer *demuxer);
 
 void demux_metadata_changed(demuxer_t *demuxer);
 void demux_set_duration(demuxer_t *demuxer, double duration);
+void demux_set_nav_active(demuxer_t *demuxer, bool active);
 void demux_lists_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer, double playback_pts);
 

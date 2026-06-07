@@ -126,8 +126,25 @@ struct stream_nav_cmd {
     int x, y; // for MOUSE_*
 };
 
+// Whether the action can activate a button / run a disc VM command.
+static inline bool stream_nav_action_activates(enum stream_nav_action a)
+{
+    switch (a) {
+    case STREAM_NAV_SELECT:
+    case STREAM_NAV_MOUSE_CLICK:
+    case STREAM_NAV_MENU_ROOT:
+    case STREAM_NAV_MENU_TITLE:
+    case STREAM_NAV_MENU_POPUP:
+    case STREAM_NAV_PREV_MENU:
+        return true;
+    default:
+        return false;
+    }
+}
+
 // Snapshot of the stream's menu state.
 struct stream_nav_state {
+    bool nav_active;         // interactive disc navigation is enabled
     bool menu_active;        // a selectable menu/highlight is currently visible
     bool has_popup;          // disc supports a popup menu (BD only)
     int  src_w, src_h;       // dimensions of the coordinate space mouse uses
