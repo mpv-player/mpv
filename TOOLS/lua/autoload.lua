@@ -297,6 +297,11 @@ local function find_and_add_entries()
     end
 
     local path = mp.get_property("path", "")
+    if utils.readdir(path) then
+        msg.debug("stopping: current path is a directory")
+        return
+    end
+
     local dir, filename = utils.split_path(path)
     msg.trace(("dir: %s, filename: %s"):format(dir, filename))
     if o.disabled then
