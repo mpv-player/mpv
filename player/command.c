@@ -8509,7 +8509,7 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         if (mpctx->playback_initialized && demuxer && demuxer->stream &&
                 (!strcmp(demuxer->stream->info->name, "bd") ||
                  !strcmp(demuxer->stream->info->name, "bdmv/bluray"))) {
-            int angle = opts->stream_bluray_opts->angle - 1;
+            int angle = opts->stream_bluray_opts->angle;
             stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
         }
     }
