@@ -514,7 +514,7 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
         }
         break;
     case BD_EVENT_ANGLE:
-        b->current_angle = ev->param;
+        b->current_angle = MPMAX(0, (int)ev->param - 1);
         if (b->title_info) {
             bd_free_title_info(b->title_info);
             b->title_info = bd_get_playlist_info(b->bd, b->current_playlist,
@@ -695,7 +695,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_ANGLE: {
-        *((int *) arg) = b->current_angle;
+        *((int *) arg) = b->current_angle + 1;
         return STREAM_OK;
     }
     case STREAM_CTRL_SET_ANGLE: {
@@ -703,10 +703,10 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         if (!ti)
             return STREAM_UNSUPPORTED;
         int angle = *((int *) arg);
-        if (angle < 0 || angle > ti->angle_count)
+        if (angle < 1 || angle > ti->angle_count)
             return STREAM_UNSUPPORTED;
-        b->current_angle = angle;
-        bd_seamless_angle_change(b->bd, angle);
+        b->current_angle = angle - 1;
+        bd_seamless_angle_change(b->bd, b->current_angle);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_TITLE_LENGTH: {
