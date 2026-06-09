@@ -60,14 +60,13 @@ struct sd_ass_priv {
     struct mp_osd_res osd;
     struct seen_packet *seen_packets;
     int num_seen_packets;
-    int *packets_animated;
-    int num_packets_animated;
     bool check_animated;
 };
 
 struct seen_packet {
     int64_t pos;
     double pts;
+    int animated; // -1 is unknown
 };
 
 #undef OPT_BASE_STRUCT
@@ -402,18 +401,18 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
                 if (ctx->check_animated && pkt->animated != 1)
                     pkt->animated = is_animated(event->Text);
             }
-            MP_TARRAY_APPEND(ctx, ctx->packets_animated, ctx->num_packets_animated, pkt->animated);
+            ctx->seen_packets[pkt->seen_pos].animated = pkt->animated;
         } else {
-            if (ctx->check_animated && ctx->packets_animated[pkt->seen_pos] == -1) {
+            if (ctx->check_animated && ctx->seen_packets[pkt->seen_pos].animated == -1) {
                 for (int n = track->n_events - 1; n >= 0; n--) {
                     if (n + 1 == old_n_events || pkt->animated == 1)
                         break;
                     ASS_Event *event = &track->events[n];
-                    ctx->packets_animated[pkt->seen_pos] = is_animated(event->Text);
-                    pkt->animated = ctx->packets_animated[pkt->seen_pos];
+                    ctx->seen_packets[pkt->seen_pos].animated = is_animated(event->Text);
+                    pkt->animated = ctx->seen_packets[pkt->seen_pos].animated;
                 }
             } else {
-                pkt->animated = ctx->packets_animated[pkt->seen_pos];
+                pkt->animated = ctx->seen_packets[pkt->seen_pos].animated;
             }
         }
     }
@@ -446,7 +445,7 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
     }
     packet->seen_pos = a;
     MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a,
-                        (struct seen_packet){packet->pos, packet->pts});
+                        (struct seen_packet){packet->pos, packet->pts, -1});
     return false;
 }
 
@@ -998,7 +997,6 @@ static void reset(struct sd *sd)
     if (sd->opts->sub_clear_on_seek || ctx->clear_once) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
-        ctx->num_packets_animated = 0;
         sd->preload_ok = false;
         ctx->clear_once = false;
     }

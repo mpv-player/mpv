@@ -126,7 +126,7 @@ static int control(stream_t *s, int cmd, void *arg)
             // This usually yields the URLContext (why does it even exist?),
             // which holds the name of the actual protocol implementation.
             void *child = avio->av_class->child_next(avio, NULL);
-            AVClass *cl = *(AVClass **)child;
+            AVClass *cl = child ? *(AVClass **)child : NULL;
             if (cl && cl->item_name)
                 proto = cl->item_name(child);
         }

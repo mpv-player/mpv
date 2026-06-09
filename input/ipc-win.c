@@ -55,7 +55,7 @@ static char *get_user_sid(void)
 {
     char *ssid = NULL;
     TOKEN_USER *info = NULL;
-    HANDLE t;
+    HANDLE t = INVALID_HANDLE_VALUE;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &t))
         goto done;
 
@@ -72,7 +72,7 @@ static char *get_user_sid(void)
 
     ConvertSidToStringSidA(info->User.Sid, &ssid);
 done:
-    if (t)
+    if (t != INVALID_HANDLE_VALUE)
         CloseHandle(t);
     talloc_free(info);
     return ssid;
@@ -83,7 +83,7 @@ static char *get_integrity_sid(void)
 {
     char *ssid = NULL;
     TOKEN_MANDATORY_LABEL *info = NULL;
-    HANDLE t;
+    HANDLE t = INVALID_HANDLE_VALUE;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &t))
         goto done;
 
@@ -100,7 +100,7 @@ static char *get_integrity_sid(void)
 
     ConvertSidToStringSidA(info->Label.Sid, &ssid);
 done:
-    if (t)
+    if (t != INVALID_HANDLE_VALUE)
         CloseHandle(t);
     talloc_free(info);
     return ssid;
@@ -311,16 +311,21 @@ done:
 
 static void ipc_start_client(struct mp_ipc_ctx *ctx, struct client_arg *client)
 {
-    client->client = mp_new_client(ctx->client_api, client->client_name),
-    client->log    = mp_client_get_log(client->client);
+    client->client = mp_new_client(ctx->client_api, client->client_name);
+    if (!client->client)
+        goto err;
+    client->log = mp_client_get_log(client->client);
 
     mp_thread client_thr;
-    if (mp_thread_create(&client_thr, client_thread, client)) {
-        mpv_destroy(client->client);
-        CloseHandle(client->client_h);
-        talloc_free(client);
-    }
+    if (mp_thread_create(&client_thr, client_thread, client))
+        goto err;
     mp_thread_detach(client_thr);
+    return;
+
+err:
+    mpv_destroy(client->client);
+    CloseHandle(client->client_h);
+    talloc_free(client);
 }
 
 static void ipc_start_client_json(struct mp_ipc_ctx *ctx, int id, HANDLE h)

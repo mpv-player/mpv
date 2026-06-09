@@ -224,8 +224,10 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
         sigfillset(&sigmask);
         pthread_sigmask(SIG_BLOCK, &sigmask, &oldmask);
         pid_t fres = fork();
-        if (fres < 0)
+        if (fres < 0) {
+            pthread_sigmask(SIG_SETMASK, &oldmask, NULL);
             goto done;
+        }
         if (fres == 0) {
             // child
             setsid();

@@ -342,7 +342,7 @@ static bool is_aformat_ok(struct mp_aframe *a, struct mp_aframe *b)
 static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
     return a->imgfmt == b->imgfmt &&
-           a->w == b->w && a->h && b->h &&
+           a->w == b->w && a->h == b->h &&
            a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h &&
            a->nominal_fps == b->nominal_fps;
 }
