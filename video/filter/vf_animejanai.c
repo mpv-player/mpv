@@ -24,7 +24,11 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <dlfcn.h>
+#endif
 
 #include <ffnvcodec/dynlink_loader.h>
 
@@ -43,6 +47,50 @@
 #include "video/mp_image_pool.h"
 
 #include "aji.h"
+
+#ifdef _WIN32
+#define AJI_DEFAULT_LIB "aji.dll"
+#else
+#define AJI_DEFAULT_LIB "libaji.so"
+#endif
+
+static void *aji_lib_open(const char *path)
+{
+#ifdef _WIN32
+    return (void *)LoadLibraryA(path);
+#else
+    return dlopen(path, RTLD_NOW | RTLD_LOCAL);
+#endif
+}
+
+static void *aji_lib_sym(void *handle, const char *name)
+{
+#ifdef _WIN32
+    return (void *)GetProcAddress((HMODULE)handle, name);
+#else
+    return dlsym(handle, name);
+#endif
+}
+
+static void aji_lib_close(void *handle)
+{
+#ifdef _WIN32
+    FreeLibrary((HMODULE)handle);
+#else
+    dlclose(handle);
+#endif
+}
+
+static const char *aji_lib_error(void)
+{
+#ifdef _WIN32
+    static __thread char buf[32];
+    snprintf(buf, sizeof(buf), "error %lu", (unsigned long)GetLastError());
+    return buf;
+#else
+    return dlerror();
+#endif
+}
 
 struct opts {
     bool passthrough;
@@ -324,7 +372,7 @@ static void uninit(struct mp_filter *vf)
     if (p->aji)
         p->api.destroy(&p->aji);
     if (p->api.handle)
-        dlclose(p->api.handle);
+        aji_lib_close(p->api.handle);
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->av_device_ref);
     cuda_free_functions(&p->cu);
@@ -362,21 +410,20 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
 
     if (p->opts->engine && p->opts->engine[0]) {
         // Strict C ABI boundary: the inference backend (TensorRT) is loaded
-        // at runtime and never linked. (dlopen here; LoadLibrary on win32
-        // once the Windows backend exists.)
+        // at runtime and never linked.
         const char *lib = p->opts->lib && p->opts->lib[0] ? p->opts->lib
-                                                          : "libaji.so";
-        p->api.handle = dlopen(lib, RTLD_NOW | RTLD_LOCAL);
+                                                          : AJI_DEFAULT_LIB;
+        p->api.handle = aji_lib_open(lib);
         if (!p->api.handle) {
             MP_ERR(f, "Failed to load inference shim '%s': %s\n", lib,
-                   dlerror());
+                   aji_lib_error());
             goto fail;
         }
-        p->api.create = dlsym(p->api.handle, "aji_create");
-        p->api.infer = dlsym(p->api.handle, "aji_infer");
-        p->api.scale_factor = dlsym(p->api.handle, "aji_scale_factor");
-        p->api.last_error = dlsym(p->api.handle, "aji_last_error");
-        p->api.destroy = dlsym(p->api.handle, "aji_destroy");
+        p->api.create = aji_lib_sym(p->api.handle, "aji_create");
+        p->api.infer = aji_lib_sym(p->api.handle, "aji_infer");
+        p->api.scale_factor = aji_lib_sym(p->api.handle, "aji_scale_factor");
+        p->api.last_error = aji_lib_sym(p->api.handle, "aji_last_error");
+        p->api.destroy = aji_lib_sym(p->api.handle, "aji_destroy");
         if (!p->api.create || !p->api.infer || !p->api.scale_factor ||
             !p->api.last_error || !p->api.destroy) {
             MP_ERR(f, "Inference shim '%s' is missing aji_* symbols\n", lib);
