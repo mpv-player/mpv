@@ -1,9 +1,12 @@
 /*
  * vf_animejanai: GPU-resident AI upscaling filter (CUDA / TensorRT)
  *
- * Phase 0 spike A: synchronized GPU-side plane copy (passthrough), no
- * inference yet. Proves: IMGFMT_CUDA in -> own AVHWFramesContext pool ->
- * IMGFMT_CUDA out, with no hwdownload/autoconvert inserted by the chain.
+ * The filter keeps frames in GPU memory end to end: IMGFMT_CUDA in, own
+ * AVHWFramesContext output pool, IMGFMT_CUDA out. Inference runs in the
+ * libaji shim, loaded at runtime across a strict C ABI (see aji.h) so the
+ * TensorRT toolchain never links into mpv. With no engine configured the
+ * filter degrades to a synchronized GPU-side plane copy (passthrough),
+ * which is also the de-risk path used by phase 0 spike A.
  *
  * This file is part of mpv.
  *
@@ -21,21 +24,40 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
+
 #include <ffnvcodec/dynlink_loader.h>
 
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
+#include <libavutil/pixfmt.h>
 
 #include "common/common.h"
 #include "filters/filter.h"
 #include "filters/filter_internal.h"
 #include "filters/user_filters.h"
+#include "options/m_option.h"
 #include "refqueue.h"
+#include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
+#include "aji.h"
+
 struct opts {
     bool passthrough;
+    char *engine;
+    char *lib;
+};
+
+struct aji_api {
+    void *handle;
+    aji_ctx *(*create)(const aji_create_params *params);
+    int (*infer)(aji_ctx *c, const aji_frame *in, const aji_frame *out,
+                 void *cu_stream);
+    int (*scale_factor)(aji_ctx *c);
+    const char *(*last_error)(aji_ctx *c);
+    void (*destroy)(aji_ctx **c);
 };
 
 struct priv {
@@ -47,6 +69,12 @@ struct priv {
     CUstream stream;
 
     AVBufferRef *hw_pool;
+
+    struct aji_api api;
+    aji_ctx *aji;
+    int aji_fmt;
+    int aji_w, aji_h;   // input dims the aji ctx was created for
+    int scale;
 
     struct mp_refqueue *queue;
     struct mp_image_params params, out_params;
@@ -69,6 +97,14 @@ static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
 }
 
 #define CHECK_CU(x) check_cu(vf, (x), #x)
+
+static void aji_log_bridge(void *opaque, int level, const char *msg)
+{
+    struct mp_filter *vf = opaque;
+    // levels follow TRT severity: 0/1 error, 2 warning, 3+ info/verbose
+    int mp_level = level <= 1 ? MSGL_ERR : level == 2 ? MSGL_WARN : MSGL_V;
+    mp_msg(vf->log, mp_level, "[aji] %s\n", msg);
+}
 
 static void flush_frames(struct mp_filter *vf)
 {
@@ -124,11 +160,37 @@ static struct mp_image *render(struct mp_filter *vf)
     out->params = p->out_params;
     out->pts = in->pts;
 
+    if (p->aji) {
+        const aji_frame fin = {
+            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            .plane = {in->planes[0], in->planes[1]},
+            .stride = {in->stride[0], in->stride[1]},
+        };
+        const aji_frame fout = {
+            .width = p->out_params.w, .height = p->out_params.h,
+            .format = p->aji_fmt,
+            .plane = {out->planes[0], out->planes[1]},
+            .stride = {out->stride[0], out->stride[1]},
+        };
+        if (p->api.infer(p->aji, &fin, &fout, p->stream) != AJI_OK) {
+            MP_ERR(vf, "inference failed: %s\n", p->api.last_error(p->aji));
+            goto done;
+        }
+        // Keep the synchronized model: the input (decoder) surface must not
+        // be recycled before our reads complete, and the output is complete
+        // when handed downstream.
+        if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
+            goto done;
+        if (CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) == 0)
+            ret = 0;
+        CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
+        goto done;
+    }
+
     if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
         goto done;
 
-    // Synchronized copy out of the decoder surface ring: decouples our
-    // frame lifetime from the fixed-size NVDEC pool.
+    // Passthrough: synchronized copy out of the decoder surface ring.
     for (int n = 0; n < p->layout.fmt.num_planes; n++) {
         CUDA_MEMCPY2D cpy = {
             .srcMemoryType = CU_MEMORYTYPE_DEVICE,
@@ -191,13 +253,60 @@ static void vf_animejanai_process(struct mp_filter *vf)
         AVCUDADeviceContext *cudactx = avhwctx->hwctx;
         p->cuda_ctx = cudactx->cuda_ctx;
         p->stream = cudactx->stream;
-        // Spike A: passthrough, output geometry == input geometry.
+
         p->out_params = p->params;
+
+        if (p->api.handle) {
+            enum AVPixelFormat sw = imgfmt2pixfmt(p->params.hw_subfmt);
+            p->aji_fmt = sw == AV_PIX_FMT_NV12 ? AJI_FMT_NV12 :
+                         sw == AV_PIX_FMT_P010 ? AJI_FMT_P010 : 0;
+            if (!p->aji_fmt) {
+                MP_ERR(vf, "Unsupported sw format %s for inference\n",
+                       mp_imgfmt_to_name(p->params.hw_subfmt));
+                mp_filter_internal_mark_failed(vf);
+                return;
+            }
+
+            if (p->aji && (p->aji_w != p->params.w || p->aji_h != p->params.h))
+                p->api.destroy(&p->aji);
+
+            if (!p->aji) {
+                aji_create_params cp = {
+                    .api_version = AJI_API_VERSION,
+                    .cuda_context = p->cuda_ctx,
+                    .engine_path = p->opts->engine,
+                    .max_width = p->params.w,
+                    .max_height = p->params.h,
+                    .log = aji_log_bridge,
+                    .log_opaque = vf,
+                };
+                p->aji = p->api.create(&cp);
+                if (!p->aji) {
+                    MP_ERR(vf, "Failed to create inference context for %s\n",
+                           p->opts->engine);
+                    mp_filter_internal_mark_failed(vf);
+                    return;
+                }
+                p->aji_w = p->params.w;
+                p->aji_h = p->params.h;
+                p->scale = p->api.scale_factor(p->aji);
+                MP_VERBOSE(vf, "Inference ready: %s, scale %dx\n",
+                           p->opts->engine, p->scale);
+            }
+
+            p->out_params.w = p->params.w * p->scale;
+            p->out_params.h = p->params.h * p->scale;
+            p->out_params.crop.x0 *= p->scale;
+            p->out_params.crop.y0 *= p->scale;
+            p->out_params.crop.x1 *= p->scale;
+            p->out_params.crop.y1 *= p->scale;
+        }
 
         mp_image_setfmt(&p->layout, p->params.hw_subfmt);
         mp_image_set_size(&p->layout, p->params.w, p->params.h);
-        MP_VERBOSE(vf, "Configured: %dx%d subfmt=%s\n", p->params.w,
-                   p->params.h, mp_imgfmt_to_name(p->params.hw_subfmt));
+        MP_VERBOSE(vf, "Configured: %dx%d subfmt=%s -> %dx%d\n", p->params.w,
+                   p->params.h, mp_imgfmt_to_name(p->params.hw_subfmt),
+                   p->out_params.w, p->out_params.h);
     }
 
     if (!mp_refqueue_can_output(p->queue))
@@ -212,6 +321,10 @@ static void uninit(struct mp_filter *vf)
 
     flush_frames(vf);
     talloc_free(p->queue);
+    if (p->aji)
+        p->api.destroy(&p->aji);
+    if (p->api.handle)
+        dlclose(p->api.handle);
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->av_device_ref);
     cuda_free_functions(&p->cu);
@@ -240,10 +353,36 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
     struct priv *p = f->priv;
     p->opts = talloc_steal(p, options);
     p->queue = mp_refqueue_alloc(f);
+    p->scale = 1;
 
     if (cuda_load_functions(&p->cu, NULL) < 0) {
         MP_ERR(f, "Failed to load CUDA driver API\n");
         goto fail;
+    }
+
+    if (p->opts->engine && p->opts->engine[0]) {
+        // Strict C ABI boundary: the inference backend (TensorRT) is loaded
+        // at runtime and never linked. (dlopen here; LoadLibrary on win32
+        // once the Windows backend exists.)
+        const char *lib = p->opts->lib && p->opts->lib[0] ? p->opts->lib
+                                                          : "libaji.so";
+        p->api.handle = dlopen(lib, RTLD_NOW | RTLD_LOCAL);
+        if (!p->api.handle) {
+            MP_ERR(f, "Failed to load inference shim '%s': %s\n", lib,
+                   dlerror());
+            goto fail;
+        }
+        p->api.create = dlsym(p->api.handle, "aji_create");
+        p->api.infer = dlsym(p->api.handle, "aji_infer");
+        p->api.scale_factor = dlsym(p->api.handle, "aji_scale_factor");
+        p->api.last_error = dlsym(p->api.handle, "aji_last_error");
+        p->api.destroy = dlsym(p->api.handle, "aji_destroy");
+        if (!p->api.create || !p->api.infer || !p->api.scale_factor ||
+            !p->api.last_error || !p->api.destroy) {
+            MP_ERR(f, "Inference shim '%s' is missing aji_* symbols\n", lib);
+            goto fail;
+        }
+        MP_VERBOSE(f, "Loaded inference shim: %s\n", lib);
     }
 
     // The CUDA device is adopted from the first input frame's
@@ -263,6 +402,8 @@ fail:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
+    {"engine", OPT_STRING(engine), .flags = M_OPT_FILE},
+    {"lib", OPT_STRING(lib), .flags = M_OPT_FILE},
     {"passthrough", OPT_BOOL(passthrough)},
     {0}
 };
