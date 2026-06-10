@@ -4,9 +4,15 @@
  * The filter keeps frames in GPU memory end to end: IMGFMT_CUDA in, own
  * AVHWFramesContext output pool, IMGFMT_CUDA out. Inference runs in the
  * libaji shim, loaded at runtime across a strict C ABI (see aji.h) so the
- * TensorRT toolchain never links into mpv. With no engine configured the
- * filter degrades to a synchronized GPU-side plane copy (passthrough),
- * which is also the de-risk path used by phase 0 spike A.
+ * TensorRT toolchain never links into mpv.
+ *
+ * Modes:
+ *  - conf=animejanai.conf (+ model-dir/trtexec/slot): full chain selection
+ *    per slot and video properties, engines built on first play.
+ *  - engine=file.engine: single fixed engine (spike/debug).
+ *  - neither: synchronized GPU-side plane copy (passthrough).
+ *
+ * Runtime: `vf-command animejanai slot <N>` switches the active slot.
  *
  * This file is part of mpv.
  *
@@ -23,6 +29,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <stdio.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -95,15 +103,24 @@ static const char *aji_lib_error(void)
 struct opts {
     bool passthrough;
     char *engine;
+    char *conf;
+    char *model_dir;
+    char *trtexec;
+    char *trtexec_libdir;
+    char *stats;
     char *lib;
+    int slot;
 };
 
 struct aji_api {
     void *handle;
     aji_ctx *(*create)(const aji_create_params *params);
+    int (*set_slot)(aji_ctx *c, int slot);
+    int (*configure)(aji_ctx *c, int w, int h, double fps, int *out_w,
+                     int *out_h);
     int (*infer)(aji_ctx *c, const aji_frame *in, const aji_frame *out,
                  void *cu_stream);
-    int (*scale_factor)(aji_ctx *c);
+    const char *(*current_log)(aji_ctx *c);
     const char *(*last_error)(aji_ctx *c);
     void (*destroy)(aji_ctx **c);
 };
@@ -121,11 +138,13 @@ struct priv {
     struct aji_api api;
     aji_ctx *aji;
     int aji_fmt;
-    int aji_w, aji_h;   // input dims the aji ctx was created for
-    int scale;
+    bool aji_active;     // a chain/engine is configured; else passthrough copy
+    bool configured;     // saw at least one reinit
+    int cur_slot, pending_slot;
 
     struct mp_refqueue *queue;
     struct mp_image_params params, out_params;
+    double fps;
     // Software layout of params.hw_subfmt, for plane geometry only.
     struct mp_image layout;
 };
@@ -149,15 +168,98 @@ static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
 static void aji_log_bridge(void *opaque, int level, const char *msg)
 {
     struct mp_filter *vf = opaque;
-    // levels follow TRT severity: 0/1 error, 2 warning, 3+ info/verbose
     int mp_level = level <= 1 ? MSGL_ERR : level == 2 ? MSGL_WARN : MSGL_V;
     mp_msg(vf->log, mp_level, "[aji] %s\n", msg);
+}
+
+static int map_matrix(struct mp_image_params *params)
+{
+    switch (params->repr.sys) {
+    case PL_COLOR_SYSTEM_BT_601:     return AJI_MATRIX_BT601;
+    case PL_COLOR_SYSTEM_BT_2020_NC: return AJI_MATRIX_BT2020;
+    case PL_COLOR_SYSTEM_BT_709:     return AJI_MATRIX_BT709;
+    default:
+        // untagged: same SD heuristic as the legacy pipeline
+        return params->h < 720 ? AJI_MATRIX_BT601 : AJI_MATRIX_BT709;
+    }
+}
+
+static int map_range(struct mp_image_params *params)
+{
+    return params->repr.levels == PL_COLOR_LEVELS_FULL ? AJI_RANGE_FULL
+                                                       : AJI_RANGE_LIMITED;
+}
+
+static int map_siting(struct mp_image_params *params)
+{
+    switch (params->chroma_location) {
+    case PL_CHROMA_CENTER:   return AJI_SITING_CENTER;
+    case PL_CHROMA_TOP_LEFT: return AJI_SITING_TOPLEFT;
+    case PL_CHROMA_LEFT:
+    default:                 return AJI_SITING_LEFT;
+    }
 }
 
 static void flush_frames(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
     mp_refqueue_flush(p->queue);
+}
+
+static void write_stats(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if (!p->opts->stats || !p->opts->stats[0] || !p->aji)
+        return;
+    FILE *f = fopen(p->opts->stats, "w");
+    if (!f) {
+        MP_WARN(vf, "Cannot write stats file %s\n", p->opts->stats);
+        return;
+    }
+    fputs(p->api.current_log(p->aji), f);
+    fclose(f);
+}
+
+// (Re)configure the shim for the current stream params and slot. Updates
+// out_params (and thus the output pool geometry). May block on first-play
+// engine builds, like the legacy pipeline.
+static bool configure_aji(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    p->out_params = p->params;
+    p->aji_active = false;
+    if (!p->aji)
+        return true;
+
+    p->api.set_slot(p->aji, p->pending_slot);
+    p->cur_slot = p->pending_slot;
+
+    int ow = 0, oh = 0;
+    int ret = p->api.configure(p->aji, p->params.w, p->params.h, p->fps,
+                               &ow, &oh);
+    if (ret < 0) {
+        MP_ERR(vf, "configure failed: %s\n", p->api.last_error(p->aji));
+        return false;
+    }
+    write_stats(vf);
+    if (ret == 0) {
+        MP_VERBOSE(vf, "No chain active for %dx%d@%.3f slot %d (passthrough)\n",
+                   p->params.w, p->params.h, p->fps, p->cur_slot);
+        return true;
+    }
+
+    p->aji_active = true;
+    double sx = (double)ow / p->params.w, sy = (double)oh / p->params.h;
+    p->out_params.w = ow;
+    p->out_params.h = oh;
+    p->out_params.crop.x0 = lrint(p->params.crop.x0 * sx);
+    p->out_params.crop.y0 = lrint(p->params.crop.y0 * sy);
+    p->out_params.crop.x1 = lrint(p->params.crop.x1 * sx);
+    p->out_params.crop.y1 = lrint(p->params.crop.y1 * sy);
+    MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d\n", p->cur_slot,
+               p->params.w, p->params.h, ow, oh);
+    return true;
 }
 
 static struct mp_image *alloc_out(struct mp_filter *vf)
@@ -208,15 +310,20 @@ static struct mp_image *render(struct mp_filter *vf)
     out->params = p->out_params;
     out->pts = in->pts;
 
-    if (p->aji) {
+    if (p->aji_active) {
+        const int mat = map_matrix(&p->params);
+        const int rng = map_range(&p->params);
+        const int sit = map_siting(&p->params);
         const aji_frame fin = {
             .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
             .plane = {in->planes[0], in->planes[1]},
             .stride = {in->stride[0], in->stride[1]},
         };
         const aji_frame fout = {
             .width = p->out_params.w, .height = p->out_params.h,
             .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
             .plane = {out->planes[0], out->planes[1]},
             .stride = {out->stride[0], out->stride[1]},
         };
@@ -276,6 +383,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
         av_buffer_unref(&p->hw_pool);
 
         p->params = in_fmt->params;
+        p->fps = in_fmt->nominal_fps;
         if (!p->params.hw_subfmt) {
             MP_ERR(vf, "Unknown hw_subfmt\n");
             mp_filter_internal_mark_failed(vf);
@@ -302,9 +410,35 @@ static void vf_animejanai_process(struct mp_filter *vf)
         p->cuda_ctx = cudactx->cuda_ctx;
         p->stream = cudactx->stream;
 
-        p->out_params = p->params;
+        if (p->api.handle && !p->aji) {
+            // mpv suboption values cannot contain '=', so the option takes a
+            // plain lib dir and the env assignment is composed here.
+            char *env = p->opts->trtexec_libdir && p->opts->trtexec_libdir[0]
+                ? talloc_asprintf(p, "LD_LIBRARY_PATH=%s", p->opts->trtexec_libdir)
+                : NULL;
+            aji_create_params cp = {
+                .api_version = AJI_API_VERSION,
+                .cuda_context = p->cuda_ctx,
+                .conf_path = p->opts->conf,
+                .model_dir = p->opts->model_dir,
+                .trtexec = p->opts->trtexec,
+                .trtexec_env = env,
+                .slot = p->opts->slot,
+                .engine_path = p->opts->engine,
+                .max_width = p->params.w,
+                .max_height = p->params.h,
+                .log = aji_log_bridge,
+                .log_opaque = vf,
+            };
+            p->aji = p->api.create(&cp);
+            if (!p->aji) {
+                MP_ERR(vf, "Failed to create inference context\n");
+                mp_filter_internal_mark_failed(vf);
+                return;
+            }
+        }
 
-        if (p->api.handle) {
+        if (p->aji) {
             enum AVPixelFormat sw = imgfmt2pixfmt(p->params.hw_subfmt);
             p->aji_fmt = sw == AV_PIX_FMT_NV12 ? AJI_FMT_NV12 :
                          sw == AV_PIX_FMT_P010 ? AJI_FMT_P010 : 0;
@@ -314,53 +448,53 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 mp_filter_internal_mark_failed(vf);
                 return;
             }
-
-            if (p->aji && (p->aji_w != p->params.w || p->aji_h != p->params.h))
-                p->api.destroy(&p->aji);
-
-            if (!p->aji) {
-                aji_create_params cp = {
-                    .api_version = AJI_API_VERSION,
-                    .cuda_context = p->cuda_ctx,
-                    .engine_path = p->opts->engine,
-                    .max_width = p->params.w,
-                    .max_height = p->params.h,
-                    .log = aji_log_bridge,
-                    .log_opaque = vf,
-                };
-                p->aji = p->api.create(&cp);
-                if (!p->aji) {
-                    MP_ERR(vf, "Failed to create inference context for %s\n",
-                           p->opts->engine);
-                    mp_filter_internal_mark_failed(vf);
-                    return;
-                }
-                p->aji_w = p->params.w;
-                p->aji_h = p->params.h;
-                p->scale = p->api.scale_factor(p->aji);
-                MP_VERBOSE(vf, "Inference ready: %s, scale %dx\n",
-                           p->opts->engine, p->scale);
-            }
-
-            p->out_params.w = p->params.w * p->scale;
-            p->out_params.h = p->params.h * p->scale;
-            p->out_params.crop.x0 *= p->scale;
-            p->out_params.crop.y0 *= p->scale;
-            p->out_params.crop.x1 *= p->scale;
-            p->out_params.crop.y1 *= p->scale;
         }
+
+        if (!configure_aji(vf)) {
+            mp_filter_internal_mark_failed(vf);
+            return;
+        }
+        p->configured = true;
 
         mp_image_setfmt(&p->layout, p->params.hw_subfmt);
         mp_image_set_size(&p->layout, p->params.w, p->params.h);
-        MP_VERBOSE(vf, "Configured: %dx%d subfmt=%s -> %dx%d\n", p->params.w,
-                   p->params.h, mp_imgfmt_to_name(p->params.hw_subfmt),
+        MP_VERBOSE(vf, "Stream: %dx%d@%.3f subfmt=%s -> %dx%d\n", p->params.w,
+                   p->params.h, p->fps, mp_imgfmt_to_name(p->params.hw_subfmt),
                    p->out_params.w, p->out_params.h);
+    }
+
+    // Runtime slot switch (vf-command): reconfigure on the filter thread.
+    if (p->configured && p->aji && p->pending_slot != p->cur_slot) {
+        av_buffer_unref(&p->hw_pool);
+        if (!configure_aji(vf)) {
+            mp_filter_internal_mark_failed(vf);
+            return;
+        }
     }
 
     if (!mp_refqueue_can_output(p->queue))
         return;
 
     mp_refqueue_write_out_pin(p->queue, render(vf));
+}
+
+static bool vf_animejanai_command(struct mp_filter *vf,
+                                  struct mp_filter_command *cmd)
+{
+    struct priv *p = vf->priv;
+    if (cmd->type != MP_FILTER_COMMAND_TEXT || !cmd->cmd)
+        return false;
+    if (strcmp(cmd->cmd, "slot") == 0 && cmd->arg) {
+        int slot = atoi(cmd->arg);
+        if (slot <= 0) {
+            MP_ERR(vf, "Invalid slot '%s'\n", cmd->arg);
+            return false;
+        }
+        p->pending_slot = slot;
+        mp_filter_wakeup(vf);
+        return true;
+    }
+    return false;
 }
 
 static void uninit(struct mp_filter *vf)
@@ -381,6 +515,7 @@ static void uninit(struct mp_filter *vf)
 static const struct mp_filter_info vf_animejanai_filter = {
     .name = "animejanai",
     .process = vf_animejanai_process,
+    .command = vf_animejanai_command,
     .reset = flush_frames,
     .destroy = uninit,
     .priv_size = sizeof(struct priv),
@@ -401,14 +536,16 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
     struct priv *p = f->priv;
     p->opts = talloc_steal(p, options);
     p->queue = mp_refqueue_alloc(f);
-    p->scale = 1;
+    p->cur_slot = p->pending_slot = p->opts->slot;
 
     if (cuda_load_functions(&p->cu, NULL) < 0) {
         MP_ERR(f, "Failed to load CUDA driver API\n");
         goto fail;
     }
 
-    if (p->opts->engine && p->opts->engine[0]) {
+    bool want_aji = (p->opts->engine && p->opts->engine[0]) ||
+                    (p->opts->conf && p->opts->conf[0]);
+    if (want_aji) {
         // Strict C ABI boundary: the inference backend (TensorRT) is loaded
         // at runtime and never linked.
         const char *lib = p->opts->lib && p->opts->lib[0] ? p->opts->lib
@@ -420,13 +557,17 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
             goto fail;
         }
         p->api.create = aji_lib_sym(p->api.handle, "aji_create");
+        p->api.set_slot = aji_lib_sym(p->api.handle, "aji_set_slot");
+        p->api.configure = aji_lib_sym(p->api.handle, "aji_configure");
         p->api.infer = aji_lib_sym(p->api.handle, "aji_infer");
-        p->api.scale_factor = aji_lib_sym(p->api.handle, "aji_scale_factor");
+        p->api.current_log = aji_lib_sym(p->api.handle, "aji_current_log");
         p->api.last_error = aji_lib_sym(p->api.handle, "aji_last_error");
         p->api.destroy = aji_lib_sym(p->api.handle, "aji_destroy");
-        if (!p->api.create || !p->api.infer || !p->api.scale_factor ||
-            !p->api.last_error || !p->api.destroy) {
-            MP_ERR(f, "Inference shim '%s' is missing aji_* symbols\n", lib);
+        if (!p->api.create || !p->api.set_slot || !p->api.configure ||
+            !p->api.infer || !p->api.current_log || !p->api.last_error ||
+            !p->api.destroy) {
+            MP_ERR(f, "Inference shim '%s' is missing aji_* symbols "
+                      "(ABI version mismatch?)\n", lib);
             goto fail;
         }
         MP_VERBOSE(f, "Loaded inference shim: %s\n", lib);
@@ -449,6 +590,12 @@ fail:
 
 #define OPT_BASE_STRUCT struct opts
 static const m_option_t vf_opts_fields[] = {
+    {"conf", OPT_STRING(conf), .flags = M_OPT_FILE},
+    {"model-dir", OPT_STRING(model_dir), .flags = M_OPT_FILE},
+    {"trtexec", OPT_STRING(trtexec), .flags = M_OPT_FILE},
+    {"trtexec-libdir", OPT_STRING(trtexec_libdir), .flags = M_OPT_FILE},
+    {"slot", OPT_INT(slot), M_RANGE(1, 9999)},
+    {"stats", OPT_STRING(stats), .flags = M_OPT_FILE},
     {"engine", OPT_STRING(engine), .flags = M_OPT_FILE},
     {"lib", OPT_STRING(lib), .flags = M_OPT_FILE},
     {"passthrough", OPT_BOOL(passthrough)},
@@ -462,6 +609,7 @@ const struct mp_user_filter_entry vf_animejanai = {
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .passthrough = true,
+            .slot = 1,
         },
         .options = vf_opts_fields,
     },
