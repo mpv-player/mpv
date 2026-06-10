@@ -63,6 +63,11 @@ static inline OPT_STRING_VALIDATE_FUNC(vk_validate_dev)
         goto done;
 
     struct bstr param = bstr0(*value);
+    if (!param.len) {
+        mp_err(log, "No Vulkan device specified.\n");
+        ret = M_OPT_INVALID;
+        goto done;
+    }
     bool help = bstr_equals0(param, "help");
     if (help)
         mp_info(log, "Available vulkan devices:\n");
