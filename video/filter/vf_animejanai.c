@@ -678,6 +678,14 @@ static bool vf_animejanai_command(struct mp_filter *vf,
     struct priv *p = vf->priv;
     if (cmd->type != MP_FILTER_COMMAND_TEXT || !cmd->cmd)
         return false;
+    if (strcmp(cmd->cmd, "poll") == 0) {
+        // No-op wakeup: while playback is paused no frames flow, so
+        // process() (and with it the background-build completion poll)
+        // never runs. The engine-build monitor script kicks this so a
+        // finished build is noticed and playback can auto-resume.
+        mp_filter_wakeup(vf);
+        return true;
+    }
     if (strcmp(cmd->cmd, "slot") == 0 && cmd->arg) {
         int slot = atoi(cmd->arg);
         // slot 0 = bypass: the filter stays in the chain but passes frames
