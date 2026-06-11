@@ -66,6 +66,19 @@
 static void *aji_lib_open(const char *path)
 {
 #ifdef _WIN32
+    // With an explicit path, resolve the shim's own dependencies (the
+    // TensorRT runtime) from its directory, so the whole inference runtime
+    // can live in one self-contained dir instead of next to mpv.exe or on
+    // PATH. The search flags need a fully qualified, normalized path
+    // (config expansion produces absolute-but-unnormalized ones).
+    if (strpbrk(path, "/\\")) {
+        char full[MAX_PATH];
+        DWORD n = GetFullPathNameA(path, sizeof(full), full, NULL);
+        const char *p = (n > 0 && n < sizeof(full)) ? full : path;
+        return (void *)LoadLibraryExA(p, NULL,
+                                      LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR |
+                                      LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    }
     return (void *)LoadLibraryA(path);
 #else
     return dlopen(path, RTLD_NOW | RTLD_LOCAL);
