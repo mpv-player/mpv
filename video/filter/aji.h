@@ -1,5 +1,5 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 2).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 3).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
  * backend (TensorRT/MSVC world on Windows). Only C types and opaque
@@ -29,7 +29,7 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 2
+#define AJI_API_VERSION 3
 
 typedef struct aji_ctx aji_ctx;
 
@@ -57,6 +57,7 @@ enum aji_siting {           /* chroma sample position for 4:2:0 */
 
 enum aji_status {
     AJI_OK          = 0,
+    AJI_SCENE       = 1,    /* aji_infer_rife: scene change, no interpolation */
     AJI_ERR         = -1,
     AJI_ERR_SHAPE   = -2,
     AJI_ERR_FORMAT  = -3,
@@ -77,6 +78,8 @@ typedef struct aji_create_params {
     const char *trtexec;      /* trtexec binary for on-first-play builds */
     const char *trtexec_env;  /* optional env prefix, e.g. "LD_LIBRARY_PATH=..." */
     int slot;                 /* initial slot (1-9, 1001-1003, 1010-1011) */
+    const char *rife_model_dir; /* dir with rife_v*.onnx + engine cache;
+                                   NULL disables RIFE even if a chain asks */
 
     /* direct mode */
     const char *engine_path;
@@ -122,6 +125,20 @@ AJI_EXPORT const char *aji_current_log(aji_ctx *c);
 
 /* Direct mode: spatial scale of the loaded engine. Conf mode: 0. */
 AJI_EXPORT int aji_scale_factor(aji_ctx *c);
+
+/* RIFE interpolation factor of the active chain. Returns 1 and fills
+ * num/den if RIFE is active after the last aji_configure(), else 0. */
+AJI_EXPORT int aji_rife_factor(aji_ctx *c, int *num, int *den);
+
+/* Interpolate between two already-upscaled frames (dims = configure's
+ * output dims) at time point t in (0,1). Returns AJI_OK with *out
+ * written, or AJI_SCENE if the pair straddles a scene change (out is
+ * untouched; emit a duplicate of `a` instead, like the reference
+ * pipeline). Enqueues on cu_stream but synchronizes it internally for
+ * the scene-change decision. */
+AJI_EXPORT int aji_infer_rife(aji_ctx *c, const aji_frame *a,
+                              const aji_frame *b, double t,
+                              const aji_frame *out, void *cu_stream);
 
 AJI_EXPORT const char *aji_last_error(aji_ctx *c);
 

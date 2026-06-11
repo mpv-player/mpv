@@ -110,6 +110,7 @@ struct opts {
     char *trtexec_libdir;
     char *stats;
     char *lib;
+    char *rife_model_dir;
     int slot;
     bool skip_seek_pre_target;
 };
@@ -122,6 +123,9 @@ struct aji_api {
                      int *out_h);
     int (*infer)(aji_ctx *c, const aji_frame *in, const aji_frame *out,
                  void *cu_stream);
+    int (*rife_factor)(aji_ctx *c, int *num, int *den);
+    int (*infer_rife)(aji_ctx *c, const aji_frame *a, const aji_frame *b,
+                      double t, const aji_frame *out, void *cu_stream);
     const char *(*current_log)(aji_ctx *c);
     const char *(*last_error)(aji_ctx *c);
     void (*destroy)(aji_ctx **c);
@@ -134,7 +138,7 @@ struct priv {
     // opts: the option machinery owns and frees those strings itself.
     struct {
         char *conf, *model_dir, *trtexec, *trtexec_libdir, *stats, *engine,
-             *lib;
+             *lib, *rife_model_dir;
     } path;
 
     CudaFunctions *cu;
@@ -157,6 +161,16 @@ struct priv {
     double fps;
     // Software layout of params.hw_subfmt, for plane geometry only.
     struct mp_image layout;
+
+    // RIFE: per input frame, (factor-1) interpolated frames are emitted
+    // before the upscaled frame itself. The first goes out through the
+    // refqueue (consuming the input); the rest wait in outq and are
+    // written on subsequent process() calls without consuming input.
+    bool rife_on;
+    int rife_factor;            // integer output multiplier (num/den)
+    struct mp_image *rife_prev; // last emitted upscaled frame (left frame)
+    struct mp_image *outq[8];
+    int outq_n, outq_pos;
 };
 
 static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
@@ -214,6 +228,10 @@ static void flush_frames(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
     mp_refqueue_flush(p->queue);
+    mp_image_unrefp(&p->rife_prev);
+    for (int i = 0; i < p->outq_n; i++)
+        mp_image_unrefp(&p->outq[p->outq_pos + i]);
+    p->outq_n = p->outq_pos = 0;
 }
 
 static void write_stats(struct mp_filter *vf)
@@ -253,10 +271,26 @@ static bool configure_aji(struct mp_filter *vf)
         return false;
     }
     write_stats(vf);
+
+    int rn = 0, rd = 0;
+    p->rife_on = false;
+    p->rife_factor = 1;
+    mp_image_unrefp(&p->rife_prev);  // never interpolate across a reconfigure
+    if (p->api.rife_factor(p->aji, &rn, &rd) && rd > 0 && rn > rd) {
+        if (rn % rd == 0 && rn / rd <= 8) {
+            p->rife_factor = rn / rd;
+            p->rife_on = true;
+            MP_VERBOSE(vf, "RIFE active: %dx interpolation\n", p->rife_factor);
+        } else {
+            MP_WARN(vf, "RIFE factor %d/%d is not a supported integer "
+                        "multiplier; interpolation disabled\n", rn, rd);
+        }
+    }
+
     if (ret == 0) {
         MP_VERBOSE(vf, "No chain active for %dx%d@%.3f slot %d (passthrough)\n",
                    p->params.w, p->params.h, p->fps, p->cur_slot);
-        return true;
+        return true;  // no scaling chain; rife (if any) still applies
     }
 
     p->aji_active = true;
@@ -388,6 +422,61 @@ done:
     return out;
 }
 
+// Interpolate between two upscaled frames at time point t. Returns the
+// interpolated image, a new ref of `a` on a scene change (the reference
+// pipeline substitutes the left frame), or NULL on error. pts is left for
+// the caller to set.
+static struct mp_image *render_interp(struct mp_filter *vf,
+                                      struct mp_image *a, struct mp_image *b,
+                                      double t)
+{
+    struct priv *p = vf->priv;
+    CUcontext dummy;
+
+    struct mp_image *out = alloc_out(vf);
+    if (!out)
+        return NULL;
+    mp_image_copy_attributes(out, b);
+
+    const int mat = map_matrix(&p->out_params);
+    const int rng = map_range(&p->out_params);
+    const aji_frame fa = {
+        .width = p->out_params.w, .height = p->out_params.h,
+        .format = p->aji_fmt, .matrix = mat, .range = rng,
+        .siting = AJI_SITING_LEFT,
+        .plane = {a->planes[0], a->planes[1]},
+        .stride = {a->stride[0], a->stride[1]},
+    };
+    aji_frame fb = fa, fout = fa;
+    fb.plane[0] = b->planes[0];
+    fb.plane[1] = b->planes[1];
+    fb.stride[0] = b->stride[0];
+    fb.stride[1] = b->stride[1];
+    fout.plane[0] = out->planes[0];
+    fout.plane[1] = out->planes[1];
+    fout.stride[0] = out->stride[0];
+    fout.stride[1] = out->stride[1];
+
+    int ret = p->api.infer_rife(p->aji, &fa, &fb, t, &fout, p->stream);
+    if (ret == AJI_SCENE) {
+        talloc_free(out);
+        return mp_image_new_ref(a);
+    }
+    if (ret != AJI_OK) {
+        MP_ERR(vf, "interpolation failed: %s\n", p->api.last_error(p->aji));
+        talloc_free(out);
+        return NULL;
+    }
+    bool ok = false;
+    if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+        ok = CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) >= 0;
+        CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
+    }
+    if (!ok)
+        TA_FREEP(&out);
+    return out;
+}
+
 static void vf_animejanai_process(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -452,6 +541,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 .trtexec = p->path.trtexec,
                 .trtexec_env = env,
                 .slot = p->opts->slot,
+                .rife_model_dir = p->path.rife_model_dir,
                 .engine_path = p->path.engine,
                 .max_width = p->params.w,
                 .max_height = p->params.h,
@@ -500,10 +590,60 @@ static void vf_animejanai_process(struct mp_filter *vf)
         }
     }
 
+    // Extra RIFE outputs first: they go straight to the out pin without
+    // consuming input (the refqueue isn't touched while any are pending,
+    // which also keeps EOF behind them).
+    if (p->outq_n) {
+        if (mp_pin_in_needs_data(vf->ppins[1])) {
+            struct mp_image *img = p->outq[p->outq_pos];
+            p->outq[p->outq_pos] = NULL;
+            p->outq_pos++;
+            if (--p->outq_n == 0)
+                p->outq_pos = 0;
+            mp_pin_in_write(vf->ppins[1], MAKE_FRAME(MP_FRAME_VIDEO, img));
+            mp_filter_internal_mark_progress(vf);
+        }
+        return;
+    }
+
     if (!mp_refqueue_can_output(p->queue))
         return;
 
-    mp_refqueue_write_out_pin(p->queue, render(vf));
+    struct mp_image *out = render(vf);
+
+    if (out && p->rife_on) {
+        if (out->nominal_fps > 0)
+            out->nominal_fps *= p->rife_factor;
+        struct mp_image *first = out;
+        if (p->rife_prev && p->rife_prev->pts != MP_NOPTS_VALUE &&
+            out->pts != MP_NOPTS_VALUE && out->pts > p->rife_prev->pts) {
+            struct mp_image *list[8];
+            int n = 0;
+            for (int k = 1; k < p->rife_factor && n < 7; k++) {
+                double t = (double)k / p->rife_factor;
+                struct mp_image *ip =
+                    render_interp(vf, p->rife_prev, out, t);
+                if (!ip)
+                    break;  // degrade to fewer/no interpolated frames
+                ip->pts = p->rife_prev->pts +
+                          (out->pts - p->rife_prev->pts) * t;
+                list[n++] = ip;
+            }
+            if (n) {
+                list[n++] = out;
+                first = list[0];
+                for (int i = 1; i < n; i++)
+                    p->outq[p->outq_n++] = list[i];
+                p->outq_pos = 0;
+            }
+        }
+        mp_image_unrefp(&p->rife_prev);
+        p->rife_prev = mp_image_new_ref(out);
+        mp_refqueue_write_out_pin(p->queue, first);
+        return;
+    }
+
+    mp_refqueue_write_out_pin(p->queue, out);
 }
 
 static bool vf_animejanai_command(struct mp_filter *vf,
@@ -607,6 +747,7 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         {&p->path.stats, p->opts->stats},
         {&p->path.engine, p->opts->engine},
         {&p->path.lib, p->opts->lib},
+        {&p->path.rife_model_dir, p->opts->rife_model_dir},
     };
     for (int i = 0; i < MP_ARRAY_SIZE(path_opts); i++) {
         if (path_opts[i].src && path_opts[i].src[0])
@@ -634,12 +775,14 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         p->api.set_slot = aji_lib_sym(p->api.handle, "aji_set_slot");
         p->api.configure = aji_lib_sym(p->api.handle, "aji_configure");
         p->api.infer = aji_lib_sym(p->api.handle, "aji_infer");
+        p->api.rife_factor = aji_lib_sym(p->api.handle, "aji_rife_factor");
+        p->api.infer_rife = aji_lib_sym(p->api.handle, "aji_infer_rife");
         p->api.current_log = aji_lib_sym(p->api.handle, "aji_current_log");
         p->api.last_error = aji_lib_sym(p->api.handle, "aji_last_error");
         p->api.destroy = aji_lib_sym(p->api.handle, "aji_destroy");
         if (!p->api.create || !p->api.set_slot || !p->api.configure ||
-            !p->api.infer || !p->api.current_log || !p->api.last_error ||
-            !p->api.destroy) {
+            !p->api.infer || !p->api.rife_factor || !p->api.infer_rife ||
+            !p->api.current_log || !p->api.last_error || !p->api.destroy) {
             MP_ERR(f, "Inference shim '%s' is missing aji_* symbols "
                       "(ABI version mismatch?)\n", lib);
             goto fail;
@@ -673,6 +816,7 @@ static const m_option_t vf_opts_fields[] = {
     {"stats", OPT_STRING(stats), .flags = M_OPT_FILE},
     {"engine", OPT_STRING(engine), .flags = M_OPT_FILE},
     {"lib", OPT_STRING(lib), .flags = M_OPT_FILE},
+    {"rife-model-dir", OPT_STRING(rife_model_dir), .flags = M_OPT_FILE},
     {"passthrough", OPT_BOOL(passthrough)},
     {"skip-seek-pre-target", OPT_BOOL(skip_seek_pre_target)},
     {0}
