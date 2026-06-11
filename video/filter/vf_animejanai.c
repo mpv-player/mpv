@@ -257,6 +257,10 @@ static bool configure_aji(struct mp_filter *vf)
     p->out_params.crop.y0 = lrint(p->params.crop.y0 * sy);
     p->out_params.crop.x1 = lrint(p->params.crop.x1 * sx);
     p->out_params.crop.y1 = lrint(p->params.crop.y1 * sy);
+    // The shim's RGB->YUV output is always left-sited, matching the
+    // reference pipeline (VS/zimg doesn't propagate chroma location from
+    // unsubsampled sources); tag the output accordingly.
+    p->out_params.chroma_location = PL_CHROMA_LEFT;
     MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d\n", p->cur_slot,
                p->params.w, p->params.h, ow, oh);
     return true;
