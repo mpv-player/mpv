@@ -14,6 +14,13 @@ struct mp_refqueue *mp_refqueue_alloc(struct mp_filter *f);
 void mp_refqueue_add_in_format(struct mp_refqueue *q, int fmt, int subfmt);
 
 void mp_refqueue_set_refs(struct mp_refqueue *q, int past, int future);
+
+// Optional gate called for each incoming video frame before it enters the
+// queue; return true to drop the frame (e.g. hr-seek pre-target skipping).
+void mp_refqueue_set_drop_check(struct mp_refqueue *q,
+                                bool (*cb)(void *ctx, struct mp_image *img),
+                                void *ctx);
+
 void mp_refqueue_flush(struct mp_refqueue *q);
 struct mp_image *mp_refqueue_get(struct mp_refqueue *q, int pos);
 

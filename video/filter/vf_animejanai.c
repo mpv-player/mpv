@@ -111,6 +111,7 @@ struct opts {
     char *stats;
     char *lib;
     int slot;
+    bool skip_seek_pre_target;
 };
 
 struct aji_api {
@@ -526,6 +527,27 @@ static const struct mp_filter_info vf_animejanai_filter = {
     .priv_size = sizeof(struct priv),
 };
 
+// During hr-seek, frames before the target would be upscaled and then
+// discarded by the post-filter framedrop; skip inference on them entirely
+// (same approach as the vf_vapoursynth fast-seek patch).
+static bool drop_pre_seek_target(void *ctx, struct mp_image *mpi)
+{
+    struct mp_filter *vf = ctx;
+    struct priv *p = vf->priv;
+
+    if (!p->opts->skip_seek_pre_target || mpi->pts == MP_NOPTS_VALUE)
+        return false;
+    struct mp_stream_info *info = mp_filter_find_stream_info(vf);
+    double target;
+    if (!(info && info->get_hrseek && info->get_hrseek(info, &target)))
+        return false;
+    if (mpi->pts >= target - 0.005)
+        return false;
+    MP_DBG(vf, "drop pre-seek-target frame pts=%f target=%f\n", mpi->pts,
+           target);
+    return true;
+}
+
 static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
                                               void *options)
 {
@@ -596,6 +618,7 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
     mp_refqueue_add_in_format(p->queue, IMGFMT_CUDA, 0);
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue, 0);
+    mp_refqueue_set_drop_check(p->queue, drop_pre_seek_target, f);
 
     return f;
 
@@ -615,6 +638,7 @@ static const m_option_t vf_opts_fields[] = {
     {"engine", OPT_STRING(engine), .flags = M_OPT_FILE},
     {"lib", OPT_STRING(lib), .flags = M_OPT_FILE},
     {"passthrough", OPT_BOOL(passthrough)},
+    {"skip-seek-pre-target", OPT_BOOL(skip_seek_pre_target)},
     {0}
 };
 
@@ -626,6 +650,7 @@ const struct mp_user_filter_entry vf_animejanai = {
         .priv_defaults = &(const OPT_BASE_STRUCT) {
             .passthrough = true,
             .slot = 1,
+            .skip_seek_pre_target = true,
         },
         .options = vf_opts_fields,
     },
