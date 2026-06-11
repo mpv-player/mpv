@@ -141,6 +141,7 @@ struct priv {
     AVBufferRef *av_device_ref;
     CUcontext cuda_ctx;
     CUstream stream;
+    CUstream own_stream;
 
     AVBufferRef *hw_pool;
 
@@ -422,6 +423,20 @@ static void vf_animejanai_process(struct mp_filter *vf)
         AVCUDADeviceContext *cudactx = avhwctx->hwctx;
         p->cuda_ctx = cudactx->cuda_ctx;
         p->stream = cudactx->stream;
+        if (!p->stream) {
+            // ffmpeg's CUDA device context usually leaves this NULL (the
+            // default stream); TensorRT then adds extra stream syncs per
+            // enqueue, and CUDA graph capture is impossible. Use our own.
+            // (Format re-adoptions reuse it; the device ctx is stable.)
+            if (!p->own_stream &&
+                CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+                CUcontext dummy;
+                CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
+                                               CU_STREAM_NON_BLOCKING));
+                CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
+            }
+            p->stream = p->own_stream;
+        }
 
         if (p->api.handle && !p->aji) {
             // mpv suboption values cannot contain '=', so the option takes a
@@ -523,6 +538,12 @@ static void uninit(struct mp_filter *vf)
         p->api.destroy(&p->aji);
     if (p->api.handle)
         aji_lib_close(p->api.handle);
+    if (p->own_stream && p->cu &&
+        p->cu->cuCtxPushCurrent(p->cuda_ctx) == CUDA_SUCCESS) {
+        CUcontext dummy;
+        p->cu->cuStreamDestroy(p->own_stream);
+        p->cu->cuCtxPopCurrent(&dummy);
+    }
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->av_device_ref);
     cuda_free_functions(&p->cu);
