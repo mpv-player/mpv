@@ -139,6 +139,7 @@ struct aji_api {
     int (*rife_factor)(aji_ctx *c, int *num, int *den);
     int (*infer_rife)(aji_ctx *c, const aji_frame *a, const aji_frame *b,
                       double t, const aji_frame *out, void *cu_stream);
+    int (*poll)(aji_ctx *c);
     const char *(*current_log)(aji_ctx *c);
     const char *(*last_error)(aji_ctx *c);
     void (*destroy)(aji_ctx **c);
@@ -555,6 +556,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 .trtexec_env = env,
                 .slot = p->opts->slot,
                 .rife_model_dir = p->path.rife_model_dir,
+                .async_build = 1,
                 .engine_path = p->path.engine,
                 .max_width = p->params.w,
                 .max_height = p->params.h,
@@ -596,6 +598,17 @@ static void vf_animejanai_process(struct mp_filter *vf)
 
     // Runtime slot switch (vf-command): reconfigure on the filter thread.
     if (p->configured && p->aji && p->pending_slot != p->cur_slot) {
+        av_buffer_unref(&p->hw_pool);
+        if (!configure_aji(vf)) {
+            mp_filter_internal_mark_failed(vf);
+            return;
+        }
+    }
+
+    // A background engine build finished: reconfigure, and the chain (or
+    // RIFE) activates mid-playback. Until then frames pass through.
+    if (p->configured && p->aji && p->api.poll(p->aji)) {
+        MP_VERBOSE(vf, "background engine build finished; reconfiguring\n");
         av_buffer_unref(&p->hw_pool);
         if (!configure_aji(vf)) {
             mp_filter_internal_mark_failed(vf);
@@ -790,11 +803,13 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         p->api.infer = aji_lib_sym(p->api.handle, "aji_infer");
         p->api.rife_factor = aji_lib_sym(p->api.handle, "aji_rife_factor");
         p->api.infer_rife = aji_lib_sym(p->api.handle, "aji_infer_rife");
+        p->api.poll = aji_lib_sym(p->api.handle, "aji_poll");
         p->api.current_log = aji_lib_sym(p->api.handle, "aji_current_log");
         p->api.last_error = aji_lib_sym(p->api.handle, "aji_last_error");
         p->api.destroy = aji_lib_sym(p->api.handle, "aji_destroy");
         if (!p->api.create || !p->api.set_slot || !p->api.configure ||
             !p->api.infer || !p->api.rife_factor || !p->api.infer_rife ||
+            !p->api.poll ||
             !p->api.current_log || !p->api.last_error || !p->api.destroy) {
             MP_ERR(f, "Inference shim '%s' is missing aji_* symbols "
                       "(ABI version mismatch?)\n", lib);

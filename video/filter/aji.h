@@ -1,5 +1,5 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 3).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 4).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
  * backend (TensorRT/MSVC world on Windows). Only C types and opaque
@@ -29,7 +29,7 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 3
+#define AJI_API_VERSION 4
 
 typedef struct aji_ctx aji_ctx;
 
@@ -80,6 +80,11 @@ typedef struct aji_create_params {
     int slot;                 /* initial slot (1-9, 1001-1003, 1010-1011) */
     const char *rife_model_dir; /* dir with rife_v*.onnx + engine cache;
                                    NULL disables RIFE even if a chain asks */
+    int async_build;          /* nonzero: missing engines build on a
+                                 background thread; aji_configure returns
+                                 passthrough (or chain-without-rife)
+                                 meanwhile, and aji_poll() reports when to
+                                 reconfigure. Zero: builds block (CLI). */
 
     /* direct mode */
     const char *engine_path;
@@ -129,6 +134,12 @@ AJI_EXPORT int aji_scale_factor(aji_ctx *c);
 /* RIFE interpolation factor of the active chain. Returns 1 and fills
  * num/den if RIFE is active after the last aji_configure(), else 0. */
 AJI_EXPORT int aji_rife_factor(aji_ctx *c, int *num, int *den);
+
+/* Async builds: returns 1 (once) when a background engine build finished;
+ * the caller should re-run aji_configure, which now finds the engine in
+ * the cache (or logs the failure and stays passthrough). Cheap to call
+ * per frame. */
+AJI_EXPORT int aji_poll(aji_ctx *c);
 
 /* Interpolate between two already-upscaled frames (dims = configure's
  * output dims) at time point t in (0,1). Returns AJI_OK with *out
