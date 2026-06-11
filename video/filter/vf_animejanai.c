@@ -130,6 +130,13 @@ struct aji_api {
 struct priv {
     struct opts *opts;
 
+    // Expanded copies of the path options (~~/ etc.). Kept separate from
+    // opts: the option machinery owns and frees those strings itself.
+    struct {
+        char *conf, *model_dir, *trtexec, *trtexec_libdir, *stats, *engine,
+             *lib;
+    } path;
+
     CudaFunctions *cu;
     AVBufferRef *av_device_ref;
     CUcontext cuda_ctx;
@@ -211,11 +218,11 @@ static void flush_frames(struct mp_filter *vf)
 static void write_stats(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
-    if (!p->opts->stats || !p->opts->stats[0] || !p->aji)
+    if (!p->path.stats || !p->aji)
         return;
-    FILE *f = fopen(p->opts->stats, "w");
+    FILE *f = fopen(p->path.stats, "w");
     if (!f) {
-        MP_WARN(vf, "Cannot write stats file %s\n", p->opts->stats);
+        MP_WARN(vf, "Cannot write stats file %s\n", p->path.stats);
         return;
     }
     fputs(p->api.current_log(p->aji), f);
@@ -419,18 +426,18 @@ static void vf_animejanai_process(struct mp_filter *vf)
         if (p->api.handle && !p->aji) {
             // mpv suboption values cannot contain '=', so the option takes a
             // plain lib dir and the env assignment is composed here.
-            char *env = p->opts->trtexec_libdir && p->opts->trtexec_libdir[0]
-                ? talloc_asprintf(p, "LD_LIBRARY_PATH=%s", p->opts->trtexec_libdir)
+            char *env = p->path.trtexec_libdir
+                ? talloc_asprintf(p, "LD_LIBRARY_PATH=%s", p->path.trtexec_libdir)
                 : NULL;
             aji_create_params cp = {
                 .api_version = AJI_API_VERSION,
                 .cuda_context = p->cuda_ctx,
-                .conf_path = p->opts->conf,
-                .model_dir = p->opts->model_dir,
-                .trtexec = p->opts->trtexec,
+                .conf_path = p->path.conf,
+                .model_dir = p->path.model_dir,
+                .trtexec = p->path.trtexec,
                 .trtexec_env = env,
                 .slot = p->opts->slot,
-                .engine_path = p->opts->engine,
+                .engine_path = p->path.engine,
                 .max_width = p->params.w,
                 .max_height = p->params.h,
                 .log = aji_log_bridge,
@@ -567,13 +574,20 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
 
     // Expand mpv path shortcuts (~~/ etc.) so portable configs can point at
     // files relative to the config directory (suboptions are not expanded
-    // by the option parser itself).
-    char **path_opts[] = {&p->opts->conf, &p->opts->model_dir,
-                          &p->opts->trtexec, &p->opts->trtexec_libdir,
-                          &p->opts->stats, &p->opts->engine, &p->opts->lib};
+    // by the option parser itself). Empty options stay NULL.
+    struct { char **dst; char *src; } path_opts[] = {
+        {&p->path.conf, p->opts->conf},
+        {&p->path.model_dir, p->opts->model_dir},
+        {&p->path.trtexec, p->opts->trtexec},
+        {&p->path.trtexec_libdir, p->opts->trtexec_libdir},
+        {&p->path.stats, p->opts->stats},
+        {&p->path.engine, p->opts->engine},
+        {&p->path.lib, p->opts->lib},
+    };
     for (int i = 0; i < MP_ARRAY_SIZE(path_opts); i++) {
-        if (*path_opts[i] && (*path_opts[i])[0])
-            *path_opts[i] = mp_get_user_path(p, f->global, *path_opts[i]);
+        if (path_opts[i].src && path_opts[i].src[0])
+            *path_opts[i].dst = mp_get_user_path(p, f->global,
+                                                 path_opts[i].src);
     }
 
     if (cuda_load_functions(&p->cu, NULL) < 0) {
@@ -581,13 +595,11 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         goto fail;
     }
 
-    bool want_aji = (p->opts->engine && p->opts->engine[0]) ||
-                    (p->opts->conf && p->opts->conf[0]);
+    bool want_aji = p->path.engine || p->path.conf;
     if (want_aji) {
         // Strict C ABI boundary: the inference backend (TensorRT) is loaded
         // at runtime and never linked.
-        const char *lib = p->opts->lib && p->opts->lib[0] ? p->opts->lib
-                                                          : AJI_DEFAULT_LIB;
+        const char *lib = p->path.lib ? p->path.lib : AJI_DEFAULT_LIB;
         p->api.handle = aji_lib_open(lib);
         if (!p->api.handle) {
             MP_ERR(f, "Failed to load inference shim '%s': %s\n", lib,
