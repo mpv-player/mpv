@@ -296,7 +296,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
     if (!tonecurve[1]) tonecurve[1] = tonecurve[0];
     if (!tonecurve[2]) tonecurve[2] = tonecurve[0];
 
-    cmsHPROFILE *vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
+    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
                                                       tonecurve);
 
     if (tonecurve[2] != tonecurve[0]) cmsFreeToneCurve(tonecurve[2]);
