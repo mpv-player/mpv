@@ -627,7 +627,7 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
 #endif
 
     MP_ERR(p, "Failed mapping hwdec frame? Open a bug!\n");
-    return false;
+    return NULL;
 }
 
 static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
