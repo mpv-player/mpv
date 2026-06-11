@@ -49,6 +49,7 @@
 #include "filters/filter_internal.h"
 #include "filters/user_filters.h"
 #include "options/m_option.h"
+#include "options/path.h"
 #include "refqueue.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -541,6 +542,17 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
     p->opts = talloc_steal(p, options);
     p->queue = mp_refqueue_alloc(f);
     p->cur_slot = p->pending_slot = p->opts->slot;
+
+    // Expand mpv path shortcuts (~~/ etc.) so portable configs can point at
+    // files relative to the config directory (suboptions are not expanded
+    // by the option parser itself).
+    char **path_opts[] = {&p->opts->conf, &p->opts->model_dir,
+                          &p->opts->trtexec, &p->opts->trtexec_libdir,
+                          &p->opts->stats, &p->opts->engine, &p->opts->lib};
+    for (int i = 0; i < MP_ARRAY_SIZE(path_opts); i++) {
+        if (*path_opts[i] && (*path_opts[i])[0])
+            *path_opts[i] = mp_get_user_path(p, f->global, *path_opts[i]);
+    }
 
     if (cuda_load_functions(&p->cu, NULL) < 0) {
         MP_ERR(f, "Failed to load CUDA driver API\n");
