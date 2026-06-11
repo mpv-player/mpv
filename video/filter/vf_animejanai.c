@@ -499,7 +499,10 @@ static bool vf_animejanai_command(struct mp_filter *vf,
         return false;
     if (strcmp(cmd->cmd, "slot") == 0 && cmd->arg) {
         int slot = atoi(cmd->arg);
-        if (slot <= 0) {
+        // slot 0 = bypass: the filter stays in the chain but passes frames
+        // through, so on/off toggling never rebuilds the chain (a rebuild
+        // would race with vf-commands sent right after a profile change).
+        if (slot < 0 || (slot == 0 && strcmp(cmd->arg, "0") != 0)) {
             MP_ERR(vf, "Invalid slot '%s'\n", cmd->arg);
             return false;
         }
@@ -645,7 +648,7 @@ static const m_option_t vf_opts_fields[] = {
     {"model-dir", OPT_STRING(model_dir), .flags = M_OPT_FILE},
     {"trtexec", OPT_STRING(trtexec), .flags = M_OPT_FILE},
     {"trtexec-libdir", OPT_STRING(trtexec_libdir), .flags = M_OPT_FILE},
-    {"slot", OPT_INT(slot), M_RANGE(1, 9999)},
+    {"slot", OPT_INT(slot), M_RANGE(0, 9999)},
     {"stats", OPT_STRING(stats), .flags = M_OPT_FILE},
     {"engine", OPT_STRING(engine), .flags = M_OPT_FILE},
     {"lib", OPT_STRING(lib), .flags = M_OPT_FILE},
