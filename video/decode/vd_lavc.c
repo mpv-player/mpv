@@ -492,6 +492,19 @@ static AVBufferRef *hwdec_create_dev(struct mp_filter *vd,
             return av_buffer_ref(hw_ctx->av_device_ref);
     }
 
+    if (!autoprobe) {
+        // Explicitly forced hwdec, but no VO-provided device (e.g. --vo=null
+        // or headless filter-only pipelines): create a standalone device.
+        // Frames a VO can't map are downconverted by autoconvert as usual.
+        AVBufferRef *ref = NULL;
+        av_hwdevice_ctx_create(&ref, hwdec->lavc_device, NULL, NULL, 0);
+        if (ref) {
+            MP_VERBOSE(vd, "Created standalone %s device for forced hwdec.\n",
+                       av_hwdevice_get_type_name(hwdec->lavc_device));
+        }
+        return ref;
+    }
+
     return NULL;
 }
 

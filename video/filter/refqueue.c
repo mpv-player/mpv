@@ -31,6 +31,11 @@ struct mp_refqueue {
     struct mp_autoconvert *conv;
     struct mp_pin *in, *out;
 
+    // Optional input gate: incoming frames it returns true for are dropped
+    // before entering the queue (and before format-change handling).
+    bool (*drop_check)(void *ctx, struct mp_image *img);
+    void *drop_check_ctx;
+
     struct mp_image *in_format;
 
     // Buffered frame in case of format changes.
@@ -85,6 +90,14 @@ void mp_refqueue_add_in_format(struct mp_refqueue *q, int fmt, int subfmt)
 }
 
 // The minimum number of frames required before and after the current frame.
+void mp_refqueue_set_drop_check(struct mp_refqueue *q,
+                                bool (*cb)(void *ctx, struct mp_image *img),
+                                void *ctx)
+{
+    q->drop_check = cb;
+    q->drop_check_ctx = ctx;
+}
+
 void mp_refqueue_set_refs(struct mp_refqueue *q, int past, int future)
 {
     mp_assert(past >= 0 && future >= 0);
@@ -330,6 +343,12 @@ bool mp_refqueue_can_output(struct mp_refqueue *q)
     }
 
     struct mp_image *img = frame.data;
+
+    if (q->drop_check && q->drop_check(q->drop_check_ctx, img)) {
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_progress(q->filter);
+        return false;
+    }
 
     if (!q->in_format || !!q->in_format->hwctx != !!img->hwctx ||
         (img->hwctx && img->hwctx->data != q->in_format->hwctx->data) ||
