@@ -753,7 +753,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (is_image(st, sh->attached_picture, priv->avif)) {
             MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
-            sh->image = true;
+            sh->codec->image = true;
             sh->codec->fps = demuxer->opts->mf_fps;
         }
         sh->codec->par_w = st->sample_aspect_ratio.num;
@@ -1191,7 +1191,7 @@ static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_gro
 
     struct sh_stream *primary_sh = vsh->group->members[0];
     vsh->codec->fps    = primary_sh->codec->fps;
-    vsh->image         = primary_sh->image;
+    vsh->codec->image  = primary_sh->codec->image;
     vsh->still_image   = primary_sh->still_image;
     vsh->default_track = true;
     vsh->codec->codec  = primary_sh->codec->codec;
@@ -1610,7 +1610,7 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     }
 
     // Never send additional frames for streams that are a single frame.
-    if (stream->image && priv->format_hack.first_frame_only && pkt->pos != 0) {
+    if (stream->codec->image && priv->format_hack.first_frame_only && pkt->pos != 0) {
         av_packet_free(&pkt);
         return true;
     }

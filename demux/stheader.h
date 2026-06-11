@@ -66,7 +66,6 @@ struct sh_stream {
     bool hearing_impaired_track;// container flag
     bool original_track;        // container flag
     bool commentary_track;      // container flag
-    bool image;                 // video stream is an image
     bool still_image;           // video consists of multiple sparse still images
     int hls_bitrate;
     int *program_ids;
@@ -143,6 +142,7 @@ struct mp_codec_params {
     struct replaygain_data *replaygain_data;
 
     // STREAM_VIDEO
+    bool image;           // stream encodes a single image
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     double fps;           // frames per second (set only if constant fps)
     bool reliable_fps;    // the fps field is definitely not broken

@@ -1861,6 +1861,10 @@ Video
         ``mpv --hwdec=vdpau --hwdec-codecs=h264,mpeg2video``
             Enable vdpau decoding for h264 and mpeg2 only.
 
+``--hwdec-decode-images=<yes|no>``
+    Enable hardware decoding for single images (default: no). Hardware decoding
+    can cause errors with images.
+
 ``--hwdec-threads=<N>``
     Number of threads used for hardware decoding (default: 4). This, as opposed
     to vd-queue, enables frame and slice threading in libavcodec. It can help
