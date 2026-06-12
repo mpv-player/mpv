@@ -19,6 +19,7 @@
 
 struct demux_packet_pool;
 struct demux_packet;
+struct MPContext;
 struct mpv_global;
 
 /**
@@ -28,8 +29,9 @@ struct mpv_global;
  * once per mpv context.
  *
  * @param global Pointer to the global context.
+ * @param parent Pointer to the mpv context.
  */
-void demux_packet_pool_init(struct mpv_global *global);
+void demux_packet_pool_init(struct mpv_global *global, struct MPContext *parent);
 
 /**
  * Returns the demux packet pool context for client use.
