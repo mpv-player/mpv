@@ -456,6 +456,14 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!in)
         return NULL;
 
+    // Bypass (slot 0 / no matching chain): hand the decoder frame through
+    // untouched — exactly as safe as filterless playback. With RIFE
+    // active the copy stays: the buffered prev/cur frames (+ outq) would
+    // otherwise pin entries of the decoder's fixed surface ring, which is
+    // the documented copy-on-arrival rationale.
+    if (!p->aji_active && !p->rife_on)
+        return mp_image_new_ref(in);
+
     struct mp_image *out = alloc_out(vf);
     if (!out)
         return NULL;
