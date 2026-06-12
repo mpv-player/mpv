@@ -79,7 +79,7 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
     struct bstr f_fbname = bstr0(mp_basename(fname));
     struct bstr f_fname = mp_iconv_to_utf8(log, f_fbname,
                                            "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
-    struct bstr f_fname_noext = bstrdup(tmpmem, bstr_strip_ext(f_fname));
+    struct bstr f_fname_noext = bstrdup(tmpmem, mp_strip_ext(f_fname));
     struct bstr f_fname_trim = bstr_strip(f_fname_noext);
 
     if (f_fbname.start != f_fname.start)
@@ -101,8 +101,8 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
         struct bstr dename = mp_iconv_to_utf8(log, den,
                                               "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
         // retrieve various parts of the filename
-        struct bstr tmp_fname_noext = bstrdup(tmpmem2, bstr_strip_ext(dename));
-        struct bstr tmp_fname_ext = bstr_get_ext(dename);
+        struct bstr tmp_fname_noext = bstrdup(tmpmem2, mp_strip_ext(dename));
+        struct bstr tmp_fname_ext = mp_get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
         if (den.start != dename.start)

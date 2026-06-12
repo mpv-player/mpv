@@ -988,7 +988,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         } else {
             bstr parent = {0};
             if (mpctx->filename)
-                parent = bstr_strip_ext(bstr0(mp_basename(mpctx->filename)));
+                parent = mp_strip_ext(bstr0(mp_basename(mpctx->filename)));
             bstr title = bstr0(mp_basename(disp_filename));
             bstr_eatstart(&title, parent);
             bstr_eatstart(&title, bstr0("."));

@@ -2155,10 +2155,7 @@ static void update_user_shader_opts(struct gl_video *p, const char *path,
     if (!p->opts.user_shader_opts)
         return;
 
-    const char *basename = mp_basename(path);
-    struct bstr shadername;
-    if (!mp_splitext(basename, &shadername))
-        shadername = bstr0(basename);
+    struct bstr shadername = mp_strip_ext(mp_basename_bstr(bstr0(path)));
 
     for (int n = 0; p->opts.user_shader_opts[n * 2]; n++) {
         struct bstr key = bstr0(p->opts.user_shader_opts[n * 2 + 0]);
