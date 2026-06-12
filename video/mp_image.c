@@ -287,9 +287,9 @@ struct mp_image *mp_image_alloc(int imgfmt, int w, int h)
     return mpi;
 }
 
-int mp_image_approx_byte_size(struct mp_image *img)
+size_t mp_image_approx_byte_size(struct mp_image *img)
 {
-    int total = sizeof(*img);
+    size_t total = sizeof(*img);
 
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         struct AVBufferRef *buf = img->bufs[n];
