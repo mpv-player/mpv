@@ -140,6 +140,7 @@ struct opts {
     char *rife_model_dir;
     int slot;
     bool skip_seek_pre_target;
+    bool output_444;
 };
 
 struct aji_api {
@@ -189,6 +190,7 @@ struct priv {
     struct aji_api api;
     aji_ctx *aji;
     int aji_fmt;
+    int out_fmt;         // output frames: aji_fmt or AJI_FMT_YUV444P16
     bool aji_active;     // a chain/engine is configured; else passthrough copy
     bool configured;     // saw at least one reinit
     int cur_slot, pending_slot;
@@ -350,6 +352,15 @@ static bool configure_aji(struct mp_filter *vf)
     }
 
     p->aji_active = true;
+    p->out_fmt = p->aji_fmt;
+    if (p->opts->output_444 && !p->is_d3d11) {
+        // Full-resolution chroma straight from the model: 16-bit 4:4:4
+        // planar output (exceeds the reference pipeline, which always
+        // subsampled back to 4:2:0). D3D11/DirectML stays 4:2:0 - DXGI
+        // has no planar 16-bit 4:4:4 video format for the pool.
+        p->out_fmt = AJI_FMT_YUV444P16;
+        p->out_params.hw_subfmt = pixfmt2imgfmt(AV_PIX_FMT_YUV444P16);
+    }
     double sx = (double)ow / p->params.w, sy = (double)oh / p->params.h;
     p->out_params.w = ow;
     p->out_params.h = oh;
@@ -530,10 +541,10 @@ static struct mp_image *render(struct mp_filter *vf)
         };
         const aji_frame fout = {
             .width = p->out_params.w, .height = p->out_params.h,
-            .format = p->aji_fmt,
+            .format = p->out_fmt,
             .matrix = mat, .range = rng, .siting = sit,
-            .plane = {out->planes[0], out->planes[1]},
-            .stride = {out->stride[0], out->stride[1]},
+            .plane = {out->planes[0], out->planes[1], out->planes[2]},
+            .stride = {out->stride[0], out->stride[1], out->stride[2]},
         };
         if (p->api.infer(p->aji, &fin, &fout, p->stream) != AJI_OK) {
             MP_ERR(vf, "inference failed: %s\n", p->api.last_error(p->aji));
@@ -602,20 +613,18 @@ static struct mp_image *render_interp(struct mp_filter *vf,
     const int rng = map_range(&p->out_params);
     const aji_frame fa = {
         .width = p->out_params.w, .height = p->out_params.h,
-        .format = p->aji_fmt, .matrix = mat, .range = rng,
+        .format = p->out_fmt, .matrix = mat, .range = rng,
         .siting = AJI_SITING_LEFT,
-        .plane = {a->planes[0], a->planes[1]},
-        .stride = {a->stride[0], a->stride[1]},
+        .plane = {a->planes[0], a->planes[1], a->planes[2]},
+        .stride = {a->stride[0], a->stride[1], a->stride[2]},
     };
     aji_frame fb = fa, fout = fa;
-    fb.plane[0] = b->planes[0];
-    fb.plane[1] = b->planes[1];
-    fb.stride[0] = b->stride[0];
-    fb.stride[1] = b->stride[1];
-    fout.plane[0] = out->planes[0];
-    fout.plane[1] = out->planes[1];
-    fout.stride[0] = out->stride[0];
-    fout.stride[1] = out->stride[1];
+    for (int i = 0; i < 3; i++) {
+        fb.plane[i] = b->planes[i];
+        fb.stride[i] = b->stride[i];
+        fout.plane[i] = out->planes[i];
+        fout.stride[i] = out->stride[i];
+    }
 
     int ret = p->api.infer_rife(p->aji, &fa, &fb, t, &fout, p->stream);
     if (ret == AJI_SCENE) {
@@ -1102,6 +1111,7 @@ static const m_option_t vf_opts_fields[] = {
     {"rife-model-dir", OPT_STRING(rife_model_dir), .flags = M_OPT_FILE},
     {"passthrough", OPT_BOOL(passthrough)},
     {"skip-seek-pre-target", OPT_BOOL(skip_seek_pre_target)},
+    {"output-444", OPT_BOOL(output_444)},
     {0}
 };
 
@@ -1114,6 +1124,7 @@ const struct mp_user_filter_entry vf_animejanai = {
             .passthrough = true,
             .slot = 1,
             .skip_seek_pre_target = true,
+            .output_444 = true,
         },
         .options = vf_opts_fields,
     },

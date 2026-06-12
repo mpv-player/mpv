@@ -1,5 +1,5 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 5).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 6).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
  * backends (MSVC world on Windows). Only C types and opaque handles
@@ -39,13 +39,16 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 5
+#define AJI_API_VERSION 6
 
 typedef struct aji_ctx aji_ctx;
 
 enum aji_format {
     AJI_FMT_NV12 = 1,   /* 8-bit 4:2:0, interleaved CbCr */
     AJI_FMT_P010 = 2,   /* 10-bit-in-16 (MSB) 4:2:0, interleaved CbCr */
+    AJI_FMT_YUV444P16 = 3, /* 16-bit 4:4:4 planar (output only: carries the
+                              model's full-resolution chroma; TensorRT
+                              backend only) */
 };
 
 enum aji_matrix {
@@ -114,8 +117,11 @@ typedef struct aji_frame {
     int matrix;               /* enum aji_matrix */
     int range;                /* enum aji_range */
     int siting;               /* enum aji_siting */
-    void *plane[2];           /* CUdeviceptr: Y, CbCr */
-    ptrdiff_t stride[2];      /* bytes */
+    void *plane[3];           /* CUdeviceptr: Y, CbCr (4:2:0) or Y, Cb, Cr
+                                 (4:4:4). DirectML: plane[0] is the
+                                 ID3D11Texture2D*, plane[1] the subresource
+                                 index. */
+    ptrdiff_t stride[3];      /* bytes */
 } aji_frame;
 
 AJI_EXPORT aji_ctx *aji_create(const aji_create_params *params);
