@@ -252,7 +252,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
             const int intent = PL_INTENT_RELATIVE_COLORIMETRIC;
             cmsCIEXYZ bp_XYZ;
             if (!cmsDetectBlackPoint(&bp_XYZ, disp_profile, intent, 0))
-                return false;
+                return NULL;
 
             // Map this XYZ value back into the (linear) source space
             cmsHPROFILE rev_profile;
@@ -267,7 +267,7 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
             cmsCloseProfile(rev_profile);
             cmsCloseProfile(xyz_profile);
             if (!xyz2src)
-                return false;
+                return NULL;
 
             cmsDoTransform(xyz2src, &bp_XYZ, src_black, 1);
             cmsDeleteTransform(xyz2src);
@@ -291,12 +291,12 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
     }
 
     if (!tonecurve[0])
-        return false;
+        return NULL;
 
     if (!tonecurve[1]) tonecurve[1] = tonecurve[0];
     if (!tonecurve[2]) tonecurve[2] = tonecurve[0];
 
-    cmsHPROFILE *vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
+    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
                                                       tonecurve);
 
     if (tonecurve[2] != tonecurve[0]) cmsFreeToneCurve(tonecurve[2]);

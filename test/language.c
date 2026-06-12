@@ -92,7 +92,7 @@ int main(void)
     TEST_LANG_GUESS("foo.en-aaaaaaaaa.srt", "", -1, 0);
     TEST_LANG_GUESS("foo.en-0.srt", "", -1, 0);
 
-    TEST_LANG_GUESS("foo[en].srt", "en", 3, 00);
+    TEST_LANG_GUESS("foo[en].srt", "en", 3, 0);
     TEST_LANG_GUESS("foo[en-US].srt", "en-US", 3, 0);
     TEST_LANG_GUESS("foo[en-US][hi].srt", "en-US", 3, TRACK_HEARING_IMPAIRED);
     TEST_LANG_GUESS("foo[en-US][sdh].srt", "en-US", 3, TRACK_HEARING_IMPAIRED);
