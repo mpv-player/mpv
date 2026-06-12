@@ -424,6 +424,11 @@ static bool configure_aji(struct mp_filter *vf)
     if (ret == 0) {
         MP_VERBOSE(vf, "No chain active for %dx%d@%.3f slot %d (passthrough)\n",
                    p->params.w, p->params.h, p->fps, p->cur_slot);
+        // RIFE-only chains interpolate the passthrough copies, which stay
+        // in the input format; never inherit a stale out_fmt from a
+        // previously configured upscale chain (out_params was just reset
+        // to the input geometry above).
+        p->out_fmt = p->aji_fmt;
         update_depth(vf);
         return true;  // no scaling chain; rife (if any) still applies
     }
