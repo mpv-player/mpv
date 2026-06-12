@@ -1,10 +1,18 @@
 /*
- * vf_animejanai: GPU-resident AI upscaling filter (CUDA / TensorRT)
+ * vf_animejanai: GPU-resident AI upscaling filter (CUDA / D3D11)
  *
- * The filter keeps frames in GPU memory end to end: IMGFMT_CUDA in, own
- * AVHWFramesContext output pool, IMGFMT_CUDA out. Inference runs in the
- * libaji shim, loaded at runtime across a strict C ABI (see aji.h) so the
- * TensorRT toolchain never links into mpv.
+ * The filter keeps frames in GPU memory end to end: IMGFMT_CUDA or
+ * IMGFMT_D3D11 in, own AVHWFramesContext output pool, same format out.
+ * Inference runs in the libaji shim, loaded at runtime across a strict
+ * C ABI (see aji.h) so no inference toolchain links into mpv; the shim
+ * dispatches on the conf's backend key (TensorRT on CUDA frames,
+ * DirectML on D3D11 frames).
+ *
+ * On the D3D11 path, decoder textures are neither shareable nor
+ * implicitly synchronized (see vf_amf.c), so each input frame is staged
+ * with a GPU copy into a filter-owned SHARED|NTHANDLE texture; the
+ * output pool's textures get the same flags so the shim's D3D12 side
+ * can open everything it touches.
  *
  * Modes:
  *  - conf=animejanai.conf (+ model-dir/trtexec/slot): full chain selection
@@ -32,6 +40,8 @@
 
 #include <stdio.h>
 
+#include "config.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -43,6 +53,10 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 #include <libavutil/pixfmt.h>
+
+#if HAVE_D3D11
+#include <libavutil/hwcontext_d3d11va.h>
+#endif
 
 #include "common/common.h"
 #include "filters/filter.h"
@@ -160,6 +174,15 @@ struct priv {
     CUcontext cuda_ctx;
     CUstream stream;
     CUstream own_stream;
+
+    bool is_d3d11;
+#if HAVE_D3D11
+    ID3D11Device *d3d_dev;          // borrowed; av_device_ref keeps it alive
+    ID3D11DeviceContext *d3d_ctx;
+    ID3D11Texture2D *d3d_stage;     // shareable input staging texture
+    int d3d_stage_w, d3d_stage_h;
+    DXGI_FORMAT d3d_stage_fmt;
+#endif
 
     AVBufferRef *hw_pool;
 
@@ -324,14 +347,64 @@ static bool configure_aji(struct mp_filter *vf)
     return true;
 }
 
+#if HAVE_D3D11
+// Like mp_update_av_hw_frames_pool for IMGFMT_D3D11, but the textures
+// also get the SHARED|NTHANDLE misc flags so the inference shim's D3D12
+// device can open them.
+static bool update_d3d11_pool(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (p->hw_pool) {
+        AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
+        if (hw_frames->width != p->out_params.w ||
+            hw_frames->height != p->out_params.h ||
+            hw_frames->sw_format != imgfmt2pixfmt(p->out_params.hw_subfmt))
+            av_buffer_unref(&p->hw_pool);
+    }
+    if (p->hw_pool)
+        return true;
+
+    p->hw_pool = av_hwframe_ctx_alloc(p->av_device_ref);
+    if (!p->hw_pool)
+        return false;
+    AVHWFramesContext *hw_frames = (void *)p->hw_pool->data;
+    hw_frames->format = AV_PIX_FMT_D3D11;
+    hw_frames->sw_format = imgfmt2pixfmt(p->out_params.hw_subfmt);
+    hw_frames->width = p->out_params.w;
+    hw_frames->height = p->out_params.h;
+    AVD3D11VAFramesContext *d3d_frames = hw_frames->hwctx;
+    d3d_frames->BindFlags = D3D11_BIND_RENDER_TARGET |
+                            D3D11_BIND_SHADER_RESOURCE;
+    d3d_frames->MiscFlags = D3D11_RESOURCE_MISC_SHARED |
+                            D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+    if (av_hwframe_ctx_init(p->hw_pool) < 0) {
+        av_buffer_unref(&p->hw_pool);
+        return false;
+    }
+    return true;
+}
+#endif
+
 static struct mp_image *alloc_out(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
 
-    if (!mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ref,
-                                     IMGFMT_CUDA, p->out_params.hw_subfmt,
-                                     p->out_params.w, p->out_params.h, false))
-    {
+    bool pool_ok;
+    if (p->is_d3d11) {
+#if HAVE_D3D11
+        pool_ok = update_d3d11_pool(vf);
+#else
+        pool_ok = false;
+#endif
+    } else {
+        pool_ok = mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ref,
+                                              IMGFMT_CUDA,
+                                              p->out_params.hw_subfmt,
+                                              p->out_params.w,
+                                              p->out_params.h, false);
+    }
+    if (!pool_ok) {
         MP_ERR(vf, "Failed to create hw pool\n");
         return NULL;
     }
@@ -371,6 +444,52 @@ static struct mp_image *render(struct mp_filter *vf)
     mp_image_copy_attributes(out, in);
     out->params = p->out_params;
     out->pts = in->pts;
+
+#if HAVE_D3D11
+    if (p->is_d3d11) {
+        // Stage the decode slice into our shareable texture first:
+        // decoder surfaces are neither shareable nor synchronized for
+        // other devices, and the same-device copy orders against decode
+        // on the immediate context (vf_amf.c precedent).
+        ID3D11Resource *src_tex = (ID3D11Resource *)in->planes[0];
+        UINT src_sub = (UINT)(intptr_t)in->planes[1];
+        if (p->aji_active) {
+            ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+                (ID3D11Resource *)p->d3d_stage, 0, 0, 0, 0,
+                src_tex, src_sub, NULL);
+            const int mat = map_matrix(&p->params);
+            const int rng = map_range(&p->params);
+            const int sit = map_siting(&p->params);
+            const aji_frame fin = {
+                .width = p->params.w, .height = p->params.h,
+                .format = p->aji_fmt,
+                .matrix = mat, .range = rng, .siting = sit,
+                .plane = {p->d3d_stage, 0},
+            };
+            const aji_frame fout = {
+                .width = p->out_params.w, .height = p->out_params.h,
+                .format = p->aji_fmt,
+                .matrix = mat, .range = rng, .siting = sit,
+                .plane = {out->planes[0], out->planes[1]},
+            };
+            // The DirectML shim completes synchronously; the output
+            // texture is ready for any D3D11 consumer on return.
+            if (p->api.infer(p->aji, &fin, &fout, NULL) != AJI_OK) {
+                MP_ERR(vf, "inference failed: %s\n",
+                       p->api.last_error(p->aji));
+                goto done;
+            }
+        } else {
+            // Passthrough: same-device copy into the output slice.
+            ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+                (ID3D11Resource *)out->planes[0],
+                (UINT)(intptr_t)out->planes[1], 0, 0, 0,
+                src_tex, src_sub, NULL);
+        }
+        ret = 0;
+        goto done;
+    }
+#endif
 
     if (p->aji_active) {
         const int mat = map_matrix(&p->params);
@@ -481,8 +600,8 @@ static struct mp_image *render_interp(struct mp_filter *vf,
         talloc_free(out);
         return NULL;
     }
-    bool ok = false;
-    if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+    bool ok = p->is_d3d11;  // the DirectML shim completes synchronously
+    if (!ok && CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
         ok = CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) >= 0;
         CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
     }
@@ -515,30 +634,45 @@ static void vf_animejanai_process(struct mp_filter *vf)
         }
         AVHWFramesContext *fctx = (void *)in_fmt->hwctx->data;
         AVHWDeviceContext *avhwctx = fctx->device_ctx;
-        if (avhwctx->type != AV_HWDEVICE_TYPE_CUDA) {
-            MP_ERR(vf, "Input frames are not CUDA frames\n");
+        if (avhwctx->type == AV_HWDEVICE_TYPE_CUDA && p->cu) {
+            p->is_d3d11 = false;
+            av_buffer_unref(&p->av_device_ref);
+            p->av_device_ref = av_buffer_ref(fctx->device_ref);
+            MP_HANDLE_OOM(p->av_device_ref);
+            AVCUDADeviceContext *cudactx = avhwctx->hwctx;
+            p->cuda_ctx = cudactx->cuda_ctx;
+            p->stream = cudactx->stream;
+            if (!p->stream) {
+                // ffmpeg's CUDA device context usually leaves this NULL (the
+                // default stream); TensorRT then adds extra stream syncs per
+                // enqueue, and CUDA graph capture is impossible. Use our own.
+                // (Format re-adoptions reuse it; the device ctx is stable.)
+                if (!p->own_stream &&
+                    CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+                    CUcontext dummy;
+                    CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
+                                                   CU_STREAM_NON_BLOCKING));
+                    CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
+                }
+                p->stream = p->own_stream;
+            }
+#if HAVE_D3D11
+        } else if (avhwctx->type == AV_HWDEVICE_TYPE_D3D11VA) {
+            p->is_d3d11 = true;
+            av_buffer_unref(&p->av_device_ref);
+            p->av_device_ref = av_buffer_ref(fctx->device_ref);
+            MP_HANDLE_OOM(p->av_device_ref);
+            AVD3D11VADeviceContext *d3dctx = avhwctx->hwctx;
+            p->d3d_dev = d3dctx->device;
+            p->d3d_ctx = d3dctx->device_context;
+            p->stream = NULL;
+#endif
+        } else {
+            MP_ERR(vf, "Input frames are neither CUDA nor D3D11 frames%s\n",
+                   avhwctx->type == AV_HWDEVICE_TYPE_CUDA
+                       ? " (CUDA driver unavailable)" : "");
             mp_filter_internal_mark_failed(vf);
             return;
-        }
-        av_buffer_unref(&p->av_device_ref);
-        p->av_device_ref = av_buffer_ref(fctx->device_ref);
-        MP_HANDLE_OOM(p->av_device_ref);
-        AVCUDADeviceContext *cudactx = avhwctx->hwctx;
-        p->cuda_ctx = cudactx->cuda_ctx;
-        p->stream = cudactx->stream;
-        if (!p->stream) {
-            // ffmpeg's CUDA device context usually leaves this NULL (the
-            // default stream); TensorRT then adds extra stream syncs per
-            // enqueue, and CUDA graph capture is impossible. Use our own.
-            // (Format re-adoptions reuse it; the device ctx is stable.)
-            if (!p->own_stream &&
-                CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
-                CUcontext dummy;
-                CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
-                                               CU_STREAM_NON_BLOCKING));
-                CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
-            }
-            p->stream = p->own_stream;
         }
 
         if (p->api.handle && !p->aji) {
@@ -549,7 +683,10 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 : NULL;
             aji_create_params cp = {
                 .api_version = AJI_API_VERSION,
-                .cuda_context = p->cuda_ctx,
+                .cuda_context = p->is_d3d11 ? NULL : p->cuda_ctx,
+#if HAVE_D3D11
+                .d3d11_device = p->is_d3d11 ? p->d3d_dev : NULL,
+#endif
                 .conf_path = p->path.conf,
                 .model_dir = p->path.model_dir,
                 .trtexec = p->path.trtexec,
@@ -582,6 +719,42 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 return;
             }
         }
+
+#if HAVE_D3D11
+        if (p->is_d3d11) {
+            const DXGI_FORMAT fmt = p->aji_fmt == AJI_FMT_P010
+                                        ? DXGI_FORMAT_P010 : DXGI_FORMAT_NV12;
+            if (!p->d3d_stage || p->d3d_stage_w != p->params.w ||
+                p->d3d_stage_h != p->params.h || p->d3d_stage_fmt != fmt) {
+                if (p->d3d_stage)
+                    ID3D11Texture2D_Release(p->d3d_stage);
+                p->d3d_stage = NULL;
+                D3D11_TEXTURE2D_DESC desc = {
+                    .Width = p->params.w,
+                    .Height = p->params.h,
+                    .MipLevels = 1,
+                    .ArraySize = 1,
+                    .Format = fmt,
+                    .SampleDesc = { .Count = 1 },
+                    .Usage = D3D11_USAGE_DEFAULT,
+                    .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+                    .MiscFlags = D3D11_RESOURCE_MISC_SHARED |
+                                 D3D11_RESOURCE_MISC_SHARED_NTHANDLE,
+                };
+                if (FAILED(ID3D11Device_CreateTexture2D(p->d3d_dev, &desc,
+                                                        NULL,
+                                                        &p->d3d_stage))) {
+                    MP_ERR(vf, "Failed to create the shared staging "
+                               "texture\n");
+                    mp_filter_internal_mark_failed(vf);
+                    return;
+                }
+                p->d3d_stage_w = p->params.w;
+                p->d3d_stage_h = p->params.h;
+                p->d3d_stage_fmt = fmt;
+            }
+        }
+#endif
 
         if (!configure_aji(vf)) {
             mp_filter_internal_mark_failed(vf);
@@ -718,9 +891,14 @@ static void uninit(struct mp_filter *vf)
         p->cu->cuStreamDestroy(p->own_stream);
         p->cu->cuCtxPopCurrent(&dummy);
     }
+#if HAVE_D3D11
+    if (p->d3d_stage)
+        ID3D11Texture2D_Release(p->d3d_stage);
+#endif
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->av_device_ref);
-    cuda_free_functions(&p->cu);
+    if (p->cu)
+        cuda_free_functions(&p->cu);
 }
 
 static const struct mp_filter_info vf_animejanai_filter = {
@@ -789,9 +967,11 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
                                                  path_opts[i].src);
     }
 
+    // Not fatal: on non-NVIDIA machines the D3D11/DirectML path carries
+    // the filter; CUDA frames are rejected at reinit instead.
     if (cuda_load_functions(&p->cu, NULL) < 0) {
-        MP_ERR(f, "Failed to load CUDA driver API\n");
-        goto fail;
+        p->cu = NULL;
+        MP_VERBOSE(f, "CUDA driver API unavailable (D3D11 input only)\n");
     }
 
     bool want_aji = p->path.engine || p->path.conf;
@@ -831,6 +1011,9 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
     // whether the VO provides a hwdec device (e.g. with --vo=null).
 
     mp_refqueue_add_in_format(p->queue, IMGFMT_CUDA, 0);
+#if HAVE_D3D11
+    mp_refqueue_add_in_format(p->queue, IMGFMT_D3D11, 0);
+#endif
     mp_refqueue_set_refs(p->queue, 0, 0);
     mp_refqueue_set_mode(p->queue, 0);
     mp_refqueue_set_drop_check(p->queue, drop_pre_seek_target, f);
@@ -860,7 +1043,7 @@ static const m_option_t vf_opts_fields[] = {
 
 const struct mp_user_filter_entry vf_animejanai = {
     .desc = {
-        .description = "AnimeJaNai AI upscaling filter (CUDA)",
+        .description = "AnimeJaNai AI upscaling filter (CUDA/D3D11)",
         .name = "animejanai",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT) {
