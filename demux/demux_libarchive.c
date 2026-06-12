@@ -50,10 +50,42 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         probe_size *= 100;
     }
 
+    struct demux_libarchive_opts *opts =
+        mp_get_config_group(demuxer, demuxer->global, demuxer->desc->options);
+    struct demux_opts *demux_opts =
+        mp_get_config_group(demuxer, demuxer->global, &demux_conf);
+    struct MPOpts *mp_opts =
+        mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
+
+    char **filter = demux_opts->directory_filter;
+
+    struct stream *archive_stream = demuxer->stream;
+
+    int autocreate = demuxer->params && demuxer->params->allow_playlist_create
+        && bstr_startswith0(bstr0(archive_stream->url), "archive://")
+        ? demux_opts->autocreate_playlist : 0;
+
+    bstr archive_url, entry_path;
+    if (autocreate) {
+        bstr url = bstr0(archive_stream->url);
+        bstr rest = bstr_cut(url, strlen("archive://"));
+        int sep = bstr_find0(rest, "|/");
+        archive_url = bstr_splice(rest, 0, sep);
+        entry_path = bstr_cut(rest, sep + 2); // skip the "|/"
+        char *decoded_archive_url = mp_url_unescape(demuxer, bstrto0(demuxer, archive_url));
+
+        archive_stream =
+            stream_create(decoded_archive_url, STREAM_READ_FILE_FLAGS_DEFAULT,
+                          NULL, demuxer->global);
+
+        if (!archive_stream)
+            return -1;
+    }
+
     void *probe = ta_alloc_size(NULL, probe_size);
     if (!probe)
         return -1;
-    int probe_got = stream_read_peek(demuxer->stream, probe, probe_size);
+    int probe_got = stream_read_peek(archive_stream, probe, probe_size);
     struct stream *probe_stream =
         stream_memory_open(demuxer->global, probe, probe_got);
     struct mp_archive *mpa = mp_archive_new(mp_null_log, probe_stream, flags, 0);
@@ -64,25 +96,45 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     if (!ok)
         return -1;
 
-    struct demux_libarchive_opts *opts =
-        mp_get_config_group(demuxer, demuxer->global, demuxer->desc->options);
-    struct demux_opts *demux_opts =
-        mp_get_config_group(demuxer, demuxer->global, &demux_conf);
-    struct MPOpts *mp_opts =
-        mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
-    char **filter = demux_opts->directory_filter;
-
     if (!opts->rar_list_all_volumes)
         flags |= MP_ARCHIVE_FLAG_NO_VOLUMES;
 
-    mpa = mp_archive_new(demuxer->log, demuxer->stream, flags, 0);
-    if (!mpa)
+    mpa = mp_archive_new(demuxer->log, archive_stream, flags, 0);
+    if (!mpa) {
+        if (autocreate)
+            free_stream(archive_stream);
         return -1;
+    }
+
+    char *same_type_filter[2] = {NULL, NULL};
+    if (autocreate == 2) {
+        bstr ext = bstr_get_ext(entry_path);
+        if (bstr_in_list0(ext, mp_opts->video_exts)) {
+            same_type_filter[0] = "video";
+        } else if (bstr_in_list0(ext, mp_opts->audio_exts)) {
+            same_type_filter[0] = "audio";
+        } else if (bstr_in_list0(ext, mp_opts->image_exts)) {
+            same_type_filter[0] = "image";
+        } else if (bstr_in_list0(ext, mp_opts->archive_exts)) {
+            same_type_filter[0] = "archive";
+        } else if (bstr_in_list0(ext, mp_opts->playlist_exts)) {
+            same_type_filter[0] = "playlist";
+        } else {
+            same_type_filter[0] = "none";
+        }
+        filter = same_type_filter;
+    }
 
     struct playlist *pl = talloc_zero(demuxer, struct playlist);
     demuxer->playlist = pl;
 
-    char *prefix = mp_url_escape(NULL, demuxer->stream->url, "~|%");
+    char *prefix;
+    if (autocreate) {
+        pl->playlist_dir = talloc_asprintf(pl, "archive://%.*s|/", BSTR_P(archive_url));
+        prefix = bstrto0(NULL, archive_url);
+    } else {
+        prefix = mp_url_escape(NULL, demuxer->stream->url, "~|%");
+    }
 
     char **files = NULL;
     int num_files = 0;
@@ -102,6 +154,8 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
                 pass |= bstr_in_list0(ext, mp_opts->archive_exts);
             if (bstr_in_list0(bstr0("playlist"), filter))
                 pass |= bstr_in_list0(ext, mp_opts->playlist_exts);
+            if (bstr_equals0(entry_path, mpa->entry_filename))
+                pass = true;
 
             if (!pass)
                 continue;
