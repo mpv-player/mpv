@@ -1,9 +1,19 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 4).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 5).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
- * backend (TensorRT/MSVC world on Windows). Only C types and opaque
- * handles cross this ABI; CUDA handles are passed as void*.
+ * backends (MSVC world on Windows). Only C types and opaque handles
+ * cross this ABI; CUDA/D3D11 handles are passed as void*.
+ *
+ * aji.dll itself is a thin dispatcher: it reads the conf's [global]
+ * backend key and forwards to the sibling backend library (aji_trt /
+ * aji_dml). Frame handles are backend-specific:
+ *  - TensorRT: aji_frame.plane[] = CUdeviceptr per plane; cu_stream =
+ *    CUstream. d3d11_device is ignored.
+ *  - DirectML: aji_frame.plane[0] = ID3D11Texture2D*, plane[1] =
+ *    (intptr_t)subresource index; stride[] is ignored; cu_stream is
+ *    NULL. d3d11_device is required, and frame textures must be
+ *    created with the SHARED + SHARED_NTHANDLE misc flags.
  *
  * Two modes:
  *  - conf mode: create with conf_path/model_dir; aji_configure() selects
@@ -29,7 +39,7 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 4
+#define AJI_API_VERSION 5
 
 typedef struct aji_ctx aji_ctx;
 
@@ -85,6 +95,10 @@ typedef struct aji_create_params {
                                  passthrough (or chain-without-rife)
                                  meanwhile, and aji_poll() reports when to
                                  reconfigure. Zero: builds block (CLI). */
+    void *d3d11_device;       /* ID3D11Device* of the caller (the device
+                                 the frame textures live on). Required by
+                                 the DirectML backend; ignored by
+                                 TensorRT. */
 
     /* direct mode */
     const char *engine_path;
