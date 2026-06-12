@@ -199,13 +199,20 @@ struct priv {
     // Software layout of params.hw_subfmt, for plane geometry only.
     struct mp_image layout;
 
-    // RIFE: per input frame, (factor-1) interpolated frames are emitted
-    // before the upscaled frame itself. The first goes out through the
-    // refqueue (consuming the input); the rest wait in outq and are
+    // RIFE: outputs live on a uniform grid of num/den times the input
+    // rate (vsmlrt video_player semantics: output j sits at input
+    // position j*den/num; integer positions pass the source frame
+    // through, fractional ones interpolate at t = frac). Per input pair
+    // the due grid points are emitted: the first goes out through the
+    // refqueue (consuming the input), the rest wait in outq and are
     // written on subsequent process() calls without consuming input.
+    // With fractional factors some source frames are never emitted and
+    // only serve as interpolation endpoints.
     bool rife_on;
-    int rife_factor;            // integer output multiplier (num/den)
-    struct mp_image *rife_prev; // last emitted upscaled frame (left frame)
+    int rife_num, rife_den;     // reduced output multiplier num/den
+    int rife_acc;               // next grid point's offset into the
+                                // current pair, in 1/num units (0, num]
+    struct mp_image *rife_prev; // last upscaled frame (left endpoint)
     struct mp_image *outq[8];
     int outq_n, outq_pos;
 };
@@ -269,6 +276,8 @@ static void flush_frames(struct mp_filter *vf)
     for (int i = 0; i < p->outq_n; i++)
         mp_image_unrefp(&p->outq[p->outq_pos + i]);
     p->outq_n = p->outq_pos = 0;
+    // the output grid restarts at the next frame (= a source frame)
+    p->rife_acc = p->rife_den;
 }
 
 static void write_stats(struct mp_filter *vf)
@@ -311,18 +320,28 @@ static bool configure_aji(struct mp_filter *vf)
 
     int rn = 0, rd = 0;
     p->rife_on = false;
-    p->rife_factor = 1;
+    p->rife_num = p->rife_den = 1;
     mp_image_unrefp(&p->rife_prev);  // never interpolate across a reconfigure
     if (p->api.rife_factor(p->aji, &rn, &rd) && rd > 0 && rn > rd) {
-        if (rn % rd == 0 && rn / rd <= 8) {
-            p->rife_factor = rn / rd;
+        int a = rn, b = rd;
+        while (b) {  // reduce the fraction
+            int t = a % b;
+            a = b;
+            b = t;
+        }
+        rn /= a;
+        rd /= a;
+        if (rn <= 8 * rd) {  // at most 8 outputs per input pair (outq size)
+            p->rife_num = rn;
+            p->rife_den = rd;
             p->rife_on = true;
-            MP_VERBOSE(vf, "RIFE active: %dx interpolation\n", p->rife_factor);
+            MP_VERBOSE(vf, "RIFE active: %d/%d interpolation\n", rn, rd);
         } else {
-            MP_WARN(vf, "RIFE factor %d/%d is not a supported integer "
-                        "multiplier; interpolation disabled\n", rn, rd);
+            MP_WARN(vf, "RIFE factor %d/%d exceeds the supported 8x output "
+                        "multiplication; interpolation disabled\n", rn, rd);
         }
     }
+    p->rife_acc = p->rife_den;
 
     if (ret == 0) {
         MP_VERBOSE(vf, "No chain active for %dx%d@%.3f slot %d (passthrough)\n",
@@ -812,32 +831,69 @@ static void vf_animejanai_process(struct mp_filter *vf)
 
     if (out && p->rife_on) {
         if (out->nominal_fps > 0)
-            out->nominal_fps *= p->rife_factor;
+            out->nominal_fps = out->nominal_fps * p->rife_num / p->rife_den;
         struct mp_image *first = out;
+        bool emitted_cur = true;
         if (p->rife_prev && p->rife_prev->pts != MP_NOPTS_VALUE &&
             out->pts != MP_NOPTS_VALUE && out->pts > p->rife_prev->pts) {
+            // Emit the output-grid points due within this input pair:
+            // offsets acc, acc+den, ... (in 1/num units) while <= num.
+            // An offset of exactly num is the right source frame itself;
+            // with fractional factors some pairs end on an interpolation
+            // and the source frame is never emitted.
             struct mp_image *list[8];
             int n = 0;
-            for (int k = 1; k < p->rife_factor && n < 7; k++) {
-                double t = (double)k / p->rife_factor;
-                struct mp_image *ip =
-                    render_interp(vf, p->rife_prev, out, t);
-                if (!ip)
-                    break;  // degrade to fewer/no interpolated frames
-                ip->pts = p->rife_prev->pts +
-                          (out->pts - p->rife_prev->pts) * t;
-                list[n++] = ip;
+            bool failed = false;
+            emitted_cur = false;
+            while (p->rife_acc <= p->rife_num && n < 8) {
+                if (p->rife_acc == p->rife_num) {
+                    list[n++] = out;
+                    emitted_cur = true;
+                    MP_DBG(vf, "rife: source frame pts=%f\n", out->pts);
+                } else {
+                    double t = (double)p->rife_acc / p->rife_num;
+                    struct mp_image *ip =
+                        render_interp(vf, p->rife_prev, out, t);
+                    if (!ip) {
+                        failed = true;  // degrade to fewer frames
+                        break;
+                    }
+                    ip->pts = p->rife_prev->pts +
+                              (out->pts - p->rife_prev->pts) * t;
+                    MP_DBG(vf, "rife: interp t=%f pts=%f\n", t, ip->pts);
+                    list[n++] = ip;
+                }
+                p->rife_acc += p->rife_den;
+            }
+            if (failed || !n) {
+                // resync the grid on the next pair, starting from `out`
+                p->rife_acc = p->rife_den;
+                if (!emitted_cur) {
+                    // drop any interpolations made before the failure and
+                    // emit the source frame so playback keeps moving
+                    for (int i = 0; i < n; i++)
+                        mp_image_unrefp(&list[i]);
+                    n = 0;
+                    emitted_cur = true;
+                }
+            } else {
+                p->rife_acc -= p->rife_num;  // rebase into the next pair
             }
             if (n) {
-                list[n++] = out;
                 first = list[0];
                 for (int i = 1; i < n; i++)
                     p->outq[p->outq_n++] = list[i];
                 p->outq_pos = 0;
             }
+        } else {
+            // fresh pair chain (start of stream or after a seek): `out`
+            // is the grid origin and the next point lies den/num in
+            p->rife_acc = p->rife_den;
         }
         mp_image_unrefp(&p->rife_prev);
         p->rife_prev = mp_image_new_ref(out);
+        if (!emitted_cur)
+            mp_image_unrefp(&out);  // endpoint only; rife_prev keeps it
         mp_refqueue_write_out_pin(p->queue, first);
         return;
     }
