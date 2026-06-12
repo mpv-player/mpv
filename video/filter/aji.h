@@ -1,5 +1,5 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 6).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 7).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
  * backends (MSVC world on Windows). Only C types and opaque handles
@@ -39,7 +39,7 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 6
+#define AJI_API_VERSION 7
 
 typedef struct aji_ctx aji_ctx;
 
@@ -137,11 +137,29 @@ AJI_EXPORT int aji_set_slot(aji_ctx *c, int slot);
 AJI_EXPORT int aji_configure(aji_ctx *c, int w, int h, double fps,
                              int *out_w, int *out_h);
 
-/* Upscale one frame through the configured plan. Enqueues on cu_stream;
- * no synchronization — caller owns the stream. Frame dims must match the
+/* Upscale one frame through the configured plan. Enqueues asynchronously
+ * (TensorRT: on cu_stream; DirectML: on the shim's D3D12 queue) and may
+ * return before the GPU finishes — the output is complete only once a
+ * ticket taken after this call completes (see aji_flush). Successive
+ * calls are ordered on the same stream/queue, so queuing the next frame
+ * before the previous one completes is safe. Frame dims must match the
  * last aji_configure(). */
 AJI_EXPORT int aji_infer(aji_ctx *c, const aji_frame *in,
                          const aji_frame *out, void *cu_stream);
+
+/* Completion tickets (pipelining). aji_flush() places a marker after all
+ * work submitted so far and returns its ticket: monotonic, nonzero; 0 is
+ * "nothing pending" and always counts as complete. Tickets complete in
+ * submission order. cu_stream must be the stream the work was enqueued
+ * on (TensorRT; ignored by DirectML). */
+AJI_EXPORT uint64_t aji_flush(aji_ctx *c, void *cu_stream);
+
+/* Poll a ticket: 1 complete, 0 pending, <0 error. */
+AJI_EXPORT int aji_done(aji_ctx *c, uint64_t ticket);
+
+/* Block until a ticket completes: AJI_OK, or an error on device
+ * loss/timeout. */
+AJI_EXPORT int aji_wait(aji_ctx *c, uint64_t ticket);
 
 /* Human-readable description of the active configuration, formatted like
  * currentanimejanai.log (info lines, blank line, numbered steps). Valid
@@ -165,8 +183,9 @@ AJI_EXPORT int aji_poll(aji_ctx *c);
  * output dims) at time point t in (0,1). Returns AJI_OK with *out
  * written, or AJI_SCENE if the pair straddles a scene change (out is
  * untouched; emit a duplicate of `a` instead, like the reference
- * pipeline). Enqueues on cu_stream but synchronizes it internally for
- * the scene-change decision. */
+ * pipeline). The documented synchronous exception to the ticket model:
+ * the scene-change decision is a CPU readback, so this synchronizes
+ * internally and the output is complete on return. */
 AJI_EXPORT int aji_infer_rife(aji_ctx *c, const aji_frame *a,
                               const aji_frame *b, double t,
                               const aji_frame *out, void *cu_stream);

@@ -20,6 +20,12 @@
  *  - engine=file.engine: single fixed engine (spike/debug).
  *  - neither: synchronized GPU-side plane copy (passthrough).
  *
+ * Upscale chains run pipelined (queue-depth frames in flight, default 3):
+ * aji_infer only submits, completion is gated per frame through the
+ * shim's ticket API (aji_flush/aji_wait), and the refqueue's future-ref
+ * window provides the input read-ahead. RIFE chains stay synchronous
+ * (their scene-change decision is a CPU readback per frame pair).
+ *
  * Runtime: `vf-command animejanai slot <N>` switches the active slot.
  *
  * This file is part of mpv.
@@ -141,7 +147,10 @@ struct opts {
     int slot;
     bool skip_seek_pre_target;
     bool output_444;
+    int queue_depth;
 };
+
+#define MAX_DEPTH 4
 
 struct aji_api {
     void *handle;
@@ -151,6 +160,9 @@ struct aji_api {
                      int *out_h);
     int (*infer)(aji_ctx *c, const aji_frame *in, const aji_frame *out,
                  void *cu_stream);
+    uint64_t (*flush)(aji_ctx *c, void *cu_stream);
+    int (*done)(aji_ctx *c, uint64_t ticket);
+    int (*wait)(aji_ctx *c, uint64_t ticket);
     int (*rife_factor)(aji_ctx *c, int *num, int *den);
     int (*infer_rife)(aji_ctx *c, const aji_frame *a, const aji_frame *b,
                       double t, const aji_frame *out, void *cu_stream);
@@ -180,7 +192,14 @@ struct priv {
 #if HAVE_D3D11
     ID3D11Device *d3d_dev;          // borrowed; av_device_ref keeps it alive
     ID3D11DeviceContext *d3d_ctx;
-    ID3D11Texture2D *d3d_stage;     // shareable input staging texture
+    // Shareable input staging textures, one per pipelined frame: the
+    // D3D11 copy into a stage and the shim's D3D12 reads of it are not
+    // ordered across APIs, so a stage must not be rewritten while a
+    // queued frame still reads it. Slot reuse is safe because a slot
+    // comes around again only after its previous frame's ticket was
+    // waited at emission.
+    ID3D11Texture2D *d3d_stage[MAX_DEPTH];
+    int d3d_stage_count, d3d_stage_next;
     int d3d_stage_w, d3d_stage_h;
     DXGI_FORMAT d3d_stage_fmt;
 #endif
@@ -200,6 +219,21 @@ struct priv {
     double fps;
     // Software layout of params.hw_subfmt, for plane geometry only.
     struct mp_image layout;
+
+    // Pipelined inference: frames submitted to the GPU but not yet
+    // emitted, oldest first. ring[i].src identifies the refqueue frame at
+    // relative position i (borrowed pointer, identity only - the
+    // refqueue's future-ref window keeps it alive and thus the decoder
+    // surface pinned until emission waits the ticket). depth is the
+    // active queue depth: 1 (synchronous) for RIFE chains and bypass,
+    // else the queue-depth option.
+    struct {
+        struct mp_image *src;
+        struct mp_image *out;
+        uint64_t ticket;
+    } ring[MAX_DEPTH];
+    int ring_n;
+    int depth;
 
     // RIFE: outputs live on a uniform grid of num/den times the input
     // rate (vsmlrt video_player semantics: output j sits at input
@@ -270,9 +304,36 @@ static int map_siting(struct mp_image_params *params)
     }
 }
 
+// Wait until every submitted frame's GPU work completed. The ring entries
+// stay queued for emission; tickets complete in order, so waiting the
+// newest covers all.
+static bool drain_ring(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if (!p->ring_n)
+        return true;
+    if (p->api.wait(p->aji, p->ring[p->ring_n - 1].ticket) != AJI_OK) {
+        MP_ERR(vf, "pipeline drain failed: %s\n", p->api.last_error(p->aji));
+        return false;
+    }
+    return true;
+}
+
+static void clear_ring(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    drain_ring(vf);
+    for (int i = 0; i < p->ring_n; i++)
+        mp_image_unrefp(&p->ring[i].out);
+    p->ring_n = 0;
+}
+
 static void flush_frames(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
+    // GPU reads of the queued input frames must finish before the
+    // refqueue drops them
+    clear_ring(vf);
     mp_refqueue_flush(p->queue);
     mp_image_unrefp(&p->rife_prev);
     for (int i = 0; i < p->outq_n; i++)
@@ -296,6 +357,19 @@ static void write_stats(struct mp_filter *vf)
     fclose(f);
 }
 
+// Pipeline depth for the current configuration. RIFE chains stay
+// synchronous (their scene-change decision is a CPU readback per pair),
+// as do bypass and passthrough; active upscale chains run queue-depth
+// frames deep, with the refqueue's future-ref window supplying the
+// read-ahead (depth - 1 buffered future frames).
+static void update_depth(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    int depth = MPCLAMP(p->opts->queue_depth, 1, MAX_DEPTH);
+    p->depth = (p->aji_active && !p->rife_on) ? depth : 1;
+    mp_refqueue_set_refs(p->queue, 0, p->depth - 1);
+}
+
 // (Re)configure the shim for the current stream params and slot. Updates
 // out_params (and thus the output pool geometry). May block on first-play
 // engine builds, like the legacy pipeline.
@@ -305,8 +379,10 @@ static bool configure_aji(struct mp_filter *vf)
 
     p->out_params = p->params;
     p->aji_active = false;
-    if (!p->aji)
+    if (!p->aji) {
+        update_depth(vf);
         return true;
+    }
 
     p->api.set_slot(p->aji, p->pending_slot);
     p->cur_slot = p->pending_slot;
@@ -348,6 +424,7 @@ static bool configure_aji(struct mp_filter *vf)
     if (ret == 0) {
         MP_VERBOSE(vf, "No chain active for %dx%d@%.3f slot %d (passthrough)\n",
                    p->params.w, p->params.h, p->fps, p->cur_slot);
+        update_depth(vf);
         return true;  // no scaling chain; rife (if any) still applies
     }
 
@@ -372,8 +449,9 @@ static bool configure_aji(struct mp_filter *vf)
     // reference pipeline (VS/zimg doesn't propagate chroma location from
     // unsubsampled sources); tag the output accordingly.
     p->out_params.chroma_location = PL_CHROMA_LEFT;
-    MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d\n", p->cur_slot,
-               p->params.w, p->params.h, ow, oh);
+    update_depth(vf);
+    MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d (depth %d)\n",
+               p->cur_slot, p->params.w, p->params.h, ow, oh, p->depth);
     return true;
 }
 
@@ -457,6 +535,110 @@ static struct mp_image *alloc_out(struct mp_filter *vf)
     return img;
 }
 
+// Enqueue inference for `in` and append it to the in-flight ring without
+// waiting for the GPU. `in` stays alive (and the decoder surface pinned)
+// through the refqueue until emission waits the entry's ticket.
+static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
+{
+    struct priv *p = vf->priv;
+
+    mp_assert(p->ring_n < MAX_DEPTH);
+
+    struct mp_image *out = alloc_out(vf);
+    if (!out)
+        return false;
+    mp_image_copy_attributes(out, in);
+    out->params = p->out_params;
+    out->pts = in->pts;
+
+    const int mat = map_matrix(&p->params);
+    const int rng = map_range(&p->params);
+    const int sit = map_siting(&p->params);
+    bool ok;
+    void *stream = NULL;
+
+#if HAVE_D3D11
+    if (p->is_d3d11) {
+        // Stage the decode slice into a shareable texture first: decoder
+        // surfaces are neither shareable nor synchronized for other
+        // devices, and the same-device copy orders against decode on the
+        // immediate context (vf_amf.c precedent).
+        ID3D11Texture2D *stage = p->d3d_stage[p->d3d_stage_next];
+        p->d3d_stage_next = (p->d3d_stage_next + 1) % p->d3d_stage_count;
+        ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+            (ID3D11Resource *)stage, 0, 0, 0, 0,
+            (ID3D11Resource *)in->planes[0], (UINT)(intptr_t)in->planes[1],
+            NULL);
+        const aji_frame fin = {
+            .width = p->params.w, .height = p->params.h,
+            .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {stage, 0},
+        };
+        const aji_frame fout = {
+            .width = p->out_params.w, .height = p->out_params.h,
+            .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {out->planes[0], out->planes[1]},
+        };
+        ok = p->api.infer(p->aji, &fin, &fout, NULL) == AJI_OK;
+    } else
+#endif
+    {
+        const aji_frame fin = {
+            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {in->planes[0], in->planes[1]},
+            .stride = {in->stride[0], in->stride[1]},
+        };
+        const aji_frame fout = {
+            .width = p->out_params.w, .height = p->out_params.h,
+            .format = p->out_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {out->planes[0], out->planes[1], out->planes[2]},
+            .stride = {out->stride[0], out->stride[1], out->stride[2]},
+        };
+        stream = p->stream;
+        ok = p->api.infer(p->aji, &fin, &fout, p->stream) == AJI_OK;
+    }
+
+    uint64_t ticket = ok ? p->api.flush(p->aji, stream) : 0;
+    if (!ticket) {
+        MP_ERR(vf, "inference failed: %s\n", p->api.last_error(p->aji));
+        // a failed call may still have queued partial device work that
+        // references `out`; let it finish before the frame is freed
+        p->api.wait(p->aji, p->api.flush(p->aji, stream));
+        talloc_free(out);
+        return false;
+    }
+
+    p->ring[p->ring_n].src = in;
+    p->ring[p->ring_n].out = out;
+    p->ring[p->ring_n].ticket = ticket;
+    p->ring_n++;
+    return true;
+}
+
+// Pop the oldest in-flight frame, waiting until its GPU work (writes to
+// the output, reads of the decoder surface) completed.
+static struct mp_image *pop_ring(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    mp_assert(p->ring_n > 0);
+    struct mp_image *out = p->ring[0].out;
+    uint64_t ticket = p->ring[0].ticket;
+    p->ring_n--;
+    memmove(&p->ring[0], &p->ring[1], p->ring_n * sizeof(p->ring[0]));
+
+    if (p->api.wait(p->aji, ticket) != AJI_OK) {
+        MP_ERR(vf, "inference wait failed: %s\n", p->api.last_error(p->aji));
+        talloc_free(out);
+        return NULL;
+    }
+    return out;
+}
+
 static struct mp_image *render(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -475,6 +657,14 @@ static struct mp_image *render(struct mp_filter *vf)
     if (!p->aji_active && !p->rife_on)
         return mp_image_new_ref(in);
 
+    if (p->aji_active) {
+        // Synchronous inference (RIFE chains, queue-depth=1, pipeline
+        // fallback): submit and immediately wait.
+        if (!submit_frame(vf, in))
+            return NULL;
+        return pop_ring(vf);
+    }
+
     struct mp_image *out = alloc_out(vf);
     if (!out)
         return NULL;
@@ -485,81 +675,16 @@ static struct mp_image *render(struct mp_filter *vf)
 
 #if HAVE_D3D11
     if (p->is_d3d11) {
-        // Stage the decode slice into our shareable texture first:
-        // decoder surfaces are neither shareable nor synchronized for
-        // other devices, and the same-device copy orders against decode
-        // on the immediate context (vf_amf.c precedent).
-        ID3D11Resource *src_tex = (ID3D11Resource *)in->planes[0];
-        UINT src_sub = (UINT)(intptr_t)in->planes[1];
-        if (p->aji_active) {
-            ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
-                (ID3D11Resource *)p->d3d_stage, 0, 0, 0, 0,
-                src_tex, src_sub, NULL);
-            const int mat = map_matrix(&p->params);
-            const int rng = map_range(&p->params);
-            const int sit = map_siting(&p->params);
-            const aji_frame fin = {
-                .width = p->params.w, .height = p->params.h,
-                .format = p->aji_fmt,
-                .matrix = mat, .range = rng, .siting = sit,
-                .plane = {p->d3d_stage, 0},
-            };
-            const aji_frame fout = {
-                .width = p->out_params.w, .height = p->out_params.h,
-                .format = p->aji_fmt,
-                .matrix = mat, .range = rng, .siting = sit,
-                .plane = {out->planes[0], out->planes[1]},
-            };
-            // The DirectML shim completes synchronously; the output
-            // texture is ready for any D3D11 consumer on return.
-            if (p->api.infer(p->aji, &fin, &fout, NULL) != AJI_OK) {
-                MP_ERR(vf, "inference failed: %s\n",
-                       p->api.last_error(p->aji));
-                goto done;
-            }
-        } else {
-            // Passthrough: same-device copy into the output slice.
-            ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
-                (ID3D11Resource *)out->planes[0],
-                (UINT)(intptr_t)out->planes[1], 0, 0, 0,
-                src_tex, src_sub, NULL);
-        }
-        ret = 0;
-        goto done;
+        // Passthrough: same-device copy into the output slice (implicitly
+        // synchronized on the immediate context).
+        ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+            (ID3D11Resource *)out->planes[0],
+            (UINT)(intptr_t)out->planes[1], 0, 0, 0,
+            (ID3D11Resource *)in->planes[0], (UINT)(intptr_t)in->planes[1],
+            NULL);
+        return out;
     }
 #endif
-
-    if (p->aji_active) {
-        const int mat = map_matrix(&p->params);
-        const int rng = map_range(&p->params);
-        const int sit = map_siting(&p->params);
-        const aji_frame fin = {
-            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
-            .matrix = mat, .range = rng, .siting = sit,
-            .plane = {in->planes[0], in->planes[1]},
-            .stride = {in->stride[0], in->stride[1]},
-        };
-        const aji_frame fout = {
-            .width = p->out_params.w, .height = p->out_params.h,
-            .format = p->out_fmt,
-            .matrix = mat, .range = rng, .siting = sit,
-            .plane = {out->planes[0], out->planes[1], out->planes[2]},
-            .stride = {out->stride[0], out->stride[1], out->stride[2]},
-        };
-        if (p->api.infer(p->aji, &fin, &fout, p->stream) != AJI_OK) {
-            MP_ERR(vf, "inference failed: %s\n", p->api.last_error(p->aji));
-            goto done;
-        }
-        // Keep the synchronized model: the input (decoder) surface must not
-        // be recycled before our reads complete, and the output is complete
-        // when handed downstream.
-        if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
-            goto done;
-        if (CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) == 0)
-            ret = 0;
-        CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
-        goto done;
-    }
 
     if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
         goto done;
@@ -760,11 +885,13 @@ static void vf_animejanai_process(struct mp_filter *vf)
         if (p->is_d3d11) {
             const DXGI_FORMAT fmt = p->aji_fmt == AJI_FMT_P010
                                         ? DXGI_FORMAT_P010 : DXGI_FORMAT_NV12;
-            if (!p->d3d_stage || p->d3d_stage_w != p->params.w ||
+            const int want = MPCLAMP(p->opts->queue_depth, 1, MAX_DEPTH);
+            if (p->d3d_stage_count != want || p->d3d_stage_w != p->params.w ||
                 p->d3d_stage_h != p->params.h || p->d3d_stage_fmt != fmt) {
-                if (p->d3d_stage)
-                    ID3D11Texture2D_Release(p->d3d_stage);
-                p->d3d_stage = NULL;
+                for (int i = 0; i < p->d3d_stage_count; i++)
+                    ID3D11Texture2D_Release(p->d3d_stage[i]);
+                p->d3d_stage_count = 0;
+                p->d3d_stage_next = 0;
                 D3D11_TEXTURE2D_DESC desc = {
                     .Width = p->params.w,
                     .Height = p->params.h,
@@ -777,13 +904,16 @@ static void vf_animejanai_process(struct mp_filter *vf)
                     .MiscFlags = D3D11_RESOURCE_MISC_SHARED |
                                  D3D11_RESOURCE_MISC_SHARED_NTHANDLE,
                 };
-                if (FAILED(ID3D11Device_CreateTexture2D(p->d3d_dev, &desc,
-                                                        NULL,
-                                                        &p->d3d_stage))) {
-                    MP_ERR(vf, "Failed to create the shared staging "
-                               "texture\n");
-                    mp_filter_internal_mark_failed(vf);
-                    return;
+                for (int i = 0; i < want; i++) {
+                    if (FAILED(ID3D11Device_CreateTexture2D(p->d3d_dev,
+                                                            &desc, NULL,
+                                                            &p->d3d_stage[i]))) {
+                        MP_ERR(vf, "Failed to create the shared staging "
+                                   "texture\n");
+                        mp_filter_internal_mark_failed(vf);
+                        return;
+                    }
+                    p->d3d_stage_count = i + 1;
                 }
                 p->d3d_stage_w = p->params.w;
                 p->d3d_stage_h = p->params.h;
@@ -844,7 +974,34 @@ static void vf_animejanai_process(struct mp_filter *vf)
     if (!mp_refqueue_can_output(p->queue))
         return;
 
-    struct mp_image *out = render(vf);
+    // Pipelined inference: submit the current frame plus the refqueue's
+    // buffered future frames before waiting on the oldest, so the GPU
+    // already works on frame N+1 (and N+2, ...) while N's wait blocks.
+    // Stream/queue ordering in the shim makes overlapping submissions
+    // safe; the refqueue window keeps each input alive until its
+    // emission below.
+    if (p->aji_active && !p->rife_on && p->depth > 1) {
+        for (int rel = p->ring_n; p->ring_n < p->depth; rel++) {
+            struct mp_image *src = mp_refqueue_get(p->queue, rel);
+            if (!src)
+                break;  // EOF tail or fewer futures buffered yet
+            if (!submit_frame(vf, src))
+                break;  // degrade; the current frame falls back below
+        }
+    }
+
+    struct mp_image *out;
+    if (p->ring_n && p->ring[0].src == mp_refqueue_get(p->queue, 0)) {
+        // also drains leftovers after a mid-flight reconfigure (their
+        // outputs are valid frames of the pre-reconfigure chain)
+        out = pop_ring(vf);
+    } else {
+        if (p->ring_n) {
+            MP_WARN(vf, "pipeline lost sync; rendering synchronously\n");
+            clear_ring(vf);
+        }
+        out = render(vf);
+    }
 
     if (out && p->rife_on) {
         if (out->nominal_fps > 0)
@@ -965,8 +1122,8 @@ static void uninit(struct mp_filter *vf)
         p->cu->cuCtxPopCurrent(&dummy);
     }
 #if HAVE_D3D11
-    if (p->d3d_stage)
-        ID3D11Texture2D_Release(p->d3d_stage);
+    for (int i = 0; i < p->d3d_stage_count; i++)
+        ID3D11Texture2D_Release(p->d3d_stage[i]);
 #endif
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->av_device_ref);
@@ -1062,6 +1219,9 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         p->api.set_slot = aji_lib_sym(p->api.handle, "aji_set_slot");
         p->api.configure = aji_lib_sym(p->api.handle, "aji_configure");
         p->api.infer = aji_lib_sym(p->api.handle, "aji_infer");
+        p->api.flush = aji_lib_sym(p->api.handle, "aji_flush");
+        p->api.done = aji_lib_sym(p->api.handle, "aji_done");
+        p->api.wait = aji_lib_sym(p->api.handle, "aji_wait");
         p->api.rife_factor = aji_lib_sym(p->api.handle, "aji_rife_factor");
         p->api.infer_rife = aji_lib_sym(p->api.handle, "aji_infer_rife");
         p->api.poll = aji_lib_sym(p->api.handle, "aji_poll");
@@ -1069,7 +1229,8 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         p->api.last_error = aji_lib_sym(p->api.handle, "aji_last_error");
         p->api.destroy = aji_lib_sym(p->api.handle, "aji_destroy");
         if (!p->api.create || !p->api.set_slot || !p->api.configure ||
-            !p->api.infer || !p->api.rife_factor || !p->api.infer_rife ||
+            !p->api.infer || !p->api.flush || !p->api.done || !p->api.wait ||
+            !p->api.rife_factor || !p->api.infer_rife ||
             !p->api.poll ||
             !p->api.current_log || !p->api.last_error || !p->api.destroy) {
             MP_ERR(f, "Inference shim '%s' is missing aji_* symbols "
@@ -1112,6 +1273,7 @@ static const m_option_t vf_opts_fields[] = {
     {"passthrough", OPT_BOOL(passthrough)},
     {"skip-seek-pre-target", OPT_BOOL(skip_seek_pre_target)},
     {"output-444", OPT_BOOL(output_444)},
+    {"queue-depth", OPT_INT(queue_depth), M_RANGE(1, MAX_DEPTH)},
     {0}
 };
 
@@ -1125,6 +1287,7 @@ const struct mp_user_filter_entry vf_animejanai = {
             .slot = 1,
             .skip_seek_pre_target = true,
             .output_444 = true,
+            .queue_depth = 3,
         },
         .options = vf_opts_fields,
     },
