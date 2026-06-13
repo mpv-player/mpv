@@ -442,6 +442,13 @@ static bool configure_aji(struct mp_filter *vf)
         // has no planar 16-bit 4:4:4 video format for the pool.
         p->out_fmt = AJI_FMT_YUV444P16;
         p->out_params.hw_subfmt = pixfmt2imgfmt(AV_PIX_FMT_YUV444P16);
+        // out_params was copied from the 8-bit input; its bit encoding must
+        // follow the format change to 16-bit, or the CUDA->Vulkan interop
+        // (gpu-api=vulkan) renders the planes with a ~0.5 LSB normalization
+        // shift (the d3d11/sw path re-derives this and is unaffected).
+        p->out_params.repr.bits = (struct pl_bit_encoding){
+            .sample_depth = 16, .color_depth = 16, .bit_shift = 0,
+        };
     }
     double sx = (double)ow / p->params.w, sy = (double)oh / p->params.h;
     p->out_params.w = ow;
