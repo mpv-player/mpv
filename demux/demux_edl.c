@@ -243,7 +243,7 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
                     : get_meta(tl, index);
                 sh->lang = get_param0(&ctx, sh, "lang");
                 sh->title = get_param0(&ctx, sh, "title");
-                sh->hls_bitrate = get_param_int(&ctx, "byterate", 0) * 8;
+                MP_SATURATE_MUL(&sh->hls_bitrate, get_param_int(&ctx, "byterate", 0), 8);
                 int pid = get_param_int(&ctx, "program_id", -1);
                 if (pid >= 0)
                     MP_TARRAY_APPEND(sh, sh->program_ids, sh->num_program_ids, pid);
