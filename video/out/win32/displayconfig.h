@@ -24,4 +24,8 @@
 // Windows 7 DisplayConfig API. Returns 0.0 on failure.
 double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device);
 
+// Given a GDI monitor device name, get the SDR white level used in HDR mode,
+// in nits, using the Windows 10 DisplayConfig API. Returns 0.0 on failure.
+double mp_w32_displayconfig_get_sdr_white_level(const wchar_t *device);
+
 #endif
