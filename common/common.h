@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <limits.h>
 
 #include "config.h"
 
@@ -64,6 +65,27 @@
 #define MP_PTS_MAX(a, b) MPMAX(MP_PTS_OR_DEF(a, b), MP_PTS_OR_DEF(b, a))
 // Return a+b, unless a is NOPTS. b must not be NOPTS.
 #define MP_ADD_PTS(a, b) ((a) == MP_NOPTS_VALUE ? (a) : ((a) + (b)))
+
+// Return the maximum value representable by integer type of a.
+#define MP_MAX_VAL(a) _Generic((a),                             \
+                               char: SCHAR_MAX,                 \
+                               unsigned char: UCHAR_MAX,        \
+                               short: SHRT_MAX,                 \
+                               unsigned short: USHRT_MAX,       \
+                               int: INT_MAX,                    \
+                               unsigned int: UINT_MAX,          \
+                               long: LONG_MAX,                  \
+                               unsigned long: ULONG_MAX,        \
+                               long long: LLONG_MAX,            \
+                               unsigned long long: ULLONG_MAX)
+
+// Multiply a * b and store in result. If result would overflow, saturate at
+// its maximum value instead, and return true. Otherwise, return false.
+#define MP_SATURATE_MUL(result, a, b) (         \
+    MP_CKD_MUL(result, a, b) ?                  \
+        *result = MP_MAX_VAL(*result), true :   \
+        false                                   \
+)
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
