@@ -191,7 +191,9 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
      * of the ffmpeg Vulkan hwcontext and video decoding capability.
      */
     const char *opt_extensions[] = {
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 26, 0)
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
+#endif
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
@@ -332,16 +334,22 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
        .dynamicRendering = true,
     };
 
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 26, 0)
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
         .pNext = &dynamic_rendering_feature,
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
+#endif
 
     VkPhysicalDeviceShaderAtomicFloatFeaturesEXT atomic_float_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT,
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 26, 0)
         .pNext = &descriptor_buffer_feature,
+#else
+        .pNext = &dynamic_rendering_feature,
+#endif
         .shaderBufferFloat32Atomics = true,
         .shaderBufferFloat32AtomicAdd = true,
     };
@@ -350,6 +358,11 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
         .pNext = &atomic_float_feature,
         .scalarBlockLayout = true,
+        .shaderUniformBufferArrayNonUniformIndexing = true,
+        .shaderSampledImageArrayNonUniformIndexing = true,
+        .shaderStorageBufferArrayNonUniformIndexing = true,
+        .shaderStorageImageArrayNonUniformIndexing = true,
+        .runtimeDescriptorArray = true,
         .shaderBufferInt64Atomics = true,
         .uniformBufferStandardLayout = true,
     };

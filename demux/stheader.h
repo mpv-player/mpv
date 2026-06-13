@@ -27,6 +27,21 @@
 
 struct MPOpts;
 struct demuxer;
+struct sh_stream;
+
+// Container-level stream groups (e.g. AVStreamGroup from libavformat).
+// A group bundles multiple real streams that the user should normally see as
+// a single logical track.
+struct sh_stream_group {
+    // The streams in the group. Index matches the [i] input label in lavfi_graph.
+    // All members must be of the same media type.
+    struct sh_stream **members;
+    int num_members;
+
+    // Frame-level merge recipe. A libavfilter graph string with labelled inputs
+    // ([0]..[N-1]) and one output [out].
+    char *lavfi_graph;
+};
 
 // Stream headers:
 
@@ -65,6 +80,10 @@ struct sh_stream {
 
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
+
+    // Stream group members that this track is parent of. This can be base track
+    // with all dependent streams or a virtual stream representing the group.
+    struct sh_stream_group *group;
 
     // Internal to demux.c
     struct demux_stream *ds;

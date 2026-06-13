@@ -1842,8 +1842,8 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default, this is set to ``h264,vc1,hevc,vp8,vp9,av1,prores,prores_raw,ffv1,dpx``. Note that
-    the hardware acceleration special codecs like ``h264_vdpau`` are not
+    By default, this is set to ``h264,vc1,hevc,vp8,vp9,av1,prores,prores_raw,ffv1,dpx,apv``.
+    Note that the hardware acceleration special codecs like ``h264_vdpau`` are not
     relevant anymore, and in fact have been removed from FFmpeg in this form.
 
     This is usually only needed with broken GPUs, where a codec is reported
@@ -3488,7 +3488,7 @@ Window
     :level:   A level as integer.
 
 ``--focus-on=<never|open|all>``,
-    (macOS only)
+    (X11 and macOS only)
     Focus the video window and make it the front most window on specific events (default: open).
 
     :never: Never focus the window on open or new file load events.
@@ -4334,6 +4334,19 @@ Demuxer
     The default value is 0 seconds, which disables the caching hysteresis. A
     value of 10 seconds probably works well for most usecases.
 
+``--demuxer-hysteresis-bytes=<bytesize>``
+    Same as ``--demuxer-hysteresis-secs``, but specifies the hysteresis in
+    bytes of forward buffered data instead of seconds. Once the demuxer limit
+    is reached, the demuxer will not buffer ahead again until the amount of
+    forward buffered data drops to this value.
+
+    This option is useful for streams with variable or unknown bitrate, where
+    a byte-based threshold is more meaningful than a time-based one. It can
+    also be combined with ``--demuxer-hysteresis-secs``. In that case buffering
+    can resume when either threshold is reached.
+
+    The default value is 0, which disables the byte-based caching hysteresis.
+
 ``--prefetch-playlist=<yes|no>``
     Prefetch next playlist entry while playback of the current entry is ending
     (default: no). This merely opens the URL of the next playlist entry as soon
@@ -4383,9 +4396,10 @@ Demuxer
     ``--shuffle``, and like ``lazy`` otherwise.
 
 ``--directory-filter-types=<video,audio,image,archive,playlist>``
-    Media file types to filter when opening directory. To have all files added
-    to the playlist, clear the list using ``--directory-filter-types-clr``.
-    (Default: ``video,audio,image,archive,playlist``)
+    Media file types to filter when opening directories and archives. To have
+    all files added to the playlist, clear the list using
+    ``--directory-filter-types-clr``. (Default:
+    ``video,audio,image,archive,playlist``)
 
     This is a string list option. See `List Options`_ for details.
 
@@ -5294,7 +5308,7 @@ libavfilter, within the system audio API resampler, or any other places).
 
 ``--audio-resample-max-output-size=<length>``
     Limit maximum size of audio frames filtered at once, in ms (default: 40).
-    The output size size is limited in order to make resample speed changes
+    The output size is limited in order to make resample speed changes
     react faster. This is necessary especially if decoders or filters output
     very large frame sizes (like some lossless codecs or some DRC filters).
     This option does not affect the resampling algorithm in any way.
@@ -5412,11 +5426,7 @@ Terminal
     line. Expands properties. See `Property Expansion`_.
 
 ``--term-title=<string>``
-    Set the terminal title. Currently, this simply concatenates the escape
-    sequence setting the window title with the provided (property expanded)
-    string. This will mess up if the expanded string contain bytes that end the
-    escape sequence, or if the terminal does not understand the sequence. The
-    latter probably includes the regrettable win32.
+    Set the terminal title.
 
     Expands properties. See `Property Expansion`_.
 
@@ -5653,9 +5663,16 @@ Network
     Certificate authority database file for use with TLS. (Silently fails with
     older FFmpeg versions.)
 
-``--tls-verify``
-    Verify peer certificates when using TLS (e.g. with ``https://...``).
-    (Silently fails with older FFmpeg versions.)
+``--tls-verify=<yes|no>``
+    Verify peer certificates when using TLS (e.g. with ``https://...``)
+    (default: yes*). Disabling this option allows man-in-the-middle attacks
+    to silently substitute the content of an HTTPS stream and is only
+    recommended as a per-stream override when verification fails for a
+    known-good reason (e.g. an outdated CA bundle, a corporate proxy, a
+    development server with a self-signed certificate).
+
+    This is disabled by default, if mpv is built without libcurl and
+    libavformat is older than 63.0.100.
 
 ``--tls-cert-file``
     A file containing a certificate to use in the handshake with the
@@ -5704,6 +5721,75 @@ Network
 
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
+
+Network backend (libcurl)
+-------------------------
+
+When mpv is built with libcurl support, ``http://``, ``https://``, ``ftp://``
+and ``ftps://`` URLs are served by an internal libcurl-based stream backend
+instead of FFmpeg. The backend fully supports all features of libcurl, making it
+more robust and compatible with a wide range of servers and CDNs, and faster too.
+
+For HTTP transfers, the backend transparently negotiates HTTP/1.1, HTTP/2
+multiplexing or HTTP/3 (QUIC) when the server offers them, with HSTS enabled
+and TCP keep-alive turned on. Content compression (gzip, deflate, zstd,
+brotli) is always advertised in the request. If the server applies it, the
+transfer is treated as non-seekable. Servers normally do not compress
+already-compressed media payloads. Otherwise, it's great improvement for text
+playlist data transfers.
+
+The backend honors the network options listed above (``--user-agent``,
+``--http-proxy``, ``--http-header-fields``, ``--referrer``, ``--cookies*``,
+``--tls-*``).
+
+If libcurl is not available at build time, mpv uses FFmpeg's networking
+implementation instead.
+
+To inspect libcurl's debug output (requests, response headers,
+TLS/connection diagnostics), set ``--msg-level=curl=trace``.
+
+``--curl-enabled=<yes|no>``
+    Enable the libcurl-based network backend (default: ``yes``).
+
+    Defaults to ``no`` with libavformat < 62.15.101, which has a nested IO
+    cleanup bug that can cause crashes or memory leaks. The issue happens only
+    on transfer failures or aborts, can be enabled if you don't mind possible
+    stability issues.
+
+``--curl-http-version=<auto|1.0|1.1|2|2tls|2-prior-knowledge|3|3only>``
+    Select the maximum HTTP protocol version libcurl is allowed to negotiate.
+    If libcurl was built without HTTP/3 support, it will fallback to ``auto``.
+    (default: ``auto``, i.e. let libcurl pick)
+
+``--curl-max-redirects=<0-100>``
+    Maximum number of HTTP redirects to follow before reporting an error
+    (default: 16).
+
+``--curl-max-retries=<0-100>``
+    Number of times a single seekable transfer may be transparently
+    re-attempted after a recoverable error (timeout, connection drop,
+    HTTP/2 stream reset, ...) before the stream gives up (default: 5).
+    Non-seekable transfers cannot be retried and ignore this option.
+
+``--curl-connect-timeout=<seconds>``
+    TCP/TLS connect timeout in seconds (default: 30, range 0-600). 0 lets
+    libcurl use its built-in default. The overall transfer timeout is
+    controlled by ``--network-timeout``.
+
+``--curl-buffer-size=<bytes>``
+    Size of the per-stream producer-side ring buffer that decouples the
+    network thread from the consumer (default: 4 MiB, minimum: 32 KiB).
+    Lower values may reduce in-flight data and reduce latency.
+
+``--curl-max-request-size=<bytes>``
+    For seekable streams, split the transfer into Range requests of at most
+    this size (default: 0, i.e. one open-ended request for the whole stream).
+    A non-zero value can help with very long-running connections that some
+    CDNs or proxies recycle aggressively, and is also a common workaround for
+    per-connection bandwidth throttling employed by some CDNs (notably some
+    video hosting services), where each individual Range request is served at
+    full speed but a single long-lived connection is rate-limited. Ignored for
+    non-seekable streams.
 
 DVB
 ---
@@ -6995,7 +7081,7 @@ them.
 
 ``--macos-geometry-calculation=<visible|whole>``
     This changes the rectangle which is used to calculate the screen position
-    and size of the window (default: visible). ``visible`` takes the the menu
+    and size of the window (default: visible). ``visible`` takes the menu
     bar and Dock into account and the window is only positioned/sized within the
     visible screen frame rectangle, ``whole`` takes the whole screen frame
     rectangle and ignores the menu bar and Dock. Other previous restrictions

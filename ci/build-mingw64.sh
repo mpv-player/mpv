@@ -8,6 +8,15 @@ ln -snf . "$prefix_dir/local"
 wget="wget -nc --progress=bar:force"
 gitclone="git clone --depth=1 --recursive --shallow-submodules"
 
+if [[ -z "$TARGET" || -z "$RUST_TARGET" ]]; then
+    echo "Error: must set TARGET and RUST_TARGET" >&2
+    exit 1
+fi
+if ! command -v pkg-config >/dev/null; then
+    echo "Error: missing pkg-config" >&2
+    exit 1
+fi
+
 # -posix is Ubuntu's variant with pthreads support
 export CC=$TARGET-gcc-posix
 export AS=$TARGET-gcc-posix
@@ -19,18 +28,18 @@ export RANLIB=$TARGET-ranlib
 export CFLAGS="-O2 -pipe -Wall"
 export LDFLAGS="-fstack-protector-strong"
 
-# anything that uses pkg-config
-export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
-export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
-
 . ./ci/build-common.sh
 
 if [[ "$TARGET" == "i686-"* ]]; then
     export WINEPATH="`$CC -print-file-name=`;/usr/$TARGET/lib"
 fi
 
+# anything that uses pkg-config
+export PKG_CONFIG_SYSROOT_DIR="$prefix_dir"
+export PKG_CONFIG_LIBDIR="$PKG_CONFIG_SYSROOT_DIR/lib/pkgconfig"
+
 # autotools(-like)
-commonflags="--disable-static --enable-shared"
+at_flags="--disable-static --enable-shared"
 
 # meson
 fam=x86_64
@@ -39,11 +48,13 @@ cat >"$prefix_dir/crossfile" <<EOF
 [built-in options]
 buildtype = 'release'
 wrap_mode = 'nodownload'
+default_library = 'shared'
 [binaries]
 c = ['ccache', '${CC}']
 cpp = ['ccache', '${CXX}']
 rust = ['rustc', '--target', '${RUST_TARGET}']
 ar = '${AR}'
+nm = '${NM}'
 strip = '${TARGET}-strip'
 pkgconfig = 'pkg-config'
 pkg-config = 'pkg-config'
@@ -68,6 +79,7 @@ cmake_args=(
     -DCMAKE_RC_COMPILER="${TARGET}-windres"
     -DCMAKE_ASM_COMPILER="$AS"
     -DCMAKE_BUILD_TYPE=Release
+    -DBUILD_SHARED_LIBS=ON
 )
 
 export CC="ccache $CC"
@@ -89,11 +101,30 @@ function makeplusinstall {
     fi
 }
 
+# $1: URL to download
+# $2: directory name inside tar (optional)
 function gettar {
-    local name="${1##*/}"
-    [ -d "${name%%.*}" ] && return 0
-    $wget "$1"
-    tar -xaf "$name"
+    local fname="${1##*/}"
+    local dname="$2"
+    [ -z "$dname" ] && dname="${fname%.tar.*}"
+    [ -d "$dname" ] && return 0
+    local cachename="$(md5sum <<<"$1" | cut -d " " -f 1)"
+    if [[ -n "$DOWNLOAD_CACHE" && -s "$DOWNLOAD_CACHE/$cachename" ]]; then
+        cp -v "$DOWNLOAD_CACHE/$cachename" "$fname"
+        cachename=
+    else
+        $wget "$1" -O "$fname"
+    fi
+    tar -xaf "$fname"
+    if [ ! -d "$dname" ]; then
+        echo "Error: expected $fname to extract to $dname but it was not created" >&2
+        return 2
+    fi
+    if [[ -n "$DOWNLOAD_CACHE" && -n "$cachename" ]]; then
+        # assume successful extraction means the file was fine
+        mkdir -p "$DOWNLOAD_CACHE"
+        cp -v "$fname" "$DOWNLOAD_CACHE/$cachename"
+    fi
 }
 
 function build_if_missing {
@@ -105,7 +136,7 @@ function build_if_missing {
     _$name
     echo "::endgroup::"
     if [ ! -e "$mark_file" ]; then
-        echo "Error: Build of $1 completed but $mark_file was not created."
+        echo "Error: Build of $1 completed but $mark_file was not created" >&2
         return 2
     fi
 }
@@ -114,26 +145,26 @@ function build_if_missing {
 ## mpv's dependencies
 
 _iconv () {
-    local ver=1.18
+    local ver=1.19
     gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
-    ../configure --host=$TARGET $commonflags
+    ../configure --host=$TARGET $at_flags
     makeplusinstall
     popd
 }
 _iconv_mark=lib/libiconv.dll.a
 
-_zlib () {
-    local ver=1.3.1
-    gettar "https://zlib.net/fossils/zlib-${ver}.tar.gz"
-    pushd zlib-${ver}
-    make -fwin32/Makefile.gcc clean
-    make -fwin32/Makefile.gcc PREFIX=$TARGET- CC="$CC" SHARED_MODE=1 \
-        DESTDIR="$prefix_dir" install \
-        BINARY_PATH=/bin INCLUDE_PATH=/include LIBRARY_PATH=/lib
+_zlib_ng () {
+    local ver=2.3.3
+    gettar "https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${ver}.tar.gz" zlib-ng-${ver}
+    builddir zlib-ng-${ver}
+    cmake .. "${cmake_args[@]}" \
+        -DZLIB_COMPAT=ON -DBUILD_TESTING=OFF
+    makeplusinstall
     popd
+    ln -snf libzlib.dll.a "$prefix_dir/lib/libz.dll.a" # see zlib-ng/zlib-ng#1864
 }
-_zlib_mark=lib/libz.dll.a
+_zlib_ng_mark=lib/libzlib.dll.a
 
 _dav1d () {
     [ -d dav1d ] || $gitclone https://code.videolan.org/videolan/dav1d.git
@@ -156,12 +187,11 @@ _lcms2 () {
 _lcms2_mark=lib/liblcms2.dll.a
 
 _amf_headers () {
-    local ver=1.5.0
-    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz"
+    local ver=1.5.2
+    gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz" amf-headers-v${ver}
     pushd amf-headers-v${ver}
     mkdir -p "$prefix_dir/include"
     cp -r AMF "$prefix_dir/include/"
-    touch "$prefix_dir/include/AMF/core/Version.h"
     popd
 }
 _amf_headers_mark=include/AMF/core/Version.h
@@ -172,7 +202,7 @@ _ffmpeg () {
     local args=(
         --pkg-config=pkg-config --target-os=mingw32 --enable-gpl
         --enable-cross-compile --cross-prefix=$TARGET- --arch=${TARGET%%-*}
-        --cc="$CC" --cxx="$CXX" $commonflags
+        --cc="$CC" --cxx="$CXX" $at_flags
         --disable-{doc,programs}
         --enable-muxer=spdif --enable-encoder=mjpeg,png --enable-libdav1d
     )
@@ -243,7 +273,7 @@ _libplacebo () {
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.14.1
+    local ver=2.14.3
     gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
@@ -264,7 +294,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=12.2.0
+    local ver=14.2.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
@@ -277,7 +307,7 @@ _harfbuzz_mark=lib/libharfbuzz.dll.a
 _libass () {
     [ -d libass ] || $gitclone https://github.com/libass/libass.git
     builddir libass
-    meson setup .. --cross-file "$prefix_dir/crossfile" -Ddefault_library=shared
+    meson setup .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall
     popd
 }
@@ -288,7 +318,10 @@ _luajit () {
     pushd LuaJIT
     local hostcc="ccache cc"
     local flags=
-    [[ "$TARGET" == "i686-"* ]] && { hostcc="$hostcc -m32"; flags=XCFLAGS=-DLUAJIT_NO_UNWIND; }
+    if [[ "$TARGET" == "i686-"* ]]; then
+        hostcc="$hostcc -m32"
+        flags=XCFLAGS=-DLUAJIT_NO_UNWIND
+    fi
     make TARGET_SYS=Windows clean
     make TARGET_SYS=Windows HOST_CC="$hostcc" CROSS="ccache $TARGET-" \
         BUILDMODE=static $flags amalg
@@ -302,14 +335,25 @@ _subrandr () {
 }
 _subrandr_mark=lib/libsubrandr.dll.a
 
-for x in iconv zlib shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
+_curl () {
+    local ver=8.20.0
+    gettar "https://curl.se/download/curl-${ver}.tar.xz"
+    builddir curl-${ver}
+    cmake .. "${cmake_args[@]}" \
+        -DCURL_{USE_SCHANNEL,ZLIB}=ON -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBPSL=OFF
+    makeplusinstall
+    popd
+}
+_curl_mark=lib/libcurl.dll.a
+
+for x in iconv zlib-ng shaderc spirv-cross amf-headers nv-headers dav1d lcms2; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
     build_if_missing vulkan-headers
     build_if_missing vulkan-loader
 fi
-for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit; do
+for x in ffmpeg libplacebo freetype fribidi harfbuzz libass luajit curl; do
     build_if_missing $x
 done
 if [[ "$TARGET" != "i686-"* ]]; then
@@ -318,7 +362,10 @@ fi
 
 ## mpv
 
-[ -z "$1" ] && exit 0
+if [ -z "$1" ]; then
+    echo "Not building mpv."
+    exit 0
+fi
 
 CFLAGS+=" -I'$prefix_dir/include'"
 LDFLAGS+=" -L'$prefix_dir/lib'"
@@ -326,20 +373,25 @@ export CFLAGS LDFLAGS
 build=mingw_build
 rm -rf $build
 
-meson setup $build --cross-file "$prefix_dir/crossfile" $common_args \
-  --buildtype debugoptimized \
-  --force-fallback-for=mujs \
-  -Dmujs:werror=false \
-  -Dmujs:default_library=static \
-  -Dlua=luajit \
-  -D{amf,shaderc,spirv-cross,d3d11,javascript}=enabled
+mpv_args=(
+    --cross-file "$prefix_dir/crossfile" $common_args
+    --buildtype debugoptimized
+    --force-fallback-for=mujs
+    -Dmujs:werror=false
+    -Dmujs:default_library=static
+    -Dlua=luajit
+    -D{amf,shaderc,spirv-cross,d3d11,javascript,libcurl}=enabled
+)
+meson setup $build "${mpv_args[@]}"
 meson compile -C $build
 
 if [ "$2" = pack ]; then
     mkdir -p artifact/tmp
     echo "Copying:"
     cp -pv $build/mpv.com $build/mpv.exe etc/mpv-*.bat artifact/
-    # copy everything we can get our hands on
+
+    echo "Adding DLLs:"
+    # grab everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
     for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
@@ -348,17 +400,16 @@ if [ "$2" = pack ]; then
     # pick DLLs we need
     pushd artifact/tmp
     dlls=(
-        libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll # compiler runtime
-        av*.dll sw*.dll {postproc,subrandr}-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
-        lib{shaderc_shared,spirv-cross-c-shared,dav1d,lcms2}.dll zlib1.dll
+        # compiler runtime
+        libgcc_*.dll lib{ssp,stdc++,winpthread}-[0-9]*.dll
+        # ffmpeg
+        av*.dll sw*.dll postproc-[0-9]*.dll
+        # everything else
+        subrandr-[0-9]*.dll lib{ass,freetype,fribidi,harfbuzz,iconv,placebo}-[0-9]*.dll
+        lib{curl,shaderc_shared,spirv-cross-c-shared,dav1d,lcms2,zlib1}.dll
     )
-    if [[ -f vulkan-1.dll ]]; then
-        dlls+=(vulkan-1.dll)
-    fi
+    [[ -f vulkan-1.dll ]] && dlls+=(vulkan-1.dll)
     mv -v "${dlls[@]}" ..
     popd
-
-    pushd artifact
-    rm -rf tmp
-    popd
+    rm -rf artifact/tmp
 fi

@@ -296,6 +296,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
     const VkFormat *vk_fmt = av_vkfmt_from_pixfmt(hwfc->sw_format);
 
+    p->vkf = vkf;
     vkfc->lock_frame(hwfc, vkf);
 
     for (int i = 0; i < p->layout.num_planes; i++) {
@@ -354,11 +355,10 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         mapper->tex[i] = ratex;
     }
 
-    p->vkf = vkf;
     return 0;
 
  error:
-    vkfc->unlock_frame(hwfc, vkf);
+    // unmap will unlock the frame and clear p->vkf
     mapper_unmap(mapper);
     return -1;
 }

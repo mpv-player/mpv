@@ -46,8 +46,6 @@ static void vk_ctx_destroy(void *p)
     vk->gpu = NULL;
     pl_vulkan_destroy(&vk->vulkan);
     mpvk_uninit(vk);
-    talloc_free(vk);
-    talloc_free(ractx);
 }
 
 static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
@@ -69,19 +67,17 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
         goto error;
 
     struct pl_vk_inst_params pl_vk_params = {0};
-    struct ra_ctx_opts *ctx_opts = mp_get_config_group(NULL, global, &ra_ctx_conf);
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(ctx, global, &ra_ctx_conf);
     pl_vk_params.debug = ctx_opts->debug;
-    talloc_free(ctx_opts);
     mppl_log_set_probing(vk->pllog, true);
     vk->vkinst = pl_vk_inst_create(vk->pllog, &pl_vk_params);
     mppl_log_set_probing(vk->pllog, false);
     if (!vk->vkinst)
         goto error;
 
-    struct vulkan_opts *vk_opts = mp_get_config_group(NULL, global, &vulkan_conf);
+    struct vulkan_opts *vk_opts = mp_get_config_group(ctx, global, &vulkan_conf);
     vk->vulkan = mppl_create_vulkan(vk_opts, vk->vkinst, vk->pllog, VK_NULL_HANDLE,
                                     ctx_opts->allow_sw);
-    talloc_free(vk_opts);
     if (!vk->vulkan)
         goto error;
 
@@ -99,13 +95,13 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
     ctx->ra = ractx->ra;
     ctx->priv = vkctx;
 
+    talloc_free(ctx_opts);
+    talloc_free(vk_opts);
     return ctx;
 
 error:
     pl_vulkan_destroy(&vk->vulkan);
     mpvk_uninit(vk);
-    talloc_free(vk);
-    talloc_free(ractx);
     talloc_free(ctx);
     return NULL;
 }

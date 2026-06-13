@@ -50,6 +50,7 @@
 #include "f_async_queue.h"
 #include "f_decoder_wrapper.h"
 #include "f_demux_in.h"
+#include "f_lavfi.h"
 #include "filter_internal.h"
 
 struct dec_queue_opts {
@@ -232,6 +233,16 @@ struct priv {
     bool pts_reset;
     int attempt_framedrops; // try dropping this many frames
     int dropped_frames; // total frames _probably_ dropped
+
+    // --- Decoder group.
+    //     The group of decoders this wrapper manages. Decodes dependent streams
+    //     which then can be passed further for processing. Currently, the
+    //     supported configuration is multiple video decoders into single output
+    //     pin that which has output merged by specified mp_lavfi graph.
+    //     When is_group is true, the wrapper acts as a manager of the group.
+    bool is_group;
+    struct mp_decoder_wrapper **children;
+    int num_children;
 };
 
 static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
@@ -349,6 +360,18 @@ int mp_decoder_wrapper_control(struct mp_decoder_wrapper *d,
 {
     struct priv *p = d->f->priv;
     int res = CONTROL_UNKNOWN;
+    if (p->is_group) {
+        mp_assert(p->num_children);
+        for (int i = 0; i < p->num_children; i++) {
+            // Forward control to all children, but get the result from the last
+            // one. Currently it is used only for same decoders, so we care only
+            // about the control, and the result for GET can be whatever.
+            res = mp_decoder_wrapper_control(p->children[i], cmd, arg);
+            if (i == p->num_children - 1)
+                return res;
+        }
+        return res;
+    }
     thread_lock(p);
     if (cmd == VDCTRL_GET_HWDEC) {
         res = update_cached_values(p);
@@ -487,6 +510,13 @@ static bool decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
 {
     struct priv *p = d->f->priv;
+    if (p->is_group) {
+        for (int i = 0; i < p->num_children; i++) {
+            if (!mp_decoder_wrapper_reinit(p->children[i]))
+                return false;
+        }
+        return true;
+    }
     thread_lock(p);
     bool res = reinit_decoder(p);
     thread_unlock(p);
@@ -547,6 +577,12 @@ bool mp_decoder_wrapper_get_pts_reset(struct mp_decoder_wrapper *d)
 void mp_decoder_wrapper_set_play_dir(struct mp_decoder_wrapper *d, int dir)
 {
     struct priv *p = d->f->priv;
+    if (p->is_group) {
+        for (int i = 0; i < p->num_children; i++)
+            mp_decoder_wrapper_set_play_dir(p->children[i], dir);
+        p->play_dir = dir;
+        return;
+    }
     thread_lock(p);
     p->play_dir = dir;
     thread_unlock(p);
@@ -865,6 +901,11 @@ static void process_output_frame(struct priv *p, struct mp_frame frame)
 void mp_decoder_wrapper_set_start_pts(struct mp_decoder_wrapper *d, double pts)
 {
     struct priv *p = d->f->priv;
+    if (p->is_group) {
+        for (int i = 0; i < p->num_children; i++)
+            mp_decoder_wrapper_set_start_pts(p->children[i], pts);
+        return;
+    }
     p->start_pts = pts;
 }
 
@@ -995,7 +1036,12 @@ static void read_frame(struct priv *p)
     struct mp_pin *pin = p->decf->ppins[0];
     struct mp_frame frame = {0};
 
-    if (!p->decoder || !mp_pin_in_needs_data(pin))
+    if (!p->decoder) {
+        if (mp_pin_in_needs_data(pin))
+            mp_pin_in_write(pin, MP_EOF_FRAME);
+        return;
+    }
+    if (!mp_pin_in_needs_data(pin))
         return;
 
     if (p->decoded_coverart.type) {
@@ -1202,6 +1248,81 @@ static void onlock_dec_thread(void *ptr)
     mp_filter_graph_interrupt(p->dec_root_filter);
 }
 
+// Build the multi-decoder + libavfilter merge subgraph for a stream group
+// track.
+static bool init_group_decoder(struct priv *p, struct mp_filter *public_f)
+{
+    struct sh_stream_group *g = p->header->group;
+
+    p->is_group = true;
+    p->fps = p->header->codec->fps;
+
+    // Currently only lavfi merge is supported, this can be extended if needed.
+    if (g->num_members < 1 || !g->lavfi_graph) {
+        MP_ERR(p, "Stream group is missing members or filter graph.\n");
+        return false;
+    }
+
+    mp_require(!public_f->stream_info);
+    struct mp_stream_info *parent_info = mp_filter_find_stream_info(public_f);
+    struct mp_stream_info *group_info = talloc_zero(p, struct mp_stream_info);
+    if (parent_info)
+        *group_info = *parent_info;
+    group_info->force_swdec = true;
+    public_f->stream_info = group_info;
+
+    enum mp_frame_type ftype;
+    switch (p->header->type) {
+    case STREAM_VIDEO: ftype = MP_FRAME_VIDEO; break;
+    case STREAM_AUDIO: ftype = MP_FRAME_AUDIO; break;
+    default:
+        MP_ERR(p, "Stream group has unsupported media type.\n");
+        return false;
+    }
+
+    struct mp_lavfi *lavfi = mp_lavfi_create_graph(public_f, ftype, false,
+                                                   NULL, NULL, g->lavfi_graph);
+    if (!lavfi) {
+        MP_ERR(p, "Failed to create stream group filter graph: %s\n",
+               g->lavfi_graph);
+        return false;
+    }
+
+    for (int i = 0; i < g->num_members; i++) {
+        struct sh_stream *m = g->members[i];
+        if (!m) {
+            MP_ERR(p, "Stream group member %d is NULL\n", i);
+            return false;
+        }
+        if (m->type != p->header->type) {
+            MP_ERR(p, "Stream group member %d has mismatching media type.\n", i);
+            return false;
+        }
+
+        struct mp_decoder_wrapper *child = mp_decoder_wrapper_create(public_f, m);
+        if (!child)
+            return false;
+        MP_TARRAY_APPEND(p, p->children, p->num_children, child);
+
+        char *pad = mp_tprintf(16, "%d", i);
+        struct mp_pin *in_pin = mp_filter_get_named_pin(lavfi->f, pad);
+        if (!in_pin) {
+            MP_ERR(p, "Stream group filter graph is missing input '%s'\n", pad);
+            return false;
+        }
+        mp_pin_connect(in_pin, child->f->pins[0]);
+    }
+
+    struct mp_pin *out_pin = mp_filter_get_named_pin(lavfi->f, "out");
+    if (!out_pin) {
+        MP_ERR(p, "Stream group filter graph is missing output 'out'\n");
+        return false;
+    }
+    mp_pin_connect(public_f->ppins[0], out_pin);
+
+    return true;
+}
+
 struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src)
 {
@@ -1219,6 +1340,16 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
     p->codec = p->header->codec;
     p->play_dir = 1;
     mp_filter_add_pin(public_f, MP_PIN_OUT, "out");
+
+    if (src->group && src->group->lavfi_graph) {
+        const char *tag = src->type == STREAM_AUDIO ? "!ad" : "!vd";
+        p->log = mp_log_new(p, parent->global->log, tag);
+        public_f->log = p->log;
+        if (!init_group_decoder(p, public_f))
+            goto error;
+        public_f_reset(public_f);
+        return &p->public;
+    }
 
     if (p->header->type == STREAM_VIDEO) {
         p->log = mp_log_new(p, parent->global->log, "!vd");

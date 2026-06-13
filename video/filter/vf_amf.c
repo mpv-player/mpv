@@ -281,7 +281,6 @@ static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
         else
             profile = FRC_PROFILE_HIGH;
     }
-    profile = FRC_PROFILE_HIGH;
     AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_PROFILE, profile);
     if (res != AMF_OK) {
         MP_WARN(f, "Failed to set FRC profile: %d\n", res);
@@ -630,6 +629,7 @@ static void process(struct mp_filter *f)
 
     if (res == AMF_INPUT_FULL) {
         MP_WARN(f, "FRC input queue full...\n");
+        frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
         return;
     }

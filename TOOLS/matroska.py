@@ -291,8 +291,8 @@ class MatroskaElement:
         self.subelements = subelements
         self.subids = {x[0].elid for x in subelements}
 
-elementd = {}
-elementlist = []
+elementd: dict[str, MatroskaElement] = {}
+elementlist: list[MatroskaElement] = []
 def parse_elems(elements, namespace):
     subelements = []
     for el in elements:

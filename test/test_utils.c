@@ -3,6 +3,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/subprocess.h"
 #include "osdep/terminal.h"
 #include "test_utils.h"

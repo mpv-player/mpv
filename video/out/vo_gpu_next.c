@@ -142,6 +142,7 @@ struct priv {
     bool want_reset;
     bool flush_cache;
     bool frame_pending;
+    bool paused;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -626,7 +627,7 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
 #endif
 
     MP_ERR(p, "Failed mapping hwdec frame? Open a bug!\n");
-    return false;
+    return NULL;
 }
 
 static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
@@ -1077,15 +1078,15 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_render_params params = pars->params;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
-    bool cache_frame = will_redraw || frame->still;
+    bool cache_frame = will_redraw || frame->still || p->paused;
     bool can_interpolate = opts->interpolation && frame->display_synced &&
-                           !frame->still && frame->num_frames > 1;
+                           !frame->still && frame->num_frames > 1 && !p->paused;
     double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     params.info_callback = info_callback;
     params.info_priv = vo;
     params.skip_caching_single_frame = !cache_frame;
     params.preserve_mixing_cache = p->next_opts->inter_preserve && !frame->still;
-    if (frame->still)
+    if (frame->still || p->paused)
         params.frame_mixer = NULL;
 
     if (frame->current && frame->current->params.vflip) {
@@ -1890,6 +1891,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_PAUSE:
         if (p->is_interpolated)
             vo->want_redraw = true;
+        p->paused = true;
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        p->paused = false;
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
@@ -2695,7 +2700,7 @@ AV_NOWARN_DEPRECATED(
     pars->params.hooks = p->hooks;
 
     MP_DBG(p, "Render options updated, flushing renderer cache.\n");
-    p->flush_cache = true;
+    p->flush_cache = p->paused || !p->next_opts->inter_preserve;
 }
 
 const struct vo_driver video_out_gpu_next = {

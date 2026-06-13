@@ -61,6 +61,7 @@ extern const struct m_sub_options tv_params_conf;
 extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
+extern const struct m_sub_options mp_network_conf;
 extern const struct m_sub_options stream_lavf_conf;
 extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options zimg_conf;
@@ -94,6 +95,7 @@ extern const struct m_sub_options ao_conf;
 
 extern const struct m_sub_options dvd_conf;
 extern const struct m_sub_options clipboard_conf;
+extern const struct m_sub_options curl_conf;
 
 extern const struct m_sub_options opengl_conf;
 extern const struct m_sub_options vulkan_conf;
@@ -672,6 +674,7 @@ static const m_option_t mp_opts[] = {
 #if HAVE_DVBIN
     {"dvbin", OPT_SUBSTRUCT(stream_dvb_opts, stream_dvb_conf)},
 #endif
+    {"", OPT_SUBSTRUCT(network_opts, mp_network_conf)},
     {"", OPT_SUBSTRUCT(stream_lavf_opts, stream_lavf_conf)},
 
 // ------------------------- a-v sync options --------------------
@@ -923,6 +926,10 @@ static const m_option_t mp_opts[] = {
     {"input-builtin-drag-and-drop", OPT_BOOL(builtin_dnd)},
 
     {"clipboard", OPT_SUBSTRUCT(clipboard_opts, clipboard_conf)},
+
+#if HAVE_LIBCURL
+    {"curl", OPT_SUBSTRUCT(curl_opts, curl_conf)},
+#endif
 
     {"", OPT_SUBSTRUCT(vo, vo_sub_opts)},
     {"", OPT_SUBSTRUCT(demux_opts, demux_conf)},

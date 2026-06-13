@@ -3166,6 +3166,14 @@ static int mp_property_term_size(void *ctx, struct m_property *prop,
     return m_property_read_sub(props, action, arg);
 }
 
+static int mp_property_player_operation_mode(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    const struct m_opt_choice_alternatives mode_names[] = {{"cplayer", 0}, {"pseudo-gui", 1}};
+    return m_property_strdup_ro(action, arg, m_opt_choice_str(mode_names, mpctx->opts->operation_mode));
+}
+
 static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -3528,6 +3536,34 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
             if (line->end != MP_NOPTS_VALUE)
                 node_map_add_double(entry, "end", line->end);
         }
+        talloc_free(lines);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_PRINT: {
+        struct sub_lines *lines = sub_get_lines(sub);
+        if (!lines)
+            return M_PROPERTY_UNAVAILABLE;
+
+        char *res = talloc_strdup(NULL, "");
+        double time_pos = get_playback_time(mpctx);
+        int pos = 0;
+
+        for (int i = 0; i < lines->num_entries; i++) {
+            struct sub_line *line = &lines->entries[i];
+            const char *reset = "";
+
+            if (line->start <= time_pos && line->end > time_pos) {
+                res = append_selected_style(mpctx, res);
+                reset = get_style_reset(mpctx);
+            }
+
+            res = talloc_asprintf_append(res, "%s%s\n", line->text, reset);
+
+            if (line->start <= time_pos && i)
+                pos += count_lines(lines->entries[i - 1].text);
+        }
+
+        *(char **)arg = cut_osd_list(mpctx, "Subtitle lines", res, pos);
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
@@ -4633,6 +4669,7 @@ static const struct m_property mp_properties_base[] = {
     {"idle-active", mp_property_idle},
     {"window-id", mp_property_window_id},
     {"display-swapchain", mp_property_vo_display_swapchain},
+    {"player-operation-mode", mp_property_player_operation_mode},
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", mp_property_list_tracks},

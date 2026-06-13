@@ -505,11 +505,6 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (p->loop == NULL)
         return -1;
 
-    pw_thread_loop_lock(p->loop);
-
-    if (pw_thread_loop_start(p->loop) < 0)
-        goto error;
-
     struct pw_properties *props = NULL;
 #if !PW_CHECK_VERSION(1, 3, 81)
     props = pw_properties_new(PW_KEY_CONFIG_NAME, "client-rt.conf", NULL);
@@ -525,7 +520,7 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (!p->core) {
         MP_MSG(ao, ao->probing ? MSGL_V : MSGL_ERR,
                "Could not connect to context '%s': %s\n",
-               p->options.remote, mp_strerror(errno));
+               p->options.remote ? p->options.remote : "(default)", mp_strerror(errno));
         pw_context_destroy(context);
         goto error;
     }
@@ -533,7 +528,8 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (pw_core_add_listener(p->core, &p->core_listener, &core_events, ao) < 0)
         goto error;
 
-    pw_thread_loop_unlock(p->loop);
+    if (pw_thread_loop_start(p->loop) < 0)
+        goto error;
 
     if (!session_has_sinks(ao)) {
         MP_VERBOSE(ao, "PipeWire does not have any audio sinks, skipping\n");
@@ -543,7 +539,6 @@ static int pipewire_init_boilerplate(struct ao *ao)
     return 0;
 
 error:
-    pw_thread_loop_unlock(p->loop);
     return -1;
 }
 

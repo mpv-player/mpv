@@ -49,6 +49,8 @@
 #include "misc/thread_tools.h"
 
 #include "stream/stream.h"
+#include "stream/stream_curl.h"
+
 #include "demux.h"
 #include "stheader.h"
 #include "options/m_config.h"
@@ -214,6 +216,7 @@ static const struct format_hack format_hacks[] = {
 struct nested_stream {
     AVIOContext *id;
     int64_t last_bytes;
+    void *curl_data;
 };
 
 struct stream_info {
@@ -945,12 +948,24 @@ static int nested_io_open(struct AVFormatContext *s, AVIOContext **pb,
         }
     }
 
-    int r = priv->default_io_open(s, pb, url, flags, options);
+    // Try the libcurl-based backend first, so nested connections use the same
+    // stack. Only ENOSYS (the URL not supported) falls back to Lavf IO.
+    void *curl_data = NULL;
+    int r = AVERROR(ENOSYS);
+#if HAVE_LIBCURL
+    r = mp_curl_avio_open(demuxer, pb, &curl_data, url, flags, options,
+                          s->protocol_whitelist, s->protocol_blacklist);
+    mp_assert(r != 0 || curl_data != NULL);
+#endif
+    if (r == AVERROR(ENOSYS))
+        r = priv->default_io_open(s, pb, url, flags, options);
+
     if (r >= 0) {
         if (options)
             mp_avdict_print_unset(demuxer->log, MSGL_TRACE, *options);
         struct nested_stream nest = {
             .id = *pb,
+            .curl_data = curl_data,
         };
         MP_TARRAY_APPEND(priv, priv->nested, priv->num_nested, nest);
     }
@@ -963,12 +978,21 @@ static int nested_io_close2(struct AVFormatContext *s, AVIOContext *pb)
     mp_require(demuxer);
     lavf_priv_t *priv = demuxer->priv;
 
+    MP_UNUSED void *curl_data = NULL;
     for (int n = 0; n < priv->num_nested; n++) {
         if (priv->nested[n].id == pb) {
+            curl_data = priv->nested[n].curl_data;
             MP_TARRAY_REMOVE_AT(priv->nested, priv->num_nested, n);
             break;
         }
     }
+
+#if HAVE_LIBCURL
+    if (curl_data) {
+        mp_curl_avio_close(pb, curl_data);
+        return 0;
+    }
+#endif
 
     return priv->default_io_close2(s, pb);
 }
@@ -991,6 +1015,7 @@ static void build_editions(demuxer_t *demuxer)
         return;
     }
 
+    int first_nonempty = -1;
     for (unsigned i = 0; i < avfc->nb_programs; i++) {
         AVProgram *prog = avfc->programs[i];
 
@@ -1000,12 +1025,13 @@ static void build_editions(demuxer_t *demuxer)
         };
         mp_tags_copy_from_av_dictionary(ed.metadata, prog->metadata);
 
-        int video_count = 0, audio_count = 0;
+        int video_count = 0, audio_count = 0, track_count = 0;
         int video_idx = -1, audio_idx = -1;
         for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
             unsigned idx = prog->stream_index[j];
             if (idx >= priv->num_streams || !priv->streams[idx]->sh)
                 continue;
+            track_count++;
             struct sh_stream *sh = priv->streams[idx]->sh;
             if (sh->type == STREAM_VIDEO) {
                 video_count++;
@@ -1041,6 +1067,9 @@ static void build_editions(demuxer_t *demuxer)
                                                   prog->id, prefix);
         if (title)
             mp_tags_set_str(ed.metadata, "title", title);
+
+        if (track_count > 0 && first_nonempty < 0)
+            first_nonempty = demuxer->num_editions;
 
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
     }
@@ -1091,70 +1120,97 @@ static void build_editions(demuxer_t *demuxer)
             selected = best;
     }
 
-    demuxer->edition = selected >= 0 ? selected : 0;
+    demuxer->edition = selected >= 0 ? selected : first_nonempty >= 0 ? first_nonempty : 0;
 }
 
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 22, 100)
-// Correct the display dimensions of the primary tile stream to the composed
-// image size, and mark the remaining tile streams as dependent.
-static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stg)
+// Synthesize a virtual track that assembles an AVStreamGroupTileGrid.
+static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_group)
 {
     lavf_priv_t *priv = demuxer->priv;
-    AVStreamGroupTileGrid *tile_grid = stg->params.tile_grid;
+    AVStreamGroupTileGrid *grid = stream_group->params.tile_grid;
 
-    // AV_DISPOSITION_DEFAULT identifies the intended presentation stream.
-    AVStream *primary_st = NULL;
-    struct sh_stream *primary_sh = NULL;
-    for (unsigned i = 0; i < stg->nb_streams; i++) {
-        AVStream *st = stg->streams[i];
-        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+    MP_VERBOSE(demuxer, "Tile grid group: %u tiles -> %dx%d",
+               grid->nb_tiles, grid->width, grid->height);
+
+    struct sh_stream *vsh = demux_alloc_sh_stream(STREAM_VIDEO);
+    vsh->group = talloc_zero(vsh, struct sh_stream_group);
+    MP_TARRAY_GROW(vsh->group, vsh->group->members, grid->nb_tiles);
+    char *graph = talloc_strdup(vsh->group, "");
+
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        unsigned int group_idx = grid->offsets[i].idx;
+        if (group_idx >= stream_group->nb_streams) {
+            MP_ERR(demuxer, "Tile %d references out-of-range group "
+                   "stream index %u (group has %u streams) – skipping.\n",
+                   i, group_idx, stream_group->nb_streams);
             continue;
-        struct sh_stream *sh = priv->streams[st->index]->sh;
-        if (!sh)
-            continue;
-        if (st->disposition & AV_DISPOSITION_DEFAULT) {
-            primary_st = st;
-            primary_sh = sh;
-            break;
         }
-        if (!primary_st) {
-            primary_st = st;
-            primary_sh = sh;
+
+        if (grid->offsets[i].horizontal >= grid->coded_width ||
+            grid->offsets[i].vertical   >= grid->coded_height) {
+            MP_WARN(demuxer, "Tile grid offsets exceed coded canvas (%dx%d) -"
+                    "ignoring tile grid.\n",
+                    grid->coded_width, grid->coded_height);
+            goto error;
         }
+
+        int ff_idx = stream_group->streams[group_idx]->index;
+        if (ff_idx >= 0 && ff_idx < priv->num_streams && priv->streams[ff_idx] &&
+            priv->streams[ff_idx]->sh) {
+            vsh->group->members[vsh->group->num_members++] = priv->streams[ff_idx]->sh;
+        } else {
+            MP_WARN(demuxer, "Tile grid offset %d is not associated to any stream.\n", i);
+            goto error;
+        }
+
+        graph = talloc_asprintf_append(graph, "[%d]", i);
     }
 
-    if (!primary_sh) {
-        MP_WARN(demuxer, "Tile grid stream group %u has no usable streams.\n",
-                stg->index);
-        return;
+    graph = talloc_asprintf_append(graph, "xstack=inputs=%d:layout=", grid->nb_tiles);
+    for (int i = 0; i < grid->nb_tiles; i++) {
+        if (i > 0)
+            graph = talloc_asprintf_append(graph, "|");
+        graph = talloc_asprintf_append(graph, "%d_%d",
+                                       grid->offsets[i].horizontal, grid->offsets[i].vertical);
+    }
+    graph = talloc_asprintf_append(graph,
+                                   ":fill=0x%02X%02X%02X@0x%02X",
+                                   grid->background[0], grid->background[1],
+                                   grid->background[2], grid->background[3]);
+
+    if (grid->coded_width != grid->width || grid->coded_height != grid->height) {
+        graph = talloc_asprintf_append(graph, ",crop=w=%d:h=%d:x=%d:y=%d",
+                                       grid->width, grid->height,
+                                       grid->horizontal_offset, grid->vertical_offset);
     }
 
-    MP_VERBOSE(demuxer, "Tile grid group: %u tiles, canvas %dx%d, "
-               "visible %dx%d at offset (%d,%d)\n",
-               tile_grid->nb_tiles,
-               tile_grid->coded_width, tile_grid->coded_height,
-               tile_grid->width, tile_grid->height,
-               tile_grid->horizontal_offset, tile_grid->vertical_offset);
+    graph = talloc_asprintf_append(graph, "[out]");
+    vsh->group->lavfi_graph = graph;
 
-    // width/height is the final visible region; coded_width/coded_height is
-    // the full canvas including padding — use the former for presentation.
-    primary_sh->codec->disp_w = tile_grid->width;
-    primary_sh->codec->disp_h = tile_grid->height;
+    struct sh_stream *primary_sh = vsh->group->members[0];
+    vsh->codec->fps    = primary_sh->codec->fps;
+    vsh->image         = primary_sh->image;
+    vsh->still_image   = primary_sh->still_image;
+    vsh->default_track = true;
+    vsh->codec->codec  = primary_sh->codec->codec;
+    vsh->codec->codec_desc = primary_sh->codec->codec_desc;
+    vsh->codec->disp_w = grid->width;
+    vsh->codec->disp_h = grid->height;
+    vsh->title = talloc_asprintf(vsh, "Tile grid (%dx%d, %d tiles)",
+                                 grid->width, grid->height,
+                                 grid->nb_tiles);
 
-    if (stg->metadata)
-        mp_tags_copy_from_av_dictionary(primary_sh->tags, stg->metadata);
+    if (stream_group->metadata)
+        mp_tags_copy_from_av_dictionary(vsh->tags, stream_group->metadata);
 
-    for (unsigned i = 0; i < stg->nb_streams; i++) {
-        AVStream *st = stg->streams[i];
-        if (st == primary_st)
-            continue;
-        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
-            continue;
-        struct sh_stream *sh = priv->streams[st->index]->sh;
-        if (sh)
-            sh->dependent_track = true;
-    }
+    demux_add_sh_stream(demuxer, vsh);
+
+    return;
+
+error:
+    talloc_free(vsh);
 }
 #endif
 
@@ -1182,20 +1238,26 @@ static void handle_iamf_audio_element_group(demuxer_t *demuxer,
 // enhancement NALUs. Only the base is decodable on its own.
 static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
 {
-    lavf_priv_t *priv = demuxer->priv;
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 19, 100)
+    AVStreamGroupLayeredVideo *lcevc = stg->params.layered_video;
+    unsigned el_index = lcevc->el_index;
+#else
     AVStreamGroupLCEVC *lcevc = stg->params.lcevc;
+    unsigned el_index = lcevc->lcevc_index;
+#endif
+    lavf_priv_t *priv = demuxer->priv;
 
-    if (lcevc->lcevc_index >= stg->nb_streams) {
-        MP_WARN(demuxer, "LCEVC group %u: lcevc_index %u out of range (%u streams)\n",
-                stg->index, lcevc->lcevc_index, stg->nb_streams);
+    if (el_index >= stg->nb_streams) {
+        MP_WARN(demuxer, "LCEVC group %u: el_index %u out of range (%u streams)\n",
+                stg->index, el_index, stg->nb_streams);
         return;
     }
 
     MP_VERBOSE(demuxer, "LCEVC group %u: enhancement stream index %u, "
                "final size %dx%d\n",
-               stg->index, lcevc->lcevc_index, lcevc->width, lcevc->height);
+               stg->index, el_index, lcevc->width, lcevc->height);
 
-    AVStream *lcevc_st = stg->streams[lcevc->lcevc_index];
+    AVStream *lcevc_st = stg->streams[el_index];
     if ((unsigned)lcevc_st->index < (unsigned)priv->num_streams) {
         struct sh_stream *sh = priv->streams[lcevc_st->index]->sh;
         if (sh)
@@ -1349,6 +1411,22 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     } else {
         avfc->io_open = block_io_open;
     }
+
+#if HAVE_LIBCURL
+    // When nested HTTP requests are routed through our libcurl backend,
+    // Lavf's HLS demuxer must not try to reuse the URLContext of the previous
+    // request via ff_http_do_new_request2(). Our AVIOContext is not backed by a
+    // URLContext, so ffio_geturlcontext() returns NULL and av_assert0() trips.
+    // Note that our implementation will reuse and multiplex connections.
+    // This will be fixed upstream, but keep compatibility with older versions.
+    if (demuxer->access_references) {
+        av_dict_set(&dopts, "http_persistent", "0", 0);
+        // Actually enable http_multiple, this is basic prefetching logic in
+        // HLS demuxer. We just need to avoid autodetection (-1) which would
+        // be incorrect as our backed is handling everything.
+        av_dict_set(&dopts, "http_multiple", "1", 0);
+    }
+#endif
 
     mp_set_avdict(&dopts, lavfdopts->avopts);
 
@@ -1505,6 +1583,8 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
     if (r < 0) {
         av_packet_free(&pkt);
         if (r == AVERROR_EOF)
+            return false;
+        if (mp_cancel_test(demux->cancel))
             return false;
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         if (priv->retry_counter >= 10) {

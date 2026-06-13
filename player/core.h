@@ -269,6 +269,7 @@ typedef struct MPContext {
     char *term_osd_title;
     char *last_window_title;
     struct voctrl_playback_state vo_playback_state;
+    int64_t vo_playback_state_time;
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only

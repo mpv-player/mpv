@@ -19,6 +19,7 @@
 
 #include "misc/bstr.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/threads.h"
 #include "path.h"
 

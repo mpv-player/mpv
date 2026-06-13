@@ -80,6 +80,9 @@ int mp_make_cloexec_pipe(int pipes[2]);
 int mp_make_wakeup_pipe(int pipes[2]);
 void mp_flush_wakeup_pipe(int pipe_end);
 
+FILE *mp_fopen(const char *filename, const char *mode);
+#define fopen(...) mp_fopen(__VA_ARGS__)
+
 #ifdef _WIN32
 
 #include <wchar.h>
@@ -117,7 +120,6 @@ int mp_fprintf(FILE *stream, const char *format, ...) MP_PRINTF_ATTRIBUTE(2, 3);
 int mp_open(const char *filename, int oflag, ...);
 int mp_creat(const char *filename, int mode);
 int mp_rename(const char *oldpath, const char *newpath);
-FILE *mp_fopen(const char *filename, const char *mode);
 DIR *mp_opendir(const char *path);
 struct dirent *mp_readdir(DIR *dir);
 int mp_closedir(DIR *dir);
@@ -138,7 +140,6 @@ off_t mp_lseek64(int fd, off_t offset, int whence);
 int mp_ftruncate64(int fd, off_t length);
 void *mp_dlopen(const char *filename, int flag);
 void *mp_dlsym(void *handle, const char *symbol);
-int mp_dlclose(void *handle);
 char *mp_dlerror(void);
 
 // mp_stat types. MSVCRT's dev_t and ino_t are way too short to be unique.
@@ -191,7 +192,6 @@ void mp_globfree(mp_glob_t *pglob);
 #define open(...) mp_open(__VA_ARGS__)
 #define creat(...) mp_creat(__VA_ARGS__)
 #define rename(...) mp_rename(__VA_ARGS__)
-#define fopen(...) mp_fopen(__VA_ARGS__)
 #define opendir(...) mp_opendir(__VA_ARGS__)
 #define readdir(...) mp_readdir(__VA_ARGS__)
 #define closedir(...) mp_closedir(__VA_ARGS__)
@@ -211,7 +211,6 @@ void mp_globfree(mp_glob_t *pglob);
 #define RTLD_GLOBAL 0
 #define dlopen(fn,fg) mp_dlopen((fn), (fg))
 #define dlsym(h,s) mp_dlsym((h), (s))
-#define dlclose(h) mp_dlclose((h))
 #define dlerror mp_dlerror
 
 // Affects both "stat()" and "struct stat".

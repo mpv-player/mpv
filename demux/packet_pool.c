@@ -108,6 +108,39 @@ void demux_packet_pool_prepend(struct demux_packet_pool *pool,
 #endif
 }
 
+// Number of most-recently-pushed packets kept at the head of the freelist for
+// fast reuse. Pop walks at most this many cold-cache nodes per call, so we keep
+// it small.
+#define POOL_HOT_RESERVE 16
+
+// Maximum number of packets freed per pop, starting after the hot reserve.
+// Acts as a self-balancing GC. After a large push, for example on cache reset,
+// the pool will shrink across multiple subsequent pops. This value has to be
+// reasonably higher than POOL_HOT_RESERVE to make the clearing effective, but
+// not too high to avoid const of big GC baches on each pop.
+#define POOL_GC_BATCH 64
+
+// Detach up to POOL_GC_BATCH packets from the pool, starting after the
+// first POOL_HOT_RESERVE entries. Must be called locked.
+static inline struct demux_packet *pool_gc_detach(struct demux_packet_pool *pool)
+{
+    struct demux_packet *cat_reserve = pool->packets;
+    for (int i = 1; cat_reserve && i < POOL_HOT_RESERVE; i++)
+        cat_reserve = cat_reserve->next;
+
+    if (!cat_reserve || !cat_reserve->next)
+        return NULL;
+
+    struct demux_packet *gc = cat_reserve->next;
+    struct demux_packet *cut_rest = gc;
+    for (int i = 1; cut_rest->next && i < POOL_GC_BATCH; i++)
+        cut_rest = cut_rest->next;
+
+    cat_reserve->next = cut_rest->next;
+    cut_rest->next = NULL;
+    return gc;
+}
+
 struct demux_packet *demux_packet_pool_pop(struct demux_packet_pool *pool)
 {
     mp_mutex_lock(&pool->lock);
@@ -116,15 +149,16 @@ struct demux_packet *demux_packet_pool_pop(struct demux_packet_pool *pool)
         pool->packets = dp->next;
         dp->next = NULL;
     }
+    struct demux_packet *gc = pool_gc_detach(pool);
     mp_mutex_unlock(&pool->lock);
 
-    // Clear the packet from possible external references. This is done in the
-    // pop function instead of prepend to distribute the load of clearing packets.
-    // packet_create() is called at a reasonable rate, so it's fine to clear
-    // a single packet at a time. This avoids the need to clear potentially
-    // hundreds of thousands of packets at once when file playback is stopped,
-    // which would require a significant amount of time to iterate over all packets.
+    // Clear the popped packet's external references and drain a small batch
+    // of old pooled packets. Both costs are amortized across packet_create()
+    // calls so EOF / cache reset never has to free a huge list at once.
     demux_packet_unref(dp);
+    // GC is done unlocked, this makes packets be iterated again, but that's
+    // should be fine, with POOL_GC_BATCH elements only.
+    free_demux_packets(gc);
 
     return dp;
 }

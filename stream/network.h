@@ -17,17 +17,22 @@
 
 #pragma once
 
-#include <libavutil/channel_layout.h>
+#include <stdbool.h>
 
-#include "config.h"
+struct m_sub_options;
 
-#include "chmap.h"
+struct mp_network_opts {
+    bool cookies_enabled;
+    char *cookies_file;
+    char *useragent;
+    char *referrer;
+    char **http_header_fields;
+    bool tls_verify;
+    char *tls_ca_file;
+    char *tls_cert_file;
+    char *tls_key_file;
+    double timeout;
+    char *http_proxy;
+};
 
-bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src);
-
-void mp_chmap_to_av_layout(AVChannelLayout *dst, const struct mp_chmap *src);
-
-// Like mp_chmap_to_av_layout(), but always emit AV_CHANNEL_ORDER_CUSTOM for
-// known layouts so that the original channel order is preserved.
-void mp_chmap_to_av_layout_custom(AVChannelLayout *dst,
-                                  const struct mp_chmap *src);
+extern const struct m_sub_options mp_network_conf;

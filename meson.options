@@ -19,6 +19,7 @@ option('lcms2', type: 'feature', value: 'auto', description: 'LCMS2 support')
 option('libarchive', type: 'feature', value: 'auto', description: 'libarchive wrapper for reading zip files and more')
 option('libavdevice', type: 'feature', value: 'auto', description: 'libavdevice')
 option('libbluray', type: 'feature', value: 'auto', description: 'Bluray support')
+option('libcurl', type: 'feature', value: 'auto', description: 'libcurl-based stream backend')
 option('lua',
     type: 'combo',
     choices: ['lua', 'lua52', 'lua5.2', 'lua-5.2', 'luajit', 'lua51',

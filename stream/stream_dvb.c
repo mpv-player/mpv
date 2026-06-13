@@ -53,6 +53,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "osdep/io.h"
 #include "osdep/poll_wrapper.h"
 #include "osdep/threads.h"
 
@@ -293,6 +294,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 
         vpid_str[0] = apid_str[0] = tpid_str[0] = 0;
         vdr_loc_str[0] = vdr_par_str[0] = 0;
+        tmp_lcr[0] = tmp_hier[0] = inv[0] = bw[0] = 0;
+        cr[0] = mod[0] = transm[0] = gi[0] = 0;
 
         char *colon = strchr(line, ':');
         if (!colon)

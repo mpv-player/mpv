@@ -102,6 +102,8 @@ const struct m_sub_options demux_conf = {
         {"cache-on-disk", OPT_BOOL(disk_cache)},
         {"demuxer-readahead-secs", OPT_DOUBLE(min_secs), M_RANGE(0, DBL_MAX)},
         {"demuxer-hysteresis-secs", OPT_DOUBLE(hyst_secs), M_RANGE(0, DBL_MAX)},
+        {"demuxer-hysteresis-bytes", OPT_BYTE_SIZE(hyst_bytes),
+            M_RANGE(0, M_MAX_MEM_BYTES)},
         {"demuxer-max-bytes", OPT_BYTE_SIZE(max_bytes),
             M_RANGE(0, M_MAX_MEM_BYTES)},
         {"demuxer-max-back-bytes", OPT_BYTE_SIZE(max_bytes_bw),
@@ -128,6 +130,7 @@ const struct m_sub_options demux_conf = {
         {"demuxer-backward-playback-step", OPT_DOUBLE(back_seek_size),
             M_RANGE(0, DBL_MAX)},
         {"metadata-codepage", OPT_STRING(meta_cp)},
+        {"directory-filter-types", OPT_STRINGLIST(directory_filter)},
         {"autocreate-playlist", OPT_CHOICE(autocreate_playlist,
             {"no", 0}, {"filter", 1}, {"same", 2})},
         {0}
@@ -152,6 +155,9 @@ const struct m_sub_options demux_conf = {
             [STREAM_AUDIO] = 10,
         },
         .meta_cp = "auto",
+        .directory_filter = (char *[]){
+            "video", "audio", "image", "archive", "playlist", NULL
+        },
     },
     .get_sub_options = get_demux_sub_opts,
 };
@@ -201,6 +207,7 @@ struct demux_internal {
     bool eof;                   // whether we're in EOF state
     double min_secs;
     double hyst_secs;           // stop reading till there's hyst_secs remaining
+    size_t hyst_bytes;          // stop reading till there's hyst_bytes remaining
     bool hyst_active;
     size_t max_bytes;
     size_t max_bytes_bw;
@@ -322,6 +329,10 @@ struct demux_cached_range {
 // Don't index packets whose timestamps that are within the last index entry by
 // this amount of time (it's better to seek them manually).
 #define INDEX_STEP_SIZE 1.0
+
+// Diff between the demuxer's reported start_time and a range's earliest cached
+// timestamp, below which the range is still considered beginning-of-file.
+#define BOF_START_TOLERANCE 1.0
 
 struct index_entry {
     double pts;
@@ -1962,6 +1973,19 @@ static void adjust_seek_range_on_packet(struct demux_stream *ds,
                 if (queue->seek_start == MP_NOPTS_VALUE) {
                     update_ranges = true;
                     queue->seek_start = kf_min + ds->sh->seek_preroll;
+
+                    // queue->is_bof is set optimistically after a seek to start,
+                    // assuming demuxing began at the start of the file. That is
+                    // wrong for streams opened mid-content, which can happen in
+                    // unfinished event HLS playlists, which starts at live-edge,
+                    // but the seekable range in the past is still valid.
+                    double start_time = ds->in->d_thread->start_time;
+                    if (queue->is_bof && ds->in->d_thread->seekable &&
+                        start_time != MP_NOPTS_VALUE &&
+                        queue->seek_start > start_time + BOF_START_TOLERANCE)
+                    {
+                        queue->is_bof = false;
+                    }
                 }
             }
 
@@ -2275,12 +2299,17 @@ static bool read_packet(struct demux_internal *in)
         total_fw_bytes += get_forward_buffered_bytes(ds);
     }
 
+    if (in->hyst_bytes > 0 && total_fw_bytes <= in->hyst_bytes) {
+        in->hyst_active = false;
+        prefetch_more |= true;
+    }
+
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
              (size_t)total_fw_bytes, read_more, prefetch_more, refresh_more);
     if (total_fw_bytes >= in->max_bytes) {
         // if we hit the limit just by prefetching, simply stop prefetching
         if (!read_more) {
-            in->hyst_active = !!in->hyst_secs;
+            in->hyst_active = in->hyst_secs > 0 || in->hyst_bytes > 0;
             return false;
         }
         if (!in->warned_queue_overflow) {
@@ -2313,7 +2342,7 @@ static bool read_packet(struct demux_internal *in)
     }
 
     if (!read_more && !prefetch_more && !refresh_more) {
-        in->hyst_active = !!in->hyst_secs;
+        in->hyst_active = in->hyst_secs > 0 || in->hyst_bytes > 0;
         return false;
     }
 
@@ -2533,6 +2562,7 @@ static void update_opts(struct demuxer *demuxer)
 
     in->min_secs = opts->min_secs;
     in->hyst_secs = opts->hyst_secs;
+    in->hyst_bytes = opts->hyst_bytes;
     in->max_bytes = opts->max_bytes;
     in->max_bytes_bw = opts->max_bytes_bw;
 
@@ -4090,6 +4120,22 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
     }
 }
 
+static bool select_track(struct demux_internal *in,
+                         struct sh_stream *stream,
+                         double ref_pts, bool selected)
+{
+    struct demux_stream *ds = stream->ds;
+    if (ds->selected == selected)
+        return false;
+    MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
+    ds->selected = selected;
+    update_stream_selection_state(in, ds);
+    in->tracks_switched = true;
+    if (ds->selected)
+        refresh_track(in, stream, ref_pts);
+    return true;
+}
+
 // Set whether the given stream should return packets.
 // ref_pts is used only if the stream is enabled. Then it serves as approximate
 // start pts for this stream (in the worst case it is ignored).
@@ -4097,16 +4143,17 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           double ref_pts, bool selected)
 {
     struct demux_internal *in = demuxer->in;
-    struct demux_stream *ds = stream->ds;
     mp_mutex_lock(&in->lock);
-    // don't flush buffers if stream is already selected / unselected
-    if (ds->selected != selected) {
-        MP_VERBOSE(in, "%sselect track %d\n", selected ? "" : "de", stream->index);
-        ds->selected = selected;
-        update_stream_selection_state(in, ds);
-        in->tracks_switched = true;
-        if (ds->selected)
-            refresh_track(in, stream, ref_pts);
+    bool changed = select_track(in, stream, ref_pts, selected);
+    if (stream->group) {
+        for (int i = 0; i < stream->group->num_members; i++) {
+            struct sh_stream *m = stream->group->members[i];
+            mp_assert(m);
+            if (m != stream)
+                changed |= select_track(in, m, ref_pts, selected);
+        }
+    }
+    if (changed) {
         if (in->threading) {
             mp_cond_signal(&in->wakeup);
         } else {

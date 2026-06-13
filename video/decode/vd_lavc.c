@@ -166,7 +166,7 @@ const struct m_sub_options hwdec_conf = {
     .defaults = &(const struct hwdec_opts){
         .software_fallback = 3,
         .hwdec_api = (char *[]){"no", NULL,},
-        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores,prores_raw,ffv1,dpx",
+        .hwdec_codecs = "h264,vc1,hevc,vp8,vp9,av1,prores,prores_raw,ffv1,dpx,apv",
         // Maximum number of surfaces the player wants to buffer. This number
         // might require adjustment depending on whatever the player does;
         // for example, if vo_gpu increases the number of reference surfaces for
@@ -233,6 +233,7 @@ typedef struct lavc_ctx {
     // From VO
     struct vo *vo;
     struct mp_hwdec_devices *hwdec_devs;
+    bool force_swdec;
 
     // Wrapped AVHWDeviceContext* used for decoding.
     AVBufferRef *hwdec_dev;
@@ -529,6 +530,9 @@ static void select_and_set_hwdec(struct mp_filter *vd)
         } else if (!hwdec_codec_allowed(vd, codec)) {
             MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
                     "on whitelist.\n", codec);
+            break;
+        } else if (ctx->force_swdec) {
+            MP_VERBOSE(vd, "Not trying to use hardware decoding: disallowed\n");
             break;
         } else {
             bool hwdec_name_supported = false;  // relevant only if !hwdec_auto
@@ -1482,6 +1486,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
     if (info) {
         ctx->hwdec_devs = info->hwdec_devs;
         ctx->vo = info->dr_vo;
+        ctx->force_swdec = info->force_swdec;
     }
 
     reinit(vd);
