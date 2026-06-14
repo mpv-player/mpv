@@ -1,5 +1,5 @@
-COMMANDS
-========
+COMMANDS SCRIPT
+===============
 
 This script allows running and completing input commands in the console
 interactively, and also adds mpv's log to the console's log.
