@@ -583,10 +583,19 @@ static pl_color_space_t target_csp(struct ra_swapchain *sw)
     return (pl_color_space_t){0};
 }
 
+static float target_ref_luma(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    if (p->params.preferred_ref_luma)
+        return p->params.preferred_ref_luma(sw->ctx);
+    return 0;
+}
+
 static const struct ra_swapchain_fns vulkan_swapchain = {
     .color_depth   = color_depth,
     .set_color     = set_color,
     .target_csp    = target_csp,
+    .target_ref_luma = target_ref_luma,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
     .swap_buffers  = swap_buffers,
