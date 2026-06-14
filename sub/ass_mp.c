@@ -36,7 +36,7 @@
 
 // res_y should be track->PlayResY
 // It determines scaling of font sizes and more.
-void mp_ass_set_style(ASS_Style *style, double res_y,
+void mp_ass_set_style(ASS_Style *style, double res_x, double res_y,
                       const struct osd_style_opts *opts)
 {
     if (!style)
@@ -51,20 +51,21 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
 
     // libass_font_size = FontSize * (window_height / res_y)
     // scale translates parameters from PlayResY=720 to res_y
-    double scale = res_y / 720.0;
+    double scale_y = res_y / 720.0;
+    double scale_x = res_x / 1280.0;
 
-    style->FontSize = opts->font_size * scale;
+    style->FontSize = opts->font_size * scale_y;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
     style->SecondaryColour = style->PrimaryColour;
     style->OutlineColour = MP_ASS_COLOR(opts->outline_color);
     style->BackColour = MP_ASS_COLOR(opts->back_color);
     style->BorderStyle = opts->border_style;
-    style->Outline = opts->outline_size * scale;
-    style->Shadow = opts->shadow_offset * scale;
-    style->Spacing = opts->spacing * scale;
-    style->MarginL = opts->margin_x * scale;
+    style->Outline = opts->outline_size * scale_y;
+    style->Shadow = opts->shadow_offset * scale_y;
+    style->Spacing = opts->spacing * scale_y;
+    style->MarginL = lrint(opts->margin_x * scale_x);
     style->MarginR = style->MarginL;
-    style->MarginV = (opts->margin_y + opts->margin_y_offset) * scale;
+    style->MarginV = lrint((opts->margin_y + opts->margin_y_offset) * scale_y);
     style->ScaleX = 1.;
     style->ScaleY = 1.;
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
