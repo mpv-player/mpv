@@ -63,12 +63,15 @@ static void deint_process(struct mp_filter *f)
     bool filter_needed = opts->deinterlace == 1 ||
                          (opts->deinterlace == -1 && (p->interlaced_frame || p->sub.filter));
 
-    // If the image format changed, or if we no longer need a filter,
-    // destroy any existing filter.
-    if (img->imgfmt != p->prev_imgfmt || (p->sub.filter && !filter_needed)) {
+    // If the image format changed, destroy any existing filter immediately since
+    // it may not support the new format. If we no longer need a filter, drain
+    // and destroy it gracefully.
+    if (img->imgfmt != p->prev_imgfmt) {
+        mp_subfilter_destroy(&p->sub);
+        p->prev_imgfmt = img->imgfmt;
+    } else if (p->sub.filter && !filter_needed) {
         if (!mp_subfilter_drain_destroy(&p->sub))
             return;
-        p->prev_imgfmt = img->imgfmt;
     }
 
     // If no filter is needed or if the filter is already inserted and we reach
