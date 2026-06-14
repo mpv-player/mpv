@@ -18,6 +18,7 @@ project('mpv',
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 python = find_program('python3')
+fs = import('fs')
 
 # ffmpeg
 libavcodec = dependency('libavcodec', version: '>= 60.31.102')
@@ -780,10 +781,34 @@ if features['uchardet']
     dependencies += uchardet
 endif
 
-vapoursynth = dependency('vapoursynth', version: '>= 56', required: get_option('vapoursynth'))
+vapoursynth_opt = get_option('vapoursynth')
+vapoursynth = dependency('', required: false)
+
+# Newer VapourSynth ships its headers inside the Python module and may not
+# install a pkg-config file.
+if not vapoursynth_opt.disabled()
+    vs_get_inc = run_command(python, '-m', 'vapoursynth', 'get-include', check: false)
+    vs_inc = vs_get_inc.stdout().strip()
+    if vs_get_inc.returncode() == 0 and fs.is_dir(vs_inc)
+        vs_incdirs = include_directories(vs_inc, is_system: true)
+        if cc.has_header('VSScript4.h', include_directories: vs_incdirs)
+            vapoursynth = declare_dependency(include_directories: vs_incdirs)
+            message('Vapoursynth include dir found via Python module: ' + vs_inc)
+        endif
+    endif
+endif
+
+# Fall back to pkg-config for older versions without the get-include helper.
+if not vapoursynth.found()
+    vapoursynth = dependency('vapoursynth-script', version: '>= 56', required: vapoursynth_opt)
+    if vapoursynth.found()
+        vapoursynth = vapoursynth.partial_dependency(compile_args: true, includes: true)
+    endif
+endif
+
 features += {'vapoursynth': vapoursynth.found()}
 if features['vapoursynth']
-    dependencies += vapoursynth.partial_dependency(compile_args: true, includes: true)
+    dependencies += vapoursynth
     sources += files('video/filter/vf_vapoursynth.c')
 endif
 
