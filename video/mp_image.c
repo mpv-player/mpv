@@ -1023,10 +1023,20 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     } else if (forced_csp == PL_COLOR_SYSTEM_XYZ) {
         params->repr.sys = PL_COLOR_SYSTEM_XYZ;
         params->repr.levels = PL_COLOR_LEVELS_FULL;
-        // Force gamma to ST428 as this is the only correct for DCDM X'Y'Z'
-        params->color.transfer = PL_COLOR_TRC_ST428;
-        // Don't care about primaries, they shouldn't be used, or if anything
-        // MP_CSP_PRIM_ST428 should be defined.
+        // Default the gamma to ST428, the only correct value for DCDM
+        // X'Y'Z', but respect an explicit transfer tag, since linear-light
+        // XYZ (e.g. scene-referred camera raw) must keep TRC=LINEAR.
+        if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
+            params->color.transfer = PL_COLOR_TRC_ST428;
+        // For DCDM the primaries are not used: libplacebo tags it DCI-P3
+        // itself, so that the DCI white point gets chromatically adapted to
+        // the display. Scene-linear XYZ however is D65-referenced, and the
+        // primaries select the gamut it gets decoded into; default them to a
+        // wide D65 gamut here, before pl_color_space_infer's generic BT.709
+        // fallback below clips the gamut to BT.709.
+        if (params->color.transfer == PL_COLOR_TRC_LINEAR &&
+            params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
+            params->color.primaries = PL_COLOR_PRIM_BT_2020;
     } else {
         // We have no clue.
         params->repr.sys = PL_COLOR_SYSTEM_UNKNOWN;
@@ -1117,6 +1127,17 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         .primaries = pl_primaries_from_av(src->color_primaries),
         .transfer = pl_transfer_from_av(src->color_trc),
     };
+
+    // SMPTE 428-1 / CIE XYZ tristimulus inputs aren't an RGB primary set,
+    // so route through PL_COLOR_SYSTEM_XYZ so libplacebo applies the XYZ to RGB
+    // decode. Leave the primaries unset: the correct white point follows from
+    // the transfer function (DCI-white DCDM vs. D65 scene-linear XYZ) and is
+    // decided in mp_image_params_guess_csp/libplacebo. Don't override the TRC
+    // either: linear-light XYZ keeps TRC=LINEAR, DCDM keeps TRC=ST428.
+    if (src->color_primaries == AVCOL_PRI_SMPTE428) {
+        dst->params.repr.sys = PL_COLOR_SYSTEM_XYZ;
+        dst->params.color.primaries = PL_COLOR_PRIM_UNKNOWN;
+    }
 
     dst->params.chroma_location = pl_chroma_from_av(src->chroma_location);
 
