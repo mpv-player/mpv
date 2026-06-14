@@ -27,6 +27,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "misc/bstr.h"
 #include "misc/codepoint_width.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -586,8 +587,8 @@ void mp_msg_sanitize(bstr *text, bool allow_sgr)
             if (!sgr)
                 text->start[i] = '?';
         }
-        // Allow only printable > 0x20 and 0x08-0x0D (backspace, tab, newline, ...)
-        else if (ch < 0x08 || (ch > 0x0D && ch < 0x20) || ch == 0x7F) {
+        // Allow only printable >= 0x20, plus HT, LF, CR.
+        else if (ch == 0x7F || (ch < 0x20 && ch != 0x09 && ch != 0x0A && ch != 0x0D)) {
             text->start[i] = '?';
         }
         // Block UTF-8 encoded C1 controls (U+0080-U+009F = bytes C2 80..C2 9F),
@@ -601,6 +602,15 @@ void mp_msg_sanitize(bstr *text, bool allow_sgr)
             text->start[i] = '?';
             text->start[i + 1] = '?';
             i++;
+        }
+        // Block raw 8-bit C1 (0x80-0x9F) except PU1/PU2; UTF-8 chars skipped below.
+        else if (ch >= 0x80 && ch <= 0x9F && ch != 0x91 && ch != 0x92) {
+            text->start[i] = '?';
+        }
+        else {
+            bstr rest = {text->start + i, text->len - i}, next;
+            if (bstr_decode_utf8(rest, &next) >= 0)
+                i = next.start - text->start - 1;
         }
     }
 }
