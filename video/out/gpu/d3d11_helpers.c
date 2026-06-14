@@ -26,6 +26,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/windows_utils.h"
+#include "video/out/win32/displayconfig.h"
 
 #include "d3d11_helpers.h"
 
@@ -992,6 +993,8 @@ void mp_dxgi_factory_uninit(struct mp_dxgi_factory_ctx *ctx)
 
     SAFE_RELEASE(ctx->factory);
     SAFE_RELEASE(ctx->last_matched_output);
+    ctx->white_level_monitor = NULL;
+    ctx->sdr_white_level = 0;
 }
 
 bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
@@ -1006,6 +1009,10 @@ bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
         return false;
 
     if (!ctx->factory || !IDXGIFactory1_IsCurrent(ctx->factory)) {
+        // This also clears `white_level_monitor`, to invalidate cached value.
+        // While we are using displayconfig API to get reference luminance,
+        // DXGI IsCurrent() is actually tracking reference luminance changes in
+        // settings. There is no window message sent on this change.
         mp_dxgi_factory_uninit(ctx);
         PFN_CREATE_DXGI_FACTORY pCreateDXGIFactory1 = get_CreateDXGIFactory1();
         if (FAILED(pCreateDXGIFactory1(&IID_IDXGIFactory1, (void **)&ctx->factory)))
@@ -1065,6 +1072,34 @@ bool mp_dxgi_output_desc_from_swapchain(struct mp_dxgi_factory_ctx *ctx,
     if (SUCCEEDED(IDXGISwapChain_GetDesc(swapchain, &swap_desc)))
         return mp_dxgi_output_desc_from_hwnd(ctx, swap_desc.OutputWindow, desc);
     return false;
+}
+
+float mp_dxgi_sdr_white_level_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
+                                        HWND hwnd)
+{
+#if HAVE_WIN32_DESKTOP
+    DXGI_OUTPUT_DESC1 desc;
+    if (!mp_dxgi_output_desc_from_hwnd(ctx, hwnd, &desc))
+        return 0;
+
+    if (ctx && ctx->white_level_monitor == desc.Monitor)
+        return ctx->sdr_white_level;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
+    if (!GetMonitorInfoW(desc.Monitor, (MONITORINFO*)&mi))
+        return 0;
+
+    float white_level = mp_w32_displayconfig_get_sdr_white_level(mi.szDevice);
+
+    if (ctx) {
+        ctx->white_level_monitor = desc.Monitor;
+        ctx->sdr_white_level = white_level;
+    }
+
+    return white_level;
+#else
+    return 0;
+#endif
 }
 
 struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc)
