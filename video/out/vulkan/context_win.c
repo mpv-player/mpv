@@ -90,7 +90,15 @@ static bool win_init(struct ra_ctx *ctx)
     };
 
     VkInstance inst = vk->vkinst->instance;
-    VkResult res = vkCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
+    mp_assert(vk->vkinst->get_proc_addr);
+    PFN_vkCreateWin32SurfaceKHR pCreateWin32SurfaceKHR = (PFN_vkCreateWin32SurfaceKHR)
+        vk->vkinst->get_proc_addr(inst, "vkCreateWin32SurfaceKHR");
+    if (!pCreateWin32SurfaceKHR) {
+        MP_MSG(ctx, msgl, "Failed to load vkCreateWin32SurfaceKHR\n");
+        goto error;
+    }
+
+    VkResult res = pCreateWin32SurfaceKHR(inst, &wininfo, NULL, &vk->surface);
     if (res != VK_SUCCESS) {
         MP_MSG(ctx, msgl, "Failed creating Windows surface\n");
         goto error;
