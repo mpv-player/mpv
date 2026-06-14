@@ -77,6 +77,9 @@ struct ra_ctx_params {
     // Preferred device color space. Optional.
     pl_color_space_t (*preferred_csp)(struct ra_ctx *ctx);
 
+    // See ra_swapchain_fns.target_ref_luma. Optional.
+    float (*preferred_ref_luma)(struct ra_ctx *ctx);
+
     // See ra_swapchain_fns.set_color. Optional.
     bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
 
