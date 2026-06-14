@@ -692,6 +692,32 @@ static bool format_supported(struct vo *vo, int format, bool use_uint)
     return true;
 }
 
+// Effective reference white luminance in nits to assume for SDR content.
+static float get_ref_luma(struct priv *p)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    if (opts->hdr_reference_white)
+        return opts->hdr_reference_white;
+
+    // auto: follow the system reference white, if available
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    if (sw->fns->target_ref_luma)
+        return sw->fns->target_ref_luma(sw);
+
+    return 0;
+}
+
+static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color_space *target_csp)
+{
+    if (!pl_color_transfer_is_hdr(csp->transfer))
+        return true;
+#if PL_API_VER >= 362
+    if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_transfer_is_hdr(target_csp->transfer))
+        return true;
+#endif
+    return false;
+}
+
 static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src,
                       struct pl_frame *frame)
 {
@@ -729,9 +755,9 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     };
 
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
-        frame->color.hdr.max_luma = opts->hdr_reference_white;
-
+    float ref_luma;
+    if (!pl_color_transfer_is_hdr(frame->color.transfer) && (ref_luma = get_ref_luma(p)))
+        frame->color.hdr.max_luma = ref_luma;
 
     if (opts->treat_srgb_as_power22 & 1 && frame->color.transfer == PL_COLOR_TRC_SRGB) {
         // The sRGB EOTF is a pure gamma 2.2 function. See reference display in
@@ -942,7 +968,8 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color, 
 }
 
 static void apply_target_options(struct priv *p, struct pl_frame *target,
-                                 float min_luma, bool hint)
+                                 float min_luma, bool hint, float target_ref_luma,
+                                 const struct pl_color_space *target_csp)
 {
     update_lut(p, &p->next_opts->target_lut);
     target->lut = p->next_opts->target_lut.lut;
@@ -959,9 +986,9 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
         target->color.transfer = opts->target_trc;
     if (opts->target_peak && (!target->color.hdr.max_luma || !hint))
         target->color.hdr.max_luma = opts->target_peak;
-    if (opts->hdr_reference_white && (!target->color.hdr.max_luma || !hint) &&
-        !pl_color_transfer_is_hdr(target->color.transfer)) {
-        target->color.hdr.max_luma = opts->hdr_reference_white;
+    if (target_ref_luma && (!target->color.hdr.max_luma || !hint) &&
+        use_ref_luma(&target->color, target_csp)) {
+        target->color.hdr.max_luma = target_ref_luma;
     }
     if ((!target->color.hdr.min_luma || !hint))
         apply_target_contrast(p, &target->color, min_luma);
@@ -1179,9 +1206,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // Assume HDR is supported, if target_csp() is not available
     // TODO: Remove this fallback when all backends support target_csp()
     bool target_unknown = target_csp.transfer == PL_COLOR_TRC_UNKNOWN;
+    float target_ref_luma = 0;
     if (target_unknown) {
         target_csp = (struct pl_color_space){
             .transfer = opts->target_trc ? opts->target_trc : pl_color_space_hdr10.transfer };
+    } else {
+        target_ref_luma = get_ref_luma(p);
     }
     bool external_params = false;
     if (target_hint && frame->current) {
@@ -1246,8 +1276,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
-        if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(hint.transfer))
-            hint.hdr.max_luma = opts->hdr_reference_white;
+        if (target_ref_luma && use_ref_luma(&hint, &target_csp))
+            hint.hdr.max_luma = target_ref_luma;
         // Always set maxCLL, display uses this metadata and we shouldn't let it
         // fallback to default value.
         if (!hint.hdr.max_cll)
@@ -1311,7 +1341,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (external_params)
         target.color = hint;
     bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
-    apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
+    apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params,
+                         target_ref_luma, &target_csp);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
 #if PL_API_VER >= 362
     clip_gamut = clip_gamut && target.color.transfer != PL_COLOR_TRC_SCRGB;
@@ -1736,7 +1767,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
-        apply_target_options(p, &target, 0, false);
+        apply_target_options(p, &target, 0, false, 0, NULL);
     } else if (args->native_csp) {
         target.color = image.color;
     } else {

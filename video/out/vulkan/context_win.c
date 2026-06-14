@@ -63,6 +63,12 @@ static struct pl_color_space preferred_csp(struct ra_ctx *ctx)
     return (struct pl_color_space){0};
 }
 
+static float preferred_ref_luma(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    return mp_dxgi_sdr_white_level_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(ctx->vo));
+}
+
 static bool win_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -87,6 +93,7 @@ static bool win_init(struct ra_ctx *ctx)
     struct ra_ctx_params params = {
         .color_depth = color_depth,
         .preferred_csp = preferred_csp,
+        .preferred_ref_luma = preferred_ref_luma,
     };
 
     VkInstance inst = vk->vkinst->instance;
