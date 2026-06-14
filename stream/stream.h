@@ -94,6 +94,59 @@ enum stream_ctrl {
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
+    STREAM_CTRL_NAV_CMD,             // struct stream_nav_cmd*
+    STREAM_CTRL_GET_NAV_STATE,       // struct stream_nav_state*
+    STREAM_CTRL_GET_NAV_OVERLAY,     // struct stream_nav_overlay_req*
+};
+
+// Fetch a BGRA snapshot of the disc-menu overlay (used for Blu-ray HDMV).
+struct stream_nav_overlay_req {
+    int w, h;             // input: caller's plane dimensions; output: actual
+    int stride;           // input: dest row stride in bytes
+    uint8_t *dst;         // input: dest buffer (caller-allocated, BGRA)
+    uint32_t change_id;   // output: latched change_id of the snapshot
+};
+
+// In-disc navigation (DVD/BD menu) actions, used with STREAM_CTRL_NAV_CMD.
+enum stream_nav_action {
+    STREAM_NAV_UP,
+    STREAM_NAV_DOWN,
+    STREAM_NAV_LEFT,
+    STREAM_NAV_RIGHT,
+    STREAM_NAV_SELECT,         // activate currently highlighted button
+    STREAM_NAV_MENU_ROOT,      // jump to the disc's root/title menu
+    STREAM_NAV_MENU_TITLE,     // jump to the current title's menu
+    STREAM_NAV_MENU_POPUP,     // BD popup menu (no-op for DVD)
+    STREAM_NAV_PREV_MENU,      // return to previous menu / leave still
+    STREAM_NAV_MOUSE_MOVE,     // mouse moved; .x,.y are video-space coords
+    STREAM_NAV_MOUSE_CLICK,    // mouse button activated at .x,.y
+};
+
+struct stream_nav_cmd {
+    enum stream_nav_action action;
+    int x, y; // for MOUSE_*
+};
+
+// Snapshot of the stream's menu state.
+struct stream_nav_state {
+    bool menu_active;        // a selectable menu/highlight is currently visible
+    bool has_popup;          // disc supports a popup menu (BD only)
+    int  src_w, src_h;       // dimensions of the coordinate space mouse uses
+    // Highlight rectangle of the currently focused button (in src coords).
+    int  hl_x, hl_y, hl_w, hl_h;
+    // BGRA highlight palette (0xAARRGGBB, straight) to substitute for the
+    // four SPU pixel values inside the highlight rect. Zeroed when no highlight
+    // is active.
+    uint32_t hl_palette[4];
+    uint32_t change_id; // Bumped whenever any of the above changes
+    uint32_t discontinuity_id; // Bumped when the stream's source position jumps
+
+    // Disc-driven track selection.
+    int active_audio_id;
+    int active_sub_id;
+    bool sub_visible;   // disc says subs should be displayed
+    int angle;          // 1-based current angle (0 if unknown)
+    int num_angles;     // total angle count (0 if unknown or always 1)
 };
 
 struct stream_lang_req {

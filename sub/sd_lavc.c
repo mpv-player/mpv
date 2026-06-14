@@ -71,6 +71,10 @@ struct sd_lavc_priv {
     struct seekpoint *seekpoints;
     int num_seekpoints;
     struct bitmap_packer *packer;
+
+    // DVD-nav per-pixel highlight overlay state.
+    struct mp_dvdnav_hli hli;
+    uint32_t hli_change_id;
 };
 
 static int init(struct sd *sd)
@@ -294,6 +298,23 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
 
+        // DVD navigation highlight
+        bool hli_active = priv->hli.show &&
+                          priv->hli.w > 0 && priv->hli.h > 0 &&
+                          r->x < priv->hli.x + priv->hli.w &&
+                          r->y < priv->hli.y + priv->hli.h &&
+                          r->x + r->w > priv->hli.x &&
+                          r->y + r->h > priv->hli.y;
+        uint32_t hli_pal[4] = {0};
+        if (hli_active) {
+            memcpy(hli_pal, priv->hli.palette, sizeof(hli_pal));
+            convert_pal(hli_pal, 4, opts->sub_gray);
+        }
+        int hli_x0 = priv->hli.x - r->x;
+        int hli_y0 = priv->hli.y - r->y;
+        int hli_x1 = hli_x0 + priv->hli.w;
+        int hli_y1 = hli_y0 + priv->hli.h;
+
         for (int y = -padding; y < b->h + padding; y++) {
             uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
             int start = 0;
@@ -301,8 +322,14 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
                 out[x] = 0;
             if (y >= 0 && y < b->h) {
                 uint8_t *in = data[0] + y * linesize[0];
-                for (int x = 0; x < b->w; x++)
-                    *out++ = pal[*in++];
+                bool y_in_hli = hli_active && y >= hli_y0 && y < hli_y1;
+                for (int x = 0; x < b->w; x++) {
+                    uint8_t pv = *in++;
+                    if (y_in_hli && x >= hli_x0 && x < hli_x1 && pv < 4)
+                        *out++ = hli_pal[pv];
+                    else
+                        *out++ = pal[pv];
+                }
                 start = b->w;
             }
             for (int x = start; x < b->w + padding; x++)
@@ -319,6 +346,21 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
         if (apply_blur)
             mp_blur_rgba_sub_bitmap(b, opts->sub_gauss);
+    }
+}
+
+static void rerender_queued_subs(struct sd *sd)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    for (int n = 0; n < MAX_QUEUE; n++) {
+        struct sub *sub = &priv->subs[n];
+        if (!sub->valid)
+            continue;
+        sub->count = 0;
+        sub->src_w = 0;
+        sub->src_h = 0;
+        sub->id = priv->new_id++;
+        read_sub_bitmaps(sd, sub);
     }
 }
 
@@ -715,6 +757,16 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
+    case SD_CTRL_APPLY_DVDNAV: {
+        struct mp_dvdnav_hli *hli = arg;
+        if (priv->hli_change_id == hli->change_id)
+            return CONTROL_OK;
+        priv->hli = *hli;
+        priv->hli_change_id = hli->change_id;
+        // Re-render any decoded subtitles, after style update.
+        rerender_queued_subs(sd);
+        return CONTROL_OK;
+    }
     default:
         return CONTROL_UNKNOWN;
     }

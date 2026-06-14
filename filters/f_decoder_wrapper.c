@@ -1406,13 +1406,14 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
 
     decf_reset(p->decf);
 
+    struct mp_pin *out_pin;
     if (p->queue) {
         struct mp_filter *f_in =
             mp_async_queue_create_filter(public_f, MP_PIN_OUT, p->queue);
         struct mp_filter *f_out =
             mp_async_queue_create_filter(p->decf, MP_PIN_IN, p->queue);
-        mp_pin_connect(public_f->ppins[0], f_in->pins[0]);
         mp_pin_connect(f_out->pins[0], p->decf->pins[0]);
+        out_pin = f_in->pins[0];
 
         p->dec_thread_valid = true;
         if (mp_thread_create(&p->dec_thread, dec_thread, p)) {
@@ -1420,8 +1421,10 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
             goto error;
         }
     } else {
-        mp_pin_connect(public_f->ppins[0], p->decf->pins[0]);
+        out_pin = p->decf->pins[0];
     }
+
+    mp_pin_connect(public_f->ppins[0], out_pin);
 
     public_f_reset(public_f);
 

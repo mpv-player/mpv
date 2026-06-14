@@ -44,15 +44,21 @@
 #include "options/options.h"
 #include "common/msg.h"
 #include "input/input.h"
+#include "misc/thread_tools.h"
 #include "options/m_config.h"
 #include "options/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"
+#include "video/csputils.h"
 #include "video/out/vo.h"
 
 #define TITLE_MENU -1
 #define TITLE_LONGEST -2
+
+// Default source dimensions if dvdnav_get_video_resolution() fails.
+#define DVD_SRC_W_DEFAULT 720
+#define DVD_SRC_H_DEFAULT 576
 
 struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
@@ -68,6 +74,20 @@ struct priv {
 
     int track;
     char *device;
+
+    bool in_menu;
+    int current_button;                 // mirror of libdvdnav HL_BTNN_REG
+    int btn_rect[4];                    // x, y, w, h in source coords
+    uint32_t hl_palette[4];             // 0xAARRGGBB for SPU pixel values 0..3
+    uint32_t nav_change_id;
+    uint32_t discontinuity_id;          // bumped on actions that may jump
+    int src_w, src_h;                   // video resolution in pixels
+    int auto_actioned_button;           // last auto-activated button; 0 if none
+
+    // Disc-driven audio/sub/angle state.
+    int audio_physical;                 // 0..7 from DVDNAV_AUDIO_STREAM_CHANGE
+    int sub_physical;                   // 0..31 from DVDNAV_SPU_STREAM_CHANGE
+    bool sub_visible;                   // SPU "on" flag from same event
 
     struct dvd_opts *opts;
 };
@@ -209,6 +229,238 @@ static int dvd_probe(const char *path, const char *ext, const char *sig)
     return r;
 }
 
+static bool in_menu_domain(dvdnav_t *dvdnav)
+{
+    return dvdnav_is_domain_vmgm(dvdnav) == 1 ||
+           dvdnav_is_domain_vtsm(dvdnav) == 1 ||
+           dvdnav_is_domain_fp(dvdnav) == 1;
+}
+
+static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
+{
+    priv->btn_rect[0] = priv->btn_rect[1] = 0;
+    priv->btn_rect[2] = priv->btn_rect[3] = 0;
+    if (btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
+        return;
+    // btni_t is packed and full of bitfields, memcpy to ensure correct alignment.
+    btni_t b;
+    memcpy(&b, &pci->hli.btnit[btn - 1], sizeof(b));
+    int xs = b.x_start, xe = b.x_end;
+    int ys = b.y_start, ye = b.y_end;
+    priv->btn_rect[0] = xs;
+    priv->btn_rect[1] = ys;
+    priv->btn_rect[2] = xe > xs ? xe - xs : 0;
+    priv->btn_rect[3] = ye > ys ? ye - ys : 0;
+}
+
+// Resolve the 4-entry "select-state" highlight palette for the focused button.
+// btn_coli holds two packed words per color set ([select, action]); the select
+// word encodes [Ci3 Ci2 Ci1 Ci0 A3 A2 A1 A0]: four CLUT indices and four 4-bit
+// alphas.
+static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
+{
+    memset(priv->hl_palette, 0, sizeof(priv->hl_palette));
+    if (!priv->spu_clut_valid || btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
+        return;
+    btni_t b;
+    memcpy(&b, &pci->hli.btnit[btn - 1], sizeof(b));
+    if (b.btn_coln == 0)
+        return; // spec: "no color" - button is invisible
+    int coln = b.btn_coln - 1;
+    if (coln > 2)
+        coln = 2;
+    uint32_t coli;
+    memcpy(&coli, &pci->hli.btn_colit.btn_coli[coln][1], sizeof(coli)); // [1] = select state
+
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    struct pl_transform3x3 cmatrix;
+    mp_get_csp_matrix(&csp, &cmatrix);
+
+    for (int i = 0; i < 4; i++) {
+        uint8_t ci = (coli >> (16 + i * 4)) & 0xF;
+        uint8_t a  = (coli >> (i * 4)) & 0xF;
+        uint32_t entry = priv->spu_clut[ci];
+        // CLUT entry is 0x00YYCrCb. mp_get_csp_matrix returns a YCbCr→RGB matrix
+        // expecting {Y, Cb, Cr}, reorder to match this.
+        int y[3] = {(entry >> 16) & 0xff, entry & 0xff, (entry >> 8) & 0xff};
+        int c[3];
+        mp_map_fixp_color(&cmatrix, 8, y, 8, c);
+        uint32_t alpha = (a << 4) | a;
+        priv->hl_palette[i] = (alpha << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
+    }
+}
+
+// Map a libdvdnav physical audio stream number (0..7) to the corresponding
+// MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
+static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+{
+    if (physical < 0 || physical > 7)
+        return -1;
+    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, physical);
+    switch (fmt) {
+    case DVD_AUDIO_FORMAT_AC3:
+        return 0x80 + physical;
+    case DVD_AUDIO_FORMAT_DTS:
+        return 0x88 + physical;
+    case DVD_AUDIO_FORMAT_LPCM:
+        return 0xa0 + physical;
+    case DVD_AUDIO_FORMAT_MPEG:
+    case DVD_AUDIO_FORMAT_MPEG2_EXT:
+        return 0xc0 + physical;
+    default:
+        return -1;
+    }
+}
+
+static void refresh_video_resolution(struct priv *priv)
+{
+    uint32_t w = 0, h = 0;
+    if (dvdnav_get_video_resolution(priv->dvdnav, &w, &h) == DVDNAV_STATUS_OK &&
+        w > 0 && h > 0)
+    {
+        priv->src_w = (int)w;
+        priv->src_h = (int)h;
+    } else {
+        priv->src_w = DVD_SRC_W_DEFAULT;
+        priv->src_h = DVD_SRC_H_DEFAULT;
+    }
+}
+
+// Pull the current selection back from libdvdnav and refresh our overlay
+// state. Called on NAV_PACKET/HIGHLIGHT events and after every nav command.
+static void update_highlight(struct priv *priv)
+{
+    int prev_btn = priv->current_button;
+    int prev_x = priv->btn_rect[0], prev_y = priv->btn_rect[1];
+    int prev_w = priv->btn_rect[2], prev_h = priv->btn_rect[3];
+    bool prev_menu = priv->in_menu;
+    uint32_t prev_palette[4];
+    memcpy(prev_palette, priv->hl_palette, sizeof(prev_palette));
+
+    priv->in_menu = in_menu_domain(priv->dvdnav);
+    pci_t *pci = priv->in_menu ? dvdnav_get_current_nav_pci(priv->dvdnav) : NULL;
+    bool has_buttons = pci && pci->hli.hl_gi.hli_ss != 0 && pci->hli.hl_gi.btn_ns > 0;
+
+    // Suppress the visible highlight while we're inside the menu's intro.
+    // The PCI gives us both the current VOBU's start PTS and the highlight
+    // valid window; once vobu_s_ptm catches up to hli_s_ptm (and we're still
+    // inside hli_e_ptm), it's live.
+    bool highlight_live = false;
+    if (has_buttons) {
+        uint32_t now = pci->pci_gi.vobu_s_ptm;
+        uint32_t hs  = pci->hli.hl_gi.hli_s_ptm;
+        uint32_t he  = pci->hli.hl_gi.hli_e_ptm;
+        highlight_live = now >= hs && (he == 0 || now < he);
+    }
+
+    int32_t btn = 0;
+    if (highlight_live)
+        dvdnav_get_current_highlight(priv->dvdnav, &btn);
+
+    if (!highlight_live || btn <= 0 || btn > pci->hli.hl_gi.btn_ns) {
+        priv->current_button = 0;
+        priv->btn_rect[0] = priv->btn_rect[1] = 0;
+        priv->btn_rect[2] = priv->btn_rect[3] = 0;
+        memset(priv->hl_palette, 0, sizeof(priv->hl_palette));
+    } else {
+        priv->current_button = btn;
+        compute_button_rect(priv, pci, btn);
+        compute_highlight_palette(priv, pci, btn);
+    }
+
+    if (priv->in_menu != prev_menu || priv->current_button != prev_btn ||
+        priv->btn_rect[0] != prev_x || priv->btn_rect[1] != prev_y ||
+        priv->btn_rect[2] != prev_w || priv->btn_rect[3] != prev_h ||
+        memcmp(prev_palette, priv->hl_palette, sizeof(prev_palette)) != 0)
+    {
+        priv->nav_change_id++;
+    }
+
+    // When we leave the menu, clear the auto-action latch so the next entry
+    // can fire again on the same button number.
+    if (!priv->in_menu)
+        priv->auto_actioned_button = 0;
+
+    // Auto-action buttons: a btnit entry can request immediate activation
+    // when its button gets focus (auto_action_mode == 1).
+    // Fire it once per menu entry / button transition.
+    if (highlight_live && priv->current_button > 0 &&
+        priv->current_button != priv->auto_actioned_button)
+    {
+        btni_t b;
+        memcpy(&b, &pci->hli.btnit[priv->current_button - 1], sizeof(b));
+        if (b.auto_action_mode == 1) {
+            priv->auto_actioned_button = priv->current_button;
+            dvdnav_button_activate(priv->dvdnav, pci);
+        }
+    }
+}
+
+static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+{
+    struct priv *priv = stream->priv;
+
+    switch (cmd->action) {
+    case STREAM_NAV_MENU_ROOT:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_TITLE:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_POPUP:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_PREV_MENU:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
+        update_highlight(priv);
+        return;
+    default:
+        break;
+    }
+
+    if (!in_menu_domain(priv->dvdnav))
+        return;
+
+    pci_t *pci = dvdnav_get_current_nav_pci(priv->dvdnav);
+    if (!pci || pci->hli.hl_gi.hli_ss == 0 || pci->hli.hl_gi.btn_ns == 0)
+        return;
+
+    switch (cmd->action) {
+    case STREAM_NAV_UP:
+        dvdnav_upper_button_select(priv->dvdnav, pci);
+        break;
+    case STREAM_NAV_DOWN:
+        dvdnav_lower_button_select(priv->dvdnav, pci);
+        break;
+    case STREAM_NAV_LEFT:
+        dvdnav_left_button_select(priv->dvdnav, pci);
+        break;
+    case STREAM_NAV_RIGHT:
+        dvdnav_right_button_select(priv->dvdnav, pci);
+        break;
+    case STREAM_NAV_MOUSE_MOVE:
+        priv->mousex = cmd->x;
+        priv->mousey = cmd->y;
+        dvdnav_mouse_select(priv->dvdnav, pci, cmd->x, cmd->y);
+        break;
+    case STREAM_NAV_MOUSE_CLICK:
+        priv->mousex = cmd->x;
+        priv->mousey = cmd->y;
+        dvdnav_mouse_activate(priv->dvdnav, pci, cmd->x, cmd->y);
+        break;
+    case STREAM_NAV_SELECT:
+        dvdnav_button_activate(priv->dvdnav, pci);
+        break;
+    default:
+        break;
+    }
+
+    update_highlight(priv);
+}
+
 /**
  * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
  * \param stream: - stream pointer
@@ -309,22 +561,30 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
             uint32_t start_pts = pnavpci->pci_gi.vobu_s_ptm;
             MP_TRACE(s, "start pts = %"PRIu32"\n", start_pts);
+            // Each NAV packet can change the highlighted button or the
+            // available button set; keep our mirrored state in sync.
+            update_highlight(priv);
             break;
         }
         case DVDNAV_STILL_FRAME:
             dvdnav_still_skip(dvdnav);
-            return 0;
+            break;
         case DVDNAV_WAIT:
             dvdnav_wait_skip(dvdnav);
-            return 0;
+            break;
+        case DVDNAV_HOP_CHANNEL:
+            // Bump discontinuity_id so the playloop flushes the cache.
+            priv->discontinuity_id++;
+            break;
         case DVDNAV_HIGHLIGHT:
+            update_highlight(priv);
             break;
         case DVDNAV_VTS_CHANGE: {
             int tit = 0, part = 0;
             dvdnav_vts_change_event_t *vts_event =
-                (dvdnav_vts_change_event_t *)s->buffer;
-            MP_INFO(s, "DVDNAV, switched to title: %d\n",
-                   vts_event->new_vtsN);
+                (dvdnav_vts_change_event_t *)buf;
+            MP_VERBOSE(s, "DVDNAV, switched to VTS: %d\n",
+                       vts_event->new_vtsN);
             if (!priv->had_initial_vts) {
                 // dvdnav sends an initial VTS change before any data; don't
                 // cause a blocking wait for the player, because the player in
@@ -338,6 +598,11 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
                 if (priv->title > 0 && tit != priv->title)
                     MP_WARN(s, "Requested title not found\n");
             }
+            // Resolution can change across VTS (PAL vs. NTSC titles); refresh
+            // so mouse coordinate translation stays correct.
+            refresh_video_resolution(priv);
+            // VTS change is a title-set boundary, flush.
+            priv->discontinuity_id++;
             break;
         }
         case DVDNAV_CELL_CHANGE: {
@@ -351,6 +616,32 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
         case DVDNAV_SPU_CLUT_CHANGE: {
             memcpy(priv->spu_clut, buf, 16 * sizeof(uint32_t));
             priv->spu_clut_valid = true;
+            update_highlight(priv);
+            break;
+        }
+        case DVDNAV_AUDIO_STREAM_CHANGE: {
+            dvdnav_audio_stream_change_event_t *ev = buf;
+            // physical: 0..7 = active audio stream, -1 = SPU/audio off.
+            MP_VERBOSE(s, "DVDNAV, audio change phys=%d log=%d\n", ev->physical, ev->logical);
+            if (priv->audio_physical != ev->physical) {
+                priv->audio_physical = ev->physical;
+                priv->nav_change_id++;
+            }
+            break;
+        }
+        case DVDNAV_SPU_STREAM_CHANGE: {
+            dvdnav_spu_stream_change_event_t *ev = buf;
+            int raw = ev->physical_wide;
+            bool visible = raw >= 0 && !(raw & 0x80);
+            int phys = raw >= 0 ? (raw & 0x1F) : -1;
+            MP_VERBOSE(s, "DVDNAV, sub change phys_wide=0x%x lb=0x%x ps=0x%x log=%d\n",
+                       ev->physical_wide, ev->physical_letterbox,
+                       ev->physical_pan_scan, ev->logical);
+            if (priv->sub_physical != phys || priv->sub_visible != visible) {
+                priv->sub_physical = phys;
+                priv->sub_visible = visible;
+                priv->nav_change_id++;
+            }
             break;
         }
         }
@@ -444,8 +735,20 @@ static int control(stream_t *stream, int cmd, void *arg)
     }
     case STREAM_CTRL_SET_CURRENT_TITLE: {
         int title = *((unsigned int *) arg);
+        int32_t num_titles = 0;
+        dvdnav_get_number_of_titles(priv->dvdnav, &num_titles);
+        // demux_disc appends a synthetic "Disc Menu" edition at the end.
+        if (title == num_titles) {
+            if (dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root)
+                != DVDNAV_STATUS_OK)
+                break;
+            priv->discontinuity_id++;
+            stream_drop_buffers(stream);
+            return STREAM_OK;
+        }
         if (dvdnav_title_play(priv->dvdnav, title + 1) != DVDNAV_STATUS_OK)
             break;
+        priv->discontinuity_id++;
         stream_drop_buffers(stream);
         return STREAM_OK;
     }
@@ -531,6 +834,36 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, volume);
         return STREAM_OK;
     }
+    case STREAM_CTRL_NAV_CMD: {
+        handle_nav_cmd(stream, arg);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_NAV_STATE: {
+        struct stream_nav_state *st = arg;
+        if (priv->src_w <= 0 || priv->src_h <= 0)
+            refresh_video_resolution(priv);
+        uint32_t cur_angle = 0, num_angles = 0;
+        dvdnav_get_angle_info(dvdnav, &cur_angle, &num_angles);
+        *st = (struct stream_nav_state){
+            .menu_active = priv->in_menu,
+            .has_popup = false,
+            .src_w = priv->src_w,
+            .src_h = priv->src_h,
+            .hl_x = priv->btn_rect[0],
+            .hl_y = priv->btn_rect[1],
+            .hl_w = priv->btn_rect[2],
+            .hl_h = priv->btn_rect[3],
+            .change_id = priv->nav_change_id,
+            .discontinuity_id = priv->discontinuity_id,
+            .active_audio_id = dvd_physical_audio_to_substream(priv, priv->audio_physical),
+            .active_sub_id = priv->sub_physical >= 0 ? 0x20 + priv->sub_physical : -1,
+            .sub_visible = priv->sub_visible,
+            .angle = cur_angle,
+            .num_angles = num_angles,
+        };
+        memcpy(st->hl_palette, priv->hl_palette, sizeof(st->hl_palette));
+        return STREAM_OK;
+    }
     }
 
     return STREAM_UNSUPPORTED;
@@ -582,6 +915,10 @@ static int open_s_internal(stream_t *stream)
     char *filename;
     int ret = 0;
 
+    priv->audio_physical = -1;
+    priv->sub_physical = -1;
+    priv->sub_visible = false;
+
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 
     if (p->device && p->device[0])
@@ -597,34 +934,38 @@ static int open_s_internal(stream_t *stream)
         goto err;
     }
 
+    int32_t num_titles = 0;
+    dvdnav_get_number_of_titles(priv->dvdnav, &num_titles);
+
     if (p->track == TITLE_LONGEST) { // longest
         dvdnav_t *dvdnav = priv->dvdnav;
         uint64_t best_length = 0;
         int best_title = -1;
-        int32_t num_titles;
-        if (dvdnav_get_number_of_titles(dvdnav, &num_titles) == DVDNAV_STATUS_OK) {
-            MP_VERBOSE(stream, "List of available titles:\n");
-            for (int n = 1; n <= num_titles; n++) {
-                uint64_t *parts = NULL, duration = 0;
-                dvdnav_describe_title_chapters(dvdnav, n, &parts, &duration);
-                if (parts) {
-                    if (duration > best_length) {
-                        best_length = duration;
-                        best_title = n;
-                    }
-                    if (duration > 90000) { // arbitrarily ignore <1s titles
-                        char *time = mp_format_time(duration / 90000, false);
-                        MP_VERBOSE(stream, "title: %3d duration: %s\n",
-                                   n - 1, time);
-                        talloc_free(time);
-                    }
-                    free(parts);
+        MP_VERBOSE(stream, "List of available titles:\n");
+        for (int n = 1; n <= num_titles; n++) {
+            uint64_t *parts = NULL, duration = 0;
+            dvdnav_describe_title_chapters(dvdnav, n, &parts, &duration);
+            if (parts) {
+                if (duration > best_length) {
+                    best_length = duration;
+                    best_title = n;
                 }
+                if (duration > 90000) { // arbitrarily ignore <1s titles
+                    char *time = mp_format_time(duration / 90000, false);
+                    MP_VERBOSE(stream, "title: %3d duration: %s\n",
+                               n - 1, time);
+                    talloc_free(time);
+                }
+                free(parts);
             }
         }
         p->track = best_title - 1;
         MP_INFO(stream, "Selecting title %d.\n", p->track);
     }
+
+    // demux_disc.c appends a synthetic "Disc Menu" edition at index num_titles.
+    if (p->track >= num_titles)
+        p->track = TITLE_MENU;
 
     if (p->track >= 0) {
         priv->title = p->track;
@@ -635,9 +976,10 @@ static int open_s_internal(stream_t *stream)
             goto err;
         }
     } else {
-        MP_FATAL(stream, "DVD menu support has been removed.\n");
-        ret = STREAM_ERROR;
-        goto err;
+        // Menu mode: don't pre-select any title; let dvdnav start with the
+        // disc's first-play / VMGM menu and drive everything via NAV events.
+        priv->title = 0;
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root);
     }
     if (p->opts->angle > 1)
         dvdnav_angle_change(priv->dvdnav, p->opts->angle);
@@ -663,11 +1005,12 @@ static int open_s(stream_t *stream)
     bstr title, bdevice;
     bstr_split_tok(bstr0(stream->path), "/", &title, &bdevice);
 
-    priv->track = TITLE_LONGEST;
-
     struct MPOpts *opts = mp_get_config_group(stream, stream->global, &mp_opt_root);
     int edition_id = opts->edition_id;
+    bool disc_menu = opts->disc_menu;
     talloc_free(opts);
+
+    priv->track = disc_menu ? TITLE_MENU : TITLE_LONGEST;
 
     if (edition_id >= 0) {
         priv->track = edition_id;
@@ -713,7 +1056,8 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
         goto unsupported;
 
     struct MPOpts *opts = mp_get_config_group(NULL, stream->global, &mp_opt_root);
-    priv->track = opts->edition_id >= 0 ? opts->edition_id : TITLE_LONGEST;
+    priv->track = opts->edition_id >= 0 ? opts->edition_id :
+                  (opts->disc_menu ? TITLE_MENU : TITLE_LONGEST);
     talloc_free(opts);
 
     char *path = mp_file_get_path(priv, bstr0(stream->url));

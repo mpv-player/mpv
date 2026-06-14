@@ -279,6 +279,8 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
         mp_pin_connect(vo_c->filter->f->pins[0], vo_c->dec_src);
     }
 
+    update_vo_chain_el_pair(mpctx);
+
     if (!recreate_video_filters(mpctx))
         goto err_out;
 

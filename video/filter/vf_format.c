@@ -61,6 +61,7 @@ struct vf_format_opts {
     int force_scaler;
     bool dovi;
     bool hdr10plus;
+    bool enhancement_layer;
     float min_luma;
     float max_luma;
     float max_cll;
@@ -185,6 +186,16 @@ static void vf_format_process(struct mp_filter *f)
                 .clm = get_side_data(img, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL),
                 .dhp = get_side_data(img, AV_FRAME_DATA_DYNAMIC_HDR_PLUS),
             });
+            // Tell the f_enhancement_pair filter to not inherit DV metadata
+            // from the EL.
+            img->params.no_dovi = true;
+        }
+
+        if (!priv->opts->enhancement_layer) {
+            // This is no-op, but just in case. f_enhancement_pair runs at the
+            // end of chain.
+            mp_image_unrefp(&img->enhancement_layer);
+            img->params.no_enhancement_layer = true;
         }
 
         if (!priv->opts->hdr10plus) {
@@ -269,6 +280,7 @@ static const m_option_t vf_opts_fields[] = {
     {"dar", OPT_DOUBLE(dar)},
     {"convert", OPT_BOOL(convert)},
     {"dolbyvision", OPT_BOOL(dovi)},
+    {"enhancement-layer", OPT_BOOL(enhancement_layer)},
     {"hdr10plus", OPT_BOOL(hdr10plus)},
     {"min-luma", OPT_FLOAT(min_luma), M_RANGE(0, 10000)},
     {"max-luma", OPT_FLOAT(max_luma), M_RANGE(0, 10000)},
@@ -290,6 +302,7 @@ const struct mp_user_filter_entry vf_format = {
         .priv_defaults = &(const OPT_BASE_STRUCT){
             .rotate = -1,
             .dovi = true,
+            .enhancement_layer = true,
             .hdr10plus = true,
             .film_grain = true,
         },

@@ -99,6 +99,23 @@ static inline bool sh_stream_has_program(const struct sh_stream *sh, int program
     return false;
 }
 
+// Return the dependent twin of the given base track (e.g. a Dolby Vision
+// enhancement-layer stream paired with the base layer), or NULL if none. Only
+// twin-track groups (exactly 2 members) of matching type are supported.
+static inline struct sh_stream *sh_stream_dependent_sibling(struct sh_stream *bl)
+{
+    if (!bl || !bl->group || bl->dependent_track)
+        return NULL;
+    if (bl->group->num_members != 2)
+        return NULL;
+    for (int i = 0; i < bl->group->num_members; i++) {
+        struct sh_stream *m = bl->group->members[i];
+        if (m && m != bl && m->dependent_track && m->type == bl->type)
+            return m;
+    }
+    return NULL;
+}
+
 struct mp_codec_params {
     enum stream_type type;
 
@@ -158,6 +175,7 @@ struct mp_codec_params {
     bool dovi;
     uint8_t dv_profile;
     uint8_t dv_level;
+    bool dv_el_present;     // BL and EL interleaved in this stream (Profile 7)
 
     // STREAM_VIDEO + STREAM_AUDIO
     int bits_per_coded_sample;
