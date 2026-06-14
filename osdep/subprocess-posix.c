@@ -225,7 +225,7 @@ static pid_t spawn_process(const char *path, struct mp_subprocess_opts *opts,
                            int src_fds[])
 {
     bool detach = opts->detach;
-    void *stacks[2];
+    void *stacks[2] = {0};
     void *ctx = NULL;
 
 #if HAVE_CLONE || HAVE_RFORK
