@@ -78,8 +78,6 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
 // signal handlers first so nothing funny happens.
 static void reset_signals_child(void)
 {
-#if !HAVE_RFORK
-    // RFSPAWN has reset all signal actions in the child to default already
     struct sigaction sa = { 0 };
     sigset_t sigmask;
     sa.sa_handler = SIG_DFL;
@@ -88,7 +86,6 @@ static void reset_signals_child(void)
     for (int nr = 1; nr <= SIGNAL_MAX; nr++)
         sigaction(nr, &sa, NULL);
     sigprocmask(SIG_SETMASK, &sigmask, NULL);
-#endif
 }
 
 struct child_args {
