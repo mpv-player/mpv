@@ -524,7 +524,9 @@ static enum pl_color_system mp_image_params_get_forced_csp(struct mp_image_param
     int imgfmt = params->hw_subfmt ? params->hw_subfmt : params->imgfmt;
     enum pl_color_system csp = mp_imgfmt_get_forced_csp(imgfmt);
 
-    if (csp == PL_COLOR_SYSTEM_RGB && params->repr.sys == PL_COLOR_SYSTEM_XYZ)
+    // RGB formats carry XYZ when tagged as such, or with ST 428-1 primaries
+    if (csp == PL_COLOR_SYSTEM_RGB && (params->repr.sys == PL_COLOR_SYSTEM_XYZ ||
+                                       params->color.primaries == PL_COLOR_PRIM_CIE_1931))
         csp = PL_COLOR_SYSTEM_XYZ;
 
     return csp;
@@ -1035,10 +1037,18 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     } else if (forced_csp == PL_COLOR_SYSTEM_XYZ) {
         params->repr.sys = PL_COLOR_SYSTEM_XYZ;
         params->repr.levels = PL_COLOR_LEVELS_FULL;
-        // Force gamma to ST428 as this is the only correct for DCDM X'Y'Z'
-        params->color.transfer = PL_COLOR_TRC_ST428;
-        // Don't care about primaries, they shouldn't be used, or if anything
-        // MP_CSP_PRIM_ST428 should be defined.
+        // ST 428-1 primaries tag the XYZ data itself, not an RGB space
+        if (params->color.primaries == PL_COLOR_PRIM_CIE_1931)
+            params->color.primaries = PL_COLOR_PRIM_UNKNOWN;
+        if (params->color.transfer == PL_COLOR_TRC_LINEAR) {
+            // Linear light XYZ is decoded into the tagged primaries
+            if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
+                params->color.primaries = PL_COLOR_PRIM_BT_2020;
+        } else {
+            // Anything else is DCDM X'Y'Z' (ST 428-1), decoded into DCI-P3
+            params->color.transfer = PL_COLOR_TRC_ST428;
+            params->color.primaries = PL_COLOR_PRIM_DCI_P3;
+        }
     } else {
         // We have no clue.
         params->repr.sys = PL_COLOR_SYSTEM_UNKNOWN;
@@ -1301,6 +1311,8 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *src)
     }
 
     pl_avframe_set_color(dst, params.color);
+    if (params.repr.sys == PL_COLOR_SYSTEM_XYZ)
+        dst->color_primaries = AVCOL_PRI_SMPTE428;
 
     {
         AVFrameSideData *sd = av_frame_new_side_data(dst,

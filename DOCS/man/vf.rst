@@ -257,7 +257,7 @@ Available mpv-only filters are:
         :apple:        Apple RGB
         :adobe:        Adobe RGB (1998)
         :prophoto:     ProPhoto RGB (ROMM)
-        :cie1931:      CIE 1931 RGB
+        :cie1931:      CIE 1931 RGB, in RGB formats this marks XYZ data (ST 428-1)
         :dci-p3:       DCI-P3 (Digital Cinema)
         :v-gamut:      Panasonic V-Gamut primaries
 
