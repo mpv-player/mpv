@@ -145,6 +145,9 @@ typedef struct mkv_track {
 
     bool require_keyframes;
 
+    // VfW mode: block timestamps are real DTS, route them to the packet DTS.
+    bool block_dts;
+
     /* stuff for realaudio braincancer */
     double ra_pts;              /* previous audio timestamp */
     uint32_t sub_packet_size;   ///< sub packet size, per stream
@@ -1647,7 +1650,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
         mp_set_codec_from_tag(sh_v);
-        sh_v->avi_dts = true;
+        track->block_dts = true;
     } else if (track->private_size >= RVPROPERTIES_SIZE
                && (!strcmp(track->codec_id, "V_REAL/RV10")
                 || !strcmp(track->codec_id, "V_REAL/RV20")
@@ -3108,7 +3111,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->pts = current_pts + i * track->default_duration;
                 dp->keyframe = keyframe;
             }
-            if (stream->codec->avi_dts)
+            if (track->block_dts)
                 MPSWAP(double, dp->pts, dp->dts);
             if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;

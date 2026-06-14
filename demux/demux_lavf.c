@@ -775,7 +775,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             sh->codec->dv_level = cfg->dv_level;
         }
 
-        // This also applies to vfw-muxed mkv, but we can't detect these easily.
+        // AVI uses decode-order indices as DTS and needs the compensation.
         sh->codec->avi_dts = matches_avinputformat_name(priv, "avi");
 
         break;
