@@ -800,7 +800,7 @@ endif
 
 # Fall back to pkg-config for older versions without the get-include helper.
 if not vapoursynth.found()
-    vapoursynth = dependency('vapoursynth', version: '>= 56', required: vapoursynth_opt)
+    vapoursynth = dependency('vapoursynth-script', version: '>= 56', required: vapoursynth_opt)
     if vapoursynth.found()
         vapoursynth = vapoursynth.partial_dependency(compile_args: true, includes: true)
     endif
