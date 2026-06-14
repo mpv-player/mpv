@@ -1576,8 +1576,12 @@ done:
     cleanup_deassociated_complex_filters(mpctx);
 
     if (mpctx->playback_initialized) {
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            reselect_demux_stream(mpctx, mpctx->tracks[n], false);
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            if (t->stream && t->stream->dependent_track && !t->selected)
+                continue;
+            reselect_demux_stream(mpctx, t, false);
+        }
     }
 
     mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
@@ -1585,11 +1589,25 @@ done:
     return success ? 1 : -1;
 }
 
+// Match the enhancement-layer pairing on the vo_chain to the currently
+// selected video track. Idempotent. Decoupled from lavfi-complex internals.
+void update_vo_chain_el_pair(struct MPContext *mpctx)
+{
+    if (!mpctx->vo_chain || !mpctx->vo_chain->filter)
+        return;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    mp_output_chain_set_el_stream(mpctx->vo_chain->filter,
+        track ? sh_stream_dependent_sibling(track->stream) : NULL);
+}
+
 void update_lavfi_complex(struct MPContext *mpctx)
 {
     if (mpctx->playback_initialized) {
-        if (reinit_complex_filters(mpctx, false) != 0)
+        int r = reinit_complex_filters(mpctx, false);
+        if (r != 0)
             issue_refresh_seek(mpctx, MPSEEK_EXACT);
+        if (r > 0)
+            update_vo_chain_el_pair(mpctx);
     }
 }
 
@@ -1919,10 +1937,18 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     process_hooks(mpctx, "on_loaded");
-    for (int t = 0; t < STREAM_TYPE_COUNT; t++)
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            if (mpctx->tracks[n]->type == t)
-                reselect_demux_stream(mpctx, mpctx->tracks[n], false);
+    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != t)
+                continue;
+            // Only reselect dependent tracks when explicitly selected by user
+            if (track->stream && track->stream->dependent_track &&
+                !track->selected)
+                continue;
+            reselect_demux_stream(mpctx, track, false);
+        }
+    }
 
     update_demuxer_properties(mpctx);
 
@@ -1931,6 +1957,9 @@ static void play_current_file(struct MPContext *mpctx)
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
+    // For lavfi-complex mode reinit_video_chain skips chain setup, so set up
+    // the enhancement-layer pairing here. No-op in non-lavfi-complex mode.
+    update_vo_chain_el_pair(mpctx);
 
     if (mpctx->encode_lavc_ctx) {
         if (mpctx->vo_chain)

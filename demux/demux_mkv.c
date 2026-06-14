@@ -55,6 +55,7 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "demux.h"
+#include "dovi_split.h"
 #include "packet_pool.h"
 #include "stheader.h"
 #include "ebml.h"
@@ -163,6 +164,8 @@ typedef struct mkv_track {
     size_t last_index_entry;
 
     AVDOVIDecoderConfigurationRecord *dovi_config;
+    bstr hvce;
+    struct mp_dovi_split *dovi_split;
 } mkv_track_t;
 
 typedef struct mkv_index {
@@ -837,9 +840,13 @@ static void parse_block_addition_mapping(struct demuxer *demuxer,
         switch (block_addition_mapping->block_add_id_type) {
         case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35:
         break;
-        case MKBETAG('a','v','c','E'):
         case MKBETAG('h','v','c','E'):
-            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback is not supported.\n");
+            if (block_addition_mapping->n_block_add_id_extra_data)
+                track->hvce = bstrdup(track, block_addition_mapping->block_add_id_extra_data);
+        break;
+        case MKBETAG('a','v','c','E'):
+            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback for AVC "
+                    "is not supported.\n");
         break;
         case MKBETAG('d','v','c','C'):
         case MKBETAG('d','v','v','C'):
@@ -867,6 +874,7 @@ static void demux_mkv_free_trackentry(mkv_track_t *track)
 {
     talloc_free(track->parser_tmp);
     av_freep(&track->dovi_config);
+    TA_FREEP(&track->dovi_split);
     talloc_free(track);
 }
 
@@ -1802,10 +1810,32 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->dovi = true;
         sh_v->dv_level = track->dovi_config->dv_level;
         sh_v->dv_profile = track->dovi_config->dv_profile;
+        sh_v->dv_el_present = track->dovi_config->bl_present_flag &&
+                              track->dovi_config->el_present_flag;
     }
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 35, 100)
+    if (track->hvce.len > 0) {
+        void *data = av_memdup(track->hvce.start, track->hvce.len);
+        MP_HANDLE_OOM(data);
+        if (!av_packet_side_data_add(&sh_v->lav_codecpar->coded_side_data,
+                                     &sh_v->lav_codecpar->nb_coded_side_data,
+                                     AV_PKT_DATA_HEVC_CONF,
+                                     data, track->hvce.len, 0))
+        {
+            MP_ERR(demuxer, "Failed to attach hvcE configuration record to "
+                   "codec parameters for track %d!\n", track->tnum);
+            av_free(data);
+        }
+    }
+#endif
 
 done:
     demux_add_sh_stream(demuxer, sh);
+
+    // Profile 7 NALU-interleaved
+    if (sh_v->dv_el_present)
+        track->dovi_split = mp_dovi_split_create(demuxer, sh);
 
     return 0;
 }
@@ -2250,6 +2280,51 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
+static void pair_dovi_tracks(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    mkv_track_t *bl_track = NULL, *el_track = NULL;
+
+    for (int i = 0; i < mkv_d->num_tracks; i++) {
+        mkv_track_t *track = mkv_d->tracks[i];
+        if (!track->stream || track->stream->type != STREAM_VIDEO ||
+            !track->codec_id || strcmp(track->codec_id, "V_MPEGH/ISO/HEVC"))
+            continue;
+
+        AVDOVIDecoderConfigurationRecord *dovi = track->dovi_config;
+        if (dovi && dovi->dv_profile == 7 && dovi->el_present_flag) {
+            // bl_present_flag is not checked, because the files in the
+            // wild set it to 1 for EL stream, while the expectation, based
+            // on Dolby spec for MPEG-TS would be that it's set to 0.
+            // Ignore this, if we have EL track and single other video track
+            // it's safe to assume it's BL.
+            if (el_track)
+                return;
+            el_track = track;
+            continue;
+        }
+
+        if (bl_track)
+            return;
+        bl_track = track;
+    }
+
+    if (!el_track || !bl_track)
+        return;
+
+    struct sh_stream *bl_sh = bl_track->stream;
+    struct sh_stream *el_sh = el_track->stream;
+
+    // Group storage is attached to the BL so its lifetime tracks the demuxer.
+    struct sh_stream_group *group = talloc_zero(bl_sh, struct sh_stream_group);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, bl_sh);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, el_sh);
+
+    bl_sh->group = group;
+    el_sh->group = group;
+    el_sh->dependent_track = true;
+}
+
 // Workaround for broken files that don't set attached_picture
 static void probe_if_image(demuxer_t *demuxer)
 {
@@ -2531,6 +2606,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     MP_VERBOSE(demuxer, "All headers are parsed!\n");
 
     display_create_tracks(demuxer);
+    pair_dovi_tracks(demuxer);
     add_coverart(demuxer);
     process_tags(demuxer);
 
@@ -2749,6 +2825,7 @@ static void mkv_seek_reset(demuxer_t *demuxer)
             av_parser_close(track->av_parser);
         track->av_parser = NULL;
         avcodec_free_context(&track->av_parser_codec);
+        mp_dovi_split_reset(track->dovi_split);
     }
 
     for (int n = 0; n < mkv_d->num_blocks; n++)
@@ -2896,7 +2973,16 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     if (!track->parse || !track->av_parser || !track->av_parser_codec) {
+        struct demux_packet *el_dp = NULL;
+        struct sh_stream *el_sh = NULL;
+        if (track->dovi_split) {
+            el_sh = mp_dovi_split_el_stream(track->dovi_split);
+            if (el_sh && demux_stream_is_selected(el_sh))
+                el_dp = mp_dovi_split_dispatch(track->dovi_split, dp);
+        }
         add_packet(demuxer, stream, dp);
+        if (el_dp)
+            add_packet(demuxer, el_sh, el_dp);
         return;
     }
 
@@ -3034,7 +3120,13 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     struct sh_stream *stream = track->stream;
     bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
-    if (!demux_stream_is_selected(stream))
+    // Keep BL blocks flowing to feed the Dolby Vision splitter when its
+    // virtual EL is selected, even if the BL itself isn't selected.
+    struct sh_stream *split_el = track->dovi_split
+                                    ? mp_dovi_split_el_stream(track->dovi_split)
+                                    : NULL;
+    bool need_for_split = split_el && demux_stream_is_selected(split_el);
+    if (!demux_stream_is_selected(stream) && !need_for_split)
         return 0;
 
     current_pts = tc / 1e9 - track->codec_delay;

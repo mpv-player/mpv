@@ -553,7 +553,7 @@ static bool get_native_desc(int mpfmt, struct mp_imgfmt_desc *desc)
     return true;
 }
 
-int mp_imgfmt_desc_get_num_comps(struct mp_imgfmt_desc *desc)
+int mp_imgfmt_desc_get_num_comps(const struct mp_imgfmt_desc *desc)
 {
     int flags = desc->flags;
     if (!(flags & MP_IMGFLAG_COLOR_MASK))

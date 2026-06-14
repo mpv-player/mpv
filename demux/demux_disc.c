@@ -123,8 +123,9 @@ static void add_dvd_streams(demuxer_t *demuxer)
 static void add_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
+    int old_num = p->num_streams;
 
-    for (int n = p->num_streams; n < demux_get_num_stream(p->slave); n++) {
+    for (int n = old_num; n < demux_get_num_stream(p->slave); n++) {
         struct sh_stream *src = demux_get_stream(p->slave, n);
         if (src->type == STREAM_SUB) {
             struct sh_stream *sub = NULL;
@@ -142,6 +143,7 @@ static void add_streams(demuxer_t *demuxer)
         // Copy all stream fields that might be relevant
         *sh->codec = *src->codec;
         sh->demuxer_id = src->demuxer_id;
+        sh->dependent_track = src->dependent_track;
         if (src->type == STREAM_VIDEO) {
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
@@ -157,6 +159,31 @@ static void add_streams(demuxer_t *demuxer)
         get_disc_lang(demuxer->stream, sh, p->is_dvd);
         demux_add_sh_stream(demuxer, sh);
     }
+
+    // Mirror slave sh_stream_group onto the disc-level sh_streams. This is needed
+    // for the Dolby Vision BL+EL group, it's detected well by lavf. We could use
+    // the libbluray `dv_streams[]` info, but it's not available yet in release
+    // version, and mapping it through lavf is less code.
+    for (int n = old_num; n < p->num_streams; n++) {
+        struct sh_stream *disc_sh = p->streams[n];
+        if (!disc_sh || disc_sh->group)
+            continue;
+        struct sh_stream *src = demux_get_stream(p->slave, n);
+        if (!src || !src->group)
+            continue;
+        struct sh_stream_group *grp = talloc_zero(disc_sh, struct sh_stream_group);
+        for (int m = 0; m < src->group->num_members; m++) {
+            struct sh_stream *sh = src->group->members[m];
+            if (!sh || sh->index < 0 || sh->index >= p->num_streams)
+                continue;
+            struct sh_stream *disc_member = p->streams[sh->index];
+            if (!disc_member)
+                continue;
+            MP_TARRAY_APPEND(grp, grp->members, grp->num_members, disc_member);
+            disc_member->group = grp;
+        }
+    }
+
     reselect_streams(demuxer);
 }
 

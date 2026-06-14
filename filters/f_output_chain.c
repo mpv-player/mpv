@@ -1,6 +1,7 @@
 #include "audio/aframe.h"
 #include "audio/out/ao.h"
 #include "common/global.h"
+#include "common/msg.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "video/out/vo.h"
@@ -9,6 +10,7 @@
 
 #include "f_autoconvert.h"
 #include "f_auto_filters.h"
+#include "f_enhancement_pair.h"
 #include "f_lavfi.h"
 #include "f_output_chain.h"
 #include "f_utils.h"
@@ -41,6 +43,11 @@ struct chain {
 
     struct mp_user_filter *input, *output, *convert_wrapper;
     struct mp_autoconvert *convert;
+
+    // Enhancement-layer pair filter wrapper (tail of post_filters). NULL when
+    // no EL is paired.
+    struct mp_user_filter *el_pair;
+    struct sh_stream *el_sh;
 
     struct vo *vo;
     struct ao *ao;
@@ -390,6 +397,45 @@ void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
     p->stream_info.dr_vo = vo;
     p->vo = vo;
     update_output_caps(p);
+}
+
+void mp_output_chain_set_el_stream(struct mp_output_chain *c,
+                                   struct sh_stream *el_sh)
+{
+    struct chain *p = c->f->priv;
+
+    mp_assert(p->type == MP_OUTPUT_CHAIN_VIDEO);
+
+    if (p->el_sh == el_sh && (!el_sh || p->el_pair))
+        return;
+
+    if (p->el_pair) {
+        for (int n = 0; n < p->num_post_filters; n++) {
+            if (p->post_filters[n] == p->el_pair) {
+                MP_TARRAY_REMOVE_AT(p->post_filters, p->num_post_filters, n);
+                break;
+            }
+        }
+        talloc_free(p->el_pair->wrapper);
+        p->el_pair = NULL;
+        p->el_sh = NULL;
+    }
+
+    if (el_sh) {
+        struct mp_user_filter *u = create_wrapper_filter(p);
+        u->name = "el_pair";
+        u->f = mp_enhancement_pair_create(u->wrapper, el_sh);
+        if (!u->f) {
+            MP_WARN(p, "Failed to set up enhancement-layer pairing.\n");
+            talloc_free(u->wrapper);
+        } else {
+            MP_TARRAY_APPEND(p, p->post_filters, p->num_post_filters, u);
+            p->el_pair = u;
+            p->el_sh = el_sh;
+        }
+    }
+
+    relink_filter_list(p);
 }
 
 void mp_output_chain_set_ao(struct mp_output_chain *c, struct ao *ao)
