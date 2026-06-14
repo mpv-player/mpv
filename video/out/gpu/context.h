@@ -115,6 +115,10 @@ struct ra_swapchain_fns {
     // Target device color space. Optional.
     pl_color_space_t (*target_csp)(struct ra_swapchain *sw);
 
+    // Target device reference luminance in nits, i.e. the luminance at which
+    // the system displays diffuse (SDR) white. Returns 0 if unknown. Optional.
+    float (*target_ref_luma)(struct ra_swapchain *sw);
+
     // Call into backends so they can use the appropriate platform-specific
     // functions to configure color spaces. Returns true if request was handled.
     bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
