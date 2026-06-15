@@ -95,6 +95,7 @@ static void deint_process(struct mp_filter *f)
         field_parity = "auto";
     }
 
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
     bool has_filter = true;
     if (img->imgfmt == IMGFMT_VDPAU) {
         char *args[] = {"deint", "yes",
@@ -126,6 +127,11 @@ static void deint_process(struct mp_filter *f)
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vavpp", args);
+    } else if (info && info->deinterlace && !IMGFMT_IS_HWACCEL(img->imgfmt)) {
+        char *args[] = {"interlaced-only", opts->deinterlace == 1 ? "no" : "yes",
+                        "parity", field_parity, NULL};
+        p->sub.filter = mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO,
+                                              "fieldrate", args);
     } else {
         has_filter = false;
     }
