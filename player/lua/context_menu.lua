@@ -495,7 +495,7 @@ local function handle_mouse_move()
         open_submenu_timer = nil
     end
 
-    if item and item.data.submenu then
+    if item and item.data.submenu and not has_state(item.data, "disabled") then
         open_submenu_timer = mp.add_timeout(options.seconds_to_open_submenus, function ()
             open_submenu()
         end)
