@@ -68,9 +68,16 @@ By default select.lua's script bindings are bound to key sequences starting with
 ``g`` listed in `Keyboard Control`_. The names of the script bindings listed
 below can be used to bind them to different keys.
 
+All script bindings accept an optional ``keep-open`` argument that
+prevents the menu from closing after a selection.
+
 .. admonition:: Example to rebind playlist selection in input.conf
 
     Ctrl+p script-binding select/select-playlist
+
+.. admonition:: Example to keep the track menu open in input.conf
+
+    g-t script-binding select/select-track keep-open
 
 Available script bindings are:
 
