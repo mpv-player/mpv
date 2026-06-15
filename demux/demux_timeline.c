@@ -59,6 +59,7 @@ struct virtual_source {
     struct timeline_par *tl;
 
     bool dash, no_clip, delay_open;
+    bool rebase;
 
     struct segment **segments;
     int num_segments;
@@ -250,6 +251,8 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     reselect_streams(demuxer);
     if (!src->no_clip)
         demux_set_ts_offset(new->d, new->start - new->d_start);
+    else if (src->rebase)
+        demux_set_ts_offset(new->d, new->start - new->d->start_time);
     if (!src->no_clip || !init)
         demux_seek(new->d, start_pts, flags);
 
@@ -546,6 +549,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 {
     struct priv *p = demuxer->priv;
 
+    struct MPOpts *mp_opts = mp_get_config_group(NULL, demuxer->global, &mp_opt_root);
     struct virtual_source *src = talloc_ptrtype(p, src);
     *src = (struct virtual_source){
         .tl = tl,
@@ -553,7 +557,9 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
         .delay_open = tl->delay_open,
         .no_clip = tl->no_clip || tl->dash,
         .dts = MP_NOPTS_VALUE,
+        .rebase = tl->delay_open && mp_opts->rebase_start_time,
     };
+    TA_FREEP(&mp_opts);
 
     if (!tl->num_parts)
         return false;
