@@ -205,6 +205,8 @@ enum {
     VO_CAP_FRAMEOWNER   = 1 << 5,
     // VO does handle mp_image_params.vflip
     VO_CAP_VFLIP        = 1 << 6,
+    // VO supports deinterlacing
+    VO_CAP_DEINTERLACE  = 1 << 7,
 };
 
 enum {
