@@ -217,6 +217,7 @@ sources = files(
     'video/filter/refqueue.c',
     'video/filter/vf_format.c',
     'video/filter/vf_sub.c',
+    'video/filter/vf_fieldrate.c',
     'video/fmt-conversion.c',
     'video/hwdec.c',
     'video/image_loader.c',
