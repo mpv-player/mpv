@@ -1099,8 +1099,14 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     dst->params.crop.x0 = src->crop_left;
     dst->params.crop.y0 = src->crop_top;
-    dst->params.crop.x1 = src->width - src->crop_right;
-    dst->params.crop.y1 = src->height - src->crop_bottom;
+    dst->params.crop.x1 = src->crop_left <= src->width
+        ? src->width - src->crop_right : src->width;
+    dst->params.crop.y1 = src->crop_top <= src->height
+        ? src->height - src->crop_bottom : src->height;
+
+    if (dst->params.crop.x0 >= dst->params.crop.x1 ||
+        dst->params.crop.y0 >= dst->params.crop.y1)
+        dst->params.crop = (struct mp_rect){0, 0, src->width, src->height};
 
     dst->fields = 0;
     if (src->flags & AV_FRAME_FLAG_INTERLACED)
