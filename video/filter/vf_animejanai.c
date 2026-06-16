@@ -856,19 +856,40 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 if (!p->own_stream &&
                     CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
                     CUcontext dummy;
-                    CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
-                                                   CU_STREAM_NON_BLOCKING));
-                    // Our own stream is non-blocking, so it does not order
-                    // against the default stream where decode/copy runs; the
-                    // events below provide that ordering explicitly (see
-                    // order_after_decode). Created only when all succeed.
-                    bool evt_ok = true;
-                    for (int i = 0; i < MAX_DEPTH; i++)
-                        evt_ok &= CHECK_CU(p->cu->cuEventCreate(
-                            &p->decode_evt[i], CU_EVENT_DISABLE_TIMING)) >= 0;
-                    p->decode_evt_ok = evt_ok;
+                    if (CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
+                                            CU_STREAM_NON_BLOCKING)) >= 0) {
+                        // A non-blocking stream does not order against the
+                        // default stream where decode/copy runs; the events
+                        // give that ordering explicitly (order_after_decode).
+                        bool evt_ok = true;
+                        for (int i = 0; i < MAX_DEPTH; i++)
+                            evt_ok &= CHECK_CU(p->cu->cuEventCreate(
+                                &p->decode_evt[i],
+                                CU_EVENT_DISABLE_TIMING)) >= 0;
+                        if (evt_ok) {
+                            p->decode_evt_ok = true;
+                        } else {
+                            // Without the events the private stream cannot be
+                            // ordered after decode. Don't keep it and silently
+                            // race: drop it and run inference on the decode/
+                            // default stream (implicitly ordered, at the cost
+                            // of per-enqueue TRT syncs and no CUDA graphs).
+                            MP_WARN(vf, "CUDA event setup failed; falling back "
+                                    "to the decode stream (no CUDA graphs)\n");
+                            for (int i = 0; i < MAX_DEPTH; i++) {
+                                if (p->decode_evt[i])
+                                    p->cu->cuEventDestroy(p->decode_evt[i]);
+                                p->decode_evt[i] = NULL;
+                            }
+                            p->cu->cuStreamDestroy(p->own_stream);
+                            p->own_stream = NULL;
+                        }
+                    }
                     CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
                 }
+                // own_stream is NULL if creation/event setup failed; then
+                // p->stream stays the decode (default) stream and inference
+                // is ordered implicitly, never racing.
                 p->stream = p->own_stream;
             }
 #if HAVE_D3D11
