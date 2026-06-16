@@ -391,7 +391,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                     MP_ERR(ctx, "Too many subelements.\n");
                     num_elems[i] = max;
                 }
-                int sz = num_elems[i] * type->fields[i].desc->size;
+                size_t sz = (size_t)num_elems[i] * type->fields[i].desc->size;
                 *(generic_struct **) ptr = talloc_zero_size(ctx->talloc_ctx, sz);
                 break;
             }
