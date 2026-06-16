@@ -135,12 +135,13 @@ int packer_pack(struct bitmap_packer *packer)
         if (in[i].x <= 0 || in[i].y <= 0) {
             in[i] = (struct pos){0, 0};
         } else {
+            if (packer->padding > 32767)
+                packer->padding = 32767;
             in[i].x += packer->padding * 2;
             in[i].y += packer->padding * 2;
         }
-        if (in[i].x < 0 || in [i].x > 65535 || in[i].y < 0 || in[i].y > 65535) {
-            fprintf(stderr, "Invalid OSD / subtitle bitmap size\n");
-            abort();
+        if (in[i].x < 0 || in[i].x > 65535 || in[i].y < 0 || in[i].y > 65535) {
+            in[i] = (struct pos){0, 0};
         }
         xmax = MPMAX(xmax, in[i].x);
         ymax = MPMAX(ymax, in[i].y);
