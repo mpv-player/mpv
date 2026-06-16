@@ -288,8 +288,9 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         sub->src_w = MPMAX(sub->src_w, b->x + b->w);
         sub->src_h = MPMAX(sub->src_h, b->y + b->h);
 
-        mp_assert(r->nb_colors > 0);
-        mp_assert(r->nb_colors <= 256);
+        if (r->nb_colors <= 0 || r->nb_colors > 256 || !data[1])
+            continue;
+
         uint32_t pal[256] = {0};
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
