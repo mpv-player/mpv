@@ -187,6 +187,10 @@ struct priv {
     CUcontext cuda_ctx;
     CUstream stream;
     CUstream own_stream;
+    CUstream decode_stream;          // stream NVDEC decode/copy runs on (may be NULL/default)
+    CUevent  decode_evt[MAX_DEPTH];  // per-frame decode->inference ordering events
+    int      decode_evt_next;
+    bool     decode_evt_ok;
 
     bool is_d3d11;
 #if HAVE_D3D11
@@ -268,6 +272,27 @@ static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
 }
 
 #define CHECK_CU(x) check_cu(vf, (x), #x)
+
+// Inference reads the decoder surface on p->stream; decode/copy ran on
+// p->decode_stream. When they differ (we made a private non-blocking
+// stream), nothing orders them, so a HAGS-scheduled read can race ahead
+// of decode and pick up a recycled pool slot's previous frame. Insert an
+// explicit dependency: record decode's progress, make inference wait.
+static bool order_after_decode(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if (p->is_d3d11 || p->stream == p->decode_stream || !p->decode_evt_ok)
+        return true;                       // already ordered / nothing to do
+    CUcontext dummy;
+    if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
+        return false;
+    CUevent ev = p->decode_evt[p->decode_evt_next];
+    p->decode_evt_next = (p->decode_evt_next + 1) % MAX_DEPTH;
+    bool ok = CHECK_CU(p->cu->cuEventRecord(ev, p->decode_stream)) >= 0 &&
+              CHECK_CU(p->cu->cuStreamWaitEvent(p->stream, ev, 0)) >= 0;
+    p->cu->cuCtxPopCurrent(&dummy);
+    return ok;
+}
 
 static void aji_log_bridge(void *opaque, int level, const char *msg)
 {
@@ -610,6 +635,10 @@ static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
             .plane = {out->planes[0], out->planes[1], out->planes[2]},
             .stride = {out->stride[0], out->stride[1], out->stride[2]},
         };
+        if (!order_after_decode(vf)) {
+            talloc_free(out);
+            return false;
+        }
         stream = p->stream;
         ok = p->api.infer(p->aji, &fin, &fout, p->stream) == AJI_OK;
     }
@@ -697,6 +726,9 @@ static struct mp_image *render(struct mp_filter *vf)
         return out;
     }
 #endif
+
+    if (!order_after_decode(vf))
+        goto done;
 
     if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) < 0)
         goto done;
@@ -815,6 +847,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
             AVCUDADeviceContext *cudactx = avhwctx->hwctx;
             p->cuda_ctx = cudactx->cuda_ctx;
             p->stream = cudactx->stream;
+            p->decode_stream = cudactx->stream;   // the real decode stream (may be NULL)
             if (!p->stream) {
                 // ffmpeg's CUDA device context usually leaves this NULL (the
                 // default stream); TensorRT then adds extra stream syncs per
@@ -825,6 +858,15 @@ static void vf_animejanai_process(struct mp_filter *vf)
                     CUcontext dummy;
                     CHECK_CU(p->cu->cuStreamCreate(&p->own_stream,
                                                    CU_STREAM_NON_BLOCKING));
+                    // Our own stream is non-blocking, so it does not order
+                    // against the default stream where decode/copy runs; the
+                    // events below provide that ordering explicitly (see
+                    // order_after_decode). Created only when all succeed.
+                    bool evt_ok = true;
+                    for (int i = 0; i < MAX_DEPTH; i++)
+                        evt_ok &= CHECK_CU(p->cu->cuEventCreate(
+                            &p->decode_evt[i], CU_EVENT_DISABLE_TIMING)) >= 0;
+                    p->decode_evt_ok = evt_ok;
                     CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
                 }
                 p->stream = p->own_stream;
@@ -1130,6 +1172,9 @@ static void uninit(struct mp_filter *vf)
     if (p->own_stream && p->cu &&
         p->cu->cuCtxPushCurrent(p->cuda_ctx) == CUDA_SUCCESS) {
         CUcontext dummy;
+        for (int i = 0; i < MAX_DEPTH; i++)
+            if (p->decode_evt[i])
+                p->cu->cuEventDestroy(p->decode_evt[i]);
         p->cu->cuStreamDestroy(p->own_stream);
         p->cu->cuCtxPopCurrent(&dummy);
     }
