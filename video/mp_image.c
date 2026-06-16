@@ -70,18 +70,22 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
         int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
         int align = mp_lcm(stride_align, (desc.bpp[n] && desc.bpp[n] % 8 == 0) ? desc.bpp[n] / 8 : 1);
         out_stride[n] = MP_ALIGN_NPOT(line_bytes, align);
+        if (alloc_h > 0 && out_stride[n] > INT_MAX / alloc_h)
+            return -1;
         out_plane_size[n] = out_stride[n] * alloc_h;
     }
     if (desc.flags & MP_IMGFLAG_PAL)
         out_plane_size[1] = AVPALETTE_SIZE;
 
-    int sum = 0;
+    int64_t sum = 0;
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         out_plane_offset[n] = out_plane_size[n] ? sum : -1;
         sum += out_plane_size[n];
     }
 
-    return sum;
+    if (sum > INT_MAX || sum < 0)
+        return -1;
+    return (int)sum;
 }
 
 // Return the total size needed for an image allocation of the given
