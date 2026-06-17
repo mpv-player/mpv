@@ -460,6 +460,19 @@ static bool configure_aji(struct mp_filter *vf)
 
     p->aji_active = true;
     p->out_fmt = p->aji_fmt;
+    if (p->aji_fmt == AJI_FMT_RGB10A2) {
+        // RGB input (a hwuploaded 4:4:4 source) upscales out as 4:2:0 P010,
+        // re-encoded from the model's RGB with a YUV matrix and routed through
+        // the proven shared-P010 pool (a shared RGB output pool stalls the
+        // DirectML->gpu-next handoff). mpv lost the source matrix in the
+        // YUV->RGB upload, so tag the P010 output by the same height heuristic
+        // map_matrix() applies to the (RGB) input, with its (full) range, so
+        // the VO inverts it back to exactly the model's RGB.
+        p->out_fmt = AJI_FMT_P010;
+        p->out_params.hw_subfmt = pixfmt2imgfmt(AV_PIX_FMT_P010);
+        p->out_params.repr.sys = p->params.h < 720 ? PL_COLOR_SYSTEM_BT_601
+                                                    : PL_COLOR_SYSTEM_BT_709;
+    }
     if (p->opts->output_444 && !p->is_d3d11) {
         // Option forces full-resolution 4:4:4 even from a 4:2:0 source
         // (exceeds the reference pipeline, which always subsampled back to
@@ -619,7 +632,7 @@ static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
         };
         const aji_frame fout = {
             .width = p->out_params.w, .height = p->out_params.h,
-            .format = p->aji_fmt,
+            .format = p->out_fmt,   // may differ from aji_fmt (RGB in -> P010 out)
             .matrix = mat, .range = rng, .siting = sit,
             .plane = {out->planes[0], out->planes[1]},
         };
