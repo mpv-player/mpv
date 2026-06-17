@@ -46,9 +46,9 @@ typedef struct aji_ctx aji_ctx;
 enum aji_format {
     AJI_FMT_NV12 = 1,   /* 8-bit 4:2:0, interleaved CbCr */
     AJI_FMT_P010 = 2,   /* 10-bit-in-16 (MSB) 4:2:0, interleaved CbCr */
-    AJI_FMT_YUV444P16 = 3, /* 16-bit 4:4:4 planar (output only: carries the
-                              model's full-resolution chroma; TensorRT
-                              backend only) */
+    AJI_FMT_YUV444P16 = 3, /* 16-bit 4:4:4 planar: carries the model's
+                              full-resolution chroma. Valid for input and
+                              output; TensorRT backend only. */
 };
 
 enum aji_matrix {
