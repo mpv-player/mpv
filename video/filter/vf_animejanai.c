@@ -953,19 +953,30 @@ static void vf_animejanai_process(struct mp_filter *vf)
 
         if (p->aji) {
             enum AVPixelFormat sw = imgfmt2pixfmt(p->params.hw_subfmt);
+            // x2bgr10 (packed 10-bit RGB) is what mpv hwuploads a 4:4:4 source
+            // to on D3D11 (no planar 4:4:4 DXGI format); the DirectML backend
+            // ingests it as RGB and round-trips it as RGB.
             p->aji_fmt = sw == AV_PIX_FMT_NV12 ? AJI_FMT_NV12 :
                          sw == AV_PIX_FMT_P010 ? AJI_FMT_P010 :
-                         sw == AV_PIX_FMT_YUV444P16 ? AJI_FMT_YUV444P16 : 0;
+                         sw == AV_PIX_FMT_YUV444P16 ? AJI_FMT_YUV444P16 :
+                         sw == AV_PIX_FMT_X2BGR10 ? AJI_FMT_RGB10A2 : 0;
             if (!p->aji_fmt) {
                 MP_ERR(vf, "Unsupported sw format %s for inference\n",
                        mp_imgfmt_to_name(p->params.hw_subfmt));
                 mp_filter_internal_mark_failed(vf);
                 return;
             }
-            // 4:4:4 ingest is implemented only on the TensorRT/CUDA backend;
-            // the D3D11 staging path has no planar 16-bit 4:4:4 DXGI format.
+            // 4:4:4 planar ingest is TensorRT/CUDA only (no planar 16-bit
+            // 4:4:4 DXGI format); on D3D11 it arrives as x2bgr10 RGB instead.
             if (p->is_d3d11 && p->aji_fmt == AJI_FMT_YUV444P16) {
                 MP_ERR(vf, "yuv444p16 input requires the TensorRT/CUDA backend\n");
+                mp_filter_internal_mark_failed(vf);
+                return;
+            }
+            // RGB ingest is DirectML/D3D11 only (the CUDA path gets native
+            // 4:4:4); reject it cleanly on CUDA rather than mis-decoding.
+            if (!p->is_d3d11 && p->aji_fmt == AJI_FMT_RGB10A2) {
+                MP_ERR(vf, "x2bgr10 input requires the DirectML backend\n");
                 mp_filter_internal_mark_failed(vf);
                 return;
             }
@@ -973,8 +984,10 @@ static void vf_animejanai_process(struct mp_filter *vf)
 
 #if HAVE_D3D11
         if (p->is_d3d11) {
-            const DXGI_FORMAT fmt = p->aji_fmt == AJI_FMT_P010
-                                        ? DXGI_FORMAT_P010 : DXGI_FORMAT_NV12;
+            const DXGI_FORMAT fmt =
+                p->aji_fmt == AJI_FMT_RGB10A2 ? DXGI_FORMAT_R10G10B10A2_UNORM :
+                p->aji_fmt == AJI_FMT_P010    ? DXGI_FORMAT_P010 :
+                                                DXGI_FORMAT_NV12;
             const int want = MPCLAMP(p->opts->queue_depth, 1, MAX_DEPTH);
             if (p->d3d_stage_count != want || p->d3d_stage_w != p->params.w ||
                 p->d3d_stage_h != p->params.h || p->d3d_stage_fmt != fmt) {
