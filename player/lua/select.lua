@@ -72,33 +72,41 @@ local function format_playlist_entry(entry, show)
     return item
 end
 
-mp.add_key_binding(nil, "select-playlist", function ()
-    local playlist = {}
-    local default_item
-    local show = mp.get_property_native("osd-playlist-entry")
+mp.add_key_binding(nil, "select-playlist", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open(default_item)
+        local playlist = {}
+        local show = mp.get_property_native("osd-playlist-entry")
 
-    for i, entry in ipairs(mp.get_property_native("playlist")) do
-        playlist[i] = format_playlist_entry(entry, show)
+        for i, entry in ipairs(mp.get_property_native("playlist")) do
+            playlist[i] = format_playlist_entry(entry, show)
 
-        if entry.playing then
-            default_item = i
+            if not default_item and entry.playing then
+                default_item = i
+            end
         end
-    end
 
-    if #playlist == 0 then
-        show_warning("The playlist is empty.")
-        return
-    end
+        if #playlist == 0 then
+            show_warning("The playlist is empty.")
+            return
+        end
 
-    input.select({
-        prompt = "Select a playlist entry:",
-        items = playlist,
-        default_item = default_item,
-        submit = function (index)
-            mp.commandv("playlist-play-index", index - 1)
-        end,
-    })
-end)
+        input.select({
+            prompt = "Select a playlist entry:",
+            items = playlist,
+            default_item = default_item,
+            keep_open = keep_open,
+            submit = function (index)
+                mp.commandv("playlist-play-index", index - 1)
+                if keep_open then
+                    open(index)
+                end
+            end,
+        })
+    end
+    open()
+end, { complex = true })
 
 local function format_track_type(track)
     return (track.image
@@ -150,229 +158,284 @@ local function format_track(track)
         ):sub(1, -2) .. ")" .. format_flags(track)
 end
 
-mp.add_key_binding(nil, "select-track", function ()
-    local tracks = {}
+mp.add_key_binding(nil, "select-track", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open(default_item)
+        local tracks = {}
 
-    for i, track in ipairs(mp.get_property_native("track-list")) do
-        tracks[i] = format_track_type(track) .. format_track(track)
+        for i, track in ipairs(mp.get_property_native("track-list")) do
+            tracks[i] = format_track_type(track) .. format_track(track)
+        end
+
+        if #tracks == 0 then
+            show_warning("No available tracks.")
+            return
+        end
+
+        input.select({
+            prompt = "Select a track:",
+            items = tracks,
+            default_item = default_item,
+            keep_open = keep_open,
+            submit = function (id)
+                local track = mp.get_property_native("track-list/" .. id - 1)
+                if track then
+                    mp.set_property(track.type, track.selected and "no" or track.id)
+                end
+                if keep_open then
+                    open(id)
+                end
+            end,
+        })
     end
+    open()
+end, { complex = true })
 
-    if #tracks == 0 then
-        show_warning("No available tracks.")
-        return
-    end
+local function select_track(property, type, prompt, warning, keep_open)
+    local function open(default_item)
+        local tracks = {}
+        local items = {}
+        local track_id = mp.get_property_native(property)
 
-    input.select({
-        prompt = "Select a track:",
-        items = tracks,
-        submit = function (id)
-            local track = mp.get_property_native("track-list/" .. id - 1)
-            if track then
-                mp.set_property(track.type, track.selected and "no" or track.id)
-            end
-        end,
-    })
-end)
+        for _, track in ipairs(mp.get_property_native("track-list")) do
+            if track.type == type then
+                tracks[#tracks + 1] = track
+                items[#items + 1] = format_track(track)
 
-local function select_track(property, type, prompt, warning)
-    local tracks = {}
-    local items = {}
-    local default_item
-    local track_id = mp.get_property_native(property)
-
-    for _, track in ipairs(mp.get_property_native("track-list")) do
-        if track.type == type then
-            tracks[#tracks + 1] = track
-            items[#items + 1] = format_track(track)
-
-            if track.id == track_id then
-                default_item = #items
+                if not default_item and track.id == track_id then
+                    default_item = #items
+                end
             end
         end
-    end
 
-    if #items == 0 then
-        show_warning(warning)
-        return
-    end
+        if #items == 0 then
+            show_warning(warning)
+            return
+        end
 
-    input.select({
-        prompt = prompt,
-        items = items,
-        default_item = default_item,
-        submit = function (id)
-            mp.set_property(property, tracks[id].selected and "no" or tracks[id].id)
-        end,
-    })
+        input.select({
+            prompt = prompt,
+            items = items,
+            default_item = default_item,
+            keep_open = keep_open,
+            submit = function (id)
+                mp.set_property(property, tracks[id].selected and "no" or tracks[id].id)
+                if keep_open then
+                    open(id)
+                end
+            end,
+        })
+    end
+    open()
 end
 
-mp.add_key_binding(nil, "select-sid", function ()
-    select_track("sid", "sub", "Select a subtitle:", "No available subtitles.")
-end)
+mp.add_key_binding(nil, "select-sid", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    select_track("sid", "sub", "Select a subtitle:", "No available subtitles.",
+                 t.arg == "keep-open")
+end, { complex = true })
 
-mp.add_key_binding(nil, "select-secondary-sid", function ()
+mp.add_key_binding(nil, "select-secondary-sid", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
     select_track("secondary-sid", "sub", "Select a secondary subtitle:",
-                 "No available subtitles.")
-end)
+                 "No available subtitles.", t.arg == "keep-open")
+end, { complex = true })
 
-mp.add_key_binding(nil, "select-aid", function ()
+mp.add_key_binding(nil, "select-aid", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
     select_track("aid", "audio", "Select an audio track:",
-                 "No available audio tracks.")
-end)
+                 "No available audio tracks.", t.arg == "keep-open")
+end, { complex = true })
 
-mp.add_key_binding(nil, "select-vid", function ()
+mp.add_key_binding(nil, "select-vid", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
     select_track("vid", "video", "Select a video track:",
-                 "No available video tracks.")
-end)
+                 "No available video tracks.", t.arg == "keep-open")
+end, { complex = true })
 
 local function format_time(t, duration)
     local fmt = math.max(t, duration) >= 60 * 60 and "%H:%M:%S" or "%M:%S"
     return mp.format_time(t, fmt)
 end
 
-mp.add_key_binding(nil, "select-chapter", function ()
-    local chapters = {}
-    local default_item = mp.get_property_native("chapter")
+mp.add_key_binding(nil, "select-chapter", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open(default_item)
+        local chapters = {}
+        local current_chapter = mp.get_property_native("chapter")
 
-    if default_item == nil then
-        show_warning("No available chapters.")
-        return
+        if current_chapter == nil then
+            show_warning("No available chapters.")
+            return
+        end
+
+        local duration = mp.get_property_native("duration", math.huge)
+
+        for i, chapter in ipairs(mp.get_property_native("chapter-list")) do
+            chapters[i] = format_time(chapter.time, duration) .. " " .. chapter.title
+        end
+
+        input.select({
+            prompt = "Select a chapter:",
+            items = chapters,
+            default_item = default_item or (current_chapter > -1 and current_chapter + 1),
+            keep_open = keep_open,
+            submit = function (chapter)
+                mp.set_property("chapter", chapter - 1)
+                if keep_open then
+                    open(chapter)
+                end
+            end,
+        })
     end
-
-    local duration = mp.get_property_native("duration", math.huge)
-
-    for i, chapter in ipairs(mp.get_property_native("chapter-list")) do
-        chapters[i] = format_time(chapter.time, duration) .. " " .. chapter.title
-    end
-
-    input.select({
-        prompt = "Select a chapter:",
-        items = chapters,
-        default_item = default_item > -1 and default_item + 1,
-        submit = function (chapter)
-            mp.set_property("chapter", chapter - 1)
-        end,
-    })
-end)
+    open()
+end, { complex = true })
 
 local function format_edition(edition)
     return edition.title or ("Edition " .. edition.id + 1)
 end
 
-mp.add_key_binding(nil, "select-edition", function ()
-    local edition_list = mp.get_property_native("edition-list")
+mp.add_key_binding(nil, "select-edition", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open(default_item)
+        local edition_list = mp.get_property_native("edition-list")
 
-    if edition_list == nil or #edition_list < 2 then
-        show_warning("No available editions.")
-        return
-    end
-
-    local editions = {}
-    local default_item = mp.get_property_native("current-edition")
-
-    for i, edition in ipairs(edition_list) do
-        editions[i] = format_edition(edition)
-    end
-
-    input.select({
-        prompt = "Select an edition:",
-        items = editions,
-        default_item = default_item > -1 and default_item + 1,
-        submit = function (edition)
-            mp.set_property("edition", edition - 1)
-        end,
-    })
-end)
-
-local function select_subtitle_line(secondary)
-    local lines = mp.get_property_native(secondary .. "sub-lines")
-
-    if not lines then
-        show_warning("Subtitle lines could not be retrieved.")
-        return
-    end
-
-    local items = {}
-    local times = {}
-    local default_item
-    local delay = mp.get_property_native(secondary .. "sub-delay")
-    local time_pos = mp.get_property_native("time-pos") - delay
-    local duration = mp.get_property_native("duration", math.huge)
-
-    for _, line in ipairs(lines) do
-        if line.start <= time_pos then
-            default_item = #items + 1
+        if edition_list == nil or #edition_list < 2 then
+            show_warning("No available editions.")
+            return
         end
 
-        for text in line.text:gmatch("[^\n]+") do
-            items[#items + 1] = format_time(line.start, duration) .. " " .. text
-            times[#times + 1] = line.start
+        local editions = {}
+        local current_edition = mp.get_property_native("current-edition")
+
+        for i, edition in ipairs(edition_list) do
+            editions[i] = format_edition(edition)
         end
 
-        if line.text == "" then
-            items[#items + 1] = format_time(line.start, duration)
-            times[#times + 1] = line.start
-        end
+        input.select({
+            prompt = "Select an edition:",
+            items = editions,
+            default_item = default_item or (current_edition > -1 and current_edition + 1),
+            keep_open = keep_open,
+            submit = function (edition)
+                mp.set_property("edition", edition - 1)
+                if keep_open then
+                    open(edition)
+                end
+            end,
+        })
     end
+    open()
+end, { complex = true })
 
-    input.select({
-        prompt = "Select a line to seek to:",
-        items = items,
-        default_item = default_item,
-        submit = function (i)
-            -- Add an offset to seek to the correct line while paused without a
-            -- video track.
-            if mp.get_property_native("current-tracks/video/image") ~= false then
-                delay = delay + 0.1
+local function select_subtitle_line(secondary, keep_open)
+    local function open(default_item)
+        local lines = mp.get_property_native(secondary .. "sub-lines")
+
+        if not lines then
+            show_warning("Subtitle lines could not be retrieved.")
+            return
+        end
+
+        local items = {}
+        local times = {}
+        local delay = mp.get_property_native(secondary .. "sub-delay")
+        local time_pos = mp.get_property_native("time-pos") - delay
+        local duration = mp.get_property_native("duration", math.huge)
+
+        for _, line in ipairs(lines) do
+            if not default_item and line.start <= time_pos then
+                default_item = #items + 1
             end
 
-            mp.commandv("seek", times[i] + delay, "absolute")
-        end,
-    })
+            for text in line.text:gmatch("[^\n]+") do
+                items[#items + 1] = format_time(line.start, duration) .. " " .. text
+                times[#times + 1] = line.start
+            end
+
+            if line.text == "" then
+                items[#items + 1] = format_time(line.start, duration)
+                times[#times + 1] = line.start
+            end
+        end
+
+        input.select({
+            prompt = "Select a line to seek to:",
+            items = items,
+            default_item = default_item,
+            keep_open = keep_open,
+            submit = function (i)
+                -- Add an offset to seek to the correct line while paused without a
+                -- video track.
+                if mp.get_property_native("current-tracks/video/image") ~= false then
+                    delay = delay + 0.1
+                end
+
+                mp.commandv("seek", times[i] + delay, "absolute")
+                if keep_open then
+                    open(i)
+                end
+            end,
+        })
+    end
+    open()
 end
 
-mp.add_key_binding(nil, "select-subtitle-line", function ()
-    select_subtitle_line("")
-end)
-mp.add_key_binding(nil, "select-secondary-subtitle-line", function ()
-    select_subtitle_line("secondary-")
-end)
+mp.add_key_binding(nil, "select-subtitle-line", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    select_subtitle_line("", t.arg == "keep-open")
+end, { complex = true })
+mp.add_key_binding(nil, "select-secondary-subtitle-line", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    select_subtitle_line("secondary-", t.arg == "keep-open")
+end, { complex = true })
 
 local function format_audio_device(device)
     return device.name .. " (" .. device.description .. ")"
 end
 
-mp.add_key_binding(nil, "select-audio-device", function ()
-    local devices = mp.get_property_native("audio-device-list")
-    local items = {}
-    -- This is only useful if an --audio-device has been explicitly set,
-    -- otherwise its value is just auto and there is no current-audio-device
-    -- property.
-    local selected_device = mp.get_property("audio-device")
-    local default_item
+mp.add_key_binding(nil, "select-audio-device", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open(default_item)
+        local devices = mp.get_property_native("audio-device-list")
+        local items = {}
+        -- This is only useful if an --audio-device has been explicitly set,
+        -- otherwise its value is just auto and there is no current-audio-device
+        -- property.
+        local selected_device = mp.get_property("audio-device")
 
-    if #devices == 0 then
-        show_warning("No available audio devices.")
-        return
-    end
-
-    for i, device in ipairs(devices) do
-        items[i] = format_audio_device(device)
-
-        if device.name == selected_device then
-            default_item = i
+        if #devices == 0 then
+            show_warning("No available audio devices.")
+            return
         end
-    end
 
-    input.select({
-        prompt = "Select an audio device:",
-        items = items,
-        default_item = default_item,
-        submit = function (id)
-            mp.set_property("audio-device", devices[id].name)
-        end,
-    })
-end)
+        for i, device in ipairs(devices) do
+            items[i] = format_audio_device(device)
+
+            if not default_item and device.name == selected_device then
+                default_item = i
+            end
+        end
+
+        input.select({
+            prompt = "Select an audio device:",
+            items = items,
+            default_item = default_item,
+            keep_open = keep_open,
+            submit = function (id)
+                mp.set_property("audio-device", devices[id].name)
+                if keep_open then
+                    open(id)
+                end
+            end,
+        })
+    end
+    open()
+end, { complex = true })
 
 local function format_history_entry(entry)
     local status
@@ -397,74 +460,84 @@ local function format_history_entry(entry)
     return item .. filename .. " (" .. directory .. ")"
 end
 
-mp.add_key_binding(nil, "select-watch-history", function ()
-    local history_file_path = mp.command_native(
-        {"expand-path", mp.get_property("watch-history-path")})
-    local history_file, error_message = io.open(history_file_path)
-    if not history_file then
-        show_warning(mp.get_property_native("save-watch-history")
-                     and error_message
-                     or "Enable --save-watch-history to jump to recently played files.")
-        return
-    end
-
-    local all_entries = {}
-    local line_num = 1
-    for line in history_file:lines() do
-        local entry = utils.parse_json(line)
-        if entry and entry.path then
-            all_entries[#all_entries + 1] = entry
-        else
-            mp.msg.warn(history_file_path .. ": Parse error at line " .. line_num)
+mp.add_key_binding(nil, "select-watch-history", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
+    local function open_history()
+        local history_file_path = mp.command_native(
+            {"expand-path", mp.get_property("watch-history-path")})
+        local history_file, error_message = io.open(history_file_path)
+        if not history_file then
+            show_warning(mp.get_property_native("save-watch-history")
+                         and error_message
+                         or "Enable --save-watch-history to jump to recently played files.")
+            return
         end
-        line_num = line_num + 1
-    end
-    history_file:close()
 
-    local entries = {}
-    local items = {}
-    local seen = {}
-
-    for i = #all_entries, 1, -1 do
-        local entry = all_entries[i]
-        if not seen[entry.path] or not options.hide_history_duplicates then
-            seen[entry.path] = true
-            entries[#entries + 1] = entry
-            items[#items + 1] = format_history_entry(entry)
-        end
-    end
-
-    items[#items+1] = "Clear history"
-
-    input.select({
-        prompt = "Select a file:",
-        items = items,
-        submit = function (i)
-            if entries[i] then
-                mp.commandv("loadfile", entries[i].path)
-                return
+        local all_entries = {}
+        local line_num = 1
+        for line in history_file:lines() do
+            local entry = utils.parse_json(line)
+            if entry and entry.path then
+                all_entries[#all_entries + 1] = entry
+            else
+                mp.msg.warn(history_file_path .. ": Parse error at line " .. line_num)
             end
+            line_num = line_num + 1
+        end
+        history_file:close()
 
-            input.select({
-                prompt = "Are you sure you want to clear the history?",
-                items = {"No", "Yes"},
-                submit = function (j)
-                    if j == 2 then
-                        error_message = select(2, os.remove(history_file_path))
-                        if error_message then
-                            show_error(error_message)
+        local entries = {}
+        local items = {}
+        local seen = {}
+
+        for i = #all_entries, 1, -1 do
+            local entry = all_entries[i]
+            if not seen[entry.path] or not options.hide_history_duplicates then
+                seen[entry.path] = true
+                entries[#entries + 1] = entry
+                items[#items + 1] = format_history_entry(entry)
+            end
+        end
+
+        items[#items+1] = "Clear history"
+
+        input.select({
+            prompt = "Select a file:",
+            items = items,
+            keep_open = keep_open,
+            submit = function (i)
+                if entries[i] then
+                    mp.commandv("loadfile", entries[i].path)
+                    return
+                end
+
+                input.select({
+                    prompt = "Are you sure you want to clear the history?",
+                    items = {"No", "Yes"},
+                    submit = function (j)
+                        if j == 2 then
+                            error_message = select(2, os.remove(history_file_path))
+                            if error_message then
+                                show_error(error_message)
+                            else
+                                mp.osd_message("History cleared.")
+                            end
                         else
-                            mp.osd_message("History cleared.")
+                            open_history()
                         end
                     end
-                end
-            })
+                })
 
-        end,
-    })
-end)
+            end,
+        })
+    end
+    open_history()
+end, { complex = true })
 
-mp.add_key_binding(nil, "select-watch-later", function ()
+mp.add_key_binding(nil, "select-watch-later", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
+    local keep_open = t.arg == "keep-open"
     local watch_later_dir = mp.get_property("current-watch-later-dir")
 
     if not watch_later_dir then
@@ -514,11 +587,12 @@ mp.add_key_binding(nil, "select-watch-later", function ()
     input.select({
         prompt = "Select a file:",
         items = items,
+        keep_open = keep_open,
         submit = function (i)
             mp.commandv("loadfile", files[i][1])
         end,
     })
-end)
+end, { complex = true })
 
 local function get_active_bindings()
     local bindings = {}
@@ -540,7 +614,8 @@ local function get_active_bindings()
     return bindings
 end
 
-mp.add_key_binding(nil, "select-binding", function ()
+mp.add_key_binding(nil, "select-binding", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
     local items = {}
     for _, binding in pairs(get_active_bindings()) do
         if binding.cmd ~= "ignore" then
@@ -553,11 +628,12 @@ mp.add_key_binding(nil, "select-binding", function ()
     input.select({
         prompt = "Select a binding:",
         items = items,
+        keep_open = t.arg == "keep-open",
         submit = function (i)
             mp.command(items[i]:gsub("^.- ", ""))
         end,
     })
-end)
+end, { complex = true })
 
 local properties = {}
 
@@ -573,7 +649,8 @@ local function add_property(property, value)
     end
 end
 
-mp.add_key_binding(nil, "show-properties", function ()
+mp.add_key_binding(nil, "show-properties", function (t)
+    if t.event == "up" or t.event == "repeat" then return end
     properties = {}
 
     -- Don't log errors for renamed and removed properties.
@@ -597,6 +674,7 @@ mp.add_key_binding(nil, "show-properties", function ()
     input.select({
         prompt = "Inspect a property:",
         items = properties,
+        keep_open = t.arg == "keep-open",
         submit = function (i)
             if mp.get_property_native("vo-configured") then
                 mp.commandv("expand-properties", "show-text",
@@ -608,7 +686,7 @@ mp.add_key_binding(nil, "show-properties", function ()
             end
         end,
     })
-end)
+end, { complex = true })
 
 local function system_open(path)
     local args
