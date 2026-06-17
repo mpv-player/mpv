@@ -963,6 +963,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     s->seek = p->seekable ? curl_seek : NULL;
     s->get_size = curl_get_size;
     s->close = curl_close;
+    s->pos = p->request_start;
 
     return STREAM_OK;
 }
@@ -1172,6 +1173,7 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
     }
     pb->seekable = s->seekable ? AVIO_SEEKABLE_NORMAL : 0;
     pb->av_class = &curl_avio_class;
+    pb->pos = oa.offset;
 
     *pb_out = pb;
     *cookie_out = c;
