@@ -164,6 +164,7 @@ struct aji_api {
     int (*done)(aji_ctx *c, uint64_t ticket);
     int (*wait)(aji_ctx *c, uint64_t ticket);
     int (*rife_factor)(aji_ctx *c, int *num, int *den);
+    int (*rife_before_upscale)(aji_ctx *c);  // optional (may be NULL)
     int (*infer_rife)(aji_ctx *c, const aji_frame *a, const aji_frame *b,
                       double t, const aji_frame *out, void *cu_stream);
     int (*poll)(aji_ctx *c);
@@ -255,6 +256,11 @@ struct priv {
     struct mp_image *rife_prev; // last upscaled frame (left endpoint)
     struct mp_image *outq[8];
     int outq_n, outq_pos;
+    // RIFE-first (CUDA only): interpolate the source pair, then upscale every
+    // emitted frame. rife_prev then holds the previous *source* frame and
+    // src_pool supplies source-resolution buffers for the interpolation temps.
+    bool rife_first;
+    AVBufferRef *src_pool;
 };
 
 static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
@@ -423,6 +429,7 @@ static bool configure_aji(struct mp_filter *vf)
 
     int rn = 0, rd = 0;
     p->rife_on = false;
+    p->rife_first = false;
     p->rife_num = p->rife_den = 1;
     mp_image_unrefp(&p->rife_prev);  // never interpolate across a reconfigure
     if (p->api.rife_factor(p->aji, &rn, &rd) && rd > 0 && rn > rd) {
@@ -491,6 +498,15 @@ static bool configure_aji(struct mp_filter *vf)
     // reference pipeline (VS/zimg doesn't propagate chroma location from
     // unsubsampled sources); tag the output accordingly.
     p->out_params.chroma_location = PL_CHROMA_LEFT;
+    // RIFE-first runs only on the TensorRT/CUDA path (the source-resolution
+    // interpolation temp needs a CUDA hwframe pool; DirectML reports 0). The
+    // shim configured RIFE for the matching resolution, so the order here must
+    // agree with what aji_rife_before_upscale() reports.
+    p->rife_first = p->rife_on && p->aji_active && !p->is_d3d11 &&
+                    p->api.rife_before_upscale &&
+                    p->api.rife_before_upscale(p->aji);
+    if (p->rife_first)
+        MP_VERBOSE(vf, "RIFE-first: interpolating before upscaling\n");
     update_depth(vf);
     MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d (depth %d)\n",
                p->cur_slot, p->params.w, p->params.h, ow, oh, p->depth);
@@ -802,6 +818,12 @@ static struct mp_image *render_interp(struct mp_filter *vf,
         fout.stride[i] = out->stride[i];
     }
 
+    // b is the just-decoded source frame; order the read after decode (same
+    // HAGS race the upscale path guards against).
+    if (!order_after_decode(vf)) {
+        talloc_free(out);
+        return NULL;
+    }
     int ret = p->api.infer_rife(p->aji, &fa, &fb, t, &fout, p->stream);
     if (ret == AJI_SCENE) {
         talloc_free(out);
@@ -822,6 +844,96 @@ static struct mp_image *render_interp(struct mp_filter *vf,
     return out;
 }
 
+// RIFE-first (CUDA): allocate a source-resolution hwframe for an
+// interpolation temp (the upscale models then consume it). Mirrors alloc_out
+// but at the input geometry and from a dedicated pool.
+static struct mp_image *alloc_src(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (!mp_update_av_hw_frames_pool(&p->src_pool, p->av_device_ref,
+                                     IMGFMT_CUDA, p->params.hw_subfmt,
+                                     p->params.w, p->params.h, false)) {
+        MP_ERR(vf, "Failed to create source hw pool\n");
+        return NULL;
+    }
+    AVFrame *av_frame = av_frame_alloc();
+    MP_HANDLE_OOM(av_frame);
+    if (av_hwframe_get_buffer(p->src_pool, av_frame, 0) < 0) {
+        MP_ERR(vf, "Failed to allocate source frame from hw pool\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *img = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!img)
+        MP_ERR(vf, "Internal error when converting source AVFrame\n");
+    return img;
+}
+
+// RIFE-first (CUDA): interpolate two source-resolution frames at time t into a
+// fresh source-resolution frame (the caller upscales it). Returns a new ref of
+// `a` on a scene change, NULL on error. pts is left for the caller.
+static struct mp_image *interp_source(struct mp_filter *vf,
+                                      struct mp_image *a, struct mp_image *b,
+                                      double t)
+{
+    struct priv *p = vf->priv;
+    CUcontext dummy;
+
+    struct mp_image *out = alloc_src(vf);
+    if (!out)
+        return NULL;
+    mp_image_copy_attributes(out, b);
+    out->params = p->params;
+
+    const int mat = map_matrix(&p->params);
+    const int rng = map_range(&p->params);
+    const int sit = map_siting(&p->params);
+    const aji_frame fa = {
+        .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+        .matrix = mat, .range = rng, .siting = sit,
+        .plane = {a->planes[0], a->planes[1], a->planes[2]},
+        .stride = {a->stride[0], a->stride[1], a->stride[2]},
+    };
+    aji_frame fb = fa, fout = fa;
+    for (int i = 0; i < 3; i++) {
+        fb.plane[i] = b->planes[i];
+        fb.stride[i] = b->stride[i];
+        fout.plane[i] = out->planes[i];
+        fout.stride[i] = out->stride[i];
+    }
+
+    int ret = p->api.infer_rife(p->aji, &fa, &fb, t, &fout, p->stream);
+    if (ret == AJI_SCENE) {
+        talloc_free(out);
+        return mp_image_new_ref(a);
+    }
+    if (ret != AJI_OK) {
+        MP_ERR(vf, "interpolation failed: %s\n", p->api.last_error(p->aji));
+        talloc_free(out);
+        return NULL;
+    }
+    bool ok = false;
+    if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+        ok = CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) >= 0;
+        CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
+    }
+    if (!ok)
+        TA_FREEP(&out);
+    return out;
+}
+
+// RIFE-first: upscale one source-resolution frame synchronously (submit +
+// wait), used on the source frame and on each interpolation temp.
+static struct mp_image *upscale_image(struct mp_filter *vf,
+                                      struct mp_image *in)
+{
+    if (!submit_frame(vf, in))
+        return NULL;
+    return pop_ring(vf);
+}
+
 static void vf_animejanai_process(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -829,6 +941,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
     struct mp_image *in_fmt = mp_refqueue_execute_reinit(p->queue);
     if (in_fmt) {
         av_buffer_unref(&p->hw_pool);
+        av_buffer_unref(&p->src_pool);
 
         p->params = in_fmt->params;
         p->fps = in_fmt->nominal_fps;
@@ -1077,6 +1190,78 @@ static void vf_animejanai_process(struct mp_filter *vf)
     if (!mp_refqueue_can_output(p->queue))
         return;
 
+    if (p->rife_first) {
+        // CUDA RIFE-first: interpolate the source pair, then upscale each
+        // emitted frame. Same output-grid cadence as the default path below,
+        // but rife_prev holds the previous *source* frame and the heavy
+        // upscaler runs per emitted frame instead of RIFE at the output res.
+        struct mp_image *src = mp_refqueue_get(p->queue, 0);
+        if (!src)
+            return;
+        const double in_fps = src->nominal_fps;
+        struct mp_image *list[8];
+        int n = 0;
+        bool failed = false;
+        if (p->rife_prev && p->rife_prev->pts != MP_NOPTS_VALUE &&
+            src->pts != MP_NOPTS_VALUE && src->pts > p->rife_prev->pts) {
+            while (p->rife_acc <= p->rife_num && n < 8) {
+                struct mp_image *frame;
+                double pts;
+                if (p->rife_acc == p->rife_num) {
+                    frame = upscale_image(vf, src);  // source grid point
+                    pts = src->pts;
+                } else {
+                    double t = (double)p->rife_acc / p->rife_num;
+                    struct mp_image *tmp =
+                        interp_source(vf, p->rife_prev, src, t);
+                    frame = tmp ? upscale_image(vf, tmp) : NULL;
+                    mp_image_unrefp(&tmp);
+                    pts = p->rife_prev->pts +
+                          (src->pts - p->rife_prev->pts) * t;
+                }
+                if (!frame) {
+                    failed = true;
+                    break;
+                }
+                frame->pts = pts;
+                if (in_fps > 0)
+                    frame->nominal_fps = in_fps * p->rife_num / p->rife_den;
+                MP_DBG(vf, "rife-first: %s pts=%f\n",
+                       p->rife_acc == p->rife_num ? "source" : "interp", pts);
+                list[n++] = frame;
+                p->rife_acc += p->rife_den;
+            }
+            if (failed || !n) {
+                for (int i = 0; i < n; i++)
+                    mp_image_unrefp(&list[i]);
+                n = 0;
+            } else {
+                p->rife_acc -= p->rife_num;  // rebase into the next pair
+            }
+        }
+        if (!n) {
+            // fresh chain (start/seek), invalid pts, or a failed interp: emit
+            // the upscaled source as the grid origin and resync.
+            p->rife_acc = p->rife_den;
+            struct mp_image *u = upscale_image(vf, src);
+            if (!u) {
+                mp_filter_internal_mark_failed(vf);
+                return;
+            }
+            u->pts = src->pts;
+            if (in_fps > 0)
+                u->nominal_fps = in_fps * p->rife_num / p->rife_den;
+            list[n++] = u;
+        }
+        mp_image_unrefp(&p->rife_prev);
+        p->rife_prev = mp_image_new_ref(src);  // previous *source* endpoint
+        for (int i = 1; i < n; i++)
+            p->outq[p->outq_n++] = list[i];
+        p->outq_pos = 0;
+        mp_refqueue_write_out_pin(p->queue, list[0]);
+        return;
+    }
+
     // Pipelined inference: submit the current frame plus the refqueue's
     // buffered future frames before waiting on the oldest, so the GPU
     // already works on frame N+1 (and N+2, ...) while N's wait blocks.
@@ -1232,6 +1417,7 @@ static void uninit(struct mp_filter *vf)
         ID3D11Texture2D_Release(p->d3d_stage[i]);
 #endif
     av_buffer_unref(&p->hw_pool);
+    av_buffer_unref(&p->src_pool);
     av_buffer_unref(&p->av_device_ref);
     if (p->cu)
         cuda_free_functions(&p->cu);
@@ -1329,6 +1515,10 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         p->api.done = aji_lib_sym(p->api.handle, "aji_done");
         p->api.wait = aji_lib_sym(p->api.handle, "aji_wait");
         p->api.rife_factor = aji_lib_sym(p->api.handle, "aji_rife_factor");
+        // Optional (added without an API_VERSION bump); NULL on older shims,
+        // which then run the default upscale-then-RIFE order.
+        p->api.rife_before_upscale =
+            aji_lib_sym(p->api.handle, "aji_rife_before_upscale");
         p->api.infer_rife = aji_lib_sym(p->api.handle, "aji_infer_rife");
         p->api.poll = aji_lib_sym(p->api.handle, "aji_poll");
         p->api.current_log = aji_lib_sym(p->api.handle, "aji_current_log");
