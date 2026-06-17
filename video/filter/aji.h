@@ -50,10 +50,10 @@ enum aji_format {
                               full-resolution chroma. Valid for input and
                               output; TensorRT backend only. */
     AJI_FMT_RGB10A2 = 4,   /* packed 10-bit RGB (DXGI R10G10B10A2 / mpv
-                              x2bgr10: R in the low 10 bits). DirectML input
-                              only — what mpv hwuploads a 4:4:4 source to on
-                              D3D11. Already RGB, so the backend skips the
-                              YUV->RGB matrix; output is 4:2:0 (P010). */
+                              x2bgr10: R in the low 10 bits). DirectML only —
+                              what mpv hwuploads a 4:4:4 source to on D3D11.
+                              Already RGB, so the backend skips the YUV
+                              matrix and round-trips it as RGB. */
 };
 
 enum aji_matrix {
