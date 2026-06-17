@@ -389,9 +389,10 @@ static void af_scaletempo_process(struct mp_filter *f)
         out_offset += s->bytes_stride;
 
         // input stride
-        memcpy(s->buf_overlap,
-               s->buf_queue + bytes_off + s->bytes_stride,
-               s->bytes_overlap);
+        if (s->buf_overlap && s->bytes_overlap)
+            memcpy(s->buf_overlap,
+                   s->buf_queue + bytes_off + s->bytes_stride,
+                   s->bytes_overlap);
         tf = s->frames_stride_scaled + s->frames_stride_error;
         ti = (int)tf;
         s->frames_stride_error = tf - ti;
