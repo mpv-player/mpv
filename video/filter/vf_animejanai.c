@@ -461,14 +461,19 @@ static bool configure_aji(struct mp_filter *vf)
     p->aji_active = true;
     p->out_fmt = p->aji_fmt;
     if (p->opts->output_444 && !p->is_d3d11) {
-        // Full-resolution chroma straight from the model: 16-bit 4:4:4
-        // planar output (exceeds the reference pipeline, which always
-        // subsampled back to 4:2:0). D3D11/DirectML stays 4:2:0 - DXGI
-        // has no planar 16-bit 4:4:4 video format for the pool.
+        // Option forces full-resolution 4:4:4 even from a 4:2:0 source
+        // (exceeds the reference pipeline, which always subsampled back to
+        // 4:2:0). D3D11/DirectML stays 4:2:0 - DXGI has no planar 16-bit
+        // 4:4:4 video format for the pool.
         p->out_fmt = AJI_FMT_YUV444P16;
+    }
+    if (p->out_fmt == AJI_FMT_YUV444P16) {
+        // Either the option forced it, or a 4:4:4 source mirrors straight
+        // through to 4:4:4 output. The model emits full-16-bit 4:4:4 planar;
+        // tag the pool to match (444 input is CUDA-only, gated at reinit).
         p->out_params.hw_subfmt = pixfmt2imgfmt(AV_PIX_FMT_YUV444P16);
-        // out_params was copied from the 8-bit input; its bit encoding must
-        // follow the format change to 16-bit, or the CUDA->Vulkan interop
+        // out_params was copied from the input; its bit encoding must follow
+        // the format change to 16-bit, or the CUDA->Vulkan interop
         // (gpu-api=vulkan) renders the planes with a ~0.5 LSB normalization
         // shift (the d3d11/sw path re-derives this and is unaffected).
         p->out_params.repr.bits = (struct pl_bit_encoding){
@@ -625,8 +630,10 @@ static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
         const aji_frame fin = {
             .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
             .matrix = mat, .range = rng, .siting = sit,
-            .plane = {in->planes[0], in->planes[1]},
-            .stride = {in->stride[0], in->stride[1]},
+            // plane[2]/stride[2] carry Cr for 4:4:4 input; ignored by the
+            // engine for the 2-plane NV12/P010 formats.
+            .plane = {in->planes[0], in->planes[1], in->planes[2]},
+            .stride = {in->stride[0], in->stride[1], in->stride[2]},
         };
         const aji_frame fout = {
             .width = p->out_params.w, .height = p->out_params.h,
@@ -947,10 +954,18 @@ static void vf_animejanai_process(struct mp_filter *vf)
         if (p->aji) {
             enum AVPixelFormat sw = imgfmt2pixfmt(p->params.hw_subfmt);
             p->aji_fmt = sw == AV_PIX_FMT_NV12 ? AJI_FMT_NV12 :
-                         sw == AV_PIX_FMT_P010 ? AJI_FMT_P010 : 0;
+                         sw == AV_PIX_FMT_P010 ? AJI_FMT_P010 :
+                         sw == AV_PIX_FMT_YUV444P16 ? AJI_FMT_YUV444P16 : 0;
             if (!p->aji_fmt) {
                 MP_ERR(vf, "Unsupported sw format %s for inference\n",
                        mp_imgfmt_to_name(p->params.hw_subfmt));
+                mp_filter_internal_mark_failed(vf);
+                return;
+            }
+            // 4:4:4 ingest is implemented only on the TensorRT/CUDA backend;
+            // the D3D11 staging path has no planar 16-bit 4:4:4 DXGI format.
+            if (p->is_d3d11 && p->aji_fmt == AJI_FMT_YUV444P16) {
+                MP_ERR(vf, "yuv444p16 input requires the TensorRT/CUDA backend\n");
                 mp_filter_internal_mark_failed(vf);
                 return;
             }
