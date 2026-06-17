@@ -844,9 +844,8 @@ local function add_single_video(json)
             "rtmp_app", json.app)
     end
 
-    if json.proxy and json.proxy ~= "" then
-        stream_opts = append_libav_opt(stream_opts,
-            "http_proxy", json.proxy)
+    if json.proxy and json.proxy ~= "" and not option_was_set("http-proxy") then
+        mp.set_property("file-local-options/http-proxy", json.proxy)
     end
 
     set_cookies(cookies)
