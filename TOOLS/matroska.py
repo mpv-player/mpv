@@ -52,9 +52,9 @@ elements_matroska = (
         ),
 
         "Info*, 1549a966, sub", (
-            "SegmentUID, 73a4, binary",
-            "PrevUID, 3cb923, binary",
-            "NextUID, 3eb923, binary",
+            "SegmentUID, 73a4, binary, 16",
+            "PrevUID, 3cb923, binary, 16",
+            "NextUID, 3eb923, binary, 16",
             "TimecodeScale, 2ad7b1, uint",
             "DateUTC, 4461, sint",
             "Title, 7ba9, str",
@@ -119,7 +119,7 @@ elements_matroska = (
                     "PixelCropRight, 54dd, uint",
                     "PixelCropBottom, 54aa, uint",
                     "FrameRate, 2383e3, float",
-                    "ColourSpace, 2eb524, binary",
+                    "ColourSpace, 2eb524, binary, 4",
                     "StereoMode, 53b8, uint",
                     "Colour, 55b0, sub", (
                         "MatrixCoefficients,      55B1, uint",
@@ -216,7 +216,7 @@ elements_matroska = (
                     "ChapterTimeEnd, 92, uint",
                     "ChapterFlagHidden, 98, uint",
                     "ChapterFlagEnabled, 4598, uint",
-                    "ChapterSegmentUID, 6e67, binary",
+                    "ChapterSegmentUID, 6e67, binary, 16",
                     "ChapterSegmentEditionUID, 6ebc, uint",
                     "ChapterDisplay*, 80, sub", (
                         "ChapString, 85, str",
@@ -266,13 +266,14 @@ def camelcase_to_words(name):
 
 class MatroskaElement:
 
-    def __init__(self, name, elid, valtype, namespace):
+    def __init__(self, name, elid, valtype, namespace, length=None):
         self.name = name
         self.definename = f"{namespace}_ID_{name.upper()}"
         self.fieldname = camelcase_to_words(name)
         self.structname = "ebml_" + self.fieldname
         self.elid = elid
         self.valtype = valtype
+        self.length = int(length or "0")
         if valtype == "sub":
             self.ebmltype = "EBML_TYPE_SUBELEMENTS"
             self.valname = "struct " + self.structname
@@ -297,11 +298,12 @@ def parse_elems(elements, namespace):
     subelements = []
     for el in elements:
         if isinstance(el, str):
-            name, hexid, eltype = (x.strip() for x in el.split(","))
+            name, hexid, eltype, *rest = (x.strip() for x in el.split(","))
+            length = rest[0] if rest else None
             hexid = hexid.lower()
             multiple = name.endswith("*")
             name = name.strip("*")
-            new = MatroskaElement(name, hexid, eltype, namespace)
+            new = MatroskaElement(name, hexid, eltype, namespace, length)
             elementd[hexid] = new
             elementlist.append(new)
             subelements.append((new, multiple))
@@ -363,7 +365,8 @@ def generate_c_definitions(out):
             printf(out, "}};")
             printf(out, "#undef N")
         else:
-            printf(out, f'E("{el.name}", {el.fieldname}, {el.ebmltype})')
+            printf(out, f'E("{el.name}", {el.fieldname}, {el.ebmltype}, '
+                        f'{el.length})')
 
 def read(s, length):
     t = s.read(length)
