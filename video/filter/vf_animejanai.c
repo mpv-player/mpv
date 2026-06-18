@@ -498,11 +498,11 @@ static bool configure_aji(struct mp_filter *vf)
     // reference pipeline (VS/zimg doesn't propagate chroma location from
     // unsubsampled sources); tag the output accordingly.
     p->out_params.chroma_location = PL_CHROMA_LEFT;
-    // RIFE-first runs only on the TensorRT/CUDA path (the source-resolution
-    // interpolation temp needs a CUDA hwframe pool; DirectML reports 0). The
-    // shim configured RIFE for the matching resolution, so the order here must
-    // agree with what aji_rife_before_upscale() reports.
-    p->rife_first = p->rife_on && p->aji_active && !p->is_d3d11 &&
+    // RIFE-first: interpolate at the source resolution, then upscale every
+    // frame. The shim configured RIFE for the matching resolution, so the
+    // order here must agree with what aji_rife_before_upscale() reports
+    // (TensorRT and DirectML both support it; older shims report 0).
+    p->rife_first = p->rife_on && p->aji_active &&
                     p->api.rife_before_upscale &&
                     p->api.rife_before_upscale(p->aji);
     if (p->rife_first)
@@ -546,6 +546,43 @@ static bool update_d3d11_pool(struct mp_filter *vf)
                             D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
     if (av_hwframe_ctx_init(p->hw_pool) < 0) {
         av_buffer_unref(&p->hw_pool);
+        return false;
+    }
+    return true;
+}
+
+// RIFE-first (D3D11): a source-resolution shareable pool for interpolation
+// temps (and shareable staged copies of the source frames). Mirrors
+// update_d3d11_pool but at the input geometry.
+static bool update_d3d11_src_pool(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (p->src_pool) {
+        AVHWFramesContext *hw_frames = (void *)p->src_pool->data;
+        if (hw_frames->width != p->params.w ||
+            hw_frames->height != p->params.h ||
+            hw_frames->sw_format != imgfmt2pixfmt(p->params.hw_subfmt))
+            av_buffer_unref(&p->src_pool);
+    }
+    if (p->src_pool)
+        return true;
+
+    p->src_pool = av_hwframe_ctx_alloc(p->av_device_ref);
+    if (!p->src_pool)
+        return false;
+    AVHWFramesContext *hw_frames = (void *)p->src_pool->data;
+    hw_frames->format = AV_PIX_FMT_D3D11;
+    hw_frames->sw_format = imgfmt2pixfmt(p->params.hw_subfmt);
+    hw_frames->width = p->params.w;
+    hw_frames->height = p->params.h;
+    AVD3D11VAFramesContext *d3d_frames = hw_frames->hwctx;
+    d3d_frames->BindFlags = D3D11_BIND_RENDER_TARGET |
+                            D3D11_BIND_SHADER_RESOURCE;
+    d3d_frames->MiscFlags = D3D11_RESOURCE_MISC_SHARED |
+                            D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+    if (av_hwframe_ctx_init(p->src_pool) < 0) {
+        av_buffer_unref(&p->src_pool);
         return false;
     }
     return true;
@@ -851,9 +888,19 @@ static struct mp_image *alloc_src(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
 
-    if (!mp_update_av_hw_frames_pool(&p->src_pool, p->av_device_ref,
-                                     IMGFMT_CUDA, p->params.hw_subfmt,
-                                     p->params.w, p->params.h, false)) {
+    bool pool_ok;
+    if (p->is_d3d11) {
+#if HAVE_D3D11
+        pool_ok = update_d3d11_src_pool(vf);
+#else
+        pool_ok = false;
+#endif
+    } else {
+        pool_ok = mp_update_av_hw_frames_pool(&p->src_pool, p->av_device_ref,
+                                              IMGFMT_CUDA, p->params.hw_subfmt,
+                                              p->params.w, p->params.h, false);
+    }
+    if (!pool_ok) {
         MP_ERR(vf, "Failed to create source hw pool\n");
         return NULL;
     }
@@ -871,8 +918,31 @@ static struct mp_image *alloc_src(struct mp_filter *vf)
     return img;
 }
 
-// RIFE-first (CUDA): interpolate two source-resolution frames at time t into a
-// fresh source-resolution frame (the caller upscales it). Returns a new ref of
+#if HAVE_D3D11
+// RIFE-first (D3D11): copy a decoder source texture into a fresh shareable
+// source-res texture, so the shim's D3D12 device can open it for interpolation
+// (decoder textures are neither shareable nor synchronized). The same staged
+// copy serves as a rife endpoint for two pairs and as an upscale input.
+static struct mp_image *stage_src_d3d11(struct mp_filter *vf,
+                                        struct mp_image *src)
+{
+    struct priv *p = vf->priv;
+    struct mp_image *out = alloc_src(vf);
+    if (!out)
+        return NULL;
+    mp_image_copy_attributes(out, src);
+    out->params = p->params;
+    ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+        (ID3D11Resource *)out->planes[0], (UINT)(intptr_t)out->planes[1],
+        0, 0, 0,
+        (ID3D11Resource *)src->planes[0], (UINT)(intptr_t)src->planes[1],
+        NULL);
+    return out;
+}
+#endif
+
+// RIFE-first: interpolate two source-resolution frames at time t into a fresh
+// source-resolution frame (the caller upscales it). Returns a new ref of
 // `a` on a scene change, NULL on error. pts is left for the caller.
 static struct mp_image *interp_source(struct mp_filter *vf,
                                       struct mp_image *a, struct mp_image *b,
@@ -914,8 +984,8 @@ static struct mp_image *interp_source(struct mp_filter *vf,
         talloc_free(out);
         return NULL;
     }
-    bool ok = false;
-    if (CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
+    bool ok = p->is_d3d11;   // the DirectML shim completes synchronously
+    if (!ok && CHECK_CU(p->cu->cuCtxPushCurrent(p->cuda_ctx)) >= 0) {
         ok = CHECK_CU(p->cu->cuStreamSynchronize(p->stream)) >= 0;
         CHECK_CU(p->cu->cuCtxPopCurrent(&dummy));
     }
@@ -1191,14 +1261,28 @@ static void vf_animejanai_process(struct mp_filter *vf)
         return;
 
     if (p->rife_first) {
-        // CUDA RIFE-first: interpolate the source pair, then upscale each
-        // emitted frame. Same output-grid cadence as the default path below,
-        // but rife_prev holds the previous *source* frame and the heavy
-        // upscaler runs per emitted frame instead of RIFE at the output res.
+        // RIFE-first: interpolate the source pair, then upscale each emitted
+        // frame. Same output-grid cadence as the default path below, but
+        // rife_prev holds the previous *source* frame and the heavy upscaler
+        // runs per emitted frame instead of RIFE at the output res.
         struct mp_image *src = mp_refqueue_get(p->queue, 0);
         if (!src)
             return;
         const double in_fps = src->nominal_fps;
+        // The rife/upscale read this owned source frame: a ref of the decoder
+        // frame on CUDA, a shareable staged copy on D3D11 (decoder textures
+        // aren't shareable to the shim's D3D12 device).
+        struct mp_image *cur_src;
+#if HAVE_D3D11
+        if (p->is_d3d11)
+            cur_src = stage_src_d3d11(vf, src);
+        else
+#endif
+            cur_src = mp_image_new_ref(src);
+        if (!cur_src) {
+            mp_filter_internal_mark_failed(vf);
+            return;
+        }
         struct mp_image *list[8];
         int n = 0;
         bool failed = false;
@@ -1208,12 +1292,12 @@ static void vf_animejanai_process(struct mp_filter *vf)
                 struct mp_image *frame;
                 double pts;
                 if (p->rife_acc == p->rife_num) {
-                    frame = upscale_image(vf, src);  // source grid point
+                    frame = upscale_image(vf, cur_src);  // source grid point
                     pts = src->pts;
                 } else {
                     double t = (double)p->rife_acc / p->rife_num;
                     struct mp_image *tmp =
-                        interp_source(vf, p->rife_prev, src, t);
+                        interp_source(vf, p->rife_prev, cur_src, t);
                     frame = tmp ? upscale_image(vf, tmp) : NULL;
                     mp_image_unrefp(&tmp);
                     pts = p->rife_prev->pts +
@@ -1243,8 +1327,9 @@ static void vf_animejanai_process(struct mp_filter *vf)
             // fresh chain (start/seek), invalid pts, or a failed interp: emit
             // the upscaled source as the grid origin and resync.
             p->rife_acc = p->rife_den;
-            struct mp_image *u = upscale_image(vf, src);
+            struct mp_image *u = upscale_image(vf, cur_src);
             if (!u) {
+                mp_image_unrefp(&cur_src);
                 mp_filter_internal_mark_failed(vf);
                 return;
             }
@@ -1254,7 +1339,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
             list[n++] = u;
         }
         mp_image_unrefp(&p->rife_prev);
-        p->rife_prev = mp_image_new_ref(src);  // previous *source* endpoint
+        p->rife_prev = cur_src;  // previous *source* endpoint (owns the ref)
         for (int i = 1; i < n; i++)
             p->outq[p->outq_n++] = list[i];
         p->outq_pos = 0;
