@@ -98,14 +98,19 @@ done
 # runtime). libGL/EGL/drm/gbm/cuda/nvidia stay host-provided (driver-coupled).
 EXCLUDE='ld-linux|libc\.so|libm\.so|libdl\.so|libpthread|librt\.so|libresolv|libstdc\+\+|libgcc_s|libGL|libEGL|libGLX|libGLdispatch|libOpenGL|libdrm|libgbm|libva\.|libva-|libcuda\.so|libnvidia'
 collect(){ # recursively copy a binary's non-excluded NEEDED libs
-  ldd "$1" 2>/dev/null | awk '/=>/{print $3}' | grep -E '^/' | while read -r lib; do
+  # Capture into a var (no pipe subshell) so a leaf lib with no further deps
+  # doesn't trip pipefail/set -e. Always returns 0.
+  local deps lib base
+  deps=$(ldd "$1" 2>/dev/null | awk '/=> \//{print $3}') || true
+  for lib in $deps; do
     base=$(basename "$lib")
     echo "$base" | grep -Eq "$EXCLUDE" && continue
     [ -e "$BUNDLE/$base" ] && continue
-    cp -aL "$lib" "$BUNDLE/$base" && collect "$lib"
+    cp -aL "$lib" "$BUNDLE/$base" 2>/dev/null || continue
+    collect "$lib"
   done
+  return 0
 }
-export -f collect; export BUNDLE EXCLUDE
 collect "$BUNDLE/mpv"
 for so in "$BUNDLE"/libmpv.so*; do collect "$so"; done
 
