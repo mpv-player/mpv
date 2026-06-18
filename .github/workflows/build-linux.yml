@@ -20,10 +20,8 @@ jobs:
     permissions:
       contents: write
     steps:
-    - name: Checkout (master carries vf_animejanai)
+    - name: Checkout (linux-support = master + the build script; carries vf_animejanai)
       uses: actions/checkout@v4
-      with:
-        ref: master
 
     - name: Build portable mpv bundle
       run: |
