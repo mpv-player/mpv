@@ -24,6 +24,7 @@ mkdir -p "$DEPS" "$PREFIX" "$OUT"
 
 WAYLAND_TAG=1.23.1; WAYLAND_PROTOCOLS_TAG=1.41
 FFNVCODEC_TAG=n13.0.19.0; FFMPEG_TAG=n7.1; SHADERC_TAG=v2024.0
+VULKAN_TAG=vulkan-sdk-1.3.296.0  # jammy ships 1.3.204; mpv needs vulkan >= 1.3.238
 say(){ echo -e "\n========== $* =========="; }
 clone(){ [ -d "$2" ] || git clone --depth 1 -b "$3" "$1" "$2"; }
 
@@ -49,6 +50,15 @@ clone https://github.com/FFmpeg/FFmpeg.git "$DEPS/ffmpeg" "$FFMPEG_TAG"
     --enable-nvenc --disable-programs --disable-doc --disable-debug \
     --extra-cflags="-I$PREFIX/include" --extra-ldflags="-L$PREFIX/lib" \
   && make -j"$JOBS" && make install )
+
+say "Vulkan-Headers + Loader $VULKAN_TAG"
+clone https://github.com/KhronosGroup/Vulkan-Headers.git "$DEPS/vulkan-headers" "$VULKAN_TAG"
+cmake -B "$DEPS/vulkan-headers/b" -S "$DEPS/vulkan-headers" -DCMAKE_INSTALL_PREFIX="$PREFIX" >/dev/null
+cmake --install "$DEPS/vulkan-headers/b"
+clone https://github.com/KhronosGroup/Vulkan-Loader.git "$DEPS/vulkan-loader" "$VULKAN_TAG"
+cmake -B "$DEPS/vulkan-loader/b" -S "$DEPS/vulkan-loader" -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX="$PREFIX" -DVULKAN_HEADERS_INSTALL_DIR="$PREFIX" -DBUILD_TESTS=OFF
+cmake --build "$DEPS/vulkan-loader/b" -j"$JOBS"; cmake --install "$DEPS/vulkan-loader/b"
 
 say "shaderc $SHADERC_TAG"
 if [ ! -d "$DEPS/shaderc" ]; then
@@ -84,7 +94,9 @@ for so in "$PREFIX"/lib/x86_64-linux-gnu/libmpv.so* "$PREFIX"/lib/libmpv.so*; do
   [ -e "$so" ] && cp -aL "$so" "$BUNDLE/" 2>/dev/null || true
 done
 # host-provided, never bundled (driver/display-coupled + the C/C++ runtime)
-EXCLUDE='ld-linux|libc\.so|libm\.so|libdl\.so|libpthread|librt\.so|libresolv|libstdc\+\+|libgcc_s|libGL|libEGL|libGLX|libGLdispatch|libOpenGL|libvulkan|libdrm|libgbm|libva\.|libva-|libcuda\.so|libnvidia'
+# libvulkan is bundled (our newer loader; it still finds the host's NVIDIA ICD at
+# runtime). libGL/EGL/drm/gbm/cuda/nvidia stay host-provided (driver-coupled).
+EXCLUDE='ld-linux|libc\.so|libm\.so|libdl\.so|libpthread|librt\.so|libresolv|libstdc\+\+|libgcc_s|libGL|libEGL|libGLX|libGLdispatch|libOpenGL|libdrm|libgbm|libva\.|libva-|libcuda\.so|libnvidia'
 collect(){ # recursively copy a binary's non-excluded NEEDED libs
   ldd "$1" 2>/dev/null | awk '/=>/{print $3}' | grep -E '^/' | while read -r lib; do
     base=$(basename "$lib")
