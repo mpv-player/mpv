@@ -543,7 +543,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_STR:
             if (length > 1024 * 1024) {
                 MP_ERR(ctx, "Not reading overly long string element.\n");
-                break;
+                goto error;
             }
             char **strptr;
             GETPTR(strptr, char *);
@@ -554,7 +554,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_BINARY:;
             if (length > 0x80000000) {
                 MP_ERR(ctx, "Not reading overly long EBML element.\n");
-                break;
+                goto error;
             }
             struct bstr *binptr;
             GETPTR(binptr, struct bstr);
