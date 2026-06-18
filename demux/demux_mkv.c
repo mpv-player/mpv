@@ -467,17 +467,11 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     }
     if (info.n_segment_uid) {
         size_t len = info.segment_uid.len;
-        if (len != sizeof(demuxer->matroska_data.uid.segment)) {
-            MP_INFO(demuxer, "segment uid invalid length %zu\n", len);
-        } else {
-            memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start,
-                   len);
-            MP_DBG(demuxer, "| + segment uid");
-            for (size_t i = 0; i < len; i++)
-                MP_DBG(demuxer, " %02x",
-                       demuxer->matroska_data.uid.segment[i]);
-            MP_DBG(demuxer, "\n");
-        }
+        memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start, len);
+        MP_DBG(demuxer, "| + segment uid");
+        for (size_t i = 0; i < len; i++)
+            MP_DBG(demuxer, " %02x", demuxer->matroska_data.uid.segment[i]);
+        MP_DBG(demuxer, "\n");
     }
     if (demuxer->params && demuxer->params->matroska_wanted_uids) {
         if (info.n_segment_uid) {
@@ -747,7 +741,7 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         track->v_height = video->pixel_height;
         MP_DBG(demuxer, "|   + Pixel height: %"PRIu32"\n", track->v_height);
     }
-    if (video->n_colour_space && video->colour_space.len == 4) {
+    if (video->n_colour_space) {
         uint8_t *d = (uint8_t *)&video->colour_space.start[0];
         track->colorspace = d[0] | ((uint32_t)d[1] << 8) | ((uint32_t)d[2] << 16) | ((uint32_t)d[3] << 24);
         MP_DBG(demuxer, "|   + Colorspace: %#"PRIx32"\n", track->colorspace);
@@ -1235,22 +1229,15 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             if (ca->n_chapter_segment_uid) {
                 chapter.has_segment_uid = true;
                 int len = ca->chapter_segment_uid.len;
-                if (len != sizeof(chapter.uid.segment))
-                    MP_MSG(demuxer, warn_level,
-                           "Chapter segment uid bad length %d\n", len);
-                else {
-                    memcpy(chapter.uid.segment, ca->chapter_segment_uid.start,
-                           len);
-                    if (ca->n_chapter_segment_edition_uid)
-                        chapter.uid.edition = ca->chapter_segment_edition_uid;
-                    else
-                        chapter.uid.edition = 0;
-                    MP_DBG(demuxer, "Chapter segment uid ");
-                    for (int n = 0; n < len; n++)
-                        MP_DBG(demuxer, "%02x ",
-                               chapter.uid.segment[n]);
-                    MP_DBG(demuxer, "\n");
-                }
+                memcpy(chapter.uid.segment, ca->chapter_segment_uid.start, len);
+                if (ca->n_chapter_segment_edition_uid)
+                    chapter.uid.edition = ca->chapter_segment_edition_uid;
+                else
+                    chapter.uid.edition = 0;
+                MP_DBG(demuxer, "Chapter segment uid ");
+                for (int n = 0; n < len; n++)
+                    MP_DBG(demuxer, "%02x ", chapter.uid.segment[n]);
+                MP_DBG(demuxer, "\n");
             }
 
             MP_DBG(demuxer, "Chapter %u from %02d:%02d:%02d.%09d "
