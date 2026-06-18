@@ -465,11 +465,13 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     if (info.title) {
         mp_tags_set_str(demuxer->metadata, "TITLE", info.title);
     }
+    bool have_segment_uid = false;
     if (info.n_segment_uid) {
         size_t len = info.segment_uid.len;
         if (len != sizeof(demuxer->matroska_data.uid.segment)) {
             MP_INFO(demuxer, "segment uid invalid length %zu\n", len);
         } else {
+            have_segment_uid = true;
             memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start,
                    len);
             MP_DBG(demuxer, "| + segment uid");
@@ -480,7 +482,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         }
     }
     if (demuxer->params && demuxer->params->matroska_wanted_uids) {
-        if (info.n_segment_uid) {
+        if (have_segment_uid) {
             for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
                 struct matroska_segment_uid *uid = demuxer->params->matroska_wanted_uids + i;
                 if (!memcmp(info.segment_uid.start, uid->segment, 16)) {
