@@ -1,0 +1,53 @@
+name: Build Linux (portable mpv + vf_animejanai)
+
+# Builds a portable Linux mpv bundle (mpv + libmpv.so.2 with the vf_animejanai
+# filter, plus its shared-lib deps) on the Ubuntu 22.04 baseline image and
+# publishes it as a release asset. The mpv-upscale-2x_animejanai assembler
+# downloads this (InstallLinuxMpv) - the Linux analogue of the mpv-winbuild
+# release for Windows. The filter lives on master (aji ABI v7).
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (matches MpvForkLinuxVersion in the assembler)'
+        required: true
+  push:
+    branches: [linux-support]
+    paths:
+      - ci/build-linux-portable.sh
+      - .github/workflows/build-linux.yml
+
+# Default tag for push-triggered runs (matches MpvForkLinuxVersion).
+env:
+  DEFAULT_TAG: 2026-06-18-9bb5fe9680
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/the-database/animejanai-linux-build:ubuntu2204
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      packages: read
+    steps:
+    - name: Checkout (linux-support = master + the build script; carries vf_animejanai)
+      uses: actions/checkout@v4
+
+    - name: Build portable mpv bundle
+      run: |
+        chmod +x ci/build-linux-portable.sh
+        MPV_SRC="$PWD" ci/build-linux-portable.sh "${{ github.event.inputs.release_tag || env.DEFAULT_TAG }}" "$PWD/out"
+
+    - name: Publish release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ github.event.inputs.release_tag || env.DEFAULT_TAG }}
+        name: ${{ github.event.inputs.release_tag || env.DEFAULT_TAG }}
+        draft: false
+        prerelease: false
+        allowUpdates: true
+        artifacts: "out/mpv-linux-x64-${{ github.event.inputs.release_tag || env.DEFAULT_TAG }}.tar.zst"
+        token: ${{ secrets.GITHUB_TOKEN }}
