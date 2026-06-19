@@ -321,13 +321,19 @@ void mark_seek(struct MPContext *mpctx)
     cmd->last_seek_time = now;
 }
 
-static char *append_selected_style(struct MPContext *mpctx, char *str)
+static char *append_selected_style(struct MPContext *mpctx, char *str, bool selected)
 {
-    if (!mpctx->video_out || !mpctx->opts->video_osd)
-        return talloc_strdup_append(str, TERM_ESC_REVERSE_COLORS);
+    if (!mpctx->video_out || !mpctx->opts->video_osd) {
+        if (selected)
+            return talloc_strdup_append(str, TERM_ESC_REVERSE_COLORS);
+        return str;
+    }
+
+    if (!selected)
+        return talloc_strdup_append(str, OSD_ASS_0 "{\\alpha&HFF}" BLACK_CIRCLE "{\\r} " OSD_ASS_1);
 
     return talloc_asprintf_append(str,
-               "%s{\\b1\\1c&H%02hhx%02hhx%02hhx&\\1a&H%02hhx&\\3c&H%02hhx%02hhx%02hhx&\\3a&H%02hhx&}%s",
+               "%s{\\1c&H%02hhx%02hhx%02hhx&\\1a&H%02hhx&\\3c&H%02hhx%02hhx%02hhx&\\3a&H%02hhx&}%s%s ",
                OSD_ASS_0,
                mpctx->video_out->osd->opts->osd_selected_color.b,
                mpctx->video_out->osd->opts->osd_selected_color.g,
@@ -337,6 +343,7 @@ static char *append_selected_style(struct MPContext *mpctx, char *str)
                mpctx->video_out->osd->opts->osd_selected_outline_color.g,
                mpctx->video_out->osd->opts->osd_selected_outline_color.r,
                (uint8_t)(255 - mpctx->video_out->osd->opts->osd_selected_outline_color.a),
+               BLACK_CIRCLE,
                OSD_ASS_1);
 }
 
@@ -1099,8 +1106,7 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
         }
 
         for (n = 0; n < count; n++) {
-            if (n == cur)
-                res = append_selected_style(mpctx, res);
+            res = append_selected_style(mpctx, res, n == cur);
             char *name = chapter_name(mpctx, n);
             double t = chapter_start_time(mpctx, n);
             char* time = mp_format_time(t, false);
@@ -1222,8 +1228,7 @@ static int mp_property_list_editions(void *ctx, struct m_property *prop,
         for (int n = 0; n < num_editions; n++) {
             struct demux_edition *ed = &editions[n];
 
-            if (n == current)
-                res = append_selected_style(mpctx, res);
+            res = append_selected_style(mpctx, res, n == current);
             res = talloc_asprintf_append(res, "%d: ", n);
             char *title = mp_tags_get_str(ed->metadata, "title");
             if (!title)
@@ -3553,8 +3558,10 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
             const char *reset = "";
 
             if (line->start <= time_pos && line->end > time_pos) {
-                res = append_selected_style(mpctx, res);
+                res = append_selected_style(mpctx, res, true);
                 reset = get_style_reset(mpctx);
+            } else {
+                res = append_selected_style(mpctx, res, false);
             }
 
             res = talloc_asprintf_append(res, "%s%s\n", line->text, reset);
@@ -3695,8 +3702,7 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 
         for (int n = 0; n < pl->num_entries; n++) {
             struct playlist_entry *e = pl->entries[n];
-            if (pl->current == e)
-                res = append_selected_style(mpctx, res);
+            res = append_selected_style(mpctx, res, pl->current == e);
             const char *reset = pl->current == e ? get_style_reset(mpctx) : "";
             const char *p = e->title;
             if (!p || mpctx->opts->playlist_entry_name > 0) {
