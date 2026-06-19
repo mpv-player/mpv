@@ -1,5 +1,5 @@
 /*
- * aji.h — AnimeJaNai inference shim, C ABI (version 7).
+ * aji.h — AnimeJaNai inference shim, C ABI (version 8).
  *
  * Boundary between the mpv filter (mingw/gcc world) and the inference
  * backends (MSVC world on Windows). Only C types and opaque handles
@@ -39,7 +39,7 @@ extern "C" {
 #  define AJI_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define AJI_API_VERSION 7
+#define AJI_API_VERSION 8
 
 typedef struct aji_ctx aji_ctx;
 
@@ -177,6 +177,24 @@ AJI_EXPORT int aji_scale_factor(aji_ctx *c);
 /* RIFE interpolation factor of the active chain. Returns 1 and fills
  * num/den if RIFE is active after the last aji_configure(), else 0. */
 AJI_EXPORT int aji_rife_factor(aji_ctx *c, int *num, int *den);
+
+/* Pre-RIFE downscale (rife-first only). When aji_rife_before_upscale() returns
+ * 1 and the active chain's first model carries a "resize before upscale", this
+ * returns 1 and fills (work_w, work_h): the resolution the caller must
+ * downscale source frames to (via aji_resize) BEFORE interpolating + upscaling,
+ * so RIFE runs on the smaller frame. The configured RIFE dims and the upscale
+ * chain's input dims are then (work_w, work_h), not the source dims. Returns 0
+ * when no pre-RIFE downscale is configured (the caller feeds source-resolution
+ * frames as before). Valid after aji_configure(). */
+AJI_EXPORT int aji_pre_resize(aji_ctx *c, int *work_w, int *work_h);
+
+/* Downscale one source-resolution frame to the work resolution reported by
+ * aji_pre_resize() (Spline36, the same resampler as the in-chain resize). `in`
+ * dims = configure's source dims; `out` dims = (work_w, work_h); same format in
+ * and out. Enqueues like aji_infer (TensorRT: cu_stream; DirectML: the shim's
+ * queue). Only meaningful when aji_pre_resize() returned 1. */
+AJI_EXPORT int aji_resize(aji_ctx *c, const aji_frame *in,
+                          const aji_frame *out, void *cu_stream);
 
 /* Async builds: returns 1 (once) when a background engine build finished;
  * the caller should re-run aji_configure, which now finds the engine in

@@ -165,6 +165,9 @@ struct aji_api {
     int (*wait)(aji_ctx *c, uint64_t ticket);
     int (*rife_factor)(aji_ctx *c, int *num, int *den);
     int (*rife_before_upscale)(aji_ctx *c);  // optional (may be NULL)
+    int (*pre_resize)(aji_ctx *c, int *work_w, int *work_h);  // optional
+    int (*resize)(aji_ctx *c, const aji_frame *in, const aji_frame *out,
+                  void *cu_stream);          // optional; pre-RIFE downscale
     int (*infer_rife)(aji_ctx *c, const aji_frame *a, const aji_frame *b,
                       double t, const aji_frame *out, void *cu_stream);
     int (*poll)(aji_ctx *c);
@@ -256,11 +259,22 @@ struct priv {
     struct mp_image *rife_prev; // last upscaled frame (left endpoint)
     struct mp_image *outq[8];
     int outq_n, outq_pos;
-    // RIFE-first (CUDA only): interpolate the source pair, then upscale every
-    // emitted frame. rife_prev then holds the previous *source* frame and
-    // src_pool supplies source-resolution buffers for the interpolation temps.
+    // RIFE-first: interpolate the source pair, then upscale every emitted
+    // frame. rife_prev then holds the previous work-res source frame; src_pool
+    // supplies source-resolution shareable copies of the decoder frames (the
+    // D3D11 rife endpoints / pre-resize input).
     bool rife_first;
     AVBufferRef *src_pool;
+    // Pre-RIFE downscale (rife-first): when the engine reports one via
+    // aji_pre_resize, source frames are downscaled to (work_w, work_h) with
+    // api.resize before RIFE + upscaling, so RIFE runs on the smaller frame.
+    // The interp temps and upscale inputs are then at the work resolution
+    // (work_pool). When there is no pre-resize, work_w/h == params.w/h.
+    bool has_pre_resize;
+    int work_w, work_h;
+    AVBufferRef *work_pool;          // work-res frames (interp temps + the
+                                     // pre-RIFE downscale output); only used
+                                     // when has_pre_resize
 };
 
 static int check_cu(struct mp_filter *vf, CUresult err, const char *func)
@@ -430,6 +444,9 @@ static bool configure_aji(struct mp_filter *vf)
     int rn = 0, rd = 0;
     p->rife_on = false;
     p->rife_first = false;
+    p->has_pre_resize = false;
+    p->work_w = p->params.w;
+    p->work_h = p->params.h;
     p->rife_num = p->rife_den = 1;
     mp_image_unrefp(&p->rife_prev);  // never interpolate across a reconfigure
     if (p->api.rife_factor(p->aji, &rn, &rd) && rd > 0 && rn > rd) {
@@ -507,6 +524,20 @@ static bool configure_aji(struct mp_filter *vf)
                     p->api.rife_before_upscale(p->aji);
     if (p->rife_first)
         MP_VERBOSE(vf, "RIFE-first: interpolating before upscaling\n");
+    // Pre-RIFE downscale: when rife-first, ask the engine whether the first
+    // model's "resize before upscale" was hoisted ahead of RIFE. If so, source
+    // frames are downscaled to (work_w, work_h) via api.resize before being
+    // interpolated and upscaled, so the RIFE + upscale path runs at work res.
+    if (p->rife_first && p->api.pre_resize && p->api.resize) {
+        int ww = 0, wh = 0;
+        if (p->api.pre_resize(p->aji, &ww, &wh) && ww > 0 && wh > 0) {
+            p->has_pre_resize = true;
+            p->work_w = ww;
+            p->work_h = wh;
+            MP_VERBOSE(vf, "Pre-RIFE downscale: %dx%d -> %dx%d\n",
+                       p->params.w, p->params.h, ww, wh);
+        }
+    }
     update_depth(vf);
     MP_VERBOSE(vf, "Configured slot %d: %dx%d -> %dx%d (depth %d)\n",
                p->cur_slot, p->params.w, p->params.h, ow, oh, p->depth);
@@ -587,6 +618,43 @@ static bool update_d3d11_src_pool(struct mp_filter *vf)
     }
     return true;
 }
+
+// RIFE-first pre-resize (D3D11): a work-resolution shareable pool for the
+// downscaled source frames + interpolation temps. Mirrors update_d3d11_src_pool
+// but at the work geometry.
+static bool update_d3d11_work_pool(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+
+    if (p->work_pool) {
+        AVHWFramesContext *hw_frames = (void *)p->work_pool->data;
+        if (hw_frames->width != p->work_w ||
+            hw_frames->height != p->work_h ||
+            hw_frames->sw_format != imgfmt2pixfmt(p->params.hw_subfmt))
+            av_buffer_unref(&p->work_pool);
+    }
+    if (p->work_pool)
+        return true;
+
+    p->work_pool = av_hwframe_ctx_alloc(p->av_device_ref);
+    if (!p->work_pool)
+        return false;
+    AVHWFramesContext *hw_frames = (void *)p->work_pool->data;
+    hw_frames->format = AV_PIX_FMT_D3D11;
+    hw_frames->sw_format = imgfmt2pixfmt(p->params.hw_subfmt);
+    hw_frames->width = p->work_w;
+    hw_frames->height = p->work_h;
+    AVD3D11VAFramesContext *d3d_frames = hw_frames->hwctx;
+    d3d_frames->BindFlags = D3D11_BIND_RENDER_TARGET |
+                            D3D11_BIND_SHADER_RESOURCE;
+    d3d_frames->MiscFlags = D3D11_RESOURCE_MISC_SHARED |
+                            D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+    if (av_hwframe_ctx_init(p->work_pool) < 0) {
+        av_buffer_unref(&p->work_pool);
+        return false;
+    }
+    return true;
+}
 #endif
 
 static struct mp_image *alloc_out(struct mp_filter *vf)
@@ -654,22 +722,33 @@ static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
 
 #if HAVE_D3D11
     if (p->is_d3d11) {
-        // Stage the decode slice into a shareable texture first: decoder
-        // surfaces are neither shareable nor synchronized for other
-        // devices, and the same-device copy orders against decode on the
-        // immediate context (vf_amf.c precedent).
-        ID3D11Texture2D *stage = p->d3d_stage[p->d3d_stage_next];
-        p->d3d_stage_next = (p->d3d_stage_next + 1) % p->d3d_stage_count;
-        ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
-            (ID3D11Resource *)stage, 0, 0, 0, 0,
-            (ID3D11Resource *)in->planes[0], (UINT)(intptr_t)in->planes[1],
-            NULL);
-        const aji_frame fin = {
-            .width = p->params.w, .height = p->params.h,
+        // Input geometry comes from the frame: the decoder size on the normal
+        // path, the work (downscaled) size in rife-first mode.
+        aji_frame fin = {
+            .width = in->w, .height = in->h,
             .format = p->aji_fmt,
             .matrix = mat, .range = rng, .siting = sit,
-            .plane = {stage, 0},
         };
+        if (p->rife_first) {
+            // rife-first frames (the downscaled source / interp temps) are
+            // already shareable work-res textures; feed them to the shim
+            // directly, no decoder staging.
+            fin.plane[0] = in->planes[0];
+            fin.plane[1] = in->planes[1];
+        } else {
+            // Stage the decode slice into a shareable texture first: decoder
+            // surfaces are neither shareable nor synchronized for other
+            // devices, and the same-device copy orders against decode on the
+            // immediate context (vf_amf.c precedent).
+            ID3D11Texture2D *stage = p->d3d_stage[p->d3d_stage_next];
+            p->d3d_stage_next = (p->d3d_stage_next + 1) % p->d3d_stage_count;
+            ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+                (ID3D11Resource *)stage, 0, 0, 0, 0,
+                (ID3D11Resource *)in->planes[0], (UINT)(intptr_t)in->planes[1],
+                NULL);
+            fin.plane[0] = stage;
+            fin.plane[1] = 0;
+        }
         const aji_frame fout = {
             .width = p->out_params.w, .height = p->out_params.h,
             .format = p->aji_fmt,
@@ -681,7 +760,9 @@ static bool submit_frame(struct mp_filter *vf, struct mp_image *in)
 #endif
     {
         const aji_frame fin = {
-            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            // Input geometry from the frame: decoder size normally, work
+            // (downscaled) size in rife-first mode.
+            .width = in->w, .height = in->h, .format = p->aji_fmt,
             .matrix = mat, .range = rng, .siting = sit,
             // plane[2]/stride[2] carry Cr for 4:4:4 input; ignored by the
             // engine for the 2-plane NV12/P010 formats.
@@ -918,6 +999,45 @@ static struct mp_image *alloc_src(struct mp_filter *vf)
     return img;
 }
 
+// RIFE-first: allocate a work-resolution frame (interpolation temps and the
+// pre-RIFE downscale output). When there is no pre-resize the work res equals
+// the source res, so this is just alloc_src.
+static struct mp_image *alloc_work(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    if (!p->has_pre_resize)
+        return alloc_src(vf);
+
+    bool pool_ok;
+    if (p->is_d3d11) {
+#if HAVE_D3D11
+        pool_ok = update_d3d11_work_pool(vf);
+#else
+        pool_ok = false;
+#endif
+    } else {
+        pool_ok = mp_update_av_hw_frames_pool(&p->work_pool, p->av_device_ref,
+                                              IMGFMT_CUDA, p->params.hw_subfmt,
+                                              p->work_w, p->work_h, false);
+    }
+    if (!pool_ok) {
+        MP_ERR(vf, "Failed to create work hw pool\n");
+        return NULL;
+    }
+    AVFrame *av_frame = av_frame_alloc();
+    MP_HANDLE_OOM(av_frame);
+    if (av_hwframe_get_buffer(p->work_pool, av_frame, 0) < 0) {
+        MP_ERR(vf, "Failed to allocate work frame from hw pool\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *img = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!img)
+        MP_ERR(vf, "Internal error when converting work AVFrame\n");
+    return img;
+}
+
 #if HAVE_D3D11
 // RIFE-first (D3D11): copy a decoder source texture into a fresh shareable
 // source-res texture, so the shim's D3D12 device can open it for interpolation
@@ -941,9 +1061,83 @@ static struct mp_image *stage_src_d3d11(struct mp_filter *vf,
 }
 #endif
 
-// RIFE-first: interpolate two source-resolution frames at time t into a fresh
-// source-resolution frame (the caller upscales it). Returns a new ref of
-// `a` on a scene change, NULL on error. pts is left for the caller.
+// RIFE-first pre-resize: downscale a decoder source frame to the work
+// resolution via aji_resize, returning an owned work-res frame (the caller
+// interpolates and upscales it). NULL on error. CUDA reads the decoder frame
+// directly; D3D11 stages it into the shareable d3d_stage ring (free in
+// rife-first mode, since submit feeds the shim's textures directly) first.
+static struct mp_image *downscale_src(struct mp_filter *vf,
+                                      struct mp_image *src)
+{
+    struct priv *p = vf->priv;
+
+    struct mp_image *work = alloc_work(vf);
+    if (!work)
+        return NULL;
+    mp_image_copy_attributes(work, src);
+    work->params = p->params;
+    work->params.w = p->work_w;
+    work->params.h = p->work_h;
+
+    const int mat = map_matrix(&p->params);
+    const int rng = map_range(&p->params);
+    const int sit = map_siting(&p->params);
+    int ret;
+
+#if HAVE_D3D11
+    if (p->is_d3d11) {
+        ID3D11Texture2D *stage = p->d3d_stage[p->d3d_stage_next];
+        p->d3d_stage_next = (p->d3d_stage_next + 1) % p->d3d_stage_count;
+        ID3D11DeviceContext_CopySubresourceRegion(p->d3d_ctx,
+            (ID3D11Resource *)stage, 0, 0, 0, 0,
+            (ID3D11Resource *)src->planes[0], (UINT)(intptr_t)src->planes[1],
+            NULL);
+        const aji_frame fin = {
+            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {stage, 0},
+        };
+        const aji_frame fout = {
+            .width = p->work_w, .height = p->work_h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {work->planes[0], work->planes[1]},
+        };
+        ret = p->api.resize(p->aji, &fin, &fout, NULL);
+    } else
+#endif
+    {
+        if (!order_after_decode(vf)) {
+            talloc_free(work);
+            return NULL;
+        }
+        const aji_frame fin = {
+            .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {src->planes[0], src->planes[1], src->planes[2]},
+            .stride = {src->stride[0], src->stride[1], src->stride[2]},
+        };
+        const aji_frame fout = {
+            .width = p->work_w, .height = p->work_h, .format = p->aji_fmt,
+            .matrix = mat, .range = rng, .siting = sit,
+            .plane = {work->planes[0], work->planes[1], work->planes[2]},
+            .stride = {work->stride[0], work->stride[1], work->stride[2]},
+        };
+        ret = p->api.resize(p->aji, &fin, &fout, p->stream);
+    }
+
+    if (ret != AJI_OK) {
+        MP_ERR(vf, "pre-RIFE downscale failed: %s\n",
+               p->api.last_error(p->aji));
+        talloc_free(work);
+        return NULL;
+    }
+    return work;
+}
+
+// RIFE-first: interpolate two work-resolution frames at time t into a fresh
+// work-resolution frame (the caller upscales it). Without a pre-RIFE downscale
+// the work res equals the source res. Returns a new ref of `a` on a scene
+// change, NULL on error. pts is left for the caller.
 static struct mp_image *interp_source(struct mp_filter *vf,
                                       struct mp_image *a, struct mp_image *b,
                                       double t)
@@ -951,17 +1145,19 @@ static struct mp_image *interp_source(struct mp_filter *vf,
     struct priv *p = vf->priv;
     CUcontext dummy;
 
-    struct mp_image *out = alloc_src(vf);
+    struct mp_image *out = alloc_work(vf);
     if (!out)
         return NULL;
     mp_image_copy_attributes(out, b);
     out->params = p->params;
+    out->params.w = p->work_w;
+    out->params.h = p->work_h;
 
     const int mat = map_matrix(&p->params);
     const int rng = map_range(&p->params);
     const int sit = map_siting(&p->params);
     const aji_frame fa = {
-        .width = p->params.w, .height = p->params.h, .format = p->aji_fmt,
+        .width = p->work_w, .height = p->work_h, .format = p->aji_fmt,
         .matrix = mat, .range = rng, .siting = sit,
         .plane = {a->planes[0], a->planes[1], a->planes[2]},
         .stride = {a->stride[0], a->stride[1], a->stride[2]},
@@ -1012,6 +1208,7 @@ static void vf_animejanai_process(struct mp_filter *vf)
     if (in_fmt) {
         av_buffer_unref(&p->hw_pool);
         av_buffer_unref(&p->src_pool);
+        av_buffer_unref(&p->work_pool);
 
         p->params = in_fmt->params;
         p->fps = in_fmt->nominal_fps;
@@ -1269,10 +1466,15 @@ static void vf_animejanai_process(struct mp_filter *vf)
         if (!src)
             return;
         const double in_fps = src->nominal_fps;
-        // The rife/upscale read this owned source frame: a ref of the decoder
-        // frame on CUDA, a shareable staged copy on D3D11 (decoder textures
-        // aren't shareable to the shim's D3D12 device).
+        // The rife/upscale read this owned work-res source frame. With a
+        // pre-RIFE downscale it's source -> work res via aji_resize; otherwise
+        // (work == source res) it's a ref of the decoder frame on CUDA, or a
+        // shareable staged copy on D3D11 (decoder textures aren't shareable to
+        // the shim's D3D12 device).
         struct mp_image *cur_src;
+        if (p->has_pre_resize)
+            cur_src = downscale_src(vf, src);
+        else
 #if HAVE_D3D11
         if (p->is_d3d11)
             cur_src = stage_src_d3d11(vf, src);
@@ -1503,6 +1705,7 @@ static void uninit(struct mp_filter *vf)
 #endif
     av_buffer_unref(&p->hw_pool);
     av_buffer_unref(&p->src_pool);
+    av_buffer_unref(&p->work_pool);
     av_buffer_unref(&p->av_device_ref);
     if (p->cu)
         cuda_free_functions(&p->cu);
@@ -1604,6 +1807,10 @@ static struct mp_filter *vf_animejanai_create(struct mp_filter *parent,
         // which then run the default upscale-then-RIFE order.
         p->api.rife_before_upscale =
             aji_lib_sym(p->api.handle, "aji_rife_before_upscale");
+        // Optional pre-RIFE downscale (rife-first). NULL on older shims, which
+        // then run RIFE at the source resolution (no pre-resize).
+        p->api.pre_resize = aji_lib_sym(p->api.handle, "aji_pre_resize");
+        p->api.resize = aji_lib_sym(p->api.handle, "aji_resize");
         p->api.infer_rife = aji_lib_sym(p->api.handle, "aji_infer_rife");
         p->api.poll = aji_lib_sym(p->api.handle, "aji_poll");
         p->api.current_log = aji_lib_sym(p->api.handle, "aji_current_log");
