@@ -353,6 +353,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-lavc-o", OPT_KEYVALUELIST(sub_avopts), .flags = UPDATE_SUB_HARD},
         {"sub-glyph-limit", OPT_INT(sub_glyph_limit)},
         {"sub-bitmap-max-size", OPT_INT(sub_bitmap_max_size)},
+        {"sub-ass-render-threads", OPT_INT(sub_ass_render_threads), M_RANGE(0, 64),
+            .flags = UPDATE_SUB_HARD},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
@@ -372,6 +374,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         .ass_video_aspect = 0,
         .sub_shaper = 1,
         .use_embedded_fonts = true,
+        .sub_ass_render_threads = 0,  // 0 = auto (CPU count), 1 = single-threaded
     },
     .change_flags = UPDATE_OSD,
 };

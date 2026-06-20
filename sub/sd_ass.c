@@ -288,6 +288,10 @@ static void assobjects_init(struct sd *sd)
 
     enable_output(sd, true);
     ass_set_cache_limits(ctx->ass_renderer, sd->opts->sub_glyph_limit, sd->opts->sub_bitmap_max_size);
+#if HAVE_ASS_RENDER_THREAD_COUNT
+    // Parallel per-event rendering: 1 = single-threaded, 0 = auto (CPU count).
+    ass_set_render_thread_count(ctx->ass_renderer, sd->opts->sub_ass_render_threads);
+#endif
 }
 
 static void assobjects_destroy(struct sd *sd)

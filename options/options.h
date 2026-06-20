@@ -134,6 +134,7 @@ struct mp_subtitle_opts {
     bool sub_past_video_end;
     int sub_glyph_limit;
     int sub_bitmap_max_size;
+    int sub_ass_render_threads;
     char **sub_avopts;
 };
 
