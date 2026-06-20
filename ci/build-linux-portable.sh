@@ -76,6 +76,16 @@ meson setup "$DEPS/libplacebo/b" "$DEPS/libplacebo" --prefix="$PREFIX" --buildty
   -Dlibdovi=disabled -Ddemos=false -Dtests=false 2>/dev/null || true
 ninja -C "$DEPS/libplacebo/b" install
 
+say "libass (the-database fork: carries multithreaded rendering)"
+# Built into $PREFIX (ahead of the container's apt libass on PKG_CONFIG_PATH) so
+# mpv links the fork and --sub-ass-render-threads is live. Tracks the fork's
+# master, like the mpv source itself. Static by default, so it bakes into
+# libmpv and needs no bundling.
+clone https://github.com/the-database/libass.git "$DEPS/libass" master
+meson setup "$DEPS/libass/b" "$DEPS/libass" --prefix="$PREFIX" --buildtype=release \
+  -Dthreads=enabled 2>/dev/null || true
+ninja -C "$DEPS/libass/b" install
+
 say "mpv (this fork)"
 meson setup "$MPV_SRC/b" "$MPV_SRC" --prefix="$PREFIX" --buildtype=release \
   -Dlibmpv=true -Dcuda-hwaccel=enabled -Dvulkan=enabled -Dlua=enabled 2>/dev/null || true
