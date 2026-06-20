@@ -92,6 +92,22 @@ struct curl_opts {
 #define CURL_HTTP_VERSION_3ONLY CURL_HTTP_VERSION_NONE
 #endif
 
+// Older lavf has a bug with nested IO cleanup, so don't enable curl by default.
+// <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/23082>
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 15, 101)
+#define CURL_BY_DEFAULT
+#elif LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 12, 102) && LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(62, 13, 0)
+#define CURL_BY_DEFAULT /* 8.1 backport */
+#elif LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 3, 103) && LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(62, 4, 0)
+#define CURL_BY_DEFAULT /* 8.0 backport */
+#elif LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 7, 103) && LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(61, 8, 0)
+#define CURL_BY_DEFAULT /* 7.1 backport */
+#elif LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(61, 1, 103) && LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(61, 2, 0)
+#define CURL_BY_DEFAULT /* 7.0 backport */
+#elif LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 16, 101) && LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 17, 0)
+#define CURL_BY_DEFAULT /* 6.1 backport */
+#endif
+
 #define OPT_BASE_STRUCT struct curl_opts
 const struct m_sub_options curl_conf = {
     .opts = (const struct m_option[]) {
@@ -116,9 +132,9 @@ const struct m_sub_options curl_conf = {
         {0}
     },
     .defaults = &(const struct curl_opts) {
-        // Older lavf has a bug with nested IO cleanup, disable by default.
-        // <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/23082>
-        .enabled = LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 15, 101),
+#ifdef CURL_BY_DEFAULT
+        .enabled = true,
+#endif
         .http_version = CURL_HTTP_VERSION_NONE,
         .max_redirects = 16,
         .max_retries = 5,
