@@ -468,9 +468,13 @@ features += {'memrchr': cc.has_function('memrchr', args: '-D_GNU_SOURCE',
 features += {'clone': cc.has_header_symbol('sched.h', 'clone', args: '-D_GNU_SOURCE')}
 features += {'rfork': cc.has_header_symbol('unistd.h', 'rfork_thread')}
 
-# Multithreaded subtitle rendering (libass with ass_set_render_thread_count)
-features += {'ass-render-thread-count': cc.has_function('ass_set_render_thread_count',
-                                                        dependencies: libass)}
+# Multithreaded subtitle rendering (libass with ass_set_render_thread_count).
+# Use a compile-only declaration check rather than has_function(): the latter
+# links a probe, which can spuriously fail against a static libass whose
+# transitive deps aren't all on the probe link line (e.g. mingw cross builds),
+# silently compiling out the call.
+features += {'ass-render-thread-count': cc.has_header_symbol('ass/ass.h', 'ass_set_render_thread_count',
+                                                             dependencies: libass)}
 
 optical_devices = {
     'windows': 'D:',

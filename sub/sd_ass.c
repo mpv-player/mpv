@@ -291,6 +291,8 @@ static void assobjects_init(struct sd *sd)
 #if HAVE_ASS_RENDER_THREAD_COUNT
     // Parallel per-event rendering: 1 = single-threaded, 0 = auto (CPU count).
     ass_set_render_thread_count(ctx->ass_renderer, sd->opts->sub_ass_render_threads);
+    MP_VERBOSE(sd, "libass render threads: %d\n",
+               ass_get_render_thread_count(ctx->ass_renderer));
 #endif
 }
 
