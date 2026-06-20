@@ -468,6 +468,10 @@ features += {'memrchr': cc.has_function('memrchr', args: '-D_GNU_SOURCE',
 features += {'clone': cc.has_header_symbol('sched.h', 'clone', args: '-D_GNU_SOURCE')}
 features += {'rfork': cc.has_header_symbol('unistd.h', 'rfork_thread')}
 
+# Multithreaded subtitle rendering (libass with ass_set_render_thread_count)
+features += {'ass-render-thread-count': cc.has_function('ass_set_render_thread_count',
+                                                        dependencies: libass)}
+
 optical_devices = {
     'windows': 'D:',
     'cygwin': 'D:',
