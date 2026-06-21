@@ -157,6 +157,17 @@ static int vulkan_init(struct ra_hwdec *hw)
             };
         }
     }
+#ifdef VK_NV_optical_flow
+    for (int i = 0; i < num_qf; i++) {
+        if ((qf[i].queueFamilyProperties.queueFlags) & VK_QUEUE_OPTICAL_FLOW_BIT_NV) {
+            device_hwctx->qf[device_hwctx->nb_qf++] = (AVVulkanDeviceQueueFamily) {
+                .idx = i,
+                .num = qf[i].queueFamilyProperties.queueCount,
+                .flags = VK_QUEUE_OPTICAL_FLOW_BIT_NV,
+            };
+        }
+    }
+#endif
 #else
     int decode_index = -1;
     for (int i = 0; i < num_qf; i++) {
