@@ -4957,11 +4957,44 @@ static bool is_property_set(int action, void *val)
     }
 }
 
+static int handle_secondary_sub_scale_default(struct MPContext *ctx,
+                                              const char *name, int action,
+                                              void *val)
+{
+    const char *opt_name = name;
+    if (strncmp(opt_name, "options/", 8) == 0)
+        opt_name += 8;
+
+    if (strcmp(opt_name, "secondary-sub-scale") != 0 ||
+        (action != M_PROPERTY_SWITCH && action != M_PROPERTY_MULTIPLY) ||
+        !isnan(ctx->opts->subs_shared->secondary_sub_scale))
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
+    struct m_config_option *opt =
+        m_config_get_co(ctx->mconfig, bstr0(opt_name));
+    if (!opt)
+        return M_PROPERTY_UNKNOWN;
+
+    float scale = ctx->opts->subs_rend->sub_scale;
+    if (action == M_PROPERTY_SWITCH) {
+        struct m_property_switch_arg *sarg = val;
+        opt->opt->type->add(opt->opt, &scale, sarg->inc, sarg->wrap);
+    } else {
+        opt->opt->type->multiply(opt->opt, &scale, *(double *)val);
+    }
+
+    if (m_config_set_option_raw(ctx->mconfig, opt, &scale, 0) < 0)
+        return M_PROPERTY_ERROR;
+    return M_PROPERTY_OK;
+}
+
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
-    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    int r = handle_secondary_sub_scale_default(ctx, name, action, val);
+    if (r == M_PROPERTY_NOT_IMPLEMENTED)
+        r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
         struct m_property *property = m_property_list_find(cmd->properties, name);

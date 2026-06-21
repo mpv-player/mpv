@@ -2584,7 +2584,9 @@ Subtitles
 
 ``--secondary-sub-scale=<default|0-100>``
     Factor for the secondary subtitle font size. The default value
-    ``default`` inherits the value of ``--sub-scale``.
+    ``default`` inherits the value of ``--sub-scale``. If ``add`` or
+    ``multiply`` is used while this is ``default``, the command starts from the
+    inherited ``--sub-scale`` value and sets an explicit value.
 
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used
