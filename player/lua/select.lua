@@ -345,9 +345,10 @@ local function select_subtitle_line(secondary, keep_open)
         local delay = mp.get_property_native(secondary .. "sub-delay")
         local time_pos = mp.get_property_native("time-pos") - delay
         local duration = mp.get_property_native("duration", math.huge)
+        local nested_call = default_item ~= nil
 
         for _, line in ipairs(lines) do
-            if not default_item and line.start <= time_pos then
+            if not nested_call and line.start <= time_pos then
                 default_item = #items + 1
             end
 
