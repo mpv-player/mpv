@@ -143,6 +143,7 @@ struct mp_subtitle_shared_opts {
     float sub_pos[2];
     bool sub_visibility[2];
     int ass_style_override[2];
+    float secondary_sub_scale;
 };
 
 struct mp_osd_render_opts {
