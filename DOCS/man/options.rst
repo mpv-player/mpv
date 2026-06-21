@@ -2658,6 +2658,24 @@ Subtitles
 
     Default: 0.
 
+``--sub-render-ahead-frames=<0-240>``
+    Render ASS/SSA subtitle bitmaps for upcoming frames on a background thread,
+    keeping up to this many frames of pre-rendered subtitles ready, instead of
+    rendering each frame synchronously on the video output thread.
+
+    This hides occasional expensive subtitle frames (complex motion-tracked
+    typesetting, especially at high output resolutions) that would otherwise
+    stall the display and drop a frame: as long as subtitle rendering is fast
+    enough *on average*, the lookahead buffer absorbs the slow frames. It does
+    not speed up rendering itself; combine it with ``--sub-ass-render-threads``
+    for the throughput that lets the worker stay ahead.
+
+    A larger value rides out longer bursts of heavy frames but adds that much
+    latency to seeking and unpausing. Only affects libass-rendered text
+    subtitles; image subtitles are unaffected.
+
+    Default: 0 (off, render on the display thread).
+
 ``--sub-ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
