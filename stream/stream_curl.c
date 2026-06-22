@@ -84,14 +84,6 @@ struct curl_opts {
     int64_t max_request_size;
 };
 
-#ifndef CURL_HTTP_VERSION_3
-#define CURL_HTTP_VERSION_3 CURL_HTTP_VERSION_NONE
-#endif
-
-#ifndef CURL_HTTP_VERSION_3ONLY
-#define CURL_HTTP_VERSION_3ONLY CURL_HTTP_VERSION_NONE
-#endif
-
 // Older lavf has a bug with nested IO cleanup, so don't enable curl by default.
 // <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/23082>
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(62, 15, 101)
