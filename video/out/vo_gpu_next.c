@@ -66,11 +66,15 @@
 
 struct osd_entry {
     pl_tex tex;
-    pl_buf buf;               // streaming upload buffer (async, see update_overlays)
     pl_tex blur_tex, tmp_tex; // deferred-blur scratch (see osd_blur_part)
     struct pl_overlay_part *parts;
     int num_parts;
 };
+
+// Ring of streaming upload buffers cycled across uploads, so a buffer is never
+// reused while its previous async upload is still in flight (which would make
+// pl_buf_write block). Sized well above the in-flight depth.
+#define NUM_OVERLAY_BUFS 8
 
 struct osd_state {
     struct osd_entry entries[MAX_OSD_PARTS];
@@ -135,8 +139,8 @@ struct priv {
     pl_fmt osd_fmt[SUBBITMAP_COUNT];
     pl_tex *sub_tex;
     int num_sub_tex;
-    pl_buf *sub_buf;            // recycled streaming upload buffers
-    int num_sub_buf;
+    pl_buf overlay_bufs[NUM_OVERLAY_BUFS]; // ring; see NUM_OVERLAY_BUFS
+    unsigned overlay_buf_idx;
 
     struct mp_rect src, dst;
     struct mp_osd_res osd_res;
@@ -416,8 +420,6 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         pl_fmt tex_fmt = p->osd_fmt[item->format];
         if (!entry->tex)
             MP_TARRAY_POP(p->sub_tex, p->num_sub_tex, &entry->tex);
-        if (!entry->buf)
-            MP_TARRAY_POP(p->sub_buf, p->num_sub_buf, &entry->buf);
         bool ok = pl_tex_recreate(p->gpu, &entry->tex, &(struct pl_tex_params) {
             .format = tex_fmt,
             .w = MPMAX(item->packed_w, entry->tex ? entry->tex->params.w : 0),
@@ -439,12 +441,13 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         // backends without upload callbacks (e.g. d3d11), so this no longer
         // blocks the VO thread the way a synchronous `ptr` upload does.
         size_t buf_size = (size_t) upload_params.row_pitch * item->packed_h;
+        pl_buf *ring = &p->overlay_bufs[p->overlay_buf_idx++ % NUM_OVERLAY_BUFS];
         int64_t dbg_u0 = mp_time_ns();
-        if (pl_buf_recreate(p->gpu, &entry->buf,
+        if (pl_buf_recreate(p->gpu, ring,
                             pl_buf_params(.size = buf_size, .host_writable = true)))
         {
-            pl_buf_write(p->gpu, entry->buf, 0, item->packed->planes[0], buf_size);
-            upload_params.buf = entry->buf;
+            pl_buf_write(p->gpu, *ring, 0, item->packed->planes[0], buf_size);
+            upload_params.buf = *ring;
             ok = pl_tex_upload(p->gpu, &upload_params);
         } else {
             // Fallback to a direct upload if the buffer can't be allocated.
@@ -1012,9 +1015,6 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
         pl_tex tex = fp->subs.entries[i].tex;
         if (tex)
             MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
-        pl_buf buf = fp->subs.entries[i].buf;
-        if (buf)
-            MP_TARRAY_APPEND(p, p->sub_buf, p->num_sub_buf, buf);
         pl_tex_destroy(p->gpu, &fp->subs.entries[i].blur_tex);
         pl_tex_destroy(p->gpu, &fp->subs.entries[i].tmp_tex);
     }
@@ -2339,14 +2339,13 @@ static void uninit(struct vo *vo)
     pl_queue_destroy(&p->queue); // destroy this first
     for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++) {
         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tex);
-        pl_buf_destroy(p->gpu, &p->osd_state.entries[i].buf);
         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].blur_tex);
         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tmp_tex);
     }
     for (int i = 0; i < p->num_sub_tex; i++)
         pl_tex_destroy(p->gpu, &p->sub_tex[i]);
-    for (int i = 0; i < p->num_sub_buf; i++)
-        pl_buf_destroy(p->gpu, &p->sub_buf[i]);
+    for (int i = 0; i < NUM_OVERLAY_BUFS; i++)
+        pl_buf_destroy(p->gpu, &p->overlay_bufs[i]);
     for (int i = 0; i < p->num_user_hooks; i++)
         pl_mpv_user_shader_destroy(&p->user_hooks[i].hook);
 
