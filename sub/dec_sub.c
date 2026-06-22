@@ -33,7 +33,6 @@
 #include "common/recorder.h"
 #include "misc/dispatch.h"
 #include "osdep/threads.h"
-#include "osdep/timer.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
@@ -48,47 +47,6 @@ static const struct sd_functions *const sd_list[] = {
 #endif
     &sd_ass,
     NULL
-};
-
-// --- Render-ahead (see --sub-render-ahead-frames) -------------------------
-// A worker thread renders subtitle bitmaps for upcoming video PTSes into a
-// ring, so the VO display path serves a pre-rendered frame instead of calling
-// libass synchronously. This hides occasional expensive frames (which would
-// otherwise stall the display and drop a frame) as long as rendering keeps up
-// on average. Entries are keyed by the raw (pre-delay) video PTS so the VO
-// fast path needs no pts_to_subtitle (delay/speed changes flush the ring).
-//
-// Locking: `ahead.lock` protects the ring and the shared cursor/geometry; the
-// VO fast path takes only this lock (never blocking on a render). The actual
-// libass render holds the decoder lock `sub->lock`. The worker holds at most
-// one of the two at a time (never both), so there is no lock-ordering cycle.
-// Rendering happens in increasing PTS order on the single worker, so libass's
-// change-detection / change_id stay correct.
-struct sub_ahead_entry {
-    bool valid;
-    double video_pts;
-    struct mp_osd_res dim;
-    int format;
-    uint64_t gen;
-    struct sub_bitmaps *bmp;     // owned; NULL means "no subtitles at this pts"
-};
-
-struct sub_ahead {
-    bool worker_running;
-    mp_thread thread;
-    mp_mutex lock;
-    mp_cond wakeup;
-    bool terminate;
-
-    int depth;                   // lookahead frames (0 = feature off)
-    double video_fps;            // for the frame interval
-    double vo_pts;               // latest raw video pts the VO asked for
-    struct mp_osd_res cur_dim;
-    int cur_format;
-    uint64_t gen;                // bumped on any invalidation
-
-    struct sub_ahead_entry *ring;
-    int ring_len;
 };
 
 struct dec_sub {
@@ -121,8 +79,6 @@ struct dec_sub {
 
     double last_vo_pts;
     struct sd *sd;
-
-    struct sub_ahead ahead;
 
     struct demux_packet *new_segment;
     struct demux_packet **cached_pkts;
@@ -170,183 +126,6 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     return pts;
 }
 
-// Render bitmaps for an (already subtitle-space) pts. Decoder lock held.
-static struct sub_bitmaps *get_bitmaps_locked(struct dec_sub *sub,
-                                              struct mp_osd_res dim,
-                                              int format, double sub_pts)
-{
-    if (sub->end != MP_NOPTS_VALUE && sub_pts >= sub->end)
-        return NULL;
-    if (!sub->sd->driver->get_bitmaps)
-        return NULL;
-    return sub->sd->driver->get_bitmaps(sub->sd, dim, format, sub_pts);
-}
-
-// --- render-ahead ring helpers (ahead.lock held) --------------------------
-
-static void ahead_clear(struct sub_ahead *a)
-{
-    for (int n = 0; n < a->ring_len; n++) {
-        if (a->ring[n].valid) {
-            talloc_free(a->ring[n].bmp);
-            a->ring[n] = (struct sub_ahead_entry){0};
-        }
-    }
-}
-
-// Index of a current-generation entry for video pts V at the given geometry,
-// or -1. V is matched within half a frame interval.
-static int ahead_find(struct sub_ahead *a, double V, struct mp_osd_res dim,
-                      int format)
-{
-    double tol = (a->video_fps > 0 ? 1.0 / a->video_fps : 1.0 / 24.0) * 0.5;
-    for (int n = 0; n < a->ring_len; n++) {
-        struct sub_ahead_entry *e = &a->ring[n];
-        if (e->valid && e->gen == a->gen && e->format == format &&
-            osd_res_equals(e->dim, dim) && fabs(e->video_pts - V) < tol)
-            return n;
-    }
-    return -1;
-}
-
-// Store a freshly rendered frame, taking ownership of bmp. Reuses a free slot,
-// else evicts the entry with the oldest (smallest) video pts.
-static void ahead_store(struct sub_ahead *a, double V, struct mp_osd_res dim,
-                        int format, uint64_t gen, struct sub_bitmaps *bmp)
-{
-    int slot = -1;
-    double oldest = INFINITY;
-    for (int n = 0; n < a->ring_len; n++) {
-        if (!a->ring[n].valid) {
-            slot = n;
-            break;
-        }
-        if (a->ring[n].video_pts < oldest) {
-            oldest = a->ring[n].video_pts;
-            slot = n;
-        }
-    }
-    if (a->ring[slot].valid)
-        talloc_free(a->ring[slot].bmp);
-    a->ring[slot] = (struct sub_ahead_entry){
-        .valid = true, .video_pts = V, .dim = dim, .format = format,
-        .gen = gen, .bmp = bmp,
-    };
-}
-
-static MP_THREAD_VOID sub_ahead_thread(void *ptr)
-{
-    struct dec_sub *sub = ptr;
-    struct sub_ahead *a = &sub->ahead;
-    mp_thread_set_name("sub/ahead");
-
-    mp_mutex_lock(&a->lock);
-    while (!a->terminate) {
-        double vo = a->vo_pts;
-        int depth = a->depth;
-        if (depth <= 0 || vo == MP_NOPTS_VALUE) {
-            mp_cond_wait(&a->wakeup, &a->lock);
-            continue;
-        }
-        struct mp_osd_res dim = a->cur_dim;
-        int format = a->cur_format;
-        uint64_t gen = a->gen;
-        double interval = a->video_fps > 0 ? 1.0 / a->video_fps : 1.0 / 24.0;
-
-        // Find the nearest upcoming frame not yet in the ring.
-        double target = MP_NOPTS_VALUE;
-        for (int i = 0; i <= depth; i++) {
-            double V = vo + i * interval;
-            if (ahead_find(a, V, dim, format) < 0) {
-                target = V;
-                break;
-            }
-        }
-        if (target == MP_NOPTS_VALUE) {
-            // Window full; wait for the VO to advance (or a flush).
-            mp_cond_timedwait(&a->wakeup, &a->lock, MP_TIME_MS_TO_NS(50));
-            continue;
-        }
-        bool is_current = target == vo;
-        mp_mutex_unlock(&a->lock);
-
-        // Render holding the decoder lock; the VO never takes it on its fast
-        // path, so it is not blocked by this.
-        mp_mutex_lock(&sub->lock);
-        double sub_pts = pts_to_subtitle(sub, target);
-        // Only refuse to render ahead across a pending segment switch (the
-        // current decoder is wrong past the boundary). Do NOT gate on
-        // last_pkt_pts: that is the last *event* packet's pts, and sub packets
-        // are sparse, so for a long-lived event it sits far behind the
-        // lookahead -- gating on it both blocks exactly the heavy frames we
-        // want buffered and spins, re-targeting the same unstorable frame.
-        bool blocked = !is_current && sub->new_segment &&
-                       sub_pts >= sub->new_segment->start;
-        struct sub_bitmaps *bmp = NULL;
-        if (!blocked)
-            bmp = get_bitmaps_locked(sub, dim, format, sub_pts);
-        mp_mutex_unlock(&sub->lock);
-
-        mp_mutex_lock(&a->lock);
-        if (blocked) {
-            // Wait for the boundary to pass rather than respinning on it.
-            mp_cond_timedwait(&a->wakeup, &a->lock, MP_TIME_MS_TO_NS(50));
-            continue;
-        }
-        if (gen == a->gen && format == a->cur_format &&
-            osd_res_equals(dim, a->cur_dim))
-        {
-            ahead_store(a, target, dim, format, gen, bmp);
-        } else {
-            talloc_free(bmp);   // stale (flush/resize during render)
-        }
-    }
-    mp_mutex_unlock(&a->lock);
-    MP_THREAD_RETURN();
-}
-
-// (Re)configure the worker from current options. Called with no locks held.
-static void sub_ahead_configure(struct dec_sub *sub)
-{
-    struct sub_ahead *a = &sub->ahead;
-    bool driver_ok = sub->sd && sub->sd->driver == &sd_ass;
-    int depth = driver_ok ? sub->opts->sub_render_ahead_frames : 0;
-
-    mp_mutex_lock(&a->lock);
-    a->depth = depth;
-    a->video_fps = sub->video_fps;
-    a->gen++;
-    ahead_clear(a);
-    a->vo_pts = MP_NOPTS_VALUE;
-    int want_len = depth > 0 ? depth + 2 : 0;
-    if (want_len != a->ring_len) {
-        ahead_clear(a);
-        a->ring = talloc_realloc(sub, a->ring, struct sub_ahead_entry, want_len);
-        for (int n = a->ring_len; n < want_len; n++)
-            a->ring[n] = (struct sub_ahead_entry){0};
-        a->ring_len = want_len;
-    }
-    bool spawn = depth > 0 && !a->worker_running;
-    if (spawn)
-        a->worker_running = mp_thread_create(&a->thread, sub_ahead_thread, sub) == 0;
-    mp_cond_signal(&a->wakeup);
-    mp_mutex_unlock(&a->lock);
-}
-
-static void sub_ahead_stop(struct dec_sub *sub)
-{
-    struct sub_ahead *a = &sub->ahead;
-    if (a->worker_running) {
-        mp_mutex_lock(&a->lock);
-        a->terminate = true;
-        mp_cond_signal(&a->wakeup);
-        mp_mutex_unlock(&a->lock);
-        mp_thread_join(a->thread);
-        a->worker_running = false;
-    }
-    ahead_clear(a);
-}
-
 static void wakeup_demux(void *ctx)
 {
     struct mp_dispatch_queue *q = ctx;
@@ -370,14 +149,11 @@ void sub_destroy(struct dec_sub *sub)
     if (!sub)
         return;
     demux_set_stream_wakeup_cb(sub->sh, NULL, NULL);
-    sub_ahead_stop(sub);   // join the worker before touching the decoder
     if (sub->sd) {
         sub_reset(sub);
         sub->sd->driver->uninit(sub->sd);
     }
     talloc_free(sub->sd);
-    mp_cond_destroy(&sub->ahead.wakeup);
-    mp_mutex_destroy(&sub->ahead.lock);
     mp_mutex_destroy(&sub->lock);
     talloc_free(sub);
 }
@@ -442,13 +218,10 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
     sub->opts = sub->opts_cache->opts;
     sub->shared_opts = sub->shared_opts_cache->opts;
     mp_mutex_init(&sub->lock);
-    mp_mutex_init(&sub->ahead.lock);
-    mp_cond_init(&sub->ahead.wakeup);
 
     sub->sd = init_decoder(sub);
     if (sub->sd) {
         update_subtitle_speed(sub);
-        sub_ahead_configure(sub);
         return sub;
     }
 
@@ -649,28 +422,6 @@ void sub_redecode_cached_packets(struct dec_sub *sub)
 struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
                                     int format, double pts)
 {
-    struct sub_ahead *a = &sub->ahead;
-
-    // Render-ahead fast path: serve a pre-rendered frame from the worker. Only
-    // takes the ring lock, so the display is never blocked on a render.
-    mp_mutex_lock(&a->lock);
-    if (a->depth > 0 && a->worker_running) {
-        a->vo_pts = pts;
-        if (a->cur_format != format || !osd_res_equals(a->cur_dim, dim)) {
-            a->cur_dim = dim;
-            a->cur_format = format;
-            a->gen++;
-            ahead_clear(a);   // entries were rendered for the old geometry
-        }
-        int idx = ahead_find(a, pts, dim, format);
-        struct sub_bitmaps *res = idx >= 0 && a->ring[idx].bmp ?
-                                  sub_bitmaps_copy(NULL, a->ring[idx].bmp) : NULL;
-        mp_mutex_unlock(&a->lock);
-        mp_cond_signal(&a->wakeup);   // nudge the worker to refill ahead of us
-        return res;
-    }
-    mp_mutex_unlock(&a->lock);
-
     mp_mutex_lock(&sub->lock);
 
     pts = pts_to_subtitle(sub, pts);
@@ -678,7 +429,11 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     sub->last_vo_pts = pts;
     update_segment(sub);
 
-    struct sub_bitmaps *res = get_bitmaps_locked(sub, dim, format, pts);
+    struct sub_bitmaps *res = NULL;
+
+    if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
+        sub->sd->driver->get_bitmaps)
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
 
     mp_mutex_unlock(&sub->lock);
     return res;
@@ -743,13 +498,6 @@ void sub_reset(struct dec_sub *sub)
     demux_packet_pool_push(sub->packet_pool, sub->new_segment);
     sub->new_segment = NULL;
     mp_mutex_unlock(&sub->lock);
-
-    // Drop pre-rendered frames (seek / track switch / clear-on-seek).
-    mp_mutex_lock(&sub->ahead.lock);
-    sub->ahead.gen++;
-    ahead_clear(&sub->ahead);
-    sub->ahead.vo_pts = MP_NOPTS_VALUE;
-    mp_mutex_unlock(&sub->ahead.lock);
 }
 
 void sub_select(struct dec_sub *sub, bool selected)
@@ -765,12 +513,10 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     int r = CONTROL_UNKNOWN;
     mp_mutex_lock(&sub->lock);
     bool propagate = false;
-    bool reconfigure_ahead = false;
     switch (cmd) {
     case SD_CTRL_SET_VIDEO_DEF_FPS:
         sub->video_fps = *(double *)arg;
         update_subtitle_speed(sub);
-        reconfigure_ahead = true;   // frame interval + pts mapping changed
         break;
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
@@ -794,7 +540,6 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
             // that clears all preloaded sub packets
             sub->preload_attempted = false;
         }
-        reconfigure_ahead = true;   // depth / delay / speed may have changed
         break;
     }
     default:
@@ -802,10 +547,6 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     }
     if (propagate && sub->sd->driver->control)
         r = sub->sd->driver->control(sub->sd, cmd, arg);
-    // Re-evaluate the render-ahead worker (depth, fps, pts mapping). Holds the
-    // ahead lock; the decoder lock is held here, matching sub_reset's order.
-    if (reconfigure_ahead)
-        sub_ahead_configure(sub);
     mp_mutex_unlock(&sub->lock);
     return r;
 }
