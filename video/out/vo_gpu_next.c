@@ -400,6 +400,11 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
     frame->overlays = state->overlays;
     frame->num_overlays = 0;
 
+    // --- TEMP instrumentation: split the overlay cost (upload/blur/total) ---
+    int64_t dbg_t0 = mp_time_ns();
+    int64_t dbg_upload = 0, dbg_blur = 0;
+    int64_t dbg_area = 0, dbg_parts = 0, dbg_aw = 0, dbg_ah = 0;
+
     for (int n = 0; n < subs->num_items; n++) {
         const struct sub_bitmaps *item = subs->items[n];
         if (!item->num_parts || !item->packed)
@@ -430,7 +435,12 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             upload_params.callback = talloc_free;
             upload_params.priv = mp_image_new_ref(item->packed);
         }
+        int64_t dbg_u0 = mp_time_ns();
         ok = pl_tex_upload(p->gpu, &upload_params);
+        dbg_upload += mp_time_ns() - dbg_u0;
+        dbg_aw = MPMAX(dbg_aw, item->packed_w); dbg_ah = MPMAX(dbg_ah, item->packed_h);
+        for (int i = 0; i < item->num_parts; i++) { dbg_parts++;
+            dbg_area += (int64_t)item->parts[i].w * item->parts[i].h; }
         if (!ok) {
             MP_ERR(vo, "Failed uploading OSD texture!\n");
             talloc_free(upload_params.priv);
@@ -480,6 +490,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                 int tw = entry->tex->params.w, th = entry->tex->params.h;
                 struct pl_tex_params bp = { .format=tex_fmt, .w=tw, .h=th,
                                             .sampleable=true, .storable=true };
+                int64_t dbg_b0 = mp_time_ns();
                 if (pl_tex_recreate(p->gpu, &entry->blur_tex, &bp) &&
                     pl_tex_recreate(p->gpu, &entry->tmp_tex, &bp))
                 {
@@ -497,6 +508,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
                     }
                     overlay_tex = entry->blur_tex;
                 }
+                dbg_blur += mp_time_ns() - dbg_b0;
             }
         }
 
@@ -572,6 +584,16 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             ol->parts = entry->parts;
             ol->num_parts = entry->num_parts;
         }
+    }
+
+    // --- TEMP instrumentation emit (only for non-trivial overlay frames) ---
+    int64_t dbg_total = mp_time_ns() - dbg_t0;
+    if (dbg_total > 2000000 && dbg_parts > 0) {
+        MP_STATS(vo, "value %f osd-total-ms",  dbg_total  / 1e6);
+        MP_STATS(vo, "value %f osd-upload-ms", dbg_upload / 1e6);
+        MP_STATS(vo, "value %f osd-blur-ms",   dbg_blur   / 1e6);
+        MP_STATS(vo, "value %f osd-parts",     (double) dbg_parts);
+        MP_STATS(vo, "value %f osd-atlas-mpx", (double) dbg_aw * dbg_ah / 1e6);
     }
 
     talloc_free(subs);
