@@ -16,13 +16,11 @@
 #define MP_FALLTHROUGH __attribute__((fallthrough))
 #define MP_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #define MP_UNUSED __attribute__((unused))
-#define MP_NO_ASAN __attribute__((no_sanitize("address")))
 #else
 #define MP_NORETURN
 #define MP_FALLTHROUGH do {} while (0)
 #define MP_WARN_UNUSED_RESULT
 #define MP_UNUSED
-#define MP_NO_ASAN
 #endif
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ < 202311L) && !defined(thread_local)
@@ -41,6 +39,12 @@
 #define MP_NONSTRING __attribute__((nonstring))
 #else
 #define MP_NONSTRING
+#endif
+
+#if __has_attribute(no_sanitize)
+#define MP_NO_ASAN __attribute__((no_sanitize("address")))
+#else
+#define MP_NO_ASAN
 #endif
 
 #ifndef NDEBUG
