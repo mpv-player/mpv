@@ -748,6 +748,11 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     if (pts == MP_NOPTS_VALUE || !renderer)
         goto done;
 
+    // Opt in to libass emitting unblurred coverage + a per-image gaussian
+    // std-dev, so vo_gpu_next can do the (expensive) blur on the GPU. No-op
+    // after the first call unless the option toggles (which empties the cache).
+    ass_set_blur_deferred(renderer, opts->sub_gpu_blur);
+
     // Currently no supported text sub formats support a distinction between forced
     // and unforced lines, so we just assume everything's unforced and discard everything.
     // If we ever see a format that makes this distinction, we can add support here.

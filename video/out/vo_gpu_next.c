@@ -25,6 +25,7 @@
 #include <libplacebo/renderer.h>
 #include <libplacebo/shaders/lut.h>
 #include <libplacebo/shaders/icc.h>
+#include <libplacebo/shaders/custom.h>
 #include <libplacebo/utils/libav.h>
 #include <libplacebo/utils/frame_queue.h>
 
@@ -65,6 +66,7 @@
 
 struct osd_entry {
     pl_tex tex;
+    pl_tex blur_tex, tmp_tex; // deferred-blur scratch (see osd_blur_part)
     struct pl_overlay_part *parts;
     int num_parts;
 };
@@ -125,6 +127,8 @@ struct priv {
     pl_log pllog;
     pl_gpu gpu;
     pl_renderer rr;
+    pl_dispatch osd_dp; // for the deferred-blur compute passes
+    bool osd_blur_unsupported; // logged once if the format can't be blurred
     pl_queue queue;
     pl_swapchain sw;
     pl_fmt osd_fmt[SUBBITMAP_COUNT];
@@ -312,6 +316,74 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
+// Separable gaussian over one atlas sub-region [ox,oy,rw,rh], clamped to that
+// region (so a blurred part can't read/write its atlas neighbours). sigma == 0
+// degenerates to a copy. Validated against a CPU reference via lavapipe.
+static const char *const osd_blur_body_h =
+    "ivec2 g = ivec2(gl_GlobalInvocationID.xy);\n"
+    "if (g.x < rw && g.y < rh) {\n"
+    "    int px = g.x + ox, py = g.y + oy;\n"
+    "    float acc = 0.0, wsum = 0.0;\n"
+    "    for (int t = -radius; t <= radius; t++) {\n"
+    "        int q = px + t;\n"
+    "        if (q >= ox && q < ox+rw) {\n"
+    "            float w = sigma > 0.0 ? exp(-0.5*float(t*t)/(sigma*sigma)) : float(t==0);\n"
+    "            acc += w * texelFetch(src, ivec2(q, py), 0).r; wsum += w;\n"
+    "        }\n"
+    "    }\n"
+    "    imageStore(dst, ivec2(px, py), vec4(acc / wsum, 0.0, 0.0, 0.0));\n"
+    "}\n";
+static const char *const osd_blur_body_v =
+    "ivec2 g = ivec2(gl_GlobalInvocationID.xy);\n"
+    "if (g.x < rw && g.y < rh) {\n"
+    "    int px = g.x + ox, py = g.y + oy;\n"
+    "    float acc = 0.0, wsum = 0.0;\n"
+    "    for (int t = -radius; t <= radius; t++) {\n"
+    "        int q = py + t;\n"
+    "        if (q >= oy && q < oy+rh) {\n"
+    "            float w = sigma > 0.0 ? exp(-0.5*float(t*t)/(sigma*sigma)) : float(t==0);\n"
+    "            acc += w * texelFetch(src, ivec2(px, q), 0).r; wsum += w;\n"
+    "        }\n"
+    "    }\n"
+    "    imageStore(dst, ivec2(px, py), vec4(acc / wsum, 0.0, 0.0, 0.0));\n"
+    "}\n";
+
+static void osd_blur_part(struct priv *p, pl_tex src, pl_tex dst,
+                          int ox, int oy, int rw, int rh, float sigma,
+                          const char *body)
+{
+    int radius = (int)(3.0f * sigma + 0.999f); // ~ceil(3*sigma); 0 when sigma==0
+    pl_shader sh = pl_dispatch_begin(p->osd_dp);
+    struct pl_shader_desc descs[] = {
+        { .desc = { .name="src", .type=PL_DESC_SAMPLED_TEX, .binding=0 },
+          .binding = { .object=src } },
+        { .desc = { .name="dst", .type=PL_DESC_STORAGE_IMG, .binding=1,
+                    .access=PL_DESC_ACCESS_WRITEONLY },
+          .binding = { .object=dst } },
+    };
+    struct pl_shader_var vars[] = {
+        { .var = pl_var_int("ox"),     .data=&ox },
+        { .var = pl_var_int("oy"),     .data=&oy },
+        { .var = pl_var_int("rw"),     .data=&rw },
+        { .var = pl_var_int("rh"),     .data=&rh },
+        { .var = pl_var_int("radius"), .data=&radius },
+        { .var = pl_var_float("sigma"),.data=&sigma },
+    };
+    struct pl_custom_shader cs = {
+        .input = PL_SHADER_SIG_NONE, .output = PL_SHADER_SIG_NONE,
+        .compute = true, .compute_group_size = {16, 16},
+        .descriptors = descs, .num_descriptors = 2,
+        .variables = vars, .num_variables = 6,
+        .body = body,
+    };
+    if (pl_shader_custom(sh, &cs)) {
+        pl_dispatch_compute(p->osd_dp, pl_dispatch_compute_params(
+            .shader = &sh, .dispatch_size = { (rw+15)/16, (rh+15)/16, 1 }));
+    } else {
+        pl_dispatch_abort(p->osd_dp, &sh);
+    }
+}
+
 static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct osd_state *state, struct pl_frame *frame,
@@ -384,9 +456,53 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
         }
 
+        // Deferred-blur (see ass_set_blur_deferred): libass emitted unblurred
+        // coverage in pre-expanded bounds plus a per-part gaussian std-dev; do
+        // the blur here on the GPU instead of on the CPU display path.
+        pl_tex overlay_tex = entry->tex;
+        if (item->format == SUBBITMAP_LIBASS) {
+            bool any_blur = false;
+            for (int i = 0; i < item->num_parts; i++) {
+                if (item->parts[i].libass.blur_x > 0 || item->parts[i].libass.blur_y > 0) {
+                    any_blur = true;
+                    break;
+                }
+            }
+            if (any_blur && !(tex_fmt->caps & PL_FMT_CAP_STORABLE)) {
+                if (!p->osd_blur_unsupported) {
+                    MP_WARN(vo, "GPU subtitle blur needs a storable OSD format; "
+                               "falling back to unblurred. Disable --sub-gpu-blur.\n");
+                    p->osd_blur_unsupported = true;
+                }
+                any_blur = false;
+            }
+            if (any_blur) {
+                int tw = entry->tex->params.w, th = entry->tex->params.h;
+                struct pl_tex_params bp = { .format=tex_fmt, .w=tw, .h=th,
+                                            .sampleable=true, .storable=true };
+                if (pl_tex_recreate(p->gpu, &entry->blur_tex, &bp) &&
+                    pl_tex_recreate(p->gpu, &entry->tmp_tex, &bp))
+                {
+                    for (int i = 0; i < item->num_parts; i++) {
+                        const struct sub_bitmap *b = &item->parts[i];
+                        if (b->w < 1 || b->h < 1)
+                            continue;
+                        // separable: H with blur_x (atlas->tmp), V with blur_y (tmp->blur)
+                        osd_blur_part(p, entry->tex, entry->tmp_tex,
+                                      b->src_x, b->src_y, b->w, b->h,
+                                      b->libass.blur_x, osd_blur_body_h);
+                        osd_blur_part(p, entry->tmp_tex, entry->blur_tex,
+                                      b->src_x, b->src_y, b->w, b->h,
+                                      b->libass.blur_y, osd_blur_body_v);
+                    }
+                    overlay_tex = entry->blur_tex;
+                }
+            }
+        }
+
         struct pl_overlay *ol = &state->overlays[frame->num_overlays++];
         *ol = (struct pl_overlay) {
-            .tex = entry->tex,
+            .tex = overlay_tex,
             .parts = entry->parts,
             .num_parts = entry->num_parts,
             .color = pl_color_space_srgb,
@@ -856,6 +972,8 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
         pl_tex tex = fp->subs.entries[i].tex;
         if (tex)
             MP_TARRAY_APPEND(p, p->sub_tex, p->num_sub_tex, tex);
+        pl_tex_destroy(p->gpu, &fp->subs.entries[i].blur_tex);
+        pl_tex_destroy(p->gpu, &fp->subs.entries[i].tmp_tex);
     }
     talloc_free(mpi);
 }
@@ -2176,8 +2294,11 @@ static void uninit(struct vo *vo)
         pl_gpu_finish(p->gpu);
 
     pl_queue_destroy(&p->queue); // destroy this first
-    for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++)
+    for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++) {
         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tex);
+        pl_tex_destroy(p->gpu, &p->osd_state.entries[i].blur_tex);
+        pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tmp_tex);
+    }
     for (int i = 0; i < p->num_sub_tex; i++)
         pl_tex_destroy(p->gpu, &p->sub_tex[i]);
     for (int i = 0; i < p->num_user_hooks; i++)
@@ -2205,6 +2326,7 @@ static void uninit(struct vo *vo)
 
     pl_icc_close(&p->icc_profile);
     pl_renderer_destroy(&p->rr);
+    pl_dispatch_destroy(&p->osd_dp);
 
     for (int i = 0; i < VO_PASS_PERF_MAX; ++i) {
         pl_shader_info_deref(&p->perf_fresh.info[i].shader);
@@ -2266,6 +2388,7 @@ static int preinit(struct vo *vo)
 
     pl_gpu_set_cache(p->gpu, p->shader_cache.cache);
     p->rr = pl_renderer_create(p->pllog, p->gpu);
+    p->osd_dp = pl_dispatch_create(p->pllog, p->gpu);
     p->queue = pl_queue_create(p->gpu);
     p->osd_fmt[SUBBITMAP_LIBASS] = pl_find_named_fmt(p->gpu, "r8");
     p->osd_fmt[SUBBITMAP_BGRA] = pl_find_named_fmt(p->gpu, "bgra8");

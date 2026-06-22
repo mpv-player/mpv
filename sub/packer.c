@@ -302,6 +302,8 @@ void mp_sub_packer_pack_ass(struct mp_sub_packer *p, ASS_Image **image_lists,
             b->bitmap = img->bitmap;
             b->stride = img->stride;
             b->libass.color = img->color;
+            b->libass.blur_x = img->blur_x;
+            b->libass.blur_y = img->blur_y;
             b->dw = b->w = img->w;
             b->dh = b->h = img->h;
             b->x = img->dst_x;

@@ -2658,6 +2658,22 @@ Subtitles
 
     Default: 0.
 
+``--sub-gpu-blur=<yes|no>``
+    Apply the gaussian blur of ASS/SSA subtitles (``\blur``, and the blur from
+    a soft shadow) on the GPU instead of on the CPU. libass emits the unblurred
+    coverage plus the blur radius, and ``--vo=gpu-next`` does the blur as part
+    of compositing. The blur is the dominant cost of rendering dense
+    motion-tracked typesetting at high output resolutions, and it normally runs
+    on the CPU on the display thread; moving it to the GPU avoids the frame
+    drops that causes.
+
+    Requires a libass build with deferred-blur support and ``--vo=gpu-next``
+    with a storable OSD texture format; otherwise it is silently ignored.
+    Output is visually identical to the CPU blur. Box blur (``\be``) is still
+    done on the CPU.
+
+    Default: no.
+
 ``--sub-ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
