@@ -274,31 +274,25 @@ static MP_THREAD_VOID sub_ahead_thread(void *ptr)
         // path, so it is not blocked by this.
         mp_mutex_lock(&sub->lock);
         double sub_pts = pts_to_subtitle(sub, target);
-        // Only refuse to render ahead across a pending segment switch (the
-        // current decoder is wrong past the boundary). Do NOT gate on
-        // last_pkt_pts: that is the last *event* packet's pts, and sub packets
-        // are sparse, so for a long-lived event it sits far behind the
-        // lookahead -- gating on it both blocks exactly the heavy frames we
-        // want buffered and spins, re-targeting the same unstorable frame.
-        bool blocked = !is_current && sub->new_segment &&
-                       sub_pts >= sub->new_segment->start;
+        // Don't render ahead past decoded packets (events would be missing);
+        // the current frame is always renderable (the VO is showing it).
+        bool decoded = is_current || sub->last_pkt_pts == MP_NOPTS_VALUE ||
+                       sub_pts <= sub->last_pkt_pts;
+        // Don't render ahead across a pending segment switch (wrong decoder).
+        if (sub->new_segment && sub_pts >= sub->new_segment->start)
+            decoded = false;
         struct sub_bitmaps *bmp = NULL;
-        if (!blocked)
+        if (decoded)
             bmp = get_bitmaps_locked(sub, dim, format, sub_pts);
         mp_mutex_unlock(&sub->lock);
 
         mp_mutex_lock(&a->lock);
-        if (blocked) {
-            // Wait for the boundary to pass rather than respinning on it.
-            mp_cond_timedwait(&a->wakeup, &a->lock, MP_TIME_MS_TO_NS(50));
-            continue;
-        }
-        if (gen == a->gen && format == a->cur_format &&
+        if (decoded && gen == a->gen && format == a->cur_format &&
             osd_res_equals(dim, a->cur_dim))
         {
             ahead_store(a, target, dim, format, gen, bmp);
         } else {
-            talloc_free(bmp);   // stale (flush/resize during render)
+            talloc_free(bmp);   // stale (flush/resize during render) or not ready
         }
     }
     mp_mutex_unlock(&a->lock);
