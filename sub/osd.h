@@ -52,6 +52,9 @@ struct sub_bitmap {
     union {
         struct {
             uint32_t color;
+            // Deferred-blur mode: gaussian std-dev (px) still to apply to this
+            // part's coverage on the GPU; 0 = already blurred / no blur.
+            float blur_x, blur_y;
         } libass;
         struct {
             const struct sbr_output_image *image;

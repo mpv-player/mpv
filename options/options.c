@@ -355,6 +355,7 @@ const struct m_sub_options mp_subtitle_sub_opts = {
         {"sub-bitmap-max-size", OPT_INT(sub_bitmap_max_size)},
         {"sub-ass-render-threads", OPT_INT(sub_ass_render_threads), M_RANGE(0, 64),
             .flags = UPDATE_SUB_HARD},
+        {"sub-gpu-blur", OPT_BOOL(sub_gpu_blur), .flags = UPDATE_SUB_HARD},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
