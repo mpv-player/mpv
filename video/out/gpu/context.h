@@ -122,6 +122,10 @@ struct ra_swapchain_fns {
     // the system displays diffuse (SDR) white. Returns 0 if unknown. Optional.
     float (*target_ref_luma)(struct ra_swapchain *sw);
 
+    // Get enable status for global color management and HDR. Returns false if
+    // not enabled or result is not reliable. Optional.
+    bool (*target_global_color_management_status)(struct ra_swapchain *sw);
+
     // Call into backends so they can use the appropriate platform-specific
     // functions to configure color spaces. Returns true if request was handled.
     bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
