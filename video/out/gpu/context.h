@@ -80,6 +80,9 @@ struct ra_ctx_params {
     // See ra_swapchain_fns.target_ref_luma. Optional.
     float (*preferred_ref_luma)(struct ra_ctx *ctx);
 
+    // See ra_swapchain_fns.target_global_color_management_status. Optional.
+    bool (*global_color_management_status)(struct ra_ctx *ctx);
+
     // See ra_swapchain_fns.set_color. Optional.
     bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
 
