@@ -589,6 +589,14 @@ static void select_and_set_hwdec(struct mp_filter *vd)
 
                     const struct hwcontext_fns *fns =
                                 hwdec_get_hwcontext_fns(hwdec->lavc_device);
+                    if (fns && fns->is_codec_allowed &&
+                        !fns->is_codec_allowed(ctx->hwdec_dev, hwdec->codec->id))
+                    {
+                        MP_WARN(vd, "Hardware decoding of '%s' is disabled on this "
+                                    "device.\n", codec);
+                        av_buffer_unref(&ctx->hwdec_dev);
+                        continue;
+                    }
                     if (fns && fns->is_emulated && fns->is_emulated(ctx->hwdec_dev)) {
                         if (hwdec_auto) {
                             MP_VERBOSE(vd, "Not using emulated API.\n");
