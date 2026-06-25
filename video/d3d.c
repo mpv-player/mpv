@@ -94,6 +94,9 @@ static const struct d3d11_codec_blocklist_entry {
     // HEVC decoding crashes on Intel
     {AV_CODEC_ID_HEVC, 0x8086, D3D_DRIVER_VERSION(20, 19, 15, 4284),
                                D3D_DRIVER_VERSION(20, 19, 15, 5172)},
+    // VP9 decoder does not accept bitstreams, even when advertised
+    {AV_CODEC_ID_VP9,  0x8086, D3D_DRIVER_VERSION(23, 20, 16, 4974),
+                               D3D_DRIVER_VERSION(23, 20, 16, 5044)},
 };
 
 static bool d3d11_is_codec_allowed(AVBufferRef *device_ref, int av_codec_id)
