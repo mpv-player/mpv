@@ -29,6 +29,7 @@ local chapter_list = {}
 local metadata = {}
 local playlist_cookies = {}
 local playlist_metadata = {}
+local stream_delay = 0
 
 local function Set (t)
     local set = {}
@@ -635,6 +636,17 @@ local function formats_to_edl(json, formats, use_all_formats)
     return res
 end
 
+-- Seconds to wait before the formats become available
+local function get_stream_delay(formats)
+    local available_at = 0
+    for _, track in ipairs(formats or {}) do
+        if type(track.available_at) == "number" then
+            available_at = math.max(available_at, track.available_at)
+        end
+    end
+    return available_at > 0 and math.max(0, available_at - os.time()) or 0
+end
+
 local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
@@ -647,6 +659,9 @@ local function add_single_video(json)
     local cookies = has_requested_formats
                     and requested_formats[1].cookies
                     or json.cookies
+
+    stream_delay = math.max(stream_delay,
+        get_stream_delay(has_requested_formats and requested_formats or {json}))
 
     if o.use_manifests and valid_manifest(json) then
         -- prefer manifest_url if present
@@ -868,6 +883,7 @@ end
 
 local function run_ytdl_hook(url)
     local start_time = os.clock()
+    stream_delay = 0
 
     -- strip ytdl://
     if url:find("ytdl://") == 1 then
@@ -1153,7 +1169,7 @@ local function run_ytdl_hook(url)
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end
 
-local function on_load_hook(load_fail)
+local function on_load_hook(load_fail, hook)
     local url = mp.get_property("stream-open-filename", "")
     local force = url:find("^ytdl://") ~= nil
     local early = force or o.try_ytdl_first or is_whitelisted(url)
@@ -1164,10 +1180,18 @@ local function on_load_hook(load_fail)
         return
     end
     run_ytdl_hook(url)
+
+    -- defer loading until the formats become available
+    if stream_delay > 0 then
+        msg.info(("Waiting %.2f seconds for the stream to become available...")
+                 :format(stream_delay))
+        hook:defer()
+        mp.add_timeout(stream_delay, function() hook:cont() end)
+    end
 end
 
-mp.add_hook("on_load", 10, function() on_load_hook(false) end)
-mp.add_hook("on_load_fail", 10, function() on_load_hook(true) end)
+mp.add_hook("on_load", 10, function(hook) on_load_hook(false, hook) end)
+mp.add_hook("on_load_fail", 10, function(hook) on_load_hook(true, hook) end)
 
 mp.add_hook("on_load", 20, function ()
     msg.verbose('playlist hook')
