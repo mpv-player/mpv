@@ -1546,7 +1546,7 @@ static void add_coverart(struct demuxer *demuxer)
             sh->attached_picture->pts = 0;
             talloc_steal(sh, sh->attached_picture);
             sh->attached_picture->keyframe = true;
-            sh->image = true;
+            sh->codec->image = true;
         }
         sh->title = att->name;
         demux_add_sh_stream(demuxer, sh);
@@ -2263,7 +2263,7 @@ static void probe_if_image(demuxer_t *demuxer)
         mkv_track_t *track = mkv_d->tracks[n];
         struct sh_stream *sh = track->stream;
 
-        if (!sh || sh->type != STREAM_VIDEO || sh->image)
+        if (!sh || sh->type != STREAM_VIDEO || sh->codec->image)
             continue;
 
         int64_t timecode = -1;
@@ -2282,7 +2282,7 @@ static void probe_if_image(demuxer_t *demuxer)
 
         // Assume still image
         if (video_blocks == 1)
-            sh->image = true;
+            sh->codec->image = true;
     }
 }
 
