@@ -948,8 +948,9 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
 
     char *content_type = NULL;
     curl_easy_getinfo(p->curl, CURLINFO_CONTENT_TYPE, &content_type);
-    if (content_type && content_type[0])
-        s->mime_type = talloc_strdup(s, content_type);
+    bstr mime = bstr_strip(bstr_split(bstr0(content_type), ";", NULL));
+    if (mime.len)
+        s->mime_type = bstrto0(s, mime);
 
     const char *effective_url = NULL;
     curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
