@@ -9,6 +9,7 @@
 * [Downloads](#downloads)
 * [Changelog](#changelog)
 * [Compilation](#compilation)
+* [Installation & Verification](#installation--verification)
 * [Release cycle](#release-cycle)
 * [Bug reports](#bug-reports)
 * [Contributing](#contributing)
@@ -150,6 +151,27 @@ statically linked against those.
 
 If you want to build a Windows binary, see [Windows compilation][windows_compilation].
 
+## Installation & Verification
+
+After compilation, install mpv system-wide:
+
+    meson install -C build
+
+On macOS/Linux, you may need `sudo` for system directories:
+
+    sudo meson install -C build
+
+Verify the installation:
+
+    mpv --version
+
+Test playback functionality:
+
+    mpv --frames=30 --vo=null https://www.w3schools.com/html/mov_bbb.mp4
+
+Clean up build files (optional):
+
+    rm -rf build
 
 ## Release cycle
 
