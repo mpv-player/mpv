@@ -979,7 +979,9 @@ local function on_idle()
 
     for _, item in pairs(menu) do
         if item.dirty then
+            current_item = item
             item:update()
+            current_item = nil
             item.dirty = false
         end
     end
