@@ -49,7 +49,7 @@
 #endif
 
 #ifndef NDEBUG
-#define MP_ASSERT_UNREACHABLE() assert(!"unreachable")
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
 #elif __has_builtin(__builtin_unreachable)
 #define MP_ASSERT_UNREACHABLE() __builtin_unreachable()
 #elif defined(_MSC_VER)
