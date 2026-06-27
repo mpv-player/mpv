@@ -210,8 +210,8 @@ const struct m_sub_options gl_next_conf = {
         {"border-background", OPT_CHOICE(border_background,
             {"none",  BACKGROUND_NONE},
             {"color", BACKGROUND_COLOR},
-            {"tiles", BACKGROUND_TILES}
-            ,{"blur", BACKGROUND_BLUR})},
+            {"tiles", BACKGROUND_TILES},
+            {"blur", BACKGROUND_BLUR})},
         {"background-blur-radius", OPT_FLOAT(background_blur_radius)},
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
