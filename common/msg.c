@@ -27,6 +27,7 @@
 
 #include "common/common.h"
 #include "common/global.h"
+#include "misc/bstr.h"
 #include "misc/codepoint_width.h"
 #include "options/options.h"
 #include "options/path.h"
@@ -585,23 +586,44 @@ void mp_msg_sanitize(bstr *text, bool allow_sgr)
             // Nuke everything that is not an SGR sequence
             if (!sgr)
                 text->start[i] = '?';
+            continue;
         }
-        // Allow only printable > 0x20 and 0x08-0x0D (backspace, tab, newline, ...)
-        else if (ch < 0x08 || (ch > 0x0D && ch < 0x20) || ch == 0x7F) {
-            text->start[i] = '?';
+
+        int len = bstr_parse_utf8_code_length(ch);
+
+        // ASCII: allow only printable plus HT, LF, CR.
+        if (len == 1) {
+            if (ch == 0x7F || (ch < 0x20 && ch != '\t' && ch != '\n' && ch != '\r'))
+                text->start[i] = '?';
+            continue;
         }
-        // Block UTF-8 encoded C1 controls (U+0080-U+009F = bytes C2 80..C2 9F),
-        // except PU1 (0x91) and PU2 (0x92) used as internal escape prefixes.
-        else if (ch == 0xC2 && i + 1 < text->len &&
-                 (unsigned char)text->start[i + 1] >= 0x80 &&
-                 (unsigned char)text->start[i + 1] <= 0x9F &&
-                 (unsigned char)text->start[i + 1] != 0x91 &&
-                 (unsigned char)text->start[i + 1] != 0x92)
-        {
-            text->start[i] = '?';
-            text->start[i + 1] = '?';
+
+        // Block UTF-8 C1 controls (C2 80..C2 9F), except PU1/PU2 used internally.
+        if (ch == 0xC2 && i + 1 < text->len) {
+            unsigned char c1 = text->start[i + 1];
+            if (c1 >= 0x80 && c1 <= 0x9F && c1 != 0x91 && c1 != 0x92) {
+                text->start[i] = '?';
+                text->start[i + 1] = '?';
+            }
             i++;
+            continue;
         }
+
+        // Skip valid multi-byte sequences so continuation bytes aren't seen as
+        // raw C1. Reject overlong 0xC0/0xC1 and verify the bytes before skipping.
+        if (len >= 2 && ch >= 0xC2 && i + len <= text->len) {
+            bool valid = true;
+            for (int n = 1; n < len; n++)
+                valid &= (text->start[i + n] & 0xC0) == 0x80;
+            if (valid) {
+                i += len - 1;
+                continue;
+            }
+        }
+
+        // Block raw 8-bit C1 (0x80-0x9F); leave other invalid bytes alone.
+        if (ch <= 0x9F)
+            text->start[i] = '?';
     }
 }
 
