@@ -134,6 +134,7 @@ struct bluray_priv_s {
     uint32_t nav_change_id;          // bumped on FLUSH/HIDE/MENU/POPUP events
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
+    bool still_active;               // holding an indefinite still.
 
     // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
     // and BD_EVENT_PG_TEXTST{,_STREAM}. The numbers are 1-based libbluray
@@ -471,13 +472,23 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
         }
         break;
     case BD_EVENT_STILL:
-        if (ev->param)
-            bd_read_skip_still(b->bd);
+        mp_mutex_lock(&b->overlay_lock);
+        b->still_active = ev->param != 0;
+        mp_mutex_unlock(&b->overlay_lock);
         break;
     case BD_EVENT_STILL_TIME:
-        bd_read_skip_still(b->bd);
+        if (ev->param == 0) {
+            mp_mutex_lock(&b->overlay_lock);
+            b->still_active = true;
+            mp_mutex_unlock(&b->overlay_lock);
+        } else {
+            bd_read_skip_still(b->bd);
+        }
         break;
     case BD_EVENT_END_OF_TITLE:
+        mp_mutex_lock(&b->overlay_lock);
+        b->still_active = false;
+        mp_mutex_unlock(&b->overlay_lock);
         break;
     case BD_EVENT_PLAYLIST: {
         int playlist = ev->param;
@@ -585,6 +596,8 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         // delivers one event per call, which we hand off to handle_event.
         while (bd_get_event(b->bd, &event))
             handle_event(s, &event);
+        if (b->still_active)
+            return 0;
         int total = 0;
         int events_seen = 0;
         // Loop briefly to absorb event-only returns (where bd_read_ext
@@ -607,8 +620,11 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             }
             if (n > 0) {
                 total += n;
+                b->still_active = false;
                 break;
             }
+            if (b->still_active)
+                break;
             if (b->data_delivered && b->discontinuity_id != disc_before)
                 break;
             if (mp_cancel_test(s->cancel))
@@ -815,7 +831,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         case STREAM_NAV_MENU_TITLE:
             // BD doesn't distinguish "title menu", both map to disc root.
             bd_menu_call(b->bd, -1);
-            return STREAM_OK;
+            break;
         case STREAM_NAV_MENU_POPUP:
             key = BD_VK_POPUP;
             break;
@@ -827,7 +843,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             break;
         case STREAM_NAV_MOUSE_MOVE:
             bd_mouse_select(b->bd, -1, nav->x, nav->y);
-            return STREAM_OK;
+            break;
         case STREAM_NAV_MOUSE_CLICK:
             bd_mouse_select(b->bd, -1, nav->x, nav->y);
             key = BD_VK_MOUSE_ACTIVATE;
@@ -835,6 +851,14 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         }
         if (key != BD_VK_NONE)
             bd_user_input(b->bd, -1, key);
+        // If an activation just ran a button command, it may have released a
+        // held still, bump discontinuity_id.
+        if (stream_nav_action_activates(nav->action)) {
+            mp_mutex_lock(&b->overlay_lock);
+            if (b->still_active)
+                b->discontinuity_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+        }
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_NAV_STATE: {
@@ -881,6 +905,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             .nav_active = true,
             .menu_active = visible,
             .has_popup = b->popup_supported,
+            .still_active = b->still_active,
             .src_w = MPMAX(b->ig.disp_w, b->pg.disp_w),
             .src_h = MPMAX(b->ig.disp_h, b->pg.disp_h),
             .change_id = b->nav_change_id,
