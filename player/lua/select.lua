@@ -827,7 +827,7 @@ local menu_data = {}
 local observed_properties = {}
 local property_cache = {}
 local active_bindings = {}
-local property_set = {}
+local property_set
 local property_items = {}
 local have_dirty_items = false
 local current_item
@@ -858,11 +858,19 @@ local function on_none_property_change(name)
     on_property_change(name, none_getters[name]())
 end
 
+local function is_known_property(name)
+    if not property_set then
+        property_set = to_map(mp.get_property_native("property-list"))
+    end
+
+    return property_set[name] ~= nil
+end
+
 function _G.get(name, default)
     if not observed_properties[name] then
         local result, err = (none_getters[name] or mp.get_property_native)(name)
 
-        if err == "property not found" and not property_set(name:match("^([^/]+)")) then
+        if err == "property not found" and not is_known_property(name:match("^([^/]+)")) then
             mp.msg.error("Property '" .. name .. "' was not found.")
             return default
         end
@@ -1359,7 +1367,6 @@ local function parse_menu_conf(_, vo_configured)
 
     mp.unobserve_property(parse_menu_conf)
 
-    property_set = to_map(mp.get_property_native("property-list"))
     active_bindings = get_active_bindings()
 
     local lines = get_menu_conf()
@@ -1404,7 +1411,6 @@ local function parse_menu_conf(_, vo_configured)
         end
     end
 
-    property_set = nil
     active_bindings = nil
     current_item = nil
 
