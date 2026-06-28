@@ -46,6 +46,10 @@ struct disc_nav_state {
     uint32_t bd_last_change_id;
     struct mp_osd_res bd_last_vo_res;
 
+    // Last menu-overlay change_id we forced an OSD redraw for.
+    uint32_t last_overlay_change_id;
+    bool overlay_change_seen;
+
     // Last observed disc-nav discontinuity counter (bumped by the stream
     // backend on user nav actions and on libbluray/libdvdnav-internal
     // playlist/title/cell transitions).
@@ -441,6 +445,11 @@ void disc_nav_update(struct MPContext *mpctx)
     struct disc_nav_state *st = get_state(mpctx);
     struct stream_nav_state nav = {0};
     bool have = s && stream_control(s, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1;
+    bool still = have && nav.still_active;
+    if (s && still != mpctx->disc_nav_still_frame)
+        MP_VERBOSE(s, "still_frame %d->%d\n",
+                   mpctx->disc_nav_still_frame, still);
+    mpctx->disc_nav_still_frame = still;
     if (!have) {
         if (st->overlay_visible) {
             osd_set_bitmaps(mpctx->osd, OSDTYPE_DISC_MENU, NULL);
@@ -450,6 +459,7 @@ void disc_nav_update(struct MPContext *mpctx)
         st->bd_last_change_id = 0;
         st->bd_last_vo_res = (struct mp_osd_res){0};
         st->menu_selected_track = NULL;
+        st->overlay_change_seen = false;
         if (st->menu_active_seen && st->last_menu_active) {
             st->last_menu_active = false;
             mp_notify_property(mpctx, "disc-menu-active");
@@ -475,6 +485,12 @@ void disc_nav_update(struct MPContext *mpctx)
     } else {
         push_dvd_overlay(mpctx, &nav, visible);
         ensure_menu_sub_selection(mpctx, nav.menu_active);
+    }
+
+    if (!st->overlay_change_seen || nav.change_id != st->last_overlay_change_id) {
+        st->overlay_change_seen = true;
+        st->last_overlay_change_id = nav.change_id;
+        osd_changed(mpctx->osd);
     }
 
     if (visible != st->overlay_visible) {
