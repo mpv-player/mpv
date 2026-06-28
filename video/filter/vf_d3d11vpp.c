@@ -145,6 +145,12 @@ static void destroy_video_proc(struct mp_filter *vf)
     p->vp_enum = NULL;
 }
 
+static bool want_nvidia_true_hdr(struct mp_filter *vf)
+{
+    struct priv *p = vf->priv;
+    return p->opts->nvidia_true_hdr && !pl_color_space_is_hdr(&p->params.color);
+}
+
 static void enable_nvidia_rtx_extension(struct mp_filter *vf)
 {
     struct priv *p = vf->priv;
@@ -399,7 +405,7 @@ static int recreate_video_proc(struct mp_filter *vf)
                                                             D3D11_VIDEO_PROCESSOR_OUTPUT_RATE_NORMAL,
                                                          FALSE, 0);
 
-    if (p->opts->nvidia_true_hdr && enable_nvidia_true_hdr(vf)) {
+    if (want_nvidia_true_hdr(vf) && enable_nvidia_true_hdr(vf)) {
         // NVIDIA RTX Video HDR seems to require BT.2020+PQ RGB output.
         p->out_params.color = pl_color_space_hdr10;
         p->out_params.color.hdr.max_luma = 1000;
@@ -657,8 +663,13 @@ static void vf_d3d11vpp_process(struct mp_filter *vf)
         if (p->opts->format)
             p->out_params.hw_subfmt = p->opts->format;
 
+        if (p->opts->nvidia_true_hdr && pl_color_space_is_hdr(&p->params.color)) {
+            MP_WARN(vf, "NVIDIA RTX Video HDR requested, but the source is "
+                        "already HDR, not used.\n");
+        }
+
         p->require_filtering = !mp_image_params_static_equal(&p->params, &p->out_params) ||
-                               p->opts->nvidia_true_hdr;
+                               want_nvidia_true_hdr(vf);
     }
 
     if (!mp_refqueue_can_output(p->queue))
