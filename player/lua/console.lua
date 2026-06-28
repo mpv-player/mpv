@@ -1697,6 +1697,13 @@ set_active = function (active)
         mp.set_property_bool("input-ime", ime_active)
         mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
+
+        -- these tables may be extremely large, reset them for garbage collection
+        selectable_items = nil
+        matches = {}
+        item_positions = {}
+        completion_buffer = {}
+
         collectgarbage()
     end
     render()

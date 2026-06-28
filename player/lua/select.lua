@@ -636,19 +636,17 @@ mp.add_key_binding(nil, "select-binding", function (t)
     })
 end, { complex = true })
 
-local properties = {}
-
-local function add_property(property, value)
+local function add_property(properties, property, value)
     value = value or mp.get_property_native(property)
 
     if type(value) == "table" and next(value) then
         if type(next(value)) == "number" then
             for i, val in ipairs(value) do
-                add_property(property .. "/" .. (i - 1), val)
+                add_property(properties, property .. "/" .. (i - 1), val)
             end
         else
             for key, val in pairs(value) do
-                add_property(property .. "/" .. key, val)
+                add_property(properties, property .. "/" .. key, val)
             end
         end
     else
@@ -663,7 +661,7 @@ end
 
 mp.add_key_binding(nil, "show-properties", function (t)
     if t.event == "up" or t.event == "repeat" then return end
-    properties = {}
+    local properties = {}
 
     -- Don't log errors for renamed and removed properties.
     local msg_level_backup = mp.get_property("msg-level")
@@ -671,15 +669,15 @@ mp.add_key_binding(nil, "show-properties", function (t)
                                  or msg_level_backup .. ",cplayer=no")
 
     for _, property in pairs(mp.get_property_native("property-list")) do
-        add_property(property)
+        add_property(properties, property)
     end
 
     mp.set_property("msg-level", msg_level_backup)
 
-    add_property("current-tracks/audio")
-    add_property("current-tracks/video")
-    add_property("current-tracks/sub")
-    add_property("current-tracks/sub2")
+    add_property(properties, "current-tracks/audio")
+    add_property(properties, "current-tracks/video")
+    add_property(properties, "current-tracks/sub")
+    add_property(properties, "current-tracks/sub2")
 
     table.sort(properties)
 
