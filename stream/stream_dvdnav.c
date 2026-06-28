@@ -65,6 +65,7 @@ struct priv {
     char *filename;                     // path
     unsigned int duration;              // in milliseconds
     int title;
+    bool still_active;                  // fill_buffer() is holding a still
     uint32_t spu_clut[16];
     bool spu_clut_valid;
     bool had_initial_vts;
@@ -395,7 +396,43 @@ static void update_highlight(struct priv *priv)
     }
 }
 
-static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+static bool nav_action_activates(enum stream_nav_action a)
+{
+    switch (a) {
+    case STREAM_NAV_SELECT:
+    case STREAM_NAV_MOUSE_CLICK:
+    case STREAM_NAV_MENU_ROOT:
+    case STREAM_NAV_MENU_TITLE:
+    case STREAM_NAV_MENU_POPUP:
+    case STREAM_NAV_PREV_MENU:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// Move the highlight to the spec-defined neighbour of the current button. We
+// resolve the neighbour ourselves and use dvdnav_button_select() (rather than
+// dvdnav_{upper,lower,left,right}_button_select()) so that auto-action buttons
+// are activated only through update_highlight(), where we can observe it.
+static void select_neighbour_button(struct priv *priv, pci_t *pci,
+                                    enum stream_nav_action action)
+{
+    int32_t cur = 0;
+    dvdnav_get_current_highlight(priv->dvdnav, &cur);
+    if (cur <= 0 || cur > pci->hli.hl_gi.btn_ns)
+        return;
+    btni_t b;
+    memcpy(&b, &pci->hli.btnit[cur - 1], sizeof(b));
+    int target = action == STREAM_NAV_UP    ? b.up    :
+                 action == STREAM_NAV_DOWN  ? b.down  :
+                 action == STREAM_NAV_LEFT  ? b.left  :
+                 action == STREAM_NAV_RIGHT ? b.right : 0;
+    if (target > 0)
+        dvdnav_button_select(priv->dvdnav, pci, target);
+}
+
+static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
 
@@ -429,16 +466,10 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 
     switch (cmd->action) {
     case STREAM_NAV_UP:
-        dvdnav_upper_button_select(priv->dvdnav, pci);
-        break;
     case STREAM_NAV_DOWN:
-        dvdnav_lower_button_select(priv->dvdnav, pci);
-        break;
     case STREAM_NAV_LEFT:
-        dvdnav_left_button_select(priv->dvdnav, pci);
-        break;
     case STREAM_NAV_RIGHT:
-        dvdnav_right_button_select(priv->dvdnav, pci);
+        select_neighbour_button(priv, pci, cmd->action);
         break;
     case STREAM_NAV_MOUSE_MOVE:
         dvdnav_mouse_select(priv->dvdnav, pci, cmd->x, cmd->y);
@@ -454,6 +485,18 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     }
 
     update_highlight(priv);
+}
+
+static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+{
+    struct priv *priv = stream->priv;
+
+    int prev_auto = priv->auto_actioned_button;
+    do_nav_cmd(stream, cmd);
+    bool activated = nav_action_activates(cmd->action) ||
+                     priv->auto_actioned_button != prev_auto;
+    if (priv->still_active && activated)
+        priv->discontinuity_id++;
 }
 
 /**
@@ -549,8 +592,12 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
         }
         switch (event) {
         case DVDNAV_BLOCK_OK:
+            // Real data is flowing again: we are no longer holding a still.
+            priv->still_active = false;
             return len;
         case DVDNAV_STOP:
+            // End of disc: a real EOF, not a held still.
+            priv->still_active = false;
             return 0;
         case DVDNAV_NAV_PACKET: {
             pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
@@ -561,9 +608,25 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             update_highlight(priv);
             break;
         }
-        case DVDNAV_STILL_FRAME:
-            dvdnav_still_skip(dvdnav);
-            break;
+        case DVDNAV_STILL_FRAME: {
+            dvdnav_still_event_t *still = buf;
+            // We only honor indefinite (0xff) stills. Finite stills (studio
+            // logos / warnings shown for a few seconds before the menu) are
+            // not hold on screen. This avoids complexities with correctly
+            // timing the still frames, and there is little use-case for holding
+            // 10+ seconds on single still frame.
+            if (still->length != 0xFF) {
+                MP_VERBOSE(s, "skipping finite still (%d s)\n",
+                           still->length);
+                dvdnav_still_skip(dvdnav);
+                break;
+            }
+            // Indefinite still: report EOF to the demuxer so the video decoder
+            // is drained and the last frame is actually pushed to screen.
+            MP_VERBOSE(s, "indefinite still -> EOF, hold last frame\n");
+            priv->still_active = true;
+            return 0;
+        }
         case DVDNAV_WAIT:
             dvdnav_wait_skip(dvdnav);
             break;
@@ -843,6 +906,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             .nav_active = true,
             .menu_active = priv->in_menu,
             .has_popup = false,
+            .still_active = priv->still_active,
             .src_w = priv->src_w,
             .src_h = priv->src_h,
             .hl_x = priv->btn_rect[0],

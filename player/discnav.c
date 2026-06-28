@@ -46,6 +46,10 @@ struct disc_nav_state {
     uint32_t bd_last_change_id;
     struct mp_osd_res bd_last_vo_res;
 
+    // Last menu-overlay change_id we forced an OSD redraw for.
+    uint32_t last_overlay_change_id;
+    bool overlay_change_seen;
+
     // Last observed disc-nav discontinuity counter (bumped by the stream
     // backend on user nav actions and on libbluray/libdvdnav-internal
     // playlist/title/cell transitions).
@@ -407,6 +411,11 @@ void disc_nav_update(struct MPContext *mpctx)
     struct stream *s = disc_nav_get_stream(mpctx);
     struct stream_nav_state nav = {0};
     bool have = s && stream_control(s, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1;
+    bool still = have && nav.still_active;
+    if (still != mpctx->disc_nav_still_frame)
+        MP_VERBOSE(mpctx, "discnav: still_frame %d->%d\n",
+                   mpctx->disc_nav_still_frame, still);
+    mpctx->disc_nav_still_frame = still;
     if (!have) {
         struct disc_nav_state *st = mpctx->disc_nav;
         if (!st)
@@ -419,6 +428,7 @@ void disc_nav_update(struct MPContext *mpctx)
         st->bd_last_change_id = 0;
         st->bd_last_vo_res = (struct mp_osd_res){0};
         st->menu_selected_track = NULL;
+        st->overlay_change_seen = false;
         return;
     }
 
@@ -436,6 +446,18 @@ void disc_nav_update(struct MPContext *mpctx)
     } else {
         push_dvd_overlay(mpctx, &nav, visible);
         ensure_menu_sub_selection(mpctx, nav.menu_active);
+    }
+
+    // The menu overlay updates independently of video. When it changes while
+    // the video isn't producing frames (held on a still, or paused) nothing
+    // would repaint it, so request an OSD redraw; handle_osd_redraw() honors it
+    // at EOF/paused and the next video frame consumes it during playback. (BD's
+    // osd_set_external2() already flags want_redraw, but covering both keeps the
+    // DVD highlight, which goes through the SPU path, in sync.)
+    if (!st->overlay_change_seen || nav.change_id != st->last_overlay_change_id) {
+        st->overlay_change_seen = true;
+        st->last_overlay_change_id = nav.change_id;
+        osd_changed(mpctx->osd);
     }
 
     if (visible != st->overlay_visible) {

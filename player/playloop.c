@@ -1238,6 +1238,10 @@ static void handle_eof(struct MPContext *mpctx)
     bool prevent_eof =
         mpctx->paused && mpctx->video_out && vo_has_frame(mpctx->video_out) &&
         !mpctx->vo_chain->is_coverart;
+    /* A disc menu parked on an infinite still frame reports EOF so the decoder
+     * drains and the menu frame is shown. Hold it until the user navigates,
+     * rather than ending the file. */
+    prevent_eof |= mpctx->disc_nav_still_frame;
     /* It's possible for the user to simultaneously switch both audio
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.

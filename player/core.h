@@ -447,6 +447,8 @@ typedef struct MPContext {
     struct screenshot_ctx *screenshot_ctx;
     struct command_ctx *command_ctx;
     struct disc_nav_state *disc_nav;
+    // Disc is parked on an infinite still frame (DVD/BD menu).
+    bool disc_nav_still_frame;
     struct encode_lavc_context *encode_lavc_ctx;
 
     struct mp_option_callback *option_callbacks;
