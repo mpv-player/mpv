@@ -3488,8 +3488,12 @@ Window
     :level:   A level as integer.
 
 ``--focus-on=<never|open|all>``,
-    (X11 and macOS only)
+    (Windows, X11 and macOS only)
     Focus the video window and make it the front most window on specific events (default: open).
+
+    On Windows, due to the system's focus stealing prevention mechanism,
+    ``--force-window=immediate`` is recommended for ``open`` and ``all``
+    to work reliably.
 
     :never: Never focus the window on open or new file load events.
     :open:  Focus the window on creation, eg when a vo is initialised.

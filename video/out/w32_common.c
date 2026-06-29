@@ -1987,6 +1987,9 @@ set_pos_done:
             ShowWindow(w32->window, SW_SHOWMINNOACTIVE);
         } else if (w32->opts->window_maximized && !w32->current_fs) {
             ShowWindow(w32->window, SW_SHOWMAXIMIZED);
+        } else if (w32->opts->focus_on == 0) {
+            ShowWindow(w32->window, SW_SHOWNOACTIVATE);
+            SetWindowPos(w32->window, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
         } else {
             ShowWindow(w32->window, SW_SHOW);
         }
@@ -2305,6 +2308,7 @@ static bool gui_thread_control_supports(int request)
     case VOCTRL_BEGIN_DRAGGING:
     case VOCTRL_SHOW_MENU:
     case VOCTRL_UPDATE_MENU:
+    case VOCTRL_BRING_FRONT:
         return true;
     }
 
@@ -2499,12 +2503,17 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_SHOW_MENU:
         PostMessageW(w32->window, WM_SHOWMENU, 0, 0);
         return VO_TRUE;
-    case VOCTRL_UPDATE_MENU:;
+    case VOCTRL_UPDATE_MENU:
         const m_option_t menu_data_type = {.type = CONF_TYPE_NODE};
         m_option_free(&menu_data_type, &w32->menu_data);
         m_option_copy(&menu_data_type, &w32->menu_data, arg);
         talloc_steal(w32, node_get_alloc(&w32->menu_data));
         return VO_TRUE;
+    case VOCTRL_BRING_FRONT:
+        if (SetForegroundWindow(w32->window) != FALSE)
+            return VO_TRUE;
+
+        return VO_FALSE;
     }
 
     // Keep gui_thread_control_supports() in sync
