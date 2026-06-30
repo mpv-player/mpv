@@ -123,6 +123,47 @@ static void test_roundtrip(const uint8_t *plain, size_t plain_len,
     free(coded);
 }
 
+// A plaintext that is an exact multiple of BLOCKSIZE gets a whole 16-byte
+// PKCS#7 padding block. After all real bytes are delivered the wrapper must
+// report a clean EOF, not a decrypt error from the dropped padding block.
+static void test_block_aligned_eof(size_t plain_len)
+{
+    mp_require(plain_len % BLOCKSIZE == 0);
+
+    uint8_t *plain = malloc(plain_len ? plain_len : 1);
+    mp_require(plain);
+    for (size_t i = 0; i < plain_len; i++)
+        plain[i] = (uint8_t)(i * 7u + 3u);
+
+    size_t coded_len;
+    uint8_t *coded = encrypt_pkcs7(test_key, test_iv, plain, plain_len, &coded_len);
+
+    struct mem_reader mr = { .data = coded, .size = coded_len };
+    AVIOContext *inner = make_inner(&mr);
+
+    AVIOContext *wrapper = NULL;
+    bstr kb = { (uint8_t *)test_key, BLOCKSIZE };
+    bstr ib = { (uint8_t *)test_iv, BLOCKSIZE };
+    assert_int_equal(mp_avio_crypto_open(&wrapper, inner, kb, ib), 0);
+
+    uint8_t out[2048];
+    mp_require(plain_len + BLOCKSIZE <= sizeof(out));
+    size_t got = 0;
+    int n;
+    while ((n = avio_read(wrapper, out + got, (int)(sizeof(out) - got))) > 0)
+        got += n;
+
+    assert_int_equal(got, plain_len);
+    if (plain_len)
+        assert_memcmp(out, plain, plain_len);
+    assert_int_equal(n, AVERROR_EOF);
+
+    mp_avio_crypto_close(&wrapper);
+    free_inner(&inner);
+    free(coded);
+    free(plain);
+}
+
 // Feed a single ciphertext block whose plaintext last byte is `bad`. The
 // decrypt path treats that byte as the PKCS#7 length and rejects it.
 static void test_invalid_padding(uint8_t bad)
@@ -206,6 +247,11 @@ int main(void)
     // Long input that crosses many internal refill boundaries.
     test_roundtrip(big, sizeof(big), 0, 0);
     test_roundtrip(big, sizeof(big), 5, 11);
+
+    test_block_aligned_eof(16);
+    test_block_aligned_eof(32);
+    test_block_aligned_eof(64);
+    test_block_aligned_eof(1024);
 
     test_invalid_padding(0x00);          // zero is invalid
     test_invalid_padding(BLOCKSIZE + 1); // > BLOCKSIZE is invalid

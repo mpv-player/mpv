@@ -98,6 +98,7 @@ static int crypto_read(void *opaque, uint8_t *buf, int size)
             if (padding < 1 || padding > BLOCKSIZE)
                 return AVERROR_INVALIDDATA;
             p->plain_end -= padding;
+            p->ct_end = p->plain_end;
         }
     }
 
