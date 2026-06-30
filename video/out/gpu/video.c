@@ -378,7 +378,7 @@ static const struct gl_video_opts gl_video_opts_def = {
             {WINDOW_PREFERRED, .params = {NAN, NAN}, .functions = filter_windows},
         },
         [SCALER_CSCALE] = {
-            {SCALER_INHERIT, .params = {NAN, NAN}, .functions = cdscale_filters},
+            {SCALER_CATMULL_ROM, .params = {NAN, NAN}, .functions = cdscale_filters},
             {WINDOW_PREFERRED, .params = {NAN, NAN}, .functions = filter_windows},
         },
         [SCALER_TSCALE] = {
