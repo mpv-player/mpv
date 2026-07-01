@@ -381,8 +381,8 @@ const struct m_sub_options mp_subtitle_sub_opts = {
 
 const struct m_sub_options mp_subtitle_shared_sub_opts = {
     .opts = (const struct m_option[]){
-        {"sub-delay", OPT_FLOAT(sub_delay[0])},
-        {"secondary-sub-delay", OPT_FLOAT(sub_delay[1])},
+        {"sub-delay", OPT_DOUBLE(sub_delay[0])},
+        {"secondary-sub-delay", OPT_DOUBLE(sub_delay[1])},
         {"sub-pos", OPT_FLOAT(sub_pos[0]), M_RANGE(0.0, 150.0)},
         {"secondary-sub-pos", OPT_FLOAT(sub_pos[1]), M_RANGE(0.0, 150.0)},
         {"sub-visibility", OPT_BOOL(sub_visibility[0])},
@@ -692,7 +692,7 @@ static const m_option_t mp_opts[] = {
     {"audio-pitch-correction", OPT_BOOL(pitch_correction)},
 
     // set a-v distance
-    {"audio-delay", OPT_FLOAT(audio_delay)},
+    {"audio-delay", OPT_DOUBLE(audio_delay)},
 
 // ------------------------- codec/vfilter options --------------------
 
