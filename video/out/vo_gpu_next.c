@@ -1205,6 +1205,19 @@ static void update_tm_viz(struct pl_color_map_params *params,
 static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
+// Currently only used by Windows implementation
+#ifdef _WIN32
+static bool get_global_color_management_status(struct priv *p)
+{
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
+    if (sw->fns->target_global_color_management_status)
+        return sw->fns->target_global_color_management_status(sw);
+    else
+        return false;
+}
+#endif
+
 static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
@@ -1487,18 +1500,18 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 #ifdef _WIN32
         // Windows uses the sRGB piecewise function. Send piecewise sRGB to
         // Windows in HDR mode so that it can be converted to PQ, the same way
-        // as mpv does internally. Note that in SDR mode, even with ACM enabled,
-        // Windows assumes the display is sRGB. It doesn't perform gamma
-        // conversion, or any conversions would roundtrip back to sRGB.
-        // In which case the EOTF depends on the display.
-        // Ideally, compositors would agree on how to handle sRGB, but I’ll
+        // as mpv does internally. This happens on both ACM and HDR.
+        // For non-HDR/ACM cases, use power 2.2 since most monitors default to
+        // power 2.2.
+        // Ideally, compositors would agree on how to handle sRGB, but I'll
         // leave that part of the story for the reader to explore.
         // Note: Older Windows versions, without ACM, were not able to convert
         // sRGB to PQ output. We are not concerned about this case, as it would
         // look wrong anyway.
         bool target_pq = !target_unknown && target_csp.transfer == PL_COLOR_TRC_PQ;
-        if (opts->treat_srgb_as_power22 & 4 && target_pq)
-            target.color.transfer = PL_COLOR_TRC_SRGB;
+        if (opts->treat_srgb_as_power22 & 4)
+            if (get_global_color_management_status(p) || target_pq)
+                target.color.transfer = PL_COLOR_TRC_SRGB;
 #endif
     }
     stats_time_start(p->stats, "osd-update");

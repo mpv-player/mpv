@@ -69,6 +69,20 @@ static float preferred_ref_luma(struct ra_ctx *ctx)
     return mp_dxgi_sdr_white_level_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(ctx->vo));
 }
 
+static bool global_color_management_status(struct ra_ctx *ctx)
+{
+    struct priv *p = ctx->priv;
+    bool reliable = false;
+    struct mp_w32_acm_status status = {0};
+
+    reliable = mp_dxgi_get_acm_status_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(ctx->vo), &status);
+
+    if (reliable && status.acm_enabled)
+        return true;
+    else
+        return false;
+}
+
 static bool win_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -94,6 +108,7 @@ static bool win_init(struct ra_ctx *ctx)
         .color_depth = color_depth,
         .preferred_csp = preferred_csp,
         .preferred_ref_luma = preferred_ref_luma,
+        .global_color_management_status = global_color_management_status,
     };
 
     VkInstance inst = vk->vkinst->instance;
