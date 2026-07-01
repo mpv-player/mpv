@@ -1179,6 +1179,12 @@ static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_gro
         graph = talloc_asprintf_append(graph, "[%d]", i);
     }
 
+    if (vsh->group->num_members < 1) {
+        MP_WARN(demuxer, "Tile grid group %u has no resolvable member "
+                "streams - ignoring.\n", stream_group->index);
+        goto error;
+    }
+
     graph = talloc_asprintf_append(graph, "xstack=inputs=%d:layout=", grid->nb_tiles);
     for (int i = 0; i < grid->nb_tiles; i++) {
         if (i > 0)
