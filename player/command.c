@@ -5431,7 +5431,7 @@ static void cmd_overlay_add(void *pcmd)
         MP_ERR(mpctx, "overlay-add: invalid id %d\n", id);
         goto error;
     }
-    if (w <= 0 || h <= 0 || stride < w * 4 || (stride % 4) || offset < 0) {
+    if (w <= 0 || h <= 0 || stride / 4 < w || (stride % 4) || offset < 0) {
         MP_ERR(mpctx, "overlay-add: inconsistent parameters\n");
         goto error;
     }
