@@ -149,6 +149,7 @@ struct priv {
     pl_options pars;
     struct m_config_cache *opts_cache;
     struct m_config_cache *next_opts_cache;
+    struct m_config_cache *filter_opts_cache;
     struct gl_next_opts *next_opts;
     struct cache shader_cache, icc_cache;
     struct mp_csp_equalizer_state *video_eq;
@@ -182,6 +183,7 @@ struct gl_next_opts {
     float background_blur_radius;
     float corner_rounding;
     bool inter_preserve;
+    int deint_algo;
     struct user_lut lut;
     struct user_lut image_lut;
     struct user_lut target_lut;
@@ -210,11 +212,16 @@ const struct m_sub_options gl_next_conf = {
         {"border-background", OPT_CHOICE(border_background,
             {"none",  BACKGROUND_NONE},
             {"color", BACKGROUND_COLOR},
-            {"tiles", BACKGROUND_TILES}
-            ,{"blur", BACKGROUND_BLUR})},
+            {"tiles", BACKGROUND_TILES},
+            {"blur", BACKGROUND_BLUR})},
         {"background-blur-radius", OPT_FLOAT(background_blur_radius)},
         {"corner-rounding", OPT_FLOAT(corner_rounding), M_RANGE(0, 1)},
         {"interpolation-preserve", OPT_BOOL(inter_preserve)},
+        {"deinterlace-algorithm", OPT_CHOICE(deint_algo,
+             {"weave", PL_DEINTERLACE_WEAVE},
+             {"bob", PL_DEINTERLACE_BOB},
+             {"yadif", PL_DEINTERLACE_YADIF},
+             {"bwdif", PL_DEINTERLACE_BWDIF})},
         {"lut", OPT_STRING(lut.opt), .flags = M_OPT_FILE},
         {"lut-type", OPT_CHOICE_C(lut.type, lut_types)},
         {"image-lut", OPT_STRING(image_lut.opt), .flags = M_OPT_FILE},
@@ -230,6 +237,7 @@ const struct m_sub_options gl_next_conf = {
     .defaults = &(struct gl_next_opts) {
         .border_background = BACKGROUND_COLOR,
         .background_blur_radius = 16.0f,
+        .deint_algo = PL_DEINTERLACE_BWDIF,
         .inter_preserve = true,
         .sub_hdr_peak = PL_COLOR_SDR_WHITE,
         .image_subs_hdr_peak = 1000,
@@ -1026,6 +1034,7 @@ static void update_options(struct vo *vo)
     pl_options pars = p->pars;
     bool changed = m_config_cache_update(p->opts_cache);
     changed = m_config_cache_update(p->next_opts_cache) || changed;
+    changed = m_config_cache_update(p->filter_opts_cache) || changed;
     if (changed)
         update_render_options(vo);
 
@@ -1280,13 +1289,29 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         mpi->priv = fp;
         fp->vo = vo;
 
+        bool use_fields = params.deinterlace_params &&
+                          mpi->fields & MP_IMGFIELD_INTERLACED;
+
+        // vf_fieldrate emits a frame for each field only to make mpv render
+        // at the second field PTS. But don't actually push it to pl_queue,
+        // because it already derives it internally from first_field.
+        if (use_fields && (mpi->fields & MP_IMGFIELD_TICK_SECOND)) {
+            talloc_free(mpi);
+            p->last_id = id;
+            continue;
+        }
+        int first_field = !use_fields ? PL_FIELD_NONE :
+            (mpi->fields & MP_IMGFIELD_TOP_FIRST) ? PL_FIELD_TOP : PL_FIELD_BOTTOM;
+
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
-            .duration = can_interpolate ? frame->approx_duration : 0,
+            .duration = can_interpolate ? frame->approx_duration :
+                        use_fields ? mpi->pkt_duration : 0,
             .frame_data = mpi,
             .map = map_frame,
             .unmap = unmap_frame,
             .discard = discard_frame,
+            .first_field = first_field,
         });
 
         p->last_id = id;
@@ -2372,6 +2397,7 @@ static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
+    p->filter_opts_cache = m_config_cache_alloc(p, vo->global, &filter_conf);
     p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
     p->next_opts = p->next_opts_cache->opts;
     p->video_eq = mp_csp_equalizer_create(p, vo->global);
@@ -2699,6 +2725,7 @@ static void update_render_options(struct vo *vo)
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
+    const struct filter_opts *fopts = p->filter_opts_cache->opts;
     pars->params.background_color[0] = opts->background_color.r / 255.0;
     pars->params.background_color[1] = opts->background_color.g / 255.0;
     pars->params.background_color[2] = opts->background_color.b / 255.0;
@@ -2731,6 +2758,9 @@ static void update_render_options(struct vo *vo)
     pars->params.downscaler = map_scaler(p, SCALER_DSCALE);
     pars->params.plane_upscaler = map_scaler(p, SCALER_CSCALE);
     pars->params.frame_mixer = opts->interpolation ? map_scaler(p, SCALER_TSCALE) : NULL;
+
+    pars->params.deinterlace_params = fopts->deinterlace != 0 ? &pars->deinterlace_params : NULL;
+    pars->deinterlace_params.algo = p->next_opts->deint_algo;
 
     // Request as many frames as required from the decoder, depending on the
     // speed VPS/FPS ratio libplacebo may need more frames. Request frames up to
@@ -2849,6 +2879,7 @@ const struct vo_driver video_out_gpu_next = {
     .caps = VO_CAP_ROTATE90 |
             VO_CAP_FILM_GRAIN |
             VO_CAP_VFLIP |
+            VO_CAP_DEINTERLACE |
             0x0,
     .preinit = preinit,
     .query_format = query_format,
