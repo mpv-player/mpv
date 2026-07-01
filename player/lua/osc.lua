@@ -3126,6 +3126,8 @@ tick = function()
         msg.trace("idle message")
         if user_opts.idlescreen then
             render_logo()
+        else
+            render_wipe(state.logo_osd)
         end
 
         -- Hide main OSC but keep window controls functional
