@@ -139,7 +139,7 @@ struct mp_subtitle_opts {
 
 // Options for both primary and secondary subs.
 struct mp_subtitle_shared_opts {
-    float sub_delay[2];
+    double sub_delay[2];
     float sub_pos[2];
     bool sub_visibility[2];
     int ass_style_override[2];
@@ -263,7 +263,7 @@ typedef struct MPOpts {
     int hr_seek;
     float hr_seek_demuxer_offset;
     bool hr_seek_framedrop;
-    float audio_delay;
+    double audio_delay;
     float default_max_pts_correction;
     int autosync;
     int frame_dropping;
