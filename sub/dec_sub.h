@@ -21,6 +21,14 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_DEF_FPS,
     SD_CTRL_RESET_SOFT,
     SD_CTRL_UPDATE_OPTS,
+    SD_CTRL_APPLY_DVDNAV,   // struct mp_dvdnav_hli *
+};
+
+struct mp_dvdnav_hli {
+    bool show;
+    int x, y, w, h;       // button rect in SPU/source coords
+    uint32_t palette[4];  // 0xAARRGGBB, straight alpha
+    uint32_t change_id;   // bumped on any visible change
 };
 
 enum sd_text_type {

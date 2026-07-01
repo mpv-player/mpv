@@ -367,6 +367,23 @@ void update_demuxer_properties(struct MPContext *mpctx)
         add_demuxer_tracks(mpctx, tracks);
         print_track_list(mpctx, NULL);
         tracks->events &= ~DEMUX_EVENT_STREAMS;
+
+        // Streams surfaced after play_current_file's selection phase (e.g.
+        // disc-nav playlist hop, or lavf identifying a PES stream only once
+        // its first packet arrives) wouldn't otherwise get auto-selected.
+        if (mpctx->playback_initialized && mpctx->opts->stream_auto_sel) {
+            for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+                for (int i = 0; i < num_ptracks[t]; i++) {
+                    if (mpctx->current_track[i][t])
+                        continue;
+                    if (mpctx->opts->stream_id[i][t] == -2)
+                        continue;
+                    struct track *sel = select_default_track(mpctx, i, t);
+                    if (sel)
+                        mp_switch_track_n(mpctx, i, t, sel, 0);
+                }
+            }
+        }
     }
     if (events & DEMUX_EVENT_METADATA) {
         struct mp_tags *info =
@@ -410,6 +427,25 @@ void update_demuxer_properties(struct MPContext *mpctx)
     }
     if (events & DEMUX_EVENT_DURATION)
         mp_notify(mpctx, MP_EVENT_DURATION_UPDATE, NULL);
+    if (events & DEMUX_EVENT_LISTS) {
+        // Demuxer just published a new chapter / edition list at runtime.
+        talloc_free(mpctx->chapters);
+        mpctx->chapters = NULL;
+        mpctx->num_chapters = demuxer->num_chapters;
+        if (demuxer->num_chapters > 0) {
+            mpctx->chapters = demux_copy_chapter_data(demuxer->chapters,
+                                                     demuxer->num_chapters);
+            if (mpctx->opts->rebase_start_time) {
+                for (int n = 0; n < mpctx->num_chapters; n++)
+                    mpctx->chapters[n].pts -= demuxer->start_time;
+            }
+        }
+        mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
+        mp_notify_property(mpctx, "chapter-list");
+        mp_notify_property(mpctx, "edition");
+        mp_notify_property(mpctx, "current-edition");
+        mp_notify_property(mpctx, "editions");
+    }
     demuxer->events = 0;
 }
 
