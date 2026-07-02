@@ -7497,7 +7497,7 @@ them.
         In such a configuration, we highly recommend setting ``--tone-mapping``
         to ``mobius`` or even ``clip``.
 
-``--target-contrast=<auto|10-1000000|inf>``
+``--target-contrast=<auto|10-10000000|inf>``
     Specifies the measured contrast of the output display. ``--target-contrast``
     in conjunction with ``--target-peak`` value is used to calculate display
     black point. Used in black point compensation during HDR tone-mapping.
@@ -7505,6 +7505,21 @@ them.
     would have or an infinite contrast when HDR ``--target-trc`` is used.
     If supported by the API, display contrast will be used as reported.
     ``inf`` contrast specifies display with perfect black level, in practice OLED.
+    (Only for ``--vo=gpu-next``)
+
+``--target-contrast-hdr=<no|auto|10-10000000|inf>``
+    Same as ``--target-contrast``, but only applies when ``--target-trc`` is set to
+    a HDR transfer function and would override the settings of ``--target-contrast``.
+    This allows to specify a different contrast for HDR content.
+
+    This might be useful when user is running a host OS that supports global color
+    management and monitor has large contrast ratio. In this case, under some OS
+    implementation, mpv can't correctly get the actual contrast ratio info of the
+    monitor when ``--target-trc`` is a SDR transfer function, and only use
+    ``--target-contrast=auto`` might cause washed out colors.
+
+    ``no`` is the default value and means the contrast is only controlled by
+    ``--target-contrast``.
     (Only for ``--vo=gpu-next``)
 
 ``--target-gamut=<value>``
