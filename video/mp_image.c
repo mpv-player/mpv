@@ -1017,23 +1017,31 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
             params->color.transfer = params->repr.levels == PL_COLOR_LEVELS_LIMITED ?
                                         PL_COLOR_TRC_BT_1886 : PL_COLOR_TRC_SRGB;
     } else if (forced_csp == PL_COLOR_SYSTEM_RGB) {
-        params->repr.sys = PL_COLOR_SYSTEM_RGB;
-        params->repr.levels = PL_COLOR_LEVELS_FULL;
+        // Respect an explicit XYZ system tagging
+        if (params->repr.sys != PL_COLOR_SYSTEM_XYZ) {
+            params->repr.sys = PL_COLOR_SYSTEM_RGB;
+            params->repr.levels = PL_COLOR_LEVELS_FULL;
 
-        // The majority of RGB content is either sRGB or (rarely) some other
-        // color space which we don't even handle, like AdobeRGB or
-        // ProPhotoRGB. The only reasonable thing we can do is assume it's
-        // sRGB and hope for the best, which should usually just work out fine.
-        // Note: sRGB primaries = BT.709 primaries
-        if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
-            params->color.primaries = PL_COLOR_PRIM_BT_709;
-        if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
-            params->color.transfer = PL_COLOR_TRC_SRGB;
+            // The majority of RGB content is either sRGB or (rarely) some other
+            // color space which we don't even handle, like AdobeRGB or
+            // ProPhotoRGB. The only reasonable thing we can do is assume it's
+            // sRGB and hope for the best, which should usually just work out fine.
+            // Note: sRGB primaries = BT.709 primaries
+            if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
+                params->color.primaries = PL_COLOR_PRIM_BT_709;
+            if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
+                params->color.transfer = PL_COLOR_TRC_SRGB;
+        } else {
+            params->repr.levels = PL_COLOR_LEVELS_FULL;
+        }
     } else if (forced_csp == PL_COLOR_SYSTEM_XYZ) {
         params->repr.sys = PL_COLOR_SYSTEM_XYZ;
         params->repr.levels = PL_COLOR_LEVELS_FULL;
-        // Force gamma to ST428 as this is the only correct for DCDM X'Y'Z'
-        params->color.transfer = PL_COLOR_TRC_ST428;
+        // Default the gamma to ST428, the only correct value for DCDM
+        // X'Y'Z', but respect an explicit transfer tag, since linear-light
+        // XYZ (e.g. scene-referred camera raw) must keep TRC=LINEAR.
+        if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
+            params->color.transfer = PL_COLOR_TRC_ST428;
         // Don't care about primaries, they shouldn't be used, or if anything
         // MP_CSP_PRIM_ST428 should be defined.
     } else {
@@ -1126,6 +1134,16 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
         .primaries = pl_primaries_from_av(src->color_primaries),
         .transfer = pl_transfer_from_av(src->color_trc),
     };
+
+    // SMPTE 428-1 / CIE XYZ tristimulus inputs aren't an RGB primary set,
+    // so route through PL_COLOR_SYSTEM_XYZ so libplacebo applies the XYZ to RGB
+    // decode, and tag post-decode primaries as DCI-P3 to match what its XYZ
+    // handler bakes in. Don't override the TRC: linear-light XYZ keeps
+    // TRC=LINEAR, DCDM-encoded XYZ keeps TRC=ST428.
+    if (src->color_primaries == AVCOL_PRI_SMPTE428) {
+        dst->params.repr.sys = PL_COLOR_SYSTEM_XYZ;
+        dst->params.color.primaries = PL_COLOR_PRIM_BT_2020;
+    }
 
     dst->params.chroma_location = pl_chroma_from_av(src->chroma_location);
 
