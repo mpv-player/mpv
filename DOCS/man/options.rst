@@ -2513,6 +2513,9 @@ Subtitles
 ``--sub-scale=<0-100>``
     Factor for the text subtitle font size (default: 1).
 
+    This affects both primary and secondary subtitles by default. Use
+    ``--secondary-sub-scale`` to override the scale for secondary subtitles.
+
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
@@ -2578,6 +2581,12 @@ Subtitles
 ``--secondary-sub-pos=<0-150>``
     Specify the position of secondary subtitles on the screen. This is similar
     to ``--sub-pos`` but for secondary subtitles.
+
+``--secondary-sub-scale=<default|0-100>``
+    Factor for the secondary subtitle font size. The default value
+    ``default`` inherits the value of ``--sub-scale``. If ``add`` or
+    ``multiply`` is used while this is ``default``, the command starts from the
+    inherited ``--sub-scale`` value and sets an explicit value.
 
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used

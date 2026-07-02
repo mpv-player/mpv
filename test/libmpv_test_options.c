@@ -114,6 +114,46 @@ static void test_options_and_properties(void)
         fail("Node: expected 1 but got %d'!\n", result_node.u.flag);
 }
 
+static void test_secondary_sub_scale(void)
+{
+    check_string("secondary-sub-scale", "default");
+
+    double sub_scale = 1.25;
+    set_option_or_property("sub-scale", MPV_FORMAT_DOUBLE, &sub_scale, false);
+
+    command_string("add secondary-sub-scale 0.25");
+    check_double("secondary-sub-scale", 1.5);
+
+    set_property_string("secondary-sub-scale", "default");
+    check_string("secondary-sub-scale", "default");
+
+    command_string("multiply secondary-sub-scale 2");
+    check_double("secondary-sub-scale", 2.5);
+
+    set_property_string("secondary-sub-scale", "default");
+    check_string("secondary-sub-scale", "default");
+
+    command_string("add options/secondary-sub-scale 0.25");
+    check_double("secondary-sub-scale", 1.5);
+
+    set_property_string("secondary-sub-scale", "default");
+    check_string("secondary-sub-scale", "default");
+
+    command_string("multiply options/secondary-sub-scale 2");
+    check_double("secondary-sub-scale", 2.5);
+
+    set_property_string("secondary-sub-scale", "default");
+    check_string("secondary-sub-scale", "default");
+
+    double secondary_sub_scale = 0.5;
+    set_option_or_property("secondary-sub-scale", MPV_FORMAT_DOUBLE,
+                           &secondary_sub_scale, false);
+    check_double("secondary-sub-scale", secondary_sub_scale);
+
+    set_property_string("secondary-sub-scale", "default");
+    check_string("secondary-sub-scale", "default");
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 1)
@@ -130,6 +170,8 @@ int main(int argc, char *argv[])
     const char *fmt = "================ TEST: %s ================\n";
     printf(fmt, "test_options_and_properties");
     test_options_and_properties();
+    printf(fmt, "test_secondary_sub_scale");
+    test_secondary_sub_scale();
     printf("================ SHUTDOWN ================\n");
 
     command_string("quit");
