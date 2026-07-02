@@ -608,7 +608,7 @@ bool mp_aframe_reverse(struct mp_aframe *f)
     return true;
 }
 
-int mp_aframe_approx_byte_size(struct mp_aframe *frame)
+size_t mp_aframe_approx_byte_size(struct mp_aframe *frame)
 {
     // God damn, AVFrame is too fucking annoying. Just go with the size that
     // allocating a new frame would use.
