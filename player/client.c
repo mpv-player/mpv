@@ -456,8 +456,8 @@ static void mp_destroy_client(mpv_handle *ctx, bool terminate)
     mpv_wait_async_requests(ctx);
 
     osd_set_external_remove_owner(mpctx->osd, ctx);
+    command_remove_overlays_by_owner(mpctx, ctx);
     mp_input_remove_sections_by_owner(mpctx->input, ctx->name);
-
     mp_mutex_lock(&clients->lock);
 
     for (int n = 0; n < clients->num_clients; n++) {
