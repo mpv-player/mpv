@@ -1845,7 +1845,8 @@ static void parse_vorbis_chmap(struct mp_chmap *channels, unsigned char *data,
     if (size < 4)
         return;
     uint32_t vendor_length = AV_RL32(data);
-    if (vendor_length + 4 > size) // also check for the next AV_RB32 below
+    // 4 (vendor_length) + vendor string + 4 (num_headers); subtract to avoid overflow
+    if (size < 8 || vendor_length > size - 8)
         return;
     size -= vendor_length + 4;
     data += vendor_length + 4;
