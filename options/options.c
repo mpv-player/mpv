@@ -803,6 +803,7 @@ static const m_option_t mp_opts[] = {
     {"", OPT_SUBSTRUCT(video_equalizer, mp_csp_equalizer_conf)},
 
     {"use-filedir-conf", OPT_BOOL(use_filedir_conf)},
+    {"osd-lua", OPT_BOOL(lua_load_osd)},
     {"osd-level", OPT_CHOICE(osd_level,
         {"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})},
     {"osd-on-seek", OPT_CHOICE(osd_on_seek,
@@ -1016,6 +1017,7 @@ static const struct MPOpts mp_default_opts = {
     .osd_on_seek = 1,
     .osd_duration = 1000,
 #if HAVE_LUA
+    .lua_load_osd = false,
     .lua_load_osc = true,
     .lua_load_ytdl = true,
     .lua_ytdl_format = NULL,
