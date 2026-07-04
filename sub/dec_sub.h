@@ -25,7 +25,8 @@ enum sd_ctrl {
 };
 
 struct mp_dvdnav_hli {
-    bool show;
+    bool show;            // render the button highlight
+    bool menu_active;     // menu subpicture is persistent display state
     int x, y, w, h;       // button rect in SPU/source coords
     uint32_t palette[4];  // 0xAARRGGBB, straight alpha
     uint32_t change_id;   // bumped on any visible change

@@ -460,6 +460,16 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
 static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
 {
+    // A menu subpicture is persistent display state, not bound to playback
+    // time.
+    if (priv->hli.menu_active) {
+        for (int n = 0; n < MAX_QUEUE; n++) {
+            if (priv->subs[n].valid)
+                return &priv->subs[n];
+        }
+        return NULL;
+    }
+
     struct sub *current = NULL;
     for (int n = 0; n < MAX_QUEUE; n++) {
         struct sub *sub = &priv->subs[n];
@@ -631,6 +641,10 @@ static bool accepts_packet(struct sd *sd, double min_pts)
 {
     struct sd_lavc_priv *priv = sd->priv;
 
+    // Menu subpictures are not pts-ordered; never block delivery.
+    if (priv->hli.menu_active)
+        return true;
+
     double pts = priv->current_pts;
     if (min_pts != MP_NOPTS_VALUE) {
         // guard against bogus rendering PTS in the future.
@@ -663,8 +677,12 @@ static void reset(struct sd *sd)
 {
     struct sd_lavc_priv *priv = sd->priv;
 
-    for (int n = 0; n < MAX_QUEUE; n++)
-        clear_sub(&priv->subs[n]);
+    // Keep the menu subpicture; timeline resets don't invalidate it and the
+    // disc won't re-send it. Purged when the menu closes.
+    if (!priv->hli.menu_active) {
+        for (int n = 0; n < MAX_QUEUE; n++)
+            clear_sub(&priv->subs[n]);
+    }
     // lavc might not do this right for all codecs; may need close+reopen
     avcodec_flush_buffers(priv->avctx);
 
@@ -759,12 +777,18 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         return CONTROL_OK;
     case SD_CTRL_APPLY_DVDNAV: {
         struct mp_dvdnav_hli *hli = arg;
-        if (priv->hli_change_id == hli->change_id)
-            return CONTROL_OK;
+        bool menu_closed = priv->hli.menu_active && !hli->menu_active;
+        bool changed = priv->hli_change_id != hli->change_id;
         priv->hli = *hli;
         priv->hli_change_id = hli->change_id;
+        // Don't let menu subpictures leak into title playback.
+        if (menu_closed) {
+            for (int n = 0; n < MAX_QUEUE; n++)
+                clear_sub(&priv->subs[n]);
+        }
         // Re-render any decoded subtitles, after style update.
-        rerender_queued_subs(sd);
+        if (changed)
+            rerender_queued_subs(sd);
         return CONTROL_OK;
     }
     default:
