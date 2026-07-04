@@ -322,6 +322,22 @@ static void sync_initial_edition(struct demuxer *demuxer)
     }
 }
 
+static void refresh_disc_metadata(struct demuxer *demuxer)
+{
+    double len;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
+        demux_set_duration(demuxer, len);
+    else
+        demux_set_duration(demuxer, -1);
+
+    // Old chapter metadata is not freed here, they are parented to demuxer.
+    demuxer->chapters = NULL;
+    demuxer->num_chapters = 0;
+    add_stream_chapters(demuxer);
+    sync_initial_edition(demuxer);
+    demux_lists_changed(demuxer);
+}
+
 static bool reopen_slave(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
@@ -351,23 +367,27 @@ static bool reopen_slave(struct demuxer *demuxer)
     }
 
     sync_streams(demuxer);
+    refresh_disc_metadata(demuxer);
 
-    // Refresh duration / chapters / edition for the new playlist.
-    double len;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
-        demux_set_duration(demuxer, len);
-    else
-        demux_set_duration(demuxer, -1);
+    return true;
+}
 
-    for (int n = 0; n < demuxer->num_chapters; n++)
-        talloc_free(demuxer->chapters[n].metadata);
-    demuxer->num_chapters = 0;
-    add_stream_chapters(demuxer);
+// Handle a disc-nav discontinuity (title/menu/cell jump)
+static bool process_discontinuity(struct demuxer *demuxer, uint32_t new_id)
+{
+    struct priv *p = demuxer->priv;
 
-    sync_initial_edition(demuxer);
-
-    demux_lists_changed(demuxer);
-
+    if (!p->is_dvd) {
+        // BD needs a full reopen (codecs can change across titles).
+        if (!reopen_slave(demuxer))
+            return false;
+    } else {
+        if (p->slave->desc->drop_buffers)
+            p->slave->desc->drop_buffers(p->slave);
+        refresh_disc_metadata(demuxer);
+    }
+    p->last_discontinuity_id = new_id;
+    p->seek_reinit = true;
     return true;
 }
 
@@ -381,31 +401,26 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             p->nav_active = nav.nav_active;
             demux_set_nav_active(demuxer, nav.nav_active);
         }
-        if (nav.discontinuity_id != p->last_discontinuity_id) {
-            MP_VERBOSE(demuxer, "discontinuity %u->%u, reopening slave\n",
+        if (!p->is_dvd && nav.discontinuity_id != p->last_discontinuity_id) {
+            MP_VERBOSE(demuxer, "discontinuity %u->%u, handling\n",
                        p->last_discontinuity_id, nav.discontinuity_id);
-            if (!reopen_slave(demuxer))
+            if (!process_discontinuity(demuxer, nav.discontinuity_id))
                 return false;
-            if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
-                p->last_discontinuity_id = nav.discontinuity_id;
-            p->seek_reinit = true;
         }
     }
 
     struct demux_packet *pkt = demux_read_any_packet(p->slave);
     if (!pkt) {
-        // The slave can hit EOF mid-playback when the stream layer breaks
-        // its read at a disc-driven discontinuity.
+        // EOF is either a real still (hold the frame) or the one-shot drain
+        // EOF at a jump boundary; in the latter case resync and continue.
         struct stream_nav_state nav2 = {0};
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav2) >= 1
             && nav2.discontinuity_id != p->last_discontinuity_id)
         {
-            MP_VERBOSE(demuxer, "discontinuity %u->%u at EOF, reopening slave\n",
+            MP_VERBOSE(demuxer, "discontinuity %u->%u at EOF, handling\n",
                        p->last_discontinuity_id, nav2.discontinuity_id);
-            if (!reopen_slave(demuxer))
+            if (!process_discontinuity(demuxer, nav2.discontinuity_id))
                 return false;
-            p->last_discontinuity_id = nav2.discontinuity_id;
-            p->seek_reinit = true;
             pkt = demux_read_any_packet(p->slave);
         }
         if (!pkt)
@@ -414,8 +429,12 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
 
     demux_update(p->slave, MP_NOPTS_VALUE);
 
-    if (p->seek_reinit)
+    if (p->seek_reinit) {
         reset_pts(demuxer);
+        double len;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) >= 1)
+            demux_set_duration(demuxer, len);
+    }
 
     int slave_index = pkt->stream;
     if (demux_get_num_stream(p->slave) > p->slave_to_outer_count ||
