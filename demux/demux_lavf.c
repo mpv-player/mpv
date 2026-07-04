@@ -1817,6 +1817,11 @@ static void demux_drop_buffers_lavf(demuxer_t *demuxer)
     stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
     avformat_flush(priv->avfc);
+    // Clear sticky EOF/error to reuse this demuxer.
+    if (priv->avfc->pb) {
+        priv->avfc->pb->eof_reached = 0;
+        priv->avfc->pb->error = 0;
+    }
     reset_dovi_split_state(demuxer);
 }
 
