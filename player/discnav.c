@@ -56,11 +56,10 @@ struct disc_nav_state {
     uint32_t last_discontinuity_id;
     bool discontinuity_seen;
 
-    // DVD-only: when a menu opens with no DVD sub track selected, we
-    // transiently select one so the menu graphic renders through the normal
-    // sd_lavc path. menu_selected_track remembers what we selected so we
-    // can deselect it again when the menu closes.
+    // DVD-only: dvd_subtitle track we force-selected for the menu, and the
+    // selection it displaced (restored on menu close).
     struct track *menu_selected_track;
+    struct track *menu_saved_track;
 
     // Last disc-driven audio/sub/angle we acted on.
     int last_audio_id;
@@ -71,6 +70,13 @@ struct disc_nav_state {
     // Last disc-discontinuity id we acted on for track sync.
     uint32_t last_track_disc_id;
 };
+
+static bool is_dvd_sub_track(struct track *t)
+{
+    return t && t->type == STREAM_SUB && t->stream && t->stream->codec &&
+           t->stream->codec->codec &&
+           strcmp(t->stream->codec->codec, "dvd_subtitle") == 0;
+}
 
 static struct disc_nav_state *get_state(struct MPContext *mpctx)
 {
@@ -127,12 +133,14 @@ bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
     return true;
 }
 
+// Push the current menu/highlight state to the dvd_subtitle decoders.
 static void push_dvd_overlay(struct MPContext *mpctx,
                              struct stream_nav_state *nav, bool visible)
 {
     struct mp_dvdnav_hli hli = {
         .show = visible,
-        .change_id = visible ? nav->change_id : 0,
+        .menu_active = nav->menu_active,
+        .change_id = nav->change_id,
     };
     if (visible) {
         hli.x = nav->hl_x;
@@ -143,9 +151,7 @@ static void push_dvd_overlay(struct MPContext *mpctx,
     }
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        if (t->type != STREAM_SUB || !t->d_sub || !t->stream ||
-            !t->stream->codec ||
-            strcmp(t->stream->codec->codec, "dvd_subtitle") != 0)
+        if (!is_dvd_sub_track(t) || !t->d_sub)
             continue;
         sub_control(t->d_sub, SD_CTRL_APPLY_DVDNAV, &hli);
     }
@@ -266,6 +272,8 @@ static void check_async_discontinuity(struct MPContext *mpctx,
     st->last_discontinuity_id = nav->discontinuity_id;
     reset_playback_state(mpctx);
     demux_flush(mpctx->demuxer);
+    // Re-queue the retained menu subpicture the flush may have destroyed.
+    demux_nav_refresh(mpctx->demuxer);
 }
 
 static struct track *find_track_by_demuxer_id(struct MPContext *mpctx,
@@ -362,38 +370,45 @@ static void ensure_menu_sub_selection(struct MPContext *mpctx, bool menu_on)
     struct track *cur = mpctx->current_track[0][STREAM_SUB];
 
     // If the track list got rebuilt under us (e.g. another file/disc loaded
-    // mid-session) the cached pointer could be stale. Trust only what we
+    // mid-session) the cached pointers could be stale. Trust only what we
     // can still see in mpctx->tracks.
-    if (st->menu_selected_track) {
+    for (int i = 0; i < 2; i++) {
+        struct track **slot = i ? &st->menu_saved_track : &st->menu_selected_track;
+        if (!*slot)
+            continue;
         bool still_present = false;
         for (int n = 0; n < mpctx->num_tracks; n++) {
-            if (mpctx->tracks[n] == st->menu_selected_track) {
+            if (mpctx->tracks[n] == *slot) {
                 still_present = true;
                 break;
             }
         }
         if (!still_present)
-            st->menu_selected_track = NULL;
+            *slot = NULL;
     }
 
     if (menu_on) {
-        if (cur || st->menu_selected_track)
+        // Re-checked every frame; other selectors (stream auto-select, slave
+        // reopens) can change the sub under us.
+        if (st->menu_selected_track && cur == st->menu_selected_track)
+            return;
+        // A dvd_subtitle track is already active; nothing to force.
+        if (is_dvd_sub_track(cur))
             return;
         if (mpctx->opts->stream_id[0][STREAM_SUB] == -2)
             return;
         struct track *pick = NULL;
         for (int n = 0; n < mpctx->num_tracks; n++) {
-            struct track *t = mpctx->tracks[n];
-            if (t->type == STREAM_SUB && t->stream && t->stream->codec &&
-                t->stream->codec->codec &&
-                strcmp(t->stream->codec->codec, "dvd_subtitle") == 0)
-            {
-                pick = t;
+            if (is_dvd_sub_track(mpctx->tracks[n])) {
+                pick = mpctx->tracks[n];
                 break;
             }
         }
         if (!pick)
             return;
+        // Remember the displaced selection only on the first override.
+        if (!st->menu_selected_track)
+            st->menu_saved_track = cur;
         mp_switch_track_n(mpctx, 0, STREAM_SUB, pick, 0);
         st->menu_selected_track = pick;
     } else {
@@ -401,8 +416,9 @@ static void ensure_menu_sub_selection(struct MPContext *mpctx, bool menu_on)
             return;
         // Only revert if our override is still the active selection.
         if (cur == st->menu_selected_track)
-            mp_switch_track_n(mpctx, 0, STREAM_SUB, NULL, 0);
+            mp_switch_track_n(mpctx, 0, STREAM_SUB, st->menu_saved_track, 0);
         st->menu_selected_track = NULL;
+        st->menu_saved_track = NULL;
     }
 }
 
@@ -428,6 +444,7 @@ void disc_nav_update(struct MPContext *mpctx)
         st->bd_last_change_id = 0;
         st->bd_last_vo_res = (struct mp_osd_res){0};
         st->menu_selected_track = NULL;
+        st->menu_saved_track = NULL;
         st->overlay_change_seen = false;
         return;
     }
@@ -450,10 +467,7 @@ void disc_nav_update(struct MPContext *mpctx)
 
     // The menu overlay updates independently of video. When it changes while
     // the video isn't producing frames (held on a still, or paused) nothing
-    // would repaint it, so request an OSD redraw; handle_osd_redraw() honors it
-    // at EOF/paused and the next video frame consumes it during playback. (BD's
-    // osd_set_external2() already flags want_redraw, but covering both keeps the
-    // DVD highlight, which goes through the SPU path, in sync.)
+    // would repaint it, so request an OSD redraw.
     if (!st->overlay_change_seen || nav.change_id != st->last_overlay_change_id) {
         st->overlay_change_seen = true;
         st->last_overlay_change_id = nav.change_id;
