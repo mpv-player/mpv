@@ -612,7 +612,10 @@ static void add_stream_editions(struct demuxer *demuxer)
         talloc_free(time);
     }
 
-    // Append a synthetic "Disc Menu" entry.
+    // Append a synthetic "Disc Menu" entry, if the disc has menu support.
+    struct stream_nav_state nav = {0};
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) < 1)
+        return;
     struct demux_edition menu = {
         .demuxer_id = titles,
         .default_edition = false,
