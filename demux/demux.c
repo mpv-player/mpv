@@ -4322,6 +4322,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
     };
     mp_tags_set_str(new.metadata, "TITLE", name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
+    talloc_steal(demuxer->chapters, new.metadata);
     return demuxer->num_chapters - 1;
 }
 
