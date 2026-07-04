@@ -246,6 +246,9 @@ void reset_playback_state(struct MPContext *mpctx)
     reset_audio_state(mpctx);
     reset_subtitle_state(mpctx);
 
+    if (mpctx->demuxer)
+        demux_nav_refresh(mpctx->demuxer);
+
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
         // (Often, but not always, this is redundant and also done elsewhere.)
