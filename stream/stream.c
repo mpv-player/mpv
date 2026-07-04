@@ -56,6 +56,8 @@ extern const stream_info_t stream_info_slice;
 extern const stream_info_t stream_info_fd;
 extern const stream_info_t stream_info_ifo_dvdnav;
 extern const stream_info_t stream_info_dvdnav;
+extern const stream_info_t stream_info_ifo_dvda;
+extern const stream_info_t stream_info_dvda;
 extern const stream_info_t stream_info_bdmv_dir;
 extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_edl;
@@ -72,6 +74,10 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_avdevice,
 #if HAVE_DVBIN
     &stream_info_dvb,
+#endif
+#if HAVE_DVDA
+    &stream_info_ifo_dvda,
+    &stream_info_dvda,
 #endif
 #if HAVE_DVDNAV
     &stream_info_ifo_dvdnav,
