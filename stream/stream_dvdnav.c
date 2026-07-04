@@ -79,6 +79,7 @@ struct priv {
     uint32_t hl_palette[4];             // 0xAARRGGBB for SPU pixel values 0..3
     uint32_t nav_change_id;
     uint32_t discontinuity_id;          // bumped on actions that may jump
+    bool pending_drain;                 // emit one EOF at the next jump boundary
     int src_w, src_h;                   // video resolution in pixels
     int auto_actioned_button;           // last auto-activated button; 0 if none
 
@@ -468,6 +469,13 @@ static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     update_highlight(priv);
 }
 
+// Mark a source-position jump.
+static void bump_discontinuity(struct priv *priv)
+{
+    priv->discontinuity_id++;
+    priv->pending_drain = true;
+}
+
 static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
@@ -477,7 +485,7 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     bool activated = stream_nav_action_activates(cmd->action) ||
                      priv->auto_actioned_button != prev_auto;
     if (priv->still_active && activated)
-        priv->discontinuity_id++;
+        bump_discontinuity(priv);
 }
 
 /**
@@ -559,6 +567,10 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
     }
 
     while (1) {
+        if (priv->pending_drain) {
+            priv->pending_drain = false;
+            return 0;
+        }
         int len = -1;
         int event = DVDNAV_NOP;
         if (dvdnav_get_next_block(dvdnav, buf, &event, &len) != DVDNAV_STATUS_OK)
@@ -613,7 +625,7 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             break;
         case DVDNAV_HOP_CHANNEL:
             // Bump discontinuity_id so the playloop flushes the cache.
-            priv->discontinuity_id++;
+            bump_discontinuity(priv);
             break;
         case DVDNAV_HIGHLIGHT:
             update_highlight(priv);
@@ -638,8 +650,7 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
                     MP_WARN(s, "Requested title not found\n");
             }
             // VTS change is a title-set boundary, flush.
-            refresh_video_resolution(priv);
-            priv->discontinuity_id++;
+            bump_discontinuity(priv);
             break;
         }
         case DVDNAV_CELL_CHANGE: {
@@ -780,13 +791,13 @@ static int control(stream_t *stream, int cmd, void *arg)
             if (dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root)
                 != DVDNAV_STATUS_OK)
                 break;
-            priv->discontinuity_id++;
+            bump_discontinuity(priv);
             stream_drop_buffers(stream);
             return STREAM_OK;
         }
         if (dvdnav_title_play(priv->dvdnav, title + 1) != DVDNAV_STATUS_OK)
             break;
-        priv->discontinuity_id++;
+        bump_discontinuity(priv);
         stream_drop_buffers(stream);
         return STREAM_OK;
     }
