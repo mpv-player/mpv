@@ -247,6 +247,7 @@ struct demux_internal {
     bool back_any_need_recheck; // at least 1 ds->back_need_recheck set
 
     bool tracks_switched;       // thread needs to inform demuxer of this
+    bool nav_refresh;           // thread needs to call desc->nav_refresh
 
     bool seeking;               // there's a seek queued
     int seek_flags;             // flags for next seek (if seeking==true)
@@ -1261,6 +1262,21 @@ void demux_drive_nav(struct demuxer *demuxer)
     in->nav_pump = true;
     in->reading = true;
     mp_cond_signal(&in->wakeup);
+    mp_mutex_unlock(&in->lock);
+}
+
+// Re-queue sticky packets (e.g. the DVD menu subpicture) for re-delivery.
+void demux_nav_refresh(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_user);
+
+    mp_mutex_lock(&in->lock);
+    if (in->d_thread->desc->nav_refresh) {
+        in->nav_refresh = true;
+        in->reading = true;
+        mp_cond_signal(&in->wakeup);
+    }
     mp_mutex_unlock(&in->lock);
 }
 
@@ -2543,6 +2559,18 @@ static void execute_trackswitch(struct demux_internal *in)
     mp_mutex_lock(&in->lock);
 }
 
+static void execute_nav_refresh(struct demux_internal *in)
+{
+    in->nav_refresh = false;
+
+    mp_mutex_unlock(&in->lock);
+
+    if (in->d_thread->desc->nav_refresh)
+        in->d_thread->desc->nav_refresh(in->d_thread);
+
+    mp_mutex_lock(&in->lock);
+}
+
 static void execute_seek(struct demux_internal *in)
 {
     int flags = in->seek_flags;
@@ -2657,6 +2685,10 @@ static bool thread_work(struct demux_internal *in)
     }
     if (in->tracks_switched) {
         execute_trackswitch(in);
+        return true;
+    }
+    if (in->nav_refresh) {
+        execute_nav_refresh(in);
         return true;
     }
     if (in->need_back_seek) {

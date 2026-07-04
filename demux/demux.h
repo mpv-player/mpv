@@ -147,6 +147,8 @@ typedef struct demuxer_desc {
     // will be repeated.
     bool (*read_packet)(struct demuxer *demuxer, struct demux_packet **pkt);
     void (*drop_buffers)(struct demuxer *demuxer);
+    // Optional. Re-queue retained sticky packets (DVD menu subpicture).
+    void (*nav_refresh)(struct demuxer *demuxer);
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
     void (*switched_tracks)(struct demuxer *demuxer);
@@ -322,6 +324,7 @@ void demux_stop_thread(struct demuxer *demuxer);
 void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *ctx);
 void demux_start_prefetch(struct demuxer *demuxer);
 void demux_drive_nav(struct demuxer *demuxer);
+void demux_nav_refresh(struct demuxer *demuxer);
 
 bool demux_cancel_test(struct demuxer *demuxer);
 

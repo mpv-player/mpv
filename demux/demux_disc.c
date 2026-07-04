@@ -25,6 +25,7 @@
 #include "stream/stream.h"
 #include "video/mp_image.h"
 #include "demux.h"
+#include "packet.h"
 #include "stheader.h"
 
 #include "video/csputils.h"
@@ -58,6 +59,15 @@ struct priv {
     // 0x20, carrying the disc-level CLUT as extradata.
     struct sh_stream *dvd_subs[MAX_DVD_SPU_STREAMS];
 
+    // DVD-only: retain the last SPU packet per substream. The menu subpicture
+    // is one-shot on an unseekable stream; re-deliver it on (re)selection and
+    // demux_nav_refresh(), like a refresh seek for ordinary streams.
+    struct dvd_sub_hold {
+        struct demux_packet *pkt;   // clone, with playback-rebased timestamps
+        struct sh_stream *sh;       // outer stream it belongs to
+        bool pending;               // re-deliver on next read
+    } dvd_sub_hold[MAX_DVD_SPU_STREAMS];
+
     // Used to rewrite the raw MPEG timestamps to playback time.
     double base_time;   // playback display start time of current segment
     double base_dts;    // packet DTS that maps to base_time
@@ -68,6 +78,24 @@ struct priv {
 
     bool is_dvd, is_cdda;
 };
+
+static void clear_dvd_sub_holds(struct priv *p)
+{
+    for (int i = 0; i < MAX_DVD_SPU_STREAMS; i++) {
+        talloc_free(p->dvd_sub_hold[i].pkt);
+        p->dvd_sub_hold[i] = (struct dvd_sub_hold){0};
+    }
+}
+
+// Mark retained subpictures of selected streams for re-delivery.
+static void arm_dvd_sub_holds(struct priv *p)
+{
+    for (int i = 0; i < MAX_DVD_SPU_STREAMS; i++) {
+        struct dvd_sub_hold *h = &p->dvd_sub_hold[i];
+        if (h->pkt && h->sh && demux_stream_is_selected(h->sh))
+            h->pending = true;
+    }
+}
 
 static void reselect_streams(demuxer_t *demuxer)
 {
@@ -80,6 +108,13 @@ static void reselect_streams(demuxer_t *demuxer)
                 MP_NOPTS_VALUE, demux_stream_is_selected(outer));
         }
     }
+    arm_dvd_sub_holds(p);
+}
+
+static void d_nav_refresh(demuxer_t *demuxer)
+{
+    struct priv *p = demuxer->priv;
+    arm_dvd_sub_holds(p);
 }
 
 static void get_disc_lang(struct stream *stream, struct sh_stream *sh, bool dvd)
@@ -285,6 +320,8 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     if (p->slave->desc->drop_buffers)
         p->slave->desc->drop_buffers(p->slave);
 
+    clear_dvd_sub_holds(p);
+
     p->seek_reinit = true;
 }
 
@@ -352,6 +389,7 @@ static bool reopen_slave(struct demuxer *demuxer)
         params.force_format = "+rawaudio";
 
     demux_free(p->slave);
+    clear_dvd_sub_holds(p);
     // Discard anything the stream wrapper buffered before the disc-nav
     // discontinuity.
     stream_drop_buffers(demuxer->stream);
@@ -382,6 +420,7 @@ static bool process_discontinuity(struct demuxer *demuxer, uint32_t new_id)
         if (!reopen_slave(demuxer))
             return false;
     } else {
+        clear_dvd_sub_holds(p);
         if (p->slave->desc->drop_buffers)
             p->slave->desc->drop_buffers(p->slave);
         refresh_disc_metadata(demuxer);
@@ -395,8 +434,10 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
 {
     struct priv *p = demuxer->priv;
 
+    bool menu_active = false;
     struct stream_nav_state nav = {0};
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1) {
+        menu_active = nav.menu_active;
         if (nav.nav_active != p->nav_active) {
             p->nav_active = nav.nav_active;
             demux_set_nav_active(demuxer, nav.nav_active);
@@ -406,6 +447,24 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
                        p->last_discontinuity_id, nav.discontinuity_id);
             if (!process_discontinuity(demuxer, nav.discontinuity_id))
                 return false;
+        }
+    }
+
+    // Re-deliver a retained menu subpicture.
+    if (menu_active) {
+        for (int i = 0; i < MAX_DVD_SPU_STREAMS; i++) {
+            struct dvd_sub_hold *h = &p->dvd_sub_hold[i];
+            if (!h->pending || !h->pkt || !h->sh ||
+                !demux_stream_is_selected(h->sh))
+                continue;
+            h->pending = false;
+            struct demux_packet *rp = demux_copy_packet(demuxer->packet_pool,
+                                                        h->pkt);
+            if (!rp)
+                continue;
+            rp->stream = h->sh->index;
+            *out_pkt = rp;
+            return true;
         }
     }
 
@@ -446,7 +505,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
 
     struct sh_stream *sh = slave_index < p->slave_to_outer_count
                               ? p->slave_to_outer[slave_index] : NULL;
-    if (!sh || !demux_stream_is_selected(sh)) {
+    bool dvd_sub = sh && p->is_dvd && sh->type == STREAM_SUB;
+    if (!sh || (!demux_stream_is_selected(sh) && !dvd_sub)) {
         talloc_free(pkt);
         return true;
     }
@@ -504,6 +564,23 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     }
 
     MP_TRACE(demuxer, "opts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
+
+    if (dvd_sub) {
+        int idx = sh->demuxer_id - 0x20;
+        if (idx >= 0 && idx < MAX_DVD_SPU_STREAMS) {
+            struct dvd_sub_hold *h = &p->dvd_sub_hold[idx];
+            talloc_free(h->pkt);
+            h->pkt = demux_copy_packet(demuxer->packet_pool, pkt);
+            if (h->pkt)
+                talloc_steal(p, h->pkt);
+            h->sh = sh;
+            h->pending = false;
+        }
+        if (!demux_stream_is_selected(sh)) {
+            talloc_free(pkt);
+            return true;
+        }
+    }
 
     *out_pkt = pkt;
     return 1;
@@ -622,6 +699,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 static void d_close(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
+    clear_dvd_sub_holds(p);
     demux_free(p->slave);
 }
 
@@ -633,4 +711,5 @@ const demuxer_desc_t demuxer_desc_disc = {
     .close = d_close,
     .seek = d_seek,
     .switched_tracks = reselect_streams,
+    .nav_refresh = d_nav_refresh,
 };
