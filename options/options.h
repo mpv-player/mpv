@@ -420,6 +420,7 @@ typedef struct MPOpts {
     struct wingl_opts *wingl_opts;
     struct cuda_opts *cuda_opts;
     struct dvd_opts *dvd_opts;
+    struct dvda_opts *dvda_opts;
     struct vaapi_opts *vaapi_opts;
     struct sws_opts *sws_opts;
     struct zimg_opts *zimg_opts;

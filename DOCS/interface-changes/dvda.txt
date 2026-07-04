@@ -1,0 +1,2 @@
+add `dvda://` protocol for DVD-Audio playback (requires libdvdread >= 7.1.0)
+add `--dvda-device` option

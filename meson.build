@@ -660,6 +660,17 @@ if features['dvbin']
                      'stream/stream_dvb.c')
 endif
 
+dvda_opt = get_option('dvda').require(
+    get_option('gpl'),
+    error_message: 'the build is not GPL!',
+)
+dvdread = dependency('dvdread', version: '>= 7.1.0', required: dvda_opt)
+features += {'dvda': dvdread.found()}
+if features['dvda']
+    dependencies += dvdread
+    sources += files('stream/stream_dvda.c')
+endif
+
 dvdnav_opt = get_option('dvdnav').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
