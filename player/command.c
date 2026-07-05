@@ -6534,10 +6534,15 @@ static void cmd_playlist_remove(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist,
-                                                         cmd->args[0].v.i);
-    if (cmd->args[0].v.i < 0)
+    int64_t id = cmd->args[1].v.i64;
+    struct playlist_entry *e = NULL;
+    if (cmd->args[0].v.i == -1)
         e = mpctx->playlist->current;
+    else if (cmd->args[0].v.i == -2)
+        e = playlist_entry_from_id(mpctx->playlist, id);
+    else
+        e = playlist_entry_from_index(mpctx->playlist, cmd->args[0].v.i);
+
     if (!e) {
         cmd->success = false;
         return;
@@ -7779,8 +7784,9 @@ const struct mp_cmd_def mp_cmds[] = {
     },
     { "playlist-clear", cmd_playlist_clear },
     { "playlist-remove", cmd_playlist_remove, {
-        {"index", OPT_CHOICE(v.i, {"current", -1}),
-            M_RANGE(0, INT_MAX)}, }},
+        {"index", OPT_CHOICE(v.i, {"current", -1}, {"id", -2}),
+            M_RANGE(0, INT_MAX)},
+        {"id", OPT_INT64(v.i64), .flags = MP_CMD_OPT_ARG}, }},
     { "playlist-move", cmd_playlist_move,  { {"index1", OPT_INT(v.i)},
                                              {"index2", OPT_INT(v.i)}, }},
     { "run", cmd_run, { {"command", OPT_STRING(v.s)},
