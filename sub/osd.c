@@ -193,6 +193,7 @@ void osd_free(struct osd_state *osd)
         return;
     osd_destroy_backend(osd);
     talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->external2);
+    talloc_free(osd->objs[OSDTYPE_DISC_MENU]->external2);
     mp_mutex_destroy(&osd->lock);
     talloc_free(osd);
 }
@@ -306,7 +307,8 @@ static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
 void osd_resize(struct osd_state *osd, struct mp_osd_res res)
 {
     mp_mutex_lock(&osd->lock);
-    int types[] = {OSDTYPE_OSD, OSDTYPE_EXTERNAL, OSDTYPE_EXTERNAL2, -1};
+    int types[] = {OSDTYPE_OSD, OSDTYPE_EXTERNAL, OSDTYPE_EXTERNAL2,
+                   OSDTYPE_DISC_MENU, -1};
     for (int n = 0; types[n] >= 0; n++)
         check_obj_resize(osd, res, osd->objs[types[n]]);
     mp_mutex_unlock(&osd->lock);
@@ -331,7 +333,8 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
     } else if (obj->type == OSDTYPE_SUB2) {
         if (obj->sub && sub_is_secondary_visible(obj->sub))
             res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
-    } else if (obj->type == OSDTYPE_EXTERNAL2) {
+    } else if (obj->type == OSDTYPE_EXTERNAL2 ||
+               obj->type == OSDTYPE_DISC_MENU) {
         if (obj->external2 && obj->external2->format) {
             res = sub_bitmaps_copy(NULL, obj->external2); // need to be owner
             obj->external2->change_id = 0;

@@ -7,6 +7,8 @@
 #include "osdep/threads.h"
 
 enum mp_osdtype {
+    OSDTYPE_DISC_MENU,
+
     OSDTYPE_SUB,
     OSDTYPE_SUB2, // IDs must be numerically successive
 
@@ -44,7 +46,7 @@ struct osd_object {
     struct osd_external **externals;
     int num_externals;
 
-    // OSDTYPE_EXTERNAL2
+    // OSDTYPE_EXTERNAL2 / OSDTYPE_DISC_MENU
     struct sub_bitmaps *external2;
 
     // VO cache state

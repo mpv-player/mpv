@@ -113,7 +113,7 @@ struct mp_osd_res {
 bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b);
 
 // 0 <= sub_bitmaps.render_index < MAX_OSD_PARTS
-#define MAX_OSD_PARTS 5
+#define MAX_OSD_PARTS 6
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
