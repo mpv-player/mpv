@@ -274,10 +274,10 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     mp_mutex_unlock(&osd->lock);
 }
 
-void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
+void osd_set_bitmaps(struct osd_state *osd, int type, struct sub_bitmaps *imgs)
 {
     mp_mutex_lock(&osd->lock);
-    struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL2];
+    struct osd_object *obj = osd->objs[type];
     talloc_free(obj->external2);
     obj->external2 = sub_bitmaps_copy(NULL, imgs);
     obj->vo_change_id += 1;
