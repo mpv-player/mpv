@@ -19,9 +19,16 @@
 
 #pragma once
 
-#include <ffnvcodec/dynlink_loader.h>
-
 #include "video/out/gpu/hwdec.h"
+
+#define FFNV_LOG_FUNC(logctx, ...) \
+    mp_msg(((struct ra_hwdec *)(logctx))->log, \
+           ((struct ra_hwdec *)(logctx))->probing ? MSGL_V : MSGL_ERR, \
+           __VA_ARGS__)
+#define FFNV_DEBUG_LOG_FUNC(logctx, ...) \
+    mp_msg(((struct ra_hwdec *)(logctx))->log, MSGL_DEBUG, __VA_ARGS__)
+
+#include <ffnvcodec/dynlink_loader.h>
 
 struct cuda_hw_priv {
     struct mp_hwdec_ctx hwctx;
