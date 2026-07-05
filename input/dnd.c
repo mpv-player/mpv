@@ -140,6 +140,23 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
     MP_THREAD_RETURN();
 }
 
+void mp_dnd_load_file(mpv_handle *mpv, int num_files, char **files, enum mp_dnd_action action)
+{
+    mpv_node *items = talloc_zero_array(NULL, mpv_node, num_files);
+    mpv_node_list list = {.values = items, .num = num_files};
+    mpv_node node = {.format = MPV_FORMAT_NODE_ARRAY, .u = {.list = &list}};
+    for (int n = 0; n < num_files; n++) {
+        items[n] = (mpv_node){.format = MPV_FORMAT_STRING,
+                              .u = {.string = files[n]}};
+    }
+
+    char *actionstr = action == DND_REPLACE ? "replace" :
+                      action == DND_APPEND ? "append" :
+                      action == DND_INSERT_NEXT ? "insert-next" :
+                      "none";
+    handle_dnd(mpv, &node, actionstr);
+}
+
 void mp_dnd_init(mpv_handle *mpv)
 {
     mp_thread mpv_event_loop;
