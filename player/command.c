@@ -5363,7 +5363,7 @@ done:
         new->num_parts = 0;
     }
 
-    osd_set_external2(mpctx->osd, new);
+    osd_set_bitmaps(mpctx->osd, OSDTYPE_EXTERNAL2, new);
     mp_wakeup_core(mpctx);
     cmd->overlay_osd_current = overlay_next;
 }
@@ -5501,7 +5501,7 @@ static void overlay_uninit(struct MPContext *mpctx)
         return;
     for (int id = 0; id < cmd->num_overlays; id++)
         replace_overlay(mpctx, id, &(struct overlay){0});
-    osd_set_external2(mpctx->osd, NULL);
+    osd_set_bitmaps(mpctx->osd, OSDTYPE_EXTERNAL2, NULL);
     for (int n = 0; n < 2; n++)
         mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }

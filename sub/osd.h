@@ -208,7 +208,7 @@ struct osd_progbar_state {
 };
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
 
-void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
+void osd_set_bitmaps(struct osd_state *osd, int type, struct sub_bitmaps *imgs);
 
 enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),
