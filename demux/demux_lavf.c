@@ -1812,7 +1812,8 @@ static void reset_dovi_split_state(demuxer_t *demuxer)
 static void demux_drop_buffers_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
-    av_seek_frame(priv->avfc, -1, 0, 1);
+    if (!priv->stream || priv->stream->seekable)
+        av_seek_frame(priv->avfc, -1, 0, 1);
     demux_flush(demuxer);
     stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
