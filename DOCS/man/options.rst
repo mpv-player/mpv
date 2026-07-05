@@ -3947,6 +3947,11 @@ Disc Devices
 
         ``mpv dvda:// --dvda-device=/path/to/dvda/``
 
+``--dvda-page=<-1|0-...>``
+    Force the still picture page shown during DVD-Audio playback, instead of
+    the page scheduled for the current playback position (default: -1, use
+    the scheduled page).
+
 ``--bluray-device=<path>``
     Specify the Blu-ray disc location. Must be a directory with Blu-ray
     structure. The default device path depends on the OS. See the

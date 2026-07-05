@@ -164,6 +164,11 @@ struct mp_bluray_opts {
     int angle;
 };
 
+struct dvda_opts {
+    char *device;
+    int page;
+};
+
 typedef struct MPOpts {
     bool property_print_help;
     bool use_terminal;

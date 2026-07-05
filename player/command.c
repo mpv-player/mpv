@@ -8544,6 +8544,18 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
     }
 #endif
 
+#if HAVE_DVDA
+    if (opt_ptr == &opts->dvda_opts->page) {
+        struct demuxer *demuxer = mpctx->demuxer;
+        if (mpctx->playback_initialized && demuxer && demuxer->stream &&
+                (!strcmp(demuxer->stream->info->name, "dvda") ||
+                 !strcmp(demuxer->stream->info->name, "ifo_dvda"))) {
+            int page = opts->dvda_opts->page;
+            stream_control(demuxer->stream, STREAM_CTRL_SET_STILL_PAGE, &page);
+        }
+    }
+#endif
+
     if (opt_ptr == &opts->pause)
         set_pause_state(mpctx, opts->pause);
 
