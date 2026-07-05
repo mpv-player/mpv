@@ -87,7 +87,7 @@
 
 #if defined(__STDC_VERSION_STDCKDINT_H__) && __STDC_VERSION_STDCKDINT_H__ >= 202311L
 #define MP_CKD_MUL(result, a, b) ckd_mul(result, a, b)
-#elif __has_builtin(__builtin_mul_overflow)
+#else
 #define MP_CKD_MUL(result, a, b) __builtin_mul_overflow(a, b, result)
 #endif
 
