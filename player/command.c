@@ -6560,11 +6560,17 @@ static void cmd_playlist_move(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    bool use_id = cmd->args[2].v.i;
 
-    struct playlist_entry *e1 = playlist_entry_from_index(mpctx->playlist,
-                                                          cmd->args[0].v.i);
-    struct playlist_entry *e2 = playlist_entry_from_index(mpctx->playlist,
-                                                          cmd->args[1].v.i);
+    struct playlist_entry *e1 = NULL, *e2 = NULL;
+    if (use_id) {
+        e1 = playlist_entry_from_id(mpctx->playlist, cmd->args[0].v.i64);
+        e2 = playlist_entry_from_id(mpctx->playlist, cmd->args[1].v.i64);
+    } else {
+        e1 = playlist_entry_from_index(mpctx->playlist, cmd->args[0].v.i64);
+        e2 = playlist_entry_from_index(mpctx->playlist, cmd->args[1].v.i64);
+    }
+
     if (!e1) {
         cmd->success = false;
         return;
@@ -7787,8 +7793,11 @@ const struct mp_cmd_def mp_cmds[] = {
         {"index", OPT_CHOICE(v.i, {"current", -1}, {"id", -2}),
             M_RANGE(0, INT_MAX)},
         {"id", OPT_INT64(v.i64), .flags = MP_CMD_OPT_ARG}, }},
-    { "playlist-move", cmd_playlist_move,  { {"index1", OPT_INT(v.i)},
-                                             {"index2", OPT_INT(v.i)}, }},
+    { "playlist-move", cmd_playlist_move, {
+        {"index1", OPT_INT64(v.i64)},
+        {"index2", OPT_INT64(v.i64)},
+        {"flags", OPT_FLAGS(v.i, {"index", 0}, {"id", 1}),
+                .flags = MP_CMD_OPT_ARG}, }},
     { "run", cmd_run, { {"command", OPT_STRING(v.s)},
                         {"args", OPT_STRING(v.s)}, },
         .vararg = true,
