@@ -167,6 +167,7 @@ enum load_action_type {
 struct load_action {
     enum load_action_type type;
     bool play;
+    bool use_id;
 };
 
 // U+00A0 NO-BREAK SPACE
@@ -6387,29 +6388,34 @@ static void cmd_escape_ass(void *p)
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
     int type = action_flag & 3;
-    bool play = (action_flag >> 3) & 1;
+    struct load_action action = {
+        .play = (action_flag >> 3) & 1,
+        .use_id = (action_flag >> 2) & 1,
+    };
     switch (type) {
     case 0:
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = play};
+        action.type = LOAD_TYPE_REPLACE; break;
     case 1:
-        return (struct load_action){LOAD_TYPE_APPEND, .play = play};
+        action.type = LOAD_TYPE_APPEND; break;
     case 2:
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = play};
+        action.type = LOAD_TYPE_INSERT_NEXT; break;
     case 3:
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = play};
+        action.type = LOAD_TYPE_INSERT_AT; break;
     default: // default: replace
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
+        action.type = LOAD_TYPE_REPLACE; break;
     }
+    return action;
 }
 
 static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct load_action *action,
-                                               int insert_at_idx)
+                                               int64_t insert_at_idx)
 {
     switch (action->type) {
     case LOAD_TYPE_INSERT_NEXT:
         return playlist_get_next(mpctx->playlist, +1);
     case LOAD_TYPE_INSERT_AT:
-        return playlist_entry_from_index(mpctx->playlist, insert_at_idx);
+        return action->use_id ? playlist_entry_from_id(mpctx->playlist, insert_at_idx)
+                              : playlist_entry_from_index(mpctx->playlist, insert_at_idx);
     case LOAD_TYPE_REPLACE:
     case LOAD_TYPE_APPEND:
     default:
@@ -6423,7 +6429,7 @@ static void cmd_loadfile(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int64_t insert_at_idx = cmd->args[2].v.i64;
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
@@ -6461,7 +6467,7 @@ static void cmd_loadlist(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int64_t insert_at_idx = cmd->args[2].v.i64;
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
@@ -7740,13 +7746,14 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"append", 1},
                 {"insert-next", 2},
                 {"insert-at", 3},
+                {"id", 4},
                 {"play", 8},
                 // backwards compatibility
                 {"append-play", 1|8},
                 {"insert-next-play", 2|8},
                 {"insert-at-play", 3|8}),
                 .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"index", OPT_INT64(v.i64), OPTDEF_INT64(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
     },
@@ -7758,13 +7765,14 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"append", 1},
                 {"insert-next", 2},
                 {"insert-at", 3},
+                {"id", 4},
                 {"play", 8},
                 // backwards compatibility
                 {"append-play", 1|8},
                 {"insert-next-play", 2|8},
                 {"insert-at-play", 3|8}),
                 .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"index", OPT_INT64(v.i64), OPTDEF_INT64(-1)},
         },
         .spawn_thread = true,
         .can_abort = true,
