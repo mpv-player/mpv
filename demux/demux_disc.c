@@ -71,6 +71,11 @@ struct priv {
     bool nav_active;    // last interactive-nav state pushed to the cache
 
     bool is_dvd, is_cdda, is_bd;
+
+    // DVD-Audio still-image video track.
+    struct sh_stream *still_sh;
+    int last_still_id;
+    struct demux_packet *pending_pkt; // still or the audio deferred behind it
 };
 
 static void clear_dvd_sub_holds(struct priv *p)
@@ -364,6 +369,10 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
 
     clear_dvd_sub_holds(p);
 
+    // Re-inject the still for the new position.
+    p->last_still_id = -1;
+    TA_FREEP(&p->pending_pkt);
+
     p->seek_reinit = true;
 }
 
@@ -474,9 +483,57 @@ static bool process_discontinuity(struct demuxer *demuxer, uint32_t new_id)
     return true;
 }
 
+// Create the DVD-Audio still-image video track, if the stream provides stills.
+static void add_still_stream(struct demuxer *demuxer)
+{
+    struct priv *p = demuxer->priv;
+    struct stream_still_req sr = {.time = 0};
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_STILL, &sr) != STREAM_OK)
+        return;
+    if (!sr.has_stills)
+        return;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
+    sh->codec->codec = "mpeg2video";
+    sh->title = talloc_strdup(sh, "Cover");
+    sh->still_image = true;     // sparse: one frame per track, read lazily
+    p->still_sh = sh;
+    p->last_still_id = -1;
+    demux_add_sh_stream(demuxer, sh);
+}
+
+// Inject the still for playback time `time` as a video packet, when the still
+// track is selected and the shown still changed.
+static void inject_still(struct demuxer *demuxer, double time)
+{
+    struct priv *p = demuxer->priv;
+    if (!p->still_sh || p->pending_pkt ||
+        !demux_stream_is_selected(p->still_sh))
+        return;
+    struct stream_still_req sr = {.time = time};
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_STILL, &sr) != STREAM_OK)
+        return;
+    if (sr.id < 0 || sr.id == p->last_still_id || !sr.data || sr.data_size <= 0)
+        return;
+    p->last_still_id = sr.id;
+    struct demux_packet *dp =
+        new_demux_packet_from(demuxer->packet_pool, sr.data, sr.data_size);
+    if (!dp)
+        return;
+    dp->stream = p->still_sh->index;
+    dp->pts = dp->dts = time;
+    dp->keyframe = true;
+    p->pending_pkt = dp;
+}
+
 static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt)
 {
     struct priv *p = demuxer->priv;
+
+    if (p->pending_pkt) {
+        *out_pkt = p->pending_pkt;
+        p->pending_pkt = NULL;
+        return true;
+    }
 
     bool menu_active = false;
     struct stream_nav_state nav = {0};
@@ -614,6 +671,18 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     MP_TRACE(demuxer, "mapped pkt: type=%d pts=%f dts=%f\n",
              sh->type, pkt->pts, pkt->dts);
 
+    if (sh->type == STREAM_AUDIO && pkt->pts != MP_NOPTS_VALUE) {
+        inject_still(demuxer, pkt->pts);
+        // Deliver the still before the audio it belongs to, so the frame is
+        // already present when the player starts or restarts here.
+        if (p->pending_pkt) {
+            struct demux_packet *still = p->pending_pkt;
+            p->pending_pkt = pkt;
+            *out_pkt = still;
+            return 1;
+        }
+    }
+
     if (dvd_sub) {
         int idx = sh->demuxer_id - 0x20;
         if (idx >= 0 && idx < MAX_DVD_SPU_STREAMS) {
@@ -742,6 +811,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     add_dvd_streams(demuxer);
     sync_streams(demuxer);
+    add_still_stream(demuxer);
     add_stream_chapters(demuxer);
     add_stream_editions(demuxer);
 
@@ -758,6 +828,7 @@ static void d_close(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
     clear_dvd_sub_holds(p);
+    TA_FREEP(&p->pending_pkt);
     demux_free(p->slave);
 }
 

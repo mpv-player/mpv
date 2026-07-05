@@ -1359,8 +1359,11 @@ PROTOCOLS
 
     Play the AUDIO_TS zone of a DVD-Audio disc. Titles correspond to the
     disc's audio groups, tracks are exposed as chapters. If no title is
-    given, the longest title is auto-selected. Menus and still images are
-    not supported.
+    given, the longest title is auto-selected. Menus are not supported.
+
+    Still images (ASVS), such as cover art or booklet pages a disc associates
+    with its tracks, are exposed as a video track and shown by default. Can be
+    disabled with ``--vid=no``.
 
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 

@@ -97,6 +97,20 @@ enum stream_ctrl {
     STREAM_CTRL_NAV_CMD,             // struct stream_nav_cmd*
     STREAM_CTRL_GET_NAV_STATE,       // struct stream_nav_state*
     STREAM_CTRL_GET_NAV_OVERLAY,     // struct stream_nav_overlay_req*
+    STREAM_CTRL_GET_STILL,           // struct stream_still_req*
+    STREAM_CTRL_SET_STILL_PAGE,      // int*, force the shown still page
+};
+
+// Fetch the still image that a disc (DVD-Audio ASVS) associates with the given
+// playback position, as an MPEG-2 video elementary stream.
+struct stream_still_req {
+    double time;      // input: title-relative playback time to query
+    int id;           // output: id of the still valid at `time`, changes
+                      //         when the shown still should change; -1 if none
+    bool has_stills;  // output: the current title has stills at all (used
+                      //         to decide whether to expose a video track)
+    uint8_t *data;    // output: MPEG-2 video ES; owned by the stream and
+    int data_size;    //         valid until the next STREAM_CTRL_GET_STILL call
 };
 
 // Fetch a BGRA snapshot of the disc-menu overlay (used for Blu-ray HDMV).
