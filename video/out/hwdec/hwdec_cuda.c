@@ -87,7 +87,7 @@ static int cuda_init(struct ra_hwdec *hw)
             continue;
 
         if (!initialized) {
-            ret = cuda_load_functions(&p->cu, NULL);
+            ret = cuda_load_functions(&p->cu, hw);
             if (ret != 0) {
                 MP_MSG(hw, level, "Failed to load CUDA symbols\n");
                 return -1;
