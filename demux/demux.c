@@ -907,13 +907,13 @@ static void update_stream_selection_state(struct demux_internal *in,
         any_streams |= s->selected;
     }
 
-    // Subtitles are only eagerly read if there are no other eagerly read
-    // streams.
+    // Subtitles and sparse still-image video are only eagerly read if there are
+    // no other eagerly read streams.
     if (any_av_streams) {
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *s = in->streams[n]->ds;
 
-            if (s->type == STREAM_SUB)
+            if (s->type == STREAM_SUB || s->still_image)
                 s->eager = false;
         }
     }
