@@ -249,11 +249,11 @@ class InputHelper: NSObject {
         return String(utf16CodeUnits: chars, count: length)
     }
 
-    @objc func open(files: [String], append: Bool = false) {
+    @objc func handleDnd(files: [String]) {
         lock.withLock {
             guard let input = input else { return }
 
-            open(files: files, append: append) { (filesPtr, action) in
+            open(files: files) { (filesPtr, action) in
                 mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
             }
         }
