@@ -377,6 +377,10 @@ static bool display_init(struct ra_ctx *ctx)
 
     VkDisplayModePropertiesKHR *mode = NULL;
 
+#if HAVE_DRM
+    p->drm_params.fd = -1;
+    p->drm_params.render_fd = -1;
+#endif
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_display_conf);
     int display_idx = p->opts->display;
     int mode_idx = p->opts->mode;
