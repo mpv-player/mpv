@@ -192,8 +192,8 @@ void osd_free(struct osd_state *osd)
     if (!osd)
         return;
     osd_destroy_backend(osd);
-    talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->external2);
-    talloc_free(osd->objs[OSDTYPE_DISC_MENU]->external2);
+    talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->image_overlay);
+    talloc_free(osd->objs[OSDTYPE_DISC_MENU]->image_overlay);
     mp_mutex_destroy(&osd->lock);
     talloc_free(osd);
 }
@@ -279,8 +279,8 @@ void osd_set_bitmaps(struct osd_state *osd, int type, struct sub_bitmaps *imgs)
 {
     mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[type];
-    talloc_free(obj->external2);
-    obj->external2 = sub_bitmaps_copy(NULL, imgs);
+    talloc_free(obj->image_overlay);
+    obj->image_overlay = sub_bitmaps_copy(NULL, imgs);
     obj->vo_change_id += 1;
     osd->want_redraw_notification = true;
     mp_mutex_unlock(&osd->lock);
@@ -335,9 +335,9 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
             res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
     } else if (obj->type == OSDTYPE_EXTERNAL2 ||
                obj->type == OSDTYPE_DISC_MENU) {
-        if (obj->external2 && obj->external2->format) {
-            res = sub_bitmaps_copy(NULL, obj->external2); // need to be owner
-            obj->external2->change_id = 0;
+        if (obj->image_overlay && obj->image_overlay->format) {
+            res = sub_bitmaps_copy(NULL, obj->image_overlay); // need to be owner
+            obj->image_overlay->change_id = 0;
         }
     } else {
         res = osd_object_get_bitmaps(osd, obj, format);

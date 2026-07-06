@@ -47,7 +47,7 @@ struct osd_object {
     int num_externals;
 
     // OSDTYPE_EXTERNAL2 / OSDTYPE_DISC_MENU
-    struct sub_bitmaps *external2;
+    struct sub_bitmaps *image_overlay;
 
     // VO cache state
     int vo_change_id;
