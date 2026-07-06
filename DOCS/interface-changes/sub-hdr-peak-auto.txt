@@ -1,0 +1,1 @@
+add `--sub-hdr-peak=auto` to follow the reference white and make it the default

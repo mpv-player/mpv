@@ -2815,10 +2815,12 @@ Subtitles
     This also affects image subtitle brightness in HDR tone mapping with
     ``--blend-subtitles=<yes|video>``.
 
-``--sub-hdr-peak=<sdr|10-10000>``
+``--sub-hdr-peak=<auto|sdr|10-10000>``
     Controls the text subtitle and OSD diffuse white level in cd/m² (nits)
-    for HDR output (default: sdr). ``sdr`` is 203 cd/m² for standard SDR white.
-    (``--vo=gpu-next`` only)
+    for HDR output (default: auto). In ``auto`` mode, subtitles and OSD follow
+    the reference white (see ``--hdr-reference-white``), matching the diffuse
+    white level used for SDR content. ``sdr`` forces 203 cd/m² for standard SDR
+    white. (``--vo=gpu-next`` only)
 
     This also affects text subtitle brightness in HDR tone mapping with
     ``--blend-subtitles=<yes|video>``.
