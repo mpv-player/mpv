@@ -775,10 +775,15 @@ static float get_ref_luma(struct priv *p)
     if (opts->hdr_reference_white)
         return opts->hdr_reference_white;
 
+#if PL_API_VER >= 371
     // auto: follow the system reference white, if available
+    // Use auto mode only on libplacebo >= 371, to avoid luminance mismatches,
+    // on SDR->SDR in some corner cases. User override is still respected, to
+    // preserve previous behavior.
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
     if (sw->fns->target_ref_luma)
         return sw->fns->target_ref_luma(sw);
+#endif
 
     return 0;
 }

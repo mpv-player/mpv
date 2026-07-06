@@ -7542,7 +7542,8 @@ them.
 
     In ``auto`` mode (default), the reference white luminance is queried from
     the system. This is currently only supported on Windows. If the system does
-    not provide a value, 203 cd/m² is assumed.
+    not provide a value, 203 cd/m² is assumed. (``auto`` mode works only
+    with libplacebo >= 371)
 
     .. note::
 
