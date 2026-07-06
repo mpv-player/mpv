@@ -92,6 +92,7 @@ int main(void)
 
             set_option_string(ctx, "msg-level", "all=trace");
             set_option_string(ctx, "terminal", "yes");
+            set_option_string(ctx, "msg-time", "yes");
 
             check_error(initialize(ctx));
 
