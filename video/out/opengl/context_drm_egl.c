@@ -562,6 +562,8 @@ static bool drm_egl_init(struct ra_ctx *ctx)
         goto err;
 
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
+    p->drm_params.fd = -1;
+    p->drm_params.render_fd = -1;
     struct vo_drm_state *drm = ctx->vo->drm;
 
     if (ctx->vo->drm->opts->draw_surface_size.wh_valid) {
