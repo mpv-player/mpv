@@ -1803,6 +1803,12 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     // the resulting mix is the correct frame for this PTS
     struct pl_frame image = *(struct pl_frame *) mix.frames[0];
     struct mp_image *mpi = image.user_data;
+
+    // Clear reference luminance before taking a screenshot, we want screenshot
+    // to be independent of the system reference luminance.
+    if (!pl_color_transfer_is_hdr(image.color.transfer))
+        image.color.hdr.max_luma = 0;
+
     struct mp_rect src = p->src, dst = p->dst;
     struct mp_osd_res osd = p->osd_res;
     if (!args->scaled) {
