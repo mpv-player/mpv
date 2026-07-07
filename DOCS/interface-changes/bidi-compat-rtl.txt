@@ -1,0 +1,1 @@
+add sub-vsfilter-bidi-compat=force-rtl
