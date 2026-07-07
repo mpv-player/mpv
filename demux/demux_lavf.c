@@ -69,11 +69,11 @@
 
 #define OPT_BASE_STRUCT struct demux_lavf_opts
 struct demux_lavf_opts {
-    int probesize;
+    int64_t probesize;
     int probeinfo;
     int probescore;
     float analyzeduration;
-    int buffersize;
+    int64_t buffersize;
     bool allow_mimetype;
     char *format;
     char **avopts;
@@ -86,14 +86,15 @@ struct demux_lavf_opts {
 
 const struct m_sub_options demux_lavf_conf = {
     .opts = (const m_option_t[]) {
-        {"demuxer-lavf-probesize", OPT_INT(probesize), M_RANGE(32, INT_MAX)},
+        {"demuxer-lavf-probesize", OPT_BYTE_SIZE(probesize),
+         M_RANGE(32, M_MAX_MEM_BYTES)},
         {"demuxer-lavf-probe-info", OPT_CHOICE(probeinfo,
             {"no", 0}, {"yes", 1}, {"auto", -1}, {"nostreams", -2})},
         {"demuxer-lavf-format", OPT_STRING(format)},
         {"demuxer-lavf-analyzeduration", OPT_FLOAT(analyzeduration),
          M_RANGE(0, 3600)},
-        {"demuxer-lavf-buffersize", OPT_INT(buffersize),
-         M_RANGE(1, 10 * 1024 * 1024), OPTDEF_INT(BIO_BUFFER_SIZE)},
+        {"demuxer-lavf-buffersize", OPT_BYTE_SIZE(buffersize),
+         M_RANGE(1, 10 * 1024 * 1024), OPTDEF_INT64(BIO_BUFFER_SIZE)},
         {"demuxer-lavf-allow-mimetype", OPT_BOOL(allow_mimetype)},
         {"demuxer-lavf-probescore", OPT_INT(probescore),
          M_RANGE(1, AVPROBE_SCORE_MAX)},
@@ -1401,7 +1402,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
-            MP_ERR(demuxer, "couldn't set option probesize to %u\n",
+            MP_ERR(demuxer, "couldn't set option probesize to %"PRId64"\n",
                    lavfdopts->probesize);
     }
 
