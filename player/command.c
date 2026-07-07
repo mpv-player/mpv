@@ -8389,6 +8389,10 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
                                 mp_switch_track_n(mpctx, i, t, sel, 0);
                         }
                     }
+                    if (demuxer->ts_resets_possible) {
+                        reset_playback_state(mpctx);
+                        demux_flush(demuxer);
+                    }
                     mp_notify_property(mpctx, "current-edition");
                     print_track_list(mpctx,
                         mp_tprintf(42, "Selected edition %d:", demuxer->edition));
