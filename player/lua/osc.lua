@@ -338,6 +338,7 @@ local state = {
     playlist_count = 0,
     playlist_pos_1 = 0,
     duration = nil,
+    has_duration = false,
     pause = false,
     volume = 0,
     mute = false,
@@ -3203,7 +3204,11 @@ observe_cached("chapter-list", function ()
     request_init()
 end)
 observe_cached("duration", function ()
-    if state.chapter_list[1] and state.slider_element then
+    local has_duration = state.duration ~= nil and state.duration > 0
+    if has_duration ~= state.has_duration then
+        state.has_duration = has_duration
+        request_init()
+    elseif state.chapter_list[1] and state.slider_element then
         update_slider(state.slider_element)
         request_tick()
     end
