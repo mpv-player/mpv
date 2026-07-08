@@ -146,10 +146,11 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
     }
 
     // If preemption_callback has been called during our recovery attempt, we
-    // need to retry the recovery. This check is not strictly necessary, because
-    // we would act on the next check anyway, but it doesn't hurt.
-    if (ctx->is_preempted)
-        return -1;
+    // need to retry the recovery. Throttle next init, same as errors above.
+    if (ctx->is_preempted) {
+        ctx->last_preemption_retry_fail = mp_time_sec();
+        goto error;
+    }
 
     ctx->preemption_user_notified = false;
     ctx->last_preemption_retry_fail = 0;
