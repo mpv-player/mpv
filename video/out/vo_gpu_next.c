@@ -425,7 +425,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             }
             break;
         case SUBBITMAP_LIBASS:
-            if (src && item->video_color_space && !pl_color_space_is_hdr(&src->params.color))
+            if (src && item->video_color_space && !pl_color_transfer_is_hdr(src->params.color.transfer))
                 ol->color = src->params.color;
             if (src && pl_color_transfer_is_hdr(src->params.color.transfer) &&
                 p->next_opts->sub_hdr_peak)
