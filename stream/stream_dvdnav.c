@@ -954,6 +954,36 @@ static void stream_dvdnav_close(stream_t *s)
         dvd_set_speed(s, priv->filename, -1);
 }
 
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(6, 1, 0)
+static void dvdnav_log(void *priv, dvdnav_logger_level_t level,
+                       const char *fmt, va_list va)
+{
+    int lvl;
+    switch (level) {
+    case DVDNAV_LOGGER_LEVEL_ERROR: lvl = MSGL_ERR;   break;
+    case DVDNAV_LOGGER_LEVEL_WARN:  lvl = MSGL_WARN;  break;
+    case DVDNAV_LOGGER_LEVEL_DEBUG: lvl = MSGL_DEBUG; break;
+    case DVDNAV_LOGGER_LEVEL_INFO:
+    default:                        lvl = MSGL_V;     break;
+    }
+    if (!mp_msg_test(priv, lvl))
+        return;
+    mp_msg_va(priv, lvl, fmt, va);
+    mp_msg(priv, lvl, "\n");
+}
+#endif
+
+static dvdnav_status_t nav_open(stream_t *stream, dvdnav_t **dest, const char *path)
+{
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(6, 1, 0)
+    struct mp_log *log = mp_log_new(stream, stream->log, "/libdvdnav");
+    const dvdnav_logger_cb logger_cb = { .pf_log = dvdnav_log };
+    return dvdnav_open2(dest, log, &logger_cb, path);
+#else
+    return dvdnav_open(dest, path);
+#endif
+}
+
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
 {
     struct priv *priv = stream->priv;
@@ -968,7 +998,7 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     priv->dvd_speed = priv->opts->speed;
     dvd_set_speed(stream, priv->filename, priv->dvd_speed);
 
-    if (dvdnav_open(&(priv->dvdnav), priv->filename) != DVDNAV_STATUS_OK)
+    if (nav_open(stream, &priv->dvdnav, priv->filename) != DVDNAV_STATUS_OK)
         return NULL;
 
     if (!priv->dvdnav)
