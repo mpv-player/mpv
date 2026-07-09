@@ -48,7 +48,6 @@
 #include "osdep/threads.h"
 #include "stream.h"
 #include "osdep/io.h"
-#include "osdep/timer.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
 #include "video/csputils.h"
@@ -66,6 +65,11 @@
 #define BD_TIMEBASE (90000)
 #define BD_TIME_TO_MP(x) ((x) / (double)(BD_TIMEBASE))
 #define BD_TIME_FROM_MP(x) ((uint64_t)(x * BD_TIMEBASE))
+
+// Interval between read retries while navigation is idle
+#define BLURAY_POLL_TIME_S   0.010
+// In menu mode, tolerate this many consecutive idle reads at the end of playlist
+#define BLURAY_NAV_EOF_POLLS 100
 
 // copied from aacs.h in libaacs
 #define AACS_ERROR_CORRUPTED_DISC -1 /* opening or reading of AACS files failed */
@@ -448,188 +452,212 @@ static void bluray_stream_close(stream_t *s)
     mp_mutex_destroy(&priv->overlay_lock);
 }
 
-static void handle_event(stream_t *s, const BD_EVENT *ev)
+static const char *bd_event_str(uint32_t event)
 {
-    struct bluray_priv_s *b = s->priv;
-    if (b->hdmv_mode)
-        MP_VERBOSE(s, "bdnav: event %d param %u\n", ev->event, ev->param);
-    switch (ev->event) {
-    case BD_EVENT_MENU:
-        // ev->param: 1 if the disc is currently in an HDMV menu, 0 otherwise.
-        if (b->hdmv_mode) {
-            mp_mutex_lock(&b->overlay_lock);
-            b->menu_event_active = ev->param != 0;
-            b->nav_change_id++;
-            mp_mutex_unlock(&b->overlay_lock);
-        }
-        break;
-    case BD_EVENT_STILL:
-        mp_mutex_lock(&b->overlay_lock);
-        b->still_active = ev->param != 0;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    case BD_EVENT_STILL_TIME:
-        if (ev->param == 0) {
-            mp_mutex_lock(&b->overlay_lock);
-            b->still_active = true;
-            mp_mutex_unlock(&b->overlay_lock);
-        } else {
-            bd_read_skip_still(b->bd);
-        }
-        break;
-    case BD_EVENT_END_OF_TITLE:
-        mp_mutex_lock(&b->overlay_lock);
-        b->still_active = false;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    case BD_EVENT_PLAYLIST: {
-        int playlist = ev->param;
-        int title = bd_get_current_title(b->bd);
-        if (b->title_to_playlist) {
-            for (int i = 0; i < b->num_titles; i++) {
-                if (b->title_to_playlist[i] == (uint32_t)ev->param) {
-                    title = i;
-                    break;
-                }
-            }
-        }
-        BLURAY_TITLE_INFO *ti = bd_get_playlist_info(b->bd, playlist, b->current_angle);
-        mp_mutex_lock(&b->overlay_lock);
-        if (b->title_info)
-            bd_free_title_info(b->title_info);
-        b->title_info = ti;
-        b->current_playlist = playlist;
-        b->current_title = title;
-        if (b->hdmv_mode)
-            b->discontinuity_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    }
-    case BD_EVENT_TITLE: {
-        int title = bd_get_current_title(b->bd);
-        mp_mutex_lock(&b->overlay_lock);
-        if (b->title_info) {
-            bd_free_title_info(b->title_info);
-            b->title_info = NULL;
-        }
-        b->current_title = title;
-        if (b->hdmv_mode)
-            b->discontinuity_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    }
-    case BD_EVENT_ANGLE: {
-        int angle = ev->param;
-        BLURAY_TITLE_INFO *ti = b->title_info ? bd_get_playlist_info(b->bd, b->current_playlist, angle)
-                                              : NULL;
-        mp_mutex_lock(&b->overlay_lock);
-        b->current_angle = angle;
-        if (ti) {
-            bd_free_title_info(b->title_info);
-            b->title_info = ti;
-        }
-        if (b->hdmv_mode)
-            b->nav_change_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    }
-    case BD_EVENT_AUDIO_STREAM:
-        mp_mutex_lock(&b->overlay_lock);
-        b->audio_stream_num = ev->param;
-        if (b->hdmv_mode)
-            b->nav_change_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    case BD_EVENT_PG_TEXTST_STREAM:
-        mp_mutex_lock(&b->overlay_lock);
-        b->sub_stream_num = ev->param;
-        if (b->hdmv_mode)
-            b->nav_change_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    case BD_EVENT_PG_TEXTST:
-        mp_mutex_lock(&b->overlay_lock);
-        b->sub_visible = ev->param != 0;
-        if (b->hdmv_mode)
-            b->nav_change_id++;
-        mp_mutex_unlock(&b->overlay_lock);
-        break;
-    case BD_EVENT_POPUP:
-        // ev->param: 1 if popup menu is currently available, 0 otherwise.
-        if (b->hdmv_mode) {
-            mp_mutex_lock(&b->overlay_lock);
-            b->popup_supported = ev->param != 0;
-            b->nav_change_id++;
-            mp_mutex_unlock(&b->overlay_lock);
-        }
-        break;
-#if BLURAY_VERSION >= BLURAY_VERSION_CODE(0, 5, 0)
-    case BD_EVENT_DISCONTINUITY:
-        break;
+#if BLURAY_VERSION >= BLURAY_VERSION_CODE(1, 3, 0)
+    const char *name = bd_event_name(event);
+    if (name)
+        return name;
 #endif
-    default:
-        MP_TRACE(s, "Unhandled event: %d %d\n", ev->event, ev->param);
-        break;
-    }
+    return "?";
 }
 
 static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
 {
     struct bluray_priv_s *b = s->priv;
-    BD_EVENT event;
 
-    if (b->hdmv_mode) {
-        // bd_read() doesn't drive the HDMV VM, so the disc's first-play
-        // bytecode would never run and we'd be stuck with "no valid title"
-        // forever. bd_read_ext() runs the VM between event drains and also
-        // delivers one event per call, which we hand off to handle_event.
-        while (bd_get_event(b->bd, &event))
-            handle_event(s, &event);
+    uint32_t disc_id = b->discontinuity_id;
+
+    int idle_reads = 0;
+    while (!mp_cancel_test(s->cancel)) {
+        BD_EVENT ev;
+        int n = bd_read_ext(b->bd, buf, len, &ev);
+        if (n < 0) {
+            MP_VERBOSE(s, "bd_read_ext() failed.\n");
+            return -1;
+        }
+
+        if (b->hdmv_mode && ev.event != BD_EVENT_NONE)
+            MP_DBG(s, "event %s(%u) param %u\n", bd_event_str(ev.event), ev.event, ev.param);
+
+        bool stalled = false;  // EOF unless the VM continues
+        bool bdj_idle = false; // BD-J title alive with no playlist playing
+
+        switch (ev.event) {
+        case BD_EVENT_NONE:
+            stalled = n == 0;
+            break;
+        case BD_EVENT_ERROR:
+            MP_ERR(s, "Blu-ray navigation error (%u).\n", ev.param);
+            return -1;
+        case BD_EVENT_READ_ERROR:
+            MP_WARN(s, "Blu-ray read error, skipping unit.\n");
+            break;
+        case BD_EVENT_END_OF_TITLE:
+            mp_mutex_lock(&b->overlay_lock);
+            b->still_active = false;
+            mp_mutex_unlock(&b->overlay_lock);
+            stalled = true;
+            break;
+        case BD_EVENT_IDLE:
+            bdj_idle = true;
+            break;
+        case BD_EVENT_STILL:
+            mp_mutex_lock(&b->overlay_lock);
+            b->still_active = ev.param != 0;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        case BD_EVENT_STILL_TIME:
+            // TODO: consider timed stills support
+            // param == 0 is an indefinite still
+            if (ev.param == 0) {
+                mp_mutex_lock(&b->overlay_lock);
+                b->still_active = true;
+                mp_mutex_unlock(&b->overlay_lock);
+            } else {
+                bd_read_skip_still(b->bd);
+            }
+            break;
+        case BD_EVENT_MENU:
+            // ev.param: 1 if the disc is currently in an HDMV menu, 0 otherwise.
+            if (b->hdmv_mode) {
+                mp_mutex_lock(&b->overlay_lock);
+                b->menu_event_active = ev.param != 0;
+                b->nav_change_id++;
+                mp_mutex_unlock(&b->overlay_lock);
+            }
+            break;
+        case BD_EVENT_POPUP:
+            // ev.param: 1 if popup menu is currently available, 0 otherwise.
+            if (b->hdmv_mode) {
+                mp_mutex_lock(&b->overlay_lock);
+                b->popup_supported = ev.param != 0;
+                b->nav_change_id++;
+                mp_mutex_unlock(&b->overlay_lock);
+            }
+            break;
+        case BD_EVENT_PLAYLIST: {
+            int playlist = ev.param;
+            int title = bd_get_current_title(b->bd);
+            if (b->title_to_playlist) {
+                for (int i = 0; i < b->num_titles; i++) {
+                    if (b->title_to_playlist[i] == ev.param) {
+                        title = i;
+                        break;
+                    }
+                }
+            }
+            BLURAY_TITLE_INFO *ti = bd_get_playlist_info(b->bd, playlist, b->current_angle);
+            mp_mutex_lock(&b->overlay_lock);
+            if (b->title_info)
+                bd_free_title_info(b->title_info);
+            b->title_info = ti;
+            b->current_playlist = playlist;
+            b->current_title = title;
+            if (b->hdmv_mode)
+                b->discontinuity_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        }
+        case BD_EVENT_TITLE: {
+            int title = bd_get_current_title(b->bd);
+            mp_mutex_lock(&b->overlay_lock);
+            if (b->title_info) {
+                bd_free_title_info(b->title_info);
+                b->title_info = NULL;
+            }
+            b->current_title = title;
+            if (b->hdmv_mode)
+                b->discontinuity_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        }
+        case BD_EVENT_ANGLE: {
+            int angle = ev.param;
+            BLURAY_TITLE_INFO *ti = b->title_info ? bd_get_playlist_info(b->bd, b->current_playlist, angle)
+                                                  : NULL;
+            mp_mutex_lock(&b->overlay_lock);
+            b->current_angle = angle;
+            if (ti) {
+                bd_free_title_info(b->title_info);
+                b->title_info = ti;
+            }
+            if (b->hdmv_mode)
+                b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        }
+        case BD_EVENT_AUDIO_STREAM:
+            mp_mutex_lock(&b->overlay_lock);
+            b->audio_stream_num = ev.param;
+            if (b->hdmv_mode)
+                b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        case BD_EVENT_PG_TEXTST_STREAM:
+            mp_mutex_lock(&b->overlay_lock);
+            b->sub_stream_num = ev.param;
+            if (b->hdmv_mode)
+                b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        case BD_EVENT_PG_TEXTST:
+            mp_mutex_lock(&b->overlay_lock);
+            b->sub_visible = ev.param != 0;
+            if (b->hdmv_mode)
+                b->nav_change_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
+        case BD_EVENT_DISCONTINUITY:
+            break;
+        default:
+            MP_TRACE(s, "Unhandled event: %s(%u) %u\n",
+                     bd_event_str(ev.event), ev.event, ev.param);
+            break;
+        }
+
+        if (n > 0) {
+            if (b->still_active) {
+                mp_mutex_lock(&b->overlay_lock);
+                b->still_active = false;
+                mp_mutex_unlock(&b->overlay_lock);
+            }
+            b->data_delivered = true;
+            return n;
+        }
+
+        // Holding an indefinite still frame: report EOF. The player keeps
+        // showing the last frame; user interaction releases the still and
+        // resumes reading through a discontinuity_id bump.
         if (b->still_active)
             return 0;
-        int total = 0;
-        int events_seen = 0;
-        // Loop briefly to absorb event-only returns (where bd_read_ext
-        // returns 0 with a freshly produced event) before reporting EOF.
-        // If an event bumps discontinuity_id (PLAYLIST/TITLE) *after* we
-        // have already delivered data to the slave demuxer, stop here even
-        // if no data was read: the next bd_read_ext would deliver data from
-        // the new playlist, but the slave must be reopened first so it
-        // parses with the correct codec context.
-        for (int i = 0; i < 200; i++) {
-            uint32_t disc_before = b->discontinuity_id;
-            int n = bd_read_ext(b->bd, (uint8_t *)buf + total, len - total, &event);
-            if (n < 0) {
-                MP_VERBOSE(s, "bdnav: bd_read_ext err iter=%d\n", i);
-                return -1;
-            }
-            if (event.event != BD_EVENT_NONE) {
-                handle_event(s, &event);
-                events_seen++;
-            }
-            if (n > 0) {
-                total += n;
-                b->still_active = false;
-                break;
-            }
-            if (b->still_active)
-                break;
-            if (b->data_delivered && b->discontinuity_id != disc_before)
-                break;
-            if (mp_cancel_test(s->cancel))
-                return 0;
-            mp_sleep_ns(MP_TIME_MS_TO_NS(5));
-        }
-        if (total > 0)
-            b->data_delivered = true;
-        if (total == 0)
-            MP_VERBOSE(s, "bdnav: fill returned 0 (events=%d)\n", events_seen);
-        return total;
-    }
+        // The play position jumped to another title/playlist after data was
+        // already delivered: report EOF so demux_disc reopens the slave
+        // demuxer before it parses data from the new playlist.
+        if (b->data_delivered && b->discontinuity_id != disc_id)
+            return 0;
 
-    while (bd_get_event(b->bd, &event))
-        handle_event(s, &event);
-    return bd_read(b->bd, buf, len);
+        if (bdj_idle) {
+            idle_reads = 0;
+            mp_cancel_wait(s->cancel, BLURAY_POLL_TIME_S);
+        } else if (stalled) {
+            // Without menus there is nothing that could continue: plain EOF.
+            if (!b->hdmv_mode)
+                return 0;
+            // Retry for a while before concluding that playback ended. The
+            // first retry is immediate: a just-resumed VM progresses at once.
+            if (++idle_reads > BLURAY_NAV_EOF_POLLS) {
+                MP_VERBOSE(s, "Navigation stopped, EOF.\n");
+                return 0;
+            }
+            if (idle_reads > 1)
+                mp_cancel_wait(s->cancel, BLURAY_POLL_TIME_S);
+        } else {
+            // The VM/title made progress; read again immediately.
+            idle_reads = 0;
+        }
+    }
+    return 0;
 }
 
 static bool nav_action_activates(enum stream_nav_action a)
