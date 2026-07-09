@@ -3576,7 +3576,7 @@ Property list
         this can be potentially wrong if a demuxer other than libavformat
         (``--demuxer=lavf``) is used. For mkv files, the index will usually
         match even if the default (builtin) demuxer is used, but there is
-        no hard guarantee.
+        no hard guarantee. May be unavailable if no known mapping exists.
 
     ``track-list/N/decoder``
         If this track is being decoded, the short decoder name,
