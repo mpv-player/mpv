@@ -72,8 +72,9 @@ struct sd_lavc_priv {
     int num_seekpoints;
     struct bitmap_packer *packer;
 
-    // DVD-nav per-pixel highlight overlay state.
-    struct mp_dvdnav_hli hli;
+    // DVD-nav menu/highlight overlay state.
+    bool menu_active;               // in-menu: gates the highlight overlay
+    struct mp_dvdnav_highlight hl;  // focused button rect + palette
     uint32_t hli_change_id;
 };
 
@@ -300,21 +301,20 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         convert_pal(pal, 256, opts->sub_gray);
 
         // DVD navigation highlight
-        bool hli_active = priv->hli.show &&
-                          priv->hli.w > 0 && priv->hli.h > 0 &&
-                          r->x < priv->hli.x + priv->hli.w &&
-                          r->y < priv->hli.y + priv->hli.h &&
-                          r->x + r->w > priv->hli.x &&
-                          r->y + r->h > priv->hli.y;
+        struct mp_rect hlr = priv->hl.rect;
+        bool hli_active = priv->menu_active &&
+                          mp_rect_w(hlr) > 0 && mp_rect_h(hlr) > 0 &&
+                          r->x < hlr.x1 && r->y < hlr.y1 &&
+                          r->x + r->w > hlr.x0 && r->y + r->h > hlr.y0;
         uint32_t hli_pal[4] = {0};
         if (hli_active) {
-            memcpy(hli_pal, priv->hli.palette, sizeof(hli_pal));
+            memcpy(hli_pal, priv->hl.palette, sizeof(hli_pal));
             convert_pal(hli_pal, 4, opts->sub_gray);
         }
-        int hli_x0 = priv->hli.x - r->x;
-        int hli_y0 = priv->hli.y - r->y;
-        int hli_x1 = hli_x0 + priv->hli.w;
-        int hli_y1 = hli_y0 + priv->hli.h;
+        int hli_x0 = hlr.x0 - r->x;
+        int hli_y0 = hlr.y0 - r->y;
+        int hli_x1 = hlr.x1 - r->x;
+        int hli_y1 = hlr.y1 - r->y;
 
         for (int y = -padding; y < b->h + padding; y++) {
             uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
@@ -760,13 +760,20 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         priv->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
     case SD_CTRL_APPLY_DVDNAV: {
-        struct mp_dvdnav_hli *hli = arg;
-        if (priv->hli_change_id == hli->change_id)
-            return CONTROL_OK;
-        priv->hli = *hli;
-        priv->hli_change_id = hli->change_id;
+        const struct stream_nav_state *nav = arg;
+        bool menu_closed = priv->menu_active && !nav->menu_active;
+        bool changed = priv->hli_change_id != nav->change_id;
+        priv->menu_active = nav->menu_active;
+        priv->hl = nav->hl;
+        priv->hli_change_id = nav->change_id;
+        // Don't let menu subpictures leak into title playback.
+        if (menu_closed) {
+            for (int n = 0; n < MAX_QUEUE; n++)
+                clear_sub(&priv->subs[n]);
+        }
         // Re-render any decoded subtitles, after style update.
-        rerender_queued_subs(sd);
+        if (changed)
+            rerender_queued_subs(sd);
         return CONTROL_OK;
     }
     default:
