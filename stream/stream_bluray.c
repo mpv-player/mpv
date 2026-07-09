@@ -63,8 +63,8 @@
 
 // 90khz ticks
 #define BD_TIMEBASE (90000)
-#define BD_TIME_TO_MP(x) ((x) / (double)(BD_TIMEBASE))
-#define BD_TIME_FROM_MP(x) ((uint64_t)(x * BD_TIMEBASE))
+#define BD_TIME_TO_S(x) ((x) / (double)(BD_TIMEBASE))
+#define BD_TIME_FROM_S(x) ((uint64_t)(x * BD_TIMEBASE))
 
 // Interval between read retries while navigation is idle
 #define BLURAY_POLL_TIME_S   0.010
@@ -696,7 +696,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         if (ti) {
             double time = MP_NOPTS_VALUE;
             if (chapter >= 0 && chapter < ti->chapter_count)
-                time = BD_TIME_TO_MP(ti->chapters[chapter].start);
+                time = BD_TIME_TO_S(ti->chapters[chapter].start);
             if (time != MP_NOPTS_VALUE) {
                 *(double *)arg = time;
                 rc = STREAM_OK;
@@ -737,17 +737,17 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_lock(&b->overlay_lock);
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (ti)
-            *((double *) arg) = BD_TIME_TO_MP(ti->duration);
+            *((double *) arg) = BD_TIME_TO_S(ti->duration);
         mp_mutex_unlock(&b->overlay_lock);
         return ti ? STREAM_OK : STREAM_UNSUPPORTED;
     }
     case STREAM_CTRL_GET_CURRENT_TIME: {
-        *((double *) arg) = BD_TIME_TO_MP(bd_tell_time(b->bd));
+        *((double *) arg) = BD_TIME_TO_S(bd_tell_time(b->bd));
         return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
         double pts = *((double *) arg);
-        bd_seek_time(b->bd, BD_TIME_FROM_MP(pts));
+        bd_seek_time(b->bd, BD_TIME_FROM_S(pts));
         stream_drop_buffers(s);
         // API makes it hard to determine seeking success
         return STREAM_OK;
@@ -787,7 +787,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         BLURAY_TITLE_INFO *ti = bd_get_title_info(b->bd, title, 0);
         if (!ti)
             return STREAM_UNSUPPORTED;
-        *(double *)arg = BD_TIME_TO_MP(ti->duration);
+        *(double *)arg = BD_TIME_TO_S(ti->duration);
         bd_free_title_info(ti);
         return STREAM_OK;
     }
