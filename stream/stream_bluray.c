@@ -95,6 +95,18 @@ const struct m_sub_options stream_bluray_conf = {
     },
 };
 
+// libbluray's support only global debug callback, without per-instance info.
+static mp_static_mutex bluray_log_lock = MP_STATIC_MUTEX_INITIALIZER;
+static struct mp_log *bluray_log;
+
+static void bluray_logger(const char *msg)
+{
+    mp_mutex_lock(&bluray_log_lock);
+    if (bluray_log)
+        mp_msg(bluray_log, MSGL_DEBUG, "%s", msg);
+    mp_mutex_unlock(&bluray_log_lock);
+}
+
 // One overlay plane (BGRA, premultiplied alpha).
 struct bd_overlay_plane {
     uint32_t *work;
@@ -105,6 +117,7 @@ struct bd_overlay_plane {
 
 struct bluray_priv_s {
     BLURAY *bd;
+    struct mp_log *bluray_log;
     BLURAY_TITLE_INFO *title_info;
     int num_titles;
     int current_angle;
@@ -449,6 +462,11 @@ static void bluray_stream_close(stream_t *s)
         }
         bd_close(priv->bd);
     }
+    mp_mutex_lock(&bluray_log_lock);
+    // If we created the global log, unset it.
+    if (bluray_log == priv->bluray_log)
+        bluray_log = NULL;
+    mp_mutex_unlock(&bluray_log_lock);
     mp_mutex_destroy(&priv->overlay_lock);
 }
 
@@ -1112,8 +1130,25 @@ static int bluray_stream_open_internal(stream_t *s)
         goto err;
     }
 
-    if (!mp_msg_test(s->log, MSGL_DEBUG))
-        bd_set_debug_mask(0);
+    mp_mutex_lock(&bluray_log_lock);
+    // libbluray log callback is global and there is no way to separate it per
+    // instance, just replace with new one if already present.
+    if (bluray_log) {
+        MP_WARN(s, "Replacing logger from previous instance.");
+        talloc_free(bluray_log);
+    }
+    uint32_t mask = 0;
+    if (mp_msg_test(s->log, MSGL_DEBUG))
+        mask |= DBG_CRIT | DBG_BLURAY | DBG_HDMV;
+    // When all bits are set (-1) libbluray inits to DBG_CRIT, set all bits,
+    // except one, so we avoid this default fallback.
+    if (mp_msg_test(s->log, MSGL_TRACE))
+        mask |= UINT32_MAX >> 1;
+    bd_set_debug_mask(mask);
+    if (mask)
+        b->bluray_log = bluray_log = mp_log_new(s, s->log, "/libbluray");
+    bd_set_debug_handler(bluray_logger);
+    mp_mutex_unlock(&bluray_log_lock);
 
     /* open device */
     char *device_tmp = mp_get_user_path(NULL, s->global, device);
