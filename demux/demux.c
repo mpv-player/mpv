@@ -1003,9 +1003,6 @@ static void demux_add_sh_stream_locked(struct demux_internal *in,
     if (!sh->codec->codec)
         sh->codec->codec = "";
 
-    if (sh->ff_index < 0)
-        sh->ff_index = sh->index;
-
     MP_TARRAY_APPEND(in, in->streams, in->num_streams, sh);
     mp_assert(in->streams[sh->index] == sh);
 
