@@ -1549,13 +1549,14 @@ static void add_coverart(struct demuxer *demuxer)
 }
 
 static void init_track(demuxer_t *demuxer, mkv_track_t *track,
-                       struct sh_stream *sh)
+                       struct sh_stream *sh, int idx)
 {
     track->stream = sh;
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh->lang = track->language;
 
+    sh->ff_index = idx; // Emulate lavf track index. For backward compatibility.
     sh->demuxer_id = track->tnum;
     sh->title = track->name;
     sh->default_track = track->default_track;
@@ -1566,9 +1567,9 @@ static void init_track(demuxer_t *demuxer, mkv_track_t *track,
     sh->commentary_track = track->commentary_track;
 }
 
-static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track);
-static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track);
-static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track);
+static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track, int idx);
+static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track, int idx);
+static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track, int idx);
 
 static void display_create_tracks(demuxer_t *demuxer)
 {
@@ -1577,13 +1578,13 @@ static void display_create_tracks(demuxer_t *demuxer)
     for (int i = 0; i < mkv_d->num_tracks; i++) {
         switch (mkv_d->tracks[i]->type) {
         case MATROSKA_TRACK_VIDEO:
-            demux_mkv_open_video(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_video(demuxer, mkv_d->tracks[i], i);
             break;
         case MATROSKA_TRACK_AUDIO:
-            demux_mkv_open_audio(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_audio(demuxer, mkv_d->tracks[i], i);
             break;
         case MATROSKA_TRACK_SUBTITLE:
-            demux_mkv_open_sub(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_sub(demuxer, mkv_d->tracks[i], i);
             break;
         }
     }
@@ -1619,12 +1620,12 @@ static void avcodec_par_destructor(void *p)
     avcodec_parameters_free(p);
 }
 
-static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     unsigned char *extradata = NULL;
     unsigned int extradata_size = 0;
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
     struct mp_codec_params *sh_v = sh->codec;
 
     sh_v->bits_per_coded_sample = 24;
@@ -1925,10 +1926,10 @@ static const char *const mkv_audio_tags[][2] = {
     { NULL },
 };
 
-static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
     struct mp_codec_params *sh_a = sh->codec;
 
     if (track->private_size > 0x1000000)
@@ -2208,7 +2209,7 @@ static const char *const mkv_sub_tag[][2] = {
     {0}
 };
 
-static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     const char *subtitle_type = NULL;
     for (int n = 0; mkv_sub_tag[n][0]; n++) {
@@ -2222,7 +2223,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         return 1;
 
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
 
     sh->codec->codec = subtitle_type;
     bstr in = (bstr){track->private_data, track->private_size};
