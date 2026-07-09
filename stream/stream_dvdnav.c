@@ -56,6 +56,10 @@
 #define TITLE_MENU -1
 #define TITLE_LONGEST -2
 
+#define DVD_TIMEBASE 90000
+#define DVD_TIME_TO_S(x) ((x) / (double)(DVD_TIMEBASE))
+#define DVD_TIME_FROM_S(x) ((int64_t)((x) * DVD_TIMEBASE))
+
 // Default source dimensions if dvdnav_get_video_resolution() fails.
 #define DVD_SRC_W_DEFAULT 720
 #define DVD_SRC_H_DEFAULT 576
@@ -63,7 +67,7 @@
 struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
     char *filename;                     // path
-    unsigned int duration;              // in milliseconds
+    int64_t duration;                   // in 90 kHz PTS ticks
     int title;
     bool still_active;                  // fill_buffer() is holding a still
     uint32_t spu_clut[16];
@@ -679,7 +683,7 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             dvdnav_cell_change_event_t *ev =  (dvdnav_cell_change_event_t *)buf;
 
             if (ev->pgc_length)
-                priv->duration = ev->pgc_length / 90;
+                priv->duration = ev->pgc_length;
 
             break;
         }
@@ -749,13 +753,13 @@ static int control(stream_t *stream, int cmd, void *arg)
             free(parts);
             break;
         }
-        *ch = chapter > 0 ? parts[chapter - 1] / 90000.0 : 0;
+        *ch = chapter > 0 ? DVD_TIME_TO_S(parts[chapter - 1]) : 0;
         free(parts);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_TIME_LENGTH: {
-        if (priv->duration) {
-            *(double *)arg = (double)priv->duration / 1000.0;
+        if (priv->duration > 0) {
+            *(double *)arg = DVD_TIME_TO_S(priv->duration);
             return STREAM_OK;
         }
         break;
@@ -766,10 +770,9 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_CURRENT_TIME: {
-        double tm;
-        tm = dvdnav_get_current_time(dvdnav) / 90000.0f;
+        int64_t tm = dvdnav_get_current_time(dvdnav);
         if (tm != -1) {
-            *(double *)arg = tm;
+            *(double *)arg = DVD_TIME_TO_S(tm);
             return STREAM_OK;
         }
         break;
@@ -794,7 +797,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         if (!parts)
             break;
         free(parts);
-        *(double *)arg = duration / 90000.0;
+        *(double *)arg = DVD_TIME_TO_S(duration);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
@@ -828,11 +831,11 @@ static int control(stream_t *stream, int cmd, void *arg)
         int flags = args[1]; // from SEEK_* flags (demux.h)
         if (flags & SEEK_HR)
             d -= 10; // fudge offset; it's a hack, because fuck libdvd*
-        int64_t tm = (int64_t)(d * 90000);
+        int64_t tm = DVD_TIME_FROM_S(d);
         if (tm < 0)
             tm = 0;
-        if (priv->duration && tm >= (int64_t)priv->duration * 90)
-            tm = (int64_t)priv->duration * 90 - 1;
+        if (priv->duration > 0 && tm >= priv->duration)
+            tm = priv->duration - 1;
         uint32_t pos, len;
         if (dvdnav_get_position(dvdnav, &pos, &len) != DVDNAV_STATUS_OK)
             break;
@@ -840,7 +843,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
             break;
         stream_drop_buffers(stream);
-        d = dvdnav_get_current_time(dvdnav) / 90000.0f;
+        d = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
         MP_VERBOSE(stream, "landed at: %f\n", d);
         if (dvdnav_get_position(dvdnav, &pos, &len) == DVDNAV_STATUS_OK)
             MP_VERBOSE(stream, "block: %lu\n", (unsigned long)pos);
