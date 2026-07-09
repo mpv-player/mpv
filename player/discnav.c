@@ -134,26 +134,13 @@ bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
 }
 
 // Push the current menu/highlight state to the dvd_subtitle decoders.
-static void push_dvd_overlay(struct MPContext *mpctx,
-                             struct stream_nav_state *nav, bool visible)
+static void push_dvd_overlay(struct MPContext *mpctx, struct stream_nav_state *nav)
 {
-    struct mp_dvdnav_hli hli = {
-        .show = visible,
-        .menu_active = nav->menu_active,
-        .change_id = nav->change_id,
-    };
-    if (visible) {
-        hli.x = nav->hl_x;
-        hli.y = nav->hl_y;
-        hli.w = nav->hl_w;
-        hli.h = nav->hl_h;
-        memcpy(hli.palette, nav->hl_palette, sizeof(hli.palette));
-    }
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
         if (!is_dvd_sub_track(t) || !t->d_sub)
             continue;
-        sub_control(t->d_sub, SD_CTRL_APPLY_DVDNAV, &hli);
+        sub_control(t->d_sub, SD_CTRL_APPLY_DVDNAV, nav);
     }
 }
 
@@ -456,12 +443,13 @@ void disc_nav_update(struct MPContext *mpctx)
     sync_disc_track_selection(mpctx, s, &nav);
 
     bool is_bd = strcmp(s->info->name, "bd") == 0 || strcmp(s->info->name, "bdmv/bluray") == 0;
-    bool visible = nav.menu_active && (is_bd || (nav.hl_w > 0 && nav.hl_h > 0));
+    bool visible = nav.menu_active &&
+                   (is_bd || (mp_rect_w(nav.hl.rect) > 0 && mp_rect_h(nav.hl.rect) > 0));
 
     if (is_bd) {
         push_bd_overlay(mpctx, s, &nav, visible);
     } else {
-        push_dvd_overlay(mpctx, &nav, visible);
+        push_dvd_overlay(mpctx, &nav);
         ensure_menu_sub_selection(mpctx, nav.menu_active);
     }
 

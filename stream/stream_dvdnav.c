@@ -81,8 +81,7 @@ struct priv {
 
     bool in_menu;
     int current_button;                 // mirror of libdvdnav HL_BTNN_REG
-    int btn_rect[4];                    // x, y, w, h in source coords
-    uint32_t hl_palette[4];             // 0xAARRGGBB for SPU pixel values 0..3
+    struct mp_dvdnav_highlight hl;      // focused button rect + palette
     uint32_t nav_change_id;
     uint32_t discontinuity_id;          // bumped on actions that may jump
     bool pending_drain;                 // emit one EOF at the next jump boundary
@@ -243,8 +242,7 @@ static bool in_menu_domain(dvdnav_t *dvdnav)
 
 static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
 {
-    priv->btn_rect[0] = priv->btn_rect[1] = 0;
-    priv->btn_rect[2] = priv->btn_rect[3] = 0;
+    priv->hl.rect = (struct mp_rect){0};
     if (btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
         return;
     // btni_t is packed and full of bitfields, memcpy to ensure correct alignment.
@@ -252,10 +250,11 @@ static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
     memcpy(&b, &pci->hli.btnit[btn - 1], sizeof(b));
     int xs = b.x_start, xe = b.x_end;
     int ys = b.y_start, ye = b.y_end;
-    priv->btn_rect[0] = xs;
-    priv->btn_rect[1] = ys;
-    priv->btn_rect[2] = xe > xs ? xe - xs : 0;
-    priv->btn_rect[3] = ye > ys ? ye - ys : 0;
+    priv->hl.rect = (struct mp_rect){
+        .x0 = xs, .y0 = ys,
+        .x1 = xe > xs ? xe : xs,
+        .y1 = ye > ys ? ye : ys,
+    };
 }
 
 // Resolve the 4-entry "select-state" highlight palette for the focused button.
@@ -264,7 +263,7 @@ static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
 // alphas.
 static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
 {
-    memset(priv->hl_palette, 0, sizeof(priv->hl_palette));
+    memset(priv->hl.palette, 0, sizeof(priv->hl.palette));
     if (!priv->spu_clut_valid || btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
         return;
     btni_t b;
@@ -291,7 +290,7 @@ static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
         int c[3];
         mp_map_fixp_color(&cmatrix, 8, y, 8, c);
         uint32_t alpha = (a << 4) | a;
-        priv->hl_palette[i] = (alpha << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
+        priv->hl.palette[i] = (alpha << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
     }
 }
 
@@ -336,11 +335,8 @@ static void refresh_video_resolution(struct priv *priv)
 static void update_highlight(struct priv *priv)
 {
     int prev_btn = priv->current_button;
-    int prev_x = priv->btn_rect[0], prev_y = priv->btn_rect[1];
-    int prev_w = priv->btn_rect[2], prev_h = priv->btn_rect[3];
     bool prev_menu = priv->in_menu;
-    uint32_t prev_palette[4];
-    memcpy(prev_palette, priv->hl_palette, sizeof(prev_palette));
+    struct mp_dvdnav_highlight prev_hl = priv->hl;
 
     priv->in_menu = in_menu_domain(priv->dvdnav);
     pci_t *pci = priv->in_menu ? dvdnav_get_current_nav_pci(priv->dvdnav) : NULL;
@@ -364,9 +360,7 @@ static void update_highlight(struct priv *priv)
 
     if (!highlight_live || btn <= 0 || btn > pci->hli.hl_gi.btn_ns) {
         priv->current_button = 0;
-        priv->btn_rect[0] = priv->btn_rect[1] = 0;
-        priv->btn_rect[2] = priv->btn_rect[3] = 0;
-        memset(priv->hl_palette, 0, sizeof(priv->hl_palette));
+        priv->hl = (struct mp_dvdnav_highlight){0};
     } else {
         priv->current_button = btn;
         compute_button_rect(priv, pci, btn);
@@ -374,9 +368,7 @@ static void update_highlight(struct priv *priv)
     }
 
     if (priv->in_menu != prev_menu || priv->current_button != prev_btn ||
-        priv->btn_rect[0] != prev_x || priv->btn_rect[1] != prev_y ||
-        priv->btn_rect[2] != prev_w || priv->btn_rect[3] != prev_h ||
-        memcmp(prev_palette, priv->hl_palette, sizeof(prev_palette)) != 0)
+        memcmp(&prev_hl, &priv->hl, sizeof(prev_hl)) != 0)
     {
         priv->nav_change_id++;
     }
@@ -924,10 +916,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             .still_active = priv->still_active,
             .src_w = priv->src_w,
             .src_h = priv->src_h,
-            .hl_x = priv->btn_rect[0],
-            .hl_y = priv->btn_rect[1],
-            .hl_w = priv->btn_rect[2],
-            .hl_h = priv->btn_rect[3],
+            .hl = priv->hl,
             .change_id = priv->nav_change_id,
             .discontinuity_id = priv->discontinuity_id,
             .active_audio_id = dvd_physical_audio_to_substream(priv, priv->audio_physical),
@@ -936,7 +925,6 @@ static int control(stream_t *stream, int cmd, void *arg)
             .angle = cur_angle,
             .num_angles = num_angles,
         };
-        memcpy(st->hl_palette, priv->hl_palette, sizeof(st->hl_palette));
         return STREAM_OK;
     }
     }

@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#include "common/common.h"
 #include "misc/bstr.h"
 
 // Minimum guaranteed buffer and seek-back size. For any reads <= of this size,
@@ -126,6 +127,12 @@ struct stream_nav_cmd {
     int x, y; // for MOUSE_*
 };
 
+// A DVD subpicture button highlight.
+struct mp_dvdnav_highlight {
+    struct mp_rect rect;    // button rectangle in SPU/source coords
+    uint32_t palette[4];    // replacement colors for SPU pixel values 0..3
+};
+
 // Snapshot of the stream's menu state.
 struct stream_nav_state {
     bool nav_active;         // interactive disc navigation is enabled
@@ -133,12 +140,7 @@ struct stream_nav_state {
     bool has_popup;          // disc supports a popup menu (BD only)
     bool still_active;       // holding an indefinite still frame
     int  src_w, src_h;       // dimensions of the coordinate space mouse uses
-    // Highlight rectangle of the currently focused button (in src coords).
-    int  hl_x, hl_y, hl_w, hl_h;
-    // BGRA highlight palette (0xAARRGGBB, straight) to substitute for the
-    // four SPU pixel values inside the highlight rect. Zeroed when no highlight
-    // is active.
-    uint32_t hl_palette[4];
+    struct mp_dvdnav_highlight hl; // focused button highlight (DVD only)
     uint32_t change_id; // Bumped whenever any of the above changes
     uint32_t discontinuity_id; // Bumped when the stream's source position jumps
 
