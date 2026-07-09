@@ -664,7 +664,7 @@ dvdnav_opt = get_option('dvdnav').require(
     get_option('gpl'),
     error_message: 'the build is not GPL!',
 )
-dvdnav = dependency('dvdnav', version: '>= 4.2.0', required: dvdnav_opt)
+dvdnav = dependency('dvdnav', version: '>= 6.1.0', required: dvdnav_opt)
 features += {'dvdnav': dvdnav.found()}
 if features['dvdnav']
     dependencies += dvdnav
