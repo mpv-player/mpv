@@ -668,7 +668,7 @@ static int init(struct ao *ao)
 
     pw_thread_loop_unlock(p->loop);
 
-    if (p->init_state == INIT_STATE_ERROR)
+    if (p->init_state != INIT_STATE_SUCCESS)
         goto error;
 
     return 0;
