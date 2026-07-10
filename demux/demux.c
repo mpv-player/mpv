@@ -891,15 +891,8 @@ static void wakeup_ds(struct demux_stream *ds)
     }
 }
 
-static void update_stream_selection_state(struct demux_internal *in,
-                                          struct demux_stream *ds)
+static void update_stream_eager_state(struct demux_internal *in)
 {
-    ds->eof = false;
-    ds->refreshing = false;
-
-    // We still have to go over the whole stream list to update ds->eager for
-    // other streams too, because they depend on other stream's selections.
-
     bool any_av_streams = false;
     bool any_streams = false;
 
@@ -926,6 +919,27 @@ static void update_stream_selection_state(struct demux_internal *in,
 
     if (!any_streams)
         in->blocked = false;
+}
+
+void demux_set_stream_still_image(demuxer_t *demuxer, struct sh_stream *sh,
+                                  bool still_image)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_thread);
+
+    mp_mutex_lock(&in->lock);
+    sh->still_image = still_image;
+    update_stream_eager_state(in);
+    mp_mutex_unlock(&in->lock);
+}
+
+static void update_stream_selection_state(struct demux_internal *in,
+                                          struct demux_stream *ds)
+{
+    ds->eof = false;
+    ds->refreshing = false;
+
+    update_stream_eager_state(in);
 
     ds_clear_reader_state(ds, true);
 
