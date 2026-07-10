@@ -146,9 +146,7 @@ struct bluray_priv_s {
     struct bd_overlay_plane pg;
     mp_mutex overlay_lock;
 
-    bool menu_event_active;          // BD_EVENT_MENU == 1
-    bool popup_supported;            // BD_EVENT_POPUP == 1
-    uint32_t nav_change_id;          // bumped on FLUSH/HIDE/MENU/POPUP events
+    uint32_t nav_change_id;          // bumped on overlay FLUSH/HIDE events
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
     bool still_active;               // holding an indefinite still.
@@ -548,24 +546,6 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
                 mp_mutex_unlock(&b->overlay_lock);
             } else {
                 bd_read_skip_still(b->bd);
-            }
-            break;
-        case BD_EVENT_MENU:
-            // ev.param: 1 if the disc is currently in an HDMV menu, 0 otherwise.
-            if (b->hdmv_mode) {
-                mp_mutex_lock(&b->overlay_lock);
-                b->menu_event_active = ev.param != 0;
-                b->nav_change_id++;
-                mp_mutex_unlock(&b->overlay_lock);
-            }
-            break;
-        case BD_EVENT_POPUP:
-            // ev.param: 1 if popup menu is currently available, 0 otherwise.
-            if (b->hdmv_mode) {
-                mp_mutex_lock(&b->overlay_lock);
-                b->popup_supported = ev.param != 0;
-                b->nav_change_id++;
-                mp_mutex_unlock(&b->overlay_lock);
             }
             break;
         case BD_EVENT_PLAYLIST: {
@@ -972,14 +952,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             mp_mutex_unlock(&b->overlay_lock);
             return STREAM_OK;
         }
-        // BD_EVENT_MENU isn't fired by BD-J (it's HDMV-only), so treat any
-        // visible BD-J plane as an active menu too.
-        bool any_overlay = b->ig.visible || b->pg.visible;
-        bool visible = (b->menu_event_active && b->ig.visible) || any_overlay;
+        // There is no reliable "menu on screen" signal that covers both HDMV
+        // and BD-J (BD_EVENT_MENU is HDMV-only). Any visible overlay plane is
+        // treated as an active menu.
         *st = (struct stream_nav_state){
             .nav_active = true,
-            .menu_active = visible,
-            .has_popup = b->popup_supported,
+            .menu_active = b->ig.visible || b->pg.visible,
             .still_active = b->still_active,
             .src_w = MPMAX(b->ig.disp_w, b->pg.disp_w),
             .src_h = MPMAX(b->ig.disp_h, b->pg.disp_h),
