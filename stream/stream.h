@@ -153,7 +153,6 @@ struct mp_dvdnav_highlight {
 struct stream_nav_state {
     bool nav_active;         // interactive disc navigation is enabled
     bool menu_active;        // a selectable menu/highlight is currently visible
-    bool has_popup;          // disc supports a popup menu (BD only)
     bool still_active;       // holding an indefinite still frame
     int  src_w, src_h;       // dimensions of the coordinate space mouse uses
     struct mp_dvdnav_highlight hl; // focused button highlight (DVD only)

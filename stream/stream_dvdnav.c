@@ -897,7 +897,6 @@ static int control(stream_t *stream, int cmd, void *arg)
             .nav_active = true,
             .no_audio = no_audio,
             .menu_active = priv->in_menu,
-            .has_popup = false,
             .still_active = priv->still_active,
             .src_w = priv->src_w,
             .src_h = priv->src_h,
