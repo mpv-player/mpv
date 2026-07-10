@@ -58,7 +58,6 @@ struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
     char *filename;                     // path
     unsigned int duration;              // in milliseconds
-    int mousex, mousey;
     int title;
     uint32_t spu_clut[16];
     bool spu_clut_valid;
