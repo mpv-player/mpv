@@ -344,6 +344,8 @@ static void sync_streams(struct demuxer *demuxer)
     }
 }
 
+static void refresh_disc_metadata(struct demuxer *demuxer);
+
 static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
@@ -359,13 +361,31 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
         seek_pts *= tmp;
     }
 
-    MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
+    // If the disc VM jumped on its own, this seek is the resync for it. The
+    // VM is already at the destination, only flush and release the held data.
+    struct stream_nav_state nav = {0};
+    bool have_nav = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1;
+    bool resync = have_nav && nav.drain_pending;
 
-    double seek_arg[] = {seek_pts, flags};
-    stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
+    if (resync) {
+        MP_VERBOSE(demuxer, "resync seek at jump boundary (disc id %u)\n",
+                   nav.discontinuity_id);
+    } else {
+        MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
+        double seek_arg[] = {seek_pts, flags};
+        stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
+    }
 
     if (p->slave && p->slave->desc->drop_buffers)
         p->slave->desc->drop_buffers(p->slave);
+
+    if (resync) {
+        stream_control(demuxer->stream, STREAM_CTRL_NAV_DRAIN_ACK, NULL);
+        refresh_disc_metadata(demuxer);
+    }
+
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+        p->last_discontinuity_id = nav.discontinuity_id;
 
     clear_dvd_sub_holds(p);
 
@@ -463,21 +483,14 @@ static bool reopen_slave(struct demuxer *demuxer)
     return true;
 }
 
-// Handle a disc-nav discontinuity (title/menu/cell jump)
+// Handle a BD nav discontinuity (title/menu jump)
 static bool process_discontinuity(struct demuxer *demuxer, uint32_t new_id)
 {
     struct priv *p = demuxer->priv;
+    mp_assert(!p->is_dvd); // DVD doesn't need reopen.
 
-    if (!p->is_dvd) {
-        // BD needs a full reopen (codecs can change across titles).
-        if (!reopen_slave(demuxer))
-            return false;
-    } else {
-        clear_dvd_sub_holds(p);
-        if (p->slave->desc->drop_buffers)
-            p->slave->desc->drop_buffers(p->slave);
-        refresh_disc_metadata(demuxer);
-    }
+    if (!reopen_slave(demuxer))
+        return false;
     p->last_discontinuity_id = new_id;
     p->seek_reinit = true;
     return true;
@@ -543,6 +556,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             p->nav_active = nav.nav_active;
             demux_set_nav_active(demuxer, nav.nav_active);
         }
+        // DVD holds an EOF at jump boundaries and the player resyncs
+        // through the seek path. BD has no in-band boundary, handle it here.
         if (!p->is_dvd && nav.discontinuity_id != p->last_discontinuity_id) {
             MP_VERBOSE(demuxer, "discontinuity %u->%u, handling\n",
                        p->last_discontinuity_id, nav.discontinuity_id);
@@ -578,12 +593,11 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
 
     struct demux_packet *pkt = demux_read_any_packet(p->slave);
     if (!pkt) {
-        // EOF is either a real still (hold the frame) or the one-shot drain
-        // EOF at a jump boundary; in the latter case resync and continue.
+        // EOF is a real still (hold the frame), a held jump boundary (the
+        // player resyncs it via the seek path), or (BD) an out-of-band jump.
         struct stream_nav_state nav2 = {0};
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav2) >= 1
-            && nav2.discontinuity_id != p->last_discontinuity_id)
-        {
+        bool have_nav2 = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav2) >= 1;
+        if (have_nav2 && !p->is_dvd && nav2.discontinuity_id != p->last_discontinuity_id) {
             MP_VERBOSE(demuxer, "discontinuity %u->%u at EOF, handling\n",
                        p->last_discontinuity_id, nav2.discontinuity_id);
             if (!process_discontinuity(demuxer, nav2.discontinuity_id))
@@ -803,6 +817,14 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     p->slave = demux_open_url("-", &params, demuxer->cancel, demuxer->global);
     if (!p->slave)
         return -1;
+
+    // Jumps during open/probe predate the slave and must not be handled by
+    // dropping the data it just buffered. Hold at boundaries from here on.
+    struct stream_nav_state nav = {0};
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+        p->last_discontinuity_id = nav.discontinuity_id;
+    if (p->is_dvd)
+        stream_control(demuxer->stream, STREAM_CTRL_NAV_DRAIN_ENABLE, NULL);
 
     // Can be seekable even if the stream isn't.
     demuxer->seekable = true;

@@ -263,8 +263,8 @@ static void sync_current_edition(struct MPContext *mpctx, struct stream *s,
     }
 }
 
-// Catch async playlist/title hops driven by the disc itself (HDMV bytecode,
-// dvdnav HOP_CHANNEL, etc.).
+// Catch playlist/title jumps driven by the disc itself (menu buttons, HDMV
+// bytecode, end of title, dvdnav HOP_CHANNEL, etc.).
 static void check_async_discontinuity(struct MPContext *mpctx, struct stream *s,
                                       struct stream_nav_state *nav)
 {
@@ -278,13 +278,16 @@ static void check_async_discontinuity(struct MPContext *mpctx, struct stream *s,
     }
     if (nav->discontinuity_id == st->last_discontinuity_id)
         return;
-    MP_VERBOSE(s, "async discontinuity %u->%u, flushing\n",
-               st->last_discontinuity_id, nav->discontinuity_id);
     st->last_discontinuity_id = nav->discontinuity_id;
-    reset_playback_state(mpctx);
-    demux_flush(mpctx->demuxer);
-    // Re-queue the retained menu subpicture the flush may have destroyed.
-    demux_nav_refresh(mpctx->demuxer);
+
+    // The disc jumped on its own, resync through the regular seek path.
+    // demux_disc releases the held boundary instead of repositioning the VM.
+    double t = 0;
+    if (stream_control(s, STREAM_CTRL_GET_CURRENT_TIME, &t) < 1)
+        t = 0;
+    MP_VERBOSE(s, "disc jumped (id %u), resync seek to %f\n",
+               nav->discontinuity_id, t);
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, t, MPSEEK_KEYFRAME, 0);
 }
 
 static struct track *find_track_by_demuxer_id(struct MPContext *mpctx,

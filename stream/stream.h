@@ -99,6 +99,8 @@ enum stream_ctrl {
     STREAM_CTRL_GET_NAV_OVERLAY,     // struct stream_nav_overlay_req*
     STREAM_CTRL_GET_STILL,           // struct stream_still_req*
     STREAM_CTRL_SET_STILL_PAGE,      // int*, force the shown still page
+    STREAM_CTRL_NAV_DRAIN_ENABLE,    // start holding EOF at jump boundaries
+    STREAM_CTRL_NAV_DRAIN_ACK,       // flush done, release the held EOF
 };
 
 // Fetch the still image that a disc (DVD-Audio ASVS) associates with the given
@@ -172,6 +174,7 @@ struct stream_nav_state {
     struct mp_dvdnav_highlight hl; // focused button highlight (DVD only)
     uint32_t change_id; // Bumped whenever any of the above changes
     uint32_t discontinuity_id; // Bumped when the stream's source position jumps
+    bool drain_pending; // holding an EOF at a jump boundary, awaiting ACK
 
     // Disc-driven track selection.
     bool no_audio;      // the current playlist/domain has no audio
