@@ -70,12 +70,20 @@ struct priv {
     uint32_t last_discontinuity_id; // Last source-position-jump id seen from the stream.
     bool nav_active;    // last interactive-nav state pushed to the cache
 
-    bool is_dvd, is_cdda, is_bd;
+    bool is_dvd, is_dvda, is_cdda, is_bd;
 
     // DVD-Audio still-image video track.
     struct sh_stream *still_sh;
     int last_still_id;
     struct demux_packet *pending_pkt; // still or the audio deferred behind it
+
+    // Sparse-video (slideshow title) detection state.
+    struct sh_stream *video_sh;
+    double last_video_dts;
+
+    // Seeks into sparse-video titles land at the preceding chapter start,
+    // where the target's still frame is. Drop audio until this target.
+    double skip_audio_until;
 };
 
 static void clear_dvd_sub_holds(struct priv *p)
@@ -380,12 +388,36 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     bool have_nav = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1;
     bool resync = have_nav && nav.drain_pending;
 
+    p->skip_audio_until = MP_NOPTS_VALUE;
+
     if (resync) {
         MP_VERBOSE(demuxer, "resync seek at jump boundary (disc id %u)\n",
                    nav.discontinuity_id);
     } else {
-        MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
-        double seek_arg[] = {seek_pts, flags};
+        // In slideshow titles the target's still lies at the preceding
+        // chapter (cell) start and can't be read backwards from a mid-cell
+        // landing. Land there and drop audio up to the actual target.
+        double stream_target = seek_pts;
+        int stream_flags = flags;
+        if (p->video_sh && p->video_sh->still_image &&
+            demuxer->num_chapters > 0)
+        {
+            double snap = 0;
+            for (int n = 0; n < demuxer->num_chapters; n++) {
+                double c = demuxer->chapters[n].pts;
+                if (c <= seek_pts && c > snap)
+                    snap = c;
+            }
+            if (seek_pts - snap > 0.5) {
+                MP_VERBOSE(demuxer, "sparse video: landing at chapter start %f, "
+                           "skipping audio to %f\n", snap, seek_pts);
+                stream_target = snap;
+                stream_flags &= ~(unsigned)SEEK_HR; // landing is chosen exactly
+                p->skip_audio_until = seek_pts;
+            }
+        }
+        MP_VERBOSE(demuxer, "seek to: %f\n", stream_target);
+        double seek_arg[] = {stream_target, stream_flags};
         stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
     }
 
@@ -421,6 +453,7 @@ static void reset_pts(demuxer_t *demuxer)
 
     p->base_dts = p->last_dts = MP_NOPTS_VALUE;
     p->base_time = base;
+    p->last_video_dts = MP_NOPTS_VALUE;
     p->seek_reinit = false;
 }
 
@@ -678,7 +711,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             p->last_dts = pkt->dts;
 
         if (fabs(p->last_dts - pkt->dts) >= DTS_RESET_THRESHOLD) {
-            MP_VERBOSE(demuxer, "PTS discontinuity: %f->%f\n", p->last_dts, pkt->dts);
+            MP_VERBOSE(demuxer, "PTS discontinuity: %f->%f (%s)\n",
+                       p->last_dts, pkt->dts, stream_type_name(sh->type));
             p->base_time += p->last_dts - p->base_dts;
             p->base_dts = pkt->dts;
             if (pkt->duration > 0)
@@ -697,6 +731,42 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
 
     MP_TRACE(demuxer, "mapped pkt: type=%d pts=%f dts=%f\n",
              sh->type, pkt->pts, pkt->dts);
+
+    // Detect slideshow video, one still per song on audio DVDs. Audio
+    // running several seconds past the last video packet cannot happen with
+    // really interleaved video.
+    if ((p->is_dvd || p->is_dvda) && pkt->dts != MP_NOPTS_VALUE) {
+        if (sh->type == STREAM_VIDEO) {
+            p->video_sh = sh;
+            p->last_video_dts = pkt->dts;
+        } else if (sh->type == STREAM_AUDIO && p->video_sh &&
+                   !p->video_sh->still_image &&
+                   demux_stream_is_selected(p->video_sh) &&
+                   p->last_video_dts != MP_NOPTS_VALUE &&
+                   pkt->dts - p->last_video_dts > 5.0)
+        {
+            MP_VERBOSE(demuxer, "no video for %.1fs while audio advances; "
+                       "marking video as sparse still images\n",
+                       pkt->dts - p->last_video_dts);
+            // Stop the starved video stream from forcing eager reads (it
+            // would race through the source hunting for the next still).
+            demux_set_stream_still_image(demuxer, p->video_sh, true);
+        }
+    }
+
+    // Drop audio between the chapter-start landing and the seek target
+    // (see d_seek).
+    if (p->skip_audio_until != MP_NOPTS_VALUE && sh->type == STREAM_AUDIO &&
+        pkt->pts != MP_NOPTS_VALUE)
+    {
+        if (pkt->pts < p->skip_audio_until) {
+            talloc_free(pkt);
+            return true;
+        }
+        MP_VERBOSE(demuxer, "audio reached seek target %f\n",
+                   p->skip_audio_until);
+        p->skip_audio_until = MP_NOPTS_VALUE;
+    }
 
     if (sh->type == STREAM_AUDIO && pkt->pts != MP_NOPTS_VALUE) {
         inject_still(demuxer, pkt->pts);
@@ -809,8 +879,11 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     p->is_cdda = strcmp(sname, "cdda") == 0;
     p->is_dvd = strcmp(sname, "dvdnav") == 0 ||
                 strcmp(sname, "ifo_dvdnav") == 0;
+    p->is_dvda = strcmp(sname, "dvda") == 0 ||
+                 strcmp(sname, "ifo_dvda") == 0;
     p->is_bd = strcmp(sname, "bd") == 0 ||
                strcmp(sname, "bdmv/bluray") == 0;
+    p->skip_audio_until = MP_NOPTS_VALUE;
 
     if (p->is_cdda)
         params.force_format = "+rawaudio";
