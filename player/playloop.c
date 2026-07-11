@@ -237,6 +237,18 @@ void step_frame_mute(struct MPContext *mpctx, bool mute)
     ao_set_gain(mpctx->ao_chain->ao, gain);
 }
 
+// Update the sparse video state during playback.
+static void update_sparse_video(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (vo_c && !vo_c->is_sparse && vo_c->track && vo_c->track->stream &&
+        vo_c->track->stream->still_image)
+    {
+        MP_VERBOSE(mpctx, "video track consists of sparse still images\n");
+        vo_c->is_sparse = true;
+    }
+}
+
 // Clear some playback-related fields on file loading or after seeks.
 void reset_playback_state(struct MPContext *mpctx)
 {
@@ -248,6 +260,8 @@ void reset_playback_state(struct MPContext *mpctx)
 
     if (mpctx->demuxer)
         demux_nav_refresh(mpctx->demuxer);
+
+    update_sparse_video(mpctx);
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
@@ -1272,6 +1286,8 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     update_demuxer_properties(mpctx);
+
+    update_sparse_video(mpctx);
 
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);

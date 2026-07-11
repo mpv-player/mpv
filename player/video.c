@@ -494,8 +494,13 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
         *logical_eof = true;
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
-        hrseek = false;
     }
+
+    // Sparse streams usually have no frame at the seek target, or rather we
+    // don't want to jump to next keyframe, when there is a lot of other stream
+    // data in between.
+    if (vo_c->is_sparse)
+        hrseek = false;
 
     if (have_new_frame(mpctx, false))
         return VD_NEW_FRAME;
@@ -1140,6 +1145,20 @@ void write_video(struct MPContext *mpctx)
         return;
     }
 
+    // A sparse still-image stream may have no frame at the seek target.
+    // Complete the restart without showing it.
+    if (vo_c->is_sparse && mpctx->video_status < STATUS_READY) {
+        double ref = mpctx->playback_pts != MP_NOPTS_VALUE
+                        ? mpctx->playback_pts : mpctx->last_seek_pts;
+        if (ref != MP_NOPTS_VALUE && mpctx->next_frames[0]->pts > ref + 1.0) {
+            MP_VERBOSE(mpctx, "sparse video: frame %f is ahead of %f, not "
+                       "showing it for the restart\n",
+                       mpctx->next_frames[0]->pts, ref);
+            mpctx->video_status = STATUS_READY;
+            return;
+        }
+    }
+
     if (logical_eof && !mpctx->num_past_frames && mpctx->num_next_frames == 1 &&
         use_video_lookahead(mpctx) && !vo_c->is_sparse)
     {
@@ -1195,6 +1214,17 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->time_frame -= get_relative_time(mpctx);
     update_avsync_before_frame(mpctx);
+
+    // Schedule frames directly against the audio clock for sparse video.
+    if (vo_c->is_sparse && !mpctx->display_sync_active &&
+        mpctx->audio_status == STATUS_PLAYING &&
+        mpctx->video_status == STATUS_PLAYING)
+    {
+        double apts = playing_audio_pts(mpctx);
+        double fpts = mpctx->next_frames[0]->pts;
+        if (apts != MP_NOPTS_VALUE && fpts != MP_NOPTS_VALUE)
+            mpctx->time_frame = MPMAX(fpts - apts, 0) / mpctx->video_speed;
+    }
 
     // Enforce timing subtitles to video frames.
     osd_set_force_video_pts(mpctx->osd, MP_NOPTS_VALUE);
