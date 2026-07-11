@@ -65,6 +65,7 @@
 
 struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
+    struct mp_log *log;                 // borrowed from the stream
     char *filename;                     // path
     int64_t duration;                   // in 90 kHz PTS ticks
     int title;
@@ -85,7 +86,9 @@ struct priv {
     struct mp_dvdnav_highlight hl;      // focused button rect + palette
     uint32_t nav_change_id;
     uint32_t discontinuity_id;          // bumped on actions that may jump
-    bool pending_drain;                 // emit one EOF at the next jump boundary
+    bool drain_enabled;                 // a demuxer is attached and acks drains
+    bool pending_drain;                 // hold EOF until the demuxer acks
+    bool at_boundary;                   // no payload delivered since last jump
     int src_w, src_h;                   // video resolution in pixels
     int auto_actioned_button;           // last auto-activated button; 0 if none
     pci_t pci;                          // Copy of the last NAV packet's PCI.
@@ -297,6 +300,19 @@ static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
     }
 }
 
+static const char *dvd_domain_name(dvdnav_t *dvdnav)
+{
+    if (dvdnav_is_domain_fp(dvdnav) == 1)
+        return "FP";
+    if (dvdnav_is_domain_vmgm(dvdnav) == 1)
+        return "VMGM";
+    if (dvdnav_is_domain_vtsm(dvdnav) == 1)
+        return "VTSM";
+    if (dvdnav_is_domain_vts(dvdnav) == 1)
+        return "VTS";
+    return "?";
+}
+
 // Map a libdvdnav physical audio stream number (0..7) to the corresponding
 // MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
 static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
@@ -471,11 +487,20 @@ static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     update_highlight(priv);
 }
 
-// Mark a source-position jump.
+// Mark a source-position jump. Runs with priv->lock held.
 static void bump_discontinuity(struct priv *priv)
 {
+    // Back-to-back jump events with no payload between them are one jump.
+    if (priv->at_boundary)
+        return;
+    priv->at_boundary = true;
     priv->discontinuity_id++;
-    priv->pending_drain = true;
+    // Hold an EOF at the boundary until the demuxer flushed and acked.
+    // Off while no demuxer is attached (open/probing would starve).
+    if (priv->drain_enabled)
+        priv->pending_drain = true;
+    MP_DBG(priv, "discontinuity -> %"PRIu32" (drain=%d)\n",
+           priv->discontinuity_id, priv->pending_drain);
 }
 
 static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
@@ -568,8 +593,10 @@ static int process_event(stream_t *s, int event, void *buf, int len)
 
     switch (event) {
     case DVDNAV_BLOCK_OK:
-        // Real data is flowing again: we are no longer holding a still.
+        // Real data is flowing again: we are no longer holding a still, and
+        // the last jump boundary (if any) has been crossed.
         priv->still_active = false;
+        priv->at_boundary = false;
         return len;
     case DVDNAV_STOP:
         // End of disc: a real EOF, not a held still.
@@ -600,7 +627,8 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         }
         // Indefinite still: report EOF to the demuxer so the video decoder
         // is drained and the last frame is actually pushed to screen.
-        MP_VERBOSE(s, "indefinite still -> EOF, hold last frame\n");
+        if (!priv->still_active)
+            MP_VERBOSE(s, "indefinite still -> EOF, hold last frame\n");
         priv->still_active = true;
         return 0;
     }
@@ -608,7 +636,7 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         dvdnav_wait_skip(dvdnav);
         break;
     case DVDNAV_HOP_CHANNEL:
-        // Bump discontinuity_id so the playloop flushes the cache.
+        MP_VERBOSE(s, "hop channel (domain=%s)\n", dvd_domain_name(dvdnav));
         bump_discontinuity(priv);
         break;
     case DVDNAV_HIGHLIGHT:
@@ -618,8 +646,9 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         int tit = 0, part = 0;
         dvdnav_vts_change_event_t *vts_event =
             (dvdnav_vts_change_event_t *)buf;
-        MP_VERBOSE(s, "DVDNAV, switched to VTS: %d\n",
-                   vts_event->new_vtsN);
+        MP_VERBOSE(s, "switched to VTS: %d (old=%d) domain=%s\n",
+                   vts_event->new_vtsN, vts_event->old_vtsN,
+                   dvd_domain_name(dvdnav));
         if (!priv->had_initial_vts) {
             // dvdnav sends an initial VTS change before any data; don't
             // cause a blocking wait for the player, because the player in
@@ -646,6 +675,11 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         if (ev->pgc_length)
             priv->duration = ev->pgc_length;
 
+        MP_VERBOSE(s, "cell change: cell=%d pg=%d pgc_len=%.3f "
+                   "cur_time=%.3f domain=%s\n",
+                   ev->cellN, ev->pgN, DVD_TIME_TO_S(ev->pgc_length),
+                   DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav)),
+                   dvd_domain_name(dvdnav));
         break;
     }
     case DVDNAV_SPU_CLUT_CHANGE: {
@@ -657,7 +691,8 @@ static int process_event(stream_t *s, int event, void *buf, int len)
     case DVDNAV_AUDIO_STREAM_CHANGE: {
         dvdnav_audio_stream_change_event_t *ev = buf;
         // physical: 0..7 = active audio stream, -1 = SPU/audio off.
-        MP_VERBOSE(s, "DVDNAV, audio change phys=%d log=%d\n", ev->physical, ev->logical);
+        MP_VERBOSE(s, "audio change phys=%d log=%d domain=%s\n",
+                   ev->physical, ev->logical, dvd_domain_name(dvdnav));
         if (priv->audio_physical != ev->physical) {
             priv->audio_physical = ev->physical;
             priv->nav_change_id++;
@@ -669,9 +704,9 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         int raw = ev->physical_wide;
         bool visible = raw >= 0 && !(raw & 0x80);
         int phys = raw >= 0 ? (raw & 0x1F) : -1;
-        MP_VERBOSE(s, "DVDNAV, sub change phys_wide=0x%x lb=0x%x ps=0x%x log=%d\n",
+        MP_VERBOSE(s, "sub change phys_wide=0x%x lb=0x%x ps=0x%x log=%d domain=%s\n",
                    ev->physical_wide, ev->physical_letterbox,
-                   ev->physical_pan_scan, ev->logical);
+                   ev->physical_pan_scan, ev->logical, dvd_domain_name(dvdnav));
         if (priv->sub_physical != phys || priv->sub_visible != visible) {
             priv->sub_physical = phys;
             priv->sub_visible = visible;
@@ -697,10 +732,11 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
     while (1) {
         mp_mutex_lock(&priv->lock);
         bool drain = priv->pending_drain;
-        priv->pending_drain = false;
         mp_mutex_unlock(&priv->lock);
-        if (drain)
+        if (drain) {
+            MP_DBG(s, "holding drain EOF (jump boundary)\n");
             return 0;
+        }
 
         int len = -1;
         int event = DVDNAV_NOP;
@@ -845,6 +881,12 @@ static int control(stream_t *stream, int cmd, void *arg)
         MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
         if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
             break;
+        // The seek reinitializes everything itself. Clear any held boundary
+        // and coalesce the HOP_CHANNEL libdvdnav emits for the seek.
+        mp_mutex_lock(&priv->lock);
+        priv->pending_drain = false;
+        priv->at_boundary = true;
+        mp_mutex_unlock(&priv->lock);
         stream_drop_buffers(stream);
         d = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
         MP_VERBOSE(stream, "landed at: %f\n", d);
@@ -916,6 +958,23 @@ static int control(stream_t *stream, int cmd, void *arg)
         handle_nav_cmd(stream, arg);
         return STREAM_OK;
     }
+    case STREAM_CTRL_NAV_DRAIN_ENABLE: {
+        mp_mutex_lock(&priv->lock);
+        priv->drain_enabled = true;
+        priv->pending_drain = false;
+        priv->at_boundary = false;
+        mp_mutex_unlock(&priv->lock);
+        MP_DBG(stream, "jump boundary drain enabled\n");
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_NAV_DRAIN_ACK: {
+        mp_mutex_lock(&priv->lock);
+        MP_DBG(stream, "jump boundary drain acked (was %d)\n",
+               priv->pending_drain);
+        priv->pending_drain = false;
+        mp_mutex_unlock(&priv->lock);
+        return STREAM_OK;
+    }
     case STREAM_CTRL_GET_NAV_STATE: {
         struct stream_nav_state *st = arg;
         uint32_t cur_angle = 0, num_angles = 0;
@@ -938,6 +997,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             .hl = priv->hl,
             .change_id = priv->nav_change_id,
             .discontinuity_id = priv->discontinuity_id,
+            .drain_pending = priv->pending_drain,
             .active_audio_id = dvd_physical_audio_to_substream(priv, priv->audio_physical),
             .active_sub_id = priv->sub_physical >= 0 ? 0x20 + priv->sub_physical : -1,
             .sub_visible = priv->sub_visible,
@@ -1025,6 +1085,7 @@ static int open_s_internal(stream_t *stream)
 
     mp_mutex_init(&priv->lock);
 
+    priv->log = stream->log;
     priv->audio_physical = -1;
     priv->sub_physical = -1;
     priv->sub_visible = false;
