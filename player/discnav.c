@@ -70,6 +70,9 @@ struct disc_nav_state {
     // Last disc-discontinuity id we acted on for track sync.
     uint32_t last_track_disc_id;
 
+    // Last audio id we logged as "not in tracks yet" (avoids log spam).
+    int last_missing_audio_id;
+
     // Last menu_active pushed through property-change notification.
     bool last_menu_active;
     bool menu_active_seen;
@@ -332,11 +335,23 @@ static void sync_disc_track_selection(struct MPContext *mpctx, struct stream *s,
             }
             st->last_audio_id = nav->active_audio_id;
         } else if (nav->active_audio_id >= 0) {
-            MP_TRACE(s, "disc audio 0x%x not in tracks yet\n",
-                     nav->active_audio_id);
+            if (st->last_missing_audio_id != nav->active_audio_id) {
+                st->last_missing_audio_id = nav->active_audio_id;
+                MP_VERBOSE(s, "disc audio 0x%x not in tracks yet\n",
+                           nav->active_audio_id);
+            }
         }
     } else if (first) {
         st->last_audio_id = nav->active_audio_id;
+        if (mpctx->opts->stream_id[0][STREAM_AUDIO] == -1) {
+            struct track *t = find_track_by_demuxer_id(mpctx, STREAM_AUDIO,
+                                                       nav->active_audio_id);
+            if (t && mpctx->current_track[0][STREAM_AUDIO] != t) {
+                MP_VERBOSE(s, "initial disc audio -> demuxer_id 0x%x\n",
+                           nav->active_audio_id);
+                mp_switch_track_n(mpctx, 0, STREAM_AUDIO, t, 0);
+            }
+        }
     }
 
     if (!first && (hopped ||
