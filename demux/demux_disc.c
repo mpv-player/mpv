@@ -244,8 +244,13 @@ static struct sh_stream *find_outer_for_slave(struct priv *p,
 static void sync_streams(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
-    int num_slave = demux_get_num_stream(p->slave);
 
+    int nav_audio_id = -1;
+    struct stream_nav_state nav = {0};
+    if (p->is_dvd && stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+        nav_audio_id = nav.active_audio_id;
+
+    int num_slave = demux_get_num_stream(p->slave);
     if (num_slave > p->slave_to_outer_count) {
         MP_TARRAY_GROW(p, p->slave_to_outer, num_slave - 1);
         for (int n = p->slave_to_outer_count; n < num_slave; n++)
@@ -275,10 +280,18 @@ static void sync_streams(struct demuxer *demuxer)
         struct sh_stream *outer = find_outer_for_slave(p, src, ordinal);
 
         if (!outer) {
+            MP_VERBOSE(demuxer, "new stream: slave=%d type=%s id=0x%x codec=%s\n",
+                       n, stream_type_name(src->type), src->demuxer_id,
+                       src->codec->codec ? src->codec->codec : "?");
             outer = demux_alloc_sh_stream(src->type);
             adopt_codec_params(outer, src);
             outer->demuxer_id = src->demuxer_id;
             outer->dependent_track = src->dependent_track;
+            if (src->type == STREAM_AUDIO && src->demuxer_id == nav_audio_id) {
+                MP_VERBOSE(demuxer, "marking audio id 0x%x as default track\n",
+                           nav_audio_id);
+                outer->default_track = true;
+            }
             if (src->type == STREAM_VIDEO) {
                 double ar;
                 if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
@@ -300,8 +313,8 @@ static void sync_streams(struct demuxer *demuxer)
             const char *new_codec = src->codec->codec;
             const char *cur_codec = outer->codec->codec;
             if (new_codec && cur_codec && strcmp(new_codec, cur_codec) != 0) {
-                MP_VERBOSE(demuxer, "stream %d codec changed: %s -> %s\n",
-                           n, cur_codec, new_codec);
+                MP_VERBOSE(demuxer, "stream %d (id=0x%x) codec changed: %s -> %s\n",
+                           n, src->demuxer_id, cur_codec, new_codec);
                 adopt_codec_params(outer, src);
             }
         }
