@@ -119,6 +119,7 @@ struct bd_overlay_plane {
 struct bluray_priv_s {
     BLURAY *bd;
     struct mp_log *bluray_log;
+    bool probing;               // open is an .iso auto-detection probe
     BLURAY_TITLE_INFO *title_info;
     int num_titles;
     int current_angle;
@@ -1047,9 +1048,11 @@ static bool check_disc_info(stream_t *s)
 
     // check Blu-ray
     if (!info->bluray_detected) {
-        MP_ERR(s, "Given stream is not a Blu-ray.\n");
+        if (!b->probing)
+            MP_ERR(s, "Given stream is not a Blu-ray.\n");
         return false;
     }
+    b->probing = false;
 
     // check AACS
     if (info->aacs_detected) {
@@ -1159,7 +1162,8 @@ static int bluray_stream_open_internal(stream_t *s)
     BLURAY *bd = bd_open(device_tmp, NULL);
     talloc_free(device_tmp);
     if (!bd) {
-        MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
+        if (!b->probing)
+            MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
         ret = STREAM_UNSUPPORTED;
         goto err;
     }
@@ -1384,6 +1388,21 @@ static int bdmv_dir_stream_open(stream_t *stream)
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
         goto unsupported;
+
+    // Hand the .iso to libbluray as the device. Opening validates the disc
+    // info, so it doubles as the probe (see priv->probing).
+    if (bstr_case_endswith(bstr0(path), bstr0(".iso"))) {
+        priv->cfg_device = talloc_strdup(priv, path);
+        priv->probing = stream->autoprobed;
+        int r = bluray_stream_open_internal(stream);
+        if (r != STREAM_OK) {
+            if (priv->probing)
+                goto unsupported;
+            return r;
+        }
+        MP_INFO(stream, "Blu-ray ISO image detected. Redirecting to bluray://\n");
+        return r;
+    }
 
     // We allow the path to point to a directory containing BDMV/, a
     // directory containing MovieObject.bdmv, or that file itself.
