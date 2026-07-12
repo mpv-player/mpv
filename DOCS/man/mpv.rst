@@ -1336,6 +1336,9 @@ PROTOCOLS
     Play a Blu-ray disc. Since libbluray 1.0.1, you can read from ISO files
     by passing them to ``--bluray-device``.
 
+    A Blu-ray ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened.
+
     ``title`` can be: ``longest`` or ``first`` (selects the default
     playlist); ``menu`` (starts in the disc menu, see ``--disc-menu`` and the
     ``discnav`` command); ``mpls/<number>`` (selects <number>.mpls playlist);
@@ -1352,6 +1355,9 @@ PROTOCOLS
     it will probably try to open an actual optical drive, if available and
     implemented for the OS.
 
+    A DVD-Video ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened.
+
     ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
     thing.
 
@@ -1364,6 +1370,10 @@ PROTOCOLS
     Still images (ASVS), such as cover art or booklet pages a disc associates
     with its tracks, are exposed as a video track and shown by default. Can be
     disabled with ``--vid=no``.
+
+    A DVD-Audio ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened. For hybrid discs, the DVD-Audio zone is preferred over
+    the DVD-Video zone.
 
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 

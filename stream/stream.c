@@ -368,6 +368,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
         s->log = mp_log_new(s, s->global->log, sinfo->name);
     }
     s->info = sinfo;
+    s->autoprobed = !args->sinfo;
     s->cancel = args->cancel;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);

@@ -66,6 +66,8 @@
 struct priv {
     dvdnav_t *dvdnav;                   // handle to libdvdnav stuff
     struct mp_log *log;                 // borrowed from the stream
+    struct mp_log *lib_log;             // used by libdvdnav's log callback
+    bool probing;                       // open is an .iso auto-detection probe
     char *filename;                     // path
     int64_t duration;                   // in 90 kHz PTS ticks
     int title;
@@ -1023,9 +1025,10 @@ static void stream_dvdnav_close(stream_t *s)
     mp_mutex_destroy(&priv->lock);
 }
 
-static void dvdnav_log(void *priv, dvdnav_logger_level_t level,
+static void dvdnav_log(void *p, dvdnav_logger_level_t level,
                        const char *fmt, va_list va)
 {
+    struct priv *priv = p;
     int lvl;
     switch (level) {
     case DVDNAV_LOGGER_LEVEL_ERROR: lvl = MSGL_ERR;   break;
@@ -1034,17 +1037,20 @@ static void dvdnav_log(void *priv, dvdnav_logger_level_t level,
     case DVDNAV_LOGGER_LEVEL_INFO:
     default:                        lvl = MSGL_V;     break;
     }
-    if (!mp_msg_test(priv, lvl))
+    if (priv->probing)
+        lvl = MPMAX(lvl, MSGL_V);
+    if (!mp_msg_test(priv->lib_log, lvl))
         return;
-    mp_msg_va(priv, lvl, fmt, va);
-    mp_msg(priv, lvl, "\n");
+    mp_msg_va(priv->lib_log, lvl, fmt, va);
+    mp_msg(priv->lib_log, lvl, "\n");
 }
 
 static dvdnav_status_t nav_open(stream_t *stream, dvdnav_t **dest, const char *path)
 {
-    struct mp_log *log = mp_log_new(stream, stream->log, "/libdvdnav");
+    struct priv *priv = stream->priv;
+    priv->lib_log = mp_log_new(stream, stream->log, "/libdvdnav");
     const dvdnav_logger_cb logger_cb = { .pf_log = dvdnav_log };
-    return dvdnav_open2(dest, log, &logger_cb, path);
+    return dvdnav_open2(dest, priv, &logger_cb, path);
 }
 
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
@@ -1099,11 +1105,12 @@ static int open_s_internal(stream_t *stream)
     else
         filename = DEFAULT_OPTICAL_DEVICE;
     if (!new_dvdnav_stream(stream, filename)) {
-        MP_ERR(stream, "Couldn't open DVD device: %s\n",
-                filename);
-        ret = STREAM_ERROR;
+        if (!priv->probing)
+            MP_ERR(stream, "Couldn't open DVD device: %s\n", filename);
+        ret = priv->probing ? STREAM_UNSUPPORTED : STREAM_ERROR;
         goto err;
     }
+    priv->probing = false;
 
     int32_t num_titles = 0;
     dvdnav_get_number_of_titles(priv->dvdnav, &num_titles);
@@ -1232,6 +1239,21 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
         goto unsupported;
+
+    // Hand the .iso to libdvdnav as the device. Opening validates the VMG
+    // IFO, so it doubles as the probe (see priv->probing).
+    if (bstr_case_endswith(bstr0(path), bstr0(".iso"))) {
+        priv->device = talloc_strdup(priv, path);
+        priv->probing = stream->autoprobed;
+        int r = open_s_internal(stream);
+        if (r != STREAM_OK) {
+            if (priv->probing)
+                goto unsupported;
+            return r;
+        }
+        MP_INFO(stream, "DVD ISO image detected. Redirecting to dvd://\n");
+        return r;
+    }
 
     // We allow the path to point to a directory containing VIDEO_TS/, a
     // directory containing VIDEO_TS.IFO, or that file itself.

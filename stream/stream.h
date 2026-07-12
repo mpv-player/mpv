@@ -255,6 +255,8 @@ typedef struct stream {
     bool is_regular : 1; // regular file
     bool access_references : 1; // open other streams
     bool allow_partial_read : 1; // allows partial read with stream_read_file()
+    bool autoprobed : 1; // opened by the autoprobe loop, not explicitly
+                         // requested, failures should stay quiet
     struct mp_log *log;
     struct mpv_global *global;
 

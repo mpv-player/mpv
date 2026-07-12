@@ -101,6 +101,8 @@ struct priv {
     mp_mutex still_lock;        // guards the still-picture state below
     int page;                   // forced still page (--dvda-page), -1 = time-based
     char *device;
+    struct mp_log *lib_log;     // used by libdvdread's log callback
+    bool probing;               // open is an .iso auto-detection probe
     struct dvda_opts *opts;
 };
 
@@ -225,11 +227,13 @@ static bool read_disc_structure(stream_t *stream)
 
     ifo_handle_t *amg = ifoOpenVMGI(priv->dvd);
     if (!amg || amg->ifo_format != IFO_AUDIO || !amg->amgi_mat) {
-        MP_ERR(stream, "Could not read AUDIO_TS.IFO.\n");
+        if (!priv->probing)
+            MP_ERR(stream, "Could not read AUDIO_TS.IFO.\n");
         if (amg)
             ifoClose(amg);
         return false;
     }
+    priv->probing = false;
     int num_ats = amg->amgi_mat->amg_nr_of_title_sets;
     ifoClose(amg);
 
@@ -583,9 +587,10 @@ static void stream_dvda_close(stream_t *stream)
         DVDClose(priv->dvd);
 }
 
-static void dvda_log(void *priv, dvd_logger_level_t level,
+static void dvda_log(void *p, dvd_logger_level_t level,
                      const char *fmt, va_list va)
 {
+    struct priv *priv = p;
     int lvl;
     switch (level) {
     case DVD_LOGGER_LEVEL_ERROR: lvl = MSGL_ERR;   break;
@@ -594,10 +599,12 @@ static void dvda_log(void *priv, dvd_logger_level_t level,
     case DVD_LOGGER_LEVEL_INFO:
     default:                     lvl = MSGL_V;     break;
     }
-    if (!mp_msg_test(priv, lvl))
+    if (priv->probing)
+        lvl = MPMAX(lvl, MSGL_V);
+    if (!mp_msg_test(priv->lib_log, lvl))
         return;
-    mp_msg_va(priv, lvl, fmt, va);
-    mp_msg(priv, lvl, "\n");
+    mp_msg_va(priv->lib_log, lvl, fmt, va);
+    mp_msg(priv->lib_log, lvl, "\n");
 }
 
 static int open_s_internal(stream_t *stream)
@@ -622,16 +629,18 @@ static int open_s_internal(stream_t *stream)
     if (!path)
         goto err;
 
-    struct mp_log *log = mp_log_new(stream, stream->log, "/libdvdread");
+    priv->lib_log = mp_log_new(stream, stream->log, "/libdvdread");
     const dvd_logger_cb logger_cb = { .pf_log = dvda_log };
-    priv->dvd = DVDOpenAudio(log, &logger_cb, path);
+    priv->dvd = DVDOpenAudio(priv, &logger_cb, path);
     if (!priv->dvd) {
-        MP_ERR(stream, "Couldn't open DVD-Audio device: %s\n", path);
+        if (!priv->probing)
+            MP_ERR(stream, "Couldn't open DVD-Audio device: %s\n", path);
         goto err;
     }
 
     if (!read_disc_structure(stream)) {
-        MP_ERR(stream, "No DVD-Audio titles found: %s\n", path);
+        if (!priv->probing)
+            MP_ERR(stream, "No DVD-Audio titles found: %s\n", path);
         goto err;
     }
 
@@ -666,7 +675,7 @@ static int open_s_internal(stream_t *stream)
 
 err:
     stream_dvda_close(stream);
-    return STREAM_ERROR;
+    return priv->probing ? STREAM_UNSUPPORTED : STREAM_ERROR;
 }
 
 static int open_s(stream_t *stream)
@@ -741,6 +750,21 @@ static int ifo_dvda_stream_open(stream_t *stream)
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
         goto unsupported;
+
+    // Hand the .iso to libdvdread as the device. Opening validates the AMG
+    // IFO, so it doubles as the probe (see priv->probing).
+    if (bstr_case_endswith(bstr0(path), bstr0(".iso"))) {
+        priv->device = talloc_strdup(priv, path);
+        priv->probing = stream->autoprobed;
+        int r = open_s_internal(stream);
+        if (r != STREAM_OK) {
+            if (priv->probing)
+                goto unsupported;
+            return r;
+        }
+        MP_INFO(stream, "DVD-Audio ISO image detected. Redirecting to dvda://\n");
+        return r;
+    }
 
     // We allow the path to point to a directory containing AUDIO_TS/, a
     // directory containing AUDIO_TS.IFO, or that file itself.
