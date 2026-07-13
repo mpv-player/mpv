@@ -25,6 +25,8 @@ enum {
     F_EXTF16    = 1 << 6, // GL_EXT_color_buffer_half_float
     F_GL2F      = 1 << 7, // GL2.1-only with texture_rg + texture_float + FBOs
     F_APPL      = 1 << 8, // GL_APPLE_rgb_422
+    F_GL2RG     = 1 << 9, // GL2.1-only with texture_rg (no float/FBO requirement)
+    F_ES2RG     = 1 << 10, // ES2-only with GL_EXT_texture_rg
 
     // Feature flags. They are additional and signal presence of features.
     F_CR        = 1 << 16, // color-renderable
