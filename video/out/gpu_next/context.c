@@ -15,22 +15,39 @@
  * License along with mpv.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <libplacebo/config.h>
+#include <libplacebo/config.h>                   // for PL_HAVE_OPENGL, PL_API_VER
 
 #ifdef PL_HAVE_D3D11
 #include <libplacebo/d3d11.h>
 #endif
 
 #ifdef PL_HAVE_OPENGL
-#include <libplacebo/opengl.h>
+#include "mpv/render_gl.h"                       // for mpv_opengl_init_params
+#include <libplacebo/opengl.h>                   // for pl_opengl_destroy
+#include "video/out/gpu_next/libmpv_gpu_next.h"  // for libmpv_gpu_next_context
+#include "video/out/gpu_next/ra.h"               // for ra_pl_create, ra_pl_...
 #endif
 
-#include "context.h"
-#include "config.h"
-#include "common/common.h"
-#include "options/m_config.h"
-#include "video/out/placebo/utils.h"
-#include "video/out/gpu/video.h"
+#ifdef PL_HAVE_VULKAN
+#include "mpv/render_vk.h"                       // for mpv_vulkan_init_params
+#include <libplacebo/vulkan.h>                   // for pl_vulkan_import
+#include "video/out/gpu_next/libmpv_gpu_next.h"  // for libmpv_gpu_next_context
+#include "video/out/gpu_next/ra.h"               // for ra_pl_create, ra_pl_...
+#endif
+
+#include <stddef.h>                              // for NULL
+#include "config.h"                              // for HAVE_GL, HAVE_D3D11
+#include "context.h"                             // for gpu_ctx
+#include "common/msg.h"                          // for MP_ERR, mp_msg, mp_msg_err
+#include "mpv/client.h"                          // for mpv_error
+#include "mpv/render.h"                          // for mpv_render_param
+#include "options/options.h"                     // for mp_vo_opts
+#include "ta/ta_talloc.h"                        // for talloc_zero, talloc_...
+#include "video/out/gpu/context.h"               // for ra_ctx_opts, ra_ctx
+#include "video/out/libmpv.h"                    // for get_mpv_render_param
+#include "video/out/opengl/common.h"             // for GL
+#include "video/out/placebo/utils.h"             // for mppl_log_set_probing
+#include "video/out/vo.h"                        // for vo
 
 #if HAVE_D3D11
 #include "osdep/windows_utils.h"
@@ -39,15 +56,27 @@
 #endif
 
 #if HAVE_GL
-#include "video/out/opengl/context.h"
-#include "video/out/opengl/ra_gl.h"
+#include "video/out/opengl/ra_gl.h"              // for ra_is_gl, ra_gl_get
 # if HAVE_EGL
-#include <EGL/egl.h>
+#include <EGL/egl.h>                             // for eglGetCurrentContext
 # endif
 #endif
 
 #if HAVE_VULKAN
-#include "video/out/vulkan/context.h"
+#include "video/out/vulkan/context.h"            // for ra_vk_ctx_get
+#endif
+
+#if HAVE_GL
+// Store Libplacebo OpenGL context information.
+struct priv {
+    pl_log pl_log;
+    pl_opengl gl;
+    pl_gpu gpu;
+    struct ra_next *ra;
+
+    // Store a persistent copy of the init params to avoid a dangling pointer.
+    mpv_opengl_init_params gl_params;
+};
 #endif
 
 #if HAVE_D3D11
@@ -234,3 +263,466 @@ skip_common_pl_cleanup:
     talloc_free(ctx);
     *ctxp = NULL;
 }
+
+#if HAVE_GL && defined(PL_HAVE_OPENGL)
+/**
+ * @brief Callback to make the OpenGL context current.
+ * @param priv Pointer to the private data (mpv_opengl_init_params).
+ * @return True on success, false on failure.
+ */
+static bool pl_callback_makecurrent_gl(void *priv)
+{
+    mpv_opengl_init_params *gl_params = priv;
+    // The mpv render API contract specifies that the client must make the
+    // context current inside its get_proc_address callback. We can trigger
+    // this by calling it with a harmless, common function name.
+    if (gl_params && gl_params->get_proc_address) {
+        gl_params->get_proc_address(gl_params->get_proc_address_ctx, "glGetString");
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @brief Callback to release the OpenGL context.
+ * @param priv Pointer to the private data (mpv_opengl_init_params).
+ */
+static void pl_callback_releasecurrent_gl(void *priv)
+{
+}
+
+/**
+ * @brief Callback to log messages from libplacebo.
+ * @param log_priv Pointer to the private data (mp_log).
+ * @param level The log level.
+ * @param msg The log message.
+ */
+static void pl_log_cb(void *log_priv, enum pl_log_level level, const char *msg)
+{
+    struct mp_log *log = log_priv;
+    mp_msg(log, MSGL_WARN, "[gpu-next:pl] %s\n", msg);
+}
+
+/**
+ * @brief Initializes the OpenGL context for the GPU next renderer.
+ * @param ctx The libmpv_gpu_next_context to initialize.
+ * @param params The render parameters.
+ * @return 0 on success, negative error code on failure.
+ */
+static int libmpv_gpu_next_init_gl(struct libmpv_gpu_next_context *ctx, mpv_render_param *params)
+{
+    ctx->priv = talloc_zero(NULL, struct priv);
+    struct priv *p = ctx->priv;
+
+    mpv_opengl_init_params *gl_params =
+    get_mpv_render_param(params, MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, NULL);
+    if (!gl_params || !gl_params->get_proc_address)
+        return MPV_ERROR_INVALID_PARAMETER;
+
+    // Make a persistent copy of the params struct's contents.
+    p->gl_params = *gl_params;
+
+    // Setup libplacebo logging
+    struct pl_log_params log_params = {
+        .log_level = PL_LOG_DEBUG
+    };
+
+    // Enable verbose logging if trace is enabled
+    if (mp_msg_test(ctx->log, MSGL_TRACE)) {
+        log_params.log_cb = pl_log_cb;
+        log_params.log_priv = ctx->log;
+    }
+
+    p->pl_log = pl_log_create(PL_API_VER, &log_params);
+    p->gl = pl_opengl_create(p->pl_log, pl_opengl_params(
+        .get_proc_addr_ex = (pl_voidfunc_t (*)(void*, const char*))gl_params->get_proc_address,
+        .proc_ctx = gl_params->get_proc_address_ctx,
+        .make_current = pl_callback_makecurrent_gl,
+        .release_current = pl_callback_releasecurrent_gl,
+        .priv = &p->gl_params // Pass the ADDRESS of our persistent copy
+    ));
+
+    if (!p->gl) {
+        MP_ERR(ctx, "Failed to create libplacebo OpenGL context.\n");
+        pl_log_destroy(&p->pl_log);
+        return MPV_ERROR_UNSUPPORTED;
+    }
+    p->gpu = p->gl->gpu;
+
+    // Pass the libplacebo log to the RA as well.
+    p->ra = ra_pl_create(p->gpu, ctx->log, p->pl_log);
+    if (!p->ra) {
+        pl_opengl_destroy(&p->gl);
+        pl_log_destroy(&p->pl_log);
+        return MPV_ERROR_VO_INIT_FAILED;
+    }
+
+    ctx->ra = p->ra;
+    ctx->gpu = p->gpu;
+    return 0;
+}
+
+/**
+ * @brief Wraps an OpenGL framebuffer object (FBO) as a libplacebo texture.
+ * @param ctx The libmpv_gpu_next_context.
+ * @param params The render parameters.
+ * @param out_tex Pointer to the output texture.
+ * @return 0 on success, negative error code on failure.
+ */
+static int libmpv_gpu_next_wrap_fbo_gl(struct libmpv_gpu_next_context *ctx,
+                    mpv_render_param *params, pl_tex *out_tex)
+{
+    struct priv *p = ctx->priv;
+    *out_tex = NULL;
+
+    // Get the FBO from the render parameters
+    mpv_opengl_fbo *fbo =
+        get_mpv_render_param(params, MPV_RENDER_PARAM_OPENGL_FBO, NULL);
+    if (!fbo)
+        return MPV_ERROR_INVALID_PARAMETER;
+
+    // Wrap the FBO as a libplacebo texture
+    pl_tex tex = pl_opengl_wrap(p->gpu, pl_opengl_wrap_params(
+        .framebuffer = fbo->fbo,
+        .width = fbo->w,
+        .height = fbo->h,
+        .iformat = fbo->internal_format
+    ));
+
+    if (!tex) {
+        MP_ERR(ctx, "Failed to wrap provided FBO as a libplacebo texture.\n");
+        return MPV_ERROR_GENERIC;
+    }
+
+    *out_tex = tex;
+    return 0;
+}
+
+/**
+ * @brief Callback to mark the end of a frame rendering.
+ * @param ctx The libmpv_gpu_next_context.
+ */
+static void libmpv_gpu_next_done_frame_gl(struct libmpv_gpu_next_context *ctx)
+{
+    // Nothing to do (yet), leaving the function empty.
+}
+
+/**
+ * @brief Destroys the OpenGL context for the GPU next renderer.
+ * @param ctx The libmpv_gpu_next_context to destroy.
+ */
+static void libmpv_gpu_next_destroy_gl(struct libmpv_gpu_next_context *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (!p)
+        return;
+
+    if (p->ra) {
+        ra_pl_destroy(&p->ra);
+    }
+
+    pl_opengl_destroy(&p->gl);
+    pl_log_destroy(&p->pl_log);
+}
+
+/**
+ * @brief Context functions for the OpenGL GPU next renderer.
+ */
+const struct libmpv_gpu_next_context_fns libmpv_gpu_next_context_gl = {
+    .api_name = MPV_RENDER_API_TYPE_OPENGL,
+    .init = libmpv_gpu_next_init_gl,
+    .wrap_fbo = libmpv_gpu_next_wrap_fbo_gl,
+    .done_frame = libmpv_gpu_next_done_frame_gl,
+    .destroy = libmpv_gpu_next_destroy_gl,
+};
+#endif
+
+#if HAVE_VULKAN && defined(PL_HAVE_VULKAN)
+// Store Libplacebo Vulkan context information.
+struct priv_vk {
+    pl_log pl_log;
+    pl_vulkan vulkan;
+    pl_gpu gpu;
+    struct ra_next *ra;
+    pl_tex frame_tex;
+    VkImageLayout target_layout;
+    mpv_vulkan_sync frame_sync;
+    VkQueue graphics_queue;
+    VkSemaphore completion;
+    uint64_t completion_value;
+};
+
+/**
+ * @brief Callback to log messages from libplacebo (Vulkan).
+ */
+static void pl_log_cb_vk(void *log_priv, enum pl_log_level level, const char *msg)
+{
+    struct mp_log *log = log_priv;
+    mp_msg(log, MSGL_WARN, "[gpu-next:pl] %s\n", msg);
+}
+
+/**
+ * @brief Initializes the Vulkan context for the GPU next renderer.
+ * @param ctx The libmpv_gpu_next_context to initialize.
+ * @param params The render parameters.
+ * @return 0 on success, negative error code on failure.
+ */
+static int libmpv_gpu_next_init_vk(struct libmpv_gpu_next_context *ctx, mpv_render_param *params)
+{
+    ctx->priv = talloc_zero(NULL, struct priv_vk);
+    struct priv_vk *p = ctx->priv;
+
+    mpv_vulkan_init_params *vk_params =
+        get_mpv_render_param(params, MPV_RENDER_PARAM_VULKAN_INIT_PARAMS, NULL);
+    if (!vk_params)
+        return MPV_ERROR_INVALID_PARAMETER;
+
+    if (!vk_params->instance || !vk_params->physical_device ||
+        !vk_params->device || !vk_params->graphics_queue) {
+        MP_ERR(ctx, "Missing required Vulkan handles\n");
+        return MPV_ERROR_INVALID_PARAMETER;
+    }
+
+    // Setup libplacebo logging
+    struct pl_log_params log_params = {
+        .log_level = PL_LOG_DEBUG
+    };
+
+    // Enable verbose logging if trace is enabled
+    if (mp_msg_test(ctx->log, MSGL_TRACE)) {
+        log_params.log_cb = pl_log_cb_vk;
+        log_params.log_priv = ctx->log;
+    }
+
+    p->pl_log = pl_log_create(PL_API_VER, &log_params);
+    if (!p->pl_log) {
+        MP_ERR(ctx, "Failed to create libplacebo log\n");
+        return MPV_ERROR_GENERIC;
+    }
+
+    // Import user's Vulkan device into libplacebo
+    PFN_vkGetInstanceProcAddr get_proc = vk_params->get_instance_proc_addr;
+    if (!get_proc)
+        get_proc = vkGetInstanceProcAddr;
+
+    struct pl_vulkan_import_params import_params = {
+        .instance = vk_params->instance,
+        .phys_device = vk_params->physical_device,
+        .device = vk_params->device,
+        .get_proc_addr = get_proc,
+        .queue_graphics = {
+            .index = vk_params->graphics_queue_family,
+            .count = 1,
+        },
+        .features = vk_params->features,
+        .extensions = vk_params->extensions,
+        .num_extensions = vk_params->num_extensions,
+    };
+
+    p->vulkan = pl_vulkan_import(p->pl_log, &import_params);
+    if (!p->vulkan) {
+        MP_ERR(ctx, "Failed to import Vulkan device\n");
+        pl_log_destroy(&p->pl_log);
+        return MPV_ERROR_UNSUPPORTED;
+    }
+
+    p->gpu = p->vulkan->gpu;
+    p->graphics_queue = vk_params->graphics_queue;
+
+    VkSemaphoreTypeCreateInfo timeline_info = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO,
+        .semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE,
+        .initialValue = 0,
+    };
+    VkSemaphoreCreateInfo semaphore_info = {
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = &timeline_info,
+    };
+    if (vkCreateSemaphore(vk_params->device, &semaphore_info, NULL,
+                          &p->completion) != VK_SUCCESS) {
+        MP_ERR(ctx, "Failed to create Vulkan completion semaphore\n");
+        pl_vulkan_destroy(&p->vulkan);
+        pl_log_destroy(&p->pl_log);
+        return MPV_ERROR_VO_INIT_FAILED;
+    }
+
+    // Create the RA abstraction
+    p->ra = ra_pl_create(p->gpu, ctx->log, p->pl_log);
+    if (!p->ra) {
+        MP_ERR(ctx, "Failed to create RA from pl_gpu\n");
+        vkDestroySemaphore(vk_params->device, p->completion, NULL);
+        pl_vulkan_destroy(&p->vulkan);
+        pl_log_destroy(&p->pl_log);
+        return MPV_ERROR_VO_INIT_FAILED;
+    }
+
+    ctx->ra = p->ra;
+    ctx->gpu = p->gpu;
+    return 0;
+}
+
+/**
+ * @brief Wraps a Vulkan image as a libplacebo texture.
+ * @param ctx The libmpv_gpu_next_context.
+ * @param params The render parameters.
+ * @param out_tex Pointer to the output texture.
+ * @return 0 on success, negative error code on failure.
+ */
+static int libmpv_gpu_next_wrap_fbo_vk(struct libmpv_gpu_next_context *ctx,
+                    mpv_render_param *params, pl_tex *out_tex)
+{
+    struct priv_vk *p = ctx->priv;
+    *out_tex = NULL;
+
+    mpv_vulkan_fbo *fbo =
+        get_mpv_render_param(params, MPV_RENDER_PARAM_VULKAN_FBO, NULL);
+    if (!fbo)
+        return MPV_ERROR_INVALID_PARAMETER;
+
+    if (!fbo->image || !fbo->width || !fbo->height) {
+        MP_ERR(ctx, "Invalid Vulkan FBO parameters\n");
+        return MPV_ERROR_INVALID_PARAMETER;
+    }
+
+    // Wrap the VkImage as pl_tex using pl_vulkan_wrap
+    struct pl_vulkan_wrap_params wrap_params = {
+        .image = fbo->image,
+        .width = fbo->width,
+        .height = fbo->height,
+        .format = fbo->format,
+        .usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                 VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+    };
+
+    pl_tex tex = pl_vulkan_wrap(p->gpu, &wrap_params);
+    if (!tex) {
+        MP_ERR(ctx, "Failed to wrap VkImage as pl_tex\n");
+        return MPV_ERROR_GENERIC;
+    }
+
+    mpv_vulkan_sync *sync =
+        get_mpv_render_param(params, MPV_RENDER_PARAM_VULKAN_SYNC, NULL);
+    p->frame_sync = sync ? *sync : (mpv_vulkan_sync) {0};
+
+    // Transfer ownership of the acquired swapchain image to libplacebo.
+    // When supplied, wait_semaphore is signalled by the embedding client once
+    // the image is available for rendering.
+    struct pl_vulkan_release_params release_params = {
+        .tex = tex,
+        .layout = fbo->current_layout,
+        .qf = VK_QUEUE_FAMILY_IGNORED,
+        .semaphore = (pl_vulkan_sem) {
+            .sem = p->frame_sync.wait_semaphore,
+            .value = p->frame_sync.wait_value,
+        },
+    };
+    pl_vulkan_release_ex(p->gpu, &release_params);
+
+    p->frame_tex = tex;
+    p->target_layout = fbo->target_layout;
+    *out_tex = tex;
+    return 0;
+}
+
+/**
+ * @brief Callback to mark the end of a frame rendering (Vulkan).
+ * @param ctx The libmpv_gpu_next_context.
+ */
+static void libmpv_gpu_next_done_frame_vk(struct libmpv_gpu_next_context *ctx)
+{
+    struct priv_vk *p = ctx->priv;
+    if (!p->frame_tex)
+        return;
+
+    const bool client_sync = p->frame_sync.signal_semaphore != VK_NULL_HANDLE;
+    pl_vulkan_sem completion = {0};
+    if (client_sync) {
+        completion.sem = p->frame_sync.signal_semaphore;
+        completion.value = p->frame_sync.signal_value;
+    } else {
+        p->completion_value++;
+        completion.sem = p->completion;
+        completion.value = p->completion_value;
+    }
+
+    bool ok = pl_vulkan_hold_ex(p->gpu, pl_vulkan_hold_params(
+        .tex = p->frame_tex,
+        .layout = p->target_layout,
+        .qf = VK_QUEUE_FAMILY_IGNORED,
+        .semaphore = completion,
+    ));
+
+    if (!ok) {
+        // Preserve the old synchronous fallback.  A client-provided binary
+        // semaphore still has to be signalled, otherwise vkQueuePresentKHR()
+        // would wait forever.
+        pl_gpu_finish(p->gpu);
+        if (client_sync) {
+            VkTimelineSemaphoreSubmitInfo timeline = {
+                .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
+                .signalSemaphoreValueCount = 1,
+                .pSignalSemaphoreValues = &p->frame_sync.signal_value,
+            };
+            VkSubmitInfo submit = {
+                .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+                .pNext = p->frame_sync.signal_value ? &timeline : NULL,
+                .signalSemaphoreCount = 1,
+                .pSignalSemaphores = &p->frame_sync.signal_semaphore,
+            };
+            vkQueueSubmit(p->graphics_queue, 1, &submit, VK_NULL_HANDLE);
+        }
+    } else if (!client_sync) {
+        // Legacy callers do not provide a semaphore that they can wait on, so
+        // retain the blocking behaviour for API compatibility.
+        VkSemaphoreWaitInfo wait_info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO,
+            .semaphoreCount = 1,
+            .pSemaphores = &p->completion,
+            .pValues = &p->completion_value,
+        };
+        vkWaitSemaphores(p->vulkan->device, &wait_info, UINT64_MAX);
+    }
+
+    // The caller owns and destroys the temporary pl_tex wrapper after this
+    // callback.  It is safe to do so now that the image has been held back.
+    p->frame_tex = NULL;
+    p->frame_sync = (mpv_vulkan_sync) {0};
+}
+
+/**
+ * @brief Destroys the Vulkan context for the GPU next renderer.
+ * @param ctx The libmpv_gpu_next_context to destroy.
+ */
+static void libmpv_gpu_next_destroy_vk(struct libmpv_gpu_next_context *ctx)
+{
+    struct priv_vk *p = ctx->priv;
+    if (!p)
+        return;
+
+    if (p->ra) {
+        ra_pl_destroy(&p->ra);
+    }
+
+    if (p->frame_tex)
+        pl_tex_destroy(p->gpu, &p->frame_tex);
+    if (p->completion)
+        vkDestroySemaphore(p->vulkan->device, p->completion, NULL);
+    if (p->vulkan) {
+        pl_vulkan_destroy(&p->vulkan);
+    }
+
+    pl_log_destroy(&p->pl_log);
+}
+
+/**
+ * @brief Context functions for the Vulkan GPU next renderer.
+ */
+const struct libmpv_gpu_next_context_fns libmpv_gpu_next_context_vk = {
+    .api_name = MPV_RENDER_API_TYPE_VULKAN,
+    .init = libmpv_gpu_next_init_vk,
+    .wrap_fbo = libmpv_gpu_next_wrap_fbo_vk,
+    .done_frame = libmpv_gpu_next_done_frame_vk,
+    .destroy = libmpv_gpu_next_destroy_vk,
+};
+#endif
