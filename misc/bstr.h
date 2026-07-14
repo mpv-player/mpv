@@ -232,6 +232,9 @@ static inline struct bstr bstr_cut(struct bstr str, int n)
     }
     if (((size_t)n) > str.len)
         n = str.len;
+    // Forming a pointer from NULL (e.g. NULL + 0) is undefined behavior.
+    if (!str.start)
+        return (struct bstr){NULL, str.len - n};
     return (struct bstr){str.start + n, str.len - n};
 }
 
