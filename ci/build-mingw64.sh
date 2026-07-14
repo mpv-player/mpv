@@ -206,7 +206,7 @@ _ffmpeg () {
         --disable-{doc,programs}
         --enable-muxer=spdif --enable-encoder=mjpeg,png --enable-libdav1d
     )
-    pkg-config vulkan && args+=(--enable-vulkan --enable-libshaderc)
+    pkg-config vulkan && args+=(--enable-vulkan)
     ../configure "${args[@]}"
     makeplusinstall
     popd
