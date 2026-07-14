@@ -44,6 +44,7 @@ struct buffer {
 struct priv {
     struct mp_sws_context *sws;
     struct buffer *free_buffers;
+    void *buffers;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
@@ -93,7 +94,7 @@ static struct buffer *buffer_create(struct vo *vo, int width, int height)
     data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (data == MAP_FAILED)
         goto error1;
-    buf = talloc_zero(NULL, struct buffer);
+    buf = talloc_zero(p->buffers, struct buffer);
     if (!buf)
         goto error2;
     buf->vo = vo;
@@ -131,13 +132,9 @@ error0:
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    struct buffer *buf;
 
-    while (p->free_buffers) {
-        buf = p->free_buffers;
-        p->free_buffers = buf->next;
-        talloc_free(buf);
-    }
+    TA_FREEP(&p->buffers);
+    p->free_buffers = NULL;
     vo_wayland_uninit(vo);
 }
 
@@ -152,6 +149,7 @@ static int preinit(struct vo *vo)
                  wl_shm_interface.name);
         goto err;
     }
+    p->buffers = talloc_new(vo);
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
