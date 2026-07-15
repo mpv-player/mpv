@@ -85,6 +85,7 @@ typedef struct mp_vo_opts {
     double minimum_display_fps;
     double timing_offset;
     int video_sync;
+    bool vrr_adjust;
 
     struct m_geometry android_surface_size;
 
