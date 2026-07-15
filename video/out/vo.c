@@ -705,6 +705,7 @@ static void forget_frames(struct vo *vo)
     if (in->current_frame) {
         in->current_frame->num_vsyncs = 0; // but reset future repeats
         in->current_frame->display_synced = false; // mark discontinuity
+        in->current_frame->is_forgotten = true;
     }
 }
 
@@ -837,7 +838,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     bool r = vo->config_ok && !in->frame_queued &&
-             (!in->current_frame || in->current_frame->num_vsyncs < 1);
+             (!in->current_frame || in->current_frame->num_vsyncs < 1 || in->current_frame->);
     if (r && next_pts >= 0) {
         // Don't show the frame too early - it would basically freeze the
         // display by disallowing OSD redrawing or VO interaction.
@@ -924,6 +925,15 @@ static bool render_frame(struct vo *vo)
     mp_mutex_lock(&in->lock);
 
     if (in->frame_queued) {
+        if (vo->opts->vrr_adjust && in->current_frame && !in->current_frame->is_forgotten){
+            //assuming current_frame's end pts was increased or reduced,
+            //then we need to adjust frame_queued's start pts as well,
+            //while maintaining its end_time the same.
+            //expectation is that this has no effect if current_frame's end pts was not changed.
+            int64_t frame_queued_end_time = in->frame_queued.pts + in->frame_queued.duration;
+            in->frame_queued.pts = in->current_frame.pts + in->current_frame.duration;
+            in->frame_queued.duration = frame_queued_end_time - in->frame_queued.pts;
+        }
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
@@ -934,6 +944,14 @@ static bool render_frame(struct vo *vo)
         goto done;
     }
 
+    int64_t now = mp_time_ns();
+    if (vo->opts->vrr_adjust && now > in->current_frame.pts){
+        //if time has moved past our starting position, then this reduces our expected duration.
+        //we will deal with duration potentially being 0 or negative later.
+        in->current_frame.duration = in->current_frame.pts + in->current_frame.duration - now;
+		in->current_frame.pts = now;
+    }
+
     frame = vo_frame_ref(in->current_frame);
     mp_assert(frame);
 
@@ -942,7 +960,6 @@ static bool render_frame(struct vo *vo)
         frame->duration = -1;
     }
 
-    int64_t now = mp_time_ns();
     int64_t pts = frame->pts;
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
@@ -950,8 +967,12 @@ static bool render_frame(struct vo *vo)
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
-    // "normal" strict drop threshold.
-    in->dropped_frame = duration >= 0 && end_time < now;
+    if (vo->opts->vrr_adjust){
+        in->dropped_frame = duration <= 0;
+    else {
+        // "normal" strict drop threshold.
+        in->dropped_frame = duration >= 0 && end_time < now;
+    }
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
