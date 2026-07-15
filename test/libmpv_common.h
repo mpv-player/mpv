@@ -54,7 +54,7 @@ static inline void fail(const char *fmt, ...)
 
 static inline void exit_cleanup(void)
 {
-    mpv_destroy(ctx);
+    mpv_terminate_destroy(ctx);
     ctx = NULL;
 }
 
@@ -126,7 +126,7 @@ MP_UNUSED static void check_double(const char *property, double expect)
     double result_double;
     get_property(property, MPV_FORMAT_DOUBLE, &result_double);
     if (expect != result_double)
-        fail("Double: expected '%f' but got '%f'!\n", expect, result_double);
+        fail("%s (double): expected '%f' but got '%f'!\n", property, expect, result_double);
 }
 
 MP_UNUSED static void check_flag(const char *property, int expect)
@@ -134,7 +134,7 @@ MP_UNUSED static void check_flag(const char *property, int expect)
     int result_flag;
     get_property(property, MPV_FORMAT_FLAG, &result_flag);
     if (expect != result_flag)
-        fail("Flag: expected '%d' but got '%d'!\n", expect, result_flag);
+        fail("%s (flag): expected '%d' but got '%d'!\n", property, expect, result_flag);
 }
 
 MP_UNUSED static void check_int(const char *property, int64_t expect)
@@ -142,7 +142,7 @@ MP_UNUSED static void check_int(const char *property, int64_t expect)
     int64_t result_int;
     get_property(property, MPV_FORMAT_INT64, &result_int);
     if (expect != result_int)
-        fail("Int: expected '%" PRId64 "' but got '%" PRId64 "'!\n", expect, result_int);
+        fail("%s (int): expected '%" PRId64 "' but got '%" PRId64 "'!\n", property, expect, result_int);
 }
 
 MP_UNUSED static inline void check_string(const char *property, const char *expect)
@@ -150,7 +150,7 @@ MP_UNUSED static inline void check_string(const char *property, const char *expe
     char *result_string;
     get_property(property, MPV_FORMAT_STRING, &result_string);
     if (strcmp(expect, result_string) != 0)
-        fail("String: expected '%s' but got '%s'!\n", expect, result_string);
+        fail("%s (string): expected '%s' but got '%s'!\n", property, expect, result_string);
     mpv_free(result_string);
 }
 

@@ -1993,7 +1993,7 @@ The following hooks are currently defined:
     Ordered after ``start-file`` and before ``playback-restart``.
 
 ``on_load_fail``
-    Called after after a file has been opened, but failed to. This can be
+    Called after a file has been opened, but failed to. This can be
     used to provide a fallback in case native demuxers failed to recognize
     the file, instead of always running before the native demuxers like
     ``on_load``. Demux will only be retried if ``stream-open-filename``
@@ -3231,6 +3231,38 @@ Property list
             "pad-btns"           MPV_FORMAT_NODE_MAP
                (key and string value for each pad-btn entry)
 
+``dropped-files``
+    Information of the most recent drag-and-drop event mpv received.
+    A client can observe this property to detect when a drag-and-drop event
+    happens. This property is unavailable if no drag-and-drop event has
+    happened.
+
+    Has the following sub-properties:
+
+    ``dropped-files/time``
+        The timestamp of the last drag-and-drop event mpv received, in
+        nanoseconds. This uses the same clock as ``mpv_get_time_ns()``.
+
+    ``dropped-files/action``
+        The action of the drag-and-drop event. This is normally ``replace``.
+        Depending on the platform, this can also be ``append`` in some cases,
+        such as shift key being held while files are dropped.
+
+    ``dropped-files/files``
+        The dropped file names of the drag-and-drop event.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "time"    MPV_FORMAT_INT64
+            "action"  MPV_FORMAT_STRING
+            "files"   MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_STRING
+
 ``sub-ass-extradata``
     The current ASS subtitle track's extradata. There is no formatting done.
     The extradata is returned as a string as-is. This property is not
@@ -3502,7 +3534,13 @@ Property list
         The bitrate of the HLS stream, if available.
 
     ``track-list/N/program-id``
-        The program ID of the stream, if available.
+        The first program ID this stream belongs to, if any. Deprecated,
+        use ``track-list/N/program-ids``.
+
+    ``track-list/N/program-ids``
+        A list of all program IDs this stream belongs to. A stream can belong
+        to more than one program (e.g. in MPEG-TS or HLS). Unavailable if the
+        stream does not belong to any program.
 
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
@@ -3538,7 +3576,7 @@ Property list
         this can be potentially wrong if a demuxer other than libavformat
         (``--demuxer=lavf``) is used. For mkv files, the index will usually
         match even if the default (builtin) demuxer is used, but there is
-        no hard guarantee.
+        no hard guarantee. May be unavailable if no known mapping exists.
 
     ``track-list/N/decoder``
         If this track is being decoded, the short decoder name,
@@ -3629,6 +3667,7 @@ Property list
                 "hearing-impaired"  MPV_FORMAT_FLAG
                 "hls-bitrate"       MPV_FORMAT_INT64
                 "program-id"        MPV_FORMAT_INT64
+                "program-ids"       MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_INT64]
                 "selected"          MPV_FORMAT_FLAG
                 "main-selection"    MPV_FORMAT_INT64
                 "external"          MPV_FORMAT_FLAG
@@ -4346,6 +4385,11 @@ Property list
 ``current-clipboard-backend``
     A string containing the currently active clipboard backend.
     See ``--clipboard-backends`` option for the list of available backends.
+
+``player-operation-mode``
+    A read-only string of the current player operation mode, mirroring the
+    ``--player-operation-mode`` option. To set operation mode, set the option
+    at startup instead.
 
 ``clock``
     The current local time in hour:minutes format.

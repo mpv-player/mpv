@@ -393,7 +393,7 @@ Left double click
     Toggle fullscreen on/off.
 
 Right click
-    Toggle pause on/off.
+    Show the context menu (see `CONTEXT MENU`_).
 
 Forward/Back button
     Skip to next/previous entry in playlist.
@@ -1492,6 +1492,10 @@ PROTOCOLS
 
         This will play ``video.mkv`` in the archive file ``file.zip``.
 
+``env://variable``
+
+    Read the environment variable ``variable`` as source data.
+
 PSEUDO GUI MODE
 ===============
 
@@ -1520,7 +1524,7 @@ The profile is currently defined as follows:
     [builtin-pseudo-gui]
     terminal=no
     force-window=yes
-    idle=once
+    idle=yes
     screenshot-directory=~~desktop/
 
 The ``pseudo-gui`` profile exists for compatibility. The options in the
@@ -1536,10 +1540,15 @@ works like in older mpv releases:
 .. warning::
 
     Currently, you can extend the ``pseudo-gui`` profile in the config file the
-    normal way. This is deprecated. In future mpv releases, the behavior might
-    change, and not apply your additional settings, and/or use a different
-    profile name.
+    normal way. This is deprecated and will be removed in future mpv releases.
 
+    As an alternative, a conditional autoprofile can be used instead:
+
+        ::
+
+            [gui]
+            profile-cond=p["player-operation-mode"]=="pseudo-gui"
+            idle=once
 
 .. include:: options.rst
 

@@ -362,7 +362,7 @@ static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
     // Unbelievable but true: Lua loads .lua files AND dynamic libraries from
     // the working directory. This is highly security relevant.
     // Lua scripts are still supposed to load globally installed libraries, so
-    // try to get by by filtering out any relative paths.
+    // try to get by filtering out any relative paths.
     while (path.len) {
         bstr item;
         bstr_split_tok(path, ";", &item, &path);
@@ -1296,6 +1296,7 @@ static int script_autofree_call(lua_State *L)
 
 static int script_autofree_trampoline(lua_State *L)
 {
+    struct script_ctx *ctx = get_ctx(L);
     // n*args
     autofree_data data = {
         .target = lua_touserdata(L, lua_upvalueindex(2)),  // fn
@@ -1307,7 +1308,7 @@ static int script_autofree_trampoline(lua_State *L)
     lua_insert(L, 1);  // autofree_call n*args
     lua_pushlightuserdata(L, &data);  // autofree_call n*args &data
 
-    data.ctx = talloc_new(NULL);
+    data.ctx = talloc_new(ctx);
     int r = lua_pcall(L, lua_gettop(L) - 1, LUA_MULTRET, 0);  // m*retvals
     talloc_free(data.ctx);
 

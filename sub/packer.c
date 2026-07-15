@@ -369,7 +369,9 @@ static bool pack_subrandr(struct mp_sub_packer *p, struct sub_bitmaps *res,
             .w = instance->src_width,  .h = instance->src_height,
             .src_x = image_b->src_x + instance->src_off_x,
             .src_y = image_b->src_y + instance->src_off_y,
-            .bitmap = image_b->bitmap, .stride = byte_stride,
+            .bitmap = (sbr_bgra8 *)image_b->bitmap
+                      + pixel_stride * instance->src_off_y + instance->src_off_x,
+            .stride = byte_stride,
         };
         res->num_parts++;
     }

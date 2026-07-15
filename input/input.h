@@ -22,6 +22,7 @@
 #include "misc/bstr.h"
 
 #include "cmd.h"
+#include "event.h"
 
 #define MP_MAX_TABLET_PAD_BUTTONS 10
 
@@ -76,9 +77,6 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
 // Must be called on the same thread as loop_fn (see mp_input_add_thread_src()).
 // Set src->cancel and src->uninit (if needed) before calling this.
 void mp_input_src_init_done(struct mp_input_src *src);
-
-// Feed text data, which will be split into lines of commands.
-void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
 
 // Process keyboard input. code is a key code from keycodes.h, possibly
 // with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
@@ -204,6 +202,15 @@ bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y);
 // Whether input.c wants mouse drag events at this mouse position. If this
 // returns false, some VOs will initiate window dragging.
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
+
+// Enqueue files for playback after drag and drop
+void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         enum mp_dnd_action action);
+// Last dropped files
+void mp_input_get_dropped_files(struct input_ctx *ictx, void *talloc_ctx,
+                                int64_t *dnd_ts,
+                                enum mp_dnd_action *dnd_action,
+                                char ***dropped_files);
 
 // Initialize the input system
 struct mpv_global;

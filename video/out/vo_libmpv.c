@@ -359,7 +359,7 @@ int mpv_render_context_render(mpv_render_context *ctx, mpv_render_param *params)
 
             struct mp_rect src, dst;
             struct mp_osd_res osd;
-            mp_get_src_dst_rects(ctx->log, ctx->vo_opts, ctx->vo->driver->caps,
+            mp_get_src_dst_rects(ctx->log, ctx->vo_opts, ctx->renderer->driver_caps,
                                 &ctx->img_params, vp_w, abs(vp_h),
                                 1.0, &src, &dst, &osd);
 

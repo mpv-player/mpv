@@ -1,4 +1,5 @@
 name: Pull Request Fuzzing
+
 on:
   pull_request:
     branches: [master]
@@ -12,10 +13,13 @@ on:
         - 'Copyright'
         - 'README.md'
         - 'RELEASE_NOTES'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
+
 permissions: {}
+
 jobs:
   Fuzzing:
     runs-on: ubuntu-latest

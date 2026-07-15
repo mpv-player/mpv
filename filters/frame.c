@@ -169,7 +169,7 @@ double mp_frame_get_pts(struct mp_frame frame)
 
 void mp_frame_set_pts(struct mp_frame frame, double pts)
 {
-    if (frame_handlers[frame.type].get_pts)
+    if (frame_handlers[frame.type].set_pts)
         frame_handlers[frame.type].set_pts(frame.data, pts);
 }
 

@@ -29,6 +29,7 @@ local chapter_list = {}
 local metadata = {}
 local playlist_cookies = {}
 local playlist_metadata = {}
+local stream_delay = 0
 
 local function Set (t)
     local set = {}
@@ -79,6 +80,8 @@ local ext_map = {
 
 local codec_map = {
     -- src pattern  = mpv codec
+    ["ass"]         = "ass",
+    ["srt"]         = "subrip",
     ["vtt"]         = "webvtt",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
@@ -193,40 +196,33 @@ local function parse_cookies(cookies_line)
     return cookies
 end
 
--- serialize cookies for avformat
-local function serialize_cookies_for_avformat(cookies)
+-- serialize cookies in Netscape cookies.txt format
+local function serialize_cookies(cookies)
     local result = ''
     for _, cookie in pairs(cookies) do
-        local cookie_str = ('%s=%s; '):format(cookie.name, cookie.value:gsub('^"(.+)"$', '%1'))
-        for k, v in pairs(cookie) do
-            if k ~= "name" and k ~= "value" then
-                cookie_str = cookie_str .. ('%s=%s; '):format(k, v)
-            end
-        end
-        result = result .. cookie_str .. '\r\n'
+        local domain = cookie.domain or ""
+        result = result .. ("%s\t%s\t%s\t%s\t%s\t%s\t%s\n"):format(
+            domain,
+            (domain:sub(1, 1) == ".") and "TRUE" or "FALSE",
+            cookie.path or "/",
+            cookie.secure and "TRUE" or "FALSE",
+            cookie.expires or "0",
+            cookie.name,
+            cookie.value:gsub('^"(.+)"$', '%1'))
     end
     return result
 end
 
--- set file-local cookies, preserving existing ones
+-- set file-local cookies-file pointing at an in-memory cookies.txt
 local function set_cookies(cookies)
     if not cookies or cookies == "" then
         return
     end
-
-    local option_key = "file-local-options/stream-lavf-o"
-    local stream_opts = mp.get_property_native(option_key, {})
-    local existing_cookies = parse_cookies(stream_opts["cookies"])
-
-    local new_cookies = parse_cookies(cookies)
-    for cookie_key, cookie in pairs(new_cookies) do
-        if not existing_cookies[cookie_key] then
-            existing_cookies[cookie_key] = cookie
-        end
+    local data = serialize_cookies(parse_cookies(cookies))
+    if data ~= "" then
+        mp.set_property_bool("file-local-options/cookies", true)
+        mp.set_property("file-local-options/cookies-file", "memory://" .. data)
     end
-
-    stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
-    mp.set_property_native(option_key, stream_opts)
 end
 
 local function append_libav_opt(props, name, value)
@@ -640,10 +636,20 @@ local function formats_to_edl(json, formats, use_all_formats)
     return res
 end
 
+-- Seconds to wait before the formats become available
+local function get_stream_delay(formats)
+    local available_at = 0
+    for _, track in ipairs(formats or {}) do
+        if type(track.available_at) == "number" then
+            available_at = math.max(available_at, track.available_at)
+        end
+    end
+    return available_at > 0 and math.max(0, available_at - os.time()) or 0
+end
+
 local function add_single_video(json)
     local streamurl = ""
     local format_info = ""
-    local max_bitrate = 0
     local requested_formats = json["requested_formats"] or json["requested_downloads"]
     local all_formats = json["formats"]
     local has_requested_formats = requested_formats and #requested_formats > 0
@@ -653,6 +659,9 @@ local function add_single_video(json)
     local cookies = has_requested_formats
                     and requested_formats[1].cookies
                     or json.cookies
+
+    stream_delay = math.max(stream_delay,
+        get_stream_delay(has_requested_formats and requested_formats or {json}))
 
     if o.use_manifests and valid_manifest(json) then
         -- prefer manifest_url if present
@@ -669,18 +678,9 @@ local function add_single_video(json)
 
         streamurl = mpd_url
 
-        if requested_formats then
-            for _, track in pairs(requested_formats) do
-                max_bitrate = (track.tbr and track.tbr > max_bitrate) and
-                    track.tbr or max_bitrate
-            end
-        elseif json.tbr then
-            max_bitrate = json.tbr > max_bitrate and json.tbr or max_bitrate
-        end
-
         for json_name, mp_name in pairs(tag_list) do
             if json[json_name] then
-                metadata[mp_name] = json[json_name]
+                metadata[mp_name] = tostring(json[json_name])
             end
         end
     end
@@ -736,13 +736,6 @@ local function add_single_video(json)
     msg.debug("streamurl: " .. streamurl)
 
     mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
-
-    -- set hls-bitrate for dash track selection
-    if max_bitrate > 0 and
-        not option_was_set("hls-bitrate") and
-        not option_was_set_locally("hls-bitrate") then
-        mp.set_property_native('file-local-options/hls-bitrate', max_bitrate*1000)
-    end
 
     -- add subtitles
     if json.requested_subtitles ~= nil then
@@ -867,19 +860,11 @@ local function add_single_video(json)
             "rtmp_app", json.app)
     end
 
-    if json.proxy and json.proxy ~= "" then
-        stream_opts = append_libav_opt(stream_opts,
-            "http_proxy", json.proxy)
+    if json.proxy and json.proxy ~= "" and not option_was_set("http-proxy") then
+        mp.set_property("file-local-options/http-proxy", json.proxy)
     end
 
-    if cookies and cookies ~= "" then
-        local existing_cookies = parse_cookies(stream_opts["cookies"])
-        local new_cookies = parse_cookies(cookies)
-        for cookie_key, cookie in pairs(new_cookies) do
-            existing_cookies[cookie_key] = cookie
-        end
-        stream_opts["cookies"] = serialize_cookies_for_avformat(existing_cookies)
-    end
+    set_cookies(cookies)
 
     local chunk_size = math.huge
     if has_requested_formats then
@@ -891,6 +876,7 @@ local function add_single_video(json)
     end
     if chunk_size < math.huge then
         stream_opts = append_libav_opt(stream_opts, "request_size", tostring(chunk_size))
+        mp.set_property_native("file-local-options/curl-max-request-size", chunk_size)
     end
 
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
@@ -898,6 +884,7 @@ end
 
 local function run_ytdl_hook(url)
     local start_time = os.clock()
+    stream_delay = 0
 
     -- strip ytdl://
     if url:find("ytdl://") == 1 then
@@ -1079,7 +1066,7 @@ local function run_ytdl_hook(url)
 
             -- can't change the http headers for each entry, so use the 1st
             set_http_headers(json.entries[1].http_headers)
-            set_cookies(json.entries[1].cookies or json.cookies)
+            playlist_cookies[playlist] = json.entries[1].cookies or json.cookies
 
             mp.set_property("stream-open-filename", playlist)
             if json.title and mp.get_property("force-media-title", "") == "" then
@@ -1183,7 +1170,7 @@ local function run_ytdl_hook(url)
     msg.debug('script running time: '..os.clock()-start_time..' seconds')
 end
 
-local function on_load_hook(load_fail)
+local function on_load_hook(load_fail, hook)
     local url = mp.get_property("stream-open-filename", "")
     local force = url:find("^ytdl://") ~= nil
     local early = force or o.try_ytdl_first or is_whitelisted(url)
@@ -1194,10 +1181,18 @@ local function on_load_hook(load_fail)
         return
     end
     run_ytdl_hook(url)
+
+    -- defer loading until the formats become available
+    if stream_delay > 0 then
+        msg.info(("Waiting %.2f seconds for the stream to become available...")
+                 :format(stream_delay))
+        hook:defer()
+        mp.add_timeout(stream_delay, function() hook:cont() end)
+    end
 end
 
-mp.add_hook("on_load", 10, function() on_load_hook(false) end)
-mp.add_hook("on_load_fail", 10, function() on_load_hook(true) end)
+mp.add_hook("on_load", 10, function(hook) on_load_hook(false, hook) end)
+mp.add_hook("on_load_fail", 10, function(hook) on_load_hook(true, hook) end)
 
 mp.add_hook("on_load", 20, function ()
     msg.verbose('playlist hook')

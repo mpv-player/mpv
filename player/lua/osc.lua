@@ -61,7 +61,6 @@ local user_opts = {
     floatingalpha = 105,          -- alpha of the floating layout background
     tracknumberswidth = 35,       -- width for track number labels (0 = icon only)
     greenandgrumpy = false,     -- disable santa hat
-    livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
     unicodeminus = false,       -- whether to use the Unicode minus sign character
     icon_style = "layout",      -- icon style: layout/classic/fluent
@@ -321,6 +320,7 @@ local state = {
     screen_sizeX = nil, screen_sizeY = nil, -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
     marginsREQ = false,                     -- is a margins update pending?
+    mouse_stateREQ = false,                 -- is a mouse state update pending?
     last_mouseX = nil, last_mouseY = nil,   -- last mouse position, to detect significant mouse movement
     last_touchX = -1, last_touchY = -1,     -- last touch position
     mouse_in_window = false,
@@ -338,6 +338,7 @@ local state = {
     playlist_count = 0,
     playlist_pos_1 = 0,
     duration = nil,
+    has_duration = false,
     pause = false,
     volume = 0,
     mute = false,
@@ -788,6 +789,98 @@ end
 
 local elements = {}
 
+local function update_slider(element)
+    local elem_geo = element.layout.geometry
+    local r1 = 0
+    local r2 = 0
+    local slider_lo = element.layout.slider
+    -- offset between element outline and drag-area
+    local foV = slider_lo.border + slider_lo.gap
+
+    -- calculate positions of min and max points
+    if slider_lo.stype ~= "bar" then
+        r1 = elem_geo.h / 2
+        element.slider.min.ele_pos = elem_geo.h / 2
+        element.slider.max.ele_pos = elem_geo.w - (elem_geo.h / 2)
+        if slider_lo.stype == "diamond" then
+            r2 = (elem_geo.h - 2 * slider_lo.border) / 2
+        elseif slider_lo.stype == "knob" then
+            r2 = r1
+        end
+    else
+        element.slider.min.ele_pos = slider_lo.border + slider_lo.gap
+        element.slider.max.ele_pos = elem_geo.w - (slider_lo.border + slider_lo.gap)
+    end
+
+    element.slider.min.glob_pos =
+    element.hitbox.x1 + element.slider.min.ele_pos
+    element.slider.max.glob_pos =
+    element.hitbox.x1 + element.slider.max.ele_pos
+
+    local static_ass = assdraw.ass_new()
+    static_ass:draw_start()
+
+    -- the box
+    ass_draw_rr_h_cw(static_ass, 0, 0, elem_geo.w, elem_geo.h, r1,
+                     slider_lo.stype == "diamond")
+
+    -- the "hole"
+    ass_draw_rr_h_ccw(static_ass, slider_lo.border, slider_lo.border,
+                      elem_geo.w - slider_lo.border, elem_geo.h - slider_lo.border,
+                      r2, slider_lo.stype == "diamond")
+
+    -- marker nibbles
+    if element.slider.markerF ~= nil and slider_lo.gap > 0 then
+        local markers = element.slider.markerF()
+        for _,marker in pairs(markers) do
+            if marker > element.slider.min.value and
+                marker < element.slider.max.value then
+
+                local s = get_slider_ele_pos_for(element, marker)
+
+                if slider_lo.gap > 1 then -- draw triangles
+
+                    local a = slider_lo.gap / 0.5 --0.866
+
+                    --top
+                    if slider_lo.nibbles_top then
+                        static_ass:move_to(s - (a / 2), slider_lo.border)
+                        static_ass:line_to(s + (a / 2), slider_lo.border)
+                        static_ass:line_to(s, foV)
+                    end
+
+                    --bottom
+                    if slider_lo.nibbles_bottom then
+                        static_ass:move_to(s - (a / 2),
+                            elem_geo.h - slider_lo.border)
+                        static_ass:line_to(s,
+                            elem_geo.h - foV)
+                        static_ass:line_to(s + (a / 2),
+                            elem_geo.h - slider_lo.border)
+                    end
+
+                else -- draw 2x1px nibbles
+
+                    --top
+                    if slider_lo.nibbles_top then
+                        static_ass:rect_cw(s - 1, slider_lo.border,
+                            s + 1, slider_lo.border + slider_lo.gap);
+                    end
+
+                    --bottom
+                    if slider_lo.nibbles_bottom then
+                        static_ass:rect_cw(s - 1,
+                            elem_geo.h - slider_lo.border - slider_lo.gap,
+                            s + 1, elem_geo.h - slider_lo.border);
+                    end
+                end
+            end
+        end
+    end
+
+    element.static_ass = static_ass
+end
+
 local function prepare_elements()
 
     -- remove elements without layout or invisible
@@ -833,112 +926,18 @@ local function prepare_elements()
 
         element.style_ass = style_ass
 
-        local static_ass = assdraw.ass_new()
-
-
         if element.type == "box" then
             --draw box
+            local static_ass = assdraw.ass_new()
             static_ass:draw_start()
             ass_draw_rr_h_cw(static_ass, 0, 0, elem_geo.w, elem_geo.h,
                              element.layout.box.radius, element.layout.box.hexagon)
             static_ass:draw_stop()
+            element.static_ass = static_ass
 
         elseif element.type == "slider" then
-            --draw static slider parts
-
-            local r1 = 0
-            local r2 = 0
-            local slider_lo = element.layout.slider
-            -- offset between element outline and drag-area
-            local foV = slider_lo.border + slider_lo.gap
-
-            -- calculate positions of min and max points
-            if slider_lo.stype ~= "bar" then
-                r1 = elem_geo.h / 2
-                element.slider.min.ele_pos = elem_geo.h / 2
-                element.slider.max.ele_pos = elem_geo.w - (elem_geo.h / 2)
-                if slider_lo.stype == "diamond" then
-                    r2 = (elem_geo.h - 2 * slider_lo.border) / 2
-                elseif slider_lo.stype == "knob" then
-                    r2 = r1
-                end
-            else
-                element.slider.min.ele_pos =
-                    slider_lo.border + slider_lo.gap
-                element.slider.max.ele_pos =
-                    elem_geo.w - (slider_lo.border + slider_lo.gap)
-            end
-
-            element.slider.min.glob_pos =
-                element.hitbox.x1 + element.slider.min.ele_pos
-            element.slider.max.glob_pos =
-                element.hitbox.x1 + element.slider.max.ele_pos
-
-            -- -- --
-
-            static_ass:draw_start()
-
-            -- the box
-            ass_draw_rr_h_cw(static_ass, 0, 0, elem_geo.w, elem_geo.h, r1,
-                             slider_lo.stype == "diamond")
-
-            -- the "hole"
-            ass_draw_rr_h_ccw(static_ass, slider_lo.border, slider_lo.border,
-                              elem_geo.w - slider_lo.border, elem_geo.h - slider_lo.border,
-                              r2, slider_lo.stype == "diamond")
-
-            -- marker nibbles
-            if element.slider.markerF ~= nil and slider_lo.gap > 0 then
-                local markers = element.slider.markerF()
-                for _,marker in pairs(markers) do
-                    if marker > element.slider.min.value and
-                        marker < element.slider.max.value then
-
-                        local s = get_slider_ele_pos_for(element, marker)
-
-                        if slider_lo.gap > 1 then -- draw triangles
-
-                            local a = slider_lo.gap / 0.5 --0.866
-
-                            --top
-                            if slider_lo.nibbles_top then
-                                static_ass:move_to(s - (a / 2), slider_lo.border)
-                                static_ass:line_to(s + (a / 2), slider_lo.border)
-                                static_ass:line_to(s, foV)
-                            end
-
-                            --bottom
-                            if slider_lo.nibbles_bottom then
-                                static_ass:move_to(s - (a / 2),
-                                    elem_geo.h - slider_lo.border)
-                                static_ass:line_to(s,
-                                    elem_geo.h - foV)
-                                static_ass:line_to(s + (a / 2),
-                                    elem_geo.h - slider_lo.border)
-                            end
-
-                        else -- draw 2x1px nibbles
-
-                            --top
-                            if slider_lo.nibbles_top then
-                                static_ass:rect_cw(s - 1, slider_lo.border,
-                                    s + 1, slider_lo.border + slider_lo.gap);
-                            end
-
-                            --bottom
-                            if slider_lo.nibbles_bottom then
-                                static_ass:rect_cw(s - 1,
-                                    elem_geo.h -slider_lo.border -slider_lo.gap,
-                                    s + 1, elem_geo.h - slider_lo.border);
-                            end
-                        end
-                    end
-                end
-            end
+            update_slider(element)
         end
-
-        element.static_ass = static_ass
-
 
         -- if the element is supposed to be disabled,
         -- style it accordingly and kill the eventresponders
@@ -1259,6 +1258,7 @@ local function render_elements(master_ass)
                         local thumb_req = {
                             x = math.floor(thumb_x + 0.5), y = math.floor(thumb_y + 0.5),
                             w = math.floor(thumb_w + 0.5), h = math.floor(thumb_h + 0.5),
+                            ["hover-sec"] = hover_sec,
                         }
 
                         local thumb_ass = assdraw.ass_new()
@@ -2618,7 +2618,7 @@ local function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = state.duration ~= nil
+    ne.visible = state.duration and state.duration > 0
     ne.content = function ()
         if state.rightTC_trem then
             local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
@@ -2707,7 +2707,9 @@ end
 
 local function osc_visible(visible)
     set_bar_visible("osc_visible", visible)
-    disable_thumbnail()
+    if not visible then
+        disable_thumbnail()
+    end
 end
 
 local function set_wc_visible(visible)
@@ -2747,9 +2749,9 @@ end
 local function hide_bar(label, visible_key, anitype_key, set_visible)
     msg.trace("hide_" .. label)
     if not state.enabled then
+        set_visible(false)
         -- typically hide happens at render() from tick(), but now tick() is
         -- no-op and won't render again to remove the osc, so do that manually.
-        state[visible_key] = false
         render_wipe(state.osd)
     elseif user_opts.fadeduration > 0 then
         if state[visible_key] then
@@ -2802,6 +2804,41 @@ local function element_has_action(element, action)
         element.eventresponder[action]
 end
 
+local function process_mouse_move(refresh)
+    if refresh then
+        state.mouse_in_window = recently_touched() or mp.get_property_bool("mouse-pos/hover")
+        if not state.mouse_in_window then
+            state.last_mouseX, state.last_mouseY = nil, nil
+            return
+        end
+    end
+
+    local mouseX, mouseY = get_virt_mouse_pos()
+    if refresh or user_opts.minmousemove == 0 or
+        ((state.last_mouseX ~= nil and state.last_mouseY ~= nil) and
+            ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
+                or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
+            )
+        ) then
+        if window_controls_enabled() and user_opts.windowcontrols_independent then
+            if mouse_in_area("showhide_wc") then
+                show_wc()
+            elseif user_opts.visibility ~= "always" then
+                hide_wc()
+            end
+            if mouse_in_area("showhide") then
+                show_osc()
+            elseif user_opts.visibility ~= "always" then
+                hide_osc()
+            end
+        else
+            show_osc()
+            if window_controls_enabled() then show_wc() end
+        end
+    end
+    state.last_mouseX, state.last_mouseY = mouseX, mouseY
+end
+
 local function process_event(source, what)
     local action = string.format("%s%s", source,
         what and ("_" .. what) or "")
@@ -2852,31 +2889,7 @@ local function process_event(source, what)
     elseif source == "mouse_move" then
 
         state.mouse_in_window = true
-
-        local mouseX, mouseY = get_virt_mouse_pos()
-        if user_opts.minmousemove == 0 or
-            ((state.last_mouseX ~= nil and state.last_mouseY ~= nil) and
-                ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
-                    or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
-                )
-            ) then
-            if window_controls_enabled() and user_opts.windowcontrols_independent then
-                if mouse_in_area("showhide_wc") then
-                    show_wc()
-                elseif user_opts.visibility ~= "always" then
-                    hide_wc()
-                end
-                if mouse_in_area("showhide") then
-                    show_osc()
-                elseif user_opts.visibility ~= "always" then
-                    hide_osc()
-                end
-            else
-                show_osc()
-                if window_controls_enabled() then show_wc() end
-            end
-        end
-        state.last_mouseX, state.last_mouseY = mouseX, mouseY
+        process_mouse_move()
 
         local n = state.active_element
         if element_has_action(elements[n], action) then
@@ -2946,6 +2959,11 @@ local function render()
 
             state.last_mouseX, state.last_mouseY = mouseX, mouseY
         end
+    end
+
+    if state.mouse_stateREQ then
+        process_mouse_move(true)
+        state.mouse_stateREQ = false
     end
 
 
@@ -3186,8 +3204,13 @@ observe_cached("chapter-list", function ()
     request_init()
 end)
 observe_cached("duration", function ()
-    if user_opts.livemarkers and state.chapter_list[1] then
+    local has_duration = state.duration ~= nil and state.duration > 0
+    if has_duration ~= state.has_duration then
+        state.has_duration = has_duration
         request_init()
+    elseif state.chapter_list[1] and state.slider_element then
+        update_slider(state.slider_element)
+        request_tick()
     end
 end)
 
@@ -3307,6 +3330,7 @@ end
 -- mode can be auto/always/never/cycle
 -- the modes only affect internal variables and not stored on its own.
 local function visibility_mode(mode, no_osd)
+    local old_vis = mp.get_property_native("user-data/osc/visibility") or user_opts.visibility
     if mode == "cycle" then
         for i, allowed_mode in ipairs(state.visibility_modes) do
             if i == #state.visibility_modes then
@@ -3346,6 +3370,7 @@ local function visibility_mode(mode, no_osd)
     mp.disable_key_bindings("window-controls")
     state.input_enabled = false
 
+    state.mouse_stateREQ = old_vis == "never" and mode ~= "never"
     update_margins()
     request_tick()
 end

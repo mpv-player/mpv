@@ -22,12 +22,10 @@
 #include "options/path.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "common/tags.h"
 #include "common/av_common.h"
-#include "demux/demux.h"
-#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
 #include "stream.h"
+#include "network.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 
@@ -36,43 +34,18 @@
 #include "misc/bstr.h"
 #include "mpv_talloc.h"
 
-#define OPT_BASE_STRUCT struct stream_lavf_params
-struct stream_lavf_params {
+#define OPT_BASE_STRUCT struct stream_lavf_opts
+
+struct stream_lavf_opts {
     char **avopts;
-    bool cookies_enabled;
-    char *cookies_file;
-    char *useragent;
-    char *referrer;
-    char **http_header_fields;
-    bool tls_verify;
-    char *tls_ca_file;
-    char *tls_cert_file;
-    char *tls_key_file;
-    double timeout;
-    char *http_proxy;
 };
 
 const struct m_sub_options stream_lavf_conf = {
     .opts = (const m_option_t[]) {
         {"stream-lavf-o", OPT_KEYVALUELIST(avopts)},
-        {"http-header-fields", OPT_STRINGLIST(http_header_fields)},
-        {"user-agent", OPT_STRING(useragent)},
-        {"referrer", OPT_STRING(referrer)},
-        {"cookies", OPT_BOOL(cookies_enabled)},
-        {"cookies-file", OPT_STRING(cookies_file), .flags = M_OPT_FILE},
-        {"tls-verify", OPT_BOOL(tls_verify)},
-        {"tls-ca-file", OPT_STRING(tls_ca_file), .flags = M_OPT_FILE},
-        {"tls-cert-file", OPT_STRING(tls_cert_file), .flags = M_OPT_FILE},
-        {"tls-key-file", OPT_STRING(tls_key_file), .flags = M_OPT_FILE},
-        {"network-timeout", OPT_DOUBLE(timeout), M_RANGE(0, DBL_MAX)},
-        {"http-proxy", OPT_STRING(http_proxy)},
         {0}
     },
-    .size = sizeof(struct stream_lavf_params),
-    .defaults = &(const struct stream_lavf_params){
-        .useragent = "libmpv",
-        .timeout = 60,
-    },
+    .size = sizeof(struct stream_lavf_opts),
 };
 
 static const char *const http_like[] =
@@ -150,7 +123,7 @@ static int control(stream_t *s, int cmd, void *arg)
             // This usually yields the URLContext (why does it even exist?),
             // which holds the name of the actual protocol implementation.
             void *child = avio->av_class->child_next(avio, NULL);
-            AVClass *cl = *(AVClass **)child;
+            AVClass *cl = child ? *(AVClass **)child : NULL;
             if (cl && cl->item_name)
                 proto = cl->item_name(child);
         }
@@ -184,8 +157,8 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
                                  struct mpv_global *global, struct mp_log *log)
 {
     void *temp = talloc_new(NULL);
-    struct stream_lavf_params *opts =
-        mp_get_config_group(temp, global, &stream_lavf_conf);
+    struct mp_network_opts *opts =
+        mp_get_config_group(temp, global, &mp_network_conf);
 
     // HTTP specific options (other protocols ignore them)
     if (opts->useragent)
@@ -239,7 +212,9 @@ void mp_setup_av_network_options(AVDictionary **dict, const char *target_fmt,
     if (opts->http_proxy && opts->http_proxy[0])
         av_dict_set(dict, "http_proxy", opts->http_proxy, 0);
 
-    mp_set_avdict(dict, opts->avopts);
+    struct stream_lavf_opts *lavf_opts =
+        mp_get_config_group(temp, global, &stream_lavf_conf);
+    mp_set_avdict(dict, lavf_opts->avopts);
 
     talloc_free(temp);
 }
@@ -478,51 +453,14 @@ static struct mp_tags *read_icy(stream_t *s)
     // Send a metadata update only 1. on start, and 2. on a new metadata packet.
     // To detect new packages, set the icy_metadata_packet to "-" once we've
     // read it (a bit hacky, but works).
-
     struct mp_tags *res = NULL;
-    if ((!icy_header || !icy_header[0]) && (!icy_packet || !icy_packet[0]))
-        goto done;
-
     bstr packet = bstr0(icy_packet);
-    if (bstr_equals0(packet, "-"))
-        goto done;
+    if (!bstr_equals0(packet, "-"))
+        res = mp_parse_icy_metadata(s, bstr0(icy_header), packet);
 
-    res = talloc_zero(NULL, struct mp_tags);
+    if (res)
+        av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
 
-    bstr header = bstr0(icy_header);
-    while (header.len) {
-        bstr line = bstr_strip_linebreaks(bstr_getline(header, &header));
-        bstr name, val;
-        if (bstr_split_tok(line, ": ", &name, &val))
-            mp_tags_set_bstr(res, name, val);
-    }
-
-    bstr head = bstr0("StreamTitle='");
-    int i = bstr_find(packet, head);
-    if (i >= 0) {
-        packet = bstr_cut(packet, i + head.len);
-        int end = bstr_find(packet, bstr0("\';"));
-        packet = bstr_splice(packet, 0, end);
-
-        bool allocated = false;
-        struct demux_opts *opts = mp_get_config_group(NULL, s->global, &demux_conf);
-        const char *charset = mp_charset_guess(s, s->log, packet, opts->meta_cp, 0);
-        if (charset && !mp_charset_is_utf8(charset)) {
-            bstr conv = mp_iconv_to_utf8(s->log, packet, charset, 0);
-            if (conv.start && conv.start != packet.start) {
-                allocated = true;
-                packet = conv;
-            }
-        }
-        mp_tags_set_bstr(res, bstr0("icy-title"), packet);
-        talloc_free(opts);
-        if (allocated)
-            talloc_free(packet.start);
-    }
-
-    av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);
-
-done:
     av_free(icy_header);
     av_free(icy_packet);
     return res;

@@ -11,6 +11,7 @@ struct mpv_global {
     char *configdir;
     struct stats_base *stats;
     struct demux_packet_pool *packet_pool;
+    struct curl_ctx *curl;
 };
 
 #endif

@@ -56,6 +56,7 @@
 #include "common/playlist.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "input/dnd.h"
 #include "input/input.h"
 #include "demux/packet_pool.h"
 
@@ -68,6 +69,8 @@
 #include "client.h"
 #include "command.h"
 #include "screenshot.h"
+
+#include "stream/stream_curl.h"
 
 static const char def_config[] =
 #include "etc/builtin.conf.inc"
@@ -288,6 +291,9 @@ struct MPContext *mp_create(void)
 
     demux_packet_pool_init(mpctx->global);
     stats_global_init(mpctx->global);
+#if HAVE_LIBCURL
+    mp_curl_global_init(mpctx->global);
+#endif
 
     // Nothing must call mp_msg*() and related before this
     mp_msg_init(mpctx->global);
@@ -419,6 +425,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (opts->media_controls)
         mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
+
+    mp_dnd_init(mp_new_client(mpctx->clients, "dnd"));
 
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 

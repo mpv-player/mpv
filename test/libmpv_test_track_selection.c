@@ -301,6 +301,15 @@ static void test_track_selection(char *file, char *path)
         reload_file(path);
         check_string("track-list/5/selected", "yes");
     } else if (strcmp(file, "multiprogram.ts") == 0) {
+        // Program 1
+        //    Stream #0:0[0x100]: Video
+        //    Stream #0:1[0x101](eng): Subtitle
+        //    Stream #0:2[0x104](fra): Subtitle
+        // Program 2
+        //    Stream #0:3[0x102]: Video
+        //    Stream #0:4[0x103](jpn): Subtitle
+        //    Stream #0:2[0x104](fra): Subtitle
+
         set_property_string("subs-match-os-language", "no");
         set_property_string("edition", "1");
 
@@ -308,72 +317,193 @@ static void test_track_selection(char *file, char *path)
         check_string("current-edition", "1");
 
         // no subs are selected by default
-        check_string("track-list/count", "2");
-        check_string("track-list/0/program-id", "2");
-        check_string("track-list/0/selected", "yes");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/type", "sub");
+        check_string("track-list/0/lang", "fra");
+        check_string("track-list/0/id", "2");
+        check_string("track-list/0/program-id", "1");
+        check_string("track-list/0/program-ids", "1,2");
+        check_string("track-list/0/selected", "no");
+        check_string("track-list/1/type", "video");
+        check_string("track-list/1/id", "2");
         check_string("track-list/1/program-id", "2");
-        check_string("track-list/1/selected", "no");
+        check_string("track-list/1/selected", "yes");
+        check_string("track-list/2/lang", "jpn");
+        check_string("track-list/2/id", "3");
+        check_string("track-list/2/program-id", "2");
+        check_string("track-list/2/selected", "no");
 
         set_property_string("slang", "eng");
 
         // no eng subs in edition 1
         reload_file(path);
-        check_string("track-list/count", "2");
-        check_string("track-list/0/program-id", "2");
-        check_string("track-list/0/selected", "yes");
-        check_string("track-list/1/program-id", "2");
-        check_string("track-list/1/selected", "no");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/lang", "fra");
+        check_string("track-list/0/id", "2");
+        check_string("track-list/0/selected", "no");
+        check_string("track-list/1/type", "video");
+        check_string("track-list/1/id", "2");
+        check_string("track-list/1/selected", "yes");
+        check_string("track-list/2/lang", "jpn");
+        check_string("track-list/2/id", "3");
+        check_string("track-list/2/selected", "no");
 
+        check_string("current-tracks/video/id", "2");
         check_string("current-tracks/video/program-id", "2");
 
         // eng subs in edition 0
         set_property_string("edition", "0");
         check_string("current-edition", "0");
-        check_string("track-list/count", "2");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/id", "1");
         check_string("track-list/0/program-id", "1");
         check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/id", "1");
         check_string("track-list/1/program-id", "1");
         check_string("track-list/1/lang", "eng");
         check_string("track-list/1/selected", "yes");
+        check_string("track-list/2/lang", "fra");
+        check_string("track-list/2/id", "2");
+        check_string("track-list/2/program-ids", "1,2");
+        check_string("track-list/2/selected", "no");
 
         check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/id", "1");
         check_string("current-tracks/sub/program-id", "1");
+        check_string("current-tracks/video/id", "1");
         check_string("current-tracks/video/program-id", "1");
 
         // reload should give the same result
         reload_file(path);
         check_string("current-edition", "0");
-        check_string("track-list/count", "2");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/id", "1");
         check_string("track-list/0/program-id", "1");
         check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/id", "1");
         check_string("track-list/1/program-id", "1");
         check_string("track-list/1/lang", "eng");
         check_string("track-list/1/selected", "yes");
+        check_string("track-list/2/lang", "fra");
+        check_string("track-list/2/id", "2");
+        check_string("track-list/2/selected", "no");
 
         check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/id", "1");
         check_string("current-tracks/sub/program-id", "1");
+        check_string("current-tracks/video/id", "1");
         check_string("current-tracks/video/program-id", "1");
 
         set_property_string("subs-fallback", "yes");
         set_property_string("edition", "1");
-        // the jpn track is selected even though the user requested eng subtitles
+        // fra is selected: both fra and jpn are in-program for program 2, but fra
+        // has a lower tid
         check_string("current-edition", "1");
-        check_string("track-list/count", "2");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/lang", "fra");
+        check_string("track-list/0/id", "2");
         check_string("track-list/0/selected", "yes");
-        check_string("current-tracks/sub/lang", "jpn");
+        check_string("track-list/1/type", "video");
+        check_string("track-list/1/id", "2");
         check_string("track-list/1/selected", "yes");
+        check_string("track-list/2/lang", "jpn");
+        check_string("track-list/2/id", "3");
+        check_string("track-list/2/selected", "no");
+        check_string("current-tracks/sub/lang", "fra");
+        check_string("current-tracks/sub/id", "2");
 
         check_string("current-edition", "1");
-        check_string("track-list/count", "2");
-        check_string("track-list/0/program-id", "2");
+        check_string("track-list/count", "3");
+        check_string("track-list/0/lang", "fra");
+        check_string("track-list/0/id", "2");
+        check_string("track-list/0/program-id", "1");
         check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/id", "2");
         check_string("track-list/1/program-id", "2");
-        check_string("track-list/1/lang", "jpn");
         check_string("track-list/1/selected", "yes");
 
-        check_string("current-tracks/sub/lang", "jpn");
-        check_string("current-tracks/sub/program-id", "2");
+        check_string("current-tracks/sub/lang", "fra");
+        check_string("current-tracks/sub/id", "2");
+        check_string("current-tracks/sub/program-id", "1");
+        check_string("current-tracks/video/id", "2");
         check_string("current-tracks/video/program-id", "2");
+
+        // flatten-editions: all 5 tracks exposed, no edition filtering
+        set_property_string("flatten-editions", "yes");
+        set_property_string("edition", "auto");
+        set_property_string("slang", "");
+        set_property_string("subs-fallback", "no");
+        reload_file(path);
+        check_string("track-list/count", "5");
+        check_string("edition-list/count", "0");
+
+        // video from program 1 selected (first video), no sub selected
+        check_string("track-list/0/type", "video");
+        check_string("track-list/0/id", "1");
+        check_string("track-list/0/program-id", "1");
+        check_string("track-list/0/selected", "yes");
+        check_string("track-list/1/lang", "eng");
+        check_string("track-list/1/id", "1");
+        check_string("track-list/1/program-id", "1");
+        check_string("track-list/2/lang", "fra");
+        check_string("track-list/2/id", "2");
+        check_string("track-list/2/program-id", "1");
+        check_string("track-list/2/program-ids", "1,2");
+        check_string("track-list/3/type", "video");
+        check_string("track-list/3/id", "2");
+        check_string("track-list/3/program-id", "2");
+        check_string("track-list/4/lang", "jpn");
+        check_string("track-list/4/id", "3");
+        check_string("track-list/4/program-id", "2");
+        check_string("current-tracks/video/id", "1");
+        check_string("current-tracks/video/program-id", "1");
+        check_string("sid", "no");
+
+        // eng sub in video 1 is picked when slang=eng
+        set_property_string("slang", "eng");
+        reload_file(path);
+        check_string("current-tracks/video/id", "1");
+        check_string("current-tracks/video/program-id", "1");
+        check_string("current-tracks/sub/lang", "eng");
+        check_string("current-tracks/sub/id", "1");
+        check_string("current-tracks/sub/program-id", "1");
+
+        // no matching sub for video 2 with slang=jpn
+        set_property_string("vid", "2");
+        reload_file(path);
+        check_string("sid", "no");
+
+        // jpn sub in video 2 is picked when slang=jpn
+        set_property_string("vid", "2");
+        set_property_string("slang", "jpn");
+        reload_file(path);
+        check_string("current-tracks/video/id", "2");
+        check_string("current-tracks/video/program-id", "2");
+        check_string("current-tracks/sub/lang", "jpn");
+        check_string("current-tracks/sub/id", "3");
+        check_string("current-tracks/sub/program-id", "2");
+
+        // no matching sub for video 1 with slang=jpn
+        set_property_string("vid", "1");
+        reload_file(path);
+        check_string("sid", "no");
+
+        // fra sub in program 2 is picked when slang=fra
+        set_property_string("slang", "fra");
+        set_property_string("vid", "1");
+        reload_file(path);
+        check_string("current-tracks/video/id", "1");
+        check_string("current-tracks/video/program-id", "1");
+        check_string("current-tracks/sub/lang", "fra");
+        check_string("current-tracks/sub/id", "2");
+        check_string("current-tracks/sub/program-ids", "1,2");
+        set_property_string("vid", "2");
+        reload_file(path);
+        check_string("current-tracks/video/id", "2");
+        check_string("current-tracks/video/program-id", "2");
+        check_string("current-tracks/sub/lang", "fra");
+        check_string("current-tracks/sub/id", "2");
+        check_string("current-tracks/sub/program-ids", "1,2");
     }
 }
 

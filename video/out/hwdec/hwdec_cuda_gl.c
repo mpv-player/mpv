@@ -39,9 +39,8 @@ static bool cuda_ext_gl_init(struct ra_hwdec_mapper *mapper,
     struct cuda_mapper_priv *p = mapper->priv;
     CudaFunctions *cu = p_owner->cu;
     int ret = 0;
-    CUcontext dummy;
 
-    struct ext_gl *egl = talloc_ptrtype(NULL, egl);
+    struct ext_gl *egl = talloc_zero_ptrtype(NULL, egl);
     p->ext[n] = egl;
 
     struct ra_tex_params params = {
@@ -84,7 +83,6 @@ static bool cuda_ext_gl_init(struct ra_hwdec_mapper *mapper,
     return true;
 
 error:
-    CHECK_CU(cu->cuCtxPopCurrent(&dummy));
     return false;
 }
 

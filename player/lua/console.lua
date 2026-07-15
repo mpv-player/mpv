@@ -348,6 +348,10 @@ local function calculate_max_item_width()
     end
 
     local longest_item = prompt .. ("a"):rep(9)
+    if #selectable_items > calculate_max_lines() then
+        local digits = math.floor(math.log(#selectable_items, 10)) + 1
+        longest_item = longest_item .. ("0"):rep(digits) .. "/" .. ("0"):rep(digits)
+    end
     local longest_item_width = utils.terminal_display_width(longest_item)
     for _, item in pairs(selectable_items) do
         local item_width = utils.terminal_display_width(item)
@@ -669,7 +673,7 @@ local function print_to_terminal()
     local counter = ""
     if selectable_items then
         if #selectable_items > calculate_max_lines() then
-            local digits = math.ceil(math.log(#selectable_items, 10))
+            local digits = math.floor(math.log(#selectable_items, 10)) + 1
             counter = terminal_styles.disabled ..
                       "[" .. string.format("%0" .. digits .. "d", focused_match) ..
                       "/" .. string.format("%0" .. digits .. "d", #matches) ..
@@ -1415,6 +1419,9 @@ end
 -- clipboard or the primary selection buffer is used (on X11 and Wayland only.)
 local function paste(clip)
     local text = get_clipboard(clip)
+    if selectable_items then
+        text = text:gsub("\r?\n", " ")
+    end
     local before_cur = line:sub(1, cursor - 1)
     local after_cur = line:sub(cursor)
     line = before_cur .. text .. after_cur
@@ -1532,7 +1539,7 @@ local function get_bindings()
         { "ctrl+[",      function() set_active(false) end       },
         { "enter",       submit                                 },
         { "kp_enter",    submit                                 },
-        { "shift+enter", function() handle_char_input("\n") end },
+        { "shift+enter", function() if not selectable_items then handle_char_input("\n") end end },
         { "ctrl+j",      submit                                 },
         { "ctrl+m",      submit                                 },
         { "bs",          handle_backspace                       },
@@ -1690,6 +1697,13 @@ set_active = function (active)
         mp.set_property_bool("input-ime", ime_active)
         mp.commandv("script-message-to", input_caller, input_caller_handler,
                     "closed", utils.format_json({line, cursor}))
+
+        -- these tables may be extremely large, reset them for garbage collection
+        selectable_items = nil
+        matches = {}
+        item_positions = {}
+        completion_buffer = {}
+
         collectgarbage()
     end
     render()

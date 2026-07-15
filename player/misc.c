@@ -200,15 +200,25 @@ void update_vo_playback_state(struct MPContext *mpctx)
             .position = pos > 0 ? lrint(pos * UINT8_MAX) : 0,
         };
 
-        if (oldstate.taskbar_progress != newstate.taskbar_progress ||
-            oldstate.playing != newstate.playing ||
-            oldstate.paused != newstate.paused ||
-            oldstate.position != newstate.position)
-        {
+        bool state_changed = oldstate.taskbar_progress != newstate.taskbar_progress ||
+                             oldstate.playing != newstate.playing ||
+                             oldstate.paused != newstate.paused;
+        if (state_changed || oldstate.position != newstate.position) {
             // Don't update progress bar if it was and still is hidden
             if ((oldstate.playing && oldstate.taskbar_progress) ||
                 (newstate.playing && newstate.taskbar_progress))
             {
+                // Rate-limit progress-only updates. The win32 backend forwards
+                // these to the shell (explorer.exe), we don't want to spam it
+                // too much to avoid performance issues, when stealing cpu time
+                // from the shell thread. In normal playback, this doesn't update
+                // at all, but in live streams the duration can change, even on
+                // every frame.
+                int64_t now = mp_time_ns();
+                int64_t elapsed = now - mpctx->vo_playback_state_time;
+                if (!state_changed && elapsed < MP_TIME_MS_TO_NS(1000))
+                    return;
+                mpctx->vo_playback_state_time = now;
                 vo_control_async(mpctx->video_out,
                                  VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
             }

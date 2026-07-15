@@ -289,13 +289,13 @@ static bool edition_has_track_of_type(struct MPContext *mpctx,
     int program = demuxer->editions[demuxer->edition].demuxer_id;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        if (t->type == type && t->program_id == program)
+        if (t->type == type && track_has_program(t, program))
             return true;
     }
     return false;
 }
 
-bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
+static bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer || !demuxer->edition_is_track_mapping || demuxer->num_editions <= 1)
@@ -303,13 +303,22 @@ bool track_in_current_edition(struct MPContext *mpctx, struct track *track)
     if (track->is_external)
         return true;
     int program = demuxer->editions[demuxer->edition].demuxer_id;
-    if (track->program_id == program)
+    if (track_has_program(track, program))
         return true;
     // Program-agnostic tracks only show in editions that don't supply their own
     // track of this type.
-    if (track->program_id < 0)
+    if (!track->stream || !track->stream->num_program_ids)
         return !edition_has_track_of_type(mpctx, track->type);
     return false;
+}
+
+bool track_is_visible(struct MPContext *mpctx, struct track *track)
+{
+    if (!track_in_current_edition(mpctx, track))
+        return false;
+    if (track->dependent_track && !mpctx->opts->show_dependent_tracks)
+        return false;
+    return true;
 }
 
 void print_track_list(struct MPContext *mpctx, const char *msg)
@@ -319,7 +328,7 @@ void print_track_list(struct MPContext *mpctx, const char *msg)
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *track = mpctx->tracks[n];
-            if (track->type != t || !track_in_current_edition(mpctx, track))
+            if (track->type != t || !track_is_visible(mpctx, track))
                 continue;
             // Indent tracks after messages like "Tracks switched" and
             // "Playing:".
@@ -460,7 +469,6 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .demuxer_id = stream->demuxer_id,
         .ff_index = stream->ff_index,
         .hls_bitrate = stream->hls_bitrate,
-        .program_id = stream->program_id,
         .title = stream->title,
         .default_track = stream->default_track,
         .forced_track = stream->forced_track,
@@ -516,7 +524,7 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs, bool
     bool sub = t2->type == STREAM_SUB;
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
-    if (ext1 != ext2) {
+    if (ext1 != ext2 && t1->image == t2->image) {
         if (t1->attached_picture && t2->attached_picture
             && opts->audio_display == 1)
             return !ext1;
@@ -607,6 +615,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
 {
     struct MPOpts *opts = mpctx->opts;
     int tid = opts->stream_id[order][type];
+    const struct demuxer *demuxer = mpctx->demuxer;
     if (tid == -2)
         return NULL;
     char **langs = process_langs(opts->stream_lang[type]);
@@ -621,12 +630,22 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                              mpctx->current_track[0][STREAM_AUDIO]->lang :
                              NULL;
     bool sub = type == STREAM_SUB;
+    int *preferred_programs = NULL;
+    int num_preferred_programs = 0;
+    struct track *cvt = mpctx->current_track[0][STREAM_VIDEO];
+    bool video_has_programs = cvt && cvt->stream && cvt->stream->num_program_ids;
+    bool no_edition_mapping = !demuxer || !demuxer->edition_is_track_mapping ||
+                              demuxer->num_editions <= 1;
+    if (type != STREAM_VIDEO && video_has_programs && no_edition_mapping) {
+        preferred_programs = cvt->stream->program_ids;
+        num_preferred_programs = cvt->stream->num_program_ids;
+    }
     struct track *pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track->type != type)
             continue;
-        if (!track_in_current_edition(mpctx, track))
+        if (!track_is_visible(mpctx, track))
             continue;
         if (track->user_tid == tid) {
             pick = track;
@@ -635,6 +654,13 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         if (track->no_auto_select)
             continue;
         if (!opts->autoload_files && track->is_external)
+            continue;
+        // Prefer tracks from the same programs as the selected video.
+        bool in_program = !num_preferred_programs || track->is_external ||
+                          !track->stream || !track->stream->num_program_ids;
+        for (int i = 0; i < num_preferred_programs && !in_program; i++)
+            in_program = track_has_program(track, preferred_programs[i]);
+        if (!in_program)
             continue;
         if (duplicate_track(mpctx, order, type, track))
             continue;
@@ -962,7 +988,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         } else {
             bstr parent = {0};
             if (mpctx->filename)
-                parent = bstr_strip_ext(bstr0(mp_basename(mpctx->filename)));
+                parent = mp_strip_ext(bstr0(mp_basename(mpctx->filename)));
             bstr title = bstr0(mp_basename(disp_filename));
             bstr_eatstart(&title, parent);
             bstr_eatstart(&title, bstr0("."));
@@ -1025,8 +1051,12 @@ void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel)
     struct subfn *list = find_external_files(mpctx->global, mpctx->filename, opts);
     talloc_steal(tmp, list);
 
-    int sc[STREAM_TYPE_COUNT] = {0};
+    // demux_edl allocates metadata track with type set to STREAM_TYPE_COUNT,
+    // count this too, even though it won't have any effect on the selection.
+    int sc[STREAM_TYPE_COUNT + 1] = {0};
     for (int n = 0; n < mpctx->num_tracks; n++) {
+        mp_assert(mpctx->tracks[n]->type >= 0);
+        mp_assert(mpctx->tracks[n]->type <= STREAM_TYPE_COUNT);
         if (!mpctx->tracks[n]->attached_picture)
             sc[mpctx->tracks[n]->type]++;
     }
@@ -1546,8 +1576,12 @@ done:
     cleanup_deassociated_complex_filters(mpctx);
 
     if (mpctx->playback_initialized) {
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            reselect_demux_stream(mpctx, mpctx->tracks[n], false);
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            if (t->stream && t->stream->dependent_track && !t->selected)
+                continue;
+            reselect_demux_stream(mpctx, t, false);
+        }
     }
 
     mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
@@ -1555,11 +1589,25 @@ done:
     return success ? 1 : -1;
 }
 
+// Match the enhancement-layer pairing on the vo_chain to the currently
+// selected video track. Idempotent. Decoupled from lavfi-complex internals.
+void update_vo_chain_el_pair(struct MPContext *mpctx)
+{
+    if (!mpctx->vo_chain || !mpctx->vo_chain->filter)
+        return;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    mp_output_chain_set_el_stream(mpctx->vo_chain->filter,
+        track ? sh_stream_dependent_sibling(track->stream) : NULL);
+}
+
 void update_lavfi_complex(struct MPContext *mpctx)
 {
     if (mpctx->playback_initialized) {
-        if (reinit_complex_filters(mpctx, false) != 0)
+        int r = reinit_complex_filters(mpctx, false);
+        if (r != 0)
             issue_refresh_seek(mpctx, MPSEEK_EXACT);
+        if (r > 0)
+            update_vo_chain_el_pair(mpctx);
     }
 }
 
@@ -1889,10 +1937,18 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     process_hooks(mpctx, "on_loaded");
-    for (int t = 0; t < STREAM_TYPE_COUNT; t++)
-        for (int n = 0; n < mpctx->num_tracks; n++)
-            if (mpctx->tracks[n]->type == t)
-                reselect_demux_stream(mpctx, mpctx->tracks[n], false);
+    for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type != t)
+                continue;
+            // Only reselect dependent tracks when explicitly selected by user
+            if (track->stream && track->stream->dependent_track &&
+                !track->selected)
+                continue;
+            reselect_demux_stream(mpctx, track, false);
+        }
+    }
 
     update_demuxer_properties(mpctx);
 
@@ -1901,6 +1957,9 @@ static void play_current_file(struct MPContext *mpctx)
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
+    // For lavfi-complex mode reinit_video_chain skips chain setup, so set up
+    // the enhancement-layer pairing here. No-op in non-lavfi-complex mode.
+    update_vo_chain_el_pair(mpctx);
 
     if (mpctx->encode_lavc_ctx) {
         if (mpctx->vo_chain)

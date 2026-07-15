@@ -26,3 +26,8 @@
 bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src);
 
 void mp_chmap_to_av_layout(AVChannelLayout *dst, const struct mp_chmap *src);
+
+// Like mp_chmap_to_av_layout(), but always emit AV_CHANNEL_ORDER_CUSTOM for
+// known layouts so that the original channel order is preserved.
+void mp_chmap_to_av_layout_custom(AVChannelLayout *dst,
+                                  const struct mp_chmap *src);

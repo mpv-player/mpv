@@ -32,9 +32,6 @@
 #include "player/core.h"
 #include "external_files.h"
 
-// Needed for mp_might_be_subtitle_file
-char **sub_exts;
-
 static int test_ext(MPOpts *opts, bstr ext)
 {
     if (bstr_in_list0(ext, opts->sub_auto_exts))
@@ -51,16 +48,6 @@ static int test_cover_filename(bstr fname, char **cover_files)
     int idx = bstr_find_in_list0(fname, cover_files, false);
     // This equals to 0 if not in list (idx == -1)
     return -idx - 1;
-}
-
-bool mp_might_be_subtitle_file(const char *filename)
-{
-    return bstr_in_list0(bstr_get_ext(bstr0(filename)), sub_exts);
-}
-
-void mp_update_subtitle_exts(struct MPOpts *opts)
-{
-    sub_exts = opts->sub_auto_exts;
 }
 
 static int compare_filename(const void *a, const void *b)
@@ -92,7 +79,7 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
     struct bstr f_fbname = bstr0(mp_basename(fname));
     struct bstr f_fname = mp_iconv_to_utf8(log, f_fbname,
                                            "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
-    struct bstr f_fname_noext = bstrdup(tmpmem, bstr_strip_ext(f_fname));
+    struct bstr f_fname_noext = bstrdup(tmpmem, mp_strip_ext(f_fname));
     struct bstr f_fname_trim = bstr_strip(f_fname_noext);
 
     if (f_fbname.start != f_fname.start)
@@ -114,8 +101,8 @@ static void append_dir_external_files(struct mpv_global *global, struct MPOpts *
         struct bstr dename = mp_iconv_to_utf8(log, den,
                                               "UTF-8-MAC", MP_NO_LATIN1_FALLBACK);
         // retrieve various parts of the filename
-        struct bstr tmp_fname_noext = bstrdup(tmpmem2, bstr_strip_ext(dename));
-        struct bstr tmp_fname_ext = bstr_get_ext(dename);
+        struct bstr tmp_fname_noext = bstrdup(tmpmem2, mp_strip_ext(dename));
+        struct bstr tmp_fname_ext = mp_get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
         if (den.start != dename.start)

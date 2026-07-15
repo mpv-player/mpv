@@ -157,6 +157,9 @@ bool bstr_split_tok(bstr str, const char *tok, bstr *out_left, bstr *out_right)
 
 struct bstr bstr_splice(struct bstr str, int start, int end)
 {
+    if (!str.len)
+        return str;
+
     if (start < 0)
         start += str.len;
     if (end < 0)
@@ -419,22 +422,6 @@ bool bstr_case_endswith(struct bstr s, struct bstr suffix)
 {
     struct bstr end = bstr_cut(s, -suffix.len);
     return end.len == suffix.len && bstrcasecmp(end, suffix) == 0;
-}
-
-struct bstr bstr_strip_ext(struct bstr str)
-{
-    int dotpos = bstrrchr(str, '.');
-    if (dotpos < 0)
-        return str;
-    return (struct bstr){str.start, dotpos};
-}
-
-struct bstr bstr_get_ext(struct bstr s)
-{
-    int dotpos = bstrrchr(s, '.');
-    if (dotpos < 0)
-        return (struct bstr){NULL, 0};
-    return bstr_splice(s, dotpos + 1, s.len);
 }
 
 static int h_to_i(unsigned char c)

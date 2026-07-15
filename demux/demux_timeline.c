@@ -59,6 +59,7 @@ struct virtual_source {
     struct timeline_par *tl;
 
     bool dash, no_clip, delay_open;
+    bool rebase;
 
     struct segment **segments;
     int num_segments;
@@ -250,6 +251,8 @@ static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
     reselect_streams(demuxer);
     if (!src->no_clip)
         demux_set_ts_offset(new->d, new->start - new->d_start);
+    else if (src->rebase)
+        demux_set_ts_offset(new->d, new->start - new->d->start_time);
     if (!src->no_clip || !init)
         demux_seek(new->d, start_pts, flags);
 
@@ -523,8 +526,8 @@ static void apply_meta(struct sh_stream *dst, struct sh_stream *src)
     dst->forced_track = src->forced_track;
     if (src->hls_bitrate)
         dst->hls_bitrate = src->hls_bitrate;
-    if (src->program_id >= 0)
-        dst->program_id = src->program_id;
+    for (int i = 0; i < src->num_program_ids; i++)
+        MP_TARRAY_APPEND(dst, dst->program_ids, dst->num_program_ids, src->program_ids[i]);
     dst->missing_timestamps = src->missing_timestamps;
     if (src->attached_picture)
         dst->attached_picture = src->attached_picture;
@@ -546,6 +549,7 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
 {
     struct priv *p = demuxer->priv;
 
+    struct MPOpts *mp_opts = mp_get_config_group(NULL, demuxer->global, &mp_opt_root);
     struct virtual_source *src = talloc_ptrtype(p, src);
     *src = (struct virtual_source){
         .tl = tl,
@@ -553,7 +557,9 @@ static bool add_tl(struct demuxer *demuxer, struct timeline_par *tl)
         .delay_open = tl->delay_open,
         .no_clip = tl->no_clip || tl->dash,
         .dts = MP_NOPTS_VALUE,
+        .rebase = tl->delay_open && mp_opts->rebase_start_time,
     };
+    TA_FREEP(&mp_opts);
 
     if (!tl->num_parts)
         return false;
@@ -653,37 +659,47 @@ static void build_editions(struct demuxer *demuxer)
     if (demuxer->num_editions > 0)
         return;
 
+    struct MPOpts *mp_opts = mp_get_config_group(NULL, demuxer->global, &mp_opt_root);
+    int hls_bitrate = mp_opts->hls_bitrate;
+    int edition_id = mp_opts->edition_id;
+    bool flatten_editions = mp_opts->flatten_editions;
+    TA_FREEP(&mp_opts);
+    if (flatten_editions) {
+        MP_VERBOSE(demuxer, "Flattening track-based editions.\n");
+        return;
+    }
+
     int num_streams = demux_get_num_stream(demuxer);
     for (int n = 0; n < num_streams; n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
-        if (sh->program_id < 0)
-            continue;
-
-        if (find_edition(demuxer, sh->program_id) >= 0)
-            continue;
-
-        struct demux_edition ed = {
-            .demuxer_id = sh->program_id,
-            .metadata = talloc_zero(demuxer, struct mp_tags),
-        };
-
-        const char *prefix = NULL;
-        bool prefix_is_video = false;
-        for (int i = n; i < num_streams; i++) {
-            struct sh_stream *s = demux_get_stream(demuxer, i);
-            if (s->program_id != sh->program_id || !s->title)
+        for (int pi = 0; pi < sh->num_program_ids; pi++) {
+            int program_id = sh->program_ids[pi];
+            if (find_edition(demuxer, program_id) >= 0)
                 continue;
-            if (!prefix || (!prefix_is_video && s->type == STREAM_VIDEO)) {
-                prefix = s->title;
-                prefix_is_video = s->type == STREAM_VIDEO;
-            }
-        }
-        char *title = demux_compose_edition_title(demuxer, demuxer,
-                                                  sh->program_id, prefix);
-        if (title)
-            mp_tags_set_str(ed.metadata, "title", title);
 
-        MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
+            struct demux_edition ed = {
+                .demuxer_id = program_id,
+                .metadata = talloc_zero(demuxer, struct mp_tags),
+            };
+
+            const char *prefix = NULL;
+            bool prefix_is_video = false;
+            for (int i = 0; i < num_streams; i++) {
+                struct sh_stream *s = demux_get_stream(demuxer, i);
+                if (!sh_stream_has_program(s, program_id) || !s->title)
+                    continue;
+                if (!prefix || (!prefix_is_video && s->type == STREAM_VIDEO)) {
+                    prefix = s->title;
+                    prefix_is_video = s->type == STREAM_VIDEO;
+                }
+            }
+            char *title = demux_compose_edition_title(demuxer, demuxer,
+                                                      program_id, prefix);
+            if (title)
+                mp_tags_set_str(ed.metadata, "title", title);
+
+            MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, ed);
+        }
     }
 
     if (demuxer->num_editions <= 1) {
@@ -693,48 +709,52 @@ static void build_editions(struct demuxer *demuxer)
 
     demuxer->edition_is_track_mapping = true;
 
-    struct MPOpts *mp_opts = mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
-    int hls_bitrate = mp_opts->hls_bitrate;
-    int edition_id = mp_opts->edition_id;
-    TA_FREEP(&mp_opts);
-
     int selected = -1;
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
         selected = edition_id;
 
     // Select initial edition by best variant bitrate, preferring editions
-    // whose video stream is marked as default.
+    // whose video stream is marked as default. Audio streams are considered
+    // too so that audio-only variants (e.g. HLS/DASH audio-only renditions)
+    // still get picked, but video always wins over audio.
     if (selected < 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
         bool best_default = false;
+        bool best_video = false;
         for (int n = 0; n < num_streams; n++) {
             struct sh_stream *sh = demux_get_stream(demuxer, n);
-            if (sh->type != STREAM_VIDEO || sh->program_id < 0)
+            if (sh->type != STREAM_VIDEO && sh->type != STREAM_AUDIO)
                 continue;
             if (!sh->default_track && (hls_bitrate < 0 || sh->hls_bitrate <= 0))
                 continue;
-            int e = find_edition(demuxer, sh->program_id);
-            if (e < 0)
-                continue;
-            bool ok = hls_bitrate < 0 || sh->hls_bitrate <= hls_bitrate;
-            bool better;
-            if (best < 0) {
-                better = true;
-            } else if (sh->default_track != best_default) {
-                better = sh->default_track;
-            } else if (ok != best_ok) {
-                better = ok;
-            } else {
-                better = ok ? sh->hls_bitrate > best_bitrate
-                            : sh->hls_bitrate < best_bitrate;
-            }
-            if (better) {
-                best = e;
-                best_bitrate = sh->hls_bitrate;
-                best_ok = ok;
-                best_default = sh->default_track;
+            for (int pi = 0; pi < sh->num_program_ids; pi++) {
+                int e = find_edition(demuxer, sh->program_ids[pi]);
+                if (e < 0)
+                    continue;
+                bool ok = hls_bitrate < 0 || sh->hls_bitrate <= hls_bitrate;
+                bool is_video = sh->type == STREAM_VIDEO;
+                bool better;
+                if (best < 0) {
+                    better = true;
+                } else if (is_video != best_video) {
+                    better = is_video;
+                } else if (sh->default_track != best_default) {
+                    better = sh->default_track;
+                } else if (ok != best_ok) {
+                    better = ok;
+                } else {
+                    better = ok ? sh->hls_bitrate > best_bitrate
+                                : sh->hls_bitrate < best_bitrate;
+                }
+                if (better) {
+                    best = e;
+                    best_bitrate = sh->hls_bitrate;
+                    best_ok = ok;
+                    best_default = sh->default_track;
+                    best_video = is_video;
+                }
             }
         }
         if (best >= 0)

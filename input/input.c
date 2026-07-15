@@ -33,6 +33,7 @@
 #include "osdep/io.h"
 #include "misc/rendezvous.h"
 
+#include "event.h"
 #include "input.h"
 #include "keycodes.h"
 #include "osdep/threads.h"
@@ -44,6 +45,7 @@
 #include "options/path.h"
 #include "mpv_talloc.h"
 #include "options/options.h"
+#include "player/external_files.h"
 #include "misc/bstr.h"
 #include "misc/node.h"
 #include "stream/stream.h"
@@ -157,6 +159,12 @@ struct input_ctx {
     // List currently active touch points
     struct touch_point *touch_points;
     int num_touch_points;
+
+    // List of last dropped files
+    int64_t dnd_ts;
+    enum mp_dnd_action dnd_action;
+    bstr *dropped_files;
+    int num_dropped_files;
 
     int tablet_x, tablet_y;
     // Indicates tablet tools in proximity / close to tablet surface
@@ -994,7 +1002,7 @@ static int find_touch_point_index(struct input_ctx *ictx, int id)
     return -1;
 }
 
-static void notify_touch_update(struct input_ctx *ictx)
+static void notify_event_update(struct input_ctx *ictx)
 {
     // queue dummy cmd so that touch-pos can notify observers
     mp_cmd_t *cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
@@ -1014,7 +1022,7 @@ static void update_touch_point(struct input_ctx *ictx, int idx, int id, int x, i
     // Emulate mouse input from the primary touch point (the first one added)
     if (ictx->opts->touch_emulate_mouse && idx == 0)
         set_mouse_pos(ictx, x, y, false);
-    notify_touch_update(ictx);
+    notify_event_update(ictx);
 }
 
 void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
@@ -1035,7 +1043,7 @@ void mp_input_add_touch_point(struct input_ctx *ictx, int id, int x, int y)
             set_mouse_pos(ictx, x, y, false);
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_DOWN, 1, false);
         }
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
@@ -1062,7 +1070,7 @@ void mp_input_remove_touch_point(struct input_ctx *ictx, int id)
         // Emulate MBTN_LEFT up if there are no touch points left
         if (ictx->opts->touch_emulate_mouse && ictx->num_touch_points == 0)
             feed_key(ictx, MP_MBTN_LEFT | MP_KEY_STATE_UP, 1, false);
-        notify_touch_update(ictx);
+        notify_event_update(ictx);
     }
     input_unlock(ictx);
 }
@@ -1274,6 +1282,39 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
                         test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
     input_unlock(ictx);
     return r;
+}
+
+void mp_input_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         enum mp_dnd_action action)
+{
+    input_lock(ictx);
+    TA_FREEP(&ictx->dropped_files);
+    ictx->dropped_files = talloc_zero_array(ictx, bstr, num_files);
+    ictx->num_dropped_files = num_files;
+    ictx->dnd_ts = mp_time_ns();
+    ictx->dnd_action = action;
+    for (int i = 0; i < num_files; i++)
+        ictx->dropped_files[i] = bstrdup(ictx->dropped_files, bstr0(files[i]));
+
+    notify_event_update(ictx);
+    input_unlock(ictx);
+}
+
+void mp_input_get_dropped_files(struct input_ctx *ictx, void *talloc_ctx,
+                                int64_t *dnd_ts,
+                                enum mp_dnd_action *dnd_action,
+                                char ***dropped_files)
+{
+    input_lock(ictx);
+    *dnd_ts = ictx->dnd_ts;
+    *dnd_action = ictx->dnd_action;
+    *dropped_files = NULL;
+    int num = 0;
+    for (int i = 0; i < ictx->num_dropped_files; i++)
+        MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num,
+                         bstrto0(talloc_ctx, ictx->dropped_files[i]));
+    MP_TARRAY_APPEND(talloc_ctx, *dropped_files, num, NULL);
+    input_unlock(ictx);
 }
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
@@ -1686,6 +1727,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
         .wakeup_ctx = wakeup_ctx,
         .active_sections = talloc_array(ictx, struct active_section, 0),
         .touch_points = talloc_array(ictx, struct touch_point, 0),
+        .dnd_action = DND_NONE,
     };
 
     ictx->opts = ictx->opts_cache->opts;
@@ -2012,43 +2054,6 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
         return -1;
     }
     return 0;
-}
-
-#define CMD_BUFFER (4 * 4096)
-
-void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
-{
-    struct mp_input_src_internal *in = src->in;
-    if (!in->cmd_buffer)
-        in->cmd_buffer = talloc_size(in, CMD_BUFFER);
-    while (len) {
-        char *next = memchr(buf, '\n', len);
-        bool term = !!next;
-        next = next ? next + 1 : buf + len;
-        size_t copy = next - buf;
-        bool overflow = copy > CMD_BUFFER - in->cmd_buffer_size;
-        if (overflow || in->drop) {
-            in->cmd_buffer_size = 0;
-            in->drop = overflow || !term;
-            MP_WARN(src, "Dropping overlong line.\n");
-        } else {
-            memcpy(in->cmd_buffer + in->cmd_buffer_size, buf, copy);
-            in->cmd_buffer_size += copy;
-            buf += copy;
-            len -= copy;
-            if (term) {
-                bstr s = {in->cmd_buffer, in->cmd_buffer_size};
-                s = bstr_strip(s);
-                struct mp_cmd *cmd = mp_input_parse_cmd_str(src->log, s, "<>");
-                if (cmd) {
-                    input_lock(src->input_ctx);
-                    queue_cmd(src->input_ctx, cmd);
-                    input_unlock(src->input_ctx);
-                }
-                in->cmd_buffer_size = 0;
-            }
-        }
-    }
 }
 
 void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay)

@@ -32,6 +32,7 @@
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 #include "osdep/als.h"
+#include "demux/stheader.h"
 
 // definitions used internally by the core player code
 
@@ -114,7 +115,6 @@ struct track {
     int demuxer_id; // same as stream->demuxer_id. -1 if not set.
     int ff_index; // same as stream->ff_index, or 0.
     int hls_bitrate; // same as stream->hls_bitrate. 0 if not set.
-    int program_id; // same as stream->program_id. -1 if not set.
 
     char *title;
     bool default_track, forced_track, dependent_track;
@@ -152,6 +152,12 @@ struct track {
     struct ao_chain *ao_c;
     struct mp_pin *sink;
 };
+
+// Returns true if the track belongs to the given program.
+static inline bool track_has_program(const struct track *track, int program_id)
+{
+    return track->stream && sh_stream_has_program(track->stream, program_id);
+}
 
 // Summarizes video filtering and output.
 struct vo_chain {
@@ -263,6 +269,7 @@ typedef struct MPContext {
     char *term_osd_title;
     char *last_window_title;
     struct voctrl_playback_state vo_playback_state;
+    int64_t vo_playback_state_time;
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only
@@ -551,7 +558,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
-bool track_in_current_edition(struct MPContext *mpctx, struct track *track);
+bool track_is_visible(struct MPContext *mpctx, struct track *track);
 void print_track_list(struct MPContext *mpctx, const char *msg);
 void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
                            bool refresh_only);
@@ -561,6 +568,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
 void prefetch_next(struct MPContext *mpctx);
 void update_lavfi_complex(struct MPContext *mpctx);
+void update_vo_chain_el_pair(struct MPContext *mpctx);
 
 // main.c
 int mp_initialize(struct MPContext *mpctx, char **argv);

@@ -40,6 +40,7 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 500M
+      DOWNLOAD_CACHE: ${{ github.workspace }}/.ccache/downloads
       TARGET: ${{ matrix.arch }}-w64-mingw32
       RUST_TARGET: ${{ matrix.arch }}-pc-windows-gnu
     strategy:
@@ -51,14 +52,14 @@ jobs:
           - arch: x86_64
             wine: wine64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Get time
         id: get_time
         run: echo "timestamp=`date +%s%N`" >> $GITHUB_OUTPUT
 
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
@@ -122,7 +123,7 @@ jobs:
           path: artifact/*
 
       - name: Save Cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -156,7 +157,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Get time
         id: get_time
@@ -164,7 +165,7 @@ jobs:
           "timestamp=$((Get-Date).Ticks)" >> $env:GITHUB_OUTPUT
 
       - name: Restore cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ matrix.target }}-${{ steps.get_time.outputs.timestamp }}
@@ -260,7 +261,7 @@ jobs:
             build/mpv.pdb
 
       - name: Save Cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -284,7 +285,7 @@ jobs:
             swift: "-target arm64-apple-macosx10.15"
             target: "10.15"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Remove stray upstream python binary symlinks under /usr/local
         run: |
@@ -310,7 +311,7 @@ jobs:
             brew update
           fi
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
-          brew install -q autoconf automake pkgconf libtool python freetype fribidi little-cms2 \
+          brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
           brew link ffmpeg-full
@@ -380,7 +381,7 @@ jobs:
             ld: "lld"
             args: "-Db_lto=true -Db_lto_mode=thin"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build with meson
         id: build
@@ -410,7 +411,7 @@ jobs:
         CC: "clang"
         CXX: "clang++"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Build with meson
         id: build
@@ -433,12 +434,13 @@ jobs:
       # Musl support is an added bonus.
       image: alpine:3.21
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
           apk update
           apk add \
               binutils \
+              curl-dev \
               ffmpeg-dev \
               gcc \
               git \
@@ -484,15 +486,16 @@ jobs:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Test in OpenBSD VM
-      uses: cross-platform-actions/action@v1.0.0
+      uses: cross-platform-actions/action@v1.3.0
       with:
         operating_system: openbsd
         version: '7.8'
         run: |
             sudo pkg_add -U \
                 cmake \
+                curl \
                 ffmpeg \
                 git \
                 libarchive \
@@ -530,17 +533,18 @@ jobs:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v1.0.0
+      uses: cross-platform-actions/action@v1.3.0
       with:
         operating_system: freebsd
-        version: '15.0'
+        version: '15.1'
         run: |
             sudo pkg update
             sudo pkg install -y \
                 alsa-lib \
                 cmake \
+                curl \
                 evdev-proto \
                 ffmpeg \
                 git \
@@ -613,7 +617,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.sys }}
@@ -625,6 +629,7 @@ jobs:
             ca-certificates:p
             cc:p
             cppwinrt:p
+            curl:p
             ffmpeg:p
             lcms2:p
             libarchive:p
@@ -665,8 +670,117 @@ jobs:
         id: tests
         run: |
           meson test -C build
+        env:
+          GGML_NO_BACKTRACE: 1
 
       - name: Print meson test log
         if: ${{ failure() && steps.tests.outcome == 'failure' }}
         run: |
           cat ./build/meson-logs/testlog.txt
+
+  publish:
+    name: Publish git release
+    needs: [mingw, win32, macos]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
+        github.repository == 'mpv-player/mpv'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    concurrency:
+      group: publish-git
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Publish to git release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          tag=git-release
+          base_url="https://github.com/$GH_REPO/releases/download/$tag"
+
+          artifacts=$(gh api "repos/{owner}/{repo}/actions/runs/${{ github.run_id }}/artifacts")
+
+          # Attach every build artifact unchanged; the notes link to them with
+          # labels derived from the verbose names.
+          mkdir -p release
+          jq -r '.artifacts[] | "\(.id)\t\(.name)"' <<< "$artifacts" |
+          while IFS=$'\t' read -r id name; do
+            gh api "repos/{owner}/{repo}/actions/artifacts/$id/zip" > "release/$name.zip"
+          done
+
+          section() {
+            jq -r --arg url "$base_url" --arg re "$1" '
+              def pretty:
+                (if   test("i686")    then "i686"
+                 elif test("aarch64") then "arm64"
+                 elif test("-arm$")   then "arm64"
+                 elif test("intel")   then "x86_64"
+                 else "x86_64" end) as $arch
+                | [ (if test("mingw") then "GCC" elif test("msvc") then "Clang" else empty end),
+                    (if test("macos") then "macOS " + capture("macos-(?<v>[0-9]+)").v else empty end),
+                    (if test("-pdb") then "debug symbols" else empty end) ] as $q
+                | $arch + (if ($q | length) > 0 then " (" + ($q | join(", ")) + ")" else "" end);
+              # primary builds first (x86_64, arm64, i686; Clang before GCC), debug symbols last
+              def rank:
+                [ (if test("-pdb") then 1 else 0 end),
+                  (if test("x86_64|intel") then 0 elif test("i686") then 2 else 1 end),
+                  (if test("mingw") then 1 else 0 end),
+                  (if test("macos") then (capture("macos-(?<v>[0-9]+)").v | tonumber) else 0 end) ];
+              [ .artifacts[] | select(.name | test($re)) ] | sort_by(.name | rank)
+              | map("* [\(.name | pretty)](\($url)/\(.name).zip)") | join("\n")
+            ' <<< "$artifacts"
+          }
+
+          # Match the version string baked into the build (see common/meson.build).
+          version=$(git describe --abbrev=9 --tags --dirty --match "v0.*")
+          notes=$(cat <<EOF
+          Automated development build of the latest \`master\` branch.
+
+          - Version: \`$version\`
+          - Commit: ${{ github.sha }}
+          - Built: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+
+          ### Windows
+
+          $(section 'w64|msvc')
+
+          ### macOS
+
+          $(section 'macos')
+
+          > [!WARNING]
+          > These are untested development builds of the very latest \`master\`.
+          > They are **not** official releases. For stable builds see the
+          > [latest release](https://github.com/$GH_REPO/releases/latest).
+          EOF
+          )
+
+          # Create the release once (which also creates the tag), then only edit
+          # it in place so watchers aren't notified on every master push. Stale
+          # assets are dropped first since their names embed the run id.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release view "$tag" --json assets --jq '.assets[].name' |
+            while read -r asset; do
+              gh release delete-asset "$tag" "$asset" --yes
+            done
+            gh release edit "$tag" \
+              --prerelease \
+              --latest=false \
+              --title "mpv development build" \
+              --notes "$notes"
+            gh release upload "$tag" release/*
+          else
+            gh release create "$tag" \
+              --target "$GITHUB_SHA" \
+              --prerelease \
+              --latest=false \
+              --title "mpv development build" \
+              --notes "$notes" \
+              release/*
+          fi

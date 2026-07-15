@@ -22,6 +22,7 @@
 
 #include "common/common.h"
 #include "misc/ctype.h"
+#include "misc/path_utils.h"
 
 #define L(s) { #s, sizeof(#s) - 1 }
 
@@ -299,7 +300,7 @@ done:
 
 bstr mp_guess_lang_from_filename(bstr name, int *lang_start, enum track_flags *flags)
 {
-    name = bstr_strip(bstr_strip_ext(name));
+    name = bstr_strip(mp_strip_ext(name));
 
     if (lang_start)
         *lang_start = -1;

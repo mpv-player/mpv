@@ -45,6 +45,7 @@
 #include "options/options.h"
 #include "options/path.h"
 #include "stream.h"
+#include "osdep/io.h"
 #include "osdep/timer.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
@@ -203,7 +204,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             return STREAM_UNSUPPORTED;
         int chapter = *(double *)arg;
         double time = MP_NOPTS_VALUE;
-        if (chapter >= 0 || chapter < ti->chapter_count)
+        if (chapter >= 0 && chapter < ti->chapter_count)
             time = BD_TIME_TO_MP(ti->chapters[chapter].start);
         if (time == MP_NOPTS_VALUE)
             return STREAM_ERROR;

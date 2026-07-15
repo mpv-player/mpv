@@ -87,7 +87,7 @@ static int cuda_init(struct ra_hwdec *hw)
             continue;
 
         if (!initialized) {
-            ret = cuda_load_functions(&p->cu, NULL);
+            ret = cuda_load_functions(&p->cu, hw);
             if (ret != 0) {
                 MP_MSG(hw, level, "Failed to load CUDA symbols\n");
                 return -1;
@@ -193,8 +193,10 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         return ret;
 
     for (int n = 0; n < desc.num_planes; n++) {
-        if (!p_owner->ext_init(mapper, desc.planes[n], n))
+        if (!p_owner->ext_init(mapper, desc.planes[n], n)) {
+            ret = -1;
             goto error;
+        }
     }
 
  error:

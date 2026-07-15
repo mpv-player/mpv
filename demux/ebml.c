@@ -211,7 +211,7 @@ int ebml_resync_cluster(struct mp_log *log, stream_t *s)
 
 
 #define EVALARGS(F, ...) F(__VA_ARGS__)
-#define E(str, N, type) const struct ebml_elem_desc ebml_ ## N ## _desc = { str, type };
+#define E(str, N, type, length) const struct ebml_elem_desc ebml_ ## N ## _desc = { str, type, length };
 #define E_SN(str, count, N) const struct ebml_elem_desc ebml_ ## N ## _desc = { str, EBML_TYPE_SUBELEMENTS, sizeof(struct ebml_ ## N), count, (const struct ebml_field_desc[]){
 #define E_S(str, count) EVALARGS(E_SN, str, count, N)
 #define FN(id, name, multiple, N) { id, multiple, offsetof(struct ebml_ ## N, name), offsetof(struct ebml_ ## N, n_ ## name), &ebml_##name##_desc},
@@ -543,7 +543,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_STR:
             if (length > 1024 * 1024) {
                 MP_ERR(ctx, "Not reading overly long string element.\n");
-                break;
+                goto error;
             }
             char **strptr;
             GETPTR(strptr, char *);
@@ -554,7 +554,12 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_BINARY:;
             if (length > 0x80000000) {
                 MP_ERR(ctx, "Not reading overly long EBML element.\n");
-                break;
+                goto error;
+            }
+            if (ed->size && length != ed->size) {
+                MP_WARN(ctx, "%s invalid length %"PRIu64", ignoring\n",
+                        ed->name, length);
+                goto error;
             }
             struct bstr *binptr;
             GETPTR(binptr, struct bstr);

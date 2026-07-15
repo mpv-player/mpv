@@ -55,6 +55,7 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "demux.h"
+#include "dovi_split.h"
 #include "packet_pool.h"
 #include "stheader.h"
 #include "ebml.h"
@@ -145,6 +146,9 @@ typedef struct mkv_track {
 
     bool require_keyframes;
 
+    // VfW mode: block timestamps are real DTS, route them to the packet DTS.
+    bool block_dts;
+
     /* stuff for realaudio braincancer */
     double ra_pts;              /* previous audio timestamp */
     uint32_t sub_packet_size;   ///< sub packet size, per stream
@@ -163,6 +167,8 @@ typedef struct mkv_track {
     size_t last_index_entry;
 
     AVDOVIDecoderConfigurationRecord *dovi_config;
+    bstr hvce;
+    struct mp_dovi_split *dovi_split;
 } mkv_track_t;
 
 typedef struct mkv_index {
@@ -464,17 +470,11 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     }
     if (info.n_segment_uid) {
         size_t len = info.segment_uid.len;
-        if (len != sizeof(demuxer->matroska_data.uid.segment)) {
-            MP_INFO(demuxer, "segment uid invalid length %zu\n", len);
-        } else {
-            memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start,
-                   len);
-            MP_DBG(demuxer, "| + segment uid");
-            for (size_t i = 0; i < len; i++)
-                MP_DBG(demuxer, " %02x",
-                       demuxer->matroska_data.uid.segment[i]);
-            MP_DBG(demuxer, "\n");
-        }
+        memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start, len);
+        MP_DBG(demuxer, "| + segment uid");
+        for (size_t i = 0; i < len; i++)
+            MP_DBG(demuxer, " %02x", demuxer->matroska_data.uid.segment[i]);
+        MP_DBG(demuxer, "\n");
     }
     if (demuxer->params && demuxer->params->matroska_wanted_uids) {
         if (info.n_segment_uid) {
@@ -744,7 +744,7 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         track->v_height = video->pixel_height;
         MP_DBG(demuxer, "|   + Pixel height: %"PRIu32"\n", track->v_height);
     }
-    if (video->n_colour_space && video->colour_space.len == 4) {
+    if (video->n_colour_space) {
         uint8_t *d = (uint8_t *)&video->colour_space.start[0];
         track->colorspace = d[0] | ((uint32_t)d[1] << 8) | ((uint32_t)d[2] << 16) | ((uint32_t)d[3] << 24);
         MP_DBG(demuxer, "|   + Colorspace: %#"PRIx32"\n", track->colorspace);
@@ -837,9 +837,13 @@ static void parse_block_addition_mapping(struct demuxer *demuxer,
         switch (block_addition_mapping->block_add_id_type) {
         case MATROSKA_BLOCK_ADD_ID_TYPE_ITU_T_T35:
         break;
-        case MKBETAG('a','v','c','E'):
         case MKBETAG('h','v','c','E'):
-            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback is not supported.\n");
+            if (block_addition_mapping->n_block_add_id_extra_data)
+                track->hvce = bstrdup(track, block_addition_mapping->block_add_id_extra_data);
+        break;
+        case MKBETAG('a','v','c','E'):
+            MP_WARN(demuxer, "Dolby Vision enhancement-layer playback for AVC "
+                    "is not supported.\n");
         break;
         case MKBETAG('d','v','c','C'):
         case MKBETAG('d','v','v','C'):
@@ -867,6 +871,7 @@ static void demux_mkv_free_trackentry(mkv_track_t *track)
 {
     talloc_free(track->parser_tmp);
     av_freep(&track->dovi_config);
+    TA_FREEP(&track->dovi_split);
     talloc_free(track);
 }
 
@@ -1232,22 +1237,15 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             if (ca->n_chapter_segment_uid) {
                 chapter.has_segment_uid = true;
                 int len = ca->chapter_segment_uid.len;
-                if (len != sizeof(chapter.uid.segment))
-                    MP_MSG(demuxer, warn_level,
-                           "Chapter segment uid bad length %d\n", len);
-                else {
-                    memcpy(chapter.uid.segment, ca->chapter_segment_uid.start,
-                           len);
-                    if (ca->n_chapter_segment_edition_uid)
-                        chapter.uid.edition = ca->chapter_segment_edition_uid;
-                    else
-                        chapter.uid.edition = 0;
-                    MP_DBG(demuxer, "Chapter segment uid ");
-                    for (int n = 0; n < len; n++)
-                        MP_DBG(demuxer, "%02x ",
-                               chapter.uid.segment[n]);
-                    MP_DBG(demuxer, "\n");
-                }
+                memcpy(chapter.uid.segment, ca->chapter_segment_uid.start, len);
+                if (ca->n_chapter_segment_edition_uid)
+                    chapter.uid.edition = ca->chapter_segment_edition_uid;
+                else
+                    chapter.uid.edition = 0;
+                MP_DBG(demuxer, "Chapter segment uid ");
+                for (int n = 0; n < len; n++)
+                    MP_DBG(demuxer, "%02x ", chapter.uid.segment[n]);
+                MP_DBG(demuxer, "\n");
             }
 
             MP_DBG(demuxer, "Chapter %u from %02d:%02d:%02d.%09d "
@@ -1551,13 +1549,14 @@ static void add_coverart(struct demuxer *demuxer)
 }
 
 static void init_track(demuxer_t *demuxer, mkv_track_t *track,
-                       struct sh_stream *sh)
+                       struct sh_stream *sh, int idx)
 {
     track->stream = sh;
 
     if (track->language && (strcmp(track->language, "und") != 0))
         sh->lang = track->language;
 
+    sh->ff_index = idx; // Emulate lavf track index. For backward compatibility.
     sh->demuxer_id = track->tnum;
     sh->title = track->name;
     sh->default_track = track->default_track;
@@ -1568,9 +1567,9 @@ static void init_track(demuxer_t *demuxer, mkv_track_t *track,
     sh->commentary_track = track->commentary_track;
 }
 
-static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track);
-static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track);
-static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track);
+static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track, int idx);
+static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track, int idx);
+static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track, int idx);
 
 static void display_create_tracks(demuxer_t *demuxer)
 {
@@ -1579,13 +1578,13 @@ static void display_create_tracks(demuxer_t *demuxer)
     for (int i = 0; i < mkv_d->num_tracks; i++) {
         switch (mkv_d->tracks[i]->type) {
         case MATROSKA_TRACK_VIDEO:
-            demux_mkv_open_video(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_video(demuxer, mkv_d->tracks[i], i);
             break;
         case MATROSKA_TRACK_AUDIO:
-            demux_mkv_open_audio(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_audio(demuxer, mkv_d->tracks[i], i);
             break;
         case MATROSKA_TRACK_SUBTITLE:
-            demux_mkv_open_sub(demuxer, mkv_d->tracks[i]);
+            demux_mkv_open_sub(demuxer, mkv_d->tracks[i], i);
             break;
         }
     }
@@ -1621,12 +1620,12 @@ static void avcodec_par_destructor(void *p)
     avcodec_parameters_free(p);
 }
 
-static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     unsigned char *extradata = NULL;
     unsigned int extradata_size = 0;
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
     struct mp_codec_params *sh_v = sh->codec;
 
     sh_v->bits_per_coded_sample = 24;
@@ -1647,7 +1646,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
         mp_set_codec_from_tag(sh_v);
-        sh_v->avi_dts = true;
+        track->block_dts = true;
     } else if (track->private_size >= RVPROPERTIES_SIZE
                && (!strcmp(track->codec_id, "V_REAL/RV10")
                 || !strcmp(track->codec_id, "V_REAL/RV20")
@@ -1688,6 +1687,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
+    } else if (strcmp(track->codec_id, "V_VC1") == 0) {
+        if (track->private_size >= 7 && (track->private_data[0] & 0xf0) == 0xc0) {
+            extradata = track->private_data + 7;
+            extradata_size = track->private_size - 7;
+        }
+        sh_v->codec = "vc1";
     } else {
         for (int i = 0; mkv_video_tags[i][0]; i++) {
             if (!strcmp(mkv_video_tags[i][0], track->codec_id)) {
@@ -1802,10 +1807,32 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         sh_v->dovi = true;
         sh_v->dv_level = track->dovi_config->dv_level;
         sh_v->dv_profile = track->dovi_config->dv_profile;
+        sh_v->dv_el_present = track->dovi_config->bl_present_flag &&
+                              track->dovi_config->el_present_flag;
     }
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(62, 35, 100)
+    if (track->hvce.len > 0) {
+        void *data = av_memdup(track->hvce.start, track->hvce.len);
+        MP_HANDLE_OOM(data);
+        if (!av_packet_side_data_add(&sh_v->lav_codecpar->coded_side_data,
+                                     &sh_v->lav_codecpar->nb_coded_side_data,
+                                     AV_PKT_DATA_HEVC_CONF,
+                                     data, track->hvce.len, 0))
+        {
+            MP_ERR(demuxer, "Failed to attach hvcE configuration record to "
+                   "codec parameters for track %d!\n", track->tnum);
+            av_free(data);
+        }
+    }
+#endif
 
 done:
     demux_add_sh_stream(demuxer, sh);
+
+    // Profile 7 NALU-interleaved
+    if (sh_v->dv_el_present)
+        track->dovi_split = mp_dovi_split_create(demuxer, sh);
 
     return 0;
 }
@@ -1899,10 +1926,10 @@ static const char *const mkv_audio_tags[][2] = {
     { NULL },
 };
 
-static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
     struct mp_codec_params *sh_a = sh->codec;
 
     if (track->private_size > 0x1000000)
@@ -2182,7 +2209,7 @@ static const char *const mkv_sub_tag[][2] = {
     {0}
 };
 
-static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
+static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track, int idx)
 {
     const char *subtitle_type = NULL;
     for (int n = 0; mkv_sub_tag[n][0]; n++) {
@@ -2196,7 +2223,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         return 1;
 
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
-    init_track(demuxer, track, sh);
+    init_track(demuxer, track, sh, idx);
 
     sh->codec->codec = subtitle_type;
     bstr in = (bstr){track->private_data, track->private_size};
@@ -2248,6 +2275,51 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         MP_ERR(demuxer, "Subtitle type '%s' is not supported.\n", track->codec_id);
 
     return 0;
+}
+
+static void pair_dovi_tracks(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    mkv_track_t *bl_track = NULL, *el_track = NULL;
+
+    for (int i = 0; i < mkv_d->num_tracks; i++) {
+        mkv_track_t *track = mkv_d->tracks[i];
+        if (!track->stream || track->stream->type != STREAM_VIDEO ||
+            !track->codec_id || strcmp(track->codec_id, "V_MPEGH/ISO/HEVC"))
+            continue;
+
+        AVDOVIDecoderConfigurationRecord *dovi = track->dovi_config;
+        if (dovi && dovi->dv_profile == 7 && dovi->el_present_flag) {
+            // bl_present_flag is not checked, because the files in the
+            // wild set it to 1 for EL stream, while the expectation, based
+            // on Dolby spec for MPEG-TS would be that it's set to 0.
+            // Ignore this, if we have EL track and single other video track
+            // it's safe to assume it's BL.
+            if (el_track)
+                return;
+            el_track = track;
+            continue;
+        }
+
+        if (bl_track)
+            return;
+        bl_track = track;
+    }
+
+    if (!el_track || !bl_track)
+        return;
+
+    struct sh_stream *bl_sh = bl_track->stream;
+    struct sh_stream *el_sh = el_track->stream;
+
+    // Group storage is attached to the BL so its lifetime tracks the demuxer.
+    struct sh_stream_group *group = talloc_zero(bl_sh, struct sh_stream_group);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, bl_sh);
+    MP_TARRAY_APPEND(group, group->members, group->num_members, el_sh);
+
+    bl_sh->group = group;
+    el_sh->group = group;
+    el_sh->dependent_track = true;
 }
 
 // Workaround for broken files that don't set attached_picture
@@ -2531,6 +2603,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     MP_VERBOSE(demuxer, "All headers are parsed!\n");
 
     display_create_tracks(demuxer);
+    pair_dovi_tracks(demuxer);
     add_coverart(demuxer);
     process_tags(demuxer);
 
@@ -2749,6 +2822,7 @@ static void mkv_seek_reset(demuxer_t *demuxer)
             av_parser_close(track->av_parser);
         track->av_parser = NULL;
         avcodec_free_context(&track->av_parser_codec);
+        mp_dovi_split_reset(track->dovi_split);
     }
 
     for (int n = 0; n < mkv_d->num_blocks; n++)
@@ -2896,7 +2970,16 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
     }
 
     if (!track->parse || !track->av_parser || !track->av_parser_codec) {
+        struct demux_packet *el_dp = NULL;
+        struct sh_stream *el_sh = NULL;
+        if (track->dovi_split) {
+            el_sh = mp_dovi_split_el_stream(track->dovi_split);
+            if (el_sh && demux_stream_is_selected(el_sh))
+                el_dp = mp_dovi_split_dispatch(track->dovi_split, dp);
+        }
         add_packet(demuxer, stream, dp);
+        if (el_dp)
+            add_packet(demuxer, el_sh, el_dp);
         return;
     }
 
@@ -3034,7 +3117,13 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     struct sh_stream *stream = track->stream;
     bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
-    if (!demux_stream_is_selected(stream))
+    // Keep BL blocks flowing to feed the Dolby Vision splitter when its
+    // virtual EL is selected, even if the BL itself isn't selected.
+    struct sh_stream *split_el = track->dovi_split
+                                    ? mp_dovi_split_el_stream(track->dovi_split)
+                                    : NULL;
+    bool need_for_split = split_el && demux_stream_is_selected(split_el);
+    if (!demux_stream_is_selected(stream) && !need_for_split)
         return 0;
 
     current_pts = tc / 1e9 - track->codec_delay;
@@ -3108,7 +3197,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->pts = current_pts + i * track->default_duration;
                 dp->keyframe = keyframe;
             }
-            if (stream->codec->avi_dts)
+            if (track->block_dts)
                 MPSWAP(double, dp->pts, dp->dts);
             if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;

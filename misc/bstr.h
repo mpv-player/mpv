@@ -222,8 +222,6 @@ bool bstr_eatend(struct bstr *s, struct bstr prefix);
 
 bool bstr_case_startswith(struct bstr s, struct bstr prefix);
 bool bstr_case_endswith(struct bstr s, struct bstr suffix);
-struct bstr bstr_strip_ext(struct bstr str);
-struct bstr bstr_get_ext(struct bstr s);
 
 static inline struct bstr bstr_cut(struct bstr str, int n)
 {

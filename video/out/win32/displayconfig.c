@@ -138,3 +138,39 @@ end:
     talloc_free(ctx);
     return freq;
 }
+
+double mp_w32_displayconfig_get_sdr_white_level(const wchar_t *device)
+{
+    void *ctx = talloc_new(NULL);
+    double white_level = 0.0;
+
+    UINT32 num_paths;
+    DISPLAYCONFIG_PATH_INFO* paths;
+    UINT32 num_modes;
+    DISPLAYCONFIG_MODE_INFO* modes;
+    if (get_config(ctx, &num_paths, &paths, &num_modes, &modes))
+        goto end;
+
+    DISPLAYCONFIG_PATH_INFO* path;
+    if (!(path = get_path(num_paths, paths, device)))
+        goto end;
+
+    DISPLAYCONFIG_SDR_WHITE_LEVEL sdr_white_level = {
+        .header = {
+            .size = sizeof(sdr_white_level),
+            .type = DISPLAYCONFIG_DEVICE_INFO_GET_SDR_WHITE_LEVEL,
+            .adapterId = path->targetInfo.adapterId,
+            .id = path->targetInfo.id,
+        }
+    };
+    if (DisplayConfigGetDeviceInfo(&sdr_white_level.header) != ERROR_SUCCESS)
+        goto end;
+
+    // SDRWhiteLevel is a multiplier of the standard 80 nits SDR white level,
+    // in units of 1/1000
+    white_level = sdr_white_level.SDRWhiteLevel * 80 / 1000.0;
+
+end:
+    talloc_free(ctx);
+    return white_level;
+}

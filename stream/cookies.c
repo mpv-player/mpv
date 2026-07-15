@@ -81,7 +81,9 @@ static struct cookie_list_type *load_cookies_from(void *ctx,
                                                   const char *filename)
 {
     mp_verbose(log, "Loading cookie file: %s\n", filename);
-    bstr data = stream_read_file(filename, ctx, global, 1000000);
+    bstr data = stream_read_file2(filename, ctx,
+                                  STREAM_READ_FILE_FLAGS_DEFAULT & ~STREAM_LOCAL_FS_ONLY,
+                                  global, 1000000);
     if (!data.start) {
         mp_verbose(log, "Error reading\n");
         return NULL;

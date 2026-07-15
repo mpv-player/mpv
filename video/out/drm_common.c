@@ -1043,6 +1043,7 @@ bool vo_drm_init(struct vo *vo)
         .mode = {{0}},
         .crtc_id = -1,
         .card_no = -1,
+        .fd = -1,
     };
 
     drm->vt_switcher_active = vt_switcher_init(&drm->vt_switcher, drm->log);
@@ -1156,7 +1157,8 @@ void vo_drm_uninit(struct vo *vo)
     if (drm->atomic_context)
         drm_atomic_destroy_context(drm->atomic_context);
 
-    close(drm->fd);
+    if (drm->fd >= 0)
+        close(drm->fd);
     talloc_free(drm);
     vo->drm = NULL;
 }

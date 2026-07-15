@@ -7,6 +7,7 @@
 #define MP_EXPAND_ARGS(...) __VA_ARGS__
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#include <stdckdint.h>
 #define MP_NORETURN [[noreturn]]
 #define MP_FALLTHROUGH [[fallthrough]]
 #define MP_WARN_UNUSED_RESULT [[nodiscard]]
@@ -41,8 +42,14 @@
 #define MP_NONSTRING
 #endif
 
+#if __has_attribute(no_sanitize)
+#define MP_NO_ASAN __attribute__((no_sanitize("address")))
+#else
+#define MP_NO_ASAN
+#endif
+
 #ifndef NDEBUG
-#define MP_ASSERT_UNREACHABLE() assert(!"unreachable")
+#define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
 #elif __has_builtin(__builtin_unreachable)
 #define MP_ASSERT_UNREACHABLE() __builtin_unreachable()
 #elif defined(_MSC_VER)
@@ -76,6 +83,12 @@
 #define MP_SCANF_ATTRIBUTE(a1, a2) __attribute__((format(MP_SCANF_FORMAT, a1, a2)))
 #else
 #define MP_SCANF_ATTRIBUTE(a1, a2)
+#endif
+
+#if defined(__STDC_VERSION_STDCKDINT_H__) && __STDC_VERSION_STDCKDINT_H__ >= 202311L
+#define MP_CKD_MUL(result, a, b) ckd_mul(result, a, b)
+#else
+#define MP_CKD_MUL(result, a, b) __builtin_mul_overflow(a, b, result)
 #endif
 
 #endif

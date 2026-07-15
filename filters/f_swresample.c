@@ -44,8 +44,6 @@ struct priv {
     struct mp_aframe *pre_out_fmt; // format before final conversion
     struct SwrContext *avrctx_out; // for output channel reordering
     struct mp_resample_opts *opts; // opts requested by the user
-    // At least libswresample keeps a pointer around for this:
-    int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
     struct mp_aframe_pool *reorder_buffer;
     struct mp_aframe_pool *out_pool;
@@ -107,53 +105,6 @@ static void close_lavrr(struct priv *p)
 static int rate_from_speed(int rate, double speed)
 {
     return lrint(rate * speed);
-}
-
-static const struct mp_chmap fudge_pairs[][2] = {
-    {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
-    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
-    {MP_CHMAP2(SDL, SDR), MP_CHMAP2(SL,  SR)},
-    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(SDL, SDR)},
-};
-
-// Modify out_layout and return the new value. The intention is reducing the
-// loss libswresample's rematrixing will cause by exchanging similar, but
-// strictly speaking incompatible channel pairs. For example, 7.1 should be
-// changed to 7.1(wide) without dropping the SL/SR channels. (We still leave
-// it to libswresample to create the remix matrix.)
-static uint64_t fudge_layout_conversion(struct priv *p,
-                                        uint64_t in, uint64_t out)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(fudge_pairs); n++) {
-        uint64_t a = mp_chmap_to_lavc(&fudge_pairs[n][0]);
-        uint64_t b = mp_chmap_to_lavc(&fudge_pairs[n][1]);
-        if ((in & a) == a && (in & b) == 0 &&
-            (out & a) == 0 && (out & b) == b)
-        {
-            out = (out & ~b) | a;
-
-            MP_VERBOSE(p, "Fudge: %s -> %s\n",
-                       mp_chmap_to_str(&fudge_pairs[n][0]),
-                       mp_chmap_to_str(&fudge_pairs[n][1]));
-        }
-    }
-    return out;
-}
-
-// mp_chmap_get_reorder() performs:
-//  to->speaker[n] = from->speaker[src[n]]
-// but libavresample does:
-//  to->speaker[dst[n]] = from->speaker[n]
-static void transpose_order(int *map, int num)
-{
-    int nmap[MP_NUM_CHANNELS] = {0};
-    for (int n = 0; n < num; n++) {
-        for (int i = 0; i < num; i++) {
-            if (map[n] == i)
-                nmap[i] = n;
-        }
-    }
-    memcpy(map, nmap, sizeof(nmap));
 }
 
 static bool configure_lavrr(struct priv *p, bool verbose)
@@ -234,9 +185,6 @@ static bool configure_lavrr(struct priv *p, bool verbose)
         goto error;
     }
 
-    mp_chmap_get_reorder(p->reorder_in, &map_in, &in_lavc);
-    transpose_order(p->reorder_in, map_in.num);
-
     if (mp_chmap_equals(&out_lavc, &map_out)) {
         // No intermediate step required - output new format directly.
         out_samplefmtp = out_samplefmt;
@@ -268,14 +216,13 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     if (map_out.num > out_lavc.num)
         mp_aframe_set_chmap(p->pool_fmt, &map_out);
 
-    out_ch_layout = fudge_layout_conversion(p, in_ch_layout, out_ch_layout);
-
-    // Real conversion; output is input to avrctx_out.
     AVChannelLayout in_layout, out_layout;
-    mp_chmap_to_av_layout(&in_layout, &in_lavc);
+    mp_chmap_to_av_layout_custom(&in_layout, &map_in);
     mp_chmap_to_av_layout(&out_layout, &out_lavc);
     av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
     av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
+    av_channel_layout_uninit(&in_layout);
+    av_channel_layout_uninit(&out_layout);
     av_opt_set_int(p->avrctx, "in_sample_rate",     p->in_rate, 0);
     av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
     av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
@@ -285,15 +232,11 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     av_channel_layout_default(&fake_layout, map_out.num);
     av_opt_set_chlayout(p->avrctx_out, "in_chlayout", &fake_layout, 0);
     av_opt_set_chlayout(p->avrctx_out, "out_chlayout", &fake_layout, 0);
+    av_channel_layout_uninit(&fake_layout);
     av_opt_set_int(p->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(p->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(p->avrctx_out, "in_sample_rate",     p->out_rate, 0);
     av_opt_set_int(p->avrctx_out, "out_sample_rate",    p->out_rate, 0);
-
-    // API has weird requirements, quoting avresample.h:
-    //  * This function can only be called when the allocated context is not open.
-    //  * Also, the input channel layout must have already been set.
-    swr_set_channel_mapping(p->avrctx, p->reorder_in);
 
     p->is_resampling = false;
 
@@ -336,7 +279,8 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
     if (num_planes && !planes)
         return false;
     uint8_t *old_planes[MP_NUM_CHANNELS];
-    mp_assert(num_planes <= MP_NUM_CHANNELS);
+    mp_require(num_planes <= MP_NUM_CHANNELS);
+    num_planes = MPMIN(num_planes, MP_NUM_CHANNELS);
     for (int n = 0; n < num_planes; n++)
         old_planes[n] = planes[n];
 

@@ -547,4 +547,6 @@ void mp_smtc_init(mpv_handle *mpv)
     mp_thread mpv_event_loop;
     if (!mp_thread_create(&mpv_event_loop, mpv_event_loop_fn, mpv))
         mp_thread_detach(mpv_event_loop);
+    else
+        mpv_destroy(mpv);
 }

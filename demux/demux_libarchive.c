@@ -23,6 +23,7 @@
 #include "misc/natural_sort.h"
 #include "misc/path_utils.h"
 #include "options/m_config.h"
+#include "options/options.h"
 #include "stream/stream.h"
 #include "demux.h"
 
@@ -65,6 +66,11 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
 
     struct demux_libarchive_opts *opts =
         mp_get_config_group(demuxer, demuxer->global, demuxer->desc->options);
+    struct demux_opts *demux_opts =
+        mp_get_config_group(demuxer, demuxer->global, &demux_conf);
+    struct MPOpts *mp_opts =
+        mp_get_config_group(demuxer, demuxer->global, &mp_opt_root);
+    char **filter = demux_opts->directory_filter;
 
     if (!opts->rar_list_all_volumes)
         flags |= MP_ARCHIVE_FLAG_NO_VOLUMES;
@@ -82,6 +88,25 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
     int num_files = 0;
 
     while (mp_archive_next_entry(mpa)) {
+        if (filter && filter[0]) {
+            bstr ext = mp_get_ext(bstr0(mpa->entry_filename));
+            bool pass = false;
+
+            if (bstr_in_list0(bstr0("video"), filter))
+                pass |= bstr_in_list0(ext, mp_opts->video_exts);
+            if (bstr_in_list0(bstr0("audio"), filter))
+                pass |= bstr_in_list0(ext, mp_opts->audio_exts);
+            if (bstr_in_list0(bstr0("image"), filter))
+                pass |= bstr_in_list0(ext, mp_opts->image_exts);
+            if (bstr_in_list0(bstr0("archive"), filter))
+                pass |= bstr_in_list0(ext, mp_opts->archive_exts);
+            if (bstr_in_list0(bstr0("playlist"), filter))
+                pass |= bstr_in_list0(ext, mp_opts->playlist_exts);
+
+            if (!pass)
+                continue;
+        }
+
         // stream_libarchive.c does the real work
         char *f = talloc_asprintf(mpa, "archive://%s|/%s", prefix,
                                   mpa->entry_filename);

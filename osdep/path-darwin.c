@@ -35,7 +35,7 @@ static void path_init(void)
     char *home = getenv("HOME");
     char *xdg_config = getenv("XDG_CONFIG_HOME");
 
-    if (xdg_config && xdg_config[0]) {
+    if (xdg_config && xdg_config[0] == '/') {
         snprintf(mpv_home, sizeof(mpv_home), "%s/mpv", xdg_config);
     } else if (home && home[0]) {
         snprintf(mpv_home, sizeof(mpv_home), "%s/.config/mpv", home);
