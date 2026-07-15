@@ -261,6 +261,8 @@ struct vo_frame {
     bool display_synced;
     // Dropping the frame is allowed if the VO is behind.
     bool can_drop;
+    //forget_frames() was used on a vo containing this frame
+    bool is_forgotten;
     // The current frame to be drawn.
     // Warning: When OSD should be redrawn in --force-window --idle mode, this
     //          can be NULL. The VO should draw a black background, OSD on top.
