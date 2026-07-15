@@ -82,6 +82,7 @@ typedef struct mp_vo_opts {
     int window_corners;
 
     double display_fps_override;
+    double minimum_display_fps;
     double timing_offset;
     int video_sync;
 
