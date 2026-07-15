@@ -189,6 +189,8 @@ static const m_option_t mp_vo_opt_list[] = {
     {"show-in-taskbar", OPT_BOOL(show_in_taskbar)},
     {"display-fps-override", OPT_DOUBLE(display_fps_override),
         M_RANGE(0, DBL_MAX)},
+    {"minimum-display-fps", OPT_DOUBLE(minimum_display_fps),
+        M_RANGE(0, DBL_MAX)},
     {"video-timing-offset", OPT_DOUBLE(timing_offset), M_RANGE(0.0, 1.0)},
     {"video-sync", OPT_CHOICE(video_sync,
         {"audio", VS_DEFAULT},
