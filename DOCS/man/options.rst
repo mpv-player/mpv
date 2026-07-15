@@ -1292,6 +1292,10 @@ Video
     Set this option only if you have reason to believe the automatically
     determined value is wrong.
 
+``--minimum-display-fps=<fps>``
+    Set the minimum display FPS used with the ``--vrr-adjust=true`` mode. By
+    default, it uses the maximum display fps.
+
 ``--hwdec=<api1,api2,...|no|auto|auto-copy>``
     Specify the hardware video decoding API that should be used if possible.
     Whether hardware decoding is actually done depends on the video codec. If
@@ -8189,6 +8193,51 @@ Video Sync
     the A/V desync cannot be compensated, too high values could lead to chaotic
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
+
+``--vrr-adjust=<true|reduce-refresh-flicker|false>``
+    This option tries to increase the chance of the display being ready for
+    frames the moment they are sent (default: false), for cases where the
+    display is unreliable, primarily useful for VRR displays. This uses
+    ``--minimum-display-fps`` and display-fps (maximum fps). This is not
+    compatible with ``--video-sync=display-...``.
+    
+    This is done by observing each individual frame and dynamically:
+    1. Not doing anything if they are perfectly between the minimum refresh time
+       and the middle refresh time.
+    2. Repeating frames at a middle refresh time if possible, else repeating
+       tending towards the middle refresh time (the middle refresh time gives
+       us the best error leeway in case there are random application or OS delays
+       that would put us in a position that exceeds either the minimum or
+       the maximum refresh time).
+    3. If we can't reliably repeat it, then we send it even if it's between the 
+       middle refresh time and the maximum refresh time. Note that because of the
+       above mentioned potential delays, this may cause us to exceed our target
+       even if we initially appear in valid range.
+    4. If the next frame exceeds our minimum refresh time, whether because our
+       repetition failed or that's how the frames exist, we will move it to the
+       closest valid position that's within the refresh range. If two frames are
+       put on the same position, we send the newest one only.
+
+    The above does not take into account refresh rate flicker (which may happen
+    in specific cases, eg. when time between frames is constantly higher than
+    minimum refresh time + average refresh time), and optimizes just for reaching
+    target position.
+    If that's a problem, then you can choose the ``reduce-refresh-flicker`` mode,
+    which does the minimum necessary to reach the target, without forcing to reach
+    the "middle refresh time", causing more refresh time stability
+    at potential chance increase of missing our target. Note: this mode may still
+    cause refresh-flicker. If that's still a problem, you should reduce the range
+    between ``--minimum-display-fps`` and ``--display-fps-override``.
+
+    Note: this is more computationally expensive than leaving the burden to
+    the display.
+
+``--vrr-adjust-repetition-refresh-rate=<fps>``
+    Set the refresh rate we should tend towards, instead of the
+    default "middle refresh time". Increasing it or reducing it will come at a cost
+    of potential chance increase of missing our target. However, setting it at a
+    lower refresh rate will reduce the amount of repetitions, which can help if
+    computational burden is a problem.
 
 Miscellaneous
 -------------
