@@ -803,20 +803,57 @@ local function add_single_video(json)
         end
     end
 
-    -- add chapters
-    local chapters = json.chapters or json.sponsorblock_chapters
-    if chapters then
-        msg.debug("Adding pre-parsed chapters")
-        chapter_list = {}
-        for i = 1, #chapters do
-            local chapter = chapters[i]
-            local title = chapter.title or ""
-            if title == "" then
-                title = string.format('Chapter %02d', i)
-            end
-            table.insert(chapter_list, {time=chapter.start_time, title=title})
-        end
-    end
+	chapter_list = {}
+
+	-- add normal chapters
+	if json.chapters then
+		msg.debug("Adding pre-parsed chapters")
+		for i = 1, #json.chapters do
+			local chapter = json.chapters[i]
+			local title = chapter.title or ""
+			if title == "" then
+				title = string.format("Chapter %02d", i)
+			end
+			table.insert(chapter_list, { time = chapter.start_time, title = title })
+		end
+	end
+
+	-- add sponsorblock chapters
+	local sponsorblock_chapters = json.sponsorblock_chapters
+	if sponsorblock_chapters then
+		msg.debug("Adding pre-parsed sponsorblock chapters")
+		local function get_chapter_near_time(target_time, tolerance)
+			tolerance = tolerance or 1
+			for _, chapter in pairs(chapter_list) do
+				local is_around = target_time - tolerance <= chapter.time and chapter.time <= target_time + tolerance
+				if is_around then
+					return chapter
+				end
+			end
+		end
+		for i = 1, #sponsorblock_chapters do
+			local sb_chapter = sponsorblock_chapters[i]
+			local sb_title = sb_chapter.title or string.format("Chapter %02d", i)
+			-- insert sponsorblock chapter start
+			local chapter_near_sb_start = get_chapter_near_time(sb_chapter.start_time)
+			if chapter_near_sb_start then
+				chapter_near_sb_start.title = ("%s + %s (start)"):format(chapter_near_sb_start.title, sb_title)
+			else
+				table.insert(chapter_list, { time = sb_chapter.start_time, title = sb_title .. " (start)" })
+			end
+			-- insert sponsorblock chapter end
+			local chapter_near_sb_end = get_chapter_near_time(sb_chapter.end_time)
+			if chapter_near_sb_end then
+				chapter_near_sb_end.title = ("%s + %s (end)"):format(chapter_near_sb_end.title, sb_title)
+			else
+				table.insert(chapter_list, { time = sb_chapter.end_time, title = sb_title .. " (end)" })
+			end
+		end
+		table.sort(chapter_list, function(a, b)
+			return a.time < b.time
+		end)
+	end
+
 
     -- set start time
     if (json.start_time or json.section_start) and
