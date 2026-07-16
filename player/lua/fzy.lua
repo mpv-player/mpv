@@ -293,6 +293,71 @@ function fzy.filter(needle, haystacks, case_sensitive)
   return result
 end
 
+-- Filter a range of haystacks, computing only scores, without positions.
+--
+-- This can be called on unfinished over consecutive ranges to allow processing
+-- pending input between the calls.
+--
+-- Args:
+--   needle (string)
+--   haystacks ({string, ...})
+--   first (int), last (int): inclusive range of haystacks to process
+--   indices ({int, ...}): the indices of matching haystacks are appended
+--   scores ({number, ...}): the matches' scores are appended, parallel to
+--     `indices`
+--   case_sensitive (bool, optional): defaults to false
+--   haystacks_lower ({string, ...} or nil): string.lower() of each haystack,
+--     used when not case_sensitive instead of allocating lowercased copies
+--     on every call
+function fzy.filter_range(needle, haystacks, first, last, indices, scores,
+                          case_sensitive, haystacks_lower)
+  local find = string.find
+  local lower = string.lower
+
+  if not case_sensitive then
+    needle = lower(needle)
+  end
+
+  local n = #needle
+  local needle_chars = {}
+  for i = 1, n do
+    needle_chars[i] = needle:sub(i, i)
+  end
+
+  local k = #indices
+
+  for i = first, last do
+    local haystack = haystacks[i]
+    local folded = haystack
+    if not case_sensitive then
+      folded = haystacks_lower and haystacks_lower[i] or lower(haystack)
+    end
+
+    local j = 1
+    for ci = 1, n do
+      j = find(folded, needle_chars[ci], j, true)
+      if not j then
+        break
+      end
+      j = j + 1
+    end
+
+    if j then
+      local m = #haystack
+      k = k + 1
+      indices[k] = i
+      if n == 0 or m > MATCH_MAX_LENGTH then
+        scores[k] = SCORE_MIN
+      elseif n == m then
+        scores[k] = SCORE_MAX
+      else
+        local score = compute(needle, haystack, folded, false)
+        scores[k] = score
+      end
+    end
+  end
+end
+
 -- The lowest value returned by `score`.
 --
 -- In two special cases:
