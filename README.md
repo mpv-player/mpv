@@ -28,7 +28,7 @@
 ## Overview
 
 
-**mpv** is a free (as in freedom) media player for the command line. It supports
+**mpv** is a free (as in freedom) modern GUI-ready media player. It supports
 a wide variety of media file formats, audio and video codecs, and subtitle types.
 
 There is a [FAQ][FAQ].
