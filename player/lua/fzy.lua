@@ -124,7 +124,7 @@ local function compute(needle, haystack_cased, haystack, full)
 
   -- Note that the match bonuses must be computed before the arguments are
   -- converted to lowercase, since there are bonuses for camelCase.
-  local match_bonus = precompute_bonus(haystack_cased)
+  local bonus = precompute_bonus(haystack_cased)
 
   local D, M
   if full then
@@ -147,9 +147,9 @@ local function compute(needle, haystack_cased, haystack, full)
       if needle_char == byte(haystack, j) then
         local score = SCORE_MIN
         if i == 1 then
-          score = (j - 1) * SCORE_GAP_LEADING + match_bonus[j]
+          score = (j - 1) * SCORE_GAP_LEADING + bonus[j]
         elseif j > 1 then
-          local match = prev_M[j - 1] + match_bonus[j]
+          local match = prev_M[j - 1] + bonus[j]
           local consecutive = prev_D[j - 1] + SCORE_MATCH_CONSECUTIVE
           score = match > consecutive and match or consecutive
         end
