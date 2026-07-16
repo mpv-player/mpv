@@ -997,6 +997,15 @@ local function handle_cursor_move()
     end
 end
 
+-- Filtering hundreds of thousands of items takes long enough to make typing
+-- sluggish, so it is done in time slices of a coroutine which yields to the
+-- event loop, letting pending keypresses be handled in between.
+local filter_slice_duration = 0.005
+-- The elapsed time is only checked once per this many items.
+local filter_chunk_size = 1000
+
+local filter_co
+
 local function filter_items()
     local items = selectable_items
     local item_count = #items
@@ -1022,37 +1031,50 @@ local function filter_items()
     local indices = {}
     local scores = not exact and needle ~= "" and {} or nil
     local lowered = selectable_items_lower
+    local deadline = mp.get_time() + filter_slice_duration
 
-    if needle == "" then
-        for i = 1, item_count do
-            indices[i] = i
-        end
-    else
-        if not case_sensitive then
-            for i = 1, item_count do
-                if not lowered[i] then
-                    lowered[i] = items[i]:lower()
-                end
-            end
-        end
+    local first = 1
+    while first <= item_count do
+        local last = math.min(first + filter_chunk_size - 1, item_count)
 
-        if exact then
-            for i = 1, item_count do
-                local haystack = case_sensitive and items[i] or lowered[i]
-                local match = true
-                for w = 1, #words do
-                    if not haystack:find(words[w], 1, true) then
-                        match = false
-                        break
-                    end
-                end
-                if match then
-                    indices[#indices + 1] = i
-                end
+        if needle == "" then
+            for i = first, last do
+                indices[i] = i
             end
         else
-            fzy.filter_range(needle, items, 1, item_count, indices, scores,
-                             false, lowered)
+            if not case_sensitive then
+                for i = first, last do
+                    if not lowered[i] then
+                        lowered[i] = items[i]:lower()
+                    end
+                end
+            end
+
+            if exact then
+                for i = first, last do
+                    local haystack = case_sensitive and items[i] or lowered[i]
+                    local match = true
+                    for w = 1, #words do
+                        if not haystack:find(words[w], 1, true) then
+                            match = false
+                            break
+                        end
+                    end
+                    if match then
+                        indices[#indices + 1] = i
+                    end
+                end
+            else
+                fzy.filter_range(needle, items, first, last, indices, scores,
+                                 false, lowered)
+            end
+        end
+
+        first = last + 1
+
+        if first <= item_count and mp.get_time() >= deadline then
+            coroutine.yield()
+            deadline = mp.get_time() + filter_slice_duration
         end
     end
 
@@ -1079,15 +1101,54 @@ local function filter_items()
     render()
 end
 
+local filter_timer
+
+local function step_filter()
+    local ok, err = coroutine.resume(filter_co)
+    if coroutine.status(filter_co) == "dead" then
+        filter_timer:kill()
+        filter_co = nil
+        if not ok then
+            error(err)
+        end
+    end
+end
+
+filter_timer = mp.add_periodic_timer(0, step_filter, true)
+
+local function cancel_filter()
+    filter_timer:kill()
+    filter_co = nil
+end
+
+local function start_filter()
+    cancel_filter()
+    filter_co = coroutine.create(filter_items)
+
+    -- Run the first slice synchronously so any smaller list is filtered
+    -- instantly, and only huge workloads are deferred.
+    step_filter()
+    if filter_co then
+        filter_timer:resume()
+    end
+end
+
 local function handle_edit()
     if not selectable_items then
+        cancel_filter()
         handle_cursor_move()
         mp.commandv("script-message-to", input_caller, input_caller_handler, "edited",
                     utils.format_json({line}))
         return
     end
 
-    filter_items()
+    start_filter()
+
+    -- Render new user input with previous matches, the matches will be updated
+    -- once available.
+    if filter_co then
+        render()
+    end
 end
 
 -- Insert a character at the current cursor position (any_unicode)
@@ -1768,6 +1829,7 @@ set_active = function (active)
         mp.set_property_bool("input-ime", true)
     elseif searching_history then
         searching_history = false
+        cancel_filter()
         selectable_items = nil
         selectable_items_lower = nil
         unbind_mouse()
@@ -1776,6 +1838,7 @@ set_active = function (active)
         undefine_key_bindings()
         unbind_mouse()
         completion_timer:kill()
+        cancel_filter()
         mp.set_property_bool("user-data/mpv/console/open", false)
         mp.set_property_bool("input-ime", ime_active)
         mp.commandv("script-message-to", input_caller, input_caller_handler,
@@ -1883,6 +1946,7 @@ mp.register_script_message("get-input", function (args)
         handle_edit()
         bind_mouse()
     else
+        cancel_filter()
         selectable_items = nil
         selectable_items_lower = nil
         unbind_mouse()
