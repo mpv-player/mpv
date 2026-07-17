@@ -690,15 +690,27 @@ local function print_to_terminal()
         end
 
         if not dim_completions then
+            local term_size = mp.get_property_native("term-size", { w = 80, h = 24 })
+            local max_width = term_size.w * (term_size.h - 2 - select(2,
+                (prompt .. mp.get_property("term-status-msg")):gsub("\\n", "")))
+            local completions = ""
+
             for i, completion in ipairs(completion_buffer) do
                 if should_highlight_completion(i) then
-                    log = log .. terminal_styles.selected_completion ..
-                          completion .. "\027[0m"
+                    completions = completions .. terminal_styles.selected_completion ..
+                                  completion .. "\027[0m"
                 else
-                    log = log .. completion
+                    completions = completions .. completion
                 end
-                log = log .. (i < #completion_buffer and "\t" or "\n")
+                completions = completions .. (i < #completion_buffer and "\t" or "\n")
+
+                if utils.terminal_display_width(completions) > max_width then
+                    completions = completions .. "\n"
+                    break
+                end
             end
+
+            log = log .. completions
         end
     end
 
