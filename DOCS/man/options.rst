@@ -8226,18 +8226,22 @@ Video Sync
     which does the minimum necessary to reach the target, without forcing to reach
     the "middle refresh time", causing more refresh time stability
     at potential chance increase of missing our target. Note: this mode may still
-    cause refresh-flicker. If that's still a problem, you should reduce the range
-    between ``--minimum-display-fps`` and ``--display-fps-override``.
+    cause refresh-flicker. If that's still a problem, you need to reduce the range
+    between ``--minimum-display-fps`` and ``--display-fps-override``, until the
+    display is stable.
 
     Note: this is more computationally expensive than leaving the burden to
     the display.
 
-``--vrr-adjust-repetition-refresh-rate=<fps>``
+``--vrr-adjust-target-refresh-rate=<fps>``
     Set the refresh rate we should tend towards, instead of the
-    default "middle refresh time". Increasing it or reducing it will come at a cost
-    of potential chance increase of missing our target. However, setting it at a
+    default "middle refresh time". Setting it at a
     lower refresh rate will reduce the amount of repetitions, which can help if
-    computational burden is a problem.
+    computational burden is a problem. However, increasing it or reducing it will
+    come at a cost of potential chance increase of missing our target.
+    When needed, we will still use the entire range of ``--minimum-display-fps`` and
+    ``--display-fps-override``, so this option only increases the chance towards
+    the refresh rate we tend to.
 
 Miscellaneous
 -------------
