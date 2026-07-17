@@ -168,7 +168,6 @@ struct vo_internal {
     int64_t wakeup_pts;             // time at which to pull frame from decoder
 
     bool rendering;                 // true if an image is being rendered
-    bool repeating;                 // true if current_frame is currently being repeated 
     struct vo_frame *frame_queued;  // should be drawn next
     int req_frames;                 // VO's requested value of num_frames
     uint64_t current_frame_id;
@@ -176,7 +175,7 @@ struct vo_internal {
     double display_fps;
     double reported_display_fps;
     double minimum_display_fps;     // for vrr
-    double average_display_fps;     // for vrr
+    double vrr_target_refresh_fps;     // for vrr
 
     struct stats_ctx *stats;
 };
@@ -551,6 +550,7 @@ static void update_display_fps(struct vo *vo)
         in->reported_display_fps = fps;
     }
 
+    bool vrr_target_refresh_rate_needs_update = false;
     double display_fps = vo->opts->display_fps_override;
     if (display_fps <= 0)
         display_fps = in->reported_display_fps;
@@ -559,19 +559,37 @@ static void update_display_fps(struct vo *vo)
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
         in->display_fps = display_fps;
-        double minimum_display_fps = vo->opts->minimum_display_fps;
-        
-        if (minimum_display_fps <= 0)
-            minimum_display_fps = in->display_fps;
-
-        in->average_display_fps = 1/((1/minimum_display_fps+1/display_fps)/2);
-        in->minimum_display_fps = minimum_display_fps;
+        vrr_target_refresh_rate_needs_update = true
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
 
         // make sure to update the player
         in->queued_events |= VO_EVENT_WIN_STATE;
         wakeup_core(vo);
+    }
+
+    double minimum_display_fps = vo->opts->minimum_display_fps;
+
+    if (minimum_display_fps > 0 && in->minimum_display_fps != minimum_display_fps) {
+        in->minimum_display_fps = minimum_display_fps;
+        vrr_target_refresh_rate_needs_update = true;
+    }
+    //this condition is not very worth it, but i'm keeping it for consistency
+    else if (vrr_target_refresh_rate_needs_update) {
+        //if vo->opts->minimum_display_fps is turned up and then set back to 0
+        //we won't update this value until the display one is.
+        in->minimum_display_fps = in->display_fps;
+    }
+
+    double vrr_target_refresh_fps = vo->opts->vrr_adjust_target_refresh_rate;
+    
+    if (vrr_target_refresh_fps > 0 && in->vrr_target_refresh_fps != vrr_target_refresh_fps) {
+        in->vrr_target_refresh_fps = vrr_target_refresh_fps;
+    }
+    else if (vrr_target_refresh_rate_needs_update) {
+        //if vo->opts->vrr_adjust_target_refresh_rate is turned up and then set back to 0
+        //we won't update this value until the display one is.
+        in->vrr_target_refresh_fps = 1/((1/in->minimum_display_fps+1/in->display_fps)/2);
     }
 
     mp_mutex_unlock(&in->lock);
@@ -848,7 +866,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     bool r = vo->config_ok && !in->frame_queued &&
-             (!in->current_frame || !in->repeating);
+             (!in->current_frame || !in->current_frame->request_repeat);
     if (r && next_pts >= 0) {
         // Don't show the frame too early - it would basically freeze the
         // display by disallowing OSD redrawing or VO interaction.
@@ -888,7 +906,7 @@ void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     mp_assert(vo->config_ok && !in->frame_queued &&
-           (!in->current_frame || !in->repeating));
+           (!in->current_frame || !in->current_frame->request_repeat));
     in->hasframe = true;
     frame->frame_id = ++(in->current_frame_id);
     in->frame_queued = frame;
@@ -947,7 +965,7 @@ static bool render_frame(struct vo *vo)
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
-    } else if (in->paused || !in->current_frame || !in->hasframe || !in->repeating)
+    } else if (in->paused || !in->current_frame || !in->hasframe || !in->current_frame->request_repeat)
     {
         goto done;
     }
@@ -1006,7 +1024,7 @@ static bool render_frame(struct vo *vo)
     }
     if (in->current_frame->num_vsyncs > 0) {
         in->current_frame->num_vsyncs -= 1;
-        in->repeating = !!in->current_frame->num_vsyncs;
+        in->current_frame->request_repeat = !!in->current_frame->num_vsyncs;
     }
 
     // Always render when paused (it's typically the last frame for a while).
@@ -1030,7 +1048,7 @@ static bool render_frame(struct vo *vo)
         // Can the core queue new video now? Non-display-sync uses a separate
         // timer instead, but possibly benefits from preparing a frame early.
         bool can_queue = !in->frame_queued &&
-            (!in->repeating || in->paused);
+            (!in->current_frame->request_repeat || in->paused);
         mp_mutex_unlock(&in->lock);
 
         if (can_queue)
@@ -1086,7 +1104,7 @@ static bool render_frame(struct vo *vo)
             in->request_redraw = false;
     }
 
-    if (in->current_frame && in->repeating)
+    if (in->current_frame && in->current_frame->request_repeat)
         more_frames = true;
 
     if (in->frame_queued && in->frame_queued->display_synced)
