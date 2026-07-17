@@ -36,6 +36,19 @@ local MATCH_MAX_LENGTH = 1024
 
 local fzy = {}
 
+local byte = string.byte
+
+local CHAR_SLASH      = byte("/")
+local CHAR_BACKSLASH  = byte("\\")
+local CHAR_DASH       = byte("-")
+local CHAR_UNDERSCORE = byte("_")
+local CHAR_SPACE      = byte(" ")
+local CHAR_DOT        = byte(".")
+local CHAR_A          = byte("A")
+local CHAR_Z          = byte("Z")
+local CHAR_a          = byte("a")
+local CHAR_z          = byte("z")
+
 -- Check if `needle` is a subsequence of the `haystack`.
 --
 -- Usually called before `score` or `positions`.
@@ -66,32 +79,24 @@ function fzy.has_match(needle, haystack, case_sensitive)
   return true
 end
 
-local function is_lower(c)
-  return c:match("%l")
-end
-
-local function is_upper(c)
-  return c:match("%u")
-end
-
 local function precompute_bonus(haystack)
   local match_bonus = {}
-
-  local last_char = "/"
-  for i = 1, string.len(haystack) do
-    local this_char = haystack:sub(i, i)
-    if last_char == "/" or last_char == "\\" then
-      match_bonus[i] = SCORE_MATCH_SLASH
-    elseif last_char == "-" or last_char == "_" or last_char == " " then
-      match_bonus[i] = SCORE_MATCH_WORD
-    elseif last_char == "." then
-      match_bonus[i] = SCORE_MATCH_DOT
-    elseif is_lower(last_char) and is_upper(this_char) then
-      match_bonus[i] = SCORE_MATCH_CAPITAL
-    else
-      match_bonus[i] = 0
+  local last_char = CHAR_SLASH
+  for i = 1, #haystack do
+    local this_char = byte(haystack, i)
+    local bonus = 0
+    if last_char == CHAR_SLASH or last_char == CHAR_BACKSLASH then
+      bonus = SCORE_MATCH_SLASH
+    elseif last_char == CHAR_DASH or last_char == CHAR_UNDERSCORE or last_char == CHAR_SPACE then
+      bonus = SCORE_MATCH_WORD
+    elseif last_char == CHAR_DOT then
+      bonus = SCORE_MATCH_DOT
+    elseif last_char >= CHAR_a and last_char <= CHAR_z and
+           this_char >= CHAR_A and this_char <= CHAR_Z then
+      bonus = SCORE_MATCH_CAPITAL
     end
 
+    match_bonus[i] = bonus
     last_char = this_char
   end
 
