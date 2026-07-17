@@ -1703,6 +1703,7 @@ set_active = function (active)
         matches = {}
         item_positions = {}
         completion_buffer = {}
+        fzy.gc()
 
         collectgarbage()
     end
