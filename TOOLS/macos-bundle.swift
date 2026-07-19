@@ -516,7 +516,7 @@ func bundleVersion(_ buildPath: String) -> String {
 // MARK: - CLI
 
 func printUsageAndExit(_ message: String) -> Never {
-    let usage = "usage: osxbundle.swift [-s|--skip-deps] [-c|--category video|games] binary [src_path]\n"
+    let usage = "usage: macos-bundle.swift [-s|--skip-deps] [-c|--category video|games] binary [src_path]\n"
     FileHandle.standardError.write(usage.data(using: .utf8)!)
     if !message.isEmpty {
         FileHandle.standardError.write((message + "\n").data(using: .utf8)!)
