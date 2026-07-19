@@ -1889,7 +1889,7 @@ if get_option('cplayer')
     endif
 
     if darwin
-        osxbundle = find_program(join_paths(tools_directory, 'osxbundle.py'), required: true)
+        osxbundle = find_program(join_paths(tools_directory, 'osxbundle.swift'), required: true)
         custom_target('macos-bundle',
             output: 'mpv.app',
             depends: version_h,
