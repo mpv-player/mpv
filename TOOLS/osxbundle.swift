@@ -104,17 +104,27 @@ func dirname(_ path: String) -> String {
 
 // MARK: - dylib_unhell
 
-func isUserLib(_ objfile: String, _ libname: String) -> Bool {
+func isUserLib(_ libname: String) -> Bool {
+    let base = basename(libname)
     return !libname.hasPrefix("/System") &&
            !libname.hasPrefix("/usr/lib/") &&
            !libname.hasPrefix("@executable_path") &&
-           !libname.contains("libobjc.") &&
-           !libname.contains("libSystem.") &&
-           !libname.contains("libc.") &&
-           !libname.contains("libgcc.") &&
-           basename(libname) != "Python" &&
-           !libname.contains(basename(objfile)) &&
-           !libname.contains("libswift")
+           !base.contains("libobjc.") &&
+           !base.contains("libSystem.") &&
+           !base.contains("libc.") &&
+           !base.contains("libgcc.") &&
+           base != "Python" &&
+           !base.contains("libswift")
+}
+
+// dylibs list their own LC_ID_DYLIB as the first `otool -L` entry; executables
+// have none. Matching it exactly (via `otool -D`) avoids excluding real
+// dependencies whose path merely happens to contain the binary's basename.
+func otoolSelfId(_ objfile: String) throws -> String? {
+    let output = try checkOutput("otool", ["-D", objfile])
+    let lines = output.split(separator: "\n").map(String.init)
+    guard lines.count >= 2 else { return nil }
+    return lines[1].trimmingCharacters(in: .whitespaces)
 }
 
 func resolveLibPath(_ objfile: String, _ lib: String, _ rpaths: [String]) throws -> String {
@@ -145,12 +155,14 @@ func resolveLibPath(_ objfile: String, _ lib: String, _ rpaths: [String]) throws
 
 func otoolLibs(_ objfile: String, _ rpaths: [String]) throws -> (Set<String>, Set<String>) {
     let output = try checkOutput("otool", ["-L", objfile])
+    let selfId = try otoolSelfId(objfile)
     var libs = Set<String>()
     for line in output.split(separator: "\n", omittingEmptySubsequences: false) {
         guard line.hasPrefix("\t") else { continue }
         guard let lib = line.trimmingCharacters(in: .whitespaces)
             .split(separator: " ").first.map(String.init) else { continue }
-        if isUserLib(objfile, lib) {
+        if lib == selfId { continue }
+        if isUserLib(lib) {
             libs.insert(lib)
         }
     }
