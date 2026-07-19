@@ -302,7 +302,7 @@ func processSwiftLibraries(_ binary: String) throws {
 
     var args = [
         "--copy", "--platform", "macosx",
-        "--scan-executable", binary, "--destination", libPath(binary),
+        "--scan-executable", binary, "--destination", libPath(binary)
     ]
 
     if FileManager.default.fileExists(atPath: swiftLibPath) {
@@ -332,19 +332,17 @@ func processVulkanLoader(
         pathJoin("/usr/local/share", loaderRelativeFolder),
         pathJoin("/usr/share", loaderRelativeFolder),
         pathJoin(homebrewPrefix, pathJoin("etc", loaderRelativeFolder)),
-        pathJoin(homebrewPrefix, pathJoin("share", loaderRelativeFolder)),
+        pathJoin(homebrewPrefix, pathJoin("share", loaderRelativeFolder))
     ]
 
     var loaderSystemFolder = ""
     var loaderSystemPath = ""
-    for folder in loaderSystemSearchFolders {
-        if FileManager.default.fileExists(atPath: folder) {
-            loaderSystemFolder = folder
-            let candidate = pathJoin(folder, loaderName)
-            if FileManager.default.fileExists(atPath: candidate) {
-                loaderSystemPath = candidate
-                break
-            }
+    for folder in loaderSystemSearchFolders where FileManager.default.fileExists(atPath: folder) {
+        loaderSystemFolder = folder
+        let candidate = pathJoin(folder, loaderName)
+        if FileManager.default.fileExists(atPath: candidate) {
+            loaderSystemPath = candidate
+            break
         }
     }
 
@@ -517,9 +515,9 @@ func bundleVersion(_ buildPath: String) -> String {
 
 func printUsageAndExit(_ message: String) -> Never {
     let usage = "usage: macos-bundle.swift [-s|--skip-deps] [-c|--category video|games] binary [src_path]\n"
-    FileHandle.standardError.write(usage.data(using: .utf8)!)
+    FileHandle.standardError.write(Data(usage.utf8))
     if !message.isEmpty {
-        FileHandle.standardError.write((message + "\n").data(using: .utf8)!)
+        FileHandle.standardError.write(Data((message + "\n").utf8))
     }
     exit(2)
 }
@@ -584,6 +582,6 @@ do {
 
     print("done.")
 } catch {
-    FileHandle.standardError.write("error: \(error)\n".data(using: .utf8)!)
+    FileHandle.standardError.write(Data("error: \(error)\n".utf8))
     exit(1)
 }
