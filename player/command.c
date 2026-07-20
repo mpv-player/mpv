@@ -8247,9 +8247,6 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
                 int ret = sub_control(sub, SD_CTRL_UPDATE_OPTS, &flags);
                 if (ret == CONTROL_OK && flags & (UPDATE_SUB_FILT | UPDATE_SUB_HARD)) {
                     sub_redecode_cached_packets(sub);
-                    sub_reset(sub);
-                    if (track->selected)
-                        reselect_demux_stream(mpctx, track, true);
                 }
             }
         }
