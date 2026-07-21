@@ -8194,12 +8194,12 @@ Video Sync
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
 
-``--vrr-adjust=<true|reduce-refresh-flicker|false>``
+``--vrr-adjust=<yes|no>``
     This option tries to increase the chance of the display being ready for
-    frames the moment they are sent (default: false), for cases where the
+    frames the moment they are sent (default: no), for cases where the
     display is unreliable, primarily useful for VRR displays. This uses
     ``--minimum-display-fps`` and display-fps (maximum fps). This is not
-    compatible with ``--video-sync=display-...``.
+    compatible with ``--video-sync=display-...`` modes, yet.
     
     This is done by observing each individual frame and dynamically:
     1. Not doing anything if they are perfectly between the minimum refresh time
@@ -8218,20 +8218,17 @@ Video Sync
        closest valid position that's within the refresh range. If two frames are
        put on the same position, we send the newest one only.
 
-    The above does not take into account refresh rate flicker (which may happen
+    Note: this is more computationally expensive than leaving the burden to
+    the display.
+
+``--vrr-adjust-max-refresh-variance-time=<decimal seconds>``
+    The default does not take into account refresh rate flicker (which may happen
     in specific cases, eg. when time between frames is constantly higher than
     minimum refresh time + average refresh time), and optimizes just for reaching
     target position.
-    If that's a problem, then you can choose the ``reduce-refresh-flicker`` mode,
-    which does the minimum necessary to reach the target, without forcing to reach
-    the "middle refresh time", causing more refresh time stability
-    at potential chance increase of missing our target. Note: this mode may still
-    cause refresh-flicker. If that's still a problem, you need to reduce the range
-    between ``--minimum-display-fps`` and ``--display-fps-override``, until the
-    display is stable.
-
-    Note: this is more computationally expensive than leaving the burden to
-    the display.
+    If that's a problem, then this option can try limit sudden changes in refresh
+    time. The lower the value set, the more refresh time stability, the higher chance
+    of missing our target.
 
 ``--vrr-adjust-target-refresh-rate=<fps>``
     Set the refresh rate we should tend towards, instead of the
