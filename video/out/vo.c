@@ -156,8 +156,10 @@ struct vo_internal {
     bool expecting_vsync;
     int64_t num_successive_vsyncs;
 
-    int64_t flip_queue_offset; // queue flip events at most this much in advance
-    int64_t timing_offset;     // same (but from options; not VO configured)
+    // queue flip events at most this much in advance, without changing the presentation time
+    int64_t flip_queue_offset;
+    // render this much in advance, without changing the flip event time (from options; not VO configured)
+    int64_t timing_offset;
 
     int64_t delayed_count;
     int64_t drop_count;
@@ -174,8 +176,12 @@ struct vo_internal {
 
     double display_fps;
     double reported_display_fps;
-    double minimum_display_fps;     // for vrr
-    double vrr_target_refresh_fps;     // for vrr
+    double minimum_display_fps;       // for vrr
+    double vrr_target_refresh_fps;
+    // whether we calculate the value automatically or it's taken from opts
+    bool vrr_target_refresh_fps_auto;
+    // offsets the presentation time
+    double vrr_pts_offset;
 
     struct stats_ctx *stats;
 };
@@ -550,7 +556,7 @@ static void update_display_fps(struct vo *vo)
         in->reported_display_fps = fps;
     }
 
-    bool vrr_target_refresh_rate_needs_update = false;
+    bool vrr_auto_needs_update = false;
     double display_fps = vo->opts->display_fps_override;
     if (display_fps <= 0)
         display_fps = in->reported_display_fps;
@@ -559,7 +565,7 @@ static void update_display_fps(struct vo *vo)
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
         in->display_fps = display_fps;
-        vrr_target_refresh_rate_needs_update = true
+        vrr_auto_needs_update = true
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
 
@@ -569,26 +575,28 @@ static void update_display_fps(struct vo *vo)
     }
 
     double minimum_display_fps = vo->opts->minimum_display_fps;
+    if (minimum_display_fps < 0)
+        minimum_display_fps = in->display_fps;
 
-    if (minimum_display_fps > 0 && in->minimum_display_fps != minimum_display_fps) {
+    if (in->minimum_display_fps != minimum_display_fps) {
         in->minimum_display_fps = minimum_display_fps;
-        vrr_target_refresh_rate_needs_update = true;
-    }
-    //this condition is not very worth it, but i'm keeping it for consistency
-    else if (vrr_target_refresh_rate_needs_update) {
-        //if vo->opts->minimum_display_fps is turned up and then set back to 0
-        //we won't update this value until the display one is.
-        in->minimum_display_fps = in->display_fps;
+        vrr_auto_needs_update = true;
     }
 
-    double vrr_target_refresh_fps = vo->opts->vrr_adjust_target_refresh_rate;
+    double vrr_target_refresh_fps = vo->opts->vrr_target_refresh_rate;
     
-    if (vrr_target_refresh_fps > 0 && in->vrr_target_refresh_fps != vrr_target_refresh_fps) {
+    if (vrr_target_refresh_fps >= 0) {
         in->vrr_target_refresh_fps = vrr_target_refresh_fps;
+        in->vrr_target_refresh_fps_auto = false;
+        vrr_auto_needs_update = false;
     }
-    else if (vrr_target_refresh_rate_needs_update) {
-        //if vo->opts->vrr_adjust_target_refresh_rate is turned up and then set back to 0
-        //we won't update this value until the display one is.
+    else if (!in->vrr_target_refresh_fps_auto) {
+        //switching to auto value
+        in->vrr_target_refresh_fps_auto = true;
+        vrr_auto_needs_update = true;
+    }
+
+    if (vrr_auto_needs_update) {
         in->vrr_target_refresh_fps = 1/((1/in->minimum_display_fps+1/in->display_fps)/2);
     }
 
@@ -653,7 +661,7 @@ static void run_reconfig(void *p)
     talloc_free(in->current_frame);
     in->current_frame = NULL;
     forget_frames(vo);
-    reset_vsync_timings(vo);
+    discard_timing_info(vo);
     mp_mutex_unlock(&in->lock);
 
     update_display_fps(vo);
@@ -733,7 +741,7 @@ static void forget_frames(struct vo *vo)
     if (in->current_frame) {
         in->current_frame->num_vsyncs = 0; // but reset future repeats
         in->current_frame->display_synced = false; // mark discontinuity
-        in->current_frame->is_forgotten = true;
+        in->current_frame->request_repeat = false;
     }
 }
 
@@ -874,6 +882,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
         // time.
         next_pts -= in->timing_offset;
         next_pts -= in->flip_queue_offset;
+        next_pts += in->vrr_pts_offset;
         int64_t now = mp_time_ns();
         if (next_pts > now)
             r = false;
@@ -946,22 +955,23 @@ static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     struct vo_frame *frame = NULL;
+    struct vo_frame *unmodified_frame = NULL;
     bool more_frames = false;
 
     update_display_fps(vo);
 
     mp_mutex_lock(&in->lock);
 
-    if (in->frame_queued) {
-        if (vo->opts->vrr_adjust && in->current_frame && !in->current_frame->is_forgotten){
-            //assuming current_frame's end pts was increased or reduced,
-            //then we need to adjust frame_queued's start pts as well,
-            //while maintaining its end_time the same.
-            //expectation is that this has no effect if current_frame's end pts was not changed.
-            int64_t frame_queued_end_time = in->frame_queued.pts + in->frame_queued.duration;
-            in->frame_queued.pts = in->current_frame.pts + in->current_frame.duration;
-            in->frame_queued.duration = frame_queued_end_time - in->frame_queued.pts;
-        }
+    //if by odd chance we have a frame queued while request_repeat is true,
+    //prioritize ending request_repeat first, which may still have time to be validly 
+    //displayed before frame_queued.
+    if (in->frame_queued && !(vo->opts->vrr_adjust && in->current_frame && in->current_frame->request_repeat)) {
+        //if current_frame's expected duration was increased or reduced,
+        //then we need to adjust frame_queued's start pts as well,
+        //while maintaining its end_time the same.
+        //vrr_pts_offset may dynamically change, so we prefer to update it here than in player/video.c
+        in->frame_queued.pts = in->frame_queued.pts + in->vrr_pts_offset;
+        in->frame_queued.duration = in->frame_queued.duration - in->vrr_pts_offset;
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
@@ -970,36 +980,39 @@ static bool render_frame(struct vo *vo)
         goto done;
     }
 
-    int64_t now = mp_time_ns();
-    if (vo->opts->vrr_adjust && now > in->current_frame.pts){
-        //if time has moved past our starting position, then this reduces our expected duration.
-        //we will deal with duration potentially being 0 or negative later.
-        in->current_frame.duration = in->current_frame.pts + in->current_frame.duration - now;
-		in->current_frame.pts = now;
-    }
-
+    //in->current_frame may be modified by vo.
+    //this below frame may be modified by vo and driver.
+    //unmodified_frame may not be modified.
     frame = vo_frame_ref(in->current_frame);
+    unmodified_frame = vo_frame_ref(in->current_frame);
     mp_assert(frame);
+    mp_assert(unmodified_frame);
+
+    int64_t now = mp_time_ns();
+    int64_t pts = frame->pts;
+    int64_t duration = frame->duration;
+    int64_t end_time = pts + duration;
+    double prev_vrr_pts_offset = in->vrr_pts_offset; //storing for later
+
+    if (vo->opts->vrr_adjust){
+        if (now > frame->pts) {
+            //if time has moved past our starting position, then this reduces our expected duration.
+            duration = pts + duration - now;
+    		pts = now;
+            end_time = pts + duration;
+        }
+    }
 
     if (frame->display_synced) {
         frame->pts = 0;
         frame->duration = -1;
     }
 
-    int64_t pts = frame->pts;
-    int64_t duration = frame->duration;
-    int64_t end_time = pts + duration;
-
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
-    if (vo->opts->vrr_adjust){
-        duration = duration 
-        in->dropped_frame = duration <= 0;
-    else {
-        // "normal" strict drop threshold.
-        in->dropped_frame = duration >= 0 && end_time < now;
-    }
+    // "normal" strict drop threshold.
+    in->dropped_frame = frame->duration >= 0 && end_time < now;
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
@@ -1022,10 +1035,16 @@ static bool render_frame(struct vo *vo)
         }
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
+
+    in->current_frame->request_repeat = false;
+
     if (in->current_frame->num_vsyncs > 0) {
         in->current_frame->num_vsyncs -= 1;
-        in->current_frame->request_repeat = !!in->current_frame->num_vsyncs;
+        in->current_frame->request_repeat |= !!in->current_frame->num_vsyncs;
     }
+
+    //also update on this frame to let the driver know we will repeat
+    frame->request_repeat = in->current_frame->request_repeat;
 
     // Always render when paused (it's typically the last frame for a while).
     in->dropped_frame &= !in->paused;
@@ -1037,9 +1056,18 @@ static bool render_frame(struct vo *vo)
 
     // Store the initial value before we unlock.
     bool request_redraw = in->request_redraw;
+    bool controlled_drop = false;
 
-    if (in->dropped_frame) {
-        in->drop_count += 1;
+    if (vo->opts->vrr_adjust && in->dropped_frame && frame->repeat) {
+        in->dropped_frame = false;
+        controlled_drop = true;
+    }
+
+    if (in->dropped_frame || controlled_drop) {
+        //do not log vrr repeat frame drops. should this also include display-sync
+        //repeat frame drops?
+        if (!controlled_drop)
+            in->drop_count += 1;
         wakeup_core(vo);
     } else {
         in->rendering = true;
@@ -1084,6 +1112,19 @@ static bool render_frame(struct vo *vo)
         in->rendering = false;
 
         update_vsync_timing_after_swap(vo, &vsync);
+
+        //we might still have valid time to output the frame even after the driver
+        //has dropped it, so retry. we won't be retrying forever since it will
+        //become old and vo will properly invalidate it to go next.
+        //regardless, keep the dropped frame logging.
+        if (vo->opts->vrr_adjust && in->current_frame && in->dropped_frame) {
+            talloc_free(in->current_frame);
+            //reverting timing info
+            in->current_frame = unmodified_frame;
+            unmodified_frame = NULL;
+            in->current_frame->request_repeat = true;
+            in->vrr_pts_offset = prev_vrr_pts_offset;
+        }
     }
 
     if (vo->driver->caps & VO_CAP_NORETAIN) {
@@ -1091,6 +1132,8 @@ static bool render_frame(struct vo *vo)
         in->current_frame = NULL;
     }
 
+    //if the driver drops a frame, then log it in even if it's a repeat frame.
+    //(ideally we would not, but i don't think it's meaningful to worry about)
     if (in->dropped_frame) {
         MP_STATS(vo, "drop-vo");
     } else {
@@ -1106,15 +1149,33 @@ static bool render_frame(struct vo *vo)
 
     if (in->current_frame && in->current_frame->request_repeat)
         more_frames = true;
+        //set it to 0 while repeating
+        in->wakeup_pts = 0;
+    else if (unmodified_frame->repeat) {
+        //if we are no longer repeating and this is a repeat frame, revert the wakeup.
+        //in the other cases where we don't have a repeat frame, the wakeup is already correct.
+        in->wakeup_pts = end_time;
+    }
 
     if (in->frame_queued && in->frame_queued->display_synced)
         more_frames = true;
+
+    if (in->current_frame->request_repeat) {
+        
+    }
+    else if (frame->repeat) {
+    }
 
     mp_cond_broadcast(&in->wakeup); // for vo_wait_frame()
 
 done:
     if (!(vo->driver->caps & VO_CAP_FRAMEOWNER) || in->dropped_frame)
         talloc_free(frame);
+
+    if (unmodified_frame) {
+        talloc_free(unmodified_frame);
+    }
+    
     mp_mutex_unlock(&in->lock);
 
     return more_frames;
@@ -1281,7 +1342,7 @@ void vo_set_paused(struct vo *vo, bool paused)
             in->request_redraw = true;
             wakeup_core(vo);
         }
-        reset_vsync_timings(vo);
+        discard_timing_info(vo);
         wakeup_locked(vo);
     }
     mp_mutex_unlock(&in->lock);
@@ -1329,7 +1390,7 @@ void vo_seek_reset(struct vo *vo)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     forget_frames(vo);
-    reset_vsync_timings(vo);
+    discard_timing_info(vo);
     in->send_reset = true;
     wakeup_locked(vo);
     mp_mutex_unlock(&in->lock);
@@ -1441,11 +1502,28 @@ double vo_get_delay(struct vo *vo)
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : 0;
 }
 
+double vo_get_vrr_pts_offset(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    double res = in->vrr_pts_offset;
+    mp_mutex_unlock(&in->lock);
+    return res;
+}
+
+//always called locked
+void discard_timing_info(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    in->vrr_pts_offset = 0;
+    reset_vsync_timings(vo);
+}
+
 void vo_discard_timing_info(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
-    reset_vsync_timings(vo);
+    discard_timing_info(vo);
     mp_mutex_unlock(&in->lock);
 }
 
