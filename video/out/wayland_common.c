@@ -1777,7 +1777,10 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
 static void handle_surface_config(void *data, struct xdg_surface *surface,
                                   uint32_t serial)
 {
+    struct vo_wayland_state *wl = data;
+
     xdg_surface_ack_configure(surface, serial);
+    wl->pending_vo_events |= VO_EVENT_EXPOSE;
 }
 
 static const struct xdg_surface_listener xdg_surface_listener = {
@@ -1934,8 +1937,6 @@ resize:
                    mp_rect_w(old_geometry), mp_rect_h(old_geometry),
                    mp_rect_w(wl->geometry), mp_rect_h(wl->geometry));
         wl->pending_vo_events |= VO_EVENT_RESIZE;
-    } else if (wl->resizing) {
-        wl->pending_vo_events |= VO_EVENT_EXPOSE;
     }
 
     wl->override_surface_local = width == 0 || height == 0 || wl->reconfigured;
