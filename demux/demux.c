@@ -1276,7 +1276,7 @@ void demux_append_codec_desc(void *ta_ctx, bstr *dst, struct sh_stream *sh,
     if (c->disp_w)
         append_field(ta_ctx, dst, skip_dup,
                      mp_tprintf(32, "%dx%d", c->disp_w, c->disp_h));
-    if (c->fps && !sh->image) {
+    if (c->fps && !c->image) {
         char *fps = mp_format_double(ta_ctx, c->fps, 4, false, false, true);
         append_field(ta_ctx, dst, skip_dup, mp_tprintf(32, "%s fps", fps));
     }
