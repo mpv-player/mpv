@@ -21,6 +21,7 @@
 #include <d3d11.h>
 
 #include <AMF/components/FRC.h>
+#include <AMF/components/VQEnhancer.h>
 #include <AMF/core/Context.h>
 #include <AMF/core/Factory.h>
 #include <AMF/core/Surface.h>
@@ -823,5 +824,176 @@ const struct mp_user_filter_entry vf_amf_frc = {
         .options = vf_frc_opts_fields,
     },
     .create = vf_amf_frc_create,
+};
+#undef OPT_BASE_STRUCT
+
+// AMD Video Quality Enhancer (amf_vqe)
+//
+// VQE is a plain one frame in, one frame out component: each SubmitInput yields
+// at most one output frame, so unlike amf_frc it does not change the frame rate
+// and does not use `has_frame`. A NULL output surface simply means more input is
+// required and is not an error.
+
+struct vqe_opts {
+    double attenuation;
+};
+
+static int vqe_init(struct mp_filter *f, struct mp_image *src, bool reinit)
+{
+    AMF_RESULT res;
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+    struct vqe_opts *opts = p->opts;
+
+    mp_assert(a->comp);
+
+    AMF_SURFACE_FORMAT amf_fmt;
+    int width, height;
+    if (amf_get_init_params(f, src, &amf_fmt, &width, &height) < 0)
+        goto err;
+
+    if (reinit)
+        goto init;
+
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_VIDEO_ENHANCER_ENGINE_TYPE,
+                              AMF_MEMORY_DX11);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set VQE engine type to DX11: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_DOUBLE(res, a->comp, AMF_VE_FCR_ATTENUATION,
+                               opts->attenuation);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to set VQE attenuation: %d\n", res);
+        goto err;
+    }
+
+    // Documented as required for the enhancement to be performed, but not
+    // exposed by every runtime version, in which case it is not needed.
+    AMFSize size = AMFConstructSize(width, height);
+    AMF_ASSIGN_PROPERTY_SIZE(res, a->comp, AMF_VIDEO_ENHANCER_OUTPUT_SIZE, size);
+    if (res != AMF_OK)
+        MP_VERBOSE(f, "Failed to set VQE output size: %d\n", res);
+
+init:
+    if (amf_component_init(f, amf_fmt, width, height) < 0)
+        goto err;
+
+    return 0;
+
+err:
+    ICALL(Terminate, a->comp);
+    return -1;
+}
+
+static void vqe_process(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+
+    if (!mp_pin_in_needs_data(f->ppins[1]))
+        return;
+
+    if (!mp_pin_out_request_data(f->ppins[0]))
+        return;
+
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+
+    if (frame.type == MP_FRAME_NONE) {
+        MP_WARN(f, "Needs a frame, but got MP_FRAME_NONE...\n");
+        return;
+    }
+
+    if (frame.type == MP_FRAME_EOF) {
+        ICALL(Drain, a->comp);
+        goto read_out;
+    }
+
+    if (frame.type != MP_FRAME_VIDEO) {
+        MP_ERR(f, "Unexpected frame type: %d\n", frame.type);
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    struct mp_image *in = frame.data;
+    mp_image_unrefp(&p->ref_image);
+    p->ref_image = mp_image_new_ref(in);
+
+    AMF_RESULT res = amf_submit_image(f, in, vqe_init);
+
+    if (res == AMF_INPUT_FULL) {
+        // Queue full: put the frame back and drain one output below to free a
+        // slot, otherwise we would re-read and re-submit the same frame.
+        frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
+        mp_pin_out_unread(f->ppins[0], frame);
+    } else if (res == AMF_FAIL) {
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+read_out:;
+    AMFSurface *amf_out = NULL;
+    res = ICALL(QueryOutput, a->comp, (AMFData **)&amf_out);
+
+    if (res == AMF_EOF) {
+        mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_EOF, NULL));
+        return;
+    }
+
+    if (res != AMF_OK && res != AMF_REPEAT) {
+        MP_WARN(f, "QueryOutput returned: %d\n", res);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    // No output yet: the component needs more input. Not an error.
+    if (!amf_out)
+        return;
+
+    struct mp_image *out = mp_image_from_amf_surface(f, amf_out);
+    if (!out) {
+        MP_WARN(f, "Failed to create mp_image from AMF surface\n");
+        ICALL(Release, amf_out);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    mp_image_unrefp(&p->ref_image);
+    mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_VIDEO, out));
+}
+
+static const struct mp_filter_info vf_amf_vqe_filter = {
+    .name = "amf_vqe",
+    .process = vqe_process,
+    .reset = flush,
+    .destroy = destroy,
+    .priv_size = sizeof(struct priv),
+};
+
+static struct mp_filter *vf_amf_vqe_create(struct mp_filter *parent,
+                                           void *options)
+{
+    return amf_create(parent, options, &vf_amf_vqe_filter, AMFVQEnhancer);
+}
+
+#define OPT_BASE_STRUCT struct vqe_opts
+static const m_option_t vf_vqe_opts_fields[] = {
+    {"attenuation", OPT_DOUBLE(attenuation), M_RANGE(0.02, 0.4)},
+    {0}
+};
+
+const struct mp_user_filter_entry vf_amf_vqe = {
+    .desc = {
+        .description = "AMD Video Quality Enhancer filter",
+        .name = "amf_vqe",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .priv_defaults = &(const OPT_BASE_STRUCT) {
+            .attenuation = VE_FCR_DEFAULT_ATTENUATION,
+        },
+        .options = vf_vqe_opts_fields,
+    },
+    .create = vf_amf_vqe_create,
 };
 #undef OPT_BASE_STRUCT

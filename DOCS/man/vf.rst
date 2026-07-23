@@ -820,6 +820,21 @@ Available mpv-only filters are:
         the current pair of frames. This will introduce one extra frame time of
         latency. (default: yes)
 
+``amf_vqe``
+    AMD Video Quality Enhancer filter. Requires AMD hardware and drivers
+    supporting AMF VQ Enhancer.
+
+    AMF VQ Enhancer reduces the blocking artifacts introduced by AVC/HEVC
+    compression at low bit rates, while preserving details.
+
+    AMF VQ Enhancer only supports D3D11 input currently. Use ``--hwdec=d3d11va``
+    or ``--vf-pre=format=d3d11`` to upload the data. ``--d3d11va-zero-copy`` is
+    also recommended for better performance.
+
+    ``attenuation=<0.02-0.4>``
+        Controls the strength of the enhancement. Higher values result in
+        stronger artifact reduction. (default: 0.1)
+
 ``fingerprint=...``
     Compute video frame fingerprints and provide them as metadata. Actually, it
     currently barely deserved to be called ``fingerprint``, because it does not
