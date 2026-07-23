@@ -1780,9 +1780,11 @@ Video
 ``--deinterlace=<yes|no|auto>``
     Enable or disable deinterlacing (default: no).
     Interlaced video shows ugly comb-like artifacts, which are visible on
-    fast movement. Enabling this typically inserts the bwdif video filter in
-    order to deinterlace the video, or lets the video output apply deinterlacing
-    if supported.
+    fast movement. Enabling this inserts the hardware deinterlacing filter if
+    ``--hwdec`` is used, otherwise the video output applies deinterlacing. If
+    neither is possible, a software bwdif filter is used instead. The
+    ``--deinterlace-algorithm`` option can be used to select the deinterlacing
+    algorithm used by the video output (``gpu-next`` only).
 
     When using ``auto``, mpv will insert a deinterlacing filter if ffmpeg
     detects that the video frame is interlaced. Be aware that there can be false
@@ -6217,6 +6219,12 @@ them.
     them are much slower and demanding even larger amount of shared memory.
     Among these kernels, ``burkes`` achieves a good balance between performance
     and quality, and probably is the one you want to try first.
+
+``--deinterlace-algorithm=<weave|bob|yadif|bwdif>``
+    Sets the deinterlacing algorithm to use when the VO is doing deinterlacing.
+    Currently only ``gpu-next`` supports this.
+
+    Default: ``bwdif``.
 
 ``--gpu-debug``
     Enables GPU debugging. What this means depends on the API type. For OpenGL,

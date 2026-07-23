@@ -36,6 +36,8 @@
 
 #define MP_IMGFIELD_TOP_FIRST 0x02
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
+#define MP_IMGFIELD_TICK_FIRST 0x08
+#define MP_IMGFIELD_TICK_SECOND 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
 // Describes image parameters that usually stay constant.
