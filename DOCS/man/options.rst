@@ -8201,6 +8201,7 @@ Video Sync
     ``--minimum-display-fps`` and display-fps (maximum fps).
     
     This is done by observing each individual frame and dynamically:
+
     1. Not doing anything if they are perfectly between the minimum refresh time
        and the middle refresh time.
     2. Repeating frames at a middle refresh time if possible, else repeating
@@ -8217,27 +8218,29 @@ Video Sync
        closest valid position that's within the refresh range. If two frames are
        put on the same position, we send the newest one only.
 
-    Note: This is not fully compatible with ``--video-sync=display-...`` modes, yet,
-    which would be the only ones capable of getting rid of the last displaying inconsistencies.
+    Note: This is not compatible with ``--video-sync=display-...`` modes, yet,
+    which would be the only ones capable of getting rid of the last displaying
+    weirdnesses.
 
 ``--vrr-adjust-max-refresh-variance-time=<decimal seconds>``
     The default does not take into account refresh rate flicker (which may happen
     in specific cases, eg. when time between frames is constantly higher than
     minimum refresh time + average refresh time), and optimizes just for reaching
     target position.
+
     If that's a problem, then this option can try limit sudden changes in refresh
     time. The lower the value set, the more refresh time stability, the higher chance
     of missing our target.
 
 ``--vrr-adjust-target-refresh-rate=<fps>``
-    Set the refresh rate we should tend towards, instead of the
-    default "middle refresh time". Setting it at a
-    lower refresh rate will reduce the amount of repetitions, which can help if
-    computational burden is a problem. However, increasing it or reducing it will
-    come at a cost of potential chance increase of missing our target.
+    Set the refresh rate we should tend towards, instead of the default "middle refresh
+    time". Setting it at a lower refresh rate will reduce the amount of repetitions,
+    which can help if computational burden is a problem. However, increasing it or
+    reducing it will come at a cost of potential chance increase of missing our target.
+
     When needed, we will still use the entire range of ``--minimum-display-fps`` and
     ``--display-fps-override``, so this option only increases the chance towards
-    the refresh rate we tend to.
+    the refresh rate we tend towards.
 
 Miscellaneous
 -------------
