@@ -808,7 +808,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     mpctx->display_sync_active = false;
 
-    if (vo->opts->vrr_adjust && vo_get_vrr_pts_offset(vo) ~= 0) {
+    if (vo->opts->vrr_adjust && vo_get_vrr_pts_offset(vo) != 0) {
         mpctx->mistimed_frames_total += 1;
         MP_STATS(mpctx, "mistimed");
     }
