@@ -38,17 +38,6 @@ local fzy = {}
 
 local byte = string.byte
 
-local CHAR_SLASH      = byte("/")
-local CHAR_BACKSLASH  = byte("\\")
-local CHAR_DASH       = byte("-")
-local CHAR_UNDERSCORE = byte("_")
-local CHAR_SPACE      = byte(" ")
-local CHAR_DOT        = byte(".")
-local CHAR_A          = byte("A")
-local CHAR_Z          = byte("Z")
-local CHAR_a          = byte("a")
-local CHAR_z          = byte("z")
-
 -- Reusable memory arrays for repeating filtering calls. Profiling shown that
 -- with huge payloads we spend a lot of time allocating and later dealociting,
 -- making poor GC work overtime. Keep them allocated. Free them with fzy.gc()
@@ -89,23 +78,26 @@ function fzy.has_match(needle, haystack, case_sensitive)
   return true
 end
 
+local bonus_other = {
+  [byte("/")]  = SCORE_MATCH_SLASH,
+  [byte("\\")] = SCORE_MATCH_SLASH,
+  [byte("-")]  = SCORE_MATCH_WORD,
+  [byte("_")]  = SCORE_MATCH_WORD,
+  [byte(" ")]  = SCORE_MATCH_WORD,
+  [byte(".")]  = SCORE_MATCH_DOT,
+}
+local bonus_upper, bonus_state = {}, {}
+for c = 0, 255 do
+  bonus_other[c] = bonus_other[c] or 0
+  bonus_upper[c] = c >= byte("a") and c <= byte("z") and SCORE_MATCH_CAPITAL or bonus_other[c]
+  bonus_state[c] = c >= byte("A") and c <= byte("Z") and bonus_upper or bonus_other
+end
+
 local function precompute_bonus(haystack)
-  local last_char = CHAR_SLASH
+  local last_char = byte("/")
   for i = 1, #haystack do
     local this_char = byte(haystack, i)
-    local bonus = 0
-    if last_char == CHAR_SLASH or last_char == CHAR_BACKSLASH then
-      bonus = SCORE_MATCH_SLASH
-    elseif last_char == CHAR_DASH or last_char == CHAR_UNDERSCORE or last_char == CHAR_SPACE then
-      bonus = SCORE_MATCH_WORD
-    elseif last_char == CHAR_DOT then
-      bonus = SCORE_MATCH_DOT
-    elseif last_char >= CHAR_a and last_char <= CHAR_z and
-           this_char >= CHAR_A and this_char <= CHAR_Z then
-      bonus = SCORE_MATCH_CAPITAL
-    end
-
-    match_bonus[i] = bonus
+    match_bonus[i] = bonus_state[this_char][last_char]
     last_char = this_char
   end
 
