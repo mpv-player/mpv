@@ -8198,8 +8198,7 @@ Video Sync
     This option tries to increase the chance of the display being ready for
     frames the moment they are sent (default: no), for cases where the
     display is unreliable, primarily useful for VRR displays. This uses
-    ``--minimum-display-fps`` and display-fps (maximum fps). This is not
-    compatible with ``--video-sync=display-...`` modes, yet.
+    ``--minimum-display-fps`` and display-fps (maximum fps).
     
     This is done by observing each individual frame and dynamically:
     1. Not doing anything if they are perfectly between the minimum refresh time
@@ -8218,8 +8217,8 @@ Video Sync
        closest valid position that's within the refresh range. If two frames are
        put on the same position, we send the newest one only.
 
-    Note: this is more computationally expensive than leaving the burden to
-    the display.
+    Note: This is not fully compatible with ``--video-sync=display-...`` modes, yet,
+    which would be the only ones capable of getting rid of the last displaying inconsistencies.
 
 ``--vrr-adjust-max-refresh-variance-time=<decimal seconds>``
     The default does not take into account refresh rate flicker (which may happen
