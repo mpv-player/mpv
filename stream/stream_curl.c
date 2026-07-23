@@ -1001,7 +1001,14 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     s->get_size = curl_get_size;
     s->control = curl_control;
     s->close = curl_close;
-    s->pos = p->request_start;
+    if (p->request_start > 0 && !p->seekable) {
+        MP_TRACE(p, "dropping initial transfer of %" PRIu64 " bytes from %s because the stream is not seekable\n",
+                p->request_start,
+                p->url);
+        s->pos = 0;
+    } else {
+        s->pos = p->request_start;
+    }
 
     return STREAM_OK;
 }
