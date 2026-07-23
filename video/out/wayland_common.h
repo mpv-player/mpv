@@ -126,6 +126,12 @@ struct vo_wayland_state {
     struct wp_content_type_v1 *content_type;
     int current_content_type;
 
+    /* content-frame-rate */
+    struct wp_content_frame_rate_manager_v1 *content_frame_rate_manager;
+    struct wp_content_frame_rate_v1 *content_frame_rate;
+    uint32_t current_content_frame_rate_num;
+    uint32_t current_content_frame_rate_den;
+
     /* cursor-shape */
     struct wp_cursor_shape_manager_v1 *cursor_shape_manager;
 

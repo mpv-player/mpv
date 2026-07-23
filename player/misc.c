@@ -17,9 +17,12 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#include <libavutil/rational.h>
 
 #include "mpv_talloc.h"
 
@@ -174,6 +177,28 @@ void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec)
     queue_seek(mpctx, MPSEEK_ABSOLUTE, get_current_time(mpctx), min_prec, 0);
 }
 
+static void update_content_frame_rate(struct MPContext *mpctx, struct track *track)
+{
+    struct voctrl_content_frame_rate frame_rate = {
+        .numerator = 0,
+        .denominator = 1,
+    };
+
+    if (track && track->vo_c && !track->image) {
+        double fps = track->vo_c->filter->container_fps;
+        if (fps > 0) {
+            AVRational rate = av_d2q(fps, INT_MAX);
+            if (rate.num > 0 && rate.den > 0) {
+                frame_rate.numerator = rate.num;
+                frame_rate.denominator = rate.den;
+            }
+        }
+    }
+
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_CONTENT_FRAME_RATE, &frame_rate);
+}
+
 void update_content_type(struct MPContext *mpctx, struct track *track)
 {
     enum mp_content_type content_type;
@@ -186,6 +211,8 @@ void update_content_type(struct MPContext *mpctx, struct track *track)
     }
     if (mpctx->video_out)
         vo_control(mpctx->video_out, VOCTRL_CONTENT_TYPE, &content_type);
+
+    update_content_frame_rate(mpctx, track);
 }
 
 void update_vo_playback_state(struct MPContext *mpctx)
