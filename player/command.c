@@ -765,7 +765,7 @@ static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->vo_chain || !mpctx->display_sync_active)
+    if (!mpctx->vo_chain || !(mpctx->display_sync_active || mpctx->video_out->opts->vrr_adjust))
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
