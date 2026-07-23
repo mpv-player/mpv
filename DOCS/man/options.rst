@@ -4410,8 +4410,8 @@ Demuxer
     This is a string list option. See `List Options`_ for details.
 
 ``--autocreate-playlist=<no|filter|same>``
-    When opening a local regular file, act as if the parent directory is opened
-    and create a playlist automatically.
+    When opening a local regular file or ``archive://`` URL, act as if the
+    parent directory or archive is opened and create a playlist automatically.
 
     :no:     Load a single file (default).
     :filter: Create a playlist from the parent directory with files matching
