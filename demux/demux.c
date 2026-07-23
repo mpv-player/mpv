@@ -209,6 +209,12 @@ struct demux_internal {
     double hyst_secs;           // stop reading till there's hyst_secs remaining
     size_t hyst_bytes;          // stop reading till there's hyst_bytes remaining
     bool hyst_active;
+    // Set while interactive disc navigation (DVD/BD menus) is active.
+    bool nav_active;
+    // One-shot request to force a single read even when nothing is being
+    // consumed, so a disc-nav command can drive the VM forward. Mostly used in
+    // paused state.
+    bool nav_pump;
     size_t max_bytes;
     size_t max_bytes_bw;
     bool seekable_cache;
@@ -241,6 +247,7 @@ struct demux_internal {
     bool back_any_need_recheck; // at least 1 ds->back_need_recheck set
 
     bool tracks_switched;       // thread needs to inform demuxer of this
+    bool nav_refresh;           // thread needs to call desc->nav_refresh
 
     bool seeking;               // there's a seek queued
     int seek_flags;             // flags for next seek (if seeking==true)
@@ -900,13 +907,13 @@ static void update_stream_selection_state(struct demux_internal *in,
         any_streams |= s->selected;
     }
 
-    // Subtitles are only eagerly read if there are no other eagerly read
-    // streams.
+    // Subtitles and sparse still-image video are only eagerly read if there are
+    // no other eagerly read streams.
     if (any_av_streams) {
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *s = in->streams[n]->ds;
 
-            if (s->type == STREAM_SUB)
+            if (s->type == STREAM_SUB || s->still_image)
                 s->eager = false;
         }
     }
@@ -1243,6 +1250,33 @@ void demux_start_prefetch(struct demuxer *demuxer)
     mp_mutex_lock(&in->lock);
     in->reading = true;
     mp_cond_signal(&in->wakeup);
+    mp_mutex_unlock(&in->lock);
+}
+
+void demux_drive_nav(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_user);
+
+    mp_mutex_lock(&in->lock);
+    in->nav_pump = true;
+    in->reading = true;
+    mp_cond_signal(&in->wakeup);
+    mp_mutex_unlock(&in->lock);
+}
+
+// Re-queue sticky packets (e.g. the DVD menu subpicture) for re-delivery.
+void demux_nav_refresh(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_user);
+
+    mp_mutex_lock(&in->lock);
+    if (in->d_thread->desc->nav_refresh) {
+        in->nav_refresh = true;
+        in->reading = true;
+        mp_cond_signal(&in->wakeup);
+    }
     mp_mutex_unlock(&in->lock);
 }
 
@@ -2301,6 +2335,12 @@ static bool read_packet(struct demux_internal *in)
         prefetch_more |= true;
     }
 
+    // While interactive disc navigation is active, never read ahead. It would
+    // advance the disc VM past what the user is watching.
+    if (in->nav_active)
+        prefetch_more = false;
+    prefetch_more |= in->nav_pump;
+
     MP_TRACE(in, "bytes=%zd, read_more=%d prefetch_more=%d, refresh_more=%d\n",
              (size_t)total_fw_bytes, read_more, prefetch_more, refresh_more);
     if (total_fw_bytes >= in->max_bytes) {
@@ -2354,6 +2394,7 @@ static bool read_packet(struct demux_internal *in)
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
     in->reading = true;
+    in->nav_pump = false;
     in->after_seek = false;
     in->after_seek_to_start = false;
     mp_mutex_unlock(&in->lock);
@@ -2518,6 +2559,18 @@ static void execute_trackswitch(struct demux_internal *in)
     mp_mutex_lock(&in->lock);
 }
 
+static void execute_nav_refresh(struct demux_internal *in)
+{
+    in->nav_refresh = false;
+
+    mp_mutex_unlock(&in->lock);
+
+    if (in->d_thread->desc->nav_refresh)
+        in->d_thread->desc->nav_refresh(in->d_thread);
+
+    mp_mutex_lock(&in->lock);
+}
+
 static void execute_seek(struct demux_internal *in)
 {
     int flags = in->seek_flags;
@@ -2632,6 +2685,10 @@ static bool thread_work(struct demux_internal *in)
     }
     if (in->tracks_switched) {
         execute_trackswitch(in);
+        return true;
+    }
+    if (in->nav_refresh) {
+        execute_nav_refresh(in);
         return true;
     }
     if (in->need_back_seek) {
@@ -3072,7 +3129,7 @@ static void demux_update_replaygain(demuxer_t *demuxer)
             if (!rg)
                 rg = decode_rgain(demuxer->log, demuxer->metadata);
             if (rg)
-                sh->codec->replaygain_data = talloc_steal(in, rg);
+                sh->codec->replaygain_data = talloc_steal(sh->codec, rg);
         }
     }
 }
@@ -3175,6 +3232,55 @@ void demux_metadata_changed(demuxer_t *demuxer)
 
     mp_mutex_lock(&in->lock);
     add_timed_metadata(in, demuxer->metadata, NULL, MP_NOPTS_VALUE);
+    mp_mutex_unlock(&in->lock);
+}
+
+// Updates the duration should it need to be changed. Used for demuxers that
+// changes titles/playlists at runtime.
+void demux_set_duration(demuxer_t *demuxer, double duration)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->duration = duration;
+    in->d_thread->duration = duration;
+    // Clear the high-water mark so subsequent packets can re-ratchet duration
+    // upward from the new playlist's PTS base without being shadowed by the
+    // previous title's value.
+    in->highest_av_pts = MP_NOPTS_VALUE;
+    in->events |= DEMUX_EVENT_DURATION;
+    mp_mutex_unlock(&in->lock);
+}
+
+// Tell the cache whether interactive disc navigation is active.
+void demux_set_nav_active(demuxer_t *demuxer, bool active)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    if (in->nav_active != active) {
+        in->nav_active = active;
+        mp_cond_signal(&in->wakeup);
+    }
+    mp_mutex_unlock(&in->lock);
+}
+
+// Updates the chapters/editions should it need to be changed. Used for demuxers
+// that changes titles/playlists at runtime.
+void demux_lists_changed(demuxer_t *demuxer)
+{
+    mp_assert(demuxer == demuxer->in->d_thread);
+    struct demux_internal *in = demuxer->in;
+
+    mp_mutex_lock(&in->lock);
+    in->d_user->chapters = in->d_thread->chapters;
+    in->d_user->num_chapters = in->d_thread->num_chapters;
+    in->d_user->editions = in->d_thread->editions;
+    in->d_user->num_editions = in->d_thread->num_editions;
+    in->d_user->edition = in->d_thread->edition;
+    in->events |= DEMUX_EVENT_LISTS;
     mp_mutex_unlock(&in->lock);
 }
 
@@ -4248,6 +4354,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
     };
     mp_tags_set_str(new.metadata, "TITLE", name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
+    talloc_steal(demuxer->chapters, new.metadata);
     return demuxer->num_chapters - 1;
 }
 

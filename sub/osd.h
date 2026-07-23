@@ -113,7 +113,7 @@ struct mp_osd_res {
 bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b);
 
 // 0 <= sub_bitmaps.render_index < MAX_OSD_PARTS
-#define MAX_OSD_PARTS 5
+#define MAX_OSD_PARTS 6
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
@@ -208,7 +208,7 @@ struct osd_progbar_state {
 };
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
 
-void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
+void osd_set_bitmaps(struct osd_state *osd, int type, struct sub_bitmaps *imgs);
 
 enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),

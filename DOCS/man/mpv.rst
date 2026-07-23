@@ -1336,6 +1336,13 @@ PROTOCOLS
     ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
     thing.
 
+``dvda://[title][/device]`` ``--dvda-device=PATH``
+
+    Play the AUDIO_TS zone of a DVD-Audio disc. Titles correspond to the
+    disc's audio groups, tracks are exposed as chapters. If no title is
+    given, the longest title is auto-selected. Menus and still images are
+    not supported.
+
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 
     Digital TV via DVB. (Linux only.)

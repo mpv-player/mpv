@@ -67,6 +67,11 @@
 // libavformat (almost) always reads data in blocks of this size.
 #define BIO_BUFFER_SIZE 32768
 
+static void avcodec_par_destructor(void *p)
+{
+    avcodec_parameters_free(p);
+}
+
 #define OPT_BASE_STRUCT struct demux_lavf_opts
 struct demux_lavf_opts {
     int64_t probesize;
@@ -233,6 +238,7 @@ typedef struct lavf_priv {
     struct stream *stream;
     bool own_stream;
     bool is_dvd_bd;
+    bool is_dvd;
     char *filename;
     struct format_hack format_hack;
     const AVInputFormat *avif;
@@ -641,7 +647,7 @@ static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
     if (!track_data_available && !album_data_available)
         return;
 
-    struct replaygain_data *rgain = talloc_ptrtype(demuxer, rgain);
+    struct replaygain_data *rgain = talloc_ptrtype(sh->codec, rgain);
     rgain->track_gain = rgain->album_gain = 0;
     rgain->track_peak = rgain->album_peak = 1;
 
@@ -719,7 +725,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
-        sh->codec->format_name = talloc_strdup(sh, av_get_sample_fmt_name(codec->format));
+        sh->codec->format_name = talloc_strdup(sh->codec, av_get_sample_fmt_name(codec->format));
 
         double delay = 0;
         if (codec->sample_rate > 0)
@@ -759,7 +765,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
         sh->codec->bitrate = codec->bit_rate;
-        sh->codec->format_name = talloc_strdup(sh, av_get_pix_fmt_name(codec->format));
+        sh->codec->format_name = talloc_strdup(sh->codec, av_get_pix_fmt_name(codec->format));
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (is_image(st, sh->attached_picture, priv->avif)) {
@@ -796,7 +802,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh = demux_alloc_sh_stream(STREAM_SUB);
 
         if (codec->extradata_size) {
-            sh->codec->extradata = talloc_size(sh, codec->extradata_size);
+            sh->codec->extradata = talloc_size(sh->codec, codec->extradata_size);
             memcpy(sh->codec->extradata, codec->extradata, codec->extradata_size);
             sh->codec->extradata_size = codec->extradata_size;
         }
@@ -838,9 +844,11 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         mp_codec_info_from_avcodecpar(codec, sh->codec);
         sh->codec->codec_tag = codec->codec_tag;
-        sh->codec->lav_codecpar = avcodec_parameters_alloc();
-        if (sh->codec->lav_codecpar)
-            avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
+        AVCodecParameters **lavp = talloc_ptrtype(sh->codec, lavp);
+        talloc_set_destructor(lavp, avcodec_par_destructor);
+        *lavp = avcodec_parameters_alloc();
+        if (*lavp && avcodec_parameters_copy(*lavp, codec) >= 0)
+            sh->codec->lav_codecpar = *lavp;
         sh->codec->native_tb_num = st->time_base.num;
         sh->codec->native_tb_den = st->time_base.den;
         sh->codec->duration = st->duration * av_q2d(st->time_base);
@@ -880,6 +888,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
         mp_tags_move_from_av_dictionary(sh->tags, &st->metadata);
         demux_add_sh_stream(demuxer, sh);
+
+        // DVD routes the menu's button-graphics through an SPU
+        // substream lavf only discovers once the first SPU PES arrives
+        // mid-playback. Select it immediately to avoid missing menu highlights.
+        if (priv->is_dvd && sh->type == STREAM_SUB)
+            demuxer_select_track(demuxer, sh, MP_NOPTS_VALUE, true);
 
         // Unfortunately, there is no better way to detect PCM codecs, other
         // than listing them all manually. (Or other "frameless" codecs. Or
@@ -1639,8 +1653,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (priv->stream) {
         const char *sname = priv->stream->info->name;
-        priv->is_dvd_bd = strcmp(sname, "dvdnav") == 0 ||
-                          strcmp(sname, "ifo_dvdnav") == 0 ||
+        priv->is_dvd = strcmp(sname, "dvdnav") == 0 ||
+                       strcmp(sname, "ifo_dvdnav") == 0;
+        priv->is_dvd_bd = priv->is_dvd ||
                           strcmp(sname, "bd") == 0 ||
                           strcmp(sname, "bdnav") == 0 ||
                           strcmp(sname, "bdmv/bluray") == 0;
@@ -1797,11 +1812,17 @@ static void reset_dovi_split_state(demuxer_t *demuxer)
 static void demux_drop_buffers_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
-    av_seek_frame(priv->avfc, -1, 0, 1);
+    if (!priv->stream || priv->stream->seekable)
+        av_seek_frame(priv->avfc, -1, 0, 1);
     demux_flush(demuxer);
     stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
     avformat_flush(priv->avfc);
+    // Clear sticky EOF/error to reuse this demuxer.
+    if (priv->avfc->pb) {
+        priv->avfc->pb->eof_reached = 0;
+        priv->avfc->pb->error = 0;
+    }
     reset_dovi_split_state(demuxer);
 }
 
@@ -1918,8 +1939,6 @@ static void demux_close_lavf(demuxer_t *demuxer)
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
             struct stream_info *info = priv->streams[n];
-            if (info->sh)
-                avcodec_parameters_free(&info->sh->codec->lav_codecpar);
             TA_FREEP(&info->dovi_split);
         }
         TA_FREEP(&priv->pending_pkt);
