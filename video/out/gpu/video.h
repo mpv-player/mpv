@@ -142,6 +142,7 @@ struct gl_video_opts {
     int sdr_adjust_gamma;
     int treat_srgb_as_power22;
     int target_contrast;
+    int target_contrast_hdr;
     char *target_gamut;
     struct gl_tone_map_opts tone_map;
     bool correct_downscaling;
