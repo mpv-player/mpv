@@ -255,6 +255,8 @@ struct vo_frame {
     // A repeat frame can be redrawn, in which case repeat==redraw==true, and
     // OSD should be updated.
     bool redraw, repeat;
+    // Set to request the vo to continue repeating the frame.
+    bool request_repeat;
     // The frame is not in movement - e.g. redrawing while paused.
     bool still;
     // Frames are output as fast as possible, with implied vsync blocking.
@@ -557,6 +559,7 @@ double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 void * vo_get_display_swapchain(struct vo *vo);
 double vo_get_delay(struct vo *vo);
+double vo_get_pts_offset(struct vo *vo);
 void vo_discard_timing_info(struct vo *vo);
 struct vo_frame *vo_get_current_vo_frame(struct vo *vo);
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,

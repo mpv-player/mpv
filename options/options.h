@@ -82,8 +82,12 @@ typedef struct mp_vo_opts {
     int window_corners;
 
     double display_fps_override;
+    double minimum_display_fps;
     double timing_offset;
     int video_sync;
+    bool vrr_adjust;
+    double vrr_max_refresh_variance_time;
+    double vrr_target_refresh_rate;
 
     struct m_geometry android_surface_size;
 
