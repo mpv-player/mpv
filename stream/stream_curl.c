@@ -789,7 +789,8 @@ static void setup_curl(struct priv *p)
     curl_easy_setopt(c, CURLOPT_DEBUGFUNCTION, debug_callback);
     curl_easy_setopt(c, CURLOPT_DEBUGDATA, p);
 
-    curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, "");
+    bool identity = p->start_offset > 0 || p->request_end > 0;
+    curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, identity ? "identity" : "");
     curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(c, CURLOPT_MAXREDIRS, (long)p->opts->max_redirects);
     curl_easy_setopt(c, CURLOPT_HTTP_VERSION, (long)p->opts->http_version);
