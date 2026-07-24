@@ -35,6 +35,24 @@ struct drm_format {
     uint64_t modifier;
 };
 
+struct vo_wayland_toplevel_pending_flags {
+    bool is_maximized;
+    bool is_fullscreen;
+    bool is_activated;
+    bool is_resizing;
+    bool is_suspended;
+    bool is_tiled;
+};
+
+struct vo_wayland_toplevel_pending_state {
+    int32_t bounded_width;
+    int32_t bounded_height;
+    int32_t width;
+    int32_t height;
+    struct vo_wayland_toplevel_pending_flags flags;
+    uint32_t new_decoration_mode;
+};
+
 struct vo_wayland_state {
     struct m_config_cache   *opts_cache;
     struct mp_log           *log;
@@ -70,6 +88,7 @@ struct vo_wayland_state {
     bool override_surface_local;
 
     /* State */
+    struct vo_wayland_toplevel_pending_state pending_state;
     bool activated;
     bool focused;
     bool frame_wait;
