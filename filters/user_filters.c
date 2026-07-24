@@ -103,6 +103,7 @@ const struct mp_user_filter_entry *vf_list[] = {
 #endif
 #if HAVE_AMF
     &vf_amf_frc,
+    &vf_amf_vqe,
 #endif
 #if (HAVE_GL && HAVE_EGL) || HAVE_VULKAN
     &vf_gpu,
