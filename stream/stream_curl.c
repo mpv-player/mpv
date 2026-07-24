@@ -168,6 +168,7 @@ struct priv {
     // Stream parameters
     bool seekable;
     int64_t content_size; // -1 if unknown
+    int64_t start_offset; // requested initial byte offset, immutable after open
 
     // Producer state. Only touched by the curl thread.
     uint64_t request_start;    // absolute byte position of next request
@@ -953,8 +954,10 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
 
     if (args->special_arg) {
         const struct curl_open_args *oa = args->special_arg;
-        if (oa->offset > 0)
+        if (oa->offset > 0) {
+            p->start_offset = oa->offset;
             p->request_start = oa->offset;
+        }
         if (oa->end_offset > 0)
             p->request_end = oa->end_offset;
     }
@@ -1001,7 +1004,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     s->get_size = curl_get_size;
     s->control = curl_control;
     s->close = curl_close;
-    s->pos = p->request_start;
+    s->pos = p->start_offset;
 
     return STREAM_OK;
 }
