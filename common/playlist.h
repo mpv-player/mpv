@@ -118,7 +118,8 @@ int64_t playlist_append_entries(struct playlist *pl, struct playlist *source_pl)
 
 int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e);
 int playlist_entry_count(struct playlist *pl);
-struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index);
+struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int64_t index);
+struct playlist_entry *playlist_entry_from_id(struct playlist *pl, int64_t id);
 
 struct mp_cancel;
 struct mpv_global;
