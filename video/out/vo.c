@@ -139,6 +139,7 @@ struct vo_internal {
     bool paused;
     bool visible;
     bool wakeup_on_done;
+    bool changing_file;
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
@@ -237,15 +238,29 @@ static void read_opts(struct vo *vo)
 static void update_opts(void *p)
 {
     struct vo *vo = p;
+    struct vo_internal *in = vo->in;
 
     if (m_config_cache_update(vo->opts_cache)) {
         read_opts(vo);
-        if (vo->driver->control) {
-            vo->driver->control(vo, VOCTRL_VO_OPTS_CHANGED, NULL);
+        vo->driver->control(vo, VOCTRL_VO_OPTS_CHANGED, NULL);
+        if (!in->changing_file) {
             // "Legacy" update of video position related options.
             // Unlike VOCTRL_VO_OPTS_CHANGED, often not propagated to backends.
             vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
         }
+    }
+}
+
+static void handle_file_change(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    if (in->changing_file) {
+        in->changing_file = false;
+        vo->driver->control(vo, VOCTRL_SET_PANSCAN, NULL);
+
+        if (vo->opts->focus_on == 2)
+            vo->driver->control(vo, VOCTRL_BRING_FRONT, NULL);
     }
 }
 
@@ -1014,6 +1029,8 @@ static bool render_frame(struct vo *vo)
 
         stats_time_start(in->stats, "video-flip");
 
+        handle_file_change(vo);
+
         vo->driver->flip_page(vo);
 
         struct vo_vsync_info vsync = {
@@ -1069,6 +1086,13 @@ done:
     mp_mutex_unlock(&in->lock);
 
     return more_frames;
+}
+
+void vo_set_changing_file(struct vo *vo)
+{
+    mp_mutex_lock(&vo->in->lock);
+    vo->in->changing_file = true;
+    mp_mutex_unlock(&vo->in->lock);
 }
 
 static void do_redraw(struct vo *vo)
