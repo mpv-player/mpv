@@ -3596,7 +3596,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
 
                 // For the non-interpolation case, we draw to a single "cache"
                 // texture to speed up subsequent re-draws (if any exist)
-                bool repeats = frame->num_vsyncs > 1 && frame->display_synced;
+                bool repeats = frame->request_repeat;
                 bool r = false;
                 if ((repeats || frame->still) && !p->dumb_mode &&
                     (p->ra->caps & RA_CAP_BLIT) && fbo->tex->params.blit_dst)
