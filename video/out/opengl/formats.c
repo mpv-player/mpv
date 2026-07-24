@@ -24,6 +24,15 @@ const struct gl_format gl_formats[] = {
     // Specifically not color-renderable.
     {"rgb16",   GL_RGB16,    GL_RGB,             T_U16, F_TF | F_EXT16},
 
+    // GL 2.1 with GL_ARB/EXT_texture_rg, but without requiring FBOs or float
+    // textures (unlike F_GL2F). Upload/filtering only.
+    {"r8",      GL_R8,       GL_RED,             T_U8,  F_TF | F_GL2RG},
+    {"rg8",     GL_RG8,      GL_RG,              T_U8,  F_TF | F_GL2RG},
+
+    // ES2 with GL_EXT_texture_rg. ES2 requires unsized internal formats.
+    {"r",       GL_RED,      GL_RED,             T_U8,  F_TF | F_ES2RG},
+    {"rg",      GL_RG,       GL_RG,              T_U8,  F_TF | F_ES2RG},
+
     // GL2 legacy. Ignores possibly present FBO extensions (no CF flag set).
     {"l8",    GL_LUMINANCE8, GL_LUMINANCE,       T_U8,  F_TF | F_GL2},
     {"la8", GL_LUMINANCE8_ALPHA8, GL_LUMINANCE_ALPHA, T_U8,  F_TF | F_GL2},
@@ -104,7 +113,7 @@ const struct gl_format gl_formats[] = {
 // Return an or-ed combination of all F_ flags that apply.
 int gl_format_feature_flags(GL *gl)
 {
-    return (gl->version == 210 ? F_GL2 : 0)
+    int flags = (gl->version == 210 ? F_GL2 : 0)
          | (gl->version >= 300 ? F_GL3 : 0)
          | (gl->es == 200 ? F_ES2 : 0)
          | (gl->es >= 300 ? F_ES3 : 0)
@@ -116,7 +125,15 @@ int gl_format_feature_flags(GL *gl)
             (gl->mpgl_caps & MPGL_CAP_ARB_FLOAT) &&
             (gl->mpgl_caps & MPGL_CAP_TEX_RG) &&
             (gl->mpgl_caps & MPGL_CAP_FB)) ? F_GL2F : 0)
+         | ((gl->version == 210 &&
+            (gl->mpgl_caps & MPGL_CAP_TEX_RG)) ? F_GL2RG : 0)
+         | ((gl->es == 200 &&
+            (gl->mpgl_caps & MPGL_CAP_TEX_RG)) ? F_ES2RG : 0)
          | (gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422 ? F_APPL : 0);
+    // F_GL2RG is a subset of F_GL2F; avoid duplicate format entries.
+    if (flags & F_GL2F)
+        flags &= ~F_GL2RG;
+    return flags;
 }
 
 int gl_format_type(const struct gl_format *format)

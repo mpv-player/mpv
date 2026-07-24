@@ -193,6 +193,12 @@ int ra_gl_ctx_color_depth(struct ra_swapchain *sw)
     if ((gl->es < 300 && !gl->version) || !(gl->mpgl_caps & MPGL_CAP_FB))
         return 0;
 
+    // Querying the default framebuffer needs GL_ARB_framebuffer_object or
+    // GL 3.0+; GL_EXT_framebuffer_object does not allow it.
+    if (!p->main_fb && gl->version && gl->version < 300 &&
+        !gl_check_extension(gl->extensions, "GL_ARB_framebuffer_object"))
+        return 0;
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, p->main_fb);
 
     GLenum obj = gl->version ? GL_BACK_LEFT : GL_BACK;
