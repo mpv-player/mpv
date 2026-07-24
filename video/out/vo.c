@@ -610,7 +610,7 @@ static void update_display_fps(struct vo *vo)
     }
 
     if (vrr_update) {
-        in->vrr_target_refresh_time = in->minimum_display_fps > 0 ? (in->minimum_display_time + in->maximum_display_time) / 2 : in->maximum_display_time;
+        in->vrr_target_refresh_time = in->maximum_display_time < DBL_MAX ? (in->minimum_display_time + in->maximum_display_time) / 2 : in->maximum_display_time;
     }
 
     mp_mutex_unlock(&in->lock);
@@ -1245,10 +1245,11 @@ static bool render_frame(struct vo *vo)
             in->request_redraw = false;
     }
 
-    if (in->current_frame && in->current_frame->request_repeat)
+    if (in->current_frame && in->current_frame->request_repeat) {
         more_frames = true;
         //set it to 0 while repeating
         in->wakeup_pts = 0;
+    }
     else {
         in->wakeup_pts = end_time;
     }
