@@ -402,6 +402,15 @@ static void reset_vsync_timings(struct vo *vo)
     in->num_successive_vsyncs = 0;
 }
 
+//always called locked
+static void discard_timing_info(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    in->pts_offset = 0;
+    in->prev_valid_duration = 0;
+    reset_vsync_timings(vo);
+}
+
 static double vsync_stddef(struct vo *vo, double ref_vsync)
 {
     struct vo_internal *in = vo->in;
@@ -1038,7 +1047,7 @@ static bool render_frame(struct vo *vo)
             target_refresh_time     = MPCLAMP(target_refresh_time, minimum_display_time, maximum_display_time);
         }
 
-        for (i = 0; i <= 1; i++) {
+        for (int i = 0; i <= 1; i++) {
             //we put the effort into always reaching target_refresh_time positions, which gives us some
     		//error leeway in case there are random application or os delays that would cause us to go beyond our pts.
             double targetDuration = frame->duration - (floor(frame->duration / target_refresh_time) - i) * target_refresh_time;
@@ -1600,15 +1609,6 @@ double vo_get_pts_offset(struct vo *vo)
     double res = in->pts_offset;
     mp_mutex_unlock(&in->lock);
     return res;
-}
-
-//always called locked
-void discard_timing_info(struct vo *vo)
-{
-    struct vo_internal *in = vo->in;
-    in->pts_offset = 0;
-    in->prev_valid_duration = 0;
-    reset_vsync_timings(vo);
 }
 
 void vo_discard_timing_info(struct vo *vo)
