@@ -591,11 +591,22 @@ static float target_ref_luma(struct ra_swapchain *sw)
     return 0;
 }
 
+static bool target_global_color_management_status(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+
+    if (p->params.global_color_management_status)
+        return p->params.global_color_management_status(sw->ctx);
+    else
+        return false;
+}
+
 static const struct ra_swapchain_fns vulkan_swapchain = {
     .color_depth   = color_depth,
     .set_color     = set_color,
     .target_csp    = target_csp,
     .target_ref_luma = target_ref_luma,
+    .target_global_color_management_status = target_global_color_management_status,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
     .swap_buffers  = swap_buffers,

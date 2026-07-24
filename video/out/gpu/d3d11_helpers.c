@@ -26,7 +26,6 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/windows_utils.h"
-#include "video/out/win32/displayconfig.h"
 
 #include "d3d11_helpers.h"
 
@@ -993,8 +992,11 @@ void mp_dxgi_factory_uninit(struct mp_dxgi_factory_ctx *ctx)
 
     SAFE_RELEASE(ctx->factory);
     SAFE_RELEASE(ctx->last_matched_output);
-    ctx->white_level_monitor = NULL;
+    ctx->target_monitor = NULL;
     ctx->sdr_white_level = 0;
+    ctx->color_management_status_reliable = false;
+    ctx->color_management_status.acm_enabled = false;
+    ctx->color_management_status.hdr_enabled = false;
 }
 
 bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
@@ -1009,7 +1011,7 @@ bool mp_dxgi_output_desc_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
         return false;
 
     if (!ctx->factory || !IDXGIFactory1_IsCurrent(ctx->factory)) {
-        // This also clears `white_level_monitor`, to invalidate cached value.
+        // This also clears `target_monitor`, to invalidate cached value.
         // While we are using displayconfig API to get reference luminance,
         // DXGI IsCurrent() is actually tracking reference luminance changes in
         // settings. There is no window message sent on this change.
@@ -1082,7 +1084,7 @@ float mp_dxgi_sdr_white_level_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
     if (!mp_dxgi_output_desc_from_hwnd(ctx, hwnd, &desc))
         return 0;
 
-    if (ctx && ctx->white_level_monitor == desc.Monitor)
+    if (ctx && ctx->target_monitor == desc.Monitor)
         return ctx->sdr_white_level;
 
     MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
@@ -1092,13 +1094,55 @@ float mp_dxgi_sdr_white_level_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
     float white_level = mp_w32_displayconfig_get_sdr_white_level(mi.szDevice);
 
     if (ctx) {
-        ctx->white_level_monitor = desc.Monitor;
+        ctx->target_monitor = desc.Monitor;
         ctx->sdr_white_level = white_level;
     }
 
     return white_level;
 #else
     return 0;
+#endif
+}
+
+bool mp_dxgi_get_acm_status_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
+                                      HWND hwnd,
+                                      struct mp_w32_acm_status *status)
+{
+#if HAVE_WIN32_DESKTOP
+    DXGI_OUTPUT_DESC1 desc;
+    bool reliable = false;
+
+    if (!mp_dxgi_output_desc_from_hwnd(ctx, hwnd, &desc)) {
+        ctx->color_management_status_reliable = false;
+        return false;
+    }
+
+    // Cache ACM status to avoid query OS API every time. Switching ACM during
+    // playing would still trigger re-query.
+    if (ctx && ctx->target_monitor == desc.Monitor) {
+        status->acm_enabled = ctx->color_management_status.acm_enabled;
+        status->hdr_enabled = ctx->color_management_status.hdr_enabled;
+        return ctx->color_management_status_reliable;
+    }
+
+    MONITORINFOEXW mi = { .cbSize = sizeof(mi) };
+    if (!GetMonitorInfoW(desc.Monitor, (MONITORINFO*)&mi)) {
+        ctx->color_management_status_reliable = false;
+        return false;
+    }
+
+    reliable = mp_w32_displayconfig_get_acm_status(mi.szDevice, status);
+
+    if (ctx) {
+        ctx->target_monitor = desc.Monitor;
+        ctx->color_management_status_reliable = reliable;
+        ctx->color_management_status.acm_enabled = status->acm_enabled;
+        ctx->color_management_status.hdr_enabled = status->hdr_enabled;
+    }
+
+    return reliable;
+#else
+    return false;
 #endif
 }
 

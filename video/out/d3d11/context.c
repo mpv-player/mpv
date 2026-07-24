@@ -230,6 +230,24 @@ static float d3d11_target_ref_luma(struct ra_swapchain *sw)
     return mp_dxgi_sdr_white_level_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(sw->ctx->vo));
 }
 
+static bool d3d11_target_global_color_management_status(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    bool reliable = false;
+    struct mp_w32_acm_status status = {0};
+
+    // We don't have a window to match the monitor on d3d11 composition mode.
+    if (sw->ctx->opts.composition)
+        return false;
+
+    reliable = mp_dxgi_get_acm_status_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(sw->ctx->vo), &status);
+
+    if (reliable && status.acm_enabled)
+        return true;
+    else
+        return false;
+}
+
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
@@ -496,6 +514,7 @@ static const struct ra_swapchain_fns d3d11_swapchain = {
     .color_depth  = d3d11_color_depth,
     .target_csp   = d3d11_target_color_space,
     .target_ref_luma = d3d11_target_ref_luma,
+    .target_global_color_management_status = d3d11_target_global_color_management_status,
     .start_frame  = d3d11_start_frame,
     .submit_frame = d3d11_submit_frame,
     .swap_buffers = d3d11_swap_buffers,
