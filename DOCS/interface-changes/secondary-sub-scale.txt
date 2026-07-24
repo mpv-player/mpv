@@ -1,0 +1,2 @@
+add `--secondary-sub-scale` option
+`--sub-scale` now only affects primary subtitles

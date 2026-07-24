@@ -110,7 +110,9 @@ local autoselect_completion
 local has_completions
 
 local selectable_items
+local selectable_items_lower
 local matches = {}
+local matches_query = { needle = "" }
 local focused_match = 1
 local first_match_to_print = 1
 local default_item
@@ -490,65 +492,80 @@ local function format_grid(list, width_max, rows_max)
     return table.concat(rows, ass_escape("\n")), row_count
 end
 
-local function fuzzy_find(needle, haystacks)
-    local result = require "mp.fzy".filter(needle, haystacks)
-    table.sort(result, function (i, j)
-        if i[3] ~= j[3] then
-            return i[3] > j[3]
+local fzy = require "mp.fzy"
+
+-- fzy scores are sums of the score constants in fzy.lua, which are all
+-- multiples of 0.005, so 200 * score is an integer. This allows packing a
+-- match's score and its position in the list into a single number. This makes
+-- sort infinitely faster, because it no longer has to call lua comparator.
+-- Positions are packed into the low bits, so this supports lists of up to
+-- sort_ranks items.
+local sort_ranks = 2 ^ 30
+local score_infinity = fzy.get_score_ceiling() * 200 + 1
+
+-- Stable sort the indices in `indices` by their `scores`.
+local function sort_by_score(indices, scores)
+    local keys = {}
+    for i = 1, #indices do
+        local score = scores[i] * 200
+        if score > score_infinity then
+            score = score_infinity
+        elseif score < -score_infinity then
+            score = -score_infinity
+        else
+            score = math.floor(score + 0.5)
         end
+        keys[i] = (i - 1) - score * sort_ranks
+    end
 
-        return i[1] < j[1]
-    end)
+    table.sort(keys)
 
-    return result
+    local sorted = {}
+    for i = 1, #keys do
+        sorted[i] = indices[keys[i] % sort_ranks + 1]
+    end
+
+    return sorted
 end
 
-local function find_matches(needle, haystacks)
-    if not opts.exact_match and needle:sub(1, 1) ~= "'" then
-        return fuzzy_find(needle, haystacks)
+local function fuzzy_find(needle, haystacks)
+    local indices = {}
+    local scores = {}
+    fzy.filter_range(needle, haystacks, 1, #haystacks, indices, scores)
+
+    return sort_by_score(indices, scores)
+end
+
+local function get_match_positions(index)
+    local needle = matches_query.needle
+
+    if needle == "" then
+        return {}
     end
 
-    if not opts.exact_match then
-        needle = needle:sub(2)
+    local text = selectable_items[index]
+
+    if not matches_query.exact then
+        return (fzy.positions(needle, text))
     end
 
-    if not opts.case_sensitive then
-        needle = needle:lower()
+    if not matches_query.case_sensitive then
+        text = selectable_items_lower[index]
     end
 
-    local result = {}
-    local needle_words = {}
+    local positions = {}
+    for _, word in ipairs(matches_query.words) do
+        local start_pos, end_pos = text:find(word, 1, true)
 
-    for word in needle:gmatch("%S+") do
-        needle_words[#needle_words + 1] = word
-    end
-
-    for i, haystack in ipairs(haystacks) do
-        if not opts.case_sensitive then
-            haystack = haystack:lower()
-        end
-
-        local matching_positions = {}
-        for _, word in pairs(needle_words) do
-            local start, e = haystack:find(word, 1, true)
-
-            if start then
-                for j = start, e do
-                    matching_positions[#matching_positions + 1] = j
-                end
-            else
-                matching_positions = nil
-                break
+        if start_pos then
+            for i = start_pos, end_pos do
+                positions[#positions + 1] = i
             end
         end
-
-        if matching_positions then
-            table.sort(matching_positions)
-            result[#result + 1] = { i, matching_positions }
-        end
     end
+    table.sort(positions)
 
-    return result
+    return positions
 end
 
 local function get_matches_to_print(terminal)
@@ -579,9 +596,11 @@ local function get_matches_to_print(terminal)
     for i = first_match_to_print, last_match_to_print do
         local item = ""
         local end_highlight = terminal and terminal_styles.match_end or "{\\1c}"
+        local text = selectable_items[matches[i]]
+        local positions = get_match_positions(matches[i])
 
         if terminal then
-            if matches[i].index == default_item then
+            if matches[i] == default_item then
                 item = terminal_styles.default_item
             end
             if i == focused_match then
@@ -599,26 +618,26 @@ local function get_matches_to_print(terminal)
             end
         end
 
-        local char_positions = utf8_positions(matches[i].text)
-        local start_of_last_match = matches[i].positions[1]
+        local char_positions = utf8_positions(text)
+        local start_of_last_match = positions[1]
 
         if not start_of_last_match then
-            item = item .. escape(matches[i].text)
+            item = item .. escape(text)
         elseif start_of_last_match > 1 then
-            item = item .. escape(matches[i].text:sub(1, start_of_last_match - 1))
+            item = item .. escape(text:sub(1, start_of_last_match - 1))
         end
 
-        for j, pos in ipairs(matches[i].positions) do
-            local last_pos = matches[i].positions[j - 1]
+        for j, pos in ipairs(positions) do
+            local last_pos = positions[j - 1]
 
             if last_pos and pos > last_pos + 1 then
                 if char_positions[start_of_last_match] and char_positions[last_pos + 1] then
                     item = item .. highlight ..
-                           escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                           escape(text:sub(start_of_last_match, last_pos)) ..
                            end_highlight ..
-                           escape(matches[i].text:sub(last_pos + 1, pos - 1))
+                           escape(text:sub(last_pos + 1, pos - 1))
                 else
-                    item = item .. escape(matches[i].text:sub(start_of_last_match, pos - 1))
+                    item = item .. escape(text:sub(start_of_last_match, pos - 1))
                 end
 
                 start_of_last_match = pos
@@ -626,15 +645,15 @@ local function get_matches_to_print(terminal)
         end
 
         if start_of_last_match then
-            local last_pos = matches[i].positions[#matches[i].positions]
+            local last_pos = positions[#positions]
 
             if char_positions[start_of_last_match] and char_positions[last_pos + 1] then
                 item = item .. highlight ..
-                       escape(matches[i].text:sub(start_of_last_match, last_pos)) ..
+                       escape(text:sub(start_of_last_match, last_pos)) ..
                        end_highlight ..
-                       escape(matches[i].text:sub(last_pos + 1))
+                       escape(text:sub(last_pos + 1))
             else
-                item = item .. escape(matches[i].text:sub(start_of_last_match))
+                item = item .. escape(text:sub(start_of_last_match))
             end
         end
 
@@ -690,15 +709,27 @@ local function print_to_terminal()
         end
 
         if not dim_completions then
+            local term_size = mp.get_property_native("term-size", { w = 80, h = 24 })
+            local max_width = term_size.w * (term_size.h - 2 - select(2,
+                (prompt .. mp.get_property("term-status-msg")):gsub("\\n", "")))
+            local completions = ""
+
             for i, completion in ipairs(completion_buffer) do
                 if should_highlight_completion(i) then
-                    log = log .. terminal_styles.selected_completion ..
-                          completion .. "\027[0m"
+                    completions = completions .. terminal_styles.selected_completion ..
+                                  completion .. "\027[0m"
                 else
-                    log = log .. completion
+                    completions = completions .. completion
                 end
-                log = log .. (i < #completion_buffer and "\t" or "\n")
+                completions = completions .. (i < #completion_buffer and "\t" or "\n")
+
+                if utils.terminal_display_width(completions) > max_width then
+                    completions = completions .. "\n"
+                    break
+                end
             end
+
+            log = log .. completions
         end
     end
 
@@ -853,7 +884,7 @@ render = function()
             or y - (1.5 + #items - i) * line_height
 
         if (first_match_to_print - 1 + i == focused_match or
-            matches[first_match_to_print - 1 + i].index == default_item)
+            matches[first_match_to_print - 1 + i] == default_item)
            and (not searching_history or border_style == "background-box") then
             ass:new_event()
             ass:an(4)
@@ -978,22 +1009,94 @@ local function handle_cursor_move()
     end
 end
 
-local function handle_edit()
-    if not selectable_items then
-        handle_cursor_move()
-        mp.commandv("script-message-to", input_caller, input_caller_handler, "edited",
-                    utils.format_json({line}))
-        return
+-- Filtering hundreds of thousands of items takes long enough to make typing
+-- sluggish, so it is done in time slices of a coroutine which yields to the
+-- event loop, letting pending keypresses be handled in between.
+local filter_slice_duration = 0.005
+-- The elapsed time is only checked once per this many items.
+local filter_chunk_size = 1000
+
+local filter_co
+
+local function filter_items()
+    local items = selectable_items
+    local item_count = #items
+    local needle = line
+    local exact = opts.exact_match or needle:sub(1, 1) == "'"
+    local case_sensitive = exact and opts.case_sensitive
+    local words
+
+    if exact then
+        if not opts.exact_match then
+            needle = needle:sub(2)
+        end
+        if not case_sensitive then
+            needle = needle:lower()
+        end
+
+        words = {}
+        for word in needle:gmatch("%S+") do
+            words[#words + 1] = word
+        end
     end
 
-    matches = {}
-    for i, match in ipairs(find_matches(line, selectable_items)) do
-        matches[i] = {
-            index = match[1],
-            text = selectable_items[match[1]],
-            positions = match[2],
-        }
+    local indices = {}
+    local scores = not exact and needle ~= "" and {} or nil
+    local lowered = selectable_items_lower
+    local deadline = mp.get_time() + filter_slice_duration
+
+    local first = 1
+    while first <= item_count do
+        local last = math.min(first + filter_chunk_size - 1, item_count)
+
+        if needle == "" then
+            for i = first, last do
+                indices[i] = i
+            end
+        else
+            if not case_sensitive then
+                for i = first, last do
+                    if not lowered[i] then
+                        lowered[i] = items[i]:lower()
+                    end
+                end
+            end
+
+            if exact then
+                for i = first, last do
+                    local haystack = case_sensitive and items[i] or lowered[i]
+                    local match = true
+                    for w = 1, #words do
+                        if not haystack:find(words[w], 1, true) then
+                            match = false
+                            break
+                        end
+                    end
+                    if match then
+                        indices[#indices + 1] = i
+                    end
+                end
+            else
+                fzy.filter_range(needle, items, first, last, indices, scores,
+                                 false, lowered)
+            end
+        end
+
+        first = last + 1
+
+        if first <= item_count and mp.get_time() >= deadline then
+            coroutine.yield()
+            deadline = mp.get_time() + filter_slice_duration
+        end
     end
+
+    if scores then
+        indices = sort_by_score(indices, scores)
+    end
+
+    matches = indices
+    matches_query = { needle = needle, exact = exact, words = words,
+                      case_sensitive = case_sensitive }
 
     if line == "" and default_item then
         focused_match = default_item
@@ -1008,6 +1111,56 @@ local function handle_edit()
     end
 
     render()
+end
+
+local filter_timer
+
+local function step_filter()
+    local ok, err = coroutine.resume(filter_co)
+    if coroutine.status(filter_co) == "dead" then
+        filter_timer:kill()
+        filter_co = nil
+        if not ok then
+            error(err)
+        end
+    end
+end
+
+filter_timer = mp.add_periodic_timer(0, step_filter, true)
+
+local function cancel_filter()
+    filter_timer:kill()
+    filter_co = nil
+end
+
+local function start_filter()
+    cancel_filter()
+    filter_co = coroutine.create(filter_items)
+
+    -- Run the first slice synchronously so any smaller list is filtered
+    -- instantly, and only huge workloads are deferred.
+    step_filter()
+    if filter_co then
+        filter_timer:resume()
+    end
+end
+
+local function handle_edit()
+    if not selectable_items then
+        cancel_filter()
+        handle_cursor_move()
+        mp.commandv("script-message-to", input_caller, input_caller_handler, "edited",
+                    utils.format_json({line}))
+        return
+    end
+
+    start_filter()
+
+    -- Render new user input with previous matches, the matches will be updated
+    -- once available.
+    if filter_co then
+        render()
+    end
 end
 
 -- Insert a character at the current cursor position (any_unicode)
@@ -1092,8 +1245,9 @@ end
 local function submit()
     if searching_history then
         searching_history = false
+        line = #matches > 0 and selectable_items[matches[focused_match]] or ""
         selectable_items = nil
-        line = #matches > 0 and matches[focused_match].text or ""
+        selectable_items_lower = nil
         cursor = #line + 1
         handle_edit()
         unbind_mouse()
@@ -1103,7 +1257,7 @@ local function submit()
     if selectable_items then
         if #matches > 0 then
             mp.commandv("script-message-to", input_caller, input_caller_handler, "submit",
-                        utils.format_json({matches[focused_match].index}))
+                        utils.format_json({matches[focused_match]}))
         end
     else
         if selected_completion_index == 0 and autoselect_completion
@@ -1278,6 +1432,7 @@ local function search_history()
 
     searching_history = true
     selectable_items = {}
+    selectable_items_lower = {}
     horizontal_offset = 0
 
     for i = 1, #history do
@@ -1434,7 +1589,7 @@ local function copy()
         mp.set_property("clipboard/text", line)
         mp.msg.info("Input line copied")
     elseif matches[1] then
-        mp.set_property("clipboard/text", matches[focused_match].text)
+        mp.set_property("clipboard/text", selectable_items[matches[focused_match]])
 
         if terminal_output() then
             mp.msg.info("Item copied")
@@ -1686,13 +1841,16 @@ set_active = function (active)
         mp.set_property_bool("input-ime", true)
     elseif searching_history then
         searching_history = false
+        cancel_filter()
         selectable_items = nil
+        selectable_items_lower = nil
         unbind_mouse()
     else
         open = false
         undefine_key_bindings()
         unbind_mouse()
         completion_timer:kill()
+        cancel_filter()
         mp.set_property_bool("user-data/mpv/console/open", false)
         mp.set_property_bool("input-ime", ime_active)
         mp.commandv("script-message-to", input_caller, input_caller_handler,
@@ -1700,9 +1858,12 @@ set_active = function (active)
 
         -- these tables may be extremely large, reset them for garbage collection
         selectable_items = nil
+        selectable_items_lower = nil
         matches = {}
+        matches_query = { needle = "" }
         item_positions = {}
         completion_buffer = {}
+        fzy.gc()
 
         collectgarbage()
     end
@@ -1774,6 +1935,7 @@ mp.register_script_message("get-input", function (args)
         end
 
         selectable_items = {}
+        selectable_items_lower = {}
         horizontal_offset = 0
 
         -- Limit the number of characters to prevent libass from freezing mpv.
@@ -1796,7 +1958,9 @@ mp.register_script_message("get-input", function (args)
         handle_edit()
         bind_mouse()
     else
+        cancel_filter()
         selectable_items = nil
+        selectable_items_lower = nil
         unbind_mouse()
         id = args.id or input_caller .. args.prompt
         log_offset = 0
@@ -1934,9 +2098,9 @@ mp.register_script_message("complete", function (message)
         completion_pos = 1
     end
 
-    for i, match in ipairs(fuzzy_find(line:sub(completion_pos, cursor - 1),
-                                      completions)) do
-        completion_buffer[i] = completions[match[1]]
+    for i, match_index in ipairs(fuzzy_find(line:sub(completion_pos, cursor - 1),
+                                            completions)) do
+        completion_buffer[i] = completions[match_index]
     end
 
     -- Rendering outdated completions makes the completions appear more

@@ -539,6 +539,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     bool set_scale_with_window = false;
     bool set_scale_by_window = true;
     bool total_override = false;
+
     // With forced overrides, apply the --sub-* specific options
     if (converted || shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_FORCE) {
         set_scale_with_window = opts->sub_scale_with_window;
@@ -555,7 +556,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_hinting = opts->sub_hinting;
     }
     if (total_override || shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_SCALE) {
-        set_font_scale = opts->sub_scale;
+        set_font_scale = shared_opts->sub_scale[sd->order];
     }
     if (set_scale_with_window) {
         set_font_scale *= dim->h / MPMAX(get_libass_scale_height(dim, set_use_margins), 1);

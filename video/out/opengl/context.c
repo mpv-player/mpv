@@ -141,12 +141,12 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_ctx_params params)
     };
 
     if (!gl->version && !gl->es)
-        return false;
+        goto fail;
 
     if (gl->mpgl_caps & MPGL_CAP_SW) {
         MP_WARN(p, "Suspected software renderer or indirect context.\n");
         if (ctx->opts.probing && !ctx->opts.allow_sw)
-            return false;
+            goto fail;
     }
 
     gl->debug_context = ctx->opts.debug;
@@ -158,7 +158,14 @@ bool ra_gl_ctx_init(struct ra_ctx *ctx, GL *gl, struct ra_ctx_params params)
     }
 
     ctx->ra = ra_create_gl(p->gl, ctx->log);
-    return !!ctx->ra;
+    if (!ctx->ra)
+        goto fail;
+
+    return true;
+
+fail:
+    ra_gl_ctx_uninit(ctx);
+    return false;
 }
 
 void ra_gl_ctx_resize(struct ra_swapchain *sw, int w, int h, int fbo)
