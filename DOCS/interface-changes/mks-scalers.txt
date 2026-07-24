@@ -1,0 +1,1 @@
+add `mks2013` and `mks2021` (Magic Kernel Sharp) scale filters
