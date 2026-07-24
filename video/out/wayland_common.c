@@ -4879,6 +4879,11 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->shm)
         wl_shm_destroy(wl->shm);
 
+#ifdef WL_FIXES_DESTROY
+    if (wl->fixes)
+        wl_fixes_destroy(wl->fixes);
+#endif
+
     if (wl->single_pixel_manager)
         wp_single_pixel_buffer_manager_v1_destroy(wl->single_pixel_manager);
 
