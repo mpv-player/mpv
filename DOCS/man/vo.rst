@@ -578,6 +578,114 @@ Available video output drivers are:
         in some terminals (``xterm``). The default (-1) will choose a palette
         on every frame and will have better quality.
 
+``chafa``
+    Graphical output for the terminal, using chafa.
+
+    Note: the image output is not synchronized with other terminal
+    output from mpv, which can lead to broken images.
+    The option ``--really-quiet`` can help with that, and is recommended.
+
+    You may need to use ``--profile=sw-fast`` to get decent performance.
+
+    When the pixel mode is set to ``sixels``, chafa has the same caveats that the
+    ``sixel`` VO has. See those.
+
+    Sixel size and alignment options:
+
+    ``--vo-chafa-cols=<columns>``, ``--vo-chafa-rows=<rows>`` (default: 0)
+        Specify the terminal size in character cells, otherwise (0) read it
+        from the terminal, or fall back to 80x25. Note that mpv doesn't use the
+        the last row with chafa because this seems to result in scrolling.
+
+    ``--vo-chafa-width=<width>``, ``--vo-chafa-height=<height>`` (default: 0)
+        Specify the available size in pixels, otherwise (0) read it from the
+        terminal, or fall back to 320x240. Other than excluding the last line,
+        the height is also further rounded down to a multiple of 6 (chafa unit
+        height) to avoid overflowing below the designated size.
+
+    ``--vo-chafa-left=<col>``, ``--vo-chafa-top=<row>`` (default: 0)
+        Specify the position in character cells where the image starts (1 is
+        the first column or row). If 0 (default) then try to automatically
+        determine it according to the other values and the image aspect ratio
+        and zoom.
+
+    ``--vo-chafa-pad-x=<pad_x>``, ``--vo-chafa-pad-y=<pad_y>`` (default: -1)
+        Used only when mpv reads the size in pixels from the terminal.
+        Specify the number of padding pixels (on one side) which are included
+        at the size which the terminal reports. If -1 (default) then the number
+        of pixels is rounded down to a multiple of number of cells (per axis),
+        to take into account padding at the report - this only works correctly
+        when the overall padding per axis is smaller than the number of cells.
+
+    ``--vo-chafa-config-clear=<yes|no>`` (default: yes)
+        Whether or not to clear the terminal whenever the output is
+        reconfigured (e.g. when video size changes).
+
+    ``--vo-chafa-alt-screen=<yes|no>`` (default: yes)
+        Whether or not to use the alternate screen buffer and return the
+        terminal to its previous state on exit. When set to no, the last
+        chafa image stays on screen after quit, with the cursor following it.
+
+    ``--vo-chafa-pixel-mode=<pixel_mode>``
+        Selects the graphics protocol that chafa will render graphics with.
+        Can be one of the below list
+
+        auto (Default)
+            Infers the best pixel mode to use based on
+            what your terminal supports.
+        symbols
+            Writes unicode characters to the terminal
+        sixels
+            Uses the sixel protocol to render graphics.
+        kitty
+            Uses the kitty image protocol to render graphics.
+        iterm2
+            Uses the iterm2 image protocol to render graphics.
+
+    ``--vo-chafa-canvas-mode=<canvas_mode>`` (default: truecolor)
+        Selects the colorspace that chafa will render graphics with.
+        Can be one of the below list as per chafa's documentation.
+
+        auto (Default)
+            Infers the best canvas mode to use based on
+            what your terminal supports.
+        truecolor (Default)
+            Truecolor (sRGB)
+        256
+            256 colors.
+        240
+            256 colors, but avoid using the lower 16 whose values vary between
+            terminal environments.
+        16
+            16 colors using the aixterm ANSI extension.
+        fgbg-bgfg
+            Default foreground and background colors, plus inversion.
+        fgbg
+            Default foreground and background colors. No ANSI codes will be used.
+        8
+            8 colors, compatible with original ANSI X3.64.
+        16-8
+            16 FG colors (8 of which enabled with bold/bright) and 8 BG colors.
+
+
+    chafa image quality options as per chafa's documentation:
+
+    ``--vo-chafa-dither=<algo>``
+        Selects the dither algorithm which chafa should apply.
+        Can be one of the below list.
+
+        none (Default)
+            Don't diffuse
+        ordered
+            Ordered dithering (Bayer or similar).
+        diffusion
+            Error diffusion dithering (Floyd-Steinberg or similar).
+        noise
+            Error diffusion dithering (Floyd-Steinberg or similar).
+
+    ``--vo-chafa-work-factor=<work_factor>`` (default: 50)
+        Sets the work/quality tradeoff factor. A higher value means more time and memory will be spent towards a higher quality output.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
