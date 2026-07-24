@@ -559,7 +559,7 @@ static void update_display_fps(struct vo *vo)
         in->reported_display_fps = fps;
     }
 
-    bool vrr_target_refresh_time_update = false;
+    bool vrr_update = false;
     double display_fps = vo->opts->display_fps_override;
     if (display_fps <= 0)
         display_fps = in->reported_display_fps;
@@ -569,8 +569,8 @@ static void update_display_fps(struct vo *vo)
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
         in->display_fps = display_fps;
 
-        in->minimum_display_time = in->vsync_interval;
-        vrr_target_refresh_time_update = true;
+        in->minimum_display_time = display_fps > 0 ? MPMAX(MP_TIME_S_TO_NS(1) / display_fps, 1) : DBL_MAX;
+        vrr_update = true;
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
 
@@ -584,21 +584,14 @@ static void update_display_fps(struct vo *vo)
     if (minimum_display_fps < 0) {
         minimum_display_fps = display_fps;
     }
-    else {
-        minimum_display_fps = MPMIN(minimum_display_fps, display_fps);
-    }
 
-    if (in->minimum_display_fps != minimum_display_fps) {
+    if (in->minimum_display_fps != minimum_display_fps || vrr_update) {
         in->minimum_display_fps = minimum_display_fps;
 
-        if (minimum_display_fps == 0) {
-            in->maximum_display_time = DBL_MAX;
-        }
-        else {
-            in->maximum_display_time = MP_TIME_S_TO_NS(1) / minimum_display_fps;
-        }
+        //even when minimum_display_fps does not change, we still recalculate for the minimum_display_time MPMAX
+        in->maximum_display_time = minimum_display_fps > 0 ? MPMAX(MP_TIME_S_TO_NS(1) / minimum_display_fps, in->minimum_display_time) : DBL_MAX;
 
-        vrr_target_refresh_time_update = true;
+        vrr_update = true;
     }
 
     double vrr_target_refresh_rate = vo->opts->vrr_target_refresh_rate;
@@ -607,25 +600,17 @@ static void update_display_fps(struct vo *vo)
         in->vrr_target_refresh_rate = vrr_target_refresh_rate;
 
         if (vrr_target_refresh_rate < 0) {
-            vrr_target_refresh_time_update = true;
-        }
-        else if (vrr_target_refresh_rate == 0) {
-            in->vrr_target_refresh_time = MPMIN(DBL_MAX, in->maximum_display_time);
-            vrr_target_refresh_time_update = false;
+            vrr_update = true;
         }
         else {
-            in->vrr_target_refresh_time = MPCLAMP(MP_TIME_S_TO_NS(1) / vrr_target_refresh_rate, in->minimum_display_time, in->maximum_display_time);
-            vrr_target_refresh_time_update = false;
+            in->vrr_target_refresh_time = vrr_target_refresh_rate > 0 ? 
+                MPCLAMP(MP_TIME_S_TO_NS(1) / vrr_target_refresh_rate, in->minimum_display_time, in->maximum_display_time) : in->maximum_display_time;
+            vrr_update = false;
         }
     }
 
-    if (vrr_target_refresh_time_update) {
-        if (in->minimum_display_fps == 0) {
-            in->vrr_target_refresh_time = DBL_MAX;
-        }
-        else {
-            in->vrr_target_refresh_time = (in->minimum_display_time + in->maximum_display_time) / 2;
-        }
+    if (vrr_update) {
+        in->vrr_target_refresh_time = in->minimum_display_fps > 0 ? (in->minimum_display_time + in->maximum_display_time) / 2 : in->maximum_display_time;
     }
 
     mp_mutex_unlock(&in->lock);
@@ -1009,7 +994,7 @@ static bool render_frame(struct vo *vo)
     mp_assert(unmodified_frame);
     double unmodified_vrr_pts_offset = in->vrr_pts_offset; //storing for later
     
-    if (frame->display_synced) {
+    if (frame->display_synced && !vo->opts->vrr_adjust) {
         frame->pts = 0;
         frame->duration = -1;
     }
@@ -1018,7 +1003,13 @@ static bool render_frame(struct vo *vo)
     //if this becomes true, we may later switch to false if needed.
     in->dropped_frame = frame->duration >= 0;
 
-    //we adjust the pts, while mainting the end time the same.
+    if (vo->opts->vrr_adjust) {
+        //we are assuming valid frame inputs should always have >= 0 frame->duration,
+        //except the above special case. so now make sure it's in valid range so that
+        //it doesn't mess up future calculations.
+        frame->duration = MPMAX(frame->duration, 0);
+    }
+    //we adjust the pts, while maintaining the end time the same.
     frame->pts += in->vrr_pts_offset;
     frame->duration -= in->vrr_pts_offset;
 
@@ -1033,7 +1024,7 @@ static bool render_frame(struct vo *vo)
     }
 
     if (frame->duration <= 0) {
-        //move next frame to current position (which is expected to be a valid position)
+        //move next frame to current position. this helps maintain the previously defined valid vrr_pts_offset.
         in->vrr_pts_offset = -frame->duration;
     }
     else if (vo->opts->vrr_adjust){
@@ -1044,7 +1035,7 @@ static bool render_frame(struct vo *vo)
         if (in->vrr_max_refresh_variance_time >= 0 && in->prev_valid_duration > 0) {
             minimum_display_time    = MPCLAMP(in->prev_valid_duration - in->vrr_max_refresh_variance_time, minimum_display_time, maximum_display_time);
             maximum_display_time    = MPCLAMP(in->prev_valid_duration + in->vrr_max_refresh_variance_time, minimum_display_time, maximum_display_time);
-            target_refresh_time     = MPCLAMP(in->vrr_target_refresh_time, minimum_display_time, maximum_display_time);
+            target_refresh_time     = MPCLAMP(target_refresh_time, minimum_display_time, maximum_display_time);
         }
 
         for (i = 0; i <= 1; i++) {
@@ -1067,8 +1058,8 @@ static bool render_frame(struct vo *vo)
                 //unless the frame is repeating.
     			//using lrint to get the closest full divisible of duration by target_refresh_time
     			//and capping it appropriatelly.
-    			targetDuration = MPCLAMP(targetDuration / lrint(targetDuration / target_refresh_time),
-                minimum_display_time, maximum_display_time);
+                int64_t divisions = lrint(targetDuration / target_refresh_time);
+    			targetDuration = divisions > 0 ? MPCLAMP(targetDuration / divisions, minimum_display_time, maximum_display_time) : maximum_display_time;
                 newFrameRepeat = true;
             }
             else {
