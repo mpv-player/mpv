@@ -260,7 +260,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         if (!ti)
             return STREAM_UNSUPPORTED;
         int angle = *((int *) arg);
-        if (angle < 0 || angle > ti->angle_count)
+        if (angle < 0 || angle >= ti->angle_count)
             return STREAM_UNSUPPORTED;
         b->current_angle = angle;
         bd_seamless_angle_change(b->bd, angle);
