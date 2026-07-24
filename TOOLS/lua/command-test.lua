@@ -107,6 +107,47 @@ mp.observe_property("vo-configured", "bool", function(_, v)
     -- Runs detached; should be killed on player exit (forces timeout)
     mp.command_native({_flags={"async"}, _name = "subprocess",
                        playback_only = false, args = {"sleep", "inf"}})
+
+    -- Responsiveness test. First we test how long a synchronous command took
+    -- without asynchronous commands being dispatched, then we test how long it
+    -- takes while asynchronous commands are being dispatched.
+    local function test_responsiveness()
+        local baseline_start = mp.get_time()
+        mp.command_native({"expand-text", ""})
+        print(string.format("responsiveness baseline: %.3fms",
+            (mp.get_time() - baseline_start) * 1000))
+
+        for _ = 1, 1000 do
+            mp.command_native_async({name = "subprocess", args = {"true"}},
+                function() end)
+        end
+
+        local loaded_start = mp.get_time()
+        mp.command_native({"expand-text", ""})
+        print(string.format("responsiveness while spawning subprocesses: %.3fms",
+            (mp.get_time() - loaded_start) * 1000))
+    end
+
+    -- Rapidly dispatching many subprocesses asynchronously must not block the
+    -- main thread. If it takes multiple seconds we're blocking the main thread.
+    local rapid_done = 0
+    local rapid_start = mp.get_time()
+    for _ = 1, 1000 do
+        mp.command_native_async({name = "subprocess", args = {"true"}},
+            function(_, _, _)
+                rapid_done = rapid_done + 1
+                if rapid_done == 1000 then
+                    print(string.format("done rapid subprocess dispatch in %.3fms",
+                        (mp.get_time() - rapid_start) * 1000))
+                    -- Responsiveness test needs to be called from the final
+                    -- callback of the rapid dispatch test, in case it does
+                    -- block the main thread. This is the clearest way to ensure
+                    -- this test is done before we move on to the responsiveness
+                    -- test.
+                    test_responsiveness()
+                end
+            end)
+    end
 end)
 
 local counter
