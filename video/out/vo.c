@@ -160,6 +160,7 @@ struct vo_internal {
     int64_t flip_queue_offset;
     // render this much in advance, without changing the flip event time (from options; not VO configured)
     int64_t timing_offset;
+    double pts_offset;              // for vrr
 
     int64_t delayed_count;
     int64_t drop_count;
@@ -176,14 +177,13 @@ struct vo_internal {
 
     double display_fps;
     double reported_display_fps;
-    double minimum_display_fps;
     double minimum_display_time;     // for vrr
+    double minimum_display_fps;      //from options
     double maximum_display_time;     // for vrr
-    double prev_valid_duration;      // for vrr
-    double vrr_target_refresh_rate;
+    double vrr_target_refresh_rate;  //from options
     double vrr_target_refresh_time;
-    double vrr_max_refresh_variance_time;
-    double vrr_pts_offset;
+    double vrr_max_refresh_variance_time; //from options
+    double prev_valid_duration;      // for vrr
 
     struct stats_ctx *stats;
 };
@@ -895,7 +895,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
         // time.
         next_pts -= in->timing_offset;
         next_pts -= in->flip_queue_offset;
-        next_pts += in->vrr_pts_offset;
+        next_pts += in->pts_offset;
         int64_t now = mp_time_ns();
         if (next_pts > now)
             r = false;
@@ -992,7 +992,7 @@ static bool render_frame(struct vo *vo)
     unmodified_frame = vo_frame_ref(in->current_frame);
     mp_assert(frame);
     mp_assert(unmodified_frame);
-    double unmodified_vrr_pts_offset = in->vrr_pts_offset; //storing for later
+    double unmodified_pts_offset = in->pts_offset; //storing for later
     
     if (frame->display_synced && !vo->opts->vrr_adjust) {
         frame->pts = 0;
@@ -1010,8 +1010,8 @@ static bool render_frame(struct vo *vo)
         frame->duration = MPMAX(frame->duration, 0);
     }
     //we adjust the pts, while maintaining the end time the same.
-    frame->pts += in->vrr_pts_offset;
-    frame->duration -= in->vrr_pts_offset;
+    frame->pts += in->pts_offset;
+    frame->duration -= in->pts_offset;
 
     in->current_frame->request_repeat = false;
     int64_t now = mp_time_ns();
@@ -1024,8 +1024,8 @@ static bool render_frame(struct vo *vo)
     }
 
     if (frame->duration <= 0) {
-        //move next frame to current position. this helps maintain the previously defined valid vrr_pts_offset.
-        in->vrr_pts_offset = -frame->duration;
+        //move next frame to current position. this helps maintain the previously defined valid pts_offset.
+        in->pts_offset = -frame->duration;
     }
     else if (vo->opts->vrr_adjust){
         double minimum_display_time    = in->minimum_display_time;
@@ -1088,7 +1088,7 @@ static bool render_frame(struct vo *vo)
 
             continue;
         endLoop:
-            in->vrr_pts_offset = targetDuration - frame->duration;
+            in->pts_offset = targetDuration - frame->duration;
             frame->duration = targetDuration;
             break;
         }
@@ -1212,7 +1212,7 @@ static bool render_frame(struct vo *vo)
             in->current_frame = unmodified_frame;
             unmodified_frame = NULL;
             in->current_frame->request_repeat = true;
-            in->vrr_pts_offset = unmodified_vrr_pts_offset;
+            in->pts_offset = unmodified_pts_offset;
             in->prev_valid_duration = unmodified_prev_valid_duration;
             in->drop_count = prev_drop_count;
             controlled_drop = true;
@@ -1592,11 +1592,11 @@ double vo_get_delay(struct vo *vo)
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : 0;
 }
 
-double vo_get_vrr_pts_offset(struct vo *vo)
+double vo_get_pts_offset(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
-    double res = in->vrr_pts_offset;
+    double res = in->pts_offset;
     mp_mutex_unlock(&in->lock);
     return res;
 }
@@ -1605,7 +1605,7 @@ double vo_get_vrr_pts_offset(struct vo *vo)
 void discard_timing_info(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    in->vrr_pts_offset = 0;
+    in->pts_offset = 0;
     in->prev_valid_duration = 0;
     reset_vsync_timings(vo);
 }
