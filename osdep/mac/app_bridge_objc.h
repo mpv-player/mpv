@@ -28,6 +28,7 @@
 #include "common/global.h"
 #include "input/input.h"
 #include "input/event.h"
+#include "input/dnd.h"
 #include "input/keycodes.h"
 #include "video/out/win_state.h"
 

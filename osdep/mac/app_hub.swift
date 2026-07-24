@@ -39,6 +39,7 @@ class AppHub: NSObject {
     var isApplication: Bool { return NSApp is Application }
     var isBundle: Bool { return ProcessInfo.processInfo.environment["MPVBUNDLE"] == "true" }
     var openEvents: Int = 0
+    var openFiles: [String] = []
 
     private override init() {
         input = InputHelper()
@@ -113,9 +114,22 @@ class AppHub: NSObject {
             return strL.localizedStandardCompare(strR) == .orderedAscending
         }
         log.verbose("\(openEvents > 0 ? "Appending" : "Opening") dropped files: \(files)")
-        input.open(files: files, append: openEvents > 0)
-        openEvents += 1
+        DispatchQueue.main.async {
+            self.open(files: files, append: self.openEvents > 0)
+            self.openEvents += 1
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.openEvents -= 1 }
+
+    }
+
+    func open(files: [String], append: Bool = false) {
+        openFiles += files
+        guard let mpv = mpv else { return }
+
+        input.open(files: files, append: append) { (filesPtr, action) in
+            mp_dnd_load_file(mpv, Int32(openFiles.count), &filesPtr, action)
+        }
+        openFiles = []
     }
 
     func getIcon() -> NSImage {
