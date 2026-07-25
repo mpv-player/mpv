@@ -327,6 +327,13 @@ Playback Control
     different demuxers and will not work with this option. They still can be
     played directly, without using this option.
 
+    This option differs from specifying playlist files directly as arguments.
+    The playlists specified by ``--playlist`` are expanded at startup, while
+    playlist files specified directly as arguments are expanded only when the
+    list is being played. Note that this expansion is not recursive, except in
+    the case of ``--playlist=<directory>``, where expansion follows the
+    ``--directory-mode`` option.
+
     By default, mpv doesn't play URLs from playlists which are considered
     unsafe. If you trust the playlist file, you can disable any security checks
     with ``--load-unsafe-playlists``. Because playlists can load other playlist
