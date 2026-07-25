@@ -285,8 +285,23 @@ Playback Control
 ``--pause``
     Start the player in paused state.
 
-``--shuffle``
+``--shuffle=<yes|no>``
     Play files in random order.
+    This works by shuffling the playlist at the following points:
+
+      1. At player startup before playback starts. The files specified on the
+         command line are shuffled. Note that the directories and
+         playlist files in these arguments are not expanded at this time, so
+         their contents are not shuffled until the situation 2 mentioned below
+         happens. To expand these lists at startup, use ``--playlist``.
+
+      2. When loading a directory or playlist file, either with ``loadlist``
+         command or by playing a playlist file in the current playlist. The
+         items in the loaded playlist are shuffled before they are added to
+         the current playlist. Other existing items are not shuffled.
+
+      3. When ``--loop-playlist`` is enabled, the player performs a shuffle
+         after looping.
 
 ``--playlist-start=<auto|index>``
     Set which file on the internal playlist to start playback with. The index
