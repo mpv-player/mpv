@@ -203,7 +203,7 @@ static const m_option_t mp_vo_opt_list[] = {
         {"display-desync", VS_DISP_NONE},
         {"desync", VS_NONE})},
     {"vrr-adjust", OPT_BOOL(vrr_adjust)},
-    {"vrr-adjust-max-refresh-variance-time", OPT_DOUBLE(vrr_max_refresh_variance_time)},
+    {"vrr-adjust-max-refresh-variance", OPT_DOUBLE(vrr_max_refresh_variance), M_RANGE(0.0, 1.0)},
     {"vrr-adjust-target-refresh-rate", OPT_DOUBLE(vrr_target_refresh_rate)},
 #if HAVE_X11
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
@@ -299,7 +299,7 @@ const struct m_sub_options vo_sub_opts = {
         .ontop_level = -1,
         .minimum_display_fps = -1,
         .timing_offset = 0.050,
-        .vrr_max_refresh_variance_time = -1,
+        .vrr_max_refresh_variance = 1,
         .vrr_target_refresh_rate = -1,
         .swapchain_depth = 2,
         .focus_on = 1,
