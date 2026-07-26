@@ -242,7 +242,6 @@ static void read_opts(struct vo *vo)
 
     mp_mutex_lock(&in->lock);
     in->timing_offset = (uint64_t)(MP_TIME_S_TO_NS(vo->opts->timing_offset));
-    in->vrr_max_refresh_variance_time = MP_TIME_S_TO_NS(vo->opts->vrr_max_refresh_variance_time);
     mp_mutex_unlock(&in->lock);
 }
 
