@@ -718,9 +718,23 @@ Available mpv-only filters are:
             Apply high quality VDPAU scaling (needs capable hardware).
 
 ``d3d11vpp``
-    Direct3D 11 video post-processing. Requires a D3D11 context and works best
-    with hardware decoding. Software frames are automatically uploaded to hardware
+    Direct3D 11 video post-processing. Works best with a D3D11 context and
+    hardware decoding. Software frames are automatically uploaded to hardware
     for processing.
+
+    If the video output provides no D3D11 device, for example with
+    ``--gpu-api=vulkan``, the filter creates its own device. Every frame is
+    then copied between the two devices, directly on the GPU when the formats
+    involved allow it and through system memory otherwise, which costs memory
+    bandwidth and adds latency. Prefer ``--gpu-api=d3d11`` when using this
+    filter.
+
+    In that fallback mode, frames from a different hardware decoder, such as
+    the CUDA frames ``nvdec`` produces, are routed through system memory on
+    their way to the D3D11 device, which costs yet another copy.
+    ``--hwdec=d3d11va`` cannot be used at all, because the decoder picks its
+    device before this filter is created, so it falls back to software
+    decoding.
 
     ``format``
         Convert to the selected image format, e.g., nv12, p010, etc. (default: don't change).

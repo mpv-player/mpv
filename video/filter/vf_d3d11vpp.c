@@ -115,6 +115,10 @@ struct priv {
     AVBufferRef *av_device_ref;
     AVBufferRef *hw_pool;
 
+    // Set only if the device was created by us instead of taken from the VO.
+    struct mp_hwdec_devices *hwdec_devs;
+    struct mp_hwdec_ctx own_hwctx;
+
     struct mp_refqueue *queue;
 
     UINT num_past_views;
@@ -697,6 +701,9 @@ static void uninit(struct mp_filter *vf)
     flush_frames(vf);
     talloc_free(p->queue);
     av_buffer_unref(&p->hw_pool);
+
+    if (p->hwdec_devs)
+        hwdec_devices_remove(p->hwdec_devs, &p->own_hwctx);
     av_buffer_unref(&p->av_device_ref);
 
     if (p->video_ctx)
@@ -757,9 +764,43 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
     struct mp_hwdec_ctx *hwctx =
         hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, IMGFMT_D3D11,
                                              AV_HWDEVICE_TYPE_D3D11VA);
-    if (!hwctx || !hwctx->av_device_ref)
-        goto fail;
-    p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
+    bool from_vo = hwctx && hwctx->av_device_ref &&
+                   !(hwctx->driver_name &&
+                     !strcmp(hwctx->driver_name, vf_d3d11vpp_filter.name));
+
+    if (from_vo) {
+        p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
+    } else {
+        // The VO does not provide a D3D11 device (e.g. --gpu-api=vulkan).
+        // Share one with any other instance of this filter, so that frames
+        // stay usable across a chain of them, or create one if we are first.
+        if (hwctx && hwctx->av_device_ref) {
+            p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
+        } else {
+            const struct hwcontext_fns *fns =
+                hwdec_get_hwcontext_fns(AV_HWDEVICE_TYPE_D3D11VA);
+            if (!fns || !fns->create_dev)
+                goto fail;
+            struct hwcontext_create_dev_params dev_params = {0};
+            p->av_device_ref = fns->create_dev(f->global, f->log, &dev_params);
+            if (!p->av_device_ref)
+                goto fail;
+            MP_WARN(f, "No D3D11 video output, using a standalone device. "
+                       "Frames are copied through system memory, which is "
+                       "slow. Use --gpu-api=d3d11 to avoid this.\n");
+        }
+        // Advertise the device so that the generic upload/download filters can
+        // move frames in and out of it. Every instance registers its own entry
+        // even when sharing a device: filters are created before the old ones
+        // are destroyed, so the instance we borrowed from may go away first.
+        p->own_hwctx = (struct mp_hwdec_ctx){
+            .driver_name = vf_d3d11vpp_filter.name,
+            .av_device_ref = p->av_device_ref,
+            .hw_imgfmt = IMGFMT_D3D11,
+        };
+        p->hwdec_devs = info->hwdec_devs;
+        hwdec_devices_add(p->hwdec_devs, &p->own_hwctx);
+    }
     AVHWDeviceContext *avhwctx = (void *)p->av_device_ref->data;
     AVD3D11VADeviceContext *d3dctx = avhwctx->hwctx;
 
