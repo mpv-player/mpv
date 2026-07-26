@@ -397,7 +397,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
     if (mf->nr_of_files == 1) {
         MP_VERBOSE(demuxer, "Assuming this is an image format.\n");
-        sh->image = true;
+        sh->codec->image = true;
     }
 
     struct mp_codec_params *c = sh->codec;
