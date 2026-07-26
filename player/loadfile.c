@@ -1133,17 +1133,23 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl, bool overwri
 
 // Replace the current playlist entry with playlist contents. Moves the entries
 // from the given playlist pl, so the entries don't actually need to be copied.
+// The new entries inherit the file-local options of the current entry.
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
                               int64_t *start_id, int *num_new_entries)
 {
     if (pl->num_entries) {
         prepare_playlist(mpctx, pl, true);
         struct playlist_entry *new = pl->current;
+        struct playlist_entry *current = mpctx->playlist->current;
         *num_new_entries = pl->num_entries;
+        if (current && mpctx->opts->playlist_inherit_options == 1)
+            playlist_set_params(pl, current->params, current->num_params);
+        else if (current && new && mpctx->opts->playlist_inherit_options == 2)
+            playlist_entry_add_params(new, current->params, current->num_params);
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
-        if (mpctx->playlist->current)
-            playlist_remove(mpctx->playlist, mpctx->playlist->current);
+        if (current)
+            playlist_remove(mpctx->playlist, current);
         if (new)
             mpctx->playlist->current = new;
         mpctx->playlist->playlist_dir = talloc_steal(mpctx->playlist, pl->playlist_dir);
