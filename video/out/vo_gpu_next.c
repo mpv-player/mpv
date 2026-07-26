@@ -1224,7 +1224,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct pl_render_params params = pars->params;
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
+    bool will_redraw = frame->request_repeat;
     bool cache_frame = will_redraw || frame->still || p->paused;
     bool can_interpolate = opts->interpolation && frame->display_synced &&
                            !frame->still && frame->num_frames > 1 && !p->paused;
