@@ -1986,7 +1986,7 @@ The following hooks are currently defined:
     For example, you could read and write the ``stream-open-filename``
     property to redirect an URL to something else (consider support for
     streaming sites which rarely give the user a direct media URL), or
-    you could set per-file options with by setting the property
+    you could set file-local options by setting the property
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
