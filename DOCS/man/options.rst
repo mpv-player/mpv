@@ -335,6 +335,12 @@ Playback Control
         local files, such as special protocols like ``avdevice://`` (which are
         inherently unsafe).
 
+``--playlist-inherit-options=<yes|no|current>``
+    Whether the per-file options of a playlist file are inherited by its items
+    when the playlist file is resolved and expanded (default: no). The value
+    ``current`` means that for playlists created by ``--autocreate-playlist``,
+    only the file from which the playlist is created inherits the options.
+
 ``--chapter-merge-threshold=<number>``
     Threshold for merging almost consecutive ordered chapter parts in
     milliseconds (default: 100). Some Matroska files with ordered chapters
