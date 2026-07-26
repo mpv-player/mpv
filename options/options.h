@@ -86,7 +86,7 @@ typedef struct mp_vo_opts {
     double timing_offset;
     int video_sync;
     bool vrr_adjust;
-    double vrr_max_refresh_variance_time;
+    double vrr_max_refresh_variance;
     double vrr_target_refresh_rate;
 
     struct m_geometry android_surface_size;
