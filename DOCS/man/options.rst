@@ -8228,15 +8228,17 @@ Video Sync
     which would be the only ones capable of getting rid of the last displaying
     weirdnesses.
 
-``--vrr-adjust-max-refresh-variance-time=<decimal seconds>``
+``--vrr-adjust-max-refresh-variance=<0.0-1.0>``
+    How much percentage wise the refresh time can vary from one frame to the next,
+    where 1.0 means the refresh time can immediatelly move between the minimum and
+    maximum refresh time, while 0 means the refresh time is static. (default: 1.0)
+
     The default does not take into account refresh rate flicker (which may happen
     in specific cases, eg. when time between frames is constantly higher than
-    minimum refresh time + average refresh time), and optimizes just for reaching
-    target position.
-
-    If that's a problem, then this option can try limit sudden changes in refresh
+    minimum refresh time + middle refresh time), and optimizes just for reaching
+    target position. If that's a problem, then this option can limit sudden changes in refresh
     time. The lower the value set, the more refresh time stability, the higher chance
-    of missing our target.
+    of missing our target. 
 
 ``--vrr-adjust-target-refresh-rate=<fps>``
     Set the refresh rate we should tend towards, instead of the default "middle refresh
