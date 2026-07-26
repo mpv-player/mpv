@@ -777,15 +777,40 @@ static struct mp_filter *vf_d3d11vpp_create(struct mp_filter *parent,
         if (hwctx && hwctx->av_device_ref) {
             p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
         } else {
-            const struct hwcontext_fns *fns =
-                hwdec_get_hwcontext_fns(AV_HWDEVICE_TYPE_D3D11VA);
-            if (!fns || !fns->create_dev)
-                goto fail;
-            struct hwcontext_create_dev_params dev_params = {0};
-            p->av_device_ref = fns->create_dev(f->global, f->log, &dev_params);
-            if (!p->av_device_ref)
-                goto fail;
-            MP_WARN(f, "No D3D11 video output, using a standalone device. "
+            // Prefer deriving from the VO's device, so that we land on the
+            // same adapter it is rendering on. Creating a device standalone
+            // picks whichever adapter enumerates first, which is not
+            // necessarily the same GPU on a multi-adapter system.
+            struct hwdec_imgfmt_request vk_params = {
+                .imgfmt = IMGFMT_VULKAN,
+                .probing = false,
+            };
+            hwdec_devices_request_for_img_fmt(info->hwdec_devs, &vk_params);
+            struct mp_hwdec_ctx *vkctx =
+                hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs,
+                                                     IMGFMT_VULKAN,
+                                                     AV_HWDEVICE_TYPE_VULKAN);
+            if (vkctx && vkctx->av_device_ref) {
+                int ret = av_hwdevice_ctx_create_derived(&p->av_device_ref,
+                                                         AV_HWDEVICE_TYPE_D3D11VA,
+                                                         vkctx->av_device_ref, 0);
+                if (ret < 0) {
+                    MP_VERBOSE(f, "Could not derive a D3D11 device from the "
+                                  "VO's Vulkan device: %s\n", av_err2str(ret));
+                    p->av_device_ref = NULL;
+                }
+            }
+            if (!p->av_device_ref) {
+                const struct hwcontext_fns *fns =
+                    hwdec_get_hwcontext_fns(AV_HWDEVICE_TYPE_D3D11VA);
+                if (!fns || !fns->create_dev)
+                    goto fail;
+                struct hwcontext_create_dev_params dev_params = {0};
+                p->av_device_ref = fns->create_dev(f->global, f->log, &dev_params);
+                if (!p->av_device_ref)
+                    goto fail;
+            }
+            MP_WARN(f, "No D3D11 video output, using a separate device. "
                        "Frames are copied through system memory, which is "
                        "slow. Use --gpu-api=d3d11 to avoid this.\n");
         }
