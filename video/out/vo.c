@@ -1018,12 +1018,11 @@ static bool render_frame(struct vo *vo)
     //if this becomes true, we may later switch to false if needed.
     in->dropped_frame = frame->duration >= 0;
 
-    if (vo->opts->vrr_adjust) {
-        //we are assuming valid frame inputs should always have >= 0 frame->duration,
-        //except the above special case. so now make sure it's in valid range so that
-        //it doesn't mess up future calculations.
-        frame->duration = MPMAX(frame->duration, 0);
-    }
+    //we are assuming valid frame inputs should always have >= 0 frame->duration,
+    //except the above special case. so now make sure it's non-negative so that
+    //it doesn't mess up future calculations.
+    frame->duration = MPMAX(frame->duration, 0);
+
     //we adjust the pts, while maintaining the end time the same.
     frame->pts += in->pts_offset;
     frame->duration -= in->pts_offset;
