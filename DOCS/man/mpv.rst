@@ -622,7 +622,8 @@ reset when a new file is played.
 
 Sometimes, it is useful to change options per-file. This can be achieved by
 adding the special per-file markers ``--{`` and ``--}``. (Note that you must
-escape these on some shells.) Example::
+escape these on some shells.) When a file is loaded, the associated per-file
+options are applied and marked as file-local options. Example::
 
     mpv --a file1.mkv --b --\{ --c file2.mkv --d file3.mkv --e --\} file4.mkv --f
 
@@ -637,7 +638,8 @@ file4.mkv       ``--a --b --f``
 
 Additionally, any file-local option changed at runtime is reset when the current
 file stops playing. If option ``--c`` is changed during playback of
-``file2.mkv``, it is reset when advancing to ``file3.mkv``. This only affects
+``file2.mkv``, it is reset when advancing to ``file3.mkv``, or when restarting
+the current file with the ``playlist-play-index`` command. This only affects
 file-local options. The option ``--a`` is never reset here.
 
 
@@ -816,6 +818,8 @@ file-specific configuration is loaded from ``~/.config/mpv``. In addition, the
 ``--use-filedir-conf`` option enables directory-specific configuration files.
 For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
+The options loaded in this way are marked as file-local, which are reset when
+the current file stops playing.
 
 
 Profiles
@@ -1265,6 +1269,9 @@ mpv also stores options other than the playback position when they have been
 modified after playback began, for example the volume and selected audio/subtitles,
 and restores their values the next time the file is played. Which options are
 saved can be configured with the ``--watch-later-options`` option.
+
+The options applied in this way are marked as file-local, and they are reset when
+playback of the file associated with it stops.
 
 When playing multiple playlist entries, mpv checks if one them has a resume
 config file associated, and if it finds one it restarts playback from it. For
