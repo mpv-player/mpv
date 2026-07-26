@@ -1176,19 +1176,19 @@ static bool render_frame(struct vo *vo)
 
     // Store the initial value before we unlock.
     bool request_redraw = in->request_redraw;
-    bool controlled_drop = false;
+    bool current_controlled_drop = false;
 
     if (vo->opts->vrr_adjust && in->dropped_frame && frame->repeat) {
         in->dropped_frame = false;
-        controlled_drop = true;
+        current_controlled_drop = true;
     }
 
     bool driver_has_received_frame = false;
     bool driver_dropped_frame = false;
 
-    if (in->dropped_frame || controlled_drop) {
+    if (in->dropped_frame || current_controlled_drop) {
         //do not log vrr repeat frame drops
-        if (!controlled_drop)
+        if (in->dropped_frame)
             in->drop_count += 1;
 
         wakeup_core(vo);
@@ -1234,10 +1234,12 @@ static bool render_frame(struct vo *vo)
         stats_time_end(in->stats, "video-flip");
 
         mp_mutex_lock(&in->lock);
-        //if in->drop_count increases, assumption is that the current frame has been dropped
+        //if in->drop_count increases, assumption is that the current frame may have been dropped
         driver_dropped_frame = prev_drop_count < vo->in->drop_count;
+        //if multiple frames have been dropped, always set to true.
+        in->dropped_frame = in->drop_count - prev_drop_count > 1;
 
-        //we might still have valid time to output the frame even after, for whatever
+        //we might still have valid time to output the current frame even after, for whatever
         //reason, the driver has dropped it, so retry. we won't be retrying forever
         //since it will become old and vo will properly drop it to go next.
         if (vo->opts->vrr_adjust && in->current_frame && driver_dropped_frame) {
@@ -1248,8 +1250,8 @@ static bool render_frame(struct vo *vo)
             in->current_frame->request_repeat = true;
             in->pts_offset = unmodified_pts_offset;
             in->prev_valid_duration = unmodified_prev_valid_duration;
-            in->drop_count = prev_drop_count;
-            controlled_drop = true;
+            in->drop_count -= 1;
+            current_controlled_drop = true;
         }
         else {
             in->dropped_frame = driver_dropped_frame;
@@ -1265,8 +1267,8 @@ static bool render_frame(struct vo *vo)
         in->current_frame = NULL;
     }
 
-    if (in->dropped_frame || controlled_drop) {
-        if (!controlled_drop)
+    if (in->dropped_frame || current_controlled_drop) {
+        if (in->dropped_frame)
             MP_STATS(vo, "drop-vo");
     } else {
         // If the initial redraw request was true and mpv is still playing,
