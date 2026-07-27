@@ -145,6 +145,8 @@ static const struct wasapi_sample_fmt wasapi_formats[] = {
     {AF_FORMAT_S_TRUEHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_MLP},
     {AF_FORMAT_S_EAC3,  16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DOLBY_DIGITAL_PLUS},
     {AF_FORMAT_S_DTSHD, 16, 16, &KSDATAFORMAT_SUBTYPE_IEC61937_DTS_HD},
+    // DSD-over-PCM
+    {AF_FORMAT_S_DOP,   32, 24, &KSDATAFORMAT_SUBTYPE_PCM},
     {0},
 };
 
@@ -328,8 +330,9 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf,
     }
 
     // Do not touch the ao for passthrough, just assume that we set WAVEFORMATEX
-    // correctly.
-    if (af_fmt_is_pcm(format.mp_format)) {
+    // correctly. Checked on both sides, since the DoP wire format is plain
+    // 24-in-32 PCM and reverse maps to a PCM sample format.
+    if (af_fmt_is_pcm(format.mp_format) && af_fmt_is_pcm(ao->format)) {
         struct mp_chmap channels;
         if (!chmap_from_waveformat(&channels, wf)) {
             MP_ERR(ao, "Unable to construct channel map from WAVEFORMAT %s\n",
@@ -474,6 +477,10 @@ static bool find_formats_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     if (try_format_exclusive(ao, wformat))
         return true;
 
+    // DoP must be played back bit-exactly at the requested rate.
+    if (ao->format == AF_FORMAT_S_DOP)
+        return false;
+
     if (af_fmt_is_spdif(ao->format)) {
         if (ao->format != AF_FORMAT_S_AC3) {
             // If the requested format failed and it is passthrough, but not
@@ -576,7 +583,7 @@ static bool find_formats(struct ao *ao)
     WAVEFORMATEXTENSIBLE wformat;
     set_waveformat(&wformat, &wasapi_format, ao->samplerate, &channels);
 
-    if (state->opt_exclusive || af_fmt_is_spdif(ao->format)) {
+    if (state->opt_exclusive || !af_fmt_is_pcm(ao->format)) {
         share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
         if(!find_formats_exclusive(ao, &wformat))
             return false;
