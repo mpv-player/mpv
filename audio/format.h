@@ -48,6 +48,10 @@ enum af_format {
     AF_FORMAT_S_MP3,
     AF_FORMAT_S_TRUEHD,
 
+    // DSD-over-PCM (DoP): 16 DSD bits and a marker byte in the 24 MSBs of
+    // 32-bit samples.
+    AF_FORMAT_S_DOP,
+
     AF_FORMAT_COUNT
 };
 

@@ -32,7 +32,8 @@ struct mp_aframe {
     AVFrame *av_frame;
     // We support channel layouts different from AVFrame channel masks
     struct mp_chmap chmap;
-    // We support spdif formats, which are allocated as AV_SAMPLE_FMT_S16.
+    // We support bitstream formats, which are allocated as fake integer PCM
+    // of matching sample size.
     int format;
     double pts;
     double speed;
@@ -306,9 +307,10 @@ bool mp_aframe_set_format(struct mp_aframe *frame, int format)
         return false;
     enum AVSampleFormat av_format = af_to_avformat(format);
     if (av_format == AV_SAMPLE_FMT_NONE && format) {
-        if (!af_fmt_is_spdif(format))
+        if (af_fmt_is_pcm(format))
             return false;
-        av_format = AV_SAMPLE_FMT_S16;
+        av_format = af_fmt_to_bytes(format) == 4 ? AV_SAMPLE_FMT_S32
+                                                 : AV_SAMPLE_FMT_S16;
     }
     frame->format = format;
     frame->av_frame->format = av_format;
@@ -488,7 +490,7 @@ double mp_aframe_duration(struct mp_aframe *f)
 
 // Clip the given frame to the given timestamp range. Adjusts the frame size
 // and timestamp.
-// Refuses to change spdif frames.
+// Refuses to change bitstream (spdif/DoP) frames.
 void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
 {
     double f_end = mp_aframe_end_pts(f);
@@ -500,7 +502,7 @@ void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
             if (f->pts >= end) {
                 f->av_frame->nb_samples = 0;
             } else {
-                if (af_fmt_is_spdif(mp_aframe_get_format(f)))
+                if (!af_fmt_is_pcm(mp_aframe_get_format(f)))
                     return;
                 int new = (end - f->pts) * rate;
                 f->av_frame->nb_samples = MPCLAMP(new, 0, f->av_frame->nb_samples);
@@ -513,7 +515,7 @@ void mp_aframe_clip_timestamps(struct mp_aframe *f, double start, double end)
                 f->av_frame->nb_samples = 0;
                 f->pts = f_end;
             } else {
-                if (af_fmt_is_spdif(mp_aframe_get_format(f)))
+                if (!af_fmt_is_pcm(mp_aframe_get_format(f)))
                     return;
                 int skip = (start - f->pts) * rate;
                 skip = MPCLAMP(skip, 0, f->av_frame->nb_samples);
