@@ -33,6 +33,8 @@ int af_fmt_to_bytes(int format)
     case AF_FORMAT_FLOAT:   return 4;
     case AF_FORMAT_DOUBLE:  return 8;
     }
+    if (format == AF_FORMAT_S_DOP)
+        return 4;
     if (af_fmt_is_spdif(format))
         return 2;
     return 0;
@@ -53,9 +55,10 @@ bool af_fmt_is_float(int format)
 // true for both unsigned and signed ints
 bool af_fmt_is_int(int format)
 {
-    return format && !af_fmt_is_spdif(format) && !af_fmt_is_float(format);
+    return format && af_fmt_is_pcm(format) && !af_fmt_is_float(format);
 }
 
+// true for IEC61937 wrapped formats only (not other bitstream formats)
 bool af_fmt_is_spdif(int format)
 {
     return af_format_sample_alignment(format) > 1;
@@ -63,7 +66,8 @@ bool af_fmt_is_spdif(int format)
 
 bool af_fmt_is_pcm(int format)
 {
-    return af_fmt_is_valid(format) && !af_fmt_is_spdif(format);
+    return af_fmt_is_valid(format) && !af_fmt_is_spdif(format) &&
+           format != AF_FORMAT_S_DOP;
 }
 
 static const int planar_formats[][2] = {
@@ -135,6 +139,7 @@ const char *af_fmt_to_str(int format)
     case AF_FORMAT_S_EAC3:      return "spdif-eac3";
     case AF_FORMAT_S_MP3:       return "spdif-mp3";
     case AF_FORMAT_S_TRUEHD:    return "spdif-truehd";
+    case AF_FORMAT_S_DOP:       return "dop";
     }
     return "??";
 }
