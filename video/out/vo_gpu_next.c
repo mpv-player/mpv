@@ -2756,7 +2756,9 @@ static void update_render_options(struct vo *vo)
         req_frames += ceilf(pars->params.frame_mixer->kernel->radius) *
                       (pars->params.skip_anti_aliasing ? 1 : 2);
     }
-    vo_set_queue_params(vo, 0, MPMIN(VO_MAX_REQ_FRAMES, req_frames));
+    req_frames = MPMIN(VO_MAX_REQ_FRAMES, req_frames);
+    // pl_queue also retains past frames for the symmetric mixing window,
+    vo_set_queue_params(vo, 0, req_frames, 2 * req_frames - 1);
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
