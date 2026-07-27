@@ -1569,20 +1569,27 @@ Video
     Runtime changes to this are ignored (the current option value is used
     whenever the renderer is created).
 
-``--hwdec-extra-frames=<N>``
-    Number of GPU frames hardware decoding should preallocate (default: see
-    ``--list-options`` output). If this is too low, frame allocation may fail
-    during decoding, and video frames might get dropped and/or corrupted.
-    Setting it too high simply wastes GPU memory and has no advantages.
+``--hwdec-extra-frames=<auto|N>``
+    Number of extra GPU frames hardware decoding should preallocate, on top of
+    what the codec itself requires (default: ``auto``).
 
     This value is used only for hardware decoding APIs which require
     preallocating surfaces (known examples include ``d3d11va`` and ``vaapi``).
     For other APIs, frames are allocated as needed. The details depend on the
     libavcodec implementations of the hardware decoders.
 
-    The required number of surfaces depends on dynamic runtime situations. The
-    default is a fixed value that is thought to be sufficient for most uses. But
-    in certain situations, it may not be enough.
+    In ``auto`` mode, the number is derived from how many frames the player
+    and the VO may reference at the same time. For example, enabling
+    ``--interpolation`` increases it in proportion to the ``--tscale`` filter
+    radius, and VO deinterlacing adds the temporal reference frames it needs.
+    The value is determined when the decoder is initialized; runtime option
+    changes that increase frame requirements do not resize the pool, so set a
+    fixed value if you intend to switch such options during playback.
+
+    Setting a fixed value overrides the automatic sizing in both directions.
+    If it is too low, frame allocation may fail during decoding, and video
+    frames might get dropped and/or corrupted. Setting it too high simply
+    wastes GPU memory and has no advantages.
 
 ``--hwdec-image-format=<name>``
     Set the internal pixel format used by hardware decoding via ``--hwdec``
@@ -1821,6 +1828,10 @@ Video
     Keep in mind that using this filter **will** conflict with any manually
     inserted deinterlacing filters, and that this will make video look worse if
     it's not actually interlaced.
+
+    Enabling video output deinterlacing at runtime may require setting
+    ``--hwdec-extra-frames``, as the hardware decoder's surface pool is sized
+    at decoder initialization.
 
 ``--deinterlace-field-parity=<tff|bff|auto>``
     Specify the field parity/order when deinterlacing (default: auto).
@@ -5984,6 +5995,10 @@ them.
     being the smoothest/blurriest and ``oversample`` being the sharpest/least
     smooth.
 
+    Switching to a filter with a larger radius at runtime may require setting
+    ``--hwdec-extra-frames``, as the hardware decoder's surface pool is sized
+    at decoder initialization.
+
 ``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
     Set filter parameters. By default, these are set to the special string
     ``default``, which maps to a scaler-specific default value. Ignored if the
@@ -6135,6 +6150,9 @@ them.
     This essentially attempts to interpolate the missing frames by convoluting
     the video along the temporal axis. The filter used can be controlled using
     the ``--tscale`` setting.
+
+    Enabling this at runtime may require setting ``--hwdec-extra-frames``, as
+    the hardware decoder's surface pool is sized at decoder initialization.
 
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
