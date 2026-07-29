@@ -110,7 +110,7 @@ char *mp_format_double(void *talloc_ctx, double val, int precision,
     if (percent_sign)
         bstr_xappend(talloc_ctx, &str, bstr0("%"));
     str.start[str.len] = '\0';
-    return str.start;
+    return (char *)str.start;
 }
 
 // Set rc to the union of rc and rc2
@@ -231,7 +231,7 @@ void mp_append_utf8_bstr(void *talloc_ctx, struct bstr *buf, uint32_t codepoint)
     uint8_t tmp;
     char *output = data;
     PUT_UTF8(codepoint, tmp, *output++ = tmp;);
-    bstr_xappend(talloc_ctx, buf, (bstr){data, output - data});
+    bstr_xappend(talloc_ctx, buf, (bstr){(unsigned char *)data, output - data});
 }
 
 // Parse a C/JSON-style escape beginning at code, and append the result to *str
@@ -257,7 +257,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     case '\'': replace = '\''; break;
     }
     if (replace) {
-        bstr_xappend(talloc_ctx, dst, (bstr){&replace, 1});
+        bstr_xappend(talloc_ctx, dst, (bstr){(unsigned char *)&replace, 1});
         *code = bstr_cut(*code, 1);
         return true;
     }
@@ -266,7 +266,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
         char c = bstrtoll(num, &num, 16);
         if (num.len)
             return false;
-        bstr_xappend(talloc_ctx, dst, (bstr){&c, 1});
+        bstr_xappend(talloc_ctx, dst, (bstr){(unsigned char *)&c, 1});
         *code = bstr_cut(*code, 3);
         return true;
     }
