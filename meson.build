@@ -307,8 +307,7 @@ test_flags = ['-Wdisabled-optimization',
 
 test_flags_c = ['-Wmissing-prototypes',
                 '-Wstrict-prototypes',
-                '-Werror=implicit-function-declaration',
-                '-Wno-pointer-sign']
+                '-Werror=implicit-function-declaration']
 
 flags += cc.get_supported_arguments(test_flags)
 flags_c += cc.get_supported_arguments(test_flags_c)
