@@ -370,7 +370,7 @@ static void af_scaletempo_process(struct mp_filter *f)
     uint8_t **out_planes = mp_aframe_get_data_rw(out);
     if (!out_planes)
         goto error;
-    int8_t *pout = out_planes[0];
+    uint8_t *pout = out_planes[0];
     int out_offset = 0;
     if (s->bytes_queued >= s->bytes_queue) {
         int ti;

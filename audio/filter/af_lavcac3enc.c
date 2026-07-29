@@ -254,7 +254,7 @@ static void af_lavcac3enc_process(struct mp_filter *f)
     uint8_t **planes = mp_aframe_get_data_rw(out);
     if (!planes)
         goto error;
-    char *buf = planes[0];
+    uint8_t *buf = planes[0];
     memcpy(buf, hdr, header_len);
     memcpy(buf + header_len, pkt->data, pkt->size);
     memset(buf + header_len + pkt->size, 0,

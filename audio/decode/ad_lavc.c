@@ -237,7 +237,7 @@ static int receive_frame(struct mp_filter *da, struct mp_frame *out)
     AVFrameSideData *sd =
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
     if (sd && sd->size >= 10) {
-        char *d = sd->data;
+        uint8_t *d = sd->data;
         priv->skip_samples += AV_RL32(d + 0);
         priv->trim_samples += AV_RL32(d + 4);
     }

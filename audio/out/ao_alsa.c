@@ -757,7 +757,7 @@ static int init_device(struct ao *ao, int mode)
 
     int num_channels = ao->channels.num;
     err = snd_pcm_hw_params_set_channels_near
-            (p->alsa, alsa_hwparams, &num_channels);
+            (p->alsa, alsa_hwparams, (unsigned int *)&num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
     dump_hw_params(ao, "HW params after channels:\n", alsa_hwparams);
 
@@ -767,7 +767,7 @@ static int init_device(struct ao *ao, int mode)
     }
 
     err = snd_pcm_hw_params_set_rate_near
-            (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
+            (p->alsa, alsa_hwparams, (unsigned int *)&ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
     dump_hw_params(ao, "HW params after rate-2:\n", alsa_hwparams);
 
