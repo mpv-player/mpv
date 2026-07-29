@@ -1727,7 +1727,7 @@ found: ;
     finish_pass_tex(p, tex, p->texture_w, p->texture_h);
     struct image img = image_wrap(*tex, PLANE_RGB, p->components);
     img = pass_hook(p, name, img, tex_trans, 4);
-    copy_image(p, &(int){0}, img);
+    copy_image(p, &(unsigned int){0}, img);
     p->texture_w = img.w;
     p->texture_h = img.h;
     p->components = img.components;
@@ -2356,7 +2356,7 @@ static void pass_read_video(struct gl_video *p)
     for (int n = 0; n < 4; n++) {
         if (img[n].tex && img[n].tex->params.format->ctype == RA_CTYPE_UINT) {
             GLSLF("// use_integer fix for plane %d\n", n);
-            copy_image(p, &(int){0}, img[n]);
+            copy_image(p, &(unsigned int){0}, img[n]);
             pass_describe(p, "use_integer fix");
             finish_pass_tex(p, &p->integer_tex[n], img[n].w, img[n].h);
             img[n] = image_wrap(p->integer_tex[n], img[n].type,
@@ -2413,7 +2413,7 @@ static void pass_read_video(struct gl_video *p)
             p->ra_format.chroma_w != 1)
         {
             GLSLF("// chroma fix for rotated plane %d\n", n);
-            copy_image(p, &(int){0}, img[n]);
+            copy_image(p, &(unsigned int){0}, img[n]);
             pass_describe(p, "chroma fix for rotated plane");
             finish_pass_tex(p, &p->chroma_tex[n], img[n].w, img[n].h);
             img[n] = image_wrap(p->chroma_tex[n], img[n].type,
@@ -2532,7 +2532,7 @@ static void pass_read_video(struct gl_video *p)
 static void pass_read_tex(struct gl_video *p, struct ra_tex *tex)
 {
     struct image img = image_wrap(tex, PLANE_RGB, p->components);
-    copy_image(p, &(int){0}, img);
+    copy_image(p, &(unsigned int){0}, img);
 }
 
 // yuv conversion, and any other conversions before main up/down-scaling
@@ -3008,7 +3008,7 @@ static void pass_dither(struct gl_video *p, const struct ra_fbo *fbo)
             finish_pass_tex(p, &p->error_diffusion_tex[1], o_w, o_h);
 
             img = image_wrap(p->error_diffusion_tex[1], PLANE_RGB, p->components);
-            copy_image(p, &(int){0}, img);
+            copy_image(p, &(unsigned int){0}, img);
 
             return;
         }
@@ -3300,7 +3300,7 @@ static void pass_draw_to_screen(struct gl_video *p, const struct ra_fbo *fbo, in
             o_h = p->dst_rect.y1 - p->dst_rect.y0;
         finish_pass_tex(p, &p->screen_tex, o_w, o_h);
         struct image tmp = image_wrap(p->screen_tex, PLANE_RGB, p->components);
-        copy_image(p, &(int){0}, tmp);
+        copy_image(p, &(unsigned int){0}, tmp);
     }
 
     if (p->has_alpha) {
@@ -3824,7 +3824,7 @@ static void frame_perf_data(struct pass_info pass[], struct mp_frame_perf *out)
         if (!pass[i].desc.len)
             break;
         out->perf[out->count] = pass[i].perf;
-        strncpy(out->desc[out->count], pass[i].desc.start,
+        strncpy(out->desc[out->count], (char *)pass[i].desc.start,
                 sizeof(out->desc[out->count]) - 1);
         out->desc[out->count][sizeof(out->desc[out->count]) - 1] = '\0';
         out->count++;
