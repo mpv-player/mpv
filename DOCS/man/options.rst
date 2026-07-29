@@ -357,11 +357,13 @@ Playback Control
         local files, such as special protocols like ``avdevice://`` (which are
         inherently unsafe).
 
-``--playlist-inherit-options=<yes|no|current>``
+``--playlist-inherit-options=<yes|no|current|auto>``
     Whether the per-file options of a playlist file are inherited by its items
-    when the playlist file is resolved and expanded (default: no). The value
+    when the playlist file is resolved and expanded (default: auto). The value
     ``current`` means that for playlists created by ``--autocreate-playlist``,
     only the file from which the playlist is created inherits the options.
+    The value ``auto`` behaves like ``current`` for playlists created by
+    ``--autocreate-playlist``, and behaves like ``yes`` otherwise.
 
 ``--chapter-merge-threshold=<number>``
     Threshold for merging almost consecutive ordered chapter parts in
