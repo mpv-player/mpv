@@ -547,7 +547,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             }
             char **strptr;
             GETPTR(strptr, char *);
-            *strptr = talloc_strndup(ctx->talloc_ctx, data, length);
+            *strptr = talloc_strndup(ctx->talloc_ctx, (char *)data, length);
             MP_TRACE(ctx, "string \"%s\"\n", *strptr);
             break;
 

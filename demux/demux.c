@@ -4801,7 +4801,7 @@ static void visit_convert(void *ctx, void *ta, char **s)
     bstr conv = mp_iconv_to_utf8(in->log, data, in->meta_charset,
                                  MP_ICONV_VERBOSE);
     if (conv.start && conv.start != data.start) {
-        char *ns = conv.start; // 0-termination is guaranteed
+        char *ns = (char *)conv.start; // 0-termination is guaranteed
         // (The old string might not be an alloc, but if it is, it's a talloc
         // child, and will not leak, even if it stays allocated uselessly.)
         *s = ns;

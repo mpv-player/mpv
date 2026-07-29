@@ -73,7 +73,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct demuxer *d, char *filename
                 int len = stream_read_peek(s, buf, sizeof(buf));
                 if (!len)
                     break;
-                bstr data = (bstr){buf, len};
+                bstr data = (bstr){(unsigned char *)buf, len};
                 int pos = bstrchr(data, '\n');
                 data = bstr_splice(data, 0, pos < 0 ? data.len : pos + 1);
                 bstr fname = bstr_strip(data);
