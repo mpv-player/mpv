@@ -800,7 +800,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
         if (s) {
             struct bstr content = stream_read_complete(s, p, 1000000000);
             if (content.start) {
-                p->encoder->stats_in = content.start;
+                p->encoder->stats_in = (char *)content.start;
             } else {
                 MP_WARN(p, "could not read '%s', "
                         "disabling 2-pass encoding at pass 1\n", filename);

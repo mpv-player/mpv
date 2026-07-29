@@ -88,7 +88,7 @@ int main(void)
         p++;
     }
 #endif
-    TEST_NORMALIZE(dst.start, "foo");
+    TEST_NORMALIZE((char *)dst.start, "foo");
     talloc_free(ctx);
 
 #if HAVE_DOS_PATHS
