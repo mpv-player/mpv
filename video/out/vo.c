@@ -169,6 +169,7 @@ struct vo_internal {
 
     bool rendering;                 // true if an image is being rendered
     struct vo_frame *frame_queued;  // should be drawn next
+    int req_past_frames;            // VO's requested value of num_past_frames
     int req_frames;                 // VO's requested value of num_frames
     int frame_refs;                 // max frames the VO may reference at once
     uint64_t current_frame_id;
@@ -1327,20 +1328,33 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 
 // flip_page[_timed] will be called offset_us nanoseconds too early.
 // (For vo_vdpau, which does its own timing.)
+// num_req_past_frames sets the requested number of past vo_frame.past_frames
 // num_req_frames set the requested number of requested vo_frame.frames.
 // (For vo_gpu interpolation.)
 // num_frame_refs sets the total number of frames the VO may reference at the
 // same time, including retained past frames. (For sizing fixed hardware
 // decoder surface pools.)
-void vo_set_queue_params(struct vo *vo, int64_t offset_ns, int num_req_frames,
+void vo_set_queue_params(struct vo *vo, int64_t offset_ns,
+                         int num_req_past_frames, int num_req_frames,
                          int num_frame_refs)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_ns;
+    in->req_past_frames = MPCLAMP(num_req_past_frames, 0, VO_MAX_REQ_FRAMES);
     in->req_frames = MPCLAMP(num_req_frames, 1, VO_MAX_REQ_FRAMES);
-    in->frame_refs = MPCLAMP(num_frame_refs, in->req_frames, 2 * VO_MAX_REQ_FRAMES);
+    in->frame_refs = MPCLAMP(num_frame_refs, in->req_frames + in->req_past_frames,
+                             2 * VO_MAX_REQ_FRAMES);
     mp_mutex_unlock(&in->lock);
+}
+
+int vo_get_num_req_past_frames(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    int res = in->req_past_frames;
+    mp_mutex_unlock(&in->lock);
+    return res;
 }
 
 int vo_get_num_req_frames(struct vo *vo)
@@ -1494,6 +1508,8 @@ struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
 static void destroy_frame(void *p)
 {
     struct vo_frame *frame = p;
+    for (int n = 0; n < frame->num_past_frames; n++)
+        talloc_free(frame->past_frames[n]);
     for (int n = 0; n < frame->num_frames; n++)
         talloc_free(frame->frames[n]);
 }
@@ -1509,6 +1525,8 @@ struct vo_frame *vo_frame_ref(struct vo_frame *frame)
     struct vo_frame *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, destroy_frame);
     *new = *frame;
+    for (int n = 0; n < frame->num_past_frames; n++)
+        new->past_frames[n] = mp_image_new_ref(frame->past_frames[n]);
     for (int n = 0; n < frame->num_frames; n++)
         new->frames[n] = mp_image_new_ref(frame->frames[n]);
     new->current = new->num_frames ? new->frames[0] : NULL;
