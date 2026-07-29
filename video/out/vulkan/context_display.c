@@ -69,7 +69,7 @@ static bool walk_display_properties(struct mp_log *log,
 
     // Count displays. This must be done before enumerating planes with the
     // Intel driver, or it will not enumerate any planes. WTF.
-    int num_displays = 0;
+    uint32_t num_displays = 0;
     vkGetPhysicalDeviceDisplayPropertiesKHR(device, &num_displays, NULL);
     if (!num_displays) {
         mp_msg(log, msgl_info, "    No available displays for device.\n");
@@ -82,7 +82,7 @@ static bool walk_display_properties(struct mp_log *log,
     }
 
     // Enumerate Planes
-    int num_planes = 0;
+    uint32_t num_planes = 0;
     vkGetPhysicalDeviceDisplayPlanePropertiesKHR(device, &num_planes, NULL);
     if (!num_planes) {
         mp_msg(log, msgl_info, "    No available planes for device.\n");
@@ -107,7 +107,7 @@ static bool walk_display_properties(struct mp_log *log,
     VkDisplayKHR **planes_to_displays =
         talloc_zero_array(tmp, VkDisplayKHR *, num_planes);
     for (int j = 0; j < num_planes; j++) {
-        int num_displays_for_plane = 0;
+        uint32_t num_displays_for_plane = 0;
         vkGetDisplayPlaneSupportedDisplaysKHR(device, j,
                                               &num_displays_for_plane, NULL);
         if (!num_displays_for_plane)
@@ -150,7 +150,7 @@ static bool walk_display_properties(struct mp_log *log,
 
         mp_msg(log, msgl_info, "    Modes:\n");
 
-        int num_modes = 0;
+        uint32_t num_modes = 0;
         vkGetDisplayModePropertiesKHR(device, display, &num_modes, NULL);
         if (!num_modes) {
             mp_msg(log, msgl_info, "      No available modes for display.\n");
