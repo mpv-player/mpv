@@ -74,7 +74,7 @@ static inline void write_bstr(bstr bs)
 
 static inline void write_str(unsigned char* s)
 {
-    write_bstr(bstr0(s));
+    write_bstr(bstr0((char *)s));
 }
 
 #define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
@@ -226,7 +226,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     write_bstr_passthrough(p, KITTY_ESC_END);
 
     if (p->opts.config_clear)
-        write_str(TERM_ESC_CLEAR_SCREEN);
+        write_str((unsigned char *)TERM_ESC_CLEAR_SCREEN);
 
     get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
     set_out_params(vo);
@@ -371,7 +371,7 @@ static void flip_page(struct vo *vo)
                                             offset + chunk < output_size);
 
             // Append at max chunk bytes
-            bstr_xappend(p, &p->cmd, (bstr){p->output + offset, chunk});
+            bstr_xappend(p, &p->cmd, (bstr){(unsigned char *)p->output + offset, chunk});
             append_passthrough(p, &p->cmd, KITTY_ESC_END);
             offset += chunk;
         }
@@ -423,7 +423,7 @@ static int preinit(struct vo *vo)
         int p_size = strlen(p->shm_path) - 1;
         int b64_size = AV_BASE64_SIZE(p_size);
         p->shm_path_b64 = talloc_array(vo, char, b64_size);
-        av_base64_encode(p->shm_path_b64, b64_size, p->shm_path + 1, p_size);
+        av_base64_encode(p->shm_path_b64, b64_size, (uint8_t *)p->shm_path + 1, p_size);
     }
 #else
     if (p->opts.use_shm) {
@@ -443,10 +443,10 @@ static int preinit(struct vo *vo)
             p->dcs_suffix = DCS_SUFFIX;
     }
 
-    write_str(TERM_ESC_HIDE_CURSOR);
+    write_str((unsigned char *)TERM_ESC_HIDE_CURSOR);
     terminal_set_mouse_input(true);
     if (p->opts.alt_screen)
-        write_str(TERM_ESC_ALT_SCREEN);
+        write_str((unsigned char *)TERM_ESC_ALT_SCREEN);
 
     return 0;
 }
@@ -474,14 +474,14 @@ static void uninit(struct vo *vo)
     write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
     write_bstr_passthrough(p, KITTY_ESC_END);
 
-    write_str(TERM_ESC_RESTORE_CURSOR);
+    write_str((unsigned char *)TERM_ESC_RESTORE_CURSOR);
     terminal_set_mouse_input(false);
 
     if (p->opts.alt_screen) {
-        write_str(TERM_ESC_NORMAL_SCREEN);
+        write_str((unsigned char *)TERM_ESC_NORMAL_SCREEN);
     } else {
         char *cmd = talloc_asprintf(vo, TERM_ESC_GOTO_YX, p->cols, 0);
-        write_str(cmd);
+        write_str((unsigned char *)cmd);
     }
 
     free_bufs(vo);

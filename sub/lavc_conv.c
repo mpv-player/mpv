@@ -101,7 +101,7 @@ struct lavc_conv *lavc_conv_create(struct sd *sd)
     avctx->pkt_timebase = avctx->time_base;
     avctx->sub_charenc_mode = FF_SUB_CHARENC_MODE_IGNORE;
     priv->avctx = avctx;
-    priv->extradata = talloc_strndup(priv, avctx->subtitle_header,
+    priv->extradata = talloc_strndup(priv, (char *)avctx->subtitle_header,
                                      avctx->subtitle_header_size);
     mp_codec_info_from_av(avctx, sd->codec);
     // Keep original codec name, which get_lavc_format() may have transformed

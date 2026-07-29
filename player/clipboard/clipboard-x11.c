@@ -165,13 +165,13 @@ static void clipboard_x11_handle_selection_notify(struct clipboard_x11_priv *x11
     if (actual_type == XA(x11, UTF8_STRING) && selection == XA(x11, CLIPBOARD)) {
         mp_mutex_lock(&x11->lock);
         talloc_free(x11->selection_text.start);
-        x11->selection_text = bstrdup(x11, bstr0(data));
+        x11->selection_text = bstrdup(x11, bstr0((char *)data));
         x11->data_changed = true;
         mp_mutex_unlock(&x11->lock);
     } else if (actual_type == XA(x11, UTF8_STRING) && selection == XA_PRIMARY) {
         mp_mutex_lock(&x11->lock);
         talloc_free(x11->primary_selection_text.start);
-        x11->primary_selection_text = bstrdup(x11, bstr0(data));
+        x11->primary_selection_text = bstrdup(x11, bstr0((char *)data));
         x11->data_changed = true;
         mp_mutex_unlock(&x11->lock);
     }

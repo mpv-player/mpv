@@ -267,7 +267,7 @@ static void assobjects_init(struct sd *sd)
     ctx->shadow_track->PlayResY = MP_ASS_FONT_PLAYRESY;
     mp_ass_add_default_styles(sd, ctx->shadow_track, opts, shared_opts);
 
-    char *extradata = sd->codec->extradata;
+    char *extradata = (char *)sd->codec->extradata;
     int extradata_size = sd->codec->extradata_size;
     if (ctx->converter) {
         extradata = lavc_conv_get_extradata(ctx->converter);
@@ -384,7 +384,7 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
             return;
     }
 
-    ass_process_chunk(ctx->ass_track, pkt->buffer, pkt->len,
+    ass_process_chunk(ctx->ass_track, (char *)pkt->buffer, pkt->len,
                       floor(pkt->pts * 1000 + 1e-6),
                       floor(pkt->duration * 1000 + 1e-6));
 
@@ -477,7 +477,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             struct demux_packet pkt2 = {
                 .pts = sub_pts,
                 .duration = sub_duration,
-                .buffer = r[n],
+                .buffer = (unsigned char *)r[n],
                 .len = strlen(r[n]),
             };
             filter_and_add(sd, &pkt2);
@@ -796,7 +796,7 @@ done:
 
 static void append(bstr *b, char c)
 {
-    bstr_xappend(NULL, b, (bstr){&c, 1});
+    bstr_xappend(NULL, b, (bstr){(unsigned char *)&c, 1});
 }
 
 static void ass_to_plaintext(bstr *b, const char *in)
@@ -987,7 +987,7 @@ static void fill_plaintext(struct sd *sd, double pts)
     event->Start = 0;
     event->Duration = INT_MAX;
     event->Style = track->default_style;
-    event->Text = strdup(dst.start);
+    event->Text = strdup((char *)dst.start);
 
     talloc_free(dst.start);
 }
@@ -1238,7 +1238,7 @@ int sd_ass_fmt_offset(const char *evt_fmt)
 bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset)
 {
     // e.g. pkt->buffer ("4" is ReadOrder): "4,0,Default,,0,0,0,,fifth line"
-    bstr txt = {(char *)pkt->buffer, pkt->len}, t0 = txt;
+    bstr txt = {(unsigned char *)pkt->buffer, pkt->len}, t0 = txt;
     while (offset-- > 0) {
         int n = bstrchr(txt, ',');
         if (n < 0) {  // shouldn't happen
@@ -1252,8 +1252,8 @@ bstr sd_ass_pkt_text(struct sd_filter *ft, struct demux_packet *pkt, int offset)
 
 bstr sd_ass_to_plaintext(char **out, const char *in)
 {
-    bstr b = {*out};
+    bstr b = {(unsigned char *)*out};
     ass_to_plaintext(&b, in);
-    *out = b.start;
+    *out = (char *)b.start;
     return b;
 }

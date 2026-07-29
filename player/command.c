@@ -559,7 +559,7 @@ static int mp_property_env(void *ctx, struct m_property *prop,
             char *sep = strchr(*env, '=');
             if (!sep)
                 continue;
-            bstr key = { .start = *env, .len = sep - *env };
+            bstr key = { .start = (unsigned char *)*env, .len = sep - *env };
             struct mpv_node *np = node_map_badd(&node, key, MPV_FORMAT_NONE);
             np->format = MPV_FORMAT_STRING;
             np->u.string = talloc_strdup(node.u.list, sep + 1);
@@ -5010,7 +5010,7 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
             break;
         bstr_xappend(tmp, &dst, bstr0("\""));
     }
-    char *r = mp_property_expand_string(mpctx, dst.start);
+    char *r = mp_property_expand_string(mpctx, (char *)dst.start);
     talloc_free(tmp);
     return r;
 }
@@ -6802,7 +6802,7 @@ static void subprocess_read(void *p, char *data, size_t size)
     struct subprocess_fd_ctx *ctx = p;
     if (ctx->capture) {
         if (ctx->output.len < ctx->max_size)
-            bstr_xappend(ctx->talloc_ctx, &ctx->output, (bstr){data, size});
+            bstr_xappend(ctx->talloc_ctx, &ctx->output, (bstr){(unsigned char *)data, size});
     } else {
         mp_msg(ctx->log, ctx->msgl, "%.*s", (int)size, data);
     }

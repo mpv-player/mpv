@@ -125,7 +125,7 @@ static int read_str(void *ta_parent, struct mpv_node *dst, char **src)
         bstr r = bstr0(str);
         if (!mp_append_escaped_string(ta_parent, &unescaped, &r))
             return -1; // broken escapes
-        str = unescaped.start; // the function guarantees null-termination
+        str = (char *)unescaped.start; // the function guarantees null-termination
     }
     dst->format = MPV_FORMAT_STRING;
     dst->u.string = str;
@@ -268,9 +268,9 @@ static void write_json_str(bstr *b, unsigned char *str)
             break;
         bstr_xappend(NULL, b, (bstr){str, cur - str});
         if (cur[0] == '\"') {
-            bstr_xappend(NULL, b, (bstr){"\\\"", 2});
+            bstr_xappend(NULL, b, (bstr){(unsigned char *)"\\\"", 2});
         } else if (cur[0] == '\\') {
-            bstr_xappend(NULL, b, (bstr){"\\\\", 2});
+            bstr_xappend(NULL, b, (bstr){(unsigned char *)"\\\\", 2});
         } else if (cur[0] < sizeof(special_escape) && special_escape[cur[0]]) {
             bstr_xappend_asprintf(NULL, b, "\\%c", special_escape[cur[0]]);
         } else {
@@ -278,7 +278,7 @@ static void write_json_str(bstr *b, unsigned char *str)
         }
         str = cur + 1;
     }
-    APPEND(b, str);
+    APPEND(b, (char *)str);
     APPEND(b, "\"");
 }
 
@@ -312,7 +312,7 @@ int json_append(bstr *b, const struct mpv_node *src, int indent)
         if (indent == 0)
             APPEND(b, src->u.string);
         else
-            write_json_str(b, src->u.string);
+            write_json_str(b, (unsigned char *)(src->u.string));
         return 0;
     case MPV_FORMAT_NODE_ARRAY:
     case MPV_FORMAT_NODE_MAP: {
@@ -325,7 +325,7 @@ int json_append(bstr *b, const struct mpv_node *src, int indent)
                 APPEND(b, ",");
             add_indent(b, next_indent);
             if (is_obj) {
-                write_json_str(b, list->keys[n]);
+                write_json_str(b, (unsigned char *)list->keys[n]);
                 APPEND(b, ":");
             }
             json_append(b, &list->values[n], next_indent);
@@ -342,7 +342,7 @@ static int json_append_str(char **dst, struct mpv_node *src, int indent)
 {
     bstr buffer = bstr0(*dst);
     int r = json_append(&buffer, src, indent);
-    *dst = buffer.start;
+    *dst = (char *) buffer.start;
     return r;
 }
 

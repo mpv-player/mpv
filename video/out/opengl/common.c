@@ -36,7 +36,7 @@
 // This guesses if the current GL context is a suspected software renderer.
 static bool is_software_gl(GL *gl)
 {
-    const char *renderer = gl->GetString(GL_RENDERER);
+    const char *renderer = (const char *)gl->GetString(GL_RENDERER);
     // Note we don't attempt to blacklist Microsoft's fallback implementation.
     // It only provides OpenGL 1.1 and will be skipped anyway.
     return !renderer ||
@@ -50,7 +50,7 @@ static bool is_software_gl(GL *gl)
 // This guesses whether our DR path is fast or slow
 static bool is_fast_dr(GL *gl)
 {
-    const char *vendor = gl->GetString(GL_VENDOR);
+    const char *vendor = (const char *)gl->GetString(GL_VENDOR);
     if (!vendor)
         return false;
 
@@ -527,7 +527,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     }
 
     int major = 0, minor = 0;
-    const char *version_string = gl->GetString(GL_VERSION);
+    const char *version_string = (const char *)gl->GetString(GL_VERSION);
     if (!version_string) {
         mp_fatal(log, "glGetString(GL_VERSION) returned NULL.\n");
         goto error;
@@ -554,7 +554,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     mp_verbose(log, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
     mp_verbose(log, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
-    const char *shader = gl->GetString(GL_SHADING_LANGUAGE_VERSION);
+    const char *shader = (const char *)gl->GetString(GL_SHADING_LANGUAGE_VERSION);
     if (shader)
         mp_verbose(log, "GL_SHADING_LANGUAGE_VERSION='%s'\n", shader);
 
@@ -568,7 +568,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         GLint exts;
         gl->GetIntegerv(GL_NUM_EXTENSIONS, &exts);
         for (int n = 0; n < exts; n++) {
-            const char *ext = gl->GetStringi(GL_EXTENSIONS, n);
+            const char *ext = (const char *)gl->GetStringi(GL_EXTENSIONS, n);
             gl->extensions = talloc_asprintf_append(gl->extensions, " %s", ext);
         }
 

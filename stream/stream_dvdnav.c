@@ -475,14 +475,14 @@ static int control(stream_t *stream, int cmd, void *arg)
     }
     case STREAM_CTRL_GET_NUM_ANGLES: {
         uint32_t curr, angles;
-        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+        if (dvdnav_get_angle_info(dvdnav, (int32_t *)&curr, (int32_t *)&angles) != DVDNAV_STATUS_OK)
             break;
         *(int *)arg = angles;
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_ANGLE: {
         uint32_t curr, angles;
-        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+        if (dvdnav_get_angle_info(dvdnav, (int32_t *)&curr, (int32_t *)&angles) != DVDNAV_STATUS_OK)
             break;
         *(int *)arg = curr;
         return STREAM_OK;
@@ -490,7 +490,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     case STREAM_CTRL_SET_ANGLE: {
         uint32_t curr, angles;
         int new_angle = *(int *)arg;
-        if (dvdnav_get_angle_info(dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+        if (dvdnav_get_angle_info(dvdnav, (int32_t *)&curr, (int32_t *)&angles) != DVDNAV_STATUS_OK)
             break;
         if (new_angle > angles || new_angle < 1)
             break;

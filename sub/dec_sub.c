@@ -462,7 +462,7 @@ char *sub_ass_get_extradata(struct dec_sub *sub)
     mp_mutex_lock(&sub->lock);
     if (strcmp(sub->sd->codec->codec, "ass") != 0)
         goto done;
-    char *extradata = sub->sd->codec->extradata;
+    char *extradata = (char *)sub->sd->codec->extradata;
     int extradata_size = sub->sd->codec->extradata_size;
     data = talloc_strndup(NULL, extradata, extradata_size);
 done:

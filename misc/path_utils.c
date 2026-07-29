@@ -61,7 +61,7 @@ bstr mp_basename_bstr(bstr path)
 
 const char *mp_basename(const char *path)
 {
-    return mp_basename_bstr(bstr0(path)).start;
+    return (char *)mp_basename_bstr(bstr0(path)).start;
 }
 
 struct bstr mp_dirname(const char *path)

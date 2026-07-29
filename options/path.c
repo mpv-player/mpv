@@ -191,7 +191,7 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
         // parse to "~" <prefix> "/" <rest>
         bstr prefix, rest;
         if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
-            const char *rest0 = rest.start; // ok in this case
+            const char *rest0 = (char *)rest.start; // ok in this case
             if (bstr_equals0(prefix, "~")) {
                 res = mp_find_config_file(talloc_ctx, global, rest0);
                 if (!res) {

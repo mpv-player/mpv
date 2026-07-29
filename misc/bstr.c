@@ -48,7 +48,7 @@ int bstrcasecmp(struct bstr str1, struct bstr str2)
 {
     int ret = 0;
     if (str1.len && str2.len)
-        ret = strncasecmp(str1.start, str2.start, MPMIN(str1.len, str2.len));
+        ret = strncasecmp((char *)str1.start, (char *)str2.start, MPMIN(str1.len, str2.len));
 
     if (!ret) {
         if (str1.len == str2.len)
@@ -397,7 +397,7 @@ int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
     va_list copy;
     va_copy(copy, ap);
     size_t avail = talloc_get_size(s->start) - s->len;
-    char *dest = s->start ? s->start + s->len : NULL;
+    char *dest = s->start ? (char *)(s->start + s->len) : NULL;
     size = vsnprintf(dest, avail, fmt, copy);
     va_end(copy);
 
@@ -406,7 +406,7 @@ int bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
 
     if (avail < 1 || size + 1 > avail) {
         resize_append(talloc_ctx, s, size + 1);
-        vsnprintf(s->start + s->len, size + 1, fmt, ap);
+        vsnprintf((char *)(s->start + s->len), size + 1, fmt, ap);
     }
     s->len += size;
     return size;
@@ -457,7 +457,7 @@ bool bstr_decode_hex(void *talloc_ctx, struct bstr hex, struct bstr *out)
         arr[len++] = (a << 4) | b;
     }
 
-    *out = (struct bstr){ .start = arr, .len = len };
+    *out = (struct bstr){ .start = (unsigned char *)arr, .len = len };
     return true;
 }
 

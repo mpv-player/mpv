@@ -652,7 +652,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     bool swapuv = ctx->xv_format == MP_FOURCC_YV12;
     for (int n = 0; n < img.num_planes; n++) {
         int sn = n > 0 &&  swapuv ? (n == 1 ? 2 : 1) : n;
-        img.planes[n] = xv_image->data + xv_image->offsets[sn];
+        img.planes[n] = (uint8_t *)xv_image->data + xv_image->offsets[sn];
         img.stride[n] = xv_image->pitches[sn];
     }
 

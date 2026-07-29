@@ -578,7 +578,7 @@ static bool check_bdmv(const char *path)
     bool ret = false;
 
     if (fread(data, 50, 1, temp) == 1) {
-        bstr bdata = {data, 50};
+        bstr bdata = {(unsigned char *)data, 50};
         ret = bstr_startswith0(bdata, "MOBJ0100") || // AVCHD
               bstr_startswith0(bdata, "MOBJ0200") || // Blu-ray
               bstr_startswith0(bdata, "MOBJ0300");   // UHD BD

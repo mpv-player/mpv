@@ -542,7 +542,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, bstr force_section,
         if (MP_KEY_IS_UNICODE(code)) {
             bstr text = {0};
             mp_append_utf8_bstr(ret, &text, code);
-            ret->key_text = text.start;
+            ret->key_text = (char *)text.start;
         }
         ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {

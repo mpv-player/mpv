@@ -561,7 +561,7 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems, void *us
     if (p->probed)
         return bytes;
 
-    struct bstr line = bstr_strip_linebreaks((bstr){buffer, bytes});
+    struct bstr line = bstr_strip_linebreaks((bstr){(unsigned char *)buffer, bytes});
     switch (p->scheme->proto) {
     case MP_CURL_PROTO_HTTP:
         probe_http(p, line);
@@ -587,7 +587,7 @@ static int debug_callback(CURL *handle, curl_infotype type, char *data, size_t s
     case CURLINFO_HEADER_OUT: prefix = "> "; break;
     default:                  return 0;
     }
-    bstr msg = bstr_strip_linebreaks((bstr){data, size});
+    bstr msg = bstr_strip_linebreaks((bstr){(unsigned char *)data, size});
     MP_TRACE(p, "%s%.*s\n", prefix, BSTR_P(msg));
     return 0;
 }
@@ -1100,11 +1100,11 @@ static bool is_protocol_allowed(struct mp_log *log, bstr scheme,
     // `scheme` is required to be wrapped null-terminated string literal.
     // This is UB otherwise, see curl_schemes.
     mp_assert(scheme.len && scheme.start[scheme.len] == '\0');
-    if (whitelist && av_match_list(scheme.start, whitelist, ',') <= 0) {
+    if (whitelist && av_match_list((char *)scheme.start, whitelist, ',') <= 0) {
         mp_err(log, "Protocol '%.*s' not on whitelist '%s'!\n", BSTR_P(scheme), whitelist);
         return false;
     }
-    if (blacklist && av_match_list(scheme.start, blacklist, ',') > 0) {
+    if (blacklist && av_match_list((char *)scheme.start, blacklist, ',') > 0) {
         mp_err(log, "Protocol '%.*s' on blacklist '%s'!\n", BSTR_P(scheme), blacklist);
         return false;
     }
@@ -1324,7 +1324,7 @@ int mp_curl_avio_open(struct demuxer *demuxer, AVIOContext **pb_out,
     if (bstr_eatstart0(&rest, "crypto+") || bstr_eatstart0(&rest, "crypto:")) {
         if (!is_protocol_allowed(demuxer->log, (bstr)bstr0_lit("crypto"), whitelist, blacklist))
             return AVERROR(EINVAL);
-        return open_curl_crypto(demuxer, pb_out, cookie_out, rest.start,
+        return open_curl_crypto(demuxer, pb_out, cookie_out, (char *)rest.start,
                                 flags, options, whitelist, blacklist);
     }
 

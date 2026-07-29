@@ -808,7 +808,7 @@ int stream_skip_bom(struct stream *s)
 {
     char buf[4];
     int len = stream_read_peek(s, buf, sizeof(buf));
-    bstr data = {buf, len};
+    bstr data = {(unsigned char *)buf, len};
     for (int n = 0; n < 3; n++) {
         if (bstr_startswith0(data, bom[n])) {
             stream_seek_skip(s, stream_tell(s) + strlen(bom[n]));
@@ -868,7 +868,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     }
     buf = talloc_realloc_size(talloc_ctx, buf, total_read + padding);
     memset(&buf[total_read], 0, padding);
-    return (struct bstr){buf, total_read};
+    return (struct bstr){(unsigned char *)buf, total_read};
 }
 
 struct bstr stream_read_file(const char *filename, void *talloc_ctx,

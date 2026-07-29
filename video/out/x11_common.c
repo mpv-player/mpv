@@ -133,7 +133,7 @@ static const char x11_icon_128[] =
 #include "etc/mpv-icon-8bit-128x128.png.inc"
 ;
 
-#define ICON_ENTRY(var) { (char *)var, sizeof(var) }
+#define ICON_ENTRY(var) { (unsigned char *)var, sizeof(var) }
 static const struct bstr x11_icons[] = {
     ICON_ENTRY(x11_icon_16),
     ICON_ENTRY(x11_icon_32),
@@ -1279,7 +1279,7 @@ void vo_x11_check_events(struct vo *vo)
                 if (mpkey) {
                     mp_input_put_key(x11->input_ctx, mpkey | modifiers);
                 } else if (status == XLookupChars || status == XLookupBoth) {
-                    struct bstr t = { buf, len };
+                    struct bstr t = { (unsigned char *)buf, len };
                     mp_input_put_key_utf8(x11->input_ctx, modifiers, t);
                 }
             } else {
@@ -1475,7 +1475,7 @@ static void vo_x11_set_property_utf8(struct vo *vo, Atom name, const char *t)
     struct vo_x11_state *x11 = vo->x11;
 
     XChangeProperty(x11->display, x11->window, name, XA(x11, UTF8_STRING), 8,
-                    PropModeReplace, t, strlen(t));
+                    PropModeReplace, (const unsigned char *)t, strlen(t));
 }
 
 // set a X text property that expects a STRING or COMPOUND_TEXT type
@@ -1522,7 +1522,7 @@ static void vo_x11_xembed_update(struct vo_x11_state *x11, int flags)
     long xembed_info[] = {XEMBED_VERSION, flags};
     Atom name = XA(x11, _XEMBED_INFO);
     XChangeProperty(x11->display, x11->window, name, name, 32,
-                    PropModeReplace, (char *)xembed_info, 2);
+                    PropModeReplace, (unsigned char *)xembed_info, 2);
 }
 
 static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce)
@@ -1934,7 +1934,7 @@ static void vo_x11_update_geometry(struct vo *vo)
     x11->winrc = (struct mp_rect){0, 0, 0, 0};
     if (win) {
         XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
-                     &w, &h, &dummy_int, &dummy_uint);
+                     &w, &h, (unsigned int *)&dummy_int, &dummy_uint);
         if (w > INT_MAX || h > INT_MAX)
             w = h = 0;
         XTranslateCoordinates(x11->display, win, x11->rootwin, 0, 0,

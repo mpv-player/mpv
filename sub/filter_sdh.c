@@ -465,7 +465,7 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
     char *line = filter_SDH(ft, (char *)pkt->buffer, (int)pkt->len, toff);
     if (!line)
         return NULL;
-    if (0 == bstrcmp0((bstr){(char *)pkt->buffer, pkt->len}, line)) {
+    if (0 == bstrcmp0((bstr){(unsigned char *)pkt->buffer, pkt->len}, line)) {
         talloc_free(line);
         return pkt;  // unmodified, no need to allocate new packet
     }

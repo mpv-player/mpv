@@ -268,7 +268,7 @@ static void load_file(lua_State *L, const char *fname)
     struct bstr s = stream_read_file(fname, tmp, ctx->mpctx->global, 100000000);
     if (!s.start)
         luaL_error(L, "Could not read file.\n");
-    if (luaL_loadbuffer(L, s.start, s.len, dispname))
+    if (luaL_loadbuffer(L, (char *)s.start, s.len, dispname))
         lua_error(L);
     lua_call(L, 0, 1);
     talloc_free(tmp);
@@ -1156,7 +1156,7 @@ static int script_split_path(lua_State *L)
 {
     const char *p = luaL_checkstring(L, 1);
     bstr fname = mp_dirname(p);
-    lua_pushlstring(L, fname.start, fname.len);
+    lua_pushlstring(L, (char *)fname.start, fname.len);
     lua_pushstring(L, mp_basename(p));
     return 2;
 }

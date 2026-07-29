@@ -247,7 +247,7 @@ static bool resize(struct vo *vo)
         *img = (struct mp_image){0};
         mp_image_setfmt(img, mpfmt);
         mp_image_set_size(img, p->image_width, p->image_height);
-        img->planes[0] = p->myximage[i]->data;
+        img->planes[0] = (uint8_t *)p->myximage[i]->data;
         img->stride[0] = p->myximage[i]->bytes_per_line;
 
         mp_image_params_guess_csp(&img->params);

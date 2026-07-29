@@ -253,7 +253,7 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     if (check >= DEMUX_CHECK_UNSAFE) {
         char probe[PROBE_SIZE];
         int len = stream_read_peek(s, probe, sizeof(probe));
-        if (len < 1 || !mp_probe_cue((bstr){probe, len}))
+        if (len < 1 || !mp_probe_cue((bstr){(unsigned char *)probe, len}))
             return -1;
     }
     struct priv *p = talloc_zero(demuxer, struct priv);

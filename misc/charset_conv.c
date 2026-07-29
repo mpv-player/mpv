@@ -69,7 +69,7 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
     uchardet_t det = uchardet_new();
     if (!det)
         return NULL;
-    if (uchardet_handle_data(det, buf.start, buf.len) != 0) {
+    if (uchardet_handle_data(det, (char *)buf.start, buf.len) != 0) {
         uchardet_delete(det);
         return NULL;
     }
@@ -180,7 +180,7 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
     size_t oleft = size - 1;
 
     char *outbuf = talloc_size(NULL, osize);
-    char *ip = buf.start;
+    char *ip = (char *)buf.start;
     char *op = outbuf;
 
     while (1) {
@@ -222,7 +222,7 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
     iconv_close(icdsc);
 
     outbuf[osize - oleft - 1] = 0;
-    return (bstr){outbuf, osize - oleft - 1};
+    return (bstr){(unsigned char *)outbuf, osize - oleft - 1};
 
 failure:
 #endif

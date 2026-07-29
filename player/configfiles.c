@@ -219,7 +219,7 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
     if (opts->ignore_path_in_watch_later_config && !mp_is_url(bstr0(path)))
         path = mp_basename(path);
 
-    bstr hashstr = mp_hash_to_bstr(tmp, path, strlen(path), "MD5");
+    bstr hashstr = mp_hash_to_bstr(tmp, (const uint8_t *)path, strlen(path), "MD5");
     char *wl_dir = mp_get_playback_resume_dir(mpctx);
     if (wl_dir && wl_dir[0])
         res = mp_path_join_bstr(NULL, bstr0(wl_dir), hashstr);

@@ -787,7 +787,7 @@ static int preinit(struct vo *vo)
     status = vaQuerySubpictureFormats(p->display,
                                       p->va_subpic_formats,
                                       p->va_subpic_flags,
-                                      &p->va_num_subpic_formats);
+                                      (unsigned int *)&p->va_num_subpic_formats);
     if (!CHECK_VA_STATUS(p, "vaQuerySubpictureFormats()"))
         p->va_num_subpic_formats = 0;
     MP_VERBOSE(vo, "%d subpicture formats available:\n",

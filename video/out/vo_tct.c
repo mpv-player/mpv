@@ -115,16 +115,16 @@ static void print_seq3(bstr *frame, struct lut_item *lut, bstr prefix,
                        uint8_t r, uint8_t g, uint8_t b)
 {
     bstr_xappend(NULL, frame, prefix);
-    bstr_xappend(NULL, frame, (bstr){ lut[r].str, lut[r].width });
-    bstr_xappend(NULL, frame, (bstr){ lut[g].str, lut[g].width });
-    bstr_xappend(NULL, frame, (bstr){ lut[b].str, lut[b].width });
+    bstr_xappend(NULL, frame, (bstr){ (unsigned char *)lut[r].str, lut[r].width });
+    bstr_xappend(NULL, frame, (bstr){ (unsigned char *)lut[g].str, lut[g].width });
+    bstr_xappend(NULL, frame, (bstr){ (unsigned char *)lut[b].str, lut[b].width });
     bstr_xappend0(NULL, frame, "m");
 }
 
 static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c)
 {
     bstr_xappend(NULL, frame, prefix);
-    bstr_xappend(NULL, frame, (bstr){ lut[c].str, lut[c].width });
+    bstr_xappend(NULL, frame, (bstr){ (unsigned char *)lut[c].str, lut[c].width });
     bstr_xappend0(NULL, frame, "m");
 }
 

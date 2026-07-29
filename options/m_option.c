@@ -1418,7 +1418,7 @@ static char **separate_input_param(const m_option_t *opt, bstr param,
 
     char **list = talloc_array(NULL, char *, n + 2);
     str = bstrdup(NULL, param);
-    char *ptr = str.start;
+    char *ptr = (char *)str.start;
     n = 0;
 
     while (1) {

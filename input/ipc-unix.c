@@ -100,7 +100,7 @@ static MP_THREAD_VOID client_thread(void *p)
     int rc;
 
     struct client_arg *arg = p;
-    bstr client_msg = { talloc_strdup(NULL, ""), 0 };
+    bstr client_msg = { (unsigned char *)talloc_strdup(NULL, ""), 0 };
 
     char *tname = talloc_asprintf(NULL, "ipc/%s", arg->client_name);
     mp_thread_set_name(tname);
@@ -163,7 +163,7 @@ static MP_THREAD_VOID client_thread(void *p)
         if (fds[1].revents & (POLLIN | POLLHUP | POLLNVAL)) {
             while (1) {
                 char buf[128];
-                bstr append = { buf, 0 };
+                bstr append = { (unsigned char *)buf, 0 };
 
                 ssize_t bytes = read(arg->client_fd, buf, sizeof(buf));
                 if (bytes < 0) {

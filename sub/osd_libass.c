@@ -245,7 +245,7 @@ void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
             in += 1;
             continue;
         }
-        bstr_xappend(NULL, dst, (bstr){(char *)in, 1});
+        bstr_xappend(NULL, dst, (bstr){(unsigned char *)in, 1});
         // Break ASS escapes with U+2060 WORD JOINER
         if (escape_ass && *in == '\\')
             mp_append_utf8_bstr(NULL, dst, 0x2060);

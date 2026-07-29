@@ -408,7 +408,7 @@ static int open_f(stream_t *stream)
     if (avio->av_class) {
         uint8_t *mt = NULL;
         if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0) {
-            stream->mime_type = talloc_strdup(stream, mt);
+            stream->mime_type = talloc_strdup(stream, (char *)mt);
             av_free(mt);
         }
     }
@@ -454,9 +454,9 @@ static struct mp_tags *read_icy(stream_t *s)
     // To detect new packages, set the icy_metadata_packet to "-" once we've
     // read it (a bit hacky, but works).
     struct mp_tags *res = NULL;
-    bstr packet = bstr0(icy_packet);
+    bstr packet = bstr0((char *)icy_packet);
     if (!bstr_equals0(packet, "-"))
-        res = mp_parse_icy_metadata(s, bstr0(icy_header), packet);
+        res = mp_parse_icy_metadata(s, bstr0((char *)icy_header), packet);
 
     if (res)
         av_opt_set(avio, "icy_metadata_packet", "-", AV_OPT_SEARCH_CHILDREN);

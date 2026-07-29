@@ -2544,7 +2544,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
 
     const struct pl_hook *hook = NULL;
     if (shader.len)
-        hook = pl_mpv_user_shader_parse(p->gpu, shader.start, shader.len);
+        hook = pl_mpv_user_shader_parse(p->gpu, (char *)shader.start, shader.len);
 
     MP_TARRAY_APPEND(p, p->user_hooks, p->num_user_hooks, (struct user_hook) {
         .path = talloc_strdup(p, path),
@@ -2617,7 +2617,7 @@ static void update_lut(struct priv *p, struct user_lut *lut)
         MP_ERR(p, "Failed to read LUT data from %s, make sure it's a valid file "
                   "and smaller or equal to %d bytes\n", fname, lut_max_size);
     } else {
-        lut->lut = pl_lut_parse_cube(p->pllog, lutdata.start, lutdata.len);
+        lut->lut = pl_lut_parse_cube(p->pllog, (char *)lutdata.start, lutdata.len);
     }
     talloc_free(fname);
     talloc_free(lutdata.start);

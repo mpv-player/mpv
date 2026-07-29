@@ -110,7 +110,7 @@ static int show_profile(struct m_config *config, bstr param, int depth)
                 int l = e - list;
                 if (!l)
                     continue;
-                show_profile(config, (bstr){list, e - list}, depth);
+                show_profile(config, (bstr){(unsigned char *)list, e - list}, depth);
                 list = e + 1;
             }
             if (list[0] != '\0')
