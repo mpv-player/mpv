@@ -4396,7 +4396,7 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
     }
 
     queue_size = MPMIN(queue_size, VO_MAX_REQ_FRAMES);
-    vo_set_queue_params(vo, 0, queue_size, queue_size + 1);
+    vo_set_queue_params(vo, 0, 0, queue_size, queue_size + 1);
 }
 
 static int validate_error_diffusion_opt(struct mp_log *log, const m_option_t *opt,
