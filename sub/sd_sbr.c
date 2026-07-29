@@ -150,7 +150,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
     ctx->sbr_subtitles = sbr_load_text(
         ctx->sbr_library,
-        packet->buffer,
+        (char *)packet->buffer,
         packet->len,
         fmt,
         sd->lang
