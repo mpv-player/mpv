@@ -31,7 +31,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
 
     // Exclude data with null bytes inside
-    if (strlen(data) != size - 1)
+    if (strlen((const char *)data) != size - 1)
         return 0;
 
 #ifdef MPV_PROTO
@@ -55,7 +55,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     check_error(mpv_initialize(ctx));
 
-    const char *cmd[] = {"loadfile", data, NULL};
+    const char *cmd[] = {"loadfile", (const char *)data, NULL};
     check_error(mpv_command(ctx, cmd));
 
     player_loop(ctx);

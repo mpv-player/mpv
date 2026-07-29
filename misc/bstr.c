@@ -481,13 +481,13 @@ bool bstr_in_list0(struct bstr str, char **list)
 
 int bstr_to_wchar(void *talloc_ctx, struct bstr s, wchar_t **ret)
 {
-    int count = MultiByteToWideChar(CP_UTF8, 0, s.start, s.len, NULL, 0);
+    int count = MultiByteToWideChar(CP_UTF8, 0, (const char *)s.start, s.len, NULL, 0);
     if (count <= 0)
         abort();
     wchar_t *wbuf = *ret;
     if (!wbuf || ta_get_size(wbuf) < (count + 1) * sizeof(wchar_t))
         wbuf = talloc_realloc(talloc_ctx, wbuf, wchar_t, count + 1);
-    MultiByteToWideChar(CP_UTF8, 0, s.start, s.len, wbuf, count);
+    MultiByteToWideChar(CP_UTF8, 0, (const char *)s.start, s.len, wbuf, count);
     wbuf[count] = L'\0';
     *ret = wbuf;
     return count;

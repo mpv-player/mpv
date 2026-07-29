@@ -82,7 +82,7 @@ int main(void)
     bstr dst = bstr0(mp_getcwd(ctx));
     bstr_xappend(ctx, &dst, bstr0("/foo"));
 #if HAVE_DOS_PATHS
-    char *p = dst.start;
+    char *p = (char *)dst.start;
     while (*p) {
         *p = *p == '/' ? '\\' : *p;
         p++;
