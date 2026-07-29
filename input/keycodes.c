@@ -328,7 +328,7 @@ char *mp_input_get_key_combo_name(const int *keys, int max)
         else
             break;
     }
-    return dst.start;
+    return (char *)dst.start;
 }
 
 int mp_input_get_keys_from_string(char *name, int max_num_keys,

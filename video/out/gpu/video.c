@@ -2328,7 +2328,7 @@ static void pass_read_video(struct gl_video *p)
             continue;
 
         int first = n;
-        int num = 0;
+        unsigned int num = 0;
 
         for (int i = 0; i < n; i++) {
             if (image_equiv(img[n], img[i]) &&
@@ -2519,7 +2519,7 @@ static void pass_read_video(struct gl_video *p)
 
     // All planes are of the same size and properly aligned at this point
     pass_describe(p, "combining planes");
-    int coord = 0;
+    unsigned int coord = 0;
     for (int i = 0; i < 4; i++) {
         if (img[i].type != PLANE_NONE)
             copy_image(p, &coord, img[i]);
@@ -3163,7 +3163,7 @@ static void pass_render_frame_dumb(struct gl_video *p)
     struct gl_transform transform;
     compute_src_transform(p, &transform);
 
-    int index = 0;
+    unsigned int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
         int cw = img[i].type == PLANE_CHROMA ? p->ra_format.chroma_w : 1;
         int ch = img[i].type == PLANE_CHROMA ? p->ra_format.chroma_h : 1;

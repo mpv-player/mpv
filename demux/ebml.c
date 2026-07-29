@@ -417,7 +417,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                                                           num_elems[i]);
                 break;
             case EBML_TYPE_EBML_ID:
-                *(int32_t **) ptr = talloc_zero_array(ctx->talloc_ctx,
+                *(int32_t **) ptr = (int32_t *)talloc_zero_array(ctx->talloc_ctx,
                                                       uint32_t, num_elems[i]);
                 break;
             default:
