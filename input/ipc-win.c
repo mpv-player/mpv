@@ -205,7 +205,7 @@ static MP_THREAD_VOID client_thread(void *p)
     char buf[4096];
     HANDLE wakeup_event = CreateEventW(NULL, TRUE, FALSE, NULL);
     OVERLAPPED ol = { .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
-    bstr client_msg = { talloc_strdup(NULL, ""), 0 };
+    bstr client_msg = { (unsigned char *)talloc_strdup(NULL, ""), 0 };
     DWORD ioerr = 0;
     DWORD r;
 
@@ -269,7 +269,7 @@ static MP_THREAD_VOID client_thread(void *p)
                 goto done;
             }
 
-            bstr_xappend(NULL, &client_msg, (bstr){buf, r});
+            bstr_xappend(NULL, &client_msg, (bstr){(unsigned char *)buf, r});
             while (bstrchr(client_msg, '\n') != -1) {
                 char *reply_msg = mp_ipc_consume_next_command(arg->client,
                     NULL, &client_msg);

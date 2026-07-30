@@ -65,7 +65,7 @@ static void write_arg(bstr *cmdline, char *arg)
             break;
         case '"':
             // Write the argument up to the point before the quote
-            bstr_xappend(NULL, cmdline, (struct bstr){arg, pos});
+            bstr_xappend(NULL, cmdline, (struct bstr){(unsigned char *)arg, pos});
             arg += pos;
             pos = 0;
 
@@ -107,7 +107,7 @@ static wchar_t *write_cmdline(void *ctx, char *argv0, char **args)
         }
     }
 
-    wchar_t *wcmdline = mp_from_utf8(ctx, cmdline.start);
+    wchar_t *wcmdline = mp_from_utf8(ctx, (char *)cmdline.start);
     talloc_free(cmdline.start);
     return wcmdline;
 }
@@ -382,7 +382,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     // https://www.catch22.net/tuts/undocumented-createprocess>
     si.StartupInfo.cbReserved2 = sizeof(int) + crt_fd_count * (1 + sizeof(intptr_t));
     si.StartupInfo.lpReserved2 = talloc_size(tmp, si.StartupInfo.cbReserved2);
-    char *crt_buf_flags = si.StartupInfo.lpReserved2 + sizeof(int);
+    char *crt_buf_flags = (char *)si.StartupInfo.lpReserved2 + sizeof(int);
     char *crt_buf_hndls = crt_buf_flags + crt_fd_count;
 
     memcpy(si.StartupInfo.lpReserved2, &crt_fd_count, sizeof(int));
