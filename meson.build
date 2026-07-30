@@ -1712,7 +1712,7 @@ if rst2man.found()
           docutils_wrapper, rst2man,
           '--record-dependencies', '@DEPFILE@',
           '--strip-elements-with-class=contents',
-          '@INPUT@', '@OUTPUT@'],
+          '--output=@OUTPUT@', '@INPUT@'],
         depfile: 'mpv.1.dep',
         install: true,
         install_tag: 'man',
