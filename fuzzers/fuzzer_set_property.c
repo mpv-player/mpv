@@ -26,7 +26,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     switch (MPV_FORMAT)
     {
     case MPV_FORMAT_STRING:
-        value_len = strnlen(data, size);
+        value_len = strnlen((const char *)data, size);
         if (!value_len || value_len == size)
             return 0;
         value_len += 1;
