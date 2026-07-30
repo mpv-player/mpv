@@ -1614,7 +1614,7 @@ static void save_cached_program(struct ra *ra, struct ra_renderpass *pass,
     strncpy(header.compiler, spirv->name, sizeof(header.compiler));
 
     struct bstr *prog = &pass->params.cached_program;
-    bstr_xappend(pass, prog, (bstr){ (char *) &header, sizeof(header) });
+    bstr_xappend(pass, prog, (bstr){ (unsigned char *) &header, sizeof(header) });
     bstr_xappend(pass, prog, vert_bc);
     bstr_xappend(pass, prog, frag_bc);
     bstr_xappend(pass, prog, comp_bc);
@@ -1825,7 +1825,7 @@ static void renderpass_run_raster(struct ra *ra,
 
     ID3D11DeviceContext_IASetInputLayout(p->ctx, pass_p->layout);
     ID3D11DeviceContext_IASetVertexBuffers(p->ctx, 0, 1, &p->vbuf,
-        &pass->params.vertex_stride, &vbuf_offset);
+    (const unsigned int *)&pass->params.vertex_stride, &vbuf_offset);
     ID3D11DeviceContext_IASetPrimitiveTopology(p->ctx,
         D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
