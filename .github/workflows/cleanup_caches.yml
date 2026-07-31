@@ -17,31 +17,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          gh cache list -L 100 --json id,key,ref -S last_accessed_at -O desc --jq '
-            map(select(.key | startswith("x86_64-w64-mingw32-") or
-                              startswith("i686-w64-mingw32-") or
-                              startswith("aarch64-pc-windows-msvc-") or
-                              startswith("x86_64-pc-windows-msvc-"))) |
-            group_by(.ref) |
-            map({
-              ref: .[0].ref,
-              caches: map({
-                        key: .key,
-                        prefix: (.key | capture("^(?<prefix>[\\w_-]+-)\\d+$").prefix)
-                      }) | group_by(.prefix) | map({keys: map(.key)})
-            }) |
-            .[]
-          ' |
-          while read -r group; do
-            pr=$(echo "$group" | jq -r '.ref | capture("refs/pull/(?<num>[0-9]+)/merge").num')
-            if [[ -n "$pr" ]] && [ "$(gh pr view $pr --json state --jq '.state')" != "OPEN" ]; then
-              keys=$(echo "$group" | jq -c '.caches | map(.keys) | .[]')
-            else
-              keys=$(echo "$group" | jq -c '.caches | map(.keys[1:]) | .[]')
-            fi
-            for key in $(echo "$keys" | jq -r '.[]'); do
-              gh cache delete "$key"
-            done
+          set -o pipefail
+          gh cache list -L 1000 --json id,key,ref -S last_accessed_at -O desc > caches.json
+
+          # Resolve the state of every pull request that owns a cache.
+          for pr in $(jq -r '.[].ref | select(test("^refs/pull/[0-9]+/merge$")) |
+                             split("/")[2]' caches.json | sort -u); do
+            jq -n --arg pr "$pr" --arg state "$(gh pr view $pr --json state --jq .state)" \
+                  '{($pr): $state}'
+          done | jq -s 'add // {}' > prs.json
+
+          jq -r --slurpfile prs prs.json '
+            $prs[0] as $state |
+
+            [ .[] | select(.key | startswith("x86_64-w64-mingw32-") or
+                                  startswith("i686-w64-mingw32-") or
+                                  startswith("aarch64-pc-windows-msvc-") or
+                                  startswith("x86_64-pc-windows-msvc-"))
+                  | . + { group: (.key | sub("-[0-9]+$"; "")),
+                          pr:    (.ref | if test("^refs/pull/[0-9]+/merge$")
+                                         then split("/")[2] else null end) } ] as $all
+
+            # Caches of merged or closed pull requests.
+            | ( $all | map(select(.pr != null and $state[.pr] != "OPEN")) ) as $dead
+
+            # Of the rest only the newest cache of each kind per ref is used.
+            | ( ($all - $dead) | group_by([.ref, .group]) | map(.[1:]) | add // [] ) as $superseded
+
+            | ($dead + $superseded)[] | "\(.id)\t\(.ref)\t\(.key)"
+          ' caches.json |
+          while IFS=$'\t' read -r id ref key; do
+            echo "deleting $ref $key"
+            gh cache delete "$id"
           done
     env:
       GH_REPO: ${{ github.repository }}
