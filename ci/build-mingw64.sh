@@ -5,7 +5,7 @@ mkdir -p "$prefix_dir"
 ln -snf . "$prefix_dir/usr"
 ln -snf . "$prefix_dir/local"
 
-wget="wget -nc --progress=bar:force"
+wget="wget --progress=bar:force"
 gitclone="git clone --depth=1 --recursive --shallow-submodules"
 
 if [[ -z "$TARGET" || -z "$RUST_TARGET" ]]; then
@@ -109,13 +109,15 @@ function gettar {
     [ -z "$dname" ] && dname="${fname%.tar.*}"
     [ -d "$dname" ] && return 0
     local cachename="$(md5sum <<<"$1" | cut -d " " -f 1)"
-    if [[ -n "$DOWNLOAD_CACHE" && -s "$DOWNLOAD_CACHE/$cachename" ]]; then
+    if [ -s "$fname" ]; then
+        : # exists
+    elif [[ -n "$DOWNLOAD_CACHE" && -s "$DOWNLOAD_CACHE/$cachename" ]]; then
         cp -v "$DOWNLOAD_CACHE/$cachename" "$fname"
         cachename=
     else
-        $wget "$1" -O "$fname"
+        $wget "$1" -O "$fname" || return 1
     fi
-    tar -xaf "$fname"
+    tar -xaf "$fname" || return 1
     if [ ! -d "$dname" ]; then
         echo "Error: expected $fname to extract to $dname but it was not created" >&2
         return 2
@@ -146,7 +148,8 @@ function build_if_missing {
 
 _iconv () {
     local ver=1.19
-    gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz"
+    gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz" || \
+        gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
     ../configure --host=$TARGET $at_flags
     makeplusinstall
@@ -274,7 +277,8 @@ _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
     local ver=2.14.3
-    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz"
+    gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz" || \
+        gettar "https://sourceforge.net/projects/freetype/files/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile"
     makeplusinstall
