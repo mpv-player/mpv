@@ -170,6 +170,7 @@ struct vo_internal {
     bool rendering;                 // true if an image is being rendered
     struct vo_frame *frame_queued;  // should be drawn next
     int req_frames;                 // VO's requested value of num_frames
+    int frame_refs;                 // max frames the VO may reference at once
     uint64_t current_frame_id;
 
     double display_fps;
@@ -293,6 +294,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
         .req_frames = 1,
+        .frame_refs = 2, // current_frame + frame_queued
         .estimated_vsync_jitter = -1,
         .stats = stats_ctx_create(vo, global, "vo"),
     };
@@ -1332,12 +1334,17 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 // (For vo_vdpau, which does its own timing.)
 // num_req_frames set the requested number of requested vo_frame.frames.
 // (For vo_gpu interpolation.)
-void vo_set_queue_params(struct vo *vo, int64_t offset_ns, int num_req_frames)
+// num_frame_refs sets the total number of frames the VO may reference at the
+// same time, including retained past frames. (For sizing fixed hardware
+// decoder surface pools.)
+void vo_set_queue_params(struct vo *vo, int64_t offset_ns, int num_req_frames,
+                         int num_frame_refs)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_ns;
     in->req_frames = MPCLAMP(num_req_frames, 1, VO_MAX_REQ_FRAMES);
+    in->frame_refs = MPCLAMP(num_frame_refs, in->req_frames, 2 * VO_MAX_REQ_FRAMES);
     mp_mutex_unlock(&in->lock);
 }
 
@@ -1346,6 +1353,15 @@ int vo_get_num_req_frames(struct vo *vo)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     int res = in->req_frames;
+    mp_mutex_unlock(&in->lock);
+    return res;
+}
+
+int vo_get_num_frame_refs(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    int res = in->frame_refs;
     mp_mutex_unlock(&in->lock);
     return res;
 }

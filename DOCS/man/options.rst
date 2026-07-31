@@ -285,8 +285,23 @@ Playback Control
 ``--pause``
     Start the player in paused state.
 
-``--shuffle``
+``--shuffle=<yes|no>``
     Play files in random order.
+    This works by shuffling the playlist at the following points:
+
+      1. At player startup before playback starts. The files specified on the
+         command line are shuffled. Note that the directories and
+         playlist files in these arguments are not expanded at this time, so
+         their contents are not shuffled until the situation 2 mentioned below
+         happens. To expand these lists at startup, use ``--playlist``.
+
+      2. When loading a directory or playlist file, either with ``loadlist``
+         command or by playing a playlist file in the current playlist. The
+         items in the loaded playlist are shuffled before they are added to
+         the current playlist. Other existing items are not shuffled.
+
+      3. When ``--loop-playlist`` is enabled, the player performs a shuffle
+         after looping.
 
 ``--playlist-start=<auto|index>``
     Set which file on the internal playlist to start playback with. The index
@@ -312,6 +327,13 @@ Playback Control
     different demuxers and will not work with this option. They still can be
     played directly, without using this option.
 
+    This option differs from specifying playlist files directly as arguments.
+    The playlists specified by ``--playlist`` are expanded at startup, while
+    playlist files specified directly as arguments are expanded only when the
+    list is being played. Note that this expansion is not recursive, except in
+    the case of ``--playlist=<directory>``, where expansion follows the
+    ``--directory-mode`` option.
+
     By default, mpv doesn't play URLs from playlists which are considered
     unsafe. If you trust the playlist file, you can disable any security checks
     with ``--load-unsafe-playlists``. Because playlists can load other playlist
@@ -334,6 +356,12 @@ Playback Control
         In particular, playlists can contain entries using protocols other than
         local files, such as special protocols like ``avdevice://`` (which are
         inherently unsafe).
+
+``--playlist-inherit-options=<yes|no|current>``
+    Whether the per-file options of a playlist file are inherited by its items
+    when the playlist file is resolved and expanded (default: no). The value
+    ``current`` means that for playlists created by ``--autocreate-playlist``,
+    only the file from which the playlist is created inherits the options.
 
 ``--chapter-merge-threshold=<number>``
     Threshold for merging almost consecutive ordered chapter parts in
@@ -1541,20 +1569,27 @@ Video
     Runtime changes to this are ignored (the current option value is used
     whenever the renderer is created).
 
-``--hwdec-extra-frames=<N>``
-    Number of GPU frames hardware decoding should preallocate (default: see
-    ``--list-options`` output). If this is too low, frame allocation may fail
-    during decoding, and video frames might get dropped and/or corrupted.
-    Setting it too high simply wastes GPU memory and has no advantages.
+``--hwdec-extra-frames=<auto|N>``
+    Number of extra GPU frames hardware decoding should preallocate, on top of
+    what the codec itself requires (default: ``auto``).
 
     This value is used only for hardware decoding APIs which require
     preallocating surfaces (known examples include ``d3d11va`` and ``vaapi``).
     For other APIs, frames are allocated as needed. The details depend on the
     libavcodec implementations of the hardware decoders.
 
-    The required number of surfaces depends on dynamic runtime situations. The
-    default is a fixed value that is thought to be sufficient for most uses. But
-    in certain situations, it may not be enough.
+    In ``auto`` mode, the number is derived from how many frames the player
+    and the VO may reference at the same time. For example, enabling
+    ``--interpolation`` increases it in proportion to the ``--tscale`` filter
+    radius, and VO deinterlacing adds the temporal reference frames it needs.
+    The value is determined when the decoder is initialized; runtime option
+    changes that increase frame requirements do not resize the pool, so set a
+    fixed value if you intend to switch such options during playback.
+
+    Setting a fixed value overrides the automatic sizing in both directions.
+    If it is too low, frame allocation may fail during decoding, and video
+    frames might get dropped and/or corrupted. Setting it too high simply
+    wastes GPU memory and has no advantages.
 
 ``--hwdec-image-format=<name>``
     Set the internal pixel format used by hardware decoding via ``--hwdec``
@@ -1793,6 +1828,10 @@ Video
     Keep in mind that using this filter **will** conflict with any manually
     inserted deinterlacing filters, and that this will make video look worse if
     it's not actually interlaced.
+
+    Enabling video output deinterlacing at runtime may require setting
+    ``--hwdec-extra-frames``, as the hardware decoder's surface pool is sized
+    at decoder initialization.
 
 ``--deinterlace-field-parity=<tff|bff|auto>``
     Specify the field parity/order when deinterlacing (default: auto).
@@ -4555,14 +4594,16 @@ Input
     .. admonition:: Example
 
         ``--input-ipc-client=fd://123``
+        ``--input-ipc-client=handle://123``
 
     .. note::
 
         To use this option on Windows, the fd must refer to a wrapped
         (created by ``_open_osfhandle``) named pipe server handle with a client
-        already connected. The named pipe must be created duplex with overlapped
-        IO and inheritable handles. The program communicates with mpv through
-        the client handle.
+        already connected. Alternatively, the Windows HANDLE can be passed by
+        prefixing it with handle:// if mpv inherited it from the parent. The
+        named pipe must be created duplex with overlapped IO and inheritable
+        handles. The program communicates with mpv through the client handle.
 
     .. warning::
 
@@ -5954,6 +5995,10 @@ them.
     being the smoothest/blurriest and ``oversample`` being the sharpest/least
     smooth.
 
+    Switching to a filter with a larger radius at runtime may require setting
+    ``--hwdec-extra-frames``, as the hardware decoder's surface pool is sized
+    at decoder initialization.
+
 ``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
     Set filter parameters. By default, these are set to the special string
     ``default``, which maps to a scaler-specific default value. Ignored if the
@@ -6105,6 +6150,9 @@ them.
     This essentially attempts to interpolate the missing frames by convoluting
     the video along the temporal axis. The filter used can be controlled using
     the ``--tscale`` setting.
+
+    Enabling this at runtime may require setting ``--hwdec-extra-frames``, as
+    the hardware decoder's surface pool is sized at decoder initialization.
 
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:

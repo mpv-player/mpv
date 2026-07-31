@@ -924,8 +924,7 @@ static void update_metadata(demuxer_t *demuxer)
 
 static int interrupt_cb(void *ctx)
 {
-    struct demuxer *demuxer = ctx;
-    return mp_cancel_test(demuxer->cancel);
+    return demux_read_interrupted(ctx);
 }
 
 static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
@@ -1676,8 +1675,10 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
         av_packet_free(&pkt);
         if (r == AVERROR_EOF)
             return false;
-        if (mp_cancel_test(demux->cancel))
+        if (demux_read_interrupted(demux)) {
+            MP_VERBOSE(demux, "read interrupted: %s.\n", av_err2str(r));
             return false;
+        }
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         if (priv->retry_counter >= 10) {
             MP_ERR(demux, "...treating it as fatal error.\n");

@@ -52,6 +52,15 @@ void playlist_entry_add_params(struct playlist_entry *e,
         playlist_entry_add_param(e, params[n].name, params[n].value);
 }
 
+void playlist_set_params(struct playlist *pl, struct playlist_param *params,
+                         int num_params)
+{
+    for (int n = 0; n < pl->num_entries; n++) {
+        pl->entries[n]->num_params = 0;
+        playlist_entry_add_params(pl->entries[n], params, num_params);
+    }
+}
+
 static void playlist_update_indexes(struct playlist *pl, int start, int end)
 {
     start = MPMAX(start, 0);

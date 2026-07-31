@@ -36,6 +36,18 @@ local MATCH_MAX_LENGTH = 1024
 
 local fzy = {}
 
+local byte = string.byte
+
+-- Reusable memory arrays for repeating filtering calls. Profiling shown that
+-- with huge payloads we spend a lot of time allocating and later dealociting,
+-- making poor GC work overtime. Keep them allocated. Free them with fzy.gc()
+-- after use.
+local match_bonus, row_D1, row_M1, row_D2, row_M2 = {}, {}, {}, {}, {}
+
+function fzy.gc()
+  match_bonus, row_D1, row_M1, row_D2, row_M2 = {}, {}, {}, {}, {}
+end
+
 -- Check if `needle` is a subsequence of the `haystack`.
 --
 -- Usually called before `score` or `positions`.
@@ -66,85 +78,98 @@ function fzy.has_match(needle, haystack, case_sensitive)
   return true
 end
 
-local function is_lower(c)
-  return c:match("%l")
-end
-
-local function is_upper(c)
-  return c:match("%u")
+local bonus_other = {
+  [byte("/")]  = SCORE_MATCH_SLASH,
+  [byte("\\")] = SCORE_MATCH_SLASH,
+  [byte("-")]  = SCORE_MATCH_WORD,
+  [byte("_")]  = SCORE_MATCH_WORD,
+  [byte(" ")]  = SCORE_MATCH_WORD,
+  [byte(".")]  = SCORE_MATCH_DOT,
+}
+local bonus_upper, bonus_state = {}, {}
+for c = 0, 255 do
+  bonus_other[c] = bonus_other[c] or 0
+  bonus_upper[c] = c >= byte("a") and c <= byte("z") and SCORE_MATCH_CAPITAL or bonus_other[c]
+  bonus_state[c] = c >= byte("A") and c <= byte("Z") and bonus_upper or bonus_other
 end
 
 local function precompute_bonus(haystack)
-  local match_bonus = {}
-
-  local last_char = "/"
-  for i = 1, string.len(haystack) do
-    local this_char = haystack:sub(i, i)
-    if last_char == "/" or last_char == "\\" then
-      match_bonus[i] = SCORE_MATCH_SLASH
-    elseif last_char == "-" or last_char == "_" or last_char == " " then
-      match_bonus[i] = SCORE_MATCH_WORD
-    elseif last_char == "." then
-      match_bonus[i] = SCORE_MATCH_DOT
-    elseif is_lower(last_char) and is_upper(this_char) then
-      match_bonus[i] = SCORE_MATCH_CAPITAL
-    else
-      match_bonus[i] = 0
-    end
-
+  local last_char = byte("/")
+  for i = 1, #haystack do
+    local this_char = byte(haystack, i)
+    match_bonus[i] = bonus_state[this_char][last_char]
     last_char = this_char
   end
 
   return match_bonus
 end
 
-local function compute(needle, haystack, D, M, case_sensitive)
+
+
+-- Run the dynamic programming loop over the score matrices D (score of the
+-- best match ending at this position) and M (best score up to this position).
+--
+-- `needle` and `haystack` must already be case-folded as desired and both
+-- non-empty, with #needle < #haystack <= MATCH_MAX_LENGTH. `haystack_cased`
+-- is the original-case haystack, used for the match bonuses.
+--
+-- Returns the score, and, if `full` is true, also the D and M matrices as
+-- freshly allocated arrays of rows, which are needed to trace back the
+-- matched positions. Otherwise only two reused rows are kept, making
+-- repeated scoring allocation-free.
+local function compute(needle, haystack_cased, haystack, full)
+  local n = #needle
+  local m = #haystack
+
+
   -- Note that the match bonuses must be computed before the arguments are
   -- converted to lowercase, since there are bonuses for camelCase.
-  local match_bonus = precompute_bonus(haystack)
-  local n = string.len(needle)
-  local m = string.len(haystack)
+  local bonus = precompute_bonus(haystack_cased)
 
-  if not case_sensitive then
-    needle = string.lower(needle)
-    haystack = string.lower(haystack)
+  local D, M
+  if full then
+    D, M = {}, {}
   end
 
-  -- Because lua only grants access to chars through substring extraction,
-  -- get all the characters from the haystack once now, to reuse below.
-  local haystack_chars = {}
-  for i = 1, m do
-    haystack_chars[i] = haystack:sub(i, i)
-  end
+  local prev_D, prev_M, cur_D, cur_M = row_D2, row_M2, row_D1, row_M1
 
   for i = 1, n do
-    D[i] = {}
-    M[i] = {}
+    if full then
+      cur_D, cur_M = {}, {}
+      D[i], M[i] = cur_D, cur_M
+    end
 
     local prev_score = SCORE_MIN
     local gap_score = i == n and SCORE_GAP_TRAILING or SCORE_GAP_INNER
-    local needle_char = needle:sub(i, i)
+    local needle_char = byte(needle, i)
 
     for j = 1, m do
-      if needle_char == haystack_chars[j] then
+      if needle_char == byte(haystack, j) then
         local score = SCORE_MIN
         if i == 1 then
-          score = ((j - 1) * SCORE_GAP_LEADING) + match_bonus[j]
+          score = (j - 1) * SCORE_GAP_LEADING + bonus[j]
         elseif j > 1 then
-          local a = M[i - 1][j - 1] + match_bonus[j]
-          local b = D[i - 1][j - 1] + SCORE_MATCH_CONSECUTIVE
-          score = math.max(a, b)
+          local match = prev_M[j - 1] + bonus[j]
+          local consecutive = prev_D[j - 1] + SCORE_MATCH_CONSECUTIVE
+          score = match > consecutive and match or consecutive
         end
-        D[i][j] = score
-        prev_score = math.max(score, prev_score + gap_score)
-        M[i][j] = prev_score
-      else
-        D[i][j] = SCORE_MIN
+        cur_D[j] = score
         prev_score = prev_score + gap_score
-        M[i][j] = prev_score
+        if score > prev_score then
+          prev_score = score
+        end
+        cur_M[j] = prev_score
+      else
+        cur_D[j] = SCORE_MIN
+        prev_score = prev_score + gap_score
+        cur_M[j] = prev_score
       end
     end
+
+    prev_D, prev_M, cur_D, cur_M = cur_D, cur_M, prev_D, prev_M
   end
+
+  return prev_M[m], D, M
 end
 
 -- Compute a matching score.
@@ -159,19 +184,23 @@ end
 --   number: higher scores indicate better matches. See also `get_score_min`
 --     and `get_score_max`.
 function fzy.score(needle, haystack, case_sensitive)
-  local n = string.len(needle)
-  local m = string.len(haystack)
+  local n = #needle
+  local m = #haystack
 
   if n == 0 or m == 0 or m > MATCH_MAX_LENGTH or n > m then
     return SCORE_MIN
   elseif n == m then
     return SCORE_MAX
-  else
-    local D = {}
-    local M = {}
-    compute(needle, haystack, D, M, case_sensitive)
-    return M[n][m]
   end
+
+  local haystack_cased = haystack
+  if not case_sensitive then
+    needle = string.lower(needle)
+    haystack = string.lower(haystack)
+  end
+
+  local score = compute(needle, haystack_cased, haystack, false)
+  return score
 end
 
 -- Compute the locations where fzy matches a string.
@@ -190,8 +219,8 @@ end
 --     character of `needle` in `haystack`.
 --   number: the same matching score returned by `score`
 function fzy.positions(needle, haystack, case_sensitive)
-  local n = string.len(needle)
-  local m = string.len(haystack)
+  local n = #needle
+  local m = #haystack
 
   if n == 0 or m == 0 or m > MATCH_MAX_LENGTH or n > m then
     return {}, SCORE_MIN
@@ -203,9 +232,13 @@ function fzy.positions(needle, haystack, case_sensitive)
     return consecutive, SCORE_MAX
   end
 
-  local D = {}
-  local M = {}
-  compute(needle, haystack, D, M, case_sensitive)
+  local haystack_cased = haystack
+  if not case_sensitive then
+    needle = string.lower(needle)
+    haystack = string.lower(haystack)
+  end
+
+  local score, D, M = compute(needle, haystack_cased, haystack, true)
 
   local positions = {}
   local match_required = false
@@ -224,7 +257,7 @@ function fzy.positions(needle, haystack, case_sensitive)
     end
   end
 
-  return positions, M[n][m]
+  return positions, score
 end
 
 -- Apply `has_match` and `positions` to an array of haystacks.
@@ -250,6 +283,71 @@ function fzy.filter(needle, haystacks, case_sensitive)
   end
 
   return result
+end
+
+-- Filter a range of haystacks, computing only scores, without positions.
+--
+-- This can be called on unfinished over consecutive ranges to allow processing
+-- pending input between the calls.
+--
+-- Args:
+--   needle (string)
+--   haystacks ({string, ...})
+--   first (int), last (int): inclusive range of haystacks to process
+--   indices ({int, ...}): the indices of matching haystacks are appended
+--   scores ({number, ...}): the matches' scores are appended, parallel to
+--     `indices`
+--   case_sensitive (bool, optional): defaults to false
+--   haystacks_lower ({string, ...} or nil): string.lower() of each haystack,
+--     used when not case_sensitive instead of allocating lowercased copies
+--     on every call
+function fzy.filter_range(needle, haystacks, first, last, indices, scores,
+                          case_sensitive, haystacks_lower)
+  local find = string.find
+  local lower = string.lower
+
+  if not case_sensitive then
+    needle = lower(needle)
+  end
+
+  local n = #needle
+  local needle_chars = {}
+  for i = 1, n do
+    needle_chars[i] = needle:sub(i, i)
+  end
+
+  local k = #indices
+
+  for i = first, last do
+    local haystack = haystacks[i]
+    local folded = haystack
+    if not case_sensitive then
+      folded = haystacks_lower and haystacks_lower[i] or lower(haystack)
+    end
+
+    local j = 1
+    for ci = 1, n do
+      j = find(folded, needle_chars[ci], j, true)
+      if not j then
+        break
+      end
+      j = j + 1
+    end
+
+    if j then
+      local m = #haystack
+      k = k + 1
+      indices[k] = i
+      if n == 0 or m > MATCH_MAX_LENGTH then
+        scores[k] = SCORE_MIN
+      elseif n == m then
+        scores[k] = SCORE_MAX
+      else
+        local score = compute(needle, haystack, folded, false)
+        scores[k] = score
+      end
+    end
+  end
 end
 
 -- The lowest value returned by `score`.

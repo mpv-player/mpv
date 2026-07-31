@@ -184,7 +184,7 @@ struct demux_internal {
 
     // -- All the following fields are protected by lock.
 
-    bool thread_terminate;
+    atomic_bool thread_terminate;   // read unlocked by demux_read_interrupted()
     bool threading;
     bool shutdown_async;
     void (*wakeup_cb)(void *ctx);
@@ -242,7 +242,8 @@ struct demux_internal {
 
     bool tracks_switched;       // thread needs to inform demuxer of this
 
-    bool seeking;               // there's a seek queued
+    atomic_bool seeking;        // there's a seek queued; read unlocked
+                                // by demux_read_interrupted()
     int seek_flags;             // flags for next seek (if seeking==true)
     double seek_pts;
 
@@ -2362,7 +2363,7 @@ static bool read_packet(struct demux_internal *in)
     struct demux_packet *pkt = NULL;
 
     bool eof = true;
-    if (demux->desc->read_packet && !demux_cancel_test(demux))
+    if (demux->desc->read_packet && !demux_read_interrupted(demux))
         eof = !demux->desc->read_packet(demux, &pkt);
 
     mp_mutex_lock(&in->lock);
@@ -3436,8 +3437,12 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
 
-    if (stream)
-        stream_seek(stream, 0);
+    if (stream && !stream_seek(stream, 0)) {
+        mp_err(log, "Failed to rewind stream to the start.\n");
+        demuxer->stream = NULL;
+        demux_free(demuxer);
+        return NULL;
+    }
 
     in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
@@ -4728,6 +4733,16 @@ void demux_get_reader_state(struct demuxer *demuxer, struct demux_reader_state *
 bool demux_cancel_test(struct demuxer *demuxer)
 {
     return mp_cancel_test(demuxer->cancel);
+}
+
+// Returns true if a blocking read should be aborted as soon as possible,
+// because its result will be discarded anyway.
+bool demux_read_interrupted(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    return atomic_load_explicit(&in->seeking, memory_order_relaxed) ||
+           atomic_load_explicit(&in->thread_terminate, memory_order_relaxed) ||
+           demux_cancel_test(demuxer);
 }
 
 struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)

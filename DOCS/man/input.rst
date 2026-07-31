@@ -1986,7 +1986,7 @@ The following hooks are currently defined:
     For example, you could read and write the ``stream-open-filename``
     property to redirect an URL to something else (consider support for
     streaming sites which rarely give the user a direct media URL), or
-    you could set per-file options with by setting the property
+    you could set file-local options by setting the property
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
@@ -4162,9 +4162,14 @@ Property list
 
 ``file-local-options/<name>`` (RW)
     Similar to ``options/<name>``, but when setting an option through this
-    property, the option is reset to its old value once the current file has
-    stopped playing. Trying to write an option while no file is playing (or
-    is being loaded) results in an error.
+    property, the option is marked as file-local, which causes it to reset to
+    its old value once the current file has stopped playing. Trying to write
+    an option while no file is playing (or is being loaded) results in an error.
+
+    If an option is applied through a file specific mechanism such as per-file
+    options, watch later, ``options`` parameter of the ``loadfile`` command,
+    or file-specific configuration files, the option is similarly marked as
+    file-local.
 
     (Note that if an option is marked as file-local, even ``options/`` will
     access the local value, and the ``old`` value, which will be restored on

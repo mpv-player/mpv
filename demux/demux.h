@@ -322,6 +322,7 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
 void demux_start_prefetch(struct demuxer *demuxer);
 
 bool demux_cancel_test(struct demuxer *demuxer);
+bool demux_read_interrupted(struct demuxer *demuxer);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);

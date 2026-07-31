@@ -617,6 +617,8 @@ static const m_option_t mp_opts[] = {
 
     {"playlist-start", OPT_CHOICE(playlist_pos, {"auto", -1}, {"no", -1}),
         M_RANGE(0, INT_MAX)},
+    {"playlist-inherit-options", OPT_CHOICE(playlist_inherit_options,
+        {"no", 0}, {"yes", 1}, {"current", 2})},
 
     {"pause", OPT_BOOL(pause)},
     {"keep-open", OPT_CHOICE(keep_open,

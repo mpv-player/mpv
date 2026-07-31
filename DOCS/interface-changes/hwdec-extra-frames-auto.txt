@@ -1,0 +1,1 @@
+change `--hwdec-extra-frames` default to `auto`, sized from VO frame retention

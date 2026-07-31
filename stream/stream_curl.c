@@ -168,6 +168,7 @@ struct priv {
     // Stream parameters
     bool seekable;
     int64_t content_size; // -1 if unknown
+    int64_t start_offset; // requested initial byte offset, immutable after open
 
     // Producer state. Only touched by the curl thread.
     uint64_t request_start;    // absolute byte position of next request
@@ -415,24 +416,34 @@ static int xferinfo_callback(void *userdata, curl_off_t dl_total, curl_off_t dl_
     return atomic_load_explicit(&p->aborted, memory_order_relaxed);
 }
 
-static int64_t parse_content_range_total(const char *value)
-{
-    if (!value)
-        return -1;
-    bstr after;
-    if (!bstr_split_tok(bstr0(value), "/", &(bstr){0}, &after))
-        return -1;
-    bstr rest;
-    long long total = bstrtoll(after, &rest, 10);
-    return (rest.len == 0 && total > 0) ? (int64_t)total : -1;
-}
-
 static const char *header_value(CURL *c, const char *name)
 {
     struct curl_header *h = NULL;
     if (curl_easy_header(c, name, 0, CURLH_HEADER, -1, &h) == CURLHE_OK)
         return h->value;
     return NULL;
+}
+
+static void parse_content_range(CURL *c, int64_t *out_start, int64_t *out_total)
+{
+    *out_start = *out_total = -1;
+    const char *value = header_value(c, "Content-Range");
+    if (!value)
+        return;
+    bstr range, total;
+    if (!bstr_split_tok(bstr0(value), "/", &range, &total))
+        return;
+    bstr rest;
+    long long v = bstrtoll(total, &rest, 10);
+    if (rest.len == 0 && v > 0)
+        *out_total = v;
+    bstr_eatstart0(&range, "bytes");
+    bstr start;
+    if (!bstr_split_tok(bstr_lstrip(range), "-", &start, &(bstr){0}))
+        return;
+    v = bstrtoll(start, &rest, 10);
+    if (start.len > 0 && rest.len == 0 && v >= 0)
+        *out_start = v;
 }
 
 static void finalize_probe(struct priv *p)
@@ -480,6 +491,16 @@ static void probe_http(struct priv *p, struct bstr line)
         goto done;
     }
 
+    int64_t range_start, range_total;
+    parse_content_range(p->curl, &range_start, &range_total);
+
+    // A request with an explicit start offset must be honored by the server
+    if (p->start_offset > 0 && range_start != p->start_offset) {
+        MP_ERR(p, "Server ignored range request at offset %" PRId64 "\n",
+               p->start_offset);
+        goto done;
+    }
+
     // Compressed responses are byte-addressed in the encoded representation,
     // which our caller can't translate, so they are non-seekable.
     const char *ce = header_value(p->curl, "Content-Encoding");
@@ -496,7 +517,7 @@ static void probe_http(struct priv *p, struct bstr line)
     if (p->seekable) {
         // Content-Range carries the full size on a partial response. On any
         // non-206 success code use Content-Length.
-        int64_t total = parse_content_range_total(header_value(p->curl, "Content-Range"));
+        int64_t total = range_total;
         if (total < 0 && resp != 206) {
             curl_off_t cl = -1;
             if (curl_easy_getinfo(p->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
@@ -768,7 +789,8 @@ static void setup_curl(struct priv *p)
     curl_easy_setopt(c, CURLOPT_DEBUGFUNCTION, debug_callback);
     curl_easy_setopt(c, CURLOPT_DEBUGDATA, p);
 
-    curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, "");
+    bool identity = p->start_offset > 0 || p->request_end > 0;
+    curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, identity ? "identity" : "");
     curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(c, CURLOPT_MAXREDIRS, (long)p->opts->max_redirects);
     curl_easy_setopt(c, CURLOPT_HTTP_VERSION, (long)p->opts->http_version);
@@ -953,8 +975,10 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
 
     if (args->special_arg) {
         const struct curl_open_args *oa = args->special_arg;
-        if (oa->offset > 0)
+        if (oa->offset > 0) {
+            p->start_offset = oa->offset;
             p->request_start = oa->offset;
+        }
         if (oa->end_offset > 0)
             p->request_end = oa->end_offset;
     }
@@ -1001,7 +1025,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     s->get_size = curl_get_size;
     s->control = curl_control;
     s->close = curl_close;
-    s->pos = p->request_start;
+    s->pos = p->start_offset;
 
     return STREAM_OK;
 }

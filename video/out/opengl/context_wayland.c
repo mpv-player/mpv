@@ -96,7 +96,7 @@ static void wayland_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info
 
 static bool egl_create_context(struct ra_ctx *ctx)
 {
-    struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
+    struct priv *p = ctx->priv;
     struct vo_wayland_state *wl = ctx->vo->wl;
 
     if (!(p->egl_display = mpegl_get_display(EGL_PLATFORM_WAYLAND_EXT,
@@ -225,9 +225,10 @@ static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
 
 static bool wayland_egl_init(struct ra_ctx *ctx)
 {
+    ctx->priv = talloc_zero(ctx, struct priv);
     if (vo_wayland_init(ctx->vo) && egl_create_context(ctx))
         return true;
-    vo_wayland_uninit(ctx->vo);
+    wayland_egl_uninit(ctx);
     return false;
 }
 

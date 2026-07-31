@@ -33,6 +33,7 @@
 #include "m_property.h"
 #include "common/msg.h"
 #include "common/common.h"
+#include "player/client.h"
 
 static int do_action(const struct m_property *prop_list, const char *name,
                      int action, void *arg, void *ctx)
@@ -485,7 +486,8 @@ int m_property_read_sub(const struct m_sub_property *props, int action, void *ar
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET: {
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
         struct mpv_node node;
         node.format = MPV_FORMAT_NODE_MAP;
         node.u.list = talloc_zero(NULL, mpv_node_list);
@@ -571,7 +573,8 @@ int m_property_read_list(int action, void *arg, int count,
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET: {
+    case M_PROPERTY_GET:
+    case M_PROPERTY_GET_NODE: {
         struct mpv_node node;
         node.format = MPV_FORMAT_NODE_ARRAY;
         node.u.list = talloc_zero(NULL, mpv_node_list);
@@ -582,7 +585,9 @@ int m_property_read_list(int action, void *arg, int count,
             sub->format = MPV_FORMAT_NONE;
             int r;
             r = get_item(n, M_PROPERTY_GET_NODE, sub, ctx);
-            if (r == M_PROPERTY_NOT_IMPLEMENTED) {
+            if (r >= 0) {
+                talloc_steal(node.u.list, node_get_alloc(sub));
+            } else if (r == M_PROPERTY_NOT_IMPLEMENTED) {
                 struct m_option opt = {0};
                 r = get_item(n, M_PROPERTY_GET_TYPE, &opt, ctx);
                 if (r != M_PROPERTY_OK)
