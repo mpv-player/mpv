@@ -27,19 +27,29 @@ jobs:
                   '{($pr): $state}'
           done | jq -s 'add // {}' > prs.json
 
-          jq -r --slurpfile prs prs.json '
+          jq -r --slurpfile prs prs.json --arg default "$DEFAULT_REF" '
             $prs[0] as $state |
 
-            [ .[] | select(.key | startswith("x86_64-w64-mingw32-") or
-                                  startswith("i686-w64-mingw32-") or
-                                  startswith("aarch64-pc-windows-msvc-") or
-                                  startswith("x86_64-pc-windows-msvc-"))
-                  | . + { group: (.key | sub("-[0-9]+$"; "")),
-                          pr:    (.ref | if test("^refs/pull/[0-9]+/merge$")
-                                         then split("/")[2] else null end) } ] as $all
+            # Group caches by kind, dropping the timestamp or content hash
+            # that every save appends to the key.
+            def family: if startswith("msys2-") then "msys2"
+                        elif test("-[0-9]+$") then "ccache"
+                        else "other" end;
+            def group:  if family == "msys2" then sub("-(files|state):.*$"; "")
+                        else sub("-[0-9]+$"; "") end;
 
-            # Caches of merged or closed pull requests.
-            | ( $all | map(select(.pr != null and $state[.pr] != "OPEN")) ) as $dead
+            [ .[] | . + { family: (.key | family),
+                          group:  (.key | group),
+                          pr:     (.ref | if test("^refs/pull/[0-9]+/merge$")
+                                          then split("/")[2] else null end) } ]
+            | map(select(.family != "other")) as $all
+
+            # Caches of merged or closed pull requests, and msys2 caches
+            # outside the default branch, which every ref restores from.
+            | ( $all | map(select(
+                  (.pr != null and $state[.pr] != "OPEN") or
+                  (.family == "msys2" and .ref != $default)
+                )) ) as $dead
 
             # Of the rest only the newest cache of each kind per ref is used.
             | ( ($all - $dead) | group_by([.ref, .group]) | map(.[1:]) | add // [] ) as $superseded
@@ -53,3 +63,4 @@ jobs:
     env:
       GH_REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEFAULT_REF: refs/heads/${{ github.event.repository.default_branch }}
