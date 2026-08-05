@@ -23,23 +23,96 @@ _mpv_options()
   echo "$_mpv_options_cache"
 }
 
+_mpv_option_doc()
+{
+  _mpv_options | awk -v opt="$1" '$1 == opt {print; exit}'
+}
+
+_mpv_normalize_option()
+{
+  case $1 in
+    --*) echo "$1" ;;
+    *) echo "--$1" ;;
+  esac
+}
+
+_mpv_alias_target()
+{
+  echo "$1" | awk '$2 == "alias" && $3 == "for" {print $4; exit}'
+}
+
+_mpv_doc_expects_file()
+{
+  case $1 in
+    *'[file]'*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_mpv_list_option_parent()
+{
+  case $1 in
+    *-add|*-append|*-pre|*-set|*-del|*-remove|*-toggle)
+      echo "${1%-*}"
+      ;;
+  esac
+}
+
+_mpv_file_option_doc()
+{
+  local opt="$1"
+  local doc target parent parent_doc i
+
+  # File aliases can point at list operations, e.g. --sub-file -> --sub-files-append.
+  for i in 1 2 3 4; do
+    doc=$(_mpv_option_doc "$opt")
+    if _mpv_doc_expects_file "$doc" ; then
+      echo "$doc"
+      return 0
+    fi
+
+    target=$(_mpv_alias_target "$doc")
+    if [ -n "$target" ]; then
+      opt=$(_mpv_normalize_option "$target")
+      continue
+    fi
+
+    parent=$(_mpv_list_option_parent "$opt")
+    if [ -n "$parent" ]; then
+      parent_doc=$(_mpv_option_doc "$parent")
+      if _mpv_doc_expects_file "$parent_doc" ; then
+        echo "$parent_doc"
+        return 0
+      fi
+    fi
+
+    return 1
+  done
+
+  return 1
+}
+
 _mpv_get_args()
 {
-  local doc=$(_mpv_options | grep -E "^\\s*$1\\s")
+  local doc=$(_mpv_option_doc "$1")
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
+  local file_doc=$(_mpv_file_option_doc "$1")
 
   # We special-case profiles to ensure we read the config
   if [ "$1" = "--show-profile" ]; then
     type="ShowProfile"
   elif [ "$1" = "--profile" ]; then
     type="Profile"
+  elif [ -n "$file_doc" ]; then
+    doc="$file_doc"
+    type=$(echo "$doc" | awk '{print $2;}')
   fi
 
   declare -a candidates
   case $type in
     String)
-      if echo "$doc" | grep -q '\[file\]' ; then
+      if _mpv_doc_expects_file "$doc" ; then
         if [ "$cur" = '=' ]; then
           # Without this, _filedir will try and complete files starting with '='
           cur=""
