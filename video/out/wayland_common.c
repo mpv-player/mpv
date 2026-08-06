@@ -1687,9 +1687,13 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     if (outputs == 1)
         update_output_geometry(wl);
 
-    MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
-               wl->current_output->make, wl->current_output->model, wl->current_output->name,
-               wl->current_output->id, wl->scaling_factor, wl->current_output->refresh_rate);
+    if (wl->current_output) {
+        MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
+                   wl->current_output->make, wl->current_output->model, wl->current_output->name,
+                   wl->current_output->id, wl->scaling_factor, wl->current_output->refresh_rate);
+    } else {
+        MP_VERBOSE(wl, "Surface entered unknown output\n");
+    }
 
     wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
@@ -4108,7 +4112,8 @@ static void update_output_geometry(struct vo_wayland_state *wl)
         force_resize = true;
     }
 
-    if (!mp_rect_equals(&wl->old_output_geometry, &wl->current_output->geometry)) {
+    if (wl->current_output &&
+        !mp_rect_equals(&wl->old_output_geometry, &wl->current_output->geometry)) {
         set_geometry(wl, false);
         force_resize = true;
     }
