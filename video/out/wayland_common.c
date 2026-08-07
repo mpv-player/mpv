@@ -1777,6 +1777,9 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
 static void handle_surface_config(void *data, struct xdg_surface *surface,
                                   uint32_t serial)
 {
+    struct vo_wayland_state *wl = data;
+
+    wl->surface_configured = true;
     xdg_surface_ack_configure(surface, serial);
 }
 
@@ -4695,11 +4698,18 @@ bool vo_wayland_init(struct vo *vo)
 
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
+
+    // Do a commit without any buffer attached to ensure the compositor
+    // configures the surface.
     wl_surface_commit(wl->surface);
 
-    /* Do another roundtrip to ensure all of the above is initialized
-     * before mpv does anything else. */
-    wl_display_roundtrip(wl->display);
+    // Block until the compositor has configured the surface. Since all requests
+    // are processed in order, this also ensures that all requests preceding
+    // the above surface commit have also been seen by the compositor.
+    while (!wl->surface_configured) {
+        if (wl_display_dispatch(wl->display) < 0)
+            goto err;
+    }
 
     return true;
 
