@@ -84,6 +84,7 @@ struct vo_wayland_state {
     bool state_change;
     bool tiled;
     bool toplevel_configured;
+    bool surface_configured;
     int display_fd;
     int mouse_x;
     int mouse_y;
