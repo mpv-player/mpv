@@ -2533,7 +2533,7 @@ local function osc_init()
         if user_opts.seekrangestyle == "none" or not cache_enabled() then
             return nil
         end
-        if state.duration == nil then
+        if state.duration == nil or state.duration == 0 then
             return nil
         end
         local nranges = {}
