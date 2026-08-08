@@ -510,7 +510,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             else                                                        \
                 subelptr = (fieldtype *) fieldptr
             GETPTR(uintptr, uint64_t);
-            if (length < 1 || length > 8) {
+            if (length > 8) {
                 MP_ERR(ctx, "uint invalid length %"PRIu64"\n", length);
                 goto error;
             }
