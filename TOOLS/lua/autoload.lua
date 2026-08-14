@@ -297,10 +297,6 @@ local function find_and_add_entries()
     end
 
     local path = mp.get_property("path", "")
-    if utils.readdir(path) then
-        msg.debug("stopping: current path is a directory")
-        return
-    end
 
     local dir, filename = utils.split_path(path)
     msg.trace(("dir: %s, filename: %s"):format(dir, filename))
@@ -309,6 +305,11 @@ local function find_and_add_entries()
         return
     elseif #dir == 0 then
         msg.debug("stopping: not a local path")
+        return
+    end
+    local pathinfo = utils.file_info(path)
+    if pathinfo and pathinfo.is_dir then
+        msg.debug("stopping: path is a directory")
         return
     end
 
