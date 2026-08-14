@@ -28,13 +28,13 @@ from math import ldexp
 
 elements_ebml = (
     "EBML, 1a45dfa3, sub", (
-        "EBMLVersion, 4286, uint",
-        "EBMLReadVersion, 42f7, uint",
-        "EBMLMaxIDLength, 42f2, uint",
-        "EBMLMaxSizeLength, 42f3, uint",
+        "EBMLVersion, 4286, uint, default=1",
+        "EBMLReadVersion, 42f7, uint, default=1",
+        "EBMLMaxIDLength, 42f2, uint, default=4",
+        "EBMLMaxSizeLength, 42f3, uint, default=8",
         "DocType, 4282, str",
-        "DocTypeVersion, 4287, uint",
-        "DocTypeReadVersion, 4285, uint",
+        "DocTypeVersion, 4287, uint, default=1",
+        "DocTypeReadVersion, 4285, uint, default=1",
     ),
 
     "CRC32, bf, binary",
@@ -55,7 +55,7 @@ elements_matroska = (
             "SegmentUID, 73a4, binary, length=16",
             "PrevUID, 3cb923, binary, length=16",
             "NextUID, 3eb923, binary, length=16",
-            "TimecodeScale, 2ad7b1, uint",
+            "TimecodeScale, 2ad7b1, uint, default=1000000",
             "DateUTC, 4461, sint",
             "Title, 7ba9, str",
             "MuxingApp, 4d80, str",
@@ -72,7 +72,7 @@ elements_matroska = (
                 "DiscardPadding,  75A2, sint",
                 "BlockAdditions, 75A1, sub", (
                     "BlockMore*, A6, sub", (
-                        "BlockAddID, EE, uint",
+                        "BlockAddID, EE, uint, default=1",
                         "BlockAdditional, A5, binary",
                     ),
                 ),
@@ -85,34 +85,34 @@ elements_matroska = (
                 "TrackNumber, d7, uint",
                 "TrackUID, 73c5, uint",
                 "TrackType, 83, uint",
-                "FlagEnabled, b9, uint",
-                "FlagDefault, 88, uint",
+                "FlagEnabled, b9, uint, default=1",
+                "FlagDefault, 88, uint, default=1",
                 "FlagForced, 55aa, uint",
                 "FlagHearingImpaired, 55ab, uint",
                 "FlagVisualImpaired, 55ac, uint",
                 "FlagOriginal, 55ae, uint",
                 "FlagCommentary, 55af, uint",
-                "FlagLacing, 9c, uint",
+                "FlagLacing, 9c, uint, default=1",
                 "MinCache, 6de7, uint",
                 "MaxCache, 6df8, uint",
                 "DefaultDuration, 23e383, uint",
-                "TrackTimecodeScale, 23314f, float",
+                "TrackTimecodeScale, 23314f, float, default=1",
                 "MaxBlockAdditionID, 55ee, uint",
                 "Name, 536e, str",
-                "Language, 22b59c, str",
+                "Language, 22b59c, str, default=eng",
                 "LanguageBCP47, 22b59d, str",
                 "CodecID, 86, str",
                 "CodecPrivate, 63a2, binary",
                 "CodecName, 258688, str",
-                "CodecDecodeAll, aa, uint",
+                "CodecDecodeAll, aa, uint, default=1",
                 "CodecDelay, 56aa, uint",
                 "SeekPreRoll, 56bb, uint",
                 "Video, e0, sub", (
                     "FlagInterlaced, 9a, uint",
                     "PixelWidth, b0, uint",
                     "PixelHeight, ba, uint",
-                    "DisplayWidth, 54b0, uint",
-                    "DisplayHeight, 54ba, uint",
+                    "DisplayWidth, 54b0, uint, default=context",
+                    "DisplayHeight, 54ba, uint, default=context",
                     "DisplayUnit, 54b2, uint",
                     "PixelCropTop, 54bb, uint",
                     "PixelCropLeft, 54cc, uint",
@@ -122,7 +122,7 @@ elements_matroska = (
                     "ColourSpace, 2eb524, binary, length=4",
                     "StereoMode, 53b8, uint",
                     "Colour, 55b0, sub", (
-                        "MatrixCoefficients,      55B1, uint",
+                        "MatrixCoefficients,      55B1, uint, default=2",
                         "BitsPerChannel,          55B2, uint",
                         "ChromaSubsamplingHorz,   55B3, uint",
                         "ChromaSubsamplingVert,   55B4, uint",
@@ -131,8 +131,8 @@ elements_matroska = (
                         "ChromaSitingHorz,        55B7, uint",
                         "ChromaSitingVert,        55B8, uint",
                         "Range,                   55B9, uint",
-                        "TransferCharacteristics, 55BA, uint",
-                        "Primaries,               55BB, uint",
+                        "TransferCharacteristics, 55BA, uint, default=2",
+                        "Primaries,               55BB, uint, default=2",
                         "MaxCLL,                  55BC, uint",
                         "MaxFALL,                 55BD, uint",
                         "MasteringMetadata,       55D0, sub", (
@@ -157,15 +157,15 @@ elements_matroska = (
                     ),
                 ),
                 "Audio, e1, sub", (
-                    "SamplingFrequency, b5, float",
-                    "OutputSamplingFrequency, 78b5, float",
-                    "Channels, 9f, uint",
+                    "SamplingFrequency, b5, float, default=8000",
+                    "OutputSamplingFrequency, 78b5, float, default=context",
+                    "Channels, 9f, uint, default=1",
                     "BitDepth, 6264, uint",
                 ),
                 "ContentEncodings, 6d80, sub", (
                     "ContentEncoding*, 6240, sub", (
                         "ContentEncodingOrder, 5031, uint",
-                        "ContentEncodingScope, 5032, uint",
+                        "ContentEncodingScope, 5032, uint, default=1",
                         "ContentEncodingType, 5033, uint",
                         "ContentCompression, 5034, sub", (
                             "ContentCompAlgo, 4254, uint",
@@ -215,12 +215,12 @@ elements_matroska = (
                     "ChapterTimeStart, 91, uint",
                     "ChapterTimeEnd, 92, uint",
                     "ChapterFlagHidden, 98, uint",
-                    "ChapterFlagEnabled, 4598, uint",
+                    "ChapterFlagEnabled, 4598, uint, default=1",
                     "ChapterSegmentUID, 6e67, binary, length=16",
                     "ChapterSegmentEditionUID, 6ebc, uint",
                     "ChapterDisplay*, 80, sub", (
                         "ChapString, 85, str",
-                        "ChapLanguage*, 437c, str",
+                        "ChapLanguage*, 437c, str, default=eng",
                         "ChapLanguageBCP47*, 437d, str",
                         "ChapCountry*, 437e, str",
                     ),
@@ -230,7 +230,7 @@ elements_matroska = (
         "Tags*, 1254c367, sub", (
             "Tag*, 7373, sub", (
                 "Targets, 63c0, sub", (
-                    "TargetTypeValue, 68ca, uint",
+                    "TargetTypeValue, 68ca, uint, default=50",
                     "TargetType, 63ca, str",
                     "TargetTrackUID, 63c5, uint",
                     "TargetEditionUID, 63c9, uint",
@@ -239,10 +239,10 @@ elements_matroska = (
                  ),
                 "SimpleTag*, 67c8, sub", (
                     "TagName, 45a3, str",
-                    "TagLanguage, 447a, str",
+                    "TagLanguage, 447a, str, default=und",
                     "TagLanguageBCP47, 447b, str",
                     "TagString, 4487, str",
-                    "TagDefault, 4484, uint",
+                    "TagDefault, 4484, uint, default=1",
                 ),
             ),
         ),
@@ -266,7 +266,8 @@ def camelcase_to_words(name):
 
 class MatroskaElement:
 
-    def __init__(self, name, elid, valtype, namespace, length=None):
+    def __init__(self, name, elid, valtype, namespace, length=None,
+                 default=None):
         self.name = name
         self.definename = f"{namespace}_ID_{name.upper()}"
         self.fieldname = camelcase_to_words(name)
@@ -274,6 +275,7 @@ class MatroskaElement:
         self.elid = elid
         self.valtype = valtype
         self.length = int(length or "0")
+        self.default = default
         if valtype == "sub":
             self.ebmltype = "EBML_TYPE_SUBELEMENTS"
             self.valname = "struct " + self.structname
@@ -292,6 +294,21 @@ class MatroskaElement:
         self.subelements = subelements
         self.subids = {x[0].elid for x in subelements}
 
+    def default_initializer(self):
+        if self.default is None:
+            return "false, {0}"
+        if self.default == "context":
+            return "true, {0}"
+        if self.valtype == "uint":
+            return f"false, {{.u = {int(self.default)}}}"
+        if self.valtype == "sint":
+            return f"false, {{.i = {int(self.default)}}}"
+        if self.valtype == "float":
+            return f"false, {{.f = {float(self.default)}}}"
+        if self.valtype == "str":
+            return f'false, {{.s = "{self.default}"}}'
+        raise SyntaxError("Default not supported for type " + self.valtype)
+
 elementd: dict[str, MatroskaElement] = {}
 elementlist: list[MatroskaElement] = []
 def parse_elems(elements, namespace):
@@ -302,7 +319,7 @@ def parse_elems(elements, namespace):
             attrs = {}
             for extra in rest:
                 key, sep, value = extra.partition("=")
-                if not sep or key not in ("length",):
+                if not sep or key not in ("length", "default"):
                     raise SyntaxError("Invalid element attribute " + extra)
                 attrs[key] = value
             hexid = hexid.lower()
@@ -371,7 +388,7 @@ def generate_c_definitions(out):
             printf(out, "#undef N")
         else:
             printf(out, f'E("{el.name}", {el.fieldname}, {el.ebmltype}, '
-                        f'{el.length})')
+                        f'{el.length}, {el.default_initializer()})')
 
 def read(s, length):
     t = s.read(length)
