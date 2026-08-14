@@ -52,9 +52,9 @@ elements_matroska = (
         ),
 
         "Info*, 1549a966, sub", (
-            "SegmentUID, 73a4, binary, 16",
-            "PrevUID, 3cb923, binary, 16",
-            "NextUID, 3eb923, binary, 16",
+            "SegmentUID, 73a4, binary, length=16",
+            "PrevUID, 3cb923, binary, length=16",
+            "NextUID, 3eb923, binary, length=16",
             "TimecodeScale, 2ad7b1, uint",
             "DateUTC, 4461, sint",
             "Title, 7ba9, str",
@@ -119,7 +119,7 @@ elements_matroska = (
                     "PixelCropRight, 54dd, uint",
                     "PixelCropBottom, 54aa, uint",
                     "FrameRate, 2383e3, float",
-                    "ColourSpace, 2eb524, binary, 4",
+                    "ColourSpace, 2eb524, binary, length=4",
                     "StereoMode, 53b8, uint",
                     "Colour, 55b0, sub", (
                         "MatrixCoefficients,      55B1, uint",
@@ -216,7 +216,7 @@ elements_matroska = (
                     "ChapterTimeEnd, 92, uint",
                     "ChapterFlagHidden, 98, uint",
                     "ChapterFlagEnabled, 4598, uint",
-                    "ChapterSegmentUID, 6e67, binary, 16",
+                    "ChapterSegmentUID, 6e67, binary, length=16",
                     "ChapterSegmentEditionUID, 6ebc, uint",
                     "ChapterDisplay*, 80, sub", (
                         "ChapString, 85, str",
@@ -299,11 +299,16 @@ def parse_elems(elements, namespace):
     for el in elements:
         if isinstance(el, str):
             name, hexid, eltype, *rest = (x.strip() for x in el.split(","))
-            length = rest[0] if rest else None
+            attrs = {}
+            for extra in rest:
+                key, sep, value = extra.partition("=")
+                if not sep or key not in ("length",):
+                    raise SyntaxError("Invalid element attribute " + extra)
+                attrs[key] = value
             hexid = hexid.lower()
             multiple = name.endswith("*")
             name = name.strip("*")
-            new = MatroskaElement(name, hexid, eltype, namespace, length)
+            new = MatroskaElement(name, hexid, eltype, namespace, **attrs)
             elementd[hexid] = new
             elementlist.append(new)
             subelements.append((new, multiple))
