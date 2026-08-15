@@ -43,6 +43,10 @@ struct mp_decoder_wrapper {
 struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src);
 
+// Number of extra hw surfaces the player retains on top of the default budget.
+// Video only.
+void mp_decoder_wrapper_set_extra_hw_frames(struct mp_decoder_wrapper *d, int n);
+
 // Legacy decoder framedrop control.
 void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num);
 int mp_decoder_wrapper_get_frames_dropped(struct mp_decoder_wrapper *d);
@@ -74,6 +78,8 @@ enum dec_ctrl {
     VDCTRL_GET_BFRAMES,
     // framedrop mode: 0=none, 1=standard, 2=hrseek
     VDCTRL_SET_FRAMEDROP,
+    // int*: extra hw surfaces retained
+    VDCTRL_SET_EXTRA_HW_FRAMES,
     VDCTRL_CHECK_FORCED_EOF,
 };
 
