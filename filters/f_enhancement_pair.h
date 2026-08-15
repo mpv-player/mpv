@@ -21,6 +21,9 @@
 
 struct sh_stream;
 
+// Maximum number of decoded frames the pairing filter retains while matching.
+#define MP_ENHANCEMENT_PAIR_QUEUE_MAX 8
+
 // Enhancement-layer pairing filter.
 //
 // Reads base-layer (BL) mp_image frames from its input pin, decodes the

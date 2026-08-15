@@ -29,7 +29,7 @@
 #define PTS_MATCH_TOLERANCE 1e-6
 
 // Number of frames hold for matching.
-#define QUEUE_MAX 16
+#define QUEUE_MAX MP_ENHANCEMENT_PAIR_QUEUE_MAX
 
 struct priv {
     struct mp_decoder_wrapper *el_dec;
@@ -226,6 +226,8 @@ struct mp_filter *mp_enhancement_pair_create(struct mp_filter *parent,
 
     struct priv *p = f->priv;
     p->el_dec = mp_decoder_wrapper_create(f, el_sh);
+    if (p->el_dec)
+        mp_decoder_wrapper_set_extra_hw_frames(p->el_dec, QUEUE_MAX);
     if (!p->el_dec || !mp_decoder_wrapper_reinit(p->el_dec)) {
         MP_WARN(f, "Failed to set up enhancement-layer decoder; "
                 "rendering base layer only.\n");
