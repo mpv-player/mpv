@@ -1,0 +1,3 @@
+add `--ao=asio` audio output (Windows)
+add `--asio-device`, `--asio-buffer-size`, `--asio-sample-rate`,
+    `--asio-sample-type` and `--asio-channel-offset` options

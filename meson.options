@@ -56,6 +56,7 @@ option('pulse', type: 'feature', value: 'auto', description: 'PulseAudio audio o
 option('sdl2-audio', type: 'feature', value: 'disabled', description: 'SDL2 audio output')
 option('sndio', type: 'feature', value: 'auto', description: 'sndio audio output')
 option('wasapi', type: 'feature', value: 'auto', description: 'WASAPI audio output')
+option('asio', type: 'feature', value: 'auto', description: 'Steinberg ASIO audio output (Windows)')
 
 # video output features
 option('amf', type: 'feature', value: 'auto', description: 'AMD AMF')

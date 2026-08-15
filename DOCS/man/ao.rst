@@ -321,3 +321,46 @@ Available audio output drivers are:
         cases, but reportedly on some devices there are glitches following
         stream resets under the default setting. In such cases, specifying a
         shorter duration might help.
+
+``asio`` (Windows only)
+    Audio output to a Steinberg ASIO driver.
+
+    This is intended for audio interfaces whose ASIO driver gives lower
+    latency or more direct channel routing than WASAPI, and for multichannel
+    setups where the physical output channels should be addressed directly
+    rather than through the Windows mixer. It is not autoprobed ahead of
+    ``wasapi``; it has to be requested explicitly.
+
+    Devices are enumerated from the ASIO driver registry, and can be selected
+    with ``--audio-device=asio/<name>`` or ``--asio-device``. Most ASIO
+    drivers can only be opened by one process at a time.
+
+    Channels are written to the driver's physical output ports by index,
+    starting at ``--asio-channel-offset``. The driver's own control panel
+    still decides what those ports are wired to.
+
+    The following global options are supported by this audio output:
+
+    ``--asio-device=<name>``
+        Name of the ASIO driver to open. If unset, ``--audio-device`` is used;
+        if that is unset too, the first available driver is opened.
+
+    ``--asio-buffer-size=<0-65536>``
+        Buffer size in samples (default: 0, meaning the driver's preferred
+        size). Other values are clamped to the range the driver reports and
+        rounded to its granularity. Smaller buffers lower latency and raise
+        the risk of dropouts.
+
+    ``--asio-sample-rate=<0-384000>``
+        Force a sample rate in Hz (default: 0, meaning the rate of the audio
+        being played). Set this if the driver should stay at a fixed rate.
+
+    ``--asio-sample-type=<auto|int16|int24|int32|float32>``
+        Sample format handed to the driver (default: ``auto``, meaning the
+        driver's native format). Conversion happens from float regardless, so
+        this only matters if a driver misreports what it prefers.
+
+    ``--asio-channel-offset=<0-255>``
+        Index of the first physical output channel to use (default: 0). Use
+        this to place playback on a different set of outputs, e.g. ``2`` to
+        start at the third output of the interface.

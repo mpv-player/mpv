@@ -959,6 +959,14 @@ if features['wasapi']
                      'audio/out/ao_wasapi_utils.c')
 endif
 
+asio = cc.has_header('objbase.h', required:
+    get_option('asio').require(win32))
+features += {'asio': asio}
+if features['asio']
+    sources += files('audio/out/ao_asio.c')
+    dependencies += cc.find_library('advapi32', required: false)
+endif
+
 
 # video output dependencies
 caca_opt = get_option('caca').require(
