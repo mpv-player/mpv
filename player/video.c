@@ -39,6 +39,7 @@
 #include "sub/osd.h"
 #include "video/hwdec.h"
 #include "filters/f_decoder_wrapper.h"
+#include "filters/f_enhancement_pair.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -191,6 +192,9 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     track->dec = mp_decoder_wrapper_create(parent, track->stream);
     if (!track->dec)
         goto err_out;
+
+    if (sh_stream_dependent_sibling(track->stream))
+        mp_decoder_wrapper_set_extra_hw_frames(track->dec, MP_ENHANCEMENT_PAIR_QUEUE_MAX);
 
     if (!mp_decoder_wrapper_reinit(track->dec))
         goto err_out;
