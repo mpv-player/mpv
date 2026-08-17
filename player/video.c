@@ -808,6 +808,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     mpctx->display_sync_active = false;
 
+    if (vo->opts->vrr_adjust && vo_get_pts_offset(vo) != 0) {
+        mpctx->mistimed_frames_total += 1;
+        MP_STATS(mpctx, "mistimed");
+    }
+
     if (!VS_IS_DISP(mode) || !vo_is_visible(vo))
         return;
 
