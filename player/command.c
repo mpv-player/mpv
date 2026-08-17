@@ -167,6 +167,7 @@ enum load_action_type {
 struct load_action {
     enum load_action_type type;
     bool play;
+    bool use_id;
 };
 
 // U+00A0 NO-BREAK SPACE
@@ -6248,14 +6249,20 @@ static void cmd_playlist_play_index(void *p)
     struct playlist *pl = mpctx->playlist;
     int pos = cmd->args[0].v.i;
     bool preserve_options = cmd->num_args >= 2 && cmd->args[1].v.b;
+    int64_t id = cmd->args[2].v.i64;
 
-    if (pos == -2)
-        pos = playlist_entry_to_index(pl, pl->current);
+    struct playlist_entry *entry;
+    if (pos == -3)
+        entry = playlist_entry_from_id(pl, id);
+    else if (pos == -2)
+        entry = pl->current;
+    else
+        entry = playlist_entry_from_index(pl, pos);
 
     if (preserve_options && pl->current && pos == pl->current->pl_index)
         pl->current->reloading = true;
 
-    mp_set_playlist_entry(mpctx, playlist_entry_from_index(pl, pos));
+    mp_set_playlist_entry(mpctx, entry);
     if (cmd->on_osd & MP_ON_OSD_MSG)
         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_CURRENT_FILE;
 }
@@ -6382,29 +6389,34 @@ static void cmd_escape_ass(void *p)
 static struct load_action get_load_action(struct MPContext *mpctx, int action_flag)
 {
     int type = action_flag & 3;
-    bool play = (action_flag >> 3) & 1;
+    struct load_action action = {
+        .play = (action_flag >> 3) & 1,
+        .use_id = (action_flag >> 2) & 1,
+    };
     switch (type) {
     case 0:
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = play};
+        action.type = LOAD_TYPE_REPLACE; break;
     case 1:
-        return (struct load_action){LOAD_TYPE_APPEND, .play = play};
+        action.type = LOAD_TYPE_APPEND; break;
     case 2:
-        return (struct load_action){LOAD_TYPE_INSERT_NEXT, .play = play};
+        action.type = LOAD_TYPE_INSERT_NEXT; break;
     case 3:
-        return (struct load_action){LOAD_TYPE_INSERT_AT, .play = play};
+        action.type = LOAD_TYPE_INSERT_AT; break;
     default: // default: replace
-        return (struct load_action){LOAD_TYPE_REPLACE, .play = true};
+        action.type = LOAD_TYPE_REPLACE; break;
     }
+    return action;
 }
 
 static struct playlist_entry *get_insert_entry(struct MPContext *mpctx, struct load_action *action,
-                                               int insert_at_idx)
+                                               int64_t insert_at_idx)
 {
     switch (action->type) {
     case LOAD_TYPE_INSERT_NEXT:
         return playlist_get_next(mpctx->playlist, +1);
     case LOAD_TYPE_INSERT_AT:
-        return playlist_entry_from_index(mpctx->playlist, insert_at_idx);
+        return action->use_id ? playlist_entry_from_id(mpctx->playlist, insert_at_idx)
+                              : playlist_entry_from_index(mpctx->playlist, insert_at_idx);
     case LOAD_TYPE_REPLACE:
     case LOAD_TYPE_APPEND:
     default:
@@ -6418,7 +6430,7 @@ static void cmd_loadfile(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int64_t insert_at_idx = cmd->args[2].v.i64;
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
@@ -6456,7 +6468,7 @@ static void cmd_loadlist(void *p)
     struct MPContext *mpctx = cmd->mpctx;
     char *filename = cmd->args[0].v.s;
     int action_flag = cmd->args[1].v.i;
-    int insert_at_idx = cmd->args[2].v.i;
+    int64_t insert_at_idx = cmd->args[2].v.i64;
 
     struct load_action action = get_load_action(mpctx, action_flag);
 
@@ -6523,10 +6535,15 @@ static void cmd_playlist_remove(void *p)
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
 
-    struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist,
-                                                         cmd->args[0].v.i);
-    if (cmd->args[0].v.i < 0)
+    int64_t id = cmd->args[1].v.i64;
+    struct playlist_entry *e = NULL;
+    if (cmd->args[0].v.i == -1)
         e = mpctx->playlist->current;
+    else if (cmd->args[0].v.i == -2)
+        e = playlist_entry_from_id(mpctx->playlist, id);
+    else
+        e = playlist_entry_from_index(mpctx->playlist, cmd->args[0].v.i);
+
     if (!e) {
         cmd->success = false;
         return;
@@ -6544,11 +6561,17 @@ static void cmd_playlist_move(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
+    bool use_id = cmd->args[2].v.i;
 
-    struct playlist_entry *e1 = playlist_entry_from_index(mpctx->playlist,
-                                                          cmd->args[0].v.i);
-    struct playlist_entry *e2 = playlist_entry_from_index(mpctx->playlist,
-                                                          cmd->args[1].v.i);
+    struct playlist_entry *e1 = NULL, *e2 = NULL;
+    if (use_id) {
+        e1 = playlist_entry_from_id(mpctx->playlist, cmd->args[0].v.i64);
+        e2 = playlist_entry_from_id(mpctx->playlist, cmd->args[1].v.i64);
+    } else {
+        e1 = playlist_entry_from_index(mpctx->playlist, cmd->args[0].v.i64);
+        e2 = playlist_entry_from_index(mpctx->playlist, cmd->args[1].v.i64);
+    }
+
     if (!e1) {
         cmd->success = false;
         return;
@@ -7531,9 +7554,13 @@ const struct mp_cmd_def mp_cmds[] = {
         .priv = &(const int){-1} },
     { "playlist-play-index", cmd_playlist_play_index,
         {
-            {"index", OPT_CHOICE(v.i, {"current", -2}, {"none", -1}),
+            {"index", OPT_CHOICE(v.i,
+                {"id", -3},
+                {"current", -2},
+                {"none", -1}),
                 M_RANGE(-1, INT_MAX)},
             {"preserve-options", OPT_BOOL(v.b), .flags = MP_CMD_OPT_ARG},
+            {"id", OPT_INT64(v.i64), .flags = MP_CMD_OPT_ARG},
         }
     },
     { "playlist-shuffle", cmd_playlist_shuffle, },
@@ -7727,17 +7754,18 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", 0},
+                {"append", 1},
+                {"insert-next", 2},
+                {"insert-at", 3},
+                {"id", 4},
+                {"play", 8},
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
+                {"append-play", 1|8},
+                {"insert-next-play", 2|8},
+                {"insert-at-play", 3|8}),
                 .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"index", OPT_INT64(v.i64), OPTDEF_INT64(-1)},
             {"options", OPT_KEYVALUELIST(v.str_list), .flags = MP_CMD_OPT_ARG},
         },
     },
@@ -7745,27 +7773,32 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"url", OPT_STRING(v.s)},
             {"flags", OPT_FLAGS(v.i,
-                {"replace", 4|0},
-                {"append", 4|1},
-                {"insert-next", 4|2},
-                {"insert-at", 4|3},
-                {"play", 32|8},
+                {"replace", 0},
+                {"append", 1},
+                {"insert-next", 2},
+                {"insert-at", 3},
+                {"id", 4},
+                {"play", 8},
                 // backwards compatibility
-                {"append-play", (4|1) + (16|8)},
-                {"insert-next-play", (4|2) + (16|8)},
-                {"insert-at-play", (4|3) + (16|8)}),
+                {"append-play", 1|8},
+                {"insert-next-play", 2|8},
+                {"insert-at-play", 3|8}),
                 .flags = MP_CMD_OPT_ARG},
-            {"index", OPT_INT(v.i), OPTDEF_INT(-1)},
+            {"index", OPT_INT64(v.i64), OPTDEF_INT64(-1)},
         },
         .spawn_thread = true,
         .can_abort = true,
     },
     { "playlist-clear", cmd_playlist_clear },
     { "playlist-remove", cmd_playlist_remove, {
-        {"index", OPT_CHOICE(v.i, {"current", -1}),
-            M_RANGE(0, INT_MAX)}, }},
-    { "playlist-move", cmd_playlist_move,  { {"index1", OPT_INT(v.i)},
-                                             {"index2", OPT_INT(v.i)}, }},
+        {"index", OPT_CHOICE(v.i, {"current", -1}, {"id", -2}),
+            M_RANGE(0, INT_MAX)},
+        {"id", OPT_INT64(v.i64), .flags = MP_CMD_OPT_ARG}, }},
+    { "playlist-move", cmd_playlist_move, {
+        {"index1", OPT_INT64(v.i64)},
+        {"index2", OPT_INT64(v.i64)},
+        {"flags", OPT_FLAGS(v.i, {"index", 0}, {"id", 1}),
+                .flags = MP_CMD_OPT_ARG}, }},
     { "run", cmd_run, { {"command", OPT_STRING(v.s)},
                         {"args", OPT_STRING(v.s)}, },
         .vararg = true,
