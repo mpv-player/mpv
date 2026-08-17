@@ -273,12 +273,13 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
 
 static float spa_volume_to_mp_volume(float vol)
 {
-        return vol * 100;
+        return cbrt(vol) * 100;
 }
 
 static float mp_volume_to_spa_volume(float vol)
 {
-        return vol / 100;
+        vol /= 100;
+        return vol * vol * vol;
 }
 
 static float volume_avg(float* vols, uint32_t n)
