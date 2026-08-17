@@ -1474,9 +1474,7 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
-    bool eof = mpctx->video_status == STATUS_EOF &&
-               mpctx->audio_status == STATUS_EOF;
-    return m_property_bool_ro(action, arg, eof);
+    return m_property_bool_ro(action, arg, mpctx_eof_reached(mpctx));
 }
 
 static int mp_property_seeking(void *ctx, struct m_property *prop,

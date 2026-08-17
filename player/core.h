@@ -616,6 +616,7 @@ double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
 void set_pause_state(struct MPContext *mpctx, bool user_pause);
 void update_internal_pause_state(struct MPContext *mpctx);
+bool mpctx_eof_reached(struct MPContext *mpctx);
 void update_core_idle_state(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir, bool use_seek);
 void step_frame_mute(struct MPContext *mpctx, bool mute);
