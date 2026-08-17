@@ -142,6 +142,9 @@ static const struct m_option mdata_type = {
 };
 
 struct overlay {
+    void *owner;
+    int id;
+
     struct mp_image *source;
     int x, y;
     int dw, dh;
@@ -5369,21 +5372,76 @@ done:
     cmd->overlay_osd_current = overlay_next;
 }
 
+void command_remove_overlays_by_owner(struct MPContext *mpctx,
+                              void *owner)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    bool changed = false;
+
+    for (int n = cmd->num_overlays - 1; n >= 0; n--) {
+        struct overlay *o = &cmd->overlays[n];
+
+        if (o->owner == owner) {
+            talloc_free(o->source);
+
+            MP_TARRAY_REMOVE_AT(cmd->overlays,
+                                cmd->num_overlays,
+                                n);
+
+            changed = true;
+        }
+    }
+
+    if (changed)
+        recreate_overlays(mpctx);
+}
+
+static int find_overlay(struct command_ctx *cmd,
+                        void *owner,
+                        int id)
+{
+    for (int n = 0; n < cmd->num_overlays; n++) {
+        struct overlay *o = &cmd->overlays[n];
+
+        if (o->owner == owner && o->id == id)
+            return n;
+    }
+
+    return -1;
+}
+
 // Set overlay with the given ID to the contents as described by "new".
-static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new)
+static void replace_overlay(struct MPContext *mpctx,
+                            void *owner,
+                            int id,
+                            struct overlay *new)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     mp_assert(id >= 0);
-    if (id >= cmd->num_overlays) {
-        MP_TARRAY_GROW(cmd, cmd->overlays, id);
-        while (cmd->num_overlays <= id)
-            cmd->overlays[cmd->num_overlays++] = (struct overlay){0};
+
+    int index = find_overlay(cmd, owner, id);
+
+    if (!new->source) {
+        if (index >= 0) {
+            talloc_free(cmd->overlays[index].source);
+
+            MP_TARRAY_REMOVE_AT(cmd->overlays,
+                                cmd->num_overlays,
+                                index);
+
+            recreate_overlays(mpctx);
+        }
+        return;
     }
 
-    struct overlay *ptr = &cmd->overlays[id];
+    if (index < 0) {
+        MP_TARRAY_APPEND(cmd, cmd->overlays, cmd->num_overlays, *new);
+    } else {
+        struct overlay *ptr = &cmd->overlays[index];
 
-    talloc_free(ptr->source);
-    *ptr = *new;
+        talloc_free(ptr->source);
+        *ptr = *new;
+    }
 
     recreate_overlays(mpctx);
 }
@@ -5438,6 +5496,9 @@ static void cmd_overlay_add(void *pcmd)
         goto error;
     }
     struct overlay overlay = {
+        .owner = cmd->cmd->sender,
+        .id    = id,
+
         .source = mp_image_alloc(IMGFMT_BGRA, w, h),
         .x = x,
         .y = y,
@@ -5479,7 +5540,7 @@ static void cmd_overlay_add(void *pcmd)
         goto error;
     }
 
-    replace_overlay(mpctx, id, &overlay);
+    replace_overlay(mpctx, cmd->cmd->sender, id, &overlay);
     return;
 error:
     cmd->success = false;
@@ -5489,20 +5550,30 @@ static void cmd_overlay_remove(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
-    struct command_ctx *cmdctx = mpctx->command_ctx;
     int id = cmd->args[0].v.i;
-    if (id >= 0 && id < cmdctx->num_overlays)
-        replace_overlay(mpctx, id, &(struct overlay){0});
+
+    if (id >= 0)
+        replace_overlay(mpctx, cmd->cmd->sender, id,
+                        &(struct overlay){0});
 }
 
 static void overlay_uninit(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
+
     if (!mpctx->osd)
         return;
-    for (int id = 0; id < cmd->num_overlays; id++)
-        replace_overlay(mpctx, id, &(struct overlay){0});
+
+    while (cmd->num_overlays > 0) {
+        talloc_free(cmd->overlays[0].source);
+
+        MP_TARRAY_REMOVE_AT(cmd->overlays,
+                            cmd->num_overlays,
+                            0);
+    }
+
     osd_set_external2(mpctx->osd, NULL);
+
     for (int n = 0; n < 2; n++)
         mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }

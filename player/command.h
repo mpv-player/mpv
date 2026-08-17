@@ -31,6 +31,7 @@ struct m_config_option;
 
 void command_init(struct MPContext *mpctx);
 void command_uninit(struct MPContext *mpctx);
+void command_remove_overlays_by_owner(struct MPContext *mpctx, void *owner);
 
 // Runtime context for a single command.
 struct mp_cmd_ctx {
