@@ -95,6 +95,17 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
     vo_c->underrun_signaled = false;
 }
 
+static void trim_saved_frames(struct MPContext *mpctx, int max_frames)
+{
+    mp_assert(max_frames >= 0);
+    mp_assert(max_frames <= MP_ARRAY_SIZE(mpctx->saved_frames));
+
+    while (mpctx->num_saved_frames > max_frames) {
+        mpctx->num_saved_frames--;
+        mp_image_unrefp(&mpctx->saved_frames[mpctx->num_saved_frames]);
+    }
+}
+
 void reset_video_state(struct MPContext *mpctx)
 {
     if (mpctx->vo_chain) {
@@ -107,7 +118,7 @@ void reset_video_state(struct MPContext *mpctx)
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);
     mpctx->num_next_frames = 0;
-    mp_image_unrefp(&mpctx->saved_frame);
+    trim_saved_frames(mpctx, 0);
 
     mpctx->delay = 0;
     mpctx->time_frame = 0;
@@ -401,15 +412,59 @@ static void handle_new_frame(struct MPContext *mpctx)
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
 
+static void add_saved_frame(struct MPContext *mpctx, struct mp_image *frame,
+                            int max_frames)
+{
+    mp_assert(frame);
+    mp_assert(max_frames >= 0);
+    mp_assert(max_frames <= MP_ARRAY_SIZE(mpctx->saved_frames));
+
+    if (!max_frames) {
+        trim_saved_frames(mpctx, 0);
+        talloc_free(frame);
+        return;
+    }
+
+    // Make room for the new newest frame.
+    trim_saved_frames(mpctx, max_frames - 1);
+
+    for (int n = mpctx->num_saved_frames; n > 0; n--)
+        mpctx->saved_frames[n] = mpctx->saved_frames[n - 1];
+
+    mpctx->saved_frames[0] = frame;
+    mpctx->num_saved_frames++;
+}
+
+static struct mp_image *take_saved_frame(struct MPContext *mpctx)
+{
+    if (!mpctx->num_saved_frames)
+        return NULL;
+
+    struct mp_image *frame = mpctx->saved_frames[0];
+
+    for (int n = 1; n < mpctx->num_saved_frames; n++)
+        mpctx->saved_frames[n - 1] = mpctx->saved_frames[n];
+
+    mpctx->num_saved_frames--;
+    mpctx->saved_frames[mpctx->num_saved_frames] = NULL;
+
+    return frame;
+}
+
 // Remove the first frame in mpctx->next_frames
 static void shift_frames(struct MPContext *mpctx)
 {
     if (mpctx->num_next_frames < 1)
         return;
-    talloc_free(mpctx->next_frames[0]);
+
+    struct mp_image *frame = mpctx->next_frames[0];
+
     for (int n = 0; n < mpctx->num_next_frames - 1; n++)
         mpctx->next_frames[n] = mpctx->next_frames[n + 1];
     mpctx->num_next_frames -= 1;
+    mpctx->next_frames[mpctx->num_next_frames] = NULL;
+
+    add_saved_frame(mpctx, frame, vo_get_num_req_past_frames(mpctx->video_out));
 }
 
 static bool use_video_lookahead(struct MPContext *mpctx)
@@ -528,18 +583,19 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
                                   mpctx->hrseek_lastframe))
             {
                 /* just skip - but save in case it was the last frame */
-                mp_image_setrefp(&mpctx->saved_frame, img);
+                add_saved_frame(mpctx, img,
+                                vo_get_num_req_past_frames(mpctx->video_out) + 1);
+                img = NULL;
             } else {
                 if (hrseek && mpctx->hrseek_backstep) {
-                    if (mpctx->saved_frame) {
-                        add_new_frame(mpctx, mpctx->saved_frame);
-                        mpctx->saved_frame = NULL;
+                    struct mp_image *saved = take_saved_frame(mpctx);
+                    if (saved) {
+                        add_new_frame(mpctx, saved);
                     } else {
                         MP_WARN(mpctx, "Backstep failed.\n");
                     }
                     mpctx->hrseek_backstep = false;
                 }
-                mp_image_unrefp(&mpctx->saved_frame);
                 add_new_frame(mpctx, img);
                 img = NULL;
             }
@@ -547,14 +603,13 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
         }
     }
 
-    if (!hrseek)
-        mp_image_unrefp(&mpctx->saved_frame);
-
     if (r == VD_EOF) {
         // If hr-seek went past EOF, use the last frame.
-        if (mpctx->saved_frame)
-            add_new_frame(mpctx, mpctx->saved_frame);
-        mpctx->saved_frame = NULL;
+        if (hrseek) {
+            struct mp_image *saved = take_saved_frame(mpctx);
+            if (saved)
+                add_new_frame(mpctx, saved);
+        }
         *logical_eof = true;
     }
 
@@ -1225,16 +1280,22 @@ void write_video(struct MPContext *mpctx)
     };
     calculate_frame_duration(mpctx);
 
+    int req_past = vo_get_num_req_past_frames(mpctx->video_out);
     int req = vo_get_num_req_frames(mpctx->video_out);
+    mp_assert(req_past >= 0 && req_past <= VO_MAX_REQ_FRAMES);
     mp_assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
+    trim_saved_frames(mpctx, req_past);
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,
         .still = mpctx->step_frames > 0,
         .can_drop = opts->frame_dropping & 1,
+        .num_past_frames = mpctx->num_saved_frames,
         .num_frames = MPMIN(mpctx->num_next_frames, req),
         .num_vsyncs = 1,
     };
+    for (int n = 0; n < dummy.num_past_frames; n++)
+        dummy.past_frames[n] = mpctx->saved_frames[n];
     for (int n = 0; n < dummy.num_frames; n++)
         dummy.frames[n] = mpctx->next_frames[n];
     struct vo_frame *frame = vo_frame_ref(&dummy);
