@@ -67,6 +67,113 @@ local function dispatch_key_binding(name, state, key_name, key_text, scale, arg)
     end
 end
 
+-- LuaJIT profiling support
+local script_profile = nil
+
+local function get_profile_path()
+    local scripts = mp.get_property_native("options/profile-scripts", {}) or {}
+    for i = #scripts, 1, -1 do
+        local entry = scripts[i]
+        local name, path = entry:match("^([^=]+)=(.*)$")
+        if not name then
+            name = entry
+        end
+        if name == mp.script_name then
+            return path or ""
+        end
+    end
+    return nil
+end
+
+local function format_script_profile(state)
+    local entries = {}
+    for stack, samples in pairs(state.entries) do
+        entries[#entries + 1] = {stack = stack, samples = samples}
+    end
+
+    table.sort(entries, function(a, b)
+        if a.samples ~= b.samples then
+            return a.samples > b.samples
+        end
+        return a.stack < b.stack
+    end)
+
+    local lines = {
+        "script: " .. mp.script_name,
+        "samples: " .. state.total_samples,
+        "",
+    }
+
+    for _, entry in ipairs(entries) do
+        local percent = entry.samples * 100 / (state.total_samples or 1)
+        lines[#lines + 1] = string.format("%8d %6.2f%% %s",
+            entry.samples, percent, entry.stack)
+    end
+
+    return table.concat(lines, "\n")
+end
+
+local function write_script_profile(outpath, data)
+    if outpath == "" then
+        mp.log("info", data)
+        return
+    end
+
+    local out, err = io.open(outpath, "w+b")
+    local ok = out ~= nil
+    if out ~= nil then
+        ok, err = out:write(data, "\n")
+        if ok then
+            ok, err = out:flush()
+        end
+        out:close()
+    end
+    if ok then
+        mp.log("info", "Profile data written to " .. outpath)
+    else
+        mp.log("error", "Could not write profile data to " ..
+            outpath .. ": " .. tostring(err))
+    end
+end
+
+local function stop_script_profile()
+    if not script_profile then
+        return
+    end
+
+    script_profile.profiler.stop()
+
+    local data = format_script_profile(script_profile)
+    write_script_profile(script_profile.output_path, data)
+    script_profile = nil
+end
+
+local function setup_script_profile()
+    local output_path = get_profile_path()
+    if not output_path then
+        return
+    end
+
+    local ok, profiler = pcall(require, "jit.profile")
+    if not ok then
+        error("Lua profiling requires LuaJIT")
+    end
+
+    script_profile = {
+        profiler = profiler,
+        total_samples = 0,
+        entries = {},
+        output_path = output_path,
+    }
+
+    profiler.start("fi4", function(thread, samples)
+        local stack = profiler.dumpstack(thread, "fZ;", 100)
+        script_profile.entries[stack] =
+            (script_profile.entries[stack] or 0) + samples
+        script_profile.total_samples = script_profile.total_samples + samples
+    end)
+end
+
 -- "Old", deprecated API
 
 -- each script has its own section, so that they don't conflict
@@ -421,6 +528,7 @@ mp.keep_running = true
 
 function _G.exit()
     mp.keep_running = false
+    stop_script_profile()
 end
 
 local event_handlers = {}
@@ -501,6 +609,8 @@ _G.print = mp.msg.info
 
 package.loaded["mp"] = mp
 package.loaded["mp.msg"] = mp.msg
+
+setup_script_profile()
 
 _G.mp_event_loop = function()
     mp.dispatch_events(true)
