@@ -2707,9 +2707,13 @@ Property list
     on a linear curve, while with PulseAudio this controls per-application volume
     on a cubic curve.
 
+    .. warning:: This property is deprecated and will be removed in the future.
+
 ``ao-mute`` (RW)
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
     even if ``ao-volume`` works.
+
+     .. warning:: This property is deprecated and will be removed in the future.
 
 ``audio-params``
     Audio format as output by the audio decoder.
