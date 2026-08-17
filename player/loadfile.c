@@ -1142,10 +1142,15 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl,
         struct playlist_entry *new = pl->current;
         struct playlist_entry *current = mpctx->playlist->current;
         *num_new_entries = pl->num_entries;
-        if (current && mpctx->opts->playlist_inherit_options == 1)
+        if (current && (mpctx->opts->playlist_inherit_options == 1 ||
+                        (!new && mpctx->opts->playlist_inherit_options == 3)))
+        {
             playlist_set_params(pl, current->params, current->num_params);
-        else if (current && new && mpctx->opts->playlist_inherit_options == 2)
+        } else if (current && new && (mpctx->opts->playlist_inherit_options == 2 ||
+                                      mpctx->opts->playlist_inherit_options == 3))
+        {
             playlist_entry_add_params(new, current->params, current->num_params);
+        }
         *start_id = playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (current)
