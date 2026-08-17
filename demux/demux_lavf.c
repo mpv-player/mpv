@@ -1038,6 +1038,7 @@ static void build_editions(demuxer_t *demuxer)
     // lavf happened to discover them.
     AVProgram **progs = talloc_memdup(NULL, avfc->programs, avfc->nb_programs * sizeof(progs[0]));
     qsort(progs, avfc->nb_programs, sizeof(progs[0]), cmp_avprogram);
+    bool *nonempty = talloc_zero_array(progs, bool, avfc->nb_programs);
 
     int first_nonempty = -1;
     for (unsigned i = 0; i < avfc->nb_programs; i++) {
@@ -1092,6 +1093,7 @@ static void build_editions(demuxer_t *demuxer)
         if (title)
             mp_tags_set_str(ed.metadata, "title", title);
 
+        nonempty[i] = track_count > 0;
         if (track_count > 0 && first_nonempty < 0)
             first_nonempty = demuxer->num_editions;
 
@@ -1104,39 +1106,24 @@ static void build_editions(demuxer_t *demuxer)
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
         selected = edition_id;
 
-    // Select initial edition by best variant bitrate. Prefer the program's
-    // video stream as the representative, falling back to audio for
-    // audio-only variants (e.g. HLS audio-only renditions).
+    // Select initial edition by best variant bitrate from the program's
+    // metadata (HLS variant BANDWIDTH).
     if (selected < 0 && hls_bitrate >= 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
         for (int n = 0; n < demuxer->num_editions; n++) {
             AVProgram *prog = progs[n];
-            struct sh_stream *rep = NULL;
-            for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
-                unsigned idx = prog->stream_index[j];
-                if (idx >= priv->num_streams || !priv->streams[idx]->sh)
-                    continue;
-                struct sh_stream *sh = priv->streams[idx]->sh;
-                if (sh->hls_bitrate <= 0)
-                    continue;
-                if (sh->type == STREAM_VIDEO) {
-                    rep = sh;
-                    break;
-                }
-                if (sh->type == STREAM_AUDIO && !rep)
-                    rep = sh;
-            }
-            if (!rep)
+            int bitrate = dict_get_decimal(prog->metadata, "variant_bitrate", 0);
+            if (bitrate <= 0 || !nonempty[n])
                 continue;
-            bool ok = rep->hls_bitrate <= hls_bitrate;
+            bool ok = bitrate <= hls_bitrate;
             if (best < 0 || (ok && !best_ok) ||
-                (ok && best_ok && rep->hls_bitrate > best_bitrate) ||
-                (!ok && !best_ok && rep->hls_bitrate < best_bitrate))
+                (ok && best_ok && bitrate > best_bitrate) ||
+                (!ok && !best_ok && bitrate < best_bitrate))
             {
                 best = n;
-                best_bitrate = rep->hls_bitrate;
+                best_bitrate = bitrate;
                 best_ok = ok;
             }
         }
