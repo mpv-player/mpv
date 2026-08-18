@@ -1039,7 +1039,8 @@ static int curl_control(struct stream *s, int cmd, void *arg)
 static void priv_destructor(void *ptr)
 {
     struct priv *p = ptr;
-    mp_cancel_set_cb(p->s->cancel, NULL, NULL);
+    if (p->s->cancel)
+        mp_cancel_set_cb(p->s->cancel, NULL, NULL);
     if (p->curl) {
         cmd_sync(p, CMD_REMOVE, 0, false);
         curl_easy_cleanup(p->curl);
@@ -1055,7 +1056,8 @@ static void curl_close(struct stream *s)
     struct priv *p = s->priv;
     if (!p)
         return;
-    mp_cancel_set_cb(s->cancel, NULL, NULL);
+    if (s->cancel)
+        mp_cancel_set_cb(s->cancel, NULL, NULL);
     if (p->curl) {
         cmd_sync(p, CMD_REMOVE, 0, false);
         curl_easy_cleanup(p->curl);
@@ -1117,7 +1119,8 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
 
     if (!setup_curl(p))
         return STREAM_ERROR;
-    mp_cancel_set_cb(s->cancel, on_cancel, p);
+    if (s->cancel)
+        mp_cancel_set_cb(s->cancel, on_cancel, p);
 
     cmd_sync(p, CMD_ADD, 0, false);
 
