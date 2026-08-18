@@ -142,7 +142,9 @@ static const struct curl_scheme *curl_scheme_lookup(bstr url)
     return NULL;
 }
 
+// Global state
 struct curl_ctx {
+    struct mp_log *log;
     mp_thread thread;
     struct mp_dispatch_queue *dispatch;
     CURLM *multi;
@@ -299,11 +301,18 @@ static MP_THREAD_VOID curl_thread(void *arg)
     mp_thread_set_name("curl");
     struct curl_ctx *ctx = arg;
 
-    curl_global_init(CURL_GLOBAL_ALL);
+    CURLcode res = curl_global_init(CURL_GLOBAL_DEFAULT);
+    if (res != CURLE_OK) {
+        MP_ERR(ctx, "libcurl failed to initialize: %d\n", (int)res);
+        MP_THREAD_RETURN();
+    }
+
     ctx->multi = curl_multi_init();
+    mp_require(ctx->multi);
     curl_multi_setopt(ctx->multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
     mp_dispatch_set_wakeup_fn(ctx->dispatch, curl_wakeup, ctx);
+    MP_TRACE(ctx, "thread is ready\n");
 
     while (!ctx->exit) {
         mp_dispatch_queue_process(ctx->dispatch, 0);
@@ -314,8 +323,10 @@ static MP_THREAD_VOID curl_thread(void *arg)
 
         int running = 0;
         CURLMcode mres = curl_multi_perform(ctx->multi, &running);
-        if (mres != CURLM_OK && mres != CURLM_CALL_MULTI_PERFORM)
+        if (mres != CURLM_OK && mres != CURLM_CALL_MULTI_PERFORM) {
+            MP_ERR(ctx, "perform error: %s\n", curl_multi_strerror(mres));
             break;
+        }
 
         CURLMsg *msg;
         int left = 0;
@@ -325,16 +336,20 @@ static MP_THREAD_VOID curl_thread(void *arg)
             struct priv *p = NULL;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_PRIVATE, &p);
             mp_assert(p);
-            curl_multi_remove_handle(ctx->multi, msg->easy_handle);
+            mres = curl_multi_remove_handle(ctx->multi, msg->easy_handle);
+            mp_assert(mres == CURLM_OK);
             p->active = false;
             on_done(p, msg->data.result);
         }
 
-        curl_multi_poll(ctx->multi, NULL, 0, 1000, NULL);
+        mres = curl_multi_poll(ctx->multi, NULL, 0, 1000, NULL);
+        if (mres != CURLM_OK) {
+            MP_WARN(ctx, "poll error: %s\n", curl_multi_strerror(mres));
+        }
     }
 
     curl_multi_cleanup(ctx->multi);
-    curl_global_cleanup();
+    ctx->multi = NULL;
     MP_THREAD_RETURN();
 }
 
@@ -342,14 +357,17 @@ static void mp_curl_destroy(void *ptr)
 {
     struct curl_ctx *ctx = ptr;
     struct cmd c = { .kind = CMD_EXIT, .ctx = ctx };
-    mp_dispatch_run(ctx->dispatch, run_cmd, &c);
+    // use async cmd in case the thread is already dead
+    mp_dispatch_enqueue_autofree(ctx->dispatch, run_cmd, talloc_dup(NULL, &c));
     mp_thread_join(ctx->thread);
+    curl_global_cleanup();
 }
 
 void mp_curl_global_init(struct mpv_global *global)
 {
     struct curl_ctx *ctx = talloc_zero(global, struct curl_ctx);
     talloc_set_destructor(ctx, mp_curl_destroy);
+    ctx->log = mp_log_new(ctx, global->log, "curl");
     ctx->dispatch = mp_dispatch_create(ctx);
     global->curl = ctx;
     mp_require(!mp_thread_create(&ctx->thread, curl_thread, ctx));
@@ -948,6 +966,10 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     if (!s->global || !s->global->curl) {
         MP_ERR(s, "curl backend not initialized\n");
         return STREAM_ERROR;
+    }
+    if (!s->global->curl->multi) {
+        // curl thread is gone for some reason, fall back cleanly
+        return STREAM_NO_MATCH;
     }
 
     struct curl_opts *opts = mp_get_config_group(s, s->global, &curl_conf);
