@@ -168,9 +168,6 @@ static int init(struct ao *ao)
     if (!reinit_device(ao))
         goto coreaudio_error;
 
-    if (!register_hotplug_cb(ao))
-        goto coreaudio_error;
-
     if (p->change_physical_format)
         init_physical_format(ao);
 
@@ -186,6 +183,9 @@ static int init(struct ao *ao)
     talloc_free(layout);
 
     if (!r)
+        goto coreaudio_error;
+
+    if (!register_hotplug_cb(ao))
         goto coreaudio_error;
 
     reinit_latency(ao);
