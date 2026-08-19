@@ -140,15 +140,22 @@ finish:
     if (sample_buffer) CFRelease(sample_buffer);
 }
 
+static void request_media_data(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    [p->renderer requestMediaDataWhenReadyOnQueue:p->queue usingBlock:^{
+        feed(ao);
+    }];
+}
+
 static void start(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
     p->end_time_av = -1;
     [p->synchronizer setRate:1];
-    [p->renderer requestMediaDataWhenReadyOnQueue:p->queue usingBlock:^{
-        feed(ao);
-    }];
+    request_media_data(ao);
 }
 
 static void stop(struct ao *ao)
@@ -167,9 +174,11 @@ static bool set_pause(struct ao *ao, bool paused)
     struct priv *p = ao->priv;
 
     if (paused) {
+        [p->renderer stopRequestingMediaData];
         [p->synchronizer setRate:0];
     } else {
         [p->synchronizer setRate:1];
+        request_media_data(ao);
     }
 
     return true;
