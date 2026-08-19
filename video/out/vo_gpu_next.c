@@ -373,13 +373,14 @@ static void dup_stereo_parts(struct priv *p, struct osd_entry *entry,
 }
 
 static struct pl_color_space bgra_overlay_color(struct priv *p,
+                                                const struct sub_bitmaps *item,
                                                 const struct mp_image *src,
                                                 float ref_luma)
 {
     struct pl_color_space color = pl_color_space_srgb;
 
     // Infer bitmap colorspace from source
-    if (src) {
+    if (src && item->video_color_space) {
         color = src->params.color;
         if (pl_color_transfer_is_hdr(color.transfer)) {
             bool use_static = p->next_opts->image_subs_hdr_peak == -2;
@@ -448,7 +449,7 @@ static void add_item_overlay(struct priv *p, struct osd_state *state,
     case SUBBITMAP_BGRA:
         ol->mode = PL_OVERLAY_NORMAL;
         ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
-        ol->color = bgra_overlay_color(p, src, ref_luma);
+        ol->color = bgra_overlay_color(p, item, src, ref_luma);
         break;
     case SUBBITMAP_LIBASS:
         ol->mode = PL_OVERLAY_MONOCHROME;
