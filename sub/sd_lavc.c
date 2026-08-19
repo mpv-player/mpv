@@ -465,6 +465,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
     res->packed_w = current->bound_w;
     res->packed_h = current->bound_h;
     res->format = SUBBITMAP_BGRA;
+    res->video_color_space = true;
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
