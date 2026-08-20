@@ -71,7 +71,8 @@ struct osd_entry {
 
 struct osd_state {
     struct osd_entry entries[MAX_OSD_PARTS];
-    struct pl_overlay overlays[MAX_OSD_PARTS];
+    struct pl_overlay *overlays;
+    int num_overlays;
 };
 
 struct scaler_params {
@@ -350,10 +351,10 @@ static bool upload_overlay_tex(struct vo *vo, struct osd_entry *entry,
 }
 
 // Duplicate overlay parts for each eye in stereo 3D modes
-static void dup_stereo_parts(struct priv *p, struct osd_entry *entry,
+static void dup_stereo_parts(struct priv *p, struct osd_entry *entry, int start,
                              struct mp_osd_res res, const int div[2])
 {
-    int num_eye_parts = entry->num_parts;
+    int num_eye_parts = entry->num_parts - start;
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
             if (x == 0 && y == 0)
@@ -361,7 +362,7 @@ static void dup_stereo_parts(struct priv *p, struct osd_entry *entry,
             float off_x = res.w * x;
             float off_y = res.h * y;
             for (int i = 0; i < num_eye_parts; i++) {
-                struct pl_overlay_part duped = entry->parts[i];
+                struct pl_overlay_part duped = entry->parts[start + i];
                 duped.dst.x0 += off_x;
                 duped.dst.x1 += off_x;
                 duped.dst.y0 += off_y;
@@ -374,35 +375,55 @@ static void dup_stereo_parts(struct priv *p, struct osd_entry *entry,
 
 static struct pl_color_space bgra_overlay_color(struct priv *p,
                                                 const struct sub_bitmaps *item,
+                                                const struct sub_bitmap *b,
                                                 const struct mp_image *src,
                                                 float ref_luma)
 {
     struct pl_color_space color = pl_color_space_srgb;
 
-    // Infer bitmap colorspace from source
-    if (src && item->video_color_space) {
+    if (src && (item->video_color_space || b->bgra.video_color_space)) {
+        // Muxed image subtitles and overlays tagged with video_colorspace
+        // are in the video's colorspace
         color = src->params.color;
         if (pl_color_transfer_is_hdr(color.transfer)) {
-            bool use_static = p->next_opts->image_subs_hdr_peak == -2;
-            if (use_static || p->next_opts->image_subs_hdr_peak == -3) {
-                float max;
-                pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
-                    .color      = &color,
-                    .metadata   = use_static ? PL_HDR_METADATA_HDR10 : PL_HDR_METADATA_ANY,
-                    .scaling    = PL_HDR_NITS,
-                    .out_max    = &max,
-                ));
-                color.hdr = (struct pl_hdr_metadata) {
-                    .max_luma = max,
-                };
-            } else if (p->next_opts->image_subs_hdr_peak != -1) {
-                color.hdr = (struct pl_hdr_metadata) {
-                    .max_luma = p->next_opts->image_subs_hdr_peak,
-                };
+            // Don't apply `image_subs_hdr_peak` for overlays.
+            if (!b->bgra.video_color_space) {
+                bool use_static = p->next_opts->image_subs_hdr_peak == -2;
+                if (use_static || p->next_opts->image_subs_hdr_peak == -3) {
+                    float max;
+                    pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
+                        .color      = &color,
+                        .metadata   = use_static ? PL_HDR_METADATA_HDR10 : PL_HDR_METADATA_ANY,
+                        .scaling    = PL_HDR_NITS,
+                        .out_max    = &max,
+                    ));
+                    color.hdr = (struct pl_hdr_metadata) {
+                        .max_luma = max,
+                    };
+                } else if (p->next_opts->image_subs_hdr_peak != -1) {
+                    color.hdr = (struct pl_hdr_metadata) {
+                        .max_luma = p->next_opts->image_subs_hdr_peak,
+                    };
+                }
             }
         } else if (ref_luma) {
             color.hdr.max_luma = ref_luma;
         }
+    } else {
+        // sRGB, unless tagged explicitly
+        if (b->bgra.primaries)
+            color.primaries = b->bgra.primaries;
+        if (b->bgra.transfer)
+            color.transfer = b->bgra.transfer;
+        if (!pl_color_transfer_is_hdr(color.transfer) && ref_luma)
+            color.hdr.max_luma = ref_luma;
+    }
+
+    // Explicit luminance peak overrides every other metadata
+    if (b->bgra.max_luma) {
+        color.hdr = (struct pl_hdr_metadata) {
+            .max_luma = b->bgra.max_luma,
+        };
     }
 
     return color;
@@ -430,18 +451,19 @@ static struct pl_color_space libass_overlay_color(struct priv *p,
     return color;
 }
 
-static void add_item_overlay(struct priv *p, struct osd_state *state,
-                             struct pl_frame *frame,
-                             const struct osd_entry *entry,
-                             const struct sub_bitmaps *item,
-                             enum pl_overlay_coords coords,
-                             const struct mp_image *src, float ref_luma)
+static void add_run_overlay(struct priv *p, struct osd_state *state,
+                            const struct osd_entry *entry,
+                            const struct sub_bitmaps *item,
+                            const struct pl_color_space *color, int start,
+                            enum pl_overlay_coords coords)
 {
-    struct pl_overlay *ol = &state->overlays[frame->num_overlays++];
+    MP_TARRAY_GROW(p, state->overlays, state->num_overlays);
+    struct pl_overlay *ol = &state->overlays[state->num_overlays++];
     *ol = (struct pl_overlay) {
         .tex = entry->tex,
-        .parts = entry->parts,
-        .num_parts = entry->num_parts,
+        .parts = entry->parts + start,
+        .num_parts = entry->num_parts - start,
+        .color = *color,
         .coords = coords,
     };
 
@@ -449,12 +471,10 @@ static void add_item_overlay(struct priv *p, struct osd_state *state,
     case SUBBITMAP_BGRA:
         ol->mode = PL_OVERLAY_NORMAL;
         ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
-        ol->color = bgra_overlay_color(p, item, src, ref_luma);
         break;
     case SUBBITMAP_LIBASS:
         ol->mode = PL_OVERLAY_MONOCHROME;
         ol->repr.alpha = PL_ALPHA_INDEPENDENT;
-        ol->color = libass_overlay_color(p, item, src, ref_luma);
         break;
     }
 }
@@ -472,8 +492,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
     res.h /= div[1];
     struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, mp_draw_sub_formats);
 
-    frame->overlays = state->overlays;
-    frame->num_overlays = 0;
+    state->num_overlays = 0;
 
     for (int n = 0; n < subs->num_items; n++) {
         const struct sub_bitmaps *item = subs->items[n];
@@ -483,11 +502,27 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         if (!upload_overlay_tex(vo, entry, item))
             break;
 
+        MP_TARRAY_GROW(p, entry->parts, item->num_parts * div[0] * div[1]);
         entry->num_parts = 0;
+        struct pl_color_space color = {0};
+        int start = -1;
         for (int i = 0; i < item->num_parts; i++) {
             const struct sub_bitmap *b = &item->parts[i];
             if (b->dw == 0 || b->dh == 0)
                 continue;
+            struct pl_color_space part_color = item->format == SUBBITMAP_BGRA
+                                    ? bgra_overlay_color(p, item, b, src, ref_luma)
+                                    : libass_overlay_color(p, item, src, ref_luma);
+            // Emit pl_overlay per each distinct colorspace run
+            if (start >= 0 && !pl_color_space_equal(&color, &part_color)) {
+                dup_stereo_parts(p, entry, start, res, div);
+                add_run_overlay(p, state, entry, item, &color, start, coords);
+                start = -1;
+            }
+            if (start < 0) {
+                start = entry->num_parts;
+                color = part_color;
+            }
             struct pl_overlay_part part = {
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
                 .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
@@ -501,9 +536,14 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             }
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
         }
-        dup_stereo_parts(p, entry, res, div);
-        add_item_overlay(p, state, frame, entry, item, coords, src, ref_luma);
+        if (start >= 0) {
+            dup_stereo_parts(p, entry, start, res, div);
+            add_run_overlay(p, state, entry, item, &color, start, coords);
+        }
     }
+
+    frame->overlays = state->overlays;
+    frame->num_overlays = state->num_overlays;
 
     talloc_free(subs);
 }
