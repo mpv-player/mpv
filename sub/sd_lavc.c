@@ -229,7 +229,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         if (r->w <= 0 || r->h <= 0)
             continue;
 
-        b->bitmap = r; // save for later (dumb hack to avoid more complexity)
+        // save the rect for later (dumb hack to avoid more complexity)
+        *b = (struct sub_bitmap){ .bitmap = r };
 
         priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
         sub->count++;
