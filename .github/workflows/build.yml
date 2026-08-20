@@ -656,6 +656,7 @@ jobs:
               vapoursynth:p \
               vulkan-devel:p && break
             echo "Package installation failed (attempt $attempt/3), retrying..."
+            [ "$attempt" -lt 3 ] || exit 1
             sleep 30
           done
 
