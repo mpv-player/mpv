@@ -623,34 +623,41 @@ jobs:
           msystem: ${{ matrix.sys }}
           update: true
           install: git
-          pacboy: >-
-            amf-headers:p
-            angleproject:p
-            ca-certificates:p
-            cc:p
-            cppwinrt:p
-            curl:p
-            ffmpeg:p
-            lcms2:p
-            libarchive:p
-            libass:p
-            libcdio-paranoia:p
-            libdvdnav:p
-            libjpeg-turbo:p
-            libplacebo:p
-            lua51:p
-            meson:p
-            ninja:p
-            pkgconf:p
-            python:p
-            rst2pdf:p
-            rubberband:p
-            rust:p
-            shaderc:p
-            spirv-cross:p
-            uchardet:p
-            vapoursynth:p
-            vulkan-devel:p
+      - name: Install MSYS2 packages
+        shell: msys2 {0}
+        run: |
+          for attempt in 1 2 3; do
+            pacboy --noconfirm -S --needed \
+              amf-headers:p \
+              angleproject:p \
+              ca-certificates:p \
+              cc:p \
+              cppwinrt:p \
+              curl:p \
+              ffmpeg:p \
+              lcms2:p \
+              libarchive:p \
+              libass:p \
+              libcdio-paranoia:p \
+              libdvdnav:p \
+              libjpeg-turbo:p \
+              libplacebo:p \
+              lua51:p \
+              meson:p \
+              ninja:p \
+              pkgconf:p \
+              python:p \
+              rst2pdf:p \
+              rubberband:p \
+              rust:p \
+              shaderc:p \
+              spirv-cross:p \
+              uchardet:p \
+              vapoursynth:p \
+              vulkan-devel:p && break
+            echo "Package installation failed (attempt $attempt/3), retrying..."
+            sleep 30
+          done
 
       - name: Build with meson
         id: build
