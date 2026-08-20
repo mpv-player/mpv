@@ -216,6 +216,7 @@ static bool pack_rgba(struct mp_sub_packer *p, struct sub_bitmaps *res)
         .format = SUBBITMAP_BGRA,
         .parts = p->rgba_imgs,
         .num_parts = num_bb,
+        .video_color_space = res->video_color_space,
     };
 
     for (int n = 0; n < imgs.num_parts; n++) {
