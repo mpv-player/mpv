@@ -904,7 +904,7 @@ OSD Commands
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD. ``no-osd`` has no effect on this command.
 
-``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> <dw> <dh>``
+``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> [<dw> [<dh> [<video_colorspace> [<max_luma> [<primaries> [<transfer>]]]]]]``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -963,6 +963,24 @@ OSD Commands
     The overlay visible portion of the overlay (``w`` and ``h``) is scaled to
     in display to ``dw`` and ``dh``.  If parameters are not present, the
     values for ``w`` and ``h`` are used.
+
+    ``video_colorspace`` (default: no) interprets the overlay in the video's
+    colorspace, including HDR metadata, so it is tone mapped exactly like
+    the video.
+
+    ``max_luma`` specifies the (optional) luminance peak of the overlay in
+    cd/m². If unset, it is inferred from the overlay's colorspace, or taken
+    from the video for ``video_colorspace`` overlays.
+
+    ``primaries`` and ``transfer`` specify the (optional) colorspace the
+    overlay is encoded in, and accept the same values as ``--target-prim``
+    and ``--target-trc``. The default ``auto`` means sRGB (BT.709 primaries
+    and sRGB transfer). They are ignored if ``video_colorspace`` is set.
+
+    Currently only ``--vo=gpu-next`` honors these parameters. ``--vo=gpu``
+    always assumes the overlay is sRGB and adapts it to the display. Other
+    VOs ignore these parameters, and either blend the overlay without any
+    colorspace conversion or pass it to the system compositor.
 
     .. note::
 
