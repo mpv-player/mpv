@@ -371,17 +371,17 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             const struct sub_bitmap *b = &item->parts[i];
             if (b->dw == 0 || b->dh == 0)
                 continue;
-            uint32_t c = b->libass.color;
             struct pl_overlay_part part = {
                 .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
                 .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
-                .color = {
-                    (c >> 24) / 255.0f,
-                    ((c >> 16) & 0xFF) / 255.0f,
-                    ((c >> 8) & 0xFF) / 255.0f,
-                    (255 - (c & 0xFF)) / 255.0f,
-                }
             };
+            if (item->format == SUBBITMAP_LIBASS) {
+                uint32_t c = b->libass.color;
+                part.color[0] = (c >> 24) / 255.0f;
+                part.color[1] = ((c >> 16) & 0xFF) / 255.0f;
+                part.color[2] = ((c >> 8) & 0xFF) / 255.0f;
+                part.color[3] = (255 - (c & 0xFF)) / 255.0f;
+            }
             MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
         }
 
