@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <libplacebo/colorspace.h>
+
 #include "options/m_option.h"
 
 // NOTE: VOs must support at least SUBBITMAP_BGRA.
@@ -56,6 +58,15 @@ struct sub_bitmap {
         struct {
             const struct sbr_output_image *image;
         } subrandr;
+        struct {
+            enum pl_color_primaries primaries;
+            enum pl_color_transfer transfer;
+            // Only luminance for now, not using full pl_color_space to save on size.
+            float max_luma;
+            // The bitmap is in the video's colorspace, including HDR
+            // metadata. primaries and transfer are ignored.
+            bool video_color_space;
+        } bgra;
     };
 };
 
