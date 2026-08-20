@@ -145,6 +145,7 @@ struct overlay {
     struct mp_image *source;
     int x, y;
     int dw, dh;
+    int colorspace;   // enum sub_bitmap_colorspace, declared by the client
 };
 
 struct hook_handler {
@@ -5288,6 +5289,9 @@ static void recreate_overlays(struct MPContext *mpctx)
     struct sub_bitmaps *new = &cmd->overlay_osd[overlay_next];
     new->format = SUBBITMAP_BGRA;
     new->change_id = 1;
+    // Each part carries its own colorspace, so ids with different ones can
+    // be mixed.
+    new->video_color_space = false;
 
     bool valid = false;
 
@@ -5304,6 +5308,7 @@ static void recreate_overlays(struct MPContext *mpctx)
                 .x = o->x,
                 .y = o->y,
             };
+            b.colorspace = o->colorspace;
             MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, b);
         }
     }
@@ -5420,6 +5425,7 @@ static void cmd_overlay_add(void *pcmd)
     char *fmt = cmd->args[5].v.s;
     int w = cmd->args[6].v.i, h = cmd->args[7].v.i, stride = cmd->args[8].v.i;
     int dw = cmd->args[9].v.i, dh = cmd->args[10].v.i;
+    int colorspace = cmd->args[11].v.i;
 
     if (dw <= 0)
         dw = w;
@@ -5443,6 +5449,7 @@ static void cmd_overlay_add(void *pcmd)
         .y = y,
         .dw = dw,
         .dh = dh,
+        .colorspace = colorspace,
     };
     if (!overlay.source)
         goto error;
@@ -7890,7 +7897,11 @@ const struct mp_cmd_def mp_cmds[] = {
                                         {"h", OPT_INT(v.i)},
                                         {"stride", OPT_INT(v.i)},
                                         {"dw", OPT_INT(v.i), OPTDEF_INT(0)},
-                                        {"dh", OPT_INT(v.i), OPTDEF_INT(0)}, }},
+                                        {"dh", OPT_INT(v.i), OPTDEF_INT(0)},
+                                        {"colorspace", OPT_CHOICE(v.i,
+                                            {"srgb", SUB_BITMAP_CSP_SRGB},
+                                            {"video", SUB_BITMAP_CSP_VIDEO}),
+                                            OPTDEF_INT(SUB_BITMAP_CSP_SRGB)} }},
     { "overlay-remove", cmd_overlay_remove, { {"id", OPT_INT(v.i)} } },
 
     { "osd-overlay", cmd_osd_overlay,

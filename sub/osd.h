@@ -35,6 +35,14 @@ enum sub_bitmap_format {
     SUBBITMAP_COUNT
 };
 
+// Colorspace a client declared for a bitmap it supplied.
+// It indexes the per-colorspace groups the VO renders in one pass.
+enum sub_bitmap_colorspace {
+    SUB_BITMAP_CSP_SRGB = 0,  // client drawn content, the default
+    SUB_BITMAP_CSP_VIDEO,     // taken from the video, treat it like the video
+    SUB_BITMAP_CSP_COUNT
+};
+
 struct sub_bitmap {
     void *bitmap;
     int stride;
@@ -48,6 +56,11 @@ struct sub_bitmap {
     // is the position within the source. (Strictly speaking this is redundant
     // with the bitmap pointer.)
     int src_x, src_y;
+
+    // enum sub_bitmap_colorspace; only meaningful for SUBBITMAP_BGRA. Placed
+    // here because it fits the existing padding and leaves the struct's size
+    // unchanged.
+    uint8_t colorspace;
 
     union {
         struct {
