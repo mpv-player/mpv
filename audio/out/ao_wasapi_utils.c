@@ -908,8 +908,8 @@ exit_label:
     destroy_enumerator(enumerator);
 }
 
-static bool load_device(struct mp_log *l,
-                           IMMDevice **ppDevice, LPWSTR deviceID)
+bool wasapi_load_device(struct mp_log *l, IMMDevice **ppDevice,
+                        LPWSTR deviceID)
 {
     IMMDeviceEnumerator *pEnumerator = NULL;
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_INPROC_SERVER,
@@ -1021,7 +1021,7 @@ bool wasapi_thread_init(struct ao *ao)
 
 retry:
     if (state->deviceID) {
-        if (!load_device(ao->log, &state->pDevice, state->deviceID))
+        if (!wasapi_load_device(ao->log, &state->pDevice, state->deviceID))
             return false;
 
         MP_DBG(ao, "Activating pAudioClient interface\n");
