@@ -167,9 +167,6 @@ static int init(struct ao *ao)
     if (!reinit_device(ao))
         goto coreaudio_error;
 
-    if (!register_hotplug_cb(ao))
-        goto coreaudio_error;
-
     if (p->change_physical_format)
         init_physical_format(ao);
 
@@ -192,6 +189,11 @@ static int init(struct ao *ao)
 
     p->queue = dispatch_queue_create("io.mpv.coreaudio_stop_during_idle",
                                      DISPATCH_QUEUE_SERIAL);
+
+    // Register last: ao_uninit() does not call uninit() for a failed init, but
+    // frees the ao, so a listener registered earlier would outlive it.
+    if (!register_hotplug_cb(ao))
+        goto coreaudio_error;
 
     return CONTROL_OK;
 
