@@ -20,6 +20,12 @@
 
 #include <wchar.h>
 
+// Struct describing current host OS's global color management and HDR status
+struct mp_w32_acm_status {
+    bool acm_enabled;
+    bool hdr_enabled;
+};
+
 // Given a GDI monitor device name, get the precise refresh rate using the
 // Windows 7 DisplayConfig API. Returns 0.0 on failure.
 double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device);
@@ -27,5 +33,10 @@ double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device);
 // Given a GDI monitor device name, get the SDR white level used in HDR mode,
 // in nits, using the Windows 10 DisplayConfig API. Returns 0.0 on failure.
 double mp_w32_displayconfig_get_sdr_white_level(const wchar_t *device);
+
+// Given a GDI monitor device name, get the current ACM and HDR status.
+// Returns false if related API is not supported.
+bool mp_w32_displayconfig_get_acm_status(const wchar_t *device,
+                                         struct mp_w32_acm_status *status);
 
 #endif
