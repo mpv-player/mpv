@@ -1029,6 +1029,14 @@ void mp_msg_set_early_logging(struct mpv_global *global, bool enable)
 {
     struct mp_log_root *root = global->log->root;
 
+    if (enable) {
+        // Nothing is initialized when we get here, so default to logging to the
+        // terminal. There normally aren't any messages unless verbose is enabled.
+        char *verbose_env = getenv("MPV_VERBOSE");
+        root->verbose = verbose_env ? strtol(verbose_env, NULL, 10) : 0;
+        root->use_terminal = true;
+    }
+
     mp_msg_set_early_logging_raw(global, enable, &root->early_buffer,
                                  EARLY_TERM_BUF, MP_LOG_BUFFER_MSGL_TERM);
 
