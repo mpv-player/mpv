@@ -6987,15 +6987,10 @@ them.
 
     Windows with ANGLE only.
 
-``--angle-renderer=<d3d9|d3d11|auto>``
-    Forces a specific renderer when using the ANGLE backend (default: auto). In
-    auto mode this will pick D3D11 for systems that support Direct3D 11 feature
-    level 9_3 or higher, and D3D9 otherwise. This option is mainly for
-    debugging purposes. Normally there is no reason to force a specific
-    renderer, though ``--angle-renderer=d3d9`` may give slightly better
-    performance on old hardware. Note that the D3D9 renderer only supports
-    OpenGL ES 2.0, so most extended OpenGL features will not work if this
-    renderer is selected (similar to ``--gpu-dumb-mode``).
+``--angle-renderer=<d3d11|auto>``
+    Forces a specific renderer when using the ANGLE backend (default: auto).
+    This option is mainly for debugging purposes. Normally there is no reason
+    to force a specific renderer.
 
     Windows with ANGLE only.
 
