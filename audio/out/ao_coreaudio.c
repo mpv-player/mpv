@@ -141,6 +141,7 @@ static void init_physical_format(struct ao *ao);
 static void reinit_latency(struct ao *ao);
 static bool register_hotplug_cb(struct ao *ao);
 static void unregister_hotplug_cb(struct ao *ao);
+static void uninit(struct ao *ao);
 
 static bool reinit_device(struct ao *ao) {
     struct priv *p = ao->priv;
@@ -167,9 +168,6 @@ static int init(struct ao *ao)
     if (!reinit_device(ao))
         goto coreaudio_error;
 
-    if (!register_hotplug_cb(ao))
-        goto coreaudio_error;
-
     if (p->change_physical_format)
         init_physical_format(ao);
 
@@ -187,6 +185,9 @@ static int init(struct ao *ao)
     if (!r)
         goto coreaudio_error;
 
+    if (!register_hotplug_cb(ao))
+        goto coreaudio_error;
+
     reinit_latency(ao);
     ao->device_buffer = av_rescale(p->hw_latency_ns, ao->samplerate, 1000000000) * 2;
 
@@ -196,6 +197,7 @@ static int init(struct ao *ao)
     return CONTROL_OK;
 
 coreaudio_error:
+    uninit(ao);
     return CONTROL_ERROR;
 }
 
@@ -436,14 +438,18 @@ static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    dispatch_sync(p->queue, ^{
-        cancel_and_release_idle_work(p);
-    });
-    dispatch_release(p->queue);
+    if (p->queue) {
+        dispatch_sync(p->queue, ^{
+            cancel_and_release_idle_work(p);
+        });
+        dispatch_release(p->queue);
+    }
 
-    AudioOutputUnitStop(p->audio_unit);
-    AudioUnitUninitialize(p->audio_unit);
-    AudioComponentInstanceDispose(p->audio_unit);
+    if (p->audio_unit) {
+        AudioOutputUnitStop(p->audio_unit);
+        AudioUnitUninitialize(p->audio_unit);
+        AudioComponentInstanceDispose(p->audio_unit);
+    }
 
     if (p->original_asbd.mFormatID) {
         OSStatus err = CA_SET(p->original_asbd_stream,
