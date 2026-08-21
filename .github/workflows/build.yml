@@ -485,104 +485,148 @@ jobs:
   openbsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    defaults:
+      run:
+        shell: cpa.sh {0} --sync-files none
     steps:
-    - uses: actions/checkout@v7
-    - name: Test in OpenBSD VM
-      uses: cross-platform-actions/action@v1.4.0
-      with:
-        operating_system: openbsd
-        version: '7.8'
+      - uses: actions/checkout@v7
+
+      - name: Start OpenBSD VM
+        uses: cross-platform-actions/action@v1.4.0
+        with:
+          operating_system: openbsd
+          version: '7.8'
+          sync_files: runner-to-vm
+
+      - name: Install dependencies
         run: |
-            sudo pkg_add -U \
-                cmake \
-                curl \
-                ffmpeg \
-                git \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                libiconv \
-                libplacebo \
-                libv4l \
-                libxkbcommon \
-                luajit \
-                meson \
-                openal \
-                pkgconf \
-                pulseaudio \
-                python3 \
-                rubberband \
-                rust \
-                sdl2 \
-                shaderc \
-                spirv-cross \
-                spirv-headers \
-                uchardet \
-                vulkan-loader \
-                vulkan-headers \
-                zimg
-            ./ci/build-openbsd.sh
-            if ! meson test -C build; then
-                cat ./build/meson-logs/testlog.txt
-                exit 1
-            fi
+          sudo pkg_add -U \
+              cmake \
+              curl \
+              ffmpeg \
+              git \
+              libarchive \
+              libbluray \
+              libcaca \
+              libcdio-paranoia \
+              libdvdnav \
+              libiconv \
+              libplacebo \
+              libv4l \
+              libxkbcommon \
+              luajit \
+              meson \
+              openal \
+              pkgconf \
+              pulseaudio \
+              python3 \
+              rubberband \
+              rust \
+              sdl2 \
+              shaderc \
+              spirv-cross \
+              spirv-headers \
+              uchardet \
+              vulkan-loader \
+              vulkan-headers \
+              zimg
+
+      - name: Build with meson
+        id: build
+        run: |
+          ./ci/build-openbsd.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    defaults:
+      run:
+        shell: cpa.sh {0} --sync-files none
     steps:
-    - uses: actions/checkout@v7
-    - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v1.4.0
-      with:
-        operating_system: freebsd
-        version: '15.1'
+      - uses: actions/checkout@v7
+
+      - name: Start FreeBSD VM
+        uses: cross-platform-actions/action@v1.4.0
+        with:
+          operating_system: freebsd
+          version: '15.1'
+          sync_files: runner-to-vm
+
+      - name: Install dependencies
         run: |
-            sudo pkg update
-            sudo pkg install -y \
-                alsa-lib \
-                cmake \
-                curl \
-                evdev-proto \
-                ffmpeg \
-                git \
-                iconv \
-                jackit \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                libdisplay-info \
-                libplacebo \
-                libXinerama \
-                libxkbcommon \
-                libXpresent \
-                libXv \
-                luajit \
-                meson \
-                mujs \
-                openal-soft \
-                pipewire \
-                pkgconf \
-                pulseaudio \
-                python3 \
-                rubberband \
-                rust \
-                sekrit-twc-zimg \
-                sdl2 \
-                sndio \
-                uchardet \
-                v4l_compat \
-                vulkan-headers \
-                wayland-protocols
-            ./ci/build-freebsd.sh
-            if ! meson test -C build; then
-                cat ./build/meson-logs/testlog.txt
-                exit 1
-            fi
+          sudo pkg update
+          sudo pkg install -y \
+              alsa-lib \
+              cmake \
+              curl \
+              evdev-proto \
+              ffmpeg \
+              git \
+              iconv \
+              jackit \
+              libarchive \
+              libbluray \
+              libcaca \
+              libcdio-paranoia \
+              libdvdnav \
+              libdisplay-info \
+              libplacebo \
+              libXinerama \
+              libxkbcommon \
+              libXpresent \
+              libXv \
+              luajit \
+              meson \
+              mujs \
+              openal-soft \
+              pipewire \
+              pkgconf \
+              pulseaudio \
+              python3 \
+              rubberband \
+              rust \
+              sekrit-twc-zimg \
+              sdl2 \
+              sndio \
+              uchardet \
+              v4l_compat \
+              vulkan-headers \
+              wayland-protocols
+
+      - name: Build with meson
+        id: build
+        run: |
+          ./ci/build-freebsd.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
 
   msys2:
     runs-on: ${{ matrix.os }}
