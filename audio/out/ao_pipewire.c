@@ -53,6 +53,11 @@ static uint64_t pw_stream_get_nsec(struct pw_stream *stream)
 }
 #endif
 
+// cubic volume scale for a more natural feel of volume change
+#define VOL_MP2PW_LIN(v) pow(v/100., 3)
+// transform PW linear values to cubic scale, pow(x, 1/n) is the nth root of x
+#define VOL_PW2MP_CUB(v) lrint(100 * pow(v, 1/3.))
+
 enum init_state {
     INIT_STATE_NONE,
     INIT_STATE_SUCCESS,
@@ -273,12 +278,12 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
 
 static float spa_volume_to_mp_volume(float vol)
 {
-        return vol * 100;
+        return VOL_PW2MP_CUB(vol);
 }
 
 static float mp_volume_to_spa_volume(float vol)
 {
-        return vol / 100;
+        return VOL_MP2PW_LIN(vol);
 }
 
 static float volume_avg(float* vols, uint32_t n)
