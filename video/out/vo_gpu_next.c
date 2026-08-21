@@ -398,8 +398,10 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         case SUBBITMAP_BGRA:
             ol->mode = PL_OVERLAY_NORMAL;
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
-            // Infer bitmap colorspace from source
-            if (src) {
+            // Infer bitmap colorspace from source, but only if the bitmap is
+            // actually in it. Bitmaps from overlay-add come from the client and
+            // are sRGB, so they keep the default set above.
+            if (src && item->video_color_space) {
                 ol->color = src->params.color;
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
                     bool use_static = p->next_opts->image_subs_hdr_peak == -2;
