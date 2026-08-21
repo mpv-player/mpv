@@ -307,6 +307,8 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
             return 0;
         case DVDNAV_NAV_PACKET: {
             pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
+            if (!pnavpci)
+                break;
             uint32_t start_pts = pnavpci->pci_gi.vobu_s_ptm;
             MP_TRACE(s, "start pts = %"PRIu32"\n", start_pts);
             break;
@@ -322,7 +324,7 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
         case DVDNAV_VTS_CHANGE: {
             int tit = 0, part = 0;
             dvdnav_vts_change_event_t *vts_event =
-                (dvdnav_vts_change_event_t *)s->buffer;
+                (dvdnav_vts_change_event_t *)buf;
             MP_INFO(s, "DVDNAV, switched to title: %d\n",
                    vts_event->new_vtsN);
             if (!priv->had_initial_vts) {
