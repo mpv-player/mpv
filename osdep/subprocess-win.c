@@ -211,6 +211,7 @@ static wchar_t *convert_environ(void *ctx, char **env)
             abort();
         pos += count;
     }
+    ret[pos] = L'\0';
 
     return ret;
 }
