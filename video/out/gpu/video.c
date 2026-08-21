@@ -453,6 +453,8 @@ const struct m_sub_options gl_video_conf = {
             {"no", 0}, {"input", 1}, {"output", 2}, {"both", 1|2}, {"auto", 1|2|4})},
         {"target-contrast", OPT_CHOICE(target_contrast, {"auto", 0}, {"inf", -1}),
             M_RANGE(10, 10 / PL_COLOR_HDR_BLACK)},
+        {"target-contrast-hdr", OPT_CHOICE(target_contrast_hdr, {"no", 0}, {"auto", -1}, {"inf", -2}),
+            M_RANGE(10, 10 / PL_COLOR_HDR_BLACK)},
         {"target-gamut", OPT_STRING_VALIDATE(target_gamut, validate_target_gamut)},
         {"tone-mapping", OPT_CHOICE(tone_map.curve,
             {"auto",     TONE_MAPPING_AUTO},
