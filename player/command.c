@@ -145,6 +145,10 @@ struct overlay {
     struct mp_image *source;
     int x, y;
     int dw, dh;
+    enum pl_color_primaries primaries;
+    enum pl_color_transfer transfer;
+    float max_luma;
+    bool video_colorspace;
 };
 
 struct hook_handler {
@@ -5303,6 +5307,12 @@ static void recreate_overlays(struct MPContext *mpctx)
                 .h = s->h, .dh = o->dh,
                 .x = o->x,
                 .y = o->y,
+                .bgra = {
+                    .primaries = o->primaries,
+                    .transfer = o->transfer,
+                    .max_luma = o->max_luma,
+                    .video_color_space = o->video_colorspace,
+                },
             };
             MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, b);
         }
@@ -5420,6 +5430,13 @@ static void cmd_overlay_add(void *pcmd)
     char *fmt = cmd->args[5].v.s;
     int w = cmd->args[6].v.i, h = cmd->args[7].v.i, stride = cmd->args[8].v.i;
     int dw = cmd->args[9].v.i, dh = cmd->args[10].v.i;
+    bool video_colorspace = cmd->args[11].v.b;
+    float max_luma = cmd->args[12].v.f;
+    int primaries = cmd->args[13].v.i, transfer = cmd->args[14].v.i;
+
+    // video_colorspace overrides explicit tags
+    if (video_colorspace)
+        primaries = transfer = 0;
 
     if (dw <= 0)
         dw = w;
@@ -5443,6 +5460,10 @@ static void cmd_overlay_add(void *pcmd)
         .y = y,
         .dw = dw,
         .dh = dh,
+        .primaries = primaries,
+        .transfer = transfer,
+        .max_luma = max_luma,
+        .video_colorspace = video_colorspace,
     };
     if (!overlay.source)
         goto error;
@@ -7890,7 +7911,15 @@ const struct mp_cmd_def mp_cmds[] = {
                                         {"h", OPT_INT(v.i)},
                                         {"stride", OPT_INT(v.i)},
                                         {"dw", OPT_INT(v.i), OPTDEF_INT(0)},
-                                        {"dh", OPT_INT(v.i), OPTDEF_INT(0)}, }},
+                                        {"dh", OPT_INT(v.i), OPTDEF_INT(0)},
+                                        {"video_colorspace", OPT_BOOL(v.b),
+                                            OPTDEF_INT(0)},
+                                        {"max_luma", OPT_FLOAT(v.f),
+                                            M_RANGE(0, 10000), OPTDEF_FLOAT(0)},
+                                        {"primaries", OPT_CHOICE_C(v.i, pl_csp_prim_names),
+                                            OPTDEF_INT(PL_COLOR_PRIM_UNKNOWN)},
+                                        {"transfer", OPT_CHOICE_C(v.i, pl_csp_trc_names),
+                                            OPTDEF_INT(PL_COLOR_TRC_UNKNOWN)}, }},
     { "overlay-remove", cmd_overlay_remove, { {"id", OPT_INT(v.i)} } },
 
     { "osd-overlay", cmd_osd_overlay,

@@ -229,7 +229,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         if (r->w <= 0 || r->h <= 0)
             continue;
 
-        b->bitmap = r; // save for later (dumb hack to avoid more complexity)
+        // save the rect for later (dumb hack to avoid more complexity)
+        *b = (struct sub_bitmap){ .bitmap = r };
 
         priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
         sub->count++;
@@ -465,6 +466,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
     res->packed_w = current->bound_w;
     res->packed_h = current->bound_h;
     res->format = SUBBITMAP_BGRA;
+    res->video_color_space = true;
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
