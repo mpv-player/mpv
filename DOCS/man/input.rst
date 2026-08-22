@@ -1753,6 +1753,45 @@ Miscellaneous Commands
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
 
+``discnav <action> [<x> <y>]``
+    Send a navigation command to the optical-disc stream that is currently
+    playing (DVD via ``dvdnav``, Blu-ray via ``libbluray``). The command does
+    nothing when no disc is being played.
+
+    ``<action>`` is one of:
+
+    up, down, left, right
+        Move the on-disc button selection.
+    select
+        Activate the currently highlighted button.
+    menu
+        Jump to the disc's root menu (DVD: VMGM root menu, BD: HDMV top menu).
+    title-menu
+        Jump to the current title's menu (DVD only; treated like ``menu`` on BD).
+    popup
+        Show / dismiss the Blu-ray popup menu. For DVDs, falls back to the
+        chapter menu where available.
+    prev
+        Return from a menu to playback, or to the previous menu domain.
+    mouse-move
+        Forward a mouse position to the disc, so it can update the focused
+        button under the cursor. With no ``<x> <y>`` arguments, the position
+        is read from the ``mouse-pos`` property and mapped from window into
+        source-video coordinates automatically.
+    mouse-click
+        Like ``mouse-move`` but also activates the button under the cursor.
+
+    ``<x>`` and ``<y>`` are optional and only meaningful for the ``mouse-*``
+    actions. They should normalized cormalized coordinates (top-left at ``0,0``).
+    Those values are used directly, instead of the live ``mouse-pos``.
+
+    mpv ships default bindings for this command in the ``{discnav}`` input
+    section (``UP``/``DOWN``/``LEFT``/``RIGHT`` for navigation, ``ENTER`` to
+    select, ``ESC`` / ``BS`` to leave, ``MBTN_LEFT`` / ``MOUSE_MOVE`` for
+    mouse). The player enables and disables that section automatically as
+    the menu appears and disappears, so the bindings only shadow the normal
+    ones while a menu is actually on screen.
+
 ``update-clipboard <type> [timeout]``
     Update the clipboard content so that the ``clipboard`` property reflects
     up-to-date value. This command is required to update the ``clipboard``
@@ -2422,6 +2461,12 @@ Property list
     loaded, or the file has no editions. (Matroska files make a difference
     between having no editions and a single edition, which will be reflected by
     the property, although in practice it does not matter.)
+
+``disc-menu-active``
+    ``yes`` when the current optical-disc stream (DVD or Blu-ray) is showing
+    an interactive menu with a selectable button highlight, and ``no``
+    otherwise. Unavailable when the currently playing source is not an
+    optical disc.
 
 ``chapters``
     Number of chapters.

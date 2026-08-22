@@ -190,6 +190,7 @@ void mp_destroy(struct MPContext *mpctx)
     mpctx->encode_lavc_ctx = NULL;
 
     command_uninit(mpctx);
+    disc_nav_destroy(mpctx);
 
     mp_clients_destroy(mpctx);
 

@@ -170,6 +170,7 @@ sources = files(
     'player/client.c',
     'player/command.c',
     'player/configfiles.c',
+    'player/discnav.c',
     'player/external_files.c',
     'player/loadfile.c',
     'player/main.c',
@@ -657,6 +658,17 @@ features += {'dvbin': dvbin}
 if features['dvbin']
     sources += files('stream/dvb_tune.c',
                      'stream/stream_dvb.c')
+endif
+
+dvda_opt = get_option('dvda').require(
+    get_option('gpl'),
+    error_message: 'the build is not GPL!',
+)
+dvdread = dependency('dvdread', version: '>= 7.1.0', required: dvda_opt)
+features += {'dvda': dvdread.found()}
+if features['dvda']
+    dependencies += dvdread
+    sources += files('stream/stream_dvda.c')
 endif
 
 dvdnav_opt = get_option('dvdnav').require(

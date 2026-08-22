@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "player/core.h"
+#include "stream/stream.h"
 #include "osd.h"
 
 struct sh_stream;
@@ -21,6 +22,7 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_DEF_FPS,
     SD_CTRL_RESET_SOFT,
     SD_CTRL_UPDATE_OPTS,
+    SD_CTRL_APPLY_DVDNAV,   // const struct stream_nav_state *
 };
 
 enum sd_text_type {
