@@ -71,7 +71,9 @@ struct osd_entry {
 
 struct osd_state {
     struct osd_entry entries[MAX_OSD_PARTS];
-    struct pl_overlay overlays[MAX_OSD_PARTS];
+    // A bitmap object can declare several colorspaces, and each one is drawn as
+    // its own overlay over the shared texture.
+    struct pl_overlay overlays[MAX_OSD_PARTS * SUB_BITMAP_CSP_COUNT];
 };
 
 struct scaler_params {
@@ -366,26 +368,68 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             break;
         }
 
+        // Group parts by declared colorspace into unbroken runs so overlays
+        // can point to them directly. Processing one colorspace per pass keeps
+        // it linear without sorting or extra allocations. Only client-supplied
+        // bitmaps set a per-part colorspace, image subtitles declare one
+        // globally and leave per-part fields unset, keeping them in a group.
+        const int num_csp = item->format == SUBBITMAP_BGRA &&
+                            !item->video_color_space ? SUB_BITMAP_CSP_COUNT : 1;
+        int csp_start[SUB_BITMAP_CSP_COUNT];
+        int csp_count[SUB_BITMAP_CSP_COUNT];
         entry->num_parts = 0;
-        for (int i = 0; i < item->num_parts; i++) {
-            const struct sub_bitmap *b = &item->parts[i];
-            if (b->dw == 0 || b->dh == 0)
-                continue;
-            uint32_t c = b->libass.color;
-            struct pl_overlay_part part = {
-                .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
-                .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
-                .color = {
-                    (c >> 24) / 255.0f,
-                    ((c >> 16) & 0xFF) / 255.0f,
-                    ((c >> 8) & 0xFF) / 255.0f,
-                    (255 - (c & 0xFF)) / 255.0f,
+        for (int csp = 0; csp < num_csp; csp++) {
+            csp_start[csp] = entry->num_parts;
+            for (int i = 0; i < item->num_parts; i++) {
+                const struct sub_bitmap *b = &item->parts[i];
+                if (b->dw == 0 || b->dh == 0)
+                    continue;
+                if (num_csp > 1 && b->colorspace != csp)
+                    continue;
+                uint32_t c = b->libass.color;
+                struct pl_overlay_part part = {
+                    .src = { b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h },
+                    .dst = { b->x, b->y, b->x + b->dw, b->y + b->dh },
+                    .color = {
+                        (c >> 24) / 255.0f,
+                        ((c >> 16) & 0xFF) / 255.0f,
+                        ((c >> 8) & 0xFF) / 255.0f,
+                        (255 - (c & 0xFF)) / 255.0f,
+                    }
+                };
+                MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
+            }
+
+            // Duplicate overlay parts for each eye in stereo 3D modes. This
+            // runs while the current colorspace's group is still the tail of
+            // the array, so that the group stays one unbroken run.
+            if (div[0] > 1 || div[1] > 1) {
+                int orig_num = entry->num_parts;
+                for (int x = 0; x < div[0]; x++) {
+                    for (int y = 0; y < div[1]; y++) {
+                        if (x == 0 && y == 0)
+                            continue;
+                        float off_x = res.w * x;
+                        float off_y = res.h * y;
+                        for (int i = csp_start[csp]; i < orig_num; i++) {
+                            struct pl_overlay_part duped = entry->parts[i];
+                            duped.dst.x0 += off_x;
+                            duped.dst.x1 += off_x;
+                            duped.dst.y0 += off_y;
+                            duped.dst.y1 += off_y;
+                            MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, duped);
+                        }
+                    }
                 }
-            };
-            MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, part);
+            }
+
+            csp_count[csp] = entry->num_parts - csp_start[csp];
         }
 
-        struct pl_overlay *ol = &state->overlays[frame->num_overlays++];
+        // The groups share everything except which parts they cover and, for a
+        // client that asked for the video's colorspace, the colorspace itself.
+        struct pl_overlay overlay;
+        struct pl_overlay *ol = &overlay;
         *ol = (struct pl_overlay) {
             .tex = entry->tex,
             .parts = entry->parts,
@@ -398,8 +442,10 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         case SUBBITMAP_BGRA:
             ol->mode = PL_OVERLAY_NORMAL;
             ol->repr.alpha = PL_ALPHA_PREMULTIPLIED;
-            // Infer bitmap colorspace from source
-            if (src) {
+            // Infer bitmap colorspace from source, but only if the bitmap is
+            // actually in it. Bitmaps from overlay-add come from the client and
+            // are sRGB, so they keep the default set above.
+            if (src && item->video_color_space) {
                 ol->color = src->params.color;
                 if (pl_color_transfer_is_hdr(ol->color.transfer)) {
                     bool use_static = p->next_opts->image_subs_hdr_peak == -2;
@@ -441,27 +487,19 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             break;
         }
 
-        // Duplicate overlay parts for each eye in stereo 3D modes
-        if (div[0] > 1 || div[1] > 1) {
-            int orig_num = entry->num_parts;
-            for (int x = 0; x < div[0]; x++) {
-                for (int y = 0; y < div[1]; y++) {
-                    if (x == 0 && y == 0)
-                        continue;
-                    float off_x = res.w * x;
-                    float off_y = res.h * y;
-                    for (int i = 0; i < orig_num; i++) {
-                        struct pl_overlay_part duped = entry->parts[i];
-                        duped.dst.x0 += off_x;
-                        duped.dst.x1 += off_x;
-                        duped.dst.y0 += off_y;
-                        duped.dst.y1 += off_y;
-                        MP_TARRAY_APPEND(p, entry->parts, entry->num_parts, duped);
-                    }
-                }
-            }
-            ol->parts = entry->parts;
-            ol->num_parts = entry->num_parts;
+        for (int csp = 0; csp < num_csp; csp++) {
+            if (!csp_count[csp])
+                continue;
+            struct pl_overlay *out = &state->overlays[frame->num_overlays++];
+            *out = *ol;
+            out->parts = entry->parts + csp_start[csp];
+            out->num_parts = csp_count[csp];
+            // A client that declared the video's colorspace wants its bitmap
+            // treated exactly like the video, so this takes the colorspace
+            // verbatim and skips the peak override applied above, which
+            // is there to stop image subtitles blowing out.
+            if (csp == SUB_BITMAP_CSP_VIDEO && src)
+                out->color = src->params.color;
         }
     }
 

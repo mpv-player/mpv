@@ -1,0 +1,1 @@
+add `colorspace` argument to the `overlay-add` command, taking `srgb` (the default) or `video`

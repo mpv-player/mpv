@@ -904,7 +904,7 @@ OSD Commands
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD. ``no-osd`` has no effect on this command.
 
-``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> <dw> <dh>``
+``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> <dw> <dh> [<colorspace>]``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -963,6 +963,13 @@ OSD Commands
     The overlay visible portion of the overlay (``w`` and ``h``) is scaled to
     in display to ``dw`` and ``dh``.  If parameters are not present, the
     values for ``w`` and ``h`` are used.
+
+    ``colorspace`` says which colorspace the bitmap is in. ``srgb`` (the
+    default) is right for images the client drew itself, such as an
+    interface or a static picture. ``video`` is for images taken from the
+    video, such as thumbnails decoded elsewhere and passed in unconverted:
+    they are then treated like the video and tone mapped with it.
+    Overlays with different colorspaces can be used at the same time.
 
     .. note::
 
