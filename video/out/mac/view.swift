@@ -92,7 +92,7 @@ class View: NSView, CALayerDelegate {
             }
         }
         if files.isEmpty { return false }
-        input?.open(files: files)
+        input?.handleDnd(files: files)
         return true
     }
 
