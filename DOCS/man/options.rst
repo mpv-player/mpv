@@ -5959,6 +5959,17 @@ them.
         set to ``0.0`` and ``0.5`` respectively. This filter is sharper than
         ``mitchell``, but prone to ringing.
 
+    ``mks2013``
+        Magic Kernel Sharp 2013. The quadratic B-spline ("magic kernel")
+        combined with a sharpening step, expressed as a single kernel with a
+        support of radius 2.5. See https://johncostella.com/magic/ for details.
+
+    ``mks2021``
+        Magic Kernel Sharp 2021. A refinement of ``mks2013`` with a flatter
+        frequency response (support of radius 4.5), making it closer to true
+        interpolation, at a slightly higher cost and with marginally more
+        ringing.
+
     ``oversample``
         A version of nearest neighbour that (naively) oversamples pixels, so
         that pixels overlapping edges get linearly interpolated instead of
