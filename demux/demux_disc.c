@@ -444,12 +444,21 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     struct stream_nav_state nav = {0};
     bool have_nav = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1;
     bool resync = have_nav && nav.drain_pending;
+    // The BD equivalent of a jump resync, the slave reopen for it is still
+    // pending on the packet-read path.
+    bool bd_jump = have_nav && !p->is_dvd && nav.discontinuity_id != p->last_discontinuity_id;
 
     p->skip_audio_until = MP_NOPTS_VALUE;
 
     if (resync) {
         MP_VERBOSE(demuxer, "resync seek at jump boundary (disc id %u)\n",
                    nav.discontinuity_id);
+    } else if (bd_jump) {
+        // The disc VM is already at the jump destination. Don't reposition
+        // it with a stale time, just flush our side. The read path performs
+        // the slave reopen when it sees the counter mismatch.
+        MP_VERBOSE(demuxer, "resync seek for disc jump (id %u), "
+                   "slave reopen pending\n", nav.discontinuity_id);
     } else {
         // In slideshow titles the target's still lies at the preceding
         // chapter (cell) start and can't be read backwards from a mid-cell
@@ -486,7 +495,11 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
         refresh_disc_metadata(demuxer);
     }
 
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+    // A DVD jump is fully handled by this seek, adopt the current counter.
+    // A BD jump additionally needs the slave reopened, which only the
+    // packet-read path does. Keep the counter stale so that still happens,
+    // else the old slave keeps parsing the new playlist's data.
+    if (p->is_dvd && stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
         p->last_discontinuity_id = nav.discontinuity_id;
 
     clear_dvd_sub_holds(p);
@@ -815,8 +828,11 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             demux_set_nav_active(demuxer, nav.nav_active);
         }
         // DVD holds an EOF at jump boundaries and the player resyncs
-        // through the seek path. BD has no in-band boundary, handle it here.
+        // through the seek path. BD has no in-band boundary, handle it here,
+        // after the resync seek.
         if (!p->is_dvd && nav.discontinuity_id != p->last_discontinuity_id) {
+            if (nav.drain_pending)
+                return false;
             MP_VERBOSE(demuxer, "discontinuity %u->%u, handling\n",
                        p->last_discontinuity_id, nav.discontinuity_id);
             if (!process_discontinuity(demuxer, nav.discontinuity_id))
@@ -863,7 +879,9 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
         // player resyncs it via the seek path), or (BD) an out-of-band jump.
         struct stream_nav_state nav2 = {0};
         bool have_nav2 = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav2) >= 1;
-        if (have_nav2 && !p->is_dvd && nav2.discontinuity_id != p->last_discontinuity_id) {
+        if (have_nav2 && !p->is_dvd && !nav2.drain_pending &&
+            nav2.discontinuity_id != p->last_discontinuity_id)
+        {
             MP_VERBOSE(demuxer, "discontinuity %u->%u at EOF, handling\n",
                        p->last_discontinuity_id, nav2.discontinuity_id);
             if (!process_discontinuity(demuxer, nav2.discontinuity_id))
@@ -1112,6 +1130,11 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // correct stream-layer time (at least with libdvdnav).
     stream_read_peek(demuxer->stream, &(char){0}, 1);
     reset_pts(demuxer);
+
+    // Boundaries settled before the first slave open predate any player
+    // state to resync, release them so the probe can read.
+    if (!p->is_dvd)
+        stream_control(demuxer->stream, STREAM_CTRL_NAV_DRAIN_ACK, NULL);
 
     p->slave = demux_open_url("-", &params, demuxer->cancel, demuxer->global);
     if (!p->slave)

@@ -50,11 +50,7 @@ struct disc_nav_state {
     uint32_t last_overlay_change_id;
     bool overlay_change_seen;
 
-    // Last observed disc-nav discontinuity counter (bumped by the stream
-    // backend on user nav actions and on libbluray/libdvdnav-internal
-    // playlist/title/cell transitions).
-    uint32_t last_discontinuity_id;
-    bool discontinuity_seen;
+    bool drain_was_pending; // last poll saw a boundary awaiting resync
 
     // DVD-only: dvd_subtitle track we force-selected for the menu, and the
     // selection it displaced (restored on menu close).
@@ -274,14 +270,11 @@ static void check_async_discontinuity(struct MPContext *mpctx, struct stream *s,
     struct disc_nav_state *st = get_state(mpctx);
     if (!mpctx->demuxer)
         return;
-    if (!st->discontinuity_seen) {
-        st->last_discontinuity_id = nav->discontinuity_id;
-        st->discontinuity_seen = true;
+
+    bool new_drain = nav->drain_pending && !st->drain_was_pending;
+    st->drain_was_pending = nav->drain_pending;
+    if (!new_drain)
         return;
-    }
-    if (nav->discontinuity_id == st->last_discontinuity_id)
-        return;
-    st->last_discontinuity_id = nav->discontinuity_id;
 
     // The disc jumped on its own, resync through the regular seek path.
     // demux_disc releases the held boundary instead of repositioning the VM.
