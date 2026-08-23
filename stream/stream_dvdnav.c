@@ -777,6 +777,16 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
     return 0;
 }
 
+static int64_t seek_landing_ticks(struct priv *priv, double d, double margin)
+{
+    int64_t tm = DVD_TIME_FROM_S(d - margin);
+    if (tm < 0)
+        tm = 0;
+    if (priv->duration > 0 && tm >= priv->duration)
+        tm = priv->duration - 1;
+    return tm;
+}
+
 static int control(stream_t *stream, int cmd, void *arg)
 {
     struct priv *priv = stream->priv;
@@ -885,19 +895,43 @@ static int control(stream_t *stream, int cmd, void *arg)
         double *args = arg;
         double d = args[0]; // absolute target timestamp
         int flags = args[1]; // from SEEK_* flags (demux.h)
-        if (flags & SEEK_HR)
-            d -= 10; // fudge offset; it's a hack, because fuck libdvd*
-        int64_t tm = DVD_TIME_FROM_S(d);
-        if (tm < 0)
-            tm = 0;
-        if (priv->duration > 0 && tm >= priv->duration)
-            tm = priv->duration - 1;
-        uint32_t pos, len;
-        if (dvdnav_get_position(dvdnav, &pos, &len) != DVDNAV_STATUS_OK)
-            break;
-        MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
-        if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
-            break;
+        if (in_menu_domain(dvdnav)) {
+            // The menu subpicture (buttons, highlight) is a one-shot packet
+            // at its cell start, and dvdnav's time search lands mid-cell,
+            // past it, so the menu would show without buttons until its next
+            // loop. Map seeks to program skips, every landing is a program
+            // start where the display state is established.
+            double cur = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
+            MP_VERBOSE(stream, "menu seek to %f (cur %f) -> %s program\n",
+                       d, cur, d >= cur ? "next" : "prev");
+            dvdnav_status_t r = d >= cur ? dvdnav_next_pg_search(dvdnav)
+                                         : dvdnav_prev_pg_search(dvdnav);
+            if (r != DVDNAV_STATUS_OK)
+                break;
+        } else {
+            uint32_t pos, len;
+            if (dvdnav_get_position(dvdnav, &pos, &len) != DVDNAV_STATUS_OK)
+                break;
+            // hr-seeks decode from the landing up to the exact target, so
+            // the landing must not overshoot it. Time-map landings are
+            // accurate to one map entry, the time_search fallback
+            // interpolates from cell durations and can be off by several
+            // seconds on VBR content.
+            int64_t tm = seek_landing_ticks(priv, d, flags & SEEK_HR ? 2 : 0);
+            MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
+            // The disc's time maps give accurate landings. Fall back to
+            // dvdnav's cell-duration interpolation for titles that lack
+            // them.
+            bool jumped = false;
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+            jumped = dvdnav_jump_to_sector_by_time(dvdnav, tm, 0) == DVDNAV_STATUS_OK;
+#endif
+            if (!jumped) {
+                tm = seek_landing_ticks(priv, d, flags & SEEK_HR ? 10 : 0);
+                if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
+                    break;
+            }
+        }
         // The seek reinitializes everything itself. Clear any held boundary
         // and coalesce the HOP_CHANNEL libdvdnav emits for the seek.
         mp_mutex_lock(&priv->lock);
@@ -907,8 +941,9 @@ static int control(stream_t *stream, int cmd, void *arg)
         stream_drop_buffers(stream);
         d = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
         MP_VERBOSE(stream, "landed at: %f\n", d);
+        uint32_t pos, len;
         if (dvdnav_get_position(dvdnav, &pos, &len) == DVDNAV_STATUS_OK)
-            MP_VERBOSE(stream, "block: %lu\n", (unsigned long)pos);
+            MP_VERBOSE(stream, "block: %" PRIu32 "\n", pos);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_ANGLES: {
