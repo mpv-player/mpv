@@ -292,7 +292,8 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             pkt->dts += delta;
     }
 
-    MP_TRACE(demuxer, "opts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
+    MP_TRACE(demuxer, "mapped pkt: type=%d pts=%f dts=%f\n",
+             sh->type, pkt->pts, pkt->dts);
 
     *out_pkt = pkt;
     return 1;
