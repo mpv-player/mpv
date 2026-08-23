@@ -609,6 +609,21 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         priv->pci = *pnavpci;
         priv->pci_valid = true;
         MP_TRACE(s, "start pts = %"PRIu32"\n", pnavpci->pci_gi.vobu_s_ptm);
+        // Reset selection to first button if the current selection is out of
+        // range. libdvdnav holds stale button selections when the menu changes,
+        // which makes the new page unusable.
+        if (in_menu_domain(dvdnav) && pnavpci->hli.hl_gi.hli_ss &&
+            pnavpci->hli.hl_gi.btn_ns > 0)
+        {
+            int32_t btn = 0;
+            dvdnav_get_current_highlight(dvdnav, &btn);
+            if (btn <= 0 || btn > pnavpci->hli.hl_gi.btn_ns) {
+                MP_VERBOSE(s, "stale button %d for a %d-button menu, "
+                           "selecting button 1\n", btn,
+                           pnavpci->hli.hl_gi.btn_ns);
+                dvdnav_button_select(dvdnav, pnavpci, 1);
+            }
+        }
         // Each NAV packet can change the highlighted button or the
         // available button set; keep our mirrored state in sync.
         update_highlight(priv);
