@@ -67,6 +67,7 @@ struct osd_entry {
     pl_tex tex;
     struct pl_overlay_part *parts;
     int num_parts;
+    int change_id;
 };
 
 struct osd_state {
@@ -335,35 +336,51 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
             continue;
         struct osd_entry *entry = &state->entries[item->render_index];
         pl_fmt tex_fmt = p->osd_fmt[item->format];
-        if (!entry->tex)
+        if (!entry->tex) {
             MP_TARRAY_POP(p->sub_tex, p->num_sub_tex, &entry->tex);
-        bool ok = pl_tex_recreate(p->gpu, &entry->tex, &(struct pl_tex_params) {
-            .format = tex_fmt,
-            .w = MPMAX(item->packed_w, entry->tex ? entry->tex->params.w : 0),
-            .h = MPMAX(item->packed_h, entry->tex ? entry->tex->params.h : 0),
-            .host_writable = true,
-            .sampleable = true,
-        });
-        if (!ok) {
-            MP_ERR(vo, "Failed recreating OSD texture!\n");
-            break;
+            entry->change_id = 0; // pooled texture holds another entry's data
         }
-        struct pl_tex_transfer_params upload_params = {
-            .tex        = entry->tex,
-            .rc         = { .x1 = item->packed_w, .y1 = item->packed_h, },
-            .row_pitch  = item->packed->stride[0],
-            .ptr        = item->packed->planes[0],
-        };
-        // Keep the image alive until it's fully read.
-        if (p->gpu->limits.callbacks) {
-            upload_params.callback = talloc_free;
-            upload_params.priv = mp_image_new_ref(item->packed);
+        // pl_tex_recreate() invalidates the texture even when it keeps it, so
+        // only call it when the size or format has to change. Textures only
+        // ever grow, so a size mismatch means the texture is too small.
+        pl_tex tex = entry->tex;
+        if (!tex || tex->params.w < item->packed_w ||
+            tex->params.h < item->packed_h || tex->params.format != tex_fmt)
+        {
+            entry->change_id = 0; // the new texture starts out undefined
+            bool ok = pl_tex_recreate(p->gpu, &entry->tex, pl_tex_params(
+                .format = tex_fmt,
+                .w = MPMAX(item->packed_w, tex ? tex->params.w : 0),
+                .h = MPMAX(item->packed_h, tex ? tex->params.h : 0),
+                .host_writable = true,
+                .sampleable = true,
+            ));
+            if (!ok) {
+                MP_ERR(vo, "Failed recreating OSD texture!\n");
+                break;
+            }
         }
-        ok = pl_tex_upload(p->gpu, &upload_params);
-        if (!ok) {
-            MP_ERR(vo, "Failed uploading OSD texture!\n");
-            talloc_free(upload_params.priv);
-            break;
+        if (entry->change_id != item->change_id) {
+            struct pl_tex_transfer_params upload_params = {
+                .tex        = entry->tex,
+                .rc         = { .x1 = item->packed_w, .y1 = item->packed_h, },
+                .row_pitch  = item->packed->stride[0],
+                .ptr        = item->packed->planes[0],
+            };
+            // Keep the image alive until it's fully read.
+            if (p->gpu->limits.callbacks) {
+                upload_params.callback = talloc_free;
+                upload_params.priv = mp_image_new_ref(item->packed);
+            }
+            // A failed upload can leave the texture partially written, so
+            // only record the new id once the upload has succeeded.
+            entry->change_id = 0;
+            if (!pl_tex_upload(p->gpu, &upload_params)) {
+                MP_ERR(vo, "Failed uploading OSD texture!\n");
+                talloc_free(upload_params.priv);
+                break;
+            }
+            entry->change_id = item->change_id;
         }
 
         entry->num_parts = 0;
