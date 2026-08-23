@@ -298,7 +298,7 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
         }
         if (event != DVDNAV_BLOCK_OK) {
             const char *name = LOOKUP_NAME(mp_dvdnav_events, event);
-            MP_TRACE(s, "DVDNAV: event %s (%d).\n", name, event);
+            MP_TRACE(s, "event %s (%d)\n", name, event);
         }
         switch (event) {
         case DVDNAV_BLOCK_OK:
@@ -629,7 +629,7 @@ static int open_s_internal(stream_t *stream)
     if (p->track >= 0) {
         priv->title = p->track;
         if (dvdnav_title_play(priv->dvdnav, p->track + 1) != DVDNAV_STATUS_OK) {
-            MP_FATAL(stream, "dvdnav_stream, couldn't select title %d, error '%s'\n",
+            MP_FATAL(stream, "couldn't select title %d, error '%s'\n",
                    p->track, dvdnav_err_to_string(priv->dvdnav));
             ret = STREAM_UNSUPPORTED;
             goto err;
