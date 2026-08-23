@@ -383,6 +383,11 @@ static void w32_register(struct MPContext *mpctx)
     REGISTER_AUTOPLAY_HANDLER("dvd", "DVDMovie", "Play DVD movie");
 #endif
 
+#if HAVE_DVDA
+    // Register DVD-Audio handler
+    REGISTER_AUTOPLAY_HANDLER("dvda", "DVDAudio", "Play DVD-Audio");
+#endif
+
 #if HAVE_LIBBLURAY
     // Register Blu-ray handler
     REGISTER_AUTOPLAY_HANDLER("bluray", "BluRay", "Play Blu-ray movie");
@@ -444,6 +449,7 @@ static void w32_unregister(struct MPContext *mpctx)
     reg_del(log, root, KEY_MPV_PROG_ID("bluray"), NULL);
     reg_del(log, root, KEY_MPV_PROG_ID("cdda"), NULL);
     reg_del(log, root, KEY_MPV_PROG_ID("dvd"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("dvda"), NULL);
     reg_del(log, root, KEY_MPV_PROG_ID("file"), NULL);
     reg_del(log, root, KEY_MPV_PROG_ID("url"), NULL);
 
@@ -453,6 +459,9 @@ static void w32_unregister(struct MPContext *mpctx)
     reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDMovieOnArrival", NULL);
     reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDMovieOnArrival",
             L"MpvPlayDVDMovieOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDAudioOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDAudioOnArrival",
+            L"MpvPlayDVDAudioOnArrival");
     reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayBluRayOnArrival", NULL);
     reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayBluRayOnArrival",
             L"MpvPlayBluRayOnArrival");
