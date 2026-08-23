@@ -151,6 +151,7 @@ struct bluray_priv_s {
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
     bool still_active;               // holding an indefinite still.
+    bool resync_owed;                // jump settled, resync seek not acked yet
 
     // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
     // and BD_EVENT_PG_TEXTST{,_STREAM}. The numbers are 1-based libbluray
@@ -493,7 +494,12 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
 
     mp_mutex_lock(&b->overlay_lock);
     uint32_t disc_id = b->discontinuity_id;
+    bool resync_owed = b->resync_owed;
     mp_mutex_unlock(&b->overlay_lock);
+
+    // Resync pending, skip the read.
+    if (resync_owed)
+        return 0;
 
     int idle_reads = 0;
     bool hopped = false;
@@ -663,6 +669,9 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         if (hopped) {
             if (ev.event != BD_EVENT_NONE)
                 continue;
+            mp_mutex_lock(&b->overlay_lock);
+            b->resync_owed = true;
+            mp_mutex_unlock(&b->overlay_lock);
             MP_VERBOSE(s, "jump settled (id %u), EOF for demuxer resync\n",
                        b->discontinuity_id);
             return 0;
@@ -775,6 +784,11 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         // API makes it hard to determine seeking success
         return STREAM_OK;
     }
+    case STREAM_CTRL_NAV_DRAIN_ACK:
+        mp_mutex_lock(&b->overlay_lock);
+        b->resync_owed = false;
+        mp_mutex_unlock(&b->overlay_lock);
+        return STREAM_OK;
     case STREAM_CTRL_GET_NUM_ANGLES: {
         mp_mutex_lock(&b->overlay_lock);
         const BLURAY_TITLE_INFO *ti = b->title_info;
@@ -964,6 +978,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             .src_h = MPMAX(b->ig.disp_h, b->pg.disp_h),
             .change_id = b->nav_change_id,
             .discontinuity_id = b->discontinuity_id,
+            .drain_pending = b->resync_owed,
             .no_audio = no_audio,
             .active_audio_id = audio_pid,
             .active_sub_id = sub_pid,
