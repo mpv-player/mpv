@@ -637,7 +637,9 @@ mp.add_key_binding(nil, "select-binding", function (t)
 end, { complex = true })
 
 local function add_property(properties, property, value)
-    value = value or mp.get_property_native(property)
+    if value == nil then
+        value = mp.get_property_native(property)
+    end
 
     if type(value) == "table" and next(value) then
         if type(next(value)) == "number" then
