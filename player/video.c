@@ -1072,6 +1072,11 @@ void write_video(struct MPContext *mpctx)
     if (r < 0)
         goto error;
 
+    // A frame arriving while the restart is still in progress is the
+    // restart's first frame, even if the (sparse) stream was at EOF.
+    if (r == VD_NEW_FRAME && mpctx->video_status == STATUS_EOF && !mpctx->restart_complete)
+        mpctx->video_status = STATUS_SYNCING;
+
     if (r == VD_WAIT) {
         // Heuristic to detect underruns.
         if (mpctx->video_status == STATUS_PLAYING && !vo_still_displaying(vo) &&
