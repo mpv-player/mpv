@@ -337,13 +337,19 @@ static void reset_pts(demuxer_t *demuxer)
 
 static void add_stream_chapters(struct demuxer *demuxer);
 
-// Sync demuxer->edition with the disc's current title.
+// Sync demuxer->edition with the disc's current playback position.
 static void sync_initial_edition(struct demuxer *demuxer)
 {
     unsigned title;
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) >= 1 &&
         title < (unsigned)demuxer->num_editions)
         demuxer->edition = title;
+    struct stream_nav_state nav = {0};
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1
+        && nav.menu_active && demuxer->num_editions > 0)
+    {
+        demuxer->edition = demuxer->num_editions - 1;
+    }
 }
 
 static bool reopen_slave(struct demuxer *demuxer)
@@ -525,16 +531,19 @@ static void add_stream_editions(struct demuxer *demuxer)
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES, &titles) != STREAM_OK)
         return;
     for (unsigned title = 0; title < titles; ++title) {
-        double duration = title;
-        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TITLE_LENGTH, &duration) != STREAM_OK)
-            continue;
-
         struct demux_edition new = {
             .demuxer_id = title,
             .default_edition = false,
             .metadata = talloc_zero(demuxer, struct mp_tags),
         };
         MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, new);
+
+        double duration = title;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TITLE_LENGTH, &duration) != STREAM_OK) {
+            mp_tags_set_str(new.metadata, "TITLE",
+                            mp_tprintf(42, "title: %u", title + 1));
+            continue;
+        }
 
         char *time = mp_format_time(duration, true);
         double playlist = title;
@@ -544,6 +553,15 @@ static void add_stream_editions(struct demuxer *demuxer)
                         mp_tprintf(42, "title: %u (%s)", title + 1, time));
         talloc_free(time);
     }
+
+    // Append a synthetic "Disc Menu" entry.
+    struct demux_edition menu = {
+        .demuxer_id = titles,
+        .default_edition = false,
+        .metadata = talloc_zero(demuxer, struct mp_tags),
+    };
+    MP_TARRAY_APPEND(demuxer, demuxer->editions, demuxer->num_editions, menu);
+    mp_tags_set_str(menu.metadata, "TITLE", "Disc Menu");
 }
 
 static void add_stream_chapters(struct demuxer *demuxer)
