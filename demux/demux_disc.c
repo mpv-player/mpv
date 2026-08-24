@@ -908,6 +908,10 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
             if (!process_discontinuity(demuxer, nav2.discontinuity_id))
                 return false;
             pkt = demux_read_any_packet(p->slave);
+        } else if (p->is_bd && p->nav_active) {
+            // The slave latches the EOF and stops touching the stream.
+            // Peek to run the event loop, the VM progresses only on reads.
+            stream_read_peek(demuxer->stream, &(char){0}, 1);
         }
         if (!pkt) {
             p->av_map_seq++;

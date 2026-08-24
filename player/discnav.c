@@ -464,6 +464,23 @@ void disc_nav_update(struct MPContext *mpctx)
         MP_VERBOSE(s, "still_frame %d->%d\n",
                    mpctx->disc_nav_still_frame, still);
     mpctx->disc_nav_still_frame = still;
+
+    // The BD-J VM progresses only on reads, pump them while playback idles
+    // at EOF or a held still, per libbluray's requirement. Our core wakes up
+    // at 1s intervals even at pause, but that's not enough for fluid button
+    // navigation. So, we always drive the VM at least at 20Hz.
+    if (have && mpctx->demuxer) {
+        bool bd_idle = (strcmp(s->info->name, "bd") == 0 ||
+                        strcmp(s->info->name, "bdmv/bluray") == 0) &&
+                       (still || (mpctx->video_status == STATUS_EOF &&
+                                  mpctx->audio_status == STATUS_EOF));
+        if (bd_idle || (nav.menu_active && mpctx->paused)) {
+            if (bd_idle)
+                demux_drive_nav(mpctx->demuxer);
+            mp_set_timeout(mpctx, 0.05);
+        }
+    }
+
     if (!have) {
         if (st->overlay_visible) {
             osd_set_bitmaps(mpctx->osd, OSDTYPE_DISC_MENU, NULL);
