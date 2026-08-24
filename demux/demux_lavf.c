@@ -1805,6 +1805,12 @@ static void demux_drop_buffers_lavf(demuxer_t *demuxer)
     demux_flush(demuxer);
     stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
+    if (priv->stream && !priv->stream->seekable) {
+        // The stream may have been repositioned externally (disc seeks).
+        // Resync the avio position so mpegts detects the jump and resets
+        // its packet state.
+        avio_seek(priv->avfc->pb, stream_tell(priv->stream), SEEK_SET);
+    }
     avformat_flush(priv->avfc);
     // Clear sticky EOF/error to reuse this demuxer.
     priv->avfc->pb->eof_reached = 0;

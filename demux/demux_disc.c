@@ -487,6 +487,18 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
         MP_VERBOSE(demuxer, "seek to: %f\n", stream_target);
         double seek_arg[] = {stream_target, stream_flags};
         stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
+        if (p->is_bd) {
+            // The reposition starts a new byte-stream run. Restart the byte
+            // position counters, the slave's drop_buffers below resyncs the
+            // avio position so mpegts detects the jump and resets its packet
+            // state in place. DVD does not need this. libdvdnav hands out whole
+            // 2048-byte blocks and seeks land on VOBU boundaries, so the PS
+            // slave resumes exactly at a pack header and keeps no cross-reads.
+            stream_rebase_position(demuxer->stream);
+            p->last_read_pos = 0;
+            for (int n = 0; n < p->num_tl_streams; n++)
+                p->tl_streams[n].select_pos = -1;
+        }
     }
 
     if (p->slave && p->slave->desc->drop_buffers)
