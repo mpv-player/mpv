@@ -105,6 +105,8 @@ struct priv {
     bool seek_reinit;   // needs reinit after seek
     uint32_t last_discontinuity_id; // Last source-position-jump id seen from the stream.
     bool nav_active;    // last interactive-nav state pushed to the cache
+    uint32_t eof_log_id;    // last logged EOF state, avoids per-read spam
+    bool eof_log_still;
 
     bool is_dvd, is_dvda, is_cdda, is_bd;
 
@@ -695,7 +697,6 @@ static bool reopen_slave(struct demuxer *demuxer)
     if (p->is_cdda)
         params.force_format = "+rawaudio";
 
-    MP_VERBOSE(demuxer, "reopening slave demuxer\n");
     demux_free(p->slave);
     clear_dvd_sub_holds(p);
     // Discard anything the stream wrapper buffered before the disc-nav
@@ -706,6 +707,14 @@ static bool reopen_slave(struct demuxer *demuxer)
     p->last_read_pos = 0;
     for (int n = 0; n < p->num_tl_streams; n++)
         p->tl_streams[n].select_pos = -1;
+    // Between positions an open would only probe an EOF. The peek pumps
+    // the stream's event loop, the bytes stay buffered for the probe.
+    uint8_t hdr[192];
+    if (stream_read_peek(demuxer->stream, hdr, sizeof(hdr)) <= 0) {
+        p->slave = NULL;
+        return false;
+    }
+    MP_VERBOSE(demuxer, "reopening slave demuxer\n");
     p->slave = demux_open_url("-", &params, demuxer->cancel, demuxer->global);
     if (!p->slave) {
         // Happens when the stream is between positions (e.g. the disc VM is
@@ -895,9 +904,15 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
                 MP_TARRAY_REMOVE_AT(p->pending_subs, p->num_pending_subs, 0);
                 return deliver_dvd_sub(demuxer, ps.sh, ps.pkt, out_pkt);
             }
-            MP_VERBOSE(demuxer, "slave EOF (disc id %u, still %d)\n",
-                       have_nav2 ? nav2.discontinuity_id : 0,
-                       have_nav2 ? nav2.still_active : -1);
+            if (p->eof_log_id != nav2.discontinuity_id ||
+                p->eof_log_still != nav2.still_active)
+            {
+                MP_VERBOSE(demuxer, "slave EOF (disc id %u, still %d)\n",
+                           have_nav2 ? nav2.discontinuity_id : 0,
+                           have_nav2 ? nav2.still_active : -1);
+                p->eof_log_id = nav2.discontinuity_id;
+                p->eof_log_still = nav2.still_active;
+            }
             return false;
         }
     }
