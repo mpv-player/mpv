@@ -151,6 +151,8 @@ struct bluray_priv_s {
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
     bool still_active;               // holding an indefinite still.
+    uint64_t next_read_pos;          // expected bd_tell() of the next read
+    bool read_pos_known;             // next_read_pos is valid
     bool resync_owed;                // jump settled, resync seek not acked yet
 
     // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
@@ -505,6 +507,18 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
     bool hopped = false;
     while (!mp_cancel_test(s->cancel)) {
         BD_EVENT ev;
+        // BD-J applets reposition the stream, sometimes with no event.
+        // Detect it before reading so the new position's head survives.
+        if (!hopped && b->read_pos_known && bd_tell(b->bd) != b->next_read_pos) {
+            MP_VERBOSE(s, "position warped (%"PRIu64" -> %"PRIu64"), "
+                       "treating as a jump\n", b->next_read_pos, bd_tell(b->bd));
+            b->read_pos_known = false;
+            mp_mutex_lock(&b->overlay_lock);
+            if (b->discontinuity_id == disc_id)
+                b->discontinuity_id++;
+            mp_mutex_unlock(&b->overlay_lock);
+            hopped = true;
+        }
         // Once a jump was detected, stop consuming data (it belongs to the
         // new position and the slave demuxer must be reopened first); a
         // zero-length read only polls the remaining events.
@@ -640,6 +654,26 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         }
 
         if (n > 0) {
+            // A jump event popped by this read can mean the data already
+            // belongs to the new position. Drop non-contiguous reads and
+            // drain like any other jump.
+            uint64_t pos = bd_tell(b->bd);
+            if (b->read_pos_known && pos - n != b->next_read_pos) {
+                MP_VERBOSE(s, "read not contiguous (expected %"PRIu64", "
+                           "got %"PRIu64"), treating as a jump\n",
+                           b->next_read_pos, pos - n);
+                b->read_pos_known = false;
+                mp_mutex_lock(&b->overlay_lock);
+                if (b->discontinuity_id == disc_id)
+                    b->discontinuity_id++;
+                mp_mutex_unlock(&b->overlay_lock);
+                hopped = true;
+                continue;
+            }
+            if (!b->read_pos_known)
+                MP_DBG(s, "reads resume at %"PRIu64"\n", pos - n);
+            b->next_read_pos = pos;
+            b->read_pos_known = true;
             if (b->still_active) {
                 mp_mutex_lock(&b->overlay_lock);
                 b->still_active = false;
@@ -669,6 +703,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         if (hopped) {
             if (ev.event != BD_EVENT_NONE)
                 continue;
+            b->read_pos_known = false;
             mp_mutex_lock(&b->overlay_lock);
             b->resync_owed = true;
             mp_mutex_unlock(&b->overlay_lock);
@@ -786,6 +821,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         double pts = *((double *) arg);
         bd_seek_time(b->bd, BD_TIME_FROM_S(pts));
         stream_drop_buffers(s);
+        b->read_pos_known = false;
         // API makes it hard to determine seeking success
         return STREAM_OK;
     }
