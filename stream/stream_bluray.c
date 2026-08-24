@@ -681,6 +681,11 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         // showing the last frame; user interaction releases the still and
         // resumes reading through a discontinuity_id bump.
         if (still_active) {
+            // Drain queued events first, the still may already be released.
+            // libbluray re-emits STILL_TIME on every read while holding, it
+            // is not progress.
+            if (ev.event != BD_EVENT_NONE && ev.event != BD_EVENT_STILL_TIME)
+                continue;
             MP_VERBOSE(s, "holding still frame, EOF\n");
             return 0;
         }
