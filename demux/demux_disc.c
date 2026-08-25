@@ -389,6 +389,23 @@ static void sync_streams(struct demuxer *demuxer)
         p->slave_to_outer[n] = outer;
     }
 
+    // Outer demuxer may have seen PMT with track that is not longer present in
+    // the stream. Mark such tracks as absent, so that they don't deliver packets.
+    // For now limited to dependent_tracks, to work around a missing DV EL.
+    // All other tracks stays as in in outer demuxer and are deselected.
+    // There is no way to "remove" a track from outer demuxer.
+    if (p->is_bd) {
+        for (int i = 0; i < p->num_outer_streams; i++) {
+            struct sh_stream *sh = p->outer_streams[i];
+            if (!sh || !sh->dependent_track)
+                continue;
+            bool mapped = false;
+            for (int n = 0; n < num_slave && !mapped; n++)
+                mapped = p->slave_to_outer[n] == sh;
+            demux_set_stream_absent(demuxer, sh, !mapped);
+        }
+    }
+
     // Propagate outer selection state to the slave. Unmapped slave streams
     // (ignored non-presentation streams) are kept deselected so they don't
     // deliver packets.
