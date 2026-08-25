@@ -303,6 +303,7 @@ typedef struct MPOpts {
     bool save_watch_history;
     char *watch_history_path;
     bool pause;
+    bool sub_pause;
     int keep_open;
     bool keep_open_pause;
     double image_display_duration;

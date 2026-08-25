@@ -1302,6 +1302,14 @@ void write_video(struct MPContext *mpctx)
             mpctx->max_frames--;
     }
 
+    // After the frame stepping above, which must get to clear step_frames and
+    // unmute first.
+    if (mpctx->num_next_frames >= 1 &&
+        sub_pause_check(mpctx, mpctx->video_pts, mpctx->next_frames[0]->pts))
+    {
+        set_pause_state(mpctx, true);
+    }
+
     vo_c->underrun_signaled = false;
 
     if (mpctx->video_status == STATUS_EOF || mpctx->stop_play)
