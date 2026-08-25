@@ -7682,6 +7682,9 @@ them.
     linear
         Linearly stretches the entire reference gamut to (a linear multiple of)
         the display.
+    linearlight
+        Like linear, but in linear light instead of perceptually linear.
+        (``--vo=gpu-next`` only)
     spline
         Perceptually linear single-pivot polynomial. (``--vo=gpu-next`` only)
     bt.2446a
