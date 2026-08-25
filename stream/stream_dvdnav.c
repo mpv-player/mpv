@@ -248,10 +248,15 @@ static bool in_menu_domain(dvdnav_t *dvdnav)
            dvdnav_is_domain_fp(dvdnav) == 1;
 }
 
+static int pci_num_buttons(const pci_t *pci)
+{
+    return MPMIN(pci->hli.hl_gi.btn_ns, MP_ARRAY_SIZE(pci->hli.btnit));
+}
+
 static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
 {
     priv->hl.rect = (struct mp_rect){0};
-    if (btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
+    if (btn <= 0 || btn > pci_num_buttons(pci))
         return;
     // btni_t is packed and full of bitfields, memcpy to ensure correct alignment.
     btni_t b;
@@ -272,7 +277,7 @@ static void compute_button_rect(struct priv *priv, pci_t *pci, int btn)
 static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
 {
     memset(priv->hl.palette, 0, sizeof(priv->hl.palette));
-    if (!priv->spu_clut_valid || btn <= 0 || btn > pci->hli.hl_gi.btn_ns)
+    if (!priv->spu_clut_valid || btn <= 0 || btn > pci_num_buttons(pci))
         return;
     btni_t b;
     memcpy(&b, &pci->hli.btnit[btn - 1], sizeof(b));
@@ -380,7 +385,7 @@ static void update_highlight(struct priv *priv)
     if (highlight_live)
         dvdnav_get_current_highlight(priv->dvdnav, &btn);
 
-    if (!highlight_live || btn <= 0 || btn > pci->hli.hl_gi.btn_ns) {
+    if (!highlight_live || btn <= 0 || btn > pci_num_buttons(pci)) {
         priv->current_button = 0;
         priv->hl = (struct mp_dvdnav_highlight){0};
     } else {
@@ -422,7 +427,7 @@ static void select_neighbour_button(struct priv *priv, pci_t *pci,
 {
     int32_t cur = 0;
     dvdnav_get_current_highlight(priv->dvdnav, &cur);
-    if (cur <= 0 || cur > pci->hli.hl_gi.btn_ns)
+    if (cur <= 0 || cur > pci_num_buttons(pci))
         return;
     btni_t b;
     memcpy(&b, &pci->hli.btnit[cur - 1], sizeof(b));
@@ -617,10 +622,10 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         {
             int32_t btn = 0;
             dvdnav_get_current_highlight(dvdnav, &btn);
-            if (btn <= 0 || btn > pnavpci->hli.hl_gi.btn_ns) {
+            if (btn <= 0 || btn > pci_num_buttons(pnavpci)) {
                 MP_VERBOSE(s, "stale button %d for a %d-button menu, "
                            "selecting button 1\n", btn,
-                           pnavpci->hli.hl_gi.btn_ns);
+                           pci_num_buttons(pnavpci));
                 dvdnav_button_select(dvdnav, pnavpci, 1);
             }
         }
