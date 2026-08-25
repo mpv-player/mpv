@@ -900,7 +900,7 @@ static void update_stream_eager_state(struct demux_internal *in)
         struct demux_stream *s = in->streams[n]->ds;
 
         s->still_image = s->sh->still_image;
-        s->eager = s->selected && !s->sh->attached_picture;
+        s->eager = s->selected && !s->sh->absent && !s->sh->attached_picture;
         if (s->eager && !s->still_image)
             any_av_streams |= s->type != STREAM_SUB;
         any_streams |= s->selected;
@@ -930,6 +930,23 @@ void demux_set_stream_still_image(demuxer_t *demuxer, struct sh_stream *sh,
     mp_mutex_lock(&in->lock);
     sh->still_image = still_image;
     update_stream_eager_state(in);
+    mp_mutex_unlock(&in->lock);
+}
+
+// Set whether the media provides data for this stream at all.
+void demux_set_stream_absent(demuxer_t *demuxer, struct sh_stream *sh,
+                             bool absent)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_thread);
+
+    mp_mutex_lock(&in->lock);
+    if (sh->absent != absent) {
+        MP_VERBOSE(in, "stream %d is %s\n", sh->index,
+                   absent ? "absent" : "present");
+        sh->absent = absent;
+        update_stream_eager_state(in);
+    }
     mp_mutex_unlock(&in->lock);
 }
 

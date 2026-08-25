@@ -68,6 +68,7 @@ struct sh_stream {
     bool commentary_track;      // container flag
     bool image;                 // video stream is an image
     bool still_image;           // video consists of multiple sparse still images
+    bool absent;                // the media provides no data for this stream
     int hls_bitrate;
     int *program_ids;
     int num_program_ids;
