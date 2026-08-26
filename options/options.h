@@ -161,6 +161,7 @@ struct mp_osd_render_opts {
 
 struct mp_bluray_opts {
     char *bluray_device;
+    char *keyfile;
     int angle;
 };
 
