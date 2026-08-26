@@ -120,6 +120,7 @@ enum track_flags {
     TRACK_ATTACHED_PICTURE = 1 << 4,
     TRACK_FORCED = 1 << 5,
     TRACK_DEFAULT = 1 << 6,
+    TRACK_COMMENTARY = 1 << 7,
 };
 
 #define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
