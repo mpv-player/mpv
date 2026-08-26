@@ -3930,6 +3930,12 @@ Disc Devices
     The menu can also be reached at any time via the synthetic "Disc Menu"
     entry in the editions/titles list, or with ``discnav menu`` command.
 
+    Blu-ray discs whose menus are BD-J rather than HDMV additionally need a
+    Java runtime and libbluray's BD-J jar (``libbluray-j2se-<version>.jar``).
+    libbluray should be able to find them automatically, but their locations
+    can also be overridden with the ``JAVA_HOME`` and ``LIBBLURAY_CP``
+    environment variables.
+
 ``--cdda-device=<path>``
     Specify the CD device for CDDA playback. The default device path depends on
     the OS. See the `OPTICAL DRIVES`_ section.
