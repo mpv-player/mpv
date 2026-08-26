@@ -122,6 +122,7 @@ struct bluray_priv_s {
     int current_angle;
     int current_title;
     int current_playlist;
+    int current_playitem;
 
     // Cached map from filtered title index (0..num_titles-1) to mpls_id.
     uint32_t *title_to_playlist;
@@ -213,12 +214,52 @@ static void bd_overlay_flush(struct bluray_priv_s *priv, struct bd_overlay_plane
     priv->nav_change_id++;
 }
 
-static enum pl_color_system bd_overlay_csp(struct bluray_priv_s *priv)
+// The clip currently being played.
+static const BLURAY_CLIP_INFO *bd_current_clip(const struct bluray_priv_s *priv)
 {
     const BLURAY_TITLE_INFO *ti = priv->title_info;
-    if (!ti || !ti->clip_count || !ti->clips[0].video_stream_count)
+    if (!ti || !ti->clip_count)
+        return NULL;
+    int n = priv->current_playitem >= 0 ? priv->current_playitem : 0;
+    if (n >= ti->clip_count)
+        n = 0;
+    return &ti->clips[n];
+}
+
+// Fill req->name from the clip's stream table. Returns whether the pid matched.
+static bool bd_clip_lang(const BLURAY_CLIP_INFO *ci, struct stream_lang_req *req)
+{
+    if (!ci)
+        return false;
+    const BLURAY_STREAM_INFO *si = NULL;
+    int count = 0;
+    switch (req->type) {
+    case STREAM_AUDIO:
+        count = ci->audio_stream_count;
+        si = ci->audio_streams;
+        break;
+    case STREAM_SUB:
+        count = ci->pg_stream_count;
+        si = ci->pg_streams;
+        break;
+    default:
+        return false;
+    }
+    for (int n = 0; n < count; n++) {
+        if (si[n].pid == req->id) {
+            snprintf(req->name, sizeof(req->name), "%.4s", si[n].lang);
+            return true;
+        }
+    }
+    return false;
+}
+
+static enum pl_color_system bd_overlay_csp(struct bluray_priv_s *priv)
+{
+    const BLURAY_CLIP_INFO *ci = bd_current_clip(priv);
+    if (!ci || !ci->video_stream_count)
         return PL_COLOR_SYSTEM_BT_709;
-    const BLURAY_STREAM_INFO *vs = &ti->clips[0].video_streams[0];
+    const BLURAY_STREAM_INFO *vs = &ci->video_streams[0];
 
 #if BLURAY_VERSION >= BLURAY_VERSION_CODE(1, 5, 0)
     // HEVC on UHD BD (2160p or 1080p) can be either 2020 or 709
@@ -592,11 +633,21 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             b->title_info = ti;
             b->current_playlist = playlist;
             b->current_title = title;
+            // A new playlist always starts at its first play item.
+            b->current_playitem = 0;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
             mp_mutex_unlock(&b->overlay_lock);
             break;
         }
+        case BD_EVENT_PLAYITEM:
+            mp_mutex_lock(&b->overlay_lock);
+            if (b->current_playitem != ev.param) {
+                b->current_playitem = ev.param;
+                b->nav_change_id++;
+            }
+            mp_mutex_unlock(&b->overlay_lock);
+            break;
         case BD_EVENT_TITLE: {
             MP_VERBOSE(s, "title number %u\n", ev.param);
             mp_mutex_lock(&b->overlay_lock);
@@ -887,24 +938,16 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (ti && ti->clip_count) {
             struct stream_lang_req *req = arg;
-            BLURAY_STREAM_INFO *si = NULL;
-            int count = 0;
-            switch (req->type) {
-            case STREAM_AUDIO:
-                count = ti->clips[0].audio_stream_count;
-                si = ti->clips[0].audio_streams;
-                break;
-            case STREAM_SUB:
-                count = ti->clips[0].pg_stream_count;
-                si = ti->clips[0].pg_streams;
-                break;
-            }
-            for (int n = 0; n < count; n++) {
-                BLURAY_STREAM_INFO *i = &si[n];
-                if (i->pid == req->id) {
-                    snprintf(req->name, sizeof(req->name), "%.4s", i->lang);
-                    rc = STREAM_OK;
-                    break;
+            const BLURAY_CLIP_INFO *cur = bd_current_clip(b);
+            if (bd_clip_lang(cur, req)) {
+                rc = STREAM_OK;
+            } else {
+                // The track list covers the whole playlist, so a pid the
+                // played clip does not carry may still be described by
+                // another one. Without this those tracks lose their language.
+                for (unsigned c = 0; c < ti->clip_count && rc != STREAM_OK; c++) {
+                    if (&ti->clips[c] != cur && bd_clip_lang(&ti->clips[c], req))
+                        rc = STREAM_OK;
                 }
             }
         }
@@ -980,8 +1023,8 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         bool no_audio = false;
         mp_mutex_lock(&b->overlay_lock);
         const BLURAY_TITLE_INFO *ti = b->title_info;
-        if (ti && ti->clip_count) {
-            const BLURAY_CLIP_INFO *ci = &ti->clips[0];
+        const BLURAY_CLIP_INFO *ci = bd_current_clip(b);
+        if (ci) {
             no_audio = ci->audio_stream_count == 0;
             if (b->audio_stream_num >= 1 &&
                 b->audio_stream_num <= ci->audio_stream_count)
