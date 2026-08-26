@@ -1397,11 +1397,18 @@ static int bluray_stream_open_internal(stream_t *s)
 
     b->hdmv_mode = b->cfg_title == BLURAY_MENU_TITLE;
 
-    // BD-J menus require a usable Java VM and libbluray.jar.
+    // BD-J menus require a usable Java VM and libbluray's BD-J jar.
     if (b->hdmv_mode && info->bdj_detected && !info->bdj_handled) {
-        MP_WARN(s, "BD-J menus not supported. Playing without menus. "
-                   "Java VM: %d, libbluray.jar: %d\n",
-                info->libjvm_detected, info->bdj_handled);
+        if (!info->libjvm_detected) {
+            MP_WARN(s, "This disc uses BD-J menus, but no Java VM was found. "
+                       "Playing without menus. Install a JRE, and set JAVA_HOME "
+                       "if it is not auto-detected.\n");
+        } else {
+            MP_WARN(s, "This disc uses BD-J menus and a Java VM was found, but "
+                       "libbluray's BD-J support is unusable. Playing without "
+                       "menus. Its BD-J jar (libbluray-j2se-<version>.jar) is "
+                       "most likely missing, set LIBBLURAY_CP to its path.\n");
+        }
         b->hdmv_mode = false;
         b->cfg_title = BLURAY_DEFAULT_TITLE;
     }
