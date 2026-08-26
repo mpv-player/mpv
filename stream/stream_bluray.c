@@ -598,13 +598,12 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             break;
         }
         case BD_EVENT_TITLE: {
-            int title = bd_get_current_title(b->bd);
+            MP_VERBOSE(s, "title number %u\n", ev.param);
             mp_mutex_lock(&b->overlay_lock);
             if (b->title_info) {
                 bd_free_title_info(b->title_info);
                 b->title_info = NULL;
             }
-            b->current_title = title;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
             mp_mutex_unlock(&b->overlay_lock);
