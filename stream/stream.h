@@ -91,7 +91,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_NUM_TITLES,
     STREAM_CTRL_GET_TITLE_LENGTH,    // double* (in: title number, out: len)
     STREAM_CTRL_GET_TITLE_PLAYLIST,  // double* (in: title number, out: playlist)
-    STREAM_CTRL_GET_LANG,
+    STREAM_CTRL_GET_TRACK_INFO,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
     STREAM_CTRL_NAV_CMD,             // struct stream_nav_cmd*
@@ -185,10 +185,11 @@ struct stream_nav_state {
     int num_angles;     // total angle count (0 if unknown or always 1)
 };
 
-struct stream_lang_req {
+struct stream_track_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
     int id;
     char name[50];
+    enum track_flags flags;
 };
 
 struct stream_dvd_info_req {

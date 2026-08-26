@@ -574,42 +574,64 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     mp_mutex_unlock(&priv->lock);
 }
 
-/**
- * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
+// Fill in what the IFO declares about one track. Returns whether the stream
+// was found at all, the name is left empty when the language is unspecified.
+static bool dvd_track_info(stream_t *stream, struct stream_track_req *req)
 {
     struct priv *priv = stream->priv;
+    uint16_t lang = 0xffff;
 
-    int lg = dvd_audio_logical_for_id(priv, aid);
-    if (lg < 0)
-        return 0;
-    uint16_t lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
-}
+    if (req->type == STREAM_AUDIO) {
+        int n = dvd_audio_logical_for_id(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_audio_stream_to_lang(priv->dvdnav, n);
+        audio_attr_t attr;
+        if (dvdnav_get_audio_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "audio 0x%x: logical %d, code extension %d\n",
+                       req->id, n, attr.code_extension);
+            switch (attr.code_extension) {
+            case 2: // visually impaired
+                req->flags |= TRACK_VISUAL_IMPAIRED;
+                break;
+            case 3: // director's comments
+            case 4: // alternate director's comments
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else if (req->type == STREAM_SUB) {
+        int n = dvd_spu_logical_stream(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_spu_stream_to_lang(priv->dvdnav, n);
+        subp_attr_t attr;
+        if (dvdnav_get_spu_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "subtitle 0x%x: logical %d, code extension %d\n",
+                       req->id, n, attr.code_extension);
+            switch (attr.code_extension) {
+            case 9: // mandatory caption, forced display
+                req->flags |= TRACK_FORCED;
+                break;
+            case 5: // closed captions, normal
+            case 6: // closed captions, large
+            case 7: // closed captions, for children
+                req->flags |= TRACK_HEARING_IMPAIRED;
+                break;
+            case 13: // director's comments, normal
+            case 14: // director's comments, large
+            case 15: // director's comments, for children
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else {
+        return false;
+    }
 
-/**
- * \brief mp_dvdnav_lang_from_sid() returns the language corresponding to subtitle id 'sid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid)
-{
-    struct priv *priv = stream->priv;
-
-    int k = dvd_spu_logical_stream(priv, sid);
-    if (k < 0)
-        return 0;
-    uint16_t lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
+    if (lang && lang != 0xffff)
+        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
+    return true;
 }
 
 /**
@@ -1017,20 +1039,9 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_LANG: {
-        struct stream_lang_req *req = arg;
-        int lang = 0;
-        switch (req->type) {
-        case STREAM_AUDIO:
-            lang = mp_dvdnav_lang_from_aid(stream, req->id);
+    case STREAM_CTRL_GET_TRACK_INFO: {
+        if (!dvd_track_info(stream, arg))
             break;
-        case STREAM_SUB:
-            lang = mp_dvdnav_lang_from_sid(stream, req->id);
-            break;
-        }
-        if (!lang)
-            break;
-        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_DVD_INFO: {
