@@ -107,6 +107,7 @@ struct priv {
 struct dvd_opts {
     int angle;
     int speed;
+    int region;
     char *device;
 };
 
@@ -117,6 +118,7 @@ const struct m_sub_options dvd_conf = {
         {"device", OPT_STRING(device), .flags = M_OPT_FILE},
         {"speed", OPT_INT(speed)},
         {"angle", OPT_INT(angle), M_RANGE(1, 99)},
+        {"region", OPT_CHOICE(region, {"auto", 0}), M_RANGE(1, 8)},
         {0}
     },
     .size = sizeof(struct dvd_opts),
@@ -1222,6 +1224,27 @@ static int open_s_internal(stream_t *stream)
         goto err;
     }
     priv->probing = false;
+
+    int32_t region_mask = 0;
+    if (p->opts->region) {
+        region_mask = 1 << (p->opts->region - 1);
+    } else {
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+        if (dvdnav_get_disk_region_mask(priv->dvdnav, &region_mask) != DVDNAV_STATUS_OK)
+            region_mask = 0;
+        // The disc reports every region it allows, while a player holds one.
+        // Claim the lowest of them, so the disc's own region checks pass.
+        region_mask &= -region_mask;
+#endif
+        if (!region_mask)
+            region_mask = 0xff; // Nothing to go on, claim region free.
+    }
+    // Set region mask to user provided value, or to the disc's region mask.
+    if (dvdnav_set_region_mask(priv->dvdnav, region_mask) == DVDNAV_STATUS_OK) {
+        MP_VERBOSE(stream, "player region mask set to 0x%02x\n", region_mask);
+    } else {
+        MP_WARN(stream, "Couldn't set the player region mask.\n");
+    }
 
     set_dvd_languages(stream);
 

@@ -4049,6 +4049,11 @@ Disc Devices
 
         You need write access to the DVD device to change the speed.
 
+``--dvd-region=<auto|1-8>``
+    DVD player region code (default: auto). ``auto`` claims whichever regions
+    the disc itself allows, so region checks in the disc's own code pass.
+    Naming a region claims exactly that one.
+
 ``--dvd-angle=<ID>``
     Some DVDs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
