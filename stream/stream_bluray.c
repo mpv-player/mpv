@@ -521,7 +521,16 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         // zero-length read only polls the remaining events.
         int n = bd_read_ext(b->bd, buf, hopped ? 0 : len, &ev);
         if (n < 0) {
-            MP_VERBOSE(s, "bd_read_ext() failed.\n");
+            // A failed read can still have queued the event that explains it,
+            // and that event does not come back with the failure, so ask.
+            if (bd_get_event(b->bd, &ev) && ev.event == BD_EVENT_ENCRYPTED) {
+                MP_ERR(s, "Blu-ray clip is encrypted and cannot be decrypted, "
+                          "%s support is missing or the disc is not "
+                          "supported.\n",
+                       ev.param == BD_ERROR_BDPLUS ? "BD+" : "AACS");
+            } else {
+                MP_VERBOSE(s, "bd_read_ext() failed.\n");
+            }
             return -1;
         }
 
