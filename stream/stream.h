@@ -133,7 +133,15 @@ enum stream_nav_action {
     STREAM_NAV_MENU_ROOT,      // jump to the disc's root/title menu
     STREAM_NAV_MENU_TITLE,     // jump to the current title's menu
     STREAM_NAV_MENU_POPUP,     // BD popup menu (chapter menu on DVD)
+    STREAM_NAV_MENU_AUDIO,     // DVD audio menu
+    STREAM_NAV_MENU_SUBTITLE,  // DVD subpicture menu
+    STREAM_NAV_MENU_ANGLE,     // DVD angle menu
+    STREAM_NAV_GO_UP,          // DVD: move to the parent menu
     STREAM_NAV_PREV_MENU,      // return to previous menu / leave still
+    STREAM_NAV_KEY_RED,        // BD color keys
+    STREAM_NAV_KEY_GREEN,
+    STREAM_NAV_KEY_YELLOW,
+    STREAM_NAV_KEY_BLUE,
     STREAM_NAV_MOUSE_MOVE,     // mouse moved; .x,.y are video-space coords
     STREAM_NAV_MOUSE_CLICK,    // mouse button activated at .x,.y
 };
@@ -152,7 +160,15 @@ static inline bool stream_nav_action_activates(enum stream_nav_action a)
     case STREAM_NAV_MENU_ROOT:
     case STREAM_NAV_MENU_TITLE:
     case STREAM_NAV_MENU_POPUP:
+    case STREAM_NAV_MENU_AUDIO:
+    case STREAM_NAV_MENU_SUBTITLE:
+    case STREAM_NAV_MENU_ANGLE:
+    case STREAM_NAV_GO_UP:
     case STREAM_NAV_PREV_MENU:
+    case STREAM_NAV_KEY_RED:
+    case STREAM_NAV_KEY_GREEN:
+    case STREAM_NAV_KEY_YELLOW:
+    case STREAM_NAV_KEY_BLUE:
         return true;
     default:
         return false;
