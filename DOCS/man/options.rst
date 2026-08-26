@@ -11,6 +11,12 @@ Track Selection
     will be used. A track that matches more subtags will be preferred over one
     that matches fewer. See also ``--aid``.
 
+    On a disc the list is also handed to the disc's own selection logic. A DVD
+    register holds a single two-letter ISO 639-1 code, so only the first
+    two-letter entry is used and longer ones are skipped. This only affects
+    what the disc itself picks, mpv's own track selection always uses the
+    whole list.
+
     This is a string list option. See `List Options`_ for details.
 
     .. admonition:: Examples
