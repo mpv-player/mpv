@@ -1121,6 +1121,43 @@ static dvdnav_status_t nav_open(stream_t *stream, dvdnav_t **dest, const char *p
     return dvdnav_open2(dest, priv, &logger_cb, path);
 }
 
+// Set the VM's language registers from our options.
+static void set_dvd_languages(stream_t *stream)
+{
+    struct priv *priv = stream->priv;
+    struct MPOpts *opts = mp_get_config_group(NULL, stream->global, &mp_opt_root);
+
+    static const struct {
+        int type;
+        dvdnav_status_t (*select)(dvdnav_t *, char *);
+        const char *name;
+    } regs[] = {
+        {STREAM_AUDIO, dvdnav_audio_language_select, "audio"},
+        {STREAM_SUB,   dvdnav_spu_language_select,   "subtitle"},
+        // SPRM0 picks the menu language unit. Unlike the other two libdvdnav
+        // reads it itself, so leaving it alone means every multi language disc
+        // shows English menus. Follow the subtitle preference, menus are text.
+        {STREAM_SUB,   dvdnav_menu_language_select,  "menu"},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(regs); i++) {
+        char **langs = opts->stream_lang[regs[i].type];
+        for (int n = 0; langs && langs[n]; n++) {
+            // dvdnav_*_language_select() take the first two bytes as they are,
+            // so a longer code would be truncated into a bogus one.
+            if (strlen(langs[n]) != 2)
+                continue;
+            if (regs[i].select(priv->dvdnav, langs[n]) == DVDNAV_STATUS_OK) {
+                MP_VERBOSE(stream, "%s language register set to '%s'\n",
+                           regs[i].name, langs[n]);
+            }
+            break;
+        }
+    }
+
+    talloc_free(opts);
+}
+
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
 {
     struct priv *priv = stream->priv;
@@ -1179,6 +1216,8 @@ static int open_s_internal(stream_t *stream)
         goto err;
     }
     priv->probing = false;
+
+    set_dvd_languages(stream);
 
     int32_t num_titles = 0;
     dvdnav_get_number_of_titles(priv->dvdnav, &num_titles);
