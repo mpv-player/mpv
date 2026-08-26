@@ -541,6 +541,11 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         case BD_EVENT_READ_ERROR:
             MP_WARN(s, "Blu-ray read error, skipping unit.\n");
             break;
+        case BD_EVENT_ENCRYPTED:
+            MP_ERR(s, "Blu-ray clip is encrypted and cannot be decrypted, "
+                      "%s support is missing or the disc is not supported.\n",
+                   ev.param == BD_ERROR_BDPLUS ? "BD+" : "AACS");
+            return -1;
         case BD_EVENT_END_OF_TITLE:
             mp_mutex_lock(&b->overlay_lock);
             b->still_active = false;
