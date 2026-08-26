@@ -1018,6 +1018,23 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         case STREAM_NAV_MENU_POPUP:
             key = BD_VK_POPUP;
             break;
+        case STREAM_NAV_KEY_RED:
+            key = BD_VK_RED;
+            break;
+        case STREAM_NAV_KEY_GREEN:
+            key = BD_VK_GREEN;
+            break;
+        case STREAM_NAV_KEY_YELLOW:
+            key = BD_VL_YELLOW; // libbluray typo
+            break;
+        case STREAM_NAV_KEY_BLUE:
+            key = BD_VK_BLUE;
+            break;
+        case STREAM_NAV_MENU_AUDIO:
+        case STREAM_NAV_MENU_SUBTITLE:
+        case STREAM_NAV_MENU_ANGLE:
+        case STREAM_NAV_GO_UP:
+            return STREAM_UNSUPPORTED;
         case STREAM_NAV_PREV_MENU:
             // No dedicated "previous menu" key; popup-toggle is the closest
             // equivalent and behaves like "dismiss current menu" on most

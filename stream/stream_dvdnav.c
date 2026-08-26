@@ -458,6 +458,22 @@ static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
         update_highlight(priv);
         return;
+    case STREAM_NAV_MENU_AUDIO:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_SUBTITLE:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_ANGLE:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_GO_UP:
+        dvdnav_go_up(priv->dvdnav);
+        update_highlight(priv);
+        return;
     case STREAM_NAV_PREV_MENU:
         dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
         update_highlight(priv);
@@ -512,9 +528,19 @@ static void bump_discontinuity(struct priv *priv)
            priv->discontinuity_id, priv->pending_drain);
 }
 
-static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
+
+    switch (cmd->action) {
+    case STREAM_NAV_KEY_RED:
+    case STREAM_NAV_KEY_GREEN:
+    case STREAM_NAV_KEY_YELLOW:
+    case STREAM_NAV_KEY_BLUE:
+        return STREAM_UNSUPPORTED; // Blu-ray only.
+    default:
+        break;
+    }
 
     mp_mutex_lock(&priv->lock);
     int prev_auto = priv->auto_actioned_button;
@@ -524,6 +550,7 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     if (priv->still_active && activated)
         bump_discontinuity(priv);
     mp_mutex_unlock(&priv->lock);
+    return STREAM_OK;
 }
 
 // Index of a physical audio stream in the current title set's attribute
@@ -1059,10 +1086,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, volume);
         return STREAM_OK;
     }
-    case STREAM_CTRL_NAV_CMD: {
-        handle_nav_cmd(stream, arg);
-        return STREAM_OK;
-    }
+    case STREAM_CTRL_NAV_CMD:
+        return handle_nav_cmd(stream, arg);
     case STREAM_CTRL_NAV_DRAIN_ENABLE: {
         mp_mutex_lock(&priv->lock);
         priv->drain_enabled = true;
