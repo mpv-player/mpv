@@ -88,11 +88,15 @@ const struct m_sub_options stream_bluray_conf = {
         // libbluray multiplies this by 45000 into a uint32_t, so stay well
         // below where that would overflow.
         {"min-title-length", OPT_INT(min_title_length), M_RANGE(0, 86400)},
+        {"region", OPT_CHOICE(region, {"auto", 0}, {"a", 1}, {"b", 2}, {"c", 4})},
+        {"uo-restriction", OPT_CHOICE(uo_restriction, {"auto", -1},
+            {"disabled", 0}, {"relaxed", 5}, {"safe", 10}, {"compliant", 20})},
         {0},
     },
     .size = sizeof(struct mp_bluray_opts),
     .defaults = &(const struct mp_bluray_opts){
         .angle = 1,
+        .uo_restriction = -1,
     },
 };
 
@@ -1282,20 +1286,43 @@ static int bluray_stream_open_internal(stream_t *s)
     mp_mutex_unlock(&bluray_log_lock);
 
     /* open device */
+    BLURAY *bd = bd_init();
+    if (!bd) {
+        MP_ERR(s, "Couldn't create a libbluray instance.\n");
+        ret = STREAM_ERROR;
+        goto err;
+    }
+    b->bd = bd;
+
+    if (b->opts->region) {
+        // libbluray defaults this to region B.
+        if (!bd_set_player_setting(bd, BLURAY_PLAYER_SETTING_REGION_CODE,
+                                   b->opts->region))
+            MP_WARN(s, "Couldn't set the player region.\n");
+    }
+    if (b->opts->uo_restriction >= 0) {
+#if BLURAY_VERSION >= BLURAY_VERSION_CODE(1, 4, 1)
+        if (!bd_set_player_setting(bd, BLURAY_PLAYER_SETTING_UO_RESTRICTION_LEVEL,
+                                   b->opts->uo_restriction))
+            MP_WARN(s, "Couldn't set the user operation restriction level.\n");
+#else
+        MP_WARN(s, "--bluray-uo-restriction requires libbluray 1.4.1 or newer.\n");
+#endif
+    }
+
     char *device_tmp = mp_get_user_path(NULL, s->global, device);
     char *keyfile = NULL;
     if (b->opts->keyfile && b->opts->keyfile[0])
         keyfile = mp_get_user_path(NULL, s->global, b->opts->keyfile);
-    BLURAY *bd = bd_open(device_tmp, keyfile);
+    int opened = bd_open_disc(bd, device_tmp, keyfile);
     talloc_free(keyfile);
     talloc_free(device_tmp);
-    if (!bd) {
+    if (!opened) {
         if (!b->probing)
             MP_ERR(s, "Couldn't open Blu-ray device: %s\n", device);
         ret = STREAM_UNSUPPORTED;
         goto err;
     }
-    b->bd = bd;
 
     if (!check_disc_info(s)) {
         ret = STREAM_UNSUPPORTED;

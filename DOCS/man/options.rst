@@ -3968,6 +3968,20 @@ Disc Devices
 
         ``mpv bd:// --bluray-device=/path/to/bd/``
 
+``--bluray-region=<auto|a|b|c>``
+    Blu-ray player region code (default: auto). ``auto`` leaves libbluray's
+    own default in place, which is region B. Only matters for discs whose
+    menus or BD-J code check the player region.
+
+``--bluray-uo-restriction=<auto|disabled|relaxed|safe|compliant>``
+    How strictly to enforce the disc's User Operation prohibition masks
+    (default: auto, which leaves libbluray's default of ``relaxed`` in place).
+
+    Discs use these masks to make warnings and trailers unskippable.
+    ``disabled`` executes every operation unconditionally and may break
+    playback on some discs, ``compliant`` obeys the disc fully, and the two
+    values in between trade compliance for usability.
+
 ``--bluray-min-title-length=<seconds>``
     Ignore Blu-ray titles (playlists) shorter than this when building the
     title list (default: 0, list every title). Discs commonly carry a large
