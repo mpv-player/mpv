@@ -314,7 +314,7 @@ jobs:
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
-            libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread rubberband zimg
           brew link ffmpeg-full
 
       - name: Build with meson
@@ -586,6 +586,7 @@ jobs:
               libcaca \
               libcdio-paranoia \
               libdvdnav \
+              libdvdread \
               libdisplay-info \
               libplacebo \
               libXinerama \
@@ -682,6 +683,7 @@ jobs:
             libass:p
             libcdio-paranoia:p
             libdvdnav:p
+            libdvdread:p
             libjpeg-turbo:p
             libplacebo:p
             lua51:p

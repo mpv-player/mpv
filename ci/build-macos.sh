@@ -18,7 +18,7 @@ PKG_CONFIG_PATH="$(brew --prefix libarchive)/lib/pkgconfig/" CC="${CC}" CXX="${C
 meson setup build $common_args \
   -Dobjc_args="${objc_args}" \
   -Dc_args="${c_args}" \
-  -D{caca,cdda,dvdnav,gl,iconv,lcms2,libarchive,libbluray,lua,jpeg}=enabled \
+  -D{caca,cdda,dvda,dvdnav,gl,iconv,lcms2,libarchive,libbluray,lua,jpeg}=enabled \
   -D{plain-gl,rubberband,zimg,zlib}=enabled \
   -D{cocoa,coreaudio,gl-cocoa,videotoolbox-gl,videotoolbox-pl}=enabled \
   -D{swift-build,macos-cocoa-cb,macos-media-player,macos-touchbar,vulkan}=enabled \
