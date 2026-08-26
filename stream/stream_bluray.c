@@ -39,6 +39,7 @@
 #include "common/msg.h"
 #include "misc/thread_tools.h"
 #include "options/m_config.h"
+#include "misc/language.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "osdep/threads.h"
@@ -486,6 +487,26 @@ static void bd_argb_overlay_cb(void *handle, const BD_ARGB_OVERLAY *ov)
         break;
     }
     mp_mutex_unlock(&priv->overlay_lock);
+}
+
+// libbluray compares the player setting to the stream table byte for byte, and
+// both ISO 639-2 forms are in use, so the disc's own spelling has to go back in.
+struct bd_lang_pick {
+    char code[4];
+    int score;
+};
+
+static void bd_pick_lang(struct bd_lang_pick *pick, char **langs,
+                         const BLURAY_STREAM_INFO *si, int count)
+{
+    for (int i = 0; i < count; i++) {
+        const char *c = (const char *)si[i].lang;
+        int score = mp_match_lang(langs, c);
+        if (score > pick->score) {
+            pick->score = score;
+            snprintf(pick->code, sizeof(pick->code), "%.3s", c);
+        }
+    }
 }
 
 inline static int play_playlist(struct bluray_priv_s *priv, int playlist)
@@ -1297,6 +1318,10 @@ static int bluray_stream_open_internal(stream_t *s)
     MP_INFO(s, "List of available titles:\n");
 
     /* parse titles information */
+    struct MPOpts *mpopts = mp_get_config_group(NULL, s->global, &mp_opt_root);
+    char **alang = mpopts->stream_lang[STREAM_AUDIO];
+    char **slang = mpopts->stream_lang[STREAM_SUB];
+    struct bd_lang_pick audio_pick = {0}, pg_pick = {0};
     b->title_to_playlist = talloc_array(b, uint32_t, b->num_titles);
     for (int i = 0; i < b->num_titles; i++) {
         b->title_to_playlist[i] = (uint32_t)-1;
@@ -1308,6 +1333,13 @@ static int bluray_stream_open_internal(stream_t *s)
 
         b->title_to_playlist[i] = ti->playlist;
 
+        for (uint32_t c = 0; c < ti->clip_count; c++) {
+            bd_pick_lang(&audio_pick, alang, ti->clips[c].audio_streams,
+                         ti->clips[c].audio_stream_count);
+            bd_pick_lang(&pg_pick, slang, ti->clips[c].pg_streams,
+                         ti->clips[c].pg_stream_count);
+        }
+
         char *time = mp_format_time(ti->duration / 90000, false);
         MP_INFO(s, "idx: %3d duration: %s angles: %2d (playlist: %05d.mpls)\n",
                     i, time, ti->angle_count, ti->playlist);
@@ -1315,6 +1347,12 @@ static int bluray_stream_open_internal(stream_t *s)
 
         bd_free_title_info(ti);
     }
+
+    if (audio_pick.score && bd_set_player_setting_str(bd, BLURAY_PLAYER_SETTING_AUDIO_LANG, audio_pick.code))
+        MP_VERBOSE(s, "audio language set to '%s'\n", audio_pick.code);
+    if (pg_pick.score && bd_set_player_setting_str(bd, BLURAY_PLAYER_SETTING_PG_LANG, pg_pick.code))
+        MP_VERBOSE(s, "subtitle language set to '%s'\n", pg_pick.code);
+    talloc_free(mpopts);
 
     // these should be set before any callback
     b->current_angle = -1;
