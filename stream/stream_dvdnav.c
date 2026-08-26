@@ -1003,6 +1003,19 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_DISC_NAME: {
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+        char *volid = dvdnav_get_volid_string(dvdnav);
+        if (volid && volid[0]) {
+            bstr name = bstr_sanitize_utf8_latin1(NULL, bstr0(volid));
+            // Sanitize adds a terminating NUL, so we can use it directly, but
+            // only if conversion has happened.
+            *(char **)arg = name.start == (unsigned char *)volid
+                                ? talloc_strdup(NULL, volid) : (char *)name.start;
+            free(volid);
+            return STREAM_OK;
+        }
+        free(volid);
+#endif
         const char *volume = NULL;
         if (dvdnav_get_title_string(dvdnav, &volume) != DVDNAV_STATUS_OK)
             break;
