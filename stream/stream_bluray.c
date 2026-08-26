@@ -20,10 +20,6 @@
 /*
  * Blu-ray parser/reader using libbluray
  *  Use 'git clone git://git.videolan.org/libbluray' to get it.
- *
- * TODO:
- *  - Add descrambled keys database support (KEYDB.cfg)
- *
  */
 
 #include <string.h>
@@ -86,6 +82,7 @@
 const struct m_sub_options stream_bluray_conf = {
     .opts = (const struct m_option[]) {
         {"device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
+        {"key-file", OPT_STRING(keyfile), .flags = M_OPT_FILE},
         {"angle", OPT_INT(angle), M_RANGE(1, 999)},
         {0},
     },
@@ -1215,7 +1212,11 @@ static int bluray_stream_open_internal(stream_t *s)
 
     /* open device */
     char *device_tmp = mp_get_user_path(NULL, s->global, device);
-    BLURAY *bd = bd_open(device_tmp, NULL);
+    char *keyfile = NULL;
+    if (b->opts->keyfile && b->opts->keyfile[0])
+        keyfile = mp_get_user_path(NULL, s->global, b->opts->keyfile);
+    BLURAY *bd = bd_open(device_tmp, keyfile);
+    talloc_free(keyfile);
     talloc_free(device_tmp);
     if (!bd) {
         if (!b->probing)

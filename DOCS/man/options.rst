@@ -3961,6 +3961,10 @@ Disc Devices
 
         ``mpv bd:// --bluray-device=/path/to/bd/``
 
+``--bluray-key-file=<path>``
+    Path to a ``KEYDB.cfg`` unit key database, passed to libbluray for AACS
+    decryption (default: unset, let libaacs use its own configured location).
+
 ``--cdda-...``
     These options can be used to tune the CD Audio reading feature of mpv.
 
