@@ -163,6 +163,7 @@ struct mp_bluray_opts {
     char *bluray_device;
     char *keyfile;
     int angle;
+    int min_title_length;
 };
 
 struct dvda_opts {

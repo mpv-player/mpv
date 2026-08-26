@@ -3961,6 +3961,20 @@ Disc Devices
 
         ``mpv bd:// --bluray-device=/path/to/bd/``
 
+``--bluray-min-title-length=<seconds>``
+    Ignore Blu-ray titles (playlists) shorter than this when building the
+    title list (default: 0, list every title). Discs commonly carry a large
+    number of very short playlists used only by the disc menus, and those show
+    up as editions. Setting this to something like 180 hides them.
+
+    If no title is long enough, the whole list is used instead, so that a disc
+    is never left unplayable by this.
+
+    Note that the title list is what ``bd://<N>`` and ``--edition`` index
+    into, so changing this renumbers them. ``bd://mpls/<NNNNN>`` is unaffected.
+    The language preferences are also picked from the titles that survive the
+    filter.
+
 ``--bluray-key-file=<path>``
     Path to a ``KEYDB.cfg`` unit key database, passed to libbluray for AACS
     decryption (default: unset, let libaacs use its own configured location).

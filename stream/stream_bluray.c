@@ -84,6 +84,9 @@ const struct m_sub_options stream_bluray_conf = {
         {"device", OPT_STRING(bluray_device), .flags = M_OPT_FILE},
         {"key-file", OPT_STRING(keyfile), .flags = M_OPT_FILE},
         {"angle", OPT_INT(angle), M_RANGE(1, 999)},
+        // libbluray multiplies this by 45000 into a uint32_t, so stay well
+        // below where that would overflow.
+        {"min-title-length", OPT_INT(min_title_length), M_RANGE(0, 86400)},
         {0},
     },
     .size = sizeof(struct mp_bluray_opts),
@@ -1279,7 +1282,12 @@ static int bluray_stream_open_internal(stream_t *s)
     }
 
     /* check for available titles on disc */
-    b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
+    b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, b->opts->min_title_length);
+    if (!b->num_titles && b->opts->min_title_length) {
+        MP_WARN(s, "No title is at least %d seconds long, listing all of them.\n",
+                b->opts->min_title_length);
+        b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
+    }
     if (!b->num_titles) {
         MP_ERR(s, "Can't find any Blu-ray-compatible title here.\n");
         ret = STREAM_UNSUPPORTED;
