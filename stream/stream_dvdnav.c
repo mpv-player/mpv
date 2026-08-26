@@ -834,9 +834,19 @@ static int control(stream_t *stream, int cmd, void *arg)
         break;
     }
     case STREAM_CTRL_GET_ASPECT_RATIO: {
-        uint8_t ar = dvdnav_get_video_aspect(dvdnav);
-        *(double *)arg = !ar ? 4.0 / 3.0 : 16.0 / 9.0;
-        return STREAM_OK;
+        int8_t ar = dvdnav_get_video_aspect(dvdnav);
+        if (ar < 0)
+            return STREAM_ERROR;
+        if (ar == 0) {
+            *(double *)arg = 4.0 / 3.0;
+            return STREAM_OK;
+        }
+        if (ar == 3) {
+            *(double *)arg = 16.0 / 9.0;
+            return STREAM_OK;
+        }
+        MP_WARN(stream, "Unexpected DVD video aspect ratio %d.\n", ar);
+        break;
     }
     case STREAM_CTRL_GET_CURRENT_TIME: {
         int64_t tm = dvdnav_get_current_time(dvdnav);
