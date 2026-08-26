@@ -526,51 +526,86 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     mp_mutex_unlock(&priv->lock);
 }
 
-/**
- * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
+// Index of a physical audio stream in the current title set's attribute
+// table, or -1.
+static int dvd_audio_attr_index(struct priv *priv, int aid)
 {
-    uint8_t lg;
-    uint16_t lang;
-    struct priv *priv = stream->priv;
-
     if (aid < 0)
-        return 0;
-    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
-    if (lg == 0xff)
-        return 0;
-    lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
+        return -1;
+    int8_t n = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
+    return n < 0 ? -1 : n;
 }
 
-/**
- * \brief mp_dvdnav_lang_from_sid() returns the language corresponding to subtitle id 'sid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid)
+// Same for a physical subpicture stream (0..31).
+static int dvd_spu_attr_index(struct priv *priv, int sid)
 {
-    uint8_t k;
-    uint16_t lang;
-    struct priv *priv = stream->priv;
     if (sid < 0)
-        return 0;
-    for (k = 0; k < 32; k++)
-        if (dvdnav_get_spu_logical_stream(priv->dvdnav, k) == sid)
-            break;
-    if (k == 32)
-        return 0;
-    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
+        return -1;
+    for (int n = 0; n < 32; n++) {
+        if (dvdnav_get_spu_logical_stream(priv->dvdnav, n) == sid)
+            return n;
+    }
+    return -1;
+}
+
+// Fill in what the IFO declares about one track. Returns whether the stream
+// was found at all, the name is left empty when the language is unspecified.
+static bool dvd_track_info(stream_t *stream, struct stream_track_req *req)
+{
+    struct priv *priv = stream->priv;
+    uint16_t lang = 0xffff;
+
+    if (req->type == STREAM_AUDIO) {
+        int n = dvd_audio_attr_index(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_audio_stream_to_lang(priv->dvdnav, n);
+        audio_attr_t attr;
+        if (dvdnav_get_audio_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "audio 0x%x: code extension %d\n",
+                       req->id, attr.code_extension);
+            switch (attr.code_extension) {
+            case 2: // visually impaired
+                req->flags |= TRACK_VISUAL_IMPAIRED;
+                break;
+            case 3: // director's comments
+            case 4: // alternate director's comments
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else if (req->type == STREAM_SUB) {
+        int n = dvd_spu_attr_index(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_spu_stream_to_lang(priv->dvdnav, n);
+        subp_attr_t attr;
+        if (dvdnav_get_spu_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "subtitle 0x%x: code extension %d\n",
+                       req->id, attr.code_extension);
+            switch (attr.code_extension) {
+            case 9: // mandatory caption, forced display
+                req->flags |= TRACK_FORCED;
+                break;
+            case 5: // closed captions, normal
+            case 6: // closed captions, large
+            case 7: // closed captions, for children
+                req->flags |= TRACK_HEARING_IMPAIRED;
+                break;
+            case 13: // director's comments, normal
+            case 14: // director's comments, large
+            case 15: // director's comments, for children
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else {
+        return false;
+    }
+
+    if (lang && lang != 0xffff)
+        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
+    return true;
 }
 
 /**
@@ -988,20 +1023,9 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_LANG: {
-        struct stream_lang_req *req = arg;
-        int lang = 0;
-        switch (req->type) {
-        case STREAM_AUDIO:
-            lang = mp_dvdnav_lang_from_aid(stream, req->id);
+    case STREAM_CTRL_GET_TRACK_INFO: {
+        if (!dvd_track_info(stream, arg))
             break;
-        case STREAM_SUB:
-            lang = mp_dvdnav_lang_from_sid(stream, req->id);
-            break;
-        }
-        if (!lang)
-            break;
-        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_DVD_INFO: {

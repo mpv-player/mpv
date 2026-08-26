@@ -235,7 +235,7 @@ static const BLURAY_CLIP_INFO *bd_current_clip(const struct bluray_priv_s *priv)
 }
 
 // Fill req->name from the clip's stream table. Returns whether the pid matched.
-static bool bd_clip_lang(const BLURAY_CLIP_INFO *ci, struct stream_lang_req *req)
+static bool bd_clip_lang(const BLURAY_CLIP_INFO *ci, struct stream_track_req *req)
 {
     if (!ci)
         return false;
@@ -960,12 +960,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         bd_free_title_info(ti);
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_LANG: {
+    case STREAM_CTRL_GET_TRACK_INFO: {
         int rc = STREAM_ERROR;
         mp_mutex_lock(&b->overlay_lock);
         const BLURAY_TITLE_INFO *ti = b->title_info;
         if (ti && ti->clip_count) {
-            struct stream_lang_req *req = arg;
+            struct stream_track_req *req = arg;
             const BLURAY_CLIP_INFO *cur = bd_current_clip(b);
             if (bd_clip_lang(cur, req)) {
                 rc = STREAM_OK;
