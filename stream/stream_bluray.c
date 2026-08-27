@@ -843,6 +843,25 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_unlock(&b->overlay_lock);
         return ti ? STREAM_OK : STREAM_UNSUPPORTED;
     }
+    case STREAM_CTRL_GET_CHAPTER_NAME: {
+#if BLURAY_VERSION >= BLURAY_VERSION_CODE(1, 5, 0)
+        struct stream_name_req *req = arg;
+        int rc = STREAM_UNSUPPORTED;
+        mp_mutex_lock(&b->overlay_lock);
+        const BLURAY_TITLE_INFO *ti = b->title_info;
+        if (ti && req->index >= 0 && req->index < ti->chapter_count) {
+            const char *name = ti->chapters[req->index].chapter_name;
+            if (name && name[0]) {
+                req->name = talloc_strdup(NULL, name);
+                rc = STREAM_OK;
+            }
+        }
+        mp_mutex_unlock(&b->overlay_lock);
+        return rc;
+#else
+        break;
+#endif
+    }
     case STREAM_CTRL_GET_CHAPTER_TIME: {
         int chapter = *(double *)arg;
         mp_mutex_lock(&b->overlay_lock);
