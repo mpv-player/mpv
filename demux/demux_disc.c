@@ -689,16 +689,23 @@ static void add_stream_chapters(struct demuxer *demuxer);
 // Sync demuxer->edition with the disc's current playback position.
 static void sync_initial_edition(struct demuxer *demuxer)
 {
+    struct stream_nav_state nav = {0};
+    bool in_disc_nav = stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1
+                       && nav.nav_active && demuxer->num_editions > 0;
+
     unsigned title;
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TITLE, &title) >= 1 &&
         title < (unsigned)demuxer->num_editions)
-        demuxer->edition = title;
-    struct stream_nav_state nav = {0};
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1
-        && nav.menu_active && demuxer->num_editions > 0)
     {
+        demuxer->edition = title;
+    } else if (in_disc_nav) {
+        // The disc is playing something the title list does not contain, an
+        // intro or a menu. Point at the synthetic entry instead of leaving
+        // whichever edition happened to be marked before.
         demuxer->edition = demuxer->num_editions - 1;
     }
+    if (in_disc_nav && nav.menu_active)
+        demuxer->edition = demuxer->num_editions - 1;
 }
 
 static void refresh_disc_metadata(struct demuxer *demuxer)
