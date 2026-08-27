@@ -912,9 +912,12 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
     case STREAM_CTRL_GET_DISC_NAME: {
         const struct meta_dl *meta = bd_get_meta(b->bd);
-        if (!meta || !meta->di_name || !meta->di_name[0])
+        const char *name = meta ? meta->di_name : NULL;
+        if (!name || !name[0])
+            name = bd_get_disc_info(b->bd)->udf_volume_id;
+        if (!name || !name[0])
             break;
-        *(char**)arg = talloc_strdup(NULL, meta->di_name);
+        *(char **)arg = talloc_strdup(NULL, name);
         return STREAM_OK;
     }
     case STREAM_CTRL_NAV_CMD: {
