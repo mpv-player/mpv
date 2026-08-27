@@ -582,11 +582,13 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     return acted;
 }
 
-// Mark a source-position jump. Runs with priv->lock held.
-static void bump_discontinuity(struct priv *priv)
+// Mark a source-position jump. Runs with priv->lock held. Set requested for a
+// move mpv asked the disc to make, as opposed to one the disc reported.
+static void bump_discontinuity(struct priv *priv, bool requested)
 {
-    // Back-to-back jump events with no payload between them are one jump.
-    if (priv->at_boundary)
+    // Back-to-back disc events with no payload between them are one jump. A
+    // held still never delivers payload, so a requested move must not wait.
+    if (priv->at_boundary && !requested)
         return;
     priv->at_boundary = true;
     priv->discontinuity_id++;
@@ -640,8 +642,10 @@ static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     bool was_still = priv->still_active; // do_nav_cmd may release it
     bool acted = do_nav_cmd(stream, cmd);
     bool activated = acted || priv->auto_actioned_button != prev_auto;
-    if (was_still && activated)
-        bump_discontinuity(priv);
+    // The reader is parked on a held still, and dvdnav_go_up bumps no hop
+    // channel, so neither move would be reported. Announce them here.
+    if (activated && (was_still || cmd->action == STREAM_NAV_GO_UP))
+        bump_discontinuity(priv, true);
     mp_mutex_unlock(&priv->lock);
     return STREAM_OK;
 }
@@ -798,7 +802,7 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         break;
     case DVDNAV_HOP_CHANNEL:
         MP_VERBOSE(s, "hop channel (domain=%s)\n", dvd_domain_name(dvdnav));
-        bump_discontinuity(priv);
+        bump_discontinuity(priv, false);
         break;
     case DVDNAV_HIGHLIGHT:
         update_highlight(priv);
@@ -827,7 +831,7 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         // so mouse coordinate translation stays correct.
         refresh_video_resolution(priv);
         // VTS change is a title-set boundary, flush.
-        bump_discontinuity(priv);
+        bump_discontinuity(priv, false);
         break;
     }
     case DVDNAV_CELL_CHANGE: {
@@ -1032,7 +1036,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         // demuxer thread when the discontinuity is processed.
         mp_mutex_lock(&priv->lock);
         release_still(priv);
-        bump_discontinuity(priv);
+        bump_discontinuity(priv, true);
         mp_mutex_unlock(&priv->lock);
         return STREAM_OK;
     }
