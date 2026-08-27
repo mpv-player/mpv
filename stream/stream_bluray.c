@@ -1233,12 +1233,14 @@ static bool check_disc_info(stream_t *s)
     return true;
 }
 
-static void select_initial_title(stream_t *s, int title_guess) {
+static bool select_initial_title(stream_t *s, int title_guess) {
     struct bluray_priv_s *b = s->priv;
 
     if (b->cfg_title == BLURAY_PLAYLIST_TITLE) {
-        if (!play_playlist(b, b->cfg_playlist))
-            MP_WARN(s, "Couldn't start playlist '%05d'.\n", b->cfg_playlist);
+        if (!play_playlist(b, b->cfg_playlist)) {
+            MP_ERR(s, "Couldn't start playlist '%05d'.\n", b->cfg_playlist);
+            return false;
+        }
         b->current_title = bd_title_for_playlist(b, b->cfg_playlist);
     } else {
         int title = -1;
@@ -1247,15 +1249,17 @@ static void select_initial_title(stream_t *s, int title_guess) {
         else
             title = title_guess;
         if (title < 0)
-            return;
+            return false;
 
         if (play_title(b, title))
             b->current_title = title;
         else {
-            MP_WARN(s, "Couldn't start title '%d'.\n", title);
+            MP_ERR(s, "Couldn't start title '%d'.\n", title);
             b->current_title = -1;
+            return false;
         }
     }
+    return true;
 }
 
 static int bluray_stream_open_internal(stream_t *s)
@@ -1362,7 +1366,7 @@ static int bluray_stream_open_internal(stream_t *s)
     }
     if (!b->num_titles) {
         MP_ERR(s, "Can't find any Blu-ray-compatible title here.\n");
-        ret = STREAM_UNSUPPORTED;
+        ret = STREAM_ERROR;
         goto err;
     }
 
@@ -1444,13 +1448,14 @@ static int bluray_stream_open_internal(stream_t *s)
             bd_register_argb_overlay_proc(bd, b, bd_argb_overlay_cb, NULL);
         if (!bd_play(bd)) {
             MP_ERR(s, "Couldn't start Blu-ray HDMV playback.\n");
-            ret = STREAM_UNSUPPORTED;
+            ret = STREAM_ERROR;
             goto err;
         }
         // BD_EVENT_PLAYLIST fills current_title in once the disc picks one.
         MP_VERBOSE(s, "bdnav: HDMV entered\n");
-    } else {
-        select_initial_title(s, bd_get_main_title(bd));
+    } else if (!select_initial_title(s, bd_get_main_title(bd))) {
+        ret = STREAM_ERROR;
+        goto err;
     }
 
     // Angle selection is only valid once a playlist has been picked.
