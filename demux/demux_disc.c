@@ -109,6 +109,7 @@ struct priv {
     bool eof_log_still;
     int disc_audio_id; // last audio track selected by the disc itself, -1 = unknown
     double seek_base_time; // playback time captured right after a seek
+    double pushed_tl_off;  // last raw->playback offset handed to the stream
 
     bool is_dvd, is_dvda, is_cdda, is_bd;
 
@@ -622,6 +623,18 @@ static struct stream_timeline *get_stream_tl(struct priv *p,
     return &p->tl_streams[sh->index];
 }
 
+// The disc VM needs the clip's own timestamps, but the player only knows
+// playback time. Hand the stream the offset between them so it can convert.
+static void push_timeline_offset(demuxer_t *demuxer)
+{
+    struct priv *p = demuxer->priv;
+    if (!p->is_bd || !p->tl_cur.have_off || p->tl_cur.off == p->pushed_tl_off)
+        return;
+    double off = p->tl_cur.off;
+    if (stream_control(demuxer->stream, STREAM_CTRL_SET_TIMELINE_OFFSET, &off) >= 1)
+        p->pushed_tl_off = off;
+}
+
 static void start_new_gen(struct priv *p, double off)
 {
     p->tl_prev = p->tl_cur;
@@ -1075,6 +1088,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
         map_sub_packet(demuxer, sh, pkt);
     } else {
         map_av_packet(demuxer, sh, pkt);
+        push_timeline_offset(demuxer);
         p->av_map_seq++;
     }
 
