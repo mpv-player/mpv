@@ -1143,8 +1143,14 @@ static void add_stream_editions(struct demuxer *demuxer)
         double playlist = title;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_TITLE_PLAYLIST, &playlist) == STREAM_OK)
             time = talloc_asprintf_append(time, ") (%05.0f.mpls", playlist);
-        mp_tags_set_str(new.metadata, "TITLE",
-                        mp_tprintf(42, "title: %u (%s)", title + 1, time));
+        struct stream_name_req name = {.index = title};
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_TITLE_NAME, &name) >= 1) {
+            time = talloc_asprintf_append(time, ") (%s", name.name);
+            talloc_free(name.name);
+        }
+        char *label = talloc_asprintf(NULL, "title: %u (%s)", title + 1, time);
+        mp_tags_set_str(new.metadata, "TITLE", label);
+        talloc_free(label);
         talloc_free(time);
     }
 

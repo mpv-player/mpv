@@ -93,6 +93,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_TITLE_PLAYLIST,  // double* (in: title number, out: playlist)
     STREAM_CTRL_GET_TRACK_INFO,
     STREAM_CTRL_GET_CHAPTER_NAME,    // struct stream_name_req*
+    STREAM_CTRL_GET_TITLE_NAME,      // struct stream_name_req*
     STREAM_CTRL_SET_ACTIVE_TRACK,    // struct stream_track_req* (audio, id in)
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
