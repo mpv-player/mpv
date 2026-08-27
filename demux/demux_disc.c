@@ -107,6 +107,7 @@ struct priv {
     bool nav_active;    // last interactive-nav state pushed to the cache
     uint32_t eof_log_id;    // last logged EOF state, avoids per-read spam
     bool eof_log_still;
+    int disc_audio_id; // last audio track selected by the disc itself, -1 = unknown
 
     bool is_dvd, is_dvda, is_cdda, is_bd;
 
@@ -157,6 +158,30 @@ static bool slave_stream_enabled(struct priv *p, struct sh_stream *outer)
 static struct stream_timeline *get_stream_tl(struct priv *p,
                                              struct sh_stream *sh);
 
+// Tell the disc VM which audio track is playing, but only when the user moved
+// it. Echoing back what the disc just chose would fight it during transitions.
+static void push_active_track(demuxer_t *demuxer)
+{
+    struct priv *p = demuxer->priv;
+    if (!p->is_dvd)
+        return;
+
+    int selected = -1;
+    for (int i = 0; i < p->num_outer_streams; i++) {
+        struct sh_stream *sh = p->outer_streams[i];
+        if (sh && sh->type == STREAM_AUDIO && demux_stream_is_selected(sh)) {
+            selected = sh->demuxer_id;
+            break;
+        }
+    }
+    if (selected < 0 || selected == p->disc_audio_id)
+        return;
+
+    struct stream_track_req req = {.type = STREAM_AUDIO, .id = selected};
+    if (stream_control(demuxer->stream, STREAM_CTRL_SET_ACTIVE_TRACK, &req) >= 1)
+        p->disc_audio_id = selected;
+}
+
 static void reselect_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
@@ -183,6 +208,7 @@ static void reselect_streams(demuxer_t *demuxer)
             tl->was_selected = sel;
         }
     }
+    push_active_track(demuxer);
     arm_dvd_sub_holds(p);
 }
 
@@ -318,8 +344,10 @@ static void sync_streams(struct demuxer *demuxer)
 
     int nav_audio_id = -1;
     struct stream_nav_state nav = {0};
-    if (p->is_dvd && stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
+    if (p->is_dvd && stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1) {
         nav_audio_id = nav.active_audio_id;
+        p->disc_audio_id = nav_audio_id;
+    }
 
     int num_slave = demux_get_num_stream(p->slave);
     if (num_slave > p->slave_to_outer_count) {
@@ -1153,6 +1181,7 @@ static void add_stream_chapters(struct demuxer *demuxer)
 static int d_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
+    p->disc_audio_id = -1;
 
     if (check != DEMUX_CHECK_FORCE)
         return -1;

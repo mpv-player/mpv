@@ -1103,6 +1103,27 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, volume);
         return STREAM_OK;
     }
+    case STREAM_CTRL_SET_ACTIVE_TRACK: {
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+        // The disc's own commands compare against this register, so a track
+        // the user picked here has to reach it or the disc keeps acting on
+        // its previous choice. Despite the header calling it a physical index,
+        // dvdnav_set_active_stream() validates against pgc->audio_control,
+        // which is keyed by the logical stream.
+        struct stream_track_req *req = arg;
+        if (req->type != STREAM_AUDIO)
+            break;
+        int n = dvd_audio_logical_for_id(priv, req->id);
+        if (n < 0)
+            break;
+        if (dvdnav_set_active_stream(dvdnav, n, DVD_AUDIO_STREAM) != DVDNAV_STATUS_OK)
+            break;
+        MP_VERBOSE(stream, "audio register set to logical %d\n", n);
+        return STREAM_OK;
+#else
+        break;
+#endif
+    }
     case STREAM_CTRL_NAV_CMD:
         return handle_nav_cmd(stream, arg);
     case STREAM_CTRL_NAV_DRAIN_ENABLE: {
