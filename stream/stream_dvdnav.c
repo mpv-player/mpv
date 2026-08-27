@@ -489,53 +489,56 @@ static void select_neighbour_button(struct priv *priv, pci_t *pci,
         dvdnav_button_select(priv->dvdnav, pci, target);
 }
 
-static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
+    dvdnav_status_t st;
 
     switch (cmd->action) {
     case STREAM_NAV_MENU_ROOT:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_MENU_TITLE:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_MENU_POPUP:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_MENU_AUDIO:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_MENU_SUBTITLE:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_MENU_ANGLE:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_GO_UP:
-        dvdnav_go_up(priv->dvdnav);
+        st = dvdnav_go_up(priv->dvdnav);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_PREV_MENU:
-        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
+        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
         update_highlight(priv);
-        return;
+        return st == DVDNAV_STATUS_OK;
     default:
         break;
     }
 
     if (!in_menu_domain(priv->dvdnav) || !priv->pci_valid)
-        return;
+        return false;
 
     pci_t *pci = &priv->pci;
     if (pci->hli.hl_gi.hli_ss == 0 || pci->hli.hl_gi.btn_ns == 0)
-        return;
+        return false;
+
+    bool acted = false;
 
     switch (cmd->action) {
     case STREAM_NAV_UP:
@@ -548,16 +551,17 @@ static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         dvdnav_mouse_select(priv->dvdnav, pci, cmd->x, cmd->y);
         break;
     case STREAM_NAV_MOUSE_CLICK:
-        dvdnav_mouse_activate(priv->dvdnav, pci, cmd->x, cmd->y);
+        acted = dvdnav_mouse_activate(priv->dvdnav, pci, cmd->x, cmd->y) == DVDNAV_STATUS_OK;
         break;
     case STREAM_NAV_SELECT:
-        dvdnav_button_activate(priv->dvdnav, pci);
+        acted = dvdnav_button_activate(priv->dvdnav, pci) == DVDNAV_STATUS_OK;
         break;
     default:
         break;
     }
 
     update_highlight(priv);
+    return acted;
 }
 
 // Mark a source-position jump. Runs with priv->lock held.
@@ -615,9 +619,8 @@ static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 
     mp_mutex_lock(&priv->lock);
     int prev_auto = priv->auto_actioned_button;
-    do_nav_cmd(stream, cmd);
-    bool activated = stream_nav_action_activates(cmd->action) ||
-                     priv->auto_actioned_button != prev_auto;
+    bool acted = do_nav_cmd(stream, cmd);
+    bool activated = acted || priv->auto_actioned_button != prev_auto;
     if (priv->still_active && activated)
         bump_discontinuity(priv);
     mp_mutex_unlock(&priv->lock);
