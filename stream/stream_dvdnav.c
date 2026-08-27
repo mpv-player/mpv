@@ -484,6 +484,16 @@ static void select_neighbour_button(struct priv *priv, pci_t *pci,
         dvdnav_button_select(priv->dvdnav, pci, target);
 }
 
+// Drop a still fill_buffer is holding after mpv moved the VM itself, which
+// dvdnav_go_up() and dvdnav_title_play() do not do. Activating no button only
+// clears the still, like the repositioning calls do internally.
+static void release_still(struct priv *priv)
+{
+    if (priv->still_active)
+        dvdnav_button_activate_cmd(priv->dvdnav, 0, NULL);
+    priv->still_active = false;
+}
+
 static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
@@ -516,6 +526,8 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_GO_UP:
         st = dvdnav_go_up(priv->dvdnav);
+        if (st == DVDNAV_STATUS_OK)
+            release_still(priv);
         update_highlight(priv);
         return st == DVDNAV_STATUS_OK;
     case STREAM_NAV_PREV_MENU:
@@ -625,9 +637,10 @@ static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 
     mp_mutex_lock(&priv->lock);
     int prev_auto = priv->auto_actioned_button;
+    bool was_still = priv->still_active; // do_nav_cmd may release it
     bool acted = do_nav_cmd(stream, cmd);
     bool activated = acted || priv->auto_actioned_button != prev_auto;
-    if (priv->still_active && activated)
+    if (was_still && activated)
         bump_discontinuity(priv);
     mp_mutex_unlock(&priv->lock);
     return STREAM_OK;
@@ -1018,6 +1031,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         // This may run on the player thread; buffered data is dropped on the
         // demuxer thread when the discontinuity is processed.
         mp_mutex_lock(&priv->lock);
+        release_still(priv);
         bump_discontinuity(priv);
         mp_mutex_unlock(&priv->lock);
         return STREAM_OK;
