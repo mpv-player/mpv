@@ -560,6 +560,17 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         break;
     }
 
+    // A button command jumps only when the disc says so, and libdvdnav clears
+    // the still it was parked on only then. Take the library's answer instead
+    // of keeping our own, which cannot tell the two apart. Without this a
+    // resync re-delivers the old page's subpicture over the page the jump
+    // landed on.
+    if (acted && priv->still_active) {
+        uint32_t pos, len;
+        if (dvdnav_get_position(priv->dvdnav, &pos, &len) != DVDNAV_STATUS_OK)
+            priv->still_active = false;
+    }
+
     update_highlight(priv);
     return acted;
 }

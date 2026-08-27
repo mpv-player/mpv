@@ -576,7 +576,15 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     if (p->is_dvd && stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_STATE, &nav) >= 1)
         p->last_discontinuity_id = nav.discontinuity_id;
 
-    clear_dvd_sub_holds(p);
+    // The menu subpicture is one-shot. Resyncing while a still is held leaves
+    // the same menu on screen with no data left to redraw it, so keep what we
+    // retained and re-deliver it. A genuinely new subpicture replaces the hold
+    // when it arrives.
+    if (p->is_dvd && resync && nav.still_active) {
+        arm_dvd_sub_holds(p);
+    } else {
+        clear_dvd_sub_holds(p);
+    }
 
     // Re-inject the still for the new position.
     p->last_still_id = -1;
