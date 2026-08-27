@@ -314,7 +314,7 @@ static bool read_disc_structure(stream_t *stream)
 
         for (int n = 0; n < tt->nr_titles; n++) {
             atsi_title_record_t *rec = &tt->atsi_title_row_tables[n];
-            int num_tracks = MPMIN(rec->nr_tracks, rec->nr_pointer_records);
+            int num_tracks = rec->nr_pointer_records ? rec->nr_tracks : 0;
             if (num_tracks <= 0)
                 continue;
 
@@ -338,18 +338,29 @@ static bool read_disc_structure(stream_t *stream)
             }
 
             int64_t time = 0;
+            int cells = rec->nr_pointer_records;
             for (int i = 0; i < num_tracks; i++) {
                 atsi_track_timestamp_t *ts = &rec->atsi_track_timestamp_rows[i];
-                atsi_track_pointer_t *ptr = &rec->atsi_track_pointer_rows[i];
+                int first = ts->track_number_in_title;
+                if (first < 1 || first > cells)
+                    first = MPMIN(i + 1, cells);
+                int last = cells;
+                if (i + 1 < num_tracks) {
+                    int next = rec->atsi_track_timestamp_rows[i + 1].track_number_in_title;
+                    if (next > first && next <= cells)
+                        last = next - 1;
+                }
+                last = MPMAX(last, first);
+
                 t.tracks[i] = (struct dvda_track){
                     .time = time,
                     .duration = ts->length_pts_of_track,
-                    .start_sector = ptr->start_sector,
-                    .end_sector = ptr->end_sector,
+                    .start_sector = rec->atsi_track_pointer_rows[first - 1].start_sector,
+                    .end_sector = rec->atsi_track_pointer_rows[last - 1].end_sector,
                 };
                 time += t.tracks[i].duration;
-                if (ptr->end_sector > t.end_sector)
-                    t.end_sector = ptr->end_sector;
+                if (t.tracks[i].end_sector > t.end_sector)
+                    t.end_sector = t.tracks[i].end_sector;
             }
             parse_title_stills(stream, &t, rec);
 
