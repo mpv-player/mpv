@@ -576,6 +576,24 @@ static void bump_discontinuity(struct priv *priv)
            priv->discontinuity_id, priv->pending_drain);
 }
 
+static bool nav_action_prohibited(dvdnav_t *dvdnav, enum stream_nav_action a)
+{
+    user_ops_t ops = dvdnav_get_restrictions(dvdnav);
+    switch (a) {
+    case STREAM_NAV_MENU_ROOT:     return ops.root_menu_call;
+    case STREAM_NAV_MENU_TITLE:    return ops.title_menu_call;
+    case STREAM_NAV_MENU_POPUP:    return ops.chapter_menu_call;
+    case STREAM_NAV_MENU_AUDIO:    return ops.audio_menu_call;
+    case STREAM_NAV_MENU_SUBTITLE: return ops.subpic_menu_call;
+    case STREAM_NAV_MENU_ANGLE:    return ops.angle_menu_call;
+    case STREAM_NAV_GO_UP:         return ops.go_up;
+    case STREAM_NAV_PREV_MENU:     return ops.resume;
+    case STREAM_NAV_SELECT:
+    case STREAM_NAV_MOUSE_CLICK:   return ops.button_select_or_activate;
+    default:                       return false;
+    }
+}
+
 static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
@@ -589,6 +607,11 @@ static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     default:
         break;
     }
+
+    // Purely informational. libdvdnav never enforces these itself, and mpv
+    // deliberately does not either. It just explains odd disc behavior.
+    if (nav_action_prohibited(priv->dvdnav, cmd->action))
+        MP_DBG(stream, "disc prohibits this user operation at the current position, performing it anyway\n");
 
     mp_mutex_lock(&priv->lock);
     int prev_auto = priv->auto_actioned_button;
