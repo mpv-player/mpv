@@ -95,6 +95,9 @@ enum stream_ctrl {
     STREAM_CTRL_GET_CHAPTER_NAME,    // struct stream_name_req*
     STREAM_CTRL_GET_TITLE_NAME,      // struct stream_name_req*
     STREAM_CTRL_SET_ACTIVE_TRACK,    // struct stream_track_req* (audio, id in)
+    STREAM_CTRL_SET_TIMELINE_OFFSET, // double*, playback = raw + offset
+    STREAM_CTRL_SET_PLAYBACK_TIME,   // double*, current presentation time
+    STREAM_CTRL_SET_PLAYBACK_RATE,   // double*, 0 = paused, 1 = normal
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
     STREAM_CTRL_NAV_CMD,             // struct stream_nav_cmd*

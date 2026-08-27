@@ -46,6 +46,8 @@ struct disc_nav_state {
     uint32_t bd_last_change_id;
     struct mp_osd_res bd_last_vo_res;
 
+    double pushed_rate; // last playback rate handed to the disc VM
+
     // Last menu-overlay change_id we forced an OSD redraw for.
     uint32_t last_overlay_change_id;
     bool overlay_change_seen;
@@ -464,6 +466,20 @@ void disc_nav_update(struct MPContext *mpctx)
         MP_VERBOSE(s, "still_frame %d->%d\n",
                    mpctx->disc_nav_still_frame, still);
     mpctx->disc_nav_still_frame = still;
+
+    // BD-J applets schedule against the presentation clock. Left alone
+    // libbluray derives it from the read position, which runs ahead by the
+    // whole readahead, set the real playback time.
+    if (have && mpctx->playback_pts != MP_NOPTS_VALUE) {
+        double t = mpctx->playback_pts;
+        stream_control(s, STREAM_CTRL_SET_PLAYBACK_TIME, &t);
+    }
+
+    double rate = mpctx->paused ? 0.0 : mpctx->opts->playback_speed;
+    if (have && rate != st->pushed_rate) {
+        if (stream_control(s, STREAM_CTRL_SET_PLAYBACK_RATE, &rate) >= 1)
+            st->pushed_rate = rate;
+    }
 
     // The BD-J VM progresses only on reads, pump them while playback idles
     // at EOF or a held still, per libbluray's requirement. Our core wakes up

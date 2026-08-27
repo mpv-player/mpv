@@ -61,7 +61,7 @@
 // 90khz ticks
 #define BD_TIMEBASE (90000)
 #define BD_TIME_TO_S(x) ((x) / (double)(BD_TIMEBASE))
-#define BD_TIME_FROM_S(x) ((uint64_t)(x * BD_TIMEBASE))
+#define BD_TIME_FROM_S(x) ((uint64_t)((x) * BD_TIMEBASE))
 
 // Interval between read retries while navigation is idle
 #define BLURAY_POLL_TIME_S   0.010
@@ -149,6 +149,9 @@ struct bluray_priv_s {
     bool hdmv_mode;
     struct bd_overlay_plane ig;
     struct bd_overlay_plane pg;
+    double tl_offset;
+    bool tl_offset_valid;
+
     mp_mutex overlay_lock;
 
     uint32_t nav_change_id;          // bumped on overlay FLUSH/HIDE events
@@ -159,6 +162,8 @@ struct bluray_priv_s {
     bool read_pos_known;             // next_read_pos is valid
     bool resync_owed;                // jump settled, resync seek not acked yet
     bool clip_open;                  // libbluray still has a clip to act on
+    double pending_rate;             // rate the player asked for, not applied yet
+    bool pending_rate_set;
     int pending_angle;               // 1-based, 0 when no angle change is owed
 
     // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
@@ -744,10 +749,16 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         }
 
         mp_mutex_lock(&b->overlay_lock);
+        bool pending_rate = b->pending_rate_set && b->clip_open;
+        double rate = b->pending_rate;
+        if (pending_rate)
+            b->pending_rate_set = false;
         int pending_angle = b->clip_open ? b->pending_angle : 0;
         if (pending_angle)
             b->pending_angle = 0;
         mp_mutex_unlock(&b->overlay_lock);
+        if (pending_rate)
+            bd_set_rate(b->bd, BD_TIME_FROM_S(rate));
         if (pending_angle)
             bd_seamless_angle_change(b->bd, pending_angle - 1);
 
@@ -910,6 +921,42 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_lock(&b->overlay_lock);
         b->current_title = title;
         mp_mutex_unlock(&b->overlay_lock);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_SET_TIMELINE_OFFSET:
+        mp_mutex_lock(&b->overlay_lock);
+        b->tl_offset = *(double *)arg;
+        b->tl_offset_valid = true;
+        mp_mutex_unlock(&b->overlay_lock);
+        return STREAM_OK;
+    case STREAM_CTRL_SET_PLAYBACK_TIME: {
+        if (!b->hdmv_mode)
+            break;
+        // libbluray wants the clip's own presentation timestamp, so undo the
+        // demuxer's rebase.
+        mp_mutex_lock(&b->overlay_lock);
+        int64_t raw = BD_TIME_FROM_S(*(double *)arg - b->tl_offset);
+        const BLURAY_CLIP_INFO *ci = bd_current_clip(b);
+        bool ok = b->tl_offset_valid && ci &&
+                  raw >= (int64_t)ci->in_time && raw <= (int64_t)ci->out_time;
+        mp_mutex_unlock(&b->overlay_lock);
+        if (!ok)
+            break;
+        bd_set_scr(b->bd, raw);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_SET_PLAYBACK_RATE: {
+        if (!b->hdmv_mode)
+            break;
+        double rate = *(double *)arg;
+        if (rate == 0) {
+            bd_set_rate(b->bd, BD_TIME_FROM_S(rate));
+        } else {
+            mp_mutex_lock(&b->overlay_lock);
+            b->pending_rate = rate;
+            b->pending_rate_set = true;
+            mp_mutex_unlock(&b->overlay_lock);
+        }
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
