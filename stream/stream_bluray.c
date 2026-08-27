@@ -1493,6 +1493,10 @@ static int bluray_stream_open_internal(stream_t *s)
                info->num_hdmv_titles, info->num_bdj_titles,
                info->num_unsupported_titles);
 
+    // demux_disc appends a synthetic "Disc Menu" edition at index num_titles
+    if (b->cfg_title == b->num_titles)
+        b->cfg_title = BLURAY_MENU_TITLE;
+
     b->hdmv_mode = b->cfg_title == BLURAY_MENU_TITLE;
 
     // BD-J menus require a usable Java VM and libbluray's BD-J jar.
