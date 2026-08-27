@@ -1172,31 +1172,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
                 sub_pid = ci->pg_streams[b->sub_stream_num - 1].pid;
             }
         }
-        if (!b->hdmv_mode) {
-            // Even outside HDMV we can carry disc-driven audio/sub/angle so
-            // the player tracks the disc author's defaults on a plain-title
-            // playback.
-            *st = (struct stream_nav_state){
-                .no_audio = no_audio,
-                .active_audio_id = audio_pid,
-                .active_sub_id = sub_pid,
-                .sub_visible = b->sub_visible,
-                .angle = b->current_angle + 1,
-                .num_angles = ti ? ti->angle_count : 0,
-            };
-            mp_mutex_unlock(&b->overlay_lock);
-            return STREAM_OK;
-        }
-        // There is no reliable "menu on screen" signal that covers both HDMV
-        // and BD-J (BD_EVENT_MENU is HDMV-only). Any visible overlay plane is
-        // treated as an active menu.
         *st = (struct stream_nav_state){
-            .nav_active = true,
-            .menu_active = b->ig.visible || b->pg.visible,
-            .still_active = b->still_active,
-            .src_w = MPMAX(b->ig.disp_w, b->pg.disp_w),
-            .src_h = MPMAX(b->ig.disp_h, b->pg.disp_h),
-            .change_id = b->nav_change_id,
             .discontinuity_id = b->discontinuity_id,
             .drain_pending = b->resync_owed,
             .no_audio = no_audio,
@@ -1206,6 +1182,17 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             .angle = b->current_angle + 1,
             .num_angles = ti ? ti->angle_count : 0,
         };
+        if (b->hdmv_mode) {
+            // There is no reliable "menu on screen" signal that covers both
+            // HDMV and BD-J (BD_EVENT_MENU is HDMV-only). Any visible overlay
+            // plane is treated as an active menu.
+            st->nav_active = true;
+            st->menu_active = b->ig.visible || b->pg.visible;
+            st->still_active = b->still_active;
+            st->src_w = MPMAX(b->ig.disp_w, b->pg.disp_w);
+            st->src_h = MPMAX(b->ig.disp_h, b->pg.disp_h);
+            st->change_id = b->nav_change_id;
+        }
         mp_mutex_unlock(&b->overlay_lock);
         return STREAM_OK;
     }
