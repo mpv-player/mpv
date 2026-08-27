@@ -310,7 +310,13 @@ static void sync_disc_track_selection(struct MPContext *mpctx, struct stream *s,
     st->last_track_disc_id = nav->discontinuity_id;
     st->track_sync_seen = true;
 
-    if (!first && hopped && nav->no_audio &&
+    // The deselect below leaves aid at "auto", so a stream surfacing later
+    // can be auto-selected into the slot with no hop in between.
+    bool auto_reselected_audio = st->last_audio_id < 0 &&
+                                 mpctx->opts->stream_id[0][STREAM_AUDIO] == -1 &&
+                                 mpctx->current_track[0][STREAM_AUDIO];
+
+    if (!first && (hopped || auto_reselected_audio) && nav->no_audio &&
         mpctx->opts->stream_id[0][STREAM_AUDIO] != -2)
     {
         // The disc hopped into a domain without any audio stream. Deselect audio.
