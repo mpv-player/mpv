@@ -1143,7 +1143,10 @@ static void add_stream_chapters(struct demuxer *demuxer)
         double p = n;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p) < 1)
             continue;
-        demuxer_add_chapter(demuxer, "", p, 0);
+        struct stream_name_req req = {.index = n};
+        stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_NAME, &req);
+        demuxer_add_chapter(demuxer, req.name ? req.name : "", p, 0);
+        talloc_free(req.name);
     }
 }
 

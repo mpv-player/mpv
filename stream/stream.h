@@ -92,6 +92,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_TITLE_LENGTH,    // double* (in: title number, out: len)
     STREAM_CTRL_GET_TITLE_PLAYLIST,  // double* (in: title number, out: playlist)
     STREAM_CTRL_GET_TRACK_INFO,
+    STREAM_CTRL_GET_CHAPTER_NAME,    // struct stream_name_req*
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
     STREAM_CTRL_NAV_CMD,             // struct stream_nav_cmd*
@@ -199,6 +200,11 @@ struct stream_nav_state {
     bool sub_visible;   // disc says subs should be displayed
     int angle;          // 1-based current angle (0 if unknown)
     int num_angles;     // total angle count (0 if unknown or always 1)
+};
+
+struct stream_name_req {
+    int index;      // 0-based, what to ask about
+    char *name;     // out, talloc allocated, only set when the disc names it
 };
 
 struct stream_track_req {
