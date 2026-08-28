@@ -152,9 +152,9 @@ struct priv {
     int *asvu_first_pvob;       // 1-based first P_VOB of each ASVU
     int num_asvus;
     uint32_t pvobs_end;         // end of the still-picture area (sectors)
-    uint8_t *still_data;        // the most recently extracted still (MPEG-2 video ES)
+    uint8_t *still_data;        // the MPEG-2 video ES it produced, or NULL
     int still_size;
-    int still_pvob;             // P_VOB index of the cached still, -1 if none
+    int still_pvob;             // P_VOB index of the attempt, -1 if none
 
     int track;                  // requested title, or TITLE_LONGEST
 
@@ -513,6 +513,10 @@ static int current_still_pvob(stream_t *stream, struct dvda_title *t, double tim
 static bool extract_still(stream_t *stream, int pvob)
 {
     struct priv *priv = stream->priv;
+    talloc_free(priv->still_data);
+    priv->still_data = NULL;
+    priv->still_size = 0;
+    priv->still_pvob = pvob;
     if (pvob < 0 || pvob >= priv->num_pvobs || !priv->sv_file)
         return false;
 
@@ -571,11 +575,13 @@ static bool extract_still(stream_t *stream, int pvob)
         }
     }
 
-    talloc_free(priv->still_data);
+    if (!es_len) {
+        talloc_free(es);
+        return false;
+    }
     priv->still_data = es;
     priv->still_size = es_len;
-    priv->still_pvob = pvob;
-    return es_len > 0;
+    return true;
 }
 
 static int control(stream_t *stream, int cmd, void *arg)
@@ -608,9 +614,9 @@ static int control(stream_t *stream, int cmd, void *arg)
             mp_mutex_unlock(&priv->still_lock);
             return STREAM_OK;
         }
-        if (req->id != priv->still_pvob || !priv->still_data)
+        if (req->id != priv->still_pvob)
             extract_still(stream, req->id);
-        if (priv->still_pvob == req->id && priv->still_data) {
+        if (priv->still_data) {
             req->data = priv->still_data;
             req->data_size = priv->still_size;
         }
@@ -789,6 +795,7 @@ static int open_s(stream_t *stream)
 {
     struct priv *priv = talloc_zero(stream, struct priv);
     stream->priv = priv;
+    priv->still_pvob = -1;
 
     bstr title, bdevice;
     bstr_split_tok(bstr0(stream->path), "/", &title, &bdevice);
@@ -846,6 +853,7 @@ static int ifo_dvda_stream_open(stream_t *stream)
 {
     struct priv *priv = talloc_zero(stream, struct priv);
     stream->priv = priv;
+    priv->still_pvob = -1;
 
     if (!stream->access_references)
         goto unsupported;
