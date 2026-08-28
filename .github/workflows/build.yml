@@ -194,6 +194,8 @@ jobs:
           meson wrap install harfbuzz
           meson wrap install libpng
           meson wrap install zlib
+          meson wrap install lcms2
+          meson wrap install freetype2
 
       - name: Find Visual Studio
         run: |
