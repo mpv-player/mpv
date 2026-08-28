@@ -233,6 +233,8 @@ static void uninit_demuxer(struct MPContext *mpctx)
 
     kill_demuxers_reentrant(mpctx, demuxers, num_demuxers);
     talloc_free(demuxers);
+
+    disc_nav_reset(mpctx);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
