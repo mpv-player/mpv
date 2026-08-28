@@ -234,6 +234,36 @@ static void get_disc_track_info(struct stream *stream, struct sh_stream *sh, boo
     sh->commentary_track |= !!(req.flags & TRACK_COMMENTARY);
 }
 
+// A DVD keeps the subtitle palette in the PGC, not in the subpicture data, so
+// hand it to the decoder as emulated extradata.
+static void set_dvd_sub_palette(struct demuxer *demuxer, struct sh_stream *sh)
+{
+    struct stream_dvd_info_req info;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_DVD_INFO, &info) <= 0)
+        return;
+
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    struct pl_transform3x3 cmatrix;
+    mp_get_csp_matrix(&csp, &cmatrix);
+
+    char *s = talloc_strdup(sh, "palette: ");
+    for (int i = 0; i < 16; i++) {
+        // A CLUT entry is 0x00YYCrCb, and the matrix takes its input as
+        // Y, Cb, Cr and answers as R, G, B.
+        int color = info.palette[i];
+        int y[3] = {(color >> 16) & 0xff, color & 0xff, (color >> 8) & 0xff};
+        int c[3];
+        mp_map_fixp_color(&cmatrix, 8, y, 8, c);
+        color = (c[0] << 16) | (c[1] << 8) | c[2];
+        s = talloc_asprintf_append(s, "%s%06x", i ? ", " : "", color);
+    }
+    s = talloc_asprintf_append(s, "\n");
+
+    talloc_free(sh->codec->extradata);
+    sh->codec->extradata = s;
+    sh->codec->extradata_size = strlen(s);
+}
+
 static void add_dvd_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
@@ -250,30 +280,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
             p->dvd_subs[n] = sh;
             MP_TARRAY_APPEND(p, p->outer_streams, p->num_outer_streams, sh);
 
-            // emulate the extradata
-            struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-            struct pl_transform3x3 cmatrix;
-            mp_get_csp_matrix(&csp, &cmatrix);
-
-            char *s = talloc_strdup(sh, "");
-            s = talloc_asprintf_append(s, "palette: ");
-            for (int i = 0; i < 16; i++) {
-                // A CLUT entry is 0x00YYCrCb, and the matrix takes its
-                // input as Y, Cb, Cr and answers as R, G, B.
-                int color = info.palette[i];
-                int y[3] = {(color >> 16) & 0xff, color & 0xff, (color >> 8) & 0xff};
-                int c[3];
-                mp_map_fixp_color(&cmatrix, 8, y, 8, c);
-                color = (c[0] << 16) | (c[1] << 8) | c[2];
-
-                if (i != 0)
-                    s = talloc_asprintf_append(s, ", ");
-                s = talloc_asprintf_append(s, "%06x", color);
-            }
-            s = talloc_asprintf_append(s, "\n");
-
-            sh->codec->extradata = s;
-            sh->codec->extradata_size = strlen(s);
+            set_dvd_sub_palette(demuxer, sh);
 
             demux_add_sh_stream(demuxer, sh);
         }
@@ -408,6 +415,8 @@ static void sync_streams(struct demuxer *demuxer)
                 }
             }
             get_disc_track_info(demuxer->stream, outer, p->is_dvd);
+            if (p->is_dvd && outer->type == STREAM_SUB)
+                set_dvd_sub_palette(demuxer, outer);
             MP_TARRAY_APPEND(p, p->outer_streams, p->num_outer_streams, outer);
             demux_add_sh_stream(demuxer, outer);
         } else if (outer->type != STREAM_SUB && outer->codec && src->codec) {
