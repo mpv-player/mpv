@@ -484,6 +484,14 @@ static void select_neighbour_button(struct priv *priv, pci_t *pci,
         dvdnav_button_select(priv->dvdnav, pci, target);
 }
 
+static bool vm_moved(struct priv *priv, dvdnav_status_t st)
+{
+    if (st == DVDNAV_STATUS_OK)
+        priv->pci_valid = false;
+    update_highlight(priv);
+    return st == DVDNAV_STATUS_OK;
+}
+
 // Drop a still fill_buffer is holding after mpv moved the VM itself, which
 // dvdnav_go_up() and dvdnav_title_play() do not do. Activating no button only
 // clears the still, like the repositioning calls do internally.
@@ -501,39 +509,24 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 
     switch (cmd->action) {
     case STREAM_NAV_MENU_ROOT:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root));
     case STREAM_NAV_MENU_TITLE:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title));
     case STREAM_NAV_MENU_POPUP:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part));
     case STREAM_NAV_MENU_AUDIO:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio));
     case STREAM_NAV_MENU_SUBTITLE:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture));
     case STREAM_NAV_MENU_ANGLE:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle));
     case STREAM_NAV_GO_UP:
         st = dvdnav_go_up(priv->dvdnav);
         if (st == DVDNAV_STATUS_OK)
             release_still(priv);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, st);
     case STREAM_NAV_PREV_MENU:
-        st = dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
-        update_highlight(priv);
-        return st == DVDNAV_STATUS_OK;
+        return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape));
     default:
         break;
     }
@@ -1036,6 +1029,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         // demuxer thread when the discontinuity is processed.
         mp_mutex_lock(&priv->lock);
         release_still(priv);
+        priv->pci_valid = false;
         bump_discontinuity(priv, true);
         mp_mutex_unlock(&priv->lock);
         return STREAM_OK;
@@ -1084,6 +1078,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         // The seek reinitializes everything itself. Clear any held boundary
         // and coalesce the HOP_CHANNEL libdvdnav emits for the seek.
         mp_mutex_lock(&priv->lock);
+        release_still(priv);
+        priv->pci_valid = false;
         priv->pending_drain = false;
         priv->at_boundary = true;
         mp_mutex_unlock(&priv->lock);
