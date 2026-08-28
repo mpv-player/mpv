@@ -269,8 +269,10 @@ static void parse_title_stills(stream_t *stream, struct dvda_title *t,
             MP_TRACE(stream, "  rec[%d]: asv %d track %#x timing %d -> "
                      "still %d\n", k, fr->asv_number, fr->track_nr,
                      fr->display_timing, pvob);
-            // With a shared range, the per-record track number selects the track.
-            if (rr->dmod.timing == 0 && fr->track_nr != i + 1)
+            // The record's track number selects the track, but only when the
+            // programs share one range. It reads zero when each track owns its
+            // own records, and then every record here is already ours.
+            if (rr->dmod.timing == 0 && fr->track_nr && fr->track_nr != i + 1)
                 continue;
             if (pvob < 0 || pvob >= priv->num_pvobs)
                 continue;
