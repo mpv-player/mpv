@@ -901,12 +901,14 @@ void mp_image_params_update_dynamic(struct mp_image_params *dst,
 {
     dst->repr.dovi = src->repr.dovi;
     // Don't overwrite peak-detected HDR metadata if available.
-    float max_pq_y = dst->color.hdr.max_pq_y;
-    float avg_pq_y = dst->color.hdr.avg_pq_y;
-    dst->color.hdr = src->color.hdr;
+    struct pl_hdr_metadata *hdr = &dst->color.hdr;
+    const struct pl_hdr_metadata prev = *hdr;
+    *hdr = src->color.hdr;
     if (has_peak_detect_values) {
-        dst->color.hdr.max_pq_y = max_pq_y;
-        dst->color.hdr.avg_pq_y = avg_pq_y;
+        hdr->max_pq_y  = prev.max_pq_y;
+        hdr->avg_pq_y  = prev.avg_pq_y;
+        hdr->scene_avg = prev.scene_avg;
+        memcpy(hdr->scene_max, prev.scene_max, sizeof(hdr->scene_max));
     }
 }
 
