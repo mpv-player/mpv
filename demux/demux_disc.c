@@ -258,11 +258,13 @@ static void add_dvd_streams(demuxer_t *demuxer)
             char *s = talloc_strdup(sh, "");
             s = talloc_asprintf_append(s, "palette: ");
             for (int i = 0; i < 16; i++) {
+                // A CLUT entry is 0x00YYCrCb, and the matrix takes its
+                // input as Y, Cb, Cr and answers as R, G, B.
                 int color = info.palette[i];
-                int y[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+                int y[3] = {(color >> 16) & 0xff, color & 0xff, (color >> 8) & 0xff};
                 int c[3];
                 mp_map_fixp_color(&cmatrix, 8, y, 8, c);
-                color = (c[2] << 16) | (c[1] << 8) | c[0];
+                color = (c[0] << 16) | (c[1] << 8) | c[2];
 
                 if (i != 0)
                     s = talloc_asprintf_append(s, ", ");
