@@ -148,8 +148,32 @@ bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
     double fy = (wy - dst.y0) / (double)dh;
     if (fx < 0 || fx > 1 || fy < 0 || fy > 1)
         return false;
-    *out_x = MPMIN((int)(fx * src_w), src_w - 1);
-    *out_y = MPMIN((int)(fy * src_h), src_h - 1);
+    // src is the part of the frame on screen, in the frame as the VO shows
+    // it, rotated and flipped. Take the point through it and undo the VO's
+    // transform, the button coordinates span the frame as decoded.
+    struct mp_image_params par = vo_get_current_params(vo);
+    int rotate = 0;
+    if ((vo->driver->caps & VO_CAP_ROTATE90) && par.rotate % 90 == 0)
+        rotate = par.rotate % 360;
+    int fw = par.w, fh = par.h;
+    if (rotate % 180 == 90)
+        MPSWAP(int, fw, fh);
+    if (fw <= 0 || fh <= 0)
+        return false;
+    double vx = (src.x0 + fx * (src.x1 - src.x0)) / fw;
+    double vy = (src.y0 + fy * (src.y1 - src.y0)) / fh;
+    if (vx < 0 || vx > 1 || vy < 0 || vy > 1)
+        return false;
+    if (rotate % 180 == 90)
+        MPSWAP(double, vx, vy);
+    if (rotate == 90 || rotate == 180)
+        vy = 1 - vy;
+    if (rotate == 180 || rotate == 270)
+        vx = 1 - vx;
+    if ((vo->driver->caps & VO_CAP_VFLIP) && par.vflip)
+        vy = 1 - vy;
+    *out_x = MPMIN((int)(vx * src_w), src_w - 1);
+    *out_y = MPMIN((int)(vy * src_h), src_h - 1);
     return true;
 }
 
