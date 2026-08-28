@@ -3938,8 +3938,11 @@ Disc Devices
 ``--disc-menu=<yes|no>``
     When set, opening ``dvd://`` or ``bd://`` boots into the disc's interactive
     menu instead of automatically playing the longest title (default: ``no``).
-    The menu can also be reached at any time via the synthetic "Disc Menu"
-    entry in the editions/titles list, or with ``discnav menu`` command.
+    On DVD the disc's virtual machine runs either way, so the menu can be
+    reached at any time via the synthetic "Disc Menu" entry in the
+    editions/titles list, or with the ``discnav menu`` command. A Blu-ray only
+    has disc navigation when playback started in menu mode, so neither is
+    available for a plain ``bd://``.
 
     Blu-ray discs whose menus are BD-J rather than HDMV additionally need a
     Java runtime and libbluray's BD-J jar (``libbluray-j2se-<version>.jar``).
