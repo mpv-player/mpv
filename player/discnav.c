@@ -52,7 +52,7 @@ struct disc_nav_state {
     uint32_t last_overlay_change_id;
     bool overlay_change_seen;
 
-    bool drain_was_pending; // last poll saw a boundary awaiting resync
+    uint32_t resync_queued_id; // discontinuity the resync seek was queued for
 
     // DVD-only: dvd_subtitle track we force-selected for the menu, and the
     // selection it displaced (restored on menu close).
@@ -297,10 +297,9 @@ static void check_async_discontinuity(struct MPContext *mpctx, struct stream *s,
     if (!mpctx->demuxer)
         return;
 
-    bool new_drain = nav->drain_pending && !st->drain_was_pending;
-    st->drain_was_pending = nav->drain_pending;
-    if (!new_drain)
+    if (!nav->drain_pending || nav->discontinuity_id == st->resync_queued_id)
         return;
+    st->resync_queued_id = nav->discontinuity_id;
 
     // The disc jumped on its own, resync through the regular seek path.
     // demux_disc releases the held boundary instead of repositioning the VM.
