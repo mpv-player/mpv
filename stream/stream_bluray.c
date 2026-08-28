@@ -1515,6 +1515,13 @@ static int bluray_stream_open_internal(stream_t *s)
         b->cfg_title = BLURAY_DEFAULT_TITLE;
     }
 
+    if (b->hdmv_mode && info->no_menu_support) {
+        MP_WARN(s, "This disc's index is missing or unreadable, playing "
+                   "without menus.\n");
+        b->hdmv_mode = false;
+        b->cfg_title = BLURAY_DEFAULT_TITLE;
+    }
+
     MP_VERBOSE(s, "bdnav: cfg_title=%d hdmv_mode=%d\n", b->cfg_title, b->hdmv_mode);
     if (b->hdmv_mode) {
         bd_register_overlay_proc(bd, b, bd_yuv_overlay_cb);
