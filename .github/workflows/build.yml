@@ -278,6 +278,7 @@ jobs:
           - os: "macos-15"
             arch: "arm"
           - os: "macos-15-intel"
+            homebrew: "956fbd2598f7b0bc3c7ef72edaa622e19415f6c9"
           - os: "macos-26"
             arch: "arm"
           - os: "macos-26"
