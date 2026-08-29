@@ -324,6 +324,7 @@ jobs:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
           MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
+          MACOS_ARCH: "${{ matrix.arch }}"
 
       - name: Create App Bundle
         if: ${{ matrix.arch != 'test' }}

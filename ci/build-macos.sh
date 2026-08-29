@@ -4,6 +4,11 @@ set -e
 
 . ./ci/build-common.sh
 
+if [[ "${MACOS_ARCH}" == "test" ]]; then
+    # remove -werror + tests and keep libmpv for test builds only
+    common_args="-Dlibmpv=true"
+fi
+
 PKG_CONFIG_PATH="$(brew --prefix libarchive)/lib/pkgconfig/" CC="${CC}" CXX="${CXX}" \
 meson setup build $common_args \
   -Dobjc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations" \
