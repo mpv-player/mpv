@@ -1,0 +1,2 @@
+deprecate `ao-volume`
+deprecate `ao-mute`
