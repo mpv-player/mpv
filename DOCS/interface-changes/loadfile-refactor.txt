@@ -1,1 +1,2 @@
 the `loadfile` and `loadlist` commands can now take multiple flags (i.e. `append+play`)
+add `prepend` and `insert-prev` flags to `loadfile` and `loadlist` commands
