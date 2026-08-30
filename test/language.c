@@ -125,5 +125,15 @@ int main(void)
     TEST_LANG_GUESS("foo.forced.srt", "", -1, TRACK_FORCED);
     TEST_LANG_GUESS("foo.default.srt", "", -1, TRACK_DEFAULT);
 
+    TEST_LANG_GUESS("foo.bar.srt", "", -1, false);
+    TEST_LANG_GUESS("foo.bar.hi.srt", "", -1, true);
+    TEST_LANG_GUESS("foo.bar.sdh.srt", "", -1, true);
+    TEST_LANG_GUESS("foo[bar].srt", "", -1, false);
+    TEST_LANG_GUESS("foo[bar][hi].srt", "", -1, true);
+    TEST_LANG_GUESS("foo[bar][sdh].srt", "", -1, true);
+    TEST_LANG_GUESS("foo(bar).srt", "", -1, false);
+    TEST_LANG_GUESS("foo(bar)(hi).srt", "", -1, true);
+    TEST_LANG_GUESS("foo(bar)(sdh).srt", "", -1, true);
+
     talloc_free(ta_ctx);
 }
