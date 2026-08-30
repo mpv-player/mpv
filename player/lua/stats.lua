@@ -208,6 +208,19 @@ local function text_style()
 end
 
 
+local function ellipsize(text, max_len)
+    assert(text, "no text")
+    max_len = max_len or 80
+    if max_len < 6 or text:len() <= max_len then
+        return text end
+
+    local middle = max_len/2 + max_len%2
+    local ellipsized = ("%s...%s"):format(text:sub(1, middle-1), text:sub(-middle+2))
+
+    return assert(ellipsized:len() == max_len, "lengths don't match") and ellipsized
+end
+
+
 local function has_vo_window()
     return mp.get_property_native("vo-configured") and mp.get_property_native("video-osd")
 end
@@ -278,6 +291,9 @@ local function append(s, str, attr)
     attr.prefix = attr.prefix or ""
     attr.no_prefix_markup = attr.no_prefix_markup or false
     attr.prefix = attr.no_prefix_markup and attr.prefix or bold(attr.prefix)
+
+    -- squeeze str to fit the desired length
+    str = attr.max_len and ellipsize(str, attr.max_len) or str
 
     local index = #s + (attr.nl == "" and 0 or 1)
     s[index] = s[index] or ""
@@ -675,7 +691,7 @@ end
 
 local function add_file(s, print_cache, print_tags)
     append(s, "", {prefix="File:", nl="", indent=""})
-    append_property(s, "filename", {prefix_sep="", nl="", indent=""})
+    append_property(s, "filename", {prefix_sep="", nl="", indent="", max_len=32})
     if mp.get_property_osd("filename") ~= mp.get_property_osd("media-title") then
         append_property(s, "media-title", {prefix="Title:"})
     end
