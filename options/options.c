@@ -623,7 +623,7 @@ static const m_option_t mp_opts[] = {
     {"playlist-start", OPT_CHOICE(playlist_pos, {"auto", -1}, {"no", -1}),
         M_RANGE(0, INT_MAX)},
     {"playlist-inherit-options", OPT_CHOICE(playlist_inherit_options,
-        {"no", 0}, {"yes", 1}, {"current", 2})},
+        {"no", 0}, {"yes", 1}, {"current", 2}, {"auto", 3})},
 
     {"pause", OPT_BOOL(pause)},
     {"keep-open", OPT_CHOICE(keep_open,
@@ -1068,6 +1068,7 @@ static const struct MPOpts mp_default_opts = {
     .term_osd_bar_chars = "[-+-]",
     .consolecontrols = true,
     .playlist_pos = -1,
+    .playlist_inherit_options = 3,
     .play_frames = -1,
     .rebase_start_time = true,
     .keep_open_pause = true,
