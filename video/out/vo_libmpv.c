@@ -711,7 +711,16 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo)
 {
 #if HAVE_MACOS_COCOA_CB
-    cocoa_init_cocoa_cb();
+    struct m_config_cache *opts_cache = m_config_cache_alloc(vo, vo->global, &vo_sub_opts);
+    struct mp_vo_opts *opts = opts_cache->opts;
+    MP_VERBOSE(vo, "preinit: WinID:  %" PRIu64 "\n", opts->WinID);
+
+    if (opts->WinID > 0) {
+        // External view embedding mode, WinID is a pointer to an NSView
+        cocoa_init_embedded_view(opts->WinID);
+    } else {
+        cocoa_init_cocoa_cb();
+    }
 #else
     if (vo->probing)
         return -1;
