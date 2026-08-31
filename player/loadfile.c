@@ -1811,6 +1811,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->last_chapter_seek = -2;
     mpctx->last_chapter_flag = false;
     mpctx->last_chapter = -2;
+    mpctx->sub_snap = (struct sub_snap_state){0};
     mpctx->paused = false;
     mpctx->playing_msg_shown = false;
     mpctx->max_frames = -1;
