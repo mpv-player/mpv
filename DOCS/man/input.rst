@@ -3387,8 +3387,7 @@ Property list
     Same as ``sub-end``, but for the secondary subtitles.
 
 ``sub-lines``
-    The list of subtitle lines in memory. Not available if the subtitle is not
-    text-based (i.e. DVD/BD subtitles).
+    The list of subtitle lines in memory.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -3403,6 +3402,10 @@ Property list
                 "end"   MPV_FORMAT_DOUBLE
 
     ASS tags are stripped from ``text``.
+
+    ``text`` is empty for image subtitles (i.e. DVD/BD subtitles), which have
+    no text. Only the lines decoded so far are listed for them, the same ones
+    ``sub-seek`` can reach.
 
     ``end`` is absent if unknown.
 
