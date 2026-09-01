@@ -987,9 +987,6 @@ static bool render_frame(struct vo *vo)
         in->prev_vsync = now;
     in->expecting_vsync = use_vsync;
 
-    // Store the initial value before we unlock.
-    bool request_redraw = in->request_redraw;
-
     if (in->dropped_frame) {
         in->drop_count += 1;
         wakeup_core(vo);
@@ -1001,6 +998,8 @@ static bool render_frame(struct vo *vo)
         // timer instead, but possibly benefits from preparing a frame early.
         bool can_queue = !in->frame_queued &&
             (in->current_frame->num_vsyncs < 1 || !use_vsync);
+        // This draw covers every redraw request made so far.
+        in->request_redraw = false;
         mp_mutex_unlock(&in->lock);
 
         if (can_queue)
@@ -1043,18 +1042,14 @@ static bool render_frame(struct vo *vo)
         in->current_frame = NULL;
     }
 
-    if (in->dropped_frame) {
+    if (in->dropped_frame)
         MP_STATS(vo, "drop-vo");
-    } else {
-        // If the initial redraw request was true and mpv is still playing,
-        // then we can clear it here since the next loop will guarantee that
-        // we draw whatever is needed. However if there initially is
-        // no redraw request, then something can change this (i.e. the OSD)
-        // while the vo was unlocked. If we are paused, don't touch
-        // in->request_redraw in that case and let do_redraw do the work later.
-        if (request_redraw && !in->paused)
-            in->request_redraw = false;
-    }
+
+    // A redraw request that arrived while the VO was unlocked, will be handled
+    // by the already queued frame. Clear pending redraw requests to avoid
+    // unnecessary wakeups.
+    if (in->frame_queued)
+        in->request_redraw = false;
 
     if (in->current_frame && in->current_frame->num_vsyncs &&
         in->current_frame->display_synced)
