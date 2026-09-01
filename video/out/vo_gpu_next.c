@@ -105,6 +105,16 @@ struct cache {
     pl_cache cache;
 };
 
+// Mapping state of single hwdec frame.
+struct hwdec_slot {
+    struct ra_hwdec_mapper *mapper;
+    struct timer_pool *timer;
+    struct mp_pass_perf perf;
+    struct mp_image *owner;   // queue entry image that owns the mapping
+    bool acquired;            // between acquire and release of a render pass
+    pl_tex tex[4];            // plane textures of the current mapping
+};
+
 struct priv {
     struct mp_log *log;
     struct mpv_global *global;
@@ -112,11 +122,8 @@ struct priv {
     struct ra_ctx *ra_ctx;
     struct gpu_ctx *context;
     struct ra_hwdec_ctx hwdec_ctx;
-    struct ra_hwdec_mapper *hwdec_mapper;
-    struct timer_pool *hwdec_timer;
-    struct mp_pass_perf hwdec_perf;
-    struct ra_hwdec_mapper *el_hwdec_mapper;
-    struct timer_pool *el_hwdec_timer;
+    struct hwdec_slot hwdec;
+    struct hwdec_slot el_hwdec;
     struct timer_pool *sw_upload_timer;
     struct mp_pass_perf sw_upload_perf;
 
@@ -652,32 +659,63 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-static bool hwdec_reconfig(struct priv *p, struct ra_hwdec_mapper **mapper,
-                           struct timer_pool **timer, struct ra_hwdec *hwdec,
-                           const struct mp_image_params *par)
+static void slot_unmap(struct priv *p, struct hwdec_slot *s)
 {
-    if (*mapper) {
-        if (mp_image_params_static_equal(par, &(*mapper)->src_params)) {
-            (*mapper)->src_params.repr.dovi = par->repr.dovi;
-            (*mapper)->dst_params.repr.dovi = par->repr.dovi;
-            (*mapper)->src_params.color.hdr = par->color.hdr;
-            (*mapper)->dst_params.color.hdr = par->color.hdr;
+    mp_assert(!s->acquired);
+    if (!s->mapper)
+        return;
+    // For RAs not based on ra_pl the plane textures are wrappers we created.
+    if (!ra_pl_get(s->mapper->ra)) {
+        for (int n = 0; n < MP_ARRAY_SIZE(s->tex); n++)
+            pl_tex_destroy(p->gpu, &s->tex[n]);
+    }
+    memset(s->tex, 0, sizeof(s->tex));
+    ra_hwdec_mapper_unmap(s->mapper);
+    s->owner = NULL;
+}
+
+static bool slot_reconfig(struct priv *p, struct hwdec_slot *s,
+                          struct ra_hwdec *hwdec,
+                          const struct mp_image_params *par)
+{
+    if (s->mapper) {
+        if (mp_image_params_static_equal(par, &s->mapper->src_params)) {
+            s->mapper->src_params.repr.dovi = par->repr.dovi;
+            s->mapper->dst_params.repr.dovi = par->repr.dovi;
+            s->mapper->src_params.color.hdr = par->color.hdr;
+            s->mapper->dst_params.color.hdr = par->color.hdr;
             return true;
-        } else {
-            ra_hwdec_mapper_free(mapper);
-            timer_pool_destroy(*timer);
-            *timer = NULL;
         }
+        slot_unmap(p, s);
+        ra_hwdec_mapper_free(&s->mapper);
+        timer_pool_destroy(s->timer);
+        s->timer = NULL;
     }
 
-    *mapper = ra_hwdec_mapper_create(hwdec, par);
-    if (!*mapper) {
+    s->mapper = ra_hwdec_mapper_create(hwdec, par);
+    if (!s->mapper) {
         MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         return false;
     }
-    *timer = timer_pool_create(p->ra_ctx->ra);
+    s->timer = timer_pool_create(p->ra_ctx->ra);
 
     return true;
+}
+
+// The queue dropped this entry. Release the mapping if the entry owns it.
+static void slot_release_owner(struct priv *p, struct hwdec_slot *s,
+                               struct mp_image *owner)
+{
+    if (s->owner == owner)
+        slot_unmap(p, s);
+}
+
+static void slot_uninit(struct priv *p, struct hwdec_slot *s)
+{
+    slot_unmap(p, s);
+    ra_hwdec_mapper_free(&s->mapper);
+    timer_pool_destroy(s->timer);
+    s->timer = NULL;
 }
 
 // For RAs not based on ra_pl, this creates a new pl_tex wrapper.
@@ -746,37 +784,65 @@ static void setup_hwdec_plane_mapping(struct pl_frame *frame,
     }
 }
 
+static bool slot_acquire(struct priv *p, struct hwdec_slot *s,
+                         struct mp_image *owner, struct mp_image *mpi,
+                         struct pl_frame *frame)
+{
+    if (s->owner != owner) {
+        // With one frame per role acquired at a time the previous owner is
+        // not in use and can be evicted. Interlaced sources would break this
+        // (prev and next are acquired alongside the image), see hwdec_slot.
+        if (s->acquired) {
+            MP_ERR(p, "Hardware frame of this role is still in use.\n");
+            return false;
+        }
+        slot_unmap(p, s);
+
+        stats_time_start(p->stats, "hwdec-map");
+        timer_pool_start(s->timer);
+        int ret = ra_hwdec_mapper_map(s->mapper, mpi);
+        timer_pool_stop(s->timer);
+        stats_time_end(p->stats, "hwdec-map");
+        if (ret < 0) {
+            MP_ERR(p, "Mapping hardware decoded surface failed.\n");
+            return false;
+        }
+        s->perf = timer_pool_measure(s->timer);
+        s->owner = owner;
+    }
+
+    if (ra_hwdec_mapper_begin_access(s->mapper) < 0)
+        return false;
+    // Set before handing out textures so that the release libplacebo issues
+    // after a failed acquire ends the access again.
+    s->acquired = true;
+
+    for (int n = 0; n < frame->num_planes; n++) {
+        if (!s->tex[n])
+            s->tex[n] = hwdec_get_tex(p, s->mapper, n);
+        if (!s->tex[n])
+            return false;
+        frame->planes[n].texture = s->tex[n];
+    }
+
+    return true;
+}
+
+static void slot_release(struct hwdec_slot *s)
+{
+    if (!s->acquired)
+        return;
+    ra_hwdec_mapper_end_access(s->mapper);
+    s->acquired = false;
+}
+
 static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (!hwdec_reconfig(p, &p->hwdec_mapper, &p->hwdec_timer, fp->hwdec,
-                        &mpi->params))
-        return false;
-
-    stats_time_start(p->stats, "hwdec-map");
-    timer_pool_start(p->hwdec_timer);
-    if (ra_hwdec_mapper_map(p->hwdec_mapper, mpi) < 0) {
-        MP_ERR(p, "Mapping hardware decoded surface failed.\n");
-        timer_pool_stop(p->hwdec_timer);
-        stats_time_end(p->stats, "hwdec-map");
-        return false;
-    }
-
-    for (int n = 0; n < frame->num_planes; n++) {
-        if (!(frame->planes[n].texture = hwdec_get_tex(p, p->hwdec_mapper, n))) {
-            timer_pool_stop(p->hwdec_timer);
-            stats_time_end(p->stats, "hwdec-map");
-            return false;
-        }
-    }
-
-    timer_pool_stop(p->hwdec_timer);
-    p->hwdec_perf = timer_pool_measure(p->hwdec_timer);
-    stats_time_end(p->stats, "hwdec-map");
-
-    return true;
+    return slot_reconfig(p, &p->hwdec, fp->hwdec, &mpi->params) &&
+           slot_acquire(p, &p->hwdec, mpi, mpi, frame);
 }
 
 static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
@@ -784,12 +850,7 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (!ra_pl_get(p->hwdec_mapper->ra)) {
-        for (int n = 0; n < frame->num_planes; n++)
-            pl_tex_destroy(p->gpu, &frame->planes[n].texture);
-    }
-
-    ra_hwdec_mapper_unmap(p->hwdec_mapper);
+    slot_release(&p->hwdec);
 }
 
 #if PL_API_VER >= 367
@@ -799,22 +860,9 @@ static bool hwdec_acquire_el(pl_gpu gpu, struct pl_frame *frame)
     struct mp_image *el_mpi = bl_mpi->enhancement_layer;
     struct frame_priv *fp = bl_mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (!hwdec_reconfig(p, &p->el_hwdec_mapper, &p->el_hwdec_timer,
-                        fp->el_hwdec, &el_mpi->params))
-        return false;
-
-    if (ra_hwdec_mapper_map(p->el_hwdec_mapper, el_mpi) < 0) {
-        MP_ERR(p, "Mapping enhancement-layer hwdec surface failed.\n");
-        return false;
-    }
-
-    for (int n = 0; n < frame->num_planes; n++) {
-        if (!(frame->planes[n].texture =
-                hwdec_get_tex(p, p->el_hwdec_mapper, n)))
-            return false;
-    }
-
-    return true;
+    // The EL image belongs to the BL queue entry, which therefore owns the slot.
+    return slot_reconfig(p, &p->el_hwdec, fp->el_hwdec, &el_mpi->params) &&
+           slot_acquire(p, &p->el_hwdec, bl_mpi, el_mpi, frame);
 }
 
 static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
@@ -822,12 +870,7 @@ static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
     struct mp_image *bl_mpi = frame->user_data;
     struct frame_priv *fp = bl_mpi->priv;
     struct priv *p = fp->vo->priv;
-    if (!ra_pl_get(p->el_hwdec_mapper->ra)) {
-        for (int n = 0; n < frame->num_planes; n++)
-            pl_tex_destroy(p->gpu, &frame->planes[n].texture);
-    }
-
-    ra_hwdec_mapper_unmap(p->el_hwdec_mapper);
+    slot_release(&p->el_hwdec);
 }
 #endif
 
@@ -947,13 +990,12 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         // only reconfig the mapper here (potentially creating it) to access
         // `dst_params`. In practice, though, this should not matter unless the
         // image format changes mid-stream.
-        if (!hwdec_reconfig(p, &p->hwdec_mapper, &p->hwdec_timer, fp->hwdec,
-                            &mpi->params)) {
+        if (!slot_reconfig(p, &p->hwdec, fp->hwdec, &mpi->params)) {
             talloc_free(mpi);
             return false;
         }
 
-        par = p->hwdec_mapper->dst_params;
+        par = p->hwdec.mapper->dst_params;
     }
 
     mp_image_params_guess_csp(&par);
@@ -988,7 +1030,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         frame->release = hwdec_release;
         setup_hwdec_plane_mapping(frame, &desc);
     } else { // swdec
-        p->hwdec_perf.count = 0;
+        p->hwdec.perf.count = 0;
 
         if (!p->sw_upload_timer)
             p->sw_upload_timer = timer_pool_create(p->ra_ctx->ra);
@@ -1017,9 +1059,8 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         struct mp_image_params el_par = el->params;
         bool el_ok = true;
         if (fp->el_hwdec) {
-            if (hwdec_reconfig(p, &p->el_hwdec_mapper, &p->el_hwdec_timer,
-                               fp->el_hwdec, &el->params)) {
-                el_par = p->el_hwdec_mapper->dst_params;
+            if (slot_reconfig(p, &p->el_hwdec, fp->el_hwdec, &el->params)) {
+                el_par = p->el_hwdec.mapper->dst_params;
             } else {
                 fp->el_hwdec = NULL;
                 el_ok = false;
@@ -1083,6 +1124,8 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
         if (fp->el_tex[i])
             pl_tex_destroy(gpu, &fp->el_tex[i]);
     }
+    slot_release_owner(p, &p->hwdec, mpi);
+    slot_release_owner(p, &p->el_hwdec, mpi);
     talloc_free(mpi);
 }
 
@@ -2164,7 +2207,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_PERFORMANCE_DATA: {
         struct voctrl_performance_data *perf = data;
-        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec_perf, &p->sw_upload_perf);
+        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
         copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw, NULL, NULL);
         return true;
     }
@@ -2423,10 +2466,8 @@ static void uninit(struct vo *vo)
     timer_pool_destroy(p->sw_upload_timer);
 
     if (vo->hwdec_devs) {
-        ra_hwdec_mapper_free(&p->hwdec_mapper);
-        timer_pool_destroy(p->hwdec_timer);
-        ra_hwdec_mapper_free(&p->el_hwdec_mapper);
-        timer_pool_destroy(p->el_hwdec_timer);
+        slot_uninit(p, &p->hwdec);
+        slot_uninit(p, &p->el_hwdec);
         ra_hwdec_ctx_uninit(&p->hwdec_ctx);
         hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
         hwdec_devices_destroy(vo->hwdec_devs);
