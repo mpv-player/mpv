@@ -176,6 +176,19 @@ int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img)
     return 0;
 }
 
+int ra_hwdec_mapper_begin_access(struct ra_hwdec_mapper *mapper)
+{
+    if (!mapper->driver->begin_access)
+        return 0;
+    return mapper->driver->begin_access(mapper);
+}
+
+void ra_hwdec_mapper_end_access(struct ra_hwdec_mapper *mapper)
+{
+    if (mapper->driver->end_access)
+        mapper->driver->end_access(mapper);
+}
+
 static int ra_hwdec_validate_opt_full(struct mp_log *log, bool include_modes,
                                       const m_option_t *opt,
                                       struct bstr name, const char **value)

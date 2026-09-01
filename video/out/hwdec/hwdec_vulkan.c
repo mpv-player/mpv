@@ -34,6 +34,8 @@ struct vulkan_mapper_priv {
     struct mp_image layout;
     AVVkFrame *vkf;
     pl_tex tex[4];
+    bool multiplane;
+    bool accessed;
 };
 
 static void lock_queue(struct AVHWDeviceContext *ctx,
@@ -238,32 +240,51 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
 
 }
 
-static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+// Hand the frame over to libplacebo for one render. FFmpeg's frame lock stays
+// held until mapper_end_access, as required around command submission.
+static int mapper_begin_access(struct ra_hwdec_mapper *mapper)
 {
     struct vulkan_hw_priv *p_owner = mapper->owner->priv;
     struct vulkan_mapper_priv *p = mapper->priv;
-    if (!mapper->src)
-        goto end;
+    AVHWFramesContext *hwfc = (AVHWFramesContext *) mapper->src->hwctx->data;
+    const AVVulkanFramesContext *vkfc = hwfc->hwctx;
+    AVVkFrame *vkf = p->vkf;
+
+    vkfc->lock_frame(hwfc, vkf);
+    p->accessed = true;
+
+    for (int i = 0; i < p->layout.num_planes; i++) {
+        int index = p->multiplane ? 0 : i;
+        pl_vulkan_release_ex(p_owner->gpu, pl_vulkan_release_params(
+            .tex = p->tex[i],
+            .layout = vkf->layout[index],
+            .qf = VK_QUEUE_FAMILY_IGNORED,
+            .semaphore = (pl_vulkan_sem) {
+                .sem = vkf->sem[index],
+                .value = vkf->sem_value[index],
+            },
+        ));
+    }
+
+    return 0;
+}
+
+// Take the frame back from libplacebo and record its state for the decoder.
+static void mapper_end_access(struct ra_hwdec_mapper *mapper)
+{
+    struct vulkan_hw_priv *p_owner = mapper->owner->priv;
+    struct vulkan_mapper_priv *p = mapper->priv;
+    if (!p->accessed)
+        return;
 
     AVHWFramesContext *hwfc = (AVHWFramesContext *) mapper->src->hwctx->data;
     const AVVulkanFramesContext *vkfc = hwfc->hwctx;
     AVVkFrame *vkf = p->vkf;
 
-    int num_images;
-    for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
-
-    for (int i = 0; (p->tex[i] != NULL); i++) {
-        pl_tex *tex = &p->tex[i];
-        if (!*tex)
-            continue;
-
-        // If we have multiple planes and one image, then that is a multiplane
-        // frame. Anything else is treated as one-image-per-plane.
-        int index = p->layout.num_planes > 1 && num_images == 1 ? 0 : i;
-
-        // Update AVVkFrame state to reflect current layout
+    for (int i = 0; i < p->layout.num_planes; i++) {
+        int index = p->multiplane ? 0 : i;
         bool ok = pl_vulkan_hold_ex(p_owner->gpu, pl_vulkan_hold_params(
-            .tex = *tex,
+            .tex = p->tex[i],
             .out_layout = &vkf->layout[index],
             .qf = VK_QUEUE_FAMILY_IGNORED,
             .semaphore = (pl_vulkan_sem) {
@@ -274,21 +295,29 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 
         vkf->access[index] = 0;
         vkf->sem_value[index] += !!ok;
-        *tex = NULL;
     }
 
     vkfc->unlock_frame(hwfc, vkf);
+    p->accessed = false;
+}
 
- end:
-    for (int i = 0; i < p->layout.num_planes; i++)
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+{
+    struct vulkan_mapper_priv *p = mapper->priv;
+
+    // Wrapped images have to be held by us when their wrapper is destroyed.
+    mapper_end_access(mapper);
+
+    for (int i = 0; i < p->layout.num_planes; i++) {
         ra_tex_free(mapper->ra, &mapper->tex[i]);
+        p->tex[i] = NULL;
+    }
 
     p->vkf = NULL;
 }
 
 static int mapper_map(struct ra_hwdec_mapper *mapper)
 {
-    bool result = false;
     struct vulkan_hw_priv *p_owner = mapper->owner->priv;
     struct vulkan_mapper_priv *p = mapper->priv;
     pl_vulkan vk = pl_vulkan_get(p_owner->gpu);
@@ -313,17 +342,15 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     for (num_images = 0; (vkf->img[num_images] != VK_NULL_HANDLE); num_images++);
     const VkFormat *vk_fmt = av_vkfmt_from_pixfmt(hwfc->sw_format);
 
+    p->multiplane = p->layout.num_planes > 1 && num_images == 1;
     p->vkf = vkf;
-    vkfc->lock_frame(hwfc, vkf);
 
     for (int i = 0; i < p->layout.num_planes; i++) {
         pl_tex *tex = &p->tex[i];
         VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT;
         int index = i;
 
-        // If we have multiple planes and one image, then that is a multiplane
-        // frame. Anything else is treated as one-image-per-plane.
-        if (p->layout.num_planes > 1 && num_images == 1) {
+        if (p->multiplane) {
             index = 0;
 
             switch (i) {
@@ -341,6 +368,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
             }
         }
 
+        // The wrapped image starts out held by us. It is handed to
+        // libplacebo per render in mapper_begin_access.
         *tex = pl_vulkan_wrap(p_owner->gpu, pl_vulkan_wrap_params(
             .image = vkf->img[index],
             .width = mp_image_plane_w(&raw_layout, i),
@@ -352,19 +381,8 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         if (!*tex)
             goto error;
 
-        pl_vulkan_release_ex(p_owner->gpu, pl_vulkan_release_params(
-            .tex = p->tex[i],
-            .layout = vkf->layout[index],
-            .qf = VK_QUEUE_FAMILY_IGNORED,
-            .semaphore = (pl_vulkan_sem) {
-                .sem = vkf->sem[index],
-                .value = vkf->sem_value[index],
-            },
-        ));
-
         struct ra_tex *ratex = talloc_ptrtype(NULL, ratex);
-        result = mppl_wrap_tex(mapper->ra, *tex, ratex);
-        if (!result) {
+        if (!mppl_wrap_tex(mapper->ra, *tex, ratex)) {
             pl_tex_destroy(p_owner->gpu, tex);
             talloc_free(ratex);
             goto error;
@@ -375,7 +393,6 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
     return 0;
 
  error:
-    // unmap will unlock the frame and clear p->vkf
     mapper_unmap(mapper);
     return -1;
 }
@@ -393,5 +410,7 @@ const struct ra_hwdec_driver ra_hwdec_vulkan = {
         .uninit = mapper_uninit,
         .map = mapper_map,
         .unmap = mapper_unmap,
+        .begin_access = mapper_begin_access,
+        .end_access = mapper_end_access,
     },
 };

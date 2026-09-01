@@ -1094,6 +1094,7 @@ static void unref_current_image(struct gl_video *p)
 
     if (vimg->hwdec_mapped) {
         mp_assert(p->hwdec_active && p->hwdec_mapper);
+        ra_hwdec_mapper_end_access(p->hwdec_mapper);
         ra_hwdec_mapper_unmap(p->hwdec_mapper);
         memset(vimg->planes, 0, sizeof(vimg->planes));
         vimg->hwdec_mapped = false;
@@ -3866,11 +3867,14 @@ static bool pass_upload_image(struct gl_video *p, struct mp_image *mpi, uint64_t
         pass_describe(p, "map frame (hwdec)");
         timer_pool_start(p->upload_timer);
         bool ok = ra_hwdec_mapper_map(p->hwdec_mapper, vimg->mpi) >= 0;
+        vimg->hwdec_mapped = ok;
+        // The frame stays mapped and in use until it is replaced.
+        if (ok)
+            ok = ra_hwdec_mapper_begin_access(p->hwdec_mapper) >= 0;
         timer_pool_stop(p->upload_timer);
         struct mp_pass_perf perf = timer_pool_measure(p->upload_timer);
         pass_record(p, &perf);
 
-        vimg->hwdec_mapped = true;
         if (ok) {
             struct ra_tex **tex = p->hwdec_mapper->tex;
             for (int n = 0; n < p->plane_count; n++) {
