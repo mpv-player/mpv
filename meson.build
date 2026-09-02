@@ -971,6 +971,17 @@ if features['wasapi']
                      'audio/out/ao_wasapi_utils.c')
 endif
 
+wasapi_spatial = (
+    features['wasapi'] and
+    features['win32-desktop'] and
+    cc.has_header_symbol('spatialaudioclient.h', 'ISpatialAudioClient',
+                         required: false)
+)
+features += {'wasapi-spatial': wasapi_spatial}
+if features['wasapi-spatial']
+    sources += files('audio/out/ao_wasapi_spatial.c')
+endif
+
 
 # video output dependencies
 caca_opt = get_option('caca').require(

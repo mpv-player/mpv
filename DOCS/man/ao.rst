@@ -304,6 +304,19 @@ Available audio output drivers are:
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
 
+``wasapi-spatial`` (Windows only)
+    Sends decoded PCM channel layouts to the Windows Spatial Audio API as
+    static audio objects. Windows renders the objects through the spatial
+    audio path for the selected output device.
+
+    This driver supports decoded PCM only. It doesn't pass through compressed
+    bitstreams or native object metadata from Dolby Atmos or DTS:X streams.
+    It never requests exclusive audio access.
+
+    The driver isn't selected automatically. Use
+    ``--ao=wasapi-spatial,wasapi`` to try it and fall back to regular WASAPI.
+    Use ``--audio-device=help`` to list available devices.
+
 ``wasapi``
     Audio output to the Windows Audio Session API.
 
