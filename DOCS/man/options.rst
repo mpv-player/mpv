@@ -3024,6 +3024,24 @@ Subtitles
     Can be used to disable display of secondary subtitles, but still select and
     decode them.
 
+``--sub-pause=<yes|no>``
+    Automatically pause playback on the last frame on which each primary
+    subtitle is visible (default: no). Resuming plays until the end of the next
+    subtitle, so repeatedly resuming steps through the dialogue line by line.
+    Has no effect without a primary subtitle track, while subtitles are hidden
+    (see ``--sub-visibility``), or during backward playback.
+
+    Since this needs a following video frame to pause on, it does nothing for
+    audio-only playback, for cover art and other still images, for a subtitle
+    that is still visible on the last frame of a file, and when video frame
+    lookahead is disabled (``--untimed``, ``--video-latency-hacks``, and VOs
+    that do not retain frames). It also does nothing for subtitles with an
+    unknown end time, or in formats rendered by ``subrandr``.
+
+    If several subtitles overlap, playback is paused when the last of them
+    ends. With ASS subtitles this counts signs and other non-dialogue events,
+    so tracks that use them can pause more than once per line of dialogue.
+
 ``--sub-clear-on-seek``
     (Obscure, rarely useful.) Can be used to play broken mkv files with
     duplicate ReadOrder fields. ReadOrder is the first field in a
