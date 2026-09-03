@@ -112,6 +112,7 @@ struct mp_decoder_fns {
 extern const struct mp_decoder_fns vd_lavc;
 extern const struct mp_decoder_fns ad_lavc;
 extern const struct mp_decoder_fns ad_spdif;
+extern const struct mp_decoder_fns ad_dsd;
 
 // Convenience wrapper for lavc based decoders. Treat lavc_state as private;
 // init to all-0 on init and resets.
@@ -125,3 +126,6 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
 
 // ad_spdif.c
 struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);
+
+// ad_dsd.c
+struct mp_decoder_list *select_dsd_codec(const char *codec, const char *pref);

@@ -60,6 +60,7 @@ sources = files(
     'audio/chmap.c',
     'audio/chmap_avchannel.c',
     'audio/chmap_sel.c',
+    'audio/decode/ad_dsd.c',
     'audio/decode/ad_lavc.c',
     'audio/decode/ad_spdif.c',
     'audio/filter/af_drop.c',
