@@ -363,7 +363,7 @@ static char *skip_n_lines(char *text, int lines)
 
 static int count_lines(char *text)
 {
-    if (!text[0])
+    if (!text || !text[0])
         return 0;
 
     int count = 0;
@@ -3569,7 +3569,7 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
         for (int i = 0; i < lines->num_entries; i++) {
             struct sub_line *line = &lines->entries[i];
             struct mpv_node *entry = node_array_add(node, MPV_FORMAT_NODE_MAP);
-            node_map_add_string(entry, "text", line->text);
+            node_map_add_string(entry, "text", line->text ? line->text : "");
             node_map_add_double(entry, "start", line->start);
             if (line->end != MP_NOPTS_VALUE)
                 node_map_add_double(entry, "end", line->end);
@@ -3595,7 +3595,9 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
                 reset = get_style_reset(mpctx);
             }
 
-            res = talloc_asprintf_append(res, "%s%s\n", line->text, reset);
+            // Image subtitles have no text; they list as empty lines.
+            res = talloc_asprintf_append(res, "%s%s\n",
+                                         line->text ? line->text : "", reset);
 
             if (line->start <= time_pos && i)
                 pos += count_lines(lines->entries[i - 1].text);
