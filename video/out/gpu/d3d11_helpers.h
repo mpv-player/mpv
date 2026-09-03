@@ -26,6 +26,7 @@
 #include <dxgidebug.h>
 
 #include "video/mp_image.h"
+#include "video/out/win32/displayconfig.h"
 
 #if !HAVE_DXGI_DEBUG_D3D11
 DEFINE_GUID(DXGI_DEBUG_D3D11, 0x4b99317b, 0xac39, 0x4aa6, 0xbb, 0xb, 0xba, 0xa0, 0x47, 0x84, 0x79, 0x8f);
@@ -65,8 +66,10 @@ struct d3d11_device_opts {
 struct mp_dxgi_factory_ctx {
     IDXGIFactory1 *factory;
     IDXGIOutput6 *last_matched_output;
-    HMONITOR white_level_monitor;
+    HMONITOR target_monitor;
     float sdr_white_level;
+    bool color_management_status_reliable;
+    struct mp_w32_acm_status color_management_status;
 };
 
 void mp_dxgi_factory_uninit(struct mp_dxgi_factory_ctx *ctx);
@@ -85,6 +88,12 @@ bool mp_dxgi_output_desc_from_swapchain(struct mp_dxgi_factory_ctx *ctx,
 // or 0 if unknown.
 float mp_dxgi_sdr_white_level_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
                                         HWND hwnd);
+
+// Get the status of ACM and HDR for the monitor the window is on. Returns
+// false if related API is not supported.
+bool mp_dxgi_get_acm_status_from_hwnd(struct mp_dxgi_factory_ctx *ctx,
+                                      HWND hwnd,
+                                      struct mp_w32_acm_status *status);
 
 struct pl_color_space mp_dxgi_desc_to_color_space(const DXGI_OUTPUT_DESC1 *desc);
 
