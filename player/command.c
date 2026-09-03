@@ -6775,6 +6775,7 @@ static void cmd_track_reload(void *p)
         flags |= t->visual_impaired_track ? TRACK_VISUAL_IMPAIRED : 0;
         flags |= t->forced_track ? TRACK_FORCED : 0;
         flags |= t->default_track ? TRACK_DEFAULT : 0;
+        flags |= t->commentary_track ? TRACK_COMMENTARY : 0;
         mp_remove_track(mpctx, t);
         nt_num = mp_add_external_file(mpctx, filename, type, cmd->abort->cancel,
                                       flags);
@@ -7686,7 +7687,8 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"hearing-impaired", TRACK_HEARING_IMPAIRED},
                 {"visual-impaired", TRACK_VISUAL_IMPAIRED},
                 {"forced", TRACK_FORCED},
-                {"default", TRACK_DEFAULT}),
+                {"default", TRACK_DEFAULT},
+                {"commentary", TRACK_COMMENTARY}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
@@ -7704,7 +7706,8 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"hearing-impaired", TRACK_HEARING_IMPAIRED},
                 {"visual-impaired", TRACK_VISUAL_IMPAIRED},
                 {"forced", TRACK_FORCED},
-                {"default", TRACK_DEFAULT}),
+                {"default", TRACK_DEFAULT},
+                {"commentary", TRACK_COMMENTARY}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
@@ -7723,7 +7726,8 @@ const struct mp_cmd_def mp_cmds[] = {
                 {"visual-impaired", TRACK_VISUAL_IMPAIRED},
                 {"attached-picture", TRACK_ATTACHED_PICTURE},
                 {"forced", TRACK_FORCED},
-                {"default", TRACK_DEFAULT}),
+                {"default", TRACK_DEFAULT},
+                {"commentary", TRACK_COMMENTARY}),
                 .flags = MP_CMD_OPT_ARG},
             {"title", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
             {"lang", OPT_STRING(v.s), .flags = MP_CMD_OPT_ARG},
@@ -8087,7 +8091,15 @@ const struct mp_cmd_def mp_cmds[] = {
             {"menu",        STREAM_NAV_MENU_ROOT},
             {"title-menu",  STREAM_NAV_MENU_TITLE},
             {"popup",       STREAM_NAV_MENU_POPUP},
+            {"audio-menu",  STREAM_NAV_MENU_AUDIO},
+            {"sub-menu",    STREAM_NAV_MENU_SUBTITLE},
+            {"angle-menu",  STREAM_NAV_MENU_ANGLE},
+            {"up-menu",     STREAM_NAV_GO_UP},
             {"prev",        STREAM_NAV_PREV_MENU},
+            {"red",         STREAM_NAV_KEY_RED},
+            {"green",       STREAM_NAV_KEY_GREEN},
+            {"yellow",      STREAM_NAV_KEY_YELLOW},
+            {"blue",        STREAM_NAV_KEY_BLUE},
             {"mouse-move",  STREAM_NAV_MOUSE_MOVE},
             {"mouse-click", STREAM_NAV_MOUSE_CLICK})},
           {"x", OPT_DOUBLE(v.d), OPTDEF_DOUBLE(-1)},

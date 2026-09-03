@@ -107,6 +107,7 @@ struct priv {
 struct dvd_opts {
     int angle;
     int speed;
+    int region;
     char *device;
 };
 
@@ -117,6 +118,7 @@ const struct m_sub_options dvd_conf = {
         {"device", OPT_STRING(device), .flags = M_OPT_FILE},
         {"speed", OPT_INT(speed)},
         {"angle", OPT_INT(angle), M_RANGE(1, 99)},
+        {"region", OPT_CHOICE(region, {"auto", 0}), M_RANGE(1, 8)},
         {0}
     },
     .size = sizeof(struct dvd_opts),
@@ -320,13 +322,39 @@ static const char *dvd_domain_name(dvdnav_t *dvdnav)
     return "?";
 }
 
-// Map a libdvdnav physical audio stream number (0..7) to the corresponding
-// MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
-static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+// dvdnav_get_*_logical_stream() map the other way, taking the logical stream
+// number and returning the physical substream it is muxed under. Attributes,
+// language and format are all keyed by the logical one, so invert here.
+static int dvd_audio_logical_stream(struct priv *priv, int physical)
 {
-    if (physical < 0 || physical > 7)
+    if (physical < 0)
         return -1;
-    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, physical);
+    for (int n = 0; n < 8; n++) {
+        if (dvdnav_get_audio_logical_stream(priv->dvdnav, n) == physical)
+            return n;
+    }
+    return -1;
+}
+
+static int dvd_spu_logical_stream(struct priv *priv, int physical)
+{
+    if (physical < 0)
+        return -1;
+    for (int n = 0; n < 32; n++) {
+        if (dvdnav_get_spu_logical_stream(priv->dvdnav, n) == physical)
+            return n;
+    }
+    return -1;
+}
+
+// Build the MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
+// The format is an attribute, so it is keyed by the logical stream, while the
+// number within that format comes from the physical one.
+static int dvd_audio_substream_id(struct priv *priv, int logical, int physical)
+{
+    if (logical < 0 || physical < 0 || physical > 7)
+        return -1;
+    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, logical);
     switch (fmt) {
     case DVD_AUDIO_FORMAT_AC3:
         return 0x80 + physical;
@@ -340,6 +368,28 @@ static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
     default:
         return -1;
     }
+}
+
+// Map a libdvdnav physical audio stream number (0..7) to its substream byte.
+static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+{
+    int logical = dvd_audio_logical_stream(priv, physical);
+    return dvd_audio_substream_id(priv, logical, physical);
+}
+
+// The physical number alone does not identify a substream, a disc carrying the
+// same track as both AC3 and DTS gives them the same one. Match on the whole
+// substream byte instead, so the format tells the two apart.
+static int dvd_audio_logical_for_id(struct priv *priv, int id)
+{
+    if (id < 0)
+        return -1;
+    for (int n = 0; n < 8; n++) {
+        int physical = dvdnav_get_audio_logical_stream(priv->dvdnav, n);
+        if (dvd_audio_substream_id(priv, n, physical) == id)
+            return n;
+    }
+    return -1;
 }
 
 static void refresh_video_resolution(struct priv *priv)
@@ -456,6 +506,22 @@ static void do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         dvdnav_menu_call(priv->dvdnav, DVD_MENU_Part);
         update_highlight(priv);
         return;
+    case STREAM_NAV_MENU_AUDIO:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Audio);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_SUBTITLE:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Subpicture);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_MENU_ANGLE:
+        dvdnav_menu_call(priv->dvdnav, DVD_MENU_Angle);
+        update_highlight(priv);
+        return;
+    case STREAM_NAV_GO_UP:
+        dvdnav_go_up(priv->dvdnav);
+        update_highlight(priv);
+        return;
     case STREAM_NAV_PREV_MENU:
         dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape);
         update_highlight(priv);
@@ -510,9 +576,19 @@ static void bump_discontinuity(struct priv *priv)
            priv->discontinuity_id, priv->pending_drain);
 }
 
-static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
+static int handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 {
     struct priv *priv = stream->priv;
+
+    switch (cmd->action) {
+    case STREAM_NAV_KEY_RED:
+    case STREAM_NAV_KEY_GREEN:
+    case STREAM_NAV_KEY_YELLOW:
+    case STREAM_NAV_KEY_BLUE:
+        return STREAM_UNSUPPORTED; // Blu-ray only.
+    default:
+        break;
+    }
 
     mp_mutex_lock(&priv->lock);
     int prev_auto = priv->auto_actioned_button;
@@ -522,53 +598,67 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
     if (priv->still_active && activated)
         bump_discontinuity(priv);
     mp_mutex_unlock(&priv->lock);
+    return STREAM_OK;
 }
 
-/**
- * \brief mp_dvdnav_lang_from_aid() returns the language corresponding to audio id 'aid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
+// Fill in what the IFO declares about one track. Returns whether the stream
+// was found at all, the name is left empty when the language is unspecified.
+static bool dvd_track_info(stream_t *stream, struct stream_track_req *req)
 {
-    uint8_t lg;
-    uint16_t lang;
     struct priv *priv = stream->priv;
+    uint16_t lang = 0xffff;
 
-    if (aid < 0)
-        return 0;
-    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
-    if (lg == 0xff)
-        return 0;
-    lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
-}
+    if (req->type == STREAM_AUDIO) {
+        int n = dvd_audio_logical_for_id(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_audio_stream_to_lang(priv->dvdnav, n);
+        audio_attr_t attr;
+        if (dvdnav_get_audio_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "audio 0x%x: logical %d, code extension %d\n",
+                       req->id, n, attr.code_extension);
+            switch (attr.code_extension) {
+            case 2: // visually impaired
+                req->flags |= TRACK_VISUAL_IMPAIRED;
+                break;
+            case 3: // director's comments
+            case 4: // alternate director's comments
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else if (req->type == STREAM_SUB) {
+        int n = dvd_spu_logical_stream(priv, req->id);
+        if (n < 0)
+            return false;
+        lang = dvdnav_spu_stream_to_lang(priv->dvdnav, n);
+        subp_attr_t attr;
+        if (dvdnav_get_spu_attr(priv->dvdnav, n, &attr) == DVDNAV_STATUS_OK) {
+            MP_VERBOSE(stream, "subtitle 0x%x: logical %d, code extension %d\n",
+                       req->id, n, attr.code_extension);
+            switch (attr.code_extension) {
+            case 9: // mandatory caption, forced display
+                req->flags |= TRACK_FORCED;
+                break;
+            case 5: // closed captions, normal
+            case 6: // closed captions, large
+            case 7: // closed captions, for children
+                req->flags |= TRACK_HEARING_IMPAIRED;
+                break;
+            case 13: // director's comments, normal
+            case 14: // director's comments, large
+            case 15: // director's comments, for children
+                req->flags |= TRACK_COMMENTARY;
+                break;
+            }
+        }
+    } else {
+        return false;
+    }
 
-/**
- * \brief mp_dvdnav_lang_from_sid() returns the language corresponding to subtitle id 'sid'
- * \param stream: - stream pointer
- * \param sid: physical subtitle id
- * \return 0 on error, otherwise language id
- */
-static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid)
-{
-    uint8_t k;
-    uint16_t lang;
-    struct priv *priv = stream->priv;
-    if (sid < 0)
-        return 0;
-    for (k = 0; k < 32; k++)
-        if (dvdnav_get_spu_logical_stream(priv->dvdnav, k) == sid)
-            break;
-    if (k == 32)
-        return 0;
-    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
-    if (lang == 0xffff)
-        return 0;
-    return lang;
+    if (lang && lang != 0xffff)
+        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
+    return true;
 }
 
 /**
@@ -834,9 +924,19 @@ static int control(stream_t *stream, int cmd, void *arg)
         break;
     }
     case STREAM_CTRL_GET_ASPECT_RATIO: {
-        uint8_t ar = dvdnav_get_video_aspect(dvdnav);
-        *(double *)arg = !ar ? 4.0 / 3.0 : 16.0 / 9.0;
-        return STREAM_OK;
+        int8_t ar = dvdnav_get_video_aspect(dvdnav);
+        if (ar < 0)
+            return STREAM_ERROR;
+        if (ar == 0) {
+            *(double *)arg = 4.0 / 3.0;
+            return STREAM_OK;
+        }
+        if (ar == 3) {
+            *(double *)arg = 16.0 / 9.0;
+            return STREAM_OK;
+        }
+        MP_WARN(stream, "Unexpected DVD video aspect ratio %d.\n", ar);
+        break;
     }
     case STREAM_CTRL_GET_CURRENT_TIME: {
         int64_t tm = dvdnav_get_current_time(dvdnav);
@@ -976,20 +1076,9 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         return STREAM_OK;
     }
-    case STREAM_CTRL_GET_LANG: {
-        struct stream_lang_req *req = arg;
-        int lang = 0;
-        switch (req->type) {
-        case STREAM_AUDIO:
-            lang = mp_dvdnav_lang_from_aid(stream, req->id);
+    case STREAM_CTRL_GET_TRACK_INFO: {
+        if (!dvd_track_info(stream, arg))
             break;
-        case STREAM_SUB:
-            lang = mp_dvdnav_lang_from_sid(stream, req->id);
-            break;
-        }
-        if (!lang)
-            break;
-        snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_DVD_INFO: {
@@ -1003,6 +1092,18 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_DISC_NAME: {
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+        bstr volid = bstr0(dvdnav_get_volid_string(dvdnav));
+        if (volid.start) {
+            bstr name = bstr_sanitize_utf8_latin1(NULL, volid);
+            // Sanitize adds a terminating NUL, so we can use it directly, but
+            // only if conversion has happened.
+            *(char **)arg = name.start == volid.start ? talloc_strdup(NULL, volid.start)
+                                                      : (char *)name.start;
+            free(volid.start);
+            return STREAM_OK;
+        }
+#endif
         const char *volume = NULL;
         if (dvdnav_get_title_string(dvdnav, &volume) != DVDNAV_STATUS_OK)
             break;
@@ -1011,10 +1112,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, volume);
         return STREAM_OK;
     }
-    case STREAM_CTRL_NAV_CMD: {
-        handle_nav_cmd(stream, arg);
-        return STREAM_OK;
-    }
+    case STREAM_CTRL_NAV_CMD:
+        return handle_nav_cmd(stream, arg);
     case STREAM_CTRL_NAV_DRAIN_ENABLE: {
         mp_mutex_lock(&priv->lock);
         priv->drain_enabled = true;
@@ -1108,6 +1207,40 @@ static dvdnav_status_t nav_open(stream_t *stream, dvdnav_t **dest, const char *p
     return dvdnav_open2(dest, priv, &logger_cb, path);
 }
 
+// Set the VM's language registers from our options. This provides initial
+// language/track selection for the disc.
+static void set_dvd_languages(stream_t *stream)
+{
+    struct priv *priv = stream->priv;
+    struct MPOpts *opts = mp_get_config_group(NULL, stream->global, &mp_opt_root);
+
+    static const struct {
+        int type;
+        dvdnav_status_t (*select)(dvdnav_t *, char *);
+        const char *name;
+    } regs[] = {
+        {STREAM_AUDIO, dvdnav_audio_language_select, "audio"},
+        {STREAM_SUB,   dvdnav_spu_language_select,   "subtitle"},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(regs); i++) {
+        char **langs = opts->stream_lang[regs[i].type];
+        for (int n = 0; langs && langs[n]; n++) {
+            // dvdnav_*_language_select() take the first two bytes as they are,
+            // so a longer code would be truncated into a bogus one.
+            if (strlen(langs[n]) != 2)
+                continue;
+            if (regs[i].select(priv->dvdnav, langs[n]) == DVDNAV_STATUS_OK) {
+                MP_VERBOSE(stream, "%s language register set to '%s'\n",
+                           regs[i].name, langs[n]);
+            }
+            break;
+        }
+    }
+
+    talloc_free(opts);
+}
+
 static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
 {
     struct priv *priv = stream->priv;
@@ -1166,6 +1299,29 @@ static int open_s_internal(stream_t *stream)
         goto err;
     }
     priv->probing = false;
+
+    int32_t region_mask = 0;
+    if (p->opts->region) {
+        region_mask = 1 << (p->opts->region - 1);
+    } else {
+#if DVDNAV_VERSION >= DVDNAV_VERSION_CODE(7, 0, 0)
+        if (dvdnav_get_disk_region_mask(priv->dvdnav, &region_mask) != DVDNAV_STATUS_OK)
+            region_mask = 0;
+        // The disc reports every region it allows, while a player holds one.
+        // Claim the lowest of them, so the disc's own region checks pass.
+        region_mask &= -region_mask;
+#endif
+        if (!region_mask)
+            region_mask = 0xff; // Nothing to go on, claim region free.
+    }
+    // Set region mask to user provided value, or to the disc's region mask.
+    if (dvdnav_set_region_mask(priv->dvdnav, region_mask) == DVDNAV_STATUS_OK) {
+        MP_VERBOSE(stream, "player region mask set to 0x%02x\n", region_mask);
+    } else {
+        MP_WARN(stream, "Couldn't set the player region mask.\n");
+    }
+
+    set_dvd_languages(stream);
 
     int32_t num_titles = 0;
     dvdnav_get_number_of_titles(priv->dvdnav, &num_titles);

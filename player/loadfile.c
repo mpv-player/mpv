@@ -1039,6 +1039,7 @@ int mp_add_external_file(struct MPContext *mpctx, char *filename,
         t->visual_impaired_track = flags & TRACK_VISUAL_IMPAIRED;
         t->forced_track = flags & TRACK_FORCED;
         t->default_track = flags & TRACK_DEFAULT;
+        t->commentary_track = flags & TRACK_COMMENTARY;
         // if we found video, and we are loading cover art, flag as such.
         t->attached_picture = t->type == STREAM_VIDEO && (flags & TRACK_ATTACHED_PICTURE);
         if (first_num < 0 && (filter == STREAM_TYPE_COUNT || sh->type == filter))

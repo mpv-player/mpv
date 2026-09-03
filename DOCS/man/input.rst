@@ -1790,8 +1790,17 @@ Miscellaneous Commands
     popup
         Show / dismiss the Blu-ray popup menu. For DVDs, falls back to the
         chapter menu where available.
+    audio-menu, sub-menu, angle-menu
+        Jump to the disc's audio, subtitle or angle menu. DVD only, discs are
+        not required to have them and nothing happens when they do not.
+    up-menu
+        Play the "go up" program chain the disc authored for the current
+        position, which usually leads to a higher level menu. DVD only, and
+        nothing happens when the disc did not author one.
     prev
         Return from a menu to playback, or to the previous menu domain.
+    red, green, yellow, blue
+        Send a colored remote key. Blu-ray only.
     mouse-move
         Forward a mouse position to the disc, so it can update the focused
         button under the cursor. With no ``<x> <y>`` arguments, the position
