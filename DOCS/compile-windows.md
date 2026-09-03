@@ -173,6 +173,8 @@ they will be automatically downloaded and built by Meson.
    meson wrap install harfbuzz
    meson wrap install libpng
    meson wrap install zlib
+   meson wrap install lcms2
+   meson wrap install freetype2
    ```
 4. Set environment variables so Meson uses the Clang/LLVM toolchain, or pass an
 equivalent `--native-file` to Meson.
