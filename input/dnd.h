@@ -18,4 +18,7 @@
 
 #include "player/client.h"
 
+#include "event.h"
+
+void mp_dnd_load_file(mpv_handle *ctx, int num_files, char **files, enum mp_dnd_action action);
 void mp_dnd_init(mpv_handle *mpv);
