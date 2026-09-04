@@ -177,7 +177,6 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
     bool present_clock;
-    bool present_v2;
     bool use_present;
 
     /* single-pixel-buffer */
