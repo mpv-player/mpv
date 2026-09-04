@@ -166,6 +166,7 @@ struct vo_wayland_feedback_pool {
     struct wp_presentation_feedback **fback;
     struct vo_wayland_state *wl;
     int last_zero_copy;
+    int last_refresh_type;
     int len;
 };
 
@@ -2591,6 +2592,14 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
                  current_zero_copy ? "direct scanout" : "a copy");
         fback_pool->last_zero_copy = current_zero_copy;
     }
+    if (wp_presentation_feedback_get_version(fback) >= 3) {
+        bool current_refresh_type = flags & WP_PRESENTATION_FEEDBACK_KIND_FIXED_RATE;
+        if (fback_pool->last_refresh_type == -1 || fback_pool->last_refresh_type != current_refresh_type) {
+            MP_DBG(wl, "Presentation was done with %s refresh rate.\n",
+                   current_refresh_type ? "fixed" : "variable");
+            fback_pool->last_refresh_type = current_refresh_type;
+        }
+    }
 
     if (fback)
         remove_feedback(fback_pool, fback);
@@ -2616,6 +2625,7 @@ static void feedback_discarded(void *data, struct wp_presentation_feedback *fbac
 {
     struct vo_wayland_feedback_pool *fback_pool = data;
     fback_pool->last_zero_copy = -1;
+    fback_pool->last_refresh_type = -1;
     if (fback)
         remove_feedback(fback_pool, fback);
 }
@@ -2930,8 +2940,7 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
-        ver = MPMIN(ver, 2);
-        wl->present_v2 = ver == 2;
+        ver = MPMIN(ver, 3);
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
         wp_presentation_add_listener(wl->presentation, &presentation_listener, wl);
     }
@@ -4684,6 +4693,7 @@ bool vo_wayland_init(struct vo *vo)
         wl->fback_pool->wl = wl;
         wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
         wl->fback_pool->last_zero_copy = -1,
+        wl->fback_pool->last_refresh_type = -1,
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
                                                   wl->fback_pool->len);
         wl->present = mp_present_initialize(wl, wl->opts, VO_MAX_SWAPCHAIN_DEPTH);
@@ -5076,6 +5086,11 @@ void vo_wayland_wakeup(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
+}
+
+int vo_wayland_proxy_get_version(struct wl_proxy *proxy)
+{
+    return wl_proxy_get_version(proxy);
 }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_48
