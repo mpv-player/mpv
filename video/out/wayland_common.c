@@ -2931,7 +2931,6 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 
     if (!strcmp(interface, wp_presentation_interface.name) && found++) {
         ver = MPMIN(ver, 2);
-        wl->present_v2 = ver == 2;
         wl->presentation = wl_registry_bind(reg, id, &wp_presentation_interface, ver);
         wp_presentation_add_listener(wl->presentation, &presentation_listener, wl);
     }
@@ -5076,6 +5075,11 @@ void vo_wayland_wakeup(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
     (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
+}
+
+int vo_wayland_proxy_get_version(struct wl_proxy *proxy)
+{
+    return wl_proxy_get_version(proxy);
 }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_48
